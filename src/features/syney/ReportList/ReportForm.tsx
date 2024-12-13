@@ -39,7 +39,7 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
           .map((item) => item.Qty! * Number(item.TaxUnitPrice?.toFixed(2)))
           .reduce((acc, price) => acc + price!, 0)
 
-        const itemsDistinct = distinctItems(items)
+        const itemsDistinct = distinctItems(items as ISyneyItem[])
 
         TotalAmount = Math.round(TotalAmount * 100) / 100
 

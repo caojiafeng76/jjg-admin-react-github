@@ -55,6 +55,7 @@ interface ISyneyPo {
   Spec: string | null
   Status: string | null
   Technique: string | null
+  Detail?: string | null
 }
 
 interface ISyneySpecFormRef {
