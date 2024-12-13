@@ -1,0 +1,95 @@
+import { ISyneySpec } from '@/types'
+import supabase from './supabase'
+
+export async function getSyneySpecs({
+  PartNo,
+  page,
+  pageSize,
+  isAll,
+}: {
+  PartNo: string
+  page: number
+  pageSize: number
+  isAll: boolean
+}) {
+  let query = supabase
+    .from('syney-specs')
+    .select('*', { count: 'exact' })
+    .order('PartNo')
+
+  if (!isAll) {
+    if (PartNo) {
+      query = query.ilike('PartNo', `%${PartNo}%`)
+    }
+
+    const from = (page - 1) * pageSize
+    const to = from + pageSize
+
+    query = query.range(from, to - 1)
+  }
+
+  const { data: syneySpecs, error, count } = await query
+
+  if (error) {
+    console.error(error)
+    throw new Error('踏板规格列表获取失败')
+  }
+
+  return { syneySpecs, count }
+}
+
+export async function getSyneySpec(id: number) {
+  const { data: syneySpec, error } = await supabase
+    .from('syney-specs')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    console.error(error)
+    throw new Error('踏板规格获取失败')
+  }
+
+  return syneySpec
+}
+
+export async function createSyneySpec(newSyneySpec: ISyneySpec) {
+  // console.log(newSyneySpec);
+
+  const { data, error } = await supabase
+    .from('syney-specs')
+    .insert([newSyneySpec])
+    .select()
+    .single()
+
+  if (error) {
+    console.error(error)
+    throw new Error('踏板规格创建失败')
+  }
+
+  return data
+}
+
+export async function updateSyneySpec(updates: Partial<ISyneySpec>) {
+  const { data, error } = await supabase
+    .from('syney-specs')
+    .update(updates)
+    .eq('PartNo', updates.PartNo!)
+    .select()
+    .single()
+
+  if (error) {
+    console.error(error)
+    throw new Error('踏板规格更新失败')
+  }
+  return data
+}
+
+export async function deleteSyneySpecs(ids: number[]) {
+  const { error } = await supabase.from('syney-specs').delete().in('id', ids)
+
+  if (error) {
+    console.error(error)
+    throw new Error('踏板规格删除失败')
+  }
+}
