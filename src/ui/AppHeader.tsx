@@ -5,7 +5,6 @@ import {
 import { Button } from 'antd'
 import { Header } from 'antd/es/layout/layout'
 
-import { useDarkMode } from '@contexts/DarkModeContext'
 import DarkModeButton from '@ui/DarkModeButton'
 
 export default function AppHeader({
@@ -17,14 +16,6 @@ export default function AppHeader({
   collapsed: boolean
   onToggleCollapse: () => void
 }) {
-  const { darkMode, setDarkMode } = useDarkMode()
-
-  function onToggleMode() {
-    if (typeof setDarkMode === 'function') {
-      setDarkMode((dark) => !dark)
-    }
-  }
-
   return (
     <Header
       className="flex items-center"
@@ -48,7 +39,7 @@ export default function AppHeader({
       />
 
       <div className="mr-12 flex h-full flex-1 items-center justify-end">
-        <DarkModeButton darkMode={!!darkMode} onToggleMode={onToggleMode} />
+        <DarkModeButton />
       </div>
     </Header>
   )
