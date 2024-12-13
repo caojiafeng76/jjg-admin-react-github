@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle } from 'react'
 import { Form, Input } from 'antd'
 
-import { ISyneyStoreReport, ISyneyStoreReportFormRef } from '@/types'
+import { ISyneyItem, ISyneyStoreReport, ISyneyStoreReportFormRef } from '@/types'
 import { useSyneySpecs } from '@syney/SpecList/useSyneySpecs'
 import { useCreateReport } from './useCreateReport'
 import { useStore } from '@/store'
