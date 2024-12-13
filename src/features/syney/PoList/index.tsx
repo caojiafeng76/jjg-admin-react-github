@@ -129,7 +129,7 @@ export default function PoList() {
       setTimeout(() => {
         poFormRef.current
           ?.getInstance()
-          .setFieldsValue({ ...po, EndDate: dayjs(po.EndDate) })
+          .setFieldsValue({ ...po, EndDate: dayjs(po.EndDate) as any })
         setModalTitle('编辑订单')
       }, 0)
     }
