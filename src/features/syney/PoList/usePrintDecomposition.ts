@@ -14,7 +14,7 @@ export function usePrintDecomposition() {
   const { selectedMap, isLoading } = useSelectedPos()
 
   doc.setFontSize(20)
-  doc.text('踏板分解账单', 120, 20)
+  doc.text('踏板分解单', 120, 20)
 
   doc.rect(15, 30, 270, 170) // 画一个方框
   doc.line(15, 40, 285, 40)
