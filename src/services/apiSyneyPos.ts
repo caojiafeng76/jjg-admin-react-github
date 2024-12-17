@@ -4,9 +4,11 @@ import supabase from './supabase'
 export async function getSyneyPos({
   page,
   pageSize,
+  Status,
 }: {
   page: number
   pageSize: number
+  Status: string
 }) {
   let query = supabase
     .from('syney-pos')
@@ -21,6 +23,10 @@ export async function getSyneyPos({
     const to = from + pageSize
 
     query = query.range(from, to - 1)
+  }
+
+  if (Status && Status !== '全部') {
+    query = query.eq('Status', Status)
   }
 
   const { data: syneyPos, count, error } = await query
