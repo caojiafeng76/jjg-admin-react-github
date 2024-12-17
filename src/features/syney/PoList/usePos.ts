@@ -10,13 +10,15 @@ export function usePos() {
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
 
+  const Status = searchParams.get('Status') || '全部'
+
   const {
     data: { syneyPos: pos, count } = { syneyPos: [], count: 0 },
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['syney-pos', page, pageSize],
-    queryFn: () => getSyneyPos({ page, pageSize }),
+    queryKey: ['syney-pos', page, pageSize, Status],
+    queryFn: () => getSyneyPos({ page, pageSize, Status }),
   })
 
   if (error) {
@@ -28,14 +30,14 @@ export function usePos() {
 
   if (page < pageCount)
     queryClient.prefetchQuery({
-      queryKey: ['syney-pos', page + 1, pageSize],
-      queryFn: () => getSyneyPos({ page: page + 1, pageSize }),
+      queryKey: ['syney-pos', page + 1, pageSize, Status],
+      queryFn: () => getSyneyPos({ page: page + 1, pageSize, Status }),
     })
 
   if (page > 1)
     queryClient.prefetchQuery({
-      queryKey: ['syney-pos', page - 1, pageSize],
-      queryFn: () => getSyneyPos({ page: page - 1, pageSize }),
+      queryKey: ['syney-pos', page - 1, pageSize, Status],
+      queryFn: () => getSyneyPos({ page: page - 1, pageSize, Status }),
     })
 
   return {

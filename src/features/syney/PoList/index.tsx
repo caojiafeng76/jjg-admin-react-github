@@ -29,6 +29,7 @@ import EditButton from '@/ui/EditButton'
 import { usePo } from './usePo'
 import { useUpdatePos } from './useUpdatePos'
 import PrintDecompositionButton from './PrintDecompositionButton'
+import PoSelectedFilter from './PoSelectedFilter'
 
 export default function PoList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -165,6 +166,9 @@ export default function PoList() {
 
         <span>操作：</span>
         <PoSelected />
+
+        <span>过滤：</span>
+        <PoSelectedFilter />
       </div>
 
       <div className="no-scrollbar overflow-y-scroll">
