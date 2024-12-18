@@ -76,7 +76,7 @@ export default function PoList() {
     }
   }
 
-  function onFinish(values: ISyneyPo) {
+  async function onFinish(values: ISyneyPo) {
     if (!specsLoading && !serialNoLoading && !isUpdating) {
       const No = values.No
       values.EndDate = format(values.EndDate?.toString() || '', 'yyyy-MM-dd')
@@ -104,9 +104,8 @@ export default function PoList() {
       updateSerialNo(tmpSerialNo)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { Detail, ...po } = values
-      console.log('isCreating:', isCreating)
 
-      createPo(
+      await createPo(
         { po, map },
         {
           onSettled: () => {
