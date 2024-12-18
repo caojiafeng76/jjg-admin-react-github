@@ -11,6 +11,7 @@ export function useUpdate() {
       queryClient.invalidateQueries({
         queryKey: ['syney-Po'],
       })
+      message.success('更新成功')
     },
     onError: (err) => {
       console.error(err)
