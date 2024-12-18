@@ -1,3 +1,51 @@
-export default function DetailForm() {
-  return <div>DetailForm</div>
-}
+import { useStore } from '@/store'
+import { PoDetailFormType } from '@/types'
+import { Form, FormInstance, Input } from 'antd'
+import { forwardRef, useImperativeHandle } from 'react'
+import { useUpdate } from './useUpdate'
+
+export default forwardRef<{
+  getInstance: () => FormInstance<PoDetailFormType>
+}>(function DetailForm(_, ref) {
+  const [form] = Form.useForm<PoDetailFormType>()
+
+  const { tableSelectedKeys, setTableSelectedKeys, isLoading, setIsLoading } =
+    useStore()
+  const { updateItems } = useUpdate()
+
+  const layout = {
+    labelCol: { span: 4 },
+    wrapperCol: { span: 20 },
+  }
+
+  async function onFinish(values: PoDetailFormType) {
+    setIsLoading(true)
+    await updateItems(
+      { ids: tableSelectedKeys.map(Number), values },
+      {
+        onSettled: () => {
+          setTableSelectedKeys([])
+          setIsLoading(false)
+        },
+      },
+    )
+  }
+
+  useImperativeHandle(ref, () => ({ getInstance: () => form }))
+
+  return (
+    <Form {...layout} name="po-detail" form={form} onFinish={onFinish}>
+      <Form.Item name="PartNo" label="件号">
+        <Input disabled />
+      </Form.Item>
+
+      <Form.Item name="ParamSpec" label="参数规格" rules={[{ required: true }]}>
+        <Input disabled={isLoading} />
+      </Form.Item>
+
+      <Form.Item name="Remark" label="备注">
+        <Input.TextArea rows={4} cols={30} disabled />
+      </Form.Item>
+    </Form>
+  )
+})

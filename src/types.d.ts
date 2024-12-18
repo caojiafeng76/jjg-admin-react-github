@@ -73,3 +73,9 @@ interface ISyneyStoreReportFormRef {
 interface ISyneyItemFormRef {
   getInstance(): FormInstance<ISyneyItem>
 }
+
+type PoDetailFormType = {
+  PartNo: string
+  ParamSpec: string
+  Remark: string
+}
