@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { message, Modal } from 'antd'
 import { format } from 'date-fns'
 import dayjs from 'dayjs'
@@ -41,7 +41,12 @@ export default function PoList() {
   const poFormRef = useRef<ISyneyPoFormRef>(null)
 
   const { count } = usePos()
-  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
+  const {
+    tableSelectedKeys,
+    setTableSelectedKeys,
+    isLoading: isCreating,
+    setIsLoading: setIsCreating,
+  } = useStore()
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const { isDeleting, deletePo } = useDeletePo()
   const { data: po, isLoading: poLoading } = usePo()
@@ -52,7 +57,7 @@ export default function PoList() {
   })
   const { serialNo, isLoading: serialNoLoading } = useSerialNo()
 
-  const { createPo, isCreating } = useCreatePo()
+  const { createPo } = useCreatePo()
   const { updateSerialNo, isUpdating } = useUpdateSerialNo()
 
   function handleDelete() {
@@ -105,6 +110,8 @@ export default function PoList() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { Detail, ...po } = values
 
+      setIsCreating(true)
+
       await createPo(
         { po, map },
         {
@@ -114,6 +121,7 @@ export default function PoList() {
           },
         },
       )
+      setIsCreating(false)
     }
   }
 
@@ -129,11 +137,22 @@ export default function PoList() {
       setTimeout(() => {
         poFormRef.current
           ?.getInstance()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .setFieldsValue({ ...po, EndDate: dayjs(po.EndDate) as any })
         setModalTitle('编辑订单')
       }, 0)
     }
   }
+
+  useEffect(() => {
+    setIsCreating(false)
+    setTableSelectedKeys([])
+
+    return () => {
+      setIsCreating(false)
+      setTableSelectedKeys([])
+    }
+  }, [setIsCreating, setTableSelectedKeys])
 
   return (
     <div className="grid grid-rows-[32px_1fr] gap-4">
