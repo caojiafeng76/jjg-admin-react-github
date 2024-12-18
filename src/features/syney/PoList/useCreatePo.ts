@@ -5,13 +5,12 @@ import { createPo as createPoApi } from '@/services/apiSyneyPos'
 export function useCreatePo() {
   const queryClient = useQueryClient()
 
-  const { mutate: createPo, isPending: isCreating } = useMutation({
+  const { mutateAsync: createPo, isPending: isCreating } = useMutation({
     mutationFn: createPoApi,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['syney-pos'],
       })
-      console.log('isCreating:', isCreating)
 
       message.success('创建订单成功')
     },
