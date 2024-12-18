@@ -4,9 +4,12 @@ import { Form, FormInstance, Input } from 'antd'
 import { forwardRef, useImperativeHandle } from 'react'
 import { useUpdate } from './useUpdate'
 
-export default forwardRef<{
-  getInstance: () => FormInstance<PoDetailFormType>
-}>(function DetailForm(_, ref) {
+export default forwardRef<
+  {
+    getInstance: () => FormInstance<PoDetailFormType>
+  },
+  { onClose: () => void }
+>(function DetailForm({ onClose }, ref) {
   const [form] = Form.useForm<PoDetailFormType>()
 
   const { tableSelectedKeys, setTableSelectedKeys, isLoading, setIsLoading } =
@@ -26,6 +29,7 @@ export default forwardRef<{
         onSettled: () => {
           setTableSelectedKeys([])
           setIsLoading(false)
+          onClose()
         },
       },
     )

@@ -32,3 +32,18 @@ export async function updatePoItems({
     throw new Error('订单详情更新失败')
   }
 }
+
+export async function getItemById(id: number) {
+  const { data, error } = await supabase
+    .from('syney-po-items')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    console.error(error)
+    throw new Error('获取订单详情失败')
+  }
+
+  return data
+}
