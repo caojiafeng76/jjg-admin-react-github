@@ -118,10 +118,10 @@ export default function PoList() {
           onSettled: () => {
             setIsModalOpen(false)
             setTableSelectedKeys([])
+            setIsCreating(false)
           },
         },
       )
-      setIsCreating(false)
     }
   }
 
