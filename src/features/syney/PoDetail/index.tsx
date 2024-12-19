@@ -5,7 +5,7 @@ import DetailForm from './DetailForm'
 import { useRef, useState } from 'react'
 import { useStore } from '@/store'
 import { FormInstance } from 'antd/lib'
-import { PoDetailFormType } from '@/types'
+import { ISyneyItem } from '@/types'
 import { useItem } from './useItem'
 
 export default function PoDetail() {
@@ -15,7 +15,7 @@ export default function PoDetail() {
   const { data } = useItem()
 
   const detailFormRef = useRef<{
-    getInstance: () => FormInstance<PoDetailFormType>
+    getInstance: () => FormInstance<ISyneyItem>
   }>(null)
 
   return (
@@ -28,7 +28,7 @@ export default function PoDetail() {
             setTimeout(() => {
               detailFormRef.current
                 ?.getInstance()
-                .setFieldsValue(data as PoDetailFormType)
+                .setFieldsValue(data as ISyneyItem)
             }, 0)
           }}
         />
@@ -42,7 +42,9 @@ export default function PoDetail() {
           open={isModalOpen}
           confirmLoading={isLoading}
           onCancel={() => setIsModalOpen(false)}
-          onOk={() => setIsModalOpen(false)}
+          onOk={() => {
+            detailFormRef.current?.getInstance().submit()
+          }}
         >
           <DetailForm
             ref={detailFormRef}
