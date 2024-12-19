@@ -1,16 +1,16 @@
 import { useStore } from '@/store'
-import { PoDetailFormType } from '@/types'
+import { ISyneyItem } from '@/types'
 import { Form, FormInstance, Input } from 'antd'
 import { forwardRef, useImperativeHandle } from 'react'
 import { useUpdate } from './useUpdate'
 
 export default forwardRef<
   {
-    getInstance: () => FormInstance<PoDetailFormType>
+    getInstance: () => FormInstance<ISyneyItem>
   },
   { onClose: () => void }
 >(function DetailForm({ onClose }, ref) {
-  const [form] = Form.useForm<PoDetailFormType>()
+  const [form] = Form.useForm<ISyneyItem>()
 
   const { tableSelectedKeys, setTableSelectedKeys, isLoading, setIsLoading } =
     useStore()
@@ -21,7 +21,7 @@ export default forwardRef<
     wrapperCol: { span: 20 },
   }
 
-  async function onFinish(values: PoDetailFormType) {
+  async function onFinish(values: ISyneyItem) {
     setIsLoading(true)
     await updateItems(
       { ids: tableSelectedKeys.map(Number), values },
@@ -40,6 +40,14 @@ export default forwardRef<
   return (
     <Form {...layout} name="po-detail" form={form} onFinish={onFinish}>
       <Form.Item name="PartNo" label="件号">
+        <Input disabled />
+      </Form.Item>
+
+      <Form.Item name="PartName" label="名称">
+        <Input disabled />
+      </Form.Item>
+
+      <Form.Item name="Spec" label="规格">
         <Input disabled />
       </Form.Item>
 
