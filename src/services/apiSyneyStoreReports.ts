@@ -14,7 +14,7 @@ export async function getSyneyStoreReports({
     .from('syney-store-reports')
     .select('*', { count: 'exact' })
     .range(pageSize * (page - 1), pageSize * page - 1)
-    .order('created_at')
+    .order('created_at', { ascending: false })
 
   if (status !== 'all') {
     query = query.eq('Status', status)
