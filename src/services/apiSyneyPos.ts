@@ -113,8 +113,10 @@ export async function createPo({
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const promises: any[] = []
+
+  const itemsArr: ISyneyItem[][] = []
   // 遍历map
-  map.forEach((_items, key) => {
+  map.forEach((items, key) => {
     const [SONo, SerialNo] = key.split('~')
     const insertPoPromise = supabase
       .from('syney-pos')
@@ -122,6 +124,7 @@ export async function createPo({
       .select()
       .single()
     promises.push(insertPoPromise)
+    itemsArr.push(items)
   })
 
   try {
@@ -132,7 +135,7 @@ export async function createPo({
         console.error(poError)
         throw new Error('订单创建失败')
       }
-      const items = Array.from(map.values())[i]
+      const items = itemsArr[i]
       const poItems = items.map((item) => ({
         No: item.No,
         PartNo: item.PartNo,
