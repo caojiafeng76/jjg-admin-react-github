@@ -185,6 +185,7 @@ export function usePrintDecomposition() {
         const { PartNo, ParamSpec, Qty, Remark } = item
         //前板规格
         if (PartNo?.includes('XN2808EB') || PartNo?.includes('XN3024BR')) {
+          doc.setFontSize(8)
           doc.text(`${ParamSpec}`, 75, 51 + index * 40)
           doc.setFontSize(12)
           doc.text(`${Qty}`, 92, 51 + index * 40)
