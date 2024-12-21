@@ -57,7 +57,7 @@ export function usePrint() {
               case 9:
                 PartNoX = 58
                 break
-              case 11:
+              case 10:
                 PartNoX = 56
                 break
               default:
