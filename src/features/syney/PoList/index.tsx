@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { message, Modal } from 'antd'
+import { FormInstance, message, Modal } from 'antd'
 import { format } from 'date-fns'
 import dayjs from 'dayjs'
 
@@ -8,7 +8,7 @@ import AppPagination from '@/ui/AppPagination'
 import PoTable from './PoTable'
 import PoForm from './PoForm'
 import { useStore } from '@/store'
-import { ISyneyItem, ISyneyPo, ISyneyPoFormRef } from '@/types'
+import { ISyneyItem, ISyneyPo } from '@/types'
 import DeleteButton from '@/ui/DeleteButton'
 import { useDeletePo } from './useDeletePo'
 import { usePos } from './usePos'
@@ -38,7 +38,7 @@ export default function PoList() {
 
   const { generateLabel } = usePrint()
 
-  const poFormRef = useRef<ISyneyPoFormRef>(null)
+  const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
   const { count } = usePos()
   const {
@@ -135,10 +135,11 @@ export default function PoList() {
     setIsModalOpen(true)
     if (!poLoading && po) {
       setTimeout(() => {
-        poFormRef.current
-          ?.getInstance()
+        poFormRef.current?.setFieldsValue({
+          ...po,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .setFieldsValue({ ...po, EndDate: dayjs(po.EndDate) as any })
+          EndDate: dayjs(po.EndDate) as any,
+        })
         setModalTitle('编辑订单')
       }, 0)
     }
@@ -160,7 +161,7 @@ export default function PoList() {
         <AddButton
           handleCreate={() => {
             setIsEdit(false)
-            poFormRef.current?.getInstance().resetFields()
+            poFormRef.current?.resetFields()
             setModalTitle('创建订单')
             setIsModalOpen(true)
           }}
@@ -200,7 +201,7 @@ export default function PoList() {
           open={isModalOpen}
           confirmLoading={isCreating || isPoUpdating}
           // destroyOnClose={true}
-          onOk={poFormRef.current?.getInstance().submit}
+          onOk={poFormRef.current?.submit}
           onCancel={() => setIsModalOpen(false)}
         >
           <PoForm
