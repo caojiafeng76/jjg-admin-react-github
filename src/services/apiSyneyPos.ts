@@ -54,55 +54,55 @@ export default async function getSyneyPo(id: string) {
   return data
 }
 
-// export async function createPo({
-//   po,
-//   map,
-// }: {
-//   po: ISyneyPo
-//   map: Map<string, ISyneyItem[]>
-// }) {
-//   map.forEach(async (items, key) => {
-//     const [SONo, SerialNo] = key.split('~')
+export async function createPo({
+  po,
+  map,
+}: {
+  po: ISyneyPo
+  map: Map<string, ISyneyItem[]>
+}) {
+  map.forEach(async (items, key) => {
+    const [SONo, SerialNo] = key.split('~')
 
-//     // console.log(po.SONo, po.SerialNo)
-//     const { data: poRepo, error: poError } = await supabase
-//       .from('syney-pos')
-//       .insert([{ ...po, SONo, SerialNo: +SerialNo }])
-//       .select()
-//       .single()
+    // console.log(po.SONo, po.SerialNo)
+    const { data: poRepo, error: poError } = await supabase
+      .from('syney-pos')
+      .insert([{ ...po, SONo, SerialNo: +SerialNo }])
+      .select()
+      .single()
 
-//     if (poError) {
-//       console.error(poError)
-//       throw new Error('订单创建失败')
-//     }
+    if (poError) {
+      console.error(poError)
+      throw new Error('订单创建失败')
+    }
 
-//     const poItems = items.map((item) => ({
-//       No: item.No,
-//       PartNo: item.PartNo,
-//       PartName: item.PartName,
-//       PartName2: item.PartName2,
-//       Spec: item.Spec,
-//       ParamSpec: item.ParamSpec,
-//       Unit: item.Unit,
-//       Qty: item.Qty,
-//       SONo: item.SONo,
-//       PartCode: item.PartCode,
-//       PartModel: item.PartModel,
-//       Remark: item.Remark,
-//       PoId: poRepo.id,
-//     }))
+    const poItems = items.map((item) => ({
+      No: item.No,
+      PartNo: item.PartNo,
+      PartName: item.PartName,
+      PartName2: item.PartName2,
+      Spec: item.Spec,
+      ParamSpec: item.ParamSpec,
+      Unit: item.Unit,
+      Qty: item.Qty,
+      SONo: item.SONo,
+      PartCode: item.PartCode,
+      PartModel: item.PartModel,
+      Remark: item.Remark,
+      PoId: poRepo.id,
+    }))
 
-//     const { error: itemsError } = await supabase
-//       .from('syney-po-items')
-//       .insert(poItems)
+    const { error: itemsError } = await supabase
+      .from('syney-po-items')
+      .insert(poItems)
 
-//     if (itemsError) {
-//       await supabase.from('syney-pos').delete().eq('id', poRepo.id)
-//       console.error(itemsError)
-//       throw new Error('订单明细创建失败')
-//     }
-//   })
-// }
+    if (itemsError) {
+      await supabase.from('syney-pos').delete().eq('id', poRepo.id)
+      console.error(itemsError)
+      throw new Error('订单明细创建失败')
+    }
+  })
+}
 
 // export async function createPo({
 //   po,
@@ -169,59 +169,59 @@ export default async function getSyneyPo(id: string) {
 //   }
 // }
 
-export async function createPo({
-  po,
-  map,
-}: {
-  po: ISyneyPo
-  map: Map<string, ISyneyItem[]>
-}) {
-  await Promise.all(
-    Array.from(map.keys()).map((key) => {
-      return async () => {
-        const [SONo, SerialNo] = key.split('~')
-        const items = map.get(key)
+// export async function createPo({
+//   po,
+//   map,
+// }: {
+//   po: ISyneyPo
+//   map: Map<string, ISyneyItem[]>
+// }) {
+//   await Promise.all(
+//     Array.from(map.keys()).map((key) => {
+//       return async () => {
+//         const [SONo, SerialNo] = key.split('~')
+//         const items = map.get(key)
 
-        const { data: poRepo, error: poError } = await supabase
-          .from('syney-pos')
-          .insert([{ ...po, SONo, SerialNo: +SerialNo }])
-          .select()
-          .single()
+//         const { data: poRepo, error: poError } = await supabase
+//           .from('syney-pos')
+//           .insert([{ ...po, SONo, SerialNo: +SerialNo }])
+//           .select()
+//           .single()
 
-        if (poError) {
-          console.error(poError)
-          throw new Error('订单创建失败')
-        }
+//         if (poError) {
+//           console.error(poError)
+//           throw new Error('订单创建失败')
+//         }
 
-        const poItems = items?.map((item) => ({
-          No: item.No,
-          PartNo: item.PartNo,
-          PartName: item.PartName,
-          PartName2: item.PartName2,
-          Spec: item.Spec,
-          ParamSpec: item.ParamSpec,
-          Unit: item.Unit,
-          Qty: item.Qty,
-          SONo: item.SONo,
-          PartCode: item.PartCode,
-          PartModel: item.PartModel,
-          Remark: item.Remark,
-          PoId: poRepo.id,
-        }))
+//         const poItems = items?.map((item) => ({
+//           No: item.No,
+//           PartNo: item.PartNo,
+//           PartName: item.PartName,
+//           PartName2: item.PartName2,
+//           Spec: item.Spec,
+//           ParamSpec: item.ParamSpec,
+//           Unit: item.Unit,
+//           Qty: item.Qty,
+//           SONo: item.SONo,
+//           PartCode: item.PartCode,
+//           PartModel: item.PartModel,
+//           Remark: item.Remark,
+//           PoId: poRepo.id,
+//         }))
 
-        const { error: itemsError } = await supabase
-          .from('syney-po-items')
-          .insert(poItems as ISyneyItem[])
+//         const { error: itemsError } = await supabase
+//           .from('syney-po-items')
+//           .insert(poItems as ISyneyItem[])
 
-        if (itemsError) {
-          await supabase.from('syney-pos').delete().eq('id', poRepo.id)
-          console.error(itemsError)
-          throw new Error('订单明细创建失败')
-        }
-      }
-    }),
-  )
-}
+//         if (itemsError) {
+//           await supabase.from('syney-pos').delete().eq('id', poRepo.id)
+//           console.error(itemsError)
+//           throw new Error('订单明细创建失败')
+//         }
+//       }
+//     }),
+//   )
+// }
 
 export async function deletePo(ids: string[]) {
   const { error } = await supabase
