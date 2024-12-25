@@ -4,14 +4,14 @@ import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 
 export function usePrintDecomposition() {
-  const doc = new jsPDF({ orientation: 'l' })
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { selectedMap, isLoading } = useSelectedPos()
 
+  const doc = new jsPDF({ orientation: 'l' })
   // 设置中文字体
   doc.addFileToVFS('msyh.ttf', myFont2)
   doc.addFont('msyh.ttf', 'myFont', 'normal')
   doc.setFont('myFont')
-
-  const { selectedMap, isLoading } = useSelectedPos()
 
   doc.setFontSize(20)
   doc.text('踏板分解单', 120, 20)
