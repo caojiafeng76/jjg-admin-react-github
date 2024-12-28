@@ -1,13 +1,21 @@
 import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
-import { Button } from 'antd'
+import { Button, message } from 'antd'
 import { usePrintDecomposition } from './usePrintDecomposition'
 import { useStore } from '@/store'
 
 export default function PrintDecompositionButton() {
   const { printDecomposition } = usePrintDecomposition()
-  const { setTableSelectedKeys } = useStore()
+  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
 
   function onClick() {
+    if (tableSelectedKeys.length === 0) {
+      message.warning('请选择至少一条数据')
+      return
+    }
+    if (tableSelectedKeys.length > 4) {
+      message.warning('最多选择四条数据')
+      return
+    }
     printDecomposition()
     setTableSelectedKeys([])
   }
