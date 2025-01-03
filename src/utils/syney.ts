@@ -123,7 +123,7 @@ function extractDataArray(jsonString: string) {
   return ''
 }
 
-export function jsonToArray(json: string) {
+export function jsonToArray(json: string): ISyneyItem[] {
   // if (json) {
   //   return JSON.parse(JSON.stringify(json, ['data'], 2), (_k, v: string) => {
   //     if (v) {
