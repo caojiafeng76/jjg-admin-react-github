@@ -90,30 +90,83 @@ export function distinctItems(items: ISyneyItem[]) {
   return Array.from(map.values())
 }
 
-export function jsonToArray(json: string): ISyneyItem[] | null {
-  if (json) {
-    return JSON.parse(JSON.stringify(json, ['data'], 2), (_k, v: string) => {
-      if (v) {
-        return (JSON.parse(v) as { data: ISyneyItem[] }).data.map((item) => ({
-          No: item.No,
-          ParamSpec: '',
-          PartName: item.PartName,
-          PartName2: item.PartName2 || '',
-          PartNo: item.PartNo,
-          Qty: item.Qty,
-          Remark: item.Remark,
-          SONo: item.SONo,
-          Spec: item.Spec,
-          TaxTotalPrice: 0,
-          TaxUnitPrice: item.TaxUnitPrice,
-          Unit: item.Unit,
-          PartCode: item.PartCode,
-          PartModel: item.PartModel,
-        }))
-      }
-    })
+function extractDataArray(jsonString: string) {
+  // 找到"data"键的起始位置
+  const dataKeyStart = jsonString.indexOf('data')
+  if (dataKeyStart === -1) return ''
+
+  // 找到冒号:
+  const colonIndex = jsonString.indexOf(':', dataKeyStart)
+  if (colonIndex === -1) return ''
+
+  // 跳过空白字符
+  let startIndex = colonIndex + 1
+  while (startIndex < jsonString.length && /\s/.test(jsonString[startIndex])) {
+    startIndex++
   }
-  return null
+
+  // 检查是否以[开始
+  if (jsonString[startIndex] !== '[') return ''
+
+  // 开始计数
+  let count = 1
+  for (let i = startIndex + 1; i < jsonString.length; i++) {
+    if (jsonString[i] === '[') {
+      count++
+    } else if (jsonString[i] === ']') {
+      count--
+      if (count === 0) {
+        return jsonString.substring(startIndex, i + 1)
+      }
+    }
+  }
+  return ''
+}
+
+export function jsonToArray(json: string) {
+  // if (json) {
+  //   return JSON.parse(JSON.stringify(json, ['data'], 2), (_k, v: string) => {
+  //     if (v) {
+  //       return (JSON.parse(v) as { data: ISyneyItem[] }).data.map((item) => ({
+  //         No: item.No,
+  //         ParamSpec: '',
+  //         PartName: item.PartName,
+  //         PartName2: item.PartName2 || '',
+  //         PartNo: item.PartNo,
+  //         Qty: item.Qty,
+  //         Remark: item.Remark,
+  //         SONo: item.SONo,
+  //         Spec: item.Spec,
+  //         TaxTotalPrice: 0,
+  //         TaxUnitPrice: item.TaxUnitPrice,
+  //         Unit: item.Unit,
+  //         PartCode: item.PartCode,
+  //         PartModel: item.PartModel,
+  //       }))
+  //     }
+  //   })
+  // }
+  // return null
+
+  const jsonArrayStr = extractDataArray(json)
+  const jsonArray = JSON.parse(jsonArrayStr)
+
+  return jsonArray.map((item: ISyneyItem) => ({
+    No: item.No,
+    ParamSpec: '',
+    PartName: item.PartName,
+    PartName2: item.PartName2 || '',
+    PartNo: item.PartNo,
+    Qty: item.Qty,
+    Remark: item.Remark,
+    SONo: item.SONo,
+    Spec: item.Spec,
+    TaxTotalPrice: 0,
+    TaxUnitPrice: item.TaxUnitPrice,
+    Unit: item.Unit,
+    PartCode: item.PartCode,
+    PartModel: item.PartModel,
+  }))
 }
 
 export function getItemsWithExtraInfo(
