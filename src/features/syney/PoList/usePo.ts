@@ -1,10 +1,10 @@
 import getSyneyPo from '@/services/apiSyneyPos'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { useQuery } from '@tanstack/react-query'
 import { message } from 'antd'
 
 export function usePo() {
-  const { tableSelectedKeys } = useStore()
+  const { tableSelectedKeys } = useAppStore()
 
   const id = tableSelectedKeys[0] || ''
 

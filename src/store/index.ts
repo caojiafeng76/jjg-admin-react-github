@@ -15,7 +15,7 @@ type Actions = {
   setIsDarkMode: () => void
 }
 
-export const useStore = create<State & Actions>()(
+export const useAppStore = create<State & Actions>()(
   devtools(
     persist(
       immer((set) => ({

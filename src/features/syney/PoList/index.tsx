@@ -7,7 +7,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import PoTable from './PoTable'
 import PoForm from './PoForm'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { ISyneyItem, ISyneyPo } from '@/types'
 import DeleteButton from '@/ui/DeleteButton'
 import { useDeletePo } from './useDeletePo'
@@ -46,7 +46,7 @@ export default function PoList() {
     setTableSelectedKeys,
     isLoading: isCreating,
     setIsLoading: setIsCreating,
-  } = useStore()
+  } = useAppStore()
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const { isDeleting, deletePo } = useDeletePo()
   const { data: po, isLoading: poLoading } = usePo()

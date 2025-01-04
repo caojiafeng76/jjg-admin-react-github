@@ -11,7 +11,7 @@ import ReportTable from '@syney/ReportList/ReportTable'
 import { useSelectedReports } from './useSelectedReports'
 import PrintButton from '@/ui/PrintButton'
 import ReportSelect from './ReportSelect'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import ConfirmButton from './ConfirmButton'
 import UnConfirmedButton from './UnConfirmedButton'
 import AppPagination from '@/ui/AppPagination'
@@ -24,7 +24,7 @@ export default function ReportList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
-  const { tableSelectedKeys, isLoading: isCreating } = useStore()
+  const { tableSelectedKeys, isLoading: isCreating } = useAppStore()
   const { selectedReportsLoading } = useSelectedReports()
   const { print } = useGenerateSyneyStoreReportPDF()
 

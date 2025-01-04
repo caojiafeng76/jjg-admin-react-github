@@ -1,6 +1,6 @@
 import { Key } from 'react'
 import { Table, TableColumnsType, TableProps } from 'antd'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { ISyneyItem } from '@/types'
 import { useDetail } from './useDetail'
 
@@ -52,7 +52,7 @@ const columns: TableColumnsType<ISyneyItem> = [
   },
 ]
 export default function DetailTable() {
-  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
   const { data, isLoading } = useDetail()
 
   const rowSelection: TableProps<ISyneyItem>['rowSelection'] = {

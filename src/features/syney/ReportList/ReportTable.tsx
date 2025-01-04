@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 
 import { ISyneyStoreReport } from '@/types'
 import { formatNumber } from '@/utils/helps'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { useReports } from './useReports'
 
 const columns: TableColumnsType<ISyneyStoreReport> = [
@@ -48,7 +48,7 @@ const columns: TableColumnsType<ISyneyStoreReport> = [
   },
 ]
 export default function ReportTable() {
-  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
   const { isLoading, reports } = useReports()
 

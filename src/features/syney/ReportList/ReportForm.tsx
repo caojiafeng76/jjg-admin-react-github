@@ -1,10 +1,14 @@
 import { forwardRef, useEffect, useImperativeHandle } from 'react'
 import { Form, Input } from 'antd'
 
-import { ISyneyItem, ISyneyStoreReport, ISyneyStoreReportFormRef } from '@/types'
+import {
+  ISyneyItem,
+  ISyneyStoreReport,
+  ISyneyStoreReportFormRef,
+} from '@/types'
 import { useSyneySpecs } from '@syney/SpecList/useSyneySpecs'
 import { useCreateReport } from './useCreateReport'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { getItemsWithParamSpec, jsonToArray, distinctItems } from '@utils/syney'
 
 type ReportFormProps = {
@@ -18,7 +22,7 @@ const layout = {
 
 const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
   ({ handleCancel }, ref) => {
-    const { setIsLoading } = useStore()
+    const { setIsLoading } = useAppStore()
 
     const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
       isAll: true,

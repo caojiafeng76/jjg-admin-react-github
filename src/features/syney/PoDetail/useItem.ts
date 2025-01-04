@@ -1,9 +1,9 @@
 import { getItemById } from '@/services/apiSyneyPo'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { useQuery } from '@tanstack/react-query'
 
 export function useItem() {
-  const { tableSelectedKeys } = useStore()
+  const { tableSelectedKeys } = useAppStore()
   const id = Number(tableSelectedKeys[0])
 
   const { data, error, isLoading } = useQuery({

@@ -3,7 +3,7 @@ import DetailTable from './DetailTable'
 import { Modal } from 'antd'
 import DetailForm from './DetailForm'
 import { useRef, useState } from 'react'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { FormInstance } from 'antd/lib'
 import { ISyneyItem } from '@/types'
 import { useItem } from './useItem'
@@ -11,7 +11,7 @@ import { useItem } from './useItem'
 export default function PoDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const { isLoading } = useStore()
+  const { isLoading } = useAppStore()
   const { data } = useItem()
 
   const detailFormRef = useRef<{

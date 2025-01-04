@@ -1,12 +1,12 @@
 import { CheckCircleIcon } from '@heroicons/react/16/solid'
 import { Button, message } from 'antd'
 import { useUpdateReports } from './useUpdateReports'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 
 export default function ConfirmButton() {
   const { isUpdating, updateReports } = useUpdateReports()
 
-  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
   return (
     <Button

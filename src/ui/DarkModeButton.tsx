@@ -1,9 +1,9 @@
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { MoonIcon, SunIcon } from '@heroicons/react/16/solid'
 import { Button } from 'antd'
 
 export default function DarkModeButton() {
-  const { isDarkMode, setIsDarkMode } = useStore()
+  const { isDarkMode, setIsDarkMode } = useAppStore()
 
   return (
     <Button type="text" onClick={setIsDarkMode}>

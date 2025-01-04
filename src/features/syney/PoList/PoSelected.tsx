@@ -1,10 +1,10 @@
 import { Select } from 'antd'
 import { useUpdatePos } from './useUpdatePos'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 
 export default function PoSelected() {
   const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
-  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
   const changeStatus = (value: string) => {
     updatePos({

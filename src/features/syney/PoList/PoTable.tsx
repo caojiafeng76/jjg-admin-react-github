@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { Table, TableColumnsType, TableProps } from 'antd'
 import { format } from 'date-fns'
 
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { ISyneyPo } from '@/types'
 import { usePos } from './usePos'
 
@@ -91,7 +91,7 @@ export default function PoTable() {
     },
   ]
 
-  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
   const { isLoading, pos } = usePos()
 
