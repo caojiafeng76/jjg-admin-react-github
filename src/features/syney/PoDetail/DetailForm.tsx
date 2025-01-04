@@ -1,4 +1,4 @@
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { ISyneyItem } from '@/types'
 import { Form, FormInstance, Input } from 'antd'
 import { forwardRef, useImperativeHandle } from 'react'
@@ -13,7 +13,7 @@ export default forwardRef<
   const [form] = Form.useForm<ISyneyItem>()
 
   const { tableSelectedKeys, setTableSelectedKeys, isLoading, setIsLoading } =
-    useStore()
+    useAppStore()
   const { updateItems } = useUpdate()
 
   const layout = {

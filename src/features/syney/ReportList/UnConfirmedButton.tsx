@@ -1,10 +1,10 @@
 import { Button, message } from 'antd'
 import { XCircleIcon } from '@heroicons/react/16/solid'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import { useUpdateReports } from './useUpdateReports'
 
 export default function UnConfirmedButton() {
-  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
   const { isUpdating, updateReports } = useUpdateReports()
 
   return (

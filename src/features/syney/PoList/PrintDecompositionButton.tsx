@@ -1,11 +1,11 @@
 import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
 import { Button, message } from 'antd'
 import { usePrintDecomposition } from './usePrintDecomposition'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 
 export default function PrintDecompositionButton() {
   const { printDecomposition } = usePrintDecomposition()
-  const { tableSelectedKeys, setTableSelectedKeys } = useStore()
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
   function onClick() {
     if (tableSelectedKeys.length === 0) {

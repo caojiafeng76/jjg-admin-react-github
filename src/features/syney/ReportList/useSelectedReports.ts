@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSelectedSyneyStoreReports } from '@/services/apiSyneyStoreReports'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 
 export function useSelectedReports() {
-  const { tableSelectedKeys: Nos } = useStore()
+  const { tableSelectedKeys: Nos } = useAppStore()
 
   const {
     data: selectedMap,

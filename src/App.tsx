@@ -10,7 +10,7 @@ import PageNotFound from '@pages/PageNotFound'
 import SyneySpecList from '@pages/SyneySpecList'
 import SyneyStoreReportList from '@pages/SyneyStoreReportList'
 import SyneyStoreReportDetail from '@pages/SyneyStoreReportDetail'
-import { useStore } from '@/store'
+import { useAppStore } from '@/store'
 import SyneyPoList from './pages/SyneyPoList'
 import SyneySetting from './pages/SyneySetting'
 import SyneyPoDetail from './pages/SyneyPoDetail'
@@ -20,7 +20,7 @@ const queryClient = new QueryClient()
 export default function App() {
   // const { darkMode } = useDarkMode()
 
-  const { isDarkMode } = useStore()
+  const { isDarkMode } = useAppStore()
 
   const themeMode = isDarkMode
     ? {
