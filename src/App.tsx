@@ -37,27 +37,27 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route element={<AppLayout />}>
-              <Route index element={<Navigate replace to="dashboard" />} />
-              <Route path="dashboard" element={<Dashboard />} />
+              <Route index element={<Navigate replace to="/dashboard" />} />
+              <Route path="/dashboard" element={<Dashboard />} />
 
-              <Route path="syney-spec-list" element={<SyneySpecList />} />
+              <Route path="/syney-spec-list" element={<SyneySpecList />} />
 
               <Route
-                path="syney-store-report-list"
+                path="/syney-store-report-list"
                 element={<SyneyStoreReportList />}
               />
               <Route
-                path="syney-store-report-list/:reportNo"
+                path="/syney-store-report-list/:reportNo"
                 element={<SyneyStoreReportDetail />}
               />
 
-              <Route path="syney-po-list" element={<SyneyPoList />} />
-              <Route path="syney-po-list/:PoId" element={<SyneyPoDetail />} />
+              <Route path="/syney-po-list" element={<SyneyPoList />} />
+              <Route path="/syney-po-list/:PoId" element={<SyneyPoDetail />} />
 
-              <Route path="syney-setting" element={<SyneySetting />} />
+              <Route path="/syney-setting" element={<SyneySetting />} />
             </Route>
 
-            <Route path="login" element={<Login />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<PageNotFound />} />
           </Routes>
         </BrowserRouter>
