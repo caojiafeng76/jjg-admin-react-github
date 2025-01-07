@@ -25,7 +25,7 @@ const PoForm: FC<PoFormProps> = ({ onFinish, isCreating, isEdit, ref }) => {
         form={form}
         name="po-form"
         onFinish={onFinish}
-        preserve={false}
+        // preserve={false}
       >
         <Form.Item name="No" label="订单号" rules={[{ required: true }]}>
           <Input disabled={isCreating} />
