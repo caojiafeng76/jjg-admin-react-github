@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@supabase/supabase-js": "^2.47.10",
-    "@tanstack/react-query": "^5.62.14",
-    "@tanstack/react-query-devtools": "^5.62.14",
+    "@supabase/supabase-js": "^2.47.12",
+    "@tanstack/react-query": "^5.63.0",
+    "@tanstack/react-query-devtools": "^5.63.0",
     "@types/node": "^22.10.5",
-    "antd": "^5.22.7",
+    "antd": "^5.23.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "immer": "^10.1.1",
@@ -25,15 +25,15 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "zustand": "^5.0.2"
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@types/react": "^18.3.18",
+    "@eslint/js": "^9.18.0",
+    "@types/react": "^19.0.4",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
-    "eslint": "^9.17.0",
+    "eslint": "^9.18.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
@@ -41,8 +41,8 @@
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
     "tailwindcss": "^3.4.17",
-    "typescript": "~5.7.2",
-    "typescript-eslint": "^8.19.0",
+    "typescript": "~5.7.3",
+    "typescript-eslint": "^8.19.1",
     "vite": "^6.0.7"
   }
 }
