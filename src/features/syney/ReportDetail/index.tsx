@@ -1,46 +1,46 @@
-import { Key, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { message, Modal } from 'antd'
 
 import { useDetail } from '@syney/ReportDetail/useDetail'
 
-import { ISyneyItem, ISyneyItemFormRef } from '@/types'
+import { ISyneyItem } from '@/types'
 import DetailTable from '@syney/ReportDetail/DetailTable'
 import EditButton from '@ui/EditButton'
 import DetailForm from './DetailForm'
 import { useUpdateDetail } from './useUpdateDetail'
 import DeleteButton from '@/ui/DeleteButton'
 import { useDeleteDetail } from './useDeleteDetail'
+import { FormInstance } from 'antd/lib'
+import { useAppStore } from '@/store'
 
 export default function ReportDetail() {
-  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
-  const [idToUpdate, setIdToUpdate] = useState<number | undefined>(undefined)
 
-  const detailFormRef = useRef<ISyneyItemFormRef>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selectedId, setSelectedId] = useState<React.Key>('')
+
+  const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)
 
   const { report, reportLoading } = useDetail()
   const { updateItem, isUpdating } = useUpdateDetail()
   const { isDeleting, deleteDetail } = useDeleteDetail()
 
-  const reportItemIds = selectedRowKeys.map(String)
   const reportItem = report?.find(
-    (item) => item.id === Number(reportItemIds?.at(0)),
+    (item) => item.id === Number(tableSelectedKeys?.at(0)),
   )
 
-  function onSelect(keys: Key[]) {
-    setSelectedRowKeys(keys)
-  }
   function showModal() {
     // 条件性地重置表单的字段，如果specFormInstance存在的话
-    detailFormRef?.current?.getInstance().resetFields()
+    detailFormRef?.current?.resetFields()
 
     // 设置模态框的显示状态为true，使其可见
     setIsModalOpen(true)
   }
   function handleEdit() {
     // 检查specIds数组的长度是否不等于1，如果不满足条件，则显示警告消息并返回
-    if (reportItemIds?.length !== 1) {
+    if (tableSelectedKeys?.length !== 1) {
       message.warning('只能选择一条数据')
       return
     }
@@ -51,33 +51,30 @@ export default function ReportDetail() {
 
   function handleOk() {
     // 触发表单实例的提交事件，如果表单验证通过则继续后续操作
-    detailFormRef?.current?.getInstance().submit()
+    detailFormRef?.current?.submit()
 
     // 清除所有选中的行键，表示用户已经做出确认，不再需要之前的选择状态
-    setSelectedRowKeys([])
+    setTableSelectedKeys([])
   }
   function handleCancel() {
     // 重置表单实例的字段
-    detailFormRef?.current?.getInstance().resetFields()
+    detailFormRef?.current?.resetFields()
 
     // 设置模态框是否打开的状态为false
     setIsModalOpen(false)
-    setSelectedRowKeys([])
+    setTableSelectedKeys([])
   }
 
-  const onFinishFuc = (values: ISyneyItem) => {
-    updateItem(
-      { item: { ...values, id: idToUpdate! } },
-      { onSettled: handleCancel },
-    )
+  function onFinishFuc(values: ISyneyItem) {
+    updateItem({ item: values }, { onSettled: handleCancel })
   }
 
   useEffect(() => {
     if (isModalOpen) {
-      detailFormRef?.current?.getInstance().setFieldsValue(reportItem || {})
-      setIdToUpdate(reportItem?.id)
+      detailFormRef?.current?.setFieldsValue(reportItem || {})
+      setSelectedId(tableSelectedKeys.at(0)!)
     }
-  }, [isModalOpen, reportItem])
+  }, [isModalOpen, reportItem, tableSelectedKeys])
 
   return (
     <div className="grid grid-rows-[32px_1fr] gap-4">
@@ -87,16 +84,16 @@ export default function ReportDetail() {
           isDeleting={isDeleting}
           open={isConfirmOpen}
           showPopconfirm={() => {
-            if (selectedRowKeys.length === 0) {
+            if (tableSelectedKeys.length === 0) {
               message.error('请选择要删除的数据')
               return
             }
             setIsConfirmOpen(true)
           }}
           onConfirm={() => {
-            deleteDetail(reportItemIds, {
+            deleteDetail(tableSelectedKeys.map(String), {
               onSettled: () => {
-                setSelectedRowKeys([])
+                setTableSelectedKeys([])
                 setIsConfirmOpen(false)
               },
             })
@@ -111,8 +108,6 @@ export default function ReportDetail() {
         <DetailTable
           data={report || []}
           loading={reportLoading || isUpdating || isDeleting}
-          selectedRowKeys={selectedRowKeys}
-          onSelect={onSelect}
         />
 
         <Modal
@@ -122,7 +117,7 @@ export default function ReportDetail() {
           onOk={handleOk}
           onCancel={handleCancel}
         >
-          <DetailForm ref={detailFormRef} onFinishFunc={onFinishFuc} />
+          <DetailForm ref={detailFormRef} onFinishFuc={onFinishFuc} />
         </Modal>
       </div>
     </div>

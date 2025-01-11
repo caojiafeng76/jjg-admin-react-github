@@ -3,17 +3,14 @@ import { Table, TableColumnsType, TableProps } from 'antd'
 
 import { ISyneyItem } from '@/types'
 import { formatNumber } from '@utils/helps'
+import { useAppStore } from '@/store'
 
 export default function DetailTable({
   data,
   loading,
-  selectedRowKeys,
-  onSelect,
 }: {
   data: ISyneyItem[]
   loading: boolean
-  selectedRowKeys: Key[]
-  onSelect: (selectedRowKeys: Key[]) => void
 }) {
   const columns: TableColumnsType<ISyneyItem> = [
     {
@@ -65,10 +62,13 @@ export default function DetailTable({
       render: (text: number) => formatNumber(text),
     },
   ]
+
+  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+
   const rowSelection: TableProps<ISyneyItem>['rowSelection'] = {
-    selectedRowKeys,
+    selectedRowKeys: tableSelectedKeys,
     onChange: (newSelectedRowKeys: Key[]) => {
-      onSelect(newSelectedRowKeys)
+      setTableSelectedKeys(newSelectedRowKeys)
     },
   }
 
