@@ -29,7 +29,7 @@ export default function DetailForm({ ref, onFinishFuc }: FormProps) {
       ref={ref}
     >
       <Form.Item name="id" label="id">
-        <Input disabled={true} />
+        <Input hidden={false} disabled={true} />
       </Form.Item>
       <Form.Item name="PartNo" label="件号">
         <Input disabled={true} />
