@@ -19,7 +19,6 @@ export default function ReportDetail() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedId, setSelectedId] = useState<React.Key>('')
 
   const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)
 
@@ -72,9 +71,9 @@ export default function ReportDetail() {
   useEffect(() => {
     if (isModalOpen) {
       detailFormRef?.current?.setFieldsValue(reportItem || {})
-      setSelectedId(tableSelectedKeys.at(0)!)
     }
-  }, [isModalOpen, reportItem, tableSelectedKeys])
+    setIsModalOpen(true)
+  }, [isModalOpen, reportItem])
 
   return (
     <div className="grid grid-rows-[32px_1fr] gap-4">
