@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { message, Modal } from 'antd'
 
 import { useDetail } from '@syney/ReportDetail/useDetail'
@@ -17,8 +17,6 @@ export default function ReportDetail() {
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
   const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)
 
