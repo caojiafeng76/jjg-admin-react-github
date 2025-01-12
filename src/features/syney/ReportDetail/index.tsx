@@ -69,8 +69,8 @@ export default function ReportDetail() {
   useEffect(() => {
     if (isModalOpen) {
       detailFormRef?.current?.setFieldsValue(reportItem || {})
+      setIsModalOpen(true)
     }
-    setIsModalOpen(true)
   }, [isModalOpen, reportItem])
 
   return (
