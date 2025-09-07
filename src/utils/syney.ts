@@ -186,6 +186,10 @@ export function getItemsWithExtraInfo(
     'XN3024BX',
     'XN3024BY',
     'XN2808AL',
+    'XN3024DF',
+    'XN2808JY',
+    'XN3024DG',
+    'XN2808JZ',
   ]
 
   // 创建一个 Map，用于按销售订单号（SONo）和序列号分组存储物品

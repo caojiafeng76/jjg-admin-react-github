@@ -192,7 +192,12 @@ export function usePrintDecomposition() {
         }
 
         //上中板规格
-        if (PartNo?.includes('XN2808BP') || PartNo?.includes('XN3024BS')) {
+        if (
+          PartNo?.includes('XN2808BP') ||
+          PartNo?.includes('XN3024BS') ||
+          PartNo?.includes('XN2808JY') ||
+          PartNo?.includes('XN3024DF')
+        ) {
           doc.setFontSize(8)
           doc.text(`${ParamSpec}`, 111, 47 + index * 40)
           doc.setFontSize(12)
@@ -200,7 +205,12 @@ export function usePrintDecomposition() {
         }
 
         //下中板规格
-        if (PartNo?.includes('XN2808BQ') || PartNo?.includes('XN3024BT')) {
+        if (
+          PartNo?.includes('XN2808BQ') ||
+          PartNo?.includes('XN3024BT') ||
+          PartNo?.includes('XN2808JZ') ||
+          PartNo?.includes('XN3024DG')
+        ) {
           doc.setFontSize(8)
           doc.text(`${ParamSpec}`, 111, 56 + index * 40)
           doc.setFontSize(12)
