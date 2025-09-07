@@ -3,15 +3,16 @@ import { Button } from 'antd'
 
 interface IProps {
   handlePrint: () => void
+  children?: React.ReactNode
 }
-export default function PrintButton({ handlePrint }: IProps) {
+export default function PrintButton({ handlePrint, children }: IProps) {
   return (
     <Button
       type="text"
       icon={<PrinterIcon className="size-4 !text-blue-500/80" />}
       onClick={handlePrint}
     >
-      打印
+      {children ? children : '打印中文标签'}
     </Button>
   )
 }
