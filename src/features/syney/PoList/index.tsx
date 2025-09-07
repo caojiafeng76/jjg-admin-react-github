@@ -30,6 +30,7 @@ import { usePo } from './usePo'
 import { useUpdatePos } from './useUpdatePos'
 import PrintDecompositionButton from './PrintDecompositionButton'
 import PoSelectedFilter from './PoSelectedFilter'
+import { usePrintEnglish } from './usePrintEnglish'
 
 export default function PoList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -37,6 +38,7 @@ export default function PoList() {
   const [isEdit, setIsEdit] = useState(false)
 
   const { generateLabel } = usePrint()
+  const { generateEnglishLabel } = usePrintEnglish()
 
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
@@ -130,6 +132,11 @@ export default function PoList() {
     setTableSelectedKeys([])
   }
 
+  function handlePrintEnglish() {
+    generateEnglishLabel()
+    setTableSelectedKeys([])
+  }
+
   function handleEdit() {
     setIsEdit(true)
     setIsModalOpen(true)
@@ -178,6 +185,7 @@ export default function PoList() {
         />
 
         <PrintButton handlePrint={handlePrint} />
+        <PrintButton handlePrint={handlePrintEnglish}>打印英文标签</PrintButton>
 
         <ExportInfoButton />
 
