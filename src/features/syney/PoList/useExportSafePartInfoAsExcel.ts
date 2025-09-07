@@ -18,7 +18,9 @@ export function useExportSafePartInfoAsExcel() {
             item.PartNo?.includes('XN2808EB') ||
             item.PartNo?.includes('XN3024BR') ||
             item.PartNo?.includes('XN2808BP') ||
-            item.PartNo?.includes('XN3024BS'),
+            item.PartNo?.includes('XN3024BS') ||
+            item.PartNo?.includes('XN2808JY') ||
+            item.PartNo?.includes('XN3024DF'),
         )
         .map((item, index) => ({
           序号: index + 1,
