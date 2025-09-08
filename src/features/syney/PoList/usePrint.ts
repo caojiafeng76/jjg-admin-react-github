@@ -119,7 +119,7 @@ export function usePrint() {
   }
   function generateLabel() {
     doc.output('dataurlnewwindow', {
-      filename: 'new',
+      filename: '标签',
     })
   }
   return { generateLabel }

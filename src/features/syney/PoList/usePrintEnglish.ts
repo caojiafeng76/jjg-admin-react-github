@@ -21,8 +21,13 @@ export function usePrintEnglish() {
     selectedMap?.forEach((data, key) => {
       const [SONo, Spec, EndDate] = key.split('~')
       data.forEach((item) => {
+        // 设置字体大小
+        doc.setFontSize(7)
         if (item.PartCode?.length) {
           for (let i = 0; i < (item.Qty || 1); i++) {
+            // 设置字体大小
+            doc.setFontSize(7)
+
             doc.addPage()
             doc.setPage(doc.internal.pages[doc.internal.pages.length - 1] + 1)
 
@@ -39,9 +44,16 @@ export function usePrintEnglish() {
             doc.line(36, 22, 36, 27) // 下面竖线
 
             doc.text('PartName', 6, 6)
+
+            // 设置字体大小
+            doc.setFontSize(6)
+
             const PartName2 =
               item.PartName2?.length === 5 ? 'COMB PLATE' : 'COVER PLATE'
             doc.text(`${PartName2}`, 21, 6)
+
+            // 设置字体大小
+            doc.setFontSize(7)
 
             doc.text('ParamSpec', 6, 11)
             doc.text(`${item.ParamSpec}`, 21, 11)
@@ -49,7 +61,7 @@ export function usePrintEnglish() {
             doc.text('PartCode', 6, 16)
             doc.text(`${item.PartCode}`, 21, 16)
 
-            doc.text('Qty', 6, 21)
+            doc.text('Qty', 8, 21)
             doc.text('1', 27, 21)
 
             doc.text('PartNo', 40, 6)
@@ -79,10 +91,10 @@ export function usePrintEnglish() {
             doc.text('SupplierName', 10, 26)
             doc.setFontSize(5)
             doc.text('Huzhou Yindu Aluminum Technology Co. , Ltd.', 40, 26)
-            doc.setFontSize(7)
           }
         }
       })
+
       doc.addPage()
       doc.setPage(doc.internal.pages[doc.internal.pages.length - 1] + 1)
 
@@ -102,9 +114,9 @@ export function usePrintEnglish() {
       doc.text(`Frame`, 24, 6)
 
       doc.text('ParamSpec', 6, 11)
-      doc.text(`${/\d+/g.exec(Spec.split('-').at(0) || '')?.at(0)}#`, 23, 11)
+      doc.text(`${/\d+/g.exec(Spec.split('-').at(0) || '')?.at(0)}#`, 24, 11)
 
-      doc.text('Qty', 6, 21)
+      doc.text('Qty', 8, 21)
       doc.text('1', 27, 21)
 
       doc.text('PartNo', 40, 6)
@@ -123,7 +135,7 @@ export function usePrintEnglish() {
   }
   function generateEnglishLabel() {
     doc.output('dataurlnewwindow', {
-      filename: 'new',
+      filename: 'Label',
     })
   }
   return { generateEnglishLabel }
