@@ -256,7 +256,7 @@ export function usePrintDecomposition() {
         }
 
         //横围
-        if (PartNo?.includes('XN2808EC')) {
+        if (PartNo?.includes('XN2808EC') || PartNo?.includes('XN2838CP')) {
           doc.setFontSize(8)
           doc.text(
             `${ParamSpec?.slice(ParamSpec?.indexOf('=') + 1)}*${Qty}`,
@@ -266,11 +266,15 @@ export function usePrintDecomposition() {
         }
 
         //上侧围
-        if (PartNo?.includes('XN2808ED') && Remark?.includes('上头部')) {
+        if (
+          (PartNo?.includes('XN2808ED') || PartNo?.includes('XN2838CQ')) &&
+          Remark?.includes('上头部')
+        ) {
           const count = data
             .filter(
               (it) =>
-                it.PartNo?.includes('XN2808ED') &&
+                (it.PartNo?.includes('XN2808ED') ||
+                  it.PartNo?.includes('XN2838CQ')) &&
                 it.Remark?.includes('上头部'),
             )
             .map((it) => it.Qty)
@@ -285,11 +289,15 @@ export function usePrintDecomposition() {
         }
 
         //下侧围
-        if (PartNo?.includes('XN2808ED') && Remark?.includes('下头部')) {
+        if (
+          (PartNo?.includes('XN2808ED') || PartNo?.includes('XN2838CQ')) &&
+          Remark?.includes('下头部')
+        ) {
           const count = data
             .filter(
               (it) =>
-                it.PartNo?.includes('XN2808ED') &&
+                (it.PartNo?.includes('XN2808ED') ||
+                  it.PartNo?.includes('XN2838CQ')) &&
                 it.Remark?.includes('下头部'),
             )
             .map((it) => it.Qty)
@@ -310,7 +318,7 @@ export function usePrintDecomposition() {
 
   function printDecomposition() {
     doc.output('dataurlnewwindow', {
-      filename: 'new',
+      filename: '分解单',
     })
   }
   return { printDecomposition }
