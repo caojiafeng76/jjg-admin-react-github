@@ -76,7 +76,7 @@ const PoForm: FC<PoFormProps> = ({ onFinish, isCreating, isEdit, ref }) => {
               },
               {
                 value: '1000型-室内-老围框',
-                label: <span>1000型-室内-围框</span>,
+                label: <span>1000型-室内-老围框</span>,
               },
               {
                 value: '800型-室内-老围框',
