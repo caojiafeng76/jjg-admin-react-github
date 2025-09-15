@@ -87,7 +87,7 @@ export default function ReportList() {
             open={isConfirmOpen}
             closeConfirm={() => setIsConfirmOpen(false)}
           />
-          <PrintButton handlePrint={handlePrint} />
+          <PrintButton handlePrint={handlePrint} >打印对账单</PrintButton>
           <ExportAsExcelButton />
           <ExportPDFButton />
 
