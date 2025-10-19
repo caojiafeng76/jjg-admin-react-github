@@ -95,6 +95,8 @@ export function usePrintEnglish() {
         }
       })
 
+      doc.setFontSize(7)
+
       doc.addPage()
       doc.setPage(doc.internal.pages[doc.internal.pages.length - 1] + 1)
 
