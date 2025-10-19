@@ -95,8 +95,6 @@ export function usePrintEnglish() {
         }
       })
 
-      doc.setFontSize(7)
-
       doc.addPage()
       doc.setPage(doc.internal.pages[doc.internal.pages.length - 1] + 1)
 
@@ -111,6 +109,8 @@ export function usePrintEnglish() {
       doc.line(36, 2, 36, 22) // 第二条竖线
       doc.line(51, 2, 51, 22) // 第三条竖线
       doc.line(36, 22, 36, 27) // 下面竖线
+
+      doc.setFontSize(7)
 
       doc.text('PartName', 6, 6)
       doc.text(`Frame`, 24, 6)
