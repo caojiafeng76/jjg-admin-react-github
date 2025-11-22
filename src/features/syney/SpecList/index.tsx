@@ -20,7 +20,6 @@ export default function SpecList() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建规格')
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
@@ -43,27 +42,6 @@ export default function SpecList() {
 
     // 设置模态框的显示状态为true，使其可见
     setIsModalOpen(true)
-  }
-
-  /**
-   * 处理打开状态变化的函数
-   *
-   * 该函数根据数据源的长度来决定是否可以改变打开状态
-   * 如果数据源为空，则显示警告信息并阻止打开状态的变化
-   * 如果数据源不为空，则允许打开状态随用户操作改变
-   *
-   * @param newOpen 新的打开状态，表示是否打开
-   */
-  function showPopconfirm() {
-    // 检查数据源长度是否为0
-    if (specIds?.length === 0) {
-      // 如果数据源为空，显示警告信息并设置确认打开状态为false
-      message.warning('请选择至少一条数据')
-      setIsConfirmOpen(false)
-    } else {
-      // 如果数据源不为空，设置确认打开状态为新的打开状态
-      setIsConfirmOpen(true)
-    }
   }
 
   function onSelect(specIds: Key[]) {
@@ -145,9 +123,18 @@ export default function SpecList() {
    * 此函数负责调用deleteSyneySpecs函数以删除规格信息，并关闭确认对话框
    * 它没有参数和返回值
    */
+  /**
+   * 处理删除操作的函数
+   * 此函数负责调用deleteSyneySpecs函数以删除规格信息，并关闭确认对话框
+   * 它没有参数和返回值
+   */
   function handleDelete() {
     // 调用deleteSyneySpecs函数，传入specIds以删除对应的规格信息
-    deleteSyneySpecs(specIds, { onSettled: () => setIsConfirmOpen(false) })
+    if (specIds?.length === 0) {
+      message.warning('请选择至少一条数据')
+      return
+    }
+    deleteSyneySpecs(specIds)
   }
 
   useEffect(() => {
@@ -170,13 +157,7 @@ export default function SpecList() {
 
         <EditButton title="只能选择一条数据" handleEdit={handleEdit} />
 
-        <DeleteButton
-          showPopconfirm={showPopconfirm}
-          onConfirm={handleDelete}
-          isDeleting={isDeleting}
-          open={isConfirmOpen}
-          closeConfirm={() => setIsConfirmOpen(false)}
-        />
+        <DeleteButton onConfirm={handleDelete} isDeleting={isDeleting} />
         <PartNoInput />
       </div>
 

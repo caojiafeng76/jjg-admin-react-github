@@ -16,7 +16,6 @@ import { useAppStore } from '@/store'
 export default function ReportDetail() {
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
   const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)
 
@@ -79,24 +78,16 @@ export default function ReportDetail() {
         <EditButton title="请选择一条数据" handleEdit={handleEdit} />
         <DeleteButton
           isDeleting={isDeleting}
-          open={isConfirmOpen}
-          showPopconfirm={() => {
+          onConfirm={() => {
             if (tableSelectedKeys.length === 0) {
               message.error('请选择要删除的数据')
               return
             }
-            setIsConfirmOpen(true)
-          }}
-          onConfirm={() => {
             deleteDetail(tableSelectedKeys.map(String), {
               onSettled: () => {
                 setTableSelectedKeys([])
-                setIsConfirmOpen(false)
               },
             })
-          }}
-          closeConfirm={() => {
-            setIsConfirmOpen(false)
           }}
         />
       </div>

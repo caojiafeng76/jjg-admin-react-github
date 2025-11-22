@@ -22,7 +22,6 @@ import ExportPDFButton from './ExportPDFButton'
 
 export default function ReportList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
   const { tableSelectedKeys, isLoading: isCreating } = useAppStore()
   const { selectedReportsLoading } = useSelectedReports()
@@ -49,21 +48,11 @@ export default function ReportList() {
 
   function handleDelete() {
     // 调用deleteSyneySpecs函数，传入specIds以删除对应的规格信息
-    deleteReport(tableSelectedKeys.map(String), {
-      onSettled: () => setIsConfirmOpen(false),
-    })
-  }
-
-  function showPopconfirm() {
-    // 检查数据源长度是否为0
-    if (tableSelectedKeys?.length === 0) {
-      // 如果数据源为空，显示警告信息并设置确认打开状态为false
+    if (tableSelectedKeys.length === 0) {
       message.warning('请选择至少一条数据')
-      setIsConfirmOpen(false)
-    } else {
-      // 如果数据源不为空，设置确认打开状态为新的打开状态
-      setIsConfirmOpen(true)
+      return
     }
+    deleteReport(tableSelectedKeys.map(String))
   }
 
   function handlePrint() {
@@ -80,14 +69,8 @@ export default function ReportList() {
         <div className="actions flex grow items-center gap-4">
           <span className="text-[16px] font-semibold">操作</span>
           <AddButton handleCreate={handleCreate} />
-          <DeleteButton
-            onConfirm={handleDelete}
-            isDeleting={isDeleting}
-            showPopconfirm={showPopconfirm}
-            open={isConfirmOpen}
-            closeConfirm={() => setIsConfirmOpen(false)}
-          />
-          <PrintButton handlePrint={handlePrint} >打印对账单</PrintButton>
+          <DeleteButton onConfirm={handleDelete} isDeleting={isDeleting} />
+          <PrintButton handlePrint={handlePrint}>打印对账单</PrintButton>
           <ExportAsExcelButton />
           <ExportPDFButton />
 
