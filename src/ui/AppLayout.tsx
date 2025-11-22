@@ -31,7 +31,7 @@ export default function AppLayout() {
           onToggleCollapse={onToggleCollapse}
         />
         <Content
-          className=""
+          className="flex flex-col overflow-hidden"
           style={{
             margin: '12px 8px',
             padding: 12,

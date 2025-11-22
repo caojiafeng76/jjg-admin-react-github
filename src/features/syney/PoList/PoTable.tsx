@@ -110,7 +110,7 @@ export default function PoTable() {
       loading={isLoading}
       pagination={false}
       scroll={{
-        y: 560,
+        y: 'calc(100vh - 320px)',
       }}
       summary={(pageData) => {
         let totalCount = 0

@@ -2,7 +2,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 
-import { ISyneyItem } from '@/types'
+import { ISyneyItem } from '@services/types'
 import { formatNumber } from '@/utils/helps'
 import myFont from '@/assets/myFont'
 import { useSelectedReports } from './useSelectedReports'

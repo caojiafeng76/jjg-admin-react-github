@@ -1,5 +1,6 @@
-import { ISyneyItem, ISyneyPo } from '@/types'
+import { ISyneyItem, ISyneyPo } from './types'
 import supabase from './supabase'
+import { handleApiError } from '@utils/errorHandler'
 
 export async function getSyneyPos({
   page,
@@ -52,8 +53,7 @@ export async function getSyneyPos({
   const { data: syneyPos, count, error } = await query
 
   if (error) {
-    console.error(error)
-    throw new Error('订单列表获取失败')
+    throw handleApiError(error, '订单列表获取失败')
   }
 
   return { syneyPos, count }
@@ -67,127 +67,11 @@ export default async function getSyneyPo(id: string) {
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error('获取订单详情失败')
+    throw handleApiError(error, '获取订单详情失败')
   }
 
   return data
 }
-
-// export async function createPo({
-//   po,
-//   map,
-// }: {
-//   po: ISyneyPo
-//   map: Map<string, ISyneyItem[]>
-// }) {
-//   map.forEach(async (items, key) => {
-//     const [SONo, SerialNo] = key.split('~')
-
-//     // console.log(po.SONo, po.SerialNo)
-//     const { data: poRepo, error: poError } = await supabase
-//       .from('syney-pos')
-//       .insert([{ ...po, SONo, SerialNo: +SerialNo }])
-//       .select()
-//       .single()
-
-//     if (poError) {
-//       console.error(poError)
-//       throw new Error('订单创建失败')
-//     }
-
-//     const poItems = items.map((item) => ({
-//       No: item.No,
-//       PartNo: item.PartNo,
-//       PartName: item.PartName,
-//       PartName2: item.PartName2,
-//       Spec: item.Spec,
-//       ParamSpec: item.ParamSpec,
-//       Unit: item.Unit,
-//       Qty: item.Qty,
-//       SONo: item.SONo,
-//       PartCode: item.PartCode,
-//       PartModel: item.PartModel,
-//       Remark: item.Remark,
-//       PoId: poRepo.id,
-//     }))
-
-//     const { error: itemsError } = await supabase
-//       .from('syney-po-items')
-//       .insert(poItems)
-
-//     if (itemsError) {
-//       await supabase.from('syney-pos').delete().eq('id', poRepo.id)
-//       console.error(itemsError)
-//       throw new Error('订单明细创建失败')
-//     }
-//   })
-// }
-
-// export async function createPo({
-//   po,
-//   map,
-// }: {
-//   po: ISyneyPo
-//   map: Map<string, ISyneyItem[]>
-// }) {
-//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//   const promises: any[] = []
-
-//   const itemsArr: ISyneyItem[][] = []
-//   // 遍历map
-//   map.forEach((items, key) => {
-//     const [SONo, SerialNo] = key.split('~')
-//     const insertPoPromise = supabase
-//       .from('syney-pos')
-//       .insert([{ ...po, SONo, SerialNo: +SerialNo }])
-//       .select()
-//       .single()
-//     promises.push(insertPoPromise)
-//     itemsArr.push(items)
-//   })
-
-//   try {
-//     const poRepoResults = await Promise.all(promises)
-//     for (let i = 0; i < poRepoResults.length; i++) {
-//       const { data: poRepo, error: poError } = poRepoResults[i]
-//       if (poError) {
-//         console.error(poError)
-//         throw new Error('订单创建失败')
-//       }
-//       const items = itemsArr[i]
-//       const poItems = items.map((item) => ({
-//         No: item.No,
-//         PartNo: item.PartNo,
-//         PartName: item.PartName,
-//         PartName2: item.PartName2,
-//         Spec: item.Spec,
-//         ParamSpec: item.ParamSpec,
-//         Unit: item.Unit,
-//         Qty: item.Qty,
-//         SONo: item.SONo,
-//         PartCode: item.PartCode,
-//         PartModel: item.PartModel,
-//         Remark: item.Remark,
-//         PoId: poRepo.id,
-//       }))
-
-//       const { error: itemsError } = await supabase
-//         .from('syney-po-items')
-//         .insert(poItems)
-
-//       if (itemsError) {
-//         await supabase.from('syney-pos').delete().eq('id', poRepo.id)
-//         console.error(itemsError)
-//         throw new Error('订单明细创建失败')
-//       }
-//     }
-//   } catch (error) {
-//     console.error(error)
-//     // 这里可以根据具体需求进一步细化错误处理或者向外抛出更合适的错误提示等
-//     throw error
-//   }
-// }
 
 export async function createPo({
   po,
@@ -208,8 +92,7 @@ export async function createPo({
         .single()
 
       if (poError) {
-        console.error(poError)
-        throw new Error('订单创建失败')
+        throw handleApiError(poError, '订单创建失败')
       }
 
       const poItems = items?.map((item) => ({
@@ -234,8 +117,7 @@ export async function createPo({
 
       if (itemsError) {
         await supabase.from('syney-pos').delete().eq('id', poRepo.id)
-        console.error(itemsError)
-        throw new Error('订单明细创建失败')
+        throw handleApiError(itemsError, '订单明细创建失败')
       }
     }),
   )
@@ -248,8 +130,7 @@ export async function deletePo(ids: string[]) {
     .in('id', ids.map(Number))
 
   if (error) {
-    console.error(error)
-    throw new Error('订单删除失败')
+    throw handleApiError(error, '订单删除失败')
   }
 }
 
@@ -266,8 +147,7 @@ export async function updatePos({
     .in('id', ids.map(Number))
 
   if (error) {
-    console.error(error)
-    throw new Error('订单更新失败')
+    throw handleApiError(error, '订单更新失败')
   }
 }
 
@@ -278,8 +158,7 @@ export async function getSelectedPosWithItems(PoIds: number[]) {
     .in('PoId', PoIds)
 
   if (itemsError) {
-    console.error(itemsError)
-    throw new Error('订单明细获取失败')
+    throw handleApiError(itemsError, '订单明细获取失败')
   }
 
   const { data: selectedPos, error: posError } = await supabase
@@ -292,8 +171,7 @@ export async function getSelectedPosWithItems(PoIds: number[]) {
     .order('SerialNo', { ascending: true }) // 按序列号升序
 
   if (posError) {
-    console.error(posError)
-    throw new Error('订单获取失败')
+    throw handleApiError(posError, '订单获取失败')
   }
 
   const map = new Map<string, ISyneyItem[]>()
