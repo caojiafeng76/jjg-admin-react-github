@@ -5,7 +5,7 @@ import { updatePos as updatePosApi } from '@/services/apiSyneyPos'
 
 export function useUpdatePos() {
   const queryClient = useQueryClient()
-  const [messageApi] = message.useMessage()
+  const [messageApi, contextHolder] = message.useMessage()
 
   const { mutate: updatePos, isPending: isUpdating } = useMutation({
     mutationFn: updatePosApi,
@@ -25,5 +25,5 @@ export function useUpdatePos() {
     },
   })
 
-  return { updatePos, isUpdating }
+  return { updatePos, isUpdating, contextHolder }
 }
