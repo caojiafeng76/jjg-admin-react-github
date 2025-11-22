@@ -5,16 +5,18 @@ import { updatePos as updatePosApi } from '@/services/apiSyneyPos'
 
 export function useUpdatePos() {
   const queryClient = useQueryClient()
+  const [messageApi] = message.useMessage()
+
   const { mutate: updatePos, isPending: isUpdating } = useMutation({
     mutationFn: updatePosApi,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['syney-pos'],
       })
-      message.success('更新成功')
+      messageApi.success('更新成功')
     },
     onError: (err) => {
-      message.error(err.message)
+      messageApi.error(err.message || '更新失败')
     },
   })
 

@@ -4,6 +4,7 @@ import { createPo as createPoApi } from '@/services/apiSyneyPos'
 
 export function useCreatePo() {
   const queryClient = useQueryClient()
+  const [messageApi] = message.useMessage()
 
   const { mutateAsync: createPo, isPending: isCreating } = useMutation({
     mutationFn: createPoApi,
@@ -12,11 +13,11 @@ export function useCreatePo() {
         queryKey: ['syney-pos'],
       })
 
-      message.success('创建订单成功')
+      messageApi.success('创建订单成功')
     },
     onError: (err) => {
       console.error(err)
-      message.error('创建订单失败')
+      messageApi.error('创建订单失败')
     },
   })
 

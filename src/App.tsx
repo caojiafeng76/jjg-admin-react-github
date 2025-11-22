@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { ConfigProvider, theme } from 'antd'
+import { ConfigProvider, theme, App as AntdApp } from 'antd'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
@@ -33,36 +33,41 @@ export default function App() {
 
   return (
     <ConfigProvider theme={themeMode}>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route index element={<Navigate replace to="/dashboard" />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+      <AntdApp>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route index element={<Navigate replace to="/dashboard" />} />
+                <Route path="/dashboard" element={<Dashboard />} />
 
-              <Route path="/syney-spec-list" element={<SyneySpecList />} />
+                <Route path="/syney-spec-list" element={<SyneySpecList />} />
 
-              <Route
-                path="/syney-store-report-list"
-                element={<SyneyStoreReportList />}
-              />
-              <Route
-                path="/syney-store-report-list/:reportNo"
-                element={<SyneyStoreReportDetail />}
-              />
+                <Route
+                  path="/syney-store-report-list"
+                  element={<SyneyStoreReportList />}
+                />
+                <Route
+                  path="/syney-store-report-list/:reportNo"
+                  element={<SyneyStoreReportDetail />}
+                />
 
-              <Route path="/syney-po-list" element={<SyneyPoList />} />
-              <Route path="/syney-po-list/:PoId" element={<SyneyPoDetail />} />
+                <Route path="/syney-po-list" element={<SyneyPoList />} />
+                <Route
+                  path="/syney-po-list/:PoId"
+                  element={<SyneyPoDetail />}
+                />
 
-              <Route path="/syney-setting" element={<SyneySetting />} />
-            </Route>
+                <Route path="/syney-setting" element={<SyneySetting />} />
+              </Route>
 
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<PageNotFound />} />
-          </Routes>
-        </BrowserRouter>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<PageNotFound />} />
+            </Routes>
+          </BrowserRouter>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </AntdApp>
     </ConfigProvider>
   )
 }
