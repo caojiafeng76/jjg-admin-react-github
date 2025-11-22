@@ -31,6 +31,8 @@ import { useUpdatePos } from './useUpdatePos'
 import PrintDecompositionButton from './PrintDecompositionButton'
 import PoSelectedFilter from './PoSelectedFilter'
 import { usePrintEnglish } from './usePrintEnglish'
+import PoDateFilter from './PoDateFilter'
+import PoSearchInput from './PoSearchInput'
 
 export default function PoList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -165,41 +167,64 @@ export default function PoList() {
   }, [setIsCreating, setTableSelectedKeys])
 
   return (
-    <div className="grid grid-rows-[32px_1fr] gap-4">
+    <div className="grid grid-rows-[auto_1fr] gap-4">
       {labelContextHolder}
       {englishLabelContextHolder}
-      <div className="flex h-full items-center gap-2">
-        <AddButton
-          handleCreate={() => {
-            setIsEdit(false)
-            poFormRef.current?.resetFields()
-            setModalTitle('创建订单')
-            setIsModalOpen(true)
-          }}
-        />
 
-        <EditButton title="编辑" handleEdit={handleEdit} />
+      {/* 工具栏 */}
+      <div className="flex flex-col gap-2">
+        {/* 第一行：功能按钮 */}
+        <div className="flex flex-wrap items-center gap-2">
+          <AddButton
+            handleCreate={() => {
+              setIsEdit(false)
+              poFormRef.current?.resetFields()
+              setModalTitle('创建订单')
+              setIsModalOpen(true)
+            }}
+          />
 
-        <DeleteButton
-          onConfirm={handleDelete}
-          isDeleting={isDeleting}
-          showPopconfirm={showPopconfirm}
-          open={isConfirmOpen}
-          closeConfirm={() => setIsConfirmOpen(false)}
-        />
+          <EditButton title="编辑" handleEdit={handleEdit} />
 
-        <PrintButton handlePrint={handlePrint} />
-        <PrintButton handlePrint={handlePrintEnglish}>打印英文标签</PrintButton>
+          <DeleteButton
+            onConfirm={handleDelete}
+            isDeleting={isDeleting}
+            showPopconfirm={showPopconfirm}
+            open={isConfirmOpen}
+            closeConfirm={() => setIsConfirmOpen(false)}
+          />
 
-        <ExportInfoButton />
+          <PrintButton handlePrint={handlePrint} />
+          <PrintButton handlePrint={handlePrintEnglish}>
+            打印英文标签
+          </PrintButton>
 
-        <PrintDecompositionButton />
+          <ExportInfoButton />
 
-        <span>操作：</span>
-        <PoSelected />
+          <PrintDecompositionButton />
+        </div>
 
-        <span>过滤：</span>
-        <PoSelectedFilter />
+        {/* 第二行：操作、过滤和搜索 */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">操作：</span>
+            <PoSelected />
+          </div>
+          <div className="h-6 w-px bg-gray-300" /> {/* 分隔线 */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">状态：</span>
+            <PoSelectedFilter />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">交货日期：</span>
+            <PoDateFilter />
+          </div>
+          <div className="h-6 w-px bg-gray-300" /> {/* 分隔线 */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600">搜索：</span>
+            <PoSearchInput />
+          </div>
+        </div>
       </div>
 
       <div className="no-scrollbar overflow-y-scroll">
