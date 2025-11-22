@@ -42,7 +42,7 @@ export default function PoList() {
   const { generateLabel, contextHolder: labelContextHolder } = usePrint()
   const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
     usePrintEnglish()
-  const [messageApi] = message.useMessage()
+  const [messageApi, messageContextHolder] = message.useMessage()
 
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
@@ -88,7 +88,23 @@ export default function PoList() {
   }
 
   async function onFinish(values: ISyneyPo) {
-    if (!specsLoading && !serialNoLoading && !isUpdating) {
+    // 检查数据是否正在加载
+    if (specsLoading) {
+      messageApi.warning('规格数据加载中,请稍后再试')
+      return
+    }
+
+    if (serialNoLoading) {
+      messageApi.warning('序列号数据加载中,请稍后再试')
+      return
+    }
+
+    if (isUpdating) {
+      messageApi.warning('序列号更新中,请稍后再试')
+      return
+    }
+
+    try {
       const No = values.No
       values.EndDate = format(values.EndDate?.toString() || '', 'yyyy-MM-dd')
 
@@ -128,6 +144,10 @@ export default function PoList() {
           },
         },
       )
+    } catch (error) {
+      console.error('提交失败:', error)
+      messageApi.error('提交失败,请重试')
+      setIsCreating(false)
     }
   }
 
@@ -144,17 +164,16 @@ export default function PoList() {
   function handleEdit() {
     // 检查是否选择了数据
     if (tableSelectedKeys.length === 0) {
-      messageApi.warning('请选择一条数据进行编辑')
-      return
-    }
-
-    if (tableSelectedKeys.length > 1) {
-      messageApi.warning('只能选择一条数据进行编辑')
+      messageApi.warning('请选择至少一条数据进行编辑')
       return
     }
 
     setIsEdit(true)
-    setModalTitle('编辑订单')
+    setModalTitle(
+      tableSelectedKeys.length === 1
+        ? '编辑订单'
+        : `批量编辑 ${tableSelectedKeys.length} 个订单`,
+    )
     setIsModalOpen(true)
   }
 
@@ -183,6 +202,7 @@ export default function PoList() {
     <div className="grid h-full grid-rows-[auto_1fr] gap-4">
       {labelContextHolder}
       {englishLabelContextHolder}
+      {messageContextHolder}
 
       {/* 工具栏 */}
       <div className="flex flex-col gap-2">
