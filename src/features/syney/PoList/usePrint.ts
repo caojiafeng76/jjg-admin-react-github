@@ -1,24 +1,37 @@
 import jsPDF from 'jspdf'
 import { format } from 'date-fns'
+import { message } from 'antd'
 
 import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 
 export function usePrint() {
-  const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: [90, 30] })
-
-  // 设置中文字体
-  doc.addFileToVFS('msyh.ttf', myFont2)
-  doc.addFont('msyh.ttf', 'myFont', 'normal')
-  doc.setFont('myFont')
-
-  // 设置字体大小
-  doc.setFontSize(8)
-
   const { selectedMap, isLoading } = useSelectedPos()
 
-  if (!isLoading) {
-    selectedMap?.forEach((data, key) => {
+  function generateLabel() {
+    // 数据验证
+    if (isLoading) {
+      message.warning('数据加载中，请稍后再试')
+      return
+    }
+
+    if (!selectedMap || selectedMap.size === 0) {
+      message.warning('没有数据可供打印')
+      return
+    }
+
+    // 创建 PDF 文档
+    const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: [90, 30] })
+
+    // 设置中文字体
+    doc.addFileToVFS('msyh.ttf', myFont2)
+    doc.addFont('msyh.ttf', 'myFont', 'normal')
+    doc.setFont('myFont')
+
+    // 设置字体大小
+    doc.setFontSize(8)
+
+    selectedMap.forEach((data, key) => {
       const [SONo, Spec, EndDate] = key.split('~')
       data.forEach((item) => {
         if (item.PartCode?.length) {
@@ -116,11 +129,12 @@ export function usePrint() {
       doc.text('湖州银都铝业科技有限公司', 45, 26)
     })
     doc.deletePage(1)
-  }
-  function generateLabel() {
+
+    // 输出 PDF
     doc.output('dataurlnewwindow', {
       filename: '标签',
     })
   }
+
   return { generateLabel }
 }

@@ -1,157 +1,167 @@
 import jsPDF from 'jspdf'
+import { message } from 'antd'
 
 import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 
 export function usePrintDecomposition() {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { selectedMap, isLoading } = useSelectedPos()
 
-  const doc = new jsPDF({ orientation: 'l' })
-  // 设置中文字体
-  doc.addFileToVFS('msyh.ttf', myFont2)
-  doc.addFont('msyh.ttf', 'myFont', 'normal')
-  doc.setFont('myFont')
+  function printDecomposition() {
+    // 数据验证
+    if (isLoading) {
+      message.warning('数据加载中，请稍后再试')
+      return
+    }
 
-  doc.setFontSize(20)
-  doc.text('踏板分解单', 120, 20)
+    if (!selectedMap || selectedMap.size === 0) {
+      message.warning('没有数据可供打印')
+      return
+    }
 
-  doc.rect(15, 30, 270, 170) // 画一个方框
-  doc.line(15, 40, 285, 40)
+    // 创建 PDF 文档
+    const doc = new jsPDF({ orientation: 'l' })
 
-  doc.setFontSize(10)
-
-  doc.text('序号', 18, 30 + 7)
-  doc.line(28, 30, 28, 40) //1
-
-  doc.text('交货日期', 20 + 10 + 2, 30 + 7)
-  doc.line(50, 30, 50, 40) //2
-
-  doc.text('台数', 28 + 20 + 2 * 2, 30 + 7)
-  doc.line(62, 30, 62, 40) //3
-
-  doc.text('名称', 50 + 10 + 2 * 2, 30 + 7)
-  doc.line(74, 30, 74, 40) //4
-
-  doc.text('规格', 60 + 10 + 2 * 4, 30 + 7)
-  doc.line(89, 30, 89, 40) //5
-
-  doc.text('件数', 70 + 10 + 2 * 5, 30 + 7)
-  doc.line(98, 30, 98, 40) //6
-
-  doc.text('名称', 80 + 10 + 2 * 5, 30 + 7)
-  doc.line(110, 30, 110, 40) //7
-
-  doc.text('规格', 90 + 10 + 2 * 7, 30 + 7)
-  doc.line(125, 30, 125, 40) //8
-
-  doc.text('件数', 100 + 10 + 2 * 8, 30 + 7)
-  doc.line(134, 30, 134, 40) //9
-
-  doc.text('名称', 110 + 10 + 2 * 8, 30 + 7)
-  doc.line(146, 30, 146, 40) //10
-
-  doc.text('规格', 120 + 10 + 2 * 10, 30 + 7)
-  doc.line(146 + 15, 30, 146 + 15, 40) //11
-
-  doc.text('件数', 130 + 10 + 2 * 11, 30 + 7)
-  doc.line(146 + 15 + 9, 30, 146 + 15 + 9, 40) //12
-
-  doc.text('名称', 140 + 10 + 2 * 11, 30 + 7)
-  doc.line(170 + 12, 30, 170 + 12, 40) //13
-
-  doc.text('规格', 150 + 10 + 2 * 13, 30 + 7)
-  doc.line(170 + 12 + 15, 30, 170 + 12 + 15, 40) //14
-
-  doc.text('件数', 160 + 10 + 2 * 14, 30 + 7)
-  doc.line(170 + 12 + 15 + 9, 30, 170 + 12 + 15 + 9, 40) //15
-
-  doc.text('类型', 170 + 10 + 2 * 15, 30 + 7)
-  doc.line(206 + 14, 30, 206 + 14, 40) //16
-
-  doc.text('工艺要求', 180 + 10 + 2 * 16 + 2, 30 + 7)
-  doc.line(220 + 22, 30, 220 + 22, 40) //17
-
-  doc.text('横 围', 190 + 20 + 2 * 17 + 2, 30 + 7)
-  doc.line(242 + 15, 30, 242 + 15, 40) //18
-
-  doc.text('侧 围', 210 + 10 + 2 * 18 + 3, 30 + 7)
-  doc.line(256 + 14, 30, 256 + 14, 40) //19
-
-  doc.text('围框垫', 220 + 10 + 2 * 19 + 4, 30 + 7)
-
-  for (let i = 0; i < 4; i++) {
-    doc.line(28, 60 + i * 40, 285, 60 + i * 40)
-    doc.line(28, 70 + i * 40, 285, 70 + i * 40)
-
-    //横线
-    doc.line(110, 50 + i * 40, 134, 50 + i * 40)
-    doc.line(146, 50 + i * 40, 170, 50 + i * 40)
-    doc.line(182, 50 + i * 40, 206, 50 + i * 40)
-    doc.line(242 + 15, 50 + i * 40, 242 + 15 + 13, 50 + i * 40)
-
-    //竖线
-    doc.line(50, 40 + i * 40, 50, 60 + i * 40)
-    doc.line(62, 40 + i * 40, 62, 60 + i * 40)
-    doc.line(74, 40 + i * 40, 74, 60 + i * 40)
-    doc.line(89, 40 + i * 40, 89, 60 + i * 40)
-    doc.line(98, 40 + i * 40, 98, 60 + i * 40)
-    doc.line(110, 40 + i * 40, 110, 60 + i * 40)
-    doc.line(125, 40 + i * 40, 125, 60 + i * 40)
-    doc.line(134, 40 + i * 40, 134, 60 + i * 40)
-    doc.line(146, 40 + i * 40, 146, 60 + i * 40)
-    doc.line(161, 40 + i * 40, 161, 60 + i * 40)
-    doc.line(170, 40 + i * 40, 170, 60 + i * 40)
-    doc.line(182, 40 + i * 40, 182, 60 + i * 40)
-    doc.line(197, 40 + i * 40, 197, 60 + i * 40)
-    doc.line(206, 40 + i * 40, 206, 60 + i * 40)
-    doc.line(206 + 14, 40 + i * 40, 206 + 14, 60 + i * 40)
-    doc.line(220 + 22, 40 + i * 40, 220 + 22, 60 + i * 40)
-    doc.line(242 + 15, 40 + i * 40, 242 + 15, 60 + i * 40)
-    doc.line(256 + 14, 40 + i * 40, 256 + 14, 60 + i * 40)
-
-    doc.setFontSize(16)
-    doc.text('前', 65, 47 + i * 40)
-    doc.text('板', 65, 56 + i * 40)
-
-    doc.text('中', 101, 47 + i * 40)
-    doc.text('板', 101, 56 + i * 40)
-
-    doc.text('后', 137, 47 + i * 40)
-    doc.text('板', 137, 56 + i * 40)
-
-    doc.setFontSize(12)
-    doc.text('加', 174, 44 + i * 40)
-    doc.text('长', 174, 51 + i * 40)
-    doc.text('板', 174, 58 + i * 40)
-
-    doc.setFontSize(10)
-    doc.text('订单号：', 30, 67 + i * 40)
-    doc.text('商标：', 85, 67 + i * 40)
-    doc.text('编号：', 155, 67 + i * 40)
-    doc.text('合同号：', 200, 67 + i * 40)
-    doc.text('备注：', 30, 77 + i * 40)
+    // 设置中文字体
+    doc.addFileToVFS('msyh.ttf', myFont2)
+    doc.addFont('msyh.ttf', 'myFont', 'normal')
+    doc.setFont('myFont')
 
     doc.setFontSize(20)
-    doc.text(`${i + 1}`, 20, 61 + i * 40)
-    doc.text(`${1}`, 55, 51 + i * 40)
-  }
+    doc.text('踏板分解单', 120, 20)
 
-  //一条长竖线
-  doc.line(28, 40, 28, 200)
-  //三条长横线
-  doc.line(15, 80, 285, 80)
-  doc.line(15, 120, 285, 120)
-  doc.line(15, 160, 285, 160)
+    doc.rect(15, 30, 270, 170) // 画一个方框
+    doc.line(15, 40, 285, 40)
 
-  // doc.text('中：雷达孔', 223, 44)
-  // doc.text('前：角钢', 223, 51)
-  // doc.text('后：防撞块', 223, 58)
+    doc.setFontSize(10)
 
-  if (!isLoading) {
+    doc.text('序号', 18, 30 + 7)
+    doc.line(28, 30, 28, 40) //1
+
+    doc.text('交货日期', 20 + 10 + 2, 30 + 7)
+    doc.line(50, 30, 50, 40) //2
+
+    doc.text('台数', 28 + 20 + 2 * 2, 30 + 7)
+    doc.line(62, 30, 62, 40) //3
+
+    doc.text('名称', 50 + 10 + 2 * 2, 30 + 7)
+    doc.line(74, 30, 74, 40) //4
+
+    doc.text('规格', 60 + 10 + 2 * 4, 30 + 7)
+    doc.line(89, 30, 89, 40) //5
+
+    doc.text('件数', 70 + 10 + 2 * 5, 30 + 7)
+    doc.line(98, 30, 98, 40) //6
+
+    doc.text('名称', 80 + 10 + 2 * 5, 30 + 7)
+    doc.line(110, 30, 110, 40) //7
+
+    doc.text('规格', 90 + 10 + 2 * 7, 30 + 7)
+    doc.line(125, 30, 125, 40) //8
+
+    doc.text('件数', 100 + 10 + 2 * 8, 30 + 7)
+    doc.line(134, 30, 134, 40) //9
+
+    doc.text('名称', 110 + 10 + 2 * 8, 30 + 7)
+    doc.line(146, 30, 146, 40) //10
+
+    doc.text('规格', 120 + 10 + 2 * 10, 30 + 7)
+    doc.line(146 + 15, 30, 146 + 15, 40) //11
+
+    doc.text('件数', 130 + 10 + 2 * 11, 30 + 7)
+    doc.line(146 + 15 + 9, 30, 146 + 15 + 9, 40) //12
+
+    doc.text('名称', 140 + 10 + 2 * 11, 30 + 7)
+    doc.line(170 + 12, 30, 170 + 12, 40) //13
+
+    doc.text('规格', 150 + 10 + 2 * 13, 30 + 7)
+    doc.line(170 + 12 + 15, 30, 170 + 12 + 15, 40) //14
+
+    doc.text('件数', 160 + 10 + 2 * 14, 30 + 7)
+    doc.line(170 + 12 + 15 + 9, 30, 170 + 12 + 15 + 9, 40) //15
+
+    doc.text('类型', 170 + 10 + 2 * 15, 30 + 7)
+    doc.line(206 + 14, 30, 206 + 14, 40) //16
+
+    doc.text('工艺要求', 180 + 10 + 2 * 16 + 2, 30 + 7)
+    doc.line(220 + 22, 30, 220 + 22, 40) //17
+
+    doc.text('横 围', 190 + 20 + 2 * 17 + 2, 30 + 7)
+    doc.line(242 + 15, 30, 242 + 15, 40) //18
+
+    doc.text('侧 围', 210 + 10 + 2 * 18 + 3, 30 + 7)
+    doc.line(256 + 14, 30, 256 + 14, 40) //19
+
+    doc.text('围框垫', 220 + 10 + 2 * 19 + 4, 30 + 7)
+
+    for (let i = 0; i < 4; i++) {
+      doc.line(28, 60 + i * 40, 285, 60 + i * 40)
+      doc.line(28, 70 + i * 40, 285, 70 + i * 40)
+
+      //横线
+      doc.line(110, 50 + i * 40, 134, 50 + i * 40)
+      doc.line(146, 50 + i * 40, 170, 50 + i * 40)
+      doc.line(182, 50 + i * 40, 206, 50 + i * 40)
+      doc.line(242 + 15, 50 + i * 40, 242 + 15 + 13, 50 + i * 40)
+
+      //竖线
+      doc.line(50, 40 + i * 40, 50, 60 + i * 40)
+      doc.line(62, 40 + i * 40, 62, 60 + i * 40)
+      doc.line(74, 40 + i * 40, 74, 60 + i * 40)
+      doc.line(89, 40 + i * 40, 89, 60 + i * 40)
+      doc.line(98, 40 + i * 40, 98, 60 + i * 40)
+      doc.line(110, 40 + i * 40, 110, 60 + i * 40)
+      doc.line(125, 40 + i * 40, 125, 60 + i * 40)
+      doc.line(134, 40 + i * 40, 134, 60 + i * 40)
+      doc.line(146, 40 + i * 40, 146, 60 + i * 40)
+      doc.line(161, 40 + i * 40, 161, 60 + i * 40)
+      doc.line(170, 40 + i * 40, 170, 60 + i * 40)
+      doc.line(182, 40 + i * 40, 182, 60 + i * 40)
+      doc.line(197, 40 + i * 40, 197, 60 + i * 40)
+      doc.line(206, 40 + i * 40, 206, 60 + i * 40)
+      doc.line(206 + 14, 40 + i * 40, 206 + 14, 60 + i * 40)
+      doc.line(220 + 22, 40 + i * 40, 220 + 22, 60 + i * 40)
+      doc.line(242 + 15, 40 + i * 40, 242 + 15, 60 + i * 40)
+      doc.line(256 + 14, 40 + i * 40, 256 + 14, 60 + i * 40)
+
+      doc.setFontSize(16)
+      doc.text('前', 65, 47 + i * 40)
+      doc.text('板', 65, 56 + i * 40)
+
+      doc.text('中', 101, 47 + i * 40)
+      doc.text('板', 101, 56 + i * 40)
+
+      doc.text('后', 137, 47 + i * 40)
+      doc.text('板', 137, 56 + i * 40)
+
+      doc.setFontSize(12)
+      doc.text('加', 174, 44 + i * 40)
+      doc.text('长', 174, 51 + i * 40)
+      doc.text('板', 174, 58 + i * 40)
+
+      doc.setFontSize(10)
+      doc.text('订单号：', 30, 67 + i * 40)
+      doc.text('商标：', 85, 67 + i * 40)
+      doc.text('编号：', 155, 67 + i * 40)
+      doc.text('合同号：', 200, 67 + i * 40)
+      doc.text('备注：', 30, 77 + i * 40)
+
+      doc.setFontSize(20)
+      doc.text(`${i + 1}`, 20, 61 + i * 40)
+      doc.text(`${1}`, 55, 51 + i * 40)
+    }
+
+    //一条长竖线
+    doc.line(28, 40, 28, 200)
+    //三条长横线
+    doc.line(15, 80, 285, 80)
+    doc.line(15, 120, 285, 120)
+    doc.line(15, 160, 285, 160)
+
+    // 填充数据
     let index = 0
 
-    selectedMap?.forEach((data, key) => {
+    selectedMap.forEach((data, key) => {
       const [SONo, Spec, EndDate, No, SerialNo, Brand, Technique, Remark] =
         key.split('~')
       const [xinghao, huanjing, leixing] = Spec.split('-')
@@ -314,12 +324,12 @@ export function usePrintDecomposition() {
 
       index++
     })
-  }
 
-  function printDecomposition() {
+    // 输出 PDF
     doc.output('dataurlnewwindow', {
       filename: '分解单',
     })
   }
+
   return { printDecomposition }
 }
