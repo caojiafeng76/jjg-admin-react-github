@@ -4,9 +4,10 @@ import { handleApiError } from '@utils/errorHandler'
 
 export async function getSyneyPoDetail(PoId: string) {
   const { data, error } = await supabase
-    .from('syney-po-items')
-    .select('*')
-    .eq('PoId', +PoId)
+    .from('syney-pos')
+    .select('*, items:syney-po-items(*)')
+    .eq('id', +PoId)
+    .single()
 
   if (error) {
     throw handleApiError(error, '获取订单详情失败')

@@ -1,5 +1,9 @@
 import { getSyneyPos } from '@/services/apiSyneyPos'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { message } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
@@ -17,12 +21,13 @@ export function usePos() {
 
   const {
     data: { syneyPos: pos, count } = { syneyPos: [], count: 0 },
-    isLoading,
+    isFetching,
     error,
   } = useQuery({
     queryKey: ['syney-pos', page, pageSize, Status, startDate, endDate, SONo],
     queryFn: () =>
       getSyneyPos({ page, pageSize, Status, startDate, endDate, SONo }),
+    placeholderData: keepPreviousData,
   })
 
   if (error) {
@@ -79,7 +84,7 @@ export function usePos() {
   return {
     pos,
     count,
-    isLoading,
+    isLoading: isFetching,
     error,
   }
 }
