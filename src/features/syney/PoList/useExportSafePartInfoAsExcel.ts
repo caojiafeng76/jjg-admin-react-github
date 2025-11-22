@@ -6,7 +6,7 @@ import { useSelectedPos } from './useSelectedPos'
 
 export function useExportSafePartInfoAsExcel() {
   const [messageApi, contextHolder] = message.useMessage()
-  const { isLoading, selectedMap } = useSelectedPos()
+  const { isLoading, selectedPosList } = useSelectedPos()
 
   function exportSafePartInfoAsExcel() {
     // 数据验证
@@ -15,7 +15,7 @@ export function useExportSafePartInfoAsExcel() {
       return
     }
 
-    if (!selectedMap || selectedMap.size === 0) {
+    if (!selectedPosList || selectedPosList.length === 0) {
       messageApi.warning('请选择至少一条数据')
       return
     }
@@ -25,10 +25,10 @@ export function useExportSafePartInfoAsExcel() {
       const wb = utils.book_new()
 
       // 准备数据并添加到工作簿
-      selectedMap.forEach((data, key) => {
-        const [SONo, , EndDate, No] = key.split('~')
+      selectedPosList.forEach(({ poInfo, items }) => {
+        const { SONo, EndDate, No } = poInfo
 
-        const excelData = data
+        const excelData = items
           .filter(
             (item) =>
               item.PartNo?.includes('XN2808EB') ||
