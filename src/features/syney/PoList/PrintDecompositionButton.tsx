@@ -6,7 +6,7 @@ import { useAppStore } from '@/store'
 export default function PrintDecompositionButton() {
   const { printDecomposition, contextHolder } = usePrintDecomposition()
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
-  const [messageApi] = message.useMessage()
+  const [messageApi, contextHolder2] = message.useMessage()
 
   function onClick() {
     if (tableSelectedKeys.length === 0) {
@@ -24,6 +24,7 @@ export default function PrintDecompositionButton() {
   return (
     <>
       {contextHolder}
+      {contextHolder2}
       <Button
         type="text"
         icon={<DocumentArrowDownIcon className="size-4 !text-red-500/80" />}
