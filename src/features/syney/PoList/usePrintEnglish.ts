@@ -1,24 +1,37 @@
 import jsPDF from 'jspdf'
 import { format } from 'date-fns'
+import { message } from 'antd'
 
 import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 
 export function usePrintEnglish() {
-  const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: [90, 30] })
-
-  // 设置中文字体
-  doc.addFileToVFS('msyh.ttf', myFont2)
-  doc.addFont('msyh.ttf', 'myFont', 'normal')
-  doc.setFont('myFont')
-
-  // 设置字体大小
-  doc.setFontSize(7)
-
   const { selectedMap, isLoading } = useSelectedPos()
 
-  if (!isLoading) {
-    selectedMap?.forEach((data, key) => {
+  function generateEnglishLabel() {
+    // 数据验证
+    if (isLoading) {
+      message.warning('数据加载中，请稍后再试')
+      return
+    }
+
+    if (!selectedMap || selectedMap.size === 0) {
+      message.warning('没有数据可供打印')
+      return
+    }
+
+    // 创建 PDF 文档
+    const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: [90, 30] })
+
+    // 设置中文字体
+    doc.addFileToVFS('msyh.ttf', myFont2)
+    doc.addFont('msyh.ttf', 'myFont', 'normal')
+    doc.setFont('myFont')
+
+    // 设置字体大小
+    doc.setFontSize(7)
+
+    selectedMap.forEach((data, key) => {
       const [SONo, Spec, EndDate] = key.split('~')
       data.forEach((item) => {
         // 设置字体大小
@@ -134,11 +147,12 @@ export function usePrintEnglish() {
       doc.text('Huzhou Yindu Aluminum Technology Co., Ltd.', 40, 26)
     })
     doc.deletePage(1)
-  }
-  function generateEnglishLabel() {
+
+    // 输出 PDF
     doc.output('dataurlnewwindow', {
       filename: 'Label',
     })
   }
+
   return { generateEnglishLabel }
 }
