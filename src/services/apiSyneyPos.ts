@@ -5,10 +5,16 @@ export async function getSyneyPos({
   page,
   pageSize,
   Status,
+  startDate,
+  endDate,
+  SONo,
 }: {
   page: number
   pageSize: number
   Status: string
+  startDate?: string
+  endDate?: string
+  SONo?: string
 }) {
   let query = supabase
     .from('syney-pos')
@@ -27,6 +33,20 @@ export async function getSyneyPos({
 
   if (Status && Status !== '全部') {
     query = query.eq('Status', Status)
+  }
+
+  // 日期范围过滤
+  if (startDate && endDate) {
+    query = query.gte('EndDate', startDate).lte('EndDate', endDate)
+  } else if (startDate) {
+    query = query.gte('EndDate', startDate)
+  } else if (endDate) {
+    query = query.lte('EndDate', endDate)
+  }
+
+  // 生产号模糊搜索
+  if (SONo) {
+    query = query.ilike('SONo', `%${SONo}%`)
   }
 
   const { data: syneyPos, count, error } = await query
