@@ -37,8 +37,10 @@ export default function PoList() {
   const [modalTitle, setModalTitle] = useState('创建订单')
   const [isEdit, setIsEdit] = useState(false)
 
-  const { generateLabel } = usePrint()
-  const { generateEnglishLabel } = usePrintEnglish()
+  const { generateLabel, contextHolder: labelContextHolder } = usePrint()
+  const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
+    usePrintEnglish()
+  const [messageApi] = message.useMessage()
 
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
@@ -75,7 +77,7 @@ export default function PoList() {
     // 检查数据源长度是否为0
     if (tableSelectedKeys?.length === 0) {
       // 如果数据源为空，显示警告信息并设置确认打开状态为false
-      message.warning('请选择至少一条数据')
+      messageApi.warning('请选择至少一条数据')
       setIsConfirmOpen(false)
     } else {
       // 如果数据源不为空，设置确认打开状态为新的打开状态
@@ -164,6 +166,8 @@ export default function PoList() {
 
   return (
     <div className="grid grid-rows-[32px_1fr] gap-4">
+      {labelContextHolder}
+      {englishLabelContextHolder}
       <div className="flex h-full items-center gap-2">
         <AddButton
           handleCreate={() => {
