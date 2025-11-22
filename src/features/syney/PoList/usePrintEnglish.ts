@@ -7,16 +7,17 @@ import { useSelectedPos } from './useSelectedPos'
 
 export function usePrintEnglish() {
   const { selectedMap, isLoading } = useSelectedPos()
+  const [messageApi, contextHolder] = message.useMessage()
 
   function generateEnglishLabel() {
     // 数据验证
     if (isLoading) {
-      message.warning('数据加载中，请稍后再试')
+      messageApi.warning('数据加载中，请稍后再试')
       return
     }
 
     if (!selectedMap || selectedMap.size === 0) {
-      message.warning('没有数据可供打印')
+      messageApi.warning('没有数据可供打印')
       return
     }
 
@@ -154,5 +155,5 @@ export function usePrintEnglish() {
     })
   }
 
-  return { generateEnglishLabel }
+  return { generateEnglishLabel, contextHolder }
 }
