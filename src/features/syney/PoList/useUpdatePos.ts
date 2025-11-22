@@ -10,8 +10,13 @@ export function useUpdatePos() {
   const { mutate: updatePos, isPending: isUpdating } = useMutation({
     mutationFn: updatePosApi,
     onSuccess: () => {
+      // 失效列表缓存
       queryClient.invalidateQueries({
         queryKey: ['syney-pos'],
+      })
+      // 失效单条数据缓存
+      queryClient.invalidateQueries({
+        queryKey: ['po'],
       })
       messageApi.success('更新成功')
     },
