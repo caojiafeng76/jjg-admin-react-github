@@ -6,7 +6,7 @@ import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 
 export function usePrintEnglish() {
-  const { selectedMap, isLoading } = useSelectedPos()
+  const { selectedPosList, isLoading } = useSelectedPos()
   const [messageApi, contextHolder] = message.useMessage()
 
   function generateEnglishLabel() {
@@ -16,7 +16,7 @@ export function usePrintEnglish() {
       return
     }
 
-    if (!selectedMap || selectedMap.size === 0) {
+    if (!selectedPosList || selectedPosList.length === 0) {
       messageApi.warning('没有数据可供打印')
       return
     }
@@ -32,9 +32,9 @@ export function usePrintEnglish() {
     // 设置字体大小
     doc.setFontSize(7)
 
-    selectedMap.forEach((data, key) => {
-      const [SONo, Spec, EndDate] = key.split('~')
-      data.forEach((item) => {
+    selectedPosList.forEach(({ poInfo, items }) => {
+      const { SONo, Spec, EndDate } = poInfo
+      items.forEach((item) => {
         // 设置字体大小
         doc.setFontSize(7)
         if (item.PartCode?.length) {

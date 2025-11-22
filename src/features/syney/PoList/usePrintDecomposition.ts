@@ -5,7 +5,7 @@ import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 
 export function usePrintDecomposition() {
-  const { selectedMap, isLoading } = useSelectedPos()
+  const { selectedPosList, isLoading } = useSelectedPos()
   const [messageApi, contextHolder] = message.useMessage()
 
   function printDecomposition() {
@@ -15,7 +15,7 @@ export function usePrintDecomposition() {
       return
     }
 
-    if (!selectedMap || selectedMap.size === 0) {
+    if (!selectedPosList || selectedPosList.length === 0) {
       messageApi.warning('没有数据可供打印')
       return
     }
@@ -162,9 +162,9 @@ export function usePrintDecomposition() {
     // 填充数据
     let index = 0
 
-    selectedMap.forEach((data, key) => {
-      const [SONo, Spec, EndDate, No, SerialNo, Brand, Technique, Remark] =
-        key.split('~')
+    selectedPosList.forEach(({ poInfo, items }) => {
+      const { SONo, Spec, EndDate, No, SerialNo, Brand, Technique, Remark } =
+        poInfo
       const [xinghao, huanjing, leixing] = Spec.split('-')
 
       doc.setFontSize(10)
@@ -192,7 +192,7 @@ export function usePrintDecomposition() {
         doc.text(`${Remark}`, 50, 77 + index * 40)
 
       doc.setFontSize(8)
-      data.forEach((item) => {
+      items.forEach((item) => {
         const { PartNo, ParamSpec, Qty, Remark } = item
         //前板规格
         if (PartNo?.includes('XN2808EB') || PartNo?.includes('XN3024BR')) {
@@ -281,7 +281,7 @@ export function usePrintDecomposition() {
           (PartNo?.includes('XN2808ED') || PartNo?.includes('XN2838CQ')) &&
           Remark?.includes('上头部')
         ) {
-          const count = data
+          const count = items
             .filter(
               (it) =>
                 (it.PartNo?.includes('XN2808ED') ||
@@ -304,7 +304,7 @@ export function usePrintDecomposition() {
           (PartNo?.includes('XN2808ED') || PartNo?.includes('XN2838CQ')) &&
           Remark?.includes('下头部')
         ) {
-          const count = data
+          const count = items
             .filter(
               (it) =>
                 (it.PartNo?.includes('XN2808ED') ||

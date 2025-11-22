@@ -152,48 +152,50 @@ export async function updatePos({
 }
 
 export async function getSelectedPosWithItems(PoIds: number[]) {
-  const { data: selectedPoItems, error: itemsError } = await supabase
-    .from('syney-po-items')
-    .select('*')
-    .in('PoId', PoIds)
-
-  if (itemsError) {
-    throw handleApiError(itemsError, '订单明细获取失败')
+  if (PoIds.length === 0) {
+    return new Map<string, ISyneyItem[]>()
   }
 
-  const { data: selectedPos, error: posError } = await supabase
-    .from('syney-pos')
-    .select('*')
-    .in('id', PoIds)
-    .order('EndDate', { ascending: false }) // 按交货日期降序
-    .order('No', { ascending: true }) // 按订单号升序
-    .order('SONo', { ascending: true }) // 按销售订单号升序
-    .order('SerialNo', { ascending: true }) // 按序列号升序
+  // 1. 并行查询订单和明细
+  const [itemsResult, posResult] = await Promise.all([
+    supabase.from('syney-po-items').select('*').in('PoId', PoIds),
+    supabase
+      .from('syney-pos')
+      .select('*')
+      .in('id', PoIds)
+      .order('EndDate', { ascending: false })
+      .order('No', { ascending: true })
+      .order('SONo', { ascending: true })
+      .order('SerialNo', { ascending: true }),
+  ])
 
-  if (posError) {
-    throw handleApiError(posError, '订单获取失败')
+  if (itemsResult.error) {
+    throw handleApiError(itemsResult.error, '订单明细获取失败')
   }
 
+  if (posResult.error) {
+    throw handleApiError(posResult.error, '订单获取失败')
+  }
+
+  // 2. 使用 Map 优化明细查找 (O(1) 查找)
+  const itemsByPoId = new Map<number, ISyneyItem[]>()
+  itemsResult.data.forEach((item) => {
+    if (item.PoId) {
+      const existing = itemsByPoId.get(item.PoId) || []
+      existing.push(item)
+      itemsByPoId.set(item.PoId, existing)
+    }
+  })
+
+  // 3. 构建结果 Map
   const map = new Map<string, ISyneyItem[]>()
 
-  selectedPos
-    .map((po) => ({
-      id: po.id,
-      SONo: po.SONo,
-      Spec: po.Spec,
-      EndDate: po.EndDate,
-      No: po.No,
-      SerialNo: po.SerialNo,
-      Brand: po.Brand,
-      Technique: po.Technique,
-      Remark: po.Remark,
-    }))
-    .forEach((po) => {
-      map.set(
-        `${po.SONo}~${po.Spec}~${po.EndDate}~${po.No}~${po.SerialNo}~${po.Brand}~${po.Technique}~${po.Remark}`,
-        selectedPoItems.filter((item) => item.PoId === po.id),
-      )
-    })
+  posResult.data.forEach((po) => {
+    // 保持原有的键格式以确保兼容性
+    const key = `${po.SONo}~${po.Spec}~${po.EndDate}~${po.No}~${po.SerialNo}~${po.Brand}~${po.Technique}~${po.Remark}`
+    const items = itemsByPoId.get(po.id) || []
+    map.set(key, items)
+  })
 
   return map
 }
