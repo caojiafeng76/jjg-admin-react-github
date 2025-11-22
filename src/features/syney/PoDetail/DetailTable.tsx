@@ -53,7 +53,7 @@ const columns: TableColumnsType<ISyneyItem> = [
 ]
 export default function DetailTable() {
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
-  const { data, isLoading } = useDetail()
+  const { items, isLoading } = useDetail()
 
   const rowSelection: TableProps<ISyneyItem>['rowSelection'] = {
     selectedRowKeys: tableSelectedKeys,
@@ -67,10 +67,10 @@ export default function DetailTable() {
       rowSelection={rowSelection}
       rowKey={(record) => record.id?.toString() ?? ''}
       columns={columns}
-      dataSource={data}
+      dataSource={items}
       loading={isLoading}
       scroll={{
-        y: 700,
+        y: 'calc(100vh - 200px)',
       }}
       pagination={false}
     />

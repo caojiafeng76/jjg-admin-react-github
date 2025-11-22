@@ -6,7 +6,7 @@ export function useDetail() {
   const { PoId } = useParams()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['syney-Po'],
+    queryKey: ['syney-Po', PoId],
     queryFn: () => getSyneyPoDetail(PoId || ''),
   })
   console.log(data)
@@ -16,8 +16,12 @@ export function useDetail() {
     throw new Error('获取采购单详情失败')
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const items = (data as any)?.items || []
+
   return {
-    data,
+    items,
+    po: data,
     isLoading,
   }
 }
