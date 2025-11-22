@@ -142,19 +142,32 @@ export default function PoList() {
   }
 
   function handleEdit() {
-    setIsEdit(true)
-    setIsModalOpen(true)
-    if (!poLoading && po) {
-      setTimeout(() => {
-        poFormRef.current?.setFieldsValue({
-          ...po,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          EndDate: dayjs(po.EndDate) as any,
-        })
-        setModalTitle('编辑订单')
-      }, 0)
+    // 检查是否选择了数据
+    if (tableSelectedKeys.length === 0) {
+      messageApi.warning('请选择一条数据进行编辑')
+      return
     }
+
+    if (tableSelectedKeys.length > 1) {
+      messageApi.warning('只能选择一条数据进行编辑')
+      return
+    }
+
+    setIsEdit(true)
+    setModalTitle('编辑订单')
+    setIsModalOpen(true)
   }
+
+  // 使用 useEffect 监听数据加载完成后填充表单
+  useEffect(() => {
+    if (isEdit && !poLoading && po && isModalOpen) {
+      poFormRef.current?.setFieldsValue({
+        ...po,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        EndDate: dayjs(po.EndDate) as any,
+      })
+    }
+  }, [isEdit, poLoading, po, isModalOpen])
 
   useEffect(() => {
     setIsCreating(false)
@@ -247,7 +260,10 @@ export default function PoList() {
         confirmLoading={isCreating || isPoUpdating}
         // destroyOnClose={true}
         onOk={poFormRef.current?.submit}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => {
+          setIsModalOpen(false)
+          setIsEdit(false)
+        }}
       >
         <PoForm
           ref={poFormRef}
