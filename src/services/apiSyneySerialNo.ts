@@ -1,4 +1,5 @@
 import supabase from './supabase'
+import { handleApiError } from '@utils/errorHandler'
 
 export async function getSerialNo() {
   const { data, error } = await supabase
@@ -7,8 +8,7 @@ export async function getSerialNo() {
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error('获取流水号失败')
+    throw handleApiError(error, '获取流水号失败')
   }
 
   return data
@@ -22,8 +22,7 @@ export async function updateSerialNo(serialNo: number) {
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error('更新编号失败')
+    throw handleApiError(error, '更新编号失败')
   }
 
   return data

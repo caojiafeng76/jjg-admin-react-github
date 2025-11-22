@@ -1,5 +1,6 @@
-import { ISyneyItem } from '@/types'
+import { ISyneyItem } from './types'
 import supabase from './supabase'
+import { handleApiError } from '@utils/errorHandler'
 
 export async function getSyneyPoDetail(PoId: string) {
   const { data, error } = await supabase
@@ -8,8 +9,7 @@ export async function getSyneyPoDetail(PoId: string) {
     .eq('PoId', +PoId)
 
   if (error) {
-    console.error(error)
-    throw new Error('获取订单详情失败')
+    throw handleApiError(error, '获取订单详情失败')
   }
 
   return data
@@ -28,8 +28,7 @@ export async function updatePoItems({
     .in('id', ids)
 
   if (error) {
-    console.error(error)
-    throw new Error('订单详情更新失败')
+    throw handleApiError(error, '订单详情更新失败')
   }
 
   const { data: specFromRepo } = await supabase
@@ -50,8 +49,7 @@ export async function updatePoItems({
   ])
 
   if (insertSpecError) {
-    console.error(insertSpecError)
-    throw new Error('创建踏板规格失败')
+    throw handleApiError(insertSpecError, '创建踏板规格失败')
   }
 }
 
@@ -63,8 +61,7 @@ export async function getItemById(id: number) {
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error('获取订单详情失败')
+    throw handleApiError(error, '获取订单详情失败')
   }
 
   return data

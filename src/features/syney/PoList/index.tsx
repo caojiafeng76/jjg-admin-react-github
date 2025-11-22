@@ -167,7 +167,7 @@ export default function PoList() {
   }, [setIsCreating, setTableSelectedKeys])
 
   return (
-    <div className="grid grid-rows-[auto_1fr] gap-4">
+    <div className="grid h-full grid-rows-[auto_1fr] gap-4">
       {labelContextHolder}
       {englishLabelContextHolder}
 
@@ -227,28 +227,35 @@ export default function PoList() {
         </div>
       </div>
 
-      <div className="no-scrollbar overflow-y-scroll">
-        <PoTable />
+      {/* 表格和分页区域 */}
+      <div className="grid grid-rows-[1fr_auto] gap-4 overflow-hidden">
+        {/* 表格区域 */}
+        <div className="overflow-hidden">
+          <PoTable />
+        </div>
 
-        <AppPagination total={count || 0} />
-
-        <Modal
-          title={modalTitle}
-          loading={poLoading}
-          open={isModalOpen}
-          confirmLoading={isCreating || isPoUpdating}
-          // destroyOnClose={true}
-          onOk={poFormRef.current?.submit}
-          onCancel={() => setIsModalOpen(false)}
-        >
-          <PoForm
-            ref={poFormRef}
-            onFinish={onFinish}
-            isCreating={isCreating || isUpdating}
-            isEdit={isEdit}
-          />
-        </Modal>
+        {/* 分页区域 */}
+        <div className="flex justify-center">
+          <AppPagination total={count || 0} />
+        </div>
       </div>
+
+      <Modal
+        title={modalTitle}
+        loading={poLoading}
+        open={isModalOpen}
+        confirmLoading={isCreating || isPoUpdating}
+        // destroyOnClose={true}
+        onOk={poFormRef.current?.submit}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <PoForm
+          ref={poFormRef}
+          onFinish={onFinish}
+          isCreating={isCreating || isUpdating}
+          isEdit={isEdit}
+        />
+      </Modal>
     </div>
   )
 }

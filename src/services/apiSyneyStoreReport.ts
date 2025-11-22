@@ -1,5 +1,6 @@
-import { ISyneyItem } from '@/types'
+import { ISyneyItem } from './types'
 import supabase from './supabase'
+import { handleApiError } from '@utils/errorHandler'
 
 export async function updateSyneyStoreReport({ item }: { item: ISyneyItem }) {
   const { error: updateItemError } = await supabase
@@ -12,8 +13,7 @@ export async function updateSyneyStoreReport({ item }: { item: ISyneyItem }) {
     .single()
 
   if (updateItemError) {
-    console.error(updateItemError)
-    throw new Error('更新入库单条目失败')
+    throw handleApiError(updateItemError, '更新入库单条目失败')
   }
 
   const { data: specFromRepo } = await supabase
@@ -34,8 +34,7 @@ export async function updateSyneyStoreReport({ item }: { item: ISyneyItem }) {
   ])
 
   if (insertSpecError) {
-    console.error(insertSpecError)
-    throw new Error('创建踏板规格失败')
+    throw handleApiError(insertSpecError, '创建踏板规格失败')
   }
 }
 
@@ -46,7 +45,6 @@ export async function deleteSyneyStoreReportItems(ids: string[]) {
     .in('id', ids.map(Number))
 
   if (error) {
-    console.error(error)
-    throw new Error('删除入库单条目失败')
+    throw handleApiError(error, '删除入库单条目失败')
   }
 }

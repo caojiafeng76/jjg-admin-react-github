@@ -1,5 +1,6 @@
-import { ISyneySpec } from '@/types'
+import { ISyneySpec } from './types'
 import supabase from './supabase'
+import { handleApiError } from '@utils/errorHandler'
 
 export async function getSyneySpecs({
   PartNo,
@@ -31,8 +32,7 @@ export async function getSyneySpecs({
   const { data: syneySpecs, error, count } = await query
 
   if (error) {
-    console.error(error)
-    throw new Error('踏板规格列表获取失败')
+    throw handleApiError(error, '踏板规格列表获取失败')
   }
 
   return { syneySpecs, count }
@@ -46,8 +46,7 @@ export async function getSyneySpec(id: number) {
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error('踏板规格获取失败')
+    throw handleApiError(error, '踏板规格获取失败')
   }
 
   return syneySpec
@@ -63,8 +62,7 @@ export async function createSyneySpec(newSyneySpec: ISyneySpec) {
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error('踏板规格创建失败')
+    throw handleApiError(error, '踏板规格创建失败')
   }
 
   return data
@@ -79,8 +77,7 @@ export async function updateSyneySpec(updates: Partial<ISyneySpec>) {
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error('踏板规格更新失败')
+    throw handleApiError(error, '踏板规格更新失败')
   }
   return data
 }
@@ -89,7 +86,6 @@ export async function deleteSyneySpecs(ids: number[]) {
   const { error } = await supabase.from('syney-specs').delete().in('id', ids)
 
   if (error) {
-    console.error(error)
-    throw new Error('踏板规格删除失败')
+    throw handleApiError(error, '踏板规格删除失败')
   }
 }
