@@ -1,40 +1,27 @@
 import { XCircleIcon } from '@heroicons/react/16/solid'
-import { Button, Popconfirm, Tooltip } from 'antd'
+import { Button, Popconfirm } from 'antd'
 
 type Props = {
   onConfirm: () => void
   isDeleting: boolean
-  open: boolean
-  showPopconfirm: () => void
-  closeConfirm: () => void
 }
-export default function DeleteButton({
-  onConfirm,
-  isDeleting,
-  open,
-  showPopconfirm,
-  closeConfirm,
-}: Props) {
+
+export default function DeleteButton({ onConfirm, isDeleting }: Props) {
   return (
-    <Tooltip title="请选择至少一条数据">
-      <Popconfirm
-        title="删除条目"
-        description="确定删除这些条目吗?"
-        open={open}
-        okButtonProps={{ loading: isDeleting }}
-        onConfirm={onConfirm}
-        okText="确认"
-        cancelText="取消"
-        onCancel={closeConfirm}
+    <Popconfirm
+      title="删除订单"
+      description="确定删除选中的订单吗?此操作不可撤销。"
+      onConfirm={onConfirm}
+      okText="确认"
+      cancelText="取消"
+      okButtonProps={{ loading: isDeleting, danger: true }}
+    >
+      <Button
+        type="text"
+        icon={<XCircleIcon className="size-4 !text-red-500/80" />}
       >
-        <Button
-          type="text"
-          icon={<XCircleIcon className="size-4 !text-red-500/80" />}
-          onClick={showPopconfirm}
-        >
-          删除
-        </Button>
-      </Popconfirm>
-    </Tooltip>
+        删除
+      </Button>
+    </Popconfirm>
   )
 }

@@ -53,8 +53,11 @@ export default function PoList() {
     isLoading: isCreating,
     setIsLoading: setIsCreating,
   } = useAppStore()
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
-  const { isDeleting, deletePo } = useDeletePo()
+  const {
+    deletePo,
+    isDeleting,
+    contextHolder: deletePoContextHolder,
+  } = useDeletePo()
   const { data: po, isLoading: poLoading } = usePo()
   const {
     updatePos,
@@ -71,24 +74,18 @@ export default function PoList() {
   const { updateSerialNo, isUpdating } = useUpdateSerialNo()
 
   function handleDelete() {
+    // 验证选择
+    if (tableSelectedKeys.length === 0) {
+      messageApi.warning('请选择至少一条数据')
+      return
+    }
+
+    // 执行删除
     deletePo(tableSelectedKeys.map(String), {
       onSettled: () => {
-        setIsConfirmOpen(false)
         setTableSelectedKeys([])
       },
     })
-  }
-
-  function showPopconfirm() {
-    // 检查数据源长度是否为0
-    if (tableSelectedKeys?.length === 0) {
-      // 如果数据源为空，显示警告信息并设置确认打开状态为false
-      messageApi.warning('请选择至少一条数据')
-      setIsConfirmOpen(false)
-    } else {
-      // 如果数据源不为空，设置确认打开状态为新的打开状态
-      setIsConfirmOpen(true)
-    }
   }
 
   async function onFinish(values: ISyneyPo) {
@@ -209,6 +206,7 @@ export default function PoList() {
       {messageContextHolder}
       {createPoContextHolder}
       {updatePosContextHolder}
+      {deletePoContextHolder}
 
       {/* 工具栏 */}
       <div className="flex flex-col gap-2">
@@ -225,13 +223,7 @@ export default function PoList() {
 
           <EditButton title="编辑" handleEdit={handleEdit} />
 
-          <DeleteButton
-            onConfirm={handleDelete}
-            isDeleting={isDeleting}
-            showPopconfirm={showPopconfirm}
-            open={isConfirmOpen}
-            closeConfirm={() => setIsConfirmOpen(false)}
-          />
+          <DeleteButton onConfirm={handleDelete} isDeleting={isDeleting} />
 
           <PrintButton handlePrint={handlePrint} />
           <PrintButton handlePrint={handlePrintEnglish}>
