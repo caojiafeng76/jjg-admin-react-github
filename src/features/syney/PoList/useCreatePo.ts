@@ -4,7 +4,7 @@ import { createPo as createPoApi } from '@/services/apiSyneyPos'
 
 export function useCreatePo() {
   const queryClient = useQueryClient()
-  const [messageApi] = message.useMessage()
+  const [messageApi, contextHolder] = message.useMessage()
 
   const { mutateAsync: createPo, isPending: isCreating } = useMutation({
     mutationFn: createPoApi,
@@ -21,5 +21,5 @@ export function useCreatePo() {
     },
   })
 
-  return { createPo, isCreating }
+  return { createPo, isCreating, contextHolder }
 }

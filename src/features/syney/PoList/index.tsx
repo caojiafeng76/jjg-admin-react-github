@@ -56,14 +56,18 @@ export default function PoList() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const { isDeleting, deletePo } = useDeletePo()
   const { data: po, isLoading: poLoading } = usePo()
-  const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
+  const {
+    updatePos,
+    isUpdating: isPoUpdating,
+    contextHolder: updatePosContextHolder,
+  } = useUpdatePos()
 
   const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
     isAll: true,
   })
   const { serialNo, isLoading: serialNoLoading } = useSerialNo()
 
-  const { createPo } = useCreatePo()
+  const { createPo, contextHolder: createPoContextHolder } = useCreatePo()
   const { updateSerialNo, isUpdating } = useUpdateSerialNo()
 
   function handleDelete() {
@@ -203,6 +207,8 @@ export default function PoList() {
       {labelContextHolder}
       {englishLabelContextHolder}
       {messageContextHolder}
+      {createPoContextHolder}
+      {updatePosContextHolder}
 
       {/* 工具栏 */}
       <div className="flex flex-col gap-2">
