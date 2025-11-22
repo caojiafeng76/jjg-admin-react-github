@@ -5,13 +5,18 @@ import { deletePo as deletePoApi } from '@/services/apiSyneyPos'
 
 export function useDeletePo() {
   const queryClient = useQueryClient()
-  const [messageApi] = message.useMessage()
+  const [messageApi, contextHolder] = message.useMessage()
 
   const { mutate: deletePo, isPending: isDeleting } = useMutation({
     mutationFn: deletePoApi,
     onSuccess: () => {
+      // 失效列表缓存
       queryClient.invalidateQueries({
         queryKey: ['syney-pos'],
+      })
+      // 失效单条数据缓存
+      queryClient.invalidateQueries({
+        queryKey: ['po'],
       })
       messageApi.success('删除订单成功')
     },
@@ -24,5 +29,6 @@ export function useDeletePo() {
   return {
     deletePo,
     isDeleting,
+    contextHolder,
   }
 }
