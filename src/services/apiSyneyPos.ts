@@ -266,6 +266,10 @@ export async function getSelectedPosWithItems(PoIds: number[]) {
     .from('syney-pos')
     .select('*')
     .in('id', PoIds)
+    .order('EndDate', { ascending: false }) // 按交货日期降序
+    .order('No', { ascending: true }) // 按订单号升序
+    .order('SONo', { ascending: true }) // 按销售订单号升序
+    .order('SerialNo', { ascending: true }) // 按序列号升序
 
   if (posError) {
     console.error(posError)
