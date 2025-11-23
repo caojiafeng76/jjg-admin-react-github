@@ -1,4 +1,4 @@
-import { Key } from 'react'
+import { Key, memo, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Table, TableColumnsType, TableProps } from 'antd'
 import { format } from 'date-fns'
@@ -7,89 +7,93 @@ import { useAppStore } from '@/store'
 import { ISyneyPo } from '@/types'
 import { usePos } from './usePos'
 
-export default function PoTable() {
+function PoTable() {
   const [searchParams] = useSearchParams()
 
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
 
-  const columns: TableColumnsType<ISyneyPo> = [
-    {
-      title: '#',
-      render: (_text: string, _record: ISyneyPo, index) =>
-        (page - 1) * pageSize + index + 1,
-      width: 50,
-    },
-    {
-      title: '交货日期',
-      dataIndex: 'EndDate',
-      width: 110,
-      render: (text: string) => format(new Date(text), 'yyyy-MM-dd'),
-    },
-    {
-      title: '送货状态',
-      dataIndex: 'Status',
-      width: 100,
-      render: (text: string) => {
-        switch (text) {
-          case '已创建':
-            return <span className="text-red-500/80">{text}</span>
-          case '部分送货':
-            return <span className="text-yellow-500/80">{text}</span>
-          case '已入库':
-            return <span className="text-green-500/80">{text}</span>
-          case '暂停':
-            return <span className="text-pink-500/80">{text}</span>
-          case '作废':
-            return <span className="text-gray-500/80">{text}</span>
-        }
+  // 使用 useMemo 缓存列定义,避免每次渲染重新创建
+  const columns: TableColumnsType<ISyneyPo> = useMemo(
+    () => [
+      {
+        title: '#',
+        render: (_text: string, _record: ISyneyPo, index) =>
+          (page - 1) * pageSize + index + 1,
+        width: 50,
       },
-    },
-    {
-      title: '订单号-[生产号]',
-      dataIndex: 'No',
-      width: 220,
-      render: (text: string, record: ISyneyPo) => (
-        <Link className="text-blue-500/80" to={`/syney-po-list/${record.id}`}>
-          {`${text}-[${record.SONo?.split('-').at(-2)}-${record.SONo?.split('-').at(-1)}]`}
-        </Link>
-      ),
-    },
-    {
-      title: '规格',
-      dataIndex: 'Spec',
-      width: 160,
-    },
-    {
-      title: '数量',
-      dataIndex: 'Qty',
-      width: 60,
-    },
-    {
-      title: '商标',
-      dataIndex: 'Brand',
-      width: 160,
-    },
-    {
-      title: '工艺要求',
-      dataIndex: 'Technique',
-      width: 160,
-    },
-    {
-      title: '编号',
-      dataIndex: 'SerialNo',
-      width: 70,
-    },
-    {
-      title: '生产号',
-      dataIndex: 'SONo',
-      width: 180,
-    },
-    {
-      title: '备注',
-      dataIndex: 'Remark',
-    },
-  ]
+      {
+        title: '交货日期',
+        dataIndex: 'EndDate',
+        width: 110,
+        render: (text: string) => format(new Date(text), 'yyyy-MM-dd'),
+      },
+      {
+        title: '送货状态',
+        dataIndex: 'Status',
+        width: 100,
+        render: (text: string) => {
+          switch (text) {
+            case '已创建':
+              return <span className="text-red-500/80">{text}</span>
+            case '部分送货':
+              return <span className="text-yellow-500/80">{text}</span>
+            case '已入库':
+              return <span className="text-green-500/80">{text}</span>
+            case '暂停':
+              return <span className="text-pink-500/80">{text}</span>
+            case '作废':
+              return <span className="text-gray-500/80">{text}</span>
+          }
+        },
+      },
+      {
+        title: '订单号-[生产号]',
+        dataIndex: 'No',
+        width: 220,
+        render: (text: string, record: ISyneyPo) => (
+          <Link className="text-blue-500/80" to={`/syney-po-list/${record.id}`}>
+            {`${text}-[${record.SONo?.split('-').at(-2)}-${record.SONo?.split('-').at(-1)}]`}
+          </Link>
+        ),
+      },
+      {
+        title: '规格',
+        dataIndex: 'Spec',
+        width: 160,
+      },
+      {
+        title: '数量',
+        dataIndex: 'Qty',
+        width: 60,
+      },
+      {
+        title: '商标',
+        dataIndex: 'Brand',
+        width: 160,
+      },
+      {
+        title: '工艺要求',
+        dataIndex: 'Technique',
+        width: 160,
+      },
+      {
+        title: '编号',
+        dataIndex: 'SerialNo',
+        width: 70,
+      },
+      {
+        title: '生产号',
+        dataIndex: 'SONo',
+        width: 180,
+      },
+      {
+        title: '备注',
+        dataIndex: 'Remark',
+      },
+    ],
+    [page, pageSize],
+  )
 
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
@@ -132,3 +136,6 @@ export default function PoTable() {
     />
   )
 }
+
+// 使用 memo 优化,避免不必要的重渲染
+export default memo(PoTable)
