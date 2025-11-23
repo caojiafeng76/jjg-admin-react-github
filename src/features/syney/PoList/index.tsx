@@ -288,7 +288,7 @@ export default function PoList() {
         open={isModalOpen}
         confirmLoading={isCreating || isPoUpdating}
         destroyOnClose={true}
-        onOk={poFormRef.current?.submit}
+        onOk={() => poFormRef.current?.submit()}
         onCancel={() => {
           setIsModalOpen(false)
           setIsEdit(false)
