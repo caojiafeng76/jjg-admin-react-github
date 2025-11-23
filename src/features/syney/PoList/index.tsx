@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { FormInstance, message, Modal } from 'antd'
 import { format } from 'date-fns'
 import dayjs from 'dayjs'
@@ -65,15 +65,17 @@ export default function PoList() {
     contextHolder: updatePosContextHolder,
   } = useUpdatePos()
 
+  // 仅在创建模式下加载规格数据,编辑模式不需要
   const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
-    isAll: true,
+    isAll: !isEdit,
   })
   const { serialNo, isLoading: serialNoLoading } = useSerialNo()
 
   const { createPo, contextHolder: createPoContextHolder } = useCreatePo()
   const { updateSerialNo, isUpdating } = useUpdateSerialNo()
 
-  function handleDelete() {
+  // 使用 useCallback 优化,避免子组件不必要的重渲染
+  const handleDelete = useCallback(() => {
     // 验证选择
     if (tableSelectedKeys.length === 0) {
       messageApi.warning('请选择至少一条数据')
@@ -86,83 +88,104 @@ export default function PoList() {
         setTableSelectedKeys([])
       },
     })
-  }
+  }, [tableSelectedKeys, messageApi, deletePo, setTableSelectedKeys])
 
-  async function onFinish(values: ISyneyPo) {
-    // 检查数据是否正在加载
-    if (specsLoading) {
-      messageApi.warning('规格数据加载中,请稍后再试')
-      return
-    }
+  // 使用 useCallback 优化,避免子组件不必要的重渲染
+  const onFinish = useCallback(
+    async (values: ISyneyPo) => {
+      // 检查数据是否正在加载
+      if (specsLoading) {
+        messageApi.warning('规格数据加载中,请稍后再试')
+        return
+      }
 
-    if (serialNoLoading) {
-      messageApi.warning('序列号数据加载中,请稍后再试')
-      return
-    }
+      if (serialNoLoading) {
+        messageApi.warning('序列号数据加载中,请稍后再试')
+        return
+      }
 
-    if (isUpdating) {
-      messageApi.warning('序列号更新中,请稍后再试')
-      return
-    }
+      if (isUpdating) {
+        messageApi.warning('序列号更新中,请稍后再试')
+        return
+      }
 
-    try {
-      const No = values.No
-      values.EndDate = format(values.EndDate?.toString() || '', 'yyyy-MM-dd')
+      try {
+        const No = values.No
+        values.EndDate = format(values.EndDate?.toString() || '', 'yyyy-MM-dd')
 
-      if (isEdit) {
-        updatePos(
-          { ids: tableSelectedKeys.map(String), data: values },
+        if (isEdit) {
+          updatePos(
+            { ids: tableSelectedKeys.map(String), data: values },
+            {
+              onSettled: () => {
+                setIsModalOpen(false)
+                setTableSelectedKeys([])
+              },
+            },
+          )
+          return
+        }
+
+        let items = jsonToArray(values.Detail || '')
+        items = items?.map((item) => ({ ...item, No })) as ISyneyItem[]
+        items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
+        const { map, tmpSerialNo } = getItemsWithExtraInfo(
+          items,
+          serialNo?.SyneySerialNo || 0,
+        )
+        updateSerialNo(tmpSerialNo)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { Detail, ...po } = values
+
+        setIsCreating(true)
+
+        await createPo(
+          { po, map },
           {
             onSettled: () => {
               setIsModalOpen(false)
               setTableSelectedKeys([])
+              setIsCreating(false)
             },
           },
         )
-        return
+      } catch (error) {
+        console.error('提交失败:', error)
+        messageApi.error('提交失败,请重试')
+        setIsCreating(false)
       }
+    },
+    [
+      specsLoading,
+      serialNoLoading,
+      isUpdating,
+      messageApi,
+      isEdit,
+      updatePos,
+      tableSelectedKeys,
+      setTableSelectedKeys,
+      syneySpecs,
+      serialNo,
+      updateSerialNo,
+      setIsCreating,
+      createPo,
+    ],
+  )
 
-      let items = jsonToArray(values.Detail || '')
-      items = items?.map((item) => ({ ...item, No })) as ISyneyItem[]
-      items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
-      const { map, tmpSerialNo } = getItemsWithExtraInfo(
-        items,
-        serialNo?.SyneySerialNo || 0,
-      )
-      updateSerialNo(tmpSerialNo)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { Detail, ...po } = values
-
-      setIsCreating(true)
-
-      await createPo(
-        { po, map },
-        {
-          onSettled: () => {
-            setIsModalOpen(false)
-            setTableSelectedKeys([])
-            setIsCreating(false)
-          },
-        },
-      )
-    } catch (error) {
-      console.error('提交失败:', error)
-      messageApi.error('提交失败,请重试')
-      setIsCreating(false)
-    }
-  }
-
-  function handlePrint() {
+  // 使用 useCallback 优化,避免子组件不必要的重渲染
+  const handlePrint = useCallback(() => {
     generateLabel()
     setTableSelectedKeys([])
-  }
+  }, [generateLabel, setTableSelectedKeys])
 
-  function handlePrintEnglish() {
+  // 使用 useCallback 优化,避免子组件不必要的重渲染
+  const handlePrintEnglish = useCallback(() => {
     generateEnglishLabel()
     setTableSelectedKeys([])
-  }
+  }, [generateEnglishLabel, setTableSelectedKeys])
 
-  function handleEdit() {
+  // 使用 useCallback 优化,避免子组件不必要的重渲染
+  const handleEdit = useCallback(() => {
     // 检查是否选择了数据
     if (tableSelectedKeys.length === 0) {
       messageApi.warning('请选择至少一条数据进行编辑')
@@ -176,7 +199,7 @@ export default function PoList() {
         : `批量编辑 ${tableSelectedKeys.length} 个订单`,
     )
     setIsModalOpen(true)
-  }
+  }, [tableSelectedKeys, messageApi])
 
   // 使用 useEffect 监听数据加载完成后填充表单
   useEffect(() => {
@@ -189,15 +212,14 @@ export default function PoList() {
     }
   }, [isEdit, poLoading, po, isModalOpen])
 
+  // 优化清理逻辑:仅在组件卸载时清理,避免不必要的状态更新
   useEffect(() => {
-    setIsCreating(false)
-    setTableSelectedKeys([])
-
     return () => {
       setIsCreating(false)
       setTableSelectedKeys([])
     }
-  }, [setIsCreating, setTableSelectedKeys])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="grid h-full grid-rows-[auto_1fr] gap-4">
@@ -276,7 +298,7 @@ export default function PoList() {
         loading={poLoading}
         open={isModalOpen}
         confirmLoading={isCreating || isPoUpdating}
-        // destroyOnClose={true}
+        destroyOnClose={true}
         onOk={poFormRef.current?.submit}
         onCancel={() => {
           setIsModalOpen(false)

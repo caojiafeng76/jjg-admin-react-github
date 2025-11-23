@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useSearchParams } from 'react-router-dom'
+import { useEffect } from 'react'
 
 export function usePos() {
   const queryClient = useQueryClient()
@@ -37,49 +38,54 @@ export function usePos() {
 
   const pageCount = Math.ceil((count || 0) / pageSize)
 
-  if (page < pageCount)
-    queryClient.prefetchQuery({
-      queryKey: [
-        'syney-pos',
-        page + 1,
-        pageSize,
-        Status,
-        startDate,
-        endDate,
-        SONo,
-      ],
-      queryFn: () =>
-        getSyneyPos({
-          page: page + 1,
+  // 优化预取逻辑:将副作用移到 useEffect 中,避免在渲染阶段执行
+  useEffect(() => {
+    if (page < pageCount) {
+      queryClient.prefetchQuery({
+        queryKey: [
+          'syney-pos',
+          page + 1,
           pageSize,
           Status,
           startDate,
           endDate,
           SONo,
-        }),
-    })
+        ],
+        queryFn: () =>
+          getSyneyPos({
+            page: page + 1,
+            pageSize,
+            Status,
+            startDate,
+            endDate,
+            SONo,
+          }),
+      })
+    }
 
-  if (page > 1)
-    queryClient.prefetchQuery({
-      queryKey: [
-        'syney-pos',
-        page - 1,
-        pageSize,
-        Status,
-        startDate,
-        endDate,
-        SONo,
-      ],
-      queryFn: () =>
-        getSyneyPos({
-          page: page - 1,
+    if (page > 1) {
+      queryClient.prefetchQuery({
+        queryKey: [
+          'syney-pos',
+          page - 1,
           pageSize,
           Status,
           startDate,
           endDate,
           SONo,
-        }),
-    })
+        ],
+        queryFn: () =>
+          getSyneyPos({
+            page: page - 1,
+            pageSize,
+            Status,
+            startDate,
+            endDate,
+            SONo,
+          }),
+      })
+    }
+  }, [page, pageCount, pageSize, Status, startDate, endDate, SONo, queryClient])
 
   return {
     pos,
