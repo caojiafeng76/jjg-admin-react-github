@@ -1,5 +1,25 @@
 import { ISyneyItem, ISyneySpec } from '@/types'
 
+// 正则表达式常量,避免重复创建
+const LENGTH_PATTERN = /(L1=|L=)(\d+)/g
+
+// 零件号常量
+const COMB_SUPPORT_PART_NOS = ['XN2808EB', 'XN3024BR'] as const
+const FLOOR_COVER_PART_NOS = [
+  'XN2808BP',
+  'XN2808BQ',
+  'XN3024BS',
+  'XN3024BT',
+  'XN2808AF',
+  'XN3024BX',
+  'XN3024BY',
+  'XN2808AL',
+  'XN3024DF',
+  'XN2808JY',
+  'XN3024DG',
+  'XN2808JZ',
+] as const
+
 /**
  * 根据给定的物品列表和规格列表，生成带有参数规格的物品列表。
  * 如果物品的备注中包含长度信息（L1= 或 L=），并且规格中包含“实际宽度”或“实际长度”，
@@ -19,9 +39,6 @@ export function getItemsWithParamSpec(
     specMap.set(item.PartNo, item.ParamSpec)
   })
 
-  // 正则表达式，用于匹配备注中的长度信息（L1= 或 L=）
-  const regex = /(L1=|L=)(\d+)/g
-
   // 遍历物品列表，生成带有参数规格的物品列表
   return items.map((item) => {
     let paramSpec = specMap.get(item.PartNo)
@@ -29,19 +46,19 @@ export function getItemsWithParamSpec(
     // 如果参数规格中包含“实际宽度”或“实际长度”，并且备注中有匹配的长度信息
     if (
       paramSpec &&
+      item.Remark &&
       (paramSpec.includes('实际宽度') || paramSpec.includes('实际长度'))
     ) {
-      const match = item.Remark?.match(regex)
-      if (match) {
-        const length = match[0].split('=')[1]
+      // 重置正则表达式的 lastIndex
+      LENGTH_PATTERN.lastIndex = 0
+      const match = item.Remark.match(LENGTH_PATTERN)
+      if (match && match.length > 0) {
+        const [prefix, length] = match[0].split('=')
 
         // 根据匹配的长度信息，替换参数规格中的占位符
-        switch (match[0].split('=')[0]) {
-          case 'L1':
-          case 'L':
-            paramSpec = paramSpec.replace('实际宽度', length)
-            paramSpec = paramSpec.replace('实际长度', `L=${length}`)
-            break
+        if (prefix === 'L1' || prefix === 'L') {
+          paramSpec = paramSpec.replace('实际宽度', length)
+          paramSpec = paramSpec.replace('实际长度', `L=${length}`)
         }
       }
     }
@@ -143,24 +160,35 @@ function extractDataArray(jsonString: string) {
 
 export function jsonToArray(json: string): ISyneyItem[] {
   const jsonArrayStr = extractDataArray(json)
-  const jsonArray = JSON.parse(jsonArrayStr) as ISyneyItem[]
 
-  return jsonArray.map((item: ISyneyItem) => ({
-    No: item.No,
-    ParamSpec: '',
-    PartName: item.PartName,
-    PartName2: item.PartName2 || '',
-    PartNo: item.PartNo,
-    Qty: item.Qty,
-    Remark: item.Remark,
-    SONo: item.SONo,
-    Spec: item.Spec,
-    TaxTotalPrice: 0,
-    TaxUnitPrice: item.TaxUnitPrice || 0,
-    Unit: item.Unit,
-    PartCode: item.PartCode || '',
-    PartModel: item.PartModel || '',
-  }))
+  if (!jsonArrayStr) {
+    console.error('无法从JSON字符串中提取数据数组')
+    return []
+  }
+
+  try {
+    const jsonArray = JSON.parse(jsonArrayStr) as ISyneyItem[]
+
+    return jsonArray.map((item: ISyneyItem) => ({
+      No: item.No,
+      ParamSpec: '',
+      PartName: item.PartName,
+      PartName2: item.PartName2 || '',
+      PartNo: item.PartNo,
+      Qty: item.Qty,
+      Remark: item.Remark,
+      SONo: item.SONo,
+      Spec: item.Spec,
+      TaxTotalPrice: 0,
+      TaxUnitPrice: item.TaxUnitPrice || 0,
+      Unit: item.Unit,
+      PartCode: item.PartCode || '',
+      PartModel: item.PartModel || '',
+    }))
+  } catch (error) {
+    console.error('JSON解析失败:', error)
+    return []
+  }
 }
 
 /**
@@ -175,61 +203,45 @@ export function getItemsWithExtraInfo(
   items: ISyneyItem[],
   tmpSerialNo: number,
 ): { map: Map<string, ISyneyItem[]>; tmpSerialNo: number } {
-  // 定义需要处理的梳齿支撑板和楼层板的零件号列表
-  const partNosOfComb = ['XN2808EB', 'XN3024BR']
-  const partNosOfCover = [
-    'XN2808BP',
-    'XN2808BQ',
-    'XN3024BS',
-    'XN3024BT',
-    'XN2808AF',
-    'XN3024BX',
-    'XN3024BY',
-    'XN2808AL',
-    'XN3024DF',
-    'XN2808JY',
-    'XN3024DG',
-    'XN2808JZ',
-  ]
-
   // 创建一个 Map，用于按销售订单号（SONo）和序列号分组存储物品
   const map = new Map<string, ISyneyItem[]>()
 
-  // 获取所有唯一的销售订单号（SONo）
-  const uniqueSONos = new Set(items?.map((item) => item.SONo))
+  // 性能优化: 预先按 SONo 分组,避免多次过滤
+  const itemsBySONo = new Map<string | null, ISyneyItem[]>()
+  items.forEach((item) => {
+    const soNo = item.SONo
+    if (!itemsBySONo.has(soNo)) {
+      itemsBySONo.set(soNo, [])
+    }
+    itemsBySONo.get(soNo)!.push(item)
+  })
 
   // 遍历每个唯一的销售订单号
-  uniqueSONos.forEach((soNo) => {
+  itemsBySONo.forEach((soItems, soNo) => {
     // 生成当前销售订单号对应的序列号
     const seNo = tmpSerialNo + 1
 
-    // 处理梳齿支撑板的零件
-    partNosOfComb.forEach((partNo) => {
-      items
-        .filter((item) => item.SONo === soNo && item.PartNo?.includes(partNo))
-        .forEach((item) => {
-          item.PartName2 = '梳齿支撑板'
-          item.PartModel = 'YD1001XN'
-          item.PartCode = `ZC00${seNo}`
-        })
-    })
+    // 性能优化: 只遍历一次物品列表
+    soItems.forEach((item) => {
+      const partNo = item.PartNo
+      if (!partNo) return
 
-    // 处理楼层板的零件
-    partNosOfCover.forEach((partNo) => {
-      items
-        .filter((item) => item.SONo === soNo && item.PartNo?.includes(partNo))
-        .forEach((item) => {
-          item.PartName2 = '楼层板'
-          item.PartModel = 'YD0201XN'
-          item.PartCode = `LC00${seNo}`
-        })
+      // 检查是否为梳齿支撑板零件
+      if (COMB_SUPPORT_PART_NOS.some((pn) => partNo.includes(pn))) {
+        item.PartName2 = '梳齿支撑板'
+        item.PartModel = 'YD1001XN'
+        item.PartCode = `ZC00${seNo}`
+      }
+      // 检查是否为楼层板零件
+      else if (FLOOR_COVER_PART_NOS.some((pn) => partNo.includes(pn))) {
+        item.PartName2 = '楼层板'
+        item.PartModel = 'YD0201XN'
+        item.PartCode = `LC00${seNo}`
+      }
     })
 
     // 将当前销售订单号的物品按分组键（SONo~seNo）存入 Map
-    map.set(
-      `${soNo}~${seNo}`,
-      items.filter((item) => item.SONo === soNo),
-    )
+    map.set(`${soNo}~${seNo}`, soItems)
 
     // 更新临时序列号
     tmpSerialNo = seNo
