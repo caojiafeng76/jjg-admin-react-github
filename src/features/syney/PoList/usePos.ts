@@ -26,9 +26,13 @@ export function usePos() {
     error,
   } = useQuery({
     queryKey: ['syney-pos', page, pageSize, Status, startDate, endDate, SONo],
-    queryFn: () =>
-      getSyneyPos({ page, pageSize, Status, startDate, endDate, SONo }),
+    queryFn: ({ signal }) =>
+      getSyneyPos({ page, pageSize, Status, startDate, endDate, SONo, signal }),
     placeholderData: keepPreviousData,
+    staleTime: 30000, // 30秒内数据视为新鲜
+    gcTime: 5 * 60 * 1000, // 5分钟后清除缓存
+    retry: 2, // 失败重试2次
+    retryDelay: 1000, // 重试延迟1秒
   })
 
   if (error) {

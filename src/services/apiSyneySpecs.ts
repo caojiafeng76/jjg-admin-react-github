@@ -15,7 +15,10 @@ export async function getSyneySpecs({
 }) {
   let query = supabase
     .from('syney-specs')
-    .select('*', { count: 'exact' })
+    // 选择所有ISyneySpec必需的字段
+    .select('id, PartNo, ParamSpec, PartName, Spec, Unit, created_at', {
+      count: isAll ? 'exact' : undefined,
+    })
     .order('PartNo')
 
   if (!isAll) {
@@ -27,6 +30,9 @@ export async function getSyneySpecs({
     const to = from + pageSize
 
     query = query.range(from, to - 1)
+  } else {
+    // 即使是全量查询,也添加合理的上限保护
+    query = query.limit(1000)
   }
 
   const { data: syneySpecs, error, count } = await query

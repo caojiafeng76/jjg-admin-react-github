@@ -9,6 +9,7 @@ export async function getSyneyPos({
   startDate,
   endDate,
   SONo,
+  signal,
 }: {
   page: number
   pageSize: number
@@ -16,10 +17,15 @@ export async function getSyneyPos({
   startDate?: string
   endDate?: string
   SONo?: string
+  signal?: AbortSignal
 }) {
   let query = supabase
     .from('syney-pos')
-    .select('*', { count: 'exact' })
+    // 选择所有必要字段
+    .select(
+      'id, No, SONo, Spec, EndDate, Status, Qty, Brand, Technique, SerialNo, Remark, created_at',
+      { count: 'exact' },
+    )
     .order('EndDate', { ascending: false })
     .order('No', { ascending: true })
     .order('SONo', { ascending: true })
@@ -50,6 +56,11 @@ export async function getSyneyPos({
     query = query.ilike('SONo', `%${SONo}%`)
   }
 
+  // 支持请求取消
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
   const { data: syneyPos, count, error } = await query
 
   if (error) {
@@ -59,12 +70,15 @@ export async function getSyneyPos({
   return { syneyPos, count }
 }
 
-export default async function getSyneyPo(id: string) {
-  const { data, error } = await supabase
-    .from('syney-pos')
-    .select('*')
-    .eq('id', +id)
-    .single()
+export default async function getSyneyPo(id: string, signal?: AbortSignal) {
+  let query = supabase.from('syney-pos').select('*').eq('id', +id)
+
+  // 支持请求取消
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.single()
 
   if (error) {
     throw handleApiError(error, '获取订单详情失败')
@@ -80,47 +94,60 @@ export async function createPo({
   po: ISyneyPo
   map: Map<string, ISyneyItem[]>
 }) {
-  await Promise.all(
-    Array.from(map.keys()).map(async (key) => {
-      const [SONo, SerialNo] = key.split('~')
-      const items = map.get(key)
+  // 追踪已创建的订单ID,用于失败时回滚
+  const createdPoIds: number[] = []
 
-      const { data: poRepo, error: poError } = await supabase
-        .from('syney-pos')
-        .insert([{ ...po, SONo, SerialNo: +SerialNo }])
-        .select()
-        .single()
+  try {
+    await Promise.all(
+      Array.from(map.keys()).map(async (key) => {
+        const [SONo, SerialNo] = key.split('~')
+        const items = map.get(key)
 
-      if (poError) {
-        throw handleApiError(poError, '订单创建失败')
-      }
+        const { data: poRepo, error: poError } = await supabase
+          .from('syney-pos')
+          .insert([{ ...po, SONo, SerialNo: +SerialNo }])
+          .select()
+          .single()
 
-      const poItems = items?.map((item) => ({
-        No: item.No,
-        PartNo: item.PartNo,
-        PartName: item.PartName,
-        PartName2: item.PartName2,
-        Spec: item.Spec,
-        ParamSpec: item.ParamSpec,
-        Unit: item.Unit,
-        Qty: item.Qty,
-        SONo: item.SONo,
-        PartCode: item.PartCode,
-        PartModel: item.PartModel,
-        Remark: item.Remark,
-        PoId: poRepo.id,
-      }))
+        if (poError) {
+          throw handleApiError(poError, '订单创建失败')
+        }
 
-      const { error: itemsError } = await supabase
-        .from('syney-po-items')
-        .insert(poItems as ISyneyItem[])
+        // 记录成功创建的订单ID
+        createdPoIds.push(poRepo.id)
 
-      if (itemsError) {
-        await supabase.from('syney-pos').delete().eq('id', poRepo.id)
-        throw handleApiError(itemsError, '订单明细创建失败')
-      }
-    }),
-  )
+        const poItems = items?.map((item) => ({
+          No: item.No,
+          PartNo: item.PartNo,
+          PartName: item.PartName,
+          PartName2: item.PartName2,
+          Spec: item.Spec,
+          ParamSpec: item.ParamSpec,
+          Unit: item.Unit,
+          Qty: item.Qty,
+          SONo: item.SONo,
+          PartCode: item.PartCode,
+          PartModel: item.PartModel,
+          Remark: item.Remark,
+          PoId: poRepo.id,
+        }))
+
+        const { error: itemsError } = await supabase
+          .from('syney-po-items')
+          .insert(poItems as ISyneyItem[])
+
+        if (itemsError) {
+          throw handleApiError(itemsError, '订单明细创建失败')
+        }
+      }),
+    )
+  } catch (error) {
+    // 清理所有已创建的订单,确保数据一致性
+    if (createdPoIds.length > 0) {
+      await supabase.from('syney-pos').delete().in('id', createdPoIds)
+    }
+    throw error
+  }
 }
 
 export async function deletePo(ids: string[]) {
