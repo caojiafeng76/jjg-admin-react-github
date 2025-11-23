@@ -12,7 +12,6 @@ export function usePo() {
     queryKey: ['po', id],
     enabled: !!id,
     queryFn: ({ signal }) => getSyneyPo(id.toString(), signal),
-    staleTime: 30000, // 30秒内数据视为新鲜
   })
 
   if (error) {
