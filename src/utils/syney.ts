@@ -20,6 +20,10 @@ const FLOOR_COVER_PART_NOS = [
   'XN2808JZ',
 ] as const
 
+// 为快速查找转换为 Set
+const COMB_SUPPORT_SET = new Set(COMB_SUPPORT_PART_NOS)
+const FLOOR_COVER_SET = new Set(FLOOR_COVER_PART_NOS)
+
 /**
  * 根据给定的物品列表和规格列表，生成带有参数规格的物品列表。
  * 如果物品的备注中包含长度信息（L1= 或 L=），并且规格中包含“实际宽度”或“实际长度”，
@@ -104,19 +108,13 @@ export function distinctItems(items: ISyneyItem[]): ISyneyItem[] {
       existingItem.Qty! += item.Qty!
       existingItem.TaxTotalPrice! = existingItem.Qty! * item.TaxUnitPrice!
     } else {
-      // 如果 Map 中不存在相同键的物品，则添加新条目
+      // 如果 Map 中不存在相同键的物品，则添加新条目（浅拷贝优化）
+      const qty = item.Qty || 0
+      const unitPrice = item.TaxUnitPrice || 0
       map.set(key, {
-        No: item.No,
-        ParamSpec: item.ParamSpec,
-        PartName: item.PartName,
-        PartNo: item.PartNo,
-        Qty: item.Qty,
-        Remark: item.Remark,
-        SONo: item.SONo,
-        Spec: item.Spec,
-        TaxUnitPrice: item.TaxUnitPrice || 0, // 默认值为 0，避免 undefined
-        TaxTotalPrice: (item.Qty || 0) * (item.TaxUnitPrice || 0), // 计算总价
-        Unit: item.Unit,
+        ...item,
+        TaxUnitPrice: unitPrice,
+        TaxTotalPrice: qty * unitPrice,
       })
     }
   })
@@ -226,14 +224,31 @@ export function getItemsWithExtraInfo(
       const partNo = item.PartNo
       if (!partNo) return
 
-      // 检查是否为梳齿支撑板零件
-      if (COMB_SUPPORT_PART_NOS.some((pn) => partNo.includes(pn))) {
+      // 优化: 使用 Set 进行 O(1) 查找而不是 array.some() 的 O(n)
+      let isCombSupport = false
+      let isFloorCover = false
+
+      for (const pn of COMB_SUPPORT_SET) {
+        if (partNo.includes(pn)) {
+          isCombSupport = true
+          break
+        }
+      }
+
+      if (!isCombSupport) {
+        for (const pn of FLOOR_COVER_SET) {
+          if (partNo.includes(pn)) {
+            isFloorCover = true
+            break
+          }
+        }
+      }
+
+      if (isCombSupport) {
         item.PartName2 = '梳齿支撑板'
         item.PartModel = 'YD1001XN'
         item.PartCode = `ZC00${seNo}`
-      }
-      // 检查是否为楼层板零件
-      else if (FLOOR_COVER_PART_NOS.some((pn) => partNo.includes(pn))) {
+      } else if (isFloorCover) {
         item.PartName2 = '楼层板'
         item.PartModel = 'YD0201XN'
         item.PartCode = `LC00${seNo}`
