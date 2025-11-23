@@ -11,7 +11,8 @@ export function usePo() {
   const { data, error, isLoading } = useQuery({
     queryKey: ['po', id],
     enabled: !!id,
-    queryFn: () => getSyneyPo(id.toString()),
+    queryFn: ({ signal }) => getSyneyPo(id.toString(), signal),
+    staleTime: 30000, // 30秒内数据视为新鲜
   })
 
   if (error) {
