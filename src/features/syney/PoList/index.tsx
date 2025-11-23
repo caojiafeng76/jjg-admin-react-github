@@ -201,17 +201,6 @@ export default function PoList() {
     setIsModalOpen(true)
   }, [tableSelectedKeys, messageApi])
 
-  // 使用 useEffect 监听数据加载完成后填充表单
-  useEffect(() => {
-    if (isEdit && !poLoading && po && isModalOpen) {
-      poFormRef.current?.setFieldsValue({
-        ...po,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        EndDate: dayjs(po.EndDate) as any,
-      })
-    }
-  }, [isEdit, poLoading, po, isModalOpen])
-
   // 优化清理逻辑:仅在组件卸载时清理,避免不必要的状态更新
   useEffect(() => {
     return () => {
@@ -310,6 +299,11 @@ export default function PoList() {
           onFinish={onFinish}
           isCreating={isCreating || isUpdating}
           isEdit={isEdit}
+          initialValues={
+            po && isEdit
+              ? { ...po, EndDate: dayjs(po.EndDate) as any }
+              : undefined
+          }
         />
       </Modal>
     </div>

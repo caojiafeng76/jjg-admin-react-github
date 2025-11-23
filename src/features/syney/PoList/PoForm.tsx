@@ -7,6 +7,7 @@ type PoFormProps = {
   isCreating: boolean
   isEdit: boolean
   ref: Ref<FormInstance<ISyneyPo>> | undefined
+  initialValues?: ISyneyPo
 }
 
 const layout = {
@@ -70,13 +71,20 @@ const SPEC_OPTIONS = [
   },
 ]
 
-const PoForm: FC<PoFormProps> = ({ onFinish, isCreating, isEdit, ref }) => {
+const PoForm: FC<PoFormProps> = ({
+  onFinish,
+  isCreating,
+  isEdit,
+  ref,
+  initialValues,
+}) => {
   return (
     <Form
       ref={ref}
       {...layout}
       name="po-form"
       onFinish={onFinish}
+      initialValues={initialValues}
       // preserve={false}
     >
       <Form.Item name="No" label="订单号" rules={[{ required: true }]}>
