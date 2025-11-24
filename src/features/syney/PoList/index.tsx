@@ -277,7 +277,7 @@ export default function PoList() {
         </div>
 
         {/* 分页区域 */}
-        <div className="flex justify-center">
+        <div className="flex justify-end">
           <AppPagination total={count || 0} />
         </div>
       </div>
