@@ -300,9 +300,9 @@ export default function PoList() {
           isCreating={isCreating || isUpdating}
           isEdit={isEdit}
           initialValues={
-            po && isEdit
-              ? { ...po, EndDate: dayjs(po.EndDate) as any }
-              : undefined
+            (po && isEdit
+              ? { ...po, EndDate: dayjs(po.EndDate) }
+              : undefined) as ISyneyPo | undefined
           }
         />
       </Modal>
