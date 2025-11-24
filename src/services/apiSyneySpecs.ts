@@ -15,9 +15,9 @@ export async function getSyneySpecs({
 }) {
   let query = supabase
     .from('syney-specs')
-    // 选择所有ISyneySpec必需的字段
+    // 选择所有ISyneySpec必需的字段,并始终获取准确的总数
     .select('id, PartNo, ParamSpec, PartName, Spec, Unit, created_at', {
-      count: isAll ? 'exact' : undefined,
+      count: 'exact',
     })
     .order('PartNo')
 
