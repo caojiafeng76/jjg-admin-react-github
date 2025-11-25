@@ -55,7 +55,7 @@ const PoForm: FC<PoFormProps> = ({
     if (ref && 'current' in ref && ref.current) {
       ref.current.setFieldsValue({
         No: data.po.No,
-        EndDate: data.po.EndDate ? dayjs(data.po.EndDate) : null,
+        EndDate: data.po.EndDate ? (dayjs(data.po.EndDate) as any) : null,
         Remark: data.po.Remark || '',
       })
     }
