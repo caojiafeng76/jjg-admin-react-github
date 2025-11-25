@@ -1,6 +1,9 @@
-import { FC, Ref, memo } from 'react'
-import { DatePicker, Form, FormInstance, Input, Select } from 'antd'
+import { FC, Ref, memo, useState } from 'react'
+import { DatePicker, Form, FormInstance, Input, Select, Radio } from 'antd'
 import { ISyneyPo } from '@/types'
+import ExcelUpload from './ExcelUpload'
+import { TransformedOrderData } from '@utils/excelUtils'
+import dayjs from 'dayjs'
 
 type PoFormProps = {
   onFinish: (values: ISyneyPo) => void
@@ -8,6 +11,7 @@ type PoFormProps = {
   isEdit: boolean
   ref: Ref<FormInstance<ISyneyPo>> | undefined
   initialValues?: ISyneyPo
+  onExcelDataChange?: (data: TransformedOrderData) => void
 }
 
 const layout = {
@@ -38,7 +42,30 @@ const PoForm: FC<PoFormProps> = ({
   isEdit,
   ref,
   initialValues,
+  onExcelDataChange,
 }) => {
+  // 导入方式: 'manual' | 'excel'
+  const [importMode, setImportMode] = useState<'manual' | 'excel'>('manual')
+
+  /**
+   * 处理Excel数据解析完成
+   */
+  const handleExcelDataParsed = (data: TransformedOrderData) => {
+    // 自动填充表单字段
+    if (ref && 'current' in ref && ref.current) {
+      ref.current.setFieldsValue({
+        No: data.po.No,
+        EndDate: data.po.EndDate ? dayjs(data.po.EndDate) : null,
+        Remark: data.po.Remark || '',
+      })
+    }
+
+    // 通知父组件Excel数据已解析
+    if (onExcelDataChange) {
+      onExcelDataChange(data)
+    }
+  }
+
   return (
     <Form
       ref={ref}
@@ -49,7 +76,7 @@ const PoForm: FC<PoFormProps> = ({
       // preserve={false}
     >
       <Form.Item name="No" label="订单号" rules={[{ required: true }]}>
-        <Input disabled={isCreating} />
+        <Input disabled={isCreating || importMode === 'excel'} />
       </Form.Item>
       <Form.Item name="Spec" label="规格">
         <Select
@@ -60,12 +87,40 @@ const PoForm: FC<PoFormProps> = ({
         />
       </Form.Item>
       <Form.Item name="EndDate" label="交货日期" rules={[{ required: true }]}>
-        <DatePicker disabled={isCreating} />
+        <DatePicker disabled={isCreating || importMode === 'excel'} />
       </Form.Item>
+
+      {/* 新增：导入方式选择 (仅在新建时显示) */}
       {!isEdit && (
-        <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
-          <Input.TextArea rows={20} cols={30} disabled={isCreating} />
-        </Form.Item>
+        <>
+          <Form.Item label="导入方式">
+            <Radio.Group
+              value={importMode}
+              onChange={(e) => setImportMode(e.target.value)}
+              disabled={isCreating}
+            >
+              <Radio value="manual">手动输入</Radio>
+              <Radio value="excel">Excel导入</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          {/* 手动输入模式 */}
+          {importMode === 'manual' && (
+            <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
+              <Input.TextArea rows={20} cols={30} disabled={isCreating} />
+            </Form.Item>
+          )}
+
+          {/* Excel导入模式 */}
+          {importMode === 'excel' && (
+            <Form.Item label="上传文件">
+              <ExcelUpload
+                onDataParsed={handleExcelDataParsed}
+                disabled={isCreating}
+              />
+            </Form.Item>
+          )}
+        </>
       )}
 
       {isEdit && (
