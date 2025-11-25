@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { FormInstance, message, Modal } from 'antd'
 import { format } from 'date-fns'
 import dayjs from 'dayjs'
+import { TransformedOrderData } from '@utils/excelUtils'
 
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -38,6 +39,7 @@ export default function PoList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')
   const [isEdit, setIsEdit] = useState(false)
+  const [excelData, setExcelData] = useState<TransformedOrderData | null>(null)
 
   const { generateLabel, contextHolder: labelContextHolder } = usePrint()
   const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
@@ -90,6 +92,11 @@ export default function PoList() {
     })
   }, [tableSelectedKeys, messageApi, deletePo, setTableSelectedKeys])
 
+  // 处理Excel数据解析
+  const handleExcelDataChange = useCallback((data: TransformedOrderData) => {
+    setExcelData(data)
+  }, [])
+
   // 使用 useCallback 优化,避免子组件不必要的重渲染
   const onFinish = useCallback(
     async (values: ISyneyPo) => {
@@ -126,8 +133,20 @@ export default function PoList() {
           return
         }
 
-        let items = jsonToArray(values.Detail || '')
-        items = items?.map((item) => ({ ...item, No })) as ISyneyItem[]
+        // 判断是Excel导入还是手动输入
+        let items: ISyneyItem[]
+
+        if (excelData && excelData.items.length > 0) {
+          // Excel导入模式
+          items = excelData.items.map((item) => ({
+            ...item,
+            No,
+          })) as ISyneyItem[]
+        } else {
+          // 手动输入模式
+          items = jsonToArray(values.Detail || '')
+          items = items?.map((item) => ({ ...item, No })) as ISyneyItem[]
+        }
         items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
         const { map, tmpSerialNo } = getItemsWithExtraInfo(
           items,
@@ -146,6 +165,8 @@ export default function PoList() {
               setIsModalOpen(false)
               setTableSelectedKeys([])
               setIsCreating(false)
+              // 清空Excel数据
+              setExcelData(null)
             },
           },
         )
@@ -169,6 +190,7 @@ export default function PoList() {
       updateSerialNo,
       setIsCreating,
       createPo,
+      excelData,
     ],
   )
 
@@ -296,6 +318,7 @@ export default function PoList() {
       >
         <PoForm
           ref={poFormRef}
+          onExcelDataChange={handleExcelDataChange}
           onFinish={onFinish}
           isCreating={isCreating || isUpdating}
           isEdit={isEdit}
