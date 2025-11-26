@@ -40,7 +40,8 @@ export function usePrintDecomposition() {
    */
   function drawPageFrame(doc: jsPDF) {
     doc.setFontSize(20)
-    doc.text('踏板分解单', 120, 20)
+    // 居中标题：15 + 270/2 = 150
+    doc.text('踏板分解单', 150, 20, { align: 'center' })
 
     doc.rect(15, 30, 270, 170) // 画一个方框
     doc.line(15, 40, 285, 40)
@@ -48,86 +49,91 @@ export function usePrintDecomposition() {
     doc.setFontSize(10)
 
     // 表头文字和竖线
-    // 序号
-    doc.text('序号', 18, 37)
+    // 序号 (15-28, center 21.5)
+    doc.text('序号', 21.5, 37, { align: 'center' })
     doc.line(28, 30, 28, 40)
 
-    // 交货日期
-    doc.text('交货日期', 32, 37)
+    // 交货日期 (28-50, center 39)
+    doc.text('交货日期', 39, 37, { align: 'center' })
     doc.line(50, 30, 50, 40)
 
-    // 台数
-    doc.text('台数', 52, 37)
+    // 台数 (50-62, center 56)
+    doc.text('台数', 56, 37, { align: 'center' })
     doc.line(62, 30, 62, 40)
 
-    // 名称
-    doc.text('名称', 64, 37)
+    // 名称 (62-74, center 68)
+    doc.text('名称', 68, 37, { align: 'center' })
     doc.line(74, 30, 74, 40)
 
-    // 规格
-    doc.text('规格', 78, 37)
+    // 规格 (74-89, center 81.5)
+    doc.text('规格', 81.5, 37, { align: 'center' })
     doc.line(89, 30, 89, 40)
 
-    // 件数
-    doc.text('件数', 90, 37)
+    // 件数 (89-98, center 93.5)
+    doc.text('件数', 93.5, 37, { align: 'center' })
     doc.line(98, 30, 98, 40)
 
-    // 名称
-    doc.text('名称', 100, 37)
+    // 名称 (98-110, center 104)
+    doc.text('名称', 104, 37, { align: 'center' })
     doc.line(110, 30, 110, 40)
 
-    // 规格
-    doc.text('规格', 114, 37)
+    // 规格 (110-125, center 117.5)
+    doc.text('规格', 117.5, 37, { align: 'center' })
     doc.line(125, 30, 125, 40)
 
-    // 件数
-    doc.text('件数', 128, 37)
+    // 件数 (125-134, center 129.5)
+    doc.text('件数', 129.5, 37, { align: 'center' })
     doc.line(134, 30, 134, 40)
 
-    // 名称
-    doc.text('名称', 138, 37)
+    // 名称 (134-146, center 140)
+    doc.text('名称', 140, 37, { align: 'center' })
     doc.line(146, 30, 146, 40)
 
-    // 规格
-    doc.text('规格', 150, 37)
-    doc.line(161, 30, 161, 40) // 原代码 146 + 15 = 161
+    // 规格 (146-161, center 153.5)
+    doc.text('规格', 153.5, 37, { align: 'center' })
+    doc.line(161, 30, 161, 40)
 
-    // 件数
-    doc.text('件数', 164, 37)
-    doc.line(170, 30, 170, 40) // 原代码 146 + 15 + 9 = 170
+    // 件数 (161-170, center 165.5)
+    doc.text('件数', 165.5, 37, { align: 'center' })
+    doc.line(170, 30, 170, 40)
 
-    // 名称
-    doc.text('名称', 172, 37)
-    doc.line(182, 30, 182, 40) // 原代码 170 + 12 = 182
+    // 名称 (170-182, center 176)
+    doc.text('名称', 176, 37, { align: 'center' })
+    doc.line(182, 30, 182, 40)
 
-    // 规格
-    doc.text('规格', 186, 37)
-    doc.line(197, 30, 197, 40) // 原代码 170 + 12 + 15 = 197
+    // 规格 (182-197, center 189.5)
+    doc.text('规格', 189.5, 37, { align: 'center' })
+    doc.line(197, 30, 197, 40)
 
-    // 件数
-    doc.text('件数', 198, 37)
-    doc.line(206, 30, 206, 40) // 原代码 170 + 12 + 15 + 9 = 206
+    // 件数 (197-206, center 201.5)
+    doc.text('件数', 201.5, 37, { align: 'center' })
+    doc.line(206, 30, 206, 40)
 
-    // 类型
-    doc.text('类型', 208, 37)
-    doc.line(220, 30, 220, 40) // 原代码 206 + 14 = 220
+    // 类型 (206-220, center 213)
+    doc.text('类型', 213, 37, { align: 'center' })
+    doc.line(220, 30, 220, 40)
 
-    // 工艺要求
-    doc.text('工艺要求', 224, 37)
-    doc.line(242, 30, 242, 40) // 原代码 220 + 22 = 242
+    // 工艺要求 (220-242, center 231)
+    doc.text('工艺要求', 231, 37, { align: 'center' })
+    doc.line(242, 30, 242, 40)
 
-    // 横 围
-    doc.text('横 围', 246, 37)
-    doc.line(257, 30, 257, 40) // 原代码 242 + 15 = 257
+    // 横 围 (242-257, center 249.5)
+    doc.text('横 围', 249.5, 37, { align: 'center' })
+    doc.line(257, 30, 257, 40)
 
-    // 侧 围
-    doc.text('侧 围', 261, 37)
-    doc.line(270, 30, 270, 40) // 原代码 256 + 14 = 270
+    // 侧 围 (257-270, center 263.5)
+    doc.text('侧 围', 263.5, 37, { align: 'center' })
+    doc.line(270, 30, 270, 40)
 
-    // 围框垫
-    doc.text('围框垫', 273, 37)
+    // 围框垫 (270-285, center 277.5)
+    doc.text('围框垫', 277.5, 37, { align: 'center' })
 
     // 绘制 4 行的表格框架
+    const xCoords = [
+      50, 62, 74, 89, 98, 110, 125, 134, 146, 161, 170, 182, 197, 206, 220, 242,
+      257, 270,
+    ]
+
     for (let i = 0; i < CONFIG.ROWS_PER_PAGE; i++) {
       const yBase = CONFIG.BASE_Y + i * CONFIG.ROW_HEIGHT
       const yLine1 = yBase // 60, 100, 140, 180
@@ -147,29 +153,37 @@ export function usePrintDecomposition() {
       const vLineStart = yBase - 20
       const vLineEnd = yBase
 
-      const xCoords = [
-        50, 62, 74, 89, 98, 110, 125, 134, 146, 161, 170, 182, 197, 206, 220,
-        242, 257, 270,
-      ]
       xCoords.forEach((x) => doc.line(x, vLineStart, x, vLineEnd))
+    }
 
-      // 固定文字
-      doc.setFontSize(16)
-      doc.text('前', 65, yBase - 13)
-      doc.text('板', 65, yBase - 4)
+    // 批量绘制文字以减少 setFontSize 调用次数
+    // Font Size 16
+    doc.setFontSize(16)
+    for (let i = 0; i < CONFIG.ROWS_PER_PAGE; i++) {
+      const yBase = CONFIG.BASE_Y + i * CONFIG.ROW_HEIGHT
+      doc.text('前', 67, yBase - 13, { align: 'center' })
+      doc.text('板', 67, yBase - 4, { align: 'center' })
 
-      doc.text('中', 101, yBase - 13)
-      doc.text('板', 101, yBase - 4)
+      doc.text('中', 104, yBase - 13, { align: 'center' })
+      doc.text('板', 104, yBase - 4, { align: 'center' })
 
-      doc.text('后', 137, yBase - 13)
-      doc.text('板', 137, yBase - 4)
+      doc.text('后', 140, yBase - 13, { align: 'center' })
+      doc.text('板', 140, yBase - 4, { align: 'center' })
+    }
 
-      doc.setFontSize(12)
-      doc.text('加', 174, yBase - 16)
-      doc.text('长', 174, yBase - 9)
-      doc.text('板', 174, yBase - 2)
+    // Font Size 12
+    doc.setFontSize(12)
+    for (let i = 0; i < CONFIG.ROWS_PER_PAGE; i++) {
+      const yBase = CONFIG.BASE_Y + i * CONFIG.ROW_HEIGHT
+      doc.text('加', 176, yBase - 16, { align: 'center' })
+      doc.text('长', 176, yBase - 9, { align: 'center' })
+      doc.text('板', 176, yBase - 2, { align: 'center' })
+    }
 
-      doc.setFontSize(10)
+    // Font Size 10
+    doc.setFontSize(10)
+    for (let i = 0; i < CONFIG.ROWS_PER_PAGE; i++) {
+      const yBase = CONFIG.BASE_Y + i * CONFIG.ROW_HEIGHT
       doc.text('订单号：', 30, yBase + 7)
       doc.text('商标：', 85, yBase + 7)
       doc.text('编号：', 155, yBase + 7)
@@ -410,8 +424,10 @@ export function usePrintDecomposition() {
 
         fillPageData(doc, pageData, pageIndex)
 
-        // 让出控制权，避免阻塞 UI
-        await new Promise((resolve) => setTimeout(resolve, 0))
+        // 让出控制权，避免阻塞 UI，每 5 页让出一次
+        if (pageIndex % 5 === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 0))
+        }
       }
 
       // 5. 输出 PDF
