@@ -22,6 +22,8 @@ export function useReports() {
   } = useQuery({
     queryKey: ['syney-reports', status, page, pageSize],
     queryFn: () => getSyneyStoreReports({ status, page, pageSize }),
+    // 缓存5分钟，避免频繁切换页面时重复请求
+    staleTime: 5 * 60 * 1000,
   })
 
   if (error) {

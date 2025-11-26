@@ -13,7 +13,8 @@ export async function getSyneyStoreReports({
 }) {
   let query = supabase
     .from('syney-store-reports')
-    .select('*', { count: 'exact' })
+    // 只选择列表页需要的字段，不要查询 Detail 字段！
+    .select('id, No, Status, TotalAmount, created_at', { count: 'exact' })
     .range(pageSize * (page - 1), pageSize * page - 1)
     .order('created_at', { ascending: false })
     .order('No')

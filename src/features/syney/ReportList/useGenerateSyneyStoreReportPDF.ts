@@ -6,17 +6,33 @@ import { ISyneyItem } from '@services/types'
 import { formatNumber } from '@/utils/helps'
 import myFont from '@/assets/myFont'
 import { useSelectedReports } from './useSelectedReports'
+import { useAppStore } from '@/store'
 
 export function useGenerateSyneyStoreReportPDF() {
-  const doc = new jsPDF({ orientation: 'l' })
-  // 设置中文字体
-  doc.addFileToVFS('msyh.ttf', myFont)
-  doc.addFont('msyh.ttf', 'myFont', 'normal')
-  doc.setFont('myFont')
+  const { tableSelectedKeys } = useAppStore()
 
-  const { selectedMap, selectedReportsLoading } = useSelectedReports()
+  // 只在有选中项时才查询数据
+  const { selectedMap, selectedReportsLoading } = useSelectedReports(
+    tableSelectedKeys.length > 0
+  )
 
-  if (!selectedReportsLoading) {
+  function print() {
+    // 如果数据还在加载，返回 false
+    if (selectedReportsLoading) {
+      return false
+    }
+
+    // 如果没有数据，返回 false
+    if (!selectedMap || selectedMap.size === 0) {
+      return false
+    }
+
+    const doc = new jsPDF({ orientation: 'l' })
+    // 设置中文字体
+    doc.addFileToVFS('msyh.ttf', myFont)
+    doc.addFont('msyh.ttf', 'myFont', 'normal')
+    doc.setFont('myFont')
+
     selectedMap?.forEach((data, No) => {
       const totalPage = Math.ceil((data.items.length + 1) / 25)
 
@@ -106,16 +122,17 @@ export function useGenerateSyneyStoreReportPDF() {
         },
       })
     })
-    doc.deletePage(1)
-  }
 
-  function print() {
+    doc.deletePage(1)
+
     doc.output('dataurlnewwindow', {
       filename: `new`,
     })
+    return true // 返回 true 表示打印成功
   }
 
   return {
     print,
+    isLoading: selectedReportsLoading,
   }
 }

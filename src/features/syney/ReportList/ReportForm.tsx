@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle } from 'react'
-import { Form, Input } from 'antd'
+import { Form, Input, App } from 'antd'
 
 import {
   ISyneyItem,
@@ -23,6 +23,7 @@ const layout = {
 
 const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
   ({ handleCancel, onSpecsLoadingChange }, ref) => {
+    const { message } = App.useApp()
     const { setIsLoading } = useAppStore()
 
     const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
@@ -33,12 +34,24 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
     const [form] = Form.useForm<ISyneyStoreReport>()
 
     const onFinish = (values: ISyneyStoreReport) => {
-      const No = values.No
+      // 从Detail JSON中提取数据
+      const detailData = jsonToArray(values.Detail || '') || []
 
-      const items = getItemsWithParamSpec(
-        jsonToArray(values.Detail || '') || [],
-        syneySpecs || [],
-      )
+      // 验证数据有效性
+      if (detailData.length === 0) {
+        message.error('详情数据为空，请粘贴有效的JSON数据')
+        return
+      }
+
+      // 从第一条记录获取对账单号
+      const No = detailData[0].No
+
+      if (!No) {
+        message.error('无法从详情中获取对账单号（No字段）')
+        return
+      }
+
+      const items = getItemsWithParamSpec(detailData, syneySpecs || [])
       let TotalAmount = items
         .map((item) => item.Qty! * Number(item.TaxUnitPrice?.toFixed(2)))
         .reduce((acc, price) => acc + price!, 0)
@@ -49,7 +62,14 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
 
       createReport(
         { No, TotalAmount, items: itemsDistinct },
-        { onSettled: () => handleCancel() },
+        {
+          onSettled: () => handleCancel(),
+          onSuccess: () => message.success('创建对账单成功'),
+          onError: (err) => {
+            console.error(err)
+            message.error('创建对账单失败')
+          },
+        },
       )
     }
 
@@ -72,9 +92,6 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
     return (
       <>
         <Form {...layout} form={form} name="report-form" onFinish={onFinish}>
-          <Form.Item name="No" label="对账单号" rules={[{ required: true }]}>
-            <Input disabled={isCreating} />
-          </Form.Item>
           <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
             <Input.TextArea rows={20} cols={30} disabled={isCreating} />
           </Form.Item>
