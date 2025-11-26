@@ -1,5 +1,5 @@
+import { App } from 'antd'
 import autoTable from 'jspdf-autotable'
-import { format } from 'date-fns'
 
 import { useSelectedReports } from './useSelectedReports'
 import { useAppStore } from '@/store'
@@ -9,12 +9,14 @@ import {
   initializePDF,
   createTableStyles,
   generateSummaryTableData,
-  addDocumentTitle,
+  generateFilename,
+  addPageNumber,
 } from '@/utils/pdfUtils'
 import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
 
 export function useGenerateSummaryPDF() {
   const { tableSelectedKeys } = useAppStore()
+  const { message } = App.useApp()
 
   // 只在有选中项时才查询数据
   const { selectedReportsLoading, selectedMap } = useSelectedReports(
@@ -22,15 +24,14 @@ export function useGenerateSummaryPDF() {
   )
 
   function generateSummaryPDF() {
-    // 如果数据还在加载，返回 false
+    // 改进错误处理
     if (selectedReportsLoading) {
-      console.warn('数据还在加载中，请稍后再试')
+      message.warning('数据加载中，请稍候重试')
       return false
     }
 
-    // 如果没有数据，返回 false
     if (!selectedMap || selectedMap.size === 0) {
-      console.warn('没有选中的入库单数据')
+      message.warning('请选择至少一条对账单数据')
       return false
     }
 
@@ -52,29 +53,33 @@ export function useGenerateSummaryPDF() {
         head: [Array.from(SUMMARY_TABLE_COLUMNS)],
         body: tableData,
         ...createTableStyles(),
-        willDrawPage: (dataOfPage) => {
+        startY: 30,
+        willDrawPage: () => {
           // 添加标题
-          const title = `对账单【湖州银都铝业科技有限公司】-- ${format(
-            new Date(),
-            'yyyy-MM-dd'
-          )}`
-          addDocumentTitle(
-            doc,
-            title,
-            (dataOfPage.cursor?.x ?? 0) + 40,
-            (dataOfPage.cursor?.y ?? 0) - 22
-          )
+          const date = new Date().toLocaleDateString('zh-CN')
+          const title = `对账单【湖州银都铝业科技有限公司】-- ${date}`
+
+          doc.setFontSize(16)
+          doc.text(title, 105, 20, { align: 'center' })
+        },
+        didDrawPage: (dataOfPage) => {
+          // 使用工具函数添加页码
+          const pageCount = doc.getNumberOfPages()
+          addPageNumber(doc, dataOfPage.pageNumber, pageCount)
         },
       })
 
-      // 输出 PDF
-      doc.output('dataurlnewwindow', {
-        filename: `对账单汇总_${new Date().toISOString().slice(0, 10)}.pdf`,
-      })
+      // 生成智能文件名
+      const filename = generateFilename('summary', selectedMap.size)
 
+      // 输出 PDF
+      doc.output('dataurlnewwindow', { filename })
+
+      message.success(`PDF生成完成: ${filename}`)
       return true // 返回 true 表示生成成功
     } catch (error) {
       console.error('生成汇总 PDF 时发生错误:', error)
+      message.error(error instanceof Error ? error.message : 'PDF生成失败，请重试')
       return false
     }
   }

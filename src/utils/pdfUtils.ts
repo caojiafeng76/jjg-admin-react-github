@@ -13,6 +13,7 @@ import {
   TABLE_CONFIG,
   LAYOUT_CONFIG,
   CACHE_CONFIG,
+  FILENAME_CONFIG,
 } from './pdfConstants'
 import { formatNumber } from './helps'
 import { ISyneyItem } from '@services/types'
@@ -143,11 +144,78 @@ export function addDocumentTitle(
  * @param totalPages 总页数
  */
 export function addPageNumber(doc: jsPDF, currentPage: number, totalPages: number) {
-  doc.text(
-    `第${currentPage}页，共${totalPages}页`,
-    LAYOUT_CONFIG.PAGE_NUMBER.X_OFFSET,
-    LAYOUT_CONFIG.PAGE_NUMBER.Y_OFFSET
-  )
+  const text = `第${currentPage}页，共${totalPages}页`
+  const pageSize = doc.internal.pageSize
+  const pageWidth =
+    typeof pageSize.getWidth === 'function' ? pageSize.getWidth() : pageSize.width
+  const pageHeight =
+    typeof pageSize.getHeight === 'function' ? pageSize.getHeight() : pageSize.height
+  const { X_OFFSET = -150, Y_OFFSET = 10 } = LAYOUT_CONFIG.PAGE_NUMBER
+
+  const x = pageWidth + X_OFFSET
+  const y = pageHeight - Y_OFFSET
+
+  doc.text(text, x, y, { align: 'center' })
+}
+
+/**
+ * 生成智能文件名
+ * @param type 文件类型 ('detail' | 'summary')
+ * @param count 数据条数
+ * @param reportNos 对账单号列表（可选）
+ * @returns 生成的文件名
+ */
+export function generateFilename(
+  type: 'detail' | 'summary',
+  count: number,
+  reportNos?: string[]
+): string {
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
+  const prefix = FILENAME_CONFIG.PREFIX[type.toUpperCase() as 'DETAIL' | 'SUMMARY'] || FILENAME_CONFIG.PREFIX.SUMMARY
+  const suffix = FILENAME_CONFIG.SUFFIX
+
+  if (type === 'detail' && reportNos && reportNos.length > 0) {
+    // 详细对账单：包含对账单号
+    const reportNoStr = reportNos.length === 1
+      ? reportNos[0]
+      : `${reportNos.length}条记录`
+    return `${prefix}_${reportNoStr}_${timestamp}${suffix}`
+  } else {
+    // 汇总表：包含数量
+    return `${prefix}_${count}条_${timestamp}${suffix}`
+  }
+}
+
+/**
+ * 带进度回调的批次处理
+ * @param array 要处理的数组
+ * @param batchSize 批次大小
+ * @param processor 处理函数
+ * @param onProgress 进度回调函数
+ */
+export async function processBatchWithProgress<T, R>(
+  array: T[],
+  batchSize: number,
+  processor: (batch: T[]) => Promise<R[]>,
+  onProgress?: (processed: number, total: number) => void
+): Promise<R[]> {
+  const results: R[] = []
+  const total = array.length
+  let processed = 0
+
+  for (let i = 0; i < array.length; i += batchSize) {
+    const batch = array.slice(i, i + batchSize)
+    const batchResults = await processor(batch)
+    results.push(...batchResults)
+
+    processed += batch.length
+    onProgress?.(processed, total)
+
+    // 让出控制权，避免阻塞UI
+    await new Promise(resolve => setTimeout(resolve, 0))
+  }
+
+  return results
 }
 
 /**
