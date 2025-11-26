@@ -277,6 +277,16 @@ export function addTableHeader(
 }
 
 /**
+ * 在新窗口打开 PDF
+ * @param doc PDF 文档实例
+ */
+export function openPDFInNewWindow(doc: jsPDF) {
+  const pdfBlob = doc.output('blob')
+  const blobUrl = URL.createObjectURL(pdfBlob)
+  window.open(blobUrl, '_blank')
+}
+
+/**
  * 生成汇总表格数据
  * @param data 汇总数据数组
  * @returns 表格数据
