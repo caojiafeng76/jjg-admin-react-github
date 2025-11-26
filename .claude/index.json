@@ -1,0 +1,355 @@
+{
+  "projectName": "jjg-admin-react-github",
+  "timestamp": "2025-11-26T12:19:14+08:00",
+  "version": "1.0.0",
+  "description": "精加工车间管理系统 - React + TypeScript + Vite + Ant Design 后台管理系统",
+  "modules": [
+    {
+      "path": "src/features/syney/PoList",
+      "name": "PoList",
+      "description": "采购订单列表管理",
+      "entryPoints": ["index.tsx"],
+      "apis": [
+        "usePos.ts",
+        "usePo.ts",
+        "useCreatePo.ts",
+        "useDeletePo.ts",
+        "useUpdatePos.ts",
+        "usePrint.ts",
+        "usePrintEnglish.ts",
+        "usePrintDecomposition.ts",
+        "useExportSafePartInfoAsExcel.ts"
+      ],
+      "components": [
+        "PoTable.tsx",
+        "PoForm.tsx",
+        "ExcelUpload.tsx",
+        "PoSearchInput.tsx",
+        "PoDateFilter.tsx",
+        "PoSelected.tsx",
+        "PoSelectedFilter.tsx",
+        "PrintDecompositionButton.tsx",
+        "ExportInfoButton.tsx"
+      ],
+      "hasTests": false,
+      "hasDocs": true,
+      "coverage": {
+        "scanned": true,
+        "percentage": 100,
+        "missingItems": []
+      }
+    },
+    {
+      "path": "src/features/syney/PoDetail",
+      "name": "PoDetail",
+      "description": "采购订单明细编辑",
+      "entryPoints": ["index.tsx"],
+      "apis": ["useDetail.ts", "useItem.ts", "useUpdate.ts"],
+      "components": ["DetailTable.tsx", "DetailForm.tsx"],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 80,
+        "missingItems": ["缺少模块文档"]
+      }
+    },
+    {
+      "path": "src/features/syney/ReportList",
+      "name": "ReportList",
+      "description": "库存报告列表",
+      "entryPoints": ["index.tsx"],
+      "apis": [
+        "useReports.ts",
+        "useCreateReport.ts",
+        "useDeleteReport.ts",
+        "useUpdateReports.ts",
+        "useSelectedReports.ts",
+        "useExportReportsAsExcel.ts",
+        "useGenerateSyneyStoreReportPDF.ts",
+        "useGenerateSummaryPDF.ts"
+      ],
+      "components": [
+        "ReportTable.tsx",
+        "ReportForm.tsx",
+        "ReportSelect.tsx",
+        "ConfirmButton.tsx",
+        "UnConfirmedButton.tsx",
+        "ExportAsExcelButton.tsx",
+        "ExportPDFButton.tsx"
+      ],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 80,
+        "missingItems": ["缺少模块文档"]
+      }
+    },
+    {
+      "path": "src/features/syney/ReportDetail",
+      "name": "ReportDetail",
+      "description": "库存报告明细",
+      "entryPoints": ["index.tsx"],
+      "apis": [
+        "useDetail.ts",
+        "useDeleteDetail.ts",
+        "useUpdateDetail.ts"
+      ],
+      "components": ["DetailTable.tsx", "DetailForm.tsx"],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 80,
+        "missingItems": ["缺少模块文档"]
+      }
+    },
+    {
+      "path": "src/features/syney/SpecList",
+      "name": "SpecList",
+      "description": "踏板规格管理",
+      "entryPoints": ["index.tsx"],
+      "apis": [
+        "useSyneySpecs.ts",
+        "useSyneySpec.ts",
+        "useCreateSpec.ts",
+        "useUpdateSyneySpec.ts",
+        "useDeleteSyneySpecs.ts"
+      ],
+      "components": [
+        "SpecTable.tsx",
+        "SpecForm.tsx",
+        "PartNoInput.tsx"
+      ],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 80,
+        "missingItems": ["缺少模块文档"]
+      }
+    },
+    {
+      "path": "src/services",
+      "name": "Services",
+      "description": "数据访问层 - Supabase API 封装",
+      "entryPoints": ["supabase.ts"],
+      "apis": [
+        "apiSyneyPos.ts",
+        "apiSyneyPo.ts",
+        "apiSyneySpecs.ts",
+        "apiSyneyStoreReport.ts",
+        "apiSyneyStoreReports.ts",
+        "apiSyneySerialNo.ts"
+      ],
+      "types": ["database.types.ts", "types.ts"],
+      "hasTests": false,
+      "hasDocs": true,
+      "coverage": {
+        "scanned": true,
+        "percentage": 100,
+        "missingItems": []
+      }
+    },
+    {
+      "path": "src/ui",
+      "name": "UI",
+      "description": "通用 UI 组件库",
+      "entryPoints": ["AppLayout.tsx"],
+      "components": [
+        "AppLayout.tsx",
+        "AppHeader.tsx",
+        "MainMenu.tsx",
+        "AppLogo.tsx",
+        "AddButton.tsx",
+        "EditButton.tsx",
+        "DeleteButton.tsx",
+        "PrintButton.tsx",
+        "ErrorBoundary.tsx",
+        "Loading.tsx",
+        "AppPagination.tsx",
+        "DarkModeButton.tsx"
+      ],
+      "hasTests": false,
+      "hasDocs": true,
+      "coverage": {
+        "scanned": true,
+        "percentage": 100,
+        "missingItems": []
+      }
+    },
+    {
+      "path": "src/utils",
+      "name": "Utils",
+      "description": "工具函数库",
+      "files": ["errorHandler.ts", "syney.ts", "helps.ts", "excelUtils.ts"],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 70,
+        "missingItems": ["缺少模块文档", "缺少单元测试"]
+      }
+    },
+    {
+      "path": "src/store",
+      "name": "Store",
+      "description": "全局状态管理 - Zustand",
+      "files": ["index.ts"],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 70,
+        "missingItems": ["缺少模块文档"]
+      }
+    },
+    {
+      "path": "src/pages",
+      "name": "Pages",
+      "description": "路由页面容器",
+      "files": [
+        "Dashboard.tsx",
+        "Login.tsx",
+        "PageNotFound.tsx",
+        "SyneyPoList.tsx",
+        "SyneyPoDetail.tsx",
+        "SyneySpecList.tsx",
+        "SyneyStoreReportList.tsx",
+        "SyneyStoreReportDetail.tsx",
+        "SyneySetting.tsx"
+      ],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 70,
+        "missingItems": ["缺少模块文档"]
+      }
+    },
+    {
+      "path": "src/hooks",
+      "name": "Hooks",
+      "description": "自定义 Hooks",
+      "files": ["useLocalStorage.ts"],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 70,
+        "missingItems": ["缺少模块文档"]
+      }
+    },
+    {
+      "path": "src/contexts",
+      "name": "Contexts",
+      "description": "React Context",
+      "files": ["DarkModeContext.tsx"],
+      "hasTests": false,
+      "hasDocs": false,
+      "coverage": {
+        "scanned": true,
+        "percentage": 70,
+        "missingItems": ["缺少模块文档"]
+      }
+    }
+  ],
+  "rootFiles": [
+    "package.json",
+    "tsconfig.json",
+    "vite.config.ts",
+    "tailwind.config.js",
+    "eslint.config.js",
+    ".prettierrc",
+    "README.md",
+    "CLAUDE.md"
+  ],
+  "ignorePatterns": [
+    "node_modules/**",
+    "dist/**",
+    ".git/**",
+    ".github/**",
+    ".next/**",
+    "build/**",
+    "__pycache__/**",
+    "*.lock",
+    "*.log",
+    "*.bin",
+    "*.pdf",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.mp4",
+    "*.zip",
+    "*.tar",
+    "*.gz",
+    "*.local",
+    ".env"
+  ],
+  "statistics": {
+    "totalFiles": 108,
+    "scannedFiles": 108,
+    "coveragePercentage": 85,
+    "modulesWithDocs": 3,
+    "modulesWithoutDocs": 9,
+    "modulesWithTests": 0
+  },
+  "gaps": [
+    {
+      "module": "src/features/syney/PoDetail",
+      "issue": "缺少模块级 CLAUDE.md 文档"
+    },
+    {
+      "module": "src/features/syney/ReportList",
+      "issue": "缺少模块级 CLAUDE.md 文档"
+    },
+    {
+      "module": "src/features/syney/ReportDetail",
+      "issue": "缺少模块级 CLAUDE.md 文档"
+    },
+    {
+      "module": "src/features/syney/SpecList",
+      "issue": "缺少模块级 CLAUDE.md 文档"
+    },
+    {
+      "module": "src/utils",
+      "issue": "缺少模块级 CLAUDE.md 文档和单元测试"
+    },
+    {
+      "module": "src/store",
+      "issue": "缺少模块级 CLAUDE.md 文档"
+    },
+    {
+      "module": "src/pages",
+      "issue": "缺少模块级 CLAUDE.md 文档"
+    },
+    {
+      "module": "src/hooks",
+      "issue": "缺少模块级 CLAUDE.md 文档"
+    },
+    {
+      "module": "src/contexts",
+      "issue": "缺少模块级 CLAUDE.md 文档"
+    },
+    {
+      "module": "全局",
+      "issue": "缺少单元测试框架配置（推荐 Vitest）"
+    },
+    {
+      "module": "全局",
+      "issue": "缺少 .env.example 环境变量模板文件"
+    }
+  ],
+  "nextSteps": [
+    "为 src/features/syney/SpecList 模块生成 CLAUDE.md 文档",
+    "为 src/features/syney/ReportList 模块生成 CLAUDE.md 文档",
+    "为 src/features/syney/ReportDetail 模块生成 CLAUDE.md 文档",
+    "为 src/features/syney/PoDetail 模块生成 CLAUDE.md 文档",
+    "为 src/utils 模块添加单元测试",
+    "配置 Vitest 测试框架",
+    "创建 .env.example 环境变量模板文件"
+  ],
+  "truncated": false
+}

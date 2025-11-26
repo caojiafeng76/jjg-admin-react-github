@@ -22,6 +22,7 @@ import ExportPDFButton from './ExportPDFButton'
 
 export default function ReportList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [specsLoading, setSpecsLoading] = useState(false)
 
   const { tableSelectedKeys, isLoading: isCreating } = useAppStore()
   const { selectedReportsLoading } = useSelectedReports()
@@ -92,11 +93,11 @@ export default function ReportList() {
         <Modal
           title="创建对账单"
           open={isModalOpen}
-          confirmLoading={isCreating}
+          confirmLoading={isCreating || specsLoading}
           onOk={handleOk}
           onCancel={handleCancel}
         >
-          <ReportForm ref={reportFormRef} handleCancel={handleCancel} />
+          <ReportForm ref={reportFormRef} handleCancel={handleCancel} onSpecsLoadingChange={setSpecsLoading} />
         </Modal>
       </div>
     </div>
