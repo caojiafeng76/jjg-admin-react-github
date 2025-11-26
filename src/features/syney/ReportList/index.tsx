@@ -61,7 +61,7 @@ export default function ReportList() {
     })
   }
 
-  function handlePrint() {
+  async function handlePrint() {
     if (tableSelectedKeys.length === 0) {
       message.warning('请选择至少一条数据')
       return
@@ -74,7 +74,7 @@ export default function ReportList() {
     }
 
     // 调用打印函数，根据返回值显示消息
-    const success = print()
+    const success = await print()
     if (success) {
       messageApi.success('PDF 文件生成成功')
     } else {

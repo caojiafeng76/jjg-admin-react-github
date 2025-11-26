@@ -47,19 +47,21 @@ export async function getSyneyStoreReport(No: string) {
 }
 
 export async function getSelectedSyneyStoreReports(Nos: string[]) {
-  const itemsQuery = supabase
-    .from('syney-store-report-items')
-    .select(`*`)
-    .in('No', Nos)
-    .order('No')
+  // 使用 Promise.all 并行查询，提升性能
+  const [itemsResult, reportsResult] = await Promise.all([
+    supabase
+      .from('syney-store-report-items')
+      .select('*')
+      .in('No', Nos)
+      .order('No'),
+    supabase
+      .from('syney-store-reports')
+      .select('*')
+      .in('No', Nos)
+  ])
 
-  const reportsQuery = supabase
-    .from('syney-store-reports')
-    .select(`*`)
-    .in('No', Nos)
-
-  const { data: itemsFromRepo, error: itemsError } = await itemsQuery
-  const { data: reports, error: reportsError } = await reportsQuery
+  const { data: itemsFromRepo, error: itemsError } = itemsResult
+  const { data: reports, error: reportsError } = reportsResult
 
   if (itemsError) {
     throw handleApiError(itemsError, '选择的入库单获取失败')
@@ -69,27 +71,38 @@ export async function getSelectedSyneyStoreReports(Nos: string[]) {
     throw handleApiError(reportsError, '选择的入库单获取失败')
   }
 
-  const map = new Map<
-    string,
-    { items: ISyneyItem[]; totalAmount: number; createdAt: string }
-  >(
-    Nos.map((No) => {
-      const items = itemsFromRepo?.filter((item) => item.No === No)
-
-      const report = reports?.find((report) => report.No === No)
-
-      return [
-        No,
-        {
-          items: items!,
-          totalAmount: report?.TotalAmount ?? 0,
-          createdAt: report?.created_at ?? '',
-        },
-      ]
-    }),
+  // 使用 Map 提升查找性能，避免重复过滤和查找
+  const reportsMap = new Map(
+    reports?.map(report => [report.No, report])
   )
 
-  return map
+  const itemsGroupMap = new Map<string, ISyneyItem[]>()
+
+  // 一次性分组，提升性能
+  itemsFromRepo?.forEach(item => {
+    const items = itemsGroupMap.get(item.No || '') || []
+    items.push(item)
+    itemsGroupMap.set(item.No || '', items)
+  })
+
+  // 构建最终结果Map
+  const result = new Map<
+    string,
+    { items: ISyneyItem[]; totalAmount: number; createdAt: string }
+  >()
+
+  Nos.forEach(No => {
+    const items = itemsGroupMap.get(No) || []
+    const report = reportsMap.get(No)
+
+    result.set(No, {
+      items,
+      totalAmount: report?.TotalAmount ?? 0,
+      createdAt: report?.created_at ?? '',
+    })
+  })
+
+  return result
 }
 
 export async function createSyneyStoreReport({
