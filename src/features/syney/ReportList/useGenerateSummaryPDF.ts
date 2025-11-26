@@ -1,11 +1,17 @@
-import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 
 import { useSelectedReports } from './useSelectedReports'
-import myFont from '@/assets/myFont'
-import { formatNumber } from '@/utils/helps'
 import { useAppStore } from '@/store'
+
+// 导入优化后的工具函数和常量
+import {
+  initializePDF,
+  createTableStyles,
+  generateSummaryTableData,
+  addDocumentTitle,
+} from '@/utils/pdfUtils'
+import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
 
 export function useGenerateSummaryPDF() {
   const { tableSelectedKeys } = useAppStore()
@@ -18,62 +24,59 @@ export function useGenerateSummaryPDF() {
   function generateSummaryPDF() {
     // 如果数据还在加载，返回 false
     if (selectedReportsLoading) {
+      console.warn('数据还在加载中，请稍后再试')
       return false
     }
 
     // 如果没有数据，返回 false
     if (!selectedMap || selectedMap.size === 0) {
+      console.warn('没有选中的入库单数据')
       return false
     }
 
-    const doc = new jsPDF({ orientation: 'l' })
-    // 设置中文字体
-    doc.addFileToVFS('msyh.ttf', myFont)
-    doc.addFont('msyh.ttf', 'myFont', 'normal')
-    doc.setFont('myFont')
+    try {
+      // 初始化 PDF 文档
+      const doc = initializePDF()
 
-    const arr: { No: string; totalAmount: number }[] = []
+      // 准备汇总数据
+      const summaryData = Array.from(selectedMap.entries()).map(([No, data]) => ({
+        No,
+        totalAmount: data.totalAmount,
+      }))
 
-    selectedMap?.forEach((data, No) => {
-      arr.push({ No, totalAmount: data.totalAmount })
-    })
+      // 生成表格数据（使用优化后的函数）
+      const tableData = generateSummaryTableData(summaryData)
 
-    autoTable(doc, {
-      head: [['序号', '入库单号', '金额']],
-      body: arr
-        ?.map((item, index) => {
-          return [index + 1 + '', item.No, formatNumber(item.totalAmount)]
-        })
-        .concat([
-          [
-            '*',
-            '合计',
-            `${formatNumber(arr.map((item) => item.totalAmount).reduce((a, b) => a + b, 0))}`,
-          ],
-        ]),
-      margin: { top: 35 },
-      headStyles: { fillColor: '#000', textColor: '#fff' },
-      styles: {
-        font: 'myFont',
-        cellPadding: { top: 1, right: 1, bottom: 1, left: 1 },
-        halign: 'center',
-        valign: 'middle',
-      },
-      theme: 'grid',
-      willDrawPage: (dataOfPage) => {
-        doc.setFontSize(20)
-        doc.text(
-          `对账单【湖州银都铝业科技有限公司】-- ${format(new Date(), 'yyyy-MM-dd')}`,
-          (dataOfPage.cursor?.x ?? 0) + 40,
-          (dataOfPage.cursor?.y ?? 0) - 22,
-        )
-      },
-    })
+      // 生成表格
+      autoTable(doc, {
+        head: [Array.from(SUMMARY_TABLE_COLUMNS)],
+        body: tableData,
+        ...createTableStyles(),
+        willDrawPage: (dataOfPage) => {
+          // 添加标题
+          const title = `对账单【湖州银都铝业科技有限公司】-- ${format(
+            new Date(),
+            'yyyy-MM-dd'
+          )}`
+          addDocumentTitle(
+            doc,
+            title,
+            (dataOfPage.cursor?.x ?? 0) + 40,
+            (dataOfPage.cursor?.y ?? 0) - 22
+          )
+        },
+      })
 
-    doc.output('dataurlnewwindow', {
-      filename: `new`,
-    })
-    return true // 返回 true 表示生成成功
+      // 输出 PDF
+      doc.output('dataurlnewwindow', {
+        filename: `对账单汇总_${new Date().toISOString().slice(0, 10)}.pdf`,
+      })
+
+      return true // 返回 true 表示生成成功
+    } catch (error) {
+      console.error('生成汇总 PDF 时发生错误:', error)
+      return false
+    }
   }
 
   return {
