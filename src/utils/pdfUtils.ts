@@ -19,27 +19,6 @@ import { formatNumber } from './helps'
 import { ISyneyItem } from '@services/types'
 
 /**
- * 安全格式化日期
- * @param date 日期字符串或对象
- * @param formatStr 格式化字符串
- * @returns 格式化后的日期或空字符串
- */
-export function safeFormatDate(
-  date: string | number | Date | null | undefined,
-  formatStr: string = 'yyyy-MM-dd',
-): string {
-  if (!date) return ''
-  try {
-    const d = new Date(date)
-    if (isNaN(d.getTime())) return ''
-    return format(d, formatStr)
-  } catch (e) {
-    console.warn('Date format error:', e)
-    return ''
-  }
-}
-
-/**
  * 初始化 PDF 文档
  * @param orientation 页面方向，默认横向
  * @returns 初始化后的 jsPDF 实例
@@ -256,6 +235,14 @@ export async function processBatchWithProgress<T, R>(
 }
 
 /**
+ * 在新窗口中打开 PDF
+ * @param doc PDF 文档实例
+ */
+export function openPDFInNewWindow(doc: jsPDF) {
+  window.open(doc.output('bloburl'), '_blank')
+}
+
+/**
  * 生成表格表头信息
  * @param doc PDF 文档实例
  * @param reportNo 报告编号
@@ -272,18 +259,8 @@ export function addTableHeader(
     theme: 'plain',
     headStyles: TABLE_CONFIG.HEAD_STYLES,
     head: LAYOUT_CONFIG.HEADER_INFO.HEAD,
-    body: [[reportNo, safeFormatDate(createdAt)]],
+    body: [[reportNo, format(new Date(createdAt), 'yyyy-MM-dd')]],
   })
-}
-
-/**
- * 在新窗口打开 PDF
- * @param doc PDF 文档实例
- */
-export function openPDFInNewWindow(doc: jsPDF) {
-  const pdfBlob = doc.output('blob')
-  const blobUrl = URL.createObjectURL(pdfBlob)
-  window.open(blobUrl, '_blank')
 }
 
 /**
@@ -303,4 +280,29 @@ export function generateSummaryTableData(
       formatNumberWithCache(item.totalAmount),
     ])
     .concat([['*', '合计', formatNumberWithCache(totalAmount)]])
+}
+
+/**
+ * 批量处理大数据量
+ * @param array 要处理的数组
+ * @param batchSize 批次大小
+ * @param processor 处理函数
+ */
+export async function processBatch<T, R>(
+  array: T[],
+  batchSize: number,
+  processor: (batch: T[]) => Promise<R[]>,
+): Promise<R[]> {
+  const results: R[] = []
+
+  for (let i = 0; i < array.length; i += batchSize) {
+    const batch = array.slice(i, i + batchSize)
+    const batchResults = await processor(batch)
+    results.push(...batchResults)
+
+    // 让出控制权，避免阻塞UI
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  }
+
+  return results
 }
