@@ -149,7 +149,7 @@ export function usePrintDecomposition() {
 
       const xCoords = [
         50, 62, 74, 89, 98, 110, 125, 134, 146, 161, 170, 182, 197, 206, 220,
-        242, 256,
+        242, 257, 270,
       ]
       xCoords.forEach((x) => doc.line(x, vLineStart, x, vLineEnd))
 
