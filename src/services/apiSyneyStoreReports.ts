@@ -110,9 +110,24 @@ export async function createSyneyStoreReport({
     throw handleApiError(reportError, '入库单创建失败')
   }
 
+  // 过滤掉数据库中不存在的字段（PartCode、PartModel、PartName2）
+  const filteredItems = items.map((item) => ({
+    No: item.No,
+    ParamSpec: item.ParamSpec,
+    PartName: item.PartName,
+    PartNo: item.PartNo,
+    Qty: item.Qty,
+    Remark: item.Remark,
+    SONo: item.SONo,
+    Spec: item.Spec,
+    TaxTotalPrice: item.TaxTotalPrice,
+    TaxUnitPrice: item.TaxUnitPrice,
+    Unit: item.Unit,
+  }))
+
   const { data, error } = await supabase
     .from('syney-store-report-items')
-    .insert(items)
+    .insert(filteredItems)
     .select()
 
   if (error) {

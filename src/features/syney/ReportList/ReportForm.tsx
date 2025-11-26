@@ -13,6 +13,7 @@ import { getItemsWithParamSpec, jsonToArray, distinctItems } from '@utils/syney'
 
 type ReportFormProps = {
   handleCancel: () => void
+  onSpecsLoadingChange: (loading: boolean) => void
 }
 
 const layout = {
@@ -21,7 +22,7 @@ const layout = {
 }
 
 const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
-  ({ handleCancel }, ref) => {
+  ({ handleCancel, onSpecsLoadingChange }, ref) => {
     const { setIsLoading } = useAppStore()
 
     const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
@@ -32,26 +33,24 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
     const [form] = Form.useForm<ISyneyStoreReport>()
 
     const onFinish = (values: ISyneyStoreReport) => {
-      if (!specsLoading) {
-        const No = values.No
+      const No = values.No
 
-        const items = getItemsWithParamSpec(
-          jsonToArray(values.Detail || '') || [],
-          syneySpecs || [],
-        )
-        let TotalAmount = items
-          .map((item) => item.Qty! * Number(item.TaxUnitPrice?.toFixed(2)))
-          .reduce((acc, price) => acc + price!, 0)
+      const items = getItemsWithParamSpec(
+        jsonToArray(values.Detail || '') || [],
+        syneySpecs || [],
+      )
+      let TotalAmount = items
+        .map((item) => item.Qty! * Number(item.TaxUnitPrice?.toFixed(2)))
+        .reduce((acc, price) => acc + price!, 0)
 
-        const itemsDistinct = distinctItems(items as ISyneyItem[])
+      const itemsDistinct = distinctItems(items as ISyneyItem[])
 
-        TotalAmount = Math.round(TotalAmount * 100) / 100
+      TotalAmount = Math.round(TotalAmount * 100) / 100
 
-        createReport(
-          { No, TotalAmount, items: itemsDistinct },
-          { onSettled: () => handleCancel() },
-        )
-      }
+      createReport(
+        { No, TotalAmount, items: itemsDistinct },
+        { onSettled: () => handleCancel() },
+      )
     }
 
     useImperativeHandle(ref, () => {
@@ -65,6 +64,10 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
     useEffect(() => {
       setIsLoading(isCreating)
     }, [isCreating, setIsLoading])
+
+    useEffect(() => {
+      onSpecsLoadingChange(specsLoading)
+    }, [specsLoading, onSpecsLoadingChange])
 
     return (
       <>
