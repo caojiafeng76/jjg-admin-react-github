@@ -19,6 +19,27 @@ import { formatNumber } from './helps'
 import { ISyneyItem } from '@services/types'
 
 /**
+ * 安全格式化日期
+ * @param date 日期字符串或对象
+ * @param formatStr 格式化字符串
+ * @returns 格式化后的日期或空字符串
+ */
+export function safeFormatDate(
+  date: string | number | Date | null | undefined,
+  formatStr: string = 'yyyy-MM-dd',
+): string {
+  if (!date) return ''
+  try {
+    const d = new Date(date)
+    if (isNaN(d.getTime())) return ''
+    return format(d, formatStr)
+  } catch (e) {
+    console.warn('Date format error:', e)
+    return ''
+  }
+}
+
+/**
  * 初始化 PDF 文档
  * @param orientation 页面方向，默认横向
  * @returns 初始化后的 jsPDF 实例
@@ -28,7 +49,11 @@ export function initializePDF(orientation: 'p' | 'l' = 'l') {
 
   // 设置中文字体
   doc.addFileToVFS(FONT_CONFIG.FONT_NAME, myFont)
-  doc.addFont(FONT_CONFIG.FONT_NAME, FONT_CONFIG.FONT_FAMILY, FONT_CONFIG.FONT_STYLE)
+  doc.addFont(
+    FONT_CONFIG.FONT_NAME,
+    FONT_CONFIG.FONT_FAMILY,
+    FONT_CONFIG.FONT_STYLE,
+  )
   doc.setFont(FONT_CONFIG.FONT_FAMILY)
 
   return doc
@@ -104,7 +129,10 @@ export function processTableData(items: ISyneyItem[]): string[][] {
  * @param totalAmount 总金额
  * @returns 总计行数据
  */
-export function calculateTotals(items: ISyneyItem[], totalAmount?: number): string[] {
+export function calculateTotals(
+  items: ISyneyItem[],
+  totalAmount?: number,
+): string[] {
   const totalQty = items.reduce((sum, item) => (sum || 0) + (item.Qty || 0), 0)
 
   return [
@@ -131,7 +159,7 @@ export function addDocumentTitle(
   doc: jsPDF,
   title: string,
   x: number = LAYOUT_CONFIG.TITLE.X_OFFSET,
-  y: number = LAYOUT_CONFIG.TITLE.Y_OFFSET
+  y: number = LAYOUT_CONFIG.TITLE.Y_OFFSET,
 ) {
   doc.setFontSize(LAYOUT_CONFIG.TITLE.FONT_SIZE)
   doc.text(title, x, y)
@@ -143,13 +171,21 @@ export function addDocumentTitle(
  * @param currentPage 当前页码
  * @param totalPages 总页数
  */
-export function addPageNumber(doc: jsPDF, currentPage: number, totalPages: number) {
+export function addPageNumber(
+  doc: jsPDF,
+  currentPage: number,
+  totalPages: number,
+) {
   const text = `第${currentPage}页，共${totalPages}页`
   const pageSize = doc.internal.pageSize
   const pageWidth =
-    typeof pageSize.getWidth === 'function' ? pageSize.getWidth() : pageSize.width
+    typeof pageSize.getWidth === 'function'
+      ? pageSize.getWidth()
+      : pageSize.width
   const pageHeight =
-    typeof pageSize.getHeight === 'function' ? pageSize.getHeight() : pageSize.height
+    typeof pageSize.getHeight === 'function'
+      ? pageSize.getHeight()
+      : pageSize.height
   const { X_OFFSET = -150, Y_OFFSET = 10 } = LAYOUT_CONFIG.PAGE_NUMBER
 
   const x = pageWidth + X_OFFSET
@@ -168,17 +204,18 @@ export function addPageNumber(doc: jsPDF, currentPage: number, totalPages: numbe
 export function generateFilename(
   type: 'detail' | 'summary',
   count: number,
-  reportNos?: string[]
+  reportNos?: string[],
 ): string {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
-  const prefix = FILENAME_CONFIG.PREFIX[type.toUpperCase() as 'DETAIL' | 'SUMMARY'] || FILENAME_CONFIG.PREFIX.SUMMARY
+  const prefix =
+    FILENAME_CONFIG.PREFIX[type.toUpperCase() as 'DETAIL' | 'SUMMARY'] ||
+    FILENAME_CONFIG.PREFIX.SUMMARY
   const suffix = FILENAME_CONFIG.SUFFIX
 
   if (type === 'detail' && reportNos && reportNos.length > 0) {
     // 详细对账单：包含对账单号
-    const reportNoStr = reportNos.length === 1
-      ? reportNos[0]
-      : `${reportNos.length}条记录`
+    const reportNoStr =
+      reportNos.length === 1 ? reportNos[0] : `${reportNos.length}条记录`
     return `${prefix}_${reportNoStr}_${timestamp}${suffix}`
   } else {
     // 汇总表：包含数量
@@ -197,7 +234,7 @@ export async function processBatchWithProgress<T, R>(
   array: T[],
   batchSize: number,
   processor: (batch: T[]) => Promise<R[]>,
-  onProgress?: (processed: number, total: number) => void
+  onProgress?: (processed: number, total: number) => void,
 ): Promise<R[]> {
   const results: R[] = []
   const total = array.length
@@ -212,7 +249,7 @@ export async function processBatchWithProgress<T, R>(
     onProgress?.(processed, total)
 
     // 让出控制权，避免阻塞UI
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
   }
 
   return results
@@ -224,14 +261,18 @@ export async function processBatchWithProgress<T, R>(
  * @param reportNo 报告编号
  * @param createdAt 创建时间
  */
-export function addTableHeader(doc: jsPDF, reportNo: string, createdAt: string) {
+export function addTableHeader(
+  doc: jsPDF,
+  reportNo: string,
+  createdAt: string,
+) {
   autoTable(doc, {
     margin: LAYOUT_CONFIG.HEADER_INFO.MARGIN,
     styles: TABLE_CONFIG.STYLES,
     theme: 'plain',
     headStyles: TABLE_CONFIG.HEAD_STYLES,
     head: LAYOUT_CONFIG.HEADER_INFO.HEAD,
-    body: [[reportNo, format(new Date(createdAt), 'yyyy-MM-dd')]],
+    body: [[reportNo, safeFormatDate(createdAt)]],
   })
 }
 
@@ -240,7 +281,9 @@ export function addTableHeader(doc: jsPDF, reportNo: string, createdAt: string) 
  * @param data 汇总数据数组
  * @returns 表格数据
  */
-export function generateSummaryTableData(data: Array<{ No: string; totalAmount: number }>) {
+export function generateSummaryTableData(
+  data: Array<{ No: string; totalAmount: number }>,
+) {
   const totalAmount = data.reduce((sum, item) => sum + item.totalAmount, 0)
 
   return data
@@ -249,32 +292,5 @@ export function generateSummaryTableData(data: Array<{ No: string; totalAmount: 
       item.No,
       formatNumberWithCache(item.totalAmount),
     ])
-    .concat([
-      ['*', '合计', formatNumberWithCache(totalAmount)],
-    ])
-}
-
-/**
- * 批量处理大数据量
- * @param array 要处理的数组
- * @param batchSize 批次大小
- * @param processor 处理函数
- */
-export async function processBatch<T, R>(
-  array: T[],
-  batchSize: number,
-  processor: (batch: T[]) => Promise<R[]>
-): Promise<R[]> {
-  const results: R[] = []
-
-  for (let i = 0; i < array.length; i += batchSize) {
-    const batch = array.slice(i, i + batchSize)
-    const batchResults = await processor(batch)
-    results.push(...batchResults)
-
-    // 让出控制权，避免阻塞UI
-    await new Promise(resolve => setTimeout(resolve, 0))
-  }
-
-  return results
+    .concat([['*', '合计', formatNumberWithCache(totalAmount)]])
 }
