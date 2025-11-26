@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { App } from 'antd'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -14,7 +16,8 @@ import {
   addDocumentTitle,
   addPageNumber,
   addTableHeader,
-  processBatch,
+  processBatchWithProgress,
+  generateFilename,
 } from '@/utils/pdfUtils'
 import { TABLE_CONFIG, TABLE_COLUMNS } from '@/utils/pdfConstants'
 
@@ -22,14 +25,14 @@ import { TABLE_CONFIG, TABLE_COLUMNS } from '@/utils/pdfConstants'
  * 生成单个报告的 PDF 页面
  * @param doc PDF 文档实例
  * @param reportNo 报告编号
- * @param data 报告数据
-  */
+ * @param reportData 报告数据
+ */
 function generateReportPage(
   doc: jsPDF,
   reportNo: string,
-  data: { items: ISyneyItem[]; totalAmount: number; createdAt: string }
+  reportData: { items: ISyneyItem[]; totalAmount: number; createdAt: string }
 ) {
-  const totalPage = Math.ceil((data.items.length + 1) / TABLE_CONFIG.ROWS_PER_PAGE)
+  const totalPage = Math.ceil((reportData.items.length + 1) / TABLE_CONFIG.ROWS_PER_PAGE)
 
   // 添加新页面并设置为当前页面
   doc.addPage()
@@ -37,8 +40,8 @@ function generateReportPage(
   doc.setPage(currentPageIndex)
 
   // 处理表格数据（使用优化后的函数）
-  const tableData = processTableData(data.items)
-  const totals = calculateTotals(data.items, data.totalAmount)
+  const tableData = processTableData(reportData.items)
+  const totals = calculateTotals(reportData.items, reportData.totalAmount)
   const body = tableData.concat([totals])
 
   // 生成表格
@@ -46,17 +49,17 @@ function generateReportPage(
     head: [Array.from(TABLE_COLUMNS)],
     body,
     ...createTableStyles(),
-    willDrawPage: (dataOfPage) => {
-      // 添加标题
+    willDrawPage: (tableData) => {
+      // 添加标题（使用原始的 cursor 偏移方式）
       addDocumentTitle(
         doc,
         '西尼对账单',
-        (dataOfPage.cursor?.x ?? 0) + 120,
-        (dataOfPage.cursor?.y ?? 0) - 22
+        (tableData.cursor?.x ?? 0) + 120,
+        (tableData.cursor?.y ?? 0) - 22
       )
 
       // 添加表头信息
-      addTableHeader(doc, reportNo, data.createdAt)
+      addTableHeader(doc, reportNo, reportData.createdAt)
     },
     didDrawPage: (dataOfPage) => {
       // 添加页码
@@ -69,16 +72,18 @@ function generateReportPage(
  * 批量生成报告（处理大数据量优化）
  * @param doc PDF 文档实例
  * @param selectedMap 选中的报告数据
+ * @param onProgress 进度回调
  */
 async function generateAllReports(
   doc: jsPDF,
-  selectedMap: Map<string, { items: ISyneyItem[]; totalAmount: number; createdAt: string }>
+  selectedMap: Map<string, { items: ISyneyItem[]; totalAmount: number; createdAt: string }>,
+  onProgress?: (processed: number, total: number) => void
 ) {
   const reports = Array.from(selectedMap.entries())
 
   // 如果数据量很大，使用批次处理
   if (reports.length > 50) {
-    await processBatch(
+    await processBatchWithProgress(
       reports,
       10, // 每批处理10个报告
       async (batch) => {
@@ -86,61 +91,95 @@ async function generateAllReports(
           generateReportPage(doc, reportNo, data)
         })
         return []
-      }
+      },
+      onProgress
     )
   } else {
-    // 数据量不大，直接处理
-    reports.forEach(([reportNo, data]) => {
+    // 数据量不大，直接处理但仍有进度回调
+    const total = reports.length
+    let processed = 0
+
+    for (const [reportNo, data] of reports) {
       generateReportPage(doc, reportNo, data)
-    })
+      processed++
+      onProgress?.(processed, total)
+
+      // 让出控制权
+      await new Promise(resolve => setTimeout(resolve, 0))
+    }
   }
 }
 
 export function useGenerateSyneyStoreReportPDF() {
   const { tableSelectedKeys } = useAppStore()
+  const { message } = App.useApp()
 
   // 只在有选中项时才查询数据
   const { selectedMap, selectedReportsLoading } = useSelectedReports(
     tableSelectedKeys.length > 0
   )
 
+  const [progress, setProgress] = useState(0)
+  const [isGenerating, setIsGenerating] = useState(false)
+
   async function print() {
-    // 如果数据还在加载，返回 false
+    // 改进错误处理
     if (selectedReportsLoading) {
-      console.warn('数据还在加载中，请稍后再试')
+      message.warning('数据加载中，请稍候重试')
       return false
     }
 
-    // 如果没有数据，返回 false
     if (!selectedMap || selectedMap.size === 0) {
-      console.warn('没有选中的入库单数据')
+      message.warning('请选择至少一条对账单数据')
       return false
     }
 
     try {
-      // 初始化 PDF 文档（使用优化后的函数）
+      setIsGenerating(true)
+      setProgress(0)
+
+      // 初始化 PDF 文档
       const doc = initializePDF()
 
-      // 生成所有报告页面
-      await generateAllReports(doc, selectedMap)
+      // 生成所有报告页面（带进度回调）
+      const reportNos = Array.from(selectedMap.keys())
+      await generateAllReports(
+        doc,
+        selectedMap,
+        (processed, total) => {
+          setProgress(Math.round((processed / total) * 100))
+          message.loading(`正在生成PDF: ${processed}/${total}`, 0)
+        }
+      )
 
       // 删除第一页（空白页）
       doc.deletePage(1)
 
+      // 生成智能文件名
+      const filename = generateFilename('detail', selectedMap.size, reportNos)
+
       // 输出 PDF
-      doc.output('dataurlnewwindow', {
-        filename: `西尼对账单_${new Date().toISOString().slice(0, 10)}.pdf`,
-      })
+      doc.output('dataurlnewwindow', { filename })
+
+      setProgress(100)
+      message.destroy() // 销毁加载提示
+      message.success(`PDF生成完成: ${filename}`)
 
       return true // 返回 true 表示打印成功
     } catch (error) {
       console.error('生成 PDF 时发生错误:', error)
+      message.destroy()
+      message.error(error instanceof Error ? error.message : 'PDF生成失败，请重试')
       return false
+    } finally {
+      setIsGenerating(false)
+      setProgress(0)
     }
   }
 
   return {
     print,
-    isLoading: selectedReportsLoading,
+    isLoading: selectedReportsLoading || isGenerating,
+    progress,
   }
 }

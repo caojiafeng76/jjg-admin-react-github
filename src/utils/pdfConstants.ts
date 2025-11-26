@@ -112,3 +112,33 @@ export const CACHE_CONFIG = {
   // 清理缓存的阈值
   CACHE_CLEANUP_THRESHOLD: 800,
 }
+
+// 报告打印布局配置
+export const REPORT_LAYOUT_CONFIG = {
+  // 标题偏移量
+  TITLE_OFFSET_X: 40,
+  TITLE_OFFSET_Y: 22,
+
+  // 对账单标题偏移量
+  DETAIL_TITLE_OFFSET_X: 120,
+  DETAIL_TITLE_OFFSET_Y: 22,
+
+  // 页码偏移量
+  PAGE_NUMBER_X_OFFSET: -150,
+  PAGE_NUMBER_Y_OFFSET: 10,
+}
+
+// 文件名生成配置
+export const FILENAME_CONFIG = {
+  // 时间戳格式
+  TIMESTAMP_FORMAT: 'yyyy-MM-dd_HH-mm-ss',
+
+  // 文件名前缀
+  PREFIX: {
+    DETAIL: '西尼对账单',
+    SUMMARY: '对账单汇总',
+  },
+
+  // 文件名后缀
+  SUFFIX: '.pdf',
+}
