@@ -1,15 +1,31 @@
 import { utils, writeFile } from 'xlsx'
-import { useSelectedReports } from './useSelectedReports'
 import { format } from 'date-fns'
 
+import { useSelectedReports } from './useSelectedReports'
+import { useAppStore } from '@/store'
+
 export function useExportReportsAsExcel() {
-  const wb = utils.book_new()
+  const { tableSelectedKeys } = useAppStore()
 
-  const { selectedMap, selectedReportsLoading } = useSelectedReports()
+  // 只在有选中项时才查询数据
+  const { selectedMap, selectedReportsLoading } = useSelectedReports(
+    tableSelectedKeys.length > 0
+  )
 
-  const totalData: { 序号: string; 入库单号: string; 金额: number }[] = []
+  function saveReportsAsExcel() {
+    // 如果数据还在加载，返回 false 表示未导出
+    if (selectedReportsLoading) {
+      return false
+    }
 
-  if (!selectedReportsLoading) {
+    // 如果没有数据，返回 false 表示未导出
+    if (!selectedMap || selectedMap.size === 0) {
+      return false
+    }
+
+    const wb = utils.book_new()
+    const totalData: { 序号: string; 入库单号: string; 金额: number }[] = []
+
     selectedMap?.forEach((data, No) => {
       totalData.push({
         序号: totalData.length + 1 + '',
@@ -40,11 +56,13 @@ export function useExportReportsAsExcel() {
     })
 
     utils.book_append_sheet(wb, utils.json_to_sheet(totalData || []), '汇总')
-  }
 
-  function saveReportsAsExcel() {
     writeFile(wb, `入库单明细--${format(new Date(), 'yyyy-MM-dd')}.xlsx`)
+    return true // 返回 true 表示导出成功
   }
 
-  return { saveReportsAsExcel }
+  return {
+    saveReportsAsExcel,
+    isLoading: selectedReportsLoading,
+  }
 }

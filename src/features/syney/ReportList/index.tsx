@@ -1,4 +1,4 @@
-import { message, Modal } from 'antd'
+import { message, Modal, App } from 'antd'
 import { useRef, useState } from 'react'
 
 import { ISyneyStoreReportFormRef } from '@/types'
@@ -8,7 +8,6 @@ import AddButton from '@ui/AddButton'
 import DeleteButton from '@ui/DeleteButton'
 import ReportForm from '@syney/ReportList/ReportForm'
 import ReportTable from '@syney/ReportList/ReportTable'
-import { useSelectedReports } from './useSelectedReports'
 import PrintButton from '@/ui/PrintButton'
 import ReportSelect from './ReportSelect'
 import { useAppStore } from '@/store'
@@ -21,12 +20,12 @@ import { useGenerateSyneyStoreReportPDF } from './useGenerateSyneyStoreReportPDF
 import ExportPDFButton from './ExportPDFButton'
 
 export default function ReportList() {
+  const { message: messageApi } = App.useApp()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [specsLoading, setSpecsLoading] = useState(false)
 
   const { tableSelectedKeys, isLoading: isCreating } = useAppStore()
-  const { selectedReportsLoading } = useSelectedReports()
-  const { print } = useGenerateSyneyStoreReportPDF()
+  const { print, isLoading: isPrinting } = useGenerateSyneyStoreReportPDF()
 
   const reportFormRef = useRef<ISyneyStoreReportFormRef>(null)
 
@@ -53,7 +52,13 @@ export default function ReportList() {
       message.warning('请选择至少一条数据')
       return
     }
-    deleteReport(tableSelectedKeys.map(String))
+    deleteReport(tableSelectedKeys.map(String), {
+      onSuccess: () => messageApi.success('删除对账单成功'),
+      onError: (err) => {
+        console.error(err)
+        messageApi.error('删除对账单失败')
+      },
+    })
   }
 
   function handlePrint() {
@@ -61,7 +66,20 @@ export default function ReportList() {
       message.warning('请选择至少一条数据')
       return
     }
-    if (!selectedReportsLoading) print()
+
+    // 如果正在加载，提示用户
+    if (isPrinting) {
+      messageApi.loading('数据加载中，请稍候...', 1)
+      return
+    }
+
+    // 调用打印函数，根据返回值显示消息
+    const success = print()
+    if (success) {
+      messageApi.success('PDF 文件生成成功')
+    } else {
+      messageApi.warning('没有可打印的数据')
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ConfigProvider, theme, App as AntdApp } from 'antd'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
@@ -40,6 +40,17 @@ export default function App() {
         algorithm: theme.darkAlgorithm,
       }
     : {}
+
+  // 配置静态方法（message、notification、modal）的全局设置
+  useEffect(() => {
+    ConfigProvider.config({
+      holderRender: (children) => (
+        <ConfigProvider theme={themeMode}>
+          {children}
+        </ConfigProvider>
+      ),
+    })
+  }, [themeMode])
 
   return (
     <ErrorBoundary>
