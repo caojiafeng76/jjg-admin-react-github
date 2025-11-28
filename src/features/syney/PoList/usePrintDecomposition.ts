@@ -253,7 +253,8 @@ export function usePrintDecomposition() {
 
       doc.text('橡胶', 273, yBase - 9)
 
-      if (Remark && Remark !== 'null') {
+      // 显示备注，确保"贴牌梯,注意不要出现西尼字样"等备注内容正确显示
+      if (Remark && Remark !== 'null' && Remark.trim() !== '') {
         doc.text(`${Remark}`, 50, yBase + 17)
       }
 
