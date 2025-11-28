@@ -207,7 +207,18 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
                 </div>
                 <div>
                   <Text strong>明细数量: </Text>
-                  <Text>{parsedData.items.length} 条</Text>
+                  <Text
+                    style={{
+                      color:
+                        parsedData.items.length % 14 === 0
+                          ? '#52c41a'
+                          : '#ff4d4f',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {parsedData.items.length} 条
+                    {parsedData.items.length % 14 === 0 ? ' ✓' : ' ⚠️'}
+                  </Text>
                 </div>
               </Space>
             }
