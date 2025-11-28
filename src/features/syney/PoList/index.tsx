@@ -17,9 +17,7 @@ import PrintButton from '@/ui/PrintButton'
 import { usePrint } from './usePrint'
 import ExportInfoButton from './ExportInfoButton'
 import { useSyneySpecs } from '../SpecList/useSyneySpecs'
-import { useSerialNo } from './useSerialNo'
 import { useCreatePo } from './useCreatePo'
-import { useUpdateSerialNo } from './useUpdateSerialNo'
 import {
   getItemsWithExtraInfo,
   getItemsWithParamSpec,
@@ -71,10 +69,8 @@ export default function PoList() {
   const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
     isAll: !isEdit,
   })
-  const { serialNo, isLoading: serialNoLoading } = useSerialNo()
 
   const { createPo, contextHolder: createPoContextHolder } = useCreatePo()
-  const { updateSerialNo, isUpdating } = useUpdateSerialNo()
 
   // 使用 useCallback 优化,避免子组件不必要的重渲染
   const handleDelete = useCallback(() => {
@@ -103,16 +99,6 @@ export default function PoList() {
       // 检查数据是否正在加载
       if (specsLoading) {
         messageApi.warning('规格数据加载中,请稍后再试')
-        return
-      }
-
-      if (serialNoLoading) {
-        messageApi.warning('序列号数据加载中,请稍后再试')
-        return
-      }
-
-      if (isUpdating) {
-        messageApi.warning('序列号更新中,请稍后再试')
         return
       }
 
@@ -148,11 +134,24 @@ export default function PoList() {
           items = items?.map((item) => ({ ...item, No })) as ISyneyItem[]
         }
         items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
-        const { map, tmpSerialNo } = getItemsWithExtraInfo(
-          items,
-          serialNo?.SyneySerialNo || 0,
+
+        // 🔥 新方案: 使用原子操作预分配序列号范围
+        // 1. 计算需要多少个序列号 (按 SONo 分组数量)
+        const uniqueSONos = new Set(items.map((item) => item.SONo))
+        const incrementBy = uniqueSONos.size
+
+        // 2. 原子性获取并递增序列号 (线程安全,防止竞态条件)
+        const { atomicIncrementSerialNo } = await import(
+          '@/services/apiSyneySerialNo'
         )
-        updateSerialNo(tmpSerialNo)
+        const finalSerialNo = await atomicIncrementSerialNo(incrementBy)
+
+        // 3. 计算起始序列号 (最终序列号 - 增量 = 起始点)
+        const startSerialNo = finalSerialNo - incrementBy
+
+        // 4. 使用预分配的序列号范围生成订单数据
+        const { map } = getItemsWithExtraInfo(items, startSerialNo)
+
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { Detail, ...po } = values
 
@@ -178,16 +177,12 @@ export default function PoList() {
     },
     [
       specsLoading,
-      serialNoLoading,
-      isUpdating,
       messageApi,
       isEdit,
       updatePos,
       tableSelectedKeys,
       setTableSelectedKeys,
       syneySpecs,
-      serialNo,
-      updateSerialNo,
       setIsCreating,
       createPo,
       excelData,
@@ -320,7 +315,7 @@ export default function PoList() {
           ref={poFormRef}
           onExcelDataChange={handleExcelDataChange}
           onFinish={onFinish}
-          isCreating={isCreating || isUpdating}
+          isCreating={isCreating}
           isEdit={isEdit}
           initialValues={
             (po && isEdit

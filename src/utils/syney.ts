@@ -199,16 +199,16 @@ export function jsonToArray(json: string): ISyneyItem[] {
 }
 
 /**
- * 根据物品列表和临时序列号，为特定零件号的物品添加额外信息（如 PartName2、PartModel、PartCode），
+ * 根据物品列表和起始序列号，为特定零件号的物品添加额外信息（如 PartName2、PartModel、PartCode），
  * 并按销售订单号（SONo）和序列号分组存储。
  *
  * @param items - 物品列表，包含需要处理的物品信息。
- * @param tmpSerialNo - 临时序列号，用于生成 PartCode。
- * @returns 返回一个对象，包含分组后的物品映射（map）和更新后的临时序列号（tmpSerialNo）。
+ * @param startSerialNo - 起始序列号（预分配），用于生成 PartCode。应该从数据库原子操作获取。
+ * @returns 返回一个对象，包含分组后的物品映射（map）和使用后的最终序列号（tmpSerialNo）。
  */
 export function getItemsWithExtraInfo(
   items: ISyneyItem[],
-  tmpSerialNo: number,
+  startSerialNo: number,
 ): { map: Map<string, ISyneyItem[]>; tmpSerialNo: number } {
   // 创建一个 Map，用于按销售订单号（SONo）和序列号分组存储物品
   const map = new Map<string, ISyneyItem[]>()
@@ -223,10 +223,14 @@ export function getItemsWithExtraInfo(
     itemsBySONo.get(soNo)!.push(item)
   })
 
+  // 使用起始序列号，为每个 SONo 分配递增的序列号
+  let currentSerialNo = startSerialNo
+
   // 遍历每个唯一的销售订单号
   itemsBySONo.forEach((soItems, soNo) => {
-    // 生成当前销售订单号对应的序列号
-    const seNo = tmpSerialNo + 1
+    // 为当前销售订单号分配序列号
+    const seNo = currentSerialNo + 1
+    currentSerialNo = seNo
 
     // 性能优化: 只遍历一次物品列表
     soItems.forEach((item) => {
@@ -266,14 +270,11 @@ export function getItemsWithExtraInfo(
 
     // 将当前销售订单号的物品按分组键（SONo~seNo）存入 Map
     map.set(`${soNo}~${seNo}`, soItems)
-
-    // 更新临时序列号
-    tmpSerialNo = seNo
   })
 
-  // 返回分组后的 Map 和更新后的临时序列号
+  // 返回分组后的 Map 和使用后的最终序列号
   return {
     map,
-    tmpSerialNo,
+    tmpSerialNo: currentSerialNo,
   }
 }

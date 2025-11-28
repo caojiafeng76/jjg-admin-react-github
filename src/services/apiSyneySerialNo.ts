@@ -27,3 +27,23 @@ export async function updateSerialNo(serialNo: number) {
 
   return data
 }
+
+/**
+ * 原子性递增序列号
+ * 使用 PostgreSQL 存储过程确保线程安全，防止竞态条件
+ * @param incrementBy - 需要递增的数量（默认为1）
+ * @returns 递增后的新序列号
+ */
+export async function atomicIncrementSerialNo(incrementBy: number = 1) {
+  // @ts-expect-error - RPC 函数可能未在自动生成的类型中定义
+  const { data, error } = await supabase.rpc('increment_serial_no', {
+    increment_by: incrementBy,
+  })
+
+  if (error) {
+    throw handleApiError(error, '序列号递增失败')
+  }
+
+  // PostgreSQL 函数返回新的序列号
+  return data as number
+}
