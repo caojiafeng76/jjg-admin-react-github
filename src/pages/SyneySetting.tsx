@@ -1,7 +1,7 @@
 import { useSerialNo } from '@/features/syney/PoList/useSerialNo'
 import { useUpdateSerialNo } from '@/features/syney/PoList/useUpdateSerialNo'
 import { Input, Typography, Spin } from 'antd'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const { Text } = Typography
 
@@ -10,6 +10,13 @@ export default function SyneySetting() {
   const { updateSerialNo, isUpdating } = useUpdateSerialNo()
 
   const [input, setInput] = useState('')
+
+  // 当 serialNo 更新时，同步更新 input 状态
+  useEffect(() => {
+    if (serialNo?.SyneySerialNo !== undefined) {
+      setInput(String(serialNo.SyneySerialNo))
+    }
+  }, [serialNo?.SyneySerialNo])
 
   return (
     <div className="h-full w-full">
@@ -22,7 +29,7 @@ export default function SyneySetting() {
           <Input
             className="ml-4 w-40"
             placeholder="请输入编号"
-            defaultValue={serialNo?.SyneySerialNo || ''}
+            value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading || isUpdating}
             onBlur={() => {
