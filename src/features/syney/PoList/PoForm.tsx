@@ -115,12 +115,17 @@ const PoForm: FC<PoFormProps> = ({
 
           {/* Excel导入模式 */}
           {importMode === 'excel' && (
-            <Form.Item label="上传文件">
-              <ExcelUpload
-                onDataParsed={handleExcelDataParsed}
-                disabled={isCreating}
-              />
-            </Form.Item>
+            <>
+              <Form.Item label="上传文件">
+                <ExcelUpload
+                  onDataParsed={handleExcelDataParsed}
+                  disabled={isCreating}
+                />
+              </Form.Item>
+              <Form.Item name="Remark" label="备注">
+                <Input.TextArea rows={3} disabled={isCreating} />
+              </Form.Item>
+            </>
           )}
         </>
       )}

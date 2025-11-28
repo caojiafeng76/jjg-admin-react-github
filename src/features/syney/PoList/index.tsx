@@ -156,9 +156,14 @@ export default function PoList() {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { Detail, ...po } = values
 
-        // 如果是Excel导入模式，确保包含从Excel解析出的工艺要求
-        if (excelData && excelData.po.Technique) {
-          po.Technique = excelData.po.Technique
+        // 如果是Excel导入模式，确保包含从Excel解析出的工艺要求和备注
+        if (excelData) {
+          if (excelData.po.Technique) {
+            po.Technique = excelData.po.Technique
+          }
+          if (excelData.po.Remark) {
+            po.Remark = excelData.po.Remark
+          }
         }
 
         setIsCreating(true)
