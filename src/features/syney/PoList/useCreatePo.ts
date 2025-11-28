@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { message } from 'antd'
+import { message, MessageInstance } from 'antd'
 import { createPo as createPoApi } from '@/services/apiSyneyPos'
 
-export function useCreatePo() {
+export function useCreatePo(messageApi?: MessageInstance) {
   const queryClient = useQueryClient()
-  const [messageApi, contextHolder] = message.useMessage()
+  const [internalMessageApi, contextHolder] = message.useMessage()
+  const api = messageApi || internalMessageApi
 
   const { mutateAsync: createPo, isPending: isCreating } = useMutation({
     mutationFn: createPoApi,
@@ -13,13 +14,13 @@ export function useCreatePo() {
         queryKey: ['syney-pos'],
       })
 
-      messageApi.success('创建订单成功')
+      api.success('创建订单成功')
     },
     onError: (err) => {
       console.error(err)
-      messageApi.error('创建订单失败')
+      api.error('创建订单失败')
     },
   })
 
-  return { createPo, isCreating, contextHolder }
+  return { createPo, isCreating, contextHolder: messageApi ? null : contextHolder }
 }

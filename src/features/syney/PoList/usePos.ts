@@ -33,14 +33,40 @@ export function usePos() {
     gcTime: 5 * 60 * 1000, // 5分钟后清除缓存
     retry: 2, // 失败重试2次
     retryDelay: 1000, // 重试延迟1秒
+    // 忽略 AbortError（请求被取消是正常行为）
+    throwOnError: (error) => {
+      // 如果是 AbortError，不抛出错误
+      if (
+        error &&
+        typeof error === 'object' &&
+        (('name' in error && error.name === 'AbortError') ||
+          ('message' in error &&
+            typeof (error as { message: unknown }).message === 'string' &&
+            (error as { message: string }).message.includes('aborted')))
+      ) {
+        return false
+      }
+      return true
+    },
   })
 
-  if (error) {
-    console.error(error)
-    message.error('Error fetching syney pos')
-  }
-
   const pageCount = Math.ceil((count || 0) / pageSize)
+
+  // 忽略 AbortError（请求被取消是正常行为，不应该显示错误）
+  if (error) {
+    const isAbortError =
+      error &&
+      typeof error === 'object' &&
+      (('name' in error && error.name === 'AbortError') ||
+        ('message' in error &&
+          typeof (error as { message: unknown }).message === 'string' &&
+          (error as { message: string }).message.includes('aborted')))
+    
+    if (!isAbortError) {
+      console.error(error)
+      message.error('Error fetching syney pos')
+    }
+  }
 
   // 优化预取逻辑:将副作用移到 useEffect 中,避免在渲染阶段执行
   useEffect(() => {

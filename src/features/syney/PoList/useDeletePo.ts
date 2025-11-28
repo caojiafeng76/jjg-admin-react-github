@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { message } from 'antd'
+import { message, MessageInstance } from 'antd'
 
 import { deletePo as deletePoApi } from '@/services/apiSyneyPos'
 
-export function useDeletePo() {
+export function useDeletePo(messageApi?: MessageInstance) {
   const queryClient = useQueryClient()
-  const [messageApi, contextHolder] = message.useMessage()
+  const [internalMessageApi, contextHolder] = message.useMessage()
+  const api = messageApi || internalMessageApi
 
   const { mutate: deletePo, isPending: isDeleting } = useMutation({
     mutationFn: deletePoApi,
@@ -18,17 +19,17 @@ export function useDeletePo() {
       queryClient.invalidateQueries({
         queryKey: ['po'],
       })
-      messageApi.success('删除订单成功')
+      api.success('删除订单成功')
     },
 
     onError: (err) => {
       console.error(err)
-      messageApi.error('删除订单失败')
+      api.error('删除订单失败')
     },
   })
   return {
     deletePo,
     isDeleting,
-    contextHolder,
+    contextHolder: messageApi ? null : contextHolder,
   }
 }
