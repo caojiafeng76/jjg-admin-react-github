@@ -10,8 +10,14 @@ export function useCreatePo(messageApi?: MessageInstance) {
   const { mutateAsync: createPo, isPending: isCreating } = useMutation({
     mutationFn: createPoApi,
     onSuccess: () => {
+      // 失效订单列表缓存
       queryClient.invalidateQueries({
         queryKey: ['syney-pos'],
+      })
+
+      // 失效序列号缓存，使设置页面自动刷新编号
+      queryClient.invalidateQueries({
+        queryKey: ['serialNo'],
       })
 
       api.success('创建订单成功')
