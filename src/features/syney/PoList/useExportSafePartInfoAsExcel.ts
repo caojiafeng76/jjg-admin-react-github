@@ -3,6 +3,35 @@ import { format } from 'date-fns'
 import { message } from 'antd'
 
 import { useSelectedPos } from './useSelectedPos'
+import { ISyneyItem } from '@/services/types'
+
+// 安全件件号前缀列表（可配置）
+const SAFE_PART_PREFIXES = [
+  'XN2808EB',
+  'XN3024BR',
+  'XN2808BP',
+  'XN3024BS',
+  'XN2808JY',
+  'XN3024DF',
+] as const
+
+// 判断是否为安全件
+function isSafePart(partNo: string | null | undefined): boolean {
+  if (!partNo) return false
+  return SAFE_PART_PREFIXES.some((prefix) => partNo.includes(prefix))
+}
+
+// Excel 数据行类型
+type ExcelRow = {
+  序号: number
+  采购单号: string | null
+  日期: string | null
+  编号: string | null | undefined
+  型号: string | null | undefined
+  名称: string | null | undefined
+  件号: string | null
+  生产号: string
+}
 
 export function useExportSafePartInfoAsExcel() {
   const [messageApi, contextHolder] = message.useMessage()
@@ -23,36 +52,45 @@ export function useExportSafePartInfoAsExcel() {
     try {
       // 创建新的工作簿
       const wb = utils.book_new()
+      const allSafeParts: ExcelRow[] = []
+      let globalIndex = 0
 
-      // 准备数据并添加到工作簿
+      // 处理每个订单的数据
       selectedPosList.forEach(({ poInfo, items }) => {
         const { SONo, EndDate, No } = poInfo
 
-        const excelData = items
-          .filter(
-            (item) =>
-              item.PartNo?.includes('XN2808EB') ||
-              item.PartNo?.includes('XN3024BR') ||
-              item.PartNo?.includes('XN2808BP') ||
-              item.PartNo?.includes('XN3024BS') ||
-              item.PartNo?.includes('XN2808JY') ||
-              item.PartNo?.includes('XN3024DF'),
-          )
-          .map((item, index) => ({
-            序号: index + 1,
-            采购单号: No,
-            日期: EndDate,
-            编号: item.PartCode,
-            型号: item.PartModel,
-            名称: item.PartName2,
-            件号: item.PartNo,
-            生产号: SONo,
-          }))
+        // 过滤安全件并转换为 Excel 数据格式
+        const excelData: ExcelRow[] = items
+          .filter((item) => isSafePart(item.PartNo))
+          .map((item) => {
+            globalIndex++
+            return {
+              序号: globalIndex,
+              采购单号: No,
+              日期: EndDate,
+              编号: item.PartCode,
+              型号: item.PartModel,
+              名称: item.PartName2,
+              件号: item.PartNo,
+              生产号: SONo,
+            }
+          })
 
         // 如果有符合条件的数据才添加工作表
         if (excelData.length > 0) {
-          const ws = utils.json_to_sheet(excelData)
-          utils.book_append_sheet(wb, ws, `${SONo}`)
+          // 为每个工作表添加局部序号（从1开始）
+          const sheetData = excelData.map((row, index) => ({
+            ...row,
+            序号: index + 1,
+          }))
+
+          const ws = utils.json_to_sheet(sheetData)
+          // 工作表名称限制在31个字符以内（Excel限制）
+          const sheetName = SONo.length > 31 ? SONo.substring(0, 31) : SONo
+          utils.book_append_sheet(wb, ws, sheetName)
+
+          // 收集所有安全件用于汇总表
+          allSafeParts.push(...excelData)
         }
       })
 
@@ -62,12 +100,40 @@ export function useExportSafePartInfoAsExcel() {
         return
       }
 
+      // 添加汇总表
+      if (allSafeParts.length > 0) {
+        const summaryData = allSafeParts.map((row) => ({
+          ...row,
+          序号: row.序号, // 使用全局序号
+        }))
+        const summaryWs = utils.json_to_sheet(summaryData)
+        // 设置列宽（可选，提升可读性）
+        const colWidths = [
+          { wch: 8 }, // 序号
+          { wch: 15 }, // 采购单号
+          { wch: 12 }, // 日期
+          { wch: 15 }, // 编号
+          { wch: 15 }, // 型号
+          { wch: 20 }, // 名称
+          { wch: 15 }, // 件号
+          { wch: 15 }, // 生产号
+        ]
+        summaryWs['!cols'] = colWidths
+        utils.book_append_sheet(wb, summaryWs, '汇总')
+      }
+
+      // 生成文件名（包含日期和时间戳，避免覆盖）
+      const timestamp = format(new Date(), 'yyyy-MM-dd_HHmmss')
+      const fileName = `安全部件信息-${timestamp}.xlsx`
+
       // 导出文件
-      writeFile(wb, `安全部件信息-${format(new Date(), 'yyyy-MM-dd')}.xlsx`)
-      messageApi.success('导出成功')
+      writeFile(wb, fileName)
+      messageApi.success(`导出成功！共 ${allSafeParts.length} 条安全部件数据`)
     } catch (error) {
       console.error('导出失败:', error)
-      messageApi.error('导出失败，请重试')
+      const errorMessage =
+        error instanceof Error ? error.message : '未知错误'
+      messageApi.error(`导出失败: ${errorMessage}`)
     }
   }
 
