@@ -1,12 +1,11 @@
 import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
-import { Button, message } from 'antd'
+import { Button } from 'antd'
 import { usePrintDecomposition } from './usePrintDecomposition'
 import { useAppStore } from '@/store'
 
 export default function PrintDecompositionButton() {
-  const { printDecomposition, contextHolder } = usePrintDecomposition()
+  const { printDecomposition, contextHolder, messageApi } = usePrintDecomposition()
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
-  const [messageApi, contextHolder2] = message.useMessage()
 
   function onClick() {
     if (tableSelectedKeys.length === 0) {
@@ -24,7 +23,6 @@ export default function PrintDecompositionButton() {
   return (
     <>
       {contextHolder}
-      {contextHolder2}
       <Button
         type="text"
         icon={<DocumentArrowDownIcon className="size-4 !text-red-500/80" />}

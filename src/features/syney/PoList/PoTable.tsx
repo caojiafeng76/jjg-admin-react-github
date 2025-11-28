@@ -76,6 +76,10 @@ function PoTable() {
         title: '工艺要求',
         dataIndex: 'Technique',
         width: 160,
+        render: (text: string) => {
+          // 将逗号替换为空格，用于订单列表显示
+          return text ? text.replace(/,/g, ' ') : ''
+        },
       },
       {
         title: '编号',

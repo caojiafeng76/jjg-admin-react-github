@@ -227,10 +227,16 @@ export function usePrintDecomposition() {
       doc.text(`${Brand || ''}`, 105, yBase + 7)
 
       if (Technique && Technique !== 'null') {
-        const [line1, line2, line3] = Technique.split(',')
-        doc.text(line1 ? `${line1}` : '', 223, yBase - 16)
-        doc.text(line2 ? `${line2}` : '', 223, yBase - 9)
-        doc.text(line3 ? `${line3}` : '', 223, yBase - 2)
+        // 将工艺要求按逗号分割，每个条件另起一行
+        const techniqueLines = Technique.split(',').filter((line) => line.trim())
+        // 显示所有条件，每个条件另起一行（最多3个，因为只有3个位置）
+        techniqueLines.forEach((line, index) => {
+          if (index < 3) {
+            // yBase - 16, yBase - 9, yBase - 2
+            const yOffset = index === 0 ? -16 : index === 1 ? -9 : -2
+            doc.text(line.trim(), 223, yBase + yOffset)
+          }
+        })
       }
 
       doc.text(
@@ -441,5 +447,5 @@ export function usePrintDecomposition() {
     }
   }
 
-  return { printDecomposition, contextHolder, isPrinting }
+  return { printDecomposition, contextHolder, isPrinting, messageApi }
 }

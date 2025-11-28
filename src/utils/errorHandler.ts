@@ -42,6 +42,20 @@ export function handleApiError(
   error: unknown,
   customMessage?: string,
 ): AppError {
+  // 忽略 AbortError（请求被取消是正常行为，不应该作为错误处理）
+  if (
+    error &&
+    typeof error === 'object' &&
+    'name' in error &&
+    (error.name === 'AbortError' ||
+      (error as { message?: string }).message?.includes('aborted'))
+  ) {
+    // 返回一个特殊的 AppError，但标记为可忽略
+    const abortError = new AppError('请求已取消', 'ABORT_ERROR', 0, error)
+    abortError.name = 'AbortError'
+    return abortError
+  }
+
   console.error('API Error:', error)
 
   // 如果已经是 AppError,直接返回
@@ -79,6 +93,10 @@ export function useErrorHandler() {
 
   const showError = (error: unknown, fallbackMessage?: string) => {
     const appError = handleApiError(error, fallbackMessage)
+    // 忽略 AbortError（请求被取消是正常行为，不应该显示错误）
+    if (appError.name === 'AbortError' || appError.code === 'ABORT_ERROR') {
+      return
+    }
     message.error(appError.message)
   }
 

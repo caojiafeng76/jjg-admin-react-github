@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { message } from 'antd'
+import { message, MessageInstance } from 'antd'
 
 import { updatePos as updatePosApi } from '@/services/apiSyneyPos'
 
-export function useUpdatePos() {
+export function useUpdatePos(messageApi?: MessageInstance) {
   const queryClient = useQueryClient()
-  const [messageApi, contextHolder] = message.useMessage()
+  const [internalMessageApi, contextHolder] = message.useMessage()
+  const api = messageApi || internalMessageApi
 
   const { mutate: updatePos, isPending: isUpdating } = useMutation({
     mutationFn: updatePosApi,
@@ -18,12 +19,12 @@ export function useUpdatePos() {
       queryClient.invalidateQueries({
         queryKey: ['po'],
       })
-      messageApi.success('更新成功')
+      api.success('更新成功')
     },
     onError: (err) => {
-      messageApi.error(err.message || '更新失败')
+      api.error(err.message || '更新失败')
     },
   })
 
-  return { updatePos, isUpdating, contextHolder }
+  return { updatePos, isUpdating, contextHolder: messageApi ? null : contextHolder }
 }

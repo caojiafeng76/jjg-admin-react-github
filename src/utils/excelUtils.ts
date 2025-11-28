@@ -224,6 +224,8 @@ export function transformToOrderData(
     // Brand优先级: 1. 后板备注提取 2. Excel商标列 3. API推断
     Spec: extractSpecFromRows(excelData.rows) || firstRow.规格 || null,
     Brand: extractBrandFromBackPlate(excelData.rows) || firstRow.商标 || null,
+    // 提取工艺要求（用逗号分割，用于分解单；订单列表显示时用空格替换）
+    Technique: extractTechnique(excelData.rows),
   }
 
   // 构建订单明细数据
@@ -292,6 +294,157 @@ function extractBrandFromBackPlate(rows: ExcelRow[]): string | null {
   }
 
   return null
+}
+
+/**
+ * 从订单明细中提取工艺要求
+ * @param rows Excel行数据
+ * @returns 工艺要求字符串（用逗号分割，用于分解单；用空格分割用于订单列表）
+ */
+function extractTechnique(rows: ExcelRow[]): string | null {
+  const techniqueList: string[] = []
+
+  // 1. 查找前板组件
+  const frontPlateRow = rows.find(
+    (row) =>
+      (row.物料名称 && String(row.物料名称).includes('前沿板')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN2808EB')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
+  )
+
+  // 检查前板remark是否包含"角钢"
+  // 需要排除否定描述，如"不带支撑角钢"、"不带角钢"、"无角钢"等
+  if (frontPlateRow && frontPlateRow.备注) {
+    const frontPlateRemark = String(frontPlateRow.备注)
+    // 检查是否包含"角钢"，但排除否定描述
+    if (frontPlateRemark.includes('角钢')) {
+      // 检查"角钢"前面是否有否定词（"不带"、"不"、"无"、"没有"等）
+      const index = frontPlateRemark.indexOf('角钢')
+      // 检查"角钢"前面15个字符内是否有否定词（考虑"不带支撑角钢"这种情况）
+      const beforeText = frontPlateRemark.substring(Math.max(0, index - 15), index)
+      // 排除包含否定词的情况
+      const hasNegativeWord =
+        beforeText.includes('不带') ||
+        beforeText.includes('不') ||
+        beforeText.includes('无') ||
+        beforeText.includes('没有') ||
+        beforeText.includes('无需')
+      
+      // 如果"角钢"前面没有否定词，则提取
+      if (!hasNegativeWord) {
+        techniqueList.push('前：角钢')
+      }
+    }
+  }
+
+  // 2. 查找后板组件
+  const backPlateRow = rows.find(
+    (row) =>
+      (row.物料名称 && String(row.物料名称).includes('后板')) ||
+      (row.物料名称 && String(row.物料名称).includes('前沿后板')),
+  )
+
+  // 检查后板remark是否包含"前沿板中间"（必须是完整的连续字符串）
+  if (backPlateRow && backPlateRow.备注) {
+    const backPlateRemark = String(backPlateRow.备注)
+    if (backPlateRemark.includes('前沿板中间')) {
+      if (!techniqueList.includes('前：商标')) {
+        techniqueList.push('前：商标')
+      }
+    }
+  }
+
+  // 3. 查找中板组件（包括上中板和下中板）
+  const middlePlateRows = rows.filter(
+    (row) =>
+      (row.物料名称 && String(row.物料名称).includes('中板')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN2808BP')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN2808BQ')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN3024BS')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN3024BT')),
+  )
+
+  // 调试日志：输出找到的中板组件
+  console.log('找到的中板组件数量:', middlePlateRows.length)
+  middlePlateRows.forEach((row, index) => {
+    console.log(`中板${index + 1}:`, {
+      物料名称: row.物料名称,
+      物料件号: row.物料件号,
+      备注: row.备注,
+    })
+  })
+
+  // 检查中板remark是否包含"雷达孔"或"不剪角"
+  middlePlateRows.forEach((middlePlateRow) => {
+    if (middlePlateRow.备注) {
+      const middlePlateRemark = String(middlePlateRow.备注)
+      console.log('检查中板备注:', middlePlateRemark, '是否包含雷达孔:', middlePlateRemark.includes('雷达孔'))
+      
+      // 检查"雷达孔"（可以是"雷达孔"、"雷达光电孔"等，只要同时包含"雷达"和"孔"即可）
+      // 使用正则表达式匹配"雷达"和"孔"同时出现（中间可以有其他字符）
+      const leiDaKongRegex = /雷达.*?孔/
+      if (leiDaKongRegex.test(middlePlateRemark)) {
+        console.log('匹配到雷达孔:', middlePlateRemark)
+        // 找到"雷达"的位置，检查前面是否有否定词
+        const index = middlePlateRemark.indexOf('雷达')
+        const beforeText = middlePlateRemark.substring(Math.max(0, index - 10), index)
+        console.log('雷达前面的文本:', beforeText)
+        // 排除包含否定词的情况（但"带"不是否定词）
+        const hasNegativeWord =
+          beforeText.includes('不带') ||
+          (beforeText.includes('不') && !beforeText.endsWith('不') && !beforeText.includes('带')) ||
+          beforeText.includes('无') ||
+          beforeText.includes('没有') ||
+          beforeText.includes('无需')
+        
+        console.log('是否有否定词:', hasNegativeWord)
+        // 如果"雷达"前面没有否定词，则提取
+        if (!hasNegativeWord) {
+          if (!techniqueList.includes('中：雷达孔')) {
+            techniqueList.push('中：雷达孔')
+            console.log('添加中：雷达孔到工艺要求列表')
+          }
+        } else {
+          console.log('雷达前有否定词，跳过:', beforeText)
+        }
+      } else {
+        console.log('未匹配到雷达孔:', middlePlateRemark)
+      }
+      
+      // 检查"不剪角"（必须是完整的三个字）
+      // 使用正则表达式确保"不剪角"是完整的词（前后不是其他中文字符或数字）
+      const buJianJiaoRegex = /不剪角/
+      if (buJianJiaoRegex.test(middlePlateRemark)) {
+        // 检查"不剪角"前面是否有否定词（排除"不剪角"本身的"不"）
+        const index = middlePlateRemark.indexOf('不剪角')
+        const beforeText = middlePlateRemark.substring(Math.max(0, index - 15), index)
+        // 排除包含否定词的情况
+        // 注意："不剪角"本身以"不"开头，所以需要检查前面是否有其他否定词
+        const hasNegativeWord =
+          (beforeText.trim() && beforeText.includes('不')) ||
+          beforeText.includes('无') ||
+          beforeText.includes('没有') ||
+          beforeText.includes('无需') ||
+          beforeText.includes('不要') ||
+          beforeText.includes('不带')
+        
+        // 如果"不剪角"前面没有否定词，则提取
+        if (!hasNegativeWord) {
+          if (!techniqueList.includes('中：不剪角')) {
+            techniqueList.push('中：不剪角')
+          }
+        }
+      }
+    }
+  })
+
+  // 返回用逗号分割的字符串（用于分解单），订单列表显示时需要用空格替换逗号
+  const result = techniqueList.length > 0 ? techniqueList.join(',') : null
+  // 调试日志：输出提取的工艺要求
+  if (result) {
+    console.log('提取的工艺要求:', techniqueList, '结果:', result)
+  }
+  return result
 }
 
 /**

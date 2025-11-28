@@ -1,15 +1,16 @@
 import jsPDF from 'jspdf'
 import { format } from 'date-fns'
-import { message } from 'antd'
+import { message, MessageInstance } from 'antd'
 import { useState } from 'react'
 
 import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 import { openPDFInNewWindow } from '@/utils/pdfUtils'
 
-export function usePrint() {
+export function usePrint(messageApi?: MessageInstance) {
   const { selectedPosList, isLoading } = useSelectedPos()
-  const [messageApi, contextHolder] = message.useMessage()
+  const [internalMessageApi, contextHolder] = message.useMessage()
+  const api = messageApi || internalMessageApi
   const [isPrinting, setIsPrinting] = useState(false)
 
   /**
@@ -42,12 +43,12 @@ export function usePrint() {
   async function generateLabel() {
     // 数据验证
     if (isLoading) {
-      messageApi.warning('数据加载中，请稍后再试')
+      api.warning('数据加载中，请稍后再试')
       return
     }
 
     if (!selectedPosList || selectedPosList.length === 0) {
-      messageApi.warning('没有数据可供打印')
+      api.warning('没有数据可供打印')
       return
     }
 
@@ -144,11 +145,11 @@ export function usePrint() {
       openPDFInNewWindow(doc)
     } catch (error) {
       console.error('打印标签失败:', error)
-      messageApi.error('打印标签失败')
+      api.error('打印标签失败')
     } finally {
       setIsPrinting(false)
     }
   }
 
-  return { generateLabel, contextHolder, isPrinting }
+  return { generateLabel, contextHolder: messageApi ? null : contextHolder, isPrinting }
 }

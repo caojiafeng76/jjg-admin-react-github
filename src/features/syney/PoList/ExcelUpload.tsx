@@ -205,6 +205,18 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
                   <Text strong>订单备注: </Text>
                   <Text>{parsedData.po.Remark || '无'}</Text>
                 </div>
+                {parsedData.po.Technique && (
+                  <div>
+                    <Text strong>工艺要求: </Text>
+                    <div style={{ marginTop: 4 }}>
+                      {parsedData.po.Technique.split(',').map((item, index) => (
+                        <div key={index} style={{ marginBottom: index < parsedData.po.Technique!.split(',').length - 1 ? 2 : 0 }}>
+                          <Text>{item.trim()}</Text>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <Text strong>明细数量: </Text>
                   <Text

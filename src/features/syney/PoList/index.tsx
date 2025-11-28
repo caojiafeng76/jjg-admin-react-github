@@ -39,10 +39,11 @@ export default function PoList() {
   const [isEdit, setIsEdit] = useState(false)
   const [excelData, setExcelData] = useState<TransformedOrderData | null>(null)
 
-  const { generateLabel, contextHolder: labelContextHolder } = usePrint()
-  const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
-    usePrintEnglish()
   const [messageApi, messageContextHolder] = message.useMessage()
+
+  const { generateLabel, contextHolder: labelContextHolder } = usePrint(messageApi)
+  const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
+    usePrintEnglish(messageApi)
 
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
@@ -57,20 +58,20 @@ export default function PoList() {
     deletePo,
     isDeleting,
     contextHolder: deletePoContextHolder,
-  } = useDeletePo()
+  } = useDeletePo(messageApi)
   const { data: po, isLoading: poLoading } = usePo()
   const {
     updatePos,
     isUpdating: isPoUpdating,
     contextHolder: updatePosContextHolder,
-  } = useUpdatePos()
+  } = useUpdatePos(messageApi)
 
   // 仅在创建模式下加载规格数据,编辑模式不需要
   const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
     isAll: !isEdit,
   })
 
-  const { createPo, contextHolder: createPoContextHolder } = useCreatePo()
+  const { createPo, contextHolder: createPoContextHolder } = useCreatePo(messageApi)
 
   // 使用 useCallback 优化,避免子组件不必要的重渲染
   const handleDelete = useCallback(() => {
@@ -154,6 +155,11 @@ export default function PoList() {
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { Detail, ...po } = values
+
+        // 如果是Excel导入模式，确保包含从Excel解析出的工艺要求
+        if (excelData && excelData.po.Technique) {
+          po.Technique = excelData.po.Technique
+        }
 
         setIsCreating(true)
 
