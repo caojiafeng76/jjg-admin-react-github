@@ -262,7 +262,11 @@ export default function PoList() {
 
           <EditButton title="编辑" handleEdit={handleEdit} />
 
-          <DeleteButton onConfirm={handleDelete} isDeleting={isDeleting} />
+          <DeleteButton
+            onConfirm={handleDelete}
+            isDeleting={isDeleting}
+            count={tableSelectedKeys.length}
+          />
 
           <PrintButton handlePrint={handlePrint} />
           <PrintButton handlePrint={handlePrintEnglish}>

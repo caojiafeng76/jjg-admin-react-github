@@ -284,14 +284,105 @@ export async function createPo({
   }
 }
 
+/**
+ * 删除订单
+ * @param ids - 订单ID数组（字符串格式）
+ * @returns 删除结果，包含删除数量和删除的订单信息
+ */
 export async function deletePo(ids: string[]) {
-  const { error } = await supabase
+  // 1. 参数验证
+  if (!ids || ids.length === 0) {
+    throw new Error('订单ID列表不能为空')
+  }
+
+  // 2. 类型转换和验证，同时去重
+  const numericIds: number[] = []
+  const invalidIds: string[] = []
+
+  for (const id of ids) {
+    const num = Number(id)
+    if (isNaN(num) || num <= 0 || !Number.isInteger(num)) {
+      invalidIds.push(id)
+    } else {
+      numericIds.push(num)
+    }
+  }
+
+  // 去重
+  const uniqueIds = Array.from(new Set(numericIds))
+
+  if (invalidIds.length > 0) {
+    throw new Error(`无效的订单ID: ${invalidIds.join(', ')}`)
+  }
+
+  if (uniqueIds.length === 0) {
+    throw new Error('没有有效的订单ID')
+  }
+
+  // 3. 检查订单是否存在
+  const { data: existingPos, error: checkError } = await supabase
+    .from('syney-pos')
+    .select('id, No, Status')
+    .in('id', uniqueIds)
+
+  if (checkError) {
+    throw handleApiError(checkError, '查询订单失败')
+  }
+
+  if (!existingPos || existingPos.length === 0) {
+    throw new Error('未找到要删除的订单')
+  }
+
+  // 检查是否有订单不存在
+  if (existingPos.length !== uniqueIds.length) {
+    const foundIds = new Set(existingPos.map((p) => p.id))
+    const missingIds = uniqueIds.filter((id) => !foundIds.has(id))
+    throw new Error(`以下订单不存在: ${missingIds.join(', ')}`)
+  }
+
+  // 4. 可选：检查订单状态，某些状态的订单不允许删除
+  // 根据业务需求，可以配置哪些状态不允许删除
+  // 当前暂不限制，但保留扩展能力
+  // const restrictedStatuses = ['已入库'] // 可根据业务需求调整
+  // const restrictedPos = existingPos.filter(
+  //   (p) => p.Status && restrictedStatuses.includes(p.Status),
+  // )
+  // if (restrictedPos.length > 0) {
+  //   throw new Error(
+  //     `以下订单状态不允许删除: ${restrictedPos.map((p) => p.No || p.id).join(', ')}`,
+  //   )
+  // }
+
+  // 5. 先删除关联的订单明细（确保数据一致性，即使数据库有级联删除）
+  const { error: itemsError } = await supabase
+    .from('syney-po-items')
+    .delete()
+    .in('PoId', uniqueIds)
+
+  if (itemsError) {
+    throw handleApiError(itemsError, '删除订单明细失败')
+  }
+
+  // 6. 删除订单主表
+  const { data: deletedData, error } = await supabase
     .from('syney-pos')
     .delete()
-    .in('id', ids.map(Number))
+    .in('id', uniqueIds)
+    .select() // 返回删除的数据
 
   if (error) {
     throw handleApiError(error, '订单删除失败')
+  }
+
+  // 7. 返回删除结果
+  return {
+    deletedCount: deletedData?.length || 0,
+    deletedIds: uniqueIds,
+    deletedOrders: existingPos.map((p) => ({
+      id: p.id,
+      No: p.No,
+      Status: p.Status,
+    })),
   }
 }
 
