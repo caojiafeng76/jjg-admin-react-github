@@ -296,57 +296,40 @@ function extractBrandFromBackPlate(rows: ExcelRow[]): string | null {
 
 /**
  * 从Excel行数据中推断规格信息
- * 参照 src/services/apiSyneyPos.ts 中的 extractSpecFromItems 逻辑
+ * 按前板件号区分扶梯还是人行道: 包含XN2808EB的是扶梯,包含XN3024BR的是人行道
+ * 解析中板规格字段确定 1000型/800型/600型 和 室内/室外
  * @param rows Excel行数据
  * @returns 推断的规格,如果无法推断则返回 null
  */
 function extractSpecFromRows(rows: ExcelRow[]): string | null {
-  // 1. 查找前沿板组件
+  // 1. 查找前沿板组件(用于判断扶梯/人行道)
   const frontPlateRow = rows.find(
     (row) =>
       (row.物料名称 && String(row.物料名称).includes('前沿板')) ||
-      (row.物料件号 && String(row.物料件号).startsWith('XN2808EB')) ||
-      (row.物料件号 && String(row.物料件号).startsWith('XN3024BR')),
+      (row.物料件号 && String(row.物料件号).includes('XN2808EB')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
   )
 
   if (!frontPlateRow) {
     return null
   }
 
-  // 2. 从 Spec 字段提取型号（1000型/800型/600型）
-  let model = ''
-  if (frontPlateRow.规格) {
-    const specMatch = String(frontPlateRow.规格).match(/(1000型|800型|600型)/)
-    if (specMatch) {
-      model = specMatch[1]
-    }
-  }
-
-  if (!model) {
-    return null
-  }
-
-  // 3. 从件号判断类型（扶梯/人行道）
+  // 2. 从前板件号判断类型(扶梯/人行道)
   let type = ''
-  const partNo = String(frontPlateRow.物料件号 || '')
+  const frontPlatePartNo = String(frontPlateRow.物料件号 || '')
 
-  // XN2808EB 系列是扶梯，XN3024BR 系列是人行道
-  if (partNo.startsWith('XN2808EB') || partNo.startsWith('XN2808')) {
+  // 包含 XN2808EB 的是扶梯,包含 XN3024BR 的是人行道
+  if (frontPlatePartNo.includes('XN2808EB')) {
     type = '扶梯'
-  } else if (partNo.startsWith('XN3024BR') || partNo.startsWith('XN3024')) {
+  } else if (frontPlatePartNo.includes('XN3024BR')) {
     type = '人行道'
-  } else if (partNo.startsWith('XN2838')) {
-    type = '扶梯' // 800型扶梯
   }
 
   if (!type) {
     return null
   }
 
-  // 4. 从中板的 Spec 字段推断环境
-  let environment = '室内' // 默认室内
-
-  // 查找中板组件（上前中板组件、下前中板组件）
+  // 3. 查找中板组件(用于提取型号和环境)
   const middlePlateRow = rows.find(
     (row) =>
       (row.物料名称 && String(row.物料名称).includes('中板')) ||
@@ -356,20 +339,34 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
       (row.物料件号 && String(row.物料件号).startsWith('XN3024BT')),
   )
 
-  if (middlePlateRow && middlePlateRow.规格) {
-    // 从 Spec 字段匹配环境（如 "1000型 室内" 或 "1000型 室外"）
-    const specStr = String(middlePlateRow.规格)
-    if (specStr.includes('室外')) {
-      environment = '室外'
-    } else if (specStr.includes('室内')) {
-      environment = '室内'
-    }
+  if (!middlePlateRow || !middlePlateRow.规格) {
+    return null
   }
 
-  // 5. 组合规格
+  // 4. 从中板规格字段提取型号(1000型/800型/600型)
+  let model = ''
+  const middlePlateSpec = String(middlePlateRow.规格)
+  const specMatch = middlePlateSpec.match(/(1000型|800型|600型)/)
+  if (specMatch) {
+    model = specMatch[1]
+  }
+
+  if (!model) {
+    return null
+  }
+
+  // 5. 从中板规格字段推断环境(室内/室外)
+  let environment = '室内' // 默认室内
+  if (middlePlateSpec.includes('室外')) {
+    environment = '室外'
+  } else if (middlePlateSpec.includes('室内')) {
+    environment = '室内'
+  }
+
+  // 6. 组合规格: 型号-环境-类型
   const spec = `${model}-${environment}-${type}`
 
-  // 6. 验证规格是否存在于支持的选项中
+  // 7. 验证规格是否存在于支持的选项中
   const validSpecs = [
     '1000型-室内-扶梯',
     '1000型-室外-扶梯',

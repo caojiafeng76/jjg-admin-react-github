@@ -57,6 +57,8 @@ const PoForm: FC<PoFormProps> = ({
         No: data.po.No,
         EndDate: data.po.EndDate ? (dayjs(data.po.EndDate) as any) : null,
         Remark: data.po.Remark || '',
+        Spec: data.po.Spec || undefined, // 填充提取的规格
+        Brand: data.po.Brand || undefined, // 填充提取的商标
       })
     }
 
