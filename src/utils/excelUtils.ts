@@ -49,6 +49,8 @@ export interface ValidationResult {
 export interface TransformedOrderData {
   po: Partial<ISyneyPo>
   items: Partial<ISyneyItem>[]
+  // 规格是否是通过后备逻辑推断的（需要用户确认）
+  specInferred?: boolean
 }
 
 /**
@@ -220,9 +222,28 @@ export function transformToOrderData(
           .filter((v): v is string => !!v),
       ),
     ).join('\n'),
-    // Spec优先级: 1. API推断 (从Excel行数据推断) 2. Excel规格列 (仅作为后备)
+    // Spec优先级: 1. API推断 (从Excel行数据推断) 2. 后备逻辑（搜索所有行） 3. Excel规格列 (仅作为后备，但需要验证格式)
     // Brand优先级: 1. 后板备注提取 2. Excel商标列 3. API推断
-    Spec: extractSpecFromRows(excelData.rows) || firstRow.规格 || null,
+    Spec: (() => {
+      const inferredSpec = extractSpecFromRows(excelData.rows)
+      if (inferredSpec) {
+        return inferredSpec
+      }
+      // 如果标准推断失败，使用后备逻辑（搜索所有行的spec和remark字段）
+      const fallbackSpec = extractSpecFromAllRows(excelData.rows)
+      if (fallbackSpec) {
+        // 标记为推断的规格，需要用户确认
+        ;(excelData as any).specInferred = true
+        return fallbackSpec
+      }
+      // 如果推断失败，检查Excel规格列是否是有效格式（包含"型"字）
+      const excelSpec = firstRow.规格 ? String(firstRow.规格) : null
+      if (excelSpec && (excelSpec.includes('型') || excelSpec.match(/^\d+型-/))) {
+        return excelSpec
+      }
+      // 如果Excel规格列格式不对（如"左件"），返回null，让用户手动选择
+      return null
+    })(),
     Brand: extractBrandFromBackPlate(excelData.rows) || firstRow.商标 || null,
     // 提取工艺要求（用逗号分割，用于分解单；订单列表显示时用空格替换）
     Technique: extractTechnique(excelData.rows),
@@ -243,7 +264,11 @@ export function transformToOrderData(
     TaxTotalPrice: null,
   }))
 
-  return { po, items }
+  return {
+    po,
+    items,
+    specInferred: (excelData as any).specInferred || false,
+  }
 }
 
 /**
@@ -448,6 +473,91 @@ function extractTechnique(rows: ExcelRow[]): string | null {
 }
 
 /**
+ * 从所有行中搜索规格信息（后备逻辑）
+ * 在所有条目的spec和remark字段中匹配1000型/800型/600型和室内/室外
+ * @param rows Excel行数据
+ * @returns 推断的规格,如果无法推断则返回 null
+ */
+function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
+  let model = ''
+  let environment = '室内' // 默认室内
+  let type = ''
+
+  // 遍历所有行，搜索型号、环境和类型
+  for (const row of rows) {
+    const spec = String(row.规格 || '')
+    const remark = String(row.备注 || '')
+    const combinedText = `${spec} ${remark}`
+
+    // 匹配型号（1000型/800型/600型）
+    if (!model) {
+      const modelMatch = combinedText.match(/(1000型|800型|600型)/)
+      if (modelMatch) {
+        model = modelMatch[1]
+        console.log('后备逻辑：找到型号:', model, '来源:', { 规格: spec, 备注: remark })
+      }
+    }
+
+    // 匹配环境（室内/室外）- 如果找到"室外"就设置为室外，否则保持默认"室内"
+    if (combinedText.includes('室外')) {
+      environment = '室外'
+    } else if (combinedText.includes('室内')) {
+      environment = '室内'
+    }
+
+    // 从件号判断类型（扶梯/人行道）
+    const partNo = String(row.物料件号 || '')
+    if (!type) {
+      if (partNo.includes('XN2808EB') || partNo.startsWith('XN2808')) {
+        type = '扶梯'
+        console.log('后备逻辑：找到类型: 扶梯, 件号:', partNo)
+      } else if (partNo.includes('XN3024BR') || partNo.startsWith('XN3024')) {
+        type = '人行道'
+        console.log('后备逻辑：找到类型: 人行道, 件号:', partNo)
+      }
+    }
+  }
+
+  // 如果找不到型号，返回null
+  if (!model) {
+    console.log('后备逻辑：未找到型号（1000型/800型/600型）')
+    return null
+  }
+
+  // 如果找不到类型，返回null（无法确定是扶梯还是人行道）
+  if (!type) {
+    console.log('后备逻辑：未找到类型（扶梯/人行道）')
+    return null
+  }
+
+  // 组合规格: 型号-环境-类型
+  const spec = `${model}-${environment}-${type}`
+  console.log('后备逻辑：推断的规格:', spec)
+
+  // 验证规格是否存在于支持的选项中
+  const validSpecs = [
+    '1000型-室内-扶梯',
+    '1000型-室外-扶梯',
+    '1000型-室内-人行道',
+    '1000型-室外-人行道',
+    '800型-室内-扶梯',
+    '800型-室外-扶梯',
+    '800型-室内-人行道',
+    '800型-室外-人行道',
+    '600型-室内-扶梯',
+    '600型-室外-扶梯',
+    '1000型-室内-老围框',
+    '800型-室内-老围框',
+    '600型-室内-老围框',
+  ]
+
+  const isValid = validSpecs.includes(spec)
+  console.log('后备逻辑：规格是否有效:', isValid)
+
+  return isValid ? spec : null
+}
+
+/**
  * 从Excel行数据中推断规格信息
  * 按前板件号区分扶梯还是人行道: 包含XN2808EB的是扶梯,包含XN3024BR的是人行道
  * 解析中板规格字段确定 1000型/800型/600型 和 室内/室外
@@ -463,7 +573,14 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
       (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
   )
 
+  console.log('查找前板组件:', frontPlateRow ? {
+    物料名称: frontPlateRow.物料名称,
+    物料件号: frontPlateRow.物料件号,
+    规格: frontPlateRow.规格,
+  } : '未找到')
+
   if (!frontPlateRow) {
+    console.log('未找到前板组件，无法推断规格')
     return null
   }
 
@@ -478,7 +595,10 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
     type = '人行道'
   }
 
+  console.log('前板件号:', frontPlatePartNo, '推断类型:', type)
+
   if (!type) {
+    console.log('无法从前板件号推断类型')
     return null
   }
 
@@ -492,19 +612,29 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
       (row.物料件号 && String(row.物料件号).startsWith('XN3024BT')),
   )
 
+  console.log('查找中板组件:', middlePlateRow ? {
+    物料名称: middlePlateRow.物料名称,
+    物料件号: middlePlateRow.物料件号,
+    规格: middlePlateRow.规格,
+  } : '未找到')
+
   if (!middlePlateRow || !middlePlateRow.规格) {
+    console.log('未找到中板组件或中板规格为空，无法推断规格')
     return null
   }
 
   // 4. 从中板规格字段提取型号(1000型/800型/600型)
   let model = ''
   const middlePlateSpec = String(middlePlateRow.规格)
+  console.log('中板规格字段:', middlePlateSpec)
   const specMatch = middlePlateSpec.match(/(1000型|800型|600型)/)
   if (specMatch) {
     model = specMatch[1]
+    console.log('提取到型号:', model)
   }
 
   if (!model) {
+    console.log('无法从中板规格字段提取型号')
     return null
   }
 
@@ -516,8 +646,12 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
     environment = '室内'
   }
 
+  console.log('推断环境:', environment)
+
   // 6. 组合规格: 型号-环境-类型
   const spec = `${model}-${environment}-${type}`
+
+  console.log('组合后的规格:', spec)
 
   // 7. 验证规格是否存在于支持的选项中
   const validSpecs = [
@@ -536,5 +670,8 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
     '600型-室内-老围框',
   ]
 
-  return validSpecs.includes(spec) ? spec : null
+  const isValid = validSpecs.includes(spec)
+  console.log('规格是否有效:', isValid)
+
+  return isValid ? spec : null
 }
