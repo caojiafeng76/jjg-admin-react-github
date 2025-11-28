@@ -195,7 +195,34 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
                 </div>
                 <div>
                   <Text strong>规格: </Text>
-                  <Text>{parsedData.po.Spec || '自动推断'}</Text>
+                  <Text>{parsedData.po.Spec || '未识别，请手动选择'}</Text>
+                  {parsedData.specInferred && (
+                    <Alert
+                      message={
+                        <Text strong style={{ fontSize: 14 }}>
+                          ⚠️ 规格已通过后备逻辑推断，请仔细核对！
+                        </Text>
+                      }
+                      description={
+                        <Text>
+                          系统从所有条目的规格和备注字段中推断出此规格：
+                          <Text strong style={{ color: '#ff4d4f', marginLeft: 4 }}>
+                            {parsedData.po.Spec}
+                          </Text>
+                          <br />
+                          请确认此规格是否正确，如有误请手动修改！
+                        </Text>
+                      }
+                      type="warning"
+                      showIcon
+                      style={{
+                        marginTop: 8,
+                        border: '2px solid #faad14',
+                        backgroundColor: '#fffbe6',
+                      }}
+                      banner
+                    />
+                  )}
                 </div>
                 <div>
                   <Text strong>商标: </Text>
