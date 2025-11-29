@@ -182,6 +182,16 @@ export async function getSyneyPos({
   const { data: syneyPos, count, error } = await query
 
   if (error) {
+    // 请求被取消时 Supabase 可能抛出 AbortError，这属于正常行为，这里直接返回空结果避免报错
+    if (
+      error &&
+      typeof error === 'object' &&
+      'name' in error &&
+      (error as { name?: string }).name === 'AbortError'
+    ) {
+      return { syneyPos: [], count: 0 }
+    }
+
     throw handleApiError(error, '订单列表获取失败')
   }
 
@@ -199,6 +209,16 @@ export default async function getSyneyPo(id: string, signal?: AbortSignal) {
   const { data, error } = await query.single()
 
   if (error) {
+    // 请求被取消时 Supabase 可能抛出 AbortError，这属于正常行为，这里直接返回 null 避免报错
+    if (
+      error &&
+      typeof error === 'object' &&
+      'name' in error &&
+      (error as { name?: string }).name === 'AbortError'
+    ) {
+      return null
+    }
+
     throw handleApiError(error, '获取订单详情失败')
   }
 

@@ -15,7 +15,9 @@ export default function Loading() {
         width: '100%',
       }}
     >
-      <Spin size="large" tip="加载中..." />
+      <Spin size="large" tip="加载中...">
+        <div style={{ minHeight: '2rem', width: '2rem' }} />
+      </Spin>
     </div>
   )
 }
