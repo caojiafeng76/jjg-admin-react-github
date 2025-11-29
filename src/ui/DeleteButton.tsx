@@ -30,6 +30,19 @@ export default function DeleteButton({
       `确定删除选中的${itemName}吗？此操作不可撤销。`
     )
 
+  // 如果传入了 count 且为 0，则不弹出二次确认，直接执行 onConfirm
+  if (count !== undefined && count <= 0) {
+    return (
+      <Button
+        type="text"
+        icon={<XCircleIcon className="size-4 !text-red-500/80" />}
+        onClick={onConfirm}
+      >
+        删除
+      </Button>
+    )
+  }
+
   return (
     <Popconfirm
       title={title}
