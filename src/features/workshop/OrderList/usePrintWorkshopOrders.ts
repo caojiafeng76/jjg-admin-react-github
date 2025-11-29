@@ -84,7 +84,7 @@ export function usePrintWorkshopOrders() {
         },
         margin: { top: 30 },
         startY: 20,
-        willDrawPage: (data) => {
+        willDrawPage: () => {
           // 添加标题
           doc.setFontSize(16)
           doc.text(

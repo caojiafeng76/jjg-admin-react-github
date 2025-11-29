@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Input, DatePicker, Button, Form, Space } from 'antd'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
-import dayjs, { Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs'
 
 const { RangePicker } = DatePicker
 
