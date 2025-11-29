@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { App, Modal, FormInstance } from 'antd'
 import dayjs from 'dayjs'
+import { useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import AddButton from '@/ui/AddButton'
@@ -38,8 +39,10 @@ export default function WorkshopOrderList() {
   const [modalTitle, setModalTitle] = useState('创建订单')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  // 使用 URL 参数管理分页，与 AppPagination 保持一致
+  const [searchParamsURL, setSearchParamsURL] = useSearchParams()
+  const page = Number(searchParamsURL.get('page')) || 1
+  const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const [formRef, setFormRef] = useState<FormInstance<WorkshopOrder> | null>(null)
   const [searchParams, setSearchParams] = useState<{
     project_no?: string
@@ -52,7 +55,7 @@ export default function WorkshopOrderList() {
   const { data, isLoading } = useQuery({
     queryKey: ['workshop-orders', page, pageSize, searchParams],
     queryFn: () => getWorkshopOrders({ page, pageSize, ...searchParams }),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   })
 
   const createMutation = useMutation({
@@ -136,14 +139,14 @@ export default function WorkshopOrderList() {
     const record = data?.items.find((item) => item.id === selectedRowKeys[0])
     if (!record) return
 
-    // 将日期字符串转换为 dayjs 对象
-    const formValues = {
+    // 将日期字符串转换为 dayjs 对象用于表单显示
+    const formValues: WorkshopOrder & { product_delivery_date: dayjs.Dayjs | undefined } = {
       ...record,
       product_delivery_date: record.product_delivery_date
         ? dayjs(record.product_delivery_date)
         : undefined,
-    }
-    setEditingRecord(formValues)
+    } as WorkshopOrder & { product_delivery_date: dayjs.Dayjs | undefined }
+    setEditingRecord(formValues as unknown as WorkshopOrder)
     setIsEdit(true)
     setModalTitle('编辑订单')
     setIsModalOpen(true)
@@ -178,19 +181,22 @@ export default function WorkshopOrderList() {
 
   const handleSearch = useCallback((params: typeof searchParams) => {
     setSearchParams(params)
-    setPage(1) // 搜索时重置到第一页
-  }, [])
+    searchParamsURL.set('page', '1')
+    setSearchParamsURL(searchParamsURL)
+  }, [searchParamsURL, setSearchParamsURL])
 
   const handleResetSearch = useCallback(() => {
     setSearchParams({})
-    setPage(1) // 重置时重置到第一页
-  }, [])
+    searchParamsURL.set('page', '1')
+    setSearchParamsURL(searchParamsURL)
+  }, [searchParamsURL, setSearchParamsURL])
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
-      setPage((prev) => Math.max(prev - 1, 1))
+      searchParamsURL.set('page', Math.max(page - 1, 1).toString())
+      setSearchParamsURL(searchParamsURL)
     }
-  }, [data, page])
+  }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
@@ -204,7 +210,7 @@ export default function WorkshopOrderList() {
           count={selectedRowKeys.length}
         />
         <PrintButton
-          onPrint={handlePrint}
+          handlePrint={handlePrint}
           loading={isPrinting}
           count={selectedRowKeys.length}
         />
@@ -227,13 +233,7 @@ export default function WorkshopOrderList() {
           />
         </div>
         <div className="flex justify-end">
-          <AppPagination
-            total={data?.total || 0}
-            onChange={(p, ps) => {
-              setPage(p)
-              setPageSize(ps)
-            }}
-          />
+          <AppPagination total={data?.total || 0} />
         </div>
       </div>
 
