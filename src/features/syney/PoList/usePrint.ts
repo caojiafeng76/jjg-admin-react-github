@@ -1,13 +1,16 @@
 import jsPDF from 'jspdf'
 import { format } from 'date-fns'
-import { message, MessageInstance } from 'antd'
+import { message } from 'antd'
 import { useState } from 'react'
 
 import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 import { openPDFInNewWindow } from '@/utils/pdfUtils'
 
-export function usePrint(messageApi?: MessageInstance) {
+// Type for the Ant Design message API instance returned by message.useMessage()
+type MessageApi = ReturnType<typeof message.useMessage>[0]
+
+export function usePrint(messageApi?: MessageApi) {
   const { selectedPosList, isLoading } = useSelectedPos()
   const [internalMessageApi, contextHolder] = message.useMessage()
   const api = messageApi || internalMessageApi

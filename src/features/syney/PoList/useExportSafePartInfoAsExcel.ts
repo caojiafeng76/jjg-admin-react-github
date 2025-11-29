@@ -3,7 +3,6 @@ import { format } from 'date-fns'
 import { message } from 'antd'
 
 import { useSelectedPos } from './useSelectedPos'
-import { ISyneyItem } from '@/services/types'
 
 // 安全件件号前缀列表（可配置）
 const SAFE_PART_PREFIXES = [

@@ -1,9 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { message, MessageInstance } from 'antd'
+import { message } from 'antd'
 
 import { deletePo as deletePoApi } from '@/services/apiSyneyPos'
 
-export function useDeletePo(messageApi?: MessageInstance) {
+// Type for the Ant Design message API instance returned by message.useMessage()
+type MessageApi = ReturnType<typeof message.useMessage>[0]
+
+export function useDeletePo(messageApi?: MessageApi) {
   const queryClient = useQueryClient()
   const [internalMessageApi, contextHolder] = message.useMessage()
   const api = messageApi || internalMessageApi
