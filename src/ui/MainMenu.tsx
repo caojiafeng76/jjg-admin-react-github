@@ -23,6 +23,12 @@ const items: MenuItem[] = [
       { key: 'syney-setting', label: '设置' },
     ],
   },
+  {
+    key: 'workshop',
+    label: '车间管理',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [{ key: 'workshop-order-list', label: '订单' }],
+  },
 ]
 
 const MainMenu: React.FC = () => {

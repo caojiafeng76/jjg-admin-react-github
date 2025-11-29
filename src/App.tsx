@@ -21,6 +21,7 @@ const SyneyStoreReportDetail = lazy(
 const SyneyPoList = lazy(() => import('./pages/SyneyPoList'))
 const SyneySetting = lazy(() => import('./pages/SyneySetting'))
 const SyneyPoDetail = lazy(() => import('./pages/SyneyPoDetail'))
+const WorkshopOrderList = lazy(() => import('./pages/WorkshopOrderList'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,6 +89,11 @@ export default function App() {
                     />
 
                     <Route path="/syney-setting" element={<SyneySetting />} />
+
+                    <Route
+                      path="/workshop-order-list"
+                      element={<WorkshopOrderList />}
+                    />
                   </Route>
 
                   <Route path="/login" element={<Login />} />
