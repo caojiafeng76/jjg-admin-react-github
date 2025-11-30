@@ -34,6 +34,7 @@ export default function ProductionRecordTable({
         dataIndex: 'production_date',
         key: 'production_date',
         width: 120,
+        fixed: 'left',
         render: (text: string) => {
           if (!text) return '-'
           return dayjs(text).format('YYYY-MM-DD')
@@ -43,6 +44,7 @@ export default function ProductionRecordTable({
         title: '订单',
         key: 'order',
         width: 250,
+        fixed: 'left',
         render: (_text, record) => {
           if (record.order) {
             const parts = [
@@ -110,6 +112,17 @@ export default function ProductionRecordTable({
         },
       },
       {
+        title: '工时（H）',
+        dataIndex: 'working_hours',
+        key: 'working_hours',
+        width: 100,
+        align: 'right',
+        render: (value: number | null | undefined) => {
+          if (value === null || value === undefined) return '-'
+          return value.toFixed(1)
+        },
+      },
+      {
         title: '操作者',
         key: 'operators',
         width: 200,
@@ -168,9 +181,13 @@ export default function ProductionRecordTable({
       (sum, record) => sum + (record.defective_quantity || 0),
       0,
     )
+    const totalWorkingHours = pageData.reduce(
+      (sum, record) => sum + (record.working_hours || 0),
+      0,
+    )
 
-    // 实际列索引（包含选择框列）：0=选择框, 1=#, 2=日期, 3=订单, 4=工序, 5=合格数量, 6=不良总数, 7=不良原因, 8=操作者, 9=备注, 10=创建时间
-    // 汇总行需要对齐到：合格数量(5) 和 不良总数(6) 列
+    // 实际列索引（包含选择框列）：0=选择框, 1=#, 2=日期, 3=订单, 4=工序, 5=合格数量, 6=不良总数, 7=不良原因, 8=工时, 9=操作者, 10=备注, 11=创建时间
+    // 汇总行需要对齐到：合格数量(5)、不良总数(6) 和 工时(8) 列
     return (
       <Table.Summary fixed>
         <Table.Summary.Row>
@@ -192,8 +209,14 @@ export default function ProductionRecordTable({
           </Table.Summary.Cell>
           {/* 不良原因列 (index 7) */}
           <Table.Summary.Cell index={7} />
-          {/* 合并剩余列：操作者、备注、创建时间 (index 8-10) */}
-          <Table.Summary.Cell index={8} colSpan={3} />
+          {/* 工时列 (index 8) */}
+          <Table.Summary.Cell index={8} align="right">
+            <span className="font-medium">
+              {totalWorkingHours > 0 ? totalWorkingHours.toFixed(1) : '-'}
+            </span>
+          </Table.Summary.Cell>
+          {/* 合并剩余列：操作者、备注、创建时间 (index 9-11) */}
+          <Table.Summary.Cell index={9} colSpan={3} />
         </Table.Summary.Row>
       </Table.Summary>
     )
@@ -206,7 +229,7 @@ export default function ProductionRecordTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 1500, y: 'calc(100vh - 260px)' as any }}
+      scroll={{ x: 'max-content', y: 'calc(100vh - 260px)' as any }}
       size="small"
       pagination={false}
       summary={summary}

@@ -17,7 +17,7 @@ import { usePrintWorkshopOrders } from './usePrintWorkshopOrders'
 
 export interface WorkshopOrder {
   id?: string
-  product_delivery_date: string
+  product_delivery_date: string | null
   project_no: string | null
   product_model: string | null
   length_mm: number | null

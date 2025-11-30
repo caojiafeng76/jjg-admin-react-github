@@ -15,6 +15,7 @@ export interface ProductionRecord {
   defective_quantity: number
   defect_reasons: DefectReasonItem[]
   operator_ids: string[]
+  working_hours?: number | null
   remark?: string | null
   created_at?: string
   updated_at?: string
@@ -28,6 +29,7 @@ export interface ProductionRecordWithRelations extends ProductionRecord {
     product_model: string | null
     customer_model: string | null
     length_mm: number | null
+    weight_per_meter_kg: number | null
   }
   process?: {
     id: string
@@ -79,7 +81,8 @@ export async function getProductionRecords({
         project_no,
         product_model,
         customer_model,
-        length_mm
+        length_mm,
+        weight_per_meter_kg
       ),
       workshop_processes!production_records_process_id_fkey (
         id,

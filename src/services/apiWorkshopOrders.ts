@@ -111,7 +111,13 @@ export async function createWorkshopOrder(values: WorkshopOrder) {
     }
   }
 
-  const { error } = await supabase.from('sales_orders').insert(values)
+  // 处理 product_delivery_date 可能为 null 的情况
+  const insertValues = {
+    ...values,
+    product_delivery_date: values.product_delivery_date || undefined,
+  } as any
+
+  const { error } = await supabase.from('sales_orders').insert(insertValues)
 
   if (error) {
     throw handleApiError(error, '创建车间订单失败')
@@ -142,9 +148,15 @@ export async function updateWorkshopOrder({
     }
   }
 
+  // 处理 product_delivery_date 可能为 null 的情况
+  const updateValues = {
+    ...values,
+    product_delivery_date: values.product_delivery_date !== null ? values.product_delivery_date : undefined,
+  } as any
+
   const { error } = await supabase
     .from('sales_orders')
-    .update(values)
+    .update(updateValues)
     .eq('id', id)
 
   if (error) {
@@ -165,7 +177,13 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
     )
   }
 
-  const { error } = await supabase.from('sales_orders').insert(rows)
+  // 处理 product_delivery_date 可能为 null 的情况
+  const insertRows = rows.map((row) => ({
+    ...row,
+    product_delivery_date: row.product_delivery_date || undefined,
+  })) as any[]
+
+  const { error } = await supabase.from('sales_orders').insert(insertRows)
 
   if (error) {
     throw handleApiError(error, '批量创建车间订单失败')
