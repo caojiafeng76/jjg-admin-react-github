@@ -23,3 +23,4 @@ CREATE TRIGGER update_employees_updated_at
 -- 创建索引以提高查询性能
 CREATE INDEX IF NOT EXISTS idx_employees_name ON employees(name);
 
+
