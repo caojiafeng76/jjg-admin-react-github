@@ -268,7 +268,9 @@ export default function PoList() {
             count={tableSelectedKeys.length}
           />
 
-          <PrintButton handlePrint={handlePrint} />
+          <PrintButton handlePrint={handlePrint}>
+            打印中文标签
+          </PrintButton>
           <PrintButton handlePrint={handlePrintEnglish}>
             打印英文标签
           </PrintButton>

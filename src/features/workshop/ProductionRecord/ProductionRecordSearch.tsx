@@ -1,6 +1,7 @@
 import { DatePicker, Select, Button, Space, Input } from 'antd'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { type Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import { useQuery } from '@tanstack/react-query'
 import { getWorkshopOrders } from '@/services/apiWorkshopOrders'
 import { getWorkshopProcesses } from '@/services/apiWorkshopProcesses'
@@ -18,11 +19,29 @@ interface Props {
     operator_id?: string
   }) => void
   onReset: () => void
+  initialStartDate?: string
+  initialEndDate?: string
 }
 
-export default function ProductionRecordSearch({ onSearch, onReset }: Props) {
-  const [startDate, setStartDate] = useState<Dayjs | null>(null)
-  const [endDate, setEndDate] = useState<Dayjs | null>(null)
+export default function ProductionRecordSearch({ 
+  onSearch, 
+  onReset,
+  initialStartDate,
+  initialEndDate,
+}: Props) {
+  // 初始化时设置为当月日期范围
+  const getCurrentMonthRange = () => {
+    const start = dayjs().startOf('month')
+    const end = dayjs().endOf('month')
+    return {
+      start: initialStartDate ? dayjs(initialStartDate) : start,
+      end: initialEndDate ? dayjs(initialEndDate) : end,
+    }
+  }
+
+  const monthRange = getCurrentMonthRange()
+  const [startDate, setStartDate] = useState<Dayjs | null>(monthRange.start)
+  const [endDate, setEndDate] = useState<Dayjs | null>(monthRange.end)
   const [orderId, setOrderId] = useState<string | undefined>(undefined)
   const [processId, setProcessId] = useState<string | undefined>(undefined)
   const [productModel, setProductModel] = useState<string | undefined>(undefined)
@@ -58,14 +77,27 @@ export default function ProductionRecordSearch({ onSearch, onReset }: Props) {
   }
 
   const handleReset = () => {
-    setStartDate(null)
-    setEndDate(null)
+    // 重置时恢复为当月日期范围
+    const currentMonthStart = dayjs().startOf('month')
+    const currentMonthEnd = dayjs().endOf('month')
+    setStartDate(currentMonthStart)
+    setEndDate(currentMonthEnd)
     setOrderId(undefined)
     setProcessId(undefined)
     setProductModel(undefined)
     setOperatorId(undefined)
     onReset()
   }
+
+  // 当初始日期变化时，同步更新本地状态（不自动触发搜索，避免循环）
+  useEffect(() => {
+    if (initialStartDate && initialEndDate) {
+      const start = dayjs(initialStartDate)
+      const end = dayjs(initialEndDate)
+      setStartDate(start)
+      setEndDate(end)
+    }
+  }, [initialStartDate, initialEndDate]) // 仅在初始日期变化时执行
 
   const handleDateRangeChange = (
     dates: null | [Dayjs | null, Dayjs | null],

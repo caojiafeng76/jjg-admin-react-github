@@ -36,7 +36,7 @@ export default function WorkshopOrderForm({
       // Excel 导入模式：批量提交
       const formattedRows = excelRows.map((row) => ({
         ...row,
-        product_delivery_date: row.product_delivery_date || '',
+        product_delivery_date: row.product_delivery_date || null,
       }))
       onFinish(formattedRows)
     } else {
@@ -45,7 +45,7 @@ export default function WorkshopOrderForm({
         ...values,
         product_delivery_date: values.product_delivery_date
           ? dayjs(values.product_delivery_date).format('YYYY-MM-DD')
-          : '',
+          : null,
       }
       onFinish(payload)
     }
@@ -157,7 +157,6 @@ export default function WorkshopOrderForm({
           <Form.Item
             name="product_delivery_date"
             label="产品交货日期"
-            rules={[{ required: true, message: '请选择产品交货日期' }]}
           >
             <DatePicker style={{ width: '100%' }} disabled={isCreating} />
           </Form.Item>

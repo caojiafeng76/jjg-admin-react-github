@@ -1,16 +1,16 @@
 import { Button } from 'antd'
-import { PrinterIcon } from '@heroicons/react/16/solid'
+import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
 
 interface Props {
-  handlePrint: () => void
+  handleExport: () => void
   disabled?: boolean
   loading?: boolean
   count?: number
   children?: React.ReactNode
 }
 
-export default function PrintButton({
-  handlePrint,
+export default function ExportButton({
+  handleExport,
   disabled = false,
   loading = false,
   count,
@@ -19,14 +19,14 @@ export default function PrintButton({
   return (
     <Button
       type="text"
-      icon={<PrinterIcon className="size-4" />}
-      onClick={handlePrint}
+      icon={<ArrowDownTrayIcon className="size-4" />}
+      onClick={handleExport}
       disabled={disabled || loading || (count !== undefined && count === 0)}
       loading={loading}
     >
       {children || (
         <>
-          打印PDF
+          导出Excel
           {count !== undefined && count > 0 && (
             <span className="ml-1 text-xs">({count})</span>
           )}
@@ -35,3 +35,4 @@ export default function PrintButton({
     </Button>
   )
 }
+

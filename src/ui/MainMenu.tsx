@@ -32,7 +32,7 @@ const items: MenuItem[] = [
       { key: 'workshop-process-list', label: '工序管理' },
       { key: 'workshop-defect-reason-list', label: '不良原因管理' },
       { key: 'employee-list', label: '员工管理' },
-      { key: 'production-record-list', label: '产量录入' },
+      { key: 'production-record-list', label: '产量录入&统计' },
     ],
   },
 ]

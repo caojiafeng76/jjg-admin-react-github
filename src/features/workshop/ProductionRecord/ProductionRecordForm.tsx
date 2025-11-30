@@ -72,9 +72,9 @@ export default function ProductionRecordForm({
       }
       form.setFieldsValue(values)
     } else {
-      // 设置默认值
+      // 设置默认值（日期默认为当前日期的前一天）
       form.setFieldsValue({
-        production_date: dayjs(),
+        production_date: dayjs().subtract(1, 'day'),
         qualified_quantity: 0,
         defective_quantity: 0,
         defect_reasons: [],
@@ -93,7 +93,7 @@ export default function ProductionRecordForm({
       ...values,
       production_date: values.production_date
         ? dayjs(values.production_date).format('YYYY-MM-DD')
-        : dayjs().format('YYYY-MM-DD'),
+        : dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
       defective_quantity: totalDefectiveQuantity,
       defect_reasons: values.defect_reasons || [],
     }
@@ -149,7 +149,7 @@ export default function ProductionRecordForm({
         name="production_date"
         label="日期"
         rules={[{ required: true, message: '请选择日期' }]}
-        initialValue={dayjs()}
+        initialValue={dayjs().subtract(1, 'day')}
       >
         <DatePicker
           style={{ width: '100%' }}
@@ -309,6 +309,20 @@ export default function ProductionRecordForm({
             (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
           }
           options={employeeOptions}
+        />
+      </Form.Item>
+
+      <Form.Item
+        name="working_hours"
+        label="工时（H）"
+      >
+        <InputNumber
+          style={{ width: '100%' }}
+          min={0}
+          step={0.1}
+          precision={1}
+          placeholder="请输入工时，例如：11.5"
+          disabled={isCreating}
         />
       </Form.Item>
 
