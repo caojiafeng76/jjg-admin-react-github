@@ -1,0 +1,216 @@
+import { useMemo } from 'react'
+import { Table, TableColumnsType, Tag } from 'antd'
+import dayjs from 'dayjs'
+import type { ProductionRecordWithRelations } from '@/services/apiProductionRecords'
+
+interface Props {
+  loading: boolean
+  data: ProductionRecordWithRelations[]
+  selectedRowKeys: React.Key[]
+  onSelect: (keys: React.Key[]) => void
+  page: number
+  pageSize: number
+}
+
+export default function ProductionRecordTable({
+  loading,
+  data,
+  selectedRowKeys,
+  onSelect,
+  page,
+  pageSize,
+}: Props) {
+  const columns: TableColumnsType<ProductionRecordWithRelations> = useMemo(
+    () => [
+      {
+        title: '#',
+        render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
+        width: 60,
+        fixed: 'left',
+        key: '#',
+      },
+      {
+        title: '日期',
+        dataIndex: 'production_date',
+        key: 'production_date',
+        width: 120,
+        render: (text: string) => {
+          if (!text) return '-'
+          return dayjs(text).format('YYYY-MM-DD')
+        },
+      },
+      {
+        title: '订单',
+        key: 'order',
+        width: 250,
+        render: (_text, record) => {
+          if (record.order) {
+            const parts = [
+              record.order.project_no || '',
+              record.order.product_model || '',
+            ].filter(Boolean)
+            const orderInfo = parts.join(' - ')
+            const lengthInfo = record.order.length_mm
+              ? `(${record.order.length_mm}mm)`
+              : ''
+            return `${orderInfo} ${lengthInfo}`.trim()
+          }
+          return '-'
+        },
+      },
+      {
+        title: '工序',
+        key: 'process',
+        width: 150,
+        render: (_text, record) => {
+          return record.process?.process_name || '-'
+        },
+      },
+      {
+        title: '合格数量',
+        dataIndex: 'qualified_quantity',
+        key: 'qualified_quantity',
+        width: 100,
+        align: 'right',
+      },
+      {
+        title: '不良总数',
+        dataIndex: 'defective_quantity',
+        key: 'defective_quantity',
+        width: 100,
+        align: 'right',
+      },
+      {
+        title: '不良原因',
+        key: 'defect_reasons',
+        width: 300,
+        render: (_text, record) => {
+          if (
+            record.defect_reasons_with_details &&
+            record.defect_reasons_with_details.length > 0
+          ) {
+            return (
+              <div className="space-y-1">
+                {record.defect_reasons_with_details.map(
+                  (item: any, index: number) => (
+                    <div key={index} className="text-xs">
+                      <span className="font-medium">
+                        {item.defect_reason?.defect_reason || '未知原因'}
+                      </span>
+                      <span className="ml-2 text-gray-500">
+                        ×{item.quantity}
+                      </span>
+                    </div>
+                  ),
+                )}
+              </div>
+            )
+          }
+          return '-'
+        },
+      },
+      {
+        title: '操作者',
+        key: 'operators',
+        width: 200,
+        render: (_text, record) => {
+          if (record.operators && record.operators.length > 0) {
+            return (
+              <div className="flex flex-wrap gap-1">
+                {record.operators.map((operator) => (
+                  <Tag key={operator.id}>{operator.name}</Tag>
+                ))}
+              </div>
+            )
+          }
+          return '-'
+        },
+      },
+      {
+        title: '备注',
+        dataIndex: 'remark',
+        key: 'remark',
+        width: 150,
+        ellipsis: true,
+        render: (text: string) => text || '-',
+      },
+      {
+        title: '创建时间',
+        dataIndex: 'created_at',
+        key: 'created_at',
+        width: 180,
+        render: (text: string) => {
+          if (!text) return '-'
+          return new Date(text).toLocaleString('zh-CN')
+        },
+      },
+    ],
+    [page, pageSize],
+  )
+
+  const rowSelection = useMemo(
+    () => ({
+      selectedRowKeys,
+      onChange: (keys: React.Key[]) => {
+        onSelect(keys)
+      },
+    }),
+    [selectedRowKeys, onSelect],
+  )
+
+  // 计算汇总数据
+  const summary = (pageData: readonly ProductionRecordWithRelations[]) => {
+    const totalQualified = pageData.reduce(
+      (sum, record) => sum + (record.qualified_quantity || 0),
+      0,
+    )
+    const totalDefective = pageData.reduce(
+      (sum, record) => sum + (record.defective_quantity || 0),
+      0,
+    )
+
+    // columns索引：0=#, 1=日期, 2=订单, 3=工序, 4=合格数量, 5=不良总数, 6=不良原因, 7=操作者, 8=备注, 9=创建时间
+    // 汇总行需要对齐到：合格数量(4) 和 不良总数(5) 列
+    return (
+      <Table.Summary fixed>
+        <Table.Summary.Row>
+          {/* 合并 #、日期、订单、工序 (index 0-3)，占用4列 */}
+          <Table.Summary.Cell index={0} colSpan={4} />
+          {/* 合格数量列 (index 4) */}
+          <Table.Summary.Cell index={4} align="right">
+            <span className="font-medium">
+              {totalQualified.toLocaleString()}
+            </span>
+          </Table.Summary.Cell>
+          {/* 不良总数列 (index 5) */}
+          <Table.Summary.Cell index={5} align="right">
+            <span className="font-medium">
+              {totalDefective.toLocaleString()}
+            </span>
+          </Table.Summary.Cell>
+          {/* 不良原因列 (index 6) */}
+          <Table.Summary.Cell index={6} />
+          {/* 合并剩余列：操作者、备注、创建时间 (index 7-9) */}
+          <Table.Summary.Cell index={7} colSpan={3} />
+        </Table.Summary.Row>
+      </Table.Summary>
+    )
+  }
+
+  return (
+    <Table<ProductionRecordWithRelations>
+      rowKey={(record) => record.id || ''}
+      loading={loading}
+      columns={columns}
+      dataSource={data}
+      rowSelection={rowSelection}
+      scroll={{ x: 1500, y: 'calc(100vh - 260px)' as any }}
+      size="small"
+      pagination={false}
+      summary={summary}
+      style={{
+        fontSize: '12px',
+      }}
+    />
+  )
+}

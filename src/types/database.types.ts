@@ -303,6 +303,105 @@ export type Database = {
         }
         Relationships: []
       }
+      workshop_processes: {
+        Row: {
+          created_at: string | null
+          id: string
+          process_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          process_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          process_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      production_records: {
+        Row: {
+          created_at: string | null
+          defect_reasons: Json
+          defective_quantity: number
+          id: string
+          operator_ids: string[]
+          order_id: string
+          process_id: string
+          production_date: string
+          qualified_quantity: number
+          remark: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          defect_reasons?: Json
+          defective_quantity?: number
+          id?: string
+          operator_ids?: string[]
+          order_id: string
+          process_id: string
+          production_date?: string
+          qualified_quantity?: number
+          remark?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          defect_reasons?: Json
+          defective_quantity?: number
+          id?: string
+          operator_ids?: string[]
+          order_id?: string
+          process_id?: string
+          production_date?: string
+          qualified_quantity?: number
+          remark?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_records_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_records_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
