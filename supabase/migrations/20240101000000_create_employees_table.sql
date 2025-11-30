@@ -24,3 +24,4 @@ CREATE TRIGGER update_employees_updated_at
 CREATE INDEX IF NOT EXISTS idx_employees_name ON employees(name);
 
 
+
