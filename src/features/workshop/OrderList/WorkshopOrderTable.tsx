@@ -313,6 +313,7 @@ export default function WorkshopOrderTable({
       rowSelection={rowSelection}
       scroll={{ x: 1300, y: 'calc(100vh - 260px)' as any }}
       size="small"
+      pagination={false}
       style={{
         fontSize: '12px',
       }}

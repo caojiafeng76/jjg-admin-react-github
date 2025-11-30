@@ -22,6 +22,10 @@ const SyneyPoList = lazy(() => import('./pages/SyneyPoList'))
 const SyneySetting = lazy(() => import('./pages/SyneySetting'))
 const SyneyPoDetail = lazy(() => import('./pages/SyneyPoDetail'))
 const WorkshopOrderList = lazy(() => import('./pages/WorkshopOrderList'))
+const WorkshopProcessList = lazy(() => import('./pages/WorkshopProcessList'))
+const WorkshopDefectReasonList = lazy(() => import('./pages/WorkshopDefectReasonList'))
+const EmployeeList = lazy(() => import('./pages/EmployeeList'))
+const ProductionRecordList = lazy(() => import('./pages/ProductionRecordList'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +97,22 @@ export default function App() {
                     <Route
                       path="/workshop-order-list"
                       element={<WorkshopOrderList />}
+                    />
+                    <Route
+                      path="/workshop-process-list"
+                      element={<WorkshopProcessList />}
+                    />
+                    <Route
+                      path="/workshop-defect-reason-list"
+                      element={<WorkshopDefectReasonList />}
+                    />
+                    <Route
+                      path="/employee-list"
+                      element={<EmployeeList />}
+                    />
+                    <Route
+                      path="/production-record-list"
+                      element={<ProductionRecordList />}
                     />
                   </Route>
 
