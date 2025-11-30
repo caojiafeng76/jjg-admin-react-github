@@ -169,29 +169,31 @@ export default function ProductionRecordTable({
       0,
     )
 
-    // columns索引：0=#, 1=日期, 2=订单, 3=工序, 4=合格数量, 5=不良总数, 6=不良原因, 7=操作者, 8=备注, 9=创建时间
-    // 汇总行需要对齐到：合格数量(4) 和 不良总数(5) 列
+    // 实际列索引（包含选择框列）：0=选择框, 1=#, 2=日期, 3=订单, 4=工序, 5=合格数量, 6=不良总数, 7=不良原因, 8=操作者, 9=备注, 10=创建时间
+    // 汇总行需要对齐到：合格数量(5) 和 不良总数(6) 列
     return (
       <Table.Summary fixed>
         <Table.Summary.Row>
-          {/* 合并 #、日期、订单、工序 (index 0-3)，占用4列 */}
-          <Table.Summary.Cell index={0} colSpan={4} />
-          {/* 合格数量列 (index 4) */}
-          <Table.Summary.Cell index={4} align="right">
+          {/* 选择框列 (index 0) */}
+          <Table.Summary.Cell index={0} />
+          {/* 合并 #、日期、订单、工序 (index 1-4)，占用4列 */}
+          <Table.Summary.Cell index={1} colSpan={4} />
+          {/* 合格数量列 (index 5) */}
+          <Table.Summary.Cell index={5} align="right">
             <span className="font-medium">
               {totalQualified.toLocaleString()}
             </span>
           </Table.Summary.Cell>
-          {/* 不良总数列 (index 5) */}
-          <Table.Summary.Cell index={5} align="right">
+          {/* 不良总数列 (index 6) */}
+          <Table.Summary.Cell index={6} align="right">
             <span className="font-medium">
               {totalDefective.toLocaleString()}
             </span>
           </Table.Summary.Cell>
-          {/* 不良原因列 (index 6) */}
-          <Table.Summary.Cell index={6} />
-          {/* 合并剩余列：操作者、备注、创建时间 (index 7-9) */}
-          <Table.Summary.Cell index={7} colSpan={3} />
+          {/* 不良原因列 (index 7) */}
+          <Table.Summary.Cell index={7} />
+          {/* 合并剩余列：操作者、备注、创建时间 (index 8-10) */}
+          <Table.Summary.Cell index={8} colSpan={3} />
         </Table.Summary.Row>
       </Table.Summary>
     )
