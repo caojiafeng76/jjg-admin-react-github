@@ -4,7 +4,6 @@ import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import type { WorkshopOrder } from './index'
 import WorkshopExcelUpload from './WorkshopExcelUpload'
-import { downloadWorkshopOrderTemplate } from '@/utils/workshopExcel'
 
 const { Text } = Typography
 
@@ -234,15 +233,6 @@ export default function WorkshopOrderForm({
       {/* Excel导入模式 */}
       {!isEdit && importMode === 'excel' && (
         <>
-          <Form.Item label="下载模板">
-            <button
-              type="button"
-              onClick={downloadWorkshopOrderTemplate}
-              className="text-blue-500 hover:text-blue-700 underline"
-            >
-              下载Excel模板
-            </button>
-          </Form.Item>
           <Form.Item label="上传文件">
             <WorkshopExcelUpload
               onParsed={handleExcelParsed}

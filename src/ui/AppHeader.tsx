@@ -7,6 +7,7 @@ import { Header } from 'antd/es/layout/layout'
 import { useLocation } from 'react-router-dom'
 
 import DarkModeButton from '@ui/DarkModeButton'
+import { useAppStore } from '@/store'
 
 // 路由到页面名称的映射
 const routeToLabelMap: Record<string, string> = {
@@ -32,6 +33,7 @@ export default function AppHeader({
   onToggleCollapse: () => void
 }) {
   const location = useLocation()
+  const { isDarkMode } = useAppStore()
   const currentPath = location.pathname.slice(1) || 'dashboard'
   const pageName = routeToLabelMap[currentPath] || ''
 
@@ -57,7 +59,13 @@ export default function AppHeader({
         }}
       />
       {pageName && (
-        <span className="ml-2 text-base font-medium text-gray-700 dark:text-gray-300">
+        <span
+          className="ml-2 text-base"
+          style={{
+            fontWeight: 600,
+            color: isDarkMode ? '#ffffff' : '#000000',
+          }}
+        >
           {pageName}
         </span>
       )}

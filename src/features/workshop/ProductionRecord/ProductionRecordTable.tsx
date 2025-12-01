@@ -229,7 +229,7 @@ export default function ProductionRecordTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 'max-content', y: 'calc(100vh - 260px)' as any }}
+      scroll={{ x: 'max-content' }}
       size="small"
       pagination={false}
       summary={summary}

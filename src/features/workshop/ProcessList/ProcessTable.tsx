@@ -75,7 +75,7 @@ export default function ProcessTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 800, y: 'calc(100vh - 260px)' as any }}
+      scroll={{ x: 800 }}
       size="small"
       pagination={false}
       style={{

@@ -121,5 +121,41 @@ export async function deleteEmployees(ids: string[]) {
   }
 }
 
+/**
+ * 批量创建员工
+ * @param names 员工姓名数组
+ * @returns 成功创建的数量和失败的数量
+ */
+export async function batchCreateEmployees(names: string[]) {
+  if (!names || names.length === 0) {
+    throw new Error('员工姓名列表不能为空')
+  }
+
+  // 过滤掉空字符串和重复的姓名
+  const uniqueNames = Array.from(new Set(names.filter((name) => name.trim())))
+
+  if (uniqueNames.length === 0) {
+    throw new Error('没有有效的员工姓名')
+  }
+
+  // 准备插入数据
+  const employees = uniqueNames.map((name) => ({ name: name.trim() }))
+
+  // 批量插入，使用 ON CONFLICT 忽略已存在的记录
+  const { data, error } = await supabase
+    .from('employees')
+    .insert(employees)
+    .select()
+
+  if (error) {
+    throw handleApiError(error, '批量创建员工失败')
+  }
+
+  return {
+    success: data?.length || 0,
+    total: uniqueNames.length,
+  }
+}
+
 
 
