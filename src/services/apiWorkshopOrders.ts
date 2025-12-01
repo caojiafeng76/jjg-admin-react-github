@@ -1,5 +1,5 @@
 import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
+import { AppError, handleApiError } from '@/utils/errorHandler'
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
 
 export async function getWorkshopOrders({
@@ -194,6 +194,12 @@ export async function deleteWorkshopOrders(ids: string[]) {
   const { error } = await supabase.from('sales_orders').delete().in('id', ids)
 
   if (error) {
+    if (error.code === '23503') {
+      throw new AppError(
+        '该订单已关联生产数据，无法删除',
+        'FOREIGN_KEY_CONSTRAINT',
+      )
+    }
     throw handleApiError(error, '删除车间订单失败')
   }
 }

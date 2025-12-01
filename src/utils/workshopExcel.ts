@@ -48,12 +48,16 @@ export async function parseWorkshopOrderExcel(file: File): Promise<WorkshopOrder
 
   const templateRows = parseTemplateSheet(sheet)
   if (templateRows.length > 0) {
-    return templateRows
+    const uniqueRows = deduplicateOrders(templateRows)
+    validateProjectNoUniqueness(uniqueRows)
+    return uniqueRows
   }
 
   const erpRows = parseErpSalesOrderSheet(sheet)
   if (erpRows.length > 0) {
-    return erpRows
+    const uniqueRows = deduplicateOrders(erpRows)
+    validateProjectNoUniqueness(uniqueRows)
+    return uniqueRows
   }
 
   throw new Error('未识别的 Excel 格式，请使用模板或 ERP 导出的《销售订单登记.xlsx》。')
@@ -156,6 +160,48 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
   }
 
   return orders
+}
+
+function deduplicateOrders(orders: WorkshopOrder[]): WorkshopOrder[] {
+  const seen = new Set<string>()
+  const unique: WorkshopOrder[] = []
+
+  for (const order of orders) {
+    const key = [
+      order.project_no ?? '',
+      order.product_model ?? '',
+      order.customer_model ?? '',
+      order.material_code ?? '',
+      order.product_delivery_date ?? '',
+      order.order_quantity ?? '',
+    ].join('|')
+
+    if (seen.has(key)) continue
+    seen.add(key)
+    unique.push(order)
+  }
+
+  return unique
+}
+
+function validateProjectNoUniqueness(orders: WorkshopOrder[]) {
+  const duplicates = orders
+    .map((order) => order.project_no?.trim())
+    .filter((projectNo): projectNo is string => !!projectNo)
+    .reduce<Record<string, number>>((acc, projectNo) => {
+      acc[projectNo] = (acc[projectNo] || 0) + 1
+      return acc
+    }, {})
+
+  const duplicatedProjectNos = Object.entries(duplicates)
+    .filter(([, count]) => count > 1)
+    .map(([projectNo]) => projectNo)
+
+  if (duplicatedProjectNos.length > 0) {
+    throw new Error(
+      `Excel 中存在重复项目号：${duplicatedProjectNos.join('、')}。\n请合并或删除重复项目号后重新上传。`,
+    )
+  }
 }
 
 function findErpColumnMap(rows: WorksheetRow[]): ErpColumnMap | null {

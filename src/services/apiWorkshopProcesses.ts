@@ -1,5 +1,5 @@
 import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
+import { AppError, handleApiError } from '@/utils/errorHandler'
 
 export interface WorkshopProcess {
   id?: string
@@ -117,6 +117,12 @@ export async function deleteWorkshopProcesses(ids: string[]) {
     .in('id', ids)
 
   if (error) {
+    if (error.code === '23503') {
+      throw new AppError(
+        '该工序已关联生产数据，无法删除',
+        'FOREIGN_KEY_CONSTRAINT',
+      )
+    }
     throw handleApiError(error, '删除工序失败')
   }
 }
