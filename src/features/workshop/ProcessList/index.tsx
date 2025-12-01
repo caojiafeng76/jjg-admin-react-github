@@ -75,6 +75,9 @@ export default function ProcessList() {
       setSelectedRowKeys([])
       message.success('删除成功')
     },
+    onError: (error) => {
+      message.error(error instanceof Error ? error.message : '删除失败')
+    },
   })
 
   const handleCreate = useCallback(() => {

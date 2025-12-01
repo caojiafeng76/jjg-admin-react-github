@@ -1,5 +1,5 @@
 import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
+import { AppError, handleApiError } from '@/utils/errorHandler'
 
 export interface Employee {
   id?: string
@@ -117,6 +117,12 @@ export async function deleteEmployees(ids: string[]) {
     .in('id', ids)
 
   if (error) {
+    if (error.code === '23503') {
+      throw new AppError(
+        '该员工已在其他数据中被引用，无法删除',
+        'FOREIGN_KEY_CONSTRAINT',
+      )
+    }
     throw handleApiError(error, '删除员工失败')
   }
 }
