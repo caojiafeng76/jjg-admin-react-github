@@ -26,9 +26,9 @@ export async function getWorkshopOrders({
     .from('sales_orders')
     .select('*', { count: 'exact' })
 
-  // 项目号搜索（精确匹配）
+  // 项目号搜索（模糊匹配）
   if (project_no) {
-    query = query.eq('project_no', project_no)
+    query = query.ilike('project_no', `%${project_no}%`)
   }
 
   // 产品型号搜索（模糊匹配）
