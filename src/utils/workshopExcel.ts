@@ -110,6 +110,9 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
     blankrows: false,
   })
 
+  const mergedRowSkipSet = buildMergedRowSkipSet(sheet)
+  const range = XLSX.utils.decode_range(sheet['!ref'] ?? 'A1:A1')
+
   let columnMap = findErpColumnMap(rows)
   if (!columnMap) {
     return []
@@ -119,6 +122,12 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
+    const rowIndex = range.s.r + i
+
+    if (mergedRowSkipSet.has(rowIndex)) {
+      continue
+    }
+
     if (!row || row.length === 0) continue
 
     if (isErpHeaderRow(row)) {
@@ -337,4 +346,20 @@ function isNoiseRow(row: WorksheetRow) {
 
 function removeSpaces(value: string) {
   return value.replace(/\s+/g, '')
+}
+
+function buildMergedRowSkipSet(sheet: WorkSheet): Set<number> {
+  const skip = new Set<number>()
+  const merges = sheet['!merges'] ?? []
+
+  for (const merge of merges) {
+    if (!merge || !merge.s || !merge.e) continue
+    if (merge.s.r === merge.e.r) continue
+
+    for (let r = merge.s.r + 1; r <= merge.e.r; r++) {
+      skip.add(r)
+    }
+  }
+
+  return skip
 }
