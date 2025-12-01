@@ -311,7 +311,7 @@ export default function WorkshopOrderTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 1300, y: 'calc(100vh - 260px)' as any }}
+      scroll={{ x: 1300 }}
       size="small"
       pagination={false}
       style={{

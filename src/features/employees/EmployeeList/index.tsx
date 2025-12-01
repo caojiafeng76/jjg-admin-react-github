@@ -166,8 +166,8 @@ export default function EmployeeList() {
       </div>
 
       {/* 表格和分页 */}
-      <div className="grid grid-rows-[1fr_auto] gap-4 overflow-hidden">
-        <div className="overflow-hidden">
+      <div className="flex flex-col gap-4 overflow-hidden">
+        <div className="flex-1 overflow-auto">
           <EmployeeTable
             loading={isLoading}
             data={data?.items || []}
@@ -177,7 +177,7 @@ export default function EmployeeList() {
             pageSize={pageSize}
           />
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end flex-shrink-0">
           <AppPagination total={data?.total || 0} />
         </div>
       </div>
