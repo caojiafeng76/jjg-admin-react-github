@@ -8,6 +8,7 @@ import AppLayout from '@ui/AppLayout'
 import ErrorBoundary from '@ui/ErrorBoundary'
 import Loading from '@ui/Loading'
 import { useAppStore } from '@/store'
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
 // 懒加载页面组件
 const Dashboard = lazy(() => import('@pages/Dashboard'))
@@ -36,6 +37,20 @@ const queryClient = new QueryClient({
   },
 })
 
+function ProtectedRoute({ element }: { element: JSX.Element }) {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return <Loading />
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  return element
+}
+
 export default function App() {
   const { isDarkMode } = useAppStore()
 
@@ -62,10 +77,13 @@ export default function App() {
       <ConfigProvider theme={themeMode}>
         <AntdApp>
           <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <Suspense fallback={<Loading />}>
-                <Routes>
-                  <Route element={<AppLayout />}>
+            <AuthProvider>
+              <BrowserRouter>
+                <Suspense fallback={<Loading />}>
+                  <Routes>
+                    <Route
+                      element={<ProtectedRoute element={<AppLayout />} />}
+                    >
                     <Route
                       index
                       element={<Navigate replace to="/dashboard" />}
@@ -116,11 +134,12 @@ export default function App() {
                     />
                   </Route>
 
-                  <Route path="/login" element={<Login />} />
-                  <Route path="*" element={<PageNotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="*" element={<PageNotFound />} />
+                  </Routes>
+                </Suspense>
+              </BrowserRouter>
+            </AuthProvider>
             <ReactQueryDevtools initialIsOpen={false} />
           </QueryClientProvider>
         </AntdApp>
