@@ -1,26 +1,24 @@
 import { useState, useCallback, useEffect } from 'react'
 import { App, Modal, FormInstance } from 'antd'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import AppPagination from '@/ui/AppPagination'
+import type { Employee } from '@/services/apiEmployees'
 import {
-  getEmployees,
-  createEmployee,
-  updateEmployee,
-  deleteEmployees,
-  type Employee,
-} from '@/services/apiEmployees'
+  useEmployeesList,
+  useCreateEmployee,
+  useUpdateEmployee,
+  useDeleteEmployees,
+} from './useEmployees'
 import EmployeeTable from './EmployeeTable'
 import EmployeeForm from './EmployeeForm'
 import EmployeeSearch from './EmployeeSearch'
 
 export default function EmployeeList() {
   const { message } = App.useApp()
-  const queryClient = useQueryClient()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建员工')
@@ -34,51 +32,17 @@ export default function EmployeeList() {
     name?: string
   }>({})
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['employees', page, pageSize, searchParams],
-    queryFn: () => getEmployees({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+  const { data, isLoading } = useEmployeesList({
+    page,
+    pageSize,
+    searchParams,
   })
 
-  const createMutation = useMutation({
-    mutationFn: createEmployee,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
-      message.success('创建成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '创建失败')
-    },
-  })
+  const createMutation = useCreateEmployee()
 
-  const updateMutation = useMutation({
-    mutationFn: updateEmployee,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
-      message.success('更新成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '更新失败')
-    },
-  })
+  const updateMutation = useUpdateEmployee()
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteEmployees,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
-      setSelectedRowKeys([])
-      message.success('删除成功')
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '删除失败')
-    },
-  })
+  const deleteMutation = useDeleteEmployees()
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -208,6 +172,3 @@ export default function EmployeeList() {
     </div>
   )
 }
-
-
-

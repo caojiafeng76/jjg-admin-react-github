@@ -1,26 +1,25 @@
 import { useState, useCallback, useEffect } from 'react'
 import { App, Modal, FormInstance } from 'antd'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import AppPagination from '@/ui/AppPagination'
+import type { WorkshopProcess } from '@/services/apiWorkshopProcesses'
 import {
-  getWorkshopProcesses,
-  createWorkshopProcess,
-  updateWorkshopProcess,
-  deleteWorkshopProcesses,
-  type WorkshopProcess,
-} from '@/services/apiWorkshopProcesses'
+  useWorkshopProcessesList,
+  useCreateWorkshopProcess,
+  useUpdateWorkshopProcess,
+  useDeleteWorkshopProcesses,
+} from './useWorkshopProcesses'
 import ProcessTable from './ProcessTable'
 import ProcessForm from './ProcessForm'
 import ProcessSearch from './ProcessSearch'
 
 export default function ProcessList() {
   const { message } = App.useApp()
-  const queryClient = useQueryClient()
+
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建工序')
@@ -34,51 +33,17 @@ export default function ProcessList() {
     process_name?: string
   }>({})
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['workshop-processes', page, pageSize, searchParams],
-    queryFn: () => getWorkshopProcesses({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+  const { data, isLoading } = useWorkshopProcessesList({
+    page,
+    pageSize,
+    searchParams,
   })
 
-  const createMutation = useMutation({
-    mutationFn: createWorkshopProcess,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-processes'] })
-      message.success('创建成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '创建失败')
-    },
-  })
+  const createMutation = useCreateWorkshopProcess()
 
-  const updateMutation = useMutation({
-    mutationFn: updateWorkshopProcess,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-processes'] })
-      message.success('更新成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '更新失败')
-    },
-  })
+  const updateMutation = useUpdateWorkshopProcess()
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteWorkshopProcesses,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-processes'] })
-      setSelectedRowKeys([])
-      message.success('删除成功')
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '删除失败')
-    },
-  })
+  const deleteMutation = useDeleteWorkshopProcesses()
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)

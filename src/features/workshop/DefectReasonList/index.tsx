@@ -1,26 +1,25 @@
 import { useState, useCallback, useEffect } from 'react'
 import { App, Modal, FormInstance } from 'antd'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import AppPagination from '@/ui/AppPagination'
+import type { WorkshopDefectReason } from '@/services/apiWorkshopDefectReasons'
 import {
-  getWorkshopDefectReasons,
-  createWorkshopDefectReason,
-  updateWorkshopDefectReason,
-  deleteWorkshopDefectReasons,
-  type WorkshopDefectReason,
-} from '@/services/apiWorkshopDefectReasons'
+  useWorkshopDefectReasonsList,
+  useCreateWorkshopDefectReason,
+  useUpdateWorkshopDefectReason,
+  useDeleteWorkshopDefectReasons,
+} from './useWorkshopDefectReasons'
 import DefectReasonTable from './DefectReasonTable'
 import DefectReasonForm from './DefectReasonForm'
 import DefectReasonSearch from './DefectReasonSearch'
 
 export default function DefectReasonList() {
   const { message } = App.useApp()
-  const queryClient = useQueryClient()
+
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建不良原因')
@@ -34,48 +33,17 @@ export default function DefectReasonList() {
     defect_reason?: string
   }>({})
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['workshop-defect-reasons', page, pageSize, searchParams],
-    queryFn: () => getWorkshopDefectReasons({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+  const { data, isLoading } = useWorkshopDefectReasonsList({
+    page,
+    pageSize,
+    searchParams,
   })
 
-  const createMutation = useMutation({
-    mutationFn: createWorkshopDefectReason,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-defect-reasons'] })
-      message.success('创建成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '创建失败')
-    },
-  })
+  const createMutation = useCreateWorkshopDefectReason()
 
-  const updateMutation = useMutation({
-    mutationFn: updateWorkshopDefectReason,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-defect-reasons'] })
-      message.success('更新成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '更新失败')
-    },
-  })
+  const updateMutation = useUpdateWorkshopDefectReason()
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteWorkshopDefectReasons,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-defect-reasons'] })
-      setSelectedRowKeys([])
-      message.success('删除成功')
-    },
-  })
+  const deleteMutation = useDeleteWorkshopDefectReasons()
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)

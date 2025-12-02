@@ -2,14 +2,19 @@ import { useState, useCallback, useEffect } from 'react'
 import { App, Modal, FormInstance } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import PrintButton from '@/ui/PrintButton'
 import AppPagination from '@/ui/AppPagination'
-import { getWorkshopOrders, createWorkshopOrder, updateWorkshopOrder, deleteWorkshopOrders, createWorkshopOrdersBatch } from '@/services/apiWorkshopOrders'
+import {
+  useWorkshopOrdersList,
+  useCreateWorkshopOrder,
+  useUpdateWorkshopOrder,
+  useCreateWorkshopOrdersBatch,
+  useDeleteWorkshopOrders,
+} from './useWorkshopOrders'
 import WorkshopOrderTable from './WorkshopOrderTable'
 import WorkshopOrderForm from './WorkshopOrderForm'
 import WorkshopOrderSearch from './WorkshopOrderSearch'
@@ -33,7 +38,6 @@ export interface WorkshopOrder {
 
 export default function WorkshopOrderList() {
   const { message } = App.useApp()
-  const queryClient = useQueryClient()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')
@@ -52,65 +56,19 @@ export default function WorkshopOrderList() {
     endDate?: string
   }>({})
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['workshop-orders', page, pageSize, searchParams],
-    queryFn: () => getWorkshopOrders({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+  const { data, isLoading } = useWorkshopOrdersList({
+    page,
+    pageSize,
+    searchParams,
   })
 
-  const createMutation = useMutation({
-    mutationFn: createWorkshopOrder,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-orders'] })
-      message.success('创建成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '创建失败')
-    },
-  })
+  const createMutation = useCreateWorkshopOrder()
 
-  const updateMutation = useMutation({
-    mutationFn: updateWorkshopOrder,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-orders'] })
-      message.success('更新成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '更新失败')
-    },
-  })
+  const updateMutation = useUpdateWorkshopOrder()
 
-  const batchCreateMutation = useMutation({
-    mutationFn: createWorkshopOrdersBatch,
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-orders'] })
-      message.success(`批量导入成功，共导入 ${variables.length} 条数据`)
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(`批量导入失败: ${error instanceof Error ? error.message : '未知错误'}`)
-    },
-  })
+  const batchCreateMutation = useCreateWorkshopOrdersBatch()
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteWorkshopOrders,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workshop-orders'] })
-      setSelectedRowKeys([])
-      message.success('删除成功')
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '删除失败')
-    },
-  })
+  const deleteMutation = useDeleteWorkshopOrders()
 
   const { generatePDF, isPrinting } = usePrintWorkshopOrders()
 

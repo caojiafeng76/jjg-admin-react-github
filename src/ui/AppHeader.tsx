@@ -7,7 +7,6 @@ import { Header } from 'antd/es/layout/layout'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import DarkModeButton from '@ui/DarkModeButton'
-import { useAppStore } from '@/store'
 import { useAuth } from '@/contexts/AuthContext'
 
 // 路由到页面名称的映射
@@ -35,7 +34,6 @@ export default function AppHeader({
 }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { isDarkMode } = useAppStore()
   const { signOut } = useAuth()
   const currentPath = location.pathname.slice(1) || 'dashboard'
   const pageName = routeToLabelMap[currentPath] || ''
@@ -63,11 +61,7 @@ export default function AppHeader({
       />
       {pageName && (
         <span
-          className="ml-2 text-base"
-          style={{
-            fontWeight: 600,
-            color: isDarkMode ? '#ffffff' : '#000000',
-          }}
+          className="ml-2 text-base font-semibold text-neutral-900 dark:text-neutral-50"
         >
           {pageName}
         </span>
