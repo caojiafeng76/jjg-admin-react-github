@@ -23,9 +23,6 @@ importers:
       '@tanstack/react-query-devtools':
         specifier: ^5.64.2
         version: 5.90.2(@tanstack/react-query@5.90.10(react@19.2.0))(react@19.2.0)
-      '@types/node':
-        specifier: ^22.10.7
-        version: 22.19.1
       antd:
         specifier: ^5.23.2
         version: 5.29.1(date-fns@4.1.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -63,6 +60,9 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.39.1
+      '@types/node':
+        specifier: ^22.10.7
+        version: 22.19.1
       '@types/react':
         specifier: ^19.0.7
         version: 19.2.6
