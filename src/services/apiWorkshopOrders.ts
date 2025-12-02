@@ -52,7 +52,8 @@ export async function getWorkshopOrders({
 
   const { data, error, count } = await query
     .range(from, to)
-    .order('product_delivery_date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .order('project_no', { ascending: true })
 
   if (error) {
     throw handleApiError(error, '获取车间订单失败')
