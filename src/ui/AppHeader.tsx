@@ -4,10 +4,11 @@ import {
 } from '@heroicons/react/16/solid'
 import { Button } from 'antd'
 import { Header } from 'antd/es/layout/layout'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import DarkModeButton from '@ui/DarkModeButton'
 import { useAppStore } from '@/store'
+import { useAuth } from '@/contexts/AuthContext'
 
 // 路由到页面名称的映射
 const routeToLabelMap: Record<string, string> = {
@@ -33,7 +34,9 @@ export default function AppHeader({
   onToggleCollapse: () => void
 }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { isDarkMode } = useAppStore()
+  const { signOut } = useAuth()
   const currentPath = location.pathname.slice(1) || 'dashboard'
   const pageName = routeToLabelMap[currentPath] || ''
 
@@ -70,8 +73,21 @@ export default function AppHeader({
         </span>
       )}
 
-      <div className="mr-12 flex h-full flex-1 items-center justify-end">
+      <div className="mr-12 flex h-full flex-1 items-center justify-end gap-4">
         <DarkModeButton />
+        <Button
+          type="link"
+          onClick={async () => {
+            try {
+              await signOut()
+              navigate('/login', { replace: true })
+            } catch {
+              // 可以在这里接入全局 message 提示
+            }
+          }}
+        >
+          退出登录
+        </Button>
       </div>
     </Header>
   )
