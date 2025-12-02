@@ -223,7 +223,7 @@ function buildErpColumnMap(row: WorksheetRow): ErpColumnMap | null {
   const productModel = findColumnIndices(row, '产品型号')
   const customerModel = findColumnIndices(row, '客户型号')
 
-  if (!projectNo.length || !productModel.length || !customerModel.length) {
+  if (!projectNo.length || !productModel.length) {
     return null
   }
 
@@ -319,7 +319,7 @@ function isErpHeaderRow(row: WorksheetRow) {
 
   if (!normalizedRow.length) return false
 
-  const requiredHeaders = ['项目号', '产品型号', '客户型号']
+  const requiredHeaders = ['项目号', '产品型号']
   return requiredHeaders.every((header) => normalizedRow.includes(header))
 }
 

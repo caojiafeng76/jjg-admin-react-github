@@ -187,7 +187,6 @@ export default function WorkshopOrderForm({
           <Form.Item
             name="customer_model"
             label="客户型号"
-            rules={[{ required: true, message: '请输入客户型号' }]}
           >
             <Input disabled={isCreating} />
           </Form.Item>
