@@ -9,6 +9,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import PrintButton from '@/ui/PrintButton'
 import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import type { ProductionRecord } from '@/services/apiProductionRecords'
 import {
   useProductionRecordsList,
@@ -78,6 +79,13 @@ export default function ProductionRecordList() {
   const updateMutation = useUpdateProductionRecord()
 
   const deleteMutation = useDeleteProductionRecords()
+
+  // 动态计算表格高度（目标10条数据撑满，需要减去汇总行高度）
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } = useTableHeight({
+    targetRowCount: 10,
+    headerHeight: 39,
+    summaryRowHeight: 40, // 汇总行高度，与普通行高相同
+  })
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -222,8 +230,8 @@ export default function ProductionRecordList() {
       </div>
 
       {/* 表格和分页 */}
-      <div className="flex flex-col gap-4 overflow-hidden">
-        <div className="flex-1 overflow-auto">
+      <div ref={tableContainerRef} className="flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-x-auto">
           <ProductionRecordTable
             loading={isLoading}
             data={data?.items || []}
@@ -231,9 +239,11 @@ export default function ProductionRecordList() {
             onSelect={setSelectedRowKeys}
             page={page}
             pageSize={pageSize}
+            scrollY={scrollY}
+            rowHeight={rowHeight}
           />
         </div>
-        <div className="flex justify-end flex-shrink-0">
+        <div ref={paginationRef} className="flex justify-end flex-shrink-0">
           <AppPagination
             total={data?.total || 0}
             pageSizeOptions={['10', '20', '30', '50', '100', '200', '300', '500']}

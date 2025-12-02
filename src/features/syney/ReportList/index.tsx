@@ -103,21 +103,24 @@ export default function ReportList() {
         </div>
       </div>
 
-      <div className="no-scrollbar overflow-y-scroll">
-        <ReportTable />
-
-        <AppPagination total={count || 0} />
-
-        <Modal
-          title="创建对账单"
-          open={isModalOpen}
-          confirmLoading={isCreating || specsLoading}
-          onOk={handleOk}
-          onCancel={handleCancel}
-        >
-          <ReportForm ref={reportFormRef} handleCancel={handleCancel} onSpecsLoadingChange={setSpecsLoading} />
-        </Modal>
+      <div className="flex flex-col gap-4 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-x-auto">
+          <ReportTable />
+        </div>
+        <div className="flex justify-end flex-shrink-0">
+          <AppPagination total={count || 0} />
+        </div>
       </div>
+
+      <Modal
+        title="创建对账单"
+        open={isModalOpen}
+        confirmLoading={isCreating || specsLoading}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <ReportForm ref={reportFormRef} handleCancel={handleCancel} onSpecsLoadingChange={setSpecsLoading} />
+      </Modal>
     </div>
   )
 }

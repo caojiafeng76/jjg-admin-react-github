@@ -306,12 +306,12 @@ export default function PoList() {
       {/* 表格和分页区域 */}
       <div className="grid grid-rows-[1fr_auto] gap-4 overflow-hidden">
         {/* 表格区域 */}
-        <div className="overflow-hidden">
+        <div className="overflow-x-auto overflow-y-hidden">
           <PoTable />
         </div>
 
         {/* 分页区域 */}
-        <div className="flex justify-end">
+        <div className="flex justify-end flex-shrink-0">
           <AppPagination total={count || 0} />
         </div>
       </div>

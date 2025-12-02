@@ -6,6 +6,7 @@ import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import AppPagination from '@/ui/AppPagination'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import type { Employee } from '@/services/apiEmployees'
 import {
   useEmployeesList,
@@ -43,6 +44,11 @@ export default function EmployeeList() {
   const updateMutation = useUpdateEmployee()
 
   const deleteMutation = useDeleteEmployees()
+
+  // 动态计算表格高度（目标10条数据撑满）
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } = useTableHeight({
+    targetRowCount: 10,
+  })
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -133,8 +139,8 @@ export default function EmployeeList() {
       </div>
 
       {/* 表格和分页 */}
-      <div className="flex flex-col gap-4 overflow-hidden">
-        <div className="flex-1 overflow-auto">
+      <div ref={tableContainerRef} className="flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-x-auto">
           <EmployeeTable
             loading={isLoading}
             data={data?.items || []}
@@ -142,9 +148,11 @@ export default function EmployeeList() {
             onSelect={setSelectedRowKeys}
             page={page}
             pageSize={pageSize}
+            scrollY={scrollY}
+            rowHeight={rowHeight}
           />
         </div>
-        <div className="flex justify-end flex-shrink-0">
+        <div ref={paginationRef} className="flex justify-end flex-shrink-0">
           <AppPagination total={data?.total || 0} />
         </div>
       </div>
