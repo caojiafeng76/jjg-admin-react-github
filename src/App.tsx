@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
 import { ConfigProvider, theme, App as AntdApp } from 'antd'
+import zhCN from 'antd/locale/zh_CN'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'
@@ -39,24 +40,20 @@ export default function App() {
     }
   }, [isDarkMode])
 
-  // 配置静态方法（message、notification、modal）的全局设置
-  useEffect(() => {
-    ConfigProvider.config({
-      holderRender: (children) => (
-        <ConfigProvider theme={themeMode}>{children}</ConfigProvider>
-      ),
-    })
-  }, [themeMode])
-
   return (
     <ErrorBoundary>
-      <ConfigProvider theme={themeMode}>
+      <ConfigProvider
+        locale={zhCN}
+        theme={themeMode}
+      >
         <AntdApp>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <RouterProvider router={router} />
             </AuthProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
+            {import.meta.env.DEV && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
           </QueryClientProvider>
         </AntdApp>
       </ConfigProvider>

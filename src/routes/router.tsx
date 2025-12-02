@@ -5,25 +5,39 @@ import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
 import { useAuth } from '@/contexts/AuthContext'
 
-// 懒加载页面组件
+// 懒加载页面组件（按 feature 组织）
 const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Login = lazy(() => import('@pages/Login'))
 const PageNotFound = lazy(() => import('@pages/PageNotFound'))
-const SyneySpecList = lazy(() => import('@pages/SyneySpecList'))
-const SyneyStoreReportList = lazy(() => import('@pages/SyneyStoreReportList'))
+
+// Syney 相关
+const SyneySpecList = lazy(() => import('@features/syney/SpecList'))
+const SyneyStoreReportList = lazy(
+  () => import('@features/syney/ReportList'),
+)
 const SyneyStoreReportDetail = lazy(
-  () => import('@pages/SyneyStoreReportDetail'),
+  () => import('@features/syney/ReportDetail'),
 )
-const SyneyPoList = lazy(() => import('@pages/SyneyPoList'))
+const SyneyPoList = lazy(() => import('@features/syney/PoList'))
 const SyneySetting = lazy(() => import('@pages/SyneySetting'))
-const SyneyPoDetail = lazy(() => import('@pages/SyneyPoDetail'))
-const WorkshopOrderList = lazy(() => import('@pages/WorkshopOrderList'))
-const WorkshopProcessList = lazy(() => import('@pages/WorkshopProcessList'))
-const WorkshopDefectReasonList = lazy(
-  () => import('@pages/WorkshopDefectReasonList'),
+const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
+
+// 车间相关
+const WorkshopOrderList = lazy(
+  () => import('@features/workshop/OrderList'),
 )
-const EmployeeList = lazy(() => import('@pages/EmployeeList'))
-const ProductionRecordList = lazy(() => import('@pages/ProductionRecordList'))
+const WorkshopProcessList = lazy(
+  () => import('@features/workshop/ProcessList'),
+)
+const WorkshopDefectReasonList = lazy(
+  () => import('@features/workshop/DefectReasonList'),
+)
+const EmployeeList = lazy(
+  () => import('@features/workshop/EmployeeList'),
+)
+const ProductionRecordList = lazy(
+  () => import('@features/workshop/ProductionRecord'),
+)
 
 function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()

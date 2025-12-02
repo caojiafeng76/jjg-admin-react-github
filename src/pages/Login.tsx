@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/AuthContext'
+import Loading from '@ui/Loading'
 
 const { Title, Text } = Typography
 
@@ -15,27 +16,41 @@ interface LoginFormValues {
 export default function Login() {
   const [form] = Form.useForm<LoginFormValues>()
   const navigate = useNavigate()
-  const { user, loading, signIn } = useAuth()
+  const { user, loading, error, clearError, signIn } = useAuth()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  // 已登录用户直接跳转
   useEffect(() => {
     if (user) {
       navigate('/dashboard', { replace: true })
     }
   }, [user, navigate])
 
+  // 将 AuthContext 的错误同步到本地提示
+  useEffect(() => {
+    if (error) {
+      setErrorMessage(error.message || '认证出现问题，请稍后重试')
+    }
+  }, [error])
+
   const handleFinish = async (values: LoginFormValues) => {
     setErrorMessage(null)
+    clearError()
     setSubmitting(true)
     try {
       await signIn(values.email, values.password)
       navigate('/dashboard', { replace: true })
-    } catch (error: any) {
-      setErrorMessage(error?.message || '登录失败，请稍后重试')
+    } catch (err: any) {
+      setErrorMessage(err?.message || '登录失败，请稍后重试')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // 首次加载时正在确认登录状态，使用全屏 Loading，避免表单闪烁
+  if (loading && !user && !submitting) {
+    return <Loading />
   }
 
   return (
@@ -62,7 +77,7 @@ export default function Login() {
           layout="vertical"
           onFinish={handleFinish}
           autoComplete="off"
-          disabled={loading || submitting}
+          disabled={submitting}
         >
           <Form.Item
             label="邮箱"
@@ -94,7 +109,7 @@ export default function Login() {
               type="primary"
               htmlType="submit"
               block
-              loading={submitting || loading}
+              loading={submitting}
             >
               登录
             </Button>

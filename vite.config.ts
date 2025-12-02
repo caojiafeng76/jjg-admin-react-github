@@ -17,11 +17,8 @@ export default defineConfig({
       '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
       '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
       '@syney': fileURLToPath(new URL('./src/features/syney', import.meta.url)),
-      '@syney-spec-list': fileURLToPath(
-        new URL('./src/features/syney/SpecList', import.meta.url),
-      ),
     },
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
   },
   plugins: [react()],
 })
