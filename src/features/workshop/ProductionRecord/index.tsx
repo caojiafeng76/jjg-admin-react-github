@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { App, Modal, FormInstance } from 'antd'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 
 import AddButton from '@/ui/AddButton'
@@ -10,13 +9,13 @@ import DeleteButton from '@/ui/DeleteButton'
 import PrintButton from '@/ui/PrintButton'
 import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
+import type { ProductionRecord } from '@/services/apiProductionRecords'
 import {
-  getProductionRecords,
-  createProductionRecord,
-  updateProductionRecord,
-  deleteProductionRecords,
-  type ProductionRecord,
-} from '@/services/apiProductionRecords'
+  useProductionRecordsList,
+  useCreateProductionRecord,
+  useUpdateProductionRecord,
+  useDeleteProductionRecords,
+} from './useProductionRecords'
 import ProductionRecordTable from './ProductionRecordTable'
 import ProductionRecordForm from './ProductionRecordForm'
 import ProductionRecordSearch from './ProductionRecordSearch'
@@ -25,7 +24,7 @@ import { useExportProductionRecordsAsExcel } from './useExportProductionRecordsA
 
 export default function ProductionRecordList() {
   const { message } = App.useApp()
-  const queryClient = useQueryClient()
+
   const { printProductionRecords, contextHolder, isPrinting } = usePrintProductionRecords(message)
   const {
     exportProductionRecordsAsExcel,
@@ -68,51 +67,17 @@ export default function ProductionRecordList() {
     }
   })
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['production-records', page, pageSize, searchParams],
-    queryFn: () => getProductionRecords({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+  const { data, isLoading } = useProductionRecordsList({
+    page,
+    pageSize,
+    searchParams,
   })
 
-  const createMutation = useMutation({
-    mutationFn: createProductionRecord,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['production-records'] })
-      await refetch()
-      message.success('录入成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '录入失败')
-    },
-  })
+  const createMutation = useCreateProductionRecord()
 
-  const updateMutation = useMutation({
-    mutationFn: updateProductionRecord,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['production-records'] })
-      await refetch()
-      message.success('更新成功')
-      setIsModalOpen(false)
-      setIsEdit(false)
-      setSelectedRowKeys([])
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '更新失败')
-    },
-  })
+  const updateMutation = useUpdateProductionRecord()
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteProductionRecords,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['production-records'] })
-      await refetch()
-      setSelectedRowKeys([])
-      message.success('删除成功')
-    },
-  })
+  const deleteMutation = useDeleteProductionRecords()
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
