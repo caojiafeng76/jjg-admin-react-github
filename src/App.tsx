@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ConfigProvider, theme, App as AntdApp } from 'antd'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
@@ -24,7 +24,9 @@ const SyneySetting = lazy(() => import('./pages/SyneySetting'))
 const SyneyPoDetail = lazy(() => import('./pages/SyneyPoDetail'))
 const WorkshopOrderList = lazy(() => import('./pages/WorkshopOrderList'))
 const WorkshopProcessList = lazy(() => import('./pages/WorkshopProcessList'))
-const WorkshopDefectReasonList = lazy(() => import('./pages/WorkshopDefectReasonList'))
+const WorkshopDefectReasonList = lazy(
+  () => import('./pages/WorkshopDefectReasonList'),
+)
 const EmployeeList = lazy(() => import('./pages/EmployeeList'))
 const ProductionRecordList = lazy(() => import('./pages/ProductionRecordList'))
 
@@ -37,7 +39,7 @@ const queryClient = new QueryClient({
   },
 })
 
-function ProtectedRoute({ element }: { element: JSX.Element }) {
+function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()
 
   if (loading) {
@@ -65,9 +67,7 @@ export default function App() {
   useEffect(() => {
     ConfigProvider.config({
       holderRender: (children) => (
-        <ConfigProvider theme={themeMode}>
-          {children}
-        </ConfigProvider>
+        <ConfigProvider theme={themeMode}>{children}</ConfigProvider>
       ),
     })
   }, [themeMode])
@@ -81,58 +81,53 @@ export default function App() {
               <BrowserRouter>
                 <Suspense fallback={<Loading />}>
                   <Routes>
-                    <Route
-                      element={<ProtectedRoute element={<AppLayout />} />}
-                    >
-                    <Route
-                      index
-                      element={<Navigate replace to="/dashboard" />}
-                    />
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route element={<ProtectedRoute element={<AppLayout />} />}>
+                      <Route
+                        index
+                        element={<Navigate replace to="/dashboard" />}
+                      />
+                      <Route path="/dashboard" element={<Dashboard />} />
 
-                    <Route
-                      path="/syney-spec-list"
-                      element={<SyneySpecList />}
-                    />
+                      <Route
+                        path="/syney-spec-list"
+                        element={<SyneySpecList />}
+                      />
 
-                    <Route
-                      path="/syney-store-report-list"
-                      element={<SyneyStoreReportList />}
-                    />
-                    <Route
-                      path="/syney-store-report-list/:reportNo"
-                      element={<SyneyStoreReportDetail />}
-                    />
+                      <Route
+                        path="/syney-store-report-list"
+                        element={<SyneyStoreReportList />}
+                      />
+                      <Route
+                        path="/syney-store-report-list/:reportNo"
+                        element={<SyneyStoreReportDetail />}
+                      />
 
-                    <Route path="/syney-po-list" element={<SyneyPoList />} />
-                    <Route
-                      path="/syney-po-list/:PoId"
-                      element={<SyneyPoDetail />}
-                    />
+                      <Route path="/syney-po-list" element={<SyneyPoList />} />
+                      <Route
+                        path="/syney-po-list/:PoId"
+                        element={<SyneyPoDetail />}
+                      />
 
-                    <Route path="/syney-setting" element={<SyneySetting />} />
+                      <Route path="/syney-setting" element={<SyneySetting />} />
 
-                    <Route
-                      path="/workshop-order-list"
-                      element={<WorkshopOrderList />}
-                    />
-                    <Route
-                      path="/workshop-process-list"
-                      element={<WorkshopProcessList />}
-                    />
-                    <Route
-                      path="/workshop-defect-reason-list"
-                      element={<WorkshopDefectReasonList />}
-                    />
-                    <Route
-                      path="/employee-list"
-                      element={<EmployeeList />}
-                    />
-                    <Route
-                      path="/production-record-list"
-                      element={<ProductionRecordList />}
-                    />
-                  </Route>
+                      <Route
+                        path="/workshop-order-list"
+                        element={<WorkshopOrderList />}
+                      />
+                      <Route
+                        path="/workshop-process-list"
+                        element={<WorkshopProcessList />}
+                      />
+                      <Route
+                        path="/workshop-defect-reason-list"
+                        element={<WorkshopDefectReasonList />}
+                      />
+                      <Route path="/employee-list" element={<EmployeeList />} />
+                      <Route
+                        path="/production-record-list"
+                        element={<ProductionRecordList />}
+                      />
+                    </Route>
 
                     <Route path="/login" element={<Login />} />
                     <Route path="*" element={<PageNotFound />} />
