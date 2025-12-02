@@ -9,6 +9,7 @@ interface SearchParams {
   project_no?: string
   product_model?: string
   customer_model?: string
+  model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
   startDate?: string
   endDate?: string
 }
@@ -26,19 +27,27 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
     project_no?: string
     product_model?: string
     customer_model?: string
+    model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
     dateRange?: [Dayjs | null, Dayjs | null]
   }) => {
     const params: SearchParams = {}
     
-    if (values.project_no?.trim()) {
-      params.project_no = values.project_no.trim()
+    // 优先使用统一的搜索字段
+    if (values.model_search?.trim()) {
+      params.model_search = values.model_search.trim()
+    } else {
+      // 如果没有统一搜索，则分别搜索
+      if (values.project_no?.trim()) {
+        params.project_no = values.project_no.trim()
+      }
+      if (values.product_model?.trim()) {
+        params.product_model = values.product_model.trim()
+      }
+      if (values.customer_model?.trim()) {
+        params.customer_model = values.customer_model.trim()
+      }
     }
-    if (values.product_model?.trim()) {
-      params.product_model = values.product_model.trim()
-    }
-    if (values.customer_model?.trim()) {
-      params.customer_model = values.customer_model.trim()
-    }
+    
     if (values.dateRange && values.dateRange[0] && values.dateRange[1]) {
       params.startDate = values.dateRange[0].format('YYYY-MM-DD')
       params.endDate = values.dateRange[1].format('YYYY-MM-DD')
@@ -58,25 +67,11 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
 
   return (
     <Form form={form} onFinish={handleSearch} layout="inline" className="flex flex-wrap items-center gap-2">
-      <Form.Item name="project_no" className="mb-0">
+      <Form.Item name="model_search" className="mb-0">
         <Input
-          placeholder="项目号"
+          placeholder="输入搜索（项目号/产品型号/客户型号）"
           allowClear
-          style={{ width: 150 }}
-        />
-      </Form.Item>
-      <Form.Item name="product_model" className="mb-0">
-        <Input
-          placeholder="产品型号"
-          allowClear
-          style={{ width: 150 }}
-        />
-      </Form.Item>
-      <Form.Item name="customer_model" className="mb-0">
-        <Input
-          placeholder="客户型号"
-          allowClear
-          style={{ width: 200 }}
+          style={{ width: 280 }}
         />
       </Form.Item>
       <Form.Item name="dateRange" className="mb-0">

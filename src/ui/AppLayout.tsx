@@ -32,7 +32,7 @@ export default function AppLayout() {
   return (
     <>
       {contextHolder}
-      <Layout className="h-screen overflow-hidden">
+    <Layout className="h-screen overflow-hidden">
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <AppLogo />
         <MainMenu />

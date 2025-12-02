@@ -8,6 +8,7 @@ export async function getWorkshopOrders({
   project_no,
   product_model,
   customer_model,
+  model_search, // 统一的搜索字段，可同时搜索项目号、产品型号和客户型号
   startDate,
   endDate,
 }: {
@@ -16,6 +17,7 @@ export async function getWorkshopOrders({
   project_no?: string
   product_model?: string
   customer_model?: string
+  model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
   startDate?: string
   endDate?: string
 }) {
@@ -26,19 +28,27 @@ export async function getWorkshopOrders({
     .from('sales_orders')
     .select('*', { count: 'exact' })
 
-  // 项目号搜索（模糊匹配）
-  if (project_no) {
-    query = query.ilike('project_no', `%${project_no}%`)
-  }
+  // 统一的搜索字段（同时搜索项目号、产品型号和客户型号，OR逻辑）
+  if (model_search) {
+    query = query.or(
+      `project_no.ilike.%${model_search}%,product_model.ilike.%${model_search}%,customer_model.ilike.%${model_search}%`,
+    )
+  } else {
+    // 如果没有统一搜索，则分别搜索
+    // 项目号搜索（模糊匹配）
+    if (project_no) {
+      query = query.ilike('project_no', `%${project_no}%`)
+    }
 
-  // 产品型号搜索（模糊匹配）
-  if (product_model) {
-    query = query.ilike('product_model', `%${product_model}%`)
-  }
+    // 产品型号搜索（模糊匹配）
+    if (product_model) {
+      query = query.ilike('product_model', `%${product_model}%`)
+    }
 
-  // 客户型号搜索（模糊匹配）
-  if (customer_model) {
-    query = query.ilike('customer_model', `%${customer_model}%`)
+    // 客户型号搜索（模糊匹配）
+    if (customer_model) {
+      query = query.ilike('customer_model', `%${customer_model}%`)
+    }
   }
 
   // 交货日期范围搜索

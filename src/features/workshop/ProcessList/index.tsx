@@ -6,6 +6,7 @@ import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import AppPagination from '@/ui/AppPagination'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import type { WorkshopProcess } from '@/services/apiWorkshopProcesses'
 import {
   useWorkshopProcessesList,
@@ -44,6 +45,11 @@ export default function ProcessList() {
   const updateMutation = useUpdateWorkshopProcess()
 
   const deleteMutation = useDeleteWorkshopProcesses()
+
+  // 动态计算表格高度（目标10条数据撑满）
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } = useTableHeight({
+    targetRowCount: 10,
+  })
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -134,8 +140,8 @@ export default function ProcessList() {
       </div>
 
       {/* 表格和分页 */}
-      <div className="flex flex-col gap-4 overflow-hidden">
-        <div className="flex-1 overflow-auto">
+      <div ref={tableContainerRef} className="flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-x-auto">
           <ProcessTable
             loading={isLoading}
             data={data?.items || []}
@@ -143,9 +149,11 @@ export default function ProcessList() {
             onSelect={setSelectedRowKeys}
             page={page}
             pageSize={pageSize}
+            scrollY={scrollY}
+            rowHeight={rowHeight}
           />
         </div>
-        <div className="flex justify-end flex-shrink-0">
+        <div ref={paginationRef} className="flex justify-end flex-shrink-0">
           <AppPagination total={data?.total || 0} />
         </div>
       </div>

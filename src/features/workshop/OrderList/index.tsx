@@ -8,6 +8,7 @@ import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import PrintButton from '@/ui/PrintButton'
 import AppPagination from '@/ui/AppPagination'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   useWorkshopOrdersList,
   useCreateWorkshopOrder,
@@ -52,6 +53,7 @@ export default function WorkshopOrderList() {
     project_no?: string
     product_model?: string
     customer_model?: string
+    model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
     startDate?: string
     endDate?: string
   }>({})
@@ -71,6 +73,11 @@ export default function WorkshopOrderList() {
   const deleteMutation = useDeleteWorkshopOrders()
 
   const { generatePDF, isPrinting } = usePrintWorkshopOrders()
+
+  // 动态计算表格高度（目标10条数据撑满）
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } = useTableHeight({
+    targetRowCount: 10,
+  })
 
   const handlePrint = useCallback(() => {
     if (selectedRowKeys.length === 0) {
@@ -184,16 +191,18 @@ export default function WorkshopOrderList() {
       </div>
 
       {/* 表格和分页 */}
-      <div className="flex flex-col gap-4 overflow-hidden">
-        <div className="flex-1 overflow-auto">
+      <div ref={tableContainerRef} className="flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-x-auto">
           <WorkshopOrderTable
             loading={isLoading}
             data={data?.items || []}
             selectedRowKeys={selectedRowKeys}
             onSelect={setSelectedRowKeys}
+            scrollY={scrollY}
+            rowHeight={rowHeight}
           />
         </div>
-        <div className="flex justify-end flex-shrink-0">
+        <div ref={paginationRef} className="flex justify-end flex-shrink-0">
           <AppPagination total={data?.total || 0} />
         </div>
       </div>

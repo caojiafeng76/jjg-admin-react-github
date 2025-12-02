@@ -9,6 +9,8 @@ interface Props {
   onSelect: (keys: React.Key[]) => void
   page: number
   pageSize: number
+  scrollY?: number
+  rowHeight?: number
 }
 
 export default function DefectReasonTable({
@@ -18,6 +20,8 @@ export default function DefectReasonTable({
   onSelect,
   page,
   pageSize,
+  scrollY = 400,
+  rowHeight = 40,
 }: Props) {
   const columns: TableColumnsType<WorkshopDefectReason> = useMemo(
     () => [
@@ -68,6 +72,28 @@ export default function DefectReasonTable({
     [selectedRowKeys, onSelect],
   )
 
+  const components = useMemo(
+    () => ({
+      body: {
+        cell: (props: any) => {
+          const { children, ...restProps } = props
+          return (
+            <td
+              {...restProps}
+              style={{
+                ...restProps.style,
+                height: `${rowHeight}px`,
+              }}
+            >
+              {children}
+            </td>
+          )
+        },
+      },
+    }),
+    [rowHeight],
+  )
+
   return (
     <Table<WorkshopDefectReason>
       rowKey={(record) => record.id || ''}
@@ -75,12 +101,13 @@ export default function DefectReasonTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 800 }}
+      scroll={{ x: 800, y: scrollY }}
       size="small"
       pagination={false}
       style={{
         fontSize: '12px',
       }}
+      components={components}
     />
   )
 }

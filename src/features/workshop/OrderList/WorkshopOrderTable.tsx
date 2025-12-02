@@ -7,6 +7,8 @@ interface Props {
   data: WorkshopOrder[]
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
+  scrollY?: number
+  rowHeight?: number
 }
 
 export default function WorkshopOrderTable({
@@ -14,6 +16,8 @@ export default function WorkshopOrderTable({
   data,
   selectedRowKeys,
   onSelect,
+  scrollY = 400,
+  rowHeight = 40,
 }: Props) {
   // 保存每列的宽度
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({
@@ -293,6 +297,7 @@ export default function WorkshopOrderTable({
                 overflow: hasEllipsis ? 'hidden' : 'visible',
                 textOverflow: hasEllipsis ? 'ellipsis' : 'clip',
                 padding: '8px 12px',
+                height: `${rowHeight}px`,
               }}
             >
               {children}
@@ -301,7 +306,7 @@ export default function WorkshopOrderTable({
         },
       },
     }),
-    [columnWidths],
+    [columnWidths, rowHeight],
   )
 
   return (
@@ -311,7 +316,7 @@ export default function WorkshopOrderTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 1300 }}
+      scroll={{ x: 1300, y: scrollY }}
       size="small"
       pagination={false}
       style={{
