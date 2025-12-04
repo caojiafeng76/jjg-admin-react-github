@@ -413,11 +413,18 @@ export function usePrintDecomposition() {
       doc.addFont('msyh_bold.ttf', 'SourceHanSansCN-Bold', 'normal')
       doc.setFont('SourceHanSansCN-Bold')
 
-      // 3. 计算分页
-      const total = selectedPosList.length
+      // 3. 按合同号升序排序
+      const sortedPosList = [...selectedPosList].sort((a, b) => {
+        const sonoA = a.poInfo.SONo || ''
+        const sonoB = b.poInfo.SONo || ''
+        return sonoA.localeCompare(sonoB, 'zh-CN', { numeric: true })
+      })
+
+      // 4. 计算分页
+      const total = sortedPosList.length
       const totalPages = Math.ceil(total / CONFIG.ROWS_PER_PAGE)
 
-      // 4. 生成每一页
+      // 5. 生成每一页
       for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
         if (pageIndex > 0) {
           doc.addPage()
@@ -427,7 +434,7 @@ export function usePrintDecomposition() {
 
         const start = pageIndex * CONFIG.ROWS_PER_PAGE
         const end = Math.min(start + CONFIG.ROWS_PER_PAGE, total)
-        const pageData = selectedPosList.slice(start, end)
+        const pageData = sortedPosList.slice(start, end)
 
         fillPageData(doc, pageData, pageIndex)
 
@@ -437,7 +444,7 @@ export function usePrintDecomposition() {
         }
       }
 
-      // 5. 输出 PDF
+      // 6. 输出 PDF
       openPDFInNewWindow(doc)
       messageApi.success('打印完成')
     } catch (error) {
