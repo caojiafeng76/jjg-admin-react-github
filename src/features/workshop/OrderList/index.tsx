@@ -193,6 +193,27 @@ export default function WorkshopOrderList() {
     setSearchParamsURL(searchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
 
+  /**
+   * 防止 Excel 批量导入后成功提示出现但模态框仍保持打开状态。
+   * 监听所有创建/更新类 mutation 成功态，统一做收尾并重置 mutation 状态。
+   */
+  useEffect(() => {
+    if (createMutation.isSuccess || updateMutation.isSuccess || batchCreateMutation.isSuccess) {
+      resetFormState()
+      createMutation.reset()
+      updateMutation.reset()
+      batchCreateMutation.reset()
+    }
+  }, [
+    batchCreateMutation.isSuccess,
+    createMutation.isSuccess,
+    updateMutation.isSuccess,
+    resetFormState,
+    batchCreateMutation,
+    createMutation,
+    updateMutation,
+  ])
+
   const handleResetSearch = useCallback(() => {
     setSearchParams({})
     searchParamsURL.set('page', '1')
