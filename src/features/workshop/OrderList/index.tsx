@@ -133,7 +133,19 @@ export default function WorkshopOrderList() {
       message.warning('请选择至少一条数据')
       return
     }
-    deleteMutation.mutate(selectedRowKeys as string[])
+    deleteMutation.mutate(selectedRowKeys as string[], {
+      onSuccess: () => {
+        message.success('删除成功')
+        setSelectedRowKeys([])
+      },
+      onError: (error) => {
+        if (error instanceof Error) {
+          message.error(error.message)
+        } else {
+          message.error('删除失败，请稍后重试')
+        }
+      },
+    })
   }, [deleteMutation, message, selectedRowKeys])
 
   const handleFinish = useCallback(
