@@ -17,6 +17,7 @@ export interface ProductionRecord {
   operator_ids: string[]
   working_hours?: number | null
   remark?: string | null
+  production_sheet_id?: string | null
   created_at?: string
   updated_at?: string
 }
