@@ -99,6 +99,14 @@ export default function WorkshopOrderList() {
 
   const [editingRecord, setEditingRecord] = useState<WorkshopOrder | null>(null)
 
+  const resetFormState = useCallback(() => {
+    setIsModalOpen(false)
+    setIsEdit(false)
+    setEditingRecord(null)
+    setSelectedRowKeys([])
+    formRef?.resetFields()
+  }, [formRef])
+
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
       message.warning('请选择一条数据进行编辑')
@@ -130,21 +138,53 @@ export default function WorkshopOrderList() {
 
   const handleFinish = useCallback(
     (values: WorkshopOrder | WorkshopOrder[]) => {
+      const handleSuccess = (successMessage: string) => {
+        message.success(successMessage)
+        resetFormState()
+      }
+      const handleError = (error: unknown) => {
+        if (error instanceof Error) {
+          message.error(error.message)
+        } else {
+          message.error('操作失败，请稍后重试')
+        }
+      }
+
       if (isEdit && selectedRowKeys[0]) {
         // 编辑模式：单条更新
-        updateMutation.mutate({
-          id: selectedRowKeys[0] as string,
-          values: values as WorkshopOrder,
-        })
+        updateMutation.mutate(
+          {
+            id: selectedRowKeys[0] as string,
+            values: values as WorkshopOrder,
+          },
+          {
+            onSuccess: () => handleSuccess('订单更新成功'),
+            onError: handleError,
+          },
+        )
       } else if (Array.isArray(values)) {
         // 新建模式：Excel 批量导入
-        batchCreateMutation.mutate(values)
+        batchCreateMutation.mutate(values, {
+          onSuccess: () => handleSuccess('订单批量导入成功'),
+          onError: handleError,
+        })
       } else {
         // 新建模式：手动输入单条
-        createMutation.mutate(values)
+        createMutation.mutate(values, {
+          onSuccess: () => handleSuccess('订单创建成功'),
+          onError: handleError,
+        })
       }
     },
-    [createMutation, isEdit, selectedRowKeys, updateMutation, batchCreateMutation],
+    [
+      batchCreateMutation,
+      createMutation,
+      isEdit,
+      message,
+      resetFormState,
+      selectedRowKeys,
+      updateMutation,
+    ],
   )
 
   const handleSearch = useCallback((params: typeof searchParams) => {
@@ -214,9 +254,7 @@ export default function WorkshopOrderList() {
         destroyOnClose
         onOk={() => formRef?.submit()}
         onCancel={() => {
-          setIsModalOpen(false)
-          setIsEdit(false)
-          setEditingRecord(null)
+          resetFormState()
         }}
       >
         <WorkshopOrderForm
