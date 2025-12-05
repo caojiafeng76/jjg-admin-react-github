@@ -1,47 +1,42 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance } from 'antd'
+import { App, Modal, FormInstance, Drawer } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
-import PrintButton from '@/ui/PrintButton'
 import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import type { ProductionRecord } from '@/services/apiProductionRecords'
 import {
-  useProductionRecordsList,
-  useCreateProductionRecord,
-  useUpdateProductionRecord,
-  useDeleteProductionRecords,
-} from './useProductionRecords'
+  useProductionSheetsList,
+  useCreateProductionSheet,
+  useUpdateProductionSheet,
+  useDeleteProductionSheets,
+  useProductionSheetById,
+} from './useProductionSheets'
+import ProductionSheetTable from './ProductionSheetTable'
+import ProductionSheetForm from './ProductionSheetForm'
+import ProductionSheetSearch from './ProductionSheetSearch'
 import ProductionRecordTable from './ProductionRecordTable'
-import ProductionRecordForm from './ProductionRecordForm'
-import ProductionRecordSearch from './ProductionRecordSearch'
-import { usePrintProductionRecords } from './usePrintProductionRecords'
-import { useExportProductionRecordsAsExcel } from './useExportProductionRecordsAsExcel'
+import { useExportProductionSheetsAsExcel } from './useExportProductionSheetsAsExcel'
 
 export default function ProductionRecordList() {
   const { message } = App.useApp()
 
-  const { printProductionRecords, contextHolder, isPrinting } = usePrintProductionRecords(message)
-  const {
-    exportProductionRecordsAsExcel,
-    contextHolder: exportContextHolder,
-    isExporting,
-  } = useExportProductionRecordsAsExcel(message)
-
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalTitle, setModalTitle] = useState('录入产量')
+  const [modalTitle, setModalTitle] = useState('录入产量单')
   const [isEdit, setIsEdit] = useState(false)
+  const [editingSheetId, setEditingSheetId] = useState<string | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const [formRef, setFormRef] = useState<FormInstance<any> | null>(null)
-  
+  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false)
+  const [selectedSheetId, setSelectedSheetId] = useState<string | null>(null)
+
   // 初始化当月日期范围
   const getCurrentMonthRange = () => {
     const start = dayjs().startOf('month')
@@ -55,10 +50,6 @@ export default function ProductionRecordList() {
   const [searchParams, setSearchParams] = useState<{
     startDate?: string
     endDate?: string
-    order_id?: string
-    process_id?: string
-    product_model?: string
-    operator_id?: string
   }>(() => {
     // 初始化时设置为当月日期范围
     const monthRange = getCurrentMonthRange()
@@ -68,89 +59,121 @@ export default function ProductionRecordList() {
     }
   })
 
-  const { data, isLoading } = useProductionRecordsList({
+  const { data, isLoading } = useProductionSheetsList({
     page,
     pageSize,
     searchParams,
   })
 
-  const createMutation = useCreateProductionRecord()
+  const createMutation = useCreateProductionSheet()
+  const updateMutation = useUpdateProductionSheet()
+  const deleteMutation = useDeleteProductionSheets()
+  const { exportProductionSheetsAsExcel, isExporting } =
+    useExportProductionSheetsAsExcel(message)
 
-  const updateMutation = useUpdateProductionRecord()
-
-  const deleteMutation = useDeleteProductionRecords()
+  const { data: sheetDetail, isLoading: detailLoading } =
+    useProductionSheetById(selectedSheetId)
+  const { data: editingSheetDetail } = useProductionSheetById(editingSheetId)
 
   // 动态计算表格高度（目标10条数据撑满，需要减去汇总行高度）
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } = useTableHeight({
-    targetRowCount: 10,
-    headerHeight: 39,
-    summaryRowHeight: 40, // 汇总行高度，与普通行高相同
-  })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
+    useTableHeight({
+      targetRowCount: 10,
+      headerHeight: 39,
+      summaryRowHeight: 40, // 汇总行高度，与普通行高相同
+    })
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
-    setModalTitle('录入产量')
+    setEditingSheetId(null)
+    setModalTitle('录入产量单')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef])
-
-  const [editingRecord, setEditingRecord] = useState<ProductionRecord | null>(null)
 
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
       message.warning('请选择一条数据进行编辑')
       return
     }
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
-    if (!record) return
-
-    setEditingRecord(record)
+    const sheetId = selectedRowKeys[0] as string
+    setEditingSheetId(sheetId)
     setIsEdit(true)
-    setModalTitle('编辑产量记录')
+    setModalTitle('编辑产量单')
     setIsModalOpen(true)
-  }, [data?.items, message, selectedRowKeys])
+  }, [message, selectedRowKeys])
 
   const handleDelete = useCallback(() => {
     if (selectedRowKeys.length === 0) {
       message.warning('请选择至少一条数据')
       return
     }
-    deleteMutation.mutate(selectedRowKeys as string[])
+    deleteMutation.mutate(selectedRowKeys as string[], {
+      onSuccess: () => {
+        message.success('删除成功')
+        setSelectedRowKeys([])
+      },
+    })
   }, [deleteMutation, message, selectedRowKeys])
 
-  const handlePrint = useCallback(() => {
-    if (selectedRowKeys.length === 0) {
-      message.warning('请选择至少一条数据')
-      return
-    }
-    // 获取选中的记录
-    const selectedRecords = data?.items.filter((item) => item.id && selectedRowKeys.includes(item.id)) || []
-    printProductionRecords(selectedRecords)
-  }, [data?.items, message, printProductionRecords, selectedRowKeys])
+  const handleFinish = useCallback(
+    (values: {
+      production_date: string
+      operator_ids: string[]
+      working_hours?: number | null
+      remark?: string | null
+      records: any[]
+    }) => {
+      if (values.records.length === 0) {
+        message.warning('至少需要添加一条产量记录')
+        return
+      }
+      if (!values.operator_ids || values.operator_ids.length === 0) {
+        message.warning('请至少选择一个操作者')
+        return
+      }
+
+      if (isEdit && editingSheetId) {
+        updateMutation.mutate(
+          {
+            id: editingSheetId,
+            ...values,
+          },
+          {
+            onSuccess: () => {
+              message.success('更新产量单成功')
+              setIsModalOpen(false)
+              setIsEdit(false)
+              setEditingSheetId(null)
+              setSelectedRowKeys([])
+            },
+          },
+        )
+      } else {
+        createMutation.mutate(values, {
+          onSuccess: () => {
+            message.success('创建产量单成功')
+            setIsModalOpen(false)
+            setSelectedRowKeys([])
+          },
+        })
+      }
+    },
+    [createMutation, updateMutation, isEdit, editingSheetId, message],
+  )
 
   const handleExport = useCallback(() => {
     if (selectedRowKeys.length === 0) {
-      message.warning('请选择至少一条数据')
+      message.warning('请选择至少一条产量单导出')
       return
     }
-    // 获取选中的记录
-    const selectedRecords = data?.items.filter((item) => item.id && selectedRowKeys.includes(item.id)) || []
-    exportProductionRecordsAsExcel(selectedRecords)
-  }, [data?.items, exportProductionRecordsAsExcel, message, selectedRowKeys])
+    exportProductionSheetsAsExcel(selectedRowKeys as string[])
+  }, [exportProductionSheetsAsExcel, message, selectedRowKeys])
 
-  const handleFinish = useCallback(
-    (values: ProductionRecord) => {
-      if (isEdit && selectedRowKeys[0]) {
-        updateMutation.mutate({
-          id: selectedRowKeys[0] as string,
-          values,
-        })
-      } else {
-        createMutation.mutate(values)
-      }
-    },
-    [createMutation, isEdit, selectedRowKeys, updateMutation],
-  )
+  const handleViewDetail = useCallback((sheetId: string) => {
+    setSelectedSheetId(sheetId)
+    setDetailDrawerOpen(true)
+  }, [])
 
   const handleSearch = useCallback(
     (params: typeof searchParams) => {
@@ -179,9 +202,14 @@ export default function ProductionRecordList() {
     // 检查URL参数中是否已有日期范围，如果没有则使用当月
     const urlStartDate = searchParamsURL.get('startDate')
     const urlEndDate = searchParamsURL.get('endDate')
-    
+
     // 如果URL中没有日期参数，且当前searchParams也没有日期，则使用当月日期范围
-    if (!urlStartDate && !urlEndDate && !searchParams.startDate && !searchParams.endDate) {
+    if (
+      !urlStartDate &&
+      !urlEndDate &&
+      !searchParams.startDate &&
+      !searchParams.endDate
+    ) {
       // URL中没有日期参数，使用当月日期范围
       const monthRange = getCurrentMonthRange()
       setSearchParams({
@@ -201,13 +229,8 @@ export default function ProductionRecordList() {
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
-          title="删除产量记录"
-          itemName="产量记录"
-        />
-        <PrintButton
-          handlePrint={handlePrint}
-          loading={isPrinting}
-          count={selectedRowKeys.length}
+          title="删除产量单"
+          itemName="产量单"
         />
         <ExportButton
           handleExport={handleExport}
@@ -215,14 +238,12 @@ export default function ProductionRecordList() {
           count={selectedRowKeys.length}
         />
       </div>
-      {contextHolder}
-      {exportContextHolder}
 
       {/* 搜索栏 */}
       <div className="flex items-center gap-2">
-        <span className="text-gray-600 whitespace-nowrap">搜索：</span>
-        <ProductionRecordSearch 
-          onSearch={handleSearch} 
+        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <ProductionSheetSearch
+          onSearch={handleSearch}
           onReset={handleResetSearch}
           initialStartDate={searchParams.startDate}
           initialEndDate={searchParams.endDate}
@@ -230,9 +251,12 @@ export default function ProductionRecordList() {
       </div>
 
       {/* 表格和分页 */}
-      <div ref={tableContainerRef} className="flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
-        <div className="flex-1 min-h-0 overflow-x-auto">
-          <ProductionRecordTable
+      <div
+        ref={tableContainerRef}
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+      >
+        <div className="min-h-0 flex-1 overflow-x-auto">
+          <ProductionSheetTable
             loading={isLoading}
             data={data?.items || []}
             selectedRowKeys={selectedRowKeys}
@@ -241,39 +265,99 @@ export default function ProductionRecordList() {
             pageSize={pageSize}
             scrollY={scrollY}
             rowHeight={rowHeight}
+            onViewDetail={handleViewDetail}
           />
         </div>
-        <div ref={paginationRef} className="flex justify-end flex-shrink-0">
+        <div ref={paginationRef} className="flex flex-shrink-0 justify-end">
           <AppPagination
             total={data?.total || 0}
-            pageSizeOptions={['10', '20', '30', '50', '100', '200', '300', '500']}
+            pageSizeOptions={[
+              '10',
+              '20',
+              '30',
+              '50',
+              '100',
+              '200',
+              '300',
+              '500',
+            ]}
             defaultPageSize={10}
           />
         </div>
       </div>
 
+      {/* 创建/编辑产量单弹窗 */}
       <Modal
         title={modalTitle}
         open={isModalOpen}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         destroyOnClose
-        onOk={() => formRef?.submit()}
+        onOk={async () => {
+          try {
+            await formRef?.validateFields()
+            formRef?.submit()
+          } catch (error) {
+            console.error('表单验证失败:', error)
+            // 验证失败时，Ant Design 会自动显示错误信息
+          }
+        }}
         onCancel={() => {
           setIsModalOpen(false)
           setIsEdit(false)
-          setEditingRecord(null)
+          setEditingSheetId(null)
+          formRef?.resetFields()
         }}
-        width={800}
+        width={1000}
+        style={{ top: 20 }}
       >
-        <ProductionRecordForm
+        <ProductionSheetForm
           onFinish={handleFinish}
           setFormRef={setFormRef}
-          isCreating={createMutation.isPending}
-          isEdit={isEdit}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          isCreating={createMutation.isPending || updateMutation.isPending}
+          initialValues={
+            isEdit && editingSheetDetail
+              ? {
+                  production_date: editingSheetDetail.production_date,
+                  operator_ids:
+                    editingSheetDetail.records?.[0]?.operator_ids || [],
+                  working_hours:
+                    editingSheetDetail.records?.[0]?.working_hours || null,
+                  remark: editingSheetDetail.remark || null,
+                  records: editingSheetDetail.records || [],
+                }
+              : undefined
+          }
         />
       </Modal>
+
+      {/* 产量单详情抽屉 */}
+      <Drawer
+        title={`产量单详情 - ${sheetDetail?.production_date ? dayjs(sheetDetail.production_date).format('YYYY-MM-DD') : ''}`}
+        placement="right"
+        size="large"
+        open={detailDrawerOpen}
+        onClose={() => {
+          setDetailDrawerOpen(false)
+          setSelectedSheetId(null)
+        }}
+      >
+        {detailLoading ? (
+          <div>加载中...</div>
+        ) : sheetDetail?.records && sheetDetail.records.length > 0 ? (
+          <ProductionRecordTable
+            loading={false}
+            data={sheetDetail.records}
+            selectedRowKeys={[]}
+            onSelect={() => {}}
+            page={1}
+            pageSize={sheetDetail.records.length}
+            scrollY={600}
+            rowHeight={40}
+          />
+        ) : (
+          <div>暂无记录</div>
+        )}
+      </Drawer>
     </div>
   )
 }
-
