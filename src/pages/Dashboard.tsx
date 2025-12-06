@@ -469,7 +469,7 @@ export default function Dashboard() {
                       operator_ids:
                         productionEditingSheetDetail.records?.[0]?.operator_ids || [],
                       working_hours:
-                        productionEditingSheetDetail.records?.[0]?.working_hours || null,
+                        productionEditingSheetDetail.working_hours || null,
                       remark: productionEditingSheetDetail.remark || null,
                       records: productionEditingSheetDetail.records || [],
                     }

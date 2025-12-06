@@ -71,6 +71,17 @@ export default function ProductionSheetTable({
         render: (value: number) => (value || 0).toLocaleString(),
       },
       {
+        title: '工时（H）',
+        dataIndex: 'working_hours',
+        key: 'working_hours',
+        width: 100,
+        align: 'right',
+        render: (value: number | null | undefined) => {
+          if (value === null || value === undefined) return '-'
+          return value.toFixed(1)
+        },
+      },
+      {
         title: '备注',
         dataIndex: 'remark',
         key: 'remark',
