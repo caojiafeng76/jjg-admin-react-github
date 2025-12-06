@@ -6,6 +6,7 @@ import MainMenu from '@ui/MainMenu'
 import AppHeader from '@ui/AppHeader'
 import AppLogo from './AppLogo'
 import { useAuth } from '@/contexts/AuthContext'
+import { translateErrorMessage } from '@/utils/errorHandler'
 
 const { Content, Sider } = Layout
 
@@ -25,7 +26,8 @@ export default function AppLayout() {
   useEffect(() => {
     if (!error) return
 
-    messageApi.error(error.message || '认证出现问题，请稍后重试')
+    const message = error.message || '认证出现问题，请稍后重试'
+    messageApi.error(translateErrorMessage(message))
     clearError()
   }, [error, messageApi, clearError])
 
