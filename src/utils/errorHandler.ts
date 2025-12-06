@@ -36,6 +36,25 @@ const ERROR_MESSAGES: Record<string, string> = {
 }
 
 /**
+ * 错误消息翻译映射（将英文错误消息翻译为中文）
+ */
+const ERROR_MESSAGE_TRANSLATIONS: Record<string, string> = {
+  'Auth session missing!': '认证会话缺失，请重新登录',
+  'Auth session missing': '认证会话缺失，请重新登录',
+  'Invalid login credentials': '登录凭据无效，请检查邮箱和密码',
+  'Email not confirmed': '邮箱未确认，请先验证邮箱',
+  'User not found': '用户不存在',
+  'Invalid password': '密码错误',
+}
+
+/**
+ * 翻译错误消息
+ */
+export function translateErrorMessage(message: string): string {
+  return ERROR_MESSAGE_TRANSLATIONS[message] || message
+}
+
+/**
  * 处理 API 错误
  */
 export function handleApiError(
@@ -66,8 +85,9 @@ export function handleApiError(
   // 处理 Supabase 错误
   if (error && typeof error === 'object' && 'message' in error) {
     const supabaseError = error as { message: string; code?: string }
-    const message = customMessage || supabaseError.message
-    return new AppError(message, supabaseError.code)
+    const originalMessage = customMessage || supabaseError.message
+    const translatedMessage = translateErrorMessage(originalMessage)
+    return new AppError(translatedMessage, supabaseError.code)
   }
 
   // 处理网络错误

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/AuthContext'
+import { translateErrorMessage } from '@/utils/errorHandler'
 import Loading from '@ui/Loading'
 
 const { Title, Text } = Typography
@@ -30,7 +31,8 @@ export default function Login() {
   // 将 AuthContext 的错误同步到本地提示
   useEffect(() => {
     if (error) {
-      setErrorMessage(error.message || '认证出现问题，请稍后重试')
+      const message = error.message || '认证出现问题，请稍后重试'
+      setErrorMessage(translateErrorMessage(message))
     }
   }, [error])
 
@@ -42,7 +44,8 @@ export default function Login() {
       await signIn(values.email, values.password)
       navigate('/dashboard', { replace: true })
     } catch (err: any) {
-      setErrorMessage(err?.message || '登录失败，请稍后重试')
+      const message = err?.message || '登录失败，请稍后重试'
+      setErrorMessage(translateErrorMessage(message))
     } finally {
       setSubmitting(false)
     }
