@@ -110,9 +110,6 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
     blankrows: false,
   })
 
-  const mergedRowSkipSet = buildMergedRowSkipSet(sheet)
-  const range = XLSX.utils.decode_range(sheet['!ref'] ?? 'A1:A1')
-
   let columnMap = findErpColumnMap(rows)
   if (!columnMap) {
     return []
@@ -122,11 +119,6 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
-    const rowIndex = range.s.r + i
-
-    if (mergedRowSkipSet.has(rowIndex)) {
-      continue
-    }
 
     if (!row || row.length === 0) continue
 
@@ -140,6 +132,8 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
     const projectNo = getStringFromRow(row, columnMap.project_no)
     const productModel = getStringFromRow(row, columnMap.product_model)
 
+    // 如果关键列（项目号或产品型号）有值，即使该行在合并单元格中，也应该解析
+    // 因为合并单元格可能只影响某些显示列，而不影响关键数据列
     if (!projectNo && !productModel) continue
 
     const normalizedProjectNo = projectNo ? removeSpaces(projectNo) : ''
@@ -348,18 +342,3 @@ function removeSpaces(value: string) {
   return value.replace(/\s+/g, '')
 }
 
-function buildMergedRowSkipSet(sheet: WorkSheet): Set<number> {
-  const skip = new Set<number>()
-  const merges = sheet['!merges'] ?? []
-
-  for (const merge of merges) {
-    if (!merge || !merge.s || !merge.e) continue
-    if (merge.s.r === merge.e.r) continue
-
-    for (let r = merge.s.r + 1; r <= merge.e.r; r++) {
-      skip.add(r)
-    }
-  }
-
-  return skip
-}
