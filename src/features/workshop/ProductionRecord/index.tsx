@@ -321,7 +321,7 @@ export default function ProductionRecordList() {
                   operator_ids:
                     editingSheetDetail.records?.[0]?.operator_ids || [],
                   working_hours:
-                    editingSheetDetail.records?.[0]?.working_hours || null,
+                    editingSheetDetail.working_hours || null,
                   remark: editingSheetDetail.remark || null,
                   records: editingSheetDetail.records || [],
                 }

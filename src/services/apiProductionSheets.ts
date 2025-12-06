@@ -6,6 +6,7 @@ import type { ProductionRecord, ProductionRecordWithRelations } from './apiProdu
 export interface ProductionSheet {
   id?: string
   production_date: string
+  working_hours?: number | null
   remark?: string | null
   created_at?: string
   updated_at?: string
@@ -356,7 +357,7 @@ export async function createProductionSheet({
   operator_ids: string[]
   working_hours?: number | null
   remark?: string | null
-  records: Omit<ProductionSheetRecord, 'id' | 'production_sheet_id' | 'created_at' | 'updated_at' | 'operator_ids' | 'working_hours'>[]
+      records: Omit<ProductionSheetRecord, 'id' | 'production_sheet_id' | 'created_at' | 'updated_at' | 'operator_ids'>[]
 }) {
   // 验证至少有一条记录
   if (!records || records.length === 0) {
@@ -372,6 +373,7 @@ export async function createProductionSheet({
   const { data: sheet, error: sheetError } = await (supabase.from('production_sheets' as any) as any)
     .insert({
       production_date,
+      working_hours: working_hours || null,
       remark: remark || null,
     })
     .select()
@@ -387,15 +389,14 @@ export async function createProductionSheet({
       ? record.defect_reasons.reduce((sum, item) => sum + (item.quantity || 0), 0)
       : 0
 
-    return {
-      ...record,
-      production_sheet_id: sheet.id,
-      production_date, // 使用产量单的日期
-      operator_ids, // 使用产量单的操作者
-      working_hours, // 使用产量单的工时
-      defective_quantity: totalDefectiveQuantity,
-      defect_reasons: (record.defect_reasons || []) as any,
-    }
+        return {
+          ...record,
+          production_sheet_id: sheet.id,
+          production_date, // 使用产量单的日期
+          operator_ids, // 使用产量单的操作者
+          defective_quantity: totalDefectiveQuantity,
+          defect_reasons: (record.defect_reasons || []) as any,
+        }
   })
 
   const { error: recordsError } = await supabase
@@ -430,6 +431,7 @@ export async function updateProductionSheet({
   // 更新产量单基本信息
   const updateData: Record<string, unknown> = {}
   if (production_date) updateData.production_date = production_date
+  if (working_hours !== undefined) updateData.working_hours = working_hours
   if (remark !== undefined) updateData.remark = remark
 
   const { error: sheetError } = await (supabase.from('production_sheets' as any) as any).update(updateData).eq('id', id)
@@ -476,7 +478,6 @@ export async function updateProductionSheet({
           production_sheet_id: id,
           production_date: sheetDate,
           operator_ids,
-          working_hours,
           defective_quantity: totalDefectiveQuantity,
           defect_reasons: (record.defect_reasons || []) as any,
         }

@@ -15,7 +15,6 @@ export interface ProductionRecord {
   defective_quantity: number
   defect_reasons: DefectReasonItem[]
   operator_ids: string[]
-  working_hours?: number | null
   remark?: string | null
   production_sheet_id?: string | null
   created_at?: string

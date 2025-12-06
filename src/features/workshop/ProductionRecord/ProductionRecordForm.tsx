@@ -313,20 +313,6 @@ export default function ProductionRecordForm({
       </Form.Item>
 
       <Form.Item
-        name="working_hours"
-        label="工时（H）"
-      >
-        <InputNumber
-          style={{ width: '100%' }}
-          min={0}
-          step={0.1}
-          precision={1}
-          placeholder="请输入工时，例如：11.5"
-          disabled={isCreating}
-        />
-      </Form.Item>
-
-      <Form.Item
         name="remark"
         label="备注"
       >

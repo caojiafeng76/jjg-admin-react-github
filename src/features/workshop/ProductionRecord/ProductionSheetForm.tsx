@@ -358,7 +358,6 @@ export default function ProductionSheetForm({
           ...record,
           production_date: dayjs(values.production_date).format('YYYY-MM-DD'),
           operator_ids: values.operator_ids, // 使用产量单的操作者
-          working_hours: values.working_hours, // 使用产量单的工时
           defective_quantity: totalDefectiveQuantity,
           defect_reasons: record.defect_reasons || [],
         }
