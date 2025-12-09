@@ -1,0 +1,4 @@
+- ESLint: @eslint/js recommended + typescript-eslint recommended; react-hooks recommended; react-refresh only-export-components warn. Ignores dist. ECMA 2020 globals browser. Files: **/*.{ts,tsx}.
+- Formatting: Prettier with tailwindcss plugin. Prefer pnpm scripts `pnpm format` (prettier --write .).
+- Tailwind v3 config minimal; darkMode 'class'.
+- TypeScript: tsconfig.app/node present (not strict info). Keep React + TS patterns; functional components with hooks; Zustand store; TanStack Query for data fetching.

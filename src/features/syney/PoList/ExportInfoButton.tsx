@@ -10,7 +10,7 @@ export default function ExportInfoButton() {
       {contextHolder}
       <Button
         type="text"
-        icon={<DocumentArrowDownIcon className="size-4 !text-green-500/80" />}
+        icon={<DocumentArrowDownIcon className="size-4 text-green-500/80!" />}
         onClick={exportSafePartInfoAsExcel}
       >
         导出安全部件信息

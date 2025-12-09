@@ -336,7 +336,7 @@ export default function Dashboard() {
                 rowHeight={orderRowHeight}
               />
             </div>
-            <div ref={orderPaginationRef} className="flex justify-end flex-shrink-0">
+            <div ref={orderPaginationRef} className="flex justify-end shrink-0">
               <div className="mr-2 mt-4 flex justify-end">
                 <Pagination
                   current={orderPage}
@@ -416,7 +416,7 @@ export default function Dashboard() {
                 rowHeight={productionRowHeight}
               />
             </div>
-            <div ref={productionPaginationRef} className="flex flex-shrink-0 justify-end">
+            <div ref={productionPaginationRef} className="flex shrink-0 justify-end">
               <div className="mr-2 mt-4 flex justify-end">
                 <Pagination
                   current={productionPage}

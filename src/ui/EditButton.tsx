@@ -12,7 +12,7 @@ export default function EditButton({
     <Tooltip title={title}>
       <Button
         type="text"
-        icon={<PencilSquareIcon className="size-4 !text-yellow-500/80" />}
+        icon={<PencilSquareIcon className="size-4 text-yellow-500/80!" />}
         onClick={handleEdit}
       >
         编辑

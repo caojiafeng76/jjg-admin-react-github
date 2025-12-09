@@ -25,7 +25,7 @@ export default function ExportAsExcelButton() {
   return (
     <Button
       type="text"
-      icon={<DocumentArrowDownIcon className="size-4 !text-green-500/80" />}
+      icon={<DocumentArrowDownIcon className="size-4 text-green-500/80!" />}
       onClick={handleExport}
       loading={isLoading}
       disabled={isLoading}

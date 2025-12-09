@@ -9,7 +9,7 @@ export default function AddButton({
   return (
     <Button
       type="text"
-      icon={<PlusCircleIcon className="size-4 !text-green-500/80" />}
+      icon={<PlusCircleIcon className="size-4 text-green-500/80!" />}
       onClick={handleCreate}
     >
       添加

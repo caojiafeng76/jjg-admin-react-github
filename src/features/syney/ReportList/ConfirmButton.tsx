@@ -34,7 +34,7 @@ export default function ConfirmButton() {
           }
         )
       }}
-      icon={<CheckCircleIcon className="size-4 !text-green-500/80" />}
+      icon={<CheckCircleIcon className="size-4 text-green-500/80!" />}
     >
       已校对
     </Button>

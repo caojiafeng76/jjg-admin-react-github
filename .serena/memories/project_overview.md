@@ -1,0 +1,5 @@
+- Purpose: React + TS + Vite admin app for production/workshop workflows (Syney purchase/spec/report lists, workshop orders/processes/defect reasons) with Supabase-backed APIs.
+- Stack: React 19, React Router 7, TanStack Query 5, Zustand, Ant Design 6, Supabase JS, date-fns/dayjs, Tailwind CSS 3 + PostCSS/Autoprefixer, Vite 7 build, TypeScript 5.
+- Structure: src/pages for routes; src/features/syney and src/features/workshop domain UIs; src/services for API calls + Supabase client and types; src/ui shared components; src/utils helpers (excel/pdf); contexts for auth/dark mode; hooks and store utilities.
+- Current Tailwind: v3 config with darkMode class, content paths index.html + src/**/*.
+- Repo bits: pnpm-lock.yaml suggests pnpm; build output in dist; supabase directory with migrations.
