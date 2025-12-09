@@ -11,7 +11,7 @@ export default function UnConfirmedButton() {
   return (
     <Button
       type="text"
-      icon={<XCircleIcon className="size-4 !text-red-500/80" />}
+      icon={<XCircleIcon className="size-4 text-red-500/80!" />}
       onClick={() => {
         if (tableSelectedKeys.length === 0)
           return message.warning('请选择要标记未校对的条目')

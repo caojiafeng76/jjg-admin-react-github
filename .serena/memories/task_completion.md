@@ -1,0 +1,1 @@
+Before handing off a change: run `pnpm lint` and `pnpm build` (or dev sanity check). No automated tests configured. Ensure formatting via `pnpm format` if you touched many files. Provide manual verification notes for affected features.

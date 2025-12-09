@@ -25,7 +25,7 @@ export default function ExportPDFButton() {
   return (
     <Button
       type="text"
-      icon={<DocumentIcon className="size-4 !text-red-500/80" />}
+      icon={<DocumentIcon className="size-4 text-red-500/80!" />}
       onClick={handleExport}
       loading={isLoading}
       disabled={isLoading}

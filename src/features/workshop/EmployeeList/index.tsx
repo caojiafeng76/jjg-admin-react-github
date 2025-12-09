@@ -152,7 +152,7 @@ export default function EmployeeList() {
             rowHeight={rowHeight}
           />
         </div>
-        <div ref={paginationRef} className="flex justify-end flex-shrink-0">
+        <div ref={paginationRef} className="flex justify-end shrink-0">
           <AppPagination total={data?.total || 0} />
         </div>
       </div>

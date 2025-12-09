@@ -107,7 +107,7 @@ export default function ReportList() {
         <div className="flex-1 min-h-0 overflow-x-auto">
           <ReportTable />
         </div>
-        <div className="flex justify-end flex-shrink-0">
+        <div className="flex justify-end shrink-0">
           <AppPagination total={count || 0} />
         </div>
       </div>

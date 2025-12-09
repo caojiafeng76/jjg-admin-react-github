@@ -268,7 +268,7 @@ export default function ProductionRecordList() {
             onViewDetail={handleViewDetail}
           />
         </div>
-        <div ref={paginationRef} className="flex flex-shrink-0 justify-end">
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination
             total={data?.total || 0}
             pageSizeOptions={[

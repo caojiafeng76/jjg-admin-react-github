@@ -35,7 +35,7 @@ export default function DeleteButton({
     return (
       <Button
         type="text"
-        icon={<XCircleIcon className="size-4 !text-red-500/80" />}
+        icon={<XCircleIcon className="size-4 text-red-500/80!" />}
         onClick={onConfirm}
       >
         删除
@@ -54,7 +54,7 @@ export default function DeleteButton({
     >
       <Button
         type="text"
-        icon={<XCircleIcon className="size-4 !text-red-500/80" />}
+        icon={<XCircleIcon className="size-4 text-red-500/80!" />}
       >
         删除
       </Button>
