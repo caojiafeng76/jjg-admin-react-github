@@ -18,6 +18,10 @@ export function useUpdatePos(messageApi?: MessageApi) {
       queryClient.invalidateQueries({
         queryKey: ['syney-pos'],
       })
+      // 失效已选订单缓存，确保打印分解单用的是最新数据
+      queryClient.invalidateQueries({
+        queryKey: ['selected-pos'],
+      })
       // 失效单条数据缓存
       queryClient.invalidateQueries({
         queryKey: ['po'],
