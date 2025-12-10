@@ -38,6 +38,9 @@ const EmployeeList = lazy(
 const ProductionRecordList = lazy(
   () => import('@features/workshop/ProductionRecord'),
 )
+const ProductionStatistics = lazy(
+  () => import('@pages/ProductionStatistics'),
+)
 
 function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()
@@ -113,6 +116,10 @@ export const router = createBrowserRouter([
       {
         path: 'production-record-list',
         element: <ProductionRecordList />,
+      },
+      {
+        path: 'production-statistics',
+        element: <ProductionStatistics />,
       },
     ],
   },
