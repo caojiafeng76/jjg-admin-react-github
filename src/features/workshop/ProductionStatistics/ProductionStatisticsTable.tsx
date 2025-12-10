@@ -7,6 +7,7 @@ interface Props {
   loading: boolean
   data: ProductionStatisticsRow[]
   defectReasonColumns: string[]
+  processColumns: string[]
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   scrollY?: number
@@ -16,6 +17,7 @@ export default function ProductionStatisticsTable({
   loading,
   data,
   defectReasonColumns,
+  processColumns,
   selectedRowKeys,
   onSelect,
   scrollY = 520,
@@ -72,7 +74,26 @@ export default function ProductionStatisticsTable({
         align: 'right',
         render: (value: number) => value.toLocaleString(),
       },
+      {
+        title: '不合格重量(kg)',
+        dataIndex: 'defectiveWeightKg',
+        width: 140,
+        align: 'right',
+        render: (value: number) => (value ? value.toFixed(2) : '-'),
+      },
     ]
+
+    const processQuantityColumns: TableColumnsType<ProductionStatisticsRow> =
+      processColumns.map((process) => ({
+        title: `${process}-合格数`,
+        dataIndex: ['processQualifiedCounts', process],
+        width: 140,
+        align: 'right',
+        render: (_value, record) => {
+          const qty = record.processQualifiedCounts[process] || 0
+          return qty > 0 ? qty.toLocaleString() : ''
+        },
+      }))
 
     const reasonColumns: TableColumnsType<ProductionStatisticsRow> =
       defectReasonColumns.map((reason) => ({
@@ -104,8 +125,8 @@ export default function ProductionStatisticsTable({
       },
     ]
 
-    return [...baseColumns, ...reasonColumns, ...tailColumns]
-  }, [defectReasonColumns])
+    return [...baseColumns, ...processQuantityColumns, ...reasonColumns, ...tailColumns]
+  }, [defectReasonColumns, processColumns])
 
   const rowSelection = useMemo(
     () => ({
@@ -124,11 +145,26 @@ export default function ProductionStatisticsTable({
       (sum, row) => sum + (row.defectiveQuantity || 0),
       0,
     )
+    const totalDefectiveWeight = data.reduce(
+      (sum, row) => sum + (row.defectiveWeightKg || 0),
+      0,
+    )
 
     const reasonTotals = defectReasonColumns.reduce<Record<string, number>>(
       (acc, reason) => {
         acc[reason] = data.reduce(
           (sum, row) => sum + (row.defectReasonCounts[reason] || 0),
+          0,
+        )
+        return acc
+      },
+      {},
+    )
+
+    const processTotals = processColumns.reduce<Record<string, number>>(
+      (acc, process) => {
+        acc[process] = data.reduce(
+          (sum, row) => sum + (row.processQualifiedCounts[process] || 0),
           0,
         )
         return acc
@@ -151,10 +187,24 @@ export default function ProductionStatisticsTable({
           <Table.Summary.Cell index={8} align="right">
             {totalDefective.toLocaleString()}
           </Table.Summary.Cell>
+          <Table.Summary.Cell index={9} align="right">
+            {totalDefectiveWeight > 0 ? totalDefectiveWeight.toFixed(2) : ''}
+          </Table.Summary.Cell>
+          {processColumns.map((process, idx) => (
+            <Table.Summary.Cell
+              key={process}
+              index={10 + idx}
+              align="right"
+            >
+              {processTotals[process] > 0
+                ? processTotals[process].toLocaleString()
+                : ''}
+            </Table.Summary.Cell>
+          ))}
           {defectReasonColumns.map((reason, idx) => (
             <Table.Summary.Cell
               key={reason}
-              index={9 + idx}
+              index={10 + processColumns.length + idx}
               align="right"
             >
               {reasonTotals[reason] > 0 ? reasonTotals[reason].toLocaleString() : ''}
@@ -162,13 +212,13 @@ export default function ProductionStatisticsTable({
           ))}
           {/* 操作人列 */}
           <Table.Summary.Cell
-            index={9 + defectReasonColumns.length}
+            index={10 + processColumns.length + defectReasonColumns.length}
             align="center"
           />
         </Table.Summary.Row>
       </Table.Summary>
     )
-  }, [data, defectReasonColumns])
+  }, [data, defectReasonColumns, processColumns])
 
   return (
     <Table<ProductionStatisticsRow>

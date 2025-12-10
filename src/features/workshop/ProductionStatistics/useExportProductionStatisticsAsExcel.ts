@@ -15,6 +15,7 @@ export function useExportProductionStatisticsAsExcel(messageApi?: MessageApi) {
   async function exportProductionStatisticsAsExcel(
     rows: ProductionStatisticsRow[],
     defectReasonColumns: string[],
+    processColumns: string[],
     searchParams: { startDate?: string; endDate?: string },
   ) {
     if (!rows || rows.length === 0) {
@@ -34,6 +35,8 @@ export function useExportProductionStatisticsAsExcel(messageApi?: MessageApi) {
         '日期范围',
         '合格数量',
         '不合格总数',
+        '不合格重量(kg)',
+        ...processColumns.map((item) => `${item}-合格数`),
         ...defectReasonColumns,
         '操作人',
       ]
@@ -48,8 +51,16 @@ export function useExportProductionStatisticsAsExcel(messageApi?: MessageApi) {
           日期范围: row.dateRange,
           合格数量: row.qualifiedQuantity || 0,
           不合格总数: row.defectiveQuantity || 0,
+          '不合格重量(kg)': row.defectiveWeightKg
+            ? Number(row.defectiveWeightKg.toFixed(2))
+            : '',
           操作人: row.operators.join('、'),
         }
+
+        processColumns.forEach((process) => {
+          const qty = row.processQualifiedCounts[process] || 0
+          record[`${process}-合格数`] = qty > 0 ? qty : ''
+        })
 
         defectReasonColumns.forEach((reason) => {
           const qty = row.defectReasonCounts[reason] || 0
