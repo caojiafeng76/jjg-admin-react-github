@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance, Drawer } from 'antd'
+import { App, Modal, FormInstance, Drawer, Spin } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 
@@ -73,7 +73,8 @@ export default function ProductionRecordList() {
 
   const { data: sheetDetail, isLoading: detailLoading } =
     useProductionSheetById(selectedSheetId)
-  const { data: editingSheetDetail } = useProductionSheetById(editingSheetId)
+  const { data: editingSheetDetail, isLoading: editingDetailLoading } =
+    useProductionSheetById(editingSheetId)
 
   // 动态计算表格高度（目标10条数据撑满，需要减去汇总行高度）
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
@@ -292,6 +293,9 @@ export default function ProductionRecordList() {
         open={isModalOpen}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         destroyOnClose
+        okButtonProps={{
+          disabled: isEdit && editingDetailLoading,
+        }}
         onOk={async () => {
           try {
             await formRef?.validateFields()
@@ -310,24 +314,29 @@ export default function ProductionRecordList() {
         width={1000}
         style={{ top: 20 }}
       >
-        <ProductionSheetForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isCreating={createMutation.isPending || updateMutation.isPending}
-          initialValues={
-            isEdit && editingSheetDetail
-              ? {
-                  production_date: editingSheetDetail.production_date,
-                  operator_ids:
-                    editingSheetDetail.records?.[0]?.operator_ids || [],
-                  working_hours:
-                    editingSheetDetail.working_hours || null,
-                  remark: editingSheetDetail.remark || null,
-                  records: editingSheetDetail.records || [],
-                }
-              : undefined
-          }
-        />
+        <Spin
+          spinning={isEdit && editingDetailLoading}
+          tip="正在加载产量单数据..."
+        >
+          <ProductionSheetForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isCreating={createMutation.isPending || updateMutation.isPending}
+            initialValues={
+              isEdit && editingSheetDetail
+                ? {
+                    production_date: editingSheetDetail.production_date,
+                    operator_ids:
+                      editingSheetDetail.records?.[0]?.operator_ids || [],
+                    working_hours:
+                      editingSheetDetail.working_hours || null,
+                    remark: editingSheetDetail.remark || null,
+                    records: editingSheetDetail.records || [],
+                  }
+                : undefined
+            }
+          />
+        </Spin>
       </Modal>
 
       {/* 产量单详情抽屉 */}

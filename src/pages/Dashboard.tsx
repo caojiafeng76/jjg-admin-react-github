@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance, Tabs, Pagination } from 'antd'
+import { App, Modal, FormInstance, Tabs, Pagination, Spin } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
@@ -83,7 +83,8 @@ export default function Dashboard() {
 
   const createProductionMutation = useCreateProductionSheet()
   const updateProductionMutation = useUpdateProductionSheet()
-  const { data: productionEditingSheetDetail } = useProductionSheetById(productionEditingSheetId)
+  const { data: productionEditingSheetDetail, isLoading: productionEditingDetailLoading } =
+    useProductionSheetById(productionEditingSheetId)
 
   // 表格高度计算
   const {
@@ -441,6 +442,9 @@ export default function Dashboard() {
             open={productionModalOpen}
             confirmLoading={createProductionMutation.isPending || updateProductionMutation.isPending}
             destroyOnClose
+        okButtonProps={{
+          disabled: productionIsEdit && productionEditingDetailLoading,
+        }}
             onOk={async () => {
               try {
                 await productionFormRef?.validateFields()
@@ -458,24 +462,29 @@ export default function Dashboard() {
             width={1000}
             style={{ top: 20 }}
           >
-            <ProductionSheetForm
-              onFinish={handleProductionFinish}
-              setFormRef={setProductionFormRef}
-              isCreating={createProductionMutation.isPending || updateProductionMutation.isPending}
-              initialValues={
-                productionIsEdit && productionEditingSheetDetail
-                  ? {
-                      production_date: productionEditingSheetDetail.production_date,
-                      operator_ids:
-                        productionEditingSheetDetail.records?.[0]?.operator_ids || [],
-                      working_hours:
-                        productionEditingSheetDetail.working_hours || null,
-                      remark: productionEditingSheetDetail.remark || null,
-                      records: productionEditingSheetDetail.records || [],
-                    }
-                  : undefined
-              }
-            />
+        <Spin
+          spinning={productionIsEdit && productionEditingDetailLoading}
+          tip="正在加载产量单数据..."
+        >
+          <ProductionSheetForm
+            onFinish={handleProductionFinish}
+            setFormRef={setProductionFormRef}
+            isCreating={createProductionMutation.isPending || updateProductionMutation.isPending}
+            initialValues={
+              productionIsEdit && productionEditingSheetDetail
+                ? {
+                    production_date: productionEditingSheetDetail.production_date,
+                    operator_ids:
+                      productionEditingSheetDetail.records?.[0]?.operator_ids || [],
+                    working_hours:
+                      productionEditingSheetDetail.working_hours || null,
+                    remark: productionEditingSheetDetail.remark || null,
+                    records: productionEditingSheetDetail.records || [],
+                  }
+                : undefined
+            }
+          />
+        </Spin>
           </Modal>
         </div>
       ),
