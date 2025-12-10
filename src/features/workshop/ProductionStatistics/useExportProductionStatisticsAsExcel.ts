@@ -34,9 +34,9 @@ export function useExportProductionStatisticsAsExcel(messageApi?: MessageApi) {
         '长度(mm)',
         '日期范围',
         '合格数量',
+        ...processColumns.map((item) => `${item}-合格数`),
         '不合格总数',
         '不合格重量(kg)',
-        ...processColumns.map((item) => `${item}-合格数`),
         ...defectReasonColumns,
         '操作人',
       ]

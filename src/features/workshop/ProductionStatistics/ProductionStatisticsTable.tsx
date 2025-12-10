@@ -67,6 +67,21 @@ export default function ProductionStatisticsTable({
         align: 'right',
         render: (value: number) => value.toLocaleString(),
       },
+    ]
+
+    const processQuantityColumns: TableColumnsType<ProductionStatisticsRow> =
+      processColumns.map((process) => ({
+        title: `${process}-合格数`,
+        dataIndex: ['processQualifiedCounts', process],
+        width: 140,
+        align: 'right',
+        render: (_value, record) => {
+          const qty = record.processQualifiedCounts[process] || 0
+          return qty > 0 ? qty.toLocaleString() : ''
+        },
+      }))
+
+    const defectColumns: TableColumnsType<ProductionStatisticsRow> = [
       {
         title: '不合格总数',
         dataIndex: 'defectiveQuantity',
@@ -82,18 +97,6 @@ export default function ProductionStatisticsTable({
         render: (value: number) => (value ? value.toFixed(2) : '-'),
       },
     ]
-
-    const processQuantityColumns: TableColumnsType<ProductionStatisticsRow> =
-      processColumns.map((process) => ({
-        title: `${process}-合格数`,
-        dataIndex: ['processQualifiedCounts', process],
-        width: 140,
-        align: 'right',
-        render: (_value, record) => {
-          const qty = record.processQualifiedCounts[process] || 0
-          return qty > 0 ? qty.toLocaleString() : ''
-        },
-      }))
 
     const reasonColumns: TableColumnsType<ProductionStatisticsRow> =
       defectReasonColumns.map((reason) => ({
@@ -125,7 +128,13 @@ export default function ProductionStatisticsTable({
       },
     ]
 
-    return [...baseColumns, ...processQuantityColumns, ...reasonColumns, ...tailColumns]
+    return [
+      ...baseColumns,
+      ...processQuantityColumns,
+      ...defectColumns,
+      ...reasonColumns,
+      ...tailColumns,
+    ]
   }, [defectReasonColumns, processColumns])
 
   const rowSelection = useMemo(
@@ -184,16 +193,10 @@ export default function ProductionStatisticsTable({
           <Table.Summary.Cell index={7} align="right">
             {totalQualified.toLocaleString()}
           </Table.Summary.Cell>
-          <Table.Summary.Cell index={8} align="right">
-            {totalDefective.toLocaleString()}
-          </Table.Summary.Cell>
-          <Table.Summary.Cell index={9} align="right">
-            {totalDefectiveWeight > 0 ? totalDefectiveWeight.toFixed(2) : ''}
-          </Table.Summary.Cell>
           {processColumns.map((process, idx) => (
             <Table.Summary.Cell
               key={process}
-              index={10 + idx}
+              index={8 + idx}
               align="right"
             >
               {processTotals[process] > 0
@@ -201,6 +204,12 @@ export default function ProductionStatisticsTable({
                 : ''}
             </Table.Summary.Cell>
           ))}
+          <Table.Summary.Cell index={8 + processColumns.length} align="right">
+            {totalDefective.toLocaleString()}
+          </Table.Summary.Cell>
+          <Table.Summary.Cell index={9 + processColumns.length} align="right">
+            {totalDefectiveWeight > 0 ? totalDefectiveWeight.toFixed(2) : ''}
+          </Table.Summary.Cell>
           {defectReasonColumns.map((reason, idx) => (
             <Table.Summary.Cell
               key={reason}
