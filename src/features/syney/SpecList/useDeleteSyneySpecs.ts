@@ -1,23 +1,15 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { message } from 'antd'
-
 import { deleteSyneySpecs as deleteSyneySpecsApi } from '@services/apiSyneySpecs'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 export function useDeleteSyneySpecs() {
-  const queryClient = useQueryClient()
+  const { mutate: deleteSyneySpecs, isPending: isDeleting } =
+    useMutationWithMessage({
+      mutationFn: deleteSyneySpecsApi,
+      invalidateQueries: [['syney-Specs']],
+      successMessage: '删除成功',
+      errorMessage: (err) => (err instanceof Error ? err.message : '删除失败'),
+    })
 
-  const { mutate: deleteSyneySpecs, isPending: isDeleting } = useMutation({
-    mutationFn: deleteSyneySpecsApi,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['syney-Specs'],
-      })
-      message.success('删除成功')
-    },
-    onError: (err) => {
-      message.error(err.message)
-    },
-  })
   return {
     deleteSyneySpecs,
     isDeleting,

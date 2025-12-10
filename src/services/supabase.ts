@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database.types'
+import { validateSupabaseEnv } from '@utils/env'
 
-export const supabaseUrl = import.meta.env.VITE_REACT_APP_SUPABASE_URL
-const supabaseKey = import.meta.env.VITE_REACT_APP_SUPABASE_KEY
+// 验证环境变量
+const { supabaseUrl, supabaseKey } = validateSupabaseEnv()
 
+// 创建 Supabase 客户端
 const supabase = createClient<Database>(supabaseUrl, supabaseKey)
 
+export { supabaseUrl }
 export default supabase

@@ -1,22 +1,14 @@
 import { updateSerialNo as updateSerialNoApi } from '@/services/apiSyneySerialNo'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { message } from 'antd'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 export function useUpdateSerialNo() {
-  const queryClient = useQueryClient()
-
-  const { mutate: updateSerialNo, isPending: isUpdating } = useMutation({
+  const { mutate: updateSerialNo, isPending: isUpdating } = useMutationWithMessage({
     mutationFn: updateSerialNoApi,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['serialNo'],
-      })
-      // message.success('更新编号成功')
-    },
-    onError: (err) => {
-      console.error(err)
-      message.error('更新编号失败')
-    },
+    invalidateQueries: [['serialNo']],
+    // 成功提示保持静默
+    successMessage: undefined,
+    errorMessage: '更新编号失败',
+    messageApi: undefined,
   })
 
   return {

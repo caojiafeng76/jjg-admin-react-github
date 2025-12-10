@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
   getEmployees,
@@ -6,6 +6,8 @@ import {
   updateEmployee,
   deleteEmployees,
 } from '@/services/apiEmployees'
+import { queryConfig } from '@/config/queryClient'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const EMPLOYEES_KEY = 'employees' as const
 
@@ -21,42 +23,28 @@ export function useEmployeesList({
   return useQuery({
     queryKey: [EMPLOYEES_KEY, page, pageSize, searchParams],
     queryFn: () => getEmployees({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
+    ...queryConfig.list,
   })
 }
 
 export function useCreateEmployee() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: createEmployee,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [EMPLOYEES_KEY] })
-      return args
-    },
+    invalidateQueries: [[EMPLOYEES_KEY]],
   })
 }
 
 export function useUpdateEmployee() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: updateEmployee,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [EMPLOYEES_KEY] })
-      return args
-    },
+    invalidateQueries: [[EMPLOYEES_KEY]],
   })
 }
 
 export function useDeleteEmployees() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: deleteEmployees,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [EMPLOYEES_KEY] })
-      return args
-    },
+    invalidateQueries: [[EMPLOYEES_KEY]],
   })
 }

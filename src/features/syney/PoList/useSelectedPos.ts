@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useAppStore } from '@/store'
 import { getSelectedPosWithItems } from '@/services/apiSyneyPos'
 import { ISyneyItem } from '@/services/types'
+import { queryConfig } from '@/config/queryClient'
 
 export function useSelectedPos() {
   const { tableSelectedKeys } = useAppStore()
@@ -15,10 +16,11 @@ export function useSelectedPos() {
   } = useQuery({
     queryKey: ['selected-pos', tableSelectedKeys],
     queryFn: () => getSelectedPosWithItems(tableSelectedKeys.map(Number)),
+    enabled: tableSelectedKeys.length > 0,
+    ...queryConfig.detail,
   })
 
   if (error) {
-    console.error(error)
     throw new Error('获取选择的入库单失败')
   }
 

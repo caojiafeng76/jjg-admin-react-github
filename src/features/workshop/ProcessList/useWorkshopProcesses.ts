@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
   getWorkshopProcesses,
@@ -6,6 +6,8 @@ import {
   updateWorkshopProcess,
   deleteWorkshopProcesses,
 } from '@/services/apiWorkshopProcesses'
+import { queryConfig } from '@/config/queryClient'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const WORKSHOP_PROCESSES_KEY = 'workshop-processes' as const
 
@@ -21,42 +23,28 @@ export function useWorkshopProcessesList({
   return useQuery({
     queryKey: [WORKSHOP_PROCESSES_KEY, page, pageSize, searchParams],
     queryFn: () => getWorkshopProcesses({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
+    ...queryConfig.list,
   })
 }
 
 export function useCreateWorkshopProcess() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: createWorkshopProcess,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_PROCESSES_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_PROCESSES_KEY]],
   })
 }
 
 export function useUpdateWorkshopProcess() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: updateWorkshopProcess,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_PROCESSES_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_PROCESSES_KEY]],
   })
 }
 
 export function useDeleteWorkshopProcesses() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: deleteWorkshopProcesses,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_PROCESSES_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_PROCESSES_KEY]],
   })
 }

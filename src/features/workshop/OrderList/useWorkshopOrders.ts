@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
   getWorkshopOrders,
@@ -7,6 +7,8 @@ import {
   createWorkshopOrdersBatch,
   deleteWorkshopOrders,
 } from '@/services/apiWorkshopOrders'
+import { queryConfig } from '@/config/queryClient'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const WORKSHOP_ORDERS_KEY = 'workshop-orders' as const
 
@@ -29,54 +31,35 @@ export function useWorkshopOrdersList({
   return useQuery({
     queryKey: [WORKSHOP_ORDERS_KEY, page, pageSize, searchParams],
     queryFn: () => getWorkshopOrders({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
+    ...queryConfig.list,
   })
 }
 
 export function useCreateWorkshopOrder() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: createWorkshopOrder,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_ORDERS_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_ORDERS_KEY]],
   })
 }
 
 export function useUpdateWorkshopOrder() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: updateWorkshopOrder,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_ORDERS_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_ORDERS_KEY]],
   })
 }
 
 export function useCreateWorkshopOrdersBatch() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: createWorkshopOrdersBatch,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_ORDERS_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_ORDERS_KEY]],
   })
 }
 
 export function useDeleteWorkshopOrders() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: deleteWorkshopOrders,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_ORDERS_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_ORDERS_KEY]],
   })
 }

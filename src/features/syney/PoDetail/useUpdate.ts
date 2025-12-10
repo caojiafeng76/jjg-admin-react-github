@@ -1,21 +1,15 @@
 import { updatePoItems } from '@/services/apiSyneyPo'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { message } from 'antd'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 export function useUpdate() {
-  const queryClient = useQueryClient()
-
-  const { mutateAsync: updateItems } = useMutation({
+  const { mutateAsync: updateItems } = useMutationWithMessage({
     mutationFn: updatePoItems,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['syney-Po'],
-      })
-      message.success('更新成功')
-    },
-    onError: (err) => {
-      console.error(err)
-      message.error('更新失败')
+    invalidateQueries: [['syney-Po']],
+    successMessage: '更新成功',
+    errorMessage: '更新失败',
+    messageApi: undefined,
+    mutationOptions: {
+      // 保持 mutateAsync 用法
     },
   })
 

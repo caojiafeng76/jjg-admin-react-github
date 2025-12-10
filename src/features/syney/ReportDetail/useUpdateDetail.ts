@@ -1,20 +1,13 @@
-import { message } from 'antd'
 import { updateSyneyStoreReport } from '@/services/apiSyneyStoreReport'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 export function useUpdateDetail() {
-  const queryClient = useQueryClient()
-  const { mutate: updateItem, isPending: isUpdating } = useMutation({
+  const { mutate: updateItem, isPending: isUpdating } = useMutationWithMessage({
     mutationFn: updateSyneyStoreReport,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['syney-store-report'],
-      })
-      message.success('编辑明细成功')
-    },
-    onError: () => {
-      message.error('编辑明细失败')
-    },
+    invalidateQueries: [['syney-store-report']],
+    successMessage: '编辑明细成功',
+    errorMessage: '编辑明细失败',
+    messageApi: undefined,
   })
 
   return {
