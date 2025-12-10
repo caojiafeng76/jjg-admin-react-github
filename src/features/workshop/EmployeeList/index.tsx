@@ -59,6 +59,14 @@ export default function EmployeeList() {
 
   const [editingRecord, setEditingRecord] = useState<Employee | null>(null)
 
+  const resetFormState = useCallback(() => {
+    setIsModalOpen(false)
+    setIsEdit(false)
+    setEditingRecord(null)
+    setSelectedRowKeys([])
+    formRef?.resetFields()
+  }, [formRef])
+
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
       message.warning('请选择一条数据进行编辑')
@@ -83,16 +91,38 @@ export default function EmployeeList() {
 
   const handleFinish = useCallback(
     (values: Employee) => {
+      const handleSuccess = (successMessage: string) => {
+        message.success(successMessage)
+        resetFormState()
+      }
+
+      const handleError = (error: unknown) => {
+        if (error instanceof Error) {
+          message.error(error.message)
+        } else {
+          message.error('操作失败，请稍后重试')
+        }
+      }
+
       if (isEdit && selectedRowKeys[0]) {
-        updateMutation.mutate({
-          id: selectedRowKeys[0] as string,
-          values,
-        })
+        updateMutation.mutate(
+          {
+            id: selectedRowKeys[0] as string,
+            values,
+          },
+          {
+            onSuccess: () => handleSuccess('员工更新成功'),
+            onError: handleError,
+          },
+        )
       } else {
-        createMutation.mutate(values)
+        createMutation.mutate(values, {
+          onSuccess: () => handleSuccess('员工创建成功'),
+          onError: handleError,
+        })
       }
     },
-    [createMutation, isEdit, selectedRowKeys, updateMutation],
+    [createMutation, isEdit, message, resetFormState, selectedRowKeys, updateMutation],
   )
 
   const handleSearch = useCallback(
@@ -164,9 +194,7 @@ export default function EmployeeList() {
         destroyOnClose
         onOk={() => formRef?.submit()}
         onCancel={() => {
-          setIsModalOpen(false)
-          setIsEdit(false)
-          setEditingRecord(null)
+          resetFormState()
         }}
       >
         <EmployeeForm
