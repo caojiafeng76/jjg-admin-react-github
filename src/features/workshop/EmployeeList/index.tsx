@@ -90,39 +90,37 @@ export default function EmployeeList() {
   }, [deleteMutation, message, selectedRowKeys])
 
   const handleFinish = useCallback(
-    (values: Employee) => {
-      const handleSuccess = (successMessage: string) => {
-        message.success(successMessage)
-        resetFormState()
-      }
+    async (values: Employee) => {
+      try {
+        if (isEdit && selectedRowKeys[0]) {
+          await updateMutation.mutateAsync({
+            id: selectedRowKeys[0] as string,
+            values,
+          })
+          message.success('员工更新成功')
+        } else {
+          await createMutation.mutateAsync(values)
+          message.success('员工创建成功')
+        }
 
-      const handleError = (error: unknown) => {
+        // 成功后关闭模态框并清理状态
+        resetFormState()
+      } catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
         } else {
           message.error('操作失败，请稍后重试')
         }
       }
-
-      if (isEdit && selectedRowKeys[0]) {
-        updateMutation.mutate(
-          {
-            id: selectedRowKeys[0] as string,
-            values,
-          },
-          {
-            onSuccess: () => handleSuccess('员工更新成功'),
-            onError: handleError,
-          },
-        )
-      } else {
-        createMutation.mutate(values, {
-          onSuccess: () => handleSuccess('员工创建成功'),
-          onError: handleError,
-        })
-      }
     },
-    [createMutation, isEdit, message, resetFormState, selectedRowKeys, updateMutation],
+    [
+      createMutation,
+      isEdit,
+      message,
+      resetFormState,
+      selectedRowKeys,
+      updateMutation,
+    ],
   )
 
   const handleSearch = useCallback(
