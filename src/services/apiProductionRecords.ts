@@ -57,6 +57,7 @@ export async function getProductionRecords({
   order_id,
   process_id,
   product_model,
+  project_no,
   operator_id,
 }: {
   page: number
@@ -66,6 +67,7 @@ export async function getProductionRecords({
   order_id?: string
   process_id?: string
   product_model?: string
+  project_no?: string
   operator_id?: string
 }) {
   const from = (page - 1) * pageSize
@@ -111,21 +113,52 @@ export async function getProductionRecords({
     query = query.eq('process_id', process_id)
   }
 
+  // 根据项目号 / 型号过滤订单列表
+  let filteredOrderIds: string[] | null = null
+
+  if (project_no) {
+    const { data: matchingOrders, error: projectError } = await supabase
+      .from('sales_orders')
+      .select('id')
+      .ilike('project_no', `%${project_no}%`)
+
+    if (projectError) {
+      throw handleApiError(projectError, '查询项目号失败')
+    }
+
+    filteredOrderIds = (matchingOrders || []).map((order) => order.id)
+  }
+
   // 型号筛选 - 通过关联表过滤
   if (product_model) {
     // 先查询匹配型号的订单ID（同时搜索产品型号和客户型号）
     const { data: matchingOrders, error: orderError } = await supabase
       .from('sales_orders')
       .select('id')
-      .or(`product_model.ilike.%${product_model}%,customer_model.ilike.%${product_model}%`)
-    
+      .or(
+        `product_model.ilike.%${product_model}%,customer_model.ilike.%${product_model}%`,
+      )
+
     if (orderError) {
       throw handleApiError(orderError, '查询订单型号失败')
     }
-    
-    if (matchingOrders && matchingOrders.length > 0) {
-      const orderIds = matchingOrders.map((order) => order.id)
-      query = query.in('order_id', orderIds)
+
+    const modelMatchedIds = (matchingOrders || []).map((order) => order.id)
+
+    // 如果已有项目号过滤，则取交集；否则直接赋值
+    if (filteredOrderIds !== null) {
+      filteredOrderIds = filteredOrderIds.filter((id) =>
+        modelMatchedIds.includes(id),
+      )
+    } else {
+      filteredOrderIds = modelMatchedIds
+    }
+  }
+
+  // 应用订单ID过滤
+  if (filteredOrderIds !== null) {
+    if (filteredOrderIds.length > 0) {
+      query = query.in('order_id', filteredOrderIds)
     } else {
       // 如果没有匹配的订单，使用一个不存在的ID来返回空结果
       query = query.eq('order_id', '00000000-0000-0000-0000-000000000000')

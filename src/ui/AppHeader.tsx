@@ -20,7 +20,8 @@ const routeToLabelMap: Record<string, string> = {
   'workshop-process-list': '工序管理',
   'workshop-defect-reason-list': '不良原因管理',
   'employee-list': '员工管理',
-  'production-record-list': '产量录入&统计',
+  'production-record-list': '产量录入',
+  'production-statistics': '产量统计',
 }
 
 export default function AppHeader({
