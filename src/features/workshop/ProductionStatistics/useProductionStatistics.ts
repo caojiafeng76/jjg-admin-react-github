@@ -23,19 +23,33 @@ export interface ProductionStatisticsRow {
   productModel: string
   customerModel: string
   lengthMm?: number | null
+  weightPerMeterKg?: number | null
   dateRange: string
   qualifiedQuantity: number
   defectiveQuantity: number
+  defectiveWeightKg: number
   operators: string[]
   defectReasonCounts: Record<string, number>
+  processQualifiedCounts: Record<string, number>
 }
 
 function aggregateStatistics(records: ProductionRecordWithRelations[]) {
   const defectReasonSet = new Set<string>()
+  const processSet = new Set<string>()
   const grouped = new Map<string, ProductionStatisticsRow & { dates: string[] }>()
 
   records.forEach((record, index) => {
     const orderId = record.order_id || `unknown-${index}`
+    const processName = record.process?.process_name || '未分配工序'
+    processSet.add(processName)
+    const lengthMm = record.order?.length_mm
+    const weightPerMeterKg = record.order?.weight_per_meter_kg
+    const defectiveQty = record.defective_quantity || 0
+    const defectiveWeight =
+      lengthMm && weightPerMeterKg
+        ? ((lengthMm / 1000) * weightPerMeterKg * defectiveQty) || 0
+        : 0
+
     const reasonCounts =
       record.defect_reasons_with_details?.reduce<Record<string, number>>(
         (acc, reasonItem) => {
@@ -56,6 +70,7 @@ function aggregateStatistics(records: ProductionRecordWithRelations[]) {
     if (existing) {
       existing.qualifiedQuantity += record.qualified_quantity || 0
       existing.defectiveQuantity += record.defective_quantity || 0
+      existing.defectiveWeightKg += defectiveWeight
       existing.operators = Array.from(
         new Set([
           ...existing.operators,
@@ -65,6 +80,10 @@ function aggregateStatistics(records: ProductionRecordWithRelations[]) {
       existing.dates = productionDate
         ? [...existing.dates, productionDate]
         : existing.dates
+
+      existing.processQualifiedCounts[processName] =
+        (existing.processQualifiedCounts[processName] || 0) +
+        (record.qualified_quantity || 0)
 
       Object.entries(reasonCounts).forEach(([reason, qty]) => {
         existing.defectReasonCounts[reason] =
@@ -78,10 +97,15 @@ function aggregateStatistics(records: ProductionRecordWithRelations[]) {
         productModel: record.order?.product_model || '-',
         customerModel: record.order?.customer_model || '-',
         lengthMm: record.order?.length_mm,
+        weightPerMeterKg: record.order?.weight_per_meter_kg,
         qualifiedQuantity: record.qualified_quantity || 0,
         defectiveQuantity: record.defective_quantity || 0,
+        defectiveWeightKg: defectiveWeight,
         operators: record.operators?.map((op) => op.name) || [],
         defectReasonCounts: reasonCounts,
+        processQualifiedCounts: {
+          [processName]: record.qualified_quantity || 0,
+        },
         dates: productionDate ? [productionDate] : [],
         dateRange: '',
       })
@@ -112,6 +136,7 @@ function aggregateStatistics(records: ProductionRecordWithRelations[]) {
   return {
     rows,
     defectReasonColumns: Array.from(defectReasonSet).sort(),
+    processColumns: Array.from(processSet).sort(),
   }
 }
 

@@ -89,7 +89,7 @@ export default function ProductionStatisticsSearch({
           }
         }}
         format="YYYY-MM-DD"
-        placeholder={['开始日期', '结束日期']}
+        placeholder={['产量单开始日期', '产量单结束日期']}
         allowClear
       />
       <Input

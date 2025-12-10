@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { App } from 'antd'
+import { useSearchParams } from 'react-router-dom'
 
 import ExportButton from '@/ui/ExportButton'
+import AppPagination from '@/ui/AppPagination'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import ProductionStatisticsSearch from './ProductionStatisticsSearch'
 import ProductionStatisticsTable from './ProductionStatisticsTable'
 import {
@@ -12,6 +15,9 @@ import { useExportProductionStatisticsAsExcel } from './useExportProductionStati
 
 export default function ProductionStatisticsFeature() {
   const { message } = App.useApp()
+  const [searchParamsURL, setSearchParamsURL] = useSearchParams()
+  const page = Number(searchParamsURL.get('page')) || 1
+  const pageSize = Number(searchParamsURL.get('pageSize')) || 20
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchParams, setSearchParams] = useState<ProductionStatisticsSearchParams>(() => {
     const start = new Date()
@@ -29,11 +35,24 @@ export default function ProductionStatisticsFeature() {
 
   const rows = data?.rows || []
   const defectReasonColumns = data?.defectReasonColumns || []
+  const processColumns = data?.processColumns || []
 
-  const handleSearch = useCallback((params: ProductionStatisticsSearchParams) => {
-    setSelectedRowKeys([])
-    setSearchParams(params)
-  }, [])
+  const paginatedRows = rows.slice((page - 1) * pageSize, page * pageSize)
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: pageSize,
+    headerHeight: 39,
+    summaryRowHeight: 40,
+  })
+
+  const handleSearch = useCallback(
+    (params: ProductionStatisticsSearchParams) => {
+      setSelectedRowKeys([])
+      setSearchParams(params)
+      searchParamsURL.set('page', '1')
+      setSearchParamsURL(searchParamsURL)
+    },
+    [searchParamsURL, setSearchParamsURL],
+  )
 
   const handleReset = useCallback(() => {
     setSelectedRowKeys([])
@@ -44,7 +63,10 @@ export default function ProductionStatisticsFeature() {
       startDate: start.toISOString().slice(0, 10),
       endDate: end.toISOString().slice(0, 10),
     })
-  }, [])
+    searchParamsURL.set('page', '1')
+    searchParamsURL.set('pageSize', pageSize.toString())
+    setSearchParamsURL(searchParamsURL)
+  }, [pageSize, searchParamsURL, setSearchParams, setSearchParamsURL])
 
   const handleExport = useCallback(() => {
     if (selectedRowKeys.length === 0) {
@@ -52,14 +74,20 @@ export default function ProductionStatisticsFeature() {
       return
     }
     const selectedRows = rows.filter((row) => selectedRowKeys.includes(row.key))
-    exportProductionStatisticsAsExcel(selectedRows, defectReasonColumns, {
-      startDate: searchParams.startDate,
-      endDate: searchParams.endDate,
-    })
+    exportProductionStatisticsAsExcel(
+      selectedRows,
+      defectReasonColumns,
+      processColumns,
+      {
+        startDate: searchParams.startDate,
+        endDate: searchParams.endDate,
+      },
+    )
   }, [
     selectedRowKeys,
     rows,
     defectReasonColumns,
+    processColumns,
     exportProductionStatisticsAsExcel,
     message,
     searchParams.startDate,
@@ -71,6 +99,14 @@ export default function ProductionStatisticsFeature() {
     const currentKeys = new Set<React.Key>(rows.map((row) => row.key))
     setSelectedRowKeys((prev) => prev.filter((key) => currentKeys.has(key)))
   }, [rows])
+
+  useEffect(() => {
+    const totalPages = Math.max(Math.ceil(rows.length / pageSize), 1)
+    if (page > totalPages) {
+      searchParamsURL.set('page', totalPages.toString())
+      setSearchParamsURL(searchParamsURL)
+    }
+  }, [page, pageSize, rows.length, searchParamsURL, setSearchParamsURL])
 
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
@@ -93,14 +129,23 @@ export default function ProductionStatisticsFeature() {
         />
       </div>
 
-      <div className="min-h-0 overflow-hidden">
+      <div ref={tableContainerRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
         <ProductionStatisticsTable
           loading={isLoading}
-          data={rows}
+          data={paginatedRows}
           defectReasonColumns={defectReasonColumns}
+          processColumns={processColumns}
           selectedRowKeys={selectedRowKeys}
           onSelect={setSelectedRowKeys}
+          scrollY={scrollY}
         />
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
+          <AppPagination
+            total={rows.length}
+            pageSizeOptions={['10', '20', '30', '50', '100', '200']}
+            defaultPageSize={20}
+          />
+        </div>
       </div>
     </div>
   )
