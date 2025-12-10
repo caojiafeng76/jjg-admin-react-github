@@ -1,8 +1,10 @@
 import { useSearchParams } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { message } from 'antd'
+import { useEffect } from 'react'
 
 import { getSyneyStoreReports } from '@services/apiSyneyStoreReports'
+import { isAbortError, queryConfig } from '@/config/queryClient'
 
 export function useReports() {
   const queryClient = useQueryClient()
@@ -22,28 +24,38 @@ export function useReports() {
   } = useQuery({
     queryKey: ['syney-reports', status, page, pageSize],
     queryFn: () => getSyneyStoreReports({ status, page, pageSize }),
-    // 缓存5分钟，避免频繁切换页面时重复请求
-    staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
+    // 使用列表查询配置预设
+    ...queryConfig.list,
   })
 
-  if (error) {
-    console.log(error)
-    message.error(error.message)
-  }
+  // 错误处理：忽略 AbortError
+  useEffect(() => {
+    if (error && !isAbortError(error)) {
+      message.error('获取对账单列表失败，请稍后重试')
+    }
+  }, [error])
 
   const pageCount = Math.ceil((count || 0) / pageSize)
 
-  if (page < pageCount)
-    queryClient.prefetchQuery({
-      queryKey: ['syney-reports', status, page + 1, pageSize],
-      queryFn: () => getSyneyStoreReports({ status, page: page + 1, pageSize }),
-    })
+  // 优化预取逻辑：将副作用移到 useEffect 中
+  useEffect(() => {
+    if (page < pageCount) {
+      queryClient.prefetchQuery({
+        queryKey: ['syney-reports', status, page + 1, pageSize],
+        queryFn: () => getSyneyStoreReports({ status, page: page + 1, pageSize }),
+        ...queryConfig.list,
+      })
+    }
 
-  if (page > 1)
-    queryClient.prefetchQuery({
-      queryKey: ['syney-reports', status, page - 1, pageSize],
-      queryFn: () => getSyneyStoreReports({ status, page: page - 1, pageSize }),
-    })
+    if (page > 1) {
+      queryClient.prefetchQuery({
+        queryKey: ['syney-reports', status, page - 1, pageSize],
+        queryFn: () => getSyneyStoreReports({ status, page: page - 1, pageSize }),
+        ...queryConfig.list,
+      })
+    }
+  }, [page, pageCount, pageSize, status, queryClient])
 
   return {
     isLoading,

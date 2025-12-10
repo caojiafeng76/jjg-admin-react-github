@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
   getWorkshopDefectReasons,
@@ -6,6 +6,8 @@ import {
   updateWorkshopDefectReason,
   deleteWorkshopDefectReasons,
 } from '@/services/apiWorkshopDefectReasons'
+import { queryConfig } from '@/config/queryClient'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const WORKSHOP_DEFECT_REASONS_KEY = 'workshop-defect-reasons' as const
 
@@ -21,42 +23,28 @@ export function useWorkshopDefectReasonsList({
   return useQuery({
     queryKey: [WORKSHOP_DEFECT_REASONS_KEY, page, pageSize, searchParams],
     queryFn: () => getWorkshopDefectReasons({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
+    ...queryConfig.list,
   })
 }
 
 export function useCreateWorkshopDefectReason() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: createWorkshopDefectReason,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_DEFECT_REASONS_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_DEFECT_REASONS_KEY]],
   })
 }
 
 export function useUpdateWorkshopDefectReason() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: updateWorkshopDefectReason,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_DEFECT_REASONS_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_DEFECT_REASONS_KEY]],
   })
 }
 
 export function useDeleteWorkshopDefectReasons() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: deleteWorkshopDefectReasons,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [WORKSHOP_DEFECT_REASONS_KEY] })
-      return args
-    },
+    invalidateQueries: [[WORKSHOP_DEFECT_REASONS_KEY]],
   })
 }

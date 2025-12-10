@@ -1,18 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
 import { updateSyneyStoreReports } from '@/services/apiSyneyStoreReports'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 export function useUpdateReports() {
-  const queryClient = useQueryClient()
-
-  const { mutate: updateReports, isPending: isUpdating } = useMutation({
-    mutationFn: updateSyneyStoreReports,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['syney-reports'],
-      })
-    },
-  })
+  const { mutate: updateReports, isPending: isUpdating } =
+    useMutationWithInvalidation({
+      mutationFn: updateSyneyStoreReports,
+      invalidateQueries: [['syney-reports']],
+    })
 
   return {
     updateReports,

@@ -1,18 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
 import { deleteSyneyStoreReport } from '@/services/apiSyneyStoreReports'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 export function useDeleteReport() {
-  const queryClient = useQueryClient()
-
-  const { mutate: deleteReport, isPending: isDeleting } = useMutation({
-    mutationFn: deleteSyneyStoreReport,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['syney-reports'],
-      })
-    },
-  })
+  const { mutate: deleteReport, isPending: isDeleting } =
+    useMutationWithInvalidation({
+      mutationFn: deleteSyneyStoreReport,
+      invalidateQueries: [['syney-reports']],
+    })
 
   return {
     deleteReport,

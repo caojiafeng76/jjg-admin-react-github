@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 import { ConfigProvider, theme, App as AntdApp } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'
 
@@ -10,15 +10,10 @@ import ErrorBoundary from '@ui/ErrorBoundary'
 import { useAppStore } from '@/store'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { router } from '@/routes/router'
+import { createQueryClient } from '@/config/queryClient'
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 分钟
-      retry: 1,
-    },
-  },
-})
+// 创建 QueryClient 实例
+const queryClient = createQueryClient()
 
 export default function App() {
   const { isDarkMode } = useAppStore()

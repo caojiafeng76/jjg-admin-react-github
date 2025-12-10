@@ -7,6 +7,7 @@ import {
 import { message } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
+import { isAbortError, queryConfig } from '@/config/queryClient'
 
 export function usePos() {
   const queryClient = useQueryClient()
@@ -28,45 +29,19 @@ export function usePos() {
     queryKey: ['syney-pos', page, pageSize, Status, startDate, endDate, SONo],
     queryFn: ({ signal }) =>
       getSyneyPos({ page, pageSize, Status, startDate, endDate, SONo, signal }),
+    // 使用列表查询配置预设
+    ...queryConfig.list,
     placeholderData: keepPreviousData,
-    staleTime: 30000, // 30秒内数据视为新鲜
-    gcTime: 5 * 60 * 1000, // 5分钟后清除缓存
-    retry: 2, // 失败重试2次
-    retryDelay: 1000, // 重试延迟1秒
-    // 忽略 AbortError（请求被取消是正常行为）
-    throwOnError: (error) => {
-      // 如果是 AbortError，不抛出错误
-      if (
-        error &&
-        typeof error === 'object' &&
-        (('name' in error && error.name === 'AbortError') ||
-          ('message' in error &&
-            typeof (error as { message: unknown }).message === 'string' &&
-            (error as { message: string }).message.includes('aborted')))
-      ) {
-        return false
-      }
-      return true
-    },
   })
 
   const pageCount = Math.ceil((count || 0) / pageSize)
 
   // 忽略 AbortError（请求被取消是正常行为，不应该显示错误）
-  if (error) {
-    const isAbortError =
-      error &&
-      typeof error === 'object' &&
-      (('name' in error && error.name === 'AbortError') ||
-        ('message' in error &&
-          typeof (error as { message: unknown }).message === 'string' &&
-          (error as { message: string }).message.includes('aborted')))
-    
-    if (!isAbortError) {
-      console.error(error)
-      message.error('Error fetching syney pos')
+  useEffect(() => {
+    if (error && !isAbortError(error)) {
+      message.error('获取订单列表失败，请稍后重试')
     }
-  }
+  }, [error])
 
   // 优化预取逻辑:将副作用移到 useEffect 中,避免在渲染阶段执行
   useEffect(() => {

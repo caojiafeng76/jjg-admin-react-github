@@ -1,38 +1,20 @@
 import { CheckCircleIcon } from '@heroicons/react/16/solid'
-import { Button, App } from 'antd'
-import { useUpdateReports } from './useUpdateReports'
+import { Button } from 'antd'
 import { useAppStore } from '@/store'
+import { useMarkReportsStatus } from './useMarkReportsStatus'
 
 export default function ConfirmButton() {
-  const { message } = App.useApp()
-  const { isUpdating, updateReports } = useUpdateReports()
-
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const { markStatus, isPending } = useMarkReportsStatus()
 
   return (
     <Button
       type="text"
-      loading={isUpdating}
+      loading={isPending}
       onClick={() => {
-        if (tableSelectedKeys.length === 0)
-          return message.warning('请选择要标记已校对的条目')
-
-        updateReports(
-          {
-            Nos: tableSelectedKeys.map(String),
-            Status: 'confirmed',
-          },
-          {
-            onSuccess: () => {
-              message.success('标记已校对成功')
-              setTableSelectedKeys([])
-            },
-            onError: (err) => {
-              console.error(err)
-              message.error('标记已校对失败')
-            },
-          }
-        )
+        markStatus(tableSelectedKeys.map(String), 'confirmed')
+        // 清空选中在 Hook 成功回调中完成，这里备用确保状态同步
+        if (!isPending) setTableSelectedKeys([])
       }}
       icon={<CheckCircleIcon className="size-4 text-green-500/80!" />}
     >

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import {
   getProductionSheets,
   getProductionSheetById,
@@ -6,6 +6,8 @@ import {
   updateProductionSheet,
   deleteProductionSheets,
 } from '@/services/apiProductionSheets'
+import { queryConfig } from '@/config/queryClient'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const PRODUCTION_SHEETS_KEY = 'production-sheets' as const
 
@@ -24,7 +26,8 @@ export function useProductionSheetsList({
   return useQuery({
     queryKey: [PRODUCTION_SHEETS_KEY, page, pageSize, searchParams],
     queryFn: () => getProductionSheets({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
+    ...queryConfig.list,
   })
 }
 
@@ -33,36 +36,28 @@ export function useProductionSheetById(id: string | null) {
     queryKey: [PRODUCTION_SHEETS_KEY, id],
     queryFn: () => (id ? getProductionSheetById(id) : null),
     enabled: !!id,
+    ...queryConfig.detail,
   })
 }
 
 export function useCreateProductionSheet() {
-  const queryClient = useQueryClient()
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: createProductionSheet,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PRODUCTION_SHEETS_KEY] })
-    },
+    invalidateQueries: [[PRODUCTION_SHEETS_KEY]],
   })
 }
 
 export function useUpdateProductionSheet() {
-  const queryClient = useQueryClient()
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: updateProductionSheet,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PRODUCTION_SHEETS_KEY] })
-    },
+    invalidateQueries: [[PRODUCTION_SHEETS_KEY]],
   })
 }
 
 export function useDeleteProductionSheets() {
-  const queryClient = useQueryClient()
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: deleteProductionSheets,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PRODUCTION_SHEETS_KEY] })
-    },
+    invalidateQueries: [[PRODUCTION_SHEETS_KEY]],
   })
 }
 

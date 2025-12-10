@@ -1,37 +1,19 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { message } from 'antd'
-
 import { updatePos as updatePosApi } from '@/services/apiSyneyPos'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 // Type for the Ant Design message API instance returned by message.useMessage()
 type MessageApi = ReturnType<typeof message.useMessage>[0]
 
 export function useUpdatePos(messageApi?: MessageApi) {
-  const queryClient = useQueryClient()
-  const [internalMessageApi, contextHolder] = message.useMessage()
-  const api = messageApi || internalMessageApi
-
-  const { mutate: updatePos, isPending: isUpdating } = useMutation({
-    mutationFn: updatePosApi,
-    onSuccess: () => {
-      // 失效列表缓存
-      queryClient.invalidateQueries({
-        queryKey: ['syney-pos'],
-      })
-      // 失效已选订单缓存，确保打印分解单用的是最新数据
-      queryClient.invalidateQueries({
-        queryKey: ['selected-pos'],
-      })
-      // 失效单条数据缓存
-      queryClient.invalidateQueries({
-        queryKey: ['po'],
-      })
-      api.success('更新成功')
-    },
-    onError: (err) => {
-      api.error(err.message || '更新失败')
-    },
-  })
+  const { mutate: updatePos, isPending: isUpdating, contextHolder } =
+    useMutationWithMessage({
+      mutationFn: updatePosApi,
+      invalidateQueries: [['syney-pos'], ['selected-pos'], ['po']],
+      successMessage: '更新成功',
+      errorMessage: (error) => (error instanceof Error ? error.message : '更新失败'),
+      messageApi,
+    })
 
   return { updatePos, isUpdating, contextHolder: messageApi ? null : contextHolder }
 }

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSyneySpec } from '@services/apiSyneySpecs'
+import { queryConfig } from '@/config/queryClient'
 
 export function useSyneySpec(id: string) {
   const {
@@ -8,8 +9,10 @@ export function useSyneySpec(id: string) {
     data: spec,
     error: specError,
   } = useQuery({
-    queryKey: ['spec'],
+    queryKey: ['spec', id],
     queryFn: () => getSyneySpec(Number(id)),
+    enabled: !!id,
+    ...queryConfig.detail,
   })
 
   return {

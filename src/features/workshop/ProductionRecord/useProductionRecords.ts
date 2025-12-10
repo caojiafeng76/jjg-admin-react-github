@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
   getProductionRecords,
@@ -6,6 +6,8 @@ import {
   updateProductionRecord,
   deleteProductionRecords,
 } from '@/services/apiProductionRecords'
+import { queryConfig } from '@/config/queryClient'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const PRODUCTION_RECORDS_KEY = 'production-records' as const
 
@@ -27,42 +29,28 @@ export function useProductionRecordsList({
   return useQuery({
     queryKey: [PRODUCTION_RECORDS_KEY, page, pageSize, searchParams],
     queryFn: () => getProductionRecords({ page, pageSize, ...searchParams }),
-    placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
+    ...queryConfig.list,
   })
 }
 
 export function useCreateProductionRecord() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: createProductionRecord,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [PRODUCTION_RECORDS_KEY] })
-      return args
-    },
+    invalidateQueries: [[PRODUCTION_RECORDS_KEY]],
   })
 }
 
 export function useUpdateProductionRecord() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: updateProductionRecord,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [PRODUCTION_RECORDS_KEY] })
-      return args
-    },
+    invalidateQueries: [[PRODUCTION_RECORDS_KEY]],
   })
 }
 
 export function useDeleteProductionRecords() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+  return useMutationWithInvalidation({
     mutationFn: deleteProductionRecords,
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: [PRODUCTION_RECORDS_KEY] })
-      return args
-    },
+    invalidateQueries: [[PRODUCTION_RECORDS_KEY]],
   })
 }
