@@ -17,7 +17,8 @@ export interface ISyneySpec {
  * 订单明细实体类型
  */
 export interface ISyneyItem {
-  [key: string]: string | number | null | undefined
+  // allow boolean flags (e.g., ParamSpecInferred) from form values
+  [key: string]: string | number | boolean | null | undefined
   created_at?: string
   id?: number
   No: string | null

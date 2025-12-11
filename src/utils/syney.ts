@@ -2,6 +2,19 @@ import { ISyneyItem, ISyneySpec } from '@/types'
 
 // 正则表达式常量,避免重复创建
 const LENGTH_PATTERN = /(L1=|L=)(\d+)/g
+const MODEL_PATTERN = /(1000(?:型)?|800(?:型)?|600(?:型)?)/ // 允许没有“型”的写法
+const MM_NUMBER_PATTERN = /(\d+(?:\.\d+)?)\s*mm/i
+
+// 基于型号的默认规格宽度映射
+const MODEL_BASE_WIDTH_MAP: Record<string, number> = {
+  '1000型': 1525,
+  '800型': 1325,
+  '600型': 1125,
+}
+
+// 备注中提取宽度的正则
+const WIDTH_PATTERN = /宽[=：:\s]*?(\d+(?:\.\d+)?)/i
+const NUMBER_FALLBACK_PATTERN = /(\d+(?:\.\d+)?)/ // 兜底提取数字
 
 // 零件号常量
 const COMB_SUPPORT_PART_NOS = ['XN2808EB', 'XN3024BR'] as const
@@ -25,6 +38,72 @@ const COMB_SUPPORT_SET = new Set(COMB_SUPPORT_PART_NOS)
 const FLOOR_COVER_SET = new Set(FLOOR_COVER_PART_NOS)
 
 /**
+ * 当无法从规格表匹配到参数规格时,尝试根据型号和备注中的宽度推测参数规格
+ * 推测规则:
+ * - 型号 1000/800/600 分别对应 1525/1325/1125
+ * - 使用备注中出现的宽度数字作为乘数,格式: `${基准宽度}*${备注宽度}`
+ */
+function isEligibleForInference(item: ISyneyItem) {
+  const partName = item.PartName || ''
+  // 仅限中板/后板相关的物料
+  return partName.includes('中板') || partName.includes('后板')
+}
+
+export function inferParamSpecFromRemark(item: ISyneyItem): {
+  paramSpec: string | null
+  inferred: boolean
+} {
+  if (!isEligibleForInference(item)) {
+    return { paramSpec: null, inferred: false }
+  }
+
+  const combined = `${item.Spec || ''} ${item.Remark || ''}`
+  const modelMatch = combined.match(MODEL_PATTERN)
+  if (!modelMatch) {
+    return { paramSpec: null, inferred: false }
+  }
+
+  const model = modelMatch[1].includes('型') ? modelMatch[1] : `${modelMatch[1]}型`
+  const baseWidth = MODEL_BASE_WIDTH_MAP[model]
+  if (!baseWidth) {
+    return { paramSpec: null, inferred: false }
+  }
+
+  const remark = item.Remark || ''
+  // 优先匹配“宽=数字”
+  const widthMatch = remark.match(WIDTH_PATTERN)
+
+  // 其次匹配显式的 “xxxmm”
+  const mmMatch = !widthMatch ? remark.match(MM_NUMBER_PATTERN) : null
+
+  // 再尝试 L1 / L
+  let lengthMatchValue: string | undefined
+  if (!widthMatch && !mmMatch) {
+    LENGTH_PATTERN.lastIndex = 0
+    const lengthMatch = LENGTH_PATTERN.exec(remark)
+    lengthMatchValue = lengthMatch?.[2]
+  }
+
+  // 最后兜底数字匹配（避免过早匹配订单号中的小数字）
+  const fallbackMatch =
+    !widthMatch && !mmMatch && !lengthMatchValue
+      ? remark.match(NUMBER_FALLBACK_PATTERN)
+      : null
+
+  const remarkWidth =
+    widthMatch?.[1] || mmMatch?.[1] || lengthMatchValue || fallbackMatch?.[1]
+
+  if (!remarkWidth) {
+    return { paramSpec: null, inferred: false }
+  }
+
+  return {
+    paramSpec: `${baseWidth}*${remarkWidth}`,
+    inferred: true,
+  }
+}
+
+/**
  * 根据给定的物品列表和规格列表,生成带有参数规格的物品列表。
  * 如果物品的备注中包含长度信息(L1= 或 L=),并且规格中包含"实际宽度"或"实际长度",
  * 则将这些占位符替换为实际的长度值。
@@ -46,6 +125,7 @@ export function getItemsWithParamSpec(
   return items.map((item) => {
     const baseParamSpec = specMap.get(item.PartNo)
     let paramSpec = baseParamSpec || ''
+    let paramSpecInferred = false
 
     // 处理参数规格中的长度占位符
     if (
@@ -63,6 +143,17 @@ export function getItemsWithParamSpec(
         paramSpec = baseParamSpec
           .replace('实际宽度', length)
           .replace('实际长度', `L=${length}`)
+      }
+    }
+
+    // 如果无法从规格库解析到参数规格,尝试根据备注推测
+    if (!paramSpec) {
+      const { paramSpec: inferredParamSpec, inferred } =
+        inferParamSpecFromRemark(item)
+
+      if (inferredParamSpec) {
+        paramSpec = inferredParamSpec
+        paramSpecInferred = inferred
       }
     }
 
@@ -87,6 +178,7 @@ export function getItemsWithParamSpec(
       Unit: item.Unit,
       PartCode: item.PartCode,
       PartModel: item.PartModel,
+      ParamSpecInferred: paramSpecInferred,
     }
   })
 }

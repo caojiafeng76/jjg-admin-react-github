@@ -113,6 +113,14 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
       dataIndex: 'ParamSpec',
       key: 'ParamSpec',
       width: 120,
+      render: (text: string, record: any) =>
+        record.ParamSpecInferred ? (
+          <Text type="warning" strong>
+            ⚠️ {text || '未识别'}
+          </Text>
+        ) : (
+          text
+        ),
     },
     {
       title: '数量',
@@ -224,6 +232,29 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
                     />
                   )}
                 </div>
+                {parsedData.items.some((item) => item.ParamSpecInferred) && (
+                  <Alert
+                    message={
+                      <Text strong style={{ fontSize: 14 }}>
+                        ⚠️ 部分参数规格为系统根据备注推测，请仔细核对
+                      </Text>
+                    }
+                    description={
+                      <Text>
+                        规格库未匹配到参数规格时，系统会按型号默认宽度 (1000型对应1525，800型对应1325，600型对应1125)
+                        与备注中的宽度组合生成，例如“1525*备注宽度”。请确认这些推测值是否正确。
+                      </Text>
+                    }
+                    type="warning"
+                    showIcon
+                    style={{
+                      marginTop: 8,
+                      border: '2px solid #faad14',
+                      backgroundColor: '#fffbe6',
+                    }}
+                    banner
+                  />
+                )}
                 <div>
                   <Text strong>商标: </Text>
                   <Text>{parsedData.po.Brand || '自动推断'}</Text>

@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx'
 import { ISyneyPo, ISyneyItem } from '@/types'
+import { inferParamSpecFromRemark } from '@utils/syney'
 import dayjs from 'dayjs'
 
 /**
@@ -264,9 +265,18 @@ export function transformToOrderData(
     TaxTotalPrice: null,
   }))
 
+  // 如果参数规格无法解析,尝试根据备注推测,并标记为推测结果
+  const itemsWithInferredParamSpec = items.map((item) => {
+    const { paramSpec, inferred } = inferParamSpecFromRemark(item as ISyneyItem)
+    if (!item.ParamSpec && paramSpec) {
+      return { ...item, ParamSpec: paramSpec, ParamSpecInferred: inferred }
+    }
+    return item
+  })
+
   return {
     po,
-    items,
+    items: itemsWithInferredParamSpec,
     specInferred: (excelData as any).specInferred || false,
   }
 }
@@ -478,6 +488,10 @@ function extractTechnique(rows: ExcelRow[]): string | null {
  * @param rows Excel行数据
  * @returns 推断的规格,如果无法推断则返回 null
  */
+function normalizePartNo(partNo: string) {
+  return partNo.replace(/^[^A-Za-z0-9]+/, '')
+}
+
 function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
   let model = ''
   let environment = '室内' // 默认室内
@@ -489,11 +503,11 @@ function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
     const remark = String(row.备注 || '')
     const combinedText = `${spec} ${remark}`
 
-    // 匹配型号（1000型/800型/600型）
+    // 匹配型号（允许不带“型”）
     if (!model) {
-      const modelMatch = combinedText.match(/(1000型|800型|600型)/)
+      const modelMatch = combinedText.match(/(1000(?:型)?|800(?:型)?|600(?:型)?)/)
       if (modelMatch) {
-        model = modelMatch[1]
+        model = modelMatch[1].includes('型') ? modelMatch[1] : `${modelMatch[1]}型`
         console.log('后备逻辑：找到型号:', model, '来源:', { 规格: spec, 备注: remark })
       }
     }
@@ -506,7 +520,7 @@ function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
     }
 
     // 从件号判断类型（扶梯/人行道）
-    const partNo = String(row.物料件号 || '')
+    const partNo = normalizePartNo(String(row.物料件号 || ''))
     if (!type) {
       if (partNo.includes('XN2808EB') || partNo.startsWith('XN2808')) {
         type = '扶梯'
@@ -586,7 +600,7 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
 
   // 2. 从前板件号判断类型(扶梯/人行道)
   let type = ''
-  const frontPlatePartNo = String(frontPlateRow.物料件号 || '')
+  const frontPlatePartNo = normalizePartNo(String(frontPlateRow.物料件号 || ''))
 
   // 包含 XN2808EB 的是扶梯,包含 XN3024BR 的是人行道
   if (frontPlatePartNo.includes('XN2808EB')) {
@@ -603,14 +617,18 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
   }
 
   // 3. 查找中板组件(用于提取型号和环境)
-  const middlePlateRow = rows.find(
-    (row) =>
-      (row.物料名称 && String(row.物料名称).includes('中板')) ||
-      (row.物料件号 && String(row.物料件号).startsWith('XN2808BP')) ||
-      (row.物料件号 && String(row.物料件号).startsWith('XN2808BQ')) ||
-      (row.物料件号 && String(row.物料件号).startsWith('XN3024BS')) ||
-      (row.物料件号 && String(row.物料件号).startsWith('XN3024BT')),
-  )
+  const middlePlateRow = rows.find((row) => {
+    const name = String(row.物料名称 || '')
+    const partNoRaw = String(row.物料件号 || '')
+    const partNo = normalizePartNo(partNoRaw)
+    return (
+      name.includes('中板') ||
+      partNo.startsWith('XN2808BP') ||
+      partNo.startsWith('XN2808BQ') ||
+      partNo.startsWith('XN3024BS') ||
+      partNo.startsWith('XN3024BT')
+    )
+  })
 
   console.log('查找中板组件:', middlePlateRow ? {
     物料名称: middlePlateRow.物料名称,
@@ -627,9 +645,9 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
   let model = ''
   const middlePlateSpec = String(middlePlateRow.规格)
   console.log('中板规格字段:', middlePlateSpec)
-  const specMatch = middlePlateSpec.match(/(1000型|800型|600型)/)
+  const specMatch = middlePlateSpec.match(/(1000(?:型)?|800(?:型)?|600(?:型)?)/)
   if (specMatch) {
-    model = specMatch[1]
+    model = specMatch[1].includes('型') ? specMatch[1] : `${specMatch[1]}型`
     console.log('提取到型号:', model)
   }
 

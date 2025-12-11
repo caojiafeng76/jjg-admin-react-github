@@ -32,6 +32,10 @@ function extractBrandFromItems(items: ISyneyItem[]): string | null {
  * @param items - 订单明细数组
  * @returns 推断的规格,如果无法推断则返回 null
  */
+function normalizePartNo(partNo: string) {
+  return partNo.replace(/^[^A-Za-z0-9]+/, '')
+}
+
 function extractSpecFromItems(items: ISyneyItem[]): string | null {
   // 1. 查找前沿板组件
   const frontPlateItem = items.find(
@@ -48,9 +52,9 @@ function extractSpecFromItems(items: ISyneyItem[]): string | null {
   // 2. 从 Spec 字段提取型号（1000型/800型/600型）
   let model = ''
   if (frontPlateItem.Spec) {
-    const specMatch = frontPlateItem.Spec.match(/(1000型|800型|600型)/)
+    const specMatch = frontPlateItem.Spec.match(/(1000(?:型)?|800(?:型)?|600(?:型)?)/)
     if (specMatch) {
-      model = specMatch[1]
+      model = specMatch[1].includes('型') ? specMatch[1] : `${specMatch[1]}型`
     }
   }
 
@@ -60,7 +64,7 @@ function extractSpecFromItems(items: ISyneyItem[]): string | null {
 
   // 3. 从件号判断类型（扶梯/人行道）
   let type = ''
-  const partNo = frontPlateItem.PartNo || ''
+  const partNo = normalizePartNo(frontPlateItem.PartNo || '')
 
   // XN2808EB 系列是扶梯，XN3024BR 系列是人行道
   if (partNo.startsWith('XN2808EB') || partNo.startsWith('XN2808')) {
@@ -79,14 +83,16 @@ function extractSpecFromItems(items: ISyneyItem[]): string | null {
   let environment = '室内' // 默认室内
 
   // 查找中板组件（上前中板组件、下前中板组件）
-  const middlePlateItem = items.find(
-    (item) =>
+  const middlePlateItem = items.find((item) => {
+    const partNo = normalizePartNo(item.PartNo || '')
+    return (
       item.PartName?.includes('中板') ||
-      item.PartNo?.startsWith('XN2808BP') ||
-      item.PartNo?.startsWith('XN2808BQ') ||
-      item.PartNo?.startsWith('XN3024BS') ||
-      item.PartNo?.startsWith('XN3024BT'),
-  )
+      partNo.startsWith('XN2808BP') ||
+      partNo.startsWith('XN2808BQ') ||
+      partNo.startsWith('XN3024BS') ||
+      partNo.startsWith('XN3024BT')
+    )
+  })
 
   if (middlePlateItem && middlePlateItem.Spec) {
     // 从 Spec 字段匹配环境（如 "1000型 室内" 或 "1000型 室外"）
