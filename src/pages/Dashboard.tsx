@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance, Tabs, Pagination, Spin } from 'antd'
+import { App, Modal, FormInstance, Tabs, Pagination, Spin, Drawer } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
@@ -24,6 +24,9 @@ import {
 import ProductionSheetTable from '@/features/workshop/ProductionRecord/ProductionSheetTable'
 import ProductionSheetForm from '@/features/workshop/ProductionRecord/ProductionSheetForm'
 import ProductionSheetSearch from '@/features/workshop/ProductionRecord/ProductionSheetSearch'
+import ProductionRecordTable from '@/features/workshop/ProductionRecord/ProductionRecordTable'
+import type { ProductionSheetRecord } from '@/services/apiProductionSheets'
+import type { ProductionSheetFormValues } from '@/features/workshop/ProductionRecord/ProductionSheetForm'
 
 export default function Dashboard() {
   const { message } = App.useApp()
@@ -31,7 +34,8 @@ export default function Dashboard() {
 
   // 车间订单相关状态
   const [orderModalOpen, setOrderModalOpen] = useState(false)
-  const [orderFormRef, setOrderFormRef] = useState<FormInstance<WorkshopOrder> | null>(null)
+  const [orderFormRef, setOrderFormRef] =
+    useState<FormInstance<WorkshopOrder> | null>(null)
   const orderPage = Number(searchParamsURL.get('orderPage')) || 1
   const orderPageSize = Number(searchParamsURL.get('orderPageSize')) || 10
   const [orderSearchParams, setOrderSearchParams] = useState<{
@@ -47,11 +51,22 @@ export default function Dashboard() {
   const [productionModalOpen, setProductionModalOpen] = useState(false)
   const [productionModalTitle, setProductionModalTitle] = useState('录入产量单')
   const [productionIsEdit, setProductionIsEdit] = useState(false)
-  const [productionEditingSheetId, setProductionEditingSheetId] = useState<string | null>(null)
-  const [productionSelectedRowKeys, setProductionSelectedRowKeys] = useState<React.Key[]>([])
-  const [productionFormRef, setProductionFormRef] = useState<FormInstance<any> | null>(null)
+  const [productionEditingSheetId, setProductionEditingSheetId] = useState<
+    string | null
+  >(null)
+  const [productionSelectedRowKeys, setProductionSelectedRowKeys] = useState<
+    React.Key[]
+  >([])
+  const [productionFormRef, setProductionFormRef] =
+    useState<FormInstance<ProductionSheetFormValues> | null>(null)
+  const [productionDetailDrawerOpen, setProductionDetailDrawerOpen] =
+    useState(false)
+  const [productionSelectedSheetId, setProductionSelectedSheetId] = useState<
+    string | null
+  >(null)
   const productionPage = Number(searchParamsURL.get('productionPage')) || 1
-  const productionPageSize = Number(searchParamsURL.get('productionPageSize')) || 10
+  const productionPageSize =
+    Number(searchParamsURL.get('productionPageSize')) || 10
   const [productionSearchParams, setProductionSearchParams] = useState<{
     startDate?: string
     endDate?: string
@@ -75,16 +90,21 @@ export default function Dashboard() {
   const batchCreateOrderMutation = useCreateWorkshopOrdersBatch()
 
   // 产量录入数据
-  const { data: productionData, isLoading: productionLoading } = useProductionSheetsList({
-    page: productionPage,
-    pageSize: productionPageSize,
-    searchParams: productionSearchParams,
-  })
+  const { data: productionData, isLoading: productionLoading } =
+    useProductionSheetsList({
+      page: productionPage,
+      pageSize: productionPageSize,
+      searchParams: productionSearchParams,
+    })
 
   const createProductionMutation = useCreateProductionSheet()
   const updateProductionMutation = useUpdateProductionSheet()
-  const { data: productionEditingSheetDetail, isLoading: productionEditingDetailLoading } =
-    useProductionSheetById(productionEditingSheetId)
+  const {
+    data: productionEditingSheetDetail,
+    isLoading: productionEditingDetailLoading,
+  } = useProductionSheetById(productionEditingSheetId)
+  const { data: productionSheetDetail, isLoading: productionDetailLoading } =
+    useProductionSheetById(productionSelectedSheetId)
 
   // 表格高度计算
   const {
@@ -187,7 +207,7 @@ export default function Dashboard() {
       operator_ids: string[]
       working_hours?: number | null
       remark?: string | null
-      records: any[]
+      records: ProductionSheetRecord[]
     }) => {
       if (values.records.length === 0) {
         message.warning('至少需要添加一条产量记录')
@@ -270,16 +290,29 @@ export default function Dashboard() {
     setSearchParamsURL(searchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
 
+  const handleProductionViewDetail = useCallback((sheetId: string) => {
+    setProductionSelectedSheetId(sheetId)
+    setProductionDetailDrawerOpen(true)
+  }, [])
+
   // 监听 mutation 成功状态，重置表单
   useEffect(() => {
     if (createOrderMutation.isSuccess || batchCreateOrderMutation.isSuccess) {
       createOrderMutation.reset()
       batchCreateOrderMutation.reset()
     }
-  }, [createOrderMutation.isSuccess, batchCreateOrderMutation.isSuccess, createOrderMutation, batchCreateOrderMutation])
+  }, [
+    createOrderMutation.isSuccess,
+    batchCreateOrderMutation.isSuccess,
+    createOrderMutation,
+    batchCreateOrderMutation,
+  ])
 
   useEffect(() => {
-    if (createProductionMutation.isSuccess || updateProductionMutation.isSuccess) {
+    if (
+      createProductionMutation.isSuccess ||
+      updateProductionMutation.isSuccess
+    ) {
       createProductionMutation.reset()
       updateProductionMutation.reset()
     }
@@ -299,8 +332,15 @@ export default function Dashboard() {
   }, [orderData, orderPage, searchParamsURL, setSearchParamsURL])
 
   useEffect(() => {
-    if (productionPage > 1 && productionData && productionData.items.length === 0) {
-      searchParamsURL.set('productionPage', Math.max(productionPage - 1, 1).toString())
+    if (
+      productionPage > 1 &&
+      productionData &&
+      productionData.items.length === 0
+    ) {
+      searchParamsURL.set(
+        'productionPage',
+        Math.max(productionPage - 1, 1).toString(),
+      )
       setSearchParamsURL(searchParamsURL)
     }
   }, [productionData, productionPage, searchParamsURL, setSearchParamsURL])
@@ -310,7 +350,7 @@ export default function Dashboard() {
       key: 'orders',
       label: '车间订单',
       children: (
-        <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4 min-h-0">
+        <div className="grid h-full min-h-0 grid-rows-[auto_auto_1fr] gap-4">
           {/* 工具栏 */}
           <div className="flex flex-wrap items-center gap-2">
             <AddButton handleCreate={handleCreateOrder} />
@@ -318,16 +358,19 @@ export default function Dashboard() {
 
           {/* 搜索栏 */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-600 whitespace-nowrap">搜索：</span>
-            <WorkshopOrderSearch onSearch={handleOrderSearch} onReset={handleOrderResetSearch} />
+            <span className="whitespace-nowrap text-gray-600">搜索：</span>
+            <WorkshopOrderSearch
+              onSearch={handleOrderSearch}
+              onReset={handleOrderResetSearch}
+            />
           </div>
 
           {/* 表格和分页 */}
           <div
             ref={orderTableContainerRef}
-            className="flex flex-col gap-4 flex-1 min-h-0 overflow-hidden"
+            className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
           >
-            <div className="flex-1 min-h-0 overflow-x-auto">
+            <div className="min-h-0 flex-1 overflow-x-auto">
               <WorkshopOrderTable
                 loading={orderLoading}
                 data={orderData?.items || []}
@@ -337,8 +380,8 @@ export default function Dashboard() {
                 rowHeight={orderRowHeight}
               />
             </div>
-            <div ref={orderPaginationRef} className="flex justify-end shrink-0">
-              <div className="mr-2 mt-4 flex justify-end">
+            <div ref={orderPaginationRef} className="flex shrink-0 justify-end">
+              <div className="mt-4 mr-2 flex justify-end">
                 <Pagination
                   current={orderPage}
                   pageSize={orderPageSize}
@@ -360,7 +403,10 @@ export default function Dashboard() {
           <Modal
             title="创建订单"
             open={orderModalOpen}
-            confirmLoading={createOrderMutation.isPending || batchCreateOrderMutation.isPending}
+            confirmLoading={
+              createOrderMutation.isPending ||
+              batchCreateOrderMutation.isPending
+            }
             destroyOnClose
             onOk={() => orderFormRef?.submit()}
             onCancel={() => {
@@ -371,7 +417,10 @@ export default function Dashboard() {
             <WorkshopOrderForm
               onFinish={handleOrderFinish}
               setFormRef={setOrderFormRef}
-              isCreating={createOrderMutation.isPending || batchCreateOrderMutation.isPending}
+              isCreating={
+                createOrderMutation.isPending ||
+                batchCreateOrderMutation.isPending
+              }
               isEdit={false}
             />
           </Modal>
@@ -382,7 +431,7 @@ export default function Dashboard() {
       key: 'production',
       label: '产量录入',
       children: (
-        <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4 min-h-0">
+        <div className="grid h-full min-h-0 grid-rows-[auto_auto_1fr] gap-4">
           {/* 工具栏 */}
           <div className="flex flex-wrap items-center gap-2">
             <AddButton handleCreate={handleCreateProduction} />
@@ -415,10 +464,14 @@ export default function Dashboard() {
                 pageSize={productionPageSize}
                 scrollY={productionScrollY}
                 rowHeight={productionRowHeight}
+                onViewDetail={handleProductionViewDetail}
               />
             </div>
-            <div ref={productionPaginationRef} className="flex shrink-0 justify-end">
-              <div className="mr-2 mt-4 flex justify-end">
+            <div
+              ref={productionPaginationRef}
+              className="flex shrink-0 justify-end"
+            >
+              <div className="mt-4 mr-2 flex justify-end">
                 <Pagination
                   current={productionPage}
                   pageSize={productionPageSize}
@@ -429,7 +482,16 @@ export default function Dashboard() {
                   }}
                   total={productionData?.total || 0}
                   showSizeChanger
-                  pageSizeOptions={['10', '20', '30', '50', '100', '200', '300', '500']}
+                  pageSizeOptions={[
+                    '10',
+                    '20',
+                    '30',
+                    '50',
+                    '100',
+                    '200',
+                    '300',
+                    '500',
+                  ]}
                   showTotal={(total) => `共 ${total} 条`}
                 />
               </div>
@@ -440,11 +502,14 @@ export default function Dashboard() {
           <Modal
             title={productionModalTitle}
             open={productionModalOpen}
-            confirmLoading={createProductionMutation.isPending || updateProductionMutation.isPending}
+            confirmLoading={
+              createProductionMutation.isPending ||
+              updateProductionMutation.isPending
+            }
             destroyOnClose
-        okButtonProps={{
-          disabled: productionIsEdit && productionEditingDetailLoading,
-        }}
+            okButtonProps={{
+              disabled: productionIsEdit && productionEditingDetailLoading,
+            }}
             onOk={async () => {
               try {
                 await productionFormRef?.validateFields()
@@ -462,41 +527,76 @@ export default function Dashboard() {
             width={1000}
             style={{ top: 20 }}
           >
-        <Spin
-          spinning={productionIsEdit && productionEditingDetailLoading}
-          tip="正在加载产量单数据..."
-        >
-          <ProductionSheetForm
-            onFinish={handleProductionFinish}
-            setFormRef={setProductionFormRef}
-            isCreating={createProductionMutation.isPending || updateProductionMutation.isPending}
-            initialValues={
-              productionIsEdit && productionEditingSheetDetail
-                ? {
-                    production_date: productionEditingSheetDetail.production_date,
-                    operator_ids:
-                      productionEditingSheetDetail.records?.[0]?.operator_ids || [],
-                    working_hours:
-                      productionEditingSheetDetail.working_hours || null,
-                    remark: productionEditingSheetDetail.remark || null,
-                    records: productionEditingSheetDetail.records || [],
-                  }
-                : undefined
-            }
-          />
-        </Spin>
+            <Spin
+              spinning={productionIsEdit && productionEditingDetailLoading}
+              tip="正在加载产量单数据..."
+            >
+              <ProductionSheetForm
+                onFinish={handleProductionFinish}
+                setFormRef={setProductionFormRef}
+                isCreating={
+                  createProductionMutation.isPending ||
+                  updateProductionMutation.isPending
+                }
+                initialValues={
+                  productionIsEdit && productionEditingSheetDetail
+                    ? {
+                        production_date:
+                          productionEditingSheetDetail.production_date,
+                        operator_ids:
+                          productionEditingSheetDetail.records?.[0]
+                            ?.operator_ids || [],
+                        working_hours:
+                          productionEditingSheetDetail.working_hours || null,
+                        remark: productionEditingSheetDetail.remark || null,
+                        records: productionEditingSheetDetail.records || [],
+                      }
+                    : undefined
+                }
+              />
+            </Spin>
           </Modal>
+
+          {/* 产量单详情抽屉 */}
+          <Drawer
+            title={`产量单详情 - ${productionSheetDetail?.production_date ? dayjs(productionSheetDetail.production_date).format('YYYY-MM-DD') : ''}`}
+            placement="right"
+            size="large"
+            open={productionDetailDrawerOpen}
+            onClose={() => {
+              setProductionDetailDrawerOpen(false)
+              setProductionSelectedSheetId(null)
+            }}
+          >
+            {productionDetailLoading ? (
+              <div>加载中...</div>
+            ) : productionSheetDetail?.records &&
+              productionSheetDetail.records.length > 0 ? (
+              <ProductionRecordTable
+                loading={false}
+                data={productionSheetDetail.records}
+                selectedRowKeys={[]}
+                onSelect={() => {}}
+                page={1}
+                pageSize={productionSheetDetail.records.length}
+                scrollY={600}
+                rowHeight={40}
+              />
+            ) : (
+              <div>暂无记录</div>
+            )}
+          </Drawer>
         </div>
       ),
     },
   ]
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       <Tabs
         defaultActiveKey="orders"
         items={tabItems}
-        className="flex-1 flex flex-col overflow-hidden"
+        className="flex flex-1 flex-col overflow-hidden"
         style={{ height: '100%' }}
         tabBarStyle={{ marginBottom: 0 }}
       />
