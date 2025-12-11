@@ -1,9 +1,21 @@
-import { Form, FormInstance, DatePicker, Select, InputNumber, Input, Button, Space } from 'antd'
+import {
+  Form,
+  FormInstance,
+  DatePicker,
+  Select,
+  InputNumber,
+  Input,
+  Button,
+  Space,
+} from 'antd'
 import { useEffect } from 'react'
 import dayjs from 'dayjs'
 import { useQuery } from '@tanstack/react-query'
 import { PlusIcon, XCircleIcon } from '@heroicons/react/16/solid'
-import type { ProductionRecord, DefectReasonItem } from '@/services/apiProductionRecords'
+import type {
+  ProductionRecord,
+  DefectReasonItem,
+} from '@/services/apiProductionRecords'
 import { getWorkshopOrders } from '@/services/apiWorkshopOrders'
 import { getWorkshopProcesses } from '@/services/apiWorkshopProcesses'
 import { getWorkshopDefectReasons } from '@/services/apiWorkshopDefectReasons'
@@ -83,10 +95,13 @@ export default function ProductionRecordForm({
     }
   }, [form, initialValues])
 
-  const handleFinish = (values: any) => {
+  const handleFinish = (values: ProductionRecordFormValues) => {
     // 计算不良总数
     const totalDefectiveQuantity = values.defect_reasons
-      ? values.defect_reasons.reduce((sum: number, item: DefectReasonItem) => sum + (item.quantity || 0), 0)
+      ? values.defect_reasons.reduce(
+          (sum: number, item: DefectReasonItem) => sum + (item.quantity || 0),
+          0,
+        )
       : 0
 
     const formattedValues: ProductionRecord = {
@@ -102,14 +117,19 @@ export default function ProductionRecordForm({
 
   // 订单选项 - 保存更多信息以便搜索
   const orderOptions =
-    ordersData?.items.map((order) => ({
-      value: order.id,
-      label: `${order.project_no || ''} - ${order.product_model || ''} - ${order.customer_model || ''}`.trim(),
-      // 保存原始数据用于搜索
-      project_no: order.project_no || '',
-      product_model: order.product_model || '',
-      customer_model: order.customer_model || '',
-    })) || []
+    ordersData?.items.map((order) => {
+      const lengthText = order.length_mm ? `-${order.length_mm}mm` : ''
+      const productModelWithLength = `${order.product_model || ''}${lengthText}`
+      return {
+        value: order.id,
+        label:
+          `${order.project_no || ''} - ${productModelWithLength} - ${order.customer_model || ''}`.trim(),
+        // 保存原始数据用于搜索
+        project_no: order.project_no || '',
+        product_model: order.product_model || '',
+        customer_model: order.customer_model || '',
+      }
+    }) || []
 
   // 工序选项
   const processOptions =
@@ -135,7 +155,10 @@ export default function ProductionRecordForm({
   // 监听不良原因变化，计算总数
   const defectReasons = useWatch('defect_reasons', form)
   const totalDefectiveQuantity = defectReasons
-    ? defectReasons.reduce((sum: number, item: DefectReasonItem) => sum + (item?.quantity || 0), 0)
+    ? defectReasons.reduce(
+        (sum: number, item: DefectReasonItem) => sum + (item?.quantity || 0),
+        0,
+      )
     : 0
 
   return (
@@ -174,7 +197,7 @@ export default function ProductionRecordForm({
             const projectNo = (option?.project_no ?? '').toLowerCase()
             const productModel = (option?.product_model ?? '').toLowerCase()
             const customerModel = (option?.customer_model ?? '').toLowerCase()
-            
+
             // 支持搜索项目号、产品型号、客户型号或完整标签
             return (
               label.includes(searchText) ||
@@ -220,9 +243,7 @@ export default function ProductionRecordForm({
         />
       </Form.Item>
 
-      <Form.Item
-        label="不良总数"
-      >
+      <Form.Item label="不良总数">
         <InputNumber
           value={totalDefectiveQuantity}
           disabled
@@ -230,15 +251,16 @@ export default function ProductionRecordForm({
         />
       </Form.Item>
 
-      <Form.Item
-        label="不良原因"
-        required
-      >
+      <Form.Item label="不良原因" required>
         <Form.List name="defect_reasons">
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }) => (
-                <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                <Space
+                  key={key}
+                  style={{ display: 'flex', marginBottom: 8 }}
+                  align="baseline"
+                >
                   <Form.Item
                     {...restField}
                     name={[name, 'defect_reason_id']}
@@ -249,7 +271,9 @@ export default function ProductionRecordForm({
                       disabled={isCreating}
                       showSearch
                       filterOption={(input, option) =>
-                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        (option?.label ?? '')
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
                       }
                       style={{ width: 200 }}
                       options={defectReasonOptions}
@@ -273,7 +297,10 @@ export default function ProductionRecordForm({
                   <XCircleIcon
                     onClick={() => remove(name)}
                     className="size-4 cursor-pointer text-red-500 hover:text-red-600"
-                    style={{ pointerEvents: isCreating ? 'none' : 'auto', opacity: isCreating ? 0.5 : 1 }}
+                    style={{
+                      pointerEvents: isCreating ? 'none' : 'auto',
+                      opacity: isCreating ? 0.5 : 1,
+                    }}
                   />
                 </Space>
               ))}
@@ -296,9 +323,7 @@ export default function ProductionRecordForm({
       <Form.Item
         name="operator_ids"
         label="操作者"
-        rules={[
-          { type: 'array', min: 1, message: '请至少选择一个操作者' },
-        ]}
+        rules={[{ type: 'array', min: 1, message: '请至少选择一个操作者' }]}
       >
         <Select
           mode="multiple"
@@ -312,10 +337,7 @@ export default function ProductionRecordForm({
         />
       </Form.Item>
 
-      <Form.Item
-        name="remark"
-        label="备注"
-      >
+      <Form.Item name="remark" label="备注">
         <Input.TextArea
           rows={3}
           placeholder="请输入备注（可选）"
@@ -325,4 +347,3 @@ export default function ProductionRecordForm({
     </Form>
   )
 }
-

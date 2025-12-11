@@ -113,14 +113,18 @@ export default function ProductionRecordSearch({
 
   // 订单选项 - 保存更多信息以便搜索
   const orderOptions =
-    ordersData?.items.map((order) => ({
-      value: order.id,
-      label: `${order.project_no || ''} - ${order.product_model || ''} - ${order.customer_model || ''}`.trim(),
-      // 保存原始数据用于搜索
-      project_no: order.project_no || '',
-      product_model: order.product_model || '',
-      customer_model: order.customer_model || '',
-    })) || []
+    ordersData?.items.map((order) => {
+      const lengthText = order.length_mm ? `-${order.length_mm}mm` : ''
+      const productModelWithLength = `${order.product_model || ''}${lengthText}`
+      return {
+        value: order.id,
+        label: `${order.project_no || ''} - ${productModelWithLength} - ${order.customer_model || ''}`.trim(),
+        // 保存原始数据用于搜索
+        project_no: order.project_no || '',
+        product_model: order.product_model || '',
+        customer_model: order.customer_model || '',
+      }
+    }) || []
 
   // 工序选项
   const processOptions =
