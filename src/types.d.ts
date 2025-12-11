@@ -13,11 +13,15 @@ interface ISyneySpec {
 }
 
 interface ISyneyItem {
-  [key: string]: string | number | null
+  [key: string]: string | number | boolean | null
   created_at?: string
   id?: number
   No: string | null
   ParamSpec: string | null
+  /**
+   * 标记参数规格是否为系统根据备注推测的结果
+   */
+  ParamSpecInferred?: boolean | null
   PartName: string | null
   PartName2?: string | null
   PartNo: string | null

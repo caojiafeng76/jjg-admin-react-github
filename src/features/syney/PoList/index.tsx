@@ -136,6 +136,14 @@ export default function PoList() {
         }
         items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
 
+        // 如果存在通过备注推测的参数规格,及时提醒用户
+        const hasInferredParamSpec = items.some(
+          (item) => item.ParamSpecInferred,
+        )
+        if (hasInferredParamSpec) {
+          messageApi.warning('部分参数规格根据备注推测生成，请确认是否准确')
+        }
+
         // 🔥 新方案: 使用原子操作预分配序列号范围
         // 1. 计算需要多少个序列号 (按 SONo 分组数量)
         const uniqueSONos = new Set(items.map((item) => item.SONo))
