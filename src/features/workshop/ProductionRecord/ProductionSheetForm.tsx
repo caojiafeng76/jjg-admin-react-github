@@ -377,14 +377,18 @@ export default function ProductionSheetForm({
   const orderOptions =
     ordersData?.items
       .filter((order) => order.id)
-      .map((order) => ({
-        value: order.id!,
-        label:
-          `${order.project_no || ''} - ${order.product_model || ''} - ${order.customer_model || ''}`.trim(),
-        project_no: order.project_no || '',
-        product_model: order.product_model || '',
-        customer_model: order.customer_model || '',
-      })) || []
+      .map((order) => {
+        const lengthText = order.length_mm ? `-${order.length_mm}mm` : ''
+        const productModelWithLength = `${order.product_model || ''}${lengthText}`
+        return {
+          value: order.id!,
+          label:
+            `${order.project_no || ''} - ${productModelWithLength} - ${order.customer_model || ''}`.trim(),
+          project_no: order.project_no || '',
+          product_model: order.product_model || '',
+          customer_model: order.customer_model || '',
+        }
+      }) || []
 
   // 工序选项
   const processOptions =
