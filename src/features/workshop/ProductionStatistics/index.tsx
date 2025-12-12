@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { App } from 'antd'
 import { useSearchParams } from 'react-router-dom'
+import dayjs from 'dayjs'
 
 import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
@@ -20,12 +21,11 @@ export default function ProductionStatisticsFeature() {
   const pageSize = Number(searchParamsURL.get('pageSize')) || 20
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchParams, setSearchParams] = useState<ProductionStatisticsSearchParams>(() => {
-    const start = new Date()
-    start.setDate(1)
-    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0)
+    const start = dayjs().startOf('month').format('YYYY-MM-DD')
+    const end = dayjs().endOf('month').format('YYYY-MM-DD')
     return {
-      startDate: start.toISOString().slice(0, 10),
-      endDate: end.toISOString().slice(0, 10),
+      startDate: start,
+      endDate: end,
     }
   })
 
@@ -56,12 +56,11 @@ export default function ProductionStatisticsFeature() {
 
   const handleReset = useCallback(() => {
     setSelectedRowKeys([])
-    const start = new Date()
-    start.setDate(1)
-    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0)
+    const start = dayjs().startOf('month').format('YYYY-MM-DD')
+    const end = dayjs().endOf('month').format('YYYY-MM-DD')
     setSearchParams({
-      startDate: start.toISOString().slice(0, 10),
-      endDate: end.toISOString().slice(0, 10),
+      startDate: start,
+      endDate: end,
     })
     searchParamsURL.set('page', '1')
     searchParamsURL.set('pageSize', pageSize.toString())

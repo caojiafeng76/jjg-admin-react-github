@@ -41,16 +41,15 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
         // 表格总可用高度 = 容器高度 - 分页高度 - gap
         // 汇总行固定在表格底部，不参与滚动，需要从可用高度中减去
         const scrollableHeight = availableHeight - summaryRowHeight
-        
+
         if (scrollableHeight > headerHeight) {
           // 计算行高：可滚动区域高度 / 目标行数
           // 可滚动区域 = 表头 + 数据行区域
           const tableBodyHeight = scrollableHeight - headerHeight
           const calculatedRowHeight = Math.floor(tableBodyHeight / targetRowCount)
-          
-          // scrollY 只包含表头和数据行区域，不包括汇总行
-          // 汇总行是固定的，会自动显示在表格底部
-          const calculatedScrollY = headerHeight + calculatedRowHeight * targetRowCount
+
+          // scrollY 仅为数据滚动区域高度，不包含表头和汇总行
+          const calculatedScrollY = calculatedRowHeight * targetRowCount
 
           setRowHeight(Math.max(32, calculatedRowHeight)) // 最小行高32px
           setScrollY(Math.max(200, calculatedScrollY))
