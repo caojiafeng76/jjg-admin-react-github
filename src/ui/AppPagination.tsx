@@ -21,7 +21,7 @@ export default function AppPagination({
   }
 
   return (
-    <div className="mr-2 mt-4 flex justify-end">
+    <div className="flex justify-end">
       <Pagination
         defaultCurrent={1}
         defaultPageSize={defaultPageSize}
