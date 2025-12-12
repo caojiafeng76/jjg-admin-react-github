@@ -181,61 +181,72 @@ export async function getProductionRecords({
     throw handleApiError(error, '获取产量记录失败')
   }
 
-  // 获取操作者和不良原因信息
+  // 批量处理操作者与不良原因，避免每条记录多次请求
   const records = (data || []) as any[]
-  const recordsWithRelations = await Promise.all(
-    records.map(async (record) => {
-      // 重命名关联字段
-      const result: any = {
-        ...record,
-        order: record.sales_orders || null,
-        process: record.workshop_processes || null,
-      }
-      delete result.sales_orders
-      delete result.workshop_processes
+  const operatorIdSet = new Set<string>()
+  const defectReasonIdSet = new Set<string>()
 
-      // 获取操作者信息
-      if (record.operator_ids && record.operator_ids.length > 0) {
-        const { data: operators } = await supabase
-          .from('employees')
-          .select('id, name')
-          .in('id', record.operator_ids)
+  records.forEach((record) => {
+    if (Array.isArray(record.operator_ids)) {
+      record.operator_ids.forEach((id: string) => id && operatorIdSet.add(id))
+    }
+    if (Array.isArray(record.defect_reasons)) {
+      record.defect_reasons.forEach((item: any) => {
+        if (item?.defect_reason_id) defectReasonIdSet.add(item.defect_reason_id)
+      })
+    }
+  })
 
-        result.operators = operators || []
-      } else {
-        result.operators = []
-      }
+  const operatorMap: Record<string, { id: string; name: string }> = {}
+  if (operatorIdSet.size > 0) {
+    const { data: operators } = await supabase
+      .from('employees')
+      .select('id, name')
+      .in('id', Array.from(operatorIdSet))
 
-      // 获取不良原因详细信息
-      if (record.defect_reasons && Array.isArray(record.defect_reasons) && record.defect_reasons.length > 0) {
-        const defectReasonIds = record.defect_reasons
-          .map((item: any) => item.defect_reason_id)
+    ;(operators || []).forEach((op) => {
+      if (op.id) operatorMap[op.id] = { id: op.id, name: op.name }
+    })
+  }
+
+  const defectReasonMap: Record<string, { id: string; defect_reason: string }> = {}
+  if (defectReasonIdSet.size > 0) {
+    const { data: defectReasons } = await supabase
+      .from('workshop_defect_reasons' as any)
+      .select('id, defect_reason')
+      .in('id', Array.from(defectReasonIdSet))
+
+    ;(defectReasons || []).forEach((reason: any) => {
+      if (reason.id) defectReasonMap[reason.id] = reason
+    })
+  }
+
+  const recordsWithRelations = records.map((record) => {
+    const result: any = {
+      ...record,
+      order: record.sales_orders || null,
+      process: record.workshop_processes || null,
+    }
+    delete result.sales_orders
+    delete result.workshop_processes
+
+    // 合并操作者信息
+    result.operators = Array.isArray(record.operator_ids)
+      ? record.operator_ids
+          .map((id: string) => operatorMap[id])
           .filter(Boolean)
+      : []
 
-        if (defectReasonIds.length > 0) {
-          const { data: defectReasons } = await supabase
-            .from('workshop_defect_reasons' as any)
-            .select('id, defect_reason')
-            .in('id', defectReasonIds)
+    // 合并不良原因详情
+    result.defect_reasons_with_details = Array.isArray(record.defect_reasons)
+      ? record.defect_reasons.map((item: any) => ({
+          ...item,
+          defect_reason: item?.defect_reason_id ? defectReasonMap[item.defect_reason_id] || null : null,
+        }))
+      : []
 
-          // 合并不良原因详情
-          result.defect_reasons_with_details = record.defect_reasons.map((item: any) => {
-            const defectReason = (defectReasons as any)?.find((dr: any) => dr.id === item.defect_reason_id)
-            return {
-              ...item,
-              defect_reason: defectReason || null,
-            }
-          })
-        } else {
-          result.defect_reasons_with_details = []
-        }
-      } else {
-        result.defect_reasons_with_details = []
-      }
-
-      return result
-    }),
-  )
+    return result
+  })
 
   return {
     items: recordsWithRelations as ProductionRecordWithRelations[],
