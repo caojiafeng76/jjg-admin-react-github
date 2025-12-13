@@ -113,7 +113,9 @@ export default function Dashboard() {
     scrollY: orderScrollY,
     rowHeight: orderRowHeight,
   } = useTableHeight({
-    targetRowCount: 10,
+    targetRowCount: 10, // 显示10行数据
+    headerHeight: 37, // size="small" 的表头高度（稍微减小以增加可用空间）
+    gap: 14, // 稍微减小gap，与布局中的 gap-4 匹配但留出更多空间
   })
 
   const {
@@ -380,22 +382,23 @@ export default function Dashboard() {
                 rowHeight={orderRowHeight}
               />
             </div>
-            <div ref={orderPaginationRef} className="flex shrink-0 justify-end">
-              <div className="mt-4 mr-2 flex justify-end">
-                <Pagination
-                  current={orderPage}
-                  pageSize={orderPageSize}
-                  onChange={(page, size) => {
-                    searchParamsURL.set('orderPage', page.toString())
-                    searchParamsURL.set('orderPageSize', size.toString())
-                    setSearchParamsURL(searchParamsURL)
-                  }}
-                  total={orderData?.total || 0}
-                  showSizeChanger
-                  pageSizeOptions={['10', '20', '50', '100']}
-                  showTotal={(total) => `共 ${total} 条`}
-                />
-              </div>
+            <div
+              ref={orderPaginationRef}
+              className="flex shrink-0 justify-end pr-2"
+            >
+              <Pagination
+                current={orderPage}
+                pageSize={orderPageSize}
+                onChange={(page, size) => {
+                  searchParamsURL.set('orderPage', page.toString())
+                  searchParamsURL.set('orderPageSize', size.toString())
+                  setSearchParamsURL(searchParamsURL)
+                }}
+                total={orderData?.total || 0}
+                showSizeChanger
+                pageSizeOptions={['10', '20', '50', '100']}
+                showTotal={(total) => `共 ${total} 条`}
+              />
             </div>
           </div>
 

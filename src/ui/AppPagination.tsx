@@ -1,4 +1,4 @@
-import { Pagination } from 'antd'
+import { Pagination, ConfigProvider } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 interface Props {
@@ -22,17 +22,24 @@ export default function AppPagination({
 
   return (
     <div className="flex justify-end">
-      <Pagination
-        defaultCurrent={1}
-        defaultPageSize={defaultPageSize}
-        current={Number(searchParams.get('page')) || 1}
-        pageSize={Number(searchParams.get('pageSize')) || defaultPageSize}
-        onChange={onChange}
-        total={total}
-        showSizeChanger
-        pageSizeOptions={pageSizeOptions}
-        showTotal={(total) => `共 ${total} 条`}
-      />
+      <ConfigProvider
+        getPopupContainer={(_triggerNode) => {
+          // 将下拉菜单渲染到 body，避免被父容器的 overflow-hidden 裁剪
+          return document.body
+        }}
+      >
+        <Pagination
+          defaultCurrent={1}
+          defaultPageSize={defaultPageSize}
+          current={Number(searchParams.get('page')) || 1}
+          pageSize={Number(searchParams.get('pageSize')) || defaultPageSize}
+          onChange={onChange}
+          total={total}
+          showSizeChanger
+          pageSizeOptions={pageSizeOptions}
+          showTotal={(total) => `共 ${total} 条`}
+        />
+      </ConfigProvider>
     </div>
   )
 }

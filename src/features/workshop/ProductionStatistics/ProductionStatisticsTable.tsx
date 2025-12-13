@@ -11,6 +11,7 @@ interface Props {
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   scrollY?: number
+  rowHeight?: number
 }
 
 export default function ProductionStatisticsTable({
@@ -21,6 +22,7 @@ export default function ProductionStatisticsTable({
   selectedRowKeys,
   onSelect,
   scrollY = 520,
+  rowHeight = 40,
 }: Props) {
   const columns: TableColumnsType<ProductionStatisticsRow> = useMemo(() => {
     const baseColumns: TableColumnsType<ProductionStatisticsRow> = [
@@ -122,11 +124,12 @@ export default function ProductionStatisticsTable({
         title: '操作人',
         dataIndex: 'operators',
         width: 180,
+        ellipsis: true,
         render: (operators: string[]) =>
           operators && operators.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex items-center gap-1 overflow-hidden" style={{ maxHeight: `${rowHeight - 16}px`, lineHeight: 1 }}>
               {operators.map((op) => (
-                <Tag key={op}>{op}</Tag>
+                <Tag key={op} className="m-0 flex-shrink-0">{op}</Tag>
               ))}
             </div>
           ) : (
@@ -142,7 +145,7 @@ export default function ProductionStatisticsTable({
       ...reasonColumns,
       ...tailColumns,
     ]
-  }, [defectReasonColumns, processColumns])
+  }, [defectReasonColumns, processColumns, rowHeight])
 
   const rowSelection = useMemo(
     () => ({
@@ -236,6 +239,31 @@ export default function ProductionStatisticsTable({
     )
   }, [data, defectReasonColumns, processColumns])
 
+  // 自定义单元格样式，设置固定行高
+  const components = useMemo(
+    () => ({
+      body: {
+        cell: (props: any) => {
+          const { children, ...restProps } = props
+          return (
+            <td
+              {...restProps}
+              style={{
+                ...restProps.style,
+                height: `${rowHeight}px`,
+                padding: '4px 12px',
+                overflow: 'hidden',
+              }}
+            >
+              {children}
+            </td>
+          )
+        },
+      },
+    }),
+    [rowHeight],
+  )
+
   return (
     <Table<ProductionStatisticsRow>
       rowKey={(record) => record.key}
@@ -247,6 +275,7 @@ export default function ProductionStatisticsTable({
       scroll={{ x: 'max-content', y: scrollY }}
       pagination={false}
       summary={() => summaryNode}
+      components={components}
     />
   )
 }
