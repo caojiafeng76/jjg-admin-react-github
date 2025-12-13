@@ -47,6 +47,13 @@ export default function ProductionStatisticsTable({
         title: '客户型号',
         dataIndex: 'customerModel',
         width: 140,
+        fixed: 'left',
+        ellipsis: true,
+        sorter: (a, b) => {
+          const aVal = a.customerModel || ''
+          const bVal = b.customerModel || ''
+          return aVal.localeCompare(bVal, 'zh-CN', { numeric: true })
+        },
       },
       {
         title: '长度(mm)',

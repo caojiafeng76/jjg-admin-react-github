@@ -42,6 +42,7 @@ export default function ProductionStatisticsFeature() {
     targetRowCount: pageSize,
     headerHeight: 39,
     summaryRowHeight: 40,
+    gap: 12, // gap-3 = 12px
   })
 
   const handleSearch = useCallback(
