@@ -38,8 +38,8 @@ export default function ProductionStatisticsFeature() {
   const processColumns = data?.processColumns || []
 
   const paginatedRows = rows.slice((page - 1) * pageSize, page * pageSize)
-  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
-    targetRowCount: pageSize,
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } = useTableHeight({
+    targetRowCount: 10, // 固定显示10条数据的高度
     headerHeight: 39,
     summaryRowHeight: 40,
     gap: 12, // gap-3 = 12px
@@ -130,16 +130,19 @@ export default function ProductionStatisticsFeature() {
       </div>
 
       <div ref={tableContainerRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
-        <ProductionStatisticsTable
-          loading={isLoading}
-          data={paginatedRows}
-          defectReasonColumns={defectReasonColumns}
-          processColumns={processColumns}
-          selectedRowKeys={selectedRowKeys}
-          onSelect={setSelectedRowKeys}
-          scrollY={scrollY}
-        />
-        <div ref={paginationRef} className="flex shrink-0 justify-end">
+        <div className="min-h-0 flex-1 overflow-x-auto">
+          <ProductionStatisticsTable
+            loading={isLoading}
+            data={paginatedRows}
+            defectReasonColumns={defectReasonColumns}
+            processColumns={processColumns}
+            selectedRowKeys={selectedRowKeys}
+            onSelect={setSelectedRowKeys}
+            scrollY={scrollY}
+            rowHeight={rowHeight}
+          />
+        </div>
+        <div ref={paginationRef} className="flex shrink-0 justify-end pr-4">
           <AppPagination
             total={rows.length}
             pageSizeOptions={['10', '20', '30', '50', '100', '200']}
