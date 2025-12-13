@@ -35,7 +35,8 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
       const paginationHeight = pagination.clientHeight
 
       // 可用高度 = 容器高度 - 分页高度 - gap
-      const availableHeight = containerHeight - paginationHeight - gap
+      // 增加 4px 的缓冲空间，确保分页组件完全显示
+      const availableHeight = containerHeight - paginationHeight - gap - 4
 
       if (availableHeight > 0) {
         // 表格总可用高度 = 容器高度 - 分页高度 - gap
