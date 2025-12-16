@@ -261,11 +261,11 @@ export function usePrintDecomposition() {
       // 填充明细项
       doc.setFontSize(8)
 
-      // 记录"无上下备注"的后板，用于在上下格子之间平均分配，避免重复
-      let genericRearPlateIndex = 0
-      
       // 记录"无上下备注"的侧围，用于在上下格子之间平均分配，避免重复
       let genericSideFrameIndex = 0
+      
+      // 记录"无上下备注"的后板，用于在上下格子之间平均分配，避免重复
+      let genericRearPlateIndex = 0
       
       // 先处理侧围：收集所有侧围item，确定分配，分组汇总
       const sideFrameItems = items.filter(
@@ -353,12 +353,119 @@ export function usePrintDecomposition() {
         }
       }
 
-      // 遍历所有items，处理其他组件（排除侧围，因为已经处理过了）
+      // 先处理后板：收集所有后板item，确定分配，分组汇总（参考侧围逻辑）
+      const rearPlateItems = items.filter((item: ISyneyItem) => {
+        const { PartNo } = item
+        return (
+          PartNo?.includes('XN2808AF') ||
+          PartNo?.includes('XN3024Y997') ||
+          PartNo?.includes('XN3024BX') ||
+          PartNo?.includes('XN3024BY')
+        )
+      })
+
+      // 确定每个后板item的分配（上/下）
+      const rearPlateAssignments: Array<{
+        item: ISyneyItem
+        isUpper: boolean
+        isLower: boolean
+      }> = []
+
+      rearPlateItems.forEach((item: ISyneyItem) => {
+        const { PartNo, Remark: ItemRemark } = item
+        const isRearExtensionOld = PartNo?.includes('XN2808AF')
+        const isRearPlateComponent = PartNo?.includes('XN3024Y997')
+
+        const hasUpFlag =
+          ItemRemark?.includes('上头部') ||
+          ItemRemark?.includes('上部') ||
+          ItemRemark?.includes('上')
+        const hasDownFlag =
+          ItemRemark?.includes('下头部') ||
+          ItemRemark?.includes('下部') ||
+          ItemRemark?.includes('下')
+
+        let isUpper = false
+        let isLower = false
+
+        // 老件号逻辑：通过备注"上头部/下头部"区分
+        if (isRearExtensionOld) {
+          if (hasUpFlag && !hasDownFlag) isUpper = true
+          if (hasDownFlag && !hasUpFlag) isLower = true
+        }
+
+        // XN3024BX 视为上后板，XN3024BY 视为下后板
+        if (PartNo?.includes('XN3024BX')) isUpper = true
+        if (PartNo?.includes('XN3024BY')) isLower = true
+
+        // 新件号：前沿后板组件 XN3024Y997
+        if (isRearPlateComponent) {
+          if (hasUpFlag && !hasDownFlag) {
+            isUpper = true
+          } else if (hasDownFlag && !hasUpFlag) {
+            isLower = true
+          }
+        }
+
+        // 如果没有明确标志，交替分配
+        if (!isUpper && !isLower && (isRearExtensionOld || isRearPlateComponent)) {
+          const assignToTop = genericRearPlateIndex % 2 === 0
+          if (assignToTop) {
+            isUpper = true
+          } else {
+            isLower = true
+          }
+          genericRearPlateIndex += 1
+        }
+
+        rearPlateAssignments.push({ item, isUpper, isLower })
+      })
+
+      // 汇总上后板和下后板的数量和规格
+      const upperRearPlateItems = rearPlateAssignments.filter((a) => a.isUpper)
+      const lowerRearPlateItems = rearPlateAssignments.filter((a) => a.isLower)
+
+      const upperRearPlateQty = upperRearPlateItems.reduce(
+        (sum, a) => sum + (a.item.Qty || 0),
+        0
+      )
+      const lowerRearPlateQty = lowerRearPlateItems.reduce(
+        (sum, a) => sum + (a.item.Qty || 0),
+        0
+      )
+
+      // 获取后板的规格（取第一个后板item的规格）
+      const firstUpperRearPlate = upperRearPlateItems[0]?.item
+      const firstLowerRearPlate = lowerRearPlateItems[0]?.item
+
+      // 绘制上后板（只绘制一次，避免重复）
+      if (upperRearPlateQty > 0 && firstUpperRearPlate) {
+        const upperSpecText = firstUpperRearPlate.ParamSpec || ''
+        doc.setFontSize(8)
+        doc.text(upperSpecText, 147, yBase - 13)
+        doc.setFontSize(12)
+        doc.text(`${upperRearPlateQty}`, 164, yBase - 13)
+      }
+
+      // 绘制下后板（只绘制一次，避免重复）
+      if (lowerRearPlateQty > 0 && firstLowerRearPlate) {
+        const lowerSpecText = firstLowerRearPlate.ParamSpec || ''
+        doc.setFontSize(8)
+        doc.text(lowerSpecText, 147, yBase - 4)
+        doc.setFontSize(12)
+        doc.text(`${lowerRearPlateQty}`, 164, yBase - 4)
+      }
+
+      // 遍历所有items，处理其他组件（排除侧围和后板，因为已经处理过了）
       items.forEach((item: ISyneyItem) => {
-        // 跳过侧围，因为已经在上面处理过了
+        // 跳过侧围和后板，因为已经在上面处理过了
         if (
           item.PartNo?.includes('XN2808ED') ||
-          item.PartNo?.includes('XN2838CQ')
+          item.PartNo?.includes('XN2838CQ') ||
+          item.PartNo?.includes('XN2808AF') ||
+          item.PartNo?.includes('XN3024Y997') ||
+          item.PartNo?.includes('XN3024BX') ||
+          item.PartNo?.includes('XN3024BY')
         ) {
           return
         }
@@ -399,70 +506,6 @@ export function usePrintDecomposition() {
           doc.text(specText, 111, yBase - 4)
           doc.setFontSize(12)
           doc.text(`${Qty}`, 128, yBase - 4)
-        }
-
-        // ---------------- 后板规格（包括前沿后板组件 XN3024Y997） ----------------
-        const isRearExtensionOld = PartNo?.includes('XN2808AF')
-        const isRearPlateComponent = PartNo?.includes('XN3024Y997')
-
-        const hasUpFlag =
-          ItemRemark?.includes('上头部') ||
-          ItemRemark?.includes('上部') ||
-          ItemRemark?.includes('上')
-        const hasDownFlag =
-          ItemRemark?.includes('下头部') ||
-          ItemRemark?.includes('下部') ||
-          ItemRemark?.includes('下')
-
-        let isUpperRear = false
-        let isLowerRear = false
-
-        // 老件号逻辑：通过备注“上头部/下头部”区分
-        if (isRearExtensionOld) {
-          if (hasUpFlag && !hasDownFlag) isUpperRear = true
-          if (hasDownFlag && !hasUpFlag) isLowerRear = true
-        }
-
-        // XN3024BX 视为上后板，XN3024BY 视为下后板
-        if (PartNo?.includes('XN3024BX')) isUpperRear = true
-        if (PartNo?.includes('XN3024BY')) isLowerRear = true
-
-        // 新件号：前沿后板组件 XN3024Y997
-        if (isRearPlateComponent) {
-          if (hasUpFlag && !hasDownFlag) {
-            // 明确标记为上部
-            isUpperRear = true
-          } else if (hasDownFlag && !hasUpFlag) {
-            // 明确标记为下部
-            isLowerRear = true
-          }
-        }
-
-        // 老件号 XN2808AF：如果没有备注上下，也做交替分配
-        // 新件号 XN3024Y997：如果没有备注上下，也做交替分配
-        if (!isUpperRear && !isLowerRear && (isRearExtensionOld || isRearPlateComponent)) {
-          const assignToTop = genericRearPlateIndex % 2 === 0
-          if (assignToTop) {
-            isUpperRear = true
-          } else {
-            isLowerRear = true
-          }
-          genericRearPlateIndex += 1
-        }
-
-        // 按最终判断结果绘制后板规格（保证一条记录只落在一个格子里）
-        if (isUpperRear) {
-          doc.setFontSize(8)
-          doc.text(specText, 147, yBase - 13)
-          doc.setFontSize(12)
-          doc.text(`${Qty}`, 164, yBase - 13)
-        }
-
-        if (isLowerRear) {
-          doc.setFontSize(8)
-          doc.text(specText, 147, yBase - 4)
-          doc.setFontSize(12)
-          doc.text(`${Qty}`, 164, yBase - 4)
         }
 
         // 上加长板
