@@ -2,7 +2,9 @@ import { ISyneyItem, ISyneySpec } from '@/types'
 
 // 正则表达式常量,避免重复创建
 const LENGTH_PATTERN = /(L1=|L=)(\d+)/g
-const MODEL_PATTERN = /(1000(?:型)?|800(?:型)?|600(?:型)?)/ // 允许没有“型”的写法
+const L_PATTERN = /L=(\d+)/i // 匹配 L=数字
+const L1_PATTERN = /L1=(\d+)/i // 匹配 L1=数字
+const MODEL_PATTERN = /(1000(?:型)?|800(?:型)?|600(?:型)?)/ // 允许没有"型"的写法
 const MM_NUMBER_PATTERN = /(\d+(?:\.\d+)?)\s*mm/i
 
 // 基于型号的默认规格宽度映射
@@ -38,6 +40,38 @@ const COMB_SUPPORT_SET = new Set(COMB_SUPPORT_PART_NOS)
 const FLOOR_COVER_SET = new Set(FLOOR_COVER_PART_NOS)
 
 /**
+ * 从备注中提取 L 和 L1 的值
+ * @param remark 备注文本
+ * @returns 返回包含 L 和 L1 值的对象，如果不存在则返回 null
+ */
+function extractLAndL1(remark: string): { L: string; L1: string } | null {
+  const lMatch = remark.match(L_PATTERN)
+  const l1Match = remark.match(L1_PATTERN)
+  
+  if (lMatch && l1Match) {
+    // 同时存在 L 和 L1，返回两者
+    return {
+      L: lMatch[1],
+      L1: l1Match[1],
+    }
+  } else if (lMatch) {
+    // 只有 L
+    return {
+      L: lMatch[1],
+      L1: '',
+    }
+  } else if (l1Match) {
+    // 只有 L1
+    return {
+      L: '',
+      L1: l1Match[1],
+    }
+  }
+  
+  return null
+}
+
+/**
  * 当无法从规格表匹配到参数规格时,尝试根据型号和备注中的宽度推测参数规格
  * 推测规则:
  * - 型号 1000/800/600 分别对应 1525/1325/1125
@@ -70,18 +104,33 @@ export function inferParamSpecFromRemark(item: ISyneyItem): {
   }
 
   const remark = item.Remark || ''
-  // 优先匹配“宽=数字”
+  
+  // 优先尝试提取 L 和 L1
+  const lengths = extractLAndL1(remark)
+  if (lengths && lengths.L && lengths.L1) {
+    // 同时存在 L 和 L1，格式化为 L*L1
+    return {
+      paramSpec: `${lengths.L}*${lengths.L1}`,
+      inferred: true,
+    }
+  }
+  
+  // 优先匹配"宽=数字"
   const widthMatch = remark.match(WIDTH_PATTERN)
 
-  // 其次匹配显式的 “xxxmm”
+  // 其次匹配显式的 "xxxmm"
   const mmMatch = !widthMatch ? remark.match(MM_NUMBER_PATTERN) : null
 
-  // 再尝试 L1 / L
+  // 再尝试 L1 / L（单个值）
   let lengthMatchValue: string | undefined
   if (!widthMatch && !mmMatch) {
-    LENGTH_PATTERN.lastIndex = 0
-    const lengthMatch = LENGTH_PATTERN.exec(remark)
-    lengthMatchValue = lengthMatch?.[2]
+    if (lengths) {
+      lengthMatchValue = lengths.L || lengths.L1
+    } else {
+      LENGTH_PATTERN.lastIndex = 0
+      const lengthMatch = LENGTH_PATTERN.exec(remark)
+      lengthMatchValue = lengthMatch?.[2]
+    }
   }
 
   // 最后兜底数字匹配（避免过早匹配订单号中的小数字）
@@ -133,16 +182,27 @@ export function getItemsWithParamSpec(
       item.Remark &&
       (baseParamSpec.includes('实际宽度') || baseParamSpec.includes('实际长度'))
     ) {
-      // 提取备注中的长度信息
-      LENGTH_PATTERN.lastIndex = 0
-      const match = LENGTH_PATTERN.exec(item.Remark)
+      // 提取备注中的长度信息（支持 L 和 L1）
+      const lengths = extractLAndL1(item.Remark)
 
-      if (match) {
-        const length = match[2] // 直接从正则捕获组获取长度值
-        // 一次性替换所有占位符
-        paramSpec = baseParamSpec
-          .replace('实际宽度', length)
-          .replace('实际长度', `L=${length}`)
+      if (lengths && lengths.L && lengths.L1) {
+        // 业务约定：当同时存在 L 和 L1 时，参数规格统一解析为「L*L1」
+        // 例如：L=1575,L1=684 => 1575*684
+        paramSpec = `${lengths.L}*${lengths.L1}`
+      } else {
+        // 保持原有占位符替换逻辑（仅单个长度值场景）
+        const singleLength =
+          lengths?.L || lengths?.L1 || (() => {
+            LENGTH_PATTERN.lastIndex = 0
+            const match = LENGTH_PATTERN.exec(item.Remark)
+            return match?.[2]
+          })()
+
+        if (singleLength) {
+          paramSpec = baseParamSpec
+            .replace('实际宽度', singleLength)
+            .replace('实际长度', `L=${singleLength}`)
+        }
       }
     }
 

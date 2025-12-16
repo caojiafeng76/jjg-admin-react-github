@@ -260,7 +260,108 @@ export function usePrintDecomposition() {
 
       // 填充明细项
       doc.setFontSize(8)
+
+      // 记录"无上下备注"的后板，用于在上下格子之间平均分配，避免重复
+      let genericRearPlateIndex = 0
+      
+      // 记录"无上下备注"的侧围，用于在上下格子之间平均分配，避免重复
+      let genericSideFrameIndex = 0
+      
+      // 先处理侧围：收集所有侧围item，确定分配，分组汇总
+      const sideFrameItems = items.filter(
+        (item: ISyneyItem) =>
+          item.PartNo?.includes('XN2808ED') || item.PartNo?.includes('XN2838CQ')
+      )
+      
+      // 确定每个侧围item的分配（上/下）
+      const sideFrameAssignments: Array<{
+        item: ISyneyItem
+        isUpper: boolean
+        isLower: boolean
+      }> = []
+      
+      sideFrameItems.forEach((item: ISyneyItem) => {
+        const remark = item.Remark || ''
+        const hasUpFlag =
+          remark.includes('上头部') ||
+          remark.includes('上部') ||
+          remark.includes('上')
+        const hasDownFlag =
+          remark.includes('下头部') ||
+          remark.includes('下部') ||
+          remark.includes('下')
+        
+        let isUpper = false
+        let isLower = false
+        
+        if (hasUpFlag && !hasDownFlag) {
+          isUpper = true
+        } else if (hasDownFlag && !hasUpFlag) {
+          isLower = true
+        } else {
+          // 无明确标志，交替分配
+          const assignToTop = genericSideFrameIndex % 2 === 0
+          if (assignToTop) {
+            isUpper = true
+          } else {
+            isLower = true
+          }
+          genericSideFrameIndex += 1
+        }
+        
+        sideFrameAssignments.push({ item, isUpper, isLower })
+      })
+      
+      // 汇总上侧围和下侧围的数量和规格
+      const upperSideFrameItems = sideFrameAssignments.filter((a) => a.isUpper)
+      const lowerSideFrameItems = sideFrameAssignments.filter((a) => a.isLower)
+      
+      const upperSideFrameQty = upperSideFrameItems.reduce(
+        (sum, a) => sum + (a.item.Qty || 0),
+        0
+      )
+      const lowerSideFrameQty = lowerSideFrameItems.reduce(
+        (sum, a) => sum + (a.item.Qty || 0),
+        0
+      )
+      
+      // 获取侧围的规格（取第一个侧围item的规格，如果规格相同的话）
+      const firstUpperSideFrame = upperSideFrameItems[0]?.item
+      const firstLowerSideFrame = lowerSideFrameItems[0]?.item
+      
+      // 绘制上侧围（只绘制一次，避免重复）
+      if (upperSideFrameQty > 0 && firstUpperSideFrame) {
+        const upperSpecText = firstUpperSideFrame.ParamSpec || ''
+        const upperSpecVal = upperSpecText.includes('=')
+          ? upperSpecText.slice(upperSpecText.indexOf('=') + 1)
+          : upperSpecText
+        if (upperSpecVal) {
+          doc.setFontSize(8)
+          doc.text(`${upperSpecVal}*${upperSideFrameQty}`, 259, yBase - 13)
+        }
+      }
+      
+      // 绘制下侧围（只绘制一次，避免重复）
+      if (lowerSideFrameQty > 0 && firstLowerSideFrame) {
+        const lowerSpecText = firstLowerSideFrame.ParamSpec || ''
+        const lowerSpecVal = lowerSpecText.includes('=')
+          ? lowerSpecText.slice(lowerSpecText.indexOf('=') + 1)
+          : lowerSpecText
+        if (lowerSpecVal) {
+          doc.setFontSize(8)
+          doc.text(`${lowerSpecVal}*${lowerSideFrameQty}`, 259, yBase - 4)
+        }
+      }
+
+      // 遍历所有items，处理其他组件（排除侧围，因为已经处理过了）
       items.forEach((item: ISyneyItem) => {
+        // 跳过侧围，因为已经在上面处理过了
+        if (
+          item.PartNo?.includes('XN2808ED') ||
+          item.PartNo?.includes('XN2838CQ')
+        ) {
+          return
+        }
         const { PartNo, ParamSpec, Qty, Remark: ItemRemark } = item
         const specText = ParamSpec ? ParamSpec : ''
 
@@ -277,7 +378,8 @@ export function usePrintDecomposition() {
           PartNo?.includes('XN2808BP') ||
           PartNo?.includes('XN3024BS') ||
           PartNo?.includes('XN2808JY') ||
-          PartNo?.includes('XN3024DF')
+          PartNo?.includes('XN3024DF') ||
+          PartNo?.includes('XN3024AP')
         ) {
           doc.setFontSize(8)
           doc.text(specText, 111, yBase - 13)
@@ -290,7 +392,8 @@ export function usePrintDecomposition() {
           PartNo?.includes('XN2808BQ') ||
           PartNo?.includes('XN3024BT') ||
           PartNo?.includes('XN2808JZ') ||
-          PartNo?.includes('XN3024DG')
+          PartNo?.includes('XN3024DG') ||
+          PartNo?.includes('XN3024AQ')
         ) {
           doc.setFontSize(8)
           doc.text(specText, 111, yBase - 4)
@@ -298,22 +401,64 @@ export function usePrintDecomposition() {
           doc.text(`${Qty}`, 128, yBase - 4)
         }
 
-        // 上后板规格
-        if (
-          (PartNo?.includes('XN2808AF') && ItemRemark?.includes('上头部')) ||
-          PartNo?.includes('XN3024BX')
-        ) {
+        // ---------------- 后板规格（包括前沿后板组件 XN3024Y997） ----------------
+        const isRearExtensionOld = PartNo?.includes('XN2808AF')
+        const isRearPlateComponent = PartNo?.includes('XN3024Y997')
+
+        const hasUpFlag =
+          ItemRemark?.includes('上头部') ||
+          ItemRemark?.includes('上部') ||
+          ItemRemark?.includes('上')
+        const hasDownFlag =
+          ItemRemark?.includes('下头部') ||
+          ItemRemark?.includes('下部') ||
+          ItemRemark?.includes('下')
+
+        let isUpperRear = false
+        let isLowerRear = false
+
+        // 老件号逻辑：通过备注“上头部/下头部”区分
+        if (isRearExtensionOld) {
+          if (hasUpFlag && !hasDownFlag) isUpperRear = true
+          if (hasDownFlag && !hasUpFlag) isLowerRear = true
+        }
+
+        // XN3024BX 视为上后板，XN3024BY 视为下后板
+        if (PartNo?.includes('XN3024BX')) isUpperRear = true
+        if (PartNo?.includes('XN3024BY')) isLowerRear = true
+
+        // 新件号：前沿后板组件 XN3024Y997
+        if (isRearPlateComponent) {
+          if (hasUpFlag && !hasDownFlag) {
+            // 明确标记为上部
+            isUpperRear = true
+          } else if (hasDownFlag && !hasUpFlag) {
+            // 明确标记为下部
+            isLowerRear = true
+          }
+        }
+
+        // 老件号 XN2808AF：如果没有备注上下，也做交替分配
+        // 新件号 XN3024Y997：如果没有备注上下，也做交替分配
+        if (!isUpperRear && !isLowerRear && (isRearExtensionOld || isRearPlateComponent)) {
+          const assignToTop = genericRearPlateIndex % 2 === 0
+          if (assignToTop) {
+            isUpperRear = true
+          } else {
+            isLowerRear = true
+          }
+          genericRearPlateIndex += 1
+        }
+
+        // 按最终判断结果绘制后板规格（保证一条记录只落在一个格子里）
+        if (isUpperRear) {
           doc.setFontSize(8)
           doc.text(specText, 147, yBase - 13)
           doc.setFontSize(12)
           doc.text(`${Qty}`, 164, yBase - 13)
         }
 
-        // 下后板规格
-        if (
-          (PartNo?.includes('XN2808AF') && ItemRemark?.includes('下头部')) ||
-          PartNo?.includes('XN3024BY')
-        ) {
+        if (isLowerRear) {
           doc.setFontSize(8)
           doc.text(specText, 147, yBase - 4)
           doc.setFontSize(12)
@@ -321,7 +466,14 @@ export function usePrintDecomposition() {
         }
 
         // 上加长板
-        if (PartNo?.includes('XN2808AL') && ItemRemark?.includes('上头部')) {
+        if (
+          (PartNo?.includes('XN2808AL') && ItemRemark?.includes('上头部')) ||
+          (PartNo?.includes('XN3024X997') && 
+            (ItemRemark?.includes('上头部') || 
+             ItemRemark?.includes('上部') || 
+             ItemRemark?.includes('上') ||
+             (!ItemRemark?.includes('下头部') && !ItemRemark?.includes('下部') && !ItemRemark?.includes('下'))))
+        ) {
           doc.setFontSize(8)
           doc.text(specText, 183, yBase - 13)
           doc.setFontSize(12)
@@ -329,7 +481,13 @@ export function usePrintDecomposition() {
         }
 
         // 下加长板
-        if (PartNo?.includes('XN2808AL') && ItemRemark?.includes('下头部')) {
+        if (
+          (PartNo?.includes('XN2808AL') && ItemRemark?.includes('下头部')) ||
+          (PartNo?.includes('XN3024X997') && 
+            (ItemRemark?.includes('下头部') || 
+             ItemRemark?.includes('下部') || 
+             ItemRemark?.includes('下')))
+        ) {
           doc.setFontSize(8)
           doc.text(specText, 183, yBase - 4)
           doc.setFontSize(12)
@@ -345,49 +503,6 @@ export function usePrintDecomposition() {
           doc.text(`${specVal}*${Qty}`, 244, yBase - 9)
         }
 
-        // 上侧围
-        if (
-          (PartNo?.includes('XN2808ED') || PartNo?.includes('XN2838CQ')) &&
-          ItemRemark?.includes('上头部')
-        ) {
-          const count = items
-            .filter(
-              (it: ISyneyItem) =>
-                (it.PartNo?.includes('XN2808ED') ||
-                  it.PartNo?.includes('XN2838CQ')) &&
-                it.Remark?.includes('上头部'),
-            )
-            .map((it: ISyneyItem) => it.Qty)
-            .reduce((a: number, b: number | null) => (a || 0) + (b || 0), 0)
-
-          doc.setFontSize(8)
-          const specVal = specText.includes('=')
-            ? specText.slice(specText.indexOf('=') + 1)
-            : specText
-          doc.text(`${specVal}*${count}`, 259, yBase - 13)
-        }
-
-        // 下侧围
-        if (
-          (PartNo?.includes('XN2808ED') || PartNo?.includes('XN2838CQ')) &&
-          ItemRemark?.includes('下头部')
-        ) {
-          const count = items
-            .filter(
-              (it: ISyneyItem) =>
-                (it.PartNo?.includes('XN2808ED') ||
-                  it.PartNo?.includes('XN2838CQ')) &&
-                it.Remark?.includes('下头部'),
-            )
-            .map((it: ISyneyItem) => it.Qty)
-            .reduce((a: number, b: number | null) => (a || 0) + (b || 0), 0)
-
-          doc.setFontSize(8)
-          const specVal = specText.includes('=')
-            ? specText.slice(specText.indexOf('=') + 1)
-            : specText
-          doc.text(`${specVal}*${count}`, 259, yBase - 4)
-        }
       })
     })
   }
@@ -413,7 +528,8 @@ export function usePrintDecomposition() {
       doc.addFont('msyh_bold.ttf', 'SourceHanSansCN-Bold', 'normal')
       doc.setFont('SourceHanSansCN-Bold')
 
-      // 3. 按合同号升序排序
+      // 3. 直接使用数据库中的 ParamSpec（不再处理，因为创建时已保存）
+      // 按合同号升序排序
       const sortedPosList = [...selectedPosList].sort((a, b) => {
         const sonoA = a.poInfo.SONo || ''
         const sonoB = b.poInfo.SONo || ''

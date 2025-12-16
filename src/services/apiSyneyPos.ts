@@ -15,10 +15,22 @@ function extractBrandFromItems(items: ISyneyItem[]): string | null {
   )
 
   if (backPlateItem && backPlateItem.Remark) {
+    const remark = backPlateItem.Remark
+    
+    // 优先匹配 "商标为" 格式（如：商标为现代电梯）
+    let brandMatch = remark.match(/商标为\s*([^\s，,。]+)/)
+    if (brandMatch && brandMatch[1]) {
+      return brandMatch[1].trim()
+    }
+    
+    // 匹配 "商标:" 或 "商标：" 格式
+    brandMatch = remark.match(/商标[:：]\s*([^\s，,。]+)/)
+    if (brandMatch && brandMatch[1]) {
+      return brandMatch[1].trim()
+    }
+    
     // 匹配 "品牌:" 后面的内容,支持括号(如 "现代电梯(杭州)有限公司")
-    const brandMatch = backPlateItem.Remark.match(
-      /品牌[::\s]*([^\s]+(?:\([^)]+\))?[^\s]*)/,
-    )
+    brandMatch = remark.match(/品牌[:：\s]*([^\s，,。]+(?:\([^)]+\))?[^\s，,。]*)/)
     if (brandMatch && brandMatch[1]) {
       return brandMatch[1].trim()
     }
@@ -90,7 +102,9 @@ function extractSpecFromItems(items: ISyneyItem[]): string | null {
       partNo.startsWith('XN2808BP') ||
       partNo.startsWith('XN2808BQ') ||
       partNo.startsWith('XN3024BS') ||
-      partNo.startsWith('XN3024BT')
+      partNo.startsWith('XN3024BT') ||
+      partNo.startsWith('XN3024AP') ||
+      partNo.startsWith('XN3024AQ')
     )
   })
 
