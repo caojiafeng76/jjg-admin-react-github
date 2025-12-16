@@ -264,9 +264,6 @@ export function usePrintDecomposition() {
       // 记录"无上下备注"的侧围，用于在上下格子之间平均分配，避免重复
       let genericSideFrameIndex = 0
       
-      // 记录"无上下备注"的后板，用于在上下格子之间平均分配，避免重复
-      let genericRearPlateIndex = 0
-      
       // 先处理侧围：收集所有侧围item，确定分配，分组汇总
       const sideFrameItems = items.filter(
         (item: ISyneyItem) =>
@@ -353,25 +350,28 @@ export function usePrintDecomposition() {
         }
       }
 
-      // 先处理后板：收集所有后板item，确定分配，分组汇总（参考侧围逻辑）
-      const rearPlateItems = items.filter((item: ISyneyItem) => {
+      // 先处理后板：收集所有后板item，确定上下分配（不叠加，每个item单独显示）
+      // 记录后板items在items数组中的位置，用于分配
+      const rearPlateItemsWithIndex: Array<{ item: ISyneyItem; index: number }> = []
+      items.forEach((item, index) => {
         const { PartNo } = item
-        return (
+        if (
           PartNo?.includes('XN2808AF') ||
           PartNo?.includes('XN3024Y997') ||
           PartNo?.includes('XN3024BX') ||
           PartNo?.includes('XN3024BY')
-        )
+        ) {
+          rearPlateItemsWithIndex.push({ item, index })
+        }
       })
 
-      // 确定每个后板item的分配（上/下）
-      const rearPlateAssignments: Array<{
-        item: ISyneyItem
-        isUpper: boolean
-        isLower: boolean
-      }> = []
+      // 确定每个后板item的上下分配
+      const rearPlateAssignments = new Map<ISyneyItem, { isUpper: boolean; isLower: boolean }>()
 
-      rearPlateItems.forEach((item: ISyneyItem) => {
+      // 先处理有明确上下标志的items
+      const itemsWithoutFlag: Array<{ item: ISyneyItem; index: number }> = []
+
+      rearPlateItemsWithIndex.forEach(({ item, index }) => {
         const { PartNo, Remark: ItemRemark } = item
         const isRearExtensionOld = PartNo?.includes('XN2808AF')
         const isRearPlateComponent = PartNo?.includes('XN3024Y997')
@@ -407,53 +407,90 @@ export function usePrintDecomposition() {
           }
         }
 
-        // 如果没有明确标志，交替分配
-        if (!isUpper && !isLower && (isRearExtensionOld || isRearPlateComponent)) {
-          const assignToTop = genericRearPlateIndex % 2 === 0
-          if (assignToTop) {
-            isUpper = true
-          } else {
-            isLower = true
-          }
-          genericRearPlateIndex += 1
+        if (isUpper || isLower) {
+          rearPlateAssignments.set(item, { isUpper, isLower })
+        } else if (isRearExtensionOld || isRearPlateComponent) {
+          itemsWithoutFlag.push({ item, index })
         }
-
-        rearPlateAssignments.push({ item, isUpper, isLower })
       })
 
-      // 汇总上后板和下后板的数量和规格
-      const upperRearPlateItems = rearPlateAssignments.filter((a) => a.isUpper)
-      const lowerRearPlateItems = rearPlateAssignments.filter((a) => a.isLower)
-
-      const upperRearPlateQty = upperRearPlateItems.reduce(
-        (sum, a) => sum + (a.item.Qty || 0),
-        0
-      )
-      const lowerRearPlateQty = lowerRearPlateItems.reduce(
-        (sum, a) => sum + (a.item.Qty || 0),
-        0
-      )
-
-      // 获取后板的规格（取第一个后板item的规格）
-      const firstUpperRearPlate = upperRearPlateItems[0]?.item
-      const firstLowerRearPlate = lowerRearPlateItems[0]?.item
-
-      // 绘制上后板（只绘制一次，避免重复）
-      if (upperRearPlateQty > 0 && firstUpperRearPlate) {
-        const upperSpecText = firstUpperRearPlate.ParamSpec || ''
-        doc.setFontSize(8)
-        doc.text(upperSpecText, 147, yBase - 13)
-        doc.setFontSize(12)
-        doc.text(`${upperRearPlateQty}`, 164, yBase - 13)
+      // 处理没有明确标志的items：按在items数组中的顺序，第一块为上后板，第二块为下后板
+      // 确保按照原始index排序，保证顺序一致
+      itemsWithoutFlag.sort((a, b) => a.index - b.index)
+      
+      // 如果只有一个item，需要确保显示在上下两个格子
+      if (itemsWithoutFlag.length === 1) {
+        const item = itemsWithoutFlag[0].item
+        // 同时分配到上下格子，打印时会分别显示
+        rearPlateAssignments.set(item, {
+          isUpper: true,
+          isLower: true,
+        })
+      } else if (itemsWithoutFlag.length >= 2) {
+        // 多个items，按顺序分配：第一块 → 上后板，第二块 → 下后板
+        const firstItem = itemsWithoutFlag[0].item
+        const secondItem = itemsWithoutFlag[1].item
+        rearPlateAssignments.set(firstItem, {
+          isUpper: true,
+          isLower: false,
+        })
+        rearPlateAssignments.set(secondItem, {
+          isUpper: false,
+          isLower: true,
+        })
       }
 
-      // 绘制下后板（只绘制一次，避免重复）
-      if (lowerRearPlateQty > 0 && firstLowerRearPlate) {
-        const lowerSpecText = firstLowerRearPlate.ParamSpec || ''
-        doc.setFontSize(8)
-        doc.text(lowerSpecText, 147, yBase - 4)
-        doc.setFontSize(12)
-        doc.text(`${lowerRearPlateQty}`, 164, yBase - 4)
+      // 先处理后板打印：确保两块后板都能显示
+      // 找到上后板和下后板，分别打印
+      let upperRearPlateItem: ISyneyItem | undefined
+      let lowerRearPlateItem: ISyneyItem | undefined
+      
+      // 优先查找明确分配到上格子的item
+      for (const [item, assignment] of rearPlateAssignments.entries()) {
+        if (assignment.isUpper && !upperRearPlateItem) {
+          upperRearPlateItem = item
+        }
+        if (assignment.isLower && !lowerRearPlateItem && !assignment.isUpper) {
+          lowerRearPlateItem = item
+        }
+      }
+      
+      // 如果没有找到单独的下后板，使用同时分配到上下格子的item（用于Qty=2的情况）
+      if (!lowerRearPlateItem) {
+        for (const [item, assignment] of rearPlateAssignments.entries()) {
+          if (assignment.isLower && assignment.isUpper) {
+            lowerRearPlateItem = item
+            break
+          }
+        }
+      }
+
+      // 打印上后板
+      if (upperRearPlateItem) {
+        const upperAssignment = rearPlateAssignments.get(upperRearPlateItem)
+        const upperSpecText = upperRearPlateItem.ParamSpec || ''
+        // 如果同时分配到上下格子，上格子显示1，否则显示实际数量
+        const upperQty = upperAssignment?.isUpper && upperAssignment?.isLower ? 1 : (upperRearPlateItem.Qty || 0)
+        if (upperQty > 0 && upperSpecText) {
+          doc.setFontSize(8)
+          doc.text(upperSpecText, 147, yBase - 13)
+          doc.setFontSize(12)
+          doc.text(`${upperQty}`, 164, yBase - 13)
+        }
+      }
+
+      // 打印下后板
+      if (lowerRearPlateItem) {
+        const lowerAssignment = rearPlateAssignments.get(lowerRearPlateItem)
+        const lowerSpecText = lowerRearPlateItem.ParamSpec || ''
+        // 如果同时分配到上下格子，下格子显示1，否则显示实际数量
+        const lowerQty = lowerAssignment?.isUpper && lowerAssignment?.isLower ? 1 : (lowerRearPlateItem.Qty || 0)
+        if (lowerQty > 0 && lowerSpecText) {
+          doc.setFontSize(8)
+          doc.text(lowerSpecText, 147, yBase - 4)
+          doc.setFontSize(12)
+          doc.text(`${lowerQty}`, 164, yBase - 4)
+        }
       }
 
       // 遍历所有items，处理其他组件（排除侧围和后板，因为已经处理过了）
@@ -462,13 +499,11 @@ export function usePrintDecomposition() {
         if (
           item.PartNo?.includes('XN2808ED') ||
           item.PartNo?.includes('XN2838CQ') ||
-          item.PartNo?.includes('XN2808AF') ||
-          item.PartNo?.includes('XN3024Y997') ||
-          item.PartNo?.includes('XN3024BX') ||
-          item.PartNo?.includes('XN3024BY')
+          rearPlateAssignments.has(item)
         ) {
           return
         }
+
         const { PartNo, ParamSpec, Qty, Remark: ItemRemark } = item
         const specText = ParamSpec ? ParamSpec : ''
 
