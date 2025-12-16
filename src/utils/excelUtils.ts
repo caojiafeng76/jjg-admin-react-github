@@ -320,12 +320,24 @@ function extractBrandFromBackPlate(rows: ExcelRow[]): string | null {
   }
 
   // 2. 从备注中提取品牌
-  // 匹配模式: "品牌:" 或 "品牌：" 后面的非空白字符
   const remark = String(backPlateRow.备注)
-  const match = remark.match(/品牌[:：]\s*(\S+)/)
-
+  
+  // 优先匹配 "商标为" 格式（如：商标为现代电梯）
+  let match = remark.match(/商标为\s*([^\s，,。]+)/)
   if (match && match[1]) {
-    return match[1]
+    return match[1].trim()
+  }
+  
+  // 匹配 "商标:" 或 "商标：" 格式
+  match = remark.match(/商标[:：]\s*([^\s，,。]+)/)
+  if (match && match[1]) {
+    return match[1].trim()
+  }
+  
+  // 匹配 "品牌:" 或 "品牌：" 格式
+  match = remark.match(/品牌[:：]\s*([^\s，,。]+)/)
+  if (match && match[1]) {
+    return match[1].trim()
   }
 
   return null
@@ -396,7 +408,9 @@ function extractTechnique(rows: ExcelRow[]): string | null {
       (row.物料件号 && String(row.物料件号).includes('XN2808BP')) ||
       (row.物料件号 && String(row.物料件号).includes('XN2808BQ')) ||
       (row.物料件号 && String(row.物料件号).includes('XN3024BS')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN3024BT')),
+      (row.物料件号 && String(row.物料件号).includes('XN3024BT')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN3024AP')) ||
+      (row.物料件号 && String(row.物料件号).includes('XN3024AQ')),
   )
 
   // 调试日志：输出找到的中板组件
@@ -626,7 +640,9 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
       partNo.startsWith('XN2808BP') ||
       partNo.startsWith('XN2808BQ') ||
       partNo.startsWith('XN3024BS') ||
-      partNo.startsWith('XN3024BT')
+      partNo.startsWith('XN3024BT') ||
+      partNo.startsWith('XN3024AP') ||
+      partNo.startsWith('XN3024AQ')
     )
   })
 
