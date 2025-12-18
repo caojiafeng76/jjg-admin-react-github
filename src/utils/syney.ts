@@ -365,6 +365,7 @@ export function jsonToArray(json: string): ISyneyItem[] {
 export function getItemsWithExtraInfo(
   items: ISyneyItem[],
   startSerialNo: number,
+  safePartSettings?: { part_no: string; name?: string | null }[],
 ): { map: Map<string, ISyneyItem[]>; tmpSerialNo: number } {
   // 创建一个 Map，用于按销售订单号（SONo）和序列号分组存储物品
   const map = new Map<string, ISyneyItem[]>()
@@ -378,6 +379,14 @@ export function getItemsWithExtraInfo(
     }
     itemsBySONo.get(soNo)!.push(item)
   })
+
+  // 根据数据库配置（如果有）构建动态匹配集合；否则退回到写死集合
+  const combSupportList =
+    safePartSettings?.filter((s) => s.name === '梳齿支撑板').map((s) => s.part_no) ??
+    Array.from(COMB_SUPPORT_SET)
+  const floorCoverList =
+    safePartSettings?.filter((s) => s.name === '楼层板').map((s) => s.part_no) ??
+    Array.from(FLOOR_COVER_SET)
 
   // 使用起始序列号，为每个 SONo 分配递增的序列号
   let currentSerialNo = startSerialNo
@@ -393,11 +402,10 @@ export function getItemsWithExtraInfo(
       const partNo = item.PartNo
       if (!partNo) return
 
-      // 优化: 使用 Set 进行 O(1) 查找而不是 array.some() 的 O(n)
       let isCombSupport = false
       let isFloorCover = false
 
-      for (const pn of COMB_SUPPORT_SET) {
+      for (const pn of combSupportList) {
         if (partNo.includes(pn)) {
           isCombSupport = true
           break
@@ -405,7 +413,7 @@ export function getItemsWithExtraInfo(
       }
 
       if (!isCombSupport) {
-        for (const pn of FLOOR_COVER_SET) {
+        for (const pn of floorCoverList) {
           if (partNo.includes(pn)) {
             isFloorCover = true
             break

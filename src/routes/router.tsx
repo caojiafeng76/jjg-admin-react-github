@@ -20,6 +20,9 @@ const SyneyStoreReportDetail = lazy(
 )
 const SyneyPoList = lazy(() => import('@features/syney/PoList'))
 const SyneySetting = lazy(() => import('@pages/SyneySetting'))
+const SafePartSettingPage = lazy(
+  () => import('@features/syney/SafePartSetting/SafePartSettingPage'),
+)
 const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
 
 // 车间相关
@@ -92,6 +95,10 @@ export const router = createBrowserRouter([
       {
         path: 'syney-po-list/:PoId',
         element: <SyneyPoDetail />,
+      },
+      {
+        path: 'syney-safe-part-setting',
+        element: <SafePartSettingPage />, 
       },
       {
         path: 'syney-setting',
