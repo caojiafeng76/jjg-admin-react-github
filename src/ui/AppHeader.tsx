@@ -15,6 +15,7 @@ const routeToLabelMap: Record<string, string> = {
   'syney-po-list': '订单列表',
   'syney-store-report-list': '入库单列表',
   'syney-spec-list': '踏板规格列表',
+  'syney-safe-part-setting': '安全件设置',
   'syney-setting': '编号设置',
   'workshop-order-list': '订单管理',
   'workshop-process-list': '工序管理',

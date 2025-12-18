@@ -223,7 +223,40 @@ export type Database = {
         }
         Relationships: []
       }
-      "syney-store-report-items": {
+      "syney_safe_part_settings": {
+        Row: {
+          id: string
+          part_no: string
+          name: string | null
+          need_print_label: boolean
+          is_safe_part: boolean
+          remark: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          part_no: string
+          name?: string | null
+          need_print_label?: boolean
+          is_safe_part?: boolean
+          remark?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          part_no?: string
+          name?: string | null
+          need_print_label?: boolean
+          is_safe_part?: boolean
+          remark?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+          "syney-store-report-items": {
         Row: {
           created_at: string
           id: number
@@ -404,16 +437,13 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
     }
     Functions: {
       increment_serial_no: { Args: { increment_by: number }; Returns: number }
     }
     Enums: {
-      [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
     }
   }
 }

@@ -4,20 +4,25 @@ import { message } from 'antd'
 
 import { useSelectedPos } from './useSelectedPos'
 
-// 安全件件号前缀列表（可配置）
-const SAFE_PART_PREFIXES = [
-  'XN2808EB',
-  'XN3024BR',
-  'XN2808BP',
-  'XN3024BS',
-  'XN2808JY',
-  'XN3024DF',
-] as const
+import { useQuery } from '@tanstack/react-query'
+import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
 
 // 判断是否为安全件
-function isSafePart(partNo: string | null | undefined): boolean {
-  if (!partNo) return false
-  return SAFE_PART_PREFIXES.some((prefix) => partNo.includes(prefix))
+function useIsSafePart() {
+  const { data: settings } = useQuery({
+    queryKey: ['syney-safe-part-settings'],
+    queryFn: getSyneySafePartSettings,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  function isSafePart(partNo: string | null | undefined): boolean {
+    if (!partNo || !settings) return false
+    return settings.some(
+      (item) => item.is_safe_part && partNo.includes(item.part_no)
+    )
+  }
+
+  return { isSafePart }
 }
 
 // Excel 数据行类型
@@ -35,6 +40,7 @@ type ExcelRow = {
 export function useExportSafePartInfoAsExcel() {
   const [messageApi, contextHolder] = message.useMessage()
   const { isLoading, selectedPosList } = useSelectedPos()
+  const { isSafePart } = useIsSafePart()
 
   function exportSafePartInfoAsExcel() {
     // 数据验证

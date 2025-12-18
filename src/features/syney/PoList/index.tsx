@@ -32,6 +32,8 @@ import PoSelectedFilter from './PoSelectedFilter'
 import { usePrintEnglish } from './usePrintEnglish'
 import PoDateFilter from './PoDateFilter'
 import PoSearchInput from './PoSearchInput'
+import { useQuery } from '@tanstack/react-query'
+import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
 
 export default function PoList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -72,6 +74,12 @@ export default function PoList() {
   })
 
   const { createPo, contextHolder: createPoContextHolder } = useCreatePo(messageApi)
+
+  const { data: safePartSettings } = useQuery({
+    queryKey: ['syney-safe-part-settings'],
+    queryFn: getSyneySafePartSettings,
+    staleTime: 5 * 60 * 1000,
+  })
 
   // 使用 useCallback 优化,避免子组件不必要的重渲染
   const handleDelete = useCallback(() => {
@@ -159,7 +167,11 @@ export default function PoList() {
         const startSerialNo = finalSerialNo - incrementBy
 
         // 4. 使用预分配的序列号范围生成订单数据
-        const { map } = getItemsWithExtraInfo(items, startSerialNo)
+        const { map } = getItemsWithExtraInfo(
+          items,
+          startSerialNo,
+          safePartSettings,
+        )
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { Detail, ...po } = values
