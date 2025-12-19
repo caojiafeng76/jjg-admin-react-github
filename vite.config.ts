@@ -21,4 +21,8 @@ export default defineConfig({
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
   },
   plugins: [react()],
+  // Use Lightning CSS for minification to avoid noisy warnings from esbuild
+  build: {
+    cssMinify: 'lightningcss',
+  },
 })
