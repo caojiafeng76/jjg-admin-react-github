@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
 
@@ -19,6 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const initializedRef = useRef(false)
 
   useEffect(() => {
     let mounted = true
@@ -33,22 +34,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Auth getUser error:', error)
           setError(error)
           setUser(null)
-          return
+        } else {
+          setUser(data.user ?? null)
         }
-
-        setUser(data.user ?? null)
       })
       .finally(() => {
         if (!mounted) return
+        initializedRef.current = true
         setLoading(false)
       })
 
     // 监听登录状态变化
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return
+
+      // 只有在初始化完成后才处理状态变化，避免竞态条件
+      if (initializedRef.current) {
+        setUser(session?.user ?? null)
+        // 登录/登出事件时，确保 loading 状态正确
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+          setLoading(false)
+        }
+      }
     })
 
     return () => {
@@ -63,20 +72,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     setError(null)
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (error) {
-      console.error('Auth signIn error:', error)
-      setError(error)
+      if (error) {
+        console.error('Auth signIn error:', error)
+        setError(error)
+        throw error
+      }
+
+      // 登录成功后，用户状态会通过 onAuthStateChange 自动更新
+      // 这里不需要手动设置，避免与 onAuthStateChange 冲突
+      setUser(data.user ?? null)
+    } finally {
+      // 确保 loading 状态被清除，即使发生错误
       setLoading(false)
-      throw error
     }
-
-    setUser(data.user ?? null)
-    setLoading(false)
   }
 
   const signOut = async () => {

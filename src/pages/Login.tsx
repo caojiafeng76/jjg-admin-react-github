@@ -21,12 +21,16 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  // 已登录用户直接跳转
+  // 已登录用户直接跳转（添加防抖，避免重复导航）
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard', { replace: true })
+    if (user && !loading) {
+      // 使用 setTimeout 确保导航在下一个事件循环中执行，避免与 signIn 中的导航冲突
+      const timer = setTimeout(() => {
+        navigate('/dashboard', { replace: true })
+      }, 0)
+      return () => clearTimeout(timer)
     }
-  }, [user, navigate])
+  }, [user, loading, navigate])
 
   // 将 AuthContext 的错误同步到本地提示
   useEffect(() => {
@@ -42,7 +46,9 @@ export default function Login() {
     setSubmitting(true)
     try {
       await signIn(values.email, values.password)
-      navigate('/dashboard', { replace: true })
+      // 登录成功后，由 useEffect 监听 user 变化来处理导航
+      // 这里不直接导航，避免与 useEffect 中的导航冲突
+      // navigate('/dashboard', { replace: true })
     } catch (err: any) {
       const message = err?.message || '登录失败，请稍后重试'
       setErrorMessage(translateErrorMessage(message))
