@@ -48,15 +48,19 @@ const ProductionStatistics = lazy(
 function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()
 
-  if (loading) {
+  // 使用 useMemo 避免不必要的重渲染
+  const shouldShowLoading = loading
+  const shouldRedirect = !loading && !user
+
+  if (shouldShowLoading) {
     return <Loading />
   }
 
-  if (!user) {
+  if (shouldRedirect) {
     return <Navigate to="/login" replace />
   }
 
-  return element
+  return <>{element}</>
 }
 
 export const router = createBrowserRouter([
@@ -74,59 +78,115 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <Dashboard />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Dashboard />
+          </Suspense>
+        ),
       },
       {
         path: 'syney-spec-list',
-        element: <SyneySpecList />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <SyneySpecList />
+          </Suspense>
+        ),
       },
       {
         path: 'syney-store-report-list',
-        element: <SyneyStoreReportList />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <SyneyStoreReportList />
+          </Suspense>
+        ),
       },
       {
         path: 'syney-store-report-list/:reportNo',
-        element: <SyneyStoreReportDetail />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <SyneyStoreReportDetail />
+          </Suspense>
+        ),
       },
       {
         path: 'syney-po-list',
-        element: <SyneyPoList />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <SyneyPoList />
+          </Suspense>
+        ),
       },
       {
         path: 'syney-po-list/:PoId',
-        element: <SyneyPoDetail />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <SyneyPoDetail />
+          </Suspense>
+        ),
       },
       {
         path: 'syney-safe-part-setting',
-        element: <SafePartSettingPage />, 
+        element: (
+          <Suspense fallback={<Loading />}>
+            <SafePartSettingPage />
+          </Suspense>
+        ),
       },
       {
         path: 'syney-setting',
-        element: <SyneySetting />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <SyneySetting />
+          </Suspense>
+        ),
       },
       {
         path: 'workshop-order-list',
-        element: <WorkshopOrderList />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <WorkshopOrderList />
+          </Suspense>
+        ),
       },
       {
         path: 'workshop-process-list',
-        element: <WorkshopProcessList />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <WorkshopProcessList />
+          </Suspense>
+        ),
       },
       {
         path: 'workshop-defect-reason-list',
-        element: <WorkshopDefectReasonList />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <WorkshopDefectReasonList />
+          </Suspense>
+        ),
       },
       {
         path: 'employee-list',
-        element: <EmployeeList />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <EmployeeList />
+          </Suspense>
+        ),
       },
       {
         path: 'production-record-list',
-        element: <ProductionRecordList />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ProductionRecordList />
+          </Suspense>
+        ),
       },
       {
         path: 'production-statistics',
-        element: <ProductionStatistics />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ProductionStatistics />
+          </Suspense>
+        ),
       },
     ],
   },

@@ -89,7 +89,11 @@ const MainMenu: React.FC = () => {
 
   const onClick: MenuProps['onClick'] = ({ key }) => {
     if (!key) return
-    navigate(`/${key}`)
+    // 如果点击的是当前路径，不进行导航，避免不必要的重渲染
+    const targetPath = `/${key}`
+    if (pathname !== targetPath) {
+      navigate(targetPath)
+    }
   }
 
   const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
