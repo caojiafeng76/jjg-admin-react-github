@@ -3,6 +3,8 @@ import { App, Modal, FormInstance, Drawer, Spin } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
@@ -16,7 +18,7 @@ import {
   useDeleteProductionSheets,
   useProductionSheetById,
 } from './useProductionSheets'
-import ProductionSheetTable from './ProductionSheetTable'
+// Table view replaced by card grid in this component
 import ProductionSheetForm from './ProductionSheetForm'
 import ProductionSheetSearch from './ProductionSheetSearch'
 import ProductionRecordTable from './ProductionRecordTable'
@@ -36,6 +38,7 @@ export default function ProductionRecordList() {
   const [formRef, setFormRef] = useState<FormInstance<any> | null>(null)
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false)
   const [selectedSheetId, setSelectedSheetId] = useState<string | null>(null)
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
 
   // 初始化当月日期范围
   const getCurrentMonthRange = () => {
@@ -77,12 +80,11 @@ export default function ProductionRecordList() {
     useProductionSheetById(editingSheetId)
 
   // 动态计算表格高度（目标10条数据撑满，需要减去汇总行高度）
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
-      targetRowCount: 10,
-      headerHeight: 39,
-      summaryRowHeight: 40, // 汇总行高度，与普通行高相同
-    })
+  const { tableContainerRef, paginationRef } = useTableHeight({
+    targetRowCount: 10,
+    headerHeight: 39,
+    summaryRowHeight: 40, // 汇总行高度，与普通行高相同
+  })
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -171,11 +173,6 @@ export default function ProductionRecordList() {
     exportProductionSheetsAsExcel(selectedRowKeys as string[])
   }, [exportProductionSheetsAsExcel, message, selectedRowKeys])
 
-  const handleViewDetail = useCallback((sheetId: string) => {
-    setSelectedSheetId(sheetId)
-    setDetailDrawerOpen(true)
-  }, [])
-
   const handleSearch = useCallback(
     (params: typeof searchParams) => {
       setSearchParams(params)
@@ -218,7 +215,9 @@ export default function ProductionRecordList() {
         endDate: monthRange.endDate,
       })
     }
-  }, []) // 仅在组件首次加载时执行
+    // 仅在组件首次加载时执行
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
@@ -256,18 +255,269 @@ export default function ProductionRecordList() {
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
-        <div className="min-h-0 flex-1 overflow-x-auto">
-          <ProductionSheetTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-            onViewDetail={handleViewDetail}
-          />
+        <div className="min-h-0 flex-1 overflow-auto">
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center py-8">
+              <Spin />
+            </div>
+          ) : data?.items && data.items.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {data.items.map((sheet) => {
+                const isSelected = selectedRowKeys.includes(sheet.id!)
+                const isExpanded = expandedCardId === sheet.id
+                return (
+                  <div
+                    key={sheet.id}
+                    className={`flex flex-col justify-between rounded-md border bg-white p-4 shadow-sm ${
+                      isSelected ? 'ring-2 ring-indigo-200' : ''
+                    }`}
+                  >
+                    <div>
+                      {/* 卡片头：姓名 / 日期 / 工时 */}
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="text-sm">
+                          <span className="mr-2 text-gray-500">姓名</span>
+                          <span className="font-medium text-gray-900">
+                            {sheet.operators && sheet.operators.length > 0
+                              ? sheet.operators[0].name
+                              : '-'}
+                          </span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="mr-2 text-gray-500">日期</span>
+                          <span className="text-gray-900">
+                            {sheet.production_date
+                              ? dayjs(sheet.production_date).format('M月D日')
+                              : '-'}
+                          </span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="mr-2 text-gray-500">工时</span>
+                          <span className="text-gray-900">
+                            {sheet.working_hours ?? '-'}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-1">
+                          <label className="text-xs text-gray-500">选择</label>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedRowKeys([
+                                  ...selectedRowKeys,
+                                  sheet.id!,
+                                ])
+                              } else {
+                                setSelectedRowKeys(
+                                  selectedRowKeys.filter(
+                                    (k) => k !== sheet.id!,
+                                  ),
+                                )
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* 记录表格（简化） */}
+                      <div className="mt-3 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          {!isExpanded && (
+                            <thead>
+                              <tr className="text-left text-gray-600">
+                                <th className="pr-2">序号</th>
+                                <th className="pr-2">项目号</th>
+                                <th className="pr-2">型号</th>
+                                <th className="pr-2">客户型号</th>
+                                <th className="pr-2">长度</th>
+                                <th className="pr-2">工序</th>
+                                <th className="pr-2">数量</th>
+                                <th className="pr-2">不良原因</th>
+                                <th className="pr-2">不良数量</th>
+                                <th className="pr-2">备注</th>
+                              </tr>
+                            </thead>
+                          )}
+                          <tbody>
+                            {(sheet.records || []).map(
+                              (rec: any, idx: number) => (
+                                <tr key={rec.id || idx} className="border-t">
+                                  <td className="py-1 pr-2">{idx + 1}</td>
+                                  <td className="py-1 pr-2">
+                                    {rec.order?.project_no ||
+                                      rec.order_id ||
+                                      '-'}
+                                  </td>
+                                  <td className="py-1 pr-2">
+                                    {rec.order?.product_model || '-'}
+                                  </td>
+                                  <td className="py-1 pr-2">
+                                    {rec.order?.customer_model || '-'}
+                                  </td>
+                                  <td className="py-1 pr-2">
+                                    {rec.order?.length_mm ?? '-'}
+                                  </td>
+                                  <td className="py-1 pr-2">
+                                    {rec.process?.process_name ||
+                                      rec.process_id ||
+                                      '-'}
+                                  </td>
+                                  <td className="py-1 pr-2">
+                                    {rec.qualified_quantity ?? 0}
+                                  </td>
+                                  <td className="py-1 pr-2">
+                                    {rec.defect_reasons_with_details &&
+                                    rec.defect_reasons_with_details.length > 0
+                                      ? rec.defect_reasons_with_details
+                                          .map(
+                                            (d: any) =>
+                                              d.defect_reason?.defect_reason ||
+                                              d.defect_reason?.defect_reason ||
+                                              '-',
+                                          )
+                                          .join('、')
+                                      : '-'}
+                                  </td>
+                                  <td className="py-1 pr-2">
+                                    {rec.defective_quantity ?? 0}
+                                  </td>
+                                  <td className="py-1 pr-2">
+                                    {rec.remark || ''}
+                                  </td>
+                                </tr>
+                              ),
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* 卡片底部：详情切换 & 创建时间 */}
+                      <div className="mt-3 flex items-center justify-between">
+                        <div>
+                          <button
+                            className="text-sm text-indigo-600 hover:underline"
+                            onClick={() => {
+                              if (expandedCardId === sheet.id) {
+                                setExpandedCardId(null)
+                                setSelectedSheetId(null)
+                              } else {
+                                setExpandedCardId(sheet.id || null)
+                                setSelectedSheetId(sheet.id || null)
+                              }
+                            }}
+                          >
+                            {expandedCardId === sheet.id ? '收起' : '详情'}
+                          </button>
+                        </div>
+
+                        <div className="text-xs text-gray-400">
+                          {sheet.created_at
+                            ? new Date(sheet.created_at).toLocaleString('zh-CN')
+                            : ''}
+                        </div>
+                      </div>
+
+                      {/* 展开详情区域（单卡展开，使用 sheetDetail） */}
+                      {expandedCardId === sheet.id && (
+                        <div className="mt-3">
+                          {selectedSheetId === sheet.id && detailLoading ? (
+                            <div className="flex items-center justify-center py-4">
+                              <Spin />
+                            </div>
+                          ) : sheetDetail && sheetDetail.id === sheet.id ? (
+                            <div className="mt-1 text-sm text-gray-700">
+                              <div className="mb-2 font-medium">明细</div>
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="text-left text-gray-600">
+                                      <th className="pr-2">序号</th>
+                                      <th className="pr-2">项目号</th>
+                                      <th className="pr-2">型号</th>
+                                      <th className="pr-2">客户型号</th>
+                                      <th className="pr-2">长度</th>
+                                      <th className="pr-2">工序</th>
+                                      <th className="pr-2">数量</th>
+                                      <th className="pr-2">不良原因</th>
+                                      <th className="pr-2">不良数量</th>
+                                      <th className="pr-2">备注</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(sheetDetail.records || []).map(
+                                      (rec: any, idx: number) => (
+                                        <tr
+                                          key={rec.id || idx}
+                                          className="border-t"
+                                        >
+                                          <td className="py-1 pr-2">
+                                            {idx + 1}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.order?.project_no ||
+                                              rec.order_id ||
+                                              '-'}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.order?.product_model || '-'}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.order?.customer_model || '-'}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.order?.length_mm ?? '-'}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.process?.process_name ||
+                                              rec.process_id ||
+                                              '-'}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.qualified_quantity ?? 0}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.defect_reasons_with_details &&
+                                            rec.defect_reasons_with_details
+                                              .length > 0
+                                              ? rec.defect_reasons_with_details
+                                                  .map(
+                                                    (d: any) =>
+                                                      d.defect_reason
+                                                        ?.defect_reason || '-',
+                                                  )
+                                                  .join('、')
+                                              : '-'}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.defective_quantity ?? 0}
+                                          </td>
+                                          <td className="py-1 pr-2">
+                                            {rec.remark || ''}
+                                          </td>
+                                        </tr>
+                                      ),
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="py-2 text-sm text-gray-500">
+                              暂无详情数据
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="p-4 text-gray-500">暂无数据</div>
+          )}
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination
@@ -328,8 +578,7 @@ export default function ProductionRecordList() {
                     production_date: editingSheetDetail.production_date,
                     operator_ids:
                       editingSheetDetail.records?.[0]?.operator_ids || [],
-                    working_hours:
-                      editingSheetDetail.working_hours || null,
+                    working_hours: editingSheetDetail.working_hours || null,
                     remark: editingSheetDetail.remark || null,
                     records: editingSheetDetail.records || [],
                   }
