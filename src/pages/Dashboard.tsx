@@ -21,7 +21,7 @@ import {
   useUpdateProductionSheet,
   useProductionSheetById,
 } from '@/features/workshop/ProductionRecord/useProductionSheets'
-import ProductionSheetTable from '@/features/workshop/ProductionRecord/ProductionSheetTable'
+import ProductionSheetCardGrid from '@/features/workshop/ProductionRecord/ProductionSheetCardGrid'
 import ProductionSheetForm from '@/features/workshop/ProductionRecord/ProductionSheetForm'
 import ProductionSheetSearch from '@/features/workshop/ProductionRecord/ProductionSheetSearch'
 import ProductionRecordTable from '@/features/workshop/ProductionRecord/ProductionRecordTable'
@@ -121,8 +121,6 @@ export default function Dashboard() {
   const {
     tableContainerRef: productionTableContainerRef,
     paginationRef: productionPaginationRef,
-    scrollY: productionScrollY,
-    rowHeight: productionRowHeight,
   } = useTableHeight({
     targetRowCount: 10,
     headerHeight: 39,
@@ -457,16 +455,12 @@ export default function Dashboard() {
             ref={productionTableContainerRef}
             className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
           >
-            <div className="min-h-0 flex-1 overflow-x-auto">
-              <ProductionSheetTable
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <ProductionSheetCardGrid
                 loading={productionLoading}
                 data={productionData?.items || []}
                 selectedRowKeys={productionSelectedRowKeys}
                 onSelect={setProductionSelectedRowKeys}
-                page={productionPage}
-                pageSize={productionPageSize}
-                scrollY={productionScrollY}
-                rowHeight={productionRowHeight}
                 onViewDetail={handleProductionViewDetail}
               />
             </div>
