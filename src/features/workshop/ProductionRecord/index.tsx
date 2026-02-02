@@ -1,5 +1,14 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance, Drawer, Spin } from 'antd'
+import {
+  App,
+  Modal,
+  FormInstance,
+  Spin,
+  Card,
+  Checkbox,
+  Table,
+  Button,
+} from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 
@@ -34,11 +43,10 @@ export default function ProductionRecordList() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
-  const pageSize = Number(searchParamsURL.get('pageSize')) || 10
+  const pageSize = Number(searchParamsURL.get('pageSize')) || 6
   const [formRef, setFormRef] = useState<FormInstance<any> | null>(null)
-  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedSheetId, setSelectedSheetId] = useState<string | null>(null)
-  const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
 
   // 初始化当月日期范围
   const getCurrentMonthRange = () => {
@@ -264,254 +272,106 @@ export default function ProductionRecordList() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {data.items.map((sheet) => {
                 const isSelected = selectedRowKeys.includes(sheet.id!)
-                const isExpanded = expandedCardId === sheet.id
+                const cardColumns = [
+                  {
+                    title: '#',
+                    width: 40,
+                    render: (_: any, __: any, idx: number) => idx + 1,
+                  },
+                  {
+                    title: '项目号',
+                    dataIndex: ['order', 'project_no'],
+                    ellipsis: true,
+                    render: (val: string, rec: any) =>
+                      val || rec.order_id || '-',
+                  },
+                  {
+                    title: '型号',
+                    dataIndex: ['order', 'product_model'],
+                    ellipsis: true,
+                    render: (val: string) => val || '-',
+                  },
+                  {
+                    title: '工序',
+                    dataIndex: ['process', 'process_name'],
+                    ellipsis: true,
+                    render: (val: string, rec: any) =>
+                      val || rec.process_id || '-',
+                  },
+                  {
+                    title: '数量',
+                    dataIndex: 'qualified_quantity',
+                    width: 60,
+                    render: (val: number) => val ?? 0,
+                  },
+                ]
                 return (
-                  <div
+                  <Card
                     key={sheet.id}
-                    className={`flex flex-col justify-between rounded-md border bg-white p-4 shadow-sm ${
-                      isSelected ? 'ring-2 ring-indigo-200' : ''
-                    }`}
-                  >
-                    <div>
-                      {/* 卡片头：姓名 / 日期 / 工时 */}
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="text-sm">
-                          <span className="mr-2 text-gray-500">姓名</span>
-                          <span className="font-medium text-gray-900">
+                    size="small"
+                    hoverable
+                    className={isSelected ? 'ring-2 ring-blue-400' : ''}
+                    title={
+                      <div className="flex items-center justify-between">
+                        <span className="text-base font-medium">
+                          {sheet.production_date
+                            ? dayjs(sheet.production_date).format('M月D日')
+                            : '-'}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-normal text-gray-500">
                             {sheet.operators && sheet.operators.length > 0
                               ? sheet.operators[0].name
                               : '-'}
                           </span>
-                        </div>
-                        <div className="text-sm">
-                          <span className="mr-2 text-gray-500">日期</span>
-                          <span className="text-gray-900">
-                            {sheet.production_date
-                              ? dayjs(sheet.production_date).format('M月D日')
-                              : '-'}
+                          <span className="text-sm font-normal text-gray-500">
+                            工时: {sheet.working_hours ?? '-'}
                           </span>
                         </div>
-                        <div className="text-sm">
-                          <span className="mr-2 text-gray-500">工时</span>
-                          <span className="text-gray-900">
-                            {sheet.working_hours ?? '-'}
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col items-end gap-1">
-                          <label className="text-xs text-gray-500">选择</label>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedRowKeys([
-                                  ...selectedRowKeys,
-                                  sheet.id!,
-                                ])
-                              } else {
-                                setSelectedRowKeys(
-                                  selectedRowKeys.filter(
-                                    (k) => k !== sheet.id!,
-                                  ),
-                                )
-                              }
-                            }}
-                          />
-                        </div>
                       </div>
-
-                      {/* 记录表格（简化） */}
-                      <div className="mt-3 overflow-x-auto">
-                        <table className="w-full text-sm">
-                          {!isExpanded && (
-                            <thead>
-                              <tr className="text-left text-gray-600">
-                                <th className="pr-2">序号</th>
-                                <th className="pr-2">项目号</th>
-                                <th className="pr-2">型号</th>
-                                <th className="pr-2">客户型号</th>
-                                <th className="pr-2">长度</th>
-                                <th className="pr-2">工序</th>
-                                <th className="pr-2">数量</th>
-                                <th className="pr-2">不良原因</th>
-                                <th className="pr-2">不良数量</th>
-                                <th className="pr-2">备注</th>
-                              </tr>
-                            </thead>
-                          )}
-                          <tbody>
-                            {(sheet.records || []).map(
-                              (rec: any, idx: number) => (
-                                <tr key={rec.id || idx} className="border-t">
-                                  <td className="py-1 pr-2">{idx + 1}</td>
-                                  <td className="py-1 pr-2">
-                                    {rec.order?.project_no ||
-                                      rec.order_id ||
-                                      '-'}
-                                  </td>
-                                  <td className="py-1 pr-2">
-                                    {rec.order?.product_model || '-'}
-                                  </td>
-                                  <td className="py-1 pr-2">
-                                    {rec.order?.customer_model || '-'}
-                                  </td>
-                                  <td className="py-1 pr-2">
-                                    {rec.order?.length_mm ?? '-'}
-                                  </td>
-                                  <td className="py-1 pr-2">
-                                    {rec.process?.process_name ||
-                                      rec.process_id ||
-                                      '-'}
-                                  </td>
-                                  <td className="py-1 pr-2">
-                                    {rec.qualified_quantity ?? 0}
-                                  </td>
-                                  <td className="py-1 pr-2">
-                                    {rec.defect_reasons_with_details &&
-                                    rec.defect_reasons_with_details.length > 0
-                                      ? rec.defect_reasons_with_details
-                                          .map(
-                                            (d: any) =>
-                                              d.defect_reason?.defect_reason ||
-                                              d.defect_reason?.defect_reason ||
-                                              '-',
-                                          )
-                                          .join('、')
-                                      : '-'}
-                                  </td>
-                                  <td className="py-1 pr-2">
-                                    {rec.defective_quantity ?? 0}
-                                  </td>
-                                  <td className="py-1 pr-2">
-                                    {rec.remark || ''}
-                                  </td>
-                                </tr>
-                              ),
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-
-                      {/* 卡片底部：详情切换 & 创建时间 */}
-                      <div className="mt-3 flex items-center justify-between">
-                        <div>
-                          <button
-                            className="text-sm text-indigo-600 hover:underline"
-                            onClick={() => {
-                              if (expandedCardId === sheet.id) {
-                                setExpandedCardId(null)
-                                setSelectedSheetId(null)
-                              } else {
-                                setExpandedCardId(sheet.id || null)
-                                setSelectedSheetId(sheet.id || null)
-                              }
-                            }}
-                          >
-                            {expandedCardId === sheet.id ? '收起' : '详情'}
-                          </button>
-                        </div>
-
-                        <div className="text-xs text-gray-400">
-                          {sheet.created_at
-                            ? new Date(sheet.created_at).toLocaleString('zh-CN')
-                            : ''}
-                        </div>
-                      </div>
-
-                      {/* 展开详情区域（单卡展开，使用 sheetDetail） */}
-                      {expandedCardId === sheet.id && (
-                        <div className="mt-3">
-                          {selectedSheetId === sheet.id && detailLoading ? (
-                            <div className="flex items-center justify-center py-4">
-                              <Spin />
-                            </div>
-                          ) : sheetDetail && sheetDetail.id === sheet.id ? (
-                            <div className="mt-1 text-sm text-gray-700">
-                              <div className="mb-2 font-medium">明细</div>
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                  <thead>
-                                    <tr className="text-left text-gray-600">
-                                      <th className="pr-2">序号</th>
-                                      <th className="pr-2">项目号</th>
-                                      <th className="pr-2">型号</th>
-                                      <th className="pr-2">客户型号</th>
-                                      <th className="pr-2">长度</th>
-                                      <th className="pr-2">工序</th>
-                                      <th className="pr-2">数量</th>
-                                      <th className="pr-2">不良原因</th>
-                                      <th className="pr-2">不良数量</th>
-                                      <th className="pr-2">备注</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {(sheetDetail.records || []).map(
-                                      (rec: any, idx: number) => (
-                                        <tr
-                                          key={rec.id || idx}
-                                          className="border-t"
-                                        >
-                                          <td className="py-1 pr-2">
-                                            {idx + 1}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.order?.project_no ||
-                                              rec.order_id ||
-                                              '-'}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.order?.product_model || '-'}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.order?.customer_model || '-'}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.order?.length_mm ?? '-'}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.process?.process_name ||
-                                              rec.process_id ||
-                                              '-'}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.qualified_quantity ?? 0}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.defect_reasons_with_details &&
-                                            rec.defect_reasons_with_details
-                                              .length > 0
-                                              ? rec.defect_reasons_with_details
-                                                  .map(
-                                                    (d: any) =>
-                                                      d.defect_reason
-                                                        ?.defect_reason || '-',
-                                                  )
-                                                  .join('、')
-                                              : '-'}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.defective_quantity ?? 0}
-                                          </td>
-                                          <td className="py-1 pr-2">
-                                            {rec.remark || ''}
-                                          </td>
-                                        </tr>
-                                      ),
-                                    )}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="py-2 text-sm text-gray-500">
-                              暂无详情数据
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    }
+                    extra={
+                      <Checkbox
+                        checked={isSelected}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedRowKeys([...selectedRowKeys, sheet.id!])
+                          } else {
+                            setSelectedRowKeys(
+                              selectedRowKeys.filter((k) => k !== sheet.id!),
+                            )
+                          }
+                        }}
+                      />
+                    }
+                    actions={[
+                      <Button
+                        key="detail"
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                          setSelectedSheetId(sheet.id || null)
+                          setDetailModalOpen(true)
+                        }}
+                      >
+                        详情
+                      </Button>,
+                      <span key="time" className="text-xs text-gray-400">
+                        {sheet.created_at
+                          ? new Date(sheet.created_at).toLocaleString('zh-CN')
+                          : ''}
+                      </span>,
+                    ]}
+                  >
+                    <Table
+                      size="small"
+                      dataSource={sheet.records || []}
+                      columns={cardColumns}
+                      rowKey={(r) => r.id || Math.random().toString()}
+                      pagination={false}
+                      scroll={{ x: 'max-content' }}
+                    />
+                  </Card>
                 )
               })}
             </div>
@@ -522,17 +382,8 @@ export default function ProductionRecordList() {
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination
             total={data?.total || 0}
-            pageSizeOptions={[
-              '10',
-              '20',
-              '30',
-              '50',
-              '100',
-              '200',
-              '300',
-              '500',
-            ]}
-            defaultPageSize={10}
+            pageSizeOptions={['6', '12', '18', '30', '60', '120']}
+            defaultPageSize={6}
           />
         </div>
       </div>
@@ -588,19 +439,22 @@ export default function ProductionRecordList() {
         </Spin>
       </Modal>
 
-      {/* 产量单详情抽屉 */}
-      <Drawer
+      {/* 产量单详情模态框 */}
+      <Modal
         title={`产量单详情 - ${sheetDetail?.production_date ? dayjs(sheetDetail.production_date).format('YYYY-MM-DD') : ''}`}
-        placement="right"
-        size="large"
-        open={detailDrawerOpen}
-        onClose={() => {
-          setDetailDrawerOpen(false)
+        open={detailModalOpen}
+        onCancel={() => {
+          setDetailModalOpen(false)
           setSelectedSheetId(null)
         }}
+        footer={null}
+        width={900}
+        destroyOnClose
       >
         {detailLoading ? (
-          <div>加载中...</div>
+          <div className="flex items-center justify-center py-8">
+            <Spin tip="加载中..." />
+          </div>
         ) : sheetDetail?.records && sheetDetail.records.length > 0 ? (
           <ProductionRecordTable
             loading={false}
@@ -609,13 +463,13 @@ export default function ProductionRecordList() {
             onSelect={() => {}}
             page={1}
             pageSize={sheetDetail.records.length}
-            scrollY={600}
+            scrollY={400}
             rowHeight={40}
           />
         ) : (
-          <div>暂无记录</div>
+          <div className="py-8 text-center text-gray-500">暂无记录</div>
         )}
-      </Drawer>
+      </Modal>
     </div>
   )
 }

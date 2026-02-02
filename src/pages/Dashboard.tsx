@@ -66,7 +66,7 @@ export default function Dashboard() {
   >(null)
   const productionPage = Number(searchParamsURL.get('productionPage')) || 1
   const productionPageSize =
-    Number(searchParamsURL.get('productionPageSize')) || 10
+    Number(searchParamsURL.get('productionPageSize')) || 6
   const [productionSearchParams, setProductionSearchParams] = useState<{
     startDate?: string
     endDate?: string
@@ -479,16 +479,7 @@ export default function Dashboard() {
                   }}
                   total={productionData?.total || 0}
                   showSizeChanger
-                  pageSizeOptions={[
-                    '10',
-                    '20',
-                    '30',
-                    '50',
-                    '100',
-                    '200',
-                    '300',
-                    '500',
-                  ]}
+                  pageSizeOptions={['6', '12', '18', '30', '60', '120']}
                   showTotal={(total) => `共 ${total} 条`}
                 />
               </div>
