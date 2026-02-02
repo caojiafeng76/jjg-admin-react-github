@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { message } from 'antd'
 import jsPDF from 'jspdf'
 
-import myFont2 from '@/assets/myFont2'
 import { useSelectedPos } from './useSelectedPos'
 import { initializePDF, openPDFInNewWindow } from '@/utils/pdfUtils'
 import { ISyneyItem } from '@/services/types'
@@ -598,13 +597,10 @@ export function usePrintDecomposition() {
 
     try {
       setIsPrinting(true)
-      // 1. 初始化 PDF
-      const doc = initializePDF('l')
+      // 1. 初始化 PDF（现在是异步的）
+      const doc = await initializePDF('l')
 
-      // 2. 注册并设置专用字体 (为了兼容性)
-      doc.addFileToVFS('msyh_bold.ttf', myFont2)
-      doc.addFont('msyh_bold.ttf', 'SourceHanSansCN-Bold', 'normal')
-      doc.setFont('SourceHanSansCN-Bold')
+      // 2. 字体已通过 initializePDF 设置（使用 Google Font）
 
       // 3. 直接使用数据库中的 ParamSpec（不再处理，因为创建时已保存）
       // 按合同号升序排序

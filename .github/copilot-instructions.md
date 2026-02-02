@@ -120,10 +120,10 @@ export async function getSyneySpecs({ PartNo, page, pageSize }) {
 ## 开发命令
 
 ```bash
-pnpm dev        # 启动开发服务器
-pnpm build      # 构建生产版本
-pnpm lint:fix   # ESLint 自动修复
-pnpm format     # Prettier 格式化
+bun dev        # 启动开发服务器
+bun run build  # 构建生产版本
+bun lint:fix   # ESLint 自动修复
+bun format     # Prettier 格式化
 ```
 
 ## 注意事项
@@ -133,3 +133,4 @@ pnpm format     # Prettier 格式化
 3. **AbortError**: 已在 queryClient 中全局处理，组件无需额外处理
 4. **暗色模式**: 同时同步 Ant Design theme 和 Tailwind CSS `dark` class
 5. **中文优先**: 错误消息、UI文案使用中文，`errorHandler.ts` 包含英转中映射
+6. **PDF 中文字体**: 使用 Google Fonts CDN 动态加载 Noto Sans SC TTF 字体，见 `utils/googleFontLoader.ts`。`initializePDF()` 是异步函数，需要 `await` 调用。字体首次加载后会缓存，后续调用直接使用缓存

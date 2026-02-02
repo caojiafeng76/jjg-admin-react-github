@@ -53,7 +53,7 @@ VITE_REACT_APP_SUPABASE_KEY=your_anon_key_here
 启动开发服务器验证配置是否正确:
 
 ```bash
-pnpm dev
+bun dev
 ```
 
 如果配置正确,应用应该能够正常连接到 Supabase 并加载数据。

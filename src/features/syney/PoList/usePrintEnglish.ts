@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { message } from 'antd'
 import { useState } from 'react'
 
-import myFont2 from '@/assets/myFont2'
+import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { useSelectedPos } from './useSelectedPos'
 import { openPDFInNewWindow } from '@/utils/pdfUtils'
 
@@ -64,10 +64,11 @@ export function usePrintEnglish(messageApi?: MessageApi) {
       // 创建 PDF 文档
       const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: [90, 30] })
 
-      // 设置中文字体
-      doc.addFileToVFS('msyh.ttf', myFont2)
-      doc.addFont('msyh.ttf', 'myFont', 'normal')
-      doc.setFont('myFont')
+      // 动态加载 Google Font
+      const fontData = await loadGoogleFont()
+      doc.addFileToVFS(GOOGLE_FONT_CONFIG.FONT_NAME, fontData)
+      doc.addFont(GOOGLE_FONT_CONFIG.FONT_NAME, GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
+      doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY)
 
       // 设置字体大小
       doc.setFontSize(7)

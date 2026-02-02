@@ -6,30 +6,32 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
-import myFont from '@/assets/myFont'
 
 import {
-  FONT_CONFIG,
   TABLE_CONFIG,
   LAYOUT_CONFIG,
   CACHE_CONFIG,
   FILENAME_CONFIG,
 } from './pdfConstants'
+import { loadGoogleFont, GOOGLE_FONT_CONFIG } from './googleFontLoader'
 import { formatNumber } from './helps'
 import { ISyneyItem } from '@services/types'
 
 /**
- * 初始化 PDF 文档
+ * 初始化 PDF 文档（异步版本，使用 Google Font）
  * @param orientation 页面方向，默认横向
  * @returns 初始化后的 jsPDF 实例
  */
-export function initializePDF(orientation: 'p' | 'l' = 'l') {
+export async function initializePDF(orientation: 'p' | 'l' = 'l') {
   const doc = new jsPDF({ orientation })
 
+  // 动态加载 Google Font
+  const fontData = await loadGoogleFont()
+
   // 设置中文字体
-  doc.addFileToVFS(FONT_CONFIG.FONT_NAME, myFont)
-  doc.addFont(FONT_CONFIG.FONT_NAME, FONT_CONFIG.FONT_FAMILY, FONT_CONFIG.FONT_STYLE)
-  doc.setFont(FONT_CONFIG.FONT_FAMILY)
+  doc.addFileToVFS(GOOGLE_FONT_CONFIG.FONT_NAME, fontData)
+  doc.addFont(GOOGLE_FONT_CONFIG.FONT_NAME, GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
+  doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY)
 
   return doc
 }

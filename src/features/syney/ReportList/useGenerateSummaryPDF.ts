@@ -23,7 +23,7 @@ export function useGenerateSummaryPDF() {
     tableSelectedKeys.length > 0
   )
 
-  function generateSummaryPDF() {
+  async function generateSummaryPDF() {
     // 改进错误处理
     if (selectedReportsLoading) {
       message.warning('数据加载中，请稍候重试')
@@ -36,8 +36,8 @@ export function useGenerateSummaryPDF() {
     }
 
     try {
-      // 初始化 PDF 文档
-      const doc = initializePDF()
+      // 初始化 PDF 文档（异步加载字体）
+      const doc = await initializePDF()
 
       // 准备汇总数据
       const summaryData = Array.from(selectedMap.entries()).map(([No, data]) => ({

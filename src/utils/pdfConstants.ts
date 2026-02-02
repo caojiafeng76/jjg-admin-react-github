@@ -15,11 +15,11 @@ export const PDF_CONFIG = {
   UNIT: 'mm' as const,
 }
 
-// 字体配置
+// 字体配置（使用 Google Font - Noto Sans SC）
 export const FONT_CONFIG = {
   // 字体文件名
-  FONT_NAME: 'msyh.ttf',
-  FONT_FAMILY: 'myFont',
+  FONT_NAME: 'NotoSansSC.ttf',
+  FONT_FAMILY: 'NotoSansSC',
   FONT_STYLE: 'normal' as const,
 }
 
