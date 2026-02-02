@@ -60,8 +60,9 @@ const defaultMutationOptions: DefaultOptions['mutations'] = {
   // 重试延迟
   retryDelay: 1000,
   
-  // 错误处理：忽略 AbortError
-  throwOnError: (error) => !isAbortError(error),
+  // 不抛出错误，让错误通过 onError 回调处理
+  // 这样可以避免未捕获的错误导致应用崩溃
+  throwOnError: false,
 }
 
 /**
