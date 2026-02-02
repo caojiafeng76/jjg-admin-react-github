@@ -121,9 +121,7 @@ export default function ProductionSheetCardGrid({
       dataIndex: 'defective_quantity',
       key: 'defective_quantity',
       width: 60,
-      render: (val: number) => (
-        <span className="text-red-600">{val ?? 0}</span>
-      ),
+      render: (val: number) => <span className="text-red-600">{val ?? 0}</span>,
     },
   ]
 
