@@ -3,11 +3,8 @@ import { App } from 'antd'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
-import myFont from '@/assets/myFont'
+import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import type { WorkshopOrder } from './index'
-
-const FONT_NAME = 'msyh.ttf'
-const FONT_FAMILY = 'myFont'
 
 // 表格列定义
 const TABLE_COLUMNS = [
@@ -30,7 +27,7 @@ export function usePrintWorkshopOrders() {
   const { message } = App.useApp()
   const [isPrinting, setIsPrinting] = useState(false)
 
-  function generatePDF(selectedOrders: WorkshopOrder[]) {
+  async function generatePDF(selectedOrders: WorkshopOrder[]) {
     if (selectedOrders.length === 0) {
       message.warning('请选择要打印的订单')
       return
@@ -42,10 +39,13 @@ export function usePrintWorkshopOrders() {
       // 初始化 PDF 文档（横向）
       const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' })
 
-      // 设置中文字体
-      doc.addFileToVFS(FONT_NAME, myFont)
-      doc.addFont(FONT_NAME, FONT_FAMILY, 'normal')
-      doc.setFont(FONT_FAMILY)
+      // 动态加载 Google Font
+      const fontData = await loadGoogleFont()
+      const fontName = GOOGLE_FONT_CONFIG.FONT_NAME
+      const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
+      doc.addFileToVFS(fontName, fontData)
+      doc.addFont(fontName, fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
+      doc.setFont(fontFamily)
 
       // 处理表格数据
       const tableData = selectedOrders.map((order, index) => [
@@ -72,11 +72,11 @@ export function usePrintWorkshopOrders() {
         headStyles: {
           fillColor: [0, 0, 0], // 黑色背景
           textColor: [255, 255, 255], // 白色文字
-          font: FONT_FAMILY,
+          font: fontFamily,
           fontSize: 9,
         },
         styles: {
-          font: FONT_FAMILY,
+          font: fontFamily,
           fontSize: 8,
           cellPadding: { top: 2, right: 2, bottom: 2, left: 2 },
           halign: 'center',

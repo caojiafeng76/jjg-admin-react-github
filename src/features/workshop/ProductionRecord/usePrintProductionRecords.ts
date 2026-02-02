@@ -4,7 +4,7 @@ import { message } from 'antd'
 import { useState } from 'react'
 import dayjs from 'dayjs'
 
-import myFont2 from '@/assets/myFont2'
+import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { openPDFInNewWindow } from '@/utils/pdfUtils'
 import type { ProductionRecordWithRelations } from '@/services/apiProductionRecords'
 
@@ -28,10 +28,11 @@ export function usePrintProductionRecords(messageApi?: MessageApi) {
       // 创建 PDF 文档（横向）
       const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' })
 
-      // 设置中文字体
-      doc.addFileToVFS('msyh.ttf', myFont2)
-      doc.addFont('msyh.ttf', 'myFont', 'normal')
-      doc.setFont('myFont')
+      // 动态加载 Google Font
+      const fontData = await loadGoogleFont()
+      doc.addFileToVFS(GOOGLE_FONT_CONFIG.FONT_NAME, fontData)
+      doc.addFont(GOOGLE_FONT_CONFIG.FONT_NAME, GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
+      doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY)
 
       // 获取页面尺寸
       const pageWidth = doc.internal.pageSize.getWidth()

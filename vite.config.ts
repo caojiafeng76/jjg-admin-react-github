@@ -18,6 +18,7 @@ export default defineConfig({
       '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
       '@syney': fileURLToPath(new URL('./src/features/syney', import.meta.url)),
     },
+    dedupe: ['react', 'react-dom'],
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
   },
   plugins: [react()],

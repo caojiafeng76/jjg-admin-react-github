@@ -138,8 +138,8 @@ export function useGenerateSyneyStoreReportPDF() {
       setIsGenerating(true)
       setProgress(0)
 
-      // 初始化 PDF 文档
-      const doc = initializePDF()
+      // 初始化 PDF 文档（异步加载字体）
+      const doc = await initializePDF()
 
       // 生成所有报告页面（带进度回调）
       const reportNos = Array.from(selectedMap.keys())

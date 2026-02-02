@@ -6,7 +6,7 @@ export default function ExportPDFButton() {
   const { message } = App.useApp()
   const { generateSummaryPDF, isLoading } = useGenerateSummaryPDF()
 
-  const handleExport = () => {
+  const handleExport = async () => {
     // 如果正在加载，提示用户
     if (isLoading) {
       message.loading('数据加载中，请稍候...', 1)
@@ -14,7 +14,7 @@ export default function ExportPDFButton() {
     }
 
     // 调用生成函数，根据返回值显示消息
-    const success = generateSummaryPDF()
+    const success = await generateSummaryPDF()
     if (success) {
       message.success('PDF 文件生成成功')
     } else {
