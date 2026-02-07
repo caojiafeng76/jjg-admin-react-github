@@ -21,7 +21,6 @@ import ProcessSearch from './ProcessSearch'
 export default function ProcessList() {
   const { message } = App.useApp()
 
-
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建工序')
   const [isEdit, setIsEdit] = useState(false)
@@ -29,7 +28,9 @@ export default function ProcessList() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [formRef, setFormRef] = useState<FormInstance<WorkshopProcess> | null>(null)
+  const [formRef, setFormRef] = useState<FormInstance<WorkshopProcess> | null>(
+    null,
+  )
   const [searchParams, setSearchParams] = useState<{
     process_name?: string
   }>({})
@@ -47,9 +48,10 @@ export default function ProcessList() {
   const deleteMutation = useDeleteWorkshopProcesses()
 
   // 动态计算表格高度（目标10条数据撑满）
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } = useTableHeight({
-    targetRowCount: 10,
-  })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
+    useTableHeight({
+      targetRowCount: 10,
+    })
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -58,7 +60,9 @@ export default function ProcessList() {
     formRef?.resetFields()
   }, [formRef])
 
-  const [editingRecord, setEditingRecord] = useState<WorkshopProcess | null>(null)
+  const [editingRecord, setEditingRecord] = useState<WorkshopProcess | null>(
+    null,
+  )
 
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
@@ -143,13 +147,16 @@ export default function ProcessList() {
 
       {/* 搜索栏 */}
       <div className="flex items-center gap-2">
-        <span className="text-gray-600 whitespace-nowrap">搜索：</span>
+        <span className="whitespace-nowrap text-gray-600">搜索：</span>
         <ProcessSearch onSearch={handleSearch} onReset={handleResetSearch} />
       </div>
 
       {/* 表格和分页 */}
-      <div ref={tableContainerRef} className="flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
-        <div className="flex-1 min-h-0 overflow-x-auto">
+      <div
+        ref={tableContainerRef}
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+      >
+        <div className="min-h-0 flex-1 overflow-x-auto">
           <ProcessTable
             loading={isLoading}
             data={data?.items || []}
@@ -161,7 +168,7 @@ export default function ProcessList() {
             rowHeight={rowHeight}
           />
         </div>
-        <div ref={paginationRef} className="flex justify-end shrink-0">
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
         </div>
       </div>
@@ -189,4 +196,3 @@ export default function ProcessList() {
     </div>
   )
 }
-
