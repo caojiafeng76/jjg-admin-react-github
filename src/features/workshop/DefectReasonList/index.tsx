@@ -82,18 +82,26 @@ export default function DefectReasonList() {
     deleteMutation.mutate(selectedRowKeys as string[])
   }, [deleteMutation, message, selectedRowKeys])
 
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false)
+    setIsEdit(false)
+    setEditingRecord(null)
+    setSelectedRowKeys([])
+    formRef?.resetFields()
+  }, [formRef])
+
   const handleFinish = useCallback(
     (values: WorkshopDefectReason) => {
       if (isEdit && selectedRowKeys[0]) {
-        updateMutation.mutate({
-          id: selectedRowKeys[0] as string,
-          values,
-        })
+        updateMutation.mutate(
+          { id: selectedRowKeys[0] as string, values },
+          { onSuccess: handleCloseModal },
+        )
       } else {
-        createMutation.mutate(values)
+        createMutation.mutate(values, { onSuccess: handleCloseModal })
       }
     },
-    [createMutation, isEdit, selectedRowKeys, updateMutation],
+    [createMutation, handleCloseModal, isEdit, selectedRowKeys, updateMutation],
   )
 
   const handleSearch = useCallback(
