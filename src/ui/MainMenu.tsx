@@ -30,21 +30,22 @@ const items: MenuItem[] = [
     icon: <Square3Stack3DIcon className="size-4" />,
     children: [
       { key: 'workshop-order-list', label: '订单管理' },
-      { key: 'workshop-process-list', label: '工序管理' },
-      { key: 'workshop-defect-reason-list', label: '不良原因管理' },
       { key: 'employee-list', label: '员工管理' },
-      { key: 'production-record-list', label: '产量录入' },
-      { key: 'production-statistics', label: '产量统计' },
     ],
   },
 ]
 
 // 查找菜单项的父菜单 key
-function findParentMenuKey(menuKey: string, menuItems: MenuItem[]): string | undefined {
+function findParentMenuKey(
+  menuKey: string,
+  menuItems: MenuItem[],
+): string | undefined {
   for (const item of menuItems) {
     if (item && 'children' in item && item.children) {
       // 检查子菜单中是否包含目标 key
-      const hasChild = item.children.some((child: MenuItem) => child?.key === menuKey)
+      const hasChild = item.children.some(
+        (child: MenuItem) => child?.key === menuKey,
+      )
       if (hasChild && item.key) {
         return item.key as string
       }
