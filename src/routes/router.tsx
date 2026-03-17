@@ -12,9 +12,7 @@ const PageNotFound = lazy(() => import('@pages/PageNotFound'))
 
 // Syney 相关
 const SyneySpecList = lazy(() => import('@features/syney/SpecList'))
-const SyneyStoreReportList = lazy(
-  () => import('@features/syney/ReportList'),
-)
+const SyneyStoreReportList = lazy(() => import('@features/syney/ReportList'))
 const SyneyStoreReportDetail = lazy(
   () => import('@features/syney/ReportDetail'),
 )
@@ -26,24 +24,8 @@ const SafePartSettingPage = lazy(
 const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
 
 // 车间相关
-const WorkshopOrderList = lazy(
-  () => import('@features/workshop/OrderList'),
-)
-const WorkshopProcessList = lazy(
-  () => import('@features/workshop/ProcessList'),
-)
-const WorkshopDefectReasonList = lazy(
-  () => import('@features/workshop/DefectReasonList'),
-)
-const EmployeeList = lazy(
-  () => import('@features/workshop/EmployeeList'),
-)
-const ProductionRecordList = lazy(
-  () => import('@features/workshop/ProductionRecord'),
-)
-const ProductionStatistics = lazy(
-  () => import('@pages/ProductionStatistics'),
-)
+const WorkshopOrderList = lazy(() => import('@features/workshop/OrderList'))
+const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
 
 function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()
@@ -149,42 +131,10 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'workshop-process-list',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <WorkshopProcessList />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'workshop-defect-reason-list',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <WorkshopDefectReasonList />
-          </Suspense>
-        ),
-      },
-      {
         path: 'employee-list',
         element: (
           <Suspense fallback={<Loading />}>
             <EmployeeList />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'production-record-list',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <ProductionRecordList />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'production-statistics',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <ProductionStatistics />
           </Suspense>
         ),
       },
