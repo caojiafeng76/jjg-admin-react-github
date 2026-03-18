@@ -26,6 +26,9 @@ const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
 // 车间相关
 const WorkshopOrderList = lazy(() => import('@features/workshop/OrderList'))
 const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
+const StandardTimeList = lazy(
+  () => import('@features/workshop/StandardTimeList'),
+)
 
 function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()
@@ -135,6 +138,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <EmployeeList />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'standard-time-list',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <StandardTimeList />
           </Suspense>
         ),
       },

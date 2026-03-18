@@ -36,7 +36,7 @@ export default function AppHeader({
 }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const currentPath = location.pathname.slice(1) || 'dashboard'
   const pageName = routeToLabelMap[currentPath] || ''
 
@@ -62,14 +62,15 @@ export default function AppHeader({
         }}
       />
       {pageName && (
-        <span
-          className="ml-2 text-base font-semibold text-neutral-900 dark:text-neutral-50"
-        >
+        <span className="ml-2 text-base font-semibold text-neutral-900 dark:text-neutral-50">
           {pageName}
         </span>
       )}
 
       <div className="mr-12 flex h-full flex-1 items-center justify-end gap-4">
+        <span className="text-sm text-gray-600 dark:text-gray-300">
+          欢迎您：{user?.email}
+        </span>
         <DarkModeButton />
         <Button
           type="link"
