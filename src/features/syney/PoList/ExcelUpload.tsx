@@ -1,23 +1,63 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import { Upload, Button, message, Table, Alert, Space, Typography } from 'antd'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 import type { UploadFile } from 'antd/es/upload/interface'
+import type { ISyneySpec } from '@services/types'
 import { importExcelOrder, TransformedOrderData } from '@utils/excelUtils'
+import { getItemsWithParamSpec } from '@utils/syney'
 
 const { Text } = Typography
 
 interface ExcelUploadProps {
   onDataParsed: (data: TransformedOrderData) => void
   disabled?: boolean
+  syneySpecs: ISyneySpec[]
+  specsLoading?: boolean
 }
 
-const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
+function buildPreviewData(
+  orderData: TransformedOrderData,
+  syneySpecs: ISyneySpec[],
+): TransformedOrderData {
+  const matchedItems = getItemsWithParamSpec(
+    orderData.items as Parameters<typeof getItemsWithParamSpec>[0],
+    syneySpecs as Parameters<typeof getItemsWithParamSpec>[1],
+  )
+
+  return {
+    ...orderData,
+    items: matchedItems as TransformedOrderData['items'],
+  }
+}
+
+const ExcelUpload: FC<ExcelUploadProps> = ({
+  onDataParsed,
+  disabled,
+  syneySpecs,
+  specsLoading = false,
+}) => {
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [loading, setLoading] = useState(false)
-  const [parsedData, setParsedData] = useState<TransformedOrderData | null>(
+  const [rawParsedData, setRawParsedData] = useState<TransformedOrderData | null>(
     null,
   )
   const [previewVisible, setPreviewVisible] = useState(false)
+
+  const parsedData = useMemo(() => {
+    if (!rawParsedData) {
+      return null
+    }
+
+    return buildPreviewData(rawParsedData, syneySpecs)
+  }, [rawParsedData, syneySpecs])
+
+  useEffect(() => {
+    if (!previewVisible || !parsedData) {
+      return
+    }
+
+    onDataParsed(parsedData)
+  }, [onDataParsed, parsedData, previewVisible])
 
   /**
    * 处理文件上传前的验证和解析
@@ -48,18 +88,15 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
       const orderData = await importExcelOrder(file)
 
       // 保存解析结果
-      setParsedData(orderData)
+      setRawParsedData(orderData)
       setPreviewVisible(true)
-
-      // 通知父组件数据已解析
-      onDataParsed(orderData)
 
       message.success('Excel文件解析成功')
     } catch (error) {
       message.error(
         `Excel导入失败: ${error instanceof Error ? error.message : '未知错误'}`,
       )
-      setParsedData(null)
+      setRawParsedData(null)
       setPreviewVisible(false)
     } finally {
       setLoading(false)
@@ -74,7 +111,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
    */
   const handleRemove = () => {
     setFileList([])
-    setParsedData(null)
+    setRawParsedData(null)
     setPreviewVisible(false)
     onDataParsed({ po: {}, items: [] })
   }
@@ -114,7 +151,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
       key: 'ParamSpec',
       width: 120,
       render: (text: string, record: any) =>
-        record.ParamSpecInferred ? (
+        !specsLoading && record.ParamSpecInferred ? (
           <Text type="warning" strong>
             ⚠️ {text || '未识别'}
           </Text>
@@ -232,7 +269,13 @@ const ExcelUpload: FC<ExcelUploadProps> = ({ onDataParsed, disabled }) => {
                     />
                   )}
                 </div>
-                {parsedData.items.some((item) => item.ParamSpecInferred) && (
+                {specsLoading && (
+                  <Text type="secondary">
+                    正在加载规格库，参数规格预览会在加载完成后自动刷新
+                  </Text>
+                )}
+                {!specsLoading &&
+                  parsedData.items.some((item) => item.ParamSpecInferred) && (
                   <Alert
                     message={
                       <Text strong style={{ fontSize: 14 }}>
