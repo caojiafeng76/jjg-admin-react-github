@@ -4,6 +4,7 @@ import { ISyneyPo } from '@/types'
 import ExcelUpload from './ExcelUpload'
 import { TransformedOrderData } from '@utils/excelUtils'
 import dayjs from 'dayjs'
+import type { ISyneySpec } from '@services/types'
 
 type PoFormProps = {
   onFinish: (values: ISyneyPo) => void
@@ -12,6 +13,8 @@ type PoFormProps = {
   ref: Ref<FormInstance<ISyneyPo>> | undefined
   initialValues?: ISyneyPo
   onExcelDataChange?: (data: TransformedOrderData) => void
+  syneySpecs: ISyneySpec[]
+  specsLoading?: boolean
 }
 
 const layout = {
@@ -43,6 +46,8 @@ const PoForm: FC<PoFormProps> = ({
   ref,
   initialValues,
   onExcelDataChange,
+  syneySpecs,
+  specsLoading = false,
 }) => {
   // 导入方式: 'manual' | 'excel'
   const [importMode, setImportMode] = useState<'manual' | 'excel'>('manual')
@@ -120,6 +125,8 @@ const PoForm: FC<PoFormProps> = ({
                 <ExcelUpload
                   onDataParsed={handleExcelDataParsed}
                   disabled={isCreating}
+                  syneySpecs={syneySpecs}
+                  specsLoading={specsLoading}
                 />
               </Form.Item>
               <Form.Item name="Remark" label="备注">

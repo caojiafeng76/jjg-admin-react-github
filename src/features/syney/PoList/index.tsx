@@ -354,6 +354,8 @@ export default function PoList() {
           onFinish={onFinish}
           isCreating={isCreating}
           isEdit={isEdit}
+          syneySpecs={syneySpecs}
+          specsLoading={specsLoading}
           initialValues={
             (po && isEdit
               ? { ...po, EndDate: dayjs(po.EndDate) }
