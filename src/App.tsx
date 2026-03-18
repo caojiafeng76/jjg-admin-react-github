@@ -37,17 +37,14 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <ConfigProvider
-        locale={zhCN}
-        theme={themeMode}
-      >
+      <ConfigProvider locale={zhCN} theme={themeMode}>
         <AntdApp>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <RouterProvider router={router} />
             </AuthProvider>
             {import.meta.env.DEV && (
-            <ReactQueryDevtools initialIsOpen={false} />
+              <ReactQueryDevtools initialIsOpen={false} />
             )}
           </QueryClientProvider>
         </AntdApp>
