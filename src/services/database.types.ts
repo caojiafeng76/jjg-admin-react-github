@@ -299,6 +299,33 @@ export type Database = {
         }
         Relationships: []
       }
+      process_standards: {
+        Row: {
+          id: string
+          operation: string
+          model: string
+          standard_seconds: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          operation: string
+          model: string
+          standard_seconds: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          operation?: string
+          model?: string
+          standard_seconds?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

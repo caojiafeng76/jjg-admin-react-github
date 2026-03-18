@@ -31,6 +31,7 @@ const items: MenuItem[] = [
     children: [
       { key: 'workshop-order-list', label: '订单管理' },
       { key: 'employee-list', label: '员工管理' },
+      { key: 'standard-time-list', label: '标准工时' },
     ],
   },
 ]

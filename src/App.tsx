@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 import { ConfigProvider, theme, App as AntdApp } from 'antd'
-import zhCN from 'antd/locale/zh_CN'
+import zhCN from 'antd/es/locale/zh_CN'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router-dom'

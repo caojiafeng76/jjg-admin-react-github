@@ -1,4 +1,5 @@
 import { Pagination, ConfigProvider } from 'antd'
+import zhCN from 'antd/es/locale/zh_CN'
 import { useSearchParams } from 'react-router-dom'
 
 interface Props {
@@ -23,6 +24,7 @@ export default function AppPagination({
   return (
     <div className="flex justify-end">
       <ConfigProvider
+        locale={zhCN}
         getPopupContainer={(_triggerNode) => {
           // 将下拉菜单渲染到 body，避免被父容器的 overflow-hidden 裁剪
           return document.body
