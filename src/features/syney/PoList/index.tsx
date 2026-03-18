@@ -43,7 +43,8 @@ export default function PoList() {
 
   const [messageApi, messageContextHolder] = message.useMessage()
 
-  const { generateLabel, contextHolder: labelContextHolder } = usePrint(messageApi)
+  const { generateLabel, contextHolder: labelContextHolder } =
+    usePrint(messageApi)
   const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
     usePrintEnglish(messageApi)
 
@@ -73,7 +74,8 @@ export default function PoList() {
     isAll: !isEdit,
   })
 
-  const { createPo, contextHolder: createPoContextHolder } = useCreatePo(messageApi)
+  const { createPo, contextHolder: createPoContextHolder } =
+    useCreatePo(messageApi)
 
   const { data: safePartSettings } = useQuery({
     queryKey: ['syney-safe-part-settings'],
@@ -158,9 +160,8 @@ export default function PoList() {
         const incrementBy = uniqueSONos.size
 
         // 2. 原子性获取并递增序列号 (线程安全,防止竞态条件)
-        const { atomicIncrementSerialNo } = await import(
-          '@/services/apiSyneySerialNo'
-        )
+        const { atomicIncrementSerialNo } =
+          await import('@/services/apiSyneySerialNo')
         const finalSerialNo = await atomicIncrementSerialNo(incrementBy)
 
         // 3. 计算起始序列号 (最终序列号 - 增量 = 起始点)
@@ -288,9 +289,7 @@ export default function PoList() {
             count={tableSelectedKeys.length}
           />
 
-          <PrintButton handlePrint={handlePrint}>
-            打印中文标签
-          </PrintButton>
+          <PrintButton handlePrint={handlePrint}>打印中文标签</PrintButton>
           <PrintButton handlePrint={handlePrintEnglish}>
             打印英文标签
           </PrintButton>
@@ -331,7 +330,7 @@ export default function PoList() {
         </div>
 
         {/* 分页区域 */}
-        <div className="flex justify-end shrink-0">
+        <div className="flex shrink-0 justify-end">
           <AppPagination total={count || 0} />
         </div>
       </div>
