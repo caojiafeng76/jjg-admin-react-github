@@ -62,15 +62,11 @@ export const renderProjectNoOption: NonNullable<
 
   return (
     <div className="py-1">
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-medium text-slate-800">{data.label}</span>
-        <span className="truncate text-xs text-slate-500">
-          型号: {data.productModel}
-        </span>
-      </div>
-      <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-        <span>长度: {data.lengthText}</span>
-        <span>客户型号: {data.customerModel}</span>
+      <div className="font-medium text-slate-800">{data.label}</div>
+      <div className="mt-1 grid grid-cols-3 gap-3 text-xs text-slate-500">
+        <span className="truncate">型号: {data.productModel}</span>
+        <span className="truncate">长度: {data.lengthText}</span>
+        <span className="truncate">客户型号: {data.customerModel}</span>
       </div>
     </div>
   )
