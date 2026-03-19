@@ -462,6 +462,124 @@ export type Database = {
         }
         Relationships: []
       }
+      production_orders: {
+        Row: {
+          created_at: string
+          efficiency: number | null
+          employee_id: string | null
+          id: string
+          order_date: string
+          remark: string | null
+          status: string
+          total_qualified_hours: number | null
+          updated_at: string
+          work_hours: number
+        }
+        Insert: {
+          created_at?: string
+          efficiency?: number | null
+          employee_id?: string | null
+          id?: string
+          order_date?: string
+          remark?: string | null
+          status?: string
+          total_qualified_hours?: number | null
+          updated_at?: string
+          work_hours: number
+        }
+        Update: {
+          created_at?: string
+          efficiency?: number | null
+          employee_id?: string | null
+          id?: string
+          order_date?: string
+          remark?: string | null
+          status?: string
+          total_qualified_hours?: number | null
+          updated_at?: string
+          work_hours?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'production_orders_employee_id_fkey'
+            columns: ['employee_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      production_order_items: {
+        Row: {
+          bonus_seconds: number
+          created_at: string
+          customer_model: string | null
+          defect_hours: number | null
+          defect_quantity_1: number
+          defect_quantity_2: number
+          defect_reason_1: string | null
+          defect_reason_2: string | null
+          id: string
+          length_mm: number | null
+          operation: string
+          order_id: string
+          product_model: string | null
+          project_no: string
+          qualified_hours: number | null
+          qualified_quantity: number
+          standard_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          bonus_seconds?: number
+          created_at?: string
+          customer_model?: string | null
+          defect_hours?: number | null
+          defect_quantity_1?: number
+          defect_quantity_2?: number
+          defect_reason_1?: string | null
+          defect_reason_2?: string | null
+          id?: string
+          length_mm?: number | null
+          operation: string
+          order_id: string
+          product_model?: string | null
+          project_no: string
+          qualified_hours?: number | null
+          qualified_quantity?: number
+          standard_seconds: number
+          updated_at?: string
+        }
+        Update: {
+          bonus_seconds?: number
+          created_at?: string
+          customer_model?: string | null
+          defect_hours?: number | null
+          defect_quantity_1?: number
+          defect_quantity_2?: number
+          defect_reason_1?: string | null
+          defect_reason_2?: string | null
+          id?: string
+          length_mm?: number | null
+          operation?: string
+          order_id?: string
+          product_model?: string | null
+          project_no?: string
+          qualified_hours?: number | null
+          qualified_quantity?: number
+          standard_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'production_order_items_order_id_fkey'
+            columns: ['order_id']
+            isOneToOne: false
+            referencedRelation: 'production_orders'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {}
     Functions: {
