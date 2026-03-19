@@ -20,9 +20,7 @@ export async function getEmployees({
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
-  let query = supabase
-    .from('employees')
-    .select('*', { count: 'exact' })
+  let query = supabase.from('employees').select('*', { count: 'exact' })
 
   // 姓名搜索（模糊匹配）
   if (name) {
@@ -100,10 +98,7 @@ export async function updateEmployee({
     }
   }
 
-  const { error } = await supabase
-    .from('employees')
-    .update(values)
-    .eq('id', id)
+  const { error } = await supabase.from('employees').update(values).eq('id', id)
 
   if (error) {
     throw handleApiError(error, '更新员工失败')
@@ -111,10 +106,7 @@ export async function updateEmployee({
 }
 
 export async function deleteEmployees(ids: string[]) {
-  const { error } = await supabase
-    .from('employees')
-    .delete()
-    .in('id', ids)
+  const { error } = await supabase.from('employees').delete().in('id', ids)
 
   if (error) {
     if (error.code === '23503') {
@@ -163,5 +155,15 @@ export async function batchCreateEmployees(names: string[]) {
   }
 }
 
+export async function getAllEmployees() {
+  const { data, error } = await supabase
+    .from('employees')
+    .select('id, name')
+    .order('name', { ascending: true })
 
+  if (error) {
+    throw handleApiError(error, '获取员工列表失败')
+  }
 
+  return (data || []) as { id: string; name: string }[]
+}

@@ -301,28 +301,221 @@ export type Database = {
       }
       process_standards: {
         Row: {
-          id: string
-          operation: string
-          model: string
-          standard_seconds: number
           created_at: string
+          id: string
+          model: string
+          operation: string
+          standard_seconds: number
           updated_at: string
         }
         Insert: {
-          id?: string
-          operation: string
-          model: string
-          standard_seconds: number
           created_at?: string
+          id?: string
+          model: string
+          operation: string
+          standard_seconds: number
           updated_at?: string
         }
         Update: {
-          id?: string
-          operation?: string
-          model?: string
-          standard_seconds?: number
           created_at?: string
+          id?: string
+          model?: string
+          operation?: string
+          standard_seconds?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      production_order_items: {
+        Row: {
+          bonus_seconds: number
+          created_at: string
+          customer_model: string | null
+          defect_hours: number | null
+          defect_quantity_1: number
+          defect_quantity_2: number
+          defect_reason_1: string | null
+          defect_reason_2: string | null
+          id: string
+          length_mm: number | null
+          operation: string
+          order_id: string
+          product_model: string | null
+          project_no: string
+          qualified_hours: number | null
+          qualified_quantity: number
+          standard_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          bonus_seconds?: number
+          created_at?: string
+          customer_model?: string | null
+          defect_hours?: number | null
+          defect_quantity_1?: number
+          defect_quantity_2?: number
+          defect_reason_1?: string | null
+          defect_reason_2?: string | null
+          id?: string
+          length_mm?: number | null
+          operation: string
+          order_id: string
+          product_model?: string | null
+          project_no: string
+          qualified_hours?: number | null
+          qualified_quantity?: number
+          standard_seconds: number
+          updated_at?: string
+        }
+        Update: {
+          bonus_seconds?: string
+          created_at?: string
+          customer_model?: string | null
+          defect_hours?: number | null
+          defect_quantity_1?: number
+          defect_quantity_2?: number
+          defect_reason_1?: string | null
+          defect_reason_2?: string | null
+          id?: string
+          length_mm?: number | null
+          operation?: string
+          order_id?: string
+          product_model?: string | null
+          project_no?: string
+          qualified_hours?: number | null
+          qualified_quantity?: number
+          standard_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'production_order_items_order_id_fkey'
+            columns: ['order_id']
+            isOneToOne: false
+            referencedRelation: 'production_orders'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      production_orders: {
+        Row: {
+          created_at: string
+          efficiency: number | null
+          employee_id: string | null
+          id: string
+          order_date: string
+          remark: string | null
+          status: string
+          total_qualified_hours: number | null
+          updated_at: string
+          work_hours: number
+        }
+        Insert: {
+          created_at?: string
+          efficiency?: number | null
+          employee_id?: string | null
+          id?: string
+          order_date?: string
+          remark?: string | null
+          status?: string
+          total_qualified_hours?: number | null
+          updated_at?: string
+          work_hours: number
+        }
+        Update: {
+          created_at?: string
+          efficiency?: number | null
+          employee_id?: string | null
+          id?: string
+          order_date?: string
+          remark?: string | null
+          status?: string
+          total_qualified_hours?: number | null
+          updated_at?: string
+          work_hours?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'production_orders_employee_id_fkey'
+            columns: ['employee_id']
+            isOneToOne: false
+            referencedRelation: 'employees'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      sales_orders: {
+        Row: {
+          color_name: string | null
+          created_at: string | null
+          customer_model: string | null
+          id: string
+          length_mm: number | null
+          material_code: string | null
+          material_name: string | null
+          order_quantity: number | null
+          package_name: string | null
+          product_category: string | null
+          product_delivery_date: string | null
+          product_model: string | null
+          project_no: string | null
+          updated_at: string | null
+          weight_per_meter_kg: number | null
+        }
+        Insert: {
+          color_name?: string | null
+          created_at?: string | null
+          customer_model?: string | null
+          id?: string
+          length_mm?: number | null
+          material_code?: string | null
+          material_name?: string | null
+          order_quantity?: number | null
+          package_name?: string | null
+          product_category?: string | null
+          product_delivery_date?: string | null
+          product_model?: string | null
+          project_no?: string | null
+          updated_at?: string | null
+          weight_per_meter_kg?: number | null
+        }
+        Update: {
+          color_name?: string | null
+          created_at?: string | null
+          customer_model?: string | null
+          id?: string
+          length_mm?: number | null
+          material_code?: string | null
+          material_name?: string | null
+          order_quantity?: number | null
+          package_name?: string | null
+          product_category?: string | null
+          product_delivery_date?: string | null
+          product_model?: string | null
+          project_no?: string | null
+          updated_at?: string | null
+          weight_per_meter_kg?: number | null
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -415,7 +608,9 @@ export type Enums<
   PublicEnumNameOrOptions extends
     | keyof PublicSchema['Enums']
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+  EnumName extends PublicEnumNameOrOptions extends {
+    schema: keyof Database
+  }
     ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums']
     : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
@@ -428,13 +623,13 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof PublicSchema['CompositeTypes']
     | { schema: keyof Database },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
   }
     ? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeName]
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema['CompositeTypes']
     ? PublicSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
     : never

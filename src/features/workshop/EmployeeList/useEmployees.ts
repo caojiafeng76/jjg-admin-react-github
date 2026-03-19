@@ -2,6 +2,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
   getEmployees,
+  getAllEmployees,
   createEmployee,
   updateEmployee,
   deleteEmployees,
@@ -24,6 +25,14 @@ export function useEmployeesList({
     queryKey: [EMPLOYEES_KEY, page, pageSize, searchParams],
     queryFn: () => getEmployees({ page, pageSize, ...searchParams }),
     placeholderData: keepPreviousData,
+    ...queryConfig.list,
+  })
+}
+
+export function useAllEmployees() {
+  return useQuery({
+    queryKey: [EMPLOYEES_KEY, 'all'],
+    queryFn: getAllEmployees,
     ...queryConfig.list,
   })
 }
