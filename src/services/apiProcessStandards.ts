@@ -53,8 +53,9 @@ export async function getModels() {
 export async function getSalesOrdersProjectNos() {
   const { data, error } = await supabase
     .from('sales_orders')
-    .select('project_no, product_model, length_mm, customer_model')
+    .select('project_no, product_model, length_mm, customer_model, created_at')
     .not('project_no', 'is', null)
+    .order('created_at', { ascending: false })
     .order('project_no', { ascending: true })
 
   if (error) {
@@ -66,6 +67,7 @@ export async function getSalesOrdersProjectNos() {
     product_model: string | null
     length_mm: number | null
     customer_model: string | null
+    created_at: string | null
   }[]
 }
 

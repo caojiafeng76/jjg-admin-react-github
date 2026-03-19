@@ -106,6 +106,10 @@ export default function ProductionOrderForm({
       }
     > = {}
     projectNos?.forEach((item) => {
+      if (map[item.project_no]) {
+        return
+      }
+
       map[item.project_no] = {
         product_model: item.product_model,
         length_mm: item.length_mm,
