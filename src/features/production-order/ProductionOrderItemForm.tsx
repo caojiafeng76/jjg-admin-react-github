@@ -1,7 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Modal, Form, InputNumber, Select, Input } from 'antd'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import {
+  buildProjectNoSelectOptions,
+  filterProjectNoOption,
+  renderProjectNoOption,
+} from './projectNoSelect'
 import {
   useSalesOrdersProjectNos,
   useOperationsByModel,
@@ -33,10 +38,15 @@ export default function ProductionOrderItemForm({
     useSalesOrdersProjectNos()
 
   const selectedProjectNo = Form.useWatch('project_no', form)
-  const { data: salesOrder } = useSalesOrdersProjectNos()
+  const selectedOperation = Form.useWatch('operation', form)
 
-  const projectNoData = salesOrder?.find(
-    (item) => item.project_no === selectedProjectNo,
+  const projectNoData = useMemo(
+    () => projectNos?.find((item) => item.project_no === selectedProjectNo),
+    [projectNos, selectedProjectNo],
+  )
+  const projectNoOptions = useMemo(
+    () => buildProjectNoSelectOptions(projectNos),
+    [projectNos],
   )
   const productModel = projectNoData?.product_model || ''
 
@@ -67,6 +77,19 @@ export default function ProductionOrderItemForm({
       })
     }
   }, [projectNoData, form])
+
+  useEffect(() => {
+    if (selectedOperation && operations) {
+      const operationData = operations.find(
+        (op) => op.operation === selectedOperation,
+      )
+      if (operationData) {
+        form.setFieldsValue({
+          standard_seconds: operationData.standard_seconds,
+        })
+      }
+    }
+  }, [selectedOperation, operations, form])
 
   const handleFinish = (values: Partial<ProductionOrderItem>) => {
     onSubmit({
@@ -124,10 +147,9 @@ export default function ProductionOrderItemForm({
             placeholder="请选择项目号"
             loading={loadingProjectNos}
             onChange={handleProjectNoChange}
-            options={projectNos?.map((item) => ({
-              label: item.project_no,
-              value: item.project_no,
-            }))}
+            options={projectNoOptions}
+            filterOption={filterProjectNoOption}
+            optionRender={renderProjectNoOption}
             style={{ width: '100%' }}
           />
         </Form.Item>
