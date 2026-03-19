@@ -85,7 +85,9 @@ export function handleApiError(
   // 处理 Supabase 错误
   if (error && typeof error === 'object' && 'message' in error) {
     const supabaseError = error as { message: string; code?: string }
-    const originalMessage = customMessage || supabaseError.message
+    const originalMessage = customMessage
+      ? `${customMessage}: ${supabaseError.message}`
+      : supabaseError.message
     const translatedMessage = translateErrorMessage(originalMessage)
     return new AppError(translatedMessage, supabaseError.code)
   }

@@ -1,21 +1,77 @@
-import { useEffect } from 'react'
-import { Modal, Form, InputNumber, Select, Input, DatePicker } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  Modal,
+  Form,
+  InputNumber,
+  Select,
+  Input,
+  DatePicker,
+  Button,
+  Card,
+  Table,
+  Space,
+  Popconfirm,
+} from 'antd'
+import {
+  PlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
 
 import type { ProductionOrder } from '@/services/apiProductionOrders'
+import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import {
+  buildProjectNoSelectOptions,
+  filterProjectNoOption,
+  renderProjectNoOption,
+} from './projectNoSelect'
+import {
+  useOperationsByModel,
+  useSalesOrdersProjectNos,
+} from './useProcessStandards'
+
+type ProductionOrderFormInitialValues = ProductionOrder & {
+  items?: ProductionOrderItem[]
+}
 
 interface Props {
   open: boolean
   onCancel: () => void
-  onSubmit: (values: Partial<ProductionOrder>) => void
-  initialValues?: ProductionOrder
+  onSubmit: (values: {
+    order: Partial<ProductionOrder>
+    items: OrderItem[]
+  }) => Promise<void> | void
+  initialValues?: ProductionOrderFormInitialValues
   employees: { id: string; name: string }[]
+}
+
+interface OrderItem {
+  id?: string
+  project_no: string
+  product_model: string | null
+  length_mm: number | null
+  customer_model: string | null
+  operation: string
+  standard_seconds: number
+  qualified_quantity: number
+  defect_reason_1: string | null
+  defect_quantity_1: number
+  defect_reason_2: string | null
+  defect_quantity_2: number
+  bonus_seconds: number
 }
 
 const STATUS_OPTIONS = [
   { label: '进行中', value: '进行中' },
   { label: '已完成', value: '已完成' },
   { label: '已取消', value: '已取消' },
+]
+
+const DEFECT_REASONS = [
+  { label: '加工', value: '加工' },
+  { label: '原料', value: '原料' },
+  { label: '其他', value: '其他' },
 ]
 
 export default function ProductionOrderForm({
@@ -26,9 +82,63 @@ export default function ProductionOrderForm({
   employees,
 }: Props) {
   const [form] = Form.useForm()
+  const { data: projectNos, isLoading: loadingProjectNos } =
+    useSalesOrdersProjectNos()
+
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false)
+  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
+  const [items, setItems] = useState<OrderItem[]>([])
+  const [itemForm] = Form.useForm()
+
+  const selectedItemProductModel = Form.useWatch('product_model', itemForm)
+  const selectedItemOperation = Form.useWatch('operation', itemForm)
+
+  const { data: operations, isLoading: loadingOperations } =
+    useOperationsByModel(selectedItemProductModel || undefined)
+
+  const modelsMap = useMemo(() => {
+    const map: Record<
+      string,
+      {
+        product_model: string | null
+        length_mm: number | null
+        customer_model: string | null
+      }
+    > = {}
+    projectNos?.forEach((item) => {
+      map[item.project_no] = {
+        product_model: item.product_model,
+        length_mm: item.length_mm,
+        customer_model: item.customer_model,
+      }
+    })
+    return map
+  }, [projectNos])
+
+  const projectNoOptions = useMemo(
+    () => buildProjectNoSelectOptions(projectNos),
+    [projectNos],
+  )
 
   useEffect(() => {
     if (initialValues) {
+      setItems(
+        (initialValues.items || []).map((item) => ({
+          id: item.id,
+          project_no: item.project_no,
+          product_model: item.product_model,
+          length_mm: item.length_mm,
+          customer_model: item.customer_model,
+          operation: item.operation,
+          standard_seconds: item.standard_seconds,
+          qualified_quantity: item.qualified_quantity,
+          defect_reason_1: item.defect_reason_1,
+          defect_quantity_1: item.defect_quantity_1,
+          defect_reason_2: item.defect_reason_2,
+          defect_quantity_2: item.defect_quantity_2,
+          bonus_seconds: item.bonus_seconds,
+        })),
+      )
       form.setFieldsValue({
         ...initialValues,
         order_date: initialValues.order_date
@@ -36,6 +146,7 @@ export default function ProductionOrderForm({
           : undefined,
       })
     } else {
+      setItems([])
       form.resetFields()
       form.setFieldsValue({
         order_date: dayjs().subtract(1, 'day'),
@@ -45,93 +156,426 @@ export default function ProductionOrderForm({
     }
   }, [initialValues, form, open])
 
-  const handleFinish = (values: {
+  useEffect(() => {
+    if (!selectedItemOperation || !operations) {
+      return
+    }
+
+    const operationData = operations.find(
+      (item) => item.operation === selectedItemOperation,
+    )
+
+    if (operationData) {
+      itemForm.setFieldsValue({
+        standard_seconds: operationData.standard_seconds,
+      })
+    }
+  }, [selectedItemOperation, operations, itemForm])
+
+  const handleFinish = async (values: {
     order_date: dayjs.Dayjs
     work_hours: number
     status: string
     remark?: string
     employee_id: string
   }) => {
-    onSubmit({
-      ...values,
-      order_date: values.order_date.format('YYYY-MM-DD'),
+    await onSubmit({
+      order: {
+        ...values,
+        order_date: values.order_date.format('YYYY-MM-DD'),
+      },
+      items: [...items],
     })
     form.resetFields()
+    setItems([])
+  }
+
+  const handleOpenItemModal = (index?: number) => {
+    if (index !== undefined) {
+      const item = items[index]
+      setEditingItemIndex(index)
+      itemForm.setFieldsValue({
+        project_no: item?.project_no,
+        product_model: item?.product_model,
+        length_mm: item?.length_mm,
+        customer_model: item?.customer_model,
+        operation: item?.operation,
+        standard_seconds: item?.standard_seconds,
+        qualified_quantity: item?.qualified_quantity || 0,
+        defect_reason_1: item?.defect_reason_1,
+        defect_quantity_1: item?.defect_quantity_1 || 0,
+        defect_reason_2: item?.defect_reason_2,
+        defect_quantity_2: item?.defect_quantity_2 || 0,
+        bonus_seconds: item?.bonus_seconds || 0,
+      })
+    } else {
+      setEditingItemIndex(null)
+      itemForm.resetFields()
+      itemForm.setFieldsValue({
+        qualified_quantity: 0,
+        defect_quantity_1: 0,
+        defect_quantity_2: 0,
+        bonus_seconds: 0,
+      })
+    }
+    setIsItemModalOpen(true)
+  }
+
+  const handleItemFinish = (values: OrderItem) => {
+    const data = modelsMap[values.project_no]
+    const newItem: OrderItem = {
+      id: editingItemIndex !== null ? items[editingItemIndex]?.id : undefined,
+      project_no: values.project_no,
+      product_model: data?.product_model ?? values.product_model ?? null,
+      length_mm: data?.length_mm ?? values.length_mm ?? null,
+      customer_model: data?.customer_model ?? values.customer_model ?? null,
+      operation: values.operation,
+      standard_seconds: Number(values.standard_seconds),
+      qualified_quantity: values.qualified_quantity || 0,
+      defect_reason_1: values.defect_reason_1 || null,
+      defect_quantity_1: Number(values.defect_quantity_1) || 0,
+      defect_reason_2: values.defect_reason_2 || null,
+      defect_quantity_2: Number(values.defect_quantity_2) || 0,
+      bonus_seconds: Number(values.bonus_seconds) || 0,
+    }
+
+    if (editingItemIndex !== null) {
+      setItems((prev) => {
+        const next = [...prev]
+        next[editingItemIndex] = newItem
+        return next
+      })
+    } else {
+      setItems((prev) => [...prev, newItem])
+    }
+
+    setIsItemModalOpen(false)
+    itemForm.resetFields()
+    setEditingItemIndex(null)
+  }
+
+  const handleItemModalCancel = () => {
+    setIsItemModalOpen(false)
+    itemForm.resetFields()
+    setEditingItemIndex(null)
+  }
+
+  const handleProjectNoChangeForItem = (value: string) => {
+    const data = modelsMap[value]
+    if (data) {
+      itemForm.setFieldsValue({
+        product_model: data.product_model,
+        length_mm: data.length_mm,
+        customer_model: data.customer_model,
+        operation: undefined,
+        standard_seconds: undefined,
+      })
+    }
   }
 
   return (
-    <Modal
-      title={initialValues ? '编辑生产工单' : '创建生产工单'}
-      open={open}
-      onCancel={onCancel}
-      onOk={() => form.submit()}
-      width={500}
-      destroyOnClose
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleFinish}
-        initialValues={{
-          order_date: dayjs().subtract(1, 'day'),
-          work_hours: 8,
-          status: '进行中',
-        }}
+    <>
+      <Modal
+        title={initialValues ? '编辑生产工单' : '创建生产工单'}
+        open={open}
+        onCancel={onCancel}
+        onOk={() => form.submit()}
+        width={1200}
+        destroyOnClose
       >
-        <Form.Item
-          name="order_date"
-          label="日期"
-          rules={[{ required: true, message: '请选择日期' }]}
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          initialValues={{
+            order_date: dayjs().subtract(1, 'day'),
+            work_hours: 8,
+            status: '进行中',
+          }}
         >
-          <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
-        </Form.Item>
+          <div className="grid grid-cols-4 gap-4">
+            <Form.Item
+              name="order_date"
+              label="日期"
+              rules={[{ required: true, message: '请选择日期' }]}
+            >
+              <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
+            </Form.Item>
 
-        <Form.Item
-          name="employee_id"
-          label="操作人"
-          rules={[{ required: true, message: '请选择操作人' }]}
+            <Form.Item
+              name="employee_id"
+              label="操作人"
+              rules={[{ required: true, message: '请选择操作人' }]}
+            >
+              <Select
+                showSearch
+                placeholder="请选择操作人"
+                optionFilterProp="children"
+                options={employees.map((emp) => ({
+                  label: emp.name,
+                  value: emp.id,
+                }))}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="work_hours"
+              label="出勤工时(小时)"
+              rules={[{ required: true, message: '请输入出勤工时' }]}
+            >
+              <InputNumber
+                min={0.01}
+                step={0.5}
+                style={{ width: '100%' }}
+                placeholder="请输入出勤工时"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="status"
+              label="状态"
+              rules={[{ required: true, message: '请选择状态' }]}
+            >
+              <Select
+                placeholder="请选择状态"
+                options={STATUS_OPTIONS}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+
+            <Form.Item name="remark" label="备注" className="col-span-4">
+              <Input.TextArea rows={2} placeholder="请输入备注" />
+            </Form.Item>
+          </div>
+
+          <Card
+            title="工序明细"
+            size="small"
+            extra={
+              <Button
+                type="primary"
+                size="small"
+                icon={<PlusIcon className="h-4 w-4" />}
+                onClick={() => handleOpenItemModal()}
+              >
+                添加工序
+              </Button>
+            }
+          >
+            <Table
+              size="small"
+              pagination={false}
+              dataSource={items.map((item: OrderItem, index: number) => ({
+                ...item,
+                key: index,
+              }))}
+              rowKey="key"
+              scroll={{ x: 1200 }}
+              columns={[
+                {
+                  title: '#',
+                  width: 50,
+                  render: (_: unknown, __: unknown, index: number) => index + 1,
+                },
+                {
+                  title: '项目号',
+                  dataIndex: 'project_no',
+                  width: 120,
+                },
+                {
+                  title: '型号',
+                  dataIndex: 'product_model',
+                  width: 100,
+                },
+                {
+                  title: '长度',
+                  dataIndex: 'length_mm',
+                  width: 80,
+                },
+                {
+                  title: '客户型号',
+                  dataIndex: 'customer_model',
+                  width: 100,
+                },
+                {
+                  title: '工序',
+                  dataIndex: 'operation',
+                  width: 100,
+                },
+                {
+                  title: '标准工时(秒)',
+                  dataIndex: 'standard_seconds',
+                  width: 100,
+                },
+                {
+                  title: '合格数量',
+                  dataIndex: 'qualified_quantity',
+                  width: 80,
+                },
+                {
+                  title: '操作',
+                  width: 100,
+                  render: (_: unknown, record: OrderItem & { key: number }) => (
+                    <Space size="small">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<PencilSquareIcon className="h-4 w-4" />}
+                        onClick={() => handleOpenItemModal(record.key)}
+                      />
+                      <Popconfirm
+                        title="确定删除此工序明细吗？"
+                        okText="确定"
+                        cancelText="取消"
+                        onConfirm={() => {
+                          setItems((prev) =>
+                            prev.filter((_, i) => i !== record.key),
+                          )
+                        }}
+                      >
+                        <Button
+                          type="text"
+                          size="small"
+                          danger
+                          icon={<TrashIcon className="h-4 w-4" />}
+                        />
+                      </Popconfirm>
+                    </Space>
+                  ),
+                },
+              ]}
+            />
+          </Card>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={editingItemIndex !== null ? '编辑工序' : '添加工序'}
+        open={isItemModalOpen}
+        onOk={() => itemForm.submit()}
+        onCancel={handleItemModalCancel}
+        width={600}
+        destroyOnClose
+      >
+        <Form
+          form={itemForm}
+          layout="vertical"
+          onFinish={handleItemFinish}
+          initialValues={{
+            qualified_quantity: 0,
+            defect_quantity_1: 0,
+            defect_quantity_2: 0,
+            bonus_seconds: 0,
+          }}
         >
-          <Select
-            showSearch
-            placeholder="请选择操作人"
-            optionFilterProp="children"
-            options={employees.map((emp) => ({
-              label: emp.name,
-              value: emp.id,
-            }))}
-            style={{ width: '100%' }}
-          />
-        </Form.Item>
+          <Form.Item
+            name="project_no"
+            label="项目号"
+            rules={[{ required: true, message: '请选择项目号' }]}
+          >
+            <Select
+              showSearch
+              placeholder="请选择项目号"
+              loading={loadingProjectNos}
+              options={projectNoOptions}
+              filterOption={filterProjectNoOption}
+              optionRender={renderProjectNoOption}
+              onChange={handleProjectNoChangeForItem}
+            />
+          </Form.Item>
 
-        <Form.Item
-          name="work_hours"
-          label="出勤工时(小时)"
-          rules={[{ required: true, message: '请输入出勤工时' }]}
-        >
-          <InputNumber
-            min={0.01}
-            step={0.5}
-            style={{ width: '100%' }}
-            placeholder="请输入出勤工时(小时)"
-          />
-        </Form.Item>
+          <div className="grid grid-cols-3 gap-4">
+            <Form.Item name="product_model" label="型号">
+              <Input disabled />
+            </Form.Item>
 
-        <Form.Item
-          name="status"
-          label="状态"
-          rules={[{ required: true, message: '请选择状态' }]}
-        >
-          <Select
-            placeholder="请选择状态"
-            options={STATUS_OPTIONS}
-            style={{ width: '100%' }}
-          />
-        </Form.Item>
+            <Form.Item name="length_mm" label="长度(mm)">
+              <Input disabled />
+            </Form.Item>
 
-        <Form.Item name="remark" label="备注">
-          <Input.TextArea rows={3} placeholder="请输入备注" />
-        </Form.Item>
-      </Form>
-    </Modal>
+            <Form.Item name="customer_model" label="客户型号">
+              <Input disabled />
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            name="operation"
+            label="工序"
+            rules={[{ required: true, message: '请选择工序' }]}
+          >
+            <Select
+              placeholder="请选择工序"
+              loading={loadingOperations}
+              options={operations?.map((item) => ({
+                label: item.operation,
+                value: item.operation,
+              }))}
+              disabled={!selectedItemProductModel}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="standard_seconds"
+            label="标准工时(秒)"
+            rules={[{ required: true, message: '请输入标准工时' }]}
+          >
+            <InputNumber style={{ width: '100%' }} min={0} />
+          </Form.Item>
+
+          <Form.Item
+            name="qualified_quantity"
+            label="合格数量"
+            rules={[{ required: true, message: '请输入合格数量' }]}
+          >
+            <InputNumber style={{ width: '100%' }} min={0} />
+          </Form.Item>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Form.Item label="不良1" className="mb-2">
+              <Space.Compact className="!flex">
+                <Form.Item name="defect_reason_1" className="!mb-0 !w-24">
+                  <Select
+                    placeholder="原因"
+                    allowClear
+                    options={DEFECT_REASONS}
+                  />
+                </Form.Item>
+                <Form.Item name="defect_quantity_1" className="!mb-0">
+                  <InputNumber
+                    placeholder="数量"
+                    min={0}
+                    style={{ width: 80 }}
+                  />
+                </Form.Item>
+              </Space.Compact>
+            </Form.Item>
+
+            <Form.Item label="不良2" className="mb-2">
+              <Space.Compact className="!flex">
+                <Form.Item name="defect_reason_2" className="!mb-0 !w-24">
+                  <Select
+                    placeholder="原因"
+                    allowClear
+                    options={DEFECT_REASONS}
+                  />
+                </Form.Item>
+                <Form.Item name="defect_quantity_2" className="!mb-0">
+                  <InputNumber
+                    placeholder="数量"
+                    min={0}
+                    style={{ width: 80 }}
+                  />
+                </Form.Item>
+              </Space.Compact>
+            </Form.Item>
+          </div>
+
+          <Form.Item name="bonus_seconds" label="加分(秒)">
+            <InputNumber style={{ width: '100%' }} min={0} />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   )
 }

@@ -13,6 +13,11 @@ import {
   useUpdateProductionOrder,
   useDeleteProductionOrders,
 } from './useProductionOrders'
+import {
+  useAddProductionOrderItem,
+  useUpdateProductionOrderItem,
+  useDeleteProductionOrderItems,
+} from './useProductionOrderItems'
 import { useAllEmployees } from '../workshop/EmployeeList/useEmployees'
 import ProductionOrderList from './ProductionOrderList'
 import ProductionOrderForm from './ProductionOrderForm'
@@ -43,6 +48,7 @@ export default function ProductionOrderPage() {
   const [editingRecord, setEditingRecord] = useState<ProductionOrder | null>(
     null,
   )
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -68,6 +74,9 @@ export default function ProductionOrderPage() {
   const createMutation = useCreateProductionOrder()
   const updateMutation = useUpdateProductionOrder()
   const deleteMutation = useDeleteProductionOrders()
+  const addItemMutation = useAddProductionOrderItem()
+  const updateItemMutation = useUpdateProductionOrderItem()
+  const deleteItemMutation = useDeleteProductionOrderItems()
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 10,
@@ -105,10 +114,16 @@ export default function ProductionOrderPage() {
   }, [])
 
   const handleDelete = useCallback(
-    (ids: string[]) => {
-      deleteMutation.mutate(ids, {
+    (ids?: string[]) => {
+      const deleteIds = ids || selectedRowKeys
+      if (deleteIds.length === 0) {
+        message.warning('请选择至少一条数据')
+        return
+      }
+      deleteMutation.mutate(deleteIds as string[], {
         onSuccess: () => {
           message.success('删除成功')
+          setSelectedRowKeys([])
         },
         onError: (error) => {
           if (error instanceof Error) {
@@ -119,24 +134,108 @@ export default function ProductionOrderPage() {
         },
       })
     },
-    [deleteMutation, message],
+    [deleteMutation, message, selectedRowKeys],
   )
 
   const handleFinish = useCallback(
-    async (values: Partial<ProductionOrder>) => {
+    async (values: {
+      order: Partial<ProductionOrder>
+      items: {
+        id?: string
+        project_no: string
+        product_model: string | null
+        length_mm: number | null
+        customer_model: string | null
+        operation: string
+        standard_seconds: number
+        qualified_quantity: number
+        defect_reason_1: string | null
+        defect_quantity_1: number
+        defect_reason_2: string | null
+        defect_quantity_2: number
+        bonus_seconds: number
+      }[]
+    }) => {
       try {
+        let orderId: string
+
         if (isEdit && editingRecord) {
           await updateMutation.mutateAsync({
             id: editingRecord.id,
-            values,
+            values: values.order,
           })
+          orderId = editingRecord.id
+
+          const existingItems = detailData?.items || []
+          const currentItems = values.items
+          const currentItemIds = new Set(
+            currentItems
+              .map((item) => item.id)
+              .filter((id): id is string => Boolean(id)),
+          )
+          const deletedIds = existingItems
+            .filter((item) => !currentItemIds.has(item.id))
+            .map((item) => item.id)
+
+          const updateTasks = currentItems
+            .filter((item): item is typeof item & { id: string } =>
+              Boolean(item.id),
+            )
+            .map((item) =>
+              updateItemMutation.mutateAsync({
+                id: item.id,
+                values: {
+                  project_no: item.project_no,
+                  product_model: item.product_model,
+                  length_mm: item.length_mm,
+                  customer_model: item.customer_model,
+                  operation: item.operation,
+                  standard_seconds: item.standard_seconds,
+                  qualified_quantity: item.qualified_quantity,
+                  defect_reason_1: item.defect_reason_1,
+                  defect_quantity_1: item.defect_quantity_1,
+                  defect_reason_2: item.defect_reason_2,
+                  defect_quantity_2: item.defect_quantity_2,
+                  bonus_seconds: item.bonus_seconds,
+                },
+              }),
+            )
+
+          const addTasks = currentItems
+            .filter((item) => !item.id)
+            .map((item) =>
+              addItemMutation.mutateAsync({
+                ...item,
+                order_id: orderId,
+              }),
+            )
+
+          if (deletedIds.length > 0) {
+            await deleteItemMutation.mutateAsync(deletedIds)
+          }
+
+          await Promise.all([...updateTasks, ...addTasks])
           message.success('工单更新成功')
         } else {
-          await createMutation.mutateAsync(
-            values as Parameters<typeof createMutation.mutateAsync>[0],
+          const newOrder = await createMutation.mutateAsync(
+            values.order as Parameters<typeof createMutation.mutateAsync>[0],
           )
+          orderId = newOrder.id
+
+          if (values.items.length > 0) {
+            await Promise.all(
+              values.items.map((item) =>
+                addItemMutation.mutateAsync({
+                  ...item,
+                  order_id: orderId,
+                }),
+              ),
+            )
+          }
+
           message.success('工单创建成功')
         }
+
         resetFormState()
       } catch (error) {
         if (error instanceof Error) {
@@ -153,6 +252,10 @@ export default function ProductionOrderPage() {
       message,
       resetFormState,
       updateMutation,
+      addItemMutation,
+      updateItemMutation,
+      deleteItemMutation,
+      detailData,
     ],
   )
 
@@ -172,61 +275,29 @@ export default function ProductionOrderPage() {
   }, [searchParamsURL, setSearchParamsURL])
 
   useEffect(() => {
-    if (createMutation.isSuccess || updateMutation.isSuccess) {
-      resetFormState()
-      createMutation.reset()
-      updateMutation.reset()
-    }
-  }, [
-    createMutation.isSuccess,
-    updateMutation.isSuccess,
-    resetFormState,
-    createMutation,
-    updateMutation,
-  ])
-
-  useEffect(() => {
     if (page > 1 && orderData && orderData.items.length === 0) {
       searchParamsURL.set('page', Math.max(page - 1, 1).toString())
       setSearchParamsURL(searchParamsURL)
     }
   }, [orderData, page, searchParamsURL, setSearchParamsURL])
 
-  const renderContent = () => {
-    if (isView && editingRecord && detailData) {
-      return (
-        <ProductionOrderDetail
-          order={
-            detailData as ProductionOrder & {
-              items?: ProductionOrderItem[]
-              employee?: { name: string }
-            }
-          }
-          onEdit={() => {
-            setIsView(false)
-            setIsEdit(true)
-            setModalTitle('编辑工单')
-          }}
-        />
-      )
-    }
-
-    return (
-      <ProductionOrderForm
-        open={isModalOpen}
-        onCancel={resetFormState}
-        onSubmit={handleFinish}
-        initialValues={editingRecord || undefined}
-        employees={employees}
-      />
-    )
-  }
+  const detailOrder = (detailData || editingRecord) as
+    | (ProductionOrder & {
+        items?: ProductionOrderItem[]
+        employee?: { name: string }
+      })
+    | null
 
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
-        <DeleteButton onConfirm={() => {}} isDeleting={false} />
+        <DeleteButton
+          onConfirm={handleDelete}
+          isDeleting={deleteMutation.isPending}
+          count={selectedRowKeys.length}
+          itemName="工单"
+        />
       </div>
 
       <ProductionOrderSearch
@@ -239,6 +310,8 @@ export default function ProductionOrderPage() {
         <ProductionOrderList
           loading={isLoading}
           data={orderData?.items || []}
+          selectedRowKeys={selectedRowKeys}
+          onSelect={setSelectedRowKeys}
           onView={handleView}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -250,15 +323,32 @@ export default function ProductionOrderPage() {
         <AppPagination total={orderData?.total || 0} />
       </div>
 
+      <ProductionOrderForm
+        open={isModalOpen && !isView}
+        onCancel={resetFormState}
+        onSubmit={handleFinish}
+        initialValues={detailData || editingRecord || undefined}
+        employees={employees}
+      />
+
       <Modal
         title={modalTitle}
-        open={isModalOpen}
+        open={isModalOpen && isView}
         onCancel={resetFormState}
-        footer={isView ? [] : undefined}
-        width={isView ? 900 : 500}
+        footer={[]}
+        width={900}
         destroyOnClose
       >
-        {renderContent()}
+        {detailOrder ? (
+          <ProductionOrderDetail
+            order={detailOrder}
+            onEdit={() => {
+              setIsView(false)
+              setIsEdit(true)
+              setModalTitle('编辑工单')
+            }}
+          />
+        ) : null}
       </Modal>
     </div>
   )

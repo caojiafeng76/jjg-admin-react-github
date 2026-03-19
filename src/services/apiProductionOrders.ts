@@ -96,6 +96,14 @@ export async function getProductionOrderById(id: string) {
 }
 
 export async function createProductionOrder(values: ProductionOrderInsert) {
+  if (
+    values.work_hours === null ||
+    values.work_hours === undefined ||
+    values.work_hours <= 0
+  ) {
+    throw new Error('出勤工时必须大于0')
+  }
+
   const { data, error } = await supabase
     .from('production_orders')
     .insert(values)
@@ -116,6 +124,14 @@ export async function updateProductionOrder({
   id: string
   values: ProductionOrderUpdate
 }) {
+  if (
+    values.work_hours !== undefined &&
+    values.work_hours !== null &&
+    values.work_hours <= 0
+  ) {
+    throw new Error('出勤工时必须大于0')
+  }
+
   const { data, error } = await supabase
     .from('production_orders')
     .update(values)

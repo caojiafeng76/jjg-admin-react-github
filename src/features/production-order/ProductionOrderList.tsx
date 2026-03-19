@@ -1,5 +1,13 @@
 import { useMemo } from 'react'
-import { Table, TableColumnsType, Button, Popconfirm, Space, Tag } from 'antd'
+import {
+  Table,
+  TableColumnsType,
+  TableProps,
+  Button,
+  Popconfirm,
+  Space,
+  Tag,
+} from 'antd'
 import { PencilSquareIcon, TrashIcon, EyeIcon } from '@heroicons/react/16/solid'
 
 import type { ProductionOrder } from '@/services/apiProductionOrders'
@@ -7,6 +15,8 @@ import type { ProductionOrder } from '@/services/apiProductionOrders'
 interface Props {
   loading: boolean
   data: ProductionOrder[]
+  selectedRowKeys: React.Key[]
+  onSelect: (keys: React.Key[]) => void
   onView: (record: ProductionOrder) => void
   onEdit: (record: ProductionOrder) => void
   onDelete: (ids: string[]) => void
@@ -22,6 +32,8 @@ const STATUS_COLORS: Record<string, string> = {
 export default function ProductionOrderList({
   loading,
   data,
+  selectedRowKeys,
+  onSelect,
   onView,
   onEdit,
   onDelete,
@@ -131,12 +143,18 @@ export default function ProductionOrderList({
     [onView, onEdit, onDelete],
   )
 
+  const rowSelection: TableProps<ProductionOrder>['rowSelection'] = {
+    selectedRowKeys,
+    onChange: onSelect,
+  }
+
   return (
     <Table<ProductionOrder>
       rowKey={(record) => record.id}
       loading={loading}
       columns={columns}
       dataSource={data}
+      rowSelection={rowSelection}
       scroll={{ y: scrollY }}
       size="small"
       pagination={false}

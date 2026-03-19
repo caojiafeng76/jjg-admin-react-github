@@ -47,7 +47,7 @@ export default function DeleteButton({
     <Popconfirm
       title={title}
       description={description}
-      onConfirm={onConfirm}
+      onConfirm={() => onConfirm()}
       okText="确认删除"
       cancelText="取消"
       okButtonProps={{ loading: isDeleting, danger: true }}
