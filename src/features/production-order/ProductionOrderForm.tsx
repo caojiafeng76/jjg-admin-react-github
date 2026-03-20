@@ -290,7 +290,7 @@ export default function ProductionOrderForm({
           onFinish={handleFinish}
           initialValues={{
             order_date: dayjs().subtract(1, 'day'),
-            work_hours: 8,
+            work_hours: 11,
           }}
         >
           <div className="grid grid-cols-4 gap-4">

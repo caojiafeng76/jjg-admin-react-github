@@ -94,11 +94,18 @@ export default function StandardTimeList() {
     async (values: StandardTime) => {
       try {
         if (isEdit && selectedRowKeys[0]) {
+          const standardSecondsChanged =
+            editingRecord?.standard_seconds !== values.standard_seconds
+
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
             values,
           })
-          message.success('标准工时更新成功')
+          message.success(
+            standardSecondsChanged
+              ? '标准工时更新成功，历史工单已同步修正'
+              : '标准工时更新成功',
+          )
         } else {
           await createMutation.mutateAsync(values)
           message.success('标准工时创建成功')
@@ -114,6 +121,7 @@ export default function StandardTimeList() {
     },
     [
       createMutation,
+      editingRecord,
       isEdit,
       message,
       resetFormState,

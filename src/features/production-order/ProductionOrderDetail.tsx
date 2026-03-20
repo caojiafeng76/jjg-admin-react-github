@@ -10,6 +10,7 @@ import {
   useUpdateProductionOrderItem,
   useDeleteProductionOrderItems,
 } from './useProductionOrderItems'
+import { useProductionOrder } from './useProductionOrders'
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import type { ProductionOrder } from '@/services/apiProductionOrders'
 
@@ -29,10 +30,12 @@ export default function ProductionOrderDetail({ order, onEdit }: Props) {
     isLoading: itemsLoading,
     refetch,
   } = useProductionOrderItems(order.id)
+  const { data: orderData, refetch: refetchOrder } = useProductionOrder(order.id)
   const addItemMutation = useAddProductionOrderItem()
   const updateItemMutation = useUpdateProductionOrderItem()
   const deleteItemMutation = useDeleteProductionOrderItems()
 
+  const currentOrder = orderData || order
   const items = itemsData || order.items || []
 
   const handleAddItem = () => {
@@ -47,7 +50,7 @@ export default function ProductionOrderDetail({ order, onEdit }: Props) {
 
   const handleDeleteItem = async (ids: string[]) => {
     await deleteItemMutation.mutateAsync(ids)
-    refetch()
+    await Promise.all([refetch(), refetchOrder()])
   }
 
   const handleItemSubmit = async (values: Partial<ProductionOrderItem>) => {
@@ -60,10 +63,10 @@ export default function ProductionOrderDetail({ order, onEdit }: Props) {
       await addItemMutation.mutateAsync(values as ProductionOrderItem)
     }
     setIsItemModalOpen(false)
-    refetch()
+    await Promise.all([refetch(), refetchOrder()])
   }
 
-  const orderWithEmployee = order as ProductionOrder & {
+  const orderWithEmployee = currentOrder as ProductionOrder & {
     employee?: { name: string }
   }
 
@@ -78,24 +81,26 @@ export default function ProductionOrderDetail({ order, onEdit }: Props) {
         }
       >
         <Descriptions column={2} size="small">
-          <Descriptions.Item label="日期">{order.order_date}</Descriptions.Item>
+          <Descriptions.Item label="日期">{currentOrder.order_date}</Descriptions.Item>
           <Descriptions.Item label="操作人">
             {orderWithEmployee.employee?.name || '-'}
           </Descriptions.Item>
           <Descriptions.Item label="出勤工时">
-            {order.work_hours} 小时
+            {currentOrder.work_hours} 小时
           </Descriptions.Item>
           <Descriptions.Item label="合格工时">
-            {order.total_qualified_hours
-              ? order.total_qualified_hours.toFixed(2)
+            {currentOrder.total_qualified_hours
+              ? currentOrder.total_qualified_hours.toFixed(2)
               : '-'}{' '}
             小时
           </Descriptions.Item>
           <Descriptions.Item label="工时效率">
-            {order.efficiency ? (order.efficiency * 100).toFixed(2) : '-'}%
+            {currentOrder.efficiency
+              ? (currentOrder.efficiency * 100).toFixed(2)
+              : '-'}%
           </Descriptions.Item>
           <Descriptions.Item label="备注" span={2}>
-            {order.remark || '-'}
+            {currentOrder.remark || '-'}
           </Descriptions.Item>
         </Descriptions>
       </Card>
