@@ -1,6 +1,12 @@
-import { utils, writeFile } from 'xlsx'
+import { utils, writeFile } from 'xlsx-js-style'
 import { format } from 'date-fns'
 import { message } from 'antd'
+import {
+  autoFitColumnWidths,
+  setRowHeight,
+  centerAllCells,
+  EXCEL_WRITE_OPTIONS,
+} from '@utils/excelStyleUtils'
 
 import { useSelectedPos } from './useSelectedPos'
 
@@ -18,7 +24,7 @@ function useIsSafePart() {
   function isSafePart(partNo: string | null | undefined): boolean {
     if (!partNo || !settings) return false
     return settings.some(
-      (item) => item.is_safe_part && partNo.includes(item.part_no)
+      (item) => item.is_safe_part && partNo.includes(item.part_no),
     )
   }
 
@@ -89,7 +95,21 @@ export function useExportSafePartInfoAsExcel() {
             序号: index + 1,
           }))
 
-          const ws = utils.json_to_sheet(sheetData)
+          // 创建二维数组用于样式设置
+          const headers = Object.keys(sheetData[0])
+          const data = [
+            headers,
+            ...sheetData.map((row) =>
+              headers.map((h) => row[h as keyof ExcelRow]),
+            ),
+          ]
+          const ws = utils.aoa_to_sheet(data)
+          // 自动调整列宽
+          autoFitColumnWidths(ws, data)
+          // 设置行高
+          setRowHeight(ws, 20, data.length)
+          // 居中显示
+          centerAllCells(ws, data)
           // 工作表名称限制在31个字符以内（Excel限制）
           const sheetName = SONo.length > 31 ? SONo.substring(0, 31) : SONo
           utils.book_append_sheet(wb, ws, sheetName)
@@ -111,19 +131,21 @@ export function useExportSafePartInfoAsExcel() {
           ...row,
           序号: row.序号, // 使用全局序号
         }))
-        const summaryWs = utils.json_to_sheet(summaryData)
-        // 设置列宽（可选，提升可读性）
-        const colWidths = [
-          { wch: 8 }, // 序号
-          { wch: 15 }, // 采购单号
-          { wch: 12 }, // 日期
-          { wch: 15 }, // 编号
-          { wch: 15 }, // 型号
-          { wch: 20 }, // 名称
-          { wch: 15 }, // 件号
-          { wch: 15 }, // 生产号
+        // 创建二维数组用于样式设置
+        const headers = Object.keys(summaryData[0])
+        const data = [
+          headers,
+          ...summaryData.map((row) =>
+            headers.map((h) => row[h as keyof ExcelRow]),
+          ),
         ]
-        summaryWs['!cols'] = colWidths
+        const summaryWs = utils.aoa_to_sheet(data)
+        // 自动调整列宽
+        autoFitColumnWidths(summaryWs, data)
+        // 设置行高
+        setRowHeight(summaryWs, 20, data.length)
+        // 居中显示
+        centerAllCells(summaryWs, data)
         utils.book_append_sheet(wb, summaryWs, '汇总')
       }
 
@@ -132,12 +154,11 @@ export function useExportSafePartInfoAsExcel() {
       const fileName = `安全部件信息-${timestamp}.xlsx`
 
       // 导出文件
-      writeFile(wb, fileName)
+      writeFile(wb, fileName, EXCEL_WRITE_OPTIONS)
       messageApi.success(`导出成功！共 ${allSafeParts.length} 条安全部件数据`)
     } catch (error) {
       console.error('导出失败:', error)
-      const errorMessage =
-        error instanceof Error ? error.message : '未知错误'
+      const errorMessage = error instanceof Error ? error.message : '未知错误'
       messageApi.error(`导出失败: ${errorMessage}`)
     }
   }

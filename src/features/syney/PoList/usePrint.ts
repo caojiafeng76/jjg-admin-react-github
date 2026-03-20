@@ -16,6 +16,17 @@ export function usePrint(messageApi?: MessageApi) {
   const api = messageApi || internalMessageApi
   const [isPrinting, setIsPrinting] = useState(false)
 
+  function drawBoldText(
+    doc: jsPDF,
+    text: string,
+    x: number,
+    y: number,
+    options?: Record<string, unknown>,
+  ) {
+    doc.text(text, x, y, options)
+    doc.text(text, x + 0.12, y, options)
+  }
+
   /**
    * 绘制标签框架（线条和通用标题）
    */
@@ -33,14 +44,14 @@ export function usePrint(messageApi?: MessageApi) {
     doc.line(36, 22, 36, 27) // 下面竖线
 
     // 通用标题
-    doc.text('产品名称', 6, 6)
-    doc.text('规格', 8, 11)
-    doc.text('数量', 8, 21)
-    doc.text('件号', 40, 6)
-    doc.text('合同号', 39, 11)
-    doc.text('制造日期', 38, 21)
-    doc.text('制造单位名称', 10, 26)
-    doc.text('湖州银都铝业科技有限公司', 45, 26)
+    drawBoldText(doc, '产品名称', 6, 6)
+    drawBoldText(doc, '规格', 8, 11)
+    drawBoldText(doc, '数量', 8, 21)
+    drawBoldText(doc, '件号', 40, 6)
+    drawBoldText(doc, '合同号', 39, 11)
+    drawBoldText(doc, '制造日期', 38, 21)
+    drawBoldText(doc, '制造单位名称', 10, 26)
+    drawBoldText(doc, '湖州银都铝业科技有限公司', 45, 26)
   }
 
   async function generateLabel() {
@@ -87,15 +98,15 @@ export function usePrint(messageApi?: MessageApi) {
               drawLabelFrame(doc)
 
               // 补充 Item 特有的标题
-              doc.text('编号', 8, 16)
-              doc.text('产品型号', 38, 16)
+              drawBoldText(doc, '编号', 8, 16)
+              drawBoldText(doc, '产品型号', 38, 16)
 
               // 填充数据
               const PartName2X = item.PartName2?.length === 5 ? 21 : 23
-              doc.text(`${item.PartName2}`, PartName2X, 6)
-              doc.text(`${item.ParamSpec}`, 21, 11)
-              doc.text(`${item.PartCode}`, 21, 16)
-              doc.text('1', 27, 21)
+              drawBoldText(doc, `${item.PartName2}`, PartName2X, 6)
+              drawBoldText(doc, `${item.ParamSpec}`, 21, 11)
+              drawBoldText(doc, `${item.PartCode}`, 21, 16)
+              drawBoldText(doc, '1', 27, 21)
 
               let PartNoX = 53
               switch (item.PartNo?.length) {
@@ -109,11 +120,11 @@ export function usePrint(messageApi?: MessageApi) {
                   PartNoX = 53
                   break
               }
-              doc.text(`${item.PartNo}`, PartNoX, 6)
+              drawBoldText(doc, `${item.PartNo}`, PartNoX, 6)
 
-              doc.text(`${item.SONo}`, 53, 11)
-              doc.text(`${item.PartModel}`, 58, 16)
-              doc.text(`${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
+              drawBoldText(doc, `${item.SONo}`, 53, 11)
+              drawBoldText(doc, `${item.PartModel}`, 58, 16)
+              drawBoldText(doc, `${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
 
               pageCount++
               if (pageCount % 10 === 0) {
@@ -132,12 +143,12 @@ export function usePrint(messageApi?: MessageApi) {
         drawLabelFrame(doc)
 
         // 填充围框数据
-        doc.text(`围框`, 24, 6)
-        doc.text(`${Spec.split('-').at(0)}`, 23, 11)
-        doc.text('1', 27, 21)
+        drawBoldText(doc, '围框', 24, 6)
+        drawBoldText(doc, `${Spec.split('-').at(0)}`, 23, 11)
+        drawBoldText(doc, '1', 27, 21)
         // 件号为空，不填
-        doc.text(`${SONo}`, 53, 11)
-        doc.text(`${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
+        drawBoldText(doc, `${SONo}`, 53, 11)
+        drawBoldText(doc, `${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
 
         pageCount++
         if (pageCount % 10 === 0) {

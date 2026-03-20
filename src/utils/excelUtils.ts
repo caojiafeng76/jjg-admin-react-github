@@ -239,7 +239,10 @@ export function transformToOrderData(
       }
       // 如果推断失败，检查Excel规格列是否是有效格式（包含"型"字）
       const excelSpec = firstRow.规格 ? String(firstRow.规格) : null
-      if (excelSpec && (excelSpec.includes('型') || excelSpec.match(/^\d+型-/))) {
+      if (
+        excelSpec &&
+        (excelSpec.includes('型') || excelSpec.match(/^\d+型-/))
+      ) {
         return excelSpec
       }
       // 如果Excel规格列格式不对（如"左件"），返回null，让用户手动选择
@@ -321,19 +324,19 @@ function extractBrandFromBackPlate(rows: ExcelRow[]): string | null {
 
   // 2. 从备注中提取品牌
   const remark = String(backPlateRow.备注)
-  
+
   // 优先匹配 "商标为" 格式（如：商标为现代电梯）
   let match = remark.match(/商标为\s*([^\s，,。]+)/)
   if (match && match[1]) {
     return match[1].trim()
   }
-  
+
   // 匹配 "商标:" 或 "商标：" 格式
   match = remark.match(/商标[:：]\s*([^\s，,。]+)/)
   if (match && match[1]) {
     return match[1].trim()
   }
-  
+
   // 匹配 "品牌:" 或 "品牌：" 格式
   match = remark.match(/品牌[:：]\s*([^\s，,。]+)/)
   if (match && match[1]) {
@@ -368,7 +371,10 @@ function extractTechnique(rows: ExcelRow[]): string | null {
       // 检查"角钢"前面是否有否定词（"不带"、"不"、"无"、"没有"等）
       const index = frontPlateRemark.indexOf('角钢')
       // 检查"角钢"前面15个字符内是否有否定词（考虑"不带支撑角钢"这种情况）
-      const beforeText = frontPlateRemark.substring(Math.max(0, index - 15), index)
+      const beforeText = frontPlateRemark.substring(
+        Math.max(0, index - 15),
+        index,
+      )
       // 排除包含否定词的情况
       const hasNegativeWord =
         beforeText.includes('不带') ||
@@ -376,7 +382,7 @@ function extractTechnique(rows: ExcelRow[]): string | null {
         beforeText.includes('无') ||
         beforeText.includes('没有') ||
         beforeText.includes('无需')
-      
+
       // 如果"角钢"前面没有否定词，则提取
       if (!hasNegativeWord) {
         techniqueList.push('前：角钢')
@@ -427,8 +433,13 @@ function extractTechnique(rows: ExcelRow[]): string | null {
   middlePlateRows.forEach((middlePlateRow) => {
     if (middlePlateRow.备注) {
       const middlePlateRemark = String(middlePlateRow.备注)
-      console.log('检查中板备注:', middlePlateRemark, '是否包含雷达孔:', middlePlateRemark.includes('雷达孔'))
-      
+      console.log(
+        '检查中板备注:',
+        middlePlateRemark,
+        '是否包含雷达孔:',
+        middlePlateRemark.includes('雷达孔'),
+      )
+
       // 检查"雷达孔"（可以是"雷达孔"、"雷达光电孔"等，只要同时包含"雷达"和"孔"即可）
       // 使用正则表达式匹配"雷达"和"孔"同时出现（中间可以有其他字符）
       const leiDaKongRegex = /雷达.*?孔/
@@ -436,16 +447,21 @@ function extractTechnique(rows: ExcelRow[]): string | null {
         console.log('匹配到雷达孔:', middlePlateRemark)
         // 找到"雷达"的位置，检查前面是否有否定词
         const index = middlePlateRemark.indexOf('雷达')
-        const beforeText = middlePlateRemark.substring(Math.max(0, index - 10), index)
+        const beforeText = middlePlateRemark.substring(
+          Math.max(0, index - 10),
+          index,
+        )
         console.log('雷达前面的文本:', beforeText)
         // 排除包含否定词的情况（但"带"不是否定词）
         const hasNegativeWord =
           beforeText.includes('不带') ||
-          (beforeText.includes('不') && !beforeText.endsWith('不') && !beforeText.includes('带')) ||
+          (beforeText.includes('不') &&
+            !beforeText.endsWith('不') &&
+            !beforeText.includes('带')) ||
           beforeText.includes('无') ||
           beforeText.includes('没有') ||
           beforeText.includes('无需')
-        
+
         console.log('是否有否定词:', hasNegativeWord)
         // 如果"雷达"前面没有否定词，则提取
         if (!hasNegativeWord) {
@@ -459,14 +475,17 @@ function extractTechnique(rows: ExcelRow[]): string | null {
       } else {
         console.log('未匹配到雷达孔:', middlePlateRemark)
       }
-      
+
       // 检查"不剪角"（必须是完整的三个字）
       // 使用正则表达式确保"不剪角"是完整的词（前后不是其他中文字符或数字）
       const buJianJiaoRegex = /不剪角/
       if (buJianJiaoRegex.test(middlePlateRemark)) {
         // 检查"不剪角"前面是否有否定词（排除"不剪角"本身的"不"）
         const index = middlePlateRemark.indexOf('不剪角')
-        const beforeText = middlePlateRemark.substring(Math.max(0, index - 15), index)
+        const beforeText = middlePlateRemark.substring(
+          Math.max(0, index - 15),
+          index,
+        )
         // 排除包含否定词的情况
         // 注意："不剪角"本身以"不"开头，所以需要检查前面是否有其他否定词
         const hasNegativeWord =
@@ -476,7 +495,7 @@ function extractTechnique(rows: ExcelRow[]): string | null {
           beforeText.includes('无需') ||
           beforeText.includes('不要') ||
           beforeText.includes('不带')
-        
+
         // 如果"不剪角"前面没有否定词，则提取
         if (!hasNegativeWord) {
           if (!techniqueList.includes('中：不剪角')) {
@@ -519,10 +538,17 @@ function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
 
     // 匹配型号（允许不带“型”）
     if (!model) {
-      const modelMatch = combinedText.match(/(1000(?:型)?|800(?:型)?|600(?:型)?)/)
+      const modelMatch = combinedText.match(
+        /(1000(?:型)?|800(?:型)?|600(?:型)?)/,
+      )
       if (modelMatch) {
-        model = modelMatch[1].includes('型') ? modelMatch[1] : `${modelMatch[1]}型`
-        console.log('后备逻辑：找到型号:', model, '来源:', { 规格: spec, 备注: remark })
+        model = modelMatch[1].includes('型')
+          ? modelMatch[1]
+          : `${modelMatch[1]}型`
+        console.log('后备逻辑：找到型号:', model, '来源:', {
+          规格: spec,
+          备注: remark,
+        })
       }
     }
 
@@ -601,11 +627,16 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
       (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
   )
 
-  console.log('查找前板组件:', frontPlateRow ? {
-    物料名称: frontPlateRow.物料名称,
-    物料件号: frontPlateRow.物料件号,
-    规格: frontPlateRow.规格,
-  } : '未找到')
+  console.log(
+    '查找前板组件:',
+    frontPlateRow
+      ? {
+          物料名称: frontPlateRow.物料名称,
+          物料件号: frontPlateRow.物料件号,
+          规格: frontPlateRow.规格,
+        }
+      : '未找到',
+  )
 
   if (!frontPlateRow) {
     console.log('未找到前板组件，无法推断规格')
@@ -646,11 +677,16 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
     )
   })
 
-  console.log('查找中板组件:', middlePlateRow ? {
-    物料名称: middlePlateRow.物料名称,
-    物料件号: middlePlateRow.物料件号,
-    规格: middlePlateRow.规格,
-  } : '未找到')
+  console.log(
+    '查找中板组件:',
+    middlePlateRow
+      ? {
+          物料名称: middlePlateRow.物料名称,
+          物料件号: middlePlateRow.物料件号,
+          规格: middlePlateRow.规格,
+        }
+      : '未找到',
+  )
 
   if (!middlePlateRow || !middlePlateRow.规格) {
     console.log('未找到中板组件或中板规格为空，无法推断规格')
