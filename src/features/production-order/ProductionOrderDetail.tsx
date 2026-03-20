@@ -30,7 +30,9 @@ export default function ProductionOrderDetail({ order, onEdit }: Props) {
     isLoading: itemsLoading,
     refetch,
   } = useProductionOrderItems(order.id)
-  const { data: orderData, refetch: refetchOrder } = useProductionOrder(order.id)
+  const { data: orderData, refetch: refetchOrder } = useProductionOrder(
+    order.id,
+  )
   const addItemMutation = useAddProductionOrderItem()
   const updateItemMutation = useUpdateProductionOrderItem()
   const deleteItemMutation = useDeleteProductionOrderItems()
@@ -81,7 +83,9 @@ export default function ProductionOrderDetail({ order, onEdit }: Props) {
         }
       >
         <Descriptions column={2} size="small">
-          <Descriptions.Item label="日期">{currentOrder.order_date}</Descriptions.Item>
+          <Descriptions.Item label="日期">
+            {currentOrder.order_date}
+          </Descriptions.Item>
           <Descriptions.Item label="操作人">
             {orderWithEmployee.employee?.name || '-'}
           </Descriptions.Item>
@@ -97,7 +101,8 @@ export default function ProductionOrderDetail({ order, onEdit }: Props) {
           <Descriptions.Item label="工时效率">
             {currentOrder.efficiency
               ? (currentOrder.efficiency * 100).toFixed(2)
-              : '-'}%
+              : '-'}
+            %
           </Descriptions.Item>
           <Descriptions.Item label="备注" span={2}>
             {currentOrder.remark || '-'}
