@@ -10,6 +10,9 @@ import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const STANDARD_TIMES_KEY = 'standard-times' as const
+const PROCESS_STANDARDS_KEY = 'process-standards' as const
+const PRODUCTION_ORDERS_KEY = 'production-orders' as const
+const PRODUCTION_ORDER_ITEMS_KEY = 'production-order-items' as const
 
 export function useStandardTimesList({
   page,
@@ -38,7 +41,12 @@ export function useCreateStandardTime() {
 export function useUpdateStandardTime() {
   return useMutationWithInvalidation({
     mutationFn: updateStandardTime,
-    invalidateQueries: [[STANDARD_TIMES_KEY]],
+    invalidateQueries: [
+      [STANDARD_TIMES_KEY],
+      [PROCESS_STANDARDS_KEY],
+      [PRODUCTION_ORDERS_KEY],
+      [PRODUCTION_ORDER_ITEMS_KEY],
+    ],
   })
 }
 
