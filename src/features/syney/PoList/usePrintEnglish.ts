@@ -16,6 +16,17 @@ export function usePrintEnglish(messageApi?: MessageApi) {
   const api = messageApi || internalMessageApi
   const [isPrinting, setIsPrinting] = useState(false)
 
+  function drawBoldText(
+    doc: jsPDF,
+    text: string,
+    x: number,
+    y: number,
+    options?: Record<string, unknown>,
+  ) {
+    doc.text(text, x, y, options)
+    doc.text(text, x + 0.12, y, options)
+  }
+
   /**
    * 绘制英文标签框架（线条和通用标题）
    */
@@ -34,16 +45,16 @@ export function usePrintEnglish(messageApi?: MessageApi) {
 
     doc.setFontSize(7)
     // 通用标题
-    doc.text('PartName', 6, 6)
-    doc.text('ParamSpec', 6, 11)
-    doc.text('Qty', 8, 21)
-    doc.text('PartNo', 40, 6)
-    doc.text('SONo', 39, 11)
-    doc.text('EndDate', 38, 21)
-    doc.text('SupplierName', 10, 26)
+    drawBoldText(doc, 'PartName', 6, 6)
+    drawBoldText(doc, 'ParamSpec', 6, 11)
+    drawBoldText(doc, 'Qty', 8, 21)
+    drawBoldText(doc, 'PartNo', 40, 6)
+    drawBoldText(doc, 'SONo', 39, 11)
+    drawBoldText(doc, 'EndDate', 38, 21)
+    drawBoldText(doc, 'SupplierName', 10, 26)
 
     doc.setFontSize(5)
-    doc.text('Huzhou Yindu Aluminum Technology Co., Ltd.', 40, 26)
+    drawBoldText(doc, 'Huzhou Yindu Aluminum Technology Co., Ltd.', 40, 26)
     doc.setFontSize(7)
   }
 
@@ -91,19 +102,19 @@ export function usePrintEnglish(messageApi?: MessageApi) {
               drawEnglishLabelFrame(doc)
 
               // Item 特有的标题
-              doc.text('PartCode', 6, 16)
-              doc.text('PartModel', 38, 16)
+              drawBoldText(doc, 'PartCode', 6, 16)
+              drawBoldText(doc, 'PartModel', 38, 16)
 
               // 填充数据
               doc.setFontSize(6)
               const PartName2 =
                 item.PartName2?.length === 5 ? 'COMB PLATE' : 'COVER PLATE'
-              doc.text(`${PartName2}`, 21, 6)
+              drawBoldText(doc, `${PartName2}`, 21, 6)
               doc.setFontSize(7)
 
-              doc.text(`${item.ParamSpec}`, 21, 11)
-              doc.text(`${item.PartCode}`, 21, 16)
-              doc.text('1', 27, 21)
+              drawBoldText(doc, `${item.ParamSpec}`, 21, 11)
+              drawBoldText(doc, `${item.PartCode}`, 21, 16)
+              drawBoldText(doc, '1', 27, 21)
 
               let PartNoX = 53
               switch (item.PartNo?.length) {
@@ -117,11 +128,11 @@ export function usePrintEnglish(messageApi?: MessageApi) {
                   PartNoX = 53
                   break
               }
-              doc.text(`${item.PartNo}`, PartNoX, 6)
+              drawBoldText(doc, `${item.PartNo}`, PartNoX, 6)
 
-              doc.text(`${item.SONo}`, 53, 11)
-              doc.text(`${item.PartModel}`, 58, 16)
-              doc.text(`${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
+              drawBoldText(doc, `${item.SONo}`, 53, 11)
+              drawBoldText(doc, `${item.PartModel}`, 58, 16)
+              drawBoldText(doc, `${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
 
               pageCount++
               if (pageCount % 10 === 0) {
@@ -140,15 +151,16 @@ export function usePrintEnglish(messageApi?: MessageApi) {
         drawEnglishLabelFrame(doc)
 
         // 填充 Frame 数据
-        doc.text(`Frame`, 24, 6)
-        doc.text(
+        drawBoldText(doc, 'Frame', 24, 6)
+        drawBoldText(
+          doc,
           `${/\d+/g.exec(Spec.split('-').at(0) || '')?.at(0)}#`,
           24,
           11,
         )
-        doc.text('1', 27, 21)
-        doc.text(`${SONo}`, 53, 11)
-        doc.text(`${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
+        drawBoldText(doc, '1', 27, 21)
+        drawBoldText(doc, `${SONo}`, 53, 11)
+        drawBoldText(doc, `${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
 
         pageCount++
         if (pageCount % 10 === 0) {

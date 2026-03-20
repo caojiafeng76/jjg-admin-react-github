@@ -1,7 +1,13 @@
-import * as XLSX from 'xlsx'
-import type { WorkSheet } from 'xlsx'
+import * as XLSX from 'xlsx-js-style'
+import type { WorkSheet } from 'xlsx-js-style'
 
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
+import {
+  autoFitColumnWidths,
+  setRowHeight,
+  centerAllCells,
+  EXCEL_WRITE_OPTIONS,
+} from '@utils/excelStyleUtils'
 
 const TEMPLATE_HEADERS = [
   '产品交货日期(yyyy-mm-dd)',
@@ -22,8 +28,14 @@ export function downloadWorkshopOrderTemplate() {
   const wb = XLSX.utils.book_new()
   const wsData = [TEMPLATE_HEADERS]
   const ws = XLSX.utils.aoa_to_sheet(wsData)
+  // 自动调整列宽
+  autoFitColumnWidths(ws, wsData)
+  // 设置行高
+  setRowHeight(ws, 20, wsData.length)
+  // 居中显示
+  centerAllCells(ws, wsData)
   XLSX.utils.book_append_sheet(wb, ws, '车间订单模板')
-  XLSX.writeFile(wb, '车间订单导入模板.xlsx')
+  XLSX.writeFile(wb, '车间订单导入模板.xlsx', EXCEL_WRITE_OPTIONS)
 }
 
 export interface WorkshopOrderExcelRow {
@@ -41,7 +53,9 @@ export interface WorkshopOrderExcelRow {
   料号: string
 }
 
-export async function parseWorkshopOrderExcel(file: File): Promise<WorkshopOrder[]> {
+export async function parseWorkshopOrderExcel(
+  file: File,
+): Promise<WorkshopOrder[]> {
   const data = await file.arrayBuffer()
   const workbook = XLSX.read(data, { type: 'array' })
   const sheet = workbook.Sheets[workbook.SheetNames[0]]
@@ -60,7 +74,9 @@ export async function parseWorkshopOrderExcel(file: File): Promise<WorkshopOrder
     return uniqueRows
   }
 
-  throw new Error('未识别的 Excel 格式，请使用模板或 ERP 导出的《销售订单登记.xlsx》。')
+  throw new Error(
+    '未识别的 Excel 格式，请使用模板或 ERP 导出的《销售订单登记.xlsx》。',
+  )
 }
 
 function parseTemplateSheet(sheet: WorkSheet): WorkshopOrder[] {
@@ -147,7 +163,10 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
     }
 
     orders.push({
-      product_delivery_date: getDateFromRow(row, columnMap.product_delivery_date),
+      product_delivery_date: getDateFromRow(
+        row,
+        columnMap.product_delivery_date,
+      ),
       project_no: projectNo || null,
       product_model: productModel || null,
       length_mm: getNumberFromRow(row, columnMap.length_mm),
@@ -289,7 +308,10 @@ function getDateFromRow(row: WorksheetRow, indices: number[]): string | null {
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 }
 
-function getCellValue(row: WorksheetRow, indices: number[]): string | number | null {
+function getCellValue(
+  row: WorksheetRow,
+  indices: number[],
+): string | number | null {
   for (const index of indices) {
     if (index === undefined || index === null) continue
     const value = row[index]
@@ -334,11 +356,12 @@ function isNoiseRow(row: WorksheetRow) {
   return row.some((cell) => {
     if (typeof cell !== 'string') return false
     const normalized = removeSpaces(cell)
-    return keywords.some((keyword) => normalized.includes(removeSpaces(keyword)))
+    return keywords.some((keyword) =>
+      normalized.includes(removeSpaces(keyword)),
+    )
   })
 }
 
 function removeSpaces(value: string) {
   return value.replace(/\s+/g, '')
 }
-
