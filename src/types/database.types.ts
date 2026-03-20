@@ -470,7 +470,6 @@ export type Database = {
           id: string
           order_date: string
           remark: string | null
-          status: string
           total_qualified_hours: number | null
           updated_at: string
           work_hours: number
@@ -482,7 +481,6 @@ export type Database = {
           id?: string
           order_date?: string
           remark?: string | null
-          status?: string
           total_qualified_hours?: number | null
           updated_at?: string
           work_hours: number
@@ -494,7 +492,6 @@ export type Database = {
           id?: string
           order_date?: string
           remark?: string | null
-          status?: string
           total_qualified_hours?: number | null
           updated_at?: string
           work_hours?: number

@@ -44,6 +44,7 @@ interface Props {
   }) => Promise<void> | void
   initialValues?: ProductionOrderFormInitialValues
   employees: { id: string; name: string }[]
+  loading?: boolean
 }
 
 interface OrderItem {
@@ -62,24 +63,13 @@ interface OrderItem {
   bonus_seconds: number
 }
 
-const STATUS_OPTIONS = [
-  { label: '进行中', value: '进行中' },
-  { label: '已完成', value: '已完成' },
-  { label: '已取消', value: '已取消' },
-]
-
-const DEFECT_REASONS = [
-  { label: '加工', value: '加工' },
-  { label: '原料', value: '原料' },
-  { label: '其他', value: '其他' },
-]
-
 export default function ProductionOrderForm({
   open,
   onCancel,
   onSubmit,
   initialValues,
   employees,
+  loading = false,
 }: Props) {
   const [form] = Form.useForm()
   const { data: projectNos, isLoading: loadingProjectNos } =
@@ -89,6 +79,7 @@ export default function ProductionOrderForm({
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
   const [items, setItems] = useState<OrderItem[]>([])
   const [itemForm] = Form.useForm()
+  const [submitting, setSubmitting] = useState(false)
 
   const selectedItemProductModel = Form.useWatch('product_model', itemForm)
   const selectedItemOperation = Form.useWatch('operation', itemForm)
@@ -155,7 +146,6 @@ export default function ProductionOrderForm({
       form.setFieldsValue({
         order_date: dayjs().subtract(1, 'day'),
         work_hours: 8,
-        status: '进行中',
       })
     }
   }, [initialValues, form, open])
@@ -179,19 +169,23 @@ export default function ProductionOrderForm({
   const handleFinish = async (values: {
     order_date: dayjs.Dayjs
     work_hours: number
-    status: string
     remark?: string
     employee_id: string
   }) => {
-    await onSubmit({
-      order: {
-        ...values,
-        order_date: values.order_date.format('YYYY-MM-DD'),
-      },
-      items: [...items],
-    })
-    form.resetFields()
-    setItems([])
+    setSubmitting(true)
+    try {
+      await onSubmit({
+        order: {
+          ...values,
+          order_date: values.order_date.format('YYYY-MM-DD'),
+        },
+        items: [...items],
+      })
+      form.resetFields()
+      setItems([])
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleOpenItemModal = (index?: number) => {
@@ -206,9 +200,9 @@ export default function ProductionOrderForm({
         operation: item?.operation,
         standard_seconds: item?.standard_seconds,
         qualified_quantity: item?.qualified_quantity || 0,
-        defect_reason_1: item?.defect_reason_1,
+        defect_reason_1: item?.defect_reason_1 || '加工',
         defect_quantity_1: item?.defect_quantity_1 || 0,
-        defect_reason_2: item?.defect_reason_2,
+        defect_reason_2: item?.defect_reason_2 || '原料',
         defect_quantity_2: item?.defect_quantity_2 || 0,
         bonus_seconds: item?.bonus_seconds || 0,
       })
@@ -217,7 +211,9 @@ export default function ProductionOrderForm({
       itemForm.resetFields()
       itemForm.setFieldsValue({
         qualified_quantity: 0,
+        defect_reason_1: '加工',
         defect_quantity_1: 0,
+        defect_reason_2: '原料',
         defect_quantity_2: 0,
         bonus_seconds: 0,
       })
@@ -236,9 +232,9 @@ export default function ProductionOrderForm({
       operation: values.operation,
       standard_seconds: Number(values.standard_seconds),
       qualified_quantity: values.qualified_quantity || 0,
-      defect_reason_1: values.defect_reason_1 || null,
+      defect_reason_1: '加工',
       defect_quantity_1: Number(values.defect_quantity_1) || 0,
-      defect_reason_2: values.defect_reason_2 || null,
+      defect_reason_2: '原料',
       defect_quantity_2: Number(values.defect_quantity_2) || 0,
       bonus_seconds: Number(values.bonus_seconds) || 0,
     }
@@ -284,6 +280,7 @@ export default function ProductionOrderForm({
         open={open}
         onCancel={onCancel}
         onOk={() => form.submit()}
+        okButtonProps={{ loading: submitting }}
         width={1200}
         destroyOnClose
       >
@@ -294,7 +291,6 @@ export default function ProductionOrderForm({
           initialValues={{
             order_date: dayjs().subtract(1, 'day'),
             work_hours: 8,
-            status: '进行中',
           }}
         >
           <div className="grid grid-cols-4 gap-4">
@@ -336,18 +332,6 @@ export default function ProductionOrderForm({
               />
             </Form.Item>
 
-            <Form.Item
-              name="status"
-              label="状态"
-              rules={[{ required: true, message: '请选择状态' }]}
-            >
-              <Select
-                placeholder="请选择状态"
-                options={STATUS_OPTIONS}
-                style={{ width: '100%' }}
-              />
-            </Form.Item>
-
             <Form.Item name="remark" label="备注" className="col-span-4">
               <Input.TextArea rows={2} placeholder="请输入备注" />
             </Form.Item>
@@ -375,7 +359,8 @@ export default function ProductionOrderForm({
                 key: index,
               }))}
               rowKey="key"
-              scroll={{ x: 1200 }}
+              scroll={{ x: 1600 }}
+              loading={loading}
               columns={[
                 {
                   title: '#',
@@ -416,6 +401,24 @@ export default function ProductionOrderForm({
                   title: '合格数量',
                   dataIndex: 'qualified_quantity',
                   width: 80,
+                },
+                {
+                  title: '加工不良数量',
+                  dataIndex: 'defect_quantity_1',
+                  width: 100,
+                  render: (value: number) => value || 0,
+                },
+                {
+                  title: '原料不良数量',
+                  dataIndex: 'defect_quantity_2',
+                  width: 100,
+                  render: (value: number) => value || 0,
+                },
+                {
+                  title: '加分(秒)',
+                  dataIndex: 'bonus_seconds',
+                  width: 80,
+                  render: (value: number) => value || 0,
                 },
                 {
                   title: '操作',
@@ -536,42 +539,24 @@ export default function ProductionOrderForm({
           </Form.Item>
 
           <div className="grid grid-cols-2 gap-4">
-            <Form.Item label="不良1" className="mb-2">
-              <Space.Compact className="!flex">
-                <Form.Item name="defect_reason_1" className="!mb-0 !w-24">
-                  <Select
-                    placeholder="原因"
-                    allowClear
-                    options={DEFECT_REASONS}
-                  />
-                </Form.Item>
-                <Form.Item name="defect_quantity_1" className="!mb-0">
-                  <InputNumber
-                    placeholder="数量"
-                    min={0}
-                    style={{ width: 80 }}
-                  />
-                </Form.Item>
-              </Space.Compact>
+            <Form.Item label="加工不良数量" className="mb-2">
+              <Form.Item name="defect_quantity_1" className="!mb-0">
+                <InputNumber
+                  placeholder="数量"
+                  min={0}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
             </Form.Item>
 
-            <Form.Item label="不良2" className="mb-2">
-              <Space.Compact className="!flex">
-                <Form.Item name="defect_reason_2" className="!mb-0 !w-24">
-                  <Select
-                    placeholder="原因"
-                    allowClear
-                    options={DEFECT_REASONS}
-                  />
-                </Form.Item>
-                <Form.Item name="defect_quantity_2" className="!mb-0">
-                  <InputNumber
-                    placeholder="数量"
-                    min={0}
-                    style={{ width: 80 }}
-                  />
-                </Form.Item>
-              </Space.Compact>
+            <Form.Item label="原料不良数量" className="mb-2">
+              <Form.Item name="defect_quantity_2" className="!mb-0">
+                <InputNumber
+                  placeholder="数量"
+                  min={0}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
             </Form.Item>
           </div>
 

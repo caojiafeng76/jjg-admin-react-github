@@ -22,14 +22,12 @@ export async function getProductionOrders({
   startDate,
   endDate,
   employeeId,
-  status,
 }: {
   page: number
   pageSize: number
   startDate?: string
   endDate?: string
   employeeId?: string
-  status?: string
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -55,10 +53,6 @@ export async function getProductionOrders({
 
   if (employeeId) {
     query = query.eq('employee_id', employeeId)
-  }
-
-  if (status) {
-    query = query.eq('status', status)
   }
 
   const { data, error, count } = await query.range(from, to)

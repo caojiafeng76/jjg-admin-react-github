@@ -9,7 +9,6 @@ interface SearchParams {
   startDate?: string
   endDate?: string
   employeeId?: string
-  status?: string
 }
 
 interface Props {
@@ -29,7 +28,6 @@ export default function ProductionOrderSearch({
   const handleSearch = (values: {
     dateRange?: [Dayjs | null, Dayjs | null]
     employeeId?: string
-    status?: string
   }) => {
     const params: SearchParams = {}
 
@@ -40,10 +38,6 @@ export default function ProductionOrderSearch({
 
     if (values.employeeId) {
       params.employeeId = values.employeeId
-    }
-
-    if (values.status) {
-      params.status = values.status
     }
 
     setIsSearching(true)
@@ -83,18 +77,7 @@ export default function ProductionOrderSearch({
           options={employees.map((emp) => ({ label: emp.name, value: emp.id }))}
         />
       </Form.Item>
-      <Form.Item name="status" className="mb-0">
-        <Select
-          placeholder="选择状态"
-          allowClear
-          style={{ width: 120 }}
-          options={[
-            { label: '进行中', value: '进行中' },
-            { label: '已完成', value: '已完成' },
-            { label: '已取消', value: '已取消' },
-          ]}
-        />
-      </Form.Item>
+
       <Form.Item className="mb-0">
         <Space>
           <Button

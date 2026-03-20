@@ -6,7 +6,6 @@ import {
   Button,
   Popconfirm,
   Space,
-  Tag,
 } from 'antd'
 import { PencilSquareIcon, TrashIcon, EyeIcon } from '@heroicons/react/16/solid'
 
@@ -21,12 +20,6 @@ interface Props {
   onEdit: (record: ProductionOrder) => void
   onDelete: (ids: string[]) => void
   scrollY?: number
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  进行中: 'processing',
-  已完成: 'success',
-  已取消: 'default',
 }
 
 export default function ProductionOrderList({
@@ -85,15 +78,7 @@ export default function ProductionOrderList({
         render: (value: number | null) =>
           value ? (value * 100).toFixed(2) : '-',
       },
-      {
-        title: '状态',
-        dataIndex: 'status',
-        key: 'status',
-        width: 100,
-        render: (value: string) => (
-          <Tag color={STATUS_COLORS[value]}>{value}</Tag>
-        ),
-      },
+
       {
         title: '备注',
         dataIndex: 'remark',
