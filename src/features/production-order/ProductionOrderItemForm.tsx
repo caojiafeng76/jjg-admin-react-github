@@ -20,12 +20,6 @@ interface Props {
   orderId: string
 }
 
-const DEFECT_REASONS = [
-  { label: '加工', value: '加工' },
-  { label: '原料', value: '原料' },
-  { label: '其他', value: '其他' },
-]
-
 export default function ProductionOrderItemForm({
   open,
   onCancel,
@@ -61,7 +55,9 @@ export default function ProductionOrderItemForm({
       form.setFieldsValue({
         order_id: orderId,
         qualified_quantity: 0,
+        defect_reason_1: '加工',
         defect_quantity_1: 0,
+        defect_reason_2: '原料',
         defect_quantity_2: 0,
         bonus_seconds: 0,
       })
@@ -128,7 +124,9 @@ export default function ProductionOrderItemForm({
         initialValues={{
           order_id: orderId,
           qualified_quantity: 0,
+          defect_reason_1: '加工',
           defect_quantity_1: 0,
+          defect_reason_2: '原料',
           defect_quantity_2: 0,
           bonus_seconds: 0,
         }}
@@ -207,36 +205,18 @@ export default function ProductionOrderItemForm({
         </Form.Item>
 
         <Form.Item
-          name="defect_reason_1"
-          label="不良原因1"
-          initialValue={undefined}
+          name="defect_quantity_1"
+          label="加工不良数量"
+          initialValue={0}
         >
-          <Select
-            placeholder="请选择不良原因"
-            allowClear
-            options={DEFECT_REASONS}
-            style={{ width: '100%' }}
-          />
-        </Form.Item>
-
-        <Form.Item name="defect_quantity_1" label="不良数量1" initialValue={0}>
           <InputNumber min={0} style={{ width: '100%' }} />
         </Form.Item>
 
         <Form.Item
-          name="defect_reason_2"
-          label="不良原因2"
-          initialValue={undefined}
+          name="defect_quantity_2"
+          label="原料不良数量"
+          initialValue={0}
         >
-          <Select
-            placeholder="请选择不良原因"
-            allowClear
-            options={DEFECT_REASONS}
-            style={{ width: '100%' }}
-          />
-        </Form.Item>
-
-        <Form.Item name="defect_quantity_2" label="不良数量2" initialValue={0}>
           <InputNumber min={0} style={{ width: '100%' }} />
         </Form.Item>
 

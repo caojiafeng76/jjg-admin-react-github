@@ -32,7 +32,6 @@ export interface ProductionOrder {
   work_hours: number
   total_qualified_hours: number | null
   efficiency: number | null
-  status: string
   remark: string | null
   created_at: string
   updated_at: string
@@ -57,7 +56,6 @@ export default function ProductionOrderPage() {
     startDate?: string
     endDate?: string
     employeeId?: string
-    status?: string
   }>({})
 
   const { data: orderData, isLoading } = useProductionOrders({
@@ -66,7 +64,9 @@ export default function ProductionOrderPage() {
     filters,
   })
 
-  const { data: detailData } = useProductionOrder(editingRecord?.id)
+  const { data: detailData, isLoading: isLoadingDetail } = useProductionOrder(
+    editingRecord?.id,
+  )
 
   const { data: allEmployees } = useAllEmployees()
   const employees = allEmployees || []
@@ -329,6 +329,7 @@ export default function ProductionOrderPage() {
         onSubmit={handleFinish}
         initialValues={detailData || editingRecord || undefined}
         employees={employees}
+        loading={isLoadingDetail && !!editingRecord?.id}
       />
 
       <Modal

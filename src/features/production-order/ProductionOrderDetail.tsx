@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Descriptions, Tag, Button } from 'antd'
+import { Card, Descriptions, Button } from 'antd'
 import { PlusIcon } from '@heroicons/react/16/solid'
 
 import ProductionOrderItemTable from './ProductionOrderItemTable'
@@ -16,12 +16,6 @@ import type { ProductionOrder } from '@/services/apiProductionOrders'
 interface Props {
   order: ProductionOrder & { items?: ProductionOrderItem[] }
   onEdit: () => void
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  进行中: 'processing',
-  已完成: 'success',
-  已取消: 'default',
 }
 
 export default function ProductionOrderDetail({ order, onEdit }: Props) {
@@ -99,9 +93,6 @@ export default function ProductionOrderDetail({ order, onEdit }: Props) {
           </Descriptions.Item>
           <Descriptions.Item label="工时效率">
             {order.efficiency ? (order.efficiency * 100).toFixed(2) : '-'}%
-          </Descriptions.Item>
-          <Descriptions.Item label="状态">
-            <Tag color={STATUS_COLORS[order.status]}>{order.status}</Tag>
           </Descriptions.Item>
           <Descriptions.Item label="备注" span={2}>
             {order.remark || '-'}

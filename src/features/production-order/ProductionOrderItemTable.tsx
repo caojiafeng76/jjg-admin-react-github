@@ -81,28 +81,16 @@ export default function ProductionOrderItemTable({
         render: (value: number | null) => value?.toFixed(2) || '-',
       },
       {
-        title: '不良原因1',
-        dataIndex: 'defect_reason_1',
-        key: 'defect_reason_1',
-        width: 90,
-      },
-      {
-        title: '不良数量1',
+        title: '加工不良数量',
         dataIndex: 'defect_quantity_1',
         key: 'defect_quantity_1',
-        width: 90,
+        width: 100,
       },
       {
-        title: '不良原因2',
-        dataIndex: 'defect_reason_2',
-        key: 'defect_reason_2',
-        width: 90,
-      },
-      {
-        title: '不良数量2',
+        title: '原料不良数量',
         dataIndex: 'defect_quantity_2',
         key: 'defect_quantity_2',
-        width: 90,
+        width: 100,
       },
       {
         title: '减分工时(h)',
