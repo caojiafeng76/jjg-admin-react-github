@@ -16,6 +16,10 @@ export interface ProductionOrderWithEmployee extends ProductionOrder {
   }
 }
 
+export interface ProductionOrderForExport extends ProductionOrderWithEmployee {
+  items: Database['public']['Tables']['production_order_items']['Row'][]
+}
+
 export async function getProductionOrders({
   page,
   pageSize,
@@ -87,6 +91,35 @@ export async function getProductionOrderById(id: string) {
   return data as ProductionOrderWithEmployee & {
     items: Database['public']['Tables']['production_order_items']['Row'][]
   }
+}
+
+export async function getProductionOrdersForExport(ids: string[]) {
+  if (ids.length === 0) {
+    return [] as ProductionOrderForExport[]
+  }
+
+  const { data, error } = await supabase
+    .from('production_orders')
+    .select(
+      `
+      *,
+      employee:employees(id, name),
+      items:production_order_items(*)
+    `,
+    )
+    .in('id', ids)
+    .order('order_date', { ascending: true })
+
+  if (error) {
+    throw handleApiError(error, '获取生产工单导出数据失败')
+  }
+
+  const rows = (data || []) as ProductionOrderForExport[]
+  const orderMap = new Map(rows.map((row) => [row.id, row]))
+
+  return ids
+    .map((id) => orderMap.get(id))
+    .filter((row): row is ProductionOrderForExport => Boolean(row))
 }
 
 export async function createProductionOrder(values: ProductionOrderInsert) {

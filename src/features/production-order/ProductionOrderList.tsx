@@ -131,6 +131,7 @@ export default function ProductionOrderList({
   const rowSelection: TableProps<ProductionOrder>['rowSelection'] = {
     selectedRowKeys,
     onChange: onSelect,
+    preserveSelectedRowKeys: true,
   }
 
   return (

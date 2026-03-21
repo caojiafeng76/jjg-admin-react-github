@@ -30,6 +30,7 @@ const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),
 )
 const ProductionOrder = lazy(() => import('@features/production-order'))
+const ProductionDailyReport = lazy(() => import('@features/production-report'))
 
 function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()
@@ -155,6 +156,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <ProductionOrder />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'production-daily-report',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ProductionDailyReport />
           </Suspense>
         ),
       },
