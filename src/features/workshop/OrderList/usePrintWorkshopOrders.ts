@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { App } from 'antd'
-import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
-import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
+import { initializePDF } from '@/utils/pdfUtils'
+import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import type { WorkshopOrder } from './index'
 
 // 表格列定义
@@ -37,15 +37,9 @@ export function usePrintWorkshopOrders() {
       setIsPrinting(true)
 
       // 初始化 PDF 文档（横向）
-      const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' })
-
-      // 动态加载 Google Font
-      const fontData = await loadGoogleFont()
-      const fontName = GOOGLE_FONT_CONFIG.FONT_NAME
       const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
-      doc.addFileToVFS(fontName, fontData)
-      doc.addFont(fontName, fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
-      doc.setFont(fontFamily)
+      const doc = await initializePDF('l')
+      doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
 
       // 处理表格数据
       const tableData = selectedOrders.map((order, index) => [
@@ -73,10 +67,12 @@ export function usePrintWorkshopOrders() {
           fillColor: [0, 0, 0], // 黑色背景
           textColor: [255, 255, 255], // 白色文字
           font: fontFamily,
+          fontStyle: GOOGLE_FONT_CONFIG.FONT_STYLE,
           fontSize: 9,
         },
         styles: {
           font: fontFamily,
+          fontStyle: GOOGLE_FONT_CONFIG.FONT_STYLE,
           fontSize: 8,
           cellPadding: { top: 2, right: 2, bottom: 2, left: 2 },
           halign: 'center',

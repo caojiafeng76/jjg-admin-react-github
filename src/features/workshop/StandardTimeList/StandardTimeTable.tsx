@@ -33,6 +33,15 @@ export default function StandardTimeTable({
         key: '#',
       },
       {
+        title: '型号',
+        dataIndex: 'model',
+        key: 'model',
+        width: 150,
+        ellipsis: {
+          showTitle: true,
+        },
+      },
+      {
         title: '工序',
         dataIndex: 'operation',
         key: 'operation',
@@ -46,15 +55,6 @@ export default function StandardTimeTable({
             return value.join(', ')
           }
           return value
-        },
-      },
-      {
-        title: '型号',
-        dataIndex: 'model',
-        key: 'model',
-        width: 150,
-        ellipsis: {
-          showTitle: true,
         },
       },
       {

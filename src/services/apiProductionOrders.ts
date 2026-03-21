@@ -16,6 +16,10 @@ export interface ProductionOrderWithEmployee extends ProductionOrder {
   }
 }
 
+export interface ProductionOrderListItem extends ProductionOrderWithEmployee {
+  hasZeroStandardQualifiedItem?: boolean
+}
+
 export interface ProductionOrderForExport extends ProductionOrderWithEmployee {
   items: Database['public']['Tables']['production_order_items']['Row'][]
 }
@@ -36,12 +40,22 @@ export async function getProductionOrders({
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
+  type ProductionOrderListRelation = Pick<
+    Database['public']['Tables']['production_order_items']['Row'],
+    'standard_seconds' | 'qualified_quantity'
+  >
+
+  type ProductionOrderListQueryRow = ProductionOrderWithEmployee & {
+    items?: ProductionOrderListRelation[]
+  }
+
   let query = supabase
     .from('production_orders')
     .select(
       `
       *,
-      employee:employees(id, name)
+      employee:employees(id, name),
+      items:production_order_items(standard_seconds, qualified_quantity)
     `,
       { count: 'exact' },
     )
@@ -65,8 +79,19 @@ export async function getProductionOrders({
     throw handleApiError(error, '获取生产工单列表失败')
   }
 
+  const items = ((data || []) as ProductionOrderListQueryRow[]).map(
+    ({ items: orderItems = [], ...order }) => ({
+      ...order,
+      hasZeroStandardQualifiedItem: orderItems.some(
+        (item) =>
+          Number(item.standard_seconds || 0) === 0 &&
+          Number(item.qualified_quantity || 0) > 0,
+      ),
+    }),
+  )
+
   return {
-    items: (data || []) as ProductionOrderWithEmployee[],
+    items,
     total: count || 0,
   }
 }

@@ -7,7 +7,10 @@ import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import type { Employee } from '@/services/apiEmployees'
+import {
+  getEmployeeDeleteBlockers,
+  type Employee,
+} from '@/services/apiEmployees'
 import {
   useEmployeesList,
   useCreateEmployee,
@@ -19,7 +22,7 @@ import EmployeeForm from './EmployeeForm'
 import EmployeeSearch from './EmployeeSearch'
 
 export default function EmployeeList() {
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建员工')
@@ -81,13 +84,83 @@ export default function EmployeeList() {
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
       message.warning('请选择至少一条数据')
       return
     }
-    deleteMutation.mutate(selectedRowKeys as string[])
-  }, [deleteMutation, message, selectedRowKeys])
+
+    const ids = selectedRowKeys as string[]
+
+    try {
+      const blockers = await getEmployeeDeleteBlockers(ids)
+
+      if (blockers.length > 0) {
+        modal.warning({
+          title: '无法删除员工',
+          okText: '知道了',
+          width: 560,
+          content: (
+            <div className="space-y-3">
+              <p>以下员工已被生产工单引用，请先处理关联数据：</p>
+              <ul className="list-disc space-y-2 pl-5">
+                {blockers.map((item) => (
+                  <li key={item.employeeId}>
+                    <div className="font-medium text-gray-800">{item.employeeName}</div>
+                    <div className="text-sm text-gray-500">
+                      已关联 {item.productionOrderCount} 张生产工单
+                      {item.orderDates.length > 0
+                        ? `，日期：${item.orderDates.slice(0, 3).join('、')}`
+                        : ''}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ),
+        })
+        return
+      }
+
+      modal.confirm({
+        title: '删除员工',
+        okText: '确认删除',
+        cancelText: '取消',
+        okButtonProps: { danger: true },
+        content: (
+          <div>
+            <p>
+              确定删除选中的 <strong>{ids.length}</strong> 个员工吗？
+            </p>
+            <p className="mt-2 text-xs text-red-500">
+              此操作不可撤销。
+            </p>
+          </div>
+        ),
+        onOk: async () => {
+          try {
+            await deleteMutation.mutateAsync(ids)
+            message.success('删除成功')
+            setSelectedRowKeys([])
+          } catch (error) {
+            if (error instanceof Error) {
+              message.error(error.message)
+            } else {
+              message.error('删除失败，请稍后重试')
+            }
+
+            throw error
+          }
+        },
+      })
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('删除失败，请稍后重试')
+      }
+    }
+  }, [deleteMutation, message, modal, selectedRowKeys])
 
   const handleFinish = useCallback(
     async (values: Employee) => {
@@ -152,7 +225,7 @@ export default function EmployeeList() {
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑" handleEdit={handleEdit} />
         <DeleteButton
-          onConfirm={handleDelete}
+          onClick={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
           title="删除员工"

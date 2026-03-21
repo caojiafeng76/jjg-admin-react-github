@@ -3,6 +3,7 @@ import { App, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
+import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
@@ -101,13 +102,26 @@ export default function ProductionOrderPage() {
     setIsModalOpen(true)
   }, [])
 
-  const handleEdit = useCallback((record: ProductionOrder) => {
-    setEditingRecord(record)
+  const handleEdit = useCallback((record?: ProductionOrder) => {
+    const targetRecord =
+      record || orderData?.items.find((item) => item.id === selectedRowKeys[0])
+
+    if (!targetRecord) {
+      message.warning('请选择一条数据进行编辑')
+      return
+    }
+
+    if (!record && selectedRowKeys.length !== 1) {
+      message.warning('请选择一条数据进行编辑')
+      return
+    }
+
+    setEditingRecord(targetRecord)
     setIsEdit(true)
     setIsView(false)
     setModalTitle('编辑工单')
     setIsModalOpen(true)
-  }, [])
+  }, [message, orderData?.items, selectedRowKeys])
 
   const handleView = useCallback((record: ProductionOrder) => {
     setEditingRecord(record)
@@ -330,6 +344,7 @@ export default function ProductionOrderPage() {
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
+        <EditButton title="编辑" handleEdit={() => handleEdit()} />
         <ExportButton
           handleExport={handleExport}
           loading={isExporting}
@@ -345,27 +360,33 @@ export default function ProductionOrderPage() {
         />
       </div>
 
-      <ProductionOrderSearch
-        onSearch={handleSearch}
-        onReset={handleResetSearch}
-        employees={employees}
-      />
-
-      <div ref={tableContainerRef} className="min-h-0">
-        <ProductionOrderList
-          loading={isLoading}
-          data={orderData?.items || []}
-          selectedRowKeys={selectedRowKeys}
-          onSelect={setSelectedRowKeys}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          scrollY={scrollY}
+      <div className="flex items-center gap-2">
+        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <ProductionOrderSearch
+          onSearch={handleSearch}
+          onReset={handleResetSearch}
+          employees={employees}
         />
       </div>
 
-      <div ref={paginationRef}>
-        <AppPagination total={orderData?.total || 0} />
+      <div
+        ref={tableContainerRef}
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+      >
+        <div className="min-h-0 flex-1 overflow-x-auto">
+          <ProductionOrderList
+            loading={isLoading}
+            data={orderData?.items || []}
+            selectedRowKeys={selectedRowKeys}
+            onSelect={setSelectedRowKeys}
+            onView={handleView}
+            scrollY={scrollY}
+          />
+        </div>
+
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
+          <AppPagination total={orderData?.total || 0} />
+        </div>
       </div>
 
       <ProductionOrderForm

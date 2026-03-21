@@ -28,27 +28,96 @@ export async function getStandardTimes({
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
-  let query = supabase.from('process_standards').select('*', { count: 'exact' })
+  const buildBaseQuery = () => {
+    let query = supabase.from('process_standards').select('*', { count: 'exact' })
 
-  if (operation) {
-    query = query.ilike('operation', `%${operation}%`)
+    if (operation) {
+      query = query.ilike('operation', `%${operation}%`)
+    }
+
+    if (model) {
+      query = query.ilike('model', `%${model}%`)
+    }
+
+    return query
   }
 
-  if (model) {
-    query = query.ilike('model', `%${model}%`)
+  const buildCountQuery = () => {
+    let query = supabase
+      .from('process_standards')
+      .select('id', { count: 'exact', head: true })
+
+    if (operation) {
+      query = query.ilike('operation', `%${operation}%`)
+    }
+
+    if (model) {
+      query = query.ilike('model', `%${model}%`)
+    }
+
+    return query
   }
 
-  const { data, error, count } = await query
-    .range(from, to)
-    .order('operation', { ascending: true })
+  const [{ count: total, error: totalError }, { count: zeroCount, error: zeroCountError }] =
+    await Promise.all([
+      buildCountQuery(),
+      buildCountQuery().eq('standard_seconds', 0),
+    ])
 
-  if (error) {
-    throw handleApiError(error, '获取标准工时列表失败')
+  if (totalError || zeroCountError) {
+    throw handleApiError(totalError || zeroCountError, '获取标准工时列表失败')
+  }
+
+  const normalizedZeroCount = zeroCount || 0
+  const fetchTasks: Array<Promise<{ data: StandardTime[]; error: unknown }>> = []
+
+  if (from < normalizedZeroCount) {
+    fetchTasks.push(
+      (async () => {
+        const { data, error } = await buildBaseQuery()
+          .eq('standard_seconds', 0)
+          .order('operation', { ascending: true })
+          .order('model', { ascending: true })
+          .range(from, Math.min(to, normalizedZeroCount - 1))
+
+        return {
+          data: (data || []) as StandardTime[],
+          error,
+        }
+      })(),
+    )
+  }
+
+  if (to >= normalizedZeroCount) {
+    const nonZeroFrom = Math.max(0, from - normalizedZeroCount)
+    const nonZeroTo = to - normalizedZeroCount
+
+    fetchTasks.push(
+      (async () => {
+        const { data, error } = await buildBaseQuery()
+          .gt('standard_seconds', 0)
+          .order('operation', { ascending: true })
+          .order('model', { ascending: true })
+          .range(nonZeroFrom, nonZeroTo)
+
+        return {
+          data: (data || []) as StandardTime[],
+          error,
+        }
+      })(),
+    )
+  }
+
+  const results = await Promise.all(fetchTasks)
+  const failed = results.find((result) => result.error)
+
+  if (failed?.error) {
+    throw handleApiError(failed.error, '获取标准工时列表失败')
   }
 
   return {
-    items: (data || []) as StandardTime[],
-    total: count || 0,
+    items: results.flatMap((result) => result.data || []),
+    total: total || 0,
   }
 }
 
