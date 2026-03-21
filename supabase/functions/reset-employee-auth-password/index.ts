@@ -75,6 +75,31 @@ serve(async (request) => {
     return jsonResponse({ error: '该员工尚未绑定账号' }, 409)
   }
 
+  const { data: authUserData, error: authUserError } =
+    await adminClient.auth.admin.getUserById(employee.auth_user_id)
+
+  if (authUserError) {
+    const message = authUserError.message || ''
+    const status = message.toLowerCase().includes('not found') ? 409 : 500
+
+    return jsonResponse(
+      {
+        error:
+          status === 409
+            ? '该员工绑定的登录账号已失效，请先解绑后重新绑定账号'
+            : '读取员工登录账号失败',
+      },
+      status,
+    )
+  }
+
+  if (!authUserData.user) {
+    return jsonResponse(
+      { error: '该员工绑定的登录账号已失效，请先解绑后重新绑定账号' },
+      409,
+    )
+  }
+
   const { error: updateError } = await adminClient.auth.admin.updateUserById(
     employee.auth_user_id,
     {
