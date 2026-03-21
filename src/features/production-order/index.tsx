@@ -4,8 +4,11 @@ import { useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
 import DeleteButton from '@/ui/DeleteButton'
+import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { getProductionOrdersForExport } from '@/services/apiProductionOrders'
+import { exportProductionOrdersToExcel } from '@/utils/productionOrderExcel'
 import {
   useProductionOrders,
   useProductionOrder,
@@ -48,6 +51,7 @@ export default function ProductionOrderPage() {
     null,
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
+  const [isExporting, setIsExporting] = useState(false)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -136,6 +140,40 @@ export default function ProductionOrderPage() {
     },
     [deleteMutation, message, selectedRowKeys],
   )
+
+  const handleExport = useCallback(async () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning('请先选择要导出的工单')
+      return
+    }
+
+    try {
+      setIsExporting(true)
+      const exportOrders = await getProductionOrdersForExport(
+        selectedRowKeys.map((key) => String(key)),
+      )
+
+      const exportableOrders = exportOrders.filter(
+        (order) => order.items && order.items.length > 0,
+      )
+
+      if (exportableOrders.length === 0) {
+        message.warning('选中的工单没有可导出的工序明细')
+        return
+      }
+
+      exportProductionOrdersToExcel(exportableOrders)
+      message.success(`已导出 ${exportableOrders.length} 张工单的工序明细`)
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('导出失败，请稍后重试')
+      }
+    } finally {
+      setIsExporting(false)
+    }
+  }, [message, selectedRowKeys])
 
   const handleFinish = useCallback(
     async (values: {
@@ -292,6 +330,13 @@ export default function ProductionOrderPage() {
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
+        <ExportButton
+          handleExport={handleExport}
+          loading={isExporting}
+          count={selectedRowKeys.length}
+        >
+          导出工单
+        </ExportButton>
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}

@@ -33,6 +33,7 @@ const items: MenuItem[] = [
       { key: 'employee-list', label: '员工管理' },
       { key: 'standard-time-list', label: '标准工时' },
       { key: 'production-order', label: '生产工单' },
+      { key: 'production-daily-report', label: '生产日报表' },
     ],
   },
 ]
