@@ -74,7 +74,9 @@ export default function ProductionOrderList({
           return (
             <span
               style={
-                record.hasZeroStandardQualifiedItem ? dangerTextStyle : undefined
+                record.hasZeroStandardQualifiedItem
+                  ? dangerTextStyle
+                  : undefined
               }
             >
               {value.toFixed(2)}
