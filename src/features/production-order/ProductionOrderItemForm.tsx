@@ -161,7 +161,9 @@ export default function ProductionOrderItemForm({
     onSubmit({
       ...values,
       operation,
-      standard_seconds: Number(values.standard_seconds ?? 0),
+      standard_seconds: Number(
+        values.standard_seconds ?? form.getFieldValue('standard_seconds') ?? 0,
+      ),
       order_id: orderId,
     } as Partial<ProductionOrderItem>)
     form.resetFields()
@@ -283,15 +285,7 @@ export default function ProductionOrderItemForm({
           />
         </Form.Item>
 
-        {compact ? (
-          <Form.Item
-            name="standard_seconds"
-            rules={[{ required: true, message: '请输入标准工时' }]}
-            hidden
-          >
-            <InputNumber />
-          </Form.Item>
-        ) : (
+        {!compact ? (
           <Form.Item
             name="standard_seconds"
             label="标准工时(秒)"
@@ -305,7 +299,7 @@ export default function ProductionOrderItemForm({
               disabled
             />
           </Form.Item>
-        )}
+        ) : null}
 
         <Form.Item
           name="qualified_quantity"

@@ -307,7 +307,9 @@ export default function ProductionOrderForm({
       length_mm: data?.length_mm ?? values.length_mm ?? null,
       customer_model: data?.customer_model ?? values.customer_model ?? null,
       operation,
-      standard_seconds: Number(values.standard_seconds ?? 0),
+      standard_seconds: Number(
+        values.standard_seconds ?? itemForm.getFieldValue('standard_seconds') ?? 0,
+      ),
       qualified_quantity: values.qualified_quantity || 0,
       defect_reason_1: '加工',
       defect_quantity_1: Number(values.defect_quantity_1) || 0,
@@ -804,15 +806,7 @@ export default function ProductionOrderForm({
             />
           </Form.Item>
 
-          {compact ? (
-            <Form.Item
-              name="standard_seconds"
-              rules={[{ required: true, message: '请输入标准工时' }]}
-              hidden
-            >
-              <InputNumber />
-            </Form.Item>
-          ) : (
+          {!compact ? (
             <Form.Item
               name="standard_seconds"
               label="标准工时(秒)"
@@ -825,7 +819,7 @@ export default function ProductionOrderForm({
                 disabled
               />
             </Form.Item>
-          )}
+          ) : null}
 
           <Form.Item
             name="qualified_quantity"
