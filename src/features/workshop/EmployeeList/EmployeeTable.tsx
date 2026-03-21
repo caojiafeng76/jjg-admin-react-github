@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Table, TableColumnsType, Tag, Typography } from 'antd'
 import type { Employee } from '@/services/apiEmployees'
+import { useEmployeeAuthEmail } from './useEmployees'
 
 interface Props {
   loading: boolean
@@ -13,6 +14,39 @@ interface Props {
   rowHeight?: number
 }
 
+interface BoundAccountCellProps {
+  employeeId?: string
+  authUserId?: string | null
+}
+
+function BoundAccountCell({ employeeId, authUserId }: BoundAccountCellProps) {
+  const { data: authEmailResult, isFetching } = useEmployeeAuthEmail(
+    employeeId,
+    Boolean(employeeId && authUserId),
+  )
+
+  if (!authUserId) {
+    return <Tag color="default">未绑定</Tag>
+  }
+
+  const email = authEmailResult?.email?.trim() || null
+  const displayText = email || `${authUserId.slice(0, 8)}...${authUserId.slice(-6)}`
+
+  return (
+    <div className="flex flex-col gap-1">
+      <Tag color="processing" className="mr-0 w-fit">
+        已绑定
+      </Tag>
+      <Typography.Text
+        copyable={{ text: email || authUserId }}
+        className="text-xs text-gray-500"
+      >
+        {isFetching && !email ? '加载中...' : displayText}
+      </Typography.Text>
+    </div>
+  )
+}
+
 export default function EmployeeTable({
   loading,
   data,
@@ -23,12 +57,6 @@ export default function EmployeeTable({
   scrollY = 400,
   rowHeight = 40,
 }: Props) {
-  const formatAuthUserId = (value?: string | null) => {
-    if (!value) return '-'
-
-    return `${value.slice(0, 8)}...${value.slice(-6)}`
-  }
-
   const columns: TableColumnsType<Employee> = useMemo(
     () => [
       {
@@ -52,23 +80,12 @@ export default function EmployeeTable({
         dataIndex: 'auth_user_id',
         key: 'auth_user_id',
         width: 240,
-        render: (value: string | null | undefined) => {
-          if (!value) {
-            return <Tag color="default">未绑定</Tag>
-          }
-
+        render: (value: string | null | undefined, record: Employee) => {
           return (
-            <div className="flex flex-col gap-1">
-              <Tag color="processing" className="mr-0 w-fit">
-                已绑定
-              </Tag>
-              <Typography.Text
-                copyable={{ text: value }}
-                className="text-xs text-gray-500"
-              >
-                {formatAuthUserId(value)}
-              </Typography.Text>
-            </div>
+            <BoundAccountCell
+              employeeId={record.id}
+              authUserId={value}
+            />
           )
         },
       },

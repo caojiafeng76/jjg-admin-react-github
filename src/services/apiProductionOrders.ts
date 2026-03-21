@@ -30,15 +30,20 @@ export async function getProductionOrders({
   startDate,
   endDate,
   employeeId,
+  productModel,
+  customerModel,
 }: {
   page: number
   pageSize: number
   startDate?: string
   endDate?: string
   employeeId?: string
+  productModel?: string
+  customerModel?: string
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
+  const hasItemFilters = Boolean(productModel || customerModel)
 
   type ProductionOrderListRelation = Pick<
     Database['public']['Tables']['production_order_items']['Row'],
@@ -49,16 +54,15 @@ export async function getProductionOrders({
     items?: ProductionOrderListRelation[]
   }
 
-  let query = supabase
-    .from('production_orders')
-    .select(
-      `
+  const selectClause = `
       *,
       employee:employees(id, name),
-      items:production_order_items(standard_seconds, qualified_quantity)
-    `,
-      { count: 'exact' },
-    )
+      items:production_order_items(standard_seconds, qualified_quantity)${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, product_model, customer_model)' : ''}
+    `
+
+  let query = supabase
+    .from('production_orders')
+    .select(selectClause, { count: 'exact' })
     .order('order_date', { ascending: false })
 
   if (startDate) {
@@ -73,13 +77,21 @@ export async function getProductionOrders({
     query = query.eq('employee_id', employeeId)
   }
 
+  if (productModel) {
+    query = query.ilike('item_filters.product_model', `%${productModel}%`)
+  }
+
+  if (customerModel) {
+    query = query.ilike('item_filters.customer_model', `%${customerModel}%`)
+  }
+
   const { data, error, count } = await query.range(from, to)
 
   if (error) {
     throw handleApiError(error, '获取生产工单列表失败')
   }
 
-  const items = ((data || []) as ProductionOrderListQueryRow[]).map(
+  const items = ((data || []) as unknown as ProductionOrderListQueryRow[]).map(
     ({ items: orderItems = [], ...order }) => ({
       ...order,
       hasZeroStandardQualifiedItem: orderItems.some(

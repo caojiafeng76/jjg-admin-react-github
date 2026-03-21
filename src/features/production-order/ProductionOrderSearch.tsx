@@ -13,6 +13,8 @@ interface SearchParams {
   startDate?: string
   endDate?: string
   employeeId?: string
+  productModel?: string
+  customerModel?: string
 }
 
 interface Props {
@@ -39,6 +41,8 @@ export default function ProductionOrderSearch({
   useEffect(() => {
     form.setFieldsValue({
       employeeId: fixedEmployee?.id || initialValues?.employeeId,
+      productModel: initialValues?.productModel,
+      customerModel: initialValues?.customerModel,
       dateRange:
         initialValues?.startDate && initialValues?.endDate
           ? [dayjs(initialValues.startDate), dayjs(initialValues.endDate)]
@@ -53,6 +57,8 @@ export default function ProductionOrderSearch({
   const handleSearch = (values: {
     dateRange?: [Dayjs | null, Dayjs | null]
     employeeId?: string
+    productModel?: string
+    customerModel?: string
   }) => {
     const params: SearchParams = {}
 
@@ -65,6 +71,16 @@ export default function ProductionOrderSearch({
       params.employeeId = fixedEmployee.id
     } else if (values.employeeId) {
       params.employeeId = values.employeeId
+    }
+
+    const productModel = values.productModel?.trim()
+    if (productModel) {
+      params.productModel = productModel
+    }
+
+    const customerModel = values.customerModel?.trim()
+    if (customerModel) {
+      params.customerModel = customerModel
     }
 
     setIsSearching(true)
@@ -120,7 +136,7 @@ export default function ProductionOrderSearch({
             allowClear
             style={{ width: mobile ? '100%' : 160 }}
             showSearch
-            optionFilterProp="children"
+            optionFilterProp="label"
             options={employees.map((emp) => ({
               label: emp.name,
               value: emp.id,
@@ -128,6 +144,22 @@ export default function ProductionOrderSearch({
           />
         </Form.Item>
       )}
+
+      <Form.Item name="productModel" className="mb-0">
+        <Input
+          placeholder="型号"
+          allowClear
+          style={{ width: mobile ? '100%' : 160 }}
+        />
+      </Form.Item>
+
+      <Form.Item name="customerModel" className="mb-0">
+        <Input
+          placeholder="客户型号"
+          allowClear
+          style={{ width: mobile ? '100%' : 180 }}
+        />
+      </Form.Item>
 
       <Form.Item className="mb-0">
         <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>

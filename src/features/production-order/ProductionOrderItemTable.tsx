@@ -130,6 +130,13 @@ export default function ProductionOrderItemTable({
         key: 'bonus_seconds',
         width: 90,
       },
+      {
+        title: '备注',
+        dataIndex: 'remark',
+        key: 'remark',
+        width: 150,
+        render: (value: string | null) => value || '-',
+      },
       ...(showActions
         ? [
             {

@@ -70,6 +70,8 @@ export default function ProductionOrderPage() {
     startDate?: string
     endDate?: string
     employeeId?: string
+    productModel?: string
+    customerModel?: string
   }>(() => ({
     employeeId:
       (role === 'employee' ? employeeProfile?.id : undefined) ||

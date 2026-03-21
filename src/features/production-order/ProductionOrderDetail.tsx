@@ -111,27 +111,6 @@ export default function ProductionOrderDetail({
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                合格工时
-              </div>
-              <div className="mt-1 font-semibold text-slate-900">
-                {currentOrder.total_qualified_hours
-                  ? currentOrder.total_qualified_hours.toFixed(2)
-                  : '-'}{' '}
-                小时
-              </div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                工时效率
-              </div>
-              <div className="mt-1 font-semibold text-slate-900">
-                {currentOrder.efficiency
-                  ? `${(currentOrder.efficiency * 100).toFixed(2)}%`
-                  : '-'}
-              </div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                 备注
               </div>
               <div className="mt-1 line-clamp-3 font-semibold text-slate-900">

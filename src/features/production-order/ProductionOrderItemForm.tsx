@@ -283,18 +283,29 @@ export default function ProductionOrderItemForm({
           />
         </Form.Item>
 
-        <Form.Item
-          name="standard_seconds"
-          label="标准工时(秒)"
-          rules={[{ required: true, message: '请输入标准工时' }]}
-        >
-          <InputNumber
-            min={0}
-            step={1}
-            style={{ width: '100%' }}
-            placeholder="请输入标准工时(秒)"
-          />
-        </Form.Item>
+        {compact ? (
+          <Form.Item
+            name="standard_seconds"
+            rules={[{ required: true, message: '请输入标准工时' }]}
+            hidden
+          >
+            <InputNumber />
+          </Form.Item>
+        ) : (
+          <Form.Item
+            name="standard_seconds"
+            label="标准工时(秒)"
+            rules={[{ required: true, message: '请输入标准工时' }]}
+          >
+            <InputNumber
+              min={0}
+              step={1}
+              style={{ width: '100%' }}
+              placeholder="根据工序自动带出"
+              disabled
+            />
+          </Form.Item>
+        )}
 
         <Form.Item
           name="qualified_quantity"
@@ -323,6 +334,10 @@ export default function ProductionOrderItemForm({
 
         <Form.Item name="bonus_seconds" label="加分项(秒)" initialValue={0}>
           <InputNumber min={0} style={{ width: '100%' }} />
+        </Form.Item>
+
+        <Form.Item name="remark" label="备注">
+          <Input.TextArea rows={2} placeholder="请输入备注" />
         </Form.Item>
       </Form>
     </Modal>

@@ -23,6 +23,8 @@ export function useProductionOrders({
     startDate?: string
     endDate?: string
     employeeId?: string
+    productModel?: string
+    customerModel?: string
   }
 }) {
   return useQuery({
