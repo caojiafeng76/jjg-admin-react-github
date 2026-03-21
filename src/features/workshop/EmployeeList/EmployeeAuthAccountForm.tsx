@@ -61,7 +61,8 @@ export default function EmployeeAuthAccountForm({
       </Form.Item>
 
       <div className="rounded-lg border border-dashed border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-6 text-sky-700">
-        默认初始密码为 {DEFAULT_EMPLOYEE_AUTH_PASSWORD}，开通后员工可在手机端自行修改密码。
+        默认初始密码为 {DEFAULT_EMPLOYEE_AUTH_PASSWORD}
+        ，开通后员工可在手机端自行修改密码。
       </div>
     </Form>
   )

@@ -56,7 +56,9 @@ export default function EmployeeMobileLayout() {
       })
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? translateErrorMessage(error.message) : '密码修改失败'
+        error instanceof Error
+          ? translateErrorMessage(error.message)
+          : '密码修改失败'
       message.error(errorMessage)
     } finally {
       setIsSubmittingPassword(false)

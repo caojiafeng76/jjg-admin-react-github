@@ -177,7 +177,5 @@ export default function ProductionOrderSearch({
     )
   }
 
-  return (
-    formContent
-  )
+  return formContent
 }

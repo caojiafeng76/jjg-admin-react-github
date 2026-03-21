@@ -319,7 +319,11 @@ export default function EmployeeList() {
         } else {
           const createdEmployee = await createMutation.mutateAsync(values)
 
-          if (values.createAuthAccount && createdEmployee.id && values.authEmail) {
+          if (
+            values.createAuthAccount &&
+            createdEmployee.id &&
+            values.authEmail
+          ) {
             try {
               await createEmployeeAuthMutation.mutateAsync({
                 employeeId: createdEmployee.id,

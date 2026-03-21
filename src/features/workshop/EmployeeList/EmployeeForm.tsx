@@ -133,7 +133,8 @@ export default function EmployeeForm({
               </Form.Item>
 
               <div className="rounded-lg border border-dashed border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-6 text-sky-700">
-                系统将自动使用默认密码 {DEFAULT_EMPLOYEE_AUTH_PASSWORD} 创建账号，员工登录后可自行修改密码。
+                系统将自动使用默认密码 {DEFAULT_EMPLOYEE_AUTH_PASSWORD}{' '}
+                创建账号，员工登录后可自行修改密码。
               </div>
             </>
           ) : null}
@@ -142,7 +143,9 @@ export default function EmployeeForm({
 
       {isEdit ? null : (
         <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-xs leading-6 text-gray-500">
-          新建员工时默认角色为“员工”、状态为“启用”。如果本次创建账号，默认密码为 {DEFAULT_EMPLOYEE_AUTH_PASSWORD}。如果本次不创建账号，后续仍可使用工具栏中的“为现有员工开通账号”补做绑定。
+          新建员工时默认角色为“员工”、状态为“启用”。如果本次创建账号，默认密码为{' '}
+          {DEFAULT_EMPLOYEE_AUTH_PASSWORD}
+          。如果本次不创建账号，后续仍可使用工具栏中的“为现有员工开通账号”补做绑定。
         </div>
       )}
     </Form>
