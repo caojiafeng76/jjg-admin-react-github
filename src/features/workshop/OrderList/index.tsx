@@ -49,7 +49,9 @@ export default function WorkshopOrderList() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [formRef, setFormRef] = useState<FormInstance<WorkshopOrder> | null>(null)
+  const [formRef, setFormRef] = useState<FormInstance<WorkshopOrder> | null>(
+    null,
+  )
   const [searchParams, setSearchParams] = useState<{
     project_no?: string
     product_model?: string
@@ -76,18 +78,19 @@ export default function WorkshopOrderList() {
   const { generatePDF, isPrinting } = usePrintWorkshopOrders()
 
   // 动态计算表格高度（目标10条数据撑满）
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } = useTableHeight({
-    targetRowCount: 10,
-  })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
+    useTableHeight({
+      targetRowCount: 10,
+    })
 
   const handlePrint = useCallback(() => {
     if (selectedRowKeys.length === 0) {
       message.warning('请选择要打印的订单')
       return
     }
-    const selectedOrders = data?.items.filter((item) =>
-      selectedRowKeys.includes(item.id || ''),
-    ) || []
+    const selectedOrders =
+      data?.items.filter((item) => selectedRowKeys.includes(item.id || '')) ||
+      []
     generatePDF(selectedOrders)
   }, [selectedRowKeys, data?.items, generatePDF, message])
 
@@ -117,7 +120,9 @@ export default function WorkshopOrderList() {
     if (!record) return
 
     // 将日期字符串转换为 dayjs 对象用于表单显示
-    const formValues: WorkshopOrder & { product_delivery_date: dayjs.Dayjs | undefined } = {
+    const formValues: WorkshopOrder & {
+      product_delivery_date: dayjs.Dayjs | undefined
+    } = {
       ...record,
       product_delivery_date: record.product_delivery_date
         ? dayjs(record.product_delivery_date)
@@ -260,18 +265,25 @@ export default function WorkshopOrderList() {
     ],
   )
 
-  const handleSearch = useCallback((params: typeof searchParams) => {
-    setSearchParams(params)
-    searchParamsURL.set('page', '1')
-    setSearchParamsURL(searchParamsURL)
-  }, [searchParamsURL, setSearchParamsURL])
+  const handleSearch = useCallback(
+    (params: typeof searchParams) => {
+      setSearchParams(params)
+      searchParamsURL.set('page', '1')
+      setSearchParamsURL(searchParamsURL)
+    },
+    [searchParamsURL, setSearchParamsURL],
+  )
 
   /**
    * 防止 Excel 批量导入后成功提示出现但模态框仍保持打开状态。
    * 监听所有创建/更新类 mutation 成功态，统一做收尾并重置 mutation 状态。
    */
   useEffect(() => {
-    if (createMutation.isSuccess || updateMutation.isSuccess || batchCreateMutation.isSuccess) {
+    if (
+      createMutation.isSuccess ||
+      updateMutation.isSuccess ||
+      batchCreateMutation.isSuccess
+    ) {
       resetFormState()
       createMutation.reset()
       updateMutation.reset()
@@ -320,13 +332,19 @@ export default function WorkshopOrderList() {
 
       {/* 搜索栏 */}
       <div className="flex items-center gap-2">
-        <span className="text-gray-600 whitespace-nowrap">搜索：</span>
-        <WorkshopOrderSearch onSearch={handleSearch} onReset={handleResetSearch} />
+        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <WorkshopOrderSearch
+          onSearch={handleSearch}
+          onReset={handleResetSearch}
+        />
       </div>
 
       {/* 表格和分页 */}
-      <div ref={tableContainerRef} className="flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
-        <div className="flex-1 min-h-0 overflow-x-auto">
+      <div
+        ref={tableContainerRef}
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+      >
+        <div className="min-h-0 flex-1 overflow-x-auto">
           <WorkshopOrderTable
             loading={isLoading}
             data={data?.items || []}
@@ -336,7 +354,7 @@ export default function WorkshopOrderList() {
             rowHeight={rowHeight}
           />
         </div>
-        <div ref={paginationRef} className="flex justify-end shrink-0">
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
         </div>
       </div>
@@ -344,7 +362,11 @@ export default function WorkshopOrderList() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
-        confirmLoading={createMutation.isPending || updateMutation.isPending || batchCreateMutation.isPending}
+        confirmLoading={
+          createMutation.isPending ||
+          updateMutation.isPending ||
+          batchCreateMutation.isPending
+        }
         destroyOnClose
         onOk={() => formRef?.submit()}
         onCancel={() => {
