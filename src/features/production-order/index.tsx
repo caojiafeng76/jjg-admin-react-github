@@ -376,7 +376,11 @@ export default function ProductionOrderPage() {
           : 'grid h-full grid-rows-[auto_auto_1fr] gap-4'
       }
     >
-      <div className={isEmployeeView ? 'w-full' : 'flex flex-wrap items-center gap-2'}>
+      <div
+        className={
+          isEmployeeView ? 'w-full' : 'flex flex-wrap items-center gap-2'
+        }
+      >
         {isEmployeeView ? (
           <Button
             type="primary"

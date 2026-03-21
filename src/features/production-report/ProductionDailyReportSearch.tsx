@@ -173,7 +173,5 @@ export default function ProductionDailyReportSearch({
     )
   }
 
-  return (
-    formContent
-  )
+  return formContent
 }
