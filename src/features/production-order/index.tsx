@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal } from 'antd'
+import { PlusCircleIcon } from '@heroicons/react/16/solid'
+import { App, Button, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
@@ -375,9 +376,24 @@ export default function ProductionOrderPage() {
           : 'grid h-full grid-rows-[auto_auto_1fr] gap-4'
       }
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑" handleEdit={() => handleEdit()} />
+      <div className={isEmployeeView ? 'w-full' : 'flex flex-wrap items-center gap-2'}>
+        {isEmployeeView ? (
+          <Button
+            type="primary"
+            block
+            size="large"
+            icon={<PlusCircleIcon className="size-4" />}
+            onClick={handleCreate}
+            className="h-11 rounded-2xl shadow-[0_12px_30px_rgba(15,23,42,0.16)]"
+          >
+            添加
+          </Button>
+        ) : (
+          <>
+            <AddButton handleCreate={handleCreate} />
+            <EditButton title="编辑" handleEdit={() => handleEdit()} />
+          </>
+        )}
         {isEmployeeView ? null : (
           <>
             <ExportButton

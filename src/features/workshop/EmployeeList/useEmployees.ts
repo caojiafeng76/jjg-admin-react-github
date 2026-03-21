@@ -3,6 +3,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import {
   getEmployees,
   getAllEmployees,
+  getEmployeeAuthEmail,
   createEmployee,
   updateEmployee,
   deleteEmployees,
@@ -42,6 +43,20 @@ export function useAllEmployees() {
     queryKey: [EMPLOYEES_KEY, 'all'],
     queryFn: getAllEmployees,
     ...queryConfig.list,
+  })
+}
+
+export function useEmployeeAuthEmail(
+  employeeId?: string,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: [EMPLOYEES_KEY, 'auth-email', employeeId],
+    queryFn: () => getEmployeeAuthEmail(employeeId as string),
+    enabled: enabled && !!employeeId,
+    retry: false,
+    throwOnError: false,
+    ...queryConfig.detail,
   })
 }
 

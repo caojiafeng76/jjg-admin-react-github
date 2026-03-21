@@ -1,12 +1,11 @@
 import { Alert, Divider, Form, FormInstance, Input, Select, Switch } from 'antd'
 import { useEffect } from 'react'
 import type { Employee } from '@/services/apiEmployees'
+import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 
 export interface EmployeeFormValues extends Employee {
   createAuthAccount?: boolean
   authEmail?: string
-  authPassword?: string
-  authConfirmPassword?: string
 }
 
 interface Props {
@@ -67,7 +66,7 @@ export default function EmployeeForm({
         message={
           isEdit
             ? '这里只维护员工基础资料；现有员工的账号开通、解绑、重绑和重置密码请使用工具栏按钮。'
-            : '新增员工时可选择同时创建登录账号；后续账号操作仍可通过工具栏按钮完成。'
+            : `新增员工时可选择同时创建登录账号；默认密码为 ${DEFAULT_EMPLOYEE_AUTH_PASSWORD}，后续账号操作仍可通过工具栏按钮完成。`
         }
       />
 
@@ -133,42 +132,9 @@ export default function EmployeeForm({
                 <Input placeholder="请输入员工登录邮箱" autoComplete="off" />
               </Form.Item>
 
-              <Form.Item
-                name="authPassword"
-                label="初始密码"
-                rules={[
-                  { required: true, message: '请输入初始密码' },
-                  { min: 6, message: '初始密码至少 6 位' },
-                ]}
-              >
-                <Input.Password
-                  placeholder="请输入初始密码"
-                  autoComplete="new-password"
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="authConfirmPassword"
-                label="确认密码"
-                dependencies={['authPassword']}
-                rules={[
-                  { required: true, message: '请再次输入初始密码' },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || value === getFieldValue('authPassword')) {
-                        return Promise.resolve()
-                      }
-
-                      return Promise.reject(new Error('两次输入的密码不一致'))
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password
-                  placeholder="请再次输入初始密码"
-                  autoComplete="new-password"
-                />
-              </Form.Item>
+              <div className="rounded-lg border border-dashed border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-6 text-sky-700">
+                系统将自动使用默认密码 {DEFAULT_EMPLOYEE_AUTH_PASSWORD} 创建账号，员工登录后可自行修改密码。
+              </div>
             </>
           ) : null}
         </>
@@ -176,7 +142,7 @@ export default function EmployeeForm({
 
       {isEdit ? null : (
         <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-xs leading-6 text-gray-500">
-          新建员工时默认角色为“员工”、状态为“启用”。如果本次不创建账号，后续仍可使用工具栏中的“为现有员工开通账号”补做绑定。
+          新建员工时默认角色为“员工”、状态为“启用”。如果本次创建账号，默认密码为 {DEFAULT_EMPLOYEE_AUTH_PASSWORD}。如果本次不创建账号，后续仍可使用工具栏中的“为现有员工开通账号”补做绑定。
         </div>
       )}
     </Form>

@@ -1,7 +1,7 @@
 import { LockOutlined, MailOutlined } from '@ant-design/icons'
 import { Alert, Button, Card, Form, Input, Typography } from 'antd'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { getDefaultHomeByRole } from '@/config/access'
@@ -18,8 +18,10 @@ interface LoginFormValues {
 export default function Login() {
   const [form] = Form.useForm<LoginFormValues>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, role, loading, error, clearError, signIn } = useAuth()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   // 已登录用户直接跳转（添加防抖，避免重复导航）
@@ -40,8 +42,18 @@ export default function Login() {
     }
   }, [error])
 
+  useEffect(() => {
+    const nextMessage = (location.state as { message?: string } | null)?.message
+
+    if (nextMessage) {
+      setSuccessMessage(nextMessage)
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location.pathname, location.state, navigate])
+
   const handleFinish = async (values: LoginFormValues) => {
     setErrorMessage(null)
+    setSuccessMessage(null)
     clearError()
     setSubmitting(true)
     try {
@@ -76,6 +88,15 @@ export default function Login() {
           <Alert
             type="error"
             message={errorMessage}
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
+        {successMessage && (
+          <Alert
+            type="success"
+            message={successMessage}
             showIcon
             style={{ marginBottom: 16 }}
           />

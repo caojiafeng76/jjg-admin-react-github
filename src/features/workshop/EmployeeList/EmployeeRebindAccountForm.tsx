@@ -9,16 +9,20 @@ export interface EmployeeRebindAccountValues {
 
 interface Props {
   employee: Employee
+  initialEmail?: string | null
   setFormRef: (form: FormInstance<EmployeeRebindAccountValues>) => void
   onFinish: (values: EmployeeRebindAccountValues) => void
   isSubmitting: boolean
+  isLoadingInitialEmail?: boolean
 }
 
 export default function EmployeeRebindAccountForm({
   employee,
+  initialEmail,
   setFormRef,
   onFinish,
   isSubmitting,
+  isLoadingInitialEmail = false,
 }: Props) {
   const [form] = Form.useForm<EmployeeRebindAccountValues>()
 
@@ -27,8 +31,10 @@ export default function EmployeeRebindAccountForm({
   }, [form, setFormRef])
 
   useEffect(() => {
-    form.resetFields()
-  }, [employee.id, form])
+    form.setFieldsValue({
+      email: initialEmail || '',
+    })
+  }, [employee.id, form, initialEmail])
 
   return (
     <Form
@@ -56,7 +62,14 @@ export default function EmployeeRebindAccountForm({
           { type: 'email', message: '请输入有效的邮箱地址' },
         ]}
       >
-        <Input placeholder="请输入已存在的 Auth 账号邮箱" autoComplete="off" />
+        <Input
+          placeholder={
+            isLoadingInitialEmail
+              ? '正在读取当前绑定邮箱...'
+              : '请输入已存在的 Auth 账号邮箱'
+          }
+          autoComplete="email"
+        />
       </Form.Item>
     </Form>
   )

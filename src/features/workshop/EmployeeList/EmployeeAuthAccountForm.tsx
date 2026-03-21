@@ -2,11 +2,10 @@ import { Alert, Form, FormInstance, Input } from 'antd'
 import { useEffect } from 'react'
 
 import type { Employee } from '@/services/apiEmployees'
+import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 
 export interface EmployeeAuthAccountValues {
   email: string
-  password: string
-  confirmPassword: string
 }
 
 interface Props {
@@ -43,7 +42,7 @@ export default function EmployeeAuthAccountForm({
         type="info"
         showIcon
         className="mb-4"
-        message={`将为现有员工“${employee.name}”创建 Supabase Auth 登录账号，并自动绑定到当前员工记录。`}
+        message={`将为现有员工“${employee.name}”创建 Supabase Auth 登录账号，并自动绑定到当前员工记录。默认密码为 ${DEFAULT_EMPLOYEE_AUTH_PASSWORD}。`}
       />
 
       <Form.Item label="员工姓名">
@@ -61,42 +60,9 @@ export default function EmployeeAuthAccountForm({
         <Input placeholder="请输入员工登录邮箱" autoComplete="off" />
       </Form.Item>
 
-      <Form.Item
-        name="password"
-        label="初始密码"
-        rules={[
-          { required: true, message: '请输入初始密码' },
-          { min: 6, message: '初始密码至少 6 位' },
-        ]}
-      >
-        <Input.Password
-          placeholder="请输入初始密码"
-          autoComplete="new-password"
-        />
-      </Form.Item>
-
-      <Form.Item
-        name="confirmPassword"
-        label="确认密码"
-        dependencies={['password']}
-        rules={[
-          { required: true, message: '请再次输入初始密码' },
-          ({ getFieldValue }) => ({
-            validator(_, value) {
-              if (!value || getFieldValue('password') === value) {
-                return Promise.resolve()
-              }
-
-              return Promise.reject(new Error('两次输入的密码不一致'))
-            },
-          }),
-        ]}
-      >
-        <Input.Password
-          placeholder="请再次输入初始密码"
-          autoComplete="new-password"
-        />
-      </Form.Item>
+      <div className="rounded-lg border border-dashed border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-6 text-sky-700">
+        默认初始密码为 {DEFAULT_EMPLOYEE_AUTH_PASSWORD}，开通后员工可在手机端自行修改密码。
+      </div>
     </Form>
   )
 }

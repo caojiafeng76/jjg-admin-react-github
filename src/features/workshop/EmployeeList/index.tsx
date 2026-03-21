@@ -20,6 +20,7 @@ import {
 import {
   useEmployeesList,
   useCreateEmployee,
+  useEmployeeAuthEmail,
   useCreateEmployeeAuthAccount,
   useResetEmployeeAuthPassword,
   useUnbindEmployeeAuthAccount,
@@ -39,6 +40,7 @@ import EmployeeResetPasswordForm, {
 } from './EmployeeResetPasswordForm'
 import EmployeeTable from './EmployeeTable'
 import EmployeeSearch from './EmployeeSearch'
+import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 
 export default function EmployeeList() {
   const { message, modal } = App.useApp()
@@ -82,6 +84,8 @@ export default function EmployeeList() {
   const resetEmployeeAuthPasswordMutation = useResetEmployeeAuthPassword()
   const unbindEmployeeAuthAccountMutation = useUnbindEmployeeAuthAccount()
   const rebindEmployeeAuthAccountMutation = useRebindEmployeeAuthAccount()
+  const { data: rebindAuthEmail, isFetching: isFetchingRebindAuthEmail } =
+    useEmployeeAuthEmail(authTargetEmployee?.id, isRebindModalOpen)
 
   const updateMutation = useUpdateEmployee()
 
@@ -315,17 +319,12 @@ export default function EmployeeList() {
         } else {
           const createdEmployee = await createMutation.mutateAsync(values)
 
-          if (
-            values.createAuthAccount &&
-            createdEmployee.id &&
-            values.authEmail &&
-            values.authPassword
-          ) {
+          if (values.createAuthAccount && createdEmployee.id && values.authEmail) {
             try {
               await createEmployeeAuthMutation.mutateAsync({
                 employeeId: createdEmployee.id,
                 email: values.authEmail,
-                password: values.authPassword,
+                password: DEFAULT_EMPLOYEE_AUTH_PASSWORD,
               })
               message.success('员工和登录账号创建成功')
             } catch (authError) {
@@ -374,11 +373,11 @@ export default function EmployeeList() {
         const result = await createEmployeeAuthMutation.mutateAsync({
           employeeId: authTargetEmployee.id,
           email: values.email,
-          password: values.password,
+          password: DEFAULT_EMPLOYEE_AUTH_PASSWORD,
         })
 
         message.success(
-          `已为现有员工 ${result.employeeName} 开通账号并绑定到 ${result.email}`,
+          `已为现有员工 ${result.employeeName} 开通账号并绑定到 ${result.email}，默认密码为 ${DEFAULT_EMPLOYEE_AUTH_PASSWORD}`,
         )
         setIsAuthModalOpen(false)
         setAuthTargetEmployee(null)
@@ -633,9 +632,11 @@ export default function EmployeeList() {
         {authTargetEmployee ? (
           <EmployeeRebindAccountForm
             employee={authTargetEmployee}
+            initialEmail={rebindAuthEmail?.email}
             setFormRef={setRebindFormRef}
             onFinish={handleRebindAccount}
             isSubmitting={rebindEmployeeAuthAccountMutation.isPending}
+            isLoadingInitialEmail={isFetchingRebindAuthEmail}
           />
         ) : null}
       </Modal>
