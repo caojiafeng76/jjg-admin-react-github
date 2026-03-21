@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { Database } from '@/types/database.types'
+import { Database } from './database.types'
 import { validateSupabaseEnv } from '@utils/env'
 
 // 验证环境变量

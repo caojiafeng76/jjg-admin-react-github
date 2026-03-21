@@ -1,8 +1,9 @@
 import supabase from './supabase'
 import { handleApiError } from '@utils/errorHandler'
-import type { Database } from '@/types/database.types'
+import type { Database } from './database.types'
 
-export type SyneySafePartSetting = Database['public']['Tables']['syney_safe_part_settings']['Row']
+export type SyneySafePartSetting =
+  Database['public']['Tables']['syney_safe_part_settings']['Row']
 
 export async function getSyneySafePartSettings() {
   const { data, error } = await supabase

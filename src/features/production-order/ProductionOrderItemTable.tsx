@@ -60,6 +60,13 @@ export default function ProductionOrderItemTable({
         dataIndex: 'operation',
         key: 'operation',
         width: 100,
+        render: (value: string | string[]) => {
+          // 处理数组格式的旧数据
+          if (Array.isArray(value)) {
+            return value.join(', ')
+          }
+          return value
+        },
       },
       {
         title: '标准工时(秒)',

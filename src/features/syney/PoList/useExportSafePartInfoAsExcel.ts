@@ -16,7 +16,7 @@ import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
 // 判断是否为安全件
 function useIsSafePart() {
   const { data: settings } = useQuery({
-    queryKey: ['syney-safe-part-settings'],
+    queryKey: ['syney_safe_part_settings'],
     queryFn: getSyneySafePartSettings,
     staleTime: 5 * 60 * 1000,
   })

@@ -1,6 +1,6 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
-import { Database } from '@/types/database.types'
+import { Database } from './database.types'
 
 export type ProductionOrder =
   Database['public']['Tables']['production_orders']['Row']
