@@ -29,6 +29,11 @@ const EXPORT_HEADERS = [
 
 type ExportRow = Array<string | number>
 
+const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
+const WORK_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('出勤工时')
+const EFFICIENCY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('工时效率')
+const REMARK_COLUMN_INDEX = EXPORT_HEADERS.indexOf('备注')
+
 function normalizeNumber(value: number | null | undefined) {
   return Number(value || 0)
 }
@@ -70,6 +75,73 @@ function buildExportRow(
     totalHours,
     item.remark || order.remark || '',
   ]
+}
+
+function shouldMergeOrderRemark(rows: ExportRow[]) {
+  if (rows.length <= 1) {
+    return false
+  }
+
+  const firstRemark = String(rows[0][REMARK_COLUMN_INDEX] ?? '')
+  return rows.every(
+    (row) => String(row[REMARK_COLUMN_INDEX] ?? '') === firstRemark,
+  )
+}
+
+function buildOrderSheetRows(
+  order: ProductionOrderForExport,
+  startRowIndex: number,
+) {
+  const rawRows = order.items.map((item) => buildExportRow(order, item))
+  const mergeRemark = shouldMergeOrderRemark(rawRows)
+
+  const rows = rawRows.map((row, index) => {
+    if (index === 0) {
+      return row
+    }
+
+    const nextRow = [...row]
+    nextRow[ORDER_DATE_COLUMN_INDEX] = ''
+    nextRow[WORK_HOURS_COLUMN_INDEX] = ''
+    nextRow[EFFICIENCY_COLUMN_INDEX] = ''
+
+    if (mergeRemark) {
+      nextRow[REMARK_COLUMN_INDEX] = ''
+    }
+
+    return nextRow
+  })
+
+  const merges: NonNullable<XLSX.WorkSheet['!merges']> = []
+
+  if (rows.length > 1) {
+    const mergeStartRow = startRowIndex
+    const mergeEndRow = startRowIndex + rows.length - 1
+
+    merges.push(
+      {
+        s: { r: mergeStartRow, c: ORDER_DATE_COLUMN_INDEX },
+        e: { r: mergeEndRow, c: ORDER_DATE_COLUMN_INDEX },
+      },
+      {
+        s: { r: mergeStartRow, c: WORK_HOURS_COLUMN_INDEX },
+        e: { r: mergeEndRow, c: WORK_HOURS_COLUMN_INDEX },
+      },
+      {
+        s: { r: mergeStartRow, c: EFFICIENCY_COLUMN_INDEX },
+        e: { r: mergeEndRow, c: EFFICIENCY_COLUMN_INDEX },
+      },
+    )
+
+    if (mergeRemark) {
+      merges.push({
+        s: { r: mergeStartRow, c: REMARK_COLUMN_INDEX },
+        e: { r: mergeEndRow, c: REMARK_COLUMN_INDEX },
+      })
+    }
+  }
+
+  return { rows, merges }
 }
 
 function sanitizeSheetName(name: string, index: number) {
@@ -123,26 +195,38 @@ export function exportProductionOrdersToExcel(
   orders: ProductionOrderForExport[],
 ) {
   const workbook = XLSX.utils.book_new()
-  const employeeGroups = new Map<string, ExportRow[]>()
+  const employeeGroups = new Map<string, ProductionOrderForExport[]>()
 
   orders.forEach((order) => {
     const employeeName = order.employee?.name || '未分配员工'
-    const rows = employeeGroups.get(employeeName) || []
+    const employeeOrders = employeeGroups.get(employeeName) || []
 
-    order.items.forEach((item) => {
-      rows.push(buildExportRow(order, item))
-    })
-
-    employeeGroups.set(employeeName, rows)
+    employeeOrders.push(order)
+    employeeGroups.set(employeeName, employeeOrders)
   })
 
   Array.from(employeeGroups.entries()).forEach(
-    ([employeeName, dataRows], index) => {
+    ([employeeName, employeeOrders], index) => {
       const sheetRows: Array<Array<string | number | null | undefined>> = [
         [...EXPORT_HEADERS],
-        ...dataRows,
       ]
+      const merges: NonNullable<XLSX.WorkSheet['!merges']> = []
+
+      employeeOrders.forEach((order) => {
+        const { rows, merges: orderMerges } = buildOrderSheetRows(
+          order,
+          sheetRows.length,
+        )
+
+        sheetRows.push(...rows)
+        merges.push(...orderMerges)
+      })
+
       const worksheet = XLSX.utils.aoa_to_sheet(sheetRows)
+
+      if (merges.length > 0) {
+        worksheet['!merges'] = merges
+      }
 
       const totalHoursColumnIndex = EXPORT_HEADERS.indexOf('合计（小时）')
       for (let rowIndex = 1; rowIndex < sheetRows.length; rowIndex += 1) {
