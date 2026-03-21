@@ -82,12 +82,23 @@ export default function StandardTimeList() {
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
       message.warning('请选择至少一条数据')
       return
     }
-    deleteMutation.mutate(selectedRowKeys as string[])
+
+    try {
+      await deleteMutation.mutateAsync(selectedRowKeys as string[])
+      message.success('标准工时删除成功')
+      setSelectedRowKeys([])
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('删除标准工时失败，请稍后重试')
+      }
+    }
   }, [deleteMutation, message, selectedRowKeys])
 
   const handleFinish = useCallback(

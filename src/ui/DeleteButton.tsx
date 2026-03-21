@@ -2,7 +2,7 @@ import { XCircleIcon } from '@heroicons/react/16/solid'
 import { Button, Popconfirm } from 'antd'
 
 type Props = {
-  onConfirm: () => void
+  onConfirm: () => void | Promise<void>
   isDeleting: boolean
   count?: number // 要删除的数量
   title?: string // 自定义标题，默认为"删除订单"

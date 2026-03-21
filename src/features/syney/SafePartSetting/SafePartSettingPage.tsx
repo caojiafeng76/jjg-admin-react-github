@@ -1,5 +1,15 @@
 import { useState } from 'react'
-import { Button, Form, Input, Switch, Table, Popconfirm, Space, App, Select } from 'antd'
+import {
+  Button,
+  Form,
+  Input,
+  Switch,
+  Table,
+  Popconfirm,
+  Space,
+  App,
+  Select,
+} from 'antd'
 import type { ColumnsType, FilterDropdownProps } from 'antd/es/table/interface'
 import { SearchOutlined } from '@ant-design/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -18,7 +28,7 @@ export default function SafePartSettingPage() {
   const [form] = Form.useForm()
 
   const { data, isLoading } = useQuery({
-    queryKey: ['syney-safe-part-settings'],
+    queryKey: ['syney_safe_part_settings'],
     queryFn: getSyneySafePartSettings,
   })
 
@@ -26,7 +36,7 @@ export default function SafePartSettingPage() {
     mutationFn: upsertSyneySafePartSetting,
     onSuccess: () => {
       message.success('保存成功')
-      queryClient.invalidateQueries({ queryKey: ['syney-safe-part-settings'] })
+      queryClient.invalidateQueries({ queryKey: ['syney_safe_part_settings'] })
       setEditing(null)
       form.resetFields()
     },
@@ -36,7 +46,7 @@ export default function SafePartSettingPage() {
     mutationFn: deleteSyneySafePartSettings,
     onSuccess: () => {
       message.success('删除成功')
-      queryClient.invalidateQueries({ queryKey: ['syney-safe-part-settings'] })
+      queryClient.invalidateQueries({ queryKey: ['syney_safe_part_settings'] })
     },
   })
 
@@ -45,26 +55,30 @@ export default function SafePartSettingPage() {
       title: '序号',
       dataIndex: 'index',
       width: 60,
-      render: (_: unknown, __: SyneySafePartSetting, index: number) => index + 1,
+      render: (_: unknown, __: SyneySafePartSetting, index: number) =>
+        index + 1,
     },
     {
       title: '件号(包含)',
       dataIndex: 'part_no',
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: FilterDropdownProps) => (
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }: FilterDropdownProps) => (
         <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
           <Input
             placeholder="搜索件号"
             value={selectedKeys[0] as string}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
             onPressEnter={() => confirm()}
             style={{ marginBottom: 8, display: 'block' }}
           />
           <Space>
-            <Button
-              type="primary"
-              size="small"
-              onClick={() => confirm()}
-            >
+            <Button type="primary" size="small" onClick={() => confirm()}>
               确定
             </Button>
             <Button
@@ -83,7 +97,9 @@ export default function SafePartSettingPage() {
         <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
       ),
       onFilter: (value, record) =>
-        (record.part_no ?? '').toLowerCase().includes(String(value).toLowerCase()),
+        (record.part_no ?? '')
+          .toLowerCase()
+          .includes(String(value).toLowerCase()),
     },
     { title: '名称', dataIndex: 'name' },
     {
@@ -135,7 +151,7 @@ export default function SafePartSettingPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4 p-4">
       <Form
         layout="inline"
         form={form}
@@ -163,10 +179,18 @@ export default function SafePartSettingPage() {
             ]}
           />
         </Form.Item>
-        <Form.Item label="需打印标签" name="need_print_label" valuePropName="checked">
+        <Form.Item
+          label="需打印标签"
+          name="need_print_label"
+          valuePropName="checked"
+        >
           <Switch />
         </Form.Item>
-        <Form.Item label="为安全部件" name="is_safe_part" valuePropName="checked">
+        <Form.Item
+          label="为安全部件"
+          name="is_safe_part"
+          valuePropName="checked"
+        >
           <Switch />
         </Form.Item>
         <Form.Item label="备注" name="remark">

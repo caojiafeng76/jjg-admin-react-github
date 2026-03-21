@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
+  App,
   Modal,
   Form,
   InputNumber,
   Select,
+  AutoComplete,
   Input,
   DatePicker,
   Button,
@@ -30,6 +33,7 @@ import {
   useOperationsByModel,
   useSalesOrdersProjectNos,
 } from './useProcessStandards'
+import { ensureStandardTimeExists } from '@/services/apiStandardTimes'
 
 type ProductionOrderFormInitialValues = ProductionOrder & {
   items?: ProductionOrderItem[]
@@ -61,6 +65,7 @@ interface OrderItem {
   defect_reason_2: string | null
   defect_quantity_2: number
   bonus_seconds: number
+  remark?: string | null
 }
 
 export default function ProductionOrderForm({
@@ -71,6 +76,8 @@ export default function ProductionOrderForm({
   employees,
   loading = false,
 }: Props) {
+  const { message } = App.useApp()
+  const queryClient = useQueryClient()
   const [form] = Form.useForm()
   const { data: projectNos, isLoading: loadingProjectNos } =
     useSalesOrdersProjectNos()
@@ -84,8 +91,18 @@ export default function ProductionOrderForm({
   const selectedItemProductModel = Form.useWatch('product_model', itemForm)
   const selectedItemOperation = Form.useWatch('operation', itemForm)
 
-  const { data: operations, isLoading: loadingOperations } =
-    useOperationsByModel(selectedItemProductModel || undefined)
+  const { data: operations } = useOperationsByModel(
+    selectedItemProductModel || undefined,
+  )
+
+  const operationOptions = useMemo(
+    () =>
+      operations?.map((item) => ({
+        label: item.operation,
+        value: item.operation,
+      })) || [],
+    [operations],
+  )
 
   const modelsMap = useMemo(() => {
     const map: Record<
@@ -145,24 +162,42 @@ export default function ProductionOrderForm({
       form.resetFields()
       form.setFieldsValue({
         order_date: dayjs().subtract(1, 'day'),
-        work_hours: 8,
+        work_hours: 11,
       })
     }
   }, [initialValues, form, open])
 
   useEffect(() => {
-    if (!selectedItemOperation || !operations) {
+    const normalizedOperation =
+      typeof selectedItemOperation === 'string'
+        ? selectedItemOperation.trim()
+        : ''
+
+    if (!normalizedOperation) {
       return
     }
 
-    const operationData = operations.find(
-      (item) => item.operation === selectedItemOperation,
+    const operationData = operations?.find(
+      (item) => item.operation === normalizedOperation,
     )
 
+    const currentStandardSeconds = itemForm.getFieldValue('standard_seconds')
+
     if (operationData) {
-      itemForm.setFieldsValue({
-        standard_seconds: operationData.standard_seconds,
-      })
+      if (currentStandardSeconds !== operationData.standard_seconds) {
+        itemForm.setFieldsValue({
+          standard_seconds: operationData.standard_seconds,
+        })
+      }
+      return
+    }
+
+    if (
+      currentStandardSeconds === undefined ||
+      currentStandardSeconds === null ||
+      currentStandardSeconds === ''
+    ) {
+      itemForm.setFieldsValue({ standard_seconds: 0 })
     }
   }, [selectedItemOperation, operations, itemForm])
 
@@ -205,6 +240,7 @@ export default function ProductionOrderForm({
         defect_reason_2: item?.defect_reason_2 || '原料',
         defect_quantity_2: item?.defect_quantity_2 || 0,
         bonus_seconds: item?.bonus_seconds || 0,
+        remark: item?.remark || null,
       })
     } else {
       setEditingItemIndex(null)
@@ -216,27 +252,58 @@ export default function ProductionOrderForm({
         defect_reason_2: '原料',
         defect_quantity_2: 0,
         bonus_seconds: 0,
+        remark: null,
       })
     }
     setIsItemModalOpen(true)
   }
 
-  const handleItemFinish = (values: OrderItem) => {
+  const handleItemFinish = async (values: OrderItem) => {
     const data = modelsMap[values.project_no]
+    const operation = values.operation.trim()
+    const productModel = data?.product_model ?? values.product_model ?? null
+    const operationExists = operations?.some(
+      (item) => item.operation === operation,
+    )
+
+    if (!operationExists && productModel) {
+      try {
+        const created = await ensureStandardTimeExists({
+          operation,
+          model: productModel,
+          standard_seconds: 0,
+        })
+
+        if (created) {
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['standard-times'] }),
+            queryClient.invalidateQueries({ queryKey: ['process-standards'] }),
+          ])
+          message.success('未匹配工序已加入标准工时，默认标准工时为 0')
+        }
+      } catch (error) {
+        message.error(
+          error instanceof Error ? error.message : '补建标准工时失败，请稍后重试',
+        )
+        return
+      }
+    }
+
     const newItem: OrderItem = {
       id: editingItemIndex !== null ? items[editingItemIndex]?.id : undefined,
       project_no: values.project_no,
-      product_model: data?.product_model ?? values.product_model ?? null,
+      product_model: productModel,
       length_mm: data?.length_mm ?? values.length_mm ?? null,
       customer_model: data?.customer_model ?? values.customer_model ?? null,
-      operation: values.operation,
-      standard_seconds: Number(values.standard_seconds),
+      operation,
+      standard_seconds: Number(values.standard_seconds ?? 0),
       qualified_quantity: values.qualified_quantity || 0,
       defect_reason_1: '加工',
       defect_quantity_1: Number(values.defect_quantity_1) || 0,
       defect_reason_2: '原料',
       defect_quantity_2: Number(values.defect_quantity_2) || 0,
       bonus_seconds: Number(values.bonus_seconds) || 0,
+      remark: values.remark || null,
     }
 
     if (editingItemIndex !== null) {
@@ -271,6 +338,21 @@ export default function ProductionOrderForm({
         standard_seconds: undefined,
       })
     }
+  }
+
+  const handleOperationChangeForItem = (value: string) => {
+    itemForm.setFieldsValue({
+      operation: value,
+    })
+
+    const normalizedOperation = value.trim()
+    const operationData = operations?.find(
+      (item) => item.operation === normalizedOperation,
+    )
+
+    itemForm.setFieldsValue({
+      standard_seconds: operationData?.standard_seconds ?? 0,
+    })
   }
 
   return (
@@ -311,6 +393,11 @@ export default function ProductionOrderForm({
                 showSearch
                 placeholder="请选择操作人"
                 optionFilterProp="children"
+                filterOption={(input, option) => {
+                  if (!option) return false
+                  const label = option.label?.toString() ?? ''
+                  return label.toLowerCase().includes(input.toLowerCase())
+                }}
                 options={employees.map((emp) => ({
                   label: emp.name,
                   value: emp.id,
@@ -391,6 +478,13 @@ export default function ProductionOrderForm({
                   title: '工序',
                   dataIndex: 'operation',
                   width: 100,
+                  render: (value: string | string[]) => {
+                    // 处理数组格式的旧数据
+                    if (Array.isArray(value)) {
+                      return value.join(', ')
+                    }
+                    return value
+                  },
                 },
                 {
                   title: '标准工时(秒)',
@@ -419,6 +513,12 @@ export default function ProductionOrderForm({
                   dataIndex: 'bonus_seconds',
                   width: 80,
                   render: (value: number) => value || 0,
+                },
+                {
+                  title: '备注',
+                  dataIndex: 'remark',
+                  width: 150,
+                  render: (value: string) => value || '',
                 },
                 {
                   title: '操作',
@@ -474,6 +574,7 @@ export default function ProductionOrderForm({
             defect_quantity_1: 0,
             defect_quantity_2: 0,
             bonus_seconds: 0,
+            remark: null,
           }}
         >
           <Form.Item
@@ -509,16 +610,33 @@ export default function ProductionOrderForm({
           <Form.Item
             name="operation"
             label="工序"
-            rules={[{ required: true, message: '请选择工序' }]}
+            rules={[
+              { required: true, message: '请输入工序' },
+              {
+                validator: async (_, value) => {
+                  if (typeof value === 'string' && value.trim()) {
+                    return
+                  }
+
+                  throw new Error('请输入工序')
+                },
+              },
+            ]}
           >
-            <Select
-              placeholder="请选择工序"
-              loading={loadingOperations}
-              options={operations?.map((item) => ({
-                label: item.operation,
-                value: item.operation,
-              }))}
+            <AutoComplete
+              placeholder="请选择或输入工序"
+              options={operationOptions}
               disabled={!selectedItemProductModel}
+              filterOption={(input, option) => {
+                if (!option) return false
+                return (
+                  option.value
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase()) ?? false
+                )
+              }}
+              onChange={handleOperationChangeForItem}
             />
           </Form.Item>
 
@@ -540,7 +658,7 @@ export default function ProductionOrderForm({
 
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="加工不良数量" className="mb-2">
-              <Form.Item name="defect_quantity_1" className="!mb-0">
+              <Form.Item name="defect_quantity_1" className="mb-0!">
                 <InputNumber
                   placeholder="数量"
                   min={0}
@@ -550,7 +668,7 @@ export default function ProductionOrderForm({
             </Form.Item>
 
             <Form.Item label="原料不良数量" className="mb-2">
-              <Form.Item name="defect_quantity_2" className="!mb-0">
+              <Form.Item name="defect_quantity_2" className="mb-0!">
                 <InputNumber
                   placeholder="数量"
                   min={0}
@@ -562,6 +680,9 @@ export default function ProductionOrderForm({
 
           <Form.Item name="bonus_seconds" label="加分(秒)">
             <InputNumber style={{ width: '100%' }} min={0} />
+          </Form.Item>
+          <Form.Item name="remark" label="备注">
+            <Input.TextArea rows={2} placeholder="请输入备注" />
           </Form.Item>
         </Form>
       </Modal>

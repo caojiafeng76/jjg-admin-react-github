@@ -40,6 +40,13 @@ export default function StandardTimeTable({
         ellipsis: {
           showTitle: true,
         },
+        render: (value: string | string[]) => {
+          // 处理数组格式的旧数据
+          if (Array.isArray(value)) {
+            return value.join(', ')
+          }
+          return value
+        },
       },
       {
         title: '型号',

@@ -10,6 +10,10 @@ export interface StandardTime {
   updated_at?: string
 }
 
+function normalizeStandardTimeValue(value: string): string {
+  return value.trim()
+}
+
 export async function getStandardTimes({
   page,
   pageSize,
@@ -74,20 +78,70 @@ async function checkStandardTimeExists(
 }
 
 export async function createStandardTime(values: StandardTime) {
-  if (values.operation && values.model) {
-    const exists = await checkStandardTimeExists(values.operation, values.model)
+  const normalizedValues: StandardTime = {
+    ...values,
+    operation: normalizeStandardTimeValue(values.operation),
+    model: normalizeStandardTimeValue(values.model),
+  }
+
+  if (normalizedValues.operation && normalizedValues.model) {
+    const exists = await checkStandardTimeExists(
+      normalizedValues.operation,
+      normalizedValues.model,
+    )
     if (exists) {
       throw new Error(
-        `工序 "${values.operation}" 和型号 "${values.model}" 的组合已存在，无法创建`,
+        `工序 "${normalizedValues.operation}" 和型号 "${normalizedValues.model}" 的组合已存在，无法创建`,
       )
     }
   }
 
-  const { error } = await supabase.from('process_standards').insert(values)
+  const { error } = await supabase
+    .from('process_standards')
+    .insert(normalizedValues)
 
   if (error) {
     throw handleApiError(error, '创建标准工时失败')
   }
+}
+
+export async function ensureStandardTimeExists({
+  operation,
+  model,
+  standard_seconds = 0,
+}: Pick<StandardTime, 'operation' | 'model'> &
+  Partial<Pick<StandardTime, 'standard_seconds'>>) {
+  const normalizedOperation = normalizeStandardTimeValue(operation)
+  const normalizedModel = normalizeStandardTimeValue(model)
+
+  if (!normalizedOperation || !normalizedModel) {
+    throw new Error('工序和型号不能为空')
+  }
+
+  const exists = await checkStandardTimeExists(
+    normalizedOperation,
+    normalizedModel,
+  )
+
+  if (exists) {
+    return false
+  }
+
+  const { error } = await supabase.from('process_standards').insert({
+    operation: normalizedOperation,
+    model: normalizedModel,
+    standard_seconds,
+  })
+
+  if (error) {
+    if (error.code === '23505') {
+      return false
+    }
+
+    throw handleApiError(error, '创建标准工时失败')
+  }
+
+  return true
 }
 
 export async function updateStandardTime({
@@ -127,6 +181,10 @@ export async function deleteStandardTimes(ids: string[]) {
     .in('id', ids)
 
   if (error) {
+    if (error.code === '23503') {
+      throw new Error('标准工时已被工序明细引用，不能删除')
+    }
+
     throw handleApiError(error, '删除标准工时失败')
   }
 }

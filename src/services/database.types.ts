@@ -189,10 +189,11 @@ export type Database = {
         }
         Relationships: []
       }
-      'syney-safe-part-settings': {
+      syney_safe_part_settings: {
         Row: {
           id: string
           part_no: string
+          name: string | null
           need_print_label: boolean
           is_safe_part: boolean
           remark: string | null
@@ -202,6 +203,7 @@ export type Database = {
         Insert: {
           id?: string
           part_no: string
+          name?: string | null
           need_print_label?: boolean
           is_safe_part?: boolean
           remark?: string | null
@@ -211,6 +213,7 @@ export type Database = {
         Update: {
           id?: string
           part_no?: string
+          name?: string | null
           need_print_label?: boolean
           is_safe_part?: boolean
           remark?: string | null
@@ -345,6 +348,7 @@ export type Database = {
           qualified_hours: number | null
           qualified_quantity: number
           standard_seconds: number
+          remark: string | null
           updated_at: string
         }
         Insert: {
@@ -365,10 +369,11 @@ export type Database = {
           qualified_hours?: number | null
           qualified_quantity?: number
           standard_seconds: number
+          remark?: string | null
           updated_at?: string
         }
         Update: {
-          bonus_seconds?: string
+          bonus_seconds?: number
           created_at?: string
           customer_model?: string | null
           defect_hours?: number | null
@@ -385,6 +390,7 @@ export type Database = {
           qualified_hours?: number | null
           qualified_quantity?: number
           standard_seconds?: number
+          remark?: string | null
           updated_at?: string
         }
         Relationships: [
