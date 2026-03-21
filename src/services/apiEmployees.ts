@@ -40,6 +40,68 @@ export interface EmployeeAuthEmailResult {
   email: string | null
 }
 
+async function extractFunctionInvokeErrorMessage(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return null
+  }
+
+  const maybeContext = (
+    error as {
+      context?: { json?: () => Promise<unknown> }
+    }
+  ).context
+
+  if (!maybeContext?.json) {
+    return null
+  }
+
+  try {
+    const payload = await maybeContext.json()
+
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'error' in payload &&
+      typeof payload.error === 'string' &&
+      payload.error.trim()
+    ) {
+      return payload.error.trim()
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+async function throwFunctionInvokeError(
+  error: unknown,
+  fallbackMessage: string,
+  code: string,
+  functionName: string,
+): Promise<never> {
+  const message = await extractFunctionInvokeErrorMessage(error)
+
+  if (message) {
+    throw new AppError(message, code)
+  }
+
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string' &&
+    error.message.includes('Failed to send a request to the Edge Function')
+  ) {
+    throw new AppError(
+      `无法访问 Edge Function ${functionName}，请确认该函数已部署且当前网络可连接到 Supabase`,
+      code,
+    )
+  }
+
+  throw handleApiError(error, fallbackMessage)
+}
+
 function formatBlockedNames(names: string[], fallbackLabel: string) {
   if (names.length === 0) return fallbackLabel
   if (names.length <= 3) return names.join('、')
@@ -354,7 +416,12 @@ export async function createEmployeeAuthAccount(
   )
 
   if (error) {
-    throw handleApiError(error, '创建员工登录账号失败')
+    await throwFunctionInvokeError(
+      error,
+      '创建员工登录账号失败',
+      'CREATE_EMPLOYEE_AUTH_FAILED',
+      'create-employee-auth',
+    )
   }
 
   if (data?.error) {
@@ -383,7 +450,12 @@ export async function resetEmployeeAuthPassword(
   )
 
   if (error) {
-    throw handleApiError(error, '重置员工登录密码失败')
+    await throwFunctionInvokeError(
+      error,
+      '重置员工登录密码失败',
+      'RESET_EMPLOYEE_PASSWORD_FAILED',
+      'reset-employee-auth-password',
+    )
   }
 
   if (data?.error) {
@@ -402,7 +474,12 @@ export async function unbindEmployeeAuthAccount(employeeId: string) {
   })
 
   if (error) {
-    throw handleApiError(error, '解绑员工账号失败')
+    await throwFunctionInvokeError(
+      error,
+      '解绑员工账号失败',
+      'UNBIND_EMPLOYEE_AUTH_FAILED',
+      'unbind-employee-auth',
+    )
   }
 
   if (data?.error) {
@@ -426,7 +503,12 @@ export async function rebindEmployeeAuthAccount(
   })
 
   if (error) {
-    throw handleApiError(error, '重新绑定员工账号失败')
+    await throwFunctionInvokeError(
+      error,
+      '重新绑定员工账号失败',
+      'REBIND_EMPLOYEE_AUTH_FAILED',
+      'rebind-employee-auth',
+    )
   }
 
   if (data?.error) {
