@@ -66,7 +66,9 @@ export default function ProductionDailyReportSearch({
       onFinish={handleFinish}
       layout={mobile ? 'vertical' : 'inline'}
       initialValues={initialValues}
-      className={mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'}
+      className={
+        mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'
+      }
     >
       <Form.Item name="dateRange" className="mb-0">
         <RangePicker
@@ -77,19 +79,35 @@ export default function ProductionDailyReportSearch({
       </Form.Item>
 
       <Form.Item name="projectNo" className="mb-0">
-        <Input allowClear placeholder="项目号" style={{ width: mobile ? '100%' : 140 }} />
+        <Input
+          allowClear
+          placeholder="项目号"
+          style={{ width: mobile ? '100%' : 140 }}
+        />
       </Form.Item>
 
       <Form.Item name="productModel" className="mb-0">
-        <Input allowClear placeholder="型号" style={{ width: mobile ? '100%' : 140 }} />
+        <Input
+          allowClear
+          placeholder="型号"
+          style={{ width: mobile ? '100%' : 140 }}
+        />
       </Form.Item>
 
       <Form.Item name="customerModel" className="mb-0">
-        <Input allowClear placeholder="客户型号" style={{ width: mobile ? '100%' : 160 }} />
+        <Input
+          allowClear
+          placeholder="客户型号"
+          style={{ width: mobile ? '100%' : 160 }}
+        />
       </Form.Item>
 
       <Form.Item name="operation" className="mb-0">
-        <Input allowClear placeholder="工序" style={{ width: mobile ? '100%' : 140 }} />
+        <Input
+          allowClear
+          placeholder="工序"
+          style={{ width: mobile ? '100%' : 140 }}
+        />
       </Form.Item>
 
       <Form.Item className="mb-0">

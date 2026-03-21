@@ -115,26 +115,30 @@ export default function ProductionOrderPage() {
     setIsModalOpen(true)
   }, [])
 
-  const handleEdit = useCallback((record?: ProductionOrder) => {
-    const targetRecord =
-      record || orderData?.items.find((item) => item.id === selectedRowKeys[0])
+  const handleEdit = useCallback(
+    (record?: ProductionOrder) => {
+      const targetRecord =
+        record ||
+        orderData?.items.find((item) => item.id === selectedRowKeys[0])
 
-    if (!targetRecord) {
-      message.warning('请选择一条数据进行编辑')
-      return
-    }
+      if (!targetRecord) {
+        message.warning('请选择一条数据进行编辑')
+        return
+      }
 
-    if (!record && selectedRowKeys.length !== 1) {
-      message.warning('请选择一条数据进行编辑')
-      return
-    }
+      if (!record && selectedRowKeys.length !== 1) {
+        message.warning('请选择一条数据进行编辑')
+        return
+      }
 
-    setEditingRecord(targetRecord)
-    setIsEdit(true)
-    setIsView(false)
-    setModalTitle('编辑工单')
-    setIsModalOpen(true)
-  }, [message, orderData?.items, selectedRowKeys])
+      setEditingRecord(targetRecord)
+      setIsEdit(true)
+      setIsView(false)
+      setModalTitle('编辑工单')
+      setIsModalOpen(true)
+    },
+    [message, orderData?.items, selectedRowKeys],
+  )
 
   const handleView = useCallback((record: ProductionOrder) => {
     setEditingRecord(record)
@@ -327,7 +331,9 @@ export default function ProductionOrderPage() {
   const handleSearch = useCallback(
     (params: typeof filters) => {
       setFilters(
-        fixedEmployee?.id ? { ...params, employeeId: fixedEmployee.id } : params,
+        fixedEmployee?.id
+          ? { ...params, employeeId: fixedEmployee.id }
+          : params,
       )
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
@@ -362,7 +368,13 @@ export default function ProductionOrderPage() {
     | null
 
   return (
-    <div className={isEmployeeView ? 'grid h-full grid-rows-[auto_auto_1fr] gap-3 p-3' : 'grid h-full grid-rows-[auto_auto_1fr] gap-4'}>
+    <div
+      className={
+        isEmployeeView
+          ? 'grid h-full grid-rows-[auto_auto_1fr] gap-3 p-3'
+          : 'grid h-full grid-rows-[auto_auto_1fr] gap-4'
+      }
+    >
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑" handleEdit={() => handleEdit()} />
@@ -385,11 +397,21 @@ export default function ProductionOrderPage() {
         )}
       </div>
 
-      <div className={isEmployeeView ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]' : 'flex items-center gap-2'}>
+      <div
+        className={
+          isEmployeeView
+            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
+            : 'flex items-center gap-2'
+        }
+      >
         {isEmployeeView ? (
           <div className="mb-3">
-            <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Filter</div>
-            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">筛选我的工单</div>
+            <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
+              Filter
+            </div>
+            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
+              筛选我的工单
+            </div>
           </div>
         ) : (
           <span className="whitespace-nowrap text-gray-600">搜索：</span>
@@ -406,9 +428,19 @@ export default function ProductionOrderPage() {
 
       <div
         ref={tableContainerRef}
-        className={isEmployeeView ? 'flex min-h-0 flex-1 flex-col gap-3 overflow-hidden' : 'flex min-h-0 flex-1 flex-col gap-4 overflow-hidden'}
+        className={
+          isEmployeeView
+            ? 'flex min-h-0 flex-1 flex-col gap-3 overflow-hidden'
+            : 'flex min-h-0 flex-1 flex-col gap-4 overflow-hidden'
+        }
       >
-        <div className={isEmployeeView ? 'min-h-0 flex-1 overflow-y-auto no-scrollbar' : 'min-h-0 flex-1 overflow-x-auto'}>
+        <div
+          className={
+            isEmployeeView
+              ? 'no-scrollbar min-h-0 flex-1 overflow-y-auto'
+              : 'min-h-0 flex-1 overflow-x-auto'
+          }
+        >
           {isEmployeeView ? (
             <ProductionOrderMobileList
               loading={isLoading}
@@ -431,7 +463,14 @@ export default function ProductionOrderPage() {
           )}
         </div>
 
-        <div ref={paginationRef} className={isEmployeeView ? 'flex shrink-0 justify-center pb-1' : 'flex shrink-0 justify-end'}>
+        <div
+          ref={paginationRef}
+          className={
+            isEmployeeView
+              ? 'flex shrink-0 justify-center pb-1'
+              : 'flex shrink-0 justify-end'
+          }
+        >
           <AppPagination total={orderData?.total || 0} />
         </div>
       </div>

@@ -30,9 +30,7 @@ import {
 import EmployeeAuthAccountForm, {
   type EmployeeAuthAccountValues,
 } from './EmployeeAuthAccountForm'
-import EmployeeForm, {
-  type EmployeeFormValues,
-} from './EmployeeForm'
+import EmployeeForm, { type EmployeeFormValues } from './EmployeeForm'
 import EmployeeRebindAccountForm, {
   type EmployeeRebindAccountValues,
 } from './EmployeeRebindAccountForm'
@@ -211,7 +209,12 @@ export default function EmployeeList() {
         }
       },
     })
-  }, [getSingleSelectedEmployee, message, modal, unbindEmployeeAuthAccountMutation])
+  }, [
+    getSingleSelectedEmployee,
+    message,
+    modal,
+    unbindEmployeeAuthAccountMutation,
+  ])
 
   const handleOpenRebindModal = useCallback(() => {
     const record = getSingleSelectedEmployee()
@@ -415,7 +418,12 @@ export default function EmployeeList() {
         }
       }
     },
-    [authTargetEmployee, message, resetEmployeeAuthPasswordMutation, resetPasswordFormRef],
+    [
+      authTargetEmployee,
+      message,
+      resetEmployeeAuthPasswordMutation,
+      resetPasswordFormRef,
+    ],
   )
 
   const handleRebindAccount = useCallback(
@@ -444,7 +452,12 @@ export default function EmployeeList() {
         }
       }
     },
-    [authTargetEmployee, message, rebindEmployeeAuthAccountMutation, rebindFormRef],
+    [
+      authTargetEmployee,
+      message,
+      rebindEmployeeAuthAccountMutation,
+      rebindFormRef,
+    ],
   )
 
   const handleSearch = useCallback(

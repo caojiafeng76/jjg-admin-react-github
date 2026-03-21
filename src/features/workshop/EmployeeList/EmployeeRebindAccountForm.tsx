@@ -31,7 +31,12 @@ export default function EmployeeRebindAccountForm({
   }, [employee.id, form])
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish} disabled={isSubmitting}>
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={onFinish}
+      disabled={isSubmitting}
+    >
       <Alert
         type="info"
         showIcon

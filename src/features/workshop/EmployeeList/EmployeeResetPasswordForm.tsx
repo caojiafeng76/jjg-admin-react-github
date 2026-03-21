@@ -32,7 +32,12 @@ export default function EmployeeResetPasswordForm({
   }, [employee.id, form])
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish} disabled={isSubmitting}>
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={onFinish}
+      disabled={isSubmitting}
+    >
       <Alert
         type="warning"
         showIcon
@@ -52,7 +57,10 @@ export default function EmployeeResetPasswordForm({
           { min: 6, message: '新密码至少 6 位' },
         ]}
       >
-        <Input.Password placeholder="请输入新密码" autoComplete="new-password" />
+        <Input.Password
+          placeholder="请输入新密码"
+          autoComplete="new-password"
+        />
       </Form.Item>
 
       <Form.Item
@@ -72,7 +80,10 @@ export default function EmployeeResetPasswordForm({
           }),
         ]}
       >
-        <Input.Password placeholder="请再次输入新密码" autoComplete="new-password" />
+        <Input.Password
+          placeholder="请再次输入新密码"
+          autoComplete="new-password"
+        />
       </Form.Item>
     </Form>
   )

@@ -47,36 +47,66 @@ export default function ProductionOrderMobileList({
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className={selected ? 'text-xs text-slate-300' : 'text-xs text-slate-400'}>
+                <div
+                  className={
+                    selected
+                      ? 'text-xs text-slate-300'
+                      : 'text-xs text-slate-400'
+                  }
+                >
                   {record.order_date}
                 </div>
                 <div className="mt-1 text-lg font-bold tracking-tight">
                   {record.employee?.name || '未分配员工'}
                 </div>
               </div>
-              <Tag color={record.hasZeroStandardQualifiedItem ? 'error' : 'processing'}>
+              <Tag
+                color={
+                  record.hasZeroStandardQualifiedItem ? 'error' : 'processing'
+                }
+              >
                 {record.hasZeroStandardQualifiedItem ? '待修正工时' : '正常'}
               </Tag>
             </div>
 
-            <div className={selected ? 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-100' : 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600'}>
+            <div
+              className={
+                selected
+                  ? 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-100'
+                  : 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600'
+              }
+            >
               <div className="rounded-2xl bg-black/5 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] opacity-60">出勤工时</div>
-                <div className="mt-1 text-base font-semibold">{record.work_hours} h</div>
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  出勤工时
+                </div>
+                <div className="mt-1 text-base font-semibold">
+                  {record.work_hours} h
+                </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] opacity-60">合格工时</div>
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  合格工时
+                </div>
                 <div className="mt-1 text-base font-semibold">
                   {record.total_qualified_hours?.toFixed(2) || '-'} h
                 </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] opacity-60">效率</div>
-                <div className="mt-1 text-base font-semibold">{renderEfficiency(record.efficiency)}</div>
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  效率
+                </div>
+                <div className="mt-1 text-base font-semibold">
+                  {renderEfficiency(record.efficiency)}
+                </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] opacity-60">备注</div>
-                <div className="mt-1 line-clamp-2 text-sm font-medium">{record.remark || '无'}</div>
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  备注
+                </div>
+                <div className="mt-1 line-clamp-2 text-sm font-medium">
+                  {record.remark || '无'}
+                </div>
               </div>
             </div>
 
