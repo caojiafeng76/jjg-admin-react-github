@@ -4,6 +4,11 @@ import { PencilSquareIcon, TrashIcon } from '@heroicons/react/16/solid'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 
+const dangerTextStyle = {
+  color: '#cf1322',
+  fontWeight: 600,
+}
+
 interface Props {
   loading: boolean
   data: ProductionOrderItem[]
@@ -85,7 +90,20 @@ export default function ProductionOrderItemTable({
         dataIndex: 'qualified_hours',
         key: 'qualified_hours',
         width: 100,
-        render: (value: number | null) => value?.toFixed(2) || '-',
+        render: (value: number | null, record: ProductionOrderItem) => {
+          if (value === null || value === undefined) {
+            return '-'
+          }
+
+          const shouldHighlight =
+            record.standard_seconds === 0 && record.qualified_quantity > 0
+
+          return (
+            <span style={shouldHighlight ? dangerTextStyle : undefined}>
+              {value.toFixed(2)}
+            </span>
+          )
+        },
       },
       {
         title: '加工不良数量',

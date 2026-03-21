@@ -1,24 +1,25 @@
 import { useMemo } from 'react'
-import {
-  Table,
-  TableColumnsType,
-  TableProps,
-  Button,
-  Popconfirm,
-  Space,
-} from 'antd'
-import { PencilSquareIcon, TrashIcon, EyeIcon } from '@heroicons/react/16/solid'
+import { Table, TableColumnsType, TableProps, Button } from 'antd'
+import { EyeIcon } from '@heroicons/react/16/solid'
 
-import type { ProductionOrder } from '@/services/apiProductionOrders'
+import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
+
+const warningTextStyle = {
+  color: '#d4b106',
+  fontWeight: 600,
+}
+
+const dangerTextStyle = {
+  color: '#cf1322',
+  fontWeight: 600,
+}
 
 interface Props {
   loading: boolean
-  data: ProductionOrder[]
+  data: ProductionOrderListItem[]
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
-  onView: (record: ProductionOrder) => void
-  onEdit: (record: ProductionOrder) => void
-  onDelete: (ids: string[]) => void
+  onView: (record: ProductionOrderListItem) => void
   scrollY?: number
 }
 
@@ -28,11 +29,9 @@ export default function ProductionOrderList({
   selectedRowKeys,
   onSelect,
   onView,
-  onEdit,
-  onDelete,
   scrollY = 400,
 }: Props) {
-  const columns: TableColumnsType<ProductionOrder> = useMemo(
+  const columns: TableColumnsType<ProductionOrderListItem> = useMemo(
     () => [
       {
         title: '#',
@@ -53,9 +52,8 @@ export default function ProductionOrderList({
         key: 'employee',
         fixed: 'left',
         width: 120,
-        render: (_text, record: ProductionOrder) =>
-          (record as unknown as { employee?: { name: string } }).employee
-            ?.name || '-',
+        render: (_text, record: ProductionOrderListItem) =>
+          record.employee?.name || '-',
       },
       {
         title: '出勤工时(h)',
@@ -68,15 +66,41 @@ export default function ProductionOrderList({
         dataIndex: 'total_qualified_hours',
         key: 'total_qualified_hours',
         width: 120,
-        render: (value: number | null) => value?.toFixed(2) || '-',
+        render: (value: number | null, record: ProductionOrderListItem) => {
+          if (value === null || value === undefined) {
+            return '-'
+          }
+
+          return (
+            <span
+              style={
+                record.hasZeroStandardQualifiedItem ? dangerTextStyle : undefined
+              }
+            >
+              {value.toFixed(2)}
+            </span>
+          )
+        },
       },
       {
         title: '工时效率(%)',
         dataIndex: 'efficiency',
         key: 'efficiency',
         width: 110,
-        render: (value: number | null) =>
-          value ? (value * 100).toFixed(2) : '-',
+        render: (value: number | null) => {
+          if (value === null || value === undefined) {
+            return '-'
+          }
+
+          const efficiencyPercent = value * 100
+          const isWarning = efficiencyPercent < 90 || efficiencyPercent > 120
+
+          return (
+            <span style={isWarning ? warningTextStyle : undefined}>
+              {efficiencyPercent.toFixed(2)}
+            </span>
+          )
+        },
       },
 
       {
@@ -90,52 +114,29 @@ export default function ProductionOrderList({
         title: '操作',
         key: 'actions',
         fixed: 'right',
-        width: 150,
-        render: (_text, record: ProductionOrder) => (
-          <Space size="small">
-            <Button
-              type="text"
-              size="small"
-              icon={<EyeIcon className="h-4 w-4" />}
-              onClick={() => onView(record)}
-              title="查看"
-            />
-            <Button
-              type="text"
-              size="small"
-              icon={<PencilSquareIcon className="h-4 w-4" />}
-              onClick={() => onEdit(record)}
-              title="编辑"
-            />
-            <Popconfirm
-              title="确定删除此生产工单吗？"
-              onConfirm={() => onDelete([record.id])}
-              okText="确定"
-              cancelText="取消"
-            >
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<TrashIcon className="h-4 w-4" />}
-                title="删除"
-              />
-            </Popconfirm>
-          </Space>
+        width: 72,
+        render: (_text, record: ProductionOrderListItem) => (
+          <Button
+            type="text"
+            size="small"
+            icon={<EyeIcon className="h-4 w-4" />}
+            onClick={() => onView(record)}
+            title="查看"
+          />
         ),
       },
     ],
-    [onView, onEdit, onDelete],
+    [onView],
   )
 
-  const rowSelection: TableProps<ProductionOrder>['rowSelection'] = {
+  const rowSelection: TableProps<ProductionOrderListItem>['rowSelection'] = {
     selectedRowKeys,
     onChange: onSelect,
     preserveSelectedRowKeys: true,
   }
 
   return (
-    <Table<ProductionOrder>
+    <Table<ProductionOrderListItem>
       rowKey={(record) => record.id}
       loading={loading}
       columns={columns}

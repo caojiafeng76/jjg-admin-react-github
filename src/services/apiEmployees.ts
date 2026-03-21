@@ -8,6 +8,89 @@ export interface Employee {
   updated_at?: string
 }
 
+export interface EmployeeDeleteBlocker {
+  employeeId: string
+  employeeName: string
+  productionOrderCount: number
+  orderDates: string[]
+}
+
+function formatBlockedNames(names: string[], fallbackLabel: string) {
+  if (names.length === 0) return fallbackLabel
+  if (names.length <= 3) return names.join('、')
+
+  return `${names.slice(0, 3).join('、')} 等${names.length}人`
+}
+
+async function assertEmployeesNotReferenced(ids: string[]) {
+  const blockers = await getEmployeeDeleteBlockers(ids)
+
+  if (blockers.length === 0) {
+    return
+  }
+
+  throw new AppError(
+    `员工 ${formatBlockedNames(
+      blockers.map((item) => item.employeeName),
+      '所选员工',
+    )} 已关联生产工单，无法删除`,
+    'FOREIGN_KEY_CONSTRAINT',
+  )
+}
+
+export async function getEmployeeDeleteBlockers(
+  ids: string[],
+): Promise<EmployeeDeleteBlocker[]> {
+  const { data: employees, error: employeesError } = await supabase
+    .from('employees')
+    .select('id, name')
+    .in('id', ids)
+
+  if (employeesError) {
+    throw handleApiError(employeesError, '检查员工引用失败')
+  }
+
+  const { data: referencedOrders, error: referenceError } = await supabase
+    .from('production_orders')
+    .select('id, employee_id, order_date')
+    .in('employee_id', ids)
+
+  if (referenceError) {
+    throw handleApiError(referenceError, '检查员工引用失败')
+  }
+
+  const employeeMap = new Map(
+    (employees || []).map((employee) => [employee.id, employee.name]),
+  )
+  const grouped = new Map<string, { count: number; dates: Set<string> }>()
+
+  ;(referencedOrders || []).forEach((order) => {
+    if (!order.employee_id) return
+
+    const current = grouped.get(order.employee_id) || {
+      count: 0,
+      dates: new Set<string>(),
+    }
+
+    current.count += 1
+
+    if (order.order_date) {
+      current.dates.add(order.order_date)
+    }
+
+    grouped.set(order.employee_id, current)
+  })
+
+  return Array.from(grouped.entries()).map(([employeeId, info]) => ({
+    employeeId,
+    employeeName: employeeMap.get(employeeId) || '未命名员工',
+    productionOrderCount: info.count,
+    orderDates: Array.from(info.dates).sort((left, right) =>
+      right.localeCompare(left),
+    ),
+  }))
+}
+
 export async function getEmployees({
   page,
   pageSize,
@@ -106,12 +189,14 @@ export async function updateEmployee({
 }
 
 export async function deleteEmployees(ids: string[]) {
+  await assertEmployeesNotReferenced(ids)
+
   const { error } = await supabase.from('employees').delete().in('id', ids)
 
   if (error) {
     if (error.code === '23503') {
       throw new AppError(
-        '该员工已在其他数据中被引用，无法删除',
+        '所选员工已关联生产工单，无法删除',
         'FOREIGN_KEY_CONSTRAINT',
       )
     }

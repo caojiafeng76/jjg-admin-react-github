@@ -1,21 +1,44 @@
 import { XCircleIcon } from '@heroicons/react/16/solid'
 import { Button, Popconfirm } from 'antd'
 
-type Props = {
-  onConfirm: () => void | Promise<void>
+type SharedProps = {
   isDeleting: boolean
   count?: number // 要删除的数量
   title?: string // 自定义标题，默认为"删除订单"
   itemName?: string // 项目名称，默认为"订单"
 }
 
+type Props =
+  | (SharedProps & {
+      onConfirm: () => void | Promise<void>
+      onClick?: never
+    })
+  | (SharedProps & {
+      onClick: () => void | Promise<void>
+      onConfirm?: never
+    })
+
 export default function DeleteButton({
+  onClick,
   onConfirm,
   isDeleting,
   count,
   title = '删除订单',
   itemName = '订单',
 }: Props) {
+  if (onClick) {
+    return (
+      <Button
+        type="text"
+        loading={isDeleting}
+        icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+        onClick={onClick}
+      >
+        删除
+      </Button>
+    )
+  }
+
   const description =
     count !== undefined && count > 0 ? (
       <div>
@@ -35,6 +58,7 @@ export default function DeleteButton({
     return (
       <Button
         type="text"
+        loading={isDeleting}
         icon={<XCircleIcon className="size-4 text-red-500/80!" />}
         onClick={onConfirm}
       >

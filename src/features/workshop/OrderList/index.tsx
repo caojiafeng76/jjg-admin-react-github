@@ -9,6 +9,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import PrintButton from '@/ui/PrintButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
 import {
   useWorkshopOrdersList,
   useCreateWorkshopOrder,
@@ -38,7 +39,7 @@ export interface WorkshopOrder {
 }
 
 export default function WorkshopOrderList() {
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')
@@ -128,25 +129,85 @@ export default function WorkshopOrderList() {
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
       message.warning('请选择至少一条数据')
       return
     }
-    deleteMutation.mutate(selectedRowKeys as string[], {
-      onSuccess: () => {
-        message.success('删除成功')
-        setSelectedRowKeys([])
-      },
-      onError: (error) => {
-        if (error instanceof Error) {
-          message.error(error.message)
-        } else {
-          message.error('删除失败，请稍后重试')
-        }
-      },
-    })
-  }, [deleteMutation, message, selectedRowKeys])
+
+    const ids = selectedRowKeys as string[]
+
+    try {
+      const blockers = await getWorkshopOrderDeleteBlockers(ids)
+
+      if (blockers.length > 0) {
+        modal.warning({
+          title: '无法删除订单',
+          okText: '知道了',
+          width: 620,
+          content: (
+            <div className="space-y-3">
+              <p>以下订单已被生产记录引用，请先处理关联数据：</p>
+              <ul className="list-disc space-y-2 pl-5">
+                {blockers.map((item) => (
+                  <li key={item.orderId}>
+                    <div className="font-medium text-gray-800">
+                      {item.projectNo?.trim() || '未填写项目号'}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      已关联 {item.productionItemCount} 条生产工单明细
+                      {item.orderDates.length > 0
+                        ? `，工单日期：${item.orderDates.slice(0, 3).join('、')}`
+                        : ''}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ),
+        })
+        return
+      }
+
+      modal.confirm({
+        title: '删除订单',
+        okText: '确认删除',
+        cancelText: '取消',
+        okButtonProps: { danger: true },
+        content: (
+          <div>
+            <p>
+              确定删除选中的 <strong>{ids.length}</strong> 个订单吗？
+            </p>
+            <p className="mt-2 text-xs text-red-500">
+              此操作不可撤销，将同时删除订单及其所有明细。
+            </p>
+          </div>
+        ),
+        onOk: async () => {
+          try {
+            await deleteMutation.mutateAsync(ids)
+            message.success('删除成功')
+            setSelectedRowKeys([])
+          } catch (error) {
+            if (error instanceof Error) {
+              message.error(error.message)
+            } else {
+              message.error('删除失败，请稍后重试')
+            }
+
+            throw error
+          }
+        },
+      })
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('删除失败，请稍后重试')
+      }
+    }
+  }, [deleteMutation, message, modal, selectedRowKeys])
 
   const handleFinish = useCallback(
     (values: WorkshopOrder | WorkshopOrder[]) => {
@@ -246,7 +307,7 @@ export default function WorkshopOrderList() {
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑" handleEdit={handleEdit} />
         <DeleteButton
-          onConfirm={handleDelete}
+          onClick={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
         />

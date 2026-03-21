@@ -39,16 +39,6 @@ export default function StandardTimeForm({
       disabled={isCreating}
     >
       <Form.Item
-        name="operation"
-        label="工序"
-        rules={[
-          { required: true, message: '请输入工序' },
-          { max: 100, message: '工序不能超过100个字符' },
-        ]}
-      >
-        <Input placeholder="请输入工序" disabled={isCreating} />
-      </Form.Item>
-      <Form.Item
         name="model"
         label="型号"
         rules={[
@@ -57,6 +47,16 @@ export default function StandardTimeForm({
         ]}
       >
         <Input placeholder="请输入型号" disabled={isCreating} />
+      </Form.Item>
+      <Form.Item
+        name="operation"
+        label="工序"
+        rules={[
+          { required: true, message: '请输入工序' },
+          { max: 100, message: '工序不能超过100个字符' },
+        ]}
+      >
+        <Input placeholder="请输入工序" disabled={isCreating} />
       </Form.Item>
       <Form.Item
         name="standard_seconds"

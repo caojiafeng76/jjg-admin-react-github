@@ -2,6 +2,126 @@ import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
 
+export interface WorkshopOrderDeleteBlocker {
+  orderId: string
+  projectNo: string | null
+  productionItemCount: number
+  orderDates: string[]
+}
+
+function formatBlockedProjectNos(projectNos: string[], fallbackLabel: string) {
+  if (projectNos.length === 0) return fallbackLabel
+  if (projectNos.length <= 3) return projectNos.join('、')
+
+  return `${projectNos.slice(0, 3).join('、')} 等${projectNos.length}条订单`
+}
+
+async function assertWorkshopOrdersNotReferenced(ids: string[]) {
+  const blockers = await getWorkshopOrderDeleteBlockers(ids)
+
+  if (blockers.length === 0) {
+    return
+  }
+
+  throw new AppError(
+    `订单 ${formatBlockedProjectNos(
+      blockers
+        .map((item) => item.projectNo?.trim())
+        .filter((projectNo): projectNo is string => Boolean(projectNo)),
+      '所选订单',
+    )} 已关联生产工单明细，无法删除`,
+    'FOREIGN_KEY_CONSTRAINT',
+  )
+}
+
+export async function getWorkshopOrderDeleteBlockers(
+  ids: string[],
+): Promise<WorkshopOrderDeleteBlocker[]> {
+  const { data: orders, error: ordersError } = await supabase
+    .from('sales_orders')
+    .select('id, project_no')
+    .in('id', ids)
+
+  if (ordersError) {
+    throw handleApiError(ordersError, '检查订单引用失败')
+  }
+
+  const selectedProjectNos = (orders || [])
+    .map((order) => order.project_no?.trim())
+    .filter((projectNo): projectNo is string => Boolean(projectNo))
+
+  if (selectedProjectNos.length === 0) {
+    return []
+  }
+
+  const { data: productionItems, error: referenceError } = await supabase
+    .from('production_order_items')
+    .select(
+      `
+      project_no,
+      order_id,
+      production_orders(order_date)
+    `,
+    )
+    .in('project_no', selectedProjectNos)
+
+  if (referenceError) {
+    throw handleApiError(referenceError, '检查订单引用失败')
+  }
+
+  const orderMap = new Map(
+    (orders || [])
+      .filter((order) => order.project_no?.trim())
+      .map((order) => [order.project_no!.trim(), order]),
+  )
+  const grouped = new Map<string, { count: number; dates: Set<string> }>()
+
+  ;(
+    (productionItems || []) as Array<{
+      project_no: string
+      order_id: string
+      production_orders:
+        | {
+            order_date: string
+          }
+        | Array<{ order_date: string }>
+        | null
+    }>
+  ).forEach((item) => {
+    const projectNo = item.project_no?.trim()
+
+    if (!projectNo || !orderMap.has(projectNo)) {
+      return
+    }
+
+    const current = grouped.get(projectNo) || {
+      count: 0,
+      dates: new Set<string>(),
+    }
+
+    current.count += 1
+
+    const productionOrder = Array.isArray(item.production_orders)
+      ? item.production_orders[0]
+      : item.production_orders
+
+    if (productionOrder?.order_date) {
+      current.dates.add(productionOrder.order_date)
+    }
+
+    grouped.set(projectNo, current)
+  })
+
+  return Array.from(grouped.entries()).map(([projectNo, info]) => ({
+    orderId: orderMap.get(projectNo)?.id || projectNo,
+    projectNo,
+    productionItemCount: info.count,
+    orderDates: Array.from(info.dates).sort((left, right) =>
+      right.localeCompare(left),
+    ),
+  }))
+}
+
 export async function getWorkshopOrders({
   page,
   pageSize,
@@ -202,12 +322,14 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
 }
 
 export async function deleteWorkshopOrders(ids: string[]) {
+  await assertWorkshopOrdersNotReferenced(ids)
+
   const { error } = await supabase.from('sales_orders').delete().in('id', ids)
 
   if (error) {
     if (error.code === '23503') {
       throw new AppError(
-        '该订单已关联生产数据，无法删除',
+        '所选订单已关联生产工单明细，无法删除',
         'FOREIGN_KEY_CONSTRAINT',
       )
     }
