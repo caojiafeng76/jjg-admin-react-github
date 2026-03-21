@@ -11,14 +11,6 @@ interface Props {
   selectedRowKeys?: React.Key[]
 }
 
-function renderEfficiency(value: number | null) {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-
-  return `${(value * 100).toFixed(2)}%`
-}
-
 export default function ProductionOrderMobileList({
   loading,
   data,
@@ -82,22 +74,6 @@ export default function ProductionOrderMobileList({
                 </div>
                 <div className="mt-1 text-base font-semibold">
                   {record.work_hours} h
-                </div>
-              </div>
-              <div className="rounded-2xl bg-black/5 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
-                  合格工时
-                </div>
-                <div className="mt-1 text-base font-semibold">
-                  {record.total_qualified_hours?.toFixed(2) || '-'} h
-                </div>
-              </div>
-              <div className="rounded-2xl bg-black/5 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
-                  效率
-                </div>
-                <div className="mt-1 text-base font-semibold">
-                  {renderEfficiency(record.efficiency)}
                 </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">

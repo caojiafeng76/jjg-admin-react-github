@@ -10,14 +10,6 @@ interface Props {
   onDelete: (ids: string[]) => void
 }
 
-function formatHours(value: number | null | undefined) {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-
-  return value.toFixed(2)
-}
-
 export default function ProductionOrderItemMobileList({
   loading,
   data,
@@ -72,26 +64,10 @@ export default function ProductionOrderItemMobileList({
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                  标准工时
-                </div>
-                <div className="mt-1 font-semibold text-slate-900">
-                  {item.standard_seconds} 秒
-                </div>
-              </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                   合格数量
                 </div>
                 <div className="mt-1 font-semibold text-slate-900">
                   {item.qualified_quantity}
-                </div>
-              </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                  合格工时
-                </div>
-                <div className="mt-1 font-semibold text-slate-900">
-                  {formatHours(item.qualified_hours)} h
                 </div>
               </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
