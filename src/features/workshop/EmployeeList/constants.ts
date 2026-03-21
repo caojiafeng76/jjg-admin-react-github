@@ -1,1 +1,2 @@
 export const DEFAULT_EMPLOYEE_AUTH_PASSWORD = '123456'
+export const EMPLOYEE_AUTH_EMAIL_DOMAIN = 'ydly.cn'
