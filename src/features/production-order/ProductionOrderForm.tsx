@@ -308,7 +308,9 @@ export default function ProductionOrderForm({
       customer_model: data?.customer_model ?? values.customer_model ?? null,
       operation,
       standard_seconds: Number(
-        values.standard_seconds ?? itemForm.getFieldValue('standard_seconds') ?? 0,
+        values.standard_seconds ??
+          itemForm.getFieldValue('standard_seconds') ??
+          0,
       ),
       qualified_quantity: values.qualified_quantity || 0,
       defect_reason_1: '加工',
