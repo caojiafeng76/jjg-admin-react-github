@@ -1,8 +1,5 @@
 import { App, Button, Empty, Tag } from 'antd'
-import {
-  PencilSquareIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline'
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 
@@ -52,7 +49,7 @@ export default function ProductionOrderItemMobileList({
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs uppercase tracking-[0.22em] text-slate-400">
+                <div className="text-xs tracking-[0.22em] text-slate-400 uppercase">
                   Step {index + 1}
                 </div>
                 <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
@@ -64,35 +61,62 @@ export default function ProductionOrderItemMobileList({
                 </div>
               </div>
 
-              <Tag color={shouldHighlight ? 'error' : 'processing'} className="mr-0 rounded-full px-3 py-1">
+              <Tag
+                color={shouldHighlight ? 'error' : 'processing'}
+                className="mr-0 rounded-full px-3 py-1"
+              >
                 {shouldHighlight ? '需补标准工时' : '正常'}
               </Tag>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">标准工时</div>
-                <div className="mt-1 font-semibold text-slate-900">{item.standard_seconds} 秒</div>
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  标准工时
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {item.standard_seconds} 秒
+                </div>
               </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">合格数量</div>
-                <div className="mt-1 font-semibold text-slate-900">{item.qualified_quantity}</div>
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  合格数量
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {item.qualified_quantity}
+                </div>
               </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">合格工时</div>
-                <div className="mt-1 font-semibold text-slate-900">{formatHours(item.qualified_hours)} h</div>
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  合格工时
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {formatHours(item.qualified_hours)} h
+                </div>
               </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">加分项</div>
-                <div className="mt-1 font-semibold text-slate-900">{item.bonus_seconds || 0} 秒</div>
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  加分项
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {item.bonus_seconds || 0} 秒
+                </div>
               </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">加工不良</div>
-                <div className="mt-1 font-semibold text-slate-900">{item.defect_quantity_1 || 0}</div>
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  加工不良
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {item.defect_quantity_1 || 0}
+                </div>
               </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">原料不良</div>
-                <div className="mt-1 font-semibold text-slate-900">{item.defect_quantity_2 || 0}</div>
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  原料不良
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {item.defect_quantity_2 || 0}
+                </div>
               </div>
             </div>
 

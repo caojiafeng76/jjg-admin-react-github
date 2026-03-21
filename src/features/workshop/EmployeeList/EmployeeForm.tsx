@@ -96,11 +96,7 @@ export default function EmployeeForm({
         />
       </Form.Item>
 
-      <Form.Item
-        name="is_active"
-        label="启用状态"
-        valuePropName="checked"
-      >
+      <Form.Item name="is_active" label="启用状态" valuePropName="checked">
         <Switch
           checkedChildren="启用"
           unCheckedChildren="停用"

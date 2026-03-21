@@ -33,7 +33,12 @@ export default function EmployeeAuthAccountForm({
   }, [employee.id, form])
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish} disabled={isSubmitting}>
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={onFinish}
+      disabled={isSubmitting}
+    >
       <Alert
         type="info"
         showIcon
@@ -64,7 +69,10 @@ export default function EmployeeAuthAccountForm({
           { min: 6, message: '初始密码至少 6 位' },
         ]}
       >
-        <Input.Password placeholder="请输入初始密码" autoComplete="new-password" />
+        <Input.Password
+          placeholder="请输入初始密码"
+          autoComplete="new-password"
+        />
       </Form.Item>
 
       <Form.Item
@@ -84,7 +92,10 @@ export default function EmployeeAuthAccountForm({
           }),
         ]}
       >
-        <Input.Password placeholder="请再次输入初始密码" autoComplete="new-password" />
+        <Input.Password
+          placeholder="请再次输入初始密码"
+          autoComplete="new-password"
+        />
       </Form.Item>
     </Form>
   )

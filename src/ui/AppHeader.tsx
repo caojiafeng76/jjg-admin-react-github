@@ -40,7 +40,8 @@ export default function AppHeader({
   const currentPath = location.pathname.slice(1) || 'dashboard'
   const pageName = routeToLabelMap[currentPath] || ''
   const displayName = employeeProfile?.name || user?.email || '未登录用户'
-  const roleLabel = role === 'admin' ? '管理员' : role === 'employee' ? '员工' : ''
+  const roleLabel =
+    role === 'admin' ? '管理员' : role === 'employee' ? '员工' : ''
 
   return (
     <Header

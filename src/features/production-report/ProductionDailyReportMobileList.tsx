@@ -14,7 +14,9 @@ export default function ProductionDailyReportMobileList({
   operations,
 }: Props) {
   if (!loading && data.length === 0) {
-    return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无日报数据" />
+    return (
+      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无日报数据" />
+    )
   }
 
   return (
@@ -45,15 +47,23 @@ export default function ProductionDailyReportMobileList({
                 </div>
               </div>
               <div className="rounded-2xl bg-slate-900 px-3 py-2 text-right text-white">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-300">工时</div>
-                <div className="mt-1 text-base font-semibold">{row.workHours.toFixed(2)} h</div>
+                <div className="text-[11px] tracking-[0.18em] text-slate-300 uppercase">
+                  工时
+                </div>
+                <div className="mt-1 text-base font-semibold">
+                  {row.workHours.toFixed(2)} h
+                </div>
               </div>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
               {topOperations.length > 0 ? (
                 topOperations.map((item) => (
-                  <Tag key={item.operation} color="processing" className="mr-0 rounded-full px-3 py-1">
+                  <Tag
+                    key={item.operation}
+                    color="processing"
+                    className="mr-0 rounded-full px-3 py-1"
+                  >
                     {item.operation} {item.quantity}
                   </Tag>
                 ))
@@ -66,19 +76,29 @@ export default function ProductionDailyReportMobileList({
 
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">操作人</div>
-                <div className="mt-1 font-semibold text-slate-900">{row.employeeName}</div>
-              </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">原料不良</div>
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  操作人
+                </div>
                 <div className="mt-1 font-semibold text-slate-900">
-                  {row.rawMaterialDefectCount} / {row.rawMaterialDefectWeightKg.toFixed(2)}kg
+                  {row.employeeName}
                 </div>
               </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3 col-span-2">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">加工不良</div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  原料不良
+                </div>
                 <div className="mt-1 font-semibold text-slate-900">
-                  {row.processingDefectCount} / {row.processingDefectWeightKg.toFixed(2)}kg
+                  {row.rawMaterialDefectCount} /{' '}
+                  {row.rawMaterialDefectWeightKg.toFixed(2)}kg
+                </div>
+              </div>
+              <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  加工不良
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.processingDefectCount} /{' '}
+                  {row.processingDefectWeightKg.toFixed(2)}kg
                 </div>
               </div>
             </div>

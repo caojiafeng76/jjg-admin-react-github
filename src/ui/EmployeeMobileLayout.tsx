@@ -33,10 +33,10 @@ export default function EmployeeMobileLayout() {
 
   return (
     <Layout className="min-h-screen bg-[radial-gradient(circle_at_top,_#f5f7ff_0%,_#eef2ff_35%,_#e8edf5_100%)]">
-      <header className="sticky top-0 z-20 border-b border-white/50 bg-white/85 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+14px)] backdrop-blur-xl">
+      <header className="sticky top-0 z-20 border-b border-white/50 bg-white/85 px-4 pt-[calc(env(safe-area-inset-top)+14px)] pb-3 backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-[11px] font-medium uppercase tracking-[0.24em] text-slate-400">
+            <div className="text-[11px] font-medium tracking-[0.24em] text-slate-400 uppercase">
               Employee Workspace
             </div>
             <div className="mt-1 text-xl font-black tracking-tight text-slate-900">
@@ -61,7 +61,7 @@ export default function EmployeeMobileLayout() {
         </div>
       </header>
 
-      <Content className="px-3 pb-[calc(env(safe-area-inset-bottom)+84px)] pt-3">
+      <Content className="px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+84px)]">
         <div
           className="min-h-[calc(100vh-168px)] rounded-[2rem] border border-white/60 shadow-[0_20px_70px_rgba(15,23,42,0.08)]"
           style={{ background: colorBgContainer }}
@@ -70,7 +70,7 @@ export default function EmployeeMobileLayout() {
         </div>
       </Content>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/60 bg-white/92 px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3 backdrop-blur-xl">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/60 bg-white/92 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+10px)] backdrop-blur-xl">
         <div className="grid grid-cols-2 gap-3">
           {navItems.map((item) => {
             const isActive = location.pathname === item.key

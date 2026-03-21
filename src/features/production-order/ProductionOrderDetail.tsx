@@ -21,7 +21,11 @@ interface Props {
   compact?: boolean
 }
 
-export default function ProductionOrderDetail({ order, onEdit, compact = false }: Props) {
+export default function ProductionOrderDetail({
+  order,
+  onEdit,
+  compact = false,
+}: Props) {
   const [isItemModalOpen, setIsItemModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<
     ProductionOrderItem | undefined
@@ -80,7 +84,7 @@ export default function ProductionOrderDetail({ order, onEdit, compact = false }
         <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-xs uppercase tracking-[0.24em] text-slate-400">
+              <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
                 Order Summary
               </div>
               <div className="mt-1 text-xl font-black tracking-tight text-slate-900">
@@ -98,19 +102,28 @@ export default function ProductionOrderDetail({ order, onEdit, compact = false }
 
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">出勤工时</div>
-              <div className="mt-1 font-semibold text-slate-900">{currentOrder.work_hours} 小时</div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">合格工时</div>
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                出勤工时
+              </div>
               <div className="mt-1 font-semibold text-slate-900">
-                {currentOrder.total_qualified_hours
-                  ? currentOrder.total_qualified_hours.toFixed(2)
-                  : '-'} 小时
+                {currentOrder.work_hours} 小时
               </div>
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">工时效率</div>
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                合格工时
+              </div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {currentOrder.total_qualified_hours
+                  ? currentOrder.total_qualified_hours.toFixed(2)
+                  : '-'}{' '}
+                小时
+              </div>
+            </div>
+            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                工时效率
+              </div>
               <div className="mt-1 font-semibold text-slate-900">
                 {currentOrder.efficiency
                   ? `${(currentOrder.efficiency * 100).toFixed(2)}%`
@@ -118,8 +131,10 @@ export default function ProductionOrderDetail({ order, onEdit, compact = false }
               </div>
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">备注</div>
-              <div className="mt-1 font-semibold text-slate-900 line-clamp-3">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                备注
+              </div>
+              <div className="mt-1 line-clamp-3 font-semibold text-slate-900">
                 {currentOrder.remark || '无'}
               </div>
             </div>
@@ -167,7 +182,7 @@ export default function ProductionOrderDetail({ order, onEdit, compact = false }
         <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-xs uppercase tracking-[0.24em] text-slate-400">
+              <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
                 Process Items
               </div>
               <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">

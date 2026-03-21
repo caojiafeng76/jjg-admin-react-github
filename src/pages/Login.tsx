@@ -114,12 +114,7 @@ export default function Login() {
           </Form.Item>
 
           <Form.Item style={{ marginTop: 24 }}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              loading={submitting}
-            >
+            <Button type="primary" htmlType="submit" block loading={submitting}>
               登录
             </Button>
           </Form.Item>

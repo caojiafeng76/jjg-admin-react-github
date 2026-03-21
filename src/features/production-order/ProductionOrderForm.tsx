@@ -384,7 +384,11 @@ export default function ProductionOrderForm({
             work_hours: 11,
           }}
         >
-          <div className={compact ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-4 gap-4'}>
+          <div
+            className={
+              compact ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-4 gap-4'
+            }
+          >
             <Form.Item
               name="order_date"
               label="日期"
@@ -429,7 +433,11 @@ export default function ProductionOrderForm({
               />
             </Form.Item>
 
-            <Form.Item name="remark" label="备注" className={compact ? undefined : 'col-span-4'}>
+            <Form.Item
+              name="remark"
+              label="备注"
+              className={compact ? undefined : 'col-span-4'}
+            >
               <Input.TextArea rows={2} placeholder="请输入备注" />
             </Form.Item>
           </div>

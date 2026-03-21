@@ -149,7 +149,13 @@ export default function ProductionDailyReportPage() {
   }, [allRows.length, page, pageSize, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className={isEmployeeView ? 'grid h-full grid-rows-[auto_auto_1fr_auto] gap-3 p-3' : 'grid h-full grid-rows-[auto_auto_1fr_auto] gap-4'}>
+    <div
+      className={
+        isEmployeeView
+          ? 'grid h-full grid-rows-[auto_auto_1fr_auto] gap-3 p-3'
+          : 'grid h-full grid-rows-[auto_auto_1fr_auto] gap-4'
+      }
+    >
       <div className="flex flex-wrap items-center gap-2">
         {isEmployeeView ? null : (
           <ExportButton
@@ -160,11 +166,21 @@ export default function ProductionDailyReportPage() {
         )}
       </div>
 
-      <div className={isEmployeeView ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]' : ''}>
+      <div
+        className={
+          isEmployeeView
+            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
+            : ''
+        }
+      >
         {isEmployeeView ? (
           <div className="mb-3">
-            <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Filter</div>
-            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">筛选我的日报</div>
+            <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
+              Filter
+            </div>
+            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
+              筛选我的日报
+            </div>
           </div>
         ) : null}
         <ProductionDailyReportSearch
@@ -175,7 +191,14 @@ export default function ProductionDailyReportPage() {
         />
       </div>
 
-      <div ref={tableContainerRef} className={isEmployeeView ? 'min-h-0 overflow-y-auto no-scrollbar' : 'min-h-0 overflow-hidden'}>
+      <div
+        ref={tableContainerRef}
+        className={
+          isEmployeeView
+            ? 'no-scrollbar min-h-0 overflow-y-auto'
+            : 'min-h-0 overflow-hidden'
+        }
+      >
         {isEmployeeView ? (
           <ProductionDailyReportMobileList
             loading={isLoading || isFetching}
@@ -228,7 +251,12 @@ export default function ProductionDailyReportPage() {
         )}
       </div>
 
-      <div ref={paginationRef} className={isEmployeeView ? 'flex justify-center pb-1' : 'flex justify-end'}>
+      <div
+        ref={paginationRef}
+        className={
+          isEmployeeView ? 'flex justify-center pb-1' : 'flex justify-end'
+        }
+      >
         <AppPagination total={allRows.length} />
       </div>
     </div>

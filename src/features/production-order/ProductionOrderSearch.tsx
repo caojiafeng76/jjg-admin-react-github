@@ -78,7 +78,9 @@ export default function ProductionOrderSearch({
       form={form}
       onFinish={handleSearch}
       layout={mobile ? 'vertical' : 'inline'}
-      className={mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'}
+      className={
+        mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'
+      }
     >
       <Form.Item name="dateRange" className="mb-0">
         <RangePicker
@@ -90,7 +92,11 @@ export default function ProductionOrderSearch({
       </Form.Item>
       {fixedEmployee ? (
         <Form.Item className="mb-0">
-          <Input value={fixedEmployee.name} disabled style={{ width: mobile ? '100%' : 160 }} />
+          <Input
+            value={fixedEmployee.name}
+            disabled
+            style={{ width: mobile ? '100%' : 160 }}
+          />
         </Form.Item>
       ) : (
         <Form.Item name="employeeId" className="mb-0">
@@ -100,7 +106,10 @@ export default function ProductionOrderSearch({
             style={{ width: mobile ? '100%' : 160 }}
             showSearch
             optionFilterProp="children"
-            options={employees.map((emp) => ({ label: emp.name, value: emp.id }))}
+            options={employees.map((emp) => ({
+              label: emp.name,
+              value: emp.id,
+            }))}
           />
         </Form.Item>
       )}

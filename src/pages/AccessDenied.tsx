@@ -26,14 +26,18 @@ export default function AccessDenied() {
           <Title level={3} style={{ marginBottom: 0 }}>
             当前账号暂无可用前端入口
           </Title>
-          <Paragraph className="text-sm text-slate-600" style={{ marginBottom: 0 }}>
+          <Paragraph
+            className="text-sm text-slate-600"
+            style={{ marginBottom: 0 }}
+          >
             {description}
           </Paragraph>
-          <Text type="secondary">
-            账号邮箱：{user?.email || '未登录'}
-          </Text>
+          <Text type="secondary">账号邮箱：{user?.email || '未登录'}</Text>
           <Space>
-            <Button type="primary" onClick={() => navigate('/login', { replace: true })}>
+            <Button
+              type="primary"
+              onClick={() => navigate('/login', { replace: true })}
+            >
               返回登录页
             </Button>
             {user ? (
