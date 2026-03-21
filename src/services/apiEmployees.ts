@@ -34,6 +34,12 @@ export interface RebindEmployeeAuthAccountInput {
   email: string
 }
 
+export interface EmployeeAuthEmailResult {
+  employeeId: string
+  authUserId: string | null
+  email: string | null
+}
+
 function formatBlockedNames(names: string[], fallbackLabel: string) {
   if (names.length === 0) return fallbackLabel
   if (names.length <= 3) return names.join('、')
@@ -432,5 +438,36 @@ export async function rebindEmployeeAuthAccount(
     employeeName: string
     userId: string
     email: string
+  }
+}
+
+export async function getEmployeeAuthEmail(
+  employeeId: string,
+): Promise<EmployeeAuthEmailResult> {
+  try {
+    const { data, error } = await supabase.functions.invoke(
+      'get-employee-auth-email',
+      {
+        body: { employeeId },
+      },
+    )
+
+    if (error) {
+      throw handleApiError(error, '获取员工绑定邮箱失败')
+    }
+
+    if (data?.error) {
+      throw new AppError(String(data.error), 'GET_EMPLOYEE_AUTH_EMAIL_FAILED')
+    }
+
+    return data as EmployeeAuthEmailResult
+  } catch (error) {
+    console.warn('获取员工绑定邮箱失败，已降级为空值', error)
+
+    return {
+      employeeId,
+      authUserId: null,
+      email: null,
+    }
   }
 }

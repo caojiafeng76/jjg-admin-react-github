@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { DatePicker, Button, Form, Input, Space, Select } from 'antd'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
+import {
+  ChevronDownIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from '@heroicons/react/16/solid'
 import dayjs, { type Dayjs } from 'dayjs'
 
 const { RangePicker } = DatePicker
@@ -30,6 +34,7 @@ export default function ProductionOrderSearch({
 }: Props) {
   const [form] = Form.useForm()
   const [isSearching, setIsSearching] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(!mobile)
 
   useEffect(() => {
     form.setFieldsValue({
@@ -40,6 +45,10 @@ export default function ProductionOrderSearch({
           : undefined,
     })
   }, [fixedEmployee, form, initialValues])
+
+  useEffect(() => {
+    setIsExpanded(!mobile)
+  }, [mobile])
 
   const handleSearch = (values: {
     dateRange?: [Dayjs | null, Dayjs | null]
@@ -60,6 +69,9 @@ export default function ProductionOrderSearch({
 
     setIsSearching(true)
     onSearch(params)
+    if (mobile) {
+      setIsExpanded(false)
+    }
     setTimeout(() => setIsSearching(false), 300)
   }
 
@@ -70,10 +82,13 @@ export default function ProductionOrderSearch({
     }
     setIsSearching(true)
     onReset()
+    if (mobile) {
+      setIsExpanded(false)
+    }
     setTimeout(() => setIsSearching(false), 300)
   }
 
-  return (
+  const formContent = (
     <Form
       form={form}
       onFinish={handleSearch}
@@ -134,5 +149,35 @@ export default function ProductionOrderSearch({
         </Space>
       </Form.Item>
     </Form>
+  )
+
+  if (mobile) {
+    return (
+      <div className="flex flex-col gap-3">
+        <Button
+          block
+          type="default"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="h-11 rounded-2xl border-slate-200 bg-slate-50 px-4 text-slate-700 shadow-none"
+        >
+          <span className="flex w-full items-center justify-between text-sm font-medium">
+            <span>{isExpanded ? '收起筛选条件' : '展开筛选条件'}</span>
+            <ChevronDownIcon
+              className={
+                isExpanded
+                  ? 'h-4 w-4 rotate-180 transition-transform'
+                  : 'h-4 w-4 transition-transform'
+              }
+            />
+          </span>
+        </Button>
+
+        {isExpanded ? formContent : null}
+      </div>
+    )
+  }
+
+  return (
+    formContent
   )
 }

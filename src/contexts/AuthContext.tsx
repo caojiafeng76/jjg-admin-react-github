@@ -15,6 +15,7 @@ type AuthContextValue = {
   error: Error | null
   clearError: () => void
   signIn: (email: string, password: string) => Promise<void>
+  changePassword: (currentPassword: string, password: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -160,6 +161,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false)
   }
 
+  const changePassword = async (currentPassword: string, password: string) => {
+    setError(null)
+
+    if (!user?.email) {
+      const nextError = new Error('当前账号缺少邮箱信息，无法验证原密码')
+      setError(nextError)
+      throw nextError
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    })
+
+    if (signInError) {
+      console.error('Auth verifyCurrentPassword error:', signInError)
+      setError(signInError)
+      throw signInError
+    }
+
+    const { error } = await supabase.auth.updateUser({ password })
+
+    if (error) {
+      console.error('Auth changePassword error:', error)
+      setError(error)
+      throw error
+    }
+  }
+
   const role = (employeeProfile?.role || null) as AppRole | null
 
   const value: AuthContextValue = {
@@ -170,6 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error,
     clearError,
     signIn,
+    changePassword,
     signOut,
   }
 
