@@ -172,8 +172,12 @@ export default function EmployeeList() {
       return
     }
 
-    const targetEmployees = selectedEmployees.filter((item) => !item.auth_user_id)
-    const skippedEmployees = selectedEmployees.filter((item) => item.auth_user_id)
+    const targetEmployees = selectedEmployees.filter(
+      (item) => !item.auth_user_id,
+    )
+    const skippedEmployees = selectedEmployees.filter(
+      (item) => item.auth_user_id,
+    )
 
     if (targetEmployees.length === 0) {
       message.warning('所选员工都已绑定账号，无需批量开通')
@@ -190,11 +194,13 @@ export default function EmployeeList() {
       content: (
         <div className="space-y-3 text-sm text-slate-600">
           <p>
-            将为 <strong>{targetEmployees.length}</strong> 名员工批量开通账号，默认密码为{' '}
+            将为 <strong>{targetEmployees.length}</strong>{' '}
+            名员工批量开通账号，默认密码为{' '}
             <strong>{DEFAULT_EMPLOYEE_AUTH_PASSWORD}</strong>。
           </p>
           <p>
-            邮箱规则：员工姓名拼音 <strong>@{EMPLOYEE_AUTH_EMAIL_DOMAIN}</strong>
+            邮箱规则：员工姓名拼音{' '}
+            <strong>@{EMPLOYEE_AUTH_EMAIL_DOMAIN}</strong>
             。同名员工会自动追加数字后缀。
           </p>
           {skippedEmployees.length > 0 ? (
@@ -215,7 +221,9 @@ export default function EmployeeList() {
                 </div>
               ))}
               {plans.length > 5 ? (
-                <div className="text-slate-400">还有 {plans.length - 5} 名员工未展开</div>
+                <div className="text-slate-400">
+                  还有 {plans.length - 5} 名员工未展开
+                </div>
               ) : null}
             </div>
           </div>
@@ -224,7 +232,8 @@ export default function EmployeeList() {
       onOk: async () => {
         setIsBatchCreatingAuth(true)
 
-        const successResults: Array<{ employeeName: string; email: string }> = []
+        const successResults: Array<{ employeeName: string; email: string }> =
+          []
         const failedResults: Array<{
           employeeName: string
           email: string
@@ -266,7 +275,9 @@ export default function EmployeeList() {
           setSelectedRowKeys([])
 
           if (successResults.length > 0) {
-            message.success(`批量开通完成，成功 ${successResults.length} 个账号`)
+            message.success(
+              `批量开通完成，成功 ${successResults.length} 个账号`,
+            )
           }
 
           if (failedResults.length > 0) {
@@ -282,10 +293,19 @@ export default function EmployeeList() {
                   </p>
                   <div className="max-h-72 space-y-2 overflow-y-auto rounded-2xl bg-slate-50 px-3 py-3">
                     {failedResults.map((item) => (
-                      <div key={`${item.employeeName}-${item.email}`} className="rounded-xl bg-white px-3 py-2">
-                        <div className="font-medium text-slate-800">{item.employeeName}</div>
-                        <div className="text-xs text-slate-500">{item.email}</div>
-                        <div className="mt-1 text-xs text-rose-500">{item.reason}</div>
+                      <div
+                        key={`${item.employeeName}-${item.email}`}
+                        className="rounded-xl bg-white px-3 py-2"
+                      >
+                        <div className="font-medium text-slate-800">
+                          {item.employeeName}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {item.email}
+                        </div>
+                        <div className="mt-1 text-xs text-rose-500">
+                          {item.reason}
+                        </div>
                       </div>
                     ))}
                   </div>
