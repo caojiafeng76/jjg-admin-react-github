@@ -683,7 +683,10 @@ export default function ProductionOrderForm({
                   {
                     title: '操作',
                     width: 100,
-                    render: (_: unknown, record: OrderItem & { key: number }) => (
+                    render: (
+                      _: unknown,
+                      record: OrderItem & { key: number },
+                    ) => (
                       <Space size="small">
                         <Button
                           type="text"

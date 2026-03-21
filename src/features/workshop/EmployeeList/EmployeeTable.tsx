@@ -30,7 +30,8 @@ function BoundAccountCell({ employeeId, authUserId }: BoundAccountCellProps) {
   }
 
   const email = authEmailResult?.email?.trim() || null
-  const displayText = email || `${authUserId.slice(0, 8)}...${authUserId.slice(-6)}`
+  const displayText =
+    email || `${authUserId.slice(0, 8)}...${authUserId.slice(-6)}`
 
   return (
     <div className="flex flex-col gap-1">
@@ -81,12 +82,7 @@ export default function EmployeeTable({
         key: 'auth_user_id',
         width: 240,
         render: (value: string | null | undefined, record: Employee) => {
-          return (
-            <BoundAccountCell
-              employeeId={record.id}
-              authUserId={value}
-            />
-          )
+          return <BoundAccountCell employeeId={record.id} authUserId={value} />
         },
       },
       {
