@@ -3,9 +3,14 @@ import type { ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
 
 import supabase from '@/services/supabase'
+import type { Employee } from '@/services/apiEmployees'
+import { getCurrentEmployeeProfile } from '@/services/apiEmployees'
+import type { AppRole } from '@/config/access'
 
 type AuthContextValue = {
   user: User | null
+  employeeProfile: Employee | null
+  role: AppRole | null
   loading: boolean
   error: Error | null
   clearError: () => void
@@ -17,9 +22,32 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [employeeProfile, setEmployeeProfile] = useState<Employee | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const initializedRef = useRef(false)
+
+  const loadEmployeeProfile = async (nextUser: User | null) => {
+    if (!nextUser) {
+      setEmployeeProfile(null)
+      return null
+    }
+
+    try {
+      const profile = await getCurrentEmployeeProfile(nextUser.id)
+      setEmployeeProfile(profile)
+      return profile
+    } catch (profileError) {
+      const normalizedError =
+        profileError instanceof Error
+          ? profileError
+          : new Error('获取当前员工信息失败')
+
+      setError(normalizedError)
+      setEmployeeProfile(null)
+      return null
+    }
+  }
 
   useEffect(() => {
     let mounted = true
@@ -34,8 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Auth getUser error:', error)
           setError(error)
           setUser(null)
+          setEmployeeProfile(null)
         } else {
-          setUser(data.user ?? null)
+          const nextUser = data.user ?? null
+          setUser(nextUser)
+          return loadEmployeeProfile(nextUser)
         }
       })
       .finally(() => {
@@ -52,11 +83,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // 只有在初始化完成后才处理状态变化，避免竞态条件
       if (initializedRef.current) {
-        setUser(session?.user ?? null)
-        // 登录/登出事件时，确保 loading 状态正确
-        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-          setLoading(false)
+        const nextUser = session?.user ?? null
+
+        if (
+          event === 'SIGNED_IN' ||
+          event === 'SIGNED_OUT' ||
+          event === 'USER_UPDATED'
+        ) {
+          setLoading(true)
+          setUser(nextUser)
+
+          void loadEmployeeProfile(nextUser).finally(() => {
+            if (mounted) {
+              setLoading(false)
+            }
+          })
+
+          return
         }
+
+        setUser(nextUser)
       }
     })
 
@@ -87,9 +133,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 登录成功后，用户状态会通过 onAuthStateChange 自动更新
       // 这里不需要手动设置，避免与 onAuthStateChange 冲突
       setUser(data.user ?? null)
-    } finally {
-      // 确保 loading 状态被清除，即使发生错误
+    } catch (error) {
       setLoading(false)
+      throw error
+    } finally {
+      // 登录成功时，loading 由 onAuthStateChange + loadEmployeeProfile 结束。
+      // 这里不主动关闭，避免 role 尚未加载完成就触发前端分流误判。
     }
   }
 
@@ -107,11 +156,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setUser(null)
+    setEmployeeProfile(null)
     setLoading(false)
   }
 
+  const role = (employeeProfile?.role || null) as AppRole | null
+
   const value: AuthContextValue = {
     user,
+    employeeProfile,
+    role,
     loading,
     error,
     clearError,

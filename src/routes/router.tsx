@@ -4,11 +4,13 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
 import { useAuth } from '@/contexts/AuthContext'
+import { getDefaultHomeByRole, type AppRole } from '@/config/access'
 
 // 懒加载页面组件（按 feature 组织）
 const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Login = lazy(() => import('@pages/Login'))
 const PageNotFound = lazy(() => import('@pages/PageNotFound'))
+const AccessDenied = lazy(() => import('@pages/AccessDenied'))
 
 // Syney 相关
 const SyneySpecList = lazy(() => import('@features/syney/SpecList'))
@@ -50,6 +52,52 @@ function ProtectedRoute({ element }: { element: ReactNode }) {
   return <>{element}</>
 }
 
+function RoleProtectedRoute({
+  element,
+  allow,
+}: {
+  element: ReactNode
+  allow: AppRole[]
+}) {
+  const { user, loading, role, employeeProfile } = useAuth()
+
+  if (loading) {
+    return <Loading />
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (!employeeProfile || employeeProfile.is_active === false || !role) {
+    return <Navigate to="/access-denied" replace />
+  }
+
+  if (!allow.includes(role)) {
+    return <Navigate to={getDefaultHomeByRole(role)} replace />
+  }
+
+  return <>{element}</>
+}
+
+function RoleHomeRedirect() {
+  const { user, loading, role, employeeProfile } = useAuth()
+
+  if (loading) {
+    return <Loading />
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (!employeeProfile || employeeProfile.is_active === false || !role) {
+    return <Navigate to="/access-denied" replace />
+  }
+
+  return <Navigate replace to={getDefaultHomeByRole(role)} />
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -61,13 +109,13 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate replace to="/dashboard" />,
+        element: <RoleHomeRedirect />,
       },
       {
         path: 'dashboard',
         element: (
           <Suspense fallback={<Loading />}>
-            <Dashboard />
+            <RoleProtectedRoute allow={['admin']} element={<Dashboard />} />
           </Suspense>
         ),
       },
@@ -75,7 +123,7 @@ export const router = createBrowserRouter([
         path: 'syney-spec-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <SyneySpecList />
+            <RoleProtectedRoute allow={['admin']} element={<SyneySpecList />} />
           </Suspense>
         ),
       },
@@ -83,7 +131,10 @@ export const router = createBrowserRouter([
         path: 'syney-store-report-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <SyneyStoreReportList />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<SyneyStoreReportList />}
+            />
           </Suspense>
         ),
       },
@@ -91,7 +142,10 @@ export const router = createBrowserRouter([
         path: 'syney-store-report-list/:reportNo',
         element: (
           <Suspense fallback={<Loading />}>
-            <SyneyStoreReportDetail />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<SyneyStoreReportDetail />}
+            />
           </Suspense>
         ),
       },
@@ -99,7 +153,7 @@ export const router = createBrowserRouter([
         path: 'syney-po-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <SyneyPoList />
+            <RoleProtectedRoute allow={['admin']} element={<SyneyPoList />} />
           </Suspense>
         ),
       },
@@ -107,7 +161,7 @@ export const router = createBrowserRouter([
         path: 'syney-po-list/:PoId',
         element: (
           <Suspense fallback={<Loading />}>
-            <SyneyPoDetail />
+            <RoleProtectedRoute allow={['admin']} element={<SyneyPoDetail />} />
           </Suspense>
         ),
       },
@@ -115,7 +169,10 @@ export const router = createBrowserRouter([
         path: 'syney-safe-part-setting',
         element: (
           <Suspense fallback={<Loading />}>
-            <SafePartSettingPage />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<SafePartSettingPage />}
+            />
           </Suspense>
         ),
       },
@@ -123,7 +180,7 @@ export const router = createBrowserRouter([
         path: 'syney-setting',
         element: (
           <Suspense fallback={<Loading />}>
-            <SyneySetting />
+            <RoleProtectedRoute allow={['admin']} element={<SyneySetting />} />
           </Suspense>
         ),
       },
@@ -131,7 +188,10 @@ export const router = createBrowserRouter([
         path: 'workshop-order-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <WorkshopOrderList />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<WorkshopOrderList />}
+            />
           </Suspense>
         ),
       },
@@ -139,7 +199,7 @@ export const router = createBrowserRouter([
         path: 'employee-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <EmployeeList />
+            <RoleProtectedRoute allow={['admin']} element={<EmployeeList />} />
           </Suspense>
         ),
       },
@@ -147,7 +207,10 @@ export const router = createBrowserRouter([
         path: 'standard-time-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <StandardTimeList />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<StandardTimeList />}
+            />
           </Suspense>
         ),
       },
@@ -155,7 +218,10 @@ export const router = createBrowserRouter([
         path: 'production-order',
         element: (
           <Suspense fallback={<Loading />}>
-            <ProductionOrder />
+            <RoleProtectedRoute
+              allow={['admin', 'employee']}
+              element={<ProductionOrder />}
+            />
           </Suspense>
         ),
       },
@@ -163,7 +229,10 @@ export const router = createBrowserRouter([
         path: 'production-daily-report',
         element: (
           <Suspense fallback={<Loading />}>
-            <ProductionDailyReport />
+            <RoleProtectedRoute
+              allow={['admin', 'employee']}
+              element={<ProductionDailyReport />}
+            />
           </Suspense>
         ),
       },
@@ -174,6 +243,14 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<Loading />}>
         <Login />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/access-denied',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <AccessDenied />
       </Suspense>
     ),
   },

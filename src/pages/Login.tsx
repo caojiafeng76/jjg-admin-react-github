@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/AuthContext'
+import { getDefaultHomeByRole } from '@/config/access'
 import { translateErrorMessage } from '@/utils/errorHandler'
 import Loading from '@ui/Loading'
 
@@ -17,20 +18,19 @@ interface LoginFormValues {
 export default function Login() {
   const [form] = Form.useForm<LoginFormValues>()
   const navigate = useNavigate()
-  const { user, loading, error, clearError, signIn } = useAuth()
+  const { user, role, loading, error, clearError, signIn } = useAuth()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   // 已登录用户直接跳转（添加防抖，避免重复导航）
   useEffect(() => {
     if (user && !loading) {
-      // 使用 setTimeout 确保导航在下一个事件循环中执行，避免与 signIn 中的导航冲突
       const timer = setTimeout(() => {
-        navigate('/dashboard', { replace: true })
+        navigate(getDefaultHomeByRole(role), { replace: true })
       }, 0)
       return () => clearTimeout(timer)
     }
-  }, [user, loading, navigate])
+  }, [user, role, loading, navigate])
 
   // 将 AuthContext 的错误同步到本地提示
   useEffect(() => {

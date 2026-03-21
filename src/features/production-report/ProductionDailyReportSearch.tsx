@@ -19,12 +19,14 @@ interface Props {
   initialValues: ProductionDailyReportFilters
   onSearch: (filters: ProductionDailyReportFilters) => void
   onReset: () => void
+  mobile?: boolean
 }
 
 export default function ProductionDailyReportSearch({
   initialValues,
   onSearch,
   onReset,
+  mobile = false,
 }: Props) {
   const [form] = Form.useForm<SearchFormValues>()
   const [isSearching, setIsSearching] = useState(false)
@@ -62,9 +64,9 @@ export default function ProductionDailyReportSearch({
     <Form<SearchFormValues>
       form={form}
       onFinish={handleFinish}
-      layout="inline"
+      layout={mobile ? 'vertical' : 'inline'}
       initialValues={initialValues}
-      className="flex flex-wrap items-center gap-2"
+      className={mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'}
     >
       <Form.Item name="dateRange" className="mb-0">
         <RangePicker
@@ -75,23 +77,23 @@ export default function ProductionDailyReportSearch({
       </Form.Item>
 
       <Form.Item name="projectNo" className="mb-0">
-        <Input allowClear placeholder="项目号" style={{ width: 140 }} />
+        <Input allowClear placeholder="项目号" style={{ width: mobile ? '100%' : 140 }} />
       </Form.Item>
 
       <Form.Item name="productModel" className="mb-0">
-        <Input allowClear placeholder="型号" style={{ width: 140 }} />
+        <Input allowClear placeholder="型号" style={{ width: mobile ? '100%' : 140 }} />
       </Form.Item>
 
       <Form.Item name="customerModel" className="mb-0">
-        <Input allowClear placeholder="客户型号" style={{ width: 160 }} />
+        <Input allowClear placeholder="客户型号" style={{ width: mobile ? '100%' : 160 }} />
       </Form.Item>
 
       <Form.Item name="operation" className="mb-0">
-        <Input allowClear placeholder="工序" style={{ width: 140 }} />
+        <Input allowClear placeholder="工序" style={{ width: mobile ? '100%' : 140 }} />
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <Space>
+        <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>
           <Button
             type="primary"
             icon={<MagnifyingGlassIcon className="h-4 w-4" />}

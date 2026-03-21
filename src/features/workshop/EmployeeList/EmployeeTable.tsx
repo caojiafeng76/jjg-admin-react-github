@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Table, TableColumnsType } from 'antd'
+import { Table, TableColumnsType, Tag, Typography } from 'antd'
 import type { Employee } from '@/services/apiEmployees'
 
 interface Props {
@@ -23,6 +23,12 @@ export default function EmployeeTable({
   scrollY = 400,
   rowHeight = 40,
 }: Props) {
+  const formatAuthUserId = (value?: string | null) => {
+    if (!value) return '-'
+
+    return `${value.slice(0, 8)}...${value.slice(-6)}`
+  }
+
   const columns: TableColumnsType<Employee> = useMemo(
     () => [
       {
@@ -36,9 +42,60 @@ export default function EmployeeTable({
         title: '姓名',
         dataIndex: 'name',
         key: 'name',
-        width: 200,
+        width: 160,
         ellipsis: {
           showTitle: true,
+        },
+      },
+      {
+        title: '绑定账号',
+        dataIndex: 'auth_user_id',
+        key: 'auth_user_id',
+        width: 240,
+        render: (value: string | null | undefined) => {
+          if (!value) {
+            return <Tag color="default">未绑定</Tag>
+          }
+
+          return (
+            <div className="flex flex-col gap-1">
+              <Tag color="processing" className="mr-0 w-fit">
+                已绑定
+              </Tag>
+              <Typography.Text
+                copyable={{ text: value }}
+                className="text-xs text-gray-500"
+              >
+                {formatAuthUserId(value)}
+              </Typography.Text>
+            </div>
+          )
+        },
+      },
+      {
+        title: '角色',
+        dataIndex: 'role',
+        key: 'role',
+        width: 110,
+        render: (value: Employee['role']) => {
+          if (value === 'admin') {
+            return <Tag color="gold">管理员</Tag>
+          }
+
+          return <Tag color="blue">员工</Tag>
+        },
+      },
+      {
+        title: '状态',
+        dataIndex: 'is_active',
+        key: 'is_active',
+        width: 110,
+        render: (value: boolean | undefined) => {
+          if (value === false) {
+            return <Tag color="red">停用</Tag>
+          }
+
+          return <Tag color="green">启用</Tag>
         },
       },
       {
@@ -104,7 +161,7 @@ export default function EmployeeTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 800, y: scrollY }}
+      scroll={{ x: 1100, y: scrollY }}
       size="small"
       pagination={false}
       style={{

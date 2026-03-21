@@ -5,13 +5,14 @@ import { Outlet, useLocation } from 'react-router-dom'
 import MainMenu from '@ui/MainMenu'
 import AppHeader from '@ui/AppHeader'
 import AppLogo from './AppLogo'
+import EmployeeMobileLayout from './EmployeeMobileLayout'
 import { useAuth } from '@/contexts/AuthContext'
 import { translateErrorMessage } from '@/utils/errorHandler'
 
 const { Content, Sider } = Layout
 
 export default function AppLayout() {
-  const { error, clearError } = useAuth()
+  const { error, clearError, role } = useAuth()
   const [messageApi, contextHolder] = message.useMessage()
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
@@ -49,6 +50,15 @@ export default function AppLayout() {
     messageApi.error(translateErrorMessage(message))
     clearError()
   }, [error, messageApi, clearError])
+
+  if (role === 'employee') {
+    return (
+      <>
+        {contextHolder}
+        <EmployeeMobileLayout />
+      </>
+    )
+  }
 
   return (
     <>

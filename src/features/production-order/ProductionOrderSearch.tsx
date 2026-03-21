@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { DatePicker, Button, Form, Space, Select } from 'antd'
+import { useEffect, useState } from 'react'
+import { DatePicker, Button, Form, Input, Space, Select } from 'antd'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
-import type { Dayjs } from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 
 const { RangePicker } = DatePicker
 
@@ -15,15 +15,31 @@ interface Props {
   onSearch: (params: SearchParams) => void
   onReset: () => void
   employees: { id: string; name: string }[]
+  initialValues?: SearchParams
+  fixedEmployee?: { id: string; name: string } | null
+  mobile?: boolean
 }
 
 export default function ProductionOrderSearch({
   onSearch,
   onReset,
   employees,
+  initialValues,
+  fixedEmployee,
+  mobile = false,
 }: Props) {
   const [form] = Form.useForm()
   const [isSearching, setIsSearching] = useState(false)
+
+  useEffect(() => {
+    form.setFieldsValue({
+      employeeId: fixedEmployee?.id || initialValues?.employeeId,
+      dateRange:
+        initialValues?.startDate && initialValues?.endDate
+          ? [dayjs(initialValues.startDate), dayjs(initialValues.endDate)]
+          : undefined,
+    })
+  }, [fixedEmployee, form, initialValues])
 
   const handleSearch = (values: {
     dateRange?: [Dayjs | null, Dayjs | null]
@@ -36,7 +52,9 @@ export default function ProductionOrderSearch({
       params.endDate = values.dateRange[1].format('YYYY-MM-DD')
     }
 
-    if (values.employeeId) {
+    if (fixedEmployee?.id) {
+      params.employeeId = fixedEmployee.id
+    } else if (values.employeeId) {
       params.employeeId = values.employeeId
     }
 
@@ -47,6 +65,9 @@ export default function ProductionOrderSearch({
 
   const handleReset = () => {
     form.resetFields()
+    if (fixedEmployee?.id) {
+      form.setFieldValue('employeeId', fixedEmployee.id)
+    }
     setIsSearching(true)
     onReset()
     setTimeout(() => setIsSearching(false), 300)
@@ -56,30 +77,36 @@ export default function ProductionOrderSearch({
     <Form
       form={form}
       onFinish={handleSearch}
-      layout="inline"
-      className="flex flex-wrap items-center gap-2"
+      layout={mobile ? 'vertical' : 'inline'}
+      className={mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'}
     >
       <Form.Item name="dateRange" className="mb-0">
         <RangePicker
           format="YYYY-MM-DD"
           placeholder={['开始日期', '结束日期']}
           allowClear
-          style={{ width: 240 }}
+          style={{ width: mobile ? '100%' : 240 }}
         />
       </Form.Item>
-      <Form.Item name="employeeId" className="mb-0">
-        <Select
-          placeholder="选择操作人"
-          allowClear
-          style={{ width: 160 }}
-          showSearch
-          optionFilterProp="children"
-          options={employees.map((emp) => ({ label: emp.name, value: emp.id }))}
-        />
-      </Form.Item>
+      {fixedEmployee ? (
+        <Form.Item className="mb-0">
+          <Input value={fixedEmployee.name} disabled style={{ width: mobile ? '100%' : 160 }} />
+        </Form.Item>
+      ) : (
+        <Form.Item name="employeeId" className="mb-0">
+          <Select
+            placeholder="选择操作人"
+            allowClear
+            style={{ width: mobile ? '100%' : 160 }}
+            showSearch
+            optionFilterProp="children"
+            options={employees.map((emp) => ({ label: emp.name, value: emp.id }))}
+          />
+        </Form.Item>
+      )}
 
       <Form.Item className="mb-0">
-        <Space>
+        <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>
           <Button
             type="primary"
             icon={<MagnifyingGlassIcon className="h-4 w-4" />}

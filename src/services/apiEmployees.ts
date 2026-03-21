@@ -4,6 +4,9 @@ import { AppError, handleApiError } from '@/utils/errorHandler'
 export interface Employee {
   id?: string
   name: string
+  auth_user_id?: string | null
+  role?: 'admin' | 'employee'
+  is_active?: boolean
   created_at?: string
   updated_at?: string
 }
@@ -13,6 +16,22 @@ export interface EmployeeDeleteBlocker {
   employeeName: string
   productionOrderCount: number
   orderDates: string[]
+}
+
+export interface CreateEmployeeAuthAccountInput {
+  employeeId: string
+  email: string
+  password: string
+}
+
+export interface ResetEmployeeAuthPasswordInput {
+  employeeId: string
+  password: string
+}
+
+export interface RebindEmployeeAuthAccountInput {
+  employeeId: string
+  email: string
 }
 
 function formatBlockedNames(names: string[], fallbackLabel: string) {
@@ -95,10 +114,14 @@ export async function getEmployees({
   page,
   pageSize,
   name,
+  role,
+  is_active,
 }: {
   page: number
   pageSize: number
   name?: string
+  role?: 'admin' | 'employee'
+  is_active?: boolean
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -108,6 +131,14 @@ export async function getEmployees({
   // 姓名搜索（模糊匹配）
   if (name) {
     query = query.ilike('name', `%${name}%`)
+  }
+
+  if (role) {
+    query = query.eq('role', role)
+  }
+
+  if (typeof is_active === 'boolean') {
+    query = query.eq('is_active', is_active)
   }
 
   const { data, error, count } = await query
@@ -150,20 +181,50 @@ async function checkEmployeeNameExists(
   return (data?.length || 0) > 0
 }
 
+function normalizeEmployeeCreatePayload(values: Employee): Employee {
+  return {
+    name: values.name.trim(),
+    auth_user_id: values.auth_user_id?.trim() || null,
+    role: values.role || 'employee',
+    is_active: values.is_active ?? true,
+  }
+}
+
+function normalizeEmployeeUpdatePayload(values: Employee): Partial<Employee> {
+  return {
+    name: values.name.trim(),
+    role: values.role || 'employee',
+    is_active: values.is_active ?? true,
+    ...(values.auth_user_id !== undefined
+      ? {
+          auth_user_id: values.auth_user_id?.trim() || null,
+        }
+      : {}),
+  }
+}
+
 export async function createEmployee(values: Employee) {
+  const payload = normalizeEmployeeCreatePayload(values)
+
   // 检查员工姓名是否已存在
-  if (values.name) {
-    const exists = await checkEmployeeNameExists(values.name)
+  if (payload.name) {
+    const exists = await checkEmployeeNameExists(payload.name)
     if (exists) {
-      throw new Error(`员工姓名 "${values.name}" 已存在，无法创建`)
+      throw new Error(`员工姓名 "${payload.name}" 已存在，无法创建`)
     }
   }
 
-  const { error } = await supabase.from('employees').insert(values)
+  const { data, error } = await supabase
+    .from('employees')
+    .insert(payload)
+    .select()
+    .single()
 
   if (error) {
     throw handleApiError(error, '创建员工失败')
   }
+
+  return data as Employee
 }
 
 export async function updateEmployee({
@@ -173,15 +234,20 @@ export async function updateEmployee({
   id: string
   values: Employee
 }) {
+  const payload = normalizeEmployeeUpdatePayload(values)
+
   // 如果更新了员工姓名，需要检查新姓名是否已被其他记录使用
-  if (values.name) {
-    const exists = await checkEmployeeNameExists(values.name, id)
+  if (payload.name) {
+    const exists = await checkEmployeeNameExists(payload.name, id)
     if (exists) {
-      throw new Error(`员工姓名 "${values.name}" 已存在，无法更新`)
+      throw new Error(`员工姓名 "${payload.name}" 已存在，无法更新`)
     }
   }
 
-  const { error } = await supabase.from('employees').update(values).eq('id', id)
+  const { error } = await supabase
+    .from('employees')
+    .update(payload)
+    .eq('id', id)
 
   if (error) {
     throw handleApiError(error, '更新员工失败')
@@ -251,4 +317,120 @@ export async function getAllEmployees() {
   }
 
   return (data || []) as { id: string; name: string }[]
+}
+
+export async function getCurrentEmployeeProfile(authUserId: string) {
+  const { data, error } = await supabase
+    .from('employees')
+    .select('id, name, auth_user_id, role, is_active, created_at, updated_at')
+    .eq('auth_user_id', authUserId)
+    .maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取当前员工信息失败')
+  }
+
+  return (data || null) as Employee | null
+}
+
+export async function createEmployeeAuthAccount(
+  values: CreateEmployeeAuthAccountInput,
+) {
+  const { data, error } = await supabase.functions.invoke(
+    'create-employee-auth',
+    {
+      body: {
+        employeeId: values.employeeId,
+        email: values.email.trim().toLowerCase(),
+        password: values.password,
+      },
+    },
+  )
+
+  if (error) {
+    throw handleApiError(error, '创建员工登录账号失败')
+  }
+
+  if (data?.error) {
+    throw new AppError(String(data.error), 'CREATE_EMPLOYEE_AUTH_FAILED')
+  }
+
+  return data as {
+    employeeId: string
+    employeeName: string
+    userId: string
+    email: string
+  }
+}
+
+export async function resetEmployeeAuthPassword(
+  values: ResetEmployeeAuthPasswordInput,
+) {
+  const { data, error } = await supabase.functions.invoke(
+    'reset-employee-auth-password',
+    {
+      body: {
+        employeeId: values.employeeId,
+        password: values.password,
+      },
+    },
+  )
+
+  if (error) {
+    throw handleApiError(error, '重置员工登录密码失败')
+  }
+
+  if (data?.error) {
+    throw new AppError(String(data.error), 'RESET_EMPLOYEE_PASSWORD_FAILED')
+  }
+
+  return data as {
+    employeeId: string
+    employeeName: string
+  }
+}
+
+export async function unbindEmployeeAuthAccount(employeeId: string) {
+  const { data, error } = await supabase.functions.invoke('unbind-employee-auth', {
+    body: { employeeId },
+  })
+
+  if (error) {
+    throw handleApiError(error, '解绑员工账号失败')
+  }
+
+  if (data?.error) {
+    throw new AppError(String(data.error), 'UNBIND_EMPLOYEE_AUTH_FAILED')
+  }
+
+  return data as {
+    employeeId: string
+    employeeName: string
+  }
+}
+
+export async function rebindEmployeeAuthAccount(
+  values: RebindEmployeeAuthAccountInput,
+) {
+  const { data, error } = await supabase.functions.invoke('rebind-employee-auth', {
+    body: {
+      employeeId: values.employeeId,
+      email: values.email.trim().toLowerCase(),
+    },
+  })
+
+  if (error) {
+    throw handleApiError(error, '重新绑定员工账号失败')
+  }
+
+  if (data?.error) {
+    throw new AppError(String(data.error), 'REBIND_EMPLOYEE_AUTH_FAILED')
+  }
+
+  return data as {
+    employeeId: string
+    employeeName: string
+    userId: string
+    email: string
+  }
 }

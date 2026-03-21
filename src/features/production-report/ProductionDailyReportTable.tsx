@@ -7,6 +7,8 @@ interface Props {
   loading: boolean
   data: ProductionDailyReportRow[]
   operations: string[]
+  page: number
+  pageSize: number
   selectedRowKeys: React.Key[]
   onRowSelectionChange: NonNullable<
     TableProps<ProductionDailyReportRow>['rowSelection']
@@ -30,6 +32,8 @@ export default function ProductionDailyReportTable({
   loading,
   data,
   operations,
+  page,
+  pageSize,
   selectedRowKeys,
   onRowSelectionChange,
   scrollY = 400,
@@ -41,13 +45,13 @@ export default function ProductionDailyReportTable({
         key: 'index',
         width: 56,
         fixed: 'left',
-        render: (_value, _record, index) => index + 1,
+        render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
       },
       {
-        title: '日期',
+        title: '日期范围',
         dataIndex: 'orderDate',
         key: 'orderDate',
-        width: 110,
+        width: 170,
         fixed: 'left',
       },
       {
@@ -115,11 +119,11 @@ export default function ProductionDailyReportTable({
         title: '操作人',
         dataIndex: 'employeeName',
         key: 'employeeName',
-        width: 120,
+        width: 220,
         fixed: 'right',
       },
     ],
-    [operations],
+    [operations, page, pageSize],
   )
 
   return (

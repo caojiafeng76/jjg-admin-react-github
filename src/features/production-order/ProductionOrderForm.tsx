@@ -48,7 +48,9 @@ interface Props {
   }) => Promise<void> | void
   initialValues?: ProductionOrderFormInitialValues
   employees: { id: string; name: string }[]
+  fixedEmployee?: { id: string; name: string } | null
   loading?: boolean
+  compact?: boolean
 }
 
 interface OrderItem {
@@ -74,7 +76,9 @@ export default function ProductionOrderForm({
   onSubmit,
   initialValues,
   employees,
+  fixedEmployee,
   loading = false,
+  compact = false,
 }: Props) {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
@@ -153,6 +157,7 @@ export default function ProductionOrderForm({
       )
       form.setFieldsValue({
         ...initialValues,
+        employee_id: initialValues.employee_id || fixedEmployee?.id,
         order_date: initialValues.order_date
           ? dayjs(initialValues.order_date)
           : undefined,
@@ -163,9 +168,10 @@ export default function ProductionOrderForm({
       form.setFieldsValue({
         order_date: dayjs().subtract(1, 'day'),
         work_hours: 11,
+        employee_id: fixedEmployee?.id,
       })
     }
-  }, [initialValues, form, open])
+  }, [fixedEmployee, initialValues, form, open])
 
   useEffect(() => {
     const normalizedOperation =
@@ -365,7 +371,8 @@ export default function ProductionOrderForm({
         onCancel={onCancel}
         onOk={() => form.submit()}
         okButtonProps={{ loading: submitting }}
-        width={1200}
+        width={compact ? 'calc(100vw - 20px)' : 1200}
+        style={compact ? { top: 12, maxWidth: 560 } : undefined}
         destroyOnClose
       >
         <Form
@@ -377,7 +384,7 @@ export default function ProductionOrderForm({
             work_hours: 11,
           }}
         >
-          <div className="grid grid-cols-4 gap-4">
+          <div className={compact ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-4 gap-4'}>
             <Form.Item
               name="order_date"
               label="日期"
@@ -395,6 +402,7 @@ export default function ProductionOrderForm({
                 showSearch
                 placeholder="请选择操作人"
                 optionFilterProp="children"
+                disabled={Boolean(fixedEmployee)}
                 filterOption={(input, option) => {
                   if (!option) return false
                   const label = option.label?.toString() ?? ''
@@ -421,7 +429,7 @@ export default function ProductionOrderForm({
               />
             </Form.Item>
 
-            <Form.Item name="remark" label="备注" className="col-span-4">
+            <Form.Item name="remark" label="备注" className={compact ? undefined : 'col-span-4'}>
               <Input.TextArea rows={2} placeholder="请输入备注" />
             </Form.Item>
           </div>
