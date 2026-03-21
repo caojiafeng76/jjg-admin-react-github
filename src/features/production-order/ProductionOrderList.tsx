@@ -17,6 +17,8 @@ const dangerTextStyle = {
 interface Props {
   loading: boolean
   data: ProductionOrderListItem[]
+  page: number
+  pageSize: number
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   onView: (record: ProductionOrderListItem) => void
@@ -26,6 +28,8 @@ interface Props {
 export default function ProductionOrderList({
   loading,
   data,
+  page,
+  pageSize,
   selectedRowKeys,
   onSelect,
   onView,
@@ -35,7 +39,7 @@ export default function ProductionOrderList({
     () => [
       {
         title: '#',
-        render: (_text, _record, index) => index + 1,
+        render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
         fixed: 'left',
         key: '#',
         width: 50,
@@ -128,7 +132,7 @@ export default function ProductionOrderList({
         ),
       },
     ],
-    [onView],
+    [onView, page, pageSize],
   )
 
   const rowSelection: TableProps<ProductionOrderListItem>['rowSelection'] = {

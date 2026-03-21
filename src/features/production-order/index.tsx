@@ -24,10 +24,12 @@ import {
 } from './useProductionOrderItems'
 import { useAllEmployees } from '../workshop/EmployeeList/useEmployees'
 import ProductionOrderList from './ProductionOrderList'
+import ProductionOrderMobileList from './ProductionOrderMobileList'
 import ProductionOrderForm from './ProductionOrderForm'
 import ProductionOrderDetail from './ProductionOrderDetail'
 import ProductionOrderSearch from './ProductionOrderSearch'
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import { useAuth } from '@/contexts/AuthContext'
 
 export interface ProductionOrder {
   id: string
@@ -43,6 +45,12 @@ export interface ProductionOrder {
 
 export default function ProductionOrderPage() {
   const { message } = App.useApp()
+  const { role, employeeProfile } = useAuth()
+  const isEmployeeView = role === 'employee'
+  const fixedEmployee =
+    isEmployeeView && employeeProfile?.id
+      ? { id: employeeProfile.id, name: employeeProfile.name }
+      : null
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建工单')
@@ -61,7 +69,12 @@ export default function ProductionOrderPage() {
     startDate?: string
     endDate?: string
     employeeId?: string
-  }>({})
+  }>(() => ({
+    employeeId:
+      (role === 'employee' ? employeeProfile?.id : undefined) ||
+      searchParamsURL.get('employeeId') ||
+      undefined,
+  }))
 
   const { data: orderData, isLoading } = useProductionOrders({
     page,
@@ -74,7 +87,7 @@ export default function ProductionOrderPage() {
   )
 
   const { data: allEmployees } = useAllEmployees()
-  const employees = allEmployees || []
+  const employees = fixedEmployee ? [fixedEmployee] : allEmployees || []
 
   const createMutation = useCreateProductionOrder()
   const updateMutation = useUpdateProductionOrder()
@@ -313,18 +326,26 @@ export default function ProductionOrderPage() {
 
   const handleSearch = useCallback(
     (params: typeof filters) => {
-      setFilters(params)
+      setFilters(
+        fixedEmployee?.id ? { ...params, employeeId: fixedEmployee.id } : params,
+      )
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
-    [searchParamsURL, setSearchParamsURL],
+    [fixedEmployee?.id, searchParamsURL, setSearchParamsURL],
   )
 
   const handleResetSearch = useCallback(() => {
-    setFilters({})
+    setFilters(fixedEmployee?.id ? { employeeId: fixedEmployee.id } : {})
     searchParamsURL.set('page', '1')
     setSearchParamsURL(searchParamsURL)
-  }, [searchParamsURL, setSearchParamsURL])
+  }, [fixedEmployee?.id, searchParamsURL, setSearchParamsURL])
+
+  useEffect(() => {
+    if (fixedEmployee?.id) {
+      setFilters((prev) => ({ ...prev, employeeId: fixedEmployee.id }))
+    }
+  }, [fixedEmployee?.id])
 
   useEffect(() => {
     if (page > 1 && orderData && orderData.items.length === 0) {
@@ -341,50 +362,76 @@ export default function ProductionOrderPage() {
     | null
 
   return (
-    <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
+    <div className={isEmployeeView ? 'grid h-full grid-rows-[auto_auto_1fr] gap-3 p-3' : 'grid h-full grid-rows-[auto_auto_1fr] gap-4'}>
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑" handleEdit={() => handleEdit()} />
-        <ExportButton
-          handleExport={handleExport}
-          loading={isExporting}
-          count={selectedRowKeys.length}
-        >
-          导出工单
-        </ExportButton>
-        <DeleteButton
-          onConfirm={handleDelete}
-          isDeleting={deleteMutation.isPending}
-          count={selectedRowKeys.length}
-          itemName="工单"
-        />
+        {isEmployeeView ? null : (
+          <>
+            <ExportButton
+              handleExport={handleExport}
+              loading={isExporting}
+              count={selectedRowKeys.length}
+            >
+              导出工单
+            </ExportButton>
+            <DeleteButton
+              onConfirm={handleDelete}
+              isDeleting={deleteMutation.isPending}
+              count={selectedRowKeys.length}
+              itemName="工单"
+            />
+          </>
+        )}
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+      <div className={isEmployeeView ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]' : 'flex items-center gap-2'}>
+        {isEmployeeView ? (
+          <div className="mb-3">
+            <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Filter</div>
+            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">筛选我的工单</div>
+          </div>
+        ) : (
+          <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        )}
         <ProductionOrderSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           employees={employees}
+          initialValues={filters}
+          fixedEmployee={fixedEmployee}
+          mobile={isEmployeeView}
         />
       </div>
 
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+        className={isEmployeeView ? 'flex min-h-0 flex-1 flex-col gap-3 overflow-hidden' : 'flex min-h-0 flex-1 flex-col gap-4 overflow-hidden'}
       >
-        <div className="min-h-0 flex-1 overflow-x-auto">
-          <ProductionOrderList
-            loading={isLoading}
-            data={orderData?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            onView={handleView}
-            scrollY={scrollY}
-          />
+        <div className={isEmployeeView ? 'min-h-0 flex-1 overflow-y-auto no-scrollbar' : 'min-h-0 flex-1 overflow-x-auto'}>
+          {isEmployeeView ? (
+            <ProductionOrderMobileList
+              loading={isLoading}
+              data={orderData?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              onView={handleView}
+            />
+          ) : (
+            <ProductionOrderList
+              loading={isLoading}
+              data={orderData?.items || []}
+              page={page}
+              pageSize={pageSize}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              onView={handleView}
+              scrollY={scrollY}
+            />
+          )}
         </div>
 
-        <div ref={paginationRef} className="flex shrink-0 justify-end">
+        <div ref={paginationRef} className={isEmployeeView ? 'flex shrink-0 justify-center pb-1' : 'flex shrink-0 justify-end'}>
           <AppPagination total={orderData?.total || 0} />
         </div>
       </div>
@@ -395,7 +442,9 @@ export default function ProductionOrderPage() {
         onSubmit={handleFinish}
         initialValues={detailData || editingRecord || undefined}
         employees={employees}
+        fixedEmployee={fixedEmployee}
         loading={isLoadingDetail && !!editingRecord?.id}
+        compact={isEmployeeView}
       />
 
       <Modal
@@ -403,12 +452,14 @@ export default function ProductionOrderPage() {
         open={isModalOpen && isView}
         onCancel={resetFormState}
         footer={[]}
-        width={900}
+        width={isEmployeeView ? 'calc(100vw - 20px)' : 900}
+        style={isEmployeeView ? { top: 12, maxWidth: 560 } : undefined}
         destroyOnClose
       >
         {detailOrder ? (
           <ProductionOrderDetail
             order={detailOrder}
+            compact={isEmployeeView}
             onEdit={() => {
               setIsView(false)
               setIsEdit(true)

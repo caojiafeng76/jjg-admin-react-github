@@ -8,6 +8,7 @@ export interface ProductionDailyReportFilters {
   productModel?: string
   customerModel?: string
   operation?: string
+  employeeId?: string
 }
 
 interface ProductionDailyReportItemRow {
@@ -56,6 +57,13 @@ interface SalesOrderWeightRow {
   weight_per_meter_kg: number | null
 }
 
+interface AggregatedProductionDailyReportRow extends ProductionDailyReportRow {
+  orderDates: Set<string>
+  employeeNames: Set<string>
+  productModels: Set<string>
+  customerModels: Set<string>
+}
+
 const FETCH_BATCH_SIZE = 1000
 
 function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) {
@@ -82,6 +90,10 @@ function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) 
 
   if (filters.endDate) {
     query = query.lte('production_orders.order_date', filters.endDate)
+  }
+
+  if (filters.employeeId) {
+    query = query.eq('production_orders.employee_id', filters.employeeId)
   }
 
   if (filters.projectNo) {
@@ -169,15 +181,35 @@ function roundTo(value: number, digits = 2) {
   return Math.round(value * factor) / factor
 }
 
-function createReportKey(item: ProductionDailyReportItemRow, employeeName: string) {
-  return [
-    item.production_orders.order_date,
-    item.project_no,
-    item.product_model || '',
-    item.customer_model || '',
-    item.length_mm ?? '',
-    employeeName,
-  ].join('::')
+function createReportKey(item: ProductionDailyReportItemRow) {
+  return item.project_no || '未填写项目号'
+}
+
+function mergeDisplayValues(values: Set<string>, fallback = '-') {
+  const normalizedValues = Array.from(values)
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .sort((left, right) => left.localeCompare(right, 'zh-CN'))
+
+  if (normalizedValues.length === 0) {
+    return fallback
+  }
+
+  return normalizedValues.join('、')
+}
+
+function formatOrderDateRange(values: Set<string>) {
+  const dates = Array.from(values).sort((left, right) => left.localeCompare(right))
+
+  if (dates.length === 0) {
+    return '-'
+  }
+
+  if (dates.length === 1) {
+    return dates[0]
+  }
+
+  return `${dates[0]} ~ ${dates[dates.length - 1]}`
 }
 
 export async function getProductionDailyReport(
@@ -185,12 +217,12 @@ export async function getProductionDailyReport(
 ): Promise<ProductionDailyReportResult> {
   const items = await getAllReportItems(filters)
   const weightMap = await getProjectWeightMap(items.map((item) => item.project_no))
-  const reportMap = new Map<string, ProductionDailyReportRow>()
+  const reportMap = new Map<string, AggregatedProductionDailyReportRow>()
   const operations = new Set<string>()
 
   items.forEach((item) => {
     const employeeName = item.production_orders.employee?.name || '-'
-    const key = createReportKey(item, employeeName)
+    const key = createReportKey(item)
     const normalizedOperation = item.operation.trim() || '未分类'
     const current = reportMap.get(key)
     const weightPerMeterKg = weightMap.get(item.project_no) || 0
@@ -219,10 +251,18 @@ export async function getProductionDailyReport(
         operationQuantities: {
           [normalizedOperation]: Number(item.qualified_quantity || 0),
         },
+        orderDates: new Set([item.production_orders.order_date]),
+        employeeNames: new Set([employeeName]),
+        productModels: new Set([item.product_model || '-']),
+        customerModels: new Set([item.customer_model || '-']),
       })
       return
     }
 
+    current.orderDates.add(item.production_orders.order_date)
+    current.employeeNames.add(employeeName)
+    current.productModels.add(item.product_model || '-')
+    current.customerModels.add(item.customer_model || '-')
     current.workHours += Number(item.qualified_hours || 0)
     current.rawMaterialDefectCount += Number(item.defect_quantity_2 || 0)
     current.processingDefectCount += Number(item.defect_quantity_1 || 0)
@@ -238,24 +278,22 @@ export async function getProductionDailyReport(
   const rows = Array.from(reportMap.values())
     .map((row) => ({
       ...row,
+      orderDate: formatOrderDateRange(row.orderDates),
+      employeeName: mergeDisplayValues(row.employeeNames),
+      productModel: mergeDisplayValues(row.productModels),
+      customerModel: mergeDisplayValues(row.customerModels),
       workHours: roundTo(row.workHours),
       rawMaterialDefectWeightKg: roundTo(row.rawMaterialDefectWeightKg),
       processingDefectWeightKg: roundTo(row.processingDefectWeightKg),
     }))
     .sort((left, right) => {
-      const dateCompare = right.orderDate.localeCompare(left.orderDate)
-
-      if (dateCompare !== 0) {
-        return dateCompare
-      }
-
       const projectCompare = left.projectNo.localeCompare(right.projectNo, 'zh-CN')
 
       if (projectCompare !== 0) {
         return projectCompare
       }
 
-      return left.employeeName.localeCompare(right.employeeName, 'zh-CN')
+      return right.orderDate.localeCompare(left.orderDate)
     })
 
   return {

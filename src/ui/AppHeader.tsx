@@ -21,8 +21,8 @@ const routeToLabelMap: Record<string, string> = {
   'workshop-process-list': '工序管理',
   'workshop-defect-reason-list': '不良原因管理',
   'employee-list': '员工管理',
-  'production-record-list': '产量录入',
-  'production-statistics': '产量统计',
+  'production-order': '生产工单',
+  'production-daily-report': '生产日报表',
 }
 
 export default function AppHeader({
@@ -36,9 +36,11 @@ export default function AppHeader({
 }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, signOut } = useAuth()
+  const { user, role, employeeProfile, signOut } = useAuth()
   const currentPath = location.pathname.slice(1) || 'dashboard'
   const pageName = routeToLabelMap[currentPath] || ''
+  const displayName = employeeProfile?.name || user?.email || '未登录用户'
+  const roleLabel = role === 'admin' ? '管理员' : role === 'employee' ? '员工' : ''
 
   return (
     <Header
@@ -69,7 +71,8 @@ export default function AppHeader({
 
       <div className="mr-12 flex h-full flex-1 items-center justify-end gap-4">
         <span className="text-sm text-gray-600 dark:text-gray-300">
-          欢迎您：{user?.email}
+          欢迎您：{displayName}
+          {roleLabel ? `（${roleLabel}）` : ''}
         </span>
         <DarkModeButton />
         <Button

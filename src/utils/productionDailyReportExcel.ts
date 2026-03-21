@@ -32,7 +32,7 @@ export function exportProductionDailyReportToExcel(
   const processingDefectWeightColumnIndex = rawMaterialDefectWeightColumnIndex + 1
 
   const headers = [
-    '日期',
+    '日期范围',
     '工时',
     '项目号',
     '产品型号',

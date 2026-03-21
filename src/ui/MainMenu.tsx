@@ -4,9 +4,11 @@ import type { MenuProps } from 'antd'
 import { Menu } from 'antd'
 import { HomeIcon, Square3Stack3DIcon } from '@heroicons/react/16/solid'
 
+import { useAuth } from '@/contexts/AuthContext'
+
 type MenuItem = Required<MenuProps>['items'][number]
 
-const items: MenuItem[] = [
+const adminItems: MenuItem[] = [
   {
     key: 'dashboard',
     label: '首页',
@@ -38,6 +40,18 @@ const items: MenuItem[] = [
   },
 ]
 
+const employeeItems: MenuItem[] = [
+  {
+    key: 'employee-workspace',
+    label: '员工工作台',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [
+      { key: 'production-order', label: '我的工单' },
+      { key: 'production-daily-report', label: '我的日报' },
+    ],
+  },
+]
+
 // 查找菜单项的父菜单 key
 function findParentMenuKey(
   menuKey: string,
@@ -60,6 +74,15 @@ function findParentMenuKey(
 const MainMenu: React.FC = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const { role } = useAuth()
+
+  const items = useMemo(() => {
+    if (role === 'employee') {
+      return employeeItems
+    }
+
+    return adminItems
+  }, [role])
 
   // 从路径中提取当前选中的菜单项和应该展开的父菜单
   const { selectedKey, openKey } = useMemo(() => {
@@ -69,7 +92,7 @@ const MainMenu: React.FC = () => {
       selectedKey: path,
       openKey: parentKey,
     }
-  }, [pathname])
+  }, [items, pathname])
 
   const [openKeys, setOpenKeys] = useState<string[]>(() => {
     // 初始化时，如果有父菜单，则展开

@@ -28,6 +28,7 @@ interface Props {
   onSubmit: (values: Partial<ProductionOrderItem>) => void
   initialValues?: ProductionOrderItem
   orderId: string
+  compact?: boolean
 }
 
 export default function ProductionOrderItemForm({
@@ -36,6 +37,7 @@ export default function ProductionOrderItemForm({
   onSubmit,
   initialValues,
   orderId,
+  compact = false,
 }: Props) {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
@@ -190,7 +192,8 @@ export default function ProductionOrderItemForm({
       open={open}
       onCancel={onCancel}
       onOk={() => form.submit()}
-      width={700}
+      width={compact ? 'calc(100vw - 20px)' : 700}
+      style={compact ? { top: 12, maxWidth: 560 } : undefined}
       destroyOnClose
     >
       <Form
@@ -210,6 +213,12 @@ export default function ProductionOrderItemForm({
         <Form.Item name="order_id" hidden>
           <Input />
         </Form.Item>
+
+        {compact ? (
+          <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            手机端建议先选择项目号，再补充工序、数量和不良数，便于自动带出型号与标准工时。
+          </div>
+        ) : null}
 
         <Form.Item
           name="project_no"
