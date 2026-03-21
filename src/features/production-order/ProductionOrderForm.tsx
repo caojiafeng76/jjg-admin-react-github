@@ -283,7 +283,9 @@ export default function ProductionOrderForm({
         }
       } catch (error) {
         message.error(
-          error instanceof Error ? error.message : '补建标准工时失败，请稍后重试',
+          error instanceof Error
+            ? error.message
+            : '补建标准工时失败，请稍后重试',
         )
         return
       }

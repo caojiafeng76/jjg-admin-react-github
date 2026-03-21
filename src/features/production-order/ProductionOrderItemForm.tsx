@@ -1,6 +1,14 @@
 import { useEffect, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { App, Modal, Form, InputNumber, Select, Input, AutoComplete } from 'antd'
+import {
+  App,
+  Modal,
+  Form,
+  InputNumber,
+  Select,
+  Input,
+  AutoComplete,
+} from 'antd'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import {
@@ -119,7 +127,9 @@ export default function ProductionOrderItemForm({
 
   const handleFinish = async (values: Partial<ProductionOrderItem>) => {
     const operation = values.operation?.trim()
-    const operationExists = operations?.some((item) => item.operation === operation)
+    const operationExists = operations?.some(
+      (item) => item.operation === operation,
+    )
 
     if (operation && !operationExists && productModel) {
       try {
@@ -138,7 +148,9 @@ export default function ProductionOrderItemForm({
         }
       } catch (error) {
         message.error(
-          error instanceof Error ? error.message : '补建标准工时失败，请稍后重试',
+          error instanceof Error
+            ? error.message
+            : '补建标准工时失败，请稍后重试',
         )
         return
       }
