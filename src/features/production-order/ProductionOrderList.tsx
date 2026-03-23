@@ -77,6 +77,13 @@ export default function ProductionOrderList({
         width: 110,
       },
       {
+        title: '正工(h)',
+        dataIndex: 'positive_qualified_hours',
+        key: 'positive_qualified_hours',
+        width: 100,
+        render: (value: number | null) => (value ?? 0).toFixed(2),
+      },
+      {
         title: '零工(h)',
         dataIndex: 'extra_qualified_hours',
         key: 'extra_qualified_hours',
@@ -84,7 +91,7 @@ export default function ProductionOrderList({
         render: (value: number | null) => (value ?? 0).toFixed(2),
       },
       {
-        title: '合格工时(h)',
+        title: '总工时(h)',
         dataIndex: 'total_qualified_hours',
         key: 'total_qualified_hours',
         width: 120,

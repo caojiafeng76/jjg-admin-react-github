@@ -80,6 +80,11 @@ export default function ProductionOrderDetail({
   const orderWithEmployee = currentOrder as ProductionOrder & {
     employee?: { name: string }
   }
+  const positiveQualifiedHours = Number(
+    items
+      .reduce((total, item) => total + Number(item.qualified_hours || 0), 0)
+      .toFixed(2),
+  )
   const formattedAuditedAt = currentOrder.audited_at
     ? dayjs(currentOrder.audited_at).format('YYYY-MM-DD HH:mm:ss')
     : null
@@ -122,6 +127,14 @@ export default function ProductionOrderDetail({
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                正工工时
+              </div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {positiveQualifiedHours.toFixed(2)} 小时
+              </div>
+            </div>
+            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                 零工工时
               </div>
               <div className="mt-1 font-semibold text-slate-900">
@@ -130,10 +143,10 @@ export default function ProductionOrderDetail({
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                备注
+                总工时
               </div>
-              <div className="mt-1 line-clamp-3 font-semibold text-slate-900">
-                {currentOrder.remark || '无'}
+              <div className="mt-1 font-semibold text-slate-900">
+                {(currentOrder.total_qualified_hours ?? 0).toFixed(2)} 小时
               </div>
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
@@ -173,10 +186,13 @@ export default function ProductionOrderDetail({
             <Descriptions.Item label="出勤工时">
               {currentOrder.work_hours} 小时
             </Descriptions.Item>
+            <Descriptions.Item label="正工工时">
+              {positiveQualifiedHours.toFixed(2)} 小时
+            </Descriptions.Item>
             <Descriptions.Item label="零工工时">
               {(currentOrder.extra_qualified_hours ?? 0).toFixed(2)} 小时
             </Descriptions.Item>
-            <Descriptions.Item label="合格工时">
+            <Descriptions.Item label="总工时">
               {currentOrder.total_qualified_hours === null ||
               currentOrder.total_qualified_hours === undefined
                 ? '-'

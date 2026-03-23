@@ -18,6 +18,7 @@ export interface ProductionOrderWithEmployee extends ProductionOrder {
 
 export interface ProductionOrderListItem extends ProductionOrderWithEmployee {
   hasZeroStandardQualifiedItem?: boolean
+  positive_qualified_hours?: number
 }
 
 export interface ProductionOrderForExport extends ProductionOrderWithEmployee {
@@ -47,7 +48,7 @@ export async function getProductionOrders({
 
   type ProductionOrderListRelation = Pick<
     Database['public']['Tables']['production_order_items']['Row'],
-    'standard_seconds' | 'qualified_quantity'
+    'standard_seconds' | 'qualified_quantity' | 'qualified_hours'
   >
 
   type ProductionOrderListQueryRow = ProductionOrderWithEmployee & {
@@ -57,7 +58,7 @@ export async function getProductionOrders({
   const selectClause = `
       *,
       employee:employees(id, name),
-      items:production_order_items(standard_seconds, qualified_quantity)${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, product_model, customer_model)' : ''}
+      items:production_order_items(standard_seconds, qualified_quantity, qualified_hours)${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, product_model, customer_model)' : ''}
     `
 
   let query = supabase
@@ -95,6 +96,14 @@ export async function getProductionOrders({
   const items = ((data || []) as unknown as ProductionOrderListQueryRow[]).map(
     ({ items: orderItems = [], ...order }) => ({
       ...order,
+      positive_qualified_hours: Number(
+        orderItems
+          .reduce(
+            (total, item) => total + Number(item.qualified_hours || 0),
+            0,
+          )
+          .toFixed(2),
+      ),
       hasZeroStandardQualifiedItem: orderItems.some(
         (item) =>
           Number(item.standard_seconds || 0) === 0 &&
