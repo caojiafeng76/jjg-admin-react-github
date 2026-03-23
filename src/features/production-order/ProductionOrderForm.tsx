@@ -522,14 +522,6 @@ export default function ProductionOrderForm({
                             </div>
                             <div className="rounded-2xl bg-slate-50 px-3 py-3">
                               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                                加分项
-                              </div>
-                              <div className="mt-1 font-semibold text-slate-900">
-                                {item.bonus_seconds || 0} 秒
-                              </div>
-                            </div>
-                            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                                 加工不良
                               </div>
                               <div className="mt-1 font-semibold text-slate-900">
@@ -730,136 +722,141 @@ export default function ProductionOrderForm({
         open={isItemModalOpen}
         onOk={() => itemForm.submit()}
         onCancel={handleItemModalCancel}
-        width={600}
+        width={compact ? 'calc(100vw - 20px)' : 600}
+        style={compact ? { top: 12, maxWidth: 560 } : undefined}
         destroyOnClose
       >
-        <Form
-          form={itemForm}
-          layout="vertical"
-          onFinish={handleItemFinish}
-          initialValues={{
-            qualified_quantity: 0,
-            defect_quantity_1: 0,
-            defect_quantity_2: 0,
-            bonus_seconds: 0,
-            remark: null,
-          }}
-        >
-          <Form.Item
-            name="project_no"
-            label="项目号"
-            rules={[{ required: true, message: '请选择项目号' }]}
+        <div className={compact ? 'max-h-[calc(100vh-240px)] overflow-y-auto pr-1' : undefined}>
+          <Form
+            form={itemForm}
+            layout="vertical"
+            onFinish={handleItemFinish}
+            initialValues={{
+              qualified_quantity: 0,
+              defect_quantity_1: 0,
+              defect_quantity_2: 0,
+              bonus_seconds: 0,
+              remark: null,
+            }}
           >
-            <Select
-              showSearch
-              placeholder="请选择项目号"
-              loading={loadingProjectNos}
-              options={projectNoOptions}
-              filterOption={filterProjectNoOption}
-              optionRender={renderProjectNoOption}
-              onChange={handleProjectNoChangeForItem}
-            />
-          </Form.Item>
-
-          <div className="grid grid-cols-3 gap-4">
-            <Form.Item name="product_model" label="型号">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item name="length_mm" label="长度(mm)">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item name="customer_model" label="客户型号">
-              <Input disabled />
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            name="operation"
-            label="工序"
-            rules={[
-              { required: true, message: '请输入工序' },
-              {
-                validator: async (_, value) => {
-                  if (typeof value === 'string' && value.trim()) {
-                    return
-                  }
-
-                  throw new Error('请输入工序')
-                },
-              },
-            ]}
-          >
-            <AutoComplete
-              placeholder="请选择或输入工序"
-              options={operationOptions}
-              disabled={!selectedItemProductModel}
-              filterOption={(input, option) => {
-                if (!option) return false
-                return (
-                  option.value
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase()) ?? false
-                )
-              }}
-              onChange={handleOperationChangeForItem}
-            />
-          </Form.Item>
-
-          {!compact ? (
             <Form.Item
-              name="standard_seconds"
-              label="标准工时(秒)"
-              rules={[{ required: true, message: '请输入标准工时' }]}
+              name="project_no"
+              label="项目号"
+              rules={[{ required: true, message: '请选择项目号' }]}
             >
-              <InputNumber
-                style={{ width: '100%' }}
-                min={0}
-                placeholder="根据工序自动带出"
-                disabled
+              <Select
+                showSearch
+                placeholder="请选择项目号"
+                loading={loadingProjectNos}
+                options={projectNoOptions}
+                filterOption={filterProjectNoOption}
+                optionRender={renderProjectNoOption}
+                onChange={handleProjectNoChangeForItem}
               />
             </Form.Item>
-          ) : null}
 
-          <Form.Item
-            name="qualified_quantity"
-            label="合格数量"
-            rules={[{ required: true, message: '请输入合格数量' }]}
-          >
-            <InputNumber style={{ width: '100%' }} min={0} />
-          </Form.Item>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Form.Item label="加工不良数量" className="mb-2">
-              <Form.Item name="defect_quantity_1" className="mb-0!">
-                <InputNumber
-                  placeholder="数量"
-                  min={0}
-                  style={{ width: '100%' }}
-                />
+            <div className="grid grid-cols-3 gap-4">
+              <Form.Item name="product_model" label="型号">
+                <Input disabled />
               </Form.Item>
+
+              <Form.Item name="length_mm" label="长度(mm)">
+                <Input disabled />
+              </Form.Item>
+
+              <Form.Item name="customer_model" label="客户型号">
+                <Input disabled />
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              name="operation"
+              label="工序"
+              rules={[
+                { required: true, message: '请输入工序' },
+                {
+                  validator: async (_, value) => {
+                    if (typeof value === 'string' && value.trim()) {
+                      return
+                    }
+
+                    throw new Error('请输入工序')
+                  },
+                },
+              ]}
+            >
+              <AutoComplete
+                placeholder="请选择或输入工序"
+                options={operationOptions}
+                disabled={!selectedItemProductModel}
+                filterOption={(input, option) => {
+                  if (!option) return false
+                  return (
+                    option.value
+                      ?.toString()
+                      .toLowerCase()
+                      .includes(input.toLowerCase()) ?? false
+                  )
+                }}
+                onChange={handleOperationChangeForItem}
+              />
             </Form.Item>
 
-            <Form.Item label="原料不良数量" className="mb-2">
-              <Form.Item name="defect_quantity_2" className="mb-0!">
+            {!compact ? (
+              <Form.Item
+                name="standard_seconds"
+                label="标准工时(秒)"
+                rules={[{ required: true, message: '请输入标准工时' }]}
+              >
                 <InputNumber
-                  placeholder="数量"
-                  min={0}
                   style={{ width: '100%' }}
+                  min={0}
+                  placeholder="根据工序自动带出"
+                  disabled
                 />
               </Form.Item>
-            </Form.Item>
-          </div>
+            ) : null}
 
-          <Form.Item name="bonus_seconds" label="加分(秒)">
-            <InputNumber style={{ width: '100%' }} min={0} />
-          </Form.Item>
-          <Form.Item name="remark" label="备注">
-            <Input.TextArea rows={2} placeholder="请输入备注" />
-          </Form.Item>
-        </Form>
+            <Form.Item
+              name="qualified_quantity"
+              label="合格数量"
+              rules={[{ required: true, message: '请输入合格数量' }]}
+            >
+              <InputNumber style={{ width: '100%' }} min={0} />
+            </Form.Item>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item label="加工不良数量" className="mb-2">
+                <Form.Item name="defect_quantity_1" className="mb-0!">
+                  <InputNumber
+                    placeholder="数量"
+                    min={0}
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
+              </Form.Item>
+
+              <Form.Item label="原料不良数量" className="mb-2">
+                <Form.Item name="defect_quantity_2" className="mb-0!">
+                  <InputNumber
+                    placeholder="数量"
+                    min={0}
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
+              </Form.Item>
+            </div>
+
+            {!compact ? (
+              <Form.Item name="bonus_seconds" label="加分(秒)">
+                <InputNumber style={{ width: '100%' }} min={0} />
+              </Form.Item>
+            ) : null}
+            <Form.Item name="remark" label="备注">
+              <Input.TextArea rows={2} placeholder="请输入备注" />
+            </Form.Item>
+          </Form>
+        </div>
       </Modal>
     </>
   )
