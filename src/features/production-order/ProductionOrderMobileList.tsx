@@ -85,7 +85,7 @@ export default function ProductionOrderMobileList({
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   备注
                 </div>
-                <div className="mt-1 text-sm leading-6 font-medium whitespace-pre-wrap wrap-break-word">
+                <div className="mt-1 text-sm leading-6 font-medium wrap-break-word whitespace-pre-wrap">
                   {record.remark?.trim() || '无备注'}
                 </div>
               </div>
