@@ -31,6 +31,7 @@ const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
 const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),
 )
+const MaterialTransfer = lazy(() => import('@features/material-transfer'))
 const ProductionOrder = lazy(() => import('@features/production-order'))
 const ProductionDailyReport = lazy(() => import('@features/production-report'))
 
@@ -210,6 +211,17 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin']}
               element={<StandardTimeList />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'material-transfer',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<MaterialTransfer />}
             />
           </Suspense>
         ),

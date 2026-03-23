@@ -9,7 +9,10 @@ import DeleteButton from '@/ui/DeleteButton'
 import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { getProductionOrdersForExport } from '@/services/apiProductionOrders'
+import {
+  getProductionOrdersForExport,
+  type ProductionOrder,
+} from '@/services/apiProductionOrders'
 import { exportProductionOrdersToExcel } from '@/utils/productionOrderExcel'
 import {
   useProductionOrders,
@@ -87,18 +90,6 @@ async function syncOrderItemsSequentially({
       order_id: orderId,
     } as ProductionOrderItem)
   }
-}
-
-export interface ProductionOrder {
-  id: string
-  order_date: string
-  employee_id: string | null
-  work_hours: number
-  total_qualified_hours: number | null
-  efficiency: number | null
-  remark: string | null
-  created_at: string
-  updated_at: string
 }
 
 export default function ProductionOrderPage() {
