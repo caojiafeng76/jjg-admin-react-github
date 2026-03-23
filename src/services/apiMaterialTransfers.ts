@@ -15,17 +15,36 @@ export const MATERIAL_TRANSFER_WORKSHOPS = [
   '仓库',
 ] as const
 
+export const MATERIAL_TRANSFER_AUDIT_OPTIONS = [
+  { label: '待审核', value: false },
+  { label: '已审核', value: true },
+] as const
+
 export type MaterialTransferWorkshop =
   (typeof MATERIAL_TRANSFER_WORKSHOPS)[number]
 
-export type MaterialTransfer =
-  Database['public']['Tables']['material_transfers']['Row']
-
-export type MaterialTransferInsert =
+type MaterialTransferRow = Database['public']['Tables']['material_transfers']['Row']
+type MaterialTransferInsertBase =
   Database['public']['Tables']['material_transfers']['Insert']
-
-export type MaterialTransferUpdate =
+type MaterialTransferUpdateBase =
   Database['public']['Tables']['material_transfers']['Update']
+
+export interface MaterialTransferAuditFields {
+  is_audited: boolean
+  audited_at: string | null
+}
+
+export type MaterialTransfer = MaterialTransferRow & MaterialTransferAuditFields
+
+export type MaterialTransferInsert = MaterialTransferInsertBase & {
+  is_audited?: boolean
+  audited_at?: string | null
+}
+
+export type MaterialTransferUpdate = MaterialTransferUpdateBase & {
+  is_audited?: boolean
+  audited_at?: string | null
+}
 
 export interface MaterialTransferWithEmployee extends MaterialTransfer {
   employee?: {
@@ -39,6 +58,43 @@ export interface MaterialTransferFilters {
   employeeId?: string
   targetWorkshop?: string
   recipientName?: string
+  isAudited?: boolean
+}
+
+export interface MaterialTransferQuantityStats {
+  totalQuantity: number
+  totalRecords: number
+}
+
+function applyMaterialTransferFilters<
+  TQuery extends {
+    ilike: (column: string, pattern: string) => TQuery
+    eq: (column: string, value: string | boolean) => TQuery
+  },
+>(query: TQuery, filters: MaterialTransferFilters) {
+  let nextQuery = query
+
+  if (filters.projectNo) {
+    nextQuery = nextQuery.ilike('project_no', `%${filters.projectNo}%`)
+  }
+
+  if (filters.employeeId) {
+    nextQuery = nextQuery.eq('operator_employee_id', filters.employeeId)
+  }
+
+  if (filters.targetWorkshop) {
+    nextQuery = nextQuery.eq('target_workshop', filters.targetWorkshop)
+  }
+
+  if (filters.recipientName) {
+    nextQuery = nextQuery.ilike('recipient_name', `%${filters.recipientName}%`)
+  }
+
+  if (typeof filters.isAudited === 'boolean') {
+    nextQuery = nextQuery.eq('is_audited', filters.isAudited)
+  }
+
+  return nextQuery
 }
 
 function normalizeTransferQuantity(quantity: number) {
@@ -62,6 +118,8 @@ function normalizeMaterialTransferInsertPayload(
     target_workshop: values.target_workshop,
     recipient_name: values.recipient_name.trim(),
     remark: values.remark?.trim() || null,
+    is_audited: values.is_audited ?? false,
+    audited_at: values.audited_at ?? null,
   }
 }
 
@@ -98,16 +156,21 @@ function normalizeMaterialTransferUpdatePayload(
     )
   }
 
+  if (values.is_audited !== undefined) {
+    payload.is_audited = values.is_audited
+  }
+
+  if (values.audited_at !== undefined) {
+    payload.audited_at = values.audited_at
+  }
+
   return payload
 }
 
 export async function getMaterialTransfers({
   page,
   pageSize,
-  projectNo,
-  employeeId,
-  targetWorkshop,
-  recipientName,
+  ...filters
 }: {
   page: number
   pageSize: number
@@ -126,21 +189,7 @@ export async function getMaterialTransfers({
     )
     .order('created_at', { ascending: false })
 
-  if (projectNo) {
-    query = query.ilike('project_no', `%${projectNo}%`)
-  }
-
-  if (employeeId) {
-    query = query.eq('operator_employee_id', employeeId)
-  }
-
-  if (targetWorkshop) {
-    query = query.eq('target_workshop', targetWorkshop)
-  }
-
-  if (recipientName) {
-    query = query.ilike('recipient_name', `%${recipientName}%`)
-  }
+  query = applyMaterialTransferFilters(query, filters)
 
   const { data, error, count } = await query.range(from, to)
 
@@ -171,6 +220,86 @@ export async function getMaterialTransferById(id: string) {
   }
 
   return data as unknown as MaterialTransferWithEmployee
+}
+
+export async function getMaterialTransfersForExport({
+  ids,
+  filters,
+}: {
+  ids?: string[]
+  filters?: MaterialTransferFilters
+}) {
+  if ((!ids || ids.length === 0) && !filters) {
+    return [] as MaterialTransferWithEmployee[]
+  }
+
+  let query = supabase
+    .from('material_transfers')
+    .select(
+      `
+      *,
+      employee:employees(id, name)
+    `,
+    )
+    .order('created_at', { ascending: true })
+
+  if (ids && ids.length > 0) {
+    query = query.in('id', ids)
+  } else if (filters) {
+    query = applyMaterialTransferFilters(query, filters)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw handleApiError(error, '获取物料转移单导出数据失败')
+  }
+
+  const rows = (data || []) as unknown as MaterialTransferWithEmployee[]
+
+  if (!ids || ids.length === 0) {
+    return rows
+  }
+
+  const rowMap = new Map(rows.map((row) => [row.id, row]))
+
+  return ids
+    .map((id) => rowMap.get(id))
+    .filter((row): row is MaterialTransferWithEmployee => Boolean(row))
+}
+
+export async function getMaterialTransferQuantityStats({
+  ids,
+  filters,
+}: {
+  ids?: string[]
+  filters?: MaterialTransferFilters
+} = {}): Promise<MaterialTransferQuantityStats> {
+  let query = supabase
+    .from('material_transfers')
+    .select('id, transfer_quantity')
+
+  if (ids && ids.length > 0) {
+    query = query.in('id', ids)
+  } else if (filters) {
+    query = applyMaterialTransferFilters(query, filters)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw handleApiError(error, '获取物料转移单数量统计失败')
+  }
+
+  const rows = data || []
+
+  return {
+    totalQuantity: rows.reduce(
+      (total, row) => total + Number(row.transfer_quantity || 0),
+      0,
+    ),
+    totalRecords: rows.length,
+  }
 }
 
 export async function createMaterialTransfer(values: MaterialTransferInsert) {
@@ -220,6 +349,37 @@ export async function updateMaterialTransfer({
   }
 
   return data as unknown as MaterialTransferWithEmployee
+}
+
+export async function batchUpdateMaterialTransfers({
+  ids,
+  values,
+}: {
+  ids: string[]
+  values: MaterialTransferUpdate
+}) {
+  if (ids.length === 0) {
+    return [] as MaterialTransferWithEmployee[]
+  }
+
+  const payload = normalizeMaterialTransferUpdatePayload(values)
+
+  const { data, error } = await supabase
+    .from('material_transfers')
+    .update(payload)
+    .in('id', ids)
+    .select(
+      `
+      *,
+      employee:employees(id, name)
+    `,
+    )
+
+  if (error) {
+    throw handleApiError(error, '批量更新物料转移单失败')
+  }
+
+  return (data || []) as unknown as MaterialTransferWithEmployee[]
 }
 
 export async function deleteMaterialTransfers(ids: string[]) {

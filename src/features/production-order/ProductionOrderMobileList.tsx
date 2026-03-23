@@ -69,8 +69,8 @@ export default function ProductionOrderMobileList({
             <div
               className={
                 selected
-                  ? 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-100'
-                  : 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600'
+                  ? 'mt-4 grid grid-cols-1 gap-3 text-sm text-slate-100'
+                  : 'mt-4 grid grid-cols-1 gap-3 text-sm text-slate-600'
               }
             >
               <div className="rounded-2xl bg-black/5 px-3 py-3">
@@ -83,26 +83,10 @@ export default function ProductionOrderMobileList({
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
-                  正工工时
+                  备注
                 </div>
-                <div className="mt-1 text-base font-semibold">
-                  {(record.positive_qualified_hours ?? 0).toFixed(2)} h
-                </div>
-              </div>
-              <div className="rounded-2xl bg-black/5 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
-                  零工工时
-                </div>
-                <div className="mt-1 text-base font-semibold">
-                  {(record.extra_qualified_hours ?? 0).toFixed(2)} h
-                </div>
-              </div>
-              <div className="rounded-2xl bg-black/5 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
-                  总工时
-                </div>
-                <div className="mt-1 text-base font-semibold">
-                  {(record.total_qualified_hours ?? 0).toFixed(2)} h
+                <div className="mt-1 text-sm leading-6 font-medium whitespace-pre-wrap wrap-break-word">
+                  {record.remark?.trim() || '无备注'}
                 </div>
               </div>
             </div>

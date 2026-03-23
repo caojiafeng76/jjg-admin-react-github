@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Button, Table, type TableColumnsType, type TableProps } from 'antd'
+import { Button, Table, Tag, type TableColumnsType, type TableProps } from 'antd'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
 
 import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
@@ -25,6 +25,15 @@ export default function MaterialTransferTable({
   onEdit,
   scrollY = 400,
 }: Props) {
+  const currentPageTransferQuantity = useMemo(
+    () =>
+      data.reduce(
+        (total, record) => total + Number(record.transfer_quantity || 0),
+        0,
+      ),
+    [data],
+  )
+
   const columns: TableColumnsType<MaterialTransferWithEmployee> = useMemo(
     () => [
       {
@@ -87,6 +96,27 @@ export default function MaterialTransferTable({
         width: 120,
       },
       {
+        title: '审核状态',
+        dataIndex: 'is_audited',
+        key: 'is_audited',
+        width: 100,
+        render: (value: boolean) => (
+          <Tag color={value ? 'success' : 'default'}>
+            {value ? '已审核' : '待审核'}
+          </Tag>
+        ),
+      },
+      {
+        title: '审核时间',
+        dataIndex: 'audited_at',
+        key: 'audited_at',
+        width: 180,
+        render: (text: string | null) => {
+          if (!text) return '-'
+          return new Date(text).toLocaleString('zh-CN')
+        },
+      },
+      {
         title: '备注',
         dataIndex: 'remark',
         key: 'remark',
@@ -137,10 +167,23 @@ export default function MaterialTransferTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 1400, y: scrollY }}
+      scroll={{ x: 1600, y: scrollY }}
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}
+      summary={() => (
+        <Table.Summary.Row>
+          <Table.Summary.Cell index={0} colSpan={5}>
+            <span className="font-medium text-slate-600">当前页合计</span>
+          </Table.Summary.Cell>
+          <Table.Summary.Cell index={5}>
+            <span className="font-semibold text-slate-900">
+              {currentPageTransferQuantity}
+            </span>
+          </Table.Summary.Cell>
+          <Table.Summary.Cell index={6} colSpan={7} />
+        </Table.Summary.Row>
+      )}
     />
   )
 }

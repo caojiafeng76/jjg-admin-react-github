@@ -127,34 +127,18 @@ export default function ProductionOrderDetail({
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                正工工时
-              </div>
-              <div className="mt-1 font-semibold text-slate-900">
-                {positiveQualifiedHours.toFixed(2)} 小时
-              </div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                零工工时
-              </div>
-              <div className="mt-1 font-semibold text-slate-900">
-                {(currentOrder.extra_qualified_hours ?? 0).toFixed(2)} 小时
-              </div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                总工时
-              </div>
-              <div className="mt-1 font-semibold text-slate-900">
-                {(currentOrder.total_qualified_hours ?? 0).toFixed(2)} 小时
-              </div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                 审核时间
               </div>
               <div className="mt-1 font-semibold text-slate-900">
                 {formattedAuditedAt || '未审核'}
+              </div>
+            </div>
+            <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                备注
+              </div>
+              <div className="mt-1 text-sm leading-6 font-medium text-slate-900 whitespace-pre-wrap wrap-break-word">
+                {currentOrder.remark?.trim() || '无备注'}
               </div>
             </div>
           </div>

@@ -1,6 +1,8 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
+  batchUpdateMaterialTransfers,
+  getMaterialTransferQuantityStats,
   getMaterialTransfers,
   getMaterialTransferById,
   createMaterialTransfer,
@@ -24,6 +26,7 @@ export function useMaterialTransfers({
     employeeId?: string
     targetWorkshop?: string
     recipientName?: string
+    isAudited?: boolean
   }
 }) {
   return useQuery({
@@ -40,6 +43,29 @@ export function useMaterialTransfer(id: string | undefined) {
     queryFn: () => getMaterialTransferById(id!),
     enabled: !!id,
     ...queryConfig.detail,
+  })
+}
+
+export function useMaterialTransferQuantityStats({
+  ids,
+  filters,
+  enabled = true,
+}: {
+  ids?: string[]
+  filters?: {
+    projectNo?: string
+    employeeId?: string
+    targetWorkshop?: string
+    recipientName?: string
+    isAudited?: boolean
+  }
+  enabled?: boolean
+}) {
+  return useQuery({
+    queryKey: [MATERIAL_TRANSFERS_KEY, 'quantity-stats', ids || null, filters || null],
+    queryFn: () => getMaterialTransferQuantityStats({ ids, filters }),
+    enabled,
+    ...queryConfig.list,
   })
 }
 
@@ -66,6 +92,13 @@ export function useUpdateMaterialTransfer() {
 export function useDeleteMaterialTransfers() {
   return useMutationWithInvalidation({
     mutationFn: deleteMaterialTransfers,
+    invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
+  })
+}
+
+export function useBatchUpdateMaterialTransfers() {
+  return useMutationWithInvalidation({
+    mutationFn: batchUpdateMaterialTransfers,
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
   })
 }
