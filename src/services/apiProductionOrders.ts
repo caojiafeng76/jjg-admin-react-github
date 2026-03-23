@@ -63,6 +63,7 @@ export async function getProductionOrders({
   let query = supabase
     .from('production_orders')
     .select(selectClause, { count: 'exact' })
+    .order('created_at', { ascending: false })
     .order('order_date', { ascending: false })
 
   if (startDate) {
