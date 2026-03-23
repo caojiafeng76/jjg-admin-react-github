@@ -5,6 +5,7 @@ import {
   getProductionOrderById,
   createProductionOrder,
   updateProductionOrder,
+  updateProductionOrders,
   deleteProductionOrders,
 } from '@/services/apiProductionOrders'
 import { queryConfig } from '@/config/queryClient'
@@ -67,6 +68,19 @@ export function useUpdateProductionOrder() {
 export function useDeleteProductionOrders() {
   return useMutationWithInvalidation({
     mutationFn: deleteProductionOrders,
+    invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
+  })
+}
+
+export function useBatchUpdateProductionOrders() {
+  return useMutationWithInvalidation({
+    mutationFn: ({
+      ids,
+      values,
+    }: {
+      ids: string[]
+      values: Parameters<typeof updateProductionOrders>[0]['values']
+    }) => updateProductionOrders({ ids, values }),
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
   })
 }

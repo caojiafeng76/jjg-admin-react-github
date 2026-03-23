@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Table, TableColumnsType, TableProps, Button } from 'antd'
+import { Table, TableColumnsType, TableProps, Button, Tag } from 'antd'
 import { EyeIcon } from '@heroicons/react/16/solid'
 
 import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
@@ -60,10 +60,28 @@ export default function ProductionOrderList({
           record.employee?.name || '-',
       },
       {
+        title: '审核状态',
+        dataIndex: 'is_audited',
+        key: 'is_audited',
+        width: 100,
+        render: (value: boolean) => (
+          <Tag color={value ? 'success' : 'default'}>
+            {value ? '已审核' : '待审核'}
+          </Tag>
+        ),
+      },
+      {
         title: '出勤工时(h)',
         dataIndex: 'work_hours',
         key: 'work_hours',
         width: 110,
+      },
+      {
+        title: '零工(h)',
+        dataIndex: 'extra_qualified_hours',
+        key: 'extra_qualified_hours',
+        width: 100,
+        render: (value: number | null) => (value ?? 0).toFixed(2),
       },
       {
         title: '合格工时(h)',
