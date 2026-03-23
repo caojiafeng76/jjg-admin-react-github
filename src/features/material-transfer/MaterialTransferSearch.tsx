@@ -2,13 +2,17 @@ import { useEffect } from 'react'
 import { Button, Form, Input, Select, Space } from 'antd'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
 
-import { MATERIAL_TRANSFER_WORKSHOPS } from '@/services/apiMaterialTransfers'
+import {
+  MATERIAL_TRANSFER_AUDIT_OPTIONS,
+  MATERIAL_TRANSFER_WORKSHOPS,
+} from '@/services/apiMaterialTransfers'
 
 interface MaterialTransferSearchValues {
   projectNo?: string
   employeeId?: string
   targetWorkshop?: string
   recipientName?: string
+  isAudited?: boolean
 }
 
 interface Props {
@@ -36,6 +40,8 @@ export default function MaterialTransferSearch({
       employeeId: values.employeeId || undefined,
       targetWorkshop: values.targetWorkshop || undefined,
       recipientName: values.recipientName?.trim() || undefined,
+      isAudited:
+        typeof values.isAudited === 'boolean' ? values.isAudited : undefined,
     })
   }
 
@@ -83,6 +89,15 @@ export default function MaterialTransferSearch({
 
       <Form.Item name="recipientName" className="mb-0">
         <Input placeholder="接收人" allowClear style={{ width: 160 }} />
+      </Form.Item>
+
+      <Form.Item name="isAudited" className="mb-0">
+        <Select
+          placeholder="审核状态"
+          allowClear
+          style={{ width: 140 }}
+          options={[...MATERIAL_TRANSFER_AUDIT_OPTIONS]}
+        />
       </Form.Item>
 
       <Form.Item className="mb-0">

@@ -8,6 +8,7 @@ import {
   Modal,
   Select,
   Space,
+  Switch,
 } from 'antd'
 
 import {
@@ -16,6 +17,7 @@ import {
   renderProjectNoOption,
 } from '@/features/production-order/projectNoSelect'
 import {
+  MATERIAL_TRANSFER_AUDIT_OPTIONS,
   MATERIAL_TRANSFER_WORKSHOPS,
   type MaterialTransferInsert,
   type MaterialTransferUpdate,
@@ -76,11 +78,15 @@ export default function MaterialTransferForm({
         target_workshop: initialValues.target_workshop,
         recipient_name: initialValues.recipient_name,
         remark: initialValues.remark || undefined,
+        is_audited: initialValues.is_audited,
       })
       return
     }
 
     form.resetFields()
+    form.setFieldsValue({
+      is_audited: false,
+    })
   }, [form, initialValues, open])
 
   function handleProjectChange(projectNo: string) {
@@ -109,6 +115,7 @@ export default function MaterialTransferForm({
       target_workshop: values.target_workshop,
       recipient_name: values.recipient_name,
       remark: values.remark || null,
+      is_audited: values.is_audited ?? false,
     })
   }
 
@@ -204,6 +211,13 @@ export default function MaterialTransferForm({
 
         <Form.Item name="remark" label="备注">
           <Input.TextArea rows={3} placeholder="可填写转移说明" />
+        </Form.Item>
+
+        <Form.Item name="is_audited" label="审核状态" valuePropName="checked">
+          <Switch
+            checkedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[1].label}
+            unCheckedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[0].label}
+          />
         </Form.Item>
 
         <Form.Item className="mb-0">
