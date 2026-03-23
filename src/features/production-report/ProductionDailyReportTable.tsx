@@ -6,7 +6,6 @@ import type { ProductionDailyReportRow } from '@/services/apiProductionDailyRepo
 interface Props {
   loading: boolean
   data: ProductionDailyReportRow[]
-  operations: string[]
   page: number
   pageSize: number
   selectedRowKeys: React.Key[]
@@ -31,7 +30,6 @@ function renderNumber(value: number | null | undefined, digits = 0) {
 export default function ProductionDailyReportTable({
   loading,
   data,
-  operations,
   page,
   pageSize,
   selectedRowKeys,
@@ -48,10 +46,10 @@ export default function ProductionDailyReportTable({
         render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
       },
       {
-        title: '日期范围',
+        title: '日期',
         dataIndex: 'orderDate',
         key: 'orderDate',
-        width: 170,
+        width: 120,
         fixed: 'left',
       },
       {
@@ -76,30 +74,54 @@ export default function ProductionDailyReportTable({
         width: 120,
       },
       {
+        title: '客户型号',
+        dataIndex: 'customerModel',
+        key: 'customerModel',
+        width: 120,
+      },
+      {
         title: '长度',
         dataIndex: 'lengthMm',
         key: 'lengthMm',
         width: 90,
         render: (value: number | null) => renderNumber(value),
       },
-      ...operations.map((operation) => ({
-        title: operation,
-        key: `operation-${operation}`,
-        width: 100,
-        render: (_value: unknown, record: ProductionDailyReportRow) =>
-          renderNumber(record.operationQuantities[operation] || 0),
-      })),
       {
-        title: '原料不良数',
+        title: '工序',
+        dataIndex: 'operation',
+        key: 'operation',
+        width: 120,
+      },
+      {
+        title: '合格数',
+        dataIndex: 'qualifiedCount',
+        key: 'qualifiedCount',
+        width: 90,
+      },
+      {
+        title: '不良数量',
+        dataIndex: 'defectCount',
+        key: 'defectCount',
+        width: 100,
+      },
+      {
+        title: '原料不良',
         dataIndex: 'rawMaterialDefectCount',
         key: 'rawMaterialDefectCount',
         width: 110,
       },
       {
-        title: '加工不良数',
+        title: '加工不良',
         dataIndex: 'processingDefectCount',
         key: 'processingDefectCount',
         width: 110,
+      },
+      {
+        title: '合格率',
+        dataIndex: 'qualifiedRate',
+        key: 'qualifiedRate',
+        width: 100,
+        render: (value: number) => `${(value * 100).toFixed(2)}%`,
       },
       {
         title: '原料不良重量kg',
@@ -119,11 +141,16 @@ export default function ProductionDailyReportTable({
         title: '操作人',
         dataIndex: 'employeeName',
         key: 'employeeName',
-        width: 220,
-        fixed: 'right',
+        width: 140,
+      },
+      {
+        title: '备注',
+        dataIndex: 'remark',
+        key: 'remark',
+        width: 180,
       },
     ],
-    [operations, page, pageSize],
+    [page, pageSize],
   )
 
   return (
@@ -139,7 +166,7 @@ export default function ProductionDailyReportTable({
       }}
       pagination={false}
       size="small"
-      scroll={{ x: 1500 + operations.length * 100, y: scrollY }}
+      scroll={{ x: 1850, y: scrollY }}
       style={{ fontSize: '12px' }}
     />
   )

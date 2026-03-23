@@ -22,27 +22,33 @@ function getColumnLetter(columnIndex: number) {
 
 export function exportProductionDailyReportToExcel(
   rows: ProductionDailyReportRow[],
-  operations: string[],
 ) {
-  const lengthColumnIndex = 4
-  const firstOperationColumnIndex = lengthColumnIndex + 1
-  const rawMaterialDefectCountColumnIndex = firstOperationColumnIndex + operations.length
-  const processingDefectCountColumnIndex = rawMaterialDefectCountColumnIndex + 1
-  const rawMaterialDefectWeightColumnIndex = processingDefectCountColumnIndex + 1
-  const processingDefectWeightColumnIndex = rawMaterialDefectWeightColumnIndex + 1
+  const workHoursColumnIndex = 1
+  const qualifiedCountColumnIndex = 7
+  const defectCountColumnIndex = 8
+  const rawMaterialDefectCountColumnIndex = 9
+  const processingDefectCountColumnIndex = 10
+  const qualifiedRateColumnIndex = 11
+  const rawMaterialDefectWeightColumnIndex = 12
+  const processingDefectWeightColumnIndex = 13
 
   const headers = [
-    '日期范围',
+    '日期',
     '工时',
     '项目号',
     '产品型号',
+    '客户型号',
     '长度',
-    ...operations,
-    '原料不良数',
-    '加工不良数',
+    '工序',
+    '合格数',
+    '不良数量',
+    '原料不良',
+    '加工不良',
+    '合格率',
     '原料不良重量kg',
     '加工不良重量kg',
     '操作人',
+    '备注',
   ]
 
   const title = '精加工车间日产量汇总'
@@ -55,13 +61,18 @@ export function exportProductionDailyReportToExcel(
       row.workHours,
       row.projectNo,
       row.productModel,
+      row.customerModel,
       row.lengthMm ?? '',
-      ...operations.map((operation) => row.operationQuantities[operation] || 0),
+      row.operation,
+      row.qualifiedCount,
+      row.defectCount,
       row.rawMaterialDefectCount,
       row.processingDefectCount,
+      row.qualifiedRate,
       row.rawMaterialDefectWeightKg,
       row.processingDefectWeightKg,
       row.employeeName,
+      row.remark,
     ]),
   ]
 
@@ -69,8 +80,9 @@ export function exportProductionDailyReportToExcel(
   const lastDataRow = rows.length + 2
   const summaryRowIndex = wsData.length + 1
   const numericColumnIndexes = [
-    1,
-    ...operations.map((_operation, index) => firstOperationColumnIndex + index),
+    workHoursColumnIndex,
+    qualifiedCountColumnIndex,
+    defectCountColumnIndex,
     rawMaterialDefectCountColumnIndex,
     processingDefectCountColumnIndex,
     rawMaterialDefectWeightColumnIndex,
@@ -108,7 +120,7 @@ export function exportProductionDailyReportToExcel(
       t: 'n',
       f: `SUM(${columnLetter}${firstDataRow}:${columnLetter}${lastDataRow})`,
       z:
-        columnIndex === 1 ||
+        columnIndex === workHoursColumnIndex ||
         columnIndex === rawMaterialDefectWeightColumnIndex ||
         columnIndex === processingDefectWeightColumnIndex
           ? '0.00'
@@ -116,6 +128,20 @@ export function exportProductionDailyReportToExcel(
       s: worksheet[cellRef]?.s,
     }
   })
+
+  const qualifiedRateCellRef = XLSX.utils.encode_cell({
+    r: summaryRowIndex - 1,
+    c: qualifiedRateColumnIndex,
+  })
+  const qualifiedCountColumnLetter = getColumnLetter(qualifiedCountColumnIndex)
+  const defectCountColumnLetter = getColumnLetter(defectCountColumnIndex)
+
+  worksheet[qualifiedRateCellRef] = {
+    t: 'n',
+    f: `IFERROR(${qualifiedCountColumnLetter}${summaryRowIndex}/(${qualifiedCountColumnLetter}${summaryRowIndex}+${defectCountColumnLetter}${summaryRowIndex}),0)`,
+    z: '0.00%',
+    s: worksheet[qualifiedRateCellRef]?.s,
+  }
 
   autoFitColumnWidths(worksheet, wsData)
   centerAllCells(worksheet, wsData)
@@ -189,6 +215,17 @@ export function exportProductionDailyReportToExcel(
           right: { style: 'thin', color: { rgb: 'D6B656' } },
         },
       }
+    }
+  }
+
+  for (let rowIndex = 2; rowIndex < summaryRowIndex - 1; rowIndex += 1) {
+    const cellRef = XLSX.utils.encode_cell({
+      r: rowIndex,
+      c: qualifiedRateColumnIndex,
+    })
+
+    if (worksheet[cellRef]) {
+      worksheet[cellRef].z = '0.00%'
     }
   }
 
