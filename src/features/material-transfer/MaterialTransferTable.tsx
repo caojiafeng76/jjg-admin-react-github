@@ -123,11 +123,12 @@ export default function MaterialTransferTable({
     [onEdit, page, pageSize],
   )
 
-  const rowSelection: TableProps<MaterialTransferWithEmployee>['rowSelection'] = {
-    selectedRowKeys,
-    onChange: onSelect,
-    preserveSelectedRowKeys: true,
-  }
+  const rowSelection: TableProps<MaterialTransferWithEmployee>['rowSelection'] =
+    {
+      selectedRowKeys,
+      onChange: onSelect,
+      preserveSelectedRowKeys: true,
+    }
 
   return (
     <Table<MaterialTransferWithEmployee>

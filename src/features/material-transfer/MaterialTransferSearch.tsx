@@ -1,9 +1,6 @@
 import { useEffect } from 'react'
 import { Button, Form, Input, Select, Space } from 'antd'
-import {
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from '@heroicons/react/16/solid'
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
 
 import { MATERIAL_TRANSFER_WORKSHOPS } from '@/services/apiMaterialTransfers'
 
@@ -97,7 +94,10 @@ export default function MaterialTransferSearch({
           >
             搜索
           </Button>
-          <Button icon={<XMarkIcon className="h-4 w-4" />} onClick={handleReset}>
+          <Button
+            icon={<XMarkIcon className="h-4 w-4" />}
+            onClick={handleReset}
+          >
             重置
           </Button>
         </Space>
