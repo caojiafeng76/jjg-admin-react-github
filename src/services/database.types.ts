@@ -7,300 +7,95 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      'syney-po-items': {
+      employees: {
         Row: {
-          created_at: string
-          id: number
-          No: string | null
-          ParamSpec: string | null
-          PartCode: string | null
-          PartModel: string | null
-          PartName: string | null
-          PartName2: string | null
-          PartNo: string | null
-          PoId: number | null
-          Qty: number | null
-          Remark: string | null
-          SONo: string | null
-          Spec: string | null
-          Unit: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          No?: string | null
-          ParamSpec?: string | null
-          PartCode?: string | null
-          PartModel?: string | null
-          PartName?: string | null
-          PartName2?: string | null
-          PartNo?: string | null
-          PoId?: number | null
-          Qty?: number | null
-          Remark?: string | null
-          SONo?: string | null
-          Spec?: string | null
-          Unit?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          No?: string | null
-          ParamSpec?: string | null
-          PartCode?: string | null
-          PartModel?: string | null
-          PartName?: string | null
-          PartName2?: string | null
-          PartNo?: string | null
-          PoId?: number | null
-          Qty?: number | null
-          Remark?: string | null
-          SONo?: string | null
-          Spec?: string | null
-          Unit?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'syney-po-items_PoId_fkey'
-            columns: ['PoId']
-            isOneToOne: false
-            referencedRelation: 'syney-pos'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      'syney-pos': {
-        Row: {
-          Brand: string | null
-          created_at: string
-          EndDate: string | null
-          id: number
-          No: string | null
-          Qty: number | null
-          Remark: string | null
-          SerialNo: number | null
-          SONo: string | null
-          Spec: string | null
-          Status: string | null
-          Technique: string | null
-        }
-        Insert: {
-          Brand?: string | null
-          created_at?: string
-          EndDate?: string | null
-          id?: number
-          No?: string | null
-          Qty?: number | null
-          Remark?: string | null
-          SerialNo?: number | null
-          SONo?: string | null
-          Spec?: string | null
-          Status?: string | null
-          Technique?: string | null
-        }
-        Update: {
-          Brand?: string | null
-          created_at?: string
-          EndDate?: string | null
-          id?: number
-          No?: string | null
-          Qty?: number | null
-          Remark?: string | null
-          SerialNo?: number | null
-          SONo?: string | null
-          Spec?: string | null
-          Status?: string | null
-          Technique?: string | null
-        }
-        Relationships: []
-      }
-      'syney-serial-no': {
-        Row: {
-          created_at: string
-          id: number
-          SyneySerialNo: number | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          SyneySerialNo?: number | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          SyneySerialNo?: number | null
-        }
-        Relationships: []
-      }
-      'syney-specs': {
-        Row: {
-          created_at: string
-          id: number
-          ParamSpec: string | null
-          PartName: string | null
-          PartNo: string | null
-          Spec: string | null
-          Unit: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          ParamSpec?: string | null
-          PartName?: string | null
-          PartNo?: string | null
-          Spec?: string | null
-          Unit?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          ParamSpec?: string | null
-          PartName?: string | null
-          PartNo?: string | null
-          Spec?: string | null
-          Unit?: string | null
-        }
-        Relationships: []
-      }
-      syney_safe_part_settings: {
-        Row: {
-          id: string
-          part_no: string
-          name: string | null
-          need_print_label: boolean
-          is_safe_part: boolean
-          remark: string | null
+          auth_user_id: string | null
           created_at: string | null
+          id: string
+          is_active: boolean
+          name: string
+          role: string
           updated_at: string | null
         }
         Insert: {
-          id?: string
-          part_no: string
-          name?: string | null
-          need_print_label?: boolean
-          is_safe_part?: boolean
-          remark?: string | null
+          auth_user_id?: string | null
           created_at?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          role?: string
           updated_at?: string | null
         }
         Update: {
-          id?: string
-          part_no?: string
-          name?: string | null
-          need_print_label?: boolean
-          is_safe_part?: boolean
-          remark?: string | null
+          auth_user_id?: string | null
           created_at?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          role?: string
           updated_at?: string | null
         }
         Relationships: []
       }
-      'syney-store-report-items': {
+      material_transfers: {
         Row: {
           created_at: string
-          id: number
-          No: string | null
-          ParamSpec: string | null
-          PartName: string | null
-          PartNo: string | null
-          Qty: number | null
-          Remark: string | null
-          SONo: string | null
-          Spec: string | null
-          TaxTotalPrice: number | null
-          TaxUnitPrice: number | null
-          Unit: string | null
+          customer_model: string | null
+          id: string
+          length_mm: number | null
+          operator_employee_id: string
+          product_model: string | null
+          project_no: string
+          recipient_name: string
+          remark: string | null
+          target_workshop: string
+          transfer_quantity: number
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          id?: number
-          No?: string | null
-          ParamSpec?: string | null
-          PartName?: string | null
-          PartNo?: string | null
-          Qty?: number | null
-          Remark?: string | null
-          SONo?: string | null
-          Spec?: string | null
-          TaxTotalPrice?: number | null
-          TaxUnitPrice?: number | null
-          Unit?: string | null
+          customer_model?: string | null
+          id?: string
+          length_mm?: number | null
+          operator_employee_id: string
+          product_model?: string | null
+          project_no: string
+          recipient_name: string
+          remark?: string | null
+          target_workshop: string
+          transfer_quantity: number
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          id?: number
-          No?: string | null
-          ParamSpec?: string | null
-          PartName?: string | null
-          PartNo?: string | null
-          Qty?: number | null
-          Remark?: string | null
-          SONo?: string | null
-          Spec?: string | null
-          TaxTotalPrice?: number | null
-          TaxUnitPrice?: number | null
-          Unit?: string | null
+          customer_model?: string | null
+          id?: string
+          length_mm?: number | null
+          operator_employee_id?: string
+          product_model?: string | null
+          project_no?: string
+          recipient_name?: string
+          remark?: string | null
+          target_workshop?: string
+          transfer_quantity?: number
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'syney-store-report-items_No_fkey'
-            columns: ['No']
+            foreignKeyName: "material_transfers_operator_employee_id_fkey"
+            columns: ["operator_employee_id"]
             isOneToOne: false
-            referencedRelation: 'syney-store-reports'
-            referencedColumns: ['No']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
-      }
-      'syney-store-reports': {
-        Row: {
-          created_at: string
-          id: number
-          No: string
-          Status: string
-          TotalAmount: number | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          No: string
-          Status?: string
-          TotalAmount?: number | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          No?: string
-          Status?: string
-          TotalAmount?: number | null
-        }
-        Relationships: []
       }
       process_standards: {
         Row: {
@@ -347,8 +142,8 @@ export type Database = {
           project_no: string
           qualified_hours: number | null
           qualified_quantity: number
-          standard_seconds: number
           remark: string | null
+          standard_seconds: number
           updated_at: string
         }
         Insert: {
@@ -368,8 +163,8 @@ export type Database = {
           project_no: string
           qualified_hours?: number | null
           qualified_quantity?: number
-          standard_seconds: number
           remark?: string | null
+          standard_seconds: number
           updated_at?: string
         }
         Update: {
@@ -389,17 +184,24 @@ export type Database = {
           project_no?: string
           qualified_hours?: number | null
           qualified_quantity?: number
-          standard_seconds?: number
           remark?: string | null
+          standard_seconds?: number
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'production_order_items_order_id_fkey'
-            columns: ['order_id']
+            foreignKeyName: "production_order_items_order_id_fkey"
+            columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: 'production_orders'
-            referencedColumns: ['id']
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_order_items_product_model_operation_fkey"
+            columns: ["product_model", "operation"]
+            isOneToOne: false
+            referencedRelation: "process_standards"
+            referencedColumns: ["model", "operation"]
           },
         ]
       }
@@ -411,6 +213,7 @@ export type Database = {
           id: string
           order_date: string
           remark: string | null
+          status: string
           total_qualified_hours: number | null
           updated_at: string
           work_hours: number
@@ -422,6 +225,7 @@ export type Database = {
           id?: string
           order_date?: string
           remark?: string | null
+          status?: string
           total_qualified_hours?: number | null
           updated_at?: string
           work_hours: number
@@ -433,17 +237,18 @@ export type Database = {
           id?: string
           order_date?: string
           remark?: string | null
+          status?: string
           total_qualified_hours?: number | null
           updated_at?: string
           work_hours?: number
         }
         Relationships: [
           {
-            foreignKeyName: 'production_orders_employee_id_fkey'
-            columns: ['employee_id']
+            foreignKeyName: "production_orders_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -501,24 +306,271 @@ export type Database = {
         }
         Relationships: []
       }
-      employees: {
+      syney_safe_part_settings: {
         Row: {
           created_at: string | null
           id: string
-          name: string
+          is_safe_part: boolean
+          name: string | null
+          need_print_label: boolean
+          part_no: string
+          remark: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
-          name: string
+          is_safe_part?: boolean
+          name?: string | null
+          need_print_label?: boolean
+          part_no: string
+          remark?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
-          name?: string
+          is_safe_part?: boolean
+          name?: string | null
+          need_print_label?: boolean
+          part_no?: string
+          remark?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      "syney-po-items": {
+        Row: {
+          created_at: string
+          id: number
+          No: string | null
+          ParamSpec: string | null
+          PartCode: string | null
+          PartModel: string | null
+          PartName: string | null
+          PartName2: string | null
+          PartNo: string | null
+          PoId: number | null
+          Qty: number | null
+          Remark: string | null
+          SONo: string | null
+          Spec: string | null
+          Unit: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          No?: string | null
+          ParamSpec?: string | null
+          PartCode?: string | null
+          PartModel?: string | null
+          PartName?: string | null
+          PartName2?: string | null
+          PartNo?: string | null
+          PoId?: number | null
+          Qty?: number | null
+          Remark?: string | null
+          SONo?: string | null
+          Spec?: string | null
+          Unit?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          No?: string | null
+          ParamSpec?: string | null
+          PartCode?: string | null
+          PartModel?: string | null
+          PartName?: string | null
+          PartName2?: string | null
+          PartNo?: string | null
+          PoId?: number | null
+          Qty?: number | null
+          Remark?: string | null
+          SONo?: string | null
+          Spec?: string | null
+          Unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syney-po-items_PoId_fkey"
+            columns: ["PoId"]
+            isOneToOne: false
+            referencedRelation: "syney-pos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      "syney-pos": {
+        Row: {
+          Brand: string | null
+          created_at: string
+          EndDate: string | null
+          id: number
+          No: string | null
+          Qty: number | null
+          Remark: string | null
+          SerialNo: number | null
+          SONo: string | null
+          Spec: string | null
+          Status: string | null
+          Technique: string | null
+        }
+        Insert: {
+          Brand?: string | null
+          created_at?: string
+          EndDate?: string | null
+          id?: number
+          No?: string | null
+          Qty?: number | null
+          Remark?: string | null
+          SerialNo?: number | null
+          SONo?: string | null
+          Spec?: string | null
+          Status?: string | null
+          Technique?: string | null
+        }
+        Update: {
+          Brand?: string | null
+          created_at?: string
+          EndDate?: string | null
+          id?: number
+          No?: string | null
+          Qty?: number | null
+          Remark?: string | null
+          SerialNo?: number | null
+          SONo?: string | null
+          Spec?: string | null
+          Status?: string | null
+          Technique?: string | null
+        }
+        Relationships: []
+      }
+      "syney-serial-no": {
+        Row: {
+          created_at: string
+          id: number
+          SyneySerialNo: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          SyneySerialNo?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          SyneySerialNo?: number | null
+        }
+        Relationships: []
+      }
+      "syney-specs": {
+        Row: {
+          created_at: string
+          id: number
+          ParamSpec: string | null
+          PartName: string | null
+          PartNo: string | null
+          Spec: string | null
+          Unit: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          ParamSpec?: string | null
+          PartName?: string | null
+          PartNo?: string | null
+          Spec?: string | null
+          Unit?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          ParamSpec?: string | null
+          PartName?: string | null
+          PartNo?: string | null
+          Spec?: string | null
+          Unit?: string | null
+        }
+        Relationships: []
+      }
+      "syney-store-report-items": {
+        Row: {
+          created_at: string
+          id: number
+          No: string | null
+          ParamSpec: string | null
+          PartName: string | null
+          PartNo: string | null
+          Qty: number | null
+          Remark: string | null
+          SONo: string | null
+          Spec: string | null
+          TaxTotalPrice: number | null
+          TaxUnitPrice: number | null
+          Unit: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          No?: string | null
+          ParamSpec?: string | null
+          PartName?: string | null
+          PartNo?: string | null
+          Qty?: number | null
+          Remark?: string | null
+          SONo?: string | null
+          Spec?: string | null
+          TaxTotalPrice?: number | null
+          TaxUnitPrice?: number | null
+          Unit?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          No?: string | null
+          ParamSpec?: string | null
+          PartName?: string | null
+          PartNo?: string | null
+          Qty?: number | null
+          Remark?: string | null
+          SONo?: string | null
+          Spec?: string | null
+          TaxTotalPrice?: number | null
+          TaxUnitPrice?: number | null
+          Unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syney-store-report-items_No_fkey"
+            columns: ["No"]
+            isOneToOne: false
+            referencedRelation: "syney-store-reports"
+            referencedColumns: ["No"]
+          },
+        ]
+      }
+      "syney-store-reports": {
+        Row: {
+          created_at: string
+          id: number
+          No: string
+          Status: string
+          TotalAmount: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          No: string
+          Status?: string
+          TotalAmount?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          No?: string
+          Status?: string
+          TotalAmount?: number | null
         }
         Relationships: []
       }
@@ -527,7 +579,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_employee_id: { Args: never; Returns: string }
+      increment_serial_no: { Args: { increment_by: number }; Returns: number }
+      is_admin: { Args: never; Returns: boolean }
+      recalculate_production_order_totals: {
+        Args: { target_order_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -538,27 +596,33 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, 'public'>]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema['Tables'] & PublicSchema['Views'])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-        Database[PublicTableNameOrOptions['schema']]['Views'])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-      Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] &
-        PublicSchema['Views'])
-    ? (PublicSchema['Tables'] &
-        PublicSchema['Views'])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -566,20 +630,24 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -587,20 +655,24 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -608,31 +680,42 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema['Enums']
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends {
-    schema: keyof Database
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema['Enums']
-    ? PublicSchema['Enums'][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema['CompositeTypes']
-    | { schema: keyof Database },
-  CompositeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema['CompositeTypes']
-    ? PublicSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
+
