@@ -51,6 +51,11 @@ export default function ProductionOrderMobileList({
                 <div className="mt-1 text-lg font-bold tracking-tight">
                   {record.employee?.name || '未分配员工'}
                 </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Tag color={record.is_audited ? 'success' : 'default'}>
+                    {record.is_audited ? '已审核' : '待审核'}
+                  </Tag>
+                </div>
               </div>
               <Tag
                 color={
@@ -64,8 +69,8 @@ export default function ProductionOrderMobileList({
             <div
               className={
                 selected
-                  ? 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-100'
-                  : 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600'
+                  ? 'mt-4 grid grid-cols-3 gap-3 text-sm text-slate-100'
+                  : 'mt-4 grid grid-cols-3 gap-3 text-sm text-slate-600'
               }
             >
               <div className="rounded-2xl bg-black/5 px-3 py-3">
@@ -74,6 +79,14 @@ export default function ProductionOrderMobileList({
                 </div>
                 <div className="mt-1 text-base font-semibold">
                   {record.work_hours} h
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  零工工时
+                </div>
+                <div className="mt-1 text-base font-semibold">
+                  {(record.extra_qualified_hours ?? 0).toFixed(2)} h
                 </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">

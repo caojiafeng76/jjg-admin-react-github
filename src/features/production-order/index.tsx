@@ -1,5 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
-import { PlusCircleIcon } from '@heroicons/react/16/solid'
+import {
+  ArrowPathIcon,
+  PlusCircleIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/16/solid'
 import { App, Button, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
@@ -19,6 +23,7 @@ import {
   useProductionOrder,
   useCreateProductionOrder,
   useUpdateProductionOrder,
+  useBatchUpdateProductionOrders,
   useDeleteProductionOrders,
 } from './useProductionOrders'
 import {
@@ -93,13 +98,17 @@ async function syncOrderItemsSequentially({
 }
 
 export default function ProductionOrderPage() {
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const { role, employeeProfile } = useAuth()
   const isEmployeeView = role === 'employee'
   const fixedEmployee =
     isEmployeeView && employeeProfile?.id
       ? { id: employeeProfile.id, name: employeeProfile.name }
       : null
+
+  const isAuditedRecord = (
+    record?: Partial<ProductionOrder> & { is_audited?: boolean },
+  ) => Boolean(record?.is_audited)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建工单')
@@ -142,6 +151,7 @@ export default function ProductionOrderPage() {
 
   const createMutation = useCreateProductionOrder()
   const updateMutation = useUpdateProductionOrder()
+  const batchUpdateMutation = useBatchUpdateProductionOrders()
   const deleteMutation = useDeleteProductionOrders()
   const addItemMutation = useAddProductionOrderItem()
   const updateItemMutation = useUpdateProductionOrderItem()
@@ -179,6 +189,11 @@ export default function ProductionOrderPage() {
 
       if (!record && selectedRowKeys.length !== 1) {
         message.warning('请选择一条数据进行编辑')
+        return
+      }
+
+      if (isEmployeeView && isAuditedRecord(targetRecord)) {
+        message.warning('已审核工单员工无法编辑')
         return
       }
 
@@ -257,6 +272,42 @@ export default function ProductionOrderPage() {
     }
   }, [message, selectedRowKeys])
 
+  const handleBatchAudit = useCallback(
+    (isAudited: boolean) => {
+      if (selectedRowKeys.length === 0) {
+        message.warning(`请选择要${isAudited ? '审核' : '反审核'}的工单`)
+        return
+      }
+
+      modal.confirm({
+        title: `批量${isAudited ? '审核' : '反审核'}工单`,
+        content: `确定要将选中的 ${selectedRowKeys.length} 张工单标记为${isAudited ? '已审核' : '待审核'}吗？`,
+        okText: '确定',
+        cancelText: '取消',
+        onOk: async () => {
+          try {
+            await batchUpdateMutation.mutateAsync({
+              ids: selectedRowKeys as string[],
+              values: {
+                is_audited: isAudited,
+                audited_at: isAudited ? undefined : null,
+              },
+            })
+            message.success(`批量${isAudited ? '审核' : '反审核'}成功`)
+            setSelectedRowKeys([])
+          } catch (error) {
+            if (error instanceof Error) {
+              message.error(error.message)
+            } else {
+              message.error(`批量${isAudited ? '审核' : '反审核'}失败，请稍后重试`)
+            }
+          }
+        },
+      })
+    },
+    [batchUpdateMutation, message, modal, selectedRowKeys],
+  )
+
   const handleFinish = useCallback(
     async (values: {
       order: Partial<ProductionOrder>
@@ -278,6 +329,14 @@ export default function ProductionOrderPage() {
     }) => {
       try {
         let orderId: string
+
+        if (
+          isEmployeeView &&
+          isAuditedRecord(detailData || editingRecord || undefined)
+        ) {
+          message.warning('已审核工单员工无法编辑')
+          return
+        }
 
         if (isEdit && editingRecord) {
           await updateMutation.mutateAsync({
@@ -415,6 +474,22 @@ export default function ProductionOrderPage() {
         ) : (
           <>
             <AddButton handleCreate={handleCreate} />
+            <Button
+              type="text"
+              icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+              onClick={() => handleBatchAudit(true)}
+              loading={batchUpdateMutation.isPending}
+            >
+              批量审核
+            </Button>
+            <Button
+              type="text"
+              icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+              onClick={() => handleBatchAudit(false)}
+              loading={batchUpdateMutation.isPending}
+            >
+              批量反审核
+            </Button>
             <EditButton title="编辑" handleEdit={() => handleEdit()} />
           </>
         )}
@@ -524,6 +599,7 @@ export default function ProductionOrderPage() {
         fixedEmployee={fixedEmployee}
         loading={isLoadingDetail && !!editingRecord?.id}
         compact={isEmployeeView}
+        showAuditField={!isEmployeeView}
       />
 
       <Modal
@@ -539,7 +615,13 @@ export default function ProductionOrderPage() {
           <ProductionOrderDetail
             order={detailOrder}
             compact={isEmployeeView}
+            canEdit={!(isEmployeeView && isAuditedRecord(detailOrder))}
             onEdit={() => {
+              if (isEmployeeView && isAuditedRecord(detailOrder)) {
+                message.warning('已审核工单员工无法编辑')
+                return
+              }
+
               setIsView(false)
               setIsEdit(true)
               setModalTitle('编辑工单')

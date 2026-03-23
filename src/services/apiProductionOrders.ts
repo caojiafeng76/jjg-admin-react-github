@@ -169,6 +169,14 @@ export async function createProductionOrder(values: ProductionOrderInsert) {
     throw new Error('出勤工时必须大于0')
   }
 
+  if (
+    values.extra_qualified_hours !== undefined &&
+    values.extra_qualified_hours !== null &&
+    values.extra_qualified_hours < 0
+  ) {
+    throw new Error('零工工时不能小于0')
+  }
+
   const { data, error } = await supabase
     .from('production_orders')
     .insert(values)
@@ -197,6 +205,14 @@ export async function updateProductionOrder({
     throw new Error('出勤工时必须大于0')
   }
 
+  if (
+    values.extra_qualified_hours !== undefined &&
+    values.extra_qualified_hours !== null &&
+    values.extra_qualified_hours < 0
+  ) {
+    throw new Error('零工工时不能小于0')
+  }
+
   const { data, error } = await supabase
     .from('production_orders')
     .update(values)
@@ -220,4 +236,28 @@ export async function deleteProductionOrders(ids: string[]) {
   if (error) {
     throw handleApiError(error, '删除生产工单失败')
   }
+}
+
+export async function updateProductionOrders({
+  ids,
+  values,
+}: {
+  ids: string[]
+  values: ProductionOrderUpdate
+}) {
+  if (ids.length === 0) {
+    return [] as ProductionOrder[]
+  }
+
+  const { data, error } = await supabase
+    .from('production_orders')
+    .update(values)
+    .in('id', ids)
+    .select()
+
+  if (error) {
+    throw handleApiError(error, '批量更新生产工单失败')
+  }
+
+  return (data || []) as ProductionOrder[]
 }

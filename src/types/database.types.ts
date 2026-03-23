@@ -207,10 +207,13 @@ export type Database = {
       }
       production_orders: {
         Row: {
+          audited_at: string | null
           created_at: string
           efficiency: number | null
           employee_id: string | null
+          extra_qualified_hours: number
           id: string
+          is_audited: boolean
           order_date: string
           remark: string | null
           status: string
@@ -219,10 +222,13 @@ export type Database = {
           work_hours: number
         }
         Insert: {
+          audited_at?: string | null
           created_at?: string
           efficiency?: number | null
           employee_id?: string | null
+          extra_qualified_hours?: number
           id?: string
+          is_audited?: boolean
           order_date?: string
           remark?: string | null
           status?: string
@@ -231,10 +237,13 @@ export type Database = {
           work_hours: number
         }
         Update: {
+          audited_at?: string | null
           created_at?: string
           efficiency?: number | null
           employee_id?: string | null
+          extra_qualified_hours?: number
           id?: string
+          is_audited?: boolean
           order_date?: string
           remark?: string | null
           status?: string

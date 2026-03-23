@@ -8,6 +8,7 @@ interface Props {
   data: ProductionOrderItem[]
   onEdit: (item: ProductionOrderItem) => void
   onDelete: (ids: string[]) => void
+  showActions?: boolean
 }
 
 export default function ProductionOrderItemMobileList({
@@ -15,6 +16,7 @@ export default function ProductionOrderItemMobileList({
   data,
   onEdit,
   onDelete,
+  showActions = true,
 }: Props) {
   const { modal } = App.useApp()
 
@@ -88,35 +90,37 @@ export default function ProductionOrderItemMobileList({
               </div>
             </div>
 
-            <div className="mt-4 flex gap-2">
-              <Button
-                type="primary"
-                className="flex-1"
-                icon={<PencilSquareIcon className="size-4" />}
-                onClick={() => onEdit(item)}
-              >
-                编辑
-              </Button>
-              <Button
-                danger
-                className="flex-1"
-                icon={<TrashIcon className="size-4" />}
-                onClick={() => {
-                  modal.confirm({
-                    title: '删除工序明细',
-                    content: `确认删除工序“${item.operation}”吗？`,
-                    okText: '删除',
-                    cancelText: '取消',
-                    okButtonProps: { danger: true },
-                    onOk: async () => {
-                      await onDelete([item.id])
-                    },
-                  })
-                }}
-              >
-                删除
-              </Button>
-            </div>
+            {showActions ? (
+              <div className="mt-4 flex gap-2">
+                <Button
+                  type="primary"
+                  className="flex-1"
+                  icon={<PencilSquareIcon className="size-4" />}
+                  onClick={() => onEdit(item)}
+                >
+                  编辑
+                </Button>
+                <Button
+                  danger
+                  className="flex-1"
+                  icon={<TrashIcon className="size-4" />}
+                  onClick={() => {
+                    modal.confirm({
+                      title: '删除工序明细',
+                      content: `确认删除工序“${item.operation}”吗？`,
+                      okText: '删除',
+                      cancelText: '取消',
+                      okButtonProps: { danger: true },
+                      onOk: async () => {
+                        await onDelete([item.id])
+                      },
+                    })
+                  }}
+                >
+                  删除
+                </Button>
+              </div>
+            ) : null}
           </article>
         )
       })}

@@ -16,6 +16,7 @@ import {
   Popconfirm,
   Empty,
   Tag,
+  Switch,
 } from 'antd'
 import {
   PlusIcon,
@@ -53,6 +54,7 @@ interface Props {
   fixedEmployee?: { id: string; name: string } | null
   loading?: boolean
   compact?: boolean
+  showAuditField?: boolean
 }
 
 interface OrderItem {
@@ -81,6 +83,7 @@ export default function ProductionOrderForm({
   fixedEmployee,
   loading = false,
   compact = false,
+  showAuditField = false,
 }: Props) {
   const { message, modal } = App.useApp()
   const queryClient = useQueryClient()
@@ -160,6 +163,7 @@ export default function ProductionOrderForm({
       )
       form.setFieldsValue({
         ...initialValues,
+        is_audited: initialValues.is_audited,
         employee_id: initialValues.employee_id || fixedEmployee?.id,
         order_date: initialValues.order_date
           ? dayjs(initialValues.order_date)
@@ -169,8 +173,10 @@ export default function ProductionOrderForm({
       setItems([])
       form.resetFields()
       form.setFieldsValue({
-        order_date: dayjs().subtract(1, 'day'),
+        order_date: dayjs(),
         work_hours: 11,
+        extra_qualified_hours: 0,
+        is_audited: false,
         employee_id: fixedEmployee?.id,
       })
     }
@@ -213,8 +219,10 @@ export default function ProductionOrderForm({
   const handleFinish = async (values: {
     order_date: dayjs.Dayjs
     work_hours: number
+    extra_qualified_hours?: number
     remark?: string
     employee_id: string
+    is_audited?: boolean
   }) => {
     setSubmitting(true)
     try {
@@ -387,8 +395,10 @@ export default function ProductionOrderForm({
           layout="vertical"
           onFinish={handleFinish}
           initialValues={{
-            order_date: dayjs().subtract(1, 'day'),
+            order_date: dayjs(),
             work_hours: 11,
+            extra_qualified_hours: 0,
+            is_audited: false,
           }}
         >
           <div
@@ -439,6 +449,30 @@ export default function ProductionOrderForm({
                 placeholder="请输入出勤工时"
               />
             </Form.Item>
+
+            <Form.Item
+              name="extra_qualified_hours"
+              label="零工工时(小时)"
+              tooltip="按小时录入，会直接计入工单总合格工时"
+            >
+              <InputNumber
+                min={0}
+                step={0.5}
+                precision={2}
+                style={{ width: '100%' }}
+                placeholder="例如 1.5"
+              />
+            </Form.Item>
+
+            {showAuditField ? (
+              <Form.Item
+                name="is_audited"
+                label="审核状态"
+                valuePropName="checked"
+              >
+                <Switch checkedChildren="已审核" unCheckedChildren="待审核" />
+              </Form.Item>
+            ) : null}
 
             <Form.Item
               name="remark"

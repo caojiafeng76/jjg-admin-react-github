@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Card, Descriptions, Button } from 'antd'
+import { Card, Descriptions, Button, Tag } from 'antd'
 import { PlusIcon } from '@heroicons/react/16/solid'
+import dayjs from 'dayjs'
 
 import ProductionOrderItemTable from './ProductionOrderItemTable'
 import ProductionOrderItemMobileList from './ProductionOrderItemMobileList'
@@ -19,12 +20,14 @@ interface Props {
   order: ProductionOrder & { items?: ProductionOrderItem[] }
   onEdit: () => void
   compact?: boolean
+  canEdit?: boolean
 }
 
 export default function ProductionOrderDetail({
   order,
   onEdit,
   compact = false,
+  canEdit = true,
 }: Props) {
   const [isItemModalOpen, setIsItemModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<
@@ -77,6 +80,9 @@ export default function ProductionOrderDetail({
   const orderWithEmployee = currentOrder as ProductionOrder & {
     employee?: { name: string }
   }
+  const formattedAuditedAt = currentOrder.audited_at
+    ? dayjs(currentOrder.audited_at).format('YYYY-MM-DD HH:mm:ss')
+    : null
 
   return (
     <div className="space-y-4">
@@ -93,9 +99,14 @@ export default function ProductionOrderDetail({
               <div className="mt-1 text-sm text-slate-500">
                 {orderWithEmployee.employee?.name || '-'}
               </div>
+              <div className="mt-2">
+                <Tag color={currentOrder.is_audited ? 'success' : 'default'}>
+                  {currentOrder.is_audited ? '已审核' : '待审核'}
+                </Tag>
+              </div>
             </div>
 
-            <Button type="primary" onClick={onEdit}>
+            <Button type="primary" onClick={onEdit} disabled={!canEdit}>
               编辑工单
             </Button>
           </div>
@@ -111,10 +122,26 @@ export default function ProductionOrderDetail({
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                零工工时
+              </div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {(currentOrder.extra_qualified_hours ?? 0).toFixed(2)} 小时
+              </div>
+            </div>
+            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                 备注
               </div>
               <div className="mt-1 line-clamp-3 font-semibold text-slate-900">
                 {currentOrder.remark || '无'}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                审核时间
+              </div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {formattedAuditedAt || '未审核'}
               </div>
             </div>
           </div>
@@ -123,7 +150,7 @@ export default function ProductionOrderDetail({
         <Card
           title="生产工单信息"
           extra={
-            <Button type="primary" onClick={onEdit}>
+            <Button type="primary" onClick={onEdit} disabled={!canEdit}>
               编辑工单
             </Button>
           }
@@ -135,19 +162,32 @@ export default function ProductionOrderDetail({
             <Descriptions.Item label="操作人">
               {orderWithEmployee.employee?.name || '-'}
             </Descriptions.Item>
+            <Descriptions.Item label="审核状态">
+              <Tag color={currentOrder.is_audited ? 'success' : 'default'}>
+                {currentOrder.is_audited ? '已审核' : '待审核'}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="审核时间">
+              {formattedAuditedAt || '-'}
+            </Descriptions.Item>
             <Descriptions.Item label="出勤工时">
               {currentOrder.work_hours} 小时
             </Descriptions.Item>
+            <Descriptions.Item label="零工工时">
+              {(currentOrder.extra_qualified_hours ?? 0).toFixed(2)} 小时
+            </Descriptions.Item>
             <Descriptions.Item label="合格工时">
-              {currentOrder.total_qualified_hours
-                ? currentOrder.total_qualified_hours.toFixed(2)
-                : '-'}{' '}
+              {currentOrder.total_qualified_hours === null ||
+              currentOrder.total_qualified_hours === undefined
+                ? '-'
+                : currentOrder.total_qualified_hours.toFixed(2)}{' '}
               小时
             </Descriptions.Item>
             <Descriptions.Item label="工时效率">
-              {currentOrder.efficiency
-                ? (currentOrder.efficiency * 100).toFixed(2)
-                : '-'}
+              {currentOrder.efficiency === null ||
+              currentOrder.efficiency === undefined
+                ? '-'
+                : (currentOrder.efficiency * 100).toFixed(2)}
               %
             </Descriptions.Item>
             <Descriptions.Item label="备注" span={2}>
@@ -172,6 +212,7 @@ export default function ProductionOrderDetail({
               type="primary"
               icon={<PlusIcon className="h-4 w-4" />}
               onClick={handleAddItem}
+              disabled={!canEdit}
             >
               添加
             </Button>
@@ -183,6 +224,7 @@ export default function ProductionOrderDetail({
               data={items}
               onEdit={handleEditItem}
               onDelete={handleDeleteItem}
+              showActions={canEdit}
             />
           </div>
         </section>
@@ -194,6 +236,7 @@ export default function ProductionOrderDetail({
               type="primary"
               icon={<PlusIcon className="h-4 w-4" />}
               onClick={handleAddItem}
+              disabled={!canEdit}
             >
               添加工序
             </Button>
@@ -205,6 +248,7 @@ export default function ProductionOrderDetail({
             onEdit={handleEditItem}
             onDelete={handleDeleteItem}
             scrollY={300}
+            showActions={canEdit}
           />
         </Card>
       )}

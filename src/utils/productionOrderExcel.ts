@@ -11,6 +11,7 @@ import {
 const EXPORT_HEADERS = [
   '日期',
   '出勤工时',
+  '零工工时(h)',
   '工时效率',
   '项目号',
   '产品型号',
@@ -31,6 +32,7 @@ type ExportRow = Array<string | number>
 
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
 const WORK_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('出勤工时')
+const EXTRA_QUALIFIED_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('零工工时(h)')
 const EFFICIENCY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('工时效率')
 const REMARK_COLUMN_INDEX = EXPORT_HEADERS.indexOf('备注')
 
@@ -60,6 +62,7 @@ function buildExportRow(
   return [
     order.order_date,
     normalizeNumber(order.work_hours),
+    normalizeNumber(order.extra_qualified_hours),
     efficiency,
     item.project_no,
     item.product_model || '',
@@ -74,6 +77,32 @@ function buildExportRow(
     assessedSeconds,
     totalHours,
     item.remark || order.remark || '',
+  ]
+}
+
+function buildEmptyExportRow(order: ProductionOrderForExport): ExportRow {
+  const efficiency =
+    order.efficiency === null || order.efficiency === undefined
+      ? ''
+      : `${(order.efficiency * 100).toFixed(2)}%`
+
+  return [
+    order.order_date,
+    normalizeNumber(order.work_hours),
+    normalizeNumber(order.extra_qualified_hours),
+    efficiency,
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    normalizeNumber(order.extra_qualified_hours) * 3600,
+    normalizeNumber(order.extra_qualified_hours),
+    order.remark || '',
   ]
 }
 
@@ -92,7 +121,10 @@ function buildOrderSheetRows(
   order: ProductionOrderForExport,
   startRowIndex: number,
 ) {
-  const rawRows = order.items.map((item) => buildExportRow(order, item))
+  const rawRows =
+    order.items.length > 0
+      ? order.items.map((item) => buildExportRow(order, item))
+      : [buildEmptyExportRow(order)]
   const mergeRemark = shouldMergeOrderRemark(rawRows)
 
   const rows = rawRows.map((row, index) => {
@@ -103,6 +135,7 @@ function buildOrderSheetRows(
     const nextRow = [...row]
     nextRow[ORDER_DATE_COLUMN_INDEX] = ''
     nextRow[WORK_HOURS_COLUMN_INDEX] = ''
+    nextRow[EXTRA_QUALIFIED_HOURS_COLUMN_INDEX] = ''
     nextRow[EFFICIENCY_COLUMN_INDEX] = ''
 
     if (mergeRemark) {
@@ -126,6 +159,10 @@ function buildOrderSheetRows(
       {
         s: { r: mergeStartRow, c: WORK_HOURS_COLUMN_INDEX },
         e: { r: mergeEndRow, c: WORK_HOURS_COLUMN_INDEX },
+      },
+      {
+        s: { r: mergeStartRow, c: EXTRA_QUALIFIED_HOURS_COLUMN_INDEX },
+        e: { r: mergeEndRow, c: EXTRA_QUALIFIED_HOURS_COLUMN_INDEX },
       },
       {
         s: { r: mergeStartRow, c: EFFICIENCY_COLUMN_INDEX },
