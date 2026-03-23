@@ -36,7 +36,10 @@ export default function ProductionDailyReportMobileList({
                   {row.productModel} / {row.customerModel}
                 </div>
                 <div className="mt-2">
-                  <Tag color="processing" className="mr-0 rounded-full px-3 py-1">
+                  <Tag
+                    color="processing"
+                    className="mr-0 rounded-full px-3 py-1"
+                  >
                     {row.operation}
                   </Tag>
                 </div>
