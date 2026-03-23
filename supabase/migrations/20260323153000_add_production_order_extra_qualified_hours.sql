@@ -1,8 +1,6 @@
 alter table public.production_orders
 add column if not exists extra_qualified_hours numeric(10, 2) not null default 0;
-
 comment on column public.production_orders.extra_qualified_hours is '生产工单零工工时（小时）';
-
 create or replace function public.recalculate_production_order_totals(target_order_id uuid) returns void language plpgsql as $$ begin if target_order_id is null then return;
 end if;
 perform 1
@@ -36,18 +34,17 @@ from (
 where po.id = target_order_id;
 end;
 $$;
-
 create or replace function public.refresh_production_order_totals_for_order() returns trigger language plpgsql as $$ begin perform public.recalculate_production_order_totals(new.id);
 return new;
 end;
 $$;
-
 drop trigger if exists recalculate_production_order_totals_on_order_change on public.production_orders;
 create trigger recalculate_production_order_totals_on_order_change
-after insert or update of work_hours, extra_qualified_hours on public.production_orders
-for each row
-execute function public.refresh_production_order_totals_for_order();
-
+after
+insert
+  or
+update of work_hours,
+  extra_qualified_hours on public.production_orders for each row execute function public.refresh_production_order_totals_for_order();
 with order_totals as (
   select po.id,
     round(

@@ -299,7 +299,9 @@ export default function ProductionOrderPage() {
             if (error instanceof Error) {
               message.error(error.message)
             } else {
-              message.error(`批量${isAudited ? '审核' : '反审核'}失败，请稍后重试`)
+              message.error(
+                `批量${isAudited ? '审核' : '反审核'}失败，请稍后重试`,
+              )
             }
           }
         },
