@@ -198,142 +198,146 @@ export default function ProductionOrderItemForm({
       style={compact ? { top: 12, maxWidth: 560 } : undefined}
       destroyOnClose
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleFinish}
-        initialValues={{
-          order_id: orderId,
-          qualified_quantity: 0,
-          defect_reason_1: '加工',
-          defect_quantity_1: 0,
-          defect_reason_2: '原料',
-          defect_quantity_2: 0,
-          bonus_seconds: 0,
-        }}
-      >
-        <Form.Item name="order_id" hidden>
-          <Input />
-        </Form.Item>
-
-        {compact ? (
-          <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            手机端建议先选择项目号，再补充工序、数量和不良数，便于自动带出型号与标准工时。
-          </div>
-        ) : null}
-
-        <Form.Item
-          name="project_no"
-          label="项目号"
-          rules={[{ required: true, message: '请选择项目号' }]}
+      <div className={compact ? 'max-h-[calc(100vh-240px)] overflow-y-auto pr-1' : undefined}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          initialValues={{
+            order_id: orderId,
+            qualified_quantity: 0,
+            defect_reason_1: '加工',
+            defect_quantity_1: 0,
+            defect_reason_2: '原料',
+            defect_quantity_2: 0,
+            bonus_seconds: 0,
+          }}
         >
-          <Select
-            showSearch
-            placeholder="请选择项目号"
-            loading={loadingProjectNos}
-            onChange={handleProjectNoChange}
-            options={projectNoOptions}
-            filterOption={filterProjectNoOption}
-            optionRender={renderProjectNoOption}
-            style={{ width: '100%' }}
-          />
-        </Form.Item>
+          <Form.Item name="order_id" hidden>
+            <Input />
+          </Form.Item>
 
-        <Form.Item name="product_model" label="型号">
-          <Input disabled />
-        </Form.Item>
+          {compact ? (
+            <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              手机端建议先选择项目号，再补充工序、数量和不良数，便于自动带出型号与标准工时。
+            </div>
+          ) : null}
 
-        <Form.Item name="length_mm" label="长度(mm)">
-          <Input disabled />
-        </Form.Item>
-
-        <Form.Item name="customer_model" label="客户型号">
-          <Input disabled />
-        </Form.Item>
-
-        <Form.Item
-          name="operation"
-          label="工序"
-          rules={[
-            { required: true, message: '请输入工序' },
-            {
-              validator: async (_, value) => {
-                if (typeof value === 'string' && value.trim()) {
-                  return
-                }
-
-                throw new Error('请输入工序')
-              },
-            },
-          ]}
-        >
-          <AutoComplete
-            placeholder="请选择或输入工序"
-            onChange={handleOperationChange}
-            options={operationOptions}
-            filterOption={(input, option) => {
-              if (!option) return false
-              return (
-                option.value
-                  ?.toString()
-                  .toLowerCase()
-                  .includes(input.toLowerCase()) ?? false
-              )
-            }}
-            style={{ width: '100%' }}
-            disabled={!productModel}
-          />
-        </Form.Item>
-
-        {!compact ? (
           <Form.Item
-            name="standard_seconds"
-            label="标准工时(秒)"
-            rules={[{ required: true, message: '请输入标准工时' }]}
+            name="project_no"
+            label="项目号"
+            rules={[{ required: true, message: '请选择项目号' }]}
           >
-            <InputNumber
-              min={0}
-              step={1}
+            <Select
+              showSearch
+              placeholder="请选择项目号"
+              loading={loadingProjectNos}
+              onChange={handleProjectNoChange}
+              options={projectNoOptions}
+              filterOption={filterProjectNoOption}
+              optionRender={renderProjectNoOption}
               style={{ width: '100%' }}
-              placeholder="根据工序自动带出"
-              disabled
             />
           </Form.Item>
-        ) : null}
 
-        <Form.Item
-          name="qualified_quantity"
-          label="合格数量"
-          rules={[{ required: true, message: '请输入合格数量' }]}
-          initialValue={0}
-        >
-          <InputNumber min={0} style={{ width: '100%' }} />
-        </Form.Item>
+          <Form.Item name="product_model" label="型号">
+            <Input disabled />
+          </Form.Item>
 
-        <Form.Item
-          name="defect_quantity_1"
-          label="加工不良数量"
-          initialValue={0}
-        >
-          <InputNumber min={0} style={{ width: '100%' }} />
-        </Form.Item>
+          <Form.Item name="length_mm" label="长度(mm)">
+            <Input disabled />
+          </Form.Item>
 
-        <Form.Item
-          name="defect_quantity_2"
-          label="原料不良数量"
-          initialValue={0}
-        >
-          <InputNumber min={0} style={{ width: '100%' }} />
-        </Form.Item>
+          <Form.Item name="customer_model" label="客户型号">
+            <Input disabled />
+          </Form.Item>
 
-        <Form.Item name="bonus_seconds" label="加分项(秒)" initialValue={0}>
-          <InputNumber min={0} style={{ width: '100%' }} />
-        </Form.Item>
+          <Form.Item
+            name="operation"
+            label="工序"
+            rules={[
+              { required: true, message: '请输入工序' },
+              {
+                validator: async (_, value) => {
+                  if (typeof value === 'string' && value.trim()) {
+                    return
+                  }
 
-        <Form.Item name="remark" label="备注">
-          <Input.TextArea rows={2} placeholder="请输入备注" />
-        </Form.Item>
-      </Form>
+                  throw new Error('请输入工序')
+                },
+              },
+            ]}
+          >
+            <AutoComplete
+              placeholder="请选择或输入工序"
+              onChange={handleOperationChange}
+              options={operationOptions}
+              filterOption={(input, option) => {
+                if (!option) return false
+                return (
+                  option.value
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase()) ?? false
+                )
+              }}
+              style={{ width: '100%' }}
+              disabled={!productModel}
+            />
+          </Form.Item>
+
+          {!compact ? (
+            <Form.Item
+              name="standard_seconds"
+              label="标准工时(秒)"
+              rules={[{ required: true, message: '请输入标准工时' }]}
+            >
+              <InputNumber
+                min={0}
+                step={1}
+                style={{ width: '100%' }}
+                placeholder="根据工序自动带出"
+                disabled
+              />
+            </Form.Item>
+          ) : null}
+
+          <Form.Item
+            name="qualified_quantity"
+            label="合格数量"
+            rules={[{ required: true, message: '请输入合格数量' }]}
+            initialValue={0}
+          >
+            <InputNumber min={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="defect_quantity_1"
+            label="加工不良数量"
+            initialValue={0}
+          >
+            <InputNumber min={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="defect_quantity_2"
+            label="原料不良数量"
+            initialValue={0}
+          >
+            <InputNumber min={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          {!compact ? (
+            <Form.Item name="bonus_seconds" label="加分项(秒)" initialValue={0}>
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+          ) : null}
+
+          <Form.Item name="remark" label="备注">
+            <Input.TextArea rows={2} placeholder="请输入备注" />
+          </Form.Item>
+        </Form>
+      </div>
     </Modal>
   )
 }

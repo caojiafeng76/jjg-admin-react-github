@@ -72,14 +72,6 @@ export default function ProductionOrderItemMobileList({
               </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                  加分项
-                </div>
-                <div className="mt-1 font-semibold text-slate-900">
-                  {item.bonus_seconds || 0} 秒
-                </div>
-              </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                   加工不良
                 </div>
                 <div className="mt-1 font-semibold text-slate-900">
