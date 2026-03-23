@@ -26,7 +26,9 @@ import { useSalesOrdersProjectNos } from '@/features/production-order/useProcess
 interface Props {
   open: boolean
   onCancel: () => void
-  onSubmit: (values: MaterialTransferInsert | MaterialTransferUpdate) => Promise<void> | void
+  onSubmit: (
+    values: MaterialTransferInsert | MaterialTransferUpdate,
+  ) => Promise<void> | void
   initialValues?: MaterialTransferWithEmployee | null
   employees: { id: string; name: string }[]
   loading?: boolean
