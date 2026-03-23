@@ -134,9 +134,9 @@ export default function ProductionDailyReportPage() {
       return
     }
 
-    exportProductionDailyReportToExcel(selectedRows, data?.operations || [])
+    exportProductionDailyReportToExcel(selectedRows)
     message.success(`已导出 ${selectedRows.length} 条日报数据`)
-  }, [data?.operations, message, selectedRowKeys, selectedRowsMap])
+  }, [message, selectedRowKeys, selectedRowsMap])
 
   useEffect(() => {
     const maxPage = Math.max(1, Math.ceil(allRows.length / pageSize))
@@ -203,13 +203,11 @@ export default function ProductionDailyReportPage() {
           <ProductionDailyReportMobileList
             loading={isLoading || isFetching}
             data={currentPageRows}
-            operations={data?.operations || []}
           />
         ) : (
           <ProductionDailyReportTable
             loading={isLoading || isFetching}
             data={currentPageRows}
-            operations={data?.operations || []}
             page={page}
             pageSize={pageSize}
             selectedRowKeys={selectedRowKeys}

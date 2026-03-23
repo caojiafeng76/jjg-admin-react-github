@@ -5,13 +5,11 @@ import type { ProductionDailyReportRow } from '@/services/apiProductionDailyRepo
 interface Props {
   loading: boolean
   data: ProductionDailyReportRow[]
-  operations: string[]
 }
 
 export default function ProductionDailyReportMobileList({
   loading,
   data,
-  operations,
 }: Props) {
   if (!loading && data.length === 0) {
     return (
@@ -22,14 +20,6 @@ export default function ProductionDailyReportMobileList({
   return (
     <div className="space-y-3">
       {data.map((row) => {
-        const topOperations = operations
-          .map((operation) => ({
-            operation,
-            quantity: row.operationQuantities[operation] || 0,
-          }))
-          .filter((item) => item.quantity > 0)
-          .slice(0, 3)
-
         return (
           <article
             key={row.key}
@@ -45,36 +35,39 @@ export default function ProductionDailyReportMobileList({
                 <div className="mt-1 text-sm text-slate-500">
                   {row.productModel} / {row.customerModel}
                 </div>
+                <div className="mt-2">
+                  <Tag color="processing" className="mr-0 rounded-full px-3 py-1">
+                    {row.operation}
+                  </Tag>
+                </div>
               </div>
               <div className="rounded-2xl bg-slate-900 px-3 py-2 text-right text-white">
                 <div className="text-[11px] tracking-[0.18em] text-slate-300 uppercase">
-                  工时
+                  合格率
                 </div>
                 <div className="mt-1 text-base font-semibold">
-                  {row.workHours.toFixed(2)} h
+                  {(row.qualifiedRate * 100).toFixed(2)}%
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {topOperations.length > 0 ? (
-                topOperations.map((item) => (
-                  <Tag
-                    key={item.operation}
-                    color="processing"
-                    className="mr-0 rounded-full px-3 py-1"
-                  >
-                    {item.operation} {item.quantity}
-                  </Tag>
-                ))
-              ) : (
-                <Tag color="default" className="mr-0 rounded-full px-3 py-1">
-                  暂无工序数量
-                </Tag>
-              )}
-            </div>
-
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  工时
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.workHours.toFixed(2)} h
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  合格 / 不良
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.qualifiedCount} / {row.defectCount}
+                </div>
+              </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                   操作人
@@ -92,13 +85,29 @@ export default function ProductionDailyReportMobileList({
                   {row.rawMaterialDefectWeightKg.toFixed(2)}kg
                 </div>
               </div>
-              <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                   加工不良
                 </div>
                 <div className="mt-1 font-semibold text-slate-900">
                   {row.processingDefectCount} /{' '}
                   {row.processingDefectWeightKg.toFixed(2)}kg
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  长度
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.lengthMm ?? '-'}
+                </div>
+              </div>
+              <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  备注
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.remark}
                 </div>
               </div>
             </div>
