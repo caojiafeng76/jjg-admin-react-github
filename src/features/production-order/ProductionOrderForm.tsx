@@ -726,7 +726,13 @@ export default function ProductionOrderForm({
         style={compact ? { top: 12, maxWidth: 560 } : undefined}
         destroyOnClose
       >
-        <div className={compact ? 'max-h-[calc(100vh-240px)] overflow-y-auto pr-1' : undefined}>
+        <div
+          className={
+            compact
+              ? 'max-h-[calc(100vh-240px)] overflow-y-auto pr-1'
+              : undefined
+          }
+        >
           <Form
             form={itemForm}
             layout="vertical"
