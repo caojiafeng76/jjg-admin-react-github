@@ -125,12 +125,6 @@ export default function ProductionOrderItemTable({
         render: (value: number | null) => value?.toFixed(2) || '-',
       },
       {
-        title: '加分项(秒)',
-        dataIndex: 'bonus_seconds',
-        key: 'bonus_seconds',
-        width: 90,
-      },
-      {
         title: '备注',
         dataIndex: 'remark',
         key: 'remark',

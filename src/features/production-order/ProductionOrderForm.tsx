@@ -70,7 +70,6 @@ interface OrderItem {
   defect_quantity_1: number
   defect_reason_2: string | null
   defect_quantity_2: number
-  bonus_seconds: number
   remark?: string | null
 }
 
@@ -158,7 +157,6 @@ export default function ProductionOrderForm({
           defect_quantity_1: item.defect_quantity_1,
           defect_reason_2: item.defect_reason_2,
           defect_quantity_2: item.defect_quantity_2,
-          bonus_seconds: item.bonus_seconds,
         })),
       )
       form.setFieldsValue({
@@ -256,7 +254,6 @@ export default function ProductionOrderForm({
         defect_quantity_1: item?.defect_quantity_1 || 0,
         defect_reason_2: item?.defect_reason_2 || '原料',
         defect_quantity_2: item?.defect_quantity_2 || 0,
-        bonus_seconds: item?.bonus_seconds || 0,
         remark: item?.remark || null,
       })
     } else {
@@ -268,7 +265,6 @@ export default function ProductionOrderForm({
         defect_quantity_1: 0,
         defect_reason_2: '原料',
         defect_quantity_2: 0,
-        bonus_seconds: 0,
         remark: null,
       })
     }
@@ -325,7 +321,6 @@ export default function ProductionOrderForm({
       defect_quantity_1: Number(values.defect_quantity_1) || 0,
       defect_reason_2: '原料',
       defect_quantity_2: Number(values.defect_quantity_2) || 0,
-      bonus_seconds: Number(values.bonus_seconds) || 0,
       remark: values.remark || null,
     }
 
@@ -699,12 +694,6 @@ export default function ProductionOrderForm({
                     render: (value: number) => value || 0,
                   },
                   {
-                    title: '加分(秒)',
-                    dataIndex: 'bonus_seconds',
-                    width: 80,
-                    render: (value: number) => value || 0,
-                  },
-                  {
                     title: '备注',
                     dataIndex: 'remark',
                     width: 150,
@@ -775,7 +764,6 @@ export default function ProductionOrderForm({
               qualified_quantity: 0,
               defect_quantity_1: 0,
               defect_quantity_2: 0,
-              bonus_seconds: 0,
               remark: null,
             }}
           >
@@ -887,11 +875,6 @@ export default function ProductionOrderForm({
               </Form.Item>
             </div>
 
-            {!compact ? (
-              <Form.Item name="bonus_seconds" label="加分(秒)">
-                <InputNumber style={{ width: '100%' }} min={0} />
-              </Form.Item>
-            ) : null}
             <Form.Item name="remark" label="备注">
               <Input.TextArea rows={2} placeholder="请输入备注" />
             </Form.Item>

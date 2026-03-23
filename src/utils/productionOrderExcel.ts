@@ -11,7 +11,9 @@ import {
 const EXPORT_HEADERS = [
   '日期',
   '出勤工时',
+  '正工工时(h)',
   '零工工时(h)',
+  '总工时(h)',
   '工时效率',
   '项目号',
   '产品型号',
@@ -19,12 +21,9 @@ const EXPORT_HEADERS = [
   '工序',
   '单件标准工时(S/支)',
   '合格产量（支数）',
-  '合格工时（S）',
+  '工序工时(h)',
   '个人不良产量（支数）',
-  '加分项',
-  '减分项',
-  '考核合计工时(秒)',
-  '合计（小时）',
+  '减分工时(h)',
   '备注',
 ] as const
 
@@ -32,7 +31,9 @@ type ExportRow = Array<string | number>
 
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
 const WORK_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('出勤工时')
+const POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('正工工时(h)')
 const EXTRA_QUALIFIED_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('零工工时(h)')
+const TOTAL_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('总工时(h)')
 const EFFICIENCY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('工时效率')
 const REMARK_COLUMN_INDEX = EXPORT_HEADERS.indexOf('备注')
 
@@ -43,17 +44,12 @@ function normalizeNumber(value: number | null | undefined) {
 function buildExportRow(
   order: ProductionOrderForExport,
   item: ProductionOrderForExport['items'][number],
+  positiveQualifiedHours: number,
 ): ExportRow {
-  const qualifiedSeconds =
-    normalizeNumber(item.standard_seconds) *
-    normalizeNumber(item.qualified_quantity)
   const personalDefectQuantity =
     normalizeNumber(item.defect_quantity_1) +
     normalizeNumber(item.defect_quantity_2)
-  const bonusSeconds = normalizeNumber(item.bonus_seconds)
-  const penaltySeconds = Math.round(normalizeNumber(item.defect_hours) * 3600)
-  const assessedSeconds = qualifiedSeconds + bonusSeconds - penaltySeconds
-  const totalHours = assessedSeconds / 3600
+  const penaltyHours = normalizeNumber(item.defect_hours)
   const efficiency =
     order.efficiency === null || order.efficiency === undefined
       ? ''
@@ -62,7 +58,9 @@ function buildExportRow(
   return [
     order.order_date,
     normalizeNumber(order.work_hours),
+    positiveQualifiedHours,
     normalizeNumber(order.extra_qualified_hours),
+    normalizeNumber(order.total_qualified_hours),
     efficiency,
     item.project_no,
     item.product_model || '',
@@ -70,17 +68,19 @@ function buildExportRow(
     item.operation,
     normalizeNumber(item.standard_seconds),
     normalizeNumber(item.qualified_quantity),
-    qualifiedSeconds,
+    normalizeNumber(item.qualified_hours),
     personalDefectQuantity,
-    bonusSeconds,
-    penaltySeconds,
-    assessedSeconds,
-    totalHours,
+    penaltyHours,
     item.remark || order.remark || '',
   ]
 }
 
 function buildEmptyExportRow(order: ProductionOrderForExport): ExportRow {
+  const positiveQualifiedHours = Number(
+    order.items
+      .reduce((total, item) => total + normalizeNumber(item.qualified_hours), 0)
+      .toFixed(2),
+  )
   const efficiency =
     order.efficiency === null || order.efficiency === undefined
       ? ''
@@ -89,7 +89,9 @@ function buildEmptyExportRow(order: ProductionOrderForExport): ExportRow {
   return [
     order.order_date,
     normalizeNumber(order.work_hours),
+    positiveQualifiedHours,
     normalizeNumber(order.extra_qualified_hours),
+    normalizeNumber(order.total_qualified_hours),
     efficiency,
     '',
     '',
@@ -99,9 +101,6 @@ function buildEmptyExportRow(order: ProductionOrderForExport): ExportRow {
     '',
     '',
     '',
-    '',
-    normalizeNumber(order.extra_qualified_hours) * 3600,
-    normalizeNumber(order.extra_qualified_hours),
     order.remark || '',
   ]
 }
@@ -121,9 +120,16 @@ function buildOrderSheetRows(
   order: ProductionOrderForExport,
   startRowIndex: number,
 ) {
+  const positiveQualifiedHours = Number(
+    order.items
+      .reduce((total, item) => total + normalizeNumber(item.qualified_hours), 0)
+      .toFixed(2),
+  )
   const rawRows =
     order.items.length > 0
-      ? order.items.map((item) => buildExportRow(order, item))
+      ? order.items.map((item) =>
+          buildExportRow(order, item, positiveQualifiedHours),
+        )
       : [buildEmptyExportRow(order)]
   const mergeRemark = shouldMergeOrderRemark(rawRows)
 
@@ -135,7 +141,9 @@ function buildOrderSheetRows(
     const nextRow = [...row]
     nextRow[ORDER_DATE_COLUMN_INDEX] = ''
     nextRow[WORK_HOURS_COLUMN_INDEX] = ''
+    nextRow[POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX] = ''
     nextRow[EXTRA_QUALIFIED_HOURS_COLUMN_INDEX] = ''
+    nextRow[TOTAL_HOURS_COLUMN_INDEX] = ''
     nextRow[EFFICIENCY_COLUMN_INDEX] = ''
 
     if (mergeRemark) {
@@ -161,8 +169,16 @@ function buildOrderSheetRows(
         e: { r: mergeEndRow, c: WORK_HOURS_COLUMN_INDEX },
       },
       {
+        s: { r: mergeStartRow, c: POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX },
+        e: { r: mergeEndRow, c: POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX },
+      },
+      {
         s: { r: mergeStartRow, c: EXTRA_QUALIFIED_HOURS_COLUMN_INDEX },
         e: { r: mergeEndRow, c: EXTRA_QUALIFIED_HOURS_COLUMN_INDEX },
+      },
+      {
+        s: { r: mergeStartRow, c: TOTAL_HOURS_COLUMN_INDEX },
+        e: { r: mergeEndRow, c: TOTAL_HOURS_COLUMN_INDEX },
       },
       {
         s: { r: mergeStartRow, c: EFFICIENCY_COLUMN_INDEX },
@@ -265,11 +281,10 @@ export function exportProductionOrdersToExcel(
         worksheet['!merges'] = merges
       }
 
-      const totalHoursColumnIndex = EXPORT_HEADERS.indexOf('合计（小时）')
       for (let rowIndex = 1; rowIndex < sheetRows.length; rowIndex += 1) {
         const cellRef = XLSX.utils.encode_cell({
           r: rowIndex,
-          c: totalHoursColumnIndex,
+          c: TOTAL_HOURS_COLUMN_INDEX,
         })
         if (worksheet[cellRef]) {
           worksheet[cellRef].z = '0.000000000'

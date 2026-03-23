@@ -81,7 +81,6 @@ export default function ProductionOrderItemForm({
         defect_quantity_1: 0,
         defect_reason_2: '原料',
         defect_quantity_2: 0,
-        bonus_seconds: 0,
       })
     }
   }, [initialValues, orderId, form, open])
@@ -214,7 +213,6 @@ export default function ProductionOrderItemForm({
             defect_quantity_1: 0,
             defect_reason_2: '原料',
             defect_quantity_2: 0,
-            bonus_seconds: 0,
           }}
         >
           <Form.Item name="order_id" hidden>
@@ -330,12 +328,6 @@ export default function ProductionOrderItemForm({
           >
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
-
-          {!compact ? (
-            <Form.Item name="bonus_seconds" label="加分项(秒)" initialValue={0}>
-              <InputNumber min={0} style={{ width: '100%' }} />
-            </Form.Item>
-          ) : null}
 
           <Form.Item name="remark" label="备注">
             <Input.TextArea rows={2} placeholder="请输入备注" />

@@ -59,7 +59,6 @@ async function syncOrderItemsSequentially({
     defect_quantity_1: number
     defect_reason_2: string | null
     defect_quantity_2: number
-    bonus_seconds: number
   }[]
   orderId: string
   addItem: (item: ProductionOrderItem) => Promise<unknown>
@@ -84,7 +83,6 @@ async function syncOrderItemsSequentially({
           defect_quantity_1: item.defect_quantity_1,
           defect_reason_2: item.defect_reason_2,
           defect_quantity_2: item.defect_quantity_2,
-          bonus_seconds: item.bonus_seconds,
         },
       })
       continue
@@ -250,17 +248,8 @@ export default function ProductionOrderPage() {
         selectedRowKeys.map((key) => String(key)),
       )
 
-      const exportableOrders = exportOrders.filter(
-        (order) => order.items && order.items.length > 0,
-      )
-
-      if (exportableOrders.length === 0) {
-        message.warning('选中的工单没有可导出的工序明细')
-        return
-      }
-
-      exportProductionOrdersToExcel(exportableOrders)
-      message.success(`已导出 ${exportableOrders.length} 张工单的工序明细`)
+      exportProductionOrdersToExcel(exportOrders)
+      message.success(`已导出 ${exportOrders.length} 张工单`)
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
@@ -326,7 +315,6 @@ export default function ProductionOrderPage() {
         defect_quantity_1: number
         defect_reason_2: string | null
         defect_quantity_2: number
-        bonus_seconds: number
       }[]
     }) => {
       try {

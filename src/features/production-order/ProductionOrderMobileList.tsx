@@ -69,8 +69,8 @@ export default function ProductionOrderMobileList({
             <div
               className={
                 selected
-                  ? 'mt-4 grid grid-cols-3 gap-3 text-sm text-slate-100'
-                  : 'mt-4 grid grid-cols-3 gap-3 text-sm text-slate-600'
+                  ? 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-100'
+                  : 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600'
               }
             >
               <div className="rounded-2xl bg-black/5 px-3 py-3">
@@ -83,6 +83,14 @@ export default function ProductionOrderMobileList({
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  正工工时
+                </div>
+                <div className="mt-1 text-base font-semibold">
+                  {(record.positive_qualified_hours ?? 0).toFixed(2)} h
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   零工工时
                 </div>
                 <div className="mt-1 text-base font-semibold">
@@ -91,10 +99,10 @@ export default function ProductionOrderMobileList({
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
-                  备注
+                  总工时
                 </div>
-                <div className="mt-1 line-clamp-2 text-sm font-medium">
-                  {record.remark || '无'}
+                <div className="mt-1 text-base font-semibold">
+                  {(record.total_qualified_hours ?? 0).toFixed(2)} h
                 </div>
               </div>
             </div>

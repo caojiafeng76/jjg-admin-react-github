@@ -126,7 +126,6 @@ export type Database = {
       }
       production_order_items: {
         Row: {
-          bonus_seconds: number
           created_at: string
           customer_model: string | null
           defect_hours: number | null
@@ -147,7 +146,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          bonus_seconds?: number
           created_at?: string
           customer_model?: string | null
           defect_hours?: number | null
@@ -168,7 +166,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          bonus_seconds?: number
           created_at?: string
           customer_model?: string | null
           defect_hours?: number | null
