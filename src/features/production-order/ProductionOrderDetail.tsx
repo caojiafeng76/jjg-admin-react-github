@@ -137,7 +137,7 @@ export default function ProductionOrderDetail({
               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                 备注
               </div>
-              <div className="mt-1 text-sm leading-6 font-medium text-slate-900 whitespace-pre-wrap wrap-break-word">
+              <div className="mt-1 text-sm leading-6 font-medium wrap-break-word whitespace-pre-wrap text-slate-900">
                 {currentOrder.remark?.trim() || '无备注'}
               </div>
             </div>

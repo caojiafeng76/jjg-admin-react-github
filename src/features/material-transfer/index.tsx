@@ -257,10 +257,7 @@ export default function MaterialTransferPage() {
           批量反审核
         </Button>
         <EditButton title="编辑物料转移单" handleEdit={() => openEditModal()} />
-        <ExportButton
-          handleExport={handleExport}
-          loading={isExporting}
-        >
+        <ExportButton handleExport={handleExport} loading={isExporting}>
           {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
         </ExportButton>
         <DeleteButton
@@ -288,7 +285,11 @@ export default function MaterialTransferPage() {
         </Card>
         <Card size="small">
           <Statistic
-            title={selectedCount > 0 ? `当前勾选总数量 / ${selectedCount} 条` : '当前勾选总数量'}
+            title={
+              selectedCount > 0
+                ? `当前勾选总数量 / ${selectedCount} 条`
+                : '当前勾选总数量'
+            }
             value={selectedQuantityStats?.totalQuantity || 0}
           />
         </Card>
