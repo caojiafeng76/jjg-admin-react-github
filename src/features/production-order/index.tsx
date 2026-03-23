@@ -32,6 +32,63 @@ import ProductionOrderSearch from './ProductionOrderSearch'
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import { useAuth } from '@/contexts/AuthContext'
 
+async function syncOrderItemsSequentially({
+  items,
+  orderId,
+  addItem,
+  updateItem,
+}: {
+  items: {
+    id?: string
+    project_no: string
+    product_model: string | null
+    length_mm: number | null
+    customer_model: string | null
+    operation: string
+    standard_seconds: number
+    qualified_quantity: number
+    defect_reason_1: string | null
+    defect_quantity_1: number
+    defect_reason_2: string | null
+    defect_quantity_2: number
+    bonus_seconds: number
+  }[]
+  orderId: string
+  addItem: (item: ProductionOrderItem) => Promise<unknown>
+  updateItem: (params: {
+    id: string
+    values: Partial<ProductionOrderItem>
+  }) => Promise<unknown>
+}) {
+  for (const item of items) {
+    if (item.id) {
+      await updateItem({
+        id: item.id,
+        values: {
+          project_no: item.project_no,
+          product_model: item.product_model,
+          length_mm: item.length_mm,
+          customer_model: item.customer_model,
+          operation: item.operation,
+          standard_seconds: item.standard_seconds,
+          qualified_quantity: item.qualified_quantity,
+          defect_reason_1: item.defect_reason_1,
+          defect_quantity_1: item.defect_quantity_1,
+          defect_reason_2: item.defect_reason_2,
+          defect_quantity_2: item.defect_quantity_2,
+          bonus_seconds: item.bonus_seconds,
+        },
+      })
+      continue
+    }
+
+    await addItem({
+      ...item,
+      order_id: orderId,
+    } as ProductionOrderItem)
+  }
+}
+
 export interface ProductionOrder {
   id: string
   order_date: string
@@ -249,44 +306,16 @@ export default function ProductionOrderPage() {
             .filter((item) => !currentItemIds.has(item.id))
             .map((item) => item.id)
 
-          const updateTasks = currentItems
-            .filter((item): item is typeof item & { id: string } =>
-              Boolean(item.id),
-            )
-            .map((item) =>
-              updateItemMutation.mutateAsync({
-                id: item.id,
-                values: {
-                  project_no: item.project_no,
-                  product_model: item.product_model,
-                  length_mm: item.length_mm,
-                  customer_model: item.customer_model,
-                  operation: item.operation,
-                  standard_seconds: item.standard_seconds,
-                  qualified_quantity: item.qualified_quantity,
-                  defect_reason_1: item.defect_reason_1,
-                  defect_quantity_1: item.defect_quantity_1,
-                  defect_reason_2: item.defect_reason_2,
-                  defect_quantity_2: item.defect_quantity_2,
-                  bonus_seconds: item.bonus_seconds,
-                },
-              }),
-            )
-
-          const addTasks = currentItems
-            .filter((item) => !item.id)
-            .map((item) =>
-              addItemMutation.mutateAsync({
-                ...item,
-                order_id: orderId,
-              }),
-            )
-
           if (deletedIds.length > 0) {
             await deleteItemMutation.mutateAsync(deletedIds)
           }
 
-          await Promise.all([...updateTasks, ...addTasks])
+          await syncOrderItemsSequentially({
+            items: currentItems,
+            orderId,
+            addItem: addItemMutation.mutateAsync,
+            updateItem: updateItemMutation.mutateAsync,
+          })
           message.success('工单更新成功')
         } else {
           const newOrder = await createMutation.mutateAsync(
@@ -295,14 +324,12 @@ export default function ProductionOrderPage() {
           orderId = newOrder.id
 
           if (values.items.length > 0) {
-            await Promise.all(
-              values.items.map((item) =>
-                addItemMutation.mutateAsync({
-                  ...item,
-                  order_id: orderId,
-                }),
-              ),
-            )
+            await syncOrderItemsSequentially({
+              items: values.items,
+              orderId,
+              addItem: addItemMutation.mutateAsync,
+              updateItem: updateItemMutation.mutateAsync,
+            })
           }
 
           message.success('工单创建成功')
