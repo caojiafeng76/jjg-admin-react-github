@@ -27,6 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const initializedRef = useRef(false)
+  const currentUserIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    currentUserIdRef.current = user?.id ?? null
+  }, [user])
 
   const loadEmployeeProfile = async (nextUser: User | null) => {
     if (!nextUser) {
@@ -85,6 +90,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 只有在初始化完成后才处理状态变化，避免竞态条件
       if (initializedRef.current) {
         const nextUser = session?.user ?? null
+        const nextUserId = nextUser?.id ?? null
+        const isSameUser = currentUserIdRef.current === nextUserId
+
+        if (event === 'SIGNED_IN' && isSameUser) {
+          setUser(nextUser)
+          return
+        }
 
         if (
           event === 'SIGNED_IN' ||
