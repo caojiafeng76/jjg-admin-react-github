@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import type { Database } from './database.types'
@@ -54,6 +56,8 @@ export interface MaterialTransferWithEmployee extends MaterialTransfer {
 }
 
 export interface MaterialTransferFilters {
+  startDate?: string
+  endDate?: string
   projectNo?: string
   employeeId?: string
   targetWorkshop?: string
@@ -70,9 +74,25 @@ function applyMaterialTransferFilters<
   TQuery extends {
     ilike: (column: string, pattern: string) => TQuery
     eq: (column: string, value: string | boolean) => TQuery
+    gte: (column: string, value: string) => TQuery
+    lt: (column: string, value: string) => TQuery
   },
 >(query: TQuery, filters: MaterialTransferFilters) {
   let nextQuery = query
+
+  if (filters.startDate) {
+    nextQuery = nextQuery.gte(
+      'created_at',
+      dayjs(filters.startDate).startOf('day').toISOString(),
+    )
+  }
+
+  if (filters.endDate) {
+    nextQuery = nextQuery.lt(
+      'created_at',
+      dayjs(filters.endDate).add(1, 'day').startOf('day').toISOString(),
+    )
+  }
 
   if (filters.projectNo) {
     nextQuery = nextQuery.ilike('project_no', `%${filters.projectNo}%`)

@@ -8,6 +8,7 @@ import {
   createMaterialTransfer,
   updateMaterialTransfer,
   deleteMaterialTransfers,
+  type MaterialTransferFilters,
 } from '@/services/apiMaterialTransfers'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
@@ -21,13 +22,7 @@ export function useMaterialTransfers({
 }: {
   page: number
   pageSize: number
-  filters: {
-    projectNo?: string
-    employeeId?: string
-    targetWorkshop?: string
-    recipientName?: string
-    isAudited?: boolean
-  }
+  filters: MaterialTransferFilters
 }) {
   return useQuery({
     queryKey: [MATERIAL_TRANSFERS_KEY, page, pageSize, filters],
@@ -52,13 +47,7 @@ export function useMaterialTransferQuantityStats({
   enabled = true,
 }: {
   ids?: string[]
-  filters?: {
-    projectNo?: string
-    employeeId?: string
-    targetWorkshop?: string
-    recipientName?: string
-    isAudited?: boolean
-  }
+  filters?: MaterialTransferFilters
   enabled?: boolean
 }) {
   return useQuery({
