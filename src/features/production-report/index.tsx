@@ -11,6 +11,7 @@ import type {
   ProductionDailyReportRow,
 } from '@/services/apiProductionDailyReport'
 import { exportProductionDailyReportToExcel } from '@/utils/productionDailyReportExcel'
+import { isEmployeeSideRole } from '@/config/access'
 import ProductionDailyReportSearch from './ProductionDailyReportSearch'
 import ProductionDailyReportTable from './ProductionDailyReportTable'
 import ProductionDailyReportMobileList from './ProductionDailyReportMobileList'
@@ -28,7 +29,7 @@ function buildDateRange(filters: ProductionDailyReportFilters) {
 export default function ProductionDailyReportPage() {
   const { message } = App.useApp()
   const { role, employeeProfile } = useAuth()
-  const isEmployeeView = role === 'employee'
+  const isEmployeeView = isEmployeeSideRole(role)
   const fixedEmployeeId = isEmployeeView ? employeeProfile?.id : undefined
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1

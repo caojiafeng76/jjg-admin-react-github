@@ -11,16 +11,19 @@ interface Props {
   isCreating: boolean
   isEdit: boolean
   initialValues?: StandardTimeFormValues | StandardTime
+  mode?: 'admin' | 'team_leader'
 }
 
 export default function StandardTimeForm({
   onFinish,
   setFormRef,
   isCreating,
-  isEdit: _isEdit,
+  isEdit,
   initialValues,
+  mode = 'admin',
 }: Props) {
   const [form] = Form.useForm<StandardTimeFormValues>()
+  const isTeamLeaderMode = mode === 'team_leader'
 
   useEffect(() => {
     setFormRef(form)
@@ -50,7 +53,10 @@ export default function StandardTimeForm({
           { max: 100, message: '型号不能超过100个字符' },
         ]}
       >
-        <Input placeholder="请输入型号" disabled={isCreating} />
+        <Input
+          placeholder="请输入型号"
+          disabled={isCreating || (isTeamLeaderMode && isEdit)}
+        />
       </Form.Item>
       <Form.Item
         name="operation"
@@ -62,18 +68,20 @@ export default function StandardTimeForm({
       >
         <Input placeholder="请输入工序" disabled={isCreating} />
       </Form.Item>
-      <Form.Item
-        name="standard_seconds"
-        label="标准工时（秒）"
-        rules={[{ required: true, message: '请输入标准工时' }]}
-      >
-        <InputNumber
-          placeholder="请输入标准工时"
-          disabled={isCreating}
-          min={0}
-          style={{ width: '100%' }}
-        />
-      </Form.Item>
+      {isTeamLeaderMode ? null : (
+        <Form.Item
+          name="standard_seconds"
+          label="标准工时（秒）"
+          rules={[{ required: true, message: '请输入标准工时' }]}
+        >
+          <InputNumber
+            placeholder="请输入标准工时"
+            disabled={isCreating}
+            min={0}
+            style={{ width: '100%' }}
+          />
+        </Form.Item>
+      )}
       <Form.Item
         name="theoretical_seconds"
         label="理论工时（秒）"

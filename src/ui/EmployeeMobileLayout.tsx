@@ -1,14 +1,16 @@
 import { App, Layout, Button, Modal, theme } from 'antd'
-import { useState } from 'react'
 import {
   ArrowRightStartOnRectangleIcon,
   ArrowsRightLeftIcon,
   ClipboardDocumentListIcon,
+  ClockIcon,
   DocumentChartBarIcon,
   KeyIcon,
 } from '@heroicons/react/24/outline'
+import { useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
+import { getRoleLabel } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
 import EmployeeChangePasswordForm, {
   type EmployeeChangePasswordValues,
@@ -17,7 +19,7 @@ import { translateErrorMessage } from '@/utils/errorHandler'
 
 const { Content } = Layout
 
-const navItems = [
+const baseNavItems = [
   {
     key: '/production-order',
     label: '我的工单',
@@ -39,12 +41,27 @@ export default function EmployeeMobileLayout() {
   const { message } = App.useApp()
   const navigate = useNavigate()
   const location = useLocation()
-  const { signOut, changePassword, user, employeeProfile } = useAuth()
+  const { signOut, changePassword, user, employeeProfile, role } = useAuth()
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isSubmittingPassword, setIsSubmittingPassword] = useState(false)
   const {
     token: { colorBgContainer },
   } = theme.useToken()
+
+  const navItems = useMemo(() => {
+    if (role === 'team_leader') {
+      return [
+        ...baseNavItems,
+        {
+          key: '/standard-time-list',
+          label: '理论工时',
+          icon: ClockIcon,
+        },
+      ]
+    }
+
+    return baseNavItems
+  }, [role])
 
   const handleChangePassword = async ({
     currentPassword,
@@ -83,7 +100,9 @@ export default function EmployeeMobileLayout() {
               {employeeProfile?.name || user?.email || '员工端'}
             </div>
             <div className="mt-1 text-xs text-slate-500">
-              手机端工单录入与日报查询
+              {role === 'team_leader'
+                ? `手机端班组长工作台 / ${getRoleLabel(role)}`
+                : '手机端工单录入与日报查询'}
             </div>
           </div>
 
@@ -122,7 +141,10 @@ export default function EmployeeMobileLayout() {
       </Content>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/60 bg-white/92 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+10px)] backdrop-blur-xl">
-        <div className="grid grid-cols-3 gap-3">
+        <div
+          className="grid gap-3"
+          style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+        >
           {navItems.map((item) => {
             const isActive = location.pathname === item.key
             const Icon = item.icon

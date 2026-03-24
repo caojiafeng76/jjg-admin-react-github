@@ -8,6 +8,7 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
+import { isEmployeeSideRole } from '@/config/access'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useAuth } from '@/contexts/AuthContext'
@@ -35,9 +36,11 @@ import MaterialTransferTable from './MaterialTransferTable'
 export default function MaterialTransferPage() {
   const { message, modal } = App.useApp()
   const { role, employeeProfile } = useAuth()
-  const isEmployeeView = role === 'employee'
+  const isEmployeeView = isEmployeeSideRole(role)
+  const isOwnOnlyView = role === 'employee'
+  const isTeamLeaderView = role === 'team_leader'
   const fixedEmployee =
-    isEmployeeView && employeeProfile?.id
+    isOwnOnlyView && employeeProfile?.id
       ? { id: employeeProfile.id, name: employeeProfile.name }
       : null
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -59,7 +62,7 @@ export default function MaterialTransferPage() {
     useState<MaterialTransferWithEmployee | null>(null)
   const [isExporting, setIsExporting] = useState(false)
 
-  const { data: employeeOptions = [] } = useAllEmployees(!isEmployeeView)
+  const { data: employeeOptions = [] } = useAllEmployees(!isOwnOnlyView)
   const { data, isLoading } = useMaterialTransfers({
     page,
     pageSize,
@@ -164,7 +167,7 @@ export default function MaterialTransferPage() {
   const handleDelete = useCallback(
     (ids?: string[]) => {
       if (isEmployeeView) {
-        message.warning('员工没有删除权限')
+        message.warning('当前角色没有删除权限')
         return
       }
 
@@ -325,10 +328,12 @@ export default function MaterialTransferPage() {
             Material Transfer
           </div>
           <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-            我的转移表
+            {isTeamLeaderView ? '班组转移表' : '我的转移表'}
           </div>
           <div className="mt-2 text-sm text-slate-500">
-            只能创建和编辑本人未审核的转移单，审核后自动锁定。
+            {isTeamLeaderView
+              ? '可查看、新建和编辑所有员工的转移单，审核后自动锁定。'
+              : '只能创建和编辑本人未审核的转移单，审核后自动锁定。'}
           </div>
         </div>
       ) : null}
@@ -395,7 +400,7 @@ export default function MaterialTransferPage() {
               Filter
             </div>
             <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-              筛选我的转移单
+              {isTeamLeaderView ? '筛选班组转移单' : '筛选我的转移单'}
             </div>
           </div>
         ) : null}
@@ -405,7 +410,7 @@ export default function MaterialTransferPage() {
           onSearch={handleSearch}
           onReset={handleResetSearch}
           mobile={isEmployeeView}
-          showEmployeeFilter={!isEmployeeView}
+          showEmployeeFilter={!isOwnOnlyView}
         />
       </div>
 

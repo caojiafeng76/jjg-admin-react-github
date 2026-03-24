@@ -1,5 +1,6 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
+import type { AppRole } from '@/config/access'
 import {
   getEmployees,
   getAllEmployees,
@@ -26,7 +27,7 @@ export function useEmployeesList({
   pageSize: number
   searchParams: {
     name?: string
-    role?: 'admin' | 'employee'
+    role?: AppRole
     is_active?: boolean
   }
 }) {

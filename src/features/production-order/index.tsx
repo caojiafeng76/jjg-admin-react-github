@@ -38,6 +38,7 @@ import ProductionOrderForm from './ProductionOrderForm'
 import ProductionOrderDetail from './ProductionOrderDetail'
 import ProductionOrderSearch from './ProductionOrderSearch'
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
 
 async function syncOrderItemsSequentially({
@@ -98,7 +99,7 @@ async function syncOrderItemsSequentially({
 export default function ProductionOrderPage() {
   const { message, modal } = App.useApp()
   const { role, employeeProfile } = useAuth()
-  const isEmployeeView = role === 'employee'
+  const isEmployeeView = isEmployeeSideRole(role)
   const fixedEmployee =
     isEmployeeView && employeeProfile?.id
       ? { id: employeeProfile.id, name: employeeProfile.name }
@@ -130,7 +131,7 @@ export default function ProductionOrderPage() {
     isAudited?: boolean
   }>(() => ({
     employeeId:
-      (role === 'employee' ? employeeProfile?.id : undefined) ||
+      (isEmployeeView ? employeeProfile?.id : undefined) ||
       searchParamsURL.get('employeeId') ||
       undefined,
     isAudited:

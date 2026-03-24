@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useSearchParams } from 'react-router-dom'
 
+import type { AppRole } from '@/config/access'
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
@@ -69,7 +70,7 @@ export default function EmployeeList() {
     useState<FormInstance<EmployeeRebindAccountValues> | null>(null)
   const [searchParams, setSearchParams] = useState<{
     name?: string
-    role?: 'admin' | 'employee'
+    role?: AppRole
     is_active?: boolean
   }>({})
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)

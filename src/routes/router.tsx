@@ -4,7 +4,11 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
 import { useAuth } from '@/contexts/AuthContext'
-import { getDefaultHomeByRole, type AppRole } from '@/config/access'
+import {
+  EMPLOYEE_SIDE_ROLES,
+  getDefaultHomeByRole,
+  type AppRole,
+} from '@/config/access'
 
 // 懒加载页面组件（按 feature 组织）
 const Dashboard = lazy(() => import('@pages/Dashboard'))
@@ -209,7 +213,7 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
-              allow={['admin']}
+              allow={['admin', 'team_leader']}
               element={<StandardTimeList />}
             />
           </Suspense>
@@ -220,7 +224,7 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
-              allow={['admin', 'employee']}
+              allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<MaterialTransfer />}
             />
           </Suspense>
@@ -231,7 +235,7 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
-              allow={['admin', 'employee']}
+              allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<ProductionOrder />}
             />
           </Suspense>
@@ -242,7 +246,7 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
-              allow={['admin', 'employee']}
+              allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<ProductionDailyReport />}
             />
           </Suspense>
