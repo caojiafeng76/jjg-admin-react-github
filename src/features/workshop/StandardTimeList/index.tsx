@@ -255,27 +255,14 @@ export default function StandardTimeList() {
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       {isTeamLeaderMode ? (
-        <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
-          <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
-            Theoretical Time
-          </div>
-          <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-            理论工时维护
-          </div>
-          <div className="mt-2 text-sm text-slate-500">
-            班组长仅可新增或编辑理论工时，标准工时与删除操作仍保留给管理员。
-          </div>
-          <div className="mt-4">
-            <Button
-              block
-              type="primary"
-              className="h-11 rounded-2xl"
-              onClick={handleCreate}
-            >
-              新建理论工时
-            </Button>
-          </div>
-        </div>
+        <Button
+          block
+          type="primary"
+          className="h-11 rounded-2xl"
+          onClick={handleCreate}
+        >
+          新建理论工时
+        </Button>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
           <AddButton handleCreate={handleCreate} />
@@ -297,16 +284,7 @@ export default function StandardTimeList() {
             : 'flex items-center gap-2'
         }
       >
-        {isTeamLeaderMode ? (
-          <div className="mb-3">
-            <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
-              Filter
-            </div>
-            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-              筛选理论工时
-            </div>
-          </div>
-        ) : (
+        {isTeamLeaderMode ? null : (
           <span className="whitespace-nowrap text-gray-600">搜索：</span>
         )}
         <StandardTimeSearch

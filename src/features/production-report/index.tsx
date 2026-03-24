@@ -176,16 +176,6 @@ export default function ProductionDailyReportPage() {
             : ''
         }
       >
-        {isEmployeeView ? (
-          <div className="mb-3">
-            <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
-              Filter
-            </div>
-            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-              筛选我的日报
-            </div>
-          </div>
-        ) : null}
         <ProductionDailyReportSearch
           initialValues={initialSearchValues}
           onSearch={handleSearch}

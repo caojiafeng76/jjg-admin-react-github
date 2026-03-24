@@ -525,16 +525,7 @@ export default function ProductionOrderPage() {
             : 'flex items-center gap-2'
         }
       >
-        {isEmployeeView ? (
-          <div className="mb-3">
-            <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
-              Filter
-            </div>
-            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-              筛选我的工单
-            </div>
-          </div>
-        ) : (
+        {isEmployeeView ? null : (
           <span className="whitespace-nowrap text-gray-600">搜索：</span>
         )}
         <ProductionOrderSearch
