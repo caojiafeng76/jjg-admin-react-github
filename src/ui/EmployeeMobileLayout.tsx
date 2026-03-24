@@ -143,7 +143,9 @@ export default function EmployeeMobileLayout() {
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/60 bg-white/92 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+10px)] backdrop-blur-xl">
         <div
           className="grid gap-3"
-          style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+          style={{
+            gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))`,
+          }}
         >
           {navItems.map((item) => {
             const isActive = location.pathname === item.key

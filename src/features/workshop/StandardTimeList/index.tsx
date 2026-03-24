@@ -129,7 +129,9 @@ export default function StandardTimeList() {
         const nextValues: StandardTimeFormValues = isTeamLeaderMode
           ? {
               operation: values.operation,
-              model: isEdit ? editingRecord?.model || values.model : values.model,
+              model: isEdit
+                ? editingRecord?.model || values.model
+                : values.model,
               standard_seconds: isEdit
                 ? editingRecord?.standard_seconds || 0
                 : 0,
@@ -154,7 +156,9 @@ export default function StandardTimeList() {
           )
         } else {
           await createMutation.mutateAsync(nextValues)
-          message.success(isTeamLeaderMode ? '理论工时创建成功' : '标准工时创建成功')
+          message.success(
+            isTeamLeaderMode ? '理论工时创建成功' : '标准工时创建成功',
+          )
         }
 
         resetFormState()
