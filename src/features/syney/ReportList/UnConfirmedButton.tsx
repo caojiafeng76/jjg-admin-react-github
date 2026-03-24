@@ -4,7 +4,7 @@ import { useAppStore } from '@/store'
 import { useMarkReportsStatus } from './useMarkReportsStatus'
 
 export default function UnConfirmedButton() {
-  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const { tableSelectedKeys } = useAppStore()
   const { markStatus, isPending } = useMarkReportsStatus()
 
   return (
@@ -13,7 +13,6 @@ export default function UnConfirmedButton() {
       icon={<XCircleIcon className="size-4 text-red-500/80!" />}
       onClick={() => {
         markStatus(tableSelectedKeys.map(String), 'unconfirmed')
-        if (!isPending) setTableSelectedKeys([])
       }}
       loading={isPending}
     >

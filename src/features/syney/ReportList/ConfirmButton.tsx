@@ -4,7 +4,7 @@ import { useAppStore } from '@/store'
 import { useMarkReportsStatus } from './useMarkReportsStatus'
 
 export default function ConfirmButton() {
-  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const { tableSelectedKeys } = useAppStore()
   const { markStatus, isPending } = useMarkReportsStatus()
 
   return (
@@ -13,8 +13,6 @@ export default function ConfirmButton() {
       loading={isPending}
       onClick={() => {
         markStatus(tableSelectedKeys.map(String), 'confirmed')
-        // 清空选中在 Hook 成功回调中完成，这里备用确保状态同步
-        if (!isPending) setTableSelectedKeys([])
       }}
       icon={<CheckCircleIcon className="size-4 text-green-500/80!" />}
     >

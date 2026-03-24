@@ -122,6 +122,7 @@ export default function MaterialTransferPage() {
       isAudited?: boolean
     }) => {
       setSearchFilters(filters)
+      setSelectedRowKeys([])
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
@@ -130,6 +131,7 @@ export default function MaterialTransferPage() {
 
   const handleResetSearch = useCallback(() => {
     setSearchFilters({})
+    setSelectedRowKeys([])
     searchParamsURL.set('page', '1')
     searchParamsURL.delete('pageSize')
     setSearchParamsURL(searchParamsURL)
@@ -174,6 +176,7 @@ export default function MaterialTransferPage() {
 
       exportMaterialTransfersToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条物料转移单`)
+      setSelectedRowKeys([])
     } catch (error) {
       message.error(error instanceof Error ? error.message : '导出失败')
     } finally {

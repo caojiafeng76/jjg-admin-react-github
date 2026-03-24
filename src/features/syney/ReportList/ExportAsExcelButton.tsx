@@ -1,9 +1,11 @@
 import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
 import { Button, App } from 'antd'
 import { useExportReportsAsExcel } from './useExportReportsAsExcel'
+import { useAppStore } from '@/store'
 
 export default function ExportAsExcelButton() {
   const { message } = App.useApp()
+  const { setTableSelectedKeys } = useAppStore()
   const { saveReportsAsExcel, isLoading } = useExportReportsAsExcel()
 
   const handleExport = () => {
@@ -17,6 +19,7 @@ export default function ExportAsExcelButton() {
     const success = saveReportsAsExcel()
     if (success) {
       message.success('Excel 文件导出成功')
+      setTableSelectedKeys([])
     } else {
       message.warning('没有可导出的数据')
     }

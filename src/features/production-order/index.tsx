@@ -250,6 +250,7 @@ export default function ProductionOrderPage() {
 
       exportProductionOrdersToExcel(exportOrders)
       message.success(`已导出 ${exportOrders.length} 张工单`)
+      setSelectedRowKeys([])
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
@@ -405,6 +406,7 @@ export default function ProductionOrderPage() {
           ? { ...params, employeeId: fixedEmployee.id }
           : params,
       )
+      setSelectedRowKeys([])
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
@@ -413,6 +415,7 @@ export default function ProductionOrderPage() {
 
   const handleResetSearch = useCallback(() => {
     setFilters(fixedEmployee?.id ? { employeeId: fixedEmployee.id } : {})
+    setSelectedRowKeys([])
     searchParamsURL.set('page', '1')
     setSearchParamsURL(searchParamsURL)
   }, [fixedEmployee?.id, searchParamsURL, setSearchParamsURL])
