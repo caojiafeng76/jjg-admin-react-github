@@ -87,10 +87,7 @@ export default function EmployeeForm({
         label="角色"
         rules={[{ required: true, message: '请选择角色' }]}
       >
-        <Select
-          disabled={isCreating}
-          options={ROLE_OPTIONS}
-        />
+        <Select disabled={isCreating} options={ROLE_OPTIONS} />
       </Form.Item>
 
       <Form.Item name="is_active" label="启用状态" valuePropName="checked">

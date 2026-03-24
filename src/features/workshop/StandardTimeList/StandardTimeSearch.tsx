@@ -30,7 +30,9 @@ export default function StandardTimeSearch({
 
   return (
     <div className={mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-1 gap-2'}>
-      <Space.Compact style={{ width: '100%', maxWidth: mobile ? undefined : 400 }}>
+      <Space.Compact
+        style={{ width: '100%', maxWidth: mobile ? undefined : 400 }}
+      >
         <Input
           placeholder="请输入工序"
           value={operation}
