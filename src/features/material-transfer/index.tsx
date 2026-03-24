@@ -283,9 +283,7 @@ export default function MaterialTransferPage() {
           await createMutation.mutateAsync({
             ...createValues,
             operator_employee_id: operatorEmployeeId,
-            is_audited: isEmployeeView
-              ? false
-              : createValues.is_audited,
+            is_audited: isEmployeeView ? false : createValues.is_audited,
           })
           message.success('创建成功')
         }
@@ -335,7 +333,9 @@ export default function MaterialTransferPage() {
         </div>
       ) : null}
 
-      <div className={isEmployeeView ? '' : 'flex flex-wrap items-center gap-2'}>
+      <div
+        className={isEmployeeView ? '' : 'flex flex-wrap items-center gap-2'}
+      >
         {isEmployeeView ? (
           <Button
             block
@@ -364,7 +364,10 @@ export default function MaterialTransferPage() {
             >
               批量反审核
             </Button>
-            <EditButton title="编辑物料转移单" handleEdit={() => openEditModal()} />
+            <EditButton
+              title="编辑物料转移单"
+              handleEdit={() => openEditModal()}
+            />
             <ExportButton handleExport={handleExport} loading={isExporting}>
               {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
             </ExportButton>
@@ -457,7 +460,10 @@ export default function MaterialTransferPage() {
         )}
       </div>
 
-      <div ref={paginationRef} className={isEmployeeView ? 'flex justify-center pb-1' : ''}>
+      <div
+        ref={paginationRef}
+        className={isEmployeeView ? 'flex justify-center pb-1' : ''}
+      >
         <AppPagination total={data?.total || 0} />
       </div>
 
