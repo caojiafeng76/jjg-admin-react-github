@@ -40,7 +40,14 @@ export default function StandardTimeList() {
   const [searchParams, setSearchParams] = useState<{
     operation?: string
     model?: string
-  }>({})
+    updatedStartDate?: string
+    updatedEndDate?: string
+  }>({
+    operation: searchParamsURL.get('operation') || undefined,
+    model: searchParamsURL.get('model') || undefined,
+    updatedStartDate: searchParamsURL.get('updatedStartDate') || undefined,
+    updatedEndDate: searchParamsURL.get('updatedEndDate') || undefined,
+  })
   const [editingRecord, setEditingRecord] = useState<StandardTime | null>(null)
 
   const { data, isLoading } = useStandardTimesList({
@@ -191,8 +198,35 @@ export default function StandardTimeList() {
     (params: typeof searchParams) => {
       setSearchParams(params)
       setSelectedRowKeys([])
-      searchParamsURL.set('page', '1')
-      setSearchParamsURL(searchParamsURL)
+      const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
+
+      nextSearchParamsURL.set('page', '1')
+
+      if (params.operation) {
+        nextSearchParamsURL.set('operation', params.operation)
+      } else {
+        nextSearchParamsURL.delete('operation')
+      }
+
+      if (params.model) {
+        nextSearchParamsURL.set('model', params.model)
+      } else {
+        nextSearchParamsURL.delete('model')
+      }
+
+      if (params.updatedStartDate) {
+        nextSearchParamsURL.set('updatedStartDate', params.updatedStartDate)
+      } else {
+        nextSearchParamsURL.delete('updatedStartDate')
+      }
+
+      if (params.updatedEndDate) {
+        nextSearchParamsURL.set('updatedEndDate', params.updatedEndDate)
+      } else {
+        nextSearchParamsURL.delete('updatedEndDate')
+      }
+
+      setSearchParamsURL(nextSearchParamsURL)
     },
     [searchParamsURL, setSearchParamsURL],
   )
@@ -200,8 +234,15 @@ export default function StandardTimeList() {
   const handleResetSearch = useCallback(() => {
     setSearchParams({})
     setSelectedRowKeys([])
-    searchParamsURL.set('page', '1')
-    setSearchParamsURL(searchParamsURL)
+    const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
+
+    nextSearchParamsURL.set('page', '1')
+    nextSearchParamsURL.delete('operation')
+    nextSearchParamsURL.delete('model')
+    nextSearchParamsURL.delete('updatedStartDate')
+    nextSearchParamsURL.delete('updatedEndDate')
+
+    setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
 
   useEffect(() => {
@@ -272,6 +313,7 @@ export default function StandardTimeList() {
           onSearch={handleSearch}
           onReset={handleResetSearch}
           mobile={isTeamLeaderMode}
+          initialValues={searchParams}
         />
       </div>
 
