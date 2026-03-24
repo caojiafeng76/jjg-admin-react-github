@@ -179,15 +179,16 @@ export default function MaterialTransferTable({
       style={{ fontSize: '12px' }}
       summary={() => (
         <Table.Summary.Row>
-          <Table.Summary.Cell index={0} colSpan={5}>
+          <Table.Summary.Cell index={0} />
+          <Table.Summary.Cell index={1} colSpan={5}>
             <span className="font-medium text-slate-600">当前页合计</span>
           </Table.Summary.Cell>
-          <Table.Summary.Cell index={5}>
+          <Table.Summary.Cell index={6}>
             <span className="font-semibold text-slate-900">
               {currentPageTransferQuantity}
             </span>
           </Table.Summary.Cell>
-          <Table.Summary.Cell index={6} colSpan={7} />
+          <Table.Summary.Cell index={7} colSpan={8} />
         </Table.Summary.Row>
       )}
     />
