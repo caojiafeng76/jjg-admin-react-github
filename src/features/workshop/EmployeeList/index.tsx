@@ -583,7 +583,7 @@ export default function EmployeeList() {
         })
 
         message.success(`已重置员工 ${result.employeeName} 的登录密码`)
-  setSelectedRowKeys([])
+        setSelectedRowKeys([])
         setIsResetPasswordModalOpen(false)
         resetPasswordFormRef?.resetFields()
       } catch (error) {
