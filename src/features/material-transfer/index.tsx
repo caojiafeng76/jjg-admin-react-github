@@ -39,7 +39,6 @@ export default function MaterialTransferPage() {
   const { role, employeeProfile } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
-  const isTeamLeaderView = role === 'team_leader'
   const fixedEmployee =
     isOwnOnlyView && employeeProfile?.id
       ? { id: employeeProfile.id, name: employeeProfile.name }
@@ -309,26 +308,10 @@ export default function MaterialTransferPage() {
     <div
       className={
         isEmployeeView
-          ? 'grid h-full grid-rows-[auto_auto_auto_1fr_auto] gap-3 p-3'
+          ? 'grid h-full grid-rows-[auto_auto_1fr_auto] gap-3 p-3'
           : 'flex h-full flex-col gap-3 overflow-hidden'
       }
     >
-      {isEmployeeView ? (
-        <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
-          <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
-            Material Transfer
-          </div>
-          <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-            {isTeamLeaderView ? '班组转移表' : '我的转移表'}
-          </div>
-          <div className="mt-2 text-sm text-slate-500">
-            {isTeamLeaderView
-              ? '可查看、新建和编辑所有员工的转移单，审核后自动锁定。'
-              : '只能创建和编辑本人未审核的转移单，审核后自动锁定。'}
-          </div>
-        </div>
-      ) : null}
-
       <div
         className={isEmployeeView ? '' : 'flex flex-wrap items-center gap-2'}
       >
@@ -385,16 +368,6 @@ export default function MaterialTransferPage() {
             : ''
         }
       >
-        {isEmployeeView ? (
-          <div className="mb-3">
-            <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
-              Filter
-            </div>
-            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
-              {isTeamLeaderView ? '筛选班组转移单' : '筛选我的转移单'}
-            </div>
-          </div>
-        ) : null}
         <MaterialTransferSearch
           employees={employees}
           initialValues={searchFilters}

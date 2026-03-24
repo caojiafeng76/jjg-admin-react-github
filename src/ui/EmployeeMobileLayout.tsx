@@ -10,7 +10,6 @@ import {
 import { useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { getRoleLabel } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
 import EmployeeChangePasswordForm, {
   type EmployeeChangePasswordValues,
@@ -98,11 +97,6 @@ export default function EmployeeMobileLayout() {
             </div>
             <div className="mt-1 text-xl font-black tracking-tight text-slate-900">
               {employeeProfile?.name || user?.email || '员工端'}
-            </div>
-            <div className="mt-1 text-xs text-slate-500">
-              {role === 'team_leader'
-                ? `手机端班组长工作台 / ${getRoleLabel(role)}`
-                : '手机端工单录入与日报查询'}
             </div>
           </div>
 
