@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance } from 'antd'
+import { App, Modal, FormInstance, Button } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
@@ -7,6 +7,7 @@ import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useAuth } from '@/contexts/AuthContext'
 import type {
   StandardTime,
   StandardTimeFormValues,
@@ -17,12 +18,15 @@ import {
   useUpdateStandardTime,
   useDeleteStandardTimes,
 } from './useStandardTimes'
+import StandardTimeMobileList from './StandardTimeMobileList'
 import StandardTimeTable from './StandardTimeTable'
 import StandardTimeForm from './StandardTimeForm'
 import StandardTimeSearch from './StandardTimeSearch'
 
 export default function StandardTimeList() {
   const { message } = App.useApp()
+  const { role } = useAuth()
+  const isTeamLeaderMode = role === 'team_leader'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建标准工时')
@@ -37,6 +41,7 @@ export default function StandardTimeList() {
     operation?: string
     model?: string
   }>({})
+  const [editingRecord, setEditingRecord] = useState<StandardTime | null>(null)
 
   const { data, isLoading } = useStandardTimesList({
     page,
@@ -55,12 +60,12 @@ export default function StandardTimeList() {
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
-    setModalTitle('创建标准工时')
+    setEditingRecord(null)
+    setSelectedRowKeys([])
+    setModalTitle(isTeamLeaderMode ? '创建理论工时' : '创建标准工时')
     setIsModalOpen(true)
     formRef?.resetFields()
-  }, [formRef])
-
-  const [editingRecord, setEditingRecord] = useState<StandardTime | null>(null)
+  }, [formRef, isTeamLeaderMode])
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
@@ -70,21 +75,36 @@ export default function StandardTimeList() {
     formRef?.resetFields()
   }, [formRef])
 
-  const handleEdit = useCallback(() => {
-    if (selectedRowKeys.length !== 1) {
-      message.warning('请选择一条数据进行编辑')
-      return
-    }
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
-    if (!record) return
+  const handleEdit = useCallback(
+    (record?: StandardTime) => {
+      const targetRecord =
+        record || data?.items.find((item) => item.id === selectedRowKeys[0])
 
-    setEditingRecord(record)
-    setIsEdit(true)
-    setModalTitle('编辑标准工时')
-    setIsModalOpen(true)
-  }, [data?.items, message, selectedRowKeys])
+      if (!record && selectedRowKeys.length !== 1) {
+        message.warning('请选择一条数据进行编辑')
+        return
+      }
+
+      if (!targetRecord) {
+        message.warning('请选择一条数据进行编辑')
+        return
+      }
+
+      setEditingRecord(targetRecord)
+      setSelectedRowKeys(targetRecord.id ? [targetRecord.id] : [])
+      setIsEdit(true)
+      setModalTitle(isTeamLeaderMode ? '编辑理论工时' : '编辑标准工时')
+      setIsModalOpen(true)
+    },
+    [data?.items, isTeamLeaderMode, message, selectedRowKeys],
+  )
 
   const handleDelete = useCallback(async () => {
+    if (isTeamLeaderMode) {
+      message.warning('班组长不能删除标准工时')
+      return
+    }
+
     if (selectedRowKeys.length === 0) {
       message.warning('请选择至少一条数据')
       return
@@ -101,28 +121,42 @@ export default function StandardTimeList() {
         message.error('删除标准工时失败，请稍后重试')
       }
     }
-  }, [deleteMutation, message, selectedRowKeys])
+  }, [deleteMutation, isTeamLeaderMode, message, selectedRowKeys])
 
   const handleFinish = useCallback(
     async (values: StandardTimeFormValues) => {
       try {
+        const nextValues: StandardTimeFormValues = isTeamLeaderMode
+          ? {
+              operation: values.operation,
+              model: isEdit ? editingRecord?.model || values.model : values.model,
+              standard_seconds: isEdit
+                ? editingRecord?.standard_seconds || 0
+                : 0,
+              theoretical_seconds: values.theoretical_seconds,
+            }
+          : values
+
         if (isEdit && selectedRowKeys[0]) {
           const standardSecondsChanged =
-            editingRecord?.standard_seconds !== values.standard_seconds
+            editingRecord?.standard_seconds !== nextValues.standard_seconds
 
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
-            values,
+            values: nextValues,
           })
           message.success(
             standardSecondsChanged
               ? '标准工时更新成功，历史工单已同步修正'
-              : '标准工时更新成功',
+              : isTeamLeaderMode
+                ? '理论工时更新成功'
+                : '标准工时更新成功',
           )
         } else {
-          await createMutation.mutateAsync(values)
-          message.success('标准工时创建成功')
+          await createMutation.mutateAsync(nextValues)
+          message.success(isTeamLeaderMode ? '理论工时创建成功' : '标准工时创建成功')
         }
+
         resetFormState()
       } catch (error) {
         if (error instanceof Error) {
@@ -136,6 +170,7 @@ export default function StandardTimeList() {
       createMutation,
       editingRecord,
       isEdit,
+      isTeamLeaderMode,
       message,
       resetFormState,
       selectedRowKeys,
@@ -169,23 +204,65 @@ export default function StandardTimeList() {
 
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑" handleEdit={handleEdit} />
-        <DeleteButton
-          onConfirm={handleDelete}
-          isDeleting={deleteMutation.isPending}
-          count={selectedRowKeys.length}
-          title="删除标准工时"
-          itemName="标准工时"
-        />
-      </div>
+      {isTeamLeaderMode ? (
+        <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
+          <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
+            Theoretical Time
+          </div>
+          <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
+            理论工时维护
+          </div>
+          <div className="mt-2 text-sm text-slate-500">
+            班组长仅可新增或编辑理论工时，标准工时与删除操作仍保留给管理员。
+          </div>
+          <div className="mt-4">
+            <Button
+              block
+              type="primary"
+              className="h-11 rounded-2xl"
+              onClick={handleCreate}
+            >
+              新建理论工时
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2">
+          <AddButton handleCreate={handleCreate} />
+          <EditButton title="编辑" handleEdit={() => handleEdit()} />
+          <DeleteButton
+            onConfirm={handleDelete}
+            isDeleting={deleteMutation.isPending}
+            count={selectedRowKeys.length}
+            title="删除标准工时"
+            itemName="标准工时"
+          />
+        </div>
+      )}
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+      <div
+        className={
+          isTeamLeaderMode
+            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
+            : 'flex items-center gap-2'
+        }
+      >
+        {isTeamLeaderMode ? (
+          <div className="mb-3">
+            <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
+              Filter
+            </div>
+            <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
+              筛选理论工时
+            </div>
+          </div>
+        ) : (
+          <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        )}
         <StandardTimeSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
+          mobile={isTeamLeaderMode}
         />
       </div>
 
@@ -193,17 +270,31 @@ export default function StandardTimeList() {
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
-        <div className="min-h-0 flex-1 overflow-x-auto">
-          <StandardTimeTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+        <div
+          className={
+            isTeamLeaderMode
+              ? 'no-scrollbar min-h-0 flex-1 overflow-y-auto'
+              : 'min-h-0 flex-1 overflow-x-auto'
+          }
+        >
+          {isTeamLeaderMode ? (
+            <StandardTimeMobileList
+              loading={isLoading}
+              data={data?.items || []}
+              onEdit={handleEdit}
+            />
+          ) : (
+            <StandardTimeTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          )}
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -215,10 +306,10 @@ export default function StandardTimeList() {
         open={isModalOpen}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         destroyOnClose
+        width={isTeamLeaderMode ? 'calc(100vw - 24px)' : undefined}
+        style={isTeamLeaderMode ? { top: 16, maxWidth: 520 } : undefined}
         onOk={() => formRef?.submit()}
-        onCancel={() => {
-          resetFormState()
-        }}
+        onCancel={resetFormState}
       >
         <StandardTimeForm
           onFinish={handleFinish}
@@ -226,6 +317,7 @@ export default function StandardTimeList() {
           isCreating={createMutation.isPending}
           isEdit={isEdit}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          mode={isTeamLeaderMode ? 'team_leader' : 'admin'}
         />
       </Modal>
     </div>

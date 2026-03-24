@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Table, TableColumnsType, Tag, Typography } from 'antd'
+import { getRoleLabel } from '@/config/access'
 import type { Employee } from '@/services/apiEmployees'
 import { useEmployeeAuthEmail } from './useEmployees'
 
@@ -95,7 +96,11 @@ export default function EmployeeTable({
             return <Tag color="gold">管理员</Tag>
           }
 
-          return <Tag color="blue">员工</Tag>
+          if (value === 'team_leader') {
+            return <Tag color="cyan">班组长</Tag>
+          }
+
+          return <Tag color="blue">{getRoleLabel(value || 'employee')}</Tag>
         },
       },
       {

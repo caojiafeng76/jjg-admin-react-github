@@ -1,5 +1,6 @@
 import { Alert, Divider, Form, FormInstance, Input, Select, Switch } from 'antd'
 import { useEffect } from 'react'
+import { ROLE_OPTIONS } from '@/config/access'
 import type { Employee } from '@/services/apiEmployees'
 import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 
@@ -88,10 +89,7 @@ export default function EmployeeForm({
       >
         <Select
           disabled={isCreating}
-          options={[
-            { label: '员工', value: 'employee' },
-            { label: '管理员', value: 'admin' },
-          ]}
+          options={ROLE_OPTIONS}
         />
       </Form.Item>
 

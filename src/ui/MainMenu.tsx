@@ -4,6 +4,7 @@ import type { MenuProps } from 'antd'
 import { Menu } from 'antd'
 import { HomeIcon, Square3Stack3DIcon } from '@heroicons/react/16/solid'
 
+import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
 
 type MenuItem = Required<MenuProps>['items'][number]
@@ -78,7 +79,7 @@ const MainMenu: React.FC = () => {
   const { role } = useAuth()
 
   const items = useMemo(() => {
-    if (role === 'employee') {
+    if (isEmployeeSideRole(role)) {
       return employeeItems
     }
 

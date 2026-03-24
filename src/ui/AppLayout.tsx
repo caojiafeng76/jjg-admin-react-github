@@ -6,6 +6,7 @@ import MainMenu from '@ui/MainMenu'
 import AppHeader from '@ui/AppHeader'
 import AppLogo from './AppLogo'
 import EmployeeMobileLayout from './EmployeeMobileLayout'
+import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
 import { translateErrorMessage } from '@/utils/errorHandler'
 
@@ -51,7 +52,7 @@ export default function AppLayout() {
     clearError()
   }, [error, messageApi, clearError])
 
-  if (role === 'employee') {
+  if (isEmployeeSideRole(role)) {
     return (
       <>
         {contextHolder}

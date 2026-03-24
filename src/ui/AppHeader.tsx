@@ -7,6 +7,7 @@ import { Header } from 'antd/es/layout/layout'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import DarkModeButton from '@ui/DarkModeButton'
+import { getRoleLabel } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
 
 // 路由到页面名称的映射
@@ -21,6 +22,7 @@ const routeToLabelMap: Record<string, string> = {
   'workshop-process-list': '工序管理',
   'workshop-defect-reason-list': '不良原因管理',
   'employee-list': '员工管理',
+  'standard-time-list': '标准工时',
   'production-order': '生产工单',
   'production-daily-report': '生产日报表',
 }
@@ -40,8 +42,7 @@ export default function AppHeader({
   const currentPath = location.pathname.slice(1) || 'dashboard'
   const pageName = routeToLabelMap[currentPath] || ''
   const displayName = employeeProfile?.name || user?.email || '未登录用户'
-  const roleLabel =
-    role === 'admin' ? '管理员' : role === 'employee' ? '员工' : ''
+  const roleLabel = getRoleLabel(role)
 
   return (
     <Header

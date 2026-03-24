@@ -1,11 +1,12 @@
 import supabase from './supabase'
+import type { AppRole } from '@/config/access'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 
 export interface Employee {
   id?: string
   name: string
   auth_user_id?: string | null
-  role?: 'admin' | 'employee'
+  role?: AppRole
   is_active?: boolean
   created_at?: string
   updated_at?: string
@@ -188,7 +189,7 @@ export async function getEmployees({
   page: number
   pageSize: number
   name?: string
-  role?: 'admin' | 'employee'
+  role?: AppRole
   is_active?: boolean
 }) {
   const from = (page - 1) * pageSize
