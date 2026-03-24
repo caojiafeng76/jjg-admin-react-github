@@ -187,6 +187,9 @@ export default function ProductionOrderItemForm({
     })
   }
 
+  const getPopupContainer = (triggerNode: HTMLElement) =>
+    triggerNode.parentElement || document.body
+
   return (
     <Modal
       title={initialValues ? '编辑工序明细' : '添加工序明细'}
@@ -199,7 +202,9 @@ export default function ProductionOrderItemForm({
     >
       <div
         className={
-          compact ? 'max-h-[calc(100vh-240px)] overflow-y-auto pr-1' : undefined
+          compact
+            ? 'max-h-[calc(100vh-240px)] overflow-y-auto overscroll-contain pr-1'
+            : undefined
         }
       >
         <Form
@@ -234,10 +239,12 @@ export default function ProductionOrderItemForm({
               showSearch
               placeholder="请选择项目号"
               loading={loadingProjectNos}
+              getPopupContainer={getPopupContainer}
               onChange={handleProjectNoChange}
               options={projectNoOptions}
               filterOption={filterProjectNoOption}
               optionRender={renderProjectNoOption}
+              listHeight={320}
               style={{ width: '100%' }}
             />
           </Form.Item>
@@ -274,6 +281,7 @@ export default function ProductionOrderItemForm({
               placeholder="请选择或输入工序"
               onChange={handleOperationChange}
               options={operationOptions}
+              getPopupContainer={getPopupContainer}
               filterOption={(input, option) => {
                 if (!option) return false
                 return (

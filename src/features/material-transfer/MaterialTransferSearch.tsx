@@ -39,6 +39,9 @@ export default function MaterialTransferSearch({
   const [form] = Form.useForm()
   const [isExpanded, setIsExpanded] = useState(!mobile)
 
+  const getPopupContainer = (triggerNode: HTMLElement) =>
+    triggerNode.parentElement || document.body
+
   useEffect(() => {
     form.setFieldsValue({
       ...initialValues,
@@ -113,6 +116,7 @@ export default function MaterialTransferSearch({
             allowClear
             showSearch
             optionFilterProp="label"
+            getPopupContainer={getPopupContainer}
             style={{ width: mobile ? '100%' : 180 }}
             options={employees.map((employee) => ({
               label: employee.name,
@@ -126,6 +130,7 @@ export default function MaterialTransferSearch({
         <Select
           placeholder="接收车间"
           allowClear
+          getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 180 }}
           options={MATERIAL_TRANSFER_WORKSHOPS.map((workshop) => ({
             label: workshop,
@@ -146,6 +151,7 @@ export default function MaterialTransferSearch({
         <Select
           placeholder="审核状态"
           allowClear
+          getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 140 }}
           options={[...MATERIAL_TRANSFER_AUDIT_OPTIONS]}
         />

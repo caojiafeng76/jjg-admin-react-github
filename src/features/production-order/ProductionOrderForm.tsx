@@ -373,6 +373,9 @@ export default function ProductionOrderForm({
     })
   }
 
+  const getPopupContainer = (triggerNode: HTMLElement) =>
+    triggerNode.parentElement || document.body
+
   return (
     <>
       <Modal
@@ -752,7 +755,7 @@ export default function ProductionOrderForm({
         <div
           className={
             compact
-              ? 'max-h-[calc(100vh-240px)] overflow-y-auto pr-1'
+              ? 'max-h-[calc(100vh-240px)] overflow-y-auto overscroll-contain pr-1'
               : undefined
           }
         >
@@ -776,9 +779,11 @@ export default function ProductionOrderForm({
                 showSearch
                 placeholder="请选择项目号"
                 loading={loadingProjectNos}
+                getPopupContainer={getPopupContainer}
                 options={projectNoOptions}
                 filterOption={filterProjectNoOption}
                 optionRender={renderProjectNoOption}
+                listHeight={320}
                 onChange={handleProjectNoChangeForItem}
               />
             </Form.Item>
@@ -816,6 +821,7 @@ export default function ProductionOrderForm({
               <AutoComplete
                 placeholder="请选择或输入工序"
                 options={operationOptions}
+                getPopupContainer={getPopupContainer}
                 disabled={!selectedItemProductModel}
                 filterOption={(input, option) => {
                   if (!option) return false
