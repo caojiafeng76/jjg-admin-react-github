@@ -50,6 +50,29 @@ export default function MaterialTransferTable({
         render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        title: '创建时间',
+        dataIndex: 'created_at',
+        key: 'created_at',
+        width: 180,
+        fixed: 'left',
+        render: (text: string) => {
+          if (!text) return '-'
+          return new Date(text).toLocaleString('zh-CN')
+        },
+      },
+      {
+        title: '审核状态',
+        dataIndex: 'is_audited',
+        key: 'is_audited',
+        width: 100,
+        fixed: 'left',
+        render: (value: boolean) => (
+          <Tag color={value ? 'success' : 'default'}>
+            {value ? '已审核' : '待审核'}
+          </Tag>
+        ),
+      },
+      {
         title: '项目号',
         dataIndex: 'project_no',
         key: 'project_no',
@@ -102,17 +125,6 @@ export default function MaterialTransferTable({
         width: 120,
       },
       {
-        title: '审核状态',
-        dataIndex: 'is_audited',
-        key: 'is_audited',
-        width: 100,
-        render: (value: boolean) => (
-          <Tag color={value ? 'success' : 'default'}>
-            {value ? '已审核' : '待审核'}
-          </Tag>
-        ),
-      },
-      {
         title: '审核时间',
         dataIndex: 'audited_at',
         key: 'audited_at',
@@ -129,16 +141,6 @@ export default function MaterialTransferTable({
         width: 180,
         ellipsis: true,
         render: (value: string | null) => value || '-',
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'created_at',
-        key: 'created_at',
-        width: 180,
-        render: (text: string) => {
-          if (!text) return '-'
-          return new Date(text).toLocaleString('zh-CN')
-        },
       },
       {
         title: '操作',
@@ -180,15 +182,15 @@ export default function MaterialTransferTable({
       summary={() => (
         <Table.Summary.Row>
           <Table.Summary.Cell index={0} />
-          <Table.Summary.Cell index={1} colSpan={5}>
+          <Table.Summary.Cell index={1} colSpan={7}>
             <span className="font-medium text-slate-600">当前页合计</span>
           </Table.Summary.Cell>
-          <Table.Summary.Cell index={6}>
+          <Table.Summary.Cell index={8}>
             <span className="font-semibold text-slate-900">
               {currentPageTransferQuantity}
             </span>
           </Table.Summary.Cell>
-          <Table.Summary.Cell index={7} colSpan={8} />
+          <Table.Summary.Cell index={9} colSpan={6} />
         </Table.Summary.Row>
       )}
     />
