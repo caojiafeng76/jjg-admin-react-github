@@ -69,13 +69,31 @@ export default function StandardTimeSearch({
     <Form
       form={form}
       onFinish={handleSearch}
-      className={mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-1 flex-wrap gap-2'}
+      className={
+        mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-1 flex-wrap gap-2'
+      }
     >
-      <Form.Item name="operation" className="mb-0" style={{ width: mobile ? '100%' : 240 }}>
-        <Input placeholder="请输入工序" onPressEnter={() => form.submit()} allowClear />
+      <Form.Item
+        name="operation"
+        className="mb-0"
+        style={{ width: mobile ? '100%' : 240 }}
+      >
+        <Input
+          placeholder="请输入工序"
+          onPressEnter={() => form.submit()}
+          allowClear
+        />
       </Form.Item>
-      <Form.Item name="model" className="mb-0" style={{ width: mobile ? '100%' : 240 }}>
-        <Input placeholder="请输入型号" onPressEnter={() => form.submit()} allowClear />
+      <Form.Item
+        name="model"
+        className="mb-0"
+        style={{ width: mobile ? '100%' : 240 }}
+      >
+        <Input
+          placeholder="请输入型号"
+          onPressEnter={() => form.submit()}
+          allowClear
+        />
       </Form.Item>
       <Form.Item
         name="updatedAtRange"
