@@ -15,6 +15,7 @@ interface SearchParams {
   employeeId?: string
   productModel?: string
   customerModel?: string
+  isAudited?: boolean
 }
 
 interface Props {
@@ -43,6 +44,7 @@ export default function ProductionOrderSearch({
       employeeId: fixedEmployee?.id || initialValues?.employeeId,
       productModel: initialValues?.productModel,
       customerModel: initialValues?.customerModel,
+      isAudited: initialValues?.isAudited,
       dateRange:
         initialValues?.startDate && initialValues?.endDate
           ? [dayjs(initialValues.startDate), dayjs(initialValues.endDate)]
@@ -59,6 +61,7 @@ export default function ProductionOrderSearch({
     employeeId?: string
     productModel?: string
     customerModel?: string
+    isAudited?: boolean
   }) => {
     const params: SearchParams = {}
 
@@ -81,6 +84,10 @@ export default function ProductionOrderSearch({
     const customerModel = values.customerModel?.trim()
     if (customerModel) {
       params.customerModel = customerModel
+    }
+
+    if (typeof values.isAudited === 'boolean') {
+      params.isAudited = values.isAudited
     }
 
     setIsSearching(true)
@@ -158,6 +165,18 @@ export default function ProductionOrderSearch({
           placeholder="客户型号"
           allowClear
           style={{ width: mobile ? '100%' : 180 }}
+        />
+      </Form.Item>
+
+      <Form.Item name="isAudited" className="mb-0">
+        <Select
+          placeholder="审核状态"
+          allowClear
+          style={{ width: mobile ? '100%' : 140 }}
+          options={[
+            { label: '已审核', value: true },
+            { label: '待审核', value: false },
+          ]}
         />
       </Form.Item>
 
