@@ -223,11 +223,7 @@ export default function MaterialTransferForm({
         </Form.Item>
 
         {canAudit ? (
-          <Form.Item
-            name="is_audited"
-            label="审核状态"
-            valuePropName="checked"
-          >
+          <Form.Item name="is_audited" label="审核状态" valuePropName="checked">
             <Switch
               checkedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[1].label}
               unCheckedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[0].label}

@@ -41,7 +41,13 @@ export default function MaterialTransferMobileList({
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className={selected ? 'text-xs text-slate-300' : 'text-xs text-slate-400'}>
+                <div
+                  className={
+                    selected
+                      ? 'text-xs text-slate-300'
+                      : 'text-xs text-slate-400'
+                  }
+                >
                   {record.created_at
                     ? new Date(record.created_at).toLocaleString('zh-CN')
                     : '-'}
@@ -49,7 +55,13 @@ export default function MaterialTransferMobileList({
                 <div className="mt-1 text-lg font-bold tracking-tight">
                   {record.project_no}
                 </div>
-                <div className={selected ? 'mt-1 text-sm text-slate-200' : 'mt-1 text-sm text-slate-500'}>
+                <div
+                  className={
+                    selected
+                      ? 'mt-1 text-sm text-slate-200'
+                      : 'mt-1 text-sm text-slate-500'
+                  }
+                >
                   {record.product_model || '-'} / {record.customer_model || '-'}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -70,24 +82,36 @@ export default function MaterialTransferMobileList({
               </div>
             </div>
 
-            <div className={selected ? 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-100' : 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600'}>
+            <div
+              className={
+                selected
+                  ? 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-100'
+                  : 'mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600'
+              }
+            >
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   接收人
                 </div>
-                <div className="mt-1 font-semibold">{record.recipient_name}</div>
+                <div className="mt-1 font-semibold">
+                  {record.recipient_name}
+                </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   操作人
                 </div>
-                <div className="mt-1 font-semibold">{record.employee?.name || '-'}</div>
+                <div className="mt-1 font-semibold">
+                  {record.employee?.name || '-'}
+                </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   长度
                 </div>
-                <div className="mt-1 font-semibold">{record.length_mm ?? '-'}</div>
+                <div className="mt-1 font-semibold">
+                  {record.length_mm ?? '-'}
+                </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">

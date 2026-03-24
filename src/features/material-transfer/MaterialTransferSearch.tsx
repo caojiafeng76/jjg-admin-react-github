@@ -72,9 +72,7 @@ export default function MaterialTransferSearch({
       onFinish={handleFinish}
       layout={mobile ? 'vertical' : 'inline'}
       className={
-        mobile
-          ? 'grid grid-cols-1 gap-3'
-          : 'flex flex-wrap items-center gap-2'
+        mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'
       }
     >
       <Form.Item name="projectNo" className="mb-0">
