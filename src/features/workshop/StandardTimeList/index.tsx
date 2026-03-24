@@ -142,7 +142,8 @@ export default function StandardTimeList() {
         if (isEdit && selectedRowKeys[0]) {
           const standardSecondsChanged =
             editingRecord?.standard_seconds !== nextValues.standard_seconds
-          const operationChanged = editingRecord?.operation !== nextValues.operation
+          const operationChanged =
+            editingRecord?.operation !== nextValues.operation
           const modelChanged = editingRecord?.model !== nextValues.model
           const relatedOrdersSynced =
             standardSecondsChanged || operationChanged || modelChanged
