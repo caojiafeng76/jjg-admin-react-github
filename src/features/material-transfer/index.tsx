@@ -14,6 +14,7 @@ import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   getMaterialTransfersForExport,
+  type MaterialTransferFilters,
   type MaterialTransferInsert,
   type MaterialTransferUpdate,
   type MaterialTransferWithEmployee,
@@ -48,13 +49,7 @@ export default function MaterialTransferPage() {
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [searchFilters, setSearchFilters] = useState<{
-    projectNo?: string
-    employeeId?: string
-    targetWorkshop?: string
-    recipientName?: string
-    isAudited?: boolean
-  }>(() => ({
+  const [searchFilters, setSearchFilters] = useState<MaterialTransferFilters>(() => ({
     employeeId: fixedEmployee?.id,
   }))
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -137,13 +132,7 @@ export default function MaterialTransferPage() {
   }, [])
 
   const handleSearch = useCallback(
-    (filters: {
-      projectNo?: string
-      employeeId?: string
-      targetWorkshop?: string
-      recipientName?: string
-      isAudited?: boolean
-    }) => {
+    (filters: MaterialTransferFilters) => {
       setSearchFilters(
         fixedEmployee?.id
           ? { ...filters, employeeId: fixedEmployee.id }

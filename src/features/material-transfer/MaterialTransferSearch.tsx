@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react'
-import { Button, Form, Input, Select, Space } from 'antd'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
+import dayjs, { type Dayjs } from 'dayjs'
 
 import {
   MATERIAL_TRANSFER_AUDIT_OPTIONS,
   MATERIAL_TRANSFER_WORKSHOPS,
+  type MaterialTransferFilters,
 } from '@/services/apiMaterialTransfers'
 
-interface MaterialTransferSearchValues {
-  projectNo?: string
-  employeeId?: string
-  targetWorkshop?: string
-  recipientName?: string
-  isAudited?: boolean
+const { RangePicker } = DatePicker
+
+interface MaterialTransferSearchValues extends MaterialTransferFilters {
+  dateRange?: [Dayjs | null, Dayjs | null]
 }
 
 interface Props {
@@ -40,7 +40,13 @@ export default function MaterialTransferSearch({
   const [isExpanded, setIsExpanded] = useState(!mobile)
 
   useEffect(() => {
-    form.setFieldsValue(initialValues)
+    form.setFieldsValue({
+      ...initialValues,
+      dateRange:
+        initialValues?.startDate && initialValues?.endDate
+          ? [dayjs(initialValues.startDate), dayjs(initialValues.endDate)]
+          : undefined,
+    })
   }, [form, initialValues])
 
   useEffect(() => {
@@ -49,6 +55,14 @@ export default function MaterialTransferSearch({
 
   function handleFinish(values: MaterialTransferSearchValues) {
     onSearch({
+      startDate:
+        values.dateRange?.[0] && values.dateRange?.[1]
+          ? values.dateRange[0].format('YYYY-MM-DD')
+          : undefined,
+      endDate:
+        values.dateRange?.[0] && values.dateRange?.[1]
+          ? values.dateRange[1].format('YYYY-MM-DD')
+          : undefined,
       projectNo: values.projectNo?.trim() || undefined,
       employeeId: values.employeeId || undefined,
       targetWorkshop: values.targetWorkshop || undefined,
@@ -75,6 +89,15 @@ export default function MaterialTransferSearch({
         mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'
       }
     >
+      <Form.Item name="dateRange" className="mb-0">
+        <RangePicker
+          format="YYYY-MM-DD"
+          placeholder={['创建开始日期', '创建结束日期']}
+          allowClear
+          style={{ width: mobile ? '100%' : 260 }}
+        />
+      </Form.Item>
+
       <Form.Item name="projectNo" className="mb-0">
         <Input
           placeholder="项目号"
