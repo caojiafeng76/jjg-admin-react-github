@@ -31,9 +31,8 @@ export default function StandardTimeList() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [formRef, setFormRef] = useState<FormInstance<StandardTimeFormValues> | null>(
-    null,
-  )
+  const [formRef, setFormRef] =
+    useState<FormInstance<StandardTimeFormValues> | null>(null)
   const [searchParams, setSearchParams] = useState<{
     operation?: string
     model?: string
