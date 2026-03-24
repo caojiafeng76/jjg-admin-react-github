@@ -33,6 +33,7 @@ export async function getProductionOrders({
   employeeId,
   productModel,
   customerModel,
+  isAudited,
 }: {
   page: number
   pageSize: number
@@ -41,6 +42,7 @@ export async function getProductionOrders({
   employeeId?: string
   productModel?: string
   customerModel?: string
+  isAudited?: boolean
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -77,6 +79,10 @@ export async function getProductionOrders({
 
   if (employeeId) {
     query = query.eq('employee_id', employeeId)
+  }
+
+  if (typeof isAudited === 'boolean') {
+    query = query.eq('is_audited', isAudited)
   }
 
   if (productModel) {

@@ -127,11 +127,16 @@ export default function ProductionOrderPage() {
     employeeId?: string
     productModel?: string
     customerModel?: string
+    isAudited?: boolean
   }>(() => ({
     employeeId:
       (role === 'employee' ? employeeProfile?.id : undefined) ||
       searchParamsURL.get('employeeId') ||
       undefined,
+    isAudited:
+      searchParamsURL.get('isAudited') === null
+        ? undefined
+        : searchParamsURL.get('isAudited') === 'true',
   }))
 
   const { data: orderData, isLoading } = useProductionOrders({
