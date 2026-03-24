@@ -49,9 +49,11 @@ export default function MaterialTransferPage() {
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [searchFilters, setSearchFilters] = useState<MaterialTransferFilters>(() => ({
-    employeeId: fixedEmployee?.id,
-  }))
+  const [searchFilters, setSearchFilters] = useState<MaterialTransferFilters>(
+    () => ({
+      employeeId: fixedEmployee?.id,
+    }),
+  )
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingRecord, setEditingRecord] =
     useState<MaterialTransferWithEmployee | null>(null)
