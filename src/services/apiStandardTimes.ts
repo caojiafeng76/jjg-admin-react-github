@@ -1,14 +1,17 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import type { Database } from './database.types'
 
-export interface StandardTime {
-  id?: string
-  operation: string
-  model: string
-  standard_seconds: number
-  created_at?: string
-  updated_at?: string
-}
+type ProcessStandardRow =
+  Database['public']['Tables']['process_standards']['Row']
+type ProcessStandardInsert =
+  Database['public']['Tables']['process_standards']['Insert']
+
+export type StandardTime = ProcessStandardRow
+export type StandardTimeFormValues = Pick<
+  ProcessStandardInsert,
+  'operation' | 'model' | 'standard_seconds' | 'theoretical_seconds'
+>
 
 function normalizeStandardTimeValue(value: string): string {
   return value.trim()
@@ -146,8 +149,8 @@ async function checkStandardTimeExists(
   return (data?.length || 0) > 0
 }
 
-export async function createStandardTime(values: StandardTime) {
-  const normalizedValues: StandardTime = {
+export async function createStandardTime(values: StandardTimeFormValues) {
+  const normalizedValues: StandardTimeFormValues = {
     ...values,
     operation: normalizeStandardTimeValue(values.operation),
     model: normalizeStandardTimeValue(values.model),
@@ -178,8 +181,9 @@ export async function ensureStandardTimeExists({
   operation,
   model,
   standard_seconds = 0,
-}: Pick<StandardTime, 'operation' | 'model'> &
-  Partial<Pick<StandardTime, 'standard_seconds'>>) {
+  theoretical_seconds = 0,
+}: Pick<StandardTimeFormValues, 'operation' | 'model'> &
+  Partial<Pick<StandardTimeFormValues, 'standard_seconds' | 'theoretical_seconds'>>) {
   const normalizedOperation = normalizeStandardTimeValue(operation)
   const normalizedModel = normalizeStandardTimeValue(model)
 
@@ -200,6 +204,7 @@ export async function ensureStandardTimeExists({
     operation: normalizedOperation,
     model: normalizedModel,
     standard_seconds,
+    theoretical_seconds,
   })
 
   if (error) {
@@ -218,7 +223,7 @@ export async function updateStandardTime({
   values,
 }: {
   id: string
-  values: StandardTime
+  values: StandardTimeFormValues
 }) {
   if (values.operation && values.model) {
     const exists = await checkStandardTimeExists(

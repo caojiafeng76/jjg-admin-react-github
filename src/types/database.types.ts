@@ -104,6 +104,7 @@ export type Database = {
           model: string
           operation: string
           standard_seconds: number
+          theoretical_seconds: number
           updated_at: string
         }
         Insert: {
@@ -112,6 +113,7 @@ export type Database = {
           model: string
           operation: string
           standard_seconds: number
+          theoretical_seconds?: number
           updated_at?: string
         }
         Update: {
@@ -120,6 +122,7 @@ export type Database = {
           model?: string
           operation?: string
           standard_seconds?: number
+          theoretical_seconds?: number
           updated_at?: string
         }
         Relationships: []

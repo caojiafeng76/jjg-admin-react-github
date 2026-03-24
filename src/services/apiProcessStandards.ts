@@ -1,9 +1,26 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
-import { Database } from './database.types'
+import type { Database } from './database.types'
 
 export type ProcessStandard =
   Database['public']['Tables']['process_standards']['Row']
+type ProcessStandardStandardSeconds = Pick<
+  ProcessStandard,
+  'standard_seconds'
+>
+type SalesOrderRow = Database['public']['Tables']['sales_orders']['Row']
+type SalesOrderProjectNoOption = Pick<
+  SalesOrderRow,
+  'project_no' | 'product_model' | 'length_mm' | 'customer_model' | 'created_at'
+> & {
+  project_no: string
+}
+type SalesOrderProjectNoDetail = Pick<
+  SalesOrderRow,
+  'project_no' | 'product_model' | 'length_mm' | 'customer_model'
+> & {
+  project_no: string
+}
 
 export async function getOperationsByModel(model: string) {
   const { data, error } = await supabase
@@ -31,7 +48,7 @@ export async function getStandardSeconds(model: string, operation: string) {
     throw handleApiError(error, '获取标准工时失败')
   }
 
-  return data?.standard_seconds as number
+  return (data as ProcessStandardStandardSeconds | null)?.standard_seconds as number
 }
 
 export async function getModels() {
@@ -62,13 +79,9 @@ export async function getSalesOrdersProjectNos() {
     throw handleApiError(error, '获取项目号列表失败')
   }
 
-  return (data || []) as {
-    project_no: string
-    product_model: string | null
-    length_mm: number | null
-    customer_model: string | null
-    created_at: string | null
-  }[]
+  return ((data || []).filter(
+    (item): item is SalesOrderProjectNoOption => item.project_no !== null,
+  )) as SalesOrderProjectNoOption[]
 }
 
 export async function getSalesOrderByProjectNo(projectNo: string) {
@@ -82,10 +95,9 @@ export async function getSalesOrderByProjectNo(projectNo: string) {
     throw handleApiError(error, '获取销售订单信息失败')
   }
 
-  return data as {
-    project_no: string
-    product_model: string | null
-    length_mm: number | null
-    customer_model: string | null
+  if (!data?.project_no) {
+    throw new Error('销售订单项目号不存在')
   }
+
+  return data as SalesOrderProjectNoDetail
 }
