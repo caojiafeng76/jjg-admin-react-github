@@ -30,7 +30,7 @@ export function usePrintWorkshopOrders() {
   async function generatePDF(selectedOrders: WorkshopOrder[]) {
     if (selectedOrders.length === 0) {
       message.warning('请选择要打印的订单')
-      return
+      return false
     }
 
     try {
@@ -120,9 +120,11 @@ export function usePrintWorkshopOrders() {
       doc.save(filename)
 
       message.success(`PDF生成成功: ${filename}`)
+      return true
     } catch (error) {
       console.error('生成PDF时发生错误:', error)
       message.error(error instanceof Error ? error.message : 'PDF生成失败，请重试')
+      return false
     } finally {
       setIsPrinting(false)
     }

@@ -9,6 +9,7 @@ import {
 } from '@utils/excelStyleUtils'
 
 import { useSelectedPos } from './useSelectedPos'
+import { useAppStore } from '@/store'
 
 import { useQuery } from '@tanstack/react-query'
 import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
@@ -45,6 +46,7 @@ type ExcelRow = {
 
 export function useExportSafePartInfoAsExcel() {
   const [messageApi, contextHolder] = message.useMessage()
+  const { setTableSelectedKeys } = useAppStore()
   const { isLoading, selectedPosList } = useSelectedPos()
   const { isSafePart } = useIsSafePart()
 
@@ -156,6 +158,7 @@ export function useExportSafePartInfoAsExcel() {
       // 导出文件
       writeFile(wb, fileName, EXCEL_WRITE_OPTIONS)
       messageApi.success(`导出成功！共 ${allSafeParts.length} 条安全部件数据`)
+      setTableSelectedKeys([])
     } catch (error) {
       console.error('导出失败:', error)
       const errorMessage = error instanceof Error ? error.message : '未知错误'

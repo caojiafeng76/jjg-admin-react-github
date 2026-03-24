@@ -83,7 +83,7 @@ export default function WorkshopOrderList() {
       targetRowCount: 10,
     })
 
-  const handlePrint = useCallback(() => {
+  const handlePrint = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
       message.warning('请选择要打印的订单')
       return
@@ -91,7 +91,10 @@ export default function WorkshopOrderList() {
     const selectedOrders =
       data?.items.filter((item) => selectedRowKeys.includes(item.id || '')) ||
       []
-    generatePDF(selectedOrders)
+    const printed = await generatePDF(selectedOrders)
+    if (printed) {
+      setSelectedRowKeys([])
+    }
   }, [selectedRowKeys, data?.items, generatePDF, message])
 
   const handleCreate = useCallback(() => {
@@ -268,6 +271,7 @@ export default function WorkshopOrderList() {
   const handleSearch = useCallback(
     (params: typeof searchParams) => {
       setSearchParams(params)
+      setSelectedRowKeys([])
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
@@ -301,6 +305,7 @@ export default function WorkshopOrderList() {
 
   const handleResetSearch = useCallback(() => {
     setSearchParams({})
+    setSelectedRowKeys([])
     searchParamsURL.set('page', '1')
     setSearchParamsURL(searchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])

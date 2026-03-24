@@ -554,6 +554,7 @@ export default function EmployeeList() {
         message.success(
           `已为现有员工 ${result.employeeName} 开通账号并绑定到 ${result.email}，默认密码为 ${DEFAULT_EMPLOYEE_AUTH_PASSWORD}`,
         )
+        setSelectedRowKeys([])
         setIsAuthModalOpen(false)
         setAuthTargetEmployee(null)
         authFormRef?.resetFields()
@@ -582,6 +583,7 @@ export default function EmployeeList() {
         })
 
         message.success(`已重置员工 ${result.employeeName} 的登录密码`)
+  setSelectedRowKeys([])
         setIsResetPasswordModalOpen(false)
         resetPasswordFormRef?.resetFields()
       } catch (error) {
@@ -616,6 +618,7 @@ export default function EmployeeList() {
         message.success(
           `已将 ${result.employeeName} 重新绑定到账号 ${result.email}`,
         )
+        setSelectedRowKeys([])
         setIsRebindModalOpen(false)
         rebindFormRef?.resetFields()
       } catch (error) {
@@ -637,6 +640,7 @@ export default function EmployeeList() {
   const handleSearch = useCallback(
     (params: typeof searchParams) => {
       setSearchParams(params)
+      setSelectedRowKeys([])
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
@@ -645,6 +649,7 @@ export default function EmployeeList() {
 
   const handleResetSearch = useCallback(() => {
     setSearchParams({})
+    setSelectedRowKeys([])
     searchParamsURL.set('page', '1')
     setSearchParamsURL(searchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])

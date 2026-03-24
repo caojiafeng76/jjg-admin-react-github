@@ -1,5 +1,5 @@
 import { message, Modal, App } from 'antd'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { ISyneyStoreReportFormRef } from '@/types'
 import { useDeleteReport } from '@syney/ReportList/useDeleteReport'
@@ -24,7 +24,8 @@ export default function ReportList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [specsLoading, setSpecsLoading] = useState(false)
 
-  const { tableSelectedKeys, isLoading: isCreating } = useAppStore()
+  const { tableSelectedKeys, setTableSelectedKeys, isLoading: isCreating } =
+    useAppStore()
   const { print, isLoading: isPrinting } = useGenerateSyneyStoreReportPDF()
 
   const reportFormRef = useRef<ISyneyStoreReportFormRef>(null)
@@ -53,7 +54,10 @@ export default function ReportList() {
       return
     }
     deleteReport(tableSelectedKeys.map(String), {
-      onSuccess: () => messageApi.success('删除对账单成功'),
+      onSuccess: () => {
+        messageApi.success('删除对账单成功')
+        setTableSelectedKeys([])
+      },
       onError: (err) => {
         console.error(err)
         messageApi.error('删除对账单失败')
@@ -77,10 +81,17 @@ export default function ReportList() {
     const success = await print()
     if (success) {
       messageApi.success('PDF 文件生成成功')
+      setTableSelectedKeys([])
     } else {
       messageApi.warning('没有可打印的数据')
     }
   }
+
+  useEffect(() => {
+    return () => {
+      setTableSelectedKeys([])
+    }
+  }, [setTableSelectedKeys])
 
   return (
     <div className="grid grid-rows-[32px_1fr] gap-4">

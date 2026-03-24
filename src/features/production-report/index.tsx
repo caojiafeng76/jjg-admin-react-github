@@ -136,6 +136,8 @@ export default function ProductionDailyReportPage() {
 
     exportProductionDailyReportToExcel(selectedRows)
     message.success(`已导出 ${selectedRows.length} 条日报数据`)
+    setSelectedRowKeys([])
+    setSelectedRowsMap({})
   }, [message, selectedRowKeys, selectedRowsMap])
 
   useEffect(() => {

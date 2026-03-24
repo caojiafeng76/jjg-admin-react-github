@@ -57,10 +57,20 @@ export default function SpecList() {
   function onFinishFuc(spec: ISyneySpec) {
     // 当处于编辑状态时，调用更新函数
     if (isEditing) {
-      updateSyneySpec(spec, { onSettled: handleCancel })
+      updateSyneySpec(spec, {
+        onSuccess: () => {
+          setSelectedRowKeys([])
+          handleCancel()
+        },
+      })
     } else {
       // 当不处于编辑状态时，调用创建函数
-      createSyneySpec(spec, { onSettled: handleCancel })
+      createSyneySpec(spec, {
+        onSuccess: () => {
+          setSelectedRowKeys([])
+          handleCancel()
+        },
+      })
     }
   }
 
@@ -84,9 +94,6 @@ export default function SpecList() {
   function handleOk() {
     // 触发表单实例的提交事件，如果表单验证通过则继续后续操作
     specFormInstance?.submit()
-
-    // 清除所有选中的行键，表示用户已经做出确认，不再需要之前的选择状态
-    setSelectedRowKeys([])
   }
 
   /**
@@ -134,7 +141,11 @@ export default function SpecList() {
       message.warning('请选择至少一条数据')
       return
     }
-    deleteSyneySpecs(specIds)
+    deleteSyneySpecs(specIds, {
+      onSuccess: () => {
+        setSelectedRowKeys([])
+      },
+    })
   }
 
   useEffect(() => {

@@ -144,6 +144,7 @@ export default function StandardTimeList() {
   const handleSearch = useCallback(
     (params: typeof searchParams) => {
       setSearchParams(params)
+      setSelectedRowKeys([])
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
@@ -152,6 +153,7 @@ export default function StandardTimeList() {
 
   const handleResetSearch = useCallback(() => {
     setSearchParams({})
+    setSelectedRowKeys([])
     searchParamsURL.set('page', '1')
     setSearchParamsURL(searchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
