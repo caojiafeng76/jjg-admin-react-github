@@ -164,6 +164,7 @@ export default function ProductionOrderPage() {
     setIsEdit(false)
     setIsView(false)
     setEditingRecord(null)
+    setSelectedRowKeys([])
   }, [])
 
   const handleCreate = useCallback(() => {
