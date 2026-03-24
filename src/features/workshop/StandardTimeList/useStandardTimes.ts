@@ -21,7 +21,12 @@ export function useStandardTimesList({
 }: {
   page: number
   pageSize: number
-  searchParams: { operation?: string; model?: string }
+  searchParams: {
+    operation?: string
+    model?: string
+    updatedStartDate?: string
+    updatedEndDate?: string
+  }
 }) {
   return useQuery({
     queryKey: [STANDARD_TIMES_KEY, page, pageSize, searchParams],

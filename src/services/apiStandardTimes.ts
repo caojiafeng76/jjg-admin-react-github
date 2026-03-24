@@ -1,4 +1,5 @@
 import supabase from './supabase'
+import dayjs from 'dayjs'
 import { handleApiError } from '@/utils/errorHandler'
 import type { Database } from './database.types'
 
@@ -22,11 +23,15 @@ export async function getStandardTimes({
   pageSize,
   operation,
   model,
+  updatedStartDate,
+  updatedEndDate,
 }: {
   page: number
   pageSize: number
   operation?: string
   model?: string
+  updatedStartDate?: string
+  updatedEndDate?: string
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -40,6 +45,20 @@ export async function getStandardTimes({
 
     if (model) {
       query = query.ilike('model', `%${model}%`)
+    }
+
+    if (updatedStartDate) {
+      query = query.gte(
+        'updated_at',
+        dayjs(updatedStartDate).startOf('day').toISOString(),
+      )
+    }
+
+    if (updatedEndDate) {
+      query = query.lte(
+        'updated_at',
+        dayjs(updatedEndDate).endOf('day').toISOString(),
+      )
     }
 
     return query
@@ -56,6 +75,20 @@ export async function getStandardTimes({
 
     if (model) {
       query = query.ilike('model', `%${model}%`)
+    }
+
+    if (updatedStartDate) {
+      query = query.gte(
+        'updated_at',
+        dayjs(updatedStartDate).startOf('day').toISOString(),
+      )
+    }
+
+    if (updatedEndDate) {
+      query = query.lte(
+        'updated_at',
+        dayjs(updatedEndDate).endOf('day').toISOString(),
+      )
     }
 
     return query
