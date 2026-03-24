@@ -34,6 +34,9 @@ interface Props {
   initialValues?: MaterialTransferWithEmployee | null
   employees: { id: string; name: string }[]
   loading?: boolean
+  fixedOperator?: { id: string; name: string } | null
+  canAudit?: boolean
+  mobile?: boolean
 }
 
 export default function MaterialTransferForm({
@@ -43,6 +46,9 @@ export default function MaterialTransferForm({
   initialValues,
   employees,
   loading = false,
+  fixedOperator = null,
+  canAudit = true,
+  mobile = false,
 }: Props) {
   const { message } = App.useApp()
   const [form] = Form.useForm<MaterialTransferInsert>()
@@ -85,9 +91,10 @@ export default function MaterialTransferForm({
 
     form.resetFields()
     form.setFieldsValue({
+      operator_employee_id: fixedOperator?.id,
       is_audited: false,
     })
-  }, [form, initialValues, open])
+  }, [fixedOperator?.id, form, initialValues, open])
 
   function handleProjectChange(projectNo: string) {
     const selectedProject = projectInfoMap.get(projectNo)
@@ -111,11 +118,11 @@ export default function MaterialTransferForm({
       length_mm: values.length_mm ?? null,
       customer_model: values.customer_model || null,
       transfer_quantity: values.transfer_quantity,
-      operator_employee_id: values.operator_employee_id,
+      operator_employee_id: fixedOperator?.id || values.operator_employee_id,
       target_workshop: values.target_workshop,
       recipient_name: values.recipient_name,
       remark: values.remark || null,
-      is_audited: values.is_audited ?? false,
+      is_audited: canAudit ? (values.is_audited ?? false) : false,
     })
   }
 
@@ -124,7 +131,8 @@ export default function MaterialTransferForm({
       title={initialValues ? '编辑物料转移单' : '创建物料转移单'}
       open={open}
       onCancel={onCancel}
-      width={760}
+      width={mobile ? 'calc(100vw - 24px)' : 760}
+      style={mobile ? { top: 16, maxWidth: 520 } : undefined}
       footer={null}
       destroyOnHidden
     >
@@ -177,6 +185,7 @@ export default function MaterialTransferForm({
               placeholder="请选择操作人"
               showSearch
               optionFilterProp="label"
+              disabled={Boolean(fixedOperator)}
               options={employees.map((employee) => ({
                 label: employee.name,
                 value: employee.id,
@@ -213,12 +222,18 @@ export default function MaterialTransferForm({
           <Input.TextArea rows={3} placeholder="可填写转移说明" />
         </Form.Item>
 
-        <Form.Item name="is_audited" label="审核状态" valuePropName="checked">
-          <Switch
-            checkedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[1].label}
-            unCheckedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[0].label}
-          />
-        </Form.Item>
+        {canAudit ? (
+          <Form.Item
+            name="is_audited"
+            label="审核状态"
+            valuePropName="checked"
+          >
+            <Switch
+              checkedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[1].label}
+              unCheckedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[0].label}
+            />
+          </Form.Item>
+        ) : null}
 
         <Form.Item className="mb-0">
           <Space className="flex justify-end">

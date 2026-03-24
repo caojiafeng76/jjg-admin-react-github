@@ -2,6 +2,7 @@ import { App, Layout, Button, Modal, theme } from 'antd'
 import { useState } from 'react'
 import {
   ArrowRightStartOnRectangleIcon,
+  ArrowsRightLeftIcon,
   ClipboardDocumentListIcon,
   DocumentChartBarIcon,
   KeyIcon,
@@ -26,6 +27,11 @@ const navItems = [
     key: '/production-daily-report',
     label: '我的日报',
     icon: DocumentChartBarIcon,
+  },
+  {
+    key: '/material-transfer',
+    label: '转移表',
+    icon: ArrowsRightLeftIcon,
   },
 ]
 
@@ -116,7 +122,7 @@ export default function EmployeeMobileLayout() {
       </Content>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/60 bg-white/92 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+10px)] backdrop-blur-xl">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {navItems.map((item) => {
             const isActive = location.pathname === item.key
             const Icon = item.icon
@@ -126,14 +132,15 @@ export default function EmployeeMobileLayout() {
                 key={item.key}
                 type="button"
                 onClick={() => navigate(item.key)}
+                aria-label={item.label}
+                title={item.label}
                 className={
                   isActive
-                    ? 'flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(15,23,42,0.25)] transition'
-                    : 'flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-600 transition'
+                    ? 'flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-white shadow-[0_10px_30px_rgba(15,23,42,0.25)] transition'
+                    : 'flex items-center justify-center rounded-2xl bg-slate-100 px-4 py-3 text-slate-600 transition'
                 }
               >
-                <Icon className="size-4" />
-                {item.label}
+                <Icon className="size-5" />
               </button>
             )
           })}

@@ -38,10 +38,11 @@ export function useEmployeesList({
   })
 }
 
-export function useAllEmployees() {
+export function useAllEmployees(enabled = true) {
   return useQuery({
     queryKey: [EMPLOYEES_KEY, 'all'],
     queryFn: getAllEmployees,
+    enabled,
     ...queryConfig.list,
   })
 }
