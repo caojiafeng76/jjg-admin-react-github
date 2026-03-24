@@ -142,14 +142,18 @@ export default function StandardTimeList() {
         if (isEdit && selectedRowKeys[0]) {
           const standardSecondsChanged =
             editingRecord?.standard_seconds !== nextValues.standard_seconds
+          const operationChanged = editingRecord?.operation !== nextValues.operation
+          const modelChanged = editingRecord?.model !== nextValues.model
+          const relatedOrdersSynced =
+            standardSecondsChanged || operationChanged || modelChanged
 
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
             values: nextValues,
           })
           message.success(
-            standardSecondsChanged
-              ? '标准工时更新成功，历史工单已同步修正'
+            relatedOrdersSynced
+              ? '标准工时更新成功，关联工单已同步修正'
               : isTeamLeaderMode
                 ? '理论工时更新成功'
                 : '标准工时更新成功',

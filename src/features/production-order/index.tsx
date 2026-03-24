@@ -144,10 +144,16 @@ export default function ProductionOrderPage() {
     page,
     pageSize,
     filters,
+    options: {
+      realtime: isEmployeeView && !isModalOpen,
+    },
   })
 
   const { data: detailData, isLoading: isLoadingDetail } = useProductionOrder(
     editingRecord?.id,
+    {
+      realtime: isEmployeeView && isModalOpen && isView,
+    },
   )
 
   const { data: allEmployees } = useAllEmployees()

@@ -13,10 +13,15 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 
 const PRODUCTION_ORDERS_KEY = 'production-orders' as const
 
+interface ProductionOrderQueryOptions {
+  realtime?: boolean
+}
+
 export function useProductionOrders({
   page,
   pageSize,
   filters,
+  options,
 }: {
   page: number
   pageSize: number
@@ -28,21 +33,25 @@ export function useProductionOrders({
     customerModel?: string
     isAudited?: boolean
   }
+  options?: ProductionOrderQueryOptions
 }) {
   return useQuery({
     queryKey: [PRODUCTION_ORDERS_KEY, page, pageSize, filters],
     queryFn: () => getProductionOrders({ page, pageSize, ...filters }),
     placeholderData: keepPreviousData,
-    ...queryConfig.list,
+    ...(options?.realtime ? queryConfig.realtime : queryConfig.list),
   })
 }
 
-export function useProductionOrder(id: string | undefined) {
+export function useProductionOrder(
+  id: string | undefined,
+  options?: ProductionOrderQueryOptions,
+) {
   return useQuery({
     queryKey: [PRODUCTION_ORDERS_KEY, id],
     queryFn: () => getProductionOrderById(id!),
     enabled: !!id,
-    ...queryConfig.detail,
+    ...(options?.realtime ? queryConfig.realtime : queryConfig.detail),
   })
 }
 
