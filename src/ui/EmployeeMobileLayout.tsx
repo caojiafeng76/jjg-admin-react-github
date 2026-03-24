@@ -89,7 +89,7 @@ export default function EmployeeMobileLayout() {
   }
 
   return (
-    <Layout className="min-h-screen bg-[radial-gradient(circle_at_top,#f5f7ff_0%,#eef2ff_35%,#e8edf5_100%)]">
+    <Layout className="h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,#f5f7ff_0%,#eef2ff_35%,#e8edf5_100%)]">
       <header className="sticky top-0 z-20 border-b border-white/50 bg-white/85 px-4 pt-[calc(env(safe-area-inset-top)+14px)] pb-3 backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -131,9 +131,9 @@ export default function EmployeeMobileLayout() {
         </div>
       </header>
 
-      <Content className="px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+84px)]">
+      <Content className="min-h-0 overflow-hidden px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+84px)]">
         <div
-          className="min-h-[calc(100vh-168px)] rounded-4xl border border-white/60 shadow-[0_20px_70px_rgba(15,23,42,0.08)]"
+          className="h-full min-h-0 overflow-hidden rounded-4xl border border-white/60 shadow-[0_20px_70px_rgba(15,23,42,0.08)]"
           style={{ background: colorBgContainer }}
         >
           <Outlet />

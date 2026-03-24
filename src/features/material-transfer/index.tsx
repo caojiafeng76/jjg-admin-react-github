@@ -430,7 +430,7 @@ export default function MaterialTransferPage() {
         ref={tableContainerRef}
         className={
           isEmployeeView
-            ? 'no-scrollbar min-h-0 overflow-y-auto'
+            ? 'no-scrollbar min-h-0 overflow-y-auto overscroll-contain'
             : 'min-h-0 flex-1 overflow-hidden'
         }
       >

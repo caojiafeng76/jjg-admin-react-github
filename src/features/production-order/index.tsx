@@ -558,7 +558,7 @@ export default function ProductionOrderPage() {
         <div
           className={
             isEmployeeView
-              ? 'no-scrollbar min-h-0 flex-1 overflow-y-auto'
+              ? 'no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain'
               : 'min-h-0 flex-1 overflow-x-auto'
           }
         >

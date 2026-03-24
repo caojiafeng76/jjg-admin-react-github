@@ -126,6 +126,9 @@ export default function MaterialTransferForm({
     })
   }
 
+  const getPopupContainer = (triggerNode: HTMLElement) =>
+    triggerNode.parentElement || document.body
+
   return (
     <Modal
       title={initialValues ? '编辑物料转移单' : '创建物料转移单'}
@@ -136,110 +139,122 @@ export default function MaterialTransferForm({
       footer={null}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
-        <Form.Item
-          name="project_no"
-          label="项目号"
-          rules={[{ required: true, message: '请选择项目号' }]}
-        >
-          <Select
-            showSearch
-            placeholder="请选择项目号"
-            loading={isLoadingProjectNos}
-            options={projectNoOptions}
-            filterOption={filterProjectNoOption}
-            optionRender={renderProjectNoOption}
-            onChange={handleProjectChange}
-          />
-        </Form.Item>
-
-        <div className="grid grid-cols-3 gap-3">
-          <Form.Item name="product_model" label="型号">
-            <Input disabled placeholder="自动带出" />
-          </Form.Item>
-
-          <Form.Item name="length_mm" label="长度(mm)">
-            <InputNumber disabled placeholder="自动带出" className="w-full" />
-          </Form.Item>
-
-          <Form.Item name="customer_model" label="客户型号">
-            <Input disabled placeholder="自动带出" />
-          </Form.Item>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
+      <div
+        className={
+          mobile
+            ? 'max-h-[calc(100vh-240px)] overflow-y-auto overscroll-contain pr-1'
+            : undefined
+        }
+      >
+        <Form form={form} layout="vertical" onFinish={handleFinish}>
           <Form.Item
-            name="transfer_quantity"
-            label="转移数量"
-            rules={[{ required: true, message: '请输入转移数量' }]}
-          >
-            <InputNumber min={1} precision={0} className="w-full" />
-          </Form.Item>
-
-          <Form.Item
-            name="operator_employee_id"
-            label="操作人"
-            rules={[{ required: true, message: '请选择操作人' }]}
+            name="project_no"
+            label="项目号"
+            rules={[{ required: true, message: '请选择项目号' }]}
           >
             <Select
-              placeholder="请选择操作人"
               showSearch
-              optionFilterProp="label"
-              disabled={Boolean(fixedOperator)}
-              options={employees.map((employee) => ({
-                label: employee.name,
-                value: employee.id,
-              }))}
-            />
-          </Form.Item>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Form.Item
-            name="target_workshop"
-            label="接收车间"
-            rules={[{ required: true, message: '请选择接收车间' }]}
-          >
-            <Select
-              placeholder="请选择接收车间"
-              options={MATERIAL_TRANSFER_WORKSHOPS.map((workshop) => ({
-                label: workshop,
-                value: workshop,
-              }))}
+              placeholder="请选择项目号"
+              loading={isLoadingProjectNos}
+              getPopupContainer={getPopupContainer}
+              options={projectNoOptions}
+              filterOption={filterProjectNoOption}
+              optionRender={renderProjectNoOption}
+              listHeight={320}
+              onChange={handleProjectChange}
             />
           </Form.Item>
 
-          <Form.Item
-            name="recipient_name"
-            label="接收人"
-            rules={[{ required: true, message: '请输入接收人' }]}
-          >
-            <Input placeholder="请输入接收人" />
+          <div className="grid grid-cols-3 gap-3">
+            <Form.Item name="product_model" label="型号">
+              <Input disabled placeholder="自动带出" />
+            </Form.Item>
+
+            <Form.Item name="length_mm" label="长度(mm)">
+              <InputNumber disabled placeholder="自动带出" className="w-full" />
+            </Form.Item>
+
+            <Form.Item name="customer_model" label="客户型号">
+              <Input disabled placeholder="自动带出" />
+            </Form.Item>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Form.Item
+              name="transfer_quantity"
+              label="转移数量"
+              rules={[{ required: true, message: '请输入转移数量' }]}
+            >
+              <InputNumber min={1} precision={0} className="w-full" />
+            </Form.Item>
+
+            <Form.Item
+              name="operator_employee_id"
+              label="操作人"
+              rules={[{ required: true, message: '请选择操作人' }]}
+            >
+              <Select
+                placeholder="请选择操作人"
+                showSearch
+                optionFilterProp="label"
+                getPopupContainer={getPopupContainer}
+                disabled={Boolean(fixedOperator)}
+                options={employees.map((employee) => ({
+                  label: employee.name,
+                  value: employee.id,
+                }))}
+              />
+            </Form.Item>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Form.Item
+              name="target_workshop"
+              label="接收车间"
+              rules={[{ required: true, message: '请选择接收车间' }]}
+            >
+              <Select
+                placeholder="请选择接收车间"
+                getPopupContainer={getPopupContainer}
+                options={MATERIAL_TRANSFER_WORKSHOPS.map((workshop) => ({
+                  label: workshop,
+                  value: workshop,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="recipient_name"
+              label="接收人"
+              rules={[{ required: true, message: '请输入接收人' }]}
+            >
+              <Input placeholder="请输入接收人" />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="remark" label="备注">
+            <Input.TextArea rows={3} placeholder="可填写转移说明" />
           </Form.Item>
-        </div>
 
-        <Form.Item name="remark" label="备注">
-          <Input.TextArea rows={3} placeholder="可填写转移说明" />
-        </Form.Item>
+          {canAudit ? (
+            <Form.Item name="is_audited" label="审核状态" valuePropName="checked">
+              <Switch
+                checkedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[1].label}
+                unCheckedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[0].label}
+              />
+            </Form.Item>
+          ) : null}
 
-        {canAudit ? (
-          <Form.Item name="is_audited" label="审核状态" valuePropName="checked">
-            <Switch
-              checkedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[1].label}
-              unCheckedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[0].label}
-            />
+          <Form.Item className="mb-0">
+            <Space className="flex justify-end">
+              <Button onClick={onCancel}>取消</Button>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {initialValues ? '保存' : '创建'}
+              </Button>
+            </Space>
           </Form.Item>
-        ) : null}
-
-        <Form.Item className="mb-0">
-          <Space className="flex justify-end">
-            <Button onClick={onCancel}>取消</Button>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              {initialValues ? '保存' : '创建'}
-            </Button>
-          </Space>
-        </Form.Item>
-      </Form>
+        </Form>
+      </div>
     </Modal>
   )
 }
