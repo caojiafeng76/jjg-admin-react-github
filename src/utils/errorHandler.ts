@@ -47,11 +47,27 @@ const ERROR_MESSAGE_TRANSLATIONS: Record<string, string> = {
   'Invalid password': '密码错误',
 }
 
+const ERROR_MESSAGE_PARTIAL_TRANSLATIONS: Array<[string, string]> = [
+  ['violates row-level security policy', '没有权限执行当前操作，请确认数据库权限策略已生效'],
+  ['permission denied for table', '没有权限访问当前数据表'],
+  ['permission denied', '没有权限执行当前操作'],
+]
+
 /**
  * 翻译错误消息
  */
 export function translateErrorMessage(message: string): string {
-  return ERROR_MESSAGE_TRANSLATIONS[message] || message
+  const exactMatch = ERROR_MESSAGE_TRANSLATIONS[message]
+
+  if (exactMatch) {
+    return exactMatch
+  }
+
+  const partialMatch = ERROR_MESSAGE_PARTIAL_TRANSLATIONS.find(([pattern]) =>
+    message.includes(pattern),
+  )
+
+  return partialMatch?.[1] || message
 }
 
 /**

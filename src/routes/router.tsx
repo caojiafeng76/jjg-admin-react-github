@@ -220,7 +220,7 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
-              allow={['admin']}
+              allow={['admin', 'employee']}
               element={<MaterialTransfer />}
             />
           </Suspense>

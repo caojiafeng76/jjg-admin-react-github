@@ -1,6 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Form, Input, Select, Space } from 'antd'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
+import {
+  ChevronDownIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from '@heroicons/react/16/solid'
 
 import {
   MATERIAL_TRANSFER_AUDIT_OPTIONS,
@@ -20,6 +24,8 @@ interface Props {
   onReset: () => void
   employees: { id: string; name: string }[]
   initialValues?: MaterialTransferSearchValues
+  mobile?: boolean
+  showEmployeeFilter?: boolean
 }
 
 export default function MaterialTransferSearch({
@@ -27,12 +33,19 @@ export default function MaterialTransferSearch({
   onReset,
   employees,
   initialValues,
+  mobile = false,
+  showEmployeeFilter = true,
 }: Props) {
   const [form] = Form.useForm()
+  const [isExpanded, setIsExpanded] = useState(!mobile)
 
   useEffect(() => {
     form.setFieldsValue(initialValues)
   }, [form, initialValues])
+
+  useEffect(() => {
+    setIsExpanded(!mobile)
+  }, [mobile])
 
   function handleFinish(values: MaterialTransferSearchValues) {
     onSearch({
@@ -48,38 +61,51 @@ export default function MaterialTransferSearch({
   function handleReset() {
     form.resetFields()
     onReset()
+    if (mobile) {
+      setIsExpanded(false)
+    }
   }
 
-  return (
+  const formContent = (
     <Form
       form={form}
       onFinish={handleFinish}
-      layout="inline"
-      className="flex flex-wrap items-center gap-2"
+      layout={mobile ? 'vertical' : 'inline'}
+      className={
+        mobile
+          ? 'grid grid-cols-1 gap-3'
+          : 'flex flex-wrap items-center gap-2'
+      }
     >
       <Form.Item name="projectNo" className="mb-0">
-        <Input placeholder="项目号" allowClear style={{ width: 180 }} />
-      </Form.Item>
-
-      <Form.Item name="employeeId" className="mb-0">
-        <Select
-          placeholder="操作人"
+        <Input
+          placeholder="项目号"
           allowClear
-          showSearch
-          optionFilterProp="label"
-          style={{ width: 180 }}
-          options={employees.map((employee) => ({
-            label: employee.name,
-            value: employee.id,
-          }))}
+          style={{ width: mobile ? '100%' : 180 }}
         />
       </Form.Item>
+
+      {showEmployeeFilter ? (
+        <Form.Item name="employeeId" className="mb-0">
+          <Select
+            placeholder="操作人"
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            style={{ width: mobile ? '100%' : 180 }}
+            options={employees.map((employee) => ({
+              label: employee.name,
+              value: employee.id,
+            }))}
+          />
+        </Form.Item>
+      ) : null}
 
       <Form.Item name="targetWorkshop" className="mb-0">
         <Select
           placeholder="接收车间"
           allowClear
-          style={{ width: 180 }}
+          style={{ width: mobile ? '100%' : 180 }}
           options={MATERIAL_TRANSFER_WORKSHOPS.map((workshop) => ({
             label: workshop,
             value: workshop,
@@ -88,20 +114,24 @@ export default function MaterialTransferSearch({
       </Form.Item>
 
       <Form.Item name="recipientName" className="mb-0">
-        <Input placeholder="接收人" allowClear style={{ width: 160 }} />
+        <Input
+          placeholder="接收人"
+          allowClear
+          style={{ width: mobile ? '100%' : 160 }}
+        />
       </Form.Item>
 
       <Form.Item name="isAudited" className="mb-0">
         <Select
           placeholder="审核状态"
           allowClear
-          style={{ width: 140 }}
+          style={{ width: mobile ? '100%' : 140 }}
           options={[...MATERIAL_TRANSFER_AUDIT_OPTIONS]}
         />
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <Space>
+        <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>
           <Button
             type="primary"
             icon={<MagnifyingGlassIcon className="h-4 w-4" />}
@@ -119,4 +149,32 @@ export default function MaterialTransferSearch({
       </Form.Item>
     </Form>
   )
+
+  if (mobile) {
+    return (
+      <div className="flex flex-col gap-3">
+        <Button
+          block
+          type="default"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          className="h-11 rounded-2xl border-slate-200 bg-slate-50 px-4 text-slate-700 shadow-none"
+        >
+          <span className="flex w-full items-center justify-between text-sm font-medium">
+            <span>{isExpanded ? '收起筛选条件' : '展开筛选条件'}</span>
+            <ChevronDownIcon
+              className={
+                isExpanded
+                  ? 'h-4 w-4 rotate-180 transition-transform'
+                  : 'h-4 w-4 transition-transform'
+              }
+            />
+          </span>
+        </Button>
+
+        {isExpanded ? formContent : null}
+      </div>
+    )
+  }
+
+  return formContent
 }
