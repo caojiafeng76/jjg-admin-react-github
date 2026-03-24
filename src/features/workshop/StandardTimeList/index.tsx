@@ -7,7 +7,10 @@ import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import type { StandardTime } from '@/services/apiStandardTimes'
+import type {
+  StandardTime,
+  StandardTimeFormValues,
+} from '@/services/apiStandardTimes'
 import {
   useStandardTimesList,
   useCreateStandardTime,
@@ -28,7 +31,7 @@ export default function StandardTimeList() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [formRef, setFormRef] = useState<FormInstance<StandardTime> | null>(
+  const [formRef, setFormRef] = useState<FormInstance<StandardTimeFormValues> | null>(
     null,
   )
   const [searchParams, setSearchParams] = useState<{
@@ -102,7 +105,7 @@ export default function StandardTimeList() {
   }, [deleteMutation, message, selectedRowKeys])
 
   const handleFinish = useCallback(
-    async (values: StandardTime) => {
+    async (values: StandardTimeFormValues) => {
       try {
         if (isEdit && selectedRowKeys[0]) {
           const standardSecondsChanged =

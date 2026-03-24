@@ -64,6 +64,12 @@ export default function StandardTimeTable({
         width: 150,
       },
       {
+        title: '理论工时（秒）',
+        dataIndex: 'theoretical_seconds',
+        key: 'theoretical_seconds',
+        width: 150,
+      },
+      {
         title: '创建时间',
         dataIndex: 'created_at',
         key: 'created_at',
@@ -126,7 +132,7 @@ export default function StandardTimeTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 800, y: scrollY }}
+      scroll={{ x: 950, y: scrollY }}
       size="small"
       pagination={false}
       style={{

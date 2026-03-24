@@ -1,13 +1,16 @@
 import { Form, FormInstance, Input, InputNumber } from 'antd'
 import { useEffect } from 'react'
-import type { StandardTime } from '@/services/apiStandardTimes'
+import type {
+  StandardTime,
+  StandardTimeFormValues,
+} from '@/services/apiStandardTimes'
 
 interface Props {
-  onFinish: (values: StandardTime) => void
-  setFormRef: (form: FormInstance<StandardTime>) => void
+  onFinish: (values: StandardTimeFormValues) => void
+  setFormRef: (form: FormInstance<StandardTimeFormValues>) => void
   isCreating: boolean
   isEdit: boolean
-  initialValues?: StandardTime
+  initialValues?: StandardTimeFormValues | StandardTime
 }
 
 export default function StandardTimeForm({
@@ -17,7 +20,7 @@ export default function StandardTimeForm({
   isEdit: _isEdit,
   initialValues,
 }: Props) {
-  const [form] = Form.useForm<StandardTime>()
+  const [form] = Form.useForm<StandardTimeFormValues>()
 
   useEffect(() => {
     setFormRef(form)
@@ -28,6 +31,7 @@ export default function StandardTimeForm({
       form.setFieldsValue(initialValues)
     } else {
       form.resetFields()
+      form.setFieldsValue({ theoretical_seconds: 0 })
     }
   }, [form, initialValues])
 
@@ -65,6 +69,18 @@ export default function StandardTimeForm({
       >
         <InputNumber
           placeholder="请输入标准工时"
+          disabled={isCreating}
+          min={0}
+          style={{ width: '100%' }}
+        />
+      </Form.Item>
+      <Form.Item
+        name="theoretical_seconds"
+        label="理论工时（秒）"
+        rules={[{ required: true, message: '请输入理论工时' }]}
+      >
+        <InputNumber
+          placeholder="请输入理论工时"
           disabled={isCreating}
           min={0}
           style={{ width: '100%' }}
