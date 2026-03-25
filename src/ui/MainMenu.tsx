@@ -34,7 +34,7 @@ const adminItems: MenuItem[] = [
     children: [
       { key: 'workshop-order-list', label: '订单管理' },
       { key: 'employee-list', label: '员工管理' },
-      { key: 'standard-time-list', label: '标准工时' },
+      { key: 'standard-time-list', label: '成本核算' },
       { key: 'material-transfer', label: '物料转移单' },
       { key: 'production-order', label: '生产工单' },
       { key: 'production-daily-report', label: '生产日报表' },

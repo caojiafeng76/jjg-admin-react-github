@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
+import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useAuth } from '@/contexts/AuthContext'
@@ -12,6 +13,7 @@ import type {
   StandardTime,
   StandardTimeFormValues,
 } from '@/services/apiStandardTimes'
+import { exportCostAccountingToExcel } from '@/utils/costAccountingExcel'
 import {
   useStandardTimesList,
   useCreateStandardTime,
@@ -29,8 +31,9 @@ export default function StandardTimeList() {
   const isTeamLeaderMode = role === 'team_leader'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalTitle, setModalTitle] = useState('创建标准工时')
+  const [modalTitle, setModalTitle] = useState('新建成本核算')
   const [isEdit, setIsEdit] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -69,7 +72,7 @@ export default function StandardTimeList() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    setModalTitle(isTeamLeaderMode ? '创建理论工时' : '创建标准工时')
+    setModalTitle(isTeamLeaderMode ? '创建理论工时' : '新建成本核算')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef, isTeamLeaderMode])
@@ -100,7 +103,7 @@ export default function StandardTimeList() {
       setEditingRecord(targetRecord)
       setSelectedRowKeys(targetRecord.id ? [targetRecord.id] : [])
       setIsEdit(true)
-      setModalTitle(isTeamLeaderMode ? '编辑理论工时' : '编辑标准工时')
+      setModalTitle(isTeamLeaderMode ? '编辑理论工时' : '编辑成本核算')
       setIsModalOpen(true)
     },
     [data?.items, isTeamLeaderMode, message, selectedRowKeys],
@@ -108,7 +111,7 @@ export default function StandardTimeList() {
 
   const handleDelete = useCallback(async () => {
     if (isTeamLeaderMode) {
-      message.warning('班组长不能删除标准工时')
+      message.warning('班组长不能删除成本核算')
       return
     }
 
@@ -119,16 +122,41 @@ export default function StandardTimeList() {
 
     try {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
-      message.success('标准工时删除成功')
+      message.success('成本核算删除成功')
       setSelectedRowKeys([])
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
       } else {
-        message.error('删除标准工时失败，请稍后重试')
+        message.error('删除成本核算失败，请稍后重试')
       }
     }
   }, [deleteMutation, isTeamLeaderMode, message, selectedRowKeys])
+
+  const handleExport = useCallback(async () => {
+    const selectedRecords = (data?.items || []).filter((item) =>
+      selectedRowKeys.includes(item.id || ''),
+    )
+
+    if (selectedRecords.length === 0) {
+      message.warning('请先选择要导出的成本核算数据')
+      return
+    }
+
+    try {
+      setIsExporting(true)
+      exportCostAccountingToExcel(selectedRecords)
+      message.success(`已导出 ${selectedRecords.length} 条成本核算数据`)
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('导出成本核算失败，请稍后重试')
+      }
+    } finally {
+      setIsExporting(false)
+    }
+  }, [data?.items, message, selectedRowKeys])
 
   const handleFinish = useCallback(
     async (values: StandardTimeFormValues) => {
@@ -161,15 +189,15 @@ export default function StandardTimeList() {
           })
           message.success(
             relatedOrdersSynced
-              ? '标准工时更新成功，关联工单已同步修正'
+              ? '成本核算更新成功，关联工单已同步修正'
               : isTeamLeaderMode
                 ? '理论工时更新成功'
-                : '标准工时更新成功',
+                : '成本核算更新成功',
           )
         } else {
           await createMutation.mutateAsync(nextValues)
           message.success(
-            isTeamLeaderMode ? '理论工时创建成功' : '标准工时创建成功',
+            isTeamLeaderMode ? '理论工时创建成功' : '成本核算创建成功',
           )
         }
 
@@ -267,12 +295,19 @@ export default function StandardTimeList() {
         <div className="flex flex-wrap items-center gap-2">
           <AddButton handleCreate={handleCreate} />
           <EditButton title="编辑" handleEdit={() => handleEdit()} />
+          <ExportButton
+            handleExport={handleExport}
+            loading={isExporting}
+            count={selectedRowKeys.length}
+          >
+            导出成本核算
+          </ExportButton>
           <DeleteButton
             onConfirm={handleDelete}
             isDeleting={deleteMutation.isPending}
             count={selectedRowKeys.length}
-            title="删除标准工时"
-            itemName="标准工时"
+            title="删除成本核算"
+            itemName="成本核算"
           />
         </div>
       )}

@@ -2,6 +2,10 @@ import { useMemo } from 'react'
 import { Table, TableColumnsType } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
 
+function formatNumber(value: number | null | undefined, digits = 4) {
+  return Number(value || 0).toFixed(digits)
+}
+
 interface Props {
   loading: boolean
   data: StandardTime[]
@@ -26,14 +30,7 @@ export default function StandardTimeTable({
   hideStandardSeconds = false,
 }: Props) {
   const columns: TableColumnsType<StandardTime> = useMemo(() => {
-    const nextColumns: TableColumnsType<StandardTime> = [
-      {
-        title: '#',
-        render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
-        width: 60,
-        fixed: 'left',
-        key: '#',
-      },
+    const baseInfoChildren: NonNullable<TableColumnsType<StandardTime>[number]>[] = [
       {
         title: '型号',
         dataIndex: 'model',
@@ -61,20 +58,150 @@ export default function StandardTimeTable({
     ]
 
     if (!hideStandardSeconds) {
-      nextColumns.push({
+      baseInfoChildren.push({
         title: '标准工时（秒）',
         dataIndex: 'standard_seconds',
         key: 'standard_seconds',
-        width: 150,
+        width: 140,
       })
     }
 
+    const nextColumns: TableColumnsType<StandardTime> = [
+      {
+        title: '#',
+        render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
+        width: 60,
+        fixed: 'left',
+        key: '#',
+      },
+      {
+        title: '基础信息',
+        children: baseInfoChildren,
+      },
+    ]
+
     nextColumns.push(
       {
-        title: '理论工时（秒）',
-        dataIndex: 'theoretical_seconds',
-        key: 'theoretical_seconds',
-        width: 150,
+        title: '费率参数',
+        children: [
+          {
+            title: '理论工时（秒）',
+            dataIndex: 'theoretical_seconds',
+            key: 'theoretical_seconds',
+            width: 140,
+          },
+          {
+            title: '检验工时（秒）',
+            dataIndex: 'inspection_seconds',
+            key: 'inspection_seconds',
+            width: 140,
+          },
+          {
+            title: '人工费率',
+            dataIndex: 'labor_rate',
+            key: 'labor_rate',
+            width: 120,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '设备费率',
+            dataIndex: 'equipment_rate',
+            key: 'equipment_rate',
+            width: 120,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '刀具费率',
+            dataIndex: 'tool_rate',
+            key: 'tool_rate',
+            width: 120,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '切削液费率',
+            dataIndex: 'cutting_fluid_rate',
+            key: 'cutting_fluid_rate',
+            width: 130,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '工装费率',
+            dataIndex: 'fixture_rate',
+            key: 'fixture_rate',
+            width: 120,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '日管理总费用',
+            dataIndex: 'daily_management_cost',
+            key: 'daily_management_cost',
+            width: 140,
+            render: (value: number) => formatNumber(value, 2),
+          },
+          {
+            title: '日总工时',
+            dataIndex: 'daily_total_hours',
+            key: 'daily_total_hours',
+            width: 120,
+            render: (value: number) => formatNumber(value, 2),
+          },
+        ],
+      },
+      {
+        title: '自动成本',
+        children: [
+          {
+            title: '人工成本',
+            dataIndex: 'labor_cost',
+            key: 'labor_cost',
+            width: 120,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '设备成本',
+            dataIndex: 'equipment_cost',
+            key: 'equipment_cost',
+            width: 120,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '刀具辅料成本',
+            dataIndex: 'tooling_consumable_cost',
+            key: 'tooling_consumable_cost',
+            width: 140,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '检验成本',
+            dataIndex: 'inspection_cost',
+            key: 'inspection_cost',
+            width: 120,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '单品分摊额',
+            dataIndex: 'overhead_cost',
+            key: 'overhead_cost',
+            width: 130,
+            render: (value: number) => formatNumber(value),
+          },
+          {
+            title: '合计',
+            dataIndex: 'total_cost',
+            key: 'total_cost',
+            width: 120,
+            render: (value: number) => formatNumber(value),
+          },
+        ],
+      },
+      {
+        title: '备注',
+        dataIndex: 'remark',
+        key: 'remark',
+        width: 180,
+        ellipsis: {
+          showTitle: true,
+        },
       },
       {
         title: '创建时间',
@@ -140,7 +267,7 @@ export default function StandardTimeTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: hideStandardSeconds ? 800 : 950, y: scrollY }}
+      scroll={{ x: hideStandardSeconds ? 2200 : 2350, y: scrollY }}
       size="small"
       pagination={false}
       style={{

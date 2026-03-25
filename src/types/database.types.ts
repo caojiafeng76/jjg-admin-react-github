@@ -100,29 +100,74 @@ export type Database = {
       process_standards: {
         Row: {
           created_at: string
+          cutting_fluid_rate: number
+          daily_management_cost: number
+          daily_total_hours: number
+          equipment_cost: number
+          equipment_rate: number
+          fixture_rate: number
           id: string
+          inspection_cost: number
+          inspection_seconds: number
+          labor_cost: number
+          labor_rate: number
           model: string
           operation: string
+          overhead_cost: number
+          remark: string | null
           standard_seconds: number
           theoretical_seconds: number
+          tool_rate: number
+          tooling_consumable_cost: number
+          total_cost: number
           updated_at: string
         }
         Insert: {
           created_at?: string
+          cutting_fluid_rate?: number
+          daily_management_cost?: number
+          daily_total_hours?: number
+          equipment_cost?: never
+          equipment_rate?: number
+          fixture_rate?: number
           id?: string
+          inspection_cost?: never
+          inspection_seconds?: number
+          labor_cost?: never
+          labor_rate?: number
           model: string
           operation: string
+          overhead_cost?: never
+          remark?: string | null
           standard_seconds: number
           theoretical_seconds?: number
+          tool_rate?: number
+          tooling_consumable_cost?: never
+          total_cost?: never
           updated_at?: string
         }
         Update: {
           created_at?: string
+          cutting_fluid_rate?: number
+          daily_management_cost?: number
+          daily_total_hours?: number
+          equipment_cost?: never
+          equipment_rate?: number
+          fixture_rate?: number
           id?: string
+          inspection_cost?: never
+          inspection_seconds?: number
+          labor_cost?: never
+          labor_rate?: number
           model?: string
           operation?: string
+          overhead_cost?: never
+          remark?: string | null
           standard_seconds?: number
           theoretical_seconds?: number
+          tool_rate?: number
+          tooling_consumable_cost?: never
+          total_cost?: never
           updated_at?: string
         }
         Relationships: []
