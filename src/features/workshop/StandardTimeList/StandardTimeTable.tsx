@@ -30,7 +30,9 @@ export default function StandardTimeTable({
   hideStandardSeconds = false,
 }: Props) {
   const columns: TableColumnsType<StandardTime> = useMemo(() => {
-    const baseInfoChildren: NonNullable<TableColumnsType<StandardTime>[number]>[] = [
+    const baseInfoChildren: NonNullable<
+      TableColumnsType<StandardTime>[number]
+    >[] = [
       {
         title: '型号',
         dataIndex: 'model',
