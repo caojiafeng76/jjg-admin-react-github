@@ -11,11 +11,43 @@ type ProcessStandardInsert =
 export type StandardTime = ProcessStandardRow
 export type StandardTimeFormValues = Pick<
   ProcessStandardInsert,
-  'operation' | 'model' | 'standard_seconds' | 'theoretical_seconds'
+  | 'operation'
+  | 'model'
+  | 'standard_seconds'
+  | 'theoretical_seconds'
+  | 'labor_rate'
+  | 'equipment_rate'
+  | 'tool_rate'
+  | 'cutting_fluid_rate'
+  | 'fixture_rate'
+  | 'inspection_seconds'
+  | 'daily_management_cost'
+  | 'daily_total_hours'
+  | 'remark'
 >
 
 function normalizeStandardTimeValue(value: string): string {
   return value.trim()
+}
+
+function normalizeStandardTimePayload(
+  values: StandardTimeFormValues,
+): StandardTimeFormValues {
+  return {
+    ...values,
+    operation: normalizeStandardTimeValue(values.operation),
+    model: normalizeStandardTimeValue(values.model),
+    theoretical_seconds: values.theoretical_seconds ?? 0,
+    labor_rate: values.labor_rate ?? 0,
+    equipment_rate: values.equipment_rate ?? 0,
+    tool_rate: values.tool_rate ?? 0,
+    cutting_fluid_rate: values.cutting_fluid_rate ?? 0,
+    fixture_rate: values.fixture_rate ?? 0,
+    inspection_seconds: values.inspection_seconds ?? 0,
+    daily_management_cost: values.daily_management_cost ?? 0,
+    daily_total_hours: values.daily_total_hours ?? 0,
+    remark: values.remark?.trim() || null,
+  }
 }
 
 export async function getStandardTimes({
@@ -101,7 +133,7 @@ export async function getStandardTimes({
     ])
 
   if (totalError || zeroCountError) {
-    throw handleApiError(totalError || zeroCountError, '获取标准工时列表失败')
+    throw handleApiError(totalError || zeroCountError, '获取成本核算列表失败')
   }
 
   const normalizedZeroCount = zeroCount || 0
@@ -148,7 +180,7 @@ export async function getStandardTimes({
   const failed = results.find((result) => result.error)
 
   if (failed?.error) {
-    throw handleApiError(failed.error, '获取标准工时列表失败')
+    throw handleApiError(failed.error, '获取成本核算列表失败')
   }
 
   return {
@@ -176,18 +208,14 @@ async function checkStandardTimeExists(
   const { data, error } = await query
 
   if (error) {
-    throw handleApiError(error, '检查标准工时失败')
+    throw handleApiError(error, '检查成本核算失败')
   }
 
   return (data?.length || 0) > 0
 }
 
 export async function createStandardTime(values: StandardTimeFormValues) {
-  const normalizedValues: StandardTimeFormValues = {
-    ...values,
-    operation: normalizeStandardTimeValue(values.operation),
-    model: normalizeStandardTimeValue(values.model),
-  }
+  const normalizedValues = normalizeStandardTimePayload(values)
 
   if (normalizedValues.operation && normalizedValues.model) {
     const exists = await checkStandardTimeExists(
@@ -196,7 +224,7 @@ export async function createStandardTime(values: StandardTimeFormValues) {
     )
     if (exists) {
       throw new Error(
-        `工序 "${normalizedValues.operation}" 和型号 "${normalizedValues.model}" 的组合已存在，无法创建`,
+        `工序 "${normalizedValues.operation}" 和型号 "${normalizedValues.model}" 的成本核算已存在，无法创建`,
       )
     }
   }
@@ -206,7 +234,7 @@ export async function createStandardTime(values: StandardTimeFormValues) {
     .insert(normalizedValues)
 
   if (error) {
-    throw handleApiError(error, '创建标准工时失败')
+    throw handleApiError(error, '创建成本核算失败')
   }
 }
 
@@ -245,7 +273,7 @@ export async function ensureStandardTimeExists({
       return false
     }
 
-    throw handleApiError(error, '创建标准工时失败')
+    throw handleApiError(error, '创建成本核算失败')
   }
 
   return true
@@ -258,26 +286,28 @@ export async function updateStandardTime({
   id: string
   values: StandardTimeFormValues
 }) {
-  if (values.operation && values.model) {
+  const normalizedValues = normalizeStandardTimePayload(values)
+
+  if (normalizedValues.operation && normalizedValues.model) {
     const exists = await checkStandardTimeExists(
-      values.operation,
-      values.model,
+      normalizedValues.operation,
+      normalizedValues.model,
       id,
     )
     if (exists) {
       throw new Error(
-        `工序 "${values.operation}" 和型号 "${values.model}" 的组合已存在，无法更新`,
+        `工序 "${normalizedValues.operation}" 和型号 "${normalizedValues.model}" 的成本核算已存在，无法更新`,
       )
     }
   }
 
   const { error } = await supabase
     .from('process_standards')
-    .update(values)
+    .update(normalizedValues)
     .eq('id', id)
 
   if (error) {
-    throw handleApiError(error, '更新标准工时失败')
+    throw handleApiError(error, '更新成本核算失败')
   }
 }
 
@@ -289,9 +319,9 @@ export async function deleteStandardTimes(ids: string[]) {
 
   if (error) {
     if (error.code === '23503') {
-      throw new Error('标准工时已被工序明细引用，不能删除')
+      throw new Error('成本核算已被工序明细引用，不能删除')
     }
 
-    throw handleApiError(error, '删除标准工时失败')
+    throw handleApiError(error, '删除成本核算失败')
   }
 }

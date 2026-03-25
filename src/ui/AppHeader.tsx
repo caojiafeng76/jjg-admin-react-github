@@ -22,7 +22,7 @@ const routeToLabelMap: Record<string, string> = {
   'workshop-process-list': '工序管理',
   'workshop-defect-reason-list': '不良原因管理',
   'employee-list': '员工管理',
-  'standard-time-list': '标准工时',
+  'standard-time-list': '成本核算',
   'production-order': '生产工单',
   'production-daily-report': '生产日报表',
 }
