@@ -1,4 +1,14 @@
-import { DatePicker, Form, FormInstance, Input, InputNumber, Radio, Table, Alert, Typography } from 'antd'
+import {
+  DatePicker,
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+  Radio,
+  Table,
+  Alert,
+  Typography,
+} from 'antd'
 import type { TableColumnsType } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -159,17 +169,11 @@ export default function WorkshopOrderForm({
       {/* 手动输入模式或编辑模式 */}
       {(importMode === 'manual' || isEdit) && (
         <>
-          <Form.Item
-            name="product_delivery_date"
-            label="产品交货日期"
-          >
+          <Form.Item name="product_delivery_date" label="产品交货日期">
             <DatePicker style={{ width: '100%' }} disabled={isCreating} />
           </Form.Item>
 
-          <Form.Item
-            name="customer"
-            label="客户"
-          >
+          <Form.Item name="customer" label="客户">
             <Input disabled={isCreating} />
           </Form.Item>
 
@@ -197,10 +201,7 @@ export default function WorkshopOrderForm({
             <InputNumber style={{ width: '100%' }} disabled={isCreating} />
           </Form.Item>
 
-          <Form.Item
-            name="customer_model"
-            label="客户型号"
-          >
+          <Form.Item name="customer_model" label="客户型号">
             <Input disabled={isCreating} />
           </Form.Item>
 
@@ -257,7 +258,9 @@ export default function WorkshopOrderForm({
                 message="Excel文件解析成功"
                 description={
                   <div>
-                    <Text strong>已解析 {excelRows.length} 条数据，点击确定将批量导入</Text>
+                    <Text strong>
+                      已解析 {excelRows.length} 条数据，点击确定将批量导入
+                    </Text>
                   </div>
                 }
                 type="success"
