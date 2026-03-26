@@ -36,9 +36,10 @@ import MaterialTransferTable from './MaterialTransferTable'
 
 export default function MaterialTransferPage() {
   const { message, modal } = App.useApp()
-  const { role, employeeProfile } = useAuth()
+  const { role, employeeProfile, user } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
+  const currentUploader = employeeProfile?.name || user?.email || null
   const fixedEmployee =
     isOwnOnlyView && employeeProfile?.id
       ? { id: employeeProfile.id, name: employeeProfile.name }
@@ -255,6 +256,7 @@ export default function MaterialTransferPage() {
             id: editingRecord.id,
             values: {
               ...(values as MaterialTransferUpdate),
+              uploaded_by_name: editingRecord.uploaded_by_name,
               operator_employee_id:
                 fixedEmployee?.id || values.operator_employee_id,
               is_audited: isEmployeeView
@@ -276,6 +278,8 @@ export default function MaterialTransferPage() {
           await createMutation.mutateAsync({
             ...createValues,
             operator_employee_id: operatorEmployeeId,
+            uploaded_by_name:
+              currentUploader || createValues.uploaded_by_name || null,
             is_audited: isEmployeeView ? false : createValues.is_audited,
           })
           message.success('创建成功')
@@ -298,6 +302,7 @@ export default function MaterialTransferPage() {
       editingRecord,
       fixedEmployee?.id,
       handleCloseModal,
+      currentUploader,
       isEmployeeView,
       message,
       updateMutation,
@@ -444,6 +449,7 @@ export default function MaterialTransferPage() {
         employees={employees}
         loading={isSubmitting}
         fixedOperator={fixedEmployee}
+        currentUploader={currentUploader}
         canAudit={!isEmployeeView}
         mobile={isEmployeeView}
       />

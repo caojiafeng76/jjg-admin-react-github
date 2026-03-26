@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import {
+  AutoComplete,
   App,
   Button,
   Form,
@@ -35,9 +36,25 @@ interface Props {
   employees: { id: string; name: string }[]
   loading?: boolean
   fixedOperator?: { id: string; name: string } | null
+  currentUploader?: string | null
   canAudit?: boolean
   mobile?: boolean
 }
+
+const SHIFT_LEADER_OPTIONS = [
+  '刘向阳',
+  '归国龙',
+  '沈佳伟',
+  '周宏凯',
+  '崔路路',
+  '张宏',
+  '刘强',
+].map((name) => ({
+  label: name,
+  value: name,
+}))
+
+const DEFAULT_INSPECTOR_NAME = '崔路路'
 
 export default function MaterialTransferForm({
   open,
@@ -47,6 +64,7 @@ export default function MaterialTransferForm({
   employees,
   loading = false,
   fixedOperator = null,
+  currentUploader = null,
   canAudit = true,
   mobile = false,
 }: Props) {
@@ -83,6 +101,9 @@ export default function MaterialTransferForm({
         operator_employee_id: initialValues.operator_employee_id,
         target_workshop: initialValues.target_workshop,
         recipient_name: initialValues.recipient_name,
+        shift_leader_name: initialValues.shift_leader_name || undefined,
+        inspector_name: initialValues.inspector_name || undefined,
+        uploaded_by_name: initialValues.uploaded_by_name || undefined,
         remark: initialValues.remark || undefined,
         is_audited: initialValues.is_audited,
       })
@@ -92,9 +113,11 @@ export default function MaterialTransferForm({
     form.resetFields()
     form.setFieldsValue({
       operator_employee_id: fixedOperator?.id,
+      inspector_name: DEFAULT_INSPECTOR_NAME,
+      uploaded_by_name: currentUploader || undefined,
       is_audited: false,
     })
-  }, [fixedOperator?.id, form, initialValues, open])
+  }, [currentUploader, fixedOperator?.id, form, initialValues, open])
 
   function handleProjectChange(projectNo: string) {
     const selectedProject = projectInfoMap.get(projectNo)
@@ -121,6 +144,9 @@ export default function MaterialTransferForm({
       operator_employee_id: fixedOperator?.id || values.operator_employee_id,
       target_workshop: values.target_workshop,
       recipient_name: values.recipient_name,
+      shift_leader_name: values.shift_leader_name || null,
+      inspector_name: values.inspector_name || null,
+      uploaded_by_name: currentUploader || values.uploaded_by_name || null,
       remark: values.remark || null,
       is_audited: canAudit ? (values.is_audited ?? false) : false,
     })
@@ -231,6 +257,28 @@ export default function MaterialTransferForm({
               <Input placeholder="请输入接收人" />
             </Form.Item>
           </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Form.Item name="shift_leader_name" label="当班负责人">
+              <AutoComplete
+                allowClear
+                placeholder="可选择或手动填写"
+                options={SHIFT_LEADER_OPTIONS}
+                filterOption
+                getPopupContainer={getPopupContainer}
+              />
+            </Form.Item>
+
+            <Form.Item name="inspector_name" label="检验人">
+              <Input placeholder="默认崔路路，可修改" />
+            </Form.Item>
+          </div>
+
+          {mobile ? null : (
+            <Form.Item name="uploaded_by_name" label="数据上传">
+              <Input disabled placeholder="自动记录当前登录用户" />
+            </Form.Item>
+          )}
 
           <Form.Item name="remark" label="备注">
             <Input.TextArea rows={3} placeholder="可填写转移说明" />
