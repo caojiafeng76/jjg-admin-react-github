@@ -153,8 +153,7 @@ export default function ProductionOrderPage() {
   const [unlockForm] = Form.useForm<UnlockManagementFormValues>()
   const [changePasswordForm] =
     Form.useForm<ChangeManagementPasswordFormValues>()
-  const isManagementLocked =
-    isAdminManagementView && !isManagementUnlocked
+  const isManagementLocked = isAdminManagementView && !isManagementUnlocked
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -670,7 +669,9 @@ export default function ProductionOrderPage() {
                       return Promise.resolve()
                     }
 
-                    return Promise.reject(new Error('两次输入的新管理密码不一致'))
+                    return Promise.reject(
+                      new Error('两次输入的新管理密码不一致'),
+                    )
                   },
                 }),
               ]}
