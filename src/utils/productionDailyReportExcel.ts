@@ -24,13 +24,14 @@ export function exportProductionDailyReportToExcel(
   rows: ProductionDailyReportRow[],
 ) {
   const workHoursColumnIndex = 1
-  const qualifiedCountColumnIndex = 7
-  const defectCountColumnIndex = 8
-  const rawMaterialDefectCountColumnIndex = 9
-  const processingDefectCountColumnIndex = 10
-  const qualifiedRateColumnIndex = 11
-  const rawMaterialDefectWeightColumnIndex = 12
-  const processingDefectWeightColumnIndex = 13
+  const incomingQualifiedCountColumnIndex = 7
+  const qualifiedCountColumnIndex = 8
+  const defectCountColumnIndex = 9
+  const rawMaterialDefectCountColumnIndex = 10
+  const processingDefectCountColumnIndex = 11
+  const qualifiedRateColumnIndex = 12
+  const rawMaterialDefectWeightColumnIndex = 13
+  const processingDefectWeightColumnIndex = 14
 
   const headers = [
     '日期',
@@ -40,7 +41,8 @@ export function exportProductionDailyReportToExcel(
     '客户型号',
     '长度',
     '工序',
-    '合格数',
+    '来料合格数',
+    '成品合格数',
     '不良数量',
     '原料不良',
     '加工不良',
@@ -64,6 +66,7 @@ export function exportProductionDailyReportToExcel(
       row.customerModel,
       row.lengthMm ?? '',
       row.operation,
+      row.incomingQualifiedCount,
       row.qualifiedCount,
       row.defectCount,
       row.rawMaterialDefectCount,
@@ -81,6 +84,7 @@ export function exportProductionDailyReportToExcel(
   const summaryRowIndex = wsData.length + 1
   const numericColumnIndexes = [
     workHoursColumnIndex,
+    incomingQualifiedCountColumnIndex,
     qualifiedCountColumnIndex,
     defectCountColumnIndex,
     rawMaterialDefectCountColumnIndex,
@@ -133,12 +137,14 @@ export function exportProductionDailyReportToExcel(
     r: summaryRowIndex - 1,
     c: qualifiedRateColumnIndex,
   })
+  const incomingQualifiedCountColumnLetter = getColumnLetter(
+    incomingQualifiedCountColumnIndex,
+  )
   const qualifiedCountColumnLetter = getColumnLetter(qualifiedCountColumnIndex)
-  const defectCountColumnLetter = getColumnLetter(defectCountColumnIndex)
 
   worksheet[qualifiedRateCellRef] = {
     t: 'n',
-    f: `IFERROR(${qualifiedCountColumnLetter}${summaryRowIndex}/(${qualifiedCountColumnLetter}${summaryRowIndex}+${defectCountColumnLetter}${summaryRowIndex}),0)`,
+    f: `IFERROR(${qualifiedCountColumnLetter}${summaryRowIndex}/${incomingQualifiedCountColumnLetter}${summaryRowIndex},0)`,
     z: '0.00%',
     s: worksheet[qualifiedRateCellRef]?.s,
   }

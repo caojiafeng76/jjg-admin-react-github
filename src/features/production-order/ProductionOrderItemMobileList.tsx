@@ -66,7 +66,15 @@ export default function ProductionOrderItemMobileList({
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                  合格数量
+                  来料合格
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {item.incoming_qualified_quantity}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  成品合格数
                 </div>
                 <div className="mt-1 font-semibold text-slate-900">
                   {item.qualified_quantity}

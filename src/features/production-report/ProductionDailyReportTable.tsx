@@ -93,7 +93,13 @@ export default function ProductionDailyReportTable({
         width: 120,
       },
       {
-        title: '合格数',
+        title: '来料合格数',
+        dataIndex: 'incomingQualifiedCount',
+        key: 'incomingQualifiedCount',
+        width: 100,
+      },
+      {
+        title: '成品合格数',
         dataIndex: 'qualifiedCount',
         key: 'qualifiedCount',
         width: 90,
@@ -166,7 +172,7 @@ export default function ProductionDailyReportTable({
       }}
       pagination={false}
       size="small"
-      scroll={{ x: 1850, y: scrollY }}
+      scroll={{ x: 1950, y: scrollY }}
       style={{ fontSize: '12px' }}
     />
   )

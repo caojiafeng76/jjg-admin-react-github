@@ -65,6 +65,7 @@ interface OrderItem {
   customer_model: string | null
   operation: string
   standard_seconds: number
+  incoming_qualified_quantity: number
   qualified_quantity: number
   defect_reason_1: string | null
   defect_quantity_1: number
@@ -152,6 +153,7 @@ export default function ProductionOrderForm({
           customer_model: item.customer_model,
           operation: item.operation,
           standard_seconds: item.standard_seconds,
+          incoming_qualified_quantity: item.incoming_qualified_quantity,
           qualified_quantity: item.qualified_quantity,
           defect_reason_1: item.defect_reason_1,
           defect_quantity_1: item.defect_quantity_1,
@@ -249,6 +251,7 @@ export default function ProductionOrderForm({
         customer_model: item?.customer_model,
         operation: item?.operation,
         standard_seconds: item?.standard_seconds,
+        incoming_qualified_quantity: item?.incoming_qualified_quantity ?? 0,
         qualified_quantity: item?.qualified_quantity || 0,
         defect_reason_1: item?.defect_reason_1 || '加工',
         defect_quantity_1: item?.defect_quantity_1 || 0,
@@ -260,6 +263,7 @@ export default function ProductionOrderForm({
       setEditingItemIndex(null)
       itemForm.resetFields()
       itemForm.setFieldsValue({
+        incoming_qualified_quantity: 0,
         qualified_quantity: 0,
         defect_reason_1: '加工',
         defect_quantity_1: 0,
@@ -316,6 +320,7 @@ export default function ProductionOrderForm({
           itemForm.getFieldValue('standard_seconds') ??
           0,
       ),
+      incoming_qualified_quantity: Number(values.incoming_qualified_quantity) || 0,
       qualified_quantity: values.qualified_quantity || 0,
       defect_reason_1: '加工',
       defect_quantity_1: Number(values.defect_quantity_1) || 0,
@@ -546,7 +551,15 @@ export default function ProductionOrderForm({
                           <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
                             <div className="rounded-2xl bg-slate-50 px-3 py-3">
                               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                                合格数量
+                                来料合格
+                              </div>
+                              <div className="mt-1 font-semibold text-slate-900">
+                                {item.incoming_qualified_quantity}
+                              </div>
+                            </div>
+                            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                                成品合格数
                               </div>
                               <div className="mt-1 font-semibold text-slate-900">
                                 {item.qualified_quantity}
@@ -680,7 +693,12 @@ export default function ProductionOrderForm({
                     width: 100,
                   },
                   {
-                    title: '合格数量',
+                    title: '来料合格数',
+                    dataIndex: 'incoming_qualified_quantity',
+                    width: 100,
+                  },
+                  {
+                    title: '成品合格数',
                     dataIndex: 'qualified_quantity',
                     width: 80,
                   },
@@ -764,6 +782,7 @@ export default function ProductionOrderForm({
             layout="vertical"
             onFinish={handleItemFinish}
             initialValues={{
+              incoming_qualified_quantity: 0,
               qualified_quantity: 0,
               defect_quantity_1: 0,
               defect_quantity_2: 0,
@@ -852,9 +871,44 @@ export default function ProductionOrderForm({
             ) : null}
 
             <Form.Item
+              name="incoming_qualified_quantity"
+              label="来料合格数"
+              dependencies={[
+                'qualified_quantity',
+                'defect_quantity_1',
+                'defect_quantity_2',
+              ]}
+              rules={[
+                { required: true, message: '请输入来料合格数' },
+                ({ getFieldValue }) => ({
+                  validator: async (_, value) => {
+                    const incomingQualifiedQuantity = Number(value || 0)
+                    const qualifiedQuantity = Number(
+                      getFieldValue('qualified_quantity') || 0,
+                    )
+                    const defectQuantity1 = Number(
+                      getFieldValue('defect_quantity_1') || 0,
+                    )
+                    const defectQuantity2 = Number(
+                      getFieldValue('defect_quantity_2') || 0,
+                    )
+                    const minimumQuantity =
+                      qualifiedQuantity + defectQuantity1 + defectQuantity2
+
+                    if (incomingQualifiedQuantity < minimumQuantity) {
+                      throw new Error('来料合格数不能小于成品合格数与不良数之和')
+                    }
+                  },
+                }),
+              ]}
+            >
+              <InputNumber style={{ width: '100%' }} min={0} />
+            </Form.Item>
+
+            <Form.Item
               name="qualified_quantity"
-              label="合格数量"
-              rules={[{ required: true, message: '请输入合格数量' }]}
+              label="成品合格数"
+              rules={[{ required: true, message: '请输入成品合格数' }]}
             >
               <InputNumber style={{ width: '100%' }} min={0} />
             </Form.Item>

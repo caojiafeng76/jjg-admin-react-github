@@ -55,6 +55,7 @@ async function syncOrderItemsSequentially({
     customer_model: string | null
     operation: string
     standard_seconds: number
+    incoming_qualified_quantity: number
     qualified_quantity: number
     defect_reason_1: string | null
     defect_quantity_1: number
@@ -79,6 +80,7 @@ async function syncOrderItemsSequentially({
           customer_model: item.customer_model,
           operation: item.operation,
           standard_seconds: item.standard_seconds,
+          incoming_qualified_quantity: item.incoming_qualified_quantity,
           qualified_quantity: item.qualified_quantity,
           defect_reason_1: item.defect_reason_1,
           defect_quantity_1: item.defect_quantity_1,
@@ -324,6 +326,7 @@ export default function ProductionOrderPage() {
         customer_model: string | null
         operation: string
         standard_seconds: number
+        incoming_qualified_quantity: number
         qualified_quantity: number
         defect_reason_1: string | null
         defect_quantity_1: number
