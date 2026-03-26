@@ -320,7 +320,8 @@ export default function ProductionOrderForm({
           itemForm.getFieldValue('standard_seconds') ??
           0,
       ),
-      incoming_qualified_quantity: Number(values.incoming_qualified_quantity) || 0,
+      incoming_qualified_quantity:
+        Number(values.incoming_qualified_quantity) || 0,
       qualified_quantity: values.qualified_quantity || 0,
       defect_reason_1: '加工',
       defect_quantity_1: Number(values.defect_quantity_1) || 0,
@@ -896,7 +897,9 @@ export default function ProductionOrderForm({
                       qualifiedQuantity + defectQuantity1 + defectQuantity2
 
                     if (incomingQualifiedQuantity < minimumQuantity) {
-                      throw new Error('来料合格数不能小于成品合格数与不良数之和')
+                      throw new Error(
+                        '来料合格数不能小于成品合格数与不良数之和',
+                      )
                     }
                   },
                 }),

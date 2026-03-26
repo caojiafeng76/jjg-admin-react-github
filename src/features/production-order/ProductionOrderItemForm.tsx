@@ -161,7 +161,9 @@ export default function ProductionOrderItemForm({
     onSubmit({
       ...values,
       operation,
-      incoming_qualified_quantity: Number(values.incoming_qualified_quantity ?? 0),
+      incoming_qualified_quantity: Number(
+        values.incoming_qualified_quantity ?? 0,
+      ),
       standard_seconds: Number(
         values.standard_seconds ?? form.getFieldValue('standard_seconds') ?? 0,
       ),
