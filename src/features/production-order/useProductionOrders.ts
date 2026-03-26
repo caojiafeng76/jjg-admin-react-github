@@ -14,6 +14,7 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 const PRODUCTION_ORDERS_KEY = 'production-orders' as const
 
 interface ProductionOrderQueryOptions {
+  enabled?: boolean
   realtime?: boolean
 }
 
@@ -38,6 +39,7 @@ export function useProductionOrders({
   return useQuery({
     queryKey: [PRODUCTION_ORDERS_KEY, page, pageSize, filters],
     queryFn: () => getProductionOrders({ page, pageSize, ...filters }),
+    enabled: options?.enabled ?? true,
     placeholderData: keepPreviousData,
     ...(options?.realtime ? queryConfig.realtime : queryConfig.list),
   })
@@ -50,7 +52,7 @@ export function useProductionOrder(
   return useQuery({
     queryKey: [PRODUCTION_ORDERS_KEY, id],
     queryFn: () => getProductionOrderById(id!),
-    enabled: !!id,
+    enabled: (options?.enabled ?? true) && !!id,
     ...(options?.realtime ? queryConfig.realtime : queryConfig.detail),
   })
 }

@@ -45,7 +45,7 @@ export async function assertAdmin(authorization: string) {
 
   const { data: adminEmployee, error: adminCheckError } = await adminClient
     .from('employees')
-    .select('id')
+    .select('id, name, auth_user_id')
     .eq('auth_user_id', user.id)
     .eq('role', 'admin')
     .eq('is_active', true)
@@ -59,5 +59,5 @@ export async function assertAdmin(authorization: string) {
     throw new Error('只有管理员可以执行此操作')
   }
 
-  return { user, adminClient }
+  return { user, adminClient, adminEmployee }
 }
