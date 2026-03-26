@@ -76,6 +76,7 @@ export default function ProductionOrderItemForm({
       form.resetFields()
       form.setFieldsValue({
         order_id: orderId,
+        incoming_qualified_quantity: 0,
         qualified_quantity: 0,
         defect_reason_1: '加工',
         defect_quantity_1: 0,
@@ -160,6 +161,7 @@ export default function ProductionOrderItemForm({
     onSubmit({
       ...values,
       operation,
+      incoming_qualified_quantity: Number(values.incoming_qualified_quantity ?? 0),
       standard_seconds: Number(
         values.standard_seconds ?? form.getFieldValue('standard_seconds') ?? 0,
       ),
@@ -213,6 +215,7 @@ export default function ProductionOrderItemForm({
           onFinish={handleFinish}
           initialValues={{
             order_id: orderId,
+            incoming_qualified_quantity: 0,
             qualified_quantity: 0,
             defect_reason_1: '加工',
             defect_quantity_1: 0,
@@ -313,9 +316,45 @@ export default function ProductionOrderItemForm({
           ) : null}
 
           <Form.Item
+            name="incoming_qualified_quantity"
+            label="来料合格数"
+            dependencies={[
+              'qualified_quantity',
+              'defect_quantity_1',
+              'defect_quantity_2',
+            ]}
+            rules={[
+              { required: true, message: '请输入来料合格数' },
+              ({ getFieldValue }) => ({
+                validator: async (_, value) => {
+                  const incomingQualifiedQuantity = Number(value || 0)
+                  const qualifiedQuantity = Number(
+                    getFieldValue('qualified_quantity') || 0,
+                  )
+                  const defectQuantity1 = Number(
+                    getFieldValue('defect_quantity_1') || 0,
+                  )
+                  const defectQuantity2 = Number(
+                    getFieldValue('defect_quantity_2') || 0,
+                  )
+                  const minimumQuantity =
+                    qualifiedQuantity + defectQuantity1 + defectQuantity2
+
+                  if (incomingQualifiedQuantity < minimumQuantity) {
+                    throw new Error('来料合格数不能小于成品合格数与不良数之和')
+                  }
+                },
+              }),
+            ]}
+            initialValue={0}
+          >
+            <InputNumber min={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
             name="qualified_quantity"
-            label="合格数量"
-            rules={[{ required: true, message: '请输入合格数量' }]}
+            label="成品合格数"
+            rules={[{ required: true, message: '请输入成品合格数' }]}
             initialValue={0}
           >
             <InputNumber min={0} style={{ width: '100%' }} />

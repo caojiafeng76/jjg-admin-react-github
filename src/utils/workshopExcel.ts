@@ -245,10 +245,7 @@ function buildErpColumnMap(row: WorksheetRow): ErpColumnMap | null {
     product_model: productModel,
     customer_model: customerModel,
     weight_per_meter_kg: findColumnIndices(row, '比重'),
-    length_mm: [
-      ...findColumnIndices(row, '精切长度'),
-      ...findColumnIndices(row, '长度'),
-    ],
+    length_mm: findColumnIndices(row, '长度'),
     order_quantity: findColumnIndices(row, '支数'),
     product_category: findColumnIndices(row, '表面处理'),
     color_name: findColumnIndices(row, '颜色'),

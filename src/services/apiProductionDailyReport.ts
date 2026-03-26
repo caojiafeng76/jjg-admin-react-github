@@ -16,6 +16,7 @@ interface ProductionDailyReportItemRow {
   project_no: string
   product_model: string | null
   customer_model: string | null
+  incoming_qualified_quantity: number
   length_mm: number | null
   operation: string
   qualified_quantity: number
@@ -38,6 +39,7 @@ export interface ProductionDailyReportRow {
   projectNo: string
   productModel: string
   customerModel: string
+  incomingQualifiedCount: number
   lengthMm: number | null
   operation: string
   qualifiedCount: number
@@ -70,6 +72,7 @@ function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) 
       project_no,
       product_model,
       customer_model,
+  incoming_qualified_quantity,
       length_mm,
       operation,
       qualified_quantity,
@@ -182,17 +185,13 @@ function roundTo(value: number, digits = 2) {
 
 function calculateQualifiedRate(
   qualifiedCount: number,
-  rawMaterialDefectCount: number,
-  processingDefectCount: number,
+  incomingQualifiedCount: number,
 ) {
-  const totalCount =
-    qualifiedCount + rawMaterialDefectCount + processingDefectCount
-
-  if (totalCount <= 0) {
+  if (incomingQualifiedCount <= 0) {
     return 0
   }
 
-  return roundTo(qualifiedCount / totalCount, 4)
+  return roundTo(qualifiedCount / incomingQualifiedCount, 4)
 }
 
 export async function getProductionDailyReport(
@@ -206,6 +205,7 @@ export async function getProductionDailyReport(
     .map((item) => {
       const employeeName = item.production_orders.employee?.name || '-'
       const normalizedOperation = item.operation.trim() || '未分类'
+      const incomingQualifiedCount = Number(item.incoming_qualified_quantity || 0)
       const rawMaterialDefectCount = Number(item.defect_quantity_2 || 0)
       const processingDefectCount = Number(item.defect_quantity_1 || 0)
       const qualifiedCount = Number(item.qualified_quantity || 0)
@@ -221,6 +221,7 @@ export async function getProductionDailyReport(
         projectNo: item.project_no,
         productModel: item.product_model || '-',
         customerModel: item.customer_model || '-',
+        incomingQualifiedCount,
         lengthMm: item.length_mm,
         operation: normalizedOperation,
         qualifiedCount,
@@ -229,11 +230,7 @@ export async function getProductionDailyReport(
         employeeName,
         rawMaterialDefectCount,
         processingDefectCount,
-        qualifiedRate: calculateQualifiedRate(
-          qualifiedCount,
-          rawMaterialDefectCount,
-          processingDefectCount,
-        ),
+        qualifiedRate: calculateQualifiedRate(qualifiedCount, incomingQualifiedCount),
         rawMaterialDefectWeightKg: roundTo(
           (weightPerMeterKg * lengthMm * rawMaterialDefectCount) / 1000,
         ),

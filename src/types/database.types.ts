@@ -182,6 +182,7 @@ export type Database = {
           defect_reason_1: string | null
           defect_reason_2: string | null
           id: string
+          incoming_qualified_quantity: number
           length_mm: number | null
           operation: string
           order_id: string
@@ -202,6 +203,7 @@ export type Database = {
           defect_reason_1?: string | null
           defect_reason_2?: string | null
           id?: string
+          incoming_qualified_quantity: number
           length_mm?: number | null
           operation: string
           order_id: string
@@ -222,6 +224,7 @@ export type Database = {
           defect_reason_1?: string | null
           defect_reason_2?: string | null
           id?: string
+          incoming_qualified_quantity?: number
           length_mm?: number | null
           operation?: string
           order_id?: string
