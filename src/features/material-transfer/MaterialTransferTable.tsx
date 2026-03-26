@@ -125,6 +125,27 @@ export default function MaterialTransferTable({
         width: 120,
       },
       {
+        title: '当班负责人',
+        dataIndex: 'shift_leader_name',
+        key: 'shift_leader_name',
+        width: 120,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '检验人',
+        dataIndex: 'inspector_name',
+        key: 'inspector_name',
+        width: 120,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '数据上传',
+        dataIndex: 'uploaded_by_name',
+        key: 'uploaded_by_name',
+        width: 120,
+        render: (value: string | null) => value || '-',
+      },
+      {
         title: '审核时间',
         dataIndex: 'audited_at',
         key: 'audited_at',
@@ -190,7 +211,7 @@ export default function MaterialTransferTable({
               {currentPageTransferQuantity}
             </span>
           </Table.Summary.Cell>
-          <Table.Summary.Cell index={9} colSpan={6} />
+          <Table.Summary.Cell index={9} colSpan={9} />
         </Table.Summary.Row>
       )}
     />

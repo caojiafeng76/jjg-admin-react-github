@@ -31,22 +31,30 @@ type MaterialTransferInsertBase =
 type MaterialTransferUpdateBase =
   Database['public']['Tables']['material_transfers']['Update']
 
+export interface MaterialTransferExtraFields {
+  shift_leader_name: string | null
+  inspector_name: string | null
+  uploaded_by_name: string | null
+}
+
 export interface MaterialTransferAuditFields {
   is_audited: boolean
   audited_at: string | null
 }
 
-export type MaterialTransfer = MaterialTransferRow & MaterialTransferAuditFields
+export type MaterialTransfer = MaterialTransferRow &
+  MaterialTransferAuditFields &
+  MaterialTransferExtraFields
 
 export type MaterialTransferInsert = MaterialTransferInsertBase & {
   is_audited?: boolean
   audited_at?: string | null
-}
+} & Partial<MaterialTransferExtraFields>
 
 export type MaterialTransferUpdate = MaterialTransferUpdateBase & {
   is_audited?: boolean
   audited_at?: string | null
-}
+} & Partial<MaterialTransferExtraFields>
 
 export interface MaterialTransferWithEmployee extends MaterialTransfer {
   employee?: {
@@ -142,6 +150,9 @@ function normalizeMaterialTransferInsertPayload(
     operator_employee_id: values.operator_employee_id,
     target_workshop: values.target_workshop,
     recipient_name: values.recipient_name.trim(),
+    shift_leader_name: values.shift_leader_name?.trim() || null,
+    inspector_name: values.inspector_name?.trim() || null,
+    uploaded_by_name: values.uploaded_by_name?.trim() || null,
     remark: values.remark?.trim() || null,
     is_audited: values.is_audited ?? false,
     audited_at: values.audited_at ?? null,
@@ -161,6 +172,18 @@ function normalizeMaterialTransferUpdatePayload(
 
   if (values.product_model !== undefined) {
     payload.product_model = values.product_model?.trim() || null
+  }
+
+  if (values.shift_leader_name !== undefined) {
+    payload.shift_leader_name = values.shift_leader_name?.trim() || null
+  }
+
+  if (values.inspector_name !== undefined) {
+    payload.inspector_name = values.inspector_name?.trim() || null
+  }
+
+  if (values.uploaded_by_name !== undefined) {
+    payload.uploaded_by_name = values.uploaded_by_name?.trim() || null
   }
 
   if (values.customer_model !== undefined) {
@@ -332,7 +355,7 @@ export async function createMaterialTransfer(values: MaterialTransferInsert) {
 
   const { data, error } = await supabase
     .from('material_transfers')
-    .insert(payload)
+    .insert(payload as MaterialTransferInsertBase)
     .select(
       `
       *,
@@ -359,7 +382,7 @@ export async function updateMaterialTransfer({
 
   const { data, error } = await supabase
     .from('material_transfers')
-    .update(payload)
+    .update(payload as MaterialTransferUpdateBase)
     .eq('id', id)
     .select(
       `
@@ -391,7 +414,7 @@ export async function batchUpdateMaterialTransfers({
 
   const { data, error } = await supabase
     .from('material_transfers')
-    .update(payload)
+    .update(payload as MaterialTransferUpdateBase)
     .in('id', ids)
     .select(
       `

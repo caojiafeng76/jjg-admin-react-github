@@ -107,6 +107,22 @@ export default function MaterialTransferMobileList({
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  当班负责人
+                </div>
+                <div className="mt-1 font-semibold">
+                  {record.shift_leader_name || '-'}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  检验人
+                </div>
+                <div className="mt-1 font-semibold">
+                  {record.inspector_name || '-'}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   长度
                 </div>
                 <div className="mt-1 font-semibold">
