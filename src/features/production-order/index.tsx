@@ -4,7 +4,12 @@ import {
   PlusCircleIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/16/solid'
-import { App, Button, Modal } from 'antd'
+import {
+  KeyIcon,
+  LockClosedIcon,
+  LockOpenIcon,
+} from '@heroicons/react/24/outline'
+import { App, Button, Card, Form, Input, Modal, Space, Typography } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
@@ -38,8 +43,24 @@ import ProductionOrderForm from './ProductionOrderForm'
 import ProductionOrderDetail from './ProductionOrderDetail'
 import ProductionOrderSearch from './ProductionOrderSearch'
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import {
+  updateAdminManagementPassword,
+  verifyAdminManagementPassword,
+} from '@/services/apiAdminManagementPassword'
 import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
+
+type UnlockManagementFormValues = {
+  password: string
+}
+
+type ChangeManagementPasswordFormValues = {
+  currentPassword: string
+  nextPassword: string
+  confirmPassword: string
+}
+
+const { Paragraph, Text, Title } = Typography
 
 async function syncOrderItemsSequentially({
   items,
@@ -102,6 +123,7 @@ export default function ProductionOrderPage() {
   const { message, modal } = App.useApp()
   const { role, employeeProfile } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
+  const isAdminManagementView = role === 'admin' && !isEmployeeView
   const fixedEmployee =
     isEmployeeView && employeeProfile?.id
       ? { id: employeeProfile.id, name: employeeProfile.name }
@@ -120,6 +142,19 @@ export default function ProductionOrderPage() {
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [isExporting, setIsExporting] = useState(false)
+  const [isManagementUnlocked, setIsManagementUnlocked] = useState(
+    !isAdminManagementView,
+  )
+  const [isUnlockingManagement, setIsUnlockingManagement] = useState(false)
+  const [isManagementPasswordModalOpen, setIsManagementPasswordModalOpen] =
+    useState(false)
+  const [isUpdatingManagementPassword, setIsUpdatingManagementPassword] =
+    useState(false)
+  const [unlockForm] = Form.useForm<UnlockManagementFormValues>()
+  const [changePasswordForm] =
+    Form.useForm<ChangeManagementPasswordFormValues>()
+  const isManagementLocked =
+    isAdminManagementView && !isManagementUnlocked
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -147,6 +182,7 @@ export default function ProductionOrderPage() {
     pageSize,
     filters,
     options: {
+      enabled: !isManagementLocked,
       realtime: isEmployeeView && !isModalOpen,
     },
   })
@@ -154,6 +190,7 @@ export default function ProductionOrderPage() {
   const { data: detailData, isLoading: isLoadingDetail } = useProductionOrder(
     editingRecord?.id,
     {
+      enabled: !isManagementLocked,
       realtime: isEmployeeView && isModalOpen && isView,
     },
   )
@@ -180,6 +217,61 @@ export default function ProductionOrderPage() {
     setEditingRecord(null)
     setSelectedRowKeys([])
   }, [])
+
+  const handleLockManagement = useCallback(() => {
+    resetFormState()
+    unlockForm.resetFields()
+    setIsManagementUnlocked(false)
+    setIsManagementPasswordModalOpen(false)
+    message.success('生产工单管理已锁定')
+  }, [message, resetFormState, unlockForm])
+
+  const handleUnlockManagement = useCallback(
+    async (values: UnlockManagementFormValues) => {
+      setIsUnlockingManagement(true)
+
+      try {
+        await verifyAdminManagementPassword(values.password)
+        setIsManagementUnlocked(true)
+        unlockForm.resetFields()
+        message.success('管理权限已解锁')
+      } catch (error) {
+        if (error instanceof Error) {
+          message.error(error.message)
+        } else {
+          message.error('管理密码验证失败')
+        }
+      } finally {
+        setIsUnlockingManagement(false)
+      }
+    },
+    [message, unlockForm],
+  )
+
+  const handleChangeManagementPassword = useCallback(
+    async (values: ChangeManagementPasswordFormValues) => {
+      setIsUpdatingManagementPassword(true)
+
+      try {
+        await updateAdminManagementPassword({
+          currentPassword: values.currentPassword,
+          nextPassword: values.nextPassword,
+        })
+        changePasswordForm.resetFields()
+        setIsManagementPasswordModalOpen(false)
+        message.success('管理密码修改成功')
+      } catch (error) {
+        if (error instanceof Error) {
+          message.error(error.message)
+        } else {
+          message.error('管理密码修改失败')
+        }
+      } finally {
+        setIsUpdatingManagementPassword(false)
+      }
+    },
+    [changePasswordForm, message],
+  )
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -443,6 +535,19 @@ export default function ProductionOrderPage() {
   }, [fixedEmployee?.id])
 
   useEffect(() => {
+    if (isEmployeeView) {
+      setIsManagementUnlocked(true)
+      return
+    }
+
+    setIsManagementUnlocked(false)
+    setIsManagementPasswordModalOpen(false)
+    unlockForm.resetFields()
+    changePasswordForm.resetFields()
+    resetFormState()
+  }, [changePasswordForm, isEmployeeView, resetFormState, unlockForm])
+
+  useEffect(() => {
     if (page > 1 && orderData && orderData.items.length === 0) {
       searchParamsURL.set('page', Math.max(page - 1, 1).toString())
       setSearchParamsURL(searchParamsURL)
@@ -455,6 +560,128 @@ export default function ProductionOrderPage() {
         employee?: { name: string }
       })
     | null
+
+  if (isManagementLocked) {
+    return (
+      <>
+        <div className="flex h-full items-center justify-center px-4 py-8">
+          <Card className="w-full max-w-md shadow-sm">
+            <Space direction="vertical" size={16} className="w-full">
+              <div className="flex items-center gap-3">
+                <div className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                  <LockClosedIcon className="size-5" />
+                </div>
+                <div>
+                  <Title level={4} style={{ marginBottom: 0 }}>
+                    生产工单管理已锁定
+                  </Title>
+                  <Text type="secondary">管理员进入页面后需先输入管理密码</Text>
+                </div>
+              </div>
+
+              <Paragraph style={{ marginBottom: 0 }}>
+                首次默认管理密码为 123456。密码正确后才会加载工单管理界面。
+              </Paragraph>
+
+              <Form
+                form={unlockForm}
+                layout="vertical"
+                onFinish={handleUnlockManagement}
+              >
+                <Form.Item
+                  name="password"
+                  label="管理密码"
+                  rules={[{ required: true, message: '请输入管理密码' }]}
+                >
+                  <Input.Password
+                    autoFocus
+                    placeholder="请输入管理密码"
+                    autoComplete="current-password"
+                  />
+                </Form.Item>
+
+                <div className="flex gap-3">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={isUnlockingManagement}
+                    icon={<LockOpenIcon className="size-4" />}
+                    className="flex-1"
+                  >
+                    解锁管理
+                  </Button>
+                  <Button
+                    icon={<KeyIcon className="size-4" />}
+                    className="flex-1"
+                    onClick={() => setIsManagementPasswordModalOpen(true)}
+                  >
+                    修改我的密码
+                  </Button>
+                </div>
+              </Form>
+            </Space>
+          </Card>
+        </div>
+
+        <Modal
+          title="修改我的管理密码"
+          open={isManagementPasswordModalOpen}
+          destroyOnClose
+          confirmLoading={isUpdatingManagementPassword}
+          onOk={() => changePasswordForm.submit()}
+          onCancel={() => {
+            setIsManagementPasswordModalOpen(false)
+            changePasswordForm.resetFields()
+          }}
+        >
+          <Form
+            form={changePasswordForm}
+            layout="vertical"
+            onFinish={handleChangeManagementPassword}
+          >
+            <Form.Item
+              name="currentPassword"
+              label="当前管理密码"
+              rules={[{ required: true, message: '请输入当前管理密码' }]}
+            >
+              <Input.Password autoComplete="current-password" />
+            </Form.Item>
+
+            <Form.Item
+              name="nextPassword"
+              label="新管理密码"
+              rules={[
+                { required: true, message: '请输入新管理密码' },
+                { min: 6, message: '新管理密码至少需要 6 位' },
+              ]}
+            >
+              <Input.Password autoComplete="new-password" />
+            </Form.Item>
+
+            <Form.Item
+              name="confirmPassword"
+              label="确认新管理密码"
+              dependencies={['nextPassword']}
+              rules={[
+                { required: true, message: '请再次输入新管理密码' },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue('nextPassword') === value) {
+                      return Promise.resolve()
+                    }
+
+                    return Promise.reject(new Error('两次输入的新管理密码不一致'))
+                  },
+                }),
+              ]}
+            >
+              <Input.Password autoComplete="new-password" />
+            </Form.Item>
+          </Form>
+        </Modal>
+      </>
+    )
+  }
 
   return (
     <div
@@ -483,6 +710,20 @@ export default function ProductionOrderPage() {
         ) : (
           <>
             <AddButton handleCreate={handleCreate} />
+            <Button
+              type="text"
+              icon={<KeyIcon className="size-4 text-sky-500" />}
+              onClick={() => setIsManagementPasswordModalOpen(true)}
+            >
+              修改管理密码
+            </Button>
+            <Button
+              type="text"
+              icon={<LockClosedIcon className="size-4 text-rose-500" />}
+              onClick={handleLockManagement}
+            >
+              锁定
+            </Button>
             <Button
               type="text"
               icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
@@ -628,6 +869,63 @@ export default function ProductionOrderPage() {
             }}
           />
         ) : null}
+      </Modal>
+
+      <Modal
+        title="修改我的管理密码"
+        open={isManagementPasswordModalOpen}
+        destroyOnClose
+        confirmLoading={isUpdatingManagementPassword}
+        onOk={() => changePasswordForm.submit()}
+        onCancel={() => {
+          setIsManagementPasswordModalOpen(false)
+          changePasswordForm.resetFields()
+        }}
+      >
+        <Form
+          form={changePasswordForm}
+          layout="vertical"
+          onFinish={handleChangeManagementPassword}
+        >
+          <Form.Item
+            name="currentPassword"
+            label="当前管理密码"
+            rules={[{ required: true, message: '请输入当前管理密码' }]}
+          >
+            <Input.Password autoComplete="current-password" />
+          </Form.Item>
+
+          <Form.Item
+            name="nextPassword"
+            label="新管理密码"
+            rules={[
+              { required: true, message: '请输入新管理密码' },
+              { min: 6, message: '新管理密码至少需要 6 位' },
+            ]}
+          >
+            <Input.Password autoComplete="new-password" />
+          </Form.Item>
+
+          <Form.Item
+            name="confirmPassword"
+            label="确认新管理密码"
+            dependencies={['nextPassword']}
+            rules={[
+              { required: true, message: '请再次输入新管理密码' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('nextPassword') === value) {
+                    return Promise.resolve()
+                  }
+
+                  return Promise.reject(new Error('两次输入的新管理密码不一致'))
+                },
+              }),
+            ]}
+          >
+            <Input.Password autoComplete="new-password" />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   )
