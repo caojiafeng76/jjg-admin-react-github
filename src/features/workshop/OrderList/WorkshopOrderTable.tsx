@@ -35,6 +35,12 @@ export default function WorkshopOrderTable({
         key: 'product_delivery_date',
       },
       {
+        title: '客户',
+        dataIndex: 'customer',
+        ellipsis: true,
+        key: 'customer',
+      },
+      {
         title: '项目号',
         dataIndex: 'project_no',
         fixed: 'left',

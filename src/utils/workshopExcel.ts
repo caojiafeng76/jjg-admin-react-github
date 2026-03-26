@@ -14,6 +14,7 @@ const TEMPLATE_HEADERS = [
   '项目号',
   '产品型号',
   '长度(mm)',
+  '客户',
   '客户型号',
   '订支数',
   '每米理论重(kg/m)',
@@ -43,6 +44,7 @@ export interface WorkshopOrderExcelRow {
   项目号: string
   产品型号: string
   '长度(mm)': number
+  客户: string
   客户型号: string
   订支数: number
   '每米理论重(kg/m)': number
@@ -91,6 +93,7 @@ function parseTemplateSheet(sheet: WorkSheet): WorkshopOrder[] {
       project_no: row.项目号 || null,
       product_model: row.产品型号 || null,
       length_mm: row['长度(mm)'] ?? null,
+      customer: row.客户 || null,
       customer_model: row.客户型号 || null,
       order_quantity: row.订支数 ?? null,
       weight_per_meter_kg: row['每米理论重(kg/m)'] ?? null,
@@ -130,6 +133,7 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
   if (!columnMap) {
     return []
   }
+  const customer = findErpCustomer(rows)
 
   const orders: WorkshopOrder[] = []
 
@@ -170,6 +174,7 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
       project_no: projectNo || null,
       product_model: productModel || null,
       length_mm: getNumberFromRow(row, columnMap.length_mm),
+      customer,
       customer_model: getStringFromRow(row, columnMap.customer_model),
       order_quantity: getNumberFromRow(row, columnMap.order_quantity),
       weight_per_meter_kg: getNumberFromRow(row, columnMap.weight_per_meter_kg),
@@ -192,6 +197,7 @@ function deduplicateOrders(orders: WorkshopOrder[]): WorkshopOrder[] {
     const key = [
       order.project_no ?? '',
       order.product_model ?? '',
+      order.customer ?? '',
       order.customer_model ?? '',
       order.material_code ?? '',
       order.product_delivery_date ?? '',
@@ -229,6 +235,26 @@ function validateProjectNoUniqueness(orders: WorkshopOrder[]) {
 function findErpColumnMap(rows: WorksheetRow[]): ErpColumnMap | null {
   const headerRow = rows.find((row) => row && isErpHeaderRow(row))
   return headerRow ? buildErpColumnMap(headerRow) : null
+}
+
+function findErpCustomer(rows: WorksheetRow[]): string | null {
+  for (const row of rows) {
+    for (const cell of row) {
+      if (typeof cell !== 'string') continue
+
+      const normalized = removeSpaces(cell)
+      const marker = '购货单位：'
+
+      if (!normalized.includes(marker)) continue
+
+      const value = normalized.split(marker)[1]?.trim()
+      if (value) {
+        return value
+      }
+    }
+  }
+
+  return null
 }
 
 function buildErpColumnMap(row: WorksheetRow): ErpColumnMap | null {

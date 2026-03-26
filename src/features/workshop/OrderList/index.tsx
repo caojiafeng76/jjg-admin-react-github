@@ -28,6 +28,7 @@ export interface WorkshopOrder {
   project_no: string | null
   product_model: string | null
   length_mm: number | null
+  customer: string | null
   customer_model: string | null
   order_quantity: number | null
   weight_per_meter_kg: number | null

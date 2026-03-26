@@ -67,6 +67,12 @@ export default function WorkshopOrderForm({
         width: 120,
       },
       {
+        title: '客户',
+        dataIndex: 'customer',
+        width: 220,
+        ellipsis: true,
+      },
+      {
         title: '项目号',
         dataIndex: 'project_no',
         width: 120,
@@ -158,6 +164,13 @@ export default function WorkshopOrderForm({
             label="产品交货日期"
           >
             <DatePicker style={{ width: '100%' }} disabled={isCreating} />
+          </Form.Item>
+
+          <Form.Item
+            name="customer"
+            label="客户"
+          >
+            <Input disabled={isCreating} />
           </Form.Item>
 
           <Form.Item
@@ -259,7 +272,7 @@ export default function WorkshopOrderForm({
                 }))}
                 size="small"
                 pagination={false}
-                scroll={{ x: 1400, y: 300 }}
+                scroll={{ x: 1620, y: 300 }}
                 bordered
               />
             </Form.Item>

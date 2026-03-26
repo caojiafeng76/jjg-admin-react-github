@@ -313,6 +313,7 @@ export type Database = {
         Row: {
           color_name: string | null
           created_at: string | null
+          customer: string | null
           customer_model: string | null
           id: string
           length_mm: number | null
@@ -330,6 +331,7 @@ export type Database = {
         Insert: {
           color_name?: string | null
           created_at?: string | null
+          customer?: string | null
           customer_model?: string | null
           id?: string
           length_mm?: number | null
@@ -347,6 +349,7 @@ export type Database = {
         Update: {
           color_name?: string | null
           created_at?: string | null
+          customer?: string | null
           customer_model?: string | null
           id?: string
           length_mm?: number | null
