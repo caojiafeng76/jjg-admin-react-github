@@ -59,6 +59,7 @@ export interface MaterialTransferFilters {
   startDate?: string
   endDate?: string
   projectNo?: string
+  productModel?: string
   employeeId?: string
   targetWorkshop?: string
   recipientName?: string
@@ -96,6 +97,10 @@ function applyMaterialTransferFilters<
 
   if (filters.projectNo) {
     nextQuery = nextQuery.ilike('project_no', `%${filters.projectNo}%`)
+  }
+
+  if (filters.productModel) {
+    nextQuery = nextQuery.ilike('product_model', `%${filters.productModel}%`)
   }
 
   if (filters.employeeId) {

@@ -67,6 +67,7 @@ export default function MaterialTransferSearch({
           ? values.dateRange[1].format('YYYY-MM-DD')
           : undefined,
       projectNo: values.projectNo?.trim() || undefined,
+      productModel: values.productModel?.trim() || undefined,
       employeeId: values.employeeId || undefined,
       targetWorkshop: values.targetWorkshop || undefined,
       recipientName: values.recipientName?.trim() || undefined,
@@ -104,6 +105,14 @@ export default function MaterialTransferSearch({
       <Form.Item name="projectNo" className="mb-0">
         <Input
           placeholder="项目号"
+          allowClear
+          style={{ width: mobile ? '100%' : 180 }}
+        />
+      </Form.Item>
+
+      <Form.Item name="productModel" className="mb-0">
+        <Input
+          placeholder="型号"
           allowClear
           style={{ width: mobile ? '100%' : 180 }}
         />
