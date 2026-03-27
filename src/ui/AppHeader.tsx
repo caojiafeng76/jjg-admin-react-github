@@ -137,50 +137,51 @@ export default function AppHeader({
     }
   }
 
-  const notificationContent = isNotificationsLoading || isUnreadCountLoading ? (
-    <div className="flex w-[360px] justify-center py-8">
-      <Spin size="small" />
-    </div>
-  ) : (
-    <div className="w-[360px]">
-      <div className="mb-3 flex items-center justify-between">
-        <div>
-          <div className="text-sm font-semibold text-slate-900">通知</div>
-          <div className="text-xs text-slate-500">
-            未读 {unreadCount} 条，展示最近 {notifications.length} 条
-          </div>
-        </div>
-        <Button
-          type="link"
-          size="small"
-          disabled={
-            unreadCount === 0 || markAllNotificationsReadMutation.isPending
-          }
-          loading={markAllNotificationsReadMutation.isPending}
-          onClick={() => {
-            void handleMarkAllNotificationsAsRead()
-          }}
-        >
-          全部已读
-        </Button>
+  const notificationContent =
+    isNotificationsLoading || isUnreadCountLoading ? (
+      <div className="flex w-[360px] justify-center py-8">
+        <Spin size="small" />
       </div>
-
-      {notifications.length === 0 ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无通知" />
-      ) : (
-        <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
-          {notifications.map((notification) => (
-            <NotificationItem
-              key={notification.id}
-              notification={notification}
-              loading={markNotificationReadMutation.isPending}
-              onConfirmRead={handleMarkNotificationAsRead}
-            />
-          ))}
+    ) : (
+      <div className="w-[360px]">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <div className="text-sm font-semibold text-slate-900">通知</div>
+            <div className="text-xs text-slate-500">
+              未读 {unreadCount} 条，展示最近 {notifications.length} 条
+            </div>
+          </div>
+          <Button
+            type="link"
+            size="small"
+            disabled={
+              unreadCount === 0 || markAllNotificationsReadMutation.isPending
+            }
+            loading={markAllNotificationsReadMutation.isPending}
+            onClick={() => {
+              void handleMarkAllNotificationsAsRead()
+            }}
+          >
+            全部已读
+          </Button>
         </div>
-      )}
-    </div>
-  )
+
+        {notifications.length === 0 ? (
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无通知" />
+        ) : (
+          <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+            {notifications.map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                notification={notification}
+                loading={markNotificationReadMutation.isPending}
+                onConfirmRead={handleMarkNotificationAsRead}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    )
 
   return (
     <>
@@ -341,7 +342,7 @@ function NotificationItem({
       <div className="mb-1 text-xs text-slate-500">
         {dayjs(notification.created_at).format('YYYY-MM-DD HH:mm:ss')}
       </div>
-      <div className="text-sm leading-6 text-slate-800 break-all">
+      <div className="text-sm leading-6 break-all text-slate-800">
         {notification.actor_name} {actionLabel}
         {entityLabel} {notification.entity_id}
       </div>
