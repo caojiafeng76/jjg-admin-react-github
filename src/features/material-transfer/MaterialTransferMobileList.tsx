@@ -102,7 +102,7 @@ export default function MaterialTransferMobileList({
                   操作人
                 </div>
                 <div className="mt-1 font-semibold">
-                  {record.employee?.name || '-'}
+                  {record.operator_names.join('、') || '-'}
                 </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">

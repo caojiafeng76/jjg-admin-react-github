@@ -19,6 +19,7 @@ import {
 } from '@/features/production-order/projectNoSelect'
 import {
   MATERIAL_TRANSFER_AUDIT_OPTIONS,
+  MATERIAL_TRANSFER_RECIPIENTS,
   MATERIAL_TRANSFER_WORKSHOPS,
   type MaterialTransferInsert,
   type MaterialTransferUpdate,
@@ -56,6 +57,8 @@ const SHIFT_LEADER_OPTIONS = [
 
 const DEFAULT_INSPECTOR_NAME = '崔路路'
 
+type MaterialTransferFormValues = Omit<MaterialTransferInsert, 'operator_names'>
+
 export default function MaterialTransferForm({
   open,
   onCancel,
@@ -69,9 +72,23 @@ export default function MaterialTransferForm({
   mobile = false,
 }: Props) {
   const { message } = App.useApp()
-  const [form] = Form.useForm<MaterialTransferInsert>()
+  const [form] = Form.useForm<MaterialTransferFormValues>()
   const { data: projectNos, isLoading: isLoadingProjectNos } =
     useSalesOrdersProjectNos()
+
+  const employeeNameMap = useMemo(
+    () => new Map(employees.map((employee) => [employee.id, employee.name])),
+    [employees],
+  )
+
+  const recipientOptions = useMemo(
+    () =>
+      MATERIAL_TRANSFER_RECIPIENTS.map((name) => ({
+        label: name,
+        value: name,
+      })),
+    [],
+  )
 
   const projectNoOptions = useMemo(
     () => buildProjectNoSelectOptions(projectNos),
@@ -98,7 +115,7 @@ export default function MaterialTransferForm({
         length_mm: initialValues.length_mm ?? undefined,
         customer_model: initialValues.customer_model || undefined,
         transfer_quantity: initialValues.transfer_quantity,
-        operator_employee_id: initialValues.operator_employee_id,
+        operator_employee_ids: initialValues.operator_employee_ids,
         target_workshop: initialValues.target_workshop,
         recipient_name: initialValues.recipient_name,
         shift_leader_name: initialValues.shift_leader_name || undefined,
@@ -112,7 +129,7 @@ export default function MaterialTransferForm({
 
     form.resetFields()
     form.setFieldsValue({
-      operator_employee_id: fixedOperator?.id,
+      operator_employee_ids: fixedOperator?.id ? [fixedOperator.id] : undefined,
       inspector_name: DEFAULT_INSPECTOR_NAME,
       uploaded_by_name: currentUploader || undefined,
       is_audited: false,
@@ -129,9 +146,21 @@ export default function MaterialTransferForm({
     })
   }
 
-  async function handleFinish(values: MaterialTransferInsert) {
+  async function handleFinish(values: MaterialTransferFormValues) {
     if (!values.project_no?.trim()) {
       message.warning('请选择项目号')
+      return
+    }
+
+    const operatorEmployeeIds = fixedOperator?.id
+      ? [fixedOperator.id]
+      : values.operator_employee_ids || []
+    const operatorNames = operatorEmployeeIds
+      .map((id) => employeeNameMap.get(id))
+      .filter((name): name is string => Boolean(name))
+
+    if (operatorEmployeeIds.length === 0) {
+      message.warning('请选择至少一名操作人')
       return
     }
 
@@ -141,7 +170,9 @@ export default function MaterialTransferForm({
       length_mm: values.length_mm ?? null,
       customer_model: values.customer_model || null,
       transfer_quantity: values.transfer_quantity,
-      operator_employee_id: fixedOperator?.id || values.operator_employee_id,
+      operator_employee_id: operatorEmployeeIds[0],
+      operator_employee_ids: operatorEmployeeIds,
+      operator_names: operatorNames,
       target_workshop: values.target_workshop,
       recipient_name: values.recipient_name,
       shift_leader_name: values.shift_leader_name || null,
@@ -215,11 +246,22 @@ export default function MaterialTransferForm({
             </Form.Item>
 
             <Form.Item
-              name="operator_employee_id"
+              name="operator_employee_ids"
               label="操作人"
-              rules={[{ required: true, message: '请选择操作人' }]}
+              rules={[
+                {
+                  validator: async (_rule, value: string[] | undefined) => {
+                    if (Array.isArray(value) && value.length > 0) {
+                      return
+                    }
+
+                    throw new Error('请选择至少一名操作人')
+                  },
+                },
+              ]}
             >
               <Select
+                mode="multiple"
                 placeholder="请选择操作人"
                 showSearch
                 optionFilterProp="label"
@@ -254,7 +296,13 @@ export default function MaterialTransferForm({
               label="接收人"
               rules={[{ required: true, message: '请输入接收人' }]}
             >
-              <Input placeholder="请输入接收人" />
+              <AutoComplete
+                allowClear
+                placeholder="可选择或手动填写"
+                options={recipientOptions}
+                filterOption
+                getPopupContainer={getPopupContainer}
+              />
             </Form.Item>
           </div>
 

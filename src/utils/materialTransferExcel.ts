@@ -43,7 +43,7 @@ export function exportMaterialTransfersToExcel(
     record.length_mm ?? '',
     record.customer_model || '',
     record.transfer_quantity,
-    record.employee?.name || '',
+    record.operator_names.join('、'),
     record.target_workshop,
     record.recipient_name,
     record.shift_leader_name || '',

@@ -108,9 +108,9 @@ export default function MaterialTransferTable({
       },
       {
         title: '操作人',
-        key: 'employee',
-        width: 120,
-        render: (_text, record) => record.employee?.name || '-',
+        key: 'operator_names',
+        width: 180,
+        render: (_text, record) => record.operator_names.join('、') || '-',
       },
       {
         title: '接收车间',

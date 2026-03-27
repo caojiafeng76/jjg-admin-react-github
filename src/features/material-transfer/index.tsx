@@ -252,13 +252,26 @@ export default function MaterialTransferPage() {
             return
           }
 
+          const operatorEmployeeIds = fixedEmployee?.id
+            ? [fixedEmployee.id]
+            : values.operator_employee_ids
+          const operatorNames = fixedEmployee?.name
+            ? [fixedEmployee.name]
+            : values.operator_names
+
+          if (!operatorEmployeeIds?.length || !operatorNames?.length) {
+            message.warning('请选择至少一名操作人')
+            return
+          }
+
           await updateMutation.mutateAsync({
             id: editingRecord.id,
             values: {
               ...(values as MaterialTransferUpdate),
               uploaded_by_name: editingRecord.uploaded_by_name,
-              operator_employee_id:
-                fixedEmployee?.id || values.operator_employee_id,
+              operator_employee_id: operatorEmployeeIds[0],
+              operator_employee_ids: operatorEmployeeIds,
+              operator_names: operatorNames,
               is_audited: isEmployeeView
                 ? false
                 : (values as MaterialTransferUpdate).is_audited,
@@ -267,17 +280,23 @@ export default function MaterialTransferPage() {
           message.success('更新成功')
         } else {
           const createValues = values as MaterialTransferInsert
-          const operatorEmployeeId =
-            fixedEmployee?.id || createValues.operator_employee_id
+          const operatorEmployeeIds = fixedEmployee?.id
+            ? [fixedEmployee.id]
+            : createValues.operator_employee_ids
+          const operatorNames = fixedEmployee?.name
+            ? [fixedEmployee.name]
+            : createValues.operator_names
 
-          if (!operatorEmployeeId) {
-            message.warning('请选择操作人')
+          if (!operatorEmployeeIds?.length || !operatorNames?.length) {
+            message.warning('请选择至少一名操作人')
             return
           }
 
           await createMutation.mutateAsync({
             ...createValues,
-            operator_employee_id: operatorEmployeeId,
+            operator_employee_id: operatorEmployeeIds[0],
+            operator_employee_ids: operatorEmployeeIds,
+            operator_names: operatorNames,
             uploaded_by_name:
               currentUploader || createValues.uploaded_by_name || null,
             is_audited: isEmployeeView ? false : createValues.is_audited,

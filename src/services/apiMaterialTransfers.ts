@@ -2,7 +2,6 @@ import dayjs from 'dayjs'
 
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
-import type { Database } from './database.types'
 
 export const MATERIAL_TRANSFER_WORKSHOPS = [
   '挤压',
@@ -22,14 +21,84 @@ export const MATERIAL_TRANSFER_AUDIT_OPTIONS = [
   { label: '已审核', value: true },
 ] as const
 
+export const MATERIAL_TRANSFER_RECIPIENTS = [
+  '贾小勇',
+  '孟祥军',
+  '鲁永祥',
+  '胡中康',
+  '吴雯雯',
+  '王建莉',
+  '顾鉴申',
+] as const
+
 export type MaterialTransferWorkshop =
   (typeof MATERIAL_TRANSFER_WORKSHOPS)[number]
 
-type MaterialTransferRow = Database['public']['Tables']['material_transfers']['Row']
-type MaterialTransferInsertBase =
-  Database['public']['Tables']['material_transfers']['Insert']
-type MaterialTransferUpdateBase =
-  Database['public']['Tables']['material_transfers']['Update']
+export interface MaterialTransferRow {
+  audited_at: string | null
+  created_at: string
+  customer_model: string | null
+  id: string
+  inspector_name: string | null
+  is_audited: boolean
+  length_mm: number | null
+  operator_employee_id: string
+  operator_employee_ids: string[]
+  operator_names: string[]
+  product_model: string | null
+  project_no: string
+  recipient_name: string
+  remark: string | null
+  shift_leader_name: string | null
+  target_workshop: string
+  transfer_quantity: number
+  updated_at: string
+  uploaded_by_name: string | null
+}
+
+export interface MaterialTransferInsertBase {
+  audited_at?: string | null
+  created_at?: string
+  customer_model?: string | null
+  id?: string
+  inspector_name?: string | null
+  is_audited?: boolean
+  length_mm?: number | null
+  operator_employee_id: string
+  operator_employee_ids: string[]
+  operator_names: string[]
+  product_model?: string | null
+  project_no: string
+  recipient_name: string
+  remark?: string | null
+  shift_leader_name?: string | null
+  target_workshop: string
+  transfer_quantity: number
+  updated_at?: string
+  uploaded_by_name?: string | null
+}
+
+export interface MaterialTransferUpdateBase {
+  audited_at?: string | null
+  created_at?: string
+  customer_model?: string | null
+  id?: string
+  inspector_name?: string | null
+  is_audited?: boolean
+  length_mm?: number | null
+  operator_employee_id?: string
+  operator_employee_ids?: string[]
+  operator_names?: string[]
+  product_model?: string | null
+  project_no?: string
+  recipient_name?: string
+  remark?: string | null
+  shift_leader_name?: string | null
+  target_workshop?: string
+  transfer_quantity?: number
+  updated_at?: string
+  uploaded_by_name?: string | null
+}
 
 export interface MaterialTransferExtraFields {
   shift_leader_name: string | null
@@ -82,6 +151,7 @@ export interface MaterialTransferQuantityStats {
 function applyMaterialTransferFilters<
   TQuery extends {
     ilike: (column: string, pattern: string) => TQuery
+    contains: (column: string, value: string[]) => TQuery
     eq: (column: string, value: string | boolean) => TQuery
     gte: (column: string, value: string) => TQuery
     lt: (column: string, value: string) => TQuery
@@ -112,7 +182,7 @@ function applyMaterialTransferFilters<
   }
 
   if (filters.employeeId) {
-    nextQuery = nextQuery.eq('operator_employee_id', filters.employeeId)
+    nextQuery = nextQuery.contains('operator_employee_ids', [filters.employeeId])
   }
 
   if (filters.targetWorkshop) {
@@ -138,16 +208,47 @@ function normalizeTransferQuantity(quantity: number) {
   return quantity
 }
 
+function normalizeOperatorPayload(
+  operatorEmployeeIds: string[],
+  operatorNames: string[],
+) {
+  const normalizedOperatorEmployeeIds = Array.from(
+    new Set(operatorEmployeeIds.filter(Boolean)),
+  )
+  const normalizedOperatorNames = operatorNames
+    .map((name) => name.trim())
+    .filter(Boolean)
+
+  if (normalizedOperatorEmployeeIds.length === 0) {
+    throw new Error('请至少选择一名操作人')
+  }
+
+  if (normalizedOperatorEmployeeIds.length !== normalizedOperatorNames.length) {
+    throw new Error('操作人姓名与员工信息不一致，请重新选择')
+  }
+
+  return {
+    operator_employee_id: normalizedOperatorEmployeeIds[0],
+    operator_employee_ids: normalizedOperatorEmployeeIds,
+    operator_names: normalizedOperatorNames,
+  }
+}
+
 function normalizeMaterialTransferInsertPayload(
   values: MaterialTransferInsert,
 ): MaterialTransferInsert {
+  const operatorPayload = normalizeOperatorPayload(
+    values.operator_employee_ids,
+    values.operator_names,
+  )
+
   return {
     project_no: values.project_no.trim(),
     product_model: values.product_model?.trim() || null,
     length_mm: values.length_mm ?? null,
     customer_model: values.customer_model?.trim() || null,
     transfer_quantity: normalizeTransferQuantity(values.transfer_quantity),
-    operator_employee_id: values.operator_employee_id,
+    ...operatorPayload,
     target_workshop: values.target_workshop,
     recipient_name: values.recipient_name.trim(),
     shift_leader_name: values.shift_leader_name?.trim() || null,
@@ -164,6 +265,20 @@ function normalizeMaterialTransferUpdatePayload(
 ): MaterialTransferUpdate {
   const payload: MaterialTransferUpdate = {
     ...values,
+  }
+
+  if (
+    values.operator_employee_ids !== undefined ||
+    values.operator_names !== undefined
+  ) {
+    if (!values.operator_employee_ids || !values.operator_names) {
+      throw new Error('操作人信息不完整，请重新选择')
+    }
+
+    Object.assign(
+      payload,
+      normalizeOperatorPayload(values.operator_employee_ids, values.operator_names),
+    )
   }
 
   if (values.project_no !== undefined) {
@@ -228,13 +343,7 @@ export async function getMaterialTransfers({
 
   let query = supabase
     .from('material_transfers')
-    .select(
-      `
-      *,
-      employee:employees(id, name)
-    `,
-      { count: 'exact' },
-    )
+    .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
 
   query = applyMaterialTransferFilters(query, filters)
@@ -254,12 +363,7 @@ export async function getMaterialTransfers({
 export async function getMaterialTransferById(id: string) {
   const { data, error } = await supabase
     .from('material_transfers')
-    .select(
-      `
-      *,
-      employee:employees(id, name)
-    `,
-    )
+    .select('*')
     .eq('id', id)
     .single()
 
@@ -283,12 +387,7 @@ export async function getMaterialTransfersForExport({
 
   let query = supabase
     .from('material_transfers')
-    .select(
-      `
-      *,
-      employee:employees(id, name)
-    `,
-    )
+    .select('*')
     .order('created_at', { ascending: true })
 
   if (ids && ids.length > 0) {
@@ -356,12 +455,7 @@ export async function createMaterialTransfer(values: MaterialTransferInsert) {
   const { data, error } = await supabase
     .from('material_transfers')
     .insert(payload as MaterialTransferInsertBase)
-    .select(
-      `
-      *,
-      employee:employees(id, name)
-    `,
-    )
+    .select('*')
     .single()
 
   if (error) {
@@ -384,12 +478,7 @@ export async function updateMaterialTransfer({
     .from('material_transfers')
     .update(payload as MaterialTransferUpdateBase)
     .eq('id', id)
-    .select(
-      `
-      *,
-      employee:employees(id, name)
-    `,
-    )
+    .select('*')
     .single()
 
   if (error) {
@@ -416,12 +505,7 @@ export async function batchUpdateMaterialTransfers({
     .from('material_transfers')
     .update(payload as MaterialTransferUpdateBase)
     .in('id', ids)
-    .select(
-      `
-      *,
-      employee:employees(id, name)
-    `,
-    )
+    .select('*')
 
   if (error) {
     throw handleApiError(error, '批量更新物料转移单失败')
