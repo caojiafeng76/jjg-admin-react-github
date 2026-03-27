@@ -127,6 +127,14 @@ export default function ProductionOrderDetail({
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                班别
+              </div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {currentOrder.shift || '白班'}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                 审核时间
               </div>
               <div className="mt-1 font-semibold text-slate-900">
@@ -169,6 +177,9 @@ export default function ProductionOrderDetail({
             </Descriptions.Item>
             <Descriptions.Item label="出勤工时">
               {currentOrder.work_hours} 小时
+            </Descriptions.Item>
+            <Descriptions.Item label="班别">
+              {currentOrder.shift || '白班'}
             </Descriptions.Item>
             <Descriptions.Item label="正工工时">
               {positiveQualifiedHours.toFixed(2)} 小时

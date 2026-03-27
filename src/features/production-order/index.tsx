@@ -21,6 +21,7 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   getProductionOrdersForExport,
   type ProductionOrder,
+  type ProductionOrderShift,
 } from '@/services/apiProductionOrders'
 import { exportProductionOrdersToExcel } from '@/utils/productionOrderExcel'
 import {
@@ -162,6 +163,7 @@ export default function ProductionOrderPage() {
     startDate?: string
     endDate?: string
     employeeId?: string
+    shift?: ProductionOrderShift
     productModel?: string
     customerModel?: string
     isAudited?: boolean
@@ -174,6 +176,11 @@ export default function ProductionOrderPage() {
       searchParamsURL.get('isAudited') === null
         ? undefined
         : searchParamsURL.get('isAudited') === 'true',
+    shift:
+      searchParamsURL.get('shift') === '白班' ||
+      searchParamsURL.get('shift') === '夜班'
+        ? (searchParamsURL.get('shift') as ProductionOrderShift)
+        : undefined,
   }))
 
   const { data: orderData, isLoading } = useProductionOrders({

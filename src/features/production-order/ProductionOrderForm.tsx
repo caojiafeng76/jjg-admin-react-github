@@ -25,7 +25,10 @@ import {
 } from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
 
-import type { ProductionOrder } from '@/services/apiProductionOrders'
+import type {
+  ProductionOrder,
+  ProductionOrderShift,
+} from '@/services/apiProductionOrders'
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import {
   buildProjectNoSelectOptions,
@@ -159,12 +162,14 @@ export default function ProductionOrderForm({
           defect_quantity_1: item.defect_quantity_1,
           defect_reason_2: item.defect_reason_2,
           defect_quantity_2: item.defect_quantity_2,
+          remark: item.remark,
         })),
       )
       form.setFieldsValue({
         ...initialValues,
         is_audited: initialValues.is_audited,
         employee_id: initialValues.employee_id || fixedEmployee?.id,
+        shift: initialValues.shift || '白班',
         order_date: initialValues.order_date
           ? dayjs(initialValues.order_date)
           : undefined,
@@ -178,6 +183,7 @@ export default function ProductionOrderForm({
         extra_qualified_hours: 0,
         is_audited: false,
         employee_id: fixedEmployee?.id,
+        shift: '白班',
       })
     }
   }, [fixedEmployee, initialValues, form, open])
@@ -222,6 +228,7 @@ export default function ProductionOrderForm({
     extra_qualified_hours?: number
     remark?: string
     employee_id: string
+    shift: ProductionOrderShift
     is_audited?: boolean
   }) => {
     setSubmitting(true)
@@ -403,6 +410,7 @@ export default function ProductionOrderForm({
             work_hours: 11,
             extra_qualified_hours: 0,
             is_audited: false,
+            shift: '白班',
           }}
         >
           <div
@@ -437,6 +445,21 @@ export default function ProductionOrderForm({
                   label: emp.name,
                   value: emp.id,
                 }))}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="shift"
+              label="班别"
+              rules={[{ required: true, message: '请选择班别' }]}
+            >
+              <Select
+                placeholder="请选择班别"
+                options={[
+                  { label: '白班', value: '白班' },
+                  { label: '夜班', value: '夜班' },
+                ]}
                 style={{ width: '100%' }}
               />
             </Form.Item>

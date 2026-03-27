@@ -55,6 +55,7 @@ export default function ProductionOrderMobileList({
                   <Tag color={record.is_audited ? 'success' : 'default'}>
                     {record.is_audited ? '已审核' : '待审核'}
                   </Tag>
+                  <Tag color="blue">{record.shift || '白班'}</Tag>
                 </div>
               </div>
               <Tag

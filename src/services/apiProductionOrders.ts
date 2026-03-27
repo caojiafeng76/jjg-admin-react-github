@@ -2,12 +2,20 @@ import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import { Database } from './database.types'
 
+export type ProductionOrderShift = '白班' | '夜班'
+
 export type ProductionOrder =
-  Database['public']['Tables']['production_orders']['Row']
+  Database['public']['Tables']['production_orders']['Row'] & {
+    shift: ProductionOrderShift
+  }
 export type ProductionOrderInsert =
-  Database['public']['Tables']['production_orders']['Insert']
+  Database['public']['Tables']['production_orders']['Insert'] & {
+    shift?: ProductionOrderShift
+  }
 export type ProductionOrderUpdate =
-  Database['public']['Tables']['production_orders']['Update']
+  Database['public']['Tables']['production_orders']['Update'] & {
+    shift?: ProductionOrderShift
+  }
 
 export interface ProductionOrderWithEmployee extends ProductionOrder {
   employee?: {
@@ -31,6 +39,7 @@ export async function getProductionOrders({
   startDate,
   endDate,
   employeeId,
+  shift,
   productModel,
   customerModel,
   isAudited,
@@ -40,6 +49,7 @@ export async function getProductionOrders({
   startDate?: string
   endDate?: string
   employeeId?: string
+  shift?: ProductionOrderShift
   productModel?: string
   customerModel?: string
   isAudited?: boolean
@@ -81,6 +91,14 @@ export async function getProductionOrders({
     query = query.eq('employee_id', employeeId)
   }
 
+  if (shift) {
+    query = (
+      query as typeof query & {
+        eq: (column: string, value: string) => typeof query
+      }
+    ).eq('shift', shift)
+  }
+
   if (typeof isAudited === 'boolean') {
     query = query.eq('is_audited', isAudited)
   }
@@ -104,10 +122,7 @@ export async function getProductionOrders({
       ...order,
       positive_qualified_hours: Number(
         orderItems
-          .reduce(
-            (total, item) => total + Number(item.qualified_hours || 0),
-            0,
-          )
+          .reduce((total, item) => total + Number(item.qualified_hours || 0), 0)
           .toFixed(2),
       ),
       hasZeroStandardQualifiedItem: orderItems.some(
