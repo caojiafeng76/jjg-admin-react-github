@@ -52,6 +52,15 @@ export default function MaterialTransferMobileList({
                     ? new Date(record.created_at).toLocaleString('zh-CN')
                     : '-'}
                 </div>
+                <div
+                  className={
+                    selected
+                      ? 'mt-1 text-sm text-slate-200'
+                      : 'mt-1 text-sm text-slate-500'
+                  }
+                >
+                  {record.customer || '-'}
+                </div>
                 <div className="mt-1 text-lg font-bold tracking-tight">
                   {record.project_no}
                 </div>

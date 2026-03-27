@@ -37,6 +37,7 @@ export type MaterialTransferWorkshop =
 export interface MaterialTransferRow {
   audited_at: string | null
   created_at: string
+  customer: string | null
   customer_model: string | null
   id: string
   inspector_name: string | null
@@ -59,6 +60,7 @@ export interface MaterialTransferRow {
 export interface MaterialTransferInsertBase {
   audited_at?: string | null
   created_at?: string
+  customer?: string | null
   customer_model?: string | null
   id?: string
   inspector_name?: string | null
@@ -81,6 +83,7 @@ export interface MaterialTransferInsertBase {
 export interface MaterialTransferUpdateBase {
   audited_at?: string | null
   created_at?: string
+  customer?: string | null
   customer_model?: string | null
   id?: string
   inspector_name?: string | null
@@ -246,6 +249,7 @@ function normalizeMaterialTransferInsertPayload(
     project_no: values.project_no.trim(),
     product_model: values.product_model?.trim() || null,
     length_mm: values.length_mm ?? null,
+    customer: values.customer?.trim() || null,
     customer_model: values.customer_model?.trim() || null,
     transfer_quantity: normalizeTransferQuantity(values.transfer_quantity),
     ...operatorPayload,
@@ -287,6 +291,10 @@ function normalizeMaterialTransferUpdatePayload(
 
   if (values.product_model !== undefined) {
     payload.product_model = values.product_model?.trim() || null
+  }
+
+  if (values.customer !== undefined) {
+    payload.customer = values.customer?.trim() || null
   }
 
   if (values.shift_leader_name !== undefined) {

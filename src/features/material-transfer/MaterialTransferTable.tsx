@@ -73,6 +73,14 @@ export default function MaterialTransferTable({
         ),
       },
       {
+        title: '客户',
+        dataIndex: 'customer',
+        key: 'customer',
+        fixed: 'left',
+        width: 140,
+        render: (value: string | null) => value || '-',
+      },
+      {
         title: '项目号',
         dataIndex: 'project_no',
         key: 'project_no',

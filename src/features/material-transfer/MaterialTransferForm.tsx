@@ -111,6 +111,7 @@ export default function MaterialTransferForm({
     if (initialValues) {
       form.setFieldsValue({
         project_no: initialValues.project_no,
+        customer: initialValues.customer || undefined,
         product_model: initialValues.product_model || undefined,
         length_mm: initialValues.length_mm ?? undefined,
         customer_model: initialValues.customer_model || undefined,
@@ -140,6 +141,7 @@ export default function MaterialTransferForm({
     const selectedProject = projectInfoMap.get(projectNo)
 
     form.setFieldsValue({
+      customer: selectedProject?.customer || undefined,
       product_model: selectedProject?.product_model || undefined,
       length_mm: selectedProject?.length_mm ?? undefined,
       customer_model: selectedProject?.customer_model || undefined,
@@ -168,6 +170,7 @@ export default function MaterialTransferForm({
       project_no: values.project_no,
       product_model: values.product_model || null,
       length_mm: values.length_mm ?? null,
+      customer: values.customer || null,
       customer_model: values.customer_model || null,
       transfer_quantity: values.transfer_quantity,
       operator_employee_id: operatorEmployeeIds[0],
@@ -222,7 +225,11 @@ export default function MaterialTransferForm({
             />
           </Form.Item>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Form.Item name="customer" label="客户">
+              <Input disabled placeholder="自动带出" />
+            </Form.Item>
+
             <Form.Item name="product_model" label="型号">
               <Input disabled placeholder="自动带出" />
             </Form.Item>

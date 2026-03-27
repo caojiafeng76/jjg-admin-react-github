@@ -11,13 +11,18 @@ type ProcessStandardStandardSeconds = Pick<
 type SalesOrderRow = Database['public']['Tables']['sales_orders']['Row']
 type SalesOrderProjectNoOption = Pick<
   SalesOrderRow,
-  'project_no' | 'product_model' | 'length_mm' | 'customer_model' | 'created_at'
+  | 'project_no'
+  | 'product_model'
+  | 'length_mm'
+  | 'customer'
+  | 'customer_model'
+  | 'created_at'
 > & {
   project_no: string
 }
 type SalesOrderProjectNoDetail = Pick<
   SalesOrderRow,
-  'project_no' | 'product_model' | 'length_mm' | 'customer_model'
+  'project_no' | 'product_model' | 'length_mm' | 'customer' | 'customer_model'
 > & {
   project_no: string
 }
@@ -70,7 +75,9 @@ export async function getModels() {
 export async function getSalesOrdersProjectNos() {
   const { data, error } = await supabase
     .from('sales_orders')
-    .select('project_no, product_model, length_mm, customer_model, created_at')
+    .select(
+      'project_no, product_model, length_mm, customer, customer_model, created_at',
+    )
     .not('project_no', 'is', null)
     .order('created_at', { ascending: false })
     .order('project_no', { ascending: true })
@@ -87,7 +94,7 @@ export async function getSalesOrdersProjectNos() {
 export async function getSalesOrderByProjectNo(projectNo: string) {
   const { data, error } = await supabase
     .from('sales_orders')
-    .select('project_no, product_model, length_mm, customer_model')
+    .select('project_no, product_model, length_mm, customer, customer_model')
     .eq('project_no', projectNo)
     .single()
 
