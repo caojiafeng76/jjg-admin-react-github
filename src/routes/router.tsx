@@ -35,6 +35,9 @@ const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
 const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),
 )
+const JobBaseSetting = lazy(
+  () => import('@features/workshop/JobBaseSetting'),
+)
 const MaterialTransfer = lazy(() => import('@features/material-transfer'))
 const ProductionOrder = lazy(() => import('@features/production-order'))
 const ProductionDailyReport = lazy(() => import('@features/production-report'))
@@ -215,6 +218,17 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin', 'team_leader']}
               element={<StandardTimeList />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'job-base-setting',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<JobBaseSetting />}
             />
           </Suspense>
         ),

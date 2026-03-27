@@ -26,9 +26,11 @@ const routeToLabelMap: Record<string, string> = {
   'workshop-defect-reason-list': '不良原因管理',
   'employee-list': '员工管理',
   'standard-time-list': '成本核算',
+  'job-base-setting': '岗位基础数值设定',
   'production-order': '生产工单',
   'production-daily-report': '生产日报表',
 }
+
 
 export default function AppHeader({
   colorBgContainer,
