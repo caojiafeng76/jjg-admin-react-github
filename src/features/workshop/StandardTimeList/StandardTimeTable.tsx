@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Table, TableColumnsType } from 'antd'
+import { Table, TableColumnsType, Tag } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
 
 function formatNumber(value: number | null | undefined, digits = 4) {
@@ -56,6 +56,14 @@ export default function StandardTimeTable({
           }
           return value
         },
+      },
+      {
+        title: '工种',
+        dataIndex: 'job_name',
+        key: 'job_name',
+        width: 120,
+        render: (value?: string | null) =>
+          value ? <span>{value}</span> : <Tag color="warning">未匹配</Tag>,
       },
     ]
 
@@ -269,6 +277,13 @@ export default function StandardTimeTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
+      onRow={(record) => ({
+        style: !record.job_name
+          ? {
+              backgroundColor: '#fffbe6',
+            }
+          : undefined,
+      })}
       scroll={{ x: hideStandardSeconds ? 2200 : 2350, y: scrollY }}
       size="small"
       pagination={false}

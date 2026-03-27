@@ -25,7 +25,11 @@ export default function StandardTimeMobileList({
       {data.map((record) => (
         <article
           key={record.id}
-          className="rounded-3xl border border-slate-200 bg-white px-4 py-4 text-slate-900 shadow-[0_10px_25px_rgba(15,23,42,0.06)]"
+          className={
+            record.job_name
+              ? 'rounded-3xl border border-slate-200 bg-white px-4 py-4 text-slate-900 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
+              : 'rounded-3xl border border-amber-300 bg-amber-50 px-4 py-4 text-slate-900 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
+          }
         >
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -40,9 +44,15 @@ export default function StandardTimeMobileList({
               <div className="mt-1 text-sm text-slate-500">
                 工序：{record.operation}
               </div>
+              <div className="mt-1 text-sm text-slate-500">
+                工种：{record.job_name || '未设置'}
+              </div>
             </div>
 
-            <Tag color="cyan">理论工时</Tag>
+            <div className="flex flex-wrap gap-2">
+              <Tag color="cyan">理论工时</Tag>
+              {!record.job_name ? <Tag color="warning">工种待匹配</Tag> : null}
+            </div>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">

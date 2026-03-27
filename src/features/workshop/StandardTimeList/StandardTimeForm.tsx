@@ -4,6 +4,7 @@ import {
   FormInstance,
   Input,
   InputNumber,
+  Select,
   Typography,
 } from 'antd'
 import { useEffect, useMemo } from 'react'
@@ -11,6 +12,7 @@ import type {
   StandardTime,
   StandardTimeFormValues,
 } from '@/services/apiStandardTimes'
+import { useJobBaseSettingOptions } from './useStandardTimes'
 
 interface Props {
   onFinish: (values: StandardTimeFormValues) => void
@@ -22,6 +24,7 @@ interface Props {
 }
 
 const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
+  job_name: undefined,
   standard_seconds: 0,
   theoretical_seconds: 0,
   labor_rate: 0,
@@ -86,7 +89,21 @@ export default function StandardTimeForm({
 }: Props) {
   const [form] = Form.useForm<StandardTimeFormValues>()
   const isTeamLeaderMode = mode === 'team_leader'
+  const { data: jobOptions = [], isLoading: isJobOptionsLoading } =
+    useJobBaseSettingOptions()
   const watchedValues = Form.useWatch([], form)
+  const initialJobName = initialValues?.job_name || undefined
+  const isJobNameRequired = !isEdit || Boolean(initialJobName)
+  const jobRateMap = useMemo(
+    () =>
+      new Map(
+        jobOptions.map((option) => [
+          option.job_name,
+          Number(option.hourly_fee || 0),
+        ]),
+      ),
+    [jobOptions],
+  )
   const costPreview = useMemo(
     () => calculateCostPreview(watchedValues),
     [watchedValues],
@@ -107,6 +124,17 @@ export default function StandardTimeForm({
       form.setFieldsValue(DEFAULT_VALUES)
     }
   }, [form, initialValues])
+
+  const handleJobChange = (value: string) => {
+    if (isTeamLeaderMode) {
+      return
+    }
+
+    const matchedRate = jobRateMap.get(value)
+    if (matchedRate !== undefined) {
+      form.setFieldValue('labor_rate', matchedRate)
+    }
+  }
 
   return (
     <Form
@@ -137,6 +165,34 @@ export default function StandardTimeForm({
         ]}
       >
         <Input placeholder="请输入工序" disabled={isCreating} />
+      </Form.Item>
+      <Form.Item
+        name="job_name"
+        label="工种"
+        rules={[
+          { required: isJobNameRequired, message: '请选择工种' },
+          { max: 50, message: '工种不能超过50个字符' },
+        ]}
+        extra={
+          isTeamLeaderMode
+            ? undefined
+            : '选定工种后会自动带出人工费率，仍可手工修改'
+        }
+      >
+        <Select
+          allowClear={!isJobNameRequired}
+          showSearch
+          loading={isJobOptionsLoading}
+          placeholder="请选择工种"
+          optionFilterProp="label"
+          options={jobOptions.map((option) => ({
+            value: option.job_name,
+            label: `${option.job_name}（工时费 ${Number(
+              option.hourly_fee || 0,
+            ).toFixed(4)}）`,
+          }))}
+          onChange={handleJobChange}
+        />
       </Form.Item>
       {isTeamLeaderMode ? null : (
         <>

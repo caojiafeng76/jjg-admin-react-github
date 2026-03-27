@@ -1,4 +1,4 @@
-import { Button, DatePicker, Form, Input, Space } from 'antd'
+import { Button, Checkbox, DatePicker, Form, Input, Space } from 'antd'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
 import { useEffect, useState } from 'react'
 import dayjs, { type Dayjs } from 'dayjs'
@@ -8,6 +8,7 @@ const { RangePicker } = DatePicker
 interface SearchValues {
   operation?: string
   model?: string
+  unmatchedOnly?: boolean
   updatedAtRange?: [Dayjs | null, Dayjs | null]
 }
 
@@ -15,6 +16,7 @@ interface Props {
   onSearch: (params: {
     operation?: string
     model?: string
+    unmatchedOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
   }) => void
@@ -23,6 +25,7 @@ interface Props {
   initialValues?: {
     operation?: string
     model?: string
+    unmatchedOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
   }
@@ -41,6 +44,7 @@ export default function StandardTimeSearch({
     form.setFieldsValue({
       operation: initialValues?.operation,
       model: initialValues?.model,
+      unmatchedOnly: initialValues?.unmatchedOnly,
       updatedAtRange:
         initialValues?.updatedStartDate && initialValues?.updatedEndDate
           ? [
@@ -59,6 +63,7 @@ export default function StandardTimeSearch({
     onSearch({
       operation: values.operation?.trim() || undefined,
       model: values.model?.trim() || undefined,
+      unmatchedOnly: values.unmatchedOnly || undefined,
       updatedStartDate:
         values.updatedAtRange?.[0]?.format('YYYY-MM-DD') || undefined,
       updatedEndDate:
@@ -119,6 +124,13 @@ export default function StandardTimeSearch({
           placeholder={['更新开始日期', '更新结束日期']}
           allowClear
         />
+      </Form.Item>
+      <Form.Item
+        name="unmatchedOnly"
+        valuePropName="checked"
+        className="mb-0 flex items-center"
+      >
+        <Checkbox>仅看未匹配工种</Checkbox>
       </Form.Item>
       <Form.Item className="mb-0">
         <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>

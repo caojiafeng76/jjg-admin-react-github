@@ -10,6 +10,7 @@ import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const JOB_BASE_SETTINGS_KEY = 'job-base-settings' as const
+const JOB_BASE_SETTINGS_OPTIONS_KEY = [JOB_BASE_SETTINGS_KEY, 'options'] as const
 
 export function useJobBaseSettingsList({
   page,
@@ -33,20 +34,20 @@ export function useJobBaseSettingsList({
 export function useCreateJobBaseSetting() {
   return useMutationWithInvalidation({
     mutationFn: createJobBaseSetting,
-    invalidateQueries: [[JOB_BASE_SETTINGS_KEY]],
+    invalidateQueries: [[JOB_BASE_SETTINGS_KEY], JOB_BASE_SETTINGS_OPTIONS_KEY],
   })
 }
 
 export function useUpdateJobBaseSetting() {
   return useMutationWithInvalidation({
     mutationFn: updateJobBaseSetting,
-    invalidateQueries: [[JOB_BASE_SETTINGS_KEY]],
+    invalidateQueries: [[JOB_BASE_SETTINGS_KEY], JOB_BASE_SETTINGS_OPTIONS_KEY],
   })
 }
 
 export function useDeleteJobBaseSettings() {
   return useMutationWithInvalidation({
     mutationFn: deleteJobBaseSettings,
-    invalidateQueries: [[JOB_BASE_SETTINGS_KEY]],
+    invalidateQueries: [[JOB_BASE_SETTINGS_KEY], JOB_BASE_SETTINGS_OPTIONS_KEY],
   })
 }

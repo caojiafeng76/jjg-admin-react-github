@@ -11,6 +11,7 @@ type ProcessStandardInsert =
 export type StandardTime = ProcessStandardRow
 export type StandardTimeFormValues = Pick<
   ProcessStandardInsert,
+  | 'job_name'
   | 'operation'
   | 'model'
   | 'standard_seconds'
@@ -35,6 +36,7 @@ function normalizeStandardTimePayload(
 ): StandardTimeFormValues {
   return {
     ...values,
+    job_name: values.job_name?.trim() || null,
     operation: normalizeStandardTimeValue(values.operation),
     model: normalizeStandardTimeValue(values.model),
     theoretical_seconds: values.theoretical_seconds ?? 0,
@@ -50,11 +52,42 @@ function normalizeStandardTimePayload(
   }
 }
 
+async function getJobHourlyFee(jobName: string): Promise<number | null> {
+  const { data, error } = await supabase
+    .from('job_base_settings')
+    .select('hourly_fee')
+    .eq('job_name', jobName)
+    .maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取岗位工时费失败')
+  }
+
+  return data?.hourly_fee ?? null
+}
+
+async function applyDefaultLaborRate(
+  values: StandardTimeFormValues,
+): Promise<StandardTimeFormValues> {
+  const normalizedValues = normalizeStandardTimePayload(values)
+
+  if (normalizedValues.job_name && values.labor_rate == null) {
+    const hourlyFee = await getJobHourlyFee(normalizedValues.job_name)
+
+    if (hourlyFee !== null) {
+      normalizedValues.labor_rate = hourlyFee
+    }
+  }
+
+  return normalizedValues
+}
+
 export async function getStandardTimes({
   page,
   pageSize,
   operation,
   model,
+  unmatchedOnly,
   updatedStartDate,
   updatedEndDate,
 }: {
@@ -62,6 +95,7 @@ export async function getStandardTimes({
   pageSize: number
   operation?: string
   model?: string
+  unmatchedOnly?: boolean
   updatedStartDate?: string
   updatedEndDate?: string
 }) {
@@ -77,6 +111,10 @@ export async function getStandardTimes({
 
     if (model) {
       query = query.ilike('model', `%${model}%`)
+    }
+
+    if (unmatchedOnly) {
+      query = query.is('job_name', null)
     }
 
     if (updatedStartDate) {
@@ -107,6 +145,10 @@ export async function getStandardTimes({
 
     if (model) {
       query = query.ilike('model', `%${model}%`)
+    }
+
+    if (unmatchedOnly) {
+      query = query.is('job_name', null)
     }
 
     if (updatedStartDate) {
@@ -215,7 +257,11 @@ async function checkStandardTimeExists(
 }
 
 export async function createStandardTime(values: StandardTimeFormValues) {
-  const normalizedValues = normalizeStandardTimePayload(values)
+  const normalizedValues = await applyDefaultLaborRate(values)
+
+  if (!normalizedValues.job_name) {
+    throw new Error('工种不能为空')
+  }
 
   if (normalizedValues.operation && normalizedValues.model) {
     const exists = await checkStandardTimeExists(
@@ -286,7 +332,7 @@ export async function updateStandardTime({
   id: string
   values: StandardTimeFormValues
 }) {
-  const normalizedValues = normalizeStandardTimePayload(values)
+  const normalizedValues = await applyDefaultLaborRate(values)
 
   if (normalizedValues.operation && normalizedValues.model) {
     const exists = await checkStandardTimeExists(

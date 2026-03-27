@@ -198,6 +198,7 @@ export type Database = {
           id: string
           inspection_cost: number | null
           inspection_seconds: number
+          job_name: string | null
           labor_cost: number | null
           labor_rate: number
           model: string
@@ -222,6 +223,7 @@ export type Database = {
           id?: string
           inspection_cost?: number | null
           inspection_seconds?: number
+          job_name?: string | null
           labor_cost?: number | null
           labor_rate?: number
           model: string
@@ -246,6 +248,7 @@ export type Database = {
           id?: string
           inspection_cost?: number | null
           inspection_seconds?: number
+          job_name?: string | null
           labor_cost?: number | null
           labor_rate?: number
           model?: string
@@ -259,7 +262,15 @@ export type Database = {
           total_cost?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "process_standards_job_name_fkey"
+            columns: ["job_name"]
+            isOneToOne: false
+            referencedRelation: "job_base_settings"
+            referencedColumns: ["job_name"]
+          },
+        ]
       }
       production_order_items: {
         Row: {
