@@ -7,6 +7,7 @@ import {
   updateProductionOrder,
   updateProductionOrders,
   deleteProductionOrders,
+  type ProductionOrderShift,
 } from '@/services/apiProductionOrders'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
@@ -30,6 +31,7 @@ export function useProductionOrders({
     startDate?: string
     endDate?: string
     employeeId?: string
+    shift?: ProductionOrderShift
     productModel?: string
     customerModel?: string
     isAudited?: boolean

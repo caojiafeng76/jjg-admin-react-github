@@ -71,6 +71,12 @@ export default function ProductionOrderList({
         ),
       },
       {
+        title: '班别',
+        dataIndex: 'shift',
+        key: 'shift',
+        width: 90,
+      },
+      {
         title: '出勤工时(h)',
         dataIndex: 'work_hours',
         key: 'work_hours',
@@ -173,7 +179,7 @@ export default function ProductionOrderList({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ y: scrollY }}
+      scroll={{ y: scrollY, x: 1150 }}
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}

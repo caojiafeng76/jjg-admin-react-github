@@ -15,6 +15,7 @@ const EXPORT_HEADERS = [
   '零工工时(h)',
   '总工时(h)',
   '工时效率',
+  '班别',
   '项目号',
   '产品型号',
   '长度(mm)',
@@ -32,10 +33,12 @@ type ExportRow = Array<string | number>
 
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
 const WORK_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('出勤工时')
-const POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('正工工时(h)')
+const POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX =
+  EXPORT_HEADERS.indexOf('正工工时(h)')
 const EXTRA_QUALIFIED_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('零工工时(h)')
 const TOTAL_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('总工时(h)')
 const EFFICIENCY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('工时效率')
+const SHIFT_COLUMN_INDEX = EXPORT_HEADERS.indexOf('班别')
 const REMARK_COLUMN_INDEX = EXPORT_HEADERS.indexOf('备注')
 
 function normalizeNumber(value: number | null | undefined) {
@@ -63,6 +66,7 @@ function buildExportRow(
     normalizeNumber(order.extra_qualified_hours),
     normalizeNumber(order.total_qualified_hours),
     efficiency,
+    order.shift || '白班',
     item.project_no,
     item.product_model || '',
     item.length_mm ?? '',
@@ -95,6 +99,8 @@ function buildEmptyExportRow(order: ProductionOrderForExport): ExportRow {
     normalizeNumber(order.extra_qualified_hours),
     normalizeNumber(order.total_qualified_hours),
     efficiency,
+    order.shift || '白班',
+    '',
     '',
     '',
     '',
@@ -148,6 +154,7 @@ function buildOrderSheetRows(
     nextRow[EXTRA_QUALIFIED_HOURS_COLUMN_INDEX] = ''
     nextRow[TOTAL_HOURS_COLUMN_INDEX] = ''
     nextRow[EFFICIENCY_COLUMN_INDEX] = ''
+    nextRow[SHIFT_COLUMN_INDEX] = ''
 
     if (mergeRemark) {
       nextRow[REMARK_COLUMN_INDEX] = ''
@@ -186,6 +193,10 @@ function buildOrderSheetRows(
       {
         s: { r: mergeStartRow, c: EFFICIENCY_COLUMN_INDEX },
         e: { r: mergeEndRow, c: EFFICIENCY_COLUMN_INDEX },
+      },
+      {
+        s: { r: mergeStartRow, c: SHIFT_COLUMN_INDEX },
+        e: { r: mergeEndRow, c: SHIFT_COLUMN_INDEX },
       },
     )
 
@@ -302,8 +313,9 @@ export function exportProductionOrdersToExcel(
       )
     },
   )
-
-  ;(workbook as XLSX.WorkBook & { Workbook?: Record<string, unknown> }).Workbook = {
+  ;(
+    workbook as XLSX.WorkBook & { Workbook?: Record<string, unknown> }
+  ).Workbook = {
     CalcPr: {
       calcMode: 'auto',
       fullCalcOnLoad: '1',

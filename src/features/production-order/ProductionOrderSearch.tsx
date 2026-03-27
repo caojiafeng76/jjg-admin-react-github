@@ -7,12 +7,15 @@ import {
 } from '@heroicons/react/16/solid'
 import dayjs, { type Dayjs } from 'dayjs'
 
+import type { ProductionOrderShift } from '@/services/apiProductionOrders'
+
 const { RangePicker } = DatePicker
 
 interface SearchParams {
   startDate?: string
   endDate?: string
   employeeId?: string
+  shift?: ProductionOrderShift
   productModel?: string
   customerModel?: string
   isAudited?: boolean
@@ -42,6 +45,7 @@ export default function ProductionOrderSearch({
   useEffect(() => {
     form.setFieldsValue({
       employeeId: fixedEmployee?.id || initialValues?.employeeId,
+      shift: initialValues?.shift,
       productModel: initialValues?.productModel,
       customerModel: initialValues?.customerModel,
       isAudited: initialValues?.isAudited,
@@ -59,6 +63,7 @@ export default function ProductionOrderSearch({
   const handleSearch = (values: {
     dateRange?: [Dayjs | null, Dayjs | null]
     employeeId?: string
+    shift?: ProductionOrderShift
     productModel?: string
     customerModel?: string
     isAudited?: boolean
@@ -74,6 +79,10 @@ export default function ProductionOrderSearch({
       params.employeeId = fixedEmployee.id
     } else if (values.employeeId) {
       params.employeeId = values.employeeId
+    }
+
+    if (values.shift) {
+      params.shift = values.shift
     }
 
     const productModel = values.productModel?.trim()
@@ -157,6 +166,18 @@ export default function ProductionOrderSearch({
           placeholder="型号"
           allowClear
           style={{ width: mobile ? '100%' : 160 }}
+        />
+      </Form.Item>
+
+      <Form.Item name="shift" className="mb-0">
+        <Select
+          placeholder="班别"
+          allowClear
+          style={{ width: mobile ? '100%' : 140 }}
+          options={[
+            { label: '白班', value: '白班' },
+            { label: '夜班', value: '夜班' },
+          ]}
         />
       </Form.Item>
 
