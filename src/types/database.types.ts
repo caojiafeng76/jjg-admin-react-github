@@ -46,46 +46,67 @@ export type Database = {
       }
       material_transfers: {
         Row: {
+          audited_at: string | null
           created_at: string
           customer_model: string | null
           id: string
+          inspector_name: string | null
+          is_audited: boolean
           length_mm: number | null
           operator_employee_id: string
+          operator_employee_ids: string[]
+          operator_names: string[]
           product_model: string | null
           project_no: string
           recipient_name: string
           remark: string | null
+          shift_leader_name: string | null
           target_workshop: string
           transfer_quantity: number
           updated_at: string
+          uploaded_by_name: string | null
         }
         Insert: {
+          audited_at?: string | null
           created_at?: string
           customer_model?: string | null
           id?: string
+          inspector_name?: string | null
+          is_audited?: boolean
           length_mm?: number | null
           operator_employee_id: string
+          operator_employee_ids?: string[]
+          operator_names?: string[]
           product_model?: string | null
           project_no: string
           recipient_name: string
           remark?: string | null
+          shift_leader_name?: string | null
           target_workshop: string
           transfer_quantity: number
           updated_at?: string
+          uploaded_by_name?: string | null
         }
         Update: {
+          audited_at?: string | null
           created_at?: string
           customer_model?: string | null
           id?: string
+          inspector_name?: string | null
+          is_audited?: boolean
           length_mm?: number | null
           operator_employee_id?: string
+          operator_employee_ids?: string[]
+          operator_names?: string[]
           product_model?: string | null
           project_no?: string
           recipient_name?: string
           remark?: string | null
+          shift_leader_name?: string | null
           target_workshop?: string
           transfer_quantity?: number
           updated_at?: string
+          uploaded_by_name?: string | null
         }
         Relationships: [
           {
