@@ -1,6 +1,11 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 
+export interface JobBaseSettingOption {
+  job_name: string
+  hourly_fee: number | null
+}
+
 export interface JobBaseSetting {
   id: string
   job_name: string
@@ -89,6 +94,18 @@ export async function getJobBaseSettings({
     items: (data || []) as JobBaseSetting[],
     total: count || 0,
   }
+}
+
+export async function getJobBaseSettingOptions() {
+  const { data, error } = await jobBaseSettingsTable()
+    .select('job_name, hourly_fee')
+    .order('job_name', { ascending: true })
+
+  if (error) {
+    throw handleApiError(error, '获取岗位工种选项失败')
+  }
+
+  return (data || []) as JobBaseSettingOption[]
 }
 
 export async function createJobBaseSetting(values: JobBaseSettingFormValues) {

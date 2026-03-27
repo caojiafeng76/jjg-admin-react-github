@@ -11,6 +11,7 @@ import {
 const EXPORT_HEADERS = [
   '型号',
   '工序',
+  '工种',
   '标准工时(秒)',
   '理论工时(秒)',
   '检验工时(秒)',
@@ -51,6 +52,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
   const rows = records.map((record) => [
     record.model,
     record.operation,
+    record.job_name || '',
     record.standard_seconds,
     record.theoretical_seconds,
     record.inspection_seconds,

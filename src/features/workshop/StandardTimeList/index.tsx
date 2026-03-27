@@ -43,11 +43,13 @@ export default function StandardTimeList() {
   const [searchParams, setSearchParams] = useState<{
     operation?: string
     model?: string
+    unmatchedOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
   }>({
     operation: searchParamsURL.get('operation') || undefined,
     model: searchParamsURL.get('model') || undefined,
+    unmatchedOnly: searchParamsURL.get('unmatchedOnly') === 'true' || undefined,
     updatedStartDate: searchParamsURL.get('updatedStartDate') || undefined,
     updatedEndDate: searchParamsURL.get('updatedEndDate') || undefined,
   })
@@ -163,6 +165,7 @@ export default function StandardTimeList() {
       try {
         const nextValues: StandardTimeFormValues = isTeamLeaderMode
           ? {
+              job_name: values.job_name,
               operation: values.operation,
               model: isEdit
                 ? editingRecord?.model || values.model
@@ -242,6 +245,12 @@ export default function StandardTimeList() {
         nextSearchParamsURL.delete('model')
       }
 
+      if (params.unmatchedOnly) {
+        nextSearchParamsURL.set('unmatchedOnly', 'true')
+      } else {
+        nextSearchParamsURL.delete('unmatchedOnly')
+      }
+
       if (params.updatedStartDate) {
         nextSearchParamsURL.set('updatedStartDate', params.updatedStartDate)
       } else {
@@ -267,6 +276,7 @@ export default function StandardTimeList() {
     nextSearchParamsURL.set('page', '1')
     nextSearchParamsURL.delete('operation')
     nextSearchParamsURL.delete('model')
+    nextSearchParamsURL.delete('unmatchedOnly')
     nextSearchParamsURL.delete('updatedStartDate')
     nextSearchParamsURL.delete('updatedEndDate')
 
