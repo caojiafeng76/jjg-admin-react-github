@@ -2,16 +2,35 @@ import {
   Bars3BottomLeftIcon,
   Bars3BottomRightIcon,
 } from '@heroicons/react/16/solid'
-import { KeyIcon } from '@heroicons/react/24/outline'
-import { App, Button, Form, Input, Modal } from 'antd'
+import { BellIcon, KeyIcon } from '@heroicons/react/24/outline'
+import dayjs from 'dayjs'
+import {
+  App,
+  Badge,
+  Button,
+  Empty,
+  Form,
+  Input,
+  Modal,
+  Popover,
+  Spin,
+} from 'antd'
 import { Header } from 'antd/es/layout/layout'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import {
+  useAdminNotifications,
+  useAdminNotificationsRealtime,
+  useMarkAdminNotificationAsRead,
+  useMarkAllAdminNotificationsAsRead,
+  useUnreadAdminNotificationCount,
+} from '@hooks/useAdminNotifications'
 import DarkModeButton from '@ui/DarkModeButton'
 import { getRoleLabel } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
 import { updateAdminManagementPassword } from '@/services/apiAdminManagementPassword'
+import type { AdminNotification } from '@/services/apiNotifications'
 
 // 路由到页面名称的映射
 const routeToLabelMap: Record<string, string> = {
@@ -57,6 +76,15 @@ export default function AppHeader({
   const pageName = routeToLabelMap[currentPath] || ''
   const displayName = employeeProfile?.name || user?.email || '未登录用户'
   const roleLabel = getRoleLabel(role)
+  const isAdmin = role === 'admin'
+  const { data: notifications = [], isLoading: isNotificationsLoading } =
+    useAdminNotifications(12, isAdmin)
+  const { data: unreadCount = 0, isLoading: isUnreadCountLoading } =
+    useUnreadAdminNotificationCount(isAdmin)
+  const markNotificationReadMutation = useMarkAdminNotificationAsRead()
+  const markAllNotificationsReadMutation = useMarkAllAdminNotificationsAsRead()
+
+  useAdminNotificationsRealtime(isAdmin)
 
   const handleChangeManagementPassword = async (values: {
     currentPassword: string
@@ -83,6 +111,76 @@ export default function AppHeader({
       setIsUpdatingManagementPassword(false)
     }
   }
+
+  const handleMarkNotificationAsRead = async (notificationId: string) => {
+    try {
+      await markNotificationReadMutation.mutateAsync(notificationId)
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('通知已读确认失败')
+      }
+    }
+  }
+
+  const handleMarkAllNotificationsAsRead = async () => {
+    try {
+      await markAllNotificationsReadMutation.mutateAsync(undefined)
+      message.success('已全部标记为已读')
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('全部已读操作失败')
+      }
+    }
+  }
+
+  const notificationContent = isNotificationsLoading || isUnreadCountLoading ? (
+    <div className="flex w-[360px] justify-center py-8">
+      <Spin size="small" />
+    </div>
+  ) : (
+    <div className="w-[360px]">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <div className="text-sm font-semibold text-slate-900">通知</div>
+          <div className="text-xs text-slate-500">
+            未读 {unreadCount} 条，展示最近 {notifications.length} 条
+          </div>
+        </div>
+        <Button
+          type="link"
+          size="small"
+          disabled={
+            unreadCount === 0 || markAllNotificationsReadMutation.isPending
+          }
+          loading={markAllNotificationsReadMutation.isPending}
+          onClick={() => {
+            void handleMarkAllNotificationsAsRead()
+          }}
+        >
+          全部已读
+        </Button>
+      </div>
+
+      {notifications.length === 0 ? (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无通知" />
+      ) : (
+        <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+          {notifications.map((notification) => (
+            <NotificationItem
+              key={notification.id}
+              notification={notification}
+              loading={markNotificationReadMutation.isPending}
+              onConfirmRead={handleMarkNotificationAsRead}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <>
@@ -113,6 +211,21 @@ export default function AppHeader({
         )}
 
         <div className="mr-12 flex h-full flex-1 items-center justify-end gap-4">
+          {isAdmin ? (
+            <Popover
+              trigger="click"
+              placement="bottomRight"
+              content={notificationContent}
+            >
+              <Badge count={unreadCount} overflowCount={99}>
+                <Button
+                  type="text"
+                  icon={<BellIcon className="size-5" />}
+                  aria-label="通知"
+                />
+              </Badge>
+            </Popover>
+          ) : null}
           <span className="text-sm text-gray-600 dark:text-gray-300">
             欢迎您：{displayName}
             {roleLabel ? `（${roleLabel}）` : ''}
@@ -200,5 +313,59 @@ export default function AppHeader({
         </Form>
       </Modal>
     </>
+  )
+}
+
+function NotificationItem({
+  notification,
+  loading,
+  onConfirmRead,
+}: {
+  notification: AdminNotification
+  loading: boolean
+  onConfirmRead: (notificationId: string) => Promise<void>
+}) {
+  const actionLabel =
+    notification.action_type === 'create' ? '新增了' : '编辑了'
+  const entityLabel =
+    notification.entity_type === 'production_order' ? '工单' : '转移表'
+
+  return (
+    <div
+      className={
+        notification.is_read
+          ? 'rounded-xl border border-slate-200 bg-white px-3 py-3'
+          : 'rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-3'
+      }
+    >
+      <div className="mb-1 text-xs text-slate-500">
+        {dayjs(notification.created_at).format('YYYY-MM-DD HH:mm:ss')}
+      </div>
+      <div className="text-sm leading-6 text-slate-800 break-all">
+        {notification.actor_name} {actionLabel}
+        {entityLabel} {notification.entity_id}
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <span
+          className={
+            notification.is_read
+              ? 'text-xs text-slate-400'
+              : 'text-xs font-medium text-sky-600'
+          }
+        >
+          {notification.is_read ? '已读' : '未读'}
+        </span>
+        <Button
+          type="link"
+          size="small"
+          disabled={notification.is_read || loading}
+          onClick={() => {
+            void onConfirmRead(notification.id)
+          }}
+        >
+          确认已读
+        </Button>
+      </div>
+    </div>
   )
 }
