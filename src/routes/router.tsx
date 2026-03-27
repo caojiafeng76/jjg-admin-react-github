@@ -35,9 +35,7 @@ const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
 const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),
 )
-const JobBaseSetting = lazy(
-  () => import('@features/workshop/JobBaseSetting'),
-)
+const JobBaseSetting = lazy(() => import('@features/workshop/JobBaseSetting'))
 const MaterialTransfer = lazy(() => import('@features/material-transfer'))
 const ProductionOrder = lazy(() => import('@features/production-order'))
 const ProductionDailyReport = lazy(() => import('@features/production-report'))

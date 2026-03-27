@@ -1,12 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import {
-  Card,
-  Form,
-  FormInstance,
-  Input,
-  InputNumber,
-  Typography,
-} from 'antd'
+import { Card, Form, FormInstance, Input, InputNumber, Typography } from 'antd'
 
 import type {
   JobBaseSetting,

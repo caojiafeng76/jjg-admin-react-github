@@ -135,7 +135,14 @@ export default function JobBaseSettingPage() {
         }
       }
     },
-    [createMutation, isEdit, message, resetFormState, selectedRowKeys, updateMutation],
+    [
+      createMutation,
+      isEdit,
+      message,
+      resetFormState,
+      selectedRowKeys,
+      updateMutation,
+    ],
   )
 
   const handleSearch = useCallback(
@@ -223,9 +230,7 @@ export default function JobBaseSettingPage() {
         title={modalTitle}
         open={isModalOpen}
         destroyOnClose
-        confirmLoading={
-          createMutation.isPending || updateMutation.isPending
-        }
+        confirmLoading={createMutation.isPending || updateMutation.isPending}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
