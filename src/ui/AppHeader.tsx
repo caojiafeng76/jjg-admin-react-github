@@ -31,7 +31,6 @@ const routeToLabelMap: Record<string, string> = {
   'production-daily-report': '生产日报表',
 }
 
-
 export default function AppHeader({
   colorBgContainer,
   collapsed,
