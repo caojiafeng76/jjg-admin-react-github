@@ -47,11 +47,7 @@ export default function MachineEquipmentMaintenanceSearch({
       onFinish={handleSearch}
       className="flex flex-1 flex-wrap gap-2"
     >
-      <Form.Item
-        name="unifiedDeviceNo"
-        className="mb-0"
-        style={{ width: 220 }}
-      >
+      <Form.Item name="unifiedDeviceNo" className="mb-0" style={{ width: 220 }}>
         <Input
           placeholder="请输入统一设备编号"
           allowClear
