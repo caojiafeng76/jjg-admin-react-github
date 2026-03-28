@@ -24,18 +24,19 @@ export function exportProductionDailyReportToExcel(
   rows: ProductionDailyReportRow[],
 ) {
   const workHoursColumnIndex = 1
-  const incomingQualifiedCountColumnIndex = 7
-  const qualifiedCountColumnIndex = 8
-  const defectCountColumnIndex = 9
-  const rawMaterialDefectCountColumnIndex = 10
-  const processingDefectCountColumnIndex = 11
-  const qualifiedRateColumnIndex = 12
-  const rawMaterialDefectWeightColumnIndex = 13
-  const processingDefectWeightColumnIndex = 14
+  const incomingQualifiedCountColumnIndex = 8
+  const qualifiedCountColumnIndex = 9
+  const defectCountColumnIndex = 10
+  const rawMaterialDefectCountColumnIndex = 11
+  const processingDefectCountColumnIndex = 12
+  const qualifiedRateColumnIndex = 13
+  const rawMaterialDefectWeightColumnIndex = 14
+  const processingDefectWeightColumnIndex = 15
 
   const headers = [
     '日期',
     '工时',
+    '数据类别',
     '项目号',
     '产品型号',
     '客户型号',
@@ -61,6 +62,7 @@ export function exportProductionDailyReportToExcel(
     ...rows.map((row) => [
       row.orderDate,
       row.workHours,
+      row.dataCategory,
       row.projectNo,
       row.productModel,
       row.customerModel,

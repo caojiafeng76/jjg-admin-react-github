@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { DatePicker, Button, Form, Input, Space } from 'antd'
+import { DatePicker, Button, Form, Input, Select, Space } from 'antd'
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -8,11 +8,13 @@ import {
 import type { Dayjs } from 'dayjs'
 
 import type { ProductionDailyReportFilters } from '@/services/apiProductionDailyReport'
+import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
 
 const { RangePicker } = DatePicker
 
 interface SearchFormValues {
   dateRange?: [Dayjs | null, Dayjs | null]
+  dataCategory?: ProductionOrderDataCategory
   projectNo?: string
   productModel?: string
   customerModel?: string
@@ -46,6 +48,7 @@ export default function ProductionDailyReportSearch({
 
   const handleFinish = (values: SearchFormValues) => {
     const filters: ProductionDailyReportFilters = {
+      dataCategory: values.dataCategory,
       projectNo: values.projectNo?.trim() || undefined,
       productModel: values.productModel?.trim() || undefined,
       customerModel: values.customerModel?.trim() || undefined,
@@ -100,6 +103,20 @@ export default function ProductionDailyReportSearch({
           style={{ width: mobile ? '100%' : 140 }}
         />
       </Form.Item>
+
+      {mobile ? null : (
+        <Form.Item name="dataCategory" className="mb-0">
+          <Select
+            allowClear
+            placeholder="数据类别"
+            style={{ width: 140 }}
+            options={[
+              { label: 'A', value: 'A' },
+              { label: 'B', value: 'B' },
+            ]}
+          />
+        </Form.Item>
+      )}
 
       <Form.Item name="productModel" className="mb-0">
         <Input
