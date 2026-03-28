@@ -696,7 +696,8 @@ export default function ProductionOrderForm({
                     title: '数据类别',
                     dataIndex: 'data_category',
                     width: 100,
-                    render: (value?: ProductionOrderDataCategory) => value || 'A',
+                    render: (value?: ProductionOrderDataCategory) =>
+                      value || 'A',
                   },
                   {
                     title: '项目号',
