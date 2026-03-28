@@ -1,12 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import {
-  Card,
-  Form,
-  FormInstance,
-  Input,
-  InputNumber,
-  Typography,
-} from 'antd'
+import { Card, Form, FormInstance, Input, InputNumber, Typography } from 'antd'
 
 import type {
   MachineEquipmentMaintenance,
@@ -17,7 +10,9 @@ const { TextArea } = Input
 
 interface Props {
   onFinish: (values: MachineEquipmentMaintenanceFormValues) => void
-  setFormRef: (form: FormInstance<MachineEquipmentMaintenanceFormValues>) => void
+  setFormRef: (
+    form: FormInstance<MachineEquipmentMaintenanceFormValues>,
+  ) => void
   isCreating: boolean
   initialValues?:
     | MachineEquipmentMaintenance
@@ -54,7 +49,9 @@ export default function MachineEquipmentMaintenanceForm({
   const preview = useMemo(() => {
     const powerKW = Number(watchedValues?.power_kw || 0)
     const syncWorkQuantity = Number(watchedValues?.sync_work_quantity || 0)
-    const electricityUnitPrice = Number(watchedValues?.electricity_unit_price || 0)
+    const electricityUnitPrice = Number(
+      watchedValues?.electricity_unit_price || 0,
+    )
     const machineValue = Number(watchedValues?.machine_value || 0)
     const depreciationYears = Number(watchedValues?.depreciation_years || 0)
     const annualRuntimeHours = Number(watchedValues?.annual_runtime_hours || 0)
@@ -88,7 +85,9 @@ export default function MachineEquipmentMaintenanceForm({
         original_no: initialValues.original_no || '',
         power_kw: Number(initialValues.power_kw || 0),
         sync_work_quantity: Number(initialValues.sync_work_quantity || 1),
-        electricity_unit_price: Number(initialValues.electricity_unit_price || 0),
+        electricity_unit_price: Number(
+          initialValues.electricity_unit_price || 0,
+        ),
         machine_value: Number(initialValues.machine_value || 0),
         depreciation_years: Number(initialValues.depreciation_years || 1),
         annual_runtime_hours: Number(initialValues.annual_runtime_hours || 1),
@@ -248,7 +247,9 @@ export default function MachineEquipmentMaintenanceForm({
             </div>
           </div>
           <div>
-            <Typography.Text type="secondary">折旧费率（元/小时）</Typography.Text>
+            <Typography.Text type="secondary">
+              折旧费率（元/小时）
+            </Typography.Text>
             <div className="mt-1 text-lg font-semibold text-slate-900">
               {formatAmount(preview.depreciationRate, 8)}
             </div>
