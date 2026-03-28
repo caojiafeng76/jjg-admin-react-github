@@ -36,6 +36,9 @@ const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),
 )
 const JobBaseSetting = lazy(() => import('@features/workshop/JobBaseSetting'))
+const MachineEquipmentMaintenance = lazy(
+  () => import('@features/workshop/MachineEquipmentMaintenance'),
+)
 const MaterialTransfer = lazy(() => import('@features/material-transfer'))
 const ProductionOrder = lazy(() => import('@features/production-order'))
 const ProductionDailyReport = lazy(() => import('@features/production-report'))
@@ -227,6 +230,17 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin']}
               element={<JobBaseSetting />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'machine-equipment-maintenance',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<MachineEquipmentMaintenance />}
             />
           </Suspense>
         ),

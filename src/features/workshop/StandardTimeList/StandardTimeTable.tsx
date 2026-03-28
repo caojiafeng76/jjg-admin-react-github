@@ -65,6 +65,14 @@ export default function StandardTimeTable({
         render: (value?: string | null) =>
           value ? <span>{value}</span> : <Tag color="warning">未匹配</Tag>,
       },
+      {
+        title: '设备编号',
+        dataIndex: 'equipment_no',
+        key: 'equipment_no',
+        width: 140,
+        render: (value?: string | null) =>
+          value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
+      },
     ]
 
     if (!hideStandardSeconds) {
@@ -117,7 +125,7 @@ export default function StandardTimeTable({
             title: '设备费率',
             dataIndex: 'equipment_rate',
             key: 'equipment_rate',
-            width: 120,
+            width: 140,
             render: (value: number) => formatNumber(value),
           },
           {
@@ -284,7 +292,7 @@ export default function StandardTimeTable({
             }
           : undefined,
       })}
-      scroll={{ x: hideStandardSeconds ? 2200 : 2350, y: scrollY }}
+      scroll={{ x: hideStandardSeconds ? 2340 : 2490, y: scrollY }}
       size="small"
       pagination={false}
       style={{

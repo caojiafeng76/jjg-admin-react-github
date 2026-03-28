@@ -166,6 +166,7 @@ export default function StandardTimeList() {
         const nextValues: StandardTimeFormValues = isTeamLeaderMode
           ? {
               job_name: values.job_name,
+              equipment_no: values.equipment_no,
               operation: values.operation,
               model: isEdit
                 ? editingRecord?.model || values.model

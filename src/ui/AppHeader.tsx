@@ -46,6 +46,7 @@ const routeToLabelMap: Record<string, string> = {
   'employee-list': '员工管理',
   'standard-time-list': '成本核算',
   'job-base-setting': '岗位基础数值设定',
+  'machine-equipment-maintenance': '机器设备维护',
   'production-order': '生产工单',
   'production-daily-report': '生产日报表',
 }
