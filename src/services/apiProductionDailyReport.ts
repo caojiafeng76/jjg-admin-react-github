@@ -1,9 +1,11 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import type { ProductionOrderDataCategory } from './apiProductionOrderItems'
 
 export interface ProductionDailyReportFilters {
   startDate?: string
   endDate?: string
+  dataCategory?: ProductionOrderDataCategory
   projectNo?: string
   productModel?: string
   customerModel?: string
@@ -13,6 +15,7 @@ export interface ProductionDailyReportFilters {
 
 interface ProductionDailyReportItemRow {
   id: string
+  data_category: ProductionOrderDataCategory | null
   project_no: string
   product_model: string | null
   customer_model: string | null
@@ -36,6 +39,7 @@ interface ProductionDailyReportItemRow {
 export interface ProductionDailyReportRow {
   key: string
   orderDate: string
+  dataCategory: ProductionOrderDataCategory
   projectNo: string
   productModel: string
   customerModel: string
@@ -69,6 +73,7 @@ const FETCH_BATCH_SIZE = 1000
 function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) {
   let query = supabase.from('production_order_items').select(`
       id,
+      data_category,
       project_no,
       product_model,
       customer_model,
@@ -100,6 +105,10 @@ function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) 
 
   if (filters.projectNo) {
     query = query.ilike('project_no', `%${filters.projectNo}%`)
+  }
+
+  if (filters.dataCategory) {
+    query = query.eq('data_category', filters.dataCategory)
   }
 
   if (filters.productModel) {
@@ -218,6 +227,7 @@ export async function getProductionDailyReport(
       return {
         key: item.id,
         orderDate: item.production_orders.order_date,
+        dataCategory: item.data_category || 'A',
         projectNo: item.project_no,
         productModel: item.product_model || '-',
         customerModel: item.customer_model || '-',

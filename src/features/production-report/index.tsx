@@ -37,6 +37,11 @@ export default function ProductionDailyReportPage() {
   const [filters, setFilters] = useState<ProductionDailyReportFilters>({
     startDate: searchParamsURL.get('startDate') || undefined,
     endDate: searchParamsURL.get('endDate') || undefined,
+    dataCategory:
+      searchParamsURL.get('dataCategory') === 'A' ||
+      searchParamsURL.get('dataCategory') === 'B'
+        ? (searchParamsURL.get('dataCategory') as 'A' | 'B')
+        : undefined,
     projectNo: searchParamsURL.get('projectNo') || undefined,
     productModel: searchParamsURL.get('productModel') || undefined,
     customerModel: searchParamsURL.get('customerModel') || undefined,
@@ -76,6 +81,7 @@ export default function ProductionDailyReportPage() {
       const mappings: Array<[keyof ProductionDailyReportFilters, string]> = [
         ['startDate', 'startDate'],
         ['endDate', 'endDate'],
+        ['dataCategory', 'dataCategory'],
         ['projectNo', 'projectNo'],
         ['productModel', 'productModel'],
         ['customerModel', 'customerModel'],

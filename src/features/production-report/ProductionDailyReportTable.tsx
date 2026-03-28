@@ -61,6 +61,13 @@ export default function ProductionDailyReportTable({
         render: (value: number) => renderNumber(value, 2),
       },
       {
+        title: '数据类别',
+        dataIndex: 'dataCategory',
+        key: 'dataCategory',
+        width: 100,
+        fixed: 'left',
+      },
+      {
         title: '项目号',
         dataIndex: 'projectNo',
         key: 'projectNo',
@@ -172,7 +179,7 @@ export default function ProductionDailyReportTable({
       }}
       pagination={false}
       size="small"
-      scroll={{ x: 1950, y: scrollY }}
+      scroll={{ x: 2050, y: scrollY }}
       style={{ fontSize: '12px' }}
     />
   )
