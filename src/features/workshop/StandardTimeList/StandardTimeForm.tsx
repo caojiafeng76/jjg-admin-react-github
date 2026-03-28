@@ -12,11 +12,22 @@ import type {
   StandardTime,
   StandardTimeFormValues,
 } from '@/services/apiStandardTimes'
-import { useJobBaseSettingOptions } from './useStandardTimes'
+import {
+  useJobBaseSettingOptions,
+  useMachineEquipmentMaintenanceOptions,
+} from './useStandardTimes'
 
 interface JobSelectOption {
   label: string
   value: string
+  searchText: string
+}
+
+interface MachineEquipmentSelectOption {
+  value: string
+  operation: string
+  machineName: string
+  equipmentHourlyRate: number
   searchText: string
 }
 
@@ -31,6 +42,7 @@ interface Props {
 
 const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
   job_name: undefined,
+  equipment_no: undefined,
   standard_seconds: 0,
   theoretical_seconds: 0,
   labor_rate: 0,
@@ -97,9 +109,13 @@ export default function StandardTimeForm({
   const isTeamLeaderMode = mode === 'team_leader'
   const { data: jobOptions = [], isLoading: isJobOptionsLoading } =
     useJobBaseSettingOptions()
+  const { data: equipmentOptions = [], isLoading: isEquipmentOptionsLoading } =
+    useMachineEquipmentMaintenanceOptions()
   const watchedValues = Form.useWatch([], form)
   const initialJobName = initialValues?.job_name || undefined
+  const initialEquipmentNo = initialValues?.equipment_no || undefined
   const isJobNameRequired = !isEdit || Boolean(initialJobName)
+  const isEquipmentNoRequired = !isEdit || Boolean(initialEquipmentNo)
   const jobSelectOptions = useMemo<JobSelectOption[]>(
     () =>
       jobOptions.map((option) => ({
@@ -108,6 +124,23 @@ export default function StandardTimeForm({
         searchText: option.job_name.toLowerCase(),
       })),
     [jobOptions],
+  )
+  const machineEquipmentSelectOptions = useMemo<MachineEquipmentSelectOption[]>(
+    () =>
+      equipmentOptions.map((option) => ({
+        value: option.unified_device_no,
+        operation: option.operation,
+        machineName: option.machine_name,
+        equipmentHourlyRate: Number(option.equipment_hourly_rate || 0),
+        searchText: [
+          option.unified_device_no,
+          option.operation,
+          option.machine_name,
+        ]
+          .join(' ')
+          .toLowerCase(),
+      })),
+    [equipmentOptions],
   )
   const jobRateMap = useMemo(
     () =>
@@ -118,6 +151,16 @@ export default function StandardTimeForm({
         ]),
       ),
     [jobOptions],
+  )
+  const equipmentRateMap = useMemo(
+    () =>
+      new Map(
+        machineEquipmentSelectOptions.map((option) => [
+          option.value,
+          option.equipmentHourlyRate,
+        ]),
+      ),
+    [machineEquipmentSelectOptions],
   )
   const costPreview = useMemo(
     () => calculateCostPreview(watchedValues),
@@ -141,13 +184,20 @@ export default function StandardTimeForm({
   }, [form, initialValues])
 
   const handleJobChange = (value: string) => {
-    if (isTeamLeaderMode) {
-      return
-    }
-
     const matchedRate = jobRateMap.get(value)
     if (matchedRate !== undefined) {
       form.setFieldValue('labor_rate', matchedRate)
+    }
+  }
+
+  const handleEquipmentChange = (value: string | undefined) => {
+    if (!value) {
+      return
+    }
+
+    const matchedRate = equipmentRateMap.get(value)
+    if (matchedRate !== undefined) {
+      form.setFieldValue('equipment_rate', matchedRate)
     }
   }
 
@@ -202,6 +252,58 @@ export default function StandardTimeForm({
           optionFilterProp="label"
           options={jobSelectOptions}
           onChange={handleJobChange}
+        />
+      </Form.Item>
+      <Form.Item
+        name="equipment_no"
+        label="设备编号"
+        rules={[
+          { required: isEquipmentNoRequired, message: '请选择设备编号' },
+          { max: 50, message: '设备编号不能超过50个字符' },
+        ]}
+        extra={
+          isTeamLeaderMode
+            ? undefined
+            : '选定设备编号后会自动带出设备费率，仍可手工修改'
+        }
+      >
+        <Select
+          allowClear={!isEquipmentNoRequired}
+          showSearch
+          loading={isEquipmentOptionsLoading}
+          placeholder="请选择设备编号"
+          optionFilterProp="label"
+          filterOption={(input, option) =>
+            String(option?.searchText || '')
+              .toLowerCase()
+              .includes(input.toLowerCase())
+          }
+          options={machineEquipmentSelectOptions.map((option) => ({
+            label: option.value,
+            value: option.value,
+            searchText: option.searchText,
+          }))}
+          optionRender={(option) => {
+            const matchedOption = machineEquipmentSelectOptions.find(
+              (item) => item.value === option.data.value,
+            )
+
+            if (!matchedOption) {
+              return option.data.label
+            }
+
+            return (
+              <div className="py-1">
+                <div className="font-medium text-slate-900">
+                  {matchedOption.value}
+                </div>
+                <div className="text-xs text-slate-500">
+                  {matchedOption.operation} / {matchedOption.machineName}
+                </div>
+              </div>
+            )
+          }}
+          onChange={handleEquipmentChange}
         />
       </Form.Item>
       {isTeamLeaderMode ? null : (

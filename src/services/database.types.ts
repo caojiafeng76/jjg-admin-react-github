@@ -109,6 +109,66 @@ export type Database = {
         }
         Relationships: []
       }
+      machine_equipment_maintenances: {
+        Row: {
+          annual_runtime_hours: number
+          created_at: string
+          depreciation_rate: number | null
+          depreciation_years: number
+          electricity_unit_price: number
+          equipment_hourly_rate: number | null
+          hourly_electricity_fee: number | null
+          id: string
+          machine_name: string
+          machine_value: number
+          operation: string
+          original_no: string | null
+          power_kw: number
+          remark: string | null
+          sync_work_quantity: number
+          unified_device_no: string
+          updated_at: string
+        }
+        Insert: {
+          annual_runtime_hours?: number
+          created_at?: string
+          depreciation_rate?: number | null
+          depreciation_years?: number
+          electricity_unit_price?: number
+          equipment_hourly_rate?: number | null
+          hourly_electricity_fee?: number | null
+          id?: string
+          machine_name: string
+          machine_value?: number
+          operation: string
+          original_no?: string | null
+          power_kw?: number
+          remark?: string | null
+          sync_work_quantity?: number
+          unified_device_no: string
+          updated_at?: string
+        }
+        Update: {
+          annual_runtime_hours?: number
+          created_at?: string
+          depreciation_rate?: number | null
+          depreciation_years?: number
+          electricity_unit_price?: number
+          equipment_hourly_rate?: number | null
+          hourly_electricity_fee?: number | null
+          id?: string
+          machine_name?: string
+          machine_value?: number
+          operation?: string
+          original_no?: string | null
+          power_kw?: number
+          remark?: string | null
+          sync_work_quantity?: number
+          unified_device_no?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       material_transfers: {
         Row: {
           audited_at: string | null
@@ -186,6 +246,50 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          action_type: string
+          actor_employee_id: string
+          actor_name: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          is_read: boolean
+          read_at: string | null
+        }
+        Insert: {
+          action_type: string
+          actor_employee_id: string
+          actor_name: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_read?: boolean
+          read_at?: string | null
+        }
+        Update: {
+          action_type?: string
+          actor_employee_id?: string
+          actor_name?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_read?: boolean
+          read_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_employee_id_fkey"
+            columns: ["actor_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       process_standards: {
         Row: {
           created_at: string
@@ -193,6 +297,7 @@ export type Database = {
           daily_management_cost: number
           daily_total_hours: number
           equipment_cost: number | null
+          equipment_no: string | null
           equipment_rate: number
           fixture_rate: number
           id: string
@@ -218,6 +323,7 @@ export type Database = {
           daily_management_cost?: number
           daily_total_hours?: number
           equipment_cost?: number | null
+          equipment_no?: string | null
           equipment_rate?: number
           fixture_rate?: number
           id?: string
@@ -243,6 +349,7 @@ export type Database = {
           daily_management_cost?: number
           daily_total_hours?: number
           equipment_cost?: number | null
+          equipment_no?: string | null
           equipment_rate?: number
           fixture_rate?: number
           id?: string
@@ -264,6 +371,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "process_standards_equipment_no_fkey"
+            columns: ["equipment_no"]
+            isOneToOne: false
+            referencedRelation: "machine_equipment_maintenances"
+            referencedColumns: ["unified_device_no"]
+          },
+          {
             foreignKeyName: "process_standards_job_name_fkey"
             columns: ["job_name"]
             isOneToOne: false
@@ -276,6 +390,7 @@ export type Database = {
         Row: {
           created_at: string
           customer_model: string | null
+          data_category: string
           defect_hours: number | null
           defect_quantity_1: number
           defect_quantity_2: number
@@ -297,6 +412,7 @@ export type Database = {
         Insert: {
           created_at?: string
           customer_model?: string | null
+          data_category?: string
           defect_hours?: number | null
           defect_quantity_1?: number
           defect_quantity_2?: number
@@ -318,6 +434,7 @@ export type Database = {
         Update: {
           created_at?: string
           customer_model?: string | null
+          data_category?: string
           defect_hours?: number | null
           defect_quantity_1?: number
           defect_quantity_2?: number
@@ -743,6 +860,14 @@ export type Database = {
     }
     Functions: {
       current_employee_id: { Args: never; Returns: string }
+      get_job_base_setting_options: {
+        Args: never
+        Returns: {
+          hourly_fee: number
+          job_name: string
+        }[]
+      }
+      get_job_hourly_fee: { Args: { target_job_name: string }; Returns: number }
       increment_serial_no: { Args: { increment_by: number }; Returns: number }
       is_admin: { Args: never; Returns: boolean }
       is_team_leader: { Args: never; Returns: boolean }
@@ -882,4 +1007,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
