@@ -1,6 +1,10 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import { Database } from './database.types'
+import type {
+  ProductionOrderDataCategory,
+  ProductionOrderItem,
+} from './apiProductionOrderItems'
 
 export type ProductionOrderShift = '白班' | '夜班'
 
@@ -30,7 +34,7 @@ export interface ProductionOrderListItem extends ProductionOrderWithEmployee {
 }
 
 export interface ProductionOrderForExport extends ProductionOrderWithEmployee {
-  items: Database['public']['Tables']['production_order_items']['Row'][]
+  items: ProductionOrderItem[]
 }
 
 export async function getProductionOrders({
@@ -40,6 +44,7 @@ export async function getProductionOrders({
   endDate,
   employeeId,
   shift,
+  dataCategory,
   productModel,
   customerModel,
   isAudited,
@@ -50,13 +55,14 @@ export async function getProductionOrders({
   endDate?: string
   employeeId?: string
   shift?: ProductionOrderShift
+  dataCategory?: ProductionOrderDataCategory
   productModel?: string
   customerModel?: string
   isAudited?: boolean
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
-  const hasItemFilters = Boolean(productModel || customerModel)
+  const hasItemFilters = Boolean(dataCategory || productModel || customerModel)
 
   type ProductionOrderListRelation = Pick<
     Database['public']['Tables']['production_order_items']['Row'],
@@ -70,7 +76,7 @@ export async function getProductionOrders({
   const selectClause = `
       *,
       employee:employees(id, name),
-      items:production_order_items(standard_seconds, qualified_quantity, qualified_hours)${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, product_model, customer_model)' : ''}
+      items:production_order_items(standard_seconds, qualified_quantity, qualified_hours)${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, data_category, product_model, customer_model)' : ''}
     `
 
   let query = supabase
@@ -97,6 +103,14 @@ export async function getProductionOrders({
         eq: (column: string, value: string) => typeof query
       }
     ).eq('shift', shift)
+  }
+
+  if (dataCategory) {
+    query = (
+      query as typeof query & {
+        eq: (column: string, value: string) => typeof query
+      }
+    ).eq('item_filters.data_category', dataCategory)
   }
 
   if (typeof isAudited === 'boolean') {
@@ -157,7 +171,7 @@ export async function getProductionOrderById(id: string) {
   }
 
   return data as ProductionOrderWithEmployee & {
-    items: Database['public']['Tables']['production_order_items']['Row'][]
+    items: ProductionOrderItem[]
   }
 }
 

@@ -23,6 +23,11 @@ import {
   type ProductionOrder,
   type ProductionOrderShift,
 } from '@/services/apiProductionOrders'
+import type {
+  ProductionOrderDataCategory,
+  ProductionOrderItem,
+  ProductionOrderItemInsert,
+} from '@/services/apiProductionOrderItems'
 import { exportProductionOrdersToExcel } from '@/utils/productionOrderExcel'
 import {
   useProductionOrders,
@@ -43,7 +48,6 @@ import ProductionOrderMobileList from './ProductionOrderMobileList'
 import ProductionOrderForm from './ProductionOrderForm'
 import ProductionOrderDetail from './ProductionOrderDetail'
 import ProductionOrderSearch from './ProductionOrderSearch'
-import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import {
   updateAdminManagementPassword,
   verifyAdminManagementPassword,
@@ -75,6 +79,7 @@ async function syncOrderItemsSequentially({
     product_model: string | null
     length_mm: number | null
     customer_model: string | null
+    data_category?: ProductionOrderDataCategory
     operation: string
     standard_seconds: number
     incoming_qualified_quantity: number
@@ -85,7 +90,7 @@ async function syncOrderItemsSequentially({
     defect_quantity_2: number
   }[]
   orderId: string
-  addItem: (item: ProductionOrderItem) => Promise<unknown>
+  addItem: (item: ProductionOrderItemInsert) => Promise<unknown>
   updateItem: (params: {
     id: string
     values: Partial<ProductionOrderItem>
@@ -100,6 +105,7 @@ async function syncOrderItemsSequentially({
           product_model: item.product_model,
           length_mm: item.length_mm,
           customer_model: item.customer_model,
+          data_category: item.data_category || 'A',
           operation: item.operation,
           standard_seconds: item.standard_seconds,
           incoming_qualified_quantity: item.incoming_qualified_quantity,
@@ -115,8 +121,9 @@ async function syncOrderItemsSequentially({
 
     await addItem({
       ...item,
+      data_category: item.data_category || 'A',
       order_id: orderId,
-    } as ProductionOrderItem)
+    })
   }
 }
 
@@ -164,6 +171,7 @@ export default function ProductionOrderPage() {
     endDate?: string
     employeeId?: string
     shift?: ProductionOrderShift
+    dataCategory?: ProductionOrderDataCategory
     productModel?: string
     customerModel?: string
     isAudited?: boolean
@@ -180,6 +188,11 @@ export default function ProductionOrderPage() {
       searchParamsURL.get('shift') === '白班' ||
       searchParamsURL.get('shift') === '夜班'
         ? (searchParamsURL.get('shift') as ProductionOrderShift)
+        : undefined,
+    dataCategory:
+      searchParamsURL.get('dataCategory') === 'A' ||
+      searchParamsURL.get('dataCategory') === 'B'
+        ? (searchParamsURL.get('dataCategory') as ProductionOrderDataCategory)
         : undefined,
   }))
 
@@ -422,6 +435,7 @@ export default function ProductionOrderPage() {
         product_model: string | null
         length_mm: number | null
         customer_model: string | null
+        data_category?: ProductionOrderDataCategory
         operation: string
         standard_seconds: number
         incoming_qualified_quantity: number

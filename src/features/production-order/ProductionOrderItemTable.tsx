@@ -36,6 +36,15 @@ export default function ProductionOrderItemTable({
         width: 50,
       },
       {
+        title: '数据类别',
+        dataIndex: 'data_category',
+        fixed: 'left',
+        key: 'data_category',
+        width: 100,
+        render: (value: ProductionOrderItem['data_category'] | null) =>
+          value || 'A',
+      },
+      {
         title: '项目号',
         dataIndex: 'project_no',
         fixed: 'left',
@@ -180,7 +189,7 @@ export default function ProductionOrderItemTable({
       loading={loading}
       columns={columns}
       dataSource={data}
-      scroll={{ y: scrollY, x: 1600 }}
+      scroll={{ y: scrollY, x: 1700 }}
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}

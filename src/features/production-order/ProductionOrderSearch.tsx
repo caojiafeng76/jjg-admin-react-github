@@ -8,6 +8,7 @@ import {
 import dayjs, { type Dayjs } from 'dayjs'
 
 import type { ProductionOrderShift } from '@/services/apiProductionOrders'
+import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
 
 const { RangePicker } = DatePicker
 
@@ -16,6 +17,7 @@ interface SearchParams {
   endDate?: string
   employeeId?: string
   shift?: ProductionOrderShift
+  dataCategory?: ProductionOrderDataCategory
   productModel?: string
   customerModel?: string
   isAudited?: boolean
@@ -46,6 +48,7 @@ export default function ProductionOrderSearch({
     form.setFieldsValue({
       employeeId: fixedEmployee?.id || initialValues?.employeeId,
       shift: initialValues?.shift,
+      dataCategory: initialValues?.dataCategory,
       productModel: initialValues?.productModel,
       customerModel: initialValues?.customerModel,
       isAudited: initialValues?.isAudited,
@@ -64,6 +67,7 @@ export default function ProductionOrderSearch({
     dateRange?: [Dayjs | null, Dayjs | null]
     employeeId?: string
     shift?: ProductionOrderShift
+    dataCategory?: ProductionOrderDataCategory
     productModel?: string
     customerModel?: string
     isAudited?: boolean
@@ -83,6 +87,10 @@ export default function ProductionOrderSearch({
 
     if (values.shift) {
       params.shift = values.shift
+    }
+
+    if (values.dataCategory) {
+      params.dataCategory = values.dataCategory
     }
 
     const productModel = values.productModel?.trim()
@@ -168,6 +176,20 @@ export default function ProductionOrderSearch({
           style={{ width: mobile ? '100%' : 160 }}
         />
       </Form.Item>
+
+      {mobile ? null : (
+        <Form.Item name="dataCategory" className="mb-0">
+          <Select
+            placeholder="数据类别"
+            allowClear
+            style={{ width: 140 }}
+            options={[
+              { label: 'A', value: 'A' },
+              { label: 'B', value: 'B' },
+            ]}
+          />
+        </Form.Item>
+      )}
 
       <Form.Item name="shift" className="mb-0">
         <Select

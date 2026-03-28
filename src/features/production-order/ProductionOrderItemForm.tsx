@@ -76,6 +76,7 @@ export default function ProductionOrderItemForm({
       form.resetFields()
       form.setFieldsValue({
         order_id: orderId,
+        data_category: 'A',
         incoming_qualified_quantity: 0,
         qualified_quantity: 0,
         defect_reason_1: '加工',
@@ -160,6 +161,7 @@ export default function ProductionOrderItemForm({
 
     onSubmit({
       ...values,
+      data_category: values.data_category || initialValues?.data_category || 'A',
       operation,
       incoming_qualified_quantity: Number(
         values.incoming_qualified_quantity ?? 0,
@@ -217,6 +219,7 @@ export default function ProductionOrderItemForm({
           onFinish={handleFinish}
           initialValues={{
             order_id: orderId,
+            data_category: 'A',
             incoming_qualified_quantity: 0,
             qualified_quantity: 0,
             defect_reason_1: '加工',
@@ -234,6 +237,21 @@ export default function ProductionOrderItemForm({
               手机端建议先选择项目号，再补充工序、数量和不良数，便于自动带出型号与标准工时。
             </div>
           ) : null}
+
+          {compact ? null : (
+            <Form.Item
+              name="data_category"
+              label="数据类别"
+              rules={[{ required: true, message: '请选择数据类别' }]}
+            >
+              <Select
+                options={[
+                  { label: 'A', value: 'A' },
+                  { label: 'B', value: 'B' },
+                ]}
+              />
+            </Form.Item>
+          )}
 
           <Form.Item
             name="project_no"

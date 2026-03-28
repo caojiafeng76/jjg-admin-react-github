@@ -29,7 +29,10 @@ import type {
   ProductionOrder,
   ProductionOrderShift,
 } from '@/services/apiProductionOrders'
-import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import type {
+  ProductionOrderDataCategory,
+  ProductionOrderItem,
+} from '@/services/apiProductionOrderItems'
 import {
   buildProjectNoSelectOptions,
   filterProjectNoOption,
@@ -62,6 +65,7 @@ interface Props {
 
 interface OrderItem {
   id?: string
+  data_category?: ProductionOrderDataCategory
   project_no: string
   product_model: string | null
   length_mm: number | null
@@ -150,6 +154,7 @@ export default function ProductionOrderForm({
       setItems(
         (initialValues.items || []).map((item) => ({
           id: item.id,
+          data_category: item.data_category,
           project_no: item.project_no,
           product_model: item.product_model,
           length_mm: item.length_mm,
@@ -252,6 +257,7 @@ export default function ProductionOrderForm({
       const item = items[index]
       setEditingItemIndex(index)
       itemForm.setFieldsValue({
+        data_category: item?.data_category || 'A',
         project_no: item?.project_no,
         product_model: item?.product_model,
         length_mm: item?.length_mm,
@@ -270,6 +276,7 @@ export default function ProductionOrderForm({
       setEditingItemIndex(null)
       itemForm.resetFields()
       itemForm.setFieldsValue({
+        data_category: 'A',
         incoming_qualified_quantity: 0,
         qualified_quantity: 0,
         defect_reason_1: '加工',
@@ -317,6 +324,12 @@ export default function ProductionOrderForm({
 
     const newItem: OrderItem = {
       id: editingItemIndex !== null ? items[editingItemIndex]?.id : undefined,
+      data_category:
+        values.data_category ||
+        (editingItemIndex !== null
+          ? items[editingItemIndex]?.data_category
+          : undefined) ||
+        'A',
       project_no: values.project_no,
       product_model: productModel,
       length_mm: data?.length_mm ?? values.length_mm ?? null,
@@ -680,6 +693,12 @@ export default function ProductionOrderForm({
                     width: 50,
                   },
                   {
+                    title: '数据类别',
+                    dataIndex: 'data_category',
+                    width: 100,
+                    render: (value?: ProductionOrderDataCategory) => value || 'A',
+                  },
+                  {
                     title: '项目号',
                     dataIndex: 'project_no',
                     width: 120,
@@ -813,6 +832,22 @@ export default function ProductionOrderForm({
               remark: null,
             }}
           >
+            {compact ? null : (
+              <Form.Item
+                name="data_category"
+                label="数据类别"
+                initialValue="A"
+                rules={[{ required: true, message: '请选择数据类别' }]}
+              >
+                <Select
+                  options={[
+                    { label: 'A', value: 'A' },
+                    { label: 'B', value: 'B' },
+                  ]}
+                />
+              </Form.Item>
+            )}
+
             <Form.Item
               name="project_no"
               label="项目号"
