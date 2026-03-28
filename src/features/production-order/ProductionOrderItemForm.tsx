@@ -161,7 +161,8 @@ export default function ProductionOrderItemForm({
 
     onSubmit({
       ...values,
-      data_category: values.data_category || initialValues?.data_category || 'A',
+      data_category:
+        values.data_category || initialValues?.data_category || 'A',
       operation,
       incoming_qualified_quantity: Number(
         values.incoming_qualified_quantity ?? 0,
