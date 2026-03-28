@@ -168,7 +168,11 @@ export default function ProductionDailyReportSearch({
           </span>
         </Button>
 
-        {isExpanded ? formContent : null}
+        {isExpanded ? (
+          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain pb-1 pr-1">
+            {formContent}
+          </div>
+        ) : null}
       </div>
     )
   }

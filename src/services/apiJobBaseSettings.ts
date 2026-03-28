@@ -97,9 +97,8 @@ export async function getJobBaseSettings({
 }
 
 export async function getJobBaseSettingOptions() {
-  const { data, error } = await jobBaseSettingsTable()
-    .select('job_name, hourly_fee')
-    .order('job_name', { ascending: true })
+  // @ts-ignore - 新增 RPC 可能尚未出现在自动生成的 Supabase 类型中
+  const { data, error } = await supabase.rpc('get_job_base_setting_options')
 
   if (error) {
     throw handleApiError(error, '获取岗位工种选项失败')
