@@ -53,17 +53,22 @@ function normalizeStandardTimePayload(
 }
 
 async function getJobHourlyFee(jobName: string): Promise<number | null> {
-  const { data, error } = await supabase
-    .from('job_base_settings')
-    .select('hourly_fee')
-    .eq('job_name', jobName)
-    .maybeSingle()
+  // @ts-ignore - 新增 RPC 可能尚未出现在自动生成的 Supabase 类型中
+  const { data, error } = await supabase.rpc('get_job_hourly_fee', {
+    target_job_name: jobName,
+  })
 
   if (error) {
     throw handleApiError(error, '获取岗位工时费失败')
   }
 
-  return data?.hourly_fee ?? null
+  if (data == null) {
+    return null
+  }
+
+  const hourlyFee = Number(data)
+
+  return Number.isFinite(hourlyFee) ? hourlyFee : null
 }
 
 async function applyDefaultLaborRate(

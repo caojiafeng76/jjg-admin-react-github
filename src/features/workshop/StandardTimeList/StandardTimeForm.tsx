@@ -14,6 +14,12 @@ import type {
 } from '@/services/apiStandardTimes'
 import { useJobBaseSettingOptions } from './useStandardTimes'
 
+interface JobSelectOption {
+  label: string
+  value: string
+  searchText: string
+}
+
 interface Props {
   onFinish: (values: StandardTimeFormValues) => void
   setFormRef: (form: FormInstance<StandardTimeFormValues>) => void
@@ -94,6 +100,15 @@ export default function StandardTimeForm({
   const watchedValues = Form.useWatch([], form)
   const initialJobName = initialValues?.job_name || undefined
   const isJobNameRequired = !isEdit || Boolean(initialJobName)
+  const jobSelectOptions = useMemo<JobSelectOption[]>(
+    () =>
+      jobOptions.map((option) => ({
+        label: option.job_name,
+        value: option.job_name,
+        searchText: option.job_name.toLowerCase(),
+      })),
+    [jobOptions],
+  )
   const jobRateMap = useMemo(
     () =>
       new Map(
@@ -185,12 +200,7 @@ export default function StandardTimeForm({
           loading={isJobOptionsLoading}
           placeholder="请选择工种"
           optionFilterProp="label"
-          options={jobOptions.map((option) => ({
-            value: option.job_name,
-            label: `${option.job_name}（工时费 ${Number(
-              option.hourly_fee || 0,
-            ).toFixed(4)}）`,
-          }))}
+          options={jobSelectOptions}
           onChange={handleJobChange}
         />
       </Form.Item>
