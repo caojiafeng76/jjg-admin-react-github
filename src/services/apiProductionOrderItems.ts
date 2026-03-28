@@ -2,12 +2,24 @@ import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import { Database } from './database.types'
 
-export type ProductionOrderItem =
+export type ProductionOrderDataCategory = 'A' | 'B'
+
+type ProductionOrderItemRowBase =
   Database['public']['Tables']['production_order_items']['Row']
-export type ProductionOrderItemInsert =
+type ProductionOrderItemInsertBase =
   Database['public']['Tables']['production_order_items']['Insert']
-export type ProductionOrderItemUpdate =
+type ProductionOrderItemUpdateBase =
   Database['public']['Tables']['production_order_items']['Update']
+
+export type ProductionOrderItem = ProductionOrderItemRowBase & {
+  data_category: ProductionOrderDataCategory
+}
+export type ProductionOrderItemInsert = ProductionOrderItemInsertBase & {
+  data_category?: ProductionOrderDataCategory
+}
+export type ProductionOrderItemUpdate = ProductionOrderItemUpdateBase & {
+  data_category?: ProductionOrderDataCategory
+}
 
 export async function getProductionOrderItems(orderId: string) {
   const { data, error } = await supabase
