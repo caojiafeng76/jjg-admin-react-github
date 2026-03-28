@@ -57,6 +57,13 @@ export default function MachineEquipmentMaintenanceTable({
         width: 180,
       },
       {
+        title: '客户',
+        dataIndex: 'customer',
+        key: 'customer',
+        width: 180,
+        render: (value: string | null) => value || '-',
+      },
+      {
         title: '原编号',
         dataIndex: 'original_no',
         key: 'original_no',
@@ -162,7 +169,7 @@ export default function MachineEquipmentMaintenanceTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 2520, y: scrollY }}
+      scroll={{ x: 2700, y: scrollY }}
       size="middle"
       bordered
       rowClassName={(_, index) =>

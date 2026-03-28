@@ -47,6 +47,9 @@ export default function StandardTimeMobileList({
               <div className="mt-1 text-sm text-slate-500">
                 工种：{record.job_name || '未设置'}
               </div>
+              <div className="mt-1 text-sm text-slate-500">
+                客户：{record.customer || '未设置'}
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2">

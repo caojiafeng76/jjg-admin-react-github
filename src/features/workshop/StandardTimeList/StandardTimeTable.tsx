@@ -66,6 +66,14 @@ export default function StandardTimeTable({
           value ? <span>{value}</span> : <Tag color="warning">未匹配</Tag>,
       },
       {
+        title: '客户',
+        dataIndex: 'customer',
+        key: 'customer',
+        width: 180,
+        render: (value?: string | null) =>
+          value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
+      },
+      {
         title: '设备编号',
         dataIndex: 'equipment_no',
         key: 'equipment_no',

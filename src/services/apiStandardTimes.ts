@@ -12,6 +12,7 @@ type ProcessStandardInsert =
 export type StandardTime = ProcessStandardRow
 export type StandardTimeFormValues = Pick<
   ProcessStandardInsert,
+  | 'customer'
   | 'job_name'
   | 'equipment_no'
   | 'operation'
@@ -38,6 +39,7 @@ function normalizeStandardTimePayload(
 ): StandardTimeFormValues {
   return {
     ...values,
+    customer: values.customer?.trim() || null,
     job_name: values.job_name?.trim() || null,
     equipment_no: values.equipment_no?.trim() || null,
     operation: normalizeStandardTimeValue(values.operation),
@@ -90,18 +92,18 @@ async function applyDefaultLaborRate(
   return normalizedValues
 }
 
-async function applyDefaultEquipmentRate(
+async function applyMachineEquipmentDefaults(
   values: StandardTimeFormValues,
 ): Promise<StandardTimeFormValues> {
   const normalizedValues = await applyDefaultLaborRate(values)
 
-  if (normalizedValues.equipment_no && values.equipment_rate == null) {
-    const hourlyRate = await getMachineEquipmentHourlyRate(
+  if (normalizedValues.equipment_no) {
+    const equipmentHourlyRate = await getMachineEquipmentHourlyRate(
       normalizedValues.equipment_no,
     )
 
-    if (hourlyRate !== null) {
-      normalizedValues.equipment_rate = hourlyRate
+    if (values.equipment_rate == null && equipmentHourlyRate !== null) {
+      normalizedValues.equipment_rate = equipmentHourlyRate
     }
   }
 
@@ -283,10 +285,14 @@ async function checkStandardTimeExists(
 }
 
 export async function createStandardTime(values: StandardTimeFormValues) {
-  const normalizedValues = await applyDefaultEquipmentRate(values)
+  const normalizedValues = await applyMachineEquipmentDefaults(values)
 
   if (!normalizedValues.job_name) {
     throw new Error('工种不能为空')
+  }
+
+  if (!normalizedValues.customer) {
+    throw new Error('客户不能为空')
   }
 
   if (normalizedValues.operation && normalizedValues.model) {
@@ -358,7 +364,7 @@ export async function updateStandardTime({
   id: string
   values: StandardTimeFormValues
 }) {
-  const normalizedValues = await applyDefaultEquipmentRate(values)
+  const normalizedValues = await applyMachineEquipmentDefaults(values)
 
   if (normalizedValues.operation && normalizedValues.model) {
     const exists = await checkStandardTimeExists(

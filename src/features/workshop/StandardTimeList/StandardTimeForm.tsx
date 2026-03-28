@@ -25,8 +25,10 @@ interface JobSelectOption {
 
 interface MachineEquipmentSelectOption {
   value: string
+  label: string
   operation: string
   machineName: string
+  customer: string | null
   equipmentHourlyRate: number
   searchText: string
 }
@@ -41,6 +43,7 @@ interface Props {
 }
 
 const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
+  customer: undefined,
   job_name: undefined,
   equipment_no: undefined,
   standard_seconds: 0,
@@ -112,8 +115,10 @@ export default function StandardTimeForm({
   const { data: equipmentOptions = [], isLoading: isEquipmentOptionsLoading } =
     useMachineEquipmentMaintenanceOptions()
   const watchedValues = Form.useWatch([], form)
+  const initialCustomer = initialValues?.customer || undefined
   const initialJobName = initialValues?.job_name || undefined
   const initialEquipmentNo = initialValues?.equipment_no || undefined
+  const isCustomerRequired = !isEdit || Boolean(initialCustomer)
   const isJobNameRequired = !isEdit || Boolean(initialJobName)
   const isEquipmentNoRequired = !isEdit || Boolean(initialEquipmentNo)
   const jobSelectOptions = useMemo<JobSelectOption[]>(
@@ -129,13 +134,16 @@ export default function StandardTimeForm({
     () =>
       equipmentOptions.map((option) => ({
         value: option.unified_device_no,
+        label: option.unified_device_no,
         operation: option.operation,
         machineName: option.machine_name,
+        customer: option.customer,
         equipmentHourlyRate: Number(option.equipment_hourly_rate || 0),
         searchText: [
           option.unified_device_no,
           option.operation,
           option.machine_name,
+          option.customer || '',
         ]
           .join(' ')
           .toLowerCase(),
@@ -157,7 +165,10 @@ export default function StandardTimeForm({
       new Map(
         machineEquipmentSelectOptions.map((option) => [
           option.value,
-          option.equipmentHourlyRate,
+          {
+            customer: option.customer,
+            equipmentHourlyRate: option.equipmentHourlyRate,
+          },
         ]),
       ),
     [machineEquipmentSelectOptions],
@@ -195,9 +206,9 @@ export default function StandardTimeForm({
       return
     }
 
-    const matchedRate = equipmentRateMap.get(value)
-    if (matchedRate !== undefined) {
-      form.setFieldValue('equipment_rate', matchedRate)
+    const matchedDefaults = equipmentRateMap.get(value)
+    if (matchedDefaults !== undefined) {
+      form.setFieldValue('equipment_rate', matchedDefaults.equipmentHourlyRate)
     }
   }
 
@@ -230,6 +241,16 @@ export default function StandardTimeForm({
         ]}
       >
         <Input placeholder="请输入工序" disabled={isCreating} />
+      </Form.Item>
+      <Form.Item
+        name="customer"
+        label="客户"
+        rules={[
+          { required: isCustomerRequired, message: '请输入客户' },
+          { max: 100, message: '客户不能超过100个字符' },
+        ]}
+      >
+        <Input placeholder="请输入客户" />
       </Form.Item>
       <Form.Item
         name="job_name"
@@ -272,37 +293,16 @@ export default function StandardTimeForm({
           showSearch
           loading={isEquipmentOptionsLoading}
           placeholder="请选择设备编号"
-          optionFilterProp="label"
           filterOption={(input, option) =>
             String(option?.searchText || '')
               .toLowerCase()
               .includes(input.toLowerCase())
           }
           options={machineEquipmentSelectOptions.map((option) => ({
-            label: option.value,
+            label: `${option.value} (${option.operation} / ${option.machineName})`,
             value: option.value,
             searchText: option.searchText,
           }))}
-          optionRender={(option) => {
-            const matchedOption = machineEquipmentSelectOptions.find(
-              (item) => item.value === option.data.value,
-            )
-
-            if (!matchedOption) {
-              return option.data.label
-            }
-
-            return (
-              <div className="py-1">
-                <div className="font-medium text-slate-900">
-                  {matchedOption.value}
-                </div>
-                <div className="text-xs text-slate-500">
-                  {matchedOption.operation} / {matchedOption.machineName}
-                </div>
-              </div>
-            )
-          }}
           onChange={handleEquipmentChange}
         />
       </Form.Item>

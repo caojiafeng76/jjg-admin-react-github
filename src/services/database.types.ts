@@ -113,6 +113,7 @@ export type Database = {
         Row: {
           annual_runtime_hours: number
           created_at: string
+          customer: string | null
           depreciation_rate: number | null
           depreciation_years: number
           electricity_unit_price: number
@@ -132,6 +133,7 @@ export type Database = {
         Insert: {
           annual_runtime_hours?: number
           created_at?: string
+          customer?: string | null
           depreciation_rate?: number | null
           depreciation_years?: number
           electricity_unit_price?: number
@@ -151,6 +153,7 @@ export type Database = {
         Update: {
           annual_runtime_hours?: number
           created_at?: string
+          customer?: string | null
           depreciation_rate?: number | null
           depreciation_years?: number
           electricity_unit_price?: number
@@ -293,6 +296,7 @@ export type Database = {
       process_standards: {
         Row: {
           created_at: string
+          customer: string | null
           cutting_fluid_rate: number
           daily_management_cost: number
           daily_total_hours: number
@@ -319,6 +323,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          customer?: string | null
           cutting_fluid_rate?: number
           daily_management_cost?: number
           daily_total_hours?: number
@@ -345,6 +350,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          customer?: string | null
           cutting_fluid_rate?: number
           daily_management_cost?: number
           daily_total_hours?: number
