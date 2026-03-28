@@ -6,6 +6,7 @@ export interface MachineEquipmentMaintenance {
   unified_device_no: string
   operation: string
   machine_name: string
+  customer: string | null
   original_no: string | null
   power_kw: number
   sync_work_quantity: number
@@ -25,6 +26,7 @@ export interface MachineEquipmentMaintenanceFormValues {
   unified_device_no: string
   operation: string
   machine_name: string
+  customer?: string
   original_no?: string
   power_kw: number
   sync_work_quantity: number
@@ -39,6 +41,7 @@ export interface MachineEquipmentMaintenanceOption {
   unified_device_no: string
   operation: string
   machine_name: string
+  customer: string | null
   equipment_hourly_rate: number
 }
 
@@ -64,6 +67,7 @@ function normalizePayload(
     unified_device_no: values.unified_device_no.trim(),
     operation: values.operation.trim(),
     machine_name: values.machine_name.trim(),
+    customer: normalizeOptionalText(values.customer),
     original_no: normalizeOptionalText(values.original_no),
     power_kw: Number(values.power_kw ?? 0),
     sync_work_quantity: Number(values.sync_work_quantity ?? 1),
@@ -146,7 +150,9 @@ export async function getMachineEquipmentMaintenances({
 
 export async function getMachineEquipmentMaintenanceOptions() {
   const { data, error } = await machineEquipmentMaintenancesTable()
-    .select('unified_device_no, operation, machine_name, equipment_hourly_rate')
+    .select(
+      'unified_device_no, operation, machine_name, customer, equipment_hourly_rate',
+    )
     .order('unified_device_no', { ascending: true })
 
   if (error) {
@@ -176,6 +182,37 @@ export async function getMachineEquipmentHourlyRate(
   const hourlyRate = Number(data.equipment_hourly_rate)
 
   return Number.isFinite(hourlyRate) ? hourlyRate : null
+}
+
+export async function getMachineEquipmentDefaults(unifiedDeviceNo: string): Promise<{
+  equipmentHourlyRate: number | null
+  customer: string | null
+}> {
+  const { data, error } = await machineEquipmentMaintenancesTable()
+    .select('equipment_hourly_rate, customer')
+    .eq('unified_device_no', unifiedDeviceNo)
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取设备默认信息失败')
+  }
+
+  if (!data) {
+    return {
+      equipmentHourlyRate: null,
+      customer: null,
+    }
+  }
+
+  const equipmentHourlyRate = Number(data.equipment_hourly_rate)
+
+  return {
+    equipmentHourlyRate: Number.isFinite(equipmentHourlyRate)
+      ? equipmentHourlyRate
+      : null,
+    customer: data.customer?.trim() || null,
+  }
 }
 
 export async function createMachineEquipmentMaintenance(

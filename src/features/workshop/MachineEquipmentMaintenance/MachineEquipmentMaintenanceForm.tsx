@@ -23,6 +23,7 @@ const DEFAULT_VALUES: MachineEquipmentMaintenanceFormValues = {
   unified_device_no: '',
   operation: '',
   machine_name: '',
+  customer: '',
   original_no: '',
   power_kw: 0,
   sync_work_quantity: 1,
@@ -45,6 +46,8 @@ export default function MachineEquipmentMaintenanceForm({
 }: Props) {
   const [form] = Form.useForm<MachineEquipmentMaintenanceFormValues>()
   const watchedValues = Form.useWatch([], form)
+  const initialCustomer = initialValues?.customer || ''
+  const isCustomerRequired = !initialValues || Boolean(initialCustomer)
 
   const preview = useMemo(() => {
     const powerKW = Number(watchedValues?.power_kw || 0)
@@ -82,6 +85,7 @@ export default function MachineEquipmentMaintenanceForm({
         unified_device_no: initialValues.unified_device_no,
         operation: initialValues.operation,
         machine_name: initialValues.machine_name,
+        customer: initialValues.customer || '',
         original_no: initialValues.original_no || '',
         power_kw: Number(initialValues.power_kw || 0),
         sync_work_quantity: Number(initialValues.sync_work_quantity || 1),
@@ -139,6 +143,17 @@ export default function MachineEquipmentMaintenanceForm({
           ]}
         >
           <Input placeholder="例如：数控车床" maxLength={100} />
+        </Form.Item>
+
+        <Form.Item
+          name="customer"
+          label="客户"
+          rules={[
+            { required: isCustomerRequired, message: '请输入客户' },
+            { max: 100, message: '客户不能超过 100 个字符' },
+          ]}
+        >
+          <Input placeholder="请输入客户" maxLength={100} />
         </Form.Item>
 
         <Form.Item
