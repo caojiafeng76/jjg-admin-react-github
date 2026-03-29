@@ -8,6 +8,8 @@ export interface Employee {
   auth_user_id?: string | null
   role?: AppRole
   is_active?: boolean
+  hourly_wage?: number
+  performance?: number
   created_at?: string
   updated_at?: string
 }
@@ -256,6 +258,8 @@ function normalizeEmployeeCreatePayload(values: Employee): Employee {
     auth_user_id: values.auth_user_id?.trim() || null,
     role: values.role || 'employee',
     is_active: values.is_active ?? true,
+    hourly_wage: Number(values.hourly_wage ?? 0),
+    performance: Number(values.performance ?? 1),
   }
 }
 
@@ -264,6 +268,8 @@ function normalizeEmployeeUpdatePayload(values: Employee): Partial<Employee> {
     name: values.name.trim(),
     role: values.role || 'employee',
     is_active: values.is_active ?? true,
+    hourly_wage: Number(values.hourly_wage ?? 0),
+    performance: Number(values.performance ?? 1),
     ...(values.auth_user_id !== undefined
       ? {
           auth_user_id: values.auth_user_id?.trim() || null,

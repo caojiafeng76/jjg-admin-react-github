@@ -4,6 +4,10 @@ import { getRoleLabel } from '@/config/access'
 import type { Employee } from '@/services/apiEmployees'
 import { useEmployeeAuthEmail } from './useEmployees'
 
+function formatNumber(value: number | null | undefined, digits = 2) {
+  return Number(value ?? 0).toFixed(digits)
+}
+
 interface Props {
   loading: boolean
   data: Employee[]
@@ -104,6 +108,20 @@ export default function EmployeeTable({
         },
       },
       {
+        title: '岗位时薪',
+        dataIndex: 'hourly_wage',
+        key: 'hourly_wage',
+        width: 120,
+        render: (value: number | null | undefined) => formatNumber(value),
+      },
+      {
+        title: '绩效',
+        dataIndex: 'performance',
+        key: 'performance',
+        width: 100,
+        render: (value: number | null | undefined) => formatNumber(value),
+      },
+      {
         title: '状态',
         dataIndex: 'is_active',
         key: 'is_active',
@@ -179,7 +197,7 @@ export default function EmployeeTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 1100, y: scrollY }}
+      scroll={{ x: 1320, y: scrollY }}
       size="small"
       pagination={false}
       style={{
