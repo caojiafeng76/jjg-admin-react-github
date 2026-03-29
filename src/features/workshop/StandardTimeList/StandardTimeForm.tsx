@@ -40,6 +40,7 @@ interface Props {
   isEdit: boolean
   initialValues?: StandardTimeFormValues | StandardTime
   mode?: 'admin' | 'team_leader'
+  currentUploader?: string | null
 }
 
 const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
@@ -56,6 +57,7 @@ const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
   inspection_seconds: 0,
   daily_management_cost: 0,
   daily_total_hours: 0,
+  uploaded_by_name: null,
   remark: null,
 }
 
@@ -107,6 +109,7 @@ export default function StandardTimeForm({
   isEdit,
   initialValues,
   mode = 'admin',
+  currentUploader = null,
 }: Props) {
   const [form] = Form.useForm<StandardTimeFormValues>()
   const isTeamLeaderMode = mode === 'team_leader'
@@ -190,9 +193,12 @@ export default function StandardTimeForm({
       })
     } else {
       form.resetFields()
-      form.setFieldsValue(DEFAULT_VALUES)
+      form.setFieldsValue({
+        ...DEFAULT_VALUES,
+        uploaded_by_name: currentUploader,
+      })
     }
-  }, [form, initialValues])
+  }, [currentUploader, form, initialValues])
 
   const handleJobChange = (value: string) => {
     const matchedRate = jobRateMap.get(value)
@@ -344,6 +350,9 @@ export default function StandardTimeForm({
           </Form.Item>
           <Form.Item name="daily_total_hours" label="日总工时（小时）">
             <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="uploaded_by_name" label="数据上传">
+            <Input disabled placeholder="自动记录当前登录用户" />
           </Form.Item>
           <Form.Item name="remark" label="备注">
             <Input.TextArea rows={3} placeholder="请输入备注" />

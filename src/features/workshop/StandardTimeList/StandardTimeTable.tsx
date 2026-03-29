@@ -221,6 +221,14 @@ export default function StandardTimeTable({
         ],
       },
       {
+        title: '数据上传',
+        dataIndex: 'uploaded_by_name',
+        key: 'uploaded_by_name',
+        width: 140,
+        render: (value?: string | null) =>
+          value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
+      },
+      {
         title: '备注',
         dataIndex: 'remark',
         key: 'remark',

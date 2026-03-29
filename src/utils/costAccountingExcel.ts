@@ -30,6 +30,7 @@ const EXPORT_HEADERS = [
   '检验成本(元/支)',
   '单品分摊额(元/支)',
   '合计(元/支)',
+  '数据上传',
   '备注',
   '更新时间',
 ] as const
@@ -73,6 +74,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
     formatNumber(record.inspection_cost),
     formatNumber(record.overhead_cost),
     formatNumber(record.total_cost),
+    record.uploaded_by_name || '',
     record.remark || '',
     formatDateTime(record.updated_at),
   ])

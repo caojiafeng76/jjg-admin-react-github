@@ -27,8 +27,9 @@ import StandardTimeSearch from './StandardTimeSearch'
 
 export default function StandardTimeList() {
   const { message } = App.useApp()
-  const { role } = useAuth()
+  const { role, employeeProfile } = useAuth()
   const isTeamLeaderMode = role === 'team_leader'
+  const currentUploader = employeeProfile?.name || null
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建成本核算')
@@ -176,8 +177,16 @@ export default function StandardTimeList() {
                 ? editingRecord?.standard_seconds || 0
                 : 0,
               theoretical_seconds: values.theoretical_seconds,
+              uploaded_by_name: isEdit
+                ? editingRecord?.uploaded_by_name || null
+                : currentUploader || values.uploaded_by_name || null,
             }
-          : values
+          : {
+              ...values,
+              uploaded_by_name: isEdit
+                ? editingRecord?.uploaded_by_name || null
+                : currentUploader || values.uploaded_by_name || null,
+            }
 
         if (isEdit && selectedRowKeys[0]) {
           const standardSecondsChanged =
@@ -394,6 +403,7 @@ export default function StandardTimeList() {
           isEdit={isEdit}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
           mode={isTeamLeaderMode ? 'team_leader' : 'admin'}
+          currentUploader={currentUploader}
         />
       </Modal>
     </div>

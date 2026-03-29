@@ -320,6 +320,7 @@ export type Database = {
           tooling_consumable_cost: number | null
           total_cost: number | null
           updated_at: string
+          uploaded_by_name: string | null
         }
         Insert: {
           created_at?: string
@@ -347,6 +348,7 @@ export type Database = {
           tooling_consumable_cost?: number | null
           total_cost?: number | null
           updated_at?: string
+          uploaded_by_name?: string | null
         }
         Update: {
           created_at?: string
@@ -374,6 +376,7 @@ export type Database = {
           tooling_consumable_cost?: number | null
           total_cost?: number | null
           updated_at?: string
+          uploaded_by_name?: string | null
         }
         Relationships: [
           {
