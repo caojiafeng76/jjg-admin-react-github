@@ -27,6 +27,7 @@ export type StandardTimeFormValues = Pick<
   | 'inspection_seconds'
   | 'daily_management_cost'
   | 'daily_total_hours'
+  | 'uploaded_by_name'
   | 'remark'
 >
 
@@ -53,6 +54,7 @@ function normalizeStandardTimePayload(
     inspection_seconds: values.inspection_seconds ?? 0,
     daily_management_cost: values.daily_management_cost ?? 0,
     daily_total_hours: values.daily_total_hours ?? 0,
+    uploaded_by_name: values.uploaded_by_name?.trim() || null,
     remark: values.remark?.trim() || null,
   }
 }
