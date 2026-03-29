@@ -1,8 +1,26 @@
-import { Alert, Divider, Form, FormInstance, Input, Select, Switch } from 'antd'
+import {
+  Alert,
+  Divider,
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+  Select,
+  Switch,
+} from 'antd'
 import { useEffect } from 'react'
 import { ROLE_OPTIONS } from '@/config/access'
 import type { Employee } from '@/services/apiEmployees'
 import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
+
+const DEFAULT_FORM_VALUES: EmployeeFormValues = {
+  name: '',
+  role: 'employee',
+  is_active: true,
+  hourly_wage: 0,
+  performance: 1,
+  createAuthAccount: false,
+}
 
 export interface EmployeeFormValues extends Employee {
   createAuthAccount?: boolean
@@ -34,17 +52,13 @@ export default function EmployeeForm({
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
-        role: 'employee',
-        is_active: true,
+        ...DEFAULT_FORM_VALUES,
         ...initialValues,
+        hourly_wage: Number(initialValues.hourly_wage ?? 0),
+        performance: Number(initialValues.performance ?? 1),
       })
     } else {
-      form.setFieldsValue({
-        name: '',
-        role: 'employee',
-        is_active: true,
-        createAuthAccount: false,
-      })
+      form.setFieldsValue(DEFAULT_FORM_VALUES)
     }
   }, [form, initialValues])
 
@@ -54,11 +68,7 @@ export default function EmployeeForm({
       layout="vertical"
       onFinish={onFinish}
       disabled={isCreating}
-      initialValues={{
-        role: 'employee',
-        is_active: true,
-        createAuthAccount: false,
-      }}
+      initialValues={DEFAULT_FORM_VALUES}
     >
       <Alert
         type="info"
@@ -89,6 +99,38 @@ export default function EmployeeForm({
       >
         <Select disabled={isCreating} options={ROLE_OPTIONS} />
       </Form.Item>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Form.Item
+          name="hourly_wage"
+          label="岗位时薪"
+          rules={[{ required: true, message: '请输入岗位时薪' }]}
+        >
+          <InputNumber
+            min={0}
+            step={0.01}
+            precision={2}
+            style={{ width: '100%' }}
+            placeholder="请输入岗位时薪"
+            disabled={isCreating}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="performance"
+          label="绩效"
+          rules={[{ required: true, message: '请输入绩效' }]}
+        >
+          <InputNumber
+            min={0}
+            step={0.01}
+            precision={2}
+            style={{ width: '100%' }}
+            placeholder="请输入绩效"
+            disabled={isCreating}
+          />
+        </Form.Item>
+      </div>
 
       <Form.Item name="is_active" label="启用状态" valuePropName="checked">
         <Switch
