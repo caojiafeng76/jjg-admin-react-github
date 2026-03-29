@@ -849,7 +849,10 @@ export default function ProductionOrderPage() {
               : 'flex shrink-0 justify-end'
           }
         >
-          <AppPagination total={orderData?.total || 0} />
+          <AppPagination
+            total={orderData?.total || 0}
+            pageSizeOptions={['10', '20', '50', '100', '500']}
+          />
         </div>
       </div>
 

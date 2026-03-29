@@ -382,7 +382,10 @@ export default function StandardTimeList() {
           )}
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
-          <AppPagination total={data?.total || 0} />
+          <AppPagination
+            total={data?.total || 0}
+            pageSizeOptions={['10', '20', '50', '100', '500']}
+          />
         </div>
       </div>
 
