@@ -31,7 +31,7 @@ export async function initializePDF(orientation: 'p' | 'l' = 'l') {
   // 设置中文字体
   doc.addFileToVFS(GOOGLE_FONT_CONFIG.FONT_NAME, fontData)
   doc.addFont(GOOGLE_FONT_CONFIG.FONT_NAME, GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
-  doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY)
+  doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
 
   return doc
 }
@@ -225,7 +225,71 @@ export async function processBatchWithProgress<T, R>(
  * @param doc PDF 文档实例
  */
 export function openPDFInNewWindow(doc: jsPDF) {
-  window.open(doc.output('bloburl'), '_blank')
+  const url = URL.createObjectURL(doc.output('blob'))
+  const openedWindow = window.open('', '_blank')
+
+  if (!openedWindow) {
+    window.open(url, '_blank')
+    return
+  }
+
+  openedWindow.document.title = 'PDF 预览'
+  openedWindow.document.body.style.margin = '0'
+  openedWindow.document.body.style.height = '100vh'
+  openedWindow.document.body.innerHTML = `
+    <iframe
+      src="${url}"
+      title="PDF 预览"
+      style="border:0; width:100%; height:100%;"
+    ></iframe>
+  `
+}
+
+/**
+ * 在新窗口中打开 PDF，并尽量保留文件名用于浏览器标签页展示
+ * @param doc PDF 文档实例
+ * @param filename 文件名
+ */
+export function previewPDF(doc: jsPDF, filename: string) {
+  const url = URL.createObjectURL(doc.output('blob'))
+  const openedWindow = window.open('', '_blank')
+
+  if (!openedWindow) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    return
+  }
+
+  openedWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${filename}</title>
+        <style>
+          html, body {
+            height: 100%;
+            margin: 0;
+            background: #f5f5f5;
+          }
+
+          iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #fff;
+          }
+        </style>
+      </head>
+      <body>
+        <iframe src="${url}" title="${filename}"></iframe>
+      </body>
+    </html>
+  `)
+  openedWindow.document.close()
 }
 
 /**
