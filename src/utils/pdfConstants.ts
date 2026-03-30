@@ -30,11 +30,13 @@ export const TABLE_CONFIG = {
     fillColor: [0, 0, 0] as [number, number, number], // 黑色背景
     textColor: [255, 255, 255] as [number, number, number], // 白色文字
     font: FONT_CONFIG.FONT_FAMILY,
+    fontStyle: FONT_CONFIG.FONT_STYLE,
   },
 
   // 表格样式
   STYLES: {
     font: FONT_CONFIG.FONT_FAMILY,
+    fontStyle: FONT_CONFIG.FONT_STYLE,
     cellPadding: { top: 1, right: 1, bottom: 1, left: 1 },
     halign: 'center' as const,
     valign: 'middle' as const,

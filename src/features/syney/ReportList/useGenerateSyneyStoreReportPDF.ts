@@ -18,6 +18,7 @@ import {
   addTableHeader,
   processBatchWithProgress,
   generateFilename,
+  previewPDF,
 } from '@/utils/pdfUtils'
 import { TABLE_CONFIG, TABLE_COLUMNS } from '@/utils/pdfConstants'
 
@@ -158,8 +159,8 @@ export function useGenerateSyneyStoreReportPDF() {
       // 生成智能文件名
       const filename = generateFilename('detail', selectedMap.size, reportNos)
 
-      // 输出 PDF
-      doc.output('dataurlnewwindow', { filename })
+      // 预览 PDF
+      previewPDF(doc, filename)
 
       setProgress(100)
       message.destroy() // 销毁加载提示

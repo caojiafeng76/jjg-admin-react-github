@@ -11,6 +11,7 @@ import {
   generateSummaryTableData,
   generateFilename,
   addPageNumber,
+  previewPDF,
 } from '@/utils/pdfUtils'
 import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
 
@@ -72,8 +73,8 @@ export function useGenerateSummaryPDF() {
       // 生成智能文件名
       const filename = generateFilename('summary', selectedMap.size)
 
-      // 输出 PDF
-      doc.output('dataurlnewwindow', { filename })
+      // 预览 PDF
+      previewPDF(doc, filename)
 
       message.success(`PDF生成完成: ${filename}`)
       return true // 返回 true 表示生成成功
