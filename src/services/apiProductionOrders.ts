@@ -197,11 +197,16 @@ export async function getProductionOrdersForExport(ids: string[]) {
   }
 
   const rows = (data || []) as ProductionOrderForExport[]
-  const orderMap = new Map(rows.map((row) => [row.id, row]))
 
-  return ids
-    .map((id) => orderMap.get(id))
-    .filter((row): row is ProductionOrderForExport => Boolean(row))
+  return rows.sort((left, right) => {
+    const dateCompare = left.order_date.localeCompare(right.order_date)
+
+    if (dateCompare !== 0) {
+      return dateCompare
+    }
+
+    return left.created_at.localeCompare(right.created_at)
+  })
 }
 
 export async function createProductionOrder(values: ProductionOrderInsert) {

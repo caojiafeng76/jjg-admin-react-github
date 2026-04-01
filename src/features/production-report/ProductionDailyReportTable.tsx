@@ -36,6 +36,15 @@ export default function ProductionDailyReportTable({
   onRowSelectionChange,
   scrollY = 400,
 }: Props) {
+  const currentPageQualifiedCount = useMemo(
+    () =>
+      data.reduce(
+        (total, record) => total + Number(record.qualifiedCount || 0),
+        0,
+      ),
+    [data],
+  )
+
   const columns: TableColumnsType<ProductionDailyReportRow> = useMemo(
     () => [
       {
@@ -181,6 +190,22 @@ export default function ProductionDailyReportTable({
       size="small"
       scroll={{ x: 2050, y: scrollY }}
       style={{ fontSize: '12px' }}
+      summary={() => (
+        <Table.Summary fixed>
+          <Table.Summary.Row>
+            <Table.Summary.Cell index={0} />
+            <Table.Summary.Cell index={1} colSpan={10}>
+              <span className="font-medium text-slate-600">当前页合计</span>
+            </Table.Summary.Cell>
+            <Table.Summary.Cell index={11}>
+              <span className="font-semibold text-slate-900">
+                {currentPageQualifiedCount}
+              </span>
+            </Table.Summary.Cell>
+            <Table.Summary.Cell index={12} colSpan={8} />
+          </Table.Summary.Row>
+        </Table.Summary>
+      )}
     />
   )
 }

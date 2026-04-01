@@ -56,6 +56,7 @@ export default function ProductionDailyReportPage() {
   const { data, isLoading, isFetching } = useProductionDailyReport(filters)
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 10,
+    summaryRowHeight: isEmployeeView ? 0 : 39,
   })
 
   const allRows = data?.rows || []

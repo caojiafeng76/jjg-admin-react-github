@@ -1,0 +1,41 @@
+{
+  "round": 7,
+  "scope": "final_remaining_orders_by_user_rules",
+  "rules": [
+    "先补员工档案",
+    "缺型号/工序整单按零工导入",
+    "合格数量非整数向上取整",
+    "缺工序标准与带减分问题按历史数据原样导入"
+  ],
+  "employees_created": [
+    "尚红梅",
+    "杨艺博"
+  ],
+  "import_execution": {
+    "first_run": {
+      "inserted_employees": 2,
+      "inserted_process_standards": 1,
+      "inserted_orders": 9,
+      "inserted_items": 9,
+      "note": "第一次执行时 employee_map 仅覆盖新建员工，先落入缺员工相关订单"
+    },
+    "second_run": {
+      "inserted_employees": 0,
+      "inserted_process_standards": 0,
+      "inserted_orders": 26,
+      "inserted_items": 26,
+      "note": "修正 employee_map 后补齐其余订单，SQL 保持幂等"
+    },
+    "total": {
+      "inserted_employees": 2,
+      "inserted_process_standards": 1,
+      "inserted_orders": 35,
+      "inserted_items": 35
+    }
+  },
+  "verification": {
+    "expected_orders": 35,
+    "matched_orders": 35,
+    "matched_items": 35
+  }
+}

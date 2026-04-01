@@ -1,0 +1,125 @@
+{
+  "round": 6,
+  "scope": "raw_historical_defect_quantity_import",
+  "notes": [
+    "按用户最新要求，剩余历史减分数据改为直接写入原始 defect_quantity_1，不再折半。",
+    "导入时使用 qualified_quantity = Excel 原数量，incoming_qualified_quantity = Excel 原数量 + 原始 defect_quantity_1，并交由现有数据库公式自动计算 defect_hours。",
+    "本轮同时补录了混合阻塞工单中缺失但标准秒数明确一致的工序标准。"
+  ],
+  "process_standards_backfilled": [
+    {
+      "model": "213-553",
+      "operation": "CNC",
+      "standard_seconds": 60
+    },
+    {
+      "model": "180-259",
+      "operation": "CNC",
+      "standard_seconds": 110
+    },
+    {
+      "model": "03-03",
+      "operation": "CNC2",
+      "standard_seconds": 160
+    },
+    {
+      "model": "213-261",
+      "operation": "冲孔2",
+      "standard_seconds": 25
+    },
+    {
+      "model": "82-440",
+      "operation": "自动切",
+      "standard_seconds": 25
+    },
+    {
+      "model": "180-217",
+      "operation": "CNC",
+      "standard_seconds": 400
+    },
+    {
+      "model": "03-03",
+      "operation": "CNC1",
+      "standard_seconds": 75
+    },
+    {
+      "model": "03-02",
+      "operation": "CNC1",
+      "standard_seconds": 90
+    },
+    {
+      "model": "269-390",
+      "operation": "CNC1",
+      "standard_seconds": 270
+    },
+    {
+      "model": "269-390",
+      "operation": "CNC2",
+      "standard_seconds": 160
+    }
+  ],
+  "fixed_in_round_6": {
+    "orders": 14,
+    "items": 41,
+    "verification": {
+      "expected_process_standards": 10,
+      "expected_orders": 14,
+      "expected_items": 41,
+      "touched_process_standards": 10,
+      "inserted_orders": 14,
+      "inserted_items": 41
+    },
+    "imported_order_keys": [
+      "陆康|2026-03-13",
+      "陈文香|2026-03-13",
+      "陈文香|2026-03-19",
+      "徐小花|2026-03-06",
+      "徐小花|2026-03-10",
+      "徐小花|2026-03-20",
+      "黄玉春|2026-03-11",
+      "沈龙杰|2026-03-05",
+      "尚能群|2026-03-07",
+      "尚能群|2026-03-19",
+      "谭术林|2026-03-16",
+      "张海蝶|2026-03-19",
+      "尚伦英|2026-03-06",
+      "尚伦英|2026-03-12"
+    ]
+  },
+  "remaining_after_round_6": {
+    "orders": 35,
+    "items": 56,
+    "reason_stats": [
+      {
+        "reason": "missing_model_operation",
+        "count": 19
+      },
+      {
+        "reason": "non_integer_quantity",
+        "count": 10
+      },
+      {
+        "reason": "missing_employee",
+        "count": 9
+      },
+      {
+        "reason": "missing_process_standard",
+        "count": 3
+      },
+      {
+        "reason": "defect_formula_incompatible",
+        "count": 3
+      }
+    ],
+    "remaining_defect_orders": [
+      "尚红梅|2026-03-10",
+      "尚红梅|2026-03-11",
+      "尚红梅|2026-03-12"
+    ],
+    "remaining_missing_process_orders": [
+      "杨艺博|2026-03-01",
+      "杨艺博|2026-03-02",
+      "吴鹏飞|2026-03-09"
+    ]
+  }
+}

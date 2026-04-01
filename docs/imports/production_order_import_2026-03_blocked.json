@@ -1,0 +1,2147 @@
+[
+  {
+    "employee": "曾庆伟",
+    "employee_id": "90a787b4-8dcc-4076-a236-9b31aabe263a",
+    "order_date": "2026-03-02",
+    "work_hours": 11,
+    "source_rows": [
+      3,
+      4
+    ],
+    "blockers": [
+      "第3行: 工序标准不存在:113-80 / 刮毛刺",
+      "第4行: 工序标准不存在:113-80 / 刮毛刺"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "曾庆伟",
+    "employee_id": "90a787b4-8dcc-4076-a236-9b31aabe263a",
+    "order_date": "2026-03-05",
+    "work_hours": 11,
+    "source_rows": [
+      12,
+      13
+    ],
+    "blockers": [
+      "第13行: 工序标准不存在:258-308 / 检验"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "曾庆伟",
+    "employee_id": "90a787b4-8dcc-4076-a236-9b31aabe263a",
+    "order_date": "2026-03-07",
+    "work_hours": 4,
+    "source_rows": [
+      17
+    ],
+    "blockers": [
+      "第17行: 工序标准不存在:286-430 / 铣缺口"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "曾庆伟",
+    "employee_id": "90a787b4-8dcc-4076-a236-9b31aabe263a",
+    "order_date": "2026-03-11",
+    "work_hours": 11,
+    "source_rows": [
+      21
+    ],
+    "blockers": [
+      "第21行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "向玲",
+    "employee_id": "bec4d796-ccaa-4ca5-8ac9-9ebb4e584f15",
+    "order_date": "2026-03-01",
+    "work_hours": 9.5,
+    "source_rows": [
+      2,
+      3,
+      4
+    ],
+    "blockers": [
+      "第3行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:100"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "向玲",
+    "employee_id": "bec4d796-ccaa-4ca5-8ac9-9ebb4e584f15",
+    "order_date": "2026-03-03",
+    "work_hours": 11,
+    "source_rows": [
+      8,
+      9
+    ],
+    "blockers": [
+      "第9行: 工序标准不存在:105-331 / 检验"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "陆康",
+    "employee_id": "78d7232c-abec-48fd-99ab-bf55eb8fe68b",
+    "order_date": "2026-03-05",
+    "work_hours": 11,
+    "source_rows": [
+      7
+    ],
+    "blockers": [
+      "第7行: 合格数量非整数:251.333333333333"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "陆康",
+    "employee_id": "78d7232c-abec-48fd-99ab-bf55eb8fe68b",
+    "order_date": "2026-03-13",
+    "work_hours": 12,
+    "source_rows": [
+      18,
+      19,
+      20,
+      21
+    ],
+    "blockers": [
+      "第20行: 存在不良数量, 当前库减分公式不兼容:19；存在减分秒数, 当前库无法直接写入:665"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "陆康",
+    "employee_id": "78d7232c-abec-48fd-99ab-bf55eb8fe68b",
+    "order_date": "2026-03-14",
+    "work_hours": 12,
+    "source_rows": [
+      22,
+      23,
+      24
+    ],
+    "blockers": [
+      "第24行: 缺少型号；缺少工序"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "曹林",
+    "employee_id": "d11567ce-9813-421b-b801-c120d374c261",
+    "order_date": "2026-03-16",
+    "work_hours": 11,
+    "source_rows": [
+      2
+    ],
+    "blockers": [
+      "第2行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "曹林",
+    "employee_id": "d11567ce-9813-421b-b801-c120d374c261",
+    "order_date": "2026-03-17",
+    "work_hours": 11,
+    "source_rows": [
+      3
+    ],
+    "blockers": [
+      "第3行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "曹林",
+    "employee_id": "d11567ce-9813-421b-b801-c120d374c261",
+    "order_date": "2026-03-18",
+    "work_hours": 11,
+    "source_rows": [
+      4
+    ],
+    "blockers": [
+      "第4行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "曹林",
+    "employee_id": "d11567ce-9813-421b-b801-c120d374c261",
+    "order_date": "2026-03-19",
+    "work_hours": 11,
+    "source_rows": [
+      5
+    ],
+    "blockers": [
+      "第5行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-01",
+    "work_hours": 9.5,
+    "source_rows": [
+      2
+    ],
+    "blockers": [
+      "第2行: 工序标准不存在:113-80 / 打孔5个"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-02",
+    "work_hours": 11,
+    "source_rows": [
+      3,
+      4
+    ],
+    "blockers": [
+      "第3行: 工序标准不存在:113-80 / 打孔5个",
+      "第4行: 工序标准不存在:113-80 / 打孔5个"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-05",
+    "work_hours": 11,
+    "source_rows": [
+      7
+    ],
+    "blockers": [
+      "第7行: 合格数量非整数:251.333333333333"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-06",
+    "work_hours": 11,
+    "source_rows": [
+      8,
+      9,
+      10
+    ],
+    "blockers": [
+      "第9行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:1656"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-10",
+    "work_hours": 12,
+    "source_rows": [
+      14,
+      15
+    ],
+    "blockers": [
+      "第14行: 存在不良数量, 当前库减分公式不兼容:40；存在减分秒数, 当前库无法直接写入:2600",
+      "第15行: 存在不良数量, 当前库减分公式不兼容:16；存在减分秒数, 当前库无法直接写入:1040"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-12",
+    "work_hours": 12,
+    "source_rows": [
+      18
+    ],
+    "blockers": [
+      "第18行: 存在不良数量, 当前库减分公式不兼容:10；存在减分秒数, 当前库无法直接写入:350"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-13",
+    "work_hours": 12,
+    "source_rows": [
+      19,
+      20,
+      21,
+      22
+    ],
+    "blockers": [
+      "第19行: 存在不良数量, 当前库减分公式不兼容:28；存在减分秒数, 当前库无法直接写入:1820",
+      "第20行: 存在不良数量, 当前库减分公式不兼容:8；存在减分秒数, 当前库无法直接写入:520",
+      "第21行: 工序标准不存在:213-553 / CNC",
+      "第22行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-17",
+    "work_hours": 11,
+    "source_rows": [
+      28
+    ],
+    "blockers": [
+      "第28行: 存在不良数量, 当前库减分公式不兼容:10；存在减分秒数, 当前库无法直接写入:1600"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-18",
+    "work_hours": 11,
+    "source_rows": [
+      29
+    ],
+    "blockers": [
+      "第29行: 存在不良数量, 当前库减分公式不兼容:12；存在减分秒数, 当前库无法直接写入:1920"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "陈文香",
+    "employee_id": "10db1c15-c154-4ec3-af53-8e06caa6d6f7",
+    "order_date": "2026-03-19",
+    "work_hours": 11,
+    "source_rows": [
+      30,
+      31
+    ],
+    "blockers": [
+      "第30行: 工序标准不存在:180-259 / CNC",
+      "第31行: 存在不良数量, 当前库减分公式不兼容:10；存在减分秒数, 当前库无法直接写入:1600"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "冯永惠",
+    "employee_id": "43dbda38-57c2-4f9a-a2cf-a56cb0954228",
+    "order_date": "2026-03-03",
+    "work_hours": 12,
+    "source_rows": [
+      6,
+      7,
+      8,
+      9
+    ],
+    "blockers": [
+      "第6行: 合格数量非整数:27.5"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "冯永惠",
+    "employee_id": "43dbda38-57c2-4f9a-a2cf-a56cb0954228",
+    "order_date": "2026-03-07",
+    "work_hours": 12,
+    "source_rows": [
+      14,
+      15
+    ],
+    "blockers": [
+      "第14行: 工序标准不存在:180-217 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "冯永惠",
+    "employee_id": "43dbda38-57c2-4f9a-a2cf-a56cb0954228",
+    "order_date": "2026-03-20",
+    "work_hours": 12,
+    "source_rows": [
+      31
+    ],
+    "blockers": [
+      "第31行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:670"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "张吉成",
+    "employee_id": "9838e9ca-e177-499c-aa0f-54e07f3e21f9",
+    "order_date": "2026-03-07",
+    "work_hours": 12,
+    "source_rows": [
+      12
+    ],
+    "blockers": [
+      "第12行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:48"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "张吉成",
+    "employee_id": "9838e9ca-e177-499c-aa0f-54e07f3e21f9",
+    "order_date": "2026-03-12",
+    "work_hours": 11,
+    "source_rows": [
+      17,
+      18,
+      19
+    ],
+    "blockers": [
+      "第18行: 存在不良数量, 当前库减分公式不兼容:24；存在减分秒数, 当前库无法直接写入:840",
+      "第19行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:72"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "张吉成",
+    "employee_id": "9838e9ca-e177-499c-aa0f-54e07f3e21f9",
+    "order_date": "2026-03-13",
+    "work_hours": 11,
+    "source_rows": [
+      20,
+      21,
+      22
+    ],
+    "blockers": [
+      "第22行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "张吉成",
+    "employee_id": "9838e9ca-e177-499c-aa0f-54e07f3e21f9",
+    "order_date": "2026-03-14",
+    "work_hours": 11,
+    "source_rows": [
+      23,
+      24,
+      25
+    ],
+    "blockers": [
+      "第23行: 合格数量非整数:743.5"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "张吉成",
+    "employee_id": "9838e9ca-e177-499c-aa0f-54e07f3e21f9",
+    "order_date": "2026-03-19",
+    "work_hours": 12,
+    "source_rows": [
+      34
+    ],
+    "blockers": [
+      "第34行: 工序标准不存在:222-148 / CNC"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "徐小花",
+    "employee_id": "d97221c0-620e-4183-a9ea-3ca91bb06573",
+    "order_date": "2026-03-05",
+    "work_hours": 12,
+    "source_rows": [
+      6,
+      7,
+      8,
+      9
+    ],
+    "blockers": [
+      "第7行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:80"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "徐小花",
+    "employee_id": "d97221c0-620e-4183-a9ea-3ca91bb06573",
+    "order_date": "2026-03-06",
+    "work_hours": 12,
+    "source_rows": [
+      10,
+      11,
+      12
+    ],
+    "blockers": [
+      "第12行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:640；工序标准不存在:03-03 / CNC2"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "徐小花",
+    "employee_id": "d97221c0-620e-4183-a9ea-3ca91bb06573",
+    "order_date": "2026-03-10",
+    "work_hours": 11,
+    "source_rows": [
+      16,
+      17
+    ],
+    "blockers": [
+      "第17行: 存在不良数量, 当前库减分公式不兼容:10；存在减分秒数, 当前库无法直接写入:600；工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "徐小花",
+    "employee_id": "d97221c0-620e-4183-a9ea-3ca91bb06573",
+    "order_date": "2026-03-14",
+    "work_hours": 11,
+    "source_rows": [
+      22,
+      23,
+      24,
+      25,
+      26
+    ],
+    "blockers": [
+      "第22行: 存在不良数量, 当前库减分公式不兼容:56；存在减分秒数, 当前库无法直接写入:1960",
+      "第23行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:48",
+      "第26行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:72"
+    ],
+    "item_count": 5
+  },
+  {
+    "employee": "徐小花",
+    "employee_id": "d97221c0-620e-4183-a9ea-3ca91bb06573",
+    "order_date": "2026-03-17",
+    "work_hours": 12,
+    "source_rows": [
+      33,
+      34
+    ],
+    "blockers": [
+      "第33行: 工序标准不存在:213-553 / CNC",
+      "第34行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "徐小花",
+    "employee_id": "d97221c0-620e-4183-a9ea-3ca91bb06573",
+    "order_date": "2026-03-18",
+    "work_hours": 12,
+    "source_rows": [
+      35,
+      36,
+      37
+    ],
+    "blockers": [
+      "第35行: 工序标准不存在:213-553 / CNC",
+      "第36行: 工序标准不存在:213-553 / CNC",
+      "第37行: 工序标准不存在:222-148 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "徐小花",
+    "employee_id": "d97221c0-620e-4183-a9ea-3ca91bb06573",
+    "order_date": "2026-03-19",
+    "work_hours": 12,
+    "source_rows": [
+      38,
+      39
+    ],
+    "blockers": [
+      "第38行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:640"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "徐小花",
+    "employee_id": "d97221c0-620e-4183-a9ea-3ca91bb06573",
+    "order_date": "2026-03-20",
+    "work_hours": 12,
+    "source_rows": [
+      40,
+      41
+    ],
+    "blockers": [
+      "第40行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:360；工序标准不存在:213-553 / CNC",
+      "第41行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "黄玉春",
+    "employee_id": "262b4e7f-d0f2-47eb-a41e-dc3e12c5bdfe",
+    "order_date": "2026-03-08",
+    "work_hours": 9,
+    "source_rows": [
+      9,
+      10
+    ],
+    "blockers": [
+      "第9行: 工序标准不存在:213-261 / 冲孔1",
+      "第10行: 工序标准不存在:213-251 / 冲孔1"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "黄玉春",
+    "employee_id": "262b4e7f-d0f2-47eb-a41e-dc3e12c5bdfe",
+    "order_date": "2026-03-09",
+    "work_hours": 11,
+    "source_rows": [
+      11,
+      12,
+      13,
+      14
+    ],
+    "blockers": [
+      "第11行: 工序标准不存在:213-261 / 冲孔1",
+      "第12行: 工序标准不存在:213-261 / 冲孔1",
+      "第13行: 工序标准不存在:213-261 / 冲孔2",
+      "第14行: 工序标准不存在:213-261 / 冲孔2"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "黄玉春",
+    "employee_id": "262b4e7f-d0f2-47eb-a41e-dc3e12c5bdfe",
+    "order_date": "2026-03-10",
+    "work_hours": 11,
+    "source_rows": [
+      15
+    ],
+    "blockers": [
+      "第15行: 工序标准不存在:213-261 / 冲孔2"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "黄玉春",
+    "employee_id": "262b4e7f-d0f2-47eb-a41e-dc3e12c5bdfe",
+    "order_date": "2026-03-11",
+    "work_hours": 11,
+    "source_rows": [
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "blockers": [
+      "第16行: 存在不良数量, 当前库减分公式不兼容:30；存在减分秒数, 当前库无法直接写入:750；工序标准不存在:213-261 / 冲孔2",
+      "第17行: 工序标准不存在:213-261 / 冲孔2",
+      "第18行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:50"
+    ],
+    "item_count": 5
+  },
+  {
+    "employee": "黄玉春",
+    "employee_id": "262b4e7f-d0f2-47eb-a41e-dc3e12c5bdfe",
+    "order_date": "2026-03-14",
+    "work_hours": 11,
+    "source_rows": [
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "blockers": [
+      "第36行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:30"
+    ],
+    "item_count": 7
+  },
+  {
+    "employee": "杨永会",
+    "employee_id": "21e161dd-bd3e-46f2-96eb-a9325b70943e",
+    "order_date": "2026-03-07",
+    "work_hours": 11,
+    "source_rows": [
+      8,
+      9
+    ],
+    "blockers": [
+      "第9行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:150"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "杨永会",
+    "employee_id": "21e161dd-bd3e-46f2-96eb-a9325b70943e",
+    "order_date": "2026-03-08",
+    "work_hours": 9.5,
+    "source_rows": [
+      10,
+      11,
+      12
+    ],
+    "blockers": [
+      "第10行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:100",
+      "第11行: 存在不良数量, 当前库减分公式不兼容:20；存在减分秒数, 当前库无法直接写入:500"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "杨永会",
+    "employee_id": "21e161dd-bd3e-46f2-96eb-a9325b70943e",
+    "order_date": "2026-03-10",
+    "work_hours": 11,
+    "source_rows": [
+      14
+    ],
+    "blockers": [
+      "第14行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:60"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "徐皋",
+    "employee_id": "81a6cf29-ee6e-48fb-8c89-74707945f61d",
+    "order_date": "2026-03-20",
+    "work_hours": 11,
+    "source_rows": [
+      6
+    ],
+    "blockers": [
+      "第6行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:480"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "沈龙杰",
+    "employee_id": "352756ee-cfe5-4286-b258-e514a578f683",
+    "order_date": "2026-03-05",
+    "work_hours": 9.5,
+    "source_rows": [
+      8,
+      9
+    ],
+    "blockers": [
+      "第9行: 存在减分秒数, 当前库无法直接写入:9600；工序标准不存在:82-440 / 自动切"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "沈龙杰",
+    "employee_id": "352756ee-cfe5-4286-b258-e514a578f683",
+    "order_date": "2026-03-06",
+    "work_hours": 9.5,
+    "source_rows": [
+      10,
+      11
+    ],
+    "blockers": [
+      "第11行: 工序标准不存在:82-440 / 自动切"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "沈龙杰",
+    "employee_id": "352756ee-cfe5-4286-b258-e514a578f683",
+    "order_date": "2026-03-07",
+    "work_hours": 9.5,
+    "source_rows": [
+      12,
+      13,
+      14
+    ],
+    "blockers": [
+      "第12行: 工序标准不存在:82-440 / 自动切"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "沈龙杰",
+    "employee_id": "352756ee-cfe5-4286-b258-e514a578f683",
+    "order_date": "2026-03-08",
+    "work_hours": 9.5,
+    "source_rows": [
+      15
+    ],
+    "blockers": [
+      "第15行: 合格数量非整数:1411.5"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "沈龙杰",
+    "employee_id": "352756ee-cfe5-4286-b258-e514a578f683",
+    "order_date": "2026-03-09",
+    "work_hours": 9.5,
+    "source_rows": [
+      16
+    ],
+    "blockers": [
+      "第16行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "杨艺博",
+    "employee_id": null,
+    "order_date": "2026-03-01",
+    "work_hours": 9.5,
+    "source_rows": [
+      2
+    ],
+    "blockers": [
+      "员工未建档:杨艺博",
+      "第2行: 工序标准不存在:113-80 / 刮毛刺"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "杨艺博",
+    "employee_id": null,
+    "order_date": "2026-03-02",
+    "work_hours": 11,
+    "source_rows": [
+      3,
+      4
+    ],
+    "blockers": [
+      "员工未建档:杨艺博",
+      "第3行: 工序标准不存在:113-80 / 检验",
+      "第4行: 工序标准不存在:113-80 / 检验"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "杨艺博",
+    "employee_id": null,
+    "order_date": "2026-03-03",
+    "work_hours": 11,
+    "source_rows": [
+      5,
+      6
+    ],
+    "blockers": [
+      "员工未建档:杨艺博",
+      "第5行: 合格数量非整数:552.5",
+      "第6行: 合格数量非整数:41.5"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "杨艺博",
+    "employee_id": null,
+    "order_date": "2026-03-04",
+    "work_hours": 9.5,
+    "source_rows": [
+      7
+    ],
+    "blockers": [
+      "员工未建档:杨艺博",
+      "第7行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "杨艺博",
+    "employee_id": null,
+    "order_date": "2026-03-05",
+    "work_hours": 11,
+    "source_rows": [
+      8
+    ],
+    "blockers": [
+      "员工未建档:杨艺博",
+      "第8行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "杨艺博",
+    "employee_id": null,
+    "order_date": "2026-03-06",
+    "work_hours": 9.5,
+    "source_rows": [
+      9
+    ],
+    "blockers": [
+      "员工未建档:杨艺博",
+      "第9行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-05",
+    "work_hours": 12,
+    "source_rows": [
+      9,
+      10
+    ],
+    "blockers": [
+      "第9行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:200",
+      "第10行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:240"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-12",
+    "work_hours": 11,
+    "source_rows": [
+      20,
+      21
+    ],
+    "blockers": [
+      "第20行: 工序标准不存在:213-553 / CNC",
+      "第21行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-13",
+    "work_hours": 11,
+    "source_rows": [
+      22,
+      23
+    ],
+    "blockers": [
+      "第23行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:240"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-14",
+    "work_hours": 11,
+    "source_rows": [
+      24,
+      25,
+      26,
+      27,
+      28
+    ],
+    "blockers": [
+      "第24行: 合格数量非整数:743.5",
+      "第26行: 工序标准不存在:213-553 / CNC",
+      "第27行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 5
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-15",
+    "work_hours": 12,
+    "source_rows": [
+      29,
+      30
+    ],
+    "blockers": [
+      "第30行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:120"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-16",
+    "work_hours": 12,
+    "source_rows": [
+      31,
+      32,
+      33
+    ],
+    "blockers": [
+      "第33行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:150"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-17",
+    "work_hours": 12,
+    "source_rows": [
+      34,
+      35
+    ],
+    "blockers": [
+      "第34行: 存在不良数量, 当前库减分公式不兼容:8；存在减分秒数, 当前库无法直接写入:400"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-18",
+    "work_hours": 12,
+    "source_rows": [
+      36
+    ],
+    "blockers": [
+      "第36行: 工序标准不存在:180-259 / CNC"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "徐新妹",
+    "employee_id": "60f5256b-29f1-4a0d-97ed-f90d56318991",
+    "order_date": "2026-03-19",
+    "work_hours": 12,
+    "source_rows": [
+      37,
+      38,
+      39
+    ],
+    "blockers": [
+      "第37行: 工序标准不存在:213-553 / CNC",
+      "第38行: 工序标准不存在:213-553 / CNC",
+      "第39行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "尚能群",
+    "employee_id": "8d3d4ecd-eb29-4af2-83be-2d76618cac50",
+    "order_date": "2026-03-06",
+    "work_hours": 11,
+    "source_rows": [
+      15,
+      16,
+      17
+    ],
+    "blockers": [
+      "第16行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:1656"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "尚能群",
+    "employee_id": "8d3d4ecd-eb29-4af2-83be-2d76618cac50",
+    "order_date": "2026-03-07",
+    "work_hours": 11,
+    "source_rows": [
+      18,
+      19
+    ],
+    "blockers": [
+      "第18行: 存在减分秒数, 当前库无法直接写入:14000；工序标准不存在:180-217 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "尚能群",
+    "employee_id": "8d3d4ecd-eb29-4af2-83be-2d76618cac50",
+    "order_date": "2026-03-09",
+    "work_hours": 12,
+    "source_rows": [
+      22,
+      23
+    ],
+    "blockers": [
+      "第22行: 工序标准不存在:269-390 / CNC1",
+      "第23行: 工序标准不存在:213-554 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "尚能群",
+    "employee_id": "8d3d4ecd-eb29-4af2-83be-2d76618cac50",
+    "order_date": "2026-03-11",
+    "work_hours": 12,
+    "source_rows": [
+      26,
+      27
+    ],
+    "blockers": [
+      "第26行: 工序标准不存在:213-553 / CNC",
+      "第27行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "尚能群",
+    "employee_id": "8d3d4ecd-eb29-4af2-83be-2d76618cac50",
+    "order_date": "2026-03-12",
+    "work_hours": 12,
+    "source_rows": [
+      28,
+      29
+    ],
+    "blockers": [
+      "第28行: 工序标准不存在:213-553 / CNC",
+      "第29行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "尚能群",
+    "employee_id": "8d3d4ecd-eb29-4af2-83be-2d76618cac50",
+    "order_date": "2026-03-18",
+    "work_hours": null,
+    "source_rows": [
+      40
+    ],
+    "blockers": [
+      "出勤工时无效",
+      "第40行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚能群",
+    "employee_id": "8d3d4ecd-eb29-4af2-83be-2d76618cac50",
+    "order_date": "2026-03-19",
+    "work_hours": 11,
+    "source_rows": [
+      41
+    ],
+    "blockers": [
+      "第41行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:1440；工序标准不存在:222-148 / CNC"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚能群",
+    "employee_id": "8d3d4ecd-eb29-4af2-83be-2d76618cac50",
+    "order_date": "2026-03-20",
+    "work_hours": 11,
+    "source_rows": [
+      42
+    ],
+    "blockers": [
+      "第42行: 工序标准不存在:222-148 / CNC"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-01",
+    "work_hours": 9.5,
+    "source_rows": [
+      2,
+      3,
+      4
+    ],
+    "blockers": [
+      "第3行: 工序标准不存在:269-389 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-03",
+    "work_hours": 12,
+    "source_rows": [
+      7,
+      8,
+      9,
+      10
+    ],
+    "blockers": [
+      "第7行: 合格数量非整数:27.5"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-04",
+    "work_hours": 12,
+    "source_rows": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "blockers": [
+      "第17行: 工序标准不存在:门小件 / 端铣"
+    ],
+    "item_count": 7
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-05",
+    "work_hours": 12,
+    "source_rows": [
+      18,
+      19,
+      20,
+      21,
+      22
+    ],
+    "blockers": [
+      "第22行: 工序标准不存在:门小件 / 端铣"
+    ],
+    "item_count": 5
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-06",
+    "work_hours": 12,
+    "source_rows": [
+      23,
+      24
+    ],
+    "blockers": [
+      "第24行: 工序标准不存在:扣条 / 冲孔"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-07",
+    "work_hours": 12,
+    "source_rows": [
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "blockers": [
+      "第26行: 工序标准不存在:门小件 / 端铣"
+    ],
+    "item_count": 5
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-12",
+    "work_hours": 11,
+    "source_rows": [
+      36,
+      37,
+      38,
+      39
+    ],
+    "blockers": [
+      "第37行: 工序标准不存在:门小件 / 端铣",
+      "第38行: 工序标准不存在:扣条 / 冲孔",
+      "第39行: 工序标准不存在:扣条 / 冲孔"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-14",
+    "work_hours": 11,
+    "source_rows": [
+      42,
+      43,
+      44,
+      45
+    ],
+    "blockers": [
+      "第45行: 工序标准不存在:门小件 / 端铣"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-16",
+    "work_hours": 12,
+    "source_rows": [
+      52,
+      53,
+      54
+    ],
+    "blockers": [
+      "第52行: 存在不良数量, 当前库减分公式不兼容:14；存在减分秒数, 当前库无法直接写入:882"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "谭术林",
+    "employee_id": "b3249c63-79cb-4aad-9403-f971e89c215d",
+    "order_date": "2026-03-17",
+    "work_hours": 12,
+    "source_rows": [
+      55,
+      56,
+      57
+    ],
+    "blockers": [
+      "第56行: 工序标准不存在:门小件 / 端铣",
+      "第57行: 工序标准不存在:扣条 / 冲孔"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-01",
+    "work_hours": 9.5,
+    "source_rows": [
+      2
+    ],
+    "blockers": [
+      "第2行: 工序标准不存在:113-80 / 检验"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-04",
+    "work_hours": 11,
+    "source_rows": [
+      7,
+      8
+    ],
+    "blockers": [
+      "第8行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:120"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-06",
+    "work_hours": 11,
+    "source_rows": [
+      11,
+      12
+    ],
+    "blockers": [
+      "第12行: 存在不良数量, 当前库减分公式不兼容:8；存在减分秒数, 当前库无法直接写入:480"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-08",
+    "work_hours": 12,
+    "source_rows": [
+      15,
+      16,
+      17,
+      18
+    ],
+    "blockers": [
+      "第15行: 工序标准不存在:269-390 / CNC1",
+      "第16行: 工序标准不存在:269-390 / CNC2",
+      "第17行: 工序标准不存在:269-390 / CNC2"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-10",
+    "work_hours": 12,
+    "source_rows": [
+      21,
+      22
+    ],
+    "blockers": [
+      "第21行: 工序标准不存在:213-553 / CNC",
+      "第22行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-11",
+    "work_hours": 12,
+    "source_rows": [
+      23,
+      24,
+      25,
+      26
+    ],
+    "blockers": [
+      "第23行: 工序标准不存在:213-553 / CNC",
+      "第25行: 工序标准不存在:213-553 / CNC",
+      "第26行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-14",
+    "work_hours": 12,
+    "source_rows": [
+      31,
+      32,
+      33
+    ],
+    "blockers": [
+      "第31行: 工序标准不存在:213-553 / CNC",
+      "第32行: 工序标准不存在:213-553 / CNC",
+      "第33行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-16",
+    "work_hours": 11,
+    "source_rows": [
+      35,
+      36
+    ],
+    "blockers": [
+      "第35行: 工序标准不存在:213-553 / CNC",
+      "第36行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-17",
+    "work_hours": 11,
+    "source_rows": [
+      37,
+      38,
+      39
+    ],
+    "blockers": [
+      "第37行: 工序标准不存在:213-553 / CNC",
+      "第38行: 工序标准不存在:213-553 / CNC",
+      "第39行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-18",
+    "work_hours": 11,
+    "source_rows": [
+      40,
+      41,
+      42
+    ],
+    "blockers": [
+      "第40行: 工序标准不存在:213-553 / CNC",
+      "第41行: 工序标准不存在:213-553 / CNC",
+      "第42行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "张海蝶",
+    "employee_id": "17842c7d-961b-427f-9120-3b4aef5159a7",
+    "order_date": "2026-03-19",
+    "work_hours": 11,
+    "source_rows": [
+      43,
+      44,
+      45,
+      46,
+      47
+    ],
+    "blockers": [
+      "第44行: 工序标准不存在:03-03 / CNC1",
+      "第45行: 工序标准不存在:03-03 / CNC2",
+      "第46行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:180；工序标准不存在:03-02 / CNC1"
+    ],
+    "item_count": 5
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-04",
+    "work_hours": null,
+    "source_rows": [
+      7
+    ],
+    "blockers": [
+      "出勤工时无效",
+      "第7行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-05",
+    "work_hours": null,
+    "source_rows": [
+      8
+    ],
+    "blockers": [
+      "出勤工时无效",
+      "第8行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-06",
+    "work_hours": 11,
+    "source_rows": [
+      9,
+      10,
+      11
+    ],
+    "blockers": [
+      "第9行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:150；工序标准不存在:03-03 / CNC1",
+      "第10行: 工序标准不存在:03-02 / CNC1"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-07",
+    "work_hours": 11,
+    "source_rows": [
+      12
+    ],
+    "blockers": [
+      "第12行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-08",
+    "work_hours": 9.5,
+    "source_rows": [
+      13,
+      14
+    ],
+    "blockers": [
+      "第13行: 工序标准不存在:269-390 / CNC1",
+      "第14行: 工序标准不存在:269-390 / CNC1"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-09",
+    "work_hours": 11,
+    "source_rows": [
+      15,
+      16
+    ],
+    "blockers": [
+      "第15行: 工序标准不存在:269-390 / CNC2",
+      "第16行: 工序标准不存在:269-390 / CNC2"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-10",
+    "work_hours": 11,
+    "source_rows": [
+      17
+    ],
+    "blockers": [
+      "第17行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-11",
+    "work_hours": 11,
+    "source_rows": [
+      18,
+      19,
+      20
+    ],
+    "blockers": [
+      "第18行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:200"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-12",
+    "work_hours": 11,
+    "source_rows": [
+      21,
+      22,
+      23
+    ],
+    "blockers": [
+      "第22行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:540；工序标准不存在:269-390 / CNC1",
+      "第23行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:320；工序标准不存在:269-390 / CNC2"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-13",
+    "work_hours": 11,
+    "source_rows": [
+      24
+    ],
+    "blockers": [
+      "第24行: 存在不良数量, 当前库减分公式不兼容:8；存在减分秒数, 当前库无法直接写入:480；工序标准不存在:213-554 / CNC"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-14",
+    "work_hours": 11,
+    "source_rows": [
+      25
+    ],
+    "blockers": [
+      "第25行: 工序标准不存在:213-554 / CNC"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚伦英",
+    "employee_id": "dad80d32-4cc9-4c3c-ac2f-244b99b84be8",
+    "order_date": "2026-03-15",
+    "work_hours": 9.5,
+    "source_rows": [
+      26,
+      27,
+      28
+    ],
+    "blockers": [
+      "第26行: 存在不良数量, 当前库减分公式不兼容:8；存在减分秒数, 当前库无法直接写入:400",
+      "第28行: 工序标准不存在:213-554 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "尚红梅",
+    "employee_id": null,
+    "order_date": "2026-03-10",
+    "work_hours": 11,
+    "source_rows": [
+      3
+    ],
+    "blockers": [
+      "员工未建档:尚红梅",
+      "第3行: 存在不良数量, 当前库减分公式不兼容:8；存在减分秒数, 当前库无法直接写入:120"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "尚红梅",
+    "employee_id": null,
+    "order_date": "2026-03-11",
+    "work_hours": 11,
+    "source_rows": [
+      4,
+      5
+    ],
+    "blockers": [
+      "员工未建档:尚红梅",
+      "第5行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:50"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "尚红梅",
+    "employee_id": null,
+    "order_date": "2026-03-12",
+    "work_hours": 11,
+    "source_rows": [
+      6
+    ],
+    "blockers": [
+      "员工未建档:尚红梅",
+      "第6行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:100"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "许彩旋",
+    "employee_id": "b9a852cd-49a8-4674-bcc5-a5c809900814",
+    "order_date": "2026-03-08",
+    "work_hours": 9.5,
+    "source_rows": [
+      9
+    ],
+    "blockers": [
+      "第9行: 工序标准不存在:213-261 / 冲孔2"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "许彩旋",
+    "employee_id": "b9a852cd-49a8-4674-bcc5-a5c809900814",
+    "order_date": "2026-03-15",
+    "work_hours": 9.5,
+    "source_rows": [
+      25
+    ],
+    "blockers": [
+      "第25行: 存在不良数量, 当前库减分公式不兼容:12；存在减分秒数, 当前库无法直接写入:300"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "熊龙华",
+    "employee_id": null,
+    "order_date": "2026-03-08",
+    "work_hours": 12,
+    "source_rows": [
+      9
+    ],
+    "blockers": [
+      "员工未建档:熊龙华"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "熊龙华",
+    "employee_id": null,
+    "order_date": "2026-03-09",
+    "work_hours": 12,
+    "source_rows": [
+      10,
+      11
+    ],
+    "blockers": [
+      "员工未建档:熊龙华"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "熊龙华",
+    "employee_id": null,
+    "order_date": "2026-03-10",
+    "work_hours": 12,
+    "source_rows": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "blockers": [
+      "员工未建档:熊龙华"
+    ],
+    "item_count": 6
+  },
+  {
+    "employee": "吴鹏飞",
+    "employee_id": "bdd2eaed-753f-4c30-be6d-44f9c072b257",
+    "order_date": "2026-03-02",
+    "work_hours": 11,
+    "source_rows": [
+      3
+    ],
+    "blockers": [
+      "第3行: 存在减分秒数, 当前库无法直接写入:10800"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "吴鹏飞",
+    "employee_id": "bdd2eaed-753f-4c30-be6d-44f9c072b257",
+    "order_date": "2026-03-03",
+    "work_hours": 11,
+    "source_rows": [
+      4,
+      5
+    ],
+    "blockers": [
+      "第4行: 合格数量非整数:552.5",
+      "第5行: 合格数量非整数:41.5"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "吴鹏飞",
+    "employee_id": "bdd2eaed-753f-4c30-be6d-44f9c072b257",
+    "order_date": "2026-03-04",
+    "work_hours": 11,
+    "source_rows": [
+      6,
+      7,
+      8
+    ],
+    "blockers": [
+      "第8行: 工序标准不存在:105-330 / 倒角"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "吴鹏飞",
+    "employee_id": "bdd2eaed-753f-4c30-be6d-44f9c072b257",
+    "order_date": "2026-03-05",
+    "work_hours": 11,
+    "source_rows": [
+      9,
+      10
+    ],
+    "blockers": [
+      "第9行: 工序标准不存在:105-330 / 倒角"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "吴鹏飞",
+    "employee_id": "bdd2eaed-753f-4c30-be6d-44f9c072b257",
+    "order_date": "2026-03-09",
+    "work_hours": 11,
+    "source_rows": [
+      17,
+      18,
+      19,
+      20
+    ],
+    "blockers": [
+      "第20行: 工序标准不存在:灯罩 / 包装"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "宋小冬",
+    "employee_id": "89c87428-4d5d-4f66-9779-b3374edef597",
+    "order_date": "2026-03-01",
+    "work_hours": 9.5,
+    "source_rows": [
+      2,
+      3
+    ],
+    "blockers": [
+      "第2行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:200"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "宋小冬",
+    "employee_id": "89c87428-4d5d-4f66-9779-b3374edef597",
+    "order_date": "2026-03-02",
+    "work_hours": 11,
+    "source_rows": [
+      4,
+      5
+    ],
+    "blockers": [
+      "第4行: 工序标准不存在:113-80 / 刮毛刺",
+      "第5行: 工序标准不存在:113-80 / 刮毛刺"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "宋小冬",
+    "employee_id": "89c87428-4d5d-4f66-9779-b3374edef597",
+    "order_date": "2026-03-05",
+    "work_hours": 11,
+    "source_rows": [
+      8
+    ],
+    "blockers": [
+      "第8行: 合格数量非整数:251.333333333333"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "宋小冬",
+    "employee_id": "89c87428-4d5d-4f66-9779-b3374edef597",
+    "order_date": "2026-03-06",
+    "work_hours": 11,
+    "source_rows": [
+      9,
+      10,
+      11
+    ],
+    "blockers": [
+      "第10行: 存在不良数量, 当前库减分公式不兼容:6；存在减分秒数, 当前库无法直接写入:1656"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "宋小冬",
+    "employee_id": "89c87428-4d5d-4f66-9779-b3374edef597",
+    "order_date": "2026-03-11",
+    "work_hours": 11,
+    "source_rows": [
+      19,
+      20
+    ],
+    "blockers": [
+      "第19行: 工序标准不存在:213-553 / CNC",
+      "第20行: 工序标准不存在:213-553 / CNC"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "宋小春",
+    "employee_id": "fc32ad61-8cf0-4e9d-b9ce-67f48e952ad4",
+    "order_date": "2026-03-06",
+    "work_hours": 11,
+    "source_rows": [
+      7
+    ],
+    "blockers": [
+      "第7行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "宋小春",
+    "employee_id": "fc32ad61-8cf0-4e9d-b9ce-67f48e952ad4",
+    "order_date": "2026-03-08",
+    "work_hours": 11,
+    "source_rows": [
+      9
+    ],
+    "blockers": [
+      "第9行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "宋小春",
+    "employee_id": "fc32ad61-8cf0-4e9d-b9ce-67f48e952ad4",
+    "order_date": "2026-03-09",
+    "work_hours": 11,
+    "source_rows": [
+      10
+    ],
+    "blockers": [
+      "第10行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "宋小春",
+    "employee_id": "fc32ad61-8cf0-4e9d-b9ce-67f48e952ad4",
+    "order_date": "2026-03-10",
+    "work_hours": 11,
+    "source_rows": [
+      11
+    ],
+    "blockers": [
+      "第11行: 缺少型号；缺少工序"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "宋小春",
+    "employee_id": "fc32ad61-8cf0-4e9d-b9ce-67f48e952ad4",
+    "order_date": "2026-03-14",
+    "work_hours": 11,
+    "source_rows": [
+      15,
+      16,
+      17,
+      18
+    ],
+    "blockers": [
+      "第18行: 工序标准不存在:门小件 / 端铣"
+    ],
+    "item_count": 4
+  },
+  {
+    "employee": "宋小春",
+    "employee_id": "fc32ad61-8cf0-4e9d-b9ce-67f48e952ad4",
+    "order_date": "2026-03-15",
+    "work_hours": 9.5,
+    "source_rows": [
+      19,
+      20,
+      21
+    ],
+    "blockers": [
+      "第21行: 工序标准不存在:213-554 / CNC"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "李雪",
+    "employee_id": "9d231831-c47a-40a8-9d11-4d18915be774",
+    "order_date": "2026-03-08",
+    "work_hours": 9.5,
+    "source_rows": [
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "blockers": [
+      "第25行: 存在不良数量, 当前库减分公式不兼容:4；存在减分秒数, 当前库无法直接写入:48"
+    ],
+    "item_count": 6
+  },
+  {
+    "employee": "李雪",
+    "employee_id": "9d231831-c47a-40a8-9d11-4d18915be774",
+    "order_date": "2026-03-10",
+    "work_hours": 11,
+    "source_rows": [
+      31,
+      32,
+      33
+    ],
+    "blockers": [
+      "第32行: 存在不良数量, 当前库减分公式不兼容:2；存在减分秒数, 当前库无法直接写入:20"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-01",
+    "work_hours": 9.5,
+    "source_rows": [
+      2,
+      3
+    ],
+    "blockers": [
+      "第3行: 工序标准不存在:243-273 / 铣上下平面"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-02",
+    "work_hours": 11,
+    "source_rows": [
+      4
+    ],
+    "blockers": [
+      "第4行: 工序标准不存在:243-273 / 铣上下平面"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-03",
+    "work_hours": 11,
+    "source_rows": [
+      5,
+      6
+    ],
+    "blockers": [
+      "第5行: 工序标准不存在:243-273 / 铣上下平面",
+      "第6行: 工序标准不存在:243-273 / 铣上下平面"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-04",
+    "work_hours": 11,
+    "source_rows": [
+      7,
+      8,
+      9
+    ],
+    "blockers": [
+      "第7行: 工序标准不存在:243-273 / 铣上下平面"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-05",
+    "work_hours": 11,
+    "source_rows": [
+      10,
+      11,
+      12
+    ],
+    "blockers": [
+      "第11行: 工序标准不存在:243-273 / 铣上下平面"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-06",
+    "work_hours": 11,
+    "source_rows": [
+      13
+    ],
+    "blockers": [
+      "第13行: 工序标准不存在:243-273 / 铣上下平面"
+    ],
+    "item_count": 1
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-09",
+    "work_hours": 11,
+    "source_rows": [
+      19,
+      20
+    ],
+    "blockers": [
+      "第20行: 工序标准不存在:243-273 / 铣上下平面"
+    ],
+    "item_count": 2
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-10",
+    "work_hours": 11,
+    "source_rows": [
+      21,
+      22,
+      23
+    ],
+    "blockers": [
+      "第21行: 工序标准不存在:243-273 / 铣上下平面"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-15",
+    "work_hours": 9.5,
+    "source_rows": [
+      28,
+      29,
+      30
+    ],
+    "blockers": [
+      "第30行: 工序标准不存在:扣条 / 冲孔"
+    ],
+    "item_count": 3
+  },
+  {
+    "employee": "黄浩东",
+    "employee_id": "6e52b5f3-44f0-49d8-b3f4-aab7f9bb3c62",
+    "order_date": "2026-03-16",
+    "work_hours": 12,
+    "source_rows": [
+      31,
+      32,
+      33,
+      34
+    ],
+    "blockers": [
+      "第33行: 工序标准不存在:扣条 / 冲孔"
+    ],
+    "item_count": 4
+  }
+]

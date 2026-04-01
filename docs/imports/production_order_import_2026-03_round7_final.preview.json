@@ -1,0 +1,564 @@
+{
+  "round": 7,
+  "scope": "final_remaining_orders_by_user_rules",
+  "rules": [
+    "先补员工档案",
+    "缺型号/工序整单按零工导入",
+    "合格数量非整数向上取整",
+    "缺工序标准与带减分问题按历史数据原样导入"
+  ],
+  "employees_to_create": [
+    "尚红梅",
+    "杨艺博"
+  ],
+  "process_standards_to_create": [
+    {
+      "model": "113-80",
+      "operation": "刮毛刺",
+      "standard_seconds": 48,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    },
+    {
+      "model": "113-80",
+      "operation": "检验",
+      "standard_seconds": 40,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    },
+    {
+      "model": "113-80",
+      "operation": "去毛刺",
+      "standard_seconds": 30,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    },
+    {
+      "model": "213-553",
+      "operation": "切割45°",
+      "standard_seconds": 30,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    },
+    {
+      "model": "213-553",
+      "operation": "CNC",
+      "standard_seconds": 60,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    },
+    {
+      "model": "243-273",
+      "operation": "打孔5个",
+      "standard_seconds": 100,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    },
+    {
+      "model": "243-273",
+      "operation": "攻丝5个",
+      "standard_seconds": 95,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    },
+    {
+      "model": "286-398",
+      "operation": "CNC",
+      "standard_seconds": 70,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    },
+    {
+      "model": "灯罩",
+      "operation": "包装",
+      "standard_seconds": 0,
+      "remark": "2026-03 历史工单补录 round7 自动补齐"
+    }
+  ],
+  "totals": {
+    "orders": 35,
+    "items": 35,
+    "extra_hours_only_orders": 19,
+    "order_with_items": 16
+  },
+  "orders": [
+    {
+      "order_key": "曹林|2026-03-16",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        2
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "曹林|2026-03-17",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        3
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "曹林|2026-03-18",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        4
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "曹林|2026-03-19",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        5
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "曾庆伟|2026-03-11",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        21
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "陈文香|2026-03-05",
+      "reasons": [
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        7
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 1
+    },
+    {
+      "order_key": "冯永惠|2026-03-03",
+      "reasons": [
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "work_hours": 12,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 4
+    },
+    {
+      "order_key": "陆康|2026-03-05",
+      "reasons": [
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        7
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 1
+    },
+    {
+      "order_key": "陆康|2026-03-14",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        22,
+        23,
+        24
+      ],
+      "work_hours": 12,
+      "extra_qualified_hours": 12.222222,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "尚红梅|2026-03-10",
+      "reasons": [
+        "missing_employee",
+        "defect_formula_incompatible"
+      ],
+      "source_rows": [
+        3
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 1
+    },
+    {
+      "order_key": "尚红梅|2026-03-11",
+      "reasons": [
+        "missing_employee",
+        "defect_formula_incompatible"
+      ],
+      "source_rows": [
+        4,
+        5
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 2
+    },
+    {
+      "order_key": "尚红梅|2026-03-12",
+      "reasons": [
+        "missing_employee",
+        "defect_formula_incompatible"
+      ],
+      "source_rows": [
+        6
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 3,
+      "import_mode": "order_with_items",
+      "item_count": 1
+    },
+    {
+      "order_key": "尚伦英|2026-03-04",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        7
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "尚伦英|2026-03-05",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        8
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "尚伦英|2026-03-07",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        12
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "尚伦英|2026-03-10",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        17
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "尚能群|2026-03-18",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        40
+      ],
+      "work_hours": 4,
+      "extra_qualified_hours": 4,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "沈龙杰|2026-03-08",
+      "reasons": [
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        15
+      ],
+      "work_hours": 9.5,
+      "extra_qualified_hours": 1.5,
+      "import_mode": "order_with_items",
+      "item_count": 1
+    },
+    {
+      "order_key": "沈龙杰|2026-03-09",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        16
+      ],
+      "work_hours": 9.5,
+      "extra_qualified_hours": 9,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "宋小春|2026-03-06",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        7
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "宋小春|2026-03-08",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        9
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "宋小春|2026-03-09",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        10
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "宋小春|2026-03-10",
+      "reasons": [
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        11
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "宋小冬|2026-03-05",
+      "reasons": [
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        8
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 1
+    },
+    {
+      "order_key": "谭术林|2026-03-03",
+      "reasons": [
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "work_hours": 12,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 4
+    },
+    {
+      "order_key": "吴鹏飞|2026-03-03",
+      "reasons": [
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        4,
+        5
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 2
+    },
+    {
+      "order_key": "吴鹏飞|2026-03-09",
+      "reasons": [
+        "missing_process_standard"
+      ],
+      "source_rows": [
+        17,
+        18,
+        19,
+        20
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 6,
+      "import_mode": "order_with_items",
+      "item_count": 4
+    },
+    {
+      "order_key": "徐新妹|2026-03-14",
+      "reasons": [
+        "non_integer_quantity",
+        "missing_process_standard"
+      ],
+      "source_rows": [
+        24,
+        25,
+        26,
+        27,
+        28
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 5
+    },
+    {
+      "order_key": "杨艺博|2026-03-01",
+      "reasons": [
+        "missing_employee",
+        "missing_process_standard"
+      ],
+      "source_rows": [
+        2
+      ],
+      "work_hours": 9.5,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 1
+    },
+    {
+      "order_key": "杨艺博|2026-03-02",
+      "reasons": [
+        "missing_employee",
+        "missing_process_standard"
+      ],
+      "source_rows": [
+        3,
+        4
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 2
+    },
+    {
+      "order_key": "杨艺博|2026-03-03",
+      "reasons": [
+        "missing_employee",
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        5,
+        6
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 2
+    },
+    {
+      "order_key": "杨艺博|2026-03-04",
+      "reasons": [
+        "missing_employee",
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        7
+      ],
+      "work_hours": 9.5,
+      "extra_qualified_hours": 9.5,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "杨艺博|2026-03-05",
+      "reasons": [
+        "missing_employee",
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        8
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 11,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "杨艺博|2026-03-06",
+      "reasons": [
+        "missing_employee",
+        "missing_model_operation"
+      ],
+      "source_rows": [
+        9
+      ],
+      "work_hours": 9.5,
+      "extra_qualified_hours": 9,
+      "import_mode": "extra_hours_only",
+      "item_count": 0
+    },
+    {
+      "order_key": "张吉成|2026-03-14",
+      "reasons": [
+        "non_integer_quantity"
+      ],
+      "source_rows": [
+        23,
+        24,
+        25
+      ],
+      "work_hours": 11,
+      "extra_qualified_hours": 0,
+      "import_mode": "order_with_items",
+      "item_count": 3
+    }
+  ]
+}

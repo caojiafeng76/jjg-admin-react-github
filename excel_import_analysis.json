@@ -1,0 +1,2991 @@
+{
+  "orderRows": 876,
+  "itemRows": 877,
+  "missingEmployees": [
+    "杨艺博",
+    "尚红梅",
+    "熊龙华"
+  ],
+  "missingProcessComboCount": 25,
+  "missingProcessCombos": [
+    [
+      "113-80|||刮毛刺",
+      [
+        {
+          "employee": "曾庆伟",
+          "row": 3,
+          "date": "2026-03-02",
+          "projectNo": "25090907-01"
+        },
+        {
+          "employee": "曾庆伟",
+          "row": 4,
+          "date": "2026-03-02",
+          "projectNo": "25090907-02"
+        },
+        {
+          "employee": "杨艺博",
+          "row": 2,
+          "date": "2026-03-01",
+          "projectNo": "25090907-02"
+        }
+      ]
+    ],
+    [
+      "258-308|||检验",
+      [
+        {
+          "employee": "曾庆伟",
+          "row": 13,
+          "date": "2026-03-05",
+          "projectNo": "26022505-02"
+        }
+      ]
+    ],
+    [
+      "286-430|||铣缺口",
+      [
+        {
+          "employee": "曾庆伟",
+          "row": 17,
+          "date": "2026-03-07",
+          "projectNo": ""
+        }
+      ]
+    ],
+    [
+      "105-331|||检验",
+      [
+        {
+          "employee": "向玲",
+          "row": 9,
+          "date": "2026-03-03",
+          "projectNo": "26020502-02"
+        }
+      ]
+    ],
+    [
+      "113-80|||打孔5个",
+      [
+        {
+          "employee": "陈文香",
+          "row": 2,
+          "date": "2026-03-01",
+          "projectNo": "25090907-02"
+        },
+        {
+          "employee": "陈文香",
+          "row": 3,
+          "date": "2026-03-02",
+          "projectNo": "25090907-01"
+        },
+        {
+          "employee": "陈文香",
+          "row": 4,
+          "date": "2026-03-02",
+          "projectNo": "25090907-02"
+        }
+      ]
+    ],
+    [
+      "213-553|||CNC",
+      [
+        {
+          "employee": "陈文香",
+          "row": 21,
+          "date": "2026-03-13",
+          "projectNo": "26022504-04"
+        },
+        {
+          "employee": "陈文香",
+          "row": 22,
+          "date": "2026-03-13",
+          "projectNo": "26022504-03"
+        },
+        {
+          "employee": "张吉成",
+          "row": 22,
+          "date": "2026-03-13",
+          "projectNo": "26022504-04"
+        }
+      ]
+    ],
+    [
+      "180-259|||CNC",
+      [
+        {
+          "employee": "陈文香",
+          "row": 30,
+          "date": "2026-03-19",
+          "projectNo": ""
+        },
+        {
+          "employee": "徐新妹",
+          "row": 36,
+          "date": "2026-03-18",
+          "projectNo": ""
+        }
+      ]
+    ],
+    [
+      "180-217|||CNC",
+      [
+        {
+          "employee": "冯永惠",
+          "row": 14,
+          "date": "2026-03-07",
+          "projectNo": "26020701-01"
+        },
+        {
+          "employee": "尚能群",
+          "row": 18,
+          "date": "2026-03-07",
+          "projectNo": "26020701-01"
+        }
+      ]
+    ],
+    [
+      "196-110*1447|||CNC",
+      [
+        {
+          "employee": "冯永惠",
+          "row": 31,
+          "date": "2026-03-20",
+          "projectNo": "26031205-01"
+        },
+        {
+          "employee": "张吉成",
+          "row": 35,
+          "date": "2026-03-20",
+          "projectNo": "26031205-01"
+        }
+      ]
+    ],
+    [
+      "222-148*2400|||CNC",
+      [
+        {
+          "employee": "张吉成",
+          "row": 34,
+          "date": "2026-03-19",
+          "projectNo": "26030903-01"
+        },
+        {
+          "employee": "徐小花",
+          "row": 37,
+          "date": "2026-03-18",
+          "projectNo": "26030903-01"
+        },
+        {
+          "employee": "尚能群",
+          "row": 41,
+          "date": "2026-03-19",
+          "projectNo": "26030903-01"
+        }
+      ]
+    ],
+    [
+      "03-03|||CNC2",
+      [
+        {
+          "employee": "徐小花",
+          "row": 12,
+          "date": "2026-03-06",
+          "projectNo": ""
+        },
+        {
+          "employee": "张海蝶",
+          "row": 45,
+          "date": "2026-03-19",
+          "projectNo": ""
+        }
+      ]
+    ],
+    [
+      "213-261|||冲孔1",
+      [
+        {
+          "employee": "黄玉春",
+          "row": 9,
+          "date": "2026-03-08",
+          "projectNo": "26010604-16"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 10,
+          "date": "2026-03-08",
+          "projectNo": "26010604-14"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 11,
+          "date": "2026-03-09",
+          "projectNo": "26010604-16"
+        }
+      ]
+    ],
+    [
+      "213-261|||冲孔2",
+      [
+        {
+          "employee": "黄玉春",
+          "row": 13,
+          "date": "2026-03-09",
+          "projectNo": "26010604-16"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 14,
+          "date": "2026-03-09",
+          "projectNo": "25121004-13"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 15,
+          "date": "2026-03-10",
+          "projectNo": "26010604-16"
+        }
+      ]
+    ],
+    [
+      "82-440|||自动切",
+      [
+        {
+          "employee": "沈龙杰",
+          "row": 9,
+          "date": "2026-03-05",
+          "projectNo": ""
+        },
+        {
+          "employee": "沈龙杰",
+          "row": 11,
+          "date": "2026-03-06",
+          "projectNo": ""
+        },
+        {
+          "employee": "沈龙杰",
+          "row": 12,
+          "date": "2026-03-07",
+          "projectNo": ""
+        }
+      ]
+    ],
+    [
+      "113-80|||检验",
+      [
+        {
+          "employee": "杨艺博",
+          "row": 3,
+          "date": "2026-03-02",
+          "projectNo": "25090907-01"
+        },
+        {
+          "employee": "杨艺博",
+          "row": 4,
+          "date": "2026-03-02",
+          "projectNo": "25090907-02"
+        },
+        {
+          "employee": "张海蝶",
+          "row": 2,
+          "date": "2026-03-01",
+          "projectNo": "25090907-02"
+        }
+      ]
+    ],
+    [
+      "269-390|||CNC1",
+      [
+        {
+          "employee": "尚能群",
+          "row": 22,
+          "date": "2026-03-09",
+          "projectNo": "26030516-03"
+        },
+        {
+          "employee": "张海蝶",
+          "row": 15,
+          "date": "2026-03-08",
+          "projectNo": "26030516-01"
+        },
+        {
+          "employee": "尚伦英",
+          "row": 13,
+          "date": "2026-03-08",
+          "projectNo": "26030516-01"
+        }
+      ]
+    ],
+    [
+      "213-554|||CNC",
+      [
+        {
+          "employee": "尚能群",
+          "row": 23,
+          "date": "2026-03-09",
+          "projectNo": ""
+        },
+        {
+          "employee": "尚伦英",
+          "row": 24,
+          "date": "2026-03-13",
+          "projectNo": "26022504-05"
+        },
+        {
+          "employee": "尚伦英",
+          "row": 25,
+          "date": "2026-03-14",
+          "projectNo": "26022504-05"
+        }
+      ]
+    ],
+    [
+      "269-389|||CNC",
+      [
+        {
+          "employee": "谭术林",
+          "row": 3,
+          "date": "2026-03-01",
+          "projectNo": "26012102-04"
+        }
+      ]
+    ],
+    [
+      "门小件|||端铣",
+      [
+        {
+          "employee": "谭术林",
+          "row": 17,
+          "date": "2026-03-04",
+          "projectNo": ""
+        },
+        {
+          "employee": "谭术林",
+          "row": 22,
+          "date": "2026-03-05",
+          "projectNo": ""
+        },
+        {
+          "employee": "谭术林",
+          "row": 26,
+          "date": "2026-03-07",
+          "projectNo": ""
+        }
+      ]
+    ],
+    [
+      "扣条|||冲孔",
+      [
+        {
+          "employee": "谭术林",
+          "row": 24,
+          "date": "2026-03-06",
+          "projectNo": ""
+        },
+        {
+          "employee": "谭术林",
+          "row": 38,
+          "date": "2026-03-12",
+          "projectNo": "别墅梯"
+        },
+        {
+          "employee": "谭术林",
+          "row": 39,
+          "date": "2026-03-12",
+          "projectNo": "别墅梯"
+        }
+      ]
+    ],
+    [
+      "269-390|||CNC2",
+      [
+        {
+          "employee": "张海蝶",
+          "row": 16,
+          "date": "2026-03-08",
+          "projectNo": "26030516-01"
+        },
+        {
+          "employee": "张海蝶",
+          "row": 17,
+          "date": "2026-03-08",
+          "projectNo": "26030516-02"
+        },
+        {
+          "employee": "尚伦英",
+          "row": 15,
+          "date": "2026-03-09",
+          "projectNo": "26030516-01"
+        }
+      ]
+    ],
+    [
+      "03-03|||CNC1",
+      [
+        {
+          "employee": "张海蝶",
+          "row": 44,
+          "date": "2026-03-19",
+          "projectNo": ""
+        },
+        {
+          "employee": "尚伦英",
+          "row": 9,
+          "date": "2026-03-06",
+          "projectNo": ""
+        }
+      ]
+    ],
+    [
+      "03-02|||CNC1",
+      [
+        {
+          "employee": "张海蝶",
+          "row": 46,
+          "date": "2026-03-19",
+          "projectNo": ""
+        },
+        {
+          "employee": "尚伦英",
+          "row": 10,
+          "date": "2026-03-06",
+          "projectNo": ""
+        }
+      ]
+    ],
+    [
+      "灯罩|||包装",
+      [
+        {
+          "employee": "吴鹏飞",
+          "row": 20,
+          "date": "2026-03-09",
+          "projectNo": ""
+        }
+      ]
+    ],
+    [
+      "243-273|||铣上下平面",
+      [
+        {
+          "employee": "黄浩东",
+          "row": 3,
+          "date": "2026-03-01",
+          "projectNo": "西尼"
+        },
+        {
+          "employee": "黄浩东",
+          "row": 4,
+          "date": "2026-03-02",
+          "projectNo": "西尼"
+        },
+        {
+          "employee": "黄浩东",
+          "row": 5,
+          "date": "2026-03-03",
+          "projectNo": "西尼"
+        }
+      ]
+    ]
+  ],
+  "missingSalesOrderCount": 58,
+  "missingSalesOrders": [
+    [
+      "26012706-05",
+      [
+        {
+          "employee": "向玲",
+          "row": 21,
+          "date": "2026-03-09",
+          "model": "213-138",
+          "length": 1825,
+          "operation": "冲孔"
+        },
+        {
+          "employee": "李雪",
+          "row": 29,
+          "date": "2026-03-08",
+          "model": "213-138",
+          "length": 1825,
+          "operation": "冲孔"
+        }
+      ]
+    ],
+    [
+      "26022605-07",
+      [
+        {
+          "employee": "向玲",
+          "row": 23,
+          "date": "2026-03-09",
+          "model": "180-265",
+          "length": 950,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "李雪",
+          "row": 27,
+          "date": "2026-03-08",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        }
+      ]
+    ],
+    [
+      "26022605-01",
+      [
+        {
+          "employee": "向玲",
+          "row": 24,
+          "date": "2026-03-09",
+          "model": "180-260",
+          "length": 1200,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "向玲",
+          "row": 25,
+          "date": "2026-03-10",
+          "model": "180-260",
+          "length": 1200,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "李雪",
+          "row": 14,
+          "date": "2026-03-06",
+          "model": "180-260",
+          "length": 1200,
+          "operation": "冲缺口"
+        }
+      ]
+    ],
+    [
+      "26022712-01",
+      [
+        {
+          "employee": "向玲",
+          "row": 28,
+          "date": "2026-03-10",
+          "model": "01-418",
+          "length": 4166,
+          "operation": "冲孔2"
+        }
+      ]
+    ],
+    [
+      "26022504-04",
+      [
+        {
+          "employee": "向玲",
+          "row": 29,
+          "date": "2026-03-11",
+          "model": "213-553",
+          "length": 1960,
+          "operation": "冲六角孔"
+        },
+        {
+          "employee": "向玲",
+          "row": 31,
+          "date": "2026-03-11",
+          "model": "213-553",
+          "length": 1960,
+          "operation": "冲牙齿"
+        },
+        {
+          "employee": "向玲",
+          "row": 33,
+          "date": "2026-03-12",
+          "model": "213-553",
+          "length": 1960,
+          "operation": "冲葫芦孔"
+        }
+      ]
+    ],
+    [
+      "26022504-03",
+      [
+        {
+          "employee": "向玲",
+          "row": 30,
+          "date": "2026-03-11",
+          "model": "213-553",
+          "length": 1960,
+          "operation": "冲牙齿"
+        },
+        {
+          "employee": "向玲",
+          "row": 34,
+          "date": "2026-03-12",
+          "model": "213-553",
+          "length": 1960,
+          "operation": "冲葫芦孔"
+        },
+        {
+          "employee": "向玲",
+          "row": 35,
+          "date": "2026-03-12",
+          "model": "213-553",
+          "length": 1960,
+          "operation": "冲六角孔"
+        }
+      ]
+    ],
+    [
+      "26022504-02",
+      [
+        {
+          "employee": "向玲",
+          "row": 37,
+          "date": "2026-03-12",
+          "model": "213-553",
+          "length": 780,
+          "operation": "冲葫芦孔"
+        },
+        {
+          "employee": "向玲",
+          "row": 44,
+          "date": "2026-03-14",
+          "model": "213-553",
+          "length": 780,
+          "operation": "冲葫芦孔"
+        },
+        {
+          "employee": "冯永惠",
+          "row": 27,
+          "date": "2026-03-18",
+          "model": "213-553",
+          "length": 780,
+          "operation": "切割45°"
+        }
+      ]
+    ],
+    [
+      "26022504-01",
+      [
+        {
+          "employee": "向玲",
+          "row": 42,
+          "date": "2026-03-13",
+          "model": "213-553",
+          "length": 780,
+          "operation": "冲葫芦孔"
+        },
+        {
+          "employee": "向玲",
+          "row": 43,
+          "date": "2026-03-14",
+          "model": "213-553",
+          "length": 780,
+          "operation": "冲葫芦孔"
+        },
+        {
+          "employee": "徐小花",
+          "row": 33,
+          "date": "2026-03-17",
+          "model": "213-553",
+          "length": 780,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "26022703-02",
+      [
+        {
+          "employee": "向玲",
+          "row": 48,
+          "date": "2026-03-14",
+          "model": "262-1791",
+          "length": 1990,
+          "operation": "冲孔2"
+        },
+        {
+          "employee": "尚红梅",
+          "row": 5,
+          "date": "2026-03-11",
+          "model": "262-1791",
+          "length": 1990,
+          "operation": "冲孔2"
+        },
+        {
+          "employee": "尚红梅",
+          "row": 6,
+          "date": "2026-03-12",
+          "model": "262-1791",
+          "length": 1990,
+          "operation": "冲孔2"
+        }
+      ]
+    ],
+    [
+      "26030302-01",
+      [
+        {
+          "employee": "向玲",
+          "row": 49,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "徐小花",
+          "row": 26,
+          "date": "2026-03-14",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "尚能群",
+          "row": 32,
+          "date": "2026-03-14",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        }
+      ]
+    ],
+    [
+      "26030306-01",
+      [
+        {
+          "employee": "向玲",
+          "row": 50,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "尚能群",
+          "row": 33,
+          "date": "2026-03-14",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "宋小冬",
+          "row": 26,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        }
+      ]
+    ],
+    [
+      "26030303-01",
+      [
+        {
+          "employee": "向玲",
+          "row": 51,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "徐小花",
+          "row": 27,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "宋小冬",
+          "row": 27,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        }
+      ]
+    ],
+    [
+      "26030309-01",
+      [
+        {
+          "employee": "向玲",
+          "row": 52,
+          "date": "2026-03-16",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "徐小花",
+          "row": 29,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "徐小花",
+          "row": 30,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        }
+      ]
+    ],
+    [
+      "26030303-02",
+      [
+        {
+          "employee": "向玲",
+          "row": 57,
+          "date": "2026-03-16",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "徐新妹",
+          "row": 32,
+          "date": "2026-03-16",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "26030306-02",
+      [
+        {
+          "employee": "向玲",
+          "row": 58,
+          "date": "2026-03-17",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "陈文香",
+          "row": 24,
+          "date": "2026-03-14",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "徐新妹",
+          "row": 33,
+          "date": "2026-03-16",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "26030301-02",
+      [
+        {
+          "employee": "向玲",
+          "row": 59,
+          "date": "2026-03-17",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "26030308-02",
+      [
+        {
+          "employee": "向玲",
+          "row": 60,
+          "date": "2026-03-17",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "徐新妹",
+          "row": 31,
+          "date": "2026-03-16",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "26030705-01",
+      [
+        {
+          "employee": "陆康",
+          "row": 12,
+          "date": "2026-03-08",
+          "model": "196-114",
+          "length": 2569.2,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "25062804-02",
+      [
+        {
+          "employee": "陈文香",
+          "row": 5,
+          "date": "2026-03-03",
+          "model": "113-54",
+          "length": 138.8,
+          "operation": "CNC"
+        },
+        {
+          "employee": "陈文香",
+          "row": 28,
+          "date": "2026-03-17",
+          "model": "113-54",
+          "length": 138.8,
+          "operation": "CNC"
+        },
+        {
+          "employee": "陈文香",
+          "row": 29,
+          "date": "2026-03-18",
+          "model": "113-54",
+          "length": 138.8,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "26030302-02",
+      [
+        {
+          "employee": "陈文香",
+          "row": 23,
+          "date": "2026-03-14",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "26031503-01",
+      [
+        {
+          "employee": "陈文香",
+          "row": 26,
+          "date": "2026-03-16",
+          "model": "105-244",
+          "length": 2200,
+          "operation": "冲腰孔"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 39,
+          "date": "2026-03-16",
+          "model": "105-244",
+          "length": 2200,
+          "operation": "折弯"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 43,
+          "date": "2026-03-17",
+          "model": "105-244",
+          "length": 2200,
+          "operation": "折弯"
+        }
+      ]
+    ],
+    [
+      "26031503-02",
+      [
+        {
+          "employee": "陈文香",
+          "row": 27,
+          "date": "2026-03-16",
+          "model": "105-244",
+          "length": 2200,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 40,
+          "date": "2026-03-16",
+          "model": "105-244",
+          "length": 2200,
+          "operation": "折弯"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 44,
+          "date": "2026-03-17",
+          "model": "105-244",
+          "length": 2200,
+          "operation": "折弯"
+        }
+      ]
+    ],
+    [
+      "26022708-08",
+      [
+        {
+          "employee": "冯永惠",
+          "row": 8,
+          "date": "2026-03-03",
+          "model": "180-259",
+          "length": 1150,
+          "operation": "端铣"
+        },
+        {
+          "employee": "谭术林",
+          "row": 9,
+          "date": "2026-03-03",
+          "model": "180-259",
+          "length": 1150,
+          "operation": "端铣"
+        }
+      ]
+    ],
+    [
+      "26020701-01",
+      [
+        {
+          "employee": "冯永惠",
+          "row": 14,
+          "date": "2026-03-07",
+          "model": "180-217",
+          "length": 1633.7,
+          "operation": "CNC"
+        },
+        {
+          "employee": "尚能群",
+          "row": 18,
+          "date": "2026-03-07",
+          "model": "180-217",
+          "length": 1633.7,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "26030401-01",
+      [
+        {
+          "employee": "徐小花",
+          "row": 7,
+          "date": "2026-03-05",
+          "model": "269-373",
+          "length": 162,
+          "operation": "CNC"
+        },
+        {
+          "employee": "徐小花",
+          "row": 8,
+          "date": "2026-03-05",
+          "model": "269-373",
+          "length": 162,
+          "operation": "打孔2"
+        },
+        {
+          "employee": "徐小花",
+          "row": 9,
+          "date": "2026-03-05",
+          "model": "269-373",
+          "length": 162,
+          "operation": "沉孔"
+        }
+      ]
+    ],
+    [
+      "26030310-05",
+      [
+        {
+          "employee": "徐小花",
+          "row": 23,
+          "date": "2026-03-14",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        }
+      ]
+    ],
+    [
+      "26030309-05",
+      [
+        {
+          "employee": "徐小花",
+          "row": 24,
+          "date": "2026-03-14",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "杨永会",
+          "row": 10,
+          "date": "2026-03-08",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "许彩旋",
+          "row": 23,
+          "date": "2026-03-14",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "26030301-01",
+      [
+        {
+          "employee": "徐小花",
+          "row": 25,
+          "date": "2026-03-14",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "杨永会",
+          "row": 12,
+          "date": "2026-03-08",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "尚能群",
+          "row": 31,
+          "date": "2026-03-14",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "26030308-01",
+      [
+        {
+          "employee": "徐小花",
+          "row": 28,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲安装孔"
+        },
+        {
+          "employee": "宋小冬",
+          "row": 28,
+          "date": "2026-03-15",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        }
+      ]
+    ],
+    [
+      "25121004-13",
+      [
+        {
+          "employee": "黄玉春",
+          "row": 12,
+          "date": "2026-03-09",
+          "model": "213-261",
+          "length": 658.6,
+          "operation": "冲孔1"
+        },
+        {
+          "employee": "黄玉春",
+          "row": 14,
+          "date": "2026-03-09",
+          "model": "213-261",
+          "length": 658.6,
+          "operation": "冲孔2"
+        }
+      ]
+    ],
+    [
+      "25121005-09",
+      [
+        {
+          "employee": "黄玉春",
+          "row": 16,
+          "date": "2026-03-11",
+          "model": "213-261",
+          "length": 658.6,
+          "operation": "冲孔2"
+        }
+      ]
+    ],
+    [
+      "25121004-05",
+      [
+        {
+          "employee": "黄玉春",
+          "row": 17,
+          "date": "2026-03-11",
+          "model": "213-261",
+          "length": 658.6,
+          "operation": "冲孔2"
+        }
+      ]
+    ],
+    [
+      "26030901-01",
+      [
+        {
+          "employee": "黄玉春",
+          "row": 41,
+          "date": "2026-03-17",
+          "model": "105-257",
+          "length": 2400,
+          "operation": "折弯"
+        },
+        {
+          "employee": "杨永会",
+          "row": 24,
+          "date": "2026-03-15",
+          "model": "105-257",
+          "length": 2400,
+          "operation": "冲腰孔"
+        },
+        {
+          "employee": "杨永会",
+          "row": 25,
+          "date": "2026-03-15",
+          "model": "105-257",
+          "length": 2400,
+          "operation": "冲头孔"
+        }
+      ]
+    ],
+    [
+      "26030901-02",
+      [
+        {
+          "employee": "黄玉春",
+          "row": 42,
+          "date": "2026-03-17",
+          "model": "105-257",
+          "length": 2400,
+          "operation": "折弯"
+        },
+        {
+          "employee": "杨永会",
+          "row": 26,
+          "date": "2026-03-15",
+          "model": "105-257",
+          "length": 2400,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "杨永会",
+          "row": 27,
+          "date": "2026-03-15",
+          "model": "105-257",
+          "length": 2400,
+          "operation": "冲头孔"
+        }
+      ]
+    ],
+    [
+      "26030309-06",
+      [
+        {
+          "employee": "杨永会",
+          "row": 21,
+          "date": "2026-03-14",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "26030309-02",
+      [
+        {
+          "employee": "杨永会",
+          "row": 22,
+          "date": "2026-03-14",
+          "model": "180-261",
+          "length": 950,
+          "operation": "冲安装孔"
+        }
+      ]
+    ],
+    [
+      "25090312-01",
+      [
+        {
+          "employee": "徐皋",
+          "row": 5,
+          "date": "2026-03-19",
+          "model": "113-58",
+          "length": 2440,
+          "operation": "冲孔"
+        },
+        {
+          "employee": "徐皋",
+          "row": 6,
+          "date": "2026-03-20",
+          "model": "113-58",
+          "length": 2440,
+          "operation": "冲孔"
+        },
+        {
+          "employee": "宋小冬",
+          "row": 31,
+          "date": "2026-03-18",
+          "model": "113-58",
+          "length": 2440,
+          "operation": "刮毛刺"
+        }
+      ]
+    ],
+    [
+      "26022504-05",
+      [
+        {
+          "employee": "沈龙杰",
+          "row": 7,
+          "date": "2026-03-04",
+          "model": "213-554",
+          "length": 51.1,
+          "operation": "自动切割"
+        },
+        {
+          "employee": "沈龙杰",
+          "row": 8,
+          "date": "2026-03-05",
+          "model": "213-554",
+          "length": 51.1,
+          "operation": "自动切割"
+        },
+        {
+          "employee": "沈龙杰",
+          "row": 10,
+          "date": "2026-03-06",
+          "model": "213-554",
+          "length": 51.1,
+          "operation": "自动切割"
+        }
+      ]
+    ],
+    [
+      "26030411-09",
+      [
+        {
+          "employee": "沈龙杰",
+          "row": 31,
+          "date": "2026-03-15",
+          "model": "113-06",
+          "length": 150,
+          "operation": "自动切割"
+        },
+        {
+          "employee": "沈龙杰",
+          "row": 33,
+          "date": "2026-03-17",
+          "model": "113-06",
+          "length": 150,
+          "operation": "自动切割"
+        },
+        {
+          "employee": "沈龙杰",
+          "row": 34,
+          "date": "2026-03-18",
+          "model": "113-06",
+          "length": 150,
+          "operation": "自动切割"
+        }
+      ]
+    ],
+    [
+      "26030411-08",
+      [
+        {
+          "employee": "沈龙杰",
+          "row": 35,
+          "date": "2026-03-18",
+          "model": "113-07",
+          "length": 150,
+          "operation": "自动切割"
+        },
+        {
+          "employee": "沈龙杰",
+          "row": 36,
+          "date": "2026-03-19",
+          "model": "113-07",
+          "length": 150,
+          "operation": "自动切割"
+        }
+      ]
+    ],
+    [
+      "26030302-05",
+      [
+        {
+          "employee": "尚能群",
+          "row": 5,
+          "date": "2026-03-04",
+          "model": "180-259",
+          "length": 950,
+          "operation": "打孔1"
+        },
+        {
+          "employee": "尚能群",
+          "row": 6,
+          "date": "2026-03-04",
+          "model": "180-259",
+          "length": 950,
+          "operation": "打孔2"
+        }
+      ]
+    ],
+    [
+      "26030309-07",
+      [
+        {
+          "employee": "尚能群",
+          "row": 7,
+          "date": "2026-03-04",
+          "model": "180-259",
+          "length": 950,
+          "operation": "打孔1"
+        },
+        {
+          "employee": "尚能群",
+          "row": 8,
+          "date": "2026-03-04",
+          "model": "180-259",
+          "length": 950,
+          "operation": "打孔2"
+        }
+      ]
+    ],
+    [
+      "26030301-05",
+      [
+        {
+          "employee": "尚能群",
+          "row": 9,
+          "date": "2026-03-04",
+          "model": "180-259",
+          "length": 950,
+          "operation": "打孔1"
+        },
+        {
+          "employee": "许彩旋",
+          "row": 20,
+          "date": "2026-03-12",
+          "model": "180-259",
+          "length": 950,
+          "operation": "冲孔1"
+        },
+        {
+          "employee": "宋小春",
+          "row": 12,
+          "date": "2026-03-11",
+          "model": "180-259",
+          "length": 950,
+          "operation": "端铣"
+        }
+      ]
+    ],
+    [
+      "26030516-03",
+      [
+        {
+          "employee": "尚能群",
+          "row": 22,
+          "date": "2026-03-09",
+          "model": "269-390",
+          "length": null,
+          "operation": "CNC1"
+        }
+      ]
+    ],
+    [
+      "25090202-15",
+      [
+        {
+          "employee": "谭术林",
+          "row": 4,
+          "date": "2026-03-01",
+          "model": "286-473",
+          "length": 190,
+          "operation": "CNC"
+        },
+        {
+          "employee": "谭术林",
+          "row": 54,
+          "date": "2026-03-16",
+          "model": "286-473",
+          "length": 190,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "26030516-02",
+      [
+        {
+          "employee": "谭术林",
+          "row": 27,
+          "date": "2026-03-07",
+          "model": "269-390",
+          "length": 380.85,
+          "operation": "CNC"
+        },
+        {
+          "employee": "张海蝶",
+          "row": 17,
+          "date": "2026-03-08",
+          "model": "269-390",
+          "length": 380.85,
+          "operation": "CNC2"
+        },
+        {
+          "employee": "尚伦英",
+          "row": 14,
+          "date": "2026-03-08",
+          "model": "269-390",
+          "length": 380.85,
+          "operation": "CNC1"
+        }
+      ]
+    ],
+    [
+      "26030309-08",
+      [
+        {
+          "employee": "谭术林",
+          "row": 42,
+          "date": "2026-03-14",
+          "model": "180-259",
+          "length": 950,
+          "operation": "端铣"
+        },
+        {
+          "employee": "宋小春",
+          "row": 15,
+          "date": "2026-03-14",
+          "model": "180-259",
+          "length": 950,
+          "operation": "端铣"
+        }
+      ]
+    ],
+    [
+      "26030309-09",
+      [
+        {
+          "employee": "谭术林",
+          "row": 43,
+          "date": "2026-03-14",
+          "model": "180-259",
+          "length": 1150,
+          "operation": "端铣"
+        },
+        {
+          "employee": "宋小春",
+          "row": 16,
+          "date": "2026-03-14",
+          "model": "180-259",
+          "length": 1150,
+          "operation": "端铣"
+        }
+      ]
+    ],
+    [
+      "26031607-03",
+      [
+        {
+          "employee": "谭术林",
+          "row": 53,
+          "date": "2026-03-16",
+          "model": "269-373",
+          "length": 133,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "26030516-01",
+      [
+        {
+          "employee": "张海蝶",
+          "row": 15,
+          "date": "2026-03-08",
+          "model": "269-390",
+          "length": 380.85,
+          "operation": "CNC1"
+        },
+        {
+          "employee": "张海蝶",
+          "row": 16,
+          "date": "2026-03-08",
+          "model": "269-390",
+          "length": 380.85,
+          "operation": "CNC2"
+        },
+        {
+          "employee": "尚伦英",
+          "row": 13,
+          "date": "2026-03-08",
+          "model": "269-390",
+          "length": 380.85,
+          "operation": "CNC1"
+        }
+      ]
+    ],
+    [
+      "26031101-01",
+      [
+        {
+          "employee": "张海蝶",
+          "row": 24,
+          "date": "2026-03-11",
+          "model": "105-257",
+          "length": 2470,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "26030701-02",
+      [
+        {
+          "employee": "尚伦英",
+          "row": 18,
+          "date": "2026-03-11",
+          "model": "258-481",
+          "length": 700,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "26030701-01",
+      [
+        {
+          "employee": "尚伦英",
+          "row": 19,
+          "date": "2026-03-11",
+          "model": "258-481",
+          "length": 770,
+          "operation": "CNC"
+        },
+        {
+          "employee": "尚伦英",
+          "row": 21,
+          "date": "2026-03-12",
+          "model": "258-481",
+          "length": 770,
+          "operation": "CNC"
+        }
+      ]
+    ],
+    [
+      "26031314-09",
+      [
+        {
+          "employee": "宋小冬",
+          "row": 36,
+          "date": "2026-03-20",
+          "model": "213-265",
+          "length": 1501.4,
+          "operation": "冲孔"
+        }
+      ]
+    ],
+    [
+      "255090312-01",
+      [
+        {
+          "employee": "宋小冬",
+          "row": 37,
+          "date": "2026-03-20",
+          "model": "113-58",
+          "length": 2440,
+          "operation": "冲孔"
+        }
+      ]
+    ],
+    [
+      "26020404-23",
+      [
+        {
+          "employee": "李雪",
+          "row": 11,
+          "date": "2026-03-05",
+          "model": "213-265",
+          "length": 1854,
+          "operation": "冲孔"
+        }
+      ]
+    ],
+    [
+      "26012306-05",
+      [
+        {
+          "employee": "李雪",
+          "row": 12,
+          "date": "2026-03-05",
+          "model": "213-138",
+          "length": 1825,
+          "operation": "冲孔"
+        }
+      ]
+    ],
+    [
+      "26022605-03",
+      [
+        {
+          "employee": "李雪",
+          "row": 20,
+          "date": "2026-03-07",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        },
+        {
+          "employee": "李雪",
+          "row": 25,
+          "date": "2026-03-08",
+          "model": "180-260",
+          "length": 950,
+          "operation": "冲缺口"
+        }
+      ]
+    ]
+  ],
+  "mismatchedSalesOrderInfoCount": 100,
+  "mismatchedSalesOrderInfo": [
+    {
+      "projectNo": "26031603-02",
+      "employee": "向玲",
+      "row": 63,
+      "date": "2026-03-18",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-01",
+      "employee": "向玲",
+      "row": 64,
+      "date": "2026-03-18",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-02",
+      "employee": "向玲",
+      "row": 66,
+      "date": "2026-03-19",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-01",
+      "employee": "向玲",
+      "row": 67,
+      "date": "2026-03-19",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "陆康",
+      "row": 13,
+      "date": "2026-03-08",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "陆康",
+      "row": 14,
+      "date": "2026-03-09",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "陆康",
+      "row": 15,
+      "date": "2026-03-10",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "陆康",
+      "row": 22,
+      "date": "2026-03-14",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "陆康",
+      "row": 23,
+      "date": "2026-03-14",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26031205-01",
+      "employee": "陆康",
+      "row": 31,
+      "date": "2026-03-20",
+      "mismatch": {
+        "length": {
+          "excel": 1447,
+          "db": 1448
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "冯永惠",
+      "row": 4,
+      "date": "2026-03-02",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "冯永惠",
+      "row": 5,
+      "date": "2026-03-02",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "冯永惠",
+      "row": 10,
+      "date": "2026-03-04",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "冯永惠",
+      "row": 11,
+      "date": "2026-03-04",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "冯永惠",
+      "row": 17,
+      "date": "2026-03-09",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "冯永惠",
+      "row": 18,
+      "date": "2026-03-10",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "冯永惠",
+      "row": 23,
+      "date": "2026-03-15",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "冯永惠",
+      "row": 24,
+      "date": "2026-03-16",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "冯永惠",
+      "row": 29,
+      "date": "2026-03-19",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "冯永惠",
+      "row": 30,
+      "date": "2026-03-19",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26031205-01",
+      "employee": "冯永惠",
+      "row": 31,
+      "date": "2026-03-20",
+      "mismatch": {
+        "model": {
+          "excel": "196-110*1447",
+          "db": "196-110"
+        },
+        "length": {
+          "excel": 1447,
+          "db": 1448
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "张吉成",
+      "row": 14,
+      "date": "2026-03-09",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "张吉成",
+      "row": 15,
+      "date": "2026-03-10",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "张吉成",
+      "row": 16,
+      "date": "2026-03-11",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "张吉成",
+      "row": 26,
+      "date": "2026-03-15",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "张吉成",
+      "row": 27,
+      "date": "2026-03-16",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "张吉成",
+      "row": 28,
+      "date": "2026-03-17",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张吉成",
+      "row": 32,
+      "date": "2026-03-18",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张吉成",
+      "row": 33,
+      "date": "2026-03-18",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26030903-01",
+      "employee": "张吉成",
+      "row": 34,
+      "date": "2026-03-19",
+      "mismatch": {
+        "model": {
+          "excel": "222-148*2400",
+          "db": "222-148"
+        }
+      }
+    },
+    {
+      "projectNo": "26031205-01",
+      "employee": "张吉成",
+      "row": 35,
+      "date": "2026-03-20",
+      "mismatch": {
+        "model": {
+          "excel": "196-110*1447",
+          "db": "196-110"
+        },
+        "length": {
+          "excel": 1447,
+          "db": 1448
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐小花",
+      "row": 31,
+      "date": "2026-03-16",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐小花",
+      "row": 32,
+      "date": "2026-03-16",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26030903-01",
+      "employee": "徐小花",
+      "row": 37,
+      "date": "2026-03-18",
+      "mismatch": {
+        "model": {
+          "excel": "222-148*2400",
+          "db": "222-148"
+        }
+      }
+    },
+    {
+      "projectNo": "26010604-16",
+      "employee": "黄玉春",
+      "row": 9,
+      "date": "2026-03-08",
+      "mismatch": {
+        "length": {
+          "excel": 658.6,
+          "db": 659.6
+        }
+      }
+    },
+    {
+      "projectNo": "26010604-14",
+      "employee": "黄玉春",
+      "row": 10,
+      "date": "2026-03-08",
+      "mismatch": {
+        "model": {
+          "excel": "213-261",
+          "db": "213-251"
+        },
+        "length": {
+          "excel": 658.6,
+          "db": 1784.3
+        }
+      }
+    },
+    {
+      "projectNo": "26010604-16",
+      "employee": "黄玉春",
+      "row": 11,
+      "date": "2026-03-09",
+      "mismatch": {
+        "length": {
+          "excel": 658.6,
+          "db": 659.6
+        }
+      }
+    },
+    {
+      "projectNo": "26010604-16",
+      "employee": "黄玉春",
+      "row": 13,
+      "date": "2026-03-09",
+      "mismatch": {
+        "length": {
+          "excel": 658.6,
+          "db": 659.6
+        }
+      }
+    },
+    {
+      "projectNo": "26010604-16",
+      "employee": "黄玉春",
+      "row": 15,
+      "date": "2026-03-10",
+      "mismatch": {
+        "length": {
+          "excel": 658.6,
+          "db": 659.6
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-01",
+      "employee": "黄玉春",
+      "row": 45,
+      "date": "2026-03-17",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-02",
+      "employee": "黄玉春",
+      "row": 46,
+      "date": "2026-03-18",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-02",
+      "employee": "黄玉春",
+      "row": 47,
+      "date": "2026-03-18",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-01",
+      "employee": "黄玉春",
+      "row": 48,
+      "date": "2026-03-19",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-02",
+      "employee": "黄玉春",
+      "row": 49,
+      "date": "2026-03-19",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-01",
+      "employee": "黄玉春",
+      "row": 50,
+      "date": "2026-03-20",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-01",
+      "employee": "瞿晓香",
+      "row": 2,
+      "date": "2026-03-17",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-02",
+      "employee": "瞿晓香",
+      "row": 3,
+      "date": "2026-03-17",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-01",
+      "employee": "瞿晓香",
+      "row": 5,
+      "date": "2026-03-18",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-02",
+      "employee": "瞿晓香",
+      "row": 6,
+      "date": "2026-03-18",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-01",
+      "employee": "瞿晓香",
+      "row": 7,
+      "date": "2026-03-19",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26031603-02",
+      "employee": "瞿晓香",
+      "row": 8,
+      "date": "2026-03-19",
+      "mismatch": {
+        "length": {
+          "excel": 2200,
+          "db": 2163
+        }
+      }
+    },
+    {
+      "projectNo": "26030903-02",
+      "employee": "瞿晓香",
+      "row": 11,
+      "date": "2026-03-20",
+      "mismatch": {
+        "model": {
+          "excel": "222-149*2380",
+          "db": "222-149"
+        }
+      }
+    },
+    {
+      "projectNo": "26030101-02",
+      "employee": "徐皋",
+      "row": 2,
+      "date": "2026-03-17",
+      "mismatch": {
+        "length": {
+          "excel": 2296.8,
+          "db": 2297.8
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "沈龙杰",
+      "row": 4,
+      "date": "2026-03-02",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "沈龙杰",
+      "row": 5,
+      "date": "2026-03-03",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 2,
+      "date": "2026-03-01",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 3,
+      "date": "2026-03-01",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 6,
+      "date": "2026-03-03",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 7,
+      "date": "2026-03-03",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 9,
+      "date": "2026-03-05",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 10,
+      "date": "2026-03-05",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 11,
+      "date": "2026-03-06",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 12,
+      "date": "2026-03-06",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 13,
+      "date": "2026-03-07",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 14,
+      "date": "2026-03-07",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 18,
+      "date": "2026-03-11",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 19,
+      "date": "2026-03-11",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 22,
+      "date": "2026-03-13",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 23,
+      "date": "2026-03-13",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 29,
+      "date": "2026-03-15",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 30,
+      "date": "2026-03-15",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 34,
+      "date": "2026-03-17",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 35,
+      "date": "2026-03-17",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 40,
+      "date": "2026-03-20",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "徐新妹",
+      "row": 41,
+      "date": "2026-03-20",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "尚能群",
+      "row": 20,
+      "date": "2026-03-08",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "尚能群",
+      "row": 21,
+      "date": "2026-03-08",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "尚能群",
+      "row": 24,
+      "date": "2026-03-10",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "尚能群",
+      "row": 25,
+      "date": "2026-03-10",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26030903-01",
+      "employee": "尚能群",
+      "row": 41,
+      "date": "2026-03-19",
+      "mismatch": {
+        "model": {
+          "excel": "222-148*2400",
+          "db": "222-148"
+        }
+      }
+    },
+    {
+      "projectNo": "26030903-01",
+      "employee": "尚能群",
+      "row": 42,
+      "date": "2026-03-20",
+      "mismatch": {
+        "model": {
+          "excel": "222-148*2400",
+          "db": "222-148"
+        }
+      }
+    },
+    {
+      "projectNo": "26012102-04",
+      "employee": "谭术林",
+      "row": 3,
+      "date": "2026-03-01",
+      "mismatch": {
+        "length": {
+          "excel": 373,
+          "db": 0
+        }
+      }
+    },
+    {
+      "projectNo": "26012605-07",
+      "employee": "谭术林",
+      "row": 50,
+      "date": "2026-03-15",
+      "mismatch": {
+        "length": {
+          "excel": 244,
+          "db": 0
+        }
+      }
+    },
+    {
+      "projectNo": "26012605-07",
+      "employee": "谭术林",
+      "row": 52,
+      "date": "2026-03-16",
+      "mismatch": {
+        "length": {
+          "excel": 243.5,
+          "db": 0
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 3,
+      "date": "2026-03-02",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 4,
+      "date": "2026-03-02",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 5,
+      "date": "2026-03-03",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 6,
+      "date": "2026-03-03",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 7,
+      "date": "2026-03-04",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 8,
+      "date": "2026-03-04",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 9,
+      "date": "2026-03-05",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 10,
+      "date": "2026-03-05",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 11,
+      "date": "2026-03-06",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 12,
+      "date": "2026-03-06",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 13,
+      "date": "2026-03-07",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 14,
+      "date": "2026-03-07",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 19,
+      "date": "2026-03-09",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 20,
+      "date": "2026-03-09",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 27,
+      "date": "2026-03-12",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    },
+    {
+      "projectNo": "26020502-01",
+      "employee": "张海蝶",
+      "row": 28,
+      "date": "2026-03-12",
+      "mismatch": {
+        "length": {
+          "excel": 260,
+          "db": 261
+        }
+      }
+    }
+  ]
+}

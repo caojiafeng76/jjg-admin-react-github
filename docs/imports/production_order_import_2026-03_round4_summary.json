@@ -1,0 +1,100 @@
+{
+  "round": 4,
+  "scope": "resolve_213_554_cnc_and_analyze_defect_orders",
+  "notes": [
+    "213-554 / CNC 在数据库中原先不存在精确工序标准记录，因此本轮先补录工序标准，再导入因此解除阻塞的纯缺工序标准工单。",
+    "用户要求 213-554 / CNC 直接按现有数据库同类标准处理，本轮采用 60 秒，并写入 process_standards。",
+    "本轮同时完成剩余减分阻塞批次的结构化分析，结论写入 defect_analysis。"
+  ],
+  "process_standard_resolution": {
+    "model": "213-554",
+    "operation": "CNC",
+    "standard_seconds": 60,
+    "remark": "2026-03 历史工单补录人工确认，按现库同类标准取值"
+  },
+  "fixed_in_round_4": {
+    "orders": 3,
+    "items": 6,
+    "imported_orders": [
+      {
+        "employee": "尚能群",
+        "order_date": "2026-03-09",
+        "item_count": 2
+      },
+      {
+        "employee": "尚伦英",
+        "order_date": "2026-03-14",
+        "item_count": 1
+      },
+      {
+        "employee": "宋小春",
+        "order_date": "2026-03-15",
+        "item_count": 3
+      }
+    ],
+    "verification": {
+      "verified_order_count": 3,
+      "verified_item_count": 6
+    }
+  },
+  "remaining_after_round_4": {
+    "orders": 83,
+    "items": 179,
+    "reason_stats": [
+      {
+        "reason": "defect_formula_incompatible",
+        "count": 51
+      },
+      {
+        "reason": "missing_model_operation",
+        "count": 19
+      },
+      {
+        "reason": "missing_process_standard",
+        "count": 16
+      },
+      {
+        "reason": "non_integer_quantity",
+        "count": 10
+      },
+      {
+        "reason": "missing_employee",
+        "count": 9
+      }
+    ]
+  },
+  "defect_analysis": {
+    "remaining_defect_orders": 51,
+    "pure_defect_orders": 36,
+    "pure_defect_items": 89,
+    "mixed_defect_orders": 15,
+    "mixed_defect_items": 38,
+    "defect_row_count": 57,
+    "ratio_summary_against_standard_seconds": [
+      {
+        "ratio": "1",
+        "count": 56
+      },
+      {
+        "ratio": "0.126",
+        "count": 1
+      }
+    ],
+    "conclusion": [
+      "剩余 57 条缺陷记录中，有 56 条满足 减分秒数 = 不良数量 × 标准秒数。",
+      "当前数据库 defect_hours 生成公式对 defect_reason_1 = 加工 采用的是 2 倍标准秒数，因此与 Excel 的主流规则系统性不一致，不能直接按现结构无损导入。",
+      "仅发现 1 条异常记录不符合 1 倍规则，需要单独人工核对。"
+    ],
+    "odd_rows": [
+      {
+        "order_key": "谭术林|2026-03-16",
+        "product_model": "269-394",
+        "operation": "CNC",
+        "defect_quantity": 14,
+        "penalty_seconds": 882,
+        "standard_seconds": 500,
+        "ratio_to_1x": 0.126
+      }
+    ]
+  }
+}

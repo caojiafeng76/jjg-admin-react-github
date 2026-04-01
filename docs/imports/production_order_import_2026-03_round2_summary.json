@@ -1,0 +1,98 @@
+{
+  "fixed_in_round_2": {
+    "orders": 3,
+    "items": 9,
+    "employees_created": [
+      "熊龙华"
+    ],
+    "imported_orders": [
+      {
+        "employee": "熊龙华",
+        "order_date": "2026-03-08",
+        "item_count": 1
+      },
+      {
+        "employee": "熊龙华",
+        "order_date": "2026-03-09",
+        "item_count": 2
+      },
+      {
+        "employee": "熊龙华",
+        "order_date": "2026-03-10",
+        "item_count": 6
+      }
+    ]
+  },
+  "remaining_after_round_2": {
+    "orders": 142,
+    "items": 326,
+    "reason_stats": [
+      {
+        "reason": "missing_process_standard",
+        "count": 121
+      },
+      {
+        "reason": "defect_formula_incompatible",
+        "count": 48
+      },
+      {
+        "reason": "missing_model_operation",
+        "count": 19
+      },
+      {
+        "reason": "non_integer_quantity",
+        "count": 12
+      },
+      {
+        "reason": "missing_employee",
+        "count": 9
+      },
+      {
+        "reason": "other",
+        "count": 3
+      }
+    ],
+    "top_missing_process_combos": [
+      {
+        "combo": "213-553 / CNC",
+        "count": 35
+      },
+      {
+        "combo": "243-273 / 铣上下平面",
+        "count": 9
+      },
+      {
+        "combo": "门小件 / 端铣",
+        "count": 7
+      },
+      {
+        "combo": "扣条 / 冲孔",
+        "count": 6
+      },
+      {
+        "combo": "269-390 / CNC2",
+        "count": 5
+      },
+      {
+        "combo": "269-390 / CNC1",
+        "count": 5
+      },
+      {
+        "combo": "222-148 / CNC",
+        "count": 4
+      },
+      {
+        "combo": "213-554 / CNC",
+        "count": 4
+      },
+      {
+        "combo": "213-261 / 冲孔2",
+        "count": 4
+      },
+      {
+        "combo": "113-80 / 刮毛刺",
+        "count": 4
+      }
+    ]
+  }
+}

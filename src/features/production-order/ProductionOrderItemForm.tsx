@@ -338,14 +338,14 @@ export default function ProductionOrderItemForm({
 
           <Form.Item
             name="incoming_qualified_quantity"
-            label="来料合格数"
+            label="来料接收数"
             dependencies={[
               'qualified_quantity',
               'defect_quantity_1',
               'defect_quantity_2',
             ]}
             rules={[
-              { required: true, message: '请输入来料合格数' },
+              { required: true, message: '请输入来料接收数' },
               ({ getFieldValue }) => ({
                 validator: async (_, value) => {
                   const incomingQualifiedQuantity = Number(value || 0)
@@ -362,7 +362,7 @@ export default function ProductionOrderItemForm({
                     qualifiedQuantity + defectQuantity1 + defectQuantity2
 
                   if (incomingQualifiedQuantity < minimumQuantity) {
-                    throw new Error('来料合格数不能小于成品合格数与不良数之和')
+                    throw new Error('来料接收数不能小于成品合格数与不良数之和')
                   }
                 },
               }),
