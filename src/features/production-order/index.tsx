@@ -363,7 +363,9 @@ export default function ProductionOrderPage() {
 
   const handleExport = useCallback(async () => {
     const exportTargetCount =
-      selectedRowKeys.length > 0 ? selectedRowKeys.length : (orderData?.total ?? 0)
+      selectedRowKeys.length > 0
+        ? selectedRowKeys.length
+        : (orderData?.total ?? 0)
 
     if (exportTargetCount === 0) {
       message.warning('当前没有可导出的工单')
@@ -777,7 +779,9 @@ export default function ProductionOrderPage() {
           <>
             <ExportButton
               handleExport={handleExport}
-              disabled={selectedRowKeys.length === 0 && (orderData?.total || 0) === 0}
+              disabled={
+                selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
+              }
               loading={isExporting}
             >
               {selectedRowKeys.length > 0

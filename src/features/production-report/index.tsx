@@ -1,4 +1,10 @@
-import { startTransition, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { App } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -59,7 +65,12 @@ export default function ProductionDailyReportPage() {
 
   const allRows = data?.rows || []
   const rowsByKey = useMemo(
-    () => new Map(allRows.map((row) => [row.key, row] satisfies [string, ProductionDailyReportRow])),
+    () =>
+      new Map(
+        allRows.map(
+          (row) => [row.key, row] satisfies [string, ProductionDailyReportRow],
+        ),
+      ),
     [allRows],
   )
   const currentPageRows = useMemo(() => {
