@@ -180,23 +180,10 @@ export async function getProductionOrdersForExport(ids: string[]) {
     return [] as ProductionOrderForExport[]
   }
 
-  const { data, error } = await supabase
-    .from('production_orders')
-    .select(
-      `
-      *,
-      employee:employees(id, name),
-      items:production_order_items(*)
-    `,
-    )
-    .in('id', ids)
-    .order('order_date', { ascending: true })
-
-  if (error) {
-    throw handleApiError(error, '获取生产工单导出数据失败')
-  }
-
-  const rows = (data || []) as ProductionOrderForExport[]
+  const uniqueIds = Array.from(new Set(ids.filter(Boolean)))
+  const rows = (await Promise.all(
+    uniqueIds.map((id) => getProductionOrderById(id)),
+  )) as ProductionOrderForExport[]
 
   return rows.sort((left, right) => {
     const dateCompare = left.order_date.localeCompare(right.order_date)

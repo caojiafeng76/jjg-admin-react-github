@@ -30,7 +30,23 @@ const EXPORT_HEADERS = [
   '备注',
 ] as const
 
+const SUMMARY_SHEET_NAME = '汇总表'
+const SUMMARY_TITLE = '精加工车间员工月工时汇总表'
+const SUMMARY_HEADERS = [
+  '序号',
+  '姓名',
+  '出勤工时',
+  '正工工时',
+  '零工工时',
+  '总工时',
+  '时薪',
+  '系数',
+  '工资',
+  '备注',
+] as const
+
 type ExportRow = Array<string | number>
+type SummaryRow = Array<string | number>
 
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
 const WORK_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('出勤工时')
@@ -44,6 +60,14 @@ const REMARK_COLUMN_INDEX = EXPORT_HEADERS.indexOf('备注')
 
 function normalizeNumber(value: number | null | undefined) {
   return Number(value || 0)
+}
+
+function getOrderPositiveQualifiedHours(order: ProductionOrderForExport) {
+  return Number(
+    order.items
+      .reduce((total, item) => total + normalizeNumber(item.qualified_hours), 0)
+      .toFixed(2),
+  )
 }
 
 function buildExportRow(
@@ -84,11 +108,7 @@ function buildExportRow(
 }
 
 function buildEmptyExportRow(order: ProductionOrderForExport): ExportRow {
-  const positiveQualifiedHours = Number(
-    order.items
-      .reduce((total, item) => total + normalizeNumber(item.qualified_hours), 0)
-      .toFixed(2),
-  )
+  const positiveQualifiedHours = getOrderPositiveQualifiedHours(order)
   const efficiency =
     order.efficiency === null || order.efficiency === undefined
       ? ''
@@ -132,11 +152,7 @@ function buildOrderSheetRows(
   order: ProductionOrderForExport,
   startRowIndex: number,
 ) {
-  const positiveQualifiedHours = Number(
-    order.items
-      .reduce((total, item) => total + normalizeNumber(item.qualified_hours), 0)
-      .toFixed(2),
-  )
+  const positiveQualifiedHours = getOrderPositiveQualifiedHours(order)
   const rawRows =
     order.items.length > 0
       ? order.items.map((item) =>
@@ -222,6 +238,64 @@ function sanitizeSheetName(name: string, index: number) {
   return (normalized || `员工${index + 1}`).slice(0, 31)
 }
 
+function buildSummarySheetRows(
+  employeeGroups: Array<[string, ProductionOrderForExport[]]>,
+) {
+  const rows: Array<Array<string | number | null | undefined>> = [
+    [SUMMARY_TITLE],
+    [...SUMMARY_HEADERS],
+  ]
+
+  employeeGroups.forEach(([employeeName, employeeOrders], index) => {
+    const workHours = Number(
+      employeeOrders
+        .reduce((total, order) => total + normalizeNumber(order.work_hours), 0)
+        .toFixed(2),
+    )
+    const positiveHours = Number(
+      employeeOrders
+        .reduce(
+          (total, order) => total + getOrderPositiveQualifiedHours(order),
+          0,
+        )
+        .toFixed(2),
+    )
+    const extraHours = Number(
+      employeeOrders
+        .reduce(
+          (total, order) => total + normalizeNumber(order.extra_qualified_hours),
+          0,
+        )
+        .toFixed(2),
+    )
+    const totalHours = Number(
+      employeeOrders
+        .reduce(
+          (total, order) => total + normalizeNumber(order.total_qualified_hours),
+          0,
+        )
+        .toFixed(2),
+    )
+
+    const row: SummaryRow = [
+      index + 1,
+      employeeName,
+      workHours,
+      positiveHours,
+      extraHours,
+      totalHours,
+      0,
+      0,
+      0,
+      '',
+    ]
+
+    rows.push(row)
+  })
+
+  return rows
+}
+
 function applySheetStyles(
   worksheet: XLSX.WorkSheet,
   rows: Array<Array<string | number | null | undefined>>,
@@ -261,6 +335,69 @@ function applySheetStyles(
   worksheet['!freeze'] = { xSplit: 0, ySplit: 1 }
 }
 
+function applySummarySheetStyles(
+  worksheet: XLSX.WorkSheet,
+  rows: Array<Array<string | number | null | undefined>>,
+) {
+  centerAllCells(worksheet, rows)
+  setRowHeight(worksheet, 22, rows.length)
+  worksheet['!rows'] = rows.map((_, index) => ({ hpt: index === 0 ? 26 : 22 }))
+  worksheet['!cols'] = [
+    { wch: 8 },
+    { wch: 14 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 10 },
+    { wch: 10 },
+    { wch: 10 },
+    { wch: 18 },
+  ]
+
+  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1')
+
+  for (let row = range.s.r; row <= range.e.r; row += 1) {
+    for (let column = range.s.c; column <= range.e.c; column += 1) {
+      const cellRef = XLSX.utils.encode_cell({ r: row, c: column })
+      if (!worksheet[cellRef]) {
+        continue
+      }
+
+      worksheet[cellRef].s = {
+        ...(worksheet[cellRef].s || {}),
+        alignment: {
+          horizontal: 'center',
+          vertical: 'center',
+        },
+        font: {
+          ...(worksheet[cellRef].s?.font || {}),
+          name: '宋体',
+          sz: row === 0 ? 14 : 11,
+          bold: row <= 1,
+        },
+        border: {
+          top: { style: 'thin', color: { rgb: '000000' } },
+          bottom: { style: 'thin', color: { rgb: '000000' } },
+          left: { style: 'thin', color: { rgb: '000000' } },
+          right: { style: 'thin', color: { rgb: '000000' } },
+        },
+      }
+
+      if (row === 1) {
+        worksheet[cellRef].s = {
+          ...(worksheet[cellRef].s || {}),
+          fill: {
+            fgColor: { rgb: 'D9EAF7' },
+          },
+        }
+      }
+    }
+  }
+
+  worksheet['!freeze'] = { xSplit: 0, ySplit: 2 }
+}
+
 export function exportProductionOrdersToExcel(
   orders: ProductionOrderForExport[],
 ) {
@@ -275,7 +412,21 @@ export function exportProductionOrdersToExcel(
     employeeGroups.set(employeeName, employeeOrders)
   })
 
-  Array.from(employeeGroups.entries()).forEach(
+  const employeeGroupEntries = Array.from(employeeGroups.entries())
+  const summaryRows = buildSummarySheetRows(employeeGroupEntries)
+  const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryRows)
+
+  summaryWorksheet['!merges'] = [
+    {
+      s: { r: 0, c: 0 },
+      e: { r: 0, c: SUMMARY_HEADERS.length - 1 },
+    },
+  ]
+
+  applySummarySheetStyles(summaryWorksheet, summaryRows)
+  XLSX.utils.book_append_sheet(workbook, summaryWorksheet, SUMMARY_SHEET_NAME)
+
+  employeeGroupEntries.forEach(
     ([employeeName, employeeOrders], index) => {
       const sheetRows: Array<Array<string | number | null | undefined>> = [
         [...EXPORT_HEADERS],

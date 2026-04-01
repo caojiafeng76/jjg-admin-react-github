@@ -851,7 +851,7 @@ export default function ProductionOrderPage() {
         >
           <AppPagination
             total={orderData?.total || 0}
-            pageSizeOptions={['10', '20', '50', '100', '500']}
+            pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
           />
         </div>
       </div>
