@@ -2,9 +2,7 @@
   "fixed_in_round_2": {
     "orders": 3,
     "items": 9,
-    "employees_created": [
-      "熊龙华"
-    ],
+    "employees_created": ["熊龙华"],
     "imported_orders": [
       {
         "employee": "熊龙华",

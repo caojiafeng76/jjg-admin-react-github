@@ -42,9 +42,7 @@ function isPureMissingProcess(order) {
   return order.blockers.every(
     (blocker) =>
       blocker.includes('工序标准不存在:') &&
-      !/减分|不良数量|非整数|缺少型号|缺少工序|员工未建档|项目号/.test(
-        blocker,
-      ),
+      !/减分|不良数量|非整数|缺少型号|缺少工序|员工未建档|项目号/.test(blocker),
   )
 }
 
@@ -93,7 +91,10 @@ async function signInAsAdmin() {
 
 async function loadEligibleOrders() {
   const blockedPath = fileURLToPath(
-    new URL('../docs/imports/production_order_import_2026-03_blocked.json', import.meta.url),
+    new URL(
+      '../docs/imports/production_order_import_2026-03_blocked.json',
+      import.meta.url,
+    ),
   )
   const workbookPath = fileURLToPath(
     new URL('../2026年3月精加工 (2) (1).xlsx', import.meta.url),
@@ -139,9 +140,7 @@ async function loadEligibleOrders() {
         {
           model: value.model,
           operation: value.operation,
-          standard_seconds: Number(
-            Array.from(value.standardSecondsValues)[0],
-          ),
+          standard_seconds: Number(Array.from(value.standardSecondsValues)[0]),
           remark: '2026-03 历史工单补录自动补齐',
         },
       ])
@@ -175,7 +174,9 @@ async function loadEligibleOrders() {
         items,
       }
     })
-    .filter((order) => order.items.every((item) => consistentCombos.has(item.comboKey)))
+    .filter((order) =>
+      order.items.every((item) => consistentCombos.has(item.comboKey)),
+    )
 
   return { eligibleOrders, consistentCombos }
 }
@@ -185,7 +186,10 @@ async function fetchExistingProcessStandards(combos) {
 
   for (const batch of chunk(combos, 100)) {
     const filters = batch
-      .map((combo) => `and(model.eq.${combo.model},operation.eq.${combo.operation})`)
+      .map(
+        (combo) =>
+          `and(model.eq.${combo.model},operation.eq.${combo.operation})`,
+      )
       .join(',')
 
     const { data, error } = await supabase
@@ -278,7 +282,9 @@ async function fetchExistingOrdersByEmployeeDate(orderPairs) {
 
 async function insertOrdersAndItems(eligibleOrders) {
   const salesOrderMap = await fetchSalesOrders(
-    eligibleOrders.flatMap((order) => order.items.map((item) => item.project_no)),
+    eligibleOrders.flatMap((order) =>
+      order.items.map((item) => item.project_no),
+    ),
   )
 
   const orderPairs = eligibleOrders.map((order) => ({
@@ -330,11 +336,11 @@ async function insertOrdersAndItems(eligibleOrders) {
         product_model: item.product_model,
         length_mm:
           salesOrder?.product_model === item.product_model
-            ? salesOrder.length_mm ?? item.length_mm
+            ? (salesOrder.length_mm ?? item.length_mm)
             : item.length_mm,
         customer_model:
           salesOrder?.product_model === item.product_model
-            ? salesOrder.customer_model ?? null
+            ? (salesOrder.customer_model ?? null)
             : null,
         operation: item.operation,
         standard_seconds: item.standard_seconds,
@@ -352,7 +358,10 @@ async function insertOrdersAndItems(eligibleOrders) {
 
   const existingItemKeys = new Set()
 
-  for (const batch of chunk(Array.from(new Set(itemsToInsert.map((item) => item.order_id))), 200)) {
+  for (const batch of chunk(
+    Array.from(new Set(itemsToInsert.map((item) => item.order_id))),
+    200,
+  )) {
     const { data, error } = await supabase
       .from('production_order_items')
       .select(
@@ -394,7 +403,9 @@ async function insertOrdersAndItems(eligibleOrders) {
   })
 
   for (const batch of chunk(pendingItems, ITEM_BATCH_SIZE)) {
-    const { error } = await supabase.from('production_order_items').insert(batch)
+    const { error } = await supabase
+      .from('production_order_items')
+      .insert(batch)
 
     if (error) {
       throw new Error(`插入 round3 工序明细失败: ${error.message}`)
@@ -453,7 +464,10 @@ async function main() {
       {
         insertedProcessStandards,
         eligibleOrders: eligibleOrders.length,
-        eligibleItems: eligibleOrders.reduce((sum, order) => sum + order.item_count, 0),
+        eligibleItems: eligibleOrders.reduce(
+          (sum, order) => sum + order.item_count,
+          0,
+        ),
         ...importResult,
         ...verifyResult,
       },
