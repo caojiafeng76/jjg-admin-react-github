@@ -89,7 +89,10 @@ function serializeJsonRecordset(tag, value) {
 
 async function loadRemainingOrders() {
   const blockedPath = fileURLToPath(
-    new URL('../docs/imports/production_order_import_2026-03_blocked.json', import.meta.url),
+    new URL(
+      '../docs/imports/production_order_import_2026-03_blocked.json',
+      import.meta.url,
+    ),
   )
   const workbookPath = fileURLToPath(
     new URL('../2026年3月精加工 (2) (1).xlsx', import.meta.url),
@@ -122,7 +125,9 @@ async function loadRemainingOrders() {
       reasons: classifyReasons(order),
     }))
     .filter((order) => !importedOrderKeys.has(order.order_key))
-    .sort((left, right) => left.order_key.localeCompare(right.order_key, 'zh-CN'))
+    .sort((left, right) =>
+      left.order_key.localeCompare(right.order_key, 'zh-CN'),
+    )
 
   return { workbook, remainingOrders }
 }
@@ -154,8 +159,7 @@ function buildRound7Payload(workbook, remainingOrders) {
         orderDate: parseExcelDate(row[0] ?? order.order_date),
         projectNo: normalizeNullableText(row[3]) ?? '',
         productModel: normalizeNullableText(row[4]),
-        lengthMm:
-          row[5] === null || row[5] === '' ? null : Number(row[5]),
+        lengthMm: row[5] === null || row[5] === '' ? null : Number(row[5]),
         operation: normalizeNullableText(row[6]),
         standardSeconds:
           row[7] === null || row[7] === '' ? null : Number(row[7]),
@@ -271,7 +275,12 @@ function buildRound7Payload(workbook, remainingOrders) {
   }
 }
 
-function buildRound7Sql({ employeesToCreate, processSeed, orderSeed, itemSeed }) {
+function buildRound7Sql({
+  employeesToCreate,
+  processSeed,
+  orderSeed,
+  itemSeed,
+}) {
   return `with employee_seed as (
   select *
   from json_to_recordset(${serializeJsonRecordset(
@@ -316,10 +325,7 @@ function buildRound7Sql({ employeesToCreate, processSeed, orderSeed, itemSeed })
   )
 ), item_seed as (
   select *
-  from json_to_recordset(${serializeJsonRecordset(
-    'item_json',
-    itemSeed,
-  )}) as x(
+  from json_to_recordset(${serializeJsonRecordset('item_json', itemSeed)}) as x(
     employee_name text,
     order_date date,
     project_no text,
@@ -475,10 +481,16 @@ async function main() {
 
   const sql = buildRound7Sql(payload)
   const previewPath = fileURLToPath(
-    new URL('../docs/imports/production_order_import_2026-03_round7_final.preview.json', import.meta.url),
+    new URL(
+      '../docs/imports/production_order_import_2026-03_round7_final.preview.json',
+      import.meta.url,
+    ),
   )
   const sqlPath = fileURLToPath(
-    new URL('../docs/imports/production_order_import_2026-03_round7_final.sql', import.meta.url),
+    new URL(
+      '../docs/imports/production_order_import_2026-03_round7_final.sql',
+      import.meta.url,
+    ),
   )
 
   await Promise.all([

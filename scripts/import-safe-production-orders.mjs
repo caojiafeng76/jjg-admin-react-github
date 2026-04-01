@@ -31,7 +31,10 @@ function chunk(array, size) {
 
 async function loadImportData() {
   const fileContent = await readFile(
-    new URL('../docs/imports/production_order_import_2026-03_safe.sql', import.meta.url),
+    new URL(
+      '../docs/imports/production_order_import_2026-03_safe.sql',
+      import.meta.url,
+    ),
     'utf8',
   )
 
@@ -74,10 +77,14 @@ async function loadImportData() {
   ]
 
   const orders = parseInsertValues(orderMatch[1]).map((values) =>
-    Object.fromEntries(orderColumns.map((column, index) => [column, values[index]])),
+    Object.fromEntries(
+      orderColumns.map((column, index) => [column, values[index]]),
+    ),
   )
   const items = parseInsertValues(itemMatch[1]).map((values) =>
-    Object.fromEntries(itemColumns.map((column, index) => [column, values[index]])),
+    Object.fromEntries(
+      itemColumns.map((column, index) => [column, values[index]]),
+    ),
   )
 
   const orderMap = new Map(
@@ -183,10 +190,11 @@ function parseSqlValue(rawValue) {
 }
 
 async function assertAdminSession() {
-  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-    email: adminEmail,
-    password: adminPassword,
-  })
+  const { data: signInData, error: signInError } =
+    await supabase.auth.signInWithPassword({
+      email: adminEmail,
+      password: adminPassword,
+    })
 
   if (signInError) {
     throw new Error(`管理员登录失败: ${signInError.message}`)
@@ -262,7 +270,9 @@ async function insertItems(orders) {
   )
 
   for (const itemBatch of chunk(items, ITEM_BATCH_SIZE)) {
-    const { error } = await supabase.from('production_order_items').insert(itemBatch)
+    const { error } = await supabase
+      .from('production_order_items')
+      .insert(itemBatch)
 
     if (error) {
       throw new Error(`插入工序明细失败: ${error.message}`)
@@ -277,17 +287,19 @@ async function verifyImport(orderIds) {
   let itemCount = 0
 
   for (const idBatch of chunk(orderIds, 200)) {
-    const [{ count: currentOrderCount, error: orderError }, { count: currentItemCount, error: itemError }] =
-      await Promise.all([
-        supabase
-          .from('production_orders')
-          .select('id', { count: 'exact', head: true })
-          .in('id', idBatch),
-        supabase
-          .from('production_order_items')
-          .select('order_id', { count: 'exact', head: true })
-          .in('order_id', idBatch),
-      ])
+    const [
+      { count: currentOrderCount, error: orderError },
+      { count: currentItemCount, error: itemError },
+    ] = await Promise.all([
+      supabase
+        .from('production_orders')
+        .select('id', { count: 'exact', head: true })
+        .in('id', idBatch),
+      supabase
+        .from('production_order_items')
+        .select('order_id', { count: 'exact', head: true })
+        .in('order_id', idBatch),
+    ])
 
     if (orderError) {
       throw new Error(`回查工单数量失败: ${orderError.message}`)
