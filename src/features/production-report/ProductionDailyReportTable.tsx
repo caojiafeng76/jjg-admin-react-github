@@ -9,9 +9,7 @@ interface Props {
   page: number
   pageSize: number
   selectedRowKeys: React.Key[]
-  onRowSelectionChange: NonNullable<
-    TableProps<ProductionDailyReportRow>['rowSelection']
-  >
+  onRowSelectionChange: (keys: React.Key[]) => void
   scrollY?: number
 }
 
@@ -175,18 +173,27 @@ export default function ProductionDailyReportTable({
     [page, pageSize],
   )
 
+  const rowSelection: TableProps<ProductionDailyReportRow>['rowSelection'] =
+    useMemo(
+      () => ({
+        selectedRowKeys,
+        onChange: onRowSelectionChange,
+        fixed: true,
+        columnWidth: 40,
+        preserveSelectedRowKeys: true,
+      }),
+      [onRowSelectionChange, selectedRowKeys],
+    )
+
   return (
     <Table<ProductionDailyReportRow>
       rowKey={(record) => record.key}
       loading={loading}
       columns={columns}
       dataSource={data}
-      rowSelection={{
-        ...onRowSelectionChange,
-        selectedRowKeys,
-        preserveSelectedRowKeys: true,
-      }}
+      rowSelection={rowSelection}
       pagination={false}
+      virtual
       size="small"
       scroll={{ x: 2050, y: scrollY }}
       style={{ fontSize: '12px' }}

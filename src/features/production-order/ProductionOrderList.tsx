@@ -42,7 +42,7 @@ export default function ProductionOrderList({
         render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
         fixed: 'left',
         key: '#',
-        width: 50,
+        width: 44,
       },
       {
         title: '日期',
@@ -166,11 +166,17 @@ export default function ProductionOrderList({
     [onView, page, pageSize],
   )
 
-  const rowSelection: TableProps<ProductionOrderListItem>['rowSelection'] = {
-    selectedRowKeys,
-    onChange: onSelect,
-    preserveSelectedRowKeys: true,
-  }
+  const rowSelection: TableProps<ProductionOrderListItem>['rowSelection'] =
+    useMemo(
+      () => ({
+        selectedRowKeys,
+        onChange: onSelect,
+        fixed: true,
+        columnWidth: 40,
+        preserveSelectedRowKeys: true,
+      }),
+      [onSelect, selectedRowKeys],
+    )
 
   return (
     <Table<ProductionOrderListItem>
@@ -180,6 +186,7 @@ export default function ProductionOrderList({
       dataSource={data}
       rowSelection={rowSelection}
       scroll={{ y: scrollY, x: 1150 }}
+      virtual
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}

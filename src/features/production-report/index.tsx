@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { startTransition, useCallback, useEffect, useMemo, useState } from 'react'
 import { App } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -49,9 +49,7 @@ export default function ProductionDailyReportPage() {
     employeeId: fixedEmployeeId,
   })
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [selectedRowsMap, setSelectedRowsMap] = useState<
-    Record<string, ProductionDailyReportRow>
-  >({})
+  const [isExporting, setIsExporting] = useState(false)
 
   const { data, isLoading, isFetching } = useProductionDailyReport(filters)
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
@@ -60,10 +58,21 @@ export default function ProductionDailyReportPage() {
   })
 
   const allRows = data?.rows || []
+  const rowsByKey = useMemo(
+    () => new Map(allRows.map((row) => [row.key, row] satisfies [string, ProductionDailyReportRow])),
+    [allRows],
+  )
   const currentPageRows = useMemo(() => {
     const from = (page - 1) * pageSize
     return allRows.slice(from, from + pageSize)
   }, [allRows, page, pageSize])
+  const selectedRows = useMemo(
+    () =>
+      selectedRowKeys
+        .map((key) => rowsByKey.get(String(key)))
+        .filter((row): row is ProductionDailyReportRow => Boolean(row)),
+    [rowsByKey, selectedRowKeys],
+  )
 
   const initialSearchValues = useMemo(
     () => ({
@@ -113,7 +122,6 @@ export default function ProductionDailyReportPage() {
       setFilters(normalizedFilters)
       updateUrlParams(normalizedFilters)
       setSelectedRowKeys([])
-      setSelectedRowsMap({})
     },
     [fixedEmployeeId, updateUrlParams],
   )
@@ -123,7 +131,6 @@ export default function ProductionDailyReportPage() {
     setFilters(nextFilters)
     updateUrlParams(nextFilters)
     setSelectedRowKeys([])
-    setSelectedRowsMap({})
   }, [fixedEmployeeId, updateUrlParams])
 
   useEffect(() => {
@@ -132,21 +139,38 @@ export default function ProductionDailyReportPage() {
     }
   }, [fixedEmployeeId])
 
-  const handleExport = useCallback(() => {
-    const selectedRows = selectedRowKeys
-      .map((key) => selectedRowsMap[String(key)])
-      .filter((row): row is ProductionDailyReportRow => Boolean(row))
+  const handleRowSelectionChange = useCallback((keys: React.Key[]) => {
+    startTransition(() => {
+      setSelectedRowKeys(keys)
+    })
+  }, [])
 
-    if (selectedRows.length === 0) {
-      message.warning('请先选择要导出的日报数据')
+  const handleExport = useCallback(async () => {
+    const exportRows = selectedRows.length > 0 ? selectedRows : allRows
+
+    if (exportRows.length === 0) {
+      message.warning('当前没有可导出的日报数据')
       return
     }
 
-    exportProductionDailyReportToExcel(selectedRows)
-    message.success(`已导出 ${selectedRows.length} 条日报数据`)
-    setSelectedRowKeys([])
-    setSelectedRowsMap({})
-  }, [message, selectedRowKeys, selectedRowsMap])
+    try {
+      setIsExporting(true)
+      await exportProductionDailyReportToExcel(exportRows)
+      message.success(
+        selectedRows.length > 0
+          ? `已导出 ${selectedRows.length} 条日报数据`
+          : `已导出当前筛选结果 ${allRows.length} 条日报数据`,
+      )
+
+      if (selectedRows.length > 0) {
+        setSelectedRowKeys([])
+      }
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '导出失败')
+    } finally {
+      setIsExporting(false)
+    }
+  }, [allRows, message, selectedRows])
 
   useEffect(() => {
     const maxPage = Math.max(1, Math.ceil(allRows.length / pageSize))
@@ -170,9 +194,13 @@ export default function ProductionDailyReportPage() {
         {isEmployeeView ? null : (
           <ExportButton
             handleExport={handleExport}
-            loading={isFetching}
-            count={selectedRowKeys.length}
-          />
+            loading={isExporting}
+            disabled={allRows.length === 0}
+          >
+            {selectedRowKeys.length > 0
+              ? `导出选中项 (${selectedRowKeys.length})`
+              : `导出当前筛选结果${allRows.length > 0 ? ` (${allRows.length})` : ''}`}
+          </ExportButton>
         )}
       </div>
 
@@ -206,44 +234,12 @@ export default function ProductionDailyReportPage() {
           />
         ) : (
           <ProductionDailyReportTable
-            loading={isLoading || isFetching}
+            loading={isLoading || isFetching || isExporting}
             data={currentPageRows}
             page={page}
             pageSize={pageSize}
             selectedRowKeys={selectedRowKeys}
-            onRowSelectionChange={{
-              onChange: (keys) => {
-                setSelectedRowKeys(keys)
-              },
-              onSelect: (record, selected) => {
-                setSelectedRowsMap((prev) => {
-                  const next = { ...prev }
-
-                  if (selected) {
-                    next[record.key] = record
-                  } else {
-                    delete next[record.key]
-                  }
-
-                  return next
-                })
-              },
-              onSelectAll: (selected, _selectedRows, changeRows) => {
-                setSelectedRowsMap((prev) => {
-                  const next = { ...prev }
-
-                  changeRows.forEach((row) => {
-                    if (selected) {
-                      next[row.key] = row
-                    } else {
-                      delete next[row.key]
-                    }
-                  })
-
-                  return next
-                })
-              },
-            }}
+            onRowSelectionChange={handleRowSelectionChange}
             scrollY={scrollY}
           />
         )}
