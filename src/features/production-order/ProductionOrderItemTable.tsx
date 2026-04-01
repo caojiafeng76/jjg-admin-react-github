@@ -89,7 +89,7 @@ export default function ProductionOrderItemTable({
         width: 110,
       },
       {
-        title: '来料合格数',
+        title: '来料接收数',
         dataIndex: 'incoming_qualified_quantity',
         key: 'incoming_qualified_quantity',
         width: 100,

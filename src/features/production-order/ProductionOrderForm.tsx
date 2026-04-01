@@ -588,7 +588,7 @@ export default function ProductionOrderForm({
                           <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
                             <div className="rounded-2xl bg-slate-50 px-3 py-3">
                               <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                                来料合格
+                                来料接收数
                               </div>
                               <div className="mt-1 font-semibold text-slate-900">
                                 {item.incoming_qualified_quantity}
@@ -737,7 +737,7 @@ export default function ProductionOrderForm({
                     width: 100,
                   },
                   {
-                    title: '来料合格数',
+                    title: '来料接收数',
                     dataIndex: 'incoming_qualified_quantity',
                     width: 100,
                   },
@@ -932,14 +932,14 @@ export default function ProductionOrderForm({
 
             <Form.Item
               name="incoming_qualified_quantity"
-              label="来料合格数"
+              label="来料接收数"
               dependencies={[
                 'qualified_quantity',
                 'defect_quantity_1',
                 'defect_quantity_2',
               ]}
               rules={[
-                { required: true, message: '请输入来料合格数' },
+                { required: true, message: '请输入来料接收数' },
                 ({ getFieldValue }) => ({
                   validator: async (_, value) => {
                     const incomingQualifiedQuantity = Number(value || 0)
@@ -957,7 +957,7 @@ export default function ProductionOrderForm({
 
                     if (incomingQualifiedQuantity < minimumQuantity) {
                       throw new Error(
-                        '来料合格数不能小于成品合格数与不良数之和',
+                        '来料接收数不能小于成品合格数与不良数之和',
                       )
                     }
                   },

@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import type { ProductionOrderDataCategory } from './apiProductionOrderItems'
@@ -92,11 +93,17 @@ function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) 
     `)
 
   if (filters.startDate) {
-    query = query.gte('production_orders.order_date', filters.startDate)
+    query = query.gte(
+      'production_orders.order_date',
+      dayjs(filters.startDate).format('YYYY-MM-DD'),
+    )
   }
 
   if (filters.endDate) {
-    query = query.lte('production_orders.order_date', filters.endDate)
+    query = query.lt(
+      'production_orders.order_date',
+      dayjs(filters.endDate).add(1, 'day').format('YYYY-MM-DD'),
+    )
   }
 
   if (filters.employeeId) {

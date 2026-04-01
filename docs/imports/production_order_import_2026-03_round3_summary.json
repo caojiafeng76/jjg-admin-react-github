@@ -1,0 +1,167 @@
+{
+  "round": 3,
+  "scope": "pure_missing_process_standard",
+  "notes": [
+    "本轮只处理仅因缺少工序标准阻塞，且同一 model + operation 的标准秒数在 Excel 中明确且一致的工单。",
+    "脚本曾在首次执行时先写入部分主表和工序标准，后续重跑依靠幂等去重补齐明细，因此 importedOrders 和 insertedProcessStandards 不能代表本轮最终成功量。",
+    "本文件以脚本最终回查结果 verifiedOrderCount 和 verifiedItemCount 作为成功口径。"
+  ],
+  "script_result": {
+    "eligible_orders": 56,
+    "eligible_items": 141,
+    "inserted_process_standards": 0,
+    "imported_orders": 0,
+    "imported_items": 141,
+    "expected_orders": 56,
+    "expected_items": 141,
+    "verified_order_count": 56,
+    "verified_item_count": 141
+  },
+  "process_standards": {
+    "backfilled_combo_count": 48,
+    "top_backfilled_combos": [
+      {
+        "combo": "213-553 / CNC",
+        "order_count": 14,
+        "standard_seconds": 60
+      },
+      {
+        "combo": "243-273 / 铣上下平面",
+        "order_count": 8,
+        "standard_seconds": 200
+      },
+      {
+        "combo": "门小件 / 端铣",
+        "order_count": 7,
+        "standard_seconds": 45
+      },
+      {
+        "combo": "286-337 / 端铣",
+        "order_count": 7,
+        "standard_seconds": 120
+      },
+      {
+        "combo": "扣条 / 冲孔",
+        "order_count": 5,
+        "standard_seconds": 30
+      },
+      {
+        "combo": "286-356 / CNC1",
+        "order_count": 4,
+        "standard_seconds": 260
+      },
+      {
+        "combo": "243-273 / 铣缺口",
+        "order_count": 4,
+        "standard_seconds": 500
+      },
+      {
+        "combo": "222-148*2400 / CNC",
+        "order_count": 3,
+        "standard_seconds": 240
+      },
+      {
+        "combo": "213-261 / 冲孔2",
+        "order_count": 3,
+        "standard_seconds": 25
+      },
+      {
+        "combo": "269-390 / CNC1",
+        "order_count": 3,
+        "standard_seconds": 270
+      }
+    ],
+    "unresolved_inconsistent_combos": [
+      {
+        "combo": "213-554 / CNC",
+        "order_count": 3,
+        "observed_standard_seconds": [18, 60]
+      }
+    ],
+    "unresolved_missing_seconds_combos": []
+  },
+  "imported_orders": [
+    "曾庆伟|2026-03-02",
+    "曾庆伟|2026-03-05",
+    "曾庆伟|2026-03-07",
+    "向玲|2026-03-03",
+    "陈文香|2026-03-01",
+    "陈文香|2026-03-02",
+    "冯永惠|2026-03-07",
+    "张吉成|2026-03-13",
+    "张吉成|2026-03-19",
+    "徐小花|2026-03-17",
+    "徐小花|2026-03-18",
+    "黄玉春|2026-03-08",
+    "黄玉春|2026-03-09",
+    "黄玉春|2026-03-10",
+    "沈龙杰|2026-03-06",
+    "沈龙杰|2026-03-07",
+    "徐新妹|2026-03-12",
+    "徐新妹|2026-03-18",
+    "徐新妹|2026-03-19",
+    "尚能群|2026-03-11",
+    "尚能群|2026-03-12",
+    "尚能群|2026-03-20",
+    "谭术林|2026-03-01",
+    "谭术林|2026-03-04",
+    "谭术林|2026-03-05",
+    "谭术林|2026-03-06",
+    "谭术林|2026-03-07",
+    "谭术林|2026-03-12",
+    "谭术林|2026-03-14",
+    "谭术林|2026-03-17",
+    "张海蝶|2026-03-01",
+    "张海蝶|2026-03-08",
+    "张海蝶|2026-03-10",
+    "张海蝶|2026-03-11",
+    "张海蝶|2026-03-14",
+    "张海蝶|2026-03-16",
+    "张海蝶|2026-03-17",
+    "张海蝶|2026-03-18",
+    "尚伦英|2026-03-08",
+    "尚伦英|2026-03-09",
+    "许彩旋|2026-03-08",
+    "吴鹏飞|2026-03-04",
+    "吴鹏飞|2026-03-05",
+    "宋小冬|2026-03-02",
+    "宋小冬|2026-03-11",
+    "宋小春|2026-03-14",
+    "黄浩东|2026-03-01",
+    "黄浩东|2026-03-02",
+    "黄浩东|2026-03-03",
+    "黄浩东|2026-03-04",
+    "黄浩东|2026-03-05",
+    "黄浩东|2026-03-06",
+    "黄浩东|2026-03-09",
+    "黄浩东|2026-03-10",
+    "黄浩东|2026-03-15",
+    "黄浩东|2026-03-16"
+  ],
+  "remaining_after_round_3": {
+    "orders": 86,
+    "items": 185,
+    "reason_stats": [
+      {
+        "reason": "defect_formula_incompatible",
+        "count": 60
+      },
+      {
+        "reason": "missing_process_standard",
+        "count": 31
+      },
+      {
+        "reason": "missing_model_operation",
+        "count": 19
+      },
+      {
+        "reason": "non_integer_quantity",
+        "count": 12
+      },
+      {
+        "reason": "missing_employee",
+        "count": 9
+      }
+    ]
+  }
+}
