@@ -37,6 +37,25 @@ export interface ProductionOrderForExport extends ProductionOrderWithEmployee {
   items: ProductionOrderItem[]
 }
 
+export interface ProductionOrderFilters {
+  startDate?: string
+  endDate?: string
+  employeeId?: string
+  shift?: ProductionOrderShift
+  dataCategory?: ProductionOrderDataCategory
+  productModel?: string
+  customerModel?: string
+  isAudited?: boolean
+}
+
+const PRODUCTION_ORDER_EXPORT_SELECT = `
+      *,
+      employee:employees(id, name),
+      items:production_order_items(*)
+    `
+
+const PRODUCTION_ORDER_EXPORT_BATCH_SIZE = 200
+
 export async function getProductionOrders({
   page,
   pageSize,
@@ -51,15 +70,7 @@ export async function getProductionOrders({
 }: {
   page: number
   pageSize: number
-  startDate?: string
-  endDate?: string
-  employeeId?: string
-  shift?: ProductionOrderShift
-  dataCategory?: ProductionOrderDataCategory
-  productModel?: string
-  customerModel?: string
-  isAudited?: boolean
-}) {
+} & ProductionOrderFilters) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
   const hasItemFilters = Boolean(dataCategory || productModel || customerModel)
@@ -156,13 +167,7 @@ export async function getProductionOrders({
 export async function getProductionOrderById(id: string) {
   const { data, error } = await supabase
     .from('production_orders')
-    .select(
-      `
-      *,
-      employee:employees(id, name),
-      items:production_order_items(*)
-    `,
-    )
+    .select(PRODUCTION_ORDER_EXPORT_SELECT)
     .eq('id', id)
     .single()
 
@@ -175,25 +180,107 @@ export async function getProductionOrderById(id: string) {
   }
 }
 
+async function getProductionOrdersForExportBatch(ids: string[]) {
+  const { data, error } = await supabase
+    .from('production_orders')
+    .select(PRODUCTION_ORDER_EXPORT_SELECT)
+    .in('id', ids)
+
+  if (error) {
+    throw handleApiError(error, '获取导出工单失败')
+  }
+
+  return (data || []) as ProductionOrderForExport[]
+}
+
 export async function getProductionOrdersForExport(ids: string[]) {
   if (ids.length === 0) {
     return [] as ProductionOrderForExport[]
   }
 
   const uniqueIds = Array.from(new Set(ids.filter(Boolean)))
+  const batches: string[][] = []
+
+  for (
+    let index = 0;
+    index < uniqueIds.length;
+    index += PRODUCTION_ORDER_EXPORT_BATCH_SIZE
+  ) {
+    batches.push(
+      uniqueIds.slice(index, index + PRODUCTION_ORDER_EXPORT_BATCH_SIZE),
+    )
+  }
+
   const rows = (await Promise.all(
-    uniqueIds.map((id) => getProductionOrderById(id)),
-  )) as ProductionOrderForExport[]
+    batches.map((batchIds) => getProductionOrdersForExportBatch(batchIds)),
+  )).flat()
+  const rowMap = new Map(rows.map((row) => [row.id, row]))
 
-  return rows.sort((left, right) => {
-    const dateCompare = left.order_date.localeCompare(right.order_date)
+  return uniqueIds
+    .map((id) => rowMap.get(id))
+    .filter((row): row is ProductionOrderForExport => Boolean(row))
+    .sort((left, right) => {
+      const dateCompare = left.order_date.localeCompare(right.order_date)
 
-    if (dateCompare !== 0) {
-      return dateCompare
-    }
+      if (dateCompare !== 0) {
+        return dateCompare
+      }
 
-    return left.created_at.localeCompare(right.created_at)
+      return left.created_at.localeCompare(right.created_at)
+    })
+}
+
+const PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE = 1000
+const PRODUCTION_ORDER_FILTER_EXPORT_PAGE_CONCURRENCY = 5
+
+export async function getProductionOrdersForExportByFilters(
+  filters: ProductionOrderFilters,
+) {
+  const firstPage = await getProductionOrders({
+    page: 1,
+    pageSize: PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE,
+    ...filters,
   })
+
+  const collectedIds = firstPage.items.map((item) => item.id)
+
+  if (firstPage.total <= collectedIds.length) {
+    return getProductionOrdersForExport(collectedIds)
+  }
+
+  const totalPages = Math.ceil(
+    firstPage.total / PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE,
+  )
+  const remainingPages = Array.from(
+    { length: Math.max(totalPages - 1, 0) },
+    (_, index) => index + 2,
+  )
+
+  for (
+    let index = 0;
+    index < remainingPages.length;
+    index += PRODUCTION_ORDER_FILTER_EXPORT_PAGE_CONCURRENCY
+  ) {
+    const pageChunk = remainingPages.slice(
+      index,
+      index + PRODUCTION_ORDER_FILTER_EXPORT_PAGE_CONCURRENCY,
+    )
+    const pageResults = await Promise.all(
+      pageChunk.map((page) =>
+        getProductionOrders({
+          page,
+          pageSize: PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE,
+          ...filters,
+        }),
+      ),
+    )
+
+    pageResults.forEach((result) => {
+      collectedIds.push(...result.items.map((item) => item.id))
+    })
+  }
+
+  return getProductionOrdersForExport(collectedIds)
 }
 
 export async function createProductionOrder(values: ProductionOrderInsert) {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { startTransition, useState, useCallback, useEffect } from 'react'
 import {
   ArrowPathIcon,
   PlusCircleIcon,
@@ -19,8 +19,10 @@ import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import {
+  getProductionOrdersForExportByFilters,
   getProductionOrdersForExport,
   type ProductionOrder,
+  type ProductionOrderFilters,
   type ProductionOrderShift,
 } from '@/services/apiProductionOrders'
 import type {
@@ -166,16 +168,7 @@ export default function ProductionOrderPage() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [filters, setFilters] = useState<{
-    startDate?: string
-    endDate?: string
-    employeeId?: string
-    shift?: ProductionOrderShift
-    dataCategory?: ProductionOrderDataCategory
-    productModel?: string
-    customerModel?: string
-    isAudited?: boolean
-  }>(() => ({
+  const [filters, setFilters] = useState<ProductionOrderFilters>(() => ({
     employeeId:
       (isEmployeeView ? employeeProfile?.id : undefined) ||
       searchParamsURL.get('employeeId') ||
@@ -362,21 +355,36 @@ export default function ProductionOrderPage() {
     [deleteMutation, message, selectedRowKeys],
   )
 
+  const handleSelect = useCallback((keys: React.Key[]) => {
+    startTransition(() => {
+      setSelectedRowKeys(keys)
+    })
+  }, [])
+
   const handleExport = useCallback(async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning('请先选择要导出的工单')
+    const exportTargetCount =
+      selectedRowKeys.length > 0 ? selectedRowKeys.length : (orderData?.total ?? 0)
+
+    if (exportTargetCount === 0) {
+      message.warning('当前没有可导出的工单')
       return
     }
 
     try {
       setIsExporting(true)
-      const exportOrders = await getProductionOrdersForExport(
-        selectedRowKeys.map((key) => String(key)),
-      )
+      const exportOrders =
+        selectedRowKeys.length > 0
+          ? await getProductionOrdersForExport(
+              selectedRowKeys.map((key) => String(key)),
+            )
+          : await getProductionOrdersForExportByFilters(filters)
 
-      exportProductionOrdersToExcel(exportOrders)
+      await exportProductionOrdersToExcel(exportOrders)
       message.success(`已导出 ${exportOrders.length} 张工单`)
-      setSelectedRowKeys([])
+
+      if (selectedRowKeys.length > 0) {
+        setSelectedRowKeys([])
+      }
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
@@ -386,7 +394,7 @@ export default function ProductionOrderPage() {
     } finally {
       setIsExporting(false)
     }
-  }, [message, selectedRowKeys])
+  }, [filters, message, orderData?.total, selectedRowKeys])
 
   const handleBatchAudit = useCallback(
     (isAudited: boolean) => {
@@ -528,7 +536,7 @@ export default function ProductionOrderPage() {
   )
 
   const handleSearch = useCallback(
-    (params: typeof filters) => {
+    (params: ProductionOrderFilters) => {
       setFilters(
         fixedEmployee?.id
           ? { ...params, employeeId: fixedEmployee.id }
@@ -769,10 +777,12 @@ export default function ProductionOrderPage() {
           <>
             <ExportButton
               handleExport={handleExport}
+              disabled={selectedRowKeys.length === 0 && (orderData?.total || 0) === 0}
               loading={isExporting}
-              count={selectedRowKeys.length}
             >
-              导出工单
+              {selectedRowKeys.length > 0
+                ? `导出选中项 (${selectedRowKeys.length})`
+                : `导出当前筛选结果${orderData?.total ? ` (${orderData.total})` : ''}`}
             </ExportButton>
             <DeleteButton
               onConfirm={handleDelete}
@@ -824,7 +834,7 @@ export default function ProductionOrderPage() {
               loading={isLoading}
               data={orderData?.items || []}
               selectedRowKeys={selectedRowKeys}
-              onSelect={setSelectedRowKeys}
+              onSelect={handleSelect}
               onView={handleView}
             />
           ) : (
@@ -834,7 +844,7 @@ export default function ProductionOrderPage() {
               page={page}
               pageSize={pageSize}
               selectedRowKeys={selectedRowKeys}
-              onSelect={setSelectedRowKeys}
+              onSelect={handleSelect}
               onView={handleView}
               scrollY={scrollY}
             />
