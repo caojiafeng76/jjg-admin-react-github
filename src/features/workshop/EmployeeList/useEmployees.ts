@@ -13,10 +13,12 @@ import {
   unbindEmployeeAuthAccount,
   rebindEmployeeAuthAccount,
 } from '@/services/apiEmployees'
+import { getJobBaseSettingOptions } from '@/services/apiJobBaseSettings'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const EMPLOYEES_KEY = 'employees' as const
+const JOB_BASE_SETTINGS_KEY = 'job-base-settings' as const
 
 export function useEmployeesList({
   page,
@@ -45,6 +47,15 @@ export function useAllEmployees(enabled = true) {
     queryFn: getAllEmployees,
     enabled,
     ...queryConfig.list,
+  })
+}
+
+export function useEmployeeJobBaseSettingOptions(enabled = true) {
+  return useQuery({
+    queryKey: [JOB_BASE_SETTINGS_KEY, 'options'],
+    queryFn: getJobBaseSettingOptions,
+    enabled,
+    ...queryConfig.detail,
   })
 }
 

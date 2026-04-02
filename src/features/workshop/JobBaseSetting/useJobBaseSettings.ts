@@ -11,6 +11,7 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 
 const JOB_BASE_SETTINGS_KEY = 'job-base-settings' as const
 const JOB_BASE_SETTINGS_OPTIONS_KEY = [JOB_BASE_SETTINGS_KEY, 'options'] as const
+const EMPLOYEES_KEY = 'employees' as const
 const STANDARD_TIMES_KEY = 'standard-times' as const
 const PROCESS_STANDARDS_KEY = 'process-standards' as const
 
@@ -39,6 +40,7 @@ export function useCreateJobBaseSetting() {
     invalidateQueries: [
       [JOB_BASE_SETTINGS_KEY],
       JOB_BASE_SETTINGS_OPTIONS_KEY,
+      [EMPLOYEES_KEY],
       [STANDARD_TIMES_KEY],
       [PROCESS_STANDARDS_KEY],
     ],
@@ -51,6 +53,7 @@ export function useUpdateJobBaseSetting() {
     invalidateQueries: [
       [JOB_BASE_SETTINGS_KEY],
       JOB_BASE_SETTINGS_OPTIONS_KEY,
+      [EMPLOYEES_KEY],
       [STANDARD_TIMES_KEY],
       [PROCESS_STANDARDS_KEY],
     ],
@@ -63,6 +66,7 @@ export function useDeleteJobBaseSettings() {
     invalidateQueries: [
       [JOB_BASE_SETTINGS_KEY],
       JOB_BASE_SETTINGS_OPTIONS_KEY,
+      [EMPLOYEES_KEY],
       [STANDARD_TIMES_KEY],
       [PROCESS_STANDARDS_KEY],
     ],
