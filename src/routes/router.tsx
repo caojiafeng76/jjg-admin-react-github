@@ -8,6 +8,7 @@ import RouteErrorPage from '@/pages/RouteErrorPage'
 import {
   EMPLOYEE_SIDE_ROLES,
   getDefaultHomeByRole,
+  PRECISION_CUTTING_ADMIN_ROLE,
   type AppRole,
 } from '@/config/access'
 
@@ -42,6 +43,9 @@ const MachineEquipmentMaintenance = lazy(
   () => import('@features/workshop/MachineEquipmentMaintenance'),
 )
 const MaterialTransfer = lazy(() => import('@features/material-transfer'))
+const PrecisionCuttingTransfer = lazy(
+  () => import('@features/precision-cutting-transfer'),
+)
 const ProductionOrder = lazy(() => import('@features/production-order'))
 const ProductionDailyReport = lazy(() => import('@features/production-report'))
 
@@ -201,7 +205,7 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
-              allow={['admin']}
+              allow={['admin', PRECISION_CUTTING_ADMIN_ROLE]}
               element={<WorkshopOrderList />}
             />
           </Suspense>
@@ -286,8 +290,8 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
-              allow={['admin']}
-              element={<ComingSoonPage />}
+              allow={['admin', PRECISION_CUTTING_ADMIN_ROLE]}
+              element={<PrecisionCuttingTransfer />}
             />
           </Suspense>
         ),

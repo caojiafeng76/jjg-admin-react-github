@@ -8,7 +8,10 @@ import {
   Square3Stack3DIcon,
 } from '@heroicons/react/16/solid'
 
-import { isEmployeeSideRole } from '@/config/access'
+import {
+  isEmployeeSideRole,
+  isPrecisionCuttingAdminRole,
+} from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
 
 type MenuItem = Required<MenuProps>['items'][number]
@@ -65,7 +68,7 @@ const adminItems: MenuItem[] = [
     key: 'precision-cutting',
     label: '精切',
     icon: <Square3Stack3DIcon className="size-4" />,
-    children: [{ key: 'precision-cutting-transfer', label: '转移单' }],
+    children: [{ key: 'precision-cutting-transfer', label: '精切转移单' }],
   },
   {
     key: 'consumables',
@@ -89,6 +92,20 @@ const employeeItems: MenuItem[] = [
       { key: 'production-order', label: '我的工单' },
       { key: 'production-daily-report', label: '我的日报' },
     ],
+  },
+]
+
+const precisionCuttingAdminItems: MenuItem[] = [
+  {
+    key: 'workshop-order-list',
+    label: '订单管理',
+    icon: <Square3Stack3DIcon className="size-4" />,
+  },
+  {
+    key: 'precision-cutting',
+    label: '精切',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [{ key: 'precision-cutting-transfer', label: '精切转移单' }],
   },
 ]
 
@@ -119,6 +136,10 @@ const MainMenu: React.FC = () => {
   const items = useMemo(() => {
     if (isEmployeeSideRole(role)) {
       return employeeItems
+    }
+
+    if (isPrecisionCuttingAdminRole(role)) {
+      return precisionCuttingAdminItems
     }
 
     return adminItems
