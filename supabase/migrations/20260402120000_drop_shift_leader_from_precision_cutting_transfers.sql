@@ -1,2 +1,1 @@
-alter table public.precision_cutting_transfers
-drop column if exists shift_leader_name;
+alter table public.precision_cutting_transfers drop column if exists shift_leader_name;
