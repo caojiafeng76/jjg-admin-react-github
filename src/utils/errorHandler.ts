@@ -70,6 +70,194 @@ export function translateErrorMessage(message: string): string {
   return partialMatch?.[1] || message
 }
 
+export interface ErrorDisplayInfo {
+  category: 'generic' | 'network' | 'permission' | 'notFound'
+  message: string
+  detail?: string
+  code?: string
+}
+
+function getErrorCategory({
+  message,
+  code,
+  statusCode,
+}: {
+  message?: string
+  code?: string
+  statusCode?: number
+}): ErrorDisplayInfo['category'] {
+  const normalizedMessage = message?.toLowerCase() || ''
+  const normalizedCode = code?.toLowerCase() || ''
+
+  if (
+    statusCode === 404 ||
+    normalizedCode === 'not_found' ||
+    normalizedMessage.includes('not found') ||
+    normalizedMessage.includes('不存在') ||
+    normalizedMessage.includes('未找到')
+  ) {
+    return 'notFound'
+  }
+
+  if (
+    statusCode === 401 ||
+    statusCode === 403 ||
+    normalizedCode === 'unauthorized' ||
+    normalizedCode === 'forbidden' ||
+    normalizedCode === '42501' ||
+    normalizedMessage.includes('permission denied') ||
+    normalizedMessage.includes('row-level security') ||
+    normalizedMessage.includes('认证') ||
+    normalizedMessage.includes('未授权') ||
+    normalizedMessage.includes('没有权限') ||
+    normalizedMessage.includes('权限')
+  ) {
+    return 'permission'
+  }
+
+  if (
+    normalizedCode === 'network_error' ||
+    normalizedMessage.includes('failed to fetch') ||
+    normalizedMessage.includes('networkerror') ||
+    normalizedMessage.includes('network error') ||
+    normalizedMessage.includes('load failed') ||
+    normalizedMessage.includes('fetch') ||
+    normalizedMessage.includes('网络') ||
+    normalizedMessage.includes('连接失败')
+  ) {
+    return 'network'
+  }
+
+  return 'generic'
+}
+
+function stringifyErrorField(value: unknown): string | undefined {
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    return trimmed || undefined
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value)
+  }
+
+  return undefined
+}
+
+function parseJsonLikeError(message: string): ErrorDisplayInfo | null {
+  const trimmedMessage = message.trim()
+  const jsonStartIndex = trimmedMessage.indexOf('{')
+
+  if (jsonStartIndex === -1) {
+    return null
+  }
+
+  const jsonText = trimmedMessage.slice(jsonStartIndex)
+
+  try {
+    const parsed = JSON.parse(jsonText) as Record<string, unknown>
+    const prefix = trimmedMessage
+      .slice(0, jsonStartIndex)
+      .trim()
+      .replace(/[：:]$/, '')
+
+    const primaryMessage =
+      stringifyErrorField(parsed.message) ||
+      stringifyErrorField(parsed.error_description) ||
+      stringifyErrorField(parsed.hint)
+
+    const detailParts = [
+      stringifyErrorField(parsed.details),
+      stringifyErrorField(parsed.hint),
+    ].filter((part): part is string => Boolean(part))
+
+    return {
+      category: getErrorCategory({
+        message: prefix || primaryMessage || trimmedMessage,
+        code: stringifyErrorField(parsed.code),
+      }),
+      message: translateErrorMessage(prefix || primaryMessage || trimmedMessage),
+      detail:
+        detailParts.length > 0
+          ? detailParts.map((part) => translateErrorMessage(part)).join('；')
+          : undefined,
+      code: stringifyErrorField(parsed.code),
+    }
+  } catch {
+    return null
+  }
+}
+
+export function getErrorDisplayInfo(
+  error: unknown,
+  fallbackMessage = '系统暂时不可用，请稍后重试。',
+): ErrorDisplayInfo {
+  const errorCode =
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    typeof error.code === 'string'
+      ? error.code
+      : undefined
+
+  const statusCode =
+    error &&
+    typeof error === 'object' &&
+    'statusCode' in error &&
+    typeof error.statusCode === 'number'
+      ? error.statusCode
+      : undefined
+
+  const rawDetail =
+    error &&
+    typeof error === 'object' &&
+    'details' in error &&
+    typeof error.details === 'string'
+      ? error.details
+      : undefined
+
+  if (typeof error === 'string') {
+    return parseJsonLikeError(error) || {
+      category: getErrorCategory({ message: error, code: errorCode, statusCode }),
+      message: translateErrorMessage(error),
+      code: errorCode,
+    }
+  }
+
+  if (error instanceof Error) {
+    return parseJsonLikeError(error.message) || {
+      category: getErrorCategory({
+        message: error.message || fallbackMessage,
+        code: errorCode,
+        statusCode,
+      }),
+      message: translateErrorMessage(error.message || fallbackMessage),
+      detail: rawDetail,
+      code: errorCode,
+    }
+  }
+
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = stringifyErrorField(error.message)
+
+    if (message) {
+      return parseJsonLikeError(message) || {
+        category: getErrorCategory({ message, code: errorCode, statusCode }),
+        message: translateErrorMessage(message),
+        detail: rawDetail,
+        code: errorCode,
+      }
+    }
+  }
+
+  return {
+    category: getErrorCategory({ message: fallbackMessage, code: errorCode, statusCode }),
+    message: fallbackMessage,
+    detail: rawDetail,
+    code: errorCode,
+  }
+}
+
 /**
  * 处理 API 错误
  */
