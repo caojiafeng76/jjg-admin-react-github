@@ -16,6 +16,7 @@ const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Login = lazy(() => import('@pages/Login'))
 const PageNotFound = lazy(() => import('@pages/PageNotFound'))
 const AccessDenied = lazy(() => import('@pages/AccessDenied'))
+const ComingSoonPage = lazy(() => import('@pages/ComingSoonPage'))
 
 // Syney 相关
 const SyneySpecList = lazy(() => import('@features/syney/SpecList'))
@@ -277,6 +278,46 @@ export const router = createBrowserRouter([
               allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<ProductionDailyReport />}
             />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'precision-cutting-transfer',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tooling-data',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tooling-inventory',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tooling-stock-in',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tooling-stock-out',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
           </Suspense>
         ),
       },

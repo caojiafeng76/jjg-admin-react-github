@@ -61,6 +61,23 @@ const adminItems: MenuItem[] = [
       { key: 'production-daily-report', label: '生产日报表' },
     ],
   },
+  {
+    key: 'precision-cutting',
+    label: '精切',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [{ key: 'precision-cutting-transfer', label: '转移单' }],
+  },
+  {
+    key: 'consumables',
+    label: '耗材',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [
+      { key: 'tooling-data', label: '刀具资料' },
+      { key: 'tooling-inventory', label: '刀具库存' },
+      { key: 'tooling-stock-in', label: '刀具入库' },
+      { key: 'tooling-stock-out', label: '刀具出库' },
+    ],
+  },
 ]
 
 const employeeItems: MenuItem[] = [
