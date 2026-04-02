@@ -97,7 +97,10 @@ export default function StandardTimeTable({
         key: 'daily_standard_capacity',
         width: 120,
         render: (_value, record) =>
-          formatNumber(calculateDailyStandardCapacity(record.standard_seconds), 2),
+          formatNumber(
+            calculateDailyStandardCapacity(record.standard_seconds),
+            2,
+          ),
       })
     }
 
