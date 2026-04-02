@@ -9,6 +9,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import PrintButton from '@/ui/PrintButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useAuth } from '@/contexts/AuthContext'
 import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
 import {
   useWorkshopOrdersList,
@@ -41,6 +42,8 @@ export interface WorkshopOrder {
 
 export default function WorkshopOrderList() {
   const { message, modal } = App.useApp()
+  const { role } = useAuth()
+  const canDelete = role === 'admin'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')
@@ -324,11 +327,13 @@ export default function WorkshopOrderList() {
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑" handleEdit={handleEdit} />
-        <DeleteButton
-          onClick={handleDelete}
-          isDeleting={deleteMutation.isPending}
-          count={selectedRowKeys.length}
-        />
+        {canDelete ? (
+          <DeleteButton
+            onClick={handleDelete}
+            isDeleting={deleteMutation.isPending}
+            count={selectedRowKeys.length}
+          />
+        ) : null}
         <PrintButton
           handlePrint={handlePrint}
           loading={isPrinting}

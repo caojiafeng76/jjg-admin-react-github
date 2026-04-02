@@ -100,6 +100,10 @@ export default function EmployeeTable({
             return <Tag color="gold">管理员</Tag>
           }
 
+          if (value === 'precision_cutting_admin') {
+            return <Tag color="purple">精切管理员</Tag>
+          }
+
           if (value === 'team_leader') {
             return <Tag color="cyan">班组长</Tag>
           }
