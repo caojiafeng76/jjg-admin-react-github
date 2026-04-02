@@ -20,7 +20,7 @@ export default function ComingSoonPage() {
     <div className="flex min-h-full items-center justify-center p-6 md:p-10">
       <Card className="w-full max-w-3xl border-0 shadow-sm">
         <Space direction="vertical" size={20} className="w-full text-center">
-          <Text className="text-xs font-medium uppercase tracking-[0.35em] text-gray-400">
+          <Text className="text-xs font-medium tracking-[0.35em] text-gray-400 uppercase">
             Coming Soon
           </Text>
           <Title level={2} className="mb-0!">

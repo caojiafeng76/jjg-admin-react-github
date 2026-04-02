@@ -285,7 +285,10 @@ export const router = createBrowserRouter([
         path: 'precision-cutting-transfer',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
           </Suspense>
         ),
       },
@@ -293,7 +296,10 @@ export const router = createBrowserRouter([
         path: 'tooling-data',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
           </Suspense>
         ),
       },
@@ -301,7 +307,10 @@ export const router = createBrowserRouter([
         path: 'tooling-inventory',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
           </Suspense>
         ),
       },
@@ -309,7 +318,10 @@ export const router = createBrowserRouter([
         path: 'tooling-stock-in',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
           </Suspense>
         ),
       },
@@ -317,7 +329,10 @@ export const router = createBrowserRouter([
         path: 'tooling-stock-out',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<ComingSoonPage />} />
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
           </Suspense>
         ),
       },
