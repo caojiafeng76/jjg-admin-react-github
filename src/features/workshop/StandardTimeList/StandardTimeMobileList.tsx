@@ -76,7 +76,9 @@ export default function StandardTimeMobileList({
                 日标准产能
               </div>
               <div className="mt-1 text-lg font-semibold text-slate-900">
-                {calculateDailyStandardCapacity(record.standard_seconds).toFixed(2)}
+                {calculateDailyStandardCapacity(
+                  record.standard_seconds,
+                ).toFixed(2)}
               </div>
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">
