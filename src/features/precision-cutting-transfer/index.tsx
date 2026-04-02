@@ -70,13 +70,13 @@ export default function MaterialTransferPage() {
 
   const { data: filteredQuantityStats } =
     usePrecisionCuttingTransferQuantityStats({
-    filters: searchFilters,
-  })
+      filters: searchFilters,
+    })
   const { data: selectedQuantityStats } =
     usePrecisionCuttingTransferQuantityStats({
-    ids: selectedIds,
-    enabled: selectedIds.length > 0,
-  })
+      ids: selectedIds,
+      enabled: selectedIds.length > 0,
+    })
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
@@ -231,8 +231,7 @@ export default function MaterialTransferPage() {
               ...(values as PrecisionCuttingTransferUpdate),
               uploaded_by_name: editingRecord.uploaded_by_name,
               operator_names: values.operator_names,
-              is_audited:
-                (values as PrecisionCuttingTransferUpdate).is_audited,
+              is_audited: (values as PrecisionCuttingTransferUpdate).is_audited,
             },
           })
           message.success('更新成功')
@@ -296,10 +295,7 @@ export default function MaterialTransferPage() {
         >
           批量反审核
         </Button>
-        <EditButton
-          title="编辑精切转移单"
-          handleEdit={() => openEditModal()}
-        />
+        <EditButton title="编辑精切转移单" handleEdit={() => openEditModal()} />
         <ExportButton handleExport={handleExport} loading={isExporting}>
           {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
         </ExportButton>

@@ -306,10 +306,12 @@ export default function MaterialTransferForm({
               <Select
                 placeholder="请选择接收车间"
                 getPopupContainer={getPopupContainer}
-                options={PRECISION_CUTTING_TRANSFER_WORKSHOPS.map((workshop) => ({
-                  label: workshop,
-                  value: workshop,
-                }))}
+                options={PRECISION_CUTTING_TRANSFER_WORKSHOPS.map(
+                  (workshop) => ({
+                    label: workshop,
+                    value: workshop,
+                  }),
+                )}
               />
             </Form.Item>
 
@@ -355,8 +357,12 @@ export default function MaterialTransferForm({
               valuePropName="checked"
             >
               <Switch
-                checkedChildren={PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS[1].label}
-                unCheckedChildren={PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS[0].label}
+                checkedChildren={
+                  PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS[1].label
+                }
+                unCheckedChildren={
+                  PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS[0].label
+                }
               />
             </Form.Item>
           ) : null}

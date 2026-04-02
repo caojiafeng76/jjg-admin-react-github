@@ -16,8 +16,7 @@ import {
 
 const { RangePicker } = DatePicker
 
-interface PrecisionCuttingTransferSearchValues
-  extends PrecisionCuttingTransferFilters {
+interface PrecisionCuttingTransferSearchValues extends PrecisionCuttingTransferFilters {
   dateRange?: [Dayjs | null, Dayjs | null]
 }
 
