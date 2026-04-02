@@ -2,6 +2,7 @@ import { Button, Empty, Tag } from 'antd'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
 import type { StandardTime } from '@/services/apiStandardTimes'
+import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 
 interface Props {
   loading: boolean
@@ -68,6 +69,14 @@ export default function StandardTimeMobileList({
               </div>
               <div className="mt-1 text-lg font-semibold text-slate-900">
                 {record.theoretical_seconds}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                日标准产能
+              </div>
+              <div className="mt-1 text-lg font-semibold text-slate-900">
+                {calculateDailyStandardCapacity(record.standard_seconds).toFixed(2)}
               </div>
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">

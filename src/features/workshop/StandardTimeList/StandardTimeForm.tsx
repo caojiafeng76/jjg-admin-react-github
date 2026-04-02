@@ -16,6 +16,7 @@ import {
   useJobBaseSettingOptions,
   useMachineEquipmentMaintenanceOptions,
 } from './useStandardTimes'
+import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 
 interface JobSelectOption {
   label: string
@@ -87,8 +88,10 @@ function calculateCostPreview(values?: Partial<StandardTimeFormValues>) {
     toolingConsumableCost +
     inspectionCost +
     overheadCost
+  const dailyStandardCapacity = calculateDailyStandardCapacity(standardSeconds)
 
   return {
+    dailyStandardCapacity,
     laborCost,
     equipmentCost,
     toolingConsumableCost,
@@ -359,6 +362,12 @@ export default function StandardTimeForm({
           </Form.Item>
           <Divider>成本预览</Divider>
           <div className="grid grid-cols-1 gap-3 rounded-2xl bg-slate-50 p-4 md:grid-cols-2">
+            <div>
+              <Typography.Text type="secondary">日标准产能</Typography.Text>
+              <div className="mt-1 text-base font-semibold text-slate-900">
+                {formatMoney(costPreview.dailyStandardCapacity)}
+              </div>
+            </div>
             <div>
               <Typography.Text type="secondary">
                 人工成本（元/支）
