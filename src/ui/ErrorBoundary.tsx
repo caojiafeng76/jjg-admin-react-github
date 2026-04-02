@@ -1,5 +1,7 @@
 import React, { Component, ReactNode } from 'react'
-import { Result, Button } from 'antd'
+
+import AppErrorView from '@ui/AppErrorView'
+import { getErrorDisplayInfo } from '@/utils/errorHandler'
 
 interface Props {
   children: ReactNode
@@ -39,33 +41,35 @@ export default class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback
       }
 
+      const errorInfo = getErrorDisplayInfo(
+        this.state.error,
+        '页面运行中断，请稍后重试。',
+      )
+
       return (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '100vh',
-            padding: '24px',
-          }}
-        >
-          <Result
-            status="error"
-            title="页面出错了"
-            subTitle={this.state.error?.message || '抱歉,页面遇到了一些问题。'}
-            extra={[
-              <Button type="primary" key="reload" onClick={this.handleReset}>
-                重新加载
-              </Button>,
-              <Button
-                key="home"
-                onClick={() => (window.location.href = '/dashboard')}
-              >
-                返回首页
-              </Button>,
-            ]}
-          />
-        </div>
+        <AppErrorView
+          variant={errorInfo.category}
+          title="页面运行中断"
+          badge="边界保护"
+          description={errorInfo.message}
+          detail={errorInfo.detail}
+          code={errorInfo.code}
+          actions={[
+            {
+              key: 'retry',
+              label: '重试渲染',
+              type: 'primary',
+              onClick: this.handleReset,
+            },
+            {
+              key: 'home',
+              label: '返回首页',
+              onClick: () => {
+                window.location.href = '/'
+              },
+            },
+          ]}
+        />
       )
     }
 

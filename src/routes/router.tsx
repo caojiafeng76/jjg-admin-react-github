@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
 import { useAuth } from '@/contexts/AuthContext'
+import RouteErrorPage from '@/pages/RouteErrorPage'
 import {
   EMPLOYEE_SIDE_ROLES,
   getDefaultHomeByRole,
@@ -110,6 +111,7 @@ function RoleHomeRedirect() {
 export const router = createBrowserRouter([
   {
     path: '/',
+    errorElement: <RouteErrorPage />,
     element: (
       <Suspense fallback={<Loading />}>
         <ProtectedRoute element={<AppLayout />} />
@@ -282,6 +284,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
+    errorElement: <RouteErrorPage />,
     element: (
       <Suspense fallback={<Loading />}>
         <Login />
@@ -290,6 +293,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/access-denied',
+    errorElement: <RouteErrorPage />,
     element: (
       <Suspense fallback={<Loading />}>
         <AccessDenied />
