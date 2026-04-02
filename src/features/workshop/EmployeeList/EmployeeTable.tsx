@@ -108,6 +108,13 @@ export default function EmployeeTable({
         },
       },
       {
+        title: '工种',
+        dataIndex: 'job_name',
+        key: 'job_name',
+        width: 160,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
         title: '岗位时薪',
         dataIndex: 'hourly_wage',
         key: 'hourly_wage',
@@ -115,9 +122,9 @@ export default function EmployeeTable({
         render: (value: number | null | undefined) => formatNumber(value),
       },
       {
-        title: '绩效',
-        dataIndex: 'performance',
-        key: 'performance',
+        title: '系数',
+        dataIndex: 'coefficient',
+        key: 'coefficient',
         width: 100,
         render: (value: number | null | undefined) => formatNumber(value),
       },
@@ -197,7 +204,7 @@ export default function EmployeeTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 1320, y: scrollY }}
+      scroll={{ x: 1480, y: scrollY }}
       size="small"
       pagination={false}
       style={{

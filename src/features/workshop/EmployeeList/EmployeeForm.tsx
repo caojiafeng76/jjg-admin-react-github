@@ -8,17 +8,19 @@ import {
   Select,
   Switch,
 } from 'antd'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { ROLE_OPTIONS } from '@/config/access'
 import type { Employee } from '@/services/apiEmployees'
+import { useEmployeeJobBaseSettingOptions } from './useEmployees'
 import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 
 const DEFAULT_FORM_VALUES: EmployeeFormValues = {
   name: '',
   role: 'employee',
   is_active: true,
+  job_name: undefined,
   hourly_wage: 0,
-  performance: 1,
+  coefficient: 1,
   createAuthAccount: false,
 }
 
@@ -44,6 +46,26 @@ export default function EmployeeForm({
 }: Props) {
   const [form] = Form.useForm<EmployeeFormValues>()
   const createAuthAccount = Form.useWatch('createAuthAccount', form)
+  const { data: jobOptions = [], isLoading: isJobOptionsLoading } =
+    useEmployeeJobBaseSettingOptions()
+  const jobSelectOptions = useMemo(
+    () =>
+      jobOptions.map((option) => ({
+        label: option.job_name,
+        value: option.job_name,
+      })),
+    [jobOptions],
+  )
+  const jobRateMap = useMemo(
+    () =>
+      new Map(
+        jobOptions.map((option) => [
+          option.job_name,
+          Number(option.hourly_fee || 0),
+        ]),
+      ),
+    [jobOptions],
+  )
 
   useEffect(() => {
     setFormRef(form)
@@ -54,13 +76,24 @@ export default function EmployeeForm({
       form.setFieldsValue({
         ...DEFAULT_FORM_VALUES,
         ...initialValues,
+        job_name: initialValues.job_name || undefined,
         hourly_wage: Number(initialValues.hourly_wage ?? 0),
-        performance: Number(initialValues.performance ?? 1),
+        coefficient: Number(initialValues.coefficient ?? 1),
       })
     } else {
       form.setFieldsValue(DEFAULT_FORM_VALUES)
     }
   }, [form, initialValues])
+
+  const handleJobChange = (value: string | undefined) => {
+    if (!value) {
+      form.setFieldValue('hourly_wage', 0)
+      return
+    }
+
+    const matchedRate = jobRateMap.get(value)
+    form.setFieldValue('hourly_wage', matchedRate ?? 0)
+  }
 
   return (
     <Form
@@ -100,33 +133,49 @@ export default function EmployeeForm({
         <Select disabled={isCreating} options={ROLE_OPTIONS} />
       </Form.Item>
 
+      <Form.Item
+        name="job_name"
+        label="工种"
+        rules={[{ required: true, message: '请选择工种' }]}
+        extra="选定工种后，岗位时薪会自动绑定岗位基础表中的工时费；岗位基础表变动后会自动同步。"
+      >
+        <Select
+          showSearch
+          optionFilterProp="label"
+          placeholder="请选择工种"
+          loading={isJobOptionsLoading}
+          options={jobSelectOptions}
+          onChange={handleJobChange}
+          disabled={isCreating}
+        />
+      </Form.Item>
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Form.Item
           name="hourly_wage"
           label="岗位时薪"
-          rules={[{ required: true, message: '请输入岗位时薪' }]}
         >
           <InputNumber
             min={0}
             step={0.01}
             precision={2}
             style={{ width: '100%' }}
-            placeholder="请输入岗位时薪"
-            disabled={isCreating}
+            placeholder="选择工种后自动带出"
+            disabled
           />
         </Form.Item>
 
         <Form.Item
-          name="performance"
-          label="绩效"
-          rules={[{ required: true, message: '请输入绩效' }]}
+          name="coefficient"
+          label="系数"
+          rules={[{ required: true, message: '请输入系数' }]}
         >
           <InputNumber
             min={0}
             step={0.01}
             precision={2}
             style={{ width: '100%' }}
-            placeholder="请输入绩效"
+            placeholder="请输入系数"
             disabled={isCreating}
           />
         </Form.Item>

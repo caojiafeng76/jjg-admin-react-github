@@ -25,6 +25,9 @@ export interface ProductionOrderWithEmployee extends ProductionOrder {
   employee?: {
     id: string
     name: string
+    job_name?: string | null
+    hourly_wage?: number | null
+    coefficient?: number | null
   }
 }
 
@@ -50,7 +53,7 @@ export interface ProductionOrderFilters {
 
 const PRODUCTION_ORDER_EXPORT_SELECT = `
       *,
-      employee:employees(id, name),
+  employee:employees(id, name, job_name, hourly_wage, coefficient),
       items:production_order_items(*)
     `
 
@@ -175,7 +178,7 @@ export async function getProductionOrderById(id: string) {
     throw handleApiError(error, '获取生产工单详情失败')
   }
 
-  return data as ProductionOrderWithEmployee & {
+  return data as unknown as ProductionOrderWithEmployee & {
     items: ProductionOrderItem[]
   }
 }
@@ -190,7 +193,7 @@ async function getProductionOrdersForExportBatch(ids: string[]) {
     throw handleApiError(error, '获取导出工单失败')
   }
 
-  return (data || []) as ProductionOrderForExport[]
+  return (data || []) as unknown as ProductionOrderForExport[]
 }
 
 export async function getProductionOrdersForExport(ids: string[]) {

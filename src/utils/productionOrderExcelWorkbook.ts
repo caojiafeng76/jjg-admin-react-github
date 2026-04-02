@@ -31,10 +31,11 @@ const EXPORT_HEADERS = [
 ] as const
 
 const SUMMARY_SHEET_NAME = '汇总表'
-const SUMMARY_TITLE = '精加工车间员工月工时汇总表'
+const SUMMARY_TITLE = '精加工车间员工工时汇总表'
 const SUMMARY_HEADERS = [
   '序号',
   '姓名',
+  '工种',
   '出勤工时',
   '正工工时',
   '零工工时',
@@ -48,6 +49,16 @@ const SUMMARY_HEADERS = [
 type ExportRow = Array<string | number>
 type SummaryRow = Array<string | number>
 
+const SUMMARY_SERIAL_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('序号')
+const SUMMARY_JOB_NAME_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('工种')
+const SUMMARY_WORK_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('出勤工时')
+const SUMMARY_POSITIVE_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('正工工时')
+const SUMMARY_EXTRA_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('零工工时')
+const SUMMARY_TOTAL_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('总工时')
+const SUMMARY_HOURLY_WAGE_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('时薪')
+const SUMMARY_COEFFICIENT_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('系数')
+const SUMMARY_SALARY_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('工资')
+
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
 const WORK_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('出勤工时')
 const POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX =
@@ -60,6 +71,113 @@ const REMARK_COLUMN_INDEX = EXPORT_HEADERS.indexOf('备注')
 
 function normalizeNumber(value: number | null | undefined) {
   return Number(value || 0)
+}
+
+function roundToTwo(value: number) {
+  return Number(value.toFixed(2))
+}
+
+function getEmployeeJobName(orders: ProductionOrderForExport[]) {
+  return orders.find((order) => order.employee?.job_name)?.employee?.job_name || ''
+}
+
+function getEmployeeHourlyWage(orders: ProductionOrderForExport[]) {
+  return roundToTwo(
+    normalizeNumber(
+      orders.find((order) => order.employee?.hourly_wage != null)?.employee
+        ?.hourly_wage,
+    ),
+  )
+}
+
+function getEmployeeCoefficient(orders: ProductionOrderForExport[]) {
+  const value = orders.find((order) => order.employee?.coefficient != null)
+    ?.employee?.coefficient
+
+  return roundToTwo(value == null ? 1 : Number(value))
+}
+
+function getExcelColumnName(columnIndex: number) {
+  let dividend = columnIndex + 1
+  let columnName = ''
+
+  while (dividend > 0) {
+    const modulo = (dividend - 1) % 26
+    columnName = String.fromCharCode(65 + modulo) + columnName
+    dividend = Math.floor((dividend - modulo) / 26)
+  }
+
+  return columnName
+}
+
+function setFormulaCell(
+  worksheet: XLSX.WorkSheet,
+  rowIndex: number,
+  columnIndex: number,
+  formula: string,
+  numberFormat = '0.00',
+) {
+  const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })
+
+  worksheet[cellRef] = {
+    t: 'n',
+    f: formula,
+    z: numberFormat,
+  }
+}
+
+function applySummarySheetFormulas(
+  worksheet: XLSX.WorkSheet,
+  employeeCount: number,
+) {
+  const dataStartRowIndex = 2
+
+  for (
+    let rowIndex = dataStartRowIndex;
+    rowIndex < dataStartRowIndex + employeeCount;
+    rowIndex += 1
+  ) {
+    const excelRowNumber = rowIndex + 1
+    const totalHoursColumn = getExcelColumnName(SUMMARY_TOTAL_HOURS_COLUMN_INDEX)
+    const hourlyWageColumn = getExcelColumnName(
+      SUMMARY_HOURLY_WAGE_COLUMN_INDEX,
+    )
+    const coefficientColumn = getExcelColumnName(
+      SUMMARY_COEFFICIENT_COLUMN_INDEX,
+    )
+
+    setFormulaCell(
+      worksheet,
+      rowIndex,
+      SUMMARY_SALARY_COLUMN_INDEX,
+      `${totalHoursColumn}${excelRowNumber}*${hourlyWageColumn}${excelRowNumber}*${coefficientColumn}${excelRowNumber}`,
+    )
+  }
+
+  const totalRowIndex = dataStartRowIndex + employeeCount
+  const dataStartExcelRow = dataStartRowIndex + 1
+  const dataEndExcelRow = dataStartRowIndex + employeeCount
+
+  if (employeeCount === 0) {
+    return
+  }
+
+  ;[
+    SUMMARY_WORK_HOURS_COLUMN_INDEX,
+    SUMMARY_POSITIVE_HOURS_COLUMN_INDEX,
+    SUMMARY_EXTRA_HOURS_COLUMN_INDEX,
+    SUMMARY_TOTAL_HOURS_COLUMN_INDEX,
+    SUMMARY_SALARY_COLUMN_INDEX,
+  ].forEach((columnIndex) => {
+    const excelColumnName = getExcelColumnName(columnIndex)
+
+    setFormulaCell(
+      worksheet,
+      totalRowIndex,
+      columnIndex,
+      `SUM(${excelColumnName}${dataStartExcelRow}:${excelColumnName}${dataEndExcelRow})`,
+    )
+  })
 }
 
 function getOrderPositiveQualifiedHours(order: ProductionOrderForExport) {
@@ -247,51 +365,53 @@ function buildSummarySheetRows(
   ]
 
   employeeGroups.forEach(([employeeName, employeeOrders], index) => {
-    const workHours = Number(
+    const jobName = getEmployeeJobName(employeeOrders)
+    const hourlyWage = getEmployeeHourlyWage(employeeOrders)
+    const coefficient = getEmployeeCoefficient(employeeOrders)
+    const workHours = roundToTwo(
       employeeOrders
-        .reduce((total, order) => total + normalizeNumber(order.work_hours), 0)
-        .toFixed(2),
+        .reduce((total, order) => total + normalizeNumber(order.work_hours), 0),
     )
-    const positiveHours = Number(
+    const positiveHours = roundToTwo(
       employeeOrders
         .reduce(
           (total, order) => total + getOrderPositiveQualifiedHours(order),
           0,
-        )
-        .toFixed(2),
+        ),
     )
-    const extraHours = Number(
+    const extraHours = roundToTwo(
       employeeOrders
         .reduce(
           (total, order) => total + normalizeNumber(order.extra_qualified_hours),
           0,
-        )
-        .toFixed(2),
+        ),
     )
-    const totalHours = Number(
+    const totalHours = roundToTwo(
       employeeOrders
         .reduce(
           (total, order) => total + normalizeNumber(order.total_qualified_hours),
           0,
-        )
-        .toFixed(2),
+        ),
     )
 
     const row: SummaryRow = [
       index + 1,
       employeeName,
+      jobName,
       workHours,
       positiveHours,
       extraHours,
       totalHours,
-      0,
-      0,
+      hourlyWage,
+      coefficient,
       0,
       '',
     ]
 
     rows.push(row)
   })
+
+  rows.push(['合计', '', '', 0, 0, 0, 0, '', '', 0, ''])
 
   return rows
 }
@@ -345,6 +465,7 @@ function applySummarySheetStyles(
   worksheet['!cols'] = [
     { wch: 8 },
     { wch: 14 },
+    { wch: 14 },
     { wch: 12 },
     { wch: 12 },
     { wch: 12 },
@@ -392,6 +513,21 @@ function applySummarySheetStyles(
           },
         }
       }
+
+      if (row === rows.length - 1) {
+        worksheet[cellRef].s = {
+          ...(worksheet[cellRef].s || {}),
+          fill: {
+            fgColor: { rgb: 'FFF2CC' },
+          },
+          font: {
+            ...(worksheet[cellRef].s?.font || {}),
+            name: '宋体',
+            sz: 11,
+            bold: true,
+          },
+        }
+      }
     }
   }
 
@@ -414,7 +550,13 @@ function createProductionOrderWorkbook(orders: ProductionOrderForExport[]) {
   const summaryRows = buildSummarySheetRows(employeeGroupEntries)
   const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryRows)
 
+  applySummarySheetFormulas(summaryWorksheet, employeeGroupEntries.length)
+
   summaryWorksheet['!merges'] = [
+    {
+      s: { r: summaryRows.length - 1, c: SUMMARY_SERIAL_COLUMN_INDEX },
+      e: { r: summaryRows.length - 1, c: SUMMARY_JOB_NAME_COLUMN_INDEX },
+    },
     {
       s: { r: 0, c: 0 },
       e: { r: 0, c: SUMMARY_HEADERS.length - 1 },
