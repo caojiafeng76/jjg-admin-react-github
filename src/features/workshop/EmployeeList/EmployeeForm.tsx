@@ -151,10 +151,7 @@ export default function EmployeeForm({
       </Form.Item>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Form.Item
-          name="hourly_wage"
-          label="岗位时薪"
-        >
+        <Form.Item name="hourly_wage" label="岗位时薪">
           <InputNumber
             min={0}
             step={0.01}
