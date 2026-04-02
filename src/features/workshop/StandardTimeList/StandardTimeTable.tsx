@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Table, TableColumnsType, Tag } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
+import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 
 function formatNumber(value: number | null | undefined, digits = 4) {
   return Number(value || 0).toFixed(digits)
@@ -89,6 +90,14 @@ export default function StandardTimeTable({
         dataIndex: 'standard_seconds',
         key: 'standard_seconds',
         width: 140,
+      })
+
+      baseInfoChildren.push({
+        title: '日标准产能',
+        key: 'daily_standard_capacity',
+        width: 120,
+        render: (_value, record) =>
+          formatNumber(calculateDailyStandardCapacity(record.standard_seconds), 2),
       })
     }
 

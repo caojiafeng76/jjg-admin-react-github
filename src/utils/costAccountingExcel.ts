@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx-js-style'
 
 import type { StandardTime } from '@/services/apiStandardTimes'
+import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import {
   autoFitColumnWidths,
   centerAllCells,
@@ -15,6 +16,7 @@ const EXPORT_HEADERS = [
   '客户',
   '设备编号',
   '标准工时(秒)',
+  '日标准产能',
   '理论工时(秒)',
   '检验工时(秒)',
   '人工费率(元/小时)',
@@ -59,6 +61,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
     record.customer || '',
     record.equipment_no || '',
     record.standard_seconds,
+    formatNumber(calculateDailyStandardCapacity(record.standard_seconds), 2),
     record.theoretical_seconds,
     record.inspection_seconds,
     formatNumber(record.labor_rate),

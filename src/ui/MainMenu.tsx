@@ -2,7 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import type { MenuProps } from 'antd'
 import { Menu } from 'antd'
-import { HomeIcon, Square3Stack3DIcon } from '@heroicons/react/16/solid'
+import {
+  DocumentChartBarIcon,
+  HomeIcon,
+  Square3Stack3DIcon,
+} from '@heroicons/react/16/solid'
 
 import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/AuthContext'
@@ -28,15 +32,30 @@ const adminItems: MenuItem[] = [
     ],
   },
   {
+    key: 'workshop-order-list',
+    label: '订单管理',
+    icon: <Square3Stack3DIcon className="size-4" />,
+  },
+  {
+    key: 'standard-time-list',
+    label: '成本核算',
+    icon: <Square3Stack3DIcon className="size-4" />,
+  },
+  {
     key: 'workshop',
-    label: '车间管理',
+    label: '基础资料',
     icon: <Square3Stack3DIcon className="size-4" />,
     children: [
-      { key: 'workshop-order-list', label: '订单管理' },
       { key: 'employee-list', label: '员工管理' },
-      { key: 'standard-time-list', label: '成本核算' },
       { key: 'job-base-setting', label: '岗位基础数值设定' },
       { key: 'machine-equipment-maintenance', label: '机器设备维护' },
+    ],
+  },
+  {
+    key: 'reports',
+    label: '报表',
+    icon: <DocumentChartBarIcon className="size-4" />,
+    children: [
       { key: 'material-transfer', label: '物料转移单' },
       { key: 'production-order', label: '生产工单' },
       { key: 'production-daily-report', label: '生产日报表' },
