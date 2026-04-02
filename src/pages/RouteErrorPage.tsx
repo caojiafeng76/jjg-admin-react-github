@@ -3,7 +3,11 @@ import {
   HomeOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
-import { isRouteErrorResponse, useNavigate, useRouteError } from 'react-router-dom'
+import {
+  isRouteErrorResponse,
+  useNavigate,
+  useRouteError,
+} from 'react-router-dom'
 
 import AppErrorView from '@ui/AppErrorView'
 import { getErrorDisplayInfo } from '@/utils/errorHandler'
@@ -41,7 +45,8 @@ function getRouteErrorContent(routeError: unknown): RouteErrorContent {
     return {
       variant: routeError.status === 404 ? 'notFound' : info.category,
       title: routeError.status === 404 ? '页面不存在' : '页面暂时无法打开',
-      badge: routeError.status === 404 ? '404 页面' : `错误 ${routeError.status}`,
+      badge:
+        routeError.status === 404 ? '404 页面' : `错误 ${routeError.status}`,
       ...info,
     }
   }
@@ -56,7 +61,9 @@ function getRouteErrorContent(routeError: unknown): RouteErrorContent {
   }
 }
 
-function getRouteTitle(category: 'generic' | 'network' | 'permission' | 'notFound') {
+function getRouteTitle(
+  category: 'generic' | 'network' | 'permission' | 'notFound',
+) {
   if (category === 'network') {
     return '网络连接暂时不可用'
   }
@@ -72,7 +79,9 @@ function getRouteTitle(category: 'generic' | 'network' | 'permission' | 'notFoun
   return '页面暂时无法打开'
 }
 
-function getRouteBadge(category: 'generic' | 'network' | 'permission' | 'notFound') {
+function getRouteBadge(
+  category: 'generic' | 'network' | 'permission' | 'notFound',
+) {
   if (category === 'network') {
     return '网络异常'
   }
