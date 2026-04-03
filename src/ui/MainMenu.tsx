@@ -29,7 +29,7 @@ const adminItems: MenuItem[] = [
     children: [
       { key: 'syney-po-list', label: '订单列表' },
       { key: 'syney-store-report-list', label: '入库单列表' },
-      { key: 'syney-safe-part-setting', label: '安全件设置' },
+      { key: 'syney-safe-part-setting', label: '件号配置' },
       { key: 'syney-spec-list', label: '踏板规格列表' },
       { key: 'syney-setting', label: '编号设置' },
     ],

@@ -43,6 +43,7 @@ export default function SafePartSettingPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<SyneySafePartSetting | null>(null)
   const [pageSize, setPageSize] = useState(10)
+  const [page, setPage] = useState(1)
   const [form] = Form.useForm()
 
   const openCreate = () => {
@@ -103,7 +104,7 @@ export default function SafePartSettingPage() {
       dataIndex: 'index',
       width: 60,
       render: (_: unknown, __: SyneySafePartSetting, index: number) =>
-        index + 1,
+        (page - 1) * pageSize + index + 1,
     },
     {
       title: '件号(包含)',
@@ -230,6 +231,8 @@ export default function SafePartSettingPage() {
               options={[
                 { label: '梳齿支撑板', value: '梳齿支撑板' },
                 { label: '楼层板', value: '楼层板' },
+                { label: '横框', value: '横框' },
+                { label: '侧框', value: '侧框' },
               ]}
             />
           </Form.Item>
@@ -281,10 +284,12 @@ export default function SafePartSettingPage() {
         columns={columns}
         size="small"
         pagination={{
+          current: page,
           pageSize,
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50],
-          onShowSizeChange: (_current, size) => setPageSize(size),
+          onChange: (p) => setPage(p),
+          onShowSizeChange: (_current, size) => { setPageSize(size); setPage(1) },
         }}
       />
     </div>
