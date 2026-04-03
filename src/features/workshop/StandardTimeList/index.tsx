@@ -13,6 +13,7 @@ import type {
   StandardTime,
   StandardTimeFormValues,
 } from '@/services/apiStandardTimes'
+import { getAllStandardTimesForExport } from '@/services/apiStandardTimes'
 import { exportCostAccountingToExcel } from '@/utils/costAccountingExcel'
 import {
   useStandardTimesList,
@@ -35,6 +36,7 @@ export default function StandardTimeList() {
   const [modalTitle, setModalTitle] = useState('新建成本核算')
   const [isEdit, setIsEdit] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [isFilterExporting, setIsFilterExporting] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -137,8 +139,9 @@ export default function StandardTimeList() {
   }, [deleteMutation, isTeamLeaderMode, message, selectedRowKeys])
 
   const handleExport = useCallback(async () => {
+    const selectedSet = new Set(selectedRowKeys)
     const selectedRecords = (data?.items || []).filter((item) =>
-      selectedRowKeys.includes(item.id || ''),
+      selectedSet.has(item.id || ''),
     )
 
     if (selectedRecords.length === 0) {
@@ -146,8 +149,10 @@ export default function StandardTimeList() {
       return
     }
 
+    setIsExporting(true)
+    // 先让 React 渲染 loading 状态，再执行同步的 Excel 生成
+    await new Promise<void>((resolve) => setTimeout(resolve, 0))
     try {
-      setIsExporting(true)
       exportCostAccountingToExcel(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条成本核算数据`)
     } catch (error) {
@@ -160,6 +165,28 @@ export default function StandardTimeList() {
       setIsExporting(false)
     }
   }, [data?.items, message, selectedRowKeys])
+
+  const handleFilterExport = useCallback(async () => {
+    setIsFilterExporting(true)
+    try {
+      const records = await getAllStandardTimesForExport(searchParams)
+      if (records.length === 0) {
+        message.warning('当前筛选条件下无数据可导出')
+        return
+      }
+      await new Promise<void>((resolve) => setTimeout(resolve, 0))
+      exportCostAccountingToExcel(records)
+      message.success(`已按筛选条件导出 ${records.length} 条成本核算数据`)
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('导出成本核算失败，请稍后重试')
+      }
+    } finally {
+      setIsFilterExporting(false)
+    }
+  }, [message, searchParams])
 
   const handleFinish = useCallback(
     async (values: StandardTimeFormValues) => {
@@ -323,7 +350,13 @@ export default function StandardTimeList() {
             loading={isExporting}
             count={selectedRowKeys.length}
           >
-            导出成本核算
+            导出已选
+          </ExportButton>
+          <ExportButton
+            handleExport={handleFilterExport}
+            loading={isFilterExporting}
+          >
+            按筛选条件导出
           </ExportButton>
           <DeleteButton
             onConfirm={handleDelete}

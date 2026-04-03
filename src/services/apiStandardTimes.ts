@@ -409,3 +409,58 @@ export async function deleteStandardTimes(ids: string[]) {
     throw handleApiError(error, '删除成本核算失败')
   }
 }
+
+export async function getAllStandardTimesForExport({
+  operation,
+  model,
+  unmatchedOnly,
+  updatedStartDate,
+  updatedEndDate,
+}: {
+  operation?: string
+  model?: string
+  unmatchedOnly?: boolean
+  updatedStartDate?: string
+  updatedEndDate?: string
+}): Promise<StandardTime[]> {
+  let query = supabase
+    .from('process_standards')
+    .select('*')
+    .order('standard_seconds', { ascending: true })
+    .order('operation', { ascending: true })
+    .order('model', { ascending: true })
+
+  if (operation) {
+    query = query.ilike('operation', `%${operation}%`)
+  }
+
+  if (model) {
+    query = query.ilike('model', `%${model}%`)
+  }
+
+  if (unmatchedOnly) {
+    query = query.is('job_name', null)
+  }
+
+  if (updatedStartDate) {
+    query = query.gte(
+      'updated_at',
+      dayjs(updatedStartDate).startOf('day').toISOString(),
+    )
+  }
+
+  if (updatedEndDate) {
+    query = query.lte(
+      'updated_at',
+      dayjs(updatedEndDate).endOf('day').toISOString(),
+    )
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw handleApiError(error, '获取成本核算导出数据失败')
+  }
+
+  return (data || []) as StandardTime[]
+}

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useCallback, useMemo } from 'react'
 import { Table, TableColumnsType, Tag } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
@@ -19,7 +19,7 @@ interface Props {
   hideStandardSeconds?: boolean
 }
 
-export default function StandardTimeTable({
+const StandardTimeTable = memo(function StandardTimeTable({
   loading,
   data,
   selectedRowKeys,
@@ -322,6 +322,15 @@ export default function StandardTimeTable({
     [rowHeight],
   )
 
+  const handleRow = useCallback(
+    (record: StandardTime) => ({
+      style: !record.job_name
+        ? { backgroundColor: '#fffbe6' }
+        : undefined,
+    }),
+    [],
+  )
+
   return (
     <Table<StandardTime>
       rowKey={(record) => record.id || ''}
@@ -329,13 +338,7 @@ export default function StandardTimeTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      onRow={(record) => ({
-        style: !record.job_name
-          ? {
-              backgroundColor: '#fffbe6',
-            }
-          : undefined,
-      })}
+      onRow={handleRow}
       scroll={{ x: hideStandardSeconds ? 2340 : 2490, y: scrollY }}
       size="small"
       pagination={false}
@@ -345,4 +348,6 @@ export default function StandardTimeTable({
       components={components}
     />
   )
-}
+})
+
+export default StandardTimeTable
