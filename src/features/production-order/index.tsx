@@ -217,8 +217,7 @@ export default function ProductionOrderPage() {
   const todayStr = dayjs().format('YYYY-MM-DD')
   const { data: hasOrderToday = false } = useQuery({
     queryKey: ['production-orders-today-check', fixedEmployee?.id, todayStr],
-    queryFn: () =>
-      checkEmployeeOrderExistsOnDate(fixedEmployee!.id, todayStr),
+    queryFn: () => checkEmployeeOrderExistsOnDate(fixedEmployee!.id, todayStr),
     enabled: isEmployeeView && Boolean(fixedEmployee?.id),
     staleTime: 0,
   })
