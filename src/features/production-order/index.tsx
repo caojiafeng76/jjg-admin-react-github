@@ -1,4 +1,6 @@
 import { startTransition, useState, useCallback, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import dayjs from 'dayjs'
 import {
   ArrowPathIcon,
   PlusCircleIcon,
@@ -21,6 +23,7 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   getProductionOrdersForExportByFilters,
   getProductionOrdersForExport,
+  checkEmployeeOrderExistsOnDate,
   type ProductionOrder,
   type ProductionOrderFilters,
   type ProductionOrderShift,
@@ -131,6 +134,7 @@ async function syncOrderItemsSequentially({
 
 export default function ProductionOrderPage() {
   const { message, modal } = App.useApp()
+  const queryClient = useQueryClient()
   const { role, employeeProfile } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
   const isAdminManagementView = role === 'admin' && !isEmployeeView
@@ -209,6 +213,15 @@ export default function ProductionOrderPage() {
 
   const { data: allEmployees } = useAllEmployees()
   const employees = fixedEmployee ? [fixedEmployee] : allEmployees || []
+
+  const todayStr = dayjs().format('YYYY-MM-DD')
+  const { data: hasOrderToday = false } = useQuery({
+    queryKey: ['production-orders-today-check', fixedEmployee?.id, todayStr],
+    queryFn: () =>
+      checkEmployeeOrderExistsOnDate(fixedEmployee!.id, todayStr),
+    enabled: isEmployeeView && Boolean(fixedEmployee?.id),
+    staleTime: 0,
+  })
 
   const createMutation = useCreateProductionOrder()
   const updateMutation = useUpdateProductionOrder()
@@ -497,6 +510,22 @@ export default function ProductionOrderPage() {
           })
           message.success('工单更新成功')
         } else {
+          if (isEmployeeView) {
+            const orderDate = values.order.order_date as string
+            const employeeId =
+              (values.order.employee_id as string) || fixedEmployee?.id
+            if (employeeId && orderDate) {
+              const exists = await checkEmployeeOrderExistsOnDate(
+                employeeId,
+                orderDate,
+              )
+              if (exists) {
+                message.error('该员工当天已有工单，同一天只能创建一张工单')
+                return
+              }
+            }
+          }
+
           const newOrder = await createMutation.mutateAsync(
             values.order as Parameters<typeof createMutation.mutateAsync>[0],
           )
@@ -512,6 +541,9 @@ export default function ProductionOrderPage() {
           }
 
           message.success('工单创建成功')
+          queryClient.invalidateQueries({
+            queryKey: ['production-orders-today-check'],
+          })
         }
 
         resetFormState()
@@ -528,6 +560,7 @@ export default function ProductionOrderPage() {
       isEdit,
       editingRecord,
       message,
+      queryClient,
       resetFormState,
       updateMutation,
       addItemMutation,
@@ -729,16 +762,24 @@ export default function ProductionOrderPage() {
         }
       >
         {isEmployeeView ? (
-          <Button
-            type="primary"
-            block
-            size="large"
-            icon={<PlusCircleIcon className="size-4" />}
-            onClick={handleCreate}
-            className="h-11 rounded-2xl shadow-[0_12px_30px_rgba(15,23,42,0.16)]"
-          >
-            添加
-          </Button>
+          <div className="space-y-1">
+            <Button
+              type="primary"
+              block
+              size="large"
+              icon={<PlusCircleIcon className="size-4" />}
+              onClick={handleCreate}
+              disabled={hasOrderToday}
+              className="h-11 rounded-2xl shadow-[0_12px_30px_rgba(15,23,42,0.16)]"
+            >
+              {hasOrderToday ? '当天工单已存在' : '添加'}
+            </Button>
+            {hasOrderToday ? (
+              <p className="text-center text-xs text-slate-400">
+                若要修改，请在原单上修改
+              </p>
+            ) : null}
+          </div>
         ) : (
           <>
             <AddButton handleCreate={handleCreate} />

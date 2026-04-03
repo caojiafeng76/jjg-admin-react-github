@@ -387,3 +387,20 @@ export async function updateProductionOrders({
 
   return (data || []) as ProductionOrder[]
 }
+
+export async function checkEmployeeOrderExistsOnDate(
+  employeeId: string,
+  orderDate: string,
+): Promise<boolean> {
+  const { count, error } = await supabase
+    .from('production_orders')
+    .select('id', { count: 'exact', head: true })
+    .eq('employee_id', employeeId)
+    .eq('order_date', orderDate)
+
+  if (error) {
+    throw handleApiError(error, '检查工单失败')
+  }
+
+  return (count ?? 0) > 0
+}
