@@ -1,13 +1,10 @@
 import { useEffect, useMemo } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import {
-  App,
   Modal,
   Form,
   InputNumber,
   Select,
   Input,
-  AutoComplete,
 } from 'antd'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
@@ -20,7 +17,6 @@ import {
   useSalesOrdersProjectNos,
   useOperationsByModel,
 } from './useProcessStandards'
-import { ensureStandardTimeExists } from '@/services/apiStandardTimes'
 
 interface Props {
   open: boolean
@@ -39,8 +35,6 @@ export default function ProductionOrderItemForm({
   orderId,
   compact = false,
 }: Props) {
-  const { message } = App.useApp()
-  const queryClient = useQueryClient()
   const [form] = Form.useForm()
   const { data: projectNos, isLoading: loadingProjectNos } =
     useSalesOrdersProjectNos()
@@ -130,34 +124,6 @@ export default function ProductionOrderItemForm({
 
   const handleFinish = async (values: Partial<ProductionOrderItem>) => {
     const operation = values.operation?.trim()
-    const operationExists = operations?.some(
-      (item) => item.operation === operation,
-    )
-
-    if (operation && !operationExists && productModel) {
-      try {
-        const created = await ensureStandardTimeExists({
-          operation,
-          model: productModel,
-          standard_seconds: 0,
-        })
-
-        if (created) {
-          await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ['standard-times'] }),
-            queryClient.invalidateQueries({ queryKey: ['process-standards'] }),
-          ])
-          message.success('未匹配工序已加入标准工时，默认标准工时为 0')
-        }
-      } catch (error) {
-        message.error(
-          error instanceof Error
-            ? error.message
-            : '补建标准工时失败，请稍后重试',
-        )
-        return
-      }
-    }
 
     onSubmit({
       ...values,
@@ -288,21 +254,11 @@ export default function ProductionOrderItemForm({
           <Form.Item
             name="operation"
             label="工序"
-            rules={[
-              { required: true, message: '请输入工序' },
-              {
-                validator: async (_, value) => {
-                  if (typeof value === 'string' && value.trim()) {
-                    return
-                  }
-
-                  throw new Error('请输入工序')
-                },
-              },
-            ]}
+            rules={[{ required: true, message: '请选择工序' }]}
           >
-            <AutoComplete
-              placeholder="请选择或输入工序"
+            <Select
+              showSearch
+              placeholder="请选择工序"
               onChange={handleOperationChange}
               options={operationOptions}
               getPopupContainer={getPopupContainer}
