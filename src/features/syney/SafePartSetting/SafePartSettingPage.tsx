@@ -21,6 +21,22 @@ import {
   SyneySafePartSetting,
 } from '@services/apiSyneySafePartSettings'
 
+const DECOMPOSITION_ROLE_LABELS: Record<string, string> = {
+  side_frame: '侧围',
+  cross_frame: '横围',
+  front_plate: '前板',
+  upper_middle: '上中板',
+  lower_middle: '下中板',
+  rear_upper: '上后板',
+  rear_lower: '下后板',
+  extension_upper: '上加长板',
+  extension_lower: '下加长板',
+}
+
+const DECOMPOSITION_ROLE_OPTIONS = Object.entries(DECOMPOSITION_ROLE_LABELS).map(
+  ([value, label]) => ({ value, label }),
+)
+
 export default function SafePartSettingPage() {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
@@ -46,6 +62,7 @@ export default function SafePartSettingPage() {
       english_name: record.english_name ?? '',
       need_print_label: record.need_print_label,
       is_safe_part: record.is_safe_part,
+      decomposition_role: record.decomposition_role ?? undefined,
       remark: record.remark ?? '',
       id: record.id,
     })
@@ -145,6 +162,11 @@ export default function SafePartSettingPage() {
       dataIndex: 'is_safe_part',
       render: (v: boolean) => (v ? '是' : '否'),
     },
+    {
+      title: '分解单列',
+      dataIndex: 'decomposition_role',
+      render: (v: string | null) => DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v ?? '-',
+    },
     { title: '备注', dataIndex: 'remark' },
     {
       title: '操作',
@@ -179,7 +201,7 @@ export default function SafePartSettingPage() {
       </div>
 
       <Modal
-        title={editing ? '编辑安全部件设置' : '新增安全部件设置'}
+        title={editing ? '编辑件号配置' : '新增件号配置'}
         open={modalOpen}
         onCancel={closeModal}
         onOk={() => form.submit()}
@@ -201,11 +223,7 @@ export default function SafePartSettingPage() {
           >
             <Input allowClear placeholder="如 XN2808EB" />
           </Form.Item>
-          <Form.Item
-            label="名称"
-            name="name"
-            rules={[{ required: true, message: '请选择名称' }]}
-          >
+          <Form.Item label="名称" name="name">
             <Select
               allowClear
               options={[
@@ -214,25 +232,13 @@ export default function SafePartSettingPage() {
               ]}
             />
           </Form.Item>
-          <Form.Item
-            label="产品型号"
-            name="part_model"
-            rules={[{ required: true, message: '请输入产品型号' }]}
-          >
+          <Form.Item label="产品型号" name="part_model">
             <Input allowClear placeholder="如 YD1001XN" />
           </Form.Item>
-          <Form.Item
-            label="编号前缀"
-            name="part_code_prefix"
-            rules={[{ required: true, message: '请输入编号前缀' }]}
-          >
+          <Form.Item label="编号前缀" name="part_code_prefix">
             <Input allowClear placeholder="如 ZC00" />
           </Form.Item>
-          <Form.Item
-            label="英文名称"
-            name="english_name"
-            rules={[{ required: true, message: '请输入英文名称' }]}
-          >
+          <Form.Item label="英文名称" name="english_name">
             <Input allowClear placeholder="如 COMB PLATE" />
           </Form.Item>
           <div className="flex gap-8">
@@ -251,6 +257,13 @@ export default function SafePartSettingPage() {
               <Switch />
             </Form.Item>
           </div>
+          <Form.Item label="分解单列" name="decomposition_role">
+            <Select
+              allowClear
+              placeholder="非分解单件号可不选"
+              options={DECOMPOSITION_ROLE_OPTIONS}
+            />
+          </Form.Item>
           <Form.Item label="备注" name="remark">
             <Input allowClear />
           </Form.Item>

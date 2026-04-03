@@ -21,12 +21,13 @@ export async function getSyneySafePartSettings() {
 export async function upsertSyneySafePartSetting(payload: {
   id?: string
   part_no: string
-  name: string
-  part_model: string
-  part_code_prefix: string
-  english_name: string
+  name?: string | null
+  part_model?: string | null
+  part_code_prefix?: string | null
+  english_name?: string | null
   need_print_label: boolean
   is_safe_part: boolean
+  decomposition_role?: string | null
   remark?: string | null
 }) {
   const { data, error } = await supabase
