@@ -74,10 +74,10 @@ export default function PoList() {
 
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading } =
     useQuery({
-    queryKey: ['syney_safe_part_settings'],
-    queryFn: getSyneySafePartSettings,
-    staleTime: 5 * 60 * 1000,
-  })
+      queryKey: ['syney_safe_part_settings'],
+      queryFn: getSyneySafePartSettings,
+      staleTime: 5 * 60 * 1000,
+    })
 
   const { generateLabel, contextHolder: labelContextHolder } = usePrint(
     safePartSettings,
