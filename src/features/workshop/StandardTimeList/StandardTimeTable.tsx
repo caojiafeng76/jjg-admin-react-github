@@ -87,8 +87,7 @@ export default function StandardTimeTable({
         dataIndex: 'length',
         key: 'length',
         width: 100,
-        render: (value: number | null | undefined) =>
-          formatNumber(value, 2),
+        render: (value: number | null | undefined) => formatNumber(value, 2),
       },
       {
         title: '料号',
