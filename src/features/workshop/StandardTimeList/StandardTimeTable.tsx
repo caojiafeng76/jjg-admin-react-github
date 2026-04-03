@@ -324,9 +324,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
 
   const handleRow = useCallback(
     (record: StandardTime) => ({
-      style: !record.job_name
-        ? { backgroundColor: '#fffbe6' }
-        : undefined,
+      style: !record.job_name ? { backgroundColor: '#fffbe6' } : undefined,
     }),
     [],
   )

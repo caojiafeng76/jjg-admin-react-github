@@ -289,7 +289,10 @@ export default function SafePartSettingPage() {
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50],
           onChange: (p) => setPage(p),
-          onShowSizeChange: (_current, size) => { setPageSize(size); setPage(1) },
+          onShowSizeChange: (_current, size) => {
+            setPageSize(size)
+            setPage(1)
+          },
         }}
       />
     </div>
