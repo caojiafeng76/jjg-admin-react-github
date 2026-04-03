@@ -22,6 +22,9 @@ export async function upsertSyneySafePartSetting(payload: {
   id?: string
   part_no: string
   name: string
+  part_model: string
+  part_code_prefix: string
+  english_name: string
   need_print_label: boolean
   is_safe_part: boolean
   remark?: string | null

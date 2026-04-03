@@ -60,6 +60,8 @@ const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
   daily_total_hours: 0,
   uploaded_by_name: null,
   remark: null,
+  length: 0,
+  part_no: null,
 }
 
 function calculateCostPreview(values?: Partial<StandardTimeFormValues>) {
@@ -356,6 +358,12 @@ export default function StandardTimeForm({
           </Form.Item>
           <Form.Item name="uploaded_by_name" label="数据上传">
             <Input disabled placeholder="自动记录当前登录用户" />
+          </Form.Item>
+          <Form.Item name="length" label="长度">
+            <InputNumber min={0} step={0.01} style={{ width: '100%' }} placeholder="请输入长度" />
+          </Form.Item>
+          <Form.Item name="part_no" label="料号">
+            <Input placeholder="请输入料号" />
           </Form.Item>
           <Form.Item name="remark" label="备注">
             <Input.TextArea rows={3} placeholder="请输入备注" />

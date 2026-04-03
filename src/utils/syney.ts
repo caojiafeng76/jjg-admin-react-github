@@ -1,4 +1,5 @@
 import { ISyneyItem, ISyneySpec } from '@/types'
+import { getLabelInfoBySettings } from './syneySafePartRules'
 
 // 正则表达式常量,避免重复创建
 const LENGTH_PATTERN = /(L1=|L=)(\d+)/g
@@ -17,31 +18,6 @@ const MODEL_BASE_WIDTH_MAP: Record<string, number> = {
 // 备注中提取宽度的正则
 const WIDTH_PATTERN = /宽[=：:\s]*?(\d+(?:\.\d+)?)/i
 const NUMBER_FALLBACK_PATTERN = /(\d+(?:\.\d+)?)/ // 兜底提取数字
-
-// 零件号常量
-const COMB_SUPPORT_PART_NOS = ['XN2808EB', 'XN3024BR'] as const
-const FLOOR_COVER_PART_NOS = [
-  'XN2808BP',
-  'XN2808BQ',
-  'XN3024BS',
-  'XN3024BT',
-  'XN3024AP1', // 扶梯上中板组件（新件号）
-  'XN3024AQ1', // 扶梯下中板组件（新件号）
-  'XN3024X997', // 前沿后加长板（新件号）
-  'XN2808AF',
-  'XN3024BX',
-  'XN3024BY',
-  'XN3024Y997', // 后板（人行道）- 新件号
-  'XN2808AL',
-  'XN3024DF',
-  'XN2808JY',
-  'XN3024DG',
-  'XN2808JZ',
-] as const
-
-// 为快速查找转换为 Set
-const COMB_SUPPORT_SET = new Set(COMB_SUPPORT_PART_NOS)
-const FLOOR_COVER_SET = new Set(FLOOR_COVER_PART_NOS)
 
 /**
  * 从备注中提取 L 和 L1 的值
@@ -365,7 +341,11 @@ export function jsonToArray(json: string): ISyneyItem[] {
 export function getItemsWithExtraInfo(
   items: ISyneyItem[],
   startSerialNo: number,
-  safePartSettings?: { part_no: string; name?: string | null }[],
+  safePartSettings?: {
+    part_no: string
+    name?: string | null
+    need_print_label?: boolean
+  }[],
 ): { map: Map<string, ISyneyItem[]>; tmpSerialNo: number } {
   // 创建一个 Map，用于按销售订单号（SONo）和序列号分组存储物品
   const map = new Map<string, ISyneyItem[]>()
@@ -380,14 +360,6 @@ export function getItemsWithExtraInfo(
     itemsBySONo.get(soNo)!.push(item)
   })
 
-  // 根据数据库配置（如果有）构建动态匹配集合；否则退回到写死集合
-  const combSupportList =
-    safePartSettings?.filter((s) => s.name === '梳齿支撑板').map((s) => s.part_no) ??
-    Array.from(COMB_SUPPORT_SET)
-  const floorCoverList =
-    safePartSettings?.filter((s) => s.name === '楼层板').map((s) => s.part_no) ??
-    Array.from(FLOOR_COVER_SET)
-
   // 使用起始序列号，为每个 SONo 分配递增的序列号
   let currentSerialNo = startSerialNo
 
@@ -399,36 +371,12 @@ export function getItemsWithExtraInfo(
 
     // 性能优化: 只遍历一次物品列表
     soItems.forEach((item) => {
-      const partNo = item.PartNo
-      if (!partNo) return
+      const labelInfo = getLabelInfoBySettings(item.PartNo, seNo, safePartSettings)
 
-      let isCombSupport = false
-      let isFloorCover = false
-
-      for (const pn of combSupportList) {
-        if (partNo.includes(pn)) {
-          isCombSupport = true
-          break
-        }
-      }
-
-      if (!isCombSupport) {
-        for (const pn of floorCoverList) {
-          if (partNo.includes(pn)) {
-            isFloorCover = true
-            break
-          }
-        }
-      }
-
-      if (isCombSupport) {
-        item.PartName2 = '梳齿支撑板'
-        item.PartModel = 'YD1001XN'
-        item.PartCode = `ZC00${seNo}`
-      } else if (isFloorCover) {
-        item.PartName2 = '楼层板'
-        item.PartModel = 'YD0201XN'
-        item.PartCode = `LC00${seNo}`
+      if (labelInfo) {
+        item.PartName2 = labelInfo.partName2
+        item.PartModel = labelInfo.partModel
+        item.PartCode = labelInfo.partCode
       }
     })
 

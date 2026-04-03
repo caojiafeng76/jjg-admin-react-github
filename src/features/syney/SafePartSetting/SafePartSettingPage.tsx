@@ -3,6 +3,7 @@ import {
   Button,
   Form,
   Input,
+  Modal,
   Switch,
   Table,
   Popconfirm,
@@ -11,7 +12,7 @@ import {
   Select,
 } from 'antd'
 import type { ColumnsType, FilterDropdownProps } from 'antd/es/table/interface'
-import { SearchOutlined } from '@ant-design/icons'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   deleteSyneySafePartSettings,
@@ -23,9 +24,39 @@ import {
 export default function SafePartSettingPage() {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
+  const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<SyneySafePartSetting | null>(null)
   const [pageSize, setPageSize] = useState(10)
   const [form] = Form.useForm()
+
+  const openCreate = () => {
+    setEditing(null)
+    form.resetFields()
+    form.setFieldsValue({ need_print_label: true, is_safe_part: true })
+    setModalOpen(true)
+  }
+
+  const openEdit = (record: SyneySafePartSetting) => {
+    setEditing(record)
+    form.setFieldsValue({
+      part_no: record.part_no,
+      name: record.name ?? undefined,
+      part_model: record.part_model ?? '',
+      part_code_prefix: record.part_code_prefix ?? '',
+      english_name: record.english_name ?? '',
+      need_print_label: record.need_print_label,
+      is_safe_part: record.is_safe_part,
+      remark: record.remark ?? '',
+      id: record.id,
+    })
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    setEditing(null)
+    form.resetFields()
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ['syney_safe_part_settings'],
@@ -37,8 +68,7 @@ export default function SafePartSettingPage() {
     onSuccess: () => {
       message.success('保存成功')
       queryClient.invalidateQueries({ queryKey: ['syney_safe_part_settings'] })
-      setEditing(null)
-      form.resetFields()
+      closeModal()
     },
   })
 
@@ -102,6 +132,9 @@ export default function SafePartSettingPage() {
           .includes(String(value).toLowerCase()),
     },
     { title: '名称', dataIndex: 'name' },
+    { title: '产品型号', dataIndex: 'part_model' },
+    { title: '编号前缀', dataIndex: 'part_code_prefix' },
+    { title: '英文名称', dataIndex: 'english_name' },
     {
       title: '是否需打印标签',
       dataIndex: 'need_print_label',
@@ -117,20 +150,7 @@ export default function SafePartSettingPage() {
       title: '操作',
       render: (_: unknown, record: SyneySafePartSetting) => (
         <Space>
-          <Button
-            type="link"
-            onClick={() => {
-              setEditing(record)
-              form.setFieldsValue({
-                part_no: record.part_no,
-                name: record.name ?? undefined,
-                need_print_label: record.need_print_label,
-                is_safe_part: record.is_safe_part,
-                remark: record.remark ?? '',
-                id: record.id,
-              })
-            }}
-          >
+          <Button type="link" onClick={() => openEdit(record)}>
             编辑
           </Button>
           <Popconfirm
@@ -152,75 +172,93 @@ export default function SafePartSettingPage() {
 
   return (
     <div className="space-y-4 p-4">
-      <Form
-        layout="inline"
-        form={form}
-        onFinish={handleSubmit}
-        initialValues={{ need_print_label: true, is_safe_part: true }}
+      <div>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+          新增
+        </Button>
+      </div>
+
+      <Modal
+        title={editing ? '编辑安全部件设置' : '新增安全部件设置'}
+        open={modalOpen}
+        onCancel={closeModal}
+        onOk={() => form.submit()}
+        okText={editing ? '保存修改' : '新增'}
+        cancelText="取消"
+        confirmLoading={saveMutation.isPending}
+        destroyOnHidden
       >
-        <Form.Item
-          label="件号(包含)"
-          name="part_no"
-          rules={[{ required: true, message: '请输入件号' }]}
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={handleSubmit}
+          className="pt-2"
         >
-          <Input allowClear placeholder="如 XN2808EB" className="w-48" />
-        </Form.Item>
-        <Form.Item
-          label="名称"
-          name="name"
-          rules={[{ required: true, message: '请选择名称' }]}
-        >
-          <Select
-            style={{ width: 200 }}
-            dropdownMatchSelectWidth={220}
-            options={[
-              { label: '梳齿支撑板', value: '梳齿支撑板' },
-              { label: '楼层板', value: '楼层板' },
-            ]}
-          />
-        </Form.Item>
-        <Form.Item
-          label="需打印标签"
-          name="need_print_label"
-          valuePropName="checked"
-        >
-          <Switch />
-        </Form.Item>
-        <Form.Item
-          label="为安全部件"
-          name="is_safe_part"
-          valuePropName="checked"
-        >
-          <Switch />
-        </Form.Item>
-        <Form.Item label="备注" name="remark">
-          <Input allowClear className="w-60" />
-        </Form.Item>
-        <Form.Item name="id" hidden>
-          <Input />
-        </Form.Item>
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={saveMutation.isPending}
+          <Form.Item
+            label="件号(包含)"
+            name="part_no"
+            rules={[{ required: true, message: '请输入件号' }]}
           >
-            {editing ? '保存修改' : '新增'}
-          </Button>
-        </Form.Item>
-        {editing && (
-          <Form.Item>
-            <Button
-              onClick={() => {
-                setEditing(null)
-                form.resetFields()
-              }}
-            >
-              取消编辑
-            </Button>
+            <Input allowClear placeholder="如 XN2808EB" />
           </Form.Item>
-        )}
-      </Form>
+          <Form.Item
+            label="名称"
+            name="name"
+            rules={[{ required: true, message: '请选择名称' }]}
+          >
+            <Select
+              allowClear
+              options={[
+                { label: '梳齿支撑板', value: '梳齿支撑板' },
+                { label: '楼层板', value: '楼层板' },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item
+            label="产品型号"
+            name="part_model"
+            rules={[{ required: true, message: '请输入产品型号' }]}
+          >
+            <Input allowClear placeholder="如 YD1001XN" />
+          </Form.Item>
+          <Form.Item
+            label="编号前缀"
+            name="part_code_prefix"
+            rules={[{ required: true, message: '请输入编号前缀' }]}
+          >
+            <Input allowClear placeholder="如 ZC00" />
+          </Form.Item>
+          <Form.Item
+            label="英文名称"
+            name="english_name"
+            rules={[{ required: true, message: '请输入英文名称' }]}
+          >
+            <Input allowClear placeholder="如 COMB PLATE" />
+          </Form.Item>
+          <div className="flex gap-8">
+            <Form.Item
+              label="需打印标签"
+              name="need_print_label"
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+            <Form.Item
+              label="为安全部件"
+              name="is_safe_part"
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+          </div>
+          <Form.Item label="备注" name="remark">
+            <Input allowClear />
+          </Form.Item>
+          <Form.Item name="id" hidden>
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <Table
         rowKey="id"
