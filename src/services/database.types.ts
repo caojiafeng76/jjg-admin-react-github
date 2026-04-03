@@ -604,6 +604,7 @@ export type Database = {
       syney_safe_part_settings: {
         Row: {
           created_at: string | null
+          decomposition_role: string | null
           english_name: string | null
           id: string
           is_safe_part: boolean
@@ -617,6 +618,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          decomposition_role?: string | null
           english_name?: string | null
           id?: string
           is_safe_part?: boolean
@@ -630,6 +632,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          decomposition_role?: string | null
           english_name?: string | null
           id?: string
           is_safe_part?: boolean
@@ -707,6 +710,7 @@ export type Database = {
       }
       "syney-pos": {
         Row: {
+          BorderMaterial: string
           Brand: string | null
           created_at: string
           EndDate: string | null
@@ -721,6 +725,7 @@ export type Database = {
           Technique: string | null
         }
         Insert: {
+          BorderMaterial?: string
           Brand?: string | null
           created_at?: string
           EndDate?: string | null
@@ -735,6 +740,7 @@ export type Database = {
           Technique?: string | null
         }
         Update: {
+          BorderMaterial?: string
           Brand?: string | null
           created_at?: string
           EndDate?: string | null

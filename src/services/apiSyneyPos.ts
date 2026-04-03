@@ -161,7 +161,7 @@ export async function getSyneyPos({
     .from('syney-pos')
     // 选择所有必要字段
     .select(
-      'id, No, SONo, Spec, EndDate, Status, Qty, Brand, Technique, SerialNo, Remark, created_at',
+      'id, No, SONo, Spec, EndDate, Status, Qty, Brand, Technique, SerialNo, Remark, BorderMaterial, created_at',
       { count: 'exact' },
     )
 
@@ -529,7 +529,7 @@ export async function getSelectedPosWithItems(PoIds: number[]) {
 
   posResult.data.forEach((po) => {
     // 保持原有的键格式以确保兼容性
-    const key = `${po.SONo}~${po.Spec}~${po.EndDate}~${po.No}~${po.SerialNo}~${po.Brand}~${po.Technique}~${po.Remark}`
+    const key = `${po.SONo}~${po.Spec}~${po.EndDate}~${po.No}~${po.SerialNo}~${po.Brand}~${po.Technique}~${po.Remark}~${po.BorderMaterial}`
     const items = itemsByPoId.get(po.id) || []
     map.set(key, items)
   })

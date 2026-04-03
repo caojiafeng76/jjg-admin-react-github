@@ -1,3 +1,14 @@
+export type DecompositionRole =
+  | 'side_frame'
+  | 'cross_frame'
+  | 'front_plate'
+  | 'upper_middle'
+  | 'lower_middle'
+  | 'rear_upper'
+  | 'rear_lower'
+  | 'extension_upper'
+  | 'extension_lower'
+
 export type SyneySafePartRule = {
   part_no: string
   name?: string | null
@@ -6,6 +17,19 @@ export type SyneySafePartRule = {
   english_name?: string | null
   need_print_label?: boolean
   is_safe_part?: boolean
+  decomposition_role?: DecompositionRole | string | null
+}
+
+// ─── 上下方向关键词判断 ───────────────────────────────────────────────────
+const UP_KEYWORDS = ['上头部', '上部', '上'] as const
+const DOWN_KEYWORDS = ['下头部', '下部', '下'] as const
+
+export function hasUpFlag(remark: string | null | undefined): boolean {
+  return UP_KEYWORDS.some((k) => remark?.includes(k))
+}
+
+export function hasDownFlag(remark: string | null | undefined): boolean {
+  return DOWN_KEYWORDS.some((k) => remark?.includes(k))
 }
 
 function normalizePartNo(partNo: string) {

@@ -5,6 +5,7 @@ import jsPDF from 'jspdf'
 import { useSelectedPos } from './useSelectedPos'
 import { initializePDF, openPDFInNewWindow } from '@/utils/pdfUtils'
 import { ISyneyItem } from '@/services/types'
+import { hasUpFlag, hasDownFlag } from '@/utils/syneySafePartRules'
 
 interface ISyneyPoGroup {
   key: string
@@ -17,6 +18,7 @@ interface ISyneyPoGroup {
     Brand: string
     Technique: string
     Remark: string
+    BorderMaterial: string
   }
   items: ISyneyItem[]
 }
@@ -27,6 +29,7 @@ const CONFIG = {
   ROW_HEIGHT: 40,
   BASE_Y: 60, // 第一行数据的基准Y坐标（对应原代码的 60 + i * 40）
   FRAME_START_Y: 30, // 框架起始Y坐标
+  MAX_TECHNIQUE_LINES: 3, // 工艺要求最多显示行数（受PDF格子高度限制）
 }
 
 export function usePrintDecomposition() {
@@ -207,7 +210,7 @@ export function usePrintDecomposition() {
   function fillPageData(doc: jsPDF, data: ISyneyPoGroup[], pageIndex: number) {
     data.forEach((record, i) => {
       const { poInfo, items } = record
-      const { SONo, Spec, EndDate, No, SerialNo, Brand, Technique, Remark } =
+      const { SONo, Spec, EndDate, No, SerialNo, Brand, Technique, Remark, BorderMaterial } =
         poInfo
       const [xinghao, huanjing, leixing] = (Spec || '').split('-')
 
@@ -230,7 +233,7 @@ export function usePrintDecomposition() {
         const techniqueLines = Technique.split(',').filter((line) => line.trim())
         // 显示所有条件，每个条件另起一行（最多3个，因为只有3个位置）
         techniqueLines.forEach((line, index) => {
-          if (index < 3) {
+          if (index < CONFIG.MAX_TECHNIQUE_LINES) {
             // yBase - 16, yBase - 9, yBase - 2
             const yOffset = index === 0 ? -16 : index === 1 ? -9 : -2
             doc.text(line.trim(), 223, yBase + yOffset)
@@ -250,7 +253,7 @@ export function usePrintDecomposition() {
         yBase - 2,
       )
 
-      doc.text('橡胶', 273, yBase - 9)
+      doc.text(BorderMaterial || '橡胶', 273, yBase - 9)
 
       // 显示备注，确保"贴牌梯,注意不要出现西尼字样"等备注内容正确显示
       if (Remark && Remark !== 'null' && Remark.trim() !== '') {
@@ -278,21 +281,15 @@ export function usePrintDecomposition() {
       
       sideFrameItems.forEach((item: ISyneyItem) => {
         const remark = item.Remark || ''
-        const hasUpFlag =
-          remark.includes('上头部') ||
-          remark.includes('上部') ||
-          remark.includes('上')
-        const hasDownFlag =
-          remark.includes('下头部') ||
-          remark.includes('下部') ||
-          remark.includes('下')
+        const isUp = hasUpFlag(remark)
+        const isDown = hasDownFlag(remark)
         
         let isUpper = false
         let isLower = false
         
-        if (hasUpFlag && !hasDownFlag) {
+        if (isUp && !isDown) {
           isUpper = true
-        } else if (hasDownFlag && !hasUpFlag) {
+        } else if (isDown && !isUp) {
           isLower = true
         } else {
           // 无明确标志，交替分配
@@ -375,22 +372,16 @@ export function usePrintDecomposition() {
         const isRearExtensionOld = PartNo?.includes('XN2808AF')
         const isRearPlateComponent = PartNo?.includes('XN3024Y997')
 
-        const hasUpFlag =
-          ItemRemark?.includes('上头部') ||
-          ItemRemark?.includes('上部') ||
-          ItemRemark?.includes('上')
-        const hasDownFlag =
-          ItemRemark?.includes('下头部') ||
-          ItemRemark?.includes('下部') ||
-          ItemRemark?.includes('下')
+        const isUp = hasUpFlag(ItemRemark)
+        const isDown = hasDownFlag(ItemRemark)
 
         let isUpper = false
         let isLower = false
 
         // 老件号逻辑：通过备注"上头部/下头部"区分
         if (isRearExtensionOld) {
-          if (hasUpFlag && !hasDownFlag) isUpper = true
-          if (hasDownFlag && !hasUpFlag) isLower = true
+          if (isUp && !isDown) isUpper = true
+          if (isDown && !isUp) isLower = true
         }
 
         // XN3024BX 视为上后板，XN3024BY 视为下后板
@@ -399,9 +390,9 @@ export function usePrintDecomposition() {
 
         // 新件号：前沿后板组件 XN3024Y997
         if (isRearPlateComponent) {
-          if (hasUpFlag && !hasDownFlag) {
+          if (isUp && !isDown) {
             isUpper = true
-          } else if (hasDownFlag && !hasUpFlag) {
+          } else if (isDown && !isUp) {
             isLower = true
           }
         }
@@ -546,10 +537,8 @@ export function usePrintDecomposition() {
         if (
           (PartNo?.includes('XN2808AL') && ItemRemark?.includes('上头部')) ||
           (PartNo?.includes('XN3024X997') && 
-            (ItemRemark?.includes('上头部') || 
-             ItemRemark?.includes('上部') || 
-             ItemRemark?.includes('上') ||
-             (!ItemRemark?.includes('下头部') && !ItemRemark?.includes('下部') && !ItemRemark?.includes('下'))))
+            (hasUpFlag(ItemRemark) ||
+             (!hasDownFlag(ItemRemark))))
         ) {
           doc.setFontSize(8)
           doc.text(specText, 183, yBase - 13)
@@ -560,10 +549,7 @@ export function usePrintDecomposition() {
         // 下加长板
         if (
           (PartNo?.includes('XN2808AL') && ItemRemark?.includes('下头部')) ||
-          (PartNo?.includes('XN3024X997') && 
-            (ItemRemark?.includes('下头部') || 
-             ItemRemark?.includes('下部') || 
-             ItemRemark?.includes('下')))
+          (PartNo?.includes('XN3024X997') && hasDownFlag(ItemRemark))
         ) {
           doc.setFontSize(8)
           doc.text(specText, 183, yBase - 4)

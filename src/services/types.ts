@@ -54,6 +54,7 @@ export interface ISyneyStoreReport {
  * 采购订单实体类型
  */
 export interface ISyneyPo {
+  BorderMaterial?: string
   Brand: string | null
   created_at: string
   EndDate: string | null

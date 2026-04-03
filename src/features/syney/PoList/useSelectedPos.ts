@@ -38,12 +38,13 @@ export function useSelectedPos() {
         Brand: string
         Technique: string
         Remark: string
+        BorderMaterial: string
       }
       items: ISyneyItem[]
     }[] = []
 
     selectedMap.forEach((items, key) => {
-      const [SONo, Spec, EndDate, No, SerialNo, Brand, Technique, Remark] =
+      const [SONo, Spec, EndDate, No, SerialNo, Brand, Technique, Remark, BorderMaterial] =
         key.split('~')
       list.push({
         key,
@@ -56,6 +57,7 @@ export function useSelectedPos() {
           Brand,
           Technique,
           Remark,
+          BorderMaterial: BorderMaterial ?? '橡胶',
         },
         items,
       })

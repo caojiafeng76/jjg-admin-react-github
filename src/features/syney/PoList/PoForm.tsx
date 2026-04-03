@@ -138,6 +138,17 @@ const PoForm: FC<PoFormProps> = ({
       )}
 
       {isEdit && (
+        <Form.Item name="BorderMaterial" label="围框材质">
+          <Select
+            disabled={isCreating}
+            options={[
+              { label: '橡胶', value: '橡胶' },
+              { label: '尼龙', value: '尼龙' },
+            ]}
+          />
+        </Form.Item>
+      )}
+      {isEdit && (
         <Form.Item name="Brand" label="商标" rules={[{ required: true }]}>
           <Input disabled={isCreating} />
         </Form.Item>
