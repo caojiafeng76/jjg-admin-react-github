@@ -33,9 +33,9 @@ const DECOMPOSITION_ROLE_LABELS: Record<string, string> = {
   extension_lower: '下加长板',
 }
 
-const DECOMPOSITION_ROLE_OPTIONS = Object.entries(DECOMPOSITION_ROLE_LABELS).map(
-  ([value, label]) => ({ value, label }),
-)
+const DECOMPOSITION_ROLE_OPTIONS = Object.entries(
+  DECOMPOSITION_ROLE_LABELS,
+).map(([value, label]) => ({ value, label }))
 
 export default function SafePartSettingPage() {
   const { message } = App.useApp()
@@ -165,7 +165,8 @@ export default function SafePartSettingPage() {
     {
       title: '分解单列',
       dataIndex: 'decomposition_role',
-      render: (v: string | null) => DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v ?? '-',
+      render: (v: string | null) =>
+        DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v ?? '-',
     },
     { title: '备注', dataIndex: 'remark' },
     {
