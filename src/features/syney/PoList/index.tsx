@@ -43,11 +43,6 @@ export default function PoList() {
 
   const [messageApi, messageContextHolder] = message.useMessage()
 
-  const { generateLabel, contextHolder: labelContextHolder } =
-    usePrint(messageApi)
-  const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
-    usePrintEnglish(messageApi)
-
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
   const { count } = usePos()
@@ -77,11 +72,20 @@ export default function PoList() {
   const { createPo, contextHolder: createPoContextHolder } =
     useCreatePo(messageApi)
 
-  const { data: safePartSettings } = useQuery({
+  const { data: safePartSettings, isLoading: isSafePartSettingsLoading } =
+    useQuery({
     queryKey: ['syney_safe_part_settings'],
     queryFn: getSyneySafePartSettings,
     staleTime: 5 * 60 * 1000,
   })
+
+  const { generateLabel, contextHolder: labelContextHolder } = usePrint(
+    safePartSettings,
+    isSafePartSettingsLoading,
+    messageApi,
+  )
+  const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
+    usePrintEnglish(safePartSettings, isSafePartSettingsLoading, messageApi)
 
   // 使用 useCallback 优化,避免子组件不必要的重渲染
   const handleDelete = useCallback(() => {
@@ -110,6 +114,11 @@ export default function PoList() {
       // 检查数据是否正在加载
       if (specsLoading) {
         messageApi.warning('规格数据加载中,请稍后再试')
+        return
+      }
+
+      if (isSafePartSettingsLoading || !safePartSettings) {
+        messageApi.warning('安全部件设置加载中,请稍后再试')
         return
       }
 
@@ -218,6 +227,8 @@ export default function PoList() {
       setIsCreating,
       createPo,
       excelData,
+      isSafePartSettingsLoading,
+      safePartSettings,
     ],
   )
 

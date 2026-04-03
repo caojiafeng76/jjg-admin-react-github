@@ -180,6 +180,8 @@ export default function StandardTimeList() {
               uploaded_by_name: isEdit
                 ? editingRecord?.uploaded_by_name || null
                 : currentUploader || values.uploaded_by_name || null,
+              length: values.length ?? 0,
+              part_no: values.part_no ?? null,
             }
           : {
               ...values,

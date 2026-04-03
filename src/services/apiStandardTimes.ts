@@ -29,6 +29,8 @@ export type StandardTimeFormValues = Pick<
   | 'daily_total_hours'
   | 'uploaded_by_name'
   | 'remark'
+  | 'length'
+  | 'part_no'
 >
 
 function normalizeStandardTimeValue(value: string): string {
@@ -56,6 +58,8 @@ function normalizeStandardTimePayload(
     daily_total_hours: values.daily_total_hours ?? 0,
     uploaded_by_name: values.uploaded_by_name?.trim() || null,
     remark: values.remark?.trim() || null,
+    length: values.length ?? 0,
+    part_no: values.part_no?.trim() || null,
   }
 }
 

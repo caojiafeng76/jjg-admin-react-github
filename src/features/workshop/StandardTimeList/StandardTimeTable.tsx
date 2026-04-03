@@ -82,6 +82,23 @@ export default function StandardTimeTable({
         render: (value?: string | null) =>
           value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
       },
+      {
+        title: '长度',
+        dataIndex: 'length',
+        key: 'length',
+        width: 100,
+        render: (value: number | null | undefined) =>
+          formatNumber(value, 2),
+      },
+      {
+        title: '料号',
+        dataIndex: 'part_no',
+        key: 'part_no',
+        width: 160,
+        ellipsis: { showTitle: true },
+        render: (value?: string | null) =>
+          value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
+      },
     ]
 
     if (!hideStandardSeconds) {

@@ -310,9 +310,11 @@ export type Database = {
           job_name: string | null
           labor_cost: number | null
           labor_rate: number
+          length: number
           model: string
           operation: string
           overhead_cost: number | null
+          part_no: string | null
           remark: string | null
           standard_seconds: number
           theoretical_seconds: number
@@ -338,9 +340,11 @@ export type Database = {
           job_name?: string | null
           labor_cost?: number | null
           labor_rate?: number
+          length?: number
           model: string
           operation: string
           overhead_cost?: number | null
+          part_no?: string | null
           remark?: string | null
           standard_seconds: number
           theoretical_seconds?: number
@@ -366,9 +370,11 @@ export type Database = {
           job_name?: string | null
           labor_cost?: number | null
           labor_rate?: number
+          length?: number
           model?: string
           operation?: string
           overhead_cost?: number | null
+          part_no?: string | null
           remark?: string | null
           standard_seconds?: number
           theoretical_seconds?: number
@@ -598,30 +604,39 @@ export type Database = {
       syney_safe_part_settings: {
         Row: {
           created_at: string | null
+          english_name: string | null
           id: string
           is_safe_part: boolean
           name: string | null
           need_print_label: boolean
+          part_code_prefix: string | null
+          part_model: string | null
           part_no: string
           remark: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          english_name?: string | null
           id?: string
           is_safe_part?: boolean
           name?: string | null
           need_print_label?: boolean
+          part_code_prefix?: string | null
+          part_model?: string | null
           part_no: string
           remark?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          english_name?: string | null
           id?: string
           is_safe_part?: boolean
           name?: string | null
           need_print_label?: boolean
+          part_code_prefix?: string | null
+          part_model?: string | null
           part_no?: string
           remark?: string | null
           updated_at?: string | null

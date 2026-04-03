@@ -10,27 +10,14 @@ import {
 
 import { useSelectedPos } from './useSelectedPos'
 import { useAppStore } from '@/store'
+import {
+  isSafePartBySettings,
+  getLabelInfoBySettings,
+  getLabelInfoFromStoredItem,
+} from '@/utils/syneySafePartRules'
 
 import { useQuery } from '@tanstack/react-query'
 import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
-
-// 判断是否为安全件
-function useIsSafePart() {
-  const { data: settings } = useQuery({
-    queryKey: ['syney_safe_part_settings'],
-    queryFn: getSyneySafePartSettings,
-    staleTime: 5 * 60 * 1000,
-  })
-
-  function isSafePart(partNo: string | null | undefined): boolean {
-    if (!partNo || !settings) return false
-    return settings.some(
-      (item) => item.is_safe_part && partNo.includes(item.part_no),
-    )
-  }
-
-  return { isSafePart }
-}
 
 // Excel 数据行类型
 type ExcelRow = {
@@ -48,12 +35,22 @@ export function useExportSafePartInfoAsExcel() {
   const [messageApi, contextHolder] = message.useMessage()
   const { setTableSelectedKeys } = useAppStore()
   const { isLoading, selectedPosList } = useSelectedPos()
-  const { isSafePart } = useIsSafePart()
+  const { data: safePartSettings, isLoading: isSafePartSettingsLoading } =
+    useQuery({
+      queryKey: ['syney_safe_part_settings'],
+      queryFn: getSyneySafePartSettings,
+      staleTime: 5 * 60 * 1000,
+    })
 
   function exportSafePartInfoAsExcel() {
     // 数据验证
     if (isLoading) {
       messageApi.warning('数据加载中，请稍后再试')
+      return
+    }
+
+    if (isSafePartSettingsLoading || !safePartSettings) {
+      messageApi.warning('安全部件设置加载中，请稍后再试')
       return
     }
 
@@ -70,20 +67,30 @@ export function useExportSafePartInfoAsExcel() {
 
       // 处理每个订单的数据
       selectedPosList.forEach(({ poInfo, items }) => {
-        const { SONo, EndDate, No } = poInfo
+        const { SONo, EndDate, No, SerialNo } = poInfo
 
         // 过滤安全件并转换为 Excel 数据格式
         const excelData: ExcelRow[] = items
-          .filter((item) => isSafePart(item.PartNo))
+          .filter((item) => isSafePartBySettings(item.PartNo, safePartSettings))
           .map((item) => {
+            // 当 DB 存储字段为空时（新零件号尚未写入），从 settings 推导
+            const labelInfo =
+              item.PartCode && item.PartModel && item.PartName2
+                ? null
+                : (getLabelInfoBySettings(
+                    item.PartNo,
+                    SerialNo,
+                    safePartSettings,
+                  ) ?? getLabelInfoFromStoredItem(item, safePartSettings))
+
             globalIndex++
             return {
               序号: globalIndex,
               采购单号: No,
               日期: EndDate,
-              编号: item.PartCode,
-              型号: item.PartModel,
-              名称: item.PartName2,
+              编号: item.PartCode || labelInfo?.partCode,
+              型号: item.PartModel || labelInfo?.partModel,
+              名称: item.PartName2 || labelInfo?.partName2,
               件号: item.PartNo,
               生产号: SONo,
             }

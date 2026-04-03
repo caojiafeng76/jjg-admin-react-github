@@ -6,11 +6,20 @@ import { useState } from 'react'
 import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { useSelectedPos } from './useSelectedPos'
 import { openPDFInNewWindow } from '@/utils/pdfUtils'
+import { SyneySafePartSetting } from '@services/apiSyneySafePartSettings'
+import {
+  getLabelInfoBySettings,
+  getLabelInfoFromStoredItem,
+} from '@/utils/syneySafePartRules'
 
 // Type for the Ant Design message API instance returned by message.useMessage()
 type MessageApi = ReturnType<typeof message.useMessage>[0]
 
-export function usePrint(messageApi?: MessageApi) {
+export function usePrint(
+  safePartSettings: SyneySafePartSetting[] | undefined,
+  isSafePartSettingsLoading: boolean,
+  messageApi?: MessageApi,
+) {
   const { selectedPosList, isLoading } = useSelectedPos()
   const [internalMessageApi, contextHolder] = message.useMessage()
   const api = messageApi || internalMessageApi
@@ -61,6 +70,11 @@ export function usePrint(messageApi?: MessageApi) {
       return
     }
 
+    if (isSafePartSettingsLoading || !safePartSettings) {
+      api.warning('安全部件设置加载中，请稍后再试')
+      return
+    }
+
     if (!selectedPosList || selectedPosList.length === 0) {
       api.warning('没有数据可供打印')
       return
@@ -84,11 +98,17 @@ export function usePrint(messageApi?: MessageApi) {
       let pageCount = 0
 
       for (const { poInfo, items } of selectedPosList) {
-        const { SONo, Spec, EndDate } = poInfo
+        const { SONo, Spec, EndDate, SerialNo } = poInfo
 
         // 1. 打印 Item 标签
         for (const item of items) {
-          if (item.PartCode?.length) {
+          const labelInfo = getLabelInfoBySettings(
+            item.PartNo,
+            SerialNo,
+            safePartSettings,
+          ) ?? getLabelInfoFromStoredItem(item, safePartSettings)
+
+          if (labelInfo) {
             for (let i = 0; i < (item.Qty || 1); i++) {
               if (!isFirstPage) {
                 doc.addPage()
@@ -102,10 +122,10 @@ export function usePrint(messageApi?: MessageApi) {
               drawBoldText(doc, '产品型号', 38, 16)
 
               // 填充数据
-              const PartName2X = item.PartName2?.length === 5 ? 21 : 23
-              drawBoldText(doc, `${item.PartName2}`, PartName2X, 6)
+              const partNameX = labelInfo.partName2.length === 5 ? 21 : 23
+              drawBoldText(doc, labelInfo.partName2, partNameX, 6)
               drawBoldText(doc, `${item.ParamSpec}`, 21, 11)
-              drawBoldText(doc, `${item.PartCode}`, 21, 16)
+              drawBoldText(doc, labelInfo.partCode, 21, 16)
               drawBoldText(doc, '1', 27, 21)
 
               let PartNoX = 53
@@ -123,7 +143,7 @@ export function usePrint(messageApi?: MessageApi) {
               drawBoldText(doc, `${item.PartNo}`, PartNoX, 6)
 
               drawBoldText(doc, `${item.SONo}`, 53, 11)
-              drawBoldText(doc, `${item.PartModel}`, 58, 16)
+              drawBoldText(doc, labelInfo.partModel, 58, 16)
               drawBoldText(doc, `${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
 
               pageCount++
