@@ -32,10 +32,10 @@ export default function AttendanceStatsSearch({
       name: initialValues?.name,
       dateRange:
         initialValues?.startDate && initialValues?.endDate
-          ? ([
-              dayjs(initialValues.startDate),
-              dayjs(initialValues.endDate),
-            ] as [dayjs.Dayjs, dayjs.Dayjs])
+          ? ([dayjs(initialValues.startDate), dayjs(initialValues.endDate)] as [
+              dayjs.Dayjs,
+              dayjs.Dayjs,
+            ])
           : undefined,
     })
   }, [form, initialValues])
