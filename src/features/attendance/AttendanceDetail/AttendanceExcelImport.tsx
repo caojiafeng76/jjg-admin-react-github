@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { Alert, Button, Modal, Table, TableColumnsType, Upload } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
-import {
-  ArrowUpTrayIcon,
-  TableCellsIcon,
-} from '@heroicons/react/16/solid'
+import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 
 import { parseAttendanceExcel } from '@/utils/attendanceExcel'
 import type { AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
@@ -14,7 +11,9 @@ interface Props {
   isImporting: boolean
 }
 
-const PREVIEW_COLUMNS: TableColumnsType<AttendanceDetailFormValues & { _idx: number }> = [
+const PREVIEW_COLUMNS: TableColumnsType<
+  AttendanceDetailFormValues & { _idx: number }
+> = [
   {
     title: '#',
     dataIndex: '_idx',
@@ -39,7 +38,10 @@ const PREVIEW_COLUMNS: TableColumnsType<AttendanceDetailFormValues & { _idx: num
   },
 ]
 
-export default function AttendanceExcelImport({ onImport, isImporting }: Props) {
+export default function AttendanceExcelImport({
+  onImport,
+  isImporting,
+}: Props) {
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [parsedRows, setParsedRows] = useState<AttendanceDetailFormValues[]>([])
@@ -50,7 +52,8 @@ export default function AttendanceExcelImport({ onImport, isImporting }: Props) 
   const handleBeforeUpload = async (file: File) => {
     const isExcel =
       file.type === 'application/vnd.ms-excel' ||
-      file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      file.type ===
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
       file.name.endsWith('.xls') ||
       file.name.endsWith('.xlsx')
 
@@ -60,11 +63,17 @@ export default function AttendanceExcelImport({ onImport, isImporting }: Props) 
 
     setParsing(true)
     try {
-      const { rows, errors, removedCount: rc } = await parseAttendanceExcel(file)
+      const {
+        rows,
+        errors,
+        removedCount: rc,
+      } = await parseAttendanceExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
       setRemovedCount(rc)
-      setFileList([{ uid: file.name, name: file.name, status: 'done' } as UploadFile])
+      setFileList([
+        { uid: file.name, name: file.name, status: 'done' } as UploadFile,
+      ])
     } catch (err) {
       setParseErrors([err instanceof Error ? err.message : 'Excel 解析失败'])
       setParsedRows([])
@@ -129,7 +138,8 @@ export default function AttendanceExcelImport({ onImport, isImporting }: Props) 
             loading={isImporting}
             onClick={handleConfirmImport}
           >
-            确认导入 {parsedRows.length > 0 ? `（${parsedRows.length} 条）` : ''}
+            确认导入{' '}
+            {parsedRows.length > 0 ? `（${parsedRows.length} 条）` : ''}
           </Button>,
         ]}
       >
@@ -172,7 +182,7 @@ export default function AttendanceExcelImport({ onImport, isImporting }: Props) 
               showIcon
               message={`解析时发现 ${parseErrors.length} 条问题（已跳过）`}
               description={
-                <ul className="mt-1 list-disc list-inside text-xs">
+                <ul className="mt-1 list-inside list-disc text-xs">
                   {parseErrors.slice(0, 10).map((e, i) => (
                     <li key={i}>{e}</li>
                   ))}

@@ -100,7 +100,11 @@ export default function AttendanceDetailForm({
           time ? time.format('HH:mm:ss') : ''
         }
       >
-        <TimePicker className="w-full" placeholder="请选择时间" format="HH:mm" />
+        <TimePicker
+          className="w-full"
+          placeholder="请选择时间"
+          format="HH:mm"
+        />
       </Form.Item>
     </Form>
   )
