@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { queryConfig } from '@/config/queryClient'
@@ -7,6 +7,7 @@ import {
   getUnreadAdminNotificationCount,
   markAdminNotificationAsRead,
   markAllAdminNotificationsAsRead,
+  type AdminNotification,
 } from '@/services/apiNotifications'
 import supabase from '@/services/supabase'
 import { useMutationWithInvalidation } from './useMutationWithInvalidation'
@@ -45,8 +46,14 @@ export function useMarkAllAdminNotificationsAsRead() {
   })
 }
 
-export function useAdminNotificationsRealtime(enabled = true) {
+export function useAdminNotificationsRealtime(
+  enabled = true,
+  onInsert?: (notification: AdminNotification) => void,
+) {
   const queryClient = useQueryClient()
+  // 用 ref 存回调，避免因函数引用变化重新创建 channel
+  const onInsertRef = useRef(onInsert)
+  onInsertRef.current = onInsert
 
   useEffect(() => {
     if (!enabled) {
@@ -62,10 +69,13 @@ export function useAdminNotificationsRealtime(enabled = true) {
           schema: 'public',
           table: 'notifications',
         },
-        () => {
+        (payload) => {
           queryClient.invalidateQueries({
             queryKey: [ADMIN_NOTIFICATIONS_KEY],
           })
+          if (payload.eventType === 'INSERT' && onInsertRef.current) {
+            onInsertRef.current(payload.new as AdminNotification)
+          }
         },
       )
       .subscribe()
