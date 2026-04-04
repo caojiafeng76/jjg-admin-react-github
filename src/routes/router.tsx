@@ -48,6 +48,9 @@ const PrecisionCuttingTransfer = lazy(
 )
 const ProductionOrder = lazy(() => import('@features/production-order'))
 const ProductionDailyReport = lazy(() => import('@features/production-report'))
+const AttendanceDetail = lazy(
+  () => import('@features/attendance/AttendanceDetail'),
+)
 
 function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()
@@ -331,6 +334,28 @@ export const router = createBrowserRouter([
       },
       {
         path: 'tooling-stock-out',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'attendance-detail',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<AttendanceDetail />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'attendance-summary',
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
