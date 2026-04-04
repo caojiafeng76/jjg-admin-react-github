@@ -54,6 +54,7 @@ export default function AttendanceDetailPage() {
     searchParams,
   })
 
+
   const createMutation = useCreateAttendanceDetail()
   const updateMutation = useUpdateAttendanceDetail()
   const deleteMutation = useDeleteAttendanceDetails()
