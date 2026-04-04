@@ -11,7 +11,11 @@ interface SearchValues {
 }
 
 interface Props {
-  onSearch: (params: { name?: string; startDate?: string; endDate?: string }) => void
+  onSearch: (params: {
+    name?: string
+    startDate?: string
+    endDate?: string
+  }) => void
   onReset: () => void
   initialValues?: { name?: string; startDate?: string; endDate?: string }
 }
@@ -28,7 +32,10 @@ export default function AttendanceDetailSearch({
       name: initialValues?.name,
       dateRange:
         initialValues?.startDate && initialValues?.endDate
-          ? ([dayjs(initialValues.startDate), dayjs(initialValues.endDate)] as [dayjs.Dayjs, dayjs.Dayjs])
+          ? ([dayjs(initialValues.startDate), dayjs(initialValues.endDate)] as [
+              dayjs.Dayjs,
+              dayjs.Dayjs,
+            ])
           : undefined,
     })
   }, [form, initialValues])

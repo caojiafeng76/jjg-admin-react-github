@@ -59,8 +59,9 @@ export default function AttendanceDetailPage() {
   const deleteMutation = useDeleteAttendanceDetails()
   const batchCreateMutation = useCreateAttendanceDetailsBatch()
 
-  const { tableContainerRef, paginationRef, scrollY } =
-    useTableHeight({ targetRowCount: 10 })
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: 10,
+  })
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
