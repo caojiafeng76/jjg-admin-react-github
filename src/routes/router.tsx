@@ -51,6 +51,9 @@ const ProductionDailyReport = lazy(() => import('@features/production-report'))
 const AttendanceDetail = lazy(
   () => import('@features/attendance/AttendanceDetail'),
 )
+const AttendanceStats = lazy(
+  () => import('@features/attendance/AttendanceStats'),
+)
 
 function ProtectedRoute({ element }: { element: ReactNode }) {
   const { user, loading } = useAuth()
@@ -360,7 +363,7 @@ export const router = createBrowserRouter([
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
               allow={['admin']}
-              element={<ComingSoonPage />}
+              element={<AttendanceStats />}
             />
           </Suspense>
         ),

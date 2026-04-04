@@ -45,6 +45,13 @@ export default function AttendanceDetailTable({
         width: 140,
       },
       {
+        title: '班别',
+        dataIndex: 'shift',
+        key: 'shift',
+        width: 100,
+        render: (value: string) => value || '白班',
+      },
+      {
         title: '时间',
         dataIndex: 'time',
         key: 'time',

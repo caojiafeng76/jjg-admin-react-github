@@ -6,6 +6,9 @@ import {
   createAttendanceDetailsBatch,
   updateAttendanceDetail,
   deleteAttendanceDetails,
+  getAttendanceShiftStats,
+  getAttendanceLateEarlyStats,
+  getAttendanceMonthlyExportData,
 } from '@/services/apiAttendanceDetails'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
@@ -58,5 +61,60 @@ export function useCreateAttendanceDetailsBatch() {
   return useMutationWithInvalidation({
     mutationFn: createAttendanceDetailsBatch,
     invalidateQueries: [[ATTENDANCE_DETAILS_KEY]],
+  })
+}
+
+export function useAttendanceShiftStats({
+  startDate,
+  endDate,
+  name,
+}: {
+  startDate?: string
+  endDate?: string
+  name?: string
+}) {
+  return useQuery({
+    queryKey: [ATTENDANCE_DETAILS_KEY, 'stats', { startDate, endDate, name }],
+    queryFn: () => getAttendanceShiftStats({ startDate, endDate, name }),
+    ...queryConfig.list,
+  })
+}
+
+export function useAttendanceLateEarlyStats({
+  startDate,
+  endDate,
+  name,
+}: {
+  startDate?: string
+  endDate?: string
+  name?: string
+}) {
+  return useQuery({
+    queryKey: [
+      ATTENDANCE_DETAILS_KEY,
+      'late-early-stats',
+      { startDate, endDate, name },
+    ],
+    queryFn: () => getAttendanceLateEarlyStats({ startDate, endDate, name }),
+    ...queryConfig.list,
+  })
+}
+
+export function useAttendanceMonthlyExportData({
+  year,
+  month,
+  name,
+  enabled,
+}: {
+  year: number
+  month: number
+  name?: string
+  enabled?: boolean
+}) {
+  return useQuery({
+    queryKey: [ATTENDANCE_DETAILS_KEY, 'monthly-export', { year, month, name }],
+    queryFn: () => getAttendanceMonthlyExportData({ year, month, name }),
+    enabled: enabled !== false,
+    ...queryConfig.detail,
   })
 }
