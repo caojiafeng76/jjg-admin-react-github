@@ -93,22 +93,25 @@ export default function AppHeader({
   const markNotificationReadMutation = useMarkAdminNotificationAsRead()
   const markAllNotificationsReadMutation = useMarkAllAdminNotificationsAsRead()
 
-  useAdminNotificationsRealtime(isAdmin, (newNotification: AdminNotification) => {
-    const entityLabel =
-      newNotification.entity_type === 'production_order'
-        ? '生产工单'
-        : newNotification.entity_type === 'material_transfer'
-          ? '物料转移单'
-          : '精切转移单'
-    const actionLabel =
-      newNotification.action_type === 'create' ? '提交了' : '更新了'
-    notification.info({
-      message: '新通知',
-      description: `${newNotification.actor_name} ${actionLabel}${entityLabel}`,
-      placement: 'bottomRight',
-      duration: 5,
-    })
-  })
+  useAdminNotificationsRealtime(
+    isAdmin,
+    (newNotification: AdminNotification) => {
+      const entityLabel =
+        newNotification.entity_type === 'production_order'
+          ? '生产工单'
+          : newNotification.entity_type === 'material_transfer'
+            ? '物料转移单'
+            : '精切转移单'
+      const actionLabel =
+        newNotification.action_type === 'create' ? '提交了' : '更新了'
+      notification.info({
+        message: '新通知',
+        description: `${newNotification.actor_name} ${actionLabel}${entityLabel}`,
+        placement: 'bottomRight',
+        duration: 5,
+      })
+    },
+  )
 
   const handleChangeManagementPassword = async (values: {
     currentPassword: string
