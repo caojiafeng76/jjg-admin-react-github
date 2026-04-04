@@ -55,6 +55,8 @@ const routeToLabelMap: Record<string, string> = {
   'tooling-inventory': '刀具库存',
   'tooling-stock-in': '刀具入库',
   'tooling-stock-out': '刀具出库',
+  'attendance-detail': '考勤明细',
+  'attendance-summary': '考勤统计',
 }
 
 export default function AppHeader({

@@ -81,6 +81,15 @@ const adminItems: MenuItem[] = [
       { key: 'tooling-stock-out', label: '刀具出库' },
     ],
   },
+  {
+    key: 'attendance',
+    label: '考勤',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [
+      { key: 'attendance-detail', label: '考勤明细' },
+      { key: 'attendance-summary', label: '考勤统计' },
+    ],
+  },
 ]
 
 const employeeItems: MenuItem[] = [
