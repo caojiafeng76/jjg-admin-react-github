@@ -475,7 +475,7 @@ export default function ProductionOrderForm({
               rules={[{ required: true, message: '请输入出勤工时' }]}
             >
               <InputNumber
-                min={0.01}
+                min={0}
                 step={0.5}
                 style={{ width: '100%' }}
                 placeholder="请输入出勤工时"

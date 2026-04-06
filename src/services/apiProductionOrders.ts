@@ -290,9 +290,9 @@ export async function createProductionOrder(values: ProductionOrderInsert) {
   if (
     values.work_hours === null ||
     values.work_hours === undefined ||
-    values.work_hours <= 0
+    values.work_hours < 0
   ) {
-    throw new Error('出勤工时必须大于0')
+    throw new Error('出勤工时不能小于0')
   }
 
   if (
@@ -326,9 +326,9 @@ export async function updateProductionOrder({
   if (
     values.work_hours !== undefined &&
     values.work_hours !== null &&
-    values.work_hours <= 0
+    values.work_hours < 0
   ) {
-    throw new Error('出勤工时必须大于0')
+    throw new Error('出勤工时不能小于0')
   }
 
   if (

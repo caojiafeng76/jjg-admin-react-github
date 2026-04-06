@@ -210,6 +210,7 @@ export interface AttendanceMonthlyRow {
   order_date: string
   work_hours: number
   shift: string
+  remark?: string | null
 }
 
 export async function getAttendanceMonthlyExportData({
@@ -221,16 +222,95 @@ export async function getAttendanceMonthlyExportData({
   month: number
   name?: string
 }) {
-  const db = supabase as unknown as AttendanceDetailsTable
-  const { data, error } = await db.rpc('get_attendance_monthly_export', {
-    p_year: year,
-    p_month: month,
-    p_name: name || null,
-  })
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const endDate = new Date(year, month, 0).toISOString().slice(0, 10)
+  const normalizedName = name?.trim()
+
+  if (normalizedName) {
+    const { data: employees, error: employeeError } = await supabase
+      .from('employees')
+      .select('id')
+      .ilike('name', `%${normalizedName}%`)
+
+    if (employeeError) {
+      throw handleApiError(employeeError, '获取月度出勤数据失败')
+    }
+
+    const employeeIds = (employees || []).map((employee) => employee.id)
+
+    if (!employeeIds.length) {
+      return [] as AttendanceMonthlyRow[]
+    }
+
+    const { data, error } = await supabase
+      .from('production_orders')
+      .select('order_date, work_hours, shift, remark, employee:employees!inner(name, job_name)')
+      .in('employee_id', employeeIds)
+      .gte('order_date', startDate)
+      .lte('order_date', endDate)
+      .order('order_date', { ascending: true })
+
+    if (error) {
+      throw handleApiError(error, '获取月度出勤数据失败')
+    }
+
+    return ((data || []) as Array<{
+      order_date: string
+      work_hours: number
+      shift: string
+      remark?: string | null
+      employee?: { name?: string | null; job_name?: string | null } | null
+    }>)
+      .filter((row) => Boolean(row.employee?.name))
+      .sort(
+        (left, right) =>
+          String(left.employee?.name || '').localeCompare(
+            String(right.employee?.name || ''),
+            'zh-CN',
+          ) || left.order_date.localeCompare(right.order_date),
+      )
+      .map((row) => ({
+        employee_name: row.employee?.name || '',
+        job_name: row.employee?.job_name || '',
+        order_date: row.order_date,
+        work_hours: Number(row.work_hours || 0),
+        shift: row.shift,
+        remark: row.remark,
+      }))
+  }
+
+  const { data, error } = await supabase
+    .from('production_orders')
+    .select('order_date, work_hours, shift, remark, employee:employees!inner(name, job_name)')
+    .gte('order_date', startDate)
+    .lte('order_date', endDate)
+    .order('order_date', { ascending: true })
 
   if (error) {
     throw handleApiError(error, '获取月度出勤数据失败')
   }
 
-  return (data || []) as AttendanceMonthlyRow[]
+  return ((data || []) as Array<{
+    order_date: string
+    work_hours: number
+    shift: string
+    remark?: string | null
+    employee?: { name?: string | null; job_name?: string | null } | null
+  }>)
+    .filter((row) => Boolean(row.employee?.name))
+    .sort(
+      (left, right) =>
+        String(left.employee?.name || '').localeCompare(
+          String(right.employee?.name || ''),
+          'zh-CN',
+        ) || left.order_date.localeCompare(right.order_date),
+    )
+    .map((row) => ({
+      employee_name: row.employee?.name || '',
+      job_name: row.employee?.job_name || '',
+      order_date: row.order_date,
+      work_hours: Number(row.work_hours || 0),
+      shift: row.shift,
+      remark: row.remark,
+    }))
 }

@@ -13,8 +13,42 @@ function daysInMonth(year: number, month: number): number {
 
 interface EmployeeMonthData {
   job_name: string
-  /** key: day (1-31), value: { work_hours, shift } */
-  days: Record<number, { work_hours: number; shift: string }>
+  /** key: day (1-31), value: { work_hours, shift, specialRemark } */
+  days: Record<
+    number,
+    { work_hours: number; shift: string; specialRemark?: string | null }
+  >
+}
+
+const SPECIAL_REMARK_KEYWORDS = ['休息', '请假', '放假', '转班']
+
+function getSpecialRemark(row: AttendanceMonthlyRow): string | null {
+  const remark = row.remark?.trim()
+
+  if (!remark || row.work_hours !== 0) {
+    return null
+  }
+
+  return SPECIAL_REMARK_KEYWORDS.some((keyword) => remark.includes(keyword))
+    ? remark
+    : null
+}
+
+function formatDayCellValue(day?: {
+  work_hours: number
+  specialRemark?: string | null
+}): string | number | null {
+  if (!day) {
+    return null
+  }
+
+  if (day.specialRemark && day.work_hours === 0) {
+    return day.specialRemark
+  }
+
+  return Number.isInteger(day.work_hours)
+    ? day.work_hours
+    : parseFloat(day.work_hours.toFixed(2))
 }
 
 /** 将 RPC 返回的扁平行数据聚合为按员工/天的结构 */
@@ -24,6 +58,8 @@ function aggregateByEmployee(
   const map = new Map<string, EmployeeMonthData>()
   for (const row of rows) {
     const day = new Date(row.order_date).getDate()
+    const specialRemark = getSpecialRemark(row)
+
     if (!map.has(row.employee_name)) {
       map.set(row.employee_name, { job_name: row.job_name, days: {} })
     }
@@ -34,8 +70,13 @@ function aggregateByEmployee(
     if (existing) {
       existing.work_hours += row.work_hours
       if (row.shift === '夜班') existing.shift = '夜班'
+      if (specialRemark) existing.specialRemark = specialRemark
     } else {
-      emp.days[day] = { work_hours: row.work_hours, shift: row.shift }
+      emp.days[day] = {
+        work_hours: row.work_hours,
+        shift: row.shift,
+        specialRemark,
+      }
     }
   }
   return map
@@ -130,13 +171,11 @@ export function exportAttendanceMonthlyExcel(
     for (let d = 1; d <= totalDays; d++) {
       const day = emp.days[d]
       if (day) {
-        // 工时取整显示（如 12.00 → 12）
-        const h = Number.isInteger(day.work_hours)
-          ? day.work_hours
-          : parseFloat(day.work_hours.toFixed(2))
-        row.push(h)
+        row.push(formatDayCellValue(day))
         totalHours += day.work_hours
-        daysCount += 1
+        if (!(day.specialRemark && day.work_hours === 0)) {
+          daysCount += 1
+        }
       } else {
         row.push(null)
       }
@@ -208,7 +247,7 @@ export function exportAttendanceMonthlyExcel(
           ...baseStyle(isNightShift ? {} : {}),
           ...(isNightShift ? { fill: NIGHT_SHIFT_FILL } : {}),
           font: { name: '宋体', sz: 11 },
-          alignment: { horizontal: 'center', vertical: 'center' },
+          alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
           border: CELL_BORDER,
         },
       }
