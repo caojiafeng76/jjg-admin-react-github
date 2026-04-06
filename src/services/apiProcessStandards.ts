@@ -4,16 +4,33 @@ import type { Database } from './database.types'
 
 export type ProcessStandard =
   Database['public']['Tables']['process_standards']['Row']
+export type ProcessStandardMatchLevel =
+  | 'part-model-length'
+  | 'model-length'
+  | 'model-only'
+
+export interface ProcessStandardMatchResult<T> {
+  records: T[]
+  matchLevel: ProcessStandardMatchLevel | null
+}
+
 type ProcessStandardStandardSeconds = Pick<
   ProcessStandard,
   'standard_seconds'
 >
+interface ProcessStandardMatchParams {
+  model: string
+  length?: number | null
+  partNo?: string | null
+  operation?: string
+}
 type SalesOrderRow = Database['public']['Tables']['sales_orders']['Row']
 type SalesOrderProjectNoOption = Pick<
   SalesOrderRow,
   | 'project_no'
   | 'product_model'
   | 'length_mm'
+  | 'material_code'
   | 'customer'
   | 'customer_model'
   | 'created_at'
@@ -22,38 +39,139 @@ type SalesOrderProjectNoOption = Pick<
 }
 type SalesOrderProjectNoDetail = Pick<
   SalesOrderRow,
-  'project_no' | 'product_model' | 'length_mm' | 'customer' | 'customer_model'
+  | 'project_no'
+  | 'product_model'
+  | 'length_mm'
+  | 'material_code'
+  | 'customer'
+  | 'customer_model'
 > & {
   project_no: string
 }
 
-export async function getOperationsByModel(model: string) {
-  const { data, error } = await supabase
-    .from('process_standards')
-    .select('*')
-    .eq('model', model)
-    .order('operation', { ascending: true })
-
-  if (error) {
-    throw handleApiError(error, '获取工序列表失败')
-  }
-
-  return (data || []) as ProcessStandard[]
+function normalizeMatchText(value: string | null | undefined) {
+  return value?.trim() || null
 }
 
-export async function getStandardSeconds(model: string, operation: string) {
-  const { data, error } = await supabase
-    .from('process_standards')
-    .select('standard_seconds')
-    .eq('model', model)
-    .eq('operation', operation)
-    .single()
+function normalizeMatchLength(value: number | null | undefined) {
+  const normalizedValue = Number(value)
 
-  if (error) {
-    throw handleApiError(error, '获取标准工时失败')
+  if (!Number.isFinite(normalizedValue) || normalizedValue <= 0) {
+    return null
   }
 
-  return (data as ProcessStandardStandardSeconds | null)?.standard_seconds as number
+  return normalizedValue
+}
+
+async function fetchMatchedProcessStandards({
+  model,
+  length,
+  partNo,
+  operation,
+  select,
+}: ProcessStandardMatchParams & {
+  select: '*' | 'standard_seconds'
+}): Promise<ProcessStandardMatchResult<ProcessStandard | ProcessStandardStandardSeconds>> {
+  const normalizedModel = normalizeMatchText(model)
+
+  if (!normalizedModel) {
+    return {
+      records: [],
+      matchLevel: null,
+    }
+  }
+
+  const normalizedLength = normalizeMatchLength(length)
+  const normalizedPartNo = normalizeMatchText(partNo)
+  const normalizedOperation = normalizeMatchText(operation)
+
+  const buildQuery = (matchLevel: ProcessStandardMatchLevel) => {
+    let query = supabase
+      .from('process_standards')
+      .select(select)
+      .eq('model', normalizedModel)
+
+    if (normalizedOperation) {
+      query = query.eq('operation', normalizedOperation)
+    }
+
+    if (matchLevel === 'part-model-length') {
+      query = query.eq('part_no', normalizedPartNo!).eq('length', normalizedLength!)
+    }
+
+    if (matchLevel === 'model-length') {
+      query = query.eq('length', normalizedLength!)
+    }
+
+    return query.order('operation', { ascending: true })
+  }
+
+  const matchLevels: ProcessStandardMatchLevel[] = []
+
+  if (normalizedPartNo && normalizedLength !== null) {
+    matchLevels.push('part-model-length')
+  }
+
+  if (normalizedLength !== null) {
+    matchLevels.push('model-length')
+  }
+
+  matchLevels.push('model-only')
+
+  for (const matchLevel of matchLevels) {
+    const { data, error } = await buildQuery(matchLevel)
+
+    if (error) {
+      throw handleApiError(error, '获取成本核算匹配数据失败')
+    }
+
+    if ((data || []).length > 0) {
+      return {
+        records: (data || []) as Array<ProcessStandard | ProcessStandardStandardSeconds>,
+        matchLevel,
+      }
+    }
+  }
+
+  return {
+    records: [],
+    matchLevel: null,
+  }
+}
+
+export async function getOperationsByModel({
+  model,
+  length,
+  partNo,
+}: ProcessStandardMatchParams) {
+  const result = await fetchMatchedProcessStandards({
+    model,
+    length,
+    partNo,
+    select: '*',
+  })
+
+  return {
+    records: result.records as ProcessStandard[],
+    matchLevel: result.matchLevel,
+  }
+}
+
+export async function getStandardSeconds({
+  model,
+  operation,
+  length,
+  partNo,
+}: ProcessStandardMatchParams) {
+  const result = await fetchMatchedProcessStandards({
+    model,
+    operation,
+    length,
+    partNo,
+    select: 'standard_seconds',
+  })
+
+  return (result.records[0] as ProcessStandardStandardSeconds | undefined)?.standard_seconds ?? 0
 }
 
 export async function getModels() {
@@ -76,7 +194,7 @@ export async function getSalesOrdersProjectNos() {
   const { data, error } = await supabase
     .from('sales_orders')
     .select(
-      'project_no, product_model, length_mm, customer, customer_model, created_at',
+      'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
     )
     .not('project_no', 'is', null)
     .order('created_at', { ascending: false })
@@ -94,7 +212,9 @@ export async function getSalesOrdersProjectNos() {
 export async function getSalesOrderByProjectNo(projectNo: string) {
   const { data, error } = await supabase
     .from('sales_orders')
-    .select('project_no, product_model, length_mm, customer, customer_model')
+    .select(
+      'project_no, product_model, length_mm, material_code, customer, customer_model',
+    )
     .eq('project_no', projectNo)
     .single()
 
