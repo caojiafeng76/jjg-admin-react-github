@@ -126,10 +126,7 @@ export default function ProductionOrderForm({
   const selectedItemOperation = Form.useWatch('operation', itemForm)
 
   const modelsMap = useMemo(() => {
-    const map: Record<
-      string,
-      ProjectNoData
-    > = {}
+    const map: Record<string, ProjectNoData> = {}
     projectNos?.forEach((item) => {
       if (map[item.project_no]) {
         return
@@ -150,8 +147,9 @@ export default function ProductionOrderForm({
     [projectNos],
   )
 
-  const selectedProjectData =
-    selectedItemProjectNo ? modelsMap[selectedItemProjectNo] : undefined
+  const selectedProjectData = selectedItemProjectNo
+    ? modelsMap[selectedItemProjectNo]
+    : undefined
 
   const { data: operationMatch } = useOperationsByModel({
     model: selectedItemProductModel || undefined,
@@ -902,7 +900,10 @@ export default function ProductionOrderForm({
             {selectedItemProductModel && operationMatchLevel ? (
               <div className="-mt-3 mb-4 text-sm text-slate-600">
                 成本核算匹配：
-                <Tag color={MATCH_LEVEL_COLORS[operationMatchLevel]} className="ml-2 mr-0">
+                <Tag
+                  color={MATCH_LEVEL_COLORS[operationMatchLevel]}
+                  className="mr-0 ml-2"
+                >
                   {MATCH_LEVEL_LABELS[operationMatchLevel]}
                 </Tag>
               </div>
