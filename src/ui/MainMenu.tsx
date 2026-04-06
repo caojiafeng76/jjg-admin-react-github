@@ -68,7 +68,10 @@ const adminItems: MenuItem[] = [
     key: 'precision-cutting',
     label: '精切',
     icon: <Square3Stack3DIcon className="size-4" />,
-    children: [{ key: 'precision-cutting-transfer', label: '精切转移单' }],
+    children: [
+      { key: 'precision-cutting-transfer', label: '精切转移单' },
+      { key: 'precision-finishing-cutting', label: '精加工切割单' },
+    ],
   },
   {
     key: 'consumables',

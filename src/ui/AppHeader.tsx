@@ -50,6 +50,7 @@ const routeToLabelMap: Record<string, string> = {
   'material-transfer': '物料转移单',
   'production-order': '生产工单',
   'production-daily-report': '生产日报表',
+  'precision-finishing-cutting': '精加工切割单',
   'precision-cutting-transfer': '精切转移单',
   'tooling-data': '刀具资料',
   'tooling-inventory': '刀具库存',
