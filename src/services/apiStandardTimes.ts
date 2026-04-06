@@ -33,6 +33,60 @@ export type StandardTimeFormValues = Pick<
   | 'part_no'
 >
 
+interface StandardTimeFilters {
+  operation?: string
+  model?: string
+  unmatchedOnly?: boolean
+  partNoOnly?: boolean
+  updatedStartDate?: string
+  updatedEndDate?: string
+}
+
+function applyStandardTimeFilters<
+  TQuery extends {
+    ilike: (column: string, pattern: string) => TQuery
+    is: (column: string, value: null) => TQuery
+    not: (column: string, operator: string, value: null) => TQuery
+    neq: (column: string, value: string) => TQuery
+    gte: (column: string, value: string) => TQuery
+    lte: (column: string, value: string) => TQuery
+  },
+>(query: TQuery, filters: StandardTimeFilters) {
+  let nextQuery = query
+
+  if (filters.operation) {
+    nextQuery = nextQuery.ilike('operation', `%${filters.operation}%`)
+  }
+
+  if (filters.model) {
+    nextQuery = nextQuery.ilike('model', `%${filters.model}%`)
+  }
+
+  if (filters.unmatchedOnly) {
+    nextQuery = nextQuery.is('job_name', null)
+  }
+
+  if (filters.partNoOnly) {
+    nextQuery = nextQuery.not('part_no', 'is', null).neq('part_no', '')
+  }
+
+  if (filters.updatedStartDate) {
+    nextQuery = nextQuery.gte(
+      'updated_at',
+      dayjs(filters.updatedStartDate).startOf('day').toISOString(),
+    )
+  }
+
+  if (filters.updatedEndDate) {
+    nextQuery = nextQuery.lte(
+      'updated_at',
+      dayjs(filters.updatedEndDate).endOf('day').toISOString(),
+    )
+  }
+
+  return nextQuery
+}
+
 function normalizeStandardTimeValue(value: string): string {
   return value.trim()
 }
@@ -122,84 +176,44 @@ export async function getStandardTimes({
   operation,
   model,
   unmatchedOnly,
+  partNoOnly,
   updatedStartDate,
   updatedEndDate,
 }: {
   page: number
   pageSize: number
-  operation?: string
-  model?: string
-  unmatchedOnly?: boolean
-  updatedStartDate?: string
-  updatedEndDate?: string
-}) {
+} & StandardTimeFilters) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
   const buildBaseQuery = () => {
-    let query = supabase.from('process_standards').select('*', { count: 'exact' })
-
-    if (operation) {
-      query = query.ilike('operation', `%${operation}%`)
-    }
-
-    if (model) {
-      query = query.ilike('model', `%${model}%`)
-    }
-
-    if (unmatchedOnly) {
-      query = query.is('job_name', null)
-    }
-
-    if (updatedStartDate) {
-      query = query.gte(
-        'updated_at',
-        dayjs(updatedStartDate).startOf('day').toISOString(),
-      )
-    }
-
-    if (updatedEndDate) {
-      query = query.lte(
-        'updated_at',
-        dayjs(updatedEndDate).endOf('day').toISOString(),
-      )
-    }
-
-    return query
+    return applyStandardTimeFilters(
+      supabase.from('process_standards').select('*', { count: 'exact' }),
+      {
+        operation,
+        model,
+        unmatchedOnly,
+        partNoOnly,
+        updatedStartDate,
+        updatedEndDate,
+      },
+    )
   }
 
   const buildCountQuery = () => {
-    let query = supabase
-      .from('process_standards')
-      .select('id', { count: 'exact', head: true })
-
-    if (operation) {
-      query = query.ilike('operation', `%${operation}%`)
-    }
-
-    if (model) {
-      query = query.ilike('model', `%${model}%`)
-    }
-
-    if (unmatchedOnly) {
-      query = query.is('job_name', null)
-    }
-
-    if (updatedStartDate) {
-      query = query.gte(
-        'updated_at',
-        dayjs(updatedStartDate).startOf('day').toISOString(),
-      )
-    }
-
-    if (updatedEndDate) {
-      query = query.lte(
-        'updated_at',
-        dayjs(updatedEndDate).endOf('day').toISOString(),
-      )
-    }
-
-    return query
+    return applyStandardTimeFilters(
+      supabase
+        .from('process_standards')
+        .select('id', { count: 'exact', head: true }),
+      {
+        operation,
+        model,
+        unmatchedOnly,
+        partNoOnly,
+        updatedStartDate,
+        updatedEndDate,
+      },
+    )
   }
 
   const [{ count: total, error: totalError }, { count: zeroCount, error: zeroCountError }] =
@@ -414,47 +428,24 @@ export async function getAllStandardTimesForExport({
   operation,
   model,
   unmatchedOnly,
+  partNoOnly,
   updatedStartDate,
   updatedEndDate,
-}: {
-  operation?: string
-  model?: string
-  unmatchedOnly?: boolean
-  updatedStartDate?: string
-  updatedEndDate?: string
-}): Promise<StandardTime[]> {
-  let query = supabase
-    .from('process_standards')
-    .select('*')
+}: StandardTimeFilters): Promise<StandardTime[]> {
+  const query = applyStandardTimeFilters(
+    supabase.from('process_standards').select('*'),
+    {
+      operation,
+      model,
+      unmatchedOnly,
+      partNoOnly,
+      updatedStartDate,
+      updatedEndDate,
+    },
+  )
     .order('standard_seconds', { ascending: true })
     .order('operation', { ascending: true })
     .order('model', { ascending: true })
-
-  if (operation) {
-    query = query.ilike('operation', `%${operation}%`)
-  }
-
-  if (model) {
-    query = query.ilike('model', `%${model}%`)
-  }
-
-  if (unmatchedOnly) {
-    query = query.is('job_name', null)
-  }
-
-  if (updatedStartDate) {
-    query = query.gte(
-      'updated_at',
-      dayjs(updatedStartDate).startOf('day').toISOString(),
-    )
-  }
-
-  if (updatedEndDate) {
-    query = query.lte(
-      'updated_at',
-      dayjs(updatedEndDate).endOf('day').toISOString(),
-    )
-  }
 
   const { data, error } = await query
 

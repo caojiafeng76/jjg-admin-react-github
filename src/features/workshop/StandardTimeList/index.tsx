@@ -47,12 +47,14 @@ export default function StandardTimeList() {
     operation?: string
     model?: string
     unmatchedOnly?: boolean
+    partNoOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
   }>({
     operation: searchParamsURL.get('operation') || undefined,
     model: searchParamsURL.get('model') || undefined,
     unmatchedOnly: searchParamsURL.get('unmatchedOnly') === 'true' || undefined,
+    partNoOnly: searchParamsURL.get('partNoOnly') === 'true' || undefined,
     updatedStartDate: searchParamsURL.get('updatedStartDate') || undefined,
     updatedEndDate: searchParamsURL.get('updatedEndDate') || undefined,
   })
@@ -291,6 +293,12 @@ export default function StandardTimeList() {
         nextSearchParamsURL.delete('unmatchedOnly')
       }
 
+      if (params.partNoOnly) {
+        nextSearchParamsURL.set('partNoOnly', 'true')
+      } else {
+        nextSearchParamsURL.delete('partNoOnly')
+      }
+
       if (params.updatedStartDate) {
         nextSearchParamsURL.set('updatedStartDate', params.updatedStartDate)
       } else {
@@ -317,6 +325,7 @@ export default function StandardTimeList() {
     nextSearchParamsURL.delete('operation')
     nextSearchParamsURL.delete('model')
     nextSearchParamsURL.delete('unmatchedOnly')
+    nextSearchParamsURL.delete('partNoOnly')
     nextSearchParamsURL.delete('updatedStartDate')
     nextSearchParamsURL.delete('updatedEndDate')
 

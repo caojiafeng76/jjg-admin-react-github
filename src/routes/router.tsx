@@ -43,6 +43,9 @@ const MachineEquipmentMaintenance = lazy(
   () => import('@features/workshop/MachineEquipmentMaintenance'),
 )
 const MaterialTransfer = lazy(() => import('@features/material-transfer'))
+const PrecisionFinishingCutting = lazy(
+  () => import('@features/precision-finishing-cutting'),
+)
 const PrecisionCuttingTransfer = lazy(
   () => import('@features/precision-cutting-transfer'),
 )
@@ -265,6 +268,17 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<MaterialTransfer />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'precision-finishing-cutting',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
+              element={<PrecisionFinishingCutting />}
             />
           </Suspense>
         ),

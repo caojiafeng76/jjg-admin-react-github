@@ -9,6 +9,7 @@ interface SearchValues {
   operation?: string
   model?: string
   unmatchedOnly?: boolean
+  partNoOnly?: boolean
   updatedAtRange?: [Dayjs | null, Dayjs | null]
 }
 
@@ -17,6 +18,7 @@ interface Props {
     operation?: string
     model?: string
     unmatchedOnly?: boolean
+    partNoOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
   }) => void
@@ -26,6 +28,7 @@ interface Props {
     operation?: string
     model?: string
     unmatchedOnly?: boolean
+    partNoOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
   }
@@ -45,6 +48,7 @@ export default function StandardTimeSearch({
       operation: initialValues?.operation,
       model: initialValues?.model,
       unmatchedOnly: initialValues?.unmatchedOnly,
+      partNoOnly: initialValues?.partNoOnly,
       updatedAtRange:
         initialValues?.updatedStartDate && initialValues?.updatedEndDate
           ? [
@@ -64,6 +68,7 @@ export default function StandardTimeSearch({
       operation: values.operation?.trim() || undefined,
       model: values.model?.trim() || undefined,
       unmatchedOnly: values.unmatchedOnly || undefined,
+      partNoOnly: values.partNoOnly || undefined,
       updatedStartDate:
         values.updatedAtRange?.[0]?.format('YYYY-MM-DD') || undefined,
       updatedEndDate:
@@ -131,6 +136,13 @@ export default function StandardTimeSearch({
         className="mb-0 flex items-center"
       >
         <Checkbox>仅看未匹配工种</Checkbox>
+      </Form.Item>
+      <Form.Item
+        name="partNoOnly"
+        valuePropName="checked"
+        className="mb-0 flex items-center"
+      >
+        <Checkbox>仅匹配有料号</Checkbox>
       </Form.Item>
       <Form.Item className="mb-0">
         <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>

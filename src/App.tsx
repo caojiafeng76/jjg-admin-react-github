@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { ConfigProvider, theme, App as AntdApp } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN'
@@ -17,6 +17,7 @@ const queryClient = createQueryClient()
 
 export default function App() {
   const { isDarkMode } = useAppStore()
+  const [isMobileViewport, setIsMobileViewport] = useState(false)
 
   const themeMode = isDarkMode
     ? {
@@ -35,6 +36,21 @@ export default function App() {
     }
   }, [isDarkMode])
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)')
+
+    const syncViewport = (event?: MediaQueryListEvent) => {
+      setIsMobileViewport(event ? event.matches : mediaQuery.matches)
+    }
+
+    syncViewport()
+    mediaQuery.addEventListener('change', syncViewport)
+
+    return () => {
+      mediaQuery.removeEventListener('change', syncViewport)
+    }
+  }, [])
+
   return (
     <ErrorBoundary>
       <ConfigProvider locale={zhCN} theme={themeMode}>
@@ -43,7 +59,7 @@ export default function App() {
             <AuthProvider>
               <RouterProvider router={router} />
             </AuthProvider>
-            {import.meta.env.DEV && (
+            {import.meta.env.DEV && !isMobileViewport && (
               <ReactQueryDevtools initialIsOpen={false} />
             )}
           </QueryClientProvider>

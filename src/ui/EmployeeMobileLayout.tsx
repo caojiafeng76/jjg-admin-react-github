@@ -6,6 +6,7 @@ import {
   ClockIcon,
   DocumentChartBarIcon,
   KeyIcon,
+  ScissorsIcon,
 } from '@heroicons/react/24/outline'
 import { useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -33,6 +34,11 @@ const baseNavItems = [
     key: '/material-transfer',
     label: '转移表',
     icon: ArrowsRightLeftIcon,
+  },
+  {
+    key: '/precision-finishing-cutting',
+    label: '精加工',
+    icon: ScissorsIcon,
   },
 ]
 
