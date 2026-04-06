@@ -532,3 +532,57 @@ export async function deleteMaterialTransfers(ids: string[]) {
     throw handleApiError(error, '删除物料转移单失败')
   }
 }
+
+export interface TransferWorkshopStat {
+  target_workshop: string
+  total_quantity: number
+  record_count: number
+}
+
+export interface ProjectTransferStats {
+  byWorkshop: TransferWorkshopStat[]
+  totalOutbound: number // 入"仓库"的总数
+  totalTransferred: number // 所有车间转移总数
+}
+
+export async function getTransferStatsByProjectNo(
+  projectNo: string,
+): Promise<ProjectTransferStats> {
+  const { data, error } = await supabase
+    .from('material_transfers')
+    .select('target_workshop, transfer_quantity')
+    .eq('project_no', projectNo.trim())
+    .order('target_workshop', { ascending: true })
+
+  if (error) {
+    throw handleApiError(error, '获取转移单统计失败')
+  }
+
+  const rows = (data || []) as { target_workshop: string; transfer_quantity: number }[]
+
+  const workshopMap = new Map<string, { total: number; count: number }>()
+  for (const row of rows) {
+    const current = workshopMap.get(row.target_workshop) ?? { total: 0, count: 0 }
+    current.total += Number(row.transfer_quantity || 0)
+    current.count += 1
+    workshopMap.set(row.target_workshop, current)
+  }
+
+  const byWorkshop: TransferWorkshopStat[] = Array.from(workshopMap.entries()).map(
+    ([workshop, stat]) => ({
+      target_workshop: workshop,
+      total_quantity: stat.total,
+      record_count: stat.count,
+    }),
+  )
+
+  const totalOutbound =
+    workshopMap.get('仓库')?.total ?? 0
+
+  const totalTransferred = rows.reduce(
+    (sum, row) => sum + Number(row.transfer_quantity || 0),
+    0,
+  )
+
+  return { byWorkshop, totalOutbound, totalTransferred }
+}

@@ -404,3 +404,92 @@ export async function checkEmployeeOrderExistsOnDate(
 
   return (count ?? 0) > 0
 }
+
+export interface ProductionItemWithOrderDetail {
+  id: string
+  operation: string
+  project_no: string
+  product_model: string | null
+  length_mm: number | null
+  customer_model: string | null
+  qualified_quantity: number
+  incoming_qualified_quantity: number
+  defect_quantity_1: number
+  defect_quantity_2: number
+  defect_reason_1: string | null
+  defect_reason_2: string | null
+  standard_seconds: number
+  remark: string | null
+  order_id: string
+  order_date: string
+  shift: string
+  employee_name: string | null
+}
+
+export async function getProductionItemsByProjectNo(
+  projectNo: string,
+): Promise<ProductionItemWithOrderDetail[]> {
+  const { data, error } = await supabase
+    .from('production_order_items')
+    .select(
+      `
+      *,
+      production_orders(
+        id,
+        order_date,
+        shift,
+        employee:employees(name)
+      )
+    `,
+    )
+    .eq('project_no', projectNo.trim())
+    .order('operation', { ascending: true })
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    throw handleApiError(error, '获取生产工单明细失败')
+  }
+
+  return ((data || []) as unknown as Array<{
+    id: string
+    operation: string
+    project_no: string
+    product_model: string | null
+    length_mm: number | null
+    customer_model: string | null
+    qualified_quantity: number
+    incoming_qualified_quantity: number
+    defect_quantity_1: number
+    defect_quantity_2: number
+    defect_reason_1: string | null
+    defect_reason_2: string | null
+    standard_seconds: number
+    remark: string | null
+    order_id: string
+    production_orders: {
+      id: string
+      order_date: string
+      shift: string
+      employee: { name: string } | null
+    } | null
+  }>).map((item) => ({
+    id: item.id,
+    operation: item.operation,
+    project_no: item.project_no,
+    product_model: item.product_model,
+    length_mm: item.length_mm,
+    customer_model: item.customer_model,
+    qualified_quantity: item.qualified_quantity,
+    incoming_qualified_quantity: item.incoming_qualified_quantity,
+    defect_quantity_1: item.defect_quantity_1,
+    defect_quantity_2: item.defect_quantity_2,
+    defect_reason_1: item.defect_reason_1,
+    defect_reason_2: item.defect_reason_2,
+    standard_seconds: item.standard_seconds,
+    remark: item.remark,
+    order_id: item.order_id,
+    order_date: item.production_orders?.order_date ?? '',
+    shift: item.production_orders?.shift ?? '',
+    employee_name: item.production_orders?.employee?.name ?? null,
+  }))
+}

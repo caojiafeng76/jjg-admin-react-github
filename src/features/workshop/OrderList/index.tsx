@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance } from 'antd'
+import { App, Modal, FormInstance, Splitter } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
@@ -21,6 +21,7 @@ import {
 import WorkshopOrderTable from './WorkshopOrderTable'
 import WorkshopOrderForm from './WorkshopOrderForm'
 import WorkshopOrderSearch from './WorkshopOrderSearch'
+import WorkshopOrderProductionStats from './WorkshopOrderProductionStats'
 import { usePrintWorkshopOrders } from './usePrintWorkshopOrders'
 
 export interface WorkshopOrder {
@@ -49,6 +50,7 @@ export default function WorkshopOrderList() {
   const [modalTitle, setModalTitle] = useState('创建订单')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
+  const [activeOrder, setActiveOrder] = useState<WorkshopOrder | null>(null)
   // 使用 URL 参数管理分页，与 AppPagination 保持一致
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -81,10 +83,11 @@ export default function WorkshopOrderList() {
 
   const { generatePDF, isPrinting } = usePrintWorkshopOrders()
 
-  // 动态计算表格高度（目标10条数据撑满）
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
+  // 动态计算表格高度（目标行数适应上半面板）
+  const { tableContainerRef, paginationRef, scrollY } =
     useTableHeight({
-      targetRowCount: 10,
+      targetRowCount: 12,
+      headerHeight: 34,
     })
 
   const handlePrint = useCallback(async () => {
@@ -322,7 +325,7 @@ export default function WorkshopOrderList() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
+    <div className="flex h-full flex-col gap-2">
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
@@ -350,25 +353,38 @@ export default function WorkshopOrderList() {
         />
       </div>
 
-      {/* 表格和分页 */}
-      <div
-        ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
-      >
-        <div className="min-h-0 flex-1 overflow-x-auto">
-          <WorkshopOrderTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
-        </div>
-        <div ref={paginationRef} className="flex shrink-0 justify-end">
-          <AppPagination total={data?.total || 0} />
-        </div>
-      </div>
+      {/* 上下分割布局 */}
+      <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+        {/* 上半部分：订单列表 */}
+        <Splitter.Panel defaultSize="60%" min="30%">
+          <div
+            ref={tableContainerRef}
+            className="flex h-full flex-col gap-2 overflow-hidden"
+          >
+            <div className="min-h-0 flex-1">
+              <WorkshopOrderTable
+                loading={isLoading}
+                data={data?.items || []}
+                selectedRowKeys={selectedRowKeys}
+                onSelect={setSelectedRowKeys}
+                activeRowId={activeOrder?.id ?? null}
+                onRowClick={setActiveOrder}
+                scrollY={scrollY}
+              />
+            </div>
+            <div ref={paginationRef} className="flex shrink-0 justify-end">
+              <AppPagination total={data?.total || 0} />
+            </div>
+          </div>
+        </Splitter.Panel>
+
+        {/* 下半部分：生产工单统计 */}
+        <Splitter.Panel min="20%">
+          <div className="h-full overflow-hidden">
+            <WorkshopOrderProductionStats selectedOrder={activeOrder} />
+          </div>
+        </Splitter.Panel>
+      </Splitter>
 
       <Modal
         title={modalTitle}
