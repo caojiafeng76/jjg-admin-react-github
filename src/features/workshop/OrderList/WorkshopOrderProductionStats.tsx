@@ -311,6 +311,7 @@ function OrderInfoHeader({
   transferStats?: {
     byWorkshop: TransferWorkshopStat[]
     totalOutbound: number
+    totalInWarehouse: number
     totalTransferred: number
   }
 }) {
@@ -359,27 +360,40 @@ function OrderInfoHeader({
             {orderQty || '-'}
           </Text>
         </span>
+        <span>
+          出库支数：
+          <Text
+            strong
+            style={{
+              fontSize: 12,
+              color:
+                (transferStats?.totalOutbound ?? 0) >= orderQty && orderQty > 0
+                  ? '#389e0d'
+                  : (transferStats?.totalOutbound ?? 0) > 0
+                    ? '#1677ff'
+                    : '#999',
+            }}
+          >
+            {transferStats?.totalOutbound ?? 0}
+          </Text>
+        </span>
+        {(transferStats?.totalInWarehouse ?? 0) > 0 && (
+          <span>
+            入库支数：
+            <Text strong style={{ fontSize: 12, color: '#389e0d' }}>
+              {transferStats!.totalInWarehouse}
+            </Text>
+          </span>
+        )}
       </div>
 
       {/* 出库进度 */}
       <div className="mt-1.5 flex items-center gap-3">
         <span className="shrink-0 text-xs text-gray-500">
           出库进度：
-          <Text
-            strong
-            style={{
-              fontSize: 12,
-              color:
-                progressPercent >= 100
-                  ? '#389e0d'
-                  : progressPercent > 0
-                    ? '#1677ff'
-                    : '#999',
-            }}
-          >
-            {outbound}
+          <Text style={{ fontSize: 11, color: '#999' }}>
+            {outbound} / {orderQty}
           </Text>
-          <Text style={{ fontSize: 11, color: '#999' }}> / {orderQty}</Text>
         </span>
         <Progress
           percent={progressPercent}
@@ -400,7 +414,13 @@ function OrderInfoHeader({
             >
               <span className="text-xs">
                 <Tag
-                  color={ws.target_workshop === '仓库' ? 'success' : 'default'}
+                  color={
+                    ws.target_workshop === '仓库'
+                      ? 'success'
+                      : ws.target_workshop === '包装'
+                        ? 'processing'
+                        : 'default'
+                  }
                   style={{ fontSize: 10, padding: '0 4px', marginRight: 2 }}
                 >
                   {ws.target_workshop}
@@ -408,7 +428,12 @@ function OrderInfoHeader({
                 <Text
                   style={{
                     fontSize: 11,
-                    color: ws.target_workshop === '仓库' ? '#389e0d' : '#555',
+                    color:
+                      ws.target_workshop === '仓库'
+                        ? '#389e0d'
+                        : ws.target_workshop === '包装'
+                          ? '#1677ff'
+                          : '#555',
                   }}
                 >
                   {ws.total_quantity}
