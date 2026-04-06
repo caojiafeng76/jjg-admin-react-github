@@ -282,6 +282,7 @@ export async function getStandardTimes({
 async function checkStandardTimeExists(
   operation: string,
   model: string,
+  partNo: string | null | undefined,
   excludeId?: string,
 ): Promise<boolean> {
   let query = supabase
@@ -290,6 +291,12 @@ async function checkStandardTimeExists(
     .eq('operation', operation)
     .eq('model', model)
     .limit(1)
+
+  if (partNo) {
+    query = query.eq('part_no', partNo)
+  } else {
+    query = query.is('part_no', null)
+  }
 
   if (excludeId) {
     query = query.neq('id', excludeId)
@@ -319,10 +326,14 @@ export async function createStandardTime(values: StandardTimeFormValues) {
     const exists = await checkStandardTimeExists(
       normalizedValues.operation,
       normalizedValues.model,
+      normalizedValues.part_no,
     )
     if (exists) {
+      const partNoSuffix = normalizedValues.part_no
+        ? ` 料号 "${normalizedValues.part_no}"`
+        : ' 且料号为空'
       throw new Error(
-        `工序 "${normalizedValues.operation}" 和型号 "${normalizedValues.model}" 的成本核算已存在，无法创建`,
+        `工序 "${normalizedValues.operation}"、型号 "${normalizedValues.model}"${partNoSuffix} 的成本核算已存在，无法创建`,
       )
     }
   }
@@ -353,6 +364,7 @@ export async function ensureStandardTimeExists({
   const exists = await checkStandardTimeExists(
     normalizedOperation,
     normalizedModel,
+    null,
   )
 
   if (exists) {
@@ -390,11 +402,15 @@ export async function updateStandardTime({
     const exists = await checkStandardTimeExists(
       normalizedValues.operation,
       normalizedValues.model,
+      normalizedValues.part_no,
       id,
     )
     if (exists) {
+      const partNoSuffix = normalizedValues.part_no
+        ? ` 料号 "${normalizedValues.part_no}"`
+        : ' 且料号为空'
       throw new Error(
-        `工序 "${normalizedValues.operation}" 和型号 "${normalizedValues.model}" 的成本核算已存在，无法更新`,
+        `工序 "${normalizedValues.operation}"、型号 "${normalizedValues.model}"${partNoSuffix} 的成本核算已存在，无法更新`,
       )
     }
   }
