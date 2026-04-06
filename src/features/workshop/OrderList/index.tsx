@@ -84,11 +84,10 @@ export default function WorkshopOrderList() {
   const { generatePDF, isPrinting } = usePrintWorkshopOrders()
 
   // 动态计算表格高度（目标行数适应上半面板）
-  const { tableContainerRef, paginationRef, scrollY } =
-    useTableHeight({
-      targetRowCount: 12,
-      headerHeight: 34,
-    })
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: 12,
+    headerHeight: 34,
+  })
 
   const handlePrint = useCallback(async () => {
     if (selectedRowKeys.length === 0) {

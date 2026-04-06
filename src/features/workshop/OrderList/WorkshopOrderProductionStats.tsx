@@ -159,7 +159,8 @@ export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
         0,
       ),
       totalDefect: groupItems.reduce(
-        (sum, i) => sum + (i.defect_quantity_1 ?? 0) + (i.defect_quantity_2 ?? 0),
+        (sum, i) =>
+          sum + (i.defect_quantity_1 ?? 0) + (i.defect_quantity_2 ?? 0),
         0,
       ),
     }))
@@ -189,7 +190,10 @@ export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
       <div className="flex h-full flex-col overflow-hidden">
         <OrderInfoHeader order={selectedOrder} transferStats={transferStats} />
         <div className="flex flex-1 items-center justify-center text-gray-400">
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无生产工单记录" />
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="暂无生产工单记录"
+          />
         </div>
       </div>
     )
@@ -206,9 +210,18 @@ export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
           {group.operation}
         </Tag>
         <Text type="secondary" style={{ fontSize: 11 }}>
-          合格 <Text style={{ color: '#389e0d', fontSize: 11 }}>{group.totalQualified}</Text>
+          合格{' '}
+          <Text style={{ color: '#389e0d', fontSize: 11 }}>
+            {group.totalQualified}
+          </Text>
           {group.totalDefect > 0 && (
-            <> · 不良 <Text style={{ color: '#cf1322', fontSize: 11 }}>{group.totalDefect}</Text></>
+            <>
+              {' '}
+              · 不良{' '}
+              <Text style={{ color: '#cf1322', fontSize: 11 }}>
+                {group.totalDefect}
+              </Text>
+            </>
           )}
         </Text>
       </span>
@@ -242,7 +255,10 @@ export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
               <Table.Summary.Cell index={6} align="right">
                 {group.totalDefect > 0 ? (
                   <Text strong style={{ color: '#cf1322', fontSize: 11 }}>
-                    {group.items.reduce((s, i) => s + (i.defect_quantity_1 ?? 0), 0)}
+                    {group.items.reduce(
+                      (s, i) => s + (i.defect_quantity_1 ?? 0),
+                      0,
+                    )}
                   </Text>
                 ) : (
                   '-'
@@ -250,9 +266,15 @@ export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
               </Table.Summary.Cell>
               <Table.Summary.Cell index={7} />
               <Table.Summary.Cell index={8} align="right">
-                {group.items.reduce((s, i) => s + (i.defect_quantity_2 ?? 0), 0) > 0 ? (
+                {group.items.reduce(
+                  (s, i) => s + (i.defect_quantity_2 ?? 0),
+                  0,
+                ) > 0 ? (
                   <Text strong style={{ color: '#cf1322', fontSize: 11 }}>
-                    {group.items.reduce((s, i) => s + (i.defect_quantity_2 ?? 0), 0)}
+                    {group.items.reduce(
+                      (s, i) => s + (i.defect_quantity_2 ?? 0),
+                      0,
+                    )}
                   </Text>
                 ) : (
                   '-'
@@ -286,33 +308,56 @@ function OrderInfoHeader({
   transferStats,
 }: {
   order: WorkshopOrder
-  transferStats?: { byWorkshop: TransferWorkshopStat[]; totalOutbound: number; totalTransferred: number }
+  transferStats?: {
+    byWorkshop: TransferWorkshopStat[]
+    totalOutbound: number
+    totalTransferred: number
+  }
 }) {
   const orderQty = order.order_quantity ?? 0
   const outbound = transferStats?.totalOutbound ?? 0
   const progressPercent =
     orderQty > 0 ? Math.min(Math.round((outbound / orderQty) * 100), 100) : 0
   const progressStatus =
-    progressPercent >= 100 ? 'success' : progressPercent > 0 ? 'active' : 'normal'
+    progressPercent >= 100
+      ? 'success'
+      : progressPercent > 0
+        ? 'active'
+        : 'normal'
 
   return (
     <div className="border-b px-3 py-2">
       {/* 基础订单信息 */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-xs text-gray-600">
         <span>
-          项目号：<Text strong style={{ fontSize: 12 }}>{order.project_no || '-'}</Text>
+          项目号：
+          <Text strong style={{ fontSize: 12 }}>
+            {order.project_no || '-'}
+          </Text>
         </span>
         <span>
-          型号：<Text strong style={{ fontSize: 12 }}>{order.product_model || '-'}</Text>
+          型号：
+          <Text strong style={{ fontSize: 12 }}>
+            {order.product_model || '-'}
+          </Text>
         </span>
         <span>
-          长度：<Text strong style={{ fontSize: 12 }}>{order.length_mm ? `${order.length_mm} mm` : '-'}</Text>
+          长度：
+          <Text strong style={{ fontSize: 12 }}>
+            {order.length_mm ? `${order.length_mm} mm` : '-'}
+          </Text>
         </span>
         <span>
-          料号：<Text strong style={{ fontSize: 12 }}>{order.material_code || '-'}</Text>
+          料号：
+          <Text strong style={{ fontSize: 12 }}>
+            {order.material_code || '-'}
+          </Text>
         </span>
         <span>
-          订单支数：<Text strong style={{ fontSize: 12 }}>{orderQty || '-'}</Text>
+          订单支数：
+          <Text strong style={{ fontSize: 12 }}>
+            {orderQty || '-'}
+          </Text>
         </span>
       </div>
 
@@ -324,7 +369,12 @@ function OrderInfoHeader({
             strong
             style={{
               fontSize: 12,
-              color: progressPercent >= 100 ? '#389e0d' : progressPercent > 0 ? '#1677ff' : '#999',
+              color:
+                progressPercent >= 100
+                  ? '#389e0d'
+                  : progressPercent > 0
+                    ? '#1677ff'
+                    : '#999',
             }}
           >
             {outbound}
