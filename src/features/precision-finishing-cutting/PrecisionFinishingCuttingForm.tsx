@@ -276,7 +276,11 @@ export default function PrecisionFinishingCuttingForm({
               <InputNumber min={0} precision={0} className="w-full" />
             </Form.Item>
 
-            <Form.Item name="defect_reason" label="不良原因" className="col-span-2">
+            <Form.Item
+              name="defect_reason"
+              label="不良原因"
+              className="col-span-2"
+            >
               <Input.TextArea rows={2} placeholder="可填写不良原因" />
             </Form.Item>
           </div>
@@ -329,10 +333,12 @@ export default function PrecisionFinishingCuttingForm({
               <Select
                 placeholder="请选择接收车间"
                 getPopupContainer={getPopupContainer}
-                options={PRECISION_FINISHING_CUTTING_WORKSHOPS.map((workshop) => ({
-                  label: workshop,
-                  value: workshop,
-                }))}
+                options={PRECISION_FINISHING_CUTTING_WORKSHOPS.map(
+                  (workshop) => ({
+                    label: workshop,
+                    value: workshop,
+                  }),
+                )}
               />
             </Form.Item>
 
@@ -374,8 +380,12 @@ export default function PrecisionFinishingCuttingForm({
               valuePropName="checked"
             >
               <Switch
-                checkedChildren={PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[1].label}
-                unCheckedChildren={PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[0].label}
+                checkedChildren={
+                  PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[1].label
+                }
+                unCheckedChildren={
+                  PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[0].label
+                }
               />
             </Form.Item>
           ) : null}

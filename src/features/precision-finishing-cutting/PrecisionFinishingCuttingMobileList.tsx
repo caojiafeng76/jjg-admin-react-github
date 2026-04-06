@@ -20,7 +20,10 @@ export default function PrecisionFinishingCuttingMobileList({
 }: Props) {
   if (!loading && data.length === 0) {
     return (
-      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无精加工切割单" />
+      <Empty
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        description="暂无精加工切割单"
+      />
     )
   }
 
@@ -43,7 +46,9 @@ export default function PrecisionFinishingCuttingMobileList({
               <div>
                 <div
                   className={
-                    selected ? 'text-xs text-slate-300' : 'text-xs text-slate-400'
+                    selected
+                      ? 'text-xs text-slate-300'
+                      : 'text-xs text-slate-400'
                   }
                 >
                   {record.created_at
@@ -52,7 +57,9 @@ export default function PrecisionFinishingCuttingMobileList({
                 </div>
                 <div
                   className={
-                    selected ? 'mt-1 text-sm text-slate-200' : 'mt-1 text-sm text-slate-500'
+                    selected
+                      ? 'mt-1 text-sm text-slate-200'
+                      : 'mt-1 text-sm text-slate-500'
                   }
                 >
                   {record.customer || '-'}
@@ -62,7 +69,9 @@ export default function PrecisionFinishingCuttingMobileList({
                 </div>
                 <div
                   className={
-                    selected ? 'mt-1 text-sm text-slate-200' : 'mt-1 text-sm text-slate-500'
+                    selected
+                      ? 'mt-1 text-sm text-slate-200'
+                      : 'mt-1 text-sm text-slate-500'
                   }
                 >
                   {record.product_model || '-'} / {record.customer_model || '-'}
@@ -97,7 +106,8 @@ export default function PrecisionFinishingCuttingMobileList({
                   长料
                 </div>
                 <div className="mt-1 font-semibold">
-                  {record.long_material_length_mm} / {record.long_material_quantity}
+                  {record.long_material_length_mm} /{' '}
+                  {record.long_material_quantity}
                 </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
@@ -128,7 +138,9 @@ export default function PrecisionFinishingCuttingMobileList({
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   接收人
                 </div>
-                <div className="mt-1 font-semibold">{record.recipient_name}</div>
+                <div className="mt-1 font-semibold">
+                  {record.recipient_name}
+                </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
@@ -142,7 +154,9 @@ export default function PrecisionFinishingCuttingMobileList({
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   长度
                 </div>
-                <div className="mt-1 font-semibold">{record.length_mm ?? '-'}</div>
+                <div className="mt-1 font-semibold">
+                  {record.length_mm ?? '-'}
+                </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
