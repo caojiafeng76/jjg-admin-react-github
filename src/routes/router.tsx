@@ -221,6 +221,28 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'production-status',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'production-scheduling',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
         path: 'employee-list',
         element: (
           <Suspense fallback={<Loading />}>
