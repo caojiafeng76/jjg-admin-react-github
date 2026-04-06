@@ -15,8 +15,7 @@ import {
 
 const { RangePicker } = DatePicker
 
-interface PrecisionFinishingCuttingSearchValues
-  extends PrecisionFinishingCuttingFilters {
+interface PrecisionFinishingCuttingSearchValues extends PrecisionFinishingCuttingFilters {
   dateRange?: [Dayjs | null, Dayjs | null]
 }
 

@@ -210,7 +210,9 @@ export default function PrecisionFinishingCuttingPage() {
   const handleBatchAudit = useCallback(
     (isAudited: boolean) => {
       if (selectedRowKeys.length === 0) {
-        message.warning(`请选择要${isAudited ? '审核' : '反审核'}的精加工切割单`)
+        message.warning(
+          `请选择要${isAudited ? '审核' : '反审核'}的精加工切割单`,
+        )
         return
       }
 
