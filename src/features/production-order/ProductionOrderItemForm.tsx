@@ -301,7 +301,10 @@ export default function ProductionOrderItemForm({
           {productModel && operationMatchLevel ? (
             <div className="-mt-3 mb-4 text-sm text-slate-600">
               成本核算匹配：
-              <Tag color={MATCH_LEVEL_COLORS[operationMatchLevel]} className="ml-2 mr-0">
+              <Tag
+                color={MATCH_LEVEL_COLORS[operationMatchLevel]}
+                className="mr-0 ml-2"
+              >
                 {MATCH_LEVEL_LABELS[operationMatchLevel]}
               </Tag>
             </div>
