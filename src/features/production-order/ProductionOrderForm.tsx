@@ -39,6 +39,7 @@ import {
 import {
   useOperationsByModel,
   useSalesOrdersProjectNos,
+  type ProcessStandardMatchLevel,
 } from './useProcessStandards'
 
 type ProductionOrderFormInitialValues = ProductionOrder & {
@@ -78,6 +79,25 @@ interface OrderItem {
   remark?: string | null
 }
 
+interface ProjectNoData {
+  product_model: string | null
+  length_mm: number | null
+  material_code: string | null
+  customer_model: string | null
+}
+
+const MATCH_LEVEL_LABELS: Record<ProcessStandardMatchLevel, string> = {
+  'part-model-length': '料号 + 型号 + 长度',
+  'model-length': '型号 + 长度',
+  'model-only': '型号兜底',
+}
+
+const MATCH_LEVEL_COLORS: Record<ProcessStandardMatchLevel, string> = {
+  'part-model-length': 'success',
+  'model-length': 'processing',
+  'model-only': 'warning',
+}
+
 export default function ProductionOrderForm({
   open,
   onCancel,
@@ -102,29 +122,13 @@ export default function ProductionOrderForm({
   const isCreateMode = !initialValues
 
   const selectedItemProductModel = Form.useWatch('product_model', itemForm)
+  const selectedItemProjectNo = Form.useWatch('project_no', itemForm)
   const selectedItemOperation = Form.useWatch('operation', itemForm)
-
-  const { data: operations } = useOperationsByModel(
-    selectedItemProductModel || undefined,
-  )
-
-  const operationOptions = useMemo(
-    () =>
-      operations?.map((item) => ({
-        label: item.operation,
-        value: item.operation,
-      })) || [],
-    [operations],
-  )
 
   const modelsMap = useMemo(() => {
     const map: Record<
       string,
-      {
-        product_model: string | null
-        length_mm: number | null
-        customer_model: string | null
-      }
+      ProjectNoData
     > = {}
     projectNos?.forEach((item) => {
       if (map[item.project_no]) {
@@ -134,6 +138,7 @@ export default function ProductionOrderForm({
       map[item.project_no] = {
         product_model: item.product_model,
         length_mm: item.length_mm,
+        material_code: item.material_code,
         customer_model: item.customer_model,
       }
     })
@@ -143,6 +148,27 @@ export default function ProductionOrderForm({
   const projectNoOptions = useMemo(
     () => buildProjectNoSelectOptions(projectNos),
     [projectNos],
+  )
+
+  const selectedProjectData =
+    selectedItemProjectNo ? modelsMap[selectedItemProjectNo] : undefined
+
+  const { data: operationMatch } = useOperationsByModel({
+    model: selectedItemProductModel || undefined,
+    length: selectedProjectData?.length_mm,
+    partNo: selectedProjectData?.material_code,
+  })
+
+  const operations = operationMatch?.records
+  const operationMatchLevel = operationMatch?.matchLevel ?? null
+
+  const operationOptions = useMemo(
+    () =>
+      operations?.map((item) => ({
+        label: item.operation,
+        value: item.operation,
+      })) || [],
+    [operations],
   )
 
   useEffect(() => {
@@ -872,6 +898,15 @@ export default function ProductionOrderForm({
                 onChange={handleOperationChangeForItem}
               />
             </Form.Item>
+
+            {selectedItemProductModel && operationMatchLevel ? (
+              <div className="-mt-3 mb-4 text-sm text-slate-600">
+                成本核算匹配：
+                <Tag color={MATCH_LEVEL_COLORS[operationMatchLevel]} className="ml-2 mr-0">
+                  {MATCH_LEVEL_LABELS[operationMatchLevel]}
+                </Tag>
+              </div>
+            ) : null}
 
             {!compact ? (
               <Form.Item

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { Modal, Form, InputNumber, Select, Input } from 'antd'
+import { Modal, Form, InputNumber, Select, Input, Tag } from 'antd'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import {
@@ -10,6 +10,7 @@ import {
 import {
   useSalesOrdersProjectNos,
   useOperationsByModel,
+  type ProcessStandardMatchLevel,
 } from './useProcessStandards'
 
 interface Props {
@@ -19,6 +20,26 @@ interface Props {
   initialValues?: ProductionOrderItem
   orderId: string
   compact?: boolean
+}
+
+interface ProjectNoData {
+  project_no: string
+  product_model: string | null
+  length_mm: number | null
+  material_code?: string | null
+  customer_model: string | null
+}
+
+const MATCH_LEVEL_LABELS: Record<ProcessStandardMatchLevel, string> = {
+  'part-model-length': '料号 + 型号 + 长度',
+  'model-length': '型号 + 长度',
+  'model-only': '型号兜底',
+}
+
+const MATCH_LEVEL_COLORS: Record<ProcessStandardMatchLevel, string> = {
+  'part-model-length': 'success',
+  'model-length': 'processing',
+  'model-only': 'warning',
 }
 
 export default function ProductionOrderItemForm({
@@ -39,14 +60,21 @@ export default function ProductionOrderItemForm({
   const projectNoData = useMemo(
     () => projectNos?.find((item) => item.project_no === selectedProjectNo),
     [projectNos, selectedProjectNo],
-  )
+  ) as ProjectNoData | undefined
   const projectNoOptions = useMemo(
     () => buildProjectNoSelectOptions(projectNos),
     [projectNos],
   )
   const productModel = projectNoData?.product_model || ''
 
-  const { data: operations } = useOperationsByModel(productModel || undefined)
+  const { data: operationMatch } = useOperationsByModel({
+    model: productModel || undefined,
+    length: projectNoData?.length_mm,
+    partNo: projectNoData?.material_code,
+  })
+
+  const operations = operationMatch?.records
+  const operationMatchLevel = operationMatch?.matchLevel ?? null
 
   const operationOptions = useMemo(
     () =>
@@ -269,6 +297,15 @@ export default function ProductionOrderItemForm({
               disabled={!productModel}
             />
           </Form.Item>
+
+          {productModel && operationMatchLevel ? (
+            <div className="-mt-3 mb-4 text-sm text-slate-600">
+              成本核算匹配：
+              <Tag color={MATCH_LEVEL_COLORS[operationMatchLevel]} className="ml-2 mr-0">
+                {MATCH_LEVEL_LABELS[operationMatchLevel]}
+              </Tag>
+            </div>
+          ) : null}
 
           {!compact ? (
             <Form.Item
