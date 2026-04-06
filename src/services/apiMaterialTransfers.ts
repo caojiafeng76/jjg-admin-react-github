@@ -541,8 +541,9 @@ export interface TransferWorkshopStat {
 
 export interface ProjectTransferStats {
   byWorkshop: TransferWorkshopStat[]
-  totalOutbound: number // 入"仓库"的总数
-  totalTransferred: number // 所有车间转移总数
+  totalOutbound: number // 所有转移单的总数量（有记录即算出库）
+  totalInWarehouse: number // 进入"仓库"的数量（入库量）
+  totalTransferred: number // 所有车间转移总数（同 totalOutbound）
 }
 
 export async function getTransferStatsByProjectNo(
@@ -576,13 +577,15 @@ export async function getTransferStatsByProjectNo(
     }),
   )
 
-  const totalOutbound =
-    workshopMap.get('仓库')?.total ?? 0
-
   const totalTransferred = rows.reduce(
     (sum, row) => sum + Number(row.transfer_quantity || 0),
     0,
   )
 
-  return { byWorkshop, totalOutbound, totalTransferred }
+  const totalOutbound = totalTransferred
+
+  const totalInWarehouse =
+    workshopMap.get('仓库')?.total ?? 0
+
+  return { byWorkshop, totalOutbound, totalInWarehouse, totalTransferred }
 }
