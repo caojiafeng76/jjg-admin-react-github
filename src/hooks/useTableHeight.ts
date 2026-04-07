@@ -5,6 +5,7 @@ interface UseTableHeightOptions {
   headerHeight?: number
   gap?: number
   summaryRowHeight?: number // 汇总行高度，用于有汇总行的表格
+  minRowHeight?: number // 最小行高，默认 32px
 }
 
 /**
@@ -18,6 +19,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
     headerHeight = 39, // size="small" 的表头高度
     gap = 16, // gap-4 = 16px
     summaryRowHeight = 0, // 汇总行高度，默认0（无汇总行）
+    minRowHeight = 32, // 最小行高，默认 32px
   } = options
 
   const tableContainerRef = useRef<HTMLDivElement>(null)
@@ -75,7 +77,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
 
           // 使用四舍五入确保行高为整数，同时保持行高和 scrollY 的一致性
           // 这样 scrollY = rowHeight × 10，确保10行能准确显示
-          const newRowHeight = Math.max(32, Math.round(calculatedRowHeight)) // 最小行高32px，四舍五入
+          const newRowHeight = Math.max(minRowHeight, Math.round(calculatedRowHeight)) // 四舍五入，不低于 minRowHeight
           
           // scrollY 必须等于 rowHeight × 10，确保10行能完全显示
           const newScrollY = Math.max(320, newRowHeight * targetRowCount)

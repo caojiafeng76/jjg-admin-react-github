@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
+import { App, FormInstance, Modal, Splitter } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
@@ -11,6 +11,7 @@ import type {
   MachineEquipmentMaintenance,
   MachineEquipmentMaintenanceFormValues,
 } from '@/services/apiMachineEquipmentMaintenances'
+import MachineEquipmentMaintenanceDetail from './MachineEquipmentMaintenanceDetail'
 import MachineEquipmentMaintenanceForm from './MachineEquipmentMaintenanceForm'
 import MachineEquipmentMaintenanceSearch from './MachineEquipmentMaintenanceSearch'
 import MachineEquipmentMaintenanceTable from './MachineEquipmentMaintenanceTable'
@@ -29,6 +30,8 @@ export default function MachineEquipmentMaintenancePage() {
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] =
+    useState<MachineEquipmentMaintenance | null>(null)
+  const [activeRecord, setActiveRecord] =
     useState<MachineEquipmentMaintenance | null>(null)
   const [formRef, setFormRef] =
     useState<FormInstance<MachineEquipmentMaintenanceFormValues> | null>(null)
@@ -59,6 +62,7 @@ export default function MachineEquipmentMaintenancePage() {
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
       targetRowCount: 10,
+      minRowHeight: 28,
     })
 
   const resetFormState = useCallback(() => {
@@ -200,7 +204,7 @@ export default function MachineEquipmentMaintenancePage() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
+    <div className="flex h-full flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑机器设备维护" handleEdit={handleEdit} />
@@ -213,7 +217,7 @@ export default function MachineEquipmentMaintenancePage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
         <span className="whitespace-nowrap text-gray-600">搜索：</span>
         <MachineEquipmentMaintenanceSearch
           onSearch={handleSearch}
@@ -222,25 +226,40 @@ export default function MachineEquipmentMaintenancePage() {
         />
       </div>
 
-      <div
-        ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
-      >
-        <div className="min-h-0 flex-1 overflow-x-auto">
-          <MachineEquipmentMaintenanceTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
-        </div>
-        <div ref={paginationRef} className="flex shrink-0 justify-end">
-          <AppPagination total={data?.total || 0} />
-        </div>
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+          <Splitter.Panel defaultSize="65%" min="34%">
+            <div
+              ref={tableContainerRef}
+              className="flex h-full flex-col gap-2 overflow-hidden"
+            >
+              <div className="min-h-0 flex-1 overflow-x-auto">
+                <MachineEquipmentMaintenanceTable
+                  loading={isLoading}
+                  data={data?.items || []}
+                  selectedRowKeys={selectedRowKeys}
+                  onSelect={setSelectedRowKeys}
+                  onRowClick={setActiveRecord}
+                  page={page}
+                  pageSize={pageSize}
+                  scrollY={scrollY}
+                  rowHeight={rowHeight}
+                  activeRowId={activeRecord?.id ?? null}
+                />
+              </div>
+              <div ref={paginationRef} className="flex shrink-0 justify-end">
+                <AppPagination total={data?.total || 0} />
+              </div>
+            </div>
+          </Splitter.Panel>
+          <Splitter.Panel min="20%">
+            <div className="h-full overflow-hidden">
+              <MachineEquipmentMaintenanceDetail
+                selectedRecord={activeRecord}
+              />
+            </div>
+          </Splitter.Panel>
+        </Splitter>
       </div>
 
       <Modal

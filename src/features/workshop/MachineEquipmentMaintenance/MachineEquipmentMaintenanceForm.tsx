@@ -213,8 +213,8 @@ export default function MachineEquipmentMaintenanceForm({
         >
           <InputNumber
             min={0}
-            step={100}
-            precision={2}
+            step={1000}
+            precision={0}
             style={{ width: '100%' }}
             placeholder="请输入机器价值"
           />
