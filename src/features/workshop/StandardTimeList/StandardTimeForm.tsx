@@ -294,12 +294,12 @@ export default function StandardTimeForm({
         <>
           <Form.Item
             label="项目号"
-            extra="选择项目号后自动带出型号、客户、长度、料号，仍可手工修改；编辑时禁用"
+            extra="选择项目号后自动带出型号、客户、长度、料号，仍可手工修改"
           >
             <Select
               allowClear
               showSearch
-              disabled={isEdit || isCreating}
+              disabled={isCreating}
               loading={isSalesOrderOptionsLoading}
               placeholder="请选择或搜索项目号"
               value={projectNoValue}
@@ -331,6 +331,28 @@ export default function StandardTimeForm({
             />
           </Form.Item>
         </>
+      )}
+      {isTeamLeaderMode && (
+        <Form.Item
+          label="项目号"
+          extra="选择项目号后自动带出相关信息，仍可手工修改"
+        >
+          <Select
+            allowClear
+            showSearch
+            disabled={isCreating}
+            loading={isSalesOrderOptionsLoading}
+            placeholder="请选择或搜索项目号"
+            value={projectNoValue}
+            onChange={handleProjectNoChange}
+            filterOption={(input, option) =>
+              String(option?.searchText || '')
+                .toLowerCase()
+                .includes(input.toLowerCase())
+            }
+            options={salesOrderProjectNoSelectOptions}
+          />
+        </Form.Item>
       )}
       <Form.Item
         name="model"
@@ -419,6 +441,28 @@ export default function StandardTimeForm({
           onChange={handleEquipmentChange}
         />
       </Form.Item>
+      {isTeamLeaderMode && (
+        <>
+          <Form.Item name="length" label="长度">
+            <InputNumber
+              min={0}
+              step={0.01}
+              style={{ width: '100%' }}
+              placeholder="请输入长度"
+            />
+          </Form.Item>
+          <Form.Item label="客户型号">
+            <Input
+              disabled
+              value={selectedSalesOrder?.customer_model ?? ''}
+              placeholder="选择项目号后自动带出"
+            />
+          </Form.Item>
+          <Form.Item name="part_no" label="料号">
+            <Input placeholder="请输入料号" />
+          </Form.Item>
+        </>
+      )}
       {isTeamLeaderMode ? null : (
         <>
           <Form.Item
