@@ -123,7 +123,7 @@ function normalizeStandardTimePayload(
     remark: values.remark?.trim() || null,
     length: values.length ?? 0,
     part_no: values.part_no?.trim() || null,
-    record_type: (values.part_no?.trim() || null) ? 'A' : 'B',
+    record_type: values.record_type ?? 'B',
   }
 }
 
