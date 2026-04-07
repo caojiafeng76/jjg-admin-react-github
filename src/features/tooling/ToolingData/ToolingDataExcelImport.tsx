@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import { Alert, Button, Modal, Table, type TableColumnsType, Upload } from 'antd'
+import {
+  Alert,
+  Button,
+  Modal,
+  Table,
+  type TableColumnsType,
+  Upload,
+} from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
 import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 
@@ -81,7 +88,9 @@ export default function ToolingDataExcelImport({
         { uid: file.name, name: file.name, status: 'done' } as UploadFile,
       ])
     } catch (error) {
-      setParseErrors([error instanceof Error ? error.message : 'Excel 解析失败'])
+      setParseErrors([
+        error instanceof Error ? error.message : 'Excel 解析失败',
+      ])
       setParsedRows([])
       setFileList([])
     } finally {
@@ -167,7 +176,10 @@ export default function ToolingDataExcelImport({
             maxCount={1}
             accept=".xlsx,.xls"
           >
-            <Button loading={parsing} icon={<ArrowUpTrayIcon className="h-4 w-4" />}>
+            <Button
+              loading={parsing}
+              icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+            >
               {parsing ? '解析中...' : '选择 Excel 文件'}
             </Button>
           </Upload>
