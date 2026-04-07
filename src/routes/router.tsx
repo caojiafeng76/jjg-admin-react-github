@@ -343,10 +343,7 @@ export const router = createBrowserRouter([
         path: 'tooling-data',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
-              element={<ToolingData />}
-            />
+            <RoleProtectedRoute allow={['admin']} element={<ToolingData />} />
           </Suspense>
         ),
       },
