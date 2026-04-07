@@ -7,14 +7,16 @@ import {
   Select,
   Typography,
 } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type {
   StandardTime,
   StandardTimeFormValues,
 } from '@/services/apiStandardTimes'
+import type { SalesOrderProjectNoOption } from '@/services/apiProcessStandards'
 import {
   useJobBaseSettingOptions,
   useMachineEquipmentMaintenanceOptions,
+  useSalesOrdersProjectNos,
 } from './useStandardTimes'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 
@@ -62,6 +64,7 @@ const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
   remark: null,
   length: 0,
   part_no: null,
+  record_type: 'B',
 }
 
 function calculateCostPreview(values?: Partial<StandardTimeFormValues>) {
@@ -122,6 +125,10 @@ export default function StandardTimeForm({
     useJobBaseSettingOptions()
   const { data: equipmentOptions = [], isLoading: isEquipmentOptionsLoading } =
     useMachineEquipmentMaintenanceOptions()
+  const {
+    data: salesOrderOptions = [],
+    isLoading: isSalesOrderOptionsLoading,
+  } = useSalesOrdersProjectNos()
   const watchedValues = Form.useWatch([], form)
   const initialCustomer = initialValues?.customer || undefined
   const initialJobName = initialValues?.job_name || undefined
@@ -129,6 +136,11 @@ export default function StandardTimeForm({
   const isCustomerRequired = !isEdit || Boolean(initialCustomer)
   const isJobNameRequired = !isEdit || Boolean(initialJobName)
   const isEquipmentNoRequired = !isEdit || Boolean(initialEquipmentNo)
+
+  // 项目号本地状态（前端查找用，不存入DB）
+  const [projectNoValue, setProjectNoValue] = useState<string | undefined>(
+    undefined,
+  )
   const jobSelectOptions = useMemo<JobSelectOption[]>(
     () =>
       jobOptions.map((option) => ({
@@ -181,6 +193,33 @@ export default function StandardTimeForm({
       ),
     [machineEquipmentSelectOptions],
   )
+  const salesOrderProjectNoSelectOptions = useMemo(
+    () =>
+      salesOrderOptions.map((option: SalesOrderProjectNoOption) => ({
+        label: [option.project_no, option.customer_model, option.product_model]
+          .filter(Boolean)
+          .join('　'),
+        value: option.project_no,
+        searchText: [
+          option.project_no,
+          option.customer_model,
+          option.product_model,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase(),
+      })),
+    [salesOrderOptions],
+  )
+  const selectedSalesOrder = useMemo(
+    () =>
+      projectNoValue
+        ? salesOrderOptions.find(
+            (o: SalesOrderProjectNoOption) => o.project_no === projectNoValue,
+          )
+        : undefined,
+    [projectNoValue, salesOrderOptions],
+  )
   const costPreview = useMemo(
     () => calculateCostPreview(watchedValues),
     [watchedValues],
@@ -196,12 +235,14 @@ export default function StandardTimeForm({
         ...DEFAULT_VALUES,
         ...initialValues,
       })
+      setProjectNoValue(undefined)
     } else {
       form.resetFields()
       form.setFieldsValue({
         ...DEFAULT_VALUES,
         uploaded_by_name: currentUploader,
       })
+      setProjectNoValue(undefined)
     }
   }, [currentUploader, form, initialValues])
 
@@ -223,6 +264,25 @@ export default function StandardTimeForm({
     }
   }
 
+  const handleProjectNoChange = useCallback(
+    (projectNo: string | undefined) => {
+      setProjectNoValue(projectNo)
+      if (!projectNo) return
+      const salesOrder = salesOrderOptions.find(
+        (o: SalesOrderProjectNoOption) => o.project_no === projectNo,
+      )
+      if (salesOrder) {
+        form.setFieldsValue({
+          model: salesOrder.product_model ?? undefined,
+          customer: salesOrder.customer ?? undefined,
+          length: salesOrder.length_mm ?? 0,
+          part_no: salesOrder.material_code ?? null,
+        })
+      }
+    },
+    [form, salesOrderOptions],
+  )
+
   return (
     <Form
       form={form}
@@ -230,6 +290,48 @@ export default function StandardTimeForm({
       onFinish={onFinish}
       disabled={isCreating}
     >
+      {!isTeamLeaderMode && (
+        <>
+          <Form.Item
+            label="项目号"
+            extra="选择项目号后自动带出型号、客户、长度、料号，仍可手工修改；编辑时禁用"
+          >
+            <Select
+              allowClear
+              showSearch
+              disabled={isEdit || isCreating}
+              loading={isSalesOrderOptionsLoading}
+              placeholder="请选择或搜索项目号"
+              value={projectNoValue}
+              onChange={handleProjectNoChange}
+              filterOption={(input, option) =>
+                String(option?.searchText || '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={salesOrderProjectNoSelectOptions}
+            />
+            {selectedSalesOrder?.customer_model && (
+              <Typography.Text type="secondary" className="mt-1 block text-xs">
+                客户型号：{selectedSalesOrder.customer_model}
+              </Typography.Text>
+            )}
+          </Form.Item>
+          <Form.Item
+            name="record_type"
+            label="类型"
+            rules={[{ required: true, message: '请选择类型' }]}
+          >
+            <Select
+              placeholder="请选择类型"
+              options={[
+                { label: 'A类（料号+型号+长度精确匹配）', value: 'A' },
+                { label: 'B类（仅型号匹配）', value: 'B' },
+              ]}
+            />
+          </Form.Item>
+        </>
+      )}
       <Form.Item
         name="model"
         label="型号"

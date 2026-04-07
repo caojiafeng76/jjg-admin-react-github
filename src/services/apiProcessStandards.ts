@@ -24,7 +24,7 @@ interface ProcessStandardMatchParams {
   operation?: string
 }
 type SalesOrderRow = Database['public']['Tables']['sales_orders']['Row']
-type SalesOrderProjectNoOption = Pick<
+export type SalesOrderProjectNoOption = Pick<
   SalesOrderRow,
   | 'project_no'
   | 'product_model'
