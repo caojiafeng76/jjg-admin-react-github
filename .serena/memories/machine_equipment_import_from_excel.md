@@ -1,0 +1,3 @@
+- 2026-04-07 设备维护 Excel 导入使用 CNC设备费率表.xlsx 作为来源。
+- 原始表中有 5 行输入列与派生费率列冲突，迁移以“单小时电费 + 折旧费率”反推 power_kw / machine_value，确保 machine_equipment_maintenances 生成列与 Excel 费率一致。
+- legacy 编号兼容映射：CNC-001..006 -> CNC-C01..06，DXJ01 -> DX-J01；先处理 process_standards.equipment_no，再清理/重命名设备档案。

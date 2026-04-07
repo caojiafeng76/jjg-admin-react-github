@@ -12,10 +12,12 @@ interface Props {
   data: MachineEquipmentMaintenance[]
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
+  onRowClick?: (record: MachineEquipmentMaintenance) => void
   page: number
   pageSize: number
   scrollY?: number
   rowHeight?: number
+  activeRowId?: string | null
 }
 
 export default function MachineEquipmentMaintenanceTable({
@@ -23,10 +25,12 @@ export default function MachineEquipmentMaintenanceTable({
   data,
   selectedRowKeys,
   onSelect,
+  onRowClick,
   page,
   pageSize,
   scrollY = 400,
   rowHeight = 40,
+  activeRowId = null,
 }: Props) {
   const columns: TableColumnsType<MachineEquipmentMaintenance> = useMemo(
     () => [
@@ -102,52 +106,8 @@ export default function MachineEquipmentMaintenanceTable({
         dataIndex: 'machine_value',
         key: 'machine_value',
         width: 140,
-        render: (value: number) => formatAmount(value),
-      },
-      {
-        title: '折旧年份',
-        dataIndex: 'depreciation_years',
-        key: 'depreciation_years',
-        width: 120,
-      },
-      {
-        title: '年运行时长（小时）',
-        dataIndex: 'annual_runtime_hours',
-        key: 'annual_runtime_hours',
-        width: 160,
-        render: (value: number) => formatAmount(value),
-      },
-      {
-        title: '折旧费率（元/小时）',
-        dataIndex: 'depreciation_rate',
-        key: 'depreciation_rate',
-        width: 180,
-        render: (value: number) => formatAmount(value, 8),
-      },
-      {
-        title: '设备小时费率（元/小时）',
-        dataIndex: 'equipment_hourly_rate',
-        key: 'equipment_hourly_rate',
-        width: 200,
-        render: (value: number) => formatAmount(value, 8),
-      },
-      {
-        title: '备注',
-        dataIndex: 'remark',
-        key: 'remark',
-        width: 200,
-        ellipsis: {
-          showTitle: true,
-        },
-        render: (value: string | null) => value || '-',
-      },
-      {
-        title: '更新时间',
-        dataIndex: 'updated_at',
-        key: 'updated_at',
-        width: 180,
-        render: (value: string) =>
-          value ? new Date(value).toLocaleString('zh-CN') : '-',
+        render: (value: number) =>
+          Math.round(Number(value || 0)).toLocaleString('zh-CN'),
       },
     ],
     [page, pageSize],
@@ -169,13 +129,18 @@ export default function MachineEquipmentMaintenanceTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 2700, y: scrollY }}
+      scroll={{ x: 'max-content', y: scrollY }}
       size="small"
-      rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
-      }
+      rowClassName={(record, index) => {
+        if (record.id === activeRowId) return 'bg-sky-100'
+        if (selectedRowKeys.includes(record.id)) return 'bg-sky-50'
+        return index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
+      }}
       onRow={(record) => ({
-        onClick: () => onSelect([record.id]),
+        onClick: () => {
+          onSelect([record.id])
+          onRowClick?.(record)
+        },
         style: { cursor: 'pointer', height: rowHeight },
       })}
     />
