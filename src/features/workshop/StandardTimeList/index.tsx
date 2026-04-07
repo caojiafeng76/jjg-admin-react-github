@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance, Button } from 'antd'
+import { App, Modal, FormInstance, Button, Splitter } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import type {
   StandardTime,
   StandardTimeFormValues,
+  ProcessStandardRecordType,
 } from '@/services/apiStandardTimes'
 import { getAllStandardTimesForExport } from '@/services/apiStandardTimes'
 import { exportCostAccountingToExcel } from '@/utils/costAccountingExcel'
@@ -23,6 +24,7 @@ import {
 } from './useStandardTimes'
 import StandardTimeMobileList from './StandardTimeMobileList'
 import StandardTimeTable from './StandardTimeTable'
+import StandardTimeCostDetail from './StandardTimeCostDetail'
 import StandardTimeForm from './StandardTimeForm'
 import StandardTimeSearch from './StandardTimeSearch'
 
@@ -50,6 +52,7 @@ export default function StandardTimeList() {
     partNoOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
+    recordType?: ProcessStandardRecordType
   }>({
     operation: searchParamsURL.get('operation') || undefined,
     model: searchParamsURL.get('model') || undefined,
@@ -57,8 +60,12 @@ export default function StandardTimeList() {
     partNoOnly: searchParamsURL.get('partNoOnly') === 'true' || undefined,
     updatedStartDate: searchParamsURL.get('updatedStartDate') || undefined,
     updatedEndDate: searchParamsURL.get('updatedEndDate') || undefined,
+    recordType:
+      (searchParamsURL.get('recordType') as ProcessStandardRecordType) ||
+      undefined,
   })
   const [editingRecord, setEditingRecord] = useState<StandardTime | null>(null)
+  const [activeRecord, setActiveRecord] = useState<StandardTime | null>(null)
 
   const { data, isLoading } = useStandardTimesList({
     page,
@@ -299,6 +306,12 @@ export default function StandardTimeList() {
         nextSearchParamsURL.delete('partNoOnly')
       }
 
+      if (params.recordType) {
+        nextSearchParamsURL.set('recordType', params.recordType)
+      } else {
+        nextSearchParamsURL.delete('recordType')
+      }
+
       if (params.updatedStartDate) {
         nextSearchParamsURL.set('updatedStartDate', params.updatedStartDate)
       } else {
@@ -326,6 +339,7 @@ export default function StandardTimeList() {
     nextSearchParamsURL.delete('model')
     nextSearchParamsURL.delete('unmatchedOnly')
     nextSearchParamsURL.delete('partNoOnly')
+    nextSearchParamsURL.delete('recordType')
     nextSearchParamsURL.delete('updatedStartDate')
     nextSearchParamsURL.delete('updatedEndDate')
 
@@ -340,7 +354,7 @@ export default function StandardTimeList() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
+    <div className="flex h-full flex-col gap-2">
       {isTeamLeaderMode ? (
         <Button
           block
@@ -395,43 +409,61 @@ export default function StandardTimeList() {
         />
       </div>
 
-      <div
-        ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
-      >
+      {isTeamLeaderMode ? (
         <div
-          className={
-            isTeamLeaderMode
-              ? 'no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain'
-              : 'min-h-0 flex-1 overflow-x-auto'
-          }
+          ref={tableContainerRef}
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
         >
-          {isTeamLeaderMode ? (
+          <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <StandardTimeMobileList
               loading={isLoading}
               data={data?.items || []}
               onEdit={handleEdit}
             />
-          ) : (
-            <StandardTimeTable
-              loading={isLoading}
-              data={data?.items || []}
-              selectedRowKeys={selectedRowKeys}
-              onSelect={setSelectedRowKeys}
-              page={page}
-              pageSize={pageSize}
-              scrollY={scrollY}
-              rowHeight={rowHeight}
+          </div>
+          <div ref={paginationRef} className="flex shrink-0 justify-end">
+            <AppPagination
+              total={data?.total || 0}
+              pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
             />
-          )}
+          </div>
         </div>
-        <div ref={paginationRef} className="flex shrink-0 justify-end">
-          <AppPagination
-            total={data?.total || 0}
-            pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
-          />
-        </div>
-      </div>
+      ) : (
+        <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+          <Splitter.Panel defaultSize="65%" min="30%">
+            <div
+              ref={tableContainerRef}
+              className="flex h-full flex-col gap-2 overflow-hidden"
+            >
+              <div className="min-h-0 flex-1 overflow-x-auto">
+                <StandardTimeTable
+                  loading={isLoading}
+                  data={data?.items || []}
+                  selectedRowKeys={selectedRowKeys}
+                  onSelect={setSelectedRowKeys}
+                  page={page}
+                  pageSize={pageSize}
+                  scrollY={scrollY}
+                  rowHeight={rowHeight}
+                  activeRowId={activeRecord?.id ?? null}
+                  onRowClick={setActiveRecord}
+                />
+              </div>
+              <div ref={paginationRef} className="flex shrink-0 justify-end">
+                <AppPagination
+                  total={data?.total || 0}
+                  pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
+                />
+              </div>
+            </div>
+          </Splitter.Panel>
+          <Splitter.Panel min="20%">
+            <div className="h-full overflow-hidden">
+              <StandardTimeCostDetail selectedRecord={activeRecord} />
+            </div>
+          </Splitter.Panel>
+        </Splitter>
+      )}
 
       <Modal
         title={modalTitle}

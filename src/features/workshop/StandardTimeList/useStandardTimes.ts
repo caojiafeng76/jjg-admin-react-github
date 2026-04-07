@@ -5,6 +5,7 @@ import {
   createStandardTime,
   updateStandardTime,
   deleteStandardTimes,
+  type ProcessStandardRecordType,
 } from '@/services/apiStandardTimes'
 import { getJobBaseSettingOptions } from '@/services/apiJobBaseSettings'
 import { getMachineEquipmentMaintenanceOptions } from '@/services/apiMachineEquipmentMaintenances'
@@ -33,6 +34,7 @@ export function useStandardTimesList({
     partNoOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
+    recordType?: ProcessStandardRecordType
   }
 }) {
   return useQuery({

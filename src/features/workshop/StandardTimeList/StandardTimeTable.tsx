@@ -17,6 +17,8 @@ interface Props {
   scrollY?: number
   rowHeight?: number
   hideStandardSeconds?: boolean
+  activeRowId?: string | null
+  onRowClick?: (record: StandardTime) => void
 }
 
 const StandardTimeTable = memo(function StandardTimeTable({
@@ -29,34 +31,44 @@ const StandardTimeTable = memo(function StandardTimeTable({
   scrollY = 400,
   rowHeight = 40,
   hideStandardSeconds = false,
+  activeRowId,
+  onRowClick,
 }: Props) {
   const columns: TableColumnsType<StandardTime> = useMemo(() => {
-    const baseInfoChildren: NonNullable<
-      TableColumnsType<StandardTime>[number]
-    >[] = [
+    const cols: TableColumnsType<StandardTime> = [
+      {
+        title: '#',
+        render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
+        width: 60,
+        fixed: 'left',
+        key: '#',
+      },
+      {
+        title: '类型',
+        dataIndex: 'record_type',
+        key: 'record_type',
+        width: 90,
+        render: (value: string | null | undefined) => {
+          if (value === 'A') return <Tag color="blue">A类</Tag>
+          if (value === 'B') return <Tag color="default">B类</Tag>
+          return <Tag color="default">-</Tag>
+        },
+      },
       {
         title: '型号',
         dataIndex: 'model',
         key: 'model',
         width: 150,
-        ellipsis: {
-          showTitle: true,
-        },
+        ellipsis: { showTitle: true },
       },
       {
         title: '工序',
         dataIndex: 'operation',
         key: 'operation',
         width: 200,
-        ellipsis: {
-          showTitle: true,
-        },
-        render: (value: string | string[]) => {
-          if (Array.isArray(value)) {
-            return value.join(', ')
-          }
-          return value
-        },
+        ellipsis: { showTitle: true },
+        render: (value: string | string[]) =>
+          Array.isArray(value) ? value.join(', ') : value,
       },
       {
         title: '工种',
@@ -101,193 +113,33 @@ const StandardTimeTable = memo(function StandardTimeTable({
     ]
 
     if (!hideStandardSeconds) {
-      baseInfoChildren.push({
-        title: '标准工时（秒）',
-        dataIndex: 'standard_seconds',
-        key: 'standard_seconds',
-        width: 140,
-      })
-
-      baseInfoChildren.push({
-        title: '日标准产能',
-        key: 'daily_standard_capacity',
-        width: 120,
-        render: (_value, record) =>
-          formatNumber(
-            calculateDailyStandardCapacity(record.standard_seconds),
-            2,
-          ),
-      })
+      cols.push(
+        {
+          title: '标准工时（秒）',
+          dataIndex: 'standard_seconds',
+          key: 'standard_seconds',
+          width: 140,
+        },
+        {
+          title: '日标准产能',
+          key: 'daily_standard_capacity',
+          width: 120,
+          render: (_value, record) =>
+            formatNumber(
+              calculateDailyStandardCapacity(record.standard_seconds),
+              2,
+            ),
+        },
+        {
+          title: '理论工时（秒）',
+          dataIndex: 'theoretical_seconds',
+          key: 'theoretical_seconds',
+          width: 140,
+        },
+      )
     }
 
-    const nextColumns: TableColumnsType<StandardTime> = [
-      {
-        title: '#',
-        render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
-        width: 60,
-        fixed: 'left',
-        key: '#',
-      },
-      {
-        title: '基础信息',
-        children: baseInfoChildren,
-      },
-    ]
-
-    nextColumns.push(
-      {
-        title: '费率参数',
-        children: [
-          {
-            title: '理论工时（秒）',
-            dataIndex: 'theoretical_seconds',
-            key: 'theoretical_seconds',
-            width: 140,
-          },
-          {
-            title: '检验工时（秒）',
-            dataIndex: 'inspection_seconds',
-            key: 'inspection_seconds',
-            width: 140,
-          },
-          {
-            title: '人工费率',
-            dataIndex: 'labor_rate',
-            key: 'labor_rate',
-            width: 120,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '设备费率',
-            dataIndex: 'equipment_rate',
-            key: 'equipment_rate',
-            width: 140,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '刀具费率',
-            dataIndex: 'tool_rate',
-            key: 'tool_rate',
-            width: 120,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '切削液费率',
-            dataIndex: 'cutting_fluid_rate',
-            key: 'cutting_fluid_rate',
-            width: 130,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '工装费率',
-            dataIndex: 'fixture_rate',
-            key: 'fixture_rate',
-            width: 120,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '日管理总费用',
-            dataIndex: 'daily_management_cost',
-            key: 'daily_management_cost',
-            width: 140,
-            render: (value: number) => formatNumber(value, 2),
-          },
-          {
-            title: '日总工时',
-            dataIndex: 'daily_total_hours',
-            key: 'daily_total_hours',
-            width: 120,
-            render: (value: number) => formatNumber(value, 2),
-          },
-        ],
-      },
-      {
-        title: '自动成本',
-        children: [
-          {
-            title: '人工成本',
-            dataIndex: 'labor_cost',
-            key: 'labor_cost',
-            width: 120,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '设备成本',
-            dataIndex: 'equipment_cost',
-            key: 'equipment_cost',
-            width: 120,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '刀具辅料成本',
-            dataIndex: 'tooling_consumable_cost',
-            key: 'tooling_consumable_cost',
-            width: 140,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '检验成本',
-            dataIndex: 'inspection_cost',
-            key: 'inspection_cost',
-            width: 120,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '单品分摊额',
-            dataIndex: 'overhead_cost',
-            key: 'overhead_cost',
-            width: 130,
-            render: (value: number) => formatNumber(value),
-          },
-          {
-            title: '合计',
-            dataIndex: 'total_cost',
-            key: 'total_cost',
-            width: 120,
-            render: (value: number) => formatNumber(value),
-          },
-        ],
-      },
-      {
-        title: '数据上传',
-        dataIndex: 'uploaded_by_name',
-        key: 'uploaded_by_name',
-        width: 140,
-        render: (value?: string | null) =>
-          value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
-      },
-      {
-        title: '备注',
-        dataIndex: 'remark',
-        key: 'remark',
-        width: 180,
-        ellipsis: {
-          showTitle: true,
-        },
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'created_at',
-        key: 'created_at',
-        width: 180,
-        render: (text: string) => {
-          if (!text) return '-'
-          return new Date(text).toLocaleString('zh-CN')
-        },
-      },
-      {
-        title: '更新时间',
-        dataIndex: 'updated_at',
-        key: 'updated_at',
-        width: 180,
-        render: (text: string) => {
-          if (!text) return '-'
-          return new Date(text).toLocaleString('zh-CN')
-        },
-      },
-    )
-
-    return nextColumns
+    return cols
   }, [hideStandardSeconds, page, pageSize])
 
   const rowSelection = useMemo(
@@ -324,9 +176,18 @@ const StandardTimeTable = memo(function StandardTimeTable({
 
   const handleRow = useCallback(
     (record: StandardTime) => ({
-      style: !record.job_name ? { backgroundColor: '#fffbe6' } : undefined,
+      onClick: () => onRowClick?.(record),
+      style: {
+        cursor: onRowClick ? 'pointer' : undefined,
+        backgroundColor:
+          record.id && record.id === activeRowId
+            ? '#e6f4ff'
+            : !record.job_name
+              ? '#fffbe6'
+              : undefined,
+      },
     }),
-    [],
+    [activeRowId, onRowClick],
   )
 
   return (
@@ -337,15 +198,14 @@ const StandardTimeTable = memo(function StandardTimeTable({
       dataSource={data}
       rowSelection={rowSelection}
       onRow={handleRow}
-      scroll={{ x: hideStandardSeconds ? 2340 : 2490, y: scrollY }}
+      scroll={{ x: hideStandardSeconds ? 1000 : 1460, y: scrollY }}
       size="small"
       pagination={false}
-      style={{
-        fontSize: '12px',
-      }}
+      style={{ fontSize: '12px' }}
       components={components}
     />
   )
 })
 
 export default StandardTimeTable
+

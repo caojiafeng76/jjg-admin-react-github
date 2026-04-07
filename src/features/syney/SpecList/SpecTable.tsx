@@ -55,6 +55,7 @@ function SpecTable({ data, loading, onSelect, selectedRowKeys }: Props) {
       columns={columns}
       dataSource={data}
       loading={loading}
+      size="small"
       pagination={false}
       scroll={{
         y: 550,

@@ -79,6 +79,7 @@ export default function DetailTable({
       columns={columns}
       dataSource={data}
       loading={loading}
+      size="small"
       pagination={false}
       scroll={{
         y: 550,
