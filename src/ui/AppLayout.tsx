@@ -65,9 +65,15 @@ export default function AppLayout() {
     <>
       {contextHolder}
       <Layout className="h-screen overflow-hidden">
-        <Sider trigger={null} collapsible collapsed={collapsed}>
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+        >
           <AppLogo />
-          <MainMenu />
+          <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+            <MainMenu />
+          </div>
         </Sider>
         <Layout>
           <AppHeader

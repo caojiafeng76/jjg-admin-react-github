@@ -117,6 +117,7 @@ function PoTable() {
       dataSource={pos}
       loading={isLoading}
       pagination={false}
+      size="small"
       scroll={{
         y: 'calc(100vh - 320px)',
       }}

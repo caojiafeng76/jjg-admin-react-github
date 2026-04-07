@@ -67,6 +67,7 @@ export default function ReportTable() {
       dataSource={reports}
       loading={isLoading}
       pagination={false}
+      size="small"
       scroll={{
         y: 560,
       }}

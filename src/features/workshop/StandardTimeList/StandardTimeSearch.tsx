@@ -1,7 +1,9 @@
-import { Button, Checkbox, DatePicker, Form, Input, Space } from 'antd'
+import { Button, Checkbox, DatePicker, Form, Input, Select, Space } from 'antd'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
 import { useEffect, useState } from 'react'
 import dayjs, { type Dayjs } from 'dayjs'
+
+import type { ProcessStandardRecordType } from '@/services/apiStandardTimes'
 
 const { RangePicker } = DatePicker
 
@@ -11,6 +13,7 @@ interface SearchValues {
   unmatchedOnly?: boolean
   partNoOnly?: boolean
   updatedAtRange?: [Dayjs | null, Dayjs | null]
+  recordType?: ProcessStandardRecordType
 }
 
 interface Props {
@@ -21,6 +24,7 @@ interface Props {
     partNoOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
+    recordType?: ProcessStandardRecordType
   }) => void
   onReset: () => void
   mobile?: boolean
@@ -31,6 +35,7 @@ interface Props {
     partNoOnly?: boolean
     updatedStartDate?: string
     updatedEndDate?: string
+    recordType?: ProcessStandardRecordType
   }
 }
 
@@ -49,6 +54,7 @@ export default function StandardTimeSearch({
       model: initialValues?.model,
       unmatchedOnly: initialValues?.unmatchedOnly,
       partNoOnly: initialValues?.partNoOnly,
+      recordType: initialValues?.recordType,
       updatedAtRange:
         initialValues?.updatedStartDate && initialValues?.updatedEndDate
           ? [
@@ -69,6 +75,7 @@ export default function StandardTimeSearch({
       model: values.model?.trim() || undefined,
       unmatchedOnly: values.unmatchedOnly || undefined,
       partNoOnly: values.partNoOnly || undefined,
+      recordType: values.recordType || undefined,
       updatedStartDate:
         values.updatedAtRange?.[0]?.format('YYYY-MM-DD') || undefined,
       updatedEndDate:
@@ -144,6 +151,19 @@ export default function StandardTimeSearch({
       >
         <Checkbox>仅匹配有料号</Checkbox>
       </Form.Item>
+      {!mobile && (
+        <Form.Item name="recordType" className="mb-0">
+          <Select
+            placeholder="类型"
+            allowClear
+            style={{ width: 120 }}
+            options={[
+              { label: 'A类（有料号）', value: 'A' },
+              { label: 'B类（无料号）', value: 'B' },
+            ]}
+          />
+        </Form.Item>
+      )}
       <Form.Item className="mb-0">
         <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>
           <Button type="primary" htmlType="submit">

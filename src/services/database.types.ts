@@ -315,6 +315,7 @@ export type Database = {
           operation: string
           overhead_cost: number | null
           part_no: string | null
+          record_type: string
           remark: string | null
           standard_seconds: number
           theoretical_seconds: number
@@ -345,6 +346,7 @@ export type Database = {
           operation: string
           overhead_cost?: number | null
           part_no?: string | null
+          record_type?: string
           remark?: string | null
           standard_seconds: number
           theoretical_seconds?: number
@@ -375,6 +377,7 @@ export type Database = {
           operation?: string
           overhead_cost?: number | null
           part_no?: string | null
+          record_type?: string
           remark?: string | null
           standard_seconds?: number
           theoretical_seconds?: number

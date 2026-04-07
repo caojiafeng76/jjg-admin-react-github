@@ -52,7 +52,6 @@ type ExportRow = Array<string | number>
 type SummaryRow = Array<string | number>
 
 const SUMMARY_SERIAL_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('序号')
-const SUMMARY_NAME_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('姓名')
 const SUMMARY_JOB_NAME_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('岗位')
 const SUMMARY_WORK_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('出勤工时')
 const SUMMARY_POSITIVE_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('正工工时')

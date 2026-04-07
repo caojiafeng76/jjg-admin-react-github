@@ -87,15 +87,13 @@ interface ProjectNoData {
 }
 
 const MATCH_LEVEL_LABELS: Record<ProcessStandardMatchLevel, string> = {
-  'part-model-length': '料号 + 型号 + 长度',
-  'model-length': '型号 + 长度',
-  'model-only': '型号兜底',
+  'type-a': 'A类（料号+型号+长度）',
+  'type-b': 'B类（仅型号）',
 }
 
 const MATCH_LEVEL_COLORS: Record<ProcessStandardMatchLevel, string> = {
-  'part-model-length': 'success',
-  'model-length': 'processing',
-  'model-only': 'warning',
+  'type-a': 'success',
+  'type-b': 'processing',
 }
 
 export default function ProductionOrderForm({

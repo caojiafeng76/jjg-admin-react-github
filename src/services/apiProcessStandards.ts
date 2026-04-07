@@ -5,9 +5,8 @@ import type { Database } from './database.types'
 export type ProcessStandard =
   Database['public']['Tables']['process_standards']['Row']
 export type ProcessStandardMatchLevel =
-  | 'part-model-length'
-  | 'model-length'
-  | 'model-only'
+  | 'type-a'
+  | 'type-b'
 
 export interface ProcessStandardMatchResult<T> {
   records: T[]
@@ -85,7 +84,7 @@ async function fetchMatchedProcessStandards({
   const normalizedPartNo = normalizeMatchText(partNo)
   const normalizedOperation = normalizeMatchText(operation)
 
-  const buildQuery = (matchLevel: ProcessStandardMatchLevel) => {
+  const buildBaseQuery = () => {
     let query = supabase
       .from('process_standards')
       .select(select)
@@ -95,31 +94,16 @@ async function fetchMatchedProcessStandards({
       query = query.eq('operation', normalizedOperation)
     }
 
-    if (matchLevel === 'part-model-length') {
-      query = query.eq('part_no', normalizedPartNo!).eq('length', normalizedLength!)
-    }
-
-    if (matchLevel === 'model-length') {
-      query = query.eq('length', normalizedLength!)
-    }
-
-    return query.order('operation', { ascending: true })
+    return query
   }
 
-  const matchLevels: ProcessStandardMatchLevel[] = []
-
+  // A 类型：按料号 + 型号 + 长度精确匹配
   if (normalizedPartNo && normalizedLength !== null) {
-    matchLevels.push('part-model-length')
-  }
-
-  if (normalizedLength !== null) {
-    matchLevels.push('model-length')
-  }
-
-  matchLevels.push('model-only')
-
-  for (const matchLevel of matchLevels) {
-    const { data, error } = await buildQuery(matchLevel)
+    const { data, error } = await buildBaseQuery()
+      .eq('record_type', 'A')
+      .eq('part_no', normalizedPartNo)
+      .eq('length', normalizedLength)
+      .order('operation', { ascending: true })
 
     if (error) {
       throw handleApiError(error, '获取成本核算匹配数据失败')
@@ -128,8 +112,24 @@ async function fetchMatchedProcessStandards({
     if ((data || []).length > 0) {
       return {
         records: (data || []) as Array<ProcessStandard | ProcessStandardStandardSeconds>,
-        matchLevel,
+        matchLevel: 'type-a',
       }
+    }
+  }
+
+  // B 类型：仅按型号匹配
+  const { data, error } = await buildBaseQuery()
+    .eq('record_type', 'B')
+    .order('operation', { ascending: true })
+
+  if (error) {
+    throw handleApiError(error, '获取成本核算匹配数据失败')
+  }
+
+  if ((data || []).length > 0) {
+    return {
+      records: (data || []) as Array<ProcessStandard | ProcessStandardStandardSeconds>,
+      matchLevel: 'type-b',
     }
   }
 

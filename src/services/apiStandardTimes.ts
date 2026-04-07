@@ -10,6 +10,8 @@ type ProcessStandardInsert =
   Database['public']['Tables']['process_standards']['Insert']
 
 export type StandardTime = ProcessStandardRow
+export type ProcessStandardRecordType = 'A' | 'B'
+
 export type StandardTimeFormValues = Pick<
   ProcessStandardInsert,
   | 'customer'
@@ -31,6 +33,7 @@ export type StandardTimeFormValues = Pick<
   | 'remark'
   | 'length'
   | 'part_no'
+  | 'record_type'
 >
 
 interface StandardTimeFilters {
@@ -40,6 +43,7 @@ interface StandardTimeFilters {
   partNoOnly?: boolean
   updatedStartDate?: string
   updatedEndDate?: string
+  recordType?: ProcessStandardRecordType
 }
 
 function applyStandardTimeFilters<
@@ -50,6 +54,7 @@ function applyStandardTimeFilters<
     neq: (column: string, value: string) => TQuery
     gte: (column: string, value: string) => TQuery
     lte: (column: string, value: string) => TQuery
+    eq: (column: string, value: string) => TQuery
   },
 >(query: TQuery, filters: StandardTimeFilters) {
   let nextQuery = query
@@ -68,6 +73,10 @@ function applyStandardTimeFilters<
 
   if (filters.partNoOnly) {
     nextQuery = nextQuery.not('part_no', 'is', null).neq('part_no', '')
+  }
+
+  if (filters.recordType) {
+    nextQuery = nextQuery.eq('record_type', filters.recordType)
   }
 
   if (filters.updatedStartDate) {
@@ -114,6 +123,7 @@ function normalizeStandardTimePayload(
     remark: values.remark?.trim() || null,
     length: values.length ?? 0,
     part_no: values.part_no?.trim() || null,
+    record_type: (values.part_no?.trim() || null) ? 'A' : 'B',
   }
 }
 
@@ -179,6 +189,7 @@ export async function getStandardTimes({
   partNoOnly,
   updatedStartDate,
   updatedEndDate,
+  recordType,
 }: {
   page: number
   pageSize: number
@@ -196,6 +207,7 @@ export async function getStandardTimes({
         partNoOnly,
         updatedStartDate,
         updatedEndDate,
+        recordType,
       },
     )
   }
@@ -212,6 +224,7 @@ export async function getStandardTimes({
         partNoOnly,
         updatedStartDate,
         updatedEndDate,
+        recordType,
       },
     )
   }
@@ -447,6 +460,7 @@ export async function getAllStandardTimesForExport({
   partNoOnly,
   updatedStartDate,
   updatedEndDate,
+  recordType,
 }: StandardTimeFilters): Promise<StandardTime[]> {
   const query = applyStandardTimeFilters(
     supabase.from('process_standards').select('*'),
@@ -457,6 +471,7 @@ export async function getAllStandardTimesForExport({
       partNoOnly,
       updatedStartDate,
       updatedEndDate,
+      recordType,
     },
   )
     .order('standard_seconds', { ascending: true })

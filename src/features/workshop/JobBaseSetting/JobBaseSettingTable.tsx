@@ -107,8 +107,7 @@ export default function JobBaseSettingTable({
       rowSelection={rowSelection}
       pagination={false}
       scroll={{ x: 1160, y: scrollY }}
-      size="middle"
-      bordered
+      size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }

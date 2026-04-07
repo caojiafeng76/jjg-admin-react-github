@@ -30,3 +30,11 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* 侧边栏菜单可滚动 */
+.ant-layout-sider .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
