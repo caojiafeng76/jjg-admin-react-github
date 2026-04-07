@@ -208,4 +208,3 @@ const StandardTimeTable = memo(function StandardTimeTable({
 })
 
 export default StandardTimeTable
-
