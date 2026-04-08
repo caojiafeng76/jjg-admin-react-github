@@ -196,14 +196,8 @@ export default function ProductionOrderItemForm({
   const getPopupContainer = (triggerNode: HTMLElement) =>
     triggerNode.parentElement || document.body
 
-  // 按选定工序过滤机器选项（只显示 device_operation 匹配的设备）
   const filteredMachineOptions = useMemo(() => {
-    const normalizedOp =
-      typeof selectedOperation === 'string' ? selectedOperation.trim() : ''
     const opts = machineOptions || []
-    const filtered = normalizedOp
-      ? opts.filter((m) => m.operation === normalizedOp)
-      : opts
     return [
       {
         id: null as string | null,
@@ -211,9 +205,9 @@ export default function ProductionOrderItemForm({
         operation: '',
         machine_name: '',
       },
-      ...filtered,
+      ...opts,
     ]
-  }, [machineOptions, selectedOperation])
+  }, [machineOptions])
 
   return (
     <Modal

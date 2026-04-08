@@ -105,11 +105,32 @@ export async function getMachineRuntimeItems({
 export async function getMachineRuntimeSummary(
   filters: Omit<MachineRuntimeFilters, 'page' | 'pageSize' | 'machineEquipmentId'>,
 ): Promise<MachineRuntimeSummaryItem[]> {
-  // 先获取所有符合条件的明细，然后在前端汇总
-  // Supabase 不直接支持 GROUP BY，通过获取全量数据后聚合
+  // 1. 获取全部设备（支持按设备编号/工序/机器名称筛选）
+  let machineQuery = supabase
+    .from('machine_equipment_maintenances')
+    .select('id, unified_device_no, operation, machine_name')
+    .order('unified_device_no')
+
+  if (filters.unifiedDeviceNo) {
+    machineQuery = machineQuery.ilike('unified_device_no', `%${filters.unifiedDeviceNo}%`)
+  }
+  if (filters.deviceOperation) {
+    machineQuery = machineQuery.ilike('operation', `%${filters.deviceOperation}%`)
+  }
+  if (filters.machineName) {
+    machineQuery = machineQuery.ilike('machine_name', `%${filters.machineName}%`)
+  }
+
+  const { data: allMachines, error: machineError } = await machineQuery
+
+  if (machineError) {
+    throw handleApiError(machineError, '获取设备列表失败')
+  }
+
+  // 2. 获取符合日期/筛选条件的运行明细，汇总 runtime_seconds
   let query = viewFrom('v_machine_runtime_items')
     .select(
-      'machine_equipment_id, unified_device_no, device_operation, machine_name, runtime_seconds',
+      'machine_equipment_id, runtime_seconds',
     )
     .not('machine_equipment_id', 'is', null)
 
@@ -119,43 +140,31 @@ export async function getMachineRuntimeSummary(
   if (filters.dateTo) {
     query = query.lte('order_date', filters.dateTo)
   }
-  if (filters.unifiedDeviceNo) {
-    query = query.ilike('unified_device_no', `%${filters.unifiedDeviceNo}%`)
-  }
-  if (filters.deviceOperation) {
-    query = query.ilike('device_operation', `%${filters.deviceOperation}%`)
-  }
-  if (filters.machineName) {
-    query = query.ilike('machine_name', `%${filters.machineName}%`)
+
+  const { data: runtimeRows, error: runtimeError } = await query
+
+  if (runtimeError) {
+    throw handleApiError(runtimeError, '获取设备运行汇总失败')
   }
 
-  const { data, error } = await query
-
-  if (error) {
-    throw handleApiError(error, '获取设备运行汇总失败')
-  }
-
-  // 前端 GROUP BY machine_equipment_id 汇总
-  const summaryMap = new Map<string, MachineRuntimeSummaryItem>()
-
-  for (const row of data || []) {
+  // 3. 按 machine_equipment_id 汇总运行秒数
+  const runtimeMap = new Map<string, number>()
+  for (const row of runtimeRows || []) {
     const key = row.machine_equipment_id as string
-    if (summaryMap.has(key)) {
-      summaryMap.get(key)!.total_runtime_seconds += Number(row.runtime_seconds || 0)
-    } else {
-      summaryMap.set(key, {
-        machine_equipment_id: key,
-        unified_device_no: row.unified_device_no || '',
-        device_operation: row.device_operation || '',
-        machine_name: row.machine_name || '',
-        total_runtime_seconds: Number(row.runtime_seconds || 0),
-      })
-    }
+    runtimeMap.set(key, (runtimeMap.get(key) ?? 0) + Number(row.runtime_seconds || 0))
   }
 
-  const result = Array.from(summaryMap.values()).sort(
-    (a, b) => b.total_runtime_seconds - a.total_runtime_seconds,
-  )
+  // 4. 合并：全部设备 LEFT JOIN 运行数据
+  const result: MachineRuntimeSummaryItem[] = (allMachines || []).map((m) => ({
+    machine_equipment_id: m.id,
+    unified_device_no: m.unified_device_no || '',
+    device_operation: m.operation || '',
+    machine_name: m.machine_name || '',
+    total_runtime_seconds: runtimeMap.get(m.id) ?? 0,
+  }))
+
+  // 按运行时间降序排列
+  result.sort((a, b) => b.total_runtime_seconds - a.total_runtime_seconds)
 
   return result
 }
