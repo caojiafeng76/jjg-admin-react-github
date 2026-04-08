@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { App, Button, Card, Statistic } from 'antd'
+import { App, Button, Splitter } from 'antd'
 import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
 import { useSearchParams } from 'react-router-dom'
 
@@ -23,10 +23,10 @@ import {
   useBatchUpdatePrecisionCuttingTransfers,
   useCreatePrecisionCuttingTransfer,
   useDeletePrecisionCuttingTransfers,
-  usePrecisionCuttingTransferQuantityStats,
   usePrecisionCuttingTransfers,
   useUpdatePrecisionCuttingTransfer,
 } from './useMaterialTransfers'
+import MaterialTransferDetail from './MaterialTransferDetail'
 import MaterialTransferForm from './MaterialTransferForm'
 import MaterialTransferSearch from './MaterialTransferSearch'
 import MaterialTransferTable from './MaterialTransferTable'
@@ -45,6 +45,8 @@ export default function MaterialTransferPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingRecord, setEditingRecord] =
     useState<PrecisionCuttingTransferRow | null>(null)
+  const [activeRecord, setActiveRecord] =
+    useState<PrecisionCuttingTransferRow | null>(null)
   const [isExporting, setIsExporting] = useState(false)
 
   const { data, isLoading } = usePrecisionCuttingTransfers({
@@ -62,21 +64,7 @@ export default function MaterialTransferPage() {
   })
 
   const selectedCount = selectedRowKeys.length
-  const selectedIds = useMemo(
-    () => selectedRowKeys.map((key) => String(key)),
-    [selectedRowKeys],
-  )
   const records = useMemo(() => data?.items || [], [data?.items])
-
-  const { data: filteredQuantityStats } =
-    usePrecisionCuttingTransferQuantityStats({
-      filters: searchFilters,
-    })
-  const { data: selectedQuantityStats } =
-    usePrecisionCuttingTransferQuantityStats({
-      ids: selectedIds,
-      enabled: selectedIds.length > 0,
-    })
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
@@ -316,41 +304,39 @@ export default function MaterialTransferPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <Card size="small">
-          <Statistic
-            title={`当前筛选总数量${filteredQuantityStats ? ` / ${filteredQuantityStats.totalRecords} 条` : ''}`}
-            value={filteredQuantityStats?.totalQuantity || 0}
-          />
-        </Card>
-        <Card size="small">
-          <Statistic
-            title={
-              selectedCount > 0
-                ? `当前勾选总数量 / ${selectedCount} 条`
-                : '当前勾选总数量'
-            }
-            value={selectedQuantityStats?.totalQuantity || 0}
-          />
-        </Card>
-      </div>
-
-      <div ref={tableContainerRef} className="min-h-0 flex-1 overflow-hidden">
-        <MaterialTransferTable
-          loading={isLoading}
-          data={records}
-          page={page}
-          pageSize={pageSize}
-          selectedRowKeys={selectedRowKeys}
-          onSelect={setSelectedRowKeys}
-          onEdit={openEditModal}
-          scrollY={scrollY}
-        />
-      </div>
-
-      <div ref={paginationRef}>
-        <AppPagination total={data?.total || 0} />
-      </div>
+      <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+        <Splitter.Panel defaultSize="65%" min="30%">
+          <div
+            ref={tableContainerRef}
+            className="flex h-full flex-col gap-2 overflow-hidden"
+          >
+            <div className="min-h-0 flex-1 overflow-x-auto">
+              <MaterialTransferTable
+                loading={isLoading}
+                data={records}
+                page={page}
+                pageSize={pageSize}
+                selectedRowKeys={selectedRowKeys}
+                onSelect={setSelectedRowKeys}
+                scrollY={scrollY}
+                activeRowId={activeRecord?.id ?? null}
+                onRowClick={setActiveRecord}
+              />
+            </div>
+            <div ref={paginationRef} className="flex shrink-0 justify-end">
+              <AppPagination total={data?.total || 0} />
+            </div>
+          </div>
+        </Splitter.Panel>
+        <Splitter.Panel min="20%">
+          <div className="h-full overflow-hidden">
+            <MaterialTransferDetail
+              selectedRecord={activeRecord}
+              onEdit={openEditModal}
+            />
+          </div>
+        </Splitter.Panel>
+      </Splitter>
 
       <MaterialTransferForm
         open={isModalOpen}
