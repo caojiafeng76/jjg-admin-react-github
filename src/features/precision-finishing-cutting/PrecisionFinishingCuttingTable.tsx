@@ -1,10 +1,5 @@
 import { useCallback, useMemo } from 'react'
-import {
-  Table,
-  Tag,
-  type TableColumnsType,
-  type TableProps,
-} from 'antd'
+import { Table, Tag, type TableColumnsType, type TableProps } from 'antd'
 
 import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
 
