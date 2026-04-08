@@ -11,7 +11,17 @@ import {
   LockClosedIcon,
   LockOpenIcon,
 } from '@heroicons/react/24/outline'
-import { App, Button, Card, Form, Input, Modal, Space, Typography } from 'antd'
+import {
+  App,
+  Button,
+  Card,
+  Form,
+  Input,
+  Modal,
+  Space,
+  Splitter,
+  Typography,
+} from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
@@ -27,6 +37,7 @@ import {
   type ProductionOrder,
   type ProductionOrderFilters,
   type ProductionOrderShift,
+  type ProductionOrderListItem,
 } from '@/services/apiProductionOrders'
 import type {
   ProductionOrderDataCategory,
@@ -52,6 +63,7 @@ import ProductionOrderList from './ProductionOrderList'
 import ProductionOrderMobileList from './ProductionOrderMobileList'
 import ProductionOrderForm from './ProductionOrderForm'
 import ProductionOrderDetail from './ProductionOrderDetail'
+import ProductionOrderInlineDetail from './ProductionOrderInlineDetail'
 import ProductionOrderSearch from './ProductionOrderSearch'
 import {
   updateAdminManagementPassword,
@@ -156,6 +168,8 @@ export default function ProductionOrderPage() {
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [isExporting, setIsExporting] = useState(false)
+  const [activeRecord, setActiveRecord] =
+    useState<ProductionOrderListItem | null>(null)
   const [isManagementUnlocked, setIsManagementUnlocked] = useState(
     !isAdminManagementView,
   )
@@ -752,7 +766,7 @@ export default function ProductionOrderPage() {
       className={
         isEmployeeView
           ? 'grid h-full grid-rows-[auto_auto_1fr] gap-3 p-3'
-          : 'grid h-full grid-rows-[auto_auto_1fr] gap-4'
+          : 'flex h-full flex-col gap-4'
       }
     >
       <div
@@ -858,22 +872,12 @@ export default function ProductionOrderPage() {
         />
       </div>
 
-      <div
-        ref={tableContainerRef}
-        className={
-          isEmployeeView
-            ? 'flex min-h-0 flex-1 flex-col gap-3 overflow-hidden'
-            : 'flex min-h-0 flex-1 flex-col gap-4 overflow-hidden'
-        }
-      >
+      {isEmployeeView ? (
         <div
-          className={
-            isEmployeeView
-              ? 'no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain'
-              : 'min-h-0 flex-1 overflow-x-auto'
-          }
+          ref={tableContainerRef}
+          className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
         >
-          {isEmployeeView ? (
+          <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <ProductionOrderMobileList
               loading={isLoading}
               data={orderData?.items || []}
@@ -881,34 +885,53 @@ export default function ProductionOrderPage() {
               onSelect={handleSelect}
               onView={handleView}
             />
-          ) : (
-            <ProductionOrderList
-              loading={isLoading}
-              data={orderData?.items || []}
-              page={page}
-              pageSize={pageSize}
-              selectedRowKeys={selectedRowKeys}
-              onSelect={handleSelect}
-              onView={handleView}
-              scrollY={scrollY}
+          </div>
+          <div
+            ref={paginationRef}
+            className="flex shrink-0 justify-center pb-1"
+          >
+            <AppPagination
+              total={orderData?.total || 0}
+              pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
             />
-          )}
+          </div>
         </div>
-
-        <div
-          ref={paginationRef}
-          className={
-            isEmployeeView
-              ? 'flex shrink-0 justify-center pb-1'
-              : 'flex shrink-0 justify-end'
-          }
-        >
-          <AppPagination
-            total={orderData?.total || 0}
-            pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
-          />
-        </div>
-      </div>
+      ) : (
+        <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+          <Splitter.Panel defaultSize="65%" min="30%">
+            <div
+              ref={tableContainerRef}
+              className="flex h-full flex-col gap-2 overflow-hidden"
+            >
+              <div className="min-h-0 flex-1 overflow-x-auto">
+                <ProductionOrderList
+                  loading={isLoading}
+                  data={orderData?.items || []}
+                  page={page}
+                  pageSize={pageSize}
+                  selectedRowKeys={selectedRowKeys}
+                  onSelect={handleSelect}
+                  onView={handleView}
+                  onRowClick={setActiveRecord}
+                  activeRowId={activeRecord?.id ?? null}
+                  scrollY={scrollY}
+                />
+              </div>
+              <div ref={paginationRef} className="flex shrink-0 justify-end">
+                <AppPagination
+                  total={orderData?.total || 0}
+                  pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
+                />
+              </div>
+            </div>
+          </Splitter.Panel>
+          <Splitter.Panel min="20%">
+            <div className="h-full overflow-hidden">
+              <ProductionOrderInlineDetail selectedRecord={activeRecord} />
+            </div>
+          </Splitter.Panel>
+        </Splitter>
+      )}
 
       <ProductionOrderForm
         open={isModalOpen && !isView}
