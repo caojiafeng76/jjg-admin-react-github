@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import { Table, TableColumnsType, TableProps, Button, Tag } from 'antd'
 import { EyeIcon } from '@heroicons/react/16/solid'
 
@@ -22,6 +22,8 @@ interface Props {
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   onView: (record: ProductionOrderListItem) => void
+  onRowClick?: (record: ProductionOrderListItem) => void
+  activeRowId?: string | null
   scrollY?: number
 }
 
@@ -33,6 +35,8 @@ export default function ProductionOrderList({
   selectedRowKeys,
   onSelect,
   onView,
+  onRowClick,
+  activeRowId,
   scrollY = 400,
 }: Props) {
   const columns: TableColumnsType<ProductionOrderListItem> = useMemo(
@@ -178,6 +182,18 @@ export default function ProductionOrderList({
       [onSelect, selectedRowKeys],
     )
 
+  const handleRow = useCallback(
+    (record: ProductionOrderListItem) => ({
+      onClick: () => onRowClick?.(record),
+      style: {
+        cursor: onRowClick ? 'pointer' : undefined,
+        backgroundColor:
+          record.id && record.id === activeRowId ? '#e6f4ff' : undefined,
+      },
+    }),
+    [activeRowId, onRowClick],
+  )
+
   return (
     <Table<ProductionOrderListItem>
       rowKey={(record) => record.id}
@@ -185,6 +201,7 @@ export default function ProductionOrderList({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
+      onRow={handleRow}
       scroll={{ y: scrollY, x: 1150 }}
       virtual
       size="small"
