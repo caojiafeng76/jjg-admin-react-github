@@ -173,14 +173,7 @@ export default function ProductionOrderForm({
   )
 
   const filteredMachineOptions = useMemo(() => {
-    const normalizedOp =
-      typeof selectedItemOperation === 'string'
-        ? selectedItemOperation.trim()
-        : ''
     const opts = machineOptions || []
-    const filtered = normalizedOp
-      ? opts.filter((m) => m.operation === normalizedOp)
-      : opts
     return [
       {
         id: null as string | null,
@@ -188,9 +181,9 @@ export default function ProductionOrderForm({
         operation: '',
         machine_name: '',
       },
-      ...filtered,
+      ...opts,
     ]
-  }, [machineOptions, selectedItemOperation])
+  }, [machineOptions])
 
   useEffect(() => {
     if (initialValues) {
