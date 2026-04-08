@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { App, Button, Card, Statistic } from 'antd'
+import { App, Button, Splitter } from 'antd'
 import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
 import { useSearchParams } from 'react-router-dom'
 
@@ -21,6 +21,7 @@ import {
 } from '@/services/apiPrecisionFinishingCuttings'
 import { translateErrorMessage } from '@/utils/errorHandler'
 import { exportPrecisionFinishingCuttingsToExcel } from '@/utils/precisionFinishingCuttingExcel'
+import PrecisionFinishingCuttingDetail from './PrecisionFinishingCuttingDetail'
 import PrecisionFinishingCuttingForm from './PrecisionFinishingCuttingForm'
 import PrecisionFinishingCuttingMobileList from './PrecisionFinishingCuttingMobileList'
 import PrecisionFinishingCuttingSearch from './PrecisionFinishingCuttingSearch'
@@ -29,7 +30,6 @@ import {
   useBatchUpdatePrecisionFinishingCuttings,
   useCreatePrecisionFinishingCutting,
   useDeletePrecisionFinishingCuttings,
-  usePrecisionFinishingCuttingQuantityStats,
   usePrecisionFinishingCuttings,
   useUpdatePrecisionFinishingCutting,
 } from './usePrecisionFinishingCuttings'
@@ -55,6 +55,8 @@ export default function PrecisionFinishingCuttingPage() {
     }))
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingRecord, setEditingRecord] =
+    useState<PrecisionFinishingCuttingWithEmployee | null>(null)
+  const [activeRecord, setActiveRecord] =
     useState<PrecisionFinishingCuttingWithEmployee | null>(null)
   const [isExporting, setIsExporting] = useState(false)
 
@@ -83,16 +85,6 @@ export default function PrecisionFinishingCuttingPage() {
     () => (fixedEmployee ? [fixedEmployee] : employeeOptions),
     [employeeOptions, fixedEmployee],
   )
-
-  const { data: filteredQuantityStats } =
-    usePrecisionFinishingCuttingQuantityStats({
-      filters: searchFilters,
-    })
-  const { data: selectedQuantityStats } =
-    usePrecisionFinishingCuttingQuantityStats({
-      ids: selectedIds,
-      enabled: selectedIds.length > 0,
-    })
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
@@ -407,63 +399,59 @@ export default function PrecisionFinishingCuttingPage() {
         />
       </div>
 
-      {isEmployeeView ? null : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <Card size="small">
-            <Statistic
-              title={`当前筛选总数量${filteredQuantityStats ? ` / ${filteredQuantityStats.totalRecords} 条` : ''}`}
-              value={filteredQuantityStats?.totalQuantity || 0}
+      {isEmployeeView ? (
+        <>
+          <div
+            ref={tableContainerRef}
+            className="no-scrollbar min-h-0 overflow-y-auto overscroll-contain"
+          >
+            <PrecisionFinishingCuttingMobileList
+              loading={isLoading}
+              data={records}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              onEdit={openEditModal}
             />
-          </Card>
-          <Card size="small">
-            <Statistic
-              title={
-                selectedCount > 0
-                  ? `当前勾选总数量 / ${selectedCount} 条`
-                  : '当前勾选总数量'
-              }
-              value={selectedQuantityStats?.totalQuantity || 0}
-            />
-          </Card>
-        </div>
+          </div>
+          <div className="flex justify-center pb-1">
+            <AppPagination total={data?.total || 0} />
+          </div>
+        </>
+      ) : (
+        <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+          <Splitter.Panel defaultSize="65%" min="30%">
+            <div
+              ref={tableContainerRef}
+              className="flex h-full flex-col gap-2 overflow-hidden"
+            >
+              <div className="min-h-0 flex-1 overflow-x-auto">
+                <PrecisionFinishingCuttingTable
+                  loading={isLoading}
+                  data={records}
+                  page={page}
+                  pageSize={pageSize}
+                  selectedRowKeys={selectedRowKeys}
+                  onSelect={setSelectedRowKeys}
+                  scrollY={scrollY}
+                  activeRowId={activeRecord?.id ?? null}
+                  onRowClick={setActiveRecord}
+                />
+              </div>
+              <div ref={paginationRef} className="flex shrink-0 justify-end">
+                <AppPagination total={data?.total || 0} />
+              </div>
+            </div>
+          </Splitter.Panel>
+          <Splitter.Panel min="20%">
+            <div className="h-full overflow-hidden">
+              <PrecisionFinishingCuttingDetail
+                selectedRecord={activeRecord}
+                onEdit={openEditModal}
+              />
+            </div>
+          </Splitter.Panel>
+        </Splitter>
       )}
-
-      <div
-        ref={tableContainerRef}
-        className={
-          isEmployeeView
-            ? 'no-scrollbar min-h-0 overflow-y-auto overscroll-contain'
-            : 'min-h-0 flex-1 overflow-hidden'
-        }
-      >
-        {isEmployeeView ? (
-          <PrecisionFinishingCuttingMobileList
-            loading={isLoading}
-            data={records}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            onEdit={openEditModal}
-          />
-        ) : (
-          <PrecisionFinishingCuttingTable
-            loading={isLoading}
-            data={records}
-            page={page}
-            pageSize={pageSize}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            onEdit={openEditModal}
-            scrollY={scrollY}
-          />
-        )}
-      </div>
-
-      <div
-        ref={paginationRef}
-        className={isEmployeeView ? 'flex justify-center pb-1' : ''}
-      >
-        <AppPagination total={data?.total || 0} />
-      </div>
 
       <PrecisionFinishingCuttingForm
         open={isModalOpen}

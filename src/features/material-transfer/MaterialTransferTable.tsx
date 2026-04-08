@@ -1,12 +1,5 @@
-import { useMemo } from 'react'
-import {
-  Button,
-  Table,
-  Tag,
-  type TableColumnsType,
-  type TableProps,
-} from 'antd'
-import { PencilSquareIcon } from '@heroicons/react/16/solid'
+import { useCallback, useMemo } from 'react'
+import { Table, Tag, type TableColumnsType, type TableProps } from 'antd'
 
 import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
 
@@ -17,8 +10,9 @@ interface Props {
   pageSize: number
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
-  onEdit: (record: MaterialTransferWithEmployee) => void
   scrollY?: number
+  activeRowId?: string | null
+  onRowClick?: (record: MaterialTransferWithEmployee) => void
 }
 
 export default function MaterialTransferTable({
@@ -28,8 +22,9 @@ export default function MaterialTransferTable({
   pageSize,
   selectedRowKeys,
   onSelect,
-  onEdit,
   scrollY = 400,
+  activeRowId,
+  onRowClick,
 }: Props) {
   const currentPageTransferQuantity = useMemo(
     () =>
@@ -53,8 +48,7 @@ export default function MaterialTransferTable({
         title: '创建时间',
         dataIndex: 'created_at',
         key: 'created_at',
-        width: 180,
-        fixed: 'left',
+        width: 165,
         render: (text: string) => {
           if (!text) return '-'
           return new Date(text).toLocaleString('zh-CN')
@@ -64,8 +58,7 @@ export default function MaterialTransferTable({
         title: '审核状态',
         dataIndex: 'is_audited',
         key: 'is_audited',
-        width: 100,
-        fixed: 'left',
+        width: 90,
         render: (value: boolean) => (
           <Tag color={value ? 'success' : 'default'}>
             {value ? '已审核' : '待审核'}
@@ -73,121 +66,53 @@ export default function MaterialTransferTable({
         ),
       },
       {
-        title: '客户',
-        dataIndex: 'customer',
-        key: 'customer',
-        fixed: 'left',
-        width: 140,
-        render: (value: string | null) => value || '-',
-      },
-      {
         title: '项目号',
         dataIndex: 'project_no',
         key: 'project_no',
-        fixed: 'left',
-        width: 140,
+        width: 130,
       },
       {
         title: '型号',
         dataIndex: 'product_model',
         key: 'product_model',
-        width: 140,
+        width: 130,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '客户型号',
+        dataIndex: 'customer_model',
+        key: 'customer_model',
+        width: 130,
         render: (value: string | null) => value || '-',
       },
       {
         title: '长度',
         dataIndex: 'length_mm',
         key: 'length_mm',
-        width: 100,
+        width: 80,
         render: (value: number | null) => value ?? '-',
-      },
-      {
-        title: '客户型号',
-        dataIndex: 'customer_model',
-        key: 'customer_model',
-        width: 160,
-        render: (value: string | null) => value || '-',
       },
       {
         title: '转移数量',
         dataIndex: 'transfer_quantity',
         key: 'transfer_quantity',
-        width: 100,
+        width: 90,
       },
       {
         title: '操作人',
         key: 'operator_names',
-        width: 180,
+        width: 160,
         render: (_text, record) => record.operator_names.join('、') || '-',
       },
       {
         title: '接收车间',
         dataIndex: 'target_workshop',
         key: 'target_workshop',
-        width: 120,
-      },
-      {
-        title: '接收人',
-        dataIndex: 'recipient_name',
-        key: 'recipient_name',
-        width: 120,
-      },
-      {
-        title: '当班负责人',
-        dataIndex: 'shift_leader_name',
-        key: 'shift_leader_name',
-        width: 120,
-        render: (value: string | null) => value || '-',
-      },
-      {
-        title: '检验人',
-        dataIndex: 'inspector_name',
-        key: 'inspector_name',
-        width: 120,
-        render: (value: string | null) => value || '-',
-      },
-      {
-        title: '数据上传',
-        dataIndex: 'uploaded_by_name',
-        key: 'uploaded_by_name',
-        width: 120,
-        render: (value: string | null) => value || '-',
-      },
-      {
-        title: '审核时间',
-        dataIndex: 'audited_at',
-        key: 'audited_at',
-        width: 180,
-        render: (text: string | null) => {
-          if (!text) return '-'
-          return new Date(text).toLocaleString('zh-CN')
-        },
-      },
-      {
-        title: '备注',
-        dataIndex: 'remark',
-        key: 'remark',
-        width: 180,
-        ellipsis: true,
-        render: (value: string | null) => value || '-',
-      },
-      {
-        title: '操作',
-        key: 'actions',
-        width: 72,
+        width: 100,
         fixed: 'right',
-        render: (_text, record) => (
-          <Button
-            type="text"
-            size="small"
-            icon={<PencilSquareIcon className="h-4 w-4" />}
-            onClick={() => onEdit(record)}
-            title="编辑"
-          />
-        ),
       },
     ],
-    [onEdit, page, pageSize],
+    [page, pageSize],
   )
 
   const rowSelection: TableProps<MaterialTransferWithEmployee>['rowSelection'] =
@@ -197,6 +122,18 @@ export default function MaterialTransferTable({
       preserveSelectedRowKeys: true,
     }
 
+  const handleRow = useCallback(
+    (record: MaterialTransferWithEmployee) => ({
+      onClick: () => onRowClick?.(record),
+      style: {
+        cursor: onRowClick ? 'pointer' : undefined,
+        backgroundColor:
+          record.id && record.id === activeRowId ? '#e6f4ff' : undefined,
+      },
+    }),
+    [activeRowId, onRowClick],
+  )
+
   return (
     <Table<MaterialTransferWithEmployee>
       rowKey={(record) => record.id}
@@ -204,7 +141,8 @@ export default function MaterialTransferTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 1600, y: scrollY }}
+      onRow={handleRow}
+      scroll={{ x: 1120, y: scrollY }}
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}
@@ -212,15 +150,15 @@ export default function MaterialTransferTable({
         <Table.Summary fixed>
           <Table.Summary.Row>
             <Table.Summary.Cell index={0} />
-            <Table.Summary.Cell index={1} colSpan={8}>
+            <Table.Summary.Cell index={1} colSpan={7}>
               <span className="font-medium text-slate-600">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={9}>
+            <Table.Summary.Cell index={8}>
               <span className="font-semibold text-slate-900">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={10} colSpan={9} />
+            <Table.Summary.Cell index={9} colSpan={2} />
           </Table.Summary.Row>
         </Table.Summary>
       )}
