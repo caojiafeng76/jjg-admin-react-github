@@ -48,9 +48,7 @@ export default function PrecisionFinishingCuttingDetail({
           {is_audited ? '已审核' : '待审核'}
         </Tag>
         {customer && <span className="font-medium">{customer}</span>}
-        {customer && project_no && (
-          <span className="text-gray-400">·</span>
-        )}
+        {customer && project_no && <span className="text-gray-400">·</span>}
         <span className="font-medium">{project_no}</span>
         {product_model && (
           <>
