@@ -60,6 +60,7 @@ const routeToLabelMap: Record<string, string> = {
   'tooling-stock-out': '刀具出库',
   'attendance-detail': '考勤明细',
   'attendance-summary': '考勤统计',
+  'machine-runtime': '设备运行时间',
 }
 
 export default function AppHeader({

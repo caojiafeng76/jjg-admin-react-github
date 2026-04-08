@@ -72,6 +72,7 @@ const adminItems: MenuItem[] = [
       { key: 'material-transfer', label: '物料转移单' },
       { key: 'production-order', label: '生产工单' },
       { key: 'production-daily-report', label: '生产日报表' },
+      { key: 'machine-runtime', label: '设备运行时间' },
     ],
   },
   {

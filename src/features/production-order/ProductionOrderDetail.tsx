@@ -13,7 +13,10 @@ import {
   useDeleteProductionOrderItems,
 } from './useProductionOrderItems'
 import { useProductionOrder } from './useProductionOrders'
-import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import type {
+  ProductionOrderItem,
+  ProductionOrderItemWithMachine,
+} from '@/services/apiProductionOrderItems'
 import type { ProductionOrder } from '@/services/apiProductionOrders'
 
 interface Props {
@@ -47,7 +50,9 @@ export default function ProductionOrderDetail({
   const deleteItemMutation = useDeleteProductionOrderItems()
 
   const currentOrder = orderData || order
-  const items = itemsData || order.items || []
+  const items = (itemsData ||
+    order.items ||
+    []) as ProductionOrderItemWithMachine[]
 
   const handleAddItem = () => {
     setEditingItem(undefined)

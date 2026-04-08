@@ -269,3 +269,22 @@ export async function deleteMachineEquipmentMaintenances(ids: string[]) {
     throw handleApiError(error, '删除机器设备维护失败')
   }
 }
+
+export interface MachineEquipmentOption {
+  id: string
+  unified_device_no: string
+  operation: string
+  machine_name: string
+}
+
+export async function getMachineEquipmentOptions(): Promise<MachineEquipmentOption[]> {
+  const { data, error } = await machineEquipmentMaintenancesTable()
+    .select('id, unified_device_no, operation, machine_name')
+    .order('unified_device_no', { ascending: true })
+
+  if (error) {
+    throw handleApiError(error, '获取设备选项失败')
+  }
+
+  return (data || []) as MachineEquipmentOption[]
+}

@@ -2,7 +2,10 @@ import { useMemo } from 'react'
 import { Table, TableColumnsType, Button, Popconfirm, Space } from 'antd'
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/16/solid'
 
-import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import type {
+  ProductionOrderItem,
+  ProductionOrderItemWithMachine,
+} from '@/services/apiProductionOrderItems'
 
 const dangerTextStyle = {
   color: '#cf1322',
@@ -11,7 +14,7 @@ const dangerTextStyle = {
 
 interface Props {
   loading: boolean
-  data: ProductionOrderItem[]
+  data: ProductionOrderItemWithMachine[]
   onEdit: (item: ProductionOrderItem) => void
   onDelete: (ids: string[]) => void
   scrollY?: number
@@ -26,7 +29,7 @@ export default function ProductionOrderItemTable({
   scrollY = 400,
   showActions = true,
 }: Props) {
-  const columns: TableColumnsType<ProductionOrderItem> = useMemo(
+  const columns: TableColumnsType<ProductionOrderItemWithMachine> = useMemo(
     () => [
       {
         title: '#',
@@ -80,6 +83,21 @@ export default function ProductionOrderItemTable({
             return value.join(', ')
           }
           return value
+        },
+      },
+      {
+        title: '机器编号',
+        key: 'machine_equipment_id',
+        width: 120,
+        render: (_: unknown, record: ProductionOrderItemWithMachine) => {
+          const m = record.machine_equipment_maintenances
+          if (!m) return <span className="text-slate-400">无</span>
+          return (
+            <div className="flex flex-col">
+              <span>{m.unified_device_no}</span>
+              <span className="text-xs text-slate-400">{m.machine_name}</span>
+            </div>
+          )
         },
       },
       {
@@ -146,6 +164,18 @@ export default function ProductionOrderItemTable({
         width: 150,
         render: (value: string | null) => value || '-',
       },
+      {
+        title: '运行时间',
+        key: 'runtime',
+        width: 100,
+        render: (_: unknown, record: ProductionOrderItemWithMachine) => {
+          const seconds =
+            (record.incoming_qualified_quantity ?? 0) *
+            (record.theoretical_seconds ?? 0)
+          if (seconds === 0) return <span className="text-slate-400">—</span>
+          return `${(seconds / 3600).toFixed(2)} h`
+        },
+      },
       ...(showActions
         ? [
             {
@@ -184,12 +214,12 @@ export default function ProductionOrderItemTable({
   )
 
   return (
-    <Table<ProductionOrderItem>
+    <Table<ProductionOrderItemWithMachine>
       rowKey={(record) => record.id}
       loading={loading}
       columns={columns}
       dataSource={data}
-      scroll={{ y: scrollY, x: 1700 }}
+      scroll={{ y: scrollY, x: 1900 }}
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}

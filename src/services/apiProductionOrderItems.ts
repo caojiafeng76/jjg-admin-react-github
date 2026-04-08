@@ -21,10 +21,20 @@ export type ProductionOrderItemUpdate = ProductionOrderItemUpdateBase & {
   data_category?: ProductionOrderDataCategory
 }
 
+export type ProductionOrderItemWithMachine = ProductionOrderItem & {
+  machine_equipment_maintenances: {
+    unified_device_no: string
+    operation: string
+    machine_name: string
+  } | null
+}
+
 export async function getProductionOrderItems(orderId: string) {
   const { data, error } = await supabase
     .from('production_order_items')
-    .select('*')
+    .select(
+      '*, machine_equipment_maintenances!machine_equipment_id(unified_device_no, operation, machine_name)',
+    )
     .eq('order_id', orderId)
     .order('created_at', { ascending: true })
 
@@ -32,7 +42,7 @@ export async function getProductionOrderItems(orderId: string) {
     throw handleApiError(error, '获取工序明细失败')
   }
 
-  return (data || []) as ProductionOrderItem[]
+  return (data || []) as unknown as ProductionOrderItemWithMachine[]
 }
 
 export async function addProductionOrderItem(
