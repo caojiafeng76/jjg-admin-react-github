@@ -41,6 +41,7 @@ import {
   useSalesOrdersProjectNos,
   type ProcessStandardMatchLevel,
 } from './useProcessStandards'
+import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
 
 type ProductionOrderFormInitialValues = ProductionOrder & {
   items?: ProductionOrderItem[]
@@ -70,6 +71,8 @@ interface OrderItem {
   customer_model: string | null
   operation: string
   standard_seconds: number
+  theoretical_seconds?: number
+  machine_equipment_id?: string | null
   incoming_qualified_quantity: number
   qualified_quantity: number
   defect_reason_1: string | null
@@ -123,6 +126,8 @@ export default function ProductionOrderForm({
   const selectedItemProjectNo = Form.useWatch('project_no', itemForm)
   const selectedItemOperation = Form.useWatch('operation', itemForm)
 
+  const { data: machineOptions } = useMachineEquipmentOptions()
+
   const modelsMap = useMemo(() => {
     const map: Record<string, ProjectNoData> = {}
     projectNos?.forEach((item) => {
@@ -167,6 +172,26 @@ export default function ProductionOrderForm({
     [operations],
   )
 
+  const filteredMachineOptions = useMemo(() => {
+    const normalizedOp =
+      typeof selectedItemOperation === 'string'
+        ? selectedItemOperation.trim()
+        : ''
+    const opts = machineOptions || []
+    const filtered = normalizedOp
+      ? opts.filter((m) => m.operation === normalizedOp)
+      : opts
+    return [
+      {
+        id: null as string | null,
+        unified_device_no: '无',
+        operation: '',
+        machine_name: '',
+      },
+      ...filtered,
+    ]
+  }, [machineOptions, selectedItemOperation])
+
   useEffect(() => {
     if (initialValues) {
       setItems(
@@ -186,6 +211,8 @@ export default function ProductionOrderForm({
           defect_reason_2: item.defect_reason_2,
           defect_quantity_2: item.defect_quantity_2,
           remark: item.remark,
+          theoretical_seconds: item.theoretical_seconds ?? 0,
+          machine_equipment_id: item.machine_equipment_id ?? null,
         })),
       )
       form.setFieldsValue({
@@ -231,6 +258,7 @@ export default function ProductionOrderForm({
       if (currentStandardSeconds !== operationData.standard_seconds) {
         itemForm.setFieldsValue({
           standard_seconds: operationData.standard_seconds,
+          theoretical_seconds: operationData.theoretical_seconds ?? 0,
         })
       }
       return
@@ -330,6 +358,12 @@ export default function ProductionOrderForm({
           itemForm.getFieldValue('standard_seconds') ??
           0,
       ),
+      theoretical_seconds: Number(
+        values.theoretical_seconds ??
+          itemForm.getFieldValue('theoretical_seconds') ??
+          0,
+      ),
+      machine_equipment_id: values.machine_equipment_id ?? null,
       incoming_qualified_quantity:
         Number(values.incoming_qualified_quantity) || 0,
       qualified_quantity: values.qualified_quantity || 0,
@@ -370,22 +404,23 @@ export default function ProductionOrderForm({
         customer_model: data.customer_model,
         operation: undefined,
         standard_seconds: undefined,
+        theoretical_seconds: undefined,
+        machine_equipment_id: undefined,
       })
     }
   }
 
   const handleOperationChangeForItem = (value: string) => {
-    itemForm.setFieldsValue({
-      operation: value,
-    })
-
     const normalizedOperation = value.trim()
     const operationData = operations?.find(
       (item) => item.operation === normalizedOperation,
     )
 
     itemForm.setFieldsValue({
+      operation: value,
       standard_seconds: operationData?.standard_seconds ?? 0,
+      theoretical_seconds: operationData?.theoretical_seconds ?? 0,
+      machine_equipment_id: undefined,
     })
   }
 
@@ -906,6 +941,70 @@ export default function ProductionOrderForm({
                 </Tag>
               </div>
             ) : null}
+
+            <Form.Item
+              name="machine_equipment_id"
+              label="机器编号"
+              rules={[
+                {
+                  validator: async (_, value) => {
+                    if (value === undefined) {
+                      throw new Error('请选择机器编号')
+                    }
+                  },
+                },
+              ]}
+            >
+              <Select
+                showSearch
+                placeholder="请选择机器编号"
+                getPopupContainer={getPopupContainer}
+                disabled={!selectedItemOperation}
+                optionLabelProp="label"
+                filterOption={(input, option) => {
+                  if (!option) return false
+                  const search = input.toLowerCase()
+                  return (
+                    (option.unified_device_no as string)
+                      ?.toLowerCase()
+                      .includes(search) ||
+                    (option.operation as string)
+                      ?.toLowerCase()
+                      .includes(search) ||
+                    (option.machine_name as string)
+                      ?.toLowerCase()
+                      .includes(search)
+                  )
+                }}
+                style={{ width: '100%' }}
+              >
+                {filteredMachineOptions.map((m) => (
+                  <Select.Option
+                    key={m.id ?? '__none__'}
+                    value={m.id}
+                    label={m.id === null ? '无' : m.unified_device_no}
+                    unified_device_no={m.unified_device_no}
+                    operation={m.operation}
+                    machine_name={m.machine_name}
+                  >
+                    {m.id === null ? (
+                      <span className="text-slate-400">无</span>
+                    ) : (
+                      <div className="flex flex-col py-0.5">
+                        <span>{m.unified_device_no}</span>
+                        <span className="text-xs text-slate-400">
+                          {m.operation}　{m.machine_name}
+                        </span>
+                      </div>
+                    )}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item name="theoretical_seconds" hidden>
+              <Input />
+            </Form.Item>
 
             {!compact ? (
               <Form.Item

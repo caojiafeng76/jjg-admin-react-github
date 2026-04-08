@@ -52,6 +52,7 @@ const PrecisionCuttingTransfer = lazy(
 )
 const ProductionOrder = lazy(() => import('@features/production-order'))
 const ProductionDailyReport = lazy(() => import('@features/production-report'))
+const MachineRuntime = lazy(() => import('@features/machine-runtime'))
 const AttendanceDetail = lazy(
   () => import('@features/attendance/AttendanceDetail'),
 )
@@ -324,6 +325,17 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<ProductionDailyReport />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'machine-runtime',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<MachineRuntime />}
             />
           </Suspense>
         ),

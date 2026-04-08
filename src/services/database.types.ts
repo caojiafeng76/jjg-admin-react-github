@@ -417,6 +417,7 @@ export type Database = {
           id: string
           incoming_qualified_quantity: number
           length_mm: number | null
+          machine_equipment_id: string | null
           operation: string
           order_id: string
           product_model: string | null
@@ -425,6 +426,7 @@ export type Database = {
           qualified_quantity: number
           remark: string | null
           standard_seconds: number
+          theoretical_seconds: number
           updated_at: string
         }
         Insert: {
@@ -439,6 +441,7 @@ export type Database = {
           id?: string
           incoming_qualified_quantity: number
           length_mm?: number | null
+          machine_equipment_id?: string | null
           operation: string
           order_id: string
           product_model?: string | null
@@ -447,6 +450,7 @@ export type Database = {
           qualified_quantity?: number
           remark?: string | null
           standard_seconds: number
+          theoretical_seconds?: number
           updated_at?: string
         }
         Update: {
@@ -461,6 +465,7 @@ export type Database = {
           id?: string
           incoming_qualified_quantity?: number
           length_mm?: number | null
+          machine_equipment_id?: string | null
           operation?: string
           order_id?: string
           product_model?: string | null
@@ -469,6 +474,7 @@ export type Database = {
           qualified_quantity?: number
           remark?: string | null
           standard_seconds?: number
+          theoretical_seconds?: number
           updated_at?: string
         }
         Relationships: [
