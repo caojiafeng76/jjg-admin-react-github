@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import {
+  Alert,
+  Button,
   Table,
   TableColumnsType,
   Tabs,
@@ -16,9 +18,17 @@ import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrde
 import type { TransferWorkshopStat } from '@/services/apiMaterialTransfers'
 import { useWorkshopOrderProductionItems } from './useWorkshopOrderProductionItems'
 import { useWorkshopOrderTransfers } from './useWorkshopOrderTransfers'
+import type { WorkshopOrderStatus } from './orderStatus'
+import {
+  getWorkshopOrderStatusColor,
+  normalizeWorkshopOrderStatus,
+} from './orderStatus'
 
 interface Props {
   selectedOrder: WorkshopOrder | null
+  canManageStatus?: boolean
+  onStatusChange?: (status: WorkshopOrderStatus) => Promise<void> | void
+  statusUpdating?: boolean
 }
 
 const { Text } = Typography
@@ -130,7 +140,12 @@ interface OperationSummary {
   totalDefect: number
 }
 
-export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
+export default function WorkshopOrderProductionStats({
+  selectedOrder,
+  canManageStatus = false,
+  onStatusChange,
+  statusUpdating = false,
+}: Props) {
   const projectNo = selectedOrder?.project_no ?? null
 
   const { data: items, isLoading } = useWorkshopOrderProductionItems(projectNo)
@@ -188,7 +203,13 @@ export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
   if (operationGroups.length === 0) {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        <OrderInfoHeader order={selectedOrder} transferStats={transferStats} />
+        <OrderInfoHeader
+          order={selectedOrder}
+          transferStats={transferStats}
+          canManageStatus={canManageStatus}
+          onStatusChange={onStatusChange}
+          statusUpdating={statusUpdating}
+        />
         <div className="flex flex-1 items-center justify-center text-gray-400">
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -290,7 +311,13 @@ export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <OrderInfoHeader order={selectedOrder} transferStats={transferStats} />
+      <OrderInfoHeader
+        order={selectedOrder}
+        transferStats={transferStats}
+        canManageStatus={canManageStatus}
+        onStatusChange={onStatusChange}
+        statusUpdating={statusUpdating}
+      />
       <div className="min-h-0 flex-1 overflow-auto px-2">
         <Tabs
           size="small"
@@ -306,6 +333,9 @@ export default function WorkshopOrderProductionStats({ selectedOrder }: Props) {
 function OrderInfoHeader({
   order,
   transferStats,
+  canManageStatus = false,
+  onStatusChange,
+  statusUpdating = false,
 }: {
   order: WorkshopOrder
   transferStats?: {
@@ -314,11 +344,17 @@ function OrderInfoHeader({
     totalInWarehouse: number
     totalTransferred: number
   }
+  canManageStatus?: boolean
+  onStatusChange?: (status: WorkshopOrderStatus) => Promise<void> | void
+  statusUpdating?: boolean
 }) {
   const orderQty = order.order_quantity ?? 0
   const outbound = transferStats?.totalOutbound ?? 0
+  const status = normalizeWorkshopOrderStatus(order.status)
   const progressPercent =
     orderQty > 0 ? Math.min(Math.round((outbound / orderQty) * 100), 100) : 0
+  const shouldRemindClose =
+    status === '生产中' && orderQty > 0 && outbound >= orderQty
   const progressStatus =
     progressPercent >= 100
       ? 'success'
@@ -328,8 +364,33 @@ function OrderInfoHeader({
 
   return (
     <div className="border-b px-3 py-2">
+      {shouldRemindClose && canManageStatus && onStatusChange && (
+        <Alert
+          showIcon
+          type="warning"
+          className="mb-2"
+          message="该订单出库进度已达 100%，请尽快修改为已结案"
+          description="结案后，新建生产工单时将不再显示该订单，避免继续关联。"
+          action={
+            <Button
+              type="primary"
+              danger
+              size="small"
+              loading={statusUpdating}
+              onClick={() => void onStatusChange('已结案')}
+            >
+              立即结案
+            </Button>
+          }
+        />
+      )}
+
       {/* 基础订单信息 */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-xs text-gray-600">
+        <span>
+          状态：
+          <Tag color={getWorkshopOrderStatusColor(status)}>{status}</Tag>
+        </span>
         <span>
           项目号：
           <Text strong style={{ fontSize: 12 }}>

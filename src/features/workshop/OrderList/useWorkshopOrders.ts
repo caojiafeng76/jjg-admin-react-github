@@ -39,27 +39,39 @@ export function useWorkshopOrdersList({
 export function useCreateWorkshopOrder() {
   return useMutationWithInvalidation({
     mutationFn: createWorkshopOrder,
-    invalidateQueries: [[WORKSHOP_ORDERS_KEY]],
+    invalidateQueries: [
+      [WORKSHOP_ORDERS_KEY],
+      ['process-standards', 'project-nos'],
+    ],
   })
 }
 
 export function useUpdateWorkshopOrder() {
   return useMutationWithInvalidation({
     mutationFn: updateWorkshopOrder,
-    invalidateQueries: [[WORKSHOP_ORDERS_KEY]],
+    invalidateQueries: [
+      [WORKSHOP_ORDERS_KEY],
+      ['process-standards', 'project-nos'],
+    ],
   })
 }
 
 export function useCreateWorkshopOrdersBatch() {
   return useMutationWithInvalidation({
     mutationFn: createWorkshopOrdersBatch,
-    invalidateQueries: [[WORKSHOP_ORDERS_KEY]],
+    invalidateQueries: [
+      [WORKSHOP_ORDERS_KEY],
+      ['process-standards', 'project-nos'],
+    ],
   })
 }
 
 export function useDeleteWorkshopOrders() {
   return useMutationWithInvalidation({
     mutationFn: deleteWorkshopOrders,
-    invalidateQueries: [[WORKSHOP_ORDERS_KEY]],
+    invalidateQueries: [
+      [WORKSHOP_ORDERS_KEY],
+      ['process-standards', 'project-nos'],
+    ],
   })
 }

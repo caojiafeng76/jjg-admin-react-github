@@ -1,6 +1,10 @@
 import { useMemo } from 'react'
-import { Table, TableColumnsType, TableProps } from 'antd'
+import { Table, TableColumnsType, TableProps, Tag } from 'antd'
 import type { WorkshopOrder } from './index'
+import {
+  getWorkshopOrderStatusColor,
+  normalizeWorkshopOrderStatus,
+} from './orderStatus'
 
 interface Props {
   loading: boolean
@@ -50,6 +54,17 @@ export default function WorkshopOrderTable({
         fixed: 'left',
         key: 'project_no',
         width: 120,
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        fixed: 'left',
+        key: 'status',
+        width: 90,
+        render: (value: WorkshopOrder['status']) => {
+          const status = normalizeWorkshopOrderStatus(value)
+          return <Tag color={getWorkshopOrderStatusColor(status)}>{status}</Tag>
+        },
       },
       {
         title: '产品型号',
