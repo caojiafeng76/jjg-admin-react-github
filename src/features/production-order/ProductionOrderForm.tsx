@@ -303,6 +303,7 @@ export default function ProductionOrderForm({
         customer_model: item?.customer_model,
         operation: item?.operation,
         standard_seconds: item?.standard_seconds,
+        machine_equipment_id: item?.machine_equipment_id,
         incoming_qualified_quantity: item?.incoming_qualified_quantity ?? 0,
         qualified_quantity: item?.qualified_quantity || 0,
         defect_reason_1: item?.defect_reason_1 || '加工',
