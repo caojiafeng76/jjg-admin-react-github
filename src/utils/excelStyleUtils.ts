@@ -69,6 +69,13 @@ export function autoFitColumnWidths(
   ws['!cols'] = colWidths
 }
 
+export function setColumnWidths(ws: WorkSheet, widths: number[]) {
+  ws['!cols'] = widths.map((width) => ({
+    wch: width,
+    wpx: Math.round(width * 8 + 12),
+  }))
+}
+
 /**
  * 设置工作表行高
  * @param ws 工作表对象
@@ -134,4 +141,92 @@ export function centerAllCells(ws: WorkSheet, data: Array<Array<unknown>>) {
       }
     }
   }
+}
+
+interface RegisterSheetStyleOptions {
+  columnWidths?: number[]
+  titleRowHeight?: number
+  headerRowHeight?: number
+  bodyRowHeight?: number
+  freezeYSplit?: number
+}
+
+export function applyRegisterSheetStyles(
+  ws: WorkSheet,
+  data: Array<Array<string | number | null | undefined>>,
+  options: RegisterSheetStyleOptions = {},
+) {
+  if (!data || data.length === 0) return
+
+  const {
+    columnWidths,
+    titleRowHeight = 34,
+    headerRowHeight = 28,
+    bodyRowHeight = 26,
+    freezeYSplit = 2,
+  } = options
+
+  if (columnWidths?.length) {
+    setColumnWidths(ws, columnWidths)
+  } else {
+    autoFitColumnWidths(ws, data)
+  }
+
+  const rowCount = data.length
+  const colCount = data[0].length
+  const borderColor = '000000'
+
+  if (!ws['!rows']) {
+    ws['!rows'] = []
+  }
+
+  ws['!rows'][0] = { hpt: titleRowHeight, hpx: titleRowHeight }
+  ws['!rows'][1] = { hpt: headerRowHeight, hpx: headerRowHeight }
+
+  for (let row = 2; row < rowCount; row += 1) {
+    ws['!rows'][row] = { hpt: bodyRowHeight, hpx: bodyRowHeight }
+  }
+
+  for (let row = 0; row < rowCount; row += 1) {
+    for (let col = 0; col < colCount; col += 1) {
+      const cellRef = `${columnIndexToLetter(col)}${row + 1}`
+
+      if (!ws[cellRef]) {
+        ws[cellRef] = { v: '' }
+      }
+
+      const baseStyle = {
+        font: {
+          ...(ws[cellRef].s?.font || {}),
+          name: '宋体',
+          sz: row === 0 ? 16 : row === 1 ? 11 : 10.5,
+          bold: row <= 1,
+        },
+        alignment: {
+          ...(ws[cellRef].s?.alignment || {}),
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: true,
+        },
+        fill: {
+          fgColor: {
+            rgb: row === 1 ? 'D8E4F1' : 'FFFFFF',
+          },
+        },
+        border: {
+          top: { style: 'thin', color: { rgb: borderColor } },
+          bottom: { style: 'thin', color: { rgb: borderColor } },
+          left: { style: 'thin', color: { rgb: borderColor } },
+          right: { style: 'thin', color: { rgb: borderColor } },
+        },
+      }
+
+      ws[cellRef].s = {
+        ...(ws[cellRef].s || {}),
+        ...baseStyle,
+      }
+    }
+  }
+
+  ws['!freeze'] = { xSplit: 0, ySplit: freezeYSplit }
 }
