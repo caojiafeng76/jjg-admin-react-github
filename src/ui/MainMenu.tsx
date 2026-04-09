@@ -40,11 +40,6 @@ const adminItems: MenuItem[] = [
     icon: <Square3Stack3DIcon className="size-4" />,
   },
   {
-    key: 'production-status',
-    label: '订单生产状况',
-    icon: <Square3Stack3DIcon className="size-4" />,
-  },
-  {
     key: 'production-scheduling',
     label: '排产计划',
     icon: <Square3Stack3DIcon className="size-4" />,

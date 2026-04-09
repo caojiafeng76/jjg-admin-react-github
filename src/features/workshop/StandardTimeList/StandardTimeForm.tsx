@@ -36,6 +36,8 @@ interface MachineEquipmentSelectOption {
   searchText: string
 }
 
+const NO_EQUIPMENT_OPTION_VALUE = '__NO_EQUIPMENT__'
+
 interface Props {
   onFinish: (values: StandardTimeFormValues) => void
   setFormRef: (form: FormInstance<StandardTimeFormValues>) => void
@@ -170,6 +172,21 @@ export default function StandardTimeForm({
       })),
     [equipmentOptions],
   )
+  const equipmentSelectOptions = useMemo(
+    () => [
+      {
+        label: '无（不关联设备）',
+        value: NO_EQUIPMENT_OPTION_VALUE,
+        searchText: '无 不关联设备',
+      },
+      ...machineEquipmentSelectOptions.map((option) => ({
+        label: `${option.value} (${option.operation} / ${option.machineName})`,
+        value: option.value,
+        searchText: option.searchText,
+      })),
+    ],
+    [machineEquipmentSelectOptions],
+  )
   const jobRateMap = useMemo(
     () =>
       new Map(
@@ -254,7 +271,7 @@ export default function StandardTimeForm({
   }
 
   const handleEquipmentChange = (value: string | undefined) => {
-    if (!value) {
+    if (!value || value === NO_EQUIPMENT_OPTION_VALUE) {
       return
     }
 
@@ -283,11 +300,24 @@ export default function StandardTimeForm({
     [form, salesOrderOptions],
   )
 
+  const handleFinish = useCallback(
+    (values: StandardTimeFormValues) => {
+      onFinish({
+        ...values,
+        equipment_no:
+          values.equipment_no === NO_EQUIPMENT_OPTION_VALUE
+            ? null
+            : values.equipment_no,
+      })
+    },
+    [onFinish],
+  )
+
   return (
     <Form
       form={form}
       layout="vertical"
-      onFinish={onFinish}
+      onFinish={handleFinish}
       disabled={isCreating}
     >
       {!isTeamLeaderMode && (
@@ -433,11 +463,7 @@ export default function StandardTimeForm({
               .toLowerCase()
               .includes(input.toLowerCase())
           }
-          options={machineEquipmentSelectOptions.map((option) => ({
-            label: `${option.value} (${option.operation} / ${option.machineName})`,
-            value: option.value,
-            searchText: option.searchText,
-          }))}
+          options={equipmentSelectOptions}
           onChange={handleEquipmentChange}
         />
       </Form.Item>
