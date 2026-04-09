@@ -2,10 +2,8 @@ import * as XLSX from 'xlsx-js-style'
 
 import type { PrecisionFinishingCuttingExportRow } from '@/services/apiPrecisionFinishingCuttings'
 import {
-  autoFitColumnWidths,
-  centerAllCells,
+  applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
-  setRowHeight,
 } from '@/utils/excelStyleUtils'
 
 const SHEET_TITLE = '精加工切割单登记表'
@@ -34,6 +32,11 @@ const EXPORT_HEADERS = [
   '审核时间',
   '备注',
 ] as const
+
+const EXPORT_COLUMN_WIDTHS = [
+  20, 14, 18, 9, 10, 24, 12, 10, 10, 10, 12, 12, 18, 10, 14, 10, 8, 8, 9,
+  10, 18, 16,
+]
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) {
@@ -86,62 +89,9 @@ export function exportPrecisionFinishingCuttingsToExcel(
     },
   ]
 
-  autoFitColumnWidths(worksheet, worksheetData)
-  centerAllCells(worksheet, worksheetData)
-  setRowHeight(worksheet, 22, worksheetData.length)
-
-  const titleCellRef = XLSX.utils.encode_cell({ r: 0, c: 0 })
-  if (worksheet[titleCellRef]) {
-    worksheet[titleCellRef].s = {
-      ...(worksheet[titleCellRef].s || {}),
-      font: {
-        ...(worksheet[titleCellRef].s?.font || {}),
-        bold: true,
-        name: '宋体',
-        sz: 14,
-      },
-      alignment: {
-        ...(worksheet[titleCellRef].s?.alignment || {}),
-        horizontal: 'center',
-        vertical: 'center',
-      },
-      fill: {
-        fgColor: { rgb: 'FFFFFF' },
-      },
-    }
-  }
-
-  for (let column = 0; column < EXPORT_HEADERS.length; column += 1) {
-    const cellRef = XLSX.utils.encode_cell({ r: 1, c: column })
-
-    if (worksheet[cellRef]) {
-      worksheet[cellRef].s = {
-        ...(worksheet[cellRef].s || {}),
-        font: {
-          ...(worksheet[cellRef].s?.font || {}),
-          bold: true,
-          name: '宋体',
-          sz: 11,
-        },
-        fill: {
-          fgColor: { rgb: 'D9EAF7' },
-        },
-        border: {
-          top: { style: 'thin', color: { rgb: 'B7C9D6' } },
-          bottom: { style: 'thin', color: { rgb: 'B7C9D6' } },
-          left: { style: 'thin', color: { rgb: 'B7C9D6' } },
-          right: { style: 'thin', color: { rgb: 'B7C9D6' } },
-        },
-      }
-    }
-  }
-
-  if (!worksheet['!rows']) {
-    worksheet['!rows'] = []
-  }
-
-  worksheet['!rows'][0] = { hpt: 28, hpx: 28 }
-  worksheet['!freeze'] = { xSplit: 0, ySplit: 2 }
+  applyRegisterSheetStyles(worksheet, worksheetData, {
+    columnWidths: EXPORT_COLUMN_WIDTHS,
+  })
 
   XLSX.utils.book_append_sheet(workbook, worksheet, '精加工切割单')
   XLSX.writeFile(

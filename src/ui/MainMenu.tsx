@@ -62,6 +62,7 @@ const adminItems: MenuItem[] = [
       { key: 'employee-list', label: '员工管理' },
       { key: 'job-base-setting', label: '岗位基础数值设定' },
       { key: 'machine-equipment-maintenance', label: '机器设备维护' },
+      { key: 'machine-runtime', label: '设备运行时间' },
     ],
   },
   {
@@ -72,7 +73,6 @@ const adminItems: MenuItem[] = [
       { key: 'material-transfer', label: '物料转移单' },
       { key: 'production-order', label: '生产工单' },
       { key: 'production-daily-report', label: '生产日报表' },
-      { key: 'machine-runtime', label: '设备运行时间' },
     ],
   },
   {
