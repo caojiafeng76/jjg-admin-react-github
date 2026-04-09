@@ -196,6 +196,7 @@ export async function getSalesOrdersProjectNos() {
     .select(
       'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
     )
+    .eq('status', '生产中')
     .not('project_no', 'is', null)
     .order('created_at', { ascending: false })
     .order('project_no', { ascending: true })

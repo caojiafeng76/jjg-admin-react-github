@@ -1,6 +1,10 @@
 import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
+import {
+  DEFAULT_WORKSHOP_ORDER_STATUS,
+  normalizeWorkshopOrderStatus,
+} from '@/features/workshop/OrderList/orderStatus'
 
 export interface WorkshopOrderDeleteBlocker {
   orderId: string
@@ -14,6 +18,26 @@ function formatBlockedProjectNos(projectNos: string[], fallbackLabel: string) {
   if (projectNos.length <= 3) return projectNos.join('、')
 
   return `${projectNos.slice(0, 3).join('、')} 等${projectNos.length}条订单`
+}
+
+function buildSalesOrderPayload(values: WorkshopOrder, mode: 'create' | 'update') {
+  const payload: Record<string, unknown> = {
+    ...values,
+    product_delivery_date:
+      values.product_delivery_date !== null
+        ? values.product_delivery_date || undefined
+        : undefined,
+  }
+
+  if (mode === 'create') {
+    payload.status = normalizeWorkshopOrderStatus(values.status)
+  } else if (values.status != null) {
+    payload.status = normalizeWorkshopOrderStatus(values.status)
+  } else {
+    delete payload.status
+  }
+
+  return payload
 }
 
 async function assertWorkshopOrdersNotReferenced(ids: string[]) {
@@ -244,8 +268,13 @@ export async function createWorkshopOrder(values: WorkshopOrder) {
 
   // 处理 product_delivery_date 可能为 null 的情况
   const insertValues = {
-    ...values,
-    product_delivery_date: values.product_delivery_date || undefined,
+    ...buildSalesOrderPayload(
+      {
+        ...values,
+        status: values.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
+      },
+      'create',
+    ),
   } as any
 
   const { error } = await supabase.from('sales_orders').insert(insertValues)
@@ -280,10 +309,7 @@ export async function updateWorkshopOrder({
   }
 
   // 处理 product_delivery_date 可能为 null 的情况
-  const updateValues = {
-    ...values,
-    product_delivery_date: values.product_delivery_date !== null ? values.product_delivery_date : undefined,
-  } as any
+  const updateValues = buildSalesOrderPayload(values, 'update') as any
 
   const { error } = await supabase
     .from('sales_orders')
@@ -309,10 +335,16 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
   }
 
   // 处理 product_delivery_date 可能为 null 的情况
-  const insertRows = rows.map((row) => ({
-    ...row,
-    product_delivery_date: row.product_delivery_date || undefined,
-  })) as any[]
+  const insertRows = rows.map(
+    (row) =>
+      buildSalesOrderPayload(
+        {
+          ...row,
+          status: row.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
+        },
+        'create',
+      ) as any,
+  )
 
   const { error } = await supabase.from('sales_orders').insert(insertRows)
 

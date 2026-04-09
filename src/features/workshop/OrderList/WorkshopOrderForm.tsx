@@ -5,6 +5,7 @@ import {
   Input,
   InputNumber,
   Radio,
+  Select,
   Table,
   Alert,
   Typography,
@@ -14,6 +15,11 @@ import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import type { WorkshopOrder } from './index'
 import WorkshopExcelUpload from './WorkshopExcelUpload'
+import {
+  DEFAULT_WORKSHOP_ORDER_STATUS,
+  WORKSHOP_ORDER_STATUS_OPTIONS,
+  normalizeWorkshopOrderStatus,
+} from './orderStatus'
 
 const { Text } = Typography
 
@@ -22,6 +28,7 @@ interface Props {
   setFormRef: (form: FormInstance<WorkshopOrder>) => void
   isCreating: boolean
   isEdit: boolean
+  canEditStatus: boolean
   initialValues?: WorkshopOrder
 }
 
@@ -30,6 +37,7 @@ export default function WorkshopOrderForm({
   setFormRef,
   isCreating,
   isEdit,
+  canEditStatus,
   initialValues,
 }: Props) {
   const [form] = Form.useForm<WorkshopOrder>()
@@ -52,6 +60,7 @@ export default function WorkshopOrderForm({
       // 手动输入模式：单条提交
       const payload: WorkshopOrder = {
         ...values,
+        status: normalizeWorkshopOrderStatus(values.status),
         product_delivery_date: values.product_delivery_date
           ? dayjs(values.product_delivery_date).format('YYYY-MM-DD')
           : null,
@@ -146,7 +155,10 @@ export default function WorkshopOrderForm({
       form={form}
       layout="vertical"
       onFinish={handleFinish}
-      initialValues={initialValues}
+      initialValues={{
+        status: DEFAULT_WORKSHOP_ORDER_STATUS,
+        ...initialValues,
+      }}
     >
       {/* 导入方式选择 (仅在新建时显示) */}
       {!isEdit && (
@@ -176,6 +188,18 @@ export default function WorkshopOrderForm({
           <Form.Item name="customer" label="客户">
             <Input disabled={isCreating} />
           </Form.Item>
+
+          {canEditStatus && isEdit && (
+            <Form.Item name="status" label="订单状态">
+              <Select
+                options={WORKSHOP_ORDER_STATUS_OPTIONS.map((item) => ({
+                  label: item.label,
+                  value: item.value,
+                }))}
+                disabled={isCreating}
+              />
+            </Form.Item>
+          )}
 
           <Form.Item
             name="project_no"

@@ -23,10 +23,12 @@ import WorkshopOrderForm from './WorkshopOrderForm'
 import WorkshopOrderSearch from './WorkshopOrderSearch'
 import WorkshopOrderProductionStats from './WorkshopOrderProductionStats'
 import { usePrintWorkshopOrders } from './usePrintWorkshopOrders'
+import type { WorkshopOrderStatus } from './orderStatus'
 
 export interface WorkshopOrder {
   id?: string
   product_delivery_date: string | null
+  status?: WorkshopOrderStatus | null
   project_no: string | null
   product_model: string | null
   length_mm: number | null
@@ -45,6 +47,7 @@ export default function WorkshopOrderList() {
   const { message, modal } = App.useApp()
   const { role } = useAuth()
   const canDelete = role === 'admin'
+  const canManageStatus = role === 'admin'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')
@@ -323,6 +326,60 @@ export default function WorkshopOrderList() {
     }
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
+  useEffect(() => {
+    if (!activeOrder?.id || !data?.items) {
+      return
+    }
+
+    const latestOrder = data.items.find((item) => item.id === activeOrder.id)
+    if (!latestOrder) {
+      setActiveOrder(null)
+      return
+    }
+
+    if (latestOrder !== activeOrder) {
+      setActiveOrder(latestOrder)
+    }
+  }, [activeOrder, data?.items])
+
+  const handleStatusChange = useCallback(
+    async (nextStatus: WorkshopOrderStatus) => {
+      if (!activeOrder?.id) {
+        return
+      }
+
+      const applyUpdate = async () => {
+        await updateMutation.mutateAsync({
+          id: activeOrder.id!,
+          values: {
+            ...activeOrder,
+            status: nextStatus,
+          },
+        })
+        setActiveOrder((current) =>
+          current ? { ...current, status: nextStatus } : current,
+        )
+        message.success(
+          nextStatus === '已结案' ? '订单已结案' : '订单状态已改为生产中',
+        )
+      }
+
+      if (nextStatus === '已结案') {
+        modal.confirm({
+          title: '确认结案',
+          content: `确定将订单 ${activeOrder.project_no || ''} 标记为已结案吗？结案后新增生产工单时将无法再关联该订单。`,
+          okText: '确认结案',
+          cancelText: '取消',
+          onOk: applyUpdate,
+        })
+        return
+      }
+
+      await applyUpdate()
+    },
+    [activeOrder, message, modal, updateMutation],
+  )
+
   return (
     <div className="flex h-full flex-col gap-2">
       {/* 工具栏 */}
@@ -380,7 +437,12 @@ export default function WorkshopOrderList() {
         {/* 下半部分：生产工单统计 */}
         <Splitter.Panel min="20%">
           <div className="h-full overflow-hidden">
-            <WorkshopOrderProductionStats selectedOrder={activeOrder} />
+            <WorkshopOrderProductionStats
+              selectedOrder={activeOrder}
+              canManageStatus={canManageStatus}
+              onStatusChange={handleStatusChange}
+              statusUpdating={updateMutation.isPending}
+            />
           </div>
         </Splitter.Panel>
       </Splitter>
@@ -404,6 +466,7 @@ export default function WorkshopOrderList() {
           setFormRef={setFormRef}
           isCreating={createMutation.isPending || batchCreateMutation.isPending}
           isEdit={isEdit}
+          canEditStatus={canManageStatus}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
         />
       </Modal>
