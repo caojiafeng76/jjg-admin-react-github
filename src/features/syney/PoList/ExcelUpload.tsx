@@ -1,3 +1,7 @@
+type ExcelUploadItemRecord = TransformedOrderData['items'][number] & {
+  ParamSpecInferred?: boolean | null
+}
+
 import { FC, useEffect, useMemo, useState } from 'react'
 import { Upload, Button, message, Table, Alert, Space, Typography } from 'antd'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
@@ -149,7 +153,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       dataIndex: 'ParamSpec',
       key: 'ParamSpec',
       width: 120,
-      render: (text: string, record: any) =>
+      render: (text: string, record: ExcelUploadItemRecord) =>
         !specsLoading && record.ParamSpecInferred ? (
           <Text type="warning" strong>
             ⚠️ {text || '未识别'}

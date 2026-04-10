@@ -28,7 +28,7 @@ import {
 } from '@hooks/useAdminNotifications'
 import DarkModeButton from '@ui/DarkModeButton'
 import { getRoleLabel } from '@/config/access'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 import { updateAdminManagementPassword } from '@/services/apiAdminManagementPassword'
 import type { AdminNotification } from '@/services/apiNotifications'
 
@@ -169,11 +169,11 @@ export default function AppHeader({
 
   const notificationContent =
     isNotificationsLoading || isUnreadCountLoading ? (
-      <div className="flex w-[360px] justify-center py-8">
+      <div className="flex w-90 justify-center py-8">
         <Spin size="small" />
       </div>
     ) : (
-      <div className="w-[360px]">
+      <div className="w-90">
         <div className="mb-3 flex items-center justify-between">
           <div>
             <div className="text-sm font-semibold text-slate-900">通知</div>
@@ -199,7 +199,7 @@ export default function AppHeader({
         {notifications.length === 0 ? (
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无通知" />
         ) : (
-          <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-105 space-y-2 overflow-y-auto pr-1">
             {notifications.map((notification) => (
               <NotificationItem
                 key={notification.id}

@@ -3,7 +3,7 @@ import { Alert, Button, Card, Form, Input, Typography } from 'antd'
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 import { getDefaultHomeByRole } from '@/config/access'
 import { translateErrorMessage } from '@/utils/errorHandler'
 import Loading from '@ui/Loading'

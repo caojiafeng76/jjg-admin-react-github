@@ -1,6 +1,25 @@
+import type { Database } from './database.types'
 import { ISyneyItem, ISyneyPo } from './types'
 import supabase from './supabase'
 import { handleApiError } from '@utils/errorHandler'
+
+type SyneyPoUpdate = Database['public']['Tables']['syney-pos']['Update']
+
+function normalizeSyneyPoUpdatePayload(data: Partial<ISyneyPo>): SyneyPoUpdate {
+  return {
+    BorderMaterial: data.BorderMaterial,
+    Brand: data.Brand,
+    EndDate: data.EndDate,
+    No: data.No,
+    Qty: data.Qty,
+    Remark: data.Remark,
+    SerialNo: data.SerialNo,
+    SONo: data.SONo,
+    Spec: data.Spec,
+    Status: data.Status,
+    Technique: data.Technique,
+  }
+}
 
 /**
  * 从订单条目中提取商标信息
@@ -478,9 +497,11 @@ export async function updatePos({
   ids: string[]
   data: Partial<ISyneyPo>
 }) {
+  const payload = normalizeSyneyPoUpdatePayload(data)
+
   const { error } = await supabase
     .from('syney-pos')
-    .update(data)
+    .update(payload)
     .in('id', ids.map(Number))
 
   if (error) {

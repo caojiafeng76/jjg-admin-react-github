@@ -8,7 +8,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 import type {
   StandardTime,
   StandardTimeFormValues,
@@ -270,6 +270,7 @@ export default function StandardTimeList() {
       message,
       resetFormState,
       selectedRowKeys,
+      currentUploader,
       updateMutation,
     ],
   )

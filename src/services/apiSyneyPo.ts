@@ -1,6 +1,27 @@
+import type { Database } from './database.types'
 import { ISyneyItem } from './types'
 import supabase from './supabase'
 import { handleApiError } from '@utils/errorHandler'
+
+type SyneyPoItemUpdate = Database['public']['Tables']['syney-po-items']['Update']
+
+function normalizeSyneyPoItemUpdatePayload(values: ISyneyItem): SyneyPoItemUpdate {
+  return {
+    No: values.No,
+    ParamSpec: values.ParamSpec,
+    PartCode: values.PartCode ?? null,
+    PartModel: values.PartModel ?? null,
+    PartName: values.PartName,
+    PartName2: values.PartName2 ?? null,
+    PartNo: values.PartNo,
+    PoId: values.PoId ?? null,
+    Qty: values.Qty,
+    Remark: values.Remark,
+    SONo: values.SONo,
+    Spec: values.Spec,
+    Unit: values.Unit,
+  }
+}
 
 export async function getSyneyPoDetail(PoId: string) {
   const { data, error } = await supabase
@@ -23,9 +44,11 @@ export async function updatePoItems({
   ids: number[]
   values: ISyneyItem
 }) {
+  const payload = normalizeSyneyPoItemUpdatePayload(values)
+
   const { error } = await supabase
     .from('syney-po-items')
-    .update(values)
+    .update(payload)
     .in('id', ids)
 
   if (error) {

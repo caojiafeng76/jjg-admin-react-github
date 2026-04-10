@@ -191,11 +191,15 @@ export async function getModels() {
 }
 
 export async function getSalesOrdersProjectNos() {
-  const { data, error } = await supabase
+  const salesOrdersQuery = supabase
     .from('sales_orders')
     .select(
       'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
     )
+
+  const { data, error } = await (salesOrdersQuery as typeof salesOrdersQuery & {
+    eq(column: string, value: string): typeof salesOrdersQuery
+  })
     .eq('status', '生产中')
     .not('project_no', 'is', null)
     .order('created_at', { ascending: false })

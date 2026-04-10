@@ -9,7 +9,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 import {
   getPrecisionCuttingTransfersForExport,
   type PrecisionCuttingTransferFilters,

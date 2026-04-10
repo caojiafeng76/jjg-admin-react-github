@@ -1,6 +1,10 @@
+import type { Database } from './database.types'
 import supabase from './supabase'
 import type { AppRole } from '@/config/access'
 import { AppError, handleApiError } from '@/utils/errorHandler'
+
+type EmployeeInsert = Database['public']['Tables']['employees']['Insert']
+type EmployeeUpdate = Database['public']['Tables']['employees']['Update']
 
 export interface Employee {
   id?: string
@@ -253,26 +257,20 @@ async function checkEmployeeNameExists(
   return (data?.length || 0) > 0
 }
 
-function normalizeEmployeeCreatePayload(values: Employee): Employee {
+function normalizeEmployeeCreatePayload(values: Employee): EmployeeInsert {
   return {
     name: values.name.trim(),
     auth_user_id: values.auth_user_id?.trim() || null,
     role: values.role || 'employee',
     is_active: values.is_active ?? true,
-    job_name: values.job_name?.trim() || null,
-    hourly_wage: Number(values.hourly_wage ?? 0),
-    coefficient: Number(values.coefficient ?? 1),
   }
 }
 
-function normalizeEmployeeUpdatePayload(values: Employee): Partial<Employee> {
+function normalizeEmployeeUpdatePayload(values: Employee): EmployeeUpdate {
   return {
     name: values.name.trim(),
     role: values.role || 'employee',
     is_active: values.is_active ?? true,
-    job_name: values.job_name?.trim() || null,
-    hourly_wage: Number(values.hourly_wage ?? 0),
-    coefficient: Number(values.coefficient ?? 1),
     ...(values.auth_user_id !== undefined
       ? {
           auth_user_id: values.auth_user_id?.trim() || null,

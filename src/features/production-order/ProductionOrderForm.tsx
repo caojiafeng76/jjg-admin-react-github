@@ -987,7 +987,7 @@ export default function ProductionOrderForm({
                       <div className="flex flex-col py-0.5">
                         <span>{m.unified_device_no}</span>
                         <span className="text-xs text-slate-400">
-                          {m.operation}　{m.machine_name}
+                          {m.operation} {m.machine_name}
                         </span>
                       </div>
                     )}

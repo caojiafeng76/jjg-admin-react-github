@@ -11,7 +11,7 @@ import ExportButton from '@/ui/ExportButton'
 import { isEmployeeSideRole } from '@/config/access'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 import {
   getPrecisionFinishingCuttingsForExport,
   type PrecisionFinishingCuttingFilters,
@@ -40,10 +40,14 @@ export default function PrecisionFinishingCuttingPage() {
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
   const currentUploader = employeeProfile?.name || user?.email || null
-  const fixedEmployee =
-    isOwnOnlyView && employeeProfile?.id
-      ? { id: employeeProfile.id, name: employeeProfile.name }
-      : null
+  const fixedEmployee = useMemo(
+    () =>
+      isOwnOnlyView && employeeProfile?.id
+        ? { id: employeeProfile.id, name: employeeProfile.name }
+        : null,
+    [employeeProfile?.id, employeeProfile?.name, isOwnOnlyView],
+  )
+  const fixedEmployeeId = fixedEmployee?.id
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
@@ -51,7 +55,7 @@ export default function PrecisionFinishingCuttingPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchFilters, setSearchFilters] =
     useState<PrecisionFinishingCuttingFilters>(() => ({
-      employeeId: fixedEmployee?.id,
+      employeeId: fixedEmployeeId,
     }))
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingRecord, setEditingRecord] =
@@ -129,24 +133,22 @@ export default function PrecisionFinishingCuttingPage() {
   const handleSearch = useCallback(
     (filters: PrecisionFinishingCuttingFilters) => {
       setSearchFilters(
-        fixedEmployee?.id
-          ? { ...filters, employeeId: fixedEmployee.id }
-          : filters,
+        fixedEmployeeId ? { ...filters, employeeId: fixedEmployeeId } : filters,
       )
       setSelectedRowKeys([])
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
-    [fixedEmployee?.id, searchParamsURL, setSearchParamsURL],
+    [fixedEmployeeId, searchParamsURL, setSearchParamsURL],
   )
 
   const handleResetSearch = useCallback(() => {
-    setSearchFilters(fixedEmployee?.id ? { employeeId: fixedEmployee.id } : {})
+    setSearchFilters(fixedEmployeeId ? { employeeId: fixedEmployeeId } : {})
     setSelectedRowKeys([])
     searchParamsURL.set('page', '1')
     searchParamsURL.delete('pageSize')
     setSearchParamsURL(searchParamsURL)
-  }, [fixedEmployee?.id, searchParamsURL, setSearchParamsURL])
+  }, [fixedEmployeeId, searchParamsURL, setSearchParamsURL])
 
   const handleDelete = useCallback(
     (ids?: string[]) => {

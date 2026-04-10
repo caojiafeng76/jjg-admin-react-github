@@ -60,11 +60,11 @@ const PoForm: FC<PoFormProps> = ({
     if (ref && 'current' in ref && ref.current) {
       ref.current.setFieldsValue({
         No: data.po.No,
-        EndDate: data.po.EndDate ? (dayjs(data.po.EndDate) as any) : null,
+        EndDate: data.po.EndDate ? dayjs(data.po.EndDate) : null,
         Remark: data.po.Remark || '',
         Spec: data.po.Spec || undefined, // 填充提取的规格
         Brand: data.po.Brand || undefined, // 填充提取的商标
-      })
+      } as Partial<ISyneyPo>)
     }
 
     // 通知父组件Excel数据已解析

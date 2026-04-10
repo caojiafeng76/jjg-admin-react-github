@@ -16,7 +16,6 @@ export default function PoDateFilter() {
 
   function handleDateChange(
     dates: null | [Dayjs | null, Dayjs | null],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _dateStrings: [string, string],
   ) {
     if (dates && dates[0] && dates[1]) {

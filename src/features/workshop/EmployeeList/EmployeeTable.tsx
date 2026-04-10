@@ -1,3 +1,4 @@
+import type { ReactNode, TdHTMLAttributes } from 'react'
 import { useMemo } from 'react'
 import { Table, TableColumnsType, Tag, Typography } from 'antd'
 import { getRoleLabel } from '@/config/access'
@@ -22,6 +23,10 @@ interface Props {
 interface BoundAccountCellProps {
   employeeId?: string
   authUserId?: string | null
+}
+
+interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement> {
+  children?: ReactNode
 }
 
 function BoundAccountCell({ employeeId, authUserId }: BoundAccountCellProps) {
@@ -182,7 +187,7 @@ export default function EmployeeTable({
   const components = useMemo(
     () => ({
       body: {
-        cell: (props: any) => {
+        cell: (props: TableCellProps) => {
           const { children, ...restProps } = props
           return (
             <td

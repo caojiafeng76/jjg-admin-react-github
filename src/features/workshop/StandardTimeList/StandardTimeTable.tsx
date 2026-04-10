@@ -1,3 +1,4 @@
+import type { ReactNode, TdHTMLAttributes } from 'react'
 import { memo, useCallback, useMemo } from 'react'
 import { Table, TableColumnsType, Tag } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
@@ -19,6 +20,10 @@ interface Props {
   hideStandardSeconds?: boolean
   activeRowId?: string | null
   onRowClick?: (record: StandardTime) => void
+}
+
+interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement> {
+  children?: ReactNode
 }
 
 const StandardTimeTable = memo(function StandardTimeTable({
@@ -155,7 +160,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
   const components = useMemo(
     () => ({
       body: {
-        cell: (props: any) => {
+        cell: (props: TableCellProps) => {
           const { children, ...restProps } = props
           return (
             <td

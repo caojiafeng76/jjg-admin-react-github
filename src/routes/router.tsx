@@ -1,128 +1,46 @@
-import { lazy, Suspense, type ReactNode } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { Suspense } from 'react'
+import { createBrowserRouter } from 'react-router-dom'
 
 import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
-import { useAuth } from '@/contexts/AuthContext'
 import RouteErrorPage from '@/pages/RouteErrorPage'
 import {
   EMPLOYEE_SIDE_ROLES,
-  getDefaultHomeByRole,
   PRECISION_CUTTING_ADMIN_ROLE,
-  type AppRole,
 } from '@/config/access'
-
-// 懒加载页面组件（按 feature 组织）
-const Dashboard = lazy(() => import('@pages/Dashboard'))
-const Login = lazy(() => import('@pages/Login'))
-const PageNotFound = lazy(() => import('@pages/PageNotFound'))
-const AccessDenied = lazy(() => import('@pages/AccessDenied'))
-const ComingSoonPage = lazy(() => import('@pages/ComingSoonPage'))
-
-// Syney 相关
-const SyneySpecList = lazy(() => import('@features/syney/SpecList'))
-const SyneyStoreReportList = lazy(() => import('@features/syney/ReportList'))
-const SyneyStoreReportDetail = lazy(
-  () => import('@features/syney/ReportDetail'),
-)
-const SyneyPoList = lazy(() => import('@features/syney/PoList'))
-const SyneySetting = lazy(() => import('@pages/SyneySetting'))
-const SafePartSettingPage = lazy(
-  () => import('@features/syney/SafePartSetting/SafePartSettingPage'),
-)
-const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
-
-// 车间相关
-const WorkshopOrderList = lazy(() => import('@features/workshop/OrderList'))
-const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
-const StandardTimeList = lazy(
-  () => import('@features/workshop/StandardTimeList'),
-)
-const JobBaseSetting = lazy(() => import('@features/workshop/JobBaseSetting'))
-const ToolingData = lazy(() => import('@features/tooling/ToolingData'))
-const MachineEquipmentMaintenance = lazy(
-  () => import('@features/workshop/MachineEquipmentMaintenance'),
-)
-const MaterialTransfer = lazy(() => import('@features/material-transfer'))
-const PrecisionFinishingCutting = lazy(
-  () => import('@features/precision-finishing-cutting'),
-)
-const PrecisionCuttingTransfer = lazy(
-  () => import('@features/precision-cutting-transfer'),
-)
-const ProductionOrder = lazy(() => import('@features/production-order'))
-const ProductionDailyReport = lazy(() => import('@features/production-report'))
-const MachineRuntime = lazy(() => import('@features/machine-runtime'))
-const AttendanceDetail = lazy(
-  () => import('@features/attendance/AttendanceDetail'),
-)
-const AttendanceStats = lazy(
-  () => import('@features/attendance/AttendanceStats'),
-)
-
-function ProtectedRoute({ element }: { element: ReactNode }) {
-  const { user, loading } = useAuth()
-
-  // 使用 useMemo 避免不必要的重渲染
-  const shouldShowLoading = loading
-  const shouldRedirect = !loading && !user
-
-  if (shouldShowLoading) {
-    return <Loading />
-  }
-
-  if (shouldRedirect) {
-    return <Navigate to="/login" replace />
-  }
-
-  return <>{element}</>
-}
-
-function RoleProtectedRoute({
-  element,
-  allow,
-}: {
-  element: ReactNode
-  allow: AppRole[]
-}) {
-  const { user, loading, role, employeeProfile } = useAuth()
-
-  if (loading) {
-    return <Loading />
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />
-  }
-
-  if (!employeeProfile || employeeProfile.is_active === false || !role) {
-    return <Navigate to="/access-denied" replace />
-  }
-
-  if (!allow.includes(role)) {
-    return <Navigate to={getDefaultHomeByRole(role)} replace />
-  }
-
-  return <>{element}</>
-}
-
-function RoleHomeRedirect() {
-  const { user, loading, role, employeeProfile } = useAuth()
-
-  if (loading) {
-    return <Loading />
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />
-  }
-
-  if (!employeeProfile || employeeProfile.is_active === false || !role) {
-    return <Navigate to="/access-denied" replace />
-  }
-
-  return <Navigate replace to={getDefaultHomeByRole(role)} />
-}
+import {
+  ProtectedRoute,
+  RoleHomeRedirect,
+  RoleProtectedRoute,
+} from './RouteGuards'
+import {
+  AccessDenied,
+  AttendanceDetail,
+  AttendanceStats,
+  ComingSoonPage,
+  Dashboard,
+  EmployeeList,
+  JobBaseSetting,
+  Login,
+  MachineEquipmentMaintenance,
+  MachineRuntime,
+  MaterialTransfer,
+  PageNotFound,
+  PrecisionCuttingTransfer,
+  PrecisionFinishingCutting,
+  ProductionDailyReport,
+  ProductionOrder,
+  SafePartSettingPage,
+  StandardTimeList,
+  SyneyPoDetail,
+  SyneyPoList,
+  SyneySetting,
+  SyneySpecList,
+  SyneyStoreReportDetail,
+  SyneyStoreReportList,
+  ToolingData,
+  WorkshopOrderList,
+} from './lazyPages'
 
 export const router = createBrowserRouter([
   {

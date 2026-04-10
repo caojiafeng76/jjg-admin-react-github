@@ -369,7 +369,7 @@ function buildOrderSheetRows(
 
 function sanitizeSheetName(name: string, index: number) {
   const normalized = (name || `员工${index + 1}`)
-    .replace(/[\\/?*\[\]:]/g, ' ')
+    .replace(/[[\]\\/?*:]/g, ' ')
     .trim()
 
   return (normalized || `员工${index + 1}`).slice(0, 31)

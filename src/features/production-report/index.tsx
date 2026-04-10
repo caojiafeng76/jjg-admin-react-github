@@ -22,7 +22,7 @@ import ProductionDailyReportSearch from './ProductionDailyReportSearch'
 import ProductionDailyReportTable from './ProductionDailyReportTable'
 import ProductionDailyReportMobileList from './ProductionDailyReportMobileList'
 import { useProductionDailyReport } from './useProductionDailyReport'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 
 function buildDateRange(filters: ProductionDailyReportFilters) {
   if (!filters.startDate || !filters.endDate) {
@@ -63,7 +63,7 @@ export default function ProductionDailyReportPage() {
     summaryRowHeight: isEmployeeView ? 0 : 39,
   })
 
-  const allRows = data?.rows || []
+  const allRows = useMemo(() => data?.rows || [], [data?.rows])
   const rowsByKey = useMemo(
     () =>
       new Map(

@@ -1,4 +1,10 @@
-import { startTransition, useState, useCallback, useEffect } from 'react'
+import {
+  startTransition,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import {
@@ -70,7 +76,7 @@ import {
   verifyAdminManagementPassword,
 } from '@/services/apiAdminManagementPassword'
 import { isEmployeeSideRole } from '@/config/access'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 
 type UnlockManagementFormValues = {
   password: string
@@ -150,10 +156,14 @@ export default function ProductionOrderPage() {
   const { role, employeeProfile } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
   const isAdminManagementView = role === 'admin' && !isEmployeeView
-  const fixedEmployee =
-    isEmployeeView && employeeProfile?.id
-      ? { id: employeeProfile.id, name: employeeProfile.name }
-      : null
+  const fixedEmployee = useMemo(
+    () =>
+      isEmployeeView && employeeProfile?.id
+        ? { id: employeeProfile.id, name: employeeProfile.name }
+        : null,
+    [employeeProfile?.id, employeeProfile?.name, isEmployeeView],
+  )
+  const fixedEmployeeId = fixedEmployee?.id
 
   const isAuditedRecord = (
     record?: Partial<ProductionOrder> & { is_audited?: boolean },
@@ -346,7 +356,7 @@ export default function ProductionOrderPage() {
       setModalTitle('编辑工单')
       setIsModalOpen(true)
     },
-    [message, orderData?.items, selectedRowKeys],
+    [isEmployeeView, message, orderData?.items, selectedRowKeys],
   )
 
   const handleView = useCallback((record: ProductionOrder) => {
@@ -526,7 +536,7 @@ export default function ProductionOrderPage() {
           if (isEmployeeView) {
             const orderDate = values.order.order_date as string
             const employeeId =
-              (values.order.employee_id as string) || fixedEmployee?.id
+              (values.order.employee_id as string) || fixedEmployeeId
             if (employeeId && orderDate) {
               const exists = await checkEmployeeOrderExistsOnDate(
                 employeeId,
@@ -570,8 +580,10 @@ export default function ProductionOrderPage() {
     },
     [
       createMutation,
+      fixedEmployeeId,
       isEdit,
       editingRecord,
+      isEmployeeView,
       message,
       queryClient,
       resetFormState,
@@ -586,29 +598,27 @@ export default function ProductionOrderPage() {
   const handleSearch = useCallback(
     (params: ProductionOrderFilters) => {
       setFilters(
-        fixedEmployee?.id
-          ? { ...params, employeeId: fixedEmployee.id }
-          : params,
+        fixedEmployeeId ? { ...params, employeeId: fixedEmployeeId } : params,
       )
       setSelectedRowKeys([])
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
-    [fixedEmployee?.id, searchParamsURL, setSearchParamsURL],
+    [fixedEmployeeId, searchParamsURL, setSearchParamsURL],
   )
 
   const handleResetSearch = useCallback(() => {
-    setFilters(fixedEmployee?.id ? { employeeId: fixedEmployee.id } : {})
+    setFilters(fixedEmployeeId ? { employeeId: fixedEmployeeId } : {})
     setSelectedRowKeys([])
     searchParamsURL.set('page', '1')
     setSearchParamsURL(searchParamsURL)
-  }, [fixedEmployee?.id, searchParamsURL, setSearchParamsURL])
+  }, [fixedEmployeeId, searchParamsURL, setSearchParamsURL])
 
   useEffect(() => {
-    if (fixedEmployee?.id) {
-      setFilters((prev) => ({ ...prev, employeeId: fixedEmployee.id }))
+    if (fixedEmployeeId) {
+      setFilters((prev) => ({ ...prev, employeeId: fixedEmployeeId }))
     }
-  }, [fixedEmployee?.id])
+  }, [fixedEmployeeId])
 
   useEffect(() => {
     if (isEmployeeView) {
