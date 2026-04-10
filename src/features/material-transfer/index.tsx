@@ -11,7 +11,7 @@ import ExportButton from '@/ui/ExportButton'
 import { isEmployeeSideRole } from '@/config/access'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 import {
   getMaterialTransfersForExport,
   type MaterialTransferFilters,
@@ -40,10 +40,15 @@ export default function MaterialTransferPage() {
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
   const currentUploader = employeeProfile?.name || user?.email || null
-  const fixedEmployee =
-    isOwnOnlyView && employeeProfile?.id
-      ? { id: employeeProfile.id, name: employeeProfile.name }
-      : null
+  const fixedEmployee = useMemo(
+    () =>
+      isOwnOnlyView && employeeProfile?.id
+        ? { id: employeeProfile.id, name: employeeProfile.name }
+        : null,
+    [employeeProfile?.id, employeeProfile?.name, isOwnOnlyView],
+  )
+  const fixedEmployeeId = fixedEmployee?.id
+  const fixedEmployeeName = fixedEmployee?.name
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
@@ -51,7 +56,7 @@ export default function MaterialTransferPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchFilters, setSearchFilters] = useState<MaterialTransferFilters>(
     () => ({
-      employeeId: fixedEmployee?.id,
+      employeeId: fixedEmployeeId,
     }),
   )
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -126,24 +131,22 @@ export default function MaterialTransferPage() {
   const handleSearch = useCallback(
     (filters: MaterialTransferFilters) => {
       setSearchFilters(
-        fixedEmployee?.id
-          ? { ...filters, employeeId: fixedEmployee.id }
-          : filters,
+        fixedEmployeeId ? { ...filters, employeeId: fixedEmployeeId } : filters,
       )
       setSelectedRowKeys([])
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
-    [fixedEmployee?.id, searchParamsURL, setSearchParamsURL],
+    [fixedEmployeeId, searchParamsURL, setSearchParamsURL],
   )
 
   const handleResetSearch = useCallback(() => {
-    setSearchFilters(fixedEmployee?.id ? { employeeId: fixedEmployee.id } : {})
+    setSearchFilters(fixedEmployeeId ? { employeeId: fixedEmployeeId } : {})
     setSelectedRowKeys([])
     searchParamsURL.set('page', '1')
     searchParamsURL.delete('pageSize')
     setSearchParamsURL(searchParamsURL)
-  }, [fixedEmployee?.id, searchParamsURL, setSearchParamsURL])
+  }, [fixedEmployeeId, searchParamsURL, setSearchParamsURL])
 
   const handleDelete = useCallback(
     (ids?: string[]) => {
@@ -242,11 +245,11 @@ export default function MaterialTransferPage() {
             return
           }
 
-          const operatorEmployeeIds = fixedEmployee?.id
-            ? [fixedEmployee.id]
+          const operatorEmployeeIds = fixedEmployeeId
+            ? [fixedEmployeeId]
             : values.operator_employee_ids
-          const operatorNames = fixedEmployee?.name
-            ? [fixedEmployee.name]
+          const operatorNames = fixedEmployeeName
+            ? [fixedEmployeeName]
             : values.operator_names
 
           if (!operatorEmployeeIds?.length || !operatorNames?.length) {
@@ -270,11 +273,11 @@ export default function MaterialTransferPage() {
           message.success('更新成功')
         } else {
           const createValues = values as MaterialTransferInsert
-          const operatorEmployeeIds = fixedEmployee?.id
-            ? [fixedEmployee.id]
+          const operatorEmployeeIds = fixedEmployeeId
+            ? [fixedEmployeeId]
             : createValues.operator_employee_ids
-          const operatorNames = fixedEmployee?.name
-            ? [fixedEmployee.name]
+          const operatorNames = fixedEmployeeName
+            ? [fixedEmployeeName]
             : createValues.operator_names
 
           if (!operatorEmployeeIds?.length || !operatorNames?.length) {
@@ -309,7 +312,8 @@ export default function MaterialTransferPage() {
     [
       createMutation,
       editingRecord,
-      fixedEmployee?.id,
+      fixedEmployeeId,
+      fixedEmployeeName,
       handleCloseModal,
       currentUploader,
       isEmployeeView,

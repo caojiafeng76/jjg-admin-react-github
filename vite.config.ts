@@ -25,5 +25,46 @@ export default defineConfig({
   // Use Lightning CSS for minification to avoid noisy warnings from esbuild
   build: {
     cssMinify: 'lightningcss',
+    // Excel workers and spreadsheet libraries are intentionally large and loaded on demand.
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) {
+            return undefined
+          }
+
+          if (id.includes('xlsx-js-style')) {
+            return 'vendor-xlsx-style'
+          }
+
+          if (/[\\/]node_modules[\\/]xlsx[\\/]/.test(id)) {
+            return 'vendor-xlsx'
+          }
+
+          if (
+            id.includes('jspdf') ||
+            id.includes('jspdf-autotable') ||
+            id.includes('html2canvas')
+          ) {
+            return 'vendor-pdf'
+          }
+
+          if (
+            id.includes('react-router') ||
+            id.includes('react-dom') ||
+            /[\\/]node_modules[\\/]react[\\/]/.test(id)
+          ) {
+            return 'vendor-react'
+          }
+
+          if (id.includes('@supabase')) {
+            return 'vendor-supabase'
+          }
+
+          return undefined
+        },
+      },
+    },
   },
 })

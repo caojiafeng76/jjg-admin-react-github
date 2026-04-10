@@ -2,9 +2,7 @@ import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 
 type AttendanceDetailsTable = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   from: (table: string) => any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rpc: (fn: string, params?: Record<string, unknown>) => any
 }
 

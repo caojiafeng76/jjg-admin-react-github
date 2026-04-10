@@ -17,7 +17,6 @@ export function useDetail() {
     throw new Error('获取采购单详情失败')
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const items = (data as any)?.items || []
 
   return {

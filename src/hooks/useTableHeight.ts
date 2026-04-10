@@ -170,7 +170,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
       resizeObserver.disconnect()
       window.removeEventListener('resize', debouncedUpdate)
     }
-  }, [targetRowCount, headerHeight, gap, summaryRowHeight])
+  }, [targetRowCount, headerHeight, gap, summaryRowHeight, minRowHeight])
 
   return {
     tableContainerRef,

@@ -1,0 +1,50 @@
+import { lazy } from 'react'
+
+export const Dashboard = lazy(() => import('@pages/Dashboard'))
+export const Login = lazy(() => import('@pages/Login'))
+export const PageNotFound = lazy(() => import('@pages/PageNotFound'))
+export const AccessDenied = lazy(() => import('@pages/AccessDenied'))
+export const ComingSoonPage = lazy(() => import('@pages/ComingSoonPage'))
+
+export const SyneySpecList = lazy(() => import('@features/syney/SpecList'))
+export const SyneyStoreReportList = lazy(() => import('@features/syney/ReportList'))
+export const SyneyStoreReportDetail = lazy(
+  () => import('@features/syney/ReportDetail'),
+)
+export const SyneyPoList = lazy(() => import('@features/syney/PoList'))
+export const SyneySetting = lazy(() => import('@pages/SyneySetting'))
+export const SafePartSettingPage = lazy(
+  () => import('@features/syney/SafePartSetting/SafePartSettingPage'),
+)
+export const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
+
+export const WorkshopOrderList = lazy(() => import('@features/workshop/OrderList'))
+export const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
+export const StandardTimeList = lazy(
+  () => import('@features/workshop/StandardTimeList'),
+)
+export const JobBaseSetting = lazy(
+  () => import('@features/workshop/JobBaseSetting'),
+)
+export const ToolingData = lazy(() => import('@features/tooling/ToolingData'))
+export const MachineEquipmentMaintenance = lazy(
+  () => import('@features/workshop/MachineEquipmentMaintenance'),
+)
+export const MaterialTransfer = lazy(() => import('@features/material-transfer'))
+export const PrecisionFinishingCutting = lazy(
+  () => import('@features/precision-finishing-cutting'),
+)
+export const PrecisionCuttingTransfer = lazy(
+  () => import('@features/precision-cutting-transfer'),
+)
+export const ProductionOrder = lazy(() => import('@features/production-order'))
+export const ProductionDailyReport = lazy(
+  () => import('@features/production-report'),
+)
+export const MachineRuntime = lazy(() => import('@features/machine-runtime'))
+export const AttendanceDetail = lazy(
+  () => import('@features/attendance/AttendanceDetail'),
+)
+export const AttendanceStats = lazy(
+  () => import('@features/attendance/AttendanceStats'),
+)

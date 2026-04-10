@@ -9,7 +9,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import PrintButton from '@/ui/PrintButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
 import {
   useWorkshopOrdersList,

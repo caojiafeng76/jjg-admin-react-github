@@ -12,7 +12,7 @@ import {
   isEmployeeSideRole,
   isPrecisionCuttingAdminRole,
 } from '@/config/access'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 
 type MenuItem = Required<MenuProps>['items'][number]
 

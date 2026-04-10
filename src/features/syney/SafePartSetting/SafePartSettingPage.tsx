@@ -37,6 +37,10 @@ const DECOMPOSITION_ROLE_OPTIONS = Object.entries(
   DECOMPOSITION_ROLE_LABELS,
 ).map(([value, label]) => ({ value, label }))
 
+type SafePartSettingFormValues = Parameters<
+  typeof upsertSyneySafePartSetting
+>[0]
+
 export default function SafePartSettingPage() {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
@@ -190,7 +194,7 @@ export default function SafePartSettingPage() {
     },
   ]
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: SafePartSettingFormValues) => {
     saveMutation.mutate(values)
   }
 

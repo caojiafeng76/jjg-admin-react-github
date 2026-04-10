@@ -7,7 +7,7 @@ import AppHeader from '@ui/AppHeader'
 import AppLogo from './AppLogo'
 import EmployeeMobileLayout from './EmployeeMobileLayout'
 import { isEmployeeSideRole } from '@/config/access'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/useAuth'
 import { translateErrorMessage } from '@/utils/errorHandler'
 
 const { Content, Sider } = Layout
