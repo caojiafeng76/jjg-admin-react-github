@@ -321,6 +321,31 @@ export async function updateWorkshopOrder({
   }
 }
 
+export async function updateWorkshopOrderStatuses({
+  ids,
+  status,
+}: {
+  ids: string[]
+  status: WorkshopOrder['status']
+}) {
+  if (!ids.length) {
+    return
+  }
+
+  const updateValues = {
+    status: normalizeWorkshopOrderStatus(status),
+  } as any
+
+  const { error } = await supabase
+    .from('sales_orders')
+    .update(updateValues)
+    .in('id', ids)
+
+  if (error) {
+    throw handleApiError(error, '批量更新车间订单状态失败')
+  }
+}
+
 export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
   if (!rows.length) return
 

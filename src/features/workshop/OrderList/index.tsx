@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
-import { App, Modal, FormInstance, Splitter } from 'antd'
+import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
+import { App, Button, Modal, FormInstance, Splitter } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
@@ -15,6 +16,7 @@ import {
   useWorkshopOrdersList,
   useCreateWorkshopOrder,
   useUpdateWorkshopOrder,
+  useBatchUpdateWorkshopOrderStatuses,
   useCreateWorkshopOrdersBatch,
   useDeleteWorkshopOrders,
 } from './useWorkshopOrders'
@@ -79,6 +81,8 @@ export default function WorkshopOrderList() {
   const createMutation = useCreateWorkshopOrder()
 
   const updateMutation = useUpdateWorkshopOrder()
+
+  const batchStatusMutation = useBatchUpdateWorkshopOrderStatuses()
 
   const batchCreateMutation = useCreateWorkshopOrdersBatch()
 
@@ -380,12 +384,87 @@ export default function WorkshopOrderList() {
     [activeOrder, message, modal, updateMutation],
   )
 
+  const handleBatchStatusChange = useCallback(
+    (nextStatus: WorkshopOrderStatus) => {
+      if (selectedRowKeys.length === 0) {
+        message.warning(`请选择要改为${nextStatus}的订单`)
+        return
+      }
+
+      const applyUpdate = async () => {
+        await batchStatusMutation.mutateAsync({
+          ids: selectedRowKeys as string[],
+          status: nextStatus,
+        })
+
+        if (activeOrder?.id && selectedRowKeys.includes(activeOrder.id)) {
+          setActiveOrder((current) =>
+            current ? { ...current, status: nextStatus } : current,
+          )
+        }
+
+        message.success(
+          nextStatus === '已结案' ? '批量结案成功' : '批量改为生产中成功',
+        )
+        setSelectedRowKeys([])
+      }
+
+      modal.confirm({
+        title: nextStatus === '已结案' ? '批量结案订单' : '批量改为生产中',
+        content:
+          nextStatus === '已结案'
+            ? `确定将选中的 ${selectedRowKeys.length} 个订单标记为已结案吗？结案后新增生产工单时将无法再关联这些订单。`
+            : `确定将选中的 ${selectedRowKeys.length} 个订单标记为生产中吗？`,
+        okText: '确定',
+        cancelText: '取消',
+        okButtonProps: nextStatus === '已结案' ? { danger: true } : undefined,
+        onOk: async () => {
+          try {
+            await applyUpdate()
+          } catch (error) {
+            if (error instanceof Error) {
+              message.error(error.message)
+            } else {
+              message.error(
+                nextStatus === '已结案'
+                  ? '批量结案失败，请稍后重试'
+                  : '批量改为生产中失败，请稍后重试',
+              )
+            }
+          }
+        },
+      })
+    },
+    [activeOrder, batchStatusMutation, message, modal, selectedRowKeys],
+  )
+
   return (
     <div className="flex h-full flex-col gap-2">
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑" handleEdit={handleEdit} />
+        {canManageStatus ? (
+          <>
+            <Button
+              type="text"
+              icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+              onClick={() => handleBatchStatusChange('生产中')}
+              loading={batchStatusMutation.isPending}
+            >
+              批量改为生产中
+            </Button>
+            <Button
+              type="text"
+              danger
+              icon={<CheckCircleIcon className="size-4 text-rose-500/80!" />}
+              onClick={() => handleBatchStatusChange('已结案')}
+              loading={batchStatusMutation.isPending}
+            >
+              批量结案
+            </Button>
+          </>
+        ) : null}
         {canDelete ? (
           <DeleteButton
             onClick={handleDelete}

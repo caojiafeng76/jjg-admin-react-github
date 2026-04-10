@@ -4,6 +4,7 @@ import {
   getWorkshopOrders,
   createWorkshopOrder,
   updateWorkshopOrder,
+  updateWorkshopOrderStatuses,
   createWorkshopOrdersBatch,
   deleteWorkshopOrders,
 } from '@/services/apiWorkshopOrders'
@@ -49,6 +50,16 @@ export function useCreateWorkshopOrder() {
 export function useUpdateWorkshopOrder() {
   return useMutationWithInvalidation({
     mutationFn: updateWorkshopOrder,
+    invalidateQueries: [
+      [WORKSHOP_ORDERS_KEY],
+      ['process-standards', 'project-nos'],
+    ],
+  })
+}
+
+export function useBatchUpdateWorkshopOrderStatuses() {
+  return useMutationWithInvalidation({
+    mutationFn: updateWorkshopOrderStatuses,
     invalidateQueries: [
       [WORKSHOP_ORDERS_KEY],
       ['process-standards', 'project-nos'],
