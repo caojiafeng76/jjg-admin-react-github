@@ -26,6 +26,7 @@
     "pinyin-pro": "^3.28.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-qr-code": "^2.0.18",
     "react-router-dom": "^7.14.0",
     "supabase": "^2.89.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",

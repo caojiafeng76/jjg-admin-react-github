@@ -296,6 +296,28 @@ export async function getWorkshopOrders({
   }
 }
 
+export async function getWorkshopOrderById(id: string) {
+  const { data, error } = await supabase
+    .from('sales_orders')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('订单不存在或已被删除')
+    }
+
+    throw handleApiError(error, '获取订单详情失败')
+  }
+
+  if (!data) {
+    throw new Error('订单不存在或已被删除')
+  }
+
+  return data as WorkshopOrder
+}
+
 /**
  * 检查项目号是否已存在
  */

@@ -64,6 +64,18 @@ const routeToLabelMap: Record<string, string> = {
   'machine-runtime': '设备运行时间',
 }
 
+function getPageName(currentPath: string) {
+  if (routeToLabelMap[currentPath]) {
+    return routeToLabelMap[currentPath]
+  }
+
+  if (currentPath.startsWith('workshop-order-list/qr/')) {
+    return '订单扫码详情'
+  }
+
+  return ''
+}
+
 export default function AppHeader({
   colorBgContainer,
   collapsed,
@@ -87,7 +99,7 @@ export default function AppHeader({
     confirmPassword: string
   }>()
   const currentPath = location.pathname.slice(1) || 'dashboard'
-  const pageName = routeToLabelMap[currentPath] || ''
+  const pageName = getPageName(currentPath)
   const displayName = employeeProfile?.name || user?.email || '未登录用户'
   const roleLabel = getRoleLabel(role)
   const isAdmin = role === 'admin'
