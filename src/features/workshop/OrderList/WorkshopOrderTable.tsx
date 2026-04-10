@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Table, TableColumnsType, TableProps, Tag } from 'antd'
 import type { WorkshopOrder } from './index'
+import WorkshopOrderQrCell from './WorkshopOrderQrCell'
 import {
   getWorkshopOrderStatusColor,
   normalizeWorkshopOrderStatus,
@@ -33,6 +34,14 @@ export default function WorkshopOrderTable({
         fixed: 'left',
         key: '#',
         width: 40,
+      },
+      {
+        title: '二维码',
+        dataIndex: 'id',
+        fixed: 'left',
+        key: 'qr_code',
+        width: 84,
+        render: (_value, record) => <WorkshopOrderQrCell order={record} />,
       },
       {
         title: '交货日期',

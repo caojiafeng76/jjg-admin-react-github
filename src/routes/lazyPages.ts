@@ -25,6 +25,9 @@ export const WorkshopOrderProduction = lazy(
 export const WorkshopOrderClosed = lazy(
   () => import('@pages/WorkshopOrderClosed'),
 )
+export const WorkshopOrderQrDetail = lazy(
+  () => import('@pages/WorkshopOrderQrDetail'),
+)
 export const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
 export const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),

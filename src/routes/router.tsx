@@ -42,6 +42,7 @@ import {
   ToolingData,
   WorkshopOrderClosed,
   WorkshopOrderProduction,
+  WorkshopOrderQrDetail,
 } from './lazyPages'
 
 export const router = createBrowserRouter([
@@ -153,6 +154,21 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin', PRECISION_CUTTING_ADMIN_ROLE]}
               element={<WorkshopOrderClosed />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'workshop-order-list/qr/:orderId',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={[
+                'admin',
+                PRECISION_CUTTING_ADMIN_ROLE,
+                ...EMPLOYEE_SIDE_ROLES,
+              ]}
+              element={<WorkshopOrderQrDetail />}
             />
           </Suspense>
         ),

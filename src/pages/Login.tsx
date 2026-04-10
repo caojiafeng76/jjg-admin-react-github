@@ -15,6 +15,20 @@ interface LoginFormValues {
   password: string
 }
 
+function getSafeRedirectTarget(locationSearch: string) {
+  const redirect = new URLSearchParams(locationSearch).get('redirect')
+
+  if (!redirect) {
+    return null
+  }
+
+  if (!redirect.startsWith('/') || redirect.startsWith('//')) {
+    return null
+  }
+
+  return redirect
+}
+
 export default function Login() {
   const [form] = Form.useForm<LoginFormValues>()
   const navigate = useNavigate()
@@ -23,16 +37,19 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const redirectTarget = getSafeRedirectTarget(location.search)
 
   // 已登录用户直接跳转（添加防抖，避免重复导航）
   useEffect(() => {
     if (user && !loading) {
       const timer = setTimeout(() => {
-        navigate(getDefaultHomeByRole(role), { replace: true })
+        navigate(redirectTarget || getDefaultHomeByRole(role), {
+          replace: true,
+        })
       }, 0)
       return () => clearTimeout(timer)
     }
-  }, [user, role, loading, navigate])
+  }, [user, role, loading, navigate, redirectTarget])
 
   // 将 AuthContext 的错误同步到本地提示
   useEffect(() => {
