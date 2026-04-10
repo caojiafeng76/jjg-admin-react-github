@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
 import { App, Button, Modal, FormInstance, Splitter } from 'antd'
 import dayjs from 'dayjs'
@@ -31,6 +31,7 @@ export interface WorkshopOrder {
   id?: string
   product_delivery_date: string | null
   status?: WorkshopOrderStatus | null
+  total_outbound_quantity?: number | null
   project_no: string | null
   product_model: string | null
   length_mm: number | null
@@ -45,7 +46,13 @@ export interface WorkshopOrder {
   material_code: string | null
 }
 
-export default function WorkshopOrderList() {
+export interface WorkshopOrderListProps {
+  fixedStatus?: WorkshopOrderStatus
+}
+
+export default function WorkshopOrderList({
+  fixedStatus,
+}: WorkshopOrderListProps = {}) {
   const { message, modal } = App.useApp()
   const { role } = useAuth()
   const canDelete = role === 'admin'
@@ -72,10 +79,18 @@ export default function WorkshopOrderList() {
     endDate?: string
   }>({})
 
+  const mergedSearchParams = useMemo(
+    () => ({
+      ...searchParams,
+      status: fixedStatus,
+    }),
+    [fixedStatus, searchParams],
+  )
+
   const { data, isLoading } = useWorkshopOrdersList({
     page,
     pageSize,
-    searchParams,
+    searchParams: mergedSearchParams,
   })
 
   const createMutation = useCreateWorkshopOrder()
@@ -329,6 +344,11 @@ export default function WorkshopOrderList() {
       setSearchParamsURL(searchParamsURL)
     }
   }, [data, page, searchParamsURL, setSearchParamsURL])
+
+  useEffect(() => {
+    setSelectedRowKeys([])
+    setActiveOrder(null)
+  }, [fixedStatus])
 
   useEffect(() => {
     if (!activeOrder?.id || !data?.items) {

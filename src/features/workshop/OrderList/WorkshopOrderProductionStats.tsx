@@ -20,6 +20,7 @@ import { useWorkshopOrderProductionItems } from './useWorkshopOrderProductionIte
 import { useWorkshopOrderTransfers } from './useWorkshopOrderTransfers'
 import type { WorkshopOrderStatus } from './orderStatus'
 import {
+  canWorkshopOrderBeClosed,
   getWorkshopOrderStatusColor,
   normalizeWorkshopOrderStatus,
 } from './orderStatus'
@@ -353,8 +354,11 @@ function OrderInfoHeader({
   const status = normalizeWorkshopOrderStatus(order.status)
   const progressPercent =
     orderQty > 0 ? Math.min(Math.round((outbound / orderQty) * 100), 100) : 0
-  const shouldRemindClose =
-    status === '生产中' && orderQty > 0 && outbound >= orderQty
+  const shouldRemindClose = canWorkshopOrderBeClosed({
+    status,
+    orderQuantity: orderQty,
+    totalOutbound: outbound,
+  })
   const progressStatus =
     progressPercent >= 100
       ? 'success'

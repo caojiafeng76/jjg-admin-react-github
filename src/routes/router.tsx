@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { Navigate } from 'react-router-dom'
 import { createBrowserRouter } from 'react-router-dom'
 
 import AppLayout from '@ui/AppLayout'
@@ -39,7 +40,8 @@ import {
   SyneyStoreReportDetail,
   SyneyStoreReportList,
   ToolingData,
-  WorkshopOrderList,
+  WorkshopOrderClosed,
+  WorkshopOrderProduction,
 } from './lazyPages'
 
 export const router = createBrowserRouter([
@@ -131,11 +133,26 @@ export const router = createBrowserRouter([
       },
       {
         path: 'workshop-order-list',
+        element: <Navigate to="/workshop-order-list/production" replace />,
+      },
+      {
+        path: 'workshop-order-list/production',
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
               allow={['admin', PRECISION_CUTTING_ADMIN_ROLE]}
-              element={<WorkshopOrderList />}
+              element={<WorkshopOrderProduction />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'workshop-order-list/closed',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin', PRECISION_CUTTING_ADMIN_ROLE]}
+              element={<WorkshopOrderClosed />}
             />
           </Suspense>
         ),

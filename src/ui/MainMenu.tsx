@@ -38,6 +38,10 @@ const adminItems: MenuItem[] = [
     key: 'workshop-order-list',
     label: '订单管理',
     icon: <Square3Stack3DIcon className="size-4" />,
+    children: [
+      { key: 'workshop-order-list/production', label: '生产中' },
+      { key: 'workshop-order-list/closed', label: '已结案' },
+    ],
   },
   {
     key: 'production-scheduling',
@@ -118,6 +122,10 @@ const precisionCuttingAdminItems: MenuItem[] = [
     key: 'workshop-order-list',
     label: '订单管理',
     icon: <Square3Stack3DIcon className="size-4" />,
+    children: [
+      { key: 'workshop-order-list/production', label: '生产中' },
+      { key: 'workshop-order-list/closed', label: '已结案' },
+    ],
   },
   {
     key: 'precision-cutting',

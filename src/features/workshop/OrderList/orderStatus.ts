@@ -13,6 +13,26 @@ export function normalizeWorkshopOrderStatus(
   return status === '已结案' ? '已结案' : DEFAULT_WORKSHOP_ORDER_STATUS
 }
 
+export function canWorkshopOrderBeClosed({
+  status,
+  orderQuantity,
+  totalOutbound,
+}: {
+  status?: WorkshopOrderStatus | null
+  orderQuantity?: number | null
+  totalOutbound?: number | null
+}) {
+  const normalizedStatus = normalizeWorkshopOrderStatus(status)
+  const normalizedOrderQuantity = orderQuantity ?? 0
+  const normalizedTotalOutbound = totalOutbound ?? 0
+
+  return (
+    normalizedStatus === '生产中' &&
+    normalizedOrderQuantity > 0 &&
+    normalizedTotalOutbound >= normalizedOrderQuantity
+  )
+}
+
 export function getWorkshopOrderStatusColor(
   status?: WorkshopOrderStatus | null,
 ) {

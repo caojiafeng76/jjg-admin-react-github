@@ -30,7 +30,7 @@ export const DEFAULT_HOME_BY_ROLE: Record<AppRole, string> = {
   admin: '/dashboard',
   employee: '/production-order',
   team_leader: '/production-order',
-  precision_cutting_admin: '/workshop-order-list',
+  precision_cutting_admin: '/workshop-order-list/production',
 }
 
 export function isEmployeeSideRole(role: AppRole | null | undefined) {
