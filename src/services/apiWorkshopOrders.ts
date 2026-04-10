@@ -3,6 +3,7 @@ import { AppError, handleApiError } from '@/utils/errorHandler'
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
 import {
   DEFAULT_WORKSHOP_ORDER_STATUS,
+  canWorkshopOrderBeClosed,
   normalizeWorkshopOrderStatus,
 } from '@/features/workshop/OrderList/orderStatus'
 
@@ -155,6 +156,7 @@ export async function getWorkshopOrders({
   model_search, // 统一的搜索字段，可同时搜索项目号、产品型号和客户型号
   startDate,
   endDate,
+  status,
 }: {
   page: number
   pageSize: number
@@ -164,6 +166,7 @@ export async function getWorkshopOrders({
   model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
   startDate?: string
   endDate?: string
+  status?: WorkshopOrder['status']
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -204,6 +207,10 @@ export async function getWorkshopOrders({
     query = query.lte('product_delivery_date', endDate)
   }
 
+  if (status) {
+    query = query.filter('status', 'eq', normalizeWorkshopOrderStatus(status))
+  }
+
   const { data, error, count } = await query
     .range(from, to)
     .order('created_at', { ascending: false })
@@ -213,8 +220,78 @@ export async function getWorkshopOrders({
     throw handleApiError(error, '获取车间订单失败')
   }
 
+  const items = ((data || []) as WorkshopOrder[]).map((item) => ({ ...item }))
+
+  const projectNos = Array.from(
+    new Set(
+      items
+        .map((item) => item.project_no?.trim())
+        .filter((projectNo): projectNo is string => Boolean(projectNo)),
+    ),
+  )
+
+  if (projectNos.length > 0) {
+    const { data: transferRows, error: transferError } = await supabase
+      .from('material_transfers')
+      .select('project_no, transfer_quantity')
+      .in('project_no', projectNos)
+
+    if (transferError) {
+      throw handleApiError(transferError, '获取订单出库统计失败')
+    }
+
+    const outboundTotalByProjectNo = new Map<string, number>()
+
+    for (const row of
+      (transferRows || []) as Array<{
+        project_no: string
+        transfer_quantity: number | null
+      }>) {
+      const projectNo = row.project_no?.trim()
+
+      if (!projectNo) {
+        continue
+      }
+
+      outboundTotalByProjectNo.set(
+        projectNo,
+        (outboundTotalByProjectNo.get(projectNo) || 0) +
+          Number(row.transfer_quantity || 0),
+      )
+    }
+
+    for (const item of items) {
+      const projectNo = item.project_no?.trim()
+
+      item.total_outbound_quantity = projectNo
+        ? outboundTotalByProjectNo.get(projectNo) || 0
+        : 0
+    }
+  }
+
+  if (status === '生产中') {
+    items.sort((left, right) => {
+      const leftPriority = canWorkshopOrderBeClosed({
+        status: left.status,
+        orderQuantity: left.order_quantity,
+        totalOutbound: left.total_outbound_quantity,
+      })
+        ? 1
+        : 0
+      const rightPriority = canWorkshopOrderBeClosed({
+        status: right.status,
+        orderQuantity: right.order_quantity,
+        totalOutbound: right.total_outbound_quantity,
+      })
+        ? 1
+        : 0
+
+      return rightPriority - leftPriority
+    })
+  }
+
   return {
-    items: (data || []) as WorkshopOrder[],
+    items,
     total: count || 0,
   }
 }

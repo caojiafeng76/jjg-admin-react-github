@@ -19,6 +19,12 @@ export const SafePartSettingPage = lazy(
 export const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
 
 export const WorkshopOrderList = lazy(() => import('@features/workshop/OrderList'))
+export const WorkshopOrderProduction = lazy(
+  () => import('@pages/WorkshopOrderProduction'),
+)
+export const WorkshopOrderClosed = lazy(
+  () => import('@pages/WorkshopOrderClosed'),
+)
 export const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
 export const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),
