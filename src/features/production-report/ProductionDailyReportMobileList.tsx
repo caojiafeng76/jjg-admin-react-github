@@ -99,10 +99,44 @@ export default function ProductionDailyReportMobileList({
               </div>
               <div className="rounded-2xl bg-slate-50 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  外协不良
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.outsourceDefectCount} /{' '}
+                  {row.outsourceDefectWeightKg.toFixed(2)}kg
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  调机不良
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.setupDefectCount} / {row.setupDefectWeightKg.toFixed(2)}
+                  kg
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
                   长度
                 </div>
                 <div className="mt-1 font-semibold text-slate-900">
                   {row.lengthMm ?? '-'}
+                </div>
+              </div>
+              <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  外协信息
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.outsourceUnit} / {row.outsourceDefectReason}
+                </div>
+              </div>
+              <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  调机负责人
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {row.setupResponsible}
                 </div>
               </div>
               <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3">

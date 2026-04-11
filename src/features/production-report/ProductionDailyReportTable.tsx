@@ -137,6 +137,36 @@ export default function ProductionDailyReportTable({
         width: 110,
       },
       {
+        title: '外协不良数',
+        dataIndex: 'outsourceDefectCount',
+        key: 'outsourceDefectCount',
+        width: 110,
+      },
+      {
+        title: '外协不良原因',
+        dataIndex: 'outsourceDefectReason',
+        key: 'outsourceDefectReason',
+        width: 150,
+      },
+      {
+        title: '外协单位',
+        dataIndex: 'outsourceUnit',
+        key: 'outsourceUnit',
+        width: 130,
+      },
+      {
+        title: '调机不良',
+        dataIndex: 'setupDefectCount',
+        key: 'setupDefectCount',
+        width: 110,
+      },
+      {
+        title: '调机负责人',
+        dataIndex: 'setupResponsible',
+        key: 'setupResponsible',
+        width: 130,
+      },
+      {
         title: '合格率',
         dataIndex: 'qualifiedRate',
         key: 'qualifiedRate',
@@ -155,6 +185,20 @@ export default function ProductionDailyReportTable({
         dataIndex: 'processingDefectWeightKg',
         key: 'processingDefectWeightKg',
         width: 130,
+        render: (value: number) => renderNumber(value, 2),
+      },
+      {
+        title: '外协不良重量kg',
+        dataIndex: 'outsourceDefectWeightKg',
+        key: 'outsourceDefectWeightKg',
+        width: 140,
+        render: (value: number) => renderNumber(value, 2),
+      },
+      {
+        title: '调机不良重量kg',
+        dataIndex: 'setupDefectWeightKg',
+        key: 'setupDefectWeightKg',
+        width: 140,
         render: (value: number) => renderNumber(value, 2),
       },
       {
@@ -195,21 +239,21 @@ export default function ProductionDailyReportTable({
       pagination={false}
       virtual
       size="small"
-      scroll={{ x: 2050, y: scrollY }}
+      scroll={{ x: 2750, y: scrollY }}
       style={{ fontSize: '12px' }}
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row>
             <Table.Summary.Cell index={0} />
-            <Table.Summary.Cell index={1} colSpan={10}>
+            <Table.Summary.Cell index={1} colSpan={9}>
               <span className="font-medium text-slate-600">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={11}>
+            <Table.Summary.Cell index={10}>
               <span className="font-semibold text-slate-900">
                 {currentPageQualifiedCount}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={12} colSpan={8} />
+            <Table.Summary.Cell index={11} colSpan={15} />
           </Table.Summary.Row>
         </Table.Summary>
       )}

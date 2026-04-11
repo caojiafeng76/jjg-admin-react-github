@@ -27,6 +27,11 @@ interface ProductionDailyReportItemRow {
   qualified_hours: number | null
   defect_quantity_1: number
   defect_quantity_2: number
+  outsource_defect_quantity: number
+  outsource_defect_reason: string | null
+  outsource_unit: string | null
+  setup_defect_quantity: number
+  setup_responsible: string | null
   remark: string | null
   production_orders: {
     order_date: string
@@ -53,9 +58,16 @@ export interface ProductionDailyReportRow {
   employeeName: string
   rawMaterialDefectCount: number
   processingDefectCount: number
+  outsourceDefectCount: number
+  outsourceDefectReason: string
+  outsourceUnit: string
+  setupDefectCount: number
+  setupResponsible: string
   qualifiedRate: number
   rawMaterialDefectWeightKg: number
   processingDefectWeightKg: number
+  outsourceDefectWeightKg: number
+  setupDefectWeightKg: number
   remark: string
 }
 
@@ -85,6 +97,11 @@ function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) 
       qualified_hours,
       defect_quantity_1,
       defect_quantity_2,
+      outsource_defect_quantity,
+      outsource_defect_reason,
+      outsource_unit,
+      setup_defect_quantity,
+      setup_responsible,
       remark,
       production_orders!inner(
         order_date,
@@ -224,8 +241,14 @@ export async function getProductionDailyReport(
       const incomingQualifiedCount = Number(item.incoming_qualified_quantity || 0)
       const rawMaterialDefectCount = Number(item.defect_quantity_2 || 0)
       const processingDefectCount = Number(item.defect_quantity_1 || 0)
+      const outsourceDefectCount = Number(item.outsource_defect_quantity || 0)
+      const setupDefectCount = Number(item.setup_defect_quantity || 0)
       const qualifiedCount = Number(item.qualified_quantity || 0)
-      const defectCount = rawMaterialDefectCount + processingDefectCount
+      const defectCount =
+        rawMaterialDefectCount +
+        processingDefectCount +
+        outsourceDefectCount +
+        setupDefectCount
       const weightPerMeterKg = weightMap.get(item.project_no) || 0
       const lengthMm = Number(item.length_mm || 0)
 
@@ -247,12 +270,23 @@ export async function getProductionDailyReport(
         employeeName,
         rawMaterialDefectCount,
         processingDefectCount,
+        outsourceDefectCount,
+        outsourceDefectReason: item.outsource_defect_reason?.trim() || '-',
+        outsourceUnit: item.outsource_unit?.trim() || '-',
+        setupDefectCount,
+        setupResponsible: item.setup_responsible?.trim() || '-',
         qualifiedRate: calculateQualifiedRate(qualifiedCount, incomingQualifiedCount),
         rawMaterialDefectWeightKg: roundTo(
           (weightPerMeterKg * lengthMm * rawMaterialDefectCount) / 1000,
         ),
         processingDefectWeightKg: roundTo(
           (weightPerMeterKg * lengthMm * processingDefectCount) / 1000,
+        ),
+        outsourceDefectWeightKg: roundTo(
+          (weightPerMeterKg * lengthMm * outsourceDefectCount) / 1000,
+        ),
+        setupDefectWeightKg: roundTo(
+          (weightPerMeterKg * lengthMm * setupDefectCount) / 1000,
         ),
         remark: item.remark?.trim() || '-',
       }
