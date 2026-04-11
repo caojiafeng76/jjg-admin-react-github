@@ -169,6 +169,7 @@ export default function ProjectNoScanButton({
 }: ProjectNoScanButtonProps) {
   const { message } = App.useApp()
   const [open, setOpen] = useState(false)
+  const [scannerReady, setScannerReady] = useState(false)
   const [starting, setStarting] = useState(false)
   const [resolving, setResolving] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
@@ -184,13 +185,17 @@ export default function ProjectNoScanButton({
   }
 
   useEffect(() => {
-    if (!open) {
+    if (!open || !scannerReady) {
       stopScanner()
-      setScanError(null)
       setStarting(false)
       setResolving(false)
       resolvingRef.current = false
       lastRawValueRef.current = ''
+
+      if (!open) {
+        setScanError(null)
+      }
+
       return
     }
 
@@ -305,7 +310,7 @@ export default function ProjectNoScanButton({
       disposed = true
       stopScanner()
     }
-  }, [message, onResolved, open, projectNos])
+  }, [message, onResolved, open, projectNos, scannerReady])
 
   return (
     <>
@@ -321,9 +326,16 @@ export default function ProjectNoScanButton({
       <Modal
         title="扫码识别项目号"
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={() => {
+          setScannerReady(false)
+          setOpen(false)
+        }}
+        afterOpenChange={(visible) => {
+          setScannerReady(visible)
+        }}
         footer={null}
         destroyOnClose
+        forceRender
         width={420}
       >
         <div className="space-y-4">
