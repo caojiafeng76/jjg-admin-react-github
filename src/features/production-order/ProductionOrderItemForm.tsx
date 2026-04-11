@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Modal, Form, InputNumber, Select, Input, Tag } from 'antd'
+import { Modal, Form, InputNumber, Select, Input, Tag, Space } from 'antd'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import {
@@ -335,29 +335,30 @@ export default function ProductionOrderItemForm({
             </Form.Item>
           )}
 
-          <Form.Item
-            name="project_no"
-            label="项目号"
-            rules={[{ required: true, message: '请选择项目号' }]}
-          >
-            <div className="flex items-center gap-2">
-              <Select
-                showSearch
-                placeholder="请选择项目号"
-                loading={loadingProjectNos}
-                getPopupContainer={getPopupContainer}
-                onChange={handleProjectNoChange}
-                options={mergedProjectNoOptions}
-                filterOption={filterProjectNoOption}
-                optionRender={renderProjectNoOption}
-                listHeight={320}
-                style={{ flex: 1 }}
-              />
+          <Form.Item label="项目号" required>
+            <Space.Compact block>
+              <Form.Item
+                name="project_no"
+                noStyle
+                rules={[{ required: true, message: '请选择项目号' }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="请选择项目号"
+                  loading={loadingProjectNos}
+                  getPopupContainer={getPopupContainer}
+                  onChange={handleProjectNoChange}
+                  options={mergedProjectNoOptions}
+                  filterOption={filterProjectNoOption}
+                  optionRender={renderProjectNoOption}
+                  listHeight={320}
+                />
+              </Form.Item>
               <ProjectNoScanButton
                 projectNos={projectNos}
                 onResolved={handleProjectNoScanResolved}
               />
-            </div>
+            </Space.Compact>
           </Form.Item>
 
           <Form.Item name="product_model" label="型号">

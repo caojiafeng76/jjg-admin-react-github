@@ -1028,29 +1028,30 @@ export default function ProductionOrderForm({
               </Form.Item>
             )}
 
-            <Form.Item
-              name="project_no"
-              label="项目号"
-              rules={[{ required: true, message: '请选择项目号' }]}
-            >
-              <div className="flex items-center gap-2">
-                <Select
-                  showSearch
-                  placeholder="请选择项目号"
-                  loading={loadingProjectNos}
-                  getPopupContainer={getPopupContainer}
-                  options={mergedProjectNoOptions}
-                  filterOption={filterProjectNoOption}
-                  optionRender={renderProjectNoOption}
-                  listHeight={320}
-                  onChange={handleProjectNoChangeForItem}
-                  style={{ flex: 1 }}
-                />
+            <Form.Item label="项目号" required>
+              <Space.Compact block>
+                <Form.Item
+                  name="project_no"
+                  noStyle
+                  rules={[{ required: true, message: '请选择项目号' }]}
+                >
+                  <Select
+                    showSearch
+                    placeholder="请选择项目号"
+                    loading={loadingProjectNos}
+                    getPopupContainer={getPopupContainer}
+                    options={mergedProjectNoOptions}
+                    filterOption={filterProjectNoOption}
+                    optionRender={renderProjectNoOption}
+                    listHeight={320}
+                    onChange={handleProjectNoChangeForItem}
+                  />
+                </Form.Item>
                 <ProjectNoScanButton
                   projectNos={projectNos}
                   onResolved={handleProjectNoScanResolvedForItem}
                 />
-              </div>
+              </Space.Compact>
             </Form.Item>
 
             <div className="grid grid-cols-3 gap-4">
