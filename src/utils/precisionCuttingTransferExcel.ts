@@ -19,9 +19,14 @@ const EXPORT_HEADERS = [
   '长料数量',
   '原料不良数',
   '加工不良数',
+  '外协不良数',
   '原料不良重量kg',
   '加工不良重量kg',
   '不良原因',
+  '外协不良原因',
+  '外协单位',
+  '责任工序',
+  '工序负责人',
   '转移数量',
   '操作人',
   '接收车间',
@@ -34,8 +39,8 @@ const EXPORT_HEADERS = [
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  20, 14, 18, 9, 10, 24, 12, 10, 10, 10, 12, 12, 18, 10, 14, 10, 8, 8, 9,
-  10, 18, 16,
+  20, 14, 18, 9, 10, 24, 12, 10, 10, 10, 10, 12, 12, 18, 18, 14, 14, 14,
+  10, 14, 10, 8, 8, 9, 10, 18, 16,
 ]
 
 function formatDateTime(value: string | null | undefined) {
@@ -60,9 +65,14 @@ export function exportPrecisionCuttingTransfersToExcel(
     record.long_material_quantity,
     record.raw_material_defect_count,
     record.processing_defect_count,
+    record.outsource_defect_quantity,
     record.raw_material_defect_weight_kg,
     record.processing_defect_weight_kg,
     record.defect_reason || '',
+    record.outsource_defect_reason || '',
+    record.outsource_unit || '',
+    record.responsible_process || '',
+    record.process_owner || '',
     record.transfer_quantity,
     record.operator_names.join('、'),
     record.target_workshop,

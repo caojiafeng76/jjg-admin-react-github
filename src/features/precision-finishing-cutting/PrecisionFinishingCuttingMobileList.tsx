@@ -136,10 +136,26 @@ export default function PrecisionFinishingCuttingMobileList({
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  外协不良数
+                </div>
+                <div className="mt-1 font-semibold">
+                  {record.outsource_defect_quantity}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   接收人
                 </div>
                 <div className="mt-1 font-semibold">
                   {record.recipient_name}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  外协单位
+                </div>
+                <div className="mt-1 font-semibold">
+                  {record.outsource_unit || '-'}
                 </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
@@ -168,12 +184,36 @@ export default function PrecisionFinishingCuttingMobileList({
                     : '未审核'}
                 </div>
               </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  责任工序
+                </div>
+                <div className="mt-1 font-semibold">
+                  {record.responsible_process || '-'}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  工序负责人
+                </div>
+                <div className="mt-1 font-semibold">
+                  {record.process_owner || '-'}
+                </div>
+              </div>
               <div className="col-span-2 rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   不良原因
                 </div>
                 <div className="mt-1 text-sm leading-6 font-medium wrap-break-word whitespace-pre-wrap">
                   {record.defect_reason?.trim() || '无'}
+                </div>
+              </div>
+              <div className="col-span-2 rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  外协不良原因
+                </div>
+                <div className="mt-1 text-sm leading-6 font-medium wrap-break-word whitespace-pre-wrap">
+                  {record.outsource_defect_reason?.trim() || '无'}
                 </div>
               </div>
               <div className="col-span-2 rounded-2xl bg-black/5 px-3 py-3">

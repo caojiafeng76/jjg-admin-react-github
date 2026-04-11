@@ -34,6 +34,11 @@ export default function PrecisionFinishingCuttingDetail({
     raw_material_defect_count,
     processing_defect_count,
     defect_reason,
+    outsource_defect_quantity,
+    outsource_defect_reason,
+    outsource_unit,
+    responsible_process,
+    process_owner,
     recipient_name,
     inspector_name,
     uploaded_by_name,
@@ -99,14 +104,39 @@ export default function PrecisionFinishingCuttingDetail({
             children: processing_defect_count ?? '-',
           },
           {
+            key: 'outsource_defect_quantity',
+            label: '外协不良数',
+            children: outsource_defect_quantity ?? '-',
+          },
+          {
             key: 'defect_reason',
             label: '不良原因',
             children: defect_reason || '-',
           },
           {
+            key: 'outsource_defect_reason',
+            label: '外协不良原因',
+            children: outsource_defect_reason || '-',
+          },
+          {
+            key: 'outsource_unit',
+            label: '外协单位',
+            children: outsource_unit || '-',
+          },
+          {
             key: 'recipient_name',
             label: '接收人',
             children: recipient_name || '-',
+          },
+          {
+            key: 'responsible_process',
+            label: '责任工序',
+            children: responsible_process || '-',
+          },
+          {
+            key: 'process_owner',
+            label: '工序负责人',
+            children: process_owner || '-',
           },
           {
             key: 'inspector_name',
