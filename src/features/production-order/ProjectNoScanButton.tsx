@@ -1,6 +1,7 @@
 import { QrcodeOutlined } from '@ant-design/icons'
 import { Alert, App, Button, Modal, Tooltip, Typography } from 'antd'
 import { useEffect, useRef, useState } from 'react'
+import qrScannerWorkerPath from 'qr-scanner/qr-scanner-worker.min.js?url'
 
 import { getSalesOrderByProjectNo } from '@/services/apiProcessStandards'
 import { getWorkshopOrderById } from '@/services/apiWorkshopOrders'
@@ -10,18 +11,6 @@ const { Paragraph, Text } = Typography
 const QR_ORDER_PATH_PATTERN = /\/workshop-order-list\/qr\/([^/?#]+)/i
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
-interface BarcodeDetectorResultLike {
-  rawValue?: string
-}
-
-interface BarcodeDetectorLike {
-  detect(source: ImageBitmapSource): Promise<BarcodeDetectorResultLike[]>
-}
-
-interface BarcodeDetectorConstructorLike {
-  new (options?: { formats?: string[] }): BarcodeDetectorLike
-}
 
 interface SalesOrderProjectNoSource {
   project_no: string
@@ -44,6 +33,11 @@ interface ProjectNoScanButtonProps {
   projectNos?: SalesOrderProjectNoSource[]
   disabled?: boolean
   onResolved: (payload: ScannedProjectPayload) => void
+}
+
+interface ScannerController {
+  stop: () => void
+  destroy: () => void
 }
 
 function buildPayload(
@@ -179,30 +173,14 @@ export default function ProjectNoScanButton({
   const [resolving, setResolving] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const detectorRef = useRef<BarcodeDetectorLike | null>(null)
-  const timerRef = useRef<number | null>(null)
-  const detectingRef = useRef(false)
+  const scannerRef = useRef<ScannerController | null>(null)
   const resolvingRef = useRef(false)
   const lastRawValueRef = useRef('')
 
   function stopScanner() {
-    if (timerRef.current !== null) {
-      window.clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-
-    streamRef.current?.getTracks().forEach((track) => track.stop())
-    streamRef.current = null
-
-    const video = videoRef.current
-    if (video) {
-      video.pause()
-      video.srcObject = null
-    }
-
-    detectorRef.current = null
-    detectingRef.current = false
+    scannerRef.current?.stop()
+    scannerRef.current?.destroy()
+    scannerRef.current = null
   }
 
   useEffect(() => {
@@ -229,87 +207,45 @@ export default function ProjectNoScanButton({
         return
       }
 
-      const BarcodeDetectorCtor = (
-        window as Window & {
-          BarcodeDetector?: BarcodeDetectorConstructorLike
-        }
-      ).BarcodeDetector
-
-      if (!BarcodeDetectorCtor) {
-        setScanError(
-          '当前浏览器不支持原生二维码扫描，请使用最新版 Chrome 或 Edge',
-        )
-        return
-      }
-
       setStarting(true)
       setScanError(null)
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: 'environment' },
-          },
-          audio: false,
-        })
-
-        if (disposed) {
-          stream.getTracks().forEach((track) => track.stop())
-          return
-        }
-
-        streamRef.current = stream
-        detectorRef.current = new BarcodeDetectorCtor({ formats: ['qr_code'] })
-
         const video = videoRef.current
         if (!video) {
           throw new Error('扫码预览初始化失败')
         }
 
-        video.srcObject = stream
-        await video.play()
+        const { default: QrScanner } = await import('qr-scanner')
 
-        timerRef.current = window.setInterval(() => {
-          void (async () => {
-            if (detectingRef.current || resolvingRef.current) {
+        if (disposed) {
+          return
+        }
+
+        QrScanner.WORKER_PATH = qrScannerWorkerPath
+
+        const scanner = new QrScanner(
+          video,
+          (result) => {
+            const rawValue = normalizeText(result.data)
+
+            if (!rawValue || rawValue === lastRawValueRef.current) {
               return
             }
 
-            const detector = detectorRef.current
-            const preview = videoRef.current
-
-            if (!detector || !preview || preview.readyState < 2) {
+            if (resolvingRef.current) {
               return
             }
 
-            detectingRef.current = true
+            lastRawValueRef.current = rawValue
+            setResolving(true)
+            resolvingRef.current = true
+            setScanError(null)
 
-            try {
-              const codes = await detector.detect(preview)
-              const rawValue = codes.find((item) =>
-                item.rawValue?.trim(),
-              )?.rawValue
-
-              if (!rawValue) {
-                return
-              }
-
-              const normalizedRawValue = normalizeText(rawValue)
-              if (
-                !normalizedRawValue ||
-                normalizedRawValue === lastRawValueRef.current
-              ) {
-                return
-              }
-
-              lastRawValueRef.current = normalizedRawValue
-              setResolving(true)
-              resolvingRef.current = true
-              setScanError(null)
-
+            void (async () => {
               try {
                 const payload = await resolveScannedProject(
-                  normalizedRawValue,
+                  rawValue,
                   projectNos,
                 )
                 onResolved(payload)
@@ -328,17 +264,32 @@ export default function ProjectNoScanButton({
                 setResolving(false)
                 resolvingRef.current = false
               }
-            } catch (error) {
-              setScanError(
-                error instanceof Error
-                  ? error.message
-                  : '二维码识别失败，请重试',
-              )
-            } finally {
-              detectingRef.current = false
-            }
-          })()
-        }, 400)
+            })()
+          },
+          {
+            preferredCamera: 'environment',
+            maxScansPerSecond: 5,
+            returnDetailedScanResult: true,
+            onDecodeError: (error) => {
+              const errorMessage =
+                typeof error === 'string' ? error : error.message
+
+              if (errorMessage === 'No QR code found') {
+                return
+              }
+
+              setScanError(errorMessage || '二维码识别失败，请重试')
+            },
+          },
+        )
+
+        if (disposed) {
+          scanner.destroy()
+          return
+        }
+
+        scannerRef.current = scanner
+        await scanner.start()
       } catch (error) {
         setScanError(
           error instanceof Error ? error.message : '摄像头启动失败，请检查权限',
@@ -408,7 +359,7 @@ export default function ProjectNoScanButton({
               将二维码放入取景框内，系统会自动识别项目号并带出型号、长度、客户型号。
             </Paragraph>
             <Text type="secondary">
-              支持识别项目号文本，以及当前系统生成的订单详情二维码。识别后仍可手动修改。
+              支持识别项目号文本，以及当前系统生成的订单详情二维码。若浏览器没有原生能力，会自动切换到兼容模式继续扫描。
             </Text>
           </div>
         </div>
