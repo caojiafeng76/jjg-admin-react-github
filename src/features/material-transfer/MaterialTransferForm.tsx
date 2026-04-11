@@ -149,7 +149,11 @@ export default function MaterialTransferForm({
 
     if (initialValues) {
       setScannedProjectDataMap((prev) => {
-        if (projectInfoMap.has(initialValues.project_no)) {
+        const existsInProjectNos = (projectNos || []).some(
+          (item) => item.project_no === initialValues.project_no,
+        )
+
+        if (existsInProjectNos || prev[initialValues.project_no]) {
           return prev
         }
 
@@ -184,7 +188,13 @@ export default function MaterialTransferForm({
     }
 
     form.resetFields()
-    setScannedProjectDataMap({})
+    setScannedProjectDataMap((prev) => {
+      if (Object.keys(prev).length === 0) {
+        return prev
+      }
+
+      return {}
+    })
     form.setFieldsValue({
       operator_employee_ids: fixedOperator?.id ? [fixedOperator.id] : undefined,
       inspector_name: DEFAULT_INSPECTOR_NAME,
@@ -197,7 +207,7 @@ export default function MaterialTransferForm({
     form,
     initialValues,
     open,
-    projectInfoMap,
+    projectNos,
   ])
 
   function handleProjectChange(projectNo: string) {
