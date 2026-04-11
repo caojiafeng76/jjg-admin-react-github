@@ -151,6 +151,41 @@ export default function ProductionOrderItemTable({
         width: 100,
       },
       {
+        title: '外协不良数',
+        dataIndex: 'outsource_defect_quantity',
+        key: 'outsource_defect_quantity',
+        width: 100,
+        render: (value: number | null) => value || 0,
+      },
+      {
+        title: '外协不良原因',
+        dataIndex: 'outsource_defect_reason',
+        key: 'outsource_defect_reason',
+        width: 140,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '外协单位',
+        dataIndex: 'outsource_unit',
+        key: 'outsource_unit',
+        width: 120,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '调机不良',
+        dataIndex: 'setup_defect_quantity',
+        key: 'setup_defect_quantity',
+        width: 100,
+        render: (value: number | null) => value || 0,
+      },
+      {
+        title: '调机负责人',
+        dataIndex: 'setup_responsible',
+        key: 'setup_responsible',
+        width: 120,
+        render: (value: string | null) => value || '-',
+      },
+      {
         title: '减分工时(h)',
         dataIndex: 'defect_hours',
         key: 'defect_hours',
@@ -219,7 +254,7 @@ export default function ProductionOrderItemTable({
       loading={loading}
       columns={columns}
       dataSource={data}
-      scroll={{ y: scrollY, x: 1900 }}
+      scroll={{ y: scrollY, x: 2500 }}
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}

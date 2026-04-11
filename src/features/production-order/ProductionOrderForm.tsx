@@ -79,6 +79,11 @@ interface OrderItem {
   defect_quantity_1: number
   defect_reason_2: string | null
   defect_quantity_2: number
+  outsource_defect_quantity: number
+  outsource_defect_reason: string | null
+  outsource_unit: string | null
+  setup_defect_quantity: number
+  setup_responsible: string | null
   remark?: string | null
 }
 
@@ -203,6 +208,11 @@ export default function ProductionOrderForm({
           defect_quantity_1: item.defect_quantity_1,
           defect_reason_2: item.defect_reason_2,
           defect_quantity_2: item.defect_quantity_2,
+          outsource_defect_quantity: item.outsource_defect_quantity ?? 0,
+          outsource_defect_reason: item.outsource_defect_reason,
+          outsource_unit: item.outsource_unit,
+          setup_defect_quantity: item.setup_defect_quantity ?? 0,
+          setup_responsible: item.setup_responsible,
           remark: item.remark,
           theoretical_seconds: item.theoretical_seconds ?? 0,
           machine_equipment_id: item.machine_equipment_id ?? null,
@@ -310,6 +320,11 @@ export default function ProductionOrderForm({
         defect_quantity_1: item?.defect_quantity_1 || 0,
         defect_reason_2: item?.defect_reason_2 || '原料',
         defect_quantity_2: item?.defect_quantity_2 || 0,
+        outsource_defect_quantity: item?.outsource_defect_quantity || 0,
+        outsource_defect_reason: item?.outsource_defect_reason || null,
+        outsource_unit: item?.outsource_unit || null,
+        setup_defect_quantity: item?.setup_defect_quantity || 0,
+        setup_responsible: item?.setup_responsible || null,
         remark: item?.remark || null,
       })
     } else {
@@ -323,6 +338,11 @@ export default function ProductionOrderForm({
         defect_quantity_1: 0,
         defect_reason_2: '原料',
         defect_quantity_2: 0,
+        outsource_defect_quantity: 0,
+        outsource_defect_reason: null,
+        outsource_unit: null,
+        setup_defect_quantity: 0,
+        setup_responsible: null,
         remark: null,
       })
     }
@@ -365,6 +385,11 @@ export default function ProductionOrderForm({
       defect_quantity_1: Number(values.defect_quantity_1) || 0,
       defect_reason_2: '原料',
       defect_quantity_2: Number(values.defect_quantity_2) || 0,
+      outsource_defect_quantity: Number(values.outsource_defect_quantity) || 0,
+      outsource_defect_reason: values.outsource_defect_reason?.trim() || null,
+      outsource_unit: values.outsource_unit?.trim() || null,
+      setup_defect_quantity: Number(values.setup_defect_quantity) || 0,
+      setup_responsible: values.setup_responsible?.trim() || null,
       remark: values.remark || null,
     }
 
@@ -637,7 +662,54 @@ export default function ProductionOrderForm({
                                 {item.defect_quantity_2 || 0}
                               </div>
                             </div>
+                            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                                外协不良
+                              </div>
+                              <div className="mt-1 font-semibold text-slate-900">
+                                {item.outsource_defect_quantity || 0}
+                              </div>
+                            </div>
+                            <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                                调机不良
+                              </div>
+                              <div className="mt-1 font-semibold text-slate-900">
+                                {item.setup_defect_quantity || 0}
+                              </div>
+                            </div>
                           </div>
+
+                          {item.outsource_defect_reason ||
+                          item.outsource_unit ||
+                          item.setup_responsible ? (
+                            <div className="mt-4 space-y-2 text-sm text-slate-600">
+                              {item.outsource_defect_reason ? (
+                                <div>
+                                  外协不良原因：
+                                  <span className="font-medium text-slate-900">
+                                    {item.outsource_defect_reason}
+                                  </span>
+                                </div>
+                              ) : null}
+                              {item.outsource_unit ? (
+                                <div>
+                                  外协单位：
+                                  <span className="font-medium text-slate-900">
+                                    {item.outsource_unit}
+                                  </span>
+                                </div>
+                              ) : null}
+                              {item.setup_responsible ? (
+                                <div>
+                                  调机负责人：
+                                  <span className="font-medium text-slate-900">
+                                    {item.setup_responsible}
+                                  </span>
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : null}
 
                           <div className="mt-4 flex gap-2">
                             <Button
@@ -778,6 +850,36 @@ export default function ProductionOrderForm({
                     render: (value: number) => value || 0,
                   },
                   {
+                    title: '外协不良数',
+                    dataIndex: 'outsource_defect_quantity',
+                    width: 100,
+                    render: (value: number) => value || 0,
+                  },
+                  {
+                    title: '外协不良原因',
+                    dataIndex: 'outsource_defect_reason',
+                    width: 140,
+                    render: (value: string | null) => value || '',
+                  },
+                  {
+                    title: '外协单位',
+                    dataIndex: 'outsource_unit',
+                    width: 120,
+                    render: (value: string | null) => value || '',
+                  },
+                  {
+                    title: '调机不良',
+                    dataIndex: 'setup_defect_quantity',
+                    width: 100,
+                    render: (value: number) => value || 0,
+                  },
+                  {
+                    title: '调机负责人',
+                    dataIndex: 'setup_responsible',
+                    width: 120,
+                    render: (value: string | null) => value || '',
+                  },
+                  {
                     title: '备注',
                     dataIndex: 'remark',
                     width: 150,
@@ -849,6 +951,11 @@ export default function ProductionOrderForm({
               qualified_quantity: 0,
               defect_quantity_1: 0,
               defect_quantity_2: 0,
+              outsource_defect_quantity: 0,
+              outsource_defect_reason: null,
+              outsource_unit: null,
+              setup_defect_quantity: 0,
+              setup_responsible: null,
               remark: null,
             }}
           >
@@ -1022,6 +1129,8 @@ export default function ProductionOrderForm({
                 'qualified_quantity',
                 'defect_quantity_1',
                 'defect_quantity_2',
+                'outsource_defect_quantity',
+                'setup_defect_quantity',
               ]}
               rules={[
                 { required: true, message: '请输入来料接收数' },
@@ -1037,8 +1146,18 @@ export default function ProductionOrderForm({
                     const defectQuantity2 = Number(
                       getFieldValue('defect_quantity_2') || 0,
                     )
+                    const outsourceDefectQuantity = Number(
+                      getFieldValue('outsource_defect_quantity') || 0,
+                    )
+                    const setupDefectQuantity = Number(
+                      getFieldValue('setup_defect_quantity') || 0,
+                    )
                     const minimumQuantity =
-                      qualifiedQuantity + defectQuantity1 + defectQuantity2
+                      qualifiedQuantity +
+                      defectQuantity1 +
+                      defectQuantity2 +
+                      outsourceDefectQuantity +
+                      setupDefectQuantity
 
                     if (incomingQualifiedQuantity < minimumQuantity) {
                       throw new Error(
@@ -1079,6 +1198,42 @@ export default function ProductionOrderForm({
                     style={{ width: '100%' }}
                   />
                 </Form.Item>
+              </Form.Item>
+
+              <Form.Item label="外协不良数" className="mb-2">
+                <Form.Item name="outsource_defect_quantity" className="mb-0!">
+                  <InputNumber
+                    placeholder="数量"
+                    min={0}
+                    precision={0}
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
+              </Form.Item>
+
+              <Form.Item label="调机不良" className="mb-2">
+                <Form.Item name="setup_defect_quantity" className="mb-0!">
+                  <InputNumber
+                    placeholder="数量"
+                    min={0}
+                    precision={0}
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
+              </Form.Item>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item name="outsource_defect_reason" label="外协不良原因">
+                <Input placeholder="请输入外协不良原因" />
+              </Form.Item>
+
+              <Form.Item name="outsource_unit" label="外协单位">
+                <Input placeholder="请输入外协单位" />
+              </Form.Item>
+
+              <Form.Item name="setup_responsible" label="调机负责人">
+                <Input placeholder="请输入调机负责人" />
               </Form.Item>
             </div>
 

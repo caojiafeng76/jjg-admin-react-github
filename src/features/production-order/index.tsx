@@ -111,6 +111,11 @@ async function syncOrderItemsSequentially({
     defect_quantity_1: number
     defect_reason_2: string | null
     defect_quantity_2: number
+    outsource_defect_quantity: number
+    outsource_defect_reason: string | null
+    outsource_unit: string | null
+    setup_defect_quantity: number
+    setup_responsible: string | null
   }[]
   orderId: string
   addItem: (item: ProductionOrderItemInsert) => Promise<unknown>
@@ -137,6 +142,11 @@ async function syncOrderItemsSequentially({
           defect_quantity_1: item.defect_quantity_1,
           defect_reason_2: item.defect_reason_2,
           defect_quantity_2: item.defect_quantity_2,
+          outsource_defect_quantity: item.outsource_defect_quantity,
+          outsource_defect_reason: item.outsource_defect_reason,
+          outsource_unit: item.outsource_unit,
+          setup_defect_quantity: item.setup_defect_quantity,
+          setup_responsible: item.setup_responsible,
         },
       })
       continue
@@ -490,6 +500,11 @@ export default function ProductionOrderPage() {
         defect_quantity_1: number
         defect_reason_2: string | null
         defect_quantity_2: number
+        outsource_defect_quantity: number
+        outsource_defect_reason: string | null
+        outsource_unit: string | null
+        setup_defect_quantity: number
+        setup_responsible: string | null
       }[]
     }) => {
       try {

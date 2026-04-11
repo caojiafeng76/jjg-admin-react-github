@@ -99,6 +99,11 @@ export default function ProductionOrderItemForm({
         defect_quantity_1: 0,
         defect_reason_2: '原料',
         defect_quantity_2: 0,
+        outsource_defect_quantity: 0,
+        outsource_defect_reason: null,
+        outsource_unit: null,
+        setup_defect_quantity: 0,
+        setup_responsible: null,
       })
     }
   }, [initialValues, orderId, form, open])
@@ -165,6 +170,11 @@ export default function ProductionOrderItemForm({
           0,
       ),
       machine_equipment_id: values.machine_equipment_id ?? null,
+      outsource_defect_quantity: Number(values.outsource_defect_quantity ?? 0),
+      outsource_defect_reason: values.outsource_defect_reason?.trim() || null,
+      outsource_unit: values.outsource_unit?.trim() || null,
+      setup_defect_quantity: Number(values.setup_defect_quantity ?? 0),
+      setup_responsible: values.setup_responsible?.trim() || null,
       order_id: orderId,
     } as Partial<ProductionOrderItem>)
     form.resetFields()
@@ -239,6 +249,11 @@ export default function ProductionOrderItemForm({
             defect_quantity_1: 0,
             defect_reason_2: '原料',
             defect_quantity_2: 0,
+            outsource_defect_quantity: 0,
+            outsource_defect_reason: null,
+            outsource_unit: null,
+            setup_defect_quantity: 0,
+            setup_responsible: null,
           }}
         >
           <Form.Item name="order_id" hidden>
@@ -421,6 +436,8 @@ export default function ProductionOrderItemForm({
               'qualified_quantity',
               'defect_quantity_1',
               'defect_quantity_2',
+              'outsource_defect_quantity',
+              'setup_defect_quantity',
             ]}
             rules={[
               { required: true, message: '请输入来料接收数' },
@@ -436,8 +453,18 @@ export default function ProductionOrderItemForm({
                   const defectQuantity2 = Number(
                     getFieldValue('defect_quantity_2') || 0,
                   )
+                  const outsourceDefectQuantity = Number(
+                    getFieldValue('outsource_defect_quantity') || 0,
+                  )
+                  const setupDefectQuantity = Number(
+                    getFieldValue('setup_defect_quantity') || 0,
+                  )
                   const minimumQuantity =
-                    qualifiedQuantity + defectQuantity1 + defectQuantity2
+                    qualifiedQuantity +
+                    defectQuantity1 +
+                    defectQuantity2 +
+                    outsourceDefectQuantity +
+                    setupDefectQuantity
 
                   if (incomingQualifiedQuantity < minimumQuantity) {
                     throw new Error('来料接收数不能小于成品合格数与不良数之和')
@@ -473,6 +500,34 @@ export default function ProductionOrderItemForm({
             initialValue={0}
           >
             <InputNumber min={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="outsource_defect_quantity"
+            label="外协不良数"
+            initialValue={0}
+          >
+            <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item name="outsource_defect_reason" label="外协不良原因">
+            <Input placeholder="请输入外协不良原因" />
+          </Form.Item>
+
+          <Form.Item name="outsource_unit" label="外协单位">
+            <Input placeholder="请输入外协单位" />
+          </Form.Item>
+
+          <Form.Item
+            name="setup_defect_quantity"
+            label="调机不良"
+            initialValue={0}
+          >
+            <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item name="setup_responsible" label="调机负责人">
+            <Input placeholder="请输入调机负责人" />
           </Form.Item>
 
           <Form.Item name="remark" label="备注">
