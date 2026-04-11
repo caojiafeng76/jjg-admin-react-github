@@ -55,12 +55,17 @@ export interface PrecisionCuttingTransferRow {
   long_material_length_mm: number
   long_material_quantity: number
   operator_names: string[]
+  outsource_defect_quantity: number
+  outsource_defect_reason: string | null
+  outsource_unit: string | null
+  process_owner: string | null
   product_model: string | null
   project_no: string
   processing_defect_count: number
   raw_material_defect_count: number
   recipient_name: string
   remark: string | null
+  responsible_process: string | null
   target_workshop: string
   transfer_quantity: number
   updated_at: string
@@ -80,12 +85,17 @@ export interface PrecisionCuttingTransferInsertBase {
   long_material_length_mm: number
   long_material_quantity: number
   operator_names: string[]
+  outsource_defect_quantity?: number
+  outsource_defect_reason?: string | null
+  outsource_unit?: string | null
+  process_owner?: string | null
   product_model?: string | null
   project_no: string
   processing_defect_count: number
   raw_material_defect_count: number
   recipient_name: string
   remark?: string | null
+  responsible_process?: string | null
   target_workshop: string
   transfer_quantity: number
   updated_at?: string
@@ -105,12 +115,17 @@ export interface PrecisionCuttingTransferUpdateBase {
   long_material_length_mm?: number
   long_material_quantity?: number
   operator_names?: string[]
+  outsource_defect_quantity?: number
+  outsource_defect_reason?: string | null
+  outsource_unit?: string | null
+  process_owner?: string | null
   product_model?: string | null
   project_no?: string
   processing_defect_count?: number
   raw_material_defect_count?: number
   recipient_name?: string
   remark?: string | null
+  responsible_process?: string | null
   target_workshop?: string
   transfer_quantity?: number
   updated_at?: string
@@ -336,7 +351,13 @@ function normalizePrecisionCuttingTransferInsertPayload(
       values.processing_defect_count,
       '加工不良数',
     ),
+    outsource_defect_quantity: normalizeDefectCount(
+      values.outsource_defect_quantity ?? 0,
+      '外协不良数',
+    ),
     defect_reason: values.defect_reason?.trim() || null,
+    outsource_defect_reason: values.outsource_defect_reason?.trim() || null,
+    outsource_unit: values.outsource_unit?.trim() || null,
     long_material_length_mm: normalizeLongMaterialLength(
       values.long_material_length_mm,
     ),
@@ -347,6 +368,8 @@ function normalizePrecisionCuttingTransferInsertPayload(
     operator_names: operatorNames,
     target_workshop: values.target_workshop,
     recipient_name: values.recipient_name.trim(),
+    responsible_process: values.responsible_process?.trim() || null,
+    process_owner: values.process_owner?.trim() || null,
     inspector_name: values.inspector_name?.trim() || null,
     uploaded_by_name: values.uploaded_by_name?.trim() || null,
     remark: values.remark?.trim() || null,
@@ -392,8 +415,23 @@ function normalizePrecisionCuttingTransferUpdatePayload(
     )
   }
 
+  if (values.outsource_defect_quantity !== undefined) {
+    payload.outsource_defect_quantity = normalizeDefectCount(
+      values.outsource_defect_quantity,
+      '外协不良数',
+    )
+  }
+
   if (values.defect_reason !== undefined) {
     payload.defect_reason = values.defect_reason?.trim() || null
+  }
+
+  if (values.outsource_defect_reason !== undefined) {
+    payload.outsource_defect_reason = values.outsource_defect_reason?.trim() || null
+  }
+
+  if (values.outsource_unit !== undefined) {
+    payload.outsource_unit = values.outsource_unit?.trim() || null
   }
 
   if (values.long_material_length_mm !== undefined) {
@@ -422,6 +460,14 @@ function normalizePrecisionCuttingTransferUpdatePayload(
 
   if (values.recipient_name !== undefined) {
     payload.recipient_name = values.recipient_name.trim()
+  }
+
+  if (values.responsible_process !== undefined) {
+    payload.responsible_process = values.responsible_process?.trim() || null
+  }
+
+  if (values.process_owner !== undefined) {
+    payload.process_owner = values.process_owner?.trim() || null
   }
 
   if (values.remark !== undefined) {

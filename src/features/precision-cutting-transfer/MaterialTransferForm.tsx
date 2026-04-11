@@ -94,7 +94,11 @@ export default function MaterialTransferForm({
         customer_model: initialValues.customer_model || undefined,
         raw_material_defect_count: initialValues.raw_material_defect_count,
         processing_defect_count: initialValues.processing_defect_count,
+        outsource_defect_quantity: initialValues.outsource_defect_quantity,
         defect_reason: initialValues.defect_reason || undefined,
+        outsource_defect_reason:
+          initialValues.outsource_defect_reason || undefined,
+        outsource_unit: initialValues.outsource_unit || undefined,
         long_material_length_mm:
           initialValues.long_material_length_mm ?? undefined,
         long_material_quantity: initialValues.long_material_quantity,
@@ -102,6 +106,8 @@ export default function MaterialTransferForm({
         operator_names: initialValues.operator_names,
         target_workshop: initialValues.target_workshop,
         recipient_name: initialValues.recipient_name,
+        responsible_process: initialValues.responsible_process || undefined,
+        process_owner: initialValues.process_owner || undefined,
         inspector_name: initialValues.inspector_name || undefined,
         uploaded_by_name: initialValues.uploaded_by_name || undefined,
         remark: initialValues.remark || undefined,
@@ -115,6 +121,7 @@ export default function MaterialTransferForm({
       operator_names: undefined,
       raw_material_defect_count: 0,
       processing_defect_count: 0,
+      outsource_defect_quantity: 0,
       uploaded_by_name: currentUploader || undefined,
       is_audited: false,
     })
@@ -152,13 +159,18 @@ export default function MaterialTransferForm({
       customer_model: values.customer_model || null,
       raw_material_defect_count: values.raw_material_defect_count,
       processing_defect_count: values.processing_defect_count,
+      outsource_defect_quantity: values.outsource_defect_quantity ?? 0,
       defect_reason: values.defect_reason || null,
+      outsource_defect_reason: values.outsource_defect_reason || null,
+      outsource_unit: values.outsource_unit || null,
       long_material_length_mm: values.long_material_length_mm,
       long_material_quantity: values.long_material_quantity,
       transfer_quantity: values.transfer_quantity,
       operator_names: operatorNames,
       target_workshop: values.target_workshop,
       recipient_name: values.recipient_name,
+      responsible_process: values.responsible_process || null,
+      process_owner: values.process_owner || null,
       inspector_name: values.inspector_name || null,
       uploaded_by_name: currentUploader || values.uploaded_by_name || null,
       remark: values.remark || null,
@@ -205,7 +217,7 @@ export default function MaterialTransferForm({
             />
           </Form.Item>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Form.Item name="customer" label="客户">
               <Input disabled placeholder="自动带出" />
             </Form.Item>
@@ -223,7 +235,7 @@ export default function MaterialTransferForm({
             </Form.Item>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             <Form.Item
               name="long_material_length_mm"
               label="长料长度(mm)"
@@ -259,6 +271,14 @@ export default function MaterialTransferForm({
             </Form.Item>
 
             <Form.Item
+              name="outsource_defect_quantity"
+              label="外协不良数"
+              initialValue={0}
+            >
+              <InputNumber min={0} precision={0} className="w-full" />
+            </Form.Item>
+
+            <Form.Item
               name="transfer_quantity"
               label="转移数量"
               rules={[{ required: true, message: '请输入转移数量' }]}
@@ -267,7 +287,29 @@ export default function MaterialTransferForm({
             </Form.Item>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Form.Item name="defect_reason" label="不良原因">
+              <Input.TextArea rows={2} placeholder="由用户填写不良原因" />
+            </Form.Item>
+
+            <Form.Item name="outsource_defect_reason" label="外协不良原因">
+              <Input.TextArea rows={2} placeholder="可填写外协不良原因" />
+            </Form.Item>
+
+            <Form.Item name="outsource_unit" label="外协单位">
+              <Input placeholder="请输入外协单位" />
+            </Form.Item>
+
+            <Form.Item name="responsible_process" label="责任工序">
+              <Input placeholder="请输入责任工序" />
+            </Form.Item>
+
+            <Form.Item name="process_owner" label="工序负责人">
+              <Input placeholder="请输入工序负责人" />
+            </Form.Item>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Form.Item
               name="operator_names"
               label="操作人"
@@ -297,7 +339,7 @@ export default function MaterialTransferForm({
             </Form.Item>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Form.Item
               name="target_workshop"
               label="接收车间"
@@ -335,10 +377,6 @@ export default function MaterialTransferForm({
               <Input placeholder="可选填写" />
             </Form.Item>
           </div>
-
-          <Form.Item name="defect_reason" label="不良原因">
-            <Input.TextArea rows={2} placeholder="由用户填写不良原因" />
-          </Form.Item>
 
           {mobile ? null : (
             <Form.Item name="uploaded_by_name" label="数据上传">
