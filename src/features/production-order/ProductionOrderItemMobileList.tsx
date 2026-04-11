@@ -96,7 +96,54 @@ export default function ProductionOrderItemMobileList({
                   {item.defect_quantity_2 || 0}
                 </div>
               </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  外协不良
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {item.outsource_defect_quantity || 0}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+                  调机不良
+                </div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {item.setup_defect_quantity || 0}
+                </div>
+              </div>
             </div>
+
+            {item.outsource_defect_reason ||
+            item.outsource_unit ||
+            item.setup_responsible ? (
+              <div className="mt-4 space-y-2 text-sm text-slate-600">
+                {item.outsource_defect_reason ? (
+                  <div>
+                    外协不良原因：
+                    <span className="font-medium text-slate-900">
+                      {item.outsource_defect_reason}
+                    </span>
+                  </div>
+                ) : null}
+                {item.outsource_unit ? (
+                  <div>
+                    外协单位：
+                    <span className="font-medium text-slate-900">
+                      {item.outsource_unit}
+                    </span>
+                  </div>
+                ) : null}
+                {item.setup_responsible ? (
+                  <div>
+                    调机负责人：
+                    <span className="font-medium text-slate-900">
+                      {item.setup_responsible}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
 
             {showActions ? (
               <div className="mt-4 flex gap-2">

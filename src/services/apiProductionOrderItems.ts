@@ -11,15 +11,31 @@ type ProductionOrderItemInsertBase =
 type ProductionOrderItemUpdateBase =
   Database['public']['Tables']['production_order_items']['Update']
 
-export type ProductionOrderItem = ProductionOrderItemRowBase & {
+type ProductionOrderItemExtraFields = {
+  outsource_defect_quantity: number
+  outsource_defect_reason: string | null
+  outsource_unit: string | null
+  setup_defect_quantity: number
+  setup_responsible: string | null
+}
+
+export type ProductionOrderItem = ProductionOrderItemRowBase &
+  ProductionOrderItemExtraFields & {
   data_category: ProductionOrderDataCategory
 }
-export type ProductionOrderItemInsert = ProductionOrderItemInsertBase & {
+export type ProductionOrderItemInsert = ProductionOrderItemInsertBase &
+  Partial<ProductionOrderItemExtraFields> & {
   data_category?: ProductionOrderDataCategory
 }
-export type ProductionOrderItemUpdate = ProductionOrderItemUpdateBase & {
+export type ProductionOrderItemUpdate = ProductionOrderItemUpdateBase &
+  Partial<ProductionOrderItemExtraFields> & {
   data_category?: ProductionOrderDataCategory
 }
+
+type ProductionOrderItemInsertPayload = ProductionOrderItemInsertBase &
+  Partial<ProductionOrderItemExtraFields>
+type ProductionOrderItemUpdatePayload = ProductionOrderItemUpdateBase &
+  Partial<ProductionOrderItemExtraFields>
 
 export type ProductionOrderItemWithMachine = ProductionOrderItem & {
   machine_equipment_maintenances: {
@@ -27,6 +43,44 @@ export type ProductionOrderItemWithMachine = ProductionOrderItem & {
     operation: string
     machine_name: string
   } | null
+}
+
+function buildProductionOrderItemInsertPayload(
+  values: ProductionOrderItemInsert,
+): ProductionOrderItemInsertPayload {
+  return {
+    ...values,
+    outsource_defect_quantity: Number(values.outsource_defect_quantity ?? 0),
+    outsource_defect_reason: values.outsource_defect_reason ?? null,
+    outsource_unit: values.outsource_unit ?? null,
+    setup_defect_quantity: Number(values.setup_defect_quantity ?? 0),
+    setup_responsible: values.setup_responsible ?? null,
+  }
+}
+
+function buildProductionOrderItemUpdatePayload(
+  values: ProductionOrderItemUpdate,
+): ProductionOrderItemUpdatePayload {
+  return {
+    ...values,
+    ...(values.outsource_defect_quantity !== undefined
+      ? {
+          outsource_defect_quantity: Number(values.outsource_defect_quantity),
+        }
+      : {}),
+    ...(values.outsource_defect_reason !== undefined
+      ? { outsource_defect_reason: values.outsource_defect_reason ?? null }
+      : {}),
+    ...(values.outsource_unit !== undefined
+      ? { outsource_unit: values.outsource_unit ?? null }
+      : {}),
+    ...(values.setup_defect_quantity !== undefined
+      ? { setup_defect_quantity: Number(values.setup_defect_quantity) }
+      : {}),
+    ...(values.setup_responsible !== undefined
+      ? { setup_responsible: values.setup_responsible ?? null }
+      : {}),
+  }
 }
 
 export async function getProductionOrderItems(orderId: string) {
@@ -48,9 +102,11 @@ export async function getProductionOrderItems(orderId: string) {
 export async function addProductionOrderItem(
   values: ProductionOrderItemInsert,
 ) {
+  const payload = buildProductionOrderItemInsertPayload(values)
+
   const { data, error } = await supabase
     .from('production_order_items')
-    .insert(values)
+    .insert(payload as ProductionOrderItemInsertBase)
     .select()
     .single()
 
@@ -68,9 +124,11 @@ export async function updateProductionOrderItem({
   id: string
   values: ProductionOrderItemUpdate
 }) {
+  const payload = buildProductionOrderItemUpdatePayload(values)
+
   const { data, error } = await supabase
     .from('production_order_items')
-    .update(values)
+    .update(payload as ProductionOrderItemUpdateBase)
     .eq('id', id)
     .select()
     .single()
