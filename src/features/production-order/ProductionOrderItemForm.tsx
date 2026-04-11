@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Modal, Form, InputNumber, Select, Input, Tag } from 'antd'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
@@ -7,6 +7,9 @@ import {
   filterProjectNoOption,
   renderProjectNoOption,
 } from './projectNoSelect'
+import ProjectNoScanButton, {
+  type ScannedProjectPayload,
+} from './ProjectNoScanButton'
 import {
   useSalesOrdersProjectNos,
   useOperationsByModel,
@@ -52,19 +55,45 @@ export default function ProductionOrderItemForm({
   const [form] = Form.useForm()
   const { data: projectNos, isLoading: loadingProjectNos } =
     useSalesOrdersProjectNos()
+  const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
+    Record<string, ProjectNoData>
+  >({})
   const { data: machineOptions } = useMachineEquipmentOptions()
 
   const selectedProjectNo = Form.useWatch('project_no', form)
   const selectedOperation = Form.useWatch('operation', form)
 
-  const projectNoData = useMemo(
-    () => projectNos?.find((item) => item.project_no === selectedProjectNo),
-    [projectNos, selectedProjectNo],
-  ) as ProjectNoData | undefined
+  const projectNoData = useMemo(() => {
+    const existing = projectNos?.find(
+      (item) => item.project_no === selectedProjectNo,
+    )
+    return (existing ||
+      (selectedProjectNo
+        ? scannedProjectDataMap[selectedProjectNo]
+        : undefined)) as ProjectNoData | undefined
+  }, [projectNos, scannedProjectDataMap, selectedProjectNo])
   const projectNoOptions = useMemo(
     () => buildProjectNoSelectOptions(projectNos),
     [projectNos],
   )
+  const mergedProjectNoOptions = useMemo(() => {
+    const existingProjectNos = new Set(
+      projectNoOptions.map((item) => item.value),
+    )
+    const scannedProjectNos = Object.entries(scannedProjectDataMap)
+      .filter(([projectNo]) => !existingProjectNos.has(projectNo))
+      .map(([project_no, item]) => ({
+        project_no,
+        product_model: item.product_model,
+        length_mm: item.length_mm,
+        customer_model: item.customer_model,
+      }))
+
+    return buildProjectNoSelectOptions([
+      ...(projectNos || []),
+      ...scannedProjectNos,
+    ])
+  }, [projectNoOptions, projectNos, scannedProjectDataMap])
   const productModel = projectNoData?.product_model || ''
 
   const { data: operationMatch } = useOperationsByModel({
@@ -89,6 +118,7 @@ export default function ProductionOrderItemForm({
     if (initialValues) {
       form.setFieldsValue(initialValues)
     } else {
+      setScannedProjectDataMap({})
       form.resetFields()
       form.setFieldsValue({
         order_id: orderId,
@@ -182,6 +212,30 @@ export default function ProductionOrderItemForm({
 
   const handleProjectNoChange = () => {
     form.setFieldsValue({
+      operation: undefined,
+      standard_seconds: undefined,
+      theoretical_seconds: undefined,
+      machine_equipment_id: undefined,
+    })
+  }
+
+  const handleProjectNoScanResolved = (payload: ScannedProjectPayload) => {
+    setScannedProjectDataMap((prev) => ({
+      ...prev,
+      [payload.projectNo]: {
+        project_no: payload.projectNo,
+        product_model: payload.productModel,
+        length_mm: payload.lengthMm,
+        material_code: payload.materialCode,
+        customer_model: payload.customerModel,
+      },
+    }))
+
+    form.setFieldsValue({
+      project_no: payload.projectNo,
+      product_model: payload.productModel,
+      length_mm: payload.lengthMm,
+      customer_model: payload.customerModel,
       operation: undefined,
       standard_seconds: undefined,
       theoretical_seconds: undefined,
@@ -286,18 +340,24 @@ export default function ProductionOrderItemForm({
             label="项目号"
             rules={[{ required: true, message: '请选择项目号' }]}
           >
-            <Select
-              showSearch
-              placeholder="请选择项目号"
-              loading={loadingProjectNos}
-              getPopupContainer={getPopupContainer}
-              onChange={handleProjectNoChange}
-              options={projectNoOptions}
-              filterOption={filterProjectNoOption}
-              optionRender={renderProjectNoOption}
-              listHeight={320}
-              style={{ width: '100%' }}
-            />
+            <div className="flex items-center gap-2">
+              <Select
+                showSearch
+                placeholder="请选择项目号"
+                loading={loadingProjectNos}
+                getPopupContainer={getPopupContainer}
+                onChange={handleProjectNoChange}
+                options={mergedProjectNoOptions}
+                filterOption={filterProjectNoOption}
+                optionRender={renderProjectNoOption}
+                listHeight={320}
+                style={{ flex: 1 }}
+              />
+              <ProjectNoScanButton
+                projectNos={projectNos}
+                onResolved={handleProjectNoScanResolved}
+              />
+            </div>
           </Form.Item>
 
           <Form.Item name="product_model" label="型号">

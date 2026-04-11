@@ -1,0 +1,3 @@
+- 生产工单工序明细项目号字段已接入扫码按钮，组件在 src/features/production-order/ProjectNoScanButton.tsx。
+- 扫码兼容两类内容：项目号纯文本、/workshop-order-list/qr/:orderId 订单详情二维码链接；链接会先查订单再回填项目号与型号/长度/客户型号/料号。
+- ProductionOrderForm 和 ProductionOrderItemForm 都维护 scannedProjectDataMap 作为项目号列表外的回填兜底，确保扫码后仍能自动带出关联字段与成本核算匹配。
