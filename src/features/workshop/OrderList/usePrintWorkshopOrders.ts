@@ -27,7 +27,7 @@ const TABLE_BOTTOM_MARGIN = 16
 const HEADER_CELL_HEIGHT = 12
 const CELL_PADDING = 2
 const QR_IMAGE_SIZE = 96
-const COLUMN_WIDTHS = [14, 30, 28, 32, 38, 20, 34, 18, 28, 35] as const
+const COLUMN_WIDTHS = [10, 22, 20, 24, 30, 14, 26, 14, 20, 24, 24, 24, 25] as const
 const TABLE_COLUMNS = [
   '序号',
   '二维码',
@@ -38,6 +38,9 @@ const TABLE_COLUMNS = [
   '客户型号',
   '订支数',
   '料号',
+  ' ',
+  ' ',
+  ' ',
   ' ',
 ] as const
 
@@ -187,6 +190,9 @@ export function usePrintWorkshopOrders() {
           formatCellText(order.customer_model),
           formatCellText(order.order_quantity),
           formatCellText(order.material_code),
+          '',
+          '',
+          '',
           '',
         ])
 
