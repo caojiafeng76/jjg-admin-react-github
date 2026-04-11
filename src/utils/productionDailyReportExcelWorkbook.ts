@@ -14,9 +14,13 @@ const QUALIFIED_COUNT_COLUMN_INDEX = 9
 const DEFECT_COUNT_COLUMN_INDEX = 10
 const RAW_MATERIAL_DEFECT_COUNT_COLUMN_INDEX = 11
 const PROCESSING_DEFECT_COUNT_COLUMN_INDEX = 12
-const QUALIFIED_RATE_COLUMN_INDEX = 13
-const RAW_MATERIAL_DEFECT_WEIGHT_COLUMN_INDEX = 14
-const PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX = 15
+const OUTSOURCE_DEFECT_COUNT_COLUMN_INDEX = 13
+const SETUP_DEFECT_COUNT_COLUMN_INDEX = 16
+const QUALIFIED_RATE_COLUMN_INDEX = 18
+const RAW_MATERIAL_DEFECT_WEIGHT_COLUMN_INDEX = 19
+const PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX = 20
+const OUTSOURCE_DEFECT_WEIGHT_COLUMN_INDEX = 21
+const SETUP_DEFECT_WEIGHT_COLUMN_INDEX = 22
 
 const REPORT_HEADERS = [
   '日期',
@@ -32,9 +36,16 @@ const REPORT_HEADERS = [
   '不良数量',
   '原料不良',
   '加工不良',
+  '外协不良数',
+  '外协不良原因',
+  '外协单位',
+  '调机不良',
+  '调机负责人',
   '合格率',
   '原料不良重量kg',
   '加工不良重量kg',
+  '外协不良重量kg',
+  '调机不良重量kg',
   '操作人',
   '备注',
 ] as const
@@ -71,9 +82,16 @@ function buildWorksheetData(rows: ProductionDailyReportRow[]) {
       row.defectCount,
       row.rawMaterialDefectCount,
       row.processingDefectCount,
+      row.outsourceDefectCount,
+      row.outsourceDefectReason,
+      row.outsourceUnit,
+      row.setupDefectCount,
+      row.setupResponsible,
       row.qualifiedRate,
       row.rawMaterialDefectWeightKg,
       row.processingDefectWeightKg,
+      row.outsourceDefectWeightKg,
+      row.setupDefectWeightKg,
       row.employeeName,
       row.remark,
     ]),
@@ -92,8 +110,12 @@ function createProductionDailyReportWorkbook(rows: ProductionDailyReportRow[]) {
     DEFECT_COUNT_COLUMN_INDEX,
     RAW_MATERIAL_DEFECT_COUNT_COLUMN_INDEX,
     PROCESSING_DEFECT_COUNT_COLUMN_INDEX,
+    OUTSOURCE_DEFECT_COUNT_COLUMN_INDEX,
+    SETUP_DEFECT_COUNT_COLUMN_INDEX,
     RAW_MATERIAL_DEFECT_WEIGHT_COLUMN_INDEX,
     PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX,
+    OUTSOURCE_DEFECT_WEIGHT_COLUMN_INDEX,
+    SETUP_DEFECT_WEIGHT_COLUMN_INDEX,
   ]
   const summaryRow = REPORT_HEADERS.map((_header, columnIndex) =>
     columnIndex === 0 ? '汇总' : '',
@@ -124,7 +146,9 @@ function createProductionDailyReportWorkbook(rows: ProductionDailyReportRow[]) {
       z:
         columnIndex === WORK_HOURS_COLUMN_INDEX ||
         columnIndex === RAW_MATERIAL_DEFECT_WEIGHT_COLUMN_INDEX ||
-        columnIndex === PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX
+        columnIndex === PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX ||
+        columnIndex === OUTSOURCE_DEFECT_WEIGHT_COLUMN_INDEX ||
+        columnIndex === SETUP_DEFECT_WEIGHT_COLUMN_INDEX
           ? '0.00'
           : '0',
       s: worksheet[cellRef]?.s,
