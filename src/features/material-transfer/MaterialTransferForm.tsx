@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   AutoComplete,
   App,
@@ -17,6 +17,9 @@ import {
   filterProjectNoOption,
   renderProjectNoOption,
 } from '@/features/production-order/projectNoSelect'
+import ProjectNoScanButton, {
+  type ScannedProjectPayload,
+} from '@/features/production-order/ProjectNoScanButton'
 import {
   MATERIAL_TRANSFER_AUDIT_OPTIONS,
   MATERIAL_TRANSFER_RECIPIENTS,
@@ -59,6 +62,15 @@ const DEFAULT_INSPECTOR_NAME = '崔路路'
 
 type MaterialTransferFormValues = Omit<MaterialTransferInsert, 'operator_names'>
 
+interface ProjectNoData {
+  project_no: string
+  customer: string | null
+  product_model: string | null
+  length_mm: number | null
+  material_code?: string | null
+  customer_model: string | null
+}
+
 export default function MaterialTransferForm({
   open,
   onCancel,
@@ -75,6 +87,9 @@ export default function MaterialTransferForm({
   const [form] = Form.useForm<MaterialTransferFormValues>()
   const { data: projectNos, isLoading: isLoadingProjectNos } =
     useSalesOrdersProjectNos()
+  const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
+    Record<string, ProjectNoData>
+  >({})
 
   const employeeNameMap = useMemo(
     () => new Map(employees.map((employee) => [employee.id, employee.name])),
@@ -94,14 +109,38 @@ export default function MaterialTransferForm({
     () => buildProjectNoSelectOptions(projectNos),
     [projectNos],
   )
+  const mergedProjectNoOptions = useMemo(() => {
+    const existingProjectNos = new Set(
+      projectNoOptions.map((item) => item.value),
+    )
+    const scannedProjectNos = Object.entries(scannedProjectDataMap)
+      .filter(([projectNo]) => !existingProjectNos.has(projectNo))
+      .map(([project_no, item]) => ({
+        project_no,
+        product_model: item.product_model,
+        length_mm: item.length_mm,
+        customer_model: item.customer_model,
+      }))
+
+    return buildProjectNoSelectOptions([
+      ...(projectNos || []),
+      ...scannedProjectNos,
+    ])
+  }, [projectNoOptions, projectNos, scannedProjectDataMap])
 
   const projectInfoMap = useMemo(() => {
-    const map = new Map(
-      (projectNos || []).map((item) => [item.project_no, item]),
-    )
+    const map = new Map<string, ProjectNoData>()
+
+    ;(projectNos || []).forEach((item) => {
+      map.set(item.project_no, item)
+    })
+
+    Object.entries(scannedProjectDataMap).forEach(([projectNo, item]) => {
+      map.set(projectNo, item)
+    })
 
     return map
-  }, [projectNos])
+  }, [projectNos, scannedProjectDataMap])
 
   useEffect(() => {
     if (!open) {
@@ -109,6 +148,22 @@ export default function MaterialTransferForm({
     }
 
     if (initialValues) {
+      setScannedProjectDataMap((prev) => {
+        if (projectInfoMap.has(initialValues.project_no)) {
+          return prev
+        }
+
+        return {
+          ...prev,
+          [initialValues.project_no]: {
+            project_no: initialValues.project_no,
+            customer: initialValues.customer,
+            product_model: initialValues.product_model,
+            length_mm: initialValues.length_mm,
+            customer_model: initialValues.customer_model,
+          },
+        }
+      })
       form.setFieldsValue({
         project_no: initialValues.project_no,
         customer: initialValues.customer || undefined,
@@ -129,13 +184,21 @@ export default function MaterialTransferForm({
     }
 
     form.resetFields()
+    setScannedProjectDataMap({})
     form.setFieldsValue({
       operator_employee_ids: fixedOperator?.id ? [fixedOperator.id] : undefined,
       inspector_name: DEFAULT_INSPECTOR_NAME,
       uploaded_by_name: currentUploader || undefined,
       is_audited: false,
     })
-  }, [currentUploader, fixedOperator?.id, form, initialValues, open])
+  }, [
+    currentUploader,
+    fixedOperator?.id,
+    form,
+    initialValues,
+    open,
+    projectInfoMap,
+  ])
 
   function handleProjectChange(projectNo: string) {
     const selectedProject = projectInfoMap.get(projectNo)
@@ -145,6 +208,28 @@ export default function MaterialTransferForm({
       product_model: selectedProject?.product_model || undefined,
       length_mm: selectedProject?.length_mm ?? undefined,
       customer_model: selectedProject?.customer_model || undefined,
+    })
+  }
+
+  function handleProjectScanResolved(payload: ScannedProjectPayload) {
+    setScannedProjectDataMap((prev) => ({
+      ...prev,
+      [payload.projectNo]: {
+        project_no: payload.projectNo,
+        customer: payload.customer,
+        product_model: payload.productModel,
+        length_mm: payload.lengthMm,
+        material_code: payload.materialCode,
+        customer_model: payload.customerModel,
+      },
+    }))
+
+    form.setFieldsValue({
+      project_no: payload.projectNo,
+      customer: payload.customer || undefined,
+      product_model: payload.productModel || undefined,
+      length_mm: payload.lengthMm ?? undefined,
+      customer_model: payload.customerModel || undefined,
     })
   }
 
@@ -207,22 +292,30 @@ export default function MaterialTransferForm({
         }
       >
         <Form form={form} layout="vertical" onFinish={handleFinish}>
-          <Form.Item
-            name="project_no"
-            label="项目号"
-            rules={[{ required: true, message: '请选择项目号' }]}
-          >
-            <Select
-              showSearch
-              placeholder="请选择项目号"
-              loading={isLoadingProjectNos}
-              getPopupContainer={getPopupContainer}
-              options={projectNoOptions}
-              filterOption={filterProjectNoOption}
-              optionRender={renderProjectNoOption}
-              listHeight={320}
-              onChange={handleProjectChange}
-            />
+          <Form.Item label="项目号" required>
+            <Space.Compact block>
+              <Form.Item
+                name="project_no"
+                noStyle
+                rules={[{ required: true, message: '请选择项目号' }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="请选择项目号"
+                  loading={isLoadingProjectNos}
+                  getPopupContainer={getPopupContainer}
+                  options={mergedProjectNoOptions}
+                  filterOption={filterProjectNoOption}
+                  optionRender={renderProjectNoOption}
+                  listHeight={320}
+                  onChange={handleProjectChange}
+                />
+              </Form.Item>
+              <ProjectNoScanButton
+                projectNos={projectNos}
+                onResolved={handleProjectScanResolved}
+              />
+            </Space.Compact>
           </Form.Item>
 
           <div className="grid grid-cols-2 gap-3">

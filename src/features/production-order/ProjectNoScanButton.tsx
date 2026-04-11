@@ -17,6 +17,7 @@ interface SalesOrderProjectNoSource {
   product_model: string | null
   length_mm: number | null
   material_code?: string | null
+  customer?: string | null
   customer_model: string | null
 }
 
@@ -25,6 +26,7 @@ export interface ScannedProjectPayload {
   productModel: string | null
   lengthMm: number | null
   materialCode: string | null
+  customer: string | null
   customerModel: string | null
   rawValue: string
 }
@@ -47,6 +49,7 @@ function buildPayload(
     product_model: string | null
     length_mm: number | null
     material_code?: string | null
+    customer?: string | null
     customer_model: string | null
   },
 ): ScannedProjectPayload {
@@ -55,6 +58,7 @@ function buildPayload(
     productModel: data.product_model,
     lengthMm: data.length_mm,
     materialCode: data.material_code ?? null,
+    customer: data.customer ?? null,
     customerModel: data.customer_model,
     rawValue,
   }
@@ -95,6 +99,7 @@ async function resolveProjectByOrderId(rawValue: string, orderId: string) {
     product_model: workshopOrder.product_model,
     length_mm: workshopOrder.length_mm,
     material_code: workshopOrder.material_code,
+    customer: workshopOrder.customer,
     customer_model: workshopOrder.customer_model,
   })
 }
