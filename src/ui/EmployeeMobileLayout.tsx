@@ -1,4 +1,4 @@
-import { App, Layout, Button, Modal, theme } from 'antd'
+import { Layout, Button, theme } from 'antd'
 import {
   ArrowRightStartOnRectangleIcon,
   ArrowsRightLeftIcon,
@@ -9,15 +9,11 @@ import {
   ScissorsIcon,
 } from '@heroicons/react/24/outline'
 import { BiScan } from 'react-icons/bi'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { ElementType } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/useAuth'
-import EmployeeChangePasswordForm, {
-  type EmployeeChangePasswordValues,
-} from './EmployeeChangePasswordForm'
-import { translateErrorMessage } from '@/utils/errorHandler'
 
 const { Content } = Layout
 
@@ -56,12 +52,9 @@ const baseNavItems: NavItem[] = [
 ]
 
 export default function EmployeeMobileLayout() {
-  const { message } = App.useApp()
   const navigate = useNavigate()
   const location = useLocation()
-  const { signOut, changePassword, user, employeeProfile, role } = useAuth()
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
-  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false)
+  const { signOut, user, employeeProfile, role } = useAuth()
   const {
     token: { colorBgContainer },
   } = theme.useToken()
@@ -81,31 +74,6 @@ export default function EmployeeMobileLayout() {
     return baseNavItems
   }, [role])
 
-  const handleChangePassword = async ({
-    currentPassword,
-    password,
-  }: EmployeeChangePasswordValues) => {
-    setIsSubmittingPassword(true)
-
-    try {
-      await changePassword(currentPassword, password)
-      setIsPasswordModalOpen(false)
-      await signOut()
-      navigate('/login', {
-        replace: true,
-        state: { message: '密码修改成功，请使用新密码重新登录' },
-      })
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? translateErrorMessage(error.message)
-          : '密码修改失败'
-      message.error(errorMessage)
-    } finally {
-      setIsSubmittingPassword(false)
-    }
-  }
-
   return (
     <Layout className="h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,#f5f7ff_0%,#eef2ff_35%,#e8edf5_100%)]">
       <header className="sticky top-0 z-20 border-b border-white/50 bg-white/85 px-4 pt-[calc(env(safe-area-inset-top)+14px)] pb-3 backdrop-blur-xl">
@@ -124,7 +92,7 @@ export default function EmployeeMobileLayout() {
               type="text"
               className="rounded-full border border-slate-200/80 bg-white/90 px-3"
               icon={<KeyIcon className="size-4" />}
-              onClick={() => setIsPasswordModalOpen(true)}
+              onClick={() => navigate('/employee/change-password')}
             >
               修改密码
             </Button>
@@ -184,39 +152,6 @@ export default function EmployeeMobileLayout() {
         </div>
       </nav>
 
-      <Modal
-        title="修改我的密码"
-        open={isPasswordModalOpen}
-        onCancel={() => setIsPasswordModalOpen(false)}
-        footer={null}
-        destroyOnClose
-        width="calc(100vw - 24px)"
-        style={{ top: 16, maxWidth: 480 }}
-      >
-        <EmployeeChangePasswordForm
-          employeeName={employeeProfile?.name || user?.email || null}
-          loading={isSubmittingPassword}
-          onFinish={handleChangePassword}
-        />
-
-        <div className="mt-4 flex gap-3">
-          <Button
-            className="flex-1 rounded-2xl"
-            onClick={() => setIsPasswordModalOpen(false)}
-          >
-            取消
-          </Button>
-          <Button
-            type="primary"
-            htmlType="submit"
-            form="employee-change-password-form"
-            className="flex-1 rounded-2xl"
-            loading={isSubmittingPassword}
-          >
-            保存新密码
-          </Button>
-        </div>
-      </Modal>
     </Layout>
   )
 }

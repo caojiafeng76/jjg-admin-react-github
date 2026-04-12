@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { App, Button, Splitter } from 'antd'
 import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -36,6 +36,7 @@ import {
 
 export default function PrecisionFinishingCuttingPage() {
   const { message, modal } = App.useApp()
+  const navigate = useNavigate()
   const { role, employeeProfile, user } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
@@ -95,9 +96,16 @@ export default function PrecisionFinishingCuttingPage() {
   const initialFormValues = useMemo(() => editingRecord, [editingRecord])
 
   const openCreateModal = useCallback(() => {
+    if (isEmployeeView) {
+      navigate('/precision-finishing-cutting/scan', {
+        state: { returnTo: '/precision-finishing-cutting' },
+      })
+      return
+    }
+
     setEditingRecord(null)
     setIsModalOpen(true)
-  }, [])
+  }, [isEmployeeView, navigate])
 
   const openEditModal = useCallback(
     (record?: PrecisionFinishingCuttingWithEmployee) => {
@@ -119,10 +127,20 @@ export default function PrecisionFinishingCuttingPage() {
         return
       }
 
+      if (isEmployeeView) {
+        navigate('/precision-finishing-cutting/scan', {
+          state: {
+            returnTo: '/precision-finishing-cutting',
+            editingRecord: targetRecord,
+          },
+        })
+        return
+      }
+
       setEditingRecord(targetRecord)
       setIsModalOpen(true)
     },
-    [isEmployeeView, message, records, selectedRowKeys],
+    [isEmployeeView, message, navigate, records, selectedRowKeys],
   )
 
   const handleCloseModal = useCallback(() => {
@@ -455,18 +473,20 @@ export default function PrecisionFinishingCuttingPage() {
         </Splitter>
       )}
 
-      <PrecisionFinishingCuttingForm
-        open={isModalOpen}
-        onCancel={handleCloseModal}
-        onSubmit={handleSubmit}
-        initialValues={initialFormValues}
-        employees={employees}
-        loading={isSubmitting}
-        fixedOperator={fixedEmployee}
-        currentUploader={currentUploader}
-        canAudit={!isEmployeeView}
-        mobile={isEmployeeView}
-      />
+      {!isEmployeeView ? (
+        <PrecisionFinishingCuttingForm
+          open={isModalOpen}
+          onCancel={handleCloseModal}
+          onSubmit={handleSubmit}
+          initialValues={initialFormValues}
+          employees={employees}
+          loading={isSubmitting}
+          fixedOperator={fixedEmployee}
+          currentUploader={currentUploader}
+          canAudit={!isEmployeeView}
+          mobile={false}
+        />
+      ) : null}
     </div>
   )
 }

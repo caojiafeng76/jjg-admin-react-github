@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { App, Button, Card, Form, Input, InputNumber, Typography } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -18,9 +18,14 @@ import {
   MATERIAL_TRANSFER_RECIPIENTS,
   MATERIAL_TRANSFER_WORKSHOPS,
   type MaterialTransferInsert,
+  type MaterialTransferUpdate,
+  type MaterialTransferWithEmployee,
 } from '@/services/apiMaterialTransfers'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import { useCreateMaterialTransfer } from './useMaterialTransfers'
+import {
+  useCreateMaterialTransfer,
+  useUpdateMaterialTransfer,
+} from './useMaterialTransfers'
 
 const { Paragraph, Title } = Typography
 
@@ -70,6 +75,8 @@ interface ProjectNoData {
 interface ScanPageLocationState {
   scannedProject?: ScannedProjectPayload
   autoOpenScanner?: boolean
+  returnTo?: string
+  editingRecord?: MaterialTransferWithEmployee
 }
 
 export default function MobileMaterialTransferScanPage() {
@@ -80,13 +87,17 @@ export default function MobileMaterialTransferScanPage() {
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
   const currentUploader = employeeProfile?.name || user?.email || null
-  const fixedEmployee =
-    isOwnOnlyView && employeeProfile?.id
-      ? { id: employeeProfile.id, name: employeeProfile.name }
-      : null
+  const fixedEmployee = useMemo(
+    () =>
+      isOwnOnlyView && employeeProfile?.id
+        ? { id: employeeProfile.id, name: employeeProfile.name }
+        : null,
+    [employeeProfile, isOwnOnlyView],
+  )
   const { data: projectNos } = useSalesOrdersProjectNos()
   const { data: employeeOptions = [] } = useAllEmployees(!isOwnOnlyView)
   const createMutation = useCreateMaterialTransfer()
+  const updateMutation = useUpdateMaterialTransfer()
   const [form] = Form.useForm<MaterialTransferScanFormValues>()
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null)
   const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
@@ -97,6 +108,9 @@ export default function MobileMaterialTransferScanPage() {
   const navigationState = location.state as ScanPageLocationState | null
   const scannedProjectFromNavigation = navigationState?.scannedProject
   const autoOpenScanner = Boolean(navigationState?.autoOpenScanner)
+  const returnTo = navigationState?.returnTo || '/material-transfer'
+  const editingRecord = navigationState?.editingRecord || null
+  const isEditMode = Boolean(editingRecord?.id)
 
   const projectInfoMap = useMemo(() => {
     const map = new Map<string, ProjectNoData>()
@@ -194,7 +208,7 @@ export default function MobileMaterialTransferScanPage() {
     return employeeNameMap.get(operatorEmployeeId) || '请选择操作人'
   }, [employeeNameMap, fixedEmployee, operatorEmployeeId])
 
-  const handleProjectResolved = (payload: ScannedProjectPayload) => {
+  const handleProjectResolved = useCallback((payload: ScannedProjectPayload) => {
     setScannedProjectDataMap((prev) => ({
       ...prev,
       [payload.projectNo]: {
@@ -213,7 +227,7 @@ export default function MobileMaterialTransferScanPage() {
       length_mm: payload.lengthMm ?? undefined,
       customer_model: payload.customerModel || undefined,
     })
-  }
+  }, [form])
 
   const handleProjectChange = (value: string) => {
     const selectedProject = projectInfoMap.get(value)
@@ -228,12 +242,41 @@ export default function MobileMaterialTransferScanPage() {
   }
 
   useEffect(() => {
+    if (editingRecord) {
+      setScannedProjectDataMap((prev) => ({
+        ...prev,
+        [editingRecord.project_no]: {
+          project_no: editingRecord.project_no,
+          customer: editingRecord.customer,
+          product_model: editingRecord.product_model,
+          length_mm: editingRecord.length_mm,
+          customer_model: editingRecord.customer_model,
+        },
+      }))
+      form.setFieldsValue({
+        project_no: editingRecord.project_no,
+        customer: editingRecord.customer || undefined,
+        product_model: editingRecord.product_model || undefined,
+        length_mm: editingRecord.length_mm ?? undefined,
+        customer_model: editingRecord.customer_model || undefined,
+        transfer_quantity: editingRecord.transfer_quantity,
+        operator_employee_id:
+          editingRecord.operator_employee_ids[0] || fixedEmployee?.id,
+        target_workshop: editingRecord.target_workshop,
+        recipient_name: editingRecord.recipient_name,
+        shift_leader_name: editingRecord.shift_leader_name || undefined,
+        inspector_name: editingRecord.inspector_name || undefined,
+        remark: editingRecord.remark || undefined,
+      })
+      return
+    }
+
     form.setFieldsValue({
       transfer_quantity: 1,
       operator_employee_id: fixedEmployee?.id || undefined,
       inspector_name: DEFAULT_INSPECTOR_NAME,
     })
-  }, [fixedEmployee?.id, form])
+  }, [editingRecord, fixedEmployee?.id, form])
 
   useEffect(() => {
     if (!scannedProjectFromNavigation) {
@@ -246,7 +289,7 @@ export default function MobileMaterialTransferScanPage() {
 
     appliedScanRef.current = scannedProjectFromNavigation.rawValue
     handleProjectResolved(scannedProjectFromNavigation)
-  }, [form, scannedProjectFromNavigation])
+  }, [handleProjectResolved, scannedProjectFromNavigation])
 
   const handleSubmit = async (values: MaterialTransferScanFormValues) => {
     if (!employeeProfile?.id) {
@@ -288,14 +331,30 @@ export default function MobileMaterialTransferScanPage() {
     }
 
     try {
-      await createMutation.mutateAsync(payload)
-      message.success('物料转移单创建成功')
-      navigate('/material-transfer')
+      if (editingRecord) {
+        const updateValues: MaterialTransferUpdate = {
+          ...payload,
+          uploaded_by_name: editingRecord.uploaded_by_name,
+          is_audited: false,
+        }
+        await updateMutation.mutateAsync({
+          id: editingRecord.id,
+          values: updateValues,
+        })
+        message.success('物料转移单更新成功')
+      } else {
+        await createMutation.mutateAsync(payload)
+        message.success('物料转移单创建成功')
+      }
+
+      navigate(returnTo)
     } catch (error) {
       message.error(
         error instanceof Error
           ? translateErrorMessage(error.message)
-          : '物料转移单创建失败',
+          : isEditMode
+            ? '物料转移单更新失败'
+            : '物料转移单创建失败',
       )
     }
   }
@@ -306,9 +365,9 @@ export default function MobileMaterialTransferScanPage() {
         <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
           <Title level={4}>当前账号不可使用扫码录入</Title>
           <Paragraph type="secondary">
-            请使用员工端账号进入后再尝试扫码新增物料转移单。
+            请使用员工端账号进入后再尝试录入物料转移单。
           </Paragraph>
-          <Button type="primary" onClick={() => navigate('/material-transfer')}>
+          <Button type="primary" onClick={() => navigate(returnTo)}>
             返回物料转移单
           </Button>
         </Card>
@@ -327,8 +386,12 @@ export default function MobileMaterialTransferScanPage() {
 
       <MobileScanPageShell
         eyebrow="Material Transfer Scan"
-        title="扫码物料转移单"
-        description="扫码后自动带出项目信息，员工端在当前页面直接完成物料转移单录入。"
+        title={isEditMode ? '编辑物料转移单' : '扫码物料转移单'}
+        description={
+          isEditMode
+            ? '在独立页面中修改物料转移单，提交后返回列表。'
+            : '扫码后自动带出项目信息，员工端在当前页面直接完成物料转移单录入。'
+        }
         scanTrigger={null}
         summary={
           <MobileProjectSummaryCard
@@ -468,17 +531,17 @@ export default function MobileMaterialTransferScanPage() {
           <div className="grid grid-cols-2 gap-3">
             <Button
               className="h-11 rounded-2xl"
-              onClick={() => navigate('/material-transfer')}
+              onClick={() => navigate(returnTo)}
             >
-              返回物料转移单
+              返回上一页
             </Button>
             <Button
               type="primary"
               className="h-11 rounded-2xl"
-              loading={createMutation.isPending}
+              loading={createMutation.isPending || updateMutation.isPending}
               onClick={() => form.submit()}
             >
-              提交创建
+              {isEditMode ? '提交更新' : '提交创建'}
             </Button>
           </div>
         }
@@ -488,7 +551,7 @@ export default function MobileMaterialTransferScanPage() {
         }}
         primaryAction={{
           label: '返回物料转移单',
-          onClick: () => navigate('/material-transfer'),
+          onClick: () => navigate(returnTo),
         }}
       />
 

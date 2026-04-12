@@ -20,6 +20,7 @@ import {
   AttendanceStats,
   ComingSoonPage,
   Dashboard,
+  EmployeeMobileChangePasswordPage,
   EmployeeList,
   JobBaseSetting,
   Login,
@@ -27,6 +28,8 @@ import {
   MachineRuntime,
   MaterialTransfer,
   MaterialTransferScan,
+  MobileProductionOrderDetail,
+  MobileProductionOrderEdit,
   PageNotFound,
   PrecisionCuttingTransfer,
   PrecisionFinishingCutting,
@@ -197,6 +200,17 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'employee/change-password',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={EMPLOYEE_SIDE_ROLES}
+              element={<EmployeeMobileChangePasswordPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
         path: 'standard-time-list',
         element: (
           <Suspense fallback={<Loading />}>
@@ -302,6 +316,28 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={EMPLOYEE_SIDE_ROLES}
               element={<ProductionOrderScan />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'production-order/:orderId',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={EMPLOYEE_SIDE_ROLES}
+              element={<MobileProductionOrderDetail />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'production-order/:orderId/edit',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={EMPLOYEE_SIDE_ROLES}
+              element={<MobileProductionOrderEdit />}
             />
           </Suspense>
         ),
