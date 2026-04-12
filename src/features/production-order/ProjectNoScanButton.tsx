@@ -1,6 +1,7 @@
-import { QrcodeOutlined } from '@ant-design/icons'
+import type { ReactNode } from 'react'
 import { Alert, App, Button, Modal, Tooltip, Typography } from 'antd'
 import { useEffect, useRef, useState } from 'react'
+import { BiScan } from 'react-icons/bi'
 import qrScannerWorkerPath from 'qr-scanner/qr-scanner-worker.min.js?url'
 
 import { getSalesOrderByProjectNo } from '@/services/apiProcessStandards'
@@ -35,6 +36,10 @@ interface ProjectNoScanButtonProps {
   projectNos?: SalesOrderProjectNoSource[]
   disabled?: boolean
   onResolved: (payload: ScannedProjectPayload) => void
+  renderTrigger?: (context: {
+    disabled: boolean
+    openScanner: () => void
+  }) => ReactNode
 }
 
 interface ScannerController {
@@ -171,6 +176,7 @@ export default function ProjectNoScanButton({
   projectNos,
   disabled = false,
   onResolved,
+  renderTrigger,
 }: ProjectNoScanButtonProps) {
   const { message } = App.useApp()
   const [open, setOpen] = useState(false)
@@ -319,14 +325,21 @@ export default function ProjectNoScanButton({
 
   return (
     <>
-      <Tooltip title="扫码填充项目号">
-        <Button
-          icon={<QrcodeOutlined />}
-          aria-label="扫码填充项目号"
-          onClick={() => setOpen(true)}
-          disabled={disabled}
-        />
-      </Tooltip>
+      {renderTrigger ? (
+        renderTrigger({
+          disabled,
+          openScanner: () => setOpen(true),
+        })
+      ) : (
+        <Tooltip title="扫码填充项目号">
+          <Button
+            icon={<BiScan className="size-5" />}
+            aria-label="扫码填充项目号"
+            onClick={() => setOpen(true)}
+            disabled={disabled}
+          />
+        </Tooltip>
+      )}
 
       <Modal
         title="扫码识别项目号"

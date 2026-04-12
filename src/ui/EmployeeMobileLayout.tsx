@@ -8,7 +8,9 @@ import {
   KeyIcon,
   ScissorsIcon,
 } from '@heroicons/react/24/outline'
+import { BiScan } from 'react-icons/bi'
 import { useMemo, useState } from 'react'
+import type { ElementType } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/useAuth'
@@ -19,7 +21,18 @@ import { translateErrorMessage } from '@/utils/errorHandler'
 
 const { Content } = Layout
 
-const baseNavItems = [
+type NavItem = {
+  key: string
+  label: string
+  icon: ElementType
+}
+
+const baseNavItems: NavItem[] = [
+  {
+    key: '/scan',
+    label: '扫码',
+    icon: BiScan,
+  },
   {
     key: '/production-order',
     label: '我的工单',
@@ -160,11 +173,11 @@ export default function EmployeeMobileLayout() {
                 title={item.label}
                 className={
                   isActive
-                    ? 'flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-white shadow-[0_10px_30px_rgba(15,23,42,0.25)] transition'
-                    : 'flex items-center justify-center rounded-2xl bg-slate-100 px-4 py-3 text-slate-600 transition'
+                    ? 'flex items-center justify-center rounded-2xl bg-slate-900 px-2 py-3 text-white shadow-[0_10px_30px_rgba(15,23,42,0.25)] transition'
+                    : 'flex items-center justify-center rounded-2xl bg-slate-100 px-2 py-3 text-slate-600 transition'
                 }
               >
-                <Icon className="size-5" />
+                <Icon className="size-6" />
               </button>
             )
           })}

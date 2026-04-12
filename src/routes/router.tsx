@@ -31,6 +31,8 @@ import {
   PrecisionFinishingCutting,
   ProductionDailyReport,
   ProductionOrder,
+  ProductionOrderScan,
+  ScanHub,
   SafePartSettingPage,
   StandardTimeList,
   SyneyPoDetail,
@@ -248,12 +250,34 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'scan',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={EMPLOYEE_SIDE_ROLES}
+              element={<ScanHub />}
+            />
+          </Suspense>
+        ),
+      },
+      {
         path: 'production-order',
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
               allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<ProductionOrder />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'production-order/scan',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={EMPLOYEE_SIDE_ROLES}
+              element={<ProductionOrderScan />}
             />
           </Suspense>
         ),

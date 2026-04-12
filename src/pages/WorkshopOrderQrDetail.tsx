@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, QrcodeOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import {
   Alert,
@@ -11,6 +11,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
+import { BiScan } from 'react-icons/bi'
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -114,7 +115,7 @@ export default function WorkshopOrderQrDetail() {
           <Alert
             type="info"
             showIcon
-            icon={<QrcodeOutlined />}
+            icon={<BiScan className="size-4" />}
             message={`项目号：${formatText(data.project_no)}`}
             description="当前页面为订单只读信息页，不提供编辑操作。"
           />
