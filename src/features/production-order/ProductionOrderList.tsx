@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from 'react'
 import { Table, TableColumnsType, TableProps, Button, Tag } from 'antd'
 import { EyeIcon } from '@heroicons/react/16/solid'
+import dayjs from 'dayjs'
 
 import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
 
@@ -152,6 +153,14 @@ export default function ProductionOrderList({
         width: 150,
       },
       {
+        title: '更新时间',
+        dataIndex: 'updated_at',
+        key: 'updated_at',
+        width: 180,
+        render: (value: string | null) =>
+          value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-',
+      },
+      {
         title: '操作',
         key: 'actions',
         fixed: 'right',
@@ -202,7 +211,7 @@ export default function ProductionOrderList({
       dataSource={data}
       rowSelection={rowSelection}
       onRow={handleRow}
-      scroll={{ y: scrollY, x: 1150 }}
+      scroll={{ y: scrollY, x: 1330 }}
       virtual
       size="small"
       pagination={false}
