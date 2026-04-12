@@ -21,7 +21,10 @@ import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
 } from '@/ui/mobile/MobileBottomSelectSheet'
 import ProductionOrderItemMobileList from './ProductionOrderItemMobileList'
-import { useProductionOrder, useUpdateProductionOrder } from './useProductionOrders'
+import {
+  useProductionOrder,
+  useUpdateProductionOrder,
+} from './useProductionOrders'
 import {
   useDeleteProductionOrderItems,
   useProductionOrderItems,
@@ -174,7 +177,12 @@ export default function MobileProductionOrderEditPage() {
               </Form.Item>
 
               <Form.Item name="extra_qualified_hours" label="零工工时(小时)">
-                <InputNumber min={0} step={0.5} precision={2} className="w-full" />
+                <InputNumber
+                  min={0}
+                  step={0.5}
+                  precision={2}
+                  className="w-full"
+                />
               </Form.Item>
 
               <Form.Item name="remark" label="备注">

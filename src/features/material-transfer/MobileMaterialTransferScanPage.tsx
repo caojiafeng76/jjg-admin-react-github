@@ -208,26 +208,29 @@ export default function MobileMaterialTransferScanPage() {
     return employeeNameMap.get(operatorEmployeeId) || '请选择操作人'
   }, [employeeNameMap, fixedEmployee, operatorEmployeeId])
 
-  const handleProjectResolved = useCallback((payload: ScannedProjectPayload) => {
-    setScannedProjectDataMap((prev) => ({
-      ...prev,
-      [payload.projectNo]: {
-        project_no: payload.projectNo,
-        customer: payload.customer,
-        product_model: payload.productModel,
-        length_mm: payload.lengthMm,
-        customer_model: payload.customerModel,
-      },
-    }))
+  const handleProjectResolved = useCallback(
+    (payload: ScannedProjectPayload) => {
+      setScannedProjectDataMap((prev) => ({
+        ...prev,
+        [payload.projectNo]: {
+          project_no: payload.projectNo,
+          customer: payload.customer,
+          product_model: payload.productModel,
+          length_mm: payload.lengthMm,
+          customer_model: payload.customerModel,
+        },
+      }))
 
-    form.setFieldsValue({
-      project_no: payload.projectNo,
-      customer: payload.customer || undefined,
-      product_model: payload.productModel || undefined,
-      length_mm: payload.lengthMm ?? undefined,
-      customer_model: payload.customerModel || undefined,
-    })
-  }, [form])
+      form.setFieldsValue({
+        project_no: payload.projectNo,
+        customer: payload.customer || undefined,
+        product_model: payload.productModel || undefined,
+        length_mm: payload.lengthMm ?? undefined,
+        customer_model: payload.customerModel || undefined,
+      })
+    },
+    [form],
+  )
 
   const handleProjectChange = (value: string) => {
     const selectedProject = projectInfoMap.get(value)

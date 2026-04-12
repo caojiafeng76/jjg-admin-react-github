@@ -69,10 +69,7 @@ export default function EmployeeMobileChangePasswordPage() {
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
       >
         <div className="mx-auto grid max-w-2xl grid-cols-2 gap-3">
-          <Button
-            className="h-11 rounded-2xl"
-            onClick={() => navigate(-1)}
-          >
+          <Button className="h-11 rounded-2xl" onClick={() => navigate(-1)}>
             返回上一页
           </Button>
           <Button

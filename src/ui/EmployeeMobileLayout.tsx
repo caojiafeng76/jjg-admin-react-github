@@ -151,7 +151,6 @@ export default function EmployeeMobileLayout() {
           })}
         </div>
       </nav>
-
     </Layout>
   )
 }
