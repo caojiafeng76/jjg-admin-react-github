@@ -10,7 +10,11 @@ import {
   createProductionOrder,
   getEmployeeOrderByDate,
 } from '@/services/apiProductionOrders'
-import { addProductionOrderItem } from '@/services/apiProductionOrderItems'
+import {
+  addProductionOrderItem,
+  updateProductionOrderItem,
+  type ProductionOrderItem,
+} from '@/services/apiProductionOrderItems'
 import {
   useSalesOrdersProjectNos,
   useOperationsByModel,
@@ -37,6 +41,9 @@ interface ProjectNoData {
 
 interface ScanPageLocationState {
   scannedProject?: ScannedProjectPayload
+  returnTo?: string
+  orderId?: string
+  editingItem?: ProductionOrderItem
 }
 
 function formatDisplayValue(value: string | number | null | undefined) {
@@ -200,6 +207,11 @@ export default function MobileProductionOrderScanPage() {
 
   const navigationState = location.state as ScanPageLocationState | null
   const scannedProjectFromNavigation = navigationState?.scannedProject
+  const returnTo = navigationState?.returnTo || '/production-order'
+  const targetOrderId = navigationState?.orderId
+  const editingItem = navigationState?.editingItem
+  const isEditMode = Boolean(editingItem?.id)
+  const isExistingOrderMode = Boolean(targetOrderId)
 
   const resetForm = () => {
     setProjectNo('')
@@ -265,15 +277,45 @@ export default function MobileProductionOrderScanPage() {
     setMachineEquipmentId(undefined)
   }, [scannedProjectFromNavigation])
 
+  useEffect(() => {
+    if (!editingItem) {
+      return
+    }
+
+    setScannedProjectDataMap((prev) => ({
+      ...prev,
+      [editingItem.project_no]: {
+        project_no: editingItem.project_no,
+        product_model: editingItem.product_model,
+        length_mm: editingItem.length_mm,
+        customer_model: editingItem.customer_model,
+      },
+    }))
+
+    setProjectNo(editingItem.project_no)
+    setOperation(editingItem.operation)
+    setMachineEquipmentId(editingItem.machine_equipment_id ?? undefined)
+    setIncomingQualifiedQuantity(editingItem.incoming_qualified_quantity || 0)
+    setQualifiedQuantity(editingItem.qualified_quantity || 0)
+    setDefectQuantity1(editingItem.defect_quantity_1 || 0)
+    setDefectQuantity2(editingItem.defect_quantity_2 || 0)
+    setOutsourceDefectQuantity(editingItem.outsource_defect_quantity || 0)
+    setOutsourceDefectReason(editingItem.outsource_defect_reason || '')
+    setOutsourceUnit(editingItem.outsource_unit || '')
+    setSetupDefectQuantity(editingItem.setup_defect_quantity || 0)
+    setSetupResponsible(editingItem.setup_responsible || '')
+    setRemark(editingItem.remark || '')
+  }, [editingItem])
+
   if (!isEmployeeView || !employeeId) {
     return (
       <div className="flex h-full items-center justify-center p-4">
         <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
           <Title level={4}>当前账号不可使用扫码录入</Title>
           <Paragraph type="secondary">
-            请使用员工端账号进入后再尝试扫码添加工单。
+            请使用员工端账号进入后再尝试录入工单。
           </Paragraph>
-          <Button type="primary" onClick={() => navigate('/production-order')}>
+          <Button type="primary" onClick={() => navigate(returnTo)}>
             返回我的工单
           </Button>
         </Card>
@@ -312,28 +354,12 @@ export default function MobileProductionOrderScanPage() {
     setIsSubmitting(true)
 
     try {
-      const orderDate = dayjs().format('YYYY-MM-DD')
-      let order = await getEmployeeOrderByDate(employeeId, orderDate)
-      const createdNewOrder = !order
-
-      if (!order) {
-        order = await createProductionOrder({
-          employee_id: employeeId,
-          order_date: orderDate,
-          work_hours: 0,
-          shift: '白班',
-          remark: null,
-          extra_qualified_hours: 0,
-        })
-      }
-
-      await addProductionOrderItem({
-        order_id: order.id,
+      const itemPayload = {
         project_no: projectNo,
         product_model: currentProject?.product_model || null,
         length_mm: currentProject?.length_mm || null,
         customer_model: currentProject?.customer_model || null,
-        data_category: 'A',
+        data_category: 'A' as const,
         operation,
         standard_seconds: Number(
           selectedOperationRecord?.standard_seconds || 0,
@@ -354,7 +380,42 @@ export default function MobileProductionOrderScanPage() {
         setup_defect_quantity: Number(setupDefectQuantity || 0),
         setup_responsible: setupResponsible.trim() || null,
         remark: remark.trim() || null,
-      })
+      }
+
+      let createdNewOrder = false
+
+      if (editingItem?.id) {
+        await updateProductionOrderItem({
+          id: editingItem.id,
+          values: itemPayload,
+        })
+      } else {
+        let orderId = targetOrderId
+
+        if (!orderId) {
+          const orderDate = dayjs().format('YYYY-MM-DD')
+          let order = await getEmployeeOrderByDate(employeeId, orderDate)
+          createdNewOrder = !order
+
+          if (!order) {
+            order = await createProductionOrder({
+              employee_id: employeeId,
+              order_date: orderDate,
+              work_hours: 0,
+              shift: '白班',
+              remark: null,
+              extra_qualified_hours: 0,
+            })
+          }
+
+          orderId = order.id
+        }
+
+        await addProductionOrderItem({
+          order_id: orderId,
+          ...itemPayload,
+        })
+      }
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['production-orders'] }),
@@ -365,13 +426,17 @@ export default function MobileProductionOrderScanPage() {
       ])
 
       message.success(
-        createdNewOrder
-          ? '今日工单已创建，并写入工序明细'
-          : '工序明细已追加到今天工单',
+        editingItem?.id
+          ? '工序明细已更新'
+          : createdNewOrder
+            ? '今日工单已创建，并写入工序明细'
+            : isExistingOrderMode
+              ? '工序明细已写入当前工单'
+              : '工序明细已追加到今天工单',
       )
 
       resetForm()
-      navigate('/production-order')
+      navigate(returnTo)
     } catch (error) {
       message.error(
         error instanceof Error ? error.message : '提交失败，请稍后重试',
@@ -391,10 +456,18 @@ export default function MobileProductionOrderScanPage() {
                 Scan To Add
               </div>
               <Title level={4} style={{ marginTop: 8, marginBottom: 4 }}>
-                扫码添加工单
+                {isEditMode
+                  ? '编辑工序明细'
+                  : isExistingOrderMode
+                    ? '新增工序明细'
+                    : '扫码添加工单'}
               </Title>
               <Text type="secondary">
-                扫描项目号后直接录入工序明细。若今天已有工单，系统会自动追加到当天工单。
+                {isEditMode
+                  ? '在独立页面中修改工序明细，提交后返回原工单。'
+                  : isExistingOrderMode
+                    ? '为当前工单新增工序明细，提交后返回详情页。'
+                    : '扫描项目号后直接录入工序明细。若今天已有工单，系统会自动追加到当天工单。'}
               </Text>
             </div>
 
@@ -677,7 +750,7 @@ export default function MobileProductionOrderScanPage() {
         <div className="mx-auto flex max-w-2xl gap-3">
           <Button
             className="h-12 flex-1 rounded-2xl"
-            onClick={() => navigate('/production-order')}
+            onClick={() => navigate(returnTo)}
           >
             取消
           </Button>
@@ -687,7 +760,7 @@ export default function MobileProductionOrderScanPage() {
             loading={isSubmitting}
             onClick={handleSubmit}
           >
-            提交工序明细
+            {isEditMode ? '保存工序明细' : '提交工序明细'}
           </Button>
         </div>
       </div>

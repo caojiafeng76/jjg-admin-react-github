@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { App, Button, Splitter } from 'antd'
 import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -36,6 +36,7 @@ import MaterialTransferTable from './MaterialTransferTable'
 
 export default function MaterialTransferPage() {
   const { message, modal } = App.useApp()
+  const navigate = useNavigate()
   const { role, employeeProfile, user } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
@@ -93,9 +94,16 @@ export default function MaterialTransferPage() {
   const initialFormValues = useMemo(() => editingRecord, [editingRecord])
 
   const openCreateModal = useCallback(() => {
+    if (isEmployeeView) {
+      navigate('/material-transfer/scan', {
+        state: { returnTo: '/material-transfer' },
+      })
+      return
+    }
+
     setEditingRecord(null)
     setIsModalOpen(true)
-  }, [])
+  }, [isEmployeeView, navigate])
 
   const openEditModal = useCallback(
     (record?: MaterialTransferWithEmployee) => {
@@ -117,10 +125,20 @@ export default function MaterialTransferPage() {
         return
       }
 
+      if (isEmployeeView) {
+        navigate('/material-transfer/scan', {
+          state: {
+            returnTo: '/material-transfer',
+            editingRecord: targetRecord,
+          },
+        })
+        return
+      }
+
       setEditingRecord(targetRecord)
       setIsModalOpen(true)
     },
-    [isEmployeeView, message, records, selectedRowKeys],
+    [isEmployeeView, message, navigate, records, selectedRowKeys],
   )
 
   const handleCloseModal = useCallback(() => {
@@ -452,18 +470,20 @@ export default function MaterialTransferPage() {
         </>
       )}
 
-      <MaterialTransferForm
-        open={isModalOpen}
-        onCancel={handleCloseModal}
-        onSubmit={handleSubmit}
-        initialValues={initialFormValues}
-        employees={employees}
-        loading={isSubmitting}
-        fixedOperator={fixedEmployee}
-        currentUploader={currentUploader}
-        canAudit={!isEmployeeView}
-        mobile={isEmployeeView}
-      />
+      {!isEmployeeView ? (
+        <MaterialTransferForm
+          open={isModalOpen}
+          onCancel={handleCloseModal}
+          onSubmit={handleSubmit}
+          initialValues={initialFormValues}
+          employees={employees}
+          loading={isSubmitting}
+          fixedOperator={fixedEmployee}
+          currentUploader={currentUploader}
+          canAudit={!isEmployeeView}
+          mobile={false}
+        />
+      ) : null}
     </div>
   )
 }

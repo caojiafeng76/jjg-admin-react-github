@@ -1,4 +1,4 @@
-import { App, Button, Empty, Tag } from 'antd'
+import { Button, Empty, Popconfirm, Tag } from 'antd'
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
@@ -18,8 +18,6 @@ export default function ProductionOrderItemMobileList({
   onDelete,
   showActions = true,
 }: Props) {
-  const { modal } = App.useApp()
-
   if (!loading && data.length === 0) {
     return (
       <Empty
@@ -155,25 +153,24 @@ export default function ProductionOrderItemMobileList({
                 >
                   编辑
                 </Button>
-                <Button
-                  danger
-                  className="flex-1"
-                  icon={<TrashIcon className="size-4" />}
-                  onClick={() => {
-                    modal.confirm({
-                      title: '删除工序明细',
-                      content: `确认删除工序“${item.operation}”吗？`,
-                      okText: '删除',
-                      cancelText: '取消',
-                      okButtonProps: { danger: true },
-                      onOk: async () => {
-                        await onDelete([item.id])
-                      },
-                    })
+                <Popconfirm
+                  title="删除工序明细"
+                  description={`确认删除工序“${item.operation}”吗？`}
+                  okText="删除"
+                  cancelText="取消"
+                  okButtonProps={{ danger: true }}
+                  onConfirm={async () => {
+                    await onDelete([item.id])
                   }}
                 >
-                  删除
-                </Button>
+                  <Button
+                    danger
+                    className="flex-1"
+                    icon={<TrashIcon className="size-4" />}
+                  >
+                    删除
+                  </Button>
+                </Popconfirm>
               </div>
             ) : null}
           </article>

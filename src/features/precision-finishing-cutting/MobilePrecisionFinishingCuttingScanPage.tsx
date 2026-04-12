@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { App, Button, Card, Form, Input, InputNumber, Typography } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -18,9 +18,14 @@ import {
   PRECISION_FINISHING_CUTTING_RECIPIENTS,
   PRECISION_FINISHING_CUTTING_WORKSHOPS,
   type PrecisionFinishingCuttingInsert,
+  type PrecisionFinishingCuttingUpdate,
+  type PrecisionFinishingCuttingWithEmployee,
 } from '@/services/apiPrecisionFinishingCuttings'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import { useCreatePrecisionFinishingCutting } from './usePrecisionFinishingCuttings'
+import {
+  useCreatePrecisionFinishingCutting,
+  useUpdatePrecisionFinishingCutting,
+} from './usePrecisionFinishingCuttings'
 
 const { Paragraph, Title } = Typography
 const DEFAULT_INSPECTOR_NAME = '崔路路'
@@ -62,6 +67,8 @@ interface ProjectNoData {
 interface ScanPageLocationState {
   scannedProject?: ScannedProjectPayload
   autoOpenScanner?: boolean
+  returnTo?: string
+  editingRecord?: PrecisionFinishingCuttingWithEmployee
 }
 
 export default function MobilePrecisionFinishingCuttingScanPage() {
@@ -72,13 +79,17 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
   const currentUploader = employeeProfile?.name || user?.email || null
-  const fixedEmployee =
-    isOwnOnlyView && employeeProfile?.id
-      ? { id: employeeProfile.id, name: employeeProfile.name }
-      : null
+  const fixedEmployee = useMemo(
+    () =>
+      isOwnOnlyView && employeeProfile?.id
+        ? { id: employeeProfile.id, name: employeeProfile.name }
+        : null,
+    [employeeProfile, isOwnOnlyView],
+  )
   const { data: projectNos } = useSalesOrdersProjectNos()
   const { data: employeeOptions = [] } = useAllEmployees(!isOwnOnlyView)
   const createMutation = useCreatePrecisionFinishingCutting()
+  const updateMutation = useUpdatePrecisionFinishingCutting()
   const [form] = Form.useForm<PrecisionFinishingCuttingScanFormValues>()
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>(null)
   const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
@@ -89,6 +100,9 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
   const navigationState = location.state as ScanPageLocationState | null
   const scannedProjectFromNavigation = navigationState?.scannedProject
   const autoOpenScanner = Boolean(navigationState?.autoOpenScanner)
+  const returnTo = navigationState?.returnTo || '/precision-finishing-cutting'
+  const editingRecord = navigationState?.editingRecord || null
+  const isEditMode = Boolean(editingRecord?.id)
 
   const projectInfoMap = useMemo(() => {
     const map = new Map<string, ProjectNoData>()
@@ -178,7 +192,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
     return employeeNameMap.get(operatorEmployeeId) || '请选择操作人'
   }, [employeeNameMap, fixedEmployee, operatorEmployeeId])
 
-  const handleProjectResolved = (payload: ScannedProjectPayload) => {
+  const handleProjectResolved = useCallback((payload: ScannedProjectPayload) => {
     setScannedProjectDataMap((prev) => ({
       ...prev,
       [payload.projectNo]: {
@@ -197,7 +211,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
       length_mm: payload.lengthMm ?? undefined,
       customer_model: payload.customerModel || undefined,
     })
-  }
+  }, [form])
 
   const handleProjectChange = (value: string) => {
     const selectedProject = projectInfoMap.get(value)
@@ -212,6 +226,45 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
   }
 
   useEffect(() => {
+    if (editingRecord) {
+      setScannedProjectDataMap((prev) => ({
+        ...prev,
+        [editingRecord.project_no]: {
+          project_no: editingRecord.project_no,
+          customer: editingRecord.customer,
+          product_model: editingRecord.product_model,
+          length_mm: editingRecord.length_mm,
+          customer_model: editingRecord.customer_model,
+        },
+      }))
+      form.setFieldsValue({
+        project_no: editingRecord.project_no,
+        customer: editingRecord.customer || undefined,
+        product_model: editingRecord.product_model || undefined,
+        length_mm: editingRecord.length_mm ?? undefined,
+        customer_model: editingRecord.customer_model || undefined,
+        long_material_length_mm: editingRecord.long_material_length_mm,
+        long_material_quantity: editingRecord.long_material_quantity,
+        raw_material_defect_count: editingRecord.raw_material_defect_count,
+        processing_defect_count: editingRecord.processing_defect_count,
+        outsource_defect_quantity: editingRecord.outsource_defect_quantity,
+        defect_reason: editingRecord.defect_reason || undefined,
+        outsource_defect_reason:
+          editingRecord.outsource_defect_reason || undefined,
+        outsource_unit: editingRecord.outsource_unit || undefined,
+        transfer_quantity: editingRecord.transfer_quantity,
+        responsible_process: editingRecord.responsible_process || undefined,
+        process_owner: editingRecord.process_owner || undefined,
+        operator_employee_id:
+          editingRecord.operator_employee_ids[0] || fixedEmployee?.id,
+        target_workshop: editingRecord.target_workshop,
+        recipient_name: editingRecord.recipient_name,
+        inspector_name: editingRecord.inspector_name || undefined,
+        remark: editingRecord.remark || undefined,
+      })
+      return
+    }
+
     form.setFieldsValue({
       long_material_length_mm: 0.01,
       long_material_quantity: 1,
@@ -222,7 +275,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
       operator_employee_id: fixedEmployee?.id || undefined,
       inspector_name: DEFAULT_INSPECTOR_NAME,
     })
-  }, [fixedEmployee?.id, form])
+  }, [editingRecord, fixedEmployee?.id, form])
 
   useEffect(() => {
     if (!scannedProjectFromNavigation) {
@@ -235,7 +288,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
 
     appliedScanRef.current = scannedProjectFromNavigation.rawValue
     handleProjectResolved(scannedProjectFromNavigation)
-  }, [form, scannedProjectFromNavigation])
+  }, [handleProjectResolved, scannedProjectFromNavigation])
 
   const handleSubmit = async (
     values: PrecisionFinishingCuttingScanFormValues,
@@ -283,14 +336,30 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
     }
 
     try {
-      await createMutation.mutateAsync(payload)
-      message.success('精加工切割单创建成功')
-      navigate('/precision-finishing-cutting')
+      if (editingRecord) {
+        const updateValues: PrecisionFinishingCuttingUpdate = {
+          ...payload,
+          uploaded_by_name: editingRecord.uploaded_by_name,
+          is_audited: false,
+        }
+        await updateMutation.mutateAsync({
+          id: editingRecord.id,
+          values: updateValues,
+        })
+        message.success('精加工切割单更新成功')
+      } else {
+        await createMutation.mutateAsync(payload)
+        message.success('精加工切割单创建成功')
+      }
+
+      navigate(returnTo)
     } catch (error) {
       message.error(
         error instanceof Error
           ? translateErrorMessage(error.message)
-          : '精加工切割单创建失败',
+          : isEditMode
+            ? '精加工切割单更新失败'
+            : '精加工切割单创建失败',
       )
     }
   }
@@ -301,11 +370,11 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
         <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
           <Title level={4}>当前账号不可使用扫码录入</Title>
           <Paragraph type="secondary">
-            请使用员工端账号进入后再尝试扫码新增精加工切割单。
+            请使用员工端账号进入后再尝试录入精加工切割单。
           </Paragraph>
           <Button
             type="primary"
-            onClick={() => navigate('/precision-finishing-cutting')}
+            onClick={() => navigate(returnTo)}
           >
             返回精加工切割单
           </Button>
@@ -325,8 +394,12 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
 
       <MobileScanPageShell
         eyebrow="Precision Finishing Scan"
-        title="扫码精加工切割单"
-        description="扫码后自动带出项目信息，员工端在当前页面直接完成精加工切割单录入。"
+        title={isEditMode ? '编辑精加工切割单' : '扫码精加工切割单'}
+        description={
+          isEditMode
+            ? '在独立页面中修改精加工切割单，提交后返回列表。'
+            : '扫码后自动带出项目信息，员工端在当前页面直接完成精加工切割单录入。'
+        }
         scanTrigger={null}
         summary={
           <MobileProjectSummaryCard
@@ -500,17 +573,17 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
           <div className="grid grid-cols-2 gap-3">
             <Button
               className="h-11 rounded-2xl"
-              onClick={() => navigate('/precision-finishing-cutting')}
+              onClick={() => navigate(returnTo)}
             >
-              返回精加工切割单
+              返回上一页
             </Button>
             <Button
               type="primary"
               className="h-11 rounded-2xl"
-              loading={createMutation.isPending}
+              loading={createMutation.isPending || updateMutation.isPending}
               onClick={() => form.submit()}
             >
-              提交创建
+              {isEditMode ? '提交更新' : '提交创建'}
             </Button>
           </div>
         }
@@ -520,7 +593,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
         }}
         primaryAction={{
           label: '返回精加工切割单',
-          onClick: () => navigate('/precision-finishing-cutting'),
+          onClick: () => navigate(returnTo),
         }}
       />
 

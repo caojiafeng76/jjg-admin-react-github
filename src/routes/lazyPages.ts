@@ -5,6 +5,9 @@ export const Login = lazy(() => import('@pages/Login'))
 export const PageNotFound = lazy(() => import('@pages/PageNotFound'))
 export const AccessDenied = lazy(() => import('@pages/AccessDenied'))
 export const ComingSoonPage = lazy(() => import('@pages/ComingSoonPage'))
+export const EmployeeMobileChangePasswordPage = lazy(
+  () => import('@ui/EmployeeMobileChangePasswordPage'),
+)
 
 export const SyneySpecList = lazy(() => import('@features/syney/SpecList'))
 export const SyneyStoreReportList = lazy(
@@ -60,6 +63,12 @@ export const ScanHub = lazy(
 export const ProductionOrder = lazy(() => import('@features/production-order'))
 export const ProductionOrderScan = lazy(
   () => import('@features/production-order/MobileProductionOrderScanPage'),
+)
+export const MobileProductionOrderDetail = lazy(
+  () => import('@features/production-order/MobileProductionOrderDetailPage'),
+)
+export const MobileProductionOrderEdit = lazy(
+  () => import('@features/production-order/MobileProductionOrderEditPage'),
 )
 export const MaterialTransferScan = lazy(
   () => import('@features/material-transfer/MobileMaterialTransferScanPage'),

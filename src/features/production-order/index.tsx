@@ -28,7 +28,7 @@ import {
   Splitter,
   Typography,
 } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
@@ -162,6 +162,7 @@ async function syncOrderItemsSequentially({
 
 export default function ProductionOrderPage() {
   const { message, modal } = App.useApp()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { role, employeeProfile } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
@@ -332,12 +333,19 @@ export default function ProductionOrderPage() {
   )
 
   const handleCreate = useCallback(() => {
+    if (isEmployeeView) {
+      navigate('/production-order/scan', {
+        state: { returnTo: '/production-order' },
+      })
+      return
+    }
+
     setIsEdit(false)
     setIsView(false)
     setModalTitle('创建工单')
     setEditingRecord(null)
     setIsModalOpen(true)
-  }, [])
+  }, [isEmployeeView, navigate])
 
   const handleEdit = useCallback(
     (record?: ProductionOrder) => {
@@ -370,12 +378,17 @@ export default function ProductionOrderPage() {
   )
 
   const handleView = useCallback((record: ProductionOrder) => {
+    if (isEmployeeView) {
+      navigate(`/production-order/${record.id}`)
+      return
+    }
+
     setEditingRecord(record)
     setIsView(true)
     setIsEdit(false)
     setModalTitle('工单详情')
     setIsModalOpen(true)
-  }, [])
+  }, [isEmployeeView, navigate])
 
   const handleDelete = useCallback(
     (ids?: string[]) => {
@@ -958,45 +971,48 @@ export default function ProductionOrderPage() {
         </Splitter>
       )}
 
-      <ProductionOrderForm
-        open={isModalOpen && !isView}
-        onCancel={resetFormState}
-        onSubmit={handleFinish}
-        initialValues={detailData || editingRecord || undefined}
-        employees={employees}
-        fixedEmployee={fixedEmployee}
-        loading={isLoadingDetail && !!editingRecord?.id}
-        compact={isEmployeeView}
-        showAuditField={!isEmployeeView}
-      />
-
-      <Modal
-        title={modalTitle}
-        open={isModalOpen && isView}
-        onCancel={resetFormState}
-        footer={[]}
-        width={isEmployeeView ? 'calc(100vw - 20px)' : 900}
-        style={isEmployeeView ? { top: 12, maxWidth: 560 } : undefined}
-        destroyOnClose
-      >
-        {detailOrder ? (
-          <ProductionOrderDetail
-            order={detailOrder}
-            compact={isEmployeeView}
-            canEdit={!(isEmployeeView && isAuditedRecord(detailOrder))}
-            onEdit={() => {
-              if (isEmployeeView && isAuditedRecord(detailOrder)) {
-                message.warning('已审核工单员工无法编辑')
-                return
-              }
-
-              setIsView(false)
-              setIsEdit(true)
-              setModalTitle('编辑工单')
-            }}
+      {!isEmployeeView ? (
+        <>
+          <ProductionOrderForm
+            open={isModalOpen && !isView}
+            onCancel={resetFormState}
+            onSubmit={handleFinish}
+            initialValues={detailData || editingRecord || undefined}
+            employees={employees}
+            fixedEmployee={fixedEmployee}
+            loading={isLoadingDetail && !!editingRecord?.id}
+            compact={false}
+            showAuditField={!isEmployeeView}
           />
-        ) : null}
-      </Modal>
+
+          <Modal
+            title={modalTitle}
+            open={isModalOpen && isView}
+            onCancel={resetFormState}
+            footer={[]}
+            width={900}
+            destroyOnClose
+          >
+            {detailOrder ? (
+              <ProductionOrderDetail
+                order={detailOrder}
+                compact={false}
+                canEdit={!(isEmployeeView && isAuditedRecord(detailOrder))}
+                onEdit={() => {
+                  if (isEmployeeView && isAuditedRecord(detailOrder)) {
+                    message.warning('已审核工单员工无法编辑')
+                    return
+                  }
+
+                  setIsView(false)
+                  setIsEdit(true)
+                  setModalTitle('编辑工单')
+                }}
+              />
+            ) : null}
+          </Modal>
+        </>
+      ) : null}
 
       <Modal
         title="修改我的管理密码"
