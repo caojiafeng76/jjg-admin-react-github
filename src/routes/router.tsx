@@ -26,9 +26,11 @@ import {
   MachineEquipmentMaintenance,
   MachineRuntime,
   MaterialTransfer,
+  MaterialTransferScan,
   PageNotFound,
   PrecisionCuttingTransfer,
   PrecisionFinishingCutting,
+  PrecisionFinishingCuttingScan,
   ProductionDailyReport,
   ProductionOrder,
   ProductionOrderScan,
@@ -239,12 +241,34 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'material-transfer/scan',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={EMPLOYEE_SIDE_ROLES}
+              element={<MaterialTransferScan />}
+            />
+          </Suspense>
+        ),
+      },
+      {
         path: 'precision-finishing-cutting',
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
               allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<PrecisionFinishingCutting />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'precision-finishing-cutting/scan',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={EMPLOYEE_SIDE_ROLES}
+              element={<PrecisionFinishingCuttingScan />}
             />
           </Suspense>
         ),

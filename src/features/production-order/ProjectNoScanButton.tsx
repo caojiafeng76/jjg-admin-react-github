@@ -35,6 +35,7 @@ export interface ScannedProjectPayload {
 interface ProjectNoScanButtonProps {
   projectNos?: SalesOrderProjectNoSource[]
   disabled?: boolean
+  autoOpen?: boolean
   onResolved: (payload: ScannedProjectPayload) => void
   renderTrigger?: (context: {
     disabled: boolean
@@ -175,6 +176,7 @@ async function resolveScannedProject(
 export default function ProjectNoScanButton({
   projectNos,
   disabled = false,
+  autoOpen = false,
   onResolved,
   renderTrigger,
 }: ProjectNoScanButtonProps) {
@@ -188,6 +190,16 @@ export default function ProjectNoScanButton({
   const scannerRef = useRef<ScannerController | null>(null)
   const resolvingRef = useRef(false)
   const lastRawValueRef = useRef('')
+  const autoOpenedRef = useRef(false)
+
+  useEffect(() => {
+    if (!autoOpen || disabled || autoOpenedRef.current) {
+      return
+    }
+
+    autoOpenedRef.current = true
+    setOpen(true)
+  }, [autoOpen, disabled])
 
   function stopScanner() {
     scannerRef.current?.stop()

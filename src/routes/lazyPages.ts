@@ -61,6 +61,13 @@ export const ProductionOrder = lazy(() => import('@features/production-order'))
 export const ProductionOrderScan = lazy(
   () => import('@features/production-order/MobileProductionOrderScanPage'),
 )
+export const MaterialTransferScan = lazy(
+  () => import('@features/material-transfer/MobileMaterialTransferScanPage'),
+)
+export const PrecisionFinishingCuttingScan = lazy(
+  () =>
+    import('@features/precision-finishing-cutting/MobilePrecisionFinishingCuttingScanPage'),
+)
 export const ProductionDailyReport = lazy(
   () => import('@features/production-report'),
 )
