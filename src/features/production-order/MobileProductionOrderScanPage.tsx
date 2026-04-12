@@ -395,17 +395,33 @@ export default function MobileProductionOrderScanPage() {
         if (!orderId) {
           const orderDate = dayjs().format('YYYY-MM-DD')
           let order = await getEmployeeOrderByDate(employeeId, orderDate)
-          createdNewOrder = !order
 
           if (!order) {
-            order = await createProductionOrder({
-              employee_id: employeeId,
-              order_date: orderDate,
-              work_hours: 0,
-              shift: '白班',
-              remark: null,
-              extra_qualified_hours: 0,
-            })
+            try {
+              createdNewOrder = true
+              order = await createProductionOrder({
+                employee_id: employeeId,
+                order_date: orderDate,
+                work_hours: 0,
+                shift: '白班',
+                remark: null,
+                extra_qualified_hours: 0,
+              })
+            } catch (error) {
+              if (
+                error instanceof Error &&
+                error.message.includes('同一天只能创建一张工单')
+              ) {
+                createdNewOrder = false
+                order = await getEmployeeOrderByDate(employeeId, orderDate)
+              } else {
+                throw error
+              }
+            }
+          }
+
+          if (!order) {
+            throw new Error('获取当天工单失败，请稍后重试')
           }
 
           orderId = order.id
@@ -429,10 +445,10 @@ export default function MobileProductionOrderScanPage() {
         editingItem?.id
           ? '工序明细已更新'
           : createdNewOrder
-            ? '今日工单已创建，并写入工序明细'
+            ? '新工单已创建，并写入工序明细'
             : isExistingOrderMode
               ? '工序明细已写入当前工单'
-              : '工序明细已追加到今天工单',
+              : '当天已存在工单，工序明细已追加到原工单',
       )
 
       resetForm()
@@ -467,7 +483,7 @@ export default function MobileProductionOrderScanPage() {
                   ? '在独立页面中修改工序明细，提交后返回原工单。'
                   : isExistingOrderMode
                     ? '为当前工单新增工序明细，提交后返回详情页。'
-                    : '扫描项目号后直接录入工序明细。若今天已有工单，系统会自动追加到当天工单。'}
+                    : '扫描项目号后直接录入工序明细；若当天已有工单，则自动追加到当天工单，否则创建新工单。'}
               </Text>
             </div>
 

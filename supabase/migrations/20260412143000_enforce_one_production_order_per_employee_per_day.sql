@@ -1,0 +1,4 @@
+alter table public.production_orders drop constraint if exists production_orders_employee_id_order_date_unique;
+alter table public.production_orders
+add constraint production_orders_employee_id_order_date_unique unique (employee_id, order_date);
+comment on constraint production_orders_employee_id_order_date_unique on public.production_orders is '限制同一员工同一天只能创建一张生产工单';

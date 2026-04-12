@@ -214,9 +214,11 @@ export async function getProductionOrdersForExport(ids: string[]) {
     )
   }
 
-  const rows = (await Promise.all(
-    batches.map((batchIds) => getProductionOrdersForExportBatch(batchIds)),
-  )).flat()
+  const rows = (
+    await Promise.all(
+      batches.map((batchIds) => getProductionOrdersForExportBatch(batchIds)),
+    )
+  ).flat()
   const rowMap = new Map(rows.map((row) => [row.id, row]))
 
   return uniqueIds
@@ -310,6 +312,13 @@ export async function createProductionOrder(values: ProductionOrderInsert) {
     .single()
 
   if (error) {
+    if (
+      error.code === '23505' &&
+      error.message.includes('production_orders_employee_id_order_date_unique')
+    ) {
+      throw new Error('该员工当天已有工单，同一天只能创建一张工单')
+    }
+
     throw handleApiError(error, '创建生产工单失败')
   }
 
@@ -470,29 +479,31 @@ export async function getProductionItemsByProjectNo(
     throw handleApiError(error, '获取生产工单明细失败')
   }
 
-  return ((data || []) as unknown as Array<{
-    id: string
-    operation: string
-    project_no: string
-    product_model: string | null
-    length_mm: number | null
-    customer_model: string | null
-    qualified_quantity: number
-    incoming_qualified_quantity: number
-    defect_quantity_1: number
-    defect_quantity_2: number
-    defect_reason_1: string | null
-    defect_reason_2: string | null
-    standard_seconds: number
-    remark: string | null
-    order_id: string
-    production_orders: {
+  return (
+    (data || []) as unknown as Array<{
       id: string
-      order_date: string
-      shift: string
-      employee: { name: string } | null
-    } | null
-  }>).map((item) => ({
+      operation: string
+      project_no: string
+      product_model: string | null
+      length_mm: number | null
+      customer_model: string | null
+      qualified_quantity: number
+      incoming_qualified_quantity: number
+      defect_quantity_1: number
+      defect_quantity_2: number
+      defect_reason_1: string | null
+      defect_reason_2: string | null
+      standard_seconds: number
+      remark: string | null
+      order_id: string
+      production_orders: {
+        id: string
+        order_date: string
+        shift: string
+        employee: { name: string } | null
+      } | null
+    }>
+  ).map((item) => ({
     id: item.id,
     operation: item.operation,
     project_no: item.project_no,

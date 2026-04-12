@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { App, Button, Card, Typography } from 'antd'
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -26,19 +25,7 @@ export default function MobileProductionOrderDetailPage() {
   const deleteMutation = useDeleteProductionOrderItems()
 
   const canEdit = !order?.is_audited
-  const typedItems = useMemo(
-    () => items as ProductionOrderItemWithMachine[],
-    [items],
-  )
-  const positiveQualifiedHours = useMemo(
-    () =>
-      Number(
-        typedItems
-          .reduce((total, item) => total + Number(item.qualified_hours || 0), 0)
-          .toFixed(2),
-      ),
-    [typedItems],
-  )
+  const typedItems = items as ProductionOrderItemWithMachine[]
 
   const handleDeleteItem = async (ids: string[]) => {
     try {
@@ -118,14 +105,6 @@ export default function MobileProductionOrderDetailPage() {
               </div>
               <div className="mt-1 font-semibold text-slate-900">
                 {order?.shift || '白班'}
-              </div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
-                正工工时
-              </div>
-              <div className="mt-1 font-semibold text-slate-900">
-                {positiveQualifiedHours.toFixed(2)} 小时
               </div>
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3">

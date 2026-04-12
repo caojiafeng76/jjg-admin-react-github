@@ -334,9 +334,7 @@ export default function ProductionOrderPage() {
 
   const handleCreate = useCallback(() => {
     if (isEmployeeView) {
-      navigate('/production-order/scan', {
-        state: { returnTo: '/production-order' },
-      })
+      navigate('/production-order/create')
       return
     }
 
@@ -826,13 +824,13 @@ export default function ProductionOrderPage() {
               disabled={hasOrderToday}
               className="h-11 rounded-2xl shadow-[0_12px_30px_rgba(15,23,42,0.16)]"
             >
-              {hasOrderToday ? '当天工单已存在' : '添加'}
+              手动添加
             </Button>
-            {hasOrderToday ? (
-              <p className="text-center text-xs text-slate-400">
-                若要修改，请在原单上修改
-              </p>
-            ) : null}
+            <p className="text-center text-xs text-slate-400">
+              {hasOrderToday
+                ? '当前用户当天已存在工单，不能重复手动创建'
+                : '手动添加会先创建工单，再进入详情维护工序'}
+            </p>
           </div>
         ) : (
           <>
