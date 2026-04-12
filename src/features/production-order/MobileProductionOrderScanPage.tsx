@@ -21,7 +21,7 @@ import ProjectNoScanButton, {
 } from './ProjectNoScanButton'
 import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
-} from './MobileBottomSelectSheet'
+} from '@/ui/mobile/MobileBottomSelectSheet'
 
 const { Paragraph, Text, Title } = Typography
 

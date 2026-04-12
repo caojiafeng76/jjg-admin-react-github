@@ -17,6 +17,12 @@ export default function MobileScanHubPage() {
   const { data: projectNos } = useSalesOrdersProjectNos()
   const isEmployeeView = isEmployeeSideRole(role)
 
+  const openAutoScanPage = (pathname: string) => {
+    navigate(pathname, {
+      state: { autoOpenScanner: true },
+    })
+  }
+
   function handleProjectResolved(payload: ScannedProjectPayload) {
     navigate('/production-order/scan', {
       state: { scannedProject: payload },
@@ -75,6 +81,36 @@ export default function MobileScanHubPage() {
               </button>
             )}
           />
+
+          <button
+            type="button"
+            onClick={() => openAutoScanPage('/material-transfer/scan')}
+            className="flex min-h-44 w-full flex-col items-center justify-center rounded-4xl border-[3px] border-slate-200 bg-white px-4 py-6 text-slate-950 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition active:scale-[0.99]"
+          >
+            <BiScan className="size-16" />
+            <span className="mt-5 text-lg font-semibold tracking-tight">
+              物料转移
+            </span>
+            <span className="mt-2 text-center text-xs text-slate-500">
+              点击后直接启动扫码并进入录入页
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              openAutoScanPage('/precision-finishing-cutting/scan')
+            }
+            className="flex min-h-44 w-full flex-col items-center justify-center rounded-4xl border-[3px] border-slate-200 bg-white px-4 py-6 text-slate-950 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition active:scale-[0.99]"
+          >
+            <BiScan className="size-16" />
+            <span className="mt-5 text-lg font-semibold tracking-tight">
+              精加工切割
+            </span>
+            <span className="mt-2 text-center text-xs text-slate-500">
+              点击后直接启动扫码并进入录入页
+            </span>
+          </button>
         </div>
       </div>
     </div>
