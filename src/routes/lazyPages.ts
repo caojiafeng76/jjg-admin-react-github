@@ -64,6 +64,9 @@ export const ProductionOrder = lazy(() => import('@features/production-order'))
 export const ProductionOrderScan = lazy(
   () => import('@features/production-order/MobileProductionOrderScanPage'),
 )
+export const MobileProductionOrderCreate = lazy(
+  () => import('@features/production-order/MobileProductionOrderCreatePage'),
+)
 export const MobileProductionOrderDetail = lazy(
   () => import('@features/production-order/MobileProductionOrderDetailPage'),
 )

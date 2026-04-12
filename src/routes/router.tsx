@@ -28,6 +28,7 @@ import {
   MachineRuntime,
   MaterialTransfer,
   MaterialTransferScan,
+  MobileProductionOrderCreate,
   MobileProductionOrderDetail,
   MobileProductionOrderEdit,
   PageNotFound,
@@ -305,6 +306,17 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
               element={<ProductionOrder />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'production-order/create',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={EMPLOYEE_SIDE_ROLES}
+              element={<MobileProductionOrderCreate />}
             />
           </Suspense>
         ),
