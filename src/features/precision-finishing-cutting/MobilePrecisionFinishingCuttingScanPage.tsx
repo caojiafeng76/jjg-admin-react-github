@@ -192,26 +192,29 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
     return employeeNameMap.get(operatorEmployeeId) || '请选择操作人'
   }, [employeeNameMap, fixedEmployee, operatorEmployeeId])
 
-  const handleProjectResolved = useCallback((payload: ScannedProjectPayload) => {
-    setScannedProjectDataMap((prev) => ({
-      ...prev,
-      [payload.projectNo]: {
-        project_no: payload.projectNo,
-        customer: payload.customer,
-        product_model: payload.productModel,
-        length_mm: payload.lengthMm,
-        customer_model: payload.customerModel,
-      },
-    }))
+  const handleProjectResolved = useCallback(
+    (payload: ScannedProjectPayload) => {
+      setScannedProjectDataMap((prev) => ({
+        ...prev,
+        [payload.projectNo]: {
+          project_no: payload.projectNo,
+          customer: payload.customer,
+          product_model: payload.productModel,
+          length_mm: payload.lengthMm,
+          customer_model: payload.customerModel,
+        },
+      }))
 
-    form.setFieldsValue({
-      project_no: payload.projectNo,
-      customer: payload.customer || undefined,
-      product_model: payload.productModel || undefined,
-      length_mm: payload.lengthMm ?? undefined,
-      customer_model: payload.customerModel || undefined,
-    })
-  }, [form])
+      form.setFieldsValue({
+        project_no: payload.projectNo,
+        customer: payload.customer || undefined,
+        product_model: payload.productModel || undefined,
+        length_mm: payload.lengthMm ?? undefined,
+        customer_model: payload.customerModel || undefined,
+      })
+    },
+    [form],
+  )
 
   const handleProjectChange = (value: string) => {
     const selectedProject = projectInfoMap.get(value)
@@ -372,10 +375,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
           <Paragraph type="secondary">
             请使用员工端账号进入后再尝试录入精加工切割单。
           </Paragraph>
-          <Button
-            type="primary"
-            onClick={() => navigate(returnTo)}
-          >
+          <Button type="primary" onClick={() => navigate(returnTo)}>
             返回精加工切割单
           </Button>
         </Card>

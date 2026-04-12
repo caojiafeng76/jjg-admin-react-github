@@ -377,18 +377,21 @@ export default function ProductionOrderPage() {
     [isEmployeeView, message, orderData?.items, selectedRowKeys],
   )
 
-  const handleView = useCallback((record: ProductionOrder) => {
-    if (isEmployeeView) {
-      navigate(`/production-order/${record.id}`)
-      return
-    }
+  const handleView = useCallback(
+    (record: ProductionOrder) => {
+      if (isEmployeeView) {
+        navigate(`/production-order/${record.id}`)
+        return
+      }
 
-    setEditingRecord(record)
-    setIsView(true)
-    setIsEdit(false)
-    setModalTitle('工单详情')
-    setIsModalOpen(true)
-  }, [isEmployeeView, navigate])
+      setEditingRecord(record)
+      setIsView(true)
+      setIsEdit(false)
+      setModalTitle('工单详情')
+      setIsModalOpen(true)
+    },
+    [isEmployeeView, navigate],
+  )
 
   const handleDelete = useCallback(
     (ids?: string[]) => {
