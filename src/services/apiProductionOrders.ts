@@ -405,6 +405,26 @@ export async function checkEmployeeOrderExistsOnDate(
   return (count ?? 0) > 0
 }
 
+export async function getEmployeeOrderByDate(
+  employeeId: string,
+  orderDate: string,
+): Promise<ProductionOrder | null> {
+  const { data, error } = await supabase
+    .from('production_orders')
+    .select('*')
+    .eq('employee_id', employeeId)
+    .eq('order_date', orderDate)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取当天工单失败')
+  }
+
+  return (data as ProductionOrder | null) ?? null
+}
+
 export interface ProductionItemWithOrderDetail {
   id: string
   operation: string

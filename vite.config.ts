@@ -3,8 +3,14 @@ import react from '@vitejs/plugin-react'
 
 import { fileURLToPath, URL } from 'node:url'
 
+import mkcert from 'vite-plugin-mkcert'
+
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    host: true, // 必须开启，以支持局域网访问
+    https: {}, // 开启 HTTPS 模式
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -21,7 +27,7 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
   },
-  plugins: [react()],
+  plugins: [react(), mkcert()],
   // Use Lightning CSS for minification to avoid noisy warnings from esbuild
   build: {
     cssMinify: 'lightningcss',

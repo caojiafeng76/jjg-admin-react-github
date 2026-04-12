@@ -7,7 +7,9 @@ export const AccessDenied = lazy(() => import('@pages/AccessDenied'))
 export const ComingSoonPage = lazy(() => import('@pages/ComingSoonPage'))
 
 export const SyneySpecList = lazy(() => import('@features/syney/SpecList'))
-export const SyneyStoreReportList = lazy(() => import('@features/syney/ReportList'))
+export const SyneyStoreReportList = lazy(
+  () => import('@features/syney/ReportList'),
+)
 export const SyneyStoreReportDetail = lazy(
   () => import('@features/syney/ReportDetail'),
 )
@@ -18,7 +20,9 @@ export const SafePartSettingPage = lazy(
 )
 export const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
 
-export const WorkshopOrderList = lazy(() => import('@features/workshop/OrderList'))
+export const WorkshopOrderList = lazy(
+  () => import('@features/workshop/OrderList'),
+)
 export const WorkshopOrderProduction = lazy(
   () => import('@pages/WorkshopOrderProduction'),
 )
@@ -28,7 +32,9 @@ export const WorkshopOrderClosed = lazy(
 export const WorkshopOrderQrDetail = lazy(
   () => import('@pages/WorkshopOrderQrDetail'),
 )
-export const EmployeeList = lazy(() => import('@features/workshop/EmployeeList'))
+export const EmployeeList = lazy(
+  () => import('@features/workshop/EmployeeList'),
+)
 export const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),
 )
@@ -39,14 +45,22 @@ export const ToolingData = lazy(() => import('@features/tooling/ToolingData'))
 export const MachineEquipmentMaintenance = lazy(
   () => import('@features/workshop/MachineEquipmentMaintenance'),
 )
-export const MaterialTransfer = lazy(() => import('@features/material-transfer'))
+export const MaterialTransfer = lazy(
+  () => import('@features/material-transfer'),
+)
 export const PrecisionFinishingCutting = lazy(
   () => import('@features/precision-finishing-cutting'),
 )
 export const PrecisionCuttingTransfer = lazy(
   () => import('@features/precision-cutting-transfer'),
 )
+export const ScanHub = lazy(
+  () => import('@features/production-order/MobileScanHubPage'),
+)
 export const ProductionOrder = lazy(() => import('@features/production-order'))
+export const ProductionOrderScan = lazy(
+  () => import('@features/production-order/MobileProductionOrderScanPage'),
+)
 export const ProductionDailyReport = lazy(
   () => import('@features/production-report'),
 )
