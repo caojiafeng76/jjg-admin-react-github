@@ -14,6 +14,11 @@ export interface ProductionDailyReportFilters {
   employeeId?: string
 }
 
+export interface ProductionDailyReportQueryParams extends ProductionDailyReportFilters {
+  page: number
+  pageSize: number
+}
+
 interface ProductionDailyReportItemRow {
   id: string
   data_category: ProductionOrderDataCategory | null
@@ -74,6 +79,7 @@ export interface ProductionDailyReportRow {
 export interface ProductionDailyReportResult {
   rows: ProductionDailyReportRow[]
   operations: string[]
+  total: number
 }
 
 interface SalesOrderWeightRow {
@@ -82,15 +88,13 @@ interface SalesOrderWeightRow {
 }
 
 const FETCH_BATCH_SIZE = 1000
-
-function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) {
-  let query = supabase.from('production_order_items').select(`
+const PRODUCTION_DAILY_REPORT_SELECT = `
       id,
       data_category,
       project_no,
       product_model,
       customer_model,
-  incoming_qualified_quantity,
+      incoming_qualified_quantity,
       length_mm,
       operation,
       qualified_quantity,
@@ -107,7 +111,18 @@ function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) 
         order_date,
         employee:employees(id, name)
       )
-    `)
+    `
+
+function buildProductionDailyReportQuery(
+  filters: ProductionDailyReportFilters,
+  withCount = false,
+) {
+  let query = supabase
+    .from('production_order_items')
+    .select(
+      PRODUCTION_DAILY_REPORT_SELECT,
+      withCount ? { count: 'exact' } : undefined,
+    )
 
   if (filters.startDate) {
     query = query.gte(
@@ -150,15 +165,50 @@ function buildProductionDailyReportQuery(filters: ProductionDailyReportFilters) 
   return query
 }
 
+function applyProductionDailyReportOrdering<
+  TQuery extends ReturnType<typeof buildProductionDailyReportQuery>,
+>(query: TQuery) {
+  return query
+    .order('order_date', {
+      ascending: false,
+      referencedTable: 'production_orders',
+    })
+    .order('project_no', { ascending: true })
+    .order('operation', { ascending: true })
+    .order('id', { ascending: true })
+}
+
+async function getProductionDailyReportPage(
+  filters: ProductionDailyReportFilters,
+  page: number,
+  pageSize: number,
+) {
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  const { data, error, count } = await applyProductionDailyReportOrdering(
+    buildProductionDailyReportQuery(filters, true),
+  ).range(from, to)
+
+  if (error) {
+    throw handleApiError(error, '获取生产日报表数据失败')
+  }
+
+  return {
+    items: (data || []) as unknown as ProductionDailyReportItemRow[],
+    total: count || 0,
+  }
+}
+
 async function getAllReportItems(filters: ProductionDailyReportFilters) {
   const items: ProductionDailyReportItemRow[] = []
   let from = 0
 
   while (true) {
     const to = from + FETCH_BATCH_SIZE - 1
-    const { data, error } = await buildProductionDailyReportQuery(filters)
-      .range(from, to)
-      .order('created_at', { ascending: false })
+    const { data, error } = await applyProductionDailyReportOrdering(
+      buildProductionDailyReportQuery(filters),
+    ).range(from, to)
 
     if (error) {
       throw handleApiError(error, '获取生产日报表数据失败')
@@ -190,6 +240,10 @@ function chunkArray<T>(items: T[], size: number) {
 async function getProjectWeightMap(projectNos: string[]) {
   const weightMap = new Map<string, number>()
   const uniqueProjectNos = Array.from(new Set(projectNos.filter(Boolean)))
+
+  if (uniqueProjectNos.length === 0) {
+    return weightMap
+  }
 
   for (const chunk of chunkArray(uniqueProjectNos, FETCH_BATCH_SIZE)) {
     const { data, error } = await supabase
@@ -227,18 +281,21 @@ function calculateQualifiedRate(
   return roundTo(qualifiedCount / incomingQualifiedCount, 4)
 }
 
-export async function getProductionDailyReport(
-  filters: ProductionDailyReportFilters,
-): Promise<ProductionDailyReportResult> {
-  const items = await getAllReportItems(filters)
-  const weightMap = await getProjectWeightMap(items.map((item) => item.project_no))
+async function buildProductionDailyReportRows(
+  items: ProductionDailyReportItemRow[],
+) {
+  const weightMap = await getProjectWeightMap(
+    items.map((item) => item.project_no),
+  )
   const operations = new Set<string>()
 
   const rows = items
     .map((item) => {
       const employeeName = item.production_orders.employee?.name || '-'
       const normalizedOperation = item.operation.trim() || '未分类'
-      const incomingQualifiedCount = Number(item.incoming_qualified_quantity || 0)
+      const incomingQualifiedCount = Number(
+        item.incoming_qualified_quantity || 0,
+      )
       const rawMaterialDefectCount = Number(item.defect_quantity_2 || 0)
       const processingDefectCount = Number(item.defect_quantity_1 || 0)
       const outsourceDefectCount = Number(item.outsource_defect_quantity || 0)
@@ -275,7 +332,10 @@ export async function getProductionDailyReport(
         outsourceUnit: item.outsource_unit?.trim() || '-',
         setupDefectCount,
         setupResponsible: item.setup_responsible?.trim() || '-',
-        qualifiedRate: calculateQualifiedRate(qualifiedCount, incomingQualifiedCount),
+        qualifiedRate: calculateQualifiedRate(
+          qualifiedCount,
+          incomingQualifiedCount,
+        ),
         rawMaterialDefectWeightKg: roundTo(
           (weightPerMeterKg * lengthMm * rawMaterialDefectCount) / 1000,
         ),
@@ -298,7 +358,10 @@ export async function getProductionDailyReport(
         return dateCompare
       }
 
-      const projectCompare = left.projectNo.localeCompare(right.projectNo, 'zh-CN')
+      const projectCompare = left.projectNo.localeCompare(
+        right.projectNo,
+        'zh-CN',
+      )
 
       if (projectCompare !== 0) {
         return projectCompare
@@ -312,5 +375,36 @@ export async function getProductionDailyReport(
     operations: Array.from(operations).sort((left, right) =>
       left.localeCompare(right, 'zh-CN'),
     ),
+  }
+}
+
+export async function getProductionDailyReport(
+  params: ProductionDailyReportQueryParams,
+): Promise<ProductionDailyReportResult> {
+  const { page, pageSize, ...filters } = params
+  const { items, total } = await getProductionDailyReportPage(
+    filters,
+    page,
+    pageSize,
+  )
+  const { rows, operations } = await buildProductionDailyReportRows(items)
+
+  return {
+    rows,
+    operations,
+    total,
+  }
+}
+
+export async function getProductionDailyReportForExport(
+  filters: ProductionDailyReportFilters,
+): Promise<ProductionDailyReportResult> {
+  const items = await getAllReportItems(filters)
+  const { rows, operations } = await buildProductionDailyReportRows(items)
+
+  return {
+    rows,
+    operations,
+    total: rows.length,
   }
 }
