@@ -17,6 +17,10 @@ import type {
   ProductionDailyReportRow,
 } from '@/services/apiProductionDailyReport'
 import { getProductionDailyReportForExport } from '@/services/apiProductionDailyReport'
+import {
+  startProductionDailyReportExportTask,
+  waitForProductionDailyReportExportTask,
+} from '@/services/apiProductionDailyReportExport'
 import { exportProductionDailyReportToExcel } from '@/utils/productionDailyReportExcel'
 import { isEmployeeSideRole } from '@/config/access'
 import ProductionDailyReportSearch from './ProductionDailyReportSearch'
@@ -171,35 +175,79 @@ export default function ProductionDailyReportPage() {
   )
 
   const handleExport = useCallback(async () => {
-    if (selectedRowKeys.length === 0 && total === 0) {
+    const exportTargetCount =
+      selectedRowKeys.length > 0 ? selectedRowKeys.length : total
+
+    if (exportTargetCount === 0) {
       message.warning('当前没有可导出的日报数据')
       return
     }
 
     try {
       setIsExporting(true)
-      const exportRows =
-        selectedRowKeys.length > 0
-          ? selectedRows
-          : (await getProductionDailyReportForExport(filters)).rows
+      let exportCount = exportTargetCount
+      let asyncTaskStarted = false
 
-      await exportProductionDailyReportToExcel(exportRows)
-      message.success(
-        selectedRowKeys.length > 0
-          ? `已导出 ${selectedRows.length} 条日报数据`
-          : `已导出当前筛选结果 ${exportRows.length} 条日报数据`,
-      )
+      try {
+        const { jobId } = await startProductionDailyReportExportTask({
+          selectedIds:
+            selectedRowKeys.length > 0
+              ? selectedRowKeys.map((key) => String(key))
+              : undefined,
+          filters: selectedRowKeys.length > 0 ? undefined : filters,
+        })
+        asyncTaskStarted = true
+
+        message.open({
+          key: 'production-daily-report-export',
+          type: 'loading',
+          content: '正在后台生成生产日报导出文件，请稍候...',
+          duration: 0,
+        })
+
+        const exportJob = await waitForProductionDailyReportExportTask(jobId)
+        const link = document.createElement('a')
+
+        link.href = exportJob.downloadUrl!
+        link.click()
+
+        message.success({
+          key: 'production-daily-report-export',
+          content: `已导出 ${exportCount} 条日报数据`,
+        })
+      } catch (asyncExportError) {
+        if (asyncTaskStarted) {
+          throw asyncExportError
+        }
+
+        const exportRows =
+          selectedRowKeys.length > 0
+            ? selectedRows
+            : (await getProductionDailyReportForExport(filters)).rows
+
+        exportCount = exportRows.length
+        await exportProductionDailyReportToExcel(exportRows)
+        message.destroy('production-daily-report-export')
+        message.success(`已导出 ${exportCount} 条日报数据`)
+
+        if (asyncExportError instanceof Error) {
+          console.warn('后台导出任务不可用，已回退为前端导出', asyncExportError)
+        }
+      }
 
       if (selectedRowKeys.length > 0) {
         setSelectedRowKeys([])
         setSelectedRowsMap(new Map())
       }
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '导出失败')
+      message.error({
+        key: 'production-daily-report-export',
+        content: error instanceof Error ? error.message : '导出失败',
+      })
     } finally {
       setIsExporting(false)
     }
-  }, [filters, message, selectedRowKeys.length, selectedRows, total])
+  }, [filters, message, selectedRowKeys, selectedRows, total])
 
   useEffect(() => {
     const maxPage = Math.max(1, Math.ceil(total / pageSize))

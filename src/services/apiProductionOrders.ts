@@ -51,10 +51,40 @@ export interface ProductionOrderFilters {
   isAudited?: boolean
 }
 
-const PRODUCTION_ORDER_EXPORT_SELECT = `
+const PRODUCTION_ORDER_DETAIL_SELECT = `
       *,
   employee:employees(id, name, job_name, hourly_wage, coefficient),
       items:production_order_items(*)
+    `
+
+const PRODUCTION_ORDER_EXPORT_SELECT = `
+      id,
+      created_at,
+      order_date,
+      work_hours,
+      extra_qualified_hours,
+      total_qualified_hours,
+      efficiency,
+      shift,
+      remark,
+      employee:employees(id, name, job_name, hourly_wage, coefficient),
+      items:production_order_items(
+        id,
+        data_category,
+        project_no,
+        product_model,
+        customer_model,
+        length_mm,
+        operation,
+        standard_seconds,
+        incoming_qualified_quantity,
+        qualified_quantity,
+        qualified_hours,
+        defect_quantity_1,
+        defect_quantity_2,
+        defect_hours,
+        remark
+      )
     `
 
 const PRODUCTION_ORDER_EXPORT_BATCH_SIZE = 200
@@ -170,7 +200,7 @@ export async function getProductionOrders({
 export async function getProductionOrderById(id: string) {
   const { data, error } = await supabase
     .from('production_orders')
-    .select(PRODUCTION_ORDER_EXPORT_SELECT)
+    .select(PRODUCTION_ORDER_DETAIL_SELECT)
     .eq('id', id)
     .single()
 
@@ -238,16 +268,100 @@ export async function getProductionOrdersForExport(ids: string[]) {
 const PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE = 1000
 const PRODUCTION_ORDER_FILTER_EXPORT_PAGE_CONCURRENCY = 5
 
+async function getProductionOrderIdsPageByFilters({
+  page,
+  pageSize,
+  startDate,
+  endDate,
+  employeeId,
+  shift,
+  dataCategory,
+  productModel,
+  customerModel,
+  isAudited,
+}: {
+  page: number
+  pageSize: number
+} & ProductionOrderFilters) {
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+  const hasItemFilters = Boolean(dataCategory || productModel || customerModel)
+
+  let query = supabase
+    .from('production_orders')
+    .select(
+      `
+      id${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, data_category, product_model, customer_model)' : ''}
+    `,
+      { count: 'exact' },
+    )
+    .order('created_at', { ascending: false })
+    .order('order_date', { ascending: false })
+
+  if (startDate) {
+    query = query.gte('order_date', startDate)
+  }
+
+  if (endDate) {
+    query = query.lte('order_date', endDate)
+  }
+
+  if (employeeId) {
+    query = query.eq('employee_id', employeeId)
+  }
+
+  if (shift) {
+    query = (
+      query as typeof query & {
+        eq: (column: string, value: string) => typeof query
+      }
+    ).eq('shift', shift)
+  }
+
+  if (dataCategory) {
+    query = (
+      query as typeof query & {
+        eq: (column: string, value: string) => typeof query
+      }
+    ).eq('item_filters.data_category', dataCategory)
+  }
+
+  if (typeof isAudited === 'boolean') {
+    query = query.eq('is_audited', isAudited)
+  }
+
+  if (productModel) {
+    query = query.ilike('item_filters.product_model', `%${productModel}%`)
+  }
+
+  if (customerModel) {
+    query = query.ilike('item_filters.customer_model', `%${customerModel}%`)
+  }
+
+  const { data, error, count } = await query.range(from, to)
+
+  if (error) {
+    throw handleApiError(error, '获取导出工单失败')
+  }
+
+  return {
+    ids: ((data || []) as unknown as Array<{ id: string }>).map(
+      (item) => item.id,
+    ),
+    total: count || 0,
+  }
+}
+
 export async function getProductionOrdersForExportByFilters(
   filters: ProductionOrderFilters,
 ) {
-  const firstPage = await getProductionOrders({
+  const firstPage = await getProductionOrderIdsPageByFilters({
     page: 1,
     pageSize: PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE,
     ...filters,
   })
 
-  const collectedIds = firstPage.items.map((item) => item.id)
+  const collectedIds = [...firstPage.ids]
 
   if (firstPage.total <= collectedIds.length) {
     return getProductionOrdersForExport(collectedIds)
@@ -272,7 +386,7 @@ export async function getProductionOrdersForExportByFilters(
     )
     const pageResults = await Promise.all(
       pageChunk.map((page) =>
-        getProductionOrders({
+        getProductionOrderIdsPageByFilters({
           page,
           pageSize: PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE,
           ...filters,
@@ -281,7 +395,7 @@ export async function getProductionOrdersForExportByFilters(
     )
 
     pageResults.forEach((result) => {
-      collectedIds.push(...result.items.map((item) => item.id))
+      collectedIds.push(...result.ids)
     })
   }
 
