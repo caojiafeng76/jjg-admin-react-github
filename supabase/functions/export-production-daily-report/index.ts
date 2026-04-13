@@ -81,8 +81,16 @@ interface SalesOrderWeightRow {
 const EXPORT_BUCKET = 'production-daily-report-exports'
 const EXPORT_PAGE_SIZE = 1000
 const EXPORT_PAGE_CONCURRENCY = 5
+const EXPORT_SELECTED_IDS_BATCH_SIZE = 100
 const EXPORT_SIGNED_URL_TTL_SECONDS = 60
 const EXPORT_FILE_EXPIRE_HOURS = 24
+
+function getExportStoragePath(
+  requestedByAdminEmployeeId: string,
+  jobId: string,
+) {
+  return `${requestedByAdminEmployeeId}/${jobId}/production-daily-report.xlsx`
+}
 
 const PRODUCTION_DAILY_REPORT_EXPORT_SELECT = `
   id,
@@ -331,8 +339,12 @@ async function getProductionDailyReportItems(
   const uniqueIds = Array.from(new Set(ids.filter(Boolean)))
   const batches: string[][] = []
 
-  for (let index = 0; index < uniqueIds.length; index += 500) {
-    batches.push(uniqueIds.slice(index, index + 500))
+  for (
+    let index = 0;
+    index < uniqueIds.length;
+    index += EXPORT_SELECTED_IDS_BATCH_SIZE
+  ) {
+    batches.push(uniqueIds.slice(index, index + EXPORT_SELECTED_IDS_BATCH_SIZE))
   }
 
   const rows = (
@@ -347,6 +359,91 @@ async function getProductionDailyReportItems(
   return uniqueIds
     .map((id) => rowMap.get(id))
     .filter((row): row is ProductionDailyReportItemRow => Boolean(row))
+}
+
+async function getProductionDailyReportItemsPageByFilters(
+  adminClient: Awaited<ReturnType<typeof assertAdmin>>['adminClient'],
+  {
+    page,
+    pageSize,
+    filters,
+  }: {
+    page: number
+    pageSize: number
+    filters: ProductionDailyReportFilters
+  },
+) {
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+  const { data, error, count } = await applyProductionDailyReportOrdering(
+    buildProductionDailyReportQuery(
+      adminClient,
+      filters,
+      PRODUCTION_DAILY_REPORT_EXPORT_SELECT,
+      true,
+    ),
+  ).range(from, to)
+
+  if (error) {
+    throw new Error(`获取导出日报详情失败: ${error.message}`)
+  }
+
+  return {
+    items: (data || []) as unknown as ProductionDailyReportItemRow[],
+    total: count || 0,
+  }
+}
+
+async function getProductionDailyReportItemsByFilters(
+  adminClient: Awaited<ReturnType<typeof assertAdmin>>['adminClient'],
+  filters: ProductionDailyReportFilters,
+) {
+  const firstPage = await getProductionDailyReportItemsPageByFilters(
+    adminClient,
+    {
+      page: 1,
+      pageSize: EXPORT_PAGE_SIZE,
+      filters,
+    },
+  )
+
+  const collectedItems = [...firstPage.items]
+
+  if (firstPage.total <= collectedItems.length) {
+    return collectedItems
+  }
+
+  const totalPages = Math.ceil(firstPage.total / EXPORT_PAGE_SIZE)
+  const remainingPages = Array.from(
+    { length: Math.max(totalPages - 1, 0) },
+    (_, index) => index + 2,
+  )
+
+  for (
+    let index = 0;
+    index < remainingPages.length;
+    index += EXPORT_PAGE_CONCURRENCY
+  ) {
+    const pageChunk = remainingPages.slice(
+      index,
+      index + EXPORT_PAGE_CONCURRENCY,
+    )
+    const pageResults = await Promise.all(
+      pageChunk.map((page) =>
+        getProductionDailyReportItemsPageByFilters(adminClient, {
+          page,
+          pageSize: EXPORT_PAGE_SIZE,
+          filters,
+        }),
+      ),
+    )
+
+    pageResults.forEach((result) => {
+      collectedItems.push(...result.items)
+    })
+  }
+
+  return collectedItems
 }
 
 function chunkArray<T>(items: T[], size: number) {
@@ -532,19 +629,18 @@ async function processExportJob({
       error_message: null,
     })
 
-    const targetIds =
+    const items =
       selectedIds.length > 0
-        ? selectedIds
-        : await getProductionDailyReportIdsByFilters(adminClient, filters)
+        ? await getProductionDailyReportItems(adminClient, selectedIds)
+        : await getProductionDailyReportItemsByFilters(adminClient, filters)
 
-    if (targetIds.length === 0) {
+    if (items.length === 0) {
       throw new Error('当前没有可导出的日报数据')
     }
 
-    const items = await getProductionDailyReportItems(adminClient, targetIds)
     const rows = await buildProductionDailyReportRows(adminClient, items)
     const buffer = buildProductionDailyReportExcelBuffer(rows)
-    const filePath = `${requestedByAdminEmployeeId}/${jobId}/${fileName}`
+    const filePath = getExportStoragePath(requestedByAdminEmployeeId, jobId)
 
     const { error: uploadError } = await adminClient.storage
       .from(EXPORT_BUCKET)

@@ -186,7 +186,20 @@ export default function ProductionDailyReportPage() {
     try {
       setIsExporting(true)
       let exportCount = exportTargetCount
-      let asyncTaskStarted = false
+
+      const fallbackToClientExport = async () => {
+        const exportRows =
+          selectedRowKeys.length > 0
+            ? selectedRows
+            : (await getProductionDailyReportForExport(filters)).rows
+
+        exportCount = exportRows.length
+        await exportProductionDailyReportToExcel(exportRows)
+        message.success({
+          key: 'production-daily-report-export',
+          content: `已导出 ${exportCount} 条日报数据`,
+        })
+      }
 
       try {
         const { jobId } = await startProductionDailyReportExportTask({
@@ -196,7 +209,6 @@ export default function ProductionDailyReportPage() {
               : undefined,
           filters: selectedRowKeys.length > 0 ? undefined : filters,
         })
-        asyncTaskStarted = true
 
         message.open({
           key: 'production-daily-report-export',
@@ -216,19 +228,7 @@ export default function ProductionDailyReportPage() {
           content: `已导出 ${exportCount} 条日报数据`,
         })
       } catch (asyncExportError) {
-        if (asyncTaskStarted) {
-          throw asyncExportError
-        }
-
-        const exportRows =
-          selectedRowKeys.length > 0
-            ? selectedRows
-            : (await getProductionDailyReportForExport(filters)).rows
-
-        exportCount = exportRows.length
-        await exportProductionDailyReportToExcel(exportRows)
-        message.destroy('production-daily-report-export')
-        message.success(`已导出 ${exportCount} 条日报数据`)
+        await fallbackToClientExport()
 
         if (asyncExportError instanceof Error) {
           console.warn('后台导出任务不可用，已回退为前端导出', asyncExportError)

@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx-js-style'
+import XLSX from 'xlsx-js-style'
 
 import type { ProductionDailyReportRow } from '@/services/apiProductionDailyReport'
 import {
@@ -162,7 +162,9 @@ function createProductionDailyReportWorkbook(rows: ProductionDailyReportRow[]) {
   const incomingQualifiedCountColumnLetter = getColumnLetter(
     INCOMING_QUALIFIED_COUNT_COLUMN_INDEX,
   )
-  const qualifiedCountColumnLetter = getColumnLetter(QUALIFIED_COUNT_COLUMN_INDEX)
+  const qualifiedCountColumnLetter = getColumnLetter(
+    QUALIFIED_COUNT_COLUMN_INDEX,
+  )
 
   worksheet[qualifiedRateCellRef] = {
     t: 'n',
@@ -224,7 +226,10 @@ function createProductionDailyReportWorkbook(rows: ProductionDailyReportRow[]) {
   }
 
   for (let column = range.s.c; column <= range.e.c; column += 1) {
-    const cellRef = XLSX.utils.encode_cell({ r: summaryRowIndex - 1, c: column })
+    const cellRef = XLSX.utils.encode_cell({
+      r: summaryRowIndex - 1,
+      c: column,
+    })
 
     if (worksheet[cellRef]) {
       worksheet[cellRef].s = {
@@ -265,7 +270,9 @@ function createProductionDailyReportWorkbook(rows: ProductionDailyReportRow[]) {
 
   worksheet['!rows'][0] = { hpt: 28, hpx: 28 }
   worksheet['!freeze'] = { xSplit: 0, ySplit: 2 }
-  ;(workbook as XLSX.WorkBook & { Workbook?: Record<string, unknown> }).Workbook = {
+  ;(
+    workbook as XLSX.WorkBook & { Workbook?: Record<string, unknown> }
+  ).Workbook = {
     CalcPr: {
       calcMode: 'auto',
       fullCalcOnLoad: '1',
