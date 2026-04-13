@@ -83,6 +83,28 @@ function roundToTwo(value: number) {
   return Number(value.toFixed(2))
 }
 
+const NIGHT_SHIFT_EXCLUDED_REMARK_KEYWORDS = ['休息', '请假', '放假', '转班']
+
+function shouldCountNightShift(order: ProductionOrderForExport) {
+  if (order.shift !== '夜班') {
+    return false
+  }
+
+  if (normalizeNumber(order.work_hours) !== 0) {
+    return true
+  }
+
+  const remark = order.remark?.trim()
+
+  if (!remark) {
+    return true
+  }
+
+  return !NIGHT_SHIFT_EXCLUDED_REMARK_KEYWORDS.some((keyword) =>
+    remark.includes(keyword),
+  )
+}
+
 function getEmployeeJobName(orders: ProductionOrderForExport[]) {
   return (
     orders.find((order) => order.employee?.job_name)?.employee?.job_name || ''
@@ -393,9 +415,7 @@ function buildSummarySheetRows(
     const jobName = getEmployeeJobName(employeeOrders)
     const hourlyWage = getEmployeeHourlyWage(employeeOrders)
     const coefficient = getEmployeeCoefficient(employeeOrders)
-    const nightShiftCount = employeeOrders.filter(
-      (order) => order.shift === '夜班',
-    ).length
+    const nightShiftCount = employeeOrders.filter(shouldCountNightShift).length
     const workHours = roundToTwo(
       employeeOrders.reduce(
         (total, order) => total + normalizeNumber(order.work_hours),
