@@ -52,6 +52,10 @@ import type {
 } from '@/services/apiProductionOrderItems'
 import { exportProductionOrdersToExcel } from '@/utils/productionOrderExcel'
 import {
+  startProductionOrderExportTask,
+  waitForProductionOrderExportTask,
+} from '@/services/apiProductionOrderExport'
+import {
   useProductionOrders,
   useProductionOrder,
   useCreateProductionOrder,
@@ -434,24 +438,72 @@ export default function ProductionOrderPage() {
 
     try {
       setIsExporting(true)
-      const exportOrders =
-        selectedRowKeys.length > 0
-          ? await getProductionOrdersForExport(
-              selectedRowKeys.map((key) => String(key)),
-            )
-          : await getProductionOrdersForExportByFilters(filters)
+      let exportCount = exportTargetCount
+      let asyncTaskStarted = false
 
-      await exportProductionOrdersToExcel(exportOrders)
-      message.success(`已导出 ${exportOrders.length} 张工单`)
+      try {
+        const { jobId } = await startProductionOrderExportTask({
+          selectedIds:
+            selectedRowKeys.length > 0
+              ? selectedRowKeys.map((key) => String(key))
+              : undefined,
+          filters: selectedRowKeys.length > 0 ? undefined : filters,
+        })
+        asyncTaskStarted = true
+
+        message.open({
+          key: 'production-order-export',
+          type: 'loading',
+          content: '正在后台生成导出文件，请稍候...',
+          duration: 0,
+        })
+
+        const exportJob = await waitForProductionOrderExportTask(jobId)
+        const link = document.createElement('a')
+
+        link.href = exportJob.downloadUrl!
+        link.click()
+
+        message.success({
+          key: 'production-order-export',
+          content: `已导出 ${exportCount} 张工单`,
+        })
+      } catch (asyncExportError) {
+        if (asyncTaskStarted) {
+          throw asyncExportError
+        }
+
+        const exportOrders =
+          selectedRowKeys.length > 0
+            ? await getProductionOrdersForExport(
+                selectedRowKeys.map((key) => String(key)),
+              )
+            : await getProductionOrdersForExportByFilters(filters)
+
+        exportCount = exportOrders.length
+        await exportProductionOrdersToExcel(exportOrders)
+        message.destroy('production-order-export')
+        message.success(`已导出 ${exportCount} 张工单`)
+
+        if (asyncExportError instanceof Error) {
+          console.warn('后台导出任务不可用，已回退为前端导出', asyncExportError)
+        }
+      }
 
       if (selectedRowKeys.length > 0) {
         setSelectedRowKeys([])
       }
     } catch (error) {
       if (error instanceof Error) {
-        message.error(error.message)
+        message.error({
+          key: 'production-order-export',
+          content: error.message,
+        })
       } else {
-        message.error('导出失败，请稍后重试')
+        message.error({
+          key: 'production-order-export',
+          content: '导出失败，请稍后重试',
+        })
       }
     } finally {
       setIsExporting(false)
