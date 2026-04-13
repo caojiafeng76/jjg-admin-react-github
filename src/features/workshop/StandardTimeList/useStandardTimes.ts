@@ -20,7 +20,6 @@ const MACHINE_EQUIPMENT_MAINTENANCES_KEY =
 const PROCESS_STANDARDS_KEY = 'process-standards' as const
 const PRODUCTION_ORDERS_KEY = 'production-orders' as const
 const PRODUCTION_ORDER_ITEMS_KEY = 'production-order-items' as const
-const SALES_ORDERS_KEY = 'sales-orders' as const
 
 export function useStandardTimesList({
   page,
@@ -91,7 +90,7 @@ export function useDeleteStandardTimes() {
 
 export function useSalesOrdersProjectNos() {
   return useQuery({
-    queryKey: [SALES_ORDERS_KEY, 'project-nos'],
+    queryKey: [PROCESS_STANDARDS_KEY, 'project-nos'],
     queryFn: getSalesOrdersProjectNos,
     ...queryConfig.detail,
   })
