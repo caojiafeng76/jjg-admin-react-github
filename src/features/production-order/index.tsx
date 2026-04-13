@@ -82,6 +82,12 @@ import {
 import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 
+const CLIENT_EXPORT_ORDER_THRESHOLD = 1500
+const ASYNC_EXPORT_WAIT_OPTIONS = {
+  intervalMs: 1000,
+  maxAttempts: 12,
+} as const
+
 type UnlockManagementFormValues = {
   password: string
 }
@@ -430,6 +436,9 @@ export default function ProductionOrderPage() {
       selectedRowKeys.length > 0
         ? selectedRowKeys.length
         : (orderData?.total ?? 0)
+    const shouldPreferClientExport =
+      selectedRowKeys.length > 0 ||
+      exportTargetCount <= CLIENT_EXPORT_ORDER_THRESHOLD
 
     if (exportTargetCount === 0) {
       message.warning('当前没有可导出的工单')
@@ -439,7 +448,32 @@ export default function ProductionOrderPage() {
     try {
       setIsExporting(true)
       let exportCount = exportTargetCount
-      let asyncTaskStarted = false
+
+      const fallbackToClientExport = async () => {
+        const exportOrders =
+          selectedRowKeys.length > 0
+            ? await getProductionOrdersForExport(
+                selectedRowKeys.map((key) => String(key)),
+              )
+            : await getProductionOrdersForExportByFilters(filters)
+
+        exportCount = exportOrders.length
+        await exportProductionOrdersToExcel(exportOrders)
+        message.success({
+          key: 'production-order-export',
+          content: `已导出 ${exportCount} 张工单`,
+        })
+      }
+
+      if (shouldPreferClientExport) {
+        await fallbackToClientExport()
+
+        if (selectedRowKeys.length > 0) {
+          setSelectedRowKeys([])
+        }
+
+        return
+      }
 
       try {
         const { jobId } = await startProductionOrderExportTask({
@@ -449,7 +483,6 @@ export default function ProductionOrderPage() {
               : undefined,
           filters: selectedRowKeys.length > 0 ? undefined : filters,
         })
-        asyncTaskStarted = true
 
         message.open({
           key: 'production-order-export',
@@ -458,7 +491,10 @@ export default function ProductionOrderPage() {
           duration: 0,
         })
 
-        const exportJob = await waitForProductionOrderExportTask(jobId)
+        const exportJob = await waitForProductionOrderExportTask(
+          jobId,
+          ASYNC_EXPORT_WAIT_OPTIONS,
+        )
         const link = document.createElement('a')
 
         link.href = exportJob.downloadUrl!
@@ -469,21 +505,14 @@ export default function ProductionOrderPage() {
           content: `已导出 ${exportCount} 张工单`,
         })
       } catch (asyncExportError) {
-        if (asyncTaskStarted) {
-          throw asyncExportError
-        }
+        message.open({
+          key: 'production-order-export',
+          type: 'loading',
+          content: '后台导出耗时较长，已切换为前端导出，请稍候...',
+          duration: 0,
+        })
 
-        const exportOrders =
-          selectedRowKeys.length > 0
-            ? await getProductionOrdersForExport(
-                selectedRowKeys.map((key) => String(key)),
-              )
-            : await getProductionOrdersForExportByFilters(filters)
-
-        exportCount = exportOrders.length
-        await exportProductionOrdersToExcel(exportOrders)
-        message.destroy('production-order-export')
-        message.success(`已导出 ${exportCount} 张工单`)
+        await fallbackToClientExport()
 
         if (asyncExportError instanceof Error) {
           console.warn('后台导出任务不可用，已回退为前端导出', asyncExportError)

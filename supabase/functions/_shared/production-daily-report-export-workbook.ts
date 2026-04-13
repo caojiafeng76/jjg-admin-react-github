@@ -1,4 +1,4 @@
-import * as XLSX from 'npm:xlsx-js-style@1.2.0'
+import XLSX from 'npm:xlsx-js-style@1.2.0'
 
 export interface ProductionDailyReportExportRow {
   key: string

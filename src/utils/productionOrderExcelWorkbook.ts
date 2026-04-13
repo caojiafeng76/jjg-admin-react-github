@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx-js-style'
+import XLSX from 'xlsx-js-style'
 
 import type { ProductionOrderForExport } from '@/services/apiProductionOrders'
 import {
@@ -59,8 +59,10 @@ const SUMMARY_EXTRA_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('零工工时')
 const SUMMARY_TOTAL_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('总工时')
 const SUMMARY_HOURLY_WAGE_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('时薪')
 const SUMMARY_COEFFICIENT_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('系数')
-const SUMMARY_NIGHT_SHIFT_COUNT_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('夜班数量')
-const SUMMARY_NIGHT_SHIFT_ALLOWANCE_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('夜班补贴')
+const SUMMARY_NIGHT_SHIFT_COUNT_COLUMN_INDEX =
+  SUMMARY_HEADERS.indexOf('夜班数量')
+const SUMMARY_NIGHT_SHIFT_ALLOWANCE_COLUMN_INDEX =
+  SUMMARY_HEADERS.indexOf('夜班补贴')
 const SUMMARY_SALARY_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('工资')
 
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
@@ -82,7 +84,9 @@ function roundToTwo(value: number) {
 }
 
 function getEmployeeJobName(orders: ProductionOrderForExport[]) {
-  return orders.find((order) => order.employee?.job_name)?.employee?.job_name || ''
+  return (
+    orders.find((order) => order.employee?.job_name)?.employee?.job_name || ''
+  )
 }
 
 function getEmployeeHourlyWage(orders: ProductionOrderForExport[]) {
@@ -142,7 +146,9 @@ function applySummarySheetFormulas(
     rowIndex += 1
   ) {
     const excelRowNumber = rowIndex + 1
-    const totalHoursColumn = getExcelColumnName(SUMMARY_TOTAL_HOURS_COLUMN_INDEX)
+    const totalHoursColumn = getExcelColumnName(
+      SUMMARY_TOTAL_HOURS_COLUMN_INDEX,
+    )
     const hourlyWageColumn = getExcelColumnName(
       SUMMARY_HOURLY_WAGE_COLUMN_INDEX,
     )
@@ -391,29 +397,28 @@ function buildSummarySheetRows(
       (order) => order.shift === '夜班',
     ).length
     const workHours = roundToTwo(
-      employeeOrders
-        .reduce((total, order) => total + normalizeNumber(order.work_hours), 0),
+      employeeOrders.reduce(
+        (total, order) => total + normalizeNumber(order.work_hours),
+        0,
+      ),
     )
     const positiveHours = roundToTwo(
-      employeeOrders
-        .reduce(
-          (total, order) => total + getOrderPositiveQualifiedHours(order),
-          0,
-        ),
+      employeeOrders.reduce(
+        (total, order) => total + getOrderPositiveQualifiedHours(order),
+        0,
+      ),
     )
     const extraHours = roundToTwo(
-      employeeOrders
-        .reduce(
-          (total, order) => total + normalizeNumber(order.extra_qualified_hours),
-          0,
-        ),
+      employeeOrders.reduce(
+        (total, order) => total + normalizeNumber(order.extra_qualified_hours),
+        0,
+      ),
     )
     const totalHours = roundToTwo(
-      employeeOrders
-        .reduce(
-          (total, order) => total + normalizeNumber(order.total_qualified_hours),
-          0,
-        ),
+      employeeOrders.reduce(
+        (total, order) => total + normalizeNumber(order.total_qualified_hours),
+        0,
+      ),
     )
 
     const row: SummaryRow = [
@@ -632,7 +637,6 @@ function createProductionOrderWorkbook(orders: ProductionOrderForExport[]) {
       sanitizeSheetName(employeeName, index),
     )
   })
-
   ;(
     workbook as XLSX.WorkBook & { Workbook?: Record<string, unknown> }
   ).Workbook = {

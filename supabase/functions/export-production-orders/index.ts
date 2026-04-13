@@ -52,6 +52,13 @@ const EXPORT_PAGE_CONCURRENCY = 5
 const EXPORT_SIGNED_URL_TTL_SECONDS = 60
 const EXPORT_FILE_EXPIRE_HOURS = 24
 
+function getExportStoragePath(
+  requestedByAdminEmployeeId: string,
+  jobId: string,
+) {
+  return `${requestedByAdminEmployeeId}/${jobId}/production-orders.xlsx`
+}
+
 const PRODUCTION_ORDER_EXPORT_SELECT = `
   id,
   created_at,
@@ -359,7 +366,7 @@ async function processExportJob({
 
     const orders = await getProductionOrdersForExport(adminClient, targetIds)
     const buffer = buildProductionOrderExcelBuffer(orders)
-    const filePath = `${requestedByAdminEmployeeId}/${jobId}/${fileName}`
+    const filePath = getExportStoragePath(requestedByAdminEmployeeId, jobId)
 
     const { error: uploadError } = await adminClient.storage
       .from(EXPORT_BUCKET)
