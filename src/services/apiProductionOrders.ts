@@ -472,6 +472,7 @@ export async function getProductionItemsByProjectNo(
     `,
     )
     .eq('project_no', projectNo.trim())
+    .neq('data_category', 'B')
     .order('operation', { ascending: true })
     .order('created_at', { ascending: true })
 
