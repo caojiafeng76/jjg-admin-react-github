@@ -206,39 +206,39 @@ export default function AppErrorView({
 
             <div className="flex flex-col justify-between gap-4 rounded-[28px] border border-slate-200/70 bg-slate-950 p-6 text-slate-100 sm:p-8 dark:border-white/10">
               <div>
-                <Text className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
+                <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
                   处理建议
-                </Text>
+                </p>
                 <Space
                   direction="vertical"
                   size={14}
                   className="mt-4 flex w-full"
                 >
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <Text className="text-sm text-slate-200">
+                    <p className="text-sm leading-7 text-slate-200">
                       {variantConfig.suggestions[0]}
-                    </Text>
+                    </p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <Text className="text-sm text-slate-200">
+                    <p className="text-sm leading-7 text-slate-200">
                       {variantConfig.suggestions[1]}
-                    </Text>
+                    </p>
                   </div>
                   <div
                     className={`rounded-2xl border border-dashed p-4 ${variantConfig.accentCard}`}
                   >
-                    <Text className="text-sm">
+                    <p className="text-sm leading-7 text-inherit">
                       {variantConfig.suggestions[2]}
-                    </Text>
+                    </p>
                   </div>
                 </Space>
               </div>
 
               {detail || code ? (
                 <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-                  <Text className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
+                  <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
                     诊断信息
-                  </Text>
+                  </p>
                   {code ? (
                     <Tag className="mt-3 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-sky-200">
                       {code}
@@ -252,9 +252,9 @@ export default function AppErrorView({
                 </div>
               ) : (
                 <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-                  <Text className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
+                  <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
                     当前状态
-                  </Text>
+                  </p>
                   <Paragraph className="!mt-3 !mb-0 text-sm leading-7 text-slate-300">
                     系统已经拦截异常并停止继续渲染，当前不会把不完整数据写入页面。
                   </Paragraph>
