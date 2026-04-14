@@ -4,19 +4,14 @@ import type { Database } from './database.types'
 
 export type ProcessStandard =
   Database['public']['Tables']['process_standards']['Row']
-export type ProcessStandardMatchLevel =
-  | 'type-a'
-  | 'type-b'
+export type ProcessStandardMatchLevel = 'type-a' | 'type-b'
 
 export interface ProcessStandardMatchResult<T> {
   records: T[]
   matchLevel: ProcessStandardMatchLevel | null
 }
 
-type ProcessStandardStandardSeconds = Pick<
-  ProcessStandard,
-  'standard_seconds'
->
+type ProcessStandardStandardSeconds = Pick<ProcessStandard, 'standard_seconds'>
 interface ProcessStandardMatchParams {
   model: string
   length?: number | null
@@ -70,7 +65,9 @@ async function fetchMatchedProcessStandards({
   select,
 }: ProcessStandardMatchParams & {
   select: '*' | 'standard_seconds'
-}): Promise<ProcessStandardMatchResult<ProcessStandard | ProcessStandardStandardSeconds>> {
+}): Promise<
+  ProcessStandardMatchResult<ProcessStandard | ProcessStandardStandardSeconds>
+> {
   const normalizedModel = normalizeMatchText(model)
 
   if (!normalizedModel) {
@@ -111,7 +108,9 @@ async function fetchMatchedProcessStandards({
 
     if ((data || []).length > 0) {
       return {
-        records: (data || []) as Array<ProcessStandard | ProcessStandardStandardSeconds>,
+        records: (data || []) as Array<
+          ProcessStandard | ProcessStandardStandardSeconds
+        >,
         matchLevel: 'type-a',
       }
     }
@@ -128,7 +127,9 @@ async function fetchMatchedProcessStandards({
 
   if ((data || []).length > 0) {
     return {
-      records: (data || []) as Array<ProcessStandard | ProcessStandardStandardSeconds>,
+      records: (data || []) as Array<
+        ProcessStandard | ProcessStandardStandardSeconds
+      >,
       matchLevel: 'type-b',
     }
   }
@@ -171,7 +172,10 @@ export async function getStandardSeconds({
     select: 'standard_seconds',
   })
 
-  return (result.records[0] as ProcessStandardStandardSeconds | undefined)?.standard_seconds ?? 0
+  return (
+    (result.records[0] as ProcessStandardStandardSeconds | undefined)
+      ?.standard_seconds ?? 0
+  )
 }
 
 export async function getModels() {
@@ -191,27 +195,42 @@ export async function getModels() {
 }
 
 export async function getSalesOrdersProjectNos() {
-  const salesOrdersQuery = supabase
-    .from('sales_orders')
-    .select(
-      'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
+  const PAGE_SIZE = 1000
+  const allData: SalesOrderProjectNoOption[] = []
+  let from = 0
+
+  while (true) {
+    const query = supabase
+      .from('sales_orders')
+      .select(
+        'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
+      )
+
+    const { data, error } = await (
+      query as typeof query & {
+        eq(column: string, value: string): typeof query
+      }
     )
+      .eq('status', '生产中')
+      .not('project_no', 'is', null)
+      .order('created_at', { ascending: false })
+      .order('project_no', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
 
-  const { data, error } = await (salesOrdersQuery as typeof salesOrdersQuery & {
-    eq(column: string, value: string): typeof salesOrdersQuery
-  })
-    .eq('status', '生产中')
-    .not('project_no', 'is', null)
-    .order('created_at', { ascending: false })
-    .order('project_no', { ascending: true })
+    if (error) {
+      throw handleApiError(error, '获取项目号列表失败')
+    }
 
-  if (error) {
-    throw handleApiError(error, '获取项目号列表失败')
+    const filtered = (data || []).filter(
+      (item): item is SalesOrderProjectNoOption => item.project_no !== null,
+    )
+    allData.push(...filtered)
+
+    if (!data || data.length < PAGE_SIZE) break
+    from += PAGE_SIZE
   }
 
-  return ((data || []).filter(
-    (item): item is SalesOrderProjectNoOption => item.project_no !== null,
-  )) as SalesOrderProjectNoOption[]
+  return allData
 }
 
 export async function getSalesOrderByProjectNo(projectNo: string) {
