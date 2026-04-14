@@ -95,6 +95,17 @@ const adminItems: MenuItem[] = [
     ],
   },
   {
+    key: 'youmai',
+    label: '优迈',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [
+      { key: 'youmai-product-data', label: '货品资料' },
+      { key: 'youmai-finished-goods-inventory', label: '成品库存' },
+      { key: 'youmai-finished-goods-stock-in', label: '成品入库' },
+      { key: 'youmai-finished-goods-stock-out', label: '成品出库' },
+    ],
+  },
+  {
     key: 'attendance',
     label: '考勤',
     icon: <Square3Stack3DIcon className="size-4" />,

@@ -66,14 +66,91 @@ src/
 本仓库已经为 VS Code Copilot 配置了项目级固定执行流程，目标是让 AI 在日常任务里尽量遵循一致的方法：
 
 1. 先复述目标、约束和预期输出
-2. 先搜索并阅读相关代码、文档或配置
-3. 仅在信息不足时提出最少必要澄清问题
-4. 实施前给出简短计划
-5. 保持改动最小化，优先修复根因
-6. 改动后做必要验证
-7. 最终按固定结构汇报结果
+2. 复杂任务必须先用 thinking 拆解问题、假设、风险和执行顺序
+3. 建立上下文时必须优先使用 Serena 做符号级检索和引用分析
+4. Serena 不可用时立即退回常规搜索，不在工具层卡住
+5. 仅在信息不足时提出最少必要澄清问题
+6. 实施前给出简短计划
+7. 保持改动最小化，优先修复根因
+8. 改动后做必要验证
+9. 最终按固定结构汇报结果
 
 默认规则定义在 [.github/copilot-instructions.md](.github/copilot-instructions.md)。
+
+其中：
+
+- thinking 用于复杂任务拆解、假设校验、风险分析和方案排序
+- Serena 用于符号概览、定义查找、引用分析和精确定位
+- 如果 Serena 当前环境不可用，Copilot 会退回常规文件搜索与文本搜索继续推进
+
+## Skill 使用约定
+
+除了 thinking 与 Serena，这个仓库现在还约定在对应场景主动使用 skill，而不是只靠自然语言临时发挥。
+
+优先使用的 skill 如下：
+
+- `tanstack-query`
+  适用于列表查询、详情查询、Mutation、缓存失效、乐观更新、列表与详情联动。
+- [.github/skills/supabase-rls-patterns/SKILL.md](.github/skills/supabase-rls-patterns/SKILL.md)
+  适用于 RLS、员工数据隔离、角色权限、Auth 绑定。
+- [.github/skills/supabase-bulk-operations/SKILL.md](.github/skills/supabase-bulk-operations/SKILL.md)
+  适用于 Excel 导入、批量 upsert、历史数据修复、幂等导入。
+- [.github/skills/business-rules-engine/SKILL.md](.github/skills/business-rules-engine/SKILL.md)
+  适用于状态流转、领域规则、工时/成本/数量计算、编辑约束。
+- [.github/skills/mobile-responsive-patterns/SKILL.md](.github/skills/mobile-responsive-patterns/SKILL.md)
+  适用于员工手机端、H5 页面、扫码流程、响应式改造、触屏交互。
+
+推荐理解为一条固定顺序：
+
+1. 先用 thinking 拆解问题
+2. 再用 Serena 建立上下文
+3. 然后根据任务类型加载对应 skill
+4. 最后再实施、验证和汇报
+
+## 在 VS Code 里怎么用 Thinking 和 Serena
+
+这套流程不要求你每次手动点某个按钮。正常情况下，你直接在 VS Code Copilot Chat 里使用项目级 prompt，Copilot 会按仓库规则自行决定先走 thinking，再优先尝试 Serena。
+
+推荐用法：
+
+```text
+/task-exec 给生产工单列表增加按车间筛选
+/bugfix 修复订单详情页切换分页后数据错乱
+/review 检查最近对员工权限模块的改动风险
+/db-change 为员工手机端相关表补充 RLS 策略
+/feature-impl 新增员工手机端工单详情页
+```
+
+实际执行顺序应当是：
+
+1. 先做 thinking，拆清楚问题、风险和顺序
+2. 再优先尝试 Serena 做符号级定位和引用分析
+3. Serena 不可用时，再退回普通搜索
+4. 建立足够上下文后，再开始实施或评审
+
+你可以通过 Copilot 的中间进度信息判断它是否按规则执行。正常表现通常包括：
+
+- 先说明会先拆解问题或先收集上下文
+- 明确提到要先检查相关符号、调用链、引用关系或模块
+- Serena 不可用时，会说明退回常规搜索，而不是停住
+
+如果你发现 Copilot 直接跳过分析开始改代码，通常有三种处理方式：
+
+1. 直接改用对应的项目级 prompt，而不是只发自然语言
+2. 在任务里补一句“按仓库固定流程执行，先 thinking，再 Serena”
+3. 如果仍未遵守，再把任务描述得更明确一些，例如补上范围、目标文件或预期结果
+
+如果你发现 Copilot 已经进入对应领域，但没有主动利用 skill，可以直接在任务里点明：
+
+```text
+按仓库固定流程执行，先 thinking，再 Serena；如果涉及缓存与 Mutation，使用 tanstack-query skill。
+```
+
+或者：
+
+```text
+按仓库固定流程执行，先 thinking，再 Serena；这是 RLS 与员工隔离场景，使用 supabase-rls-patterns skill。
+```
 
 ## Copilot 项目级 Prompt
 
@@ -150,6 +227,7 @@ src/
 这个入口会额外约束：
 
 - 先评估影响范围
+- 主动使用 `.github/skills/supabase-rls-patterns/` 或 `.github/skills/supabase-bulk-operations/` 对齐数据库场景
 - 优先用迁移文件表达 DDL 变更
 - 默认不手改 `database.types.ts`
 - 明确说明风险、兼容性和回滚方案
@@ -174,6 +252,7 @@ src/
 这个入口会额外要求：
 
 - 先看现有模块和相似实现
+- 主动使用 `tanstack-query`、`.github/skills/business-rules-engine/`、`.github/skills/mobile-responsive-patterns/` 中与任务匹配的 skill
 - 优先复用现有 feature 结构与 Query / Mutation 模式
 - 明确涉及文件、切入点和数据边界
 - 做最小必要验证并说明剩余限制
@@ -196,4 +275,8 @@ src/
 - [.github/prompts/review.prompt.md](.github/prompts/review.prompt.md)
 - [.github/prompts/db-change.prompt.md](.github/prompts/db-change.prompt.md)
 - [.github/prompts/feature-impl.prompt.md](.github/prompts/feature-impl.prompt.md)
+- [.github/skills/supabase-rls-patterns/SKILL.md](.github/skills/supabase-rls-patterns/SKILL.md)
+- [.github/skills/supabase-bulk-operations/SKILL.md](.github/skills/supabase-bulk-operations/SKILL.md)
+- [.github/skills/business-rules-engine/SKILL.md](.github/skills/business-rules-engine/SKILL.md)
+- [.github/skills/mobile-responsive-patterns/SKILL.md](.github/skills/mobile-responsive-patterns/SKILL.md)
 - [AGENTS.md](AGENTS.md)
