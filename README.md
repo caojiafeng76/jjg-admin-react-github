@@ -22,12 +22,23 @@ bun preview
 bun lint
 bun lint:fix
 bun format
+bun run db:push
+bun run db:push:dry-run
+bun run db:query -- --file docs/sql-drafts/example.sql
 ```
 
 说明：
 
 - 项目使用 bun 作为包管理器
 - 当前未配置独立测试框架，日常验证以类型检查、构建、lint 和局部回归为主
+
+Supabase 数据库命令补充：
+
+- `bun run db:push`: 默认走远程 linked 项目，执行 migration
+- `bun run db:push:dry-run`: 预演待执行 migration
+- `bun run db:query -- --file <sql-file>`: 执行单个 SQL 文件，适合数据修复或只读核对
+
+说明：本仓库已确认 `supabase start/status` 的本地容器模式依赖 Docker Desktop；如果 Docker 未运行，不影响远程 CLI 和 MCP 路径继续执行数据库脚本。详见 [docs/Supabase数据库脚本执行说明.md](docs/Supabase数据库脚本执行说明.md)。
 
 ## 目录结构
 

@@ -4,35 +4,37 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
-  ToolingData,
-  ToolingDataFormValues,
-} from '@/services/apiToolingData'
+  YoumaiProductData,
+  YoumaiProductDataFormValues,
+} from '@/services/apiYoumaiProductData'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
-import ToolingDataExcelImport from './ToolingDataExcelImport'
-import ToolingDataForm from './ToolingDataForm'
-import ToolingDataSearch from './ToolingDataSearch'
-import ToolingDataTable from './ToolingDataTable'
+import YoumaiProductDataExcelImport from './YoumaiProductDataExcelImport'
+import YoumaiProductDataForm from './YoumaiProductDataForm'
+import YoumaiProductDataSearch from './YoumaiProductDataSearch'
+import YoumaiProductDataTable from './YoumaiProductDataTable'
 import {
-  useCreateToolingData,
-  useDeleteToolingData,
-  useImportToolingData,
-  useToolingDataList,
-  useUpdateToolingData,
-} from './useToolingData'
+  useCreateYoumaiProductData,
+  useDeleteYoumaiProductData,
+  useImportYoumaiProductData,
+  useUpdateYoumaiProductData,
+  useYoumaiProductDataList,
+} from './useYoumaiProductData'
 
-export default function ToolingDataPage() {
+export default function YoumaiProductDataPage() {
   const { message } = App.useApp()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalTitle, setModalTitle] = useState('新建刀具资料')
+  const [modalTitle, setModalTitle] = useState('新建优迈货品资料')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] = useState<ToolingData | null>(null)
+  const [editingRecord, setEditingRecord] = useState<YoumaiProductData | null>(
+    null,
+  )
   const [formRef, setFormRef] =
-    useState<FormInstance<ToolingDataFormValues> | null>(null)
+    useState<FormInstance<YoumaiProductDataFormValues> | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -41,16 +43,16 @@ export default function ToolingDataPage() {
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = useToolingDataList({
+  const { data, isLoading } = useYoumaiProductDataList({
     page,
     pageSize,
     searchParams,
   })
 
-  const createMutation = useCreateToolingData()
-  const updateMutation = useUpdateToolingData()
-  const importMutation = useImportToolingData()
-  const deleteMutation = useDeleteToolingData()
+  const createMutation = useCreateYoumaiProductData()
+  const updateMutation = useUpdateYoumaiProductData()
+  const importMutation = useImportYoumaiProductData()
+  const deleteMutation = useDeleteYoumaiProductData()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -69,7 +71,7 @@ export default function ToolingDataPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    setModalTitle('新建刀具资料')
+    setModalTitle('新建优迈货品资料')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef])
@@ -88,7 +90,7 @@ export default function ToolingDataPage() {
 
     setEditingRecord(record)
     setIsEdit(true)
-    setModalTitle('编辑刀具资料')
+    setModalTitle('编辑优迈货品资料')
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
 
@@ -100,28 +102,28 @@ export default function ToolingDataPage() {
 
     try {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
-      message.success('刀具资料删除成功')
+      message.success('优迈货品资料删除成功')
       setSelectedRowKeys([])
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
       } else {
-        message.error('删除刀具资料失败，请稍后重试')
+        message.error('删除优迈货品资料失败，请稍后重试')
       }
     }
   }, [deleteMutation, message, selectedRowKeys])
 
   const handleImport = useCallback(
-    async (rows: ToolingDataFormValues[]) => {
+    async (rows: YoumaiProductDataFormValues[]) => {
       try {
         await importMutation.mutateAsync(rows)
-        message.success(`刀具资料导入成功，共 ${rows.length} 条`)
+        message.success(`优迈货品资料导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
       } catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
         } else {
-          message.error('导入刀具资料失败，请稍后重试')
+          message.error('导入优迈货品资料失败，请稍后重试')
         }
       }
     },
@@ -129,17 +131,17 @@ export default function ToolingDataPage() {
   )
 
   const handleFinish = useCallback(
-    async (values: ToolingDataFormValues) => {
+    async (values: YoumaiProductDataFormValues) => {
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
             values,
           })
-          message.success('刀具资料更新成功')
+          message.success('优迈货品资料更新成功')
         } else {
           await createMutation.mutateAsync(values)
-          message.success('刀具资料创建成功')
+          message.success('优迈货品资料创建成功')
         }
 
         resetFormState()
@@ -202,8 +204,8 @@ export default function ToolingDataPage() {
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑刀具资料" handleEdit={handleEdit} />
-        <ToolingDataExcelImport
+        <EditButton title="编辑优迈货品资料" handleEdit={handleEdit} />
+        <YoumaiProductDataExcelImport
           onImport={handleImport}
           isImporting={importMutation.isPending}
         />
@@ -211,14 +213,14 @@ export default function ToolingDataPage() {
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
-          title="删除刀具资料"
-          itemName="刀具资料"
+          title="删除优迈货品资料"
+          itemName="优迈货品资料"
         />
       </div>
 
       <div className="flex items-center gap-2">
         <span className="whitespace-nowrap text-gray-600">搜索：</span>
-        <ToolingDataSearch
+        <YoumaiProductDataSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
@@ -230,7 +232,7 @@ export default function ToolingDataPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <ToolingDataTable
+          <YoumaiProductDataTable
             loading={isLoading}
             data={data?.items || []}
             selectedRowKeys={selectedRowKeys}
@@ -254,7 +256,7 @@ export default function ToolingDataPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <ToolingDataForm
+        <YoumaiProductDataForm
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}

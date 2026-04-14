@@ -10,20 +10,20 @@ import {
 import type { UploadFile } from 'antd/es/upload/interface'
 import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 
-import type { ToolingDataFormValues } from '@/services/apiToolingData'
+import type { YoumaiProductDataFormValues } from '@/services/apiYoumaiProductData'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
 import {
-  downloadToolingDataTemplate,
-  parseToolingDataExcel,
-} from '@/utils/toolingDataExcel'
+  downloadYoumaiProductDataTemplate,
+  parseYoumaiProductDataExcel,
+} from '@/utils/youmaiProductDataExcel'
 
 interface Props {
-  onImport: (rows: ToolingDataFormValues[]) => Promise<void>
+  onImport: (rows: YoumaiProductDataFormValues[]) => Promise<void>
   isImporting: boolean
 }
 
-type PreviewRow = ToolingDataFormValues & { _idx: number }
+type PreviewRow = YoumaiProductDataFormValues & { _idx: number }
 
 const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
   {
@@ -33,39 +33,46 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
     render: (value: number) => value + 1,
   },
   {
-    title: '刀具编号',
-    dataIndex: 'tool_code',
-    width: 140,
+    title: '物料编码',
+    dataIndex: 'material_code',
+    width: 180,
   },
   {
-    title: '刀具名称',
-    dataIndex: 'tool_name',
+    title: '物料名称',
+    dataIndex: 'material_name',
     width: 160,
   },
   {
-    title: '刀具规格',
-    dataIndex: 'tool_spec',
-    width: 160,
-  },
-  {
-    title: '材质',
-    dataIndex: 'material',
+    title: '型号',
+    dataIndex: 'model',
     width: 120,
   },
   {
-    title: '单价',
-    dataIndex: 'unit_price',
+    title: '规格',
+    dataIndex: 'specification',
+    width: 120,
+  },
+  {
+    title: '比重',
+    dataIndex: 'specific_gravity',
     width: 100,
+  },
+  {
+    title: '备注',
+    dataIndex: 'remarks',
+    width: 180,
   },
 ]
 
-export default function ToolingDataExcelImport({
+export default function YoumaiProductDataExcelImport({
   onImport,
   isImporting,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
-  const [parsedRows, setParsedRows] = useState<ToolingDataFormValues[]>([])
+  const [parsedRows, setParsedRows] = useState<YoumaiProductDataFormValues[]>(
+    [],
+  )
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [parsing, setParsing] = useState(false)
 
@@ -83,7 +90,7 @@ export default function ToolingDataExcelImport({
 
     setParsing(true)
     try {
-      const { rows, errors } = await parseToolingDataExcel(file)
+      const { rows, errors } = await parseYoumaiProductDataExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
       setFileList([
@@ -134,13 +141,13 @@ export default function ToolingDataExcelImport({
     <>
       <ImportButton onClick={handleOpenModal} />
 
-      <DownloadTemplateButton onClick={downloadToolingDataTemplate} />
+      <DownloadTemplateButton onClick={downloadYoumaiProductDataTemplate} />
 
       <Modal
-        title="导入刀具资料"
+        title="导入优迈货品资料"
         open={modalOpen}
         onCancel={handleCancel}
-        width={880}
+        width={920}
         footer={[
           <Button key="cancel" onClick={handleCancel}>
             取消
@@ -179,7 +186,7 @@ export default function ToolingDataExcelImport({
           <Alert
             type="info"
             showIcon
-            title="请先下载模板后填写，模板列顺序必须保持不变；空白行会自动跳过。"
+            title="请先下载模板后填写，模板列顺序必须保持不变；空白行会自动跳过。导入时如遇到已存在物料编码，将整批失败。"
           />
 
           {parseErrors.length > 0 && (
@@ -211,7 +218,7 @@ export default function ToolingDataExcelImport({
                 dataSource={previewData}
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}
-                scroll={{ y: 320, x: 780 }}
+                scroll={{ y: 320, x: 900 }}
               />
             </div>
           )}

@@ -48,6 +48,7 @@ import {
   SyneyStoreReportDetail,
   SyneyStoreReportList,
   ToolingData,
+  YoumaiProductData,
   WorkshopOrderClosed,
   WorkshopOrderProduction,
   WorkshopOrderQrDetail,
@@ -434,7 +435,7 @@ export const router = createBrowserRouter([
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
               allow={['admin']}
-              element={<ComingSoonPage />}
+              element={<YoumaiProductData />}
             />
           </Suspense>
         ),
