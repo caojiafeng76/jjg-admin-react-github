@@ -22,6 +22,7 @@ bun preview
 bun lint
 bun lint:fix
 bun format
+bun run db:doctor
 bun run db:push
 bun run db:push:dry-run
 bun run db:query -- --file docs/sql-drafts/example.sql
@@ -37,8 +38,9 @@ Supabase 数据库命令补充：
 - `bun run db:push`: 默认走远程 linked 项目，执行 migration
 - `bun run db:push:dry-run`: 预演待执行 migration
 - `bun run db:query -- --file <sql-file>`: 执行单个 SQL 文件，适合数据修复或只读核对
+- `bun run db:doctor`: 检查 CLI、登录、query 链路、push 链路分别是否正常
 
-说明：本仓库已确认 `supabase start/status` 的本地容器模式依赖 Docker Desktop；如果 Docker 未运行，不影响远程 CLI 和 MCP 路径继续执行数据库脚本。详见 [docs/Supabase数据库脚本执行说明.md](docs/Supabase数据库脚本执行说明.md)。
+说明：本仓库已确认 `supabase start/status` 的本地容器模式依赖 Docker Desktop；如果 Docker 未运行，不影响远程 CLI 和 MCP 路径继续执行数据库脚本。若 `db:push` 失败但 `db:query` 正常，通常不是没登录，而是 linked 直连远程数据库链路失败；这时优先执行 `bun run db:doctor`，必要时配置 `SUPABASE_DB_URL` 作为回退。详见 [docs/Supabase数据库脚本执行说明.md](docs/Supabase数据库脚本执行说明.md)。
 
 ## 目录结构
 
