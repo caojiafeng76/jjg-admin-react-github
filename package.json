@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:push": "bun scripts/supabase-db-push.mjs",
+    "db:push:dry-run": "bun scripts/supabase-db-push.mjs --dry-run",
+    "db:query": "bun scripts/supabase-db-query.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.1",

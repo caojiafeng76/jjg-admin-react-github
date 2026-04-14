@@ -45,6 +45,9 @@ export const JobBaseSetting = lazy(
   () => import('@features/workshop/JobBaseSetting'),
 )
 export const ToolingData = lazy(() => import('@features/tooling/ToolingData'))
+export const YoumaiProductData = lazy(
+  () => import('@features/youmai/ProductData'),
+)
 export const MachineEquipmentMaintenance = lazy(
   () => import('@features/workshop/MachineEquipmentMaintenance'),
 )
