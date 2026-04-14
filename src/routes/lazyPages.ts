@@ -48,6 +48,12 @@ export const ToolingData = lazy(() => import('@features/tooling/ToolingData'))
 export const YoumaiProductData = lazy(
   () => import('@features/youmai/ProductData'),
 )
+export const YoumaiFinishedGoodsInventory = lazy(
+  () => import('@features/youmai/FinishedGoodsInventory'),
+)
+export const YoumaiFinishedGoodsStockIn = lazy(
+  () => import('@features/youmai/FinishedGoodsStockIn'),
+)
 export const MachineEquipmentMaintenance = lazy(
   () => import('@features/workshop/MachineEquipmentMaintenance'),
 )

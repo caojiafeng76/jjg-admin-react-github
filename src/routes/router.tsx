@@ -48,6 +48,8 @@ import {
   SyneyStoreReportDetail,
   SyneyStoreReportList,
   ToolingData,
+  YoumaiFinishedGoodsInventory,
+  YoumaiFinishedGoodsStockIn,
   YoumaiProductData,
   WorkshopOrderClosed,
   WorkshopOrderProduction,
@@ -446,7 +448,7 @@ export const router = createBrowserRouter([
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
               allow={['admin']}
-              element={<ComingSoonPage />}
+              element={<YoumaiFinishedGoodsInventory />}
             />
           </Suspense>
         ),
@@ -457,7 +459,7 @@ export const router = createBrowserRouter([
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
               allow={['admin']}
-              element={<ComingSoonPage />}
+              element={<YoumaiFinishedGoodsStockIn />}
             />
           </Suspense>
         ),
