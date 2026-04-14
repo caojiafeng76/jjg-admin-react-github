@@ -29,6 +29,7 @@
 已添加以下 Bun 命令：
 
 ```bash
+bun run db:doctor
 bun run db:push
 bun run db:push:dry-run
 bun run db:query -- --file docs/sql-drafts/20260321_day3_add_employee_scoped_rls.sql
@@ -38,8 +39,10 @@ bun run db:query -- "select now();"
 说明：
 
 - `db:push` 默认自动走 `--linked`
+- 如果存在 `SUPABASE_DB_URL`，`db:push` / `db:query` 会优先改走 `--db-url`
 - `db:query` 默认自动走 `--linked`
 - 不传 `--local` 就不会依赖本地 Docker 容器
+- `db:doctor` 会分别检查 CLI、login、query、push 四段链路，避免把所有失败都误判成没登录
 
 ## 使用前提
 
@@ -50,11 +53,31 @@ bunx supabase login
 bunx supabase link --project-ref <your-project-ref>
 ```
 
+如果你已经 login + link，但 `bun run db:push` 仍然失败，不要重复纠结登录；先执行：
+
+```bash
+bun run db:doctor
+```
+
+如果 doctor 显示：
+
+- `projects list` 正常
+- `db query` 正常
+- `db push` 超时、TLS EOF 或 failed to connect to postgres
+
+那么根因通常是远程数据库直连链路问题，不是 login 问题。
+
 如果你不想绑定，也可以显式传入远程数据库连接：
 
 ```bash
 bun run db:push -- --db-url <postgres-url>
 bun run db:query -- --db-url <postgres-url> --file path/to/file.sql
+```
+
+也可以通过环境变量提供回退连接串：
+
+```powershell
+$env:SUPABASE_DB_URL = "postgresql://postgres:your-password@your-host:5432/postgres"
 ```
 
 ## 文件类型与执行方式
