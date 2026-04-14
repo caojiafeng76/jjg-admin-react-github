@@ -92,6 +92,7 @@ export function useSalesOrdersProjectNos() {
   return useQuery({
     queryKey: [PROCESS_STANDARDS_KEY, 'project-nos'],
     queryFn: getSalesOrdersProjectNos,
-    ...queryConfig.detail,
+    ...queryConfig.realtime,
+    refetchOnMount: 'always',
   })
 }
