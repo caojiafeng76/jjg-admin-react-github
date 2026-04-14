@@ -10,6 +10,10 @@ const pageLabelMap: Record<string, string> = {
   'tooling-inventory': '刀具库存',
   'tooling-stock-in': '刀具入库',
   'tooling-stock-out': '刀具出库',
+  'youmai-product-data': '货品资料',
+  'youmai-finished-goods-inventory': '成品库存',
+  'youmai-finished-goods-stock-in': '成品入库',
+  'youmai-finished-goods-stock-out': '成品出库',
   'attendance-detail': '考勤明细',
   'attendance-summary': '考勤统计',
 }

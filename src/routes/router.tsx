@@ -429,6 +429,50 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'youmai-product-data',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'youmai-finished-goods-inventory',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'youmai-finished-goods-stock-in',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'youmai-finished-goods-stock-out',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<ComingSoonPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
         path: 'attendance-detail',
         element: (
           <Suspense fallback={<Loading />}>
