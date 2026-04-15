@@ -123,16 +123,16 @@ export default function AppErrorView({
     <div
       className={`relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 lg:px-8 ${variantConfig.shell}`}
     >
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.12)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40 dark:opacity-15" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.12)_1px,transparent_1px)] bg-size-[32px_32px] opacity-40 dark:opacity-15" />
       <div
-        className={`absolute top-12 left-[-96px] h-56 w-56 rounded-full blur-3xl ${variantConfig.glowLeft}`}
+        className={`absolute top-12 -left-24 h-56 w-56 rounded-full blur-3xl ${variantConfig.glowLeft}`}
       />
       <div
-        className={`absolute right-[-72px] bottom-0 h-72 w-72 rounded-full blur-3xl ${variantConfig.glowRight}`}
+        className={`absolute -right-18 bottom-0 h-72 w-72 rounded-full blur-3xl ${variantConfig.glowRight}`}
       />
 
       <div className="relative mx-auto flex min-h-[calc(100vh-5rem)] max-w-4xl items-center justify-center">
-        <Card className="w-full overflow-hidden rounded-[32px] border-0 bg-white/82 shadow-[0_32px_90px_rgba(15,23,42,0.16)] backdrop-blur dark:bg-slate-950/75">
+        <Card className="w-full overflow-hidden rounded-4xl border-0 bg-white/82 shadow-[0_32px_90px_rgba(15,23,42,0.16)] backdrop-blur dark:bg-slate-950/75">
           <div
             className={`absolute inset-x-0 top-0 h-1.5 ${
               variant === 'network'
@@ -165,23 +165,23 @@ export default function AppErrorView({
                 </div>
 
                 <div>
-                  <Title className="!mb-3 !text-3xl !leading-tight !text-slate-900 sm:!text-4xl dark:!text-slate-50">
+                  <Title className="mb-3! text-3xl! leading-tight! text-slate-900! sm:text-4xl! dark:text-slate-50!">
                     {title}
                   </Title>
-                  <Paragraph className="!mb-0 max-w-2xl text-base leading-7 text-slate-600 sm:text-[15px] dark:text-slate-300">
+                  <Paragraph className="mb-0! max-w-2xl text-base leading-7 text-slate-600 sm:text-[15px] dark:text-slate-300">
                     {variantConfig.headline}
                   </Paragraph>
                 </div>
 
                 <div
-                  className={`rounded-[24px] border p-5 ${variantConfig.summaryBox}`}
+                  className={`rounded-3xl border p-5 ${variantConfig.summaryBox}`}
                 >
                   <Text
                     className={`block text-[11px] tracking-[0.3em] uppercase ${variantConfig.summaryTitle}`}
                   >
                     错误摘要
                   </Text>
-                  <Paragraph className="!mt-3 !mb-0 text-sm leading-7 text-slate-700 dark:text-slate-200">
+                  <Paragraph className="mt-3! mb-0! text-sm leading-7 text-slate-700 dark:text-slate-200">
                     {description}
                   </Paragraph>
                 </div>
@@ -235,7 +235,7 @@ export default function AppErrorView({
               </div>
 
               {detail || code ? (
-                <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
                   <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
                     诊断信息
                   </p>
@@ -245,17 +245,17 @@ export default function AppErrorView({
                     </Tag>
                   ) : null}
                   {detail ? (
-                    <Paragraph className="!mt-3 !mb-0 font-mono text-xs leading-6 break-all text-slate-300">
+                    <Paragraph className="mt-3! mb-0! font-mono text-xs leading-6 break-all text-slate-300">
                       {detail}
                     </Paragraph>
                   ) : null}
                 </div>
               ) : (
-                <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
                   <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
                     当前状态
                   </p>
-                  <Paragraph className="!mt-3 !mb-0 text-sm leading-7 text-slate-300">
+                  <Paragraph className="mt-3! mb-0! text-sm leading-7 text-slate-300">
                     系统已经拦截异常并停止继续渲染，当前不会把不完整数据写入页面。
                   </Paragraph>
                 </div>
