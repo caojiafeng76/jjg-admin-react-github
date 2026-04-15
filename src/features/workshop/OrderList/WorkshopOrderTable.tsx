@@ -44,11 +44,29 @@ export default function WorkshopOrderTable({
         render: (_value, record) => <WorkshopOrderQrCell order={record} />,
       },
       {
+        title: '状态',
+        dataIndex: 'status',
+        fixed: 'left',
+        key: 'status',
+        width: 90,
+        render: (value: WorkshopOrder['status']) => {
+          const status = normalizeWorkshopOrderStatus(value)
+          return <Tag color={getWorkshopOrderStatusColor(status)}>{status}</Tag>
+        },
+      },
+      {
         title: '交货日期',
         dataIndex: 'product_delivery_date',
         fixed: 'left',
         key: 'product_delivery_date',
         width: 100,
+      },
+      {
+        title: '工艺流程',
+        dataIndex: 'process_flow',
+        fixed: 'left',
+        key: 'process_flow',
+        width: 180,
       },
       {
         title: '客户',
@@ -63,17 +81,6 @@ export default function WorkshopOrderTable({
         fixed: 'left',
         key: 'project_no',
         width: 120,
-      },
-      {
-        title: '状态',
-        dataIndex: 'status',
-        fixed: 'left',
-        key: 'status',
-        width: 90,
-        render: (value: WorkshopOrder['status']) => {
-          const status = normalizeWorkshopOrderStatus(value)
-          return <Tag color={getWorkshopOrderStatusColor(status)}>{status}</Tag>
-        },
       },
       {
         title: '产品型号',
@@ -102,6 +109,12 @@ export default function WorkshopOrderTable({
         fixed: 'left',
         key: 'length_mm',
         width: 80,
+      },
+      {
+        title: '长度公差',
+        dataIndex: 'length_tolerance',
+        key: 'length_tolerance',
+        width: 90,
       },
       {
         title: '支数',

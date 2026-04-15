@@ -14,6 +14,7 @@ const TEMPLATE_HEADERS = [
   '项目号',
   '产品型号',
   '长度(mm)',
+  '长度公差',
   '客户',
   '客户型号',
   '订支数',
@@ -23,6 +24,7 @@ const TEMPLATE_HEADERS = [
   '产品类别',
   '材质名称',
   '料号',
+  '工艺流程',
 ]
 
 export function downloadWorkshopOrderTemplate() {
@@ -44,6 +46,7 @@ export interface WorkshopOrderExcelRow {
   项目号: string
   产品型号: string
   '长度(mm)': number
+  长度公差: string
   客户: string
   客户型号: string
   订支数: number
@@ -53,6 +56,7 @@ export interface WorkshopOrderExcelRow {
   产品类别: string
   材质名称: string
   料号: string
+  工艺流程: string
 }
 
 export async function parseWorkshopOrderExcel(
@@ -93,6 +97,7 @@ function parseTemplateSheet(sheet: WorkSheet): WorkshopOrder[] {
       project_no: row.项目号 || null,
       product_model: row.产品型号 || null,
       length_mm: row['长度(mm)'] ?? null,
+      length_tolerance: row.长度公差 || null,
       customer: row.客户 || null,
       customer_model: row.客户型号 || null,
       order_quantity: row.订支数 ?? null,
@@ -102,6 +107,7 @@ function parseTemplateSheet(sheet: WorkSheet): WorkshopOrder[] {
       product_category: row.产品类别 || null,
       material_name: row.材质名称 || null,
       material_code: row.料号 || null,
+      process_flow: row.工艺流程 || null,
     }))
 }
 
@@ -113,12 +119,14 @@ interface ErpColumnMap {
   customer_model: number[]
   weight_per_meter_kg: number[]
   length_mm: number[]
+  length_tolerance: number[]
   order_quantity: number[]
   product_category: number[]
   color_name: number[]
   package_name: number[]
   material_name: number[]
   material_code: number[]
+  process_flow: number[]
   product_delivery_date: number[]
 }
 
@@ -174,6 +182,7 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
       project_no: projectNo || null,
       product_model: productModel || null,
       length_mm: getNumberFromRow(row, columnMap.length_mm),
+      length_tolerance: getStringFromRow(row, columnMap.length_tolerance),
       customer,
       customer_model: getStringFromRow(row, columnMap.customer_model),
       order_quantity: getNumberFromRow(row, columnMap.order_quantity),
@@ -183,6 +192,7 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
       product_category: getStringFromRow(row, columnMap.product_category),
       material_name: getStringFromRow(row, columnMap.material_name),
       material_code: getStringFromRow(row, columnMap.material_code),
+      process_flow: getStringFromRow(row, columnMap.process_flow),
     })
   }
 
@@ -272,12 +282,14 @@ function buildErpColumnMap(row: WorksheetRow): ErpColumnMap | null {
     customer_model: customerModel,
     weight_per_meter_kg: findColumnIndices(row, '比重'),
     length_mm: findColumnIndices(row, '长度'),
+    length_tolerance: findColumnIndices(row, '长度公差'),
     order_quantity: findColumnIndices(row, '支数'),
     product_category: findColumnIndices(row, '表面处理'),
     color_name: findColumnIndices(row, '颜色'),
     package_name: findColumnIndices(row, '包装方式'),
     material_name: findColumnIndices(row, '材质'),
     material_code: findColumnIndices(row, '料号'),
+    process_flow: findColumnIndices(row, '工艺流程'),
     product_delivery_date: findColumnIndices(row, '交货日期'),
   }
 }

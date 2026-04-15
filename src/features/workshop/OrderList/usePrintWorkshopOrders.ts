@@ -4,7 +4,7 @@ import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 import { renderToStaticMarkup } from 'react-dom/server'
 import QRCodeImport from 'react-qr-code'
-import { initializePDF } from '@/utils/pdfUtils'
+import { initializePDF, printPDF } from '@/utils/pdfUtils'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { getWorkshopOrderQrValue } from './workshopOrderQr'
 import type { WorkshopOrder } from './index'
@@ -21,24 +21,27 @@ const QRCodeComponent = (
     ).default
   : QRCodeImport
 
-const MAX_ROWS_PER_PAGE = 5
+const MAX_ROWS_PER_PAGE = 10
 const TABLE_START_Y = 24
 const TABLE_BOTTOM_MARGIN = 16
 const HEADER_CELL_HEIGHT = 12
-const CELL_PADDING = 2
+const CELL_PADDING = 1.5
 const QR_IMAGE_SIZE = 96
-const COLUMN_WIDTHS = [10, 22, 20, 24, 30, 14, 26, 14, 20, 24, 24, 24, 25] as const
+const COLUMN_WIDTHS = [
+  22, 20, 28, 22, 18, 32, 12, 14, 12, 18, 22, 25, 25, 25,
+] as const
 const TABLE_COLUMNS = [
-  '序号',
   '二维码',
   '交货日期',
+  '工艺流程',
   '项目号',
   '产品型号',
-  '长度(mm)',
   '客户型号',
+  '比重',
+  '长度',
   '订支数',
+  '长度公差',
   '料号',
-  ' ',
   ' ',
   ' ',
   ' ',
@@ -137,6 +140,34 @@ export function usePrintWorkshopOrders() {
 
     try {
       setIsPrinting(true)
+      const printWindow = window.open('', '_blank')
+
+      if (printWindow) {
+        printWindow.document.open()
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html lang="zh-CN">
+            <head>
+              <meta charset="UTF-8" />
+              <title>正在准备打印...</title>
+              <style>
+                body {
+                  margin: 0;
+                  min-height: 100vh;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-family: sans-serif;
+                  color: #555;
+                  background: #f5f5f5;
+                }
+              </style>
+            </head>
+            <body>正在生成打印内容，请稍候...</body>
+          </html>
+        `)
+        printWindow.document.close()
+      }
 
       const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
       const doc = await initializePDF('l')
@@ -167,7 +198,7 @@ export function usePrintWorkshopOrders() {
         const bodyAreaHeight =
           pageHeight - TABLE_START_Y - TABLE_BOTTOM_MARGIN - HEADER_CELL_HEIGHT
         const minCellHeight = Math.max(
-          28,
+          16,
           Math.floor(bodyAreaHeight / Math.max(pageOrders.length, 1)),
         )
 
@@ -180,17 +211,18 @@ export function usePrintWorkshopOrders() {
           align: 'right',
         })
 
-        const tableData = pageOrders.map((order, rowIndex) => [
-          (pageIndex * MAX_ROWS_PER_PAGE + rowIndex + 1).toString(),
+        const tableData = pageOrders.map((order) => [
           '',
           formatCellText(order.product_delivery_date),
+          formatCellText(order.process_flow),
           formatCellText(order.project_no),
           formatCellText(order.product_model),
-          formatCellText(order.length_mm),
           formatCellText(order.customer_model),
+          formatCellText(order.weight_per_meter_kg),
+          formatCellText(order.length_mm),
           formatCellText(order.order_quantity),
+          formatCellText(order.length_tolerance),
           formatCellText(order.material_code),
-          '',
           '',
           '',
           '',
@@ -209,7 +241,7 @@ export function usePrintWorkshopOrders() {
             textColor: [0, 0, 0],
             font: fontFamily,
             fontStyle: GOOGLE_FONT_CONFIG.FONT_STYLE,
-            fontSize: 10,
+            fontSize: 8,
             halign: 'center',
             valign: 'middle',
             lineColor: [0, 0, 0],
@@ -219,7 +251,7 @@ export function usePrintWorkshopOrders() {
           styles: {
             font: fontFamily,
             fontStyle: GOOGLE_FONT_CONFIG.FONT_STYLE,
-            fontSize: 10,
+            fontSize: 8,
             overflow: 'linebreak',
             cellPadding: {
               top: CELL_PADDING,
@@ -233,15 +265,14 @@ export function usePrintWorkshopOrders() {
             lineWidth: 0.2,
             minCellHeight,
           },
-          columnStyles: COLUMN_WIDTHS.reduce<Record<number, { cellWidth: number }>>(
-            (styles, width, columnIndex) => {
-              styles[columnIndex] = { cellWidth: width }
-              return styles
-            },
-            {},
-          ),
+          columnStyles: COLUMN_WIDTHS.reduce<
+            Record<number, { cellWidth: number }>
+          >((styles, width, columnIndex) => {
+            styles[columnIndex] = { cellWidth: width }
+            return styles
+          }, {}),
           didDrawCell: (data) => {
-            if (data.section !== 'body' || data.column.index !== 1) {
+            if (data.section !== 'body' || data.column.index !== 0) {
               return
             }
 
@@ -255,7 +286,7 @@ export function usePrintWorkshopOrders() {
               return
             }
 
-            const imageSize = Math.min(data.cell.width, data.cell.height) - 4
+            const imageSize = Math.min(data.cell.width, data.cell.height) - 3
             const imageX = data.cell.x + (data.cell.width - imageSize) / 2
             const imageY = data.cell.y + (data.cell.height - imageSize) / 2
 
@@ -275,13 +306,20 @@ export function usePrintWorkshopOrders() {
       const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
       const filename = `车间订单_${selectedOrders.length}条_${timestamp}.pdf`
 
-      doc.save(filename)
+      const printed = printPDF(doc, filename, printWindow)
 
-      message.success(`PDF生成成功: ${filename}`)
+      if (printed) {
+        message.success('已打开浏览器打印窗口')
+      } else {
+        message.warning('浏览器阻止了直接打印，已回退为 PDF 预览')
+      }
+
       return true
     } catch (error) {
       console.error('生成PDF时发生错误:', error)
-      message.error(error instanceof Error ? error.message : 'PDF生成失败，请重试')
+      message.error(
+        error instanceof Error ? error.message : 'PDF生成失败，请重试',
+      )
       return false
     } finally {
       setIsPrinting(false)
@@ -293,4 +331,3 @@ export function usePrintWorkshopOrders() {
     isPrinting,
   }
 }
-

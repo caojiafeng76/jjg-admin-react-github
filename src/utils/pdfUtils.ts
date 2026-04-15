@@ -30,7 +30,11 @@ export async function initializePDF(orientation: 'p' | 'l' = 'l') {
 
   // 设置中文字体
   doc.addFileToVFS(GOOGLE_FONT_CONFIG.FONT_NAME, fontData)
-  doc.addFont(GOOGLE_FONT_CONFIG.FONT_NAME, GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
+  doc.addFont(
+    GOOGLE_FONT_CONFIG.FONT_NAME,
+    GOOGLE_FONT_CONFIG.FONT_FAMILY,
+    GOOGLE_FONT_CONFIG.FONT_STYLE,
+  )
   doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
 
   return doc
@@ -106,7 +110,10 @@ export function processTableData(items: ISyneyItem[]): string[][] {
  * @param totalAmount 总金额
  * @returns 总计行数据
  */
-export function calculateTotals(items: ISyneyItem[], totalAmount?: number): string[] {
+export function calculateTotals(
+  items: ISyneyItem[],
+  totalAmount?: number,
+): string[] {
   const totalQty = items.reduce((sum, item) => (sum || 0) + (item.Qty || 0), 0)
 
   return [
@@ -133,7 +140,7 @@ export function addDocumentTitle(
   doc: jsPDF,
   title: string,
   x: number = LAYOUT_CONFIG.TITLE.X_OFFSET,
-  y: number = LAYOUT_CONFIG.TITLE.Y_OFFSET
+  y: number = LAYOUT_CONFIG.TITLE.Y_OFFSET,
 ) {
   doc.setFontSize(LAYOUT_CONFIG.TITLE.FONT_SIZE)
   doc.text(title, x, y)
@@ -145,13 +152,21 @@ export function addDocumentTitle(
  * @param currentPage 当前页码
  * @param totalPages 总页数
  */
-export function addPageNumber(doc: jsPDF, currentPage: number, totalPages: number) {
+export function addPageNumber(
+  doc: jsPDF,
+  currentPage: number,
+  totalPages: number,
+) {
   const text = `第${currentPage}页，共${totalPages}页`
   const pageSize = doc.internal.pageSize
   const pageWidth =
-    typeof pageSize.getWidth === 'function' ? pageSize.getWidth() : pageSize.width
+    typeof pageSize.getWidth === 'function'
+      ? pageSize.getWidth()
+      : pageSize.width
   const pageHeight =
-    typeof pageSize.getHeight === 'function' ? pageSize.getHeight() : pageSize.height
+    typeof pageSize.getHeight === 'function'
+      ? pageSize.getHeight()
+      : pageSize.height
   const { X_OFFSET = -150, Y_OFFSET = 10 } = LAYOUT_CONFIG.PAGE_NUMBER
 
   const x = pageWidth + X_OFFSET
@@ -170,17 +185,18 @@ export function addPageNumber(doc: jsPDF, currentPage: number, totalPages: numbe
 export function generateFilename(
   type: 'detail' | 'summary',
   count: number,
-  reportNos?: string[]
+  reportNos?: string[],
 ): string {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
-  const prefix = FILENAME_CONFIG.PREFIX[type.toUpperCase() as 'DETAIL' | 'SUMMARY'] || FILENAME_CONFIG.PREFIX.SUMMARY
+  const prefix =
+    FILENAME_CONFIG.PREFIX[type.toUpperCase() as 'DETAIL' | 'SUMMARY'] ||
+    FILENAME_CONFIG.PREFIX.SUMMARY
   const suffix = FILENAME_CONFIG.SUFFIX
 
   if (type === 'detail' && reportNos && reportNos.length > 0) {
     // 详细对账单：包含对账单号
-    const reportNoStr = reportNos.length === 1
-      ? reportNos[0]
-      : `${reportNos.length}条记录`
+    const reportNoStr =
+      reportNos.length === 1 ? reportNos[0] : `${reportNos.length}条记录`
     return `${prefix}_${reportNoStr}_${timestamp}${suffix}`
   } else {
     // 汇总表：包含数量
@@ -199,7 +215,7 @@ export async function processBatchWithProgress<T, R>(
   array: T[],
   batchSize: number,
   processor: (batch: T[]) => Promise<R[]>,
-  onProgress?: (processed: number, total: number) => void
+  onProgress?: (processed: number, total: number) => void,
 ): Promise<R[]> {
   const results: R[] = []
   const total = array.length
@@ -214,7 +230,7 @@ export async function processBatchWithProgress<T, R>(
     onProgress?.(processed, total)
 
     // 让出控制权，避免阻塞UI
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
   }
 
   return results
@@ -292,13 +308,121 @@ export function previewPDF(doc: jsPDF, filename: string) {
   openedWindow.document.close()
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+/**
+ * 直接触发浏览器打印 PDF
+ * @param doc PDF 文档实例
+ * @param filename 文件名
+ * @param targetWindow 可选的预打开窗口，避免异步流程被浏览器拦截弹窗
+ */
+export function printPDF(
+  doc: jsPDF,
+  filename: string,
+  targetWindow?: Window | null,
+) {
+  const url = URL.createObjectURL(doc.output('blob'))
+  const openedWindow =
+    targetWindow && !targetWindow.closed
+      ? targetWindow
+      : window.open('', '_blank')
+
+  if (!openedWindow) {
+    previewPDF(doc, filename)
+    return false
+  }
+
+  const safeTitle = escapeHtml(filename)
+  const revokeUrl = () => URL.revokeObjectURL(url)
+
+  openedWindow.document.open()
+  openedWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${safeTitle}</title>
+        <style>
+          html, body {
+            height: 100%;
+            margin: 0;
+            background: #f5f5f5;
+          }
+
+          iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #fff;
+          }
+        </style>
+      </head>
+      <body>
+        <iframe id="pdf-print-frame" src="${url}" title="${safeTitle}"></iframe>
+      </body>
+    </html>
+  `)
+  openedWindow.document.close()
+
+  const iframe = openedWindow.document.getElementById(
+    'pdf-print-frame',
+  ) as HTMLIFrameElement | null
+
+  const triggerPrint = () => {
+    const frameWindow = iframe?.contentWindow
+
+    if (frameWindow) {
+      frameWindow.focus()
+      frameWindow.print()
+      return
+    }
+
+    openedWindow.focus()
+    openedWindow.print()
+  }
+
+  iframe?.addEventListener(
+    'load',
+    () => {
+      openedWindow.setTimeout(() => {
+        triggerPrint()
+      }, 250)
+    },
+    { once: true },
+  )
+
+  openedWindow.addEventListener(
+    'afterprint',
+    () => {
+      revokeUrl()
+      openedWindow.close()
+    },
+    { once: true },
+  )
+  openedWindow.addEventListener('beforeunload', revokeUrl, { once: true })
+
+  return true
+}
+
 /**
  * 生成表格表头信息
  * @param doc PDF 文档实例
  * @param reportNo 报告编号
  * @param createdAt 创建时间
  */
-export function addTableHeader(doc: jsPDF, reportNo: string, createdAt: string) {
+export function addTableHeader(
+  doc: jsPDF,
+  reportNo: string,
+  createdAt: string,
+) {
   autoTable(doc, {
     margin: LAYOUT_CONFIG.HEADER_INFO.MARGIN,
     styles: TABLE_CONFIG.STYLES,
@@ -314,7 +438,9 @@ export function addTableHeader(doc: jsPDF, reportNo: string, createdAt: string) 
  * @param data 汇总数据数组
  * @returns 表格数据
  */
-export function generateSummaryTableData(data: Array<{ No: string; totalAmount: number }>) {
+export function generateSummaryTableData(
+  data: Array<{ No: string; totalAmount: number }>,
+) {
   const totalAmount = data.reduce((sum, item) => sum + item.totalAmount, 0)
 
   return data
@@ -323,9 +449,7 @@ export function generateSummaryTableData(data: Array<{ No: string; totalAmount: 
       item.No,
       formatNumberWithCache(item.totalAmount),
     ])
-    .concat([
-      ['*', '合计', formatNumberWithCache(totalAmount)],
-    ])
+    .concat([['*', '合计', formatNumberWithCache(totalAmount)]])
 }
 
 /**
@@ -337,7 +461,7 @@ export function generateSummaryTableData(data: Array<{ No: string; totalAmount: 
 export async function processBatch<T, R>(
   array: T[],
   batchSize: number,
-  processor: (batch: T[]) => Promise<R[]>
+  processor: (batch: T[]) => Promise<R[]>,
 ): Promise<R[]> {
   const results: R[] = []
 
@@ -347,7 +471,7 @@ export async function processBatch<T, R>(
     results.push(...batchResults)
 
     // 让出控制权，避免阻塞UI
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await new Promise((resolve) => setTimeout(resolve, 0))
   }
 
   return results

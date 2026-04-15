@@ -118,6 +118,11 @@ export default function WorkshopOrderForm({
         width: 100,
       },
       {
+        title: '长度公差',
+        dataIndex: 'length_tolerance',
+        width: 120,
+      },
+      {
         title: '支数',
         dataIndex: 'order_quantity',
         width: 80,
@@ -146,6 +151,12 @@ export default function WorkshopOrderForm({
         title: '料号',
         dataIndex: 'material_code',
         width: 120,
+      },
+      {
+        title: '工艺流程',
+        dataIndex: 'process_flow',
+        width: 220,
+        ellipsis: true,
       },
     ]
   }
@@ -225,6 +236,10 @@ export default function WorkshopOrderForm({
             <InputNumber style={{ width: '100%' }} disabled={isCreating} />
           </Form.Item>
 
+          <Form.Item name="length_tolerance" label="长度公差">
+            <Input disabled={isCreating} placeholder="如：±0.2" />
+          </Form.Item>
+
           <Form.Item name="customer_model" label="客户型号">
             <Input disabled={isCreating} />
           </Form.Item>
@@ -264,6 +279,10 @@ export default function WorkshopOrderForm({
           <Form.Item name="material_code" label="料号">
             <Input disabled={isCreating} />
           </Form.Item>
+
+          <Form.Item name="process_flow" label="工艺流程">
+            <Input disabled={isCreating} placeholder="如：切割->冲孔->CNC" />
+          </Form.Item>
         </>
       )}
 
@@ -299,7 +318,7 @@ export default function WorkshopOrderForm({
                 }))}
                 size="small"
                 pagination={false}
-                scroll={{ x: 1620, y: 300 }}
+                scroll={{ x: 1960, y: 300 }}
                 bordered
               />
             </Form.Item>
