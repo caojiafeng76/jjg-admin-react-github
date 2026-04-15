@@ -34,6 +34,11 @@ export interface YoumaiFinishedGoodsStockInFormValues {
   remarks: string
 }
 
+export interface YoumaiFinishedGoodsStockInBatchStatusValues {
+  ids: string[]
+  status: YoumaiFinishedGoodsStockInStatus
+}
+
 type DynamicSupabaseTable = {
   from: (table: string) => any
 }
@@ -199,6 +204,28 @@ export async function updateYoumaiFinishedGoodsStockIn({
 
   if (error) {
     throw handleApiError(error, '更新优迈成品入库失败')
+  }
+}
+
+export async function batchUpdateYoumaiFinishedGoodsStockInStatus({
+  ids,
+  status,
+}: YoumaiFinishedGoodsStockInBatchStatusValues) {
+  const normalizedIds = ids.filter(Boolean)
+
+  if (normalizedIds.length === 0) {
+    throw new Error('请选择至少一条优迈成品入库数据')
+  }
+
+  const { error } = await stockInTable()
+    .update({ status })
+    .in('id', normalizedIds)
+
+  if (error) {
+    throw handleApiError(
+      error,
+      `批量${status === '已审核' ? '审核' : '反审'}优迈成品入库失败`,
+    )
   }
 }
 
