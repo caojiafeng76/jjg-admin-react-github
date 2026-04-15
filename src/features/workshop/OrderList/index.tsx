@@ -35,6 +35,8 @@ export interface WorkshopOrder {
   project_no: string | null
   product_model: string | null
   length_mm: number | null
+  length_tolerance?: string | null
+  process_flow?: string | null
   customer: string | null
   customer_model: string | null
   order_quantity: number | null
