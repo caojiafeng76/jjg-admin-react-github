@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 
 import supabase from './supabase'
+import type { ProductionItemWithOrderDetail } from './apiProductionOrders'
 import { handleApiError } from '@/utils/errorHandler'
 
 const PRECISION_CUTTING_TRANSFERS_TABLE = 'precision_cutting_transfers'
@@ -146,15 +147,17 @@ export type PrecisionCuttingTransfer = PrecisionCuttingTransferRow &
   PrecisionCuttingTransferAuditFields &
   PrecisionCuttingTransferExtraFields
 
-export type PrecisionCuttingTransferInsert = PrecisionCuttingTransferInsertBase & {
-  is_audited?: boolean
-  audited_at?: string | null
-} & Partial<PrecisionCuttingTransferExtraFields>
+export type PrecisionCuttingTransferInsert =
+  PrecisionCuttingTransferInsertBase & {
+    is_audited?: boolean
+    audited_at?: string | null
+  } & Partial<PrecisionCuttingTransferExtraFields>
 
-export type PrecisionCuttingTransferUpdate = PrecisionCuttingTransferUpdateBase & {
-  is_audited?: boolean
-  audited_at?: string | null
-} & Partial<PrecisionCuttingTransferExtraFields>
+export type PrecisionCuttingTransferUpdate =
+  PrecisionCuttingTransferUpdateBase & {
+    is_audited?: boolean
+    audited_at?: string | null
+  } & Partial<PrecisionCuttingTransferExtraFields>
 
 export interface PrecisionCuttingTransferFilters {
   startDate?: string
@@ -172,8 +175,7 @@ export interface PrecisionCuttingTransferQuantityStats {
   totalRecords: number
 }
 
-export interface PrecisionCuttingTransferExportRow
-  extends PrecisionCuttingTransferRow {
+export interface PrecisionCuttingTransferExportRow extends PrecisionCuttingTransferRow {
   processing_defect_weight_kg: number
   raw_material_defect_weight_kg: number
 }
@@ -283,10 +285,12 @@ async function getProjectWeightMap(projectNos: string[]) {
       throw handleApiError(error, '获取项目比重失败')
     }
 
-    ;((data || []) as Array<{
-      project_no: string | null
-      weight_per_meter_kg: number | null
-    }>).forEach((item) => {
+    ;(
+      (data || []) as Array<{
+        project_no: string | null
+        weight_per_meter_kg: number | null
+      }>
+    ).forEach((item) => {
       if (item.project_no) {
         weightMap.set(item.project_no, Number(item.weight_per_meter_kg || 0))
       }
@@ -427,7 +431,8 @@ function normalizePrecisionCuttingTransferUpdatePayload(
   }
 
   if (values.outsource_defect_reason !== undefined) {
-    payload.outsource_defect_reason = values.outsource_defect_reason?.trim() || null
+    payload.outsource_defect_reason =
+      values.outsource_defect_reason?.trim() || null
   }
 
   if (values.outsource_unit !== undefined) {
@@ -533,6 +538,55 @@ export async function getPrecisionCuttingTransferById(id: string) {
   return data as PrecisionCuttingTransferRow
 }
 
+export async function getPrecisionCuttingTransferItemsByProjectNo(
+  projectNo: string,
+): Promise<ProductionItemWithOrderDetail[]> {
+  const { data, error } = await getPrecisionCuttingTransfersQuery()
+    .select('*')
+    .eq('project_no', projectNo.trim())
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    throw handleApiError(error, '获取精切转移单明细失败')
+  }
+
+  return ((data || []) as PrecisionCuttingTransferRow[]).map((item) => {
+    const processingDefectCount = Number(item.processing_defect_count || 0)
+    const rawMaterialDefectCount = Number(item.raw_material_defect_count || 0)
+    const outsourceDefectQuantity = Number(item.outsource_defect_quantity || 0)
+    const totalDefect =
+      processingDefectCount + rawMaterialDefectCount + outsourceDefectQuantity
+
+    return {
+      id: `precision-cutting-transfer:${item.id}`,
+      operation: '精切切割',
+      project_no: item.project_no,
+      product_model: item.product_model,
+      length_mm: item.length_mm,
+      customer_model: item.customer_model,
+      qualified_quantity: Number(item.transfer_quantity || 0),
+      incoming_qualified_quantity:
+        Number(item.transfer_quantity || 0) + totalDefect,
+      defect_quantity_1: processingDefectCount,
+      defect_quantity_2: rawMaterialDefectCount,
+      defect_reason_1:
+        processingDefectCount > 0 ? item.defect_reason?.trim() || '加工' : null,
+      defect_reason_2: rawMaterialDefectCount > 0 ? '原料' : null,
+      outsource_defect_quantity: outsourceDefectQuantity,
+      outsource_defect_reason: item.outsource_defect_reason,
+      outsource_unit: item.outsource_unit,
+      setup_defect_quantity: 0,
+      setup_responsible: null,
+      standard_seconds: 0,
+      remark: item.remark,
+      order_id: item.id,
+      order_date: dayjs(item.created_at).format('YYYY-MM-DD'),
+      shift: '白班',
+      employee_name: item.operator_names.filter(Boolean).join('、') || null,
+    }
+  })
+}
+
 export async function getPrecisionCuttingTransfersForExport({
   ids,
   filters,
@@ -544,10 +598,9 @@ export async function getPrecisionCuttingTransfersForExport({
     return []
   }
 
-  let query = getPrecisionCuttingTransfersQuery().select('*').order(
-    'created_at',
-    { ascending: true },
-  )
+  let query = getPrecisionCuttingTransfersQuery()
+    .select('*')
+    .order('created_at', { ascending: true })
 
   if (ids && ids.length > 0) {
     query = query.in('id', ids)
@@ -572,11 +625,15 @@ export async function getPrecisionCuttingTransfersForExport({
     return {
       ...row,
       raw_material_defect_weight_kg: roundTo(
-        (Number(row.raw_material_defect_count || 0) * lengthMm * weightPerMeterKg) /
+        (Number(row.raw_material_defect_count || 0) *
+          lengthMm *
+          weightPerMeterKg) /
           1000,
       ),
       processing_defect_weight_kg: roundTo(
-        (Number(row.processing_defect_count || 0) * lengthMm * weightPerMeterKg) /
+        (Number(row.processing_defect_count || 0) *
+          lengthMm *
+          weightPerMeterKg) /
           1000,
       ),
     }

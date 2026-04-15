@@ -561,6 +561,11 @@ export interface ProductionItemWithOrderDetail {
   defect_quantity_2: number
   defect_reason_1: string | null
   defect_reason_2: string | null
+  outsource_defect_quantity: number
+  outsource_defect_reason: string | null
+  outsource_unit: string | null
+  setup_defect_quantity: number
+  setup_responsible: string | null
   standard_seconds: number
   remark: string | null
   order_id: string
@@ -608,6 +613,11 @@ export async function getProductionItemsByProjectNo(
       defect_quantity_2: number
       defect_reason_1: string | null
       defect_reason_2: string | null
+      outsource_defect_quantity: number
+      outsource_defect_reason: string | null
+      outsource_unit: string | null
+      setup_defect_quantity: number
+      setup_responsible: string | null
       standard_seconds: number
       remark: string | null
       order_id: string
@@ -631,6 +641,11 @@ export async function getProductionItemsByProjectNo(
     defect_quantity_2: item.defect_quantity_2,
     defect_reason_1: item.defect_reason_1,
     defect_reason_2: item.defect_reason_2,
+    outsource_defect_quantity: item.outsource_defect_quantity,
+    outsource_defect_reason: item.outsource_defect_reason,
+    outsource_unit: item.outsource_unit,
+    setup_defect_quantity: item.setup_defect_quantity,
+    setup_responsible: item.setup_responsible,
     standard_seconds: item.standard_seconds,
     remark: item.remark,
     order_id: item.order_id,

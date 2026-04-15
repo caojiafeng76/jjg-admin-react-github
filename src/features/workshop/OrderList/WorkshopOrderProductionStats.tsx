@@ -126,6 +126,45 @@ const recordColumns: TableColumnsType<ProductionItemWithOrderDetail> = [
       v > 0 ? <Text style={{ color: '#cf1322' }}>{v}</Text> : '-',
   },
   {
+    title: '外协不良数',
+    dataIndex: 'outsource_defect_quantity',
+    key: 'outsource_defect_quantity',
+    width: 88,
+    align: 'right',
+    render: (v: number) =>
+      v > 0 ? <Text style={{ color: '#cf1322' }}>{v}</Text> : '-',
+  },
+  {
+    title: '外协不良原因',
+    dataIndex: 'outsource_defect_reason',
+    key: 'outsource_defect_reason',
+    width: 120,
+    render: (v: string | null) => v || '-',
+  },
+  {
+    title: '外协单位',
+    dataIndex: 'outsource_unit',
+    key: 'outsource_unit',
+    width: 100,
+    render: (v: string | null) => v || '-',
+  },
+  {
+    title: '调机不良',
+    dataIndex: 'setup_defect_quantity',
+    key: 'setup_defect_quantity',
+    width: 80,
+    align: 'right',
+    render: (v: number) =>
+      v > 0 ? <Text style={{ color: '#cf1322' }}>{v}</Text> : '-',
+  },
+  {
+    title: '调机负责人',
+    dataIndex: 'setup_responsible',
+    key: 'setup_responsible',
+    width: 100,
+    render: (v: string | null) => v || '-',
+  },
+  {
     title: '备注',
     dataIndex: 'remark',
     key: 'remark',
@@ -176,7 +215,11 @@ export default function WorkshopOrderProductionStats({
       ),
       totalDefect: groupItems.reduce(
         (sum, i) =>
-          sum + (i.defect_quantity_1 ?? 0) + (i.defect_quantity_2 ?? 0),
+          sum +
+          (i.defect_quantity_1 ?? 0) +
+          (i.defect_quantity_2 ?? 0) +
+          (i.outsource_defect_quantity ?? 0) +
+          (i.setup_defect_quantity ?? 0),
         0,
       ),
     }))
@@ -257,55 +300,86 @@ export default function WorkshopOrderProductionStats({
         pagination={false}
         scroll={{ x: 'max-content', y: 180 }}
         style={{ fontSize: 11 }}
-        summary={() => (
-          <Table.Summary fixed>
-            <Table.Summary.Row>
-              <Table.Summary.Cell index={0} colSpan={3}>
-                <Text strong style={{ fontSize: 11 }}>
-                  合计（{group.items.length} 条）
-                </Text>
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={3} align="right">
-                <Text style={{ fontSize: 11 }}>{group.totalIncoming}</Text>
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={4} align="right">
-                <Text strong style={{ color: '#389e0d', fontSize: 11 }}>
-                  {group.totalQualified}
-                </Text>
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={5} />
-              <Table.Summary.Cell index={6} align="right">
-                {group.totalDefect > 0 ? (
-                  <Text strong style={{ color: '#cf1322', fontSize: 11 }}>
-                    {group.items.reduce(
-                      (s, i) => s + (i.defect_quantity_1 ?? 0),
-                      0,
-                    )}
+        summary={() => {
+          const totalDefect1 = group.items.reduce(
+            (sum, item) => sum + (item.defect_quantity_1 ?? 0),
+            0,
+          )
+          const totalDefect2 = group.items.reduce(
+            (sum, item) => sum + (item.defect_quantity_2 ?? 0),
+            0,
+          )
+          const totalOutsourceDefect = group.items.reduce(
+            (sum, item) => sum + (item.outsource_defect_quantity ?? 0),
+            0,
+          )
+          const totalSetupDefect = group.items.reduce(
+            (sum, item) => sum + (item.setup_defect_quantity ?? 0),
+            0,
+          )
+
+          return (
+            <Table.Summary fixed>
+              <Table.Summary.Row>
+                <Table.Summary.Cell index={0} colSpan={3}>
+                  <Text strong style={{ fontSize: 11 }}>
+                    合计（{group.items.length} 条）
                   </Text>
-                ) : (
-                  '-'
-                )}
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={7} />
-              <Table.Summary.Cell index={8} align="right">
-                {group.items.reduce(
-                  (s, i) => s + (i.defect_quantity_2 ?? 0),
-                  0,
-                ) > 0 ? (
-                  <Text strong style={{ color: '#cf1322', fontSize: 11 }}>
-                    {group.items.reduce(
-                      (s, i) => s + (i.defect_quantity_2 ?? 0),
-                      0,
-                    )}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={3} align="right">
+                  <Text style={{ fontSize: 11 }}>{group.totalIncoming}</Text>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={4} align="right">
+                  <Text strong style={{ color: '#389e0d', fontSize: 11 }}>
+                    {group.totalQualified}
                   </Text>
-                ) : (
-                  '-'
-                )}
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={9} />
-            </Table.Summary.Row>
-          </Table.Summary>
-        )}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={5} />
+                <Table.Summary.Cell index={6} align="right">
+                  {totalDefect1 > 0 ? (
+                    <Text strong style={{ color: '#cf1322', fontSize: 11 }}>
+                      {totalDefect1}
+                    </Text>
+                  ) : (
+                    '-'
+                  )}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={7} />
+                <Table.Summary.Cell index={8} align="right">
+                  {totalDefect2 > 0 ? (
+                    <Text strong style={{ color: '#cf1322', fontSize: 11 }}>
+                      {totalDefect2}
+                    </Text>
+                  ) : (
+                    '-'
+                  )}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={9} align="right">
+                  {totalOutsourceDefect > 0 ? (
+                    <Text strong style={{ color: '#cf1322', fontSize: 11 }}>
+                      {totalOutsourceDefect}
+                    </Text>
+                  ) : (
+                    '-'
+                  )}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={10} />
+                <Table.Summary.Cell index={11} />
+                <Table.Summary.Cell index={12} align="right">
+                  {totalSetupDefect > 0 ? (
+                    <Text strong style={{ color: '#cf1322', fontSize: 11 }}>
+                      {totalSetupDefect}
+                    </Text>
+                  ) : (
+                    '-'
+                  )}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={13} />
+                <Table.Summary.Cell index={14} />
+              </Table.Summary.Row>
+            </Table.Summary>
+          )
+        }}
       />
     ),
   }))
