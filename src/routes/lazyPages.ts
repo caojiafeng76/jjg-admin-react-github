@@ -54,6 +54,9 @@ export const YoumaiFinishedGoodsInventory = lazy(
 export const YoumaiFinishedGoodsStockIn = lazy(
   () => import('@features/youmai/FinishedGoodsStockIn'),
 )
+export const YoumaiFinishedGoodsStockOut = lazy(
+  () => import('@features/youmai/FinishedGoodsStockOut'),
+)
 export const MachineEquipmentMaintenance = lazy(
   () => import('@features/workshop/MachineEquipmentMaintenance'),
 )

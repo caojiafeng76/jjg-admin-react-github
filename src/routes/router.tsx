@@ -50,6 +50,7 @@ import {
   ToolingData,
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsStockIn,
+  YoumaiFinishedGoodsStockOut,
   YoumaiProductData,
   WorkshopOrderClosed,
   WorkshopOrderProduction,
@@ -470,7 +471,7 @@ export const router = createBrowserRouter([
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute
               allow={['admin']}
-              element={<ComingSoonPage />}
+              element={<YoumaiFinishedGoodsStockOut />}
             />
           </Suspense>
         ),

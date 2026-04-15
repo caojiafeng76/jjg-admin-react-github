@@ -3,21 +3,22 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
-  batchUpdateYoumaiFinishedGoodsStockInStatus,
-  createYoumaiFinishedGoodsStockIn,
-  deleteYoumaiFinishedGoodsStockIn,
-  getYoumaiFinishedGoodsStockInList,
+  batchUpdateYoumaiFinishedGoodsStockOutStatus,
+  createYoumaiFinishedGoodsStockOut,
+  deleteYoumaiFinishedGoodsStockOut,
+  getYoumaiFinishedGoodsStockOutList,
   getYoumaiProductDataOptions,
-  updateYoumaiFinishedGoodsStockIn,
-} from '@/services/apiYoumaiFinishedGoodsStockIn'
+  importYoumaiFinishedGoodsStockOut,
+  updateYoumaiFinishedGoodsStockOut,
+} from '@/services/apiYoumaiFinishedGoodsStockOut'
 
-const YOUMAI_FINISHED_GOODS_STOCK_IN_KEY =
-  'youmai-finished-goods-stock-in' as const
+const YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY =
+  'youmai-finished-goods-stock-out' as const
 const YOUMAI_FINISHED_GOODS_INVENTORY_KEY =
   'youmai-finished-goods-inventory' as const
 const YOUMAI_PRODUCT_DATA_OPTIONS_KEY = 'youmai-product-data-options' as const
 
-export function useYoumaiFinishedGoodsStockInList({
+export function useYoumaiFinishedGoodsStockOutList({
   page,
   pageSize,
   searchParams,
@@ -31,13 +32,13 @@ export function useYoumaiFinishedGoodsStockInList({
 }) {
   return useQuery({
     queryKey: [
-      YOUMAI_FINISHED_GOODS_STOCK_IN_KEY,
+      YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY,
       page,
       pageSize,
       searchParams,
     ],
     queryFn: () =>
-      getYoumaiFinishedGoodsStockInList({
+      getYoumaiFinishedGoodsStockOutList({
         page,
         pageSize,
         keyword: searchParams.keyword,
@@ -56,41 +57,51 @@ export function useYoumaiProductDataOptions() {
   })
 }
 
-export function useCreateYoumaiFinishedGoodsStockIn() {
+export function useCreateYoumaiFinishedGoodsStockOut() {
   return useMutationWithInvalidation({
-    mutationFn: createYoumaiFinishedGoodsStockIn,
+    mutationFn: createYoumaiFinishedGoodsStockOut,
     invalidateQueries: [
-      [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
       [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
     ],
   })
 }
 
-export function useUpdateYoumaiFinishedGoodsStockIn() {
+export function useUpdateYoumaiFinishedGoodsStockOut() {
   return useMutationWithInvalidation({
-    mutationFn: updateYoumaiFinishedGoodsStockIn,
+    mutationFn: updateYoumaiFinishedGoodsStockOut,
     invalidateQueries: [
-      [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
       [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
     ],
   })
 }
 
-export function useBatchUpdateYoumaiFinishedGoodsStockInStatus() {
+export function useBatchUpdateYoumaiFinishedGoodsStockOutStatus() {
   return useMutationWithInvalidation({
-    mutationFn: batchUpdateYoumaiFinishedGoodsStockInStatus,
+    mutationFn: batchUpdateYoumaiFinishedGoodsStockOutStatus,
     invalidateQueries: [
-      [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
       [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
     ],
   })
 }
 
-export function useDeleteYoumaiFinishedGoodsStockIn() {
+export function useImportYoumaiFinishedGoodsStockOut() {
   return useMutationWithInvalidation({
-    mutationFn: deleteYoumaiFinishedGoodsStockIn,
+    mutationFn: importYoumaiFinishedGoodsStockOut,
     invalidateQueries: [
-      [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
+      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
+    ],
+  })
+}
+
+export function useDeleteYoumaiFinishedGoodsStockOut() {
+  return useMutationWithInvalidation({
+    mutationFn: deleteYoumaiFinishedGoodsStockOut,
+    invalidateQueries: [
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
       [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
     ],
   })

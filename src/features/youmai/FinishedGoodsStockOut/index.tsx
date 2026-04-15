@@ -5,36 +5,40 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
-  YoumaiFinishedGoodsStockIn,
-  YoumaiFinishedGoodsStockInFormValues,
-} from '@/services/apiYoumaiFinishedGoodsStockIn'
+  YoumaiFinishedGoodsStockOut,
+  YoumaiFinishedGoodsStockOutFormValues,
+  YoumaiFinishedGoodsStockOutImportRow,
+} from '@/services/apiYoumaiFinishedGoodsStockOut'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
-import YoumaiFinishedGoodsStockInForm from './YoumaiFinishedGoodsStockInForm'
-import YoumaiFinishedGoodsStockInSearch from './YoumaiFinishedGoodsStockInSearch'
-import YoumaiFinishedGoodsStockInTable from './YoumaiFinishedGoodsStockInTable'
+import PrintButton from '@/ui/PrintButton'
+import YoumaiFinishedGoodsStockOutExcelImport from './YoumaiFinishedGoodsStockOutExcelImport'
+import YoumaiFinishedGoodsStockOutForm from './YoumaiFinishedGoodsStockOutForm'
+import YoumaiFinishedGoodsStockOutSearch from './YoumaiFinishedGoodsStockOutSearch'
+import YoumaiFinishedGoodsStockOutTable from './YoumaiFinishedGoodsStockOutTable'
+import { usePrintYoumaiFinishedGoodsStockOut } from './usePrintYoumaiFinishedGoodsStockOut'
 import {
-  useBatchUpdateYoumaiFinishedGoodsStockInStatus,
-  useCreateYoumaiFinishedGoodsStockIn,
-  useDeleteYoumaiFinishedGoodsStockIn,
-  useUpdateYoumaiFinishedGoodsStockIn,
-  useYoumaiFinishedGoodsStockInList,
+  useBatchUpdateYoumaiFinishedGoodsStockOutStatus,
+  useCreateYoumaiFinishedGoodsStockOut,
+  useDeleteYoumaiFinishedGoodsStockOut,
+  useImportYoumaiFinishedGoodsStockOut,
+  useUpdateYoumaiFinishedGoodsStockOut,
+  useYoumaiFinishedGoodsStockOutList,
   useYoumaiProductDataOptions,
-} from './useYoumaiFinishedGoodsStockIn'
+} from './useYoumaiFinishedGoodsStockOut'
 
-export default function YoumaiFinishedGoodsStockInPage() {
+export default function YoumaiFinishedGoodsStockOutPage() {
   const { message, modal } = App.useApp()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalTitle, setModalTitle] = useState('新建优迈成品入库')
+  const [modalTitle, setModalTitle] = useState('新建优迈成品出库')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] =
-    useState<YoumaiFinishedGoodsStockIn | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<YoumaiFinishedGoodsStockInFormValues> | null>(null)
+    useState<YoumaiFinishedGoodsStockOut | null>(null)
+  const [formRef, setFormRef] = useState<FormInstance | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -49,17 +53,19 @@ export default function YoumaiFinishedGoodsStockInPage() {
       undefined,
   })
 
-  const { data, isLoading } = useYoumaiFinishedGoodsStockInList({
+  const { data, isLoading } = useYoumaiFinishedGoodsStockOutList({
     page,
     pageSize,
     searchParams,
   })
   const { data: productOptions = [] } = useYoumaiProductDataOptions()
 
-  const createMutation = useCreateYoumaiFinishedGoodsStockIn()
-  const updateMutation = useUpdateYoumaiFinishedGoodsStockIn()
-  const batchStatusMutation = useBatchUpdateYoumaiFinishedGoodsStockInStatus()
-  const deleteMutation = useDeleteYoumaiFinishedGoodsStockIn()
+  const createMutation = useCreateYoumaiFinishedGoodsStockOut()
+  const updateMutation = useUpdateYoumaiFinishedGoodsStockOut()
+  const batchStatusMutation = useBatchUpdateYoumaiFinishedGoodsStockOutStatus()
+  const importMutation = useImportYoumaiFinishedGoodsStockOut()
+  const deleteMutation = useDeleteYoumaiFinishedGoodsStockOut()
+  const { printSelected, isPrinting } = usePrintYoumaiFinishedGoodsStockOut()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -73,6 +79,10 @@ export default function YoumaiFinishedGoodsStockInPage() {
     (item) => item.status === '已审核',
   )
 
+  const handlePrint = useCallback(() => {
+    void printSelected(selectedRecords)
+  }, [printSelected, selectedRecords])
+
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
     setIsEdit(false)
@@ -85,7 +95,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    setModalTitle('新建优迈成品入库')
+    setModalTitle('新建优迈成品出库')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef])
@@ -105,7 +115,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
     setEditingRecord(record)
     setIsEdit(true)
     setModalTitle(
-      record.status === '已审核' ? '编辑优迈成品入库备注' : '编辑优迈成品入库',
+      record.status === '已审核' ? '编辑优迈成品出库备注' : '编辑优迈成品出库',
     )
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
@@ -117,19 +127,19 @@ export default function YoumaiFinishedGoodsStockInPage() {
     }
 
     if (hasAuditedSelection) {
-      message.warning('已审核的优迈成品入库不允许删除')
+      message.warning('已审核的优迈成品出库不允许删除')
       return
     }
 
     try {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
-      message.success('优迈成品入库删除成功')
+      message.success('优迈成品出库删除成功')
       setSelectedRowKeys([])
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
       } else {
-        message.error('删除优迈成品入库失败，请稍后重试')
+        message.error('删除优迈成品出库失败，请稍后重试')
       }
     }
   }, [deleteMutation, hasAuditedSelection, message, selectedRowKeys])
@@ -138,14 +148,14 @@ export default function YoumaiFinishedGoodsStockInPage() {
     (status: '待审核' | '已审核') => {
       if (selectedRowKeys.length === 0) {
         message.warning(
-          `请选择要${status === '已审核' ? '审核' : '反审'}的优迈成品入库`,
+          `请选择要${status === '已审核' ? '审核' : '反审'}的优迈成品出库`,
         )
         return
       }
 
       modal.confirm({
-        title: `批量${status === '已审核' ? '审核' : '反审'}优迈成品入库`,
-        content: `确定要将选中的 ${selectedRowKeys.length} 条优迈成品入库标记为${status}吗？`,
+        title: `批量${status === '已审核' ? '审核' : '反审'}优迈成品出库`,
+        content: `确定要将选中的 ${selectedRowKeys.length} 条优迈成品出库标记为${status}吗？`,
         okText: '确定',
         cancelText: '取消',
         onOk: async () => {
@@ -169,18 +179,35 @@ export default function YoumaiFinishedGoodsStockInPage() {
     [batchStatusMutation, message, modal, selectedRowKeys],
   )
 
+  const handleImport = useCallback(
+    async (rows: YoumaiFinishedGoodsStockOutImportRow[]) => {
+      try {
+        await importMutation.mutateAsync(rows)
+        message.success(`优迈成品出库导入成功，共 ${rows.length} 条`)
+        setSelectedRowKeys([])
+      } catch (error) {
+        if (error instanceof Error) {
+          message.error(error.message)
+        } else {
+          message.error('导入优迈成品出库失败，请稍后重试')
+        }
+      }
+    },
+    [importMutation, message],
+  )
+
   const handleFinish = useCallback(
-    async (values: YoumaiFinishedGoodsStockInFormValues) => {
+    async (values: YoumaiFinishedGoodsStockOutFormValues) => {
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
             values,
           })
-          message.success('优迈成品入库更新成功')
+          message.success('优迈成品出库更新成功')
         } else {
           await createMutation.mutateAsync(values)
-          message.success('优迈成品入库创建成功')
+          message.success('优迈成品出库创建成功')
         }
 
         resetFormState()
@@ -266,19 +293,30 @@ export default function YoumaiFinishedGoodsStockInPage() {
         >
           批量反审核
         </Button>
-        <EditButton title="编辑优迈成品入库" handleEdit={handleEdit} />
+        <EditButton title="编辑优迈成品出库" handleEdit={handleEdit} />
+        <PrintButton
+          handlePrint={handlePrint}
+          loading={isPrinting}
+          count={selectedRowKeys.length}
+        >
+          打印选中项
+        </PrintButton>
+        <YoumaiFinishedGoodsStockOutExcelImport
+          onImport={handleImport}
+          isImporting={importMutation.isPending}
+        />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
-          title="删除优迈成品入库"
-          itemName="优迈成品入库"
+          title="删除优迈成品出库"
+          itemName="优迈成品出库"
         />
       </div>
 
       <div className="flex items-center gap-2">
         <span className="whitespace-nowrap text-gray-600">搜索：</span>
-        <YoumaiFinishedGoodsStockInSearch
+        <YoumaiFinishedGoodsStockOutSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
@@ -290,7 +328,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <YoumaiFinishedGoodsStockInTable
+          <YoumaiFinishedGoodsStockOutTable
             loading={isLoading}
             data={data?.items || []}
             selectedRowKeys={selectedRowKeys}
@@ -318,7 +356,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <YoumaiFinishedGoodsStockInForm
+        <YoumaiFinishedGoodsStockOutForm
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}

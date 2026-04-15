@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react'
+import dayjs, { type Dayjs } from 'dayjs'
 import {
   Alert,
+  DatePicker,
   Form,
   type FormInstance,
   Input,
@@ -9,30 +11,43 @@ import {
 } from 'antd'
 
 import type {
-  YoumaiFinishedGoodsStockIn,
-  YoumaiFinishedGoodsStockInFormValues,
+  YoumaiFinishedGoodsStockOut,
+  YoumaiFinishedGoodsStockOutFormValues,
   YoumaiProductDataOption,
-} from '@/services/apiYoumaiFinishedGoodsStockIn'
+} from '@/services/apiYoumaiFinishedGoodsStockOut'
+
+interface YoumaiFinishedGoodsStockOutFormFields {
+  product_data_id: string
+  purchase_order_no: string
+  purchase_order_line_no: string
+  delivery_date: Dayjs | null
+  status: '待审核' | '已审核'
+  stock_out_quantity: number
+  remarks: string
+}
 
 interface Props {
-  onFinish: (values: YoumaiFinishedGoodsStockInFormValues) => void
-  setFormRef: (form: FormInstance<YoumaiFinishedGoodsStockInFormValues>) => void
+  onFinish: (values: YoumaiFinishedGoodsStockOutFormValues) => void
+  setFormRef: (form: FormInstance) => void
   isSubmitting: boolean
   productOptions: YoumaiProductDataOption[]
   initialValues?:
-    | YoumaiFinishedGoodsStockIn
-    | YoumaiFinishedGoodsStockInFormValues
+    | YoumaiFinishedGoodsStockOut
+    | YoumaiFinishedGoodsStockOutFormValues
   isAuditLocked?: boolean
 }
 
-const DEFAULT_VALUES: YoumaiFinishedGoodsStockInFormValues = {
+const DEFAULT_VALUES: YoumaiFinishedGoodsStockOutFormFields = {
   product_data_id: '',
+  purchase_order_no: '',
+  purchase_order_line_no: '1',
+  delivery_date: null,
   status: '待审核',
-  stock_in_quantity: 0,
+  stock_out_quantity: 0,
   remarks: '',
 }
 
-export default function YoumaiFinishedGoodsStockInForm({
+export default function YoumaiFinishedGoodsStockOutForm({
   onFinish,
   setFormRef,
   isSubmitting,
@@ -40,7 +55,7 @@ export default function YoumaiFinishedGoodsStockInForm({
   initialValues,
   isAuditLocked = false,
 }: Props) {
-  const [form] = Form.useForm<YoumaiFinishedGoodsStockInFormValues>()
+  const [form] = Form.useForm<YoumaiFinishedGoodsStockOutFormFields>()
   const selectedProductId = Form.useWatch('product_data_id', form)
 
   const selectedProduct = useMemo(
@@ -57,8 +72,13 @@ export default function YoumaiFinishedGoodsStockInForm({
       form.setFieldsValue({
         ...DEFAULT_VALUES,
         product_data_id: initialValues.product_data_id,
+        purchase_order_no: initialValues.purchase_order_no,
+        purchase_order_line_no: initialValues.purchase_order_line_no,
+        delivery_date: initialValues.delivery_date
+          ? dayjs(initialValues.delivery_date)
+          : null,
         status: initialValues.status,
-        stock_in_quantity: Number(initialValues.stock_in_quantity || 0),
+        stock_out_quantity: Number(initialValues.stock_out_quantity || 0),
         remarks: initialValues.remarks,
       })
       return
@@ -68,11 +88,23 @@ export default function YoumaiFinishedGoodsStockInForm({
     form.setFieldsValue(DEFAULT_VALUES)
   }, [form, initialValues])
 
+  const handleFinish = (values: YoumaiFinishedGoodsStockOutFormFields) => {
+    onFinish({
+      product_data_id: values.product_data_id,
+      purchase_order_no: values.purchase_order_no.trim(),
+      purchase_order_line_no: values.purchase_order_line_no.trim(),
+      delivery_date: values.delivery_date?.format('YYYY-MM-DD') || '',
+      status: values.status,
+      stock_out_quantity: Number(values.stock_out_quantity || 0),
+      remarks: values.remarks.trim(),
+    })
+  }
+
   return (
     <Form
       form={form}
       layout="vertical"
-      onFinish={onFinish}
+      onFinish={handleFinish}
       disabled={isSubmitting}
     >
       {isAuditLocked && (
@@ -80,7 +112,7 @@ export default function YoumaiFinishedGoodsStockInForm({
           className="mb-4"
           type="info"
           showIcon
-          message="当前记录已审核，仅允许修改备注。货品和入库数量已锁定；审核与反审请使用页面顶部按钮。"
+          title="当前记录已审核，仅允许修改备注。货品、采购订单、交货日期和出库数量已锁定；审核与反审请使用页面顶部按钮。"
         />
       )}
 
@@ -138,20 +170,48 @@ export default function YoumaiFinishedGoodsStockInForm({
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Form.Item
-          name="stock_in_quantity"
-          label="入库数量"
-          rules={[{ required: true, message: '请输入入库数量' }]}
+          name="purchase_order_no"
+          label="采购订单号"
+          rules={[{ required: true, message: '请输入采购订单号' }]}
         >
-          <InputNumber
-            disabled={isAuditLocked}
-            min={0.001}
-            step={0.001}
-            precision={3}
-            style={{ width: '100%' }}
-            placeholder="请输入入库数量"
-          />
+          <Input disabled={isAuditLocked} placeholder="请输入采购订单号" />
+        </Form.Item>
+
+        <Form.Item
+          name="purchase_order_line_no"
+          label="行号"
+          rules={[{ required: true, message: '请输入行号' }]}
+        >
+          <Input disabled={isAuditLocked} placeholder="请输入采购订单行号" />
         </Form.Item>
       </div>
+
+      <Form.Item
+        name="delivery_date"
+        label="交货日期"
+        rules={[{ required: true, message: '请选择交货日期' }]}
+      >
+        <DatePicker
+          disabled={isAuditLocked}
+          style={{ width: '100%' }}
+          format="YYYY-MM-DD"
+        />
+      </Form.Item>
+
+      <Form.Item
+        name="stock_out_quantity"
+        label="出库数量"
+        rules={[{ required: true, message: '请输入出库数量' }]}
+      >
+        <InputNumber
+          disabled={isAuditLocked}
+          min={0.001}
+          step={0.001}
+          precision={3}
+          style={{ width: '100%' }}
+          placeholder="请输入出库数量"
+        />
+      </Form.Item>
 
       <Form.Item
         name="remarks"
