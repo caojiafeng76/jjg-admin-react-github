@@ -90,6 +90,22 @@ export default function ProductionOrderDetail({
       .reduce((total, item) => total + Number(item.qualified_hours || 0), 0)
       .toFixed(2),
   )
+  const totalDefectHours = Number(
+    items
+      .reduce((total, item) => total + Number(item.defect_hours || 0), 0)
+      .toFixed(2),
+  )
+  const displayedTotalQualifiedHours = Number(
+    (
+      positiveQualifiedHours -
+      totalDefectHours +
+      (currentOrder.extra_qualified_hours ?? 0)
+    ).toFixed(2),
+  )
+  const displayedEfficiency =
+    Number(currentOrder.work_hours || 0) > 0
+      ? displayedTotalQualifiedHours / Number(currentOrder.work_hours || 0)
+      : 0
   const formattedAuditedAt = currentOrder.audited_at
     ? dayjs(currentOrder.audited_at).format('YYYY-MM-DD HH:mm:ss')
     : null
@@ -193,18 +209,10 @@ export default function ProductionOrderDetail({
               {(currentOrder.extra_qualified_hours ?? 0).toFixed(2)} 小时
             </Descriptions.Item>
             <Descriptions.Item label="总工时">
-              {currentOrder.total_qualified_hours === null ||
-              currentOrder.total_qualified_hours === undefined
-                ? '-'
-                : currentOrder.total_qualified_hours.toFixed(2)}{' '}
-              小时
+              {displayedTotalQualifiedHours.toFixed(2)} 小时
             </Descriptions.Item>
             <Descriptions.Item label="工时效率">
-              {currentOrder.efficiency === null ||
-              currentOrder.efficiency === undefined
-                ? '-'
-                : (currentOrder.efficiency * 100).toFixed(2)}
-              %
+              {(displayedEfficiency * 100).toFixed(2)}%
             </Descriptions.Item>
             <Descriptions.Item label="备注" span={2}>
               {currentOrder.remark || '-'}

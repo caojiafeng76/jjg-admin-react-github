@@ -52,6 +52,88 @@ interface SalesOrderStandardContext {
   material_code: string | null
 }
 
+type ProductionOrderItemDerivedFields = {
+  standard_seconds: number
+  qualified_quantity?: number | null
+  qualified_hours?: number | null
+  defect_quantity_1?: number | null
+  defect_quantity_2?: number | null
+  defect_reason_1?: string | null
+  defect_reason_2?: string | null
+  defect_hours?: number | null
+}
+
+function calculateQualifiedHours(
+  standardSeconds: number,
+  qualifiedQuantity: number | null | undefined,
+) {
+  const normalizedStandardSeconds = Number(standardSeconds || 0)
+  const normalizedQualifiedQuantity = Number(qualifiedQuantity || 0)
+
+  if (normalizedStandardSeconds <= 0 || normalizedQualifiedQuantity <= 0) {
+    return 0
+  }
+
+  return Number(
+    ((normalizedStandardSeconds * normalizedQualifiedQuantity) / 3600).toFixed(
+      2,
+    ),
+  )
+}
+
+function calculateDefectHours(item: {
+  standard_seconds: number
+  defect_quantity_1?: number | null
+  defect_quantity_2?: number | null
+  defect_reason_1?: string | null
+  defect_reason_2?: string | null
+}) {
+  const normalizedStandardSeconds = Number(item.standard_seconds || 0)
+
+  if (normalizedStandardSeconds <= 0) {
+    return 0
+  }
+
+  const defectSeconds =
+    (item.defect_reason_1 === '加工'
+      ? Number(item.defect_quantity_1 || 0) * 2 * normalizedStandardSeconds
+      : 0) +
+    (item.defect_reason_2 === '加工'
+      ? Number(item.defect_quantity_2 || 0) * 2 * normalizedStandardSeconds
+      : 0)
+
+  return Number((defectSeconds / 3600).toFixed(2))
+}
+
+function applyDerivedHours<TItem extends ProductionOrderItemDerivedFields>(
+  item: TItem,
+  standardSeconds = item.standard_seconds,
+): TItem {
+  const nextItem = {
+    ...item,
+    standard_seconds: standardSeconds,
+  }
+
+  if ('qualified_hours' in item) {
+    nextItem.qualified_hours = calculateQualifiedHours(
+      standardSeconds,
+      item.qualified_quantity,
+    )
+  }
+
+  if ('defect_hours' in item) {
+    nextItem.defect_hours = calculateDefectHours({
+      standard_seconds: standardSeconds,
+      defect_quantity_1: item.defect_quantity_1,
+      defect_quantity_2: item.defect_quantity_2,
+      defect_reason_1: item.defect_reason_1,
+      defect_reason_2: item.defect_reason_2,
+    })
+  }
+
+  return nextItem
+}
+
 async function resolveProductionOrderItemStandardSeconds<
   TItem extends {
     project_no: string
@@ -107,7 +189,7 @@ async function resolveProductionOrderItemStandardSeconds<
   return Promise.all(
     items.map(async (item) => {
       if (Number(item.standard_seconds || 0) > 0) {
-        return item
+        return applyDerivedHours(item)
       }
 
       const normalizedProjectNo = item.project_no?.trim()
@@ -146,10 +228,7 @@ async function resolveProductionOrderItemStandardSeconds<
       }
 
       if (resolvedStandardSeconds > 0) {
-        return {
-          ...item,
-          standard_seconds: resolvedStandardSeconds,
-        }
+        return applyDerivedHours(item, resolvedStandardSeconds)
       }
 
       return item
