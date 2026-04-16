@@ -1268,18 +1268,9 @@ export default function ProductionOrderForm({
                   />
                 </Form.Item>
               </Form.Item>
+            </div>
 
-              <Form.Item label="外协不良数" className="mb-2">
-                <Form.Item name="outsource_defect_quantity" className="mb-0!">
-                  <InputNumber
-                    placeholder="数量"
-                    min={0}
-                    precision={0}
-                    style={{ width: '100%' }}
-                  />
-                </Form.Item>
-              </Form.Item>
-
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Form.Item label="调机不良" className="mb-2">
                 <Form.Item name="setup_defect_quantity" className="mb-0!">
                   <InputNumber
@@ -1290,20 +1281,40 @@ export default function ProductionOrderForm({
                   />
                 </Form.Item>
               </Form.Item>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item name="outsource_defect_reason" label="外协不良原因">
-                <Input placeholder="请输入外协不良原因" />
-              </Form.Item>
-
-              <Form.Item name="outsource_unit" label="外协单位">
-                <Input placeholder="请输入外协单位" />
-              </Form.Item>
 
               <Form.Item name="setup_responsible" label="调机负责人">
                 <Input placeholder="请输入调机负责人" />
               </Form.Item>
+            </div>
+
+            <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4">
+              <div className="mb-3 text-sm font-medium text-red-600">
+                外协相关信息
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Form.Item label="外协不良数" className="mb-2">
+                  <Form.Item name="outsource_defect_quantity" className="mb-0!">
+                    <InputNumber
+                      placeholder="数量"
+                      min={0}
+                      precision={0}
+                      style={{ width: '100%' }}
+                    />
+                  </Form.Item>
+                </Form.Item>
+
+                <Form.Item name="outsource_unit" label="外协单位">
+                  <Input placeholder="请输入外协单位" />
+                </Form.Item>
+
+                <Form.Item
+                  name="outsource_defect_reason"
+                  label="外协不良原因"
+                  className="md:col-span-2"
+                >
+                  <Input.TextArea rows={2} placeholder="请输入外协不良原因" />
+                </Form.Item>
+              </div>
             </div>
 
             <Form.Item name="remark" label="备注">
