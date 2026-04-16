@@ -21,7 +21,10 @@ function formatBlockedProjectNos(projectNos: string[], fallbackLabel: string) {
   return `${projectNos.slice(0, 3).join('、')} 等${projectNos.length}条订单`
 }
 
-function buildSalesOrderPayload(values: WorkshopOrder, mode: 'create' | 'update') {
+function buildSalesOrderPayload(
+  values: WorkshopOrder,
+  mode: 'create' | 'update',
+) {
   const payload: Record<string, unknown> = {
     ...values,
     product_delivery_date:
@@ -154,6 +157,7 @@ export async function getWorkshopOrders({
   product_model,
   customer_model,
   model_search, // 统一的搜索字段，可同时搜索项目号、产品型号和客户型号
+  length_mm,
   startDate,
   endDate,
   status,
@@ -164,6 +168,7 @@ export async function getWorkshopOrders({
   product_model?: string
   customer_model?: string
   model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+  length_mm?: number
   startDate?: string
   endDate?: string
   status?: WorkshopOrder['status']
@@ -171,9 +176,7 @@ export async function getWorkshopOrders({
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
-  let query = supabase
-    .from('sales_orders')
-    .select('*', { count: 'exact' })
+  let query = supabase.from('sales_orders').select('*', { count: 'exact' })
 
   // 统一的搜索字段（同时搜索项目号、产品型号和客户型号，OR逻辑）
   if (model_search) {
@@ -200,11 +203,17 @@ export async function getWorkshopOrders({
 
   // 交货日期范围搜索
   if (startDate && endDate) {
-    query = query.gte('product_delivery_date', startDate).lte('product_delivery_date', endDate)
+    query = query
+      .gte('product_delivery_date', startDate)
+      .lte('product_delivery_date', endDate)
   } else if (startDate) {
     query = query.gte('product_delivery_date', startDate)
   } else if (endDate) {
     query = query.lte('product_delivery_date', endDate)
+  }
+
+  if (length_mm != null) {
+    query = query.eq('length_mm', length_mm)
   }
 
   if (status) {
@@ -242,11 +251,10 @@ export async function getWorkshopOrders({
 
     const outboundTotalByProjectNo = new Map<string, number>()
 
-    for (const row of
-      (transferRows || []) as Array<{
-        project_no: string
-        transfer_quantity: number | null
-      }>) {
+    for (const row of (transferRows || []) as Array<{
+      project_no: string
+      transfer_quantity: number | null
+    }>) {
       const projectNo = row.project_no?.trim()
 
       if (!projectNo) {
@@ -321,7 +329,9 @@ export async function getWorkshopOrderById(id: string) {
 /**
  * 检查项目号是否已存在
  */
-async function checkProjectNoExists(projectNo: string | null): Promise<boolean> {
+async function checkProjectNoExists(
+  projectNo: string | null,
+): Promise<boolean> {
   if (!projectNo) return false
 
   const { data, error } = await supabase
@@ -340,7 +350,9 @@ async function checkProjectNoExists(projectNo: string | null): Promise<boolean> 
 /**
  * 批量检查项目号是否已存在
  */
-async function checkProjectNosExist(projectNos: (string | null)[]): Promise<string[]> {
+async function checkProjectNosExist(
+  projectNos: (string | null)[],
+): Promise<string[]> {
   const validProjectNos = projectNos.filter((no): no is string => !!no)
   if (validProjectNos.length === 0) return []
 
@@ -353,7 +365,9 @@ async function checkProjectNosExist(projectNos: (string | null)[]): Promise<stri
     throw handleApiError(error, '检查项目号失败')
   }
 
-  return (data || []).map((item) => item.project_no).filter((no): no is string => !!no)
+  return (data || [])
+    .map((item) => item.project_no)
+    .filter((no): no is string => !!no)
 }
 
 export async function createWorkshopOrder(values: WorkshopOrder) {
