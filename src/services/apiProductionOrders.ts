@@ -5,6 +5,7 @@ import type {
   ProductionOrderDataCategory,
   ProductionOrderItem,
 } from './apiProductionOrderItems'
+import { resolveProductionOrderItemStandardSeconds } from './apiProductionOrderItems'
 
 export type ProductionOrderShift = '白班' | '夜班'
 
@@ -208,8 +209,13 @@ export async function getProductionOrderById(id: string) {
     throw handleApiError(error, '获取生产工单详情失败')
   }
 
-  return data as unknown as ProductionOrderWithEmployee & {
+  const order = data as unknown as ProductionOrderWithEmployee & {
     items: ProductionOrderItem[]
+  }
+
+  return {
+    ...order,
+    items: await resolveProductionOrderItemStandardSeconds(order.items || []),
   }
 }
 

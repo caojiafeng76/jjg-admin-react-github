@@ -1,6 +1,7 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import { Database } from './database.types'
+import { getStandardSeconds } from './apiProcessStandards'
 
 export type ProductionOrderDataCategory = 'A' | 'B'
 
@@ -21,16 +22,16 @@ type ProductionOrderItemExtraFields = {
 
 export type ProductionOrderItem = ProductionOrderItemRowBase &
   ProductionOrderItemExtraFields & {
-  data_category: ProductionOrderDataCategory
-}
+    data_category: ProductionOrderDataCategory
+  }
 export type ProductionOrderItemInsert = ProductionOrderItemInsertBase &
   Partial<ProductionOrderItemExtraFields> & {
-  data_category?: ProductionOrderDataCategory
-}
+    data_category?: ProductionOrderDataCategory
+  }
 export type ProductionOrderItemUpdate = ProductionOrderItemUpdateBase &
   Partial<ProductionOrderItemExtraFields> & {
-  data_category?: ProductionOrderDataCategory
-}
+    data_category?: ProductionOrderDataCategory
+  }
 
 type ProductionOrderItemInsertPayload = ProductionOrderItemInsertBase &
   Partial<ProductionOrderItemExtraFields>
@@ -43,6 +44,117 @@ export type ProductionOrderItemWithMachine = ProductionOrderItem & {
     operation: string
     machine_name: string
   } | null
+}
+
+interface SalesOrderStandardContext {
+  project_no: string
+  length_mm: number | null
+  material_code: string | null
+}
+
+async function resolveProductionOrderItemStandardSeconds<
+  TItem extends {
+    project_no: string
+    product_model: string | null
+    length_mm: number | null
+    operation: string
+    standard_seconds: number
+  },
+>(items: TItem[]): Promise<TItem[]> {
+  const missingStandardItems = items.filter(
+    (item) =>
+      Number(item.standard_seconds || 0) <= 0 &&
+      Boolean(item.project_no?.trim()) &&
+      Boolean(item.product_model?.trim()) &&
+      Boolean(item.operation?.trim()),
+  )
+
+  if (missingStandardItems.length === 0) {
+    return items
+  }
+
+  const projectNos = Array.from(
+    new Set(
+      missingStandardItems
+        .map((item) => item.project_no.trim())
+        .filter(Boolean),
+    ),
+  )
+
+  const salesOrderContextMap = new Map<string, SalesOrderStandardContext>()
+
+  if (projectNos.length > 0) {
+    const { data, error } = await supabase
+      .from('sales_orders')
+      .select('project_no, length_mm, material_code')
+      .in('project_no', projectNos)
+
+    if (error) {
+      throw handleApiError(error, '获取工单项目号匹配信息失败')
+    }
+
+    ;((data || []) as SalesOrderStandardContext[]).forEach((row) => {
+      if (!row.project_no || salesOrderContextMap.has(row.project_no)) {
+        return
+      }
+
+      salesOrderContextMap.set(row.project_no, row)
+    })
+  }
+
+  const standardSecondsCache = new Map<string, number>()
+
+  return Promise.all(
+    items.map(async (item) => {
+      if (Number(item.standard_seconds || 0) > 0) {
+        return item
+      }
+
+      const normalizedProjectNo = item.project_no?.trim()
+      const normalizedModel = item.product_model?.trim()
+      const normalizedOperation = item.operation?.trim()
+
+      if (!normalizedProjectNo || !normalizedModel || !normalizedOperation) {
+        return item
+      }
+
+      const salesOrderContext = salesOrderContextMap.get(normalizedProjectNo)
+      const length = salesOrderContext?.length_mm ?? item.length_mm
+      const partNo = salesOrderContext?.material_code ?? null
+      const cacheKey = [
+        normalizedModel,
+        normalizedOperation,
+        length ?? '',
+        partNo ?? '',
+      ].join('::')
+
+      let resolvedStandardSeconds = standardSecondsCache.get(cacheKey)
+
+      if (resolvedStandardSeconds === undefined) {
+        try {
+          resolvedStandardSeconds = await getStandardSeconds({
+            model: normalizedModel,
+            operation: normalizedOperation,
+            length,
+            partNo,
+          })
+        } catch {
+          resolvedStandardSeconds = 0
+        }
+
+        standardSecondsCache.set(cacheKey, resolvedStandardSeconds)
+      }
+
+      if (resolvedStandardSeconds > 0) {
+        return {
+          ...item,
+          standard_seconds: resolvedStandardSeconds,
+        }
+      }
+
+      return item
+    }),
+  )
 }
 
 function buildProductionOrderItemInsertPayload(
@@ -96,8 +208,12 @@ export async function getProductionOrderItems(orderId: string) {
     throw handleApiError(error, '获取工序明细失败')
   }
 
-  return (data || []) as unknown as ProductionOrderItemWithMachine[]
+  return resolveProductionOrderItemStandardSeconds(
+    (data || []) as unknown as ProductionOrderItemWithMachine[],
+  )
 }
+
+export { resolveProductionOrderItemStandardSeconds }
 
 export async function addProductionOrderItem(
   values: ProductionOrderItemInsert,

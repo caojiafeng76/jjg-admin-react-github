@@ -12,6 +12,7 @@ import ProjectNoScanButton, {
 } from './ProjectNoScanButton'
 import {
   useSalesOrdersProjectNos,
+  useSalesOrderByProjectNo,
   useOperationsByModel,
   type ProcessStandardMatchLevel,
 } from './useProcessStandards'
@@ -62,16 +63,27 @@ export default function ProductionOrderItemForm({
 
   const selectedProjectNo = Form.useWatch('project_no', form)
   const selectedOperation = Form.useWatch('operation', form)
+  const selectedProductModel = Form.useWatch('product_model', form)
+
+  const { data: selectedSalesOrderDetail } = useSalesOrderByProjectNo(
+    selectedProjectNo || undefined,
+  )
 
   const projectNoData = useMemo(() => {
     const existing = projectNos?.find(
       (item) => item.project_no === selectedProjectNo,
     )
     return (existing ||
+      selectedSalesOrderDetail ||
       (selectedProjectNo
         ? scannedProjectDataMap[selectedProjectNo]
         : undefined)) as ProjectNoData | undefined
-  }, [projectNos, scannedProjectDataMap, selectedProjectNo])
+  }, [
+    projectNos,
+    scannedProjectDataMap,
+    selectedProjectNo,
+    selectedSalesOrderDetail,
+  ])
   const projectNoOptions = useMemo(
     () => buildProjectNoSelectOptions(projectNos),
     [projectNos],
@@ -94,7 +106,11 @@ export default function ProductionOrderItemForm({
       ...scannedProjectNos,
     ])
   }, [projectNoOptions, projectNos, scannedProjectDataMap])
-  const productModel = projectNoData?.product_model || ''
+  const productModel =
+    projectNoData?.product_model ||
+    selectedProductModel ||
+    initialValues?.product_model ||
+    ''
 
   const { data: operationMatch } = useOperationsByModel({
     model: productModel || undefined,
