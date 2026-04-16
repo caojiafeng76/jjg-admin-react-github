@@ -77,6 +77,7 @@ export default function WorkshopOrderList({
     product_model?: string
     customer_model?: string
     model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+    length_mm?: number
     startDate?: string
     endDate?: string
   }>({})

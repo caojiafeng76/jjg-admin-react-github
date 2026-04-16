@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Input, DatePicker, Button, Form, Space } from 'antd'
+import { Input, InputNumber, DatePicker, Button, Form, Space } from 'antd'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import type { Dayjs } from 'dayjs'
 
@@ -10,6 +10,7 @@ interface SearchParams {
   product_model?: string
   customer_model?: string
   model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+  length_mm?: number
   startDate?: string
   endDate?: string
 }
@@ -28,10 +29,11 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
     product_model?: string
     customer_model?: string
     model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+    length_mm?: number | null
     dateRange?: [Dayjs | null, Dayjs | null]
   }) => {
     const params: SearchParams = {}
-    
+
     // 优先使用统一的搜索字段
     if (values.model_search?.trim()) {
       params.model_search = values.model_search.trim()
@@ -47,7 +49,11 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
         params.customer_model = values.customer_model.trim()
       }
     }
-    
+
+    if (values.length_mm != null) {
+      params.length_mm = values.length_mm
+    }
+
     if (values.dateRange && values.dateRange[0] && values.dateRange[1]) {
       params.startDate = values.dateRange[0].format('YYYY-MM-DD')
       params.endDate = values.dateRange[1].format('YYYY-MM-DD')
@@ -66,7 +72,12 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
   }
 
   return (
-    <Form form={form} onFinish={handleSearch} layout="inline" className="flex flex-wrap items-center gap-2">
+    <Form
+      form={form}
+      onFinish={handleSearch}
+      layout="inline"
+      className="flex flex-wrap items-center gap-2"
+    >
       <Form.Item name="model_search" className="mb-0">
         <Input
           placeholder="输入搜索（项目号/产品型号/客户型号）"
@@ -80,6 +91,14 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
           placeholder={['开始日期', '结束日期']}
           allowClear
           style={{ width: 240 }}
+        />
+      </Form.Item>
+      <Form.Item name="length_mm" className="mb-0">
+        <InputNumber
+          placeholder="长度(mm)"
+          min={0}
+          precision={0}
+          style={{ width: 140 }}
         />
       </Form.Item>
       <Form.Item className="mb-0">
@@ -104,4 +123,3 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
     </Form>
   )
 }
-
