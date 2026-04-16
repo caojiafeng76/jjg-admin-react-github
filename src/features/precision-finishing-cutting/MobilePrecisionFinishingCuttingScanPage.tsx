@@ -477,9 +477,6 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                 >
                   <InputNumber min={0} precision={0} className="w-full" />
                 </Form.Item>
-                <Form.Item name="outsource_defect_quantity" label="外协不良数">
-                  <InputNumber min={0} precision={0} className="w-full" />
-                </Form.Item>
                 <Form.Item
                   name="transfer_quantity"
                   label="转移数量"
@@ -493,14 +490,32 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                 <Input.TextArea rows={2} placeholder="可填写不良原因" />
               </Form.Item>
 
-              <Form.Item name="outsource_defect_reason" label="外协不良原因">
-                <Input.TextArea rows={2} placeholder="可填写外协不良原因" />
-              </Form.Item>
+              <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4">
+                <div className="mb-3 text-sm font-medium text-red-600">
+                  外协相关信息
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Form.Item
+                    name="outsource_defect_quantity"
+                    label="外协不良数"
+                  >
+                    <InputNumber min={0} precision={0} className="w-full" />
+                  </Form.Item>
+                  <Form.Item name="outsource_unit" label="外协单位">
+                    <Input placeholder="请输入外协单位" />
+                  </Form.Item>
+                </div>
+
+                <Form.Item
+                  name="outsource_defect_reason"
+                  label="外协不良原因"
+                  className="mb-0"
+                >
+                  <Input.TextArea rows={2} placeholder="可填写外协不良原因" />
+                </Form.Item>
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Form.Item name="outsource_unit" label="外协单位">
-                  <Input placeholder="请输入外协单位" />
-                </Form.Item>
                 <Form.Item name="responsible_process" label="责任工序">
                   <Input placeholder="请输入责任工序" />
                 </Form.Item>

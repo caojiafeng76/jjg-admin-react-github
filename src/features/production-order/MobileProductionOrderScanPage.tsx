@@ -680,20 +680,6 @@ export default function MobileProductionOrderScanPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="mb-2 text-sm font-semibold text-slate-700">
-                  外协不良数
-                </div>
-                <InputNumber
-                  min={0}
-                  value={outsourceDefectQuantity}
-                  onChange={(value) =>
-                    setOutsourceDefectQuantity(Number(value || 0))
-                  }
-                  style={{ width: '100%' }}
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
                   调机不良
                 </div>
                 <InputNumber
@@ -707,28 +693,48 @@ export default function MobileProductionOrderScanPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
+            <div className="rounded-2xl border border-red-300 bg-red-50/60 p-4">
+              <div className="mb-3 text-sm font-medium text-red-600">
+                外协相关信息
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="mb-2 text-sm font-semibold text-slate-700">
+                    外协不良数
+                  </div>
+                  <InputNumber
+                    min={0}
+                    value={outsourceDefectQuantity}
+                    onChange={(value) =>
+                      setOutsourceDefectQuantity(Number(value || 0))
+                    }
+                    style={{ width: '100%' }}
+                  />
+                </div>
+
+                <div>
+                  <div className="mb-2 text-sm font-semibold text-slate-700">
+                    外协单位
+                  </div>
+                  <Input
+                    value={outsourceUnit}
+                    onChange={(event) => setOutsourceUnit(event.target.value)}
+                    placeholder="请输入外协单位"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3">
                 <div className="mb-2 text-sm font-semibold text-slate-700">
                   外协不良原因
                 </div>
-                <Input
+                <Input.TextArea
+                  rows={2}
                   value={outsourceDefectReason}
                   onChange={(event) =>
                     setOutsourceDefectReason(event.target.value)
                   }
                   placeholder="请输入外协不良原因"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
-                  外协单位
-                </div>
-                <Input
-                  value={outsourceUnit}
-                  onChange={(event) => setOutsourceUnit(event.target.value)}
-                  placeholder="请输入外协单位"
                 />
               </div>
             </div>
