@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { App, Button, Card, Input, InputNumber, Tag, Typography } from 'antd'
+import { App, Button, Card, Input, Tag, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -26,6 +26,7 @@ import ProjectNoScanButton, {
 import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
 } from '@/ui/mobile/MobileBottomSelectSheet'
+import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 
 const { Paragraph, Text, Title } = Typography
 
@@ -629,7 +630,7 @@ export default function MobileProductionOrderScanPage() {
               <div className="mb-2 text-sm font-semibold text-slate-700">
                 来料接收数
               </div>
-              <InputNumber
+              <MobileNumberInput
                 min={0}
                 value={incomingQualifiedQuantity}
                 onChange={(value) =>
@@ -643,7 +644,7 @@ export default function MobileProductionOrderScanPage() {
               <div className="mb-2 text-sm font-semibold text-slate-700">
                 成品合格数
               </div>
-              <InputNumber
+              <MobileNumberInput
                 min={0}
                 value={qualifiedQuantity}
                 onChange={(value) => setQualifiedQuantity(Number(value || 0))}
@@ -656,7 +657,7 @@ export default function MobileProductionOrderScanPage() {
                 <div className="mb-2 text-sm font-semibold text-slate-700">
                   加工不良数量
                 </div>
-                <InputNumber
+                <MobileNumberInput
                   min={0}
                   value={defectQuantity1}
                   onChange={(value) => setDefectQuantity1(Number(value || 0))}
@@ -668,7 +669,7 @@ export default function MobileProductionOrderScanPage() {
                 <div className="mb-2 text-sm font-semibold text-slate-700">
                   原料不良数量
                 </div>
-                <InputNumber
+                <MobileNumberInput
                   min={0}
                   value={defectQuantity2}
                   onChange={(value) => setDefectQuantity2(Number(value || 0))}
@@ -682,13 +683,24 @@ export default function MobileProductionOrderScanPage() {
                 <div className="mb-2 text-sm font-semibold text-slate-700">
                   调机不良
                 </div>
-                <InputNumber
+                <MobileNumberInput
                   min={0}
                   value={setupDefectQuantity}
                   onChange={(value) =>
                     setSetupDefectQuantity(Number(value || 0))
                   }
                   style={{ width: '100%' }}
+                />
+              </div>
+
+              <div>
+                <div className="mb-2 text-sm font-semibold text-slate-700">
+                  调机负责人
+                </div>
+                <Input
+                  value={setupResponsible}
+                  onChange={(event) => setSetupResponsible(event.target.value)}
+                  placeholder="请输入调机负责人"
                 />
               </div>
             </div>
@@ -702,7 +714,7 @@ export default function MobileProductionOrderScanPage() {
                   <div className="mb-2 text-sm font-semibold text-slate-700">
                     外协不良数
                   </div>
-                  <InputNumber
+                  <MobileNumberInput
                     min={0}
                     value={outsourceDefectQuantity}
                     onChange={(value) =>
@@ -737,17 +749,6 @@ export default function MobileProductionOrderScanPage() {
                   placeholder="请输入外协不良原因"
                 />
               </div>
-            </div>
-
-            <div>
-              <div className="mb-2 text-sm font-semibold text-slate-700">
-                调机负责人
-              </div>
-              <Input
-                value={setupResponsible}
-                onChange={(event) => setSetupResponsible(event.target.value)}
-                placeholder="请输入调机负责人"
-              />
             </div>
 
             <div>

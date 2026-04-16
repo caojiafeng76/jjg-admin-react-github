@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { App, Button, Card, Form, Input, InputNumber, Typography } from 'antd'
+import { App, Button, Card, Form, Input, Typography } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { isEmployeeSideRole } from '@/config/access'
@@ -12,6 +12,7 @@ import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
 } from '@/ui/mobile/MobileBottomSelectSheet'
+import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 import MobileProjectSummaryCard from '@/ui/mobile/MobileProjectSummaryCard'
 import MobileScanPageShell from '@/ui/mobile/MobileScanPageShell'
 import {
@@ -437,7 +438,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                   <Input disabled placeholder="自动带出" />
                 </Form.Item>
                 <Form.Item name="length_mm" label="长度(mm)">
-                  <InputNumber
+                  <MobileNumberInput
                     disabled
                     className="w-full"
                     placeholder="自动带出"
@@ -454,35 +455,40 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                   label="长料长度(mm)"
                   rules={[{ required: true, message: '请输入长料长度' }]}
                 >
-                  <InputNumber min={0.01} precision={2} className="w-full" />
+                  <MobileNumberInput
+                    min={0.01}
+                    precision={2}
+                    keyboardMode="decimal"
+                    className="w-full"
+                  />
                 </Form.Item>
                 <Form.Item
                   name="long_material_quantity"
                   label="长料数量"
                   rules={[{ required: true, message: '请输入长料数量' }]}
                 >
-                  <InputNumber min={1} precision={0} className="w-full" />
+                  <MobileNumberInput min={1} precision={0} className="w-full" />
                 </Form.Item>
                 <Form.Item
                   name="raw_material_defect_count"
                   label="原料不良数"
                   rules={[{ required: true, message: '请输入原料不良数' }]}
                 >
-                  <InputNumber min={0} precision={0} className="w-full" />
+                  <MobileNumberInput min={0} precision={0} className="w-full" />
                 </Form.Item>
                 <Form.Item
                   name="processing_defect_count"
                   label="加工不良数"
                   rules={[{ required: true, message: '请输入加工不良数' }]}
                 >
-                  <InputNumber min={0} precision={0} className="w-full" />
+                  <MobileNumberInput min={0} precision={0} className="w-full" />
                 </Form.Item>
                 <Form.Item
                   name="transfer_quantity"
                   label="转移数量"
                   rules={[{ required: true, message: '请输入转移数量' }]}
                 >
-                  <InputNumber min={1} precision={0} className="w-full" />
+                  <MobileNumberInput min={1} precision={0} className="w-full" />
                 </Form.Item>
               </div>
 
@@ -499,7 +505,11 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                     name="outsource_defect_quantity"
                     label="外协不良数"
                   >
-                    <InputNumber min={0} precision={0} className="w-full" />
+                    <MobileNumberInput
+                      min={0}
+                      precision={0}
+                      className="w-full"
+                    />
                   </Form.Item>
                   <Form.Item name="outsource_unit" label="外协单位">
                     <Input placeholder="请输入外协单位" />
