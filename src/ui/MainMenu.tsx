@@ -85,13 +85,24 @@ const adminItems: MenuItem[] = [
   },
   {
     key: 'consumables',
-    label: '耗材',
+    label: '刀具',
     icon: <Square3Stack3DIcon className="size-4" />,
     children: [
       { key: 'tooling-data', label: '刀具资料' },
       { key: 'tooling-inventory', label: '刀具库存' },
       { key: 'tooling-stock-in', label: '刀具入库' },
       { key: 'tooling-stock-out', label: '刀具出库' },
+    ],
+  },
+  {
+    key: 'labor-protection',
+    label: '劳保',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [
+      { key: 'labor-protection-data', label: '劳保资料' },
+      { key: 'labor-protection-inventory', label: '劳保库存' },
+      { key: 'labor-protection-stock-in', label: '劳保入库' },
+      { key: 'labor-protection-stock-out', label: '劳保出库' },
     ],
   },
   {
