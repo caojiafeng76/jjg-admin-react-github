@@ -1,8 +1,12 @@
 {
   "_comment": "Example stdio MCP server configuration for local file system access",
   "filesystem": {
-    "command": "npx",
-    "args": ["-y", "@modelcontextprotocol/server-filesystem", "${CLAUDE_PROJECT_DIR}"],
+    "command": "bunx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-filesystem",
+      "${CLAUDE_PROJECT_DIR}"
+    ],
     "env": {
       "LOG_LEVEL": "info"
     }
