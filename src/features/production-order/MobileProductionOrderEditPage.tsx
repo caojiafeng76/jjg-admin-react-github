@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  App,
-  Button,
-  Card,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Typography,
-} from 'antd'
+import { App, Button, Card, DatePicker, Form, Input, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -20,6 +11,7 @@ import type {
 import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
 } from '@/ui/mobile/MobileBottomSelectSheet'
+import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 import ProductionOrderItemMobileList from './ProductionOrderItemMobileList'
 import {
   useProductionOrder,
@@ -173,14 +165,20 @@ export default function MobileProductionOrderEditPage() {
                 label="出勤工时(小时)"
                 rules={[{ required: true, message: '请输入出勤工时' }]}
               >
-                <InputNumber min={0} step={0.5} className="w-full" />
+                <MobileNumberInput
+                  min={0}
+                  step={0.5}
+                  keyboardMode="decimal"
+                  className="w-full"
+                />
               </Form.Item>
 
               <Form.Item name="extra_qualified_hours" label="零工工时(小时)">
-                <InputNumber
+                <MobileNumberInput
                   min={0}
                   step={0.5}
                   precision={2}
+                  keyboardMode="decimal"
                   className="w-full"
                 />
               </Form.Item>

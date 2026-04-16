@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { App, Button, Card, Form, Input, InputNumber, Typography } from 'antd'
+import { App, Button, Card, Form, Input, Typography } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { isEmployeeSideRole } from '@/config/access'
@@ -12,6 +12,7 @@ import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
 } from '@/ui/mobile/MobileBottomSelectSheet'
+import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 import MobileProjectSummaryCard from '@/ui/mobile/MobileProjectSummaryCard'
 import MobileScanPageShell from '@/ui/mobile/MobileScanPageShell'
 import {
@@ -432,7 +433,7 @@ export default function MobileMaterialTransferScanPage() {
                   <Input disabled placeholder="自动带出" />
                 </Form.Item>
                 <Form.Item name="length_mm" label="长度(mm)">
-                  <InputNumber
+                  <MobileNumberInput
                     disabled
                     className="w-full"
                     placeholder="自动带出"
@@ -449,7 +450,7 @@ export default function MobileMaterialTransferScanPage() {
                   label="转移数量"
                   rules={[{ required: true, message: '请输入转移数量' }]}
                 >
-                  <InputNumber min={1} precision={0} className="w-full" />
+                  <MobileNumberInput min={1} precision={0} className="w-full" />
                 </Form.Item>
 
                 <Form.Item
