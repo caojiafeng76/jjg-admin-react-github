@@ -42,6 +42,7 @@ import ProjectNoScanButton, {
 import {
   useOperationsByModel,
   useSalesOrdersProjectNos,
+  useSalesOrderByProjectNo,
   type ProcessStandardMatchLevel,
 } from './useProcessStandards'
 import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
@@ -184,10 +185,17 @@ export default function ProductionOrderForm({
       scannedProjectDataMap[selectedItemProjectNo])
     : undefined
 
+  const { data: selectedSalesOrderDetail } = useSalesOrderByProjectNo(
+    selectedItemProjectNo || undefined,
+  )
+
+  const resolvedSelectedProjectData =
+    selectedProjectData ?? selectedSalesOrderDetail
+
   const { data: operationMatch } = useOperationsByModel({
     model: selectedItemProductModel || undefined,
-    length: selectedProjectData?.length_mm,
-    partNo: selectedProjectData?.material_code,
+    length: resolvedSelectedProjectData?.length_mm,
+    partNo: resolvedSelectedProjectData?.material_code,
   })
 
   const operations = operationMatch?.records
