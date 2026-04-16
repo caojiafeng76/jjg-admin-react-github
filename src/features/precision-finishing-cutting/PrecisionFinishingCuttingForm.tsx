@@ -296,6 +296,29 @@ export default function PrecisionFinishingCuttingForm({
   const getPopupContainer = (triggerNode: HTMLElement) =>
     triggerNode.parentElement || document.body
 
+  const outsourceSection = (
+    <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4">
+      <div className="mb-3 text-sm font-medium text-red-600">外协相关信息</div>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <Form.Item name="outsource_defect_quantity" label="外协不良数">
+          <InputNumber min={0} precision={0} className="w-full" />
+        </Form.Item>
+
+        <Form.Item name="outsource_unit" label="外协单位">
+          <Input placeholder="请输入外协单位" />
+        </Form.Item>
+
+        <Form.Item
+          name="outsource_defect_reason"
+          label="外协不良原因"
+          className="md:col-span-2"
+        >
+          <Input.TextArea rows={2} placeholder="可填写外协不良原因" />
+        </Form.Item>
+      </div>
+    </div>
+  )
+
   return (
     <Modal
       title={initialValues ? '编辑精加工切割单' : '创建精加工切割单'}
@@ -391,10 +414,6 @@ export default function PrecisionFinishingCuttingForm({
               <InputNumber min={0} precision={0} className="w-full" />
             </Form.Item>
 
-            <Form.Item name="outsource_defect_quantity" label="外协不良数">
-              <InputNumber min={0} precision={0} className="w-full" />
-            </Form.Item>
-
             <Form.Item
               name="transfer_quantity"
               label="转移数量"
@@ -410,21 +429,9 @@ export default function PrecisionFinishingCuttingForm({
             >
               <Input.TextArea rows={2} placeholder="可填写不良原因" />
             </Form.Item>
-
-            <Form.Item
-              name="outsource_defect_reason"
-              label="外协不良原因"
-              className="xl:col-span-2"
-            >
-              <Input.TextArea rows={2} placeholder="可填写外协不良原因" />
-            </Form.Item>
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Form.Item name="outsource_unit" label="外协单位">
-              <Input placeholder="请输入外协单位" />
-            </Form.Item>
-
             <Form.Item name="responsible_process" label="责任工序">
               <Input placeholder="请输入责任工序" />
             </Form.Item>
@@ -500,13 +507,15 @@ export default function PrecisionFinishingCuttingForm({
             <Form.Item name="inspector_name" label="检验人">
               <Input placeholder="默认崔路路，可修改" />
             </Form.Item>
-
-            {mobile ? null : (
-              <Form.Item name="uploaded_by_name" label="数据上传">
-                <Input disabled placeholder="自动记录当前登录用户" />
-              </Form.Item>
-            )}
           </div>
+
+          {mobile ? null : outsourceSection}
+
+          {mobile ? null : (
+            <Form.Item name="uploaded_by_name" label="数据上传">
+              <Input disabled placeholder="自动记录当前登录用户" />
+            </Form.Item>
+          )}
 
           <Form.Item name="remark" label="备注">
             <Input.TextArea rows={3} placeholder="可填写切割说明" />
@@ -528,6 +537,8 @@ export default function PrecisionFinishingCuttingForm({
               />
             </Form.Item>
           ) : null}
+
+          {mobile ? outsourceSection : null}
 
           <Form.Item className="mb-0">
             <Space className="flex justify-end">

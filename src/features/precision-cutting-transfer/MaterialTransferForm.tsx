@@ -181,6 +181,33 @@ export default function MaterialTransferForm({
   const getPopupContainer = (triggerNode: HTMLElement) =>
     triggerNode.parentElement || document.body
 
+  const outsourceSection = (
+    <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4">
+      <div className="mb-3 text-sm font-medium text-red-600">外协相关信息</div>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <Form.Item
+          name="outsource_defect_quantity"
+          label="外协不良数"
+          initialValue={0}
+        >
+          <InputNumber min={0} precision={0} className="w-full" />
+        </Form.Item>
+
+        <Form.Item name="outsource_unit" label="外协单位">
+          <Input placeholder="请输入外协单位" />
+        </Form.Item>
+
+        <Form.Item
+          name="outsource_defect_reason"
+          label="外协不良原因"
+          className="md:col-span-2"
+        >
+          <Input.TextArea rows={2} placeholder="可填写外协不良原因" />
+        </Form.Item>
+      </div>
+    </div>
+  )
+
   return (
     <Modal
       title={initialValues ? '编辑精切转移单' : '创建精切转移单'}
@@ -271,14 +298,6 @@ export default function MaterialTransferForm({
             </Form.Item>
 
             <Form.Item
-              name="outsource_defect_quantity"
-              label="外协不良数"
-              initialValue={0}
-            >
-              <InputNumber min={0} precision={0} className="w-full" />
-            </Form.Item>
-
-            <Form.Item
               name="transfer_quantity"
               label="转移数量"
               rules={[{ required: true, message: '请输入转移数量' }]}
@@ -290,14 +309,6 @@ export default function MaterialTransferForm({
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Form.Item name="defect_reason" label="不良原因">
               <Input.TextArea rows={2} placeholder="由用户填写不良原因" />
-            </Form.Item>
-
-            <Form.Item name="outsource_defect_reason" label="外协不良原因">
-              <Input.TextArea rows={2} placeholder="可填写外协不良原因" />
-            </Form.Item>
-
-            <Form.Item name="outsource_unit" label="外协单位">
-              <Input placeholder="请输入外协单位" />
             </Form.Item>
 
             <Form.Item name="responsible_process" label="责任工序">
@@ -378,6 +389,8 @@ export default function MaterialTransferForm({
             </Form.Item>
           </div>
 
+          {mobile ? null : outsourceSection}
+
           {mobile ? null : (
             <Form.Item name="uploaded_by_name" label="数据上传">
               <Input disabled placeholder="自动记录当前登录用户" />
@@ -404,6 +417,8 @@ export default function MaterialTransferForm({
               />
             </Form.Item>
           ) : null}
+
+          {mobile ? outsourceSection : null}
 
           <Form.Item className="mb-0">
             <Space className="flex justify-end">

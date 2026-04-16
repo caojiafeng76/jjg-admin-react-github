@@ -289,6 +289,33 @@ export default function ProductionOrderItemForm({
     ]
   }, [machineOptions])
 
+  const outsourceSection = (
+    <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4">
+      <div className="mb-3 text-sm font-medium text-red-600">外协相关信息</div>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <Form.Item
+          name="outsource_defect_quantity"
+          label="外协不良数"
+          initialValue={0}
+        >
+          <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+
+        <Form.Item name="outsource_unit" label="外协单位">
+          <Input placeholder="请输入外协单位" />
+        </Form.Item>
+
+        <Form.Item
+          name="outsource_defect_reason"
+          label="外协不良原因"
+          className="md:col-span-2"
+        >
+          <Input.TextArea rows={2} placeholder="请输入外协不良原因" />
+        </Form.Item>
+      </div>
+    </div>
+  )
+
   return (
     <Modal
       title={initialValues ? '编辑工序明细' : '添加工序明细'}
@@ -579,37 +606,27 @@ export default function ProductionOrderItemForm({
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
 
-          <Form.Item
-            name="outsource_defect_quantity"
-            label="外协不良数"
-            initialValue={0}
-          >
-            <InputNumber min={0} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Form.Item
+              name="setup_defect_quantity"
+              label="调机不良"
+              initialValue={0}
+            >
+              <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+            </Form.Item>
 
-          <Form.Item name="outsource_defect_reason" label="外协不良原因">
-            <Input placeholder="请输入外协不良原因" />
-          </Form.Item>
+            <Form.Item name="setup_responsible" label="调机负责人">
+              <Input placeholder="请输入调机负责人" />
+            </Form.Item>
+          </div>
 
-          <Form.Item name="outsource_unit" label="外协单位">
-            <Input placeholder="请输入外协单位" />
-          </Form.Item>
-
-          <Form.Item
-            name="setup_defect_quantity"
-            label="调机不良"
-            initialValue={0}
-          >
-            <InputNumber min={0} precision={0} style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item name="setup_responsible" label="调机负责人">
-            <Input placeholder="请输入调机负责人" />
-          </Form.Item>
+          {compact ? null : outsourceSection}
 
           <Form.Item name="remark" label="备注">
             <Input.TextArea rows={2} placeholder="请输入备注" />
           </Form.Item>
+
+          {compact ? outsourceSection : null}
         </Form>
       </div>
     </Modal>
