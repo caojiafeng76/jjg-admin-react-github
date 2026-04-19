@@ -164,15 +164,15 @@ bun format     # Prettier 格式化
 
 关于工具优先级的总原则：
 
-- **所有任务优先使用 CLI 工具**（bun 脚本、Supabase CLI 等）完成；只有当 CLI 无法完成（如连接失败、命令不支持、Docker 不可用等）时，才回退到 Supabase MCP 作为补充。
-- 不要跳过 CLI 直接使用 MCP；先尝试 CLI，确认失败后再切换。
+- **默认情况下优先使用 CLI 工具**（bun 脚本、Supabase CLI 等）完成；只有当 CLI 无法完成（如连接失败、命令不支持、Docker 不可用等）时，才回退到 MCP 作为补充。
+- **例外：涉及 Supabase 数据库操作时，优先使用 Supabase MCP**；如果 MCP 无法完成、返回能力不足，或需要复用仓库内既有脚本与流程，再结合 CLI 执行。
 
 关于 Supabase CLI 与数据库脚本执行的约定：
 
 - 本仓库的 `supabase start`、`supabase status`、`supabase db reset` 等本地容器模式依赖 Docker Desktop；如果 Docker 未运行或本地 CLI 启动失败，不要把数据库任务卡在本地环境上。
 - 遇到数据库任务时，优先区分两类执行路径：
-  - DDL / RLS / 约束 / 索引 / 函数 / 触发器 -> 迁移文件 + `bun run db:push`（CLI 优先），CLI 失败再用 Supabase MCP `apply_migration`
-  - 一次性数据修复 / 只读校验 / 临时 SQL -> `bun run db:query -- --file <sql-file>`（CLI 优先），CLI 失败再用 Supabase MCP `execute_sql`
+  - DDL / RLS / 约束 / 索引 / 函数 / 触发器 -> 优先 Supabase MCP `apply_migration`；需要复用仓库 migration 流程、补充验证或 MCP 不足时，再结合 `bun run db:push`
+  - 一次性数据修复 / 只读校验 / 临时 SQL -> 优先 Supabase MCP `execute_sql`；需要复用仓库 SQL 文件、批处理脚本或 MCP 不足时，再结合 `bun run db:query -- --file <sql-file>`
 - 不要把结构变更直接塞进临时 SQL 裸跑；优先保持 migration 可追踪、可回滚。
 - 如果本地 Docker 不可用，但远程 linked CLI 或 MCP 可用，应继续推进数据库任务，不要因为 `supabase start` 失败而中断。
 
