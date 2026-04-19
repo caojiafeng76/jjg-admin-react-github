@@ -30,6 +30,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
     theoretical_seconds,
     inspection_seconds,
     labor_rate,
+    labor_cost_coefficient,
     equipment_rate,
     tool_rate,
     cutting_fluid_rate,
@@ -66,11 +67,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
         <span className="text-gray-400">·</span>
         <span className="text-gray-500">
           日标准产能{' '}
-          {formatNumber(
-            calculateDailyStandardCapacity(standard_seconds),
-            2,
-          )}{' '}
-          件
+          {formatNumber(calculateDailyStandardCapacity(standard_seconds), 2)} 件
         </span>
       </div>
       <Descriptions
@@ -92,6 +89,11 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
             key: 'labor_rate',
             label: '人工费率',
             children: formatNumber(labor_rate),
+          },
+          {
+            key: 'labor_cost_coefficient',
+            label: '人工成本系数',
+            children: formatNumber(labor_cost_coefficient),
           },
           {
             key: 'equipment_rate',

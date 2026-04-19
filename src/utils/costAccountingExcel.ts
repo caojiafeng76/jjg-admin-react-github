@@ -14,6 +14,7 @@ const DETAIL_HEADERS = [
   '料号',
   '标准工时\n（秒/支）',
   '人工费率',
+  '人工成本系数',
   '人工成本\n（元/支）',
   '理论加工时间',
   '设备小时费率\n（折旧+电费）\n（元/H）',
@@ -41,6 +42,7 @@ const GROUP_HEADER_ROW = [
   '人工成本',
   '',
   '',
+  '',
   '设备成本',
   '',
   '',
@@ -58,26 +60,27 @@ const GROUP_HEADER_ROW = [
 ] as const
 
 const COLUMN_WIDTHS = [
-  8, 16, 18, 16, 10, 18, 12, 10, 12, 12, 16, 12, 12, 10, 10, 13, 10, 12,
-  10, 10, 12, 10, 18,
+  8, 16, 18, 16, 10, 18, 12, 10, 10, 12, 12, 16, 12, 12, 10, 10, 13, 10, 12, 10,
+  10, 12, 10, 18,
 ]
 
 const GROUP_FILL_BY_COLUMN: Record<number, string> = {
   6: 'FFF200',
   7: 'FFF200',
   8: 'FFF200',
-  9: 'F6B21A',
+  9: 'FFF200',
   10: 'F6B21A',
   11: 'F6B21A',
-  12: '21B3E8',
+  12: 'F6B21A',
   13: '21B3E8',
   14: '21B3E8',
   15: '21B3E8',
-  16: 'E7E1F3',
+  16: '21B3E8',
   17: 'E7E1F3',
-  18: '00B050',
+  18: 'E7E1F3',
   19: '00B050',
   20: '00B050',
+  21: '00B050',
 }
 
 const BORDER_STYLE = {
@@ -176,6 +179,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
     record.part_no || '',
     record.standard_seconds,
     formatNumber(record.labor_rate),
+    formatNumber(record.labor_cost_coefficient),
     formatNumber(record.labor_cost),
     record.theoretical_seconds,
     formatNumber(record.equipment_rate),
@@ -210,13 +214,13 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
     { s: { r: 1, c: 3 }, e: { r: 2, c: 3 } },
     { s: { r: 1, c: 4 }, e: { r: 2, c: 4 } },
     { s: { r: 1, c: 5 }, e: { r: 2, c: 5 } },
-    { s: { r: 1, c: 6 }, e: { r: 1, c: 8 } },
-    { s: { r: 1, c: 9 }, e: { r: 1, c: 11 } },
-    { s: { r: 1, c: 12 }, e: { r: 1, c: 15 } },
-    { s: { r: 1, c: 16 }, e: { r: 1, c: 17 } },
-    { s: { r: 1, c: 18 }, e: { r: 1, c: 20 } },
-    { s: { r: 1, c: 21 }, e: { r: 2, c: 21 } },
+    { s: { r: 1, c: 6 }, e: { r: 1, c: 9 } },
+    { s: { r: 1, c: 10 }, e: { r: 1, c: 12 } },
+    { s: { r: 1, c: 13 }, e: { r: 1, c: 16 } },
+    { s: { r: 1, c: 17 }, e: { r: 1, c: 18 } },
+    { s: { r: 1, c: 19 }, e: { r: 1, c: 21 } },
     { s: { r: 1, c: 22 }, e: { r: 2, c: 22 } },
+    { s: { r: 1, c: 23 }, e: { r: 2, c: 23 } },
   ]
 
   worksheet['!cols'] = COLUMN_WIDTHS.map((width) => ({ wch: width }))

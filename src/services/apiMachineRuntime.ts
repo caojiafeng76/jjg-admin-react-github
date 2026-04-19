@@ -1,14 +1,6 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 
-type SupabaseAny = {
-  from: (table: string) => ReturnType<typeof supabase.from>
-}
-
-function viewFrom(viewName: string) {
-  return (supabase as unknown as SupabaseAny).from(viewName)
-}
-
 export interface MachineRuntimeFilters {
   dateFrom?: string
   dateTo?: string
@@ -65,7 +57,8 @@ export async function getMachineRuntimeItems({
   const to = from + pageSize - 1
 
   // 使用 VIEW v_machine_runtime_items 查询
-  let query = viewFrom('v_machine_runtime_items')
+  let query = supabase
+    .from('v_machine_runtime_items')
     .select('*', { count: 'exact' })
     .not('machine_equipment_id', 'is', null)
 
@@ -103,7 +96,10 @@ export async function getMachineRuntimeItems({
 }
 
 export async function getMachineRuntimeSummary(
-  filters: Omit<MachineRuntimeFilters, 'page' | 'pageSize' | 'machineEquipmentId'>,
+  filters: Omit<
+    MachineRuntimeFilters,
+    'page' | 'pageSize' | 'machineEquipmentId'
+  >,
 ): Promise<MachineRuntimeSummaryItem[]> {
   // 1. 获取全部设备（支持按设备编号/工序/机器名称筛选）
   let machineQuery = supabase
@@ -112,13 +108,22 @@ export async function getMachineRuntimeSummary(
     .order('unified_device_no')
 
   if (filters.unifiedDeviceNo) {
-    machineQuery = machineQuery.ilike('unified_device_no', `%${filters.unifiedDeviceNo}%`)
+    machineQuery = machineQuery.ilike(
+      'unified_device_no',
+      `%${filters.unifiedDeviceNo}%`,
+    )
   }
   if (filters.deviceOperation) {
-    machineQuery = machineQuery.ilike('operation', `%${filters.deviceOperation}%`)
+    machineQuery = machineQuery.ilike(
+      'operation',
+      `%${filters.deviceOperation}%`,
+    )
   }
   if (filters.machineName) {
-    machineQuery = machineQuery.ilike('machine_name', `%${filters.machineName}%`)
+    machineQuery = machineQuery.ilike(
+      'machine_name',
+      `%${filters.machineName}%`,
+    )
   }
 
   const { data: allMachines, error: machineError } = await machineQuery
@@ -128,10 +133,9 @@ export async function getMachineRuntimeSummary(
   }
 
   // 2. 获取符合日期/筛选条件的运行明细，汇总 runtime_seconds
-  let query = viewFrom('v_machine_runtime_items')
-    .select(
-      'machine_equipment_id, runtime_seconds',
-    )
+  let query = supabase
+    .from('v_machine_runtime_items')
+    .select('machine_equipment_id, runtime_seconds')
     .not('machine_equipment_id', 'is', null)
 
   if (filters.dateFrom) {
@@ -151,7 +155,10 @@ export async function getMachineRuntimeSummary(
   const runtimeMap = new Map<string, number>()
   for (const row of runtimeRows || []) {
     const key = row.machine_equipment_id as string
-    runtimeMap.set(key, (runtimeMap.get(key) ?? 0) + Number(row.runtime_seconds || 0))
+    runtimeMap.set(
+      key,
+      (runtimeMap.get(key) ?? 0) + Number(row.runtime_seconds || 0),
+    )
   }
 
   // 4. 合并：全部设备 LEFT JOIN 运行数据

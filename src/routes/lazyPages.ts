@@ -41,9 +41,6 @@ export const EmployeeList = lazy(
 export const StandardTimeList = lazy(
   () => import('@features/workshop/StandardTimeList'),
 )
-export const LaborProtectionData = lazy(
-  () => import('@features/labor-protection/LaborProtectionData'),
-)
 export const JobBaseSetting = lazy(
   () => import('@features/workshop/JobBaseSetting'),
 )

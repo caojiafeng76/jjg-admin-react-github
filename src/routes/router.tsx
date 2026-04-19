@@ -23,7 +23,6 @@ import {
   EmployeeMobileChangePasswordPage,
   EmployeeList,
   JobBaseSetting,
-  LaborProtectionData,
   Login,
   MachineEquipmentMaintenance,
   MachineRuntime,
@@ -424,50 +423,6 @@ export const router = createBrowserRouter([
       },
       {
         path: 'tooling-stock-out',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
-              element={<ComingSoonPage />}
-            />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'labor-protection-data',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
-              element={<LaborProtectionData />}
-            />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'labor-protection-inventory',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
-              element={<ComingSoonPage />}
-            />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'labor-protection-stock-in',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
-              element={<ComingSoonPage />}
-            />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'labor-protection-stock-out',
         element: (
           <Suspense fallback={<Loading />}>
             <RoleProtectedRoute

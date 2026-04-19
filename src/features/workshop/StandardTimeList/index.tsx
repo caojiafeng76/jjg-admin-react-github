@@ -202,9 +202,9 @@ export default function StandardTimeList() {
       try {
         const nextValues: StandardTimeFormValues = isTeamLeaderMode
           ? {
-              customer: values.customer,
-              job_name: values.job_name,
-              equipment_no: values.equipment_no,
+              customer: editingRecord?.customer ?? values.customer,
+              job_name: editingRecord?.job_name ?? values.job_name,
+              equipment_no: editingRecord?.equipment_no ?? values.equipment_no,
               operation: values.operation,
               model: isEdit
                 ? editingRecord?.model || values.model
@@ -213,11 +213,40 @@ export default function StandardTimeList() {
                 ? editingRecord?.standard_seconds || 0
                 : 0,
               theoretical_seconds: values.theoretical_seconds,
+              labor_rate: editingRecord?.labor_rate ?? values.labor_rate ?? 0,
+              labor_cost_coefficient:
+                editingRecord?.labor_cost_coefficient ??
+                values.labor_cost_coefficient ??
+                1,
+              equipment_rate:
+                editingRecord?.equipment_rate ?? values.equipment_rate ?? 0,
+              tool_rate: editingRecord?.tool_rate ?? values.tool_rate ?? 0,
+              cutting_fluid_rate:
+                editingRecord?.cutting_fluid_rate ??
+                values.cutting_fluid_rate ??
+                0,
+              fixture_rate:
+                editingRecord?.fixture_rate ?? values.fixture_rate ?? 0,
+              inspection_seconds:
+                editingRecord?.inspection_seconds ??
+                values.inspection_seconds ??
+                0,
+              daily_management_cost:
+                editingRecord?.daily_management_cost ??
+                values.daily_management_cost ??
+                0,
+              daily_total_hours:
+                editingRecord?.daily_total_hours ??
+                values.daily_total_hours ??
+                0,
               uploaded_by_name: isEdit
                 ? editingRecord?.uploaded_by_name || null
                 : currentUploader || values.uploaded_by_name || null,
-              length: values.length ?? 0,
-              part_no: values.part_no ?? null,
+              remark: editingRecord?.remark ?? values.remark ?? null,
+              length: values.length ?? editingRecord?.length ?? 0,
+              part_no: values.part_no ?? editingRecord?.part_no ?? null,
+              record_type:
+                editingRecord?.record_type ?? values.record_type ?? 'B',
             }
           : {
               ...values,

@@ -4,8 +4,7 @@ export type AppRole =
   | 'team_leader'
   | 'precision_cutting_admin'
 
-export const PRECISION_CUTTING_ADMIN_ROLE: AppRole =
-  'precision_cutting_admin'
+export const PRECISION_CUTTING_ADMIN_ROLE: AppRole = 'precision_cutting_admin'
 
 export const EMPLOYEE_SIDE_ROLES: AppRole[] = ['employee', 'team_leader']
 

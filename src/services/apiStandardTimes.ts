@@ -22,6 +22,7 @@ export type StandardTimeFormValues = Pick<
   | 'standard_seconds'
   | 'theoretical_seconds'
   | 'labor_rate'
+  | 'labor_cost_coefficient'
   | 'equipment_rate'
   | 'tool_rate'
   | 'cutting_fluid_rate'
@@ -112,6 +113,7 @@ function normalizeStandardTimePayload(
     model: normalizeStandardTimeValue(values.model),
     theoretical_seconds: values.theoretical_seconds ?? 0,
     labor_rate: values.labor_rate ?? 0,
+    labor_cost_coefficient: values.labor_cost_coefficient ?? 1,
     equipment_rate: values.equipment_rate ?? 0,
     tool_rate: values.tool_rate ?? 0,
     cutting_fluid_rate: values.cutting_fluid_rate ?? 0,
@@ -229,18 +231,21 @@ export async function getStandardTimes({
     )
   }
 
-  const [{ count: total, error: totalError }, { count: zeroCount, error: zeroCountError }] =
-    await Promise.all([
-      buildCountQuery(),
-      buildCountQuery().eq('standard_seconds', 0),
-    ])
+  const [
+    { count: total, error: totalError },
+    { count: zeroCount, error: zeroCountError },
+  ] = await Promise.all([
+    buildCountQuery(),
+    buildCountQuery().eq('standard_seconds', 0),
+  ])
 
   if (totalError || zeroCountError) {
     throw handleApiError(totalError || zeroCountError, '获取成本核算列表失败')
   }
 
   const normalizedZeroCount = zeroCount || 0
-  const fetchTasks: Array<Promise<{ data: StandardTime[]; error: unknown }>> = []
+  const fetchTasks: Array<Promise<{ data: StandardTime[]; error: unknown }>> =
+    []
 
   if (from < normalizedZeroCount) {
     fetchTasks.push(
@@ -366,7 +371,9 @@ export async function ensureStandardTimeExists({
   standard_seconds = 0,
   theoretical_seconds = 0,
 }: Pick<StandardTimeFormValues, 'operation' | 'model'> &
-  Partial<Pick<StandardTimeFormValues, 'standard_seconds' | 'theoretical_seconds'>>) {
+  Partial<
+    Pick<StandardTimeFormValues, 'standard_seconds' | 'theoretical_seconds'>
+  >) {
   const normalizedOperation = normalizeStandardTimeValue(operation)
   const normalizedModel = normalizeStandardTimeValue(model)
 

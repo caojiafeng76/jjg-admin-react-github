@@ -55,6 +55,7 @@ const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
   standard_seconds: 0,
   theoretical_seconds: 0,
   labor_rate: 0,
+  labor_cost_coefficient: 1,
   equipment_rate: 0,
   tool_rate: 0,
   cutting_fluid_rate: 0,
@@ -73,6 +74,7 @@ function calculateCostPreview(values?: Partial<StandardTimeFormValues>) {
   const standardSeconds = Number(values?.standard_seconds || 0)
   const theoreticalSeconds = Number(values?.theoretical_seconds || 0)
   const laborRate = Number(values?.labor_rate || 0)
+  const laborCostCoefficient = Number(values?.labor_cost_coefficient ?? 1)
   const equipmentRate = Number(values?.equipment_rate || 0)
   const toolRate = Number(values?.tool_rate || 0)
   const cuttingFluidRate = Number(values?.cutting_fluid_rate || 0)
@@ -81,7 +83,8 @@ function calculateCostPreview(values?: Partial<StandardTimeFormValues>) {
   const dailyManagementCost = Number(values?.daily_management_cost || 0)
   const dailyTotalHours = Number(values?.daily_total_hours || 0)
 
-  const laborCost = (standardSeconds * laborRate) / 3600
+  const laborCost =
+    ((standardSeconds * laborRate) / 3600) * laborCostCoefficient
   const equipmentCost = (theoreticalSeconds * equipmentRate) / 3600
   const toolingConsumableCost = toolRate + cuttingFluidRate + fixtureRate
   const inspectionCost = (inspectionSeconds * laborRate) / 3600
@@ -505,6 +508,9 @@ export default function StandardTimeForm({
           </Form.Item>
           <Divider>费率与管理参数</Divider>
           <Form.Item name="labor_rate" label="人工费率（元/小时）">
+            <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="labor_cost_coefficient" label="人工成本系数">
             <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="equipment_rate" label="设备费率（元/小时）">
