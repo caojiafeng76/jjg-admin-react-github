@@ -185,6 +185,7 @@ bun format     # Prettier 格式化
 
 - **默认情况下优先使用 CLI 工具**（bun 脚本、Supabase CLI 等）完成；只有当 CLI 无法完成（如连接失败、命令不支持、Docker 不可用等）时，才回退到 MCP 作为补充。
 - **例外：涉及 Supabase 数据库操作时，优先使用 Supabase MCP**；如果 MCP 无法完成、返回能力不足，或需要复用仓库内既有脚本与流程，再结合 CLI 执行。
+- **例外：涉及 Figma 设计稿、Figma 链接或 Figma 资源时，直接使用官方 Figma MCP** 获取设计上下文或资源内容，不要先用 CLI、手工转述或截图猜测来替代。
 
 关于 Supabase CLI 与数据库脚本执行的约定：
 
@@ -194,6 +195,12 @@ bun format     # Prettier 格式化
   - 一次性数据修复 / 只读校验 / 临时 SQL -> 优先 Supabase MCP `execute_sql`；需要复用仓库 SQL 文件、批处理脚本或 MCP 不足时，再结合 `bun run db:query -- --file <sql-file>`
 - 不要把结构变更直接塞进临时 SQL 裸跑；优先保持 migration 可追踪、可回滚。
 - 如果本地 Docker 不可用，但远程 linked CLI 或 MCP 可用，应继续推进数据库任务，不要因为 `supabase start` 失败而中断。
+
+关于 Figma 资源的使用约定：
+
+- 只要任务中出现 Figma 设计稿、Figma URL、Figma 节点、组件映射、设计资源复用或“按设计稿实现”这类需求，优先直接使用官方 Figma MCP。
+- 先通过 Figma MCP 获取设计上下文、节点信息、截图或 Code Connect 线索，再结合项目现有组件和样式实现，不要脱离设计资源自行猜 UI 细节。
+- 如果 Figma MCP 当前不可用，再退回图片、描述或代码上下文作为补充，并明确说明已降级。
 
 ## 注意事项
 

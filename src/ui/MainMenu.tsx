@@ -95,17 +95,6 @@ const adminItems: MenuItem[] = [
     ],
   },
   {
-    key: 'labor-protection',
-    label: '劳保',
-    icon: <Square3Stack3DIcon className="size-4" />,
-    children: [
-      { key: 'labor-protection-data', label: '劳保资料' },
-      { key: 'labor-protection-inventory', label: '劳保库存' },
-      { key: 'labor-protection-stock-in', label: '劳保入库' },
-      { key: 'labor-protection-stock-out', label: '劳保出库' },
-    ],
-  },
-  {
     key: 'youmai',
     label: '优迈',
     icon: <Square3Stack3DIcon className="size-4" />,
