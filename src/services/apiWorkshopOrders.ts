@@ -7,6 +7,8 @@ import {
   normalizeWorkshopOrderStatus,
 } from '@/features/workshop/OrderList/orderStatus'
 
+const WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE = 1000
+
 export interface WorkshopOrderDeleteBlocker {
   orderId: string
   projectNo: string | null
@@ -168,7 +170,7 @@ export async function getWorkshopOrders({
   product_model?: string
   customer_model?: string
   model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
-  length_mm?: number
+  length_mm?: number[]
   startDate?: string
   endDate?: string
   status?: WorkshopOrder['status']
@@ -212,8 +214,8 @@ export async function getWorkshopOrders({
     query = query.lte('product_delivery_date', endDate)
   }
 
-  if (length_mm != null) {
-    query = query.eq('length_mm', length_mm)
+  if (length_mm?.length) {
+    query = query.in('length_mm', length_mm)
   }
 
   if (status) {
@@ -302,6 +304,41 @@ export async function getWorkshopOrders({
     items,
     total: count || 0,
   }
+}
+
+export async function getWorkshopOrderLengths() {
+  const lengths = new Set<number>()
+  let from = 0
+
+  while (true) {
+    const to = from + WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('sales_orders')
+      .select('length_mm')
+      .not('length_mm', 'is', null)
+      .order('length_mm', { ascending: true })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取订单长度选项失败')
+    }
+
+    const rows = data || []
+
+    rows.forEach((item) => {
+      if (item.length_mm !== null) {
+        lengths.add(item.length_mm)
+      }
+    })
+
+    if (rows.length < WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE) {
+      break
+    }
+
+    from += WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE
+  }
+
+  return Array.from(lengths).sort((left, right) => left - right)
 }
 
 export async function getWorkshopOrderById(id: string) {

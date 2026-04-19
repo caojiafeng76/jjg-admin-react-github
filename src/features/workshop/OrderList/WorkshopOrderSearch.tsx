@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Input, InputNumber, DatePicker, Button, Form, Space } from 'antd'
+import { Input, DatePicker, Button, Form, Space, Select } from 'antd'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import type { Dayjs } from 'dayjs'
 
@@ -10,7 +10,7 @@ interface SearchParams {
   product_model?: string
   customer_model?: string
   model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
-  length_mm?: number
+  length_mm?: number[]
   startDate?: string
   endDate?: string
 }
@@ -18,9 +18,14 @@ interface SearchParams {
 interface Props {
   onSearch: (params: SearchParams) => void
   onReset: () => void
+  lengthOptions: number[]
 }
 
-export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
+export default function WorkshopOrderSearch({
+  onSearch,
+  onReset,
+  lengthOptions,
+}: Props) {
   const [form] = Form.useForm()
   const [isSearching, setIsSearching] = useState(false)
 
@@ -29,7 +34,7 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
     product_model?: string
     customer_model?: string
     model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
-    length_mm?: number | null
+    length_mm?: number[]
     dateRange?: [Dayjs | null, Dayjs | null]
   }) => {
     const params: SearchParams = {}
@@ -50,8 +55,10 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
       }
     }
 
-    if (values.length_mm != null) {
-      params.length_mm = values.length_mm
+    if (values.length_mm?.length) {
+      params.length_mm = Array.from(new Set(values.length_mm)).sort(
+        (left, right) => left - right,
+      )
     }
 
     if (values.dateRange && values.dateRange[0] && values.dateRange[1]) {
@@ -94,11 +101,17 @@ export default function WorkshopOrderSearch({ onSearch, onReset }: Props) {
         />
       </Form.Item>
       <Form.Item name="length_mm" className="mb-0">
-        <InputNumber
+        <Select
           placeholder="长度(mm)"
-          min={0}
-          precision={0}
-          style={{ width: 140 }}
+          mode="multiple"
+          allowClear
+          showSearch
+          optionFilterProp="label"
+          style={{ width: 220 }}
+          options={lengthOptions.map((length) => ({
+            label: `${length}`,
+            value: length,
+          }))}
         />
       </Form.Item>
       <Form.Item className="mb-0">
