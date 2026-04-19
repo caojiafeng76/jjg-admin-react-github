@@ -17,10 +17,10 @@ argument-hint: [数据库任务说明]
 5. 先阅读相关 schema、迁移、服务层调用、类型定义和现有文档，再决定实施方案；不要在未建立上下文时直接写 SQL。
 6. 优先评估影响范围：受影响表、现有查询、前端调用、权限模型、历史数据兼容性、回滚难度。
 7. 如果任务涉及 DDL 或权限策略，优先使用迁移文件表达变更；不要把结构变更混进随意执行的临时 SQL。
-8. 如果本地 `supabase start` 或其他本地 CLI 容器命令失败，不要停在本地环境问题上；应立即切换到远程 linked CLI 或 Supabase MCP：
+8. 涉及 Supabase 数据库操作时，优先使用 Supabase MCP；如果 MCP 能力不足、执行失败，或需要复用仓库既有脚本与文件流程，再结合远程 linked CLI。若本地 `supabase start` 或其他本地 CLI 容器命令失败，不要停在本地环境问题上：
 
-- DDL / RLS / 约束 / 索引 / 函数 -> migration + `bun run db:push`，或 MCP `apply_migration`
-- 一次性数据修复 / 临时核对 SQL -> `bun run db:query -- --file <sql-file>`，或 MCP `execute_sql`
+- DDL / RLS / 约束 / 索引 / 函数 -> 优先 MCP `apply_migration`，需要补充仓库流程时再用 migration + `bun run db:push`
+- 一次性数据修复 / 临时核对 SQL -> 优先 MCP `execute_sql`，需要补充仓库流程时再用 `bun run db:query -- --file <sql-file>`
 
 9. 默认禁止手动修改 `src/services/database.types.ts`；如变更依赖类型更新，应明确提示通过既有生成流程处理。
 10. 如果任务涉及数据修复或批量更新，先区分一次性修复脚本与长期逻辑修复，避免把临时补丁写进业务代码。
