@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import {
   getProductionDailyReport,
+  getProductionDailyReportProductModels,
   type ProductionDailyReportFilters,
 } from '@/services/apiProductionDailyReport'
 
@@ -21,6 +22,14 @@ export function useProductionDailyReport({
     queryKey: [PRODUCTION_DAILY_REPORT_KEY, page, pageSize, filters],
     queryFn: () => getProductionDailyReport({ page, pageSize, ...filters }),
     placeholderData: keepPreviousData,
+    ...queryConfig.list,
+  })
+}
+
+export function useProductionDailyReportProductModels() {
+  return useQuery({
+    queryKey: [PRODUCTION_DAILY_REPORT_KEY, 'product-model-options'],
+    queryFn: getProductionDailyReportProductModels,
     ...queryConfig.list,
   })
 }

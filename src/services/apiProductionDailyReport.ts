@@ -8,7 +8,7 @@ export interface ProductionDailyReportFilters {
   endDate?: string
   dataCategory?: ProductionOrderDataCategory
   projectNo?: string
-  productModel?: string
+  productModel?: string[]
   customerModel?: string
   operation?: string
   employeeId?: string
@@ -88,6 +88,7 @@ interface SalesOrderWeightRow {
 }
 
 const FETCH_BATCH_SIZE = 1000
+const PRODUCT_MODEL_OPTIONS_PAGE_SIZE = 1000
 const PRODUCTION_DAILY_REPORT_SELECT = `
       id,
       data_category,
@@ -150,8 +151,8 @@ function buildProductionDailyReportQuery(
     query = query.eq('data_category', filters.dataCategory)
   }
 
-  if (filters.productModel) {
-    query = query.ilike('product_model', `%${filters.productModel}%`)
+  if (filters.productModel?.length) {
+    query = query.in('product_model', filters.productModel)
   }
 
   if (filters.customerModel) {
@@ -407,4 +408,43 @@ export async function getProductionDailyReportForExport(
     operations,
     total: rows.length,
   }
+}
+
+export async function getProductionDailyReportProductModels() {
+  const productModels = new Set<string>()
+  let from = 0
+
+  while (true) {
+    const to = from + PRODUCT_MODEL_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('production_order_items')
+      .select('product_model')
+      .not('product_model', 'is', null)
+      .order('product_model', { ascending: true })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取生产日报表型号选项失败')
+    }
+
+    const rows = data || []
+
+    rows.forEach((item) => {
+      const productModel = item.product_model?.trim()
+
+      if (productModel) {
+        productModels.add(productModel)
+      }
+    })
+
+    if (rows.length < PRODUCT_MODEL_OPTIONS_PAGE_SIZE) {
+      break
+    }
+
+    from += PRODUCT_MODEL_OPTIONS_PAGE_SIZE
+  }
+
+  return Array.from(productModels).sort((left, right) =>
+    left.localeCompare(right, 'zh-CN'),
+  )
 }

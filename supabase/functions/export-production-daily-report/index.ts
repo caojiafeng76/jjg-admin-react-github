@@ -15,7 +15,7 @@ interface ProductionDailyReportFilters {
   endDate?: string
   dataCategory?: ProductionOrderDataCategory
   projectNo?: string
-  productModel?: string
+  productModel?: string[]
   customerModel?: string
   operation?: string
   employeeId?: string
@@ -137,6 +137,14 @@ function normalizeFilters(filters?: ProductionDailyReportFilters) {
     return {} as ProductionDailyReportFilters
   }
 
+  const productModel = Array.from(
+    new Set(
+      (filters.productModel || [])
+        .map((item) => normalizeString(item))
+        .filter((item): item is string => Boolean(item)),
+    ),
+  ).sort((left, right) => left.localeCompare(right, 'zh-CN'))
+
   return {
     startDate: normalizeString(filters.startDate),
     endDate: normalizeString(filters.endDate),
@@ -145,7 +153,7 @@ function normalizeFilters(filters?: ProductionDailyReportFilters) {
         ? filters.dataCategory
         : undefined,
     projectNo: normalizeString(filters.projectNo),
-    productModel: normalizeString(filters.productModel),
+    productModel: productModel.length > 0 ? productModel : undefined,
     customerModel: normalizeString(filters.customerModel),
     operation: normalizeString(filters.operation),
     employeeId: normalizeString(filters.employeeId),
@@ -199,8 +207,8 @@ function buildProductionDailyReportQuery(
     query = query.eq('data_category', filters.dataCategory)
   }
 
-  if (filters.productModel) {
-    query = query.ilike('product_model', `%${filters.productModel}%`)
+  if (filters.productModel?.length) {
+    query = query.in('product_model', filters.productModel)
   }
 
   if (filters.customerModel) {

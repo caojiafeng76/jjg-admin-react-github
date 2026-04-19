@@ -26,7 +26,10 @@ import { isEmployeeSideRole } from '@/config/access'
 import ProductionDailyReportSearch from './ProductionDailyReportSearch'
 import ProductionDailyReportTable from './ProductionDailyReportTable'
 import ProductionDailyReportMobileList from './ProductionDailyReportMobileList'
-import { useProductionDailyReport } from './useProductionDailyReport'
+import {
+  useProductionDailyReport,
+  useProductionDailyReportProductModels,
+} from './useProductionDailyReport'
 import { useAuth } from '@/contexts/useAuth'
 
 function buildDateRange(filters: ProductionDailyReportFilters) {
@@ -54,7 +57,22 @@ export default function ProductionDailyReportPage() {
         ? (searchParamsURL.get('dataCategory') as 'A' | 'B')
         : undefined,
     projectNo: searchParamsURL.get('projectNo') || undefined,
-    productModel: searchParamsURL.get('productModel') || undefined,
+    productModel: (() => {
+      const productModels = searchParamsURL
+        .getAll('productModel')
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0)
+
+      if (productModels.length > 0) {
+        return Array.from(new Set(productModels)).sort((left, right) =>
+          left.localeCompare(right, 'zh-CN'),
+        )
+      }
+
+      const legacyProductModel = searchParamsURL.get('productModel')?.trim()
+
+      return legacyProductModel ? [legacyProductModel] : undefined
+    })(),
     customerModel: searchParamsURL.get('customerModel') || undefined,
     operation: searchParamsURL.get('operation') || undefined,
     employeeId: fixedEmployeeId,
@@ -70,6 +88,8 @@ export default function ProductionDailyReportPage() {
     pageSize,
     filters,
   })
+  const { data: productModelOptions = [] } =
+    useProductionDailyReportProductModels()
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 10,
     summaryRowHeight: isEmployeeView ? 0 : 39,
@@ -104,7 +124,6 @@ export default function ProductionDailyReportPage() {
         ['endDate', 'endDate'],
         ['dataCategory', 'dataCategory'],
         ['projectNo', 'projectNo'],
-        ['productModel', 'productModel'],
         ['customerModel', 'customerModel'],
         ['operation', 'operation'],
       ]
@@ -112,11 +131,16 @@ export default function ProductionDailyReportPage() {
       mappings.forEach(([filterKey, paramKey]) => {
         const value = nextFilters[filterKey]
 
-        if (value) {
+        if (typeof value === 'string' && value) {
           nextParams.set(paramKey, value)
         } else {
           nextParams.delete(paramKey)
         }
+      })
+
+      nextParams.delete('productModel')
+      nextFilters.productModel?.forEach((item) => {
+        nextParams.append('productModel', item)
       })
 
       setSearchParamsURL(nextParams)
@@ -292,6 +316,7 @@ export default function ProductionDailyReportPage() {
           initialValues={initialSearchValues}
           onSearch={handleSearch}
           onReset={handleReset}
+          productModelOptions={productModelOptions}
           mobile={isEmployeeView}
         />
       </div>

@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/useAuth'
 import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
 import {
   useWorkshopOrdersList,
+  useWorkshopOrderLengths,
   useCreateWorkshopOrder,
   useUpdateWorkshopOrder,
   useBatchUpdateWorkshopOrderStatuses,
@@ -77,7 +78,7 @@ export default function WorkshopOrderList({
     product_model?: string
     customer_model?: string
     model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
-    length_mm?: number
+    length_mm?: number[]
     startDate?: string
     endDate?: string
   }>({})
@@ -95,6 +96,7 @@ export default function WorkshopOrderList({
     pageSize,
     searchParams: mergedSearchParams,
   })
+  const { data: lengthOptions = [] } = useWorkshopOrderLengths()
 
   const createMutation = useCreateWorkshopOrder()
 
@@ -508,6 +510,7 @@ export default function WorkshopOrderList({
         <WorkshopOrderSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
+          lengthOptions={lengthOptions}
         />
       </div>
 
