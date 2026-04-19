@@ -292,7 +292,7 @@ export async function getProductionOrderItems(orderId: string) {
   )
 }
 
-export { resolveProductionOrderItemStandardSeconds }
+export { resolveProductionOrderItemStandardSeconds, calculateQualifiedHours }
 
 export async function addProductionOrderItem(
   values: ProductionOrderItemInsert,

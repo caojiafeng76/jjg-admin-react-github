@@ -5,7 +5,10 @@ import type {
   ProductionOrderDataCategory,
   ProductionOrderItem,
 } from './apiProductionOrderItems'
-import { resolveProductionOrderItemStandardSeconds } from './apiProductionOrderItems'
+import {
+  resolveProductionOrderItemStandardSeconds,
+  calculateQualifiedHours,
+} from './apiProductionOrderItems'
 
 export type ProductionOrderShift = '白班' | '夜班'
 
@@ -111,7 +114,10 @@ export async function getProductionOrders({
 
   type ProductionOrderListRelation = Pick<
     Database['public']['Tables']['production_order_items']['Row'],
-    'standard_seconds' | 'qualified_quantity' | 'qualified_hours'
+    | 'standard_seconds'
+    | 'qualified_quantity'
+    | 'qualified_hours'
+    | 'defect_hours'
   >
 
   type ProductionOrderListQueryRow = ProductionOrderWithEmployee & {
@@ -121,7 +127,7 @@ export async function getProductionOrders({
   const selectClause = `
       *,
       employee:employees(id, name),
-      items:production_order_items(standard_seconds, qualified_quantity, qualified_hours)${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, data_category, product_model, customer_model)' : ''}
+      items:production_order_items(standard_seconds, qualified_quantity, qualified_hours, defect_hours)${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, data_category, product_model, customer_model)' : ''}
     `
 
   let query = supabase
@@ -177,19 +183,50 @@ export async function getProductionOrders({
   }
 
   const items = ((data || []) as unknown as ProductionOrderListQueryRow[]).map(
-    ({ items: orderItems = [], ...order }) => ({
-      ...order,
-      positive_qualified_hours: Number(
+    ({ items: orderItems = [], ...order }) => {
+      const positiveQualifiedHours = Number(
         orderItems
-          .reduce((total, item) => total + Number(item.qualified_hours || 0), 0)
+          .reduce(
+            (total, item) =>
+              total +
+              calculateQualifiedHours(
+                Number(item.standard_seconds || 0),
+                item.qualified_quantity,
+              ),
+            0,
+          )
           .toFixed(2),
-      ),
-      hasZeroStandardQualifiedItem: orderItems.some(
-        (item) =>
-          Number(item.standard_seconds || 0) === 0 &&
-          Number(item.qualified_quantity || 0) > 0,
-      ),
-    }),
+      )
+
+      const totalDefectHours = Number(
+        orderItems
+          .reduce((total, item) => total + Number(item.defect_hours || 0), 0)
+          .toFixed(2),
+      )
+
+      const extraQualifiedHours = Number(order.extra_qualified_hours ?? 0)
+      const totalQualifiedHours = Number(
+        (
+          positiveQualifiedHours -
+          totalDefectHours +
+          extraQualifiedHours
+        ).toFixed(2),
+      )
+      const workHours = Number(order.work_hours || 0)
+      const efficiency = workHours > 0 ? totalQualifiedHours / workHours : 0
+
+      return {
+        ...order,
+        positive_qualified_hours: positiveQualifiedHours,
+        total_qualified_hours: totalQualifiedHours,
+        efficiency,
+        hasZeroStandardQualifiedItem: orderItems.some(
+          (item) =>
+            Number(item.standard_seconds || 0) === 0 &&
+            Number(item.qualified_quantity || 0) > 0,
+        ),
+      }
+    },
   )
 
   return {
