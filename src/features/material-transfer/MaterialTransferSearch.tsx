@@ -112,7 +112,7 @@ export default function MaterialTransferSearch({
 
       <Form.Item name="productModel" className="mb-0">
         <Input
-          placeholder="型号"
+          placeholder="型号，多个用空格或逗号分隔"
           allowClear
           style={{ width: mobile ? '100%' : 180 }}
         />
@@ -123,8 +123,12 @@ export default function MaterialTransferSearch({
           <Select
             placeholder="操作人"
             allowClear
-            showSearch
-            optionFilterProp="label"
+            showSearch={{
+              filterOption: (input, option) =>
+                String(option?.label || '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase()),
+            }}
             getPopupContainer={getPopupContainer}
             style={{ width: mobile ? '100%' : 180 }}
             options={employees.map((employee) => ({

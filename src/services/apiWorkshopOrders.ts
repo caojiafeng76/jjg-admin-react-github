@@ -1,5 +1,9 @@
 import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
+import {
+  buildOrIlikeFilter,
+  normalizeSearchKeywords,
+} from '@/utils/searchKeywords'
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
 import {
   DEFAULT_WORKSHOP_ORDER_STATUS,
@@ -158,7 +162,7 @@ export async function getWorkshopOrders({
   project_no,
   product_model,
   customer_model,
-  model_search, // 统一的搜索字段，可同时搜索项目号、产品型号和客户型号
+  model_search, // 统一的搜索字段，可同时搜索多个项目号、产品型号和客户型号
   length_mm,
   startDate,
   endDate,
@@ -169,7 +173,7 @@ export async function getWorkshopOrders({
   project_no?: string
   product_model?: string
   customer_model?: string
-  model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+  model_search?: string // 统一的搜索字段，支持多个关键词同时搜索项目号、产品型号、客户型号
   length_mm?: number[]
   startDate?: string
   endDate?: string
@@ -180,10 +184,15 @@ export async function getWorkshopOrders({
 
   let query = supabase.from('sales_orders').select('*', { count: 'exact' })
 
-  // 统一的搜索字段（同时搜索项目号、产品型号和客户型号，OR逻辑）
-  if (model_search) {
+  const modelSearchKeywords = normalizeSearchKeywords(model_search)
+
+  // 统一的搜索字段（同时搜索多个项目号、产品型号和客户型号，OR逻辑）
+  if (modelSearchKeywords?.length) {
     query = query.or(
-      `project_no.ilike.%${model_search}%,product_model.ilike.%${model_search}%,customer_model.ilike.%${model_search}%`,
+      buildOrIlikeFilter(
+        ['project_no', 'product_model', 'customer_model'],
+        modelSearchKeywords,
+      ),
     )
   } else {
     // 如果没有统一搜索，则分别搜索

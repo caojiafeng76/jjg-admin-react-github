@@ -2,6 +2,10 @@ import dayjs from 'dayjs'
 
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import {
+  buildOrIlikeFilter,
+  normalizeSearchKeywords,
+} from '@/utils/searchKeywords'
 
 export const MATERIAL_TRANSFER_WORKSHOPS = [
   '挤压',
@@ -154,6 +158,7 @@ export interface MaterialTransferQuantityStats {
 function applyMaterialTransferFilters<
   TQuery extends {
     ilike: (column: string, pattern: string) => TQuery
+    or: (filters: string) => TQuery
     contains: (column: string, value: string[]) => TQuery
     eq: (column: string, value: string | boolean) => TQuery
     gte: (column: string, value: string) => TQuery
@@ -180,12 +185,18 @@ function applyMaterialTransferFilters<
     nextQuery = nextQuery.ilike('project_no', `%${filters.projectNo}%`)
   }
 
-  if (filters.productModel) {
-    nextQuery = nextQuery.ilike('product_model', `%${filters.productModel}%`)
+  const productModelKeywords = normalizeSearchKeywords(filters.productModel)
+
+  if (productModelKeywords?.length) {
+    nextQuery = nextQuery.or(
+      buildOrIlikeFilter(['product_model'], productModelKeywords),
+    )
   }
 
   if (filters.employeeId) {
-    nextQuery = nextQuery.contains('operator_employee_ids', [filters.employeeId])
+    nextQuery = nextQuery.contains('operator_employee_ids', [
+      filters.employeeId,
+    ])
   }
 
   if (filters.targetWorkshop) {
@@ -281,7 +292,10 @@ function normalizeMaterialTransferUpdatePayload(
 
     Object.assign(
       payload,
-      normalizeOperatorPayload(values.operator_employee_ids, values.operator_names),
+      normalizeOperatorPayload(
+        values.operator_employee_ids,
+        values.operator_names,
+      ),
     )
   }
 
@@ -559,23 +573,29 @@ export async function getTransferStatsByProjectNo(
     throw handleApiError(error, '获取转移单统计失败')
   }
 
-  const rows = (data || []) as { target_workshop: string; transfer_quantity: number }[]
+  const rows = (data || []) as {
+    target_workshop: string
+    transfer_quantity: number
+  }[]
 
   const workshopMap = new Map<string, { total: number; count: number }>()
   for (const row of rows) {
-    const current = workshopMap.get(row.target_workshop) ?? { total: 0, count: 0 }
+    const current = workshopMap.get(row.target_workshop) ?? {
+      total: 0,
+      count: 0,
+    }
     current.total += Number(row.transfer_quantity || 0)
     current.count += 1
     workshopMap.set(row.target_workshop, current)
   }
 
-  const byWorkshop: TransferWorkshopStat[] = Array.from(workshopMap.entries()).map(
-    ([workshop, stat]) => ({
-      target_workshop: workshop,
-      total_quantity: stat.total,
-      record_count: stat.count,
-    }),
-  )
+  const byWorkshop: TransferWorkshopStat[] = Array.from(
+    workshopMap.entries(),
+  ).map(([workshop, stat]) => ({
+    target_workshop: workshop,
+    total_quantity: stat.total,
+    record_count: stat.count,
+  }))
 
   const totalTransferred = rows.reduce(
     (sum, row) => sum + Number(row.transfer_quantity || 0),
@@ -584,8 +604,7 @@ export async function getTransferStatsByProjectNo(
 
   const totalOutbound = totalTransferred
 
-  const totalInWarehouse =
-    workshopMap.get('仓库')?.total ?? 0
+  const totalInWarehouse = workshopMap.get('仓库')?.total ?? 0
 
   return { byWorkshop, totalOutbound, totalInWarehouse, totalTransferred }
 }
