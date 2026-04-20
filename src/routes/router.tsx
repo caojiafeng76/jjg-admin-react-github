@@ -9,6 +9,7 @@ import {
   EMPLOYEE_SIDE_ROLES,
   PRECISION_CUTTING_ADMIN_ROLE,
 } from '@/config/access'
+import { LABOR_PROTECTION_PUBLIC_QR_PATH } from '@/features/labor-protection/LaborProtectionRequisition/laborProtectionPublicQr'
 import {
   ProtectedRoute,
   RoleHomeRedirect,
@@ -24,6 +25,7 @@ import {
   EmployeeList,
   JobBaseSetting,
   LaborProtectionData,
+  LaborProtectionPublicRequisitionPage,
   LaborProtectionRequisition,
   Login,
   MachineEquipmentMaintenance,
@@ -523,6 +525,15 @@ export const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: LABOR_PROTECTION_PUBLIC_QR_PATH,
+    errorElement: <RouteErrorPage />,
+    element: (
+      <Suspense fallback={<Loading />}>
+        <LaborProtectionPublicRequisitionPage />
+      </Suspense>
+    ),
   },
   {
     path: '/login',

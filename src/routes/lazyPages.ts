@@ -51,6 +51,10 @@ export const LaborProtectionData = lazy(
 export const LaborProtectionRequisition = lazy(
   () => import('@features/labor-protection/LaborProtectionRequisition'),
 )
+export const LaborProtectionPublicRequisitionPage = lazy(
+  () =>
+    import('@features/labor-protection/LaborProtectionRequisition/LaborProtectionPublicRequisitionPage'),
+)
 export const YoumaiProductData = lazy(
   () => import('@features/youmai/ProductData'),
 )

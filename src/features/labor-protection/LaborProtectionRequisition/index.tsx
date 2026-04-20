@@ -8,6 +8,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import PrintButton from '@/ui/PrintButton'
 import { useLaborProtectionDataOptions } from '../LaborProtectionData/useLaborProtectionData'
 import LaborProtectionRequisitionForm from './LaborProtectionRequisitionForm'
 import LaborProtectionRequisitionSearch from './LaborProtectionRequisitionSearch'
@@ -18,6 +19,7 @@ import {
   useLaborProtectionRequisitionList,
   useUpdateLaborProtectionRequisition,
 } from './useLaborProtectionRequisition'
+import { usePrintLaborProtectionPublicQrPoster } from './usePrintLaborProtectionPublicQrPoster'
 import type { LaborProtectionRequisitionFormValues } from '@/services/apiLaborProtectionRequisitions'
 
 export default function LaborProtectionRequisitionPage() {
@@ -54,6 +56,7 @@ export default function LaborProtectionRequisitionPage() {
   const createMutation = useCreateLaborProtectionRequisition()
   const updateMutation = useUpdateLaborProtectionRequisition()
   const deleteMutation = useDeleteLaborProtectionRequisition()
+  const { printPoster, isPrinting } = usePrintLaborProtectionPublicQrPoster()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -183,6 +186,10 @@ export default function LaborProtectionRequisitionPage() {
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
 
+  const handlePrintPoster = useCallback(() => {
+    void printPoster()
+  }, [printPoster])
+
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
@@ -196,6 +203,9 @@ export default function LaborProtectionRequisitionPage() {
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑劳保领料单" handleEdit={handleEdit} />
+        <PrintButton handlePrint={handlePrintPoster} loading={isPrinting}>
+          打印二维码
+        </PrintButton>
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
