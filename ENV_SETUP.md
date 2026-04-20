@@ -67,11 +67,19 @@ bun dev
 bun run db:doctor
 ```
 
+验证 Spec Workflow 状态入口:
+
+```bash
+bun run spec:list
+```
+
 如果需要验证 Spec Workflow MCP 可用:
 
 ```bash
 bunx spec-workflow-mcp --help
 ```
+
+说明: Spec Workflow 的阶段状态、active change 与 apply readiness 统一以 `bun run spec ...` 系列命令输出为准；`spec-workflow-mcp` 只负责 VS Code 中的 MCP 接入与可视化。
 
 如果配置正确,应用应该能够正常连接到 Supabase 并加载数据。
 

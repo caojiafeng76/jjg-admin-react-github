@@ -147,15 +147,19 @@ bun format     # Prettier 格式化
 
 当用户要求“review”时，优先进入代码评审模式：先列问题，再写概述；重点关注缺陷、风险、回归和测试缺口。
 
-关于 Spec Workflow MCP 的使用约定：
+关于 Spec Workflow 的状态来源与接入约定：
 
 - 对于会修改应用代码、脚本、SQL、配置或指令文件的任务，默认按 Spec Workflow 的执行顺序推进，除非用户明确要求跳过。
+- Spec Workflow 的阶段状态、active change、apply readiness、archive readiness，一律以 repo-local CLI wrapper 输出为准：`bun run spec:list`、`bun run spec -- status --change <name> --json`、`bun run spec -- instructions apply --change <name> --json`。
+- `spec-workflow-mcp` 只负责 VS Code MCP 接入、工具暴露与可视化，不作为独立状态来源；不要同时维护一套“按 MCP 判断阶段”和一套“按 openspec CLI 判断阶段”的逻辑。
+- 如果 MCP 展示与 CLI wrapper 输出不一致，一律以 CLI wrapper 为准，并提示重新加载 VS Code 窗口或重新连接 MCP。
 - 执行顺序固定为：`explore -> propose -> apply -> archive`。
 - 需求仍在讨论、范围不清、方案未定时，先走 `explore`，不要直接开始实现。
 - 一旦准备写代码，先检查是否已有可继续的 change；若没有，就先通过 `propose` 建立 change 和所需 artifacts，再进入实现。
 - 真正写代码时，只在 `apply` 阶段按 tasks 顺序实施；不要跳过 proposal / tasks 直接进入大段实现。
 - 任务完成后，如果对应 change 已完成，实现阶段应提示进入 `archive`；不要长期停留在“代码改完但变更未归档”的状态。
-- 如果任务非常小且用户明确要求直接修改，可走最小化实现；但必须在回复中说明本次为何跳过完整 Spec Workflow。
+- 如果任务非常小或低风险（如单文件小改、文案/说明调整、小范围配置变更），可走最小化实现；但必须在回复中说明本次为何跳过完整 Spec Workflow。
+- 如果用户已显式使用 `/opsx:explore`、`/opsx:propose`、`/opsx:apply` 或 `/opsx:archive`，则对应 opsx prompt 视为当前权威流程；其他通用 prompt 和默认流程不再重复做阶段判断或重复查询同一状态。
 
 ## 严格执行的附加规则
 
@@ -167,7 +171,7 @@ bun format     # Prettier 格式化
 6. 修改 Query / Mutation / queryKey / invalidateQueries / 缓存联动时，必须检查相关 hook、调用点和失效键是否一致，避免出现“请求成功但界面不刷新”。
 7. 修改路由、菜单、页面标题、权限或角色判断时，必须同步检查 `router`、`MainMenu`、`AppHeader`、access 配置和受影响页面入口。
 8. 修改业务规则、状态流转、数量/工时/成本/时长计算时，必须检查写入入口、展示入口和汇总口径是否一致，避免局部修复导致口径分裂。
-9. 如果已启用 `spec-workflow-mcp`，实施前必须优先检查当前任务处于 `explore`、`propose`、`apply`、`archive` 的哪一阶段；不要在阶段未就绪时直接跳到后续阶段。
+9. 涉及 Spec Workflow 的阶段判断时，统一使用 repo-local CLI wrapper 查询状态，不要从 `.mcp.json`、MCP 可用性、文件目录是否存在或历史对话中自行猜测阶段；在阶段未就绪时不要直接跳到后续阶段。
 
 ## 任务类型最低验证标准
 

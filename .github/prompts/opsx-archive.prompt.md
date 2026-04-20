@@ -8,18 +8,23 @@ Archive a completed change in the experimental workflow.
 
 **Steps**
 
-1. **If no change name provided, prompt for selection**
+1. **If no change name provided, resolve the target change**
 
-   Run `openspec list --json` to get available changes. Use the **AskUserQuestion tool** to let the user select.
+   If a name is provided, use it. Otherwise:
+   - Infer from conversation context if the user mentioned a change
+   - Auto-select if only one active change exists
+   - If ambiguous, run `bun run spec:list` to get available changes and use the **AskUserQuestion tool** to let the user select
 
-   Show only active changes (not already archived).
+   If asking the user to choose, show only active changes (not already archived).
    Include the schema used for each change if available.
 
-   **IMPORTANT**: Do NOT guess or auto-select a change. Always let the user choose.
+   **IMPORTANT**: Do NOT guess when multiple active changes exist. Only auto-select when there is exactly one active change.
+
+   Always announce which change will be archived and how to override it (e.g., `/opsx:archive <other>`).
 
 2. **Check artifact completion status**
 
-   Run `openspec status --change "<name>" --json` to check artifact completion.
+   Run `bun run spec -- status --change "<name>" --json` to check artifact completion.
 
    Parse the JSON to understand:
    - `schemaName`: The workflow being used
@@ -146,7 +151,7 @@ Target archive directory already exists.
 
 **Guardrails**
 - Always prompt for change selection if not provided
-- Use artifact graph (openspec status --json) for completion checking
+- Use artifact graph (`bun run spec -- status --change <name> --json`) for completion checking
 - Don't block archive on warnings - just inform and confirm
 - Preserve .openspec.yaml when moving to archive (it moves with the directory)
 - Show clear summary of what happened
