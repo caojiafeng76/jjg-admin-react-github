@@ -148,6 +148,7 @@ export default function LaborProtectionPublicRequisitionPage() {
                   isSubmitting={createMutation.isPending}
                   categoryOptions={categoryOptions}
                   isCategoryOptionsLoading={isCategoryOptionsLoading}
+                  categoryInputMode="bottom-sheet"
                 />
               )}
             </Card>
