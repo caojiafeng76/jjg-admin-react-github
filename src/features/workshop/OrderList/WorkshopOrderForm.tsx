@@ -1,4 +1,5 @@
 import {
+  App,
   DatePicker,
   Form,
   FormInstance,
@@ -40,6 +41,7 @@ export default function WorkshopOrderForm({
   canEditStatus,
   initialValues,
 }: Props) {
+  const { message } = App.useApp()
   const [form] = Form.useForm<WorkshopOrder>()
   const [importMode, setImportMode] = useState<'manual' | 'excel'>('manual')
   const [excelRows, setExcelRows] = useState<WorkshopOrder[]>([])
@@ -49,24 +51,30 @@ export default function WorkshopOrderForm({
   }, [form, setFormRef])
 
   const handleFinish = (values: WorkshopOrder) => {
-    if (importMode === 'excel' && excelRows.length > 0) {
+    if (importMode === 'excel') {
+      if (excelRows.length === 0) {
+        message.warning('请先上传并解析有效的 Excel 数据，再执行导入')
+        return
+      }
+
       // Excel 导入模式：批量提交
       const formattedRows = excelRows.map((row) => ({
         ...row,
         product_delivery_date: row.product_delivery_date || null,
       }))
       onFinish(formattedRows)
-    } else {
-      // 手动输入模式：单条提交
-      const payload: WorkshopOrder = {
-        ...values,
-        status: normalizeWorkshopOrderStatus(values.status),
-        product_delivery_date: values.product_delivery_date
-          ? dayjs(values.product_delivery_date).format('YYYY-MM-DD')
-          : null,
-      }
-      onFinish(payload)
+      return
     }
+
+    // 手动输入模式：单条提交
+    const payload: WorkshopOrder = {
+      ...values,
+      status: normalizeWorkshopOrderStatus(values.status),
+      product_delivery_date: values.product_delivery_date
+        ? dayjs(values.product_delivery_date).format('YYYY-MM-DD')
+        : null,
+    }
+    onFinish(payload)
   }
 
   const handleExcelParsed = (rows: WorkshopOrder[]) => {

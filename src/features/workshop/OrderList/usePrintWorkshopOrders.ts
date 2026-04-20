@@ -21,14 +21,18 @@ const QRCodeComponent = (
     ).default
   : QRCodeImport
 
-const MAX_ROWS_PER_PAGE = 10
-const TABLE_START_Y = 24
+const MAX_ROWS_PER_PAGE = 6
+const TABLE_START_Y = 26
 const TABLE_BOTTOM_MARGIN = 16
-const HEADER_CELL_HEIGHT = 12
-const CELL_PADDING = 1.5
-const QR_IMAGE_SIZE = 96
+const HEADER_CELL_HEIGHT = 14
+const CELL_PADDING = 2
+const QR_IMAGE_SIZE = 128
+const TITLE_FONT_SIZE = 18
+const META_FONT_SIZE = 11
+const TABLE_FONT_SIZE = 10
+const FOOTER_FONT_SIZE = 11
 const COLUMN_WIDTHS = [
-  22, 20, 28, 22, 18, 32, 12, 14, 12, 18, 22, 25, 25, 25,
+  22, 21, 24, 21, 17, 29, 13, 14, 14, 18, 38, 13, 13, 13,
 ] as const
 const TABLE_COLUMNS = [
   '二维码',
@@ -198,16 +202,16 @@ export function usePrintWorkshopOrders() {
         const bodyAreaHeight =
           pageHeight - TABLE_START_Y - TABLE_BOTTOM_MARGIN - HEADER_CELL_HEIGHT
         const minCellHeight = Math.max(
-          16,
+          20,
           Math.floor(bodyAreaHeight / Math.max(pageOrders.length, 1)),
         )
 
         doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
-        doc.setFontSize(16)
-        doc.text('车间生产订单', pageWidth / 2, 14, { align: 'center' })
+        doc.setFontSize(TITLE_FONT_SIZE)
+        doc.text('车间生产订单', pageWidth / 2, 16, { align: 'center' })
 
-        doc.setFontSize(10)
-        doc.text(`打印日期: ${printDate}`, pageWidth - 10, 14, {
+        doc.setFontSize(META_FONT_SIZE)
+        doc.text(`打印日期: ${printDate}`, pageWidth - 10, 16, {
           align: 'right',
         })
 
@@ -241,17 +245,17 @@ export function usePrintWorkshopOrders() {
             textColor: [0, 0, 0],
             font: fontFamily,
             fontStyle: GOOGLE_FONT_CONFIG.FONT_STYLE,
-            fontSize: 8,
+            fontSize: TABLE_FONT_SIZE,
             halign: 'center',
             valign: 'middle',
             lineColor: [0, 0, 0],
-            lineWidth: 0.2,
+            lineWidth: 0.25,
             minCellHeight: HEADER_CELL_HEIGHT,
           },
           styles: {
             font: fontFamily,
             fontStyle: GOOGLE_FONT_CONFIG.FONT_STYLE,
-            fontSize: 8,
+            fontSize: TABLE_FONT_SIZE,
             overflow: 'linebreak',
             cellPadding: {
               top: CELL_PADDING,
@@ -259,16 +263,27 @@ export function usePrintWorkshopOrders() {
               bottom: CELL_PADDING,
               left: CELL_PADDING,
             },
-            halign: 'center',
+            halign: 'left',
             valign: 'middle',
             lineColor: [0, 0, 0],
-            lineWidth: 0.2,
+            lineWidth: 0.25,
             minCellHeight,
           },
           columnStyles: COLUMN_WIDTHS.reduce<
-            Record<number, { cellWidth: number }>
+            Record<
+              number,
+              { cellWidth: number; halign?: 'left' | 'center' | 'right' }
+            >
           >((styles, width, columnIndex) => {
-            styles[columnIndex] = { cellWidth: width }
+            const halign =
+              columnIndex === 2 ||
+              columnIndex === 3 ||
+              columnIndex === 5 ||
+              columnIndex === 10
+                ? 'left'
+                : 'center'
+
+            styles[columnIndex] = { cellWidth: width, halign }
             return styles
           }, {}),
           didDrawCell: (data) => {
@@ -286,7 +301,7 @@ export function usePrintWorkshopOrders() {
               return
             }
 
-            const imageSize = Math.min(data.cell.width, data.cell.height) - 3
+            const imageSize = Math.min(data.cell.width, data.cell.height) - 2
             const imageX = data.cell.x + (data.cell.width - imageSize) / 2
             const imageY = data.cell.y + (data.cell.height - imageSize) / 2
 
@@ -294,7 +309,7 @@ export function usePrintWorkshopOrders() {
           },
         })
 
-        doc.setFontSize(10)
+        doc.setFontSize(FOOTER_FONT_SIZE)
         doc.text(
           `第 ${pageIndex + 1} 页 / 共 ${pages.length} 页`,
           pageWidth - 10,
