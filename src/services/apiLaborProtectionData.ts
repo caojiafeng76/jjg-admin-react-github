@@ -12,6 +12,11 @@ export interface LaborProtectionDataFormValues {
   category: string
 }
 
+export interface LaborProtectionDataOption {
+  id: string
+  category: string
+}
+
 type LaborProtectionDataTable = {
   from: (table: string) => any
 }
@@ -83,6 +88,18 @@ export async function getLaborProtectionDataList({
     items: (data || []) as LaborProtectionData[],
     total: count || 0,
   }
+}
+
+export async function getLaborProtectionDataOptions() {
+  const { data, error } = await laborProtectionDataTable()
+    .select('id, category')
+    .order('category', { ascending: true })
+
+  if (error) {
+    throw handleApiError(error, '获取劳保资料选项失败')
+  }
+
+  return (data || []) as LaborProtectionDataOption[]
 }
 
 export async function createLaborProtectionData(

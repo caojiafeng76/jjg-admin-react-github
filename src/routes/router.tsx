@@ -24,6 +24,7 @@ import {
   EmployeeList,
   JobBaseSetting,
   LaborProtectionData,
+  LaborProtectionRequisition,
   Login,
   MachineEquipmentMaintenance,
   MachineRuntime,
@@ -440,6 +441,17 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin']}
               element={<LaborProtectionData />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'labor-protection-requisition',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<LaborProtectionRequisition />}
             />
           </Suspense>
         ),
