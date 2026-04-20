@@ -40,9 +40,13 @@ export default function LaborProtectionRequisitionPage() {
   const [searchParams, setSearchParams] = useState<{
     keyword?: string
     categoryId?: string
+    updatedStartDate?: string
+    updatedEndDate?: string
   }>({
     keyword: searchParamsURL.get('keyword') || undefined,
     categoryId: searchParamsURL.get('categoryId') || undefined,
+    updatedStartDate: searchParamsURL.get('updatedStartDate') || undefined,
+    updatedEndDate: searchParamsURL.get('updatedEndDate') || undefined,
   })
 
   const { data, isLoading } = useLaborProtectionRequisitionList({
@@ -170,6 +174,18 @@ export default function LaborProtectionRequisitionPage() {
         nextSearchParamsURL.delete('categoryId')
       }
 
+      if (params.updatedStartDate) {
+        nextSearchParamsURL.set('updatedStartDate', params.updatedStartDate)
+      } else {
+        nextSearchParamsURL.delete('updatedStartDate')
+      }
+
+      if (params.updatedEndDate) {
+        nextSearchParamsURL.set('updatedEndDate', params.updatedEndDate)
+      } else {
+        nextSearchParamsURL.delete('updatedEndDate')
+      }
+
       setSearchParamsURL(nextSearchParamsURL)
     },
     [searchParamsURL, setSearchParamsURL],
@@ -183,6 +199,8 @@ export default function LaborProtectionRequisitionPage() {
     nextSearchParamsURL.set('page', '1')
     nextSearchParamsURL.delete('keyword')
     nextSearchParamsURL.delete('categoryId')
+    nextSearchParamsURL.delete('updatedStartDate')
+    nextSearchParamsURL.delete('updatedEndDate')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
 

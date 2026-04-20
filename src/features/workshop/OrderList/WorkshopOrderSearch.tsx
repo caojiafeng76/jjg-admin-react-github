@@ -9,7 +9,7 @@ interface SearchParams {
   project_no?: string
   product_model?: string
   customer_model?: string
-  model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+  model_search?: string // 统一的搜索字段，支持多个关键词同时搜索项目号、产品型号、客户型号
   length_mm?: number[]
   startDate?: string
   endDate?: string
@@ -33,7 +33,7 @@ export default function WorkshopOrderSearch({
     project_no?: string
     product_model?: string
     customer_model?: string
-    model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+    model_search?: string // 统一的搜索字段，支持多个关键词同时搜索项目号、产品型号、客户型号
     length_mm?: number[]
     dateRange?: [Dayjs | null, Dayjs | null]
   }) => {
@@ -87,7 +87,7 @@ export default function WorkshopOrderSearch({
     >
       <Form.Item name="model_search" className="mb-0">
         <Input
-          placeholder="输入搜索（项目号/产品型号/客户型号）"
+          placeholder="输入多个项目号/型号，空格或逗号分隔"
           allowClear
           style={{ width: 280 }}
         />
@@ -105,8 +105,10 @@ export default function WorkshopOrderSearch({
           placeholder="长度(mm)"
           mode="multiple"
           allowClear
-          showSearch
-          optionFilterProp="label"
+          showSearch={{
+            filterOption: (input, option) =>
+              String(option?.label || '').includes(input),
+          }}
           style={{ width: 220 }}
           options={lengthOptions.map((length) => ({
             label: `${length}`,

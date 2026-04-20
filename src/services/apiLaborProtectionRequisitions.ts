@@ -1,4 +1,5 @@
 import supabase from './supabase'
+import dayjs from 'dayjs'
 import { handleApiError } from '@/utils/errorHandler'
 
 export interface LaborProtectionRequisition {
@@ -129,11 +130,15 @@ export async function getLaborProtectionRequisitionList({
   pageSize,
   keyword,
   categoryId,
+  updatedStartDate,
+  updatedEndDate,
 }: {
   page: number
   pageSize: number
   keyword?: string
   categoryId?: string
+  updatedStartDate?: string
+  updatedEndDate?: string
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -152,6 +157,20 @@ export async function getLaborProtectionRequisitionList({
 
   if (categoryId) {
     query = query.eq('labor_protection_data_id', categoryId)
+  }
+
+  if (updatedStartDate) {
+    query = query.gte(
+      'updated_at',
+      dayjs(updatedStartDate).startOf('day').toISOString(),
+    )
+  }
+
+  if (updatedEndDate) {
+    query = query.lte(
+      'updated_at',
+      dayjs(updatedEndDate).endOf('day').toISOString(),
+    )
   }
 
   const { data, error, count } = await query

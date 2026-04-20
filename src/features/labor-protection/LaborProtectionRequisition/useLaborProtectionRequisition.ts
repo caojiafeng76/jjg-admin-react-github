@@ -21,6 +21,8 @@ export function useLaborProtectionRequisitionList({
   searchParams: {
     keyword?: string
     categoryId?: string
+    updatedStartDate?: string
+    updatedEndDate?: string
   }
 }) {
   return useQuery({
@@ -31,6 +33,8 @@ export function useLaborProtectionRequisitionList({
         pageSize,
         keyword: searchParams.keyword,
         categoryId: searchParams.categoryId,
+        updatedStartDate: searchParams.updatedStartDate,
+        updatedEndDate: searchParams.updatedEndDate,
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
