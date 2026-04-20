@@ -151,15 +151,15 @@ export default function PrecisionFinishingCuttingTable({
         <Table.Summary fixed>
           <Table.Summary.Row>
             <Table.Summary.Cell index={0} />
-            <Table.Summary.Cell index={1} colSpan={6}>
+            <Table.Summary.Cell index={1} colSpan={7}>
               <span className="font-medium text-slate-600">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={7}>
+            <Table.Summary.Cell index={8}>
               <span className="font-semibold text-slate-900">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={8} colSpan={3} />
+            <Table.Summary.Cell index={9} colSpan={2} />
           </Table.Summary.Row>
         </Table.Summary>
       )}

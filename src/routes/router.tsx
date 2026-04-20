@@ -23,6 +23,7 @@ import {
   EmployeeMobileChangePasswordPage,
   EmployeeList,
   JobBaseSetting,
+  LaborProtectionData,
   Login,
   MachineEquipmentMaintenance,
   MachineRuntime,
@@ -428,6 +429,17 @@ export const router = createBrowserRouter([
             <RoleProtectedRoute
               allow={['admin']}
               element={<ComingSoonPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'labor-protection-data',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RoleProtectedRoute
+              allow={['admin']}
+              element={<LaborProtectionData />}
             />
           </Suspense>
         ),
