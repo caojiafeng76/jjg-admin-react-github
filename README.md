@@ -91,20 +91,37 @@ src/
 
 默认规则定义在 [.github/copilot-instructions.md](.github/copilot-instructions.md)。
 
-## Spec Workflow MCP
+## Spec Workflow Integration
 
 仓库已安装 `spec-workflow-mcp`，并在根目录提供 [.mcp.json](.mcp.json) 配置。
 
-当前约定：对会修改应用代码、脚本、SQL、配置或指令文件的任务，默认按 Spec Workflow 顺序推进：
+当前约定：对会修改应用代码、脚本、SQL、配置或指令文件的任务，默认按 Spec Workflow 顺序推进。
+
+阶段状态、active change、apply readiness、archive readiness 的单一事实来源是 repo-local CLI wrapper：
+
+- `bun run spec:list`
+- `bun run spec -- status --change <name> --json`
+- `bun run spec -- instructions apply --change <name> --json`
+
+`spec-workflow-mcp` 只负责 VS Code MCP 接入与可视化，不作为独立状态来源；如果 MCP 展示与 CLI wrapper 输出不一致，一律以 CLI wrapper 为准。
+
+执行顺序固定为：
 
 1. `explore`：需求不清、范围未定、仍在讨论时先探索，不直接实现
 2. `propose`：准备写代码前先建立 change 与 artifacts
 3. `apply`：按 tasks 顺序实现，不跳过 proposal / tasks 直接编码
 4. `archive`：实现完成且 change 收尾后归档
 
+补充约定：
+
+- 很小且低风险的任务（如单文件小改、文案/说明调整、小范围配置变更）可以跳过完整 Spec Workflow，但需要明确说明原因
+- 如果用户已经显式使用 `/opsx:explore`、`/opsx:propose`、`/opsx:apply` 或 `/opsx:archive`，则对应 opsx prompt 视为当前权威流程，不再重复做同一轮阶段判断
+- `/opsx:archive` 在只有一个 active change 时可自动选中，只有存在多个候选时才要求用户手动选择
+
 最小验证命令：
 
 ```bash
+bun run spec:list
 bunx spec-workflow-mcp --help
 ```
 
