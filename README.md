@@ -26,6 +26,7 @@ bun run db:doctor
 bun run db:push
 bun run db:push:dry-run
 bun run db:query -- --file docs/sql-drafts/example.sql
+bunx spec-workflow-mcp --help
 ```
 
 说明：
@@ -89,6 +90,23 @@ src/
 9. 最终按固定结构汇报结果
 
 默认规则定义在 [.github/copilot-instructions.md](.github/copilot-instructions.md)。
+
+## Spec Workflow MCP
+
+仓库已安装 `spec-workflow-mcp`，并在根目录提供 [.mcp.json](.mcp.json) 配置。
+
+当前约定：对会修改应用代码、脚本、SQL、配置或指令文件的任务，默认按 Spec Workflow 顺序推进：
+
+1. `explore`：需求不清、范围未定、仍在讨论时先探索，不直接实现
+2. `propose`：准备写代码前先建立 change 与 artifacts
+3. `apply`：按 tasks 顺序实现，不跳过 proposal / tasks 直接编码
+4. `archive`：实现完成且 change 收尾后归档
+
+最小验证命令：
+
+```bash
+bunx spec-workflow-mcp --help
+```
 
 其中：
 
