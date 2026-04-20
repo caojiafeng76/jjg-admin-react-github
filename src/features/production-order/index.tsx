@@ -199,8 +199,7 @@ export default function ProductionOrderPage() {
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [isExporting, setIsExporting] = useState(false)
-  const [activeRecord, setActiveRecord] =
-    useState<ProductionOrderListItem | null>(null)
+  const [activeRecordId, setActiveRecordId] = useState<string | null>(null)
   const [isManagementUnlocked, setIsManagementUnlocked] = useState(
     !isAdminManagementView,
   )
@@ -247,6 +246,11 @@ export default function ProductionOrderPage() {
       realtime: isEmployeeView && !isModalOpen,
     },
   })
+
+  const activeRecord = useMemo(
+    () => orderData?.items.find((item) => item.id === activeRecordId) || null,
+    [activeRecordId, orderData?.items],
+  )
 
   const { data: detailData, isLoading: isLoadingDetail } = useProductionOrder(
     editingRecord?.id,
@@ -428,6 +432,12 @@ export default function ProductionOrderPage() {
   const handleSelect = useCallback((keys: React.Key[]) => {
     startTransition(() => {
       setSelectedRowKeys(keys)
+    })
+  }, [])
+
+  const handleRowClick = useCallback((record: ProductionOrderListItem) => {
+    startTransition(() => {
+      setActiveRecordId(record.id)
     })
   }, [])
 
@@ -711,6 +721,7 @@ export default function ProductionOrderPage() {
         fixedEmployeeId ? { ...params, employeeId: fixedEmployeeId } : params,
       )
       setSelectedRowKeys([])
+      setActiveRecordId(null)
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
@@ -720,6 +731,7 @@ export default function ProductionOrderPage() {
   const handleResetSearch = useCallback(() => {
     setFilters(fixedEmployeeId ? { employeeId: fixedEmployeeId } : {})
     setSelectedRowKeys([])
+    setActiveRecordId(null)
     searchParamsURL.set('page', '1')
     setSearchParamsURL(searchParamsURL)
   }, [fixedEmployeeId, searchParamsURL, setSearchParamsURL])
@@ -749,6 +761,20 @@ export default function ProductionOrderPage() {
       setSearchParamsURL(searchParamsURL)
     }
   }, [orderData, page, searchParamsURL, setSearchParamsURL])
+
+  useEffect(() => {
+    if (!activeRecordId) {
+      return
+    }
+
+    const hasActiveRecord = (orderData?.items || []).some(
+      (item) => item.id === activeRecordId,
+    )
+
+    if (!hasActiveRecord) {
+      setActiveRecordId(null)
+    }
+  }, [activeRecordId, orderData?.items])
 
   const detailOrder = (detailData || editingRecord) as
     | (ProductionOrder & {
@@ -1032,7 +1058,7 @@ export default function ProductionOrderPage() {
                   selectedRowKeys={selectedRowKeys}
                   onSelect={handleSelect}
                   onView={handleView}
-                  onRowClick={setActiveRecord}
+                  onRowClick={handleRowClick}
                   activeRowId={activeRecord?.id ?? null}
                   scrollY={scrollY}
                 />

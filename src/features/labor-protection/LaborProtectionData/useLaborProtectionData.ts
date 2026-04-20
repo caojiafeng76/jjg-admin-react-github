@@ -5,6 +5,7 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 import {
   createLaborProtectionData,
   deleteLaborProtectionData,
+  getLaborProtectionDataOptions,
   getLaborProtectionDataList,
   updateLaborProtectionData,
 } from '@/services/apiLaborProtectionData'
@@ -32,6 +33,14 @@ export function useLaborProtectionDataList({
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
+  })
+}
+
+export function useLaborProtectionDataOptions() {
+  return useQuery({
+    queryKey: [LABOR_PROTECTION_DATA_KEY, 'options'],
+    queryFn: getLaborProtectionDataOptions,
+    ...queryConfig.static,
   })
 }
 
