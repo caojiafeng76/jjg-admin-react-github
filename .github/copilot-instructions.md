@@ -195,6 +195,7 @@ bun format     # Prettier 格式化
   - 一次性数据修复 / 只读校验 / 临时 SQL -> 优先 Supabase MCP `execute_sql`；需要复用仓库 SQL 文件、批处理脚本或 MCP 不足时，再结合 `bun run db:query -- --file <sql-file>`
 - 不要把结构变更直接塞进临时 SQL 裸跑；优先保持 migration 可追踪、可回滚。
 - 如果本地 Docker 不可用，但远程 linked CLI 或 MCP 可用，应继续推进数据库任务，不要因为 `supabase start` 失败而中断。
+- 任何涉及数据库删除、清空或重置的危险操作（如 `DELETE`、`DROP`、`TRUNCATE`、`db reset`、批量清理）在真正执行前，必须由用户本人明确确认至少 3 次；未达到 3 次确认前，禁止执行。
 
 关于 Figma 资源的使用约定：
 
