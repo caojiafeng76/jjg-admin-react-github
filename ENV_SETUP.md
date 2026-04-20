@@ -67,6 +67,12 @@ bun dev
 bun run db:doctor
 ```
 
+如果需要验证 Spec Workflow MCP 可用:
+
+```bash
+bunx spec-workflow-mcp --help
+```
+
 如果配置正确,应用应该能够正常连接到 Supabase 并加载数据。
 
 ## 故障排查
