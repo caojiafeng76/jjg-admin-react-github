@@ -1,1 +1,0 @@
-drop table if exists public.labor_protection_data cascade;
