@@ -95,6 +95,12 @@ const adminItems: MenuItem[] = [
     ],
   },
   {
+    key: 'labor-protection',
+    label: '劳保',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    children: [{ key: 'labor-protection-data', label: '劳保资料' }],
+  },
+  {
     key: 'youmai',
     label: '优迈',
     icon: <Square3Stack3DIcon className="size-4" />,

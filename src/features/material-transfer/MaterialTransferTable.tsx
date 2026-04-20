@@ -70,6 +70,16 @@ export default function MaterialTransferTable({
         dataIndex: 'project_no',
         key: 'project_no',
         width: 130,
+        sorter: (a, b) =>
+          String(a.project_no || '').localeCompare(
+            String(b.project_no || ''),
+            'zh-CN',
+            {
+              numeric: true,
+              sensitivity: 'base',
+            },
+          ),
+        defaultSortOrder: 'ascend',
       },
       {
         title: '型号',
