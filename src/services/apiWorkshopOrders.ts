@@ -27,22 +27,99 @@ function formatBlockedProjectNos(projectNos: string[], fallbackLabel: string) {
   return `${projectNos.slice(0, 3).join('、')} 等${projectNos.length}条订单`
 }
 
+function normalizeOptionalText(value: string | null | undefined) {
+  if (typeof value !== 'string') {
+    return value ?? null
+  }
+
+  const trimmed = value.trim()
+  return trimmed ? trimmed : null
+}
+
+function normalizeOptionalNumber(value: number | null | undefined) {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return null
+  }
+
+  return value
+}
+
+function normalizeWorkshopOrderInput(values: WorkshopOrder): WorkshopOrder {
+  return {
+    ...values,
+    product_delivery_date: normalizeOptionalText(values.product_delivery_date),
+    project_no: normalizeOptionalText(values.project_no),
+    product_model: normalizeOptionalText(values.product_model),
+    length_mm: normalizeOptionalNumber(values.length_mm),
+    length_tolerance: normalizeOptionalText(values.length_tolerance),
+    process_flow: normalizeOptionalText(values.process_flow),
+    customer: normalizeOptionalText(values.customer),
+    customer_model: normalizeOptionalText(values.customer_model),
+    order_quantity: normalizeOptionalNumber(values.order_quantity),
+    weight_per_meter_kg: normalizeOptionalNumber(values.weight_per_meter_kg),
+    color_name: normalizeOptionalText(values.color_name),
+    package_name: normalizeOptionalText(values.package_name),
+    product_category: normalizeOptionalText(values.product_category),
+    material_name: normalizeOptionalText(values.material_name),
+    material_code: normalizeOptionalText(values.material_code),
+  }
+}
+
+function hasMeaningfulWorkshopOrderContent(values: WorkshopOrder) {
+  return Boolean(
+    values.project_no ||
+    values.product_model ||
+    values.customer ||
+    values.customer_model ||
+    values.process_flow ||
+    values.material_code ||
+    values.length_mm !== null ||
+    values.order_quantity !== null ||
+    values.weight_per_meter_kg !== null,
+  )
+}
+
+function assertWorkshopOrderHasMeaningfulContent(
+  values: WorkshopOrder,
+  label: string,
+) {
+  if (hasMeaningfulWorkshopOrderContent(values)) {
+    return
+  }
+
+  throw new Error(
+    `${label}没有任何有效内容，请先填写项目号、产品型号、长度、订支数等信息后再提交`,
+  )
+}
+
 function buildSalesOrderPayload(
   values: WorkshopOrder,
   mode: 'create' | 'update',
 ) {
+  const normalizedValues = normalizeWorkshopOrderInput(values)
+
   const payload: Record<string, unknown> = {
-    ...values,
-    product_delivery_date:
-      values.product_delivery_date !== null
-        ? values.product_delivery_date || undefined
-        : undefined,
+    product_delivery_date: normalizedValues.product_delivery_date,
+    project_no: normalizedValues.project_no,
+    product_model: normalizedValues.product_model,
+    length_mm: normalizedValues.length_mm,
+    length_tolerance: normalizedValues.length_tolerance,
+    process_flow: normalizedValues.process_flow,
+    customer: normalizedValues.customer,
+    customer_model: normalizedValues.customer_model,
+    order_quantity: normalizedValues.order_quantity,
+    weight_per_meter_kg: normalizedValues.weight_per_meter_kg,
+    color_name: normalizedValues.color_name,
+    package_name: normalizedValues.package_name,
+    product_category: normalizedValues.product_category,
+    material_name: normalizedValues.material_name,
+    material_code: normalizedValues.material_code,
   }
 
   if (mode === 'create') {
-    payload.status = normalizeWorkshopOrderStatus(values.status)
-  } else if (values.status != null) {
-    payload.status = normalizeWorkshopOrderStatus(values.status)
+    payload.status = normalizeWorkshopOrderStatus(normalizedValues.status)
+  } else if (normalizedValues.status != null) {
+    payload.status = normalizeWorkshopOrderStatus(normalizedValues.status)
   } else {
     delete payload.status
   }
@@ -417,20 +494,25 @@ async function checkProjectNosExist(
 }
 
 export async function createWorkshopOrder(values: WorkshopOrder) {
+  const normalizedValues = normalizeWorkshopOrderInput(values)
+
+  assertWorkshopOrderHasMeaningfulContent(normalizedValues, '订单')
+
   // 检查项目号是否已存在
-  if (values.project_no) {
-    const exists = await checkProjectNoExists(values.project_no)
+  if (normalizedValues.project_no) {
+    const exists = await checkProjectNoExists(normalizedValues.project_no)
     if (exists) {
-      throw new Error(`项目号 "${values.project_no}" 已存在，无法创建`)
+      throw new Error(
+        `项目号 "${normalizedValues.project_no}" 已存在，无法创建`,
+      )
     }
   }
 
-  // 处理 product_delivery_date 可能为 null 的情况
   const insertValues = {
     ...buildSalesOrderPayload(
       {
-        ...values,
-        status: values.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
+        ...normalizedValues,
+        status: normalizedValues.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
       },
       'create',
     ),
@@ -508,8 +590,14 @@ export async function updateWorkshopOrderStatuses({
 export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
   if (!rows.length) return
 
+  const normalizedRows = rows.map((row) => normalizeWorkshopOrderInput(row))
+
+  normalizedRows.forEach((row, index) => {
+    assertWorkshopOrderHasMeaningfulContent(row, `第 ${index + 1} 行订单`)
+  })
+
   // 检查所有项目号是否已存在
-  const projectNos = rows.map((row) => row.project_no)
+  const projectNos = normalizedRows.map((row) => row.project_no)
   const existingProjectNos = await checkProjectNosExist(projectNos)
 
   if (existingProjectNos.length > 0) {
@@ -518,8 +606,7 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
     )
   }
 
-  // 处理 product_delivery_date 可能为 null 的情况
-  const insertRows = rows.map(
+  const insertRows = normalizedRows.map(
     (row) =>
       buildSalesOrderPayload(
         {
