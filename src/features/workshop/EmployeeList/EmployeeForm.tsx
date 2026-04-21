@@ -9,10 +9,11 @@ import {
   Switch,
 } from 'antd'
 import { useEffect, useMemo } from 'react'
-import { ROLE_OPTIONS } from '@/config/access'
+import { useRoleOptions } from '@/hooks/useRoleOptions'
 import type { Employee } from '@/services/apiEmployees'
 import { useEmployeeJobBaseSettingOptions } from './useEmployees'
 import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
+import { usePermission } from '@/hooks/usePermission'
 
 const DEFAULT_FORM_VALUES: EmployeeFormValues = {
   name: '',
@@ -46,6 +47,11 @@ export default function EmployeeForm({
 }: Props) {
   const [form] = Form.useForm<EmployeeFormValues>()
   const createAuthAccount = Form.useWatch('createAuthAccount', form)
+  // 编辑模式下，"修改角色" 受独立 feature 权限控制；新建时由 create 权限保护
+  const canEditRole = usePermission('feature:employee-list.edit-role')
+  const roleSelectDisabled = isCreating || (isEdit && !canEditRole)
+  const { options: roleOptions, isLoading: roleOptionsLoading } =
+    useRoleOptions()
   const { data: jobOptions = [], isLoading: isJobOptionsLoading } =
     useEmployeeJobBaseSettingOptions()
   const jobSelectOptions = useMemo(
@@ -129,8 +135,13 @@ export default function EmployeeForm({
         name="role"
         label="角色"
         rules={[{ required: true, message: '请选择角色' }]}
+        extra={isEdit && !canEditRole ? '当前账号无修改角色权限' : undefined}
       >
-        <Select disabled={isCreating} options={ROLE_OPTIONS} />
+        <Select
+          disabled={roleSelectDisabled}
+          loading={roleOptionsLoading}
+          options={roleOptions}
+        />
       </Form.Item>
 
       <Form.Item

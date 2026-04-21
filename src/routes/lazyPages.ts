@@ -112,3 +112,6 @@ export const AttendanceDetail = lazy(
 export const AttendanceStats = lazy(
   () => import('@features/attendance/AttendanceStats'),
 )
+export const AccessManagement = lazy(
+  () => import('@features/access-management'),
+)

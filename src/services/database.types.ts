@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '13.0.5'
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -35,11 +35,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'admin_management_passwords_employee_id_fkey'
-            columns: ['employee_id']
+            foreignKeyName: "admin_management_passwords_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: true
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -109,11 +109,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'employees_job_name_fkey'
-            columns: ['job_name']
+            foreignKeyName: "employees_job_name_fkey"
+            columns: ["job_name"]
             isOneToOne: false
-            referencedRelation: 'job_base_settings'
-            referencedColumns: ['job_name']
+            referencedRelation: "job_base_settings"
+            referencedColumns: ["job_name"]
           },
         ]
       }
@@ -173,6 +173,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      labor_protection_requisitions: {
+        Row: {
+          created_at: string
+          id: string
+          job_title: string
+          labor_protection_data_id: string
+          quantity: number
+          recipient: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_title: string
+          labor_protection_data_id: string
+          quantity: number
+          recipient: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_title?: string
+          labor_protection_data_id?: string
+          quantity?: number
+          recipient?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "labor_protection_requisitions_labor_protection_data_id_fkey"
+            columns: ["labor_protection_data_id"]
+            isOneToOne: false
+            referencedRelation: "labor_protection_data"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       machine_equipment_maintenances: {
         Row: {
@@ -306,11 +344,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'material_transfers_operator_employee_id_fkey'
-            columns: ['operator_employee_id']
+            foreignKeyName: "material_transfers_operator_employee_id_fkey"
+            columns: ["operator_employee_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -350,13 +388,46 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'notifications_actor_employee_id_fkey'
-            columns: ['actor_employee_id']
+            foreignKeyName: "notifications_actor_employee_id_fkey"
+            columns: ["actor_employee_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      permissions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+          label: string
+          module: string
+          scope: string
+          surface: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+          label: string
+          module: string
+          scope: string
+          surface?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+          label?: string
+          module?: string
+          scope?: string
+          surface?: string
+        }
+        Relationships: []
       }
       precision_cutting_transfers: {
         Row: {
@@ -544,11 +615,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'precision_finishing_cuttings_operator_employee_id_fkey'
-            columns: ['operator_employee_id']
+            foreignKeyName: "precision_finishing_cuttings_operator_employee_id_fkey"
+            columns: ["operator_employee_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -651,25 +722,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'process_standards_equipment_no_fkey'
-            columns: ['equipment_no']
+            foreignKeyName: "process_standards_equipment_no_fkey"
+            columns: ["equipment_no"]
             isOneToOne: false
-            referencedRelation: 'machine_equipment_maintenances'
-            referencedColumns: ['unified_device_no']
+            referencedRelation: "machine_equipment_maintenances"
+            referencedColumns: ["unified_device_no"]
           },
           {
-            foreignKeyName: 'process_standards_equipment_no_fkey'
-            columns: ['equipment_no']
+            foreignKeyName: "process_standards_equipment_no_fkey"
+            columns: ["equipment_no"]
             isOneToOne: false
-            referencedRelation: 'v_machine_runtime_items'
-            referencedColumns: ['unified_device_no']
+            referencedRelation: "v_machine_runtime_items"
+            referencedColumns: ["unified_device_no"]
           },
           {
-            foreignKeyName: 'process_standards_job_name_fkey'
-            columns: ['job_name']
+            foreignKeyName: "process_standards_job_name_fkey"
+            columns: ["job_name"]
             isOneToOne: false
-            referencedRelation: 'job_base_settings'
-            referencedColumns: ['job_name']
+            referencedRelation: "job_base_settings"
+            referencedColumns: ["job_name"]
           },
         ]
       }
@@ -718,11 +789,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'production_daily_report_expor_requested_by_admin_employee__fkey'
-            columns: ['requested_by_admin_employee_id']
+            foreignKeyName: "production_daily_report_expor_requested_by_admin_employee__fkey"
+            columns: ["requested_by_admin_employee_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -771,11 +842,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'production_order_export_jobs_requested_by_admin_employee_i_fkey'
-            columns: ['requested_by_admin_employee_id']
+            foreignKeyName: "production_order_export_jobs_requested_by_admin_employee_i_fkey"
+            columns: ["requested_by_admin_employee_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -869,18 +940,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'production_order_items_machine_equipment_id_fkey'
-            columns: ['machine_equipment_id']
+            foreignKeyName: "production_order_items_machine_equipment_id_fkey"
+            columns: ["machine_equipment_id"]
             isOneToOne: false
-            referencedRelation: 'machine_equipment_maintenances'
-            referencedColumns: ['id']
+            referencedRelation: "machine_equipment_maintenances"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'production_order_items_order_id_fkey'
-            columns: ['order_id']
+            foreignKeyName: "production_order_items_order_id_fkey"
+            columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: 'production_orders'
-            referencedColumns: ['id']
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -935,13 +1006,66 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'production_orders_employee_id_fkey'
-            columns: ['employee_id']
+            foreignKeyName: "production_orders_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_id: string
+          role: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          is_builtin: boolean
+          key: string
+          label: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          is_builtin?: boolean
+          key: string
+          label: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          is_builtin?: boolean
+          key?: string
+          label?: string
+        }
+        Relationships: []
       }
       sales_orders: {
         Row: {
@@ -961,6 +1085,7 @@ export type Database = {
           product_delivery_date: string | null
           product_model: string | null
           project_no: string | null
+          row_remark: string | null
           status: string
           updated_at: string | null
           weight_per_meter_kg: number | null
@@ -982,6 +1107,7 @@ export type Database = {
           product_delivery_date?: string | null
           product_model?: string | null
           project_no?: string | null
+          row_remark?: string | null
           status?: string
           updated_at?: string | null
           weight_per_meter_kg?: number | null
@@ -1003,6 +1129,7 @@ export type Database = {
           product_delivery_date?: string | null
           product_model?: string | null
           project_no?: string | null
+          row_remark?: string | null
           status?: string
           updated_at?: string | null
           weight_per_meter_kg?: number | null
@@ -1054,7 +1181,7 @@ export type Database = {
         }
         Relationships: []
       }
-      'syney-po-items': {
+      "syney-po-items": {
         Row: {
           created_at: string
           id: number
@@ -1108,15 +1235,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'syney-po-items_PoId_fkey'
-            columns: ['PoId']
+            foreignKeyName: "syney-po-items_PoId_fkey"
+            columns: ["PoId"]
             isOneToOne: false
-            referencedRelation: 'syney-pos'
-            referencedColumns: ['id']
+            referencedRelation: "syney-pos"
+            referencedColumns: ["id"]
           },
         ]
       }
-      'syney-pos': {
+      "syney-pos": {
         Row: {
           BorderMaterial: string
           Brand: string | null
@@ -1164,7 +1291,7 @@ export type Database = {
         }
         Relationships: []
       }
-      'syney-serial-no': {
+      "syney-serial-no": {
         Row: {
           created_at: string
           id: number
@@ -1182,7 +1309,7 @@ export type Database = {
         }
         Relationships: []
       }
-      'syney-specs': {
+      "syney-specs": {
         Row: {
           created_at: string
           id: number
@@ -1212,7 +1339,7 @@ export type Database = {
         }
         Relationships: []
       }
-      'syney-store-report-items': {
+      "syney-store-report-items": {
         Row: {
           created_at: string
           id: number
@@ -1260,15 +1387,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'syney-store-report-items_No_fkey'
-            columns: ['No']
+            foreignKeyName: "syney-store-report-items_No_fkey"
+            columns: ["No"]
             isOneToOne: false
-            referencedRelation: 'syney-store-reports'
-            referencedColumns: ['No']
+            referencedRelation: "syney-store-reports"
+            referencedColumns: ["No"]
           },
         ]
       }
-      'syney-store-reports': {
+      "syney-store-reports": {
         Row: {
           created_at: string
           id: number
@@ -1331,6 +1458,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_permission_overrides: {
+        Row: {
+          created_at: string
+          employee_id: string
+          enabled: boolean
+          id: string
+          permission_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          enabled?: boolean
+          id?: string
+          permission_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          enabled?: boolean
+          id?: string
+          permission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permission_overrides_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permission_overrides_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       youmai_finished_goods_inventory: {
         Row: {
           created_at: string
@@ -1382,11 +1548,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'youmai_finished_goods_inventory_product_data_id_fkey'
-            columns: ['product_data_id']
+            foreignKeyName: "youmai_finished_goods_inventory_product_data_id_fkey"
+            columns: ["product_data_id"]
             isOneToOne: false
-            referencedRelation: 'youmai_product_data'
-            referencedColumns: ['id']
+            referencedRelation: "youmai_product_data"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1435,11 +1601,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'youmai_finished_goods_stock_in_product_data_id_fkey'
-            columns: ['product_data_id']
+            foreignKeyName: "youmai_finished_goods_stock_in_product_data_id_fkey"
+            columns: ["product_data_id"]
             isOneToOne: false
-            referencedRelation: 'youmai_product_data'
-            referencedColumns: ['id']
+            referencedRelation: "youmai_product_data"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1497,11 +1663,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'youmai_finished_goods_stock_out_product_data_id_fkey'
-            columns: ['product_data_id']
+            foreignKeyName: "youmai_finished_goods_stock_out_product_data_id_fkey"
+            columns: ["product_data_id"]
             isOneToOne: false
-            referencedRelation: 'youmai_product_data'
-            referencedColumns: ['id']
+            referencedRelation: "youmai_product_data"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1577,25 +1743,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'production_order_items_machine_equipment_id_fkey'
-            columns: ['machine_equipment_id']
+            foreignKeyName: "production_order_items_machine_equipment_id_fkey"
+            columns: ["machine_equipment_id"]
             isOneToOne: false
-            referencedRelation: 'machine_equipment_maintenances'
-            referencedColumns: ['id']
+            referencedRelation: "machine_equipment_maintenances"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'production_order_items_order_id_fkey'
-            columns: ['order_id']
+            foreignKeyName: "production_order_items_order_id_fkey"
+            columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: 'production_orders'
-            referencedColumns: ['id']
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'production_orders_employee_id_fkey'
-            columns: ['employee_id']
+            foreignKeyName: "production_orders_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1657,6 +1823,13 @@ export type Database = {
         }[]
       }
       get_job_hourly_fee: { Args: { target_job_name: string }; Returns: number }
+      get_my_permissions: {
+        Args: never
+        Returns: {
+          enabled: boolean
+          key: string
+        }[]
+      }
       increment_serial_no: { Args: { increment_by: number }; Returns: number }
       is_admin: { Args: never; Returns: boolean }
       is_precision_cutting_admin: { Args: never; Returns: boolean }
@@ -1683,33 +1856,33 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
-        DefaultSchema['Views'])
-    ? (DefaultSchema['Tables'] &
-        DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1718,23 +1891,23 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema['Tables']
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1743,23 +1916,23 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema['Tables']
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
-    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1768,36 +1941,36 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema['Enums']
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
-    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema['CompositeTypes']
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
-    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {

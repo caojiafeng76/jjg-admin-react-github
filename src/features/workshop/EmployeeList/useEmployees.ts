@@ -1,6 +1,5 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
-import type { AppRole } from '@/config/access'
 import {
   getEmployees,
   getAllEmployees,
@@ -29,7 +28,7 @@ export function useEmployeesList({
   pageSize: number
   searchParams: {
     name?: string
-    role?: AppRole
+    role?: string
     is_active?: boolean
   }
 }) {
@@ -59,10 +58,7 @@ export function useEmployeeJobBaseSettingOptions(enabled = true) {
   })
 }
 
-export function useEmployeeAuthEmail(
-  employeeId?: string,
-  enabled = true,
-) {
+export function useEmployeeAuthEmail(employeeId?: string, enabled = true) {
   return useQuery({
     queryKey: [EMPLOYEES_KEY, 'auth-email', employeeId],
     queryFn: () => getEmployeeAuthEmail(employeeId as string),

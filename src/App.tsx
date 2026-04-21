@@ -9,6 +9,7 @@ import { RouterProvider } from 'react-router-dom'
 import ErrorBoundary from '@ui/ErrorBoundary'
 import { useAppStore } from '@/store'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { PermissionProvider } from '@/contexts/PermissionContext'
 import { router } from '@/routes/router'
 import { createQueryClient } from '@/config/queryClient'
 
@@ -68,7 +69,9 @@ export default function App() {
         <AntdApp>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
-              <RouterProvider router={router} />
+              <PermissionProvider>
+                <RouterProvider router={router} />
+              </PermissionProvider>
             </AuthProvider>
             {import.meta.env.DEV && !isMobileViewport && (
               <ReactQueryDevtools initialIsOpen={false} />

@@ -9,10 +9,10 @@ import {
 } from '@heroicons/react/24/outline'
 import { useSearchParams } from 'react-router-dom'
 
-import type { AppRole } from '@/config/access'
 import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
+import PermissionButton from '@/ui/PermissionButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import {
@@ -70,7 +70,7 @@ export default function EmployeeList() {
     useState<FormInstance<EmployeeRebindAccountValues> | null>(null)
   const [searchParams, setSearchParams] = useState<{
     name?: string
-    role?: AppRole
+    role?: string
     is_active?: boolean
   }>({})
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
@@ -666,7 +666,10 @@ export default function EmployeeList() {
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
+        <AddButton
+          handleCreate={handleCreate}
+          permissionKey="feature:employee-list.create"
+        />
         <Button
           type="text"
           icon={<KeyIcon className="size-4 text-sky-500" />}
@@ -682,13 +685,14 @@ export default function EmployeeList() {
         >
           批量开通账号
         </Button>
-        <Button
+        <PermissionButton
+          permissionKey="feature:employee-list.reset-password"
           type="text"
           icon={<ShieldCheckIcon className="size-4 text-amber-500" />}
           onClick={handleOpenResetPasswordModal}
         >
           重置密码
-        </Button>
+        </PermissionButton>
         <Button
           type="text"
           icon={<LinkSlashIcon className="size-4 text-rose-500" />}
@@ -703,13 +707,18 @@ export default function EmployeeList() {
         >
           重新绑定
         </Button>
-        <EditButton title="编辑" handleEdit={handleEdit} />
+        <EditButton
+          title="编辑"
+          handleEdit={handleEdit}
+          permissionKey="feature:employee-list.edit"
+        />
         <DeleteButton
           onClick={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
           title="删除员工"
           itemName="员工"
+          permissionKey="feature:employee-list.delete"
         />
       </div>
 
