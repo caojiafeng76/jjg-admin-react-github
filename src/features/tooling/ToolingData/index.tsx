@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
 import { App, FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
@@ -217,7 +217,7 @@ export default function ToolingDataPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <span className="whitespace-nowrap text-slate-600">搜索：</span>
         <ToolingDataSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}

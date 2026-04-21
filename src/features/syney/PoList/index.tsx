@@ -313,21 +313,21 @@ export default function PoList() {
         {/* 第二行：操作、过滤和搜索 */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-gray-600">操作：</span>
+            <span className="text-slate-600">操作：</span>
             <PoSelected />
           </div>
-          <div className="h-6 w-px bg-gray-300" /> {/* 分隔线 */}
+          <div className="h-6 w-px bg-slate-300" /> {/* 分隔线 */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-600">状态：</span>
+            <span className="text-slate-600">状态：</span>
             <PoSelectedFilter />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-gray-600">交货日期：</span>
+            <span className="text-slate-600">交货日期：</span>
             <PoDateFilter />
           </div>
-          <div className="h-6 w-px bg-gray-300" /> {/* 分隔线 */}
+          <div className="h-6 w-px bg-slate-300" /> {/* 分隔线 */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-600">搜索：</span>
+            <span className="text-slate-600">搜索：</span>
             <PoSearchInput />
           </div>
         </div>

@@ -423,10 +423,10 @@ export default function EmployeeList() {
               <ul className="list-disc space-y-2 pl-5">
                 {blockers.map((item) => (
                   <li key={item.employeeId}>
-                    <div className="font-medium text-gray-800">
+                    <div className="font-medium text-slate-800">
                       {item.employeeName}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-slate-500">
                       已关联 {item.productionOrderCount} 张生产工单
                       {item.orderDates.length > 0
                         ? `，日期：${item.orderDates.slice(0, 3).join('、')}`
@@ -715,7 +715,7 @@ export default function EmployeeList() {
 
       {/* 搜索栏 */}
       <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <span className="whitespace-nowrap text-slate-600">搜索：</span>
         <EmployeeSearch onSearch={handleSearch} onReset={handleResetSearch} />
       </div>
 

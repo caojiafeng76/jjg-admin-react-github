@@ -87,7 +87,7 @@ export default function WorkshopExcelUpload({ onParsed, disabled }: Props) {
         </Button>
       </Upload>
       <div style={{ marginTop: 8 }}>
-        <span className="flex items-center gap-1 text-xs text-gray-500">
+        <span className="flex items-center gap-1 text-xs text-slate-500">
           <TableCellsIcon className="h-4 w-4" /> 支持 ERP 导出的《销售订单登记.xlsx》
         </span>
       </div>

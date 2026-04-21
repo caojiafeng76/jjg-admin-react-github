@@ -225,7 +225,7 @@ export default function EmployeeForm({
       )}
 
       {isEdit ? null : (
-        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-xs leading-6 text-gray-500">
+        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-6 text-slate-500">
           新建员工时默认角色为“员工”、状态为“启用”。如果本次创建账号，默认密码为{' '}
           {DEFAULT_EMPLOYEE_AUTH_PASSWORD}
           。如果本次不创建账号，后续仍可使用工具栏中的“为现有员工开通账号”补做绑定。

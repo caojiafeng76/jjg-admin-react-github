@@ -192,7 +192,7 @@ export default function YoumaiFinishedGoodsInventoryPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <span className="whitespace-nowrap text-slate-600">搜索：</span>
         <YoumaiFinishedGoodsInventorySearch
           onSearch={handleSearch}
           onReset={handleResetSearch}

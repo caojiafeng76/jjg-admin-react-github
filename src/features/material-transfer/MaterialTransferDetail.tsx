@@ -43,12 +43,12 @@ export default function MaterialTransferDetail({
           {is_audited ? '已审核' : '待审核'}
         </Tag>
         {customer && <span className="font-medium">{customer}</span>}
-        {customer && project_no && <span className="text-gray-400">·</span>}
+        {customer && project_no && <span className="text-slate-400">·</span>}
         <span className="font-medium">{project_no}</span>
         {product_model && (
           <>
-            <span className="text-gray-400">·</span>
-            <span className="text-gray-600">{product_model}</span>
+            <span className="text-slate-400">·</span>
+            <span className="text-slate-600">{product_model}</span>
           </>
         )}
         {onEdit && (

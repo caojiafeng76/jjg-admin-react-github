@@ -60,12 +60,12 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           {record_type === 'A' ? 'A类' : 'B类'}
         </Tag>
         <span className="font-medium">{model}</span>
-        <span className="text-gray-400">·</span>
-        <span className="text-gray-600">{operationStr}</span>
-        <span className="text-gray-400">·</span>
-        <span className="text-gray-500">标准工时 {standard_seconds}s</span>
-        <span className="text-gray-400">·</span>
-        <span className="text-gray-500">
+        <span className="text-slate-400">·</span>
+        <span className="text-slate-600">{operationStr}</span>
+        <span className="text-slate-400">·</span>
+        <span className="text-slate-500">标准工时 {standard_seconds}s</span>
+        <span className="text-slate-400">·</span>
+        <span className="text-slate-500">
           日标准产能{' '}
           {formatNumber(calculateDailyStandardCapacity(standard_seconds), 2)} 件
         </span>

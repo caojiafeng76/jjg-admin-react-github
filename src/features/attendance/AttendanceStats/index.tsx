@@ -44,7 +44,7 @@ function DatesPopover({
   dates: string[]
   color: string
 }) {
-  if (count === 0) return <span className="text-gray-400">0</span>
+  if (count === 0) return <span className="text-slate-400">0</span>
   return (
     <Popover
       content={
@@ -242,7 +242,7 @@ export default function AttendanceStatsPage() {
     <div className="grid h-full grid-rows-[auto_1fr] gap-4">
       {contextHolder}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="whitespace-nowrap text-gray-600">筛选：</span>
+        <span className="whitespace-nowrap text-slate-600">筛选：</span>
         <AttendanceStatsSearch
           onSearch={setSearchParams}
           onReset={() => setSearchParams({})}

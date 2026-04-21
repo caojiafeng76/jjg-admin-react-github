@@ -1006,7 +1006,7 @@ export default function ProductionOrderPage() {
         }
       >
         {isEmployeeView ? null : (
-          <span className="whitespace-nowrap text-gray-600">搜索：</span>
+          <span className="whitespace-nowrap text-slate-600">搜索：</span>
         )}
         <ProductionOrderSearch
           onSearch={handleSearch}

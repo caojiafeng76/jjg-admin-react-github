@@ -198,10 +198,10 @@ export default function WorkshopOrderList({
               <ul className="list-disc space-y-2 pl-5">
                 {blockers.map((item) => (
                   <li key={item.orderId}>
-                    <div className="font-medium text-gray-800">
+                    <div className="font-medium text-slate-800">
                       {item.projectNo?.trim() || '未填写项目号'}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-slate-500">
                       已关联 {item.productionItemCount} 条生产工单明细
                       {item.orderDates.length > 0
                         ? `，工单日期：${item.orderDates.slice(0, 3).join('、')}`
@@ -512,7 +512,7 @@ export default function WorkshopOrderList({
 
       {/* 搜索栏 */}
       <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <span className="whitespace-nowrap text-slate-600">搜索：</span>
         <WorkshopOrderSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}

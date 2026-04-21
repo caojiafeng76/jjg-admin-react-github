@@ -43,7 +43,7 @@ function PoTable() {
             case '暂停':
               return <span className="text-pink-500/80">{text}</span>
             case '作废':
-              return <span className="text-gray-500/80">{text}</span>
+              return <span className="text-slate-500/80">{text}</span>
           }
         },
       },
