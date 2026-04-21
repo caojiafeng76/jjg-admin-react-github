@@ -27,13 +27,13 @@ export default function ComingSoonPage() {
     <div className="flex min-h-full items-center justify-center p-6 md:p-10">
       <Card className="w-full max-w-3xl border-0 shadow-sm">
         <Space direction="vertical" size={20} className="w-full text-center">
-          <Text className="text-xs font-medium tracking-[0.35em] text-gray-400 uppercase">
+          <Text className="text-xs font-medium tracking-[0.35em] text-slate-400 uppercase">
             Coming Soon
           </Text>
           <Title level={2} className="mb-0!">
             {pageTitle}
           </Title>
-          <Paragraph className="mb-0! text-base text-gray-500">
+          <Paragraph className="mb-0! text-base text-slate-500">
             此功能开发中
           </Paragraph>
         </Space>

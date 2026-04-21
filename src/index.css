@@ -2,6 +2,26 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =============================================
+   设计 Token —— 与 App.tsx BASE_TOKENS 保持同步
+   修改颜色/圆角时，两处同步修改
+   ============================================= */
+@theme inline {
+  /* 主色 */
+  --color-primary: #1677ff;
+  --color-primary-hover: #4096ff;
+
+  /* 圆角基准（对应 antd borderRadius: 6） */
+  --radius-sm: 4px;
+  --radius-base: 6px;
+  --radius-lg: 8px;
+
+  /* 统一语义灰色（全站用 slate，不用 gray） */
+  --color-text-secondary: rgba(0, 0, 0, 0.45);
+  --color-text-tertiary: rgba(0, 0, 0, 0.25);
+  --color-divider: rgba(0, 0, 0, 0.06);
+}
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

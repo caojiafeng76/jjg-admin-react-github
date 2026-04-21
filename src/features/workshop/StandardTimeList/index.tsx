@@ -429,7 +429,7 @@ export default function StandardTimeList() {
         }
       >
         {isTeamLeaderMode ? null : (
-          <span className="whitespace-nowrap text-gray-600">搜索：</span>
+          <span className="whitespace-nowrap text-slate-600">搜索：</span>
         )}
         <StandardTimeSearch
           onSearch={handleSearch}

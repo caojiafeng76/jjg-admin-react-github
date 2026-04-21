@@ -280,7 +280,7 @@ export default function AppHeader({
               </Badge>
             </Popover>
           ) : null}
-          <span className="text-sm text-gray-600 dark:text-gray-300">
+          <span className="text-sm text-slate-600 dark:text-slate-300">
             欢迎您：{displayName}
             {roleLabel ? `（${roleLabel}）` : ''}
           </span>

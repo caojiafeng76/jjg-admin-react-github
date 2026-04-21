@@ -227,7 +227,7 @@ export default function WorkshopOrderProductionStats({
 
   if (!selectedOrder) {
     return (
-      <div className="flex h-full items-center justify-center text-gray-400">
+      <div className="flex h-full items-center justify-center text-slate-400">
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description="点击上方订单行查看生产工单"
@@ -254,7 +254,7 @@ export default function WorkshopOrderProductionStats({
           onStatusChange={onStatusChange}
           statusUpdating={statusUpdating}
         />
-        <div className="flex flex-1 items-center justify-center text-gray-400">
+        <div className="flex flex-1 items-center justify-center text-slate-400">
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description="暂无生产工单记录"
@@ -464,7 +464,7 @@ function OrderInfoHeader({
       )}
 
       {/* 基础订单信息 */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-xs text-gray-600">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-xs text-slate-600">
         <span>
           状态：
           <Tag color={getWorkshopOrderStatusColor(status)}>{status}</Tag>
@@ -528,7 +528,7 @@ function OrderInfoHeader({
 
       {/* 出库进度 */}
       <div className="mt-1.5 flex items-center gap-3">
-        <span className="shrink-0 text-xs text-gray-500">
+        <span className="shrink-0 text-xs text-slate-500">
           出库进度：
           <Text style={{ fontSize: 11, color: '#999' }}>
             {outbound} / {orderQty}

@@ -50,7 +50,7 @@ function BoundAccountCell({ employeeId, authUserId }: BoundAccountCellProps) {
       </Tag>
       <Typography.Text
         copyable={{ text: email || authUserId }}
-        className="text-xs text-gray-500"
+        className="text-xs text-slate-500"
       >
         {isFetching && !email ? '加载中...' : displayText}
       </Typography.Text>

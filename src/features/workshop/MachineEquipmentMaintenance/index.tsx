@@ -218,7 +218,7 @@ export default function MachineEquipmentMaintenancePage() {
       </div>
 
       <div className="flex items-center gap-2 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
-        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <span className="whitespace-nowrap text-slate-600">搜索：</span>
         <MachineEquipmentMaintenanceSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}

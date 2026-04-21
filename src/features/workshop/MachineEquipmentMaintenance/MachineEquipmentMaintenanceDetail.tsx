@@ -41,10 +41,10 @@ export default function MachineEquipmentMaintenanceDetail({
     <div className="h-full overflow-auto p-3">
       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
         <span className="font-medium text-slate-700">{unified_device_no}</span>
-        <span className="text-gray-400">·</span>
-        <span className="text-gray-600">{operation}</span>
-        <span className="text-gray-400">·</span>
-        <span className="text-gray-500">{machine_name}</span>
+        <span className="text-slate-400">·</span>
+        <span className="text-slate-600">{operation}</span>
+        <span className="text-slate-400">·</span>
+        <span className="text-slate-500">{machine_name}</span>
       </div>
       <Descriptions
         size="small"

@@ -222,7 +222,7 @@ export default function AttendanceDetailPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-gray-600">搜索：</span>
+        <span className="whitespace-nowrap text-slate-600">搜索：</span>
         <AttendanceDetailSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}

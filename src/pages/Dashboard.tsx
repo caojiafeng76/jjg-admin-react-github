@@ -10,8 +10,8 @@ export default function Dashboard() {
           <Title level={1} className="text-primary text-3xl font-bold">
             欢迎使用
           </Title>
-          <Text className="text-lg text-gray-600">精加工车间管理系统</Text>
-          <div className="mt-8 text-sm text-gray-400">
+          <Text className="text-lg text-slate-600">精加工车间管理系统</Text>
+          <div className="mt-8 text-sm text-slate-400">
             <Text>请从左侧菜单选择功能模块</Text>
           </div>
         </Space>

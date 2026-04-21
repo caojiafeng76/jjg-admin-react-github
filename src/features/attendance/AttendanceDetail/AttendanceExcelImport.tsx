@@ -163,7 +163,7 @@ export default function AttendanceExcelImport({
             </Button>
           </Upload>
 
-          <p className="flex items-center gap-1 text-xs text-gray-500">
+          <p className="flex items-center gap-1 text-xs text-slate-500">
             <TableCellsIcon className="h-4 w-4" />
             支持 ZKTeco 考勤管理系统导出文件，列名需包含：姓名、日期、时间
           </p>
