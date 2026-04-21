@@ -290,14 +290,20 @@ export default function PoList() {
               setModalTitle('创建订单')
               setIsModalOpen(true)
             }}
+            permissionKey="feature:syney-po-list.create"
           />
 
-          <EditButton title="编辑" handleEdit={handleEdit} />
+          <EditButton
+            title="编辑"
+            handleEdit={handleEdit}
+            permissionKey="feature:syney-po-list.edit"
+          />
 
           <DeleteButton
             onConfirm={handleDelete}
             isDeleting={isDeleting}
             count={tableSelectedKeys.length}
+            permissionKey="feature:syney-po-list.delete"
           />
 
           <PrintButton handlePrint={handlePrint}>打印中文标签</PrintButton>

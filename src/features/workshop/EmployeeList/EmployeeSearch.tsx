@@ -1,11 +1,11 @@
 import { Button, Input, Select, Space } from 'antd'
 import { useState } from 'react'
-import { ROLE_OPTIONS, type AppRole } from '@/config/access'
+import { useRoleOptions } from '@/hooks/useRoleOptions'
 
 interface Props {
   onSearch: (params: {
     name?: string
-    role?: AppRole
+    role?: string
     is_active?: boolean
   }) => void
   onReset: () => void
@@ -13,8 +13,10 @@ interface Props {
 
 export default function EmployeeSearch({ onSearch, onReset }: Props) {
   const [name, setName] = useState('')
-  const [role, setRole] = useState<AppRole | undefined>()
+  const [role, setRole] = useState<string | undefined>()
   const [status, setStatus] = useState<'active' | 'inactive' | undefined>()
+  const { options: roleOptions, isLoading: roleOptionsLoading } =
+    useRoleOptions()
 
   const handleSearch = () => {
     onSearch({
@@ -47,8 +49,9 @@ export default function EmployeeSearch({ onSearch, onReset }: Props) {
         value={role}
         onChange={(value) => setRole(value)}
         allowClear
+        loading={roleOptionsLoading}
         style={{ width: 140 }}
-        options={ROLE_OPTIONS}
+        options={roleOptions}
       />
       <Select
         placeholder="状态"

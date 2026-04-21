@@ -1,5 +1,6 @@
-import { Button } from 'antd'
+import { Button, Tooltip } from 'antd'
 import { PrinterIcon } from '@heroicons/react/16/solid'
+import { usePermission } from '@/hooks/usePermission'
 
 interface Props {
   handlePrint: () => void
@@ -7,6 +8,8 @@ interface Props {
   loading?: boolean
   count?: number
   children?: React.ReactNode
+  permissionKey?: string
+  noPermissionTip?: string
 }
 
 export default function PrintButton({
@@ -15,13 +18,19 @@ export default function PrintButton({
   loading = false,
   count,
   children,
+  permissionKey,
+  noPermissionTip = '无打印权限',
 }: Props) {
-  return (
+  const allowed = usePermission(permissionKey ?? '')
+  const denied = Boolean(permissionKey) && !allowed
+  const btn = (
     <Button
       type="text"
       icon={<PrinterIcon className="size-4" />}
       onClick={handlePrint}
-      disabled={disabled || loading || (count !== undefined && count === 0)}
+      disabled={
+        denied || disabled || loading || (count !== undefined && count === 0)
+      }
       loading={loading}
     >
       {children || (
@@ -34,4 +43,5 @@ export default function PrintButton({
       )}
     </Button>
   )
+  return denied ? <Tooltip title={noPermissionTip}>{btn}</Tooltip> : btn
 }

@@ -5,90 +5,179 @@ import { Menu } from 'antd'
 import {
   DocumentChartBarIcon,
   HomeIcon,
+  KeyIcon,
   Square3Stack3DIcon,
 } from '@heroicons/react/16/solid'
 
-import {
-  isEmployeeSideRole,
-  isPrecisionCuttingAdminRole,
-} from '@/config/access'
-import { useAuth } from '@/contexts/useAuth'
+import { usePermissionContext } from '@/contexts/PermissionContext'
 
-type MenuItem = Required<MenuProps>['items'][number]
+// ----------------------------------------------------------------
+// 菜单项类型扩展：新增可选 permission 字段
+// ----------------------------------------------------------------
+type MenuItemBase = Required<MenuProps>['items'][number]
 
-const adminItems: MenuItem[] = [
+interface MenuItemDef {
+  key: string
+  label: string
+  icon?: React.ReactNode
+  /** 对应 nav:* 权限 key；父级分组填写 nav:* 权限，无则根据子项决定是否显示 */
+  permission?: string
+  children?: MenuItemDef[]
+}
+
+// ----------------------------------------------------------------
+// 全量菜单定义（所有角色的可见菜单统一在此声明）
+// ----------------------------------------------------------------
+const allMenuItems: MenuItemDef[] = [
   {
     key: 'dashboard',
     label: '首页',
     icon: <HomeIcon className="size-4" />,
+    permission: 'page:dashboard',
   },
   {
     key: 'syney',
     label: '西尼',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:syney',
     children: [
-      { key: 'syney-po-list', label: '订单列表' },
-      { key: 'syney-store-report-list', label: '入库单列表' },
-      { key: 'syney-safe-part-setting', label: '件号配置' },
-      { key: 'syney-spec-list', label: '踏板规格列表' },
-      { key: 'syney-setting', label: '编号设置' },
+      {
+        key: 'syney-po-list',
+        label: '订单列表',
+        permission: 'page:syney-po-list',
+      },
+      {
+        key: 'syney-store-report-list',
+        label: '入库单列表',
+        permission: 'page:syney-store-report-list',
+      },
+      {
+        key: 'syney-safe-part-setting',
+        label: '件号配置',
+        permission: 'page:syney-safe-part-setting',
+      },
+      {
+        key: 'syney-spec-list',
+        label: '踏板规格列表',
+        permission: 'page:syney-spec-list',
+      },
+      {
+        key: 'syney-setting',
+        label: '编号设置',
+        permission: 'page:syney-setting',
+      },
     ],
   },
   {
     key: 'workshop-order-list',
     label: '订单管理',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:workshop-order-list',
     children: [
-      { key: 'workshop-order-list/production', label: '生产中' },
-      { key: 'workshop-order-list/closed', label: '已结案' },
+      {
+        key: 'workshop-order-list/production',
+        label: '生产中',
+        permission: 'page:workshop-order-production',
+      },
+      {
+        key: 'workshop-order-list/closed',
+        label: '已结案',
+        permission: 'page:workshop-order-closed',
+      },
     ],
   },
   {
     key: 'production-scheduling',
     label: '排产计划',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:production-scheduling',
   },
   {
     key: 'standard-time-list',
     label: '成本核算',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:standard-time-list',
   },
   {
     key: 'workshop',
     label: '基础资料',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:workshop-basic',
     children: [
-      { key: 'employee-list', label: '员工管理' },
-      { key: 'job-base-setting', label: '岗位基础数值设定' },
-      { key: 'machine-equipment-maintenance', label: '机器设备维护' },
-      { key: 'machine-runtime', label: '设备运行时间' },
+      {
+        key: 'employee-list',
+        label: '员工管理',
+        permission: 'page:employee-list',
+      },
+      {
+        key: 'job-base-setting',
+        label: '岗位基础数值设定',
+        permission: 'page:job-base-setting',
+      },
+      {
+        key: 'machine-equipment-maintenance',
+        label: '机器设备维护',
+        permission: 'page:machine-equipment-maintenance',
+      },
+      {
+        key: 'machine-runtime',
+        label: '设备运行时间',
+        permission: 'page:machine-runtime',
+      },
     ],
   },
   {
     key: 'reports',
     label: '报表',
     icon: <DocumentChartBarIcon className="size-4" />,
+    permission: 'nav:reports',
     children: [
-      { key: 'material-transfer', label: '物料转移单' },
-      { key: 'production-order', label: '生产工单' },
-      { key: 'production-daily-report', label: '生产日报表' },
+      {
+        key: 'material-transfer',
+        label: '物料转移单',
+        permission: 'page:material-transfer',
+      },
+      {
+        key: 'production-order',
+        label: '生产工单',
+        permission: 'page:production-order',
+      },
+      {
+        key: 'production-daily-report',
+        label: '生产日报表',
+        permission: 'page:production-daily-report',
+      },
     ],
   },
   {
     key: 'precision-cutting',
     label: '精切',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:precision-cutting',
     children: [
-      { key: 'precision-cutting-transfer', label: '精切转移单' },
-      { key: 'precision-finishing-cutting', label: '精加工切割单' },
+      {
+        key: 'precision-cutting-transfer',
+        label: '精切转移单',
+        permission: 'page:precision-cutting-transfer',
+      },
+      {
+        key: 'precision-finishing-cutting',
+        label: '精加工切割单',
+        permission: 'page:precision-finishing-cutting',
+      },
     ],
   },
   {
     key: 'consumables',
     label: '刀具',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:consumables',
     children: [
-      { key: 'tooling-data', label: '刀具资料' },
+      {
+        key: 'tooling-data',
+        label: '刀具资料',
+        permission: 'page:tooling-data',
+      },
       { key: 'tooling-inventory', label: '刀具库存' },
       { key: 'tooling-stock-in', label: '刀具入库' },
       { key: 'tooling-stock-out', label: '刀具出库' },
@@ -98,73 +187,142 @@ const adminItems: MenuItem[] = [
     key: 'labor-protection',
     label: '劳保',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:labor-protection',
     children: [
-      { key: 'labor-protection-data', label: '劳保资料' },
-      { key: 'labor-protection-requisition', label: '领料单' },
+      {
+        key: 'labor-protection-data',
+        label: '劳保资料',
+        permission: 'page:labor-protection-data',
+      },
+      {
+        key: 'labor-protection-requisition',
+        label: '领料单',
+        permission: 'page:labor-protection-requisition',
+      },
     ],
   },
   {
     key: 'youmai',
     label: '优迈',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:youmai',
     children: [
-      { key: 'youmai-product-data', label: '货品资料' },
-      { key: 'youmai-finished-goods-inventory', label: '成品库存' },
-      { key: 'youmai-finished-goods-stock-in', label: '成品入库' },
-      { key: 'youmai-finished-goods-stock-out', label: '成品出库' },
+      {
+        key: 'youmai-product-data',
+        label: '货品资料',
+        permission: 'page:youmai-product-data',
+      },
+      {
+        key: 'youmai-finished-goods-inventory',
+        label: '成品库存',
+        permission: 'page:youmai-finished-goods-inventory',
+      },
+      {
+        key: 'youmai-finished-goods-stock-in',
+        label: '成品入库',
+        permission: 'page:youmai-finished-goods-stock-in',
+      },
+      {
+        key: 'youmai-finished-goods-stock-out',
+        label: '成品出库',
+        permission: 'page:youmai-finished-goods-stock-out',
+      },
     ],
   },
   {
     key: 'attendance',
     label: '考勤',
     icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:attendance',
     children: [
-      { key: 'attendance-detail', label: '考勤明细' },
-      { key: 'attendance-summary', label: '考勤统计' },
+      {
+        key: 'attendance-detail',
+        label: '考勤明细',
+        permission: 'page:attendance-detail',
+      },
+      {
+        key: 'attendance-summary',
+        label: '考勤统计',
+        permission: 'page:attendance-summary',
+      },
     ],
   },
-]
-
-const employeeItems: MenuItem[] = [
+  {
+    key: 'access-management',
+    label: '权限管理',
+    icon: <KeyIcon className="size-4" />,
+    permission: 'nav:access-management',
+  },
+  // 员工/组长工作台（无独立 nav 权限，靠子项权限决定显示）
   {
     key: 'employee-workspace',
     label: '员工工作台',
     icon: <Square3Stack3DIcon className="size-4" />,
     children: [
-      { key: 'production-order', label: '我的工单' },
-      { key: 'production-daily-report', label: '我的日报' },
+      {
+        key: 'production-order',
+        label: '我的工单',
+        permission: 'page:production-order',
+      },
+      {
+        key: 'production-daily-report',
+        label: '我的日报',
+        permission: 'page:production-daily-report',
+      },
     ],
   },
 ]
 
-const precisionCuttingAdminItems: MenuItem[] = [
-  {
-    key: 'workshop-order-list',
-    label: '订单管理',
-    icon: <Square3Stack3DIcon className="size-4" />,
-    children: [
-      { key: 'workshop-order-list/production', label: '生产中' },
-      { key: 'workshop-order-list/closed', label: '已结案' },
-    ],
-  },
-  {
-    key: 'precision-cutting',
-    label: '精切',
-    icon: <Square3Stack3DIcon className="size-4" />,
-    children: [{ key: 'precision-cutting-transfer', label: '精切转移单' }],
-  },
-]
+// ----------------------------------------------------------------
+// filterMenuByPermissions：根据 can 函数过滤菜单
+// ----------------------------------------------------------------
+function filterMenuByPermissions(
+  items: MenuItemDef[],
+  can: (key: string) => boolean,
+): MenuItemBase[] {
+  const result: MenuItemBase[] = []
 
-// 查找菜单项的父菜单 key
+  for (const item of items) {
+    // 有子菜单
+    if (item.children && item.children.length > 0) {
+      const filteredChildren = filterMenuByPermissions(item.children, can)
+      // 子项全被过滤掉 → 隐藏父分组
+      if (filteredChildren.length === 0) continue
+      // 父分组有 permission → 需要额外检查（并存期保留：permission 不存在或有权限）
+      if (item.permission && !can(item.permission)) continue
+
+      result.push({
+        key: item.key,
+        label: item.label,
+        icon: item.icon,
+        children: filteredChildren,
+      } as MenuItemBase)
+      continue
+    }
+
+    // 叶子节点
+    if (item.permission && !can(item.permission)) continue
+    result.push({
+      key: item.key,
+      label: item.label,
+      icon: item.icon,
+    } as MenuItemBase)
+  }
+
+  return result
+}
+
+// ----------------------------------------------------------------
+// findParentMenuKey：找出菜单项的父级 key
+// ----------------------------------------------------------------
 function findParentMenuKey(
   menuKey: string,
-  menuItems: MenuItem[],
+  menuItems: MenuItemBase[],
 ): string | undefined {
   for (const item of menuItems) {
     if (item && 'children' in item && item.children) {
-      // 检查子菜单中是否包含目标 key
       const hasChild = item.children.some(
-        (child: MenuItem) => child?.key === menuKey,
+        (child: MenuItemBase) => child?.key === menuKey,
       )
       if (hasChild && item.key) {
         return item.key as string
@@ -174,22 +332,19 @@ function findParentMenuKey(
   return undefined
 }
 
+// ----------------------------------------------------------------
+// MainMenu 组件
+// ----------------------------------------------------------------
 const MainMenu: React.FC = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { role } = useAuth()
+  const { can, isLoading } = usePermissionContext()
 
   const items = useMemo(() => {
-    if (isEmployeeSideRole(role)) {
-      return employeeItems
-    }
-
-    if (isPrecisionCuttingAdminRole(role)) {
-      return precisionCuttingAdminItems
-    }
-
-    return adminItems
-  }, [role])
+    // 权限加载中时返回空（避免闪烁），PermissionContext 内部有 staleTime 缓存
+    if (isLoading) return []
+    return filterMenuByPermissions(allMenuItems, can)
+  }, [can, isLoading])
 
   // 从路径中提取当前选中的菜单项和应该展开的父菜单
   const { selectedKey, openKey } = useMemo(() => {
@@ -202,17 +357,14 @@ const MainMenu: React.FC = () => {
   }, [items, pathname])
 
   const [openKeys, setOpenKeys] = useState<string[]>(() => {
-    // 初始化时，如果有父菜单，则展开
     const path = pathname.slice(1) || 'dashboard'
     const parentKey = findParentMenuKey(path, items)
     return parentKey ? [parentKey] : []
   })
 
-  // 当路径变化时，确保对应的父菜单保持展开
   useEffect(() => {
     if (openKey) {
       setOpenKeys((prevKeys) => {
-        // 如果当前应该展开的父菜单不在 openKeys 中，则添加它
         if (!prevKeys.includes(openKey)) {
           return [...prevKeys, openKey]
         }
@@ -223,7 +375,6 @@ const MainMenu: React.FC = () => {
 
   const onClick: MenuProps['onClick'] = ({ key }) => {
     if (!key) return
-    // 如果点击的是当前路径，不进行导航，避免不必要的重渲染
     const targetPath = `/${key}`
     if (pathname !== targetPath) {
       navigate(targetPath)
@@ -231,10 +382,8 @@ const MainMenu: React.FC = () => {
   }
 
   const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
-    // 如果当前路径属于某个父菜单，确保该父菜单始终在 openKeys 中
     const newKeys = keys as string[]
     if (openKey && !newKeys.includes(openKey)) {
-      // 如果用户尝试关闭当前应该展开的父菜单，阻止这个操作
       setOpenKeys([...newKeys, openKey])
     } else {
       setOpenKeys(newKeys)

@@ -1,6 +1,5 @@
 import type { Database } from './database.types'
 import supabase from './supabase'
-import type { AppRole } from '@/config/access'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 
 type EmployeeInsert = Database['public']['Tables']['employees']['Insert']
@@ -10,7 +9,7 @@ export interface Employee {
   id?: string
   name: string
   auth_user_id?: string | null
-  role?: AppRole
+  role?: string
   is_active?: boolean
   job_name?: string | null
   hourly_wage?: number
@@ -196,7 +195,7 @@ export async function getEmployees({
   page: number
   pageSize: number
   name?: string
-  role?: AppRole
+  role?: string
   is_active?: boolean
 }) {
   const from = (page - 1) * pageSize
@@ -479,9 +478,12 @@ export async function resetEmployeeAuthPassword(
 }
 
 export async function unbindEmployeeAuthAccount(employeeId: string) {
-  const { data, error } = await supabase.functions.invoke('unbind-employee-auth', {
-    body: { employeeId },
-  })
+  const { data, error } = await supabase.functions.invoke(
+    'unbind-employee-auth',
+    {
+      body: { employeeId },
+    },
+  )
 
   if (error) {
     await throwFunctionInvokeError(
@@ -505,12 +507,15 @@ export async function unbindEmployeeAuthAccount(employeeId: string) {
 export async function rebindEmployeeAuthAccount(
   values: RebindEmployeeAuthAccountInput,
 ) {
-  const { data, error } = await supabase.functions.invoke('rebind-employee-auth', {
-    body: {
-      employeeId: values.employeeId,
-      email: values.email.trim().toLowerCase(),
+  const { data, error } = await supabase.functions.invoke(
+    'rebind-employee-auth',
+    {
+      body: {
+        employeeId: values.employeeId,
+        email: values.email.trim().toLowerCase(),
+      },
     },
-  })
+  )
 
   if (error) {
     await throwFunctionInvokeError(

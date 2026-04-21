@@ -14,65 +14,72 @@ import type { ElementType } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/useAuth'
+import { usePermissionContext } from '@/contexts/PermissionContext'
 
 const { Content } = Layout
 
-type NavItem = {
+type MobileNavItemDef = {
   key: string
   label: string
   icon: ElementType
+  /** 对应 nav:mobile-* 权限 key；无此字段时默认显示 */
+  permission?: string
 }
 
-const baseNavItems: NavItem[] = [
+const allMobileNavItems: MobileNavItemDef[] = [
   {
     key: '/scan',
     label: '扫码',
     icon: BiScan,
+    permission: 'nav:mobile-scan',
   },
   {
     key: '/production-order',
     label: '我的工单',
     icon: ClipboardDocumentListIcon,
+    permission: 'nav:mobile-workspace',
   },
   {
     key: '/production-daily-report',
     label: '我的日报',
     icon: DocumentChartBarIcon,
+    permission: 'nav:mobile-daily-report',
   },
   {
     key: '/material-transfer',
     label: '转移表',
     icon: ArrowsRightLeftIcon,
+    // 无独立 nav:mobile-* 权限，所有移动端用户均可见
   },
   {
     key: '/precision-finishing-cutting',
     label: '精加工',
     icon: ScissorsIcon,
+    // 无独立 nav:mobile-* 权限，所有移动端用户均可见
+  },
+  {
+    key: '/standard-time-list',
+    label: '理论工时',
+    icon: ClockIcon,
+    permission: 'nav:standard-time-list',
   },
 ]
 
 export default function EmployeeMobileLayout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { signOut, user, employeeProfile, role } = useAuth()
+  const { signOut, user, employeeProfile } = useAuth()
+  const { can, isLoading } = usePermissionContext()
   const {
     token: { colorBgContainer },
   } = theme.useToken()
 
   const navItems = useMemo(() => {
-    if (role === 'team_leader') {
-      return [
-        ...baseNavItems,
-        {
-          key: '/standard-time-list',
-          label: '理论工时',
-          icon: ClockIcon,
-        },
-      ]
-    }
-
-    return baseNavItems
-  }, [role])
+    if (isLoading) return []
+    return allMobileNavItems.filter(
+      (item) => !item.permission || can(item.permission),
+    )
+  }, [can, isLoading])
 
   return (
     <Layout className="h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,#f5f7ff_0%,#eef2ff_35%,#e8edf5_100%)]">

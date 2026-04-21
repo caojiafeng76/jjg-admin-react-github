@@ -5,18 +5,15 @@ import { createBrowserRouter } from 'react-router-dom'
 import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
 import RouteErrorPage from '@/pages/RouteErrorPage'
-import {
-  EMPLOYEE_SIDE_ROLES,
-  PRECISION_CUTTING_ADMIN_ROLE,
-} from '@/config/access'
 import { LABOR_PROTECTION_PUBLIC_QR_PATH } from '@/features/labor-protection/LaborProtectionRequisition/laborProtectionPublicQr'
 import {
+  PermissionProtectedRoute,
   ProtectedRoute,
   RoleHomeRedirect,
-  RoleProtectedRoute,
 } from './RouteGuards'
 import {
   AccessDenied,
+  AccessManagement,
   AttendanceDetail,
   AttendanceStats,
   ComingSoonPage,
@@ -79,7 +76,10 @@ export const router = createBrowserRouter([
         path: 'dashboard',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<Dashboard />} />
+            <PermissionProtectedRoute
+              permissionKey="page:dashboard"
+              element={<Dashboard />}
+            />
           </Suspense>
         ),
       },
@@ -87,7 +87,10 @@ export const router = createBrowserRouter([
         path: 'syney-spec-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<SyneySpecList />} />
+            <PermissionProtectedRoute
+              permissionKey="page:syney-spec-list"
+              element={<SyneySpecList />}
+            />
           </Suspense>
         ),
       },
@@ -95,8 +98,8 @@ export const router = createBrowserRouter([
         path: 'syney-store-report-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:syney-store-report-list"
               element={<SyneyStoreReportList />}
             />
           </Suspense>
@@ -106,8 +109,8 @@ export const router = createBrowserRouter([
         path: 'syney-store-report-list/:reportNo',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:syney-store-report-list"
               element={<SyneyStoreReportDetail />}
             />
           </Suspense>
@@ -117,7 +120,10 @@ export const router = createBrowserRouter([
         path: 'syney-po-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<SyneyPoList />} />
+            <PermissionProtectedRoute
+              permissionKey="page:syney-po-list"
+              element={<SyneyPoList />}
+            />
           </Suspense>
         ),
       },
@@ -125,7 +131,10 @@ export const router = createBrowserRouter([
         path: 'syney-po-list/:PoId',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<SyneyPoDetail />} />
+            <PermissionProtectedRoute
+              permissionKey="page:syney-po-list"
+              element={<SyneyPoDetail />}
+            />
           </Suspense>
         ),
       },
@@ -133,8 +142,8 @@ export const router = createBrowserRouter([
         path: 'syney-safe-part-setting',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:syney-safe-part-setting"
               element={<SafePartSettingPage />}
             />
           </Suspense>
@@ -144,7 +153,10 @@ export const router = createBrowserRouter([
         path: 'syney-setting',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<SyneySetting />} />
+            <PermissionProtectedRoute
+              permissionKey="page:syney-setting"
+              element={<SyneySetting />}
+            />
           </Suspense>
         ),
       },
@@ -156,8 +168,8 @@ export const router = createBrowserRouter([
         path: 'workshop-order-list/production',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin', PRECISION_CUTTING_ADMIN_ROLE]}
+            <PermissionProtectedRoute
+              permissionKey="page:workshop-order-production"
               element={<WorkshopOrderProduction />}
             />
           </Suspense>
@@ -167,8 +179,8 @@ export const router = createBrowserRouter([
         path: 'workshop-order-list/closed',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin', PRECISION_CUTTING_ADMIN_ROLE]}
+            <PermissionProtectedRoute
+              permissionKey="page:workshop-order-closed"
               element={<WorkshopOrderClosed />}
             />
           </Suspense>
@@ -178,12 +190,8 @@ export const router = createBrowserRouter([
         path: 'workshop-order-list/qr/:orderId',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={[
-                'admin',
-                PRECISION_CUTTING_ADMIN_ROLE,
-                ...EMPLOYEE_SIDE_ROLES,
-              ]}
+            <PermissionProtectedRoute
+              permissionKey="page:workshop-order-qr-detail"
               element={<WorkshopOrderQrDetail />}
             />
           </Suspense>
@@ -193,8 +201,8 @@ export const router = createBrowserRouter([
         path: 'production-scheduling',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:production-scheduling"
               element={<ComingSoonPage />}
             />
           </Suspense>
@@ -204,7 +212,10 @@ export const router = createBrowserRouter([
         path: 'employee-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<EmployeeList />} />
+            <PermissionProtectedRoute
+              permissionKey="page:employee-list"
+              element={<EmployeeList />}
+            />
           </Suspense>
         ),
       },
@@ -212,8 +223,8 @@ export const router = createBrowserRouter([
         path: 'employee/change-password',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={EMPLOYEE_SIDE_ROLES}
+            <PermissionProtectedRoute
+              permissionKey="page:mobile-change-password"
               element={<EmployeeMobileChangePasswordPage />}
             />
           </Suspense>
@@ -223,8 +234,8 @@ export const router = createBrowserRouter([
         path: 'standard-time-list',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin', 'team_leader']}
+            <PermissionProtectedRoute
+              permissionKey="page:standard-time-list"
               element={<StandardTimeList />}
             />
           </Suspense>
@@ -234,8 +245,8 @@ export const router = createBrowserRouter([
         path: 'job-base-setting',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:job-base-setting"
               element={<JobBaseSetting />}
             />
           </Suspense>
@@ -245,8 +256,8 @@ export const router = createBrowserRouter([
         path: 'machine-equipment-maintenance',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:machine-equipment-maintenance"
               element={<MachineEquipmentMaintenance />}
             />
           </Suspense>
@@ -256,8 +267,8 @@ export const router = createBrowserRouter([
         path: 'material-transfer',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
+            <PermissionProtectedRoute
+              permissionKey="page:material-transfer"
               element={<MaterialTransfer />}
             />
           </Suspense>
@@ -267,8 +278,8 @@ export const router = createBrowserRouter([
         path: 'material-transfer/scan',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={EMPLOYEE_SIDE_ROLES}
+            <PermissionProtectedRoute
+              permissionKey="page:mobile-scan-material-transfer"
               element={<MaterialTransferScan />}
             />
           </Suspense>
@@ -278,8 +289,8 @@ export const router = createBrowserRouter([
         path: 'precision-finishing-cutting',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
+            <PermissionProtectedRoute
+              permissionKey="page:precision-finishing-cutting"
               element={<PrecisionFinishingCutting />}
             />
           </Suspense>
@@ -289,8 +300,8 @@ export const router = createBrowserRouter([
         path: 'precision-finishing-cutting/scan',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={EMPLOYEE_SIDE_ROLES}
+            <PermissionProtectedRoute
+              permissionKey="page:mobile-scan-precision-finishing"
               element={<PrecisionFinishingCuttingScan />}
             />
           </Suspense>
@@ -300,8 +311,8 @@ export const router = createBrowserRouter([
         path: 'scan',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={EMPLOYEE_SIDE_ROLES}
+            <PermissionProtectedRoute
+              permissionKey="page:mobile-scan-hub"
               element={<ScanHub />}
             />
           </Suspense>
@@ -311,8 +322,8 @@ export const router = createBrowserRouter([
         path: 'production-order',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
+            <PermissionProtectedRoute
+              permissionKey="page:production-order"
               element={<ProductionOrder />}
             />
           </Suspense>
@@ -322,8 +333,8 @@ export const router = createBrowserRouter([
         path: 'production-order/create',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={EMPLOYEE_SIDE_ROLES}
+            <PermissionProtectedRoute
+              permissionKey="page:mobile-production-order"
               element={<MobileProductionOrderCreate />}
             />
           </Suspense>
@@ -333,8 +344,8 @@ export const router = createBrowserRouter([
         path: 'production-order/scan',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={EMPLOYEE_SIDE_ROLES}
+            <PermissionProtectedRoute
+              permissionKey="page:mobile-scan-production-order"
               element={<ProductionOrderScan />}
             />
           </Suspense>
@@ -344,8 +355,8 @@ export const router = createBrowserRouter([
         path: 'production-order/:orderId',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={EMPLOYEE_SIDE_ROLES}
+            <PermissionProtectedRoute
+              permissionKey="page:mobile-production-order"
               element={<MobileProductionOrderDetail />}
             />
           </Suspense>
@@ -355,8 +366,8 @@ export const router = createBrowserRouter([
         path: 'production-order/:orderId/edit',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={EMPLOYEE_SIDE_ROLES}
+            <PermissionProtectedRoute
+              permissionKey="page:mobile-production-order"
               element={<MobileProductionOrderEdit />}
             />
           </Suspense>
@@ -366,8 +377,8 @@ export const router = createBrowserRouter([
         path: 'production-daily-report',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin', ...EMPLOYEE_SIDE_ROLES]}
+            <PermissionProtectedRoute
+              permissionKey="page:production-daily-report"
               element={<ProductionDailyReport />}
             />
           </Suspense>
@@ -377,8 +388,8 @@ export const router = createBrowserRouter([
         path: 'machine-runtime',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:machine-runtime"
               element={<MachineRuntime />}
             />
           </Suspense>
@@ -388,8 +399,8 @@ export const router = createBrowserRouter([
         path: 'precision-cutting-transfer',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin', PRECISION_CUTTING_ADMIN_ROLE]}
+            <PermissionProtectedRoute
+              permissionKey="page:precision-cutting-transfer"
               element={<PrecisionCuttingTransfer />}
             />
           </Suspense>
@@ -399,7 +410,10 @@ export const router = createBrowserRouter([
         path: 'tooling-data',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute allow={['admin']} element={<ToolingData />} />
+            <PermissionProtectedRoute
+              permissionKey="page:tooling-data"
+              element={<ToolingData />}
+            />
           </Suspense>
         ),
       },
@@ -407,8 +421,8 @@ export const router = createBrowserRouter([
         path: 'tooling-inventory',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:tooling-data"
               element={<ComingSoonPage />}
             />
           </Suspense>
@@ -418,8 +432,8 @@ export const router = createBrowserRouter([
         path: 'tooling-stock-in',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:tooling-data"
               element={<ComingSoonPage />}
             />
           </Suspense>
@@ -429,8 +443,8 @@ export const router = createBrowserRouter([
         path: 'tooling-stock-out',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:tooling-data"
               element={<ComingSoonPage />}
             />
           </Suspense>
@@ -440,8 +454,8 @@ export const router = createBrowserRouter([
         path: 'labor-protection-data',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:labor-protection-data"
               element={<LaborProtectionData />}
             />
           </Suspense>
@@ -451,8 +465,8 @@ export const router = createBrowserRouter([
         path: 'labor-protection-requisition',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:labor-protection-requisition"
               element={<LaborProtectionRequisition />}
             />
           </Suspense>
@@ -462,8 +476,8 @@ export const router = createBrowserRouter([
         path: 'youmai-product-data',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:youmai-product-data"
               element={<YoumaiProductData />}
             />
           </Suspense>
@@ -473,8 +487,8 @@ export const router = createBrowserRouter([
         path: 'youmai-finished-goods-inventory',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:youmai-finished-goods-inventory"
               element={<YoumaiFinishedGoodsInventory />}
             />
           </Suspense>
@@ -484,8 +498,8 @@ export const router = createBrowserRouter([
         path: 'youmai-finished-goods-stock-in',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:youmai-finished-goods-stock-in"
               element={<YoumaiFinishedGoodsStockIn />}
             />
           </Suspense>
@@ -495,8 +509,8 @@ export const router = createBrowserRouter([
         path: 'youmai-finished-goods-stock-out',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:youmai-finished-goods-stock-out"
               element={<YoumaiFinishedGoodsStockOut />}
             />
           </Suspense>
@@ -506,8 +520,8 @@ export const router = createBrowserRouter([
         path: 'attendance-detail',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:attendance-detail"
               element={<AttendanceDetail />}
             />
           </Suspense>
@@ -517,9 +531,20 @@ export const router = createBrowserRouter([
         path: 'attendance-summary',
         element: (
           <Suspense fallback={<Loading />}>
-            <RoleProtectedRoute
-              allow={['admin']}
+            <PermissionProtectedRoute
+              permissionKey="page:attendance-summary"
               element={<AttendanceStats />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'access-management',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:access-management"
+              element={<AccessManagement />}
             />
           </Suspense>
         ),

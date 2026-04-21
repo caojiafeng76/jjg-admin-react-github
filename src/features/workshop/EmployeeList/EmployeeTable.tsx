@@ -1,7 +1,7 @@
 import type { ReactNode, TdHTMLAttributes } from 'react'
 import { useMemo } from 'react'
 import { Table, TableColumnsType, Tag, Typography } from 'antd'
-import { getRoleLabel } from '@/config/access'
+import { useRoleOptions } from '@/hooks/useRoleOptions'
 import type { Employee } from '@/services/apiEmployees'
 import { useEmployeeAuthEmail } from './useEmployees'
 
@@ -68,6 +68,7 @@ export default function EmployeeTable({
   scrollY = 400,
   rowHeight = 40,
 }: Props) {
+  const { getLabel: getRoleLabel } = useRoleOptions()
   const columns: TableColumnsType<Employee> = useMemo(
     () => [
       {
@@ -171,7 +172,7 @@ export default function EmployeeTable({
         },
       },
     ],
-    [page, pageSize],
+    [page, pageSize, getRoleLabel],
   )
 
   const rowSelection = useMemo(
