@@ -15,6 +15,8 @@ import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
 import {
   useWorkshopOrdersList,
   useWorkshopOrderLengths,
+  useWorkshopOrderProjectNos,
+  useWorkshopOrderModels,
   useCreateWorkshopOrder,
   useUpdateWorkshopOrder,
   useBatchUpdateWorkshopOrderStatuses,
@@ -47,6 +49,7 @@ export interface WorkshopOrder {
   product_category: string | null
   material_name: string | null
   material_code: string | null
+  row_remark?: string | null
 }
 
 export interface WorkshopOrderListProps {
@@ -77,7 +80,8 @@ export default function WorkshopOrderList({
     project_no?: string
     product_model?: string
     customer_model?: string
-    model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+    project_no_search?: string[] // 多关键词搜索项目号
+    model_search?: string[] // 多关键词搜索产品型号、客户型号
     length_mm?: number[]
     startDate?: string
     endDate?: string
@@ -97,6 +101,8 @@ export default function WorkshopOrderList({
     searchParams: mergedSearchParams,
   })
   const { data: lengthOptions = [] } = useWorkshopOrderLengths()
+  const { data: projectNoOptions = [] } = useWorkshopOrderProjectNos()
+  const { data: modelOptions = [] } = useWorkshopOrderModels()
 
   const createMutation = useCreateWorkshopOrder()
 
@@ -511,6 +517,8 @@ export default function WorkshopOrderList({
           onSearch={handleSearch}
           onReset={handleResetSearch}
           lengthOptions={lengthOptions}
+          projectNoOptions={projectNoOptions}
+          modelOptions={modelOptions}
         />
       </div>
 

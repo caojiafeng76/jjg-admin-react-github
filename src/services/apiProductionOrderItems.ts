@@ -297,7 +297,24 @@ export { resolveProductionOrderItemStandardSeconds, calculateQualifiedHours }
 export async function addProductionOrderItem(
   values: ProductionOrderItemInsert,
 ) {
-  const payload = buildProductionOrderItemInsertPayload(values)
+  // 写入前若 standard_seconds = 0，尝试从工序标准表动态查找正确的值
+  // qualified_hours / defect_hours 是数据库生成列，由 DB 根据 standard_seconds 自动计算，无需写入
+  const itemForResolve = {
+    project_no: (values.project_no as string | null | undefined) ?? '',
+    product_model: values.product_model ?? null,
+    length_mm:
+      (values as unknown as { length_mm?: number | null }).length_mm ?? null,
+    operation: (values.operation as string | null | undefined) ?? '',
+    standard_seconds: Number(values.standard_seconds ?? 0),
+  }
+  const [resolved] = await resolveProductionOrderItemStandardSeconds([
+    itemForResolve,
+  ])
+
+  const payload = buildProductionOrderItemInsertPayload({
+    ...values,
+    standard_seconds: resolved.standard_seconds,
+  })
 
   const { data, error } = await supabase
     .from('production_order_items')
@@ -319,7 +336,24 @@ export async function updateProductionOrderItem({
   id: string
   values: ProductionOrderItemUpdate
 }) {
-  const payload = buildProductionOrderItemUpdatePayload(values)
+  // 写入前若 standard_seconds = 0，尝试从工序标准表动态查找正确的值
+  // qualified_hours / defect_hours 是数据库生成列，由 DB 根据 standard_seconds 自动计算，无需写入
+  const itemForResolve = {
+    project_no: (values.project_no as string | null | undefined) ?? '',
+    product_model: values.product_model ?? null,
+    length_mm:
+      (values as unknown as { length_mm?: number | null }).length_mm ?? null,
+    operation: (values.operation as string | null | undefined) ?? '',
+    standard_seconds: Number(values.standard_seconds ?? 0),
+  }
+  const [resolved] = await resolveProductionOrderItemStandardSeconds([
+    itemForResolve,
+  ])
+
+  const payload = buildProductionOrderItemUpdatePayload({
+    ...values,
+    standard_seconds: resolved.standard_seconds,
+  })
 
   const { data, error } = await supabase
     .from('production_order_items')

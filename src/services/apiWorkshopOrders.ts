@@ -12,6 +12,7 @@ import {
 } from '@/features/workshop/OrderList/orderStatus'
 
 const WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE = 1000
+const WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE = 1000
 
 export interface WorkshopOrderDeleteBlocker {
   orderId: string
@@ -62,6 +63,7 @@ function normalizeWorkshopOrderInput(values: WorkshopOrder): WorkshopOrder {
     product_category: normalizeOptionalText(values.product_category),
     material_name: normalizeOptionalText(values.material_name),
     material_code: normalizeOptionalText(values.material_code),
+    row_remark: normalizeOptionalText(values.row_remark),
   }
 }
 
@@ -114,6 +116,7 @@ function buildSalesOrderPayload(
     product_category: normalizedValues.product_category,
     material_name: normalizedValues.material_name,
     material_code: normalizedValues.material_code,
+    row_remark: normalizedValues.row_remark ?? null,
   }
 
   if (mode === 'create') {
@@ -239,7 +242,8 @@ export async function getWorkshopOrders({
   project_no,
   product_model,
   customer_model,
-  model_search, // 统一的搜索字段，可同时搜索多个项目号、产品型号和客户型号
+  project_no_search, // 多关键词搜索项目号
+  model_search, // 多关键词搜索产品型号、客户型号
   length_mm,
   startDate,
   endDate,
@@ -250,7 +254,8 @@ export async function getWorkshopOrders({
   project_no?: string
   product_model?: string
   customer_model?: string
-  model_search?: string // 统一的搜索字段，支持多个关键词同时搜索项目号、产品型号、客户型号
+  project_no_search?: string[] // 多关键词搜索项目号
+  model_search?: string[] // 多关键词搜索产品型号、客户型号
   length_mm?: number[]
   startDate?: string
   endDate?: string
@@ -261,29 +266,30 @@ export async function getWorkshopOrders({
 
   let query = supabase.from('sales_orders').select('*', { count: 'exact' })
 
+  const projectNoKeywords = normalizeSearchKeywords(project_no_search)
   const modelSearchKeywords = normalizeSearchKeywords(model_search)
 
-  // 统一的搜索字段（同时搜索多个项目号、产品型号和客户型号，OR逻辑）
+  // 项目号多关键词搜索（OR 逻辑，只搜索 project_no 列）
+  if (projectNoKeywords?.length) {
+    query = query.or(buildOrIlikeFilter(['project_no'], projectNoKeywords))
+  } else if (project_no) {
+    // 向后兼容单关键词项目号搜索
+    query = query.ilike('project_no', `%${project_no}%`)
+  }
+
+  // 型号多关键词搜索（OR 逻辑，同时搜索产品型号和客户型号）
   if (modelSearchKeywords?.length) {
     query = query.or(
       buildOrIlikeFilter(
-        ['project_no', 'product_model', 'customer_model'],
+        ['product_model', 'customer_model'],
         modelSearchKeywords,
       ),
     )
   } else {
-    // 如果没有统一搜索，则分别搜索
-    // 项目号搜索（模糊匹配）
-    if (project_no) {
-      query = query.ilike('project_no', `%${project_no}%`)
-    }
-
-    // 产品型号搜索（模糊匹配）
+    // 向后兼容单独的型号搜索字段
     if (product_model) {
       query = query.ilike('product_model', `%${product_model}%`)
     }
-
-    // 客户型号搜索（模糊匹配）
     if (customer_model) {
       query = query.ilike('customer_model', `%${customer_model}%`)
     }
@@ -390,6 +396,60 @@ export async function getWorkshopOrders({
     items,
     total: count || 0,
   }
+}
+
+export async function getWorkshopOrderProjectNos() {
+  const values = new Set<string>()
+  let from = 0
+
+  while (true) {
+    const to = from + WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('sales_orders')
+      .select('project_no')
+      .not('project_no', 'is', null)
+      .order('project_no', { ascending: true })
+      .range(from, to)
+
+    if (error) throw handleApiError(error, '获取项目号选项失败')
+
+    const rows = data || []
+    rows.forEach((item) => {
+      if (item.project_no) values.add(item.project_no.trim())
+    })
+
+    if (rows.length < WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE) break
+    from += WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE
+  }
+
+  return Array.from(values).sort((a, b) => a.localeCompare(b))
+}
+
+export async function getWorkshopOrderModels() {
+  const values = new Set<string>()
+  let from = 0
+
+  while (true) {
+    const to = from + WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('sales_orders')
+      .select('product_model')
+      .not('product_model', 'is', null)
+      .order('product_model', { ascending: true })
+      .range(from, to)
+
+    if (error) throw handleApiError(error, '获取型号选项失败')
+
+    const rows = data || []
+    rows.forEach((item) => {
+      if (item.product_model) values.add(item.product_model.trim())
+    })
+
+    if (rows.length < WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE) break
+    from += WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE
+  }
+
+  return Array.from(values).sort((a, b) => a.localeCompare(b))
 }
 
 export async function getWorkshopOrderLengths() {

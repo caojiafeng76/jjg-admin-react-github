@@ -27,6 +27,9 @@ import {
   useDeleteMaterialTransfers,
   useMaterialTransfers,
   useUpdateMaterialTransfer,
+  useMaterialTransferProjectNos,
+  useMaterialTransferModels,
+  useMaterialTransferLengths,
 } from './useMaterialTransfers'
 import MaterialTransferDetail from './MaterialTransferDetail'
 import MaterialTransferForm from './MaterialTransferForm'
@@ -68,6 +71,9 @@ export default function MaterialTransferPage() {
   const [isExporting, setIsExporting] = useState(false)
 
   const { data: employeeOptions = [] } = useAllEmployees(!isOwnOnlyView)
+  const { data: projectNoOptions = [] } = useMaterialTransferProjectNos()
+  const { data: modelOptions = [] } = useMaterialTransferModels()
+  const { data: lengthOptions = [] } = useMaterialTransferLengths()
   const { data, isLoading } = useMaterialTransfers({
     page,
     pageSize,
@@ -406,6 +412,9 @@ export default function MaterialTransferPage() {
       >
         <MaterialTransferSearch
           employees={employees}
+          projectNoOptions={projectNoOptions}
+          modelOptions={modelOptions}
+          lengthOptions={lengthOptions}
           initialValues={searchFilters}
           onSearch={handleSearch}
           onReset={handleResetSearch}

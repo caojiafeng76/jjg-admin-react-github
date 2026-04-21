@@ -23,6 +23,9 @@ interface Props {
   onSearch: (values: MaterialTransferSearchValues) => void
   onReset: () => void
   employees: { id: string; name: string }[]
+  projectNoOptions: string[]
+  modelOptions: string[]
+  lengthOptions: number[]
   initialValues?: MaterialTransferSearchValues
   mobile?: boolean
   showEmployeeFilter?: boolean
@@ -32,6 +35,9 @@ export default function MaterialTransferSearch({
   onSearch,
   onReset,
   employees,
+  projectNoOptions,
+  modelOptions,
+  lengthOptions,
   initialValues,
   mobile = false,
   showEmployeeFilter = true,
@@ -66,8 +72,18 @@ export default function MaterialTransferSearch({
         values.dateRange?.[0] && values.dateRange?.[1]
           ? values.dateRange[1].format('YYYY-MM-DD')
           : undefined,
-      projectNo: values.projectNo?.trim() || undefined,
-      productModel: values.productModel?.trim() || undefined,
+      projectNo:
+        values.projectNo && values.projectNo.length > 0
+          ? values.projectNo
+          : undefined,
+      productModel:
+        values.productModel && values.productModel.length > 0
+          ? values.productModel
+          : undefined,
+      length_mm:
+        values.length_mm && values.length_mm.length > 0
+          ? values.length_mm
+          : undefined,
       employeeId: values.employeeId || undefined,
       targetWorkshop: values.targetWorkshop || undefined,
       recipientName: values.recipientName?.trim() || undefined,
@@ -103,18 +119,56 @@ export default function MaterialTransferSearch({
       </Form.Item>
 
       <Form.Item name="projectNo" className="mb-0">
-        <Input
+        <Select
+          mode="multiple"
           placeholder="项目号"
           allowClear
-          style={{ width: mobile ? '100%' : 180 }}
+          showSearch
+          filterOption={(input, option) =>
+            String(option?.label || '')
+              .toLowerCase()
+              .includes(input.toLowerCase())
+          }
+          getPopupContainer={getPopupContainer}
+          style={{ width: mobile ? '100%' : 200 }}
+          maxTagCount="responsive"
+          options={projectNoOptions.map((v) => ({ label: v, value: v }))}
         />
       </Form.Item>
 
       <Form.Item name="productModel" className="mb-0">
-        <Input
-          placeholder="型号，多个用空格或逗号分隔"
+        <Select
+          mode="multiple"
+          placeholder="型号"
           allowClear
-          style={{ width: mobile ? '100%' : 180 }}
+          showSearch
+          filterOption={(input, option) =>
+            String(option?.label || '')
+              .toLowerCase()
+              .includes(input.toLowerCase())
+          }
+          getPopupContainer={getPopupContainer}
+          style={{ width: mobile ? '100%' : 200 }}
+          maxTagCount="responsive"
+          options={modelOptions.map((v) => ({ label: v, value: v }))}
+        />
+      </Form.Item>
+
+      <Form.Item name="length_mm" className="mb-0">
+        <Select
+          mode="multiple"
+          placeholder="长度"
+          allowClear
+          showSearch
+          filterOption={(input, option) =>
+            String(option?.label || '')
+              .toLowerCase()
+              .includes(input.toLowerCase())
+          }
+          getPopupContainer={getPopupContainer}
+          style={{ width: mobile ? '100%' : 160 }}
+          maxTagCount="responsive"
+          options={lengthOptions.map((v) => ({ label: `${v}mm`, value: v }))}
         />
       </Form.Item>
 

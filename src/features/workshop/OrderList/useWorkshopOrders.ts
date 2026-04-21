@@ -3,6 +3,8 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import {
   getWorkshopOrders,
   getWorkshopOrderLengths,
+  getWorkshopOrderProjectNos,
+  getWorkshopOrderModels,
   createWorkshopOrder,
   updateWorkshopOrder,
   updateWorkshopOrderStatuses,
@@ -26,7 +28,8 @@ export function useWorkshopOrdersList({
     project_no?: string
     product_model?: string
     customer_model?: string
-    model_search?: string // 统一的搜索字段，支持项目号、产品型号、客户型号
+    project_no_search?: string[] // 多关键词搜索项目号
+    model_search?: string[] // 多关键词搜索产品型号、客户型号
     length_mm?: number[]
     startDate?: string
     endDate?: string
@@ -45,6 +48,22 @@ export function useWorkshopOrderLengths() {
   return useQuery({
     queryKey: [WORKSHOP_ORDERS_KEY, 'length-options'],
     queryFn: getWorkshopOrderLengths,
+    ...queryConfig.list,
+  })
+}
+
+export function useWorkshopOrderProjectNos() {
+  return useQuery({
+    queryKey: [WORKSHOP_ORDERS_KEY, 'project-no-options'],
+    queryFn: getWorkshopOrderProjectNos,
+    ...queryConfig.list,
+  })
+}
+
+export function useWorkshopOrderModels() {
+  return useQuery({
+    queryKey: [WORKSHOP_ORDERS_KEY, 'model-options'],
+    queryFn: getWorkshopOrderModels,
     ...queryConfig.list,
   })
 }

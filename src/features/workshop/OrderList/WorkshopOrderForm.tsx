@@ -166,6 +166,12 @@ export default function WorkshopOrderForm({
         width: 220,
         ellipsis: true,
       },
+      {
+        title: '行备注',
+        dataIndex: 'row_remark',
+        width: 150,
+        ellipsis: true,
+      },
     ]
   }
 
@@ -290,6 +296,14 @@ export default function WorkshopOrderForm({
 
           <Form.Item name="process_flow" label="工艺流程">
             <Input disabled={isCreating} placeholder="如：切割->冲孔->CNC" />
+          </Form.Item>
+
+          <Form.Item name="row_remark" label="行备注">
+            <Input.TextArea
+              disabled={isCreating}
+              placeholder="可选，填写该行订单的备注信息"
+              rows={2}
+            />
           </Form.Item>
         </>
       )}
