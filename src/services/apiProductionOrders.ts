@@ -5,10 +5,7 @@ import type {
   ProductionOrderDataCategory,
   ProductionOrderItem,
 } from './apiProductionOrderItems'
-import {
-  resolveProductionOrderItemStandardSeconds,
-  calculateQualifiedHours,
-} from './apiProductionOrderItems'
+import { resolveProductionOrderItemStandardSeconds } from './apiProductionOrderItems'
 
 export type ProductionOrderShift = '白班' | '夜班'
 
@@ -186,15 +183,7 @@ export async function getProductionOrders({
     ({ items: orderItems = [], ...order }) => {
       const positiveQualifiedHours = Number(
         orderItems
-          .reduce(
-            (total, item) =>
-              total +
-              calculateQualifiedHours(
-                Number(item.standard_seconds || 0),
-                item.qualified_quantity,
-              ),
-            0,
-          )
+          .reduce((total, item) => total + Number(item.qualified_hours || 0), 0)
           .toFixed(2),
       )
 
@@ -222,7 +211,7 @@ export async function getProductionOrders({
         efficiency,
         hasZeroStandardQualifiedItem: orderItems.some(
           (item) =>
-            Number(item.standard_seconds || 0) === 0 &&
+            Number(item.qualified_hours || 0) === 0 &&
             Number(item.qualified_quantity || 0) > 0,
         ),
       }

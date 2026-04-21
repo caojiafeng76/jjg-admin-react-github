@@ -110,7 +110,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
         title: '料号',
         dataIndex: 'part_no',
         key: 'part_no',
-        width: 160,
+        width: 120,
         ellipsis: { showTitle: true },
         render: (value?: string | null) =>
           value ? <span>{value}</span> : <Tag color="default">留空</Tag>,

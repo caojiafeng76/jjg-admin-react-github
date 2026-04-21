@@ -142,8 +142,9 @@ export interface MaterialTransferWithEmployee extends MaterialTransfer {
 export interface MaterialTransferFilters {
   startDate?: string
   endDate?: string
-  projectNo?: string
-  productModel?: string
+  projectNo?: string[] // 多关键词搜索项目号
+  productModel?: string[] // 多关键词搜索型号
+  length_mm?: number[] // 多选长度
   employeeId?: string
   targetWorkshop?: string
   recipientName?: string
@@ -155,10 +156,94 @@ export interface MaterialTransferQuantityStats {
   totalRecords: number
 }
 
+const MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE = 1000
+
+export async function getMaterialTransferProjectNos() {
+  const values = new Set<string>()
+  let from = 0
+
+  while (true) {
+    const to = from + MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('material_transfers')
+      .select('project_no')
+      .not('project_no', 'is', null)
+      .order('project_no', { ascending: true })
+      .range(from, to)
+
+    if (error) throw handleApiError(error, '获取项目号选项失败')
+
+    const rows = data || []
+    rows.forEach((item) => {
+      if (item.project_no) values.add(item.project_no.trim())
+    })
+
+    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) break
+    from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
+  }
+
+  return Array.from(values).sort((a, b) => a.localeCompare(b))
+}
+
+export async function getMaterialTransferModels() {
+  const values = new Set<string>()
+  let from = 0
+
+  while (true) {
+    const to = from + MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('material_transfers')
+      .select('product_model')
+      .not('product_model', 'is', null)
+      .order('product_model', { ascending: true })
+      .range(from, to)
+
+    if (error) throw handleApiError(error, '获取型号选项失败')
+
+    const rows = data || []
+    rows.forEach((item) => {
+      if (item.product_model) values.add(item.product_model.trim())
+    })
+
+    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) break
+    from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
+  }
+
+  return Array.from(values).sort((a, b) => a.localeCompare(b))
+}
+
+export async function getMaterialTransferLengths() {
+  const values = new Set<number>()
+  let from = 0
+
+  while (true) {
+    const to = from + MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('material_transfers')
+      .select('length_mm')
+      .not('length_mm', 'is', null)
+      .order('length_mm', { ascending: true })
+      .range(from, to)
+
+    if (error) throw handleApiError(error, '获取长度选项失败')
+
+    const rows = data || []
+    rows.forEach((item) => {
+      if (item.length_mm !== null) values.add(item.length_mm as number)
+    })
+
+    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) break
+    from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
+  }
+
+  return Array.from(values).sort((a, b) => a - b)
+}
+
 function applyMaterialTransferFilters<
   TQuery extends {
     ilike: (column: string, pattern: string) => TQuery
     or: (filters: string) => TQuery
+    in: (column: string, value: (string | number)[]) => TQuery
     contains: (column: string, value: string[]) => TQuery
     eq: (column: string, value: string | boolean) => TQuery
     gte: (column: string, value: string) => TQuery
@@ -181,8 +266,11 @@ function applyMaterialTransferFilters<
     )
   }
 
-  if (filters.projectNo) {
-    nextQuery = nextQuery.ilike('project_no', `%${filters.projectNo}%`)
+  const projectNoKeywords = normalizeSearchKeywords(filters.projectNo)
+  if (projectNoKeywords?.length) {
+    nextQuery = nextQuery.or(
+      buildOrIlikeFilter(['project_no'], projectNoKeywords),
+    )
   }
 
   const productModelKeywords = normalizeSearchKeywords(filters.productModel)
@@ -191,6 +279,10 @@ function applyMaterialTransferFilters<
     nextQuery = nextQuery.or(
       buildOrIlikeFilter(['product_model'], productModelKeywords),
     )
+  }
+
+  if (filters.length_mm?.length) {
+    nextQuery = nextQuery.in('length_mm', filters.length_mm)
   }
 
   if (filters.employeeId) {

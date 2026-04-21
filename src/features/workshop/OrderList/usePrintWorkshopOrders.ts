@@ -32,7 +32,7 @@ const META_FONT_SIZE = 11
 const TABLE_FONT_SIZE = 10
 const FOOTER_FONT_SIZE = 11
 const COLUMN_WIDTHS = [
-  22, 21, 24, 21, 17, 29, 13, 14, 14, 18, 38, 13, 13, 13,
+  22, 21, 24, 21, 17, 29, 14, 14, 18, 28, 15, 12, 12, 20,
 ] as const
 const TABLE_COLUMNS = [
   '二维码',
@@ -41,13 +41,13 @@ const TABLE_COLUMNS = [
   '项目号',
   '产品型号',
   '客户型号',
-  '比重',
   '长度',
   '订支数',
   '长度公差',
   '料号',
-  ' ',
-  ' ',
+  '表面处理',
+  '颜色',
+  '行备注',
   ' ',
 ] as const
 
@@ -222,13 +222,13 @@ export function usePrintWorkshopOrders() {
           formatCellText(order.project_no),
           formatCellText(order.product_model),
           formatCellText(order.customer_model),
-          formatCellText(order.weight_per_meter_kg),
           formatCellText(order.length_mm),
           formatCellText(order.order_quantity),
           formatCellText(order.length_tolerance),
           formatCellText(order.material_code),
-          '',
-          '',
+          formatCellText(order.product_category),
+          formatCellText(order.color_name),
+          formatCellText(order.row_remark),
           '',
         ])
 
@@ -279,7 +279,8 @@ export function usePrintWorkshopOrders() {
               columnIndex === 2 ||
               columnIndex === 3 ||
               columnIndex === 5 ||
-              columnIndex === 10
+              columnIndex === 9 ||
+              columnIndex === 12
                 ? 'left'
                 : 'center'
 

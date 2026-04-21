@@ -5,6 +5,9 @@ import {
   getMaterialTransferQuantityStats,
   getMaterialTransfers,
   getMaterialTransferById,
+  getMaterialTransferProjectNos,
+  getMaterialTransferModels,
+  getMaterialTransferLengths,
   createMaterialTransfer,
   updateMaterialTransfer,
   deleteMaterialTransfers,
@@ -51,9 +54,38 @@ export function useMaterialTransferQuantityStats({
   enabled?: boolean
 }) {
   return useQuery({
-    queryKey: [MATERIAL_TRANSFERS_KEY, 'quantity-stats', ids || null, filters || null],
+    queryKey: [
+      MATERIAL_TRANSFERS_KEY,
+      'quantity-stats',
+      ids || null,
+      filters || null,
+    ],
     queryFn: () => getMaterialTransferQuantityStats({ ids, filters }),
     enabled,
+    ...queryConfig.list,
+  })
+}
+
+export function useMaterialTransferProjectNos() {
+  return useQuery({
+    queryKey: [MATERIAL_TRANSFERS_KEY, 'project-no-options'],
+    queryFn: getMaterialTransferProjectNos,
+    ...queryConfig.list,
+  })
+}
+
+export function useMaterialTransferModels() {
+  return useQuery({
+    queryKey: [MATERIAL_TRANSFERS_KEY, 'model-options'],
+    queryFn: getMaterialTransferModels,
+    ...queryConfig.list,
+  })
+}
+
+export function useMaterialTransferLengths() {
+  return useQuery({
+    queryKey: [MATERIAL_TRANSFERS_KEY, 'length-options'],
+    queryFn: getMaterialTransferLengths,
     ...queryConfig.list,
   })
 }

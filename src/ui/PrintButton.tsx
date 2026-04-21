@@ -26,7 +26,7 @@ export default function PrintButton({
     >
       {children || (
         <>
-          打印PDF
+          打印
           {count !== undefined && count > 0 && (
             <span className="ml-1 text-xs">({count})</span>
           )}
