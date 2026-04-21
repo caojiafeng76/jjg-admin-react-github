@@ -59,6 +59,11 @@ export default function MaterialTransferTable({
         dataIndex: 'is_audited',
         key: 'is_audited',
         width: 90,
+        filters: [
+          { text: '已审核', value: true },
+          { text: '待审核', value: false },
+        ],
+        onFilter: (value, record) => record.is_audited === value,
         render: (value: boolean) => (
           <Tag color={value ? 'success' : 'default'}>
             {value ? '已审核' : '待审核'}
@@ -70,6 +75,11 @@ export default function MaterialTransferTable({
         dataIndex: 'customer',
         key: 'customer',
         width: 120,
+        filters: Array.from(
+          new Set(data.map((r) => r.customer).filter(Boolean)),
+        ).map((v) => ({ text: v as string, value: v as string })),
+        onFilter: (value, record) => record.customer === (value as string),
+        filterSearch: true,
         render: (value: string | null) => value || '-',
       },
       {
@@ -77,12 +87,22 @@ export default function MaterialTransferTable({
         dataIndex: 'project_no',
         key: 'project_no',
         width: 130,
+        filters: Array.from(new Set(data.map((r) => r.project_no))).map(
+          (v) => ({ text: v, value: v }),
+        ),
+        onFilter: (value, record) => record.project_no === (value as string),
+        filterSearch: true,
       },
       {
         title: '型号',
         dataIndex: 'product_model',
         key: 'product_model',
         width: 130,
+        filters: Array.from(
+          new Set(data.map((r) => r.product_model).filter(Boolean)),
+        ).map((v) => ({ text: v as string, value: v as string })),
+        onFilter: (value, record) => record.product_model === (value as string),
+        filterSearch: true,
         render: (value: string | null) => value || '-',
       },
       {
@@ -90,6 +110,14 @@ export default function MaterialTransferTable({
         dataIndex: 'length_mm',
         key: 'length_mm',
         width: 80,
+        filters: Array.from(
+          new Set(
+            data.map((r) => r.length_mm).filter((v): v is number => v !== null),
+          ),
+        )
+          .sort((a, b) => a - b)
+          .map((v) => ({ text: `${v}mm`, value: v })),
+        onFilter: (value, record) => record.length_mm === (value as number),
         render: (value: number | null) => value ?? '-',
       },
       {
@@ -110,9 +138,14 @@ export default function MaterialTransferTable({
         key: 'target_workshop',
         width: 100,
         fixed: 'right',
+        filters: Array.from(
+          new Set(data.map((r) => r.target_workshop).filter(Boolean)),
+        ).map((v) => ({ text: v, value: v })),
+        onFilter: (value, record) =>
+          record.target_workshop === (value as string),
       },
     ],
-    [page, pageSize],
+    [page, pageSize, data],
   )
 
   const rowSelection: TableProps<PrecisionCuttingTransferRow>['rowSelection'] =
