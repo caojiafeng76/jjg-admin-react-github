@@ -59,6 +59,11 @@ export default function MaterialTransferTable({
         dataIndex: 'is_audited',
         key: 'is_audited',
         width: 90,
+        filters: [
+          { text: '已审核', value: true },
+          { text: '待审核', value: false },
+        ],
+        onFilter: (value, record) => record.is_audited === value,
         render: (value: boolean) => (
           <Tag color={value ? 'success' : 'default'}>
             {value ? '已审核' : '待审核'}
@@ -70,6 +75,11 @@ export default function MaterialTransferTable({
         dataIndex: 'project_no',
         key: 'project_no',
         width: 130,
+        filters: Array.from(
+          new Set(data.map((r) => r.project_no).filter(Boolean)),
+        ).map((v) => ({ text: v as string, value: v as string })),
+        onFilter: (value, record) => record.project_no === (value as string),
+        filterSearch: true,
         sorter: (a, b) =>
           String(a.project_no || '').localeCompare(
             String(b.project_no || ''),
@@ -86,6 +96,11 @@ export default function MaterialTransferTable({
         dataIndex: 'product_model',
         key: 'product_model',
         width: 130,
+        filters: Array.from(
+          new Set(data.map((r) => r.product_model).filter(Boolean)),
+        ).map((v) => ({ text: v as string, value: v as string })),
+        onFilter: (value, record) => record.product_model === (value as string),
+        filterSearch: true,
         render: (value: string | null) => value || '-',
       },
       {
@@ -112,6 +127,12 @@ export default function MaterialTransferTable({
         title: '操作人',
         key: 'operator_names',
         width: 160,
+        filters: Array.from(
+          new Set(data.flatMap((r) => r.operator_names).filter(Boolean)),
+        ).map((v) => ({ text: v, value: v })),
+        onFilter: (value, record) =>
+          record.operator_names.includes(value as string),
+        filterSearch: true,
         render: (_text, record) => record.operator_names.join('、') || '-',
       },
       {
@@ -120,9 +141,14 @@ export default function MaterialTransferTable({
         key: 'target_workshop',
         width: 100,
         fixed: 'right',
+        filters: Array.from(
+          new Set(data.map((r) => r.target_workshop).filter(Boolean)),
+        ).map((v) => ({ text: v as string, value: v as string })),
+        onFilter: (value, record) =>
+          record.target_workshop === (value as string),
       },
     ],
-    [page, pageSize],
+    [page, pageSize, data],
   )
 
   const rowSelection: TableProps<MaterialTransferWithEmployee>['rowSelection'] =

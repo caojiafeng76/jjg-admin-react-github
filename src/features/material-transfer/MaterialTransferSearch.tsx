@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { Button, DatePicker, Form, Select, Space } from 'antd'
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -86,7 +86,6 @@ export default function MaterialTransferSearch({
           : undefined,
       employeeId: values.employeeId || undefined,
       targetWorkshop: values.targetWorkshop || undefined,
-      recipientName: values.recipientName?.trim() || undefined,
       isAudited:
         typeof values.isAudited === 'boolean' ? values.isAudited : undefined,
     })
@@ -203,14 +202,6 @@ export default function MaterialTransferSearch({
             label: workshop,
             value: workshop,
           }))}
-        />
-      </Form.Item>
-
-      <Form.Item name="recipientName" className="mb-0">
-        <Input
-          placeholder="接收人"
-          allowClear
-          style={{ width: mobile ? '100%' : 160 }}
         />
       </Form.Item>
 

@@ -76,6 +76,11 @@ export default function ProductionDailyReportTable({
         key: 'dataCategory',
         width: 100,
         fixed: 'left',
+        filters: [
+          { text: 'A', value: 'A' },
+          { text: 'B', value: 'B' },
+        ],
+        onFilter: (value, record) => record.dataCategory === (value as string),
       },
       {
         title: '项目号',
@@ -83,12 +88,23 @@ export default function ProductionDailyReportTable({
         key: 'projectNo',
         width: 140,
         fixed: 'left',
+        filters: Array.from(new Set(data.map((r) => r.projectNo))).map((v) => ({
+          text: v,
+          value: v,
+        })),
+        onFilter: (value, record) => record.projectNo === (value as string),
+        filterSearch: true,
       },
       {
         title: '产品型号',
         dataIndex: 'productModel',
         key: 'productModel',
         width: 120,
+        filters: Array.from(new Set(data.map((r) => r.productModel))).map(
+          (v) => ({ text: v, value: v }),
+        ),
+        onFilter: (value, record) => record.productModel === (value as string),
+        filterSearch: true,
       },
       {
         title: '客户型号',
@@ -101,6 +117,14 @@ export default function ProductionDailyReportTable({
         dataIndex: 'lengthMm',
         key: 'lengthMm',
         width: 90,
+        filters: Array.from(
+          new Set(
+            data.map((r) => r.lengthMm).filter((v): v is number => v !== null),
+          ),
+        )
+          .sort((a, b) => a - b)
+          .map((v) => ({ text: `${v}mm`, value: v })),
+        onFilter: (value, record) => record.lengthMm === (value as number),
         render: (value: number | null) => renderNumber(value),
       },
       {
@@ -108,6 +132,12 @@ export default function ProductionDailyReportTable({
         dataIndex: 'operation',
         key: 'operation',
         width: 120,
+        filters: Array.from(new Set(data.map((r) => r.operation))).map((v) => ({
+          text: v,
+          value: v,
+        })),
+        onFilter: (value, record) => record.operation === (value as string),
+        filterSearch: true,
       },
       {
         title: '来料合格数',
@@ -217,7 +247,7 @@ export default function ProductionDailyReportTable({
         width: 180,
       },
     ],
-    [page, pageSize],
+    [page, pageSize, data],
   )
 
   const rowSelection: TableProps<ProductionDailyReportRow>['rowSelection'] =
