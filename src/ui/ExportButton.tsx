@@ -45,4 +45,3 @@ export default function ExportButton({
   )
   return denied ? <Tooltip title={noPermissionTip}>{btn}</Tooltip> : btn
 }
-
