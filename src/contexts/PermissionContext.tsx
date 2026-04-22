@@ -24,7 +24,7 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   const { user, role, loading: authLoading } = useAuth()
   const enabled = !authLoading && !!user
 
-  const { data: permissions = {}, isLoading } = useQuery({
+  const { data: permissions = {}, isPending } = useQuery({
     // 必须把 user.id 放进 queryKey，避免不同账号在同浏览器切换时
     // 命中上一个用户的权限缓存，导致权限串号
     queryKey: ['my-permissions', user?.id ?? null],
@@ -32,6 +32,12 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
     enabled,
     staleTime: 5 * 60 * 1000, // 5分钟
   })
+
+  // 真正的 isLoading 语义：「已启用但首次权限数据尚未到达」。
+  // 不能直接用 useQuery 的 isLoading（= isPending && isFetching），因为 enabled
+  // 从 false 切到 true 的那一帧 isFetching 还没起来，会让 RouteGuards 误判
+  // permLoading=false + permissions={} → 立刻跳 /access-denied，刷新后才正常。
+  const isLoading = enabled && isPending
 
   // admin 用户权限加载完成后，静默同步权限注册表到数据库
   useEffect(() => {
