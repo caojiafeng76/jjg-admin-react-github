@@ -10,7 +10,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import PrintButton from '@/ui/PrintButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { useAuth } from '@/contexts/useAuth'
+import { usePermission } from '@/hooks/usePermission'
 import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
 import {
   useWorkshopOrdersList,
@@ -60,9 +60,8 @@ export default function WorkshopOrderList({
   fixedStatus,
 }: WorkshopOrderListProps = {}) {
   const { message, modal } = App.useApp()
-  const { role } = useAuth()
-  const canDelete = role === 'admin'
-  const canManageStatus = role === 'admin'
+  const canDelete = usePermission('feature:workshop-order.delete')
+  const canManageStatus = usePermission('feature:workshop-order.manage-status')
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')

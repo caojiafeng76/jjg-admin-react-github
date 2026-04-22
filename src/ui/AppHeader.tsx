@@ -29,6 +29,7 @@ import {
 import DarkModeButton from '@ui/DarkModeButton'
 import { getRoleLabel } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
+import { usePermission } from '@/hooks/usePermission'
 import { updateAdminManagementPassword } from '@/services/apiAdminManagementPassword'
 import type { AdminNotification } from '@/services/apiNotifications'
 
@@ -111,16 +112,21 @@ export default function AppHeader({
   const pageName = getPageName(currentPath)
   const displayName = employeeProfile?.name || user?.email || '未登录用户'
   const roleLabel = getRoleLabel(role)
-  const isAdmin = role === 'admin'
+  const canViewAdminNotifications = usePermission(
+    'feature:admin-notifications.view',
+  )
+  const canChangeManagementPassword = usePermission(
+    'feature:admin-management-password.update',
+  )
   const { data: notifications = [], isLoading: isNotificationsLoading } =
-    useAdminNotifications(12, isAdmin)
+    useAdminNotifications(12, canViewAdminNotifications)
   const { data: unreadCount = 0, isLoading: isUnreadCountLoading } =
-    useUnreadAdminNotificationCount(isAdmin)
+    useUnreadAdminNotificationCount(canViewAdminNotifications)
   const markNotificationReadMutation = useMarkAdminNotificationAsRead()
   const markAllNotificationsReadMutation = useMarkAllAdminNotificationsAsRead()
 
   useAdminNotificationsRealtime(
-    isAdmin,
+    canViewAdminNotifications,
     (newNotification: AdminNotification) => {
       const entityLabel =
         newNotification.entity_type === 'production_order'
@@ -265,7 +271,7 @@ export default function AppHeader({
         )}
 
         <div className="mr-12 flex h-full flex-1 items-center justify-end gap-4">
-          {isAdmin ? (
+          {canViewAdminNotifications ? (
             <Popover
               trigger="click"
               placement="bottomRight"
@@ -284,7 +290,7 @@ export default function AppHeader({
             欢迎您：{displayName}
             {roleLabel ? `（${roleLabel}）` : ''}
           </span>
-          {role === 'admin' ? (
+          {canChangeManagementPassword ? (
             <Button
               type="link"
               icon={<KeyIcon className="size-4" />}

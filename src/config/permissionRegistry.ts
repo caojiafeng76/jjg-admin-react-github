@@ -34,6 +34,24 @@ const GLOBAL_PERMISSIONS: PermissionDefinition[] = [
     surface: 'pc',
     label: '权限管理',
   },
+  // 全局 feature 权限：通知中心、管理密码
+  {
+    key: 'feature:admin-notifications.view',
+    scope: 'feature',
+    module: 'admin-notifications',
+    surface: 'pc',
+    label: '通知中心-查看',
+    description:
+      '控制顶栏通知铃图标与通知列表的可见性，未授权用户不订阅 admin 通知 realtime',
+  },
+  {
+    key: 'feature:admin-management-password.update',
+    scope: 'feature',
+    module: 'admin-management-password',
+    surface: 'pc',
+    label: '管理密码-修改',
+    description: '控制顶栏「修改管理密码」入口可见性',
+  },
 ]
 
 /**

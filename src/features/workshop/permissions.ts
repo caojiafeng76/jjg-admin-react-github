@@ -33,6 +33,24 @@ export const WORKSHOP_PERMISSIONS: PermissionDefinition[] = [
     label: '订单二维码详情',
   },
 
+  // 订单管理 feature 权限
+  {
+    key: 'feature:workshop-order.delete',
+    scope: 'feature',
+    module: 'workshop-order-list',
+    surface: 'pc',
+    label: '订单管理-删除',
+    description: '控制订单列表中"删除"按钮与批量删除入口',
+  },
+  {
+    key: 'feature:workshop-order.manage-status',
+    scope: 'feature',
+    module: 'workshop-order-list',
+    surface: 'pc',
+    label: '订单管理-状态变更',
+    description: '控制订单结案/反结案等状态批量操作入口',
+  },
+
   // 排产计划
   {
     key: 'nav:production-scheduling',
@@ -123,6 +141,47 @@ export const WORKSHOP_PERMISSIONS: PermissionDefinition[] = [
     module: 'standard-time-list',
     surface: 'pc',
     label: '成本核算',
+  },
+  {
+    key: 'feature:standard-time-list.create',
+    scope: 'feature',
+    module: 'standard-time-list',
+    surface: 'pc',
+    label: '成本核算-新建',
+    description: '控制成本核算列表"添加"按钮入口',
+  },
+  {
+    key: 'feature:standard-time-list.edit',
+    scope: 'feature',
+    module: 'standard-time-list',
+    surface: 'pc',
+    label: '成本核算-编辑',
+    description: '控制成本核算列表"编辑"按钮入口',
+  },
+  {
+    key: 'feature:standard-time-list.delete',
+    scope: 'feature',
+    module: 'standard-time-list',
+    surface: 'pc',
+    label: '成本核算-删除',
+    description: '控制成本核算列表"删除"按钮入口',
+  },
+  {
+    key: 'feature:standard-time-list.export-cost',
+    scope: 'feature',
+    module: 'standard-time-list',
+    surface: 'pc',
+    label: '成本核算-导出成本数据',
+    description: '控制"导出已选/按筛选条件导出"按钮（含敏感成本字段）',
+  },
+  {
+    key: 'field:standard-time-list.cost-detail.view',
+    scope: 'field',
+    module: 'standard-time-list',
+    surface: 'pc',
+    label: '成本核算-查看成本明细面板',
+    description:
+      '控制右侧成本明细 Splitter 面板的可见性（含人工/设备/总成本等敏感字段）',
   },
 
   // 报表
