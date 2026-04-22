@@ -25,7 +25,9 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   const enabled = !authLoading && !!user
 
   const { data: permissions = {}, isLoading } = useQuery({
-    queryKey: ['my-permissions'],
+    // 必须把 user.id 放进 queryKey，避免不同账号在同浏览器切换时
+    // 命中上一个用户的权限缓存，导致权限串号
+    queryKey: ['my-permissions', user?.id ?? null],
     queryFn: getMyPermissions,
     enabled,
     staleTime: 5 * 60 * 1000, // 5分钟

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
+import { useQueryClient } from '@tanstack/react-query'
 
 import supabase from '@/services/supabase'
 import type { Employee } from '@/services/apiEmployees'
@@ -15,6 +16,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null)
   const initializedRef = useRef(false)
   const currentUserIdRef = useRef<string | null>(null)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     currentUserIdRef.current = user?.id ?? null
@@ -157,6 +159,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setUser(null)
     setEmployeeProfile(null)
+    // 清掉所有 React Query 缓存，防止下一个登录账号读到上一个账号的数据
+    queryClient.clear()
     setLoading(false)
   }
 

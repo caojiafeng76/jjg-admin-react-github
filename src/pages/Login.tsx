@@ -3,8 +3,9 @@ import { Alert, Button, Checkbox, Form, Input, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { getDefaultHomeByRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
+import { usePermissionContext } from '@/contexts/PermissionContext'
+import { deriveDefaultHome } from '@/routes/pageHome'
 import { translateErrorMessage } from '@/utils/errorHandler'
 import Loading from '@ui/Loading'
 
@@ -36,22 +37,29 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, role, loading, error, clearError, signIn } = useAuth()
+  const { permissions, isLoading: permLoading } = usePermissionContext()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const redirectTarget = getSafeRedirectTarget(location.search)
 
   useEffect(() => {
-    if (user && !loading) {
-      const timer = setTimeout(() => {
-        navigate(redirectTarget || getDefaultHomeByRole(role), {
-          replace: true,
-        })
-      }, 0)
-
-      return () => clearTimeout(timer)
+    // 必须等权限也加载完，否则自定义角色无法基于权限挑首页
+    if (user && !loading && !permLoading) {
+      let cancelled = false
+      const resolve = async () => {
+        const target =
+          redirectTarget || (await deriveDefaultHome(role, permissions))
+        if (!cancelled) {
+          navigate(target, { replace: true })
+        }
+      }
+      resolve()
+      return () => {
+        cancelled = true
+      }
     }
-  }, [user, role, loading, navigate, redirectTarget])
+  }, [user, role, loading, permLoading, navigate, redirectTarget, permissions])
 
   useEffect(() => {
     if (error) {

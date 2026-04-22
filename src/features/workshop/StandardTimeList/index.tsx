@@ -6,6 +6,7 @@ import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import ExportButton from '@/ui/ExportButton'
+import PermissionGate from '@/ui/PermissionGate'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useAuth } from '@/contexts/useAuth'
@@ -396,18 +397,27 @@ export default function StandardTimeList() {
         </Button>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          <AddButton handleCreate={handleCreate} />
-          <EditButton title="编辑" handleEdit={() => handleEdit()} />
+          <AddButton
+            handleCreate={handleCreate}
+            permissionKey="feature:standard-time-list.create"
+          />
+          <EditButton
+            title="编辑"
+            handleEdit={() => handleEdit()}
+            permissionKey="feature:standard-time-list.edit"
+          />
           <ExportButton
             handleExport={handleExport}
             loading={isExporting}
             count={selectedRowKeys.length}
+            permissionKey="feature:standard-time-list.export-cost"
           >
             导出已选
           </ExportButton>
           <ExportButton
             handleExport={handleFilterExport}
             loading={isFilterExporting}
+            permissionKey="feature:standard-time-list.export-cost"
           >
             按筛选条件导出
           </ExportButton>
@@ -417,6 +427,7 @@ export default function StandardTimeList() {
             count={selectedRowKeys.length}
             title="删除成本核算"
             itemName="成本核算"
+            permissionKey="feature:standard-time-list.delete"
           />
         </div>
       )}
@@ -489,7 +500,9 @@ export default function StandardTimeList() {
           </Splitter.Panel>
           <Splitter.Panel min="20%">
             <div className="h-full overflow-hidden">
-              <StandardTimeCostDetail selectedRecord={activeRecord} />
+              <PermissionGate permissionKey="field:standard-time-list.cost-detail.view">
+                <StandardTimeCostDetail selectedRecord={activeRecord} />
+              </PermissionGate>
             </div>
           </Splitter.Panel>
         </Splitter>

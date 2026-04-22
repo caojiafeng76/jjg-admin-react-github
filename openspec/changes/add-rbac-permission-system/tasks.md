@@ -88,3 +88,21 @@
 - [x] 8.4 评估 EMPLOYEE_SIDE_ROLES / isEmployeeSideRole 残留：router 已无引用；剩余 7 处属于「操作者视角」派生（layout 选择、扫码身份校验、is_audited 默认值等业务规则），非访问控制，按设计保留并在 src/config/access.ts 注释明确语义
 - [x] 8.5 执行 bun run build，确认 TypeScript 无报错，构建成功
 - [x] 8.6 回归验证：admin / employee / team_leader / precision_cutting_admin 各角色用户的访问行为符合预期
+
+## 9. 精细权限增强（替换业务硬编码 admin 判断）
+
+- [x] 9.1 注册 4 个新 feature 权限：`feature:workshop-order.delete`、`feature:workshop-order.manage-status`、`feature:admin-notifications.view`、`feature:admin-management-password.update`（同步更新 `permissionRegistry.ts` 与 `features/workshop/permissions.ts`）
+- [x] 9.2 替换 `src/features/workshop/OrderList/index.tsx` 中 `canDelete = role === 'admin'` / `canManageStatus = role === 'admin'` 为 `usePermission('feature:workshop-order.*')`
+- [x] 9.3 替换 `src/ui/AppHeader.tsx` 中 `isAdmin` 控制通知铃 / 修改管理密码入口的硬编码为 `usePermission('feature:admin-notifications.view')` 与 `usePermission('feature:admin-management-password.update')`
+- [x] 9.4 新增 migration `20260422120000_add_admin_feature_permissions.sql`，INSERT 4 条新权限；依赖 `auto_grant_to_admin` trigger 自动绑定 admin
+- [x] 9.5 执行 `bun run db:push` 推送 migration 到远程库（输出确认 1 个 migration 应用成功）
+- [x] 9.6 执行 `bun run build` 通过，TypeScript 无报错
+
+## 10. 第二步精细权限：成本核算（standard-time-list）
+
+- [x] 10.1 注册 5 个新权限到 `src/features/workshop/permissions.ts`：`feature:standard-time-list.create` / `.edit` / `.delete` / `.export-cost`、以及 `field:standard-time-list.cost-detail.view`（首个 field scope 权限）
+- [x] 10.2 在 `src/features/workshop/StandardTimeList/index.tsx` 中给 AddButton/EditButton/DeleteButton/两个 ExportButton 传入 permissionKey，让按钮按权限自动 disable + 提示
+- [x] 10.3 用 `<PermissionGate permissionKey="field:standard-time-list.cost-detail.view">` 包裹 `<StandardTimeCostDetail>`，无权限时整块成本明细面板隐藏
+- [x] 10.4 新增 migration `20260423090000_add_standard_time_list_fine_grained_permissions.sql`，INSERT 5 条新权限（含 ON CONFLICT DO NOTHING）；admin 由 trigger 自动授权，其他角色默认无（行为不变）
+- [x] 10.5 执行 `bun run db:push` 推送成功
+- [x] 10.6 执行 `bun run build` 通过，TypeScript 无报错

@@ -1,10 +1,11 @@
 import { Navigate, useLocation } from 'react-router-dom'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 import Loading from '@ui/Loading'
 import { useAuth } from '@/contexts/useAuth'
 import { usePermissionContext } from '@/contexts/PermissionContext'
 import { getDefaultHomeByRole, type AppRole } from '@/config/access'
+import { deriveDefaultHome } from './pageHome'
 
 function buildLoginRedirectPath(targetPath: string) {
   return `/login?redirect=${encodeURIComponent(targetPath)}`
@@ -70,8 +71,21 @@ export function RoleProtectedRoute({
 
 export function RoleHomeRedirect() {
   const { user, loading, role, employeeProfile } = useAuth()
+  const { permissions, isLoading: permLoading } = usePermissionContext()
+  const [target, setTarget] = useState<string | null>(null)
 
-  if (loading) {
+  useEffect(() => {
+    if (loading || permLoading || !user || !employeeProfile || !role) return
+    let cancelled = false
+    deriveDefaultHome(role, permissions).then((path) => {
+      if (!cancelled) setTarget(path)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [loading, permLoading, user, employeeProfile, role, permissions])
+
+  if (loading || permLoading) {
     return <Loading />
   }
 
@@ -83,7 +97,11 @@ export function RoleHomeRedirect() {
     return <Navigate to="/access-denied" replace />
   }
 
-  return <Navigate replace to={getDefaultHomeByRole(role)} />
+  if (!target) {
+    return <Loading />
+  }
+
+  return <Navigate replace to={target} />
 }
 
 /**
