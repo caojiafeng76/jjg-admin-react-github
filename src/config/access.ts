@@ -3,8 +3,10 @@ export type AppRole =
   | 'employee'
   | 'team_leader'
   | 'precision_cutting_admin'
+  | 'warehouse_admin'
 
 export const PRECISION_CUTTING_ADMIN_ROLE: AppRole = 'precision_cutting_admin'
+export const WAREHOUSE_ADMIN_ROLE: AppRole = 'warehouse_admin'
 
 /**
  * 「员工/班组长」操作者视角集合（actor view），用于 layout 选择与业务规则派生。
@@ -24,6 +26,7 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   employee: '员工',
   team_leader: '班组长',
   precision_cutting_admin: '精切管理员',
+  warehouse_admin: '仓库管理员',
 }
 
 export const ROLE_OPTIONS: Array<{ label: string; value: AppRole }> = [
@@ -33,6 +36,7 @@ export const ROLE_OPTIONS: Array<{ label: string; value: AppRole }> = [
     label: ROLE_LABELS.precision_cutting_admin,
     value: PRECISION_CUTTING_ADMIN_ROLE,
   },
+  { label: ROLE_LABELS.warehouse_admin, value: WAREHOUSE_ADMIN_ROLE },
   { label: ROLE_LABELS.admin, value: 'admin' },
 ]
 
@@ -41,6 +45,7 @@ export const DEFAULT_HOME_BY_ROLE: Record<AppRole, string> = {
   employee: '/production-order',
   team_leader: '/production-order',
   precision_cutting_admin: '/workshop-order-list/production',
+  warehouse_admin: '/youmai-raw-material-inventory',
 }
 
 export function isEmployeeSideRole(role: AppRole | null | undefined) {

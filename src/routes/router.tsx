@@ -52,6 +52,9 @@ import {
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsStockIn,
   YoumaiFinishedGoodsStockOut,
+  YoumaiRawMaterialInventory,
+  YoumaiRawMaterialStockIn,
+  YoumaiRawMaterialStockOut,
   YoumaiProductData,
   WorkshopOrderClosed,
   WorkshopOrderProduction,
@@ -512,6 +515,39 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:youmai-finished-goods-stock-out"
               element={<YoumaiFinishedGoodsStockOut />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'youmai-raw-material-inventory',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:youmai-raw-material-inventory"
+              element={<YoumaiRawMaterialInventory />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'youmai-raw-material-stock-in',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:youmai-raw-material-stock-in"
+              element={<YoumaiRawMaterialStockIn />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'youmai-raw-material-stock-out',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:youmai-raw-material-stock-out"
+              element={<YoumaiRawMaterialStockOut />}
             />
           </Suspense>
         ),

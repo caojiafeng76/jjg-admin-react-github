@@ -67,6 +67,15 @@ export const YoumaiFinishedGoodsStockIn = lazy(
 export const YoumaiFinishedGoodsStockOut = lazy(
   () => import('@features/youmai/FinishedGoodsStockOut'),
 )
+export const YoumaiRawMaterialInventory = lazy(
+  () => import('@features/youmai/RawMaterialInventory'),
+)
+export const YoumaiRawMaterialStockIn = lazy(
+  () => import('@features/youmai/RawMaterialStockIn'),
+)
+export const YoumaiRawMaterialStockOut = lazy(
+  () => import('@features/youmai/RawMaterialStockOut'),
+)
 export const MachineEquipmentMaintenance = lazy(
   () => import('@features/workshop/MachineEquipmentMaintenance'),
 )
