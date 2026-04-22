@@ -39,4 +39,25 @@ export const YOUMAI_PERMISSIONS: PermissionDefinition[] = [
     surface: 'pc',
     label: '优迈成品出库',
   },
+  {
+    key: 'page:youmai-raw-material-inventory',
+    scope: 'page',
+    module: 'youmai',
+    surface: 'pc',
+    label: '优迈原料库存',
+  },
+  {
+    key: 'page:youmai-raw-material-stock-in',
+    scope: 'page',
+    module: 'youmai',
+    surface: 'pc',
+    label: '优迈原料入库',
+  },
+  {
+    key: 'page:youmai-raw-material-stock-out',
+    scope: 'page',
+    module: 'youmai',
+    surface: 'pc',
+    label: '优迈原料出库',
+  },
 ]

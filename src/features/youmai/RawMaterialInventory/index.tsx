@@ -4,38 +4,38 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
-  YoumaiFinishedGoodsInventory,
-  YoumaiFinishedGoodsInventoryFormValues,
-  YoumaiFinishedGoodsInventoryImportRow,
-} from '@/services/apiYoumaiFinishedGoodsInventory'
+  YoumaiRawMaterialInventory,
+  YoumaiRawMaterialInventoryFormValues,
+} from '@/services/apiYoumaiRawMaterialInventory'
+import { getYoumaiRawMaterialInventoryForExport } from '@/services/apiYoumaiRawMaterialInventory'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
-import YoumaiFinishedGoodsInventoryExcelImport from './YoumaiFinishedGoodsInventoryExcelImport'
-import YoumaiFinishedGoodsInventoryForm from './YoumaiFinishedGoodsInventoryForm'
-import YoumaiFinishedGoodsInventorySearch from './YoumaiFinishedGoodsInventorySearch'
-import YoumaiFinishedGoodsInventoryTable from './YoumaiFinishedGoodsInventoryTable'
+import ExportButton from '@/ui/ExportButton'
+import { exportYoumaiRawMaterialInventoryToExcel } from '@/utils/youmaiRawMaterialInventoryExcel'
+import YoumaiRawMaterialInventoryForm from './YoumaiRawMaterialInventoryForm'
+import YoumaiRawMaterialInventorySearch from './YoumaiRawMaterialInventorySearch'
+import YoumaiRawMaterialInventoryTable from './YoumaiRawMaterialInventoryTable'
 import {
-  useCreateYoumaiFinishedGoodsInventory,
-  useDeleteYoumaiFinishedGoodsInventory,
-  useImportYoumaiFinishedGoodsInventory,
-  useUpdateYoumaiFinishedGoodsInventory,
-  useYoumaiFinishedGoodsInventoryList,
-  useYoumaiProductDataOptions,
-} from './useYoumaiFinishedGoodsInventory'
+  useCreateYoumaiRawMaterialInventory,
+  useDeleteYoumaiRawMaterialInventory,
+  useUpdateYoumaiRawMaterialInventory,
+  useYoumaiRawMaterialInventoryList,
+} from './useYoumaiRawMaterialInventory'
 
-export default function YoumaiFinishedGoodsInventoryPage() {
+export default function YoumaiRawMaterialInventoryPage() {
   const { message } = App.useApp()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalTitle, setModalTitle] = useState('新建优迈成品库存')
+  const [modalTitle, setModalTitle] = useState('新建原料库存')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] =
-    useState<YoumaiFinishedGoodsInventory | null>(null)
+    useState<YoumaiRawMaterialInventory | null>(null)
   const [formRef, setFormRef] =
-    useState<FormInstance<YoumaiFinishedGoodsInventoryFormValues> | null>(null)
+    useState<FormInstance<YoumaiRawMaterialInventoryFormValues> | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -44,22 +44,18 @@ export default function YoumaiFinishedGoodsInventoryPage() {
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = useYoumaiFinishedGoodsInventoryList({
+  const { data, isLoading } = useYoumaiRawMaterialInventoryList({
     page,
     pageSize,
     searchParams,
   })
-  const { data: productOptions = [] } = useYoumaiProductDataOptions()
 
-  const createMutation = useCreateYoumaiFinishedGoodsInventory()
-  const updateMutation = useUpdateYoumaiFinishedGoodsInventory()
-  const importMutation = useImportYoumaiFinishedGoodsInventory()
-  const deleteMutation = useDeleteYoumaiFinishedGoodsInventory()
+  const createMutation = useCreateYoumaiRawMaterialInventory()
+  const updateMutation = useUpdateYoumaiRawMaterialInventory()
+  const deleteMutation = useDeleteYoumaiRawMaterialInventory()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
-      targetRowCount: 10,
-    })
+    useTableHeight({ targetRowCount: 10 })
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
@@ -73,7 +69,7 @@ export default function YoumaiFinishedGoodsInventoryPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    setModalTitle('新建优迈成品库存')
+    setModalTitle('新建原料库存')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef])
@@ -83,69 +79,49 @@ export default function YoumaiFinishedGoodsInventoryPage() {
       message.warning('请选择一条数据进行编辑')
       return
     }
-
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.rawMaterialInventory.find(
+      (item) => item.id === selectedRowKeys[0],
+    )
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
     }
-
     setEditingRecord(record)
     setIsEdit(true)
-    setModalTitle('编辑优迈成品库存')
+    setModalTitle('编辑原料库存')
     setIsModalOpen(true)
-  }, [data?.items, message, selectedRowKeys])
+  }, [data?.rawMaterialInventory, message, selectedRowKeys])
 
   const handleDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
       message.warning('请选择至少一条数据')
       return
     }
-
     try {
-      await deleteMutation.mutateAsync(selectedRowKeys as string[])
-      message.success('优迈成品库存删除成功')
+      for (const id of selectedRowKeys as string[]) {
+        await deleteMutation.mutateAsync(id)
+      }
+      message.success('原料库存删除成功')
       setSelectedRowKeys([])
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
       } else {
-        message.error('删除优迈成品库存失败，请稍后重试')
+        message.error('删除原料库存失败，请稍后重试')
       }
     }
   }, [deleteMutation, message, selectedRowKeys])
 
-  const handleImport = useCallback(
-    async (rows: YoumaiFinishedGoodsInventoryImportRow[]) => {
-      try {
-        await importMutation.mutateAsync(rows)
-        message.success(`优迈成品库存导入成功，共 ${rows.length} 条`)
-        setSelectedRowKeys([])
-      } catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        } else {
-          message.error('导入优迈成品库存失败，请稍后重试')
-        }
-      }
-    },
-    [importMutation, message],
-  )
-
   const handleFinish = useCallback(
-    async (values: YoumaiFinishedGoodsInventoryFormValues) => {
+    async (values: YoumaiRawMaterialInventoryFormValues) => {
       try {
-        if (isEdit && selectedRowKeys[0]) {
-          await updateMutation.mutateAsync({
-            id: selectedRowKeys[0] as string,
-            values,
-          })
-          message.success('优迈成品库存更新成功')
+        if (isEdit && editingRecord) {
+          await updateMutation.mutateAsync({ id: editingRecord.id, values })
+          message.success('原料库存更新成功')
         } else {
           await createMutation.mutateAsync(values)
-          message.success('优迈成品库存创建成功')
+          message.success('原料库存创建成功')
         }
-
         resetFormState()
       } catch (error) {
         if (error instanceof Error) {
@@ -157,10 +133,10 @@ export default function YoumaiFinishedGoodsInventoryPage() {
     },
     [
       createMutation,
+      editingRecord,
       isEdit,
       message,
       resetFormState,
-      selectedRowKeys,
       updateMutation,
     ],
   )
@@ -169,17 +145,14 @@ export default function YoumaiFinishedGoodsInventoryPage() {
     (params: typeof searchParams) => {
       setSearchParams(params)
       setSelectedRowKeys([])
-
-      const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
-      nextSearchParamsURL.set('page', '1')
-
+      const next = new URLSearchParams(searchParamsURL)
+      next.set('page', '1')
       if (params.keyword) {
-        nextSearchParamsURL.set('keyword', params.keyword)
+        next.set('keyword', params.keyword)
       } else {
-        nextSearchParamsURL.delete('keyword')
+        next.delete('keyword')
       }
-
-      setSearchParamsURL(nextSearchParamsURL)
+      setSearchParamsURL(next)
     },
     [searchParamsURL, setSearchParamsURL],
   )
@@ -187,18 +160,36 @@ export default function YoumaiFinishedGoodsInventoryPage() {
   const handleResetSearch = useCallback(() => {
     setSearchParams({})
     setSelectedRowKeys([])
-
-    const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
-    nextSearchParamsURL.set('page', '1')
-    nextSearchParamsURL.delete('keyword')
-    setSearchParamsURL(nextSearchParamsURL)
+    const next = new URLSearchParams(searchParamsURL)
+    next.set('page', '1')
+    next.delete('keyword')
+    setSearchParamsURL(next)
   }, [searchParamsURL, setSearchParamsURL])
 
+  const handleExport = useCallback(async () => {
+    try {
+      setIsExporting(true)
+      const records = await getYoumaiRawMaterialInventoryForExport(
+        searchParams.keyword,
+      )
+      if (records.length === 0) {
+        message.warning('当前没有可导出的原料库存数据')
+        return
+      }
+      exportYoumaiRawMaterialInventoryToExcel(records)
+      message.success(`已导出 ${records.length} 条原料库存数据`)
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '导出失败')
+    } finally {
+      setIsExporting(false)
+    }
+  }, [message, searchParams.keyword])
+
   useEffect(() => {
-    if (page > 1 && data && data.items.length === 0) {
-      const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
-      nextSearchParamsURL.set('page', Math.max(page - 1, 1).toString())
-      setSearchParamsURL(nextSearchParamsURL)
+    if (page > 1 && data && data.rawMaterialInventory.length === 0) {
+      const next = new URLSearchParams(searchParamsURL)
+      next.set('page', Math.max(page - 1, 1).toString())
+      setSearchParamsURL(next)
     }
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
@@ -206,23 +197,26 @@ export default function YoumaiFinishedGoodsInventoryPage() {
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑优迈成品库存" handleEdit={handleEdit} />
+        <EditButton title="编辑原料库存" handleEdit={handleEdit} />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
-          title="删除优迈成品库存"
-          itemName="优迈成品库存"
+          title="删除原料库存"
+          itemName="原料库存"
         />
-        <YoumaiFinishedGoodsInventoryExcelImport
-          onImport={handleImport}
-          isImporting={importMutation.isPending}
-        />
+        <ExportButton
+          handleExport={handleExport}
+          loading={isExporting}
+          count={data?.count}
+        >
+          导出库存
+        </ExportButton>
       </div>
 
       <div className="flex items-center gap-2">
         <span className="whitespace-nowrap text-slate-600">搜索：</span>
-        <YoumaiFinishedGoodsInventorySearch
+        <YoumaiRawMaterialInventorySearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
@@ -234,9 +228,9 @@ export default function YoumaiFinishedGoodsInventoryPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <YoumaiFinishedGoodsInventoryTable
+          <YoumaiRawMaterialInventoryTable
             loading={isLoading}
-            data={data?.items || []}
+            data={data?.rawMaterialInventory || []}
             selectedRowKeys={selectedRowKeys}
             onSelect={setSelectedRowKeys}
             page={page}
@@ -246,7 +240,7 @@ export default function YoumaiFinishedGoodsInventoryPage() {
           />
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
-          <AppPagination total={data?.total || 0} />
+          <AppPagination total={data?.count || 0} />
         </div>
       </div>
 
@@ -258,11 +252,11 @@ export default function YoumaiFinishedGoodsInventoryPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <YoumaiFinishedGoodsInventoryForm
+        <YoumaiRawMaterialInventoryForm
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
-          productOptions={productOptions}
+          isEdit={isEdit}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
         />
       </Modal>

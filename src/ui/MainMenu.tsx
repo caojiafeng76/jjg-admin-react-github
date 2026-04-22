@@ -227,6 +227,21 @@ const allMenuItems: MenuItemDef[] = [
         label: '成品出库',
         permission: 'page:youmai-finished-goods-stock-out',
       },
+      {
+        key: 'youmai-raw-material-inventory',
+        label: '原料库存',
+        permission: 'page:youmai-raw-material-inventory',
+      },
+      {
+        key: 'youmai-raw-material-stock-in',
+        label: '原料入库',
+        permission: 'page:youmai-raw-material-stock-in',
+      },
+      {
+        key: 'youmai-raw-material-stock-out',
+        label: '原料出库',
+        permission: 'page:youmai-raw-material-stock-out',
+      },
     ],
   },
   {
