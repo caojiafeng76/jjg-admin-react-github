@@ -202,6 +202,29 @@ const allMenuItems: MenuItemDef[] = [
     ],
   },
   {
+    key: 'villa-lift',
+    label: '别墅梯',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:villa-lift',
+    children: [
+      {
+        key: 'villa-lift-order-list',
+        label: '订单管理',
+        permission: 'page:villa-lift-order-list',
+      },
+      {
+        key: 'villa-lift-cutting-process',
+        label: '切割工序',
+        permission: 'page:villa-lift-cutting-process',
+      },
+      {
+        key: 'villa-lift-processing',
+        label: '加工工序',
+        permission: 'page:villa-lift-processing',
+      },
+    ],
+  },
+  {
     key: 'youmai',
     label: '优迈',
     icon: <Square3Stack3DIcon className="size-4" />,

@@ -124,3 +124,15 @@ export const AttendanceStats = lazy(
 export const AccessManagement = lazy(
   () => import('@features/access-management'),
 )
+
+export const VillaLiftOrderList = lazy(
+  () => import('@features/villa-lift/OrderList'),
+)
+
+export const VillaLiftCuttingProcess = lazy(
+  () => import('@features/villa-lift/CuttingProcess'),
+)
+
+export const VillaLiftFinishingProcess = lazy(
+  () => import('@features/villa-lift/FinishingProcess'),
+)

@@ -14,6 +14,9 @@ import {
 import {
   AccessDenied,
   AccessManagement,
+  VillaLiftOrderList,
+  VillaLiftCuttingProcess,
+  VillaLiftFinishingProcess,
   AttendanceDetail,
   AttendanceStats,
   ComingSoonPage,
@@ -581,6 +584,39 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:access-management"
               element={<AccessManagement />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'villa-lift-order-list',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:villa-lift-order-list"
+              element={<VillaLiftOrderList />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'villa-lift-cutting-process',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:villa-lift-cutting-process"
+              element={<VillaLiftCuttingProcess />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'villa-lift-processing',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:villa-lift-processing"
+              element={<VillaLiftFinishingProcess />}
             />
           </Suspense>
         ),
