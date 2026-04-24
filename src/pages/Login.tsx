@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/useAuth'
 import { usePermissionContext } from '@/contexts/PermissionContext'
-import { deriveDefaultHome } from '@/routes/pageHome'
+import { deriveDefaultHome, userCanAccessPath } from '@/routes/pageHome'
 import { translateErrorMessage } from '@/utils/errorHandler'
 import Loading from '@ui/Loading'
 
@@ -48,8 +48,17 @@ export default function Login() {
     if (user && !loading && !permLoading) {
       let cancelled = false
       const resolve = async () => {
-        const target =
-          redirectTarget || (await deriveDefaultHome(role, permissions))
+        // redirectTarget 可能是 ProtectedRoute 拦截原地址而来，必须按权限校验，
+        // 否则登录后会直接跳到无权限页面再被 PermissionProtectedRoute 弹到
+        // /access-denied（首次新建用户/调整权限时高发）。
+        let target: string | null = null
+        if (redirectTarget) {
+          const allowed = await userCanAccessPath(redirectTarget, permissions)
+          if (allowed) target = redirectTarget
+        }
+        if (!target) {
+          target = await deriveDefaultHome(role, permissions)
+        }
         if (!cancelled) {
           navigate(target, { replace: true })
         }

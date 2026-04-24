@@ -3,7 +3,7 @@ import { App, Button, FormInstance, Modal, Popconfirm, Select } from 'antd'
 import { TrashIcon } from '@heroicons/react/16/solid'
 import { useSearchParams } from 'react-router-dom'
 
-import { usePermissionContext } from '@/contexts/PermissionContext'
+import { usePermissions } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
   VillaLiftFinishingBatchFormValues,
@@ -25,8 +25,14 @@ import FinishingRecordEditModal from './FinishingRecordEditModal'
 
 export default function FinishingProcessPage() {
   const { message } = App.useApp()
-  const { can } = usePermissionContext()
-  const canEdit = can('page:villa-lift-processing')
+  const perms = usePermissions([
+    'feature:villa-lift-finishing.create',
+    'feature:villa-lift-finishing.edit',
+    'feature:villa-lift-finishing.delete',
+  ])
+  const canCreate = perms['feature:villa-lift-finishing.create']
+  const canEdit = perms['feature:villa-lift-finishing.edit']
+  const canDelete = perms['feature:villa-lift-finishing.delete']
   const [searchParams, setSearchParams] = useSearchParams()
 
   // 分页
@@ -127,8 +133,8 @@ export default function FinishingProcessPage() {
     <div className="grid h-full grid-rows-[auto_1fr] gap-4">
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
-        {canEdit && <AddButton handleCreate={handleCreate} />}
-        {canEdit && selectedRowKeys.length > 0 && (
+        {canCreate && <AddButton handleCreate={handleCreate} />}
+        {canDelete && selectedRowKeys.length > 0 && (
           <Popconfirm
             title={`确认删除选中的 ${selectedRowKeys.length} 条记录？`}
             okText="删除"
