@@ -23,6 +23,7 @@ export type VillaLiftOrderStatus = 'open' | 'closed'
 
 export interface VillaLiftOrder {
   id: string
+  planned_delivery_date: string | null
   schedule_date: string | null
   delivery_date: string | null
   customer: string
@@ -38,6 +39,11 @@ export interface VillaLiftOrder {
   processing_required_date: string | null
   processing_actual_date: string | null
   inspection_date: string | null
+  tinting_plan_date: string | null
+  painting_plan_date: string | null
+  film_plan_date: string | null
+  assembly_date: string | null
+  packaging_date: string | null
   remarks: string
   status: VillaLiftOrderStatus
   created_at: string
@@ -54,6 +60,7 @@ export interface VillaLiftOrderItemFormValues {
 }
 
 export interface VillaLiftOrderFormValues {
+  planned_delivery_date: string | Dayjs | null
   schedule_date: string | Dayjs | null
   delivery_date: string | Dayjs | null
   customer: string
@@ -69,6 +76,11 @@ export interface VillaLiftOrderFormValues {
   processing_required_date: string | Dayjs | null
   processing_actual_date: string | Dayjs | null
   inspection_date: string | Dayjs | null
+  tinting_plan_date: string | Dayjs | null
+  painting_plan_date: string | Dayjs | null
+  film_plan_date: string | Dayjs | null
+  assembly_date: string | Dayjs | null
+  packaging_date: string | Dayjs | null
   remarks: string
   status: VillaLiftOrderStatus
   items: VillaLiftOrderItemFormValues[]
@@ -82,6 +94,11 @@ function normalizeOrderPayload(
   values: Omit<VillaLiftOrderFormValues, 'items'>,
 ) {
   return {
+    planned_delivery_date: values.planned_delivery_date
+      ? typeof values.planned_delivery_date === 'string'
+        ? values.planned_delivery_date
+        : values.planned_delivery_date.format('YYYY-MM-DD')
+      : null,
     schedule_date: values.schedule_date
       ? typeof values.schedule_date === 'string'
         ? values.schedule_date
@@ -136,6 +153,31 @@ function normalizeOrderPayload(
       ? typeof values.inspection_date === 'string'
         ? values.inspection_date
         : values.inspection_date.format('YYYY-MM-DD')
+      : null,
+    tinting_plan_date: values.tinting_plan_date
+      ? typeof values.tinting_plan_date === 'string'
+        ? values.tinting_plan_date
+        : values.tinting_plan_date.format('YYYY-MM-DD')
+      : null,
+    painting_plan_date: values.painting_plan_date
+      ? typeof values.painting_plan_date === 'string'
+        ? values.painting_plan_date
+        : values.painting_plan_date.format('YYYY-MM-DD')
+      : null,
+    film_plan_date: values.film_plan_date
+      ? typeof values.film_plan_date === 'string'
+        ? values.film_plan_date
+        : values.film_plan_date.format('YYYY-MM-DD')
+      : null,
+    assembly_date: values.assembly_date
+      ? typeof values.assembly_date === 'string'
+        ? values.assembly_date
+        : values.assembly_date.format('YYYY-MM-DD')
+      : null,
+    packaging_date: values.packaging_date
+      ? typeof values.packaging_date === 'string'
+        ? values.packaging_date
+        : values.packaging_date.format('YYYY-MM-DD')
       : null,
     remarks: values.remarks?.trim() ?? '',
     status: values.status ?? 'open',

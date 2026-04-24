@@ -124,17 +124,17 @@ export default function VillaLiftOrderTable({
         render: (_v, _r, index) => (page - 1) * pageSize + index + 1,
       },
       {
-        title: '排产日期',
-        dataIndex: 'schedule_date',
-        key: 'schedule_date',
-        width: 110,
+        title: '计划交货日期',
+        dataIndex: 'planned_delivery_date',
+        key: 'planned_delivery_date',
+        width: 120,
         fixed: 'left',
         render: (v: string | null) => v ?? '-',
       },
       {
-        title: '交货日期',
-        dataIndex: 'delivery_date',
-        key: 'delivery_date',
+        title: '排产日期',
+        dataIndex: 'schedule_date',
+        key: 'schedule_date',
         width: 110,
         fixed: 'left',
         render: (v: string | null) => v ?? '-',
@@ -180,6 +180,13 @@ export default function VillaLiftOrderTable({
         align: 'right',
       },
       {
+        title: '挑料计划完成日期',
+        dataIndex: 'tinting_plan_date',
+        key: 'tinting_plan_date',
+        width: 150,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
         title: '挑料完成日期',
         dataIndex: 'material_selection_date',
         key: 'material_selection_date',
@@ -187,10 +194,24 @@ export default function VillaLiftOrderTable({
         render: (v: string | null) => v ?? '-',
       },
       {
+        title: '喷涂计划完成日期',
+        dataIndex: 'painting_plan_date',
+        key: 'painting_plan_date',
+        width: 150,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
         title: '喷涂完成日期',
         dataIndex: 'painting_date',
         key: 'painting_date',
         width: 130,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '贴膜计划完成日期',
+        dataIndex: 'film_plan_date',
+        key: 'film_plan_date',
+        width: 150,
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -236,6 +257,27 @@ export default function VillaLiftOrderTable({
         render: (v: string | null) => v ?? '-',
       },
       {
+        title: '组装完成日期',
+        dataIndex: 'assembly_date',
+        key: 'assembly_date',
+        width: 130,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '包装完成日期',
+        dataIndex: 'packaging_date',
+        key: 'packaging_date',
+        width: 130,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '发货日期',
+        dataIndex: 'delivery_date',
+        key: 'delivery_date',
+        width: 110,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
         title: '备注',
         dataIndex: 'remarks',
         key: 'remarks',
@@ -249,9 +291,9 @@ export default function VillaLiftOrderTable({
         fixed: 'right',
         render: (v: string) =>
           v === 'closed' ? (
-            <Tag color="default">已结案</Tag>
+            <Tag color="green">已结案</Tag>
           ) : (
-            <Tag color="blue">未结案</Tag>
+            <Tag color="red">未结案</Tag>
           ),
       },
       {
