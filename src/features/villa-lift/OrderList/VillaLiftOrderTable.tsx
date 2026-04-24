@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Button, Spin, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
 import {
@@ -12,6 +12,27 @@ import type {
   VillaLiftOrderItem,
 } from '@/services/apiVillaLiftOrders'
 import { useVillaLiftOrderItems } from './useVillaLiftOrders'
+
+// ----------------------------------------------------------------
+// 列选项搜索辅助：从当前数据中提取唯一值，生成带搜索的过滤器
+// ----------------------------------------------------------------
+function getSelectFilter(
+  dataIndex: keyof VillaLiftOrder,
+  data: VillaLiftOrder[],
+) {
+  const options = Array.from(
+    new Set(data.map((r) => String(r[dataIndex] ?? '')).filter(Boolean)),
+  )
+    .sort()
+    .map((v) => ({ text: v, value: v }))
+
+  return {
+    filters: options,
+    filterSearch: true,
+    onFilter: (value: React.Key | boolean, record: VillaLiftOrder) =>
+      String(record[dataIndex] ?? '') === String(value),
+  }
+}
 
 // ----------------------------------------------------------------
 // 展开行：明细子表
@@ -121,7 +142,8 @@ export default function VillaLiftOrderTable({
         key: '#',
         width: 55,
         fixed: 'left',
-        render: (_v, _r, index) => (page - 1) * pageSize + index + 1,
+        render: (_v: unknown, _r: VillaLiftOrder, index: number) =>
+          (page - 1) * pageSize + index + 1,
       },
       {
         title: '计划交货日期',
@@ -129,6 +151,7 @@ export default function VillaLiftOrderTable({
         key: 'planned_delivery_date',
         width: 120,
         fixed: 'left',
+        ...getSelectFilter('planned_delivery_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -137,6 +160,7 @@ export default function VillaLiftOrderTable({
         key: 'schedule_date',
         width: 110,
         fixed: 'left',
+        ...getSelectFilter('schedule_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -145,6 +169,7 @@ export default function VillaLiftOrderTable({
         key: 'customer',
         width: 130,
         fixed: 'left',
+        ...getSelectFilter('customer', data),
         render: (v: string) => v || '-',
       },
       {
@@ -153,6 +178,7 @@ export default function VillaLiftOrderTable({
         key: 'project_name',
         width: 160,
         fixed: 'left',
+        ...getSelectFilter('project_name', data),
         render: (v: string) => v || '-',
       },
       {
@@ -161,6 +187,7 @@ export default function VillaLiftOrderTable({
         key: 'product_name',
         width: 140,
         fixed: 'left',
+        ...getSelectFilter('product_name', data),
         render: (v: string) => v || '-',
       },
       {
@@ -169,6 +196,7 @@ export default function VillaLiftOrderTable({
         key: 'color',
         width: 100,
         fixed: 'left',
+        ...getSelectFilter('color', data),
         render: (v: string) => (v ? <Tag>{v}</Tag> : '-'),
       },
       {
@@ -178,12 +206,14 @@ export default function VillaLiftOrderTable({
         width: 80,
         fixed: 'left',
         align: 'right',
+        ...getSelectFilter('quantity', data),
       },
       {
         title: '挑料计划完成日期',
         dataIndex: 'tinting_plan_date',
         key: 'tinting_plan_date',
         width: 150,
+        ...getSelectFilter('tinting_plan_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -191,6 +221,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'material_selection_date',
         key: 'material_selection_date',
         width: 130,
+        ...getSelectFilter('material_selection_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -198,6 +229,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'painting_plan_date',
         key: 'painting_plan_date',
         width: 150,
+        ...getSelectFilter('painting_plan_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -205,6 +237,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'painting_date',
         key: 'painting_date',
         width: 130,
+        ...getSelectFilter('painting_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -212,6 +245,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'film_plan_date',
         key: 'film_plan_date',
         width: 150,
+        ...getSelectFilter('film_plan_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -219,6 +253,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'film_date',
         key: 'film_date',
         width: 130,
+        ...getSelectFilter('film_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -226,6 +261,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'cutting_required_date',
         key: 'cutting_required_date',
         width: 150,
+        ...getSelectFilter('cutting_required_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -233,6 +269,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'cutting_actual_date',
         key: 'cutting_actual_date',
         width: 150,
+        ...getSelectFilter('cutting_actual_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -240,6 +277,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'processing_required_date',
         key: 'processing_required_date',
         width: 150,
+        ...getSelectFilter('processing_required_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -247,6 +285,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'processing_actual_date',
         key: 'processing_actual_date',
         width: 150,
+        ...getSelectFilter('processing_actual_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -254,6 +293,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'inspection_date',
         key: 'inspection_date',
         width: 130,
+        ...getSelectFilter('inspection_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -261,6 +301,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'assembly_date',
         key: 'assembly_date',
         width: 130,
+        ...getSelectFilter('assembly_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -268,6 +309,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'packaging_date',
         key: 'packaging_date',
         width: 130,
+        ...getSelectFilter('packaging_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -275,12 +317,14 @@ export default function VillaLiftOrderTable({
         dataIndex: 'delivery_date',
         key: 'delivery_date',
         width: 110,
+        ...getSelectFilter('delivery_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {
         title: '备注',
         dataIndex: 'remarks',
         key: 'remarks',
+        ...getSelectFilter('remarks', data),
         render: (v: string) => v || '-',
       },
       {
@@ -289,6 +333,12 @@ export default function VillaLiftOrderTable({
         key: 'status',
         width: 90,
         fixed: 'right',
+        filters: [
+          { text: '已结案', value: 'closed' },
+          { text: '未结案', value: 'open' },
+        ],
+        onFilter: (value: boolean | React.Key, record: VillaLiftOrder) =>
+          record.status === String(value),
         render: (v: string) =>
           v === 'closed' ? (
             <Tag color="green">已结案</Tag>
@@ -301,7 +351,7 @@ export default function VillaLiftOrderTable({
         key: 'action',
         width: 70,
         fixed: 'right',
-        render: (_v, record) =>
+        render: (_v: unknown, record: VillaLiftOrder) =>
           canEdit ? (
             <Tooltip title="编辑订单">
               <Button
@@ -316,7 +366,7 @@ export default function VillaLiftOrderTable({
           ) : null,
       },
     ],
-    [page, pageSize, canEdit, onEdit],
+    [page, pageSize, canEdit, onEdit, data],
   )
 
   const expandable: TableProps<VillaLiftOrder>['expandable'] = {
