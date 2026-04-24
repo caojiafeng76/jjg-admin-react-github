@@ -1662,70 +1662,88 @@ export type Database = {
       }
       villa_lift_orders: {
         Row: {
+          assembly_date: string | null
           color: string
           created_at: string
           customer: string
+          cutting_actual_date: string | null
+          cutting_required_date: string | null
           delivery_date: string | null
+          film_date: string | null
+          film_plan_date: string | null
           id: string
+          inspection_date: string | null
+          material_selection_date: string | null
+          packaging_date: string | null
+          painting_date: string | null
+          painting_plan_date: string | null
+          planned_delivery_date: string | null
+          processing_actual_date: string | null
+          processing_required_date: string | null
           product_name: string
           project_name: string
           quantity: number
           remarks: string
           schedule_date: string | null
           status: string
+          tinting_plan_date: string | null
           updated_at: string
-          material_selection_date: string | null
-          painting_date: string | null
-          film_date: string | null
-          cutting_required_date: string | null
-          cutting_actual_date: string | null
-          processing_required_date: string | null
-          processing_actual_date: string | null
-          inspection_date: string | null
         }
         Insert: {
+          assembly_date?: string | null
           color?: string
           created_at?: string
           customer?: string
+          cutting_actual_date?: string | null
+          cutting_required_date?: string | null
           delivery_date?: string | null
+          film_date?: string | null
+          film_plan_date?: string | null
           id?: string
+          inspection_date?: string | null
+          material_selection_date?: string | null
+          packaging_date?: string | null
+          painting_date?: string | null
+          painting_plan_date?: string | null
+          planned_delivery_date?: string | null
+          processing_actual_date?: string | null
+          processing_required_date?: string | null
           product_name?: string
           project_name?: string
           quantity?: number
           remarks?: string
           schedule_date?: string | null
           status?: string
+          tinting_plan_date?: string | null
           updated_at?: string
-          material_selection_date?: string | null
-          painting_date?: string | null
-          film_date?: string | null
-          cutting_required_date?: string | null
-          cutting_actual_date?: string | null
-          processing_required_date?: string | null
-          processing_actual_date?: string | null
-          inspection_date?: string | null
         }
         Update: {
+          assembly_date?: string | null
           color?: string
           created_at?: string
           customer?: string
+          cutting_actual_date?: string | null
+          cutting_required_date?: string | null
           delivery_date?: string | null
+          film_date?: string | null
+          film_plan_date?: string | null
           id?: string
+          inspection_date?: string | null
+          material_selection_date?: string | null
+          packaging_date?: string | null
+          painting_date?: string | null
+          painting_plan_date?: string | null
+          planned_delivery_date?: string | null
+          processing_actual_date?: string | null
+          processing_required_date?: string | null
           product_name?: string
           project_name?: string
           quantity?: number
           remarks?: string
           schedule_date?: string | null
           status?: string
+          tinting_plan_date?: string | null
           updated_at?: string
-          material_selection_date?: string | null
-          painting_date?: string | null
-          film_date?: string | null
-          cutting_required_date?: string | null
-          cutting_actual_date?: string | null
-          processing_required_date?: string | null
-          processing_actual_date?: string | null
-          inspection_date?: string | null
         }
         Relationships: []
       }

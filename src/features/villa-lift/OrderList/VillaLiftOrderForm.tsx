@@ -29,6 +29,7 @@ interface Props {
 }
 
 const DEFAULT_ORDER_VALUES: VillaLiftOrderFormValues = {
+  planned_delivery_date: null,
   schedule_date: null,
   delivery_date: null,
   customer: '',
@@ -44,6 +45,11 @@ const DEFAULT_ORDER_VALUES: VillaLiftOrderFormValues = {
   processing_required_date: null,
   processing_actual_date: null,
   inspection_date: null,
+  tinting_plan_date: null,
+  painting_plan_date: null,
+  film_plan_date: null,
+  assembly_date: null,
+  packaging_date: null,
   remarks: '',
   status: 'open',
   items: [],
@@ -66,6 +72,9 @@ export default function VillaLiftOrderForm({
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
+        planned_delivery_date: initialValues.planned_delivery_date
+          ? dayjs(initialValues.planned_delivery_date)
+          : null,
         schedule_date: initialValues.schedule_date
           ? dayjs(initialValues.schedule_date)
           : null,
@@ -100,6 +109,21 @@ export default function VillaLiftOrderForm({
           : null,
         inspection_date: initialValues.inspection_date
           ? dayjs(initialValues.inspection_date)
+          : null,
+        tinting_plan_date: initialValues.tinting_plan_date
+          ? dayjs(initialValues.tinting_plan_date)
+          : null,
+        painting_plan_date: initialValues.painting_plan_date
+          ? dayjs(initialValues.painting_plan_date)
+          : null,
+        film_plan_date: initialValues.film_plan_date
+          ? dayjs(initialValues.film_plan_date)
+          : null,
+        assembly_date: initialValues.assembly_date
+          ? dayjs(initialValues.assembly_date)
+          : null,
+        packaging_date: initialValues.packaging_date
+          ? dayjs(initialValues.packaging_date)
           : null,
         remarks: initialValues.remarks,
         status: initialValues.status ?? 'open',
@@ -142,18 +166,18 @@ export default function VillaLiftOrderForm({
       {/* 主订单字段 */}
       {!itemsOnly && (
         <div className="grid grid-cols-2 gap-x-4">
+          <Form.Item name="planned_delivery_date" label="计划交货日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择计划交货日期"
+            />
+          </Form.Item>
           <Form.Item name="schedule_date" label="排产日期">
             <DatePicker
               style={{ width: '100%' }}
               format="YYYY-MM-DD"
               placeholder="选择排产日期"
-            />
-          </Form.Item>
-          <Form.Item name="delivery_date" label="交货日期">
-            <DatePicker
-              style={{ width: '100%' }}
-              format="YYYY-MM-DD"
-              placeholder="选择交货日期"
             />
           </Form.Item>
           <Form.Item name="customer" label="客户" rules={[{ max: 200 }]}>
@@ -183,6 +207,16 @@ export default function VillaLiftOrderForm({
           >
             <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
           </Form.Item>
+          <Form.Item name="remarks" label="备注" rules={[{ max: 500 }]}>
+            <Input placeholder="备注" />
+          </Form.Item>
+          <Form.Item name="tinting_plan_date" label="挑料计划完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择挑料计划完成日期"
+            />
+          </Form.Item>
           <Form.Item name="material_selection_date" label="挑料完成日期">
             <DatePicker
               style={{ width: '100%' }}
@@ -190,11 +224,25 @@ export default function VillaLiftOrderForm({
               placeholder="选择挑料完成日期"
             />
           </Form.Item>
+          <Form.Item name="painting_plan_date" label="喷涂计划完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择喷涂计划完成日期"
+            />
+          </Form.Item>
           <Form.Item name="painting_date" label="喷涂完成日期">
             <DatePicker
               style={{ width: '100%' }}
               format="YYYY-MM-DD"
               placeholder="选择喷涂完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="film_plan_date" label="贴膜计划完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择贴膜计划完成日期"
             />
           </Form.Item>
           <Form.Item name="film_date" label="贴膜完成日期">
@@ -239,8 +287,26 @@ export default function VillaLiftOrderForm({
               placeholder="选择检验完成日期"
             />
           </Form.Item>
-          <Form.Item name="remarks" label="备注" rules={[{ max: 500 }]}>
-            <Input placeholder="备注" />
+          <Form.Item name="assembly_date" label="组装完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择组装完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="packaging_date" label="包装完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择包装完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="delivery_date" label="发货日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择发货日期"
+            />
           </Form.Item>
           <Form.Item name="status" label="状态">
             <Radio.Group>
