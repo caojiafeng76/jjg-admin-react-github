@@ -8,7 +8,7 @@ export interface ProductionDailyReportFilters {
   endDate?: string
   dataCategory?: ProductionOrderDataCategory
   projectNo?: string
-  productModel?: string[]
+  productModel?: string
   customerModel?: string
   operation?: string
   employeeId?: string
@@ -151,8 +151,8 @@ function buildProductionDailyReportQuery(
     query = query.eq('data_category', filters.dataCategory)
   }
 
-  if (filters.productModel?.length) {
-    query = query.in('product_model', filters.productModel)
+  if (filters.productModel) {
+    query = query.ilike('product_model', `%${filters.productModel}%`)
   }
 
   if (filters.customerModel) {
