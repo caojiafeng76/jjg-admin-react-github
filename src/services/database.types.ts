@@ -1674,6 +1674,14 @@ export type Database = {
           schedule_date: string | null
           status: string
           updated_at: string
+          material_selection_date: string | null
+          painting_date: string | null
+          film_date: string | null
+          cutting_required_date: string | null
+          cutting_actual_date: string | null
+          processing_required_date: string | null
+          processing_actual_date: string | null
+          inspection_date: string | null
         }
         Insert: {
           color?: string
@@ -1688,6 +1696,14 @@ export type Database = {
           schedule_date?: string | null
           status?: string
           updated_at?: string
+          material_selection_date?: string | null
+          painting_date?: string | null
+          film_date?: string | null
+          cutting_required_date?: string | null
+          cutting_actual_date?: string | null
+          processing_required_date?: string | null
+          processing_actual_date?: string | null
+          inspection_date?: string | null
         }
         Update: {
           color?: string
@@ -1702,6 +1718,14 @@ export type Database = {
           schedule_date?: string | null
           status?: string
           updated_at?: string
+          material_selection_date?: string | null
+          painting_date?: string | null
+          film_date?: string | null
+          cutting_required_date?: string | null
+          cutting_actual_date?: string | null
+          processing_required_date?: string | null
+          processing_actual_date?: string | null
+          inspection_date?: string | null
         }
         Relationships: []
       }

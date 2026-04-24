@@ -8,8 +8,8 @@ argument-hint: [数据库任务说明]
 执行要求：
 
 1. 先说明本次变更属于哪一类：表结构、索引、约束、RLS、函数、视图、数据修复、查询优化，或其组合。
-2. 必须先使用 thinking 拆解变更目标、影响范围、兼容性风险和回滚思路，再进入检索和实现。
-3. 建立上下文时必须优先使用 Serena 检查相关服务层调用、类型、引用关系和受影响模块；若 Serena 当前不可用，再退回常规搜索，并明确说明已降级。
+2. 所有数据库任务开始前，必须先调用 Sequential Thinking MCP；即使任务很小，也至少要用它明确变更类型、目标和执行路径。随后必须进一步用它拆解变更目标、影响范围、兼容性风险和回滚思路，再进入检索和实现。
+3. 建立上下文时必须先调用 Serena MCP 检查相关服务层调用、类型、引用关系和受影响模块；若 Serena 当前不可用或返回 `No active project`，仍需明确说明已降级，再退回常规搜索。
 4. 根据任务类型主动使用相关 skill：
    - RLS / Auth 绑定 / 员工隔离 -> `.github/skills/supabase-rls-patterns/`
    - Excel 导入 / 批量 upsert / 数据修复 -> `.github/skills/supabase-bulk-operations/`

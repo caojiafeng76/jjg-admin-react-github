@@ -30,6 +30,14 @@ export interface VillaLiftOrder {
   product_name: string
   color: string
   quantity: number
+  material_selection_date: string | null
+  painting_date: string | null
+  film_date: string | null
+  cutting_required_date: string | null
+  cutting_actual_date: string | null
+  processing_required_date: string | null
+  processing_actual_date: string | null
+  inspection_date: string | null
   remarks: string
   status: VillaLiftOrderStatus
   created_at: string
@@ -53,6 +61,14 @@ export interface VillaLiftOrderFormValues {
   product_name: string
   color: string
   quantity: number
+  material_selection_date: string | Dayjs | null
+  painting_date: string | Dayjs | null
+  film_date: string | Dayjs | null
+  cutting_required_date: string | Dayjs | null
+  cutting_actual_date: string | Dayjs | null
+  processing_required_date: string | Dayjs | null
+  processing_actual_date: string | Dayjs | null
+  inspection_date: string | Dayjs | null
   remarks: string
   status: VillaLiftOrderStatus
   items: VillaLiftOrderItemFormValues[]
@@ -81,6 +97,46 @@ function normalizeOrderPayload(
     product_name: values.product_name?.trim() ?? '',
     color: values.color?.trim() ?? '',
     quantity: Number(values.quantity ?? 0),
+    material_selection_date: values.material_selection_date
+      ? typeof values.material_selection_date === 'string'
+        ? values.material_selection_date
+        : values.material_selection_date.format('YYYY-MM-DD')
+      : null,
+    painting_date: values.painting_date
+      ? typeof values.painting_date === 'string'
+        ? values.painting_date
+        : values.painting_date.format('YYYY-MM-DD')
+      : null,
+    film_date: values.film_date
+      ? typeof values.film_date === 'string'
+        ? values.film_date
+        : values.film_date.format('YYYY-MM-DD')
+      : null,
+    cutting_required_date: values.cutting_required_date
+      ? typeof values.cutting_required_date === 'string'
+        ? values.cutting_required_date
+        : values.cutting_required_date.format('YYYY-MM-DD')
+      : null,
+    cutting_actual_date: values.cutting_actual_date
+      ? typeof values.cutting_actual_date === 'string'
+        ? values.cutting_actual_date
+        : values.cutting_actual_date.format('YYYY-MM-DD')
+      : null,
+    processing_required_date: values.processing_required_date
+      ? typeof values.processing_required_date === 'string'
+        ? values.processing_required_date
+        : values.processing_required_date.format('YYYY-MM-DD')
+      : null,
+    processing_actual_date: values.processing_actual_date
+      ? typeof values.processing_actual_date === 'string'
+        ? values.processing_actual_date
+        : values.processing_actual_date.format('YYYY-MM-DD')
+      : null,
+    inspection_date: values.inspection_date
+      ? typeof values.inspection_date === 'string'
+        ? values.inspection_date
+        : values.inspection_date.format('YYYY-MM-DD')
+      : null,
     remarks: values.remarks?.trim() ?? '',
     status: values.status ?? 'open',
   }
@@ -229,6 +285,30 @@ export async function updateVillaLiftOrderStatus({
     .eq('id', id)
 
   if (error) throw handleApiError(error, '更新订单状态失败')
+}
+
+export async function batchDeleteVillaLiftOrders(ids: string[]): Promise<void> {
+  const { error } = await supabase
+    .from('villa_lift_orders')
+    .delete()
+    .in('id', ids)
+
+  if (error) throw handleApiError(error, '批量删除别墅梯订单失败')
+}
+
+export async function batchUpdateVillaLiftOrdersStatus({
+  ids,
+  status,
+}: {
+  ids: string[]
+  status: VillaLiftOrderStatus
+}): Promise<void> {
+  const { error } = await supabase
+    .from('villa_lift_orders')
+    .update({ status })
+    .in('id', ids)
+
+  if (error) throw handleApiError(error, '批量更新订单状态失败')
 }
 
 export async function upsertVillaLiftOrderItems({

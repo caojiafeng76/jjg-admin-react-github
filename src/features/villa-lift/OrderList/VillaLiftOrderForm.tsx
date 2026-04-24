@@ -36,6 +36,14 @@ const DEFAULT_ORDER_VALUES: VillaLiftOrderFormValues = {
   product_name: '',
   color: '',
   quantity: 0,
+  material_selection_date: null,
+  painting_date: null,
+  film_date: null,
+  cutting_required_date: null,
+  cutting_actual_date: null,
+  processing_required_date: null,
+  processing_actual_date: null,
+  inspection_date: null,
   remarks: '',
   status: 'open',
   items: [],
@@ -69,6 +77,30 @@ export default function VillaLiftOrderForm({
         product_name: initialValues.product_name,
         color: initialValues.color,
         quantity: initialValues.quantity,
+        material_selection_date: initialValues.material_selection_date
+          ? dayjs(initialValues.material_selection_date)
+          : null,
+        painting_date: initialValues.painting_date
+          ? dayjs(initialValues.painting_date)
+          : null,
+        film_date: initialValues.film_date
+          ? dayjs(initialValues.film_date)
+          : null,
+        cutting_required_date: initialValues.cutting_required_date
+          ? dayjs(initialValues.cutting_required_date)
+          : null,
+        cutting_actual_date: initialValues.cutting_actual_date
+          ? dayjs(initialValues.cutting_actual_date)
+          : null,
+        processing_required_date: initialValues.processing_required_date
+          ? dayjs(initialValues.processing_required_date)
+          : null,
+        processing_actual_date: initialValues.processing_actual_date
+          ? dayjs(initialValues.processing_actual_date)
+          : null,
+        inspection_date: initialValues.inspection_date
+          ? dayjs(initialValues.inspection_date)
+          : null,
         remarks: initialValues.remarks,
         status: initialValues.status ?? 'open',
         items: orderOnly
@@ -150,6 +182,62 @@ export default function VillaLiftOrderForm({
             rules={[{ type: 'number', min: 0 }]}
           >
             <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
+          </Form.Item>
+          <Form.Item name="material_selection_date" label="挑料完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择挑料完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="painting_date" label="喷涂完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择喷涂完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="film_date" label="贴膜完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择贴膜完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="cutting_required_date" label="切割要求完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择切割要求完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="cutting_actual_date" label="切割实际完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择切割实际完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="processing_required_date" label="加工要求完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择加工要求完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="processing_actual_date" label="加工实际完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择加工实际完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="inspection_date" label="检验完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择检验完成日期"
+            />
           </Form.Item>
           <Form.Item name="remarks" label="备注" rules={[{ max: 500 }]}>
             <Input placeholder="备注" />

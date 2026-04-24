@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
-import { App, FormInstance, Modal, Select } from 'antd'
+import { App, Button, FormInstance, Modal, Popconfirm, Select } from 'antd'
+import { TrashIcon } from '@heroicons/react/16/solid'
 import { useSearchParams } from 'react-router-dom'
 
 import { usePermissionContext } from '@/contexts/PermissionContext'
@@ -12,8 +13,8 @@ import type {
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import {
+  useBatchDeleteFinishingRecords,
   useCreateFinishingBatch,
-  useDeleteFinishingRecord,
   useFinishingRecords,
   useUpdateFinishingRecord,
   useVillaLiftOrdersForSelect,
@@ -39,9 +40,8 @@ export default function FinishingProcessPage() {
   const [editingRecord, setEditingRecord] =
     useState<VillaLiftFinishingRecordWithOrder | null>(null)
 
-  const formRef = useRef<FormInstance<VillaLiftFinishingBatchFormValues> | null>(
-    null,
-  )
+  const formRef =
+    useRef<FormInstance<VillaLiftFinishingBatchFormValues> | null>(null)
 
   // 数据
   const { data: ordersData = [] } = useVillaLiftOrdersForSelect()
@@ -52,7 +52,9 @@ export default function FinishingProcessPage() {
   })
   const createMutation = useCreateFinishingBatch()
   const updateMutation = useUpdateFinishingRecord()
-  const deleteMutation = useDeleteFinishingRecord()
+  const batchDeleteMutation = useBatchDeleteFinishingRecords()
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([])
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 10,
@@ -100,17 +102,15 @@ export default function FinishingProcessPage() {
     [editingRecord, message, updateMutation],
   )
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      try {
-        await deleteMutation.mutateAsync(id)
-        message.success('删除成功')
-      } catch (err) {
-        if (err instanceof Error) message.error(err.message)
-      }
-    },
-    [deleteMutation, message],
-  )
+  const handleBatchDelete = useCallback(async () => {
+    try {
+      await batchDeleteMutation.mutateAsync(selectedRowKeys)
+      message.success(`已删除 ${selectedRowKeys.length} 条记录`)
+      setSelectedRowKeys([])
+    } catch (err) {
+      if (err instanceof Error) message.error(err.message)
+    }
+  }, [batchDeleteMutation, message, selectedRowKeys])
 
   function handleOrderFilter(value: string | undefined) {
     const next = new URLSearchParams(searchParams)
@@ -128,6 +128,24 @@ export default function FinishingProcessPage() {
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         {canEdit && <AddButton handleCreate={handleCreate} />}
+        {canEdit && selectedRowKeys.length > 0 && (
+          <Popconfirm
+            title={`确认删除选中的 ${selectedRowKeys.length} 条记录？`}
+            okText="删除"
+            cancelText="取消"
+            okButtonProps={{ danger: true }}
+            onConfirm={handleBatchDelete}
+          >
+            <Button
+              type="text"
+              danger
+              icon={<TrashIcon className="size-4" />}
+              loading={batchDeleteMutation.isPending}
+            >
+              批量删除 ({selectedRowKeys.length})
+            </Button>
+          </Popconfirm>
+        )}
         <Select
           allowClear
           showSearch
@@ -154,9 +172,9 @@ export default function FinishingProcessPage() {
             loading={isLoading}
             data={data?.records ?? []}
             canEdit={canEdit}
-            isDeleting={deleteMutation.isPending}
+            selectedRowKeys={selectedRowKeys}
+            onSelectionChange={setSelectedRowKeys}
             onEdit={handleEdit}
-            onDelete={handleDelete}
             scrollY={scrollY}
           />
         </div>

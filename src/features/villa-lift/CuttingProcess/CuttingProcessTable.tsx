@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { Button, Popconfirm, Table, Tag, Tooltip } from 'antd'
+import { Button, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType } from 'antd'
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/16/solid'
+import { PencilSquareIcon } from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
 
 import type { VillaLiftCuttingRecordWithOrder } from '@/services/apiVillaLiftCutting'
@@ -14,9 +14,9 @@ interface CuttingProcessTableProps {
   data: VillaLiftCuttingRecordWithOrder[]
   loading: boolean
   canEdit: boolean
-  isDeleting: boolean
+  selectedRowKeys: string[]
+  onSelectionChange: (keys: string[]) => void
   onEdit: (record: VillaLiftCuttingRecordWithOrder) => void
-  onDelete: (id: string) => void
   scrollY?: number
 }
 
@@ -28,9 +28,9 @@ export default function CuttingProcessTable({
   data,
   loading,
   canEdit,
-  isDeleting,
+  selectedRowKeys,
+  onSelectionChange,
   onEdit,
-  onDelete,
   scrollY,
 }: CuttingProcessTableProps) {
   const columns: TableColumnsType<VillaLiftCuttingRecordWithOrder> = useMemo(
@@ -41,6 +41,7 @@ export default function CuttingProcessTable({
         key: 'project_name',
         width: 160,
         ellipsis: true,
+        fixed: 'left' as const,
         render: (v: string) => <span className="font-medium">{v}</span>,
       },
       {
@@ -49,6 +50,7 @@ export default function CuttingProcessTable({
         key: 'customer',
         width: 100,
         ellipsis: true,
+        fixed: 'left' as const,
       },
       {
         title: '产品',
@@ -56,6 +58,7 @@ export default function CuttingProcessTable({
         key: 'product_name',
         width: 120,
         ellipsis: true,
+        fixed: 'left' as const,
       },
       {
         title: '型号',
@@ -133,7 +136,7 @@ export default function CuttingProcessTable({
             {
               title: '操作',
               key: 'action',
-              width: 80,
+              width: 70,
               fixed: 'right' as const,
               render: (_: unknown, record: VillaLiftCuttingRecordWithOrder) => (
                 <div className="flex items-center gap-1">
@@ -145,30 +148,13 @@ export default function CuttingProcessTable({
                       onClick={() => onEdit(record)}
                     />
                   </Tooltip>
-                  <Popconfirm
-                    title="确认删除该记录？"
-                    okText="删除"
-                    cancelText="取消"
-                    okButtonProps={{ danger: true }}
-                    onConfirm={() => onDelete(record.id)}
-                  >
-                    <Tooltip title="删除">
-                      <Button
-                        type="text"
-                        size="small"
-                        danger
-                        loading={isDeleting}
-                        icon={<TrashIcon className="size-4" />}
-                      />
-                    </Tooltip>
-                  </Popconfirm>
                 </div>
               ),
             },
           ]
         : []),
     ],
-    [canEdit, isDeleting, onEdit, onDelete],
+    [canEdit, onEdit],
   )
 
   return (
@@ -180,6 +166,10 @@ export default function CuttingProcessTable({
       pagination={false}
       scroll={{ x: 1350, y: scrollY }}
       size="small"
+      rowSelection={{
+        selectedRowKeys,
+        onChange: (keys) => onSelectionChange(keys as string[]),
+      }}
     />
   )
 }

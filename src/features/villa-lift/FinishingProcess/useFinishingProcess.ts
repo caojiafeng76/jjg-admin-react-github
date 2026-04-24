@@ -4,6 +4,7 @@ import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import { getVillaLiftOrdersForSelect } from '@/services/apiVillaLiftCutting'
 import {
+  batchDeleteVillaLiftFinishingRecords,
   createVillaLiftFinishingBatch,
   deleteVillaLiftFinishingRecord,
   getProcessOperationsByModels,
@@ -65,6 +66,13 @@ export function useUpdateFinishingRecord() {
 export function useDeleteFinishingRecord() {
   return useMutationWithInvalidation({
     mutationFn: deleteVillaLiftFinishingRecord,
+    invalidateQueries: [[FINISHING_RECORDS_KEY]],
+  })
+}
+
+export function useBatchDeleteFinishingRecords() {
+  return useMutationWithInvalidation({
+    mutationFn: batchDeleteVillaLiftFinishingRecords,
     invalidateQueries: [[FINISHING_RECORDS_KEY]],
   })
 }

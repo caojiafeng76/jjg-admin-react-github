@@ -1,6 +1,11 @@
 import { useCallback, useRef, useState } from 'react'
-import { App, FormInstance, Input, Modal } from 'antd'
+import { App, Button, FormInstance, Input, Modal, Popconfirm } from 'antd'
 import { useSearchParams } from 'react-router-dom'
+import {
+  ArrowUturnLeftIcon,
+  CheckCircleIcon,
+  TrashIcon,
+} from '@heroicons/react/16/solid'
 
 import { usePermissionContext } from '@/contexts/PermissionContext'
 import { useTableHeight } from '@/hooks/useTableHeight'
@@ -12,10 +17,10 @@ import type {
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import {
+  useBatchDeleteVillaLiftOrders,
+  useBatchUpdateVillaLiftOrdersStatus,
   useCreateVillaLiftOrder,
-  useDeleteVillaLiftOrder,
   useUpdateVillaLiftOrder,
-  useUpdateVillaLiftOrderStatus,
   useUpsertVillaLiftOrderItems,
   useVillaLiftOrderItems,
   useVillaLiftOrders,
@@ -131,12 +136,15 @@ export default function VillaLiftOrderListPage() {
   const [itemsModalOpen, setItemsModalOpen] = useState(false)
   const [itemsOrderId, setItemsOrderId] = useState<string | null>(null)
 
+  // 批量操作选中行
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([])
+
   // 数据
   const { data, isLoading } = useVillaLiftOrders({ page, pageSize, keyword })
   const createMutation = useCreateVillaLiftOrder()
   const updateMutation = useUpdateVillaLiftOrder()
-  const deleteMutation = useDeleteVillaLiftOrder()
-  const toggleStatusMutation = useUpdateVillaLiftOrderStatus()
+  const batchDeleteMutation = useBatchDeleteVillaLiftOrders()
+  const batchStatusMutation = useBatchUpdateVillaLiftOrdersStatus()
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 10,
@@ -166,40 +174,44 @@ export default function VillaLiftOrderListPage() {
     setIsModalOpen(true)
   }, [])
 
-  // 行内删除订单
-  const handleDelete = useCallback(
-    async (id: string) => {
-      try {
-        await deleteMutation.mutateAsync(id)
-        message.success('订单删除成功')
-      } catch (err) {
-        if (err instanceof Error) {
-          message.error(err.message)
-        } else {
-          message.error('删除失败，请稍后重试')
-        }
-      }
-    },
-    [deleteMutation, message],
-  )
+  // 批量删除
+  const handleBatchDelete = useCallback(async () => {
+    try {
+      await batchDeleteMutation.mutateAsync(selectedRowKeys)
+      message.success(`已删除 ${selectedRowKeys.length} 条订单`)
+      setSelectedRowKeys([])
+    } catch (err) {
+      if (err instanceof Error) message.error(err.message)
+    }
+  }, [batchDeleteMutation, selectedRowKeys, message])
 
-  // 切换订单状态
-  const handleToggleStatus = useCallback(
-    async (id: string, current: 'open' | 'closed') => {
-      try {
-        await toggleStatusMutation.mutateAsync({
-          id,
-          status: current === 'open' ? 'closed' : 'open',
-        })
-        message.success(current === 'open' ? '已结案' : '已复开')
-      } catch (err) {
-        if (err instanceof Error) {
-          message.error(err.message)
-        }
-      }
-    },
-    [toggleStatusMutation, message],
-  )
+  // 批量结案
+  const handleBatchClose = useCallback(async () => {
+    try {
+      await batchStatusMutation.mutateAsync({
+        ids: selectedRowKeys,
+        status: 'closed',
+      })
+      message.success(`已结案 ${selectedRowKeys.length} 条订单`)
+      setSelectedRowKeys([])
+    } catch (err) {
+      if (err instanceof Error) message.error(err.message)
+    }
+  }, [batchStatusMutation, selectedRowKeys, message])
+
+  // 批量反结案
+  const handleBatchReopen = useCallback(async () => {
+    try {
+      await batchStatusMutation.mutateAsync({
+        ids: selectedRowKeys,
+        status: 'open',
+      })
+      message.success(`已复开 ${selectedRowKeys.length} 条订单`)
+      setSelectedRowKeys([])
+    } catch (err) {
+      if (err instanceof Error) message.error(err.message)
+    }
+  }, [batchStatusMutation, selectedRowKeys, message])
 
   // 弹出明细编辑弹窗
   const handleEditItems = useCallback((orderId: string) => {
@@ -266,6 +278,43 @@ export default function VillaLiftOrderListPage() {
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         {canEdit && <AddButton handleCreate={handleCreate} />}
+        {canEdit && selectedRowKeys.length > 0 && (
+          <>
+            <Popconfirm
+              title={`确认删除选中的 ${selectedRowKeys.length} 条订单？`}
+              description="删除后不可恢复，同时删除所有明细。"
+              okText="删除"
+              cancelText="取消"
+              okButtonProps={{ danger: true }}
+              onConfirm={handleBatchDelete}
+            >
+              <Button
+                type="text"
+                danger
+                icon={<TrashIcon className="size-4" />}
+                loading={batchDeleteMutation.isPending}
+              >
+                批量删除 ({selectedRowKeys.length})
+              </Button>
+            </Popconfirm>
+            <Button
+              type="text"
+              icon={<CheckCircleIcon className="size-4 text-green-500/80!" />}
+              loading={batchStatusMutation.isPending}
+              onClick={handleBatchClose}
+            >
+              批量结案 ({selectedRowKeys.length})
+            </Button>
+            <Button
+              type="text"
+              icon={<ArrowUturnLeftIcon className="size-4 text-blue-400/80!" />}
+              loading={batchStatusMutation.isPending}
+              onClick={handleBatchReopen}
+            >
+              批量反结案 ({selectedRowKeys.length})
+            </Button>
+          </>
+        )}
         <div className="flex items-center gap-2">
           <Input
             placeholder="搜索客户/项目/产品名称"
@@ -293,11 +342,9 @@ export default function VillaLiftOrderListPage() {
             scrollY={scrollY}
             canEdit={canEdit}
             onEdit={handleEdit}
-            onDelete={handleDelete}
             onEditItems={handleEditItems}
-            onToggleStatus={handleToggleStatus}
-            isDeleting={deleteMutation.isPending}
-            isTogglingStatus={toggleStatusMutation.isPending}
+            selectedRowKeys={selectedRowKeys}
+            onSelectionChange={setSelectedRowKeys}
           />
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">

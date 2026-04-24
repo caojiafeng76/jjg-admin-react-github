@@ -181,11 +181,12 @@ bun format     # Prettier 格式化
 - 脚本 / CLI / MCP / 配置改动：至少执行一次相关命令、dry-run、help、关键字扫描或等价校验，确认改动后的流程仍可用。
 - 数据库变更：至少验证 migration / SQL 是否成功执行，以及受影响对象或查询结果是否符合预期；如果用户要求的是“落地执行”，不要只停在写出 SQL。
 
-关于 thinking 与 Serena 的使用约定：
+关于 Sequential Thinking MCP 与 Serena MCP 的使用约定：
 
-- thinking 用于复杂任务的任务拆解、假设校验、风险分析和方案排序；在复杂任务中，应先 thinking，后检索，最后实施
-- Serena 用于符号概览、定义查找、引用分析和精确重命名；建立上下文时应先尝试 Serena，再退回常规搜索
-- 如果 Serena 出现 `No active project`、工具缺失或无法定位目标，不要卡住，应立即退回常规搜索工具继续推进
+- 所有任务在开始执行前，必须先调用 Sequential Thinking MCP 和 Serena MCP；不要跳过其中任一项。
+- 即使任务很小，也至少要先调用一次 Sequential Thinking MCP，用来明确当前目标、假设或执行路径；复杂任务则必须用它拆解问题、校验假设、分析风险并排序执行步骤。
+- 所有任务建立上下文时，必须先调用 Serena MCP 做符号概览、定义查找、引用分析或精确定位；不要直接跳过 Serena 进入常规搜索。
+- 如果 Serena 返回 `No active project`、工具缺失或无法定位目标，仍然视为“已调用 Serena MCP”；此时必须明确说明已降级，再退回常规搜索工具继续推进。
 
 关于 skills 的使用约定：
 

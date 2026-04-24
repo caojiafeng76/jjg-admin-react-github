@@ -21,8 +21,7 @@ export interface VillaLiftFinishingRecord {
   updated_at: string
 }
 
-export interface VillaLiftFinishingRecordWithOrder
-  extends VillaLiftFinishingRecord {
+export interface VillaLiftFinishingRecordWithOrder extends VillaLiftFinishingRecord {
   order: {
     project_name: string
     customer: string
@@ -128,8 +127,7 @@ export async function createVillaLiftFinishingBatch({
   operator,
   rows,
 }: VillaLiftFinishingBatchFormValues): Promise<void> {
-  if (!rows || rows.length === 0)
-    throw new AppError('请至少添加一条加工记录')
+  if (!rows || rows.length === 0) throw new AppError('请至少添加一条加工记录')
 
   const payloads = rows.map((r) => ({
     order_id,
@@ -184,4 +182,15 @@ export async function deleteVillaLiftFinishingRecord(
     .eq('id', id)
 
   if (error) throw handleApiError(error, '删除加工记录失败')
+}
+
+export async function batchDeleteVillaLiftFinishingRecords(
+  ids: string[],
+): Promise<void> {
+  const { error } = await supabase
+    .from('villa_lift_finishing_records')
+    .delete()
+    .in('id', ids)
+
+  if (error) throw handleApiError(error, '批量删除加工记录失败')
 }

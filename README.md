@@ -89,6 +89,8 @@ src/
 8. 改动后做必要验证
 9. 最终按固定结构汇报结果
 
+补充基础规则：所有任务开始前，必须先调用 Sequential Thinking MCP 和 Serena MCP。即使任务很小，也不能跳过；如果 Serena 不可用或返回 `No active project`，需要明确说明已降级后再退回常规搜索。
+
 默认规则定义在 [.github/copilot-instructions.md](.github/copilot-instructions.md)。
 
 ## Spec Workflow Integration

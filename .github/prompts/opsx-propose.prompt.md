@@ -4,6 +4,8 @@ description: Propose a new change - create it and generate all artifacts in one 
 
 Propose a new change - create the change and generate all artifacts in one step.
 
+开始前要求：无论任务大小，都必须先调用 Sequential Thinking MCP 和 Serena MCP。Sequential Thinking MCP 用于明确 proposal 边界、命名和 artifact 顺序；Serena MCP 用于先定位相关代码、模块或已有变更上下文。若 Serena 当前不可用或返回 `No active project`，仍需明确说明已降级，再退回常规搜索。
+
 I'll create a change with artifacts:
 - proposal.md (what & why)
 - design.md (how)
