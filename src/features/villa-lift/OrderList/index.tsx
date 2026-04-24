@@ -1,5 +1,14 @@
 import { useCallback, useRef, useState } from 'react'
-import { App, Button, FormInstance, Input, Modal, Popconfirm } from 'antd'
+import type { Dayjs } from 'dayjs'
+import {
+  App,
+  Button,
+  DatePicker,
+  FormInstance,
+  Input,
+  Modal,
+  Popconfirm,
+} from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import {
   ArrowUturnLeftIcon,
@@ -118,9 +127,25 @@ export default function VillaLiftOrderListPage() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const keyword = searchParamsURL.get('keyword') || undefined
 
-  const [localKeyword, setLocalKeyword] = useState(keyword ?? '')
+  // 搜索输入框本地状态（未提交）
+  const [localCustomer, setLocalCustomer] = useState('')
+  const [localProjectName, setLocalProjectName] = useState('')
+  const [localProductName, setLocalProductName] = useState('')
+  const [deliveryDateRange, setDeliveryDateRange] = useState<
+    [Dayjs | null, Dayjs | null] | null
+  >(null)
+
+  // 已提交（触发查询）的筛选值
+  const [submittedCustomer, setSubmittedCustomer] = useState<
+    string | undefined
+  >()
+  const [submittedProjectName, setSubmittedProjectName] = useState<
+    string | undefined
+  >()
+  const [submittedProductName, setSubmittedProductName] = useState<
+    string | undefined
+  >()
 
   // 订单弹窗
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -139,8 +164,22 @@ export default function VillaLiftOrderListPage() {
   // 批量操作选中行
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([])
 
+  // 发货日期范围（YYYY-MM-DD 字符串，传给服务层）
+  const deliveryDateFrom =
+    deliveryDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
+  const deliveryDateTo =
+    deliveryDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
+
   // 数据
-  const { data, isLoading } = useVillaLiftOrders({ page, pageSize, keyword })
+  const { data, isLoading } = useVillaLiftOrders({
+    page,
+    pageSize,
+    customer: submittedCustomer,
+    projectName: submittedProjectName,
+    productName: submittedProductName,
+    deliveryDateFrom,
+    deliveryDateTo,
+  })
   const createMutation = useCreateVillaLiftOrder()
   const updateMutation = useUpdateVillaLiftOrder()
   const batchDeleteMutation = useBatchDeleteVillaLiftOrders()
@@ -257,19 +296,22 @@ export default function VillaLiftOrderListPage() {
   function handleSearch() {
     const next = new URLSearchParams(searchParamsURL)
     next.set('page', '1')
-    if (localKeyword.trim()) {
-      next.set('keyword', localKeyword.trim())
-    } else {
-      next.delete('keyword')
-    }
     setSearchParamsURL(next)
+    setSubmittedCustomer(localCustomer.trim() || undefined)
+    setSubmittedProjectName(localProjectName.trim() || undefined)
+    setSubmittedProductName(localProductName.trim() || undefined)
   }
 
   function handleSearchReset() {
-    setLocalKeyword('')
+    setLocalCustomer('')
+    setLocalProjectName('')
+    setLocalProductName('')
+    setDeliveryDateRange(null)
+    setSubmittedCustomer(undefined)
+    setSubmittedProjectName(undefined)
+    setSubmittedProductName(undefined)
     const next = new URLSearchParams(searchParamsURL)
     next.set('page', '1')
-    next.delete('keyword')
     setSearchParamsURL(next)
   }
 
@@ -315,16 +357,46 @@ export default function VillaLiftOrderListPage() {
             </Button>
           </>
         )}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Input
-            placeholder="搜索客户/项目/产品名称"
-            value={localKeyword}
-            onChange={(e) => setLocalKeyword(e.target.value)}
+            placeholder="客户"
+            value={localCustomer}
+            onChange={(e) => setLocalCustomer(e.target.value)}
             onPressEnter={handleSearch}
             allowClear
-            onClear={handleSearchReset}
-            style={{ width: 240 }}
+            style={{ width: 150 }}
           />
+          <Input
+            placeholder="项目名称"
+            value={localProjectName}
+            onChange={(e) => setLocalProjectName(e.target.value)}
+            onPressEnter={handleSearch}
+            allowClear
+            style={{ width: 160 }}
+          />
+          <Input
+            placeholder="产品名称"
+            value={localProductName}
+            onChange={(e) => setLocalProductName(e.target.value)}
+            onPressEnter={handleSearch}
+            allowClear
+            style={{ width: 150 }}
+          />
+          <DatePicker.RangePicker
+            placeholder={['发货日期从', '发货日期至']}
+            value={deliveryDateRange}
+            onChange={(dates) =>
+              setDeliveryDateRange(
+                dates ? [dates[0] ?? null, dates[1] ?? null] : null,
+              )
+            }
+            style={{ width: 240 }}
+            allowClear
+          />
+          <Button type="primary" onClick={handleSearch}>
+            搜索
+          </Button>
+          <Button onClick={handleSearchReset}>重置</Button>
         </div>
       </div>
 

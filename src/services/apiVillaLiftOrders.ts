@@ -205,26 +205,46 @@ function normalizeItemPayload(
 export async function getVillaLiftOrders({
   page,
   pageSize,
-  keyword,
+  customer,
+  projectName,
+  productName,
+  deliveryDateFrom,
+  deliveryDateTo,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  customer?: string
+  projectName?: string
+  productName?: string
+  deliveryDateFrom?: string
+  deliveryDateTo?: string
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
   let query = supabase.from('villa_lift_orders').select('*', { count: 'exact' })
 
-  if (keyword?.trim()) {
-    const kw = keyword.trim()
-    query = query.or(
-      `customer.ilike.%${kw}%,project_name.ilike.%${kw}%,product_name.ilike.%${kw}%`,
-    )
+  if (customer?.trim()) {
+    query = query.ilike('customer', `%${customer.trim()}%`)
+  }
+  if (projectName?.trim()) {
+    query = query.ilike('project_name', `%${projectName.trim()}%`)
+  }
+  if (productName?.trim()) {
+    query = query.ilike('product_name', `%${productName.trim()}%`)
+  }
+
+  if (deliveryDateFrom) {
+    query = query.gte('delivery_date', deliveryDateFrom)
+  }
+  if (deliveryDateTo) {
+    query = query.lte('delivery_date', deliveryDateTo)
   }
 
   const { data, error, count } = await query
-    .order('created_at', { ascending: false })
+    // 未结案（open）在前，已结案（closed）在后；同一状态内按计划交货日期升序
+    .order('status', { ascending: false })
+    .order('planned_delivery_date', { ascending: true, nullsFirst: false })
     .range(from, to)
 
   if (error) throw handleApiError(error, '获取别墅梯订单列表失败')

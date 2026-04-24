@@ -21,15 +21,41 @@ export const VILLA_LIFT_ORDER_ITEMS_KEY = 'villa-lift-order-items' as const
 export function useVillaLiftOrders({
   page,
   pageSize,
-  keyword,
+  customer,
+  projectName,
+  productName,
+  deliveryDateFrom,
+  deliveryDateTo,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  customer?: string
+  projectName?: string
+  productName?: string
+  deliveryDateFrom?: string
+  deliveryDateTo?: string
 }) {
   return useQuery({
-    queryKey: [VILLA_LIFT_ORDERS_KEY, page, pageSize, keyword],
-    queryFn: () => getVillaLiftOrders({ page, pageSize, keyword }),
+    queryKey: [
+      VILLA_LIFT_ORDERS_KEY,
+      page,
+      pageSize,
+      customer,
+      projectName,
+      productName,
+      deliveryDateFrom,
+      deliveryDateTo,
+    ],
+    queryFn: () =>
+      getVillaLiftOrders({
+        page,
+        pageSize,
+        customer,
+        projectName,
+        productName,
+        deliveryDateFrom,
+        deliveryDateTo,
+      }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
   })
