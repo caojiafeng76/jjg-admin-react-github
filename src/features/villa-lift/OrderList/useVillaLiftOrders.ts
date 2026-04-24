@@ -3,6 +3,8 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
+  batchDeleteVillaLiftOrders,
+  batchUpdateVillaLiftOrdersStatus,
   createVillaLiftOrder,
   deleteVillaLiftOrder,
   deleteVillaLiftOrderItem,
@@ -81,5 +83,19 @@ export function useDeleteVillaLiftOrderItem(orderId: string) {
   return useMutationWithInvalidation({
     mutationFn: deleteVillaLiftOrderItem,
     invalidateQueries: [[VILLA_LIFT_ORDER_ITEMS_KEY, orderId]],
+  })
+}
+
+export function useBatchDeleteVillaLiftOrders() {
+  return useMutationWithInvalidation({
+    mutationFn: batchDeleteVillaLiftOrders,
+    invalidateQueries: [[VILLA_LIFT_ORDERS_KEY]],
+  })
+}
+
+export function useBatchUpdateVillaLiftOrdersStatus() {
+  return useMutationWithInvalidation({
+    mutationFn: batchUpdateVillaLiftOrdersStatus,
+    invalidateQueries: [[VILLA_LIFT_ORDERS_KEY]],
   })
 }

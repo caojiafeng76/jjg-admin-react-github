@@ -169,3 +169,14 @@ export async function deleteVillaLiftCuttingRecord(id: string): Promise<void> {
 
   if (error) throw handleApiError(error, '删除切割记录失败')
 }
+
+export async function batchDeleteVillaLiftCuttingRecords(
+  ids: string[],
+): Promise<void> {
+  const { error } = await supabase
+    .from('villa_lift_cutting_records')
+    .delete()
+    .in('id', ids)
+
+  if (error) throw handleApiError(error, '批量删除切割记录失败')
+}

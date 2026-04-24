@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
+  batchDeleteVillaLiftCuttingRecords,
   createVillaLiftCuttingBatch,
   deleteVillaLiftCuttingRecord,
   getVillaLiftCuttingRecords,
@@ -55,6 +56,13 @@ export function useUpdateCuttingRecord() {
 export function useDeleteCuttingRecord() {
   return useMutationWithInvalidation({
     mutationFn: deleteVillaLiftCuttingRecord,
+    invalidateQueries: [[CUTTING_RECORDS_KEY]],
+  })
+}
+
+export function useBatchDeleteCuttingRecords() {
+  return useMutationWithInvalidation({
+    mutationFn: batchDeleteVillaLiftCuttingRecords,
     invalidateQueries: [[CUTTING_RECORDS_KEY]],
   })
 }

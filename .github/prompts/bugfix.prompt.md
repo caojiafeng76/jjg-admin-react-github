@@ -8,8 +8,8 @@ argument-hint: [问题描述]
 执行要求：
 
 1. 先明确现象、预期行为、影响范围和可能的触发条件。
-2. 复杂缺陷或调用链不清晰时，必须先使用 thinking 拆解问题，整理可疑点、证据、根因假设和排查顺序。
-3. 建立上下文时必须优先使用 Serena 检查相关符号、调用链和引用关系；若 Serena 当前不可用，再退回常规搜索，并明确说明已降级。
+2. 所有缺陷修复任务开始前，必须先调用 Sequential Thinking MCP；即使任务很小，也至少要用它明确现象、预期和排查路径。复杂缺陷或调用链不清晰时，必须进一步用它拆解问题，整理可疑点、证据、根因假设和排查顺序。
+3. 建立上下文时必须先调用 Serena MCP 检查相关符号、调用链和引用关系；若 Serena 当前不可用或返回 `No active project`，仍需明确说明已降级，再退回常规搜索。
 4. 优先定位根因，不要只做表层规避；如存在多个可疑点，按概率和影响排序排查。
 5. 如果问题范围很小且低风险（如单文件小修、文案或说明调整、小范围防御式分支修正），可直接做最小化修复；但必须说明为何跳过完整 Spec Workflow。
 6. 其他需要实际改代码修复的缺陷，默认按 Spec Workflow 顺序推进：先通过 repo-local CLI wrapper 确认是否已有对应 change 和当前阶段，即 `bun run spec:list`、`bun run spec -- status --change <name> --json`、`bun run spec -- instructions apply --change <name> --json`；如果用户已显式使用 `/opsx:explore`、`/opsx:propose`、`/opsx:apply` 或 `/opsx:archive`，以对应 opsx prompt 为当前权威流程，不再重复做通用阶段判断；没有时先补 `propose`，再进入 `apply` 修复。

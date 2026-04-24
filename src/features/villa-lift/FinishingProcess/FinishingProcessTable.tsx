@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { Button, Popconfirm, Table, Tag, Tooltip } from 'antd'
+import { Button, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType } from 'antd'
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/16/solid'
+import { PencilSquareIcon } from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
 
 import type { VillaLiftFinishingRecordWithOrder } from '@/services/apiVillaLiftFinishing'
@@ -14,9 +14,9 @@ interface FinishingProcessTableProps {
   data: VillaLiftFinishingRecordWithOrder[]
   loading: boolean
   canEdit: boolean
-  isDeleting: boolean
+  selectedRowKeys: string[]
+  onSelectionChange: (keys: string[]) => void
   onEdit: (record: VillaLiftFinishingRecordWithOrder) => void
-  onDelete: (id: string) => void
   scrollY?: number
 }
 
@@ -28,9 +28,9 @@ export default function FinishingProcessTable({
   data,
   loading,
   canEdit,
-  isDeleting,
+  selectedRowKeys,
+  onSelectionChange,
   onEdit,
-  onDelete,
   scrollY,
 }: FinishingProcessTableProps) {
   const columns: TableColumnsType<VillaLiftFinishingRecordWithOrder> = useMemo(
@@ -41,6 +41,7 @@ export default function FinishingProcessTable({
         key: 'project_name',
         width: 160,
         ellipsis: true,
+        fixed: 'left' as const,
         render: (v: string) => <span className="font-medium">{v}</span>,
       },
       {
@@ -49,6 +50,7 @@ export default function FinishingProcessTable({
         key: 'customer',
         width: 100,
         ellipsis: true,
+        fixed: 'left' as const,
       },
       {
         title: '产品',
@@ -56,6 +58,7 @@ export default function FinishingProcessTable({
         key: 'product_name',
         width: 120,
         ellipsis: true,
+        fixed: 'left' as const,
       },
       {
         title: '型号',
@@ -87,8 +90,7 @@ export default function FinishingProcessTable({
         key: 'operation',
         width: 120,
         ellipsis: true,
-        render: (v: string) =>
-          v ? <Tag color="blue">{v}</Tag> : '-',
+        render: (v: string) => (v ? <Tag color="blue">{v}</Tag> : '-'),
       },
       {
         title: '加工数量',
@@ -142,7 +144,7 @@ export default function FinishingProcessTable({
             {
               title: '操作',
               key: 'action',
-              width: 80,
+              width: 70,
               fixed: 'right' as const,
               render: (
                 _: unknown,
@@ -157,30 +159,13 @@ export default function FinishingProcessTable({
                       onClick={() => onEdit(record)}
                     />
                   </Tooltip>
-                  <Popconfirm
-                    title="确认删除该记录？"
-                    okText="删除"
-                    cancelText="取消"
-                    okButtonProps={{ danger: true }}
-                    onConfirm={() => onDelete(record.id)}
-                  >
-                    <Tooltip title="删除">
-                      <Button
-                        type="text"
-                        size="small"
-                        danger
-                        loading={isDeleting}
-                        icon={<TrashIcon className="size-4" />}
-                      />
-                    </Tooltip>
-                  </Popconfirm>
                 </div>
               ),
             },
           ]
         : []),
     ],
-    [canEdit, isDeleting, onEdit, onDelete],
+    [canEdit, onEdit],
   )
 
   return (
@@ -192,6 +177,10 @@ export default function FinishingProcessTable({
       pagination={false}
       scroll={{ x: 1450, y: scrollY }}
       size="small"
+      rowSelection={{
+        selectedRowKeys,
+        onChange: (keys) => onSelectionChange(keys as string[]),
+      }}
     />
   )
 }

@@ -1,13 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Button, Popconfirm, Spin, Table, Tag, Tooltip } from 'antd'
+import { Button, Spin, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
 import {
-  ArrowUturnLeftIcon,
-  CheckCircleIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   PencilSquareIcon,
-  TrashIcon,
 } from '@heroicons/react/16/solid'
 
 import type {
@@ -98,11 +95,9 @@ interface Props {
   scrollY?: number
   canEdit: boolean
   onEdit: (record: VillaLiftOrder) => void
-  onDelete: (id: string) => void
   onEditItems: (orderId: string) => void
-  onToggleStatus: (id: string, current: 'open' | 'closed') => void
-  isDeleting: boolean
-  isTogglingStatus?: boolean
+  selectedRowKeys: string[]
+  onSelectionChange: (keys: string[]) => void
 }
 
 export default function VillaLiftOrderTable({
@@ -113,11 +108,9 @@ export default function VillaLiftOrderTable({
   scrollY = 400,
   canEdit,
   onEdit,
-  onDelete,
   onEditItems,
-  onToggleStatus,
-  isDeleting,
-  isTogglingStatus = false,
+  selectedRowKeys,
+  onSelectionChange,
 }: Props) {
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
 
@@ -135,6 +128,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'schedule_date',
         key: 'schedule_date',
         width: 110,
+        fixed: 'left',
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -142,6 +136,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'delivery_date',
         key: 'delivery_date',
         width: 110,
+        fixed: 'left',
         render: (v: string | null) => v ?? '-',
       },
       {
@@ -149,6 +144,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'customer',
         key: 'customer',
         width: 130,
+        fixed: 'left',
         render: (v: string) => v || '-',
       },
       {
@@ -156,6 +152,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'project_name',
         key: 'project_name',
         width: 160,
+        fixed: 'left',
         render: (v: string) => v || '-',
       },
       {
@@ -163,6 +160,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'product_name',
         key: 'product_name',
         width: 140,
+        fixed: 'left',
         render: (v: string) => v || '-',
       },
       {
@@ -170,6 +168,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'color',
         key: 'color',
         width: 100,
+        fixed: 'left',
         render: (v: string) => (v ? <Tag>{v}</Tag> : '-'),
       },
       {
@@ -177,7 +176,64 @@ export default function VillaLiftOrderTable({
         dataIndex: 'quantity',
         key: 'quantity',
         width: 80,
+        fixed: 'left',
         align: 'right',
+      },
+      {
+        title: '挑料完成日期',
+        dataIndex: 'material_selection_date',
+        key: 'material_selection_date',
+        width: 130,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '喷涂完成日期',
+        dataIndex: 'painting_date',
+        key: 'painting_date',
+        width: 130,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '贴膜完成日期',
+        dataIndex: 'film_date',
+        key: 'film_date',
+        width: 130,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '切割要求完成日期',
+        dataIndex: 'cutting_required_date',
+        key: 'cutting_required_date',
+        width: 150,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '切割实际完成日期',
+        dataIndex: 'cutting_actual_date',
+        key: 'cutting_actual_date',
+        width: 150,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '加工要求完成日期',
+        dataIndex: 'processing_required_date',
+        key: 'processing_required_date',
+        width: 150,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '加工实际完成日期',
+        dataIndex: 'processing_actual_date',
+        key: 'processing_actual_date',
+        width: 150,
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '检验完成日期',
+        dataIndex: 'inspection_date',
+        key: 'inspection_date',
+        width: 130,
+        render: (v: string | null) => v ?? '-',
       },
       {
         title: '备注',
@@ -190,6 +246,7 @@ export default function VillaLiftOrderTable({
         dataIndex: 'status',
         key: 'status',
         width: 90,
+        fixed: 'right',
         render: (v: string) =>
           v === 'closed' ? (
             <Tag color="default">已结案</Tag>
@@ -200,68 +257,24 @@ export default function VillaLiftOrderTable({
       {
         title: '操作',
         key: 'action',
-        width: 120,
+        width: 70,
         fixed: 'right',
         render: (_v, record) =>
           canEdit ? (
-            <div className="flex gap-1">
-              <Tooltip title="编辑订单">
-                <Button
-                  type="text"
-                  size="small"
-                  icon={
-                    <PencilSquareIcon className="size-4 text-yellow-500/80!" />
-                  }
-                  onClick={() => onEdit(record)}
-                />
-              </Tooltip>
-              <Tooltip title={record.status === 'open' ? '结案' : '复开'}>
-                <Button
-                  type="text"
-                  size="small"
-                  loading={isTogglingStatus}
-                  icon={
-                    record.status === 'open' ? (
-                      <CheckCircleIcon className="size-4 text-green-500" />
-                    ) : (
-                      <ArrowUturnLeftIcon className="size-4 text-blue-400" />
-                    )
-                  }
-                  onClick={() => onToggleStatus(record.id, record.status)}
-                />
-              </Tooltip>
-              <Popconfirm
-                title="确认删除该订单？"
-                description="删除后不可恢复，同时删除所有明细。"
-                okText="删除"
-                cancelText="取消"
-                okButtonProps={{ danger: true }}
-                onConfirm={() => onDelete(record.id)}
-              >
-                <Tooltip title="删除">
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    loading={isDeleting}
-                    icon={<TrashIcon className="size-4" />}
-                  />
-                </Tooltip>
-              </Popconfirm>
-            </div>
+            <Tooltip title="编辑订单">
+              <Button
+                type="text"
+                size="small"
+                icon={
+                  <PencilSquareIcon className="size-4 text-yellow-500/80!" />
+                }
+                onClick={() => onEdit(record)}
+              />
+            </Tooltip>
           ) : null,
       },
     ],
-    [
-      page,
-      pageSize,
-      canEdit,
-      onEdit,
-      onDelete,
-      onToggleStatus,
-      isDeleting,
-      isTogglingStatus,
-    ],
+    [page, pageSize, canEdit, onEdit],
   )
 
   const expandable: TableProps<VillaLiftOrder>['expandable'] = {
@@ -306,6 +319,10 @@ export default function VillaLiftOrderTable({
       scroll={{ x: 1200, y: scrollY }}
       pagination={false}
       expandable={expandable}
+      rowSelection={{
+        selectedRowKeys,
+        onChange: (keys) => onSelectionChange(keys as string[]),
+      }}
     />
   )
 }
