@@ -40,10 +40,14 @@ function getSelectFilter(
 interface ExpandedItemsProps {
   orderId: string
   onEditItems: (orderId: string) => void
-  canEdit: boolean
+  canEditItems: boolean
 }
 
-function ExpandedItems({ orderId, onEditItems, canEdit }: ExpandedItemsProps) {
+function ExpandedItems({
+  orderId,
+  onEditItems,
+  canEditItems,
+}: ExpandedItemsProps) {
   const { data: items = [], isLoading } = useVillaLiftOrderItems(orderId)
 
   const itemColumns: TableColumnsType<VillaLiftOrderItem> = [
@@ -79,7 +83,7 @@ function ExpandedItems({ orderId, onEditItems, canEdit }: ExpandedItemsProps) {
         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
           订单明细 ({items.length} 条)
         </span>
-        {canEdit && (
+        {canEditItems && (
           <Button
             type="dashed"
             size="small"
@@ -115,6 +119,7 @@ interface Props {
   pageSize: number
   scrollY?: number
   canEdit: boolean
+  canEditItems: boolean
   onEdit: (record: VillaLiftOrder) => void
   onEditItems: (orderId: string) => void
   selectedRowKeys: string[]
@@ -128,6 +133,7 @@ export default function VillaLiftOrderTable({
   pageSize,
   scrollY = 400,
   canEdit,
+  canEditItems,
   onEdit,
   onEditItems,
   selectedRowKeys,
@@ -366,7 +372,7 @@ export default function VillaLiftOrderTable({
           ) : null,
       },
     ],
-    [page, pageSize, canEdit, onEdit, data],
+    [page, pageSize, canEdit, canEditItems, onEdit, data],
   )
 
   const expandable: TableProps<VillaLiftOrder>['expandable'] = {
@@ -396,7 +402,7 @@ export default function VillaLiftOrderTable({
       <ExpandedItems
         orderId={record.id}
         onEditItems={onEditItems}
-        canEdit={canEdit}
+        canEditItems={canEditItems}
       />
     ),
   }

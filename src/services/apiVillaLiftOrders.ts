@@ -205,6 +205,7 @@ function normalizeItemPayload(
 export async function getVillaLiftOrders({
   page,
   pageSize,
+  status,
   customer,
   projectName,
   productName,
@@ -213,6 +214,7 @@ export async function getVillaLiftOrders({
 }: {
   page: number
   pageSize: number
+  status?: VillaLiftOrderStatus
   customer?: string
   projectName?: string
   productName?: string
@@ -224,6 +226,9 @@ export async function getVillaLiftOrders({
 
   let query = supabase.from('villa_lift_orders').select('*', { count: 'exact' })
 
+  if (status) {
+    query = query.eq('status', status)
+  }
   if (customer?.trim()) {
     query = query.ilike('customer', `%${customer.trim()}%`)
   }
@@ -409,4 +414,65 @@ export async function deleteVillaLiftOrderItem(id: string): Promise<void> {
     .eq('id', id)
 
   if (error) throw handleApiError(error, '删除订单明细失败')
+}
+
+export type VillaLiftMarkDateField =
+  | 'material_selection_date'
+  | 'painting_date'
+  | 'film_date'
+  | 'cutting_actual_date'
+
+export async function markVillaLiftOrderDate({
+  id,
+  field,
+  date,
+}: {
+  id: string
+  field: VillaLiftMarkDateField
+  date: string
+}): Promise<VillaLiftOrder> {
+  const updatePayload =
+    field === 'material_selection_date'
+      ? { material_selection_date: date }
+      : field === 'painting_date'
+        ? { painting_date: date }
+        : field === 'film_date'
+          ? { film_date: date }
+          : { cutting_actual_date: date }
+
+  const { data, error } = await supabase
+    .from('villa_lift_orders')
+    .update(updatePayload)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw handleApiError(error, '标记完成日期失败')
+  return data as VillaLiftOrder
+}
+
+export async function batchMarkVillaLiftOrdersDate({
+  ids,
+  field,
+  date,
+}: {
+  ids: string[]
+  field: VillaLiftMarkDateField
+  date: string
+}): Promise<void> {
+  const updatePayload =
+    field === 'material_selection_date'
+      ? { material_selection_date: date }
+      : field === 'painting_date'
+        ? { painting_date: date }
+        : field === 'film_date'
+          ? { film_date: date }
+          : { cutting_actual_date: date }
+
+  const { error } = await supabase
+    .from('villa_lift_orders')
+    .update(updatePayload)
+    .in('id', ids)
+
+  if (error) throw handleApiError(error, '批量标记完成日期失败')
 }
