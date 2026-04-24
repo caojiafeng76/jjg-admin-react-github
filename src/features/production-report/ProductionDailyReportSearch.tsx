@@ -16,7 +16,7 @@ interface SearchFormValues {
   dateRange?: [Dayjs | null, Dayjs | null]
   dataCategory?: ProductionOrderDataCategory
   projectNo?: string
-  productModel?: string[]
+  productModel?: string
   customerModel?: string
   operation?: string
 }
@@ -25,7 +25,6 @@ interface Props {
   initialValues: ProductionDailyReportFilters
   onSearch: (filters: ProductionDailyReportFilters) => void
   onReset: () => void
-  productModelOptions: string[]
   mobile?: boolean
 }
 
@@ -33,7 +32,6 @@ export default function ProductionDailyReportSearch({
   initialValues,
   onSearch,
   onReset,
-  productModelOptions,
   mobile = false,
 }: Props) {
   const [form] = Form.useForm<SearchFormValues>()
@@ -52,15 +50,7 @@ export default function ProductionDailyReportSearch({
     const filters: ProductionDailyReportFilters = {
       dataCategory: values.dataCategory,
       projectNo: values.projectNo?.trim() || undefined,
-      productModel: values.productModel?.length
-        ? Array.from(
-            new Set(
-              values.productModel
-                .map((item) => item.trim())
-                .filter((item) => item.length > 0),
-            ),
-          ).sort((left, right) => left.localeCompare(right, 'zh-CN'))
-        : undefined,
+      productModel: values.productModel?.trim() || undefined,
       customerModel: values.customerModel?.trim() || undefined,
       operation: values.operation?.trim() || undefined,
     }
@@ -129,18 +119,10 @@ export default function ProductionDailyReportSearch({
       )}
 
       <Form.Item name="productModel" className="mb-0">
-        <Select
+        <Input
           allowClear
-          mode="multiple"
           placeholder="型号"
-          showSearch
-          optionFilterProp="label"
-          maxTagCount={1}
-          style={{ width: mobile ? '100%' : 220 }}
-          options={productModelOptions.map((item) => ({
-            label: item,
-            value: item,
-          }))}
+          style={{ width: mobile ? '100%' : 160 }}
         />
       </Form.Item>
 

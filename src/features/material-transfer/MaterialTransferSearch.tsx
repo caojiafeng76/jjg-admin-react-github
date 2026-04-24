@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, DatePicker, Form, Select, Space } from 'antd'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -23,8 +23,6 @@ interface Props {
   onSearch: (values: MaterialTransferSearchValues) => void
   onReset: () => void
   employees: { id: string; name: string }[]
-  projectNoOptions: string[]
-  modelOptions: string[]
   lengthOptions: number[]
   initialValues?: MaterialTransferSearchValues
   mobile?: boolean
@@ -35,8 +33,6 @@ export default function MaterialTransferSearch({
   onSearch,
   onReset,
   employees,
-  projectNoOptions,
-  modelOptions,
   lengthOptions,
   initialValues,
   mobile = false,
@@ -72,14 +68,8 @@ export default function MaterialTransferSearch({
         values.dateRange?.[0] && values.dateRange?.[1]
           ? values.dateRange[1].format('YYYY-MM-DD')
           : undefined,
-      projectNo:
-        values.projectNo && values.projectNo.length > 0
-          ? values.projectNo
-          : undefined,
-      productModel:
-        values.productModel && values.productModel.length > 0
-          ? values.productModel
-          : undefined,
+      projectNo: values.projectNo?.trim() || undefined,
+      productModel: values.productModel?.trim() || undefined,
       length_mm:
         values.length_mm && values.length_mm.length > 0
           ? values.length_mm
@@ -118,38 +108,18 @@ export default function MaterialTransferSearch({
       </Form.Item>
 
       <Form.Item name="projectNo" className="mb-0">
-        <Select
-          mode="multiple"
+        <Input
           placeholder="项目号"
           allowClear
-          showSearch
-          filterOption={(input, option) =>
-            String(option?.label || '')
-              .toLowerCase()
-              .includes(input.toLowerCase())
-          }
-          getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 200 }}
-          maxTagCount="responsive"
-          options={projectNoOptions.map((v) => ({ label: v, value: v }))}
         />
       </Form.Item>
 
       <Form.Item name="productModel" className="mb-0">
-        <Select
-          mode="multiple"
+        <Input
           placeholder="型号"
           allowClear
-          showSearch
-          filterOption={(input, option) =>
-            String(option?.label || '')
-              .toLowerCase()
-              .includes(input.toLowerCase())
-          }
-          getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 200 }}
-          maxTagCount="responsive"
-          options={modelOptions.map((v) => ({ label: v, value: v }))}
         />
       </Form.Item>
 
@@ -158,12 +128,7 @@ export default function MaterialTransferSearch({
           mode="multiple"
           placeholder="长度"
           allowClear
-          showSearch
-          filterOption={(input, option) =>
-            String(option?.label || '')
-              .toLowerCase()
-              .includes(input.toLowerCase())
-          }
+          showSearch={{ optionFilterProp: 'label' }}
           getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 160 }}
           maxTagCount="responsive"
@@ -176,12 +141,7 @@ export default function MaterialTransferSearch({
           <Select
             placeholder="操作人"
             allowClear
-            showSearch={{
-              filterOption: (input, option) =>
-                String(option?.label || '')
-                  .toLowerCase()
-                  .includes(input.toLowerCase()),
-            }}
+            showSearch={{ optionFilterProp: 'label' }}
             getPopupContainer={getPopupContainer}
             style={{ width: mobile ? '100%' : 180 }}
             options={employees.map((employee) => ({

@@ -142,8 +142,8 @@ export interface MaterialTransferWithEmployee extends MaterialTransfer {
 export interface MaterialTransferFilters {
   startDate?: string
   endDate?: string
-  projectNo?: string[] // 多关键词搜索项目号
-  productModel?: string[] // 多关键词搜索型号
+  projectNo?: string // 支持空格/逗号分隔的多关键词模糊搜索项目号
+  productModel?: string // 支持空格/逗号分隔的多关键词模糊搜索型号
   length_mm?: number[] // 多选长度
   employeeId?: string
   targetWorkshop?: string
