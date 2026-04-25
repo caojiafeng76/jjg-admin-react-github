@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Button, Spin, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
+import dayjs from 'dayjs'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -12,6 +13,39 @@ import type {
   VillaLiftOrderItem,
 } from '@/services/apiVillaLiftOrders'
 import { useVillaLiftOrderItems } from './useVillaLiftOrders'
+
+// ----------------------------------------------------------------
+// 计划日期对照颜色：
+// - 已完成（actual 已填）：绿色
+// - 未完成：按距离交货日期的天数判断
+//   - > 7 天：绿色（充裕）
+//   - 3 ~ 7 天：黄色（接近）
+//   - < 3 天（含已超过交货日期）：红色（紧迫）
+// - 缺少计划日期或交货日期：不上色
+// ----------------------------------------------------------------
+function renderPlannedDate(
+  planned: string | null,
+  actual: string | null,
+  delivery: string | null,
+) {
+  if (!planned) return '-'
+  let color: string | undefined
+  if (actual) {
+    color = '#52c41a'
+  } else if (delivery) {
+    const remaining = dayjs(delivery)
+      .startOf('day')
+      .diff(dayjs().startOf('day'), 'day')
+    if (remaining > 7) color = '#52c41a'
+    else if (remaining >= 3) color = '#faad14'
+    else color = '#ff4d4f'
+  }
+  return (
+    <span style={{ color, fontWeight: color ? 600 : undefined }}>
+      {planned}
+    </span>
+  )
+}
 
 // ----------------------------------------------------------------
 // 列选项搜索辅助：从当前数据中提取唯一值，生成带搜索的过滤器
@@ -252,7 +286,8 @@ export default function VillaLiftOrderTable({
         key: 'film_plan_date',
         width: 150,
         ...getSelectFilter('film_plan_date', data),
-        render: (v: string | null) => v ?? '-',
+        render: (v: string | null, r: VillaLiftOrder) =>
+          renderPlannedDate(v, r.film_date, r.delivery_date),
       },
       {
         title: '贴膜完成日期',
@@ -268,7 +303,8 @@ export default function VillaLiftOrderTable({
         key: 'cutting_required_date',
         width: 150,
         ...getSelectFilter('cutting_required_date', data),
-        render: (v: string | null) => v ?? '-',
+        render: (v: string | null, r: VillaLiftOrder) =>
+          renderPlannedDate(v, r.cutting_actual_date, r.delivery_date),
       },
       {
         title: '切割实际完成日期',
@@ -284,7 +320,8 @@ export default function VillaLiftOrderTable({
         key: 'processing_required_date',
         width: 150,
         ...getSelectFilter('processing_required_date', data),
-        render: (v: string | null) => v ?? '-',
+        render: (v: string | null, r: VillaLiftOrder) =>
+          renderPlannedDate(v, r.processing_actual_date, r.delivery_date),
       },
       {
         title: '加工实际完成日期',
@@ -292,6 +329,30 @@ export default function VillaLiftOrderTable({
         key: 'processing_actual_date',
         width: 150,
         ...getSelectFilter('processing_actual_date', data),
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '轿箱加工完成日期',
+        dataIndex: 'cabin_processing_date',
+        key: 'cabin_processing_date',
+        width: 150,
+        ...getSelectFilter('cabin_processing_date', data),
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '中分门加工完成日期',
+        dataIndex: 'middle_door_processing_date',
+        key: 'middle_door_processing_date',
+        width: 160,
+        ...getSelectFilter('middle_door_processing_date', data),
+        render: (v: string | null) => v ?? '-',
+      },
+      {
+        title: '井架加工完成日期',
+        dataIndex: 'frame_processing_date',
+        key: 'frame_processing_date',
+        width: 150,
+        ...getSelectFilter('frame_processing_date', data),
         render: (v: string | null) => v ?? '-',
       },
       {

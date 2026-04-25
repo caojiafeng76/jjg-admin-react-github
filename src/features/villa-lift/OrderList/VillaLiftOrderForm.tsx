@@ -44,6 +44,9 @@ const DEFAULT_ORDER_VALUES: VillaLiftOrderFormValues = {
   cutting_actual_date: null,
   processing_required_date: null,
   processing_actual_date: null,
+  cabin_processing_date: null,
+  middle_door_processing_date: null,
+  frame_processing_date: null,
   inspection_date: null,
   tinting_plan_date: null,
   painting_plan_date: null,
@@ -106,6 +109,15 @@ export default function VillaLiftOrderForm({
           : null,
         processing_actual_date: initialValues.processing_actual_date
           ? dayjs(initialValues.processing_actual_date)
+          : null,
+        cabin_processing_date: initialValues.cabin_processing_date
+          ? dayjs(initialValues.cabin_processing_date)
+          : null,
+        middle_door_processing_date: initialValues.middle_door_processing_date
+          ? dayjs(initialValues.middle_door_processing_date)
+          : null,
+        frame_processing_date: initialValues.frame_processing_date
+          ? dayjs(initialValues.frame_processing_date)
           : null,
         inspection_date: initialValues.inspection_date
           ? dayjs(initialValues.inspection_date)
@@ -278,6 +290,30 @@ export default function VillaLiftOrderForm({
               style={{ width: '100%' }}
               format="YYYY-MM-DD"
               placeholder="选择加工实际完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="cabin_processing_date" label="轿箱加工完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择轿箱加工完成日期"
+            />
+          </Form.Item>
+          <Form.Item
+            name="middle_door_processing_date"
+            label="中分门加工完成日期"
+          >
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择中分门加工完成日期"
+            />
+          </Form.Item>
+          <Form.Item name="frame_processing_date" label="井架加工完成日期">
+            <DatePicker
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+              placeholder="选择井架加工完成日期"
             />
           </Form.Item>
           <Form.Item name="inspection_date" label="检验完成日期">

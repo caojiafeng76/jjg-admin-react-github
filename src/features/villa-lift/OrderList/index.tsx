@@ -20,6 +20,7 @@ import {
   PaintBrushIcon,
   ScissorsIcon,
   TrashIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/16/solid'
 
 import { usePermissions } from '@/hooks/usePermission'
@@ -140,6 +141,10 @@ export default function VillaLiftOrderListPage() {
     'feature:villa-lift-order.mark-painting',
     'feature:villa-lift-order.mark-film',
     'feature:villa-lift-order.mark-cutting',
+    'feature:villa-lift-order.mark-processing',
+    'feature:villa-lift-order.mark-cabin-processing',
+    'feature:villa-lift-order.mark-middle-door-processing',
+    'feature:villa-lift-order.mark-frame-processing',
   ])
   const canCreate = perms['feature:villa-lift-order.create']
   const canEdit = perms['feature:villa-lift-order.edit']
@@ -151,6 +156,13 @@ export default function VillaLiftOrderListPage() {
   const canMarkPainting = perms['feature:villa-lift-order.mark-painting']
   const canMarkFilm = perms['feature:villa-lift-order.mark-film']
   const canMarkCutting = perms['feature:villa-lift-order.mark-cutting']
+  const canMarkProcessing = perms['feature:villa-lift-order.mark-processing']
+  const canMarkCabinProcessing =
+    perms['feature:villa-lift-order.mark-cabin-processing']
+  const canMarkMiddleDoorProcessing =
+    perms['feature:villa-lift-order.mark-middle-door-processing']
+  const canMarkFrameProcessing =
+    perms['feature:villa-lift-order.mark-frame-processing']
 
   // URL 参数
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -488,6 +500,65 @@ export default function VillaLiftOrderListPage() {
                   }
                 >
                   切割完成 ({selectedRowKeys.length})
+                </Button>
+              )}
+              {canMarkProcessing && (
+                <Button
+                  type="text"
+                  icon={
+                    <WrenchScrewdriverIcon className="size-4 text-amber-600/80!" />
+                  }
+                  loading={batchMarkMutation.isPending}
+                  onClick={() =>
+                    handleBatchMarkDate('processing_actual_date', '加工完成')
+                  }
+                >
+                  加工完成 ({selectedRowKeys.length})
+                </Button>
+              )}
+              {canMarkCabinProcessing && (
+                <Button
+                  type="text"
+                  icon={
+                    <WrenchScrewdriverIcon className="size-4 text-rose-500/80!" />
+                  }
+                  loading={batchMarkMutation.isPending}
+                  onClick={() =>
+                    handleBatchMarkDate('cabin_processing_date', '轿箱加工完成')
+                  }
+                >
+                  轿箱加工完成 ({selectedRowKeys.length})
+                </Button>
+              )}
+              {canMarkMiddleDoorProcessing && (
+                <Button
+                  type="text"
+                  icon={
+                    <WrenchScrewdriverIcon className="size-4 text-emerald-500/80!" />
+                  }
+                  loading={batchMarkMutation.isPending}
+                  onClick={() =>
+                    handleBatchMarkDate(
+                      'middle_door_processing_date',
+                      '中分门加工完成',
+                    )
+                  }
+                >
+                  中分门加工完成 ({selectedRowKeys.length})
+                </Button>
+              )}
+              {canMarkFrameProcessing && (
+                <Button
+                  type="text"
+                  icon={
+                    <WrenchScrewdriverIcon className="size-4 text-indigo-500/80!" />
+                  }
+                  loading={batchMarkMutation.isPending}
+                  onClick={() =>
+                    handleBatchMarkDate('frame_processing_date', '井架加工完成')
+                  }
+                >
+                  井架加工完成 ({selectedRowKeys.length})
                 </Button>
               )}
             </>
