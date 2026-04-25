@@ -190,6 +190,59 @@ export async function getLaborProtectionRequisitionList({
   }
 }
 
+export async function getLaborProtectionRequisitionsForExport({
+  keyword,
+  categoryId,
+  updatedStartDate,
+  updatedEndDate,
+}: {
+  keyword?: string
+  categoryId?: string
+  updatedStartDate?: string
+  updatedEndDate?: string
+}) {
+  let query = laborProtectionRequisitionTable().select(
+    LABOR_PROTECTION_REQUISITION_SELECT,
+  )
+
+  if (keyword?.trim()) {
+    const normalizedKeyword = keyword.trim()
+    query = query.or(
+      `job_title.ilike.%${normalizedKeyword}%,recipient.ilike.%${normalizedKeyword}%`,
+    )
+  }
+
+  if (categoryId) {
+    query = query.eq('labor_protection_data_id', categoryId)
+  }
+
+  if (updatedStartDate) {
+    query = query.gte(
+      'updated_at',
+      dayjs(updatedStartDate).startOf('day').toISOString(),
+    )
+  }
+
+  if (updatedEndDate) {
+    query = query.lte(
+      'updated_at',
+      dayjs(updatedEndDate).endOf('day').toISOString(),
+    )
+  }
+
+  const { data, error } = await query
+    .order('updated_at', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw handleApiError(error, '导出劳保领料单失败')
+  }
+
+  return ((data || []) as LaborProtectionRequisitionRow[]).map(
+    mapLaborProtectionRequisition,
+  )
+}
+
 export async function createLaborProtectionRequisition(
   values: LaborProtectionRequisitionFormValues,
 ) {
