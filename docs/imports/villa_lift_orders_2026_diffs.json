@@ -1,0 +1,1654 @@
+{
+  "diffs": [
+    {
+      "project_name": "2512-187V",
+      "id": "07fed7eb-a8b8-4997-86f2-107fd313fac4",
+      "serial": "6",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢/中分门",
+          "db": "轿厢/ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "TH260104016N01",
+      "id": "667b9c9a-2194-4632-8620-c06707551274",
+      "serial": "9",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "中分门",
+          "db": "中分 门"
+        }
+      }
+    },
+    {
+      "project_name": "TH260106003N01",
+      "id": "b9378c56-9fd9-4b6d-98c2-95729b6affce",
+      "serial": "25",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "平开门4套",
+          "db": "平开 门4套"
+        }
+      }
+    },
+    {
+      "project_name": "GA252380",
+      "id": "5ccc321d-a662-4806-b94e-713ef3f5b853",
+      "serial": "31",
+      "fieldDiffs": {
+        "color": {
+          "excel": "黑纱",
+          "db": "黑 纱"
+        }
+      }
+    },
+    {
+      "project_name": "2601-026V",
+      "id": "9bdeba86-fb2f-4839-9131-16cab58dfcfb",
+      "serial": "33",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢/中分门",
+          "db": "轿厢/ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "2601-078V",
+      "id": "4d7a189d-008a-40c3-ade8-5bda78950c15",
+      "serial": "37",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢/中分门",
+          "db": "轿厢/ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "TH251107038N01",
+      "id": "151ce0c8-8d6a-4f72-9bc0-d0bf29d5c659",
+      "serial": "38",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "中分门",
+          "db": "中分 门"
+        }
+      }
+    },
+    {
+      "project_name": "姚总项目",
+      "id": "560020a5-839f-474a-b44d-086c28eb3e56",
+      "serial": "39",
+      "fieldDiffs": {
+        "material_selection_date": {
+          "excel": "2026-01-17",
+          "db": "2026-04-24"
+        }
+      }
+    },
+    {
+      "project_name": "TH260116007N01 BJ260109009",
+      "id": "23204b07-997f-40d8-823d-489e6e164bc3",
+      "serial": "43",
+      "fieldDiffs": {
+        "material_selection_date": {
+          "excel": null,
+          "db": "2026-04-24"
+        },
+        "painting_date": {
+          "excel": null,
+          "db": "2026-04-24"
+        },
+        "cutting_actual_date": {
+          "excel": null,
+          "db": "2026-04-25"
+        }
+      }
+    },
+    {
+      "project_name": "20260114马来HM11",
+      "id": "583750bb-8691-4bd1-a29b-11669ade7f9c",
+      "serial": "45",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "井架新35/轿厢",
+          "db": "井 架新35/轿厢"
+        }
+      }
+    },
+    {
+      "project_name": "202260101印尼F42",
+      "id": "9c949b9f-a4a5-46aa-b172-c0b5e04f88ff",
+      "serial": "2",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "井架新35/轿厢",
+          "db": "井 架新35/轿厢"
+        }
+      }
+    },
+    {
+      "project_name": "浙江绍兴何全峰",
+      "id": "7c07c382-db6b-462c-b6e8-799e2e12f2f6",
+      "serial": "4",
+      "fieldDiffs": {
+        "color": {
+          "excel": "香槟金F701258296451",
+          "db": "香 槟金F701258296451"
+        }
+      }
+    },
+    {
+      "project_name": "江苏盛泽李巧萍",
+      "id": "7161563f-153b-4ab1-b27b-9c69a953c028",
+      "serial": "259",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        },
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "2601-137V",
+      "id": "10989319-cbf6-47f6-b69c-69acbe2c9cf1",
+      "serial": "28",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "2601-134V",
+      "id": "717ea251-bf54-4c34-ba13-72cc0ccda844",
+      "serial": "29",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "20260112马来西亚",
+      "id": "b039e3f7-d883-457c-95b8-fa44bc71a55f",
+      "serial": "79",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "井架35/中分门",
+          "db": "井 架35/中分门"
+        }
+      }
+    },
+    {
+      "project_name": "L01260225POH02957徐福村街房25号",
+      "id": "7c18bdeb-1107-410f-8566-5829e4ba9dcd",
+      "serial": "36",
+      "fieldDiffs": {
+        "color": {
+          "excel": "厅门：2B喷砂香槟金\n轿门：MAC砂",
+          "db": "厅门：2B喷砂香槟金 轿门：MAC砂"
+        }
+      }
+    },
+    {
+      "project_name": "XZ26A3305799",
+      "id": "3cdb8ed6-13d3-4cbe-b877-f0c42af30af8",
+      "serial": "48",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "平开门边框打样",
+          "db": "平开门 边框打样"
+        }
+      }
+    },
+    {
+      "project_name": "RH97284-2",
+      "id": "7e95bc81-81c5-41ec-a5dc-10e8187101cf",
+      "serial": "50",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+中分 门"
+        }
+      }
+    },
+    {
+      "project_name": "RH97517-2",
+      "id": "a394312f-323b-4a4f-89dd-654706e40c2e",
+      "serial": "51",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+中分 门"
+        }
+      }
+    },
+    {
+      "project_name": "万苑新村28号",
+      "id": "2c4ad4cb-f912-45f1-b77f-d4cfbf4fe893",
+      "serial": "55",
+      "fieldDiffs": {
+        "customer": {
+          "excel": "东阳市吴宁\n沈氏电梯",
+          "db": "东阳市吴宁沈氏电梯"
+        }
+      }
+    },
+    {
+      "project_name": "TH260122022N01丰泰20号别墅电梯",
+      "id": "84112f7d-4502-4436-a739-5038718bda83",
+      "serial": "58",
+      "fieldDiffs": {
+        "customer": {
+          "excel": "克拉玛依亨润机\n电设备有限公司",
+          "db": "克拉玛依亨润机电设备有限公司"
+        }
+      }
+    },
+    {
+      "project_name": "4500453107",
+      "id": "94d0ec44-8f50-42bf-bce3-ac61271a00f1",
+      "serial": "162",
+      "fieldDiffs": {
+        "color": {
+          "excel": "黑砂纹00124\n+金属灰713458-9",
+          "db": "黑砂纹00124+金属灰713458-9"
+        }
+      }
+    },
+    {
+      "project_name": "GA260256-010加急",
+      "id": "96d0cdf0-feef-4f8f-ba2d-9eb5ed6e52ff",
+      "serial": "153",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+井架",
+          "db": "轿 厢+井架"
+        }
+      }
+    },
+    {
+      "project_name": "TH260317015N01郑清远",
+      "id": "ce3e53f7-604a-4843-8ebe-809e6edea60b",
+      "serial": "167",
+      "fieldDiffs": {
+        "schedule_date": {
+          "excel": "2026-03-30",
+          "db": "2026-03-03"
+        }
+      }
+    },
+    {
+      "project_name": "TJ260303563B兴平西路157号 加急",
+      "id": "009e29a0-5d44-4bc5-a98e-0daf4639f432",
+      "serial": "171",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-10",
+          "db": "2026-04-01"
+        }
+      }
+    },
+    {
+      "project_name": "2603-152V",
+      "id": "598e09c0-9438-4776-8967-9781228a0a46",
+      "serial": "178",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "2603-168V",
+      "id": "72c1c9b9-4e21-4d36-ac2f-c9e1738c8481",
+      "serial": "181",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+非标中分门",
+          "db": "轿厢+ 非标中分门"
+        }
+      }
+    },
+    {
+      "project_name": "浙江嘉兴朱晓军",
+      "id": "475f76a9-c1e8-4bf7-ab52-f87d394aa8bc",
+      "serial": "186",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "LC260232：L1陈总",
+      "id": "1b1afbec-5346-48e0-b30b-666f62eea1d1",
+      "serial": "189",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门+40井架",
+          "db": "轿 厢+中分门+40井架"
+        }
+      }
+    },
+    {
+      "project_name": "LN906015G01L43 盐城 金庭苑7-101",
+      "id": "f45c0792-7c06-416d-9806-2225a5b68b2f",
+      "serial": "199",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        }
+      }
+    },
+    {
+      "project_name": "河北邢台孟双群",
+      "id": "987cbf3a-b38d-47ed-995c-089b4a2497ec",
+      "serial": "201",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        },
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "2603-115V-2",
+      "id": "73435ee3-91b3-4ca8-888c-f11eab377a92",
+      "serial": "202",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        }
+      }
+    },
+    {
+      "project_name": "TH260403017N01唐山遵化黎明园东区孙府",
+      "id": "e8b6411e-02d6-4ec3-8089-1ad5e171986c",
+      "serial": "203",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        }
+      }
+    },
+    {
+      "project_name": "上海浦东郭正华",
+      "id": "daaeeae8-8492-4360-bd4e-609de6212a2c",
+      "serial": "206",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        },
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "上海阮国康",
+      "id": "69cb15c4-f89b-4bdc-a80d-c2527e61b7d5",
+      "serial": "207",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        }
+      }
+    },
+    {
+      "project_name": "L01260408POH01620 (芜湖通力别墅梯展厅\n样板梯",
+      "id": "6126b490-529b-4671-aa17-c4ae3e38a9be",
+      "serial": "208",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        }
+      }
+    },
+    {
+      "project_name": "卓墅展厅-2",
+      "id": "328b12da-78ac-434c-acd8-9894e80eecb6",
+      "serial": "209",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        }
+      }
+    },
+    {
+      "project_name": "L01260409POH01904 家用梯",
+      "id": "c12a4395-f2ef-4bf6-b57a-b4110dd44d0f",
+      "serial": "213",
+      "fieldDiffs": {
+        "schedule_date": {
+          "excel": "2026-04-10",
+          "db": "2026-04-01"
+        },
+        "film_date": {
+          "excel": "2026-04-13",
+          "db": "2026-04-14"
+        },
+        "cutting_required_date": {
+          "excel": "2026-04-15",
+          "db": "2026-04-16"
+        },
+        "processing_required_date": {
+          "excel": "2026-04-17",
+          "db": "2026-04-18"
+        },
+        "processing_actual_date": {
+          "excel": "2026-04-15",
+          "db": null
+        },
+        "inspection_date": {
+          "excel": "2026-04-18",
+          "db": "2026-04-19"
+        },
+        "color": {
+          "excel": "乱纹青古铜",
+          "db": "青古铜"
+        }
+      }
+    },
+    {
+      "project_name": "2603-141V湖州安吉 蒋总",
+      "id": "884fb57c-1514-4e75-b637-2d82c7183a1e",
+      "serial": "214",
+      "fieldDiffs": {
+        "schedule_date": {
+          "excel": "2026-04-10",
+          "db": "2026-04-01"
+        },
+        "planned_delivery_date": {
+          "excel": "2026-04-20",
+          "db": "2026-04-02"
+        }
+      }
+    },
+    {
+      "project_name": "MAX-26-0320-A2904",
+      "id": "b462d617-07f7-4bde-a3b1-dfd9308ee501",
+      "serial": "215",
+      "fieldDiffs": {
+        "schedule_date": {
+          "excel": "2026-04-10",
+          "db": "2026-04-01"
+        }
+      }
+    },
+    {
+      "project_name": "L01260409POH01904家用梯",
+      "id": "c12a4395-f2ef-4bf6-b57a-b4110dd44d0f",
+      "serial": "216",
+      "fieldDiffs": {
+        "schedule_date": {
+          "excel": "2026-04-10",
+          "db": "2026-04-01"
+        }
+      }
+    },
+    {
+      "project_name": "NC260303427 杨增德",
+      "id": "e80f3730-55fd-4326-bb45-baff807056cb",
+      "serial": "217",
+      "fieldDiffs": {
+        "schedule_date": {
+          "excel": "2026-04-10",
+          "db": "2026-04-01"
+        }
+      }
+    },
+    {
+      "project_name": "钱塘汇4-1DT1",
+      "id": "105eb1f0-6ca7-4a22-91a5-b60f7d1e860a",
+      "serial": "218",
+      "fieldDiffs": {
+        "assembly_date": {
+          "excel": "2026-04-21",
+          "db": null
+        },
+        "packaging_date": {
+          "excel": "2026-04-22",
+          "db": null
+        },
+        "delivery_date": {
+          "excel": "2026-04-22",
+          "db": "2026-04-23"
+        }
+      }
+    },
+    {
+      "project_name": "浙江杭州孙兴祥",
+      "id": "4f0a91ac-88c1-4d76-9689-788946a5ed83",
+      "serial": "219",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "浙江台州陈标法",
+      "id": "2e8a2c9d-4926-4a88-a201-6e14fa3c1d39",
+      "serial": "222",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "浙江嘉兴徐海军",
+      "id": "66fd052e-a5ef-4922-9637-25ce4f4e6ba9",
+      "serial": "223",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "广东揭阳黄宏林",
+      "id": "548e5bfa-cd08-4d87-89bd-3bf28e946cd9",
+      "serial": "224",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "2604-041V",
+      "id": "6f552274-2ff2-483b-aa4c-b4823e7b406d",
+      "serial": "232",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "2604-015V",
+      "id": "59d3e6ba-66f0-430e-838f-2f5aa929aebc",
+      "serial": "235",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "慈溪沧田村施杰大宅",
+      "id": "7d4cf0ad-8fc0-4b6a-9dbf-e1c071de5516",
+      "serial": "245",
+      "fieldDiffs": {
+        "color": {
+          "excel": "定制色：LSJ02SX-砂型\n栗沙金",
+          "db": "定制色：LSJ02SX-砂型栗沙金"
+        }
+      }
+    },
+    {
+      "project_name": "A2908-1",
+      "id": "caa520ac-00a7-46ce-b39f-a1572a7da013",
+      "serial": "248",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+中分 门"
+        }
+      }
+    },
+    {
+      "project_name": "广东汕头马海桐",
+      "id": "96f16f77-435c-4c1e-9e35-4357ff16533f",
+      "serial": "249",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "2604-058V",
+      "id": "f65a51f2-91d5-4e30-abff-f8e68b4302fe",
+      "serial": "254",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "轿厢+中分门",
+          "db": "轿厢+ 中分门"
+        }
+      }
+    },
+    {
+      "project_name": "广东潮州刘敬付",
+      "id": "0e1fe81f-e4a1-49af-be46-ad317a19e731",
+      "serial": "255",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        },
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "LN906015G01L44金华 青岩傅一区16-5",
+      "id": "2943b54c-7b85-4d7b-b342-df943c4cca9a",
+      "serial": "256",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "LN906015G01L45金华 青岩傅一区18-2",
+      "id": "b419007c-acb5-4303-9cfa-79f24760e0fe",
+      "serial": "257",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "广东潮州徐节鹏",
+      "id": "eb1eae45-6de1-4cd5-8360-6583aecef435",
+      "serial": "258",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "RH98278",
+      "id": "c2e5ebdf-0308-4960-a5f3-ae40dd1f7aaf",
+      "serial": "262",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "TH260408005N01蔡金枝",
+      "id": "07aa4cd6-26de-419d-a5d6-1e31e9095aef",
+      "serial": "263",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "RH96952",
+      "id": "e0adecc1-46e0-47d0-bb31-1143e4fe3365",
+      "serial": "264",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "RH98630",
+      "id": "3a3b96b3-04bc-4851-89a0-4f13ee72161a",
+      "serial": "265",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "LN906015G01L47奕聪花园13-4",
+      "id": "53cf5ee0-9670-488b-bc61-9602a3fdde1f",
+      "serial": "268",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "LN906015G01L46 泉州 石狮石龟路许总",
+      "id": "18bb764f-d4e4-40f6-8343-40bee493781e",
+      "serial": "272",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "20260417阿联酋 BE06",
+      "id": "9726f994-dbd1-4675-827f-e473276e0175",
+      "serial": "273",
+      "fieldDiffs": {
+        "planned_delivery_date": {
+          "excel": "2026-04-30",
+          "db": "2026-04-03"
+        }
+      }
+    },
+    {
+      "project_name": "湖南岳阳黄佳星",
+      "id": "634bb8d4-91c4-4c8d-bdc7-bb44cb96a535",
+      "serial": "277",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    },
+    {
+      "project_name": "江苏常州姜占元",
+      "id": "7edbd6b9-2f77-400e-b871-41616a900d57",
+      "serial": "282",
+      "fieldDiffs": {
+        "product_name": {
+          "excel": "40井架",
+          "db": "40井 架"
+        }
+      }
+    }
+  ],
+  "missingInDb": [],
+  "dbExtra": [
+    {
+      "id": "6c78abb0-b720-4515-a23d-bd842a3835af",
+      "project_name": "2603-043V福建漳州何荣华",
+      "customer": "安川双菱",
+      "product_name": "轿厢+中分门",
+      "color": "RAL1035",
+      "quantity": 1,
+      "schedule_date": "2026-03-16",
+      "planned_delivery_date": "2026-03-28",
+      "material_selection_date": "2026-03-17",
+      "painting_date": "2026-03-19",
+      "film_date": "2026-03-20",
+      "cutting_required_date": "2026-03-21",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-23",
+      "processing_actual_date": null,
+      "inspection_date": "2026-03-24",
+      "assembly_date": "2026-03-26",
+      "packaging_date": "2026-03-27",
+      "delivery_date": "2026-03-28",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "54d3dd24-1253-49d3-8fed-10a3a4561193",
+      "project_name": "2603-057V深圳王浩",
+      "customer": "安川双菱",
+      "product_name": "轿厢+中分门",
+      "color": "黑砂纹00124",
+      "quantity": 1,
+      "schedule_date": "2026-03-02",
+      "planned_delivery_date": "2026-04-02",
+      "material_selection_date": "2026-03-21",
+      "painting_date": "2026-03-23",
+      "film_date": "2026-03-24",
+      "cutting_required_date": "2026-03-26",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-28",
+      "processing_actual_date": null,
+      "inspection_date": "2026-03-29",
+      "assembly_date": "2026-03-31",
+      "packaging_date": "2026-04-01",
+      "delivery_date": "2026-04-02",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "884fb57c-1514-4e75-b637-2d82c7183a1e",
+      "project_name": "2603-141V湖州安吉  蒋总",
+      "customer": "安川双菱",
+      "product_name": "轿厢",
+      "color": "银灰ADA711381-10#02",
+      "quantity": 1,
+      "schedule_date": "2026-04-01",
+      "planned_delivery_date": "2026-04-02",
+      "material_selection_date": "2026-04-11",
+      "painting_date": "2026-04-12",
+      "film_date": "2026-04-13",
+      "cutting_required_date": "2026-04-14",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-16",
+      "processing_actual_date": "2026-04-16",
+      "inspection_date": "2026-04-18",
+      "assembly_date": "2026-04-19",
+      "packaging_date": "2026-04-20",
+      "delivery_date": "2026-04-20",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "6769a564-58a9-4613-a9f6-26f678ef83f5",
+      "project_name": "2603-162V戴乐 江西 九江胡华星",
+      "customer": "安川双菱",
+      "product_name": "轿厢+中分门",
+      "color": "银灰ADA711381-10#02",
+      "quantity": 1,
+      "schedule_date": "2026-04-01",
+      "planned_delivery_date": "2026-04-16",
+      "material_selection_date": "2026-04-02",
+      "painting_date": "2026-04-04",
+      "film_date": "2026-04-06",
+      "cutting_required_date": "2026-04-08",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-10",
+      "processing_actual_date": "2026-04-13",
+      "inspection_date": "2026-04-12",
+      "assembly_date": "2026-04-14",
+      "packaging_date": "2026-04-15",
+      "delivery_date": "2026-04-16",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "092d0707-b19c-4e51-b681-8e0fe3658182",
+      "project_name": "2603-169V戴乐 湖南 长沙 柳克易",
+      "customer": "安川双菱",
+      "product_name": "轿厢+手拉门",
+      "color": "黑砂纹00124",
+      "quantity": 1,
+      "schedule_date": "2026-04-06",
+      "planned_delivery_date": "2026-04-18",
+      "material_selection_date": "2026-04-07",
+      "painting_date": "2026-04-09",
+      "film_date": "2026-04-10",
+      "cutting_required_date": "2026-04-11",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-13",
+      "processing_actual_date": "2026-04-15",
+      "inspection_date": "2026-04-14",
+      "assembly_date": "2026-04-16",
+      "packaging_date": "2026-04-17",
+      "delivery_date": "2026-04-18",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "cb36d785-e203-427e-9ddd-7b09a337d7a0",
+      "project_name": "L01260126POH05183上海旗舰店V6（2.4继续排产）",
+      "customer": "力隆",
+      "product_name": "井道玻璃+井道",
+      "color": "客供粉末LSC00190",
+      "quantity": 1,
+      "schedule_date": "2026-02-04",
+      "planned_delivery_date": "2026-04-09",
+      "material_selection_date": "2026-02-05",
+      "painting_date": "2026-03-29",
+      "film_date": "2026-03-30",
+      "cutting_required_date": "2026-04-01",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-03",
+      "processing_actual_date": "2026-04-05",
+      "inspection_date": "2026-04-07",
+      "assembly_date": "2026-04-08",
+      "packaging_date": "2026-04-09",
+      "delivery_date": "2026-04-10",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "3330c3b0-0bb9-45c8-a542-2c20610fd52a",
+      "project_name": "L01260226POH02977 海宁市学院路自建房192号",
+      "customer": "力隆",
+      "product_name": "40B井架",
+      "color": "砂纹黑钛（派特勒）",
+      "quantity": 1,
+      "schedule_date": "2026-02-27",
+      "planned_delivery_date": "2026-03-18",
+      "material_selection_date": "2026-03-02",
+      "painting_date": "2026-03-04",
+      "film_date": "2026-03-06",
+      "cutting_required_date": "2026-03-08",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-10",
+      "processing_actual_date": "2026-03-10",
+      "inspection_date": "2026-03-13",
+      "assembly_date": "2026-03-15",
+      "packaging_date": "2026-03-17",
+      "delivery_date": "2026-03-18",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "58d1d248-986f-4fa6-8ee3-feea38a1df17",
+      "project_name": "L01260401POH00158 合肥 曼森样梯",
+      "customer": "力隆",
+      "product_name": "中分门",
+      "color": "MAC砂+柔光黑",
+      "quantity": 1,
+      "schedule_date": "2026-04-01",
+      "planned_delivery_date": "2026-04-14",
+      "material_selection_date": "2026-04-02",
+      "painting_date": "2026-04-04",
+      "film_date": "2026-04-05",
+      "cutting_required_date": "2026-04-07",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-09",
+      "processing_actual_date": "2026-04-13",
+      "inspection_date": "2026-04-10",
+      "assembly_date": "2026-04-12",
+      "packaging_date": "2026-04-13",
+      "delivery_date": "2026-04-14",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "2d59e8a6-0726-429b-a076-2b731b8bd31b",
+      "project_name": "L01260404POH01183 金国 胜",
+      "customer": "力隆",
+      "product_name": "中分门",
+      "color": "砂纹黑钛",
+      "quantity": 1,
+      "schedule_date": "2026-04-06",
+      "planned_delivery_date": "2026-04-19",
+      "material_selection_date": "2026-04-07",
+      "painting_date": "2026-04-09",
+      "film_date": "2026-04-10",
+      "cutting_required_date": "2026-04-12",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-14",
+      "processing_actual_date": "2026-04-14",
+      "inspection_date": "2026-04-15",
+      "assembly_date": "2026-04-17",
+      "packaging_date": "2026-04-18",
+      "delivery_date": "2026-04-19",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "6126b490-529b-4671-aa17-c4ae3e38a9be",
+      "project_name": "L01260408POH01620 (芜湖通力别墅梯展厅样板梯",
+      "customer": "力隆",
+      "product_name": "中分门",
+      "color": "砂纹黑钛（派特勒）",
+      "quantity": 1,
+      "schedule_date": "2026-04-08",
+      "planned_delivery_date": "2026-04-02",
+      "material_selection_date": "2026-04-09",
+      "painting_date": "2026-04-11",
+      "film_date": "2026-04-12",
+      "cutting_required_date": "2026-04-13",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-15",
+      "processing_actual_date": "2026-04-14",
+      "inspection_date": "2026-04-16",
+      "assembly_date": "2026-04-18",
+      "packaging_date": "2026-04-19",
+      "delivery_date": "2026-04-20",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "45c1c108-7a74-4735-9c78-f385d1531939",
+      "project_name": "L01260409POH01904 家用 梯",
+      "customer": "力隆",
+      "product_name": "中分门",
+      "color": "乱纹青古铜",
+      "quantity": 1,
+      "schedule_date": "2026-04-01",
+      "planned_delivery_date": "2026-04-22",
+      "material_selection_date": "2026-04-11",
+      "painting_date": "2026-04-12",
+      "film_date": "2026-04-13",
+      "cutting_required_date": "2026-04-15",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-17",
+      "processing_actual_date": "2026-04-15",
+      "inspection_date": "2026-04-18",
+      "assembly_date": "2026-04-20",
+      "packaging_date": "2026-04-21",
+      "delivery_date": "2026-04-22",
+      "remarks": ""
+    },
+    {
+      "id": "c377975e-1d23-42b6-af7e-643da8b185db",
+      "project_name": "L01260414POH03225 林溪 府 66栋 103",
+      "customer": "力隆",
+      "product_name": "中分门",
+      "color": "MAC砂",
+      "quantity": 1,
+      "schedule_date": "2026-04-14",
+      "planned_delivery_date": "2026-04-27",
+      "material_selection_date": "2026-04-15",
+      "painting_date": "2026-04-17",
+      "film_date": "2026-04-18",
+      "cutting_required_date": "2026-04-20",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-22",
+      "processing_actual_date": null,
+      "inspection_date": "2026-04-23",
+      "assembly_date": "2026-04-25",
+      "packaging_date": "2026-04-26",
+      "delivery_date": "2026-04-27",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "27ddab16-f74e-44b2-a33d-655ac272dfad",
+      "project_name": "L01260417POH04062(海宁 展厅V6出样2)",
+      "customer": "力隆",
+      "product_name": "40井架+中分门",
+      "color": "砂纹黑钛",
+      "quantity": 1,
+      "schedule_date": "2026-04-22",
+      "planned_delivery_date": "2026-05-04",
+      "material_selection_date": "2026-04-22",
+      "painting_date": "2026-04-23",
+      "film_date": "2026-04-25",
+      "cutting_required_date": "2026-04-27",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-28",
+      "processing_actual_date": null,
+      "inspection_date": "2026-04-29",
+      "assembly_date": "2026-04-30",
+      "packaging_date": "2026-04-30",
+      "delivery_date": "2026-05-04",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "3dd6d7fb-83dc-41a2-982a-05391183c721",
+      "project_name": "LN906015G01L39合肥曼森 动态样梯",
+      "customer": "力隆",
+      "product_name": "40B井架",
+      "color": "砂纹黑钛（派特勒）",
+      "quantity": 1,
+      "schedule_date": "2026-03-24",
+      "planned_delivery_date": "2026-04-06",
+      "material_selection_date": "2026-03-25",
+      "painting_date": "2026-03-27",
+      "film_date": "2026-03-29",
+      "cutting_required_date": "2026-03-31",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-02",
+      "processing_actual_date": "2026-04-07",
+      "inspection_date": "2026-04-03",
+      "assembly_date": "2026-04-04",
+      "packaging_date": "2026-04-05",
+      "delivery_date": "2026-04-06",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "f45c0792-7c06-416d-9806-2225a5b68b2f",
+      "project_name": "LN906015G01L43 盐城 金 庭苑7-101",
+      "customer": "力隆",
+      "product_name": "40B井架",
+      "color": "米珍珠",
+      "quantity": 1,
+      "schedule_date": "2026-04-06",
+      "planned_delivery_date": "2026-04-02",
+      "material_selection_date": "2026-04-07",
+      "painting_date": "2026-04-09",
+      "film_date": "2026-04-11",
+      "cutting_required_date": "2026-04-13",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-15",
+      "processing_actual_date": "2026-04-16",
+      "inspection_date": "2026-04-16",
+      "assembly_date": "2026-04-18",
+      "packaging_date": "2026-04-19",
+      "delivery_date": "2026-04-20",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "18bb764f-d4e4-40f6-8343-40bee493781e",
+      "project_name": "LN906015G01L46 泉州 石 狮石龟路许总",
+      "customer": "力隆",
+      "product_name": "40井架",
+      "color": "青古铜T184",
+      "quantity": 1,
+      "schedule_date": "2026-04-21",
+      "planned_delivery_date": "2026-04-03",
+      "material_selection_date": "2026-04-21",
+      "painting_date": "2026-04-23",
+      "film_date": "2026-04-25",
+      "cutting_required_date": "2026-04-26",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-27",
+      "processing_actual_date": null,
+      "inspection_date": "2026-04-28",
+      "assembly_date": "2026-04-29",
+      "packaging_date": "2026-04-29",
+      "delivery_date": "2026-04-30",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "387cebe7-2325-4db8-a9f2-6fa00181f4f8",
+      "project_name": "LN906050G01L14李本钢三 门中粮壹号18-103",
+      "customer": "力隆",
+      "product_name": "40井架",
+      "color": "雪山白",
+      "quantity": 1,
+      "schedule_date": "2026-04-23",
+      "planned_delivery_date": "2026-05-05",
+      "material_selection_date": "2026-04-23",
+      "painting_date": "2026-04-25",
+      "film_date": "2026-04-27",
+      "cutting_required_date": "2026-04-28",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-29",
+      "processing_actual_date": null,
+      "inspection_date": "2026-04-30",
+      "assembly_date": "2026-05-04",
+      "packaging_date": "2026-05-05",
+      "delivery_date": "2026-05-05",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "b9420aed-b08d-4d7f-80d1-7ec59ce56eef",
+      "project_name": "TH251210021N01汤逊湖一 号C302",
+      "customer": "御墅",
+      "product_name": "轿厢+门",
+      "color": "玫瑰粉12582",
+      "quantity": 1,
+      "schedule_date": "2026-04-03",
+      "planned_delivery_date": "2026-04-16",
+      "material_selection_date": "2026-04-04",
+      "painting_date": "2026-04-06",
+      "film_date": "2026-04-07",
+      "cutting_required_date": "2026-04-09",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-11",
+      "processing_actual_date": "2026-04-09",
+      "inspection_date": "2026-04-12",
+      "assembly_date": "2026-04-14",
+      "packaging_date": "2026-04-15",
+      "delivery_date": "2026-04-16",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "218e7e64-0ecb-43d0-a77d-8fc7d05899d3",
+      "project_name": "TH260306021N01杨世聪 B 版",
+      "customer": "御墅",
+      "product_name": "中分门",
+      "color": "客供粉（PTN21208香槟）",
+      "quantity": 1,
+      "schedule_date": "2026-03-16",
+      "planned_delivery_date": "2026-03-29",
+      "material_selection_date": "2026-03-17",
+      "painting_date": "2026-03-19",
+      "film_date": "2026-03-20",
+      "cutting_required_date": "2026-03-22",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-24",
+      "processing_actual_date": null,
+      "inspection_date": "2026-03-26",
+      "assembly_date": "2026-03-27",
+      "packaging_date": "2026-03-28",
+      "delivery_date": "2026-03-29",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "5dd7e8fd-8239-4fb3-8bc2-751655ef1398",
+      "project_name": "TH260326002N01鸿园银杏 苑12-3-1",
+      "customer": "御墅",
+      "product_name": "手拉门",
+      "color": "量子银灰ADA711765-13",
+      "quantity": 4,
+      "schedule_date": "2026-04-01",
+      "planned_delivery_date": "2026-04-14",
+      "material_selection_date": "2026-04-02",
+      "painting_date": "2026-04-04",
+      "film_date": "2026-04-05",
+      "cutting_required_date": "2026-04-06",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-08",
+      "processing_actual_date": "2026-04-13",
+      "inspection_date": "2026-04-10",
+      "assembly_date": "2026-04-12",
+      "packaging_date": "2026-04-13",
+      "delivery_date": "2026-04-14",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "a488ee6f-fd05-4cf4-ae95-2c9eca01d152",
+      "project_name": "TH260330023N01吉县梅塘 镇下背山肖华平别墅梯",
+      "customer": "御墅",
+      "product_name": "轿厢+中分门",
+      "color": "香槟金1035",
+      "quantity": 1,
+      "schedule_date": "2026-04-11",
+      "planned_delivery_date": "2026-04-22",
+      "material_selection_date": "2026-04-11",
+      "painting_date": "2026-04-12",
+      "film_date": "2026-04-14",
+      "cutting_required_date": "2026-04-16",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-17",
+      "processing_actual_date": "2026-04-21",
+      "inspection_date": "2026-04-19",
+      "assembly_date": "2026-04-20",
+      "packaging_date": "2026-04-21",
+      "delivery_date": "2026-04-22",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "e8b6411e-02d6-4ec3-8089-1ad5e171986c",
+      "project_name": "TH260403017N01唐山遵化 黎明园东区孙府",
+      "customer": "御墅",
+      "product_name": "轿厢+中分门",
+      "color": "香槟金1035",
+      "quantity": 1,
+      "schedule_date": "2026-04-08",
+      "planned_delivery_date": "2026-04-02",
+      "material_selection_date": "2026-04-09",
+      "painting_date": "2026-04-11",
+      "film_date": "2026-04-12",
+      "cutting_required_date": "2026-04-13",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-15",
+      "processing_actual_date": "2026-04-13",
+      "inspection_date": "2026-04-16",
+      "assembly_date": "2026-04-18",
+      "packaging_date": "2026-04-19",
+      "delivery_date": "2026-04-20",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "9d66eaa0-25d7-405e-bcd1-9f90e12a551a",
+      "project_name": "TH260407023N01西双版纳 曼弄枫黄总展厅",
+      "customer": "御墅",
+      "product_name": "新35井架",
+      "color": "闪光灰421B",
+      "quantity": 1,
+      "schedule_date": "2026-04-09",
+      "planned_delivery_date": "2026-04-21",
+      "material_selection_date": "2026-04-10",
+      "painting_date": "2026-04-11",
+      "film_date": "2026-04-12",
+      "cutting_required_date": "2026-04-14",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-16",
+      "processing_actual_date": "2026-04-18",
+      "inspection_date": "2026-04-18",
+      "assembly_date": "2026-04-19",
+      "packaging_date": "2026-04-20",
+      "delivery_date": "2026-04-21",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "331bd90c-8203-48dc-a610-03516e26afe2",
+      "project_name": "TH260421044N01竟陵办事 处东湖熊总私房",
+      "customer": "御墅",
+      "product_name": "轿厢",
+      "color": "冰川银色",
+      "quantity": 1,
+      "schedule_date": "2026-04-25",
+      "planned_delivery_date": "2026-05-08",
+      "material_selection_date": "2026-04-25",
+      "painting_date": "2026-04-27",
+      "film_date": "2026-04-29",
+      "cutting_required_date": "2026-04-30",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-05-04",
+      "processing_actual_date": null,
+      "inspection_date": "2026-05-05",
+      "assembly_date": "2026-05-06",
+      "packaging_date": "2026-05-07",
+      "delivery_date": "2026-05-08",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "4ea531ef-49cf-4bd6-9571-373a7da3f58a",
+      "project_name": "TJ2022-05957-01c堂悦32-105",
+      "customer": "沈鹏鑫",
+      "product_name": "新35井架",
+      "color": "金属灰713458-9",
+      "quantity": 1,
+      "schedule_date": "2026-03-16",
+      "planned_delivery_date": "2026-03-31",
+      "material_selection_date": "2026-03-17",
+      "painting_date": "2026-03-19",
+      "film_date": "2026-03-21",
+      "cutting_required_date": "2026-03-23",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-25",
+      "processing_actual_date": "2026-03-24",
+      "inspection_date": "2026-03-27",
+      "assembly_date": null,
+      "packaging_date": "2026-03-30",
+      "delivery_date": "2026-03-31",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "b96e42cb-6485-4b61-8030-4a691a513753",
+      "project_name": "TJ260102149B Jasper Golangco",
+      "customer": "莱爱",
+      "product_name": "40井架",
+      "color": "黑砂纹00124",
+      "quantity": 1,
+      "schedule_date": "2026-04-12",
+      "planned_delivery_date": "2026-04-21",
+      "material_selection_date": "2026-04-12",
+      "painting_date": "2026-04-14",
+      "film_date": "2026-04-15",
+      "cutting_required_date": "2026-04-16",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-17",
+      "processing_actual_date": "2026-04-18",
+      "inspection_date": "2026-04-18",
+      "assembly_date": "2026-04-19",
+      "packaging_date": "2026-04-20",
+      "delivery_date": "2026-04-21",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "009e29a0-5d44-4bc5-a98e-0daf4639f432",
+      "project_name": "TJ260303563B兴平西 路157号 加急",
+      "customer": "吴宁沈氏",
+      "product_name": "新35井架",
+      "color": "白亮光90012",
+      "quantity": 1,
+      "schedule_date": "2026-04-01",
+      "planned_delivery_date": "2026-04-01",
+      "material_selection_date": "2026-04-02",
+      "painting_date": "2026-04-04",
+      "film_date": "2026-04-05",
+      "cutting_required_date": "2026-04-06",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-07",
+      "processing_actual_date": "2026-04-09",
+      "inspection_date": "2026-04-08",
+      "assembly_date": "2026-04-09",
+      "packaging_date": "2026-04-10",
+      "delivery_date": "2026-04-10",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "8bedb7cc-e115-4981-8761-823a3fe6b71e",
+      "project_name": "TJ260303635C福清市渔 溪镇御景湾翁总别墅",
+      "customer": "张松涛",
+      "product_name": "40井架",
+      "color": "白亮光90012",
+      "quantity": 1,
+      "schedule_date": "2026-04-02",
+      "planned_delivery_date": "2026-04-15",
+      "material_selection_date": "2026-04-03",
+      "painting_date": "2026-04-05",
+      "film_date": "2026-04-07",
+      "cutting_required_date": "2026-04-09",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-11",
+      "processing_actual_date": "2026-04-15",
+      "inspection_date": "2026-04-12",
+      "assembly_date": "2026-04-13",
+      "packaging_date": "2026-04-14",
+      "delivery_date": "2026-04-15",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "fdfd7f75-0a16-420d-a999-a439fd3f8e40",
+      "project_name": "XZ26A33156 海宁盐官丰兴佳苑章剑锋（加急）",
+      "customer": "美致",
+      "product_name": "新35井架",
+      "color": "黑砂纹00124",
+      "quantity": 1,
+      "schedule_date": "2026-02-05",
+      "planned_delivery_date": "2026-02-28",
+      "material_selection_date": "2026-02-06",
+      "painting_date": null,
+      "film_date": null,
+      "cutting_required_date": null,
+      "cutting_actual_date": null,
+      "processing_required_date": null,
+      "processing_actual_date": "2026-03-03",
+      "inspection_date": null,
+      "assembly_date": null,
+      "packaging_date": null,
+      "delivery_date": "2026-02-28",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "69d06af7-f315-443b-9645-5e89cf3ff190",
+      "project_name": "ZJSJE2026200682 麻城展厅观光梯",
+      "customer": "优迈",
+      "product_name": "新35井架+轿厢+门",
+      "color": "RAL1035",
+      "quantity": 1,
+      "schedule_date": "2026-02-27",
+      "planned_delivery_date": "2026-03-12",
+      "material_selection_date": "2026-03-02",
+      "painting_date": "2026-03-04",
+      "film_date": "2026-03-05",
+      "cutting_required_date": "2026-03-07",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-08",
+      "processing_actual_date": "2026-03-08",
+      "inspection_date": "2026-03-09",
+      "assembly_date": "2026-03-10",
+      "packaging_date": "2026-03-11",
+      "delivery_date": "2026-03-12",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "bb2296ac-8897-460c-ba16-a811a19d3969",
+      "project_name": "上海浦东陆平东（上海浦 东陆总）",
+      "customer": "戴乐",
+      "product_name": "55型井架",
+      "color": "香槟金F701ZJ8296451",
+      "quantity": 1,
+      "schedule_date": "2026-03-31",
+      "planned_delivery_date": "2026-04-13",
+      "material_selection_date": "2026-04-01",
+      "painting_date": "2026-04-03",
+      "film_date": "2026-04-04",
+      "cutting_required_date": "2026-04-06",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-08",
+      "processing_actual_date": "2026-04-15",
+      "inspection_date": "2026-04-10",
+      "assembly_date": "2026-04-11",
+      "packaging_date": "2026-04-12",
+      "delivery_date": "2026-04-13",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "f16b536f-a9c6-4b3d-b926-998a673d64ba",
+      "project_name": "广东揭阳蔡加逸（揭阳惠 来蔡总）",
+      "customer": "戴乐",
+      "product_name": "40井架",
+      "color": "咖啡金AFA812863-20",
+      "quantity": 1,
+      "schedule_date": "2026-02-27",
+      "planned_delivery_date": "2026-03-15",
+      "material_selection_date": "2026-03-02",
+      "painting_date": "2026-03-04",
+      "film_date": "2026-03-06",
+      "cutting_required_date": "2026-03-08",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-10",
+      "processing_actual_date": null,
+      "inspection_date": "2026-03-12",
+      "assembly_date": "2026-03-13",
+      "packaging_date": "2026-03-14",
+      "delivery_date": "2026-03-15",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "d8e9b5ae-0c2f-4efc-8297-3df9f262253e",
+      "project_name": "浙江嘉兴江建华（嘉兴江 总）",
+      "customer": "戴乐",
+      "product_name": "40井架",
+      "color": "金属灰713458-9",
+      "quantity": 1,
+      "schedule_date": "2026-03-28",
+      "planned_delivery_date": "2026-04-11",
+      "material_selection_date": "2026-03-29",
+      "painting_date": "2026-03-31",
+      "film_date": "2026-04-02",
+      "cutting_required_date": "2026-04-04",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-06",
+      "processing_actual_date": "2026-04-04",
+      "inspection_date": "2026-04-08",
+      "assembly_date": "2026-04-09",
+      "packaging_date": "2026-04-10",
+      "delivery_date": "2026-04-11",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "63893bbc-eb8e-4237-be52-28ad8f1f82c2",
+      "project_name": "浙江杭州杨立锋（钱塘杨 总）",
+      "customer": "戴乐",
+      "product_name": "40井架",
+      "color": "灰砂7812",
+      "quantity": 1,
+      "schedule_date": "2026-03-28",
+      "planned_delivery_date": "2026-04-11",
+      "material_selection_date": "2026-03-29",
+      "painting_date": "2026-03-31",
+      "film_date": "2026-04-02",
+      "cutting_required_date": "2026-04-04",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-06",
+      "processing_actual_date": "2026-04-09",
+      "inspection_date": "2026-04-08",
+      "assembly_date": "2026-04-09",
+      "packaging_date": "2026-04-10",
+      "delivery_date": "2026-04-11",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "b63bd471-7da2-4005-9756-1a4ccbdf75e4",
+      "project_name": "浙江湖州邹汉章（长兴邹 总）",
+      "customer": "戴乐",
+      "product_name": "40型井架",
+      "color": "灰砂7812",
+      "quantity": 1,
+      "schedule_date": "2026-03-03",
+      "planned_delivery_date": "2026-03-16",
+      "material_selection_date": "2026-03-04",
+      "painting_date": "2026-03-06",
+      "film_date": "2026-03-07",
+      "cutting_required_date": "2026-03-09",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-11",
+      "processing_actual_date": "2026-03-13",
+      "inspection_date": "2026-03-13",
+      "assembly_date": "2026-03-14",
+      "packaging_date": "2026-03-15",
+      "delivery_date": "2026-03-16",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "b330a327-6403-4ed9-943d-db36b98488da",
+      "project_name": "湖南益阳蒋作才（安化蒋 作才）",
+      "customer": "戴乐",
+      "product_name": "40井架",
+      "color": "量子银灰ADA711765-13",
+      "quantity": 1,
+      "schedule_date": "2026-04-01",
+      "planned_delivery_date": "2026-04-14",
+      "material_selection_date": "2026-04-02",
+      "painting_date": "2026-04-04",
+      "film_date": "2026-04-05",
+      "cutting_required_date": "2026-04-07",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-04-09",
+      "processing_actual_date": "2026-04-11",
+      "inspection_date": "2026-04-11",
+      "assembly_date": "2026-04-12",
+      "packaging_date": "2026-04-13",
+      "delivery_date": "2026-04-14",
+      "remarks": "",
+      "__claimed": true
+    },
+    {
+      "id": "e67126e2-72ab-4e0d-9c14-2573e92ed41b",
+      "project_name": "青岛和达棠颂9号楼二单元101户（WNH101B01097）",
+      "customer": "韦恩",
+      "product_name": "轿厢",
+      "color": "毛胚",
+      "quantity": 1,
+      "schedule_date": "2026-03-23",
+      "planned_delivery_date": "2026-03-28",
+      "material_selection_date": "2026-03-24",
+      "painting_date": null,
+      "film_date": null,
+      "cutting_required_date": "2026-03-25",
+      "cutting_actual_date": null,
+      "processing_required_date": "2026-03-26",
+      "processing_actual_date": "2026-04-03",
+      "inspection_date": "2026-03-27",
+      "assembly_date": null,
+      "packaging_date": "2026-03-27",
+      "delivery_date": "2026-03-28",
+      "remarks": "",
+      "__claimed": true
+    }
+  ]
+}

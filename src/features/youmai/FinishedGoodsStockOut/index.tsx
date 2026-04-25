@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
+import {
+  ArrowDownTrayIcon,
+  ArrowPathIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/16/solid'
 import { App, Button, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
+
+import { exportYoumaiFinishedGoodsStockOutToExcel } from '@/utils/youmaiFinishedGoodsStockOutExport'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
@@ -82,6 +88,21 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   const handlePrint = useCallback(() => {
     void printSelected(selectedRecords)
   }, [printSelected, selectedRecords])
+
+  const handleExportExcel = useCallback(() => {
+    if (selectedRecords.length === 0) {
+      message.warning('请选择要导出的出库数据')
+      return
+    }
+
+    try {
+      exportYoumaiFinishedGoodsStockOutToExcel(selectedRecords)
+      message.success(`已导出 ${selectedRecords.length} 条优迈成品出库`)
+    } catch (error) {
+      console.error('导出优迈成品出库失败:', error)
+      message.error('导出失败，请稍后重试')
+    }
+  }, [message, selectedRecords])
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
@@ -301,6 +322,17 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         >
           打印选中项
         </PrintButton>
+        <Button
+          type="text"
+          icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
+          onClick={handleExportExcel}
+          disabled={selectedRowKeys.length === 0}
+        >
+          导出Excel
+          {selectedRowKeys.length > 0 && (
+            <span className="ml-1 text-xs">({selectedRowKeys.length})</span>
+          )}
+        </Button>
         <YoumaiFinishedGoodsStockOutExcelImport
           onImport={handleImport}
           isImporting={importMutation.isPending}

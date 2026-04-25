@@ -14,7 +14,7 @@ const ws = wb.Sheets[wb.SheetNames[0]]
 const rows = XLSX.utils.sheet_to_json(ws, {
   header: 1,
   defval: null,
-  raw: true,
+  raw: false, // 重要：必须拿格式化文本，否则 Excel 数值 4.30 会被读成 4.3，导致计划交货日期错误
 })
 
 // Row 0 = title, Row 1 = header, Row 2+ = data
