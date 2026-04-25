@@ -1663,6 +1663,7 @@ export type Database = {
       villa_lift_orders: {
         Row: {
           assembly_date: string | null
+          cabin_processing_date: string | null
           color: string
           created_at: string
           customer: string
@@ -1671,9 +1672,11 @@ export type Database = {
           delivery_date: string | null
           film_date: string | null
           film_plan_date: string | null
+          frame_processing_date: string | null
           id: string
           inspection_date: string | null
           material_selection_date: string | null
+          middle_door_processing_date: string | null
           packaging_date: string | null
           painting_date: string | null
           painting_plan_date: string | null
@@ -1691,6 +1694,7 @@ export type Database = {
         }
         Insert: {
           assembly_date?: string | null
+          cabin_processing_date?: string | null
           color?: string
           created_at?: string
           customer?: string
@@ -1699,9 +1703,11 @@ export type Database = {
           delivery_date?: string | null
           film_date?: string | null
           film_plan_date?: string | null
+          frame_processing_date?: string | null
           id?: string
           inspection_date?: string | null
           material_selection_date?: string | null
+          middle_door_processing_date?: string | null
           packaging_date?: string | null
           painting_date?: string | null
           painting_plan_date?: string | null
@@ -1719,6 +1725,7 @@ export type Database = {
         }
         Update: {
           assembly_date?: string | null
+          cabin_processing_date?: string | null
           color?: string
           created_at?: string
           customer?: string
@@ -1727,9 +1734,11 @@ export type Database = {
           delivery_date?: string | null
           film_date?: string | null
           film_plan_date?: string | null
+          frame_processing_date?: string | null
           id?: string
           inspection_date?: string | null
           material_selection_date?: string | null
+          middle_door_processing_date?: string | null
           packaging_date?: string | null
           painting_date?: string | null
           painting_plan_date?: string | null

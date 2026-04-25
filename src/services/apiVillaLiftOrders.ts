@@ -38,6 +38,9 @@ export interface VillaLiftOrder {
   cutting_actual_date: string | null
   processing_required_date: string | null
   processing_actual_date: string | null
+  cabin_processing_date: string | null
+  middle_door_processing_date: string | null
+  frame_processing_date: string | null
   inspection_date: string | null
   tinting_plan_date: string | null
   painting_plan_date: string | null
@@ -75,6 +78,9 @@ export interface VillaLiftOrderFormValues {
   cutting_actual_date: string | Dayjs | null
   processing_required_date: string | Dayjs | null
   processing_actual_date: string | Dayjs | null
+  cabin_processing_date: string | Dayjs | null
+  middle_door_processing_date: string | Dayjs | null
+  frame_processing_date: string | Dayjs | null
   inspection_date: string | Dayjs | null
   tinting_plan_date: string | Dayjs | null
   painting_plan_date: string | Dayjs | null
@@ -148,6 +154,21 @@ function normalizeOrderPayload(
       ? typeof values.processing_actual_date === 'string'
         ? values.processing_actual_date
         : values.processing_actual_date.format('YYYY-MM-DD')
+      : null,
+    cabin_processing_date: values.cabin_processing_date
+      ? typeof values.cabin_processing_date === 'string'
+        ? values.cabin_processing_date
+        : values.cabin_processing_date.format('YYYY-MM-DD')
+      : null,
+    middle_door_processing_date: values.middle_door_processing_date
+      ? typeof values.middle_door_processing_date === 'string'
+        ? values.middle_door_processing_date
+        : values.middle_door_processing_date.format('YYYY-MM-DD')
+      : null,
+    frame_processing_date: values.frame_processing_date
+      ? typeof values.frame_processing_date === 'string'
+        ? values.frame_processing_date
+        : values.frame_processing_date.format('YYYY-MM-DD')
       : null,
     inspection_date: values.inspection_date
       ? typeof values.inspection_date === 'string'
@@ -421,6 +442,10 @@ export type VillaLiftMarkDateField =
   | 'painting_date'
   | 'film_date'
   | 'cutting_actual_date'
+  | 'processing_actual_date'
+  | 'cabin_processing_date'
+  | 'middle_door_processing_date'
+  | 'frame_processing_date'
 
 export async function markVillaLiftOrderDate({
   id,
@@ -431,14 +456,10 @@ export async function markVillaLiftOrderDate({
   field: VillaLiftMarkDateField
   date: string
 }): Promise<VillaLiftOrder> {
-  const updatePayload =
-    field === 'material_selection_date'
-      ? { material_selection_date: date }
-      : field === 'painting_date'
-        ? { painting_date: date }
-        : field === 'film_date'
-          ? { film_date: date }
-          : { cutting_actual_date: date }
+  const updatePayload = { [field]: date } as Record<
+    VillaLiftMarkDateField,
+    string
+  >
 
   const { data, error } = await supabase
     .from('villa_lift_orders')
@@ -460,14 +481,10 @@ export async function batchMarkVillaLiftOrdersDate({
   field: VillaLiftMarkDateField
   date: string
 }): Promise<void> {
-  const updatePayload =
-    field === 'material_selection_date'
-      ? { material_selection_date: date }
-      : field === 'painting_date'
-        ? { painting_date: date }
-        : field === 'film_date'
-          ? { film_date: date }
-          : { cutting_actual_date: date }
+  const updatePayload = { [field]: date } as Record<
+    VillaLiftMarkDateField,
+    string
+  >
 
   const { error } = await supabase
     .from('villa_lift_orders')

@@ -114,6 +114,38 @@ export const VILLA_LIFT_PERMISSIONS: PermissionDefinition[] = [
     label: '别墅梯订单-切割完成',
     description: '控制「切割完成」按钮的可见性',
   },
+  {
+    key: 'feature:villa-lift-order.mark-processing',
+    scope: 'feature',
+    module: 'villa-lift',
+    surface: 'pc',
+    label: '别墅梯订单-加工完成',
+    description: '控制「加工完成」按钮的可见性',
+  },
+  {
+    key: 'feature:villa-lift-order.mark-cabin-processing',
+    scope: 'feature',
+    module: 'villa-lift',
+    surface: 'pc',
+    label: '别墅梯订单-轿箱加工完成',
+    description: '控制「轿箱加工完成」按钮的可见性',
+  },
+  {
+    key: 'feature:villa-lift-order.mark-middle-door-processing',
+    scope: 'feature',
+    module: 'villa-lift',
+    surface: 'pc',
+    label: '别墅梯订单-中分门加工完成',
+    description: '控制「中分门加工完成」按钮的可见性',
+  },
+  {
+    key: 'feature:villa-lift-order.mark-frame-processing',
+    scope: 'feature',
+    module: 'villa-lift',
+    surface: 'pc',
+    label: '别墅梯订单-井架加工完成',
+    description: '控制「井架加工完成」按钮的可见性',
+  },
 
   // ── 切割工序按钮级权限 ──────────────────────────────
   {
