@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
+import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
+import { App, Button, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
-import type { LaborProtectionRequisition } from '@/services/apiLaborProtectionRequisitions'
+import {
+  getLaborProtectionRequisitionsForExport,
+  type LaborProtectionRequisition,
+} from '@/services/apiLaborProtectionRequisitions'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import PrintButton from '@/ui/PrintButton'
+import { exportLaborProtectionRequisitionsToExcel } from '@/utils/laborProtectionRequisitionExport'
 import { useLaborProtectionDataOptions } from '../LaborProtectionData/useLaborProtectionData'
 import LaborProtectionRequisitionForm from './LaborProtectionRequisitionForm'
 import LaborProtectionRequisitionSearch from './LaborProtectionRequisitionSearch'
@@ -61,6 +66,7 @@ export default function LaborProtectionRequisitionPage() {
   const updateMutation = useUpdateLaborProtectionRequisition()
   const deleteMutation = useDeleteLaborProtectionRequisition()
   const { printPoster, isPrinting } = usePrintLaborProtectionPublicQrPoster()
+  const [isExporting, setIsExporting] = useState(false)
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -208,6 +214,40 @@ export default function LaborProtectionRequisitionPage() {
     void printPoster()
   }, [printPoster])
 
+  const handleExportExcel = useCallback(async () => {
+    setIsExporting(true)
+    try {
+      const items = await getLaborProtectionRequisitionsForExport(searchParams)
+      if (items.length === 0) {
+        message.warning('当前筛选条件下没有可导出的劳保领料单')
+        return
+      }
+
+      const categoryOption = searchParams.categoryId
+        ? categoryOptions.find(
+            (option) => option.id === searchParams.categoryId,
+          )
+        : undefined
+
+      exportLaborProtectionRequisitionsToExcel(items, {
+        keyword: searchParams.keyword,
+        categoryName: categoryOption?.category,
+        updatedStartDate: searchParams.updatedStartDate,
+        updatedEndDate: searchParams.updatedEndDate,
+      })
+      message.success(`已导出 ${items.length} 条劳保领料单`)
+    } catch (error) {
+      console.error('导出劳保领料单失败:', error)
+      if (error instanceof Error) {
+        message.error(error.message)
+      } else {
+        message.error('导出失败，请稍后重试')
+      }
+    } finally {
+      setIsExporting(false)
+    }
+  }, [categoryOptions, message, searchParams])
+
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
@@ -224,6 +264,14 @@ export default function LaborProtectionRequisitionPage() {
         <PrintButton handlePrint={handlePrintPoster} loading={isPrinting}>
           打印二维码
         </PrintButton>
+        <Button
+          type="text"
+          icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
+          onClick={handleExportExcel}
+          loading={isExporting}
+        >
+          导出Excel
+        </Button>
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
