@@ -24,6 +24,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
 
   const {
     record_type,
+    is_last_process,
     model,
     operation,
     standard_seconds,
@@ -59,6 +60,9 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
         <Tag color={record_type === 'A' ? 'blue' : 'default'}>
           {record_type === 'A' ? 'A类' : 'B类'}
         </Tag>
+        <Tag color={is_last_process ? 'green' : 'default'}>
+          {is_last_process ? '末道' : '非末道'}
+        </Tag>
         <span className="font-medium">{model}</span>
         <span className="text-slate-400">·</span>
         <span className="text-slate-600">{operationStr}</span>
@@ -75,6 +79,11 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
         column={4}
         bordered
         items={[
+          {
+            key: 'is_last_process',
+            label: '末道',
+            children: is_last_process ? '是' : '否',
+          },
           {
             key: 'theoretical_seconds',
             label: '理论工时（秒）',

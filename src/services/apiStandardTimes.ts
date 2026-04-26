@@ -9,7 +9,21 @@ type ProcessStandardRow =
 type ProcessStandardInsert =
   Database['public']['Tables']['process_standards']['Insert']
 
-export type StandardTime = ProcessStandardRow
+type LastProcessFlagFields = {
+  is_last_process: boolean
+}
+
+type LastProcessUpdateQuery = {
+  in: (column: string, values: string[]) => PromiseLike<{ error: unknown }>
+}
+
+type DynamicProcessStandardsTable = {
+  from: (table: 'process_standards') => {
+    update: (values: LastProcessFlagFields) => LastProcessUpdateQuery
+  }
+}
+
+export type StandardTime = ProcessStandardRow & LastProcessFlagFields
 export type ProcessStandardRecordType = 'A' | 'B'
 
 export type StandardTimeFormValues = Pick<
@@ -45,6 +59,17 @@ interface StandardTimeFilters {
   updatedStartDate?: string
   updatedEndDate?: string
   recordType?: ProcessStandardRecordType
+}
+
+export interface UpdateStandardTimesLastProcessValues {
+  ids: string[]
+  isLastProcess: boolean
+}
+
+function dynamicProcessStandardsTable() {
+  return (supabase as unknown as DynamicProcessStandardsTable).from(
+    'process_standards',
+  )
 }
 
 function applyStandardTimeFilters<
@@ -457,6 +482,25 @@ export async function deleteStandardTimes(ids: string[]) {
     }
 
     throw handleApiError(error, '删除成本核算失败')
+  }
+}
+
+export async function updateStandardTimesLastProcess({
+  ids,
+  isLastProcess,
+}: UpdateStandardTimesLastProcessValues) {
+  const normalizedIds = Array.from(new Set(ids.filter(Boolean)))
+
+  if (normalizedIds.length === 0) {
+    throw new Error('请选择至少一条成本核算数据')
+  }
+
+  const { error } = await dynamicProcessStandardsTable()
+    .update({ is_last_process: isLastProcess })
+    .in('id', normalizedIds)
+
+  if (error) {
+    throw handleApiError(error, '更新末道状态失败')
   }
 }
 

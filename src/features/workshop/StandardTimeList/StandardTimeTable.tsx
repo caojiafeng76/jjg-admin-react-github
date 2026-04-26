@@ -60,6 +60,14 @@ const StandardTimeTable = memo(function StandardTimeTable({
         },
       },
       {
+        title: '末道',
+        dataIndex: 'is_last_process',
+        key: 'is_last_process',
+        width: 90,
+        render: (value: boolean | null | undefined) =>
+          value ? <Tag color="green">末道</Tag> : <Tag>非末道</Tag>,
+      },
+      {
         title: '型号',
         dataIndex: 'model',
         key: 'model',
@@ -203,7 +211,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
       dataSource={data}
       rowSelection={rowSelection}
       onRow={handleRow}
-      scroll={{ x: hideStandardSeconds ? 1000 : 1460, y: scrollY }}
+      scroll={{ x: hideStandardSeconds ? 1090 : 1550, y: scrollY }}
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}

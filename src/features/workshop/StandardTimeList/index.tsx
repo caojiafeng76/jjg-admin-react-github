@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/16/solid'
 import { App, Modal, FormInstance, Button, Splitter } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
@@ -6,6 +7,7 @@ import AddButton from '@/ui/AddButton'
 import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
 import ExportButton from '@/ui/ExportButton'
+import PermissionButton from '@/ui/PermissionButton'
 import PermissionGate from '@/ui/PermissionGate'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
@@ -21,6 +23,7 @@ import {
   useStandardTimesList,
   useCreateStandardTime,
   useUpdateStandardTime,
+  useUpdateStandardTimesLastProcess,
   useDeleteStandardTimes,
 } from './useStandardTimes'
 import StandardTimeMobileList from './StandardTimeMobileList'
@@ -30,7 +33,7 @@ import StandardTimeForm from './StandardTimeForm'
 import StandardTimeSearch from './StandardTimeSearch'
 
 export default function StandardTimeList() {
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const { role, employeeProfile } = useAuth()
   const isTeamLeaderMode = role === 'team_leader'
   const currentUploader = employeeProfile?.name || null
@@ -76,6 +79,7 @@ export default function StandardTimeList() {
 
   const createMutation = useCreateStandardTime()
   const updateMutation = useUpdateStandardTime()
+  const lastProcessMutation = useUpdateStandardTimesLastProcess()
   const deleteMutation = useDeleteStandardTimes()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
@@ -147,6 +151,52 @@ export default function StandardTimeList() {
       }
     }
   }, [deleteMutation, isTeamLeaderMode, message, selectedRowKeys])
+
+  const handleBatchLastProcess = useCallback(
+    (isLastProcess: boolean) => {
+      if (isTeamLeaderMode) {
+        message.warning('班组长不能批量修改末道状态')
+        return
+      }
+
+      if (selectedRowKeys.length === 0) {
+        message.warning('请选择至少一条成本核算数据')
+        return
+      }
+
+      const selectedIds = selectedRowKeys.map(String)
+      const actionLabel = isLastProcess ? '设为末道' : '取消末道'
+
+      modal.confirm({
+        title: actionLabel,
+        content: `确认将已选 ${selectedIds.length} 条成本核算${actionLabel}？`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk: async () => {
+          try {
+            await lastProcessMutation.mutateAsync({
+              ids: selectedIds,
+              isLastProcess,
+            })
+            message.success(`已${actionLabel} ${selectedIds.length} 条成本核算`)
+            setActiveRecord((current) =>
+              current?.id && selectedIds.includes(current.id)
+                ? { ...current, is_last_process: isLastProcess }
+                : current,
+            )
+            setSelectedRowKeys([])
+          } catch (error) {
+            if (error instanceof Error) {
+              message.error(error.message)
+            } else {
+              message.error('更新末道状态失败，请稍后重试')
+            }
+          }
+        },
+      })
+    },
+    [isTeamLeaderMode, lastProcessMutation, message, modal, selectedRowKeys],
+  )
 
   const handleExport = useCallback(async () => {
     const selectedSet = new Set(selectedRowKeys)
@@ -406,6 +456,26 @@ export default function StandardTimeList() {
             handleEdit={() => handleEdit()}
             permissionKey="feature:standard-time-list.edit"
           />
+          <PermissionButton
+            type="text"
+            icon={<CheckCircleIcon className="size-4 text-green-500/80!" />}
+            loading={lastProcessMutation.isPending}
+            permissionKey="feature:standard-time-list.edit"
+            noPermissionTip="无编辑权限"
+            onClick={() => handleBatchLastProcess(true)}
+          >
+            设为末道
+          </PermissionButton>
+          <PermissionButton
+            type="text"
+            icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+            loading={lastProcessMutation.isPending}
+            permissionKey="feature:standard-time-list.edit"
+            noPermissionTip="无编辑权限"
+            onClick={() => handleBatchLastProcess(false)}
+          >
+            取消末道
+          </PermissionButton>
           <ExportButton
             handleExport={handleExport}
             loading={isExporting}
@@ -470,7 +540,7 @@ export default function StandardTimeList() {
           </div>
         </div>
       ) : (
-        <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+        <Splitter orientation="vertical" style={{ flex: 1, minHeight: 0 }}>
           <Splitter.Panel defaultSize="65%" min="30%">
             <div
               ref={tableContainerRef}
@@ -512,7 +582,7 @@ export default function StandardTimeList() {
         title={modalTitle}
         open={isModalOpen}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
-        destroyOnClose
+        destroyOnHidden
         width={isTeamLeaderMode ? 'calc(100vw - 24px)' : undefined}
         style={isTeamLeaderMode ? { top: 16, maxWidth: 520 } : undefined}
         onOk={() => formRef?.submit()}

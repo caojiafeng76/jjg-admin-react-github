@@ -42,7 +42,7 @@ const routeToLabelMap: Record<string, string> = {
   'syney-safe-part-setting': '件号配置',
   'syney-setting': '编号设置',
   'workshop-order-list': '订单管理',
-  'production-scheduling': '排产计划',
+  'production-scheduling': '订单现状',
   'workshop-process-list': '工序管理',
   'workshop-defect-reason-list': '不良原因管理',
   'employee-list': '员工管理',

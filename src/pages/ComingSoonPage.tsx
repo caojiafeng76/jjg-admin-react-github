@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'
 const { Title, Paragraph, Text } = Typography
 
 const pageLabelMap: Record<string, string> = {
-  'production-scheduling': '排产计划',
+  'production-scheduling': '订单现状',
   'precision-cutting-transfer': '转移单',
   'tooling-data': '刀具资料',
   'tooling-inventory': '刀具库存',
