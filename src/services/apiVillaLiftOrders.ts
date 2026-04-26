@@ -232,6 +232,10 @@ export async function getVillaLiftOrders({
   productName,
   deliveryDateFrom,
   deliveryDateTo,
+  scheduleDateFrom,
+  scheduleDateTo,
+  processingRequiredDateFrom,
+  processingRequiredDateTo,
 }: {
   page: number
   pageSize: number
@@ -241,6 +245,10 @@ export async function getVillaLiftOrders({
   productName?: string
   deliveryDateFrom?: string
   deliveryDateTo?: string
+  scheduleDateFrom?: string
+  scheduleDateTo?: string
+  processingRequiredDateFrom?: string
+  processingRequiredDateTo?: string
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -265,6 +273,18 @@ export async function getVillaLiftOrders({
   }
   if (deliveryDateTo) {
     query = query.lte('delivery_date', deliveryDateTo)
+  }
+  if (scheduleDateFrom) {
+    query = query.gte('schedule_date', scheduleDateFrom)
+  }
+  if (scheduleDateTo) {
+    query = query.lte('schedule_date', scheduleDateTo)
+  }
+  if (processingRequiredDateFrom) {
+    query = query.gte('processing_required_date', processingRequiredDateFrom)
+  }
+  if (processingRequiredDateTo) {
+    query = query.lte('processing_required_date', processingRequiredDateTo)
   }
 
   const { data, error, count } = await query

@@ -30,6 +30,10 @@ export function useVillaLiftOrders({
   productName,
   deliveryDateFrom,
   deliveryDateTo,
+  scheduleDateFrom,
+  scheduleDateTo,
+  processingRequiredDateFrom,
+  processingRequiredDateTo,
 }: {
   page: number
   pageSize: number
@@ -39,6 +43,10 @@ export function useVillaLiftOrders({
   productName?: string
   deliveryDateFrom?: string
   deliveryDateTo?: string
+  scheduleDateFrom?: string
+  scheduleDateTo?: string
+  processingRequiredDateFrom?: string
+  processingRequiredDateTo?: string
 }) {
   return useQuery({
     queryKey: [
@@ -51,6 +59,10 @@ export function useVillaLiftOrders({
       productName,
       deliveryDateFrom,
       deliveryDateTo,
+      scheduleDateFrom,
+      scheduleDateTo,
+      processingRequiredDateFrom,
+      processingRequiredDateTo,
     ],
     queryFn: () =>
       getVillaLiftOrders({
@@ -62,6 +74,10 @@ export function useVillaLiftOrders({
         productName,
         deliveryDateFrom,
         deliveryDateTo,
+        scheduleDateFrom,
+        scheduleDateTo,
+        processingRequiredDateFrom,
+        processingRequiredDateTo,
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,

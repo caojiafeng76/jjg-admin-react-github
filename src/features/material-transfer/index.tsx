@@ -86,6 +86,21 @@ export default function MaterialTransferPage() {
 
   const selectedCount = selectedRowKeys.length
   const records = useMemo(() => data?.items || [], [data?.items])
+  const selectedSummary = useMemo(() => {
+    if (selectedRowKeys.length === 0) {
+      return { quantity: 0, matched: 0 }
+    }
+    const keySet = new Set(selectedRowKeys.map((key) => String(key)))
+    let quantity = 0
+    let matched = 0
+    for (const item of records) {
+      if (keySet.has(String(item.id))) {
+        quantity += Number(item.transfer_quantity || 0)
+        matched += 1
+      }
+    }
+    return { quantity, matched }
+  }, [records, selectedRowKeys])
   const employees = useMemo(
     () => (fixedEmployee ? [fixedEmployee] : employeeOptions),
     [employeeOptions, fixedEmployee],
@@ -398,6 +413,29 @@ export default function MaterialTransferPage() {
           </>
         )}
       </div>
+
+      {!isEmployeeView && selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-blue-300 bg-linear-to-r from-blue-50 to-indigo-50 px-4 py-2 shadow-sm dark:border-blue-500/40 dark:from-blue-500/10 dark:to-indigo-500/10">
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+            已选
+            <span className="mx-1 text-base font-bold text-blue-600 dark:text-blue-400">
+              {selectedCount}
+            </span>
+            条
+            {selectedSummary.matched < selectedCount ? (
+              <span className="ml-1 text-xs text-amber-600 dark:text-amber-400">
+                （当前页参与合计 {selectedSummary.matched} 条）
+              </span>
+            ) : null}
+          </span>
+          <span className="text-sm text-slate-600 dark:text-slate-300">
+            转移数量合计：
+            <span className="ml-1 text-lg font-bold text-rose-600 tabular-nums dark:text-rose-400">
+              {selectedSummary.quantity.toLocaleString()}
+            </span>
+          </span>
+        </div>
+      ) : null}
 
       <div
         className={

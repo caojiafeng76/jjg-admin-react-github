@@ -178,6 +178,11 @@ export default function VillaLiftOrderListPage() {
   const [deliveryDateRange, setDeliveryDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
   >(null)
+  const [scheduleDateRange, setScheduleDateRange] = useState<
+    [Dayjs | null, Dayjs | null] | null
+  >(null)
+  const [processingRequiredDateRange, setProcessingRequiredDateRange] =
+    useState<[Dayjs | null, Dayjs | null] | null>(null)
 
   // 已提交（触发查询）的筛选值
   const [submittedCustomer, setSubmittedCustomer] = useState<
@@ -212,6 +217,16 @@ export default function VillaLiftOrderListPage() {
     deliveryDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
   const deliveryDateTo =
     deliveryDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
+  // 排产日期范围
+  const scheduleDateFrom =
+    scheduleDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
+  const scheduleDateTo =
+    scheduleDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
+  // 计划加工日期（加工要求完成日期）范围
+  const processingRequiredDateFrom =
+    processingRequiredDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
+  const processingRequiredDateTo =
+    processingRequiredDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
 
   // 数据
   const { data, isLoading } = useVillaLiftOrders({
@@ -223,6 +238,10 @@ export default function VillaLiftOrderListPage() {
     productName: submittedProductName,
     deliveryDateFrom,
     deliveryDateTo,
+    scheduleDateFrom,
+    scheduleDateTo,
+    processingRequiredDateFrom,
+    processingRequiredDateTo,
   })
   const createMutation = useCreateVillaLiftOrder()
   const updateMutation = useUpdateVillaLiftOrder()
@@ -366,6 +385,8 @@ export default function VillaLiftOrderListPage() {
     setLocalProjectName('')
     setLocalProductName('')
     setDeliveryDateRange(null)
+    setScheduleDateRange(null)
+    setProcessingRequiredDateRange(null)
     setSubmittedCustomer(undefined)
     setSubmittedProjectName(undefined)
     setSubmittedProductName(undefined)
@@ -387,6 +408,8 @@ export default function VillaLiftOrderListPage() {
     setLocalProjectName('')
     setLocalProductName('')
     setDeliveryDateRange(null)
+    setScheduleDateRange(null)
+    setProcessingRequiredDateRange(null)
     setSubmittedCustomer(undefined)
     setSubmittedProjectName(undefined)
     setSubmittedProductName(undefined)
@@ -597,6 +620,28 @@ export default function VillaLiftOrderListPage() {
                 )
               }
               style={{ width: 240 }}
+              allowClear
+            />
+            <DatePicker.RangePicker
+              placeholder={['排产日期从', '排产日期至']}
+              value={scheduleDateRange}
+              onChange={(dates) =>
+                setScheduleDateRange(
+                  dates ? [dates[0] ?? null, dates[1] ?? null] : null,
+                )
+              }
+              style={{ width: 240 }}
+              allowClear
+            />
+            <DatePicker.RangePicker
+              placeholder={['计划加工日期从', '计划加工日期至']}
+              value={processingRequiredDateRange}
+              onChange={(dates) =>
+                setProcessingRequiredDateRange(
+                  dates ? [dates[0] ?? null, dates[1] ?? null] : null,
+                )
+              }
+              style={{ width: 260 }}
               allowClear
             />
             <Button type="primary" onClick={handleSearch}>

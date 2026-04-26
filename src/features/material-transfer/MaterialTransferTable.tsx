@@ -49,6 +49,12 @@ export default function MaterialTransferTable({
         dataIndex: 'created_at',
         key: 'created_at',
         width: 165,
+        sorter: (a, b) => {
+          const at = a.created_at ? new Date(a.created_at).getTime() : 0
+          const bt = b.created_at ? new Date(b.created_at).getTime() : 0
+          return at - bt
+        },
+        sortDirections: ['descend', 'ascend'],
         render: (text: string) => {
           if (!text) return '-'
           return new Date(text).toLocaleString('zh-CN')
