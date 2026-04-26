@@ -72,19 +72,7 @@ const allMenuItems: MenuItemDef[] = [
     key: 'workshop-order-list',
     label: '订单管理',
     icon: <Square3Stack3DIcon className="size-4" />,
-    permission: 'nav:workshop-order-list',
-    children: [
-      {
-        key: 'workshop-order-list/production',
-        label: '生产中',
-        permission: 'page:workshop-order-production',
-      },
-      {
-        key: 'workshop-order-list/closed',
-        label: '已结案',
-        permission: 'page:workshop-order-closed',
-      },
-    ],
+    permission: 'page:workshop-order-production',
   },
   {
     key: 'production-scheduling',

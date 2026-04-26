@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
-import { App, Button, Modal, FormInstance, Splitter } from 'antd'
+import { App, Button, Modal, FormInstance, Splitter, Tabs } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
@@ -52,13 +52,14 @@ export interface WorkshopOrder {
   row_remark?: string | null
 }
 
-export interface WorkshopOrderListProps {
-  fixedStatus?: WorkshopOrderStatus
+type WorkshopOrderTabKey = 'production' | 'closed'
+
+const TAB_TO_STATUS: Record<WorkshopOrderTabKey, WorkshopOrderStatus> = {
+  production: '生产中',
+  closed: '已结案',
 }
 
-export default function WorkshopOrderList({
-  fixedStatus,
-}: WorkshopOrderListProps = {}) {
+export default function WorkshopOrderList() {
   const { message, modal } = App.useApp()
   const canDelete = usePermission('feature:workshop-order.delete')
   const canManageStatus = usePermission('feature:workshop-order.manage-status')
@@ -72,6 +73,9 @@ export default function WorkshopOrderList({
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
+  const activeTab: WorkshopOrderTabKey =
+    searchParamsURL.get('status') === 'closed' ? 'closed' : 'production'
+  const fixedStatus: WorkshopOrderStatus = TAB_TO_STATUS[activeTab]
   const [formRef, setFormRef] = useState<FormInstance<WorkshopOrder> | null>(
     null,
   )
@@ -468,8 +472,32 @@ export default function WorkshopOrderList({
     [activeOrder, batchStatusMutation, message, modal, selectedRowKeys],
   )
 
+  function handleTabChange(key: string) {
+    const next = new URLSearchParams(searchParamsURL)
+    if (key === 'closed') {
+      next.set('status', 'closed')
+    } else {
+      next.delete('status')
+    }
+    next.set('page', '1')
+    setSearchParamsURL(next)
+    setSearchParams({})
+    setSelectedRowKeys([])
+    setActiveOrder(null)
+  }
+
   return (
     <div className="flex h-full flex-col gap-2">
+      {/* 状态 Tab */}
+      <Tabs
+        activeKey={activeTab}
+        onChange={handleTabChange}
+        items={[
+          { key: 'production', label: '生产中' },
+          { key: 'closed', label: '已结案' },
+        ]}
+        className="mb-0!"
+      />
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
