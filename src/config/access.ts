@@ -44,7 +44,7 @@ export const DEFAULT_HOME_BY_ROLE: Record<AppRole, string> = {
   admin: '/dashboard',
   employee: '/production-order',
   team_leader: '/production-order',
-  precision_cutting_admin: '/workshop-order-list/production',
+  precision_cutting_admin: '/workshop-order-list',
   warehouse_admin: '/youmai-raw-material-inventory',
 }
 

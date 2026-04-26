@@ -59,7 +59,6 @@ import {
   YoumaiRawMaterialStockIn,
   YoumaiRawMaterialStockOut,
   YoumaiProductData,
-  WorkshopOrderClosed,
   WorkshopOrderProduction,
   WorkshopOrderQrDetail,
 } from './lazyPages'
@@ -168,10 +167,6 @@ export const router = createBrowserRouter([
       },
       {
         path: 'workshop-order-list',
-        element: <Navigate to="/workshop-order-list/production" replace />,
-      },
-      {
-        path: 'workshop-order-list/production',
         element: (
           <Suspense fallback={<Loading />}>
             <PermissionProtectedRoute
@@ -182,15 +177,12 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'workshop-order-list/production',
+        element: <Navigate to="/workshop-order-list" replace />,
+      },
+      {
         path: 'workshop-order-list/closed',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <PermissionProtectedRoute
-              permissionKey="page:workshop-order-closed"
-              element={<WorkshopOrderClosed />}
-            />
-          </Suspense>
-        ),
+        element: <Navigate to="/workshop-order-list?status=closed" replace />,
       },
       {
         path: 'workshop-order-list/qr/:orderId',
