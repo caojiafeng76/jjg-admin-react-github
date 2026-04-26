@@ -51,20 +51,20 @@ export const WORKSHOP_PERMISSIONS: PermissionDefinition[] = [
     description: '控制订单结案/反结案等状态批量操作入口',
   },
 
-  // 排产计划
+  // 订单现状
   {
     key: 'nav:production-scheduling',
     scope: 'nav',
     module: 'production-scheduling',
     surface: 'pc',
-    label: '排产计划菜单',
+    label: '订单现状菜单',
   },
   {
     key: 'page:production-scheduling',
     scope: 'page',
     module: 'production-scheduling',
     surface: 'pc',
-    label: '排产计划',
+    label: '订单现状',
   },
 
   // 员工管理

@@ -35,6 +35,7 @@ import {
   MobileProductionOrderCreate,
   MobileProductionOrderDetail,
   MobileProductionOrderEdit,
+  OrderStatusDashboard,
   PageNotFound,
   PrecisionCuttingTransfer,
   PrecisionFinishingCutting,
@@ -201,7 +202,7 @@ export const router = createBrowserRouter([
           <Suspense fallback={<Loading />}>
             <PermissionProtectedRoute
               permissionKey="page:production-scheduling"
-              element={<ComingSoonPage />}
+              element={<OrderStatusDashboard />}
             />
           </Suspense>
         ),

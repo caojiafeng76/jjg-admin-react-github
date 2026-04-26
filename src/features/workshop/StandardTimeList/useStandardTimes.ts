@@ -4,6 +4,7 @@ import {
   getStandardTimes,
   createStandardTime,
   updateStandardTime,
+  updateStandardTimesLastProcess,
   deleteStandardTimes,
   type ProcessStandardRecordType,
 } from '@/services/apiStandardTimes'
@@ -72,6 +73,18 @@ export function useMachineEquipmentMaintenanceOptions() {
 export function useUpdateStandardTime() {
   return useMutationWithInvalidation({
     mutationFn: updateStandardTime,
+    invalidateQueries: [
+      [STANDARD_TIMES_KEY],
+      [PROCESS_STANDARDS_KEY],
+      [PRODUCTION_ORDERS_KEY],
+      [PRODUCTION_ORDER_ITEMS_KEY],
+    ],
+  })
+}
+
+export function useUpdateStandardTimesLastProcess() {
+  return useMutationWithInvalidation({
+    mutationFn: updateStandardTimesLastProcess,
     invalidateQueries: [
       [STANDARD_TIMES_KEY],
       [PROCESS_STANDARDS_KEY],

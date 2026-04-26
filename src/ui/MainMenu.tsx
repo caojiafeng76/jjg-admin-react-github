@@ -76,7 +76,7 @@ const allMenuItems: MenuItemDef[] = [
   },
   {
     key: 'production-scheduling',
-    label: '排产计划',
+    label: '订单现状',
     icon: <Square3Stack3DIcon className="size-4" />,
     permission: 'nav:production-scheduling',
   },

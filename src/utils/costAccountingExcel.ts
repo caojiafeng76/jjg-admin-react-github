@@ -30,6 +30,7 @@ const DETAIL_HEADERS = [
   '单品分摊额',
   '合计',
   '备注',
+  '末道',
 ] as const
 
 const GROUP_HEADER_ROW = [
@@ -57,11 +58,12 @@ const GROUP_HEADER_ROW = [
   '',
   '合计',
   '备注',
+  '末道',
 ] as const
 
 const COLUMN_WIDTHS = [
   8, 16, 18, 16, 10, 18, 12, 10, 10, 12, 12, 16, 12, 12, 10, 10, 13, 10, 12, 10,
-  10, 12, 10, 18,
+  10, 12, 10, 18, 10,
 ]
 
 const GROUP_FILL_BY_COLUMN: Record<number, string> = {
@@ -195,6 +197,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
     formatNumber(record.overhead_cost),
     formatNumber(record.total_cost),
     record.remark || '',
+    record.is_last_process ? '是' : '否',
   ])
 
   const worksheetData = [
@@ -221,6 +224,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
     { s: { r: 1, c: 19 }, e: { r: 1, c: 21 } },
     { s: { r: 1, c: 22 }, e: { r: 2, c: 22 } },
     { s: { r: 1, c: 23 }, e: { r: 2, c: 23 } },
+    { s: { r: 1, c: 24 }, e: { r: 2, c: 24 } },
   ]
 
   worksheet['!cols'] = COLUMN_WIDTHS.map((width) => ({ wch: width }))
