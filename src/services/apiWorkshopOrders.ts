@@ -242,6 +242,7 @@ export async function getWorkshopOrders({
   project_no,
   product_model,
   customer_model,
+  material_code,
   project_no_search, // 多关键词搜索项目号
   model_search, // 多关键词搜索产品型号、客户型号
   product_delivery_date_search,
@@ -255,6 +256,7 @@ export async function getWorkshopOrders({
   project_no?: string
   product_model?: string
   customer_model?: string
+  material_code?: string
   project_no_search?: string[] // 多关键词搜索项目号
   model_search?: string[] // 多关键词搜索产品型号、客户型号
   product_delivery_date_search?: string
@@ -273,6 +275,7 @@ export async function getWorkshopOrders({
   const productDeliveryDateSearch = normalizeOptionalText(
     product_delivery_date_search,
   )
+  const materialCode = normalizeOptionalText(material_code)
 
   // 项目号多关键词搜索（OR 逻辑，只搜索 project_no 列）
   if (projectNoKeywords?.length) {
@@ -320,6 +323,10 @@ export async function getWorkshopOrders({
 
   if (length_mm?.length) {
     query = query.in('length_mm', length_mm)
+  }
+
+  if (materialCode) {
+    query = query.ilike('material_code', `%${materialCode}%`)
   }
 
   if (status) {

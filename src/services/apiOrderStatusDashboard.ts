@@ -2,6 +2,10 @@ import dayjs from 'dayjs'
 
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
 import { handleApiError } from '@/utils/errorHandler'
+import {
+  buildOrIlikeFilter,
+  normalizeSearchKeywords,
+} from '@/utils/searchKeywords'
 import { getWorkshopOrders } from './apiWorkshopOrders'
 import type { Database } from './database.types'
 import supabase from './supabase'
@@ -62,7 +66,9 @@ type ProductionOrderItemDetailRow = ProductionOrderItemRow & {
 type ProcessStandardJobRow = Pick<
   Database['public']['Tables']['process_standards']['Row'],
   'job_name' | 'operation' | 'model' | 'length' | 'part_no' | 'record_type'
->
+> & {
+  is_last_process?: boolean | null
+}
 
 type MaterialTransferRow = Pick<
   Database['public']['Tables']['material_transfers']['Row'],
@@ -75,11 +81,62 @@ type MaterialTransferRow = Pick<
   | 'created_at'
 >
 
+type PrecisionCuttingTransferRow = Pick<
+  Database['public']['Tables']['precision_cutting_transfers']['Row'],
+  | 'id'
+  | 'created_at'
+  | 'defect_reason'
+  | 'is_audited'
+  | 'length_mm'
+  | 'long_material_length_mm'
+  | 'long_material_quantity'
+  | 'operator_names'
+  | 'outsource_defect_quantity'
+  | 'outsource_defect_reason'
+  | 'outsource_unit'
+  | 'process_owner'
+  | 'processing_defect_count'
+  | 'project_no'
+  | 'raw_material_defect_count'
+  | 'recipient_name'
+  | 'remark'
+  | 'responsible_process'
+  | 'target_workshop'
+  | 'transfer_quantity'
+>
+
+interface PrecisionCuttingTransferSummary {
+  transferQuantity: number
+  transferDetails: OrderStatusPrecisionCuttingTransferDetail[]
+}
+
 export interface OrderStatusMaterialTransferDetail {
   createdAt: string
   isAudited: boolean
   operatorNames: string[]
   recipientName: string
+  targetWorkshop: string
+  transferQuantity: number
+}
+
+export interface OrderStatusPrecisionCuttingTransferDetail {
+  createdAt: string
+  defectReason: string | null
+  id: string
+  isAudited: boolean
+  lengthMm: number | null
+  longMaterialLengthMm: number
+  longMaterialQuantity: number
+  operatorNames: string[]
+  outsourceDefectQuantity: number
+  outsourceDefectReason: string | null
+  outsourceUnit: string | null
+  processOwner: string | null
+  processingDefectCount: number
+  rawMaterialDefectCount: number
+  recipientName: string
+  remark: string | null
+  responsibleProcess: string | null
   targetWorkshop: string
   transferQuantity: number
 }
@@ -148,6 +205,8 @@ export interface OrderStatusDashboardItem extends WorkshopOrder {
   totalIncomingQuantity: number
   totalQualifiedQuantity: number
   totalDefectQuantity: number
+  precisionCuttingQuantity: number
+  precisionCuttingDetails: OrderStatusPrecisionCuttingTransferDetail[]
   transferQuantity: number
   warehouseTransferQuantity: number
   transferRecordCount: number
@@ -171,8 +230,10 @@ export interface OrderStatusDashboardResult {
 }
 
 export interface OrderStatusDashboardFilters {
+  materialCode?: string
   model?: string
   orderDate?: string
+  productionStatus?: OrderProductionStatus
   projectNo?: string
   status?: WorkshopOrder['status']
 }
@@ -214,11 +275,14 @@ function buildOperationMatchKey(value: string | null | undefined) {
     return null
   }
 
-  const withoutParenthetical = normalized
-    .replace(/[（(][^（）()]*[）)]/g, '')
-    .replace(/\s+/g, '')
+  const compact = normalized.replace(/\s+/g, '')
+  const withoutParenthetical = compact.replace(/[（(][^（）()]*[）)]/g, '')
+  const withoutDirectionalSuffix = withoutParenthetical.replace(
+    /(?:上下|左右|上|下|左|右)+$/g,
+    '',
+  )
 
-  return withoutParenthetical || normalized.replace(/\s+/g, '')
+  return withoutDirectionalSuffix || withoutParenthetical || compact
 }
 
 function setUniqueJobMapValue(
@@ -244,6 +308,37 @@ function setUniqueJobMapValue(
   }
 }
 
+type LastProcessStatus = boolean | null
+
+function setLastProcessMapValue(
+  map: Map<string, LastProcessStatus>,
+  key: string,
+  isLastProcess: boolean,
+) {
+  const current = map.get(key)
+
+  if (current === undefined) {
+    map.set(key, isLastProcess)
+    return
+  }
+
+  if (current !== isLastProcess) {
+    map.set(key, null)
+  }
+}
+
+function resolveLastProcessStatus(
+  statuses: Array<LastProcessStatus | undefined>,
+) {
+  for (const status of statuses) {
+    if (status !== undefined) {
+      return status === true
+    }
+  }
+
+  return undefined
+}
+
 function chunkValues<TValue>(values: TValue[], size: number) {
   const chunks: TValue[][] = []
 
@@ -262,7 +357,7 @@ async function getAllProcessStandardJobRows() {
     const to = from + LOOKUP_PAGE_SIZE - 1
     const { data, error } = await supabase
       .from('process_standards')
-      .select('job_name, operation, model, length, part_no, record_type')
+      .select('*')
       .order('job_name', { ascending: true })
       .order('model', { ascending: true })
       .order('operation', { ascending: true })
@@ -272,7 +367,7 @@ async function getAllProcessStandardJobRows() {
       throw handleApiError(error, '获取成本核算岗位信息失败')
     }
 
-    const pageRows = (data || []) as ProcessStandardJobRow[]
+    const pageRows = (data || []) as unknown as ProcessStandardJobRow[]
     rows.push(...pageRows)
 
     if (pageRows.length < LOOKUP_PAGE_SIZE) {
@@ -385,6 +480,83 @@ async function getMaterialTransfersByProjectNos(projectNos: string[]) {
   }
 
   return rows
+}
+
+async function getPrecisionCuttingTransfersByProjectNos(projectNos: string[]) {
+  const uniqueProjectNos = Array.from(
+    new Set(projectNos.map((item) => item.trim())),
+  ).filter(Boolean)
+
+  if (uniqueProjectNos.length === 0) {
+    return [] as PrecisionCuttingTransferRow[]
+  }
+
+  const rows: PrecisionCuttingTransferRow[] = []
+
+  for (const batch of chunkValues(uniqueProjectNos, PROJECT_NO_BATCH_SIZE)) {
+    const { data, error } = await supabase
+      .from('precision_cutting_transfers')
+      .select(
+        'id, created_at, defect_reason, is_audited, length_mm, long_material_length_mm, long_material_quantity, operator_names, outsource_defect_quantity, outsource_defect_reason, outsource_unit, process_owner, processing_defect_count, project_no, raw_material_defect_count, recipient_name, remark, responsible_process, target_workshop, transfer_quantity',
+      )
+      .in('project_no', batch)
+
+    if (error) {
+      throw handleApiError(error, '获取精切转移单汇总失败')
+    }
+
+    rows.push(...((data || []) as PrecisionCuttingTransferRow[]))
+  }
+
+  return rows
+}
+
+function buildPrecisionCuttingSummaryMap(rows: PrecisionCuttingTransferRow[]) {
+  const summaryMap = new Map<string, PrecisionCuttingTransferSummary>()
+
+  for (const row of rows) {
+    const projectNo = normalizeText(row.project_no)
+
+    if (!projectNo) {
+      continue
+    }
+
+    const current = summaryMap.get(projectNo) ?? {
+      transferDetails: [],
+      transferQuantity: 0,
+    }
+    const transferQuantity = Number(row.transfer_quantity || 0)
+
+    current.transferQuantity += transferQuantity
+    current.transferDetails.push({
+      createdAt: row.created_at,
+      defectReason: row.defect_reason,
+      id: row.id,
+      isAudited: row.is_audited,
+      lengthMm: row.length_mm,
+      longMaterialLengthMm: Number(row.long_material_length_mm || 0),
+      longMaterialQuantity: Number(row.long_material_quantity || 0),
+      operatorNames: row.operator_names || [],
+      outsourceDefectQuantity: Number(row.outsource_defect_quantity || 0),
+      outsourceDefectReason: row.outsource_defect_reason,
+      outsourceUnit: row.outsource_unit,
+      processOwner: row.process_owner,
+      processingDefectCount: Number(row.processing_defect_count || 0),
+      rawMaterialDefectCount: Number(row.raw_material_defect_count || 0),
+      recipientName: row.recipient_name,
+      remark: row.remark,
+      responsibleProcess: row.responsible_process,
+      targetWorkshop: row.target_workshop,
+      transferQuantity,
+    })
+
+    current.transferDetails.sort((left, right) =>
+      dayjs(right.createdAt).diff(dayjs(left.createdAt)),
+    )
+    summaryMap.set(projectNo, current)
+  }
+
+  return summaryMap
 }
 
 function buildMaterialTransferSummaryMap(rows: MaterialTransferRow[]) {
@@ -515,6 +687,8 @@ function buildProductionDetail(
 function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
   const jobNames: string[] = []
   const jobOperations = new Map<string, string[]>()
+  const lastProcessJobNames: string[] = []
+  const lastProcessJobOperations = new Map<string, string[]>()
   const exactMap = new Map<string, string>()
   const exactOperationMatchMap = new Map<string, string>()
   const modelOperationMap = new Map<string, string>()
@@ -523,9 +697,24 @@ function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
   const modelOperationTypeBMatchMap = new Map<string, string>()
   const operationMap = new Map<string, string>()
   const operationMatchMap = new Map<string, string>()
+  const exactLastProcessMap = new Map<string, LastProcessStatus>()
+  const exactOperationMatchLastProcessMap = new Map<string, LastProcessStatus>()
+  const modelOperationLastProcessMap = new Map<string, LastProcessStatus>()
+  const modelOperationMatchLastProcessMap = new Map<string, LastProcessStatus>()
+  const modelOperationTypeBLastProcessMap = new Map<string, LastProcessStatus>()
+  const modelOperationTypeBMatchLastProcessMap = new Map<
+    string,
+    LastProcessStatus
+  >()
+  const operationLastProcessMap = new Map<string, LastProcessStatus>()
+  const operationMatchLastProcessMap = new Map<string, LastProcessStatus>()
+  const ambiguousExactKeys = new Set<string>()
   const ambiguousExactOperationMatchKeys = new Set<string>()
+  const ambiguousModelOperationKeys = new Set<string>()
   const ambiguousModelOperationMatchKeys = new Set<string>()
+  const ambiguousModelOperationTypeBKeys = new Set<string>()
   const ambiguousModelOperationTypeBMatchKeys = new Set<string>()
+  const ambiguousOperationKeys = new Set<string>()
   const ambiguousOperationMatchKeys = new Set<string>()
 
   for (const row of processRows) {
@@ -542,15 +731,31 @@ function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
     addUniqueText(operations, operation)
     jobOperations.set(jobName, operations)
 
+    if (row.is_last_process) {
+      addUniqueText(lastProcessJobNames, jobName)
+
+      const lastOperations = lastProcessJobOperations.get(jobName) ?? []
+      addUniqueText(lastOperations, operation)
+      lastProcessJobOperations.set(jobName, lastOperations)
+    }
+
     const modelOperationKey = buildProcessJobKey(row.model, operation)
     const operationMatchKey = buildOperationMatchKey(operation)
     const modelOperationMatchKey = operationMatchKey
       ? buildProcessJobKey(row.model, operationMatchKey)
       : null
 
-    if (!modelOperationMap.has(modelOperationKey)) {
-      modelOperationMap.set(modelOperationKey, jobName)
-    }
+    setUniqueJobMapValue(
+      modelOperationMap,
+      ambiguousModelOperationKeys,
+      modelOperationKey,
+      jobName,
+    )
+    setLastProcessMapValue(
+      modelOperationLastProcessMap,
+      modelOperationKey,
+      Boolean(row.is_last_process),
+    )
 
     if (modelOperationMatchKey) {
       setUniqueJobMapValue(
@@ -559,13 +764,25 @@ function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
         modelOperationMatchKey,
         jobName,
       )
+      setLastProcessMapValue(
+        modelOperationMatchLastProcessMap,
+        modelOperationMatchKey,
+        Boolean(row.is_last_process),
+      )
     }
 
-    if (
-      row.record_type === 'B' &&
-      !modelOperationTypeBMap.has(modelOperationKey)
-    ) {
-      modelOperationTypeBMap.set(modelOperationKey, jobName)
+    if (row.record_type === 'B') {
+      setUniqueJobMapValue(
+        modelOperationTypeBMap,
+        ambiguousModelOperationTypeBKeys,
+        modelOperationKey,
+        jobName,
+      )
+      setLastProcessMapValue(
+        modelOperationTypeBLastProcessMap,
+        modelOperationKey,
+        Boolean(row.is_last_process),
+      )
     }
 
     if (row.record_type === 'B' && modelOperationMatchKey) {
@@ -574,6 +791,11 @@ function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
         ambiguousModelOperationTypeBMatchKeys,
         modelOperationMatchKey,
         jobName,
+      )
+      setLastProcessMapValue(
+        modelOperationTypeBMatchLastProcessMap,
+        modelOperationMatchKey,
+        Boolean(row.is_last_process),
       )
     }
 
@@ -584,8 +806,13 @@ function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
       row.length,
     )
 
-    if (row.record_type === 'A' && !exactMap.has(exactKey)) {
-      exactMap.set(exactKey, jobName)
+    if (row.record_type === 'A') {
+      setUniqueJobMapValue(exactMap, ambiguousExactKeys, exactKey, jobName)
+      setLastProcessMapValue(
+        exactLastProcessMap,
+        exactKey,
+        Boolean(row.is_last_process),
+      )
     }
 
     if (row.record_type === 'A' && operationMatchKey) {
@@ -602,11 +829,24 @@ function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
         exactOperationMatchKey,
         jobName,
       )
+      setLastProcessMapValue(
+        exactOperationMatchLastProcessMap,
+        exactOperationMatchKey,
+        Boolean(row.is_last_process),
+      )
     }
 
-    if (!operationMap.has(operation)) {
-      operationMap.set(operation, jobName)
-    }
+    setUniqueJobMapValue(
+      operationMap,
+      ambiguousOperationKeys,
+      operation,
+      jobName,
+    )
+    setLastProcessMapValue(
+      operationLastProcessMap,
+      operation,
+      Boolean(row.is_last_process),
+    )
 
     if (operationMatchKey) {
       setUniqueJobMapValue(
@@ -615,19 +855,34 @@ function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
         operationMatchKey,
         jobName,
       )
+      setLastProcessMapValue(
+        operationMatchLastProcessMap,
+        operationMatchKey,
+        Boolean(row.is_last_process),
+      )
     }
   }
 
   return {
     exactMap,
+    exactLastProcessMap,
     exactOperationMatchMap,
+    exactOperationMatchLastProcessMap,
     jobNames,
     jobOperations,
+    lastProcessJobNames,
+    lastProcessJobOperations,
+    modelOperationLastProcessMap,
     modelOperationMap,
+    modelOperationMatchLastProcessMap,
     modelOperationMatchMap,
+    modelOperationTypeBLastProcessMap,
     modelOperationTypeBMap,
+    modelOperationTypeBMatchLastProcessMap,
     modelOperationTypeBMatchMap,
+    operationLastProcessMap,
     operationMap,
+    operationMatchLastProcessMap,
     operationMatchMap,
   }
 }
@@ -645,8 +900,17 @@ function resolveProductionJobName({
   const model = normalizeText(row.product_model)
   const operationMatchKey = buildOperationMatchKey(operation)
 
-  if (!operation || !model) {
+  if (!operation) {
     return UNMATCHED_JOB_NAME
+  }
+
+  const operationOnlyJobName =
+    processJobIndex.operationMap.get(operation) ||
+    processJobIndex.operationMatchMap.get(operationMatchKey || '') ||
+    UNMATCHED_JOB_NAME
+
+  if (!model) {
+    return operationOnlyJobName
   }
 
   const exactKey = buildProcessJobKey(
@@ -671,45 +935,84 @@ function resolveProductionJobName({
     processJobIndex.modelOperationTypeBMatchMap.get(modelOperationMatchKey) ||
     processJobIndex.modelOperationMap.get(modelOperationKey) ||
     processJobIndex.modelOperationMatchMap.get(modelOperationMatchKey) ||
-    processJobIndex.operationMap.get(operation) ||
-    processJobIndex.operationMatchMap.get(operationMatchKey || '') ||
-    UNMATCHED_JOB_NAME
+    operationOnlyJobName
+  )
+}
+
+function isLastProcessProductionRow({
+  order,
+  processJobIndex,
+  row,
+}: {
+  order: WorkshopOrder | null
+  processJobIndex: ReturnType<typeof buildProcessJobIndex>
+  row: ProductionOrderItemRow
+}) {
+  const operation = normalizeText(row.operation)
+  const model = normalizeText(row.product_model)
+  const operationMatchKey = buildOperationMatchKey(operation)
+
+  if (!operation) {
+    return false
+  }
+
+  const operationOnlyStatus = resolveLastProcessStatus([
+    processJobIndex.operationLastProcessMap.get(operation),
+    operationMatchKey
+      ? processJobIndex.operationMatchLastProcessMap.get(operationMatchKey)
+      : undefined,
+  ])
+
+  if (!model) {
+    return operationOnlyStatus ?? false
+  }
+
+  const exactKey = buildProcessJobKey(
+    model,
+    operation,
+    order?.material_code,
+    order?.length_mm ?? row.length_mm,
+  )
+  const modelOperationKey = buildProcessJobKey(model, operation)
+  const exactOperationMatchKey = buildProcessJobKey(
+    model,
+    operationMatchKey,
+    order?.material_code,
+    order?.length_mm ?? row.length_mm,
+  )
+  const modelOperationMatchKey = buildProcessJobKey(model, operationMatchKey)
+
+  return (
+    resolveLastProcessStatus([
+      processJobIndex.exactLastProcessMap.get(exactKey),
+      processJobIndex.exactOperationMatchLastProcessMap.get(
+        exactOperationMatchKey,
+      ),
+      processJobIndex.modelOperationTypeBLastProcessMap.get(modelOperationKey),
+      processJobIndex.modelOperationTypeBMatchLastProcessMap.get(
+        modelOperationMatchKey,
+      ),
+      processJobIndex.modelOperationLastProcessMap.get(modelOperationKey),
+      processJobIndex.modelOperationMatchLastProcessMap.get(
+        modelOperationMatchKey,
+      ),
+      operationOnlyStatus,
+    ]) ?? false
   )
 }
 
 function buildJobColumns({
-  jobNames,
-  jobOperations,
+  lastProcessJobNames,
+  lastProcessJobOperations,
 }: Pick<
   ReturnType<typeof buildProcessJobIndex>,
-  'jobNames' | 'jobOperations'
+  'lastProcessJobNames' | 'lastProcessJobOperations'
 >) {
-  return jobNames.map((jobName) => ({
+  return lastProcessJobNames.map((jobName) => ({
     key: jobName,
     title: jobName,
-    operations: jobOperations.get(jobName) ?? [],
+    operations: lastProcessJobOperations.get(jobName) ?? [],
   }))
-}
-
-function ensureJobColumn(
-  columns: OrderStatusJobColumn[],
-  jobName: string,
-  operation: string | null | undefined,
-) {
-  const current = columns.find((column) => column.key === jobName)
-
-  if (current) {
-    addUniqueText(current.operations, operation)
-    return
-  }
-
-  const normalizedOperation = normalizeText(operation)
-
-  columns.push({
-    key: jobName,
-    title: jobName,
-    operations: normalizedOperation ? [normalizedOperation] : [],
-  })
 }
 
 function getProductionStatus({
@@ -752,6 +1055,64 @@ function getProductionStatus({
   return '正常'
 }
 
+async function getAllDashboardWorkshopOrders(
+  filters?: OrderStatusDashboardFilters,
+) {
+  const rows: WorkshopOrder[] = []
+  let from = 0
+
+  while (true) {
+    const to = from + LOOKUP_PAGE_SIZE - 1
+    let query = supabase.from('sales_orders').select('*')
+    const projectNo = normalizeText(filters?.projectNo)
+    const modelKeywords = normalizeSearchKeywords(filters?.model)
+    const orderDate = normalizeText(filters?.orderDate)
+    const materialCode = normalizeText(filters?.materialCode)
+
+    if (projectNo) {
+      query = query.ilike('project_no', `%${projectNo}%`)
+    }
+
+    if (modelKeywords?.length) {
+      query = query.or(
+        buildOrIlikeFilter(['product_model', 'customer_model'], modelKeywords),
+      )
+    }
+
+    if (orderDate) {
+      query = query.ilike('product_delivery_date', `%${orderDate}%`)
+    }
+
+    if (materialCode) {
+      query = query.ilike('material_code', `%${materialCode}%`)
+    }
+
+    if (filters?.status) {
+      query = query.filter('status', 'eq', filters.status)
+    }
+
+    const { data, error } = await query
+      .order('created_at', { ascending: false })
+      .order('project_no', { ascending: true })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取订单现状候选订单失败')
+    }
+
+    const pageRows = (data || []) as WorkshopOrder[]
+    rows.push(...pageRows.map((item) => ({ ...item })))
+
+    if (pageRows.length < LOOKUP_PAGE_SIZE) {
+      break
+    }
+
+    from += LOOKUP_PAGE_SIZE
+  }
+
+  return rows
+}
+
 export async function getOrderStatusDashboard({
   page,
   pageSize,
@@ -761,29 +1122,42 @@ export async function getOrderStatusDashboard({
   pageSize: number
   filters?: OrderStatusDashboardFilters
 }): Promise<OrderStatusDashboardResult> {
-  const [{ items: orders, total }, processRows] = await Promise.all([
-    getWorkshopOrders({
-      page,
-      pageSize,
-      product_delivery_date_search: filters?.orderDate,
-      project_no: filters?.projectNo,
-      model_search: filters?.model ? [filters.model] : undefined,
-      status: filters?.status,
-    }),
+  const productionStatusFilter = filters?.productionStatus
+  const [orderResult, processRows] = await Promise.all([
+    productionStatusFilter
+      ? getAllDashboardWorkshopOrders(filters).then((items) => ({
+          items,
+          total: items.length,
+        }))
+      : getWorkshopOrders({
+          page,
+          pageSize,
+          product_delivery_date_search: filters?.orderDate,
+          project_no: filters?.projectNo,
+          material_code: filters?.materialCode,
+          model_search: filters?.model ? [filters.model] : undefined,
+          status: filters?.status,
+        }),
     getAllProcessStandardJobRows(),
   ])
+  const { items: orders, total } = orderResult
 
   const projectNos = orders
     .map((order) => normalizeText(order.project_no))
     .filter((projectNo): projectNo is string => Boolean(projectNo))
-  const [productionRows, materialTransferRows] = await Promise.all([
-    getProductionItemsByProjectNos(projectNos),
-    getMaterialTransfersByProjectNos(projectNos),
-  ])
+  const [productionRows, materialTransferRows, precisionCuttingTransferRows] =
+    await Promise.all([
+      getProductionItemsByProjectNos(projectNos),
+      getMaterialTransfersByProjectNos(projectNos),
+      getPrecisionCuttingTransfersByProjectNos(projectNos),
+    ])
   const processJobIndex = buildProcessJobIndex(processRows)
   const jobColumns = buildJobColumns(processJobIndex)
   const materialTransferSummaryMap =
     buildMaterialTransferSummaryMap(materialTransferRows)
+  const precisionCuttingSummaryMap = buildPrecisionCuttingSummaryMap(
+    precisionCuttingTransferRows,
+  )
   const productionByProjectNo = new Map<
     string,
     ProductionOrderItemDetailRow[]
@@ -809,6 +1183,9 @@ export async function getOrderStatusDashboard({
     const transferSummary = projectNo
       ? materialTransferSummaryMap.get(projectNo)
       : null
+    const precisionCuttingSummary = projectNo
+      ? precisionCuttingSummaryMap.get(projectNo)
+      : null
     const jobOutputs = Object.fromEntries(
       jobColumns.map((column) => [column.key, 0]),
     ) as Record<string, number>
@@ -832,8 +1209,17 @@ export async function getOrderStatusDashboard({
       totalDefectQuantity += defectQuantity
 
       if (operation) {
-        ensureJobColumn(jobColumns, jobName, operation)
-        jobOutputs[jobName] = (jobOutputs[jobName] || 0) + qualifiedQuantity
+        if (
+          isLastProcessProductionRow({
+            order,
+            processJobIndex,
+            row,
+          }) &&
+          Object.prototype.hasOwnProperty.call(jobOutputs, jobName)
+        ) {
+          jobOutputs[jobName] = (jobOutputs[jobName] || 0) + qualifiedQuantity
+        }
+
         productionDetails.push(buildProductionDetail(row, jobName))
       }
     }
@@ -872,6 +1258,8 @@ export async function getOrderStatusDashboard({
       totalIncomingQuantity,
       totalQualifiedQuantity,
       totalDefectQuantity,
+      precisionCuttingQuantity: precisionCuttingSummary?.transferQuantity ?? 0,
+      precisionCuttingDetails: precisionCuttingSummary?.transferDetails ?? [],
       transferQuantity: transferSummary?.transferQuantity ?? 0,
       warehouseTransferQuantity:
         transferSummary?.warehouseTransferQuantity ?? 0,
@@ -889,11 +1277,30 @@ export async function getOrderStatusDashboard({
     }
   })
 
+  const filteredItems = productionStatusFilter
+    ? items.filter((item) => item.productionStatus === productionStatusFilter)
+    : items
+  const resultItems = productionStatusFilter
+    ? filteredItems.slice((page - 1) * pageSize, page * pageSize)
+    : filteredItems
+  const productionItemCount = productionStatusFilter
+    ? resultItems.reduce(
+        (count, item) => count + item.productionDetails.length,
+        0,
+      )
+    : productionRows.length
+  const materialTransferCount = productionStatusFilter
+    ? resultItems.reduce(
+        (count, item) => count + item.transferDetails.length,
+        0,
+      )
+    : materialTransferRows.length
+
   return {
-    items,
-    total,
+    items: resultItems,
+    total: productionStatusFilter ? filteredItems.length : total,
     jobColumns,
-    productionItemCount: productionRows.length,
-    materialTransferCount: materialTransferRows.length,
+    productionItemCount,
+    materialTransferCount,
   }
 }
