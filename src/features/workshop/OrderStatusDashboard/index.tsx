@@ -5,6 +5,7 @@ import type {
   TdHTMLAttributes,
   ThHTMLAttributes,
 } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   ArrowPathIcon,
   MagnifyingGlassIcon,
@@ -12,6 +13,7 @@ import {
 } from '@heroicons/react/16/solid'
 import type { TableColumnsType, TableProps } from 'antd'
 import {
+  App,
   Button,
   Input,
   Modal,
@@ -26,6 +28,8 @@ import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
 import type { WorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
+import { useBatchUpdateWorkshopOrderStatuses } from '@/features/workshop/OrderList/useWorkshopOrders'
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
   OrderProductionStatus,
@@ -36,7 +40,10 @@ import type {
   OrderStatusProductionDetail,
 } from '@/services/apiOrderStatusDashboard'
 import AppPagination from '@/ui/AppPagination'
-import { useOrderStatusDashboard } from './useOrderStatusDashboard'
+import {
+  ORDER_STATUS_DASHBOARD_KEY,
+  useOrderStatusDashboard,
+} from './useOrderStatusDashboard'
 
 const { Text, Title } = Typography
 
@@ -313,6 +320,21 @@ const STATUS_TABS: Array<{ key: WorkshopOrderStatus; label: string }> = [
 
 function normalizeStatusTab(value: string | null): WorkshopOrderStatus {
   return value === '已结案' ? '已结案' : '生产中'
+}
+
+function canCloseDashboardOrder({
+  canManageStatus,
+  record,
+}: {
+  canManageStatus: boolean
+  record: OrderStatusDashboardItem
+}) {
+  return (
+    canManageStatus &&
+    Boolean(record.id) &&
+    normalizeStatusTab(record.status ?? null) !== '已结案' &&
+    (record.completionRate ?? 0) >= 100
+  )
 }
 
 function normalizeProductionStatusFilter(
@@ -1148,6 +1170,11 @@ function PrecisionCuttingDetailModal({
 }
 
 export default function OrderStatusDashboard() {
+  const { message, modal } = App.useApp()
+  const queryClient = useQueryClient()
+  const canManageStatus = usePermission('feature:workshop-order.manage-status')
+  const { mutateAsync: updateOrderStatuses, isPending: isUpdatingOrderStatus } =
+    useBatchUpdateWorkshopOrderStatuses()
   const [selectedJobDetail, setSelectedJobDetail] =
     useState<SelectedJobDetail | null>(null)
   const [selectedTransferDetail, setSelectedTransferDetail] =
@@ -1155,6 +1182,7 @@ export default function OrderStatusDashboard() {
   const [selectedPrecisionCuttingDetail, setSelectedPrecisionCuttingDetail] =
     useState<SelectedPrecisionCuttingDetail | null>(null)
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
+  const [closingOrderId, setClosingOrderId] = useState<string | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE
@@ -1223,6 +1251,49 @@ export default function OrderStatusDashboard() {
       return { ...current, [columnKey]: width }
     })
   }, [])
+  const handleCloseOrder = useCallback(
+    (record: OrderStatusDashboardItem) => {
+      if (!record.id) {
+        message.error('当前订单缺少 ID，无法结案')
+        return
+      }
+
+      const orderLabel = record.project_no || '当前订单'
+
+      modal.confirm({
+        title: '确认结案',
+        content:
+          `确定将订单 ${orderLabel} 标记为已结案吗？` +
+          '结案后新增生产工单时将无法再关联该订单。',
+        okText: '确认结案',
+        cancelText: '取消',
+        okButtonProps: { danger: true },
+        onOk: async () => {
+          setClosingOrderId(record.id!)
+
+          try {
+            await updateOrderStatuses({
+              ids: [record.id!],
+              status: '已结案',
+            })
+            await queryClient.invalidateQueries({
+              queryKey: [ORDER_STATUS_DASHBOARD_KEY],
+            })
+            message.success('订单已结案')
+          } catch (error) {
+            message.error(
+              error instanceof Error
+                ? error.message
+                : '订单结案失败，请稍后重试',
+            )
+          } finally {
+            setClosingOrderId(null)
+          }
+        },
+      })
+    },
+    [message, modal, queryClient, updateOrderStatuses],
+  )
 
   const columns = useMemo<TableColumnsType<OrderStatusDashboardItem>>(() => {
     const baseColumns: TableColumnsType<OrderStatusDashboardItem> = [
@@ -1240,6 +1311,16 @@ export default function OrderStatusDashboard() {
         key: 'project_no',
         width: 132,
         fixed: 'left',
+        sorter: (left, right) =>
+          String(left.project_no || '').localeCompare(
+            String(right.project_no || ''),
+            'zh-CN',
+            {
+              numeric: true,
+              sensitivity: 'base',
+            },
+          ),
+        sortDirections: ['ascend', 'descend'],
         render: renderText,
       },
       {
@@ -1389,15 +1470,38 @@ export default function OrderStatusDashboard() {
         title: '生产状态',
         dataIndex: 'productionStatus',
         key: 'productionStatus',
-        width: 120,
+        width: 156,
         fixed: 'right',
         align: 'center',
-        render: (value: OrderProductionStatus, record) => (
-          <Space size={4} wrap>
-            <Tag color={STATUS_COLOR[value]}>{value}</Tag>
-            {record.status && <Tag>{record.status}</Tag>}
-          </Space>
-        ),
+        render: (value: OrderProductionStatus, record) => {
+          const canCloseOrder = canCloseDashboardOrder({
+            canManageStatus,
+            record,
+          })
+
+          return (
+            <Space size={4} wrap>
+              <Tag color={STATUS_COLOR[value]}>{value}</Tag>
+              {record.status && <Tag>{record.status}</Tag>}
+              {canCloseOrder ? (
+                <Button
+                  type="primary"
+                  danger
+                  size="small"
+                  loading={
+                    isUpdatingOrderStatus && closingOrderId === record.id
+                  }
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    handleCloseOrder(record)
+                  }}
+                >
+                  结案
+                </Button>
+              ) : null}
+            </Space>
+          )
+        },
       },
     ]
 
@@ -1408,7 +1512,11 @@ export default function OrderStatusDashboard() {
     )
   }, [
     columnWidths,
+    canManageStatus,
+    closingOrderId,
     handleResizeColumn,
+    handleCloseOrder,
+    isUpdatingOrderStatus,
     jobColumns,
     openJobDetail,
     openPrecisionCuttingDetail,
