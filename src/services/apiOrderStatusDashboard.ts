@@ -1232,17 +1232,12 @@ export async function getOrderStatusDashboard({
     })
 
     const orderQuantity = Number(order.order_quantity || 0)
-    const maxJobOutput = Math.max(0, ...Object.values(jobOutputs))
-    const finishedQuantity =
+    const outboundQuantity =
       transferSummary?.transferQuantity ??
       Number(order.total_outbound_quantity || 0)
-    const progressQuantity =
-      finishedQuantity > 0 ? finishedQuantity : maxJobOutput
     const completionRate =
       orderQuantity > 0
-        ? Number(
-            Math.min((progressQuantity / orderQuantity) * 100, 100).toFixed(1),
-          )
+        ? Number(((outboundQuantity / orderQuantity) * 100).toFixed(1))
         : null
     const yieldBase = totalQualifiedQuantity + totalDefectQuantity
     const yieldRate =
@@ -1270,7 +1265,7 @@ export async function getOrderStatusDashboard({
       latestTransferOperatorNames:
         transferSummary?.latestTransferOperatorNames ?? [],
       transferDetails: transferSummary?.transferDetails ?? [],
-      finishedQuantity,
+      finishedQuantity: outboundQuantity,
       completionRate,
       yieldRate,
       productionStatus: getProductionStatus({ order, completionRate }),
