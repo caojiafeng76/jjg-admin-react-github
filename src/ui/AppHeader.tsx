@@ -30,62 +30,9 @@ import DarkModeButton from '@ui/DarkModeButton'
 import { getRoleLabel } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import { usePermission } from '@/hooks/usePermission'
+import { getRouteLabel } from '@/routes/routeLabels'
 import { updateAdminManagementPassword } from '@/services/apiAdminManagementPassword'
 import type { AdminNotification } from '@/services/apiNotifications'
-
-// 路由到页面名称的映射
-const routeToLabelMap: Record<string, string> = {
-  dashboard: '首页',
-  'syney-po-list': '订单列表',
-  'syney-store-report-list': '入库单列表',
-  'syney-spec-list': '踏板规格列表',
-  'syney-safe-part-setting': '件号配置',
-  'syney-setting': '编号设置',
-  'workshop-order-list': '订单管理',
-  'production-scheduling': '订单现状',
-  'workshop-process-list': '工序管理',
-  'workshop-defect-reason-list': '不良原因管理',
-  'employee-list': '员工管理',
-  'standard-time-list': '成本核算',
-  'job-base-setting': '岗位基础数值设定',
-  'machine-equipment-maintenance': '机器设备维护',
-  'material-transfer': '物料转移单',
-  'material-transfer/scan': '扫码物料转移单',
-  scan: '扫码导航',
-  'production-order': '生产工单',
-  'production-order/create': '手动新建工单',
-  'production-order/scan': '扫码工单',
-  'production-daily-report': '生产日报表',
-  'precision-finishing-cutting': '精加工切割单',
-  'precision-finishing-cutting/scan': '扫码精加工切割单',
-  'precision-cutting-transfer': '精切转移单',
-  'tooling-data': '刀具资料',
-  'tooling-inventory': '刀具库存',
-  'tooling-stock-in': '刀具入库',
-  'tooling-stock-out': '刀具出库',
-  'youmai-product-data': '优迈 / 货品资料',
-  'youmai-finished-goods-inventory': '优迈 / 成品库存',
-  'youmai-finished-goods-stock-in': '优迈 / 成品入库',
-  'youmai-finished-goods-stock-out': '优迈 / 成品出库',
-  'youmai-raw-material-inventory': '优迈 / 原料库存',
-  'youmai-raw-material-stock-in': '优迈 / 原料入库',
-  'youmai-raw-material-stock-out': '优迈 / 原料出库',
-  'attendance-detail': '考勤明细',
-  'attendance-summary': '考勤统计',
-  'machine-runtime': '设备运行时间',
-}
-
-function getPageName(currentPath: string) {
-  if (routeToLabelMap[currentPath]) {
-    return routeToLabelMap[currentPath]
-  }
-
-  if (currentPath.startsWith('workshop-order-list/qr/')) {
-    return '订单扫码详情'
-  }
-
-  return ''
-}
 
 export default function AppHeader({
   colorBgContainer,
@@ -109,8 +56,7 @@ export default function AppHeader({
     nextPassword: string
     confirmPassword: string
   }>()
-  const currentPath = location.pathname.slice(1) || 'dashboard'
-  const pageName = getPageName(currentPath)
+  const pageName = getRouteLabel(location.pathname)
   const displayName = employeeProfile?.name || user?.email || '未登录用户'
   const roleLabel = getRoleLabel(role)
   const canViewAdminNotifications = usePermission(
