@@ -249,9 +249,12 @@ export default function VillaLiftOrderListPage() {
   const batchStatusMutation = useBatchUpdateVillaLiftOrdersStatus()
   const batchMarkMutation = useBatchMarkVillaLiftOrdersDate()
 
-  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
-    targetRowCount: 10,
-  })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
+    useTableHeight({
+      headerHeight: 32,
+      targetRowCount: Math.min(pageSize, 14),
+      minRowHeight: 30,
+    })
 
   // 重置弹窗状态
   const resetModalState = useCallback(() => {
@@ -664,6 +667,7 @@ export default function VillaLiftOrderListPage() {
             page={page}
             pageSize={pageSize}
             scrollY={scrollY}
+            rowHeight={rowHeight}
             canEdit={canEdit}
             canEditItems={canEditItems}
             onEdit={handleEdit}

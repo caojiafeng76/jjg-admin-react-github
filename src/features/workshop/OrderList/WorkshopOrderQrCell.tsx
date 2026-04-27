@@ -11,8 +11,8 @@ import {
 } from './workshopOrderQr'
 
 const qrWrapperStyle = {
-  height: 36,
-  width: 36,
+  height: 24,
+  width: 24,
 }
 
 const qrPreviewStyle = {
@@ -66,11 +66,11 @@ export default function WorkshopOrderQrCell({
         </Space>
       }
     >
-      <div className="inline-flex rounded border border-slate-200 bg-white p-1 shadow-sm">
+      <div className="inline-flex rounded border border-slate-200 bg-white p-0.5 shadow-sm">
         <div style={qrWrapperStyle}>
           <AppQRCode
             value={qrValue}
-            size={36}
+            size={24}
             style={{ height: '100%', width: '100%' }}
           />
         </div>

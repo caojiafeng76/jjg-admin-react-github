@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import type { CSSProperties, TdHTMLAttributes, ThHTMLAttributes } from 'react'
 import { Button, Spin, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
 import dayjs from 'dayjs'
@@ -13,6 +14,69 @@ import type {
   VillaLiftOrderItem,
 } from '@/services/apiVillaLiftOrders'
 import { useVillaLiftOrderItems } from './useVillaLiftOrders'
+
+const EXPAND_COLUMN_WIDTH = 36
+const SELECTION_COLUMN_WIDTH = 36
+
+const DENSE_TABLE_CELL_STYLE: CSSProperties = {
+  fontSize: 12,
+  lineHeight: 1.2,
+  padding: '4px 6px',
+  whiteSpace: 'normal',
+  wordBreak: 'break-word',
+}
+
+const DENSE_TABLE_STYLES = {
+  root: {
+    fontSize: 12,
+    lineHeight: 1.2,
+  },
+} satisfies NonNullable<TableProps<VillaLiftOrder>['styles']>
+
+function DenseHeaderCell({
+  style,
+  ...props
+}: ThHTMLAttributes<HTMLTableCellElement>) {
+  return (
+    <th
+      {...props}
+      style={{
+        ...style,
+        ...DENSE_TABLE_CELL_STYLE,
+      }}
+    />
+  )
+}
+
+function DenseBodyCell({
+  style,
+  ...props
+}: TdHTMLAttributes<HTMLTableCellElement>) {
+  return (
+    <td
+      {...props}
+      style={{
+        ...style,
+        ...DENSE_TABLE_CELL_STYLE,
+      }}
+    />
+  )
+}
+
+const DENSE_TABLE_COMPONENTS = {
+  body: { cell: DenseBodyCell },
+  header: { cell: DenseHeaderCell },
+} satisfies NonNullable<TableProps<VillaLiftOrder>['components']>
+
+function getTableColumnWidth<RecordType>(
+  columns: TableColumnsType<RecordType>,
+) {
+  return columns.reduce((total, column) => {
+    const width = column.width
+
+    return total + (typeof width === 'number' ? width : 0)
+  }, 0)
+}
 
 // ----------------------------------------------------------------
 // 计划日期对照颜色：
@@ -152,6 +216,7 @@ interface Props {
   page: number
   pageSize: number
   scrollY?: number
+  rowHeight?: number
   canEdit: boolean
   canEditItems: boolean
   onEdit: (record: VillaLiftOrder) => void
@@ -166,6 +231,7 @@ export default function VillaLiftOrderTable({
   page,
   pageSize,
   scrollY = 400,
+  rowHeight,
   canEdit,
   canEditItems,
   onEdit,
@@ -180,8 +246,9 @@ export default function VillaLiftOrderTable({
       {
         title: '#',
         key: '#',
-        width: 55,
+        width: 46,
         fixed: 'left',
+        align: 'center',
         render: (_v: unknown, _r: VillaLiftOrder, index: number) =>
           (page - 1) * pageSize + index + 1,
       },
@@ -189,7 +256,7 @@ export default function VillaLiftOrderTable({
         title: '计划交货日期',
         dataIndex: 'planned_delivery_date',
         key: 'planned_delivery_date',
-        width: 120,
+        width: 92,
         fixed: 'left',
         ...getSelectFilter('planned_delivery_date', data),
         render: (v: string | null) => v ?? '-',
@@ -198,8 +265,7 @@ export default function VillaLiftOrderTable({
         title: '排产日期',
         dataIndex: 'schedule_date',
         key: 'schedule_date',
-        width: 110,
-        fixed: 'left',
+        width: 86,
         ...getSelectFilter('schedule_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -207,8 +273,7 @@ export default function VillaLiftOrderTable({
         title: '客户',
         dataIndex: 'customer',
         key: 'customer',
-        width: 130,
-        fixed: 'left',
+        width: 90,
         ...getSelectFilter('customer', data),
         render: (v: string) => v || '-',
       },
@@ -216,8 +281,7 @@ export default function VillaLiftOrderTable({
         title: '项目名称',
         dataIndex: 'project_name',
         key: 'project_name',
-        width: 160,
-        fixed: 'left',
+        width: 116,
         ...getSelectFilter('project_name', data),
         render: (v: string) => v || '-',
       },
@@ -225,8 +289,7 @@ export default function VillaLiftOrderTable({
         title: '产品名称',
         dataIndex: 'product_name',
         key: 'product_name',
-        width: 140,
-        fixed: 'left',
+        width: 104,
         ...getSelectFilter('product_name', data),
         render: (v: string) => v || '-',
       },
@@ -234,8 +297,7 @@ export default function VillaLiftOrderTable({
         title: '颜色',
         dataIndex: 'color',
         key: 'color',
-        width: 100,
-        fixed: 'left',
+        width: 76,
         ...getSelectFilter('color', data),
         render: (v: string) => (v ? <Tag>{v}</Tag> : '-'),
       },
@@ -243,8 +305,7 @@ export default function VillaLiftOrderTable({
         title: '数量',
         dataIndex: 'quantity',
         key: 'quantity',
-        width: 80,
-        fixed: 'left',
+        width: 60,
         align: 'right',
         ...getSelectFilter('quantity', data),
       },
@@ -252,7 +313,7 @@ export default function VillaLiftOrderTable({
         title: '挑料计划完成日期',
         dataIndex: 'tinting_plan_date',
         key: 'tinting_plan_date',
-        width: 150,
+        width: 104,
         ...getSelectFilter('tinting_plan_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -260,7 +321,7 @@ export default function VillaLiftOrderTable({
         title: '挑料完成日期',
         dataIndex: 'material_selection_date',
         key: 'material_selection_date',
-        width: 130,
+        width: 98,
         ...getSelectFilter('material_selection_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -268,7 +329,7 @@ export default function VillaLiftOrderTable({
         title: '喷涂计划完成日期',
         dataIndex: 'painting_plan_date',
         key: 'painting_plan_date',
-        width: 150,
+        width: 104,
         ...getSelectFilter('painting_plan_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -276,7 +337,7 @@ export default function VillaLiftOrderTable({
         title: '喷涂完成日期',
         dataIndex: 'painting_date',
         key: 'painting_date',
-        width: 130,
+        width: 98,
         ...getSelectFilter('painting_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -284,7 +345,7 @@ export default function VillaLiftOrderTable({
         title: '贴膜计划完成日期',
         dataIndex: 'film_plan_date',
         key: 'film_plan_date',
-        width: 150,
+        width: 104,
         ...getSelectFilter('film_plan_date', data),
         render: (v: string | null, r: VillaLiftOrder) =>
           renderPlannedDate(v, r.film_date, r.delivery_date),
@@ -293,7 +354,7 @@ export default function VillaLiftOrderTable({
         title: '贴膜完成日期',
         dataIndex: 'film_date',
         key: 'film_date',
-        width: 130,
+        width: 98,
         ...getSelectFilter('film_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -301,7 +362,7 @@ export default function VillaLiftOrderTable({
         title: '切割要求完成日期',
         dataIndex: 'cutting_required_date',
         key: 'cutting_required_date',
-        width: 150,
+        width: 112,
         ...getSelectFilter('cutting_required_date', data),
         render: (v: string | null, r: VillaLiftOrder) =>
           renderPlannedDate(v, r.cutting_actual_date, r.delivery_date),
@@ -310,7 +371,7 @@ export default function VillaLiftOrderTable({
         title: '切割实际完成日期',
         dataIndex: 'cutting_actual_date',
         key: 'cutting_actual_date',
-        width: 150,
+        width: 112,
         ...getSelectFilter('cutting_actual_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -318,7 +379,7 @@ export default function VillaLiftOrderTable({
         title: '加工要求完成日期',
         dataIndex: 'processing_required_date',
         key: 'processing_required_date',
-        width: 150,
+        width: 112,
         ...getSelectFilter('processing_required_date', data),
         render: (v: string | null, r: VillaLiftOrder) =>
           renderPlannedDate(v, r.processing_actual_date, r.delivery_date),
@@ -327,7 +388,7 @@ export default function VillaLiftOrderTable({
         title: '加工实际完成日期',
         dataIndex: 'processing_actual_date',
         key: 'processing_actual_date',
-        width: 150,
+        width: 112,
         ...getSelectFilter('processing_actual_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -335,7 +396,7 @@ export default function VillaLiftOrderTable({
         title: '轿箱加工完成日期',
         dataIndex: 'cabin_processing_date',
         key: 'cabin_processing_date',
-        width: 150,
+        width: 112,
         ...getSelectFilter('cabin_processing_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -343,7 +404,7 @@ export default function VillaLiftOrderTable({
         title: '中分门加工完成日期',
         dataIndex: 'middle_door_processing_date',
         key: 'middle_door_processing_date',
-        width: 160,
+        width: 120,
         ...getSelectFilter('middle_door_processing_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -351,7 +412,7 @@ export default function VillaLiftOrderTable({
         title: '井架加工完成日期',
         dataIndex: 'frame_processing_date',
         key: 'frame_processing_date',
-        width: 150,
+        width: 112,
         ...getSelectFilter('frame_processing_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -359,7 +420,7 @@ export default function VillaLiftOrderTable({
         title: '检验完成日期',
         dataIndex: 'inspection_date',
         key: 'inspection_date',
-        width: 130,
+        width: 98,
         ...getSelectFilter('inspection_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -367,7 +428,7 @@ export default function VillaLiftOrderTable({
         title: '组装完成日期',
         dataIndex: 'assembly_date',
         key: 'assembly_date',
-        width: 130,
+        width: 98,
         ...getSelectFilter('assembly_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -375,7 +436,7 @@ export default function VillaLiftOrderTable({
         title: '包装完成日期',
         dataIndex: 'packaging_date',
         key: 'packaging_date',
-        width: 130,
+        width: 98,
         ...getSelectFilter('packaging_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -383,7 +444,7 @@ export default function VillaLiftOrderTable({
         title: '发货日期',
         dataIndex: 'delivery_date',
         key: 'delivery_date',
-        width: 110,
+        width: 86,
         ...getSelectFilter('delivery_date', data),
         render: (v: string | null) => v ?? '-',
       },
@@ -391,6 +452,7 @@ export default function VillaLiftOrderTable({
         title: '备注',
         dataIndex: 'remarks',
         key: 'remarks',
+        width: 130,
         ...getSelectFilter('remarks', data),
         render: (v: string) => v || '-',
       },
@@ -398,7 +460,7 @@ export default function VillaLiftOrderTable({
         title: '状态',
         dataIndex: 'status',
         key: 'status',
-        width: 90,
+        width: 76,
         fixed: 'right',
         filters: [
           { text: '已结案', value: 'closed' },
@@ -416,7 +478,7 @@ export default function VillaLiftOrderTable({
       {
         title: '操作',
         key: 'action',
-        width: 70,
+        width: 56,
         fixed: 'right',
         render: (_v: unknown, record: VillaLiftOrder) =>
           canEdit ? (
@@ -433,10 +495,11 @@ export default function VillaLiftOrderTable({
           ) : null,
       },
     ],
-    [page, pageSize, canEdit, canEditItems, onEdit, data],
+    [page, pageSize, canEdit, onEdit, data],
   )
 
   const expandable: TableProps<VillaLiftOrder>['expandable'] = {
+    columnWidth: EXPAND_COLUMN_WIDTH,
     expandedRowKeys: expandedKeys,
     onExpand: (expanded, record) => {
       setExpandedKeys(
@@ -468,6 +531,9 @@ export default function VillaLiftOrderTable({
     ),
   }
 
+  const tableWidth =
+    getTableColumnWidth(columns) + EXPAND_COLUMN_WIDTH + SELECTION_COLUMN_WIDTH
+
   return (
     <Table<VillaLiftOrder>
       loading={loading}
@@ -475,10 +541,14 @@ export default function VillaLiftOrderTable({
       columns={columns}
       rowKey="id"
       size="small"
-      scroll={{ x: 1200, y: scrollY }}
+      components={DENSE_TABLE_COMPONENTS}
+      scroll={{ x: tableWidth, y: scrollY }}
       pagination={false}
       expandable={expandable}
+      styles={DENSE_TABLE_STYLES}
+      onRow={() => ({ style: { height: rowHeight } })}
       rowSelection={{
+        columnWidth: SELECTION_COLUMN_WIDTH,
         selectedRowKeys,
         onChange: (keys) => onSelectionChange(keys as string[]),
       }}

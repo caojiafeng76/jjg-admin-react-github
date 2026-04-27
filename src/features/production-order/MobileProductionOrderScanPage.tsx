@@ -157,16 +157,6 @@ export default function MobileProductionOrderScanPage() {
         item.record_type || '',
         item.part_no || '',
       ].join(' '),
-      description: (
-        <div className="flex items-center justify-between gap-3">
-          <span>
-            标准工时: {Number(item.standard_seconds || 0).toFixed(2)} 秒
-          </span>
-          <span>
-            理论工时: {Number(item.theoretical_seconds || 0).toFixed(2)} 秒
-          </span>
-        </div>
-      ),
     }))
   }, [operationRecords])
 
@@ -589,19 +579,6 @@ export default function MobileProductionOrderScanPage() {
                 </div>
                 <span className="text-slate-400">选择</span>
               </button>
-              {selectedOperationRecord ? (
-                <div className="mt-2 text-xs text-slate-500">
-                  标准工时{' '}
-                  {Number(
-                    selectedOperationRecord.standard_seconds || 0,
-                  ).toFixed(2)}{' '}
-                  秒， 理论工时{' '}
-                  {Number(
-                    selectedOperationRecord.theoretical_seconds || 0,
-                  ).toFixed(2)}{' '}
-                  秒
-                </div>
-              ) : null}
             </div>
 
             <div>

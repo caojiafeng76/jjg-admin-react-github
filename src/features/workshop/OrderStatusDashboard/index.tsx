@@ -1,11 +1,27 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import type {
+  CSSProperties,
+  MouseEvent as ReactMouseEvent,
+  TdHTMLAttributes,
+  ThHTMLAttributes,
+} from 'react'
 import {
   ArrowPathIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import type { TableColumnsType } from 'antd'
-import { Button, Input, Modal, Space, Table, Tabs, Tag, Typography } from 'antd'
+import type { TableColumnsType, TableProps } from 'antd'
+import {
+  Button,
+  Input,
+  Modal,
+  Select,
+  Space,
+  Table,
+  Tabs,
+  Tag,
+  Typography,
+} from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
@@ -14,7 +30,9 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
   OrderProductionStatus,
   OrderStatusDashboardItem,
+  OrderStatusJobColumn,
   OrderStatusMaterialTransferDetail,
+  OrderStatusPrecisionCuttingTransferDetail,
   OrderStatusProductionDetail,
 } from '@/services/apiOrderStatusDashboard'
 import AppPagination from '@/ui/AppPagination'
@@ -23,6 +41,8 @@ import { useOrderStatusDashboard } from './useOrderStatusDashboard'
 const { Text, Title } = Typography
 
 const DEFAULT_PAGE_SIZE = 20
+const EMPTY_JOB_COLUMNS: OrderStatusJobColumn[] = []
+const MIN_RESIZABLE_COLUMN_WIDTH = 44
 
 const STATUS_COLOR: Record<OrderProductionStatus, string> = {
   正常: 'green',
@@ -30,15 +50,60 @@ const STATUS_COLOR: Record<OrderProductionStatus, string> = {
   延期: 'red',
 }
 
-const JOB_OUTPUT_COLUMN_WIDTH = 96
-const BASE_TABLE_WIDTH = 1294
-const STATUS_TABLE_WIDTH = 1070
+const PRODUCTION_STATUS_OPTIONS: Array<{
+  label: OrderProductionStatus
+  value: OrderProductionStatus
+}> = [
+  { label: '正常', value: '正常' },
+  { label: '预警', value: '预警' },
+  { label: '延期', value: '延期' },
+]
+
+const JOB_OUTPUT_COLUMN_WIDTH = 72
+const JOB_OUTPUT_COLUMN_ORDER = [
+  '精切',
+  '自动切',
+  'CNC',
+  '冲床',
+  '钻床',
+  '端铣',
+  '攻丝',
+  '滚弯',
+  '折弯',
+  '焊接',
+  '塑封',
+  '去毛刺',
+  '整形',
+  '检验',
+  '组装',
+] as const
+const JOB_OUTPUT_COLUMN_ORDER_MAP: ReadonlyMap<string, number> = new Map([
+  ...JOB_OUTPUT_COLUMN_ORDER.map((jobName, index) => [jobName, index] as const),
+  ['切割', 1],
+])
+
+const DENSE_TABLE_CELL_STYLE: CSSProperties = {
+  fontSize: 12,
+  lineHeight: 1.2,
+  padding: '4px 6px',
+}
+
+const DENSE_TABLE_STYLES = {
+  root: {
+    fontSize: 12,
+    lineHeight: 1.2,
+  },
+} satisfies NonNullable<TableProps<OrderStatusDashboardItem>['styles']>
 
 type ProductionDetailRow = OrderStatusProductionDetail & {
   key: string
 }
 
 type TransferDetailRow = OrderStatusMaterialTransferDetail & {
+  key: string
+}
+
+type PrecisionCuttingDetailRow = OrderStatusPrecisionCuttingTransferDetail & {
   key: string
 }
 
@@ -58,15 +123,186 @@ type SelectedTransferDetail = {
   record: OrderStatusDashboardItem
 }
 
+type SelectedPrecisionCuttingDetail = {
+  record: OrderStatusDashboardItem
+}
+
 type SearchValues = {
+  materialCode: string
   model: string
   orderDate: string
+  productionStatus: OrderProductionStatus | ''
   projectNo: string
 }
 
+type ColumnWidthMap = Record<string, number>
+
+type ResizableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement> & {
+  columnKey?: string
+  minWidth?: number
+  onResizeColumn?: (columnKey: string, width: number) => void
+  width?: number
+}
+
+function ResizableHeaderCell({
+  children,
+  columnKey,
+  minWidth = MIN_RESIZABLE_COLUMN_WIDTH,
+  onResizeColumn,
+  style,
+  width,
+  ...props
+}: ResizableHeaderCellProps) {
+  function handleResizeStart(event: ReactMouseEvent<HTMLSpanElement>) {
+    if (!columnKey || !onResizeColumn || typeof width !== 'number') {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    const startX = event.clientX
+    const startWidth = width
+    const originalCursor = document.body.style.cursor
+    const originalUserSelect = document.body.style.userSelect
+
+    const handleResizeMove = (moveEvent: MouseEvent) => {
+      const nextWidth = Math.max(
+        minWidth,
+        Math.round(startWidth + moveEvent.clientX - startX),
+      )
+      onResizeColumn(columnKey, nextWidth)
+    }
+
+    const handleResizeEnd = () => {
+      document.body.style.cursor = originalCursor
+      document.body.style.userSelect = originalUserSelect
+      window.removeEventListener('mousemove', handleResizeMove)
+      window.removeEventListener('mouseup', handleResizeEnd)
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', handleResizeMove)
+    window.addEventListener('mouseup', handleResizeEnd)
+  }
+
+  return (
+    <th
+      {...props}
+      style={{
+        ...style,
+        ...DENSE_TABLE_CELL_STYLE,
+      }}
+    >
+      <div
+        style={{
+          display: 'block',
+          margin: '-4px -6px',
+          padding: '4px 6px',
+          position: 'relative',
+        }}
+      >
+        {children}
+        {columnKey && onResizeColumn ? (
+          <span
+            aria-label="调整列宽"
+            role="separator"
+            aria-orientation="vertical"
+            onMouseDown={handleResizeStart}
+            style={{
+              bottom: 0,
+              cursor: 'col-resize',
+              position: 'absolute',
+              right: -3,
+              top: 0,
+              width: 6,
+              zIndex: 3,
+            }}
+          />
+        ) : null}
+      </div>
+    </th>
+  )
+}
+
+function DenseBodyCell({
+  style,
+  ...props
+}: TdHTMLAttributes<HTMLTableCellElement>) {
+  return (
+    <td
+      {...props}
+      style={{
+        ...style,
+        ...DENSE_TABLE_CELL_STYLE,
+      }}
+    />
+  )
+}
+
+const DENSE_TABLE_COMPONENTS = {
+  body: { cell: DenseBodyCell },
+  header: { cell: ResizableHeaderCell },
+} satisfies NonNullable<TableProps<OrderStatusDashboardItem>['components']>
+
+function getColumnKey<RecordType>(
+  column: TableColumnsType<RecordType>[number],
+) {
+  if (column.key !== undefined) {
+    return String(column.key)
+  }
+
+  if ('dataIndex' in column && column.dataIndex !== undefined) {
+    return Array.isArray(column.dataIndex)
+      ? column.dataIndex.join('.')
+      : String(column.dataIndex)
+  }
+
+  return ''
+}
+
+function applyColumnWidths<RecordType>(
+  columns: TableColumnsType<RecordType>,
+  columnWidths: ColumnWidthMap,
+  onResizeColumn: (columnKey: string, width: number) => void,
+): TableColumnsType<RecordType> {
+  return columns.map((column) => {
+    const columnKey = getColumnKey(column)
+    const defaultWidth = typeof column.width === 'number' ? column.width : 0
+    const width = columnKey
+      ? (columnWidths[columnKey] ?? defaultWidth)
+      : defaultWidth
+
+    return {
+      ...column,
+      width,
+      onHeaderCell: () =>
+        ({
+          columnKey,
+          minWidth: MIN_RESIZABLE_COLUMN_WIDTH,
+          onResizeColumn,
+          width,
+        }) as ResizableHeaderCellProps,
+    }
+  })
+}
+
+function getTableColumnWidth<RecordType>(
+  columns: TableColumnsType<RecordType>,
+) {
+  return columns.reduce((total, column) => {
+    const width = column.width
+
+    return total + (typeof width === 'number' ? width : 0)
+  }, 0)
+}
+
 const EMPTY_SEARCH_VALUES: SearchValues = {
+  materialCode: '',
   model: '',
   orderDate: '',
+  productionStatus: '',
   projectNo: '',
 }
 
@@ -77,6 +313,12 @@ const STATUS_TABS: Array<{ key: WorkshopOrderStatus; label: string }> = [
 
 function normalizeStatusTab(value: string | null): WorkshopOrderStatus {
   return value === '已结案' ? '已结案' : '生产中'
+}
+
+function normalizeProductionStatusFilter(
+  value: string | null,
+): OrderProductionStatus | '' {
+  return value === '正常' || value === '预警' || value === '延期' ? value : ''
 }
 
 function renderText(value: string | number | null | undefined) {
@@ -137,33 +379,6 @@ function renderTransferWorkshops(value: string[]) {
   )
 }
 
-function renderLatestTransfer(
-  _value: string | null,
-  record: OrderStatusDashboardItem,
-) {
-  if (!record.latestTransferAt) {
-    return <Text type="secondary">-</Text>
-  }
-
-  const summary = [
-    record.latestTransferWorkshop,
-    record.latestTransferOperatorNames.join('、'),
-  ]
-    .filter(Boolean)
-    .join(' / ')
-
-  return (
-    <div className="leading-tight">
-      <div>{dayjs(record.latestTransferAt).format('MM-DD HH:mm')}</div>
-      {summary && (
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          {summary}
-        </Text>
-      )}
-    </div>
-  )
-}
-
 function renderTransferQuantityCell({
   onOpen,
   record,
@@ -185,7 +400,39 @@ function renderTransferQuantityCell({
     <Button
       type="link"
       size="small"
-      className="h-auto! px-0! font-semibold!"
+      className="h-auto! px-0! text-xs! font-semibold!"
+      onClick={(event) => {
+        event.stopPropagation()
+        onOpen(record)
+      }}
+    >
+      {quantity.toLocaleString()}
+    </Button>
+  )
+}
+
+function renderPrecisionCuttingQuantityCell({
+  onOpen,
+  record,
+}: {
+  onOpen: (record: OrderStatusDashboardItem) => void
+  record: OrderStatusDashboardItem
+}) {
+  const quantity = Number(record.precisionCuttingQuantity || 0)
+
+  if (quantity <= 0) {
+    return <Text type="secondary">-</Text>
+  }
+
+  if (record.precisionCuttingDetails.length === 0) {
+    return <Text strong>{quantity.toLocaleString()}</Text>
+  }
+
+  return (
+    <Button
+      type="link"
+      size="small"
+      className="h-auto! px-0! text-xs! font-semibold!"
       onClick={(event) => {
         event.stopPropagation()
         onOpen(record)
@@ -222,7 +469,7 @@ function renderJobOutputCell({
     <Button
       type="link"
       size="small"
-      className="h-auto! px-0! font-semibold!"
+      className="h-auto! px-0! text-xs! font-semibold!"
       onClick={(event) => {
         event.stopPropagation()
         onOpen(record, jobName)
@@ -697,18 +944,228 @@ function TransferDetailModal({
   )
 }
 
+function PrecisionCuttingDetailModal({
+  detail,
+  onClose,
+}: {
+  detail: SelectedPrecisionCuttingDetail | null
+  onClose: () => void
+}) {
+  const rows = useMemo<PrecisionCuttingDetailRow[]>(
+    () =>
+      (detail?.record.precisionCuttingDetails ?? []).map((item) => ({
+        ...item,
+        key: item.id,
+      })),
+    [detail],
+  )
+  const summary = useMemo(
+    () => ({
+      auditedCount: rows.filter((item) => item.isAudited).length,
+      defectQuantity: rows.reduce(
+        (total, item) =>
+          total +
+          item.rawMaterialDefectCount +
+          item.processingDefectCount +
+          item.outsourceDefectQuantity,
+        0,
+      ),
+      longMaterialQuantity: rows.reduce(
+        (total, item) => total + item.longMaterialQuantity,
+        0,
+      ),
+      transferQuantity: rows.reduce(
+        (total, item) => total + item.transferQuantity,
+        0,
+      ),
+      unauditedCount: rows.filter((item) => !item.isAudited).length,
+    }),
+    [rows],
+  )
+  const columns: TableColumnsType<PrecisionCuttingDetailRow> = [
+    {
+      title: '转移时间',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 150,
+      fixed: 'left',
+      render: (value: string) => dayjs(value).format('YYYY-MM-DD HH:mm'),
+    },
+    {
+      title: '接收车间',
+      dataIndex: 'targetWorkshop',
+      key: 'targetWorkshop',
+      width: 100,
+      render: renderText,
+    },
+    {
+      title: '精切数量',
+      dataIndex: 'transferQuantity',
+      key: 'transferQuantity',
+      width: 100,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '长料长度',
+      dataIndex: 'longMaterialLengthMm',
+      key: 'longMaterialLengthMm',
+      width: 100,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '长料支数',
+      dataIndex: 'longMaterialQuantity',
+      key: 'longMaterialQuantity',
+      width: 100,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '原料不良',
+      dataIndex: 'rawMaterialDefectCount',
+      key: 'rawMaterialDefectCount',
+      width: 90,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '加工不良',
+      dataIndex: 'processingDefectCount',
+      key: 'processingDefectCount',
+      width: 90,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '外协不良',
+      dataIndex: 'outsourceDefectQuantity',
+      key: 'outsourceDefectQuantity',
+      width: 90,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '不良原因',
+      dataIndex: 'defectReason',
+      key: 'defectReason',
+      width: 120,
+      render: renderText,
+    },
+    {
+      title: '责任工序',
+      dataIndex: 'responsibleProcess',
+      key: 'responsibleProcess',
+      width: 110,
+      render: renderText,
+    },
+    {
+      title: '责任人',
+      dataIndex: 'processOwner',
+      key: 'processOwner',
+      width: 100,
+      render: renderText,
+    },
+    {
+      title: '操作人',
+      dataIndex: 'operatorNames',
+      key: 'operatorNames',
+      width: 140,
+      render: (value: string[]) => renderText(value.join('、')),
+    },
+    {
+      title: '接收人',
+      dataIndex: 'recipientName',
+      key: 'recipientName',
+      width: 100,
+      render: renderText,
+    },
+    {
+      title: '审核状态',
+      dataIndex: 'isAudited',
+      key: 'isAudited',
+      width: 90,
+      align: 'center',
+      render: (value: boolean) => (
+        <Tag color={value ? 'green' : 'gold'}>
+          {value ? '已审核' : '未审核'}
+        </Tag>
+      ),
+    },
+    {
+      title: '备注',
+      dataIndex: 'remark',
+      key: 'remark',
+      width: 160,
+      render: renderText,
+    },
+  ]
+
+  return (
+    <Modal
+      open={Boolean(detail)}
+      title={
+        detail ? `${detail.record.project_no || '-'} 精切明细` : '精切明细'
+      }
+      footer={null}
+      width={1180}
+      destroyOnHidden
+      onCancel={onClose}
+    >
+      {detail && (
+        <div className="space-y-4">
+          <Space size={8} wrap>
+            <Tag color="blue">记录 {rows.length}</Tag>
+            <Tag color="purple">
+              精切 {summary.transferQuantity.toLocaleString()}
+            </Tag>
+            <Tag color="cyan">
+              长料 {summary.longMaterialQuantity.toLocaleString()}
+            </Tag>
+            <Tag color={summary.defectQuantity > 0 ? 'red' : 'default'}>
+              不良 {summary.defectQuantity.toLocaleString()}
+            </Tag>
+            <Tag color="green">已审核 {summary.auditedCount}</Tag>
+            <Tag color={summary.unauditedCount > 0 ? 'gold' : 'default'}>
+              未审核 {summary.unauditedCount}
+            </Tag>
+          </Space>
+
+          <Table<PrecisionCuttingDetailRow>
+            rowKey="key"
+            bordered
+            size="small"
+            columns={columns}
+            dataSource={rows}
+            pagination={false}
+            scroll={{ x: 1640, y: 420 }}
+          />
+        </div>
+      )}
+    </Modal>
+  )
+}
+
 export default function OrderStatusDashboard() {
   const [selectedJobDetail, setSelectedJobDetail] =
     useState<SelectedJobDetail | null>(null)
   const [selectedTransferDetail, setSelectedTransferDetail] =
     useState<SelectedTransferDetail | null>(null)
+  const [selectedPrecisionCuttingDetail, setSelectedPrecisionCuttingDetail] =
+    useState<SelectedPrecisionCuttingDetail | null>(null)
+  const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE
   const activeStatus = normalizeStatusTab(searchParams.get('status'))
   const searchParamValues = useMemo<SearchValues>(
     () => ({
+      materialCode: searchParams.get('materialCode')?.trim() ?? '',
       orderDate: searchParams.get('orderDate')?.trim() ?? '',
+      productionStatus: normalizeProductionStatusFilter(
+        searchParams.get('productionStatus'),
+      ),
       projectNo: searchParams.get('projectNo')?.trim() ?? '',
       model: searchParams.get('model')?.trim() ?? '',
     }),
@@ -718,7 +1175,9 @@ export default function OrderStatusDashboard() {
     useState<SearchValues>(searchParamValues)
   const filters = useMemo(
     () => ({
+      materialCode: searchParamValues.materialCode || undefined,
       orderDate: searchParamValues.orderDate || undefined,
+      productionStatus: searchParamValues.productionStatus || undefined,
       projectNo: searchParamValues.projectNo || undefined,
       model: searchParamValues.model || undefined,
       status: activeStatus,
@@ -727,8 +1186,9 @@ export default function OrderStatusDashboard() {
   )
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
-      targetRowCount: Math.min(pageSize, 12),
-      minRowHeight: 34,
+      headerHeight: 32,
+      targetRowCount: Math.min(pageSize, 14),
+      minRowHeight: 30,
     })
   const { data, isLoading, isFetching, refetch } = useOrderStatusDashboard({
     page,
@@ -738,7 +1198,7 @@ export default function OrderStatusDashboard() {
   const isDataLoading = isLoading || isFetching
 
   const rows = data?.items ?? []
-  const jobColumns = data?.jobColumns ?? []
+  const jobColumns = data?.jobColumns ?? EMPTY_JOB_COLUMNS
   const openJobDetail = useCallback(
     (record: OrderStatusDashboardItem, jobName: string) => {
       setSelectedJobDetail({ record, jobName })
@@ -748,13 +1208,28 @@ export default function OrderStatusDashboard() {
   const openTransferDetail = useCallback((record: OrderStatusDashboardItem) => {
     setSelectedTransferDetail({ record })
   }, [])
+  const openPrecisionCuttingDetail = useCallback(
+    (record: OrderStatusDashboardItem) => {
+      setSelectedPrecisionCuttingDetail({ record })
+    },
+    [],
+  )
+  const handleResizeColumn = useCallback((columnKey: string, width: number) => {
+    setColumnWidths((current) => {
+      if (current[columnKey] === width) {
+        return current
+      }
+
+      return { ...current, [columnKey]: width }
+    })
+  }, [])
 
   const columns = useMemo<TableColumnsType<OrderStatusDashboardItem>>(() => {
     const baseColumns: TableColumnsType<OrderStatusDashboardItem> = [
       {
         title: '序号',
         key: 'index',
-        width: 64,
+        width: 46,
         fixed: 'left',
         align: 'center',
         render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
@@ -763,76 +1238,94 @@ export default function OrderStatusDashboard() {
         title: '项目号',
         dataIndex: 'project_no',
         key: 'project_no',
-        width: 180,
+        width: 132,
         fixed: 'left',
-        render: renderText,
-      },
-      {
-        title: '客户',
-        dataIndex: 'customer',
-        key: 'customer',
-        width: 120,
         render: renderText,
       },
       {
         title: '型号',
         dataIndex: 'product_model',
         key: 'product_model',
-        width: 130,
+        width: 94,
+        fixed: 'left',
         render: renderText,
       },
       {
-        title: '客户型号',
-        dataIndex: 'customer_model',
-        key: 'customer_model',
-        width: 150,
-        render: renderText,
-      },
-      {
-        title: '订单日期',
-        dataIndex: 'product_delivery_date',
-        key: 'product_delivery_date',
-        width: 120,
-        render: renderText,
-      },
-      {
-        title: '料号',
-        dataIndex: 'material_code',
-        key: 'material_code',
-        width: 150,
-        render: renderText,
-      },
-      {
-        title: '图材质',
-        dataIndex: 'material_name',
-        key: 'material_name',
-        width: 120,
-        render: renderText,
-      },
-      {
-        title: '工艺流程',
-        dataIndex: 'process_flow',
-        key: 'process_flow',
-        width: 160,
+        title: '长度',
+        dataIndex: 'length_mm',
+        key: 'length_mm',
+        width: 64,
+        fixed: 'left',
+        align: 'right',
         render: renderText,
       },
       {
         title: '订单数量',
         dataIndex: 'order_quantity',
         key: 'order_quantity',
-        width: 100,
+        width: 76,
+        fixed: 'left',
         align: 'right',
         render: renderQuantity,
       },
+      {
+        title: '客户',
+        dataIndex: 'customer',
+        key: 'customer',
+        width: 88,
+        render: renderText,
+      },
+      {
+        title: '客户型号',
+        dataIndex: 'customer_model',
+        key: 'customer_model',
+        width: 108,
+        render: renderText,
+      },
+      {
+        title: '订单日期',
+        dataIndex: 'product_delivery_date',
+        key: 'product_delivery_date',
+        width: 88,
+        render: renderText,
+      },
+      {
+        title: '料号',
+        dataIndex: 'material_code',
+        key: 'material_code',
+        width: 112,
+        render: renderText,
+      },
+      {
+        title: '图材质',
+        dataIndex: 'material_name',
+        key: 'material_name',
+        width: 88,
+        render: renderText,
+      },
     ]
 
-    const outputColumns: TableColumnsType<OrderStatusDashboardItem> =
-      jobColumns.map((column) => ({
+    const sortedJobColumns = [...jobColumns]
+      .filter((column) => column.key !== '精切')
+      .sort((left, right) => {
+        const leftOrder =
+          JOB_OUTPUT_COLUMN_ORDER_MAP.get(left.key) ?? Number.MAX_SAFE_INTEGER
+        const rightOrder =
+          JOB_OUTPUT_COLUMN_ORDER_MAP.get(right.key) ?? Number.MAX_SAFE_INTEGER
+
+        if (leftOrder !== rightOrder) {
+          return leftOrder - rightOrder
+        }
+
+        return left.title.localeCompare(right.title, 'zh-Hans-CN')
+      })
+    const sortedJobOutputColumns: TableColumnsType<OrderStatusDashboardItem> =
+      sortedJobColumns.map((column) => ({
         title: column.title,
         key: `job-${column.key}`,
         width: JOB_OUTPUT_COLUMN_WIDTH,
         align: 'right',
-        render: (_value, record) =>
+        render: (_value: unknown, record: OrderStatusDashboardItem) =>
           renderJobOutputCell({
             jobName: column.key,
             onOpen: openJobDetail,
@@ -840,12 +1333,28 @@ export default function OrderStatusDashboard() {
           }),
       }))
 
+    const outputColumns: TableColumnsType<OrderStatusDashboardItem> = [
+      {
+        title: '精切',
+        dataIndex: 'precisionCuttingQuantity',
+        key: 'precisionCuttingQuantity',
+        width: 68,
+        align: 'right',
+        render: (_value, record) =>
+          renderPrecisionCuttingQuantityCell({
+            onOpen: openPrecisionCuttingDetail,
+            record,
+          }),
+      },
+      ...sortedJobOutputColumns,
+    ]
+
     const statusColumns: TableColumnsType<OrderStatusDashboardItem> = [
       {
         title: '物料转移数量',
         dataIndex: 'transferQuantity',
         key: 'transferQuantity',
-        width: 120,
+        width: 94,
         align: 'right',
         render: (_value, record) =>
           renderTransferQuantityCell({
@@ -854,40 +1363,17 @@ export default function OrderStatusDashboard() {
           }),
       },
       {
-        title: '入库数量',
-        dataIndex: 'warehouseTransferQuantity',
-        key: 'warehouseTransferQuantity',
-        width: 110,
-        align: 'right',
-        render: renderQuantity,
-      },
-      {
-        title: '转移记录',
-        dataIndex: 'transferRecordCount',
-        key: 'transferRecordCount',
-        width: 90,
-        align: 'right',
-        render: renderQuantity,
-      },
-      {
         title: '接收车间',
         dataIndex: 'transferWorkshops',
         key: 'transferWorkshops',
-        width: 180,
+        width: 118,
         render: renderTransferWorkshops,
-      },
-      {
-        title: '最近转移',
-        dataIndex: 'latestTransferAt',
-        key: 'latestTransferAt',
-        width: 190,
-        render: renderLatestTransfer,
       },
       {
         title: '成品率',
         dataIndex: 'yieldRate',
         key: 'yieldRate',
-        width: 90,
+        width: 68,
         align: 'right',
         render: renderPercent,
       },
@@ -895,7 +1381,7 @@ export default function OrderStatusDashboard() {
         title: '完工率（%）',
         dataIndex: 'completionRate',
         key: 'completionRate',
-        width: 110,
+        width: 82,
         align: 'right',
         render: renderPercent,
       },
@@ -903,7 +1389,7 @@ export default function OrderStatusDashboard() {
         title: '生产状态',
         dataIndex: 'productionStatus',
         key: 'productionStatus',
-        width: 180,
+        width: 120,
         fixed: 'right',
         align: 'center',
         render: (value: OrderProductionStatus, record) => (
@@ -915,19 +1401,32 @@ export default function OrderStatusDashboard() {
       },
     ]
 
-    return [...baseColumns, ...outputColumns, ...statusColumns]
-  }, [jobColumns, openJobDetail, openTransferDetail, page, pageSize])
+    return applyColumnWidths(
+      [...baseColumns, ...outputColumns, ...statusColumns],
+      columnWidths,
+      handleResizeColumn,
+    )
+  }, [
+    columnWidths,
+    handleResizeColumn,
+    jobColumns,
+    openJobDetail,
+    openPrecisionCuttingDetail,
+    openTransferDetail,
+    page,
+    pageSize,
+  ])
 
-  const tableWidth =
-    BASE_TABLE_WIDTH +
-    jobColumns.length * JOB_OUTPUT_COLUMN_WIDTH +
-    STATUS_TABLE_WIDTH
+  const tableWidth = getTableColumnWidth(columns)
 
   useEffect(() => {
     setSearchValues(searchParamValues)
   }, [searchParamValues])
 
-  function updateSearchParamValue(key: keyof SearchValues, value: string) {
+  function updateSearchParamValue<TKey extends keyof SearchValues>(
+    key: TKey,
+    value: SearchValues[TKey],
+  ) {
     setSearchValues((current) => ({ ...current, [key]: value }))
   }
 
@@ -948,25 +1447,31 @@ export default function OrderStatusDashboard() {
   function handleSearch() {
     const next = new URLSearchParams(searchParams)
 
+    setOrDeleteParam(next, 'materialCode', searchValues.materialCode)
     setOrDeleteParam(next, 'orderDate', searchValues.orderDate)
+    setOrDeleteParam(next, 'productionStatus', searchValues.productionStatus)
     setOrDeleteParam(next, 'projectNo', searchValues.projectNo)
     setOrDeleteParam(next, 'model', searchValues.model)
     next.set('page', '1')
     setSearchParams(next)
     setSelectedJobDetail(null)
+    setSelectedPrecisionCuttingDetail(null)
     setSelectedTransferDetail(null)
   }
 
   function handleResetSearch() {
     const next = new URLSearchParams(searchParams)
 
+    next.delete('materialCode')
     next.delete('orderDate')
+    next.delete('productionStatus')
     next.delete('projectNo')
     next.delete('model')
     next.set('page', '1')
     setSearchValues(EMPTY_SEARCH_VALUES)
     setSearchParams(next)
     setSelectedJobDetail(null)
+    setSelectedPrecisionCuttingDetail(null)
     setSelectedTransferDetail(null)
   }
 
@@ -983,6 +1488,7 @@ export default function OrderStatusDashboard() {
     next.set('page', '1')
     setSearchParams(next)
     setSelectedJobDetail(null)
+    setSelectedPrecisionCuttingDetail(null)
     setSelectedTransferDetail(null)
   }
 
@@ -1049,6 +1555,26 @@ export default function OrderStatusDashboard() {
           onPressEnter={handleSearch}
           style={{ width: 180 }}
         />
+        <Input
+          allowClear
+          placeholder="料号"
+          value={searchValues.materialCode}
+          onChange={(event) =>
+            updateSearchParamValue('materialCode', event.target.value)
+          }
+          onPressEnter={handleSearch}
+          style={{ width: 180 }}
+        />
+        <Select
+          allowClear
+          placeholder="生产状态"
+          value={searchValues.productionStatus || undefined}
+          options={PRODUCTION_STATUS_OPTIONS}
+          onChange={(value) =>
+            updateSearchParamValue('productionStatus', value ?? '')
+          }
+          style={{ width: 140 }}
+        />
         <Button
           type="primary"
           icon={<MagnifyingGlassIcon className="size-4" />}
@@ -1073,6 +1599,7 @@ export default function OrderStatusDashboard() {
           rowKey="id"
           bordered
           size="small"
+          components={DENSE_TABLE_COMPONENTS}
           loading={{ spinning: isDataLoading, tip: '数据加载中...' }}
           columns={columns}
           dataSource={rows}
@@ -1082,6 +1609,7 @@ export default function OrderStatusDashboard() {
             y: scrollY,
             scrollToFirstRowOnChange: true,
           }}
+          styles={DENSE_TABLE_STYLES}
           sticky={{ offsetScroll: 8 }}
           rowClassName={(record) =>
             record.productionStatus === '延期'
@@ -1109,6 +1637,10 @@ export default function OrderStatusDashboard() {
       <TransferDetailModal
         detail={selectedTransferDetail}
         onClose={() => setSelectedTransferDetail(null)}
+      />
+      <PrecisionCuttingDetailModal
+        detail={selectedPrecisionCuttingDetail}
+        onClose={() => setSelectedPrecisionCuttingDetail(null)}
       />
     </div>
   )

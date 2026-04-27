@@ -11,9 +11,14 @@ import {
   type PrecisionCuttingTransferFilters,
 } from '@/services/apiPrecisionCuttingTransfers'
 import { queryConfig } from '@/config/queryClient'
+import { ORDER_STATUS_DASHBOARD_KEY } from '@/features/workshop/OrderStatusDashboard/useOrderStatusDashboard'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const PRECISION_CUTTING_TRANSFERS_KEY = 'precision-cutting-transfers' as const
+const PRECISION_CUTTING_TRANSFER_INVALIDATE_KEYS = [
+  [PRECISION_CUTTING_TRANSFERS_KEY],
+  [ORDER_STATUS_DASHBOARD_KEY],
+]
 
 export function usePrecisionCuttingTransfers({
   page,
@@ -66,7 +71,7 @@ export function usePrecisionCuttingTransferQuantityStats({
 export function useCreatePrecisionCuttingTransfer() {
   return useMutationWithInvalidation({
     mutationFn: createPrecisionCuttingTransfer,
-    invalidateQueries: [[PRECISION_CUTTING_TRANSFERS_KEY]],
+    invalidateQueries: PRECISION_CUTTING_TRANSFER_INVALIDATE_KEYS,
   })
 }
 
@@ -79,20 +84,20 @@ export function useUpdatePrecisionCuttingTransfer() {
       id: string
       values: Parameters<typeof updatePrecisionCuttingTransfer>[0]['values']
     }) => updatePrecisionCuttingTransfer({ id, values }),
-    invalidateQueries: [[PRECISION_CUTTING_TRANSFERS_KEY]],
+    invalidateQueries: PRECISION_CUTTING_TRANSFER_INVALIDATE_KEYS,
   })
 }
 
 export function useDeletePrecisionCuttingTransfers() {
   return useMutationWithInvalidation({
     mutationFn: deletePrecisionCuttingTransfers,
-    invalidateQueries: [[PRECISION_CUTTING_TRANSFERS_KEY]],
+    invalidateQueries: PRECISION_CUTTING_TRANSFER_INVALIDATE_KEYS,
   })
 }
 
 export function useBatchUpdatePrecisionCuttingTransfers() {
   return useMutationWithInvalidation({
     mutationFn: batchUpdatePrecisionCuttingTransfers,
-    invalidateQueries: [[PRECISION_CUTTING_TRANSFERS_KEY]],
+    invalidateQueries: PRECISION_CUTTING_TRANSFER_INVALIDATE_KEYS,
   })
 }
