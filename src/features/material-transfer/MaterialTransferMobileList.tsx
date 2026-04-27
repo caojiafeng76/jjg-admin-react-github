@@ -1,4 +1,4 @@
-import { Button, Empty, Tag } from 'antd'
+import { Button, Empty, Spin, Tag } from 'antd'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
 import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
@@ -25,8 +25,9 @@ export default function MaterialTransferMobileList({
   }
 
   return (
-    <div className="space-y-3">
-      {data.map((record) => {
+    <Spin spinning={loading}>
+      <div className="space-y-3">
+        {data.map((record) => {
         const selected = selectedRowKeys.includes(record.id)
 
         return (
@@ -175,6 +176,7 @@ export default function MaterialTransferMobileList({
           </article>
         )
       })}
-    </div>
+      </div>
+    </Spin>
   )
 }

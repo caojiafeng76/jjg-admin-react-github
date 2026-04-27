@@ -6,6 +6,7 @@ import MainMenu from '@ui/MainMenu'
 import AppHeader from '@ui/AppHeader'
 import AppLogo from './AppLogo'
 import EmployeeMobileLayout from './EmployeeMobileLayout'
+import PageTabs from './PageTabs'
 import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import { translateErrorMessage } from '@/utils/errorHandler'
@@ -77,6 +78,7 @@ export default function AppLayout() {
             collapsed={collapsed}
             onToggleCollapse={onToggleCollapse}
           />
+          <PageTabs />
           <Content
             className="flex flex-col overflow-hidden"
             style={{
