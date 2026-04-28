@@ -38,7 +38,8 @@ export function useWorkshopOrdersList({
 }) {
   return useQuery({
     queryKey: [WORKSHOP_ORDERS_KEY, page, pageSize, searchParams],
-    queryFn: () => getWorkshopOrders({ page, pageSize, ...searchParams }),
+    queryFn: ({ signal }) =>
+      getWorkshopOrders({ page, pageSize, ...searchParams, signal }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
   })
@@ -64,7 +65,7 @@ export function useWorkshopOrderModels() {
   return useQuery({
     queryKey: [WORKSHOP_ORDERS_KEY, 'model-options'],
     queryFn: getWorkshopOrderModels,
-    ...queryConfig.list,
+    ...queryConfig.static,
   })
 }
 

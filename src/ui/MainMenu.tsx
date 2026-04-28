@@ -421,12 +421,7 @@ const MainMenu: React.FC = () => {
   }
 
   const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
-    const newKeys = keys as string[]
-    if (openKey && !newKeys.includes(openKey)) {
-      setOpenKeys([...newKeys, openKey])
-    } else {
-      setOpenKeys(newKeys)
-    }
+    setOpenKeys(keys as string[])
   }
 
   return (

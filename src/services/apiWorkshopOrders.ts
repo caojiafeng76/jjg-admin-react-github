@@ -250,6 +250,8 @@ export async function getWorkshopOrders({
   startDate,
   endDate,
   status,
+  includeOutboundSummary = true,
+  signal,
 }: {
   page: number
   pageSize: number
@@ -264,6 +266,8 @@ export async function getWorkshopOrders({
   startDate?: string
   endDate?: string
   status?: WorkshopOrder['status']
+  includeOutboundSummary?: boolean
+  signal?: AbortSignal
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -333,10 +337,16 @@ export async function getWorkshopOrders({
     query = query.filter('status', 'eq', normalizeWorkshopOrderStatus(status))
   }
 
-  const { data, error, count } = await query
+  query = query
     .range(from, to)
     .order('created_at', { ascending: false })
     .order('project_no', { ascending: true })
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error, count } = await query
 
   if (error) {
     throw handleApiError(error, '获取车间订单失败')
@@ -352,11 +362,17 @@ export async function getWorkshopOrders({
     ),
   )
 
-  if (projectNos.length > 0) {
-    const { data: transferRows, error: transferError } = await supabase
+  if (includeOutboundSummary && projectNos.length > 0) {
+    let transferQuery = supabase
       .from('material_transfers')
       .select('project_no, transfer_quantity')
       .in('project_no', projectNos)
+
+    if (signal) {
+      transferQuery = transferQuery.abortSignal(signal)
+    }
+
+    const { data: transferRows, error: transferError } = await transferQuery
 
     if (transferError) {
       throw handleApiError(transferError, '获取订单出库统计失败')
