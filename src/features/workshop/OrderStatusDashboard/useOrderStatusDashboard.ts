@@ -19,7 +19,8 @@ export function useOrderStatusDashboard({
 }) {
   return useQuery({
     queryKey: [ORDER_STATUS_DASHBOARD_KEY, { page, pageSize, filters }],
-    queryFn: () => getOrderStatusDashboard({ page, pageSize, filters }),
+    queryFn: ({ signal }) =>
+      getOrderStatusDashboard({ page, pageSize, filters, signal }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
   })

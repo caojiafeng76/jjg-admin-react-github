@@ -1,18 +1,13 @@
-import dayjs from 'dayjs'
-
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
 import { handleApiError } from '@/utils/errorHandler'
-import {
-  buildOrIlikeFilter,
-  normalizeSearchKeywords,
-} from '@/utils/searchKeywords'
-import { getWorkshopOrders } from './apiWorkshopOrders'
+import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import type { Database } from './database.types'
 import supabase from './supabase'
 
 const LOOKUP_PAGE_SIZE = 1000
-const PROJECT_NO_BATCH_SIZE = 80
 const UNMATCHED_JOB_NAME = '未匹配岗位'
+const PROCESS_STANDARD_JOB_SELECT =
+  'job_name, operation, model, length, part_no, record_type, is_last_process'
 
 type ProductionOrderItemRow = Pick<
   Database['public']['Tables']['production_order_items']['Row'],
@@ -70,44 +65,33 @@ type ProcessStandardJobRow = Pick<
   is_last_process?: boolean | null
 }
 
-type MaterialTransferRow = Pick<
-  Database['public']['Tables']['material_transfers']['Row'],
-  | 'project_no'
-  | 'target_workshop'
-  | 'transfer_quantity'
-  | 'operator_names'
-  | 'recipient_name'
-  | 'is_audited'
-  | 'created_at'
->
-
-type PrecisionCuttingTransferRow = Pick<
-  Database['public']['Tables']['precision_cutting_transfers']['Row'],
-  | 'id'
-  | 'created_at'
-  | 'defect_reason'
-  | 'is_audited'
-  | 'length_mm'
-  | 'long_material_length_mm'
-  | 'long_material_quantity'
-  | 'operator_names'
-  | 'outsource_defect_quantity'
-  | 'outsource_defect_reason'
-  | 'outsource_unit'
-  | 'process_owner'
-  | 'processing_defect_count'
-  | 'project_no'
-  | 'raw_material_defect_count'
-  | 'recipient_name'
-  | 'remark'
-  | 'responsible_process'
-  | 'target_workshop'
-  | 'transfer_quantity'
->
-
-interface PrecisionCuttingTransferSummary {
+type OrderStatusDashboardRpcItem = WorkshopOrder & {
+  id: string
+  completionRate: number | null
+  finishedQuantity: number
+  latestTransferAt: string | null
+  latestTransferOperatorNames: string[] | string | null
+  latestTransferWorkshop: string | null
+  precisionCuttingDetails: OrderStatusPrecisionCuttingTransferDetail[] | null
+  precisionCuttingQuantity: number
+  productionRows: ProductionOrderItemDetailRow[] | null
+  productionStatus: OrderProductionStatus
+  totalDefectQuantity: number
+  totalIncomingQuantity: number
+  totalQualifiedQuantity: number
+  transferDetails: OrderStatusMaterialTransferDetail[] | null
   transferQuantity: number
-  transferDetails: OrderStatusPrecisionCuttingTransferDetail[]
+  transferRecordCount: number
+  transferWorkshops: string[] | null
+  warehouseTransferQuantity: number
+  yieldRate: number | null
+}
+
+interface OrderStatusDashboardRpcResult {
+  items?: OrderStatusDashboardRpcItem[]
+  materialTransferCount?: number
+  productionItemCount?: number
+  total?: number
 }
 
 export interface OrderStatusMaterialTransferDetail {
@@ -179,17 +163,6 @@ export interface OrderStatusProductionDetail {
   remark: string | null
 }
 
-interface MaterialTransferSummary {
-  transferQuantity: number
-  warehouseTransferQuantity: number
-  transferRecordCount: number
-  transferWorkshops: string[]
-  latestTransferWorkshop: string | null
-  latestTransferAt: string | null
-  latestTransferOperatorNames: string[]
-  transferDetails: OrderStatusMaterialTransferDetail[]
-}
-
 export type OrderProductionStatus = '正常' | '预警' | '延期'
 
 export interface OrderStatusJobColumn {
@@ -248,6 +221,15 @@ function addUniqueText(target: string[], value: string | null | undefined) {
   if (normalized && !target.includes(normalized)) {
     target.push(normalized)
   }
+}
+
+function normalizeStringArray(value: string[] | string | null | undefined) {
+  if (Array.isArray(value)) {
+    return value.filter((item) => Boolean(normalizeText(item)))
+  }
+
+  const normalized = normalizeText(value)
+  return normalized ? [normalized] : []
 }
 
 function buildProcessJobKey(
@@ -339,29 +321,27 @@ function resolveLastProcessStatus(
   return undefined
 }
 
-function chunkValues<TValue>(values: TValue[], size: number) {
-  const chunks: TValue[][] = []
-
-  for (let index = 0; index < values.length; index += size) {
-    chunks.push(values.slice(index, index + size))
-  }
-
-  return chunks
-}
-
-async function getAllProcessStandardJobRows() {
+async function getAllProcessStandardJobRows(signal?: AbortSignal) {
   const rows: ProcessStandardJobRow[] = []
   let from = 0
 
   while (true) {
     const to = from + LOOKUP_PAGE_SIZE - 1
-    const { data, error } = await supabase
+    let query = supabase
       .from('process_standards')
-      .select('*')
+      .select(PROCESS_STANDARD_JOB_SELECT)
+      .not('job_name', 'is', null)
+      .not('operation', 'is', null)
       .order('job_name', { ascending: true })
       .order('model', { ascending: true })
       .order('operation', { ascending: true })
       .range(from, to)
+
+    if (signal) {
+      query = query.abortSignal(signal)
+    }
+
+    const { data, error } = await query
 
     if (error) {
       throw handleApiError(error, '获取成本核算岗位信息失败')
@@ -378,249 +358,6 @@ async function getAllProcessStandardJobRows() {
   }
 
   return rows
-}
-
-async function getProductionItemsByProjectNos(
-  projectNos: string[],
-): Promise<ProductionOrderItemDetailRow[]> {
-  const uniqueProjectNos = Array.from(
-    new Set(projectNos.map((item) => item.trim())),
-  ).filter(Boolean)
-
-  if (uniqueProjectNos.length === 0) {
-    return []
-  }
-
-  const rows: ProductionOrderItemDetailRow[] = []
-
-  for (const batch of chunkValues(uniqueProjectNos, PROJECT_NO_BATCH_SIZE)) {
-    const { data, error } = await supabase
-      .from('production_order_items')
-      .select(
-        `
-        id,
-        created_at,
-        updated_at,
-        data_category,
-        project_no,
-        product_model,
-        customer_model,
-        length_mm,
-        operation,
-        incoming_qualified_quantity,
-        qualified_quantity,
-        qualified_hours,
-        defect_quantity_1,
-        defect_quantity_2,
-        defect_reason_1,
-        defect_reason_2,
-        defect_hours,
-        outsource_defect_quantity,
-        outsource_defect_reason,
-        outsource_unit,
-        setup_defect_quantity,
-        setup_responsible,
-        standard_seconds,
-        theoretical_seconds,
-        remark,
-        order_id,
-        machine_equipment_id,
-        production_orders(
-          id,
-          order_date,
-          shift,
-          work_hours,
-          employee:employees(name)
-        ),
-        machine_equipment_maintenances!machine_equipment_id(
-          unified_device_no,
-          machine_name
-        )
-      `,
-      )
-      .in('project_no', batch)
-      .neq('data_category', 'B')
-      .order('created_at', { ascending: true })
-
-    if (error) {
-      throw handleApiError(error, '获取订单生产工单产量失败')
-    }
-
-    rows.push(...((data || []) as unknown as ProductionOrderItemDetailRow[]))
-  }
-
-  return rows
-}
-
-async function getMaterialTransfersByProjectNos(projectNos: string[]) {
-  const uniqueProjectNos = Array.from(
-    new Set(projectNos.map((item) => item.trim())),
-  ).filter(Boolean)
-
-  if (uniqueProjectNos.length === 0) {
-    return [] as MaterialTransferRow[]
-  }
-
-  const rows: MaterialTransferRow[] = []
-
-  for (const batch of chunkValues(uniqueProjectNos, PROJECT_NO_BATCH_SIZE)) {
-    const { data, error } = await supabase
-      .from('material_transfers')
-      .select(
-        'project_no, target_workshop, transfer_quantity, operator_names, recipient_name, is_audited, created_at',
-      )
-      .in('project_no', batch)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      throw handleApiError(error, '获取物料转移单汇总失败')
-    }
-
-    rows.push(...((data || []) as MaterialTransferRow[]))
-  }
-
-  return rows
-}
-
-async function getPrecisionCuttingTransfersByProjectNos(projectNos: string[]) {
-  const uniqueProjectNos = Array.from(
-    new Set(projectNos.map((item) => item.trim())),
-  ).filter(Boolean)
-
-  if (uniqueProjectNos.length === 0) {
-    return [] as PrecisionCuttingTransferRow[]
-  }
-
-  const rows: PrecisionCuttingTransferRow[] = []
-
-  for (const batch of chunkValues(uniqueProjectNos, PROJECT_NO_BATCH_SIZE)) {
-    const { data, error } = await supabase
-      .from('precision_cutting_transfers')
-      .select(
-        'id, created_at, defect_reason, is_audited, length_mm, long_material_length_mm, long_material_quantity, operator_names, outsource_defect_quantity, outsource_defect_reason, outsource_unit, process_owner, processing_defect_count, project_no, raw_material_defect_count, recipient_name, remark, responsible_process, target_workshop, transfer_quantity',
-      )
-      .in('project_no', batch)
-
-    if (error) {
-      throw handleApiError(error, '获取精切转移单汇总失败')
-    }
-
-    rows.push(...((data || []) as PrecisionCuttingTransferRow[]))
-  }
-
-  return rows
-}
-
-function buildPrecisionCuttingSummaryMap(rows: PrecisionCuttingTransferRow[]) {
-  const summaryMap = new Map<string, PrecisionCuttingTransferSummary>()
-
-  for (const row of rows) {
-    const projectNo = normalizeText(row.project_no)
-
-    if (!projectNo) {
-      continue
-    }
-
-    const current = summaryMap.get(projectNo) ?? {
-      transferDetails: [],
-      transferQuantity: 0,
-    }
-    const transferQuantity = Number(row.transfer_quantity || 0)
-
-    current.transferQuantity += transferQuantity
-    current.transferDetails.push({
-      createdAt: row.created_at,
-      defectReason: row.defect_reason,
-      id: row.id,
-      isAudited: row.is_audited,
-      lengthMm: row.length_mm,
-      longMaterialLengthMm: Number(row.long_material_length_mm || 0),
-      longMaterialQuantity: Number(row.long_material_quantity || 0),
-      operatorNames: row.operator_names || [],
-      outsourceDefectQuantity: Number(row.outsource_defect_quantity || 0),
-      outsourceDefectReason: row.outsource_defect_reason,
-      outsourceUnit: row.outsource_unit,
-      processOwner: row.process_owner,
-      processingDefectCount: Number(row.processing_defect_count || 0),
-      rawMaterialDefectCount: Number(row.raw_material_defect_count || 0),
-      recipientName: row.recipient_name,
-      remark: row.remark,
-      responsibleProcess: row.responsible_process,
-      targetWorkshop: row.target_workshop,
-      transferQuantity,
-    })
-
-    current.transferDetails.sort((left, right) =>
-      dayjs(right.createdAt).diff(dayjs(left.createdAt)),
-    )
-    summaryMap.set(projectNo, current)
-  }
-
-  return summaryMap
-}
-
-function buildMaterialTransferSummaryMap(rows: MaterialTransferRow[]) {
-  const summaryMap = new Map<string, MaterialTransferSummary>()
-
-  for (const row of rows) {
-    const projectNo = normalizeText(row.project_no)
-
-    if (!projectNo) {
-      continue
-    }
-
-    const targetWorkshop = normalizeText(row.target_workshop)
-    const current = summaryMap.get(projectNo) ?? {
-      transferQuantity: 0,
-      warehouseTransferQuantity: 0,
-      transferRecordCount: 0,
-      transferWorkshops: [],
-      latestTransferWorkshop: null,
-      latestTransferAt: null,
-      latestTransferOperatorNames: [],
-      transferDetails: [],
-    }
-    const transferQuantity = Number(row.transfer_quantity || 0)
-
-    current.transferQuantity += transferQuantity
-    current.transferRecordCount += 1
-
-    if (targetWorkshop) {
-      if (!current.transferWorkshops.includes(targetWorkshop)) {
-        current.transferWorkshops.push(targetWorkshop)
-      }
-
-      if (targetWorkshop === '仓库') {
-        current.warehouseTransferQuantity += transferQuantity
-      }
-    }
-
-    if (
-      !current.latestTransferAt ||
-      dayjs(row.created_at).isAfter(dayjs(current.latestTransferAt))
-    ) {
-      current.latestTransferAt = row.created_at
-      current.latestTransferWorkshop = targetWorkshop
-      current.latestTransferOperatorNames = row.operator_names || []
-    }
-
-    current.transferDetails.push({
-      createdAt: row.created_at,
-      isAudited: row.is_audited,
-      operatorNames: row.operator_names || [],
-      recipientName: row.recipient_name,
-      targetWorkshop: row.target_workshop,
-      transferQuantity,
-    })
-
-    current.transferDetails.sort((left, right) =>
-      dayjs(right.createdAt).diff(dayjs(left.createdAt)),
-    )
-
-    summaryMap.set(projectNo, current)
-  }
-
-  return summaryMap
 }
 
 function getSingleRelation<TRelation>(
@@ -1015,184 +752,74 @@ function buildJobColumns({
   }))
 }
 
-function getProductionStatus({
-  order,
-  completionRate,
+async function getOrderStatusDashboardRpcResult({
+  page,
+  pageSize,
+  filters,
+  signal,
 }: {
-  order: WorkshopOrder
-  completionRate: number | null
-}): OrderProductionStatus {
-  const status = normalizeText(order.status)
+  page: number
+  pageSize: number
+  filters?: OrderStatusDashboardFilters
+  signal?: AbortSignal
+}): Promise<OrderStatusDashboardRpcResult> {
+  const rpcClient = supabase as unknown as {
+    rpc: (
+      fn: string,
+      args: Record<string, unknown>,
+    ) => ReturnType<typeof supabase.rpc>
+  }
+  let query = rpcClient.rpc('get_order_status_dashboard', {
+    p_material_code: filters?.materialCode || null,
+    p_model_keywords: normalizeSearchKeywords(filters?.model) || null,
+    p_order_date: filters?.orderDate || null,
+    p_page: page,
+    p_page_size: pageSize,
+    p_production_status: filters?.productionStatus || null,
+    p_project_no: filters?.projectNo || null,
+    p_status: filters?.status || null,
+  })
 
-  if (
-    status === '已结案' ||
-    (completionRate !== null && completionRate >= 100)
-  ) {
-    return '正常'
+  if (signal) {
+    query = query.abortSignal(signal)
   }
 
-  const deliveryDate = normalizeText(order.product_delivery_date)
+  const { data, error } = await query
 
-  if (deliveryDate) {
-    const remainingDays = dayjs(deliveryDate).diff(
-      dayjs().startOf('day'),
-      'day',
-    )
-
-    if (remainingDays < 0) {
-      return '延期'
-    }
-
-    if (remainingDays <= 7 && (completionRate ?? 0) < 100) {
-      return '预警'
-    }
+  if (error) {
+    throw handleApiError(error, '获取订单现状聚合数据失败')
   }
 
-  if (completionRate !== null && completionRate > 0 && completionRate < 50) {
-    return '预警'
-  }
-
-  return '正常'
-}
-
-async function getAllDashboardWorkshopOrders(
-  filters?: OrderStatusDashboardFilters,
-) {
-  const rows: WorkshopOrder[] = []
-  let from = 0
-
-  while (true) {
-    const to = from + LOOKUP_PAGE_SIZE - 1
-    let query = supabase.from('sales_orders').select('*')
-    const projectNo = normalizeText(filters?.projectNo)
-    const modelKeywords = normalizeSearchKeywords(filters?.model)
-    const orderDate = normalizeText(filters?.orderDate)
-    const materialCode = normalizeText(filters?.materialCode)
-
-    if (projectNo) {
-      query = query.ilike('project_no', `%${projectNo}%`)
-    }
-
-    if (modelKeywords?.length) {
-      query = query.or(
-        buildOrIlikeFilter(['product_model', 'customer_model'], modelKeywords),
-      )
-    }
-
-    if (orderDate) {
-      query = query.ilike('product_delivery_date', `%${orderDate}%`)
-    }
-
-    if (materialCode) {
-      query = query.ilike('material_code', `%${materialCode}%`)
-    }
-
-    if (filters?.status) {
-      query = query.filter('status', 'eq', filters.status)
-    }
-
-    const { data, error } = await query
-      .order('created_at', { ascending: false })
-      .order('project_no', { ascending: true })
-      .range(from, to)
-
-    if (error) {
-      throw handleApiError(error, '获取订单现状候选订单失败')
-    }
-
-    const pageRows = (data || []) as WorkshopOrder[]
-    rows.push(...pageRows.map((item) => ({ ...item })))
-
-    if (pageRows.length < LOOKUP_PAGE_SIZE) {
-      break
-    }
-
-    from += LOOKUP_PAGE_SIZE
-  }
-
-  return rows
+  return (data || {}) as OrderStatusDashboardRpcResult
 }
 
 export async function getOrderStatusDashboard({
   page,
   pageSize,
   filters,
+  signal,
 }: {
   page: number
   pageSize: number
   filters?: OrderStatusDashboardFilters
+  signal?: AbortSignal
 }): Promise<OrderStatusDashboardResult> {
-  const productionStatusFilter = filters?.productionStatus
-  const [orderResult, processRows] = await Promise.all([
-    productionStatusFilter
-      ? getAllDashboardWorkshopOrders(filters).then((items) => ({
-          items,
-          total: items.length,
-        }))
-      : getWorkshopOrders({
-          page,
-          pageSize,
-          product_delivery_date_search: filters?.orderDate,
-          project_no: filters?.projectNo,
-          material_code: filters?.materialCode,
-          model_search: filters?.model ? [filters.model] : undefined,
-          status: filters?.status,
-        }),
-    getAllProcessStandardJobRows(),
+  const [rpcResult, processRows] = await Promise.all([
+    getOrderStatusDashboardRpcResult({ page, pageSize, filters, signal }),
+    getAllProcessStandardJobRows(signal),
   ])
-  const { items: orders, total } = orderResult
-
-  const projectNos = orders
-    .map((order) => normalizeText(order.project_no))
-    .filter((projectNo): projectNo is string => Boolean(projectNo))
-  const [productionRows, materialTransferRows, precisionCuttingTransferRows] =
-    await Promise.all([
-      getProductionItemsByProjectNos(projectNos),
-      getMaterialTransfersByProjectNos(projectNos),
-      getPrecisionCuttingTransfersByProjectNos(projectNos),
-    ])
+  const orders = rpcResult.items ?? []
+  const total = rpcResult.total ?? 0
   const processJobIndex = buildProcessJobIndex(processRows)
   const jobColumns = buildJobColumns(processJobIndex)
-  const materialTransferSummaryMap =
-    buildMaterialTransferSummaryMap(materialTransferRows)
-  const precisionCuttingSummaryMap = buildPrecisionCuttingSummaryMap(
-    precisionCuttingTransferRows,
-  )
-  const productionByProjectNo = new Map<
-    string,
-    ProductionOrderItemDetailRow[]
-  >()
-
-  for (const row of productionRows) {
-    const projectNo = normalizeText(row.project_no)
-
-    if (!projectNo) {
-      continue
-    }
-
-    const current = productionByProjectNo.get(projectNo) || []
-    current.push(row)
-    productionByProjectNo.set(projectNo, current)
-  }
 
   const items = orders.map<OrderStatusDashboardItem>((order) => {
     const projectNo = normalizeText(order.project_no)
-    const relatedRows = projectNo
-      ? productionByProjectNo.get(projectNo) || []
-      : []
-    const transferSummary = projectNo
-      ? materialTransferSummaryMap.get(projectNo)
-      : null
-    const precisionCuttingSummary = projectNo
-      ? precisionCuttingSummaryMap.get(projectNo)
-      : null
+    const relatedRows = order.productionRows ?? []
     const jobOutputs = Object.fromEntries(
       jobColumns.map((column) => [column.key, 0]),
     ) as Record<string, number>
     const productionDetails: OrderStatusProductionDetail[] = []
-    let totalIncomingQuantity = 0
-    let totalQualifiedQuantity = 0
-    let totalDefectQuantity = 0
 
     for (const row of relatedRows) {
       const operation = normalizeText(row.operation)
@@ -1202,11 +829,6 @@ export async function getOrderStatusDashboard({
         row,
       })
       const qualifiedQuantity = Number(row.qualified_quantity || 0)
-      const defectQuantity = getDefectQuantity(row)
-
-      totalIncomingQuantity += Number(row.incoming_qualified_quantity || 0)
-      totalQualifiedQuantity += qualifiedQuantity
-      totalDefectQuantity += defectQuantity
 
       if (operation) {
         if (
@@ -1231,71 +853,38 @@ export async function getOrderStatusDashboard({
       return rightDate.localeCompare(leftDate)
     })
 
-    const orderQuantity = Number(order.order_quantity || 0)
-    const outboundQuantity =
-      transferSummary?.transferQuantity ??
-      Number(order.total_outbound_quantity || 0)
-    const completionRate =
-      orderQuantity > 0
-        ? Number(((outboundQuantity / orderQuantity) * 100).toFixed(1))
-        : null
-    const yieldBase = totalQualifiedQuantity + totalDefectQuantity
-    const yieldRate =
-      yieldBase > 0
-        ? Number(((totalQualifiedQuantity / yieldBase) * 100).toFixed(1))
-        : null
-
     return {
       ...order,
       id: order.id || projectNo || crypto.randomUUID(),
       jobOutputs,
       productionDetails,
-      totalIncomingQuantity,
-      totalQualifiedQuantity,
-      totalDefectQuantity,
-      precisionCuttingQuantity: precisionCuttingSummary?.transferQuantity ?? 0,
-      precisionCuttingDetails: precisionCuttingSummary?.transferDetails ?? [],
-      transferQuantity: transferSummary?.transferQuantity ?? 0,
-      warehouseTransferQuantity:
-        transferSummary?.warehouseTransferQuantity ?? 0,
-      transferRecordCount: transferSummary?.transferRecordCount ?? 0,
-      transferWorkshops: transferSummary?.transferWorkshops ?? [],
-      latestTransferWorkshop: transferSummary?.latestTransferWorkshop ?? null,
-      latestTransferAt: transferSummary?.latestTransferAt ?? null,
-      latestTransferOperatorNames:
-        transferSummary?.latestTransferOperatorNames ?? [],
-      transferDetails: transferSummary?.transferDetails ?? [],
-      finishedQuantity: outboundQuantity,
-      completionRate,
-      yieldRate,
-      productionStatus: getProductionStatus({ order, completionRate }),
+      totalIncomingQuantity: Number(order.totalIncomingQuantity || 0),
+      totalQualifiedQuantity: Number(order.totalQualifiedQuantity || 0),
+      totalDefectQuantity: Number(order.totalDefectQuantity || 0),
+      precisionCuttingQuantity: Number(order.precisionCuttingQuantity || 0),
+      precisionCuttingDetails: order.precisionCuttingDetails ?? [],
+      transferQuantity: Number(order.transferQuantity || 0),
+      warehouseTransferQuantity: Number(order.warehouseTransferQuantity || 0),
+      transferRecordCount: Number(order.transferRecordCount || 0),
+      transferWorkshops: order.transferWorkshops ?? [],
+      latestTransferWorkshop: order.latestTransferWorkshop ?? null,
+      latestTransferAt: order.latestTransferAt ?? null,
+      latestTransferOperatorNames: normalizeStringArray(
+        order.latestTransferOperatorNames,
+      ),
+      transferDetails: order.transferDetails ?? [],
+      finishedQuantity: Number(order.finishedQuantity || 0),
+      completionRate: order.completionRate,
+      yieldRate: order.yieldRate,
+      productionStatus: order.productionStatus,
     }
   })
 
-  const filteredItems = productionStatusFilter
-    ? items.filter((item) => item.productionStatus === productionStatusFilter)
-    : items
-  const resultItems = productionStatusFilter
-    ? filteredItems.slice((page - 1) * pageSize, page * pageSize)
-    : filteredItems
-  const productionItemCount = productionStatusFilter
-    ? resultItems.reduce(
-        (count, item) => count + item.productionDetails.length,
-        0,
-      )
-    : productionRows.length
-  const materialTransferCount = productionStatusFilter
-    ? resultItems.reduce(
-        (count, item) => count + item.transferDetails.length,
-        0,
-      )
-    : materialTransferRows.length
-
   return {
-    items: resultItems,
-    total: productionStatusFilter ? filteredItems.length : total,
+    items,
+    total,
     jobColumns,
-    productionItemCount,
-    materialTransferCount,
+    productionItemCount: rpcResult.productionItemCount ?? 0,
+    materialTransferCount: rpcResult.materialTransferCount ?? 0,
   }
 }
