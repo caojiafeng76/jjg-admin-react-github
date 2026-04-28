@@ -28,7 +28,10 @@ import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
 import type { WorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
-import { useBatchUpdateWorkshopOrderStatuses } from '@/features/workshop/OrderList/useWorkshopOrders'
+import {
+  useBatchUpdateWorkshopOrderStatuses,
+  useWorkshopOrderModels,
+} from '@/features/workshop/OrderList/useWorkshopOrders'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
@@ -40,6 +43,7 @@ import type {
   OrderStatusProductionDetail,
 } from '@/services/apiOrderStatusDashboard'
 import AppPagination from '@/ui/AppPagination'
+import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import {
   ORDER_STATUS_DASHBOARD_KEY,
   useOrderStatusDashboard,
@@ -1201,6 +1205,11 @@ export default function OrderStatusDashboard() {
   )
   const [searchValues, setSearchValues] =
     useState<SearchValues>(searchParamValues)
+  const { data: modelOptions = [] } = useWorkshopOrderModels()
+  const modelFilterValues = useMemo(
+    () => normalizeSearchKeywords(searchParamValues.model) ?? [],
+    [searchParamValues.model],
+  )
   const filters = useMemo(
     () => ({
       materialCode: searchParamValues.materialCode || undefined,
@@ -1329,6 +1338,10 @@ export default function OrderStatusDashboard() {
         key: 'product_model',
         width: 94,
         fixed: 'left',
+        filters: modelOptions.map((model) => ({ text: model, value: model })),
+        filteredValue: modelFilterValues.length ? modelFilterValues : null,
+        filterMultiple: true,
+        filterSearch: true,
         render: renderText,
       },
       {
@@ -1518,6 +1531,8 @@ export default function OrderStatusDashboard() {
     handleCloseOrder,
     isUpdatingOrderStatus,
     jobColumns,
+    modelFilterValues,
+    modelOptions,
     openJobDetail,
     openPrecisionCuttingDetail,
     openTransferDetail,
@@ -1577,6 +1592,31 @@ export default function OrderStatusDashboard() {
     next.delete('model')
     next.set('page', '1')
     setSearchValues(EMPTY_SEARCH_VALUES)
+    setSearchParams(next)
+    setSelectedJobDetail(null)
+    setSelectedPrecisionCuttingDetail(null)
+    setSelectedTransferDetail(null)
+  }
+
+  const handleTableChange: TableProps<OrderStatusDashboardItem>['onChange'] = (
+    _pagination,
+    tableFilters,
+    _sorter,
+    extra,
+  ) => {
+    if (extra.action !== 'filter') {
+      return
+    }
+
+    const selectedModels = (tableFilters.product_model ?? [])
+      .map(String)
+      .filter(Boolean)
+    const next = new URLSearchParams(searchParams)
+    const modelValue = selectedModels.join(',')
+
+    setOrDeleteParam(next, 'model', modelValue)
+    next.set('page', '1')
+    setSearchValues((current) => ({ ...current, model: modelValue }))
     setSearchParams(next)
     setSelectedJobDetail(null)
     setSelectedPrecisionCuttingDetail(null)
@@ -1717,6 +1757,7 @@ export default function OrderStatusDashboard() {
             y: scrollY,
             scrollToFirstRowOnChange: true,
           }}
+          onChange={handleTableChange}
           styles={DENSE_TABLE_STYLES}
           sticky={{ offsetScroll: 8 }}
           rowClassName={(record) =>
