@@ -117,6 +117,9 @@ export const PrecisionFinishingCuttingScan = lazy(
 export const ProductionDailyReport = lazy(
   () => import('@features/production-report'),
 )
+export const QualityReworkRepair = lazy(
+  () => import('@features/quality/ReworkRepair'),
+)
 export const MachineRuntime = lazy(() => import('@features/machine-runtime'))
 export const AttendanceDetail = lazy(
   () => import('@features/attendance/AttendanceDetail'),
