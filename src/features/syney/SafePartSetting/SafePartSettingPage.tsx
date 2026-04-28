@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type Key } from 'react'
 import {
   Button,
   Form,
@@ -10,15 +10,29 @@ import {
   Space,
   App,
   Select,
+  Tooltip,
+  Upload,
 } from 'antd'
 import type { ColumnsType, FilterDropdownProps } from 'antd/es/table/interface'
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { SearchOutlined } from '@ant-design/icons'
+import {
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
+  EyeIcon,
+  PencilSquareIcon,
+  PlusCircleIcon,
+  XCircleIcon,
+} from '@heroicons/react/16/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   deleteSyneySafePartSettings,
+  getSyneySafePartDrawingDownloadUrl,
+  getSyneySafePartDrawingPreviewUrl,
   getSyneySafePartSettings,
+  SAFE_PART_DRAWING_ACCEPT,
   upsertSyneySafePartSetting,
   SyneySafePartSetting,
+  uploadSyneySafePartDrawing,
 } from '@services/apiSyneySafePartSettings'
 
 const DECOMPOSITION_ROLE_LABELS: Record<string, string> = {
@@ -41,11 +55,30 @@ type SafePartSettingFormValues = Parameters<
   typeof upsertSyneySafePartSetting
 >[0]
 
+type DrawingPreview = {
+  url: string
+  fileName: string
+  mimeType: string | null
+}
+
 export default function SafePartSettingPage() {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<SyneySafePartSetting | null>(null)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
+  const [previewDrawing, setPreviewDrawing] = useState<DrawingPreview | null>(
+    null,
+  )
+  const [uploadingDrawingId, setUploadingDrawingId] = useState<string | null>(
+    null,
+  )
+  const [previewingDrawingId, setPreviewingDrawingId] = useState<string | null>(
+    null,
+  )
+  const [downloadingDrawingId, setDownloadingDrawingId] = useState<
+    string | null
+  >(null)
   const [pageSize, setPageSize] = useState(10)
   const [page, setPage] = useState(1)
   const [form] = Form.useForm()
@@ -98,9 +131,93 @@ export default function SafePartSettingPage() {
     mutationFn: deleteSyneySafePartSettings,
     onSuccess: () => {
       message.success('删除成功')
+      setSelectedRowKeys([])
       queryClient.invalidateQueries({ queryKey: ['syney_safe_part_settings'] })
     },
   })
+
+  const drawingUploadMutation = useMutation({
+    mutationFn: uploadSyneySafePartDrawing,
+  })
+
+  const handleDrawingUpload = async (
+    record: SyneySafePartSetting,
+    file: File,
+  ) => {
+    setUploadingDrawingId(record.id)
+
+    try {
+      await drawingUploadMutation.mutateAsync({ setting: record, file })
+      message.success('图纸上传成功')
+      queryClient.invalidateQueries({ queryKey: ['syney_safe_part_settings'] })
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '图纸上传失败')
+    } finally {
+      setUploadingDrawingId(null)
+    }
+  }
+
+  const handlePreviewDrawing = async (record: SyneySafePartSetting) => {
+    if (!record.drawing_file_path) {
+      message.warning('暂无图纸')
+      return
+    }
+
+    setPreviewingDrawingId(record.id)
+
+    try {
+      const url = await getSyneySafePartDrawingPreviewUrl(
+        record.drawing_file_path,
+      )
+      setPreviewDrawing({
+        url,
+        fileName: record.drawing_file_name ?? '图纸预览',
+        mimeType: record.drawing_file_mime_type,
+      })
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '图纸预览失败')
+    } finally {
+      setPreviewingDrawingId(null)
+    }
+  }
+
+  const handleDownloadDrawing = async (record: SyneySafePartSetting) => {
+    if (!record.drawing_file_path) {
+      message.warning('暂无图纸')
+      return
+    }
+
+    setDownloadingDrawingId(record.id)
+
+    try {
+      const fileName = record.drawing_file_name ?? `${record.part_no}-图纸`
+      const url = await getSyneySafePartDrawingDownloadUrl({
+        filePath: record.drawing_file_path,
+        fileName,
+      })
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '图纸下载失败')
+    } finally {
+      setDownloadingDrawingId(null)
+    }
+  }
+
+  const handleBatchDelete = () => {
+    const selectedIds = selectedRowKeys.map(String)
+
+    if (selectedIds.length === 0) {
+      message.warning('请选择至少一条数据')
+      return
+    }
+
+    deleteMutation.mutate(selectedIds)
+  }
 
   const columns: ColumnsType<SyneySafePartSetting> = [
     {
@@ -173,37 +290,135 @@ export default function SafePartSettingPage() {
       render: (v: string | null) =>
         DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v ?? '-',
     },
+    {
+      title: '图纸',
+      dataIndex: 'drawing_file_name',
+      width: 220,
+      render: (_: unknown, record: SyneySafePartSetting) => {
+        const hasDrawing = Boolean(record.drawing_file_path)
+        const uploadLoading = uploadingDrawingId === record.id
+        const previewLoading = previewingDrawingId === record.id
+        const downloadLoading = downloadingDrawingId === record.id
+
+        return (
+          <Space size={4}>
+            <Upload
+              accept={SAFE_PART_DRAWING_ACCEPT}
+              beforeUpload={(file) => {
+                void handleDrawingUpload(record, file)
+                return Upload.LIST_IGNORE
+              }}
+              disabled={uploadLoading}
+              maxCount={1}
+              showUploadList={false}
+            >
+              <Button
+                type="text"
+                size="small"
+                loading={uploadLoading}
+                disabled={uploadLoading}
+                icon={<ArrowUpTrayIcon className="size-4 text-green-500/80!" />}
+              >
+                {hasDrawing ? '替换' : '上传'}
+              </Button>
+            </Upload>
+            <Tooltip title={record.drawing_file_name ?? '暂无图纸'}>
+              <Button
+                type="text"
+                size="small"
+                disabled={!hasDrawing}
+                loading={previewLoading}
+                icon={<EyeIcon className="size-4 text-blue-500/80!" />}
+                onClick={() => handlePreviewDrawing(record)}
+              >
+                查看
+              </Button>
+            </Tooltip>
+            <Button
+              type="text"
+              size="small"
+              disabled={!hasDrawing}
+              loading={downloadLoading}
+              icon={<ArrowDownTrayIcon className="size-4 text-slate-500/80!" />}
+              onClick={() => handleDownloadDrawing(record)}
+            >
+              下载
+            </Button>
+          </Space>
+        )
+      },
+    },
     { title: '备注', dataIndex: 'remark' },
     {
       title: '操作',
       render: (_: unknown, record: SyneySafePartSetting) => (
-        <Space>
-          <Button type="link" onClick={() => openEdit(record)}>
+        <Space size={4}>
+          <Button
+            type="text"
+            size="small"
+            icon={<PencilSquareIcon className="size-4 text-yellow-500/80!" />}
+            onClick={() => openEdit(record)}
+          >
             编辑
           </Button>
-          <Popconfirm
-            title="确认删除?"
-            onConfirm={() => deleteMutation.mutate([record.id])}
-          >
-            <Button type="link" danger loading={deleteMutation.isPending}>
-              删除
-            </Button>
-          </Popconfirm>
         </Space>
       ),
     },
   ]
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: Key[]) => setSelectedRowKeys(keys),
+  }
 
   const handleSubmit = (values: SafePartSettingFormValues) => {
     saveMutation.mutate(values)
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+    <div className="grid grid-rows-[32px_1fr] gap-4">
+      <div className="flex h-full items-center gap-2">
+        <Button
+          type="text"
+          icon={<PlusCircleIcon className="size-4 text-green-500/80!" />}
+          onClick={openCreate}
+        >
           新增
         </Button>
+        <Tooltip
+          title={
+            selectedRowKeys.length > 0
+              ? `已选择 ${selectedRowKeys.length} 条数据`
+              : '请选择要删除的数据'
+          }
+        >
+          <span>
+            <Popconfirm
+              title="确认批量删除?"
+              description={`确定删除选中的 ${selectedRowKeys.length} 条件号配置吗？`}
+              disabled={selectedRowKeys.length === 0}
+              onConfirm={handleBatchDelete}
+              okText="确认删除"
+              cancelText="取消"
+              okButtonProps={{
+                loading: deleteMutation.isPending,
+                danger: true,
+              }}
+            >
+              <Button
+                type="text"
+                loading={deleteMutation.isPending}
+                disabled={selectedRowKeys.length === 0}
+                icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+              >
+                删除
+                {selectedRowKeys.length > 0
+                  ? `(${selectedRowKeys.length})`
+                  : ''}
+              </Button>
+            </Popconfirm>
+          </span>
+        </Tooltip>
       </div>
 
       <Modal
@@ -281,24 +496,59 @@ export default function SafePartSettingPage() {
         </Form>
       </Modal>
 
-      <Table
-        rowKey="id"
-        loading={isLoading}
-        dataSource={data}
-        columns={columns}
-        size="small"
-        pagination={{
-          current: page,
-          pageSize,
-          showSizeChanger: true,
-          pageSizeOptions: [10, 20, 50],
-          onChange: (p) => setPage(p),
-          onShowSizeChange: (_current, size) => {
-            setPageSize(size)
-            setPage(1)
-          },
-        }}
-      />
+      <Modal
+        title={previewDrawing?.fileName ?? '图纸预览'}
+        open={Boolean(previewDrawing)}
+        footer={null}
+        width="80vw"
+        destroyOnHidden
+        onCancel={() => setPreviewDrawing(null)}
+      >
+        {previewDrawing?.mimeType?.startsWith('image/') ? (
+          <div className="flex max-h-[70vh] justify-center overflow-auto rounded border border-slate-200 bg-slate-50 p-3">
+            <img
+              src={previewDrawing.url}
+              alt={previewDrawing.fileName}
+              className="max-h-[66vh] max-w-full object-contain"
+            />
+          </div>
+        ) : (
+          <iframe
+            title={previewDrawing?.fileName ?? '图纸预览'}
+            src={previewDrawing?.url}
+            className="h-[70vh] w-full rounded border border-slate-200"
+          />
+        )}
+      </Modal>
+
+      <div className="no-scrollbar overflow-y-scroll">
+        <Table
+          rowKey="id"
+          loading={
+            isLoading || saveMutation.isPending || deleteMutation.isPending
+          }
+          dataSource={data ?? []}
+          columns={columns}
+          rowSelection={rowSelection}
+          size="small"
+          pagination={{
+            current: page,
+            pageSize,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50],
+            showTotal: (total) => `共 ${total} 条`,
+            onChange: (p) => setPage(p),
+            onShowSizeChange: (_current, size) => {
+              setPageSize(size)
+              setPage(1)
+            },
+          }}
+          scroll={{
+            x: 'max-content',
+            y: 550,
+          }}
+        />
+      </div>
     </div>
   )
 }
