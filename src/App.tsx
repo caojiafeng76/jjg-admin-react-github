@@ -29,6 +29,19 @@ const BASE_TOKENS = {
   colorTextSecondary: 'rgba(0,0,0,0.45)', // 统一次要文字色
 }
 
+const TABLE_TOKENS = {
+  cellFontSize: 12,
+  cellFontSizeMD: 12,
+  cellFontSizeSM: 12,
+  cellPaddingBlock: 4,
+  cellPaddingBlockMD: 4,
+  cellPaddingBlockSM: 4,
+  cellPaddingInline: 6,
+  cellPaddingInlineMD: 6,
+  cellPaddingInlineSM: 6,
+  selectionColumnWidth: 30,
+}
+
 export default function App() {
   const { isDarkMode } = useAppStore()
   const [isMobileViewport, setIsMobileViewport] = useState(false)
@@ -36,6 +49,9 @@ export default function App() {
   const themeConfig = {
     ...(isDarkMode ? { algorithm: theme.darkAlgorithm } : {}),
     token: BASE_TOKENS,
+    components: {
+      Table: TABLE_TOKENS,
+    },
   }
 
   // 同步 Tailwind 暗黑模式：在 <html> 标签上添加 / 移除 `dark` class

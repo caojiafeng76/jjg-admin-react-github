@@ -17,22 +17,22 @@ import {
 const SELECTION_COLUMN_WIDTH = 30
 
 const DENSE_TABLE_CELL_STYLE: CSSProperties = {
-  fontSize: 11,
+  fontSize: 12,
   lineHeight: 1.2,
-  padding: '2px 5px',
+  padding: '4px 6px',
   whiteSpace: 'nowrap',
 }
 
 const DENSE_TAG_STYLE: CSSProperties = {
-  fontSize: 11,
-  lineHeight: '16px',
+  fontSize: 12,
+  lineHeight: '18px',
   marginInlineEnd: 0,
   paddingInline: 4,
 }
 
 const DENSE_TABLE_STYLES = {
   root: {
-    fontSize: 11,
+    fontSize: 12,
     lineHeight: 1.2,
   },
 } satisfies NonNullable<TableProps<WorkshopOrder>['styles']>

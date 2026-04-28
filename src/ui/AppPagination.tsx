@@ -1,6 +1,13 @@
 import { Pagination, ConfigProvider } from 'antd'
+import type { PaginationProps } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN'
 import { useSearchParams } from 'react-router-dom'
+
+const PAGINATION_LOCALE = {
+  ...zhCN.Pagination,
+  items_per_page: '条/页',
+  page_size: '每页条数',
+} satisfies NonNullable<PaginationProps['locale']>
 
 interface Props {
   total: number
@@ -14,6 +21,16 @@ export default function AppPagination({
   defaultPageSize = 10,
 }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const currentPage = Number(searchParams.get('page')) || 1
+  const currentPageSize =
+    Number(searchParams.get('pageSize')) || defaultPageSize
+  const normalizedPageSizeOptions = pageSizeOptions.some(
+    (option) => Number(option) === currentPageSize,
+  )
+    ? pageSizeOptions
+    : [...pageSizeOptions, currentPageSize.toString()].sort(
+        (left, right) => Number(left) - Number(right),
+      )
 
   function onChange(page: number, pageSize: number) {
     searchParams.set('page', page.toString())
@@ -33,12 +50,15 @@ export default function AppPagination({
         <Pagination
           defaultCurrent={1}
           defaultPageSize={defaultPageSize}
-          current={Number(searchParams.get('page')) || 1}
-          pageSize={Number(searchParams.get('pageSize')) || defaultPageSize}
+          current={currentPage}
+          pageSize={currentPageSize}
           onChange={onChange}
           total={total}
-          showSizeChanger
-          pageSizeOptions={pageSizeOptions}
+          locale={PAGINATION_LOCALE}
+          showSizeChanger={{
+            getPopupContainer: () => document.body,
+          }}
+          pageSizeOptions={normalizedPageSizeOptions}
           showTotal={(total) => `共 ${total} 条`}
         />
       </ConfigProvider>
