@@ -138,6 +138,19 @@ const allMenuItems: MenuItemDef[] = [
     ],
   },
   {
+    key: 'quality',
+    label: '质量',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:quality',
+    children: [
+      {
+        key: 'quality-rework-repair',
+        label: '返工返修',
+        permission: 'page:quality-rework-repair',
+      },
+    ],
+  },
+  {
     key: 'precision-cutting',
     label: '精切',
     icon: <Square3Stack3DIcon className="size-4" />,
