@@ -28,8 +28,8 @@ export function useWorkshopOrdersList({
     project_no?: string
     product_model?: string
     customer_model?: string
-    project_no_search?: string[] // 多关键词搜索项目号
-    model_search?: string[] // 多关键词搜索产品型号、客户型号
+    project_no_search?: string | string[] // 多关键词搜索项目号
+    model_search?: string | string[] // 多关键词搜索产品型号、客户型号
     length_mm?: number[]
     startDate?: string
     endDate?: string

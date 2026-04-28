@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
-import { App, Button, Modal, FormInstance, Splitter, Tabs } from 'antd'
+import type { FormInstance, TableProps } from 'antd'
+import { App, Button, Modal, Splitter, Tabs } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
@@ -12,6 +13,7 @@ import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { usePermission } from '@/hooks/usePermission'
 import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
+import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import {
   useWorkshopOrdersList,
   useWorkshopOrderLengths,
@@ -83,8 +85,8 @@ export default function WorkshopOrderList() {
     project_no?: string
     product_model?: string
     customer_model?: string
-    project_no_search?: string[] // 多关键词搜索项目号
-    model_search?: string[] // 多关键词搜索产品型号、客户型号
+    project_no_search?: string | string[] // 多关键词搜索项目号
+    model_search?: string | string[] // 多关键词搜索产品型号、客户型号
     length_mm?: number[]
     startDate?: string
     endDate?: string
@@ -106,6 +108,14 @@ export default function WorkshopOrderList() {
   const { data: lengthOptions = [] } = useWorkshopOrderLengths()
   const { data: projectNoOptions = [] } = useWorkshopOrderProjectNos()
   const { data: modelOptions = [] } = useWorkshopOrderModels()
+  const projectNoFilterValues = useMemo(
+    () => normalizeSearchKeywords(searchParams.project_no_search) ?? [],
+    [searchParams.project_no_search],
+  )
+  const modelFilterValues = useMemo(
+    () => normalizeSearchKeywords(searchParams.model_search) ?? [],
+    [searchParams.model_search],
+  )
 
   const createMutation = useCreateWorkshopOrder()
 
@@ -355,6 +365,45 @@ export default function WorkshopOrderList() {
     setSearchParamsURL(searchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
 
+  const handleTableChange: TableProps<WorkshopOrder>['onChange'] = useCallback(
+    (_pagination, tableFilters, _sorter, extra) => {
+      if (extra.action !== 'filter') {
+        return
+      }
+
+      const selectedProjectNos = (tableFilters.project_no ?? [])
+        .map(String)
+        .filter(Boolean)
+      const selectedModels = (tableFilters.product_model ?? [])
+        .map(String)
+        .filter(Boolean)
+
+      setSearchParams((current) => {
+        const next = { ...current }
+
+        if (selectedProjectNos.length) {
+          next.project_no_search = selectedProjectNos
+        } else {
+          delete next.project_no_search
+        }
+
+        if (selectedModels.length) {
+          next.model_search = selectedModels
+        } else {
+          delete next.model_search
+        }
+
+        return next
+      })
+      setSelectedRowKeys([])
+
+      const nextURLParams = new URLSearchParams(searchParamsURL)
+      nextURLParams.set('page', '1')
+      setSearchParamsURL(nextURLParams)
+    },
+    [searchParamsURL, setSearchParamsURL],
+  )
+
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
       searchParamsURL.set('page', Math.max(page - 1, 1).toString())
@@ -547,8 +596,6 @@ export default function WorkshopOrderList() {
           onSearch={handleSearch}
           onReset={handleResetSearch}
           lengthOptions={lengthOptions}
-          projectNoOptions={projectNoOptions}
-          modelOptions={modelOptions}
         />
       </div>
 
@@ -564,8 +611,13 @@ export default function WorkshopOrderList() {
               <WorkshopOrderTable
                 loading={isLoading}
                 data={data?.items || []}
+                projectNoOptions={projectNoOptions}
+                modelOptions={modelOptions}
+                projectNoFilterValues={projectNoFilterValues}
+                modelFilterValues={modelFilterValues}
                 selectedRowKeys={selectedRowKeys}
                 onSelect={setSelectedRowKeys}
+                onChange={handleTableChange}
                 activeRowId={activeOrder?.id ?? null}
                 onRowClick={setActiveOrder}
                 scrollY={scrollY}
