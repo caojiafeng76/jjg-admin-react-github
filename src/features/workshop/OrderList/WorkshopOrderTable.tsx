@@ -85,8 +85,13 @@ function getTableColumnWidth<RecordType>(
 interface Props {
   loading: boolean
   data: WorkshopOrder[]
+  projectNoOptions: string[]
+  modelOptions: string[]
+  projectNoFilterValues: string[]
+  modelFilterValues: string[]
   selectedRowKeys: Key[]
   onSelect: (keys: Key[]) => void
+  onChange?: TableProps<WorkshopOrder>['onChange']
   activeRowId?: string | null
   onRowClick?: (record: WorkshopOrder) => void
   scrollY?: number
@@ -96,8 +101,13 @@ interface Props {
 export default function WorkshopOrderTable({
   loading,
   data,
+  projectNoOptions,
+  modelOptions,
+  projectNoFilterValues,
+  modelFilterValues,
   selectedRowKeys,
   onSelect,
+  onChange,
   activeRowId,
   onRowClick,
   scrollY = 400,
@@ -167,6 +177,15 @@ export default function WorkshopOrderTable({
         fixed: 'left',
         key: 'project_no',
         width: 102,
+        filters: projectNoOptions.map((projectNo) => ({
+          text: projectNo,
+          value: projectNo,
+        })),
+        filteredValue: projectNoFilterValues.length
+          ? projectNoFilterValues
+          : null,
+        filterMultiple: true,
+        filterSearch: true,
       },
       {
         title: '产品型号',
@@ -174,6 +193,13 @@ export default function WorkshopOrderTable({
         fixed: 'left',
         key: 'product_model',
         width: 82,
+        filters: modelOptions.map((model) => ({
+          text: model,
+          value: model,
+        })),
+        filteredValue: modelFilterValues.length ? modelFilterValues : null,
+        filterMultiple: true,
+        filterSearch: true,
       },
       {
         title: '客户型号',
@@ -251,7 +277,7 @@ export default function WorkshopOrderTable({
         ellipsis: true,
       },
     ],
-    [],
+    [modelFilterValues, modelOptions, projectNoFilterValues, projectNoOptions],
   )
 
   const rowSelection: TableProps<WorkshopOrder>['rowSelection'] = {
@@ -274,6 +300,7 @@ export default function WorkshopOrderTable({
       pagination={false}
       components={DENSE_TABLE_COMPONENTS}
       styles={DENSE_TABLE_STYLES}
+      onChange={onChange}
       onRow={(record) => ({
         onClick: () => onRowClick?.(record),
         style: {

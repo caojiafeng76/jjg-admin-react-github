@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DatePicker, Button, Form, Space, Select } from 'antd'
+import { DatePicker, Button, Form, Input, Space, Select } from 'antd'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import type { Dayjs } from 'dayjs'
 
@@ -9,8 +9,8 @@ interface SearchParams {
   project_no?: string
   product_model?: string
   customer_model?: string
-  project_no_search?: string[] // 多关键词搜索项目号
-  model_search?: string[] // 多关键词搜索产品型号、客户型号
+  project_no_search?: string | string[] // 多关键词搜索项目号
+  model_search?: string | string[] // 多关键词搜索产品型号、客户型号
   length_mm?: number[]
   startDate?: string
   endDate?: string
@@ -20,34 +20,33 @@ interface Props {
   onSearch: (params: SearchParams) => void
   onReset: () => void
   lengthOptions: number[]
-  projectNoOptions: string[]
-  modelOptions: string[]
 }
 
 export default function WorkshopOrderSearch({
   onSearch,
   onReset,
   lengthOptions,
-  projectNoOptions,
-  modelOptions,
 }: Props) {
   const [form] = Form.useForm()
   const [isSearching, setIsSearching] = useState(false)
 
   const handleSearch = (values: {
-    project_no_search?: string[]
-    model_search?: string[]
+    project_no_search?: string
+    model_search?: string
     length_mm?: number[]
     dateRange?: [Dayjs | null, Dayjs | null]
   }) => {
     const params: SearchParams = {}
 
-    if (values.project_no_search?.length) {
-      params.project_no_search = values.project_no_search
+    const projectNoSearch = values.project_no_search?.trim()
+    const modelSearch = values.model_search?.trim()
+
+    if (projectNoSearch) {
+      params.project_no_search = projectNoSearch
     }
 
-    if (values.model_search?.length) {
-      params.model_search = values.model_search
+    if (modelSearch) {
+      params.model_search = modelSearch
     }
 
     if (values.length_mm?.length) {
@@ -81,33 +80,19 @@ export default function WorkshopOrderSearch({
       className="flex flex-wrap items-center gap-2"
     >
       <Form.Item name="project_no_search" className="mb-0">
-        <Select
+        <Input
           placeholder="项目号"
-          mode="multiple"
           allowClear
-          showSearch
-          filterOption={(input, option) =>
-            String(option?.label || '')
-              .toLowerCase()
-              .includes(input.toLowerCase())
-          }
+          onPressEnter={() => form.submit()}
           style={{ width: 200 }}
-          options={projectNoOptions.map((v) => ({ label: v, value: v }))}
         />
       </Form.Item>
       <Form.Item name="model_search" className="mb-0">
-        <Select
+        <Input
           placeholder="型号"
-          mode="multiple"
           allowClear
-          showSearch
-          filterOption={(input, option) =>
-            String(option?.label || '')
-              .toLowerCase()
-              .includes(input.toLowerCase())
-          }
+          onPressEnter={() => form.submit()}
           style={{ width: 200 }}
-          options={modelOptions.map((v) => ({ label: v, value: v }))}
         />
       </Form.Item>
       <Form.Item name="dateRange" className="mb-0">
