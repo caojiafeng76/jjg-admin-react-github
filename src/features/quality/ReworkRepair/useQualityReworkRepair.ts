@@ -5,7 +5,9 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 import {
   createQualityReworkRepair,
   deleteQualityReworkRepair,
+  getNextQualityReworkRepairDocumentNo,
   getQualityReworkRepairList,
+  getQualityReworkRepairOrderOptions,
   updateQualityReworkRepair,
   type QualityReworkRepairSearchParams,
 } from '@/services/apiQualityReworkRepair'
@@ -32,6 +34,28 @@ export function useQualityReworkRepairList({
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
+  })
+}
+
+export function useQualityReworkRepairOrderOptions() {
+  return useQuery({
+    queryKey: [QUALITY_REWORK_REPAIR_KEY, 'order-options'],
+    queryFn: getQualityReworkRepairOrderOptions,
+    ...queryConfig.list,
+  })
+}
+
+export function useNextQualityReworkRepairDocumentNo(enabled: boolean) {
+  return useQuery({
+    queryKey: [QUALITY_REWORK_REPAIR_KEY, 'next-document-no'],
+    queryFn: getNextQualityReworkRepairDocumentNo,
+    enabled,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    retry: false,
+    staleTime: 0,
   })
 }
 

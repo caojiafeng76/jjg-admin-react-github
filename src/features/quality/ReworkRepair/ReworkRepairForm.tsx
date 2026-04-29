@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
   DatePicker,
@@ -13,15 +13,26 @@ import {
   QUALITY_REWORK_REPAIR_CATEGORIES,
   type QualityReworkRepair,
   type QualityReworkRepairFormValues,
+  type QualityReworkRepairOrderOption,
 } from '@/services/apiQualityReworkRepair'
+import {
+  buildProjectNoSelectOptions,
+  filterProjectNoOption,
+  renderProjectNoOption,
+} from '@/features/production-order/projectNoSelect'
+import {
+  useNextQualityReworkRepairDocumentNo,
+  useQualityReworkRepairOrderOptions,
+} from './useQualityReworkRepair'
 
 export interface QualityReworkRepairFormFields {
   document_no?: string
+  project_no: string
   rework_category: QualityReworkRepairFormValues['rework_category']
   product_name: string
   specification_model: string
   responsible_unit: string
-  quantity: number
+  quantity: number | null
   planned_rework_date: Dayjs | null
   actual_rework_date: Dayjs | null
   defect_description: string
@@ -50,11 +61,12 @@ interface Props {
 
 const DEFAULT_VALUES: QualityReworkRepairFormFields = {
   document_no: '',
+  project_no: '',
   rework_category: '进货检验不合格',
   product_name: '',
   specification_model: '',
   responsible_unit: '',
-  quantity: 1,
+  quantity: null,
   planned_rework_date: null,
   actual_rework_date: null,
   defect_description: '',
@@ -82,6 +94,23 @@ function formatDate(value: Dayjs | null | undefined) {
   return value?.format('YYYY-MM-DD') || ''
 }
 
+function formatOrderText(value: string | number | null | undefined) {
+  if (value === null || value === undefined || value === '') {
+    return ''
+  }
+
+  return String(value)
+}
+
+function buildSpecificationModel(order: QualityReworkRepairOrderOption) {
+  const parts = [
+    formatOrderText(order.customer_model),
+    order.length_mm ? `${order.length_mm}mm` : '',
+  ].filter(Boolean)
+
+  return parts.join(' / ') || formatOrderText(order.product_model)
+}
+
 function SectionTitle({ children }: { children: string }) {
   return (
     <div className="mt-1 mb-3 border-b border-slate-200 pb-2 text-sm font-medium text-slate-700">
@@ -97,6 +126,25 @@ export default function ReworkRepairForm({
   initialValues,
 }: Props) {
   const [form] = Form.useForm<QualityReworkRepairFormFields>()
+  const isCreateMode = !initialValues
+  const { data: orderOptions = [], isLoading: isLoadingOrderOptions } =
+    useQualityReworkRepairOrderOptions()
+  const { data: nextDocumentNo, isFetching: isFetchingDocumentNo } =
+    useNextQualityReworkRepairDocumentNo(isCreateMode)
+
+  const projectNoOptions = useMemo(
+    () => buildProjectNoSelectOptions(orderOptions),
+    [orderOptions],
+  )
+  const orderInfoMap = useMemo(() => {
+    const map = new Map<string, QualityReworkRepairOrderOption>()
+
+    orderOptions.forEach((item) => {
+      map.set(item.project_no, item)
+    })
+
+    return map
+  }, [orderOptions])
 
   useEffect(() => {
     setFormRef(form)
@@ -107,11 +155,12 @@ export default function ReworkRepairForm({
       form.setFieldsValue({
         ...DEFAULT_VALUES,
         document_no: initialValues.document_no || '',
+        project_no: initialValues.project_no || '',
         rework_category: initialValues.rework_category,
         product_name: initialValues.product_name,
         specification_model: initialValues.specification_model,
         responsible_unit: initialValues.responsible_unit,
-        quantity: Number(initialValues.quantity || 1),
+        quantity: Number(initialValues.quantity),
         planned_rework_date: toDayjs(initialValues.planned_rework_date),
         actual_rework_date: toDayjs(initialValues.actual_rework_date),
         defect_description: initialValues.defect_description,
@@ -137,14 +186,37 @@ export default function ReworkRepairForm({
     form.setFieldsValue(DEFAULT_VALUES)
   }, [form, initialValues])
 
+  useEffect(() => {
+    if (!isCreateMode || !nextDocumentNo) {
+      return
+    }
+
+    form.setFieldsValue({ document_no: nextDocumentNo })
+  }, [form, isCreateMode, nextDocumentNo])
+
+  const handleProjectNoChange = (projectNo: string) => {
+    const selectedOrder = orderInfoMap.get(projectNo)
+
+    if (!selectedOrder) {
+      return
+    }
+
+    form.setFieldsValue({
+      product_name: formatOrderText(selectedOrder.product_model),
+      specification_model: buildSpecificationModel(selectedOrder),
+      responsible_unit: formatOrderText(selectedOrder.customer),
+    })
+  }
+
   const handleFinish = (values: QualityReworkRepairFormFields) => {
     onFinish({
       document_no: values.document_no?.trim() || undefined,
+      project_no: values.project_no.trim(),
       rework_category: values.rework_category,
       product_name: values.product_name.trim(),
       specification_model: values.specification_model.trim(),
       responsible_unit: values.responsible_unit.trim(),
-      quantity: Number(values.quantity || 0),
+      quantity: Number(values.quantity ?? 0),
       planned_rework_date: formatDate(values.planned_rework_date),
       actual_rework_date: formatDate(values.actual_rework_date),
       defect_description: values.defect_description.trim(),
@@ -179,7 +251,28 @@ export default function ReworkRepairForm({
           label="编号"
           rules={[{ max: 50, message: '编号不能超过 50 个字符' }]}
         >
-          <Input placeholder="请输入编号" maxLength={50} />
+          <Input
+            disabled
+            placeholder={isFetchingDocumentNo ? '正在生成编号' : '自动生成编号'}
+            maxLength={50}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="project_no"
+          label="项目号"
+          rules={[{ required: true, message: '请选择项目号' }]}
+        >
+          <Select
+            showSearch
+            placeholder="请选择订单项目号"
+            loading={isLoadingOrderOptions}
+            options={projectNoOptions}
+            filterOption={filterProjectNoOption}
+            optionRender={renderProjectNoOption}
+            listHeight={320}
+            onChange={handleProjectNoChange}
+          />
         </Form.Item>
 
         <Form.Item

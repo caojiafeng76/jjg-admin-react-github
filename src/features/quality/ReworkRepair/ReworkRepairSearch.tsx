@@ -68,7 +68,7 @@ export default function ReworkRepairSearch({
 
       <Form.Item name="keyword" className="mb-0" style={{ width: 420 }}>
         <Input
-          placeholder="请输入编号、产品、规格、责任单位或描述"
+          placeholder="请输入编号、项目号、产品、规格、责任单位或描述"
           allowClear
           onPressEnter={() => form.submit()}
         />
