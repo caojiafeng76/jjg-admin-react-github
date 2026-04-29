@@ -55,10 +55,10 @@ export default function ReworkRepairSearch({
       onFinish={handleSearch}
       className="flex flex-1 flex-wrap gap-2"
     >
-      <Form.Item name="reworkCategory" className="mb-0" style={{ width: 220 }}>
+      <Form.Item name="reworkCategory" className="mb-0" style={{ width: 180 }}>
         <Select
           allowClear
-          placeholder="请选择返工返修类别"
+          placeholder="返工返修类别"
           options={QUALITY_REWORK_REPAIR_CATEGORIES.map((item) => ({
             value: item,
             label: item,
