@@ -233,6 +233,7 @@ export default function AppHeader({
               </Badge>
             </Popover>
           ) : null}
+          <DarkModeButton />
           <span className="text-sm text-slate-600 dark:text-slate-300">
             欢迎您：{displayName}
             {roleLabel ? `（${roleLabel}）` : ''}
@@ -246,7 +247,6 @@ export default function AppHeader({
               修改管理密码
             </Button>
           ) : null}
-          <DarkModeButton />
           <Button
             type="link"
             onClick={async () => {
