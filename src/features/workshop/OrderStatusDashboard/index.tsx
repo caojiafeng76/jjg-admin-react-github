@@ -41,11 +41,14 @@ import type {
   OrderStatusMaterialTransferDetail,
   OrderStatusPrecisionCuttingTransferDetail,
   OrderStatusProductionDetail,
+  ReworkRepairInfo,
 } from '@/services/apiOrderStatusDashboard'
 import AppPagination from '@/ui/AppPagination'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import {
   ORDER_STATUS_DASHBOARD_KEY,
+  REWORK_REPAIR_STATUS_COLORS,
+  REWORK_REPAIR_STATUS_LABELS,
   useOrderStatusDashboard,
 } from './useOrderStatusDashboard'
 
@@ -468,6 +471,47 @@ function renderPrecisionCuttingQuantityCell({
     >
       {quantity.toLocaleString()}
     </Button>
+  )
+}
+
+const REWORK_REPAIR_STATUS_KEYS = [
+  'pendingProductionCount',
+  'pendingTechnicalCount',
+  'pendingQualityCount',
+  'completedCount',
+] as const
+
+function renderReworkRepairStatus(reworkRepairInfo: ReworkRepairInfo) {
+  const total =
+    reworkRepairInfo.pendingProductionCount +
+    reworkRepairInfo.pendingTechnicalCount +
+    reworkRepairInfo.pendingQualityCount +
+    reworkRepairInfo.completedCount
+
+  if (total === 0) {
+    return <Text type="secondary">-</Text>
+  }
+
+  return (
+    <Space size={2} wrap>
+      {REWORK_REPAIR_STATUS_KEYS.map((key) => {
+        const count = reworkRepairInfo[key]
+
+        if (count <= 0) {
+          return null
+        }
+
+        return (
+          <Tag
+            key={key}
+            color={REWORK_REPAIR_STATUS_COLORS[key]}
+            className="text-xs!"
+          >
+            {REWORK_REPAIR_STATUS_LABELS[key]} {count}
+          </Tag>
+        )
+      })}
+    </Space>
   )
 }
 
@@ -1466,6 +1510,13 @@ export default function OrderStatusDashboard() {
         key: 'transferWorkshops',
         width: 118,
         render: renderTransferWorkshops,
+      },
+      {
+        title: '返工返修',
+        key: 'reworkRepairStatus',
+        width: 260,
+        align: 'center',
+        render: (_value, record) => renderReworkRepairStatus(record.reworkRepairInfo),
       },
       {
         title: '成品率',

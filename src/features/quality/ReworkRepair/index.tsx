@@ -163,8 +163,8 @@ const DEFAULT_FORM_VALUES: QualityReworkRepairFormFields = {
   specification_model: '',
   responsible_unit: '',
   quantity: null,
-  planned_rework_date: null,
-  actual_rework_date: null,
+  planned_rework_date: dayjs(),
+  actual_rework_date: dayjs(),
   defect_description: '',
   application_reason: '',
   workshop_applicant: '',
@@ -535,7 +535,8 @@ export default function QualityReworkRepairPage() {
       form.setFieldsValue({
         product_name: formatOrderText(selectedOrder.product_model),
         specification_model: buildSpecificationModel(selectedOrder),
-        responsible_unit: formatOrderText(selectedOrder.customer),
+        planned_rework_date: dayjs(),
+        actual_rework_date: dayjs(),
       })
     },
     [form, orderInfoMap],

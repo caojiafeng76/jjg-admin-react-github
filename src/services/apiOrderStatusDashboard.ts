@@ -85,6 +85,10 @@ type OrderStatusDashboardRpcItem = WorkshopOrder & {
   transferWorkshops: string[] | null
   warehouseTransferQuantity: number
   yieldRate: number | null
+  reworkRepairRows: {
+    workflow_status: string
+    quantity: number
+  }[] | null
 }
 
 interface OrderStatusDashboardRpcResult {
@@ -165,6 +169,37 @@ export interface OrderStatusProductionDetail {
 
 export type OrderProductionStatus = '正常' | '预警' | '延期'
 
+export interface ReworkRepairInfo {
+  totalQuantity: number
+  pendingWorkshopCount: number
+  pendingProductionCount: number
+  pendingTechnicalCount: number
+  pendingQualityCount: number
+  completedCount: number
+}
+
+export const REWORK_REPAIR_STATUS_COLORS: Record<
+  keyof Omit<ReworkRepairInfo, 'totalQuantity'>,
+  string
+> = {
+  pendingWorkshopCount: 'default',
+  pendingProductionCount: 'processing',
+  pendingTechnicalCount: 'warning',
+  pendingQualityCount: 'orange',
+  completedCount: 'success',
+}
+
+export const REWORK_REPAIR_STATUS_LABELS: Record<
+  keyof Omit<ReworkRepairInfo, 'totalQuantity'>,
+  string
+> = {
+  pendingWorkshopCount: '待车间发起',
+  pendingProductionCount: '待生产部确认',
+  pendingTechnicalCount: '待技术部确认',
+  pendingQualityCount: '待质量部确认',
+  completedCount: '已完成',
+}
+
 export interface OrderStatusJobColumn {
   key: string
   title: string
@@ -192,6 +227,7 @@ export interface OrderStatusDashboardItem extends WorkshopOrder {
   completionRate: number | null
   yieldRate: number | null
   productionStatus: OrderProductionStatus
+  reworkRepairInfo: ReworkRepairInfo
 }
 
 export interface OrderStatusDashboardResult {
@@ -420,6 +456,47 @@ function buildProductionDetail(
     theoreticalSeconds: Number(row.theoretical_seconds || 0),
     remark: row.remark,
   }
+}
+
+function buildReworkRepairInfo(
+  reworkRepairRows: {
+    workflow_status: string
+    quantity: number
+  }[] | null,
+): ReworkRepairInfo {
+  const info: ReworkRepairInfo = {
+    totalQuantity: 0,
+    pendingWorkshopCount: 0,
+    pendingProductionCount: 0,
+    pendingTechnicalCount: 0,
+    pendingQualityCount: 0,
+    completedCount: 0,
+  }
+
+  for (const row of reworkRepairRows ?? []) {
+    const quantity = Number(row.quantity || 0)
+    info.totalQuantity += quantity
+
+    switch (row.workflow_status) {
+      case 'workshop_pending':
+        info.pendingWorkshopCount += quantity
+        break
+      case 'production_pending':
+        info.pendingProductionCount += quantity
+        break
+      case 'technical_pending':
+        info.pendingTechnicalCount += quantity
+        break
+      case 'quality_pending':
+        info.pendingQualityCount += quantity
+        break
+      case 'completed':
+        info.completedCount += quantity
+        break
+    }
+  }
+
+  return info
 }
 
 function buildProcessJobIndex(processRows: ProcessStandardJobRow[]) {
@@ -879,6 +956,7 @@ export async function getOrderStatusDashboard({
       completionRate: order.completionRate,
       yieldRate: order.yieldRate,
       productionStatus: order.productionStatus,
+      reworkRepairInfo: buildReworkRepairInfo(order.reworkRepairRows ?? null),
     }
   })
 

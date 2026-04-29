@@ -25,6 +25,7 @@ const TEMPLATE_HEADERS = [
   '材质名称',
   '料号',
   '工艺流程',
+  '行备注',
 ]
 
 export function downloadWorkshopOrderTemplate() {
@@ -57,6 +58,7 @@ export interface WorkshopOrderExcelRow {
   材质名称: string
   料号: string
   工艺流程: string
+  行备注: string
 }
 
 export async function parseWorkshopOrderExcel(
@@ -108,6 +110,7 @@ function parseTemplateSheet(sheet: WorkSheet): WorkshopOrder[] {
       material_name: row.材质名称 || null,
       material_code: row.料号 || null,
       process_flow: row.工艺流程 || null,
+      row_remark: row.行备注 || null,
     }))
 }
 
@@ -128,6 +131,7 @@ interface ErpColumnMap {
   material_code: number[]
   process_flow: number[]
   product_delivery_date: number[]
+  row_remark: number[]
 }
 
 function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
@@ -193,6 +197,7 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
       material_name: getStringFromRow(row, columnMap.material_name),
       material_code: getStringFromRow(row, columnMap.material_code),
       process_flow: getStringFromRow(row, columnMap.process_flow),
+      row_remark: getStringFromRow(row, columnMap.row_remark),
     })
   }
 
@@ -291,6 +296,7 @@ function buildErpColumnMap(row: WorksheetRow): ErpColumnMap | null {
     material_code: findColumnIndices(row, '料号'),
     process_flow: findColumnIndices(row, '工艺流程'),
     product_delivery_date: findColumnIndices(row, '交货日期'),
+    row_remark: findColumnIndices(row, '行备注'),
   }
 }
 
