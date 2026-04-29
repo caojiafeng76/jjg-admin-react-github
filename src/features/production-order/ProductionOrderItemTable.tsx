@@ -19,7 +19,64 @@ interface Props {
   onDelete: (ids: string[]) => void
   scrollY?: number
   showActions?: boolean
+  hideCostColumns?: boolean
 }
+
+const RUNTIME_COL = {
+  title: '运行时间',
+  key: 'runtime',
+  width: 100,
+  render: (_: unknown, record: ProductionOrderItemWithMachine) => {
+    const seconds =
+      (record.incoming_qualified_quantity ?? 0) *
+      (record.theoretical_seconds ?? 0)
+    if (seconds === 0) return <span className="text-slate-400">—</span>
+    return `${(seconds / 3600).toFixed(2)} h`
+  },
+}
+
+const COST_COLUMNS: TableColumnsType<ProductionOrderItemWithMachine> = [
+  {
+    title: '标准工时(秒)',
+    dataIndex: 'standard_seconds',
+    key: 'standard_seconds',
+    width: 110,
+  },
+  {
+    title: '合格工时(h)',
+    dataIndex: 'qualified_hours',
+    key: 'qualified_hours',
+    width: 100,
+    render: (value: number | null, record: ProductionOrderItem) => {
+      if (value === null || value === undefined) {
+        return '-'
+      }
+      const shouldHighlight =
+        record.standard_seconds === 0 && record.qualified_quantity > 0
+      return (
+        <span style={shouldHighlight ? dangerTextStyle : undefined}>
+          {value.toFixed(2)}
+        </span>
+      )
+    },
+  },
+  {
+    title: '减分工时(h)',
+    dataIndex: 'defect_hours',
+    key: 'defect_hours',
+    width: 100,
+    render: (value: number | null) => value?.toFixed(2) || '-',
+  },
+  {
+    title: '数据类别',
+    dataIndex: 'data_category',
+    fixed: 'left' as const,
+    key: 'data_category',
+    width: 100,
+    render: (value: ProductionOrderItem['data_category'] | null) =>
+      value || 'A',
+  },
+]
 
 export default function ProductionOrderItemTable({
   loading,
@@ -28,29 +85,21 @@ export default function ProductionOrderItemTable({
   onDelete,
   scrollY = 400,
   showActions = true,
+  hideCostColumns = false,
 }: Props) {
   const columns: TableColumnsType<ProductionOrderItemWithMachine> = useMemo(
     () => [
       {
         title: '#',
         render: (_text, _record, index) => index + 1,
-        fixed: 'left',
+        fixed: 'left' as const,
         key: '#',
         width: 50,
       },
       {
-        title: '数据类别',
-        dataIndex: 'data_category',
-        fixed: 'left',
-        key: 'data_category',
-        width: 100,
-        render: (value: ProductionOrderItem['data_category'] | null) =>
-          value || 'A',
-      },
-      {
         title: '项目号',
         dataIndex: 'project_no',
-        fixed: 'left',
+        fixed: 'left' as const,
         key: 'project_no',
         width: 120,
       },
@@ -78,7 +127,6 @@ export default function ProductionOrderItemTable({
         key: 'operation',
         width: 100,
         render: (value: string | string[]) => {
-          // 处理数组格式的旧数据
           if (Array.isArray(value)) {
             return value.join(', ')
           }
@@ -100,12 +148,7 @@ export default function ProductionOrderItemTable({
           )
         },
       },
-      {
-        title: '标准工时(秒)',
-        dataIndex: 'standard_seconds',
-        key: 'standard_seconds',
-        width: 110,
-      },
+      ...(hideCostColumns ? [] : COST_COLUMNS),
       {
         title: '来料接收数',
         dataIndex: 'incoming_qualified_quantity',
@@ -117,26 +160,6 @@ export default function ProductionOrderItemTable({
         dataIndex: 'qualified_quantity',
         key: 'qualified_quantity',
         width: 90,
-      },
-      {
-        title: '合格工时(h)',
-        dataIndex: 'qualified_hours',
-        key: 'qualified_hours',
-        width: 100,
-        render: (value: number | null, record: ProductionOrderItem) => {
-          if (value === null || value === undefined) {
-            return '-'
-          }
-
-          const shouldHighlight =
-            record.standard_seconds === 0 && record.qualified_quantity > 0
-
-          return (
-            <span style={shouldHighlight ? dangerTextStyle : undefined}>
-              {value.toFixed(2)}
-            </span>
-          )
-        },
       },
       {
         title: '加工不良数量',
@@ -186,31 +209,13 @@ export default function ProductionOrderItemTable({
         render: (value: string | null) => value || '-',
       },
       {
-        title: '减分工时(h)',
-        dataIndex: 'defect_hours',
-        key: 'defect_hours',
-        width: 100,
-        render: (value: number | null) => value?.toFixed(2) || '-',
-      },
-      {
         title: '备注',
         dataIndex: 'remark',
         key: 'remark',
         width: 150,
         render: (value: string | null) => value || '-',
       },
-      {
-        title: '运行时间',
-        key: 'runtime',
-        width: 100,
-        render: (_: unknown, record: ProductionOrderItemWithMachine) => {
-          const seconds =
-            (record.incoming_qualified_quantity ?? 0) *
-            (record.theoretical_seconds ?? 0)
-          if (seconds === 0) return <span className="text-slate-400">—</span>
-          return `${(seconds / 3600).toFixed(2)} h`
-        },
-      },
+      ...(hideCostColumns ? [RUNTIME_COL] : []),
       ...(showActions
         ? [
             {
@@ -245,7 +250,7 @@ export default function ProductionOrderItemTable({
           ]
         : []),
     ],
-    [onEdit, onDelete, showActions],
+    [onEdit, onDelete, showActions, hideCostColumns],
   )
 
   return (

@@ -17,6 +17,8 @@ import {
   type ProcessStandardMatchLevel,
 } from './useProcessStandards'
 import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
+import { useAuth } from '@/contexts/useAuth'
+import { isViewerRole } from '@/config/access'
 
 interface Props {
   open: boolean
@@ -60,6 +62,8 @@ export default function ProductionOrderItemForm({
     Record<string, ProjectNoData>
   >({})
   const { data: machineOptions } = useMachineEquipmentOptions()
+  const { role } = useAuth()
+  const hideCostColumns = isViewerRole(role)
 
   const selectedProjectNo = Form.useWatch('project_no', form)
   const selectedOperation = Form.useWatch('operation', form)
@@ -363,7 +367,7 @@ export default function ProductionOrderItemForm({
             </div>
           ) : null}
 
-          {compact ? null : (
+          {compact || hideCostColumns ? null : (
             <Form.Item
               name="data_category"
               label="数据类别"
@@ -517,7 +521,7 @@ export default function ProductionOrderItemForm({
             <Input />
           </Form.Item>
 
-          {!compact ? (
+          {!compact && !hideCostColumns ? (
             <Form.Item
               name="standard_seconds"
               label="标准工时(秒)"

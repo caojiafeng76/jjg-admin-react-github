@@ -18,6 +18,8 @@ import type {
   ProductionOrderItemWithMachine,
 } from '@/services/apiProductionOrderItems'
 import type { ProductionOrder } from '@/services/apiProductionOrders'
+import { useAuth } from '@/contexts/useAuth'
+import { isViewerRole } from '@/config/access'
 
 interface Props {
   order: ProductionOrder & { items?: ProductionOrderItem[] }
@@ -32,6 +34,8 @@ export default function ProductionOrderDetail({
   compact = false,
   canEdit = true,
 }: Props) {
+  const { role } = useAuth()
+  const hideCostColumns = isViewerRole(role)
   const [isItemModalOpen, setIsItemModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<
     ProductionOrderItem | undefined
@@ -273,6 +277,7 @@ export default function ProductionOrderDetail({
             onDelete={handleDeleteItem}
             scrollY={300}
             showActions={canEdit}
+            hideCostColumns={hideCostColumns}
           />
         </Card>
       )}

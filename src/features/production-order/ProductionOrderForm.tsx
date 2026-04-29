@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   App,
   Modal,
@@ -46,6 +50,8 @@ import {
   type ProcessStandardMatchLevel,
 } from './useProcessStandards'
 import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
+import { useAuth } from '@/contexts/useAuth'
+import { isViewerRole } from '@/config/access'
 
 type ProductionOrderFormInitialValues = ProductionOrder & {
   items?: ProductionOrderItem[]
@@ -123,6 +129,8 @@ export default function ProductionOrderForm({
   const [form] = Form.useForm()
   const { data: projectNos, isLoading: loadingProjectNos } =
     useSalesOrdersProjectNos()
+  const { role } = useAuth()
+  const hideCostColumns = isViewerRole(role)
   const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
     Record<string, ProjectNoData>
   >({})
@@ -844,13 +852,17 @@ export default function ProductionOrderForm({
                     title: '#',
                     width: 50,
                   },
-                  {
-                    title: '数据类别',
-                    dataIndex: 'data_category',
-                    width: 100,
-                    render: (value?: ProductionOrderDataCategory) =>
-                      value || 'A',
-                  },
+                  ...(hideCostColumns
+                    ? []
+                    : [
+                        {
+                          title: '数据类别',
+                          dataIndex: 'data_category',
+                          width: 100,
+                          render: (value?: ProductionOrderDataCategory) =>
+                            value || 'A',
+                        },
+                      ]),
                   {
                     title: '项目号',
                     dataIndex: 'project_no',
@@ -883,11 +895,15 @@ export default function ProductionOrderForm({
                       return value
                     },
                   },
-                  {
-                    title: '标准工时(秒)',
-                    dataIndex: 'standard_seconds',
-                    width: 100,
-                  },
+                  ...(hideCostColumns
+                    ? []
+                    : [
+                        {
+                          title: '标准工时(秒)',
+                          dataIndex: 'standard_seconds',
+                          width: 100,
+                        },
+                      ]),
                   {
                     title: '来料接收数',
                     dataIndex: 'incoming_qualified_quantity',
@@ -1020,7 +1036,7 @@ export default function ProductionOrderForm({
               remark: null,
             }}
           >
-            {compact ? null : (
+            {compact || hideCostColumns ? null : (
               <Form.Item
                 name="data_category"
                 label="数据类别"
@@ -1176,7 +1192,7 @@ export default function ProductionOrderForm({
               <Input />
             </Form.Item>
 
-            {!compact ? (
+            {!compact && !hideCostColumns ? (
               <Form.Item
                 name="standard_seconds"
                 label="标准工时(秒)"
