@@ -8,6 +8,15 @@ function formatNumber(value: number | null | undefined, digits = 3) {
   return Number(value ?? 0).toFixed(digits)
 }
 
+function getFinalStockColorClass(value: number | null | undefined) {
+  const stock = Number(value ?? 0)
+
+  if (stock < 20) return 'text-red-600'
+  if (stock < 50) return 'text-yellow-600'
+  if (stock < 100) return 'text-orange-600'
+  return 'text-green-600'
+}
+
 interface Props {
   loading: boolean
   data: YoumaiFinishedGoodsInventory[]
@@ -114,7 +123,11 @@ export default function YoumaiFinishedGoodsInventoryTable({
         dataIndex: 'final_stock',
         key: 'final_stock',
         width: 120,
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => (
+          <span className={`${getFinalStockColorClass(value)} font-medium`}>
+            {formatNumber(value)}
+          </span>
+        ),
       },
       {
         title: '备注',
