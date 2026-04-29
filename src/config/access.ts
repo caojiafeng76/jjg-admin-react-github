@@ -4,9 +4,13 @@ export type AppRole =
   | 'team_leader'
   | 'precision_cutting_admin'
   | 'warehouse_admin'
+  | 'viewer'
 
 export const PRECISION_CUTTING_ADMIN_ROLE: AppRole = 'precision_cutting_admin'
 export const WAREHOUSE_ADMIN_ROLE: AppRole = 'warehouse_admin'
+export const VIEWER_ROLE: AppRole = 'viewer'
+
+export const EMPLOYEE_SIDE_ROLES: AppRole[] = ['employee', 'team_leader']
 
 /**
  * 「员工/班组长」操作者视角集合（actor view），用于 layout 选择与业务规则派生。
@@ -19,7 +23,6 @@ export const WAREHOUSE_ADMIN_ROLE: AppRole = 'warehouse_admin'
  *
  * admin 因 trigger 自动获得所有权限，但不应落入员工录入分支，故此判断必须基于 role 而非权限。
  */
-export const EMPLOYEE_SIDE_ROLES: AppRole[] = ['employee', 'team_leader']
 
 export const ROLE_LABELS: Record<AppRole, string> = {
   admin: '管理员',
@@ -27,6 +30,7 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   team_leader: '班组长',
   precision_cutting_admin: '精切管理员',
   warehouse_admin: '仓库管理员',
+  viewer: '查看员',
 }
 
 export const ROLE_OPTIONS: Array<{ label: string; value: AppRole }> = [
@@ -38,6 +42,7 @@ export const ROLE_OPTIONS: Array<{ label: string; value: AppRole }> = [
   },
   { label: ROLE_LABELS.warehouse_admin, value: WAREHOUSE_ADMIN_ROLE },
   { label: ROLE_LABELS.admin, value: 'admin' },
+  { label: ROLE_LABELS.viewer, value: VIEWER_ROLE },
 ]
 
 export const DEFAULT_HOME_BY_ROLE: Record<AppRole, string> = {
@@ -46,6 +51,7 @@ export const DEFAULT_HOME_BY_ROLE: Record<AppRole, string> = {
   team_leader: '/production-order',
   precision_cutting_admin: '/workshop-order-list',
   warehouse_admin: '/youmai-raw-material-inventory',
+  viewer: '/dashboard',
 }
 
 export function isEmployeeSideRole(role: AppRole | null | undefined) {
@@ -54,6 +60,10 @@ export function isEmployeeSideRole(role: AppRole | null | undefined) {
 
 export function isPrecisionCuttingAdminRole(role: AppRole | null | undefined) {
   return role === PRECISION_CUTTING_ADMIN_ROLE
+}
+
+export function isViewerRole(role: AppRole | null | undefined) {
+  return role === VIEWER_ROLE
 }
 
 export function getRoleLabel(role: AppRole | null | undefined) {
