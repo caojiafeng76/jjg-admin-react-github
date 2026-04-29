@@ -51,6 +51,14 @@ export default function ReworkRepairTable({
         render: (value: string | null) => value || '-',
       },
       {
+        title: '项目号',
+        dataIndex: 'project_no',
+        key: 'project_no',
+        width: 130,
+        fixed: 'left',
+        render: (value: string | null) => value || '-',
+      },
+      {
         title: '类别',
         dataIndex: 'rework_category',
         key: 'rework_category',
@@ -165,7 +173,7 @@ export default function ReworkRepairTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 2790, y: scrollY }}
+      scroll={{ x: 2920, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

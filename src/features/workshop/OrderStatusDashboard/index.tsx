@@ -139,6 +139,7 @@ type SelectedPrecisionCuttingDetail = {
 }
 
 type SearchValues = {
+  customer: string
   materialCode: string
   model: string
   orderDate: string
@@ -310,6 +311,7 @@ function getTableColumnWidth<RecordType>(
 }
 
 const EMPTY_SEARCH_VALUES: SearchValues = {
+  customer: '',
   materialCode: '',
   model: '',
   orderDate: '',
@@ -1193,6 +1195,7 @@ export default function OrderStatusDashboard() {
   const activeStatus = normalizeStatusTab(searchParams.get('status'))
   const searchParamValues = useMemo<SearchValues>(
     () => ({
+      customer: searchParams.get('customer')?.trim() ?? '',
       materialCode: searchParams.get('materialCode')?.trim() ?? '',
       orderDate: searchParams.get('orderDate')?.trim() ?? '',
       productionStatus: normalizeProductionStatusFilter(
@@ -1212,6 +1215,7 @@ export default function OrderStatusDashboard() {
   )
   const filters = useMemo(
     () => ({
+      customer: searchParamValues.customer || undefined,
       materialCode: searchParamValues.materialCode || undefined,
       orderDate: searchParamValues.orderDate || undefined,
       productionStatus: searchParamValues.productionStatus || undefined,
@@ -1570,6 +1574,7 @@ export default function OrderStatusDashboard() {
   function handleSearch() {
     const next = new URLSearchParams(searchParams)
 
+    setOrDeleteParam(next, 'customer', searchValues.customer)
     setOrDeleteParam(next, 'materialCode', searchValues.materialCode)
     setOrDeleteParam(next, 'orderDate', searchValues.orderDate)
     setOrDeleteParam(next, 'productionStatus', searchValues.productionStatus)
@@ -1585,6 +1590,7 @@ export default function OrderStatusDashboard() {
   function handleResetSearch() {
     const next = new URLSearchParams(searchParams)
 
+    next.delete('customer')
     next.delete('materialCode')
     next.delete('orderDate')
     next.delete('productionStatus')
@@ -1689,6 +1695,16 @@ export default function OrderStatusDashboard() {
           value={searchValues.projectNo}
           onChange={(event) =>
             updateSearchParamValue('projectNo', event.target.value)
+          }
+          onPressEnter={handleSearch}
+          style={{ width: 180 }}
+        />
+        <Input
+          allowClear
+          placeholder="客户"
+          value={searchValues.customer}
+          onChange={(event) =>
+            updateSearchParamValue('customer', event.target.value)
           }
           onPressEnter={handleSearch}
           style={{ width: 180 }}

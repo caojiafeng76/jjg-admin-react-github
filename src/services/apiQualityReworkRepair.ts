@@ -11,9 +11,12 @@ export const QUALITY_REWORK_REPAIR_CATEGORIES = [
 export type QualityReworkRepairCategory =
   (typeof QUALITY_REWORK_REPAIR_CATEGORIES)[number]
 
+const ORDER_OPTIONS_PAGE_SIZE = 1000
+
 export interface QualityReworkRepair {
   id: string
   document_no: string | null
+  project_no: string | null
   rework_category: QualityReworkRepairCategory
   product_name: string
   specification_model: string
@@ -42,6 +45,7 @@ export interface QualityReworkRepair {
 
 export interface QualityReworkRepairFormValues {
   document_no?: string
+  project_no: string
   rework_category: QualityReworkRepairCategory
   product_name: string
   specification_model: string
@@ -71,6 +75,15 @@ export interface QualityReworkRepairSearchParams {
   reworkCategory?: QualityReworkRepairCategory
 }
 
+export interface QualityReworkRepairOrderOption {
+  project_no: string
+  product_model: string | null
+  length_mm: number | null
+  material_code: string | null
+  customer: string | null
+  customer_model: string | null
+}
+
 type QualityReworkRepairPayload = Omit<
   QualityReworkRepairFormValues,
   | 'document_no'
@@ -96,10 +109,21 @@ type QualityReworkRepairTable = {
   from: (table: string) => any
 }
 
+type QualityReworkRepairRpcClient = {
+  rpc: (
+    functionName: 'next_quality_rework_repair_document_no',
+    args?: { p_document_date?: string | null },
+  ) => Promise<{ data: string | null; error: unknown }>
+}
+
 function qualityReworkRepairTable() {
   return (supabase as unknown as QualityReworkRepairTable).from(
     'quality_rework_repairs',
   )
+}
+
+function qualityReworkRepairRpc() {
+  return supabase as unknown as QualityReworkRepairRpcClient
 }
 
 function trimText(value: string | undefined | null) {
@@ -116,6 +140,7 @@ function normalizePayload(
 ): QualityReworkRepairPayload {
   return {
     document_no: emptyToNull(values.document_no),
+    project_no: trimText(values.project_no),
     rework_category: values.rework_category,
     product_name: trimText(values.product_name),
     specification_model: trimText(values.specification_model),
@@ -138,6 +163,12 @@ function normalizePayload(
     verification_result: trimText(values.verification_result),
     quality_verifier: trimText(values.quality_verifier),
     verification_date: emptyToNull(values.verification_date),
+  }
+}
+
+function assertPayloadValid(payload: QualityReworkRepairPayload) {
+  if (!payload.project_no) {
+    throw new Error('请选择关联订单项目号')
   }
 }
 
@@ -181,7 +212,7 @@ export async function getQualityReworkRepairList({
   if (keyword) {
     const normalizedKeyword = keyword.trim()
     query = query.or(
-      `document_no.ilike.%${normalizedKeyword}%,product_name.ilike.%${normalizedKeyword}%,specification_model.ilike.%${normalizedKeyword}%,responsible_unit.ilike.%${normalizedKeyword}%,defect_description.ilike.%${normalizedKeyword}%,application_reason.ilike.%${normalizedKeyword}%,improvement_actions.ilike.%${normalizedKeyword}%,verification_result.ilike.%${normalizedKeyword}%`,
+      `document_no.ilike.%${normalizedKeyword}%,project_no.ilike.%${normalizedKeyword}%,product_name.ilike.%${normalizedKeyword}%,specification_model.ilike.%${normalizedKeyword}%,responsible_unit.ilike.%${normalizedKeyword}%,defect_description.ilike.%${normalizedKeyword}%,application_reason.ilike.%${normalizedKeyword}%,improvement_actions.ilike.%${normalizedKeyword}%,verification_result.ilike.%${normalizedKeyword}%`,
     )
   }
 
@@ -200,10 +231,79 @@ export async function getQualityReworkRepairList({
   }
 }
 
+export async function getQualityReworkRepairOrderOptions() {
+  const optionMap = new Map<string, QualityReworkRepairOrderOption>()
+  let from = 0
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('sales_orders')
+      .select(
+        'project_no, product_model, length_mm, material_code, customer, customer_model',
+      )
+      .not('project_no', 'is', null)
+      .order('created_at', { ascending: false })
+      .order('project_no', { ascending: true })
+      .range(from, from + ORDER_OPTIONS_PAGE_SIZE - 1)
+
+    if (error) {
+      throw handleApiError(error, '获取订单项目号选项失败')
+    }
+
+    for (const item of data || []) {
+      const projectNo = item.project_no?.trim()
+
+      if (!projectNo || optionMap.has(projectNo)) {
+        continue
+      }
+
+      optionMap.set(projectNo, {
+        project_no: projectNo,
+        product_model: item.product_model,
+        length_mm: item.length_mm,
+        material_code: item.material_code,
+        customer: item.customer,
+        customer_model: item.customer_model,
+      })
+    }
+
+    if (!data || data.length < ORDER_OPTIONS_PAGE_SIZE) {
+      break
+    }
+
+    from += ORDER_OPTIONS_PAGE_SIZE
+  }
+
+  return Array.from(optionMap.values()).sort((left, right) =>
+    left.project_no.localeCompare(right.project_no),
+  )
+}
+
+export async function getNextQualityReworkRepairDocumentNo() {
+  const { data, error } = await qualityReworkRepairRpc().rpc(
+    'next_quality_rework_repair_document_no',
+  )
+
+  if (error) {
+    throw handleApiError(error, '生成返工返修编号失败')
+  }
+
+  if (!data) {
+    throw new Error('生成返工返修编号失败')
+  }
+
+  return data
+}
+
 export async function createQualityReworkRepair(
   values: QualityReworkRepairFormValues,
 ) {
   const payload = normalizePayload(values)
+  assertPayloadValid(payload)
+
+  if (!payload.document_no) {
+    payload.document_no = await getNextQualityReworkRepairDocumentNo()
+  }
 
   if (payload.document_no) {
     const exists = await checkDocumentNoExists(payload.document_no)
@@ -227,6 +327,7 @@ export async function updateQualityReworkRepair({
   values: QualityReworkRepairFormValues
 }) {
   const payload = normalizePayload(values)
+  assertPayloadValid(payload)
 
   if (payload.document_no) {
     const exists = await checkDocumentNoExists(payload.document_no, id)

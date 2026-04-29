@@ -203,6 +203,7 @@ export interface OrderStatusDashboardResult {
 }
 
 export interface OrderStatusDashboardFilters {
+  customer?: string
   materialCode?: string
   model?: string
   orderDate?: string
@@ -769,7 +770,8 @@ async function getOrderStatusDashboardRpcResult({
       args: Record<string, unknown>,
     ) => ReturnType<typeof supabase.rpc>
   }
-  let query = rpcClient.rpc('get_order_status_dashboard', {
+  let query = rpcClient.rpc('get_order_status_dashboard_v2', {
+    p_customer: filters?.customer || null,
     p_material_code: filters?.materialCode || null,
     p_model_keywords: normalizeSearchKeywords(filters?.model) || null,
     p_order_date: filters?.orderDate || null,
