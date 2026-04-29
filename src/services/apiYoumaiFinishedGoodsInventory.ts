@@ -194,7 +194,7 @@ export async function getYoumaiFinishedGoodsInventoryList({
   }
 
   const { data, error, count } = await query
-    .order('updated_at', { ascending: false })
+    .order('final_stock', { ascending: true })
     .order('material_code', { ascending: true })
     .range(from, to)
 
