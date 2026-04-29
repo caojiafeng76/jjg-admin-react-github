@@ -13,6 +13,17 @@ export type QualityReworkRepairCategory =
 
 const ORDER_OPTIONS_PAGE_SIZE = 1000
 
+export const QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES = [
+  'workshop_pending',
+  'production_pending',
+  'technical_pending',
+  'quality_pending',
+  'completed',
+] as const
+
+export type QualityReworkRepairWorkflowStatus =
+  (typeof QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES)[number]
+
 export interface QualityReworkRepair {
   id: string
   document_no: string | null
@@ -28,6 +39,7 @@ export interface QualityReworkRepair {
   application_reason: string
   workshop_applicant: string
   application_date: string | null
+  production_review_opinion: string
   production_reviewer: string
   production_review_date: string | null
   technical_review_opinion: string
@@ -39,6 +51,7 @@ export interface QualityReworkRepair {
   verification_result: string
   quality_verifier: string
   verification_date: string | null
+  workflow_status: QualityReworkRepairWorkflowStatus
   created_at: string
   updated_at: string
 }
@@ -57,6 +70,7 @@ export interface QualityReworkRepairFormValues {
   application_reason: string
   workshop_applicant: string
   application_date?: string
+  production_review_opinion: string
   production_reviewer: string
   production_review_date?: string
   technical_review_opinion: string
@@ -68,11 +82,13 @@ export interface QualityReworkRepairFormValues {
   verification_result: string
   quality_verifier: string
   verification_date?: string
+  workflow_status?: QualityReworkRepairWorkflowStatus
 }
 
 export interface QualityReworkRepairSearchParams {
   keyword?: string
   reworkCategory?: QualityReworkRepairCategory
+  workflowStatus?: QualityReworkRepairWorkflowStatus
 }
 
 export interface QualityReworkRepairOrderOption {
@@ -152,6 +168,7 @@ function normalizePayload(
     application_reason: trimText(values.application_reason),
     workshop_applicant: trimText(values.workshop_applicant),
     application_date: emptyToNull(values.application_date),
+    production_review_opinion: trimText(values.production_review_opinion),
     production_reviewer: trimText(values.production_reviewer),
     production_review_date: emptyToNull(values.production_review_date),
     technical_review_opinion: trimText(values.technical_review_opinion),
@@ -163,6 +180,7 @@ function normalizePayload(
     verification_result: trimText(values.verification_result),
     quality_verifier: trimText(values.quality_verifier),
     verification_date: emptyToNull(values.verification_date),
+    workflow_status: values.workflow_status || 'workshop_pending',
   }
 }
 
@@ -196,6 +214,7 @@ export async function getQualityReworkRepairList({
   pageSize,
   keyword,
   reworkCategory,
+  workflowStatus,
 }: {
   page: number
   pageSize: number
@@ -207,6 +226,10 @@ export async function getQualityReworkRepairList({
 
   if (reworkCategory) {
     query = query.eq('rework_category', reworkCategory)
+  }
+
+  if (workflowStatus) {
+    query = query.eq('workflow_status', workflowStatus)
   }
 
   if (keyword) {

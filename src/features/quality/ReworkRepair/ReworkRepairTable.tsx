@@ -1,8 +1,11 @@
 import { useMemo } from 'react'
 import dayjs from 'dayjs'
-import { Table, type TableColumnsType } from 'antd'
+import { Table, Tag, type TableColumnsType } from 'antd'
 
-import type { QualityReworkRepair } from '@/services/apiQualityReworkRepair'
+import type {
+  QualityReworkRepair,
+  QualityReworkRepairWorkflowStatus,
+} from '@/services/apiQualityReworkRepair'
 
 function formatDate(value: string | null | undefined) {
   return value ? dayjs(value).format('YYYY-MM-DD') : '-'
@@ -10,6 +13,25 @@ function formatDate(value: string | null | undefined) {
 
 function formatDateTime(value: string | null | undefined) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'
+}
+
+const WORKFLOW_STATUS_MAP: Record<
+  QualityReworkRepairWorkflowStatus,
+  { label: string; color: string }
+> = {
+  workshop_pending: { label: '车间发起', color: 'default' },
+  production_pending: { label: '生产部待确认', color: 'processing' },
+  technical_pending: { label: '技术部待确认', color: 'warning' },
+  quality_pending: { label: '质量部待最终确认', color: 'orange' },
+  completed: { label: '已完成', color: 'success' },
+}
+
+function renderWorkflowStatus(status: QualityReworkRepairWorkflowStatus) {
+  const config = WORKFLOW_STATUS_MAP[status] || {
+    label: status,
+    color: 'default',
+  }
+  return <Tag color={config.color}>{config.label}</Tag>
 }
 
 interface Props {
@@ -124,6 +146,14 @@ export default function ReworkRepairTable({
         render: (value: string) => value || '-',
       },
       {
+        title: '生产部审核意见',
+        dataIndex: 'production_review_opinion',
+        key: 'production_review_opinion',
+        width: 200,
+        ellipsis: true,
+        render: (value: string) => value || '-',
+      },
+      {
         title: '生产部审核',
         dataIndex: 'production_reviewer',
         key: 'production_reviewer',
@@ -131,20 +161,11 @@ export default function ReworkRepairTable({
         render: (value: string) => value || '-',
       },
       {
-        title: '改进措施',
-        dataIndex: 'improvement_actions',
-        key: 'improvement_actions',
-        width: 260,
-        ellipsis: true,
-        render: (value: string) => value || '-',
-      },
-      {
-        title: '验证结果',
-        dataIndex: 'verification_result',
-        key: 'verification_result',
-        width: 260,
-        ellipsis: true,
-        render: (value: string) => value || '-',
+        title: '流程状态',
+        dataIndex: 'workflow_status',
+        key: 'workflow_status',
+        width: 130,
+        render: renderWorkflowStatus,
       },
       {
         title: '更新时间',
@@ -173,7 +194,7 @@ export default function ReworkRepairTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 2920, y: scrollY }}
+      scroll={{ x: 2800, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

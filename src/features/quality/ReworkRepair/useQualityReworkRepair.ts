@@ -31,6 +31,7 @@ export function useQualityReworkRepairList({
         pageSize,
         keyword: searchParams.keyword,
         reworkCategory: searchParams.reworkCategory,
+        workflowStatus: searchParams.workflowStatus,
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
