@@ -15,11 +15,13 @@ import { useEmployeeJobBaseSettingOptions } from './useEmployees'
 import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 import { usePermission } from '@/hooks/usePermission'
 
+const NO_JOB_OPTION = { label: '无', value: '' }
+
 const DEFAULT_FORM_VALUES: EmployeeFormValues = {
   name: '',
   role: 'employee',
   is_active: true,
-  job_name: undefined,
+  job_name: '',
   hourly_wage: 0,
   coefficient: 1,
   createAuthAccount: false,
@@ -55,11 +57,13 @@ export default function EmployeeForm({
   const { data: jobOptions = [], isLoading: isJobOptionsLoading } =
     useEmployeeJobBaseSettingOptions()
   const jobSelectOptions = useMemo(
-    () =>
-      jobOptions.map((option) => ({
+    () => [
+      NO_JOB_OPTION,
+      ...jobOptions.map((option) => ({
         label: option.job_name,
         value: option.job_name,
       })),
+    ],
     [jobOptions],
   )
   const jobRateMap = useMemo(
@@ -82,7 +86,7 @@ export default function EmployeeForm({
       form.setFieldsValue({
         ...DEFAULT_FORM_VALUES,
         ...initialValues,
-        job_name: initialValues.job_name || undefined,
+        job_name: initialValues.job_name || '',
         hourly_wage: Number(initialValues.hourly_wage ?? 0),
         coefficient: Number(initialValues.coefficient ?? 1),
       })
@@ -113,7 +117,7 @@ export default function EmployeeForm({
         type="info"
         showIcon
         className="mb-4"
-        message={
+        title={
           isEdit
             ? '这里只维护员工基础资料；现有员工的账号开通、解绑、重绑和重置密码请使用工具栏按钮。'
             : `新增员工时可选择同时创建登录账号；默认密码为 ${DEFAULT_EMPLOYEE_AUTH_PASSWORD}，后续账号操作仍可通过工具栏按钮完成。`
@@ -147,12 +151,11 @@ export default function EmployeeForm({
       <Form.Item
         name="job_name"
         label="工种"
-        rules={[{ required: true, message: '请选择工种' }]}
-        extra="选定工种后，岗位时薪会自动绑定岗位基础表中的工时费；岗位基础表变动后会自动同步。"
+        extra="选定工种后，岗位时薪会自动绑定岗位基础表中的工时费；选择“无”表示不关联任何工种。"
       >
         <Select
-          showSearch
-          optionFilterProp="label"
+          showSearch={{ optionFilterProp: 'label' }}
+          allowClear
           placeholder="请选择工种"
           loading={isJobOptionsLoading}
           options={jobSelectOptions}
