@@ -1,8 +1,17 @@
 import { useState } from 'react'
-import { Alert, Button, Modal, Table, TableColumnsType, Upload } from 'antd'
+import {
+  Alert,
+  App,
+  Button,
+  Modal,
+  Table,
+  TableColumnsType,
+  Upload,
+} from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { parseAttendanceExcel } from '@/utils/attendanceExcel'
 import type { AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
 
@@ -42,6 +51,8 @@ export default function AttendanceExcelImport({
   onImport,
   isImporting,
 }: Props) {
+  const { message } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [parsedRows, setParsedRows] = useState<AttendanceDetailFormValues[]>([])
@@ -50,6 +61,11 @@ export default function AttendanceExcelImport({
   const [parsing, setParsing] = useState(false)
 
   const handleBeforeUpload = async (file: File) => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return Upload.LIST_IGNORE
+    }
+
     const isExcel =
       file.type === 'application/vnd.ms-excel' ||
       file.type ===
@@ -87,6 +103,11 @@ export default function AttendanceExcelImport({
   }
 
   const handleOpenModal = () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     setModalOpen(true)
     setParsedRows([])
     setParseErrors([])
@@ -102,6 +123,11 @@ export default function AttendanceExcelImport({
   }
 
   const handleConfirmImport = async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     if (parsedRows.length === 0) return
     await onImport(parsedRows)
     setModalOpen(false)
@@ -118,6 +144,7 @@ export default function AttendanceExcelImport({
       <Button
         icon={<ArrowUpTrayIcon className="h-4 w-4" />}
         onClick={handleOpenModal}
+        disabled={viewerDenied}
       >
         导入 Excel
       </Button>
@@ -134,7 +161,7 @@ export default function AttendanceExcelImport({
           <Button
             key="import"
             type="primary"
-            disabled={parsedRows.length === 0}
+            disabled={viewerDenied || parsedRows.length === 0}
             loading={isImporting}
             onClick={handleConfirmImport}
           >
@@ -158,6 +185,7 @@ export default function AttendanceExcelImport({
             <Button
               icon={<ArrowUpTrayIcon className="h-4 w-4" />}
               loading={parsing}
+              disabled={viewerDenied}
             >
               {parsing ? '解析中...' : '选择 Excel 文件'}
             </Button>

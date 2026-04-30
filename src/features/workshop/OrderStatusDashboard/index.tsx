@@ -27,6 +27,8 @@ import {
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
+import { isViewerRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
 import type { WorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
 import {
   useBatchUpdateWorkshopOrderStatuses,
@@ -95,6 +97,14 @@ const JOB_OUTPUT_COLUMN_ORDER_MAP: ReadonlyMap<string, number> = new Map([
   ...JOB_OUTPUT_COLUMN_ORDER.map((jobName, index) => [jobName, index] as const),
   ['切割', 1],
 ])
+const VIEWER_PRODUCTION_DETAIL_HIDDEN_COLUMN_KEYS: ReadonlySet<string> =
+  new Set([
+    'standardSeconds',
+    'qualifiedHours',
+    'defectHours',
+    'workHours',
+    'dataCategory',
+  ])
 
 const DENSE_TABLE_CELL_STYLE: CSSProperties = {
   fontSize: 12,
@@ -559,6 +569,8 @@ function ProductionDetailModal({
   detail: SelectedJobDetail | null
   onClose: () => void
 }) {
+  const { role } = useAuth()
+  const isViewer = isViewerRole(role)
   const rows = useMemo<ProductionDetailRow[]>(
     () =>
       (detail?.record.productionDetails ?? [])
@@ -629,7 +641,7 @@ function ProductionDetailModal({
       render: renderDetailQuantity,
     },
   ]
-  const columns: TableColumnsType<ProductionDetailRow> = [
+  const baseColumns: TableColumnsType<ProductionDetailRow> = [
     {
       title: '日期',
       dataIndex: 'orderDate',
@@ -842,6 +854,15 @@ function ProductionDetailModal({
       render: renderText,
     },
   ]
+  const columns = isViewer
+    ? baseColumns.filter(
+        (column) =>
+          !VIEWER_PRODUCTION_DETAIL_HIDDEN_COLUMN_KEYS.has(
+            getColumnKey(column),
+          ),
+      )
+    : baseColumns
+  const productionDetailScrollX = getTableColumnWidth(columns)
 
   return (
     <Modal
@@ -889,7 +910,7 @@ function ProductionDetailModal({
             columns={columns}
             dataSource={rows}
             pagination={false}
-            scroll={{ x: 2710, y: 360 }}
+            scroll={{ x: productionDetailScrollX, y: 360 }}
           />
         </div>
       )}
@@ -1516,7 +1537,8 @@ export default function OrderStatusDashboard() {
         key: 'reworkRepairStatus',
         width: 260,
         align: 'center',
-        render: (_value, record) => renderReworkRepairStatus(record.reworkRepairInfo),
+        render: (_value, record) =>
+          renderReworkRepairStatus(record.reworkRepairInfo),
       },
       {
         title: '成品率',

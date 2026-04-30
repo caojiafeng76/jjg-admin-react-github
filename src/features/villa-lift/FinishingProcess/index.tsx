@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { usePermissions } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   VillaLiftFinishingBatchFormValues,
   VillaLiftFinishingRecordFormValues,
@@ -25,6 +26,7 @@ import FinishingRecordEditModal from './FinishingRecordEditModal'
 
 export default function FinishingProcessPage() {
   const { message } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const perms = usePermissions([
     'feature:villa-lift-finishing.create',
     'feature:villa-lift-finishing.edit',
@@ -69,10 +71,20 @@ export default function FinishingProcessPage() {
   // ---- handlers ----
 
   const handleCreate = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     setCreateModalOpen(true)
-  }, [])
+  }, [message, viewerDenied, viewerOperationTip])
 
   const handleCreateOk = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     if (!formRef.current) return
     try {
       const values = await formRef.current.validateFields()
@@ -83,18 +95,28 @@ export default function FinishingProcessPage() {
     } catch (err) {
       if (err instanceof Error) message.error(err.message)
     }
-  }, [createMutation, message])
+  }, [createMutation, message, viewerDenied, viewerOperationTip])
 
   const handleEdit = useCallback(
     (record: VillaLiftFinishingRecordWithOrder) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       setEditingRecord(record)
       setEditModalOpen(true)
     },
-    [],
+    [message, viewerDenied, viewerOperationTip],
   )
 
   const handleEditOk = useCallback(
     async (values: VillaLiftFinishingRecordFormValues) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       if (!editingRecord) return
       try {
         await updateMutation.mutateAsync({ id: editingRecord.id, values })
@@ -105,10 +127,15 @@ export default function FinishingProcessPage() {
         if (err instanceof Error) message.error(err.message)
       }
     },
-    [editingRecord, message, updateMutation],
+    [editingRecord, message, updateMutation, viewerDenied, viewerOperationTip],
   )
 
   const handleBatchDelete = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     try {
       await batchDeleteMutation.mutateAsync(selectedRowKeys)
       message.success(`已删除 ${selectedRowKeys.length} 条记录`)
@@ -116,7 +143,13 @@ export default function FinishingProcessPage() {
     } catch (err) {
       if (err instanceof Error) message.error(err.message)
     }
-  }, [batchDeleteMutation, message, selectedRowKeys])
+  }, [
+    batchDeleteMutation,
+    message,
+    selectedRowKeys,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   function handleOrderFilter(value: string | undefined) {
     const next = new URLSearchParams(searchParams)
@@ -139,7 +172,7 @@ export default function FinishingProcessPage() {
             title={`确认删除选中的 ${selectedRowKeys.length} 条记录？`}
             okText="删除"
             cancelText="取消"
-            okButtonProps={{ danger: true }}
+            okButtonProps={{ danger: true, disabled: viewerDenied }}
             onConfirm={handleBatchDelete}
           >
             <Button
@@ -147,6 +180,7 @@ export default function FinishingProcessPage() {
               danger
               icon={<TrashIcon className="size-4" />}
               loading={batchDeleteMutation.isPending}
+              disabled={viewerDenied}
             >
               批量删除 ({selectedRowKeys.length})
             </Button>
@@ -177,7 +211,7 @@ export default function FinishingProcessPage() {
           <FinishingProcessTable
             loading={isLoading}
             data={data?.records ?? []}
-            canEdit={canEdit}
+            canEdit={!viewerDenied && canEdit}
             selectedRowKeys={selectedRowKeys}
             onSelectionChange={setSelectedRowKeys}
             onEdit={handleEdit}
@@ -199,12 +233,18 @@ export default function FinishingProcessPage() {
           formRef.current?.resetFields()
         }}
         confirmLoading={createMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied }}
         width={800}
         destroyOnClose
       >
         <FinishingProcessForm
           orders={ordersData}
           onFinish={async (values) => {
+            if (viewerDenied) {
+              message.warning(viewerOperationTip)
+              return
+            }
+
             await createMutation.mutateAsync(values)
             message.success('加工记录创建成功')
             setCreateModalOpen(false)

@@ -9,6 +9,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { useAuth } from '@/contexts/useAuth'
 import {
   getPrecisionCuttingTransfersForExport,
@@ -35,6 +36,7 @@ export default function MaterialTransferPage() {
   const { message, modal } = App.useApp()
   const { user } = useAuth()
   const currentUploader = user?.email || null
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
@@ -168,6 +170,11 @@ export default function MaterialTransferPage() {
 
   const handleBatchAudit = useCallback(
     (isAudited: boolean) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       if (selectedRowKeys.length === 0) {
         message.warning(`请选择要${isAudited ? '审核' : '反审核'}的精切转移单`)
         return
@@ -199,13 +206,25 @@ export default function MaterialTransferPage() {
         },
       })
     },
-    [batchUpdateMutation, message, modal, selectedRowKeys],
+    [
+      batchUpdateMutation,
+      message,
+      modal,
+      selectedRowKeys,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleSubmit = useCallback(
     async (
       values: PrecisionCuttingTransferInsert | PrecisionCuttingTransferUpdate,
     ) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (editingRecord) {
           if (!values.operator_names?.length) {
@@ -260,6 +279,8 @@ export default function MaterialTransferPage() {
       currentUploader,
       message,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -272,6 +293,7 @@ export default function MaterialTransferPage() {
           icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
           onClick={() => handleBatchAudit(true)}
           loading={batchUpdateMutation.isPending}
+          disabled={viewerDenied}
         >
           批量审核
         </Button>
@@ -280,6 +302,7 @@ export default function MaterialTransferPage() {
           icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
           onClick={() => handleBatchAudit(false)}
           loading={batchUpdateMutation.isPending}
+          disabled={viewerDenied}
         >
           批量反审核
         </Button>
@@ -333,6 +356,7 @@ export default function MaterialTransferPage() {
             <MaterialTransferDetail
               selectedRecord={activeRecord}
               onEdit={openEditModal}
+              editDisabled={viewerDenied}
             />
           </div>
         </Splitter.Panel>

@@ -13,6 +13,7 @@ import type { Dayjs } from 'dayjs'
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type { AttendanceLateEarlyStat } from '@/services/apiAttendanceDetails'
 import {
   getAttendanceMonthlyExportData,
@@ -185,6 +186,7 @@ function LateEarlyTab({ searchParams }: { searchParams: SearchParams }) {
 }
 
 export default function AttendanceStatsPage() {
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [searchParams, setSearchParams] = useState<SearchParams>({})
   const [exportMonth, setExportMonth] = useState<Dayjs | null>(null)
   const [exporting, setExporting] = useState(false)
@@ -192,6 +194,11 @@ export default function AttendanceStatsPage() {
   const [messageApi, contextHolder] = message.useMessage()
 
   async function handleExportLateEarly() {
+    if (viewerDenied) {
+      messageApi.warning(viewerOperationTip)
+      return
+    }
+
     setExportingLateEarly(true)
     try {
       const rows = await getAttendanceLateEarlyStats(searchParams)
@@ -212,6 +219,11 @@ export default function AttendanceStatsPage() {
   }
 
   async function handleExport() {
+    if (viewerDenied) {
+      messageApi.warning(viewerOperationTip)
+      return
+    }
+
     if (!exportMonth) {
       messageApi.warning('请先选择导出月份')
       return
@@ -260,6 +272,7 @@ export default function AttendanceStatsPage() {
             icon={<ArrowDownTrayIcon className="h-4 w-4" />}
             loading={exportingLateEarly}
             onClick={handleExportLateEarly}
+            disabled={viewerDenied}
           >
             导出迟到/早退
           </Button>
@@ -268,6 +281,7 @@ export default function AttendanceStatsPage() {
             icon={<ArrowDownTrayIcon className="h-4 w-4" />}
             loading={exporting}
             onClick={handleExport}
+            disabled={viewerDenied}
           >
             导出出勤月报
           </Button>

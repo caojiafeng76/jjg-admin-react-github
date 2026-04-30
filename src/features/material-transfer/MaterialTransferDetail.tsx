@@ -6,11 +6,13 @@ import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfe
 interface Props {
   selectedRecord: MaterialTransferWithEmployee | null
   onEdit?: (record: MaterialTransferWithEmployee) => void
+  editDisabled?: boolean
 }
 
 export default function MaterialTransferDetail({
   selectedRecord,
   onEdit,
+  editDisabled = false,
 }: Props) {
   if (!selectedRecord) {
     return (
@@ -57,6 +59,7 @@ export default function MaterialTransferDetail({
             type="text"
             icon={<PencilSquareIcon className="h-4 w-4" />}
             onClick={() => onEdit(selectedRecord)}
+            disabled={editDisabled}
             className="ml-auto"
           >
             编辑

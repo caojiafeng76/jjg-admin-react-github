@@ -1,5 +1,7 @@
 import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
-import { Button } from 'antd'
+import { Button, Tooltip } from 'antd'
+
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 
 interface Props {
   onClick: () => void
@@ -14,15 +16,22 @@ export default function DownloadTemplateButton({
   disabled = false,
   loading = false,
 }: Props) {
-  return (
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+  const button = (
     <Button
       type="text"
       icon={<ArrowDownTrayIcon className="size-4 text-cyan-600/80!" />}
       onClick={onClick}
-      disabled={disabled}
+      disabled={viewerDenied || disabled}
       loading={loading}
     >
       {children || '下载模板'}
     </Button>
+  )
+
+  return viewerDenied ? (
+    <Tooltip title={viewerOperationTip}>{button}</Tooltip>
+  ) : (
+    button
   )
 }

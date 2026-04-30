@@ -25,6 +25,7 @@ import {
 
 import { usePermissions } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   VillaLiftMarkDateField,
   VillaLiftOrder,
@@ -130,6 +131,7 @@ function ItemsModal({ open, orderId, onClose }: ItemsModalProps) {
 // ----------------------------------------------------------------
 export default function VillaLiftOrderListPage() {
   const { message } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const perms = usePermissions([
     'feature:villa-lift-order.create',
     'feature:villa-lift-order.edit',
@@ -266,22 +268,40 @@ export default function VillaLiftOrderListPage() {
 
   // 新建订单
   const handleCreate = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     setIsEdit(false)
     setEditingRecord(null)
     setModalTitle('新建别墅梯订单')
     setIsModalOpen(true)
-  }, [])
+  }, [message, viewerDenied, viewerOperationTip])
 
   // 行内编辑订单
-  const handleEdit = useCallback((record: VillaLiftOrder) => {
-    setEditingRecord(record)
-    setIsEdit(true)
-    setModalTitle('编辑别墅梯订单')
-    setIsModalOpen(true)
-  }, [])
+  const handleEdit = useCallback(
+    (record: VillaLiftOrder) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
+      setEditingRecord(record)
+      setIsEdit(true)
+      setModalTitle('编辑别墅梯订单')
+      setIsModalOpen(true)
+    },
+    [message, viewerDenied, viewerOperationTip],
+  )
 
   // 批量删除
   const handleBatchDelete = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     try {
       await batchDeleteMutation.mutateAsync(selectedRowKeys)
       message.success(`已删除 ${selectedRowKeys.length} 条订单`)
@@ -289,10 +309,21 @@ export default function VillaLiftOrderListPage() {
     } catch (err) {
       if (err instanceof Error) message.error(err.message)
     }
-  }, [batchDeleteMutation, selectedRowKeys, message])
+  }, [
+    batchDeleteMutation,
+    selectedRowKeys,
+    message,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   // 批量结案
   const handleBatchClose = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     try {
       await batchStatusMutation.mutateAsync({
         ids: selectedRowKeys,
@@ -303,10 +334,21 @@ export default function VillaLiftOrderListPage() {
     } catch (err) {
       if (err instanceof Error) message.error(err.message)
     }
-  }, [batchStatusMutation, selectedRowKeys, message])
+  }, [
+    batchStatusMutation,
+    selectedRowKeys,
+    message,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   // 批量反结案
   const handleBatchReopen = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     try {
       await batchStatusMutation.mutateAsync({
         ids: selectedRowKeys,
@@ -317,17 +359,36 @@ export default function VillaLiftOrderListPage() {
     } catch (err) {
       if (err instanceof Error) message.error(err.message)
     }
-  }, [batchStatusMutation, selectedRowKeys, message])
+  }, [
+    batchStatusMutation,
+    selectedRowKeys,
+    message,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   // 弹出明细编辑弹窗
-  const handleEditItems = useCallback((orderId: string) => {
-    setItemsOrderId(orderId)
-    setItemsModalOpen(true)
-  }, [])
+  const handleEditItems = useCallback(
+    (orderId: string) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
+      setItemsOrderId(orderId)
+      setItemsModalOpen(true)
+    },
+    [message, viewerDenied, viewerOperationTip],
+  )
 
   // 标记完成日期（批量）
   const handleBatchMarkDate = useCallback(
     async (field: VillaLiftMarkDateField, label: string) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       if (selectedRowKeys.length === 0) return
       try {
         await batchMarkMutation.mutateAsync({
@@ -341,12 +402,23 @@ export default function VillaLiftOrderListPage() {
         if (err instanceof Error) message.error(err.message)
       }
     },
-    [batchMarkMutation, selectedRowKeys, message],
+    [
+      batchMarkMutation,
+      selectedRowKeys,
+      message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   // 提交订单表单
   const handleFinish = useCallback(
     async (values: VillaLiftOrderFormValues) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && editingRecord) {
           const { items: _items, ...orderFields } = values
@@ -375,6 +447,8 @@ export default function VillaLiftOrderListPage() {
       message,
       resetModalState,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -445,7 +519,7 @@ export default function VillaLiftOrderListPage() {
                   description="删除后不可恢复，同时删除所有明细。"
                   okText="删除"
                   cancelText="取消"
-                  okButtonProps={{ danger: true }}
+                  okButtonProps={{ danger: true, disabled: viewerDenied }}
                   onConfirm={handleBatchDelete}
                 >
                   <Button
@@ -453,6 +527,7 @@ export default function VillaLiftOrderListPage() {
                     danger
                     icon={<TrashIcon className="size-4" />}
                     loading={batchDeleteMutation.isPending}
+                    disabled={viewerDenied}
                   >
                     批量删除 ({selectedRowKeys.length})
                   </Button>
@@ -466,6 +541,7 @@ export default function VillaLiftOrderListPage() {
                   }
                   loading={batchStatusMutation.isPending}
                   onClick={handleBatchClose}
+                  disabled={viewerDenied}
                 >
                   批量结案 ({selectedRowKeys.length})
                 </Button>
@@ -478,6 +554,7 @@ export default function VillaLiftOrderListPage() {
                   }
                   loading={batchStatusMutation.isPending}
                   onClick={handleBatchReopen}
+                  disabled={viewerDenied}
                 >
                   批量反结案 ({selectedRowKeys.length})
                 </Button>
@@ -487,6 +564,7 @@ export default function VillaLiftOrderListPage() {
                   type="text"
                   icon={<CubeIcon className="size-4 text-purple-500/80!" />}
                   loading={batchMarkMutation.isPending}
+                  disabled={viewerDenied}
                   onClick={() =>
                     handleBatchMarkDate('material_selection_date', '挑料完成')
                   }
@@ -499,6 +577,7 @@ export default function VillaLiftOrderListPage() {
                   type="text"
                   icon={<PaintBrushIcon className="size-4 text-blue-500/80!" />}
                   loading={batchMarkMutation.isPending}
+                  disabled={viewerDenied}
                   onClick={() =>
                     handleBatchMarkDate('painting_date', '喷涂完成')
                   }
@@ -511,6 +590,7 @@ export default function VillaLiftOrderListPage() {
                   type="text"
                   icon={<FilmIcon className="size-4 text-cyan-500/80!" />}
                   loading={batchMarkMutation.isPending}
+                  disabled={viewerDenied}
                   onClick={() => handleBatchMarkDate('film_date', '贴膜完成')}
                 >
                   贴膜完成 ({selectedRowKeys.length})
@@ -521,6 +601,7 @@ export default function VillaLiftOrderListPage() {
                   type="text"
                   icon={<ScissorsIcon className="size-4 text-orange-500/80!" />}
                   loading={batchMarkMutation.isPending}
+                  disabled={viewerDenied}
                   onClick={() =>
                     handleBatchMarkDate('cutting_actual_date', '切割完成')
                   }
@@ -535,6 +616,7 @@ export default function VillaLiftOrderListPage() {
                     <WrenchScrewdriverIcon className="size-4 text-amber-600/80!" />
                   }
                   loading={batchMarkMutation.isPending}
+                  disabled={viewerDenied}
                   onClick={() =>
                     handleBatchMarkDate('processing_actual_date', '加工完成')
                   }
@@ -549,6 +631,7 @@ export default function VillaLiftOrderListPage() {
                     <WrenchScrewdriverIcon className="size-4 text-rose-500/80!" />
                   }
                   loading={batchMarkMutation.isPending}
+                  disabled={viewerDenied}
                   onClick={() =>
                     handleBatchMarkDate('cabin_processing_date', '轿箱加工完成')
                   }
@@ -563,6 +646,7 @@ export default function VillaLiftOrderListPage() {
                     <WrenchScrewdriverIcon className="size-4 text-emerald-500/80!" />
                   }
                   loading={batchMarkMutation.isPending}
+                  disabled={viewerDenied}
                   onClick={() =>
                     handleBatchMarkDate(
                       'middle_door_processing_date',
@@ -580,6 +664,7 @@ export default function VillaLiftOrderListPage() {
                     <WrenchScrewdriverIcon className="size-4 text-indigo-500/80!" />
                   }
                   loading={batchMarkMutation.isPending}
+                  disabled={viewerDenied}
                   onClick={() =>
                     handleBatchMarkDate('frame_processing_date', '井架加工完成')
                   }
@@ -668,8 +753,8 @@ export default function VillaLiftOrderListPage() {
             pageSize={pageSize}
             scrollY={scrollY}
             rowHeight={rowHeight}
-            canEdit={canEdit}
-            canEditItems={canEditItems}
+            canEdit={!viewerDenied && canEdit}
+            canEditItems={!viewerDenied && canEditItems}
             onEdit={handleEdit}
             onEditItems={handleEditItems}
             selectedRowKeys={selectedRowKeys}
@@ -688,6 +773,7 @@ export default function VillaLiftOrderListPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetModalState}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied }}
         width={760}
         destroyOnClose
       >

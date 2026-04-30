@@ -1,6 +1,10 @@
 import { Button, Tooltip } from 'antd'
 import { PrinterIcon } from '@heroicons/react/16/solid'
 import { usePermission } from '@/hooks/usePermission'
+import {
+  useViewerOperationGuard,
+  VIEWER_OPERATION_TIP,
+} from '@/hooks/useViewerOperationGuard'
 
 interface Props {
   handlePrint: () => void
@@ -21,8 +25,10 @@ export default function PrintButton({
   permissionKey,
   noPermissionTip = '无打印权限',
 }: Props) {
+  const { viewerDenied } = useViewerOperationGuard()
   const allowed = usePermission(permissionKey ?? '')
-  const denied = Boolean(permissionKey) && !allowed
+  const denied = viewerDenied || (Boolean(permissionKey) && !allowed)
+  const deniedTip = viewerDenied ? VIEWER_OPERATION_TIP : noPermissionTip
   const btn = (
     <Button
       type="text"
@@ -43,5 +49,5 @@ export default function PrintButton({
       )}
     </Button>
   )
-  return denied ? <Tooltip title={noPermissionTip}>{btn}</Tooltip> : btn
+  return denied ? <Tooltip title={deniedTip}>{btn}</Tooltip> : btn
 }

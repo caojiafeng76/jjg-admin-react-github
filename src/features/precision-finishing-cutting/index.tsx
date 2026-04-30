@@ -10,6 +10,7 @@ import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import { isEmployeeSideRole } from '@/config/access'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useAuth } from '@/contexts/useAuth'
 import {
@@ -38,6 +39,7 @@ export default function PrecisionFinishingCuttingPage() {
   const { message, modal } = App.useApp()
   const navigate = useNavigate()
   const { role, employeeProfile, user } = useAuth()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const isEmployeeView = isEmployeeSideRole(role)
   const isOwnOnlyView = role === 'employee'
   const currentUploader = employeeProfile?.name || user?.email || null
@@ -221,6 +223,11 @@ export default function PrecisionFinishingCuttingPage() {
 
   const handleBatchAudit = useCallback(
     (isAudited: boolean) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       if (selectedRowKeys.length === 0) {
         message.warning(
           `请选择要${isAudited ? '审核' : '反审核'}的精加工切割单`,
@@ -254,13 +261,25 @@ export default function PrecisionFinishingCuttingPage() {
         },
       })
     },
-    [batchUpdateMutation, message, modal, selectedRowKeys],
+    [
+      batchUpdateMutation,
+      message,
+      modal,
+      selectedRowKeys,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleSubmit = useCallback(
     async (
       values: PrecisionFinishingCuttingInsert | PrecisionFinishingCuttingUpdate,
     ) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (editingRecord) {
           if (isEmployeeView && editingRecord.is_audited) {
@@ -342,6 +361,8 @@ export default function PrecisionFinishingCuttingPage() {
       isEmployeeView,
       message,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -373,6 +394,7 @@ export default function PrecisionFinishingCuttingPage() {
               icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
               onClick={() => handleBatchAudit(true)}
               loading={batchUpdateMutation.isPending}
+              disabled={viewerDenied}
             >
               批量审核
             </Button>
@@ -381,6 +403,7 @@ export default function PrecisionFinishingCuttingPage() {
               icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
               onClick={() => handleBatchAudit(false)}
               loading={batchUpdateMutation.isPending}
+              disabled={viewerDenied}
             >
               批量反审核
             </Button>
@@ -431,6 +454,7 @@ export default function PrecisionFinishingCuttingPage() {
               selectedRowKeys={selectedRowKeys}
               onSelect={setSelectedRowKeys}
               onEdit={openEditModal}
+              editDisabled={viewerDenied}
             />
           </div>
           <div className="flex justify-center pb-1">
@@ -467,6 +491,7 @@ export default function PrecisionFinishingCuttingPage() {
               <PrecisionFinishingCuttingDetail
                 selectedRecord={activeRecord}
                 onEdit={openEditModal}
+                editDisabled={viewerDenied}
               />
             </div>
           </Splitter.Panel>
