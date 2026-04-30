@@ -52,6 +52,7 @@ import type {
   ProductionOrderItemInsert,
 } from '@/services/apiProductionOrderItems'
 import { exportProductionOrdersToExcel } from '@/utils/productionOrderExcel'
+import { exportProductionOrderNightSnackDetailsToExcel } from '@/utils/productionOrderNightSnackExcel'
 import {
   useProductionOrders,
   useProductionOrder,
@@ -190,6 +191,7 @@ export default function ProductionOrderPage() {
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [isExporting, setIsExporting] = useState(false)
+  const [isNightSnackExporting, setIsNightSnackExporting] = useState(false)
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null)
   const [isManagementUnlocked, setIsManagementUnlocked] = useState(
     !isAdminManagementView,
@@ -508,6 +510,99 @@ export default function ProductionOrderPage() {
       setIsExporting(false)
     }
   }, [filters, message, orderData?.total, selectedRowKeys])
+
+  const handleNightSnackExport = useCallback(async () => {
+    const exportTargetCount =
+      selectedRowKeys.length > 0
+        ? selectedRowKeys.length
+        : (orderData?.total ?? 0)
+
+    if (exportTargetCount === 0) {
+      message.warning('当前没有可导出的工单')
+      return
+    }
+
+    try {
+      setIsNightSnackExporting(true)
+      const updateProgress = (loaded: number, total: number) => {
+        message.open({
+          key: 'production-order-night-snack-export',
+          type: 'loading',
+          content: `正在分片读取夜宵明细 ${loaded}/${total}，每批 ${PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE} 条...`,
+          duration: 0,
+        })
+      }
+
+      updateProgress(0, exportTargetCount)
+
+      const exportOrders =
+        selectedRowKeys.length > 0
+          ? await getProductionOrdersForExportChunked(
+              selectedRowKeys.map((key) => String(key)),
+              {
+                onProgress: ({ loaded, total }) => {
+                  updateProgress(loaded, total)
+                },
+              },
+            )
+          : await getProductionOrdersForExportByFiltersChunked(filters, {
+              onProgress: ({ loaded, total }) => {
+                updateProgress(loaded, total)
+              },
+            })
+
+      message.open({
+        key: 'production-order-night-snack-export',
+        type: 'loading',
+        content: `已读取 ${exportOrders.length} 张工单，正在生成夜宵明细表...`,
+        duration: 0,
+      })
+
+      const result = exportProductionOrderNightSnackDetailsToExcel(
+        exportOrders,
+        {
+          statistician: employeeProfile?.name || '',
+        },
+      )
+
+      if (result.nightShiftCount === 0) {
+        message.warning({
+          key: 'production-order-night-snack-export',
+          content: '当前工单中没有可导出的夜班记录',
+        })
+        return
+      }
+
+      message.success({
+        key: 'production-order-night-snack-export',
+        content: `已导出 ${result.employeeCount} 名员工、${result.nightShiftCount} 个夜班`,
+      })
+
+      if (selectedRowKeys.length > 0) {
+        setSelectedRowKeys([])
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error({
+          key: 'production-order-night-snack-export',
+          content: error.message,
+        })
+      } else {
+        message.error({
+          key: 'production-order-night-snack-export',
+          content: '夜宵明细导出失败，请稍后重试',
+        })
+      }
+    } finally {
+      setIsNightSnackExporting(false)
+    }
+  }, [
+    employeeProfile?.name,
+    filters,
+    message,
+    orderData?.total,
+    selectedRowKeys,
+  ])
 
   const handleBatchAudit = useCallback(
     (isAudited: boolean) => {
@@ -947,6 +1042,15 @@ export default function ProductionOrderPage() {
               {selectedRowKeys.length > 0
                 ? `导出选中项 (${selectedRowKeys.length})`
                 : `导出当前筛选结果${orderData?.total ? ` (${orderData.total})` : ''}`}
+            </ExportButton>
+            <ExportButton
+              handleExport={handleNightSnackExport}
+              disabled={
+                selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
+              }
+              loading={isNightSnackExporting}
+            >
+              导出夜宵明细
             </ExportButton>
             <DeleteButton
               onConfirm={handleDelete}
