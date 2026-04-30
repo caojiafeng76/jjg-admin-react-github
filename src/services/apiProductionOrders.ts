@@ -283,26 +283,43 @@ export async function getProductionOrdersForExport(ids: string[]) {
   ).flat()
   const rowMap = new Map(rows.map((row) => [row.id, row]))
 
-  return uniqueIds
-    .map((id) => rowMap.get(id))
-    .filter((row): row is ProductionOrderForExport => Boolean(row))
-    .sort((left, right) => {
-      const dateCompare = left.order_date.localeCompare(right.order_date)
-
-      if (dateCompare !== 0) {
-        return dateCompare
-      }
-
-      return left.created_at.localeCompare(right.created_at)
-    })
+  return sortProductionOrdersForExport(
+    uniqueIds
+      .map((id) => rowMap.get(id))
+      .filter((row): row is ProductionOrderForExport => Boolean(row)),
+  )
 }
 
 const PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE = 1000
 const PRODUCTION_ORDER_FILTER_EXPORT_PAGE_CONCURRENCY = 5
+export const PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE = 30
+
+export interface ProductionOrderExportProgress {
+  loaded: number
+  total: number
+}
+
+function compareProductionOrdersForExport(
+  left: ProductionOrderForExport,
+  right: ProductionOrderForExport,
+) {
+  const dateCompare = left.order_date.localeCompare(right.order_date)
+
+  if (dateCompare !== 0) {
+    return dateCompare
+  }
+
+  return left.created_at.localeCompare(right.created_at)
+}
+
+function sortProductionOrdersForExport(rows: ProductionOrderForExport[]) {
+  return [...rows].sort(compareProductionOrdersForExport)
+}
 
 async function getProductionOrderIdsPageByFilters({
   page,
   pageSize,
+  withCount = true,
   startDate,
   endDate,
   employeeId,
@@ -314,19 +331,22 @@ async function getProductionOrderIdsPageByFilters({
 }: {
   page: number
   pageSize: number
+  withCount?: boolean
 } & ProductionOrderFilters) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
   const hasItemFilters = Boolean(dataCategory || productModel || customerModel)
-
-  let query = supabase
-    .from('production_orders')
-    .select(
-      `
+  const selectClause = `
       id${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, data_category, product_model, customer_model)' : ''}
-    `,
-      { count: 'exact' },
-    )
+    `
+
+  let query = (
+    withCount
+      ? supabase.from('production_orders').select(selectClause, {
+          count: 'exact',
+        })
+      : supabase.from('production_orders').select(selectClause)
+  )
     .order('created_at', { ascending: false })
     .order('order_date', { ascending: false })
 
@@ -380,8 +400,89 @@ async function getProductionOrderIdsPageByFilters({
     ids: ((data || []) as unknown as Array<{ id: string }>).map(
       (item) => item.id,
     ),
-    total: count || 0,
+    total: count ?? 0,
   }
+}
+
+export async function getProductionOrdersForExportChunked(
+  ids: string[],
+  options?: {
+    chunkSize?: number
+    onProgress?: (progress: ProductionOrderExportProgress) => void
+  },
+) {
+  if (ids.length === 0) {
+    return [] as ProductionOrderForExport[]
+  }
+
+  const uniqueIds = Array.from(new Set(ids.filter(Boolean)))
+  const chunkSize =
+    options?.chunkSize ?? PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE
+  const rows: ProductionOrderForExport[] = []
+
+  for (let index = 0; index < uniqueIds.length; index += chunkSize) {
+    const chunkIds = uniqueIds.slice(index, index + chunkSize)
+    rows.push(...(await getProductionOrdersForExport(chunkIds)))
+    options?.onProgress?.({
+      loaded: Math.min(rows.length, uniqueIds.length),
+      total: uniqueIds.length,
+    })
+  }
+
+  return sortProductionOrdersForExport(rows)
+}
+
+export async function getProductionOrdersForExportByFiltersChunked(
+  filters: ProductionOrderFilters,
+  options?: {
+    pageSize?: number
+    onProgress?: (progress: ProductionOrderExportProgress) => void
+  },
+) {
+  const pageSize =
+    options?.pageSize ?? PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE
+  const firstPage = await getProductionOrderIdsPageByFilters({
+    page: 1,
+    pageSize,
+    withCount: true,
+    ...filters,
+  })
+  const total = firstPage.total
+  const rows: ProductionOrderForExport[] = []
+
+  if (total === 0) {
+    options?.onProgress?.({ loaded: 0, total: 0 })
+    return rows
+  }
+
+  const appendPageOrders = async (ids: string[]) => {
+    if (ids.length === 0) {
+      return
+    }
+
+    rows.push(...(await getProductionOrdersForExport(ids)))
+    options?.onProgress?.({
+      loaded: Math.min(rows.length, total),
+      total,
+    })
+  }
+
+  await appendPageOrders(firstPage.ids)
+
+  const totalPages = Math.ceil(total / pageSize)
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    const pageResult = await getProductionOrderIdsPageByFilters({
+      page,
+      pageSize,
+      withCount: false,
+      ...filters,
+    })
+
+    await appendPageOrders(pageResult.ids)
+  }
+
+  return sortProductionOrdersForExport(rows)
 }
 
 export async function getProductionOrdersForExportByFilters(

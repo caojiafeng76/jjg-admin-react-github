@@ -127,7 +127,7 @@ function getEmployeeCoefficient(orders: ProductionOrderForExport[]) {
   return roundToTwo(value == null ? 1 : Number(value))
 }
 
-function compareEmployeeGroupsByJobPresence(
+function compareEmployeeGroupsByMissingJobFirst(
   [, leftOrders]: [string, ProductionOrderForExport[]],
   [, rightOrders]: [string, ProductionOrderForExport[]],
 ) {
@@ -138,7 +138,7 @@ function compareEmployeeGroupsByJobPresence(
     return 0
   }
 
-  return leftHasJobName ? -1 : 1
+  return leftHasJobName ? 1 : -1
 }
 
 function getExcelColumnName(columnIndex: number) {
@@ -612,7 +612,7 @@ function createProductionOrderWorkbook(orders: ProductionOrderForExport[]) {
   })
 
   const employeeGroupEntries = Array.from(employeeGroups.entries()).sort(
-    compareEmployeeGroupsByJobPresence,
+    compareEmployeeGroupsByMissingJobFirst,
   )
   const summaryRows = buildSummarySheetRows(employeeGroupEntries)
   const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryRows)
