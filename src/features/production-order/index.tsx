@@ -37,8 +37,9 @@ import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import {
-  getProductionOrdersForExportByFilters,
-  getProductionOrdersForExport,
+  getProductionOrdersForExportByFiltersChunked,
+  getProductionOrdersForExportChunked,
+  PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE,
   checkEmployeeOrderExistsOnDate,
   type ProductionOrder,
   type ProductionOrderFilters,
@@ -51,10 +52,6 @@ import type {
   ProductionOrderItemInsert,
 } from '@/services/apiProductionOrderItems'
 import { exportProductionOrdersToExcel } from '@/utils/productionOrderExcel'
-import {
-  startProductionOrderExportTask,
-  waitForProductionOrderExportTask,
-} from '@/services/apiProductionOrderExport'
 import {
   useProductionOrders,
   useProductionOrder,
@@ -81,12 +78,6 @@ import {
 } from '@/services/apiAdminManagementPassword'
 import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
-
-const CLIENT_EXPORT_ORDER_THRESHOLD = 1500
-const ASYNC_EXPORT_WAIT_OPTIONS = {
-  intervalMs: 1000,
-  maxAttempts: 12,
-} as const
 
 type UnlockManagementFormValues = {
   password: string
@@ -446,9 +437,6 @@ export default function ProductionOrderPage() {
       selectedRowKeys.length > 0
         ? selectedRowKeys.length
         : (orderData?.total ?? 0)
-    const shouldPreferClientExport =
-      selectedRowKeys.length > 0 ||
-      exportTargetCount <= CLIENT_EXPORT_ORDER_THRESHOLD
 
     if (exportTargetCount === 0) {
       message.warning('当前没有可导出的工单')
@@ -458,76 +446,48 @@ export default function ProductionOrderPage() {
     try {
       setIsExporting(true)
       let exportCount = exportTargetCount
-
-      const fallbackToClientExport = async () => {
-        const exportOrders =
-          selectedRowKeys.length > 0
-            ? await getProductionOrdersForExport(
-                selectedRowKeys.map((key) => String(key)),
-              )
-            : await getProductionOrdersForExportByFilters(filters)
-
-        exportCount = exportOrders.length
-        await exportProductionOrdersToExcel(exportOrders)
-        message.success({
-          key: 'production-order-export',
-          content: `已导出 ${exportCount} 张工单`,
-        })
-      }
-
-      if (shouldPreferClientExport) {
-        await fallbackToClientExport()
-
-        if (selectedRowKeys.length > 0) {
-          setSelectedRowKeys([])
-        }
-
-        return
-      }
-
-      try {
-        const { jobId } = await startProductionOrderExportTask({
-          selectedIds:
-            selectedRowKeys.length > 0
-              ? selectedRowKeys.map((key) => String(key))
-              : undefined,
-          filters: selectedRowKeys.length > 0 ? undefined : filters,
-        })
-
+      const updateProgress = (loaded: number, total: number) => {
         message.open({
           key: 'production-order-export',
           type: 'loading',
-          content: '正在后台生成导出文件，请稍候...',
+          content: `正在分片读取工单 ${loaded}/${total}，每批 ${PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE} 条...`,
           duration: 0,
         })
-
-        const exportJob = await waitForProductionOrderExportTask(
-          jobId,
-          ASYNC_EXPORT_WAIT_OPTIONS,
-        )
-        const link = document.createElement('a')
-
-        link.href = exportJob.downloadUrl!
-        link.click()
-
-        message.success({
-          key: 'production-order-export',
-          content: `已导出 ${exportCount} 张工单`,
-        })
-      } catch (asyncExportError) {
-        message.open({
-          key: 'production-order-export',
-          type: 'loading',
-          content: '后台导出耗时较长，已切换为前端导出，请稍候...',
-          duration: 0,
-        })
-
-        await fallbackToClientExport()
-
-        if (asyncExportError instanceof Error) {
-          console.warn('后台导出任务不可用，已回退为前端导出', asyncExportError)
-        }
       }
+
+      updateProgress(0, exportTargetCount)
+
+      const exportOrders =
+        selectedRowKeys.length > 0
+          ? await getProductionOrdersForExportChunked(
+              selectedRowKeys.map((key) => String(key)),
+              {
+                onProgress: ({ loaded, total }) => {
+                  updateProgress(loaded, total)
+                },
+              },
+            )
+          : await getProductionOrdersForExportByFiltersChunked(filters, {
+              onProgress: ({ loaded, total }) => {
+                updateProgress(loaded, total)
+              },
+            })
+
+      exportCount = exportOrders.length
+
+      message.open({
+        key: 'production-order-export',
+        type: 'loading',
+        content: `已读取 ${exportCount} 张工单，正在合并生成 Excel...`,
+        duration: 0,
+      })
+
+      await exportProductionOrdersToExcel(exportOrders)
+
+      message.success({
+        key: 'production-order-export',
+        content: `已导出 ${exportCount} 张工单`,
+      })
 
       if (selectedRowKeys.length > 0) {
         setSelectedRowKeys([])
