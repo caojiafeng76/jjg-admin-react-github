@@ -6,11 +6,13 @@ import type { PrecisionCuttingTransferRow } from '@/services/apiPrecisionCutting
 interface Props {
   selectedRecord: PrecisionCuttingTransferRow | null
   onEdit?: (record: PrecisionCuttingTransferRow) => void
+  editDisabled?: boolean
 }
 
 export default function MaterialTransferDetail({
   selectedRecord,
   onEdit,
+  editDisabled = false,
 }: Props) {
   if (!selectedRecord) {
     return (
@@ -67,6 +69,7 @@ export default function MaterialTransferDetail({
             type="text"
             icon={<PencilSquareIcon className="h-4 w-4" />}
             onClick={() => onEdit(selectedRecord)}
+            disabled={editDisabled}
             className="ml-auto"
           >
             编辑

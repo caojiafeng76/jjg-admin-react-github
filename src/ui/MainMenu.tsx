@@ -10,6 +10,8 @@ import {
 } from '@heroicons/react/16/solid'
 
 import { usePermissionContext } from '@/contexts/PermissionContext'
+import { useAuth } from '@/contexts/useAuth'
+import { isViewerRole } from '@/config/access'
 
 // ----------------------------------------------------------------
 // 菜单项类型扩展：新增可选 permission 字段
@@ -22,6 +24,8 @@ interface MenuItemDef {
   icon?: React.ReactNode
   /** 对应 nav:* 权限 key；父级分组填写 nav:* 权限，无则根据子项决定是否显示 */
   permission?: string
+  /** 查看员专用隐藏项：用于没有独立权限 key 的父级分组 */
+  hiddenForViewer?: boolean
   children?: MenuItemDef[]
 }
 
@@ -291,12 +295,14 @@ const allMenuItems: MenuItemDef[] = [
     label: '权限管理',
     icon: <KeyIcon className="size-4" />,
     permission: 'nav:access-management',
+    hiddenForViewer: true,
   },
   // 员工/组长工作台（无独立 nav 权限，靠子项权限决定显示）
   {
     key: 'employee-workspace',
     label: '员工工作台',
     icon: <Square3Stack3DIcon className="size-4" />,
+    hiddenForViewer: true,
     children: [
       {
         key: 'production-order',
@@ -318,13 +324,20 @@ const allMenuItems: MenuItemDef[] = [
 function filterMenuByPermissions(
   items: MenuItemDef[],
   can: (key: string) => boolean,
+  isViewer: boolean,
 ): MenuItemBase[] {
   const result: MenuItemBase[] = []
 
   for (const item of items) {
+    if (isViewer && item.hiddenForViewer) continue
+
     // 有子菜单
     if (item.children && item.children.length > 0) {
-      const filteredChildren = filterMenuByPermissions(item.children, can)
+      const filteredChildren = filterMenuByPermissions(
+        item.children,
+        can,
+        isViewer,
+      )
       // 子项全被过滤掉 → 隐藏父分组
       if (filteredChildren.length === 0) continue
       // 父分组有 permission → 需要额外检查（并存期保留：permission 不存在或有权限）
@@ -378,12 +391,14 @@ const MainMenu: React.FC = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { can, isLoading } = usePermissionContext()
+  const { role } = useAuth()
+  const isViewer = isViewerRole(role)
 
   const items = useMemo(() => {
     // 权限加载中时返回空（避免闪烁），PermissionContext 内部有 staleTime 缓存
     if (isLoading) return []
-    return filterMenuByPermissions(allMenuItems, can)
-  }, [can, isLoading])
+    return filterMenuByPermissions(allMenuItems, can, isViewer)
+  }, [can, isLoading, isViewer])
 
   // 从路径中提取当前选中的菜单项和应该展开的父菜单
   const { selectedKey, openKey } = useMemo(() => {

@@ -6,11 +6,13 @@ import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecis
 interface Props {
   selectedRecord: PrecisionFinishingCuttingWithEmployee | null
   onEdit?: (record: PrecisionFinishingCuttingWithEmployee) => void
+  editDisabled?: boolean
 }
 
 export default function PrecisionFinishingCuttingDetail({
   selectedRecord,
   onEdit,
+  editDisabled = false,
 }: Props) {
   if (!selectedRecord) {
     return (
@@ -67,6 +69,7 @@ export default function PrecisionFinishingCuttingDetail({
             type="text"
             icon={<PencilSquareIcon className="h-4 w-4" />}
             onClick={() => onEdit(selectedRecord)}
+            disabled={editDisabled}
             className="ml-auto"
           >
             编辑

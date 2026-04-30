@@ -9,6 +9,7 @@ interface Props {
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   onEdit: (record: PrecisionFinishingCuttingWithEmployee) => void
+  editDisabled?: boolean
 }
 
 export default function PrecisionFinishingCuttingMobileList({
@@ -17,6 +18,7 @@ export default function PrecisionFinishingCuttingMobileList({
   selectedRowKeys,
   onSelect,
   onEdit,
+  editDisabled = false,
 }: Props) {
   if (!loading && data.length === 0) {
     return (
@@ -231,7 +233,7 @@ export default function PrecisionFinishingCuttingMobileList({
                 type={selected ? 'default' : 'primary'}
                 ghost={selected}
                 icon={<PencilSquareIcon className="size-4" />}
-                disabled={record.is_audited}
+                disabled={editDisabled || record.is_audited}
                 onClick={(event) => {
                   event.stopPropagation()
                   onEdit(record)

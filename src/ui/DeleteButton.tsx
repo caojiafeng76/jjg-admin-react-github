@@ -1,6 +1,10 @@
 import { XCircleIcon } from '@heroicons/react/16/solid'
 import { Button, Popconfirm, Tooltip } from 'antd'
+import { isViewerRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
 import { usePermission } from '@/hooks/usePermission'
+
+const VIEWER_OPERATION_TIP = '查看员仅可查看数据'
 
 type SharedProps = {
   isDeleting: boolean
@@ -31,8 +35,11 @@ export default function DeleteButton({
   permissionKey,
   noPermissionTip = '无删除权限',
 }: Props) {
+  const { role } = useAuth()
   const allowed = usePermission(permissionKey ?? '')
-  const denied = Boolean(permissionKey) && !allowed
+  const viewerDenied = isViewerRole(role)
+  const denied = viewerDenied || (Boolean(permissionKey) && !allowed)
+  const deniedTip = viewerDenied ? VIEWER_OPERATION_TIP : noPermissionTip
 
   if (onClick) {
     const btn = (
@@ -46,7 +53,7 @@ export default function DeleteButton({
         删除
       </Button>
     )
-    return denied ? <Tooltip title={noPermissionTip}>{btn}</Tooltip> : btn
+    return denied ? <Tooltip title={deniedTip}>{btn}</Tooltip> : btn
   }
 
   const description =
@@ -76,7 +83,7 @@ export default function DeleteButton({
         删除
       </Button>
     )
-    return denied ? <Tooltip title={noPermissionTip}>{btn0}</Tooltip> : btn0
+    return denied ? <Tooltip title={deniedTip}>{btn0}</Tooltip> : btn0
   }
 
   const trigger = (
@@ -90,7 +97,7 @@ export default function DeleteButton({
   )
 
   if (denied) {
-    return <Tooltip title={noPermissionTip}>{trigger}</Tooltip>
+    return <Tooltip title={deniedTip}>{trigger}</Tooltip>
   }
 
   return (

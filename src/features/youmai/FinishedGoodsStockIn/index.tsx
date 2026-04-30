@@ -4,6 +4,7 @@ import { App, Button, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   YoumaiFinishedGoodsStockIn,
   YoumaiFinishedGoodsStockInFormValues,
@@ -26,6 +27,7 @@ import {
 
 export default function YoumaiFinishedGoodsStockInPage() {
   const { message, modal } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建优迈成品入库')
@@ -136,6 +138,11 @@ export default function YoumaiFinishedGoodsStockInPage() {
 
   const handleBatchAudit = useCallback(
     (status: '待审核' | '已审核') => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       if (selectedRowKeys.length === 0) {
         message.warning(
           `请选择要${status === '已审核' ? '审核' : '反审'}的优迈成品入库`,
@@ -166,11 +173,23 @@ export default function YoumaiFinishedGoodsStockInPage() {
         },
       })
     },
-    [batchStatusMutation, message, modal, selectedRowKeys],
+    [
+      batchStatusMutation,
+      message,
+      modal,
+      selectedRowKeys,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleFinish = useCallback(
     async (values: YoumaiFinishedGoodsStockInFormValues) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -199,6 +218,8 @@ export default function YoumaiFinishedGoodsStockInPage() {
       resetFormState,
       selectedRowKeys,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -255,6 +276,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
           icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
           onClick={() => handleBatchAudit('已审核')}
           loading={batchStatusMutation.isPending}
+          disabled={viewerDenied}
         >
           批量审核
         </Button>
@@ -263,6 +285,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
           icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
           onClick={() => handleBatchAudit('待审核')}
           loading={batchStatusMutation.isPending}
+          disabled={viewerDenied}
         >
           批量反审核
         </Button>
@@ -315,6 +338,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
           updateMutation.isPending ||
           batchStatusMutation.isPending
         }
+        okButtonProps={{ disabled: viewerDenied }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

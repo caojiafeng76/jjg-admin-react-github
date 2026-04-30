@@ -4,6 +4,7 @@ import { App, Button, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import {
   getLaborProtectionRequisitionsForExport,
   type LaborProtectionRequisition,
@@ -29,6 +30,7 @@ import type { LaborProtectionRequisitionFormValues } from '@/services/apiLaborPr
 
 export default function LaborProtectionRequisitionPage() {
   const { message } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建劳保领料单')
@@ -129,6 +131,11 @@ export default function LaborProtectionRequisitionPage() {
 
   const handleFinish = useCallback(
     async (values: LaborProtectionRequisitionFormValues) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -157,6 +164,8 @@ export default function LaborProtectionRequisitionPage() {
       resetFormState,
       selectedRowKeys,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -211,10 +220,20 @@ export default function LaborProtectionRequisitionPage() {
   }, [searchParamsURL, setSearchParamsURL])
 
   const handlePrintPoster = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     void printPoster()
-  }, [printPoster])
+  }, [message, printPoster, viewerDenied, viewerOperationTip])
 
   const handleExportExcel = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     setIsExporting(true)
     try {
       const items = await getLaborProtectionRequisitionsForExport(searchParams)
@@ -246,7 +265,7 @@ export default function LaborProtectionRequisitionPage() {
     } finally {
       setIsExporting(false)
     }
-  }, [categoryOptions, message, searchParams])
+  }, [categoryOptions, message, searchParams, viewerDenied, viewerOperationTip])
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
@@ -269,6 +288,7 @@ export default function LaborProtectionRequisitionPage() {
           icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
           onClick={handleExportExcel}
           loading={isExporting}
+          disabled={viewerDenied}
         >
           导出Excel
         </Button>
@@ -318,6 +338,7 @@ export default function LaborProtectionRequisitionPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

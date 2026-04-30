@@ -262,6 +262,9 @@ function normalizeEmployeeCreatePayload(values: Employee): EmployeeInsert {
     auth_user_id: values.auth_user_id?.trim() || null,
     role: values.role || 'employee',
     is_active: values.is_active ?? true,
+    job_name: values.job_name?.trim() || null,
+    hourly_wage: Number(values.hourly_wage ?? 0),
+    coefficient: Number(values.coefficient ?? 1),
   }
 }
 
@@ -270,6 +273,9 @@ function normalizeEmployeeUpdatePayload(values: Employee): EmployeeUpdate {
     name: values.name.trim(),
     role: values.role || 'employee',
     is_active: values.is_active ?? true,
+    job_name: values.job_name?.trim() || null,
+    hourly_wage: Number(values.hourly_wage ?? 0),
+    coefficient: Number(values.coefficient ?? 1),
     ...(values.auth_user_id !== undefined
       ? {
           auth_user_id: values.auth_user_id?.trim() || null,

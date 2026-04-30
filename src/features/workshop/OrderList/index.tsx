@@ -12,6 +12,7 @@ import PrintButton from '@/ui/PrintButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { usePermission } from '@/hooks/usePermission'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import {
@@ -63,6 +64,7 @@ const TAB_TO_STATUS: Record<WorkshopOrderTabKey, WorkshopOrderStatus> = {
 
 export default function WorkshopOrderList() {
   const { message, modal } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const canDelete = usePermission('feature:workshop-order.delete')
   const canManageStatus = usePermission('feature:workshop-order.manage-status')
 
@@ -139,6 +141,11 @@ export default function WorkshopOrderList() {
     })
 
   const handlePrint = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     if (selectedRowKeys.length === 0) {
       message.warning('请选择要打印的订单')
       return
@@ -150,14 +157,26 @@ export default function WorkshopOrderList() {
     if (printed) {
       setSelectedRowKeys([])
     }
-  }, [selectedRowKeys, data?.items, generatePDF, message])
+  }, [
+    selectedRowKeys,
+    data?.items,
+    generatePDF,
+    message,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   const handleCreate = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     setIsEdit(false)
     setModalTitle('创建订单')
     setIsModalOpen(true)
     formRef?.resetFields()
-  }, [formRef])
+  }, [formRef, message, viewerDenied, viewerOperationTip])
 
   const [editingRecord, setEditingRecord] = useState<WorkshopOrder | null>(null)
 
@@ -170,6 +189,11 @@ export default function WorkshopOrderList() {
   }, [formRef])
 
   const handleEdit = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     if (selectedRowKeys.length !== 1) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -190,9 +214,14 @@ export default function WorkshopOrderList() {
     setIsEdit(true)
     setModalTitle('编辑订单')
     setIsModalOpen(true)
-  }, [data?.items, message, selectedRowKeys])
+  }, [data?.items, message, selectedRowKeys, viewerDenied, viewerOperationTip])
 
   const handleDelete = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     if (selectedRowKeys.length === 0) {
       message.warning('请选择至少一条数据')
       return
@@ -270,10 +299,22 @@ export default function WorkshopOrderList() {
         message.error('删除失败，请稍后重试')
       }
     }
-  }, [deleteMutation, message, modal, selectedRowKeys])
+  }, [
+    deleteMutation,
+    message,
+    modal,
+    selectedRowKeys,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   const handleFinish = useCallback(
     (values: WorkshopOrder | WorkshopOrder[]) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       const handleSuccess = (successMessage: string) => {
         message.success(successMessage)
         resetFormState()
@@ -320,6 +361,8 @@ export default function WorkshopOrderList() {
       resetFormState,
       selectedRowKeys,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -434,6 +477,11 @@ export default function WorkshopOrderList() {
 
   const handleStatusChange = useCallback(
     async (nextStatus: WorkshopOrderStatus) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       if (!activeOrder?.id) {
         return
       }
@@ -467,11 +515,23 @@ export default function WorkshopOrderList() {
 
       await applyUpdate()
     },
-    [activeOrder, message, modal, updateMutation],
+    [
+      activeOrder,
+      message,
+      modal,
+      updateMutation,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleBatchStatusChange = useCallback(
     (nextStatus: WorkshopOrderStatus) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       if (selectedRowKeys.length === 0) {
         message.warning(`请选择要改为${nextStatus}的订单`)
         return
@@ -503,7 +563,10 @@ export default function WorkshopOrderList() {
             : `确定将选中的 ${selectedRowKeys.length} 个订单标记为生产中吗？`,
         okText: '确定',
         cancelText: '取消',
-        okButtonProps: nextStatus === '已结案' ? { danger: true } : undefined,
+        okButtonProps:
+          nextStatus === '已结案'
+            ? { danger: true, disabled: viewerDenied }
+            : { disabled: viewerDenied },
         onOk: async () => {
           try {
             await applyUpdate()
@@ -521,7 +584,15 @@ export default function WorkshopOrderList() {
         },
       })
     },
-    [activeOrder, batchStatusMutation, message, modal, selectedRowKeys],
+    [
+      activeOrder,
+      batchStatusMutation,
+      message,
+      modal,
+      selectedRowKeys,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   function handleTabChange(key: string) {
@@ -561,6 +632,7 @@ export default function WorkshopOrderList() {
               icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
               onClick={() => handleBatchStatusChange('生产中')}
               loading={batchStatusMutation.isPending}
+              disabled={viewerDenied}
             >
               批量改为生产中
             </Button>
@@ -570,6 +642,7 @@ export default function WorkshopOrderList() {
               icon={<CheckCircleIcon className="size-4 text-rose-500/80!" />}
               onClick={() => handleBatchStatusChange('已结案')}
               loading={batchStatusMutation.isPending}
+              disabled={viewerDenied}
             >
               批量结案
             </Button>
@@ -635,7 +708,7 @@ export default function WorkshopOrderList() {
           <div className="h-full overflow-hidden">
             <WorkshopOrderProductionStats
               selectedOrder={activeOrder}
-              canManageStatus={canManageStatus}
+              canManageStatus={!viewerDenied && canManageStatus}
               onStatusChange={handleStatusChange}
               statusUpdating={updateMutation.isPending}
             />
@@ -653,6 +726,7 @@ export default function WorkshopOrderList() {
         }
         destroyOnClose
         onOk={() => formRef?.submit()}
+        okButtonProps={{ disabled: viewerDenied }}
         onCancel={() => {
           resetFormState()
         }}
@@ -662,7 +736,7 @@ export default function WorkshopOrderList() {
           setFormRef={setFormRef}
           isCreating={createMutation.isPending || batchCreateMutation.isPending}
           isEdit={isEdit}
-          canEditStatus={canManageStatus}
+          canEditStatus={!viewerDenied && canManageStatus}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
         />
       </Modal>

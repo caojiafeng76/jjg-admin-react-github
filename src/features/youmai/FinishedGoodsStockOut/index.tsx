@@ -10,6 +10,7 @@ import { useSearchParams } from 'react-router-dom'
 import { exportYoumaiFinishedGoodsStockOutToExcel } from '@/utils/youmaiFinishedGoodsStockOutExport'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   YoumaiFinishedGoodsStockOut,
   YoumaiFinishedGoodsStockOutFormValues,
@@ -37,6 +38,7 @@ import {
 
 export default function YoumaiFinishedGoodsStockOutPage() {
   const { message, modal } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建优迈成品出库')
@@ -86,10 +88,26 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   )
 
   const handlePrint = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     void printSelected(selectedRecords)
-  }, [printSelected, selectedRecords])
+  }, [
+    message,
+    printSelected,
+    selectedRecords,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   const handleExportExcel = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     if (selectedRecords.length === 0) {
       message.warning('请选择要导出的出库数据')
       return
@@ -102,7 +120,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
       console.error('导出优迈成品出库失败:', error)
       message.error('导出失败，请稍后重试')
     }
-  }, [message, selectedRecords])
+  }, [message, selectedRecords, viewerDenied, viewerOperationTip])
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
@@ -167,6 +185,11 @@ export default function YoumaiFinishedGoodsStockOutPage() {
 
   const handleBatchAudit = useCallback(
     (status: '待审核' | '已审核') => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       if (selectedRowKeys.length === 0) {
         message.warning(
           `请选择要${status === '已审核' ? '审核' : '反审'}的优迈成品出库`,
@@ -197,11 +220,23 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         },
       })
     },
-    [batchStatusMutation, message, modal, selectedRowKeys],
+    [
+      batchStatusMutation,
+      message,
+      modal,
+      selectedRowKeys,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleImport = useCallback(
     async (rows: YoumaiFinishedGoodsStockOutImportRow[]) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         await importMutation.mutateAsync(rows)
         message.success(`优迈成品出库导入成功，共 ${rows.length} 条`)
@@ -214,11 +249,16 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         }
       }
     },
-    [importMutation, message],
+    [importMutation, message, viewerDenied, viewerOperationTip],
   )
 
   const handleFinish = useCallback(
     async (values: YoumaiFinishedGoodsStockOutFormValues) => {
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -247,6 +287,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
       resetFormState,
       selectedRowKeys,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -303,6 +345,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
           onClick={() => handleBatchAudit('已审核')}
           loading={batchStatusMutation.isPending}
+          disabled={viewerDenied}
         >
           批量审核
         </Button>
@@ -311,6 +354,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
           onClick={() => handleBatchAudit('待审核')}
           loading={batchStatusMutation.isPending}
+          disabled={viewerDenied}
         >
           批量反审核
         </Button>
@@ -326,7 +370,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           type="text"
           icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
           onClick={handleExportExcel}
-          disabled={selectedRowKeys.length === 0}
+          disabled={viewerDenied || selectedRowKeys.length === 0}
         >
           导出Excel
           {selectedRowKeys.length > 0 && (
@@ -385,6 +429,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           updateMutation.isPending ||
           batchStatusMutation.isPending
         }
+        okButtonProps={{ disabled: viewerDenied }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

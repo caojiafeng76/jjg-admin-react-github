@@ -20,6 +20,7 @@ import {
   renderProjectNoOption,
 } from '@/features/production-order/projectNoSelect'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import {
   QUALITY_REWORK_REPAIR_CATEGORIES,
   QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES,
@@ -303,6 +304,7 @@ function buildPayload(
 
 export default function QualityReworkRepairPage() {
   const { message } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [form] = Form.useForm<QualityReworkRepairFormFields>()
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -379,15 +381,25 @@ export default function QualityReworkRepairPage() {
   }, [form])
 
   const handleCreate = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     setIsEdit(false)
     setProcessingStageKey('workshop')
     setSelectedRowKeys([])
     form.resetFields()
     form.setFieldsValue(DEFAULT_FORM_VALUES)
     setIsModalOpen(true)
-  }, [form])
+  }, [form, message, viewerDenied, viewerOperationTip])
 
   const handleProcess = useCallback(() => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     if (selectedRowKeys.length !== 1) {
       message.warning('请选择一条返工返修记录进行处理')
       return
@@ -416,9 +428,16 @@ export default function QualityReworkRepairPage() {
     form,
     message,
     selectedRowKeys,
+    viewerDenied,
+    viewerOperationTip,
   ])
 
   const handleDelete = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     if (selectedRowKeys.length === 0) {
       message.warning('请选择至少一条返工返修记录')
       return
@@ -435,9 +454,20 @@ export default function QualityReworkRepairPage() {
         message.error('删除返工返修记录失败，请稍后重试')
       }
     }
-  }, [deleteMutation, message, selectedRowKeys])
+  }, [
+    deleteMutation,
+    message,
+    selectedRowKeys,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   const handleFinish = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     const values = form.getFieldsValue(true)
     const workflowStatus = isEdit
       ? processingStage.submitStatus
@@ -473,6 +503,8 @@ export default function QualityReworkRepairPage() {
     resetFormState,
     selectedRowKeys,
     updateMutation,
+    viewerDenied,
+    viewerOperationTip,
   ])
 
   const handleWorkflowTabChange = useCallback(
@@ -861,6 +893,7 @@ export default function QualityReworkRepairPage() {
             type="text"
             icon={<PlusCircleIcon className="size-4 text-green-500/80!" />}
             onClick={handleCreate}
+            disabled={viewerDenied}
           >
             新建返工返修记录
           </Button>
@@ -869,6 +902,7 @@ export default function QualityReworkRepairPage() {
           type="text"
           icon={<PencilSquareIcon className="size-4 text-yellow-500/80!" />}
           onClick={handleProcess}
+          disabled={viewerDenied}
         >
           {activeStage.actionLabel}
         </Button>
@@ -930,12 +964,13 @@ export default function QualityReworkRepairPage() {
         confirmLoading={isSubmitting}
         onOk={() => form.submit()}
         onCancel={resetFormState}
+        okButtonProps={{ disabled: viewerDenied }}
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={handleFinish}
-          disabled={isSubmitting}
+          disabled={isSubmitting || viewerDenied}
         >
           {renderModalFields()}
         </Form>
