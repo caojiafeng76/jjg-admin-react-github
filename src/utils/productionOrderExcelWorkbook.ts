@@ -42,8 +42,6 @@ const SUMMARY_HEADERS = [
   '总工时',
   '时薪',
   '系数',
-  '夜班数量',
-  '夜班补贴',
   '工资',
   '备注',
 ] as const
@@ -59,10 +57,6 @@ const SUMMARY_EXTRA_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('零工工时')
 const SUMMARY_TOTAL_HOURS_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('总工时')
 const SUMMARY_HOURLY_WAGE_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('时薪')
 const SUMMARY_COEFFICIENT_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('系数')
-const SUMMARY_NIGHT_SHIFT_COUNT_COLUMN_INDEX =
-  SUMMARY_HEADERS.indexOf('夜班数量')
-const SUMMARY_NIGHT_SHIFT_ALLOWANCE_COLUMN_INDEX =
-  SUMMARY_HEADERS.indexOf('夜班补贴')
 const SUMMARY_SALARY_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('工资')
 
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
@@ -81,28 +75,6 @@ function normalizeNumber(value: number | null | undefined) {
 
 function roundToTwo(value: number) {
   return Number(value.toFixed(2))
-}
-
-const NIGHT_SHIFT_EXCLUDED_REMARK_KEYWORDS = ['休息', '请假', '放假', '转班']
-
-function shouldCountNightShift(order: ProductionOrderForExport) {
-  if (order.shift !== '夜班') {
-    return false
-  }
-
-  if (normalizeNumber(order.work_hours) !== 0) {
-    return true
-  }
-
-  const remark = order.remark?.trim()
-
-  if (!remark) {
-    return true
-  }
-
-  return !NIGHT_SHIFT_EXCLUDED_REMARK_KEYWORDS.some((keyword) =>
-    remark.includes(keyword),
-  )
 }
 
 function getEmployeeJobName(orders: ProductionOrderForExport[]) {
@@ -191,25 +163,12 @@ function applySummarySheetFormulas(
     const coefficientColumn = getExcelColumnName(
       SUMMARY_COEFFICIENT_COLUMN_INDEX,
     )
-    const nightShiftCountColumn = getExcelColumnName(
-      SUMMARY_NIGHT_SHIFT_COUNT_COLUMN_INDEX,
-    )
-    const nightShiftAllowanceColumn = getExcelColumnName(
-      SUMMARY_NIGHT_SHIFT_ALLOWANCE_COLUMN_INDEX,
-    )
-
-    setFormulaCell(
-      worksheet,
-      rowIndex,
-      SUMMARY_NIGHT_SHIFT_ALLOWANCE_COLUMN_INDEX,
-      `${nightShiftCountColumn}${excelRowNumber}*10`,
-    )
 
     setFormulaCell(
       worksheet,
       rowIndex,
       SUMMARY_SALARY_COLUMN_INDEX,
-      `${totalHoursColumn}${excelRowNumber}*${hourlyWageColumn}${excelRowNumber}*${coefficientColumn}${excelRowNumber}+${nightShiftAllowanceColumn}${excelRowNumber}`,
+      `${totalHoursColumn}${excelRowNumber}*${hourlyWageColumn}${excelRowNumber}*${coefficientColumn}${excelRowNumber}`,
     )
   }
 
@@ -226,8 +185,6 @@ function applySummarySheetFormulas(
     SUMMARY_POSITIVE_HOURS_COLUMN_INDEX,
     SUMMARY_EXTRA_HOURS_COLUMN_INDEX,
     SUMMARY_TOTAL_HOURS_COLUMN_INDEX,
-    SUMMARY_NIGHT_SHIFT_COUNT_COLUMN_INDEX,
-    SUMMARY_NIGHT_SHIFT_ALLOWANCE_COLUMN_INDEX,
     SUMMARY_SALARY_COLUMN_INDEX,
   ].forEach((columnIndex) => {
     const excelColumnName = getExcelColumnName(columnIndex)
@@ -429,7 +386,6 @@ function buildSummarySheetRows(
     const jobName = getEmployeeJobName(employeeOrders)
     const hourlyWage = getEmployeeHourlyWage(employeeOrders)
     const coefficient = getEmployeeCoefficient(employeeOrders)
-    const nightShiftCount = employeeOrders.filter(shouldCountNightShift).length
     const workHours = roundToTwo(
       employeeOrders.reduce(
         (total, order) => total + normalizeNumber(order.work_hours),
@@ -465,8 +421,6 @@ function buildSummarySheetRows(
       totalHours,
       hourlyWage,
       coefficient,
-      nightShiftCount,
-      0,
       0,
       '',
     ]
@@ -474,7 +428,7 @@ function buildSummarySheetRows(
     rows.push(row)
   })
 
-  rows.push(['合计', '', '', 0, 0, 0, 0, '', '', 0, 0, 0, ''])
+  rows.push(['合计', '', '', 0, 0, 0, 0, '', '', 0, ''])
 
   return rows
 }
@@ -535,8 +489,6 @@ function applySummarySheetStyles(
     { wch: 12 },
     { wch: 10 },
     { wch: 10 },
-    { wch: 12 },
-    { wch: 12 },
     { wch: 12 },
     { wch: 18 },
   ]
