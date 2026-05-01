@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   Button,
   DatePicker,
@@ -14,7 +14,10 @@ import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import type { AttendanceLateEarlyStat } from '@/services/apiAttendanceDetails'
+import type {
+  AttendanceLateEarlyStat,
+  AttendanceShiftStat,
+} from '@/services/apiAttendanceDetails'
 import {
   getAttendanceMonthlyExportData,
   getAttendanceLateEarlyStats,
@@ -35,6 +38,9 @@ type SearchParams = {
   startDate?: string
   endDate?: string
 }
+
+const SHIFT_STATS_TABLE_SCROLL_X = 530
+const LATE_EARLY_TABLE_SCROLL_X = 460
 
 function DatesPopover({
   count,
@@ -67,58 +73,100 @@ function DatesPopover({
   )
 }
 
+const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
+  {
+    title: '#',
+    key: '#',
+    width: 60,
+    fixed: 'left',
+    render: (_v, _r, i) => i + 1,
+  },
+  {
+    title: '姓名',
+    dataIndex: 'name',
+    key: 'name',
+    width: 140,
+    fixed: 'left',
+  },
+  {
+    title: '出勤天数',
+    dataIndex: 'total_days',
+    key: 'total_days',
+    width: 110,
+    align: 'center',
+  },
+  {
+    title: '白班天数',
+    dataIndex: 'day_shift_days',
+    key: 'day_shift_days',
+    width: 110,
+    align: 'center',
+    render: (v: number) => <Tag color="blue">{v}</Tag>,
+  },
+  {
+    title: '夜班天数',
+    dataIndex: 'night_shift_days',
+    key: 'night_shift_days',
+    width: 110,
+    align: 'center',
+    render: (v: number) => <Tag color="purple">{v}</Tag>,
+  },
+]
+
+const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
+  {
+    title: '#',
+    key: '#',
+    width: 60,
+    fixed: 'left',
+    render: (_v, _r, i) => i + 1,
+  },
+  {
+    title: '姓名',
+    dataIndex: 'name',
+    key: 'name',
+    width: 140,
+    fixed: 'left',
+  },
+  {
+    title: '迟到次数',
+    dataIndex: 'late_count',
+    key: 'late_count',
+    width: 130,
+    align: 'center',
+    sorter: (a, b) => a.late_count - b.late_count,
+    render: (v: number, r) => (
+      <DatesPopover count={v} dates={r.late_dates} color="orange" />
+    ),
+  },
+  {
+    title: '早退次数',
+    dataIndex: 'early_leave_count',
+    key: 'early_leave_count',
+    width: 130,
+    align: 'center',
+    sorter: (a, b) => a.early_leave_count - b.early_leave_count,
+    render: (v: number, r) => (
+      <DatesPopover count={v} dates={r.early_leave_dates} color="volcano" />
+    ),
+  },
+]
+
 function ShiftStatsTab({ searchParams }: { searchParams: SearchParams }) {
   const { data, isLoading } = useAttendanceShiftStats(searchParams)
   const { tableContainerRef, scrollY } = useTableHeight({ targetRowCount: 14 })
 
   return (
-    <div ref={tableContainerRef} className="min-h-0 overflow-x-auto">
-      <Table
+    <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
+      <Table<AttendanceShiftStat>
         size="small"
         loading={isLoading}
         dataSource={data || []}
         rowKey="name"
         pagination={false}
-        scroll={{ x: 'max-content', y: scrollY }}
-        columns={[
-          {
-            title: '#',
-            key: '#',
-            width: 60,
-            fixed: 'left',
-            render: (_v, _r, i) => i + 1,
-          },
-          {
-            title: '姓名',
-            dataIndex: 'name',
-            key: 'name',
-            width: 140,
-            fixed: 'left',
-          },
-          {
-            title: '出勤天数',
-            dataIndex: 'total_days',
-            key: 'total_days',
-            width: 110,
-            align: 'center',
-          },
-          {
-            title: '白班天数',
-            dataIndex: 'day_shift_days',
-            key: 'day_shift_days',
-            width: 110,
-            align: 'center',
-            render: (v: number) => <Tag color="blue">{v}</Tag>,
-          },
-          {
-            title: '夜班天数',
-            dataIndex: 'night_shift_days',
-            key: 'night_shift_days',
-            width: 110,
-            align: 'center',
-            render: (v: number) => <Tag color="purple">{v}</Tag>,
-          },
-        ]}
+        scroll={{ x: SHIFT_STATS_TABLE_SCROLL_X, y: scrollY }}
+        tableLayout="fixed"
+        columns={shiftStatsColumns}
       />
     </div>
   )
@@ -128,58 +176,17 @@ function LateEarlyTab({ searchParams }: { searchParams: SearchParams }) {
   const { data, isLoading } = useAttendanceLateEarlyStats(searchParams)
   const { tableContainerRef, scrollY } = useTableHeight({ targetRowCount: 14 })
 
-  const columns: TableColumnsType<AttendanceLateEarlyStat> = useMemo(
-    () => [
-      {
-        title: '#',
-        key: '#',
-        width: 60,
-        fixed: 'left',
-        render: (_v, _r, i) => i + 1,
-      },
-      {
-        title: '姓名',
-        dataIndex: 'name',
-        key: 'name',
-        width: 140,
-        fixed: 'left',
-      },
-      {
-        title: '迟到次数',
-        dataIndex: 'late_count',
-        key: 'late_count',
-        width: 130,
-        align: 'center',
-        sorter: (a, b) => a.late_count - b.late_count,
-        render: (v: number, r) => (
-          <DatesPopover count={v} dates={r.late_dates} color="orange" />
-        ),
-      },
-      {
-        title: '早退次数',
-        dataIndex: 'early_leave_count',
-        key: 'early_leave_count',
-        width: 130,
-        align: 'center',
-        sorter: (a, b) => a.early_leave_count - b.early_leave_count,
-        render: (v: number, r) => (
-          <DatesPopover count={v} dates={r.early_leave_dates} color="volcano" />
-        ),
-      },
-    ],
-    [],
-  )
-
   return (
-    <div ref={tableContainerRef} className="min-h-0 overflow-x-auto">
+    <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
       <Table
         size="small"
         loading={isLoading}
         dataSource={data || []}
         rowKey="name"
         pagination={false}
-        scroll={{ x: 'max-content', y: scrollY }}
-        columns={columns}
+        scroll={{ x: LATE_EARLY_TABLE_SCROLL_X, y: scrollY }}
+        tableLayout="fixed"
+        columns={lateEarlyColumns}
       />
     </div>
   )
