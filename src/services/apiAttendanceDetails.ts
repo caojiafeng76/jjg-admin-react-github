@@ -59,6 +59,10 @@ function normalizePayload(
   }
 }
 
+function formatMonthDate(year: number, month: number, day: number): string {
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
 export async function getAttendanceDetails({
   page,
   pageSize,
@@ -220,8 +224,12 @@ export async function getAttendanceMonthlyExportData({
   month: number
   name?: string
 }) {
-  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-  const endDate = new Date(year, month, 0).toISOString().slice(0, 10)
+  const startDate = formatMonthDate(year, month, 1)
+  const endDate = formatMonthDate(
+    year,
+    month,
+    new Date(year, month, 0).getDate(),
+  )
   const normalizedName = name?.trim()
 
   if (normalizedName) {
@@ -242,7 +250,9 @@ export async function getAttendanceMonthlyExportData({
 
     const { data, error } = await supabase
       .from('production_orders')
-      .select('order_date, work_hours, shift, remark, employee:employees!inner(name, job_name)')
+      .select(
+        'order_date, work_hours, shift, remark, employee:employees!inner(name, job_name)',
+      )
       .in('employee_id', employeeIds)
       .gte('order_date', startDate)
       .lte('order_date', endDate)
@@ -252,13 +262,15 @@ export async function getAttendanceMonthlyExportData({
       throw handleApiError(error, '获取月度出勤数据失败')
     }
 
-    return ((data || []) as Array<{
-      order_date: string
-      work_hours: number
-      shift: string
-      remark?: string | null
-      employee?: { name?: string | null; job_name?: string | null } | null
-    }>)
+    return (
+      (data || []) as Array<{
+        order_date: string
+        work_hours: number
+        shift: string
+        remark?: string | null
+        employee?: { name?: string | null; job_name?: string | null } | null
+      }>
+    )
       .filter((row) => Boolean(row.employee?.name))
       .sort(
         (left, right) =>
@@ -279,7 +291,9 @@ export async function getAttendanceMonthlyExportData({
 
   const { data, error } = await supabase
     .from('production_orders')
-    .select('order_date, work_hours, shift, remark, employee:employees!inner(name, job_name)')
+    .select(
+      'order_date, work_hours, shift, remark, employee:employees!inner(name, job_name)',
+    )
     .gte('order_date', startDate)
     .lte('order_date', endDate)
     .order('order_date', { ascending: true })
@@ -288,13 +302,15 @@ export async function getAttendanceMonthlyExportData({
     throw handleApiError(error, '获取月度出勤数据失败')
   }
 
-  return ((data || []) as Array<{
-    order_date: string
-    work_hours: number
-    shift: string
-    remark?: string | null
-    employee?: { name?: string | null; job_name?: string | null } | null
-  }>)
+  return (
+    (data || []) as Array<{
+      order_date: string
+      work_hours: number
+      shift: string
+      remark?: string | null
+      employee?: { name?: string | null; job_name?: string | null } | null
+    }>
+  )
     .filter((row) => Boolean(row.employee?.name))
     .sort(
       (left, right) =>

@@ -51,13 +51,17 @@ function formatDayCellValue(day?: {
     : parseFloat(day.work_hours.toFixed(2))
 }
 
+function getOrderDay(orderDate: string): number {
+  return Number(orderDate.slice(8, 10))
+}
+
 /** 将 RPC 返回的扁平行数据聚合为按员工/天的结构 */
 function aggregateByEmployee(
   rows: AttendanceMonthlyRow[],
 ): Map<string, EmployeeMonthData> {
   const map = new Map<string, EmployeeMonthData>()
   for (const row of rows) {
-    const day = new Date(row.order_date).getDate()
+    const day = getOrderDay(row.order_date)
     const specialRemark = getSpecialRemark(row)
 
     if (!map.has(row.employee_name)) {
@@ -161,11 +165,7 @@ export function exportAttendanceMonthlyExcel(
   // 数据行
   employeeNames.forEach((name, idx) => {
     const emp = employeeMap.get(name)!
-    const row: (string | number | null)[] = [
-      idx + 1,
-      emp.job_name,
-      name,
-    ]
+    const row: (string | number | null)[] = [idx + 1, emp.job_name, name]
     let totalHours = 0
     let daysCount = 0
     for (let d = 1; d <= totalDays; d++) {
@@ -196,9 +196,7 @@ export function exportAttendanceMonthlyExcel(
   })
 
   // 标题行合并
-  ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } },
-  ]
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } }]
 
   // 写入每个单元格
   sheetData.forEach((rowData, rowIdx) => {
@@ -247,7 +245,11 @@ export function exportAttendanceMonthlyExcel(
           ...baseStyle(isNightShift ? {} : {}),
           ...(isNightShift ? { fill: NIGHT_SHIFT_FILL } : {}),
           font: { name: '宋体', sz: 11 },
-          alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+          alignment: {
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: true,
+          },
           border: CELL_BORDER,
         },
       }
@@ -257,12 +259,12 @@ export function exportAttendanceMonthlyExcel(
   // ── 列宽 ──────────────────────────────────────────────
   // 编号: 6, 岗位: 8, 姓名: 10, 日期列: 4, 合计: 7, 天数: 6, 备注: 12
   const colWidths: { wch: number }[] = [
-    { wch: 6 },  // 编号
-    { wch: 8 },  // 岗位
+    { wch: 6 }, // 编号
+    { wch: 8 }, // 岗位
     { wch: 10 }, // 姓名
     ...Array(totalDays).fill({ wch: 4.5 }),
-    { wch: 7 },  // 合计
-    { wch: 6 },  // 天数
+    { wch: 7 }, // 合计
+    { wch: 6 }, // 天数
     { wch: 12 }, // 备注
   ]
   ws['!cols'] = colWidths
@@ -277,7 +279,11 @@ export function exportAttendanceMonthlyExcel(
 
   // ── 生成文件 ─────────────────────────────────────────
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, `${year}-${String(month).padStart(2, '0')}`)
+  XLSX.utils.book_append_sheet(
+    wb,
+    ws,
+    `${year}-${String(month).padStart(2, '0')}`,
+  )
   XLSX.writeFile(
     wb,
     `精加工${year}-${month}月份出勤明细表.xlsx`,
@@ -305,7 +311,14 @@ export function exportAttendanceLateEarlyExcel(
   const title = `迟到/早退统计表${rangeStr}`
 
   // 表头
-  const headers = ['编号', '姓名', '迟到次数', '迟到日期', '早退次数', '早退日期']
+  const headers = [
+    '编号',
+    '姓名',
+    '迟到次数',
+    '迟到日期',
+    '早退次数',
+    '早退日期',
+  ]
   const colCount = headers.length
 
   // 数据行
@@ -359,7 +372,12 @@ export function exportAttendanceLateEarlyExcel(
 
       ws[cellRef] = {
         v: cellVal ?? '',
-        t: cellVal === null || cellVal === '' ? 's' : typeof cellVal === 'number' ? 'n' : 's',
+        t:
+          cellVal === null || cellVal === ''
+            ? 's'
+            : typeof cellVal === 'number'
+              ? 'n'
+              : 's',
         s: {
           font: { name: '宋体', sz: 11 },
           alignment: {
@@ -380,7 +398,7 @@ export function exportAttendanceLateEarlyExcel(
 
   // 列宽
   ws['!cols'] = [
-    { wch: 6 },  // 编号
+    { wch: 6 }, // 编号
     { wch: 10 }, // 姓名
     { wch: 10 }, // 迟到次数
     { wch: 40 }, // 迟到日期
