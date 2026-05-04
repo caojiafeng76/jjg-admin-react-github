@@ -189,9 +189,21 @@ const allMenuItems: MenuItemDef[] = [
         label: '刀具资料',
         permission: 'page:tooling-data',
       },
-      { key: 'tooling-inventory', label: '刀具库存' },
-      { key: 'tooling-stock-in', label: '刀具入库' },
-      { key: 'tooling-stock-out', label: '刀具出库' },
+      {
+        key: 'tooling-inventory',
+        label: '刀具库存',
+        permission: 'page:tooling-inventory',
+      },
+      {
+        key: 'tooling-stock-in',
+        label: '刀具入库',
+        permission: 'page:tooling-stock-in',
+      },
+      {
+        key: 'tooling-stock-out',
+        label: '刀具出库',
+        permission: 'page:tooling-stock-out',
+      },
     ],
   },
   {

@@ -19,7 +19,6 @@ import {
   VillaLiftFinishingProcess,
   AttendanceDetail,
   AttendanceStats,
-  ComingSoonPage,
   Dashboard,
   EmployeeMobileChangePasswordPage,
   EmployeeList,
@@ -55,6 +54,9 @@ import {
   SyneyStoreReportDetail,
   SyneyStoreReportList,
   ToolingData,
+  ToolingInventory,
+  ToolingStockIn,
+  ToolingStockOut,
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsStockIn,
   YoumaiFinishedGoodsStockOut,
@@ -445,8 +447,8 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <PermissionProtectedRoute
-              permissionKey="page:tooling-data"
-              element={<ComingSoonPage />}
+              permissionKey="page:tooling-inventory"
+              element={<ToolingInventory />}
             />
           </Suspense>
         ),
@@ -456,8 +458,8 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <PermissionProtectedRoute
-              permissionKey="page:tooling-data"
-              element={<ComingSoonPage />}
+              permissionKey="page:tooling-stock-in"
+              element={<ToolingStockIn />}
             />
           </Suspense>
         ),
@@ -467,8 +469,8 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <PermissionProtectedRoute
-              permissionKey="page:tooling-data"
-              element={<ComingSoonPage />}
+              permissionKey="page:tooling-stock-out"
+              element={<ToolingStockOut />}
             />
           </Suspense>
         ),

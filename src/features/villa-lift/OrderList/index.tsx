@@ -386,7 +386,9 @@ export default function VillaLiftOrderListPage() {
   // 标记完成日期（批量）
   const handleBatchMarkDate = useCallback(
     async (field: VillaLiftMarkDateField, label: string) => {
-      if (viewerDenied) {
+      const canBypassViewerGuard = field === 'film_date' && canMarkFilm
+
+      if (viewerDenied && !canBypassViewerGuard) {
         message.warning(viewerOperationTip)
         return
       }
@@ -406,6 +408,7 @@ export default function VillaLiftOrderListPage() {
     },
     [
       batchMarkMutation,
+      canMarkFilm,
       selectedRowKeys,
       message,
       viewerDenied,
@@ -594,7 +597,7 @@ export default function VillaLiftOrderListPage() {
                   type="text"
                   icon={<FilmIcon className="size-4 text-cyan-500/80!" />}
                   loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied}
+                  disabled={viewerDenied && !canMarkFilm}
                   onClick={() => handleBatchMarkDate('film_date', '贴膜完成')}
                 >
                   贴膜完成 ({selectedRowKeys.length})
