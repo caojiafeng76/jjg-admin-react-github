@@ -5,6 +5,7 @@ const { Title, Paragraph, Text } = Typography
 
 const pageLabelMap: Record<string, string> = {
   'production-scheduling': '订单现状',
+  'order-scheduling': '订单排产',
   'precision-cutting-transfer': '转移单',
   'tooling-data': '刀具资料',
   'tooling-inventory': '刀具库存',

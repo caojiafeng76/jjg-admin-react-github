@@ -67,6 +67,22 @@ export const WORKSHOP_PERMISSIONS: PermissionDefinition[] = [
     label: '订单现状',
   },
 
+  // 订单排产
+  {
+    key: 'nav:order-scheduling',
+    scope: 'nav',
+    module: 'order-scheduling',
+    surface: 'pc',
+    label: '订单排产菜单',
+  },
+  {
+    key: 'page:order-scheduling',
+    scope: 'page',
+    module: 'order-scheduling',
+    surface: 'pc',
+    label: '订单排产',
+  },
+
   // 员工管理
   {
     key: 'page:employee-list',

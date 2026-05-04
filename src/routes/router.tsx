@@ -41,6 +41,7 @@ import {
   PrecisionFinishingCutting,
   PrecisionFinishingCuttingScan,
   ProductionDailyReport,
+  ProductionScheduling,
   QualityReworkRepair,
   ProductionOrder,
   ProductionOrderScan,
@@ -204,6 +205,17 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:production-scheduling"
               element={<OrderStatusDashboard />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'order-scheduling',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:order-scheduling"
+              element={<ProductionScheduling />}
             />
           </Suspense>
         ),
