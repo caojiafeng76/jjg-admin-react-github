@@ -1,65 +1,66 @@
-﻿import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { App, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
-  ToolingData,
-  ToolingDataFormValues,
-} from '@/services/apiToolingData'
+  ToolingInventory,
+  ToolingInventoryFormValues,
+  ToolingInventoryImportRow,
+} from '@/services/apiToolingInventory'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
-import ToolingDataExcelImport from './ToolingDataExcelImport'
-import ToolingDataForm from './ToolingDataForm'
-import ToolingDataSearch from './ToolingDataSearch'
-import ToolingDataTable from './ToolingDataTable'
+import ToolingInventoryExcelImport from './ToolingInventoryExcelImport'
+import ToolingInventoryForm from './ToolingInventoryForm'
+import ToolingInventorySearch from './ToolingInventorySearch'
+import ToolingInventoryTable from './ToolingInventoryTable'
 import {
-  useCreateToolingData,
-  useDeleteToolingData,
-  useImportToolingData,
-  useToolingDataList,
-  useUpdateToolingData,
-} from './useToolingData'
+  useCreateToolingInventory,
+  useDeleteToolingInventory,
+  useImportToolingInventory,
+  useToolingDataOptions,
+  useToolingInventoryList,
+  useUpdateToolingInventory,
+} from './useToolingInventory'
 
-const DEFAULT_PAGE_SIZE = 20
-const MIN_TABLE_ROW_HEIGHT = 28
-
-export default function ToolingDataPage() {
+export default function ToolingInventoryPage() {
   const { message } = App.useApp()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalTitle, setModalTitle] = useState('新建刀具资料')
+  const [modalTitle, setModalTitle] = useState('新建刀具库存')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] = useState<ToolingData | null>(null)
+  const [editingRecord, setEditingRecord] = useState<ToolingInventory | null>(
+    null,
+  )
   const [formRef, setFormRef] =
-    useState<FormInstance<ToolingDataFormValues> | null>(null)
+    useState<FormInstance<ToolingInventoryFormValues> | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
-  const pageSize = Number(searchParamsURL.get('pageSize')) || DEFAULT_PAGE_SIZE
+  const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const [searchParams, setSearchParams] = useState<{ keyword?: string }>({
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = useToolingDataList({
+  const { data, isLoading } = useToolingInventoryList({
     page,
     pageSize,
     searchParams,
   })
+  const { data: toolingOptions = [] } = useToolingDataOptions()
 
-  const createMutation = useCreateToolingData()
-  const updateMutation = useUpdateToolingData()
-  const importMutation = useImportToolingData()
-  const deleteMutation = useDeleteToolingData()
+  const createMutation = useCreateToolingInventory()
+  const updateMutation = useUpdateToolingInventory()
+  const importMutation = useImportToolingInventory()
+  const deleteMutation = useDeleteToolingInventory()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
-      targetRowCount: DEFAULT_PAGE_SIZE,
-      minRowHeight: MIN_TABLE_ROW_HEIGHT,
+      targetRowCount: 10,
     })
 
   const resetFormState = useCallback(() => {
@@ -74,7 +75,7 @@ export default function ToolingDataPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    setModalTitle('新建刀具资料')
+    setModalTitle('新建刀具库存')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef])
@@ -93,7 +94,7 @@ export default function ToolingDataPage() {
 
     setEditingRecord(record)
     setIsEdit(true)
-    setModalTitle('编辑刀具资料')
+    setModalTitle('编辑刀具库存')
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
 
@@ -105,28 +106,28 @@ export default function ToolingDataPage() {
 
     try {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
-      message.success('刀具资料删除成功')
+      message.success('刀具库存删除成功')
       setSelectedRowKeys([])
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
       } else {
-        message.error('删除刀具资料失败，请稍后重试')
+        message.error('删除刀具库存失败，请稍后重试')
       }
     }
   }, [deleteMutation, message, selectedRowKeys])
 
   const handleImport = useCallback(
-    async (rows: ToolingDataFormValues[]) => {
+    async (rows: ToolingInventoryImportRow[]) => {
       try {
         await importMutation.mutateAsync(rows)
-        message.success(`刀具资料导入成功，共 ${rows.length} 条`)
+        message.success(`刀具库存导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
       } catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
         } else {
-          message.error('导入刀具资料失败，请稍后重试')
+          message.error('导入刀具库存失败，请稍后重试')
         }
       }
     },
@@ -134,17 +135,17 @@ export default function ToolingDataPage() {
   )
 
   const handleFinish = useCallback(
-    async (values: ToolingDataFormValues) => {
+    async (values: ToolingInventoryFormValues) => {
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
             values,
           })
-          message.success('刀具资料更新成功')
+          message.success('刀具库存更新成功')
         } else {
           await createMutation.mutateAsync(values)
-          message.success('刀具资料创建成功')
+          message.success('刀具库存创建成功')
         }
 
         resetFormState()
@@ -211,27 +212,27 @@ export default function ToolingDataPage() {
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
         />
         <EditButton
-          title="编辑刀具资料"
+          title="编辑刀具库存"
           handleEdit={handleEdit}
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
-        />
-        <ToolingDataExcelImport
-          onImport={handleImport}
-          isImporting={importMutation.isPending}
         />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
-          title="删除刀具资料"
-          itemName="刀具资料"
+          title="删除刀具库存"
+          itemName="刀具库存"
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        />
+        <ToolingInventoryExcelImport
+          onImport={handleImport}
+          isImporting={importMutation.isPending}
         />
       </div>
 
       <div className="flex items-center gap-2">
         <span className="whitespace-nowrap text-slate-600">搜索：</span>
-        <ToolingDataSearch
+        <ToolingInventorySearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
@@ -243,7 +244,7 @@ export default function ToolingDataPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <ToolingDataTable
+          <ToolingInventoryTable
             loading={isLoading}
             data={data?.items || []}
             selectedRowKeys={selectedRowKeys}
@@ -255,10 +256,7 @@ export default function ToolingDataPage() {
           />
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
-          <AppPagination
-            total={data?.total || 0}
-            defaultPageSize={DEFAULT_PAGE_SIZE}
-          />
+          <AppPagination total={data?.total || 0} />
         </div>
       </div>
 
@@ -270,10 +268,11 @@ export default function ToolingDataPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <ToolingDataForm
+        <ToolingInventoryForm
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
+          toolingOptions={toolingOptions}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
         />
       </Modal>

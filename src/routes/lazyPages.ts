@@ -51,6 +51,15 @@ export const JobBaseSetting = lazy(
   () => import('@features/workshop/JobBaseSetting'),
 )
 export const ToolingData = lazy(() => import('@features/tooling/ToolingData'))
+export const ToolingInventory = lazy(
+  () => import('@features/tooling/ToolingInventory'),
+)
+export const ToolingStockIn = lazy(
+  () => import('@features/tooling/ToolingStockIn'),
+)
+export const ToolingStockOut = lazy(
+  () => import('@features/tooling/ToolingStockOut'),
+)
 export const LaborProtectionData = lazy(
   () => import('@features/labor-protection/LaborProtectionData'),
 )

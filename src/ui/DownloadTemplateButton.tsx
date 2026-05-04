@@ -1,6 +1,7 @@
 import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
 import { Button, Tooltip } from 'antd'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
   children?: React.ReactNode
   disabled?: boolean
   loading?: boolean
+  permissionKey?: string
+  noPermissionTip?: string
 }
 
 export default function DownloadTemplateButton({
@@ -15,23 +18,26 @@ export default function DownloadTemplateButton({
   children,
   disabled = false,
   loading = false,
+  permissionKey,
+  noPermissionTip = '无下载模板权限',
 }: Props) {
-  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+  const allowed = usePermission(permissionKey ?? '')
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: permissionKey,
+  })
+  const denied = viewerDenied || (Boolean(permissionKey) && !allowed)
+  const deniedTip = viewerDenied ? viewerOperationTip : noPermissionTip
   const button = (
     <Button
       type="text"
       icon={<ArrowDownTrayIcon className="size-4 text-cyan-600/80!" />}
       onClick={onClick}
-      disabled={viewerDenied || disabled}
+      disabled={denied || disabled}
       loading={loading}
     >
       {children || '下载模板'}
     </Button>
   )
 
-  return viewerDenied ? (
-    <Tooltip title={viewerOperationTip}>{button}</Tooltip>
-  ) : (
-    button
-  )
+  return denied ? <Tooltip title={deniedTip}>{button}</Tooltip> : button
 }

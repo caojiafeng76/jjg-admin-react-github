@@ -10,21 +10,21 @@ import {
 import type { UploadFile } from 'antd/es/upload/interface'
 import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 
-import type { ToolingDataFormValues } from '@/services/apiToolingData'
+import type { ToolingInventoryImportRow } from '@/services/apiToolingInventory'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 import {
-  downloadToolingDataTemplate,
-  parseToolingDataExcel,
-} from '@/utils/toolingDataExcel'
+  downloadToolingInventoryTemplate,
+  parseToolingInventoryExcel,
+} from '@/utils/toolingInventoryExcel'
 
 interface Props {
-  onImport: (rows: ToolingDataFormValues[]) => Promise<void>
+  onImport: (rows: ToolingInventoryImportRow[]) => Promise<void>
   isImporting: boolean
 }
 
-type PreviewRow = ToolingDataFormValues & { _idx: number }
+type PreviewRow = ToolingInventoryImportRow & { _idx: number }
 
 const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
   {
@@ -36,37 +36,27 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
   {
     title: '刀具编号',
     dataIndex: 'tool_code',
-    width: 140,
+    width: 180,
   },
   {
-    title: '刀具名称',
-    dataIndex: 'tool_name',
-    width: 160,
-  },
-  {
-    title: '刀具规格',
-    dataIndex: 'tool_spec',
-    width: 160,
-  },
-  {
-    title: '材质',
-    dataIndex: 'material',
+    title: '现有库存',
+    dataIndex: 'current_stock',
     width: 120,
   },
   {
-    title: '单价',
-    dataIndex: 'unit_price',
-    width: 100,
+    title: '备注',
+    dataIndex: 'remarks',
+    width: 220,
   },
 ]
 
-export default function ToolingDataExcelImport({
+export default function ToolingInventoryExcelImport({
   onImport,
   isImporting,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
-  const [parsedRows, setParsedRows] = useState<ToolingDataFormValues[]>([])
+  const [parsedRows, setParsedRows] = useState<ToolingInventoryImportRow[]>([])
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [parsing, setParsing] = useState(false)
 
@@ -84,7 +74,7 @@ export default function ToolingDataExcelImport({
 
     setParsing(true)
     try {
-      const { rows, errors } = await parseToolingDataExcel(file)
+      const { rows, errors } = await parseToolingInventoryExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
       setFileList([
@@ -136,18 +126,22 @@ export default function ToolingDataExcelImport({
       <ImportButton
         onClick={handleOpenModal}
         permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
-      />
+      >
+        导入库存
+      </ImportButton>
 
       <DownloadTemplateButton
-        onClick={downloadToolingDataTemplate}
+        onClick={downloadToolingInventoryTemplate}
         permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
-      />
+      >
+        下载库存模板
+      </DownloadTemplateButton>
 
       <Modal
-        title="导入刀具资料"
+        title="导入刀具库存"
         open={modalOpen}
         onCancel={handleCancel}
-        width={880}
+        width={860}
         footer={[
           <Button key="cancel" onClick={handleCancel}>
             取消
@@ -186,7 +180,7 @@ export default function ToolingDataExcelImport({
           <Alert
             type="info"
             showIcon
-            title="请先下载模板后填写，模板列顺序必须保持不变；空白行会自动跳过。"
+            title="请先下载模板后填写，模板列顺序必须保持不变；空白行会自动跳过。导入会按刀具编号匹配刀具资料，存在库存则更新现有库存和备注，不会覆盖待入库、待出库。"
           />
 
           {parseErrors.length > 0 && (
@@ -218,7 +212,7 @@ export default function ToolingDataExcelImport({
                 dataSource={previewData}
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}
-                scroll={{ y: 320, x: 780 }}
+                scroll={{ y: 320, x: 640 }}
               />
             </div>
           )}

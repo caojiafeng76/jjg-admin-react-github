@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import type { PermissionMap } from '@/types/permission'
 import {
@@ -22,6 +22,7 @@ const PermissionContext = createContext<PermissionContextValue | undefined>(
 
 export function PermissionProvider({ children }: { children: ReactNode }) {
   const { user, role, loading: authLoading } = useAuth()
+  const queryClient = useQueryClient()
   const enabled = !authLoading && !!user
 
   const { data: permissions = {}, isPending } = useQuery({
@@ -43,10 +44,16 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (role !== 'admin' || isLoading || !enabled) return
     if (PERMISSION_REGISTRY.length === 0) return
-    syncPermissionRegistry(PERMISSION_REGISTRY).catch((err) => {
-      console.error('[PermissionContext] syncPermissionRegistry error:', err)
-    })
-  }, [role, isLoading, enabled])
+    syncPermissionRegistry(PERMISSION_REGISTRY)
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ['my-permissions', user?.id ?? null],
+        })
+      })
+      .catch((err) => {
+        console.error('[PermissionContext] syncPermissionRegistry error:', err)
+      })
+  }, [role, isLoading, enabled, queryClient, user?.id])
 
   const can = (key: string) => permissions[key] === true
 
