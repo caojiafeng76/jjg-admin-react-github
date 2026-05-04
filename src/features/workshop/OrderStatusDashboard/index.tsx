@@ -1446,7 +1446,7 @@ export default function OrderStatusDashboard() {
         render: renderText,
       },
       {
-        title: '订单日期',
+        title: '交货日期',
         dataIndex: 'product_delivery_date',
         key: 'product_delivery_date',
         width: 88,
@@ -1754,7 +1754,7 @@ export default function OrderStatusDashboard() {
         <Text type="secondary">搜索：</Text>
         <Input
           allowClear
-          placeholder="订单日期"
+          placeholder="交货日期"
           value={searchValues.orderDate}
           onChange={(event) =>
             updateSearchParamValue('orderDate', event.target.value)

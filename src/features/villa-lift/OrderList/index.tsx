@@ -1,3 +1,4 @@
+import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
 import { useCallback, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
@@ -47,6 +48,7 @@ import {
 } from './useVillaLiftOrders'
 import VillaLiftOrderForm from './VillaLiftOrderForm'
 import VillaLiftOrderTable from './VillaLiftOrderTable'
+import { useExportVillaLiftOrdersAsExcel } from './useExportVillaLiftOrdersAsExcel'
 
 // ----------------------------------------------------------------
 // 明细编辑子弹窗
@@ -471,6 +473,8 @@ export default function VillaLiftOrderListPage() {
   }
 
   // 搜索
+  const { exportAsExcel } = useExportVillaLiftOrdersAsExcel()
+
   function handleSearch() {
     const next = new URLSearchParams(searchParamsURL)
     next.set('page', '1')
@@ -736,6 +740,22 @@ export default function VillaLiftOrderListPage() {
               搜索
             </Button>
             <Button onClick={handleSearchReset}>重置</Button>
+            <Button
+              type="text"
+              icon={
+                <DocumentArrowDownIcon className="size-4 text-green-500/80!" />
+              }
+              onClick={() => {
+                const success = exportAsExcel(data?.orders ?? [])
+                if (success) {
+                  message.success(`已导出 ${data?.orders?.length ?? 0} 条订单`)
+                } else {
+                  message.warning('当前列表无数据可导出')
+                }
+              }}
+            >
+              导出Excel
+            </Button>
           </div>
         </div>
       </div>
