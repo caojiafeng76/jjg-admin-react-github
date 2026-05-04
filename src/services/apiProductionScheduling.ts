@@ -1,0 +1,774 @@
+import type {
+  WorkshopOrder,
+  WorkshopOrderProcessSchedule,
+  WorkshopOrderProcessScheduleStatus,
+} from '@/features/workshop/OrderList'
+import { normalizeWorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
+import type { Database } from './database.types'
+import supabase from './supabase'
+import { handleApiError } from '@/utils/errorHandler'
+import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
+import {
+  buildOrIlikeFilter,
+  normalizeSearchKeywords,
+} from '@/utils/searchKeywords'
+
+const METRIC_PAGE_SIZE = 1000
+const PROJECT_NO_CHUNK_SIZE = 300
+
+const PROCESS_CODE_PATTERN = /[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯]/g
+
+type SalesOrderUpdatePayload =
+  Database['public']['Tables']['sales_orders']['Update'] &
+    Record<string, unknown>
+
+type ProductionQuantityRow = Pick<
+  Database['public']['Tables']['production_order_items']['Row'],
+  'project_no' | 'qualified_quantity'
+>
+
+type TransferQuantityRow = Pick<
+  Database['public']['Tables']['material_transfers']['Row'],
+  'project_no' | 'transfer_quantity'
+>
+
+type ProcessStandardCapacityRow = Pick<
+  Database['public']['Tables']['process_standards']['Row'],
+  | 'length'
+  | 'model'
+  | 'operation'
+  | 'part_no'
+  | 'record_type'
+  | 'standard_seconds'
+>
+
+export interface SchedulingProcessDefinition {
+  code: string
+  name: string
+}
+
+export interface ProductionSchedulingFilters {
+  customer?: string
+  model?: string
+  projectNo?: string
+  status?: WorkshopOrder['status'] | '全部'
+}
+
+export interface ProductionSchedulingOrdersResult {
+  orders: ProductionSchedulingOrder[]
+  total: number
+}
+
+export interface ProductionSchedulingOrder extends WorkshopOrder {
+  processed_quantity: number
+  scheduled_quantity: number
+  scheduled_rate: number
+  total_pending_quantity: number
+  transfer_quantity: number
+  transfer_rate: number
+  remaining_schedule_quantity: number
+  remaining_schedule_rate: number
+  processed_rate: number
+}
+
+export interface ProductionSchedulingProcessRow {
+  key: string
+  order: ProductionSchedulingOrder
+  schedule: WorkshopOrderProcessSchedule
+}
+
+export interface ProductionSchedulingOrderUpdate {
+  order_date?: string | null
+  planned_start_date?: string | null
+  planned_finish_date?: string | null
+  delivery_review_result?: string | null
+  process_flow?: string | null
+  process_requirement?: string | null
+  tooling_status?: string | null
+  capacity_per_day?: number | null
+  bottleneck_processes?: string | null
+  material_status?: string | null
+  order_category?: string | null
+  delivery_priority?: string | null
+  scheduling_remark?: string | null
+  process_schedules?: WorkshopOrderProcessSchedule[] | null
+}
+
+export const PRODUCTION_SCHEDULING_PROCESS_OPTIONS: SchedulingProcessDefinition[] =
+  [
+    { code: '①', name: '精切' },
+    { code: '②', name: '切割' },
+    { code: '③', name: 'CNC' },
+    { code: '④', name: '冲床' },
+    { code: '⑤', name: '钻床' },
+    { code: '⑥', name: '端铣' },
+    { code: '⑦', name: '攻丝' },
+    { code: '⑧', name: '滚弯' },
+    { code: '⑨', name: '折弯' },
+    { code: '⑩', name: '塑封' },
+    { code: '⑪', name: '去毛刺' },
+    { code: '⑫', name: '预留工序' },
+    { code: '⑬', name: '整形' },
+    { code: '⑭', name: '检验' },
+    { code: '⑮', name: '焊接' },
+    { code: '⑯', name: '组装' },
+  ]
+
+const PROCESS_BY_CODE = new Map(
+  PRODUCTION_SCHEDULING_PROCESS_OPTIONS.map((item) => [item.code, item]),
+)
+
+const PROCESS_BY_NAME = new Map(
+  PRODUCTION_SCHEDULING_PROCESS_OPTIONS.map((item) => [item.name, item]),
+)
+
+function normalizeNullableText(value: unknown) {
+  if (typeof value !== 'string') {
+    return value == null ? null : String(value)
+  }
+
+  const trimmed = value.trim()
+  return trimmed ? trimmed : null
+}
+
+function normalizeNullableNumber(value: unknown) {
+  if (value === null || value === undefined || value === '') {
+    return null
+  }
+
+  const numberValue = Number(value)
+  return Number.isFinite(numberValue) ? numberValue : null
+}
+
+function normalizeDateText(value: unknown) {
+  return normalizeNullableText(value)
+}
+
+function toQuantity(value: unknown) {
+  const numberValue = Number(value || 0)
+  return Number.isFinite(numberValue) ? numberValue : 0
+}
+
+function roundQuantity(value: number) {
+  return Math.round(value * 1000) / 1000
+}
+
+function percent(part: number, total: number) {
+  if (!total) {
+    return 0
+  }
+
+  return Math.round((part / total) * 1000) / 10
+}
+
+function createScheduleId() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function normalizeProcessName(name: string) {
+  const trimmed = name.trim()
+  if (trimmed === '自动切') return '切割'
+  return trimmed
+}
+
+function normalizeCapacityMatchText(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function getOrderProcessNames(order: Pick<WorkshopOrder, 'process_flow'>) {
+  return new Set(
+    parseSchedulingProcesses(order.process_flow).map((process) => process.name),
+  )
+}
+
+function isSameLength(
+  left: number | null | undefined,
+  right: number | null | undefined,
+) {
+  const leftValue = Number(left)
+  const rightValue = Number(right)
+
+  if (!Number.isFinite(leftValue) || !Number.isFinite(rightValue)) {
+    return false
+  }
+
+  return Math.abs(leftValue - rightValue) < 0.001
+}
+
+function getScheduleStatus(value: unknown): WorkshopOrderProcessScheduleStatus {
+  return value === '已排' || value === '余排' ? value : '待排'
+}
+
+function normalizeScheduleRecord(
+  value: unknown,
+  index: number,
+): WorkshopOrderProcessSchedule | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const record = value as Record<string, unknown>
+  const processCode = normalizeNullableText(record.process_code)
+  const rawProcessName = normalizeNullableText(record.process_name)
+  const processName = rawProcessName
+    ? normalizeProcessName(rawProcessName)
+    : null
+
+  if (!processCode && !processName) {
+    return null
+  }
+
+  const definition =
+    (processCode ? PROCESS_BY_CODE.get(processCode) : undefined) ||
+    (processName ? PROCESS_BY_NAME.get(processName) : undefined)
+
+  return {
+    id: String(record.id || createScheduleId()),
+    process_code: String(processCode || definition?.code || index + 1),
+    process_name: String(processName || definition?.name || processCode || ''),
+    status: getScheduleStatus(record.status),
+    required_production_date: normalizeDateText(
+      record.required_production_date,
+    ),
+    scheduled_date: normalizeDateText(record.scheduled_date),
+    last_scheduled_date: normalizeDateText(record.last_scheduled_date),
+    scheduled_quantity: normalizeNullableNumber(record.scheduled_quantity),
+    remark: normalizeNullableText(record.remark),
+  }
+}
+
+export function normalizeProcessSchedules(
+  value: unknown,
+): WorkshopOrderProcessSchedule[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .map((item, index) => normalizeScheduleRecord(item, index))
+    .filter((item): item is WorkshopOrderProcessSchedule => Boolean(item))
+}
+
+export function parseSchedulingProcesses(
+  processFlow: string | null | undefined,
+): SchedulingProcessDefinition[] {
+  const text = processFlow?.trim()
+  if (!text) {
+    return []
+  }
+
+  const seen = new Set<string>()
+  const processes: SchedulingProcessDefinition[] = []
+  const codeMatches = text.match(PROCESS_CODE_PATTERN) || []
+
+  for (const code of codeMatches) {
+    const definition = PROCESS_BY_CODE.get(code) || { code, name: code }
+    if (!seen.has(definition.code)) {
+      seen.add(definition.code)
+      processes.push(definition)
+    }
+  }
+
+  if (processes.length > 0) {
+    return processes
+  }
+
+  const tokens = text
+    .split(/[\s,，、/／|｜>＞→\-—]+/)
+    .map((item) => normalizeProcessName(item))
+    .filter(Boolean)
+
+  for (const token of tokens) {
+    const definition = PROCESS_BY_NAME.get(token) || {
+      code: token,
+      name: token,
+    }
+    if (!seen.has(definition.code)) {
+      seen.add(definition.code)
+      processes.push(definition)
+    }
+  }
+
+  return processes
+}
+
+export function createEmptyProcessSchedule(
+  order?: Pick<WorkshopOrder, 'order_quantity'>,
+): WorkshopOrderProcessSchedule {
+  return {
+    id: createScheduleId(),
+    process_code: '',
+    process_name: '',
+    status: '待排',
+    required_production_date: null,
+    scheduled_date: null,
+    last_scheduled_date: null,
+    scheduled_quantity: order?.order_quantity ?? null,
+    remark: null,
+  }
+}
+
+export function buildInitialProcessSchedules(
+  order: Pick<WorkshopOrder, 'order_quantity' | 'process_flow'>,
+): WorkshopOrderProcessSchedule[] {
+  const orderQuantity = toQuantity(order.order_quantity)
+  const processes = parseSchedulingProcesses(order.process_flow)
+
+  if (processes.length === 0) {
+    return [createEmptyProcessSchedule(order)]
+  }
+
+  return processes.map((process) => ({
+    id: createScheduleId(),
+    process_code: process.code,
+    process_name: process.name,
+    status: '待排',
+    required_production_date: null,
+    scheduled_date: null,
+    last_scheduled_date: null,
+    scheduled_quantity: orderQuantity || null,
+    remark: null,
+  }))
+}
+
+function getOrderScheduleRows(order: WorkshopOrder) {
+  const schedules = normalizeProcessSchedules(order.process_schedules)
+  return schedules.length > 0 ? schedules : buildInitialProcessSchedules(order)
+}
+
+function getOrderScheduledQuantity(order: WorkshopOrder) {
+  const orderQuantity = toQuantity(order.order_quantity)
+  const scheduledQuantities = normalizeProcessSchedules(order.process_schedules)
+    .filter((schedule) => schedule.status !== '待排')
+    .map((schedule) => toQuantity(schedule.scheduled_quantity))
+
+  const scheduledQuantity = scheduledQuantities.length
+    ? Math.max(...scheduledQuantities)
+    : 0
+
+  return roundQuantity(Math.min(orderQuantity, scheduledQuantity))
+}
+
+function chunkValues(values: string[]) {
+  const chunks: string[][] = []
+  for (let index = 0; index < values.length; index += PROJECT_NO_CHUNK_SIZE) {
+    chunks.push(values.slice(index, index + PROJECT_NO_CHUNK_SIZE))
+  }
+  return chunks
+}
+
+async function fetchProductionQuantities(
+  projectNos: string[],
+  signal?: AbortSignal,
+) {
+  const quantities = new Map<string, number>()
+
+  for (const projectNoChunk of chunkValues(projectNos)) {
+    let from = 0
+
+    while (true) {
+      const to = from + METRIC_PAGE_SIZE - 1
+      let query = supabase
+        .from('production_order_items')
+        .select('project_no, qualified_quantity')
+        .in('project_no', projectNoChunk)
+        .range(from, to)
+
+      if (signal) {
+        query = query.abortSignal(signal)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取已加工数量失败')
+      }
+
+      for (const row of (data || []) as ProductionQuantityRow[]) {
+        const projectNo = row.project_no?.trim()
+        if (!projectNo) continue
+        quantities.set(
+          projectNo,
+          (quantities.get(projectNo) || 0) + toQuantity(row.qualified_quantity),
+        )
+      }
+
+      if ((data || []).length < METRIC_PAGE_SIZE) {
+        break
+      }
+
+      from += METRIC_PAGE_SIZE
+    }
+  }
+
+  return quantities
+}
+
+async function fetchTransferQuantities(
+  projectNos: string[],
+  signal?: AbortSignal,
+) {
+  const quantities = new Map<string, number>()
+
+  for (const projectNoChunk of chunkValues(projectNos)) {
+    let from = 0
+
+    while (true) {
+      const to = from + METRIC_PAGE_SIZE - 1
+      let query = supabase
+        .from('material_transfers')
+        .select('project_no, transfer_quantity')
+        .in('project_no', projectNoChunk)
+        .range(from, to)
+
+      if (signal) {
+        query = query.abortSignal(signal)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取转移数量失败')
+      }
+
+      for (const row of (data || []) as TransferQuantityRow[]) {
+        const projectNo = row.project_no?.trim()
+        if (!projectNo) continue
+        quantities.set(
+          projectNo,
+          (quantities.get(projectNo) || 0) + toQuantity(row.transfer_quantity),
+        )
+      }
+
+      if ((data || []).length < METRIC_PAGE_SIZE) {
+        break
+      }
+
+      from += METRIC_PAGE_SIZE
+    }
+  }
+
+  return quantities
+}
+
+async function fetchProcessStandardCapacityRows(
+  orders: WorkshopOrder[],
+  signal?: AbortSignal,
+) {
+  const rows: ProcessStandardCapacityRow[] = []
+  const models = Array.from(
+    new Set(
+      orders
+        .map((order) => normalizeCapacityMatchText(order.product_model))
+        .filter(Boolean),
+    ),
+  )
+
+  if (models.length === 0) {
+    return []
+  }
+
+  let from = 0
+
+  while (true) {
+    const to = from + METRIC_PAGE_SIZE - 1
+    let query = supabase
+      .from('process_standards')
+      .select(
+        'record_type, model, length, part_no, operation, standard_seconds',
+      )
+      .in('model', models)
+      .in('record_type', ['A', 'B'])
+      .gt('standard_seconds', 0)
+      .order('record_type', { ascending: true })
+      .order('operation', { ascending: true })
+      .range(from, to)
+
+    if (signal) {
+      query = query.abortSignal(signal)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      throw handleApiError(error, '获取成本核算标准产能失败')
+    }
+
+    const pageRows = (data || []) as ProcessStandardCapacityRow[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < METRIC_PAGE_SIZE) {
+      break
+    }
+
+    from += METRIC_PAGE_SIZE
+  }
+
+  return rows
+}
+
+function getMatchedCapacityRows({
+  order,
+  standardRows,
+}: {
+  order: WorkshopOrder
+  standardRows: ProcessStandardCapacityRow[]
+}) {
+  const model = normalizeCapacityMatchText(order.product_model)
+  const partNo = normalizeCapacityMatchText(order.material_code)
+  const length = Number(order.length_mm)
+  const exactRows = standardRows.filter(
+    (row) =>
+      row.record_type === 'A' &&
+      normalizeCapacityMatchText(row.model) === model &&
+      normalizeCapacityMatchText(row.part_no) === partNo &&
+      isSameLength(row.length, length),
+  )
+  const matchedRows =
+    exactRows.length > 0
+      ? exactRows
+      : standardRows.filter(
+          (row) =>
+            row.record_type === 'B' &&
+            normalizeCapacityMatchText(row.model) === model,
+        )
+  const processNames = getOrderProcessNames(order)
+
+  if (processNames.size === 0) {
+    return matchedRows
+  }
+
+  const processRows = matchedRows.filter((row) =>
+    processNames.has(normalizeProcessName(row.operation || '')),
+  )
+
+  return processRows.length > 0 ? processRows : matchedRows
+}
+
+function getMatchedDailyStandardCapacity({
+  order,
+  standardRows,
+}: {
+  order: WorkshopOrder
+  standardRows: ProcessStandardCapacityRow[]
+}) {
+  const capacities = getMatchedCapacityRows({ order, standardRows })
+    .map((row) => calculateDailyStandardCapacity(row.standard_seconds))
+    .filter((capacity) => capacity > 0)
+
+  if (capacities.length === 0) {
+    return null
+  }
+
+  return roundQuantity(Math.min(...capacities))
+}
+
+export async function getProductionSchedulingOrderStandardCapacity({
+  order,
+  signal,
+}: {
+  order: WorkshopOrder
+  signal?: AbortSignal
+}) {
+  const standardRows = await fetchProcessStandardCapacityRows([order], signal)
+  return getMatchedDailyStandardCapacity({ order, standardRows })
+}
+
+function applySchedulingFilters(
+  filters: ProductionSchedulingFilters | undefined,
+) {
+  let query = supabase.from('sales_orders').select('*', { count: 'exact' })
+  const projectNoKeywords = normalizeSearchKeywords(filters?.projectNo)
+  const modelKeywords = normalizeSearchKeywords(filters?.model)
+  const customer = normalizeNullableText(filters?.customer)
+
+  if (filters?.status && filters.status !== '全部') {
+    query = query.filter(
+      'status',
+      'eq',
+      normalizeWorkshopOrderStatus(filters.status),
+    )
+  }
+
+  if (projectNoKeywords?.length) {
+    query = query.or(buildOrIlikeFilter(['project_no'], projectNoKeywords))
+  }
+
+  if (modelKeywords?.length) {
+    query = query.or(
+      buildOrIlikeFilter(['product_model', 'customer_model'], modelKeywords),
+    )
+  }
+
+  if (customer) {
+    query = query.ilike('customer', `%${customer}%`)
+  }
+
+  return query
+}
+
+export async function getProductionSchedulingOrders({
+  filters,
+  page,
+  pageSize,
+  signal,
+}: {
+  filters?: ProductionSchedulingFilters
+  page: number
+  pageSize: number
+  signal?: AbortSignal
+}): Promise<ProductionSchedulingOrdersResult> {
+  const currentPage = Math.max(page, 1)
+  const currentPageSize = Math.max(pageSize, 1)
+  const from = (currentPage - 1) * currentPageSize
+  const to = from + currentPageSize - 1
+  let query = applySchedulingFilters(filters)
+    .order('product_delivery_date', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error, count } = await query
+
+  if (error) {
+    throw handleApiError(error, '获取订单排产数据失败')
+  }
+
+  const rows = (data || []) as unknown as WorkshopOrder[]
+
+  const projectNos = Array.from(
+    new Set(
+      rows
+        .map((order) => order.project_no?.trim())
+        .filter((projectNo): projectNo is string => Boolean(projectNo)),
+    ),
+  )
+  const [productionQuantities, transferQuantities, standardCapacityRows] =
+    await Promise.all([
+      fetchProductionQuantities(projectNos, signal),
+      fetchTransferQuantities(projectNos, signal),
+      fetchProcessStandardCapacityRows(rows, signal),
+    ])
+
+  const orders = rows.map((order) => {
+    const projectNo = order.project_no?.trim() || ''
+    const orderQuantity = toQuantity(order.order_quantity)
+    const scheduledQuantity = getOrderScheduledQuantity(order)
+    const matchedDailyStandardCapacity = getMatchedDailyStandardCapacity({
+      order,
+      standardRows: standardCapacityRows,
+    })
+    const remainingScheduleQuantity = Math.max(
+      orderQuantity - scheduledQuantity,
+      0,
+    )
+    const processedQuantity = roundQuantity(
+      productionQuantities.get(projectNo) || 0,
+    )
+    const transferQuantity = roundQuantity(
+      transferQuantities.get(projectNo) || 0,
+    )
+
+    return {
+      ...order,
+      capacity_per_day:
+        toQuantity(order.capacity_per_day) || matchedDailyStandardCapacity,
+      process_schedules: normalizeProcessSchedules(order.process_schedules),
+      total_pending_quantity: orderQuantity,
+      scheduled_quantity: scheduledQuantity,
+      remaining_schedule_quantity: roundQuantity(remainingScheduleQuantity),
+      processed_quantity: processedQuantity,
+      transfer_quantity: transferQuantity,
+      scheduled_rate: percent(scheduledQuantity, orderQuantity),
+      remaining_schedule_rate: percent(
+        remainingScheduleQuantity,
+        orderQuantity,
+      ),
+      processed_rate: percent(processedQuantity, orderQuantity),
+      transfer_rate: percent(transferQuantity, orderQuantity),
+    } satisfies ProductionSchedulingOrder
+  })
+
+  return {
+    orders,
+    total: count ?? orders.length,
+  }
+}
+
+export function getProductionSchedulingProcessRows(
+  orders: ProductionSchedulingOrder[],
+): ProductionSchedulingProcessRow[] {
+  return orders.flatMap((order) =>
+    getOrderScheduleRows(order).map((schedule) => ({
+      key: `${order.id || order.project_no}-${schedule.id}`,
+      order,
+      schedule,
+    })),
+  )
+}
+
+export async function updateProductionSchedulingOrder({
+  id,
+  values,
+}: {
+  id: string
+  values: ProductionSchedulingOrderUpdate
+}) {
+  const payload: SalesOrderUpdatePayload = {
+    updated_at: new Date().toISOString(),
+  }
+  const textFields: Array<keyof ProductionSchedulingOrderUpdate> = [
+    'delivery_review_result',
+    'process_flow',
+    'process_requirement',
+    'tooling_status',
+    'bottleneck_processes',
+    'material_status',
+    'order_category',
+    'delivery_priority',
+    'scheduling_remark',
+  ]
+  const dateFields: Array<keyof ProductionSchedulingOrderUpdate> = [
+    'order_date',
+    'planned_start_date',
+    'planned_finish_date',
+  ]
+
+  for (const field of textFields) {
+    if (field in values) {
+      payload[field] = normalizeNullableText(values[field])
+    }
+  }
+
+  for (const field of dateFields) {
+    if (field in values) {
+      payload[field] = normalizeDateText(values[field])
+    }
+  }
+
+  if ('capacity_per_day' in values) {
+    payload.capacity_per_day = normalizeNullableNumber(values.capacity_per_day)
+  }
+
+  if ('process_schedules' in values) {
+    payload.process_schedules = normalizeProcessSchedules(
+      values.process_schedules,
+    )
+  }
+
+  const { error } = await supabase
+    .from('sales_orders')
+    .update(payload as Database['public']['Tables']['sales_orders']['Update'])
+    .eq('id', id)
+
+  if (error) {
+    throw handleApiError(error, '保存订单排产数据失败')
+  }
+}

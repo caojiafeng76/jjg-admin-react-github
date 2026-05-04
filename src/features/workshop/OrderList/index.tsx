@@ -35,7 +35,11 @@ import type { WorkshopOrderStatus } from './orderStatus'
 
 export interface WorkshopOrder {
   id?: string
+  order_date?: string | null
   product_delivery_date: string | null
+  planned_start_date?: string | null
+  planned_finish_date?: string | null
+  delivery_review_result?: string | null
   status?: WorkshopOrderStatus | null
   total_outbound_quantity?: number | null
   project_no: string | null
@@ -43,6 +47,15 @@ export interface WorkshopOrder {
   length_mm: number | null
   length_tolerance?: string | null
   process_flow?: string | null
+  process_requirement?: string | null
+  tooling_status?: string | null
+  capacity_per_day?: number | null
+  bottleneck_processes?: string | null
+  material_status?: string | null
+  order_category?: string | null
+  delivery_priority?: string | null
+  scheduling_remark?: string | null
+  process_schedules?: WorkshopOrderProcessSchedule[] | null
   customer: string | null
   customer_model: string | null
   order_quantity: number | null
@@ -53,6 +66,20 @@ export interface WorkshopOrder {
   material_name: string | null
   material_code: string | null
   row_remark?: string | null
+}
+
+export type WorkshopOrderProcessScheduleStatus = '待排' | '已排' | '余排'
+
+export interface WorkshopOrderProcessSchedule {
+  id: string
+  process_code: string
+  process_name: string
+  status: WorkshopOrderProcessScheduleStatus
+  required_production_date: string | null
+  scheduled_date: string | null
+  last_scheduled_date: string | null
+  scheduled_quantity: number | null
+  remark?: string | null
 }
 
 type WorkshopOrderTabKey = 'production' | 'closed'

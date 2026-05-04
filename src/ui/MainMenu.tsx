@@ -85,6 +85,12 @@ const allMenuItems: MenuItemDef[] = [
     permission: 'nav:production-scheduling',
   },
   {
+    key: 'order-scheduling',
+    label: '订单排产',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:order-scheduling',
+  },
+  {
     key: 'standard-time-list',
     label: '成本核算',
     icon: <Square3Stack3DIcon className="size-4" />,

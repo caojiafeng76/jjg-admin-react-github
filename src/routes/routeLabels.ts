@@ -7,6 +7,7 @@ const routeToLabelMap: Record<string, string> = {
   'syney-setting': '编号设置',
   'workshop-order-list': '订单管理',
   'production-scheduling': '订单现状',
+  'order-scheduling': '订单排产',
   'workshop-process-list': '工序管理',
   'workshop-defect-reason-list': '不良原因管理',
   'employee-list': '员工管理',
