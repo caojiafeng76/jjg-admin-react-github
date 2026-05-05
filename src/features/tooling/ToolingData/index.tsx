@@ -2,7 +2,9 @@
 import { App, FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   ToolingData,
   ToolingDataFormValues,
@@ -29,6 +31,10 @@ const MIN_TABLE_ROW_HEIGHT = 28
 
 export default function ToolingDataPage() {
   const { message } = App.useApp()
+  const canManageTooling = usePermission(TOOLING_MANAGE_PERMISSION_KEY)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: TOOLING_MANAGE_PERMISSION_KEY,
+  })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建刀具资料')
@@ -118,6 +124,16 @@ export default function ToolingDataPage() {
 
   const handleImport = useCallback(
     async (rows: ToolingDataFormValues[]) => {
+      if (!canManageTooling) {
+        message.warning('无刀具模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         await importMutation.mutateAsync(rows)
         message.success(`刀具资料导入成功，共 ${rows.length} 条`)
@@ -130,11 +146,27 @@ export default function ToolingDataPage() {
         }
       }
     },
-    [importMutation, message],
+    [
+      canManageTooling,
+      importMutation,
+      message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleFinish = useCallback(
     async (values: ToolingDataFormValues) => {
+      if (!canManageTooling) {
+        message.warning('无刀具模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -158,11 +190,14 @@ export default function ToolingDataPage() {
     },
     [
       createMutation,
+      canManageTooling,
       isEdit,
       message,
       resetFormState,
       selectedRowKeys,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -267,6 +302,7 @@ export default function ToolingDataPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied || !canManageTooling }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

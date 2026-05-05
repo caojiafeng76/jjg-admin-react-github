@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { App, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   ToolingInventory,
   ToolingInventoryFormValues,
@@ -28,6 +30,10 @@ import {
 
 export default function ToolingInventoryPage() {
   const { message } = App.useApp()
+  const canManageTooling = usePermission(TOOLING_MANAGE_PERMISSION_KEY)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: TOOLING_MANAGE_PERMISSION_KEY,
+  })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建刀具库存')
@@ -119,6 +125,16 @@ export default function ToolingInventoryPage() {
 
   const handleImport = useCallback(
     async (rows: ToolingInventoryImportRow[]) => {
+      if (!canManageTooling) {
+        message.warning('无刀具模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         await importMutation.mutateAsync(rows)
         message.success(`刀具库存导入成功，共 ${rows.length} 条`)
@@ -131,11 +147,27 @@ export default function ToolingInventoryPage() {
         }
       }
     },
-    [importMutation, message],
+    [
+      canManageTooling,
+      importMutation,
+      message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleFinish = useCallback(
     async (values: ToolingInventoryFormValues) => {
+      if (!canManageTooling) {
+        message.warning('无刀具模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -159,11 +191,14 @@ export default function ToolingInventoryPage() {
     },
     [
       createMutation,
+      canManageTooling,
       isEdit,
       message,
       resetFormState,
       selectedRowKeys,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -265,6 +300,7 @@ export default function ToolingInventoryPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied || !canManageTooling }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

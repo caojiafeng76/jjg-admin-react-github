@@ -137,7 +137,13 @@ export default function ToolingStockOutPage() {
       console.error('导出刀具出库失败:', error)
       message.error('导出失败，请稍后重试')
     }
-  }, [canManageTooling, message, selectedRecords, viewerDenied, viewerOperationTip])
+  }, [
+    canManageTooling,
+    message,
+    selectedRecords,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
@@ -277,7 +283,13 @@ export default function ToolingStockOutPage() {
         }
       }
     },
-    [canManageTooling, importMutation, message, viewerDenied, viewerOperationTip],
+    [
+      canManageTooling,
+      importMutation,
+      message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleFinish = useCallback(
