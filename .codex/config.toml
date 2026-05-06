@@ -1,0 +1,31 @@
+[mcp_servers.spec-workflow]
+args = [
+    "spec-workflow-mcp",
+    ".",
+]
+command = "bunx"
+
+[mcp_servers.supabase]
+args = [
+    "-y",
+    "@supabase/mcp-server-supabase",
+    "--project-ref",
+    "mlcptrkvkseyqxxlfcme",
+]
+command = "npx"
+env_vars = ["SUPABASE_ACCESS_TOKEN"]
+
+[mcp_servers.serena]
+startup_timeout_sec = 60
+args = [
+    "-p",
+    "3.13",
+    "--from",
+    "serena-agent",
+    "serena",
+    "start-mcp-server",
+    "--project",
+    "E:/code/jjg-admin-react-github",
+    "--context=codex",
+]
+command = "uvx"

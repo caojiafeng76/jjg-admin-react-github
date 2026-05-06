@@ -3,6 +3,32 @@
     "spec-workflow": {
       "command": "bunx",
       "args": ["spec-workflow-mcp", "."]
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase",
+        "--project-ref",
+        "mlcptrkvkseyqxxlfcme"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
+      }
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "-p",
+        "3.13",
+        "--from",
+        "serena-agent",
+        "serena",
+        "start-mcp-server",
+        "--project",
+        "E:/code/jjg-admin-react-github",
+        "--context=codex"
+      ]
     }
   }
 }
