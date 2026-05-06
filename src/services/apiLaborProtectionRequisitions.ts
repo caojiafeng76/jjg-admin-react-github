@@ -5,7 +5,10 @@ import { handleApiError } from '@/utils/errorHandler'
 export interface LaborProtectionRequisition {
   id: string
   labor_protection_data_id: string
+  machine_equipment_id: string | null
   category: string
+  machine_no: string
+  machine_name: string
   job_title: string
   quantity: number
   recipient: string
@@ -15,6 +18,7 @@ export interface LaborProtectionRequisition {
 
 export interface LaborProtectionRequisitionFormValues {
   labor_protection_data_id: string
+  machine_equipment_id: string
   job_title: string
   quantity: number
   recipient: string
@@ -27,6 +31,7 @@ type DynamicSupabaseTable = {
 type LaborProtectionRequisitionRow = {
   id: string
   labor_protection_data_id: string
+  machine_equipment_id: string | null
   job_title: string
   quantity: number
   recipient: string
@@ -42,17 +47,31 @@ type LaborProtectionRequisitionRow = {
         category: string
       }>
     | null
+  machine_equipment_maintenances?:
+    | {
+        id: string
+        unified_device_no: string
+        machine_name: string
+      }
+    | Array<{
+        id: string
+        unified_device_no: string
+        machine_name: string
+      }>
+    | null
 }
 
 const LABOR_PROTECTION_REQUISITION_SELECT = `
       id,
       labor_protection_data_id,
+      machine_equipment_id,
       job_title,
       quantity,
       recipient,
       created_at,
       updated_at,
-      labor_protection_data(id, category)
+      labor_protection_data(id, category),
+      machine_equipment_maintenances(id, unified_device_no, machine_name)
     `
 
 function laborProtectionRequisitionTable() {
@@ -88,8 +107,13 @@ function normalizeFormValues(
     throw new Error('请选择劳保种类')
   }
 
+  if (!values.machine_equipment_id) {
+    throw new Error('请选择机器编号')
+  }
+
   return {
     labor_protection_data_id: values.labor_protection_data_id,
+    machine_equipment_id: values.machine_equipment_id,
     job_title: normalizeRequiredText(values.job_title, '岗位'),
     quantity: normalizeQuantity(values.quantity),
     recipient: normalizeRequiredText(values.recipient, '领取人'),
@@ -110,13 +134,30 @@ function extractCategory(
   return laborProtectionData.category || ''
 }
 
+function extractMachineInfo(
+  machineEquipment: LaborProtectionRequisitionRow['machine_equipment_maintenances'],
+) {
+  const value = Array.isArray(machineEquipment)
+    ? machineEquipment[0]
+    : machineEquipment
+
+  return {
+    machine_no: value?.unified_device_no || '',
+    machine_name: value?.machine_name || '',
+  }
+}
+
 function mapLaborProtectionRequisition(
   row: LaborProtectionRequisitionRow,
 ): LaborProtectionRequisition {
+  const machineInfo = extractMachineInfo(row.machine_equipment_maintenances)
+
   return {
     id: row.id,
     labor_protection_data_id: row.labor_protection_data_id,
+    machine_equipment_id: row.machine_equipment_id,
     category: extractCategory(row.labor_protection_data),
+    ...machineInfo,
     job_title: row.job_title,
     quantity: Number(row.quantity || 0),
     recipient: row.recipient,

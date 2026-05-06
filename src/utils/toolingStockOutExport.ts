@@ -12,6 +12,8 @@ const TABLE_HEADERS = [
   '出库日期',
   '领用人',
   '用途',
+  '机器编号',
+  '机器名称',
   '刀具编号',
   '刀具名称',
   '刀具规格',
@@ -21,7 +23,7 @@ const TABLE_HEADERS = [
   '备注',
 ] as const
 
-const COLUMN_WIDTHS = [4, 12, 14, 22, 18, 18, 18, 14, 12, 12, 24]
+const COLUMN_WIDTHS = [4, 12, 14, 22, 16, 18, 18, 18, 18, 14, 12, 12, 24]
 const BORDER_COLOR = '000000'
 const HEADER_FILL = 'F2F2F2'
 
@@ -69,6 +71,8 @@ function buildWorkbook(items: ToolingStockOut[]) {
     formatCellText(item.stock_out_date),
     formatCellText(item.recipient),
     formatCellText(item.purpose),
+    formatCellText(item.machine_no),
+    formatCellText(item.machine_name),
     formatCellText(item.tool_code),
     formatCellText(item.tool_name),
     formatCellText(item.tool_spec),
@@ -155,7 +159,7 @@ function buildWorkbook(items: ToolingStockOut[]) {
     }
   }
 
-  const numericColumns = [8, 9]
+  const numericColumns = [10, 11]
   for (let r = 3; r < totalRows; r += 1) {
     numericColumns.forEach((c) => {
       const ref = `${colLetter(c)}${r + 1}`

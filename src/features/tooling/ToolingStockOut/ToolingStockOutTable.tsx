@@ -68,6 +68,20 @@ export default function ToolingStockOutTable({
         width: 180,
       },
       {
+        title: '机器编号',
+        dataIndex: 'machine_no',
+        key: 'machine_no',
+        width: 140,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
+        title: '机器名称',
+        dataIndex: 'machine_name',
+        key: 'machine_name',
+        width: 160,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
         title: '刀具编号',
         dataIndex: 'tool_code',
         key: 'tool_code',
@@ -141,7 +155,7 @@ export default function ToolingStockOutTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1860, y: scrollY }}
+      scroll={{ x: 2160, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

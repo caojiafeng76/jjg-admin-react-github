@@ -47,6 +47,20 @@ export default function LaborProtectionRequisitionTable({
         width: 180,
       },
       {
+        title: '机器编号',
+        dataIndex: 'machine_no',
+        key: 'machine_no',
+        width: 140,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
+        title: '机器名称',
+        dataIndex: 'machine_name',
+        key: 'machine_name',
+        width: 160,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
         title: '数量',
         dataIndex: 'quantity',
         key: 'quantity',
@@ -87,7 +101,7 @@ export default function LaborProtectionRequisitionTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 860, y: scrollY }}
+      scroll={{ x: 1160, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

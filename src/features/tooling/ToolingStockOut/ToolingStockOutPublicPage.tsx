@@ -12,6 +12,7 @@ import {
 import dayjs from 'dayjs'
 
 import type { ToolingStockOutFormValues } from '@/services/apiToolingStockOut'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import ToolingStockOutForm from './ToolingStockOutForm'
 import {
   useCreateToolingStockOut,
@@ -28,6 +29,7 @@ interface SubmissionSnapshot {
   quantity: number
   recipient: string
   toolLabel: string
+  machineLabel: string
   purpose: string
 }
 
@@ -38,6 +40,8 @@ export default function ToolingStockOutPublicPage() {
 
   const { data: toolingOptions = [], isLoading: isToolingOptionsLoading } =
     useToolingDataOptions()
+  const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
+    useMachineEquipmentOptions()
   const createMutation = useCreateToolingStockOut()
 
   const defaultValues = useMemo<Partial<ToolingStockOutFormValues>>(
@@ -61,6 +65,9 @@ export default function ToolingStockOutPublicPage() {
       const selectedTooling = toolingOptions.find(
         (item) => item.id === payload.tooling_data_id,
       )
+      const selectedMachine = machineOptions.find(
+        (item) => item.id === payload.machine_equipment_id,
+      )
 
       setSubmitted({
         quantity: Number(payload.stock_out_quantity),
@@ -68,6 +75,9 @@ export default function ToolingStockOutPublicPage() {
         toolLabel: selectedTooling
           ? `${selectedTooling.tool_code} | ${selectedTooling.tool_name}`
           : '未命名刀具',
+        machineLabel: selectedMachine
+          ? `${selectedMachine.unified_device_no} | ${selectedMachine.machine_name}`
+          : '未命名机器',
         purpose: payload.purpose.trim(),
       })
     } catch (error) {
@@ -110,7 +120,7 @@ export default function ToolingStockOutPublicPage() {
                   <div>{submitted.recipient} 已完成刀具出库登记</div>
                   <div>
                     {submitted.toolLabel} x {submitted.quantity}，用途：
-                    {submitted.purpose}
+                    {submitted.purpose}，机器：{submitted.machineLabel}
                   </div>
                 </div>
               }
@@ -145,19 +155,19 @@ export default function ToolingStockOutPublicPage() {
                 </div>
               </div>
 
-              {isToolingOptionsLoading ? (
+              {isToolingOptionsLoading || isMachineOptionsLoading ? (
                 <div className="flex min-h-80 items-center justify-center">
                   <div className="flex flex-col items-center gap-4 text-sm text-slate-500">
                     <Spin size="large" />
-                    <span>正在加载刀具资料</span>
+                    <span>正在加载刀具资料和机器编号</span>
                   </div>
                 </div>
-              ) : toolingOptions.length === 0 ? (
+              ) : toolingOptions.length === 0 || machineOptions.length === 0 ? (
                 <Alert
                   type="warning"
                   showIcon
-                  title="暂未配置可出库的刀具资料"
-                  description="请联系管理员先在后台维护刀具资料后，再重新扫码登记。"
+                  title="暂未配置可出库的刀具资料或机器编号"
+                  description="请联系管理员先在后台维护刀具资料和机器设备后，再重新扫码登记。"
                 />
               ) : (
                 <ToolingStockOutForm
@@ -165,6 +175,8 @@ export default function ToolingStockOutPublicPage() {
                   setFormRef={setFormRef}
                   isSubmitting={createMutation.isPending}
                   toolingOptions={toolingOptions}
+                  machineOptions={machineOptions}
+                  isMachineOptionsLoading={isMachineOptionsLoading}
                   toolingInputMode="bottom-sheet"
                   defaultValues={defaultValues}
                 />
@@ -172,7 +184,7 @@ export default function ToolingStockOutPublicPage() {
             </Card>
 
             <div className="mt-4 rounded-[24px] border border-slate-200/80 bg-slate-950/3 px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
-              提交后会立即写入刀具出库，并保持“待审核”状态。请确认刀具、领用人、用途和数量无误，再点击底部“确认登记”。
+              提交后会立即写入刀具出库，并保持“待审核”状态。请确认刀具、机器编号、领用人、用途和数量无误，再点击底部“确认登记”。
             </div>
 
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+14px)] backdrop-blur-xl sm:px-6">
@@ -184,7 +196,10 @@ export default function ToolingStockOutPublicPage() {
                   className="h-12 rounded-2xl"
                   loading={createMutation.isPending}
                   disabled={
-                    toolingOptions.length === 0 || isToolingOptionsLoading
+                    toolingOptions.length === 0 ||
+                    isToolingOptionsLoading ||
+                    machineOptions.length === 0 ||
+                    isMachineOptionsLoading
                   }
                   onClick={() => formRef?.submit()}
                 >

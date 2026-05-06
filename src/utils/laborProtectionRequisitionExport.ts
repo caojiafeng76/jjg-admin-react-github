@@ -13,6 +13,8 @@ const DETAIL_HEADERS = [
   '#',
   '种类',
   '岗位',
+  '机器编号',
+  '机器名称',
   '数量',
   '领取人',
   '更新时间',
@@ -20,7 +22,7 @@ const DETAIL_HEADERS = [
 
 const SUMMARY_HEADERS = ['#', '种类', '数量合计', '领料笔数'] as const
 
-const DETAIL_COLUMN_WIDTHS = [6, 24, 18, 12, 16, 22]
+const DETAIL_COLUMN_WIDTHS = [6, 24, 18, 16, 18, 12, 16, 22]
 const SUMMARY_COLUMN_WIDTHS = [6, 28, 14, 14]
 
 const BORDER_COLOR = '000000'
@@ -200,6 +202,8 @@ function buildDetailSheet(
       index + 1,
       formatCellText(item.category),
       formatCellText(item.job_title),
+      formatCellText(item.machine_no),
+      formatCellText(item.machine_name),
       Number(item.quantity || 0),
       formatCellText(item.recipient),
       formatDateTime(item.updated_at),
@@ -212,15 +216,15 @@ function buildDetailSheet(
     () => '',
   )
   totalRow[0] = '合计'
-  totalRow[3] = totalQuantity
+  totalRow[5] = totalQuantity
   data.push(totalRow)
   const totalRowIdx = data.length - 1
   merges.push({
     s: { r: totalRowIdx, c: 0 },
-    e: { r: totalRowIdx, c: 2 },
+    e: { r: totalRowIdx, c: 4 },
   })
   merges.push({
-    s: { r: totalRowIdx, c: 4 },
+    s: { r: totalRowIdx, c: 6 },
     e: { r: totalRowIdx, c: colCount - 1 },
   })
 
@@ -247,7 +251,7 @@ function buildDetailSheet(
     for (let c = 0; c < colCount; c += 1) {
       setBorderedCenterStyle(ws, `${colLetter(c)}${r + 1}`, {
         sz: 10.5,
-        numFmt: c === 3 ? '0' : undefined,
+        numFmt: c === 5 ? '0' : undefined,
       })
     }
   }
@@ -256,7 +260,7 @@ function buildDetailSheet(
       bold: true,
       sz: 11,
       fill: TOTAL_FILL,
-      numFmt: c === 3 ? '0' : undefined,
+      numFmt: c === 5 ? '0' : undefined,
     })
   }
 

@@ -16,12 +16,13 @@ const TABLE_START_Y = 30
 const HEADER_CELL_HEIGHT = 13
 const CELL_PADDING = 2.2
 const BODY_CELL_HEIGHT = 15
-const COLUMN_WIDTHS = [9, 22, 22, 34, 28, 34, 28, 24, 20, 22, 32] as const
+const COLUMN_WIDTHS = [8, 20, 18, 26, 24, 26, 24, 28, 24, 18, 20, 26] as const
 const TABLE_COLUMNS = [
   '#',
   '出库日期',
   '领用人',
   '用途',
+  '机器编号',
   '刀具编号',
   '刀具名称',
   '刀具规格',
@@ -130,6 +131,7 @@ export function usePrintToolingStockOut() {
           formatCellText(item.stock_out_date),
           formatCellText(item.recipient),
           formatCellText(item.purpose),
+          formatCellText(item.machine_no),
           formatCellText(item.tool_code),
           formatCellText(item.tool_name),
           formatCellText(item.tool_spec),
