@@ -28,7 +28,9 @@ import type {
   WorkshopOrderProcessScheduleStatus,
 } from '@/features/workshop/OrderList'
 import { WORKSHOP_ORDER_STATUS_OPTIONS } from '@/features/workshop/OrderList/orderStatus'
+import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import ExportButton from '@/ui/ExportButton'
 import {
   buildInitialProcessSchedules,
   createEmptyProcessSchedule,
@@ -36,11 +38,13 @@ import {
   normalizeProcessSchedules,
   parseSchedulingProcesses,
   PRODUCTION_SCHEDULING_PROCESS_OPTIONS,
+  reconcileProcessSchedulesWithFlow,
   type ProductionSchedulingFilters,
   type ProductionSchedulingOrder,
   type ProductionSchedulingOrderUpdate,
   type ProductionSchedulingProcessRow,
 } from '@/services/apiProductionScheduling'
+import { exportProductionScheduledPlanToExcel } from '@/utils/productionSchedulingPlanExcel'
 import {
   useProductionSchedulingOrderStandardCapacity,
   useProductionSchedulingOrders,
@@ -255,6 +259,10 @@ function getSummary(orders: ProductionSchedulingOrder[]) {
       transferQuantity: 0,
     },
   )
+}
+
+function hasProcessSchedules(order: ProductionSchedulingOrder) {
+  return normalizeProcessSchedules(order.process_schedules).length > 0
 }
 
 function makeBaseOrderColumns(): TableColumnsType<ProductionSchedulingOrder> {
@@ -777,6 +785,12 @@ function makeProcessColumns(
       ),
     },
     {
+      title: '操作人',
+      key: 'operator_name',
+      width: 96,
+      render: (_value, record) => renderText(record.schedule.operator_name),
+    },
+    {
       title: '项目号',
       key: 'project_no',
       width: 126,
@@ -929,6 +943,8 @@ export default function ProductionScheduling() {
     WorkshopOrderProcessSchedule[]
   >([])
   const [tableScrollY, setTableScrollY] = useState(DEFAULT_TABLE_SCROLL_Y)
+  const [exportScheduledDate, setExportScheduledDate] =
+    useState<dayjs.Dayjs | null>(null)
 
   const {
     data: schedulingResult,
@@ -946,16 +962,38 @@ export default function ProductionScheduling() {
       enabled: shouldAutoFillReviewCapacity,
       order: editingOrder,
     })
-  const orders = schedulingResult?.orders ?? []
+  const { data: employees = [], isLoading: isEmployeesLoading } =
+    useAllEmployees()
+  const orders = useMemo(
+    () => schedulingResult?.orders ?? [],
+    [schedulingResult?.orders],
+  )
+  const employeeOptions = useMemo(
+    () =>
+      employees.map((employee) => ({
+        label: employee.name,
+        value: employee.id,
+      })),
+    [employees],
+  )
+  const employeeNameById = useMemo(
+    () => new Map(employees.map((employee) => [employee.id, employee.name])),
+    [employees],
+  )
   const total = schedulingResult?.total ?? 0
   const tableLoading = isLoading && orders.length === 0
-  const processRows = useMemo(
-    () => getProductionSchedulingProcessRows(orders),
+  const schedulingOrders = useMemo(
+    () => orders.filter(hasProcessSchedules),
     [orders],
   )
+  const processRows = useMemo(
+    () => getProductionSchedulingProcessRows(schedulingOrders),
+    [schedulingOrders],
+  )
   const totalPendingOrders = useMemo(
-    () => orders.filter((order) => order.remaining_schedule_quantity > 0),
-    [orders],
+    () =>
+      schedulingOrders.filter((order) => order.remaining_schedule_quantity > 0),
+    [schedulingOrders],
   )
   const pendingProcessRows = useMemo(
     () => processRows.filter((row) => row.schedule.status === '待排'),
@@ -965,6 +1003,18 @@ export default function ProductionScheduling() {
     () => processRows.filter((row) => row.schedule.status === '已排'),
     [processRows],
   )
+  const exportScheduledProcessRows = useMemo(() => {
+    const scheduledDate = formatDatePickerValue(exportScheduledDate)
+
+    if (!scheduledDate) {
+      return scheduledProcessRows
+    }
+
+    return scheduledProcessRows.filter(
+      (row) => row.schedule.scheduled_date === scheduledDate,
+    )
+  }, [exportScheduledDate, scheduledProcessRows])
+  const exportScheduledProcessRowCount = exportScheduledProcessRows.length
   const remainingProcessRows = useMemo(
     () => processRows.filter((row) => row.schedule.status === '余排'),
     [processRows],
@@ -1027,6 +1077,7 @@ export default function ProductionScheduling() {
     pageSize,
     pendingProcessRows.length,
     remainingProcessRows.length,
+    schedulingOrders.length,
     scheduledProcessRows.length,
     totalPendingOrders.length,
   ])
@@ -1081,7 +1132,7 @@ export default function ProductionScheduling() {
       setEditingOrder(order)
       setScheduleRows(
         normalizedRows.length > 0
-          ? normalizedRows
+          ? reconcileProcessSchedulesWithFlow(order)
           : buildInitialProcessSchedules(order),
       )
       setScheduleModalOpen(true)
@@ -1165,14 +1216,21 @@ export default function ProductionScheduling() {
     }
 
     const values = await reviewForm.validateFields()
+    const payload = formatReviewPayload(values)
     await updateMutation.mutateAsync({
       id: editingOrder.id,
-      values: formatReviewPayload(values),
+      values: {
+        ...payload,
+        process_schedules: reconcileProcessSchedulesWithFlow({
+          ...editingOrder,
+          process_flow: payload.process_flow,
+        }),
+      },
     })
     message.success('订单初审信息已保存')
     setReviewModalOpen(false)
     setEditingOrder(null)
-  }, [editingOrder?.id, message, reviewForm, updateMutation])
+  }, [editingOrder, message, reviewForm, updateMutation])
 
   const handleScheduleRowChange = useCallback(
     (rowId: string, patch: Partial<WorkshopOrderProcessSchedule>) => {
@@ -1203,6 +1261,18 @@ export default function ProductionScheduling() {
     [handleScheduleRowChange],
   )
 
+  const handleOperatorSelect = useCallback(
+    (rowId: string, employeeId: string | undefined) => {
+      handleScheduleRowChange(rowId, {
+        operator_id: employeeId || null,
+        operator_name: employeeId
+          ? employeeNameById.get(employeeId) || null
+          : null,
+      })
+    },
+    [employeeNameById, handleScheduleRowChange],
+  )
+
   const handleAddScheduleRow = useCallback(() => {
     setScheduleRows((currentRows) => [
       ...currentRows,
@@ -1229,7 +1299,10 @@ export default function ProductionScheduling() {
       return
     }
 
-    const processSchedules = normalizeProcessSchedules(scheduleRows)
+    const processSchedules = reconcileProcessSchedulesWithFlow({
+      ...editingOrder,
+      process_schedules: scheduleRows,
+    })
     if (processSchedules.length === 0) {
       message.warning('请至少保留一条有效的工序排产记录')
       return
@@ -1245,7 +1318,16 @@ export default function ProductionScheduling() {
     setScheduleModalOpen(false)
     setEditingOrder(null)
     setScheduleRows([])
-  }, [editingOrder?.id, message, scheduleRows, updateMutation])
+  }, [editingOrder, message, scheduleRows, updateMutation])
+
+  const handleExportScheduledPlan = useCallback(() => {
+    if (exportScheduledProcessRows.length === 0) {
+      message.warning('暂无已排工序可导出')
+      return
+    }
+
+    exportProductionScheduledPlanToExcel(exportScheduledProcessRows)
+  }, [exportScheduledProcessRows, message])
 
   const scheduleEditColumns = useMemo(
     (): TableColumnsType<WorkshopOrderProcessSchedule> => [
@@ -1281,6 +1363,24 @@ export default function ProductionScheduling() {
                 status: value,
               })
             }
+            style={{ width: '100%' }}
+          />
+        ),
+      },
+      {
+        title: '操作人',
+        dataIndex: 'operator_id',
+        key: 'operator_id',
+        width: 142,
+        render: (_value, record) => (
+          <Select
+            allowClear
+            showSearch={{ optionFilterProp: 'label' }}
+            value={record.operator_id || undefined}
+            placeholder={record.operator_name || '选择操作人'}
+            loading={isEmployeesLoading}
+            options={employeeOptions}
+            onChange={(value) => handleOperatorSelect(record.id, value)}
             style={{ width: '100%' }}
           />
         ),
@@ -1385,7 +1485,14 @@ export default function ProductionScheduling() {
         ),
       },
     ],
-    [handleDeleteScheduleRow, handleProcessSelect, handleScheduleRowChange],
+    [
+      employeeOptions,
+      handleDeleteScheduleRow,
+      handleOperatorSelect,
+      handleProcessSelect,
+      handleScheduleRowChange,
+      isEmployeesLoading,
+    ],
   )
 
   const tabItems = useMemo(
@@ -1408,15 +1515,15 @@ export default function ProductionScheduling() {
       },
       {
         key: 'status',
-        label: `排产状态 ${orders.length}`,
+        label: `排产状态 ${schedulingOrders.length}`,
         children: (
           <Table<ProductionSchedulingOrder>
             size="small"
             rowKey={getOrderRowKey}
             columns={statusColumns}
-            dataSource={orders}
+            dataSource={schedulingOrders}
             loading={tableLoading}
-            pagination={tablePagination}
+            pagination={{ pageSize, showSizeChanger: true }}
             scroll={{ x: 2450, y: tableScrollY }}
             tableLayout="fixed"
           />
@@ -1432,7 +1539,7 @@ export default function ProductionScheduling() {
             columns={totalPendingColumns}
             dataSource={totalPendingOrders}
             loading={tableLoading}
-            pagination={tablePagination}
+            pagination={{ pageSize, showSizeChanger: true }}
             scroll={{ x: 2100, y: tableScrollY }}
             tableLayout="fixed"
           />
@@ -1449,7 +1556,7 @@ export default function ProductionScheduling() {
             dataSource={pendingProcessRows}
             loading={tableLoading}
             pagination={{ pageSize, showSizeChanger: true }}
-            scroll={{ x: 2300, y: tableScrollY }}
+            scroll={{ x: 2440, y: tableScrollY }}
             tableLayout="fixed"
           />
         ),
@@ -1458,16 +1565,33 @@ export default function ProductionScheduling() {
         key: 'process-scheduled',
         label: `工序已排 ${scheduledProcessRows.length}`,
         children: (
-          <Table<ProductionSchedulingProcessRow>
-            size="small"
-            rowKey="key"
-            columns={processScheduledColumns}
-            dataSource={scheduledProcessRows}
-            loading={tableLoading}
-            pagination={{ pageSize, showSizeChanger: true }}
-            scroll={{ x: 2400, y: tableScrollY }}
-            tableLayout="fixed"
-          />
+          <div className="flex h-full min-h-0 flex-col gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <DatePicker
+                allowClear
+                placeholder="按排产日期导出"
+                value={exportScheduledDate}
+                onChange={setExportScheduledDate}
+                style={{ width: 168 }}
+              />
+              <ExportButton
+                handleExport={handleExportScheduledPlan}
+                count={exportScheduledProcessRowCount}
+              >
+                导出生产计划
+              </ExportButton>
+            </div>
+            <Table<ProductionSchedulingProcessRow>
+              size="small"
+              rowKey="key"
+              columns={processScheduledColumns}
+              dataSource={scheduledProcessRows}
+              loading={tableLoading}
+              pagination={{ pageSize, showSizeChanger: true }}
+              scroll={{ x: 2540, y: Math.max(200, tableScrollY - 42) }}
+              tableLayout="fixed"
+            />
+          </div>
         ),
       },
       {
@@ -1481,7 +1605,7 @@ export default function ProductionScheduling() {
             dataSource={remainingProcessRows}
             loading={tableLoading}
             pagination={{ pageSize, showSizeChanger: true }}
-            scroll={{ x: 2500, y: tableScrollY }}
+            scroll={{ x: 2640, y: tableScrollY }}
             tableLayout="fixed"
           />
         ),
@@ -1490,12 +1614,16 @@ export default function ProductionScheduling() {
     [
       orders,
       pageSize,
+      exportScheduledDate,
+      exportScheduledProcessRowCount,
+      handleExportScheduledPlan,
       pendingProcessRows,
       processPendingColumns,
       processRemainingColumns,
       processScheduledColumns,
       remainingProcessRows,
       reviewColumns,
+      schedulingOrders,
       scheduledProcessRows,
       statusColumns,
       tableLoading,
@@ -1742,7 +1870,7 @@ export default function ProductionScheduling() {
           columns={scheduleEditColumns}
           dataSource={scheduleRows}
           pagination={false}
-          scroll={{ x: 1100, y: SCHEDULE_EDIT_TABLE_SCROLL_Y }}
+          scroll={{ x: 1240, y: SCHEDULE_EDIT_TABLE_SCROLL_Y }}
           tableLayout="fixed"
         />
       </Modal>

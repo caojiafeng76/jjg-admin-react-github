@@ -5,16 +5,14 @@
       "args": ["spec-workflow-mcp", "."]
     },
     "supabase": {
-      "command": "npx",
+      "command": "powershell",
       "args": [
-        "-y",
-        "@supabase/mcp-server-supabase",
-        "--project-ref",
-        "mlcptrkvkseyqxxlfcme"
-      ],
-      "env": {
-        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
-      }
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$env:SUPABASE_ACCESS_TOKEN = [Environment]::GetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', 'User'); npx -y @supabase/mcp-server-supabase --project-ref mlcptrkvkseyqxxlfcme"
+      ]
     },
     "serena": {
       "command": "uvx",

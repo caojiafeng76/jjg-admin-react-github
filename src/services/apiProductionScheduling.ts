@@ -6,6 +6,10 @@ import type {
 import { normalizeWorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
 import type { Database } from './database.types'
 import supabase from './supabase'
+import {
+  PRODUCTION_SCHEDULING_MATERIAL_CODE_QUERY_PATTERN,
+  isProductionSchedulingMaterialCode,
+} from './productionSchedulingMaterialFilter'
 import { handleApiError } from '@/utils/errorHandler'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import {
@@ -231,6 +235,8 @@ function normalizeScheduleRecord(
     process_code: String(processCode || definition?.code || index + 1),
     process_name: String(processName || definition?.name || processCode || ''),
     status: getScheduleStatus(record.status),
+    operator_id: normalizeNullableText(record.operator_id),
+    operator_name: normalizeNullableText(record.operator_name),
     required_production_date: normalizeDateText(
       record.required_production_date,
     ),
@@ -304,6 +310,8 @@ export function createEmptyProcessSchedule(
     process_code: '',
     process_name: '',
     status: '待排',
+    operator_id: null,
+    operator_name: null,
     required_production_date: null,
     scheduled_date: null,
     last_scheduled_date: null,
@@ -327,6 +335,8 @@ export function buildInitialProcessSchedules(
     process_code: process.code,
     process_name: process.name,
     status: '待排',
+    operator_id: null,
+    operator_name: null,
     required_production_date: null,
     scheduled_date: null,
     last_scheduled_date: null,
@@ -335,17 +345,135 @@ export function buildInitialProcessSchedules(
   }))
 }
 
+function sumScheduledQuantity(schedules: WorkshopOrderProcessSchedule[]) {
+  return schedules
+    .filter((schedule) => schedule.status === '已排')
+    .reduce(
+      (total, schedule) => total + toQuantity(schedule.scheduled_quantity),
+      0,
+    )
+}
+
+function getLastScheduledDate(schedules: WorkshopOrderProcessSchedule[]) {
+  const scheduledDates = schedules
+    .filter((schedule) => schedule.status === '已排')
+    .map((schedule) => schedule.scheduled_date)
+    .filter((date): date is string => Boolean(date))
+
+  return scheduledDates.at(-1) ?? null
+}
+
+export function reconcileProcessSchedulesWithFlow(
+  order: Pick<WorkshopOrder, 'order_quantity' | 'process_flow'> & {
+    process_schedules?: WorkshopOrderProcessSchedule[] | null
+  },
+): WorkshopOrderProcessSchedule[] {
+  const schedules = normalizeProcessSchedules(order.process_schedules)
+  const processes = parseSchedulingProcesses(order.process_flow)
+
+  if (processes.length === 0) {
+    return schedules
+  }
+
+  if (schedules.length === 0) {
+    return buildInitialProcessSchedules(order)
+  }
+
+  const remainingSchedules = [...schedules]
+  const orderQuantity = toQuantity(order.order_quantity)
+  const reconciledSchedules: WorkshopOrderProcessSchedule[] = []
+
+  for (const process of processes) {
+    const matchedSchedules = remainingSchedules.filter(
+      (schedule) =>
+        schedule.process_code === process.code ||
+        normalizeProcessName(schedule.process_name) === process.name,
+    )
+
+    if (matchedSchedules.length === 0) {
+      reconciledSchedules.push({
+        id: createScheduleId(),
+        process_code: process.code,
+        process_name: process.name,
+        status: '待排',
+        operator_id: null,
+        operator_name: null,
+        required_production_date: null,
+        scheduled_date: null,
+        last_scheduled_date: null,
+        scheduled_quantity: orderQuantity || null,
+        remark: null,
+      })
+      continue
+    }
+
+    for (const schedule of matchedSchedules) {
+      reconciledSchedules.push({
+        ...schedule,
+        process_code: process.code,
+        process_name: process.name,
+      })
+
+      const scheduleIndex = remainingSchedules.findIndex(
+        (item) => item.id === schedule.id,
+      )
+      if (scheduleIndex !== -1) {
+        remainingSchedules.splice(scheduleIndex, 1)
+      }
+    }
+
+    const scheduledQuantity = sumScheduledQuantity(matchedSchedules)
+    const remainingQuantity = roundQuantity(
+      Math.max(orderQuantity - scheduledQuantity, 0),
+    )
+    const hasPendingOrRemainingSchedule = matchedSchedules.some(
+      (schedule) => schedule.status !== '已排',
+    )
+
+    if (remainingQuantity > 0 && !hasPendingOrRemainingSchedule) {
+      reconciledSchedules.push({
+        id: createScheduleId(),
+        process_code: process.code,
+        process_name: process.name,
+        status: scheduledQuantity > 0 ? '余排' : '待排',
+        operator_id: null,
+        operator_name: null,
+        required_production_date: null,
+        scheduled_date: null,
+        last_scheduled_date: getLastScheduledDate(matchedSchedules),
+        scheduled_quantity: remainingQuantity,
+        remark: null,
+      })
+    }
+  }
+
+  return reconciledSchedules
+}
+
 function getOrderScheduleRows(order: WorkshopOrder) {
   const schedules = normalizeProcessSchedules(order.process_schedules)
-  return schedules.length > 0 ? schedules : buildInitialProcessSchedules(order)
+  return schedules.length > 0 ? reconcileProcessSchedulesWithFlow(order) : []
 }
 
 function getOrderScheduledQuantity(order: WorkshopOrder) {
   const orderQuantity = toQuantity(order.order_quantity)
-  const scheduledQuantities = normalizeProcessSchedules(order.process_schedules)
-    .filter((schedule) => schedule.status !== '待排')
-    .map((schedule) => toQuantity(schedule.scheduled_quantity))
+  const scheduledQuantityByProcess = new Map<string, number>()
 
+  for (const schedule of getOrderScheduleRows(order)) {
+    if (schedule.status !== '已排') {
+      continue
+    }
+
+    const processKey =
+      schedule.process_code || normalizeProcessName(schedule.process_name)
+    scheduledQuantityByProcess.set(
+      processKey,
+      (scheduledQuantityByProcess.get(processKey) || 0) +
+        toQuantity(schedule.scheduled_quantity),
+    )
+  }
+
+  const scheduledQuantities = Array.from(scheduledQuantityByProcess.values())
   const scheduledQuantity = scheduledQuantities.length
     ? Math.max(...scheduledQuantities)
     : 0
@@ -581,7 +709,10 @@ export async function getProductionSchedulingOrderStandardCapacity({
 function applySchedulingFilters(
   filters: ProductionSchedulingFilters | undefined,
 ) {
-  let query = supabase.from('sales_orders').select('*', { count: 'exact' })
+  let query = supabase
+    .from('sales_orders')
+    .select('*', { count: 'exact' })
+    .ilike('material_code', PRODUCTION_SCHEDULING_MATERIAL_CODE_QUERY_PATTERN)
   const projectNoKeywords = normalizeSearchKeywords(filters?.projectNo)
   const modelKeywords = normalizeSearchKeywords(filters?.model)
   const customer = normalizeNullableText(filters?.customer)
@@ -641,7 +772,9 @@ export async function getProductionSchedulingOrders({
     throw handleApiError(error, '获取订单排产数据失败')
   }
 
-  const rows = (data || []) as unknown as WorkshopOrder[]
+  const rows = ((data || []) as unknown as WorkshopOrder[]).filter((order) =>
+    isProductionSchedulingMaterialCode(order.material_code),
+  )
 
   const projectNos = Array.from(
     new Set(
@@ -660,6 +793,7 @@ export async function getProductionSchedulingOrders({
   const orders = rows.map((order) => {
     const projectNo = order.project_no?.trim() || ''
     const orderQuantity = toQuantity(order.order_quantity)
+    const processSchedules = getOrderScheduleRows(order)
     const scheduledQuantity = getOrderScheduledQuantity(order)
     const matchedDailyStandardCapacity = getMatchedDailyStandardCapacity({
       order,
@@ -680,7 +814,7 @@ export async function getProductionSchedulingOrders({
       ...order,
       capacity_per_day:
         toQuantity(order.capacity_per_day) || matchedDailyStandardCapacity,
-      process_schedules: normalizeProcessSchedules(order.process_schedules),
+      process_schedules: processSchedules,
       total_pending_quantity: orderQuantity,
       scheduled_quantity: scheduledQuantity,
       remaining_schedule_quantity: roundQuantity(remainingScheduleQuantity),

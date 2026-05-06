@@ -6,6 +6,7 @@ import type {
   LaborProtectionRequisition,
   LaborProtectionRequisitionFormValues,
 } from '@/services/apiLaborProtectionRequisitions'
+import type { MachineEquipmentOption } from '@/services/apiMachineEquipmentMaintenances'
 import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
 } from '@/ui/mobile/MobileBottomSelectSheet'
@@ -17,7 +18,10 @@ interface Props {
   isSubmitting: boolean
   categoryOptions: LaborProtectionDataOption[]
   isCategoryOptionsLoading: boolean
+  machineOptions: MachineEquipmentOption[]
+  isMachineOptionsLoading: boolean
   categoryInputMode?: 'select' | 'bottom-sheet'
+  machineInputMode?: 'select' | 'bottom-sheet'
   initialValues?:
     | LaborProtectionRequisition
     | LaborProtectionRequisitionFormValues
@@ -25,6 +29,7 @@ interface Props {
 
 const DEFAULT_VALUES: LaborProtectionRequisitionFormValues = {
   labor_protection_data_id: '',
+  machine_equipment_id: '',
   job_title: '',
   quantity: 1,
   recipient: '',
@@ -36,12 +41,17 @@ export default function LaborProtectionRequisitionForm({
   isSubmitting,
   categoryOptions,
   isCategoryOptionsLoading,
+  machineOptions,
+  isMachineOptionsLoading,
   categoryInputMode = 'select',
+  machineInputMode = 'select',
   initialValues,
 }: Props) {
   const [form] = Form.useForm<LaborProtectionRequisitionFormValues>()
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false)
+  const [isMachineSheetOpen, setIsMachineSheetOpen] = useState(false)
   const currentCategoryId = Form.useWatch('labor_protection_data_id', form)
+  const currentMachineId = Form.useWatch('machine_equipment_id', form)
 
   const categorySelectOptions = useMemo(
     () =>
@@ -62,11 +72,47 @@ export default function LaborProtectionRequisitionForm({
     [categoryOptions],
   )
 
+  const machineSelectOptions = useMemo(
+    () =>
+      machineOptions.map((item) => ({
+        value: item.id,
+        label: `${item.unified_device_no} | ${item.machine_name}`,
+      })),
+    [machineOptions],
+  )
+
+  const machineSheetOptions = useMemo<MobileBottomSelectOption[]>(
+    () =>
+      machineOptions.map((item) => ({
+        value: item.id,
+        label: item.unified_device_no,
+        description: (
+          <div className="space-y-1">
+            <div>机器名称：{item.machine_name || '-'}</div>
+            <div>工序：{item.operation || '-'}</div>
+          </div>
+        ),
+        keywords: [
+          item.unified_device_no,
+          item.machine_name,
+          item.operation,
+        ].join(' '),
+      })),
+    [machineOptions],
+  )
+
   const currentCategoryLabel = useMemo(
     () =>
       categoryOptions.find((item) => item.id === currentCategoryId)?.category,
     [categoryOptions, currentCategoryId],
   )
+
+  const currentMachineLabel = useMemo(() => {
+    const machine = machineOptions.find((item) => item.id === currentMachineId)
+    return machine
+      ? `${machine.unified_device_no} | ${machine.machine_name}`
+      : ''
+  }, [currentMachineId, machineOptions])
 
   useEffect(() => {
     setFormRef(form)
@@ -77,6 +123,7 @@ export default function LaborProtectionRequisitionForm({
       form.setFieldsValue({
         ...DEFAULT_VALUES,
         labor_protection_data_id: initialValues.labor_protection_data_id,
+        machine_equipment_id: initialValues.machine_equipment_id || '',
         job_title: initialValues.job_title,
         quantity: Number(initialValues.quantity || 1),
         recipient: initialValues.recipient,
@@ -128,6 +175,42 @@ export default function LaborProtectionRequisitionForm({
                   : '暂无劳保资料，请先维护劳保资料'
               }
               options={categorySelectOptions}
+            />
+          )}
+        </Form.Item>
+
+        <Form.Item
+          name="machine_equipment_id"
+          label="机器编号"
+          rules={[{ required: true, message: '请选择机器编号' }]}
+        >
+          {machineInputMode === 'bottom-sheet' ? (
+            <button
+              type="button"
+              disabled={isSubmitting || machineOptions.length === 0}
+              onClick={() => setIsMachineSheetOpen(true)}
+              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {currentMachineLabel ||
+                (machineOptions.length > 0
+                  ? '请选择机器编号'
+                  : '暂无机器资料，请先维护机器设备')}
+            </button>
+          ) : (
+            <Select
+              loading={isMachineOptionsLoading}
+              showSearch={{
+                filterOption: (input, option) =>
+                  String(option?.label || '')
+                    .toLowerCase()
+                    .includes(input.toLowerCase()),
+              }}
+              placeholder={
+                machineOptions.length > 0
+                  ? '请选择机器编号'
+                  : '暂无机器资料，请先维护机器设备'
+              }
+              options={machineSelectOptions}
             />
           )}
         </Form.Item>
@@ -198,6 +281,21 @@ export default function LaborProtectionRequisitionForm({
           onClose={() => setIsCategorySheetOpen(false)}
           onSelect={(value) => {
             form.setFieldValue('labor_protection_data_id', value)
+          }}
+        />
+      ) : null}
+
+      {machineInputMode === 'bottom-sheet' ? (
+        <MobileBottomSelectSheet
+          open={isMachineSheetOpen}
+          title="选择机器编号"
+          options={machineSheetOptions}
+          value={currentMachineId}
+          searchPlaceholder="输入机器编号、机器名称或工序搜索"
+          emptyText="暂无可选机器编号"
+          onClose={() => setIsMachineSheetOpen(false)}
+          onSelect={(value) => {
+            form.setFieldValue('machine_equipment_id', value)
           }}
         />
       ) : null}

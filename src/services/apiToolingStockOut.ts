@@ -17,6 +17,7 @@ export interface ToolingDataOption {
 export interface ToolingStockOut {
   id: string
   tooling_data_id: string
+  machine_equipment_id: string | null
   tool_code: string
   tool_name: string
   tool_spec: string
@@ -28,6 +29,8 @@ export interface ToolingStockOut {
   status: ToolingStockOutStatus
   stock_out_quantity: number
   final_stock?: number | null
+  machine_no?: string
+  machine_name?: string
   remarks: string
   created_at: string
   updated_at: string
@@ -38,8 +41,24 @@ interface ToolingInventorySnapshot {
   final_stock: number
 }
 
+type ToolingStockOutRow = ToolingStockOut & {
+  machine_equipment_maintenances?:
+    | {
+        id: string
+        unified_device_no: string
+        machine_name: string
+      }
+    | Array<{
+        id: string
+        unified_device_no: string
+        machine_name: string
+      }>
+    | null
+}
+
 export interface ToolingStockOutFormValues {
   tooling_data_id: string
+  machine_equipment_id: string
   recipient: string
   purpose: string
   stock_out_date: string
@@ -75,6 +94,11 @@ function toolingDataTable() {
   return (supabase as unknown as DynamicSupabaseTable).from('tooling_data')
 }
 
+const TOOLING_STOCK_OUT_SELECT = `
+  *,
+  machine_equipment_maintenances(id, unified_device_no, machine_name)
+`
+
 function normalizeQuantity(value: number | string | null | undefined) {
   const parsed = Number(value ?? 0)
   return Number.isFinite(parsed) ? parsed : 0
@@ -103,8 +127,17 @@ function normalizeDateString(value: string | null | undefined) {
 function normalizeFormValues(
   values: ToolingStockOutFormValues,
 ): ToolingStockOutFormValues {
+  if (!values.tooling_data_id) {
+    throw new Error('请选择刀具资料')
+  }
+
+  if (!values.machine_equipment_id) {
+    throw new Error('请选择机器编号')
+  }
+
   return {
     tooling_data_id: values.tooling_data_id,
+    machine_equipment_id: values.machine_equipment_id,
     recipient: normalizeText(values.recipient),
     purpose: normalizeText(values.purpose),
     stock_out_date: normalizeDateString(values.stock_out_date),
@@ -152,6 +185,7 @@ function buildStockOutPayload(
 ) {
   return {
     tooling_data_id: snapshot.id,
+    machine_equipment_id: values.machine_equipment_id,
     tool_code: snapshot.tool_code,
     tool_name: snapshot.tool_name,
     tool_spec: snapshot.tool_spec,
@@ -163,6 +197,19 @@ function buildStockOutPayload(
     status: values.status,
     stock_out_quantity: normalizeQuantity(values.stock_out_quantity),
     remarks: values.remarks,
+  }
+}
+
+function extractMachineInfo(
+  machineEquipment: ToolingStockOutRow['machine_equipment_maintenances'],
+) {
+  const value = Array.isArray(machineEquipment)
+    ? machineEquipment[0]
+    : machineEquipment
+
+  return {
+    machine_no: value?.unified_device_no || '',
+    machine_name: value?.machine_name || '',
   }
 }
 
@@ -201,7 +248,9 @@ export async function getToolingStockOutList({
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
-  let query = stockOutTable().select('*', { count: 'exact' })
+  let query = stockOutTable().select(TOOLING_STOCK_OUT_SELECT, {
+    count: 'exact',
+  })
 
   if (keyword?.trim()) {
     const normalizedKeyword = keyword.trim()
@@ -225,7 +274,7 @@ export async function getToolingStockOutList({
     throw handleApiError(error, '获取刀具出库列表失败')
   }
 
-  const items = (data || []) as ToolingStockOut[]
+  const items = (data || []) as ToolingStockOutRow[]
   const toolingIds = Array.from(
     new Set(items.map((item) => item.tooling_data_id)),
   )
@@ -251,6 +300,7 @@ export async function getToolingStockOutList({
   return {
     items: items.map((item) => ({
       ...item,
+      ...extractMachineInfo(item.machine_equipment_maintenances),
       final_stock: inventoryMap.get(item.tooling_data_id) ?? null,
     })),
     total: count || 0,

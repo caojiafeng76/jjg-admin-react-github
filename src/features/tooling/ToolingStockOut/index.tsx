@@ -12,6 +12,7 @@ import { exportToolingStockOutToExcel } from '@/utils/toolingStockOutExport'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import type {
   ToolingStockOut,
   ToolingStockOutFormValues,
@@ -74,6 +75,8 @@ export default function ToolingStockOutPage() {
     searchParams,
   })
   const { data: toolingOptions = [] } = useToolingDataOptions()
+  const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
+    useMachineEquipmentOptions()
 
   const createMutation = useCreateToolingStockOut()
   const updateMutation = useUpdateToolingStockOut()
@@ -527,6 +530,8 @@ export default function ToolingStockOutPage() {
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
           toolingOptions={toolingOptions}
+          machineOptions={machineOptions}
+          isMachineOptionsLoading={isMachineOptionsLoading}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
           isAuditLocked={editingRecord?.status === '已审核'}
         />

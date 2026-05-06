@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import {
   getLaborProtectionRequisitionsForExport,
   type LaborProtectionRequisition,
@@ -63,6 +64,8 @@ export default function LaborProtectionRequisitionPage() {
   })
   const { data: categoryOptions = [], isLoading: isCategoryOptionsLoading } =
     useLaborProtectionDataOptions()
+  const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
+    useMachineEquipmentOptions()
 
   const createMutation = useCreateLaborProtectionRequisition()
   const updateMutation = useUpdateLaborProtectionRequisition()
@@ -348,6 +351,8 @@ export default function LaborProtectionRequisitionPage() {
           isSubmitting={createMutation.isPending || updateMutation.isPending}
           categoryOptions={categoryOptions}
           isCategoryOptionsLoading={isCategoryOptionsLoading}
+          machineOptions={machineOptions}
+          isMachineOptionsLoading={isMachineOptionsLoading}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
         />
       </Modal>

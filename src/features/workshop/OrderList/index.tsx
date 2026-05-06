@@ -75,6 +75,8 @@ export interface WorkshopOrderProcessSchedule {
   process_code: string
   process_name: string
   status: WorkshopOrderProcessScheduleStatus
+  operator_id?: string | null
+  operator_name?: string | null
   required_production_date: string | null
   scheduled_date: string | null
   last_scheduled_date: string | null
