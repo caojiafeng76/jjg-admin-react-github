@@ -6,6 +6,7 @@ import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
 import RouteErrorPage from '@/pages/RouteErrorPage'
 import { LABOR_PROTECTION_PUBLIC_QR_PATH } from '@/features/labor-protection/LaborProtectionRequisition/laborProtectionPublicQr'
+import { TOOLING_STOCK_OUT_PUBLIC_QR_PATH } from '@/features/tooling/ToolingStockOut/toolingStockOutPublicQr'
 import {
   PermissionProtectedRoute,
   ProtectedRoute,
@@ -57,6 +58,7 @@ import {
   ToolingInventory,
   ToolingStockIn,
   ToolingStockOut,
+  ToolingStockOutPublicPage,
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsStockIn,
   YoumaiFinishedGoodsStockOut,
@@ -648,6 +650,15 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<Loading />}>
         <LaborProtectionPublicRequisitionPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: TOOLING_STOCK_OUT_PUBLIC_QR_PATH,
+    errorElement: <RouteErrorPage />,
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ToolingStockOutPublicPage />
       </Suspense>
     ),
   },

@@ -28,6 +28,7 @@ import ToolingStockOutForm from './ToolingStockOutForm'
 import ToolingStockOutSearch from './ToolingStockOutSearch'
 import ToolingStockOutTable from './ToolingStockOutTable'
 import { usePrintToolingStockOut } from './usePrintToolingStockOut'
+import { usePrintToolingStockOutPublicQrPoster } from './usePrintToolingStockOutPublicQrPoster'
 import {
   useBatchUpdateToolingStockOutStatus,
   useCreateToolingStockOut,
@@ -80,6 +81,10 @@ export default function ToolingStockOutPage() {
   const importMutation = useImportToolingStockOut()
   const deleteMutation = useDeleteToolingStockOut()
   const { printSelected, isPrinting } = usePrintToolingStockOut()
+  const {
+    printPoster: printPublicQrPoster,
+    isPrinting: isPrintingPublicQrPoster,
+  } = usePrintToolingStockOutPublicQrPoster()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -110,6 +115,26 @@ export default function ToolingStockOutPage() {
     canManageTooling,
     printSelected,
     selectedRecords,
+    viewerDenied,
+    viewerOperationTip,
+  ])
+
+  const handlePrintPublicQrPoster = useCallback(() => {
+    if (!canManageTooling) {
+      message.warning('无刀具模块操作权限')
+      return
+    }
+
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
+    void printPublicQrPoster()
+  }, [
+    canManageTooling,
+    message,
+    printPublicQrPoster,
     viewerDenied,
     viewerOperationTip,
   ])
@@ -419,6 +444,13 @@ export default function ToolingStockOutPage() {
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
         >
           打印选中项
+        </PrintButton>
+        <PrintButton
+          handlePrint={handlePrintPublicQrPoster}
+          loading={isPrintingPublicQrPoster}
+          permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        >
+          打印二维码
         </PrintButton>
         <Button
           type="text"
