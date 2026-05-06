@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
   Alert,
@@ -15,6 +15,10 @@ import type {
   ToolingStockOut,
   ToolingStockOutFormValues,
 } from '@/services/apiToolingStockOut'
+import MobileBottomSelectSheet, {
+  type MobileBottomSelectOption,
+} from '@/ui/mobile/MobileBottomSelectSheet'
+import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 
 interface ToolingStockOutFormFields {
   tooling_data_id: string
@@ -33,6 +37,8 @@ interface Props {
   toolingOptions: ToolingDataOption[]
   initialValues?: ToolingStockOut | ToolingStockOutFormValues
   isAuditLocked?: boolean
+  toolingInputMode?: 'select' | 'bottom-sheet'
+  defaultValues?: Partial<ToolingStockOutFormValues>
 }
 
 const DEFAULT_VALUES: ToolingStockOutFormFields = {
@@ -52,14 +58,51 @@ export default function ToolingStockOutForm({
   toolingOptions,
   initialValues,
   isAuditLocked = false,
+  toolingInputMode = 'select',
+  defaultValues,
 }: Props) {
   const [form] = Form.useForm<ToolingStockOutFormFields>()
+  const [isToolingSheetOpen, setIsToolingSheetOpen] = useState(false)
   const selectedToolingId = Form.useWatch('tooling_data_id', form)
 
   const selectedTooling = useMemo(
     () => toolingOptions.find((item) => item.id === selectedToolingId),
     [toolingOptions, selectedToolingId],
   )
+
+  const toolingSelectOptions = useMemo(
+    () =>
+      toolingOptions.map((item) => ({
+        value: item.id,
+        label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
+      })),
+    [toolingOptions],
+  )
+
+  const toolingSheetOptions = useMemo<MobileBottomSelectOption[]>(
+    () =>
+      toolingOptions.map((item) => ({
+        value: item.id,
+        label: `${item.tool_code} | ${item.tool_name}`,
+        description: (
+          <div className="space-y-1">
+            <div>规格：{item.tool_spec || '-'}</div>
+            <div>材质：{item.material || '-'}</div>
+          </div>
+        ),
+        keywords: [
+          item.tool_code,
+          item.tool_name,
+          item.tool_spec,
+          item.material,
+        ].join(' '),
+      })),
+    [toolingOptions],
+  )
+
+  const currentToolingLabel = selectedTooling
+    ? `${selectedTooling.tool_code} | ${selectedTooling.tool_name}`
+    : ''
 
   useEffect(() => {
     setFormRef(form)
@@ -83,8 +126,14 @@ export default function ToolingStockOutForm({
     }
 
     form.resetFields()
-    form.setFieldsValue(DEFAULT_VALUES)
-  }, [form, initialValues])
+    form.setFieldsValue({
+      ...DEFAULT_VALUES,
+      ...defaultValues,
+      stock_out_date: defaultValues?.stock_out_date
+        ? dayjs(defaultValues.stock_out_date)
+        : DEFAULT_VALUES.stock_out_date,
+    })
+  }, [defaultValues, form, initialValues])
 
   const handleFinish = (values: ToolingStockOutFormFields) => {
     onFinish({
@@ -99,45 +148,59 @@ export default function ToolingStockOutForm({
   }
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={handleFinish}
-      disabled={isSubmitting}
-    >
-      {isAuditLocked && (
-        <Alert
-          className="mb-4"
-          type="info"
-          showIcon
-          title="当前记录已审核，仅允许修改备注。刀具、领用信息、出库日期和出库数量已锁定；审核与反审请使用页面顶部按钮。"
-        />
-      )}
-
-      <Form.Item
-        name="tooling_data_id"
-        label="关联刀具资料"
-        rules={[{ required: true, message: '请选择刀具资料' }]}
+    <>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleFinish}
+        disabled={isSubmitting}
       >
-        <Select
-          disabled={isAuditLocked}
-          showSearch={{
-            filterOption: (input, option) =>
-              String(option?.label || '')
-                .toLowerCase()
-                .includes(input.toLowerCase()),
-          }}
-          placeholder={
-            toolingOptions.length > 0
-              ? '请选择刀具资料'
-              : '暂无刀具资料，请先维护刀具资料'
-          }
-          options={toolingOptions.map((item) => ({
-            value: item.id,
-            label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
-          }))}
-        />
-      </Form.Item>
+        {isAuditLocked && (
+          <Alert
+            className="mb-4"
+            type="info"
+            showIcon
+            title="当前记录已审核，仅允许修改备注。刀具、领用信息、出库日期和出库数量已锁定；审核与反审请使用页面顶部按钮。"
+          />
+        )}
+
+        <Form.Item
+          name="tooling_data_id"
+          label="关联刀具资料"
+          rules={[{ required: true, message: '请选择刀具资料' }]}
+        >
+          {toolingInputMode === 'bottom-sheet' ? (
+            <button
+              type="button"
+              disabled={
+                isAuditLocked || isSubmitting || toolingOptions.length === 0
+              }
+              onClick={() => setIsToolingSheetOpen(true)}
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {currentToolingLabel ||
+                (toolingOptions.length > 0
+                  ? '请选择刀具资料'
+                  : '暂无刀具资料，请先维护刀具资料')}
+            </button>
+          ) : (
+            <Select
+              disabled={isAuditLocked}
+              showSearch={{
+                filterOption: (input, option) =>
+                  String(option?.label || '')
+                    .toLowerCase()
+                    .includes(input.toLowerCase()),
+              }}
+              placeholder={
+                toolingOptions.length > 0
+                  ? '请选择刀具资料'
+                  : '暂无刀具资料，请先维护刀具资料'
+              }
+              options={toolingSelectOptions}
+            />
+          )}
+        </Form.Item>
 
       <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2">
         <div>
@@ -201,14 +264,26 @@ export default function ToolingStockOutForm({
         label="出库数量"
         rules={[{ required: true, message: '请输入出库数量' }]}
       >
-        <InputNumber
-          disabled={isAuditLocked}
-          min={0.001}
-          step={0.001}
-          precision={3}
-          style={{ width: '100%' }}
-          placeholder="请输入出库数量"
-        />
+        {toolingInputMode === 'bottom-sheet' ? (
+          <MobileNumberInput
+            disabled={isAuditLocked}
+            min={0.001}
+            step={0.001}
+            precision={3}
+            keyboardMode="decimal"
+            className="w-full"
+            placeholder="请输入出库数量"
+          />
+        ) : (
+          <InputNumber
+            disabled={isAuditLocked}
+            min={0.001}
+            step={0.001}
+            precision={3}
+            style={{ width: '100%' }}
+            placeholder="请输入出库数量"
+          />
+        )}
       </Form.Item>
 
       <Form.Item
@@ -222,6 +297,22 @@ export default function ToolingStockOutForm({
           autoSize={{ minRows: 3, maxRows: 5 }}
         />
       </Form.Item>
-    </Form>
+      </Form>
+
+      {toolingInputMode === 'bottom-sheet' ? (
+        <MobileBottomSelectSheet
+          open={isToolingSheetOpen}
+          title="选择刀具资料"
+          options={toolingSheetOptions}
+          value={selectedToolingId}
+          searchPlaceholder="输入刀具编号、名称、规格或材质搜索"
+          emptyText="暂无可选刀具资料"
+          onClose={() => setIsToolingSheetOpen(false)}
+          onSelect={(value) => {
+            form.setFieldValue('tooling_data_id', value)
+          }}
+        />
+      ) : null}
+    </>
   )
 }

@@ -60,6 +60,9 @@ export const ToolingStockIn = lazy(
 export const ToolingStockOut = lazy(
   () => import('@features/tooling/ToolingStockOut'),
 )
+export const ToolingStockOutPublicPage = lazy(
+  () => import('@features/tooling/ToolingStockOut/ToolingStockOutPublicPage'),
+)
 export const LaborProtectionData = lazy(
   () => import('@features/labor-protection/LaborProtectionData'),
 )
