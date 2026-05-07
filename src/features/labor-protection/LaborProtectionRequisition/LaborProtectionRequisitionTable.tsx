@@ -74,6 +74,12 @@ export default function LaborProtectionRequisitionTable({
         width: 160,
       },
       {
+        title: '领用方式',
+        dataIndex: 'collection_method',
+        key: 'collection_method',
+        width: 100,
+      },
+      {
         title: '更新时间',
         dataIndex: 'updated_at',
         key: 'updated_at',
@@ -101,7 +107,7 @@ export default function LaborProtectionRequisitionTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1160, y: scrollY }}
+      scroll={{ x: 1260, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

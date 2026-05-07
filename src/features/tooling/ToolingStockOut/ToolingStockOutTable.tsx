@@ -68,6 +68,12 @@ export default function ToolingStockOutTable({
         width: 180,
       },
       {
+        title: '领用方式',
+        dataIndex: 'collection_method',
+        key: 'collection_method',
+        width: 100,
+      },
+      {
         title: '机器编号',
         dataIndex: 'machine_no',
         key: 'machine_no',
@@ -155,7 +161,7 @@ export default function ToolingStockOutTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 2160, y: scrollY }}
+      scroll={{ x: 2260, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

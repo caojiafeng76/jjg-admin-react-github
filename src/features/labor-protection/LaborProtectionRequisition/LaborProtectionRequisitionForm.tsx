@@ -33,6 +33,7 @@ const DEFAULT_VALUES: LaborProtectionRequisitionFormValues = {
   job_title: '',
   quantity: 1,
   recipient: '',
+  collection_method: '新领取',
 }
 
 const NO_MACHINE_OPTION = {
@@ -147,6 +148,7 @@ export default function LaborProtectionRequisitionForm({
         job_title: initialValues.job_title,
         quantity: Number(initialValues.quantity || 1),
         recipient: initialValues.recipient,
+        collection_method: initialValues.collection_method || '新领取',
       })
       return
     }
@@ -286,6 +288,19 @@ export default function LaborProtectionRequisitionForm({
           rules={[{ required: true, message: '请输入领取人' }]}
         >
           <Input placeholder="请输入领取人" maxLength={100} />
+        </Form.Item>
+
+        <Form.Item
+          name="collection_method"
+          label="领用方式"
+          rules={[{ required: true, message: '请选择领用方式' }]}
+        >
+          <Select
+            options={[
+              { label: '新领取', value: '新领取' },
+              { label: '以旧换新', value: '以旧换新' },
+            ]}
+          />
         </Form.Item>
       </Form>
 

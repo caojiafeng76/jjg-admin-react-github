@@ -205,7 +205,9 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
       formatDate(order.planned_finish_date),
       formatDate(order.product_delivery_date),
       order.tooling_status || '',
-      order.responsible_person || '',
+      (order.responsible_person_names?.length
+        ? order.responsible_person_names.join('、')
+        : order.responsible_person) || '',
       getProgressText(order),
       normalizeNumber(order.transfer_quantity),
       `${Number(order.transfer_rate || 0).toFixed(1)}%`,

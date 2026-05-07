@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   ArrowPathIcon,
   PencilSquareIcon,
@@ -28,6 +29,7 @@ import type {
   ProductionSchedulingOrder,
   ProductionSchedulingOrderUpdate,
 } from '@/services/apiProductionScheduling'
+import { getAllEmployees } from '@/services/apiEmployees'
 import { exportProductionScheduledPlanToExcel } from '@/utils/productionSchedulingPlanExcel'
 import {
   useProductionSchedulingOrders,
@@ -41,6 +43,8 @@ type SearchFormValues = {
   model?: string
   projectNo?: string
   status?: ProductionSchedulingFilters['status']
+  progressStatus?: string
+  plannedStartDateRange?: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
 }
 
 type SchedulingFormValues = {
@@ -49,7 +53,7 @@ type SchedulingFormValues = {
   product_delivery_date?: dayjs.Dayjs | null
   process_requirement?: string | null
   tooling_status?: string | null
-  responsible_person?: string | null
+  responsible_person_ids?: string[]
   progress_status?: string | null
   progress_percent?: number | null
   scheduling_remark?: string | null
@@ -185,7 +189,7 @@ function makeSchedulingInitialValues(
     product_delivery_date: toDatePickerValue(order.product_delivery_date),
     process_requirement: order.process_requirement ?? null,
     tooling_status: order.tooling_status ?? null,
-    responsible_person: order.responsible_person ?? null,
+    responsible_person_ids: order.responsible_person_ids ?? [],
     progress_status: getProgressStatus(order),
     progress_percent: getProgressPercentValue(order),
     scheduling_remark: order.scheduling_remark ?? null,
@@ -195,7 +199,13 @@ function makeSchedulingInitialValues(
 function formatSchedulingPayload(
   order: ProductionSchedulingOrder,
   values: SchedulingFormValues,
+  employeeMap: Map<string, string>,
 ): ProductionSchedulingOrderUpdate {
+  const responsible_person_ids = values.responsible_person_ids ?? []
+  const responsible_person_names = responsible_person_ids
+    .map((id) => employeeMap.get(id))
+    .filter((name): name is string => Boolean(name))
+
   return {
     ...values,
     planned_start_date: formatDatePickerValue(values.planned_start_date),
@@ -203,6 +213,8 @@ function formatSchedulingPayload(
     product_delivery_date: formatDatePickerValue(values.product_delivery_date),
     progress_percent: getProgressPercentValue(order),
     progress_status: getProgressStatus(order),
+    responsible_person_ids,
+    responsible_person_names,
   }
 }
 
@@ -315,10 +327,11 @@ function makeOrderColumns({
     },
     {
       title: '负责班组/人员',
-      dataIndex: 'responsible_person',
-      key: 'responsible_person',
-      width: 140,
-      render: renderText,
+      dataIndex: 'responsible_person_names',
+      key: 'responsible_person_names',
+      width: 160,
+      render: (value: string[] | null | undefined) =>
+        renderText(value?.length ? value.join('、') : null),
     },
     {
       title: '当前进度',
@@ -396,6 +409,16 @@ export default function ProductionScheduling() {
     useState<ProductionSchedulingOrder | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [tableScrollY, setTableScrollY] = useState(DEFAULT_TABLE_SCROLL_Y)
+
+  const { data: employees = [] } = useQuery({
+    queryKey: ['employees', 'all'],
+    queryFn: getAllEmployees,
+    staleTime: 5 * 60 * 1000,
+  })
+  const employeeMap = useMemo(
+    () => new Map(employees.map((e) => [e.id, e.name])),
+    [employees],
+  )
 
   const {
     data: schedulingResult,
@@ -495,11 +518,19 @@ export default function ProductionScheduling() {
 
   const handleSearch = useCallback((values: SearchFormValues) => {
     setPage(1)
+    const range = values.plannedStartDateRange
     setFilters({
       customer: values.customer?.trim() || undefined,
       model: values.model?.trim() || undefined,
       projectNo: values.projectNo?.trim() || undefined,
       status: values.status || '生产中',
+      progressStatus: values.progressStatus || undefined,
+      plannedStartDateFrom: range?.[0]
+        ? range[0].format('YYYY-MM-DD')
+        : undefined,
+      plannedStartDateTo: range?.[1]
+        ? range[1].format('YYYY-MM-DD')
+        : undefined,
     })
   }, [])
 
@@ -518,7 +549,7 @@ export default function ProductionScheduling() {
       const values = await schedulingForm.validateFields()
       await updateMutation.mutateAsync({
         id: editingOrder.id,
-        values: formatSchedulingPayload(editingOrder, values),
+        values: formatSchedulingPayload(editingOrder, values, employeeMap),
       })
       message.success('订单排产信息已保存')
       setModalOpen(false)
@@ -530,7 +561,7 @@ export default function ProductionScheduling() {
       )
       message.error(errorMessage)
     }
-  }, [editingOrder, message, schedulingForm, updateMutation])
+  }, [editingOrder, message, schedulingForm, updateMutation, employeeMap])
 
   const handleExport = useCallback(() => {
     if (orders.length === 0) {
@@ -578,6 +609,26 @@ export default function ProductionScheduling() {
                   value: item.value,
                 })),
               ]}
+            />
+          </Form.Item>
+          <Form.Item name="progressStatus" label="当前进度">
+            <Select
+              allowClear
+              style={{ width: 110 }}
+              placeholder="全部"
+              options={[
+                { label: '未开工', value: '未开工' },
+                { label: '进行中', value: '进行中' },
+                { label: '已完工', value: '已完工' },
+                { label: '延期', value: '延期' },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item name="plannedStartDateRange" label="计划开工">
+            <DatePicker.RangePicker
+              allowClear
+              style={{ width: 240 }}
+              placeholder={['开始日期', '结束日期']}
             />
           </Form.Item>
           <Form.Item>
@@ -684,8 +735,18 @@ export default function ProductionScheduling() {
             >
               <Input allowClear placeholder="设备编号、运行状态" />
             </Form.Item>
-            <Form.Item name="responsible_person" label="负责班组/人员">
-              <Input allowClear />
+            <Form.Item name="responsible_person_ids" label="负责班组/人员">
+              <Select
+                mode="multiple"
+                allowClear
+                showSearch
+                placeholder="选择负责该订单的员工"
+                optionFilterProp="label"
+                options={employees.map((e) => ({
+                  label: e.name,
+                  value: e.id,
+                }))}
+              />
             </Form.Item>
             <Form.Item
               name="progress_status"

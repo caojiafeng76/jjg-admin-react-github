@@ -28,6 +28,7 @@ export interface ToolingStockOut {
   stock_out_date: string
   status: ToolingStockOutStatus
   stock_out_quantity: number
+  collection_method: string
   final_stock?: number | null
   machine_no?: string
   machine_name?: string
@@ -64,6 +65,7 @@ export interface ToolingStockOutFormValues {
   stock_out_date: string
   status: ToolingStockOutStatus
   stock_out_quantity: number
+  collection_method: string
   remarks: string
 }
 
@@ -79,6 +81,7 @@ export interface ToolingStockOutImportRow {
   purpose: string
   stock_out_date: string
   stock_out_quantity: number
+  collection_method: string
   remarks: string
 }
 
@@ -139,6 +142,7 @@ function normalizeFormValues(
     stock_out_date: normalizeDateString(values.stock_out_date),
     status: values.status || '待审核',
     stock_out_quantity: normalizeQuantity(values.stock_out_quantity),
+    collection_method: values.collection_method || '新领取',
     remarks: normalizeText(values.remarks),
   }
 }
@@ -153,6 +157,7 @@ function normalizeImportRow(
     purpose: normalizeText(row.purpose),
     stock_out_date: normalizeDateString(row.stock_out_date),
     stock_out_quantity: normalizeQuantity(row.stock_out_quantity),
+    collection_method: row.collection_method || '新领取',
     remarks: normalizeText(row.remarks),
   }
 }
@@ -192,6 +197,7 @@ function buildStockOutPayload(
     stock_out_date: values.stock_out_date,
     status: values.status,
     stock_out_quantity: normalizeQuantity(values.stock_out_quantity),
+    collection_method: values.collection_method || '新领取',
     remarks: values.remarks,
   }
 }
@@ -403,6 +409,7 @@ export async function importToolingStockOut(rows: ToolingStockOutImportRow[]) {
       stock_out_date: row.stock_out_date,
       status: '待审核' satisfies ToolingStockOutStatus,
       stock_out_quantity: normalizeQuantity(row.stock_out_quantity),
+      collection_method: row.collection_method || '新领取',
       remarks: row.remarks,
     }
   })

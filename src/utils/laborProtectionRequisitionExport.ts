@@ -17,12 +17,13 @@ const DETAIL_HEADERS = [
   '机器名称',
   '数量',
   '领取人',
+  '领用方式',
   '更新时间',
 ] as const
 
 const SUMMARY_HEADERS = ['#', '种类', '数量合计', '领料笔数'] as const
 
-const DETAIL_COLUMN_WIDTHS = [6, 24, 18, 16, 18, 12, 16, 22]
+const DETAIL_COLUMN_WIDTHS = [6, 24, 18, 16, 18, 12, 16, 12, 22]
 const SUMMARY_COLUMN_WIDTHS = [6, 28, 14, 14]
 
 const BORDER_COLOR = '000000'
@@ -206,6 +207,7 @@ function buildDetailSheet(
       formatCellText(item.machine_name),
       Number(item.quantity || 0),
       formatCellText(item.recipient),
+      formatCellText(item.collection_method),
       formatDateTime(item.updated_at),
     ])
   })
@@ -224,7 +226,7 @@ function buildDetailSheet(
     e: { r: totalRowIdx, c: 4 },
   })
   merges.push({
-    s: { r: totalRowIdx, c: 6 },
+    s: { r: totalRowIdx, c: 7 },
     e: { r: totalRowIdx, c: colCount - 1 },
   })
 
