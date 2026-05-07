@@ -17,6 +17,7 @@ const TEMPLATE_HEADERS = [
   '用途',
   '出库日期',
   '出库数量',
+  '领用方式',
   '备注',
 ] as const
 
@@ -75,6 +76,7 @@ export async function parseToolingStockOutExcel(
     const purpose = normalizeText(row['用途'])
     const stockOutDate = normalizeDate(row['出库日期'])
     const stockOutQuantity = normalizeNumber(row['出库数量'])
+    const collectionMethod = normalizeText(row['领用方式']) || '新领取'
     const remarks = normalizeText(row['备注'])
 
     const isEmptyRow =
@@ -125,6 +127,7 @@ export async function parseToolingStockOutExcel(
       purpose,
       stock_out_date: stockOutDate,
       stock_out_quantity: stockOutQuantity,
+      collection_method: collectionMethod,
       remarks,
     })
   })
