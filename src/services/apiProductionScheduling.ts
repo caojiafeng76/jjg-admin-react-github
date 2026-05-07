@@ -63,6 +63,9 @@ export interface ProductionSchedulingFilters {
   model?: string
   projectNo?: string
   status?: WorkshopOrder['status'] | '全部'
+  progressStatus?: string
+  plannedStartDateFrom?: string
+  plannedStartDateTo?: string
 }
 
 export interface ProductionSchedulingOrdersResult {
@@ -72,6 +75,8 @@ export interface ProductionSchedulingOrdersResult {
 
 export interface ProductionSchedulingOrder extends WorkshopOrder {
   responsible_person?: string | null
+  responsible_person_ids?: string[] | null
+  responsible_person_names?: string[] | null
   progress_status?: string | null
   progress_percent?: number | null
   processed_quantity: number
@@ -109,6 +114,8 @@ export interface ProductionSchedulingOrderUpdate {
   order_category?: string | null
   delivery_priority?: string | null
   responsible_person?: string | null
+  responsible_person_ids?: string[] | null
+  responsible_person_names?: string[] | null
   progress_status?: string | null
   progress_percent?: number | null
   scheduling_remark?: string | null
@@ -773,6 +780,15 @@ function applySchedulingFilters(
     query = query.ilike('customer', `%${customer}%`)
   }
 
+  if (filters?.plannedStartDateFrom) {
+    query = query.gte('planned_start_date', filters.plannedStartDateFrom)
+  }
+
+  if (filters?.plannedStartDateTo) {
+    query = query.lte('planned_start_date', filters.plannedStartDateTo)
+  }
+
+  // progressStatus 需要基于转移数据动态计算，在查询后过滤
   return query
 }
 
@@ -824,51 +840,71 @@ export async function getProductionSchedulingOrders({
       fetchProcessStandardCapacityRows(rows, signal),
     ])
 
-  const orders = rows.map((order) => {
-    const projectNo = order.project_no?.trim() || ''
-    const orderQuantity = toQuantity(order.order_quantity)
-    const processSchedules = getOrderScheduleRows(order)
-    const scheduledQuantity = getOrderScheduledQuantity(order)
-    const matchedDailyStandardCapacity = getMatchedDailyStandardCapacity({
-      order,
-      standardRows: standardCapacityRows,
-    })
-    const remainingScheduleQuantity = Math.max(
-      orderQuantity - scheduledQuantity,
-      0,
-    )
-    const processedQuantity = roundQuantity(
-      productionQuantities.get(projectNo) || 0,
-    )
-    const transferSummary = transferSummaries.get(projectNo)
-    const transferQuantity = roundQuantity(transferSummary?.totalQuantity || 0)
+  const orders = rows
+    .map((order) => {
+      const projectNo = order.project_no?.trim() || ''
+      const orderQuantity = toQuantity(order.order_quantity)
+      const processSchedules = getOrderScheduleRows(order)
+      const scheduledQuantity = getOrderScheduledQuantity(order)
+      const matchedDailyStandardCapacity = getMatchedDailyStandardCapacity({
+        order,
+        standardRows: standardCapacityRows,
+      })
+      const remainingScheduleQuantity = Math.max(
+        orderQuantity - scheduledQuantity,
+        0,
+      )
+      const processedQuantity = roundQuantity(
+        productionQuantities.get(projectNo) || 0,
+      )
+      const transferSummary = transferSummaries.get(projectNo)
+      const transferQuantity = roundQuantity(transferSummary?.totalQuantity || 0)
 
-    return {
-      ...order,
-      capacity_per_day:
-        toQuantity(order.capacity_per_day) || matchedDailyStandardCapacity,
-      process_schedules: processSchedules,
-      total_pending_quantity: orderQuantity,
-      scheduled_quantity: scheduledQuantity,
-      remaining_schedule_quantity: roundQuantity(remainingScheduleQuantity),
-      processed_quantity: processedQuantity,
-      transfer_latest_date: transferSummary?.latestDate ?? null,
-      transfer_latest_workshop: transferSummary?.latestWorkshop ?? null,
-      transfer_quantity: transferQuantity,
-      transfer_record_count: transferSummary?.recordCount ?? 0,
-      scheduled_rate: percent(scheduledQuantity, orderQuantity),
-      remaining_schedule_rate: percent(
-        remainingScheduleQuantity,
-        orderQuantity,
-      ),
-      processed_rate: percent(processedQuantity, orderQuantity),
-      transfer_rate: percent(transferQuantity, orderQuantity),
-    } satisfies ProductionSchedulingOrder
-  })
+      return {
+        ...order,
+        capacity_per_day:
+          toQuantity(order.capacity_per_day) || matchedDailyStandardCapacity,
+        process_schedules: processSchedules,
+        total_pending_quantity: orderQuantity,
+        scheduled_quantity: scheduledQuantity,
+        remaining_schedule_quantity: roundQuantity(remainingScheduleQuantity),
+        processed_quantity: processedQuantity,
+        transfer_latest_date: transferSummary?.latestDate ?? null,
+        transfer_latest_workshop: transferSummary?.latestWorkshop ?? null,
+        transfer_quantity: transferQuantity,
+        transfer_record_count: transferSummary?.recordCount ?? 0,
+        scheduled_rate: percent(scheduledQuantity, orderQuantity),
+        remaining_schedule_rate: percent(
+          remainingScheduleQuantity,
+          orderQuantity,
+        ),
+        processed_rate: percent(processedQuantity, orderQuantity),
+        transfer_rate: percent(transferQuantity, orderQuantity),
+      } satisfies ProductionSchedulingOrder
+    })
+    .filter((order) => {
+      if (!filters?.progressStatus) return true
+
+      const status = order.progress_status?.trim()
+      const orderQuantity = Number(order.order_quantity || 0)
+      const transferQuantity = Number(order.transfer_quantity || 0)
+
+      if (status === '延期') return '延期' === filters.progressStatus
+      if (orderQuantity > 0 && transferQuantity >= orderQuantity)
+        return '已完工' === filters.progressStatus
+      if (transferQuantity > 0) return '进行中' === filters.progressStatus
+
+      const effectiveStatus = status || '未开工'
+      return effectiveStatus === filters.progressStatus
+    })
+
+  // 若启用了进度筛选，total 以过滤后的实际数量为准
+  const effectiveTotal =
+    filters?.progressStatus ? orders.length : (count ?? orders.length)
 
   return {
     orders,
-    total: count ?? orders.length,
+    total: effectiveTotal,
   }
 }
 
@@ -932,6 +968,16 @@ export async function updateProductionSchedulingOrder({
 
   if ('progress_percent' in values) {
     payload.progress_percent = normalizeNullableNumber(values.progress_percent)
+  }
+
+  if ('responsible_person_ids' in values) {
+    ;(payload as Record<string, unknown>).responsible_person_ids =
+      values.responsible_person_ids ?? []
+  }
+
+  if ('responsible_person_names' in values) {
+    ;(payload as Record<string, unknown>).responsible_person_names =
+      values.responsible_person_names ?? []
   }
 
   if ('process_schedules' in values) {

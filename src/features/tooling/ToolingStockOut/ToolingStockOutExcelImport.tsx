@@ -64,6 +64,11 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
     width: 120,
   },
   {
+    title: '领用方式',
+    dataIndex: 'collection_method',
+    width: 100,
+  },
+  {
     title: '备注',
     dataIndex: 'remarks',
     width: 240,
@@ -232,7 +237,7 @@ export default function ToolingStockOutExcelImport({
                 dataSource={previewData}
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}
-                scroll={{ y: 320, x: 1220 }}
+                scroll={{ y: 320, x: 1320 }}
               />
             </div>
           )}

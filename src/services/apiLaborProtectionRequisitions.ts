@@ -12,6 +12,7 @@ export interface LaborProtectionRequisition {
   job_title: string
   quantity: number
   recipient: string
+  collection_method: string
   created_at: string
   updated_at: string
 }
@@ -22,6 +23,7 @@ export interface LaborProtectionRequisitionFormValues {
   job_title: string
   quantity: number
   recipient: string
+  collection_method: string
 }
 
 type DynamicSupabaseTable = {
@@ -35,6 +37,7 @@ type LaborProtectionRequisitionRow = {
   job_title: string
   quantity: number
   recipient: string
+  collection_method: string
   created_at: string
   updated_at: string
   labor_protection_data?:
@@ -68,6 +71,7 @@ const LABOR_PROTECTION_REQUISITION_SELECT = `
       job_title,
       quantity,
       recipient,
+      collection_method,
       created_at,
       updated_at,
       labor_protection_data(id, category),
@@ -113,6 +117,8 @@ function normalizeFormValues(
     job_title: normalizeRequiredText(values.job_title, '岗位'),
     quantity: normalizeQuantity(values.quantity),
     recipient: normalizeRequiredText(values.recipient, '领取人'),
+    collection_method:
+      values.collection_method || '新领取',
   }
 }
 
@@ -157,6 +163,7 @@ function mapLaborProtectionRequisition(
     job_title: row.job_title,
     quantity: Number(row.quantity || 0),
     recipient: row.recipient,
+    collection_method: row.collection_method || '新领取',
     created_at: row.created_at,
     updated_at: row.updated_at,
   }

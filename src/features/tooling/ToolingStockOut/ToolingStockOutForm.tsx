@@ -29,6 +29,7 @@ interface ToolingStockOutFormFields {
   stock_out_date: Dayjs | null
   status: '待审核' | '已审核'
   stock_out_quantity: number
+  collection_method: string
   remarks: string
 }
 
@@ -53,6 +54,7 @@ const DEFAULT_VALUES: ToolingStockOutFormFields = {
   stock_out_date: null,
   status: '待审核',
   stock_out_quantity: 0,
+  collection_method: '新领取',
   remarks: '',
 }
 
@@ -186,6 +188,7 @@ export default function ToolingStockOutForm({
           : null,
         status: initialValues.status,
         stock_out_quantity: Number(initialValues.stock_out_quantity || 0),
+        collection_method: initialValues.collection_method || '新领取',
         remarks: initialValues.remarks,
       })
       return
@@ -211,6 +214,7 @@ export default function ToolingStockOutForm({
       stock_out_date: values.stock_out_date?.format('YYYY-MM-DD') || '',
       status: values.status,
       stock_out_quantity: Number(values.stock_out_quantity || 0),
+      collection_method: values.collection_method || '新领取',
       remarks: values.remarks.trim(),
     })
   }
@@ -390,6 +394,20 @@ export default function ToolingStockOutForm({
               placeholder="请输入出库数量"
             />
           )}
+        </Form.Item>
+
+        <Form.Item
+          name="collection_method"
+          label="领用方式"
+          rules={[{ required: true, message: '请选择领用方式' }]}
+        >
+          <Select
+            disabled={isAuditLocked}
+            options={[
+              { label: '新领取', value: '新领取' },
+              { label: '以旧换新', value: '以旧换新' },
+            ]}
+          />
         </Form.Item>
 
         <Form.Item
