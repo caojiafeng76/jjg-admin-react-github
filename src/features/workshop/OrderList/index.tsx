@@ -54,6 +54,9 @@ export interface WorkshopOrder {
   material_status?: string | null
   order_category?: string | null
   delivery_priority?: string | null
+  responsible_person?: string | null
+  progress_status?: string | null
+  progress_percent?: number | null
   scheduling_remark?: string | null
   process_schedules?: WorkshopOrderProcessSchedule[] | null
   customer: string | null
