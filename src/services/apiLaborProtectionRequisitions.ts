@@ -18,7 +18,7 @@ export interface LaborProtectionRequisition {
 
 export interface LaborProtectionRequisitionFormValues {
   labor_protection_data_id: string
-  machine_equipment_id: string
+  machine_equipment_id: string | null
   job_title: string
   quantity: number
   recipient: string
@@ -107,13 +107,9 @@ function normalizeFormValues(
     throw new Error('请选择劳保种类')
   }
 
-  if (!values.machine_equipment_id) {
-    throw new Error('请选择机器编号')
-  }
-
   return {
     labor_protection_data_id: values.labor_protection_data_id,
-    machine_equipment_id: values.machine_equipment_id,
+    machine_equipment_id: values.machine_equipment_id || null,
     job_title: normalizeRequiredText(values.job_title, '岗位'),
     quantity: normalizeQuantity(values.quantity),
     recipient: normalizeRequiredText(values.recipient, '领取人'),

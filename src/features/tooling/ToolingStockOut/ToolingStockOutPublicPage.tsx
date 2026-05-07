@@ -77,7 +77,7 @@ export default function ToolingStockOutPublicPage() {
           : '未命名刀具',
         machineLabel: selectedMachine
           ? `${selectedMachine.unified_device_no} | ${selectedMachine.machine_name}`
-          : '未命名机器',
+          : '无',
         purpose: payload.purpose.trim(),
       })
     } catch (error) {
@@ -162,12 +162,12 @@ export default function ToolingStockOutPublicPage() {
                     <span>正在加载刀具资料和机器编号</span>
                   </div>
                 </div>
-              ) : toolingOptions.length === 0 || machineOptions.length === 0 ? (
+              ) : toolingOptions.length === 0 ? (
                 <Alert
                   type="warning"
                   showIcon
-                  title="暂未配置可出库的刀具资料或机器编号"
-                  description="请联系管理员先在后台维护刀具资料和机器设备后，再重新扫码登记。"
+                  title="暂未配置可出库的刀具资料"
+                  description="请联系管理员先在后台维护刀具资料后，再重新扫码登记。"
                 />
               ) : (
                 <ToolingStockOutForm
@@ -198,7 +198,6 @@ export default function ToolingStockOutPublicPage() {
                   disabled={
                     toolingOptions.length === 0 ||
                     isToolingOptionsLoading ||
-                    machineOptions.length === 0 ||
                     isMachineOptionsLoading
                   }
                   onClick={() => formRef?.submit()}

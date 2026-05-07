@@ -58,7 +58,7 @@ export default function LaborProtectionPublicRequisitionPage() {
         jobTitle: values.job_title.trim(),
         machineLabel: selectedMachine
           ? `${selectedMachine.unified_device_no} | ${selectedMachine.machine_name}`
-          : '未命名机器',
+          : '无',
         quantity: Number(values.quantity),
         recipient: values.recipient.trim(),
       })
@@ -144,13 +144,12 @@ export default function LaborProtectionPublicRequisitionPage() {
                     <span>正在加载劳保种类和机器编号</span>
                   </div>
                 </div>
-              ) : categoryOptions.length === 0 ||
-                machineOptions.length === 0 ? (
+              ) : categoryOptions.length === 0 ? (
                 <Alert
                   type="warning"
                   showIcon
-                  title="暂未配置可领取的劳保种类或机器编号"
-                  description="请联系管理员先在后台维护劳保资料和机器设备后，再重新扫码登记。"
+                  title="暂未配置可领取的劳保种类"
+                  description="请联系管理员先在后台维护劳保资料后，再重新扫码登记。"
                 />
               ) : (
                 <LaborProtectionRequisitionForm
@@ -182,7 +181,6 @@ export default function LaborProtectionPublicRequisitionPage() {
                   disabled={
                     categoryOptions.length === 0 ||
                     isCategoryOptionsLoading ||
-                    machineOptions.length === 0 ||
                     isMachineOptionsLoading
                   }
                   onClick={() => formRef?.submit()}
