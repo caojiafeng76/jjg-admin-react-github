@@ -33,8 +33,15 @@ type ProductionQuantityRow = Pick<
 
 type TransferQuantityRow = Pick<
   Database['public']['Tables']['material_transfers']['Row'],
-  'project_no' | 'transfer_quantity'
+  'created_at' | 'project_no' | 'target_workshop' | 'transfer_quantity'
 >
+
+interface TransferSummary {
+  latestDate: string | null
+  latestWorkshop: string | null
+  recordCount: number
+  totalQuantity: number
+}
 
 type ProcessStandardCapacityRow = Pick<
   Database['public']['Tables']['process_standards']['Row'],
@@ -64,11 +71,17 @@ export interface ProductionSchedulingOrdersResult {
 }
 
 export interface ProductionSchedulingOrder extends WorkshopOrder {
+  responsible_person?: string | null
+  progress_status?: string | null
+  progress_percent?: number | null
   processed_quantity: number
   scheduled_quantity: number
   scheduled_rate: number
   total_pending_quantity: number
+  transfer_latest_date: string | null
+  transfer_latest_workshop: string | null
   transfer_quantity: number
+  transfer_record_count: number
   transfer_rate: number
   remaining_schedule_quantity: number
   remaining_schedule_rate: number
@@ -83,6 +96,7 @@ export interface ProductionSchedulingProcessRow {
 
 export interface ProductionSchedulingOrderUpdate {
   order_date?: string | null
+  product_delivery_date?: string | null
   planned_start_date?: string | null
   planned_finish_date?: string | null
   delivery_review_result?: string | null
@@ -94,6 +108,9 @@ export interface ProductionSchedulingOrderUpdate {
   material_status?: string | null
   order_category?: string | null
   delivery_priority?: string | null
+  responsible_person?: string | null
+  progress_status?: string | null
+  progress_percent?: number | null
   scheduling_remark?: string | null
   process_schedules?: WorkshopOrderProcessSchedule[] | null
 }
@@ -536,11 +553,11 @@ async function fetchProductionQuantities(
   return quantities
 }
 
-async function fetchTransferQuantities(
+async function fetchTransferSummaries(
   projectNos: string[],
   signal?: AbortSignal,
 ) {
-  const quantities = new Map<string, number>()
+  const summaries = new Map<string, TransferSummary>()
 
   for (const projectNoChunk of chunkValues(projectNos)) {
     let from = 0
@@ -549,7 +566,7 @@ async function fetchTransferQuantities(
       const to = from + METRIC_PAGE_SIZE - 1
       let query = supabase
         .from('material_transfers')
-        .select('project_no, transfer_quantity')
+        .select('project_no, transfer_quantity, target_workshop, created_at')
         .in('project_no', projectNoChunk)
         .range(from, to)
 
@@ -566,10 +583,27 @@ async function fetchTransferQuantities(
       for (const row of (data || []) as TransferQuantityRow[]) {
         const projectNo = row.project_no?.trim()
         if (!projectNo) continue
-        quantities.set(
-          projectNo,
-          (quantities.get(projectNo) || 0) + toQuantity(row.transfer_quantity),
-        )
+
+        const current = summaries.get(projectNo) ?? {
+          latestDate: null,
+          latestWorkshop: null,
+          recordCount: 0,
+          totalQuantity: 0,
+        }
+        const createdAt = row.created_at || null
+
+        current.recordCount += 1
+        current.totalQuantity += toQuantity(row.transfer_quantity)
+
+        if (
+          createdAt &&
+          (!current.latestDate || createdAt > current.latestDate)
+        ) {
+          current.latestDate = createdAt
+          current.latestWorkshop = row.target_workshop || null
+        }
+
+        summaries.set(projectNo, current)
       }
 
       if ((data || []).length < METRIC_PAGE_SIZE) {
@@ -580,7 +614,7 @@ async function fetchTransferQuantities(
     }
   }
 
-  return quantities
+  return summaries
 }
 
 async function fetchProcessStandardCapacityRows(
@@ -783,10 +817,10 @@ export async function getProductionSchedulingOrders({
         .filter((projectNo): projectNo is string => Boolean(projectNo)),
     ),
   )
-  const [productionQuantities, transferQuantities, standardCapacityRows] =
+  const [productionQuantities, transferSummaries, standardCapacityRows] =
     await Promise.all([
       fetchProductionQuantities(projectNos, signal),
-      fetchTransferQuantities(projectNos, signal),
+      fetchTransferSummaries(projectNos, signal),
       fetchProcessStandardCapacityRows(rows, signal),
     ])
 
@@ -806,9 +840,8 @@ export async function getProductionSchedulingOrders({
     const processedQuantity = roundQuantity(
       productionQuantities.get(projectNo) || 0,
     )
-    const transferQuantity = roundQuantity(
-      transferQuantities.get(projectNo) || 0,
-    )
+    const transferSummary = transferSummaries.get(projectNo)
+    const transferQuantity = roundQuantity(transferSummary?.totalQuantity || 0)
 
     return {
       ...order,
@@ -819,7 +852,10 @@ export async function getProductionSchedulingOrders({
       scheduled_quantity: scheduledQuantity,
       remaining_schedule_quantity: roundQuantity(remainingScheduleQuantity),
       processed_quantity: processedQuantity,
+      transfer_latest_date: transferSummary?.latestDate ?? null,
+      transfer_latest_workshop: transferSummary?.latestWorkshop ?? null,
       transfer_quantity: transferQuantity,
+      transfer_record_count: transferSummary?.recordCount ?? 0,
       scheduled_rate: percent(scheduledQuantity, orderQuantity),
       remaining_schedule_rate: percent(
         remainingScheduleQuantity,
@@ -867,10 +903,13 @@ export async function updateProductionSchedulingOrder({
     'material_status',
     'order_category',
     'delivery_priority',
+    'responsible_person',
+    'progress_status',
     'scheduling_remark',
   ]
   const dateFields: Array<keyof ProductionSchedulingOrderUpdate> = [
     'order_date',
+    'product_delivery_date',
     'planned_start_date',
     'planned_finish_date',
   ]
@@ -889,6 +928,10 @@ export async function updateProductionSchedulingOrder({
 
   if ('capacity_per_day' in values) {
     payload.capacity_per_day = normalizeNullableNumber(values.capacity_per_day)
+  }
+
+  if ('progress_percent' in values) {
+    payload.progress_percent = normalizeNullableNumber(values.progress_percent)
   }
 
   if ('process_schedules' in values) {
