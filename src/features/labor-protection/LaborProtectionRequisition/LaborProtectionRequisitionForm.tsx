@@ -35,6 +35,11 @@ const DEFAULT_VALUES: LaborProtectionRequisitionFormValues = {
   recipient: '',
 }
 
+const NO_MACHINE_OPTION = {
+  value: '',
+  label: '无',
+}
+
 export default function LaborProtectionRequisitionForm({
   onFinish,
   setFormRef,
@@ -74,30 +79,41 @@ export default function LaborProtectionRequisitionForm({
 
   const machineSelectOptions = useMemo(
     () =>
-      machineOptions.map((item) => ({
-        value: item.id,
-        label: `${item.unified_device_no} | ${item.machine_name}`,
-      })),
+      [
+        NO_MACHINE_OPTION,
+        ...machineOptions.map((item) => ({
+          value: item.id,
+          label: `${item.unified_device_no} | ${item.machine_name}`,
+        })),
+      ],
     [machineOptions],
   )
 
   const machineSheetOptions = useMemo<MobileBottomSelectOption[]>(
     () =>
-      machineOptions.map((item) => ({
-        value: item.id,
-        label: item.unified_device_no,
-        description: (
-          <div className="space-y-1">
-            <div>机器名称：{item.machine_name || '-'}</div>
-            <div>工序：{item.operation || '-'}</div>
-          </div>
-        ),
-        keywords: [
-          item.unified_device_no,
-          item.machine_name,
-          item.operation,
-        ].join(' '),
-      })),
+      [
+        {
+          value: '',
+          label: '无',
+          description: '不关联任何机器',
+          keywords: '无 不关联 机器',
+        },
+        ...machineOptions.map((item) => ({
+          value: item.id,
+          label: item.unified_device_no,
+          description: (
+            <div className="space-y-1">
+              <div>机器名称：{item.machine_name || '-'}</div>
+              <div>工序：{item.operation || '-'}</div>
+            </div>
+          ),
+          keywords: [
+            item.unified_device_no,
+            item.machine_name,
+            item.operation,
+          ].join(' '),
+        })),
+      ],
     [machineOptions],
   )
 
@@ -108,6 +124,10 @@ export default function LaborProtectionRequisitionForm({
   )
 
   const currentMachineLabel = useMemo(() => {
+    if (currentMachineId === '') {
+      return NO_MACHINE_OPTION.label
+    }
+
     const machine = machineOptions.find((item) => item.id === currentMachineId)
     return machine
       ? `${machine.unified_device_no} | ${machine.machine_name}`
@@ -182,12 +202,11 @@ export default function LaborProtectionRequisitionForm({
         <Form.Item
           name="machine_equipment_id"
           label="机器编号"
-          rules={[{ required: true, message: '请选择机器编号' }]}
         >
           {machineInputMode === 'bottom-sheet' ? (
             <button
               type="button"
-              disabled={isSubmitting || machineOptions.length === 0}
+              disabled={isSubmitting}
               onClick={() => setIsMachineSheetOpen(true)}
               className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
             >

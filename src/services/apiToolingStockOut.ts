@@ -58,7 +58,7 @@ type ToolingStockOutRow = ToolingStockOut & {
 
 export interface ToolingStockOutFormValues {
   tooling_data_id: string
-  machine_equipment_id: string
+  machine_equipment_id: string | null
   recipient: string
   purpose: string
   stock_out_date: string
@@ -131,13 +131,9 @@ function normalizeFormValues(
     throw new Error('请选择刀具资料')
   }
 
-  if (!values.machine_equipment_id) {
-    throw new Error('请选择机器编号')
-  }
-
   return {
     tooling_data_id: values.tooling_data_id,
-    machine_equipment_id: values.machine_equipment_id,
+    machine_equipment_id: values.machine_equipment_id || null,
     recipient: normalizeText(values.recipient),
     purpose: normalizeText(values.purpose),
     stock_out_date: normalizeDateString(values.stock_out_date),

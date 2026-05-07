@@ -56,6 +56,11 @@ const DEFAULT_VALUES: ToolingStockOutFormFields = {
   remarks: '',
 }
 
+const NO_MACHINE_OPTION = {
+  value: '',
+  label: '无',
+}
+
 export default function ToolingStockOutForm({
   onFinish,
   setFormRef,
@@ -115,34 +120,49 @@ export default function ToolingStockOutForm({
 
   const machineSelectOptions = useMemo(
     () =>
-      machineOptions.map((item) => ({
-        value: item.id,
-        label: `${item.unified_device_no} | ${item.machine_name}`,
-      })),
+      [
+        NO_MACHINE_OPTION,
+        ...machineOptions.map((item) => ({
+          value: item.id,
+          label: `${item.unified_device_no} | ${item.machine_name}`,
+        })),
+      ],
     [machineOptions],
   )
 
   const machineSheetOptions = useMemo<MobileBottomSelectOption[]>(
     () =>
-      machineOptions.map((item) => ({
-        value: item.id,
-        label: item.unified_device_no,
-        description: (
-          <div className="space-y-1">
-            <div>机器名称：{item.machine_name || '-'}</div>
-            <div>工序：{item.operation || '-'}</div>
-          </div>
-        ),
-        keywords: [
-          item.unified_device_no,
-          item.machine_name,
-          item.operation,
-        ].join(' '),
-      })),
+      [
+        {
+          value: '',
+          label: '无',
+          description: '不关联任何机器',
+          keywords: '无 不关联 机器',
+        },
+        ...machineOptions.map((item) => ({
+          value: item.id,
+          label: item.unified_device_no,
+          description: (
+            <div className="space-y-1">
+              <div>机器名称：{item.machine_name || '-'}</div>
+              <div>工序：{item.operation || '-'}</div>
+            </div>
+          ),
+          keywords: [
+            item.unified_device_no,
+            item.machine_name,
+            item.operation,
+          ].join(' '),
+        })),
+      ],
     [machineOptions],
   )
 
   const currentMachineLabel = useMemo(() => {
+    if (selectedMachineId === '') {
+      return NO_MACHINE_OPTION.label
+    }
+
     const machine = machineOptions.find((item) => item.id === selectedMachineId)
     return machine
       ? `${machine.unified_device_no} | ${machine.machine_name}`
@@ -175,6 +195,7 @@ export default function ToolingStockOutForm({
     form.setFieldsValue({
       ...DEFAULT_VALUES,
       ...defaultValues,
+      machine_equipment_id: defaultValues?.machine_equipment_id || '',
       stock_out_date: defaultValues?.stock_out_date
         ? dayjs(defaultValues.stock_out_date)
         : DEFAULT_VALUES.stock_out_date,
@@ -184,7 +205,7 @@ export default function ToolingStockOutForm({
   const handleFinish = (values: ToolingStockOutFormFields) => {
     onFinish({
       tooling_data_id: values.tooling_data_id,
-      machine_equipment_id: values.machine_equipment_id,
+      machine_equipment_id: values.machine_equipment_id || null,
       recipient: values.recipient.trim(),
       purpose: values.purpose.trim(),
       stock_out_date: values.stock_out_date?.format('YYYY-MM-DD') || '',
@@ -252,13 +273,12 @@ export default function ToolingStockOutForm({
         <Form.Item
           name="machine_equipment_id"
           label="机器编号"
-          rules={[{ required: true, message: '请选择机器编号' }]}
         >
           {toolingInputMode === 'bottom-sheet' ? (
             <button
               type="button"
               disabled={
-                isAuditLocked || isSubmitting || machineOptions.length === 0
+                isAuditLocked || isSubmitting
               }
               onClick={() => setIsMachineSheetOpen(true)}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
