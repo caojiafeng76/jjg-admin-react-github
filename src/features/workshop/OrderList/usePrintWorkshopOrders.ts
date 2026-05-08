@@ -53,16 +53,6 @@ const TABLE_COLUMNS = [
 
 const qrImageCache = new Map<string, Promise<string>>()
 
-function chunkOrders(orders: WorkshopOrder[], size: number) {
-  const pages: WorkshopOrder[][] = []
-
-  for (let index = 0; index < orders.length; index += size) {
-    pages.push(orders.slice(index, index + size))
-  }
-
-  return pages
-}
-
 function formatCellText(value: string | number | null | undefined) {
   if (value === null || value === undefined) {
     return ''
@@ -177,7 +167,6 @@ export function usePrintWorkshopOrders() {
       const doc = await initializePDF('l')
       doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
 
-      const pages = chunkOrders(selectedOrders, MAX_ROWS_PER_PAGE)
       const printDate = format(new Date(), 'yyyy-MM-dd HH:mm')
       const qrImages = new Map<string, string>()
 
@@ -192,30 +181,28 @@ export function usePrintWorkshopOrders() {
         }),
       )
 
-      pages.forEach((pageOrders, pageIndex) => {
-        if (pageIndex > 0) {
-          doc.addPage()
-        }
-
+      {
         const pageWidth = doc.internal.pageSize.getWidth()
         const pageHeight = doc.internal.pageSize.getHeight()
         const bodyAreaHeight =
           pageHeight - TABLE_START_Y - TABLE_BOTTOM_MARGIN - HEADER_CELL_HEIGHT
         const minCellHeight = Math.max(
           20,
-          Math.floor(bodyAreaHeight / Math.max(pageOrders.length, 1)),
+          Math.floor(bodyAreaHeight / MAX_ROWS_PER_PAGE),
         )
 
-        doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
-        doc.setFontSize(TITLE_FONT_SIZE)
-        doc.text('车间生产订单', pageWidth / 2, 16, { align: 'center' })
+        const drawPageHeader = () => {
+          doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
+          doc.setFontSize(TITLE_FONT_SIZE)
+          doc.text('车间生产订单', pageWidth / 2, 16, { align: 'center' })
 
-        doc.setFontSize(META_FONT_SIZE)
-        doc.text(`打印日期: ${printDate}`, pageWidth - 10, 16, {
-          align: 'right',
-        })
+          doc.setFontSize(META_FONT_SIZE)
+          doc.text(`打印日期: ${printDate}`, pageWidth - 10, 16, {
+            align: 'right',
+          })
+        }
 
-        const tableData = pageOrders.map((order) => [
+        const tableData = selectedOrders.map((order) => [
           '',
           formatCellText(order.product_delivery_date),
           formatCellText(order.process_flow),
@@ -237,9 +224,16 @@ export function usePrintWorkshopOrders() {
           body: tableData,
           theme: 'grid',
           startY: TABLE_START_Y,
-          pageBreak: 'avoid',
+          pageBreak: 'auto',
           rowPageBreak: 'avoid',
-          margin: { top: TABLE_START_Y, right: 10, bottom: 12, left: 10 },
+          showHead: 'everyPage',
+          margin: {
+            top: TABLE_START_Y,
+            right: 5,
+            bottom: TABLE_BOTTOM_MARGIN,
+            left: 5,
+          },
+          willDrawPage: drawPageHeader,
           headStyles: {
             fillColor: [255, 255, 255],
             textColor: [0, 0, 0],
@@ -292,7 +286,7 @@ export function usePrintWorkshopOrders() {
               return
             }
 
-            const order = pageOrders[data.row.index]
+            const order = selectedOrders[data.row.index]
             if (!order?.id) {
               return
             }
@@ -310,14 +304,18 @@ export function usePrintWorkshopOrders() {
           },
         })
 
-        doc.setFontSize(FOOTER_FONT_SIZE)
-        doc.text(
-          `第 ${pageIndex + 1} 页 / 共 ${pages.length} 页`,
-          pageWidth - 10,
-          pageHeight - 8,
-          { align: 'right' },
-        )
-      })
+        const totalPages = doc.getNumberOfPages()
+        for (let pageIndex = 1; pageIndex <= totalPages; pageIndex += 1) {
+          doc.setPage(pageIndex)
+          doc.setFontSize(FOOTER_FONT_SIZE)
+          doc.text(
+            `第 ${pageIndex} 页 / 共 ${totalPages} 页`,
+            pageWidth - 10,
+            pageHeight - 8,
+            { align: 'right' },
+          )
+        }
+      }
 
       const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
       const filename = `车间订单_${selectedOrders.length}条_${timestamp}.pdf`
