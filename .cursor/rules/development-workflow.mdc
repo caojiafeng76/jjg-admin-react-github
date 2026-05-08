@@ -1,0 +1,40 @@
+---
+description: 每次会话必须遵循的开发流程
+alwaysApply: true
+---
+
+# 开发流程规范（每次会话必读）
+
+## 任务开始前（强制）
+
+1. **复述目标**：用 1-2 句话复述任务目标、约束和预期结果。
+2. **Sequential Thinking**：调用 `user-serena` MCP 的 `initial_instructions`，明确目标、约束和执行路径。
+3. **Serena MCP**：调用 `user-serena` MCP 做符号级检索和精确定位；若返回 `No active project`，说明已降级并退回常规搜索。
+4. **Skill 选择**：根据任务类型主动加载对应 skill（tanstack-query / supabase-rls-patterns / ant-design / frontend-design 等）。
+5. **判断是否跳过 Spec Workflow**：如果是小风险单文件改动（单组件调整、配置变更、文案修改），可直接做最小化实现，但必须说明为何跳过完整流程。
+6. **建立上下文**：先阅读相关模块、类型定义、服务层和已有相似实现，再决定方案。
+7. **执行计划**：实施前说明涉及文件列表、切入点、验证方式。
+
+## 实施时
+
+- 优先修复根因，保持改动最小化
+- 不顺手重构无关代码
+- 有联动风险时主动补查相关点
+
+## 完成后（强制汇报四项）
+
+1. **完成了什么**
+2. **关键改动**
+3. **验证结果**（前端/TS/React 必须 `bun run build`）
+4. **风险、限制或下一步**
+
+## 禁止事项
+
+- 禁止在未建立上下文时直接修改代码
+- 禁止跳过 proposal/tasks 直接进入大段实现
+- 禁止在未验证的情况下结束任务（除纯文档文本调整外）
+
+## 参考文档
+
+- `.claude/DEVELOPMENT_WORKFLOW.md` — 完整流程规范
+- `AGENTS.md` — 代码风格指南
