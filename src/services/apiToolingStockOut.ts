@@ -1,7 +1,8 @@
 import dayjs from 'dayjs'
 
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import publicSupabase from './publicSupabase'
+import supabase from './supabase'
 
 export type ToolingStockOutStatus = '待审核' | '已审核'
 
@@ -89,12 +90,14 @@ type DynamicSupabaseTable = {
   from: (table: string) => any
 }
 
-function stockOutTable() {
-  return (supabase as unknown as DynamicSupabaseTable).from('tooling_stock_out')
+function stockOutTable(client = supabase as unknown as DynamicSupabaseTable) {
+  return client.from('tooling_stock_out')
 }
 
-function toolingDataTable() {
-  return (supabase as unknown as DynamicSupabaseTable).from('tooling_data')
+function toolingDataTable(
+  client = supabase as unknown as DynamicSupabaseTable,
+) {
+  return client.from('tooling_data')
 }
 
 const TOOLING_STOCK_OUT_SELECT = `
@@ -162,8 +165,11 @@ function normalizeImportRow(
   }
 }
 
-async function getToolingSnapshot(toolingDataId: string) {
-  const { data, error } = await toolingDataTable()
+async function getToolingSnapshot(
+  toolingDataId: string,
+  client = supabase as unknown as DynamicSupabaseTable,
+) {
+  const { data, error } = await toolingDataTable(client)
     .select('id, tool_code, tool_name, tool_spec, material, unit_price')
     .eq('id', toolingDataId)
     .limit(1)
@@ -216,7 +222,24 @@ function extractMachineInfo(
 }
 
 export async function getToolingDataOptions(keyword?: string) {
-  let query = toolingDataTable()
+  return getToolingDataOptionsWithClient(
+    supabase as unknown as DynamicSupabaseTable,
+    keyword,
+  )
+}
+
+export async function getPublicToolingDataOptions(keyword?: string) {
+  return getToolingDataOptionsWithClient(
+    publicSupabase as unknown as DynamicSupabaseTable,
+    keyword,
+  )
+}
+
+async function getToolingDataOptionsWithClient(
+  client: DynamicSupabaseTable,
+  keyword?: string,
+) {
+  let query = toolingDataTable(client)
     .select('id, tool_code, tool_name, tool_spec, material, unit_price')
     .order('tool_code', { ascending: true })
 
@@ -314,6 +337,22 @@ export async function createToolingStockOut(values: ToolingStockOutFormValues) {
   const snapshot = await getToolingSnapshot(payload.tooling_data_id)
 
   const { error } = await stockOutTable().insert(
+    buildStockOutPayload(snapshot, payload),
+  )
+
+  if (error) {
+    throw handleApiError(error, '创建刀具出库失败')
+  }
+}
+
+export async function createPublicToolingStockOut(
+  values: ToolingStockOutFormValues,
+) {
+  const client = publicSupabase as unknown as DynamicSupabaseTable
+  const payload = normalizeFormValues(values)
+  const snapshot = await getToolingSnapshot(payload.tooling_data_id, client)
+
+  const { error } = await stockOutTable(client).insert(
     buildStockOutPayload(snapshot, payload),
   )
 
