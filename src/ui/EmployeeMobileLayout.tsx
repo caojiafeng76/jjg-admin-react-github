@@ -13,8 +13,8 @@ import { useMemo } from 'react'
 import type { ElementType } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { useAuth } from '@/contexts/useAuth'
-import { usePermissionContext } from '@/contexts/PermissionContext'
+import { useAuth } from '@/contexts'
+import { usePermissionContext } from '@/contexts'
 
 const { Content } = Layout
 

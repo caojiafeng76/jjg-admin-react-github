@@ -2,8 +2,8 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useEffect, useState, type ReactNode } from 'react'
 
 import Loading from '@ui/Loading'
-import { useAuth } from '@/contexts/useAuth'
-import { usePermissionContext } from '@/contexts/PermissionContext'
+import { useAuth } from '@/contexts'
+import { usePermissionContext } from '@/contexts'
 import { getDefaultHomeByRole, type AppRole } from '@/config/access'
 import { deriveDefaultHome } from './pageHome'
 

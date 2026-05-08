@@ -1,6 +1,6 @@
 import { isViewerRole } from '@/config/access'
-import { usePermissionContext } from '@/contexts/PermissionContext'
-import { useAuth } from '@/contexts/useAuth'
+import { useAuth } from '@/contexts'
+import { usePermissionContext } from '@/contexts'
 
 export const VIEWER_OPERATION_TIP = '查看员仅可查看数据'
 
