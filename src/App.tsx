@@ -8,8 +8,8 @@ import { RouterProvider } from 'react-router-dom'
 
 import ErrorBoundary from '@ui/ErrorBoundary'
 import { useAppStore } from '@/store'
-import { AuthProvider } from '@/contexts/AuthContext'
-import { PermissionProvider } from '@/contexts/PermissionContext'
+import { AuthProvider } from '@/contexts'
+import { PermissionProvider } from '@/contexts'
 import { router } from '@/routes/router'
 import { createQueryClient } from '@/config/queryClient'
 

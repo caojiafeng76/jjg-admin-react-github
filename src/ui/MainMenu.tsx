@@ -9,8 +9,8 @@ import {
   Square3Stack3DIcon,
 } from '@heroicons/react/16/solid'
 
-import { usePermissionContext } from '@/contexts/PermissionContext'
-import { useAuth } from '@/contexts/useAuth'
+import { usePermissionContext } from '@/contexts'
+import { useAuth } from '@/contexts'
 import { isViewerRole } from '@/config/access'
 
 // ----------------------------------------------------------------

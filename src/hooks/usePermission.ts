@@ -1,5 +1,5 @@
 import type { FieldPermissionState } from '@/types/permission'
-import { usePermissionContext } from '@/contexts/PermissionContext'
+import { usePermissionContext } from '@/contexts'
 
 /** 检查单个权限是否开启 */
 export function usePermission(key: string): boolean {
