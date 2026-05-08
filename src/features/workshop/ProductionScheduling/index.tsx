@@ -35,6 +35,7 @@ import {
   useProductionSchedulingOrders,
   useUpdateProductionSchedulingOrder,
 } from './useProductionScheduling'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 
 const { Text, Title } = Typography
 
@@ -415,9 +416,18 @@ export default function ProductionScheduling() {
     queryFn: getAllEmployees,
     staleTime: 5 * 60 * 1000,
   })
+  const { data: machineOptions = [] } = useMachineEquipmentOptions()
   const employeeMap = useMemo(
     () => new Map(employees.map((e) => [e.id, e.name])),
     [employees],
+  )
+  const machineSelectOptions = useMemo(
+    () =>
+      machineOptions.map((item) => ({
+        value: item.unified_device_no,
+        label: `${item.unified_device_no} | ${item.machine_name}`,
+      })),
+    [machineOptions],
   )
 
   const {
@@ -733,7 +743,15 @@ export default function ProductionScheduling() {
               label="分配设备(ERP编号)"
               className="md:col-span-2"
             >
-              <Input allowClear placeholder="设备编号、运行状态" />
+              <Select
+                allowClear
+                showSearch
+                placeholder="选择机器编号"
+                filterOption={(input, option) =>
+                  String(option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={machineSelectOptions}
+              />
             </Form.Item>
             <Form.Item name="responsible_person_ids" label="负责班组/人员">
               <Select
