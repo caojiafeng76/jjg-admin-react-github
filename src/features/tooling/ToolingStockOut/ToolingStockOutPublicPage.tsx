@@ -15,8 +15,8 @@ import type { ToolingStockOutFormValues } from '@/services/apiToolingStockOut'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import ToolingStockOutForm from './ToolingStockOutForm'
 import {
-  useCreateToolingStockOut,
-  useToolingDataOptions,
+  useCreatePublicToolingStockOut,
+  usePublicToolingDataOptions,
 } from './useToolingStockOut'
 
 const { Paragraph, Title } = Typography
@@ -39,10 +39,10 @@ export default function ToolingStockOutPublicPage() {
   const [submitted, setSubmitted] = useState<SubmissionSnapshot | null>(null)
 
   const { data: toolingOptions = [], isLoading: isToolingOptionsLoading } =
-    useToolingDataOptions()
+    usePublicToolingDataOptions()
   const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
     useMachineEquipmentOptions()
-  const createMutation = useCreateToolingStockOut()
+  const createMutation = useCreatePublicToolingStockOut()
 
   const defaultValues = useMemo<Partial<ToolingStockOutFormValues>>(
     () => ({

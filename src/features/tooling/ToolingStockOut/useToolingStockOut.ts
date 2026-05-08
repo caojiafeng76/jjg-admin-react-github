@@ -4,8 +4,10 @@ import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   batchUpdateToolingStockOutStatus,
+  createPublicToolingStockOut,
   createToolingStockOut,
   deleteToolingStockOut,
+  getPublicToolingDataOptions,
   getToolingDataOptions,
   getToolingStockOutList,
   importToolingStockOut,
@@ -15,6 +17,7 @@ import {
 const TOOLING_STOCK_OUT_KEY = 'tooling-stock-out' as const
 const TOOLING_INVENTORY_KEY = 'tooling-inventory' as const
 const TOOLING_DATA_OPTIONS_KEY = 'tooling-data-options' as const
+const PUBLIC_TOOLING_DATA_OPTIONS_KEY = 'public-tooling-data-options' as const
 
 export function useToolingStockOutList({
   page,
@@ -50,10 +53,24 @@ export function useToolingDataOptions() {
   })
 }
 
+export function usePublicToolingDataOptions() {
+  return useQuery({
+    queryKey: [PUBLIC_TOOLING_DATA_OPTIONS_KEY],
+    queryFn: () => getPublicToolingDataOptions(),
+    ...queryConfig.list,
+  })
+}
+
 export function useCreateToolingStockOut() {
   return useMutationWithInvalidation({
     mutationFn: createToolingStockOut,
     invalidateQueries: [[TOOLING_STOCK_OUT_KEY], [TOOLING_INVENTORY_KEY]],
+  })
+}
+
+export function useCreatePublicToolingStockOut() {
+  return useMutationWithInvalidation({
+    mutationFn: createPublicToolingStockOut,
   })
 }
 
