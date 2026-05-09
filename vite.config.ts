@@ -1,12 +1,16 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
 import { fileURLToPath, URL } from 'node:url'
 
 import mkcert from 'vite-plugin-mkcert'
+import { syneyStoreReportProxy } from './viteSyneyStoreReportProxy'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return {
   server: {
     host: true, // 必须开启，以支持局域网访问
     https: {}, // 开启 HTTPS 模式
@@ -27,7 +31,7 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
   },
-  plugins: [react(), mkcert()],
+  plugins: [react(), mkcert(), syneyStoreReportProxy(env)],
   // Use Lightning CSS for minification to avoid noisy warnings from esbuild
   build: {
     cssMinify: 'lightningcss',
@@ -73,4 +77,5 @@ export default defineConfig({
       },
     },
   },
+  }
 })

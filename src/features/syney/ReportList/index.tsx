@@ -1,7 +1,7 @@
-import { message, Modal, App } from 'antd'
+import { App, Input, message, Modal } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 
-import { ISyneyStoreReportFormRef } from '@/types'
+import { ISyneyItem, ISyneyStoreReportFormRef } from '@/types'
 import { useDeleteReport } from '@syney/ReportList/useDeleteReport'
 
 import AddButton from '@ui/AddButton'
@@ -18,11 +18,19 @@ import { useReports } from './useReports'
 import ExportAsExcelButton from './ExportAsExcelButton'
 import { useGenerateSyneyStoreReportPDF } from './useGenerateSyneyStoreReportPDF'
 import ExportPDFButton from './ExportPDFButton'
+import { useFetchSyneyStoreReport } from './useFetchSyneyStoreReport'
+import { useSyneySpecs } from '../SpecList/useSyneySpecs'
+import { useCreateReport } from './useCreateReport'
+import {
+  buildSyneyStoreReportPayload,
+  SyneyStoreReportPayload,
+} from '@utils/syneyStoreReport'
 
 export default function ReportList() {
   const { message: messageApi } = App.useApp()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [specsLoading, setSpecsLoading] = useState(false)
+  const [storeInNo, setStoreInNo] = useState('')
 
   const {
     tableSelectedKeys,
@@ -30,6 +38,11 @@ export default function ReportList() {
     isLoading: isCreating,
   } = useAppStore()
   const { print, isLoading: isPrinting } = useGenerateSyneyStoreReportPDF()
+  const { syneySpecs, isLoading: importSpecsLoading } = useSyneySpecs({
+    isAll: true,
+  })
+  const { fetchSyneyStoreReport, isFetching } = useFetchSyneyStoreReport()
+  const { createReport, isCreating: isCreatingFromScm } = useCreateReport()
 
   const reportFormRef = useRef<ISyneyStoreReportFormRef>(null)
 
@@ -64,6 +77,58 @@ export default function ReportList() {
       onError: (err) => {
         console.error(err)
         messageApi.error('删除对账单失败')
+      },
+    })
+  }
+
+  function handleFetchStoreReport(value: string) {
+    const trimmedStoreInNo = value.trim()
+
+    if (!trimmedStoreInNo) {
+      messageApi.warning('请输入入库单号')
+      return
+    }
+
+    if (importSpecsLoading) {
+      messageApi.loading('规格数据加载中，请稍后再试', 1)
+      return
+    }
+
+    fetchSyneyStoreReport(trimmedStoreInNo, {
+      onSuccess: (items) => {
+        if (items.length === 0) {
+          messageApi.warning('未获取到该入库单数据')
+          return
+        }
+
+        let payload: SyneyStoreReportPayload
+
+        try {
+          payload = buildSyneyStoreReportPayload(
+            items as ISyneyItem[],
+            syneySpecs || [],
+          )
+        } catch (error) {
+          messageApi.error(
+            error instanceof Error ? error.message : '入库单数据解析失败',
+          )
+          return
+        }
+
+        createReport(payload, {
+          onSuccess: () => {
+            messageApi.success('入库单生成成功')
+            setStoreInNo('')
+          },
+          onError: (err) => {
+            console.error(err)
+            messageApi.error('入库单生成失败')
+          },
+        })
+      },
+      onError: (err) => {
+        console.error(err)
+        messageApi.error(err instanceof Error ? err.message : '西尼入库单获取失败')
       },
     })
   }
@@ -109,6 +174,16 @@ export default function ReportList() {
 
           <ConfirmButton />
           <UnConfirmedButton />
+          <Input.Search
+            allowClear
+            className="max-w-[260px]"
+            enterButton="获取"
+            loading={isFetching || isCreatingFromScm}
+            placeholder="输入西尼入库单号"
+            value={storeInNo}
+            onChange={(event) => setStoreInNo(event.target.value)}
+            onSearch={handleFetchStoreReport}
+          />
         </div>
 
         <div className="flex items-center gap-4 filter">

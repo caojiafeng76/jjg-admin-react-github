@@ -1,6 +1,147 @@
 import { ISyneyItem } from './types'
+import { FunctionRegion } from '@supabase/supabase-js'
 import supabase from '@services/supabase'
 import { handleApiError } from '@utils/errorHandler'
+
+const FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS = 45000
+const SYNEY_STORE_REPORT_API_URL = import.meta.env
+  .VITE_SYNEY_STORE_REPORT_API_URL as string | undefined
+const SYNEY_STORE_REPORT_FUNCTION_REGION = import.meta.env
+  .VITE_SUPABASE_FUNCTION_REGION as string | undefined
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutMessage: string,
+) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs)
+  })
+
+  try {
+    return await Promise.race([promise, timeoutPromise])
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+  }
+}
+
+async function getFunctionErrorMessage(error: unknown) {
+  if (!error || typeof error !== 'object' || !('context' in error)) {
+    return null
+  }
+
+  const context = (error as { context?: Response }).context
+  if (!context) {
+    return null
+  }
+
+  try {
+    const body = (await context.clone().json()) as { error?: string }
+    return body.error || null
+  } catch {
+    return null
+  }
+}
+
+function getFunctionRegion() {
+  const region = SYNEY_STORE_REPORT_FUNCTION_REGION?.trim()
+  if (!region) {
+    return undefined
+  }
+
+  if (!Object.values(FunctionRegion).includes(region as FunctionRegion)) {
+    throw new Error(`Supabase Edge Function 区域配置不正确：${region}`)
+  }
+
+  return region as FunctionRegion
+}
+
+async function invokeSyneyStoreReportFunction(storeInNo: string) {
+  const region = getFunctionRegion()
+
+  const { data, error } = await withTimeout(
+    supabase.functions.invoke<{
+      storeInNo: string
+      total: number
+      items: ISyneyItem[]
+      error?: string
+    }>('fetch-syney-store-report', {
+      body: { storeInNo },
+      ...(region ? { region } : {}),
+    }),
+    FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
+    '西尼入库单获取超时，请稍后重试或检查 SCM 网络',
+  )
+
+  if (error) {
+    const functionErrorMessage = await getFunctionErrorMessage(error)
+    if (functionErrorMessage) {
+      throw new Error(functionErrorMessage)
+    }
+
+    throw handleApiError(error, '西尼入库单获取失败')
+  }
+
+  if (!data) {
+    throw new Error('西尼入库单获取失败')
+  }
+
+  if (data.error) {
+    throw new Error(data.error)
+  }
+
+  return data.items
+}
+
+export async function fetchSyneyStoreReportFromScm(storeInNo: string) {
+  const configuredProxyUrl = SYNEY_STORE_REPORT_API_URL?.trim()
+  const proxyUrl =
+    configuredProxyUrl || (import.meta.env.DEV ? '/api/syney-store-report' : '')
+
+  if (!proxyUrl) {
+    return invokeSyneyStoreReportFunction(storeInNo)
+  }
+
+  const response = await withTimeout(
+    fetch(proxyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ storeInNo }),
+    }),
+    FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
+    '西尼入库单获取超时，请稍后重试或检查 SCM 网络',
+  )
+
+  if (response.status === 404 && configuredProxyUrl) {
+    throw new Error('西尼入库单代理接口不存在，请检查代理地址配置')
+  }
+
+  if (response.status !== 404) {
+    const contentType = response.headers.get('content-type') || ''
+
+    if (!contentType.includes('application/json')) {
+      throw new Error('西尼入库单代理接口未返回 JSON，请检查代理地址配置')
+    }
+
+    const proxyData = (await response.json()) as {
+      items?: ISyneyItem[]
+      error?: string
+    }
+
+    if (!response.ok || proxyData.error) {
+      throw new Error(proxyData.error || '西尼入库单获取失败')
+    }
+
+    return proxyData.items || []
+  }
+
+  return invokeSyneyStoreReportFunction(storeInNo)
+}
 
 export async function getSyneyStoreReports({
   status,
