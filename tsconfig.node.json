@@ -19,5 +19,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "api/**/*.ts",
+    "syneyStoreReportServer.ts",
+    "vite.config.ts",
+    "viteSyneyStoreReportProxy.ts"
+  ]
 }
