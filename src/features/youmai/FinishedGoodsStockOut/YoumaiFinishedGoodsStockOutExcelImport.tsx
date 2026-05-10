@@ -7,13 +7,18 @@ import {
   Modal,
   Table,
   type TableColumnsType,
+  Tooltip,
   Upload,
 } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
-import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
+import {
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
+} from '@heroicons/react/16/solid'
 
 import type { YoumaiFinishedGoodsStockOutImportRow } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import { fetchYoumaiPurchaseOrder } from '@/services/apiYoumaiPurchaseOrder'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import ImportButton from '@/ui/ImportButton'
 import { parseYoumaiFinishedGoodsStockOutExcel } from '@/utils/youmaiFinishedGoodsStockOutExcel'
 
@@ -73,6 +78,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
   isImporting,
 }: Props) {
   const { message } = App.useApp()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [purchaseOrderNo, setPurchaseOrderNo] = useState('')
@@ -82,6 +88,9 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [parsing, setParsing] = useState(false)
   const [fetchingPurchaseOrder, setFetchingPurchaseOrder] = useState(false)
+  const [modalMode, setModalMode] = useState<'purchaseOrder' | 'excel'>(
+    'purchaseOrder',
+  )
 
   const handleBeforeUpload = async (file: File) => {
     const isExcel =
@@ -116,8 +125,9 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
     return false
   }
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (mode: 'purchaseOrder' | 'excel') => {
     setModalOpen(true)
+    setModalMode(mode)
     setPurchaseOrderNo('')
     setParsedRows([])
     setParseErrors([])
@@ -171,12 +181,34 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
     _idx: index,
   }))
 
+  const fetchButton = (
+    <Button
+      type="text"
+      icon={<ArrowDownTrayIcon className="size-4 text-cyan-500/80!" />}
+      onClick={() => handleOpenModal('purchaseOrder')}
+      disabled={viewerDenied}
+    >
+      获取采购订单
+    </Button>
+  )
+
   return (
     <>
-      <ImportButton onClick={handleOpenModal}>导入采购订单</ImportButton>
+      {viewerDenied ? (
+        <Tooltip title={viewerOperationTip}>{fetchButton}</Tooltip>
+      ) : (
+        fetchButton
+      )}
+      <ImportButton onClick={() => handleOpenModal('excel')}>
+        导入Excel
+      </ImportButton>
 
       <Modal
-        title="导入优迈成品出库"
+        title={
+          modalMode === 'purchaseOrder'
+            ? '获取优迈采购订单'
+            : '导入优迈成品出库'
+        }
         open={modalOpen}
         onCancel={handleCancel}
         width={1080}
@@ -196,48 +228,61 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
         ]}
       >
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Input
-              className="max-w-sm"
-              allowClear
-              placeholder="输入采购订单号"
-              value={purchaseOrderNo}
-              onChange={(event) => setPurchaseOrderNo(event.target.value)}
-              onPressEnter={handleFetchPurchaseOrder}
+          {modalMode === 'purchaseOrder' && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                className="max-w-sm"
+                allowClear
+                autoFocus
+                placeholder="输入采购订单号"
+                value={purchaseOrderNo}
+                onChange={(event) => setPurchaseOrderNo(event.target.value)}
+                onPressEnter={handleFetchPurchaseOrder}
+              />
+              <Button
+                type="primary"
+                loading={fetchingPurchaseOrder}
+                onClick={handleFetchPurchaseOrder}
+              >
+                获取采购订单
+              </Button>
+            </div>
+          )}
+
+          {modalMode === 'excel' && (
+            <Upload
+              fileList={fileList}
+              beforeUpload={handleBeforeUpload}
+              onRemove={() => {
+                setFileList([])
+                setParsedRows([])
+                setParseErrors([])
+              }}
+              maxCount={1}
+              accept=".xlsx,.xls"
+            >
+              <Button
+                loading={parsing}
+                icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+              >
+                {parsing ? '解析中...' : '选择采购订单 Excel'}
+              </Button>
+            </Upload>
+          )}
+
+          {modalMode === 'purchaseOrder' ? (
+            <Alert
+              type="info"
+              showIcon
+              title="输入优迈采购订单号后，系统会自动获取订单明细；确认导入时按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
             />
-            <Button
-              type="primary"
-              loading={fetchingPurchaseOrder}
-              onClick={handleFetchPurchaseOrder}
-            >
-              获取采购订单
-            </Button>
-          </div>
-
-          <Upload
-            fileList={fileList}
-            beforeUpload={handleBeforeUpload}
-            onRemove={() => {
-              setFileList([])
-              setParsedRows([])
-              setParseErrors([])
-            }}
-            maxCount={1}
-            accept=".xlsx,.xls"
-          >
-            <Button
-              loading={parsing}
-              icon={<ArrowUpTrayIcon className="h-4 w-4" />}
-            >
-              {parsing ? '解析中...' : '选择采购订单 Excel'}
-            </Button>
-          </Upload>
-
-          <Alert
-            type="info"
-            showIcon
-            title="支持输入优迈采购订单号自动获取，或直接导入采购订单导出 Excel。系统会按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
-          />
+          ) : (
+            <Alert
+              type="info"
+              showIcon
+              title="支持直接导入采购订单导出 Excel。系统会按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
+            />
+          )}
 
           {parseErrors.length > 0 && (
             <Alert
