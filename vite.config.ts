@@ -5,6 +5,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 import mkcert from 'vite-plugin-mkcert'
 import { syneyStoreReportProxy } from './viteSyneyStoreReportProxy'
+import { youmaiPurchaseOrderProxy } from './viteYoumaiPurchaseOrderProxy'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -31,7 +32,12 @@ export default defineConfig(({ mode }) => {
     dedupe: ['react', 'react-dom'],
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
   },
-  plugins: [react(), mkcert(), syneyStoreReportProxy(env)],
+  plugins: [
+    react(),
+    mkcert(),
+    syneyStoreReportProxy(env),
+    youmaiPurchaseOrderProxy(env),
+  ],
   // Use Lightning CSS for minification to avoid noisy warnings from esbuild
   build: {
     cssMinify: 'lightningcss',
