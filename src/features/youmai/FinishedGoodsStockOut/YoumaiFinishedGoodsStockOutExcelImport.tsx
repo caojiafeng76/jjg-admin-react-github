@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import {
   Alert,
+  App,
   Button,
+  Input,
   Modal,
   Table,
   type TableColumnsType,
@@ -11,6 +13,7 @@ import type { UploadFile } from 'antd/es/upload/interface'
 import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 
 import type { YoumaiFinishedGoodsStockOutImportRow } from '@/services/apiYoumaiFinishedGoodsStockOut'
+import { fetchYoumaiPurchaseOrder } from '@/services/apiYoumaiPurchaseOrder'
 import ImportButton from '@/ui/ImportButton'
 import { parseYoumaiFinishedGoodsStockOutExcel } from '@/utils/youmaiFinishedGoodsStockOutExcel'
 
@@ -69,13 +72,16 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
   onImport,
   isImporting,
 }: Props) {
+  const { message } = App.useApp()
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
+  const [purchaseOrderNo, setPurchaseOrderNo] = useState('')
   const [parsedRows, setParsedRows] = useState<
     YoumaiFinishedGoodsStockOutImportRow[]
   >([])
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [parsing, setParsing] = useState(false)
+  const [fetchingPurchaseOrder, setFetchingPurchaseOrder] = useState(false)
 
   const handleBeforeUpload = async (file: File) => {
     const isExcel =
@@ -112,6 +118,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
 
   const handleOpenModal = () => {
     setModalOpen(true)
+    setPurchaseOrderNo('')
     setParsedRows([])
     setParseErrors([])
     setFileList([])
@@ -119,9 +126,35 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
 
   const handleCancel = () => {
     setModalOpen(false)
+    setPurchaseOrderNo('')
     setParsedRows([])
     setParseErrors([])
     setFileList([])
+  }
+
+  const handleFetchPurchaseOrder = async () => {
+    const normalizedPurchaseOrderNo = purchaseOrderNo.trim()
+
+    if (!normalizedPurchaseOrderNo) {
+      message.warning('请输入采购订单号')
+      return
+    }
+
+    setFetchingPurchaseOrder(true)
+    try {
+      const rows = await fetchYoumaiPurchaseOrder(normalizedPurchaseOrderNo)
+      setParsedRows(rows)
+      setParseErrors([])
+      setFileList([])
+      message.success(`已获取 ${rows.length} 条采购订单明细`)
+    } catch (error) {
+      setParsedRows([])
+      setParseErrors([
+        error instanceof Error ? error.message : '优迈采购订单获取失败',
+      ])
+    } finally {
+      setFetchingPurchaseOrder(false)
+    }
   }
 
   const handleConfirmImport = async () => {
@@ -163,6 +196,24 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
         ]}
       >
         <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              className="max-w-sm"
+              allowClear
+              placeholder="输入采购订单号"
+              value={purchaseOrderNo}
+              onChange={(event) => setPurchaseOrderNo(event.target.value)}
+              onPressEnter={handleFetchPurchaseOrder}
+            />
+            <Button
+              type="primary"
+              loading={fetchingPurchaseOrder}
+              onClick={handleFetchPurchaseOrder}
+            >
+              获取采购订单
+            </Button>
+          </div>
+
           <Upload
             fileList={fileList}
             beforeUpload={handleBeforeUpload}
@@ -185,7 +236,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
           <Alert
             type="info"
             showIcon
-            title="支持直接导入采购订单导出 Excel。必须包含采购订单号、行号、物料编码、订购数量、交货日期等列；系统会按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
+            title="支持输入优迈采购订单号自动获取，或直接导入采购订单导出 Excel。系统会按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
           />
 
           {parseErrors.length > 0 && (
