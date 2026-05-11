@@ -1,28 +1,14 @@
 import { useEffect, useState, type CSSProperties } from 'react'
-import { useLocation, useNavigate, type Location } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Skeleton, Tabs, theme } from 'antd'
 import type { TabsProps } from 'antd'
 
 import { getDefaultHomeByRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import { getRouteLabel } from '@/routes/routeLabels'
+import { getLocationKey, type PageLocation, type PageTab } from './pageTabsUtils'
 
-interface PageTab {
-  key: string
-  href: string
-  label: string
-  closable: boolean
-}
-
-function getLocationKey(location: Location, homeKey: string | null) {
-  if (location.pathname === '/' && homeKey) {
-    return homeKey
-  }
-
-  return location.pathname
-}
-
-function getLocationHref(location: Location, key: string) {
+function getLocationHref(location: PageLocation, key: string) {
   if (location.pathname === '/') {
     return `${key}${location.search}${location.hash}`
   }
@@ -74,7 +60,11 @@ const tabLabelStyle: CSSProperties = {
   whiteSpace: 'nowrap',
 }
 
-export default function PageTabs() {
+interface PageTabsProps {
+  onTabsChange?: (tabs: PageTab[]) => void
+}
+
+export default function PageTabs({ onTabsChange }: PageTabsProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const { role, loading: authLoading } = useAuth()
@@ -115,6 +105,10 @@ export default function PageTabs() {
       return areTabsEqual(currentTabs, nextTabs) ? currentTabs : nextTabs
     })
   }, [activeHref, activeKey, homeKey])
+
+  useEffect(() => {
+    onTabsChange?.(tabs)
+  }, [onTabsChange, tabs])
 
   function handleChange(nextActiveKey: string) {
     const targetTab = tabs.find((tab) => tab.key === nextActiveKey)
