@@ -117,10 +117,19 @@ export default function PageTabs() {
   }, [activeHref, activeKey, homeKey])
 
   function handleChange(nextActiveKey: string) {
-    if (nextActiveKey !== activeKey) {
-      const targetTab = tabs.find((tab) => tab.key === nextActiveKey)
-      navigate(targetTab?.href || nextActiveKey)
-    }
+    const targetTab = tabs.find((tab) => tab.key === nextActiveKey)
+    const targetHref = targetTab?.href || nextActiveKey
+
+    if (nextActiveKey === activeKey || targetHref === activeHref) return
+
+    navigate(targetHref)
+  }
+
+  const handleTabClick: TabsProps['onTabClick'] = (nextActiveKey, event) => {
+    if (nextActiveKey !== activeKey) return
+
+    event.preventDefault()
+    event.stopPropagation()
   }
 
   function handleRemove(targetKey: string) {
@@ -193,6 +202,7 @@ export default function PageTabs() {
         type="editable-card"
         onChange={handleChange}
         onEdit={handleEdit}
+        onTabClick={handleTabClick}
       />
     </div>
   )
