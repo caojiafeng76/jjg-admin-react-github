@@ -1,13 +1,21 @@
-import { useEffect, useState, useRef } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { theme, Layout, message, Spin } from 'antd'
-import { Outlet, useLocation } from 'react-router-dom'
+import { useLocation, useOutlet } from 'react-router-dom'
 
 import MainMenu from '@ui/MainMenu'
 import AppHeader from '@ui/AppHeader'
 import AppLogo from './AppLogo'
 import EmployeeMobileLayout from './EmployeeMobileLayout'
 import PageTabs from './PageTabs'
-import { isEmployeeSideRole } from '@/config/access'
+import { getLocationKey, type PageTab } from './pageTabsUtils'
+import { getDefaultHomeByRole, isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import { translateErrorMessage } from '@/utils/errorHandler'
 
@@ -15,36 +23,86 @@ const { Content, Sider } = Layout
 
 export default function AppLayout() {
   const { error, clearError, role } = useAuth()
+  const outlet = useOutlet()
   const [messageApi, contextHolder] = message.useMessage()
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const [isNavigating, setIsNavigating] = useState(false)
+  const [pageTabs, setPageTabs] = useState<PageTab[]>([])
+  const [cachedOutlets, setCachedOutlets] = useState<Record<string, ReactNode>>(
+    {},
+  )
   const prevPathnameRef = useRef(location.pathname)
+  const cachedOutletsRef = useRef(cachedOutlets)
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
+
+  const homeKey = role ? getDefaultHomeByRole(role) : null
+  const activeKey = getLocationKey(location, homeKey)
+  const outletEntries = useMemo(() => {
+    const visibleOutlets =
+      outlet && !cachedOutlets[activeKey]
+        ? { ...cachedOutlets, [activeKey]: outlet }
+        : cachedOutlets
+
+    return Object.entries(visibleOutlets)
+  }, [activeKey, cachedOutlets, outlet])
 
   function onToggleCollapse() {
     setCollapsed(!collapsed)
   }
 
-  // 检测路由变化，显示导航 loading
+  const handleTabsChange = useCallback((nextTabs: PageTab[]) => {
+    setPageTabs(nextTabs)
+  }, [])
+
+  useEffect(() => {
+    cachedOutletsRef.current = cachedOutlets
+  }, [cachedOutlets])
+
+  useEffect(() => {
+    if (!outlet) return
+
+    setCachedOutlets((currentOutlets) => {
+      if (currentOutlets[activeKey]) return currentOutlets
+
+      return {
+        ...currentOutlets,
+        [activeKey]: outlet,
+      }
+    })
+  }, [activeKey, outlet])
+
+  useEffect(() => {
+    const availableKeys = new Set(pageTabs.map((tab) => tab.key))
+    availableKeys.add(activeKey)
+
+    setCachedOutlets((currentOutlets) => {
+      const nextOutlets = Object.fromEntries(
+        Object.entries(currentOutlets).filter(([key]) => availableKeys.has(key)),
+      )
+
+      return Object.keys(nextOutlets).length === Object.keys(currentOutlets).length
+        ? currentOutlets
+        : nextOutlets
+    })
+  }, [activeKey, pageTabs])
+
   useEffect(() => {
     if (prevPathnameRef.current !== location.pathname) {
-      setIsNavigating(true)
+      const nextActiveKey = getLocationKey(location, homeKey)
+      setIsNavigating(!cachedOutletsRef.current[nextActiveKey])
       prevPathnameRef.current = location.pathname
 
-      // 短暂延迟后隐藏 loading，给 Suspense 和页面组件时间显示其 loading 状态
-      // 这个延迟确保用户能看到切换反馈，但不会太长影响体验
       const timer = setTimeout(() => {
         setIsNavigating(false)
       }, 150)
 
       return () => clearTimeout(timer)
     }
-  }, [location.pathname])
+  }, [homeKey, location])
 
-  // 全局监听认证错误，使用 Antd message 顶部提示
   useEffect(() => {
     if (!error) return
 
@@ -78,7 +136,7 @@ export default function AppLayout() {
             collapsed={collapsed}
             onToggleCollapse={onToggleCollapse}
           />
-          <PageTabs />
+          <PageTabs onTabsChange={handleTabsChange} />
           <Content
             className="flex flex-col overflow-hidden"
             style={{
@@ -109,7 +167,15 @@ export default function AppLayout() {
                 <Spin size="large" tip="切换中..." />
               </div>
             )}
-            <Outlet />
+            {outletEntries.map(([key, cachedOutlet]) => (
+              <div
+                key={key}
+                className="min-h-0 flex-1 flex-col overflow-hidden"
+                style={{ display: key === activeKey ? 'flex' : 'none' }}
+              >
+                {cachedOutlet}
+              </div>
+            ))}
           </Content>
         </Layout>
       </Layout>
