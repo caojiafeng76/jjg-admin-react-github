@@ -1,1 +1,1 @@
-{"root":["./api/syney-store-report.ts","./api/youmai-purchase-order.ts","./syneystorereportserver.ts","./vite.config.ts","./vitesyneystorereportproxy.ts"],"version":"6.0.2"}
+{"root":["./api/syney-store-report.ts","./api/youmai-purchase-order.ts","./syneystorereportserver.ts","./vite.config.ts","./vitesyneystorereportproxy.ts"],"version":"6.0.3"}

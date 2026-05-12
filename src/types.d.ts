@@ -13,7 +13,6 @@ interface ISyneySpec {
 }
 
 interface ISyneyItem {
-  [key: string]: string | number | boolean | null
   created_at?: string
   id?: number
   No: string | null
