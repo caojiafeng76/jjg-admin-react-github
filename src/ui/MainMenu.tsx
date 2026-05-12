@@ -315,25 +315,6 @@ const allMenuItems: MenuItemDef[] = [
     permission: 'nav:access-management',
     hiddenForViewer: true,
   },
-  // 员工/组长工作台（无独立 nav 权限，靠子项权限决定显示）
-  {
-    key: 'employee-workspace',
-    label: '员工工作台',
-    icon: <Square3Stack3DIcon className="size-4" />,
-    hiddenForViewer: true,
-    children: [
-      {
-        key: 'production-order',
-        label: '我的工单',
-        permission: 'page:production-order',
-      },
-      {
-        key: 'production-daily-report',
-        label: '我的日报',
-        permission: 'page:production-daily-report',
-      },
-    ],
-  },
 ]
 
 // ----------------------------------------------------------------

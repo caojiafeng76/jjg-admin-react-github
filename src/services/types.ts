@@ -17,12 +17,14 @@ export interface ISyneySpec {
  * 订单明细实体类型
  */
 export interface ISyneyItem {
-  // allow boolean flags (e.g., ParamSpecInferred) from form values
-  [key: string]: string | number | boolean | null | undefined
   created_at?: string
   id?: number
   No: string | null
   ParamSpec: string | null
+  /**
+   * 标记参数规格是否为系统根据备注推测的结果
+   */
+  ParamSpecInferred?: boolean | null
   PartName: string | null
   PartName2?: string | null
   PartNo: string | null

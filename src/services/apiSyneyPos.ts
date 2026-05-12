@@ -354,25 +354,27 @@ export async function createPo({
         // 记录成功创建的订单ID
         createdPoIds.push(poRepo.id)
 
-        const poItems = items?.map((item) => ({
+        if (!items || items.length === 0) return
+
+        const poItems = items.map((item) => ({
           No: item.No,
           PartNo: item.PartNo,
           PartName: item.PartName,
-          PartName2: item.PartName2,
+          PartName2: item.PartName2 ?? null,
           Spec: item.Spec,
           ParamSpec: item.ParamSpec,
           Unit: item.Unit,
           Qty: item.Qty,
           SONo: item.SONo,
-          PartCode: item.PartCode,
-          PartModel: item.PartModel,
+          PartCode: item.PartCode ?? null,
+          PartModel: item.PartModel ?? null,
           Remark: item.Remark,
           PoId: poRepo.id,
         }))
 
         const { error: itemsError } = await supabase
           .from('syney-po-items')
-          .insert(poItems as ISyneyItem[])
+          .insert(poItems)
 
         if (itemsError) {
           throw handleApiError(itemsError, '订单明细创建失败')
