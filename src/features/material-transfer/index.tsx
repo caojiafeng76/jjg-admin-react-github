@@ -55,7 +55,7 @@ export default function MaterialTransferPage() {
   const fixedEmployeeName = fixedEmployee?.name
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
-  const pageSize = Number(searchParamsURL.get('pageSize')) || 10
+  const pageSize = Number(searchParamsURL.get('pageSize')) || 50
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchFilters, setSearchFilters] = useState<MaterialTransferFilters>(
@@ -83,7 +83,7 @@ export default function MaterialTransferPage() {
   const batchUpdateMutation = useBatchUpdateMaterialTransfers()
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
-    targetRowCount: 10,
+    targetRowCount: 50,
   })
 
   const selectedCount = selectedRowKeys.length
@@ -499,7 +499,7 @@ export default function MaterialTransferPage() {
                 />
               </div>
               <div ref={paginationRef} className="flex shrink-0 justify-end">
-                <AppPagination total={data?.total || 0} />
+                <AppPagination total={data?.total || 0} defaultPageSize={50} />
               </div>
             </div>
           </Splitter.Panel>
@@ -531,7 +531,7 @@ export default function MaterialTransferPage() {
             />
           </div>
           <div ref={paginationRef} className="flex justify-center pb-1">
-            <AppPagination total={data?.total || 0} />
+            <AppPagination total={data?.total || 0} defaultPageSize={50} />
           </div>
         </>
       )}
