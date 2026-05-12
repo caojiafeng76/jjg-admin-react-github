@@ -55,7 +55,7 @@ export default function MaterialTransferPage() {
   const fixedEmployeeName = fixedEmployee?.name
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
-  const pageSize = Number(searchParamsURL.get('pageSize')) || 50
+  const pageSize = Number(searchParamsURL.get('pageSize')) || 10
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchFilters, setSearchFilters] = useState<MaterialTransferFilters>(
