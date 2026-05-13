@@ -20,11 +20,13 @@ const TABLE_HEADERS = [
   '出库数量',
   '重量(KG)',
   '最终库存',
+  '计划数量',
+  '加工数量',
 ] as const
 
-const COLUMN_WIDTHS = [4, 12, 26, 6, 18, 16, 10, 10, 10, 12, 12]
+const COLUMN_WIDTHS = [4, 12, 26, 6, 18, 16, 10, 10, 10, 12, 12, 10, 10]
 const BORDER_COLOR = '000000'
-const HEADER_FILL = 'F2F2F2'
+const HEADER_FILL = 'FFFFFF'
 
 function colLetter(index: number) {
   let letter = ''
@@ -91,6 +93,8 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
       item.final_stock === null || item.final_stock === undefined
         ? '-'
         : Number(formatNumber(item.final_stock)),
+      '',
+      '',
     ]
   })
 
