@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FormInstance, message, Modal } from 'antd'
-import { format } from 'date-fns'
 import dayjs from 'dayjs'
 import { TransformedOrderData } from '@utils/excelUtils'
 
@@ -124,7 +123,7 @@ export default function PoList() {
 
       try {
         const No = values.No
-        values.EndDate = format(values.EndDate?.toString() || '', 'yyyy-MM-dd')
+        values.EndDate = dayjs(values.EndDate?.toString() || '').format('YYYY-MM-DD')
 
         if (isEdit) {
           updatePos(

@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import { message } from 'antd'
 import { useState } from 'react'
 
@@ -150,7 +150,7 @@ export function usePrintEnglish(
 
               drawBoldText(doc, `${item.SONo}`, 53, 11)
               drawBoldText(doc, labelInfo.partModel, 58, 16)
-              drawBoldText(doc, `${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
+              drawBoldText(doc, `${dayjs(EndDate).format('YYYY-MM-DD')}`, 58, 21)
 
               pageCount++
               if (pageCount % 10 === 0) {
@@ -178,7 +178,7 @@ export function usePrintEnglish(
         )
         drawBoldText(doc, '1', 27, 21)
         drawBoldText(doc, `${SONo}`, 53, 11)
-        drawBoldText(doc, `${format(EndDate, 'yyyy-MM-dd')}`, 58, 21)
+        drawBoldText(doc, `${dayjs(EndDate).format('YYYY-MM-DD')}`, 58, 21)
 
         pageCount++
         if (pageCount % 10 === 0) {

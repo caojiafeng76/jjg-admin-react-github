@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { memo, useMemo, useState } from 'react'
 import type { CSSProperties, TdHTMLAttributes, ThHTMLAttributes } from 'react'
 import { Button, Spin, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
@@ -225,7 +225,7 @@ interface Props {
   onSelectionChange: (keys: string[]) => void
 }
 
-export default function VillaLiftOrderTable({
+function VillaLiftOrderTable({
   loading,
   data,
   page,
@@ -555,3 +555,5 @@ export default function VillaLiftOrderTable({
     />
   )
 }
+
+export default memo(VillaLiftOrderTable)

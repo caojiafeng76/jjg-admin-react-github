@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Table, type TableColumnsType } from 'antd'
 
 import type { LaborProtectionRequisition } from '@/services/apiLaborProtectionRequisitions'
@@ -14,7 +14,7 @@ interface Props {
   rowHeight?: number
 }
 
-export default function LaborProtectionRequisitionTable({
+function LaborProtectionRequisitionTable({
   loading,
   data,
   selectedRowKeys,
@@ -119,3 +119,5 @@ export default function LaborProtectionRequisitionTable({
     />
   )
 }
+
+export default memo(LaborProtectionRequisitionTable)

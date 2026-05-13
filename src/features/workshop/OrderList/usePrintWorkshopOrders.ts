@@ -1,7 +1,7 @@
 import { createElement, useState } from 'react'
 import { App } from 'antd'
 import autoTable from 'jspdf-autotable'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import QRCodeImport from 'react-qr-code'
 import { initializePDF, printPDF } from '@/utils/pdfUtils'
@@ -167,7 +167,7 @@ export function usePrintWorkshopOrders() {
       const doc = await initializePDF('l')
       doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
 
-      const printDate = format(new Date(), 'yyyy-MM-dd HH:mm')
+      const printDate = dayjs(new Date()).format('YYYY-MM-DD HH:mm')
       const qrImages = new Map<string, string>()
 
       await Promise.all(
@@ -317,7 +317,7 @@ export function usePrintWorkshopOrders() {
         }
       }
 
-      const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
+      const timestamp = dayjs(new Date()).format('YYYY-MM-DD_HH-mm-ss')
       const filename = `车间订单_${selectedOrders.length}条_${timestamp}.pdf`
 
       const printed = printPDF(doc, filename, printWindow)

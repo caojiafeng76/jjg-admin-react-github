@@ -1,6 +1,6 @@
-import { Key } from 'react'
+import { Key, memo } from 'react'
 import { Table, TableColumnsType, TableProps } from 'antd'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import { Link } from 'react-router-dom'
 
 import { ISyneyStoreReport } from '@/types'
@@ -17,7 +17,7 @@ const columns: TableColumnsType<ISyneyStoreReport> = [
   {
     title: '对账日期',
     dataIndex: 'created_at',
-    render: (text: string) => format(new Date(text), 'yyyy-MM-dd'),
+    render: (text: string) => dayjs(new Date(text)).format('YYYY-MM-DD'),
   },
   {
     title: '对账状态',
@@ -47,7 +47,7 @@ const columns: TableColumnsType<ISyneyStoreReport> = [
     render: (text: number) => formatNumber(text),
   },
 ]
-export default function ReportTable() {
+function ReportTable() {
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
   const { isLoading, reports } = useReports()
@@ -92,3 +92,5 @@ export default function ReportTable() {
     />
   )
 }
+
+export default memo(ReportTable)

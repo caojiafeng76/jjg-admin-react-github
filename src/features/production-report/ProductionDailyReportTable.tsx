@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Table, type TableColumnsType, type TableProps } from 'antd'
 
 import type { ProductionDailyReportRow } from '@/services/apiProductionDailyReport'
@@ -28,7 +28,7 @@ function renderNumber(value: number | null | undefined, digits = 0) {
   return value.toFixed(digits)
 }
 
-export default function ProductionDailyReportTable({
+function ProductionDailyReportTable({
   loading,
   data,
   page,
@@ -293,3 +293,5 @@ export default function ProductionDailyReportTable({
     />
   )
 }
+
+export default memo(ProductionDailyReportTable)

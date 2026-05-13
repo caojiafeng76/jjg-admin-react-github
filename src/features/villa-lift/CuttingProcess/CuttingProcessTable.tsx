@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Button, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType } from 'antd'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
@@ -24,7 +24,7 @@ interface CuttingProcessTableProps {
 // Component
 // ----------------------------------------------------------------
 
-export default function CuttingProcessTable({
+function CuttingProcessTable({
   data,
   loading,
   canEdit,
@@ -173,3 +173,5 @@ export default function CuttingProcessTable({
     />
   )
 }
+
+export default memo(CuttingProcessTable)

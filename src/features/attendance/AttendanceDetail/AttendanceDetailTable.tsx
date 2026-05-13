@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Table, TableColumnsType } from 'antd'
 
 import type { AttendanceDetail } from '@/services/apiAttendanceDetails'
@@ -13,7 +13,7 @@ interface Props {
   scrollY?: number
 }
 
-export default function AttendanceDetailTable({
+function AttendanceDetailTable({
   loading,
   data,
   selectedRowKeys,
@@ -87,3 +87,5 @@ export default function AttendanceDetailTable({
     />
   )
 }
+
+export default memo(AttendanceDetailTable)

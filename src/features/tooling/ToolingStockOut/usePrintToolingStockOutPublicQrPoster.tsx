@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { App } from 'antd'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import AppQRCode from '@ui/AppQRCode'
@@ -278,7 +278,7 @@ export function usePrintToolingStockOutPublicQrPoster() {
           qrMarkup,
           qrPath,
           qrValue,
-          printTime: format(new Date(), 'yyyy-MM-dd HH:mm'),
+          printTime: dayjs(new Date()).format('YYYY-MM-DD HH:mm'),
         }),
       )
       printWindow.document.close()

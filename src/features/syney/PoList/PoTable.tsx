@@ -1,7 +1,7 @@
 import { Key, memo, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Table, TableColumnsType, TableProps } from 'antd'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 
 import { useAppStore } from '@/store'
 import { ISyneyPo } from '@/types'
@@ -26,7 +26,7 @@ function PoTable() {
         title: '交货日期',
         dataIndex: 'EndDate',
         width: 110,
-        render: (text: string) => format(new Date(text), 'yyyy-MM-dd'),
+        render: (text: string) => dayjs(new Date(text)).format('YYYY-MM-DD'),
       },
       {
         title: '送货状态',

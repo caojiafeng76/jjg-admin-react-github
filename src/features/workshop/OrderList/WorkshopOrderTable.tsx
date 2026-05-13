@@ -4,7 +4,7 @@ import type {
   TdHTMLAttributes,
   ThHTMLAttributes,
 } from 'react'
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Table, Tag } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
 import type { WorkshopOrder } from './index'
@@ -98,7 +98,7 @@ interface Props {
   rowHeight?: number
 }
 
-export default function WorkshopOrderTable({
+function WorkshopOrderTable({
   loading,
   data,
   projectNoOptions,
@@ -313,3 +313,5 @@ export default function WorkshopOrderTable({
     />
   )
 }
+
+export default memo(WorkshopOrderTable)

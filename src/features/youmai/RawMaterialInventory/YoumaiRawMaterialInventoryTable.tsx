@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Tag, Table, type TableColumnsType } from 'antd'
 
 import type { YoumaiRawMaterialInventory } from '@/services/apiYoumaiRawMaterialInventory'
@@ -32,7 +32,7 @@ function QuantityCell({ quantity }: { quantity: number }) {
   return <span>{quantity}</span>
 }
 
-export default function YoumaiRawMaterialInventoryTable({
+function YoumaiRawMaterialInventoryTable({
   loading,
   data,
   selectedRowKeys,
@@ -101,3 +101,5 @@ export default function YoumaiRawMaterialInventoryTable({
     />
   )
 }
+
+export default memo(YoumaiRawMaterialInventoryTable)

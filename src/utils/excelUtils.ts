@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import * as XLSX from 'xlsx-js-style'
 import { ISyneyPo, ISyneyItem } from '@/types'
 import { inferParamSpecFromRemark } from '@utils/syney'
 import dayjs from 'dayjs'
@@ -419,40 +419,18 @@ function extractTechnique(rows: ExcelRow[]): string | null {
       (row.物料件号 && String(row.物料件号).includes('XN3024AQ')),
   )
 
-  // 调试日志：输出找到的中板组件
-  console.log('找到的中板组件数量:', middlePlateRows.length)
-  middlePlateRows.forEach((row, index) => {
-    console.log(`中板${index + 1}:`, {
-      物料名称: row.物料名称,
-      物料件号: row.物料件号,
-      备注: row.备注,
-    })
-  })
-
   // 检查中板remark是否包含"雷达孔"或"不剪角"
   middlePlateRows.forEach((middlePlateRow) => {
     if (middlePlateRow.备注) {
       const middlePlateRemark = String(middlePlateRow.备注)
-      console.log(
-        '检查中板备注:',
-        middlePlateRemark,
-        '是否包含雷达孔:',
-        middlePlateRemark.includes('雷达孔'),
-      )
 
-      // 检查"雷达孔"（可以是"雷达孔"、"雷达光电孔"等，只要同时包含"雷达"和"孔"即可）
-      // 使用正则表达式匹配"雷达"和"孔"同时出现（中间可以有其他字符）
       const leiDaKongRegex = /雷达.*?孔/
       if (leiDaKongRegex.test(middlePlateRemark)) {
-        console.log('匹配到雷达孔:', middlePlateRemark)
-        // 找到"雷达"的位置，检查前面是否有否定词
         const index = middlePlateRemark.indexOf('雷达')
         const beforeText = middlePlateRemark.substring(
           Math.max(0, index - 10),
           index,
         )
-        console.log('雷达前面的文本:', beforeText)
-        // 排除包含否定词的情况（但"带"不是否定词）
         const hasNegativeWord =
           beforeText.includes('不带') ||
           (beforeText.includes('不') &&
@@ -462,32 +440,20 @@ function extractTechnique(rows: ExcelRow[]): string | null {
           beforeText.includes('没有') ||
           beforeText.includes('无需')
 
-        console.log('是否有否定词:', hasNegativeWord)
-        // 如果"雷达"前面没有否定词，则提取
         if (!hasNegativeWord) {
           if (!techniqueList.includes('中：雷达孔')) {
             techniqueList.push('中：雷达孔')
-            console.log('添加中：雷达孔到工艺要求列表')
           }
-        } else {
-          console.log('雷达前有否定词，跳过:', beforeText)
         }
-      } else {
-        console.log('未匹配到雷达孔:', middlePlateRemark)
       }
 
-      // 检查"不剪角"（必须是完整的三个字）
-      // 使用正则表达式确保"不剪角"是完整的词（前后不是其他中文字符或数字）
       const buJianJiaoRegex = /不剪角/
       if (buJianJiaoRegex.test(middlePlateRemark)) {
-        // 检查"不剪角"前面是否有否定词（排除"不剪角"本身的"不"）
         const index = middlePlateRemark.indexOf('不剪角')
         const beforeText = middlePlateRemark.substring(
           Math.max(0, index - 15),
           index,
         )
-        // 排除包含否定词的情况
-        // 注意："不剪角"本身以"不"开头，所以需要检查前面是否有其他否定词
         const hasNegativeWord =
           (beforeText.trim() && beforeText.includes('不')) ||
           beforeText.includes('无') ||
@@ -496,7 +462,6 @@ function extractTechnique(rows: ExcelRow[]): string | null {
           beforeText.includes('不要') ||
           beforeText.includes('不带')
 
-        // 如果"不剪角"前面没有否定词，则提取
         if (!hasNegativeWord) {
           if (!techniqueList.includes('中：不剪角')) {
             techniqueList.push('中：不剪角')
@@ -506,13 +471,7 @@ function extractTechnique(rows: ExcelRow[]): string | null {
     }
   })
 
-  // 返回用逗号分割的字符串（用于分解单），订单列表显示时需要用空格替换逗号
-  const result = techniqueList.length > 0 ? techniqueList.join(',') : null
-  // 调试日志：输出提取的工艺要求
-  if (result) {
-    console.log('提取的工艺要求:', techniqueList, '结果:', result)
-  }
-  return result
+  return techniqueList.length > 0 ? techniqueList.join(',') : null
 }
 
 /**
@@ -545,14 +504,9 @@ function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
         model = modelMatch[1].includes('型')
           ? modelMatch[1]
           : `${modelMatch[1]}型`
-        console.log('后备逻辑：找到型号:', model, '来源:', {
-          规格: spec,
-          备注: remark,
-        })
       }
     }
 
-    // 匹配环境（室内/室外）- 如果找到"室外"就设置为室外，否则保持默认"室内"
     if (combinedText.includes('室外')) {
       environment = '室外'
     } else if (combinedText.includes('室内')) {
@@ -564,31 +518,23 @@ function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
     if (!type) {
       if (partNo.includes('XN2808EB') || partNo.startsWith('XN2808')) {
         type = '扶梯'
-        console.log('后备逻辑：找到类型: 扶梯, 件号:', partNo)
       } else if (partNo.includes('XN3024BR') || partNo.startsWith('XN3024')) {
         type = '人行道'
-        console.log('后备逻辑：找到类型: 人行道, 件号:', partNo)
       }
     }
   }
 
-  // 如果找不到型号，返回null
   if (!model) {
-    console.log('后备逻辑：未找到型号（1000型/800型/600型）')
     return null
   }
 
   // 如果找不到类型，返回null（无法确定是扶梯还是人行道）
   if (!type) {
-    console.log('后备逻辑：未找到类型（扶梯/人行道）')
     return null
   }
 
-  // 组合规格: 型号-环境-类型
   const spec = `${model}-${environment}-${type}`
-  console.log('后备逻辑：推断的规格:', spec)
 
-  // 验证规格是否存在于支持的选项中
   const validSpecs = [
     '1000型-室内-扶梯',
     '1000型-室外-扶梯',
@@ -606,7 +552,6 @@ function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
   ]
 
   const isValid = validSpecs.includes(spec)
-  console.log('后备逻辑：规格是否有效:', isValid)
 
   return isValid ? spec : null
 }
@@ -627,19 +572,7 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
       (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
   )
 
-  console.log(
-    '查找前板组件:',
-    frontPlateRow
-      ? {
-          物料名称: frontPlateRow.物料名称,
-          物料件号: frontPlateRow.物料件号,
-          规格: frontPlateRow.规格,
-        }
-      : '未找到',
-  )
-
   if (!frontPlateRow) {
-    console.log('未找到前板组件，无法推断规格')
     return null
   }
 
@@ -654,14 +587,10 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
     type = '人行道'
   }
 
-  console.log('前板件号:', frontPlatePartNo, '推断类型:', type)
-
   if (!type) {
-    console.log('无法从前板件号推断类型')
     return null
   }
 
-  // 3. 查找中板组件(用于提取型号和环境)
   const middlePlateRow = rows.find((row) => {
     const name = String(row.物料名称 || '')
     const partNoRaw = String(row.物料件号 || '')
@@ -677,34 +606,18 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
     )
   })
 
-  console.log(
-    '查找中板组件:',
-    middlePlateRow
-      ? {
-          物料名称: middlePlateRow.物料名称,
-          物料件号: middlePlateRow.物料件号,
-          规格: middlePlateRow.规格,
-        }
-      : '未找到',
-  )
-
   if (!middlePlateRow || !middlePlateRow.规格) {
-    console.log('未找到中板组件或中板规格为空，无法推断规格')
     return null
   }
 
-  // 4. 从中板规格字段提取型号(1000型/800型/600型)
   let model = ''
   const middlePlateSpec = String(middlePlateRow.规格)
-  console.log('中板规格字段:', middlePlateSpec)
   const specMatch = middlePlateSpec.match(/(1000(?:型)?|800(?:型)?|600(?:型)?)/)
   if (specMatch) {
     model = specMatch[1].includes('型') ? specMatch[1] : `${specMatch[1]}型`
-    console.log('提取到型号:', model)
   }
 
   if (!model) {
-    console.log('无法从中板规格字段提取型号')
     return null
   }
 
@@ -716,14 +629,8 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
     environment = '室内'
   }
 
-  console.log('推断环境:', environment)
-
-  // 6. 组合规格: 型号-环境-类型
   const spec = `${model}-${environment}-${type}`
 
-  console.log('组合后的规格:', spec)
-
-  // 7. 验证规格是否存在于支持的选项中
   const validSpecs = [
     '1000型-室内-扶梯',
     '1000型-室外-扶梯',
@@ -741,7 +648,6 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
   ]
 
   const isValid = validSpecs.includes(spec)
-  console.log('规格是否有效:', isValid)
 
   return isValid ? spec : null
 }

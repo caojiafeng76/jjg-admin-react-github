@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import * as XLSX from 'xlsx-js-style'
 
 import type { LaborProtectionRequisition } from '@/services/apiLaborProtectionRequisitions'
@@ -51,7 +51,7 @@ function formatDateTime(value: string | null | undefined) {
   if (!value) return '-'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return '-'
-  return format(d, 'yyyy-MM-dd HH:mm')
+  return dayjs(d).format('YYYY-MM-DD HH:mm')
 }
 
 interface CategorySummary {
@@ -356,7 +356,7 @@ function buildWorkbook(
   items: LaborProtectionRequisition[],
   filters: FilterInfo,
 ) {
-  const exportTime = format(new Date(), 'yyyy-MM-dd HH:mm')
+  const exportTime = dayjs(new Date()).format('YYYY-MM-DD HH:mm')
   const filterText = buildFilterText(filters)
 
   const detailWs = buildDetailSheet(items, filterText, exportTime)
@@ -373,9 +373,6 @@ export function exportLaborProtectionRequisitionsToExcel(
   filters: FilterInfo,
 ) {
   const wb = buildWorkbook(items, filters)
-  const filename = `劳保领料单_${items.length}条_${format(
-    new Date(),
-    'yyyy-MM-dd_HH-mm-ss',
-  )}.xlsx`
+  const filename = `劳保领料单_${items.length}条_${dayjs(new Date()).format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
   XLSX.writeFile(wb, filename, EXCEL_WRITE_OPTIONS)
 }

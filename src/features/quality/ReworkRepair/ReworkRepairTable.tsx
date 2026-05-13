@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import dayjs from 'dayjs'
 import { Table, Tag, type TableColumnsType } from 'antd'
 
@@ -45,7 +45,7 @@ interface Props {
   rowHeight?: number
 }
 
-export default function ReworkRepairTable({
+function ReworkRepairTable({
   loading,
   data,
   selectedRowKeys,
@@ -206,3 +206,5 @@ export default function ReworkRepairTable({
     />
   )
 }
+
+export default memo(ReworkRepairTable)

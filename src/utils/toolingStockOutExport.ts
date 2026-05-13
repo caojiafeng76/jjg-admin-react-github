@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import * as XLSX from 'xlsx-js-style'
 
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
@@ -54,7 +54,7 @@ function buildWorkbook(items: ToolingStockOut[]) {
     (sum, item) => sum + Number(item.stock_out_quantity || 0),
     0,
   )
-  const printDate = format(new Date(), 'yyyy-MM-dd HH:mm')
+  const printDate = dayjs(new Date()).format('YYYY-MM-DD HH:mm')
   const colCount = TABLE_HEADERS.length
   const halfCol = Math.floor(colCount / 2)
 
@@ -180,9 +180,6 @@ function buildWorkbook(items: ToolingStockOut[]) {
 
 export function exportToolingStockOutToExcel(items: ToolingStockOut[]) {
   const wb = buildWorkbook(items)
-  const filename = `刀具出库_${items.length}条_${format(
-    new Date(),
-    'yyyy-MM-dd_HH-mm-ss',
-  )}.xlsx`
+  const filename = `刀具出库_${items.length}条_${dayjs(new Date()).format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
   XLSX.writeFile(wb, filename, EXCEL_WRITE_OPTIONS)
 }
