@@ -1,5 +1,5 @@
 import { utils, writeFile } from 'xlsx-js-style'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import { message } from 'antd'
 import {
   autoFitColumnWidths,
@@ -159,7 +159,7 @@ export function useExportSafePartInfoAsExcel() {
       }
 
       // 生成文件名（包含日期和时间戳，避免覆盖）
-      const timestamp = format(new Date(), 'yyyy-MM-dd_HHmmss')
+      const timestamp = dayjs(new Date()).format('YYYY-MM-DD_HHmmss')
       const fileName = `安全部件信息-${timestamp}.xlsx`
 
       // 导出文件

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Table, TableColumnsType, Button, Popconfirm, Space } from 'antd'
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/16/solid'
 
@@ -78,7 +78,7 @@ const COST_COLUMNS: TableColumnsType<ProductionOrderItemWithMachine> = [
   },
 ]
 
-export default function ProductionOrderItemTable({
+function ProductionOrderItemTable({
   loading,
   data,
   onEdit,
@@ -266,3 +266,5 @@ export default function ProductionOrderItemTable({
     />
   )
 }
+
+export default memo(ProductionOrderItemTable)

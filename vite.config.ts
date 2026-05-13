@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import viteCompression from 'vite-plugin-compression'
 
 import { fileURLToPath, URL } from 'node:url'
 
@@ -37,6 +38,11 @@ export default defineConfig(({ mode }) => {
     mkcert(),
     syneyStoreReportProxy(env),
     youmaiPurchaseOrderProxy(env),
+    viteCompression({
+      algorithm: 'gzip',
+      threshold: 1024,
+      deleteOriginFile: false,
+    }),
   ],
   // Use Lightning CSS for minification to avoid noisy warnings from esbuild
   build: {
@@ -50,12 +56,15 @@ export default defineConfig(({ mode }) => {
             return undefined
           }
 
-          if (id.includes('xlsx-js-style')) {
-            return 'vendor-xlsx-style'
+          if (
+            id.includes('antd') ||
+            id.includes('@ant-design')
+          ) {
+            return 'vendor-antd'
           }
 
-          if (/[\\/]node_modules[\\/]xlsx[\\/]/.test(id)) {
-            return 'vendor-xlsx'
+          if (id.includes('xlsx-js-style')) {
+            return 'vendor-xlsx-style'
           }
 
           if (

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { App } from 'antd'
 import autoTable from 'jspdf-autotable'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
@@ -100,7 +100,7 @@ export function usePrintToolingStockOut() {
       doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
 
       const pages = chunkItems(items, MAX_ROWS_PER_PAGE)
-      const printDate = format(new Date(), 'yyyy-MM-dd HH:mm')
+      const printDate = dayjs(new Date()).format('YYYY-MM-DD HH:mm')
       const totalQuantity = items.reduce(
         (sum, item) => sum + Number(item.stock_out_quantity || 0),
         0,
@@ -197,7 +197,7 @@ export function usePrintToolingStockOut() {
         )
       })
 
-      const filename = `刀具出库_${items.length}条_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.pdf`
+      const filename = `刀具出库_${items.length}条_${dayjs(new Date()).format('YYYY-MM-DD_HH-mm-ss')}.pdf`
       const printed = printPDF(doc, filename, printWindow)
 
       if (printed) {

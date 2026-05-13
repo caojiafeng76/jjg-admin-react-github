@@ -1,5 +1,5 @@
 import { utils, writeFile } from 'xlsx-js-style'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import {
   autoFitColumnWidths,
   setRowHeight,
@@ -98,7 +98,7 @@ export function useExportReportsAsExcel() {
 
     writeFile(
       wb,
-      `入库单明细--${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
+      `入库单明细--${dayjs(new Date()).format('YYYY-MM-DD')}.xlsx`,
       EXCEL_WRITE_OPTIONS,
     )
     return true // 返回 true 表示导出成功

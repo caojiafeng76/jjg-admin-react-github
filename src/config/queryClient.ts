@@ -18,8 +18,8 @@ export function isAbortError(error: unknown): boolean {
  * 默认查询选项
  */
 const defaultQueryOptions: DefaultOptions['queries'] = {
-  // 数据在 5 分钟内视为新鲜，不会重新获取
-  staleTime: 1000 * 60 * 5,
+  // 数据在 30 秒内视为新鲜，避免列表数据长时间不刷新
+  staleTime: 1000 * 30,
   
   // 缓存时间：10 分钟（原 cacheTime，v5 中改为 gcTime）
   gcTime: 1000 * 60 * 10,

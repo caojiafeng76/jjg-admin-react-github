@@ -22,12 +22,11 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.2",
-    "@heroicons/react": "^2.2.0",
+    "@heroicons/react": "2.2.0",
     "@supabase/supabase-js": "^2.105.4",
     "@tanstack/react-query": "^5.100.10",
     "@tanstack/react-query-devtools": "^5.100.10",
     "antd": "^6.3.7",
-    "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",
     "immer": "^11.1.8",
     "jspdf": "^4.2.1",
@@ -40,7 +39,6 @@
     "react-qr-code": "^2.0.21",
     "react-router-dom": "^7.15.0",
     "supabase": "^2.98.2",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "xlsx-js-style": "^1.2.0",
     "zustand": "^5.0.13"
   },
@@ -50,7 +48,6 @@
     "@types/node": "^22.19.19",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/xlsx": "^0.0.36",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -64,6 +61,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.3",
     "vite": "^8.0.12",
+    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-mkcert": "^2.0.0"
   }
 }

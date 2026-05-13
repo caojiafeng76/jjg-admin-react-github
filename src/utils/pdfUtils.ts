@@ -5,7 +5,7 @@
 
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 
 import {
   TABLE_CONFIG,
@@ -429,7 +429,7 @@ export function addTableHeader(
     theme: 'plain',
     headStyles: TABLE_CONFIG.HEAD_STYLES,
     head: LAYOUT_CONFIG.HEADER_INFO.HEAD,
-    body: [[reportNo, format(new Date(createdAt), 'yyyy-MM-dd')]],
+    body: [[reportNo, dayjs(new Date(createdAt)).format('YYYY-MM-DD')]],
   })
 }
 

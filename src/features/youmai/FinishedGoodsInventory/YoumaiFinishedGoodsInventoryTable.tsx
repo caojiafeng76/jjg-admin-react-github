@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Table, type TableColumnsType } from 'antd'
 
 import type { YoumaiFinishedGoodsInventory } from '@/services/apiYoumaiFinishedGoodsInventory'
@@ -28,7 +28,7 @@ interface Props {
   rowHeight?: number
 }
 
-export default function YoumaiFinishedGoodsInventoryTable({
+function YoumaiFinishedGoodsInventoryTable({
   loading,
   data,
   selectedRowKeys,
@@ -176,3 +176,5 @@ export default function YoumaiFinishedGoodsInventoryTable({
     />
   )
 }
+
+export default memo(YoumaiFinishedGoodsInventoryTable)

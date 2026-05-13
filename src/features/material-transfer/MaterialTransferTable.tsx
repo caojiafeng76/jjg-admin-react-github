@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { memo, useCallback, useMemo } from 'react'
 import { Table, Tag, type TableColumnsType, type TableProps } from 'antd'
 
 import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
@@ -15,7 +15,7 @@ interface Props {
   onRowClick?: (record: MaterialTransferWithEmployee) => void
 }
 
-export default function MaterialTransferTable({
+function MaterialTransferTable({
   loading,
   data,
   page,
@@ -207,3 +207,5 @@ export default function MaterialTransferTable({
     />
   )
 }
+
+export default memo(MaterialTransferTable)

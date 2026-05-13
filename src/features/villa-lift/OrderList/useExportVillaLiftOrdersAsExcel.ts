@@ -1,5 +1,5 @@
 import { utils, writeFile } from 'xlsx-js-style'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 
 import {
   autoFitColumnWidths,
@@ -161,7 +161,7 @@ export function useExportVillaLiftOrdersAsExcel() {
     utils.book_append_sheet(wb, ws, '别墅梯订单')
     writeFile(
       wb,
-      `别墅梯订单_${format(new Date(), 'yyyy-MM-dd')}.xlsx`,
+      `别墅梯订单_${dayjs(new Date()).format('YYYY-MM-DD')}.xlsx`,
       EXCEL_WRITE_OPTIONS,
     )
     return true

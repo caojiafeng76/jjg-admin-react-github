@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Button, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType } from 'antd'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
@@ -24,7 +24,7 @@ interface FinishingProcessTableProps {
 // Component
 // ----------------------------------------------------------------
 
-export default function FinishingProcessTable({
+function FinishingProcessTable({
   data,
   loading,
   canEdit,
@@ -184,3 +184,5 @@ export default function FinishingProcessTable({
     />
   )
 }
+
+export default memo(FinishingProcessTable)

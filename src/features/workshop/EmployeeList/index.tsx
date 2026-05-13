@@ -158,7 +158,7 @@ export default function EmployeeList() {
     setIsAuthModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
 
-  const handleBatchCreateAuthAccounts = useCallback(() => {
+  const handleBatchCreateAuthAccounts = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
       message.warning('请先选择要批量开通账号的员工')
       return
@@ -185,7 +185,7 @@ export default function EmployeeList() {
       return
     }
 
-    const plans = buildBatchEmployeeAuthEmails(targetEmployees)
+    const plans = await buildBatchEmployeeAuthEmails(targetEmployees)
 
     modal.confirm({
       title: '批量开通员工账号',

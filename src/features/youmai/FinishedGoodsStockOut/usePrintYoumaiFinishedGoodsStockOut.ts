@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { App } from 'antd'
 import autoTable from 'jspdf-autotable'
-import { format } from 'date-fns'
+import dayjs from 'dayjs'
 
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
@@ -100,7 +100,7 @@ export function usePrintYoumaiFinishedGoodsStockOut() {
       doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
 
       const pages = chunkItems(items, MAX_ROWS_PER_PAGE)
-      const printDate = format(new Date(), 'yyyy-MM-dd HH:mm')
+      const printDate = dayjs(new Date()).format('YYYY-MM-DD HH:mm')
       const totalWeight = items.reduce((sum, item) => {
         const weight = calculateYoumaiWeightKg({
           specification: item.specification,
@@ -209,7 +209,7 @@ export function usePrintYoumaiFinishedGoodsStockOut() {
         )
       })
 
-      const filename = `优迈成品出库_${items.length}条_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.pdf`
+      const filename = `优迈成品出库_${items.length}条_${dayjs(new Date()).format('YYYY-MM-DD_HH-mm-ss')}.pdf`
       const printed = printPDF(doc, filename, printWindow)
 
       if (printed) {
