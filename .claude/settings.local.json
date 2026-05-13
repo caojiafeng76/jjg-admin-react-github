@@ -1,0 +1,7 @@
+{
+  "enabledMcpjsonServers": [
+    "spec-workflow",
+    "supabase",
+    "serena"
+  ]
+}
