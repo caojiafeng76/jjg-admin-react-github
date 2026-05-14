@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { App, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsInventoryFormValues,
@@ -12,6 +14,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiFinishedGoodsInventoryExcelImport from './YoumaiFinishedGoodsInventoryExcelImport'
 import YoumaiFinishedGoodsInventoryForm from './YoumaiFinishedGoodsInventoryForm'
 import YoumaiFinishedGoodsInventorySearch from './YoumaiFinishedGoodsInventorySearch'
@@ -27,6 +30,10 @@ import {
 
 export default function YoumaiFinishedGoodsInventoryPage() {
   const { message } = App.useApp()
+  const canManageYoumai = usePermission(YOUMAI_MANAGE_PERMISSION_KEY)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: YOUMAI_MANAGE_PERMISSION_KEY,
+  })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建优迈成品库存')
@@ -117,6 +124,16 @@ export default function YoumaiFinishedGoodsInventoryPage() {
 
   const handleImport = useCallback(
     async (rows: YoumaiFinishedGoodsInventoryImportRow[]) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         await importMutation.mutateAsync(rows)
         message.success(`优迈成品库存导入成功，共 ${rows.length} 条`)
@@ -129,11 +146,27 @@ export default function YoumaiFinishedGoodsInventoryPage() {
         }
       }
     },
-    [importMutation, message],
+    [
+      canManageYoumai,
+      importMutation,
+      message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleFinish = useCallback(
     async (values: YoumaiFinishedGoodsInventoryFormValues) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -157,11 +190,14 @@ export default function YoumaiFinishedGoodsInventoryPage() {
     },
     [
       createMutation,
+      canManageYoumai,
       isEdit,
       message,
       resetFormState,
       selectedRowKeys,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -205,18 +241,27 @@ export default function YoumaiFinishedGoodsInventoryPage() {
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑优迈成品库存" handleEdit={handleEdit} />
+        <AddButton
+          handleCreate={handleCreate}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
+        <EditButton
+          title="编辑优迈成品库存"
+          handleEdit={handleEdit}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
           title="删除优迈成品库存"
           itemName="优迈成品库存"
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
         <YoumaiFinishedGoodsInventoryExcelImport
           onImport={handleImport}
           isImporting={importMutation.isPending}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
       </div>
 
@@ -255,6 +300,7 @@ export default function YoumaiFinishedGoodsInventoryPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied || !canManageYoumai }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

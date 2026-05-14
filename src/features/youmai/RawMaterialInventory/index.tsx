@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { App, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   YoumaiRawMaterialInventory,
   YoumaiRawMaterialInventoryFormValues,
@@ -14,6 +16,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import { exportYoumaiRawMaterialInventoryToExcel } from '@/utils/youmaiRawMaterialInventoryExcel'
+import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiRawMaterialInventoryForm from './YoumaiRawMaterialInventoryForm'
 import YoumaiRawMaterialInventorySearch from './YoumaiRawMaterialInventorySearch'
 import YoumaiRawMaterialInventoryTable from './YoumaiRawMaterialInventoryTable'
@@ -26,6 +29,10 @@ import {
 
 export default function YoumaiRawMaterialInventoryPage() {
   const { message } = App.useApp()
+  const canManageYoumai = usePermission(YOUMAI_MANAGE_PERMISSION_KEY)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: YOUMAI_MANAGE_PERMISSION_KEY,
+  })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建原料库存')
@@ -114,6 +121,16 @@ export default function YoumaiRawMaterialInventoryPage() {
 
   const handleFinish = useCallback(
     async (values: YoumaiRawMaterialInventoryFormValues) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && editingRecord) {
           await updateMutation.mutateAsync({ id: editingRecord.id, values })
@@ -133,11 +150,14 @@ export default function YoumaiRawMaterialInventoryPage() {
     },
     [
       createMutation,
+      canManageYoumai,
       editingRecord,
       isEdit,
       message,
       resetFormState,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -167,6 +187,16 @@ export default function YoumaiRawMaterialInventoryPage() {
   }, [searchParamsURL, setSearchParamsURL])
 
   const handleExport = useCallback(async () => {
+    if (!canManageYoumai) {
+      message.warning('无优迈模块操作权限')
+      return
+    }
+
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
     try {
       setIsExporting(true)
       const records = await getYoumaiRawMaterialInventoryForExport(
@@ -183,7 +213,13 @@ export default function YoumaiRawMaterialInventoryPage() {
     } finally {
       setIsExporting(false)
     }
-  }, [message, searchParams.keyword])
+  }, [
+    canManageYoumai,
+    message,
+    searchParams.keyword,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   useEffect(() => {
     if (page > 1 && data && data.rawMaterialInventory.length === 0) {
@@ -196,19 +232,28 @@ export default function YoumaiRawMaterialInventoryPage() {
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑原料库存" handleEdit={handleEdit} />
+        <AddButton
+          handleCreate={handleCreate}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
+        <EditButton
+          title="编辑原料库存"
+          handleEdit={handleEdit}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
           title="删除原料库存"
           itemName="原料库存"
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
         <ExportButton
           handleExport={handleExport}
           loading={isExporting}
           count={data?.count}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         >
           导出库存
         </ExportButton>
@@ -249,6 +294,7 @@ export default function YoumaiRawMaterialInventoryPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied || !canManageYoumai }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

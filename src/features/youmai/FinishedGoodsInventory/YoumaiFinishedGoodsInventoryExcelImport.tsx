@@ -21,6 +21,7 @@ import {
 interface Props {
   onImport: (rows: YoumaiFinishedGoodsInventoryImportRow[]) => Promise<void>
   isImporting: boolean
+  permissionKey?: string
 }
 
 type PreviewRow = YoumaiFinishedGoodsInventoryImportRow & { _idx: number }
@@ -52,6 +53,7 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
 export default function YoumaiFinishedGoodsInventoryExcelImport({
   onImport,
   isImporting,
+  permissionKey,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -125,10 +127,13 @@ export default function YoumaiFinishedGoodsInventoryExcelImport({
 
   return (
     <>
-      <ImportButton onClick={handleOpenModal}>导入库存</ImportButton>
+      <ImportButton onClick={handleOpenModal} permissionKey={permissionKey}>
+        导入库存
+      </ImportButton>
 
       <DownloadTemplateButton
         onClick={downloadYoumaiFinishedGoodsInventoryTemplate}
+        permissionKey={permissionKey}
       >
         下载库存模板
       </DownloadTemplateButton>

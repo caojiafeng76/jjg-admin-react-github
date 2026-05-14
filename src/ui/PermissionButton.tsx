@@ -1,10 +1,7 @@
 import type { ComponentProps } from 'react'
 import { Button, Tooltip } from 'antd'
-import { isViewerRole } from '@/config/access'
-import { useAuth } from '@/contexts/useAuth'
 import { usePermission } from '@/hooks/usePermission'
-
-const VIEWER_OPERATION_TIP = '查看员仅可查看数据'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 
 interface PermissionButtonProps extends ComponentProps<typeof Button> {
   /** 权限 key，对应 permissions 表中的 key 字段 */
@@ -22,12 +19,13 @@ export default function PermissionButton({
   disabled,
   ...rest
 }: PermissionButtonProps) {
-  const { role } = useAuth()
-  const viewerDenied = isViewerRole(role)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: permissionKey,
+  })
   const allowed = usePermission(permissionKey)
   const denied = viewerDenied || !allowed
   const isDisabled = denied || disabled
-  const deniedTip = viewerDenied ? VIEWER_OPERATION_TIP : noPermissionTip
+  const deniedTip = viewerDenied ? viewerOperationTip : noPermissionTip
 
   if (denied) {
     return (
