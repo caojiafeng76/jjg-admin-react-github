@@ -26,6 +26,7 @@ import YoumaiFinishedGoodsStockOutForm from './YoumaiFinishedGoodsStockOutForm'
 import YoumaiFinishedGoodsStockOutSearch from './YoumaiFinishedGoodsStockOutSearch'
 import YoumaiFinishedGoodsStockOutTable from './YoumaiFinishedGoodsStockOutTable'
 import { usePrintYoumaiFinishedGoodsStockOut } from './usePrintYoumaiFinishedGoodsStockOut'
+import { usePrintYoumaiLabel } from './usePrintYoumaiLabel'
 import {
   useBatchUpdateYoumaiFinishedGoodsStockOutStatus,
   useCreateYoumaiFinishedGoodsStockOut,
@@ -74,6 +75,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   const importMutation = useImportYoumaiFinishedGoodsStockOut()
   const deleteMutation = useDeleteYoumaiFinishedGoodsStockOut()
   const { printSelected, isPrinting } = usePrintYoumaiFinishedGoodsStockOut()
+  const { printLabels, isPrinting: isLabelPrinting } = usePrintYoumaiLabel()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -97,6 +99,33 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   }, [
     message,
     printSelected,
+    selectedRecords,
+    viewerDenied,
+    viewerOperationTip,
+  ])
+
+  const handlePrintLabel = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
+    if (selectedRecords.length === 0) {
+      message.warning('请选择要打印标签的数据')
+      return
+    }
+
+    try {
+      await printLabels(selectedRecords)
+    } catch (error) {
+      console.error('打印优迈标签失败:', error)
+      message.error(
+        error instanceof Error ? error.message : '打印标签失败',
+      )
+    }
+  }, [
+    message,
+    printLabels,
     selectedRecords,
     viewerDenied,
     viewerOperationTip,
@@ -365,6 +394,13 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           count={selectedRowKeys.length}
         >
           打印选中项
+        </PrintButton>
+        <PrintButton
+          handlePrint={handlePrintLabel}
+          loading={isLabelPrinting}
+          count={selectedRowKeys.length}
+        >
+          打印标签
         </PrintButton>
         <Button
           type="text"
