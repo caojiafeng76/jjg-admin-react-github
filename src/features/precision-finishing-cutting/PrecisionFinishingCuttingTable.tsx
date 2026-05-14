@@ -11,6 +11,7 @@ interface Props {
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   scrollY?: number
+  rowHeight?: number
   activeRowId?: string | null
   onRowClick?: (record: PrecisionFinishingCuttingWithEmployee) => void
 }
@@ -23,6 +24,7 @@ export default function PrecisionFinishingCuttingTable({
   selectedRowKeys,
   onSelect,
   scrollY = 400,
+  rowHeight = 40,
   activeRowId,
   onRowClick,
 }: Props) {
@@ -166,9 +168,10 @@ export default function PrecisionFinishingCuttingTable({
         cursor: onRowClick ? 'pointer' : undefined,
         backgroundColor:
           record.id && record.id === activeRowId ? '#e6f4ff' : undefined,
+        height: rowHeight,
       },
     }),
-    [activeRowId, onRowClick],
+    [activeRowId, onRowClick, rowHeight],
   )
 
   return (

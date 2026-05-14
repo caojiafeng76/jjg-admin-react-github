@@ -8,9 +8,11 @@ import { useAppStore } from '@/store'
 export default function DetailTable({
   data,
   loading,
+  rowHeight = 40,
 }: {
   data: ISyneyItem[]
   loading: boolean
+  rowHeight?: number
 }) {
   const columns: TableColumnsType<ISyneyItem> = [
     {
@@ -84,6 +86,7 @@ export default function DetailTable({
       scroll={{
         y: 550,
       }}
+      onRow={() => ({ style: { height: rowHeight } })}
     />
   )
 }

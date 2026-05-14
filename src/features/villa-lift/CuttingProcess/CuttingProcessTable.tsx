@@ -18,6 +18,7 @@ interface CuttingProcessTableProps {
   onSelectionChange: (keys: string[]) => void
   onEdit: (record: VillaLiftCuttingRecordWithOrder) => void
   scrollY?: number
+  rowHeight?: number
 }
 
 // ----------------------------------------------------------------
@@ -32,6 +33,7 @@ function CuttingProcessTable({
   onSelectionChange,
   onEdit,
   scrollY,
+  rowHeight = 40,
 }: CuttingProcessTableProps) {
   const columns: TableColumnsType<VillaLiftCuttingRecordWithOrder> = useMemo(
     () => [
@@ -170,6 +172,7 @@ function CuttingProcessTable({
         selectedRowKeys,
         onChange: (keys) => onSelectionChange(keys as string[]),
       }}
+      onRow={() => ({ style: { height: rowHeight } })}
     />
   )
 }

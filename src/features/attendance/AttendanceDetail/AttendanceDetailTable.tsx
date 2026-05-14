@@ -11,6 +11,7 @@ interface Props {
   page: number
   pageSize: number
   scrollY?: number
+  rowHeight?: number
 }
 
 function AttendanceDetailTable({
@@ -21,6 +22,7 @@ function AttendanceDetailTable({
   page,
   pageSize,
   scrollY = 400,
+  rowHeight = 40,
 }: Props) {
   const columns: TableColumnsType<AttendanceDetail> = useMemo(
     () => [
@@ -84,6 +86,7 @@ function AttendanceDetailTable({
         onChange: onSelect,
       }}
       size="small"
+      onRow={() => ({ style: { height: rowHeight } })}
     />
   )
 }

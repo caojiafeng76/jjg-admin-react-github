@@ -11,6 +11,7 @@ interface Props {
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   scrollY?: number
+  rowHeight?: number
   activeRowId?: string | null
   onRowClick?: (record: MaterialTransferWithEmployee) => void
 }
@@ -23,6 +24,7 @@ function MaterialTransferTable({
   selectedRowKeys,
   onSelect,
   scrollY = 400,
+  rowHeight = 40,
   activeRowId,
   onRowClick,
 }: Props) {
@@ -171,9 +173,10 @@ function MaterialTransferTable({
         cursor: onRowClick ? 'pointer' : undefined,
         backgroundColor:
           record.id && record.id === activeRowId ? '#e6f4ff' : undefined,
+        height: rowHeight,
       },
     }),
-    [activeRowId, onRowClick],
+    [activeRowId, onRowClick, rowHeight],
   )
 
   return (

@@ -10,9 +10,16 @@ type Props = {
   loading: boolean
   onSelect: (selectedRowKeys: Key[]) => void
   selectedRowKeys: Key[]
+  rowHeight?: number
 }
 
-function SpecTable({ data, loading, onSelect, selectedRowKeys }: Props) {
+function SpecTable({
+  data,
+  loading,
+  onSelect,
+  selectedRowKeys,
+  rowHeight = 40,
+}: Props) {
   const [searchParams] = useSearchParams()
 
   const page = Number(searchParams.get('page')) || 1
@@ -60,6 +67,7 @@ function SpecTable({ data, loading, onSelect, selectedRowKeys }: Props) {
       scroll={{
         y: 550,
       }}
+      onRow={() => ({ style: { height: rowHeight } })}
     />
   )
 }
