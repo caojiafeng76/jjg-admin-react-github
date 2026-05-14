@@ -18,6 +18,7 @@ interface FinishingProcessTableProps {
   onSelectionChange: (keys: string[]) => void
   onEdit: (record: VillaLiftFinishingRecordWithOrder) => void
   scrollY?: number
+  rowHeight?: number
 }
 
 // ----------------------------------------------------------------
@@ -32,6 +33,7 @@ function FinishingProcessTable({
   onSelectionChange,
   onEdit,
   scrollY,
+  rowHeight = 40,
 }: FinishingProcessTableProps) {
   const columns: TableColumnsType<VillaLiftFinishingRecordWithOrder> = useMemo(
     () => [
@@ -181,6 +183,7 @@ function FinishingProcessTable({
         selectedRowKeys,
         onChange: (keys) => onSelectionChange(keys as string[]),
       }}
+      onRow={() => ({ style: { height: rowHeight } })}
     />
   )
 }

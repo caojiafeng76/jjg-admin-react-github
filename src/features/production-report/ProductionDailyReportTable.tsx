@@ -14,6 +14,7 @@ interface Props {
     rows: ProductionDailyReportRow[],
   ) => void
   scrollY?: number
+  rowHeight?: number
 }
 
 function renderNumber(value: number | null | undefined, digits = 0) {
@@ -36,6 +37,7 @@ function ProductionDailyReportTable({
   selectedRowKeys,
   onRowSelectionChange,
   scrollY = 400,
+  rowHeight = 40,
 }: Props) {
   const currentPageQualifiedCount = useMemo(
     () =>
@@ -273,6 +275,7 @@ function ProductionDailyReportTable({
       virtual
       size="small"
       scroll={{ x: 2750, y: scrollY }}
+      onRow={() => ({ style: { height: rowHeight } })}
       style={{ fontSize: '12px' }}
       summary={() => (
         <Table.Summary fixed>

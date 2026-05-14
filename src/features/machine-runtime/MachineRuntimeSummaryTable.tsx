@@ -9,6 +9,7 @@ interface Props {
   selectedId: string | null
   onSelect: (id: string) => void
   scrollY?: number
+  rowHeight?: number
 }
 
 export default function MachineRuntimeSummaryTable({
@@ -17,6 +18,7 @@ export default function MachineRuntimeSummaryTable({
   selectedId,
   onSelect,
   scrollY = 300,
+  rowHeight = 40,
 }: Props) {
   const columns: TableColumnsType<MachineRuntimeSummaryItem> = useMemo(
     () => [
@@ -69,7 +71,7 @@ export default function MachineRuntimeSummaryTable({
       }
       onRow={(record) => ({
         onClick: () => onSelect(record.machine_equipment_id),
-        style: { cursor: 'pointer' },
+        style: { cursor: 'pointer', height: rowHeight },
       })}
     />
   )

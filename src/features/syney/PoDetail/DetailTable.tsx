@@ -51,7 +51,11 @@ const columns: TableColumnsType<ISyneyItem> = [
     width: 200,
   },
 ]
-export default function DetailTable() {
+export default function DetailTable({
+  rowHeight = 40,
+}: {
+  rowHeight?: number
+} = {}) {
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
   const { items, isLoading } = useDetail()
 
@@ -74,6 +78,7 @@ export default function DetailTable() {
         y: 'calc(100vh - 200px)',
       }}
       pagination={false}
+      onRow={() => ({ style: { height: rowHeight } })}
     />
   )
 }

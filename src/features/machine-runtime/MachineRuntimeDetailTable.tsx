@@ -12,6 +12,7 @@ interface Props {
   pageSize: number
   onPageChange: (page: number, pageSize: number) => void
   scrollY?: number
+  rowHeight?: number
 }
 
 export default function MachineRuntimeDetailTable({
@@ -22,6 +23,7 @@ export default function MachineRuntimeDetailTable({
   pageSize,
   onPageChange,
   scrollY = 350,
+  rowHeight = 40,
 }: Props) {
   const columns: TableColumnsType<MachineRuntimeItem> = useMemo(
     () => [
@@ -107,6 +109,7 @@ export default function MachineRuntimeDetailTable({
         scroll={{ y: scrollY, x: 1000 }}
         size="small"
         pagination={false}
+        onRow={() => ({ style: { height: rowHeight } })}
       />
       <div className="flex justify-end">
         <Pagination

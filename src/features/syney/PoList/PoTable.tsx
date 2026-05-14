@@ -7,7 +7,7 @@ import { useAppStore } from '@/store'
 import { ISyneyPo } from '@/types'
 import { usePos } from './usePos'
 
-function PoTable() {
+function PoTable({ rowHeight = 40 }: { rowHeight?: number } = {}) {
   const [searchParams] = useSearchParams()
 
   const page = Number(searchParams.get('page')) || 1
@@ -121,6 +121,7 @@ function PoTable() {
       scroll={{
         y: 'calc(100vh - 320px)',
       }}
+      onRow={() => ({ style: { height: rowHeight } })}
       summary={(pageData) => {
         let totalCount = 0
         pageData.forEach((item) => {

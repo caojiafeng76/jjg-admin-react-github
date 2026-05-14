@@ -47,7 +47,7 @@ const columns: TableColumnsType<ISyneyStoreReport> = [
     render: (text: number) => formatNumber(text),
   },
 ]
-function ReportTable() {
+function ReportTable({ rowHeight = 40 }: { rowHeight?: number } = {}) {
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
   const { isLoading, reports } = useReports()
@@ -71,6 +71,7 @@ function ReportTable() {
       scroll={{
         y: 560,
       }}
+      onRow={() => ({ style: { height: rowHeight } })}
       summary={(pageData) => {
         let totalAmount = 0
         pageData.forEach((item) => {

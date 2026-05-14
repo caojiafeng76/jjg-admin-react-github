@@ -18,6 +18,7 @@ interface Props {
   onEdit: (item: ProductionOrderItem) => void
   onDelete: (ids: string[]) => void
   scrollY?: number
+  rowHeight?: number
   showActions?: boolean
   hideCostColumns?: boolean
 }
@@ -84,6 +85,7 @@ function ProductionOrderItemTable({
   onEdit,
   onDelete,
   scrollY = 400,
+  rowHeight = 40,
   showActions = true,
   hideCostColumns = false,
 }: Props) {
@@ -263,6 +265,7 @@ function ProductionOrderItemTable({
       size="small"
       pagination={false}
       style={{ fontSize: '12px' }}
+      onRow={() => ({ style: { height: rowHeight } })}
     />
   )
 }
