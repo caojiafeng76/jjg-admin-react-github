@@ -21,6 +21,7 @@ import {
 interface Props {
   onImport: (rows: YoumaiProductDataFormValues[]) => Promise<void>
   isImporting: boolean
+  permissionKey?: string
 }
 
 type PreviewRow = YoumaiProductDataFormValues & { _idx: number }
@@ -67,6 +68,7 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
 export default function YoumaiProductDataExcelImport({
   onImport,
   isImporting,
+  permissionKey,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -139,9 +141,12 @@ export default function YoumaiProductDataExcelImport({
 
   return (
     <>
-      <ImportButton onClick={handleOpenModal} />
+      <ImportButton onClick={handleOpenModal} permissionKey={permissionKey} />
 
-      <DownloadTemplateButton onClick={downloadYoumaiProductDataTemplate} />
+      <DownloadTemplateButton
+        onClick={downloadYoumaiProductDataTemplate}
+        permissionKey={permissionKey}
+      />
 
       <Modal
         title="导入优迈货品资料"

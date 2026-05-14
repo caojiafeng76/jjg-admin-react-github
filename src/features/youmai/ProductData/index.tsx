@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { App, FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
   YoumaiProductData,
   YoumaiProductDataFormValues,
@@ -11,6 +13,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiProductDataExcelImport from './YoumaiProductDataExcelImport'
 import YoumaiProductDataForm from './YoumaiProductDataForm'
 import YoumaiProductDataSearch from './YoumaiProductDataSearch'
@@ -25,6 +28,10 @@ import {
 
 export default function YoumaiProductDataPage() {
   const { message } = App.useApp()
+  const canManageYoumai = usePermission(YOUMAI_MANAGE_PERMISSION_KEY)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: YOUMAI_MANAGE_PERMISSION_KEY,
+  })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建优迈货品资料')
@@ -115,6 +122,16 @@ export default function YoumaiProductDataPage() {
 
   const handleImport = useCallback(
     async (rows: YoumaiProductDataFormValues[]) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         await importMutation.mutateAsync(rows)
         message.success(`优迈货品资料导入成功，共 ${rows.length} 条`)
@@ -127,11 +144,27 @@ export default function YoumaiProductDataPage() {
         }
       }
     },
-    [importMutation, message],
+    [
+      canManageYoumai,
+      importMutation,
+      message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleFinish = useCallback(
     async (values: YoumaiProductDataFormValues) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -155,11 +188,14 @@ export default function YoumaiProductDataPage() {
     },
     [
       createMutation,
+      canManageYoumai,
       isEdit,
       message,
       resetFormState,
       selectedRowKeys,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -203,11 +239,19 @@ export default function YoumaiProductDataPage() {
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑优迈货品资料" handleEdit={handleEdit} />
+        <AddButton
+          handleCreate={handleCreate}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
+        <EditButton
+          title="编辑优迈货品资料"
+          handleEdit={handleEdit}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
         <YoumaiProductDataExcelImport
           onImport={handleImport}
           isImporting={importMutation.isPending}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
         <DeleteButton
           onConfirm={handleDelete}
@@ -215,6 +259,7 @@ export default function YoumaiProductDataPage() {
           count={selectedRowKeys.length}
           title="删除优迈货品资料"
           itemName="优迈货品资料"
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
       </div>
 
@@ -253,6 +298,7 @@ export default function YoumaiProductDataPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied || !canManageYoumai }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

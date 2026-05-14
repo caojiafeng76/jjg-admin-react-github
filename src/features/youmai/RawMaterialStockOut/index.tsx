@@ -2,13 +2,16 @@ import { useCallback, useEffect, useState } from 'react'
 import { App, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type { YoumaiRawMaterialStockOutFormValues } from '@/services/apiYoumaiRawMaterialStockOut'
 import type { YoumaiRawMaterialStockOut } from '@/services/apiYoumaiRawMaterialStockOut'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiRawMaterialStockOutForm from './YoumaiRawMaterialStockOutForm'
 import YoumaiRawMaterialStockOutSearch from './YoumaiRawMaterialStockOutSearch'
 import YoumaiRawMaterialStockOutTable from './YoumaiRawMaterialStockOutTable'
@@ -22,6 +25,10 @@ import {
 
 export default function YoumaiRawMaterialStockOutPage() {
   const { message } = App.useApp()
+  const canManageYoumai = usePermission(YOUMAI_MANAGE_PERMISSION_KEY)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: YOUMAI_MANAGE_PERMISSION_KEY,
+  })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
@@ -112,6 +119,16 @@ export default function YoumaiRawMaterialStockOutPage() {
 
   const handleFinish = useCallback(
     async (values: YoumaiRawMaterialStockOutFormValues) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
       try {
         if (isEdit && editingRecord) {
           await updateMutation.mutateAsync({
@@ -134,11 +151,14 @@ export default function YoumaiRawMaterialStockOutPage() {
     },
     [
       createMutation,
+      canManageYoumai,
       editingRecord,
       isEdit,
       message,
       resetFormState,
       updateMutation,
+      viewerDenied,
+      viewerOperationTip,
     ],
   )
 
@@ -178,14 +198,22 @@ export default function YoumaiRawMaterialStockOutPage() {
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑原料出库" handleEdit={handleEdit} />
+        <AddButton
+          handleCreate={handleCreate}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
+        <EditButton
+          title="编辑原料出库"
+          handleEdit={handleEdit}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
           title="删除原料出库记录"
           itemName="原料出库记录"
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
       </div>
 
@@ -224,6 +252,7 @@ export default function YoumaiRawMaterialStockOutPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
+        okButtonProps={{ disabled: viewerDenied || !canManageYoumai }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

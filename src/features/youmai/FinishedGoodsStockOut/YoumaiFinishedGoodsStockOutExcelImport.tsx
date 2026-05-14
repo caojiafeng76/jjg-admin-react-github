@@ -18,6 +18,7 @@ import {
 
 import type { YoumaiFinishedGoodsStockOutImportRow } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import { fetchYoumaiPurchaseOrder } from '@/services/apiYoumaiPurchaseOrder'
+import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import ImportButton from '@/ui/ImportButton'
 import { parseYoumaiFinishedGoodsStockOutExcel } from '@/utils/youmaiFinishedGoodsStockOutExcel'
@@ -25,6 +26,7 @@ import { parseYoumaiFinishedGoodsStockOutExcel } from '@/utils/youmaiFinishedGoo
 interface Props {
   onImport: (rows: YoumaiFinishedGoodsStockOutImportRow[]) => Promise<void>
   isImporting: boolean
+  permissionKey?: string
 }
 
 type PreviewRow = YoumaiFinishedGoodsStockOutImportRow & { _idx: number }
@@ -76,9 +78,15 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
 export default function YoumaiFinishedGoodsStockOutExcelImport({
   onImport,
   isImporting,
+  permissionKey,
 }: Props) {
   const { message } = App.useApp()
-  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+  const allowed = usePermission(permissionKey ?? '')
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: permissionKey,
+  })
+  const denied = viewerDenied || (Boolean(permissionKey) && !allowed)
+  const deniedTip = viewerDenied ? viewerOperationTip : '无优迈模块操作权限'
   const [modalOpen, setModalOpen] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [purchaseOrderNo, setPurchaseOrderNo] = useState('')
@@ -186,7 +194,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
       type="text"
       icon={<ArrowDownTrayIcon className="size-4 text-cyan-500/80!" />}
       onClick={() => handleOpenModal('purchaseOrder')}
-      disabled={viewerDenied}
+      disabled={denied}
     >
       获取采购订单
     </Button>
@@ -194,12 +202,15 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
 
   return (
     <>
-      {viewerDenied ? (
-        <Tooltip title={viewerOperationTip}>{fetchButton}</Tooltip>
+      {denied ? (
+        <Tooltip title={deniedTip}>{fetchButton}</Tooltip>
       ) : (
         fetchButton
       )}
-      <ImportButton onClick={() => handleOpenModal('excel')}>
+      <ImportButton
+        onClick={() => handleOpenModal('excel')}
+        permissionKey={permissionKey}
+      >
         导入Excel
       </ImportButton>
 

@@ -9,6 +9,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { exportYoumaiFinishedGoodsStockOutToExcel } from '@/utils/youmaiFinishedGoodsStockOutExport'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
@@ -21,6 +22,7 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import PrintButton from '@/ui/PrintButton'
+import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiFinishedGoodsStockOutExcelImport from './YoumaiFinishedGoodsStockOutExcelImport'
 import YoumaiFinishedGoodsStockOutForm from './YoumaiFinishedGoodsStockOutForm'
 import YoumaiFinishedGoodsStockOutSearch from './YoumaiFinishedGoodsStockOutSearch'
@@ -39,7 +41,10 @@ import {
 
 export default function YoumaiFinishedGoodsStockOutPage() {
   const { message, modal } = App.useApp()
-  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+  const canManageYoumai = usePermission(YOUMAI_MANAGE_PERMISSION_KEY)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: YOUMAI_MANAGE_PERMISSION_KEY,
+  })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建优迈成品出库')
@@ -90,6 +95,11 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   )
 
   const handlePrint = useCallback(() => {
+    if (!canManageYoumai) {
+      message.warning('无优迈模块操作权限')
+      return
+    }
+
     if (viewerDenied) {
       message.warning(viewerOperationTip)
       return
@@ -98,6 +108,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     void printSelected(selectedRecords)
   }, [
     message,
+    canManageYoumai,
     printSelected,
     selectedRecords,
     viewerDenied,
@@ -105,6 +116,11 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   ])
 
   const handlePrintLabel = useCallback(async () => {
+    if (!canManageYoumai) {
+      message.warning('无优迈模块操作权限')
+      return
+    }
+
     if (viewerDenied) {
       message.warning(viewerOperationTip)
       return
@@ -125,6 +141,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     }
   }, [
     message,
+    canManageYoumai,
     printLabels,
     selectedRecords,
     viewerDenied,
@@ -132,6 +149,11 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   ])
 
   const handleExportExcel = useCallback(() => {
+    if (!canManageYoumai) {
+      message.warning('无优迈模块操作权限')
+      return
+    }
+
     if (viewerDenied) {
       message.warning(viewerOperationTip)
       return
@@ -149,7 +171,13 @@ export default function YoumaiFinishedGoodsStockOutPage() {
       console.error('导出优迈成品出库失败:', error)
       message.error('导出失败，请稍后重试')
     }
-  }, [message, selectedRecords, viewerDenied, viewerOperationTip])
+  }, [
+    canManageYoumai,
+    message,
+    selectedRecords,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
@@ -214,6 +242,11 @@ export default function YoumaiFinishedGoodsStockOutPage() {
 
   const handleBatchAudit = useCallback(
     (status: '待审核' | '已审核') => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
       if (viewerDenied) {
         message.warning(viewerOperationTip)
         return
@@ -251,6 +284,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     },
     [
       batchStatusMutation,
+      canManageYoumai,
       message,
       modal,
       selectedRowKeys,
@@ -261,6 +295,11 @@ export default function YoumaiFinishedGoodsStockOutPage() {
 
   const handleImport = useCallback(
     async (rows: YoumaiFinishedGoodsStockOutImportRow[]) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
       if (viewerDenied) {
         message.warning(viewerOperationTip)
         return
@@ -278,11 +317,22 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         }
       }
     },
-    [importMutation, message, viewerDenied, viewerOperationTip],
+    [
+      canManageYoumai,
+      importMutation,
+      message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
   )
 
   const handleFinish = useCallback(
     async (values: YoumaiFinishedGoodsStockOutFormValues) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
       if (viewerDenied) {
         message.warning(viewerOperationTip)
         return
@@ -311,6 +361,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     },
     [
       createMutation,
+      canManageYoumai,
       isEdit,
       message,
       resetFormState,
@@ -368,13 +419,16 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
+        <AddButton
+          handleCreate={handleCreate}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
         <Button
           type="text"
           icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
           onClick={() => handleBatchAudit('已审核')}
           loading={batchStatusMutation.isPending}
-          disabled={viewerDenied}
+          disabled={viewerDenied || !canManageYoumai}
         >
           批量审核
         </Button>
@@ -383,15 +437,20 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
           onClick={() => handleBatchAudit('待审核')}
           loading={batchStatusMutation.isPending}
-          disabled={viewerDenied}
+          disabled={viewerDenied || !canManageYoumai}
         >
           批量反审核
         </Button>
-        <EditButton title="编辑优迈成品出库" handleEdit={handleEdit} />
+        <EditButton
+          title="编辑优迈成品出库"
+          handleEdit={handleEdit}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
         <PrintButton
           handlePrint={handlePrint}
           loading={isPrinting}
           count={selectedRowKeys.length}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         >
           打印选中项
         </PrintButton>
@@ -399,6 +458,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           handlePrint={handlePrintLabel}
           loading={isLabelPrinting}
           count={selectedRowKeys.length}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         >
           打印标签
         </PrintButton>
@@ -406,7 +466,9 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           type="text"
           icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
           onClick={handleExportExcel}
-          disabled={viewerDenied || selectedRowKeys.length === 0}
+          disabled={
+            viewerDenied || !canManageYoumai || selectedRowKeys.length === 0
+          }
         >
           导出Excel
           {selectedRowKeys.length > 0 && (
@@ -416,6 +478,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         <YoumaiFinishedGoodsStockOutExcelImport
           onImport={handleImport}
           isImporting={importMutation.isPending}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
         <DeleteButton
           onConfirm={handleDelete}
@@ -423,6 +486,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           count={selectedRowKeys.length}
           title="删除优迈成品出库"
           itemName="优迈成品出库"
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
       </div>
 
@@ -465,7 +529,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           updateMutation.isPending ||
           batchStatusMutation.isPending
         }
-        okButtonProps={{ disabled: viewerDenied }}
+        okButtonProps={{ disabled: viewerDenied || !canManageYoumai }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >

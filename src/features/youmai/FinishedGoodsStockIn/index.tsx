@@ -3,6 +3,7 @@ import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
 import { App, Button, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
+import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
@@ -13,6 +14,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiFinishedGoodsStockInForm from './YoumaiFinishedGoodsStockInForm'
 import YoumaiFinishedGoodsStockInSearch from './YoumaiFinishedGoodsStockInSearch'
 import YoumaiFinishedGoodsStockInTable from './YoumaiFinishedGoodsStockInTable'
@@ -27,7 +29,10 @@ import {
 
 export default function YoumaiFinishedGoodsStockInPage() {
   const { message, modal } = App.useApp()
-  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+  const canManageYoumai = usePermission(YOUMAI_MANAGE_PERMISSION_KEY)
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: YOUMAI_MANAGE_PERMISSION_KEY,
+  })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建优迈成品入库')
@@ -138,6 +143,11 @@ export default function YoumaiFinishedGoodsStockInPage() {
 
   const handleBatchAudit = useCallback(
     (status: '待审核' | '已审核') => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
       if (viewerDenied) {
         message.warning(viewerOperationTip)
         return
@@ -175,6 +185,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
     },
     [
       batchStatusMutation,
+      canManageYoumai,
       message,
       modal,
       selectedRowKeys,
@@ -185,6 +196,11 @@ export default function YoumaiFinishedGoodsStockInPage() {
 
   const handleFinish = useCallback(
     async (values: YoumaiFinishedGoodsStockInFormValues) => {
+      if (!canManageYoumai) {
+        message.warning('无优迈模块操作权限')
+        return
+      }
+
       if (viewerDenied) {
         message.warning(viewerOperationTip)
         return
@@ -213,6 +229,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
     },
     [
       createMutation,
+      canManageYoumai,
       isEdit,
       message,
       resetFormState,
@@ -270,13 +287,16 @@ export default function YoumaiFinishedGoodsStockInPage() {
   return (
     <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
+        <AddButton
+          handleCreate={handleCreate}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
         <Button
           type="text"
           icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
           onClick={() => handleBatchAudit('已审核')}
           loading={batchStatusMutation.isPending}
-          disabled={viewerDenied}
+          disabled={viewerDenied || !canManageYoumai}
         >
           批量审核
         </Button>
@@ -285,17 +305,22 @@ export default function YoumaiFinishedGoodsStockInPage() {
           icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
           onClick={() => handleBatchAudit('待审核')}
           loading={batchStatusMutation.isPending}
-          disabled={viewerDenied}
+          disabled={viewerDenied || !canManageYoumai}
         >
           批量反审核
         </Button>
-        <EditButton title="编辑优迈成品入库" handleEdit={handleEdit} />
+        <EditButton
+          title="编辑优迈成品入库"
+          handleEdit={handleEdit}
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+        />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
           title="删除优迈成品入库"
           itemName="优迈成品入库"
+          permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
       </div>
 
@@ -338,7 +363,7 @@ export default function YoumaiFinishedGoodsStockInPage() {
           updateMutation.isPending ||
           batchStatusMutation.isPending
         }
-        okButtonProps={{ disabled: viewerDenied }}
+        okButtonProps={{ disabled: viewerDenied || !canManageYoumai }}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
