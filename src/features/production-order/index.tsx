@@ -174,7 +174,7 @@ export default function ProductionOrderPage() {
       isEmployeeView && employeeProfile?.id
         ? { id: employeeProfile.id, name: employeeProfile.name }
         : null,
-    [employeeProfile?.id, employeeProfile?.name, isEmployeeView],
+    [employeeProfile, isEmployeeView],
   )
   const fixedEmployeeId = fixedEmployee?.id
 
@@ -597,7 +597,7 @@ export default function ProductionOrderPage() {
       setIsNightSnackExporting(false)
     }
   }, [
-    employeeProfile?.name,
+    employeeProfile,
     filters,
     message,
     orderData?.total,

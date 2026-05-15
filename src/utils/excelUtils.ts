@@ -298,6 +298,7 @@ export async function parseExcelFile(file: File): Promise<ExcelData> {
   } catch (error) {
     throw new Error(
       `Excel解析失败: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
     )
   }
 }

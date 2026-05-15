@@ -48,7 +48,7 @@ export default function PrecisionFinishingCuttingPage() {
       isOwnOnlyView && employeeProfile?.id
         ? { id: employeeProfile.id, name: employeeProfile.name }
         : null,
-    [employeeProfile?.id, employeeProfile?.name, isOwnOnlyView],
+    [employeeProfile, isOwnOnlyView],
   )
   const fixedEmployeeId = fixedEmployee?.id
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -355,8 +355,7 @@ export default function PrecisionFinishingCuttingPage() {
       createMutation,
       currentUploader,
       editingRecord,
-      fixedEmployee?.id,
-      fixedEmployee?.name,
+      fixedEmployee,
       handleCloseModal,
       isEmployeeView,
       message,

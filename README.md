@@ -18,6 +18,9 @@
 ```bash
 bun dev
 bun run build
+bun run test
+bun run test:watch
+bun run test:coverage
 bun preview
 bun lint
 bun lint:fix
@@ -32,7 +35,9 @@ bunx spec-workflow-mcp --help
 说明：
 
 - 项目使用 bun 作为包管理器
-- 当前未配置独立测试框架，日常验证以类型检查、构建、lint 和局部回归为主
+- 已配置 Vitest + Testing Library + jsdom，日常验证默认先跑 `bun run test`
+- 运行测试请使用 `bun run test`，不要用 Bun 内置的 `bun test` 代替
+- 完成任务后必须确保测试通过才能交付；涉及前端或 TypeScript 改动时，继续按风险补充 `bun run build`、lint 和局部回归
 
 Supabase 数据库命令补充：
 
@@ -86,7 +91,7 @@ src/
 5. 仅在信息不足时提出最少必要澄清问题
 6. 实施前给出简短计划
 7. 保持改动最小化，优先修复根因
-8. 改动后做必要验证
+8. 改动后做必要验证，完成任务后必须确保 `bun run test` 通过才能交付
 9. 最终按固定结构汇报结果
 
 补充基础规则：所有任务开始前，必须先调用 Sequential Thinking MCP 和 Serena MCP。即使任务很小，也不能跳过；如果 Serena 不可用或返回 `No active project`，需要明确说明已降级后再退回常规搜索。
