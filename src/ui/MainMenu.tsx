@@ -158,6 +158,11 @@ const allMenuItems: MenuItemDef[] = [
         label: '返工返修',
         permission: 'page:quality-rework-repair',
       },
+      {
+        key: 'quality-issue-record',
+        label: '质量问题记录',
+        permission: 'page:quality-issue-record',
+      },
     ],
   },
   {

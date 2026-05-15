@@ -42,6 +42,7 @@ import {
   PrecisionFinishingCuttingScan,
   ProductionDailyReport,
   ProductionScheduling,
+  QualityIssueRecord,
   QualityReworkRepair,
   ProductionOrder,
   ProductionOrderScan,
@@ -407,6 +408,17 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:quality-rework-repair"
               element={<QualityReworkRepair />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'quality-issue-record',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:quality-issue-record"
+              element={<QualityIssueRecord />}
             />
           </Suspense>
         ),

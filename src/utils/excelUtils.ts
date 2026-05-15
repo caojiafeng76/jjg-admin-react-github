@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx-js-style'
+import type { CellObject, WorkSheet } from 'xlsx-js-style'
 import { ISyneyPo, ISyneyItem } from '@/types'
 import { inferParamSpecFromRemark } from '@utils/syney'
 import dayjs from 'dayjs'
@@ -67,51 +68,238 @@ const REQUIRED_FIELDS = [
   '生产编号',
 ]
 
+const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50
+const ZIP_CENTRAL_DIRECTORY_HEADER_SIGNATURE = 0x02014b50
+const ZIP64_EXTRA_FIELD_ID = 0x0001
+const ZIP_UINT32_MAX = 0xffffffff
+const ZIP_LOCAL_FILE_HEADER_LENGTH = 30
+const ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH = 46
+
+type Zip64ExtraFields = {
+  uncompressedSize?: number
+  compressedSize?: number
+  localHeaderOffset?: number
+}
+
+function hasCellData(cell: CellObject | undefined): boolean {
+  if (!cell) return false
+
+  const value = cell.v
+  if (value === null || value === undefined) return false
+  if (typeof value === 'string') return value.trim() !== ''
+
+  return true
+}
+
+function readUint64AsSafeNumber(
+  view: DataView,
+  offset: number,
+): number | undefined {
+  const value = view.getBigUint64(offset, true)
+  if (value > BigInt(Number.MAX_SAFE_INTEGER)) return undefined
+
+  return Number(value)
+}
+
+function readZip64ExtraFields(
+  view: DataView,
+  extraStart: number,
+  extraLength: number,
+  needs: {
+    uncompressedSize: boolean
+    compressedSize: boolean
+    localHeaderOffset: boolean
+  },
+): Zip64ExtraFields {
+  const fields: Zip64ExtraFields = {}
+  const extraEnd = extraStart + extraLength
+  let cursor = extraStart
+
+  while (cursor + 4 <= extraEnd) {
+    const fieldId = view.getUint16(cursor, true)
+    const fieldLength = view.getUint16(cursor + 2, true)
+    const fieldStart = cursor + 4
+    const fieldEnd = fieldStart + fieldLength
+
+    if (fieldEnd > extraEnd) break
+
+    if (fieldId === ZIP64_EXTRA_FIELD_ID) {
+      let fieldCursor = fieldStart
+
+      if (needs.uncompressedSize && fieldCursor + 8 <= fieldEnd) {
+        fields.uncompressedSize = readUint64AsSafeNumber(view, fieldCursor)
+        fieldCursor += 8
+      }
+
+      if (needs.compressedSize && fieldCursor + 8 <= fieldEnd) {
+        fields.compressedSize = readUint64AsSafeNumber(view, fieldCursor)
+        fieldCursor += 8
+      }
+
+      if (needs.localHeaderOffset && fieldCursor + 8 <= fieldEnd) {
+        fields.localHeaderOffset = readUint64AsSafeNumber(view, fieldCursor)
+      }
+
+      return fields
+    }
+
+    cursor = fieldEnd
+  }
+
+  return fields
+}
+
+function patchUint32IfZip64(
+  view: DataView,
+  offset: number,
+  value: number | undefined,
+): boolean {
+  if (view.getUint32(offset, true) !== ZIP_UINT32_MAX) return false
+  if (value === undefined || value > ZIP_UINT32_MAX) return false
+
+  view.setUint32(offset, value, true)
+  return true
+}
+
+function normalizeZip64ExcelBuffer(data: ArrayBuffer): ArrayBuffer {
+  const bytes = new Uint8Array(data)
+  const view = new DataView(data)
+  let cursor = 0
+
+  while (
+    cursor + ZIP_LOCAL_FILE_HEADER_LENGTH <= bytes.length &&
+    view.getUint32(cursor, true) === ZIP_LOCAL_FILE_HEADER_SIGNATURE
+  ) {
+    const compressedSize = view.getUint32(cursor + 18, true)
+    const uncompressedSize = view.getUint32(cursor + 22, true)
+    const fileNameLength = view.getUint16(cursor + 26, true)
+    const extraLength = view.getUint16(cursor + 28, true)
+    const extraStart = cursor + ZIP_LOCAL_FILE_HEADER_LENGTH + fileNameLength
+    const zip64Fields = readZip64ExtraFields(view, extraStart, extraLength, {
+      uncompressedSize: uncompressedSize === ZIP_UINT32_MAX,
+      compressedSize: compressedSize === ZIP_UINT32_MAX,
+      localHeaderOffset: false,
+    })
+
+    patchUint32IfZip64(view, cursor + 18, zip64Fields.compressedSize)
+    patchUint32IfZip64(view, cursor + 22, zip64Fields.uncompressedSize)
+
+    const resolvedCompressedSize =
+      compressedSize === ZIP_UINT32_MAX
+        ? zip64Fields.compressedSize
+        : compressedSize
+
+    if (
+      resolvedCompressedSize === undefined ||
+      resolvedCompressedSize > bytes.length
+    ) {
+      return data
+    }
+
+    cursor = extraStart + extraLength + resolvedCompressedSize
+  }
+
+  while (
+    cursor + ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH <= bytes.length &&
+    view.getUint32(cursor, true) === ZIP_CENTRAL_DIRECTORY_HEADER_SIGNATURE
+  ) {
+    const compressedSize = view.getUint32(cursor + 20, true)
+    const uncompressedSize = view.getUint32(cursor + 24, true)
+    const localHeaderOffset = view.getUint32(cursor + 42, true)
+    const fileNameLength = view.getUint16(cursor + 28, true)
+    const extraLength = view.getUint16(cursor + 30, true)
+    const commentLength = view.getUint16(cursor + 32, true)
+    const extraStart =
+      cursor + ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH + fileNameLength
+    const zip64Fields = readZip64ExtraFields(view, extraStart, extraLength, {
+      uncompressedSize: uncompressedSize === ZIP_UINT32_MAX,
+      compressedSize: compressedSize === ZIP_UINT32_MAX,
+      localHeaderOffset: localHeaderOffset === ZIP_UINT32_MAX,
+    })
+
+    patchUint32IfZip64(view, cursor + 20, zip64Fields.compressedSize)
+    patchUint32IfZip64(view, cursor + 24, zip64Fields.uncompressedSize)
+    patchUint32IfZip64(view, cursor + 42, zip64Fields.localHeaderOffset)
+
+    cursor = extraStart + extraLength + commentLength
+  }
+
+  return data
+}
+
+export function getWorksheetDataRange(
+  worksheet: WorkSheet,
+): string | undefined {
+  let range: XLSX.Range | null = null
+
+  for (const cellRef of Object.keys(worksheet)) {
+    if (cellRef.startsWith('!')) continue
+
+    const cell = worksheet[cellRef] as CellObject | undefined
+    if (!hasCellData(cell)) continue
+
+    const cellAddress = XLSX.utils.decode_cell(cellRef)
+    if (!range) {
+      range = {
+        s: { r: cellAddress.r, c: cellAddress.c },
+        e: { r: cellAddress.r, c: cellAddress.c },
+      }
+      continue
+    }
+
+    range.s.r = Math.min(range.s.r, cellAddress.r)
+    range.s.c = Math.min(range.s.c, cellAddress.c)
+    range.e.r = Math.max(range.e.r, cellAddress.r)
+    range.e.c = Math.max(range.e.c, cellAddress.c)
+  }
+
+  return range ? XLSX.utils.encode_range(range) : undefined
+}
+
 /**
  * 解析Excel文件
  * @param file Excel文件对象
  * @returns Promise<ExcelData>
  */
 export async function parseExcelFile(file: File): Promise<ExcelData> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-
-    reader.onload = (e) => {
-      try {
-        const data = e.target?.result
-        if (!data) {
-          reject(new Error('文件读取失败'))
-          return
-        }
-
-        const workbook = XLSX.read(data, { type: 'binary' })
-        const sheetName = workbook.SheetNames[0]
-        const worksheet = workbook.Sheets[sheetName]
-
-        // 转换为JSON，保留原始值
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-          raw: true, // 保留原始数据类型
-          defval: null, // 空单元格使用null
-        }) as ExcelRow[]
-
-        // 提取表头
-        const headers = jsonData.length > 0 ? Object.keys(jsonData[0]) : []
-
-        resolve({
-          headers,
-          rows: jsonData,
-        })
-      } catch (error) {
-        reject(new Error(`Excel解析失败: ${error}`))
-      }
+  try {
+    const data = normalizeZip64ExcelBuffer(await file.arrayBuffer())
+    const workbook = XLSX.read(data, { type: 'array' })
+    const sheetName = workbook.SheetNames[0]
+    if (!sheetName) {
+      throw new Error('Excel文件中没有工作表')
     }
 
-    reader.onerror = () => {
-      reject(new Error('文件读取错误'))
+    const worksheet = workbook.Sheets[sheetName]
+    if (!worksheet) {
+      throw new Error('Excel工作表读取失败')
     }
 
-    reader.readAsBinaryString(file)
-  })
+    const range = getWorksheetDataRange(worksheet)
+    if (!range) {
+      return { headers: [], rows: [] }
+    }
+
+    // 转换为JSON，按真实有值区域解析，避免 ERP 文件虚高 !ref 导致全表扫描
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+      raw: true, // 保留原始数据类型
+      defval: null, // 空单元格使用null
+      blankrows: false,
+      range,
+    }) as ExcelRow[]
+
+    // 提取表头
+    const headers = jsonData.length > 0 ? Object.keys(jsonData[0]) : []
+
+    return {
+      headers,
+      rows: jsonData,
+    }
+  } catch (error) {
+    throw new Error(
+      `Excel解析失败: ${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
 }
 
 /**
