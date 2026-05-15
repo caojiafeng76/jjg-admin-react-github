@@ -135,6 +135,9 @@ export const ProductionDailyReport = lazy(
 export const QualityReworkRepair = lazy(
   () => import('@features/quality/ReworkRepair'),
 )
+export const QualityIssueRecord = lazy(
+  () => import('@features/quality/IssueRecord'),
+)
 export const MachineRuntime = lazy(() => import('@features/machine-runtime'))
 export const AttendanceDetail = lazy(
   () => import('@features/attendance/AttendanceDetail'),

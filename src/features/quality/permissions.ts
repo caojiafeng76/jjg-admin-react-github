@@ -15,4 +15,11 @@ export const QUALITY_PERMISSIONS: PermissionDefinition[] = [
     surface: 'pc',
     label: '质量返工返修',
   },
+  {
+    key: 'page:quality-issue-record',
+    scope: 'page',
+    module: 'quality',
+    surface: 'pc',
+    label: '质量问题记录单',
+  },
 ]

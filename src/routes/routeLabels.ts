@@ -23,6 +23,7 @@ const routeToLabelMap: Record<string, string> = {
   'production-order/scan': '扫码工单',
   'production-daily-report': '生产日报表',
   'quality-rework-repair': '质量 / 返工返修',
+  'quality-issue-record': '质量 / 质量问题记录',
   'precision-finishing-cutting': '精加工切割单',
   'precision-finishing-cutting/scan': '扫码精加工切割单',
   'precision-cutting-transfer': '精切转移单',
