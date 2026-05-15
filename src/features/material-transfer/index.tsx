@@ -49,7 +49,7 @@ export default function MaterialTransferPage() {
       isOwnOnlyView && employeeProfile?.id
         ? { id: employeeProfile.id, name: employeeProfile.name }
         : null,
-    [employeeProfile?.id, employeeProfile?.name, isOwnOnlyView],
+    [employeeProfile, isOwnOnlyView],
   )
   const fixedEmployeeId = fixedEmployee?.id
   const fixedEmployeeName = fixedEmployee?.name

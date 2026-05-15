@@ -23,6 +23,7 @@
     "api/**/*.ts",
     "syneyStoreReportServer.ts",
     "vite.config.ts",
+    "vitest.config.ts",
     "viteSyneyStoreReportProxy.ts"
   ]
 }
