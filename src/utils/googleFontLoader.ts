@@ -8,9 +8,14 @@
 let fontCache: ArrayBuffer | null = null
 let fontLoadingPromise: Promise<ArrayBuffer> | null = null
 
+// 本地字体优先，避免内网或浏览器环境无法访问 Google Fonts 时打印失败。
+const LOCAL_FONT_TTF_URL = '/fonts/NotoSansSC.ttf'
+
 // Google Fonts 思源黑体 TTF 链接
 const GOOGLE_FONT_TTF_URL =
   'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_FnYxNbPzS5HE.ttf'
+
+const FONT_SOURCE_URLS = [LOCAL_FONT_TTF_URL, GOOGLE_FONT_TTF_URL]
 
 /**
  * 从 URL 加载字体文件
@@ -18,9 +23,21 @@ const GOOGLE_FONT_TTF_URL =
 async function fetchFont(url: string): Promise<ArrayBuffer> {
   const response = await fetch(url)
   if (!response.ok) {
-    throw new Error(`Failed to fetch font: ${response.statusText}`)
+    throw new Error(`字体源不可用：${url}`)
   }
   return response.arrayBuffer()
+}
+
+async function fetchFontFromSources(): Promise<ArrayBuffer> {
+  for (const url of FONT_SOURCE_URLS) {
+    try {
+      return await fetchFont(url)
+    } catch (error) {
+      console.warn('Font source unavailable:', url, error)
+    }
+  }
+
+  throw new Error('中文字体加载失败，请检查网络或本地字体文件')
 }
 
 /**
@@ -28,10 +45,14 @@ async function fetchFont(url: string): Promise<ArrayBuffer> {
  */
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer)
+  const chunkSize = 0x8000
   let binary = ''
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i])
+
+  for (let index = 0; index < bytes.byteLength; index += chunkSize) {
+    const chunk = bytes.subarray(index, index + chunkSize)
+    binary += String.fromCharCode(...chunk)
   }
+
   return btoa(binary)
 }
 
@@ -51,8 +72,7 @@ export async function loadGoogleFont(): Promise<string> {
     return arrayBufferToBase64(buffer)
   }
 
-  // 从 Google Fonts 加载 TTF 字体
-  fontLoadingPromise = fetchFont(GOOGLE_FONT_TTF_URL)
+  fontLoadingPromise = fetchFontFromSources()
 
   try {
     fontCache = await fontLoadingPromise

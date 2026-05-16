@@ -19,6 +19,7 @@ import ExportAsExcelButton from './ExportAsExcelButton'
 import { useGenerateSyneyStoreReportPDF } from './useGenerateSyneyStoreReportPDF'
 import ExportPDFButton from './ExportPDFButton'
 import { useFetchSyneyStoreReport } from './useFetchSyneyStoreReport'
+import { usePrintSyneyStoreReceipt } from './usePrintSyneyStoreReceipt'
 import { useSyneySpecs } from '../SpecList/useSyneySpecs'
 import { useCreateReport } from './useCreateReport'
 import {
@@ -43,6 +44,8 @@ export default function ReportList() {
   })
   const { fetchSyneyStoreReport, isFetching } = useFetchSyneyStoreReport()
   const { createReport, isCreating: isCreatingFromScm } = useCreateReport()
+  const { printByStoreInNo, isPrintingStoreReceipt } =
+    usePrintSyneyStoreReceipt()
 
   const reportFormRef = useRef<ISyneyStoreReportFormRef>(null)
 
@@ -155,6 +158,15 @@ export default function ReportList() {
     }
   }
 
+  async function handlePrintStoreReceipt() {
+    if (isPrintingStoreReceipt) {
+      messageApi.loading('入库单打印准备中，请稍候...', 1)
+      return
+    }
+
+    await printByStoreInNo(storeInNo)
+  }
+
   useEffect(() => {
     return () => {
       setTableSelectedKeys([])
@@ -184,6 +196,13 @@ export default function ReportList() {
             onChange={(event) => setStoreInNo(event.target.value)}
             onSearch={handleFetchStoreReport}
           />
+          <PrintButton
+            disabled={!storeInNo.trim()}
+            handlePrint={handlePrintStoreReceipt}
+            loading={isPrintingStoreReceipt}
+          >
+            打印入库单
+          </PrintButton>
         </div>
 
         <div className="flex items-center gap-4 filter">
