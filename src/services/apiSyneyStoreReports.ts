@@ -2,6 +2,7 @@ import { ISyneyItem } from './types'
 import { FunctionRegion } from '@supabase/supabase-js'
 import supabase from '@services/supabase'
 import { handleApiError } from '@utils/errorHandler'
+import { resolveSyneyStoreReportProxyUrl } from './syneyStoreReportProxy'
 
 const FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS = 45000
 const SYNEY_STORE_REPORT_API_URL = import.meta.env
@@ -59,22 +60,50 @@ function getFunctionRegion() {
   return region as FunctionRegion
 }
 
+function isBrowserFetchFailure(error: unknown) {
+  return (
+    error instanceof TypeError &&
+    /failed to fetch|fetch failed|network/i.test(error.message)
+  )
+}
+
 async function invokeSyneyStoreReportFunction(storeInNo: string) {
   const region = getFunctionRegion()
 
-  const { data, error } = await withTimeout(
-    supabase.functions.invoke<{
-      storeInNo: string
-      total: number
-      items: ISyneyItem[]
-      error?: string
-    }>('fetch-syney-store-report', {
-      body: { storeInNo },
-      ...(region ? { region } : {}),
-    }),
-    FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
-    '西尼入库单获取超时，请稍后重试或检查 SCM 网络',
-  )
+  let result: Awaited<
+    ReturnType<
+      typeof supabase.functions.invoke<{
+        storeInNo: string
+        total: number
+        items: ISyneyItem[]
+        error?: string
+      }>
+    >
+  >
+
+  try {
+    result = await withTimeout(
+      supabase.functions.invoke<{
+        storeInNo: string
+        total: number
+        items: ISyneyItem[]
+        error?: string
+      }>('fetch-syney-store-report', {
+        body: { storeInNo },
+        ...(region ? { region } : {}),
+      }),
+      FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
+      '西尼入库单获取超时，请稍后重试或检查 SCM 网络',
+    )
+  } catch (error) {
+    if (isBrowserFetchFailure(error)) {
+      throw new Error('西尼入库单云函数连接失败，请检查网络或 Supabase 函数配置')
+    }
+
+    throw error
+  }
+
+  const { data, error } = result
 
   if (error) {
     const functionErrorMessage = await getFunctionErrorMessage(error)
@@ -98,24 +127,36 @@ async function invokeSyneyStoreReportFunction(storeInNo: string) {
 
 export async function fetchSyneyStoreReportFromScm(storeInNo: string) {
   const configuredProxyUrl = SYNEY_STORE_REPORT_API_URL?.trim()
-  const proxyUrl =
-    configuredProxyUrl || (import.meta.env.DEV ? '/api/syney-store-report' : '')
+  const proxyUrl = resolveSyneyStoreReportProxyUrl({
+    configuredProxyUrl,
+    isDev: import.meta.env.DEV,
+  })
 
   if (!proxyUrl) {
     return invokeSyneyStoreReportFunction(storeInNo)
   }
 
-  const response = await withTimeout(
-    fetch(proxyUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ storeInNo }),
-    }),
-    FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
-    '西尼入库单获取超时，请稍后重试或检查 SCM 网络',
-  )
+  let response: Response
+
+  try {
+    response = await withTimeout(
+      fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ storeInNo }),
+      }),
+      FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
+      '西尼入库单获取超时，请稍后重试或检查 SCM 网络',
+    )
+  } catch (error) {
+    if (isBrowserFetchFailure(error)) {
+      throw new Error('西尼入库单代理接口连接失败，请检查代理地址或开发服务器')
+    }
+
+    throw error
+  }
 
   if (response.status === 404 && configuredProxyUrl) {
     throw new Error('西尼入库单代理接口不存在，请检查代理地址配置')
