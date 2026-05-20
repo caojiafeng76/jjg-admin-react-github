@@ -102,6 +102,8 @@ src/
 
 仓库已安装 `spec-workflow-mcp`，并在根目录提供 [.mcp.json](.mcp.json) 配置。
 
+`.mcp.json` 同时接入了 Sequential Thinking MCP：使用 `npx -y @modelcontextprotocol/server-sequential-thinking` 启动，用于任务拆解、假设校验、风险分析和方案排序。
+
 `.mcp.json` 同时接入了 Supabase MCP：使用 `npx -y @supabase/mcp-server-supabase --project-ref mlcptrkvkseyqxxlfcme` 启动，运行前需要在本机环境变量中配置 `SUPABASE_ACCESS_TOKEN`，不要把访问 token 写入仓库。
 
 当前约定：对会修改应用代码、脚本、SQL、配置或指令文件的任务，默认按 Spec Workflow 顺序推进。
@@ -132,6 +134,7 @@ src/
 ```bash
 bun run spec:list
 bunx spec-workflow-mcp --help
+npx -y @modelcontextprotocol/server-sequential-thinking --help
 ```
 
 其中：

@@ -4,6 +4,10 @@
       "command": "npx",
       "args": ["--no-install", "spec-workflow-mcp", "."]
     },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
     "supabase": {
       "command": "powershell",
       "args": [
