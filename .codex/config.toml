@@ -1,9 +1,10 @@
 [mcp_servers.spec-workflow]
 args = [
+    "--no-install",
     "spec-workflow-mcp",
     ".",
 ]
-command = "bunx"
+command = "npx"
 
 [mcp_servers.supabase]
 args = [
@@ -28,4 +29,18 @@ args = [
     "E:/code/jjg-admin-react-github",
     "--context=codex",
 ]
-command = "uvx"
+command = "C:/Users/Administrator/.local/bin/uvx.exe"
+
+[mcp_servers.context7]
+args = [
+    "-y",
+    "@upstash/context7-mcp@latest",
+]
+command = "npx"
+
+[mcp_servers.chrome-devtools]
+args = [
+    "-y",
+    "chrome-devtools-mcp@latest",
+]
+command = "npx"
