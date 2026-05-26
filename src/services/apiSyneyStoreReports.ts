@@ -97,7 +97,9 @@ async function invokeSyneyStoreReportFunction(storeInNo: string) {
     )
   } catch (error) {
     if (isBrowserFetchFailure(error)) {
-      throw new Error('西尼入库单云函数连接失败，请检查网络或 Supabase 函数配置')
+      throw new Error('西尼入库单云函数连接失败，请检查网络或 Supabase 函数配置', {
+        cause: error,
+      })
     }
 
     throw error
@@ -152,7 +154,9 @@ export async function fetchSyneyStoreReportFromScm(storeInNo: string) {
     )
   } catch (error) {
     if (isBrowserFetchFailure(error)) {
-      throw new Error('西尼入库单代理接口连接失败，请检查代理地址或开发服务器')
+      throw new Error('西尼入库单代理接口连接失败，请检查代理地址或开发服务器', {
+        cause: error,
+      })
     }
 
     throw error
