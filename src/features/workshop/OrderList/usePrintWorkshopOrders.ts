@@ -1,32 +1,17 @@
-import { createElement, useState } from 'react'
+import { useState } from 'react'
 import { App } from 'antd'
 import autoTable from 'jspdf-autotable'
 import dayjs from 'dayjs'
-import { renderToStaticMarkup } from 'react-dom/server'
-import QRCodeImport from 'react-qr-code'
 import { initializePDF, printPDF } from '@/utils/pdfUtils'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
-import { getWorkshopOrderQrValue } from './workshopOrderQr'
+import { getWorkshopOrderQrPngDataUrl } from './workshopOrderQrImage'
 import type { WorkshopOrder } from './index'
-
-const QRCodeComponent = (
-  QRCodeImport as typeof QRCodeImport & {
-    default?: typeof QRCodeImport
-  }
-).default
-  ? (
-      QRCodeImport as typeof QRCodeImport & {
-        default: typeof QRCodeImport
-      }
-    ).default
-  : QRCodeImport
 
 const MAX_ROWS_PER_PAGE = 6
 const TABLE_START_Y = 26
 const TABLE_BOTTOM_MARGIN = 16
 const HEADER_CELL_HEIGHT = 14
 const CELL_PADDING = 2
-const QR_IMAGE_SIZE = 128
 const TITLE_FONT_SIZE = 18
 const META_FONT_SIZE = 11
 const TABLE_FONT_SIZE = 10
@@ -51,75 +36,12 @@ const TABLE_COLUMNS = [
   ' ',
 ] as const
 
-const qrImageCache = new Map<string, Promise<string>>()
-
 function formatCellText(value: string | number | null | undefined) {
   if (value === null || value === undefined) {
     return ''
   }
 
   return String(value)
-}
-
-async function svgMarkupToPngDataUrl(svgMarkup: string) {
-  const svgBlob = new Blob([svgMarkup], {
-    type: 'image/svg+xml;charset=utf-8',
-  })
-  const objectUrl = URL.createObjectURL(svgBlob)
-
-  try {
-    return await new Promise<string>((resolve, reject) => {
-      const image = new Image()
-
-      image.onload = () => {
-        const canvas = document.createElement('canvas')
-        canvas.width = QR_IMAGE_SIZE
-        canvas.height = QR_IMAGE_SIZE
-
-        const context = canvas.getContext('2d')
-        if (!context) {
-          reject(new Error('二维码画布初始化失败'))
-          return
-        }
-
-        context.fillStyle = '#ffffff'
-        context.fillRect(0, 0, QR_IMAGE_SIZE, QR_IMAGE_SIZE)
-        context.drawImage(image, 0, 0, QR_IMAGE_SIZE, QR_IMAGE_SIZE)
-        resolve(canvas.toDataURL('image/png'))
-      }
-
-      image.onerror = () => {
-        reject(new Error('二维码图片生成失败'))
-      }
-
-      image.src = objectUrl
-    })
-  } finally {
-    URL.revokeObjectURL(objectUrl)
-  }
-}
-
-function getQrImage(orderId: string) {
-  const cachedImage = qrImageCache.get(orderId)
-  if (cachedImage) {
-    return cachedImage
-  }
-
-  const qrValue = getWorkshopOrderQrValue(orderId)
-  const svgMarkup = renderToStaticMarkup(
-    createElement(QRCodeComponent, {
-      value: qrValue,
-      size: QR_IMAGE_SIZE,
-      bgColor: '#FFFFFF',
-      fgColor: '#000000',
-      level: 'M',
-    }),
-  )
-
-  const qrImagePromise = svgMarkupToPngDataUrl(svgMarkup)
-  qrImageCache.set(orderId, qrImagePromise)
-
-  return qrImagePromise
 }
 
 export function usePrintWorkshopOrders() {
@@ -176,7 +98,7 @@ export function usePrintWorkshopOrders() {
             return
           }
 
-          const qrImage = await getQrImage(order.id)
+          const qrImage = await getWorkshopOrderQrPngDataUrl(order.id)
           qrImages.set(order.id, qrImage)
         }),
       )

@@ -85,6 +85,14 @@ bunx spec-workflow-mcp --help
 npx -y @modelcontextprotocol/server-sequential-thinking --help
 ```
 
+Codex Desktop 如果当前会话没有暴露 Sequential Thinking 工具，请确认本机 `~/.codex/config.toml` 中存在:
+
+```toml
+[mcp_servers."sequential-thinking"]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+```
+
 说明: Spec Workflow 的阶段状态、active change 与 apply readiness 统一以 `bun run spec ...` 系列命令输出为准；`spec-workflow-mcp` 只负责 VS Code 中的 MCP 接入与可视化。
 
 如果配置正确,应用应该能够正常连接到 Supabase 并加载数据。

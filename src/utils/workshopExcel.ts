@@ -8,6 +8,7 @@ import {
   centerAllCells,
   EXCEL_WRITE_OPTIONS,
 } from '@utils/excelStyleUtils'
+import { extractFirstWorksheetSketchFiles } from './workshopOrderSketchXlsx'
 
 const TEMPLATE_HEADERS = [
   '产品交货日期(yyyy-mm-dd)',
@@ -67,6 +68,7 @@ export async function parseWorkshopOrderExcel(
   const data = await file.arrayBuffer()
   const workbook = XLSX.read(data, { type: 'array' })
   const sheet = workbook.Sheets[workbook.SheetNames[0]]
+  const sketchesByRowNumber = await extractFirstWorksheetSketchFiles(data)
 
   const templateRows = parseTemplateSheet(sheet)
   if (templateRows.length > 0) {
@@ -75,7 +77,7 @@ export async function parseWorkshopOrderExcel(
     return uniqueRows
   }
 
-  const erpRows = parseErpSalesOrderSheet(sheet)
+  const erpRows = parseErpSalesOrderSheet(sheet, sketchesByRowNumber)
   if (erpRows.length > 0) {
     const uniqueRows = deduplicateOrders(erpRows)
     validateProjectNoUniqueness(uniqueRows)
@@ -116,6 +118,11 @@ function parseTemplateSheet(sheet: WorkSheet): WorkshopOrder[] {
 
 type WorksheetRow = Array<string | number | null | undefined>
 
+interface WorksheetRowEntry {
+  rowNumber: number
+  row: WorksheetRow
+}
+
 interface ErpColumnMap {
   project_no: number[]
   product_model: number[]
@@ -134,12 +141,44 @@ interface ErpColumnMap {
   row_remark: number[]
 }
 
-function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
-  const rows = XLSX.utils.sheet_to_json<WorksheetRow>(sheet, {
-    header: 1,
-    raw: true,
-    blankrows: false,
-  })
+function getWorksheetRowEntries(sheet: WorkSheet): WorksheetRowEntry[] {
+  const ref = sheet['!ref']
+  if (!ref) return []
+
+  const range = XLSX.utils.decode_range(ref)
+  const entries: WorksheetRowEntry[] = []
+
+  for (let rowIndex = range.s.r; rowIndex <= range.e.r; rowIndex += 1) {
+    const row: WorksheetRow = []
+    let hasValue = false
+
+    for (let colIndex = range.s.c; colIndex <= range.e.c; colIndex += 1) {
+      const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: colIndex })]
+      const value = cell?.v as string | number | null | undefined
+
+      row[colIndex] = value
+      if (value !== undefined && value !== null && value !== '') {
+        hasValue = true
+      }
+    }
+
+    if (hasValue) {
+      entries.push({ rowNumber: rowIndex + 1, row })
+    }
+  }
+
+  return entries
+}
+
+function parseErpSalesOrderSheet(
+  sheet: WorkSheet,
+  sketchesByRowNumber = new Map<
+    number,
+    NonNullable<WorkshopOrder['sketch_file']>
+  >(),
+): WorkshopOrder[] {
+  const rowEntries = getWorksheetRowEntries(sheet)
+  const rows = rowEntries.map((entry) => entry.row)
 
   let columnMap = findErpColumnMap(rows)
   if (!columnMap) {
@@ -149,8 +188,8 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
 
   const orders: WorkshopOrder[] = []
 
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i]
+  for (const entry of rowEntries) {
+    const row = entry.row
 
     if (!row || row.length === 0) continue
 
@@ -198,6 +237,7 @@ function parseErpSalesOrderSheet(sheet: WorkSheet): WorkshopOrder[] {
       material_code: getStringFromRow(row, columnMap.material_code),
       process_flow: getStringFromRow(row, columnMap.process_flow),
       row_remark: getStringFromRow(row, columnMap.row_remark),
+      sketch_file: sketchesByRowNumber.get(entry.rowNumber) ?? null,
     })
   }
 
