@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
+import { DownloadOutlined } from '@ant-design/icons'
 import type { FormInstance, TableProps } from 'antd'
 import { App, Button, Modal, Splitter, Tabs } from 'antd'
 import dayjs from 'dayjs'
@@ -31,6 +32,7 @@ import WorkshopOrderForm from './WorkshopOrderForm'
 import WorkshopOrderSearch from './WorkshopOrderSearch'
 import WorkshopOrderProductionStats from './WorkshopOrderProductionStats'
 import { usePrintWorkshopOrders } from './usePrintWorkshopOrders'
+import { useExportWorkshopOrdersAsExcel } from './useExportWorkshopOrdersAsExcel'
 import type { WorkshopOrderStatus } from './orderStatus'
 
 export interface WorkshopOrder {
@@ -69,6 +71,13 @@ export interface WorkshopOrder {
   material_name: string | null
   material_code: string | null
   row_remark?: string | null
+  sketch_file_path?: string | null
+  sketch_file?: {
+    fileName: string
+    extension: string
+    mimeType: string
+    data: ArrayBuffer
+  } | null
 }
 
 export type WorkshopOrderProcessScheduleStatus = '待排' | '已排' | '余排'
@@ -162,6 +171,7 @@ export default function WorkshopOrderList() {
   const deleteMutation = useDeleteWorkshopOrders()
 
   const { generatePDF, isPrinting } = usePrintWorkshopOrders()
+  const { exportAsExcel, isExporting } = useExportWorkshopOrdersAsExcel()
 
   // 动态计算表格高度（目标行数适应上半面板）
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
@@ -194,6 +204,33 @@ export default function WorkshopOrderList() {
     data?.items,
     generatePDF,
     message,
+    viewerDenied,
+    viewerOperationTip,
+  ])
+
+  const handleExportExcel = useCallback(async () => {
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
+    if (selectedRowKeys.length === 0) {
+      message.warning('请选择要导出的订单')
+      return
+    }
+
+    const selectedOrders =
+      data?.items.filter((item) => selectedRowKeys.includes(item.id || '')) ||
+      []
+    const exported = await exportAsExcel(selectedOrders)
+    if (exported) {
+      setSelectedRowKeys([])
+    }
+  }, [
+    data?.items,
+    exportAsExcel,
+    message,
+    selectedRowKeys,
     viewerDenied,
     viewerOperationTip,
   ])
@@ -692,6 +729,16 @@ export default function WorkshopOrderList() {
           loading={isPrinting}
           count={selectedRowKeys.length}
         />
+        <Button
+          type="text"
+          icon={<DownloadOutlined />}
+          onClick={handleExportExcel}
+          loading={isExporting}
+          disabled={viewerDenied || selectedRowKeys.length === 0}
+        >
+          导出Excel
+          {selectedRowKeys.length > 0 ? `(${selectedRowKeys.length})` : ''}
+        </Button>
       </div>
 
       {/* 搜索栏 */}

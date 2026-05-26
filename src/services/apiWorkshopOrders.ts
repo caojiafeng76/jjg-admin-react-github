@@ -13,6 +13,7 @@ import {
 
 const WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE = 1000
 const WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE = 1000
+const WORKSHOP_ORDER_SKETCH_BUCKET = 'workshop-order-sketches'
 
 export interface WorkshopOrderDeleteBlocker {
   orderId: string
@@ -45,6 +46,63 @@ function normalizeOptionalNumber(value: number | null | undefined) {
   return value
 }
 
+function sanitizeStoragePathPart(value: string) {
+  return value
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function buildSketchPath(row: WorkshopOrder, index: number) {
+  const projectNo = sanitizeStoragePathPart(row.project_no || '') || 'unknown'
+  const fileName =
+    sanitizeStoragePathPart(row.sketch_file?.fileName || '') ||
+    `sketch.${row.sketch_file?.extension || 'emf'}`
+
+  return `${projectNo}/${Date.now()}-${index + 1}-${fileName}`
+}
+
+async function removeWorkshopOrderSketchFiles(paths: string[]) {
+  const uniquePaths = Array.from(new Set(paths.filter(Boolean)))
+  if (uniquePaths.length === 0) return
+
+  const { error } = await supabase.storage
+    .from(WORKSHOP_ORDER_SKETCH_BUCKET)
+    .remove(uniquePaths)
+
+  if (error) {
+    console.warn('订单简图删除失败:', error)
+  }
+}
+
+async function uploadWorkshopOrderSketch(
+  row: WorkshopOrder,
+  index: number,
+): Promise<{ path: string | null; uploadedPath: string | null }> {
+  const sketchFile = row.sketch_file
+  if (!sketchFile) {
+    return { path: row.sketch_file_path ?? null, uploadedPath: null }
+  }
+
+  const filePath = buildSketchPath(row, index)
+  const { error } = await supabase.storage
+    .from(WORKSHOP_ORDER_SKETCH_BUCKET)
+    .upload(
+      filePath,
+      new Blob([sketchFile.data], { type: sketchFile.mimeType }),
+      {
+        contentType: sketchFile.mimeType,
+        upsert: false,
+      },
+    )
+
+  if (error) {
+    throw handleApiError(error, '订单简图上传失败')
+  }
+
+  return { path: filePath, uploadedPath: filePath }
+}
+
 function normalizeWorkshopOrderInput(values: WorkshopOrder): WorkshopOrder {
   return {
     ...values,
@@ -64,6 +122,7 @@ function normalizeWorkshopOrderInput(values: WorkshopOrder): WorkshopOrder {
     material_name: normalizeOptionalText(values.material_name),
     material_code: normalizeOptionalText(values.material_code),
     row_remark: normalizeOptionalText(values.row_remark),
+    sketch_file_path: normalizeOptionalText(values.sketch_file_path),
   }
 }
 
@@ -117,6 +176,7 @@ function buildSalesOrderPayload(
     material_name: normalizedValues.material_name,
     material_code: normalizedValues.material_code,
     row_remark: normalizedValues.row_remark ?? null,
+    sketch_file_path: normalizedValues.sketch_file_path ?? null,
   }
 
   if (mode === 'create') {
@@ -544,6 +604,18 @@ export async function getWorkshopOrderById(id: string) {
   return data as WorkshopOrder
 }
 
+export async function downloadWorkshopOrderSketchFile(filePath: string) {
+  const { data, error } = await supabase.storage
+    .from(WORKSHOP_ORDER_SKETCH_BUCKET)
+    .download(filePath)
+
+  if (error) {
+    throw handleApiError(error, '订单简图下载失败')
+  }
+
+  return data.arrayBuffer()
+}
+
 /**
  * 检查项目号是否已存在
  */
@@ -686,6 +758,7 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
   if (!rows.length) return
 
   const normalizedRows = rows.map((row) => normalizeWorkshopOrderInput(row))
+  const uploadedSketchPaths: string[] = []
 
   normalizedRows.forEach((row, index) => {
     assertWorkshopOrderHasMeaningfulContent(row, `第 ${index + 1} 行订单`)
@@ -701,7 +774,28 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
     )
   }
 
-  const insertRows = normalizedRows.map(
+  const rowsWithSketchPaths: WorkshopOrder[] = []
+  try {
+    for (let index = 0; index < normalizedRows.length; index += 1) {
+      const row = normalizedRows[index]
+      const { path, uploadedPath } = await uploadWorkshopOrderSketch(row, index)
+
+      if (uploadedPath) {
+        uploadedSketchPaths.push(uploadedPath)
+      }
+
+      rowsWithSketchPaths.push({
+        ...row,
+        sketch_file_path: path,
+        sketch_file: null,
+      })
+    }
+  } catch (error) {
+    await removeWorkshopOrderSketchFiles(uploadedSketchPaths)
+    throw error
+  }
+
+  const insertRows = rowsWithSketchPaths.map(
     (row) =>
       buildSalesOrderPayload(
         {
@@ -715,12 +809,23 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
   const { error } = await supabase.from('sales_orders').insert(insertRows)
 
   if (error) {
+    await removeWorkshopOrderSketchFiles(uploadedSketchPaths)
     throw handleApiError(error, '批量创建车间订单失败')
   }
 }
 
 export async function deleteWorkshopOrders(ids: string[]) {
   await assertWorkshopOrdersNotReferenced(ids)
+
+  const { data: sketchRows, error: sketchError } = await (
+    supabase.from('sales_orders') as any
+  )
+    .select('sketch_file_path')
+    .in('id', ids)
+
+  if (sketchError) {
+    throw handleApiError(sketchError, '获取订单简图失败')
+  }
 
   const { error } = await supabase.from('sales_orders').delete().in('id', ids)
 
@@ -733,4 +838,10 @@ export async function deleteWorkshopOrders(ids: string[]) {
     }
     throw handleApiError(error, '删除车间订单失败')
   }
+
+  await removeWorkshopOrderSketchFiles(
+    ((sketchRows || []) as Array<{ sketch_file_path: string | null }>)
+      .map((row) => row.sketch_file_path)
+      .filter((path): path is string => Boolean(path)),
+  )
 }

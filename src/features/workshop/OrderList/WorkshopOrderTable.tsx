@@ -151,6 +151,16 @@ function WorkshopOrderTable({
         },
       },
       {
+        title: '简图',
+        dataIndex: 'sketch_file_path',
+        fixed: 'left',
+        key: 'sketch_file_path',
+        width: 54,
+        align: 'center',
+        render: (value: WorkshopOrder['sketch_file_path']) =>
+          value ? <Tag style={DENSE_TAG_STYLE}>有</Tag> : null,
+      },
+      {
         title: '交货日期',
         dataIndex: 'product_delivery_date',
         fixed: 'left',

@@ -34,6 +34,7 @@ export interface SyneyStoreReceiptReport {
 export interface SyneyStoreReceiptPage {
   items: SyneyStoreReceiptItem[]
   pageNumber: number
+  rowStartIndex: number
   totalPages: number
 }
 
@@ -204,6 +205,7 @@ export function buildSyneyStoreReceiptPages(
   return Array.from({ length: totalPages }, (_, pageIndex) => ({
     items: items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize),
     pageNumber: pageIndex + 1,
+    rowStartIndex: pageIndex * pageSize,
     totalPages,
   }))
 }
@@ -435,10 +437,11 @@ function drawTable(doc: jsPDF, page: SyneyStoreReceiptPage): void {
 
   page.items.forEach((item, rowIndex) => {
     const y = TABLE_TOP + TABLE_HEADER_HEIGHT + rowIndex * TABLE_ROW_HEIGHT
+    const globalRowIndex = page.rowStartIndex + rowIndex
     let cellX = PAGE_MARGIN
 
     TABLE_COLUMNS.forEach((column, columnIndex) => {
-      drawCell(doc, column.value(item, rowIndex), {
+      drawCell(doc, column.value(item, globalRowIndex), {
         align: column.align,
         fontSize: 7,
         fontStyle: 'normal',

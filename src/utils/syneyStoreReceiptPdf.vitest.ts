@@ -63,6 +63,7 @@ describe('syney store receipt PDF helpers', () => {
       {
         items: [],
         pageNumber: 1,
+        rowStartIndex: 0,
         totalPages: 1,
       },
     ])
@@ -78,6 +79,7 @@ describe('syney store receipt PDF helpers', () => {
     expect(pages).toHaveLength(3)
     expect(pages.map((page) => page.items.length)).toEqual([11, 11, 1])
     expect(pages.map((page) => page.pageNumber)).toEqual([1, 2, 3])
+    expect(pages.map((page) => page.rowStartIndex)).toEqual([0, 11, 22])
     expect(pages.every((page) => page.totalPages === 3)).toBe(true)
   })
 
