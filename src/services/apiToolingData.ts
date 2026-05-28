@@ -1,6 +1,8 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 
+const TOOLING_DATA_EXPORT_PAGE_SIZE = 1000
+
 export interface ToolingData {
   id: string
   tool_code: string
@@ -32,7 +34,9 @@ function toolingDataTable() {
   return (supabase as unknown as ToolingDataTable).from('tooling_data')
 }
 
-function normalizePayload(values: ToolingDataFormValues): ToolingDataFormValues {
+function normalizePayload(
+  values: ToolingDataFormValues,
+): ToolingDataFormValues {
   return {
     tool_code: values.tool_code.trim(),
     tool_name: values.tool_name.trim(),
@@ -94,6 +98,34 @@ export async function getToolingDataList({
     items: (data || []) as ToolingData[],
     total: count || 0,
   }
+}
+
+export async function getToolingDataForExport() {
+  const rows: ToolingData[] = []
+  let from = 0
+
+  while (true) {
+    const { data, error } = await toolingDataTable()
+      .select('*')
+      .order('updated_at', { ascending: false })
+      .order('tool_code', { ascending: true })
+      .range(from, from + TOOLING_DATA_EXPORT_PAGE_SIZE - 1)
+
+    if (error) {
+      throw handleApiError(error, '获取刀具资料导出数据失败')
+    }
+
+    const pageRows = (data || []) as ToolingData[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < TOOLING_DATA_EXPORT_PAGE_SIZE) {
+      break
+    }
+
+    from += TOOLING_DATA_EXPORT_PAGE_SIZE
+  }
+
+  return rows
 }
 
 export async function createToolingData(values: ToolingDataFormValues) {

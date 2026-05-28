@@ -1,8 +1,13 @@
+import dayjs from 'dayjs'
 import * as XLSX from 'xlsx-js-style'
 import type { WorkSheet } from 'xlsx-js-style'
 
-import type { ToolingDataFormValues } from '@/services/apiToolingData'
+import type {
+  ToolingData,
+  ToolingDataFormValues,
+} from '@/services/apiToolingData'
 import {
+  applyRegisterSheetStyles,
   autoFitColumnWidths,
   centerAllCells,
   EXCEL_WRITE_OPTIONS,
@@ -18,6 +23,21 @@ const TEMPLATE_HEADERS = [
   '用途',
   '备注',
 ] as const
+
+const EXPORT_SHEET_NAME = '刀具资料'
+const EXPORT_TITLE = '刀具资料'
+const EXPORT_HEADERS = [
+  '#',
+  '刀具编号',
+  '刀具名称',
+  '刀具规格',
+  '材质',
+  '单价（元）',
+  '用途',
+  '备注',
+  '更新时间',
+] as const
+const EXPORT_COLUMN_WIDTHS = [6, 16, 18, 20, 14, 12, 28, 32, 20]
 
 type TemplateHeader = (typeof TEMPLATE_HEADERS)[number]
 
@@ -39,6 +59,58 @@ export function downloadToolingDataTemplate() {
 
   XLSX.utils.book_append_sheet(workbook, worksheet, '刀具资料模板')
   XLSX.writeFile(workbook, '刀具资料导入模板.xlsx', EXCEL_WRITE_OPTIONS)
+}
+
+export function createToolingDataExportWorkbook(
+  items: ToolingData[],
+): XLSX.WorkBook {
+  const columnCount = EXPORT_HEADERS.length
+  const titleRow = Array.from({ length: columnCount }, () => '')
+  titleRow[0] = EXPORT_TITLE
+
+  const bodyRows = items.map((item, index) => [
+    index + 1,
+    item.tool_code,
+    item.tool_name,
+    item.tool_spec,
+    item.material,
+    Number(item.unit_price || 0),
+    item.usage,
+    item.remarks,
+    formatDateTime(item.updated_at),
+  ])
+
+  const worksheetData = [titleRow, Array.from(EXPORT_HEADERS), ...bodyRows]
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData)
+
+  worksheet['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: columnCount - 1 } },
+  ]
+
+  applyRegisterSheetStyles(worksheet, worksheetData, {
+    columnWidths: EXPORT_COLUMN_WIDTHS,
+    freezeYSplit: 2,
+  })
+
+  for (let rowIndex = 2; rowIndex < worksheetData.length; rowIndex += 1) {
+    const unitPriceRef = `F${rowIndex + 1}`
+    if (
+      worksheet[unitPriceRef] &&
+      typeof worksheet[unitPriceRef].v === 'number'
+    ) {
+      worksheet[unitPriceRef].z = '0.00'
+    }
+  }
+
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME)
+  return workbook
+}
+
+export function exportToolingDataToExcel(items: ToolingData[]) {
+  const workbook = createToolingDataExportWorkbook(items)
+  const filename = `刀具资料_${items.length}条_${dayjs(new Date()).format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
+  XLSX.writeFile(workbook, filename, EXCEL_WRITE_OPTIONS)
 }
 
 export async function parseToolingDataExcel(
@@ -92,7 +164,9 @@ export async function parseToolingDataExcel(
     }
 
     if (!toolName || !toolSpec || !material || !usage || !remarks) {
-      errors.push(`第 ${rowNumber} 行存在必填项为空，请检查名称/规格/材质/用途/备注`)
+      errors.push(
+        `第 ${rowNumber} 行存在必填项为空，请检查名称/规格/材质/用途/备注`,
+      )
       return
     }
 
@@ -157,4 +231,13 @@ function normalizeNumber(value: unknown) {
 
   const parsed = Number(normalized)
   return Number.isFinite(parsed) ? parsed : Number.NaN
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) {
+    return ''
+  }
+
+  const date = dayjs(value)
+  return date.isValid() ? date.format('YYYY-MM-DD HH:mm') : value
 }
