@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { getToolingDataForExport } from '@/services/apiToolingData'
 import type {
   ToolingData,
   ToolingDataFormValues,
@@ -13,6 +14,8 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import ExportButton from '@/ui/ExportButton'
+import { exportToolingDataToExcel } from '@/utils/toolingDataExcel'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 import ToolingDataExcelImport from './ToolingDataExcelImport'
 import ToolingDataForm from './ToolingDataForm'
@@ -39,6 +42,7 @@ export default function ToolingDataPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建刀具资料')
   const [isEdit, setIsEdit] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] = useState<ToolingData | null>(null)
   const [formRef, setFormRef] =
@@ -155,6 +159,37 @@ export default function ToolingDataPage() {
     ],
   )
 
+  const handleExport = useCallback(async () => {
+    if (!canManageTooling) {
+      message.warning('无刀具模块操作权限')
+      return
+    }
+
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
+    try {
+      setIsExporting(true)
+      const exportRows = await getToolingDataForExport()
+
+      if (exportRows.length === 0) {
+        message.warning('当前没有可导出的刀具资料')
+        return
+      }
+
+      exportToolingDataToExcel(exportRows)
+      message.success(`已导出 ${exportRows.length} 条刀具资料`)
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : '导出刀具资料失败，请稍后重试',
+      )
+    } finally {
+      setIsExporting(false)
+    }
+  }, [canManageTooling, message, viewerDenied, viewerOperationTip])
+
   const handleFinish = useCallback(
     async (values: ToolingDataFormValues) => {
       if (!canManageTooling) {
@@ -254,6 +289,13 @@ export default function ToolingDataPage() {
           onImport={handleImport}
           isImporting={importMutation.isPending}
         />
+        <ExportButton
+          handleExport={handleExport}
+          loading={isExporting}
+          permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        >
+          导出资料
+        </ExportButton>
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
