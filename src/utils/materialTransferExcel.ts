@@ -30,6 +30,9 @@ const EXPORT_HEADERS = [
 const EXPORT_COLUMN_WIDTHS = [
   20, 14, 18, 9, 10, 28, 10, 14, 10, 8, 12, 8, 9, 10, 18, 16,
 ]
+const TRANSFER_QUANTITY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('转移数量')
+const TRANSFER_QUANTITY_TOTAL_LABEL_COLUMN_INDEX =
+  TRANSFER_QUANTITY_COLUMN_INDEX - 1
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) {
@@ -42,6 +45,10 @@ function formatDateTime(value: string | null | undefined) {
 export function exportMaterialTransfersToExcel(
   records: MaterialTransferWithEmployee[],
 ) {
+  const transferQuantityTotal = records.reduce(
+    (sum, record) => sum + Number(record.transfer_quantity || 0),
+    0,
+  )
   const rows = records.map((record) => [
     formatDateTime(record.created_at),
     record.project_no,
@@ -60,11 +67,15 @@ export function exportMaterialTransfersToExcel(
     formatDateTime(record.audited_at),
     record.remark || '',
   ])
+  const totalRow = EXPORT_HEADERS.map(() => '') as Array<string | number>
+  totalRow[TRANSFER_QUANTITY_TOTAL_LABEL_COLUMN_INDEX] = '合计'
+  totalRow[TRANSFER_QUANTITY_COLUMN_INDEX] = transferQuantityTotal
 
   const worksheetData = [
     [SHEET_TITLE, ...EXPORT_HEADERS.slice(1).map(() => '')],
     EXPORT_HEADERS as unknown as Array<string | number>,
     ...rows,
+    totalRow,
   ]
   const workbook = XLSX.utils.book_new()
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData)
@@ -79,6 +90,7 @@ export function exportMaterialTransfersToExcel(
   applyRegisterSheetStyles(worksheet, worksheetData, {
     columnWidths: EXPORT_COLUMN_WIDTHS,
   })
+  applyTransferQuantityTotalFormula(worksheet, records.length)
 
   XLSX.utils.book_append_sheet(workbook, worksheet, '物料转移单')
   XLSX.writeFile(
@@ -86,4 +98,31 @@ export function exportMaterialTransfersToExcel(
     `物料转移单_${new Date().toISOString().slice(0, 10)}.xlsx`,
     EXCEL_WRITE_OPTIONS,
   )
+}
+
+function applyTransferQuantityTotalFormula(
+  worksheet: XLSX.WorkSheet,
+  recordCount: number,
+): void {
+  const totalRowNumber = recordCount + 3
+  const transferQuantityColumn = XLSX.utils.encode_col(
+    TRANSFER_QUANTITY_COLUMN_INDEX,
+  )
+  const totalCellRef = `${transferQuantityColumn}${totalRowNumber}`
+  const firstDataRowNumber = 3
+  const lastDataRowNumber = recordCount + 2
+
+  if (!worksheet[totalCellRef]) {
+    return
+  }
+
+  worksheet[totalCellRef] = {
+    ...worksheet[totalCellRef],
+    t: 'n',
+    f:
+      recordCount > 0
+        ? `SUM(${transferQuantityColumn}${firstDataRowNumber}:${transferQuantityColumn}${lastDataRowNumber})`
+        : undefined,
+    z: '0',
+  }
 }

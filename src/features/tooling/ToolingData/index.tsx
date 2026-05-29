@@ -1,11 +1,16 @@
 ﻿import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
+import { App, DatePicker, FormInstance, Modal } from 'antd'
+import dayjs from 'dayjs'
+import type { Dayjs } from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { getToolingDataForExport } from '@/services/apiToolingData'
+import {
+  getToolingDataForExport,
+  getToolingDataMonthlySummary,
+} from '@/services/apiToolingData'
 import type {
   ToolingData,
   ToolingDataFormValues,
@@ -15,7 +20,10 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
-import { exportToolingDataToExcel } from '@/utils/toolingDataExcel'
+import {
+  exportToolingDataMonthlySummaryToExcel,
+  exportToolingDataToExcel,
+} from '@/utils/toolingDataExcel'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 import ToolingDataExcelImport from './ToolingDataExcelImport'
 import ToolingDataForm from './ToolingDataForm'
@@ -43,6 +51,11 @@ export default function ToolingDataPage() {
   const [modalTitle, setModalTitle] = useState('新建刀具资料')
   const [isEdit, setIsEdit] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [isMonthlySummaryExporting, setIsMonthlySummaryExporting] =
+    useState(false)
+  const [monthlySummaryMonth, setMonthlySummaryMonth] = useState<Dayjs | null>(
+    dayjs(),
+  )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] = useState<ToolingData | null>(null)
   const [formRef, setFormRef] =
@@ -190,6 +203,58 @@ export default function ToolingDataPage() {
     }
   }, [canManageTooling, message, viewerDenied, viewerOperationTip])
 
+  const disableFutureSummaryMonth = useCallback((current: Dayjs) => {
+    return current.startOf('month').isAfter(dayjs().startOf('month'))
+  }, [])
+
+  const handleExportMonthlySummary = useCallback(async () => {
+    if (!canManageTooling) {
+      message.warning('无刀具模块操作权限')
+      return
+    }
+
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
+    if (!monthlySummaryMonth) {
+      message.warning('请先选择汇总月份')
+      return
+    }
+
+    const month = monthlySummaryMonth.format('YYYY-MM')
+
+    try {
+      setIsMonthlySummaryExporting(true)
+      const exportRows = await getToolingDataMonthlySummary({ month })
+
+      if (exportRows.length === 0) {
+        message.warning('当前没有可导出的刀具月度汇总')
+        return
+      }
+
+      exportToolingDataMonthlySummaryToExcel(exportRows, month)
+      message.success(
+        `已导出 ${monthlySummaryMonth.format('M')} 月刀具汇总，共 ${exportRows.length} 条`,
+      )
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : '导出刀具月度汇总失败，请稍后重试',
+      )
+    } finally {
+      setIsMonthlySummaryExporting(false)
+    }
+  }, [
+    canManageTooling,
+    message,
+    monthlySummaryMonth,
+    viewerDenied,
+    viewerOperationTip,
+  ])
+
   const handleFinish = useCallback(
     async (values: ToolingDataFormValues) => {
       if (!canManageTooling) {
@@ -295,6 +360,24 @@ export default function ToolingDataPage() {
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
         >
           导出资料
+        </ExportButton>
+        <DatePicker
+          picker="month"
+          value={monthlySummaryMonth}
+          onChange={setMonthlySummaryMonth}
+          disabledDate={disableFutureSummaryMonth}
+          allowClear={false}
+          disabled={viewerDenied || !canManageTooling}
+          placeholder="选择月份"
+          className="w-32"
+        />
+        <ExportButton
+          handleExport={handleExportMonthlySummary}
+          loading={isMonthlySummaryExporting}
+          disabled={!monthlySummaryMonth}
+          permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        >
+          导出月度汇总
         </ExportButton>
         <DeleteButton
           onConfirm={handleDelete}
