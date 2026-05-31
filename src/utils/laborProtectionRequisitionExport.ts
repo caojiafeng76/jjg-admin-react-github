@@ -6,8 +6,10 @@ import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@/utils/excelStyleUtils'
 
 const DETAIL_SHEET_NAME = '领料明细'
 const SUMMARY_SHEET_NAME = '按种类汇总'
+const SAW_BLADE_SUMMARY_SHEET_NAME = '锯片汇总'
 const DETAIL_TITLE = '劳保领料明细'
 const SUMMARY_TITLE = '劳保领料按种类汇总'
+const SAW_BLADE_SUMMARY_TITLE = '劳保领料锯片汇总'
 
 const DETAIL_HEADERS = [
   '#',
@@ -52,6 +54,10 @@ function formatDateTime(value: string | null | undefined) {
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return '-'
   return dayjs(d).format('YYYY-MM-DD HH:mm')
+}
+
+function isSawBladeCategory(category: string | null | undefined) {
+  return Boolean(category?.includes('锯片'))
 }
 
 interface CategorySummary {
@@ -274,6 +280,7 @@ function buildSummarySheet(
   items: LaborProtectionRequisition[],
   filterText: string,
   exportTime: string,
+  title = SUMMARY_TITLE,
 ) {
   const colCount = SUMMARY_HEADERS.length
   const summaries = summarizeByCategory(items)
@@ -284,7 +291,7 @@ function buildSummarySheet(
 
   const { data, merges } = buildHeaderRows(
     colCount,
-    `${SUMMARY_TITLE}（共 ${summaries.length} 类）`,
+    `${title}（共 ${summaries.length} 类）`,
     filterText,
     exportTime,
   )
@@ -360,11 +367,29 @@ function buildWorkbook(
   const filterText = buildFilterText(filters)
 
   const detailWs = buildDetailSheet(items, filterText, exportTime)
-  const summaryWs = buildSummarySheet(items, filterText, exportTime)
+  const regularItems = items.filter(
+    (item) => !isSawBladeCategory(item.category),
+  )
+  const sawBladeItems = items.filter((item) =>
+    isSawBladeCategory(item.category),
+  )
+  const summaryWs = buildSummarySheet(regularItems, filterText, exportTime)
 
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, detailWs, DETAIL_SHEET_NAME)
   XLSX.utils.book_append_sheet(wb, summaryWs, SUMMARY_SHEET_NAME)
+  if (sawBladeItems.length > 0) {
+    XLSX.utils.book_append_sheet(
+      wb,
+      buildSummarySheet(
+        sawBladeItems,
+        filterText,
+        exportTime,
+        SAW_BLADE_SUMMARY_TITLE,
+      ),
+      SAW_BLADE_SUMMARY_SHEET_NAME,
+    )
+  }
   return wb
 }
 
