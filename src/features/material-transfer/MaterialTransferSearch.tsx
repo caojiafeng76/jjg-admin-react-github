@@ -89,16 +89,22 @@ export default function MaterialTransferSearch({
     }
   }
 
+  const formClassName = mobile
+    ? 'grid grid-cols-1 gap-3'
+    : 'flex flex-nowrap items-center gap-2 [&_.ant-form-item]:[margin-inline-end:0]'
+  const formItemClassName = mobile ? 'mb-0' : 'mb-0 shrink-0'
+  const actionSpaceClassName = mobile
+    ? 'flex w-full [&_.ant-btn]:flex-1'
+    : 'whitespace-nowrap'
+
   const formContent = (
     <Form
       form={form}
       onFinish={handleFinish}
       layout={mobile ? 'vertical' : 'inline'}
-      className={
-        mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-wrap items-center gap-2'
-      }
+      className={formClassName}
     >
-      <Form.Item name="dateRange" className="mb-0">
+      <Form.Item name="dateRange" className={formItemClassName}>
         <RangePicker
           format="YYYY-MM-DD"
           placeholder={['创建开始日期', '创建结束日期']}
@@ -107,7 +113,7 @@ export default function MaterialTransferSearch({
         />
       </Form.Item>
 
-      <Form.Item name="projectNo" className="mb-0">
+      <Form.Item name="projectNo" className={formItemClassName}>
         <Input
           placeholder="项目号"
           allowClear
@@ -115,7 +121,7 @@ export default function MaterialTransferSearch({
         />
       </Form.Item>
 
-      <Form.Item name="productModel" className="mb-0">
+      <Form.Item name="productModel" className={formItemClassName}>
         <Input
           placeholder="型号"
           allowClear
@@ -123,7 +129,7 @@ export default function MaterialTransferSearch({
         />
       </Form.Item>
 
-      <Form.Item name="length_mm" className="mb-0">
+      <Form.Item name="length_mm" className={formItemClassName}>
         <Select
           mode="multiple"
           placeholder="长度"
@@ -137,7 +143,7 @@ export default function MaterialTransferSearch({
       </Form.Item>
 
       {showEmployeeFilter ? (
-        <Form.Item name="employeeId" className="mb-0">
+        <Form.Item name="employeeId" className={formItemClassName}>
           <Select
             placeholder="操作人"
             allowClear
@@ -152,7 +158,7 @@ export default function MaterialTransferSearch({
         </Form.Item>
       ) : null}
 
-      <Form.Item name="targetWorkshop" className="mb-0">
+      <Form.Item name="targetWorkshop" className={formItemClassName}>
         <Select
           placeholder="接收车间"
           allowClear
@@ -165,7 +171,7 @@ export default function MaterialTransferSearch({
         />
       </Form.Item>
 
-      <Form.Item name="isAudited" className="mb-0">
+      <Form.Item name="isAudited" className={formItemClassName}>
         <Select
           placeholder="审核状态"
           allowClear
@@ -175,8 +181,8 @@ export default function MaterialTransferSearch({
         />
       </Form.Item>
 
-      <Form.Item className="mb-0">
-        <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>
+      <Form.Item className={formItemClassName}>
+        <Space className={actionSpaceClassName}>
           <Button
             type="primary"
             icon={<MagnifyingGlassIcon className="h-4 w-4" />}

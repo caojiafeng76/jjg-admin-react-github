@@ -71,4 +71,30 @@ describe('exportLaborProtectionRequisitionsToExcel', () => {
     expect(sawBladeSheet.C6?.v).toBe(9)
     expect(sawBladeSheet.D6?.v).toBe(2)
   })
+
+  it('moves cutting oil and cutting fluid categories to the saw blade summary worksheet', () => {
+    exportLaborProtectionRequisitionsToExcel(
+      [
+        createRequisition('001', '防化手套（胶手套）', 2),
+        createRequisition('002', '切割油', 4),
+        createRequisition('003', '切削液', 6),
+      ],
+      {},
+    )
+
+    const workbook = vi.mocked(XLSX.writeFile).mock.calls[0][0] as XLSX.WorkBook
+    const summarySheet = workbook.Sheets['按种类汇总']
+    const sawBladeSheet = workbook.Sheets['锯片汇总']
+
+    expect(workbook.SheetNames).toEqual(['领料明细', '按种类汇总', '锯片汇总'])
+    expect(summarySheet.B4?.v).toBe('防化手套（胶手套）')
+    expect(summarySheet.C5?.v).toBe(2)
+    expect(summarySheet.D5?.v).toBe(1)
+
+    expect([sawBladeSheet.B4?.v, sawBladeSheet.B5?.v]).toEqual(
+      expect.arrayContaining(['切割油', '切削液']),
+    )
+    expect(sawBladeSheet.C6?.v).toBe(10)
+    expect(sawBladeSheet.D6?.v).toBe(2)
+  })
 })
