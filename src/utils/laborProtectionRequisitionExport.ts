@@ -31,6 +31,7 @@ const SUMMARY_COLUMN_WIDTHS = [6, 28, 14, 14]
 const BORDER_COLOR = '000000'
 const HEADER_FILL = 'D8E4F1'
 const TOTAL_FILL = 'FFF2CC'
+const SAW_BLADE_SUMMARY_CATEGORY_KEYWORDS = ['锯片', '切割油', '切削液'] as const
 
 function colLetter(index: number) {
   let letter = ''
@@ -57,7 +58,12 @@ function formatDateTime(value: string | null | undefined) {
 }
 
 function isSawBladeCategory(category: string | null | undefined) {
-  return Boolean(category?.includes('锯片'))
+  return Boolean(
+    category &&
+      SAW_BLADE_SUMMARY_CATEGORY_KEYWORDS.some((keyword) =>
+        category.includes(keyword),
+      ),
+  )
 }
 
 interface CategorySummary {
