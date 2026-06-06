@@ -8,28 +8,37 @@ async function extractFunctionInvokeErrorMessage(error: unknown) {
 
   const maybeContext = (
     error as {
-      context?: { json?: () => Promise<unknown> }
+      context?: {
+        json?: () => Promise<unknown>
+        status?: number
+        statusText?: string
+      }
     }
   ).context
 
-  if (!maybeContext?.json) {
-    return null
+  if (maybeContext?.json) {
+    try {
+      const payload = await maybeContext.json()
+
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        'error' in payload &&
+        typeof payload.error === 'string' &&
+        payload.error.trim()
+      ) {
+        return payload.error.trim()
+      }
+    } catch {
+      // ignore
+    }
   }
 
-  try {
-    const payload = await maybeContext.json()
-
-    if (
-      payload &&
-      typeof payload === 'object' &&
-      'error' in payload &&
-      typeof payload.error === 'string' &&
-      payload.error.trim()
-    ) {
-      return payload.error.trim()
-    }
-  } catch {
-    return null
+  if (maybeContext?.status) {
+    const status = maybeContext.status
+    if (status === 401) return '未登录，无法执行此操作'
+    if (status === 403) return '权限校验失败，无权执行此操作'
+    if (status === 404) return 'Edge Function 不存在或未部署'
   }
 
   return null
