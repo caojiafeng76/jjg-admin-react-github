@@ -12,6 +12,7 @@ import { YOUMAI_PERMISSIONS } from '@/features/youmai/permissions'
 import { ATTENDANCE_PERMISSIONS } from '@/features/attendance/permissions'
 import { VILLA_LIFT_PERMISSIONS } from '@/features/villa-lift/permissions'
 import { QUALITY_PERMISSIONS } from '@/features/quality/permissions'
+import { EXTRUSION_PRODUCTION_PERMISSIONS } from '@/features/extrusion-production/permissions'
 
 /** 全局页面权限（没有独立 feature 目录的权限） */
 const GLOBAL_PERMISSIONS: PermissionDefinition[] = [
@@ -76,4 +77,5 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
   ...ATTENDANCE_PERMISSIONS,
   ...VILLA_LIFT_PERMISSIONS,
   ...QUALITY_PERMISSIONS,
+  ...EXTRUSION_PRODUCTION_PERMISSIONS,
 ]
