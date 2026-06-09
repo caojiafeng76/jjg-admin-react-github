@@ -40,14 +40,22 @@ export default function AppLayout() {
 
   const homeKey = role ? getDefaultHomeByRole(role) : null
   const activeKey = getLocationKey(location, homeKey)
-  const outletEntries = useMemo(() => {
-    const visibleOutlets =
-      outlet && !cachedOutlets[activeKey]
-        ? { ...cachedOutlets, [activeKey]: outlet }
-        : cachedOutlets
 
-    return Object.entries(visibleOutlets)
+  // 计算可见的 outlet：用 useMemo 同步计算，确保路由变化时立即显示内容。
+  // useEffect 负责将 outlet 同步到 state，供其他依赖 cachedOutlets 的逻辑使用。
+  const visibleOutlets = useMemo<Record<string, ReactNode>>(() => {
+    if (!outlet) return cachedOutlets
+
+    return {
+      ...cachedOutlets,
+      [activeKey]: outlet,
+    }
   }, [activeKey, cachedOutlets, outlet])
+
+  const outletEntries = useMemo(
+    () => Object.entries(visibleOutlets),
+    [visibleOutlets],
+  )
 
   function onToggleCollapse() {
     setCollapsed(!collapsed)
