@@ -51,15 +51,6 @@ vi.mock('@/features/production-order/useMachineEquipmentOptions', () => ({
   }),
 }))
 
-vi.mock('@/features/workshop/EmployeeList/useEmployees', () => ({
-  useAllEmployees: () => ({
-    data: [
-      { id: 'emp-1', name: '张三' },
-      { id: 'emp-2', name: '李四' },
-    ],
-  }),
-}))
-
 function renderComponent() {
   const queryClient = new QueryClient({
     defaultOptions: {

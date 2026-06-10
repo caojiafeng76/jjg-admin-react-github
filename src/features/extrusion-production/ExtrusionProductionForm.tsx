@@ -18,7 +18,6 @@ import {
 } from '@/utils/extrusionCalculations'
 import { buildProjectNoSelectOptions, filterProjectNoOption, renderProjectNoOption } from '@/features/production-order/projectNoSelect'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
-import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import type {
   ExtrusionProduction,
   ExtrusionProductionItemInput,
@@ -43,9 +42,9 @@ interface HeaderFormValues {
   production_date: string
   machine_id: string
   shift: string
-  shift_leader_employee_id: string
-  operator_employee_id: string
-  inspector_employee_id?: string | null
+  shift_leader_name: string
+  operator_name: string
+  inspector_name?: string | null
   uploaded_by_name?: string | null
   remark?: string | null
   is_audited?: boolean
@@ -64,13 +63,6 @@ const EMPTY_ITEM_DEFAULTS: Partial<ItemFormValues> = {
   tailing_weight_kg: 0,
 }
 
-function toOptionLabel(employee: { id?: string; name: string }) {
-  return {
-    label: employee.name,
-    value: employee.id || '',
-  }
-}
-
 export default function ExtrusionProductionForm({
   open,
   onCancel,
@@ -86,7 +78,6 @@ export default function ExtrusionProductionForm({
   const { data: projectNos, isLoading: isLoadingProjectNos } =
     useExtrusionSalesOrdersProjectNos()
   const { data: machineOptions } = useMachineEquipmentOptions()
-  const { data: employees } = useAllEmployees(open)
   const [items, setItems] = useState<ExtrusionProductionItemInput[]>([])
   const [itemModalOpen, setItemModalOpen] = useState(false)
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
@@ -107,11 +98,6 @@ export default function ExtrusionProductionForm({
         value: item.unified_device_no,
       })),
     [machineOptions],
-  )
-
-  const employeeOptions = useMemo(
-    () => (employees || []).filter((item) => item.id).map(toOptionLabel),
-    [employees],
   )
 
   const watchedOrderLengthMm = Form.useWatch('order_length_mm', itemForm)
@@ -156,9 +142,9 @@ export default function ExtrusionProductionForm({
         production_date: initialValues.production_date,
         machine_id: initialValues.machine_id,
         shift: initialValues.shift,
-        shift_leader_employee_id: initialValues.shift_leader_employee_id,
-        operator_employee_id: initialValues.operator_employee_id,
-        inspector_employee_id: initialValues.inspector_employee_id || undefined,
+        shift_leader_name: initialValues.shift_leader_name,
+        operator_name: initialValues.operator_name,
+        inspector_name: initialValues.inspector_name || undefined,
         uploaded_by_name: initialValues.uploaded_by_name || undefined,
         remark: initialValues.remark || undefined,
         is_audited: initialValues.is_audited,
@@ -248,7 +234,7 @@ export default function ExtrusionProductionForm({
       header: {
         ...headerValues,
         uploaded_by_name: currentUploader || headerValues.uploaded_by_name || null,
-        inspector_employee_id: headerValues.inspector_employee_id || null,
+        inspector_name: headerValues.inspector_name || null,
         remark: headerValues.remark || null,
         is_audited: canAudit ? (headerValues.is_audited ?? false) : false,
       },
@@ -302,39 +288,23 @@ export default function ExtrusionProductionForm({
               </Form.Item>
 
               <Form.Item
-                name="shift_leader_employee_id"
+                name="shift_leader_name"
                 label="班组长"
-                rules={[{ required: true, message: '请选择班组长' }]}
+                rules={[{ required: true, message: '请输入班组长姓名' }]}
               >
-                <Select
-                  showSearch
-                  options={employeeOptions}
-                  placeholder="请选择班组长"
-                  optionFilterProp="label"
-                />
+                <Input placeholder="请输入班组长姓名" />
               </Form.Item>
 
               <Form.Item
-                name="operator_employee_id"
+                name="operator_name"
                 label="操作人"
-                rules={[{ required: true, message: '请选择操作人' }]}
+                rules={[{ required: true, message: '请输入操作人姓名' }]}
               >
-                <Select
-                  showSearch
-                  options={employeeOptions}
-                  placeholder="请选择操作人"
-                  optionFilterProp="label"
-                />
+                <Input placeholder="请输入操作人姓名" />
               </Form.Item>
 
-              <Form.Item name="inspector_employee_id" label="检验人">
-                <Select
-                  showSearch
-                  allowClear
-                  options={employeeOptions}
-                  placeholder="请选择检验人"
-                  optionFilterProp="label"
-                />
+              <Form.Item name="inspector_name" label="检验人">
+                <Input placeholder="请输入检验人姓名" />
               </Form.Item>
 
               <Form.Item name="uploaded_by_name" label="上传人">
