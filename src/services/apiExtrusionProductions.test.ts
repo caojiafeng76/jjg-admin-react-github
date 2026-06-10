@@ -75,7 +75,7 @@ describe('apiExtrusionProductions', () => {
 
     expect(from).toHaveBeenCalledWith('sales_orders')
     expect(select).toHaveBeenCalledWith(
-      'project_no, product_model, length_mm, material_code, customer, customer_model',
+      'project_no, product_model, length_mm, material_code, customer, customer_model, weight_per_meter_kg',
     )
     expect(eq).toHaveBeenCalledWith('project_no', 'PRJ-001')
     expect(result).toEqual(salesOrder)
