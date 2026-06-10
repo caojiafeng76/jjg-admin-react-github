@@ -17,17 +17,21 @@ import PageTabs from './PageTabs'
 import { getLocationKey, type PageTab } from './pageTabsUtils'
 import { getDefaultHomeByRole, isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
+import { usePermissionContext } from '@/contexts/usePermissionContext'
 import { translateErrorMessage } from '@/utils/errorHandler'
 
 const { Content, Sider } = Layout
 
 export default function AppLayout() {
   const { error, clearError, role } = useAuth()
+  const { isLoading: permLoading } = usePermissionContext()
   const outlet = useOutlet()
   const [messageApi, contextHolder] = message.useMessage()
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const [isNavigating, setIsNavigating] = useState(false)
+  const [permLoadBlock, setPermLoadBlock] = useState(false)
+  const prevPermLoadingRef = useRef(false)
   const [pageTabs, setPageTabs] = useState<PageTab[]>([])
   const [cachedOutlets, setCachedOutlets] = useState<Record<string, ReactNode>>(
     {},
@@ -70,7 +74,8 @@ export default function AppLayout() {
   }, [cachedOutlets])
 
   useEffect(() => {
-    if (!outlet) return
+    // 根路径只承载异步首页重定向，缓存后会在隐藏状态继续触发 Navigate。
+    if (!outlet || location.pathname === '/') return
 
     setCachedOutlets((currentOutlets) => {
       if (currentOutlets[activeKey]) return currentOutlets
@@ -80,7 +85,7 @@ export default function AppLayout() {
         [activeKey]: outlet,
       }
     })
-  }, [activeKey, outlet])
+  }, [activeKey, location.pathname, outlet])
 
   useEffect(() => {
     const availableKeys = new Set(pageTabs.map((tab) => tab.key))
@@ -110,6 +115,15 @@ export default function AppLayout() {
       return () => clearTimeout(timer)
     }
   }, [homeKey, location])
+
+  useEffect(() => {
+    if (permLoading && !prevPermLoadingRef.current) {
+      setPermLoadBlock(true)
+    } else if (!permLoading && prevPermLoadingRef.current) {
+      setPermLoadBlock(false)
+    }
+    prevPermLoadingRef.current = permLoading
+  }, [permLoading])
 
   useEffect(() => {
     if (!error) return
@@ -173,6 +187,26 @@ export default function AppLayout() {
                 }}
               >
                 <Spin size="large" tip="切换中..." />
+              </div>
+            )}
+            {permLoadBlock && (
+              <div
+                className="bg-white/80 dark:bg-black/60"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 11,
+                  borderRadius: borderRadiusLG,
+                  backdropFilter: 'blur(2px)',
+                }}
+              >
+                <Spin size="large" tip="权限加载中..." />
               </div>
             )}
             {outletEntries.map(([key, cachedOutlet]) => (

@@ -173,6 +173,8 @@ export default function ExtrusionProductionForm({
       customer_model: project?.customer_model || undefined,
       material_name: project?.material_code || undefined,
       order_length_mm: project?.length_mm ?? undefined,
+      theoretical_unit_weight_kg_per_meter:
+        project?.weight_per_meter_kg ?? undefined,
     })
   }
 
@@ -394,13 +396,13 @@ export default function ExtrusionProductionForm({
 
             <Form.Item
               name="theoretical_unit_weight_kg_per_meter"
-              label="理论米重(kg/m)"
-              rules={[{ required: true, message: '请输入理论米重' }]}
+              label="比重(kg/m)"
             >
               <InputNumber
                 data-testid="input-theory-weight"
                 className="w-full"
-                min={0.0001}
+                disabled
+                placeholder="选择项目号后自动带出"
               />
             </Form.Item>
 

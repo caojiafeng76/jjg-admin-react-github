@@ -106,7 +106,8 @@ export function RoleHomeRedirect() {
 
 /**
  * 基于 `page:*` 权限的路由守卫（权限系统版）。
- * 权限加载中时显示 Loading；无权限时重定向到角色默认首页并显示 access-denied。
+ * auth 或权限加载中时显示 Loading；仅在权限就绪后才判定是否可访问。
+ * 无权限时重定向到 /access-denied。
  */
 export function PermissionProtectedRoute({
   element,

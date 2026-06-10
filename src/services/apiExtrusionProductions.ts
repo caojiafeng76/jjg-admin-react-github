@@ -82,6 +82,7 @@ export type ExtrusionSalesOrderDetail = Pick<
   | 'material_code'
   | 'customer'
   | 'customer_model'
+  | 'weight_per_meter_kg'
 > & {
   project_no: string
 }
@@ -95,6 +96,7 @@ export interface ExtrusionSalesOrderOption
     | 'material_code'
     | 'customer'
     | 'customer_model'
+    | 'weight_per_meter_kg'
     | 'created_at'
   > {
   project_no: string
@@ -353,7 +355,7 @@ export async function getExtrusionSalesOrdersProjectNos() {
     const { data, error } = await supabase
       .from('sales_orders')
       .select(
-        'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
+        'project_no, product_model, length_mm, material_code, customer, customer_model, weight_per_meter_kg, created_at',
       )
       .eq('status', '生产中')
       .not('project_no', 'is', null)
@@ -386,7 +388,7 @@ export async function getExtrusionSalesOrderByProjectNo(projectNo: string) {
   const { data, error } = await supabase
     .from('sales_orders')
     .select(
-      'project_no, product_model, length_mm, material_code, customer, customer_model',
+      'project_no, product_model, length_mm, material_code, customer, customer_model, weight_per_meter_kg',
     )
     .eq('project_no', normalizedProjectNo)
     .single()
