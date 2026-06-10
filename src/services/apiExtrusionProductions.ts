@@ -47,9 +47,9 @@ export interface ExtrusionProduction {
   production_date: string
   machine_id: string
   shift: string
-  shift_leader_employee_id: string
-  operator_employee_id: string
-  inspector_employee_id: string | null
+  shift_leader_name: string
+  operator_name: string
+  inspector_name: string | null
   uploaded_by_name: string | null
   remark: string | null
   is_audited: boolean
@@ -64,7 +64,7 @@ export interface ExtrusionProductionFilters {
   endDate?: string
   shift?: string
   machineId?: string
-  operatorEmployeeId?: string
+  operatorName?: string
   projectNo?: string
   isAudited?: boolean
 }
@@ -105,9 +105,9 @@ export interface ExtrusionProductionHeaderInput {
   production_date: string
   machine_id: string
   shift: string
-  shift_leader_employee_id: string
-  operator_employee_id: string
-  inspector_employee_id?: string | null
+  shift_leader_name: string
+  operator_name: string
+  inspector_name?: string | null
   uploaded_by_name?: string | null
   remark?: string | null
   is_audited?: boolean
@@ -205,15 +205,15 @@ function normalizeExtrusionProductionHeader(
     production_date: normalizeRequiredText(header.production_date, '生产日期'),
     machine_id: normalizeRequiredText(header.machine_id, '设备'),
     shift: normalizeRequiredText(header.shift, '班别'),
-    shift_leader_employee_id: normalizeRequiredText(
-      header.shift_leader_employee_id,
+    shift_leader_name: normalizeRequiredText(
+      header.shift_leader_name,
       '班组长',
     ),
-    operator_employee_id: normalizeRequiredText(
-      header.operator_employee_id,
+    operator_name: normalizeRequiredText(
+      header.operator_name,
       '操作人',
     ),
-    inspector_employee_id: normalizeOptionalText(header.inspector_employee_id),
+    inspector_name: normalizeOptionalText(header.inspector_name),
     uploaded_by_name: normalizeOptionalText(header.uploaded_by_name),
     remark: normalizeOptionalText(header.remark),
     is_audited: header.is_audited ?? false,
@@ -328,8 +328,8 @@ function applyExtrusionProductionFilters<
     nextQuery = nextQuery.eq('machine_id', filters.machineId)
   }
 
-  if (filters.operatorEmployeeId) {
-    nextQuery = nextQuery.eq('operator_employee_id', filters.operatorEmployeeId)
+  if (filters.operatorName) {
+    nextQuery = nextQuery.eq('operator_name', filters.operatorName)
   }
 
   if (typeof filters.isAudited === 'boolean') {

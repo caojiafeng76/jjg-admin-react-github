@@ -120,14 +120,14 @@ describe('apiExtrusionProductions', () => {
 
     const result = await createExtrusionProduction({
       header: {
-        inspector_employee_id: '',
+        inspector_name: '',
         is_audited: false,
         machine_id: 'machine-1',
-        operator_employee_id: 'employee-1',
+        operator_name: 'employee-1',
         production_date: '2026-06-09',
         remark: '  备注  ',
         shift: '白班',
-        shift_leader_employee_id: 'leader-1',
+        shift_leader_name: 'leader-1',
         uploaded_by_name: '  上传人  ',
       },
       items: [
@@ -159,14 +159,14 @@ describe('apiExtrusionProductions', () => {
 
     expect(rpc).toHaveBeenCalledWith('upsert_extrusion_production', {
       p_header: expect.objectContaining({
-        inspector_employee_id: null,
+        inspector_name: null,
         is_audited: false,
         machine_id: 'machine-1',
-        operator_employee_id: 'employee-1',
+        operator_name: 'employee-1',
         production_date: '2026-06-09',
         remark: '备注',
         shift: '白班',
-        shift_leader_employee_id: 'leader-1',
+        shift_leader_name: 'leader-1',
         uploaded_by_name: '上传人',
       }),
       p_items: [

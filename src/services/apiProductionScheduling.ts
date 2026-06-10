@@ -26,6 +26,26 @@ type SalesOrderUpdatePayload =
   Database['public']['Tables']['sales_orders']['Update'] &
     Record<string, unknown>
 
+type SalesOrderTextField = Extract<
+  keyof ProductionSchedulingOrderUpdate,
+  | 'delivery_review_result'
+  | 'process_flow'
+  | 'process_requirement'
+  | 'tooling_status'
+  | 'bottleneck_processes'
+  | 'material_status'
+  | 'order_category'
+  | 'delivery_priority'
+  | 'responsible_person'
+  | 'progress_status'
+  | 'scheduling_remark'
+>
+
+type SalesOrderDateField = Extract<
+  keyof ProductionSchedulingOrderUpdate,
+  'order_date' | 'product_delivery_date' | 'planned_start_date' | 'planned_finish_date'
+>
+
 type ProductionQuantityRow = Pick<
   Database['public']['Tables']['production_order_items']['Row'],
   'project_no' | 'qualified_quantity'
@@ -930,7 +950,7 @@ export async function updateProductionSchedulingOrder({
   const payload: SalesOrderUpdatePayload = {
     updated_at: new Date().toISOString(),
   }
-  const textFields: Array<keyof ProductionSchedulingOrderUpdate> = [
+  const textFields: SalesOrderTextField[] = [
     'delivery_review_result',
     'process_flow',
     'process_requirement',
@@ -943,7 +963,7 @@ export async function updateProductionSchedulingOrder({
     'progress_status',
     'scheduling_remark',
   ]
-  const dateFields: Array<keyof ProductionSchedulingOrderUpdate> = [
+  const dateFields: SalesOrderDateField[] = [
     'order_date',
     'product_delivery_date',
     'planned_start_date',
@@ -983,7 +1003,7 @@ export async function updateProductionSchedulingOrder({
   if ('process_schedules' in values) {
     payload.process_schedules = normalizeProcessSchedules(
       values.process_schedules,
-    )
+    ) as unknown as Database['public']['Tables']['sales_orders']['Update']['process_schedules']
   }
 
   const { error } = await supabase

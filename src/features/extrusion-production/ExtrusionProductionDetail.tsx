@@ -130,19 +130,19 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
             children: selectedRecord.machine_id,
           },
           {
-            key: 'shift_leader_employee_id',
+            key: 'shift_leader_name',
             label: '班组长',
-            children: selectedRecord.shift_leader_employee_id,
+            children: selectedRecord.shift_leader_name,
           },
           {
-            key: 'operator_employee_id',
+            key: 'operator_name',
             label: '操作人',
-            children: selectedRecord.operator_employee_id,
+            children: selectedRecord.operator_name,
           },
           {
-            key: 'inspector_employee_id',
+            key: 'inspector_name',
             label: '检验人',
-            children: selectedRecord.inspector_employee_id || '-',
+            children: selectedRecord.inspector_name || '-',
           },
           {
             key: 'uploaded_by_name',
