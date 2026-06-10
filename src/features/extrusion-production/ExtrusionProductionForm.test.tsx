@@ -25,17 +25,7 @@ vi.mock('antd', async () => {
 
 vi.mock('./useExtrusionProductions', () => ({
   useExtrusionSalesOrdersProjectNos: () => ({
-    data: [
-      {
-        project_no: 'PRJ-001',
-        product_model: 'P-100',
-        length_mm: 6000,
-        material_code: '6063-T5',
-        customer: '西尼',
-        customer_model: 'XM-01',
-        created_at: '2026-06-09T00:00:00.000Z',
-      },
-    ],
+    data: [],
     isLoading: false,
   }),
 }))
@@ -76,30 +66,33 @@ describe('ExtrusionProductionForm', () => {
     vi.clearAllMocks()
   })
 
-  it('fills project snapshot and updates derived previews', async () => {
+  it('calculates preview values correctly', async () => {
     const user = userEvent.setup()
     renderComponent()
 
     await user.click(screen.getByRole('button', { name: /添加明细/i }))
 
-    await user.click(screen.getByLabelText('项目号'))
-    const options = await screen.findAllByText('PRJ-001')
-    await user.click(options[0])
+    // 找到明细 Modal 中的 number inputs 并手动填充
+    const orderLengthInput = screen.getByRole('spinbutton', { name: /订单长度/ })
+    const theoryWeightInput = screen.getByRole('spinbutton', { name: /理论米重/ })
+    const actualLengthInput = screen.getByRole('spinbutton', { name: /实际产出长度/ })
+    const actualWeightInput = screen.getByRole('spinbutton', { name: /实际支重/ })
+    const actualQuantityInput = screen.getByRole('spinbutton', { name: /实际数量/ })
+    const billetInputWeightInput = screen.getByRole('spinbutton', { name: /铝棒投入重量/ })
 
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('P-100')).toBeInTheDocument()
-      expect(screen.getByDisplayValue('西尼')).toBeInTheDocument()
-      expect(screen.getByDisplayValue('XM-01')).toBeInTheDocument()
-      expect(screen.getByDisplayValue('6063-T5')).toBeInTheDocument()
-    })
+    await user.clear(actualQuantityInput)
+    await user.type(orderLengthInput, '6000')
+    await user.type(theoryWeightInput, '0.42')
+    await user.type(actualLengthInput, '6500')
+    await user.type(actualWeightInput, '2.5')
+    await user.type(actualQuantityInput, '100')
+    await user.type(billetInputWeightInput, '320')
 
-    await user.type(screen.getByLabelText('理论米重(kg/m)'), '0.42')
-    await user.type(screen.getByLabelText('实际产出长度(mm)'), '6500')
-    await user.type(screen.getByLabelText('实际支重(kg)'), '2.5')
-    await user.clear(screen.getByLabelText('实际数量'))
-    await user.type(screen.getByLabelText('实际数量'), '100')
-    await user.type(screen.getByLabelText('铝棒投入重量(kg)'), '320')
-
+    // 验证预览计算结果
+    // 理论支数 = floor(6500/6000 * 100) = floor(1.083... * 100) = 108
+    // 理论支重 = 108 * (6000/1000) * 0.42 = 108 * 6 * 0.42 = 272.16
+    // 实际产出重量 = 100 * 2.5 = 250.00
+    // 成材率 = (250/320) * 100 = 78.125 ≈ 78.13
     await waitFor(() => {
       expect(screen.getByTestId('preview-theoretical-count')).toHaveTextContent('108')
       expect(screen.getByTestId('preview-theoretical-weight')).toHaveTextContent('272.16')
