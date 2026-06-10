@@ -59,7 +59,6 @@ export default function ExtrusionProductionSearch({
           : undefined,
       shift: values.shift || undefined,
       machineId: values.machineId?.trim() || undefined,
-      operatorName: values.operatorName?.trim() || undefined,
       projectNo: values.projectNo?.trim() || undefined,
       isAudited:
         typeof values.isAudited === 'boolean' ? values.isAudited : undefined,
@@ -101,10 +100,6 @@ export default function ExtrusionProductionSearch({
 
       <Form.Item name="machineId" className="mb-0">
         <Input placeholder="设备ID" allowClear style={{ width: 180 }} />
-      </Form.Item>
-
-      <Form.Item name="operatorName" className="mb-0">
-        <Input placeholder="操作人姓名" allowClear style={{ width: 180 }} />
       </Form.Item>
 
       <Form.Item name="isAudited" className="mb-0">

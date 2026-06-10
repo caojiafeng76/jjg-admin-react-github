@@ -73,19 +73,6 @@ export default function ExtrusionProductionTable({
         width: 180,
       },
       {
-        title: '操作人',
-        dataIndex: 'operator_name',
-        key: 'operator_name',
-        width: 180,
-      },
-      {
-        title: '检验人',
-        dataIndex: 'inspector_name',
-        key: 'inspector_name',
-        width: 180,
-        render: (value: string | null) => value || '-',
-      },
-      {
         title: '明细数',
         key: 'item_count',
         width: 88,

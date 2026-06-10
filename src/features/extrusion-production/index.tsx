@@ -210,8 +210,6 @@ export default function ExtrusionProductionPage() {
                   machine_id: targetRecord.machine_id,
                   shift: targetRecord.shift,
                   shift_leader_name: targetRecord.shift_leader_name,
-                  operator_name: targetRecord.operator_name,
-                  inspector_name: targetRecord.inspector_name,
                   uploaded_by_name: targetRecord.uploaded_by_name,
                   remark: targetRecord.remark,
                   is_audited: nextAuditValue,

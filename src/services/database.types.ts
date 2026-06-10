@@ -252,10 +252,8 @@ export type Database = {
           audited_at: string | null
           created_at: string
           id: string
-          inspector_name: string | null
           is_audited: boolean
           machine_id: string
-          operator_name: string
           production_date: string
           remark: string | null
           shift: string
@@ -267,10 +265,8 @@ export type Database = {
           audited_at?: string | null
           created_at?: string
           id?: string
-          inspector_name?: string | null
           is_audited?: boolean
           machine_id: string
-          operator_name: string
           production_date: string
           remark?: string | null
           shift: string
@@ -282,10 +278,8 @@ export type Database = {
           audited_at?: string | null
           created_at?: string
           id?: string
-          inspector_name?: string | null
           is_audited?: boolean
           machine_id?: string
-          operator_name?: string
           production_date?: string
           remark?: string | null
           shift?: string

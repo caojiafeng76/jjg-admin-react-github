@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   App,
   Button,
+  DatePicker,
   Form,
   Input,
   InputNumber,
@@ -9,6 +10,7 @@ import {
   Select,
   Switch,
 } from 'antd'
+import dayjs, { type Dayjs } from 'dayjs'
 
 import {
   calculateActualOutputWeight,
@@ -17,7 +19,6 @@ import {
   calculateTheoreticalOutputWeight,
 } from '@/utils/extrusionCalculations'
 import { buildProjectNoSelectOptions, filterProjectNoOption, renderProjectNoOption } from '@/features/production-order/projectNoSelect'
-import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import type {
   ExtrusionProduction,
   ExtrusionProductionItemInput,
@@ -39,12 +40,10 @@ interface Props {
 }
 
 interface HeaderFormValues {
-  production_date: string
+  production_date: Dayjs | null
   machine_id: string
   shift: string
   shift_leader_name: string
-  operator_name: string
-  inspector_name?: string | null
   uploaded_by_name?: string | null
   remark?: string | null
   is_audited?: boolean
@@ -55,6 +54,19 @@ type ItemFormValues = ExtrusionProductionItemInput
 const SHIFT_OPTIONS = [
   { label: '白班', value: '白班' },
   { label: '夜班', value: '夜班' },
+]
+
+const SHIFT_LEADER_OPTIONS = [
+  { label: '姚兴弟', value: '姚兴弟' },
+  { label: '蒋天恩', value: '蒋天恩' },
+  { label: '陈国明', value: '陈国明' },
+  { label: '李成', value: '李成' },
+]
+
+const MACHINE_OPTIONS = [
+  { label: '680T', value: '680T' },
+  { label: '1000T', value: '1000T' },
+  { label: '1400T', value: '1400T' },
 ]
 
 const EMPTY_ITEM_DEFAULTS: Partial<ItemFormValues> = {
@@ -77,7 +89,6 @@ export default function ExtrusionProductionForm({
   const [itemForm] = Form.useForm<ItemFormValues>()
   const { data: projectNos, isLoading: isLoadingProjectNos } =
     useExtrusionSalesOrdersProjectNos()
-  const { data: machineOptions } = useMachineEquipmentOptions()
   const [items, setItems] = useState<ExtrusionProductionItemInput[]>([])
   const [itemModalOpen, setItemModalOpen] = useState(false)
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
@@ -91,14 +102,7 @@ export default function ExtrusionProductionForm({
     return new Map((projectNos || []).map((item) => [item.project_no, item]))
   }, [projectNos])
 
-  const machineSelectOptions = useMemo(
-    () =>
-      (machineOptions || []).map((item) => ({
-        label: `${item.unified_device_no} · ${item.machine_name}`,
-        value: item.unified_device_no,
-      })),
-    [machineOptions],
-  )
+  const machineSelectOptions = MACHINE_OPTIONS
 
   const watchedOrderLengthMm = Form.useWatch('order_length_mm', itemForm)
   const watchedActualOutputLengthMm = Form.useWatch('actual_output_length_mm', itemForm)
@@ -139,12 +143,12 @@ export default function ExtrusionProductionForm({
 
     if (initialValues) {
       headerForm.setFieldsValue({
-        production_date: initialValues.production_date,
+        production_date: initialValues.production_date
+          ? dayjs(initialValues.production_date)
+          : null,
         machine_id: initialValues.machine_id,
         shift: initialValues.shift,
         shift_leader_name: initialValues.shift_leader_name,
-        operator_name: initialValues.operator_name,
-        inspector_name: initialValues.inspector_name || undefined,
         uploaded_by_name: initialValues.uploaded_by_name || undefined,
         remark: initialValues.remark || undefined,
         is_audited: initialValues.is_audited,
@@ -232,14 +236,18 @@ export default function ExtrusionProductionForm({
       return
     }
 
+    const headerPayload = {
+      ...headerValues,
+      production_date: headerValues.production_date
+        ? headerValues.production_date.format('YYYY-MM-DD')
+        : '',
+      uploaded_by_name: currentUploader || headerValues.uploaded_by_name || null,
+      remark: headerValues.remark || null,
+      is_audited: canAudit ? (headerValues.is_audited ?? false) : false,
+    }
+
     await onSubmit({
-      header: {
-        ...headerValues,
-        uploaded_by_name: currentUploader || headerValues.uploaded_by_name || null,
-        inspector_name: headerValues.inspector_name || null,
-        remark: headerValues.remark || null,
-        is_audited: canAudit ? (headerValues.is_audited ?? false) : false,
-      },
+      header: headerPayload,
       items: items.map((item, index) => ({
         ...item,
         sort_order: index,
@@ -263,9 +271,9 @@ export default function ExtrusionProductionForm({
               <Form.Item
                 name="production_date"
                 label="生产日期"
-                rules={[{ required: true, message: '请输入生产日期' }]}
+                rules={[{ required: true, message: '请选择生产日期' }]}
               >
-                <Input placeholder="YYYY-MM-DD" />
+                <DatePicker format="YYYY-MM-DD" placeholder="YYYY-MM-DD" />
               </Form.Item>
 
               <Form.Item
@@ -292,21 +300,9 @@ export default function ExtrusionProductionForm({
               <Form.Item
                 name="shift_leader_name"
                 label="班组长"
-                rules={[{ required: true, message: '请输入班组长姓名' }]}
+                rules={[{ required: true, message: '请选择班组长' }]}
               >
-                <Input placeholder="请输入班组长姓名" />
-              </Form.Item>
-
-              <Form.Item
-                name="operator_name"
-                label="操作人"
-                rules={[{ required: true, message: '请输入操作人姓名' }]}
-              >
-                <Input placeholder="请输入操作人姓名" />
-              </Form.Item>
-
-              <Form.Item name="inspector_name" label="检验人">
-                <Input placeholder="请输入检验人姓名" />
+                <Select options={SHIFT_LEADER_OPTIONS} placeholder="请选择班组长" />
               </Form.Item>
 
               <Form.Item name="uploaded_by_name" label="上传人">
