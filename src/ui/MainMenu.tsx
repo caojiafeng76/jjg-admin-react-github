@@ -253,6 +253,19 @@ const allMenuItems: MenuItemDef[] = [
     ],
   },
   {
+    key: 'extrusion-production',
+    label: '挤压生产',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:extrusion-production',
+    children: [
+      {
+        key: 'extrusion-production',
+        label: '挤压生产单',
+        permission: 'page:extrusion-production',
+      },
+    ],
+  },
+  {
     key: 'youmai',
     label: '优迈',
     icon: <Square3Stack3DIcon className="size-4" />,
