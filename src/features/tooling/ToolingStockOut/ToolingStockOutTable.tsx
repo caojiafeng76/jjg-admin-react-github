@@ -2,10 +2,7 @@ import { memo, useMemo } from 'react'
 import { Table, Tag, type TableColumnsType } from 'antd'
 
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 interface Props {
   loading: boolean

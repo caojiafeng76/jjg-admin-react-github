@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx-js-style'
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@/utils/excelStyleUtils'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
+import { formatNumber } from '@/utils/format'
 
 const SHEET_NAME = '优迈成品出库'
 const TITLE = '优迈成品出库'
@@ -36,10 +37,6 @@ function colLetter(index: number) {
     i = Math.floor(i / 26) - 1
   }
   return letter
-}
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
 }
 
 function formatCellText(value: string | number | null | undefined) {

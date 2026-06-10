@@ -4,10 +4,7 @@ import { Table, TableColumnsType, Tag, Typography } from 'antd'
 import { useRoleOptions } from '@/hooks/useRoleOptions'
 import type { Employee } from '@/services/apiEmployees'
 import { useEmployeeAuthEmail } from './useEmployees'
-
-function formatNumber(value: number | null | undefined, digits = 2) {
-  return Number(value ?? 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 interface Props {
   loading: boolean

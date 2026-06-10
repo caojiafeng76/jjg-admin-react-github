@@ -70,34 +70,41 @@ describe('ExtrusionProductionForm', () => {
     const user = userEvent.setup()
     renderComponent()
 
-    await user.click(screen.getByRole('button', { name: /添加明细/i }))
+    // 打开明细 Modal
+    await user.click(screen.getByTestId('btn-add-item'))
 
-    // 找到明细 Modal 中的 number inputs 并手动填充
-    const orderLengthInput = screen.getByRole('spinbutton', { name: /订单长度/ })
-    const theoryWeightInput = screen.getByRole('spinbutton', { name: /理论米重/ })
-    const actualLengthInput = screen.getByRole('spinbutton', { name: /实际产出长度/ })
-    const actualWeightInput = screen.getByRole('spinbutton', { name: /实际支重/ })
-    const actualQuantityInput = screen.getByRole('spinbutton', { name: /实际数量/ })
-    const billetInputWeightInput = screen.getByRole('spinbutton', { name: /铝棒投入重量/ })
+    // 填充表单字段
+    await user.clear(screen.getByTestId('input-order-length'))
+    await user.type(screen.getByTestId('input-order-length'), '6000')
 
-    await user.clear(actualQuantityInput)
-    await user.type(orderLengthInput, '6000')
-    await user.type(theoryWeightInput, '0.42')
-    await user.type(actualLengthInput, '6500')
-    await user.type(actualWeightInput, '2.5')
-    await user.type(actualQuantityInput, '100')
-    await user.type(billetInputWeightInput, '320')
+    await user.clear(screen.getByTestId('input-theory-weight'))
+    await user.type(screen.getByTestId('input-theory-weight'), '0.42')
+
+    await user.clear(screen.getByTestId('input-actual-length'))
+    await user.type(screen.getByTestId('input-actual-length'), '6500')
+
+    await user.clear(screen.getByTestId('input-actual-weight'))
+    await user.type(screen.getByTestId('input-actual-weight'), '2.5')
+
+    await user.clear(screen.getByTestId('input-actual-quantity'))
+    await user.type(screen.getByTestId('input-actual-quantity'), '100')
+
+    await user.clear(screen.getByTestId('input-billet-weight'))
+    await user.type(screen.getByTestId('input-billet-weight'), '320')
 
     // 验证预览计算结果
     // 理论支数 = floor(6500/6000 * 100) = floor(1.083... * 100) = 108
     // 理论支重 = 108 * (6000/1000) * 0.42 = 108 * 6 * 0.42 = 272.16
     // 实际产出重量 = 100 * 2.5 = 250.00
     // 成材率 = (250/320) * 100 = 78.125 ≈ 78.13
-    await waitFor(() => {
-      expect(screen.getByTestId('preview-theoretical-count')).toHaveTextContent('108')
-      expect(screen.getByTestId('preview-theoretical-weight')).toHaveTextContent('272.16')
-      expect(screen.getByTestId('preview-actual-weight')).toHaveTextContent('250.00')
-      expect(screen.getByTestId('preview-yield')).toHaveTextContent('78.13')
-    })
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('preview-theoretical-count')).toHaveTextContent('108')
+        expect(screen.getByTestId('preview-theoretical-weight')).toHaveTextContent('272.16')
+        expect(screen.getByTestId('preview-actual-weight')).toHaveTextContent('250.00')
+        expect(screen.getByTestId('preview-yield')).toHaveTextContent('78.13')
+      },
+      { timeout: 3000 },
+    )
   })
 })

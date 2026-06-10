@@ -6,10 +6,7 @@ import dayjs from 'dayjs'
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { initializePDF, printPDF } from '@/utils/pdfUtils'
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 const MAX_ROWS_PER_PAGE = 8
 const TABLE_START_Y = 30

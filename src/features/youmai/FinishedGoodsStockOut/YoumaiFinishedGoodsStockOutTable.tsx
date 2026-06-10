@@ -3,10 +3,7 @@ import { Table, Tag, type TableColumnsType } from 'antd'
 
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 function uniqueFilters(
   values: (string | number | null | undefined)[],

@@ -2,12 +2,9 @@ import { memo, useMemo } from 'react'
 import { Table, Tag, type TableColumnsType } from 'antd'
 
 import type { ToolingStockIn } from '@/services/apiToolingStockIn'
+import { formatNumber } from '@/utils/format'
 
 type FilterValue = string | number
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
-}
 
 function formatDateTime(value: string | null | undefined) {
   return value ? new Date(value).toLocaleString('zh-CN') : '-'

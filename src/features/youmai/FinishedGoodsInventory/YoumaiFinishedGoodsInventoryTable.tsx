@@ -3,10 +3,7 @@ import { Table, type TableColumnsType } from 'antd'
 
 import type { YoumaiFinishedGoodsInventory } from '@/services/apiYoumaiFinishedGoodsInventory'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 function getFinalStockColorClass(value: number | null | undefined) {
   const stock = Number(value ?? 0)

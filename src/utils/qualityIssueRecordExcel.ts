@@ -54,9 +54,7 @@ function formatDateTime(value: string | null | undefined) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : ''
 }
 
-function formatNumber(value: number | null | undefined) {
-  return value === null || value === undefined ? '' : value
-}
+import { formatNumber } from '@/utils/format'
 
 export function exportQualityIssueRecordsToExcel(
   records: QualityIssueRecord[],
@@ -76,7 +74,7 @@ export function exportQualityIssueRecordsToExcel(
     record.processed_quantity,
     record.qualified_quantity,
     record.defective_quantity,
-    Number(record.defect_rate || 0).toFixed(2),
+    formatNumber(record.defect_rate, 2),
     record.quality_issue,
     record.cause,
     record.defective_handling_result,

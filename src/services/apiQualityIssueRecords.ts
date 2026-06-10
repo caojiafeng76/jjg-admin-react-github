@@ -7,6 +7,32 @@ import {
   normalizeSearchKeywords,
 } from '@/utils/searchKeywords'
 
+/**
+ * 审核状态口径说明：
+ *
+ * 本项目存在两种审核状态设计，属于有意设计，不可混用：
+ *
+ * 1. audit_status（三态枚举）— 仅用于 quality_issue_records 表
+ *    - 值: 'pending' | 'approved' | 'rejected'
+ *    - 语义: 质量问题记录需要"待审核 → 已审核/已驳回"三态流转
+ *    - 数据库: CHECK 约束 enforce 允许值
+ *    - 特点: 无自动时间戳/操作人同步
+ *
+ * 2. is_audited（布尔值）— 用于其他所有审核模块
+ *    - 值: true（已审核）/ false（待审核）
+ *    - 语义: 简单二元审核状态
+ *    - 数据库: 有 before-insert-or-update 触发器自动填充 audited_at
+ *    - 特点: RLS 策略在 is_audited=true 时锁定记录不可修改
+ *
+ * 混用两者会导致：
+ *  - 数据库 CHECK 约束失败（quality 表不接受布尔值）
+ *  - RLS 策略不匹配（布尔模块有自动锁定，质量模块没有）
+ *  - UI 审核控件不一致（Switch vs Select）
+ */
+
+/**
+ * 质量问题类型枚举
+ */
 export const QUALITY_ISSUE_TYPES = ['尺寸', '表面伤', '表面毛刺'] as const
 
 export type QualityIssueType = (typeof QUALITY_ISSUE_TYPES)[number]

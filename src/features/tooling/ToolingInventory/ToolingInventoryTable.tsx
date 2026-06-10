@@ -2,10 +2,7 @@ import { memo, useMemo } from 'react'
 import { Table, type TableColumnsType } from 'antd'
 
 import type { ToolingInventory } from '@/services/apiToolingInventory'
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 function getFinalStockColorClass(value: number | null | undefined) {
   const stock = Number(value ?? 0)

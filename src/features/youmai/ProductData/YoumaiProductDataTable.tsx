@@ -2,10 +2,7 @@ import { useMemo } from 'react'
 import { Table, TableColumnsType } from 'antd'
 
 import type { YoumaiProductData } from '@/services/apiYoumaiProductData'
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 interface Props {
   loading: boolean
