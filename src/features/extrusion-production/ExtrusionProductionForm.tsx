@@ -385,7 +385,11 @@ export default function ExtrusionProductionForm({
               label="订单长度(mm)"
               rules={[{ required: true, message: '请输入订单长度' }]}
             >
-              <InputNumber className="w-full" min={1} />
+              <InputNumber
+                data-testid="input-order-length"
+                className="w-full"
+                min={1}
+              />
             </Form.Item>
 
             <Form.Item
@@ -393,7 +397,11 @@ export default function ExtrusionProductionForm({
               label="理论米重(kg/m)"
               rules={[{ required: true, message: '请输入理论米重' }]}
             >
-              <InputNumber className="w-full" min={0.0001} />
+              <InputNumber
+                data-testid="input-theory-weight"
+                className="w-full"
+                min={0.0001}
+              />
             </Form.Item>
 
             <Form.Item name="die_no" label="模具号">
@@ -405,7 +413,11 @@ export default function ExtrusionProductionForm({
               label="铝棒直径(mm)"
               rules={[{ required: true, message: '请输入铝棒直径' }]}
             >
-              <InputNumber className="w-full" min={0.0001} />
+              <InputNumber
+                data-testid="input-billet-diameter"
+                className="w-full"
+                min={0.0001}
+              />
             </Form.Item>
 
             <Form.Item
@@ -413,7 +425,11 @@ export default function ExtrusionProductionForm({
               label="铝棒长度(mm)"
               rules={[{ required: true, message: '请输入铝棒长度' }]}
             >
-              <InputNumber className="w-full" min={0.0001} />
+              <InputNumber
+                data-testid="input-billet-length"
+                className="w-full"
+                min={0.0001}
+              />
             </Form.Item>
 
             <Form.Item
@@ -421,7 +437,12 @@ export default function ExtrusionProductionForm({
               label="铝棒数量"
               rules={[{ required: true, message: '请输入铝棒数量' }]}
             >
-              <InputNumber className="w-full" min={1} precision={0} />
+              <InputNumber
+                data-testid="input-billet-quantity"
+                className="w-full"
+                min={1}
+                precision={0}
+              />
             </Form.Item>
 
             <Form.Item
@@ -429,7 +450,11 @@ export default function ExtrusionProductionForm({
               label="铝棒投入重量(kg)"
               rules={[{ required: true, message: '请输入铝棒投入重量' }]}
             >
-              <InputNumber className="w-full" min={0.0001} />
+              <InputNumber
+                data-testid="input-billet-weight"
+                className="w-full"
+                min={0.0001}
+              />
             </Form.Item>
 
             <Form.Item
@@ -437,7 +462,11 @@ export default function ExtrusionProductionForm({
               label="实际产出长度(mm)"
               rules={[{ required: true, message: '请输入实际产出长度' }]}
             >
-              <InputNumber className="w-full" min={0.0001} />
+              <InputNumber
+                data-testid="input-actual-length"
+                className="w-full"
+                min={0.0001}
+              />
             </Form.Item>
 
             <Form.Item
@@ -445,7 +474,11 @@ export default function ExtrusionProductionForm({
               label="实际支重(kg)"
               rules={[{ required: true, message: '请输入实际支重' }]}
             >
-              <InputNumber className="w-full" min={0.0001} />
+              <InputNumber
+                data-testid="input-actual-weight"
+                className="w-full"
+                min={0.0001}
+              />
             </Form.Item>
 
             <Form.Item
@@ -453,15 +486,28 @@ export default function ExtrusionProductionForm({
               label="实际数量"
               rules={[{ required: true, message: '请输入实际数量' }]}
             >
-              <InputNumber className="w-full" min={0} precision={0} />
+              <InputNumber
+                data-testid="input-actual-quantity"
+                className="w-full"
+                min={0}
+                precision={0}
+              />
             </Form.Item>
 
             <Form.Item name="scrap_weight_kg" label="废料重量(kg)">
-              <InputNumber className="w-full" min={0} />
+              <InputNumber
+                data-testid="input-scrap-weight"
+                className="w-full"
+                min={0}
+              />
             </Form.Item>
 
             <Form.Item name="tailing_weight_kg" label="压余重量(kg)">
-              <InputNumber className="w-full" min={0} />
+              <InputNumber
+                data-testid="input-tailing-weight"
+                className="w-full"
+                min={0}
+              />
             </Form.Item>
           </div>
 

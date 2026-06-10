@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { queryConfig } from '@/config/queryClient'
 import { ORDER_STATUS_DASHBOARD_KEY } from '@/features/workshop/OrderStatusDashboard/useOrderStatusDashboard'
-import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 import {
   createExtrusionProduction,
   deleteExtrusionProductions,
@@ -66,14 +66,15 @@ export function useExtrusionSalesOrderByProjectNo(projectNo: string | undefined)
 }
 
 export function useCreateExtrusionProduction() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: createExtrusionProduction,
     invalidateQueries: EXTRUSION_PRODUCTION_INVALIDATE_KEYS,
+    successMessage: '创建挤压生产单成功',
   })
 }
 
 export function useUpdateExtrusionProduction() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: ({
       id,
       payload,
@@ -82,12 +83,14 @@ export function useUpdateExtrusionProduction() {
       payload: UpsertExtrusionProductionPayload
     }) => updateExtrusionProduction({ id, payload }),
     invalidateQueries: EXTRUSION_PRODUCTION_INVALIDATE_KEYS,
+    successMessage: '更新挤压生产单成功',
   })
 }
 
 export function useDeleteExtrusionProductions() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: deleteExtrusionProductions,
     invalidateQueries: EXTRUSION_PRODUCTION_INVALIDATE_KEYS,
+    successMessage: '删除挤压生产单成功',
   })
 }

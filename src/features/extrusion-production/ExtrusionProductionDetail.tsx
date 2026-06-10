@@ -9,13 +9,7 @@ interface Props {
   selectedRecord: ExtrusionProduction | null
 }
 
-function renderNumber(value: number | null | undefined, digits = 2) {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-
-  return Number(value).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 const itemColumns = [
   {
@@ -56,7 +50,7 @@ const itemColumns = [
     dataIndex: 'theoretical_output_weight_kg',
     key: 'theoretical_output_weight_kg',
     width: 120,
-    render: (value: number) => renderNumber(value),
+    render: (value: number) => formatNumber(value),
   },
   {
     title: '实际数量',
@@ -69,14 +63,14 @@ const itemColumns = [
     dataIndex: 'actual_output_weight_kg',
     key: 'actual_output_weight_kg',
     width: 140,
-    render: (value: number) => renderNumber(value),
+    render: (value: number) => formatNumber(value),
   },
   {
     title: '成材率(%)',
     dataIndex: 'material_yield',
     key: 'material_yield',
     width: 110,
-    render: (value: number) => renderNumber(value),
+    render: (value: number) => formatNumber(value),
   },
   {
     title: '备注',
@@ -164,7 +158,7 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
           {
             key: 'total_actual_weight',
             label: '总实际产出重量(kg)',
-            children: renderNumber(totalActualWeight),
+            children: formatNumber(totalActualWeight),
           },
           {
             key: 'remark',

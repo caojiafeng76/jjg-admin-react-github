@@ -54,6 +54,33 @@ export const DEFAULT_HOME_BY_ROLE: Record<AppRole, string> = {
   viewer: '/dashboard',
 }
 
+/**
+ * Role 空值安全检查工具
+ *
+ * useAuth() 返回的 role 类型为 AppRole | null，在首次加载时为 null。
+ * 直接使用 role === 'xxx' 不会报错，但语义不清晰，且容易在类型收紧时产生 TS 警告。
+ * 使用以下工具函数替代直接比较：
+ *
+ *  - isEmployeeOnlyRole(role)  — 仅员工角色（非班组长）
+ *  - isTeamLeaderOnly(role)   — 仅班组长角色
+ *  - isAdminRole(role)        — 管理员角色（排除 null）
+ */
+
+/** 仅员工角色（非班组长）。role 为 null/undefined 时返回 false。 */
+export function isEmployeeOnlyRole(role: AppRole | null | undefined) {
+  return role === 'employee'
+}
+
+/** 仅班组长角色。role 为 null/undefined 时返回 false。 */
+export function isTeamLeaderOnly(role: AppRole | null | undefined) {
+  return role === 'team_leader'
+}
+
+/** 管理员角色（不含 null）。role 为 null/undefined 时返回 false。 */
+export function isAdminRole(role: AppRole | null | undefined) {
+  return role === 'admin'
+}
+
 export function isEmployeeSideRole(role: AppRole | null | undefined) {
   return role === 'employee' || role === 'team_leader'
 }

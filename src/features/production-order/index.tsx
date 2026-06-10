@@ -77,7 +77,7 @@ import {
   updateAdminManagementPassword,
   verifyAdminManagementPassword,
 } from '@/services/apiAdminManagementPassword'
-import { isEmployeeSideRole } from '@/config/access'
+import { isAdminRole, isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 
 type UnlockManagementFormValues = {
@@ -168,7 +168,7 @@ export default function ProductionOrderPage() {
   const queryClient = useQueryClient()
   const { role, employeeProfile } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
-  const isAdminManagementView = role === 'admin' && !isEmployeeView
+  const isAdminManagementView = isAdminRole(role) && !isEmployeeView
   const fixedEmployee = useMemo(
     () =>
       isEmployeeView && employeeProfile?.id

@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx-js-style'
 
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
 import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@/utils/excelStyleUtils'
+import { formatNumber } from '@/utils/format'
 
 const SHEET_NAME = '刀具出库'
 const TITLE = '刀具出库'
@@ -36,10 +37,6 @@ function colLetter(index: number) {
     i = Math.floor(i / 26) - 1
   }
   return letter
-}
-
-function formatNumber(value: number | null | undefined, digits = 3) {
-  return Number(value ?? 0).toFixed(digits)
 }
 
 function formatCellText(value: string | number | null | undefined) {

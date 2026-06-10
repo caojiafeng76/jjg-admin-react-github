@@ -11,6 +11,7 @@ import PermissionButton from '@/ui/PermissionButton'
 import PermissionGate from '@/ui/PermissionGate'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { isTeamLeaderOnly } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import type {
   StandardTime,
@@ -35,7 +36,7 @@ import StandardTimeSearch from './StandardTimeSearch'
 export default function StandardTimeList() {
   const { message, modal } = App.useApp()
   const { role, employeeProfile } = useAuth()
-  const isTeamLeaderMode = role === 'team_leader'
+  const isTeamLeaderMode = isTeamLeaderOnly(role)
   const currentUploader = employeeProfile?.name || null
 
   const [isModalOpen, setIsModalOpen] = useState(false)

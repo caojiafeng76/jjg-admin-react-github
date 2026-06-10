@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { App, Button, Card, Form, Input, Typography } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { isEmployeeSideRole } from '@/config/access'
+import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import ProjectNoScanButton, {
   type ScannedProjectPayload,
@@ -86,7 +86,7 @@ export default function MobileMaterialTransferScanPage() {
   const location = useLocation()
   const { role, employeeProfile, user } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
-  const isOwnOnlyView = role === 'employee'
+  const isOwnOnlyView = isEmployeeOnlyRole(role)
   const currentUploader = employeeProfile?.name || user?.email || null
   const fixedEmployee = useMemo(
     () =>

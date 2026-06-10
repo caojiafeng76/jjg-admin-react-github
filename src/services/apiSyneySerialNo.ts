@@ -35,7 +35,6 @@ export async function updateSerialNo(serialNo: number) {
  * @returns 递增后的新序列号
  */
 export async function atomicIncrementSerialNo(incrementBy: number = 1) {
-  // @ts-ignore - RPC 函数可能未在自动生成的类型中定义
   const { data, error } = await supabase.rpc('increment_serial_no', {
     increment_by: incrementBy,
   })

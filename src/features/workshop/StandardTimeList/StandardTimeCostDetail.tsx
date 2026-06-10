@@ -1,13 +1,10 @@
 import { Descriptions, Empty, Tag } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
+import { formatNumber } from '@/utils/format'
 
 interface Props {
   selectedRecord: StandardTime | null
-}
-
-function formatNumber(value: number | null | undefined, digits = 4) {
-  return Number(value || 0).toFixed(digits)
 }
 
 export default function StandardTimeCostDetail({ selectedRecord }: Props) {

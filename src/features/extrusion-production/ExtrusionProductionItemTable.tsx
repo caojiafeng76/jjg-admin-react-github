@@ -14,13 +14,7 @@ interface Props {
   onDelete: (index: number) => void
 }
 
-function renderNumber(value: number | null | undefined, digits = 2) {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-
-  return Number(value).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 export default function ExtrusionProductionItemTable({
   data,
@@ -66,7 +60,7 @@ export default function ExtrusionProductionItemTable({
       dataIndex: 'theoretical_output_weight_kg',
       key: 'theoretical_output_weight_kg',
       width: 120,
-      render: (value) => renderNumber(value),
+      render: (value) => formatNumber(value),
     },
     {
       title: '实际数量',
@@ -79,14 +73,14 @@ export default function ExtrusionProductionItemTable({
       dataIndex: 'actual_output_weight_kg',
       key: 'actual_output_weight_kg',
       width: 140,
-      render: (value) => renderNumber(value),
+      render: (value) => formatNumber(value),
     },
     {
       title: '成材率(%)',
       dataIndex: 'material_yield',
       key: 'material_yield',
       width: 110,
-      render: (value) => renderNumber(value),
+      render: (value) => formatNumber(value),
     },
     {
       title: '操作',
@@ -129,6 +123,7 @@ export default function ExtrusionProductionItemTable({
           type="dashed"
           icon={<PlusIcon className="size-4" />}
           onClick={onAdd}
+          data-testid="btn-add-item"
         >
           添加明细
         </Button>

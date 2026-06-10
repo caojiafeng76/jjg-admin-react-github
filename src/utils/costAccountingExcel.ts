@@ -110,13 +110,7 @@ const BODY_STYLE = {
   border: BORDER_STYLE,
 }
 
-function formatNumber(value: number | null | undefined, digits = 4) {
-  return Number(value || 0).toFixed(digits)
-}
-
-function formatMoney(value: number | null | undefined, digits = 2) {
-  return Number(value || 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 function setCellStyle(
   worksheet: XLSX.WorkSheet,
@@ -192,7 +186,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
     formatNumber(record.tooling_consumable_cost),
     record.inspection_seconds,
     formatNumber(record.inspection_cost),
-    formatMoney(record.daily_management_cost),
+    formatNumber(record.daily_management_cost, 2),
     formatNumber(record.daily_total_hours, 2),
     formatNumber(record.overhead_cost),
     formatNumber(record.total_cost),

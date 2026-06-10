@@ -155,7 +155,6 @@ function normalizeStandardTimePayload(
 }
 
 async function getJobHourlyFee(jobName: string): Promise<number | null> {
-  // @ts-ignore - 新增 RPC 可能尚未出现在自动生成的 Supabase 类型中
   const { data, error } = await supabase.rpc('get_job_hourly_fee', {
     target_job_name: jobName,
   })

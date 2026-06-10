@@ -3,10 +3,7 @@ import { memo, useCallback, useMemo } from 'react'
 import { Table, TableColumnsType, Tag } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
-
-function formatNumber(value: number | null | undefined, digits = 4) {
-  return Number(value || 0).toFixed(digits)
-}
+import { formatNumber } from '@/utils/format'
 
 interface Props {
   loading: boolean

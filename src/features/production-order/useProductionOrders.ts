@@ -11,7 +11,7 @@ import {
 } from '@/services/apiProductionOrders'
 import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
 import { queryConfig } from '@/config/queryClient'
-import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 const PRODUCTION_ORDERS_KEY = 'production-orders' as const
 
@@ -62,14 +62,15 @@ export function useProductionOrder(
 }
 
 export function useCreateProductionOrder() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: createProductionOrder,
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
+    successMessage: '创建生产工单成功',
   })
 }
 
 export function useUpdateProductionOrder() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: ({
       id,
       values,
@@ -78,18 +79,20 @@ export function useUpdateProductionOrder() {
       values: Parameters<typeof updateProductionOrder>[0]['values']
     }) => updateProductionOrder({ id, values }),
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
+    successMessage: '更新生产工单成功',
   })
 }
 
 export function useDeleteProductionOrders() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: deleteProductionOrders,
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
+    successMessage: '删除生产工单成功',
   })
 }
 
 export function useBatchUpdateProductionOrders() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: ({
       ids,
       values,
@@ -98,5 +101,6 @@ export function useBatchUpdateProductionOrders() {
       values: Parameters<typeof updateProductionOrders>[0]['values']
     }) => updateProductionOrders({ ids, values }),
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
+    successMessage: '批量更新生产工单成功',
   })
 }

@@ -7,7 +7,7 @@ import {
   deleteProductionOrderItems,
 } from '@/services/apiProductionOrderItems'
 import { queryConfig } from '@/config/queryClient'
-import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 const PRODUCTION_ORDER_ITEMS_KEY = 'production-order-items' as const
 
@@ -21,14 +21,15 @@ export function useProductionOrderItems(orderId: string | undefined) {
 }
 
 export function useAddProductionOrderItem() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: addProductionOrderItem,
     invalidateQueries: [[PRODUCTION_ORDER_ITEMS_KEY], ['production-orders']],
+    successMessage: '添加工单明细成功',
   })
 }
 
 export function useUpdateProductionOrderItem() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: ({
       id,
       values,
@@ -37,12 +38,14 @@ export function useUpdateProductionOrderItem() {
       values: Parameters<typeof updateProductionOrderItem>[0]['values']
     }) => updateProductionOrderItem({ id, values }),
     invalidateQueries: [[PRODUCTION_ORDER_ITEMS_KEY], ['production-orders']],
+    successMessage: '更新工单明细成功',
   })
 }
 
 export function useDeleteProductionOrderItems() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: deleteProductionOrderItems,
     invalidateQueries: [[PRODUCTION_ORDER_ITEMS_KEY], ['production-orders']],
+    successMessage: '删除工单明细成功',
   })
 }

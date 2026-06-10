@@ -8,7 +8,7 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
-import { isEmployeeSideRole } from '@/config/access'
+import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
@@ -42,7 +42,7 @@ export default function MaterialTransferPage() {
   const { role, employeeProfile, user } = useAuth()
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const isEmployeeView = isEmployeeSideRole(role)
-  const isOwnOnlyView = role === 'employee'
+  const isOwnOnlyView = isEmployeeOnlyRole(role)
   const currentUploader = employeeProfile?.name || user?.email || null
   const fixedEmployee = useMemo(
     () =>

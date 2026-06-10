@@ -14,7 +14,7 @@ import {
   type MaterialTransferFilters,
 } from '@/services/apiMaterialTransfers'
 import { queryConfig } from '@/config/queryClient'
-import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 const MATERIAL_TRANSFERS_KEY = 'material-transfers' as const
 
@@ -91,14 +91,15 @@ export function useMaterialTransferLengths() {
 }
 
 export function useCreateMaterialTransfer() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: createMaterialTransfer,
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
+    successMessage: '创建物料调拨单成功',
   })
 }
 
 export function useUpdateMaterialTransfer() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: ({
       id,
       values,
@@ -107,19 +108,22 @@ export function useUpdateMaterialTransfer() {
       values: Parameters<typeof updateMaterialTransfer>[0]['values']
     }) => updateMaterialTransfer({ id, values }),
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
+    successMessage: '更新物料调拨单成功',
   })
 }
 
 export function useDeleteMaterialTransfers() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: deleteMaterialTransfers,
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
+    successMessage: '删除物料调拨单成功',
   })
 }
 
 export function useBatchUpdateMaterialTransfers() {
-  return useMutationWithInvalidation({
+  return useMutationWithMessage({
     mutationFn: batchUpdateMaterialTransfers,
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
+    successMessage: '批量更新物料调拨单成功',
   })
 }
