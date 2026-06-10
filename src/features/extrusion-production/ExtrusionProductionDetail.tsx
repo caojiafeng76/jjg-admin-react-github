@@ -129,16 +129,6 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
             children: selectedRecord.shift_leader_name,
           },
           {
-            key: 'operator_name',
-            label: '操作人',
-            children: selectedRecord.operator_name,
-          },
-          {
-            key: 'inspector_name',
-            label: '检验人',
-            children: selectedRecord.inspector_name || '-',
-          },
-          {
             key: 'uploaded_by_name',
             label: '上传人',
             children: selectedRecord.uploaded_by_name || '-',

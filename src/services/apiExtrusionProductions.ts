@@ -48,8 +48,6 @@ export interface ExtrusionProduction {
   machine_id: string
   shift: string
   shift_leader_name: string
-  operator_name: string
-  inspector_name: string | null
   uploaded_by_name: string | null
   remark: string | null
   is_audited: boolean
@@ -64,7 +62,6 @@ export interface ExtrusionProductionFilters {
   endDate?: string
   shift?: string
   machineId?: string
-  operatorName?: string
   projectNo?: string
   isAudited?: boolean
 }
@@ -108,8 +105,6 @@ export interface ExtrusionProductionHeaderInput {
   machine_id: string
   shift: string
   shift_leader_name: string
-  operator_name: string
-  inspector_name?: string | null
   uploaded_by_name?: string | null
   remark?: string | null
   is_audited?: boolean
@@ -211,11 +206,6 @@ function normalizeExtrusionProductionHeader(
       header.shift_leader_name,
       '班组长',
     ),
-    operator_name: normalizeRequiredText(
-      header.operator_name,
-      '操作人',
-    ),
-    inspector_name: normalizeOptionalText(header.inspector_name),
     uploaded_by_name: normalizeOptionalText(header.uploaded_by_name),
     remark: normalizeOptionalText(header.remark),
     is_audited: header.is_audited ?? false,
@@ -328,10 +318,6 @@ function applyExtrusionProductionFilters<
 
   if (filters.machineId) {
     nextQuery = nextQuery.eq('machine_id', filters.machineId)
-  }
-
-  if (filters.operatorName) {
-    nextQuery = nextQuery.eq('operator_name', filters.operatorName)
   }
 
   if (typeof filters.isAudited === 'boolean') {
