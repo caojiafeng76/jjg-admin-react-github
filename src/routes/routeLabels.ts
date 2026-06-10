@@ -47,6 +47,7 @@ const routeToLabelMap: Record<string, string> = {
   'villa-lift-order-list': '别墅梯 / 订单管理',
   'villa-lift-cutting-process': '别墅梯 / 切割工序',
   'villa-lift-processing': '别墅梯 / 加工工序',
+  'extrusion-production': '挤压生产单',
   'access-denied': '无权限',
 }
 

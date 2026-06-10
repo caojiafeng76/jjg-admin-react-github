@@ -149,6 +149,10 @@ export const AccessManagement = lazy(
   () => import('@features/access-management'),
 )
 
+export const ExtrusionProduction = lazy(
+  () => import('@features/extrusion-production'),
+)
+
 export const VillaLiftOrderList = lazy(
   () => import('@features/villa-lift/OrderList'),
 )

@@ -23,6 +23,7 @@ import {
   Dashboard,
   EmployeeMobileChangePasswordPage,
   EmployeeList,
+  ExtrusionProduction,
   JobBaseSetting,
   LaborProtectionData,
   LaborProtectionPublicRequisitionPage,
@@ -650,6 +651,17 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:villa-lift-processing"
               element={<VillaLiftFinishingProcess />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'extrusion-production',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:extrusion-production"
+              element={<ExtrusionProduction />}
             />
           </Suspense>
         ),
