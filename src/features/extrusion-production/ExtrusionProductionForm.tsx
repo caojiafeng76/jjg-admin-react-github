@@ -50,7 +50,7 @@ interface HeaderFormValues {
   is_audited?: boolean
 }
 
-interface ItemFormValues extends ExtrusionProductionItemInput {}
+type ItemFormValues = ExtrusionProductionItemInput
 
 const SHIFT_OPTIONS = [
   { label: '白班', value: '白班' },
