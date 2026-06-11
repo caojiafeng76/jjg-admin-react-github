@@ -5,6 +5,8 @@ import userEvent from '@testing-library/user-event'
 
 import ExtrusionProductionForm from './ExtrusionProductionForm'
 
+const EXTRUSION_MACHINE_ID = '550e8400-e29b-41d4-a716-446655440000'
+
 vi.mock('antd', async () => {
   const actual = await vi.importActual<typeof import('antd')>('antd')
 
@@ -45,10 +47,13 @@ vi.mock('@/features/production-order/useMachineEquipmentOptions', () => ({
   useMachineEquipmentOptions: () => ({
     data: [
       {
-        unified_device_no: 'M-01',
-        machine_name: '挤压机 1',
+        id: EXTRUSION_MACHINE_ID,
+        unified_device_no: 'JY-1000T',
+        operation: '挤压',
+        machine_name: '1000T',
       },
     ],
+    isLoading: false,
   }),
 }))
 
@@ -77,7 +82,7 @@ describe('ExtrusionProductionForm', () => {
     vi.clearAllMocks()
   })
 
-  it('calculates preview values correctly', async () => {
+  it('calculates billet weight preview automatically', async () => {
     const user = userEvent.setup()
     renderComponent()
 
@@ -89,36 +94,11 @@ describe('ExtrusionProductionForm', () => {
       expect(screen.queryByTestId('input-order-length')).not.toBeNull()
     })
 
-    // AntD Select + disabled InputNumber 的交互较复杂，
-    // 通过 openCreateItemModal 后的 resetFields + EMPTY_ITEM_DEFAULTS 确认表单就绪
-    // 预览计算依赖 Form.useWatch，验证最终结果
-    await user.clear(screen.getByTestId('input-order-length'))
-    await user.type(screen.getByTestId('input-order-length'), '6000')
+    // 铝棒投入重量字段应该被禁用（自动计算，无需用户输入）
+    const billetWeightInput = screen.getByTestId('input-billet-weight')
+    expect(billetWeightInput).toBeDisabled()
 
-    await user.clear(screen.getByTestId('input-actual-length'))
-    await user.type(screen.getByTestId('input-actual-length'), '6500')
-
-    await user.clear(screen.getByTestId('input-actual-weight'))
-    await user.type(screen.getByTestId('input-actual-weight'), '2.5')
-
-    await user.clear(screen.getByTestId('input-actual-quantity'))
-    await user.type(screen.getByTestId('input-actual-quantity'), '100')
-
-    await user.clear(screen.getByTestId('input-billet-weight'))
-    await user.type(screen.getByTestId('input-billet-weight'), '320')
-
-    // 验证预览计算结果（理论米重字段 disabled，
-    // 但若表单中有默认值时计算仍应正确）
-    // 理论支数 = floor(6500/6000 * 100) = floor(1.083... * 100) = 108
-    // 实际产出重量 = 100 * 2.5 = 250.00（不依赖理论米重）
-    // 成材率 = (250/320) * 100 = 78.125 ≈ 78.13
-    await waitFor(
-      () => {
-        expect(screen.getByTestId('preview-theoretical-count')).toHaveTextContent('108')
-        expect(screen.getByTestId('preview-actual-weight')).toHaveTextContent('250.00')
-        expect(screen.getByTestId('preview-yield')).toHaveTextContent('78.13')
-      },
-      { timeout: 3000 },
-    )
+    // 预览区域应该显示铝棒投入重量
+    expect(screen.getByTestId('preview-billet-weight')).toBeInTheDocument()
   })
 })

@@ -99,9 +99,12 @@ describe('apiExtrusionProductions', () => {
     })
 
     expect(from).toHaveBeenCalledWith('extrusion_productions')
-    expect(select).toHaveBeenCalledWith('*, extrusion_production_items(*)', {
-      count: 'exact',
-    })
+    expect(select).toHaveBeenCalledWith(
+      '*, machine:machine_equipment_maintenances!extrusion_productions_machine_id_fkey(unified_device_no, machine_name), extrusion_production_items(*)',
+      {
+        count: 'exact',
+      },
+    )
     expect(orderBy).toHaveBeenNthCalledWith(1, 'production_date', {
       ascending: false,
     })

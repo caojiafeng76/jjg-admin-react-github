@@ -4,6 +4,7 @@ import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import {
   calculateActualOutputWeight,
+  calculateBilletInputWeight,
   calculateMaterialYield,
   calculateTheoreticalOutputWeight,
 } from '@/utils/extrusionCalculations'
@@ -54,6 +55,10 @@ export interface ExtrusionProduction {
   audited_at: string | null
   created_at: string
   updated_at: string
+  machine?: {
+    unified_device_no: string
+    machine_name: string
+  } | null
   extrusion_production_items?: ExtrusionProductionItem[] | null
 }
 
@@ -267,10 +272,14 @@ function normalizeExtrusionProductionItem(
     billet_diameter_mm: normalizePositiveNumber(item.billet_diameter_mm, '铝棒直径'),
     billet_length_mm: normalizePositiveNumber(item.billet_length_mm, '铝棒长度'),
     billet_quantity: normalizePositiveInteger(item.billet_quantity, '铝棒数量'),
-    billet_input_weight_kg: normalizePositiveNumber(
-      item.billet_input_weight_kg,
-      '铝棒投入重量',
-    ),
+    billet_input_weight_kg:
+      item.billet_input_weight_kg != null && item.billet_input_weight_kg > 0
+        ? normalizePositiveNumber(item.billet_input_weight_kg, '铝棒投入重量')
+        : calculateBilletInputWeight({
+            billetDiameterMm: normalizePositiveNumber(item.billet_diameter_mm, '铝棒直径'),
+            billetLengthMm: normalizePositiveNumber(item.billet_length_mm, '铝棒长度'),
+            billetQuantity: normalizePositiveInteger(item.billet_quantity, '铝棒数量'),
+          }),
     actual_output_length_mm: normalizePositiveNumber(
       item.actual_output_length_mm,
       '实际产出长度',
@@ -403,7 +412,10 @@ export async function getExtrusionProductions({
   const toIndex = fromIndex + pageSize - 1
 
   let query = extrusionProductionsTable()
-    .select('*, extrusion_production_items(*)', { count: 'exact' })
+    .select(
+      '*, machine:machine_equipment_maintenances!extrusion_productions_machine_id_fkey(unified_device_no, machine_name), extrusion_production_items(*)',
+      { count: 'exact' },
+    )
     .order('production_date', { ascending: false })
     .order('created_at', { ascending: false })
 
@@ -423,7 +435,9 @@ export async function getExtrusionProductions({
 
 export async function getExtrusionProductionById(id: string) {
   const { data, error } = await extrusionProductionsTable()
-    .select('*, extrusion_production_items(*)')
+    .select(
+      '*, machine:machine_equipment_maintenances!extrusion_productions_machine_id_fkey(unified_device_no, machine_name), extrusion_production_items(*)',
+    )
     .eq('id', id)
     .single()
 

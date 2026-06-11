@@ -230,7 +230,12 @@ export default function ProductionOrderPage() {
         : undefined,
   }))
 
-  const { data: orderData, isLoading } = useProductionOrders({
+  const {
+    data: orderData,
+    isFetching,
+    isLoading,
+    isPlaceholderData,
+  } = useProductionOrders({
     page,
     pageSize,
     filters,
@@ -811,11 +816,25 @@ export default function ProductionOrderPage() {
   }, [changePasswordForm, isEmployeeView, resetFormState, unlockForm])
 
   useEffect(() => {
-    if (page > 1 && orderData && orderData.items.length === 0) {
-      searchParamsURL.set('page', Math.max(page - 1, 1).toString())
-      setSearchParamsURL(searchParamsURL)
+    if (
+      page > 1 &&
+      orderData &&
+      !isFetching &&
+      !isPlaceholderData &&
+      orderData.items.length === 0
+    ) {
+      const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
+      nextSearchParamsURL.set('page', Math.max(page - 1, 1).toString())
+      setSearchParamsURL(nextSearchParamsURL)
     }
-  }, [orderData, page, searchParamsURL, setSearchParamsURL])
+  }, [
+    isFetching,
+    isPlaceholderData,
+    orderData,
+    page,
+    searchParamsURL,
+    setSearchParamsURL,
+  ])
 
   useEffect(() => {
     if (!activeRecordId) {

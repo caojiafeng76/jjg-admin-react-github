@@ -14,11 +14,13 @@ import dayjs, { type Dayjs } from 'dayjs'
 
 import {
   calculateActualOutputWeight,
+  calculateBilletInputWeight,
   calculateMaterialYield,
   calculateTheoreticalOutputCount,
   calculateTheoreticalOutputWeight,
 } from '@/utils/extrusionCalculations'
 import { buildProjectNoSelectOptions, filterProjectNoOption, renderProjectNoOption } from '@/features/production-order/projectNoSelect'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import type {
   ExtrusionProduction,
   ExtrusionProductionItemInput,
@@ -28,6 +30,7 @@ import {
   useExtrusionSalesOrdersProjectNos,
 } from './useExtrusionProductions'
 import ExtrusionProductionItemTable from './ExtrusionProductionItemTable'
+import { buildExtrusionMachineOptions } from './extrusionMachineOptions'
 
 interface Props {
   open: boolean
@@ -63,12 +66,6 @@ const SHIFT_LEADER_OPTIONS = [
   { label: '李成', value: '李成' },
 ]
 
-const MACHINE_OPTIONS = [
-  { label: '680T', value: '680T' },
-  { label: '1000T', value: '1000T' },
-  { label: '1400T', value: '1400T' },
-]
-
 const EMPTY_ITEM_DEFAULTS: Partial<ItemFormValues> = {
   actual_quantity: 0,
   scrap_weight_kg: 0,
@@ -89,6 +86,8 @@ export default function ExtrusionProductionForm({
   const [itemForm] = Form.useForm<ItemFormValues>()
   const { data: projectNos, isLoading: isLoadingProjectNos } =
     useExtrusionSalesOrdersProjectNos()
+  const { data: machines, isLoading: isLoadingMachines } =
+    useMachineEquipmentOptions()
   const [items, setItems] = useState<ExtrusionProductionItemInput[]>([])
   const [itemModalOpen, setItemModalOpen] = useState(false)
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
@@ -102,7 +101,10 @@ export default function ExtrusionProductionForm({
     return new Map((projectNos || []).map((item) => [item.project_no, item]))
   }, [projectNos])
 
-  const machineSelectOptions = MACHINE_OPTIONS
+  const machineSelectOptions = useMemo(
+    () => buildExtrusionMachineOptions(machines),
+    [machines],
+  )
 
   const watchedOrderLengthMm = Form.useWatch('order_length_mm', itemForm)
   const watchedActualOutputLengthMm = Form.useWatch('actual_output_length_mm', itemForm)
@@ -112,7 +114,15 @@ export default function ExtrusionProductionForm({
     itemForm,
   )
   const watchedActualUnitWeight = Form.useWatch('actual_unit_weight_kg', itemForm)
-  const watchedBilletInputWeight = Form.useWatch('billet_input_weight_kg', itemForm)
+  const watchedBilletDiameterMm = Form.useWatch('billet_diameter_mm', itemForm)
+  const watchedBilletLengthMm = Form.useWatch('billet_length_mm', itemForm)
+  const watchedBilletQuantity = Form.useWatch('billet_quantity', itemForm)
+
+  const billetInputWeightPreview = calculateBilletInputWeight({
+    billetDiameterMm: watchedBilletDiameterMm,
+    billetLengthMm: watchedBilletLengthMm,
+    billetQuantity: watchedBilletQuantity,
+  })
 
   const theoreticalOutputCountPreview = calculateTheoreticalOutputCount({
     actualLengthMm: watchedActualOutputLengthMm,
@@ -133,7 +143,7 @@ export default function ExtrusionProductionForm({
 
   const materialYieldPreview = calculateMaterialYield({
     actualOutputWeightKg: actualOutputWeightPreview,
-    inputWeightKg: watchedBilletInputWeight,
+    inputWeightKg: billetInputWeightPreview,
   })
 
   useEffect(() => {
@@ -208,6 +218,7 @@ export default function ExtrusionProductionForm({
     const values = await itemForm.validateFields()
     const nextItem: ExtrusionProductionItemInput = {
       ...values,
+      billet_input_weight_kg: billetInputWeightPreview,
       theoretical_output_count: theoreticalOutputCountPreview,
       theoretical_output_weight_kg: theoreticalOutputWeightPreview,
       actual_output_weight_kg: actualOutputWeightPreview,
@@ -284,6 +295,7 @@ export default function ExtrusionProductionForm({
                 <Select
                   showSearch
                   options={machineSelectOptions}
+                  loading={isLoadingMachines}
                   placeholder="请选择设备"
                   optionFilterProp="label"
                 />
@@ -446,12 +458,12 @@ export default function ExtrusionProductionForm({
             <Form.Item
               name="billet_input_weight_kg"
               label="铝棒投入重量(kg)"
-              rules={[{ required: true, message: '请输入铝棒投入重量' }]}
             >
               <InputNumber
                 data-testid="input-billet-weight"
                 className="w-full"
-                min={0.0001}
+                disabled
+                placeholder="根据直径、长度、数量自动计算"
               />
             </Form.Item>
 
@@ -509,7 +521,13 @@ export default function ExtrusionProductionForm({
             </Form.Item>
           </div>
 
-          <div className="mt-2 grid grid-cols-1 gap-3 rounded-2xl border border-blue-200 bg-blue-50/60 p-4 md:grid-cols-4">
+          <div className="mt-2 grid grid-cols-1 gap-3 rounded-2xl border border-blue-200 bg-blue-50/60 p-4 md:grid-cols-5">
+            <div>
+              <div className="text-xs text-slate-500">铝棒投入重量(kg)</div>
+              <div className="text-base font-semibold" data-testid="preview-billet-weight">
+                {billetInputWeightPreview.toFixed(2)}
+              </div>
+            </div>
             <div>
               <div className="text-xs text-slate-500">理论支数</div>
               <div className="text-base font-semibold" data-testid="preview-theoretical-count">

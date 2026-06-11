@@ -61,10 +61,14 @@ export default function ExtrusionProductionTable({
         ),
       },
       {
-        title: '设备ID',
+        title: '设备',
         dataIndex: 'machine_id',
         key: 'machine_id',
         width: 180,
+        render: (_value: string, record) =>
+          record.machine?.machine_name ||
+          record.machine?.unified_device_no ||
+          record.machine_id,
       },
       {
         title: '班组长',
