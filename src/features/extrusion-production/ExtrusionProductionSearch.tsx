@@ -6,7 +6,9 @@ import {
 } from '@heroicons/react/16/solid'
 import dayjs, { type Dayjs } from 'dayjs'
 
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import type { ExtrusionProductionFilters } from '@/services/apiExtrusionProductions'
+import { buildExtrusionMachineOptions } from './extrusionMachineOptions'
 
 const { RangePicker } = DatePicker
 
@@ -36,6 +38,9 @@ export default function ExtrusionProductionSearch({
   initialValues,
 }: Props) {
   const [form] = Form.useForm<ExtrusionProductionSearchValues>()
+  const { data: machines, isLoading: isLoadingMachines } =
+    useMachineEquipmentOptions()
+  const machineOptions = buildExtrusionMachineOptions(machines)
 
   useEffect(() => {
     form.setFieldsValue({
@@ -58,7 +63,7 @@ export default function ExtrusionProductionSearch({
           ? values.dateRange[1].format('YYYY-MM-DD')
           : undefined,
       shift: values.shift || undefined,
-      machineId: values.machineId?.trim() || undefined,
+      machineId: values.machineId || undefined,
       projectNo: values.projectNo?.trim() || undefined,
       isAudited:
         typeof values.isAudited === 'boolean' ? values.isAudited : undefined,
@@ -99,7 +104,15 @@ export default function ExtrusionProductionSearch({
       </Form.Item>
 
       <Form.Item name="machineId" className="mb-0">
-        <Input placeholder="设备ID" allowClear style={{ width: 180 }} />
+        <Select
+          placeholder="设备"
+          allowClear
+          showSearch
+          loading={isLoadingMachines}
+          options={machineOptions}
+          optionFilterProp="label"
+          style={{ width: 180 }}
+        />
       </Form.Item>
 
       <Form.Item name="isAudited" className="mb-0">

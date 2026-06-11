@@ -112,3 +112,35 @@ export function calculateMaterialYield({
 
   return (normalizedActualOutputWeightKg / normalizedInputWeightKg) * 100
 }
+
+const ALUMINUM_DENSITY_G_PER_CM3 = 2.7
+
+export interface CalculateBilletInputWeightParams {
+  billetDiameterMm: number | null | undefined
+  billetLengthMm: number | null | undefined
+  billetQuantity: number | null | undefined
+}
+
+export function calculateBilletInputWeight({
+  billetDiameterMm,
+  billetLengthMm,
+  billetQuantity,
+}: CalculateBilletInputWeightParams): number {
+  const normalizedDiameter = toPositiveNumber(billetDiameterMm)
+  const normalizedLength = toPositiveNumber(billetLengthMm)
+  const normalizedQuantity = toPositiveNumber(billetQuantity)
+
+  if (
+    normalizedDiameter === null ||
+    normalizedLength === null ||
+    normalizedQuantity === null
+  ) {
+    return 0
+  }
+
+  const radiusMm = normalizedDiameter / 2
+  const crossSectionAreaMm2 = Math.PI * radiusMm * radiusMm
+  const volumeMm3 = crossSectionAreaMm2 * normalizedLength
+  const volumeCm3 = volumeMm3 / 1000
+  return (volumeCm3 * ALUMINUM_DENSITY_G_PER_CM3 * normalizedQuantity) / 1000
+}

@@ -120,8 +120,11 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
         items={[
           {
             key: 'machine_id',
-            label: '设备 ID',
-            children: selectedRecord.machine_id,
+            label: '设备',
+            children:
+              selectedRecord.machine?.machine_name ||
+              selectedRecord.machine?.unified_device_no ||
+              selectedRecord.machine_id,
           },
           {
             key: 'shift_leader_name',

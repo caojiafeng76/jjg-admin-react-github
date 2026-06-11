@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   calculateActualOutputWeight,
+  calculateBilletInputWeight,
   calculateMaterialYield,
   calculateTheoreticalOutputCount,
   calculateTheoreticalOutputWeight,
@@ -92,6 +93,42 @@ describe('extrusion calculations', () => {
       calculateMaterialYield({
         actualOutputWeightKg: 826.34,
         inputWeightKg: 0,
+      }),
+    ).toBe(0)
+  })
+
+  it('calculates billet input weight from diameter, length, quantity with aluminum density 2.7g/cm3', () => {
+    const result = calculateBilletInputWeight({
+      billetDiameterMm: 127,
+      billetLengthMm: 7600,
+      billetQuantity: 4,
+    })
+    const expected = 127 / 2 * (127 / 2) * Math.PI * 2.7 * 7600 * 4 / 1000000
+    expect(result).toBeCloseTo(expected, 10)
+  })
+
+  it('returns 0 for invalid diameter, length, or quantity in billet input weight', () => {
+    expect(
+      calculateBilletInputWeight({
+        billetDiameterMm: null,
+        billetLengthMm: 7600,
+        billetQuantity: 4,
+      }),
+    ).toBe(0)
+
+    expect(
+      calculateBilletInputWeight({
+        billetDiameterMm: 127,
+        billetLengthMm: undefined,
+        billetQuantity: 4,
+      }),
+    ).toBe(0)
+
+    expect(
+      calculateBilletInputWeight({
+        billetDiameterMm: 127,
+        billetLengthMm: 7600,
+        billetQuantity: 0,
       }),
     ).toBe(0)
   })
