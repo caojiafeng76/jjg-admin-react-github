@@ -48,6 +48,7 @@ const routeToLabelMap: Record<string, string> = {
   'villa-lift-cutting-process': '别墅梯 / 切割工序',
   'villa-lift-processing': '别墅梯 / 加工工序',
   'extrusion-production': '挤压生产单',
+  'extrusion-production-daily-report': '挤压生产日报表',
   'access-denied': '无权限',
 }
 

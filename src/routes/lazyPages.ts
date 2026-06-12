@@ -153,6 +153,10 @@ export const ExtrusionProduction = lazy(
   () => import('@features/extrusion-production'),
 )
 
+export const ExtrusionProductionDailyReport = lazy(
+  () => import('@features/extrusion-production-daily-report'),
+)
+
 export const VillaLiftOrderList = lazy(
   () => import('@features/villa-lift/OrderList'),
 )

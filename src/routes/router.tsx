@@ -24,6 +24,7 @@ import {
   EmployeeMobileChangePasswordPage,
   EmployeeList,
   ExtrusionProduction,
+  ExtrusionProductionDailyReport,
   JobBaseSetting,
   LaborProtectionData,
   LaborProtectionPublicRequisitionPage,
@@ -662,6 +663,17 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:extrusion-production"
               element={<ExtrusionProduction />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'extrusion-production-daily-report',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:extrusion-production-daily-report"
+              element={<ExtrusionProductionDailyReport />}
             />
           </Suspense>
         ),
