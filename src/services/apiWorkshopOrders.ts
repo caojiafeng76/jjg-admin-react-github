@@ -19,6 +19,7 @@ export interface WorkshopOrderDeleteBlocker {
   orderId: string
   projectNo: string | null
   productionItemCount: number
+  extrusionProductionItemCount: number
   orderDates: string[]
 }
 
@@ -248,7 +249,12 @@ export async function getWorkshopOrderDeleteBlockers(
       .filter((order) => order.project_no?.trim())
       .map((order) => [order.project_no!.trim(), order]),
   )
-  const grouped = new Map<string, { count: number; dates: Set<string> }>()
+  const grouped = new Map<
+    string,
+    { count: number; dates: Set<string>; extrusionCount: number }
+  >()
+
+
 
   ;(
     (productionItems || []) as Array<{
@@ -271,6 +277,7 @@ export async function getWorkshopOrderDeleteBlockers(
     const current = grouped.get(projectNo) || {
       count: 0,
       dates: new Set<string>(),
+      extrusionCount: 0,
     }
 
     current.count += 1
@@ -286,10 +293,39 @@ export async function getWorkshopOrderDeleteBlockers(
     grouped.set(projectNo, current)
   })
 
+  const { data: extrusionItems, error: extrusionError } = await supabase
+    .from('extrusion_production_items')
+    .select('project_no')
+    .in('project_no', selectedProjectNos)
+
+  if (extrusionError) {
+    throw handleApiError(extrusionError, '检查挤压明细引用失败')
+  }
+
+  ;((extrusionItems || []) as Array<{ project_no: string | null }>).forEach(
+    (item) => {
+      const projectNo = item.project_no?.trim()
+
+      if (!projectNo || !orderMap.has(projectNo)) {
+        return
+      }
+
+      const current = grouped.get(projectNo) || {
+        count: 0,
+        dates: new Set<string>(),
+        extrusionCount: 0,
+      }
+
+      current.extrusionCount += 1
+      grouped.set(projectNo, current)
+    },
+  )
+
   return Array.from(grouped.entries()).map(([projectNo, info]) => ({
     orderId: orderMap.get(projectNo)?.id || projectNo,
     projectNo,
     productionItemCount: info.count,
+    extrusionProductionItemCount: info.extrusionCount ?? 0,
     orderDates: Array.from(info.dates).sort((left, right) =>
       right.localeCompare(left),
     ),

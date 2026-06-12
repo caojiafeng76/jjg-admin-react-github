@@ -74,6 +74,8 @@ type OrderStatusDashboardRpcItem = WorkshopOrder & {
   latestTransferWorkshop: string | null
   precisionCuttingDetails: OrderStatusPrecisionCuttingTransferDetail[] | null
   precisionCuttingQuantity: number
+  extrusionDetails: OrderStatusExtrusionDetail[] | null
+  extrusionQuantity: number
   productionRows: ProductionOrderItemDetailRow[] | null
   productionStatus: OrderProductionStatus
   totalDefectQuantity: number
@@ -127,6 +129,20 @@ export interface OrderStatusPrecisionCuttingTransferDetail {
   responsibleProcess: string | null
   targetWorkshop: string
   transferQuantity: number
+}
+
+export interface OrderStatusExtrusionDetail {
+  createdAt: string
+  productionDate: string
+  shift: string
+  shiftLeaderName: string
+  isAudited: boolean
+  actualOutputLengthMm: number | null
+  orderLengthMm: number | null
+  actualQuantity: number
+  theoreticalOutputCount: number
+  actualOutputWeightKg: number
+  materialYield: number
 }
 
 export interface OrderStatusProductionDetail {
@@ -215,6 +231,8 @@ export interface OrderStatusDashboardItem extends WorkshopOrder {
   totalDefectQuantity: number
   precisionCuttingQuantity: number
   precisionCuttingDetails: OrderStatusPrecisionCuttingTransferDetail[]
+  extrusionQuantity: number
+  extrusionDetails: OrderStatusExtrusionDetail[]
   transferQuantity: number
   warehouseTransferQuantity: number
   transferRecordCount: number
@@ -942,6 +960,8 @@ export async function getOrderStatusDashboard({
       totalDefectQuantity: Number(order.totalDefectQuantity || 0),
       precisionCuttingQuantity: Number(order.precisionCuttingQuantity || 0),
       precisionCuttingDetails: order.precisionCuttingDetails ?? [],
+      extrusionQuantity: Number(order.extrusionQuantity || 0),
+      extrusionDetails: order.extrusionDetails ?? [],
       transferQuantity: Number(order.transferQuantity || 0),
       warehouseTransferQuantity: Number(order.warehouseTransferQuantity || 0),
       transferRecordCount: Number(order.transferRecordCount || 0),

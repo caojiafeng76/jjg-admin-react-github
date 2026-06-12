@@ -39,6 +39,7 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
   OrderProductionStatus,
   OrderStatusDashboardItem,
+  OrderStatusExtrusionDetail,
   OrderStatusJobColumn,
   OrderStatusMaterialTransferDetail,
   OrderStatusPrecisionCuttingTransferDetail,
@@ -148,6 +149,10 @@ type SelectedTransferDetail = {
 }
 
 type SelectedPrecisionCuttingDetail = {
+  record: OrderStatusDashboardItem
+}
+
+type SelectedExtrusionDetail = {
   record: OrderStatusDashboardItem
 }
 
@@ -466,6 +471,38 @@ function renderPrecisionCuttingQuantityCell({
   }
 
   if (record.precisionCuttingDetails.length === 0) {
+    return <Text strong>{quantity.toLocaleString()}</Text>
+  }
+
+  return (
+    <Button
+      type="link"
+      size="small"
+      className="h-auto! px-0! text-xs! font-semibold!"
+      onClick={(event) => {
+        event.stopPropagation()
+        onOpen(record)
+      }}
+    >
+      {quantity.toLocaleString()}
+    </Button>
+  )
+}
+
+function renderExtrusionQuantityCell({
+  onOpen,
+  record,
+}: {
+  onOpen: (record: OrderStatusDashboardItem) => void
+  record: OrderStatusDashboardItem
+}) {
+  const quantity = Number(record.extrusionQuantity || 0)
+
+  if (quantity <= 0) {
+    return <Text type="secondary">-</Text>
+  }
+
+  if (record.extrusionDetails.length === 0) {
     return <Text strong>{quantity.toLocaleString()}</Text>
   }
 
@@ -1240,6 +1277,179 @@ function PrecisionCuttingDetailModal({
   )
 }
 
+type ExtrusionDetailRow = OrderStatusExtrusionDetail & {
+  key: string
+}
+
+function ExtrusionDetailModal({
+  detail,
+  onClose,
+}: {
+  detail: SelectedExtrusionDetail | null
+  onClose: () => void
+}) {
+  const rows = useMemo<ExtrusionDetailRow[]>(
+    () =>
+      (detail?.record.extrusionDetails ?? []).map((item, index) => ({
+        ...item,
+        key: `${item.createdAt}-${index}`,
+      })),
+    [detail],
+  )
+  const totalTheoreticalCount = rows.reduce(
+    (total, item) => total + item.theoreticalOutputCount,
+    0,
+  )
+  const totalActualOutputWeight = rows.reduce(
+    (total, item) => total + item.actualOutputWeightKg,
+    0,
+  )
+  const weightedYield =
+    totalTheoreticalCount > 0
+      ? rows.reduce(
+          (sum, item) =>
+            sum + item.materialYield * item.theoreticalOutputCount,
+          0,
+        ) / totalTheoreticalCount
+      : 0
+
+  const columns: TableColumnsType<ExtrusionDetailRow> = [
+    {
+      title: '生产日期',
+      dataIndex: 'productionDate',
+      key: 'productionDate',
+      width: 110,
+      fixed: 'left',
+      render: (value: string) => dayjs(value).format('YYYY-MM-DD'),
+    },
+    {
+      title: '班次',
+      dataIndex: 'shift',
+      key: 'shift',
+      width: 70,
+      render: renderText,
+    },
+    {
+      title: '班组长',
+      dataIndex: 'shiftLeaderName',
+      key: 'shiftLeaderName',
+      width: 100,
+      render: renderText,
+    },
+    {
+      title: '实际产出长度(mm)',
+      dataIndex: 'actualOutputLengthMm',
+      key: 'actualOutputLengthMm',
+      width: 130,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '订单要求长度(mm)',
+      dataIndex: 'orderLengthMm',
+      key: 'orderLengthMm',
+      width: 130,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '实际产出数量',
+      dataIndex: 'actualQuantity',
+      key: 'actualQuantity',
+      width: 110,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '理论支数',
+      dataIndex: 'theoreticalOutputCount',
+      key: 'theoreticalOutputCount',
+      width: 90,
+      align: 'right',
+      render: renderDetailQuantity,
+    },
+    {
+      title: '实际产出重量(kg)',
+      dataIndex: 'actualOutputWeightKg',
+      key: 'actualOutputWeightKg',
+      width: 140,
+      align: 'right',
+      render: (value: number) =>
+        Number(value || 0).toFixed(2),
+    },
+    {
+      title: '成材率(%)',
+      dataIndex: 'materialYield',
+      key: 'materialYield',
+      width: 100,
+      align: 'right',
+      render: (value: number) =>
+        value > 0 ? `${(value * 100).toFixed(2)}%` : '-',
+    },
+    {
+      title: '审核状态',
+      dataIndex: 'isAudited',
+      key: 'isAudited',
+      width: 90,
+      align: 'center',
+      render: (value: boolean) => (
+        <Tag color={value ? 'green' : 'gold'}>
+          {value ? '已审核' : '未审核'}
+        </Tag>
+      ),
+    },
+  ]
+
+  return (
+    <Modal
+      open={Boolean(detail)}
+      title={
+        detail
+          ? `${detail.record.project_no || '-'} 挤压明细`
+          : '挤压明细'
+      }
+      footer={null}
+      width={1180}
+      destroyOnHidden
+      onCancel={onClose}
+    >
+      {detail && (
+        <div className="space-y-4">
+          <Space size={8} wrap>
+            <Tag color="blue">记录 {rows.length}</Tag>
+            <Tag color="purple">
+              理论支数 {totalTheoreticalCount.toLocaleString()}
+            </Tag>
+            <Tag color="cyan">
+              实际重量 {totalActualOutputWeight.toFixed(2)} kg
+            </Tag>
+            <Tag color="green">
+              加权成材率{' '}
+              {totalTheoreticalCount > 0
+                ? `${(weightedYield * 100).toFixed(2)}%`
+                : '-'}
+            </Tag>
+            <Tag color="green">已审核 {rows.filter((item) => item.isAudited).length}</Tag>
+            <Tag color={rows.filter((item) => !item.isAudited).length > 0 ? 'gold' : 'default'}>
+              未审核 {rows.filter((item) => !item.isAudited).length}
+            </Tag>
+          </Space>
+
+          <Table<ExtrusionDetailRow>
+            rowKey="key"
+            bordered
+            size="small"
+            columns={columns}
+            dataSource={rows}
+            pagination={false}
+            scroll={{ x: 1060, y: 420 }}
+          />
+        </div>
+      )}
+    </Modal>
+  )
+}
+
 export default function OrderStatusDashboard() {
   const { message, modal } = App.useApp()
   const queryClient = useQueryClient()
@@ -1252,6 +1462,8 @@ export default function OrderStatusDashboard() {
     useState<SelectedTransferDetail | null>(null)
   const [selectedPrecisionCuttingDetail, setSelectedPrecisionCuttingDetail] =
     useState<SelectedPrecisionCuttingDetail | null>(null)
+  const [selectedExtrusionDetail, setSelectedExtrusionDetail] =
+    useState<SelectedExtrusionDetail | null>(null)
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
   const [closingOrderId, setClosingOrderId] = useState<string | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
@@ -1317,6 +1529,12 @@ export default function OrderStatusDashboard() {
   const openPrecisionCuttingDetail = useCallback(
     (record: OrderStatusDashboardItem) => {
       setSelectedPrecisionCuttingDetail({ record })
+    },
+    [],
+  )
+  const openExtrusionDetail = useCallback(
+    (record: OrderStatusDashboardItem) => {
+      setSelectedExtrusionDetail({ record })
     },
     [],
   )
@@ -1498,6 +1716,18 @@ export default function OrderStatusDashboard() {
 
     const outputColumns: TableColumnsType<OrderStatusDashboardItem> = [
       {
+        title: '挤压',
+        dataIndex: 'extrusionQuantity',
+        key: 'extrusionQuantity',
+        width: 68,
+        align: 'right',
+        render: (_value, record) =>
+          renderExtrusionQuantityCell({
+            onOpen: openExtrusionDetail,
+            record,
+          }),
+      },
+      {
         title: '精切',
         dataIndex: 'precisionCuttingQuantity',
         key: 'precisionCuttingQuantity',
@@ -1611,6 +1841,7 @@ export default function OrderStatusDashboard() {
     modelFilterValues,
     modelOptions,
     openJobDetail,
+    openExtrusionDetail,
     openPrecisionCuttingDetail,
     openTransferDetail,
     page,
@@ -1658,6 +1889,7 @@ export default function OrderStatusDashboard() {
     setSelectedJobDetail(null)
     setSelectedPrecisionCuttingDetail(null)
     setSelectedTransferDetail(null)
+    setSelectedExtrusionDetail(null)
   }
 
   function handleResetSearch() {
@@ -1675,6 +1907,7 @@ export default function OrderStatusDashboard() {
     setSelectedJobDetail(null)
     setSelectedPrecisionCuttingDetail(null)
     setSelectedTransferDetail(null)
+    setSelectedExtrusionDetail(null)
   }
 
   const handleTableChange: TableProps<OrderStatusDashboardItem>['onChange'] = (
@@ -1700,6 +1933,7 @@ export default function OrderStatusDashboard() {
     setSelectedJobDetail(null)
     setSelectedPrecisionCuttingDetail(null)
     setSelectedTransferDetail(null)
+    setSelectedExtrusionDetail(null)
   }
 
   function handleStatusTabChange(nextStatus: string) {
@@ -1717,6 +1951,7 @@ export default function OrderStatusDashboard() {
     setSelectedJobDetail(null)
     setSelectedPrecisionCuttingDetail(null)
     setSelectedTransferDetail(null)
+    setSelectedExtrusionDetail(null)
   }
 
   return (
@@ -1879,6 +2114,10 @@ export default function OrderStatusDashboard() {
       <PrecisionCuttingDetailModal
         detail={selectedPrecisionCuttingDetail}
         onClose={() => setSelectedPrecisionCuttingDetail(null)}
+      />
+      <ExtrusionDetailModal
+        detail={selectedExtrusionDetail}
+        onClose={() => setSelectedExtrusionDetail(null)}
       />
     </div>
   )
