@@ -316,8 +316,16 @@ export default function WorkshopOrderList() {
                       {item.projectNo?.trim() || '未填写项目号'}
                     </div>
                     <div className="text-sm text-slate-500">
-                      已关联 {item.productionItemCount} 条生产工单明细
-                      {item.orderDates.length > 0
+                      {item.productionItemCount > 0 &&
+                        `已关联 ${item.productionItemCount} 条生产工单明细`}
+                      {item.productionItemCount > 0 &&
+                        item.extrusionProductionItemCount > 0 &&
+                        '，'}
+                      {item.extrusionProductionItemCount > 0 &&
+                        `已关联 ${item.extrusionProductionItemCount} 条挤压明细`}
+                      {(item.productionItemCount > 0 ||
+                        item.extrusionProductionItemCount > 0) &&
+                        item.orderDates.length > 0
                         ? `，工单日期：${item.orderDates.slice(0, 3).join('、')}`
                         : ''}
                     </div>
