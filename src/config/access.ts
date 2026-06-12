@@ -5,9 +5,11 @@ export type AppRole =
   | 'precision_cutting_admin'
   | 'warehouse_admin'
   | 'viewer'
+  | 'extrusion_admin'
 
 export const PRECISION_CUTTING_ADMIN_ROLE: AppRole = 'precision_cutting_admin'
 export const WAREHOUSE_ADMIN_ROLE: AppRole = 'warehouse_admin'
+export const EXTRUSION_ADMIN_ROLE: AppRole = 'extrusion_admin'
 export const VIEWER_ROLE: AppRole = 'viewer'
 
 export const EMPLOYEE_SIDE_ROLES: AppRole[] = ['employee', 'team_leader']
@@ -31,6 +33,7 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   precision_cutting_admin: '精切管理员',
   warehouse_admin: '仓库管理员',
   viewer: '查看员',
+  extrusion_admin: '挤压主任',
 }
 
 export const ROLE_OPTIONS: Array<{ label: string; value: AppRole }> = [
@@ -43,6 +46,7 @@ export const ROLE_OPTIONS: Array<{ label: string; value: AppRole }> = [
   { label: ROLE_LABELS.warehouse_admin, value: WAREHOUSE_ADMIN_ROLE },
   { label: ROLE_LABELS.admin, value: 'admin' },
   { label: ROLE_LABELS.viewer, value: VIEWER_ROLE },
+  { label: ROLE_LABELS.extrusion_admin, value: 'extrusion_admin' },
 ]
 
 export const DEFAULT_HOME_BY_ROLE: Record<AppRole, string> = {
@@ -52,6 +56,7 @@ export const DEFAULT_HOME_BY_ROLE: Record<AppRole, string> = {
   precision_cutting_admin: '/workshop-order-list',
   warehouse_admin: '/youmai-raw-material-inventory',
   viewer: '/dashboard',
+  extrusion_admin: '/workshop-order-list',
 }
 
 /**
@@ -87,6 +92,10 @@ export function isEmployeeSideRole(role: AppRole | null | undefined) {
 
 export function isPrecisionCuttingAdminRole(role: AppRole | null | undefined) {
   return role === PRECISION_CUTTING_ADMIN_ROLE
+}
+
+export function isExtrusionAdminRole(role: AppRole | null | undefined) {
+  return role === EXTRUSION_ADMIN_ROLE
 }
 
 export function isViewerRole(role: AppRole | null | undefined) {
