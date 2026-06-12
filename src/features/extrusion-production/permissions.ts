@@ -16,6 +16,13 @@ export const EXTRUSION_PRODUCTION_PERMISSIONS: PermissionDefinition[] = [
     label: '挤压生产单',
   },
   {
+    key: 'page:extrusion-production-daily-report',
+    scope: 'page',
+    module: 'extrusion-production',
+    surface: 'pc',
+    label: '挤压生产日报表',
+  },
+  {
     key: 'feature:extrusion-production.create',
     scope: 'feature',
     module: 'extrusion-production',

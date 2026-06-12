@@ -259,9 +259,14 @@ const allMenuItems: MenuItemDef[] = [
     permission: 'nav:extrusion-production',
     children: [
       {
-        key: 'extrusion-production',
+        key: 'extrusion-production-order',
         label: '挤压生产单',
         permission: 'page:extrusion-production',
+      },
+      {
+        key: 'extrusion-production-daily-report',
+        label: '挤压生产日报表',
+        permission: 'page:extrusion-production-daily-report',
       },
     ],
   },
