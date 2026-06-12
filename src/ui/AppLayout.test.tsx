@@ -118,7 +118,7 @@ describe('AppLayout', () => {
 
     await act(async () => {
       routerState.location = {
-        pathname: '/extrusion-production',
+        pathname: '/extrusion-production-order',
         search: '',
         hash: '',
       }

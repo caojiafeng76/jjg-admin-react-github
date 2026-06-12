@@ -657,7 +657,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'extrusion-production',
+        path: 'extrusion-production-order',
         element: (
           <Suspense fallback={<Loading />}>
             <PermissionProtectedRoute

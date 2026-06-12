@@ -1,5 +1,6 @@
--- 新增 extrusion_admin（挤压主任）角色
--- 挤压主任拥有：订单管理（workshop）所有权限 + 挤压生产（extrusion-production）所有权限
+-- extrusion_admin（挤压主任）角色：仅限 3 个页面
+-- 页面：订单管理（/workshop-order-list）、挤压生产单（/extrusion-production-order）、
+--       挤压生产日报表（/extrusion-production-daily-report）
 --
 -- 依赖：
 --   20260421120000_create_roles_table.sql        (roles 表)
@@ -9,52 +10,42 @@
 -- 1. 在 roles 表中注册 extrusion_admin 内置角色
 -- ============================================================
 INSERT INTO public.roles (key, label, description, is_builtin)
-VALUES ('extrusion_admin', '挤压主任', '挤压主任：拥有订单管理和挤压生产的所有权限', true)
+VALUES ('extrusion_admin', '挤压主任', '挤压主任：仅可访问订单管理、挤压生产单和挤压生产日报表三个页面', true)
 ON CONFLICT (key) DO UPDATE
 SET label = EXCLUDED.label,
   description = EXCLUDED.description,
   is_builtin = true;
 
 -- ============================================================
--- 2. 授予 extrusion_admin 所有 PC 端导航权限（nav:* surface in pc/both）
+-- 2. 精确授予 12 个权限（nav + page + feature）
 -- ============================================================
 INSERT INTO public.role_permissions (role, permission_id)
-SELECT 'extrusion_admin',
-  id
+SELECT 'extrusion_admin', id
 FROM public.permissions
-WHERE scope = 'nav'
-  AND surface IN ('pc', 'both')
-ON CONFLICT (role, permission_id) DO NOTHING;
+WHERE key IN (
+  -- 订单管理（workshop-order-list）
+  -- nav
+  'nav:workshop-order-list',
+  -- page（生产中 + 已结案 + 二维码详情）
+  'page:workshop-order-production',
+  'page:workshop-order-closed',
+  'page:workshop-order-qr-detail',
+  -- feature（删除 + 状态变更）
+  'feature:workshop-order.delete',
+  'feature:workshop-order.manage-status',
 
--- ============================================================
--- 3. 授予 extrusion_admin 所有 PC 端页面权限（page:* surface = pc）
--- ============================================================
-INSERT INTO public.role_permissions (role, permission_id)
-SELECT 'extrusion_admin',
-  id
-FROM public.permissions
-WHERE scope = 'page'
-  AND surface IN ('pc', 'both')
-ON CONFLICT (role, permission_id) DO NOTHING;
+  -- 挤压生产单（extrusion-production）
+  -- nav
+  'nav:extrusion-production',
+  -- page
+  'page:extrusion-production',
+  -- feature（新建 + 审核 + 删除）
+  'feature:extrusion-production.create',
+  'feature:extrusion-production.audit',
+  'feature:extrusion-production.delete',
 
--- ============================================================
--- 4. 授予 extrusion_admin 所有功能权限（feature:*）
--- ============================================================
-INSERT INTO public.role_permissions (role, permission_id)
-SELECT 'extrusion_admin',
-  id
-FROM public.permissions
-WHERE scope = 'feature'
-  AND surface IN ('pc', 'both')
-ON CONFLICT (role, permission_id) DO NOTHING;
-
--- ============================================================
--- 5. 授予 extrusion_admin 所有字段级权限（field:*）
--- ============================================================
-INSERT INTO public.role_permissions (role, permission_id)
-SELECT 'extrusion_admin',
-  id
-FROM public.permissions
-WHERE scope = 'field'
-  AND surface IN ('pc', 'both')
+  -- 挤压生产日报表（extrusion-production-daily-report）
+  -- page
+  'page:extrusion-production-daily-report'
+)
 ON CONFLICT (role, permission_id) DO NOTHING;
