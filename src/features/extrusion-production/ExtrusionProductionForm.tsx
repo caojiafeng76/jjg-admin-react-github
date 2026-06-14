@@ -26,11 +26,17 @@ import type {
   ExtrusionProductionItemInput,
   UpsertExtrusionProductionPayload,
 } from '@/services/apiExtrusionProductions'
+import type { MachineEquipmentOption } from '@/services/apiMachineEquipmentMaintenances'
 import {
   useExtrusionSalesOrdersProjectNos,
 } from './useExtrusionProductions'
 import ExtrusionProductionItemTable from './ExtrusionProductionItemTable'
 import { buildExtrusionMachineOptions } from './extrusionMachineOptions'
+import {
+  extractExtrusionTonnage,
+  getBilletDiameterPreset,
+  type BilletDiameterPreset,
+} from './extrusionMachineTonnage'
 
 interface Props {
   open: boolean
@@ -117,6 +123,33 @@ export default function ExtrusionProductionForm({
   const watchedBilletDiameterMm = Form.useWatch('billet_diameter_mm', itemForm)
   const watchedBilletLengthMm = Form.useWatch('billet_length_mm', itemForm)
   const watchedBilletQuantity = Form.useWatch('billet_quantity', itemForm)
+  const watchedMachineId = Form.useWatch('machine_id', headerForm)
+
+  const machineLookupByUnifiedDeviceNo = useMemo(() => {
+    return new Map(
+      (machines || []).map((machine) => [
+        machine.unified_device_no.trim(),
+        machine,
+      ]),
+    )
+  }, [machines])
+
+  const currentMachine: MachineEquipmentOption | null = useMemo(() => {
+    if (!watchedMachineId) {
+      return null
+    }
+    return machineLookupByUnifiedDeviceNo.get(watchedMachineId) ?? null
+  }, [machineLookupByUnifiedDeviceNo, watchedMachineId])
+
+  const currentMachineTonnage = useMemo(
+    () => extractExtrusionTonnage(currentMachine?.machine_name),
+    [currentMachine],
+  )
+
+  const currentBilletDiameterPreset: BilletDiameterPreset | null = useMemo(
+    () => getBilletDiameterPreset(currentMachineTonnage),
+    [currentMachineTonnage],
+  )
 
   const billetInputWeightPreview = calculateBilletInputWeight({
     billetDiameterMm: watchedBilletDiameterMm,
@@ -195,7 +228,11 @@ export default function ExtrusionProductionForm({
   function openCreateItemModal() {
     setEditingItemIndex(null)
     itemForm.resetFields()
-    itemForm.setFieldsValue(EMPTY_ITEM_DEFAULTS)
+    const preset = currentBilletDiameterPreset
+    itemForm.setFieldsValue({
+      ...EMPTY_ITEM_DEFAULTS,
+      billet_diameter_mm: preset?.defaultDiameterMm,
+    })
     setItemModalOpen(true)
   }
 
@@ -208,6 +245,10 @@ export default function ExtrusionProductionForm({
     setEditingItemIndex(index)
     itemForm.setFieldsValue(target)
     setItemModalOpen(true)
+  }
+
+  function handleQuickPickBilletDiameter(value: number) {
+    itemForm.setFieldValue('billet_diameter_mm', value)
   }
 
   function handleDeleteItem(index: number) {
@@ -422,6 +463,33 @@ export default function ExtrusionProductionForm({
               name="billet_diameter_mm"
               label="铝棒直径(mm)"
               rules={[{ required: true, message: '请输入铝棒直径' }]}
+              extra={
+                currentBilletDiameterPreset &&
+                currentBilletDiameterPreset.quickPickDiametersMm.length > 1 ? (
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-slate-500">建议直径：</span>
+                    {currentBilletDiameterPreset.quickPickDiametersMm.map(
+                      (diameter) => (
+                        <Button
+                          key={diameter}
+                          size="small"
+                          type={
+                            watchedBilletDiameterMm === diameter
+                              ? 'primary'
+                              : 'default'
+                          }
+                          data-testid={`quick-pick-billet-diameter-${diameter}`}
+                          onClick={() =>
+                            handleQuickPickBilletDiameter(diameter)
+                          }
+                        >
+                          {diameter}mm
+                        </Button>
+                      ),
+                    )}
+                  </div>
+                ) : null
+              }
             >
               <InputNumber
                 data-testid="input-billet-diameter"
