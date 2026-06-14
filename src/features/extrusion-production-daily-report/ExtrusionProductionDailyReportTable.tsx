@@ -27,7 +27,7 @@ function renderPercentage(value: number | null | undefined) {
   if (value === null || value === undefined) {
     return '-'
   }
-  return `${(value * 100).toFixed(2)}%`
+  return `${value.toFixed(2)}%`
 }
 
 const ExtrusionProductionDailyReportTable = memo(function ExtrusionProductionDailyReportTable({
