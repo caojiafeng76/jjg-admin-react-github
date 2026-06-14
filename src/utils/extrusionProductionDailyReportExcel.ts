@@ -63,7 +63,7 @@ function formatPercentage(value: unknown): string {
   if (isNaN(num)) {
     return ''
   }
-  return (num * 100).toFixed(2)
+  return num.toFixed(2)
 }
 
 function applyHeaderStyle(

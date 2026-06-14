@@ -1384,7 +1384,7 @@ function ExtrusionDetailModal({
       width: 100,
       align: 'right',
       render: (value: number) =>
-        value > 0 ? `${(value * 100).toFixed(2)}%` : '-',
+        value > 0 ? `${value.toFixed(2)}%` : '-',
     },
     {
       title: '审核状态',
@@ -1426,7 +1426,7 @@ function ExtrusionDetailModal({
             <Tag color="green">
               加权成材率{' '}
               {totalTheoreticalCount > 0
-                ? `${(weightedYield * 100).toFixed(2)}%`
+                ? `${weightedYield.toFixed(2)}%`
                 : '-'}
             </Tag>
             <Tag color="green">已审核 {rows.filter((item) => item.isAudited).length}</Tag>
