@@ -52,6 +52,18 @@ vi.mock('@/features/production-order/useMachineEquipmentOptions', () => ({
         operation: '挤压',
         machine_name: '1000T',
       },
+      {
+        id: '770e8400-e29b-41d4-a716-446655440000',
+        unified_device_no: 'JY-1400T',
+        operation: '挤压',
+        machine_name: '1400T',
+      },
+      {
+        id: '880e8400-e29b-41d4-a716-446655440000',
+        unified_device_no: 'JY-680T',
+        operation: '挤压',
+        machine_name: '680T',
+      },
     ],
     isLoading: false,
   }),
@@ -101,4 +113,84 @@ describe('ExtrusionProductionForm', () => {
     // 预览区域应该显示铝棒投入重量
     expect(screen.getByTestId('preview-billet-weight')).toBeInTheDocument()
   })
+
+  it('prefills billet diameter with 1000T default (120) when adding an item', async () => {
+    const user = userEvent.setup()
+    renderComponent()
+
+    await selectMachine(user, '1000T')
+
+    const addItemButtons = await screen.findAllByTestId('btn-add-item')
+    await user.click(addItemButtons[0]!)
+
+    const billetDiameterInput = await screen.findByTestId(
+      'input-billet-diameter',
+    )
+    await waitFor(() => {
+      expect((billetDiameterInput as HTMLInputElement).value).toBe('120')
+    })
+  })
+
+  it('prefills billet diameter with 680T default (90) when adding an item', async () => {
+    const user = userEvent.setup()
+    renderComponent()
+
+    await selectMachine(user, '680T')
+
+    const addItemButtons = await screen.findAllByTestId('btn-add-item')
+    await user.click(addItemButtons[0]!)
+
+    const billetDiameterInput = await screen.findByTestId(
+      'input-billet-diameter',
+    )
+    await waitFor(() => {
+      expect((billetDiameterInput as HTMLInputElement).value).toBe('90')
+    })
+  })
+
+  it('prefills 1400T default (150) and quick-pick switches to 180', async () => {
+    const user = userEvent.setup()
+    renderComponent()
+
+    await selectMachine(user, '1400T')
+
+    const addItemButtons = await screen.findAllByTestId('btn-add-item')
+    await user.click(addItemButtons[0]!)
+
+    const billetDiameterInput = await screen.findByTestId(
+      'input-billet-diameter',
+    )
+    await waitFor(() => {
+      expect((billetDiameterInput as HTMLInputElement).value).toBe('150')
+    })
+
+    const quickPick180 = await screen.findByTestId(
+      'quick-pick-billet-diameter-180',
+    )
+    expect(quickPick180).toBeInTheDocument()
+
+    await user.click(quickPick180)
+
+    await waitFor(() => {
+      expect((billetDiameterInput as HTMLInputElement).value).toBe('180')
+    })
+  })
 })
+
+async function selectMachine(
+  user: ReturnType<typeof userEvent.setup>,
+  machineName: string,
+) {
+  const machineField = screen.getByLabelText('设备')
+  const input = machineField as HTMLInputElement
+  await user.click(input)
+  await user.type(input, machineName)
+  // 等下拉选项出现后点击第一条匹配项（选项 label 可能包含推荐直径后缀）
+  const option = await screen.findByText(
+    (content) => content.includes(machineName),
+    {
+      selector: '.ant-select-item-option-content',
+    },
+  )
+  await user.click(option)
+}
