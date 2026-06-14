@@ -821,20 +821,16 @@ export default function ProductionOrderPage() {
       orderData &&
       !isFetching &&
       !isPlaceholderData &&
+      orderData.total > 0 &&
       orderData.items.length === 0
     ) {
-      const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
-      nextSearchParamsURL.set('page', Math.max(page - 1, 1).toString())
-      setSearchParamsURL(nextSearchParamsURL)
+      setSearchParamsURL((prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('page', Math.max(page - 1, 1).toString())
+        return next
+      })
     }
-  }, [
-    isFetching,
-    isPlaceholderData,
-    orderData,
-    page,
-    searchParamsURL,
-    setSearchParamsURL,
-  ])
+  }, [isFetching, isPlaceholderData, orderData, page, setSearchParamsURL])
 
   useEffect(() => {
     if (!activeRecordId) {
