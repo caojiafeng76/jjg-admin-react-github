@@ -47,6 +47,19 @@ function formatChineseDate(value: Date) {
   return `${value.getFullYear()}年${value.getMonth() + 1}月${value.getDate()}日`
 }
 
+function toCellText(value: unknown, transform?: (raw: string) => string) {
+  if (value === null || value === undefined) {
+    return '-'
+  }
+
+  const text = typeof value === 'string' ? value.trim() : String(value)
+  if (!text) {
+    return '-'
+  }
+
+  return transform ? transform(text) : text
+}
+
 function getProgressText(order: ProductionSchedulingOrder) {
   const status = order.progress_status?.trim()
   const orderQuantity = Number(order.order_quantity || 0)
@@ -189,12 +202,12 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
       order.id?.slice(0, 8) || '',
       order.project_no || '',
       order.customer || '',
-      order.product_model ?? '',
-      order.customer_model ?? '',
-      order.material_name ?? '',
-      order.material_code ?? '',
-      order.length_mm ? `${order.length_mm}mm` : '',
-      order.color_name ?? '',
+      toCellText(order.product_model),
+      toCellText(order.customer_model),
+      toCellText(order.material_name),
+      toCellText(order.material_code),
+      toCellText(order.length_mm, (raw) => `${raw}mm`),
+      toCellText(order.color_name),
       normalizeNumber(order.order_quantity),
       order.process_requirement || '',
       formatDate(order.planned_start_date),
