@@ -9,7 +9,10 @@ import {
   Upload,
 } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
-import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
+import {
+  ArrowUpTrayIcon,
+  TableCellsIcon,
+} from '@heroicons/react/16/solid'
 
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { parseAttendanceExcel } from '@/utils/attendanceExcel'
@@ -27,12 +30,17 @@ const PREVIEW_COLUMNS: TableColumnsType<
     title: '#',
     dataIndex: '_idx',
     width: 60,
-    render: (v) => v + 1,
+    render: (v) => (
+      <span className="flex size-6 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">
+        {v + 1}
+      </span>
+    ),
   },
   {
     title: '姓名',
     dataIndex: 'name',
     width: 120,
+    render: (v: string) => <span className="font-medium">{v}</span>,
   },
   {
     title: '日期',
@@ -43,7 +51,7 @@ const PREVIEW_COLUMNS: TableColumnsType<
     title: '时间',
     dataIndex: 'time',
     width: 100,
-    render: (v: string) => v?.slice(0, 5) ?? '-',
+    render: (v: string) => <span className="font-mono">{v?.slice(0, 5) ?? '-'}</span>,
   },
 ]
 
@@ -142,7 +150,8 @@ export default function AttendanceExcelImport({
   return (
     <>
       <Button
-        icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+        type="text"
+        icon={<ArrowUpTrayIcon className="size-4 text-sky-500/80!" />}
         onClick={handleOpenModal}
         disabled={viewerDenied}
       >
@@ -171,36 +180,40 @@ export default function AttendanceExcelImport({
         ]}
       >
         <div className="space-y-4">
-          <Upload
-            fileList={fileList}
-            beforeUpload={handleBeforeUpload}
-            onRemove={() => {
-              setFileList([])
-              setParsedRows([])
-              setParseErrors([])
-            }}
-            maxCount={1}
-            accept=".xlsx,.xls"
-          >
-            <Button
-              icon={<ArrowUpTrayIcon className="h-4 w-4" />}
-              loading={parsing}
-              disabled={viewerDenied}
+          <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 text-center transition-colors hover:border-blue-300 hover:bg-blue-50/30">
+            <Upload
+              fileList={fileList}
+              beforeUpload={handleBeforeUpload}
+              onRemove={() => {
+                setFileList([])
+                setParsedRows([])
+                setParseErrors([])
+              }}
+              maxCount={1}
+              accept=".xlsx,.xls"
             >
-              {parsing ? '解析中...' : '选择 Excel 文件'}
-            </Button>
-          </Upload>
-
-          <p className="flex items-center gap-1 text-xs text-slate-500">
-            <TableCellsIcon className="h-4 w-4" />
-            支持 ZKTeco 考勤管理系统导出文件，列名需包含：姓名、日期、时间
-          </p>
+              <Button
+                icon={<ArrowUpTrayIcon className="h-5 w-5" />}
+                loading={parsing}
+                disabled={viewerDenied}
+                size="large"
+                className="rounded-lg"
+              >
+                {parsing ? '解析中...' : '选择 Excel 文件'}
+              </Button>
+            </Upload>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-slate-500">
+              <TableCellsIcon className="h-4 w-4" />
+              支持 ZKTeco 考勤管理系统导出文件，列名需包含：姓名、日期、时间
+            </p>
+          </div>
 
           {removedCount > 0 && (
             <Alert
               type="info"
               showIcon
               message={`自动去重：已合并 ${removedCount} 条重复打卡记录（同一人同一天 10 分钟内保留最晚一条）`}
+              className="rounded-lg"
             />
           )}
 
@@ -219,12 +232,13 @@ export default function AttendanceExcelImport({
                   )}
                 </ul>
               }
+              className="rounded-lg"
             />
           )}
 
           {parsedRows.length > 0 && (
             <div>
-              <p className="mb-2 text-sm font-medium">
+              <p className="mb-2 text-sm font-medium text-slate-600">
                 预览（共 {parsedRows.length} 条）
               </p>
               <Table
@@ -234,6 +248,7 @@ export default function AttendanceExcelImport({
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}
                 scroll={{ y: 300 }}
+                className="rounded-lg"
               />
             </div>
           )}
