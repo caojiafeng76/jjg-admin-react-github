@@ -853,8 +853,8 @@ export async function getProductionSchedulingOrders({
   const from = (currentPage - 1) * currentPageSize
   const to = from + currentPageSize - 1
   let query = applySchedulingFilters(filters)
-    .order('product_delivery_date', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false })
+    .order('order_date', { ascending: false, nullsFirst: false })
+    .order('project_no', { ascending: true })
     .range(from, to)
 
   if (signal) {
