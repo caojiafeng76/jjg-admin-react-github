@@ -38,7 +38,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
     const updateTableHeight = () => {
       // 如果正在更新中，跳过本次计算，避免循环
       if (isUpdatingRef.current) return
-      
+
       const container = tableContainerRef.current
       const pagination = paginationRef.current
       if (!container || !pagination) return
@@ -71,16 +71,16 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
           // 可滚动区域 = 表头 + 数据行区域
           // antd的scroll.y只控制tbody区域，表头是独立的，所以需要减去表头高度
           const tableBodyHeight = scrollableHeight - headerHeight
-          
+
           // 使用更精确的计算，确保10行能完全显示
           const calculatedRowHeight = tableBodyHeight / targetRowCount
 
-          // 使用四舍五入确保行高为整数，同时保持行高和 scrollY 的一致性
-          // 这样 scrollY = rowHeight × 10，确保10行能准确显示
+          // 使用四舍五入确保行高为整数
           const newRowHeight = Math.max(minRowHeight, Math.round(calculatedRowHeight)) // 四舍五入，不低于 minRowHeight
-          
-          // scrollY 必须等于 rowHeight × 10，确保10行能完全显示
-          const newScrollY = Math.max(320, newRowHeight * targetRowCount)
+
+          // scroll.y 表示 tbody 的视口高度，必须受容器可用高度约束。
+          // 行数较多时通过表格内部滚动展示，不能反向撑高外层容器。
+          const newScrollY = Math.max(1, Math.round(tableBodyHeight))
 
           // 只有当计算结果真正改变时才更新状态
           // 添加阈值检查，避免因为微小变化导致的循环更新（2px 的容差）
@@ -93,7 +93,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
           if (shouldUpdate) {
             // 设置更新标志，防止在更新期间触发新的计算
             isUpdatingRef.current = true
-            
+
             setRowHeight((prev) => {
               // 只有当变化超过2px时才更新，避免循环
               if (Math.abs(prev - newRowHeight) <= 2) {
@@ -118,7 +118,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
               rowHeight: newRowHeight,
               scrollY: newScrollY,
             }
-            
+
             // 使用 setTimeout 确保状态更新完成后再重置标志
             setTimeout(() => {
               isUpdatingRef.current = false
@@ -155,7 +155,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
         }
       }
     })
-    
+
     if (tableContainerRef.current) {
       resizeObserver.observe(tableContainerRef.current)
     }
@@ -179,4 +179,3 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
     rowHeight,
   }
 }
-
