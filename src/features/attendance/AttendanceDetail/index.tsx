@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { App, FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
+import {
+  CalendarDaysIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/react/24/outline'
 
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -204,25 +208,41 @@ export default function AttendanceDetailPage() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑考勤明细" handleEdit={handleEdit} />
-        <DeleteButton
-          onConfirm={handleDelete}
-          isDeleting={deleteMutation.isPending}
-          count={selectedRowKeys.length}
-          title="删除考勤明细"
-          itemName="考勤记录"
-        />
-        <AttendanceExcelImport
-          onImport={handleBatchImport}
-          isImporting={batchCreateMutation.isPending}
-        />
+    <div className="flex h-full flex-col gap-4 p-4">
+      {/* 工具栏卡片 */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {/* 操作按钮组 */}
+          <div className="flex items-center gap-1">
+            <AddButton handleCreate={handleCreate} />
+            <EditButton title="编辑考勤明细" handleEdit={handleEdit} />
+            <DeleteButton
+              onConfirm={handleDelete}
+              isDeleting={deleteMutation.isPending}
+              count={selectedRowKeys.length}
+              title="删除考勤明细"
+              itemName="考勤记录"
+            />
+            <div className="mx-2 h-5 w-px bg-slate-200" />
+            <AttendanceExcelImport
+              onImport={handleBatchImport}
+              isImporting={batchCreateMutation.isPending}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
+      {/* 搜索区域卡片 */}
+      <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-50/80 to-white px-5 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+        <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-500">
+          <MagnifyingGlassIcon className="h-4 w-4" />
+          <span>筛选条件</span>
+          {selectedRowKeys.length > 0 && (
+            <span className="ml-2 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">
+              已选 {selectedRowKeys.length} 条
+            </span>
+          )}
+        </div>
         <AttendanceDetailSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
@@ -230,9 +250,20 @@ export default function AttendanceDetailPage() {
         />
       </div>
 
+      {/* 数据统计提示 */}
+      {data && data.total > 0 && (
+        <div className="flex items-center gap-2 text-sm text-slate-500">
+          <CalendarDaysIcon className="h-4 w-4" />
+          <span>
+            共 <span className="font-medium text-slate-700">{data.total}</span> 条考勤记录
+          </span>
+        </div>
+      )}
+
+      {/* 表格区域 */}
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+        className="min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
           <AttendanceDetailTable
@@ -245,7 +276,10 @@ export default function AttendanceDetailPage() {
             scrollY={scrollY}
           />
         </div>
-        <div ref={paginationRef} className="flex shrink-0 justify-end">
+        <div
+          ref={paginationRef}
+          className="flex shrink-0 justify-end border-t border-slate-100 bg-slate-50/50 px-4 py-3"
+        >
           <AppPagination total={data?.total || 0} />
         </div>
       </div>

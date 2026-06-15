@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react'
 import { Table, TableColumnsType } from 'antd'
+import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 
 import type { AttendanceDetail } from '@/services/apiAttendanceDetails'
 
@@ -31,14 +32,26 @@ function AttendanceDetailTable({
         key: '#',
         width: 60,
         fixed: 'left',
-        render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
+        render: (_value, _record, index) => (
+          <span className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500">
+            {(page - 1) * pageSize + index + 1}
+          </span>
+        ),
       },
       {
-        title: '姓名',
+        title: (
+          <span className="flex items-center gap-1.5">
+            <UserCircleIcon className="h-4 w-4 text-slate-400" />
+            姓名
+          </span>
+        ),
         dataIndex: 'name',
         key: 'name',
         width: 140,
         fixed: 'left',
+        render: (value: string) => (
+          <span className="font-medium text-slate-700">{value}</span>
+        ),
       },
       {
         title: '日期',
@@ -51,22 +64,41 @@ function AttendanceDetailTable({
         dataIndex: 'shift',
         key: 'shift',
         width: 100,
-        render: (value: string) => value || '白班',
+        render: (value: string) =>
+          value === '夜班' ? (
+            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+              {value || '白班'}
+            </span>
+          ) : (
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+              {value || '白班'}
+            </span>
+          ),
       },
       {
-        title: '时间',
+        title: (
+          <span className="flex items-center gap-1.5">
+            <ClockIcon className="h-4 w-4 text-slate-400" />
+            时间
+          </span>
+        ),
         dataIndex: 'time',
         key: 'time',
         width: 120,
-        render: (value: string) => value?.slice(0, 5) ?? '-',
+        render: (value: string) => (
+          <span className="font-mono text-slate-600">{value?.slice(0, 5) ?? '-'}</span>
+        ),
       },
       {
         title: '创建时间',
         dataIndex: 'created_at',
         key: 'created_at',
         width: 180,
-        render: (value: string) =>
-          value ? new Date(value).toLocaleString('zh-CN') : '-',
+        render: (value: string) => (
+          <span className="text-xs text-slate-400">
+            {value ? new Date(value).toLocaleString('zh-CN') : '-'}
+          </span>
+        ),
       },
     ],
     [page, pageSize],
@@ -87,6 +119,7 @@ function AttendanceDetailTable({
       }}
       size="small"
       onRow={() => ({ style: { height: rowHeight } })}
+      className="[&_.ant-table-thead>tr>th]:!bg-slate-50 [&_.ant-table-thead>tr>th]:!font-medium [&_.ant-table-tbody>tr:hover>td]:!bg-blue-50/30"
     />
   )
 }
