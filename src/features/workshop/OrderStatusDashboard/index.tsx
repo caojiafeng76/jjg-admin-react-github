@@ -20,7 +20,6 @@ import {
   Select,
   Space,
   Table,
-  Tabs,
   Tag,
   Typography,
 } from 'antd'
@@ -112,13 +111,6 @@ const DENSE_TABLE_CELL_STYLE: CSSProperties = {
   lineHeight: 1.2,
   padding: '4px 6px',
 }
-
-const DENSE_TABLE_STYLES = {
-  root: {
-    fontSize: 12,
-    lineHeight: 1.2,
-  },
-} satisfies NonNullable<TableProps<OrderStatusDashboardItem>['styles']>
 
 type ProductionDetailRow = OrderStatusProductionDetail & {
   key: string
@@ -905,50 +897,86 @@ function ProductionDetailModal({
     <Modal
       open={Boolean(detail)}
       title={
-        detail
-          ? `${detail.record.project_no || '-'} / ${detail.jobName} 岗位生产工单明细`
-          : '生产工单明细'
+        <div className="flex items-center gap-3">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/30">
+            <svg className="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <div>
+            <span className="font-semibold text-slate-700">
+              {detail
+                ? `${detail.record.project_no || '-'} / ${detail.jobName} 岗位生产工单明细`
+                : '生产工单明细'}
+            </span>
+          </div>
+        </div>
       }
       footer={null}
       width={1280}
       destroyOnHidden
       onCancel={onClose}
+      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white"
     >
       {detail && (
         <div className="space-y-4">
-          <Space size={8} wrap>
-            <Tag color="blue">明细 {rows.length}</Tag>
-            <Tag color="cyan">工序 {operationSummaryRows.length}</Tag>
-            <Tag color="green">
-              合格 {summary.qualifiedQuantity.toLocaleString()}
-            </Tag>
-            <Tag color="gold">
-              来料 {summary.incomingQuantity.toLocaleString()}
-            </Tag>
-            <Tag color={summary.defectQuantity > 0 ? 'red' : 'default'}>
-              不合格 {summary.defectQuantity.toLocaleString()}
-            </Tag>
-          </Space>
+          {/* 统计摘要 */}
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
+            <div className="flex items-center gap-1.5 rounded-lg bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80">
+              <span className="text-xs font-medium text-blue-600">明细</span>
+              <span className="text-xs font-bold text-blue-700 tabular-nums">{rows.length}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
+              <span className="text-xs font-medium text-cyan-600">工序</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums">{operationSummaryRows.length}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
+              <span className="text-xs font-medium text-emerald-600">合格</span>
+              <span className="text-xs font-bold text-emerald-700 tabular-nums">{summary.qualifiedQuantity.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
+              <span className="text-xs font-medium text-amber-600">来料</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums">{summary.incomingQuantity.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-red-50/80 px-3 py-1.5 ring-1 ring-red-100/80">
+              <span className="text-xs font-medium text-red-600">不合格</span>
+              <span className="text-xs font-bold text-red-700 tabular-nums">{summary.defectQuantity.toLocaleString()}</span>
+            </div>
+          </div>
 
-          <Table<OperationSummaryRow>
-            rowKey="key"
-            bordered
-            size="small"
-            columns={operationSummaryColumns}
-            dataSource={operationSummaryRows}
-            pagination={false}
-            scroll={{ x: 370 }}
-          />
+          {/* 工序汇总表 */}
+          <div className="rounded-xl border border-slate-200/60 bg-white">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">工序汇总</span>
+            </div>
+            <Table<OperationSummaryRow>
+              rowKey="key"
+              bordered
+              size="small"
+              columns={operationSummaryColumns}
+              dataSource={operationSummaryRows}
+              pagination={false}
+              scroll={{ x: 370 }}
+              className="[&_.ant-table]:!rounded-none"
+            />
+          </div>
 
-          <Table<ProductionDetailRow>
-            rowKey="key"
-            bordered
-            size="small"
-            columns={columns}
-            dataSource={rows}
-            pagination={false}
-            scroll={{ x: productionDetailScrollX, y: 360 }}
-          />
+          {/* 详细数据表 */}
+          <div className="rounded-xl border border-slate-200/60 bg-white">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">详细记录</span>
+            </div>
+            <Table<ProductionDetailRow>
+              rowKey="key"
+              bordered
+              size="small"
+              columns={columns}
+              dataSource={rows}
+              pagination={false}
+              scroll={{ x: productionDetailScrollX, y: 360 }}
+              className="[&_.ant-table]:!rounded-none"
+            />
+          </div>
         </div>
       )}
     </Modal>
@@ -1037,37 +1065,65 @@ function TransferDetailModal({
     <Modal
       open={Boolean(detail)}
       title={
-        detail
-          ? `${detail.record.project_no || '-'} 物料转移明细`
-          : '物料转移明细'
+        <div className="flex items-center gap-3">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-md shadow-purple-500/30">
+            <svg className="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+          </div>
+          <div>
+            <span className="font-semibold text-slate-700">
+              {detail
+                ? `${detail.record.project_no || '-'} 物料转移明细`
+                : '物料转移明细'}
+            </span>
+          </div>
+        </div>
       }
       footer={null}
       width={920}
       destroyOnHidden
       onCancel={onClose}
+      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white"
     >
       {detail && (
         <div className="space-y-4">
-          <Space size={8} wrap>
-            <Tag color="blue">记录 {rows.length}</Tag>
-            <Tag color="purple">
-              转移 {summary.transferQuantity.toLocaleString()}
-            </Tag>
-            <Tag color="green">已审核 {summary.auditedCount}</Tag>
-            <Tag color={summary.unauditedCount > 0 ? 'gold' : 'default'}>
-              未审核 {summary.unauditedCount}
-            </Tag>
-          </Space>
+          {/* 统计摘要 */}
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
+            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
+              <span className="text-xs font-medium text-purple-600">记录</span>
+              <span className="text-xs font-bold text-purple-700 tabular-nums">{rows.length}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80">
+              <span className="text-xs font-medium text-pink-600">转移</span>
+              <span className="text-xs font-bold text-pink-700 tabular-nums">{summary.transferQuantity.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
+              <span className="text-xs font-medium text-emerald-600">已审核</span>
+              <span className="text-xs font-bold text-emerald-700 tabular-nums">{summary.auditedCount}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
+              <span className="text-xs font-medium text-amber-600">未审核</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums">{summary.unauditedCount}</span>
+            </div>
+          </div>
 
-          <Table<TransferDetailRow>
-            rowKey="key"
-            bordered
-            size="small"
-            columns={columns}
-            dataSource={rows}
-            pagination={false}
-            scroll={{ x: 780, y: 420 }}
-          />
+          {/* 数据表 */}
+          <div className="rounded-xl border border-slate-200/60 bg-white">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">转移记录</span>
+            </div>
+            <Table<TransferDetailRow>
+              rowKey="key"
+              bordered
+              size="small"
+              columns={columns}
+              dataSource={rows}
+              pagination={false}
+              scroll={{ x: 780, y: 420 }}
+              className="[&_.ant-table]:!rounded-none"
+            />
+          </div>
         </div>
       )}
     </Modal>
@@ -1236,41 +1292,71 @@ function PrecisionCuttingDetailModal({
     <Modal
       open={Boolean(detail)}
       title={
-        detail ? `${detail.record.project_no || '-'} 精切明细` : '精切明细'
+        <div className="flex items-center gap-3">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 shadow-md shadow-cyan-500/30">
+            <svg className="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+          </div>
+          <div>
+            <span className="font-semibold text-slate-700">
+              {detail ? `${detail.record.project_no || '-'} 精切明细` : '精切明细'}
+            </span>
+          </div>
+        </div>
       }
       footer={null}
       width={1180}
       destroyOnHidden
       onCancel={onClose}
+      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white"
     >
       {detail && (
         <div className="space-y-4">
-          <Space size={8} wrap>
-            <Tag color="blue">记录 {rows.length}</Tag>
-            <Tag color="purple">
-              精切 {summary.transferQuantity.toLocaleString()}
-            </Tag>
-            <Tag color="cyan">
-              长料 {summary.longMaterialQuantity.toLocaleString()}
-            </Tag>
-            <Tag color={summary.defectQuantity > 0 ? 'red' : 'default'}>
-              不良 {summary.defectQuantity.toLocaleString()}
-            </Tag>
-            <Tag color="green">已审核 {summary.auditedCount}</Tag>
-            <Tag color={summary.unauditedCount > 0 ? 'gold' : 'default'}>
-              未审核 {summary.unauditedCount}
-            </Tag>
-          </Space>
+          {/* 统计摘要 */}
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
+            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
+              <span className="text-xs font-medium text-cyan-600">记录</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums">{rows.length}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
+              <span className="text-xs font-medium text-purple-600">精切</span>
+              <span className="text-xs font-bold text-purple-700 tabular-nums">{summary.transferQuantity.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-teal-50/80 px-3 py-1.5 ring-1 ring-teal-100/80">
+              <span className="text-xs font-medium text-teal-600">长料</span>
+              <span className="text-xs font-bold text-teal-700 tabular-nums">{summary.longMaterialQuantity.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-red-50/80 px-3 py-1.5 ring-1 ring-red-100/80">
+              <span className="text-xs font-medium text-red-600">不良</span>
+              <span className="text-xs font-bold text-red-700 tabular-nums">{summary.defectQuantity.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
+              <span className="text-xs font-medium text-emerald-600">已审核</span>
+              <span className="text-xs font-bold text-emerald-700 tabular-nums">{summary.auditedCount}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
+              <span className="text-xs font-medium text-amber-600">未审核</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums">{summary.unauditedCount}</span>
+            </div>
+          </div>
 
-          <Table<PrecisionCuttingDetailRow>
-            rowKey="key"
-            bordered
-            size="small"
-            columns={columns}
-            dataSource={rows}
-            pagination={false}
-            scroll={{ x: 1640, y: 420 }}
-          />
+          {/* 数据表 */}
+          <div className="rounded-xl border border-slate-200/60 bg-white">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">精切记录</span>
+            </div>
+            <Table<PrecisionCuttingDetailRow>
+              rowKey="key"
+              bordered
+              size="small"
+              columns={columns}
+              dataSource={rows}
+              pagination={false}
+              scroll={{ x: 1640, y: 420 }}
+              className="[&_.ant-table]:!rounded-none"
+            />
+          </div>
         </div>
       )}
     </Modal>
@@ -1404,46 +1490,76 @@ function ExtrusionDetailModal({
     <Modal
       open={Boolean(detail)}
       title={
-        detail
-          ? `${detail.record.project_no || '-'} 挤压明细`
-          : '挤压明细'
+        <div className="flex items-center gap-3">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 shadow-md shadow-amber-500/30">
+            <svg className="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+            </svg>
+          </div>
+          <div>
+            <span className="font-semibold text-slate-700">
+              {detail
+                ? `${detail.record.project_no || '-'} 挤压明细`
+                : '挤压明细'}
+            </span>
+          </div>
+        </div>
       }
       footer={null}
       width={1180}
       destroyOnHidden
       onCancel={onClose}
+      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white"
     >
       {detail && (
         <div className="space-y-4">
-          <Space size={8} wrap>
-            <Tag color="blue">记录 {rows.length}</Tag>
-            <Tag color="purple">
-              理论支数 {totalTheoreticalCount.toLocaleString()}
-            </Tag>
-            <Tag color="cyan">
-              实际重量 {totalActualOutputWeight.toFixed(2)} kg
-            </Tag>
-            <Tag color="green">
-              加权成材率{' '}
-              {totalTheoreticalCount > 0
-                ? `${weightedYield.toFixed(2)}%`
-                : '-'}
-            </Tag>
-            <Tag color="green">已审核 {rows.filter((item) => item.isAudited).length}</Tag>
-            <Tag color={rows.filter((item) => !item.isAudited).length > 0 ? 'gold' : 'default'}>
-              未审核 {rows.filter((item) => !item.isAudited).length}
-            </Tag>
-          </Space>
+          {/* 统计摘要 */}
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
+              <span className="text-xs font-medium text-amber-600">记录</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums">{rows.length}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
+              <span className="text-xs font-medium text-purple-600">理论支数</span>
+              <span className="text-xs font-bold text-purple-700 tabular-nums">{totalTheoreticalCount.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-orange-50/80 px-3 py-1.5 ring-1 ring-orange-100/80">
+              <span className="text-xs font-medium text-orange-600">实际重量</span>
+              <span className="text-xs font-bold text-orange-700 tabular-nums">{totalActualOutputWeight.toFixed(2)} kg</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
+              <span className="text-xs font-medium text-emerald-600">加权成材率</span>
+              <span className="text-xs font-bold text-emerald-700 tabular-nums">
+                {totalTheoreticalCount > 0 ? `${weightedYield.toFixed(2)}%` : '-'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
+              <span className="text-xs font-medium text-cyan-600">已审核</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums">{rows.filter((item) => item.isAudited).length}</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80">
+              <span className="text-xs font-medium text-pink-600">未审核</span>
+              <span className="text-xs font-bold text-pink-700 tabular-nums">{rows.filter((item) => !item.isAudited).length}</span>
+            </div>
+          </div>
 
-          <Table<ExtrusionDetailRow>
-            rowKey="key"
-            bordered
-            size="small"
-            columns={columns}
-            dataSource={rows}
-            pagination={false}
-            scroll={{ x: 1060, y: 420 }}
-          />
+          {/* 数据表 */}
+          <div className="rounded-xl border border-slate-200/60 bg-white">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">挤压记录</span>
+            </div>
+            <Table<ExtrusionDetailRow>
+              rowKey="key"
+              bordered
+              size="small"
+              columns={columns}
+              dataSource={rows}
+              pagination={false}
+              scroll={{ x: 1060, y: 420 }}
+              className="[&_.ant-table]:!rounded-none"
+            />
+          </div>
         </div>
       )}
     </Modal>
@@ -1502,7 +1618,7 @@ export default function OrderStatusDashboard() {
     }),
     [activeStatus, searchParamValues],
   )
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
+  const { tableContainerRef, scrollY, rowHeight } =
     useTableHeight({
       headerHeight: 32,
       targetRowCount: Math.min(pageSize, 14),
@@ -1800,24 +1916,38 @@ export default function OrderStatusDashboard() {
           })
 
           return (
-            <Space size={4} wrap>
-              <Tag color={STATUS_COLOR[value]}>{value}</Tag>
-              {record.status && <Tag>{record.status}</Tag>}
+            <Space size={3} wrap>
+              <Tag 
+                color={STATUS_COLOR[value]}
+                className="!rounded-full !font-medium"
+              >
+                {value}
+              </Tag>
+              {record.status && (
+                <Tag className="!rounded-full">{record.status}</Tag>
+              )}
               {canCloseOrder ? (
-                <Button
-                  type="primary"
-                  danger
-                  size="small"
-                  loading={
-                    isUpdatingOrderStatus && closingOrderId === record.id
-                  }
+                <button
+                  type="button"
+                  disabled={isUpdatingOrderStatus && closingOrderId === record.id}
                   onClick={(event) => {
                     event.stopPropagation()
                     handleCloseOrder(record)
                   }}
+                  className="group flex items-center gap-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-2.5 py-1 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:from-emerald-600 hover:to-teal-600 hover:shadow-md hover:shadow-emerald-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  结案
-                </Button>
+                  {isUpdatingOrderStatus && closingOrderId === record.id ? (
+                    <svg className="size-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                  <span>结案</span>
+                </button>
               ) : null}
             </Space>
           )
@@ -1956,117 +2086,268 @@ export default function OrderStatusDashboard() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
-        <div className="min-w-0">
-          <Title level={4} className="mb-0!">
-            订单现状
-          </Title>
+      {/* 标题区 */}
+      <div className="relative overflow-hidden rounded-2xl border border-blue-100/50 bg-gradient-to-br from-white via-blue-50/30 to-slate-50/50 px-5 py-4 shadow-sm">
+        {/* 背景装饰元素 */}
+        <div className="absolute -right-8 -top-8 size-32 rounded-full bg-gradient-to-br from-blue-200/40 via-blue-100/30 to-transparent blur-3xl" />
+        <div className="absolute -bottom-6 -left-6 size-24 rounded-full bg-gradient-to-tr from-indigo-100/40 via-purple-50/30 to-transparent blur-2xl" />
+        <div className="absolute right-20 top-0 h-px w-48 bg-gradient-to-r from-transparent via-blue-200/60 to-transparent" />
+        
+        <div className="relative flex flex-wrap items-center justify-between gap-4">
+          {/* 左侧：标题 */}
+          <div className="flex items-center gap-4">
+            {/* 装饰性图标容器 */}
+            <div className="relative">
+              <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+                <svg className="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              {/* 图标光晕 */}
+              <div className="absolute inset-0 rounded-xl bg-blue-400/20 blur-md" />
+            </div>
+            
+            <div>
+              <Title level={4} className="mb-0! !text-xl !font-bold tracking-tight">
+                <span className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text">订单现状</span>
+              </Title>
+              <p className="mt-0.5 text-xs text-slate-400">实时监控生产进度与订单状态</p>
+            </div>
+          </div>
+          
+          {/* 右侧：统计标签组 */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* 订单统计 */}
+            <div className="group relative">
+              <div className="flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80 transition-all duration-200 hover:bg-blue-100/80 hover:shadow-sm hover:shadow-blue-100">
+                <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-xs font-medium text-blue-600">订单</span>
+                <span className="text-xs font-bold text-blue-700 tabular-nums">{data?.total ?? 0}</span>
+              </div>
+            </div>
+            
+            {/* 岗位统计 */}
+            <div className="group relative">
+              <div className="flex items-center gap-1.5 rounded-full bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 transition-all duration-200 hover:bg-cyan-100/80 hover:shadow-sm hover:shadow-cyan-100">
+                <span className="size-1.5 rounded-full bg-cyan-500" />
+                <span className="text-xs font-medium text-cyan-600">岗位</span>
+                <span className="text-xs font-bold text-cyan-700 tabular-nums">{jobColumns.length}</span>
+              </div>
+            </div>
+            
+            {/* 明细统计 */}
+            <div className="group relative">
+              <div className="flex items-center gap-1.5 rounded-full bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 transition-all duration-200 hover:bg-emerald-100/80 hover:shadow-sm hover:shadow-emerald-100">
+                <span className="size-1.5 rounded-full bg-emerald-500" />
+                <span className="text-xs font-medium text-emerald-600">明细</span>
+                <span className="text-xs font-bold text-emerald-700 tabular-nums">{data?.productionItemCount ?? 0}</span>
+              </div>
+            </div>
+            
+            {/* 转移统计 */}
+            <div className="group relative">
+              <div className="flex items-center gap-1.5 rounded-full bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80 transition-all duration-200 hover:bg-purple-100/80 hover:shadow-sm hover:shadow-purple-100">
+                <span className="size-1.5 rounded-full bg-purple-500" />
+                <span className="text-xs font-medium text-purple-600">转移</span>
+                <span className="text-xs font-bold text-purple-700 tabular-nums">{data?.materialTransferCount ?? 0}</span>
+              </div>
+            </div>
+            
+            {/* 刷新按钮 */}
+            <Button
+              size="small"
+              icon={<ArrowPathIcon className={`size-3.5 ${isFetching && !isLoading ? 'animate-spin' : ''}`} />}
+              loading={isFetching && !isLoading}
+              onClick={() => void refetch()}
+              className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md"
+            >
+              刷新
+            </Button>
+          </div>
         </div>
-        <Space size={8} wrap>
-          <Tag color="blue">订单 {data?.total ?? 0}</Tag>
-          <Tag color="cyan">岗位 {jobColumns.length}</Tag>
-          <Tag color="green">明细 {data?.productionItemCount ?? 0}</Tag>
-          <Tag color="purple">转移 {data?.materialTransferCount ?? 0}</Tag>
-          <Button
-            size="small"
-            icon={<ArrowPathIcon className="size-4" />}
-            loading={isFetching && !isLoading}
-            onClick={() => void refetch()}
+      </div>
+
+      {/* Tabs 标签页 */}
+      <div className="flex items-center gap-1 rounded-xl border border-slate-200/60 bg-white/60 p-1 shadow-sm backdrop-blur-sm">
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => handleStatusTabChange(tab.key)}
+            className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              activeStatus === tab.key
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/30'
+                : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-700'
+            }`}
           >
-            刷新
-          </Button>
-        </Space>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      <Tabs
-        activeKey={activeStatus}
-        items={STATUS_TABS}
-        onChange={handleStatusTabChange}
-        tabBarStyle={{ marginBottom: 0 }}
-      />
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Text type="secondary">搜索：</Text>
-        <Input
-          allowClear
-          placeholder="交货日期"
-          value={searchValues.orderDate}
-          onChange={(event) =>
-            updateSearchParamValue('orderDate', event.target.value)
-          }
-          onPressEnter={handleSearch}
-          style={{ width: 180 }}
-        />
-        <Input
-          allowClear
-          placeholder="项目号"
-          value={searchValues.projectNo}
-          onChange={(event) =>
-            updateSearchParamValue('projectNo', event.target.value)
-          }
-          onPressEnter={handleSearch}
-          style={{ width: 180 }}
-        />
-        <Input
-          allowClear
-          placeholder="客户"
-          value={searchValues.customer}
-          onChange={(event) =>
-            updateSearchParamValue('customer', event.target.value)
-          }
-          onPressEnter={handleSearch}
-          style={{ width: 180 }}
-        />
-        <Input
-          allowClear
-          placeholder="型号"
-          value={searchValues.model}
-          onChange={(event) =>
-            updateSearchParamValue('model', event.target.value)
-          }
-          onPressEnter={handleSearch}
-          style={{ width: 180 }}
-        />
-        <Input
-          allowClear
-          placeholder="料号"
-          value={searchValues.materialCode}
-          onChange={(event) =>
-            updateSearchParamValue('materialCode', event.target.value)
-          }
-          onPressEnter={handleSearch}
-          style={{ width: 180 }}
-        />
-        <Select
-          allowClear
-          placeholder="生产状态"
-          value={searchValues.productionStatus || undefined}
-          options={PRODUCTION_STATUS_OPTIONS}
-          onChange={(value) =>
-            updateSearchParamValue('productionStatus', value ?? '')
-          }
-          style={{ width: 140 }}
-        />
-        <Button
-          type="primary"
-          icon={<MagnifyingGlassIcon className="size-4" />}
-          loading={isFetching && !isLoading}
-          onClick={handleSearch}
-        >
-          搜索
-        </Button>
-        <Button
-          icon={<XMarkIcon className="size-4" />}
-          onClick={handleResetSearch}
-        >
-          重置
-        </Button>
+      {/* 搜索区 */}
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-200 hover:shadow-md hover:shadow-slate-200/50">
+        {/* 顶部装饰线 */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-200/40 to-transparent" />
+        
+        {/* 搜索标签 */}
+        <div className="flex items-center gap-2 border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-4 py-2.5">
+          <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80">
+            <MagnifyingGlassIcon className="size-3 text-blue-500" />
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">筛选条件</span>
+        </div>
+        
+        {/* 搜索表单 */}
+        <div className="p-4">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            {/* 交货日期 */}
+            <div className="group flex items-center gap-2.5">
+              <Text type="secondary" className="!text-xs font-medium text-slate-400">交货日期</Text>
+              <Input
+                allowClear
+                placeholder="交货日期"
+                value={searchValues.orderDate}
+                onChange={(event) =>
+                  updateSearchParamValue('orderDate', event.target.value)
+                }
+                onPressEnter={handleSearch}
+                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+              />
+            </div>
+            
+            {/* 项目号 */}
+            <div className="group flex items-center gap-2.5">
+              <Text type="secondary" className="!text-xs font-medium text-slate-400">项目号</Text>
+              <Input
+                allowClear
+                placeholder="项目号"
+                value={searchValues.projectNo}
+                onChange={(event) =>
+                  updateSearchParamValue('projectNo', event.target.value)
+                }
+                onPressEnter={handleSearch}
+                className="!w-44 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+              />
+            </div>
+            
+            {/* 客户 */}
+            <div className="group flex items-center gap-2.5">
+              <Text type="secondary" className="!text-xs font-medium text-slate-400">客户</Text>
+              <Input
+                allowClear
+                placeholder="客户"
+                value={searchValues.customer}
+                onChange={(event) =>
+                  updateSearchParamValue('customer', event.target.value)
+                }
+                onPressEnter={handleSearch}
+                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+              />
+            </div>
+            
+            {/* 型号 */}
+            <div className="group flex items-center gap-2.5">
+              <Text type="secondary" className="!text-xs font-medium text-slate-400">型号</Text>
+              <Input
+                allowClear
+                placeholder="型号"
+                value={searchValues.model}
+                onChange={(event) =>
+                  updateSearchParamValue('model', event.target.value)
+                }
+                onPressEnter={handleSearch}
+                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+              />
+            </div>
+            
+            {/* 料号 */}
+            <div className="group flex items-center gap-2.5">
+              <Text type="secondary" className="!text-xs font-medium text-slate-400">料号</Text>
+              <Input
+                allowClear
+                placeholder="料号"
+                value={searchValues.materialCode}
+                onChange={(event) =>
+                  updateSearchParamValue('materialCode', event.target.value)
+                }
+                onPressEnter={handleSearch}
+                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+              />
+            </div>
+            
+            {/* 状态 */}
+            <div className="group flex items-center gap-2.5">
+              <Text type="secondary" className="!text-xs font-medium text-slate-400">状态</Text>
+              <Select
+                allowClear
+                placeholder="生产状态"
+                value={searchValues.productionStatus || undefined}
+                options={PRODUCTION_STATUS_OPTIONS}
+                onChange={(value) =>
+                  updateSearchParamValue('productionStatus', value ?? '')
+                }
+                className="!w-32 [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-slate-200/80 [&_.ant-select-selector]:!bg-slate-50/50"
+              />
+            </div>
+            
+            {/* 操作按钮 */}
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                type="primary"
+                icon={<MagnifyingGlassIcon className="size-4" />}
+                loading={isFetching && !isLoading}
+                onClick={handleSearch}
+                className="!rounded-lg !bg-gradient-to-r !from-blue-500 !to-indigo-500 !shadow-md !shadow-blue-500/30 !transition-all !duration-200 hover:!from-blue-600 hover:!to-indigo-600 hover:!shadow-lg hover:!shadow-blue-500/40 active:!transform active:!scale-95"
+              >
+                搜索
+              </Button>
+              <Button
+                icon={<XMarkIcon className="size-4" />}
+                onClick={handleResetSearch}
+                className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-500 !shadow-sm !transition-all !duration-200 hover:!border-slate-300 hover:!bg-slate-50 hover:!text-slate-600"
+              >
+                重置
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
+      {/* 表格区域 */}
       <div
         ref={tableContainerRef}
-        className="min-h-0 flex-1 overflow-auto pb-3"
+        className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm"
       >
+        {/* 表头装饰 */}
+        <div className="flex items-center justify-between border-b border-slate-100/60 bg-gradient-to-r from-slate-50/80 via-white to-slate-50/80 px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80">
+              <svg className="size-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">数据列表</span>
+          </div>
+          
+          {/* 可结案订单提示 */}
+          {canManageStatus && (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
+                <svg className="size-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-xs text-emerald-600">
+                  {rows.filter((r) => canCloseDashboardOrder({ canManageStatus: true, record: r })).length} 个订单可结案
+                </span>
+              </div>
+            </div>
+          )}
+          
+          <span className="text-xs text-slate-400">
+            共 <span className="font-medium text-slate-600">{data?.total ?? 0}</span> 条记录
+          </span>
+        </div>
+        
         <Table<OrderStatusDashboardItem>
           rowKey="id"
           bordered
@@ -2082,20 +2363,28 @@ export default function OrderStatusDashboard() {
             scrollToFirstRowOnChange: true,
           }}
           onChange={handleTableChange}
-          styles={DENSE_TABLE_STYLES}
-          sticky={{ offsetScroll: 8 }}
+          sticky={{ offsetHeader: 0 }}
           rowClassName={(record) =>
             record.productionStatus === '延期'
-              ? 'bg-red-50'
+              ? 'bg-red-50/50 hover:bg-red-50'
               : record.productionStatus === '预警'
-                ? 'bg-amber-50'
-                : ''
+                ? 'bg-amber-50/50 hover:bg-amber-50'
+                : 'hover:bg-blue-50/30'
           }
-          onRow={() => ({ style: { height: rowHeight } })}
+          onRow={() => ({ 
+            style: { height: rowHeight },
+            className: 'transition-colors duration-150',
+          })}
+          className="[&_.ant-table]:!font-mono [&_.ant-table-thead>tr>th]:!font-semibold [&_.ant-table-thead>tr>th]:!text-xs [&_.ant-table-thead>tr>th]:!text-slate-500"
         />
       </div>
 
-      <div ref={paginationRef}>
+      {/* 分页区域 */}
+      <div className="flex items-center justify-between rounded-xl border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <span className="font-medium text-slate-700">{data?.total ?? 0}</span>
+          <span>条记录</span>
+        </div>
         <AppPagination
           total={data?.total ?? 0}
           defaultPageSize={DEFAULT_PAGE_SIZE}
@@ -2103,18 +2392,25 @@ export default function OrderStatusDashboard() {
         />
       </div>
 
+      {/* 模态框：生产明细 */}
       <ProductionDetailModal
         detail={selectedJobDetail}
         onClose={() => setSelectedJobDetail(null)}
       />
+      
+      {/* 模态框：物料转移 */}
       <TransferDetailModal
         detail={selectedTransferDetail}
         onClose={() => setSelectedTransferDetail(null)}
       />
+      
+      {/* 模态框：精切明细 */}
       <PrecisionCuttingDetailModal
         detail={selectedPrecisionCuttingDetail}
         onClose={() => setSelectedPrecisionCuttingDetail(null)}
       />
+      
+      {/* 模态框：挤压明细 */}
       <ExtrusionDetailModal
         detail={selectedExtrusionDetail}
         onClose={() => setSelectedExtrusionDetail(null)}

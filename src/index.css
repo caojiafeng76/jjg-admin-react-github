@@ -134,3 +134,113 @@
     0 0 28px rgba(16, 185, 129, 0.45);
   animation: scanner-sweep 2.1s linear infinite;
 }
+
+/* =============================================
+   生产工单表格定制样式
+   ============================================= */
+.production-order-table .ant-table {
+  font-size: 13px;
+}
+
+.production-order-table .ant-table-thead > tr > th {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 10px 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.production-order-table .ant-table-tbody > tr > td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.production-order-table .ant-table-tbody > tr:hover > td {
+  background-color: #f8fafc !important;
+}
+
+.production-order-table .ant-table-tbody > tr.ant-table-row-selected > td {
+  background-color: #eff6ff !important;
+}
+
+.production-order-table .ant-table-row {
+  transition: all 0.15s ease;
+}
+
+.production-order-table .ant-table-cell-fix-left,
+.production-order-table .ant-table-cell-fix-right {
+  background: inherit;
+}
+
+/* =============================================
+   标准工时表格定制样式
+   ============================================= */
+.standard-time-table .ant-table {
+  font-size: 13px;
+}
+
+.standard-time-table .ant-table-thead > tr > th {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 10px 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.standard-time-table .ant-table-thead > tr > th:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.standard-time-table .ant-table-thead > tr > th:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.standard-time-table .ant-table-tbody > tr > td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.standard-time-table .ant-table-tbody > tr:hover > td {
+  background-color: #f8fafc !important;
+}
+
+.standard-time-table .ant-table-tbody > tr.ant-table-row-selected > td {
+  background-color: #f0f7ff !important;
+}
+
+.standard-time-table .ant-table-cell-fix-left,
+.standard-time-table .ant-table-cell-fix-right {
+  background: inherit;
+}
+
+/* 分页器定制 */
+.standard-time-table .ant-pagination {
+  padding: 0;
+}
+
+.standard-time-table .ant-pagination-item {
+  border-radius: 6px;
+  border-color: #e2e8f0;
+}
+
+.standard-time-table .ant-pagination-item-active {
+  background-color: #1677ff;
+  border-color: #1677ff;
+}
+
+.standard-time-table .ant-pagination-item-active a {
+  color: white;
+}
+
+/* 加载状态 */
+.standard-time-table .ant-spin-dot-item {
+  background-color: #94a3b8;
+}

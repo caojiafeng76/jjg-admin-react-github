@@ -27,6 +27,7 @@ import {
   Space,
   Splitter,
   Typography,
+  Badge,
 } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -982,12 +983,15 @@ export default function ProductionOrderPage() {
       className={
         isEmployeeView
           ? 'grid h-full grid-rows-[auto_auto_1fr] gap-3 p-3'
-          : 'flex h-full flex-col gap-4'
+          : 'flex h-full flex-col'
       }
     >
+      {/* 页面标题与操作区 */}
       <div
         className={
-          isEmployeeView ? 'w-full' : 'flex flex-wrap items-center gap-2'
+          isEmployeeView
+            ? 'w-full'
+            : 'rounded-xl border border-slate-200/80 bg-gradient-to-r from-slate-50 via-white to-slate-50 p-4 shadow-sm'
         }
       >
         {isEmployeeView ? (
@@ -999,7 +1003,7 @@ export default function ProductionOrderPage() {
               icon={<PlusCircleIcon className="size-4" />}
               onClick={handleCreate}
               disabled={hasOrderToday}
-              className="h-11 rounded-2xl shadow-[0_12px_30px_rgba(15,23,42,0.16)]"
+              className="h-12 rounded-2xl shadow-lg shadow-blue-500/15 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0"
             >
               手动添加
             </Button>
@@ -1010,82 +1014,96 @@ export default function ProductionOrderPage() {
             </p>
           </div>
         ) : (
-          <>
-            <AddButton handleCreate={handleCreate} />
-            <Button
-              type="text"
-              icon={<KeyIcon className="size-4 text-sky-500" />}
-              onClick={() => setIsManagementPasswordModalOpen(true)}
-            >
-              修改管理密码
-            </Button>
-            <Button
-              type="text"
-              icon={<LockClosedIcon className="size-4 text-rose-500" />}
-              onClick={handleLockManagement}
-            >
-              锁定
-            </Button>
-            <Button
-              type="text"
-              icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
-              onClick={() => handleBatchAudit(true)}
-              loading={batchUpdateMutation.isPending}
-            >
-              批量审核
-            </Button>
-            <Button
-              type="text"
-              icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
-              onClick={() => handleBatchAudit(false)}
-              loading={batchUpdateMutation.isPending}
-            >
-              批量反审核
-            </Button>
-            <EditButton title="编辑" handleEdit={() => handleEdit()} />
-          </>
-        )}
-        {isEmployeeView ? null : (
-          <>
-            <ExportButton
-              handleExport={handleExport}
-              disabled={
-                selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
-              }
-              loading={isExporting}
-            >
-              {selectedRowKeys.length > 0
-                ? `导出选中项 (${selectedRowKeys.length})`
-                : `导出当前筛选结果${orderData?.total ? ` (${orderData.total})` : ''}`}
-            </ExportButton>
-            <ExportButton
-              handleExport={handleNightSnackExport}
-              disabled={
-                selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
-              }
-              loading={isNightSnackExporting}
-            >
-              导出夜宵明细
-            </ExportButton>
-            <DeleteButton
-              onConfirm={handleDelete}
-              isDeleting={deleteMutation.isPending}
-              count={selectedRowKeys.length}
-              itemName="工单"
-            />
-          </>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-1">
+              <AddButton handleCreate={handleCreate} />
+              <div className="mx-2 h-6 w-px bg-slate-200" />
+              <Button
+                type="text"
+                size="small"
+                icon={<KeyIcon className="size-4 text-slate-500" />}
+                onClick={() => setIsManagementPasswordModalOpen(true)}
+                className="h-8 rounded-lg px-3 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800"
+              >
+                修改密码
+              </Button>
+              <Button
+                type="text"
+                size="small"
+                icon={<LockClosedIcon className="size-4 text-slate-400" />}
+                onClick={handleLockManagement}
+                className="h-8 rounded-lg px-3 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              >
+                锁定
+              </Button>
+              <div className="mx-2 h-6 w-px bg-slate-200" />
+              <Badge status="success" />
+              <Button
+                type="text"
+                size="small"
+                icon={<ShieldCheckIcon className="size-4 text-emerald-500" />}
+                onClick={() => handleBatchAudit(true)}
+                loading={batchUpdateMutation.isPending}
+                className="h-8 rounded-lg px-3 text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
+              >
+                批量审核
+              </Button>
+              <Button
+                type="text"
+                size="small"
+                icon={<ArrowPathIcon className="size-4 text-amber-500" />}
+                onClick={() => handleBatchAudit(false)}
+                loading={batchUpdateMutation.isPending}
+                className="h-8 rounded-lg px-3 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700"
+              >
+                批量反审核
+              </Button>
+              <EditButton title="编辑" handleEdit={() => handleEdit()} />
+            </div>
+            <div className="flex flex-wrap items-center gap-1">
+              <ExportButton
+                handleExport={handleExport}
+                disabled={
+                  selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
+                }
+                loading={isExporting}
+              >
+                {selectedRowKeys.length > 0
+                  ? `导出 (${selectedRowKeys.length})`
+                  : `导出${orderData?.total ? ` (${orderData.total})` : ''}`}
+              </ExportButton>
+              <ExportButton
+                handleExport={handleNightSnackExport}
+                disabled={
+                  selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
+                }
+                loading={isNightSnackExporting}
+              >
+                夜宵明细
+              </ExportButton>
+              <DeleteButton
+                onConfirm={handleDelete}
+                isDeleting={deleteMutation.isPending}
+                count={selectedRowKeys.length}
+                itemName="工单"
+              />
+            </div>
+          </div>
         )}
       </div>
 
+      {/* 搜索区域 */}
       <div
         className={
           isEmployeeView
             ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
-            : 'flex items-center gap-2'
+            : 'rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md'
         }
       >
         {isEmployeeView ? null : (
-          <span className="whitespace-nowrap text-slate-600">搜索：</span>
+          <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-400">
+            筛选条件
+          </span>
         )}
         <ProductionOrderSearch
           onSearch={handleSearch}
@@ -1122,40 +1140,72 @@ export default function ProductionOrderPage() {
           </div>
         </div>
       ) : (
-        <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
-          <Splitter.Panel defaultSize="65%" min="30%">
-            <div
-              ref={tableContainerRef}
-              className="flex h-full flex-col gap-2 overflow-hidden"
-            >
-              <div className="min-h-0 flex-1 overflow-x-auto">
-                <ProductionOrderList
-                  loading={isLoading}
-                  data={orderData?.items || []}
-                  page={page}
-                  pageSize={pageSize}
-                  selectedRowKeys={selectedRowKeys}
-                  onSelect={handleSelect}
-                  onView={handleView}
-                  onRowClick={handleRowClick}
-                  activeRowId={activeRecord?.id ?? null}
-                  scrollY={scrollY}
-                />
+        <>
+          <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+            <Splitter.Panel defaultSize="65%" min="30%">
+              <div
+                ref={tableContainerRef}
+                className="flex h-full flex-col gap-3 overflow-hidden"
+              >
+                {/* 数据统计卡片 */}
+                {orderData && orderData.total > 0 && (
+                  <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200/60 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-4 py-2.5 text-sm transition-all duration-300">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-500">共</span>
+                      <span className="font-semibold text-slate-800">
+                        {orderData.total}
+                      </span>
+                      <span className="text-slate-500">条记录</span>
+                    </div>
+                    {selectedRowKeys.length > 0 && (
+                      <>
+                        <div className="h-4 w-px bg-slate-200" />
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-slate-500">已选中</span>
+                          <span className="font-semibold text-blue-600">
+                            {selectedRowKeys.length}
+                          </span>
+                          <span className="text-slate-500">项</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+                <div className="min-h-0 flex-1 overflow-x-auto rounded-lg border border-slate-200/60 bg-white shadow-sm">
+                  <ProductionOrderList
+                    loading={isLoading}
+                    data={orderData?.items || []}
+                    page={page}
+                    pageSize={pageSize}
+                    selectedRowKeys={selectedRowKeys}
+                    onSelect={handleSelect}
+                    onView={handleView}
+                    onRowClick={handleRowClick}
+                    activeRowId={activeRecord?.id ?? null}
+                    scrollY={scrollY}
+                  />
+                </div>
+                <div
+                  ref={paginationRef}
+                  className="flex shrink-0 items-center justify-between rounded-lg border border-slate-200/60 bg-white px-4 py-2 shadow-sm"
+                >
+                  <span className="text-xs text-slate-400">
+                    每页显示条数
+                  </span>
+                  <AppPagination
+                    total={orderData?.total || 0}
+                    pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
+                  />
+                </div>
               </div>
-              <div ref={paginationRef} className="flex shrink-0 justify-end">
-                <AppPagination
-                  total={orderData?.total || 0}
-                  pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
-                />
+            </Splitter.Panel>
+            <Splitter.Panel min="20%">
+              <div className="h-full overflow-hidden rounded-lg border border-slate-200/60 bg-white shadow-sm">
+                <ProductionOrderInlineDetail selectedRecord={activeRecord} />
               </div>
-            </div>
-          </Splitter.Panel>
-          <Splitter.Panel min="20%">
-            <div className="h-full overflow-hidden">
-              <ProductionOrderInlineDetail selectedRecord={activeRecord} />
-            </div>
-          </Splitter.Panel>
-        </Splitter>
+            </Splitter.Panel>
+          </Splitter>
+        </>
       )}
 
       {!isEmployeeView ? (

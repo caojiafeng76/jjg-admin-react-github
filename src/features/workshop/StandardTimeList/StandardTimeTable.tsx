@@ -1,6 +1,5 @@
-import type { ReactNode, TdHTMLAttributes } from 'react'
 import { memo, useCallback, useMemo } from 'react'
-import { Table, TableColumnsType, Tag } from 'antd'
+import { Table, TableColumnsType } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import { formatNumber } from '@/utils/format'
@@ -19,8 +18,8 @@ interface Props {
   onRowClick?: (record: StandardTime) => void
 }
 
-interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement> {
-  children?: ReactNode
+interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
+  children?: React.ReactNode
 }
 
 const StandardTimeTable = memo(function StandardTimeTable({
@@ -51,9 +50,23 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'record_type',
         width: 90,
         render: (value: string | null | undefined) => {
-          if (value === 'A') return <Tag color="blue">A类</Tag>
-          if (value === 'B') return <Tag color="default">B类</Tag>
-          return <Tag color="default">-</Tag>
+          if (value === 'A')
+            return (
+              <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
+                A类
+              </span>
+            )
+          if (value === 'B')
+            return (
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-600">
+                B类
+              </span>
+            )
+          return (
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400">
+              -
+            </span>
+          )
         },
       },
       {
@@ -62,7 +75,15 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'is_last_process',
         width: 90,
         render: (value: boolean | null | undefined) =>
-          value ? <Tag color="green">末道</Tag> : <Tag>非末道</Tag>,
+          value ? (
+            <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
+              末道
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400">
+              非末道
+            </span>
+          ),
       },
       {
         title: '型号',
@@ -70,6 +91,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'model',
         width: 150,
         ellipsis: { showTitle: true },
+        render: (value: string) => (
+          <span className="font-medium text-slate-800">{value || '-'}</span>
+        ),
       },
       {
         title: '工序',
@@ -86,7 +110,13 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'job_name',
         width: 120,
         render: (value?: string | null) =>
-          value ? <span>{value}</span> : <Tag color="warning">未匹配</Tag>,
+          value ? (
+            <span className="text-slate-700">{value}</span>
+          ) : (
+            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600">
+              未匹配
+            </span>
+          ),
       },
       {
         title: '客户',
@@ -94,7 +124,13 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'customer',
         width: 180,
         render: (value?: string | null) =>
-          value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
+          value ? (
+            <span className="text-slate-600">{value}</span>
+          ) : (
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400">
+              留空
+            </span>
+          ),
       },
       {
         title: '设备编号',
@@ -102,7 +138,13 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'equipment_no',
         width: 140,
         render: (value?: string | null) =>
-          value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
+          value ? (
+            <span className="font-mono text-slate-600">{value}</span>
+          ) : (
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400">
+              留空
+            </span>
+          ),
       },
       {
         title: '长度',
@@ -118,7 +160,13 @@ const StandardTimeTable = memo(function StandardTimeTable({
         width: 120,
         ellipsis: { showTitle: true },
         render: (value?: string | null) =>
-          value ? <span>{value}</span> : <Tag color="default">留空</Tag>,
+          value ? (
+            <span className="font-mono text-slate-600">{value}</span>
+          ) : (
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400">
+              留空
+            </span>
+          ),
       },
     ]
 
@@ -129,22 +177,28 @@ const StandardTimeTable = memo(function StandardTimeTable({
           dataIndex: 'standard_seconds',
           key: 'standard_seconds',
           width: 140,
+          render: (value: number | null | undefined) => (
+            <span className="font-medium text-indigo-600">{formatNumber(value)}</span>
+          ),
         },
         {
           title: '日标准产能',
           key: 'daily_standard_capacity',
           width: 120,
-          render: (_value, record) =>
-            formatNumber(
-              calculateDailyStandardCapacity(record.standard_seconds),
-              2,
-            ),
+          render: (_value, record) => (
+            <span className="font-medium text-emerald-600">
+              {formatNumber(calculateDailyStandardCapacity(record.standard_seconds), 2)}
+            </span>
+          ),
         },
         {
           title: '理论工时（秒）',
           dataIndex: 'theoretical_seconds',
           key: 'theoretical_seconds',
           width: 140,
+          render: (value: number | null | undefined) => (
+            <span className="font-medium text-cyan-600">{formatNumber(value)}</span>
+          ),
         },
       )
     }
@@ -191,29 +245,32 @@ const StandardTimeTable = memo(function StandardTimeTable({
         cursor: onRowClick ? 'pointer' : undefined,
         backgroundColor:
           record.id && record.id === activeRowId
-            ? '#e6f4ff'
+            ? '#f0f7ff'
             : !record.job_name
-              ? '#fffbe6'
+              ? '#fffbeb'
               : undefined,
+        transition: 'all 0.15s ease',
       },
     }),
     [activeRowId, onRowClick],
   )
 
   return (
-    <Table<StandardTime>
-      rowKey={(record) => record.id || ''}
-      loading={loading}
-      columns={columns}
-      dataSource={data}
-      rowSelection={rowSelection}
-      onRow={handleRow}
-      scroll={{ x: hideStandardSeconds ? 1090 : 1550, y: scrollY }}
-      size="small"
-      pagination={false}
-      style={{ fontSize: '12px' }}
-      components={components}
-    />
+    <div className="standard-time-table">
+      <Table<StandardTime>
+        rowKey={(record) => record.id || ''}
+        loading={loading}
+        columns={columns}
+        dataSource={data}
+        rowSelection={rowSelection}
+        onRow={handleRow}
+        scroll={{ x: hideStandardSeconds ? 1090 : 1550, y: scrollY }}
+        size="small"
+        pagination={false}
+        className="font-[family-name:var(--font-sans)]"
+        components={components}
+      />
+    </div>
   )
 })
 

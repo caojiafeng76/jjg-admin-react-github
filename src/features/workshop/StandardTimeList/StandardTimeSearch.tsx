@@ -101,75 +101,88 @@ export default function StandardTimeSearch({
       form={form}
       onFinish={handleSearch}
       className={
-        mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-1 flex-wrap gap-2'
+        mobile ? 'grid grid-cols-1 gap-3' : 'flex flex-1 flex-wrap items-center gap-3'
       }
     >
       <Form.Item
         name="operation"
         className="mb-0"
-        style={{ width: mobile ? '100%' : 240 }}
+        style={{ width: mobile ? '100%' : 200 }}
       >
         <Input
-          placeholder="请输入工序"
+          placeholder="输入工序搜索"
           onPressEnter={() => form.submit()}
           allowClear
+          className="rounded-lg"
         />
       </Form.Item>
       <Form.Item
         name="model"
         className="mb-0"
-        style={{ width: mobile ? '100%' : 240 }}
+        style={{ width: mobile ? '100%' : 200 }}
       >
         <Input
-          placeholder="请输入型号"
+          placeholder="输入型号搜索"
           onPressEnter={() => form.submit()}
           allowClear
+          className="rounded-lg"
         />
       </Form.Item>
       <Form.Item
         name="updatedAtRange"
         className="mb-0"
-        style={{ width: mobile ? '100%' : 280 }}
+        style={{ width: mobile ? '100%' : 260 }}
       >
         <RangePicker
           format="YYYY-MM-DD"
-          placeholder={['更新开始日期', '更新结束日期']}
+          placeholder={['更新开始', '更新结束']}
           allowClear
+          className="w-full rounded-lg"
         />
       </Form.Item>
       <Form.Item
         name="unmatchedOnly"
         valuePropName="checked"
-        className="mb-0 flex items-center"
+        className="mb-0"
       >
-        <Checkbox>仅看未匹配工种</Checkbox>
+        <Checkbox className="font-medium">仅看未匹配</Checkbox>
       </Form.Item>
       <Form.Item
         name="partNoOnly"
         valuePropName="checked"
-        className="mb-0 flex items-center"
+        className="mb-0"
       >
-        <Checkbox>仅匹配有料号</Checkbox>
+        <Checkbox className="font-medium">仅匹配有料号</Checkbox>
       </Form.Item>
       {!mobile && (
         <Form.Item name="recordType" className="mb-0">
           <Select
             placeholder="类型"
             allowClear
-            style={{ width: 120 }}
+            style={{ width: 140 }}
+            className="rounded-lg"
             options={[
-              { label: 'A类（有料号）', value: 'A' },
-              { label: 'B类（无料号）', value: 'B' },
+              { label: 'A类', value: 'A' },
+              { label: 'B类', value: 'B' },
             ]}
           />
         </Form.Item>
       )}
       <Form.Item className="mb-0">
         <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>
-          <Button type="primary" htmlType="submit">
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="rounded-lg font-medium shadow-sm"
+          >
             搜索
           </Button>
-          <Button onClick={handleReset}>重置</Button>
+          <Button
+            onClick={handleReset}
+            className="rounded-lg"
+          >
+            重置
+          </Button>
         </Space>
       </Form.Item>
     </Form>
@@ -182,22 +195,23 @@ export default function StandardTimeSearch({
           block
           type="default"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="h-11 rounded-2xl border-slate-200 bg-slate-50 px-4 text-slate-700 shadow-none"
+          className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm font-medium shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
         >
-          <span className="flex w-full items-center justify-between text-sm font-medium">
-            <span>{isExpanded ? '收起筛选条件' : '展开筛选条件'}</span>
+          <span className="flex w-full items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
+              <span className="text-slate-600">筛选条件</span>
+            </span>
             <ChevronDownIcon
-              className={
-                isExpanded
-                  ? 'h-4 w-4 rotate-180 transition-transform'
-                  : 'h-4 w-4 transition-transform'
-              }
+              className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${
+                isExpanded ? 'rotate-180' : ''
+              }`}
             />
           </span>
         </Button>
 
         {isExpanded ? (
-          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain pr-1 pb-1">
+          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             {formContent}
           </div>
         ) : null}

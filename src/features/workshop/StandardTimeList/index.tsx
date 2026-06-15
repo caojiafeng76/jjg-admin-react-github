@@ -436,18 +436,19 @@ export default function StandardTimeList() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="flex h-full flex-col gap-2">
+    <div className="flex h-full flex-col gap-3">
+      {/* Action Bar */}
       {isTeamLeaderMode ? (
         <Button
           block
           type="primary"
-          className="h-11 rounded-2xl"
+          className="h-11 rounded-xl font-medium shadow-md transition-all hover:shadow-lg"
           onClick={handleCreate}
         >
           新建理论工时
         </Button>
       ) : (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/80 bg-white/60 p-3 shadow-sm backdrop-blur-sm">
           <AddButton
             handleCreate={handleCreate}
             permissionKey="feature:standard-time-list.create"
@@ -457,9 +458,10 @@ export default function StandardTimeList() {
             handleEdit={() => handleEdit()}
             permissionKey="feature:standard-time-list.edit"
           />
+          <div className="h-4 w-px bg-slate-200" />
           <PermissionButton
             type="text"
-            icon={<CheckCircleIcon className="size-4 text-green-500/80!" />}
+            icon={<CheckCircleIcon className="size-4 text-emerald-500" />}
             loading={lastProcessMutation.isPending}
             permissionKey="feature:standard-time-list.edit"
             noPermissionTip="无编辑权限"
@@ -469,7 +471,7 @@ export default function StandardTimeList() {
           </PermissionButton>
           <PermissionButton
             type="text"
-            icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+            icon={<XCircleIcon className="size-4 text-red-400" />}
             loading={lastProcessMutation.isPending}
             permissionKey="feature:standard-time-list.edit"
             noPermissionTip="无编辑权限"
@@ -477,6 +479,7 @@ export default function StandardTimeList() {
           >
             取消末道
           </PermissionButton>
+          <div className="h-4 w-px bg-slate-200" />
           <ExportButton
             handleExport={handleExport}
             loading={isExporting}
@@ -503,15 +506,16 @@ export default function StandardTimeList() {
         </div>
       )}
 
+      {/* Search Bar */}
       <div
         className={
           isTeamLeaderMode
-            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
+            ? 'rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_4px_20px_rgba(15,23,42,0.06)]'
             : 'flex items-center gap-2'
         }
       >
         {isTeamLeaderMode ? null : (
-          <span className="whitespace-nowrap text-slate-600">搜索：</span>
+          <span className="whitespace-nowrap text-sm font-medium text-slate-500">搜索：</span>
         )}
         <StandardTimeSearch
           onSearch={handleSearch}
@@ -521,6 +525,7 @@ export default function StandardTimeList() {
         />
       </div>
 
+      {/* Content Area */}
       {isTeamLeaderMode ? (
         <div
           ref={tableContainerRef}
@@ -545,7 +550,7 @@ export default function StandardTimeList() {
           <Splitter.Panel defaultSize="65%" min="30%">
             <div
               ref={tableContainerRef}
-              className="flex h-full flex-col gap-2 overflow-hidden"
+              className="flex h-full flex-col gap-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
             >
               <div className="min-h-0 flex-1 overflow-x-auto">
                 <StandardTimeTable
@@ -561,7 +566,7 @@ export default function StandardTimeList() {
                   onRowClick={setActiveRecord}
                 />
               </div>
-              <div ref={paginationRef} className="flex shrink-0 justify-end">
+              <div ref={paginationRef} className="flex shrink-0 justify-end border-t border-slate-100 pt-3">
                 <AppPagination
                   total={data?.total || 0}
                   pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
@@ -570,7 +575,7 @@ export default function StandardTimeList() {
             </div>
           </Splitter.Panel>
           <Splitter.Panel min="20%">
-            <div className="h-full overflow-hidden">
+            <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
               <PermissionGate permissionKey="field:standard-time-list.cost-detail.view">
                 <StandardTimeCostDetail selectedRecord={activeRecord} />
               </PermissionGate>

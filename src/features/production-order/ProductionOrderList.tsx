@@ -1,19 +1,9 @@
 import { useMemo, useCallback } from 'react'
-import { Table, TableColumnsType, TableProps, Button, Tag } from 'antd'
+import { Table, TableColumnsType, TableProps, Button, Tag, Tooltip } from 'antd'
 import { EyeIcon } from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
 
 import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
-
-const warningTextStyle = {
-  color: '#d4b106',
-  fontWeight: 600,
-}
-
-const dangerTextStyle = {
-  color: '#cf1322',
-  fontWeight: 600,
-}
 
 interface Props {
   loading: boolean
@@ -47,30 +37,39 @@ export default function ProductionOrderList({
         render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
         fixed: 'left',
         key: '#',
-        width: 44,
+        width: 50,
+        align: 'center',
       },
       {
         title: '日期',
         dataIndex: 'order_date',
         fixed: 'left',
         key: 'order_date',
-        width: 120,
+        width: 110,
+        render: (value: string) => (
+          <span className="font-medium text-slate-700">{value}</span>
+        ),
       },
       {
         title: '操作人',
         key: 'employee',
         fixed: 'left',
-        width: 120,
+        width: 100,
         render: (_text, record: ProductionOrderListItem) =>
-          record.employee?.name || '-',
+          record.employee?.name || (
+            <span className="text-slate-300">-</span>
+          ),
       },
       {
-        title: '审核状态',
+        title: '审核',
         dataIndex: 'is_audited',
         key: 'is_audited',
-        width: 100,
+        width: 90,
         render: (value: boolean) => (
-          <Tag color={value ? 'success' : 'default'}>
+          <Tag
+            color={value ? 'success' : 'default'}
+            className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+          >
             {value ? '已审核' : '待审核'}
           </Tag>
         ),
@@ -79,92 +78,147 @@ export default function ProductionOrderList({
         title: '班别',
         dataIndex: 'shift',
         key: 'shift',
-        width: 90,
+        width: 80,
+        render: (value: string) => (
+          <span
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+              value === '白班'
+                ? 'bg-amber-50 text-amber-600'
+                : 'bg-indigo-50 text-indigo-600'
+            }`}
+          >
+            {value}
+          </span>
+        ),
       },
       {
-        title: '出勤工时(h)',
+        title: '出勤',
         dataIndex: 'work_hours',
         key: 'work_hours',
-        width: 110,
+        width: 90,
+        render: (value: number | null) => (
+          <span className="font-mono text-slate-600">{(value ?? 0).toFixed(1)}h</span>
+        ),
       },
       {
-        title: '正工(h)',
+        title: '正工',
         dataIndex: 'positive_qualified_hours',
         key: 'positive_qualified_hours',
-        width: 100,
-        render: (value: number | null) => (value ?? 0).toFixed(2),
+        width: 90,
+        render: (value: number | null) => (
+          <span className="font-mono text-emerald-600">
+            {(value ?? 0).toFixed(2)}
+          </span>
+        ),
       },
       {
-        title: '零工(h)',
+        title: '零工',
         dataIndex: 'extra_qualified_hours',
         key: 'extra_qualified_hours',
-        width: 100,
-        render: (value: number | null) => (value ?? 0).toFixed(2),
+        width: 90,
+        render: (value: number | null) => (
+          <span className="font-mono text-blue-600">
+            {(value ?? 0).toFixed(2)}
+          </span>
+        ),
       },
       {
-        title: '总工时(h)',
+        title: '总工时',
         dataIndex: 'total_qualified_hours',
         key: 'total_qualified_hours',
-        width: 120,
+        width: 100,
         render: (value: number | null, record: ProductionOrderListItem) => {
           if (value === null || value === undefined) {
-            return '-'
+            return <span className="text-slate-300">-</span>
           }
 
           return (
-            <span
-              style={
+            <Tooltip
+              title={
                 record.hasZeroStandardQualifiedItem
-                  ? dangerTextStyle
+                  ? '存在标准工时为0的工序'
                   : undefined
               }
             >
-              {value.toFixed(2)}
-            </span>
+              <span
+                className={`font-mono font-semibold ${
+                  record.hasZeroStandardQualifiedItem
+                    ? 'text-red-500'
+                    : 'text-slate-700'
+                }`}
+              >
+                {value.toFixed(2)}
+              </span>
+            </Tooltip>
           )
         },
       },
       {
-        title: '工时效率(%)',
+        title: '效率',
         dataIndex: 'efficiency',
         key: 'efficiency',
-        width: 110,
+        width: 100,
         render: (value: number | null) => {
           if (value === null || value === undefined) {
-            return '-'
+            return <span className="text-slate-300">-</span>
           }
 
           const efficiencyPercent = value * 100
           const isWarning = efficiencyPercent < 90 || efficiencyPercent > 120
+          const isGood = efficiencyPercent >= 100 && efficiencyPercent <= 110
 
           return (
-            <span style={isWarning ? warningTextStyle : undefined}>
-              {efficiencyPercent.toFixed(2)}
+            <span
+              className={`inline-flex items-center gap-1 font-mono font-medium ${
+                isGood
+                  ? 'text-emerald-600'
+                  : isWarning
+                    ? 'text-amber-600'
+                    : 'text-slate-600'
+              }`}
+            >
+              {isWarning && (
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+              )}
+              {efficiencyPercent.toFixed(1)}%
             </span>
           )
         },
       },
-
       {
         title: '备注',
         dataIndex: 'remark',
         key: 'remark',
         ellipsis: true,
-        width: 150,
+        width: 140,
+        render: (value: string | null) =>
+          value ? (
+            <Tooltip title={value}>
+              <span className="text-slate-500">{value}</span>
+            </Tooltip>
+          ) : (
+            <span className="text-slate-200">-</span>
+          ),
       },
       {
         title: '更新时间',
         dataIndex: 'updated_at',
         key: 'updated_at',
-        width: 180,
+        width: 160,
         render: (value: string | null) =>
-          value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-',
+          value ? (
+            <span className="whitespace-nowrap text-xs text-slate-400">
+              {dayjs(value).format('MM-DD HH:mm')}
+            </span>
+          ) : (
+            <span className="text-slate-300">-</span>
+          ),
       },
       {
         title: '操作',
         key: 'actions',
         fixed: 'right',
-        width: 72,
+        width: 64,
         render: (_text, record: ProductionOrderListItem) => (
           <Button
             type="text"
@@ -172,6 +226,7 @@ export default function ProductionOrderList({
             icon={<EyeIcon className="h-4 w-4" />}
             onClick={() => onView(record)}
             title="查看"
+            className="rounded-lg text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
           />
         ),
       },
@@ -194,11 +249,13 @@ export default function ProductionOrderList({
   const handleRow = useCallback(
     (record: ProductionOrderListItem) => ({
       onClick: () => onRowClick?.(record),
-      style: {
-        cursor: onRowClick ? 'pointer' : undefined,
-        backgroundColor:
-          record.id && record.id === activeRowId ? '#e6f4ff' : undefined,
-      },
+      className: `transition-colors duration-150 ${
+        onRowClick ? 'cursor-pointer' : ''
+      } ${
+        record.id && record.id === activeRowId
+          ? 'bg-blue-50/70'
+          : 'hover:bg-slate-50/60'
+      }`,
     }),
     [activeRowId, onRowClick],
   )
@@ -206,16 +263,24 @@ export default function ProductionOrderList({
   return (
     <Table<ProductionOrderListItem>
       rowKey={(record) => record.id}
-      loading={loading}
+      loading={{
+        spinning: loading,
+        tip: (
+          <div className="flex items-center gap-2 text-slate-400">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
+            <span className="animate-pulse">加载中...</span>
+          </div>
+        ),
+      }}
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
       onRow={handleRow}
-      scroll={{ y: scrollY, x: 1330 }}
+      scroll={{ y: scrollY, x: 1300 }}
       virtual
       size="small"
       pagination={false}
-      style={{ fontSize: '12px' }}
+      className="production-order-table"
     />
   )
 }
