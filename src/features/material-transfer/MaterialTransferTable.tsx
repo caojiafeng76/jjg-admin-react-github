@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from 'react'
-import { Table, Tag, type TableColumnsType, type TableProps } from 'antd'
+import { Table, type TableColumnsType, type TableProps } from 'antd'
 
 import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
 
@@ -73,9 +73,18 @@ function MaterialTransferTable({
         ],
         onFilter: (value, record) => record.is_audited === value,
         render: (value: boolean) => (
-          <Tag color={value ? 'success' : 'default'}>
+          <div
+            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium shadow-sm ${
+              value
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'bg-slate-100 text-slate-500'
+            }`}
+          >
+            <div
+              className={`h-1.5 w-1.5 rounded-full ${value ? 'bg-emerald-500' : 'bg-slate-400'}`}
+            />
             {value ? '已审核' : '待审核'}
-          </Tag>
+          </div>
         ),
       },
       {
@@ -130,6 +139,11 @@ function MaterialTransferTable({
         dataIndex: 'transfer_quantity',
         key: 'transfer_quantity',
         width: 90,
+        render: (value: number) => (
+          <span className="font-semibold tabular-nums text-slate-700">
+            {value}
+          </span>
+        ),
       },
       {
         title: '操作人',
@@ -154,6 +168,14 @@ function MaterialTransferTable({
         ).map((v) => ({ text: v as string, value: v as string })),
         onFilter: (value, record) =>
           record.target_workshop === (value as string),
+        render: (value: string | null) =>
+          value ? (
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              {value}
+            </span>
+          ) : (
+            '-'
+          ),
       },
     ],
     [page, pageSize, data],
@@ -172,7 +194,7 @@ function MaterialTransferTable({
       style: {
         cursor: onRowClick ? 'pointer' : undefined,
         backgroundColor:
-          record.id && record.id === activeRowId ? '#e6f4ff' : undefined,
+          record.id && record.id === activeRowId ? '#f0f7ff' : undefined,
         height: rowHeight,
       },
     }),
@@ -190,16 +212,17 @@ function MaterialTransferTable({
       scroll={{ x: 1120, y: scrollY }}
       size="small"
       pagination={false}
-      style={{ fontSize: '12px' }}
+      style={{ fontSize: '13px' }}
+      className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row>
+          <Table.Summary.Row className="bg-slate-50">
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={7}>
               <span className="font-medium text-slate-600">当前页合计</span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={8}>
-              <span className="font-semibold text-slate-900">
+              <span className="font-bold text-slate-900 tabular-nums">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>

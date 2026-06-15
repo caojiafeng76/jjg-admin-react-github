@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react'
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
 import { DownloadOutlined } from '@ant-design/icons'
 import type { FormInstance, TableProps } from 'antd'
-import { App, Button, Modal, Splitter, Tabs } from 'antd'
+import { App, Button, Modal, Splitter, Tabs, Badge } from 'antd'
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
@@ -687,86 +687,206 @@ export default function WorkshopOrderList() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-2">
-      {/* 状态 Tab */}
-      <Tabs
-        activeKey={activeTab}
-        onChange={handleTabChange}
-        items={[
-          { key: 'production', label: '生产中' },
-          { key: 'closed', label: '已结案' },
-        ]}
-        className="mb-0!"
-      />
-      {/* 工具栏 */}
-      <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={handleCreate} />
-        <EditButton title="编辑" handleEdit={handleEdit} />
-        {canManageStatus ? (
-          <>
-            <Button
-              type="text"
-              icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
-              onClick={() => handleBatchStatusChange('生产中')}
-              loading={batchStatusMutation.isPending}
-              disabled={viewerDenied}
-            >
-              批量改为生产中
-            </Button>
-            <Button
-              type="text"
-              danger
-              icon={<CheckCircleIcon className="size-4 text-rose-500/80!" />}
-              onClick={() => handleBatchStatusChange('已结案')}
-              loading={batchStatusMutation.isPending}
-              disabled={viewerDenied}
-            >
-              批量结案
-            </Button>
-          </>
-        ) : null}
-        {canDelete ? (
-          <DeleteButton
-            onClick={handleDelete}
-            isDeleting={deleteMutation.isPending}
-            count={selectedRowKeys.length}
-          />
-        ) : null}
-        <PrintButton
-          handlePrint={handlePrint}
-          loading={isPrinting}
-          count={selectedRowKeys.length}
-        />
-        <Button
-          type="text"
-          icon={<DownloadOutlined />}
-          onClick={handleExportExcel}
-          loading={isExporting}
-          disabled={viewerDenied || selectedRowKeys.length === 0}
-        >
-          导出Excel
-          {selectedRowKeys.length > 0 ? `(${selectedRowKeys.length})` : ''}
-        </Button>
-      </div>
-
-      {/* 搜索栏 */}
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
-        <WorkshopOrderSearch
-          onSearch={handleSearch}
-          onReset={handleResetSearch}
-          lengthOptions={lengthOptions}
+    <div className="flex h-full flex-col gap-4 p-1">
+      {/* 状态 Tab - 工业风格面板 */}
+      <div className="rounded-lg border border-slate-200/60 bg-white/80 px-4 pt-3 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/80">
+        <Tabs
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          size="large"
+          items={[
+            {
+              key: 'production',
+              label: (
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50" />
+                  生产中
+                  {data && data.total > 0 && (
+                    <Badge
+                      count={data.total}
+                      size="small"
+                      style={{
+                        backgroundColor: '#f59e0b',
+                        boxShadow: '0 0 6px rgba(245, 158, 11, 0.4)',
+                      }}
+                    />
+                  )}
+                </span>
+              ),
+            },
+            {
+              key: 'closed',
+              label: (
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-slate-400" />
+                  已结案
+                </span>
+              ),
+            },
+          ]}
+          className="[&_.ant-tabs-nav]::!mb-0"
         />
       </div>
 
-      {/* 上下分割布局 */}
+      {/* 工具栏 - 工业风格卡片 */}
+      <div className="rounded-lg border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/80">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* 核心操作按钮组 */}
+          <div className="flex items-center gap-2">
+            <AddButton handleCreate={handleCreate} />
+            <EditButton title="编辑" handleEdit={handleEdit} />
+          </div>
+
+          {/* 分隔线 */}
+          <div className="h-6 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
+
+          {/* 状态管理按钮组 */}
+          {canManageStatus ? (
+            <div className="flex items-center gap-1">
+              <Button
+                type="text"
+                icon={<ArrowPathIcon className="size-4" />}
+                onClick={() => handleBatchStatusChange('生产中')}
+                loading={batchStatusMutation.isPending}
+                disabled={viewerDenied}
+                className="text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20"
+              >
+                批量改为生产中
+              </Button>
+              <Button
+                type="text"
+                icon={<CheckCircleIcon className="size-4" />}
+                onClick={() => handleBatchStatusChange('已结案')}
+                loading={batchStatusMutation.isPending}
+                disabled={viewerDenied}
+                className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-900/20"
+              >
+                批量结案
+              </Button>
+            </div>
+          ) : null}
+
+          {/* 分隔线 */}
+          <div className="h-6 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
+
+          {/* 删除按钮 */}
+          {canDelete ? (
+            <DeleteButton
+              onClick={handleDelete}
+              isDeleting={deleteMutation.isPending}
+              count={selectedRowKeys.length}
+            />
+          ) : null}
+
+          {/* 分隔线 */}
+          <div className="h-6 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
+
+          {/* 输出按钮组 */}
+          <div className="flex items-center gap-1">
+            <PrintButton
+              handlePrint={handlePrint}
+              loading={isPrinting}
+              count={selectedRowKeys.length}
+            />
+            <Button
+              type="text"
+              icon={<DownloadOutlined />}
+              onClick={handleExportExcel}
+              loading={isExporting}
+              disabled={viewerDenied || selectedRowKeys.length === 0}
+              className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
+            >
+              导出Excel
+              {selectedRowKeys.length > 0 && (
+                <span className="ml-1 rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                  {selectedRowKeys.length}
+                </span>
+              )}
+            </Button>
+          </div>
+
+          {/* 统计信息 */}
+          {selectedRowKeys.length > 0 && (
+            <div className="ml-auto">
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                已选 {selectedRowKeys.length} 项
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 搜索栏 - 工业风格面板 */}
+      <div className="rounded-lg border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/80">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-slate-100 to-slate-200 shadow-sm dark:from-slate-700 dark:to-slate-800">
+              <svg
+                className="size-4 text-slate-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </span>
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              筛选条件
+            </span>
+          </div>
+          <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+          <div className="flex-1">
+            <WorkshopOrderSearch
+              onSearch={handleSearch}
+              onReset={handleResetSearch}
+              lengthOptions={lengthOptions}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 上下分割布局 - 工业风格面板 */}
       <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
         {/* 上半部分：订单列表 */}
         <Splitter.Panel defaultSize="60%" min="30%">
           <div
             ref={tableContainerRef}
-            className="flex h-full flex-col gap-2 overflow-hidden"
+            className="flex h-full flex-col gap-3 overflow-hidden rounded-lg border border-slate-200/60 bg-white/90 p-3 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/90"
           >
+            {/* 表格标题栏 */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm shadow-blue-500/30">
+                  <svg
+                    className="size-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    订单列表
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    共 {data?.total || 0} 条记录
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="min-h-0 flex-1">
               <WorkshopOrderTable
                 loading={isLoading}
@@ -792,7 +912,7 @@ export default function WorkshopOrderList() {
 
         {/* 下半部分：生产工单统计 */}
         <Splitter.Panel min="20%">
-          <div className="h-full overflow-hidden">
+          <div className="h-full overflow-hidden rounded-lg border border-slate-200/60 bg-white/90 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/90">
             <WorkshopOrderProductionStats
               selectedOrder={activeOrder}
               canManageStatus={!viewerDenied && canManageStatus}

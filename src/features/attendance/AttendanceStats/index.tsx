@@ -10,7 +10,15 @@ import {
   Tag,
 } from 'antd'
 import type { Dayjs } from 'dayjs'
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import {
+  ClipboardDocumentListIcon,
+  UserCircleIcon,
+  CalendarDaysIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/react/24/outline'
+import {
+  ArrowDownTrayIcon as ArrowDownTrayIconSolid,
+} from '@heroicons/react/16/solid'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
@@ -79,14 +87,26 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     key: '#',
     width: 60,
     fixed: 'left',
-    render: (_v, _r, i) => i + 1,
+    render: (_v, _r, i) => (
+      <span className="flex size-7 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500">
+        {i + 1}
+      </span>
+    ),
   },
   {
-    title: '姓名',
+    title: (
+      <span className="flex items-center gap-1.5">
+        <UserCircleIcon className="h-4 w-4 text-slate-400" />
+        姓名
+      </span>
+    ),
     dataIndex: 'name',
     key: 'name',
     width: 140,
     fixed: 'left',
+    render: (value: string) => (
+      <span className="font-medium text-slate-700">{value}</span>
+    ),
   },
   {
     title: '出勤天数',
@@ -94,6 +114,9 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     key: 'total_days',
     width: 110,
     align: 'center',
+    render: (v: number) => (
+      <span className="font-semibold text-slate-700">{v}</span>
+    ),
   },
   {
     title: '白班天数',
@@ -101,7 +124,11 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     key: 'day_shift_days',
     width: 110,
     align: 'center',
-    render: (v: number) => <Tag color="blue">{v}</Tag>,
+    render: (v: number) => (
+      <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+        {v}
+      </span>
+    ),
   },
   {
     title: '夜班天数',
@@ -109,7 +136,11 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     key: 'night_shift_days',
     width: 110,
     align: 'center',
-    render: (v: number) => <Tag color="purple">{v}</Tag>,
+    render: (v: number) => (
+      <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+        {v}
+      </span>
+    ),
   },
 ]
 
@@ -119,14 +150,26 @@ const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
     key: '#',
     width: 60,
     fixed: 'left',
-    render: (_v, _r, i) => i + 1,
+    render: (_v, _r, i) => (
+      <span className="flex size-7 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500">
+        {i + 1}
+      </span>
+    ),
   },
   {
-    title: '姓名',
+    title: (
+      <span className="flex items-center gap-1.5">
+        <UserCircleIcon className="h-4 w-4 text-slate-400" />
+        姓名
+      </span>
+    ),
     dataIndex: 'name',
     key: 'name',
     width: 140,
     fixed: 'left',
+    render: (value: string) => (
+      <span className="font-medium text-slate-700">{value}</span>
+    ),
   },
   {
     title: '迟到次数',
@@ -147,17 +190,28 @@ const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
     align: 'center',
     sorter: (a, b) => a.early_leave_count - b.early_leave_count,
     render: (v: number, r) => (
-      <DatesPopover count={v} dates={r.early_leave_dates} color="volcano" />
+      <DatesPopover
+        count={v}
+        dates={r.early_leave_dates}
+        color="volcano"
+      />
     ),
   },
 ]
 
-function ShiftStatsTab({ searchParams }: { searchParams: SearchParams }) {
+function ShiftStatsTab({
+  searchParams,
+}: {
+  searchParams: SearchParams
+}) {
   const { data, isLoading } = useAttendanceShiftStats(searchParams)
   const { tableContainerRef, scrollY } = useTableHeight({ targetRowCount: 14 })
 
   return (
-    <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
+    <div
+      ref={tableContainerRef}
+      className="min-h-0 overflow-hidden rounded-xl border border-slate-200/80"
+    >
       <Table<AttendanceShiftStat>
         size="small"
         loading={isLoading}
@@ -167,6 +221,7 @@ function ShiftStatsTab({ searchParams }: { searchParams: SearchParams }) {
         scroll={{ x: SHIFT_STATS_TABLE_SCROLL_X, y: scrollY }}
         tableLayout="fixed"
         columns={shiftStatsColumns}
+        className="[&_.ant-table-thead>tr>th]:!bg-slate-50 [&_.ant-table-thead>tr>th]:!font-medium [&_.ant-table-tbody>tr:hover>td]:!bg-blue-50/30"
       />
     </div>
   )
@@ -177,7 +232,10 @@ function LateEarlyTab({ searchParams }: { searchParams: SearchParams }) {
   const { tableContainerRef, scrollY } = useTableHeight({ targetRowCount: 14 })
 
   return (
-    <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
+    <div
+      ref={tableContainerRef}
+      className="min-h-0 overflow-hidden rounded-xl border border-slate-200/80"
+    >
       <Table
         size="small"
         loading={isLoading}
@@ -187,6 +245,7 @@ function LateEarlyTab({ searchParams }: { searchParams: SearchParams }) {
         scroll={{ x: LATE_EARLY_TABLE_SCROLL_X, y: scrollY }}
         tableLayout="fixed"
         columns={lateEarlyColumns}
+        className="[&_.ant-table-thead>tr>th]:!bg-slate-50 [&_.ant-table-thead>tr>th]:!font-medium [&_.ant-table-tbody>tr:hover>td]:!bg-blue-50/30"
       />
     </div>
   )
@@ -258,58 +317,100 @@ export default function AttendanceStatsPage() {
   }
 
   return (
-    <div className="grid h-full grid-rows-[auto_1fr] gap-4">
-      {contextHolder}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">筛选：</span>
-        <AttendanceStatsSearch
-          onSearch={setSearchParams}
-          onReset={() => setSearchParams({})}
-          initialValues={searchParams}
-        />
-        <div className="ml-auto flex items-center gap-2">
-          <DatePicker
-            picker="month"
-            value={exportMonth}
-            onChange={setExportMonth}
-            placeholder="选择导出月份"
-            allowClear
+    <div className="flex h-full flex-col gap-4 p-4">
+      {/* 搜索区域卡片 */}
+      <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-50/80 to-white px-5 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
+          <MagnifyingGlassIcon className="h-4 w-4" />
+          <span>筛选条件</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-4">
+          <AttendanceStatsSearch
+            onSearch={setSearchParams}
+            onReset={() => setSearchParams({})}
+            initialValues={searchParams}
           />
-          <Button
-            icon={<ArrowDownTrayIcon className="h-4 w-4" />}
-            loading={exportingLateEarly}
-            onClick={handleExportLateEarly}
-            disabled={viewerDenied}
-          >
-            导出迟到/早退
-          </Button>
-          <Button
-            type="primary"
-            icon={<ArrowDownTrayIcon className="h-4 w-4" />}
-            loading={exporting}
-            onClick={handleExport}
-            disabled={viewerDenied}
-          >
-            导出出勤月报
-          </Button>
+          {/* 导出操作区域 */}
+          <div className="ml-auto flex items-center gap-3">
+            <DatePicker
+              picker="month"
+              value={exportMonth}
+              onChange={setExportMonth}
+              placeholder="选择导出月份"
+              allowClear
+              className="!w-36 rounded-lg"
+            />
+            <Button
+              type="text"
+              icon={
+                <ArrowDownTrayIconSolid className="size-4 text-amber-500/80!" />
+              }
+              loading={exportingLateEarly}
+              onClick={handleExportLateEarly}
+              disabled={viewerDenied}
+            >
+              导出迟到/早退
+            </Button>
+            <Button
+              type="text"
+              icon={
+                <ArrowDownTrayIconSolid className="size-4 text-emerald-500/80!" />
+              }
+              loading={exporting}
+              onClick={handleExport}
+              disabled={viewerDenied}
+            >
+              导出出勤月报
+            </Button>
+          </div>
         </div>
       </div>
 
-      <Tabs
-        className="min-h-0"
-        items={[
-          {
-            key: 'shift',
-            label: '班次统计',
-            children: <ShiftStatsTab searchParams={searchParams} />,
-          },
-          {
-            key: 'late-early',
-            label: '迟到/早退',
-            children: <LateEarlyTab searchParams={searchParams} />,
-          },
-        ]}
-      />
+      {/* 统计概览 */}
+      <div className="flex items-center gap-4 text-sm text-slate-500">
+        <div className="flex items-center gap-1.5">
+          <ClipboardDocumentListIcon className="h-4 w-4" />
+          <span>考勤统计</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <CalendarDaysIcon className="h-4 w-4" />
+          <span>
+            {searchParams.startDate && searchParams.endDate
+              ? `${searchParams.startDate} ~ ${searchParams.endDate}`
+              : '全部时间'}
+          </span>
+        </div>
+      </div>
+
+      {/* Tabs 标签页 */}
+      <div className="min-h-0 flex-1">
+        <Tabs
+          className="h-full"
+          items={[
+            {
+              key: 'shift',
+              label: (
+                <span className="flex items-center gap-1.5">
+                  <ClipboardDocumentListIcon className="h-4 w-4" />
+                  班次统计
+                </span>
+              ),
+              children: <ShiftStatsTab searchParams={searchParams} />,
+            },
+            {
+              key: 'late-early',
+              label: (
+                <span className="flex items-center gap-1.5">
+                  <CalendarDaysIcon className="h-4 w-4" />
+                  迟到/早退
+                </span>
+              ),
+              children: <LateEarlyTab searchParams={searchParams} />,
+            },
+          ]}
+        />
+      </div>
+      {contextHolder}
     </div>
   )
 }

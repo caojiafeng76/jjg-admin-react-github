@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { DatePicker, Button, Form, Input, Space, Select } from 'antd'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import type { Dayjs } from 'dayjs'
 
 const { RangePicker } = DatePicker
@@ -77,14 +76,15 @@ export default function WorkshopOrderSearch({
       form={form}
       onFinish={handleSearch}
       layout="inline"
-      className="flex flex-wrap items-center gap-2"
+      className="flex flex-wrap items-center gap-3"
     >
       <Form.Item name="project_no_search" className="mb-0">
         <Input
           placeholder="项目号"
           allowClear
           onPressEnter={() => form.submit()}
-          style={{ width: 200 }}
+          className="rounded-md border-slate-200 bg-white/80 shadow-sm transition-all hover:border-blue-300 hover:shadow-md focus:border-blue-400 focus:shadow-md dark:border-slate-600 dark:bg-slate-700/50 dark:hover:border-blue-500"
+          style={{ width: 180 }}
         />
       </Form.Item>
       <Form.Item name="model_search" className="mb-0">
@@ -92,7 +92,8 @@ export default function WorkshopOrderSearch({
           placeholder="型号"
           allowClear
           onPressEnter={() => form.submit()}
-          style={{ width: 200 }}
+          className="rounded-md border-slate-200 bg-white/80 shadow-sm transition-all hover:border-blue-300 hover:shadow-md focus:border-blue-400 focus:shadow-md dark:border-slate-600 dark:bg-slate-700/50 dark:hover:border-blue-500"
+          style={{ width: 180 }}
         />
       </Form.Item>
       <Form.Item name="dateRange" className="mb-0">
@@ -100,7 +101,8 @@ export default function WorkshopOrderSearch({
           format="YYYY-MM-DD"
           placeholder={['开始日期', '结束日期']}
           allowClear
-          style={{ width: 240 }}
+          className="rounded-md border-slate-200 bg-white/80 shadow-sm transition-all hover:border-blue-300 focus-within:border-blue-400 dark:border-slate-600 dark:bg-slate-700/50"
+          style={{ width: 220 }}
         />
       </Form.Item>
       <Form.Item name="length_mm" className="mb-0">
@@ -112,27 +114,64 @@ export default function WorkshopOrderSearch({
             filterOption: (input, option) =>
               String(option?.label || '').includes(input),
           }}
-          style={{ width: 220 }}
+          className="min-w-[160px]"
           options={lengthOptions.map((length) => ({
             label: `${length}`,
             value: length,
           }))}
+          styles={{
+            popup: {
+              root: {
+                minWidth: 160,
+              },
+            },
+          }}
         />
       </Form.Item>
       <Form.Item className="mb-0">
         <Space>
           <Button
             type="primary"
-            icon={<MagnifyingGlassIcon className="h-4 w-4" />}
+            icon={
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            }
             htmlType="submit"
             loading={isSearching}
+            className="shadow-sm transition-all hover:shadow-md"
           >
             搜索
           </Button>
           <Button
-            icon={<XMarkIcon className="h-4 w-4" />}
+            icon={
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            }
             onClick={handleReset}
             disabled={isSearching}
+            className="shadow-sm transition-all hover:shadow-md"
           >
             重置
           </Button>
