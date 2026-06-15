@@ -80,6 +80,7 @@ export default function PrecisionFinishingCuttingPage() {
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 10,
+    summaryRowHeight: 39,
   })
 
   const selectedCount = selectedRowKeys.length
@@ -461,13 +462,17 @@ export default function PrecisionFinishingCuttingPage() {
           </div>
         </>
       ) : (
-        <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+        <Splitter
+          orientation="vertical"
+          style={{ flex: 1, minHeight: 0 }}
+          styles={{ panel: { overflow: 'hidden' } }}
+        >
           <Splitter.Panel defaultSize="65%" min="30%">
             <div
               ref={tableContainerRef}
               className="flex h-full flex-col gap-2 overflow-hidden"
             >
-              <div className="min-h-0 flex-1 overflow-x-auto">
+              <div className="min-h-0 flex-1 overflow-hidden">
                 <PrecisionFinishingCuttingTable
                   loading={isLoading}
                   data={records}
