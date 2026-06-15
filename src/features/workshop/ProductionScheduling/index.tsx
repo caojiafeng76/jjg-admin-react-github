@@ -5,7 +5,7 @@ import {
   PencilSquareIcon,
   TableCellsIcon,
 } from '@heroicons/react/16/solid'
-import type { TableColumnsType, TablePaginationConfig } from 'antd'
+import type { TableColumnsType, TablePaginationConfig, TableProps } from 'antd'
 import {
   App,
   Button,
@@ -46,6 +46,7 @@ type SearchFormValues = {
   status?: ProductionSchedulingFilters['status']
   progressStatus?: string
   plannedStartDateRange?: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
+  orderDateRange?: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
 }
 
 type SchedulingFormValues = {
@@ -181,6 +182,29 @@ function getOrderRowKey(order: ProductionSchedulingOrder) {
   )
 }
 
+/**
+ * 从 project_no 中提取订单日期。
+ * 约定：前 6 位为 YYMMDD（世纪基准 2000），例如 25052702-01 → 2025-05-27。
+ * 长度不足、含非数字或日期越界时返回 null。
+ */
+function parseProjectNoDate(
+  projectNo: string | null | undefined,
+): string | null {
+  if (!projectNo) return null
+  const head = projectNo.replace(/[\s-].*$/, '').slice(0, 6)
+  if (!/^\d{6}$/.test(head)) return null
+  const yy = Number(head.slice(0, 2))
+  const mm = Number(head.slice(2, 4))
+  const dd = Number(head.slice(4, 6))
+  const date = dayjs(
+    `20${String(yy).padStart(2, '0')}-${mm}-${dd}`,
+    'YYYY-M-D',
+    true,
+  )
+  if (!date.isValid()) return null
+  return date.format('YYYY-MM-DD')
+}
+
 function makeSchedulingInitialValues(
   order: ProductionSchedulingOrder,
 ): SchedulingFormValues {
@@ -258,6 +282,12 @@ function makeOrderColumns({
       width: 110,
       fixed: 'left',
       render: (_value, record) => renderText(renderOrderCode(record)),
+    },
+    {
+      title: '订单日期',
+      key: 'order_date',
+      width: 100,
+      render: (_value, record) => renderText(parseProjectNoDate(record.project_no)),
     },
     {
       title: '项目号',
@@ -410,6 +440,7 @@ export default function ProductionScheduling() {
     useState<ProductionSchedulingOrder | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [tableScrollY, setTableScrollY] = useState(DEFAULT_TABLE_SCROLL_Y)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
   const { data: employees = [] } = useQuery({
     queryKey: ['employees', 'all'],
@@ -444,6 +475,11 @@ export default function ProductionScheduling() {
   const total = schedulingResult?.total ?? 0
   const tableLoading = isLoading && orders.length === 0
   const summary = useMemo(() => getSummary(orders), [orders])
+  const selectedOrders = useMemo(() => {
+    if (selectedRowKeys.length === 0) return orders
+    const keySet = new Set(selectedRowKeys.map(String))
+    return orders.filter((o) => keySet.has(String(getOrderRowKey(o))))
+  }, [orders, selectedRowKeys])
 
   useEffect(() => {
     const container = tableContainerRef.current
@@ -511,6 +547,22 @@ export default function ProductionScheduling() {
     [openEditModal],
   )
 
+  const rowSelection: TableProps<ProductionSchedulingOrder>['rowSelection'] =
+    useMemo(
+      () => ({
+        selectedRowKeys,
+        onChange: (keys) => setSelectedRowKeys(keys),
+        fixed: true,
+        columnWidth: 40,
+        preserveSelectedRowKeys: true,
+      }),
+      [selectedRowKeys],
+    )
+
+  useEffect(() => {
+    setSelectedRowKeys([])
+  }, [page, pageSize, filters])
+
   const tablePagination = useMemo<TablePaginationConfig>(
     () => ({
       current: page,
@@ -528,18 +580,25 @@ export default function ProductionScheduling() {
 
   const handleSearch = useCallback((values: SearchFormValues) => {
     setPage(1)
-    const range = values.plannedStartDateRange
+    const plannedRange = values.plannedStartDateRange
+    const orderRange = values.orderDateRange
     setFilters({
       customer: values.customer?.trim() || undefined,
       model: values.model?.trim() || undefined,
       projectNo: values.projectNo?.trim() || undefined,
       status: values.status || '生产中',
       progressStatus: values.progressStatus || undefined,
-      plannedStartDateFrom: range?.[0]
-        ? range[0].format('YYYY-MM-DD')
+      plannedStartDateFrom: plannedRange?.[0]
+        ? plannedRange[0].format('YYYY-MM-DD')
         : undefined,
-      plannedStartDateTo: range?.[1]
-        ? range[1].format('YYYY-MM-DD')
+      plannedStartDateTo: plannedRange?.[1]
+        ? plannedRange[1].format('YYYY-MM-DD')
+        : undefined,
+      orderDateFrom: orderRange?.[0]
+        ? orderRange[0].format('YYYY-MM-DD')
+        : undefined,
+      orderDateTo: orderRange?.[1]
+        ? orderRange[1].format('YYYY-MM-DD')
         : undefined,
     })
   }, [])
@@ -574,13 +633,17 @@ export default function ProductionScheduling() {
   }, [editingOrder, message, schedulingForm, updateMutation, employeeMap])
 
   const handleExport = useCallback(() => {
-    if (orders.length === 0) {
-      message.warning('当前没有可导出的订单排产数据')
+    if (selectedOrders.length === 0) {
+      message.warning(
+        selectedRowKeys.length > 0
+          ? '当前页已选条目已全部移出视图，请重新勾选'
+          : '当前没有可导出的订单排产数据',
+      )
       return
     }
 
-    exportProductionScheduledPlanToExcel(orders)
-  }, [message, orders])
+    exportProductionScheduledPlanToExcel(selectedOrders)
+  }, [message, selectedOrders, selectedRowKeys])
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-3">
@@ -641,6 +704,13 @@ export default function ProductionScheduling() {
               placeholder={['开始日期', '结束日期']}
             />
           </Form.Item>
+          <Form.Item name="orderDateRange" label="订单日期">
+            <DatePicker.RangePicker
+              format="YYYY-MM-DD"
+              allowClear
+              placeholder={['开始', '结束']}
+            />
+          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
               查询
@@ -691,8 +761,13 @@ export default function ProductionScheduling() {
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        <ExportButton handleExport={handleExport} count={orders.length}>
-          导出基础排产表
+        <ExportButton
+          handleExport={handleExport}
+          count={selectedOrders.length}
+        >
+          {selectedRowKeys.length > 0
+            ? `导出选中 (${selectedOrders.length})`
+            : '导出基础排产表'}
         </ExportButton>
       </div>
 
@@ -704,8 +779,9 @@ export default function ProductionScheduling() {
           dataSource={orders}
           loading={tableLoading}
           pagination={tablePagination}
-          scroll={{ x: 2390, y: tableScrollY }}
+          scroll={{ x: 2530, y: tableScrollY }}
           tableLayout="fixed"
+          rowSelection={rowSelection}
         />
       </div>
 

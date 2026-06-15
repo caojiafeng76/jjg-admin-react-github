@@ -47,20 +47,6 @@ function formatChineseDate(value: Date) {
   return `${value.getFullYear()}年${value.getMonth() + 1}月${value.getDate()}日`
 }
 
-function getProductSpec(order: ProductionSchedulingOrder) {
-  return [
-    order.product_model,
-    order.customer_model,
-    order.material_name,
-    order.material_code,
-    order.length_mm ? `${order.length_mm}mm` : null,
-    order.color_name,
-  ]
-    .map((item) => (typeof item === 'string' ? item.trim() : item))
-    .filter(Boolean)
-    .join(' / ')
-}
-
 function getProgressText(order: ProductionSchedulingOrder) {
   const status = order.progress_status?.trim()
   const orderQuantity = Number(order.order_quantity || 0)
@@ -176,7 +162,12 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
     '*订单编号',
     '*项目号',
     '*客户名称',
-    '*产品名称及规格',
+    '*型号',
+    '*客户型号',
+    '*物料名称',
+    '*料号',
+    '*长度',
+    '*颜色',
     '*订单数量',
     '*合格标准',
     '*计划开工时间',
@@ -198,7 +189,12 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
       order.id?.slice(0, 8) || '',
       order.project_no || '',
       order.customer || '',
-      getProductSpec(order),
+      order.product_model ?? '',
+      order.customer_model ?? '',
+      order.material_name ?? '',
+      order.material_code ?? '',
+      order.length_mm ? `${order.length_mm}mm` : '',
+      order.color_name ?? '',
       normalizeNumber(order.order_quantity),
       order.process_requirement || '',
       formatDate(order.planned_start_date),
@@ -225,7 +221,7 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
   applyCommonStyles(
     worksheet,
     data,
-    [12, 16, 14, 30, 12, 20, 16, 16, 16, 22, 18, 20, 12, 12, 16, 18, 28],
+    [12, 16, 14, 14, 14, 14, 14, 10, 10, 12, 20, 16, 16, 16, 22, 18, 20, 12, 12, 16, 18, 28],
     headers.length - 1,
   )
   worksheet['!merges'] = [

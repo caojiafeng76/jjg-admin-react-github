@@ -16,6 +16,7 @@ import {
   buildOrIlikeFilter,
   normalizeSearchKeywords,
 } from '@/utils/searchKeywords'
+import dayjs from 'dayjs'
 
 const METRIC_PAGE_SIZE = 1000
 const PROJECT_NO_CHUNK_SIZE = 300
@@ -86,6 +87,8 @@ export interface ProductionSchedulingFilters {
   progressStatus?: string
   plannedStartDateFrom?: string
   plannedStartDateTo?: string
+  orderDateFrom?: string
+  orderDateTo?: string
 }
 
 export interface ProductionSchedulingOrdersResult {
@@ -767,6 +770,11 @@ export async function getProductionSchedulingOrderStandardCapacity({
   return getMatchedDailyStandardCapacity({ order, standardRows })
 }
 
+/**
+ * 从 project_no 中提取订单日期。
+ * 约定：前 6 位为 YYMMDD（世纪基准 2000），例如 25052702-01 → 2025-05-27。
+ * 长度不足、含非数字或日期越界时返回 null。
+ */
 function applySchedulingFilters(
   filters: ProductionSchedulingFilters | undefined,
 ) {
@@ -806,6 +814,23 @@ function applySchedulingFilters(
 
   if (filters?.plannedStartDateTo) {
     query = query.lte('planned_start_date', filters.plannedStartDateTo)
+  }
+
+  if (filters?.orderDateFrom || filters?.orderDateTo) {
+    // 订单日期筛选用 project_no 前 6 位 YYMMDD 翻译成 SQL 字符串范围：
+    // 约定 project_no 前缀为 YYMMDD（世纪基准 2000），例如 25052702-01 → 2025-05-27
+    const fromStr = filters.orderDateFrom
+      ? dayjs(filters.orderDateFrom).format('YYMMDD')
+      : null
+    const toNextStr = filters.orderDateTo
+      ? dayjs(filters.orderDateTo).add(1, 'day').format('YYMMDD')
+      : null
+    if (fromStr) {
+      query = query.gte('project_no', fromStr)
+    }
+    if (toNextStr) {
+      query = query.lt('project_no', toNextStr)
+    }
   }
 
   // progressStatus 需要基于转移数据动态计算，在查询后过滤
@@ -918,9 +943,10 @@ export async function getProductionSchedulingOrders({
       return effectiveStatus === filters.progressStatus
     })
 
-  // 若启用了进度筛选，total 以过滤后的实际数量为准
-  const effectiveTotal =
-    filters?.progressStatus ? orders.length : (count ?? orders.length)
+  // 仅 progressStatus 是客户端后过滤；订单日期已走 SQL，count 准确
+  const effectiveTotal = filters?.progressStatus
+    ? orders.length
+    : (count ?? orders.length)
 
   return {
     orders,
