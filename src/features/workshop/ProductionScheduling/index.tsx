@@ -16,6 +16,7 @@ import {
   Modal,
   Select,
   Table,
+  Tag,
   Typography,
 } from 'antd'
 import dayjs from 'dayjs'
@@ -426,6 +427,36 @@ function makeOrderColumns({
   ]
 }
 
+interface SummaryCardProps {
+  dotColor: string
+  label: string
+  value: string | number
+  valueClass: string
+}
+
+function SummaryCard({ dotColor, label, value, valueClass }: SummaryCardProps) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 transition-colors duration-150 hover:border-[#1677ff]/40">
+      <div className="flex items-center justify-between">
+        <Text type="secondary" className="!text-slate-500">
+          {label}
+        </Text>
+        <span
+          aria-hidden
+          className={'inline-block size-2 rounded-full ' + dotColor}
+        />
+      </div>
+      <div
+        className={
+          'mt-1 text-2xl font-semibold tabular-nums ' + valueClass
+        }
+      >
+        {value}
+      </div>
+    </div>
+  )
+}
+
 export default function ProductionScheduling() {
   const { message } = App.useApp()
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
@@ -645,17 +676,70 @@ export default function ProductionScheduling() {
     exportProductionScheduledPlanToExcel(selectedOrders)
   }, [message, selectedOrders, selectedRowKeys])
 
+  const PROGRESS_STATUS_TAGS: Array<{ label: string; value: string | null }> = [
+    { label: '全部', value: null },
+    { label: '未开工', value: '未开工' },
+    { label: '进行中', value: '进行中' },
+    { label: '已完工', value: '已完工' },
+    { label: '延期', value: '延期' },
+  ]
+
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-3">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-3">
-        <div>
-          <Title level={4} style={{ margin: 0 }}>
-            订单排产
-          </Title>
-          <Text type="secondary">
-            基础版排产表，仅维护订单、计划时间、设备人员、进度和备注。
-          </Text>
+    <div className="flex h-full min-h-0 flex-col gap-3 bg-slate-50 p-3">
+      {/* 标题区 + 进度快捷标签 */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3">
+        <div className="flex items-start gap-3">
+          <span
+            aria-hidden
+            className="mt-1 inline-block h-9 w-1 rounded-full bg-[#1677ff]"
+          />
+          <div>
+            <Title level={4} style={{ margin: 0 }} className="!text-xl !font-semibold !text-slate-800">
+              订单排产
+            </Title>
+            <Text type="secondary" className="!text-slate-500">
+              基础版排产表，仅维护订单、计划时间、设备人员、进度和备注。
+            </Text>
+          </div>
         </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Text type="secondary" className="mr-1 !text-slate-500">
+            快速筛选
+          </Text>
+          {PROGRESS_STATUS_TAGS.map((tag) => {
+            const active =
+              (tag.value ?? null) === (filters.progressStatus ?? null)
+            return (
+              <Tag.CheckableTag
+                key={tag.label}
+                checked={active}
+                onChange={() => {
+                  const nextProgress = tag.value ?? undefined
+                  setPage(1)
+                  setFilters((prev) => ({
+                    ...prev,
+                    progressStatus: nextProgress,
+                  }))
+                  searchForm.setFieldsValue({
+                    progressStatus: tag.value ?? undefined,
+                  })
+                }}
+                className={
+                  '!m-0 rounded-md border px-3 !text-sm transition-colors duration-150 ' +
+                  (active
+                    ? '!border-[#1677ff] !bg-[#1677ff] !text-white'
+                    : '!border-slate-200 !bg-white !text-slate-600 hover:!border-[#1677ff]/40 hover:!text-[#1677ff]')
+                }
+              >
+                {tag.label}
+              </Tag.CheckableTag>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* 搜索区 */}
+      <div className="rounded-lg border border-slate-200 bg-white px-4 py-3">
         <Form<SearchFormValues>
           form={searchForm}
           layout="inline"
@@ -729,49 +813,67 @@ export default function ProductionScheduling() {
         </Form>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-b border-slate-200 pb-3 text-sm md:grid-cols-5">
-        <div>
-          <Text type="secondary">订单数</Text>
-          <div className="text-lg font-semibold">{summary.totalOrders}</div>
+      {/* 摘要卡 */}
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
+        <SummaryCard
+          label="订单数"
+          value={summary.totalOrders}
+          dotColor="bg-slate-400"
+          valueClass="text-slate-800"
+        />
+        <SummaryCard
+          label="订单数量"
+          value={renderQuantity(summary.totalQuantity)}
+          dotColor="bg-slate-400"
+          valueClass="text-slate-800"
+        />
+        <SummaryCard
+          label="进行中"
+          value={summary.inProgressOrders}
+          dotColor="bg-sky-500"
+          valueClass="text-sky-600"
+        />
+        <SummaryCard
+          label="已完工"
+          value={summary.finishedOrders}
+          dotColor="bg-emerald-500"
+          valueClass="text-emerald-600"
+        />
+        <SummaryCard
+          label="延期"
+          value={summary.delayedOrders}
+          dotColor="bg-rose-500"
+          valueClass="text-rose-600"
+        />
+      </div>
+
+      {/* 操作条 */}
+      <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2">
+        <div className="flex items-center gap-3 text-sm text-slate-500">
+          <span>共 {summary.totalOrders} 条</span>
+          {selectedRowKeys.length > 0 && (
+            <span className="rounded-full bg-[#1677ff]/10 px-2 py-0.5 text-xs font-medium text-[#1677ff]">
+              已选 {selectedOrders.length} 条
+            </span>
+          )}
         </div>
-        <div>
-          <Text type="secondary">订单数量</Text>
-          <div className="text-lg font-semibold">
-            {renderQuantity(summary.totalQuantity)}
-          </div>
-        </div>
-        <div>
-          <Text type="secondary">进行中</Text>
-          <div className="text-lg font-semibold text-sky-700">
-            {summary.inProgressOrders}
-          </div>
-        </div>
-        <div>
-          <Text type="secondary">已完工</Text>
-          <div className="text-lg font-semibold text-emerald-700">
-            {summary.finishedOrders}
-          </div>
-        </div>
-        <div>
-          <Text type="secondary">延期</Text>
-          <div className="text-lg font-semibold text-rose-700">
-            {summary.delayedOrders}
-          </div>
+        <div className="flex items-center gap-2">
+          <ExportButton
+            handleExport={handleExport}
+            count={selectedOrders.length}
+          >
+            {selectedRowKeys.length > 0
+              ? `导出选中 (${selectedOrders.length})`
+              : '导出基础排产表'}
+          </ExportButton>
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-2">
-        <ExportButton
-          handleExport={handleExport}
-          count={selectedOrders.length}
-        >
-          {selectedRowKeys.length > 0
-            ? `导出选中 (${selectedOrders.length})`
-            : '导出基础排产表'}
-        </ExportButton>
-      </div>
-
-      <div ref={tableContainerRef} className="min-h-0 flex-1 overflow-hidden">
+      {/* 表格区 */}
+      <div
+        ref={tableContainerRef}
+        className="min-h-0 flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white"
+      >
         <Table<ProductionSchedulingOrder>
           size="small"
           rowKey={getOrderRowKey}
@@ -782,6 +884,9 @@ export default function ProductionScheduling() {
           scroll={{ x: 2530, y: tableScrollY }}
           tableLayout="fixed"
           rowSelection={rowSelection}
+          rowClassName={(_record, index) =>
+            index % 2 === 0 ? 'bg-slate-50/40' : ''
+          }
         />
       </div>
 
@@ -793,14 +898,22 @@ export default function ProductionScheduling() {
         cancelText="取消"
         confirmLoading={updateMutation.isPending}
         destroyOnHidden
+        classNames={{ container: 'rounded-xl' }}
+        styles={{
+          header: {
+            borderBottom: '1px solid #e2e8f0',
+            paddingBottom: 12,
+            marginBottom: 16,
+          },
+        }}
         onCancel={() => {
           setModalOpen(false)
           setEditingOrder(null)
         }}
         onOk={handleSave}
       >
-        <div className="mb-3 flex items-center gap-2 text-sm text-slate-600">
-          <TableCellsIcon className="size-4" />
+        <div className="mb-3 flex items-center gap-2 rounded-md border border-slate-200 bg-gradient-to-r from-slate-50 to-white px-3 py-2 text-sm text-slate-700">
+          <TableCellsIcon className="size-4 text-slate-500" />
           <span>{getProductSpec(editingOrder)}</span>
         </div>
         <Form<SchedulingFormValues> form={schedulingForm} layout="vertical">
