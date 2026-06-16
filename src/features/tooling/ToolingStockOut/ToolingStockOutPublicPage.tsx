@@ -88,8 +88,8 @@ export default function ToolingStockOutPublicPage() {
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_28%),linear-gradient(180deg,#f6fbfc_0%,#ffffff_42%,#e9eef1_100%)] text-slate-900">
-      <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col overflow-y-auto px-4 pt-5 pb-32 sm:px-6 sm:pt-7">
+    <div className="flex h-dvh flex-col bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_28%),linear-gradient(180deg,#f6fbfc_0%,#ffffff_42%,#e9eef1_100%)] text-slate-900">
+      <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col overflow-y-auto px-4 pt-5 pb-[calc(theme(spacing.32)+env(safe-area-inset-bottom))] sm:px-6 sm:pt-7">
         <section className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/90 px-5 py-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:px-6">
           <div className="absolute top-0 right-0 h-24 w-24 rounded-full bg-sky-200/40 blur-3xl" />
           <div className="absolute bottom-0 -left-8 h-20 w-20 rounded-full bg-slate-200/50 blur-3xl" />
@@ -186,28 +186,28 @@ export default function ToolingStockOutPublicPage() {
             <div className="mt-4 rounded-[24px] border border-slate-200/80 bg-slate-950/3 px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
               提交后会立即写入刀具出库，并保持“待审核”状态。请确认刀具、机器编号、领用人、用途和数量无误，再点击底部“确认登记”。
             </div>
-
-            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+14px)] backdrop-blur-xl sm:px-6">
-              <div className="mx-auto max-w-xl">
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  className="h-12 rounded-2xl"
-                  loading={createMutation.isPending}
-                  disabled={
-                    toolingOptions.length === 0 ||
-                    isToolingOptionsLoading ||
-                    isMachineOptionsLoading
-                  }
-                  onClick={() => formRef?.submit()}
-                >
-                  确认登记
-                </Button>
-              </div>
-            </div>
           </>
         )}
+      </div>
+
+      <div className="sticky bottom-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+14px)] backdrop-blur-xl sm:px-6">
+        <div className="mx-auto w-full max-w-xl">
+          <Button
+            type="primary"
+            size="large"
+            block
+            className="h-12 rounded-2xl"
+            loading={createMutation.isPending}
+            disabled={
+              toolingOptions.length === 0 ||
+              isToolingOptionsLoading ||
+              isMachineOptionsLoading
+            }
+            onClick={() => formRef?.submit()}
+          >
+            确认登记
+          </Button>
+        </div>
       </div>
     </div>
   )
