@@ -10,6 +10,7 @@ const { RangePicker } = DatePicker
 interface SearchValues {
   operation?: string
   model?: string
+  partNo?: string
   unmatchedOnly?: boolean
   partNoOnly?: boolean
   updatedAtRange?: [Dayjs | null, Dayjs | null]
@@ -20,6 +21,7 @@ interface Props {
   onSearch: (params: {
     operation?: string
     model?: string
+    partNo?: string
     unmatchedOnly?: boolean
     partNoOnly?: boolean
     updatedStartDate?: string
@@ -31,6 +33,7 @@ interface Props {
   initialValues?: {
     operation?: string
     model?: string
+    partNo?: string
     unmatchedOnly?: boolean
     partNoOnly?: boolean
     updatedStartDate?: string
@@ -52,6 +55,7 @@ export default function StandardTimeSearch({
     form.setFieldsValue({
       operation: initialValues?.operation,
       model: initialValues?.model,
+      partNo: initialValues?.partNo,
       unmatchedOnly: initialValues?.unmatchedOnly,
       partNoOnly: initialValues?.partNoOnly,
       recordType: initialValues?.recordType,
@@ -73,6 +77,7 @@ export default function StandardTimeSearch({
     onSearch({
       operation: values.operation?.trim() || undefined,
       model: values.model?.trim() || undefined,
+      partNo: values.partNo?.trim() || undefined,
       unmatchedOnly: values.unmatchedOnly || undefined,
       partNoOnly: values.partNoOnly || undefined,
       recordType: values.recordType || undefined,
@@ -123,6 +128,18 @@ export default function StandardTimeSearch({
       >
         <Input
           placeholder="输入型号搜索"
+          onPressEnter={() => form.submit()}
+          allowClear
+          className="rounded-lg"
+        />
+      </Form.Item>
+      <Form.Item
+        name="partNo"
+        className="mb-0"
+        style={{ width: mobile ? '100%' : 200 }}
+      >
+        <Input
+          placeholder="输入料号搜索"
           onPressEnter={() => form.submit()}
           allowClear
           className="rounded-lg"

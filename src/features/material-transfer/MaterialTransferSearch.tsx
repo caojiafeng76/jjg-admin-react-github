@@ -71,6 +71,7 @@ export default function MaterialTransferSearch({
           : undefined,
       projectNo: values.projectNo?.trim() || undefined,
       productModel: values.productModel?.trim() || undefined,
+      materialCode: values.materialCode?.trim() || undefined,
       length_mm:
         values.length_mm && values.length_mm.length > 0
           ? values.length_mm
@@ -134,6 +135,16 @@ export default function MaterialTransferSearch({
           allowClear
           onPressEnter={() => form.submit()}
           style={{ width: mobile ? '100%' : 140 }}
+          className="rounded-lg"
+        />
+      </Form.Item>
+
+      <Form.Item name="materialCode" className={formItemClassName}>
+        <Input
+          placeholder="料号"
+          allowClear
+          onPressEnter={() => form.submit()}
+          style={{ width: mobile ? '100%' : 160 }}
           className="rounded-lg"
         />
       </Form.Item>
