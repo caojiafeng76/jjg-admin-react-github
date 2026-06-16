@@ -6,6 +6,7 @@ interface UseTableHeightOptions {
   gap?: number
   summaryRowHeight?: number // 汇总行高度，用于有汇总行的表格
   minRowHeight?: number // 最小行高，默认 32px
+  reservePaginationHeight?: boolean // 是否从容器高度中扣除分页器高度
 }
 
 /**
@@ -20,6 +21,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
     gap = 16, // gap-4 = 16px
     summaryRowHeight = 0, // 汇总行高度，默认0（无汇总行）
     minRowHeight = 32, // 最小行高，默认 32px
+    reservePaginationHeight = true,
   } = options
 
   const tableContainerRef = useRef<HTMLDivElement>(null)
@@ -27,7 +29,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
   const [scrollY, setScrollY] = useState<number>(400)
   const [rowHeight, setRowHeight] = useState<number>(40)
   const isUpdatingRef = useRef<boolean>(false) // 防止更新期间触发新的计算
-  const lastCalculatedHeightRef = useRef<{ 
+  const lastCalculatedHeightRef = useRef<{
     container: number
     pagination: number
     rowHeight: number
@@ -41,25 +43,31 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
 
       const container = tableContainerRef.current
       const pagination = paginationRef.current
-      if (!container || !pagination) return
+      if (!container || (reservePaginationHeight && !pagination)) return
 
       const containerHeight = container.clientHeight
-      const paginationHeight = pagination.clientHeight
+      const paginationHeight = reservePaginationHeight
+        ? (pagination?.clientHeight ?? 0)
+        : 0
 
       // 如果容器高度和分页高度都没有变化（允许2px的容差），跳过计算
       // 这样可以避免因为表格内容变化导致的微小尺寸变化触发重新计算
       if (
         lastCalculatedHeightRef.current &&
-        Math.abs(lastCalculatedHeightRef.current.container - containerHeight) <= 2 &&
-        Math.abs(lastCalculatedHeightRef.current.pagination - paginationHeight) <= 2
+        Math.abs(lastCalculatedHeightRef.current.container - containerHeight) <=
+          2 &&
+        Math.abs(
+          lastCalculatedHeightRef.current.pagination - paginationHeight,
+        ) <= 2
       ) {
         return
       }
 
-      // 可用高度 = 容器高度 - 分页高度 - gap
-      // 为了确保10行能完全显示，减少扣除的值，给表格更多空间
-      // 使用更小的缓冲空间，并稍微减少gap的扣除
-      const availableHeight = containerHeight - paginationHeight - gap * 0.8 - 1
+      // 可用高度 = 容器高度 - 分页高度 - gap。
+      // 当容器本身已经是表格视口时，不再二次扣除分页器和间距。
+      const reservedGap = reservePaginationHeight ? gap * 0.8 : 0
+      const availableHeight =
+        containerHeight - paginationHeight - reservedGap - 1
 
       if (availableHeight > 0) {
         // 表格总可用高度 = 容器高度 - 分页高度 - gap
@@ -76,7 +84,10 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
           const calculatedRowHeight = tableBodyHeight / targetRowCount
 
           // 使用四舍五入确保行高为整数
-          const newRowHeight = Math.max(minRowHeight, Math.round(calculatedRowHeight)) // 四舍五入，不低于 minRowHeight
+          const newRowHeight = Math.max(
+            minRowHeight,
+            Math.round(calculatedRowHeight),
+          ) // 四舍五入，不低于 minRowHeight
 
           // scroll.y 表示 tbody 的视口高度，必须受容器可用高度约束。
           // 行数较多时通过表格内部滚动展示，不能反向撑高外层容器。
@@ -84,9 +95,12 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
 
           // 只有当计算结果真正改变时才更新状态
           // 添加阈值检查，避免因为微小变化导致的循环更新（2px 的容差）
-          const shouldUpdate = !lastCalculatedHeightRef.current ||
-            Math.abs(lastCalculatedHeightRef.current.rowHeight - newRowHeight) > 2 ||
-            Math.abs(lastCalculatedHeightRef.current.scrollY - newScrollY) > 2 ||
+          const shouldUpdate =
+            !lastCalculatedHeightRef.current ||
+            Math.abs(lastCalculatedHeightRef.current.rowHeight - newRowHeight) >
+              2 ||
+            Math.abs(lastCalculatedHeightRef.current.scrollY - newScrollY) >
+              2 ||
             lastCalculatedHeightRef.current.container !== containerHeight ||
             lastCalculatedHeightRef.current.pagination !== paginationHeight
 
@@ -170,7 +184,14 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
       resizeObserver.disconnect()
       window.removeEventListener('resize', debouncedUpdate)
     }
-  }, [targetRowCount, headerHeight, gap, summaryRowHeight, minRowHeight])
+  }, [
+    targetRowCount,
+    headerHeight,
+    gap,
+    summaryRowHeight,
+    minRowHeight,
+    reservePaginationHeight,
+  ])
 
   return {
     tableContainerRef,

@@ -96,6 +96,9 @@ interface Props {
   onRowClick?: (record: WorkshopOrder) => void
   scrollY?: number
   rowHeight?: number
+  // 当前页码（从 1 开始），用于序号列按全量数据连续编号
+  page?: number
+  pageSize?: number
 }
 
 function WorkshopOrderTable({
@@ -112,12 +115,15 @@ function WorkshopOrderTable({
   onRowClick,
   scrollY = 400,
   rowHeight,
+  page = 1,
+  pageSize = 10,
 }: Props) {
+  const indexOffset = Math.max((page - 1) * pageSize, 0)
   const columns: TableColumnsType<WorkshopOrder> = useMemo(
     () => [
       {
         title: '#',
-        render: (_text, _record, index) => index + 1,
+        render: (_text, _record, index) => indexOffset + index + 1,
         fixed: 'left',
         key: '#',
         width: 34,
@@ -287,7 +293,13 @@ function WorkshopOrderTable({
         ellipsis: true,
       },
     ],
-    [modelFilterValues, modelOptions, projectNoFilterValues, projectNoOptions],
+    [
+      indexOffset,
+      modelFilterValues,
+      modelOptions,
+      projectNoFilterValues,
+      projectNoOptions,
+    ],
   )
 
   const rowSelection: TableProps<WorkshopOrder>['rowSelection'] = {

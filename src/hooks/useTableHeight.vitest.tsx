@@ -38,4 +38,28 @@ describe('useTableHeight', () => {
     expect(result.current.rowHeight).toBe(32)
     expect(result.current.scrollY).toBe(307)
   })
+
+  it('uses the measured viewport directly when pagination is already outside it', () => {
+    const { result } = renderHook(() =>
+      useTableHeight({
+        headerHeight: 30,
+        reservePaginationHeight: false,
+        targetRowCount: 10,
+      }),
+    )
+    const tableContainer = document.createElement('div')
+    const pagination = document.createElement('div')
+
+    Object.defineProperty(tableContainer, 'clientHeight', { value: 360 })
+    Object.defineProperty(pagination, 'clientHeight', { value: 48 })
+    result.current.tableContainerRef.current = tableContainer
+    result.current.paginationRef.current = pagination
+
+    act(() => {
+      vi.runAllTimers()
+    })
+
+    expect(result.current.rowHeight).toBe(33)
+    expect(result.current.scrollY).toBe(329)
+  })
 })

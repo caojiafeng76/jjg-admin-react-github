@@ -176,9 +176,9 @@ export default function WorkshopOrderList() {
   // 动态计算表格高度（目标行数适应上半面板）
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
-      gap: 8,
       headerHeight: 30,
       minRowHeight: 30,
+      reservePaginationHeight: false,
       targetRowCount: Math.min(pageSize, 14),
     })
 
@@ -325,7 +325,7 @@ export default function WorkshopOrderList() {
                         `已关联 ${item.extrusionProductionItemCount} 条挤压明细`}
                       {(item.productionItemCount > 0 ||
                         item.extrusionProductionItemCount > 0) &&
-                        item.orderDates.length > 0
+                      item.orderDates.length > 0
                         ? `，工单日期：${item.orderDates.slice(0, 3).join('、')}`
                         : ''}
                     </div>
@@ -851,13 +851,14 @@ export default function WorkshopOrderList() {
       </div>
 
       {/* 上下分割布局 - 工业风格面板 */}
-      <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+      <Splitter
+        orientation="vertical"
+        style={{ flex: 1, minHeight: 0 }}
+        styles={{ panel: { overflow: 'hidden' } }}
+      >
         {/* 上半部分：订单列表 */}
         <Splitter.Panel defaultSize="60%" min="30%">
-          <div
-            ref={tableContainerRef}
-            className="flex h-full flex-col gap-3 overflow-hidden rounded-lg border border-slate-200/60 bg-white/90 p-3 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/90"
-          >
+          <div className="flex h-full flex-col gap-3 overflow-hidden rounded-lg border border-slate-200/60 bg-white/90 p-3 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/90">
             {/* 表格标题栏 */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -887,7 +888,10 @@ export default function WorkshopOrderList() {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1">
+            <div
+              ref={tableContainerRef}
+              className="min-h-0 flex-1 overflow-hidden"
+            >
               <WorkshopOrderTable
                 loading={isLoading}
                 data={data?.items || []}
@@ -902,6 +906,8 @@ export default function WorkshopOrderList() {
                 onRowClick={setActiveOrder}
                 scrollY={scrollY}
                 rowHeight={rowHeight}
+                page={page}
+                pageSize={pageSize}
               />
             </div>
             <div ref={paginationRef} className="flex shrink-0 justify-end">
@@ -931,7 +937,7 @@ export default function WorkshopOrderList() {
           updateMutation.isPending ||
           batchCreateMutation.isPending
         }
-        destroyOnClose
+        destroyOnHidden
         onOk={() => formRef?.submit()}
         okButtonProps={{ disabled: viewerDenied }}
         onCancel={() => {
