@@ -25,7 +25,7 @@ export default function PrintDecompositionButton() {
       {contextHolder}
       <Button
         type="text"
-        icon={<DocumentArrowDownIcon className="size-4 text-red-500/80!" />}
+        icon={<DocumentArrowDownIcon className="size-4 text-rose-500/80!" />}
         onClick={onClick}
       >
         打印分解单

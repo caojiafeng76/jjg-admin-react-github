@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { FormInstance, message, Modal } from 'antd'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { App, FormInstance, Modal } from 'antd'
 import dayjs from 'dayjs'
 import { TransformedOrderData } from '@utils/excelUtils'
 
@@ -33,18 +33,23 @@ import PoDateFilter from './PoDateFilter'
 import PoSearchInput from './PoSearchInput'
 import { useQuery } from '@tanstack/react-query'
 import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useSearchParams } from 'react-router-dom'
 
 export default function PoList() {
+  const { message: messageApi } = App.useApp()
+  const [searchParams] = useSearchParams()
+  const page = Number(searchParams.get('page')) || 1
+  const pageSize = Number(searchParams.get('pageSize')) || 10
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')
   const [isEdit, setIsEdit] = useState(false)
   const [excelData, setExcelData] = useState<TransformedOrderData | null>(null)
 
-  const [messageApi, messageContextHolder] = message.useMessage()
-
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
-  const { count } = usePos()
+  const { count, pos, isLoading: posLoading } = usePos()
   const {
     tableSelectedKeys,
     setTableSelectedKeys,
@@ -63,7 +68,6 @@ export default function PoList() {
     contextHolder: updatePosContextHolder,
   } = useUpdatePos(messageApi)
 
-  // 仅在创建模式下加载规格数据,编辑模式不需要
   const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
     isAll: !isEdit,
   })
@@ -86,15 +90,25 @@ export default function PoList() {
   const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
     usePrintEnglish(safePartSettings, isSafePartSettingsLoading, messageApi)
 
-  // 使用 useCallback 优化,避免子组件不必要的重渲染
+  const selectedCount = tableSelectedKeys.length
+  const records = useMemo(() => pos || [], [pos])
+  const selectedQty = useMemo(() => {
+    if (selectedCount === 0) return 0
+    const keySet = new Set(tableSelectedKeys.map((key) => String(key)))
+    let total = 0
+    for (const item of records) {
+      if (keySet.has(String(item.id))) {
+        total += Number(item.Qty || 0)
+      }
+    }
+    return total
+  }, [records, selectedCount, tableSelectedKeys])
+
   const handleDelete = useCallback(() => {
-    // 验证选择
     if (tableSelectedKeys.length === 0) {
       messageApi.warning('请选择至少一条数据')
       return
     }
-
-    // 执行删除
     deletePo(tableSelectedKeys.map(String), {
       onSettled: () => {
         setTableSelectedKeys([])
@@ -102,15 +116,12 @@ export default function PoList() {
     })
   }, [tableSelectedKeys, messageApi, deletePo, setTableSelectedKeys])
 
-  // 处理Excel数据解析
   const handleExcelDataChange = useCallback((data: TransformedOrderData) => {
     setExcelData(data)
   }, [])
 
-  // 使用 useCallback 优化,避免子组件不必要的重渲染
   const onFinish = useCallback(
     async (values: ISyneyPo) => {
-      // 检查数据是否正在加载
       if (specsLoading) {
         messageApi.warning('规格数据加载中,请稍后再试')
         return
@@ -123,7 +134,9 @@ export default function PoList() {
 
       try {
         const No = values.No
-        values.EndDate = dayjs(values.EndDate?.toString() || '').format('YYYY-MM-DD')
+        values.EndDate = dayjs(values.EndDate?.toString() || '').format(
+          'YYYY-MM-DD',
+        )
 
         if (isEdit) {
           updatePos(
@@ -138,23 +151,19 @@ export default function PoList() {
           return
         }
 
-        // 判断是Excel导入还是手动输入
         let items: ISyneyItem[]
 
         if (excelData && excelData.items.length > 0) {
-          // Excel导入模式
           items = excelData.items.map((item) => ({
             ...item,
             No,
           })) as ISyneyItem[]
         } else {
-          // 手动输入模式
           items = jsonToArray(values.Detail || '')
           items = items?.map((item) => ({ ...item, No })) as ISyneyItem[]
         }
         items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
 
-        // 如果存在通过备注推测的参数规格,及时提醒用户
         const hasInferredParamSpec = items.some(
           (item) => item.ParamSpecInferred,
         )
@@ -162,20 +171,15 @@ export default function PoList() {
           messageApi.warning('部分参数规格根据备注推测生成，请确认是否准确')
         }
 
-        // 🔥 新方案: 使用原子操作预分配序列号范围
-        // 1. 计算需要多少个序列号 (按 SONo 分组数量)
         const uniqueSONos = new Set(items.map((item) => item.SONo))
         const incrementBy = uniqueSONos.size
 
-        // 2. 原子性获取并递增序列号 (线程安全,防止竞态条件)
         const { atomicIncrementSerialNo } =
           await import('@/services/apiSyneySerialNo')
         const finalSerialNo = await atomicIncrementSerialNo(incrementBy)
 
-        // 3. 计算起始序列号 (最终序列号 - 增量 = 起始点)
         const startSerialNo = finalSerialNo - incrementBy
 
-        // 4. 使用预分配的序列号范围生成订单数据
         const { map } = getItemsWithExtraInfo(
           items,
           startSerialNo,
@@ -185,7 +189,6 @@ export default function PoList() {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { Detail, ...po } = values
 
-        // 如果是Excel导入模式，确保包含从Excel解析出的工艺要求和备注
         if (excelData) {
           if (excelData.po.Technique) {
             po.Technique = excelData.po.Technique
@@ -204,7 +207,6 @@ export default function PoList() {
               setIsModalOpen(false)
               setTableSelectedKeys([])
               setIsCreating(false)
-              // 清空Excel数据
               setExcelData(null)
             },
           },
@@ -231,21 +233,17 @@ export default function PoList() {
     ],
   )
 
-  // 使用 useCallback 优化,避免子组件不必要的重渲染
   const handlePrint = useCallback(() => {
     generateLabel()
     setTableSelectedKeys([])
   }, [generateLabel, setTableSelectedKeys])
 
-  // 使用 useCallback 优化,避免子组件不必要的重渲染
   const handlePrintEnglish = useCallback(() => {
     generateEnglishLabel()
     setTableSelectedKeys([])
   }, [generateEnglishLabel, setTableSelectedKeys])
 
-  // 使用 useCallback 优化,避免子组件不必要的重渲染
   const handleEdit = useCallback(() => {
-    // 检查是否选择了数据
     if (tableSelectedKeys.length === 0) {
       messageApi.warning('请选择至少一条数据进行编辑')
       return
@@ -260,7 +258,6 @@ export default function PoList() {
     setIsModalOpen(true)
   }, [tableSelectedKeys, messageApi])
 
-  // 优化清理逻辑:仅在组件卸载时清理,避免不必要的状态更新
   useEffect(() => {
     return () => {
       setIsCreating(false)
@@ -269,84 +266,146 @@ export default function PoList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: 12,
+    summaryRowHeight: 39,
+  })
+
   return (
-    <div className="grid h-full grid-rows-[auto_1fr] gap-4">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
       {labelContextHolder}
       {englishLabelContextHolder}
-      {messageContextHolder}
       {createPoContextHolder}
       {updatePosContextHolder}
       {deletePoContextHolder}
 
-      {/* 工具栏 */}
-      <div className="flex flex-col gap-2">
-        {/* 第一行：功能按钮 */}
-        <div className="flex flex-wrap items-center gap-2">
-          <AddButton
-            handleCreate={() => {
-              setIsEdit(false)
-              poFormRef.current?.resetFields()
-              setModalTitle('创建订单')
-              setIsModalOpen(true)
-            }}
-            permissionKey="feature:syney-po-list.create"
-          />
+      {/* 顶部工具栏 */}
+      <div className="flex flex-wrap items-center gap-2">
+        <AddButton
+          handleCreate={() => {
+            setIsEdit(false)
+            poFormRef.current?.resetFields()
+            setModalTitle('创建订单')
+            setIsModalOpen(true)
+          }}
+          permissionKey="feature:syney-po-list.create"
+        />
 
-          <EditButton
-            title="编辑"
-            handleEdit={handleEdit}
-            permissionKey="feature:syney-po-list.edit"
-          />
+        <EditButton
+          title="编辑"
+          handleEdit={handleEdit}
+          permissionKey="feature:syney-po-list.edit"
+        />
 
-          <DeleteButton
-            onConfirm={handleDelete}
-            isDeleting={isDeleting}
-            count={tableSelectedKeys.length}
-            permissionKey="feature:syney-po-list.delete"
-          />
+        <DeleteButton
+          onConfirm={handleDelete}
+          isDeleting={isDeleting}
+          count={tableSelectedKeys.length}
+          permissionKey="feature:syney-po-list.delete"
+        />
 
-          <PrintButton handlePrint={handlePrint}>打印中文标签</PrintButton>
-          <PrintButton handlePrint={handlePrintEnglish}>
-            打印英文标签
-          </PrintButton>
+        <PrintButton handlePrint={handlePrint}>打印中文标签</PrintButton>
+        <PrintButton handlePrint={handlePrintEnglish}>
+          打印英文标签
+        </PrintButton>
 
-          <ExportInfoButton />
+        <ExportInfoButton />
 
-          <PrintDecompositionButton />
+        <PrintDecompositionButton />
+      </div>
+
+      {/* 选中摘要条 */}
+      {selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm">
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100">
+              <svg
+                className="h-3.5 w-3.5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            已选
+            <span className="mx-1 text-lg font-bold text-blue-600">
+              {selectedCount}
+            </span>
+            条
+          </span>
+          {selectedQty > 0 ? (
+            <span className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100">
+                <svg
+                  className="h-3.5 w-3.5 text-rose-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  />
+                </svg>
+              </div>
+              选中数量合计：
+              <span className="text-xl font-bold text-rose-600 tabular-nums">
+                {selectedQty.toLocaleString()}
+              </span>
+            </span>
+          ) : null}
         </div>
+      ) : null}
 
-        {/* 第二行：操作、过滤和搜索 */}
+      {/* 搜索 / 过滤栏 */}
+      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <span className="text-sm font-medium text-slate-600">筛选条件</span>
+        </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600">操作：</span>
-            <PoSelected />
-          </div>
-          <div className="h-6 w-px bg-slate-300" /> {/* 分隔线 */}
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600">状态：</span>
-            <PoSelectedFilter />
-          </div>
           <div className="flex items-center gap-2">
             <span className="text-slate-600">交货日期：</span>
             <PoDateFilter />
           </div>
-          <div className="h-6 w-px bg-slate-300" /> {/* 分隔线 */}
+          <div className="h-6 w-px bg-slate-200" />
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">状态：</span>
+            <PoSelectedFilter />
+          </div>
+          <div className="h-6 w-px bg-slate-200" />
           <div className="flex items-center gap-2">
             <span className="text-slate-600">搜索：</span>
             <PoSearchInput />
           </div>
+          <div className="h-6 w-px bg-slate-200" />
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">操作：</span>
+            <PoSelected />
+          </div>
         </div>
       </div>
 
-      {/* 表格和分页区域 */}
-      <div className="grid grid-rows-[1fr_auto] gap-4 overflow-hidden">
-        {/* 表格区域 */}
-        <div className="overflow-x-auto overflow-y-hidden">
-          <PoTable />
+      {/* 表格和分页 */}
+      <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
+        <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
+          <PoTable
+            loading={posLoading || isCreating || isPoUpdating}
+            data={records}
+            page={page}
+            pageSize={pageSize}
+            scrollY={scrollY}
+          />
         </div>
-
-        {/* 分页区域 */}
-        <div className="flex shrink-0 justify-end">
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={count || 0} />
         </div>
       </div>
@@ -357,6 +416,7 @@ export default function PoList() {
         open={isModalOpen}
         confirmLoading={isCreating || isPoUpdating}
         destroyOnClose={true}
+        width={720}
         onOk={() => poFormRef.current?.submit()}
         onCancel={() => {
           setIsModalOpen(false)

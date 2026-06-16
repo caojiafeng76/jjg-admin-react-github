@@ -1,5 +1,5 @@
-import { Key, useEffect, useRef, useState } from 'react'
-import { message, Modal } from 'antd'
+import { useEffect, useRef, useState, useMemo } from 'react'
+import { App, Modal } from 'antd'
 
 import { ISyneySpec, ISyneySpecFormRef } from '@/types'
 import SpecTable from './SpecTable'
@@ -13,8 +13,16 @@ import AddButton from '@ui/AddButton'
 import DeleteButton from '@ui/DeleteButton'
 import PartNoInput from './PartNoInput'
 import AppPagination from '@/ui/AppPagination'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useSearchParams } from 'react-router-dom'
+import { Key } from 'react'
 
 export default function SpecList() {
+  const { message } = App.useApp()
+  const [searchParams] = useSearchParams()
+  const page = Number(searchParams.get('page')) || 1
+  const pageSize = Number(searchParams.get('pageSize')) || 10
+
   const specFormRef = useRef<ISyneySpecFormRef>(null)
   const specFormInstance = specFormRef.current?.getInstance()
 
@@ -31,31 +39,16 @@ export default function SpecList() {
   const specIds = selectedRowKeys.map((id) => Number(id))
   const spec = syneySpecs?.find((item) => item.id === specIds?.at(0))
 
-  /**
-   * 显示模态框
-   * 此函数旨在准备并显示一个模态框，在执行以下操作之前重置表单状态
-   * 主要用于用户想要添加新书时，重置表单确保没有之前的残留数据，从而避免混淆
-   */
   function showModal() {
-    // 条件性地重置表单的字段，如果specFormInstance存在的话
     specFormInstance?.resetFields()
-
-    // 设置模态框的显示状态为true，使其可见
     setIsModalOpen(true)
   }
 
-  function onSelect(specIds: Key[]) {
-    setSelectedRowKeys(specIds)
+  function onSelect(keys: Key[]) {
+    setSelectedRowKeys(keys)
   }
 
-  /**
-   * 处理完成操作的函数
-   * 该函数根据当前是否处于编辑状态来决定是更新还是创建一个ISyneySpec对象
-   *
-   * @param spec ISyneySpec类型的对象，包含特定的规格信息
-   */
   function onFinishFuc(spec: ISyneySpec) {
-    // 当处于编辑状态时，调用更新函数
     if (isEditing) {
       updateSyneySpec(spec, {
         onSuccess: () => {
@@ -64,7 +57,6 @@ export default function SpecList() {
         },
       })
     } else {
-      // 当不处于编辑状态时，调用创建函数
       createSyneySpec(spec, {
         onSuccess: () => {
           setSelectedRowKeys([])
@@ -74,69 +66,32 @@ export default function SpecList() {
     }
   }
 
-  /**
-   * 处理取消操作的函数
-   * 该函数重置表单状态，退出编辑模式，关闭模态框
-   */
   function handleCancel() {
-    // 重置表单实例的字段
     specFormInstance?.resetFields()
-    // 设置是否正在编辑的状态为false
     setIsEditing(false)
-    // 设置模态框是否打开的状态为false
     setIsModalOpen(false)
   }
 
-  /**
-   * 确认按钮点击事件处理函数
-   * 此函数在用户点击确认按钮后调用，执行一系列操作以处理用户的选择或输入
-   */
   function handleOk() {
-    // 触发表单实例的提交事件，如果表单验证通过则继续后续操作
     specFormInstance?.submit()
   }
 
-  /**
-   * 处理创建规格的操作
-   * 此函数重置模态框的标题和编辑状态，并显示模态框，以便用户输入新的规格信息
-   */
   function handleCreate() {
-    setModalTitle('创建规格') // 设置模态框的标题为“创建规格”
-    setIsEditing(false) // 设置当前不处于编辑状态
-    showModal() // 显示模态框
+    setModalTitle('创建规格')
+    setIsEditing(false)
+    showModal()
   }
 
-  /**
-   * 处理编辑操作的函数
-   * 此函数检查是否选择了 Exactly one 数据项进行编辑
-   * 如果没有选择数据项或选择了多个数据项，则显示警告消息
-   * 如果选择了单个数据项，则设置编辑状态并显示模态框
-   */
   function handleEdit() {
-    // 检查specIds数组的长度是否不等于1，如果不满足条件，则显示警告消息并返回
     if (specIds?.length !== 1) {
       message.warning('请选择一条数据')
       return
     }
-
-    // 设置是否处于编辑状态的布尔值为true，表示开始编辑
     setIsEditing(true)
-    // 调用显示模态框的函数，用于编辑数据
     showModal()
   }
 
-  /**
-   * 处理删除操作的函数
-   * 此函数负责调用deleteSyneySpecs函数以删除规格信息，并关闭确认对话框
-   * 它没有参数和返回值
-   */
-  /**
-   * 处理删除操作的函数
-   * 此函数负责调用deleteSyneySpecs函数以删除规格信息，并关闭确认对话框
-   * 它没有参数和返回值
-   */
   function handleDelete() {
-    // 调用deleteSyneySpecs函数，传入specIds以删除对应的规格信息
     if (specIds?.length === 0) {
       message.warning('请选择至少一条数据')
       return
@@ -149,53 +104,105 @@ export default function SpecList() {
   }
 
   useEffect(() => {
-    /**
-     * 当spec或isEditing发生变化时，更新表单和模态框标题
-     * 如果spec存在且isEditing为true，则将spec的数据设置到表单中，并设置模态框标题为“编辑规格”
-     */
     if (spec && isEditing) {
-      // 将spec的数据设置到表单中
       specFormInstance?.setFieldsValue({ ...spec })
-      // 设置模态框标题为“编辑规格”
       setModalTitle('编辑规格')
     }
   }, [spec, isEditing, specFormInstance])
 
+  const records = useMemo(() => syneySpecs || [], [syneySpecs])
+  const selectedCount = selectedRowKeys.length
+
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: 12,
+    summaryRowHeight: 0,
+  })
+
   return (
-    <div className="grid grid-rows-[32px_1fr] gap-4">
-      <div className="flex h-full items-center gap-2">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
+      {/* 顶部工具栏 */}
+      <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
-
         <EditButton title="只能选择一条数据" handleEdit={handleEdit} />
-
         <DeleteButton onConfirm={handleDelete} isDeleting={isDeleting} />
-        <PartNoInput />
       </div>
 
-      <div className="no-scrollbar overflow-y-scroll">
-        <SpecTable
-          data={syneySpecs || []}
-          loading={isLoading || isCreating || isUpdating || isDeleting}
-          onSelect={onSelect}
-          selectedRowKeys={selectedRowKeys}
-        />
+      {/* 选中摘要条 */}
+      {selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm">
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100">
+              <svg
+                className="h-3.5 w-3.5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            已选
+            <span className="mx-1 text-lg font-bold text-blue-600">
+              {selectedCount}
+            </span>
+            条
+          </span>
+        </div>
+      ) : null}
 
-        <AppPagination total={count || 0} />
+      {/* 搜索 / 过滤栏 */}
+      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <span className="text-sm font-medium text-slate-600">筛选条件</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">件号：</span>
+            <PartNoInput />
+          </div>
+        </div>
+      </div>
 
-        <Modal
-          title={modalTitle}
-          open={isModalOpen}
-          confirmLoading={isCreating || isUpdating}
-          onOk={handleOk}
-          onCancel={handleCancel}
-        >
-          <SpecForm
-            ref={specFormRef}
-            onFinishFunc={onFinishFuc}
-            isEditing={isEditing}
+      {/* 表格 + 分页 */}
+      <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
+        <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
+          <SpecTable
+            data={records}
+            loading={
+              isLoading || isCreating || isUpdating || isDeleting
+            }
+            onSelect={onSelect}
+            selectedRowKeys={selectedRowKeys}
+            page={page}
+            pageSize={pageSize}
+            scrollY={scrollY}
           />
-        </Modal>
+        </div>
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
+          <AppPagination total={count || 0} />
+        </div>
       </div>
+
+      <Modal
+        title={modalTitle}
+        open={isModalOpen}
+        confirmLoading={isCreating || isUpdating}
+        width={560}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <SpecForm
+          ref={specFormRef}
+          onFinishFunc={onFinishFuc}
+          isEditing={isEditing}
+        />
+      </Modal>
     </div>
   )
 }

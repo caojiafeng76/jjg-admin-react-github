@@ -17,8 +17,8 @@ export default forwardRef<
   const { updateItems } = useUpdate()
 
   const layout = {
-    labelCol: { span: 4 },
-    wrapperCol: { span: 20 },
+    labelCol: { span: 6 },
+    wrapperCol: { span: 18 },
   }
 
   async function onFinish(values: ISyneyItem) {
@@ -38,25 +38,44 @@ export default forwardRef<
   useImperativeHandle(ref, () => ({ getInstance: () => form }))
 
   return (
-    <Form {...layout} name="po-detail" form={form} onFinish={onFinish}>
+    <Form
+      {...layout}
+      name="po-detail"
+      form={form}
+      onFinish={onFinish}
+      className="[&_.ant-form-item]:mb-3"
+    >
       <Form.Item name="PartNo" label="件号">
-        <Input disabled />
+        <Input disabled className="rounded-lg" />
       </Form.Item>
 
       <Form.Item name="PartName" label="名称">
-        <Input disabled />
+        <Input disabled className="rounded-lg" />
       </Form.Item>
 
       <Form.Item name="Spec" label="规格">
-        <Input disabled />
+        <Input disabled className="rounded-lg" />
       </Form.Item>
 
-      <Form.Item name="ParamSpec" label="参数规格" rules={[{ required: true }]}>
-        <Input disabled={isLoading} />
+      <Form.Item
+        name="ParamSpec"
+        label="参数规格"
+        rules={[{ required: true }]}
+      >
+        <Input
+          disabled={isLoading}
+          className="rounded-lg"
+          placeholder="请输入参数规格"
+        />
       </Form.Item>
 
       <Form.Item name="Remark" label="备注">
-        <Input.TextArea rows={4} cols={30} disabled />
+        <Input.TextArea
+          rows={4}
+          disabled
+          className="rounded-lg"
+          placeholder="备注不可编辑"
+        />
       </Form.Item>
     </Form>
   )

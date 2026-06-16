@@ -1,6 +1,7 @@
 import { DatePicker } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import dayjs, { Dayjs } from 'dayjs'
+import { CalendarDaysIcon } from '@heroicons/react/16/solid'
 
 const { RangePicker } = DatePicker
 
@@ -36,7 +37,8 @@ export default function PoDateFilter() {
       format="YYYY-MM-DD"
       placeholder={['开始日期', '结束日期']}
       allowClear
-      className="w-64"
+      prefix={<CalendarDaysIcon className="h-3.5 w-3.5 text-slate-400" />}
+      className="w-64 rounded-lg"
     />
   )
 }

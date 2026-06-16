@@ -4,8 +4,8 @@ import { Form, Input } from 'antd'
 import { ISyneySpec, ISyneySpecFormRef } from '@/types'
 
 const layout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 20 },
+  labelCol: { span: 6 },
+  wrapperCol: { span: 18 },
 }
 
 const SpecForm = forwardRef<
@@ -27,22 +27,42 @@ const SpecForm = forwardRef<
   })
 
   return (
-    <>
-      <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
-        <Form.Item name="PartNo" label="件号" rules={[{ required: true }]}>
-          <Input disabled={isEditing} />
-        </Form.Item>
-        <Form.Item name="PartName" label="名称" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item name="Spec" label="规格" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item name="ParamSpec" label="参数" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-      </Form>
-    </>
+    <Form
+      {...layout}
+      form={form}
+      name="control-hooks"
+      onFinish={onFinish}
+      className="[&_.ant-form-item]:mb-3"
+    >
+      <Form.Item
+        name="PartNo"
+        label="件号"
+        rules={[{ required: true }]}
+      >
+        <Input disabled={isEditing} className="rounded-lg" />
+      </Form.Item>
+      <Form.Item
+        name="PartName"
+        label="名称"
+        rules={[{ required: true }]}
+      >
+        <Input className="rounded-lg" />
+      </Form.Item>
+      <Form.Item
+        name="Spec"
+        label="规格"
+        rules={[{ required: true }]}
+      >
+        <Input className="rounded-lg" />
+      </Form.Item>
+      <Form.Item
+        name="ParamSpec"
+        label="参数"
+        rules={[{ required: true }]}
+      >
+        <Input className="rounded-lg" />
+      </Form.Item>
+    </Form>
   )
 })
 

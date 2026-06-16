@@ -1,4 +1,4 @@
-import { useState, type Key } from 'react'
+import { useState, useMemo, type Key } from 'react'
 import {
   Button,
   Form,
@@ -6,12 +6,11 @@ import {
   Modal,
   Switch,
   Table,
-  Popconfirm,
-  Space,
   App,
   Select,
   Tooltip,
   Upload,
+  Pagination,
 } from 'antd'
 import type { ColumnsType, FilterDropdownProps } from 'antd/es/table/interface'
 import { SearchOutlined } from '@ant-design/icons'
@@ -22,6 +21,8 @@ import {
   PencilSquareIcon,
   PlusCircleIcon,
   XCircleIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
 } from '@heroicons/react/16/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -79,8 +80,9 @@ export default function SafePartSettingPage() {
   const [downloadingDrawingId, setDownloadingDrawingId] = useState<
     string | null
   >(null)
-  const [pageSize, setPageSize] = useState(10)
+  const [partNoFilter, setPartNoFilter] = useState('')
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [form] = Form.useForm()
 
   const openCreate = () => {
@@ -219,206 +221,394 @@ export default function SafePartSettingPage() {
     deleteMutation.mutate(selectedIds)
   }
 
-  const columns: ColumnsType<SyneySafePartSetting> = [
-    {
-      title: '序号',
-      dataIndex: 'index',
-      width: 60,
-      render: (_: unknown, __: SyneySafePartSetting, index: number) =>
-        (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: '件号(包含)',
-      dataIndex: 'part_no',
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }: FilterDropdownProps) => (
-        <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
-          <Input
-            placeholder="搜索件号"
-            value={selectedKeys[0] as string}
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() => confirm()}
-            style={{ marginBottom: 8, display: 'block' }}
-          />
-          <Space>
-            <Button type="primary" size="small" onClick={() => confirm()}>
-              确定
-            </Button>
-            <Button
-              size="small"
-              onClick={() => {
-                clearFilters?.()
-                confirm({ closeDropdown: false })
-              }}
-            >
-              重置
-            </Button>
-          </Space>
-        </div>
-      ),
-      filterIcon: (filtered: boolean) => (
-        <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
-      ),
-      onFilter: (value, record) =>
-        (record.part_no ?? '')
-          .toLowerCase()
-          .includes(String(value).toLowerCase()),
-    },
-    { title: '名称', dataIndex: 'name' },
-    { title: '产品型号', dataIndex: 'part_model' },
-    { title: '编号前缀', dataIndex: 'part_code_prefix' },
-    { title: '英文名称', dataIndex: 'english_name' },
-    {
-      title: '是否需打印标签',
-      dataIndex: 'need_print_label',
-      render: (v: boolean) => (v ? '是' : '否'),
-    },
-    {
-      title: '是否为安全部件',
-      dataIndex: 'is_safe_part',
-      render: (v: boolean) => (v ? '是' : '否'),
-    },
-    {
-      title: '分解单列',
-      dataIndex: 'decomposition_role',
-      render: (v: string | null) =>
-        DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v ?? '-',
-    },
-    {
-      title: '图纸',
-      dataIndex: 'drawing_file_name',
-      width: 220,
-      render: (_: unknown, record: SyneySafePartSetting) => {
-        const hasDrawing = Boolean(record.drawing_file_path)
-        const uploadLoading = uploadingDrawingId === record.id
-        const previewLoading = previewingDrawingId === record.id
-        const downloadLoading = downloadingDrawingId === record.id
+  const filteredData = useMemo(() => {
+    if (!data) return []
+    if (!partNoFilter.trim()) return data
+    const lower = partNoFilter.toLowerCase()
+    return data.filter((item) =>
+      (item.part_no ?? '').toLowerCase().includes(lower),
+    )
+  }, [data, partNoFilter])
 
-        return (
-          <Space size={4}>
-            <Upload
-              accept={SAFE_PART_DRAWING_ACCEPT}
-              beforeUpload={(file) => {
-                void handleDrawingUpload(record, file)
-                return Upload.LIST_IGNORE
-              }}
-              disabled={uploadLoading}
-              maxCount={1}
-              showUploadList={false}
-            >
+  const pagedData = useMemo(() => {
+    const start = (page - 1) * pageSize
+    return filteredData.slice(start, start + pageSize)
+  }, [filteredData, page, pageSize])
+
+  const columns: ColumnsType<SyneySafePartSetting> = useMemo(
+    () => [
+      {
+        title: '#',
+        key: 'index',
+        width: 60,
+        fixed: 'left',
+        render: (_: unknown, __: SyneySafePartSetting, index: number) =>
+          (page - 1) * pageSize + index + 1,
+      },
+      {
+        title: '件号(包含)',
+        dataIndex: 'part_no',
+        key: 'part_no',
+        width: 200,
+        filterDropdown: ({
+          setSelectedKeys,
+          selectedKeys,
+          confirm,
+          clearFilters,
+        }: FilterDropdownProps) => (
+          <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+            <Input
+              placeholder="搜索件号"
+              value={selectedKeys[0] as string}
+              onChange={(e) =>
+                setSelectedKeys(e.target.value ? [e.target.value] : [])
+              }
+              onPressEnter={() => confirm()}
+              style={{ marginBottom: 8, display: 'block' }}
+            />
+            <div className="flex gap-2">
               <Button
-                type="text"
+                type="primary"
                 size="small"
-                loading={uploadLoading}
-                disabled={uploadLoading}
-                icon={<ArrowUpTrayIcon className="size-4 text-green-500/80!" />}
+                onClick={() => confirm()}
+                className="rounded-lg"
               >
-                {hasDrawing ? '替换' : '上传'}
+                确定
               </Button>
-            </Upload>
-            <Tooltip title={record.drawing_file_name ?? '暂无图纸'}>
+              <Button
+                size="small"
+                onClick={() => {
+                  clearFilters?.()
+                  confirm({ closeDropdown: false })
+                }}
+                className="rounded-lg"
+              >
+                重置
+              </Button>
+            </div>
+          </div>
+        ),
+        filterIcon: (filtered: boolean) => (
+          <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+        ),
+        onFilter: (value, record) =>
+          (record.part_no ?? '')
+            .toLowerCase()
+            .includes(String(value).toLowerCase()),
+      },
+      {
+        title: '名称',
+        dataIndex: 'name',
+        key: 'name',
+        width: 130,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '产品型号',
+        dataIndex: 'part_model',
+        key: 'part_model',
+        width: 130,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '编号前缀',
+        dataIndex: 'part_code_prefix',
+        key: 'part_code_prefix',
+        width: 120,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '英文名称',
+        dataIndex: 'english_name',
+        key: 'english_name',
+        width: 160,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '需打印标签',
+        dataIndex: 'need_print_label',
+        key: 'need_print_label',
+        width: 100,
+        render: (v: boolean) =>
+          v ? (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600 shadow-sm">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              是
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm">
+              <div className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+              否
+            </div>
+          ),
+      },
+      {
+        title: '安全部件',
+        dataIndex: 'is_safe_part',
+        key: 'is_safe_part',
+        width: 100,
+        render: (v: boolean) =>
+          v ? (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600 shadow-sm">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              是
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm">
+              <div className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+              否
+            </div>
+          ),
+      },
+      {
+        title: '分解单列',
+        dataIndex: 'decomposition_role',
+        key: 'decomposition_role',
+        width: 110,
+        render: (v: string | null) => {
+          const label = DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v
+          return label ? (
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              {label}
+            </span>
+          ) : (
+            '-'
+          )
+        },
+      },
+      {
+        title: '图纸',
+        dataIndex: 'drawing_file_name',
+        key: 'drawing_file_name',
+        width: 240,
+        render: (_: unknown, record: SyneySafePartSetting) => {
+          const hasDrawing = Boolean(record.drawing_file_path)
+          const uploadLoading = uploadingDrawingId === record.id
+          const previewLoading = previewingDrawingId === record.id
+          const downloadLoading = downloadingDrawingId === record.id
+
+          return (
+            <div className="flex flex-wrap items-center gap-1">
+              <Upload
+                accept={SAFE_PART_DRAWING_ACCEPT}
+                beforeUpload={(file) => {
+                  void handleDrawingUpload(record, file)
+                  return Upload.LIST_IGNORE
+                }}
+                disabled={uploadLoading}
+                maxCount={1}
+                showUploadList={false}
+              >
+                <Button
+                  type="text"
+                  size="small"
+                  loading={uploadLoading}
+                  disabled={uploadLoading}
+                  icon={
+                    <ArrowUpTrayIcon className="size-4 text-emerald-500/80!" />
+                  }
+                >
+                  {hasDrawing ? '替换' : '上传'}
+                </Button>
+              </Upload>
+              <Tooltip title={record.drawing_file_name ?? '暂无图纸'}>
+                <Button
+                  type="text"
+                  size="small"
+                  disabled={!hasDrawing}
+                  loading={previewLoading}
+                  icon={<EyeIcon className="size-4 text-blue-500/80!" />}
+                  onClick={() => handlePreviewDrawing(record)}
+                >
+                  查看
+                </Button>
+              </Tooltip>
               <Button
                 type="text"
                 size="small"
                 disabled={!hasDrawing}
-                loading={previewLoading}
-                icon={<EyeIcon className="size-4 text-blue-500/80!" />}
-                onClick={() => handlePreviewDrawing(record)}
+                loading={downloadLoading}
+                icon={
+                  <ArrowDownTrayIcon className="size-4 text-slate-500/80!" />
+                }
+                onClick={() => handleDownloadDrawing(record)}
               >
-                查看
+                下载
               </Button>
-            </Tooltip>
-            <Button
-              type="text"
-              size="small"
-              disabled={!hasDrawing}
-              loading={downloadLoading}
-              icon={<ArrowDownTrayIcon className="size-4 text-slate-500/80!" />}
-              onClick={() => handleDownloadDrawing(record)}
-            >
-              下载
-            </Button>
-          </Space>
-        )
+            </div>
+          )
+        },
       },
-    },
-    { title: '备注', dataIndex: 'remark' },
-    {
-      title: '操作',
-      render: (_: unknown, record: SyneySafePartSetting) => (
-        <Space size={4}>
+      {
+        title: '备注',
+        dataIndex: 'remark',
+        key: 'remark',
+        width: 160,
+        ellipsis: true,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '操作',
+        key: 'action',
+        width: 100,
+        fixed: 'right',
+        render: (_: unknown, record: SyneySafePartSetting) => (
           <Button
             type="text"
             size="small"
-            icon={<PencilSquareIcon className="size-4 text-yellow-500/80!" />}
+            icon={
+              <PencilSquareIcon className="size-4 text-amber-500/80!" />
+            }
             onClick={() => openEdit(record)}
           >
             编辑
           </Button>
-        </Space>
-      ),
-    },
-  ]
+        ),
+      },
+    ],
+    [page, pageSize],
+  )
 
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: Key[]) => setSelectedRowKeys(keys),
+    preserveSelectedRowKeys: true,
   }
 
   const handleSubmit = (values: SafePartSettingFormValues) => {
     saveMutation.mutate(values)
   }
 
+  const selectedCount = selectedRowKeys.length
+  const total = filteredData.length
+
   return (
-    <div className="grid grid-rows-[32px_1fr] gap-4">
-      <div className="flex h-full items-center gap-2">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
+      {/* 顶部工具栏 */}
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           type="text"
-          icon={<PlusCircleIcon className="size-4 text-green-500/80!" />}
+          icon={<PlusCircleIcon className="size-4 text-emerald-500/80!" />}
           onClick={openCreate}
         >
           新增
         </Button>
         <Tooltip
           title={
-            selectedRowKeys.length > 0
-              ? `已选择 ${selectedRowKeys.length} 条数据`
+            selectedCount > 0
+              ? `已选择 ${selectedCount} 条数据`
               : '请选择要删除的数据'
           }
         >
           <span>
-            <Popconfirm
-              title="确认批量删除?"
-              description={`确定删除选中的 ${selectedRowKeys.length} 条件号配置吗？`}
-              disabled={selectedRowKeys.length === 0}
-              onConfirm={handleBatchDelete}
-              okText="确认删除"
-              cancelText="取消"
-              okButtonProps={{
-                loading: deleteMutation.isPending,
-                danger: true,
-              }}
+            <Button
+              type="text"
+              loading={deleteMutation.isPending}
+              disabled={selectedCount === 0}
+              onClick={handleBatchDelete}
+              icon={<XCircleIcon className="size-4 text-rose-500/80!" />}
             >
-              <Button
-                type="text"
-                loading={deleteMutation.isPending}
-                disabled={selectedRowKeys.length === 0}
-                icon={<XCircleIcon className="size-4 text-red-500/80!" />}
-              >
-                删除
-                {selectedRowKeys.length > 0
-                  ? `(${selectedRowKeys.length})`
-                  : ''}
-              </Button>
-            </Popconfirm>
+              删除{selectedCount > 0 ? `(${selectedCount})` : ''}
+            </Button>
           </span>
         </Tooltip>
+      </div>
+
+      {/* 选中摘要条 */}
+      {selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm">
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100">
+              <svg
+                className="h-3.5 w-3.5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            已选
+            <span className="mx-1 text-lg font-bold text-blue-600">
+              {selectedCount}
+            </span>
+            条
+          </span>
+        </div>
+      ) : null}
+
+      {/* 搜索栏 */}
+      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <span className="text-sm font-medium text-slate-600">筛选条件</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600">件号：</span>
+            <Input
+              placeholder="搜索件号（前端过滤）"
+              value={partNoFilter}
+              onChange={(e) => {
+                setPartNoFilter(e.target.value)
+                setPage(1)
+              }}
+              allowClear={{
+                clearIcon: (
+                  <XMarkIcon className="h-3.5 w-3.5 text-slate-400" />
+                ),
+              }}
+              prefix={
+                <MagnifyingGlassIcon className="h-3.5 w-3.5 text-slate-400" />
+              }
+              className="w-64 rounded-lg"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 表格 + 分页 */}
+      <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
+        <div className="min-h-0 overflow-hidden">
+          <Table
+            rowKey="id"
+            loading={
+              isLoading ||
+              saveMutation.isPending ||
+              deleteMutation.isPending
+            }
+            dataSource={pagedData}
+            columns={columns}
+            rowSelection={rowSelection}
+            size="small"
+            pagination={false}
+            scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
+            style={{ fontSize: '13px' }}
+            className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
+          />
+        </div>
+        <div className="flex shrink-0 justify-end">
+          <Pagination
+            current={page}
+            pageSize={pageSize}
+            total={total}
+            showSizeChanger={{
+              getPopupContainer: () => document.body,
+            }}
+            pageSizeOptions={['10', '20', '50', '100']}
+            showTotal={(t) => `共 ${t} 条`}
+            onChange={(p) => setPage(p)}
+            onShowSizeChange={(_current, size) => {
+              setPageSize(size)
+              setPage(1)
+            }}
+          />
+        </div>
       </div>
 
       <Modal
@@ -429,6 +619,7 @@ export default function SafePartSettingPage() {
         okText={editing ? '保存修改' : '新增'}
         cancelText="取消"
         confirmLoading={saveMutation.isPending}
+        width={640}
         destroyOnHidden
       >
         <Form
@@ -442,11 +633,13 @@ export default function SafePartSettingPage() {
             name="part_no"
             rules={[{ required: true, message: '请输入件号' }]}
           >
-            <Input allowClear placeholder="如 XN2808EB" />
+            <Input allowClear placeholder="如 XN2808EB" className="rounded-lg" />
           </Form.Item>
           <Form.Item label="名称" name="name">
             <Select
               allowClear
+              getPopupContainer={() => document.body}
+              className="rounded-lg"
               options={[
                 { label: '梳齿支撑板', value: '梳齿支撑板' },
                 { label: '楼层板', value: '楼层板' },
@@ -456,13 +649,21 @@ export default function SafePartSettingPage() {
             />
           </Form.Item>
           <Form.Item label="产品型号" name="part_model">
-            <Input allowClear placeholder="如 YD1001XN" />
+            <Input
+              allowClear
+              placeholder="如 YD1001XN"
+              className="rounded-lg"
+            />
           </Form.Item>
           <Form.Item label="编号前缀" name="part_code_prefix">
-            <Input allowClear placeholder="如 ZC00" />
+            <Input allowClear placeholder="如 ZC00" className="rounded-lg" />
           </Form.Item>
           <Form.Item label="英文名称" name="english_name">
-            <Input allowClear placeholder="如 COMB PLATE" />
+            <Input
+              allowClear
+              placeholder="如 COMB PLATE"
+              className="rounded-lg"
+            />
           </Form.Item>
           <div className="flex gap-8">
             <Form.Item
@@ -484,11 +685,13 @@ export default function SafePartSettingPage() {
             <Select
               allowClear
               placeholder="非分解单件号可不选"
+              getPopupContainer={() => document.body}
+              className="rounded-lg"
               options={DECOMPOSITION_ROLE_OPTIONS}
             />
           </Form.Item>
           <Form.Item label="备注" name="remark">
-            <Input allowClear />
+            <Input allowClear className="rounded-lg" />
           </Form.Item>
           <Form.Item name="id" hidden>
             <Input />
@@ -520,35 +723,6 @@ export default function SafePartSettingPage() {
           />
         )}
       </Modal>
-
-      <div className="no-scrollbar overflow-y-scroll">
-        <Table
-          rowKey="id"
-          loading={
-            isLoading || saveMutation.isPending || deleteMutation.isPending
-          }
-          dataSource={data ?? []}
-          columns={columns}
-          rowSelection={rowSelection}
-          size="small"
-          pagination={{
-            current: page,
-            pageSize,
-            showSizeChanger: true,
-            pageSizeOptions: [10, 20, 50],
-            showTotal: (total) => `共 ${total} 条`,
-            onChange: (p) => setPage(p),
-            onShowSizeChange: (_current, size) => {
-              setPageSize(size)
-              setPage(1)
-            },
-          }}
-          scroll={{
-            x: 'max-content',
-            y: 550,
-          }}
-        />
-      </div>
     </div>
   )
 }

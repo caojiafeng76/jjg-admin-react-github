@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { message, Modal } from 'antd'
+import { useEffect, useRef, useState, useMemo } from 'react'
+import { App, Modal } from 'antd'
 
 import { useDetail } from '@syney/ReportDetail/useDetail'
 
@@ -12,8 +12,15 @@ import DeleteButton from '@/ui/DeleteButton'
 import { useDeleteDetail } from './useDeleteDetail'
 import { FormInstance } from 'antd/lib'
 import { useAppStore } from '@/store'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import AppPagination from '@/ui/AppPagination'
+import { useSearchParams } from 'react-router-dom'
 
 export default function ReportDetail() {
+  const { message } = App.useApp()
+  const [searchParams] = useSearchParams()
+  const page = Number(searchParams.get('page')) || 1
+  const pageSize = Number(searchParams.get('pageSize')) || 10
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -23,40 +30,47 @@ export default function ReportDetail() {
   const { updateItem, isUpdating } = useUpdateDetail()
   const { isDeleting, deleteDetail } = useDeleteDetail()
 
-  const reportItem = report?.find(
-    (item) => item.id === Number(tableSelectedKeys?.at(0)),
+  const reportItem = useMemo(
+    () => report?.find((item) => item.id === Number(tableSelectedKeys?.at(0))),
+    [report, tableSelectedKeys],
   )
 
-  function showModal() {
-    // 条件性地重置表单的字段，如果specFormInstance存在的话
-    detailFormRef?.current?.resetFields()
+  const records = useMemo(() => report || [], [report])
+  const total = records.length
 
-    // 设置模态框的显示状态为true，使其可见
+  const selectedCount = tableSelectedKeys.length
+  const selectedAmount = useMemo(() => {
+    if (selectedCount === 0) return 0
+    const keySet = new Set(tableSelectedKeys.map((k) => String(k)))
+    let totalAmount = 0
+    for (const item of records) {
+      if (keySet.has(String(item.id))) {
+        totalAmount += Number(item.TaxTotalPrice || 0)
+      }
+    }
+    return totalAmount
+  }, [records, selectedCount, tableSelectedKeys])
+
+  function showModal() {
+    detailFormRef?.current?.resetFields()
     setIsModalOpen(true)
   }
+
   function handleEdit() {
-    // 检查specIds数组的长度是否不等于1，如果不满足条件，则显示警告消息并返回
     if (tableSelectedKeys?.length !== 1) {
       message.warning('只能选择一条数据')
       return
     }
-
-    // 调用显示模态框的函数，用于编辑数据
     showModal()
   }
 
   function handleOk() {
-    // 触发表单实例的提交事件，如果表单验证通过则继续后续操作
     detailFormRef?.current?.submit()
-
-    // 清除所有选中的行键，表示用户已经做出确认，不再需要之前的选择状态
     setTableSelectedKeys([])
   }
-  function handleCancel() {
-    // 重置表单实例的字段
-    detailFormRef?.current?.resetFields()
 
-    // 设置模态框是否打开的状态为false
+  function handleCancel() {
+    detailFormRef?.current?.resetFields()
     setIsModalOpen(false)
     setTableSelectedKeys([])
   }
@@ -68,13 +82,18 @@ export default function ReportDetail() {
   useEffect(() => {
     if (isModalOpen) {
       detailFormRef?.current?.setFieldsValue(reportItem || {})
-      setIsModalOpen(true)
     }
   }, [isModalOpen, reportItem])
 
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: 12,
+    summaryRowHeight: 39,
+  })
+
   return (
-    <div className="grid grid-rows-[32px_1fr] gap-4">
-      <div className="flex h-full items-center gap-2">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
+      {/* 顶部工具栏 */}
+      <div className="flex flex-wrap items-center gap-2">
         <EditButton title="请选择一条数据" handleEdit={handleEdit} />
         <DeleteButton
           isDeleting={isDeleting}
@@ -92,22 +111,83 @@ export default function ReportDetail() {
         />
       </div>
 
-      <div className="no-scrollbar overflow-y-scroll">
-        <DetailTable
-          data={report || []}
-          loading={reportLoading || isUpdating || isDeleting}
-        />
+      {/* 选中摘要条 */}
+      {selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm">
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100">
+              <svg
+                className="h-3.5 w-3.5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            已选
+            <span className="mx-1 text-lg font-bold text-blue-600">
+              {selectedCount}
+            </span>
+            条
+          </span>
+          {selectedAmount > 0 ? (
+            <span className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100">
+                <svg
+                  className="h-3.5 w-3.5 text-rose-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  />
+                </svg>
+              </div>
+              选中金额合计：
+              <span className="text-xl font-bold text-rose-600 tabular-nums">
+                {selectedAmount.toLocaleString()}
+              </span>
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
-        <Modal
-          title={'编辑参数规格'}
-          open={isModalOpen}
-          confirmLoading={isUpdating}
-          onOk={handleOk}
-          onCancel={handleCancel}
-        >
-          <DetailForm ref={detailFormRef} onFinishFuc={onFinishFuc} />
-        </Modal>
+      {/* 表格 + 分页 */}
+      <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
+        <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
+          <DetailTable
+            data={records}
+            loading={reportLoading || isUpdating || isDeleting}
+            page={page}
+            pageSize={pageSize}
+            scrollY={scrollY}
+          />
+        </div>
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
+          <AppPagination total={total} />
+        </div>
       </div>
+
+      <Modal
+        title={'编辑参数规格'}
+        open={isModalOpen}
+        confirmLoading={isUpdating}
+        width={560}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <DetailForm ref={detailFormRef} onFinishFuc={onFinishFuc} />
+      </Modal>
     </div>
   )
 }
