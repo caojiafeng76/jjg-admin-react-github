@@ -6,11 +6,11 @@ import {
   useState,
 } from 'react'
 import { App } from 'antd'
+import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
 import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 
 import AppPagination from '@/ui/AppPagination'
-import ExportButton from '@/ui/ExportButton'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
   ProductionDailyReportFilters,
@@ -77,6 +77,24 @@ export default function ProductionDailyReportPage() {
 
   const currentPageRows = useMemo(() => data?.rows || [], [data?.rows])
   const total = data?.total || 0
+  const selectedCount = selectedRowKeys.length
+  const selectedSummary = useMemo(() => {
+    if (selectedCount === 0) {
+      return { qualifiedCount: 0, defectCount: 0, matched: 0 }
+    }
+    const keySet = new Set(selectedRowKeys.map((key) => String(key)))
+    let qualifiedCount = 0
+    let defectCount = 0
+    let matched = 0
+    for (const row of currentPageRows) {
+      if (keySet.has(String(row.key))) {
+        qualifiedCount += Number(row.qualifiedCount || 0)
+        defectCount += Number(row.defectCount || 0)
+        matched += 1
+      }
+    }
+    return { qualifiedCount, defectCount, matched }
+  }, [currentPageRows, selectedCount])
   const selectedRows = useMemo(
     () =>
       selectedRowKeys
@@ -264,28 +282,109 @@ export default function ProductionDailyReportPage() {
       className={
         isEmployeeView
           ? 'grid h-full grid-rows-[auto_auto_1fr_auto] gap-3 p-3'
-          : 'grid h-full grid-rows-[auto_auto_1fr_auto] gap-4'
+          : 'flex h-full flex-col gap-3 overflow-hidden'
       }
     >
       <div className="flex flex-wrap items-center gap-2">
         {isEmployeeView ? null : (
-          <ExportButton
-            handleExport={handleExport}
-            loading={isExporting}
-            disabled={selectedRowKeys.length === 0 && total === 0}
-          >
-            {selectedRowKeys.length > 0
-              ? `导出选中项 (${selectedRowKeys.length})`
-              : `导出当前筛选结果${total > 0 ? ` (${total})` : ''}`}
-          </ExportButton>
+          <>
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={isExporting || (selectedCount === 0 && total === 0)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/60 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50/40 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              {selectedCount > 0
+                ? `导出选中项 (${selectedCount})`
+                : `导出当前筛选结果${total > 0 ? ` (${total})` : ''}`}
+            </button>
+            {isExporting ? (
+              <span className="text-xs text-slate-400">正在生成文件...</span>
+            ) : null}
+          </>
         )}
       </div>
+
+      {!isEmployeeView && selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm">
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100">
+              <svg
+                className="h-3.5 w-3.5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            已选
+            <span className="mx-1 text-lg font-bold text-blue-600">
+              {selectedCount}
+            </span>
+            条
+            {selectedSummary.matched < selectedCount ? (
+              <span className="ml-1 text-xs text-amber-600">
+                （当前页参与合计 {selectedSummary.matched} 条）
+              </span>
+            ) : null}
+          </span>
+          <span className="flex items-center gap-2 text-sm text-slate-600">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100">
+              <svg
+                className="h-3.5 w-3.5 text-emerald-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            合格数合计：
+            <span className="text-xl font-bold text-emerald-600 tabular-nums">
+              {selectedSummary.qualifiedCount.toLocaleString()}
+            </span>
+          </span>
+          <span className="flex items-center gap-2 text-sm text-slate-600">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100">
+              <svg
+                className="h-3.5 w-3.5 text-rose-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                />
+              </svg>
+            </div>
+            不良数合计：
+            <span className="text-xl font-bold text-rose-600 tabular-nums">
+              {selectedSummary.defectCount.toLocaleString()}
+            </span>
+          </span>
+        </div>
+      ) : null}
 
       <div
         className={
           isEmployeeView
             ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
-            : ''
+            : 'rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm'
         }
       >
         <ProductionDailyReportSearch
@@ -301,7 +400,7 @@ export default function ProductionDailyReportPage() {
         className={
           isEmployeeView
             ? 'no-scrollbar min-h-0 overflow-y-auto overscroll-contain'
-            : 'min-h-0 overflow-hidden'
+            : 'min-h-0 flex-1 overflow-hidden'
         }
       >
         {isEmployeeView ? (
@@ -325,7 +424,7 @@ export default function ProductionDailyReportPage() {
       <div
         ref={paginationRef}
         className={
-          isEmployeeView ? 'flex justify-center pb-1' : 'flex justify-end'
+          isEmployeeView ? 'flex justify-center pb-1' : 'flex shrink-0 justify-end'
         }
       >
         <AppPagination total={total} />

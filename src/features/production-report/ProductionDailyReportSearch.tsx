@@ -93,6 +93,8 @@ export default function ProductionDailyReportSearch({
           format="YYYY-MM-DD"
           placeholder={['开始日期', '结束日期']}
           allowClear
+          className="rounded-lg"
+          popupClassName="rounded-lg"
         />
       </Form.Item>
 
@@ -100,6 +102,7 @@ export default function ProductionDailyReportSearch({
         <Input
           allowClear
           placeholder="项目号"
+          className="rounded-lg"
           style={{ width: mobile ? '100%' : 140 }}
         />
       </Form.Item>
@@ -110,6 +113,9 @@ export default function ProductionDailyReportSearch({
             allowClear
             placeholder="数据类别"
             style={{ width: 140 }}
+            className="rounded-lg"
+            popupMatchSelectWidth={false}
+            getPopupContainer={() => document.body}
             options={[
               { label: 'A', value: 'A' },
               { label: 'B', value: 'B' },
@@ -122,6 +128,7 @@ export default function ProductionDailyReportSearch({
         <Input
           allowClear
           placeholder="型号"
+          className="rounded-lg"
           style={{ width: mobile ? '100%' : 160 }}
         />
       </Form.Item>
@@ -130,6 +137,7 @@ export default function ProductionDailyReportSearch({
         <Input
           allowClear
           placeholder="客户型号"
+          className="rounded-lg"
           style={{ width: mobile ? '100%' : 160 }}
         />
       </Form.Item>
@@ -138,6 +146,7 @@ export default function ProductionDailyReportSearch({
         <Input
           allowClear
           placeholder="工序"
+          className="rounded-lg"
           style={{ width: mobile ? '100%' : 140 }}
         />
       </Form.Item>
