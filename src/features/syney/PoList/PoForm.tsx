@@ -18,11 +18,10 @@ type PoFormProps = {
 }
 
 const layout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 20 },
+  labelCol: { span: 6 },
+  wrapperCol: { span: 18 },
 }
 
-// 规格选项
 const SPEC_OPTIONS = [
   { value: '1000型-室内-扶梯', label: <span>1000型-室内-扶梯</span> },
   { value: '1000型-室外-扶梯', label: <span>1000型-室外-扶梯</span> },
@@ -49,29 +48,25 @@ const PoForm: FC<PoFormProps> = ({
   syneySpecs,
   specsLoading = false,
 }) => {
-  // 导入方式: 'manual' | 'excel'
   const [importMode, setImportMode] = useState<'manual' | 'excel'>('manual')
 
-  /**
-   * 处理Excel数据解析完成
-   */
   const handleExcelDataParsed = (data: TransformedOrderData) => {
-    // 自动填充表单字段
     if (ref && 'current' in ref && ref.current) {
       ref.current.setFieldsValue({
         No: data.po.No,
         EndDate: data.po.EndDate ? dayjs(data.po.EndDate) : null,
         Remark: data.po.Remark || '',
-        Spec: data.po.Spec || undefined, // 填充提取的规格
-        Brand: data.po.Brand || undefined, // 填充提取的商标
+        Spec: data.po.Spec || undefined,
+        Brand: data.po.Brand || undefined,
       } as Partial<ISyneyPo>)
     }
 
-    // 通知父组件Excel数据已解析
     if (onExcelDataChange) {
       onExcelDataChange(data)
     }
   }
+
+  const fieldClassName = 'rounded-lg'
 
   return (
     <Form
@@ -80,10 +75,18 @@ const PoForm: FC<PoFormProps> = ({
       name="po-form"
       onFinish={onFinish}
       initialValues={initialValues}
-      // preserve={false}
+      className="[&_.ant-form-item]:mb-3"
     >
-      <Form.Item name="No" label="订单号" rules={[{ required: true }]}>
-        <Input disabled={isCreating || importMode === 'excel'} />
+      <Form.Item
+        name="No"
+        label="订单号"
+        rules={[{ required: true }]}
+      >
+        <Input
+          disabled={isCreating || importMode === 'excel'}
+          className={fieldClassName}
+          placeholder="请输入订单号"
+        />
       </Form.Item>
       <Form.Item name="Spec" label="规格">
         <Select
@@ -91,13 +94,21 @@ const PoForm: FC<PoFormProps> = ({
           options={SPEC_OPTIONS}
           placeholder="留空则自动推断"
           allowClear
+          getPopupContainer={() => document.body}
+          className={fieldClassName}
         />
       </Form.Item>
-      <Form.Item name="EndDate" label="交货日期" rules={[{ required: true }]}>
-        <DatePicker disabled={isCreating || importMode === 'excel'} />
+      <Form.Item
+        name="EndDate"
+        label="交货日期"
+        rules={[{ required: true }]}
+      >
+        <DatePicker
+          disabled={isCreating || importMode === 'excel'}
+          className={`${fieldClassName} w-full`}
+        />
       </Form.Item>
 
-      {/* 新增：导入方式选择 (仅在新建时显示) */}
       {!isEdit && (
         <>
           <Form.Item label="导入方式">
@@ -111,14 +122,21 @@ const PoForm: FC<PoFormProps> = ({
             </Radio.Group>
           </Form.Item>
 
-          {/* 手动输入模式 */}
           {importMode === 'manual' && (
-            <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
-              <Input.TextArea rows={20} cols={30} disabled={isCreating} />
+            <Form.Item
+              name="Detail"
+              label="详情"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea
+                rows={14}
+                disabled={isCreating}
+                className={fieldClassName}
+                placeholder="粘贴或输入订单明细 JSON 字符串"
+              />
             </Form.Item>
           )}
 
-          {/* Excel导入模式 */}
           {importMode === 'excel' && (
             <>
               <Form.Item label="上传文件">
@@ -130,7 +148,11 @@ const PoForm: FC<PoFormProps> = ({
                 />
               </Form.Item>
               <Form.Item name="Remark" label="备注">
-                <Input.TextArea rows={3} disabled={isCreating} />
+                <Input.TextArea
+                  rows={3}
+                  disabled={isCreating}
+                  className={fieldClassName}
+                />
               </Form.Item>
             </>
           )}
@@ -138,34 +160,35 @@ const PoForm: FC<PoFormProps> = ({
       )}
 
       {isEdit && (
-        <Form.Item name="BorderMaterial" label="围框材质">
-          <Select
-            disabled={isCreating}
-            options={[
-              { label: '橡胶', value: '橡胶' },
-              { label: '尼龙', value: '尼龙' },
-            ]}
-          />
-        </Form.Item>
-      )}
-      {isEdit && (
-        <Form.Item name="Brand" label="商标" rules={[{ required: true }]}>
-          <Input disabled={isCreating} />
-        </Form.Item>
-      )}
-      {isEdit && (
-        <Form.Item name="Technique" label="工艺要求">
-          <Input disabled={isCreating} />
-        </Form.Item>
-      )}
-      {isEdit && (
-        <Form.Item name="Remark" label="备注">
-          <Input disabled={isCreating} />
-        </Form.Item>
+        <>
+          <Form.Item name="BorderMaterial" label="围框材质">
+            <Select
+              disabled={isCreating}
+              options={[
+                { label: '橡胶', value: '橡胶' },
+                { label: '尼龙', value: '尼龙' },
+              ]}
+              getPopupContainer={() => document.body}
+              className={fieldClassName}
+            />
+          </Form.Item>
+          <Form.Item
+            name="Brand"
+            label="商标"
+            rules={[{ required: true }]}
+          >
+            <Input disabled={isCreating} className={fieldClassName} />
+          </Form.Item>
+          <Form.Item name="Technique" label="工艺要求">
+            <Input disabled={isCreating} className={fieldClassName} />
+          </Form.Item>
+          <Form.Item name="Remark" label="备注">
+            <Input disabled={isCreating} className={fieldClassName} />
+          </Form.Item>
+        </>
       )}
     </Form>
   )
 }
 
-// 使用 memo 优化,避免不必要的重渲染
 export default memo(PoForm)
