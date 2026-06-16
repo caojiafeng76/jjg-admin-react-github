@@ -155,6 +155,8 @@ describe('WorkshopOrderList layout', () => {
 
     const tableSlot = screen.getByTestId('workshop-order-table').parentElement
 
+    expect(screen.queryByText('订单列表')).not.toBeInTheDocument()
+    expect(screen.queryByText('共 0 条记录')).not.toBeInTheDocument()
     expect(tableSlot).toHaveClass('overflow-hidden')
     expect(tableHeightMock.options).toMatchObject({
       headerHeight: 30,
