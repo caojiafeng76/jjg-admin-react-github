@@ -1,6 +1,7 @@
 import supabase from './supabase'
 import dayjs from 'dayjs'
 import { handleApiError } from '@/utils/errorHandler'
+import { normalizeSearchKeywords, buildOrIlikeFilter } from '@/utils/searchKeywords'
 import type { Database } from './database.types'
 import { getMachineEquipmentHourlyRate } from './apiMachineEquipmentMaintenances'
 
@@ -54,6 +55,7 @@ export type StandardTimeFormValues = Pick<
 interface StandardTimeFilters {
   operation?: string
   model?: string
+  partNo?: string // 支持空格/逗号分隔的多关键词模糊搜索料号
   unmatchedOnly?: boolean
   partNoOnly?: boolean
   updatedStartDate?: string
@@ -75,6 +77,7 @@ function dynamicProcessStandardsTable() {
 function applyStandardTimeFilters<
   TQuery extends {
     ilike: (column: string, pattern: string) => TQuery
+    or: (filters: string) => TQuery
     is: (column: string, value: null) => TQuery
     not: (column: string, operator: string, value: null) => TQuery
     neq: (column: string, value: string) => TQuery
@@ -91,6 +94,13 @@ function applyStandardTimeFilters<
 
   if (filters.model) {
     nextQuery = nextQuery.ilike('model', `%${filters.model}%`)
+  }
+
+  const partNoKeywords = normalizeSearchKeywords(filters.partNo)
+  if (partNoKeywords?.length) {
+    nextQuery = nextQuery.or(
+      buildOrIlikeFilter(['part_no'], partNoKeywords),
+    )
   }
 
   if (filters.unmatchedOnly) {
@@ -211,6 +221,7 @@ export async function getStandardTimes({
   pageSize,
   operation,
   model,
+  partNo,
   unmatchedOnly,
   partNoOnly,
   updatedStartDate,
@@ -229,6 +240,7 @@ export async function getStandardTimes({
       {
         operation,
         model,
+        partNo,
         unmatchedOnly,
         partNoOnly,
         updatedStartDate,
@@ -246,6 +258,7 @@ export async function getStandardTimes({
       {
         operation,
         model,
+        partNo,
         unmatchedOnly,
         partNoOnly,
         updatedStartDate,
@@ -506,6 +519,7 @@ export async function updateStandardTimesLastProcess({
 export async function getAllStandardTimesForExport({
   operation,
   model,
+  partNo,
   unmatchedOnly,
   partNoOnly,
   updatedStartDate,
@@ -517,6 +531,7 @@ export async function getAllStandardTimesForExport({
     {
       operation,
       model,
+      partNo,
       unmatchedOnly,
       partNoOnly,
       updatedStartDate,

@@ -53,6 +53,7 @@ export default function StandardTimeList() {
   const [searchParams, setSearchParams] = useState<{
     operation?: string
     model?: string
+    partNo?: string
     unmatchedOnly?: boolean
     partNoOnly?: boolean
     updatedStartDate?: string
@@ -61,6 +62,7 @@ export default function StandardTimeList() {
   }>({
     operation: searchParamsURL.get('operation') || undefined,
     model: searchParamsURL.get('model') || undefined,
+    partNo: searchParamsURL.get('partNo') || undefined,
     unmatchedOnly: searchParamsURL.get('unmatchedOnly') === 'true' || undefined,
     partNoOnly: searchParamsURL.get('partNoOnly') === 'true' || undefined,
     updatedStartDate: searchParamsURL.get('updatedStartDate') || undefined,
@@ -376,6 +378,12 @@ export default function StandardTimeList() {
         nextSearchParamsURL.delete('model')
       }
 
+      if (params.partNo) {
+        nextSearchParamsURL.set('partNo', params.partNo)
+      } else {
+        nextSearchParamsURL.delete('partNo')
+      }
+
       if (params.unmatchedOnly) {
         nextSearchParamsURL.set('unmatchedOnly', 'true')
       } else {
@@ -419,6 +427,7 @@ export default function StandardTimeList() {
     nextSearchParamsURL.set('page', '1')
     nextSearchParamsURL.delete('operation')
     nextSearchParamsURL.delete('model')
+    nextSearchParamsURL.delete('partNo')
     nextSearchParamsURL.delete('unmatchedOnly')
     nextSearchParamsURL.delete('partNoOnly')
     nextSearchParamsURL.delete('recordType')

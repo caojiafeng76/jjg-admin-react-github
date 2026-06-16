@@ -88,8 +88,8 @@ export default function ToolingStockOutPublicPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_28%),linear-gradient(180deg,#f6fbfc_0%,#ffffff_42%,#e9eef1_100%)] text-slate-900">
-      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-4 pt-5 pb-32 sm:px-6 sm:pt-7">
+    <div className="flex h-dvh flex-col overflow-hidden bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_28%),linear-gradient(180deg,#f6fbfc_0%,#ffffff_42%,#e9eef1_100%)] text-slate-900">
+      <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col overflow-y-auto px-4 pt-5 pb-32 sm:px-6 sm:pt-7">
         <section className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/90 px-5 py-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:px-6">
           <div className="absolute top-0 right-0 h-24 w-24 rounded-full bg-sky-200/40 blur-3xl" />
           <div className="absolute bottom-0 -left-8 h-20 w-20 rounded-full bg-slate-200/50 blur-3xl" />

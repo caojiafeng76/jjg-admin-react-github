@@ -144,6 +144,7 @@ export interface MaterialTransferFilters {
   endDate?: string
   projectNo?: string // 支持空格/逗号分隔的多关键词模糊搜索项目号
   productModel?: string // 支持空格/逗号分隔的多关键词模糊搜索型号
+  materialCode?: string // 支持空格/逗号分隔的多关键词模糊搜索料号
   length_mm?: number[] // 多选长度
   employeeId?: string
   targetWorkshop?: string
@@ -278,6 +279,14 @@ function applyMaterialTransferFilters<
   if (productModelKeywords?.length) {
     nextQuery = nextQuery.or(
       buildOrIlikeFilter(['product_model'], productModelKeywords),
+    )
+  }
+
+  const materialCodeKeywords = normalizeSearchKeywords(filters.materialCode)
+
+  if (materialCodeKeywords?.length) {
+    nextQuery = nextQuery.or(
+      buildOrIlikeFilter(['material_code'], materialCodeKeywords),
     )
   }
 

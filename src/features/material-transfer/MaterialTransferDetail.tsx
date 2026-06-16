@@ -113,7 +113,7 @@ export default function MaterialTransferDetail({
         <Descriptions
           size="small"
           column={{ xs: 1, sm: 2, md: 3, lg: 4 }}
-          className="[&_.ant-descriptions-item-label]:text-slate-500 [&_.ant-descriptions-item-content]:text-slate-700"
+          className="[&_.ant-descriptions-item-label]:pl-5 [&_.ant-descriptions-item-label]:text-slate-500 [&_.ant-descriptions-item-content]:pl-2 [&_.ant-descriptions-item-content]:text-slate-700"
           items={[
             {
               key: 'customer',

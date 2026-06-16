@@ -1618,11 +1618,12 @@ export default function OrderStatusDashboard() {
     }),
     [activeStatus, searchParamValues],
   )
-  const { tableContainerRef, scrollY, rowHeight } =
+  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
       headerHeight: 32,
       targetRowCount: Math.min(pageSize, 14),
       minRowHeight: 30,
+      gap: 12,
     })
   const { data, isLoading, isFetching, refetch } = useOrderStatusDashboard({
     page,
@@ -2380,7 +2381,10 @@ export default function OrderStatusDashboard() {
       </div>
 
       {/* 分页区域 */}
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm">
+      <div
+        ref={paginationRef}
+        className="flex shrink-0 items-center justify-between rounded-xl border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm"
+      >
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <span className="font-medium text-slate-700">{data?.total ?? 0}</span>
           <span>条记录</span>

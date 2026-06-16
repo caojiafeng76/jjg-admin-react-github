@@ -1,5 +1,14 @@
-import { memo, useCallback, useMemo } from 'react'
-import { Table, TableColumnsType } from 'antd'
+import {
+  memo,
+  useCallback,
+  useMemo,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type TdHTMLAttributes,
+  type ThHTMLAttributes,
+} from 'react'
+import { Table, type TableColumnsType } from 'antd'
+
 import type { StandardTime } from '@/services/apiStandardTimes'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import { formatNumber } from '@/utils/format'
@@ -18,8 +27,144 @@ interface Props {
   onRowClick?: (record: StandardTime) => void
 }
 
-interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
+const MIN_RESIZABLE_COLUMN_WIDTH = 44
+
+type ColumnWidthMap = Record<string, number>
+
+type ResizableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement> & {
+  columnKey?: string
+  minWidth?: number
+  onResizeColumn?: (columnKey: string, width: number) => void
+  width?: number
+}
+
+function ResizableHeaderCell({
+  children,
+  columnKey,
+  minWidth = MIN_RESIZABLE_COLUMN_WIDTH,
+  onResizeColumn,
+  style,
+  width,
+  ...props
+}: ResizableHeaderCellProps) {
+  function handleResizeStart(event: ReactMouseEvent<HTMLSpanElement>) {
+    if (!columnKey || !onResizeColumn || typeof width !== 'number') {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    const startX = event.clientX
+    const startWidth = width
+    const originalCursor = document.body.style.cursor
+    const originalUserSelect = document.body.style.userSelect
+
+    const handleResizeMove = (moveEvent: MouseEvent) => {
+      const nextWidth = Math.max(
+        minWidth,
+        Math.round(startWidth + moveEvent.clientX - startX),
+      )
+      onResizeColumn(columnKey, nextWidth)
+    }
+
+    const handleResizeEnd = () => {
+      document.body.style.cursor = originalCursor
+      document.body.style.userSelect = originalUserSelect
+      window.removeEventListener('mousemove', handleResizeMove)
+      window.removeEventListener('mouseup', handleResizeEnd)
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', handleResizeMove)
+    window.addEventListener('mouseup', handleResizeEnd)
+  }
+
+  return (
+    <th {...props} style={style}>
+      <div
+        style={{
+          display: 'block',
+          margin: '-4px -6px',
+          padding: '4px 6px',
+          position: 'relative',
+        }}
+      >
+        {children}
+        {columnKey && onResizeColumn ? (
+          <span
+            aria-label="调整列宽"
+            role="separator"
+            aria-orientation="vertical"
+            onMouseDown={handleResizeStart}
+            style={{
+              bottom: 0,
+              cursor: 'col-resize',
+              position: 'absolute',
+              right: -3,
+              top: 0,
+              width: 6,
+              zIndex: 3,
+            }}
+          />
+        ) : null}
+      </div>
+    </th>
+  )
+}
+
+interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement> {
   children?: React.ReactNode
+}
+
+function getColumnKey<RecordType>(
+  column: TableColumnsType<RecordType>[number],
+) {
+  if (column.key !== undefined) {
+    return String(column.key)
+  }
+
+  if ('dataIndex' in column && column.dataIndex !== undefined) {
+    return Array.isArray(column.dataIndex)
+      ? column.dataIndex.join('.')
+      : String(column.dataIndex)
+  }
+
+  return ''
+}
+
+function applyColumnWidths<RecordType>(
+  columns: TableColumnsType<RecordType>,
+  columnWidths: ColumnWidthMap,
+  onResizeColumn: (columnKey: string, width: number) => void,
+): TableColumnsType<RecordType> {
+  return columns.map((column) => {
+    const columnKey = getColumnKey(column)
+    const defaultWidth = typeof column.width === 'number' ? column.width : 0
+    const width = columnKey
+      ? (columnWidths[columnKey] ?? defaultWidth)
+      : defaultWidth
+
+    return {
+      ...column,
+      width,
+      onHeaderCell: () =>
+        ({
+          columnKey,
+          minWidth: MIN_RESIZABLE_COLUMN_WIDTH,
+          onResizeColumn,
+          width,
+        }) as ResizableHeaderCellProps,
+    }
+  })
+}
+
+function getTableColumnWidth<RecordType>(columns: TableColumnsType<RecordType>) {
+  return columns.reduce((total, column) => {
+    const width = column.width
+    return total + (typeof width === 'number' ? width : 0)
+  }, 0)
 }
 
 const StandardTimeTable = memo(function StandardTimeTable({
@@ -35,7 +180,21 @@ const StandardTimeTable = memo(function StandardTimeTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const columns: TableColumnsType<StandardTime> = useMemo(() => {
+  const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
+
+  const handleResizeColumn = useCallback(
+    (columnKey: string, width: number) => {
+      setColumnWidths((current) => {
+        if (current[columnKey] === width) {
+          return current
+        }
+        return { ...current, [columnKey]: width }
+      })
+    },
+    [],
+  )
+
+  const baseColumns: TableColumnsType<StandardTime> = useMemo(() => {
     const cols: TableColumnsType<StandardTime> = [
       {
         title: '#',
@@ -206,6 +365,13 @@ const StandardTimeTable = memo(function StandardTimeTable({
     return cols
   }, [hideStandardSeconds, page, pageSize])
 
+  const columns = useMemo(
+    () => applyColumnWidths(baseColumns, columnWidths, handleResizeColumn),
+    [baseColumns, columnWidths, handleResizeColumn],
+  )
+
+  const tableWidth = useMemo(() => getTableColumnWidth(columns), [columns])
+
   const rowSelection = useMemo(
     () => ({
       selectedRowKeys,
@@ -233,6 +399,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
             </td>
           )
         },
+      },
+      header: {
+        cell: ResizableHeaderCell,
       },
     }),
     [rowHeight],
@@ -264,7 +433,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
         dataSource={data}
         rowSelection={rowSelection}
         onRow={handleRow}
-        scroll={{ x: hideStandardSeconds ? 1090 : 1550, y: scrollY }}
+        scroll={{ x: tableWidth, y: scrollY }}
         size="small"
         pagination={false}
         className="font-[family-name:var(--font-sans)]"
