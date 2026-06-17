@@ -1566,6 +1566,39 @@ function ExtrusionDetailModal({
   )
 }
 
+function extractTextFilters(
+  items: OrderStatusDashboardItem[],
+  getter: (item: OrderStatusDashboardItem) => string | null | undefined,
+) {
+  const values = Array.from(
+    new Set(
+      items
+        .map(getter)
+        .map((v) => (typeof v === 'string' ? v.trim() : v))
+        .filter((v): v is string => Boolean(v)),
+    ),
+  ).sort((a, b) => a.localeCompare(b, 'zh-CN'))
+  return values.map((v) => ({ text: v, value: v }))
+}
+
+function extractNumberFilters(
+  items: OrderStatusDashboardItem[],
+  getter: (item: OrderStatusDashboardItem) => number | null | undefined,
+  format?: (v: number) => string,
+) {
+  const values = Array.from(
+    new Set(
+      items
+        .map(getter)
+        .filter((v): v is number => v !== null && v !== undefined),
+    ),
+  ).sort((a, b) => a - b)
+  return values.map((v) => ({
+    text: format ? format(v) : String(v),
+    value: v,
+  }))
+}
+
 export default function OrderStatusDashboard() {
   const { message, modal } = App.useApp()
   const queryClient = useQueryClient()
@@ -1632,7 +1665,7 @@ export default function OrderStatusDashboard() {
   })
   const isDataLoading = isLoading || isFetching
 
-  const rows = data?.items ?? []
+  const rows = useMemo(() => data?.items ?? [], [data?.items])
   const jobColumns = data?.jobColumns ?? EMPTY_JOB_COLUMNS
   const openJobDetail = useCallback(
     (record: OrderStatusDashboardItem, jobName: string) => {
@@ -1724,6 +1757,10 @@ export default function OrderStatusDashboard() {
         key: 'project_no',
         width: 132,
         fixed: 'left',
+        filters: extractTextFilters(rows, (r) => r.project_no),
+        onFilter: (value, record) =>
+          (record.project_no?.trim() ?? '') === (value as string),
+        filterSearch: true,
         sorter: (left, right) =>
           String(left.project_no || '').localeCompare(
             String(right.project_no || ''),
@@ -1755,6 +1792,10 @@ export default function OrderStatusDashboard() {
         width: 64,
         fixed: 'left',
         align: 'right',
+        filters: extractNumberFilters(rows, (r) => Number(r.length_mm || 0)),
+        onFilter: (value, record) =>
+          Number(record.length_mm || 0) === (value as number),
+        filterSearch: true,
         render: renderText,
       },
       {
@@ -1764,6 +1805,10 @@ export default function OrderStatusDashboard() {
         width: 76,
         fixed: 'left',
         align: 'right',
+        filters: extractNumberFilters(rows, (r) => Number(r.order_quantity || 0)),
+        onFilter: (value, record) =>
+          Number(record.order_quantity || 0) === (value as number),
+        filterSearch: true,
         render: renderQuantity,
       },
       {
@@ -1771,6 +1816,10 @@ export default function OrderStatusDashboard() {
         dataIndex: 'customer',
         key: 'customer',
         width: 88,
+        filters: extractTextFilters(rows, (r) => r.customer),
+        onFilter: (value, record) =>
+          (record.customer?.trim() ?? '') === (value as string),
+        filterSearch: true,
         render: renderText,
       },
       {
@@ -1778,6 +1827,10 @@ export default function OrderStatusDashboard() {
         dataIndex: 'customer_model',
         key: 'customer_model',
         width: 108,
+        filters: extractTextFilters(rows, (r) => r.customer_model),
+        onFilter: (value, record) =>
+          (record.customer_model?.trim() ?? '') === (value as string),
+        filterSearch: true,
         render: renderText,
       },
       {
@@ -1785,6 +1838,10 @@ export default function OrderStatusDashboard() {
         dataIndex: 'product_delivery_date',
         key: 'product_delivery_date',
         width: 88,
+        filters: extractTextFilters(rows, (r) => r.product_delivery_date),
+        onFilter: (value, record) =>
+          (record.product_delivery_date ?? '') === (value as string),
+        filterSearch: true,
         render: renderText,
       },
       {
@@ -1792,6 +1849,10 @@ export default function OrderStatusDashboard() {
         dataIndex: 'material_code',
         key: 'material_code',
         width: 112,
+        filters: extractTextFilters(rows, (r) => r.material_code),
+        onFilter: (value, record) =>
+          (record.material_code?.trim() ?? '') === (value as string),
+        filterSearch: true,
         render: renderText,
       },
       {
@@ -1799,6 +1860,10 @@ export default function OrderStatusDashboard() {
         dataIndex: 'material_name',
         key: 'material_name',
         width: 88,
+        filters: extractTextFilters(rows, (r) => r.material_name),
+        onFilter: (value, record) =>
+          (record.material_name?.trim() ?? '') === (value as string),
+        filterSearch: true,
         render: renderText,
       },
     ]
@@ -1823,6 +1888,13 @@ export default function OrderStatusDashboard() {
         key: `job-${column.key}`,
         width: JOB_OUTPUT_COLUMN_WIDTH,
         align: 'right',
+        filters: extractNumberFilters(
+          rows,
+          (r) => Number(r.jobOutputs[column.key] || 0),
+        ),
+        onFilter: (value, record) =>
+          Number(record.jobOutputs[column.key] || 0) === (value as number),
+        filterSearch: true,
         render: (_value: unknown, record: OrderStatusDashboardItem) =>
           renderJobOutputCell({
             jobName: column.key,
@@ -1838,6 +1910,10 @@ export default function OrderStatusDashboard() {
         key: 'extrusionQuantity',
         width: 68,
         align: 'right',
+        filters: extractNumberFilters(rows, (r) => Number(r.extrusionQuantity || 0)),
+        onFilter: (value, record) =>
+          Number(record.extrusionQuantity || 0) === (value as number),
+        filterSearch: true,
         render: (_value, record) =>
           renderExtrusionQuantityCell({
             onOpen: openExtrusionDetail,
@@ -1850,6 +1926,10 @@ export default function OrderStatusDashboard() {
         key: 'precisionCuttingQuantity',
         width: 68,
         align: 'right',
+        filters: extractNumberFilters(rows, (r) => Number(r.precisionCuttingQuantity || 0)),
+        onFilter: (value, record) =>
+          Number(record.precisionCuttingQuantity || 0) === (value as number),
+        filterSearch: true,
         render: (_value, record) =>
           renderPrecisionCuttingQuantityCell({
             onOpen: openPrecisionCuttingDetail,
@@ -1866,6 +1946,10 @@ export default function OrderStatusDashboard() {
         key: 'transferQuantity',
         width: 94,
         align: 'right',
+        filters: extractNumberFilters(rows, (r) => Number(r.transferQuantity || 0)),
+        onFilter: (value, record) =>
+          Number(record.transferQuantity || 0) === (value as number),
+        filterSearch: true,
         render: (_value, record) =>
           renderTransferQuantityCell({
             onOpen: openTransferDetail,
@@ -1877,6 +1961,14 @@ export default function OrderStatusDashboard() {
         dataIndex: 'transferWorkshops',
         key: 'transferWorkshops',
         width: 118,
+        filters: extractTextFilters(rows, (r) =>
+          r.transferWorkshops?.length ? r.transferWorkshops.join('、') : null,
+        ),
+        onFilter: (value, record) =>
+          (record.transferWorkshops?.length
+            ? record.transferWorkshops.join('、')
+            : '') === (value as string),
+        filterSearch: true,
         render: renderTransferWorkshops,
       },
       {
@@ -1884,6 +1976,16 @@ export default function OrderStatusDashboard() {
         key: 'reworkRepairStatus',
         width: 260,
         align: 'center',
+        filters: [
+          { text: '待生产', value: 'pendingProductionCount' },
+          { text: '待技术', value: 'pendingTechnicalCount' },
+          { text: '待品质', value: 'pendingQualityCount' },
+          { text: '已完成', value: 'completedCount' },
+        ],
+        onFilter: (value, record) => {
+          const key = value as keyof ReworkRepairInfo
+          return Number(record.reworkRepairInfo[key] || 0) > 0
+        },
         render: (_value, record) =>
           renderReworkRepairStatus(record.reworkRepairInfo),
       },
@@ -1893,6 +1995,13 @@ export default function OrderStatusDashboard() {
         key: 'yieldRate',
         width: 68,
         align: 'right',
+        filters: extractNumberFilters(
+          rows,
+          (r) => r.yieldRate,
+          (v) => `${v}%`,
+        ),
+        onFilter: (value, record) => record.yieldRate === (value as number),
+        filterSearch: true,
         render: renderPercent,
       },
       {
@@ -1901,6 +2010,13 @@ export default function OrderStatusDashboard() {
         key: 'completionRate',
         width: 82,
         align: 'right',
+        filters: extractNumberFilters(
+          rows,
+          (r) => r.completionRate,
+          (v) => `${v}%`,
+        ),
+        onFilter: (value, record) => record.completionRate === (value as number),
+        filterSearch: true,
         render: renderPercent,
       },
       {
@@ -1910,6 +2026,12 @@ export default function OrderStatusDashboard() {
         width: 156,
         fixed: 'right',
         align: 'center',
+        filters: PRODUCTION_STATUS_OPTIONS.map((opt) => ({
+          text: opt.label,
+          value: opt.value,
+        })),
+        onFilter: (value, record) =>
+          record.productionStatus === (value as string),
         render: (value: OrderProductionStatus, record) => {
           const canCloseOrder = canCloseDashboardOrder({
             canManageStatus,
@@ -1977,6 +2099,7 @@ export default function OrderStatusDashboard() {
     openTransferDetail,
     page,
     pageSize,
+    rows,
   ])
 
   const tableWidth = getTableColumnWidth(columns)
