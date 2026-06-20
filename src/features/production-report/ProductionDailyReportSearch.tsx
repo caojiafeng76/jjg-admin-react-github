@@ -93,6 +93,8 @@ export default function ProductionDailyReportSearch({
           format="YYYY-MM-DD"
           placeholder={['开始日期', '结束日期']}
           allowClear
+          inputReadOnly={mobile}
+          getPopupContainer={() => document.body}
           className="rounded-lg"
           popupClassName="rounded-lg"
         />

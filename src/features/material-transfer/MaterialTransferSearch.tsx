@@ -114,6 +114,8 @@ export default function MaterialTransferSearch({
           format="YYYY-MM-DD"
           placeholder={['创建开始', '创建结束']}
           allowClear
+          inputReadOnly={mobile}
+          getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 240 }}
           className="rounded-lg"
         />

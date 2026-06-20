@@ -154,6 +154,8 @@ export default function StandardTimeSearch({
           format="YYYY-MM-DD"
           placeholder={['更新开始', '更新结束']}
           allowClear
+          inputReadOnly={mobile}
+          getPopupContainer={() => document.body}
           className="w-full rounded-lg"
         />
       </Form.Item>
