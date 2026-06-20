@@ -262,3 +262,15 @@ body {
 .standard-time-table .ant-spin-dot-item {
   background-color: #94a3b8;
 }
+
+/* =============================================
+   移动端日期范围选择器（RangePicker）面板适配
+   窄屏下 antd 默认的双月面板横向排列会超出视口宽度，
+   导致左侧月份面板被裁切（左半边被遮挡）。改为纵向
+   堆叠，保证日历面板在 H5 页面完整显示。
+   ============================================= */
+@media (max-width: 599.98px) {
+  .ant-picker-dropdown .ant-picker-panels {
+    flex-direction: column !important;
+  }
+}
