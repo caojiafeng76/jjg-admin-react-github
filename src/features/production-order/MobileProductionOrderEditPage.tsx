@@ -139,7 +139,12 @@ export default function MobileProductionOrderEditPage() {
                 label="日期"
                 rules={[{ required: true, message: '请选择日期' }]}
               >
-                <DatePicker className="w-full" format="YYYY-MM-DD" />
+                <DatePicker
+                  className="w-full"
+                  format="YYYY-MM-DD"
+                  inputReadOnly
+                  getPopupContainer={() => document.body}
+                />
               </Form.Item>
 
               <Form.Item label="操作人">

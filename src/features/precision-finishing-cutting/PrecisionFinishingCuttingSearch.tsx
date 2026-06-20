@@ -98,6 +98,8 @@ export default function PrecisionFinishingCuttingSearch({
           format="YYYY-MM-DD"
           placeholder={['创建开始日期', '创建结束日期']}
           allowClear
+          inputReadOnly={mobile}
+          getPopupContainer={() => document.body}
           style={{ width: mobile ? '100%' : 260 }}
         />
       </Form.Item>
