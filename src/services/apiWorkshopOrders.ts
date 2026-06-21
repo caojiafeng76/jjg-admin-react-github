@@ -159,6 +159,10 @@ function buildSalesOrderPayload(
   mode: 'create' | 'update',
 ) {
   const normalizedValues = normalizeWorkshopOrderInput(values)
+  const hasClosedAtValue = Object.prototype.hasOwnProperty.call(
+    values,
+    'closed_at',
+  )
 
   const payload: Record<string, unknown> = {
     product_delivery_date: normalizedValues.product_delivery_date,
@@ -188,7 +192,25 @@ function buildSalesOrderPayload(
     delete payload.status
   }
 
+  if (mode === 'update' && hasClosedAtValue) {
+    payload.closed_at = normalizeOptionalText(values.closed_at)
+  }
+
   return payload
+}
+
+export function buildWorkshopOrderStatusUpdateValues(
+  status: WorkshopOrder['status'],
+  closedAt: Date | string = new Date(),
+) {
+  const normalizedStatus = normalizeWorkshopOrderStatus(status)
+  const normalizedClosedAt =
+    typeof closedAt === 'string' ? closedAt : closedAt.toISOString()
+
+  return {
+    status: normalizedStatus,
+    closed_at: normalizedStatus === '已结案' ? normalizedClosedAt : null,
+  }
 }
 
 async function assertWorkshopOrdersNotReferenced(ids: string[]) {
@@ -253,8 +275,6 @@ export async function getWorkshopOrderDeleteBlockers(
     string,
     { count: number; dates: Set<string>; extrusionCount: number }
   >()
-
-
 
   ;(
     (productionItems || []) as Array<{
@@ -768,17 +788,20 @@ export async function updateWorkshopOrder({
 export async function updateWorkshopOrderStatuses({
   ids,
   status,
+  closed_at,
 }: {
   ids: string[]
   status: WorkshopOrder['status']
+  closed_at?: string | null
 }) {
   if (!ids.length) {
     return
   }
 
-  const updateValues = {
-    status: normalizeWorkshopOrderStatus(status),
-  } as any
+  const updateValues = buildWorkshopOrderStatusUpdateValues(
+    status,
+    closed_at ?? new Date(),
+  ) as any
 
   const { error } = await supabase
     .from('sales_orders')

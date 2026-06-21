@@ -41,6 +41,7 @@ export interface WorkshopOrder {
   product_delivery_date: string | null
   planned_start_date?: string | null
   planned_finish_date?: string | null
+  closed_at?: string | null
   delivery_review_result?: string | null
   status?: WorkshopOrderStatus | null
   total_outbound_quantity?: number | null
@@ -564,15 +565,21 @@ export default function WorkshopOrderList() {
       }
 
       const applyUpdate = async () => {
+        const closedAt =
+          nextStatus === '已结案' ? new Date().toISOString() : null
+
         await updateMutation.mutateAsync({
           id: activeOrder.id!,
           values: {
             ...activeOrder,
             status: nextStatus,
+            closed_at: closedAt,
           },
         })
         setActiveOrder((current) =>
-          current ? { ...current, status: nextStatus } : current,
+          current
+            ? { ...current, status: nextStatus, closed_at: closedAt }
+            : current,
         )
         message.success(
           nextStatus === '已结案' ? '订单已结案' : '订单状态已改为生产中',
@@ -615,14 +622,20 @@ export default function WorkshopOrderList() {
       }
 
       const applyUpdate = async () => {
+        const closedAt =
+          nextStatus === '已结案' ? new Date().toISOString() : null
+
         await batchStatusMutation.mutateAsync({
           ids: selectedRowKeys as string[],
           status: nextStatus,
+          closed_at: closedAt,
         })
 
         if (activeOrder?.id && selectedRowKeys.includes(activeOrder.id)) {
           setActiveOrder((current) =>
-            current ? { ...current, status: nextStatus } : current,
+            current
+              ? { ...current, status: nextStatus, closed_at: closedAt }
+              : current,
           )
         }
 
@@ -738,7 +751,7 @@ export default function WorkshopOrderList() {
           </div>
 
           {/* 分隔线 */}
-          <div className="h-6 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
+          <div className="h-6 w-px bg-linear-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
 
           {/* 状态管理按钮组 */}
           {canManageStatus ? (
@@ -767,7 +780,7 @@ export default function WorkshopOrderList() {
           ) : null}
 
           {/* 分隔线 */}
-          <div className="h-6 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
+          <div className="h-6 w-px bg-linear-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
 
           {/* 删除按钮 */}
           {canDelete ? (
@@ -779,7 +792,7 @@ export default function WorkshopOrderList() {
           ) : null}
 
           {/* 分隔线 */}
-          <div className="h-6 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
+          <div className="h-6 w-px bg-linear-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
 
           {/* 输出按钮组 */}
           <div className="flex items-center gap-1">
@@ -820,7 +833,7 @@ export default function WorkshopOrderList() {
       <div className="rounded-lg border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/80">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-slate-100 to-slate-200 shadow-sm dark:from-slate-700 dark:to-slate-800">
+            <span className="flex size-7 items-center justify-center rounded-md bg-linear-to-br from-slate-100 to-slate-200 shadow-sm dark:from-slate-700 dark:to-slate-800">
               <svg
                 className="size-4 text-slate-500"
                 fill="none"

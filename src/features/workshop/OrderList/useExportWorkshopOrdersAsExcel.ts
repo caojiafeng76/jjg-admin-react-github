@@ -24,6 +24,7 @@ const EXCEL_HEADERS = [
   '二维码',
   '简图',
   '交货日期',
+  '结案时间',
   '工艺流程',
   '客户',
   '项目号',
@@ -42,12 +43,16 @@ const EXCEL_HEADERS = [
 ] as const
 
 const COLUMN_WIDTHS = [
-  14, 14, 12, 18, 14, 14, 14, 24, 9, 10, 12, 8, 12, 10, 12, 12, 18, 20,
+  14, 14, 12, 18, 18, 14, 14, 14, 24, 9, 10, 12, 8, 12, 10, 12, 12, 18, 20,
 ]
 
 function formatCellText(value: string | number | null | undefined) {
   if (value === null || value === undefined) return ''
   return String(value)
+}
+
+function formatClosedAt(value: WorkshopOrder['closed_at']) {
+  return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : ''
 }
 
 function getExtensionFromPath(path: string) {
@@ -139,6 +144,7 @@ export function createWorkshopOrderWorkbookBuffer(orders: WorkshopOrder[]) {
     '',
     '',
     formatCellText(order.product_delivery_date),
+    formatClosedAt(order.closed_at),
     formatCellText(order.process_flow),
     formatCellText(order.customer),
     formatCellText(order.project_no),
