@@ -7,6 +7,7 @@ import type {
 import { memo, useMemo } from 'react'
 import { Table, Tag } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
+import dayjs from 'dayjs'
 import type { WorkshopOrder } from './index'
 import WorkshopOrderQrCell from './WorkshopOrderQrCell'
 import {
@@ -82,6 +83,10 @@ function getTableColumnWidth<RecordType>(
   }, 0)
 }
 
+function formatClosedAt(value: WorkshopOrder['closed_at']) {
+  return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : ''
+}
+
 interface Props {
   loading: boolean
   data: WorkshopOrder[]
@@ -155,6 +160,14 @@ function WorkshopOrderTable({
             </Tag>
           )
         },
+      },
+      {
+        title: '结案时间',
+        dataIndex: 'closed_at',
+        fixed: 'left',
+        key: 'closed_at',
+        width: 112,
+        render: formatClosedAt,
       },
       {
         title: '简图',
