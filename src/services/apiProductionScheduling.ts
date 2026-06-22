@@ -7,7 +7,7 @@ import { normalizeWorkshopOrderStatus } from '@/features/workshop/OrderList/orde
 import type { Database } from './database.types'
 import supabase from './supabase'
 import {
-  PRODUCTION_SCHEDULING_MATERIAL_CODE_QUERY_PATTERN,
+  PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER,
   isProductionSchedulingMaterialCode,
 } from './productionSchedulingMaterialFilter'
 import { handleApiError } from '@/utils/errorHandler'
@@ -44,7 +44,10 @@ type SalesOrderTextField = Extract<
 
 type SalesOrderDateField = Extract<
   keyof ProductionSchedulingOrderUpdate,
-  'order_date' | 'product_delivery_date' | 'planned_start_date' | 'planned_finish_date'
+  | 'order_date'
+  | 'product_delivery_date'
+  | 'planned_start_date'
+  | 'planned_finish_date'
 >
 
 type ProductionQuantityRow = Pick<
@@ -81,6 +84,8 @@ export interface SchedulingProcessDefinition {
 
 export interface ProductionSchedulingFilters {
   customer?: string
+  lengthMm?: number[]
+  materialCode?: string
   model?: string
   projectNo?: string
   status?: WorkshopOrder['status'] | '全部'
@@ -781,10 +786,14 @@ function applySchedulingFilters(
   let query = supabase
     .from('sales_orders')
     .select('*', { count: 'exact' })
-    .ilike('material_code', PRODUCTION_SCHEDULING_MATERIAL_CODE_QUERY_PATTERN)
+    .or(PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER)
   const projectNoKeywords = normalizeSearchKeywords(filters?.projectNo)
+  const materialCodeKeywords = normalizeSearchKeywords(filters?.materialCode)
   const modelKeywords = normalizeSearchKeywords(filters?.model)
   const customer = normalizeNullableText(filters?.customer)
+  const lengthMm = (filters?.lengthMm ?? []).filter((value) =>
+    Number.isFinite(value),
+  )
 
   if (filters?.status && filters.status !== '全部') {
     query = query.filter(
@@ -804,8 +813,18 @@ function applySchedulingFilters(
     )
   }
 
+  if (materialCodeKeywords?.length) {
+    query = query.or(
+      buildOrIlikeFilter(['material_code'], materialCodeKeywords),
+    )
+  }
+
   if (customer) {
     query = query.ilike('customer', `%${customer}%`)
+  }
+
+  if (lengthMm.length) {
+    query = query.in('length_mm', lengthMm)
   }
 
   if (filters?.plannedStartDateFrom) {
@@ -903,7 +922,9 @@ export async function getProductionSchedulingOrders({
         productionQuantities.get(projectNo) || 0,
       )
       const transferSummary = transferSummaries.get(projectNo)
-      const transferQuantity = roundQuantity(transferSummary?.totalQuantity || 0)
+      const transferQuantity = roundQuantity(
+        transferSummary?.totalQuantity || 0,
+      )
 
       return {
         ...order,
@@ -952,6 +973,50 @@ export async function getProductionSchedulingOrders({
     orders,
     total: effectiveTotal,
   }
+}
+
+export async function getProductionSchedulingLengthOptions(
+  signal?: AbortSignal,
+) {
+  const lengths = new Set<number>()
+  let from = 0
+
+  while (true) {
+    const to = from + METRIC_PAGE_SIZE - 1
+    let query = supabase
+      .from('sales_orders')
+      .select('length_mm')
+      .not('length_mm', 'is', null)
+      .or(PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER)
+      .order('length_mm', { ascending: true })
+      .range(from, to)
+
+    if (signal) {
+      query = query.abortSignal(signal)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      throw handleApiError(error, '获取订单排产长度选项失败')
+    }
+
+    const rows = data || []
+
+    rows.forEach((item) => {
+      if (item.length_mm !== null) {
+        lengths.add(item.length_mm)
+      }
+    })
+
+    if (rows.length < METRIC_PAGE_SIZE) {
+      break
+    }
+
+    from += METRIC_PAGE_SIZE
+  }
+
+  return Array.from(lengths).sort((left, right) => left - right)
 }
 
 export function getProductionSchedulingProcessRows(

@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
+  getProductionSchedulingLengthOptions,
   getProductionSchedulingOrderStandardCapacity,
   getProductionSchedulingOrders,
   updateProductionSchedulingOrder,
@@ -30,6 +31,14 @@ export function useProductionSchedulingOrders({
     queryFn: ({ signal }) =>
       getProductionSchedulingOrders({ filters, page, pageSize, signal }),
     placeholderData: keepPreviousData,
+    ...queryConfig.list,
+  })
+}
+
+export function useProductionSchedulingLengthOptions() {
+  return useQuery({
+    queryKey: [PRODUCTION_SCHEDULING_KEY, 'length-options'],
+    queryFn: ({ signal }) => getProductionSchedulingLengthOptions(signal),
     ...queryConfig.list,
   })
 }

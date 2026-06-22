@@ -1,9 +1,17 @@
-export const PRODUCTION_SCHEDULING_MATERIAL_CODE_PREFIX = '02.'
-export const PRODUCTION_SCHEDULING_MATERIAL_CODE_QUERY_PATTERN = `${PRODUCTION_SCHEDULING_MATERIAL_CODE_PREFIX}%`
+export const PRODUCTION_SCHEDULING_MATERIAL_CODE_PREFIXES = [
+  '01.',
+  '02.',
+] as const
+export const PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER =
+  PRODUCTION_SCHEDULING_MATERIAL_CODE_PREFIXES.map(
+    (prefix) => `material_code.ilike.${prefix}%`,
+  ).join(',')
 
 export function isProductionSchedulingMaterialCode(value: unknown): boolean {
   return (
     typeof value === 'string' &&
-    value.trim().startsWith(PRODUCTION_SCHEDULING_MATERIAL_CODE_PREFIX)
+    PRODUCTION_SCHEDULING_MATERIAL_CODE_PREFIXES.some((prefix) =>
+      value.trim().startsWith(prefix),
+    )
   )
 }
