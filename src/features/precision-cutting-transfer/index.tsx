@@ -39,7 +39,7 @@ export default function MaterialTransferPage() {
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
-  const pageSize = Number(searchParamsURL.get('pageSize')) || 10
+  const pageSize = Number(searchParamsURL.get('pageSize')) || 50
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchFilters, setSearchFilters] =
@@ -62,12 +62,30 @@ export default function MaterialTransferPage() {
   const batchUpdateMutation = useBatchUpdatePrecisionCuttingTransfers()
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
-    targetRowCount: 10,
+    targetRowCount: 50,
     summaryRowHeight: 39,
   })
 
   const selectedCount = selectedRowKeys.length
   const records = useMemo(() => data?.items || [], [data?.items])
+  const selectedSummary = useMemo(() => {
+    if (selectedRowKeys.length === 0) {
+      return { quantity: 0, matched: 0 }
+    }
+
+    const keySet = new Set(selectedRowKeys.map((key) => String(key)))
+    let quantity = 0
+    let matched = 0
+
+    for (const item of records) {
+      if (keySet.has(String(item.id))) {
+        quantity += Number(item.transfer_quantity || 0)
+        matched += 1
+      }
+    }
+
+    return { quantity, matched }
+  }, [records, selectedRowKeys])
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
@@ -328,6 +346,59 @@ export default function MaterialTransferPage() {
         />
       </div>
 
+      {selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-linear-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm">
+          <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100">
+              <svg
+                className="h-3.5 w-3.5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            已选
+            <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
+              {selectedCount}
+            </span>
+            条
+            {selectedSummary.matched < selectedCount ? (
+              <span className="ml-1 text-xs text-amber-600 dark:text-amber-400">
+                （当前页参与合计 {selectedSummary.matched} 条）
+              </span>
+            ) : null}
+          </span>
+          <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100">
+              <svg
+                className="h-3.5 w-3.5 text-rose-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                />
+              </svg>
+            </div>
+            转移数量合计：
+            <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
+              {selectedSummary.quantity.toLocaleString()}
+            </span>
+          </span>
+        </div>
+      ) : null}
+
       <Splitter
         orientation="vertical"
         style={{ flex: 1, minHeight: 0 }}
@@ -352,7 +423,7 @@ export default function MaterialTransferPage() {
               />
             </div>
             <div ref={paginationRef} className="flex shrink-0 justify-end">
-              <AppPagination total={data?.total || 0} />
+              <AppPagination total={data?.total || 0} defaultPageSize={50} />
             </div>
           </div>
         </Splitter.Panel>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   ArrowPathIcon,
+  MagnifyingGlassIcon,
   PencilSquareIcon,
   TableCellsIcon,
 } from '@heroicons/react/16/solid'
@@ -835,13 +836,18 @@ export default function ProductionScheduling() {
               <Button
                 type="primary"
                 htmlType="submit"
-                icon={<ArrowPathIcon className="size-4" />}
+                icon={<MagnifyingGlassIcon className="size-4" />}
               >
                 查询
               </Button>
             </Form.Item>
             <Form.Item className="!mb-0">
-              <Button onClick={handleReset}>重置</Button>
+              <Button
+                icon={<ArrowPathIcon className="size-4" />}
+                onClick={handleReset}
+              >
+                重置
+              </Button>
             </Form.Item>
           </Form>
         </div>
