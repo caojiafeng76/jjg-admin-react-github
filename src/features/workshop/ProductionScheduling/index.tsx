@@ -37,6 +37,7 @@ import type {
 import { getAllEmployees } from '@/services/apiEmployees'
 import { exportProductionScheduledPlanToExcel } from '@/utils/productionSchedulingPlanExcel'
 import {
+  useProductionSchedulingLengthOptions,
   useProductionSchedulingOrders,
   useUpdateProductionSchedulingOrder,
 } from './useProductionScheduling'
@@ -46,6 +47,8 @@ const { Text, Title } = Typography
 
 type SearchFormValues = {
   customer?: string
+  lengthMm?: number[]
+  materialCode?: string
   model?: string
   projectNo?: string
   status?: ProductionSchedulingFilters['status']
@@ -488,6 +491,7 @@ export default function ProductionScheduling() {
     queryFn: getAllEmployees,
     staleTime: 5 * 60 * 1000,
   })
+  const { data: lengthOptions = [] } = useProductionSchedulingLengthOptions()
   const { data: machineOptions = [] } = useMachineEquipmentOptions()
   const employeeMap = useMemo(
     () => new Map(employees.map((e) => [e.id, e.name])),
@@ -563,6 +567,8 @@ export default function ProductionScheduling() {
     const orderRange = values.orderDateRange
     setFilters({
       customer: values.customer?.trim() || undefined,
+      lengthMm: values.lengthMm?.length ? values.lengthMm : undefined,
+      materialCode: values.materialCode?.trim() || undefined,
       model: values.model?.trim() || undefined,
       projectNo: values.projectNo?.trim() || undefined,
       status: values.status || '生产中',
@@ -732,6 +738,35 @@ export default function ProductionScheduling() {
               className="!mb-0"
             >
               <Input allowClear placeholder="产品/客户型号" className="!w-36" />
+            </Form.Item>
+            <Form.Item
+              name="materialCode"
+              label={<span className="text-xs! text-slate-500">料号</span>}
+              className="mb-0!"
+            >
+              <Input
+                allowClear
+                placeholder="多关键词用空格分隔"
+                className="w-44!"
+              />
+            </Form.Item>
+            <Form.Item
+              name="lengthMm"
+              label={<span className="text-xs! text-slate-500">长度</span>}
+              className="mb-0!"
+            >
+              <Select
+                allowClear
+                className="w-40!"
+                maxTagCount="responsive"
+                mode="multiple"
+                options={lengthOptions.map((length) => ({
+                  label: `${length}mm`,
+                  value: length,
+                }))}
+                placeholder="全部"
+                showSearch={{ optionFilterProp: 'label' }}
+              />
             </Form.Item>
             <Form.Item
               name="customer"
