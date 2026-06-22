@@ -1,27 +1,31 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   ArrowPathIcon,
   PencilSquareIcon,
   TableCellsIcon,
 } from '@heroicons/react/16/solid'
-import type { TableColumnsType, TablePaginationConfig, TableProps } from 'antd'
+import type { TableColumnsType, TableProps } from 'antd'
 import {
   App,
   Button,
+  ConfigProvider,
   DatePicker,
   Form,
   Input,
   InputNumber,
   Modal,
+  Pagination,
   Select,
   Table,
   Tag,
   Typography,
 } from 'antd'
 import dayjs from 'dayjs'
+import zhCN from 'antd/es/locale/zh_CN'
 
 import { WORKSHOP_ORDER_STATUS_OPTIONS } from '@/features/workshop/OrderList/orderStatus'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import ExportButton from '@/ui/ExportButton'
 import { getErrorDisplayInfo } from '@/utils/errorHandler'
@@ -67,9 +71,6 @@ const DEFAULT_FILTERS: ProductionSchedulingFilters = {
 }
 
 const DEFAULT_PAGE_SIZE = 20
-const DEFAULT_TABLE_SCROLL_Y = 520
-const MIN_TABLE_SCROLL_Y = 280
-const TABLE_SCROLL_VERTICAL_PADDING = 56
 
 const PROGRESS_STATUS_OPTIONS = [
   { label: '未开工', value: '未开工' },
@@ -459,7 +460,7 @@ export default function ProductionScheduling() {
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [searchForm] = Form.useForm<SearchFormValues>()
   const [schedulingForm] = Form.useForm<SchedulingFormValues>()
-  const tableContainerRef = useRef<HTMLDivElement>(null)
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight()
   const [filters, setFilters] =
     useState<ProductionSchedulingFilters>(DEFAULT_FILTERS)
   const [page, setPage] = useState(1)
@@ -467,7 +468,6 @@ export default function ProductionScheduling() {
   const [editingOrder, setEditingOrder] =
     useState<ProductionSchedulingOrder | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
-  const [tableScrollY, setTableScrollY] = useState(DEFAULT_TABLE_SCROLL_Y)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
   const { data: employees = [] } = useQuery({
@@ -509,53 +509,6 @@ export default function ProductionScheduling() {
     return orders.filter((o) => keySet.has(String(getOrderRowKey(o))))
   }, [orders, selectedRowKeys])
 
-  useEffect(() => {
-    const container = tableContainerRef.current
-    if (!container) {
-      return
-    }
-
-    let animationFrameId = 0
-
-    const updateTableScrollY = () => {
-      const pagination = container.querySelector<HTMLElement>(
-        '.ant-table-pagination',
-      )
-      const paginationHeight = pagination?.offsetHeight ?? 32
-      const nextScrollY = Math.max(
-        MIN_TABLE_SCROLL_Y,
-        container.clientHeight -
-          paginationHeight -
-          TABLE_SCROLL_VERTICAL_PADDING,
-      )
-
-      setTableScrollY((currentScrollY) =>
-        Math.abs(currentScrollY - nextScrollY) > 2
-          ? nextScrollY
-          : currentScrollY,
-      )
-    }
-
-    const scheduleUpdate = () => {
-      cancelAnimationFrame(animationFrameId)
-      animationFrameId = requestAnimationFrame(updateTableScrollY)
-    }
-
-    const timeoutId = window.setTimeout(scheduleUpdate, 0)
-    const resizeObserver = new ResizeObserver(scheduleUpdate)
-    resizeObserver.observe(container)
-    window.addEventListener('resize', scheduleUpdate)
-
-    scheduleUpdate()
-
-    return () => {
-      window.clearTimeout(timeoutId)
-      cancelAnimationFrame(animationFrameId)
-      resizeObserver.disconnect()
-      window.removeEventListener('resize', scheduleUpdate)
-    }
-  }, [orders.length, pageSize])
-
   const openEditModal = useCallback(
     (order: ProductionSchedulingOrder) => {
       if (viewerDenied) {
@@ -590,21 +543,6 @@ export default function ProductionScheduling() {
   useEffect(() => {
     setSelectedRowKeys([])
   }, [page, pageSize, filters])
-
-  const tablePagination = useMemo<TablePaginationConfig>(
-    () => ({
-      current: page,
-      pageSize,
-      showSizeChanger: true,
-      showTotal: (value) => `共 ${value} 条`,
-      total,
-      onChange: (nextPage, nextPageSize) => {
-        setPage(nextPage)
-        setPageSize(nextPageSize || DEFAULT_PAGE_SIZE)
-      },
-    }),
-    [page, pageSize, total],
-  )
 
   const handleSearch = useCallback((values: SearchFormValues) => {
     setPage(1)
@@ -884,23 +822,43 @@ export default function ProductionScheduling() {
       {/* 表格区 */}
       <div
         ref={tableContainerRef}
-        className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm"
       >
-        <Table<ProductionSchedulingOrder>
-          size="small"
-          rowKey={getOrderRowKey}
-          columns={columns}
-          dataSource={orders}
-          loading={tableLoading}
-          pagination={tablePagination}
-          scroll={{ x: 2530, y: tableScrollY }}
-          tableLayout="fixed"
-          rowSelection={rowSelection}
-          rowClassName={(_record, index) =>
-            index % 2 === 0 ? 'bg-slate-50/40' : ''
-          }
-          className="[&_.ant-table]:!font-medium"
-        />
+        <div className="min-h-0 flex-1 overflow-x-auto">
+          <Table<ProductionSchedulingOrder>
+            size="small"
+            rowKey={getOrderRowKey}
+            columns={columns}
+            dataSource={orders}
+            loading={tableLoading}
+            pagination={false}
+            scroll={{ x: 2530, y: scrollY }}
+            tableLayout="fixed"
+            rowSelection={rowSelection}
+            rowClassName={(_record, index) =>
+              index % 2 === 0 ? 'bg-slate-50/40' : ''
+            }
+            className="[&_.ant-table]:!font-medium"
+          />
+        </div>
+        <div
+          ref={paginationRef}
+          className="flex shrink-0 justify-end border-t border-slate-100 px-3 py-2"
+        >
+          <ConfigProvider locale={zhCN}>
+            <Pagination
+              current={page}
+              pageSize={pageSize}
+              total={total}
+              showSizeChanger={{ getPopupContainer: () => document.body }}
+              showTotal={(value) => `共 ${value} 条`}
+              onChange={(nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize || DEFAULT_PAGE_SIZE)
+              }}
+            />
+          </ConfigProvider>
+        </div>
       </div>
 
       <Modal
