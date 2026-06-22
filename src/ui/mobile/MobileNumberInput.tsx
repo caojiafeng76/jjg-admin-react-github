@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { InputNumber } from 'antd'
 import type { InputNumberProps } from 'antd'
 
@@ -10,6 +10,7 @@ export interface MobileNumberInputProps extends InputNumberProps<number> {
 
 export default function MobileNumberInput({
   keyboardMode = 'numeric',
+  style,
   ...props
 }: MobileNumberInputProps) {
   const wrapperRef = useRef<HTMLDivElement | null>(null)
@@ -30,9 +31,14 @@ export default function MobileNumberInput({
     input.setAttribute('autocomplete', 'off')
   }, [keyboardMode])
 
+  const mergedStyle = useMemo(
+    () => ({ width: '100%', ...style }),
+    [style],
+  )
+
   return (
-    <div ref={wrapperRef}>
-      <InputNumber {...props} />
+    <div ref={wrapperRef} className="w-full">
+      <InputNumber {...props} style={mergedStyle} className="!w-full" />
     </div>
   )
 }

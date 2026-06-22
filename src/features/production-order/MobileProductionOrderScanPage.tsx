@@ -454,9 +454,9 @@ export default function MobileProductionOrderScanPage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto px-3 pt-3 pb-52">
-      <div className="mx-auto max-w-2xl space-y-3">
-        <section className="rounded-[28px] border border-slate-200 bg-white px-4 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+    <div className="h-full overflow-y-auto px-4 pt-4 pb-[calc(--spacing(16)+env(safe-area-inset-bottom))]">
+      <div className="mx-auto flex max-w-2xl flex-col gap-4">
+        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-[11px] font-semibold tracking-[0.24em] text-slate-400 uppercase">
@@ -484,7 +484,7 @@ export default function MobileProductionOrderScanPage() {
             />
           </div>
 
-          <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
             <div className="flex items-center justify-between gap-3">
               <span>当前录入日期</span>
               <span className="font-semibold text-slate-900">
@@ -500,136 +500,156 @@ export default function MobileProductionOrderScanPage() {
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-slate-200 bg-white px-4 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <div className="mb-2 text-sm font-semibold text-slate-700">
-                项目号
+        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
+          <div className="flex flex-col gap-5">
+            {/* 基本信息 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300" />
+                基本信息
               </div>
-              <button
-                type="button"
-                onClick={() => setActiveSheet('project')}
-                className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm"
-              >
-                <div>
+
+              <div>
+                <div className="mb-1 text-sm font-semibold text-slate-700">
+                  项目号
+                </div>
+                <div className="mb-2 text-xs text-slate-500">
+                  可扫码自动带出，也可手动修改
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveSheet('project')}
+                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm"
+                >
                   <div className="text-base font-semibold text-slate-900">
                     {projectNo || '请选择项目号'}
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">
-                    可扫码自动带出，也可手动修改
+                  <span className="text-sm font-medium text-slate-400">
+                    选择
+                  </span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                    型号
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-900">
+                    {formatDisplayValue(currentProject?.product_model)}
                   </div>
                 </div>
-                <span className="text-slate-400">选择</span>
-              </button>
-            </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                    长度(mm)
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-900">
+                    {formatDisplayValue(currentProject?.length_mm)}
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                    客户型号
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-900">
+                    {formatDisplayValue(currentProject?.customer_model)}
+                  </div>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-                <div className="text-xs text-slate-400">型号</div>
-                <div className="mt-1 text-sm font-semibold text-slate-900">
-                  {formatDisplayValue(currentProject?.product_model)}
+              <div>
+                <div className="mb-1 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
+                  <span>工序</span>
+                  {operationMatch?.matchLevel ? (
+                    <Tag
+                      color={
+                        operationMatch.matchLevel === 'type-a'
+                          ? 'success'
+                          : 'processing'
+                      }
+                    >
+                      {operationMatch.matchLevel === 'type-a'
+                        ? 'A类匹配'
+                        : 'B类匹配'}
+                    </Tag>
+                  ) : null}
                 </div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-                <div className="text-xs text-slate-400">长度(mm)</div>
-                <div className="mt-1 text-sm font-semibold text-slate-900">
-                  {formatDisplayValue(currentProject?.length_mm)}
+                <div className="mb-2 text-xs text-slate-500">
+                  {currentProductModel
+                    ? '根据项目号自动匹配工序列表'
+                    : '请先确定项目号'}
                 </div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-                <div className="text-xs text-slate-400">客户型号</div>
-                <div className="mt-1 text-sm font-semibold text-slate-900">
-                  {formatDisplayValue(currentProject?.customer_model)}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-2 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
-                <span>工序</span>
-                {operationMatch?.matchLevel ? (
-                  <Tag
-                    color={
-                      operationMatch.matchLevel === 'type-a'
-                        ? 'success'
-                        : 'processing'
-                    }
-                  >
-                    {operationMatch.matchLevel === 'type-a'
-                      ? 'A类匹配'
-                      : 'B类匹配'}
-                  </Tag>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveSheet('operation')}
-                className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm"
-                disabled={!currentProductModel}
-              >
-                <div>
+                <button
+                  type="button"
+                  onClick={() => setActiveSheet('operation')}
+                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={!currentProductModel}
+                >
                   <div className="text-base font-semibold text-slate-900">
                     {operation || '请选择工序'}
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">
-                    {currentProductModel
-                      ? '根据项目号自动匹配工序列表'
-                      : '请先确定项目号'}
-                  </div>
-                </div>
-                <span className="text-slate-400">选择</span>
-              </button>
-            </div>
-
-            <div>
-              <div className="mb-2 text-sm font-semibold text-slate-700">
-                机器编号
+                  <span className="text-sm font-medium text-slate-400">
+                    选择
+                  </span>
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setActiveSheet('machine')}
-                className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm"
-                disabled={!operation}
-              >
-                <div>
+
+              <div>
+                <div className="mb-1 text-sm font-semibold text-slate-700">
+                  机器编号
+                </div>
+                <div className="mb-2 text-xs text-slate-500">
+                  {operation ? '从底部弹层中选择机器编号' : '请先选择工序'}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveSheet('machine')}
+                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={!operation}
+                >
                   <div className="text-base font-semibold text-slate-900">
                     {currentMachineLabel}
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">
-                    {operation ? '从底部弹层中选择机器编号' : '请先选择工序'}
-                  </div>
+                  <span className="text-sm font-medium text-slate-400">
+                    选择
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* 数量明细 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300" />
+                数量明细
+              </div>
+
+              <div>
+                <div className="mb-2 text-sm font-semibold text-slate-700">
+                  来料接收数
                 </div>
-                <span className="text-slate-400">选择</span>
-              </button>
-            </div>
-
-            <div>
-              <div className="mb-2 text-sm font-semibold text-slate-700">
-                来料接收数
+                <MobileNumberInput
+                  min={0}
+                  value={incomingQualifiedQuantity}
+                  onChange={(value) =>
+                    setIncomingQualifiedQuantity(Number(value || 0))
+                  }
+                  className="h-12 w-full rounded-2xl"
+                />
               </div>
-              <MobileNumberInput
-                min={0}
-                value={incomingQualifiedQuantity}
-                onChange={(value) =>
-                  setIncomingQualifiedQuantity(Number(value || 0))
-                }
-                style={{ width: '100%' }}
-              />
-            </div>
 
-            <div>
-              <div className="mb-2 text-sm font-semibold text-slate-700">
-                成品合格数
+              <div>
+                <div className="mb-2 text-sm font-semibold text-slate-700">
+                  成品合格数
+                </div>
+                <MobileNumberInput
+                  min={0}
+                  value={qualifiedQuantity}
+                  onChange={(value) => setQualifiedQuantity(Number(value || 0))}
+                  className="h-12 w-full rounded-2xl"
+                />
               </div>
-              <MobileNumberInput
-                min={0}
-                value={qualifiedQuantity}
-                onChange={(value) => setQualifiedQuantity(Number(value || 0))}
-                style={{ width: '100%' }}
-              />
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="mb-2 text-sm font-semibold text-slate-700">
                   加工不良数量
@@ -638,7 +658,7 @@ export default function MobileProductionOrderScanPage() {
                   min={0}
                   value={defectQuantity1}
                   onChange={(value) => setDefectQuantity1(Number(value || 0))}
-                  style={{ width: '100%' }}
+                  className="h-12 w-full rounded-2xl"
                 />
               </div>
 
@@ -650,12 +670,18 @@ export default function MobileProductionOrderScanPage() {
                   min={0}
                   value={defectQuantity2}
                   onChange={(value) => setDefectQuantity2(Number(value || 0))}
-                  style={{ width: '100%' }}
+                  className="h-12 w-full rounded-2xl"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            {/* 调机与外协 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300" />
+                调机与外协
+              </div>
+
               <div>
                 <div className="mb-2 text-sm font-semibold text-slate-700">
                   调机不良
@@ -666,7 +692,7 @@ export default function MobileProductionOrderScanPage() {
                   onChange={(value) =>
                     setSetupDefectQuantity(Number(value || 0))
                   }
-                  style={{ width: '100%' }}
+                  className="h-12 w-full rounded-2xl"
                 />
               </div>
 
@@ -678,15 +704,14 @@ export default function MobileProductionOrderScanPage() {
                   value={setupResponsible}
                   onChange={(event) => setSetupResponsible(event.target.value)}
                   placeholder="请输入调机负责人"
+                  className="h-12 w-full rounded-2xl border-slate-200"
                 />
               </div>
-            </div>
 
-            <div className="rounded-2xl border border-red-300 bg-red-50/60 p-4">
-              <div className="mb-3 text-sm font-medium text-red-600">
-                外协相关信息
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                <div className="mb-3 text-xs text-slate-500">
+                  涉及外协工序时填写
+                </div>
                 <div>
                   <div className="mb-2 text-sm font-semibold text-slate-700">
                     外协不良数
@@ -697,11 +722,11 @@ export default function MobileProductionOrderScanPage() {
                     onChange={(value) =>
                       setOutsourceDefectQuantity(Number(value || 0))
                     }
-                    style={{ width: '100%' }}
+                    className="h-12 w-full rounded-2xl"
                   />
                 </div>
 
-                <div>
+                <div className="mt-3">
                   <div className="mb-2 text-sm font-semibold text-slate-700">
                     外协单位
                   </div>
@@ -709,35 +734,43 @@ export default function MobileProductionOrderScanPage() {
                     value={outsourceUnit}
                     onChange={(event) => setOutsourceUnit(event.target.value)}
                     placeholder="请输入外协单位"
+                    className="h-12 w-full rounded-2xl border-slate-200"
+                  />
+                </div>
+
+                <div className="mt-3">
+                  <div className="mb-2 text-sm font-semibold text-slate-700">
+                    外协不良原因
+                  </div>
+                  <Input.TextArea
+                    rows={2}
+                    value={outsourceDefectReason}
+                    onChange={(event) =>
+                      setOutsourceDefectReason(event.target.value)
+                    }
+                    placeholder="请输入外协不良原因"
+                    className="rounded-2xl"
                   />
                 </div>
               </div>
-
-              <div className="mt-3">
-                <div className="mb-2 text-sm font-semibold text-slate-700">
-                  外协不良原因
-                </div>
-                <Input.TextArea
-                  rows={2}
-                  value={outsourceDefectReason}
-                  onChange={(event) =>
-                    setOutsourceDefectReason(event.target.value)
-                  }
-                  placeholder="请输入外协不良原因"
-                />
-              </div>
             </div>
 
-            <div>
-              <div className="mb-2 text-sm font-semibold text-slate-700">
+            {/* 备注 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300" />
                 备注
               </div>
-              <Input.TextArea
-                rows={3}
-                value={remark}
-                onChange={(event) => setRemark(event.target.value)}
-                placeholder="如有需要可补充说明"
-              />
+
+              <div>
+                <Input.TextArea
+                  rows={3}
+                  value={remark}
+                  onChange={(event) => setRemark(event.target.value)}
+                  placeholder="如有需要可补充说明"
+                  className="rounded-2xl"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -747,16 +780,16 @@ export default function MobileProductionOrderScanPage() {
         className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
       >
-        <div className="mx-auto flex max-w-2xl gap-3">
+        <div className="mx-auto grid max-w-2xl grid-cols-[1fr_1.4fr] gap-3">
           <Button
-            className="h-12 flex-1 rounded-2xl"
+            className="h-12 rounded-2xl"
             onClick={() => navigate(returnTo)}
           >
             取消
           </Button>
           <Button
             type="primary"
-            className="h-12 flex-[1.4] rounded-2xl"
+            className="h-12 rounded-2xl"
             loading={isSubmitting}
             onClick={handleSubmit}
           >
