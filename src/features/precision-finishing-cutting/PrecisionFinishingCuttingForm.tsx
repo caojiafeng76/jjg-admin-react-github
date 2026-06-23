@@ -296,27 +296,48 @@ export default function PrecisionFinishingCuttingForm({
   const getPopupContainer = (triggerNode: HTMLElement) =>
     triggerNode.parentElement || document.body
 
+  const formItemClassName = 'mb-0'
+  const sectionClassName =
+    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm'
+  const sectionTitleClassName =
+    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700'
+
+  const sectionDot = (className = 'bg-blue-500') => (
+    <span className={`h-1.5 w-1.5 rounded-full ${className}`} />
+  )
+
   const outsourceSection = (
-    <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4">
-      <div className="mb-3 text-sm font-medium text-red-600">外协相关信息</div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <Form.Item name="outsource_defect_quantity" label="外协不良数">
-          <InputNumber min={0} precision={0} className="w-full" />
+    <section className="rounded-2xl border border-red-200/80 bg-red-50/70 p-4 shadow-sm">
+      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-red-600">
+        {sectionDot('bg-red-500')}
+        外协相关信息
+      </div>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <Form.Item
+          name="outsource_defect_quantity"
+          label="外协不良数"
+          className={formItemClassName}
+        >
+          <InputNumber min={0} precision={0} style={{ width: '100%' }} />
         </Form.Item>
 
-        <Form.Item name="outsource_unit" label="外协单位">
+        <Form.Item
+          name="outsource_unit"
+          label="外协单位"
+          className={formItemClassName}
+        >
           <Input placeholder="请输入外协单位" />
         </Form.Item>
 
         <Form.Item
           name="outsource_defect_reason"
           label="外协不良原因"
-          className="md:col-span-2"
+          className={`${formItemClassName} md:col-span-2 xl:col-span-3`}
         >
           <Input.TextArea rows={2} placeholder="可填写外协不良原因" />
         </Form.Item>
       </div>
-    </div>
+    </section>
   )
 
   return (
@@ -324,223 +345,312 @@ export default function PrecisionFinishingCuttingForm({
       title={initialValues ? '编辑精加工切割单' : '创建精加工切割单'}
       open={open}
       onCancel={onCancel}
-      width={mobile ? 'calc(100vw - 24px)' : 860}
+      width={mobile ? 'calc(100vw - 24px)' : 960}
       style={mobile ? { top: 16, maxWidth: 520 } : undefined}
+      styles={{
+        body: {
+          maxHeight: mobile ? 'calc(100vh - 120px)' : 'calc(100vh - 180px)',
+          overflowY: 'auto',
+          paddingRight: 4,
+        },
+      }}
       footer={null}
       destroyOnHidden
     >
-      <div
-        className={
-          mobile
-            ? 'max-h-[calc(100vh-240px)] overflow-y-auto overscroll-contain pr-1'
-            : undefined
-        }
-      >
-        <Form form={form} layout="vertical" onFinish={handleFinish}>
-          <Form.Item label="项目号" required>
-            <Space.Compact block>
+      <div className={mobile ? 'overscroll-contain pr-1' : undefined}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          className="flex flex-col gap-4 [&_.ant-form-item-label>label]:font-medium"
+        >
+          <section className={sectionClassName}>
+            <div className={sectionTitleClassName}>
+              {sectionDot()}
+              基础订单信息
+            </div>
+            <Form.Item label="项目号" required className={formItemClassName}>
+              <Space.Compact block>
+                <Form.Item
+                  name="project_no"
+                  noStyle
+                  rules={[{ required: true, message: '请选择项目号' }]}
+                >
+                  <Select
+                    showSearch={{ filterOption: filterProjectNoOption }}
+                    placeholder="请选择项目号"
+                    loading={isLoadingProjectNos}
+                    getPopupContainer={getPopupContainer}
+                    options={mergedProjectNoOptions}
+                    optionRender={renderProjectNoOption}
+                    listHeight={320}
+                    onChange={handleProjectChange}
+                  />
+                </Form.Item>
+                <ProjectNoScanButton
+                  projectNos={projectNos}
+                  onResolved={handleProjectScanResolved}
+                />
+              </Space.Compact>
+            </Form.Item>
+
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
               <Form.Item
-                name="project_no"
-                noStyle
-                rules={[{ required: true, message: '请选择项目号' }]}
+                name="customer"
+                label="客户"
+                className={formItemClassName}
               >
-                <Select
-                  showSearch
-                  placeholder="请选择项目号"
-                  loading={isLoadingProjectNos}
-                  getPopupContainer={getPopupContainer}
-                  options={mergedProjectNoOptions}
-                  filterOption={filterProjectNoOption}
-                  optionRender={renderProjectNoOption}
-                  listHeight={320}
-                  onChange={handleProjectChange}
+                <Input disabled placeholder="自动带出" />
+              </Form.Item>
+
+              <Form.Item
+                name="product_model"
+                label="型号"
+                className={formItemClassName}
+              >
+                <Input disabled placeholder="自动带出" />
+              </Form.Item>
+
+              <Form.Item
+                name="length_mm"
+                label="长度(mm)"
+                className={formItemClassName}
+              >
+                <InputNumber
+                  disabled
+                  placeholder="自动带出"
+                  style={{ width: '100%' }}
                 />
               </Form.Item>
-              <ProjectNoScanButton
-                projectNos={projectNos}
-                onResolved={handleProjectScanResolved}
-              />
-            </Space.Compact>
-          </Form.Item>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Form.Item name="customer" label="客户">
-              <Input disabled placeholder="自动带出" />
-            </Form.Item>
+              <Form.Item
+                name="customer_model"
+                label="客户型号"
+                className={formItemClassName}
+              >
+                <Input disabled placeholder="自动带出" />
+              </Form.Item>
+            </div>
+          </section>
 
-            <Form.Item name="product_model" label="型号">
-              <Input disabled placeholder="自动带出" />
-            </Form.Item>
+          <section className={sectionClassName}>
+            <div className={sectionTitleClassName}>
+              {sectionDot('bg-rose-500')}
+              长料与不良数量
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <Form.Item
+                name="long_material_length_mm"
+                label="长料长度(mm)"
+                className={formItemClassName}
+                rules={[{ required: true, message: '请输入长料长度' }]}
+              >
+                <InputNumber
+                  min={0.01}
+                  precision={2}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
 
-            <Form.Item name="length_mm" label="长度(mm)">
-              <InputNumber disabled placeholder="自动带出" className="w-full" />
-            </Form.Item>
+              <Form.Item
+                name="long_material_quantity"
+                label="长料数量"
+                className={formItemClassName}
+                rules={[{ required: true, message: '请输入长料数量' }]}
+              >
+                <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
 
-            <Form.Item name="customer_model" label="客户型号">
-              <Input disabled placeholder="自动带出" />
-            </Form.Item>
-          </div>
+              <Form.Item
+                name="raw_material_defect_count"
+                label="原料不良数"
+                className={formItemClassName}
+                rules={[{ required: true, message: '请输入原料不良数' }]}
+              >
+                <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            <Form.Item
-              name="long_material_length_mm"
-              label="长料长度(mm)"
-              rules={[{ required: true, message: '请输入长料长度' }]}
-            >
-              <InputNumber min={0.01} precision={2} className="w-full" />
-            </Form.Item>
+              <Form.Item
+                name="processing_defect_count"
+                label="加工不良数"
+                className={formItemClassName}
+                rules={[{ required: true, message: '请输入加工不良数' }]}
+              >
+                <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
 
-            <Form.Item
-              name="long_material_quantity"
-              label="长料数量"
-              rules={[{ required: true, message: '请输入长料数量' }]}
-            >
-              <InputNumber min={1} precision={0} className="w-full" />
-            </Form.Item>
+              <Form.Item
+                name="transfer_quantity"
+                label="转移数量"
+                className={formItemClassName}
+                rules={[{ required: true, message: '请输入转移数量' }]}
+              >
+                <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
+            </div>
+          </section>
 
-            <Form.Item
-              name="raw_material_defect_count"
-              label="原料不良数"
-              rules={[{ required: true, message: '请输入原料不良数' }]}
-            >
-              <InputNumber min={0} precision={0} className="w-full" />
-            </Form.Item>
+          <section className={sectionClassName}>
+            <div className={sectionTitleClassName}>
+              {sectionDot('bg-amber-500')}
+              不良原因与责任
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              <Form.Item
+                name="defect_reason"
+                label="不良原因"
+                className={formItemClassName}
+              >
+                <Input.TextArea rows={2} placeholder="可填写不良原因" />
+              </Form.Item>
 
-            <Form.Item
-              name="processing_defect_count"
-              label="加工不良数"
-              rules={[{ required: true, message: '请输入加工不良数' }]}
-            >
-              <InputNumber min={0} precision={0} className="w-full" />
-            </Form.Item>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <Form.Item
+                  name="responsible_process"
+                  label="责任工序"
+                  className={formItemClassName}
+                >
+                  <Input placeholder="请输入责任工序" />
+                </Form.Item>
 
-            <Form.Item
-              name="transfer_quantity"
-              label="转移数量"
-              rules={[{ required: true, message: '请输入转移数量' }]}
-            >
-              <InputNumber min={1} precision={0} className="w-full" />
-            </Form.Item>
+                <Form.Item
+                  name="process_owner"
+                  label="工序负责人"
+                  className={formItemClassName}
+                >
+                  <Input placeholder="请输入工序负责人" />
+                </Form.Item>
+              </div>
+            </div>
+          </section>
 
-            <Form.Item
-              name="defect_reason"
-              label="不良原因"
-              className="xl:col-span-2"
-            >
-              <Input.TextArea rows={2} placeholder="可填写不良原因" />
-            </Form.Item>
-          </div>
+          <section className={sectionClassName}>
+            <div className={sectionTitleClassName}>
+              {sectionDot('bg-emerald-500')}
+              操作与接收
+            </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <Form.Item
+                name="operator_employee_ids"
+                label="操作人"
+                className={formItemClassName}
+                rules={[
+                  {
+                    validator: async (_rule, value: string[] | undefined) => {
+                      if (Array.isArray(value) && value.length > 0) {
+                        return
+                      }
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Form.Item name="responsible_process" label="责任工序">
-              <Input placeholder="请输入责任工序" />
-            </Form.Item>
-
-            <Form.Item name="process_owner" label="工序负责人">
-              <Input placeholder="请输入工序负责人" />
-            </Form.Item>
-
-            <Form.Item
-              name="operator_employee_ids"
-              label="操作人"
-              rules={[
-                {
-                  validator: async (_rule, value: string[] | undefined) => {
-                    if (Array.isArray(value) && value.length > 0) {
-                      return
-                    }
-
-                    throw new Error('请选择至少一名操作人')
+                      throw new Error('请选择至少一名操作人')
+                    },
                   },
-                },
-              ]}
-            >
-              <Select
-                mode="multiple"
-                placeholder="请选择操作人"
-                showSearch
-                optionFilterProp="label"
-                getPopupContainer={getPopupContainer}
-                disabled={Boolean(fixedOperator)}
-                options={employees.map((employee) => ({
-                  label: employee.name,
-                  value: employee.id,
-                }))}
-              />
-            </Form.Item>
-          </div>
+                ]}
+              >
+                <Select
+                  mode="multiple"
+                  placeholder="请选择操作人"
+                  showSearch={{ optionFilterProp: 'label' }}
+                  getPopupContainer={getPopupContainer}
+                  disabled={Boolean(fixedOperator)}
+                  options={employees.map((employee) => ({
+                    label: employee.name,
+                    value: employee.id,
+                  }))}
+                />
+              </Form.Item>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Form.Item
-              name="target_workshop"
-              label="接收车间"
-              rules={[{ required: true, message: '请选择接收车间' }]}
-            >
-              <Select
-                placeholder="请选择接收车间"
-                getPopupContainer={getPopupContainer}
-                options={PRECISION_FINISHING_CUTTING_WORKSHOPS.map(
-                  (workshop) => ({
-                    label: workshop,
-                    value: workshop,
-                  }),
-                )}
-              />
-            </Form.Item>
+              <Form.Item
+                name="target_workshop"
+                label="接收车间"
+                className={formItemClassName}
+                rules={[{ required: true, message: '请选择接收车间' }]}
+              >
+                <Select
+                  placeholder="请选择接收车间"
+                  getPopupContainer={getPopupContainer}
+                  options={PRECISION_FINISHING_CUTTING_WORKSHOPS.map(
+                    (workshop) => ({
+                      label: workshop,
+                      value: workshop,
+                    }),
+                  )}
+                />
+              </Form.Item>
 
-            <Form.Item
-              name="recipient_name"
-              label="接收人"
-              rules={[{ required: true, message: '请输入接收人' }]}
-            >
-              <AutoComplete
-                allowClear
-                placeholder="可选择或手动填写"
-                options={recipientOptions}
-                filterOption
-                getPopupContainer={getPopupContainer}
-              />
-            </Form.Item>
-          </div>
+              <Form.Item
+                name="recipient_name"
+                label="接收人"
+                className={formItemClassName}
+                rules={[{ required: true, message: '请输入接收人' }]}
+              >
+                <AutoComplete
+                  allowClear
+                  placeholder="可选择或手动填写"
+                  options={recipientOptions}
+                  showSearch={{ filterOption: true }}
+                  getPopupContainer={getPopupContainer}
+                />
+              </Form.Item>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Form.Item name="inspector_name" label="检验人">
-              <Input placeholder="默认崔路路，可修改" />
-            </Form.Item>
-          </div>
+              <Form.Item
+                name="inspector_name"
+                label="检验人"
+                className={formItemClassName}
+              >
+                <Input placeholder="默认崔路路，可修改" />
+              </Form.Item>
+            </div>
+          </section>
 
           {mobile ? null : outsourceSection}
 
-          {mobile ? null : (
-            <Form.Item name="uploaded_by_name" label="数据上传">
-              <Input disabled placeholder="自动记录当前登录用户" />
-            </Form.Item>
-          )}
+          <section className={sectionClassName}>
+            <div className={sectionTitleClassName}>
+              {sectionDot('bg-slate-400')}
+              备注与审核
+            </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {mobile ? null : (
+                <Form.Item
+                  name="uploaded_by_name"
+                  label="数据上传"
+                  className={formItemClassName}
+                >
+                  <Input disabled placeholder="自动记录当前登录用户" />
+                </Form.Item>
+              )}
 
-          <Form.Item name="remark" label="备注">
-            <Input.TextArea rows={3} placeholder="可填写切割说明" />
-          </Form.Item>
+              {canAudit ? (
+                <Form.Item
+                  name="is_audited"
+                  label="审核状态"
+                  valuePropName="checked"
+                  className={formItemClassName}
+                >
+                  <Switch
+                    checkedChildren={
+                      PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[1].label
+                    }
+                    unCheckedChildren={
+                      PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[0].label
+                    }
+                  />
+                </Form.Item>
+              ) : null}
 
-          {canAudit ? (
-            <Form.Item
-              name="is_audited"
-              label="审核状态"
-              valuePropName="checked"
-            >
-              <Switch
-                checkedChildren={
-                  PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[1].label
-                }
-                unCheckedChildren={
-                  PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[0].label
-                }
-              />
-            </Form.Item>
-          ) : null}
+              <Form.Item
+                name="remark"
+                label="备注"
+                className={`${formItemClassName} md:col-span-2`}
+              >
+                <Input.TextArea rows={3} placeholder="可填写切割说明" />
+              </Form.Item>
+            </div>
+          </section>
 
           {mobile ? outsourceSection : null}
 
-          <Form.Item className="mb-0">
+          <Form.Item className="sticky bottom-0 z-10 -mx-1 mb-0 border-t border-slate-100 bg-white/95 px-1 pt-3 backdrop-blur-sm">
             <Space className="flex justify-end">
               <Button onClick={onCancel}>取消</Button>
               <Button type="primary" htmlType="submit" loading={loading}>
