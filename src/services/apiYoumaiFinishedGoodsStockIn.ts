@@ -39,6 +39,19 @@ export interface YoumaiFinishedGoodsStockInBatchStatusValues {
   status: YoumaiFinishedGoodsStockInStatus
 }
 
+interface YoumaiFinishedGoodsStockInAuditRow {
+  id: string
+  product_data_id: string
+  material_code: string
+  material_name: string
+  stock_in_quantity: number
+}
+
+interface YoumaiFinishedGoodsInventoryStockRow {
+  product_data_id: string
+  current_stock: number
+}
+
 type DynamicSupabaseTable = {
   from: (table: string) => any
 }
@@ -52,6 +65,12 @@ function stockInTable() {
 function productDataTable() {
   return (supabase as unknown as DynamicSupabaseTable).from(
     'youmai_product_data',
+  )
+}
+
+function inventoryTable() {
+  return (supabase as unknown as DynamicSupabaseTable).from(
+    'youmai_finished_goods_inventory',
   )
 }
 
@@ -105,6 +124,100 @@ function buildStockInPayload(
     status: values.status,
     stock_in_quantity: normalizeQuantity(values.stock_in_quantity),
     remarks: values.remarks.trim(),
+  }
+}
+
+function formatQuantity(value: number) {
+  return Number(value || 0).toLocaleString('zh-CN', {
+    maximumFractionDigits: 3,
+  })
+}
+
+async function assertCanReverseAuditedStockIn(ids: string[]) {
+  const { data: stockInRows, error } = await stockInTable()
+    .select(
+      'id, product_data_id, material_code, material_name, stock_in_quantity',
+    )
+    .in('id', ids)
+    .eq('status', '已审核')
+
+  if (error) {
+    throw handleApiError(error, '校验优迈成品入库反审库存失败')
+  }
+
+  const auditedRows = (stockInRows ||
+    []) as YoumaiFinishedGoodsStockInAuditRow[]
+
+  if (auditedRows.length === 0) {
+    return
+  }
+
+  const requiredQuantityMap = new Map<
+    string,
+    {
+      materialCode: string
+      materialName: string
+      quantity: number
+    }
+  >()
+
+  auditedRows.forEach((row) => {
+    const current = requiredQuantityMap.get(row.product_data_id)
+    const quantity = normalizeQuantity(row.stock_in_quantity)
+
+    if (current) {
+      current.quantity += quantity
+      return
+    }
+
+    requiredQuantityMap.set(row.product_data_id, {
+      materialCode: row.material_code,
+      materialName: row.material_name,
+      quantity,
+    })
+  })
+
+  const productDataIds = Array.from(requiredQuantityMap.keys())
+  const { data: inventoryRows, error: inventoryError } = await inventoryTable()
+    .select('product_data_id, current_stock')
+    .in('product_data_id', productDataIds)
+
+  if (inventoryError) {
+    throw handleApiError(inventoryError, '校验优迈成品库存失败')
+  }
+
+  const currentStockMap = new Map(
+    ((inventoryRows || []) as YoumaiFinishedGoodsInventoryStockRow[]).map(
+      (row) => [row.product_data_id, normalizeQuantity(row.current_stock)],
+    ),
+  )
+
+  const insufficientItems = productDataIds
+    .map((productDataId) => {
+      const required = requiredQuantityMap.get(productDataId)
+
+      if (!required) {
+        return null
+      }
+
+      const currentStock = currentStockMap.get(productDataId) ?? 0
+
+      if (currentStock >= required.quantity) {
+        return null
+      }
+
+      return `${required.materialCode} ${required.materialName}（需扣 ${formatQuantity(
+        required.quantity,
+      )}，现有 ${formatQuantity(currentStock)}）`
+    })
+    .filter((item): item is string => Boolean(item))
+
+  if (insufficientItems.length > 0) {
+    throw new Error(
+      `库存不足，无法反审以下优迈成品入库：${insufficientItems.join(
+        '；',
+      )}。请先反审/删除后续出库或补足库存后再操作`,
+    )
   }
 }
 
@@ -215,6 +328,10 @@ export async function batchUpdateYoumaiFinishedGoodsStockInStatus({
 
   if (normalizedIds.length === 0) {
     throw new Error('请选择至少一条优迈成品入库数据')
+  }
+
+  if (status === '待审核') {
+    await assertCanReverseAuditedStockIn(normalizedIds)
   }
 
   const { error } = await stockInTable()

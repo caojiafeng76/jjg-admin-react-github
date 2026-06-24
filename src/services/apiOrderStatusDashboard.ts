@@ -87,10 +87,12 @@ type OrderStatusDashboardRpcItem = WorkshopOrder & {
   transferWorkshops: string[] | null
   warehouseTransferQuantity: number
   yieldRate: number | null
-  reworkRepairRows: {
-    workflow_status: string
-    quantity: number
-  }[] | null
+  reworkRepairRows:
+    | {
+        workflow_status: string
+        quantity: number
+      }[]
+    | null
 }
 
 interface OrderStatusDashboardRpcResult {
@@ -477,10 +479,12 @@ function buildProductionDetail(
 }
 
 function buildReworkRepairInfo(
-  reworkRepairRows: {
-    workflow_status: string
-    quantity: number
-  }[] | null,
+  reworkRepairRows:
+    | {
+        workflow_status: string
+        quantity: number
+      }[]
+    | null,
 ): ReworkRepairInfo {
   const info: ReworkRepairInfo = {
     totalQuantity: 0,
@@ -987,4 +991,27 @@ export async function getOrderStatusDashboard({
     productionItemCount: rpcResult.productionItemCount ?? 0,
     materialTransferCount: rpcResult.materialTransferCount ?? 0,
   }
+}
+
+export async function getOrderStatusDashboardForExport({
+  filters,
+  total,
+  signal,
+}: {
+  filters?: OrderStatusDashboardFilters
+  total: number
+  signal?: AbortSignal
+}) {
+  if (total <= 0) {
+    return []
+  }
+
+  const result = await getOrderStatusDashboard({
+    filters,
+    page: 1,
+    pageSize: total,
+    signal,
+  })
+
+  return result.items
 }
