@@ -7,6 +7,7 @@ import type {
 } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
+  ArrowDownTrayIcon,
   ArrowPathIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
@@ -15,6 +16,7 @@ import type { TableColumnsType, TableProps } from 'antd'
 import {
   App,
   Button,
+  DatePicker,
   Input,
   Modal,
   Select,
@@ -26,7 +28,7 @@ import {
 import dayjs from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
 
-import { isViewerRole } from '@/config/access'
+import { isAdminRole, isViewerRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import type { WorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
 import {
@@ -45,7 +47,9 @@ import type {
   OrderStatusProductionDetail,
   ReworkRepairInfo,
 } from '@/services/apiOrderStatusDashboard'
+import { getOrderStatusDashboardForExport } from '@/services/apiOrderStatusDashboard'
 import AppPagination from '@/ui/AppPagination'
+import { exportOrderStatusDashboardToExcel } from '@/utils/orderStatusDashboardExcel'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import {
   ORDER_STATUS_DASHBOARD_KEY,
@@ -899,8 +903,18 @@ function ProductionDetailModal({
       title={
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/30">
-            <svg className="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            <svg
+              className="size-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
             </svg>
           </div>
           <div>
@@ -924,30 +938,42 @@ function ProductionDetailModal({
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
             <div className="flex items-center gap-1.5 rounded-lg bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80">
               <span className="text-xs font-medium text-blue-600">明细</span>
-              <span className="text-xs font-bold text-blue-700 tabular-nums">{rows.length}</span>
+              <span className="text-xs font-bold text-blue-700 tabular-nums">
+                {rows.length}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
               <span className="text-xs font-medium text-cyan-600">工序</span>
-              <span className="text-xs font-bold text-cyan-700 tabular-nums">{operationSummaryRows.length}</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums">
+                {operationSummaryRows.length}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
               <span className="text-xs font-medium text-emerald-600">合格</span>
-              <span className="text-xs font-bold text-emerald-700 tabular-nums">{summary.qualifiedQuantity.toLocaleString()}</span>
+              <span className="text-xs font-bold text-emerald-700 tabular-nums">
+                {summary.qualifiedQuantity.toLocaleString()}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
               <span className="text-xs font-medium text-amber-600">来料</span>
-              <span className="text-xs font-bold text-amber-700 tabular-nums">{summary.incomingQuantity.toLocaleString()}</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums">
+                {summary.incomingQuantity.toLocaleString()}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-red-50/80 px-3 py-1.5 ring-1 ring-red-100/80">
               <span className="text-xs font-medium text-red-600">不合格</span>
-              <span className="text-xs font-bold text-red-700 tabular-nums">{summary.defectQuantity.toLocaleString()}</span>
+              <span className="text-xs font-bold text-red-700 tabular-nums">
+                {summary.defectQuantity.toLocaleString()}
+              </span>
             </div>
           </div>
 
           {/* 工序汇总表 */}
           <div className="rounded-xl border border-slate-200/60 bg-white">
             <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">工序汇总</span>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                工序汇总
+              </span>
             </div>
             <Table<OperationSummaryRow>
               rowKey="key"
@@ -964,7 +990,9 @@ function ProductionDetailModal({
           {/* 详细数据表 */}
           <div className="rounded-xl border border-slate-200/60 bg-white">
             <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">详细记录</span>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                详细记录
+              </span>
             </div>
             <Table<ProductionDetailRow>
               rowKey="key"
@@ -1067,8 +1095,18 @@ function TransferDetailModal({
       title={
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-md shadow-purple-500/30">
-            <svg className="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            <svg
+              className="size-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+              />
             </svg>
           </div>
           <div>
@@ -1092,26 +1130,38 @@ function TransferDetailModal({
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
             <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
               <span className="text-xs font-medium text-purple-600">记录</span>
-              <span className="text-xs font-bold text-purple-700 tabular-nums">{rows.length}</span>
+              <span className="text-xs font-bold text-purple-700 tabular-nums">
+                {rows.length}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80">
               <span className="text-xs font-medium text-pink-600">转移</span>
-              <span className="text-xs font-bold text-pink-700 tabular-nums">{summary.transferQuantity.toLocaleString()}</span>
+              <span className="text-xs font-bold text-pink-700 tabular-nums">
+                {summary.transferQuantity.toLocaleString()}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
-              <span className="text-xs font-medium text-emerald-600">已审核</span>
-              <span className="text-xs font-bold text-emerald-700 tabular-nums">{summary.auditedCount}</span>
+              <span className="text-xs font-medium text-emerald-600">
+                已审核
+              </span>
+              <span className="text-xs font-bold text-emerald-700 tabular-nums">
+                {summary.auditedCount}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
               <span className="text-xs font-medium text-amber-600">未审核</span>
-              <span className="text-xs font-bold text-amber-700 tabular-nums">{summary.unauditedCount}</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums">
+                {summary.unauditedCount}
+              </span>
             </div>
           </div>
 
           {/* 数据表 */}
           <div className="rounded-xl border border-slate-200/60 bg-white">
             <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">转移记录</span>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                转移记录
+              </span>
             </div>
             <Table<TransferDetailRow>
               rowKey="key"
@@ -1294,13 +1344,25 @@ function PrecisionCuttingDetailModal({
       title={
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 shadow-md shadow-cyan-500/30">
-            <svg className="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            <svg
+              className="size-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+              />
             </svg>
           </div>
           <div>
             <span className="font-semibold text-slate-700">
-              {detail ? `${detail.record.project_no || '-'} 精切明细` : '精切明细'}
+              {detail
+                ? `${detail.record.project_no || '-'} 精切明细`
+                : '精切明细'}
             </span>
           </div>
         </div>
@@ -1317,34 +1379,50 @@ function PrecisionCuttingDetailModal({
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
             <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
               <span className="text-xs font-medium text-cyan-600">记录</span>
-              <span className="text-xs font-bold text-cyan-700 tabular-nums">{rows.length}</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums">
+                {rows.length}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
               <span className="text-xs font-medium text-purple-600">精切</span>
-              <span className="text-xs font-bold text-purple-700 tabular-nums">{summary.transferQuantity.toLocaleString()}</span>
+              <span className="text-xs font-bold text-purple-700 tabular-nums">
+                {summary.transferQuantity.toLocaleString()}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-teal-50/80 px-3 py-1.5 ring-1 ring-teal-100/80">
               <span className="text-xs font-medium text-teal-600">长料</span>
-              <span className="text-xs font-bold text-teal-700 tabular-nums">{summary.longMaterialQuantity.toLocaleString()}</span>
+              <span className="text-xs font-bold text-teal-700 tabular-nums">
+                {summary.longMaterialQuantity.toLocaleString()}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-red-50/80 px-3 py-1.5 ring-1 ring-red-100/80">
               <span className="text-xs font-medium text-red-600">不良</span>
-              <span className="text-xs font-bold text-red-700 tabular-nums">{summary.defectQuantity.toLocaleString()}</span>
+              <span className="text-xs font-bold text-red-700 tabular-nums">
+                {summary.defectQuantity.toLocaleString()}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
-              <span className="text-xs font-medium text-emerald-600">已审核</span>
-              <span className="text-xs font-bold text-emerald-700 tabular-nums">{summary.auditedCount}</span>
+              <span className="text-xs font-medium text-emerald-600">
+                已审核
+              </span>
+              <span className="text-xs font-bold text-emerald-700 tabular-nums">
+                {summary.auditedCount}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
               <span className="text-xs font-medium text-amber-600">未审核</span>
-              <span className="text-xs font-bold text-amber-700 tabular-nums">{summary.unauditedCount}</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums">
+                {summary.unauditedCount}
+              </span>
             </div>
           </div>
 
           {/* 数据表 */}
           <div className="rounded-xl border border-slate-200/60 bg-white">
             <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">精切记录</span>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                精切记录
+              </span>
             </div>
             <Table<PrecisionCuttingDetailRow>
               rowKey="key"
@@ -1393,8 +1471,7 @@ function ExtrusionDetailModal({
   const weightedYield =
     totalTheoreticalCount > 0
       ? rows.reduce(
-          (sum, item) =>
-            sum + item.materialYield * item.theoreticalOutputCount,
+          (sum, item) => sum + item.materialYield * item.theoreticalOutputCount,
           0,
         ) / totalTheoreticalCount
       : 0
@@ -1460,8 +1537,7 @@ function ExtrusionDetailModal({
       key: 'actualOutputWeightKg',
       width: 140,
       align: 'right',
-      render: (value: number) =>
-        Number(value || 0).toFixed(2),
+      render: (value: number) => Number(value || 0).toFixed(2),
     },
     {
       title: '成材率(%)',
@@ -1469,8 +1545,7 @@ function ExtrusionDetailModal({
       key: 'materialYield',
       width: 100,
       align: 'right',
-      render: (value: number) =>
-        value > 0 ? `${value.toFixed(2)}%` : '-',
+      render: (value: number) => (value > 0 ? `${value.toFixed(2)}%` : '-'),
     },
     {
       title: '审核状态',
@@ -1492,9 +1567,23 @@ function ExtrusionDetailModal({
       title={
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 shadow-md shadow-amber-500/30">
-            <svg className="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+            <svg
+              className="size-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"
+              />
             </svg>
           </div>
           <div>
@@ -1518,36 +1607,56 @@ function ExtrusionDetailModal({
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
             <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
               <span className="text-xs font-medium text-amber-600">记录</span>
-              <span className="text-xs font-bold text-amber-700 tabular-nums">{rows.length}</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums">
+                {rows.length}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
-              <span className="text-xs font-medium text-purple-600">理论支数</span>
-              <span className="text-xs font-bold text-purple-700 tabular-nums">{totalTheoreticalCount.toLocaleString()}</span>
+              <span className="text-xs font-medium text-purple-600">
+                理论支数
+              </span>
+              <span className="text-xs font-bold text-purple-700 tabular-nums">
+                {totalTheoreticalCount.toLocaleString()}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-orange-50/80 px-3 py-1.5 ring-1 ring-orange-100/80">
-              <span className="text-xs font-medium text-orange-600">实际重量</span>
-              <span className="text-xs font-bold text-orange-700 tabular-nums">{totalActualOutputWeight.toFixed(2)} kg</span>
+              <span className="text-xs font-medium text-orange-600">
+                实际重量
+              </span>
+              <span className="text-xs font-bold text-orange-700 tabular-nums">
+                {totalActualOutputWeight.toFixed(2)} kg
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
-              <span className="text-xs font-medium text-emerald-600">加权成材率</span>
+              <span className="text-xs font-medium text-emerald-600">
+                加权成材率
+              </span>
               <span className="text-xs font-bold text-emerald-700 tabular-nums">
-                {totalTheoreticalCount > 0 ? `${weightedYield.toFixed(2)}%` : '-'}
+                {totalTheoreticalCount > 0
+                  ? `${weightedYield.toFixed(2)}%`
+                  : '-'}
               </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
               <span className="text-xs font-medium text-cyan-600">已审核</span>
-              <span className="text-xs font-bold text-cyan-700 tabular-nums">{rows.filter((item) => item.isAudited).length}</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums">
+                {rows.filter((item) => item.isAudited).length}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80">
               <span className="text-xs font-medium text-pink-600">未审核</span>
-              <span className="text-xs font-bold text-pink-700 tabular-nums">{rows.filter((item) => !item.isAudited).length}</span>
+              <span className="text-xs font-bold text-pink-700 tabular-nums">
+                {rows.filter((item) => !item.isAudited).length}
+              </span>
             </div>
           </div>
 
           {/* 数据表 */}
           <div className="rounded-xl border border-slate-200/60 bg-white">
             <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">挤压记录</span>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                挤压记录
+              </span>
             </div>
             <Table<ExtrusionDetailRow>
               rowKey="key"
@@ -1601,8 +1710,10 @@ function extractNumberFilters(
 
 export default function OrderStatusDashboard() {
   const { message, modal } = App.useApp()
+  const { role } = useAuth()
   const queryClient = useQueryClient()
   const canManageStatus = usePermission('feature:workshop-order.manage-status')
+  const canExportCurrentFilters = isAdminRole(role)
   const { mutateAsync: updateOrderStatuses, isPending: isUpdatingOrderStatus } =
     useBatchUpdateWorkshopOrderStatuses()
   const [selectedJobDetail, setSelectedJobDetail] =
@@ -1615,6 +1726,7 @@ export default function OrderStatusDashboard() {
     useState<SelectedExtrusionDetail | null>(null)
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
   const [closingOrderId, setClosingOrderId] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE
@@ -1805,7 +1917,9 @@ export default function OrderStatusDashboard() {
         width: 76,
         fixed: 'left',
         align: 'right',
-        filters: extractNumberFilters(rows, (r) => Number(r.order_quantity || 0)),
+        filters: extractNumberFilters(rows, (r) =>
+          Number(r.order_quantity || 0),
+        ),
         onFilter: (value, record) =>
           Number(record.order_quantity || 0) === (value as number),
         filterSearch: true,
@@ -1888,9 +2002,8 @@ export default function OrderStatusDashboard() {
         key: `job-${column.key}`,
         width: JOB_OUTPUT_COLUMN_WIDTH,
         align: 'right',
-        filters: extractNumberFilters(
-          rows,
-          (r) => Number(r.jobOutputs[column.key] || 0),
+        filters: extractNumberFilters(rows, (r) =>
+          Number(r.jobOutputs[column.key] || 0),
         ),
         onFilter: (value, record) =>
           Number(record.jobOutputs[column.key] || 0) === (value as number),
@@ -1910,7 +2023,9 @@ export default function OrderStatusDashboard() {
         key: 'extrusionQuantity',
         width: 68,
         align: 'right',
-        filters: extractNumberFilters(rows, (r) => Number(r.extrusionQuantity || 0)),
+        filters: extractNumberFilters(rows, (r) =>
+          Number(r.extrusionQuantity || 0),
+        ),
         onFilter: (value, record) =>
           Number(record.extrusionQuantity || 0) === (value as number),
         filterSearch: true,
@@ -1926,7 +2041,9 @@ export default function OrderStatusDashboard() {
         key: 'precisionCuttingQuantity',
         width: 68,
         align: 'right',
-        filters: extractNumberFilters(rows, (r) => Number(r.precisionCuttingQuantity || 0)),
+        filters: extractNumberFilters(rows, (r) =>
+          Number(r.precisionCuttingQuantity || 0),
+        ),
         onFilter: (value, record) =>
           Number(record.precisionCuttingQuantity || 0) === (value as number),
         filterSearch: true,
@@ -1946,7 +2063,9 @@ export default function OrderStatusDashboard() {
         key: 'transferQuantity',
         width: 94,
         align: 'right',
-        filters: extractNumberFilters(rows, (r) => Number(r.transferQuantity || 0)),
+        filters: extractNumberFilters(rows, (r) =>
+          Number(r.transferQuantity || 0),
+        ),
         onFilter: (value, record) =>
           Number(record.transferQuantity || 0) === (value as number),
         filterSearch: true,
@@ -2015,7 +2134,8 @@ export default function OrderStatusDashboard() {
           (r) => r.completionRate,
           (v) => `${v}%`,
         ),
-        onFilter: (value, record) => record.completionRate === (value as number),
+        onFilter: (value, record) =>
+          record.completionRate === (value as number),
         filterSearch: true,
         render: renderPercent,
       },
@@ -2040,7 +2160,7 @@ export default function OrderStatusDashboard() {
 
           return (
             <Space size={3} wrap>
-              <Tag 
+              <Tag
                 color={STATUS_COLOR[value]}
                 className="!rounded-full !font-medium"
               >
@@ -2052,7 +2172,9 @@ export default function OrderStatusDashboard() {
               {canCloseOrder ? (
                 <button
                   type="button"
-                  disabled={isUpdatingOrderStatus && closingOrderId === record.id}
+                  disabled={
+                    isUpdatingOrderStatus && closingOrderId === record.id
+                  }
                   onClick={(event) => {
                     event.stopPropagation()
                     handleCloseOrder(record)
@@ -2060,13 +2182,38 @@ export default function OrderStatusDashboard() {
                   className="group flex items-center gap-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-2.5 py-1 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:from-emerald-600 hover:to-teal-600 hover:shadow-md hover:shadow-emerald-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isUpdatingOrderStatus && closingOrderId === record.id ? (
-                    <svg className="size-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    <svg
+                      className="size-3 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
                     </svg>
                   ) : (
-                    <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    <svg
+                      className="size-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   )}
                   <span>结案</span>
@@ -2164,6 +2311,49 @@ export default function OrderStatusDashboard() {
     setSelectedExtrusionDetail(null)
   }
 
+  async function handleExportCurrentFilters() {
+    if (data?.total === 0) {
+      message.warning('当前没有可导出的订单现状数据')
+      return
+    }
+
+    try {
+      setIsExporting(true)
+      message.open({
+        key: 'order-status-dashboard-export',
+        type: 'loading',
+        content: '正在导出当前筛选结果...',
+        duration: 0,
+      })
+
+      const exportRows = await getOrderStatusDashboardForExport({
+        filters,
+        total: data?.total ?? 0,
+      })
+
+      if (exportRows.length === 0) {
+        message.warning({
+          key: 'order-status-dashboard-export',
+          content: '当前没有可导出的订单现状数据',
+        })
+        return
+      }
+
+      exportOrderStatusDashboardToExcel(exportRows, jobColumns)
+      message.success({
+        key: 'order-status-dashboard-export',
+        content: `已导出 ${exportRows.length} 条订单现状数据`,
+      })
+    } catch (error) {
+      message.error({
+        key: 'order-status-dashboard-export',
+        content: error instanceof Error ? error.message : '导出失败',
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   const handleTableChange: TableProps<OrderStatusDashboardItem>['onChange'] = (
     _pagination,
     tableFilters,
@@ -2213,74 +2403,120 @@ export default function OrderStatusDashboard() {
       {/* 标题区 */}
       <div className="relative overflow-hidden rounded-2xl border border-blue-100/50 bg-gradient-to-br from-white via-blue-50/30 to-slate-50/50 px-5 py-4 shadow-sm">
         {/* 背景装饰元素 */}
-        <div className="absolute -right-8 -top-8 size-32 rounded-full bg-gradient-to-br from-blue-200/40 via-blue-100/30 to-transparent blur-3xl" />
+        <div className="absolute -top-8 -right-8 size-32 rounded-full bg-gradient-to-br from-blue-200/40 via-blue-100/30 to-transparent blur-3xl" />
         <div className="absolute -bottom-6 -left-6 size-24 rounded-full bg-gradient-to-tr from-indigo-100/40 via-purple-50/30 to-transparent blur-2xl" />
-        <div className="absolute right-20 top-0 h-px w-48 bg-gradient-to-r from-transparent via-blue-200/60 to-transparent" />
-        
+        <div className="absolute top-0 right-20 h-px w-48 bg-gradient-to-r from-transparent via-blue-200/60 to-transparent" />
+
         <div className="relative flex flex-wrap items-center justify-between gap-4">
           {/* 左侧：标题 */}
           <div className="flex items-center gap-4">
             {/* 装饰性图标容器 */}
             <div className="relative">
               <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
-                <svg className="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg
+                  className="size-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
               </div>
               {/* 图标光晕 */}
               <div className="absolute inset-0 rounded-xl bg-blue-400/20 blur-md" />
             </div>
-            
+
             <div>
-              <Title level={4} className="mb-0! !text-xl !font-bold tracking-tight">
-                <span className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text">订单现状</span>
+              <Title
+                level={4}
+                className="mb-0! !text-xl !font-bold tracking-tight"
+              >
+                <span className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text">
+                  订单现状
+                </span>
               </Title>
-              <p className="mt-0.5 text-xs text-slate-400">实时监控生产进度与订单状态</p>
+              <p className="mt-0.5 text-xs text-slate-400">
+                实时监控生产进度与订单状态
+              </p>
             </div>
           </div>
-          
+
           {/* 右侧：统计标签组 */}
           <div className="flex flex-wrap items-center gap-2">
             {/* 订单统计 */}
             <div className="group relative">
               <div className="flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80 transition-all duration-200 hover:bg-blue-100/80 hover:shadow-sm hover:shadow-blue-100">
-                <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <span className="size-1.5 animate-pulse rounded-full bg-blue-500" />
                 <span className="text-xs font-medium text-blue-600">订单</span>
-                <span className="text-xs font-bold text-blue-700 tabular-nums">{data?.total ?? 0}</span>
+                <span className="text-xs font-bold text-blue-700 tabular-nums">
+                  {data?.total ?? 0}
+                </span>
               </div>
             </div>
-            
+
             {/* 岗位统计 */}
             <div className="group relative">
               <div className="flex items-center gap-1.5 rounded-full bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 transition-all duration-200 hover:bg-cyan-100/80 hover:shadow-sm hover:shadow-cyan-100">
                 <span className="size-1.5 rounded-full bg-cyan-500" />
                 <span className="text-xs font-medium text-cyan-600">岗位</span>
-                <span className="text-xs font-bold text-cyan-700 tabular-nums">{jobColumns.length}</span>
+                <span className="text-xs font-bold text-cyan-700 tabular-nums">
+                  {jobColumns.length}
+                </span>
               </div>
             </div>
-            
+
             {/* 明细统计 */}
             <div className="group relative">
               <div className="flex items-center gap-1.5 rounded-full bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 transition-all duration-200 hover:bg-emerald-100/80 hover:shadow-sm hover:shadow-emerald-100">
                 <span className="size-1.5 rounded-full bg-emerald-500" />
-                <span className="text-xs font-medium text-emerald-600">明细</span>
-                <span className="text-xs font-bold text-emerald-700 tabular-nums">{data?.productionItemCount ?? 0}</span>
+                <span className="text-xs font-medium text-emerald-600">
+                  明细
+                </span>
+                <span className="text-xs font-bold text-emerald-700 tabular-nums">
+                  {data?.productionItemCount ?? 0}
+                </span>
               </div>
             </div>
-            
+
             {/* 转移统计 */}
             <div className="group relative">
               <div className="flex items-center gap-1.5 rounded-full bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80 transition-all duration-200 hover:bg-purple-100/80 hover:shadow-sm hover:shadow-purple-100">
                 <span className="size-1.5 rounded-full bg-purple-500" />
-                <span className="text-xs font-medium text-purple-600">转移</span>
-                <span className="text-xs font-bold text-purple-700 tabular-nums">{data?.materialTransferCount ?? 0}</span>
+                <span className="text-xs font-medium text-purple-600">
+                  转移
+                </span>
+                <span className="text-xs font-bold text-purple-700 tabular-nums">
+                  {data?.materialTransferCount ?? 0}
+                </span>
               </div>
             </div>
-            
+
+            {canExportCurrentFilters && (
+              <Button
+                size="small"
+                icon={<ArrowDownTrayIcon className="size-3.5" />}
+                loading={isExporting}
+                disabled={isDataLoading || (data?.total ?? 0) === 0}
+                onClick={() => void handleExportCurrentFilters()}
+                className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md"
+              >
+                导出当前筛选结果
+              </Button>
+            )}
+
             {/* 刷新按钮 */}
             <Button
               size="small"
-              icon={<ArrowPathIcon className={`size-3.5 ${isFetching && !isLoading ? 'animate-spin' : ''}`} />}
+              icon={
+                <ArrowPathIcon
+                  className={`size-3.5 ${isFetching && !isLoading ? 'animate-spin' : ''}`}
+                />
+              }
               loading={isFetching && !isLoading}
               onClick={() => void refetch()}
               className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md"
@@ -2312,36 +2548,53 @@ export default function OrderStatusDashboard() {
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-200 hover:shadow-md hover:shadow-slate-200/50">
         {/* 顶部装饰线 */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-200/40 to-transparent" />
-        
+
         {/* 搜索标签 */}
         <div className="flex items-center gap-2 border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-4 py-2.5">
           <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80">
             <MagnifyingGlassIcon className="size-3 text-blue-500" />
           </div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">筛选条件</span>
+          <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+            筛选条件
+          </span>
         </div>
-        
+
         {/* 搜索表单 */}
         <div className="p-4">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
             {/* 交货日期 */}
             <div className="group flex items-center gap-2.5">
-              <Text type="secondary" className="!text-xs font-medium text-slate-400">交货日期</Text>
-              <Input
+              <Text
+                type="secondary"
+                className="!text-xs font-medium text-slate-400"
+              >
+                交货日期
+              </Text>
+              <DatePicker
                 allowClear
+                format="YYYY-MM-DD"
                 placeholder="交货日期"
-                value={searchValues.orderDate}
-                onChange={(event) =>
-                  updateSearchParamValue('orderDate', event.target.value)
+                value={
+                  searchValues.orderDate ? dayjs(searchValues.orderDate) : null
                 }
-                onPressEnter={handleSearch}
-                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+                onChange={(date) =>
+                  updateSearchParamValue(
+                    'orderDate',
+                    date ? date.format('YYYY-MM-DD') : '',
+                  )
+                }
+                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
               />
             </div>
-            
+
             {/* 项目号 */}
             <div className="group flex items-center gap-2.5">
-              <Text type="secondary" className="!text-xs font-medium text-slate-400">项目号</Text>
+              <Text
+                type="secondary"
+                className="!text-xs font-medium text-slate-400"
+              >
+                项目号
+              </Text>
               <Input
                 allowClear
                 placeholder="项目号"
@@ -2350,13 +2603,18 @@ export default function OrderStatusDashboard() {
                   updateSearchParamValue('projectNo', event.target.value)
                 }
                 onPressEnter={handleSearch}
-                className="!w-44 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+                className="!w-44 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
               />
             </div>
-            
+
             {/* 客户 */}
             <div className="group flex items-center gap-2.5">
-              <Text type="secondary" className="!text-xs font-medium text-slate-400">客户</Text>
+              <Text
+                type="secondary"
+                className="!text-xs font-medium text-slate-400"
+              >
+                客户
+              </Text>
               <Input
                 allowClear
                 placeholder="客户"
@@ -2365,13 +2623,18 @@ export default function OrderStatusDashboard() {
                   updateSearchParamValue('customer', event.target.value)
                 }
                 onPressEnter={handleSearch}
-                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
               />
             </div>
-            
+
             {/* 型号 */}
             <div className="group flex items-center gap-2.5">
-              <Text type="secondary" className="!text-xs font-medium text-slate-400">型号</Text>
+              <Text
+                type="secondary"
+                className="!text-xs font-medium text-slate-400"
+              >
+                型号
+              </Text>
               <Input
                 allowClear
                 placeholder="型号"
@@ -2380,13 +2643,18 @@ export default function OrderStatusDashboard() {
                   updateSearchParamValue('model', event.target.value)
                 }
                 onPressEnter={handleSearch}
-                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
               />
             </div>
-            
+
             {/* 料号 */}
             <div className="group flex items-center gap-2.5">
-              <Text type="secondary" className="!text-xs font-medium text-slate-400">料号</Text>
+              <Text
+                type="secondary"
+                className="!text-xs font-medium text-slate-400"
+              >
+                料号
+              </Text>
               <Input
                 allowClear
                 placeholder="料号"
@@ -2395,13 +2663,18 @@ export default function OrderStatusDashboard() {
                   updateSearchParamValue('materialCode', event.target.value)
                 }
                 onPressEnter={handleSearch}
-                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 focus:!border-blue-400 focus:!bg-white hover:!border-slate-300 hover:!bg-white"
+                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
               />
             </div>
-            
+
             {/* 状态 */}
             <div className="group flex items-center gap-2.5">
-              <Text type="secondary" className="!text-xs font-medium text-slate-400">状态</Text>
+              <Text
+                type="secondary"
+                className="!text-xs font-medium text-slate-400"
+              >
+                状态
+              </Text>
               <Select
                 allowClear
                 placeholder="生产状态"
@@ -2413,7 +2686,7 @@ export default function OrderStatusDashboard() {
                 className="!w-32 [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-slate-200/80 [&_.ant-select-selector]:!bg-slate-50/50"
               />
             </div>
-            
+
             {/* 操作按钮 */}
             <div className="ml-auto flex items-center gap-2">
               <Button
@@ -2421,7 +2694,7 @@ export default function OrderStatusDashboard() {
                 icon={<MagnifyingGlassIcon className="size-4" />}
                 loading={isFetching && !isLoading}
                 onClick={handleSearch}
-                className="!rounded-lg !bg-gradient-to-r !from-blue-500 !to-indigo-500 !shadow-md !shadow-blue-500/30 !transition-all !duration-200 hover:!from-blue-600 hover:!to-indigo-600 hover:!shadow-lg hover:!shadow-blue-500/40 active:!transform active:!scale-95"
+                className="!rounded-lg !bg-gradient-to-r !from-blue-500 !to-indigo-500 !shadow-md !shadow-blue-500/30 !transition-all !duration-200 hover:!from-blue-600 hover:!to-indigo-600 hover:!shadow-lg hover:!shadow-blue-500/40 active:!scale-95 active:!transform"
               >
                 搜索
               </Button>
@@ -2446,32 +2719,66 @@ export default function OrderStatusDashboard() {
         <div className="flex items-center justify-between border-b border-slate-100/60 bg-gradient-to-r from-slate-50/80 via-white to-slate-50/80 px-4 py-2.5">
           <div className="flex items-center gap-2">
             <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80">
-              <svg className="size-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              <svg
+                className="size-3 text-blue-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
               </svg>
             </div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">数据列表</span>
+            <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+              数据列表
+            </span>
           </div>
-          
+
           {/* 可结案订单提示 */}
           {canManageStatus && (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
-                <svg className="size-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="size-3.5 text-emerald-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span className="text-xs text-emerald-600">
-                  {rows.filter((r) => canCloseDashboardOrder({ canManageStatus: true, record: r })).length} 个订单可结案
+                  {
+                    rows.filter((r) =>
+                      canCloseDashboardOrder({
+                        canManageStatus: true,
+                        record: r,
+                      }),
+                    ).length
+                  }{' '}
+                  个订单可结案
                 </span>
               </div>
             </div>
           )}
-          
+
           <span className="text-xs text-slate-400">
-            共 <span className="font-medium text-slate-600">{data?.total ?? 0}</span> 条记录
+            共{' '}
+            <span className="font-medium text-slate-600">
+              {data?.total ?? 0}
+            </span>{' '}
+            条记录
           </span>
         </div>
-        
+
         <Table<OrderStatusDashboardItem>
           rowKey="id"
           bordered
@@ -2495,11 +2802,11 @@ export default function OrderStatusDashboard() {
                 ? 'bg-amber-50/50 hover:bg-amber-50'
                 : 'hover:bg-blue-50/30'
           }
-          onRow={() => ({ 
+          onRow={() => ({
             style: { height: rowHeight },
             className: 'transition-colors duration-150',
           })}
-          className="[&_.ant-table]:!font-mono [&_.ant-table-thead>tr>th]:!font-semibold [&_.ant-table-thead>tr>th]:!text-xs [&_.ant-table-thead>tr>th]:!text-slate-500"
+          className="[&_.ant-table]:!font-mono [&_.ant-table-thead>tr>th]:!text-xs [&_.ant-table-thead>tr>th]:!font-semibold [&_.ant-table-thead>tr>th]:!text-slate-500"
         />
       </div>
 
@@ -2524,19 +2831,19 @@ export default function OrderStatusDashboard() {
         detail={selectedJobDetail}
         onClose={() => setSelectedJobDetail(null)}
       />
-      
+
       {/* 模态框：物料转移 */}
       <TransferDetailModal
         detail={selectedTransferDetail}
         onClose={() => setSelectedTransferDetail(null)}
       />
-      
+
       {/* 模态框：精切明细 */}
       <PrecisionCuttingDetailModal
         detail={selectedPrecisionCuttingDetail}
         onClose={() => setSelectedPrecisionCuttingDetail(null)}
       />
-      
+
       {/* 模态框：挤压明细 */}
       <ExtrusionDetailModal
         detail={selectedExtrusionDetail}

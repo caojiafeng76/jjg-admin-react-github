@@ -48,7 +48,14 @@ const ERROR_MESSAGE_TRANSLATIONS: Record<string, string> = {
 }
 
 const ERROR_MESSAGE_PARTIAL_TRANSLATIONS: Array<[string, string]> = [
-  ['violates row-level security policy', '没有权限执行当前操作，请确认数据库权限策略已生效'],
+  [
+    'youmai_finished_goods_inventory_current_stock_non_negative',
+    '优迈成品库存不足，无法反审入库；请先反审/删除后续出库或补足库存后再操作',
+  ],
+  [
+    'violates row-level security policy',
+    '没有权限执行当前操作，请确认数据库权限策略已生效',
+  ],
   ['permission denied for table', '没有权限访问当前数据表'],
   ['permission denied', '没有权限执行当前操作'],
 ]
@@ -176,7 +183,9 @@ function parseJsonLikeError(message: string): ErrorDisplayInfo | null {
         message: prefix || primaryMessage || trimmedMessage,
         code: stringifyErrorField(parsed.code),
       }),
-      message: translateErrorMessage(prefix || primaryMessage || trimmedMessage),
+      message: translateErrorMessage(
+        prefix || primaryMessage || trimmedMessage,
+      ),
       detail:
         detailParts.length > 0
           ? detailParts.map((part) => translateErrorMessage(part)).join('；')
@@ -217,41 +226,55 @@ export function getErrorDisplayInfo(
       : undefined
 
   if (typeof error === 'string') {
-    return parseJsonLikeError(error) || {
-      category: getErrorCategory({ message: error, code: errorCode, statusCode }),
-      message: translateErrorMessage(error),
-      code: errorCode,
-    }
+    return (
+      parseJsonLikeError(error) || {
+        category: getErrorCategory({
+          message: error,
+          code: errorCode,
+          statusCode,
+        }),
+        message: translateErrorMessage(error),
+        code: errorCode,
+      }
+    )
   }
 
   if (error instanceof Error) {
-    return parseJsonLikeError(error.message) || {
-      category: getErrorCategory({
-        message: error.message || fallbackMessage,
+    return (
+      parseJsonLikeError(error.message) || {
+        category: getErrorCategory({
+          message: error.message || fallbackMessage,
+          code: errorCode,
+          statusCode,
+        }),
+        message: translateErrorMessage(error.message || fallbackMessage),
+        detail: rawDetail,
         code: errorCode,
-        statusCode,
-      }),
-      message: translateErrorMessage(error.message || fallbackMessage),
-      detail: rawDetail,
-      code: errorCode,
-    }
+      }
+    )
   }
 
   if (error && typeof error === 'object' && 'message' in error) {
     const message = stringifyErrorField(error.message)
 
     if (message) {
-      return parseJsonLikeError(message) || {
-        category: getErrorCategory({ message, code: errorCode, statusCode }),
-        message: translateErrorMessage(message),
-        detail: rawDetail,
-        code: errorCode,
-      }
+      return (
+        parseJsonLikeError(message) || {
+          category: getErrorCategory({ message, code: errorCode, statusCode }),
+          message: translateErrorMessage(message),
+          detail: rawDetail,
+          code: errorCode,
+        }
+      )
     }
   }
 
   return {
-    category: getErrorCategory({ message: fallbackMessage, code: errorCode, statusCode }),
+    category: getErrorCategory({
+      message: fallbackMessage,
+      code: errorCode,
+      statusCode,
+    }),
     message: fallbackMessage,
     detail: rawDetail,
     code: errorCode,
