@@ -55,6 +55,11 @@ export interface TransformedOrderData {
   specInferred?: boolean
 }
 
+type SpecInferenceResult = {
+  spec: string | null
+  hasMixedSpecs: boolean
+}
+
 /**
  * 必填字段列表
  */
@@ -74,6 +79,43 @@ const ZIP64_EXTRA_FIELD_ID = 0x0001
 const ZIP_UINT32_MAX = 0xffffffff
 const ZIP_LOCAL_FILE_HEADER_LENGTH = 30
 const ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH = 46
+
+function inferConsistentSpecFromRows(rows: ExcelRow[]): SpecInferenceResult {
+  const rowsBySONo = new Map<string, ExcelRow[]>()
+
+  for (const row of rows) {
+    const soNo = String(row.生产编号 || '').trim()
+    if (!soNo) continue
+
+    const groupRows = rowsBySONo.get(soNo) || []
+    groupRows.push(row)
+    rowsBySONo.set(soNo, groupRows)
+  }
+
+  if (rowsBySONo.size <= 1) {
+    return {
+      spec: extractSpecFromRows(rows),
+      hasMixedSpecs: false,
+    }
+  }
+
+  const inferredSpecs = Array.from(rowsBySONo.values())
+    .map((groupRows) => extractSpecFromRows(groupRows))
+    .filter((spec): spec is string => !!spec)
+  const distinctSpecs = new Set(inferredSpecs)
+
+  if (distinctSpecs.size > 1) {
+    return {
+      spec: null,
+      hasMixedSpecs: true,
+    }
+  }
+
+  return {
+    spec: inferredSpecs[0] || extractSpecFromRows(rows),
+    hasMixedSpecs: false,
+  }
+}
 
 type Zip64ExtraFields = {
   uncompressedSize?: number
@@ -415,9 +457,12 @@ export function transformToOrderData(
     // Spec优先级: 1. API推断 (从Excel行数据推断) 2. 后备逻辑（搜索所有行） 3. Excel规格列 (仅作为后备，但需要验证格式)
     // Brand优先级: 1. 后板备注提取 2. Excel商标列 3. API推断
     Spec: (() => {
-      const inferredSpec = extractSpecFromRows(excelData.rows)
-      if (inferredSpec) {
-        return inferredSpec
+      const inferredSpecResult = inferConsistentSpecFromRows(excelData.rows)
+      if (inferredSpecResult.spec) {
+        return inferredSpecResult.spec
+      }
+      if (inferredSpecResult.hasMixedSpecs) {
+        return null
       }
       // 如果标准推断失败，使用后备逻辑（搜索所有行的spec和remark字段）
       const fallbackSpec = extractSpecFromAllRows(excelData.rows)
