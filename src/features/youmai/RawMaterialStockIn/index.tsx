@@ -195,7 +195,7 @@ export default function YoumaiRawMaterialStockInPage() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
       <div className="flex flex-wrap items-center gap-2">
         <AddButton
           handleCreate={handleCreate}
@@ -216,8 +216,13 @@ export default function YoumaiRawMaterialStockInPage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
+      <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="flex items-center gap-2">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+            筛选条件
+          </span>
+        </div>
         <YoumaiRawMaterialStockInSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
@@ -227,9 +232,9 @@ export default function YoumaiRawMaterialStockInPage() {
 
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
-        <div className="min-h-0 flex-1 overflow-x-auto">
+        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
           <YoumaiRawMaterialStockInTable
             loading={isLoading}
             data={data?.rawMaterialStockIn || []}
