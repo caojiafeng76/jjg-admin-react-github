@@ -36,13 +36,15 @@ describe('createProductionScheduledPlanWorkbook', () => {
       createOrder('001', '02.BP-1000'),
       createOrder('002', '01.EB-800'),
       createOrder('003', '02.BP-800'),
-      createOrder('004', 'AB-OTHER'),
+      createOrder('004', '03.CNC-1000'),
+      createOrder('005', 'AB-OTHER'),
     ])
 
     expect(workbook.SheetNames).toEqual([
       '基础信息',
       '01.',
       '02.',
+      '03.',
       '其他',
       '生产资源配置',
       '审核确认',
@@ -50,6 +52,7 @@ describe('createProductionScheduledPlanWorkbook', () => {
     expect(workbook.Sheets['01.'].G3?.v).toBe('01.EB-800')
     expect(workbook.Sheets['02.'].G3?.v).toBe('02.BP-1000')
     expect(workbook.Sheets['02.'].G4?.v).toBe('02.BP-800')
+    expect(workbook.Sheets['03.'].G3?.v).toBe('03.CNC-1000')
     expect(workbook.Sheets['其他'].G3?.v).toBe('AB-OTHER')
   })
 })
