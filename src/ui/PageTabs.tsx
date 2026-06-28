@@ -1,4 +1,9 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+} from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Skeleton, Tabs, theme } from 'antd'
 import type { TabsProps } from 'antd'
@@ -150,6 +155,24 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
     }
   }
 
+  function handleTabMouseDown(event: ReactMouseEvent<HTMLSpanElement>) {
+    if (event.button !== 1) return
+
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  function handleTabAuxClick(
+    targetKey: string,
+    event: ReactMouseEvent<HTMLSpanElement>,
+  ) {
+    if (event.button !== 1) return
+
+    event.preventDefault()
+    event.stopPropagation()
+    handleRemove(targetKey)
+  }
+
   if (authLoading) {
     return (
       <div
@@ -170,7 +193,12 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
   const items: TabsProps['items'] = tabs.map((tab) => ({
     key: tab.key,
     label: (
-      <span style={tabLabelStyle} title={tab.label}>
+      <span
+        style={tabLabelStyle}
+        title={tab.label}
+        onAuxClick={(event) => handleTabAuxClick(tab.key, event)}
+        onMouseDown={handleTabMouseDown}
+      >
         {tab.label}
       </span>
     ),
