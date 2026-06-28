@@ -6,6 +6,8 @@ import { EXCEL_WRITE_OPTIONS, setColumnWidths } from './excelStyleUtils'
 const BORDER_COLOR = '000000'
 const TITLE_FILL = 'D9EAF7'
 const HEADER_FILL = 'F2F2F2'
+const OTHER_MATERIAL_CODE_SHEET_NAME = '其他'
+const MATERIAL_CODE_SHEET_PREFIX_PATTERN = /^(\d{2}\.)/
 
 type SheetCellValue = string | number | null
 type WorksheetData = SheetCellValue[][]
@@ -91,6 +93,43 @@ function getPlanPeriod(orders: ProductionSchedulingOrder[]) {
   }
 
   return `${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`
+}
+
+function getMaterialCodeSheetName(order: ProductionSchedulingOrder) {
+  const materialCode = order.material_code?.trim() || ''
+  const match = materialCode.match(MATERIAL_CODE_SHEET_PREFIX_PATTERN)
+
+  return match?.[1] || OTHER_MATERIAL_CODE_SHEET_NAME
+}
+
+function groupOrdersByMaterialCodePrefix(orders: ProductionSchedulingOrder[]) {
+  const groupMap = new Map<string, ProductionSchedulingOrder[]>()
+
+  for (const order of orders) {
+    const sheetName = getMaterialCodeSheetName(order)
+    const group = groupMap.get(sheetName)
+
+    if (group) {
+      group.push(order)
+    } else {
+      groupMap.set(sheetName, [order])
+    }
+  }
+
+  const sortedSheetNames = Array.from(groupMap.keys())
+    .filter((sheetName) => sheetName !== OTHER_MATERIAL_CODE_SHEET_NAME)
+    .sort((left, right) =>
+      left.localeCompare(right, 'zh-Hans-CN', { numeric: true }),
+    )
+
+  if (groupMap.has(OTHER_MATERIAL_CODE_SHEET_NAME)) {
+    sortedSheetNames.push(OTHER_MATERIAL_CODE_SHEET_NAME)
+  }
+
+  return sortedSheetNames.map((sheetName) => ({
+    orders: groupMap.get(sheetName) || [],
+    sheetName,
+  }))
 }
 
 function applyCommonStyles(
@@ -316,23 +355,35 @@ function downloadExcel(buffer: ArrayBuffer, filename: string) {
   }, 0)
 }
 
-export function exportProductionScheduledPlanToExcel(
+export function createProductionScheduledPlanWorkbook(
   orders: ProductionSchedulingOrder[],
 ) {
   const workbook = XLSX.utils.book_new()
 
   XLSX.utils.book_append_sheet(workbook, createBasicInfoSheet(orders), '基础信息')
-  XLSX.utils.book_append_sheet(
-    workbook,
-    createDetailSheet(orders),
-    '订单排产详情',
-  )
+
+  for (const group of groupOrdersByMaterialCodePrefix(orders)) {
+    XLSX.utils.book_append_sheet(
+      workbook,
+      createDetailSheet(group.orders),
+      group.sheetName,
+    )
+  }
+
   XLSX.utils.book_append_sheet(
     workbook,
     createResourceSheet(),
     '生产资源配置',
   )
   XLSX.utils.book_append_sheet(workbook, createAuditSheet(), '审核确认')
+
+  return workbook
+}
+
+export function exportProductionScheduledPlanToExcel(
+  orders: ProductionSchedulingOrder[],
+) {
+  const workbook = createProductionScheduledPlanWorkbook(orders)
 
   const buffer = XLSX.write(workbook, {
     ...EXCEL_WRITE_OPTIONS,
