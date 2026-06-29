@@ -94,7 +94,7 @@ export default function ProductionDailyReportPage() {
       }
     }
     return { qualifiedCount, defectCount, matched }
-  }, [currentPageRows, selectedCount])
+  }, [currentPageRows, selectedCount, selectedRowKeys])
   const selectedRows = useMemo(
     () =>
       selectedRowKeys
