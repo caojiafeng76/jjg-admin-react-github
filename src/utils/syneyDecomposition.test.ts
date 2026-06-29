@@ -1,0 +1,49 @@
+import { describe, expect, it } from 'vitest'
+
+import { buildDecompositionCells } from './syneyDecomposition'
+import type { ISyneyItem } from '@/services/types'
+import type { SyneySafePartRule } from './syneySafePartRules'
+
+const settings: SyneySafePartRule[] = [
+  { part_no: 'XN3024Z', decomposition_role: 'front_plate' },
+  { part_no: 'XN3024AB', decomposition_role: 'rear_upper' },
+  { part_no: 'XN3024AD', decomposition_role: 'rear_lower' },
+  { part_no: 'XN3024AE', decomposition_role: 'upper_middle' },
+  { part_no: 'XN3024AF', decomposition_role: 'lower_middle' },
+]
+
+function item(values: Partial<ISyneyItem>): ISyneyItem {
+  return {
+    No: 'P202606290153',
+    ParamSpec: null,
+    PartName: null,
+    PartNo: null,
+    Qty: null,
+    Remark: null,
+    SONo: 'XN-RZ14-516-1409-1838',
+    Spec: null,
+    Unit: null,
+    ...values,
+  }
+}
+
+describe('buildDecompositionCells', () => {
+  it('maps configured new Syney part numbers into decomposition columns', () => {
+    const cells = buildDecompositionCells(
+      [
+        item({ PartNo: 'XN3024AB1', ParamSpec: '1575*360', Qty: 1 }),
+        item({ PartNo: 'XN3024AD1', ParamSpec: '1575*504', Qty: 1 }),
+        item({ PartNo: 'XN3024AE1', ParamSpec: '1575*550', Qty: 1 }),
+        item({ PartNo: 'XN3024AF1', ParamSpec: '1575*549', Qty: 1 }),
+        item({ PartNo: 'XN3024Z1', ParamSpec: '1060*446', Qty: 2 }),
+      ],
+      settings,
+    )
+
+    expect(cells.frontPlate).toEqual({ spec: '1060*446', qty: 2 })
+    expect(cells.upperMiddle).toEqual({ spec: '1575*550', qty: 1 })
+    expect(cells.lowerMiddle).toEqual({ spec: '1575*549', qty: 1 })
+    expect(cells.rearUpper).toEqual({ spec: '1575*360', qty: 1 })
+    expect(cells.rearLower).toEqual({ spec: '1575*504', qty: 1 })
+  })
+})
