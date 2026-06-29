@@ -1,4 +1,4 @@
-import { useState, useMemo, type Key } from 'react'
+import { useCallback, useState, useMemo, type Key } from 'react'
 import {
   Button,
   Form,
@@ -92,7 +92,7 @@ export default function SafePartSettingPage() {
     setModalOpen(true)
   }
 
-  const openEdit = (record: SyneySafePartSetting) => {
+  const openEdit = useCallback((record: SyneySafePartSetting) => {
     setEditing(record)
     form.setFieldsValue({
       part_no: record.part_no,
@@ -107,7 +107,7 @@ export default function SafePartSettingPage() {
       id: record.id,
     })
     setModalOpen(true)
-  }
+  }, [form])
 
   const closeModal = () => {
     setModalOpen(false)
@@ -142,73 +142,81 @@ export default function SafePartSettingPage() {
     mutationFn: uploadSyneySafePartDrawing,
   })
 
-  const handleDrawingUpload = async (
-    record: SyneySafePartSetting,
-    file: File,
-  ) => {
-    setUploadingDrawingId(record.id)
+  const handleDrawingUpload = useCallback(
+    async (record: SyneySafePartSetting, file: File) => {
+      setUploadingDrawingId(record.id)
 
-    try {
-      await drawingUploadMutation.mutateAsync({ setting: record, file })
-      message.success('图纸上传成功')
-      queryClient.invalidateQueries({ queryKey: ['syney_safe_part_settings'] })
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : '图纸上传失败')
-    } finally {
-      setUploadingDrawingId(null)
-    }
-  }
+      try {
+        await drawingUploadMutation.mutateAsync({ setting: record, file })
+        message.success('图纸上传成功')
+        queryClient.invalidateQueries({
+          queryKey: ['syney_safe_part_settings'],
+        })
+      } catch (error) {
+        message.error(error instanceof Error ? error.message : '图纸上传失败')
+      } finally {
+        setUploadingDrawingId(null)
+      }
+    },
+    [drawingUploadMutation, message, queryClient],
+  )
 
-  const handlePreviewDrawing = async (record: SyneySafePartSetting) => {
-    if (!record.drawing_file_path) {
-      message.warning('暂无图纸')
-      return
-    }
+  const handlePreviewDrawing = useCallback(
+    async (record: SyneySafePartSetting) => {
+      if (!record.drawing_file_path) {
+        message.warning('暂无图纸')
+        return
+      }
 
-    setPreviewingDrawingId(record.id)
+      setPreviewingDrawingId(record.id)
 
-    try {
-      const url = await getSyneySafePartDrawingPreviewUrl(
-        record.drawing_file_path,
-      )
-      setPreviewDrawing({
-        url,
-        fileName: record.drawing_file_name ?? '图纸预览',
-        mimeType: record.drawing_file_mime_type,
-      })
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : '图纸预览失败')
-    } finally {
-      setPreviewingDrawingId(null)
-    }
-  }
+      try {
+        const url = await getSyneySafePartDrawingPreviewUrl(
+          record.drawing_file_path,
+        )
+        setPreviewDrawing({
+          url,
+          fileName: record.drawing_file_name ?? '图纸预览',
+          mimeType: record.drawing_file_mime_type,
+        })
+      } catch (error) {
+        message.error(error instanceof Error ? error.message : '图纸预览失败')
+      } finally {
+        setPreviewingDrawingId(null)
+      }
+    },
+    [message],
+  )
 
-  const handleDownloadDrawing = async (record: SyneySafePartSetting) => {
-    if (!record.drawing_file_path) {
-      message.warning('暂无图纸')
-      return
-    }
+  const handleDownloadDrawing = useCallback(
+    async (record: SyneySafePartSetting) => {
+      if (!record.drawing_file_path) {
+        message.warning('暂无图纸')
+        return
+      }
 
-    setDownloadingDrawingId(record.id)
+      setDownloadingDrawingId(record.id)
 
-    try {
-      const fileName = record.drawing_file_name ?? `${record.part_no}-图纸`
-      const url = await getSyneySafePartDrawingDownloadUrl({
-        filePath: record.drawing_file_path,
-        fileName,
-      })
-      const link = document.createElement('a')
-      link.href = url
-      link.download = fileName
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : '图纸下载失败')
-    } finally {
-      setDownloadingDrawingId(null)
-    }
-  }
+      try {
+        const fileName = record.drawing_file_name ?? `${record.part_no}-图纸`
+        const url = await getSyneySafePartDrawingDownloadUrl({
+          filePath: record.drawing_file_path,
+          fileName,
+        })
+        const link = document.createElement('a')
+        link.href = url
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } catch (error) {
+        message.error(error instanceof Error ? error.message : '图纸下载失败')
+      } finally {
+        setDownloadingDrawingId(null)
+      }
+    },
+    [message],
+  )
 
   const handleBatchDelete = () => {
     const selectedIds = selectedRowKeys.map(String)
@@ -466,7 +474,17 @@ export default function SafePartSettingPage() {
         ),
       },
     ],
-    [page, pageSize],
+    [
+      downloadingDrawingId,
+      handleDownloadDrawing,
+      handleDrawingUpload,
+      handlePreviewDrawing,
+      openEdit,
+      page,
+      pageSize,
+      previewingDrawingId,
+      uploadingDrawingId,
+    ],
   )
 
   const rowSelection = {

@@ -20,6 +20,10 @@ import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
 } from '@/ui/mobile/MobileBottomSelectSheet'
 import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
+import {
+  buildToolingOptionKeywords,
+  matchesToolingOptionKeyword,
+} from '@/utils/toolingOptionSearch'
 
 interface ToolingStockOutFormFields {
   tooling_data_id: string
@@ -91,6 +95,12 @@ export default function ToolingStockOutForm({
       toolingOptions.map((item) => ({
         value: item.id,
         label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
+        keywords: buildToolingOptionKeywords([
+          item.tool_code,
+          item.tool_name,
+          item.tool_spec,
+          item.material,
+        ]),
       })),
     [toolingOptions],
   )
@@ -106,12 +116,12 @@ export default function ToolingStockOutForm({
             <div>材质：{item.material || '-'}</div>
           </div>
         ),
-        keywords: [
+        keywords: buildToolingOptionKeywords([
           item.tool_code,
           item.tool_name,
           item.tool_spec,
           item.material,
-        ].join(' '),
+        ]),
       })),
     [toolingOptions],
   )
@@ -260,9 +270,10 @@ export default function ToolingStockOutForm({
               disabled={isAuditLocked}
               showSearch={{
                 filterOption: (input, option) =>
-                  String(option?.label || '')
-                    .toLowerCase()
-                    .includes(input.toLowerCase()),
+                  matchesToolingOptionKeyword(
+                    input,
+                    `${option?.label || ''} ${option?.keywords || ''}`,
+                  ),
               }}
               placeholder={
                 toolingOptions.length > 0
