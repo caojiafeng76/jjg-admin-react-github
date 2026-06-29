@@ -2,9 +2,19 @@ import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
 import { Button } from 'antd'
 import { usePrintDecomposition } from './usePrintDecomposition'
 import { useAppStore } from '@/store'
+import type { SyneySafePartSetting } from '@/services/apiSyneySafePartSettings'
 
-export default function PrintDecompositionButton() {
-  const { printDecomposition, contextHolder, messageApi } = usePrintDecomposition()
+interface PrintDecompositionButtonProps {
+  safePartSettings?: SyneySafePartSetting[]
+  isSafePartSettingsLoading: boolean
+}
+
+export default function PrintDecompositionButton({
+  safePartSettings,
+  isSafePartSettingsLoading,
+}: PrintDecompositionButtonProps) {
+  const { printDecomposition, contextHolder, messageApi } =
+    usePrintDecomposition(safePartSettings, isSafePartSettingsLoading)
   const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
 
   function onClick() {

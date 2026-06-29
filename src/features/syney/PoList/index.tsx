@@ -305,13 +305,14 @@ export default function PoList() {
         />
 
         <PrintButton handlePrint={handlePrint}>打印中文标签</PrintButton>
-        <PrintButton handlePrint={handlePrintEnglish}>
-          打印英文标签
-        </PrintButton>
+        <PrintButton handlePrint={handlePrintEnglish}>打印英文标签</PrintButton>
 
         <ExportInfoButton />
 
-        <PrintDecompositionButton />
+        <PrintDecompositionButton
+          safePartSettings={safePartSettings}
+          isSafePartSettingsLoading={isSafePartSettingsLoading}
+        />
       </div>
 
       {/* 选中摘要条 */}
