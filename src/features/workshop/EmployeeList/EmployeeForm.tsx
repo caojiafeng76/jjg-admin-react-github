@@ -21,6 +21,7 @@ const DEFAULT_FORM_VALUES: EmployeeFormValues = {
   name: '',
   role: 'employee',
   is_active: true,
+  is_external: false,
   job_name: '',
   hourly_wage: 0,
   coefficient: 1,
@@ -200,6 +201,14 @@ export default function EmployeeForm({
         />
       </Form.Item>
 
+      <Form.Item name="is_external" label="是否外来" valuePropName="checked">
+        <Switch
+          checkedChildren="是"
+          unCheckedChildren="否"
+          disabled={isCreating}
+        />
+      </Form.Item>
+
       {isEdit ? null : (
         <>
           <Divider className="my-4">登录账号</Divider>
@@ -240,7 +249,7 @@ export default function EmployeeForm({
 
       {isEdit ? null : (
         <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-6 text-slate-500">
-          新建员工时默认角色为“员工”、状态为“启用”。如果本次创建账号，默认密码为{' '}
+          新建员工时默认角色为“员工”、状态为“启用”、是否外来为“否”。如果本次创建账号，默认密码为{' '}
           {DEFAULT_EMPLOYEE_AUTH_PASSWORD}
           。如果本次不创建账号，后续仍可使用工具栏中的“为现有员工开通账号”补做绑定。
         </div>

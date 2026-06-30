@@ -65,7 +65,10 @@ function aggregateByEmployee(
     const specialRemark = getSpecialRemark(row)
 
     if (!map.has(row.employee_name)) {
-      map.set(row.employee_name, { job_name: row.job_name, days: {} })
+      map.set(row.employee_name, {
+        job_name: row.job_name,
+        days: {},
+      })
     }
     const emp = map.get(row.employee_name)!
 
@@ -116,16 +119,13 @@ function baseStyle(opts: { bold?: boolean; bg?: string } = {}) {
   }
 }
 
-/**
- * 导出月度考勤明细表 Excel
- * @param rows   RPC 返回的原始数据
- * @param year   年份
- * @param month  月份 (1-12)
- */
-export function exportAttendanceMonthlyExcel(
+function appendAttendanceMonthlyWorksheet(
+  wb: XLSX.WorkBook,
   rows: AttendanceMonthlyRow[],
   year: number,
   month: number,
+  sheetName: string,
+  titleSuffix: string,
 ) {
   const totalDays = daysInMonth(year, month)
   const employeeMap = aggregateByEmployee(rows)
@@ -147,7 +147,7 @@ export function exportAttendanceMonthlyExcel(
 
   // 标题行
   const titleRow: (string | number | null)[] = Array(totalCols).fill(null)
-  titleRow[0] = `精加工${year}-${month}月份出勤明细表`
+  titleRow[0] = `精加工${year}-${month}月份出勤明细表${titleSuffix}`
   sheetData.push(titleRow)
 
   // 表头行
@@ -277,13 +277,40 @@ export function exportAttendanceMonthlyExcel(
   ]
   ws['!rows'] = rowHeights
 
-  // ── 生成文件 ─────────────────────────────────────────
+  XLSX.utils.book_append_sheet(wb, ws, sheetName)
+}
+
+/**
+ * 导出月度考勤明细表 Excel
+ * @param rows   RPC 返回的原始数据
+ * @param year   年份
+ * @param month  月份 (1-12)
+ */
+export function exportAttendanceMonthlyExcel(
+  rows: AttendanceMonthlyRow[],
+  year: number,
+  month: number,
+) {
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(
+  const monthLabel = `${year}-${String(month).padStart(2, '0')}`
+
+  appendAttendanceMonthlyWorksheet(
     wb,
-    ws,
-    `${year}-${String(month).padStart(2, '0')}`,
+    rows.filter((row) => row.is_external !== true),
+    year,
+    month,
+    `${monthLabel}-非外来`,
+    '（非外来）',
   )
+  appendAttendanceMonthlyWorksheet(
+    wb,
+    rows.filter((row) => row.is_external === true),
+    year,
+    month,
+    `${monthLabel}-外来`,
+    '（外来）',
+  )
+
   XLSX.writeFile(
     wb,
     `精加工${year}-${month}月份出勤明细表.xlsx`,

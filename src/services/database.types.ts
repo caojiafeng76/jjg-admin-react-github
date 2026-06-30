@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       admin_management_passwords: {
@@ -103,6 +78,7 @@ export type Database = {
           hourly_wage: number
           id: string
           is_active: boolean
+          is_external: boolean
           job_name: string | null
           name: string
           role: string
@@ -115,6 +91,7 @@ export type Database = {
           hourly_wage?: number
           id?: string
           is_active?: boolean
+          is_external?: boolean
           job_name?: string | null
           name: string
           role?: string
@@ -127,6 +104,7 @@ export type Database = {
           hourly_wage?: number
           id?: string
           is_active?: boolean
+          is_external?: boolean
           job_name?: string | null
           name?: string
           role?: string
@@ -253,6 +231,8 @@ export type Database = {
           created_at: string
           id: string
           is_audited: boolean
+          legacy_inspector_name: string | null
+          legacy_operator_name: string | null
           machine_id: string
           production_date: string
           remark: string | null
@@ -266,6 +246,8 @@ export type Database = {
           created_at?: string
           id?: string
           is_audited?: boolean
+          legacy_inspector_name?: string | null
+          legacy_operator_name?: string | null
           machine_id: string
           production_date: string
           remark?: string | null
@@ -279,6 +261,8 @@ export type Database = {
           created_at?: string
           id?: string
           is_audited?: boolean
+          legacy_inspector_name?: string | null
+          legacy_operator_name?: string | null
           machine_id?: string
           production_date?: string
           remark?: string | null
@@ -293,7 +277,14 @@ export type Database = {
             columns: ["machine_id"]
             isOneToOne: false
             referencedRelation: "machine_equipment_maintenances"
-            referencedColumns: ["id"]
+            referencedColumns: ["unified_device_no"]
+          },
+          {
+            foreignKeyName: "extrusion_productions_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "v_machine_runtime_items"
+            referencedColumns: ["unified_device_no"]
           },
         ]
       }
@@ -1569,6 +1560,7 @@ export type Database = {
         Row: {
           bottleneck_processes: string | null
           capacity_per_day: number | null
+          closed_at: string | null
           color_name: string | null
           created_at: string | null
           customer: string | null
@@ -1610,6 +1602,7 @@ export type Database = {
         Insert: {
           bottleneck_processes?: string | null
           capacity_per_day?: number | null
+          closed_at?: string | null
           color_name?: string | null
           created_at?: string | null
           customer?: string | null
@@ -1651,6 +1644,7 @@ export type Database = {
         Update: {
           bottleneck_processes?: string | null
           capacity_per_day?: number | null
+          closed_at?: string | null
           color_name?: string | null
           created_at?: string | null
           customer?: string | null
@@ -3194,9 +3188,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

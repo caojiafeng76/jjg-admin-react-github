@@ -213,6 +213,7 @@ export interface AttendanceMonthlyRow {
   work_hours: number
   shift: string
   remark?: string | null
+  is_external?: boolean | null
 }
 
 export async function getAttendanceMonthlyExportData({
@@ -251,7 +252,7 @@ export async function getAttendanceMonthlyExportData({
     const { data, error } = await supabase
       .from('production_orders')
       .select(
-        'order_date, work_hours, shift, remark, employee:employees!inner(name, job_name)',
+        'order_date, work_hours, shift, remark, employee:employees!inner(name, job_name, is_external)',
       )
       .in('employee_id', employeeIds)
       .gte('order_date', startDate)
@@ -268,7 +269,11 @@ export async function getAttendanceMonthlyExportData({
         work_hours: number
         shift: string
         remark?: string | null
-        employee?: { name?: string | null; job_name?: string | null } | null
+        employee?: {
+          name?: string | null
+          job_name?: string | null
+          is_external?: boolean | null
+        } | null
       }>
     )
       .filter((row) => Boolean(row.employee?.name))
@@ -286,13 +291,14 @@ export async function getAttendanceMonthlyExportData({
         work_hours: Number(row.work_hours || 0),
         shift: row.shift,
         remark: row.remark,
+        is_external: row.employee?.is_external ?? false,
       }))
   }
 
   const { data, error } = await supabase
     .from('production_orders')
     .select(
-      'order_date, work_hours, shift, remark, employee:employees!inner(name, job_name)',
+      'order_date, work_hours, shift, remark, employee:employees!inner(name, job_name, is_external)',
     )
     .gte('order_date', startDate)
     .lte('order_date', endDate)
@@ -308,7 +314,11 @@ export async function getAttendanceMonthlyExportData({
       work_hours: number
       shift: string
       remark?: string | null
-      employee?: { name?: string | null; job_name?: string | null } | null
+      employee?: {
+        name?: string | null
+        job_name?: string | null
+        is_external?: boolean | null
+      } | null
     }>
   )
     .filter((row) => Boolean(row.employee?.name))
@@ -326,5 +336,6 @@ export async function getAttendanceMonthlyExportData({
       work_hours: Number(row.work_hours || 0),
       shift: row.shift,
       remark: row.remark,
+      is_external: row.employee?.is_external ?? false,
     }))
 }

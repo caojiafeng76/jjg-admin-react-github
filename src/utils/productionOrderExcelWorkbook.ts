@@ -30,7 +30,8 @@ const EXPORT_HEADERS = [
   '备注',
 ] as const
 
-const SUMMARY_SHEET_NAME = '汇总表'
+const INTERNAL_SUMMARY_SHEET_NAME = '汇总表-非外来'
+const EXTERNAL_SUMMARY_SHEET_NAME = '汇总表-外来'
 const SUMMARY_TITLE = '精加工车间员工工时汇总表'
 const SUMMARY_HEADERS = [
   '序号',
@@ -551,21 +552,15 @@ function applySummarySheetStyles(
   worksheet['!freeze'] = { xSplit: 0, ySplit: 2 }
 }
 
-function createProductionOrderWorkbook(orders: ProductionOrderForExport[]) {
-  const workbook = XLSX.utils.book_new()
-  const employeeGroups = new Map<string, ProductionOrderForExport[]>()
+function isExternalEmployeeGroup(orders: ProductionOrderForExport[]) {
+  return orders.some((order) => order.employee?.is_external === true)
+}
 
-  orders.forEach((order) => {
-    const employeeName = order.employee?.name || '未分配员工'
-    const employeeOrders = employeeGroups.get(employeeName) || []
-
-    employeeOrders.push(order)
-    employeeGroups.set(employeeName, employeeOrders)
-  })
-
-  const employeeGroupEntries = Array.from(employeeGroups.entries()).sort(
-    compareEmployeeGroupsByMissingJobFirst,
-  )
+function appendSummarySheet(
+  workbook: XLSX.WorkBook,
+  sheetName: string,
+  employeeGroupEntries: Array<[string, ProductionOrderForExport[]]>,
+) {
   const summaryRows = buildSummarySheetRows(employeeGroupEntries)
   const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryRows)
 
@@ -583,7 +578,41 @@ function createProductionOrderWorkbook(orders: ProductionOrderForExport[]) {
   ]
 
   applySummarySheetStyles(summaryWorksheet, summaryRows)
-  XLSX.utils.book_append_sheet(workbook, summaryWorksheet, SUMMARY_SHEET_NAME)
+  XLSX.utils.book_append_sheet(workbook, summaryWorksheet, sheetName)
+}
+
+function createProductionOrderWorkbook(orders: ProductionOrderForExport[]) {
+  const workbook = XLSX.utils.book_new()
+  const employeeGroups = new Map<string, ProductionOrderForExport[]>()
+
+  orders.forEach((order) => {
+    const employeeName = order.employee?.name || '未分配员工'
+    const employeeOrders = employeeGroups.get(employeeName) || []
+
+    employeeOrders.push(order)
+    employeeGroups.set(employeeName, employeeOrders)
+  })
+
+  const employeeGroupEntries = Array.from(employeeGroups.entries()).sort(
+    compareEmployeeGroupsByMissingJobFirst,
+  )
+  const internalEmployeeGroupEntries = employeeGroupEntries.filter(
+    ([, employeeOrders]) => !isExternalEmployeeGroup(employeeOrders),
+  )
+  const externalEmployeeGroupEntries = employeeGroupEntries.filter(
+    ([, employeeOrders]) => isExternalEmployeeGroup(employeeOrders),
+  )
+
+  appendSummarySheet(
+    workbook,
+    INTERNAL_SUMMARY_SHEET_NAME,
+    internalEmployeeGroupEntries,
+  )
+  appendSummarySheet(
+    workbook,
+    EXTERNAL_SUMMARY_SHEET_NAME,
+    externalEmployeeGroupEntries,
+  )
 
   employeeGroupEntries.forEach(([employeeName, employeeOrders], index) => {
     const sheetRows: Array<Array<string | number | null | undefined>> = [

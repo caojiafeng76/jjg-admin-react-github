@@ -11,6 +11,7 @@ export interface Employee {
   auth_user_id?: string | null
   role?: string
   is_active?: boolean
+  is_external?: boolean
   job_name?: string | null
   hourly_wage?: number
   coefficient?: number
@@ -267,23 +268,29 @@ async function checkEmployeeNameExists(
   return (data?.length || 0) > 0
 }
 
-function normalizeEmployeeCreatePayload(values: Employee): EmployeeInsert {
+export function buildEmployeeCreatePayload(
+  values: Employee,
+): EmployeeInsert {
   return {
     name: values.name.trim(),
     auth_user_id: values.auth_user_id?.trim() || null,
     role: values.role || 'employee',
     is_active: values.is_active ?? true,
+    is_external: values.is_external ?? false,
     job_name: values.job_name?.trim() || null,
     hourly_wage: Number(values.hourly_wage ?? 0),
     coefficient: Number(values.coefficient ?? 1),
   }
 }
 
-function normalizeEmployeeUpdatePayload(values: Employee): EmployeeUpdate {
+export function buildEmployeeUpdatePayload(
+  values: Employee,
+): EmployeeUpdate {
   return {
     name: values.name.trim(),
     role: values.role || 'employee',
     is_active: values.is_active ?? true,
+    is_external: values.is_external ?? false,
     job_name: values.job_name?.trim() || null,
     hourly_wage: Number(values.hourly_wage ?? 0),
     coefficient: Number(values.coefficient ?? 1),
@@ -296,7 +303,7 @@ function normalizeEmployeeUpdatePayload(values: Employee): EmployeeUpdate {
 }
 
 export async function createEmployee(values: Employee) {
-  const payload = normalizeEmployeeCreatePayload(values)
+  const payload = buildEmployeeCreatePayload(values)
 
   // 检查员工姓名是否已存在
   if (payload.name) {
@@ -326,7 +333,7 @@ export async function updateEmployee({
   id: string
   values: Employee
 }) {
-  const payload = normalizeEmployeeUpdatePayload(values)
+  const payload = buildEmployeeUpdatePayload(values)
 
   // 如果更新了员工姓名，需要检查新姓名是否已被其他记录使用
   if (payload.name) {
@@ -415,7 +422,7 @@ export async function getCurrentEmployeeProfile(authUserId: string) {
   const { data, error } = await supabase
     .from('employees')
     .select(
-      'id, name, auth_user_id, role, is_active, job_name, hourly_wage, coefficient, created_at, updated_at',
+      'id, name, auth_user_id, role, is_active, is_external, job_name, hourly_wage, coefficient, created_at, updated_at',
     )
     .eq('auth_user_id', authUserId)
     .maybeSingle()
