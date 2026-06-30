@@ -29,6 +29,7 @@ export interface ProductionOrderWithEmployee extends ProductionOrder {
     job_name?: string | null
     hourly_wage?: number | null
     coefficient?: number | null
+    is_external?: boolean | null
   }
 }
 
@@ -54,7 +55,7 @@ export interface ProductionOrderFilters {
 
 const PRODUCTION_ORDER_DETAIL_SELECT = `
       *,
-  employee:employees(id, name, job_name, hourly_wage, coefficient),
+  employee:employees(id, name, job_name, hourly_wage, coefficient, is_external),
       items:production_order_items(*)
     `
 
@@ -68,7 +69,7 @@ const PRODUCTION_ORDER_EXPORT_SELECT = `
       efficiency,
       shift,
       remark,
-      employee:employees(id, name, job_name, hourly_wage, coefficient),
+      employee:employees(id, name, job_name, hourly_wage, coefficient, is_external),
       items:production_order_items(
         id,
         data_category,

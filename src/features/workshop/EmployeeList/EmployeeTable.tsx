@@ -149,6 +149,19 @@ export default function EmployeeTable({
         },
       },
       {
+        title: '是否外来',
+        dataIndex: 'is_external',
+        key: 'is_external',
+        width: 110,
+        render: (value: boolean | undefined) => {
+          if (value) {
+            return <Tag color="orange">是</Tag>
+          }
+
+          return <Tag color="default">否</Tag>
+        },
+      },
+      {
         title: '创建时间',
         dataIndex: 'created_at',
         key: 'created_at',
@@ -211,7 +224,7 @@ export default function EmployeeTable({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      scroll={{ x: 1480, y: scrollY }}
+      scroll={{ x: 1590, y: scrollY }}
       size="small"
       pagination={false}
       style={{
