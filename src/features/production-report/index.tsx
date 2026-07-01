@@ -16,11 +16,10 @@ import type {
   ProductionDailyReportFilters,
   ProductionDailyReportRow,
 } from '@/services/apiProductionDailyReport'
-import { getProductionDailyReportForExport } from '@/services/apiProductionDailyReport'
 import {
-  startProductionDailyReportExportTask,
-  waitForProductionDailyReportExportTask,
-} from '@/services/apiProductionDailyReportExport'
+  getProductionDailyReportForExportChunked,
+  PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE,
+} from '@/services/apiProductionDailyReport'
 import { exportProductionDailyReportToExcel } from '@/utils/productionDailyReportExcel'
 import { isEmployeeSideRole } from '@/config/access'
 import ProductionDailyReportSearch from './ProductionDailyReportSearch'
@@ -204,54 +203,43 @@ export default function ProductionDailyReportPage() {
     try {
       setIsExporting(true)
       let exportCount = exportTargetCount
-
-      const fallbackToClientExport = async () => {
-        const exportRows =
-          selectedRowKeys.length > 0
-            ? selectedRows
-            : (await getProductionDailyReportForExport(filters)).rows
-
-        exportCount = exportRows.length
-        await exportProductionDailyReportToExcel(exportRows)
-        message.success({
-          key: 'production-daily-report-export',
-          content: `已导出 ${exportCount} 条日报数据`,
-        })
-      }
-
-      try {
-        const { jobId } = await startProductionDailyReportExportTask({
-          selectedIds:
-            selectedRowKeys.length > 0
-              ? selectedRowKeys.map((key) => String(key))
-              : undefined,
-          filters: selectedRowKeys.length > 0 ? undefined : filters,
-        })
-
+      const updateProgress = (loaded: number, progressTotal: number) => {
         message.open({
           key: 'production-daily-report-export',
           type: 'loading',
-          content: '正在后台生成生产日报导出文件，请稍候...',
+          content: `正在分片读取日报数据 ${loaded}/${progressTotal}，每批 ${PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE} 条...`,
           duration: 0,
         })
-
-        const exportJob = await waitForProductionDailyReportExportTask(jobId)
-        const link = document.createElement('a')
-
-        link.href = exportJob.downloadUrl!
-        link.click()
-
-        message.success({
-          key: 'production-daily-report-export',
-          content: `已导出 ${exportCount} 条日报数据`,
-        })
-      } catch (asyncExportError) {
-        await fallbackToClientExport()
-
-        if (asyncExportError instanceof Error) {
-          console.warn('后台导出任务不可用，已回退为前端导出', asyncExportError)
-        }
       }
+
+      updateProgress(0, exportTargetCount)
+
+      const exportRows =
+        selectedRowKeys.length > 0
+          ? selectedRows
+          : (
+              await getProductionDailyReportForExportChunked(filters, {
+                onProgress: ({ loaded, total: progressTotal }) => {
+                  updateProgress(loaded, progressTotal)
+                },
+              })
+            ).rows
+
+      exportCount = exportRows.length
+
+      message.open({
+        key: 'production-daily-report-export',
+        type: 'loading',
+        content: `已读取 ${exportCount} 条日报数据，正在生成 Excel...`,
+        duration: 0,
+      })
+
+      await exportProductionDailyReportToExcel(exportRows)
+
+      message.success({
+        key: 'production-daily-report-export',
+        content: `已导出 ${exportCount} 条日报数据`,
+      })
 
       if (selectedRowKeys.length > 0) {
         setSelectedRowKeys([])
@@ -424,7 +412,9 @@ export default function ProductionDailyReportPage() {
       <div
         ref={paginationRef}
         className={
-          isEmployeeView ? 'flex justify-center pb-1' : 'flex shrink-0 justify-end'
+          isEmployeeView
+            ? 'flex justify-center pb-1'
+            : 'flex shrink-0 justify-end'
         }
       >
         <AppPagination total={total} />
