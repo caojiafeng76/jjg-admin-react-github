@@ -32,35 +32,45 @@ function downloadProductionDailyReportExcel(
   }, 0)
 }
 
-function buildProductionDailyReportExcelInWorker(rows: ProductionDailyReportRow[]) {
-  return new Promise<ProductionDailyReportExcelWorkerSuccess>((resolve, reject) => {
-    const worker = new Worker(
-      new URL('./productionDailyReportExcel.worker.ts', import.meta.url),
-      { type: 'module' },
-    )
+function buildProductionDailyReportExcelInWorker(
+  rows: ProductionDailyReportRow[],
+) {
+  return new Promise<ProductionDailyReportExcelWorkerSuccess>(
+    (resolve, reject) => {
+      const worker = new Worker(
+        new URL('./productionDailyReportExcel.worker.ts', import.meta.url),
+        { type: 'module' },
+      )
 
-    worker.onmessage = (
-      event: MessageEvent<
-        | ProductionDailyReportExcelWorkerSuccess
-        | ProductionDailyReportExcelWorkerFailure
-      >,
-    ) => {
-      worker.terminate()
+      worker.onmessage = (
+        event: MessageEvent<
+          | ProductionDailyReportExcelWorkerSuccess
+          | ProductionDailyReportExcelWorkerFailure
+        >,
+      ) => {
+        worker.terminate()
 
-      if ('error' in event.data) {
-        reject(new Error(event.data.error))
-        return
+        if ('error' in event.data) {
+          reject(new Error(event.data.error))
+          return
+        }
+
+        resolve(event.data)
       }
 
-      resolve(event.data)
-    }
+      worker.onerror = () => {
+        worker.terminate()
+        reject(new Error('生产日报表导出任务启动失败'))
+      }
 
-    worker.onerror = () => {
-      worker.terminate()
-      reject(new Error('生产日报表导出任务启动失败'))
-    }
+      worker.postMessage({ rows })
+    },
+  )
+}
 
-    worker.postMessage({ rows })
+async function waitForNextPaint() {
+  await new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => resolve())
   })
 }
 
@@ -68,6 +78,8 @@ export async function exportProductionDailyReportToExcel(
   rows: ProductionDailyReportRow[],
 ) {
   const filename = getProductionDailyReportExportFilename()
+
+  await waitForNextPaint()
 
   if (typeof Worker !== 'undefined') {
     try {
