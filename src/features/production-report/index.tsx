@@ -234,6 +234,10 @@ export default function ProductionDailyReportPage() {
         duration: 0,
       })
 
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve())
+      })
+
       await exportProductionDailyReportToExcel(exportRows)
 
       message.success({
