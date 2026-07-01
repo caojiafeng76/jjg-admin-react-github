@@ -6,10 +6,17 @@ if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
   printUsageAndExit()
 }
 
-const result = spawnSync(process.execPath, ['x', 'openspec', ...args], {
-  encoding: 'utf8',
-  stdio: 'pipe',
-})
+// 注意: npm 上裸包名 "openspec" 是一个无关的空占位包(仅 0.0.0, 无可执行文件),
+// 真正的 OpenSpec CLI 发布在 "@fission-ai/openspec"(https://github.com/Fission-AI/OpenSpec),
+// 其 bin 名称仍为 openspec。若直接用 'openspec' 会报 "could not determine executable to run"。
+const result = spawnSync(
+  process.execPath,
+  ['x', '@fission-ai/openspec', ...args],
+  {
+    encoding: 'utf8',
+    stdio: 'pipe',
+  },
+)
 
 if (result.stdout) {
   process.stdout.write(result.stdout)
