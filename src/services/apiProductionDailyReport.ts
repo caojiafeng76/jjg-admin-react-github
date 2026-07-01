@@ -201,33 +201,6 @@ async function getProductionDailyReportPage(
   }
 }
 
-async function getAllReportItems(filters: ProductionDailyReportFilters) {
-  const items: ProductionDailyReportItemRow[] = []
-  let from = 0
-
-  while (true) {
-    const to = from + FETCH_BATCH_SIZE - 1
-    const { data, error } = await applyProductionDailyReportOrdering(
-      buildProductionDailyReportQuery(filters),
-    ).range(from, to)
-
-    if (error) {
-      throw handleApiError(error, '获取生产日报表数据失败')
-    }
-
-    const batch = (data || []) as unknown as ProductionDailyReportItemRow[]
-    items.push(...batch)
-
-    if (batch.length < FETCH_BATCH_SIZE) {
-      break
-    }
-
-    from += FETCH_BATCH_SIZE
-  }
-
-  return items
-}
-
 function chunkArray<T>(items: T[], size: number) {
   const chunks: T[][] = []
 
@@ -397,10 +370,46 @@ export async function getProductionDailyReport(
   }
 }
 
-export async function getProductionDailyReportForExport(
+export const PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE = 200
+
+export interface ProductionDailyReportExportProgress {
+  loaded: number
+  total: number
+}
+
+export async function getProductionDailyReportForExportChunked(
   filters: ProductionDailyReportFilters,
+  options?: {
+    pageSize?: number
+    onProgress?: (progress: ProductionDailyReportExportProgress) => void
+  },
 ): Promise<ProductionDailyReportResult> {
-  const items = await getAllReportItems(filters)
+  const pageSize =
+    options?.pageSize ?? PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE
+  const firstPage = await getProductionDailyReportPage(filters, 1, pageSize)
+  const total = firstPage.total
+  const items: ProductionDailyReportItemRow[] = [...firstPage.items]
+
+  if (total === 0) {
+    options?.onProgress?.({ loaded: 0, total: 0 })
+    return { rows: [], operations: [], total: 0 }
+  }
+
+  options?.onProgress?.({ loaded: Math.min(items.length, total), total })
+
+  const totalPages = Math.ceil(total / pageSize)
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    const pageResult = await getProductionDailyReportPage(
+      filters,
+      page,
+      pageSize,
+    )
+
+    items.push(...pageResult.items)
+    options?.onProgress?.({ loaded: Math.min(items.length, total), total })
+  }
+
   const { rows, operations } = await buildProductionDailyReportRows(items)
 
   return {
