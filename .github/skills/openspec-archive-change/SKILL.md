@@ -11,6 +11,8 @@ metadata:
 
 Archive a completed change in the experimental workflow.
 
+开始前要求：无论任务大小，都必须先调用 Sequential Thinking MCP 和 Serena MCP。Sequential Thinking MCP 用于明确归档前检查项、警告与决策路径；Serena MCP 用于先定位相关 change、tasks、specs 或受影响文件。若 Serena 当前不可用或返回 `No active project`，仍需明确说明已降级，再退回常规搜索。
+
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**
