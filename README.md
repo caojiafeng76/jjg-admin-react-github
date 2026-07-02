@@ -26,6 +26,9 @@ bun preview
 bun lint
 bun lint:fix
 bun format
+bun run ai:doctor
+bun run graphify:build
+bun run graphify:update
 bun run db:doctor
 bun run db:push
 bun run db:push:dry-run
@@ -42,6 +45,7 @@ bunx spec-workflow-mcp --help
 - 完成任务后必须确保测试通过才能交付；涉及前端或 TypeScript 改动时，继续按风险补充 `bun run build`、lint 和局部回归
 - `bun run typecheck` 只做 TypeScript 项目级类型检查（`tsc -b`），比完整 `bun run build` 快，适合作为改动后的快速校验
 - 推送到 GitHub 后，CI（`.github/workflows/ci.yml`）会自动执行 lint、typecheck、test、build 兜底校验
+- `bun run ai:doctor` 用于检查 AI 工具链、MCP 配置、环境变量、Spec Workflow 和 Graphify 索引状态
 
 Supabase 数据库命令补充：
 
@@ -101,7 +105,7 @@ src/
 
 补充基础规则：所有任务开始前，必须先调用 Sequential Thinking MCP 和 Serena MCP。即使任务很小，也不能跳过；如果 Serena 不可用或返回 `No active project`，需要明确说明已降级后再退回常规搜索。
 
-默认规则定义在 [.github/copilot-instructions.md](.github/copilot-instructions.md)。
+默认规则定义在 [.github/copilot-instructions.md](.github/copilot-instructions.md)，任务类型分流和最低验证矩阵见 [.github/ai-task-matrix.md](.github/ai-task-matrix.md)。工具状态不确定时，先运行 `bun run ai:doctor`。
 
 ## Spec Workflow Integration
 
@@ -139,6 +143,7 @@ args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
 补充约定：
 
 - 很小且低风险的任务（如单文件小改、文案/说明调整、小范围配置变更）可以跳过完整 Spec Workflow，但需要明确说明原因
+- 是否适用小任务 fast lane，优先按 [.github/ai-task-matrix.md](.github/ai-task-matrix.md) 判断
 - 如果用户已经显式使用 `/opsx:explore`、`/opsx:propose`、`/opsx:apply` 或 `/opsx:archive`，则对应 opsx prompt 视为当前权威流程，不再重复做同一轮阶段判断
 - `/opsx:archive` 在只有一个 active change 时可自动选中，只有存在多个候选时才要求用户手动选择
 
