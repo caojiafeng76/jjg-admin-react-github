@@ -21,15 +21,35 @@ export type SyneySafePartRule = {
 }
 
 // ─── 上下方向关键词判断 ───────────────────────────────────────────────────
-const UP_KEYWORDS = ['上头部', '上部', '上'] as const
-const DOWN_KEYWORDS = ['下头部', '下部', '下'] as const
+const UP_KEYWORDS = ['上头部', '上部'] as const
+const DOWN_KEYWORDS = ['下头部', '下部'] as const
+const DIRECTION_SEPARATOR_CHARS = '\\s,，;；、/\\\\|()（）\\[\\]【】'
+const DIRECTION_SEPARATOR_PATTERN = `[${DIRECTION_SEPARATOR_CHARS}]*`
+
+function hasStandaloneDirection(
+  remark: string | null | undefined,
+  direction: '上' | '下',
+): boolean {
+  if (!remark) return false
+
+  return new RegExp(
+    `(^|[${DIRECTION_SEPARATOR_CHARS}])${direction}` +
+      `${DIRECTION_SEPARATOR_PATTERN}($|[${DIRECTION_SEPARATOR_CHARS}])`,
+  ).test(remark)
+}
 
 export function hasUpFlag(remark: string | null | undefined): boolean {
-  return UP_KEYWORDS.some((k) => remark?.includes(k))
+  return (
+    UP_KEYWORDS.some((k) => remark?.includes(k)) ||
+    hasStandaloneDirection(remark, '上')
+  )
 }
 
 export function hasDownFlag(remark: string | null | undefined): boolean {
-  return DOWN_KEYWORDS.some((k) => remark?.includes(k))
+  return (
+    DOWN_KEYWORDS.some((k) => remark?.includes(k)) ||
+    hasStandaloneDirection(remark, '下')
+  )
 }
 
 function normalizePartNo(partNo: string) {

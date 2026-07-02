@@ -46,4 +46,26 @@ describe('buildDecompositionCells', () => {
     expect(cells.rearUpper).toEqual({ spec: '1575*360', qty: 1 })
     expect(cells.rearLower).toEqual({ spec: '1575*504', qty: 1 })
   })
+
+  it('does not treat rear plate position text as the lower head marker', () => {
+    const cells = buildDecompositionCells([
+      item({
+        PartNo: 'XN2808AF1',
+        PartName: '前沿后板组件',
+        ParamSpec: '1525*540',
+        Qty: 1,
+        Remark: 'XNJD-FZ26-071-0186 后板右下角 品牌:西尼 L1=540mm 上头部',
+      }),
+      item({
+        PartNo: 'XN2808AF997',
+        PartName: '前沿后板组件',
+        ParamSpec: '1525*612',
+        Qty: 1,
+        Remark: 'XNJD-FZ26-071-0186 后板右下角 品牌:西尼 L1=612mm 下头部',
+      }),
+    ])
+
+    expect(cells.rearUpper).toEqual({ spec: '1525*540', qty: 1 })
+    expect(cells.rearLower).toEqual({ spec: '1525*612', qty: 1 })
+  })
 })
