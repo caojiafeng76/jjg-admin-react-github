@@ -122,10 +122,12 @@ export async function getSyneySpecs({ PartNo, page, pageSize }) {
 ```bash
 bun dev        # 启动开发服务器
 bun run build  # 构建生产版本
+bun run typecheck # 仅 TypeScript 类型检查（tsc -b，比 build 快）
 bun run test   # Vitest 单元/组件测试
 bun run test:coverage # 生成测试覆盖率报告
 bun lint:fix   # ESLint 自动修复
 bun format     # Prettier 格式化
+bun run db:types # migration 后重新生成 database.types.ts
 ```
 
 ## 默认任务执行流程
@@ -177,11 +179,11 @@ bun format     # Prettier 格式化
 
 ## 任务类型最低验证标准
 
-- 前端 / TypeScript / React 代码改动：至少执行一次 `bun run test`，并执行 `bun run build`、类型检查或等价校验；如果改动影响用户操作流程，尽量补充一次页面或流程级验证。
+- 前端 / TypeScript / React 代码改动：至少执行一次 `bun run test`，并执行 `bun run typecheck`（快速）或 `bun run build`（完整）作为类型校验；如果改动影响用户操作流程，尽量补充一次页面或流程级验证。
 - 查询 / 服务层 / Mutation / 缓存相关改动：除 `bun run test` 与构建或类型检查外，还应验证关键调用链或缓存失效链是否覆盖到受影响页面。
 - 路由 / 表单 / 列表 / 权限相关改动：除 `bun run test` 与构建外，优先补充一次目标页面、关键提交流程或权限边界的回归验证；做不到时要明确说明缺口。
 - 脚本 / CLI / MCP / 配置改动：至少执行一次 `bun run test` 或相关命令、dry-run、help、关键字扫描或等价校验，确认改动后的流程仍可用。
-- 数据库变更：至少验证 migration / SQL 是否成功执行，以及受影响对象或查询结果是否符合预期；如果用户要求的是“落地执行”，不要只停在写出 SQL。
+- 数据库变更：至少验证 migration / SQL 是否成功执行，以及受影响对象或查询结果是否符合预期；如果用户要求的是“落地执行”，不要只停在写出 SQL。migration 成功后必须运行 `bun run db:types` 重新生成 `database.types.ts`，避免类型与 schema 漂移。
 
 关于 Sequential Thinking MCP 与 Serena MCP 的使用约定：
 
@@ -214,6 +216,7 @@ bun format     # Prettier 格式化
 - 不要把结构变更直接塞进临时 SQL 裸跑；优先保持 migration 可追踪、可回滚。
 - 如果本地 Docker 不可用，但远程 linked CLI 或 MCP 可用，应继续推进数据库任务，不要因为 `supabase start` 失败而中断。
 - 任何涉及数据库删除、清空或重置的危险操作（如 `DELETE`、`DROP`、`TRUNCATE`、`db reset`、批量清理）在真正执行前，必须由用户本人明确确认至少 3 次；未达到 3 次确认前，禁止执行。
+- 破坏性 SQL 不允许直接走 Supabase MCP `execute_sql` 裸跑；必须优先通过 `bun run db:query -- --file <sql-file>` 执行，让仓库内 destructive guard 生效。Supabase MCP `execute_sql` 仅用于只读校验或已明确不含破坏性语句的临时查询。
 
 关于 Figma 资源的使用约定：
 

@@ -4,12 +4,16 @@
     "spec-workflow": {
       "type": "local",
       "command": ["npx", "--no-install", "spec-workflow-mcp", "."],
-      "enabled": true
+      "enabled": true,
     },
     "sequential-thinking": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking",
+      ],
+      "enabled": true,
     },
     "supabase": {
       "type": "local",
@@ -19,14 +23,14 @@
         "-ExecutionPolicy",
         "Bypass",
         "-Command",
-        "$env:SUPABASE_ACCESS_TOKEN = [Environment]::GetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', 'User'); npx -y @supabase/mcp-server-supabase --project-ref mlcptrkvkseyqxxlfcme"
+        "$env:SUPABASE_ACCESS_TOKEN = [Environment]::GetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', 'User'); npx -y @supabase/mcp-server-supabase --project-ref mlcptrkvkseyqxxlfcme",
       ],
-      "enabled": true
+      "enabled": true,
     },
     "serena": {
       "type": "local",
       "command": [
-        "C:/Users/Administrator/.local/bin/uvx.exe",
+        "uvx",
         "-p",
         "3.13",
         "--from",
@@ -34,20 +38,20 @@
         "serena",
         "start-mcp-server",
         "--project",
-        "E:/code/jjg-admin-react-github",
-        "--context=codex"
+        ".",
+        "--context=codex",
       ],
-      "enabled": true
+      "enabled": true,
     },
     "context7": {
       "type": "local",
       "command": ["npx", "-y", "@upstash/context7-mcp@latest"],
-      "enabled": true
+      "enabled": true,
     },
     "chrome-devtools": {
       "type": "local",
       "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
-      "enabled": true
-    }
-  }
+      "enabled": true,
+    },
+  },
 }

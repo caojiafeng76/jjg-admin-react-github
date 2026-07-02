@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  # 占位环境变量：仅用于让依赖 env 校验的模块在 CI 中可加载，
+  # 不是真实凭据（真实 anon key 本身也是公开的，但 CI 不需要连接数据库）
+  VITE_REACT_APP_SUPABASE_URL: https://ci-placeholder.supabase.co
+  VITE_REACT_APP_SUPABASE_KEY: ci-placeholder-key-0000000000000000000000000000000000000000
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Build
+        run: bun run build
