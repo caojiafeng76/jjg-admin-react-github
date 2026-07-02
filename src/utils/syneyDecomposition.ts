@@ -160,6 +160,14 @@ export function buildDecompositionCells(
   const unassignedRearItems: ISyneyItem[] = []
 
   items.forEach((item) => {
+    if (isLegacyRearPlateCandidate(item)) {
+      const rearKey = getLegacyRearCellKey(item)
+      if (rearKey) {
+        addCell(cells, rearKey, item)
+        return
+      }
+    }
+
     const configuredKey = getConfiguredCellKey(item, settings)
     if (configuredKey) {
       addCell(cells, configuredKey, item)
@@ -173,12 +181,7 @@ export function buildDecompositionCells(
     }
 
     if (isLegacyRearPlateCandidate(item)) {
-      const rearKey = getLegacyRearCellKey(item)
-      if (rearKey) {
-        addCell(cells, rearKey, item)
-      } else {
-        unassignedRearItems.push(item)
-      }
+      unassignedRearItems.push(item)
     }
   })
 
