@@ -58,10 +58,9 @@ const MONTHLY_SUMMARY_HEADERS = [
   '数量',
   '金额',
   '备注',
-  '更新时间',
 ] as const
 const MONTHLY_SUMMARY_COLUMN_WIDTHS = [
-  4, 11, 10, 17, 11, 12, 12, 7, 7, 7, 7, 7, 7, 7, 7, 16, 16,
+  4, 11, 10, 17, 11, 12, 12, 7, 7, 7, 7, 7, 7, 7, 7, 16,
 ]
 const MONTHLY_SUMMARY_GROUP_HEADERS = [
   '',
@@ -78,7 +77,6 @@ const MONTHLY_SUMMARY_GROUP_HEADERS = [
   '出库',
   '',
   '结余',
-  '',
   '',
   '',
 ] as const
@@ -184,7 +182,6 @@ export function createToolingDataMonthlySummaryWorkbook(
     item.closing_quantity,
     null,
     item.remarks,
-    formatDateTime(item.updated_at),
   ])
 
   const totalRow: Array<string | number | null> = Array.from(

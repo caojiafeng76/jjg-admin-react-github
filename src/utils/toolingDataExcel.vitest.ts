@@ -98,7 +98,8 @@ describe('createToolingDataMonthlySummaryWorkbook', () => {
     expect(worksheet.A3?.v).toBe('#')
     expect(worksheet.H3?.v).toBe('数量')
     expect(worksheet.I3?.v).toBe('金额')
-    expect(worksheet.Q3?.v).toBe('更新时间')
+    expect(worksheet.P3?.v).toBe('备注')
+    expect(worksheet.Q3?.v).toBeUndefined()
 
     expect(worksheet.B4?.v).toBe('T-001')
     expect(worksheet.F4?.z).toBe('0.00')
@@ -123,7 +124,7 @@ describe('createToolingDataMonthlySummaryWorkbook', () => {
       expect.arrayContaining([
         {
           s: { r: 0, c: 0 },
-          e: { r: 0, c: 16 },
+          e: { r: 0, c: 15 },
         },
         {
           s: { r: 1, c: 7 },
