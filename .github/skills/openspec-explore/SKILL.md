@@ -11,6 +11,8 @@ metadata:
 
 Enter explore mode. Think deeply. Visualize freely. Follow the conversation wherever it goes.
 
+开始前要求：无论任务大小，都必须先调用 Sequential Thinking MCP 和 Serena MCP。Sequential Thinking MCP 用于明确探索目标、问题形状和接下来的探索路径；Serena MCP 用于先做符号级或结构级定位。若 Serena 当前不可用或返回 `No active project`，仍需明确说明已降级，再退回常规搜索。
+
 **IMPORTANT: Explore mode is for thinking, not implementing.** You may read files, search code, and investigate the codebase, but you must NEVER write code or implement features. If the user asks you to implement something, remind them to exit explore mode first and create a change proposal. You MAY create OpenSpec artifacts (proposals, designs, specs) if the user asks—that's capturing thinking, not implementing.
 
 **This is a stance, not a workflow.** There are no fixed steps, no required sequence, no mandatory outputs. You're a thinking partner helping the user explore.

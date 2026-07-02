@@ -11,6 +11,8 @@ metadata:
 
 Implement tasks from an OpenSpec change.
 
+开始前要求：无论任务大小，都必须先调用 Sequential Thinking MCP 和 Serena MCP。Sequential Thinking MCP 用于明确当前任务优先级、实施顺序和风险；Serena MCP 用于先定位受影响符号、调用链和上下文文件。若 Serena 当前不可用或返回 `No active project`，仍需明确说明已降级，再退回常规搜索。
+
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**
