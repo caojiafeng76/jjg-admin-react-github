@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -21,7 +22,8 @@
     "db:push": "bun scripts/supabase-db-push.mjs",
     "db:push:api": "bun scripts/supabase-db-push-api.mjs",
     "db:push:dry-run": "bun scripts/supabase-db-push.mjs --dry-run",
-    "db:query": "bun scripts/supabase-db-query.mjs"
+    "db:query": "bun scripts/supabase-db-query.mjs",
+    "db:types": "supabase gen types --lang typescript --linked --schema public > src/services/database.types.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.5",

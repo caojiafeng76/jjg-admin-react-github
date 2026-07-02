@@ -18,6 +18,7 @@
 ```bash
 bun dev
 bun run build
+bun run typecheck
 bun run test
 bun run test:watch
 bun run test:coverage
@@ -29,6 +30,7 @@ bun run db:doctor
 bun run db:push
 bun run db:push:dry-run
 bun run db:query -- --file docs/sql-drafts/example.sql
+bun run db:types
 bunx spec-workflow-mcp --help
 ```
 
@@ -38,6 +40,8 @@ bunx spec-workflow-mcp --help
 - 已配置 Vitest + Testing Library + jsdom，日常验证默认先跑 `bun run test`
 - 运行测试请使用 `bun run test`，不要用 Bun 内置的 `bun test` 代替
 - 完成任务后必须确保测试通过才能交付；涉及前端或 TypeScript 改动时，继续按风险补充 `bun run build`、lint 和局部回归
+- `bun run typecheck` 只做 TypeScript 项目级类型检查（`tsc -b`），比完整 `bun run build` 快，适合作为改动后的快速校验
+- 推送到 GitHub 后，CI（`.github/workflows/ci.yml`）会自动执行 lint、typecheck、test、build 兜底校验
 
 Supabase 数据库命令补充：
 
@@ -45,6 +49,7 @@ Supabase 数据库命令补充：
 - `bun run db:push:dry-run`: 预演待执行 migration
 - `bun run db:query -- --file <sql-file>`: 执行单个 SQL 文件，适合数据修复或只读核对
 - `bun run db:doctor`: 检查 CLI、登录、query 链路、push 链路分别是否正常
+- `bun run db:types`: 从远程 linked 项目重新生成 `src/services/database.types.ts`；任何 migration 执行成功后都应运行一次，保持类型与 schema 一致
 
 说明：本仓库已确认 `supabase start/status` 的本地容器模式依赖 Docker Desktop；如果 Docker 未运行，不影响远程 CLI 和 MCP 路径继续执行数据库脚本。若 `db:push` 失败但 `db:query` 正常，通常不是没登录，而是 linked 直连远程数据库链路失败；这时优先执行 `bun run db:doctor`，必要时配置 `SUPABASE_DB_URL` 作为回退。详见 [docs/Supabase数据库脚本执行说明.md](docs/Supabase数据库脚本执行说明.md)。
 

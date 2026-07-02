@@ -19,7 +19,7 @@
       ]
     },
     "serena": {
-      "command": "C:/Users/Administrator/.local/bin/uvx.exe",
+      "command": "uvx",
       "args": [
         "-p",
         "3.13",
@@ -28,7 +28,7 @@
         "serena",
         "start-mcp-server",
         "--project",
-        "E:/code/jjg-admin-react-github",
+        ".",
         "--context=codex"
       ]
     },
