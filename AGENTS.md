@@ -163,6 +163,7 @@ FeatureName/
 ## 参考文档
 
 - `.github/copilot-instructions.md` - **权威**执行规则来源（默认任务流程、附加规则、验证标准、MCP/工具优先级）
+- `.github/ai-task-matrix.md` - AI 任务类型分流、必选工具和最低验证矩阵
 - `.claude/DEVELOPMENT_WORKFLOW.md` - Claude Code 场景下的执行摘要（内容以上面这份为准，仅做格式适配）
 - `.github/prompts/*.prompt.md` - 5 种任务类型 prompt（含更详细的逐条要求）
 - `CLAUDE.md` - 项目根目录文档
