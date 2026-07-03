@@ -61,7 +61,6 @@ export default function PoList() {
     isDeleting,
     contextHolder: deletePoContextHolder,
   } = useDeletePo(messageApi)
-  const { data: po, isLoading: poLoading } = usePo()
   const {
     updatePos,
     isUpdating: isPoUpdating,
@@ -90,11 +89,28 @@ export default function PoList() {
   const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
     usePrintEnglish(safePartSettings, isSafePartSettingsLoading, messageApi)
 
-  const selectedCount = tableSelectedKeys.length
   const records = useMemo(() => pos || [], [pos])
+  const currentPoIds = useMemo(
+    () =>
+      records
+        .map((record) => record.id)
+        .filter((id): id is number => typeof id === 'number'),
+    [records],
+  )
+  const currentPoIdSet = useMemo(
+    () => new Set(currentPoIds.map(String)),
+    [currentPoIds],
+  )
+  const validSelectedKeys = useMemo(
+    () =>
+      tableSelectedKeys.filter((key) => currentPoIdSet.has(String(key))),
+    [currentPoIdSet, tableSelectedKeys],
+  )
+  const selectedCount = validSelectedKeys.length
+  const { data: po, isLoading: poLoading } = usePo(currentPoIds)
   const selectedQty = useMemo(() => {
     if (selectedCount === 0) return 0
-    const keySet = new Set(tableSelectedKeys.map((key) => String(key)))
+    const keySet = new Set(validSelectedKeys.map((key) => String(key)))
     let total = 0
     for (const item of records) {
       if (keySet.has(String(item.id))) {
@@ -102,7 +118,7 @@ export default function PoList() {
       }
     }
     return total
-  }, [records, selectedCount, tableSelectedKeys])
+  }, [records, selectedCount, validSelectedKeys])
 
   const handleDelete = useCallback(() => {
     if (tableSelectedKeys.length === 0) {
@@ -244,19 +260,23 @@ export default function PoList() {
   }, [generateEnglishLabel, setTableSelectedKeys])
 
   const handleEdit = useCallback(() => {
-    if (tableSelectedKeys.length === 0) {
+    if (validSelectedKeys.length === 0) {
+      if (tableSelectedKeys.length > 0) {
+        setTableSelectedKeys([])
+      }
       messageApi.warning('请选择至少一条数据进行编辑')
       return
     }
 
     setIsEdit(true)
+    setTableSelectedKeys(validSelectedKeys)
     setModalTitle(
-      tableSelectedKeys.length === 1
+      validSelectedKeys.length === 1
         ? '编辑订单'
-        : `批量编辑 ${tableSelectedKeys.length} 个订单`,
+        : `批量编辑 ${validSelectedKeys.length} 个订单`,
     )
     setIsModalOpen(true)
-  }, [tableSelectedKeys, messageApi])
+  }, [messageApi, setTableSelectedKeys, tableSelectedKeys.length, validSelectedKeys])
 
   useEffect(() => {
     return () => {
@@ -416,7 +436,7 @@ export default function PoList() {
         loading={poLoading}
         open={isModalOpen}
         confirmLoading={isCreating || isPoUpdating}
-        destroyOnClose={true}
+        destroyOnHidden={true}
         width={720}
         onOk={() => poFormRef.current?.submit()}
         onCancel={() => {

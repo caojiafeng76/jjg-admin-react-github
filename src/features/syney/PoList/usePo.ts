@@ -5,14 +5,17 @@ import { message } from 'antd'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
 
-export function usePo() {
+export function usePo(validPoIds?: number[]) {
   const { tableSelectedKeys } = useAppStore()
 
   const id = tableSelectedKeys[0] || ''
+  const numericId = Number(id)
+  const isSelectedPoInCurrentList =
+    validPoIds === undefined || validPoIds.includes(numericId)
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['po', id],
-    enabled: !!id,
+    enabled: !!id && isSelectedPoInCurrentList,
     queryFn: ({ signal }) => getSyneyPo(id.toString(), signal),
     ...queryConfig.detail,
   })
