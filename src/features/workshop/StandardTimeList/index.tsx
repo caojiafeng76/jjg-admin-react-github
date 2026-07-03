@@ -524,7 +524,9 @@ export default function StandardTimeList() {
         }
       >
         {isTeamLeaderMode ? null : (
-          <span className="whitespace-nowrap text-sm font-medium text-slate-500">搜索：</span>
+          <span className="text-sm font-medium whitespace-nowrap text-slate-500">
+            搜索：
+          </span>
         )}
         <StandardTimeSearch
           onSearch={handleSearch}
@@ -575,7 +577,10 @@ export default function StandardTimeList() {
                   onRowClick={setActiveRecord}
                 />
               </div>
-              <div ref={paginationRef} className="flex shrink-0 justify-end border-t border-slate-100 pt-3">
+              <div
+                ref={paginationRef}
+                className="flex shrink-0 justify-end border-t border-slate-100 pt-3"
+              >
                 <AppPagination
                   total={data?.total || 0}
                   pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
@@ -598,7 +603,7 @@ export default function StandardTimeList() {
         open={isModalOpen}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         destroyOnHidden
-        width={isTeamLeaderMode ? 'calc(100vw - 24px)' : undefined}
+        width={isTeamLeaderMode ? 'calc(100vw - 24px)' : 900}
         style={isTeamLeaderMode ? { top: 16, maxWidth: 520 } : undefined}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}

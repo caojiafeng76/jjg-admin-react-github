@@ -325,44 +325,51 @@ export default function StandardTimeForm({
     >
       {!isTeamLeaderMode && (
         <>
-          <Form.Item
-            label="项目号"
-            extra="选择项目号后自动带出型号、客户、长度、料号，仍可手工修改"
-          >
-            <Select
-              allowClear
-              showSearch
-              disabled={isCreating}
-              loading={isSalesOrderOptionsLoading}
-              placeholder="请选择或搜索项目号"
-              value={projectNoValue}
-              onChange={handleProjectNoChange}
-              filterOption={(input, option) =>
-                String(option?.searchText || '')
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
-              options={salesOrderProjectNoSelectOptions}
-            />
-            {selectedSalesOrder?.customer_model && (
-              <Typography.Text type="secondary" className="mt-1 block text-xs">
-                客户型号：{selectedSalesOrder.customer_model}
-              </Typography.Text>
-            )}
-          </Form.Item>
-          <Form.Item
-            name="record_type"
-            label="类型"
-            rules={[{ required: true, message: '请选择类型' }]}
-          >
-            <Select
-              placeholder="请选择类型"
-              options={[
-                { label: 'A类（料号+型号+长度精确匹配）', value: 'A' },
-                { label: 'B类（仅型号匹配）', value: 'B' },
-              ]}
-            />
-          </Form.Item>
+          <Divider titlePlacement="left">项目关联</Divider>
+          <div className="grid grid-cols-3 gap-x-4">
+            <Form.Item
+              label="项目号"
+              className="col-span-2"
+              extra="选择项目号后自动带出型号、客户、长度、料号，仍可手工修改"
+            >
+              <Select
+                allowClear
+                showSearch
+                disabled={isCreating}
+                loading={isSalesOrderOptionsLoading}
+                placeholder="请选择或搜索项目号"
+                value={projectNoValue}
+                onChange={handleProjectNoChange}
+                filterOption={(input, option) =>
+                  String(option?.searchText || '')
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={salesOrderProjectNoSelectOptions}
+              />
+              {selectedSalesOrder?.customer_model && (
+                <Typography.Text
+                  type="secondary"
+                  className="mt-1 block text-xs"
+                >
+                  客户型号：{selectedSalesOrder.customer_model}
+                </Typography.Text>
+              )}
+            </Form.Item>
+            <Form.Item
+              name="record_type"
+              label="类型"
+              rules={[{ required: true, message: '请选择类型' }]}
+            >
+              <Select
+                placeholder="请选择类型"
+                options={[
+                  { label: 'A类（料号+型号+长度精确匹配）', value: 'A' },
+                  { label: 'B类（仅型号匹配）', value: 'B' },
+                ]}
+              />
+            </Form.Item>
+          </div>
         </>
       )}
       {isTeamLeaderMode && (
@@ -387,172 +394,200 @@ export default function StandardTimeForm({
           />
         </Form.Item>
       )}
-      <Form.Item
-        name="model"
-        label="型号"
-        rules={[
-          { required: true, message: '请输入型号' },
-          { max: 100, message: '型号不能超过100个字符' },
-        ]}
+      <Divider titlePlacement="left">基本信息</Divider>
+      <div
+        className={isTeamLeaderMode ? undefined : 'grid grid-cols-3 gap-x-4'}
       >
-        <Input
-          placeholder="请输入型号"
-          disabled={isCreating || (isTeamLeaderMode && isEdit)}
-        />
-      </Form.Item>
-      <Form.Item
-        name="operation"
-        label="工序"
-        rules={[
-          { required: true, message: '请输入工序' },
-          { max: 100, message: '工序不能超过100个字符' },
-        ]}
-      >
-        <Input placeholder="请输入工序" disabled={isCreating} />
-      </Form.Item>
-      <Form.Item
-        name="customer"
-        label="客户"
-        rules={[
-          { required: isCustomerRequired, message: '请输入客户' },
-          { max: 100, message: '客户不能超过100个字符' },
-        ]}
-      >
-        <Input placeholder="请输入客户" />
-      </Form.Item>
-      <Form.Item
-        name="job_name"
-        label="工种"
-        rules={[
-          { required: isJobNameRequired, message: '请选择工种' },
-          { max: 50, message: '工种不能超过50个字符' },
-        ]}
-        extra={
-          isTeamLeaderMode
-            ? undefined
-            : '选定工种后会自动带出人工费率，仍可手工修改'
-        }
-      >
-        <Select
-          allowClear={!isJobNameRequired}
-          showSearch
-          loading={isJobOptionsLoading}
-          placeholder="请选择工种"
-          optionFilterProp="label"
-          options={jobSelectOptions}
-          onChange={handleJobChange}
-        />
-      </Form.Item>
-      <Form.Item
-        name="equipment_no"
-        label="设备编号"
-        rules={[
-          { required: isEquipmentNoRequired, message: '请选择设备编号' },
-          { max: 50, message: '设备编号不能超过50个字符' },
-        ]}
-        extra={
-          isTeamLeaderMode
-            ? undefined
-            : '选定设备编号后会自动带出设备费率，仍可手工修改'
-        }
-      >
-        <Select
-          allowClear={!isEquipmentNoRequired}
-          showSearch
-          loading={isEquipmentOptionsLoading}
-          placeholder="请选择设备编号"
-          filterOption={(input, option) =>
-            String(option?.searchText || '')
-              .toLowerCase()
-              .includes(input.toLowerCase())
+        <Form.Item
+          name="model"
+          label="型号"
+          rules={[
+            { required: true, message: '请输入型号' },
+            { max: 100, message: '型号不能超过100个字符' },
+          ]}
+        >
+          <Input
+            placeholder="请输入型号"
+            disabled={isCreating || (isTeamLeaderMode && isEdit)}
+          />
+        </Form.Item>
+        <Form.Item
+          name="operation"
+          label="工序"
+          rules={[
+            { required: true, message: '请输入工序' },
+            { max: 100, message: '工序不能超过100个字符' },
+          ]}
+        >
+          <Input placeholder="请输入工序" disabled={isCreating} />
+        </Form.Item>
+        <Form.Item
+          name="customer"
+          label="客户"
+          rules={[
+            { required: isCustomerRequired, message: '请输入客户' },
+            { max: 100, message: '客户不能超过100个字符' },
+          ]}
+        >
+          <Input placeholder="请输入客户" />
+        </Form.Item>
+        <Form.Item
+          name="job_name"
+          label="工种"
+          rules={[
+            { required: isJobNameRequired, message: '请选择工种' },
+            { max: 50, message: '工种不能超过50个字符' },
+          ]}
+          extra={
+            isTeamLeaderMode
+              ? undefined
+              : '选定工种后会自动带出人工费率，仍可手工修改'
           }
-          options={equipmentSelectOptions}
-          onChange={handleEquipmentChange}
-        />
-      </Form.Item>
-      {isTeamLeaderMode && (
-        <>
-          <Form.Item name="length" label="长度">
-            <InputNumber
-              min={0}
-              step={0.01}
-              style={{ width: '100%' }}
-              placeholder="请输入长度"
-            />
-          </Form.Item>
-          <Form.Item label="客户型号">
-            <Input
-              disabled
-              value={selectedSalesOrder?.customer_model ?? ''}
-              placeholder="选择项目号后自动带出"
-            />
-          </Form.Item>
-          <Form.Item name="part_no" label="料号">
-            <Input placeholder="请输入料号" />
-          </Form.Item>
-        </>
-      )}
+        >
+          <Select
+            allowClear={!isJobNameRequired}
+            showSearch
+            loading={isJobOptionsLoading}
+            placeholder="请选择工种"
+            optionFilterProp="label"
+            options={jobSelectOptions}
+            onChange={handleJobChange}
+          />
+        </Form.Item>
+        <Form.Item
+          name="equipment_no"
+          label="设备编号"
+          rules={[
+            { required: isEquipmentNoRequired, message: '请选择设备编号' },
+            { max: 50, message: '设备编号不能超过50个字符' },
+          ]}
+          extra={
+            isTeamLeaderMode
+              ? undefined
+              : '选定设备编号后会自动带出设备费率，仍可手工修改'
+          }
+        >
+          <Select
+            allowClear={!isEquipmentNoRequired}
+            showSearch
+            loading={isEquipmentOptionsLoading}
+            placeholder="请选择设备编号"
+            filterOption={(input, option) =>
+              String(option?.searchText || '')
+                .toLowerCase()
+                .includes(input.toLowerCase())
+            }
+            options={equipmentSelectOptions}
+            onChange={handleEquipmentChange}
+          />
+        </Form.Item>
+        {isTeamLeaderMode && (
+          <>
+            <Form.Item name="length" label="长度">
+              <InputNumber
+                min={0}
+                step={0.01}
+                style={{ width: '100%' }}
+                placeholder="请输入长度"
+              />
+            </Form.Item>
+            <Form.Item label="客户型号">
+              <Input
+                disabled
+                value={selectedSalesOrder?.customer_model ?? ''}
+                placeholder="选择项目号后自动带出"
+              />
+            </Form.Item>
+            <Form.Item name="part_no" label="料号">
+              <Input placeholder="请输入料号" />
+            </Form.Item>
+          </>
+        )}
+      </div>
       {isTeamLeaderMode ? null : (
         <>
-          <Form.Item
-            name="standard_seconds"
-            label="标准工时（秒）"
-            rules={[{ required: true, message: '请输入标准工时' }]}
-          >
-            <InputNumber
-              placeholder="请输入标准工时"
-              disabled={isCreating}
-              min={0}
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
-          <Divider>费率与管理参数</Divider>
-          <Form.Item name="labor_rate" label="人工费率（元/小时）">
-            <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="labor_cost_coefficient" label="人工成本系数">
-            <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="equipment_rate" label="设备费率（元/小时）">
-            <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="tool_rate" label="刀具费率（元/支）">
-            <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="cutting_fluid_rate" label="切削液费率（元/支）">
-            <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="fixture_rate" label="工装费率（元/支）">
-            <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="inspection_seconds" label="检验工时（秒）">
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="daily_management_cost" label="日管理总费用（元）">
-            <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="daily_total_hours" label="日总工时（小时）">
-            <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item name="uploaded_by_name" label="数据上传">
-            <Input disabled placeholder="自动记录当前登录用户" />
-          </Form.Item>
-          <Form.Item name="length" label="长度">
-            <InputNumber
-              min={0}
-              step={0.01}
-              style={{ width: '100%' }}
-              placeholder="请输入长度"
-            />
-          </Form.Item>
-          <Form.Item name="part_no" label="料号">
-            <Input placeholder="请输入料号" />
-          </Form.Item>
+          <Divider titlePlacement="left">工时信息</Divider>
+          <div className="grid grid-cols-2 gap-x-4">
+            <Form.Item
+              name="standard_seconds"
+              label="标准工时（秒）"
+              rules={[{ required: true, message: '请输入标准工时' }]}
+            >
+              <InputNumber
+                placeholder="请输入标准工时"
+                disabled={isCreating}
+                min={0}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+            <Form.Item
+              name="theoretical_seconds"
+              label="理论工时（秒）"
+              rules={[{ required: true, message: '请输入理论工时' }]}
+            >
+              <InputNumber
+                placeholder="请输入理论工时"
+                disabled={isCreating}
+                min={0}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+          </div>
+
+          <Divider titlePlacement="left">费率与管理参数</Divider>
+          <div className="grid grid-cols-3 gap-x-4">
+            <Form.Item name="labor_rate" label="人工费率（元/小时）">
+              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="labor_cost_coefficient" label="人工成本系数">
+              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="equipment_rate" label="设备费率（元/小时）">
+              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="tool_rate" label="刀具费率（元/支）">
+              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="cutting_fluid_rate" label="切削液费率（元/支）">
+              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="fixture_rate" label="工装费率（元/支）">
+              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="inspection_seconds" label="检验工时（秒）">
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="daily_management_cost" label="日管理总费用（元）">
+              <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item name="daily_total_hours" label="日总工时（小时）">
+              <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+            </Form.Item>
+          </div>
+
+          <Divider titlePlacement="left">其他信息</Divider>
+          <div className="grid grid-cols-3 gap-x-4">
+            <Form.Item name="uploaded_by_name" label="数据上传">
+              <Input disabled placeholder="自动记录当前登录用户" />
+            </Form.Item>
+            <Form.Item name="length" label="长度">
+              <InputNumber
+                min={0}
+                step={0.01}
+                style={{ width: '100%' }}
+                placeholder="请输入长度"
+              />
+            </Form.Item>
+            <Form.Item name="part_no" label="料号">
+              <Input placeholder="请输入料号" />
+            </Form.Item>
+          </div>
           <Form.Item name="remark" label="备注">
             <Input.TextArea rows={3} placeholder="请输入备注" />
           </Form.Item>
-          <Divider>成本预览</Divider>
-          <div className="grid grid-cols-1 gap-3 rounded-2xl bg-slate-50 p-4 md:grid-cols-2">
+
+          <Divider titlePlacement="left">成本预览</Divider>
+          <div className="grid grid-cols-3 gap-3 rounded-2xl bg-slate-50 p-4">
             <div>
               <Typography.Text type="secondary">日标准产能</Typography.Text>
               <div className="mt-1 text-base font-semibold text-slate-900">
@@ -608,18 +643,20 @@ export default function StandardTimeForm({
           </div>
         </>
       )}
-      <Form.Item
-        name="theoretical_seconds"
-        label="理论工时（秒）"
-        rules={[{ required: true, message: '请输入理论工时' }]}
-      >
-        <InputNumber
-          placeholder="请输入理论工时"
-          disabled={isCreating}
-          min={0}
-          style={{ width: '100%' }}
-        />
-      </Form.Item>
+      {isTeamLeaderMode && (
+        <Form.Item
+          name="theoretical_seconds"
+          label="理论工时（秒）"
+          rules={[{ required: true, message: '请输入理论工时' }]}
+        >
+          <InputNumber
+            placeholder="请输入理论工时"
+            disabled={isCreating}
+            min={0}
+            style={{ width: '100%' }}
+          />
+        </Form.Item>
+      )}
     </Form>
   )
 }
