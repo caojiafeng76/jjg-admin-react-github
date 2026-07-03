@@ -70,6 +70,17 @@ interface Props {
   submitting?: boolean
 }
 
+function SectionTitle({ title }: { title: string }) {
+  return (
+    <div className="mb-3 flex items-center gap-2">
+      <span className="h-3.5 w-1 rounded-full bg-blue-500" />
+      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+        {title}
+      </span>
+    </div>
+  )
+}
+
 function formatOptionText(value: string | number | null | undefined) {
   if (value === null || value === undefined || value === '') {
     return '-'
@@ -278,6 +289,7 @@ export default function IssueRecordForm({
       destroyOnHidden
     >
       <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <SectionTitle title="基本信息" />
         <div className="grid grid-cols-3 gap-3">
           <Form.Item
             name="production_date"
@@ -304,6 +316,19 @@ export default function IssueRecordForm({
             />
           </Form.Item>
 
+          <Form.Item name="audit_status" label="审核状态">
+            <Select
+              getPopupContainer={getPopupContainer}
+              options={QUALITY_ISSUE_AUDIT_STATUSES.map((status) => ({
+                label: AUDIT_STATUS_LABELS[status],
+                value: status,
+              }))}
+            />
+          </Form.Item>
+        </div>
+
+        <SectionTitle title="订单信息" />
+        <div className="grid grid-cols-1 gap-3">
           <Form.Item
             name="project_no"
             label="项目号"
@@ -346,28 +371,29 @@ export default function IssueRecordForm({
           </Form.Item>
         </div>
 
-        <div className="grid grid-cols-5 gap-3">
-          <Form.Item name="customer" label="客户">
+        <div className="mb-4 grid grid-cols-5 gap-3 rounded-lg bg-slate-50 px-3 pt-3 dark:bg-slate-800/50">
+          <Form.Item name="customer" label="客户" className="mb-3">
             <Input disabled placeholder="自动带出" />
           </Form.Item>
 
-          <Form.Item name="product_model" label="型号">
+          <Form.Item name="product_model" label="型号" className="mb-3">
             <Input disabled placeholder="自动带出" />
           </Form.Item>
 
-          <Form.Item name="length_mm" label="长度(mm)">
+          <Form.Item name="length_mm" label="长度(mm)" className="mb-3">
             <InputNumber disabled className="w-full" placeholder="自动带出" />
           </Form.Item>
 
-          <Form.Item name="customer_model" label="客户型号">
+          <Form.Item name="customer_model" label="客户型号" className="mb-3">
             <Input disabled placeholder="自动带出" />
           </Form.Item>
 
-          <Form.Item name="order_quantity" label="订单数量">
+          <Form.Item name="order_quantity" label="订单数量" className="mb-3">
             <InputNumber disabled className="w-full" placeholder="自动带出" />
           </Form.Item>
         </div>
 
+        <SectionTitle title="数量统计" />
         <div className="grid grid-cols-4 gap-3">
           <Form.Item
             name="processed_quantity"
@@ -398,19 +424,8 @@ export default function IssueRecordForm({
           </Form.Item>
         </div>
 
+        <SectionTitle title="相关人员" />
         <div className="grid grid-cols-3 gap-3">
-          <Form.Item name="issue_type" label="问题类型">
-            <Select
-              allowClear
-              placeholder="请选择问题类型"
-              getPopupContainer={getPopupContainer}
-              options={QUALITY_ISSUE_TYPES.map((type) => ({
-                label: type,
-                value: type,
-              }))}
-            />
-          </Form.Item>
-
           <Form.Item
             name="operator_employee_id"
             label="操作人"
@@ -431,31 +446,39 @@ export default function IssueRecordForm({
           <Form.Item name="shift_leader_name" label="当班负责人">
             <Input placeholder="请输入当班负责人" maxLength={50} />
           </Form.Item>
-        </div>
 
-        <div className="grid grid-cols-3 gap-3">
           <Form.Item name="inspector_name" label="检验人">
             <Input placeholder="请输入检验人" maxLength={50} />
           </Form.Item>
+        </div>
 
-          <Form.Item name="audit_status" label="审核状态">
+        <SectionTitle title="问题与处理" />
+        <div className="grid grid-cols-3 gap-3">
+          <Form.Item name="issue_type" label="问题类型">
             <Select
+              allowClear
+              placeholder="请选择问题类型"
               getPopupContainer={getPopupContainer}
-              options={QUALITY_ISSUE_AUDIT_STATUSES.map((status) => ({
-                label: AUDIT_STATUS_LABELS[status],
-                value: status,
+              options={QUALITY_ISSUE_TYPES.map((type) => ({
+                label: type,
+                value: type,
               }))}
             />
           </Form.Item>
-        </div>
 
-        <Form.Item
-          name="quality_issue"
-          label="质量问题"
-          rules={[{ required: true, message: '请输入质量问题' }]}
-        >
-          <Input.TextArea rows={3} placeholder="请输入质量问题" />
-        </Form.Item>
+          <Form.Item
+            name="quality_issue"
+            label="质量问题"
+            className="col-span-2"
+            rules={[{ required: true, message: '请输入质量问题' }]}
+          >
+            <Input.TextArea
+              rows={2}
+              autoSize={{ minRows: 2, maxRows: 4 }}
+              placeholder="请输入质量问题"
+            />
+          </Form.Item>
+        </div>
 
         <div className="grid grid-cols-3 gap-3">
           <Form.Item name="cause" label="造成原因">
