@@ -5,22 +5,35 @@ import { handleApiError } from '@utils/errorHandler'
 
 type SyneyPoItemUpdate = Database['public']['Tables']['syney-po-items']['Update']
 
-function normalizeSyneyPoItemUpdatePayload(values: ISyneyItem): SyneyPoItemUpdate {
-  return {
-    No: values.No,
-    ParamSpec: values.ParamSpec,
-    PartCode: values.PartCode ?? null,
-    PartModel: values.PartModel ?? null,
-    PartName: values.PartName,
-    PartName2: values.PartName2 ?? null,
-    PartNo: values.PartNo,
-    PoId: values.PoId ?? null,
-    Qty: values.Qty,
-    Remark: values.Remark,
-    SONo: values.SONo,
-    Spec: values.Spec,
-    Unit: values.Unit,
+function normalizeSyneyPoItemUpdatePayload(
+  values: Partial<ISyneyItem>,
+): SyneyPoItemUpdate {
+  const payload: SyneyPoItemUpdate = {}
+
+  const assignIfPresent = <K extends keyof SyneyPoItemUpdate>(
+    key: K,
+    value: SyneyPoItemUpdate[K] | undefined,
+  ) => {
+    if (value !== undefined) {
+      payload[key] = value
+    }
   }
+
+  assignIfPresent('No', values.No)
+  assignIfPresent('ParamSpec', values.ParamSpec)
+  assignIfPresent('PartCode', values.PartCode)
+  assignIfPresent('PartModel', values.PartModel)
+  assignIfPresent('PartName', values.PartName)
+  assignIfPresent('PartName2', values.PartName2)
+  assignIfPresent('PartNo', values.PartNo)
+  assignIfPresent('PoId', values.PoId)
+  assignIfPresent('Qty', values.Qty)
+  assignIfPresent('Remark', values.Remark)
+  assignIfPresent('SONo', values.SONo)
+  assignIfPresent('Spec', values.Spec)
+  assignIfPresent('Unit', values.Unit)
+
+  return payload
 }
 
 export async function getSyneyPoDetail(PoId: string) {
@@ -46,7 +59,7 @@ export async function updatePoItems({
   values,
 }: {
   ids: number[]
-  values: ISyneyItem
+  values: Partial<ISyneyItem>
 }) {
   const payload = normalizeSyneyPoItemUpdatePayload(values)
 
@@ -59,10 +72,12 @@ export async function updatePoItems({
     throw handleApiError(error, '订单详情更新失败')
   }
 
+  if (!values.PartNo) return
+
   const { data: specFromRepo } = await supabase
     .from('syney-specs')
     .select('*')
-    .eq('PartNo', values.PartNo || '')
+    .eq('PartNo', values.PartNo)
     .single()
 
   if (specFromRepo) return

@@ -2,7 +2,7 @@ import EditButton from '@/ui/EditButton'
 import DetailTable from './DetailTable'
 import { App, Modal } from 'antd'
 import DetailForm from './DetailForm'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppStore } from '@/store'
 import { FormInstance } from 'antd/lib'
 import { ISyneyItem } from '@/types'
@@ -10,17 +10,17 @@ import { useItem } from './useItem'
 import { useDetail } from './useDetail'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
-import { useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 
 export default function PoDetail() {
   const { message } = App.useApp()
+  const { PoId } = useParams()
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const { isLoading } = useAppStore()
-  const { data } = useItem()
+  const { isLoading, setTableSelectedKeys } = useAppStore()
   const { items, isLoading: isDetailLoading } = useDetail()
 
   const detailFormRef = useRef<{
@@ -28,7 +28,19 @@ export default function PoDetail() {
   }>(null)
 
   const records = useMemo(() => (items as ISyneyItem[]) || [], [items])
+  const currentItemIds = useMemo(
+    () =>
+      records
+        .map((item) => item.id)
+        .filter((id): id is number => typeof id === 'number'),
+    [records],
+  )
+  const { data } = useItem(currentItemIds)
   const total = records.length
+
+  useEffect(() => {
+    setTableSelectedKeys([])
+  }, [PoId, setTableSelectedKeys])
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 12,
