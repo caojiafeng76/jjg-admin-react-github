@@ -303,6 +303,10 @@ export default async function getSyneyPo(id: string, signal?: AbortSignal) {
       return null
     }
 
+    if (error.code === 'PGRST116') {
+      throw new Error('入库单不存在或已被删除')
+    }
+
     throw handleApiError(error, '获取订单详情失败')
   }
 

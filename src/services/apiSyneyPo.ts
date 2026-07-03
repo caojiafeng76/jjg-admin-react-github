@@ -31,6 +31,10 @@ export async function getSyneyPoDetail(PoId: string) {
     .single()
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('采购单不存在或已被删除')
+    }
+
     throw handleApiError(error, '获取订单详情失败')
   }
 
@@ -85,6 +89,10 @@ export async function getItemById(id: number) {
     .single()
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('订单明细不存在或已被删除')
+    }
+
     throw handleApiError(error, '获取订单详情失败')
   }
 
