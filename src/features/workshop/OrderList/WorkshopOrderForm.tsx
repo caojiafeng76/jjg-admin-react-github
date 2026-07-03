@@ -24,6 +24,17 @@ import {
 
 const { Text } = Typography
 
+function SectionTitle({ title }: { title: string }) {
+  return (
+    <div className="mb-3 flex items-center gap-2">
+      <span className="h-3.5 w-1 rounded-full bg-blue-500" />
+      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+        {title}
+      </span>
+    </div>
+  )
+}
+
 interface Props {
   onFinish: (values: WorkshopOrder | WorkshopOrder[]) => void
   setFormRef: (form: FormInstance<WorkshopOrder>) => void
@@ -206,94 +217,104 @@ export default function WorkshopOrderForm({
       {/* 手动输入模式或编辑模式 */}
       {(importMode === 'manual' || isEdit) && (
         <>
-          <Form.Item name="product_delivery_date" label="产品交货日期">
-            <DatePicker style={{ width: '100%' }} disabled={isCreating} />
-          </Form.Item>
-
-          <Form.Item name="customer" label="客户">
-            <Input disabled={isCreating} />
-          </Form.Item>
-
-          {canEditStatus && isEdit && (
-            <Form.Item name="status" label="订单状态">
-              <Select
-                options={WORKSHOP_ORDER_STATUS_OPTIONS.map((item) => ({
-                  label: item.label,
-                  value: item.value,
-                }))}
-                disabled={isCreating}
-              />
+          <SectionTitle title="基本信息" />
+          <div className="grid grid-cols-3 gap-x-4">
+            <Form.Item
+              name="project_no"
+              label="项目号"
+              rules={[{ required: true, message: '请输入项目号' }]}
+            >
+              <Input disabled={isCreating} />
             </Form.Item>
-          )}
 
-          <Form.Item
-            name="project_no"
-            label="项目号"
-            rules={[{ required: true, message: '请输入项目号' }]}
-          >
-            <Input disabled={isCreating} />
-          </Form.Item>
+            <Form.Item
+              name="product_model"
+              label="产品型号"
+              rules={[{ required: true, message: '请输入产品型号' }]}
+            >
+              <Input disabled={isCreating} />
+            </Form.Item>
 
-          <Form.Item
-            name="product_model"
-            label="产品型号"
-            rules={[{ required: true, message: '请输入产品型号' }]}
-          >
-            <Input disabled={isCreating} />
-          </Form.Item>
+            <Form.Item name="customer_model" label="客户型号">
+              <Input disabled={isCreating} />
+            </Form.Item>
 
-          <Form.Item
-            name="length_mm"
-            label="长度(mm)"
-            rules={[{ required: true, message: '请输入长度' }]}
-          >
-            <InputNumber style={{ width: '100%' }} disabled={isCreating} />
-          </Form.Item>
+            <Form.Item name="customer" label="客户">
+              <Input disabled={isCreating} />
+            </Form.Item>
 
-          <Form.Item name="length_tolerance" label="长度公差">
-            <Input disabled={isCreating} placeholder="如：±0.2" />
-          </Form.Item>
+            <Form.Item name="product_delivery_date" label="产品交货日期">
+              <DatePicker style={{ width: '100%' }} disabled={isCreating} />
+            </Form.Item>
 
-          <Form.Item name="customer_model" label="客户型号">
-            <Input disabled={isCreating} />
-          </Form.Item>
+            {canEditStatus && isEdit && (
+              <Form.Item name="status" label="订单状态">
+                <Select
+                  options={WORKSHOP_ORDER_STATUS_OPTIONS.map((item) => ({
+                    label: item.label,
+                    value: item.value,
+                  }))}
+                  disabled={isCreating}
+                />
+              </Form.Item>
+            )}
+          </div>
 
-          <Form.Item
-            name="order_quantity"
-            label="订支数"
-            rules={[{ required: true, message: '请输入订支数' }]}
-          >
-            <InputNumber style={{ width: '100%' }} disabled={isCreating} />
-          </Form.Item>
+          <SectionTitle title="尺寸与数量" />
+          <div className="grid grid-cols-4 gap-x-4">
+            <Form.Item
+              name="length_mm"
+              label="长度(mm)"
+              rules={[{ required: true, message: '请输入长度' }]}
+            >
+              <InputNumber style={{ width: '100%' }} disabled={isCreating} />
+            </Form.Item>
 
-          <Form.Item
-            name="weight_per_meter_kg"
-            label="每米理论重(kg/m)"
-            rules={[{ required: true, message: '请输入每米理论重' }]}
-          >
-            <InputNumber style={{ width: '100%' }} disabled={isCreating} />
-          </Form.Item>
+            <Form.Item name="length_tolerance" label="长度公差">
+              <Input disabled={isCreating} placeholder="如：±0.2" />
+            </Form.Item>
 
-          <Form.Item name="color_name" label="颜色名称">
-            <Input disabled={isCreating} />
-          </Form.Item>
+            <Form.Item
+              name="order_quantity"
+              label="订支数"
+              rules={[{ required: true, message: '请输入订支数' }]}
+            >
+              <InputNumber style={{ width: '100%' }} disabled={isCreating} />
+            </Form.Item>
 
-          <Form.Item name="package_name" label="包装名称">
-            <Input disabled={isCreating} />
-          </Form.Item>
+            <Form.Item
+              name="weight_per_meter_kg"
+              label="每米理论重(kg/m)"
+              rules={[{ required: true, message: '请输入每米理论重' }]}
+            >
+              <InputNumber style={{ width: '100%' }} disabled={isCreating} />
+            </Form.Item>
+          </div>
 
-          <Form.Item name="product_category" label="产品类别">
-            <Input disabled={isCreating} />
-          </Form.Item>
+          <SectionTitle title="表面处理与材质" />
+          <div className="grid grid-cols-3 gap-x-4">
+            <Form.Item name="color_name" label="颜色名称">
+              <Input disabled={isCreating} />
+            </Form.Item>
 
-          <Form.Item name="material_name" label="材质名称">
-            <Input disabled={isCreating} />
-          </Form.Item>
+            <Form.Item name="package_name" label="包装名称">
+              <Input disabled={isCreating} />
+            </Form.Item>
 
-          <Form.Item name="material_code" label="料号">
-            <Input disabled={isCreating} />
-          </Form.Item>
+            <Form.Item name="product_category" label="产品类别">
+              <Input disabled={isCreating} />
+            </Form.Item>
 
+            <Form.Item name="material_name" label="材质名称">
+              <Input disabled={isCreating} />
+            </Form.Item>
+
+            <Form.Item name="material_code" label="料号">
+              <Input disabled={isCreating} />
+            </Form.Item>
+          </div>
+
+          <SectionTitle title="工艺与备注" />
           <Form.Item name="process_flow" label="工艺流程">
             <Input disabled={isCreating} placeholder="如：切割->冲孔->CNC" />
           </Form.Item>

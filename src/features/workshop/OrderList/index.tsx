@@ -916,6 +916,7 @@ export default function WorkshopOrderList() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
+        width={960}
         confirmLoading={
           createMutation.isPending ||
           updateMutation.isPending ||
