@@ -16,8 +16,23 @@ interface Props {
   initialValues?: PackagingWorkOrder | PackagingWorkOrderFormValues
 }
 
-const DEFAULT_VALUES: PackagingWorkOrderFormValues = {
-  work_date: dayjs().format('YYYY-MM-DD'),
+interface WorkOrderFormValues {
+  work_date: dayjs.Dayjs
+  employee_id: string | null
+  project_no: string | null
+  product_model: string
+  color_name: string | null
+  process_name: string | null
+  length_mm: number | null
+  part_no: string | null
+  unit: string
+  quantity: number
+  standard_seconds: number
+  remark: string | null
+}
+
+const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
+  work_date: dayjs(),
   employee_id: null,
   project_no: null,
   product_model: '',
@@ -37,14 +52,12 @@ export default function WorkOrderForm({
   isSubmitting,
   initialValues,
 }: Props) {
-  const [form] = Form.useForm<PackagingWorkOrderFormValues>()
+  const [form] = Form.useForm<WorkOrderFormValues>()
   const { message } = App.useApp()
-  const [projectNoValue, setProjectNoValue] = useState<string | undefined>(
-    undefined,
-  )
+  const [projectNoValue, setProjectNoValue] = useState<string | undefined>(undefined)
 
   const { data: projectNoOptions = [] } = usePackagingSalesOrdersProjectNos()
-  const { data: employeeOptions = [] } = usePackagingEmployeeOptions()
+  const { data: employeeOptions } = usePackagingEmployeeOptions()
 
   const projectNoSelectOptions = useMemo(
     () =>
@@ -58,7 +71,7 @@ export default function WorkOrderForm({
 
   const employeeSelectOptions = useMemo(
     () =>
-      employeeOptions.items.map((employee) => ({
+      (employeeOptions?.items ?? []).map((employee) => ({
         label: employee.name,
         value: employee.id,
       })),
@@ -66,17 +79,15 @@ export default function WorkOrderForm({
   )
 
   useEffect(() => {
-    setFormRef(form)
+    setFormRef(form as unknown as FormInstance<PackagingWorkOrderFormValues>)
   }, [form, setFormRef])
 
   useEffect(() => {
     if (initialValues) {
-      const workDate = initialValues.work_date
-        ? dayjs(initialValues.work_date)
-        : dayjs()
+      const workDate = initialValues.work_date ? dayjs(initialValues.work_date) : dayjs()
 
       form.setFieldsValue({
-        ...DEFAULT_VALUES,
+        ...DEFAULT_FORM_VALUES,
         work_date: workDate,
         employee_id: initialValues.employee_id,
         project_no: initialValues.project_no,
@@ -95,10 +106,7 @@ export default function WorkOrderForm({
     }
 
     form.resetFields()
-    form.setFieldsValue({
-      ...DEFAULT_VALUES,
-      work_date: dayjs(),
-    })
+    form.setFieldsValue({ ...DEFAULT_FORM_VALUES })
     setProjectNoValue(undefined)
   }, [form, initialValues])
 
@@ -127,7 +135,7 @@ export default function WorkOrderForm({
           color_name: orderInfo.color_name ?? null,
           length_mm: orderInfo.length_mm ?? null,
           part_no: orderInfo.material_code ?? null,
-          standard_seconds,
+          standard_seconds: standardSeconds,
         })
       } catch (error) {
         message.warning('项目号信息获取失败，请手动填写')
@@ -144,27 +152,35 @@ export default function WorkOrderForm({
     return ((q * s) / 3600).toFixed(2)
   }, [quantity, standardSeconds])
 
+  const handleFinish = useCallback(
+    (values: WorkOrderFormValues) => {
+      const formValues: PackagingWorkOrderFormValues = {
+        work_date: values.work_date.format('YYYY-MM-DD'),
+        employee_id: values.employee_id,
+        project_no: values.project_no,
+        product_model: values.product_model,
+        color_name: values.color_name,
+        process_name: values.process_name,
+        length_mm: values.length_mm,
+        part_no: values.part_no,
+        unit: values.unit,
+        quantity: values.quantity,
+        standard_seconds: values.standard_seconds,
+        remark: values.remark,
+      }
+      onFinish(formValues)
+    },
+    [onFinish],
+  )
+
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={onFinish}
-      disabled={isSubmitting}
-    >
+    <Form form={form} layout="vertical" onFinish={handleFinish} disabled={isSubmitting}>
       <div className="grid grid-cols-2 gap-3">
-        <Form.Item
-          name="work_date"
-          label="日期"
-          rules={[{ required: true, message: '请选择日期' }]}
-        >
+        <Form.Item name="work_date" label="日期" rules={[{ required: true, message: '请选择日期' }]}>
           <DatePicker className="w-full" />
         </Form.Item>
 
-        <Form.Item
-          name="employee_id"
-          label="人员"
-          rules={[{ required: true, message: '请选择人员' }]}
-        >
+        <Form.Item name="employee_id" label="人员" rules={[{ required: true, message: '请选择人员' }]}>
           <Select
             allowClear
             showSearch
@@ -190,11 +206,7 @@ export default function WorkOrderForm({
           />
         </Form.Item>
 
-        <Form.Item
-          name="product_model"
-          label="型号"
-          rules={[{ required: true, message: '请输入型号' }]}
-        >
+        <Form.Item name="product_model" label="型号" rules={[{ required: true, message: '请输入型号' }]}>
           <Input placeholder="请输入型号" allowClear />
         </Form.Item>
 
@@ -214,28 +226,15 @@ export default function WorkOrderForm({
           <Input placeholder="请输入料号" allowClear />
         </Form.Item>
 
-        <Form.Item
-          name="unit"
-          label="单位"
-          rules={[{ required: true, message: '请输入单位' }]}
-          initialValue="支"
-        >
+        <Form.Item name="unit" label="单位" rules={[{ required: true, message: '请输入单位' }]} initialValue="支">
           <Input placeholder="单位" />
         </Form.Item>
 
-        <Form.Item
-          name="quantity"
-          label="数量"
-          rules={[{ required: true, message: '请输入数量' }]}
-        >
+        <Form.Item name="quantity" label="数量" rules={[{ required: true, message: '请输入数量' }]}>
           <InputNumber min={0} step={1} className="w-full" placeholder="请输入数量" />
         </Form.Item>
 
-        <Form.Item
-          name="standard_seconds"
-          label="标准工时（秒）"
-          rules={[{ required: true, message: '请输入标准工时' }]}
-        >
+        <Form.Item name="standard_seconds" label="标准工时（秒）" rules={[{ required: true, message: '请输入标准工时' }]}>
           <InputNumber min={0} step={1} className="w-full" placeholder="请输入标准工时" />
         </Form.Item>
 
