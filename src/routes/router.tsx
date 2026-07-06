@@ -15,6 +15,8 @@ import {
 import {
   AccessDenied,
   AccessManagement,
+  PackagingEmployeeList,
+  PackagingStandardTimeList,
   VillaLiftOrderList,
   VillaLiftCuttingProcess,
   VillaLiftFinishingProcess,
@@ -652,6 +654,28 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:villa-lift-processing"
               element={<VillaLiftFinishingProcess />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'packaging-process-employee-list',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:packaging-process-employee-list"
+              element={<PackagingEmployeeList />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'packaging-process-standard-time-list',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:packaging-process-standard-time-list"
+              element={<PackagingStandardTimeList />}
             />
           </Suspense>
         ),
