@@ -1,0 +1,170 @@
+import { memo, useMemo } from 'react'
+import { Table, type TableColumnsType } from 'antd'
+import dayjs from 'dayjs'
+
+import type { PackagingWorkOrder } from '@/services/apiPackagingWorkOrders'
+
+interface Props {
+  loading: boolean
+  data: PackagingWorkOrder[]
+  selectedRowKeys: React.Key[]
+  onSelect: (keys: React.Key[]) => void
+  page: number
+  pageSize: number
+  scrollY?: number
+  rowHeight?: number
+}
+
+function WorkOrderTable({
+  loading,
+  data,
+  selectedRowKeys,
+  onSelect,
+  page,
+  pageSize,
+  scrollY = 400,
+  rowHeight = 40,
+}: Props) {
+  const columns: TableColumnsType<PackagingWorkOrder> = useMemo(
+    () => [
+      {
+        title: '#',
+        key: '#',
+        width: 60,
+        fixed: 'left',
+        render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
+      },
+      {
+        title: '日期',
+        dataIndex: 'work_date',
+        key: 'work_date',
+        width: 120,
+        render: (value: string) =>
+          value ? dayjs(value).format('MM-DD') : '-',
+      },
+      {
+        title: '人员',
+        dataIndex: 'employee_name',
+        key: 'employee_name',
+        width: 100,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
+        title: '项目号',
+        dataIndex: 'project_no',
+        key: 'project_no',
+        width: 140,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '型号',
+        dataIndex: 'product_model',
+        key: 'product_model',
+        width: 160,
+      },
+      {
+        title: '颜色',
+        dataIndex: 'color_name',
+        key: 'color_name',
+        width: 90,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '工艺',
+        dataIndex: 'process_name',
+        key: 'process_name',
+        width: 100,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '长度(mm)',
+        dataIndex: 'length_mm',
+        key: 'length_mm',
+        width: 110,
+        render: (value: number | null) => value ?? '-',
+      },
+      {
+        title: '料号',
+        dataIndex: 'part_no',
+        key: 'part_no',
+        width: 120,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '单位',
+        dataIndex: 'unit',
+        key: 'unit',
+        width: 70,
+      },
+      {
+        title: '数量',
+        dataIndex: 'quantity',
+        key: 'quantity',
+        width: 80,
+        align: 'right' as const,
+      },
+      {
+        title: '标时/s',
+        dataIndex: 'standard_seconds',
+        key: 'standard_seconds',
+        width: 90,
+        align: 'right' as const,
+      },
+      {
+        title: '时间(小时)',
+        dataIndex: 'work_hours',
+        key: 'work_hours',
+        width: 110,
+        align: 'right' as const,
+        render: (value: number) =>
+          value !== null && value !== undefined ? Number(value).toFixed(2) : '0.00',
+      },
+      {
+        title: '备注',
+        dataIndex: 'remark',
+        key: 'remark',
+        width: 160,
+        render: (value: string | null) => value || '-',
+      },
+      {
+        title: '创建时间',
+        dataIndex: 'created_at',
+        key: 'created_at',
+        width: 160,
+        render: (value: string) =>
+          value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-',
+      },
+    ],
+    [page, pageSize],
+  )
+
+  const rowSelection = useMemo(
+    () => ({
+      selectedRowKeys,
+      onChange: (keys: React.Key[]) => onSelect(keys),
+    }),
+    [onSelect, selectedRowKeys],
+  )
+
+  return (
+    <Table<PackagingWorkOrder>
+      rowKey="id"
+      loading={loading}
+      columns={columns}
+      dataSource={data}
+      rowSelection={rowSelection}
+      pagination={false}
+      scroll={{ x: 1600, y: scrollY }}
+      size="small"
+      rowClassName={(_, index) =>
+        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
+      }
+      onRow={(record) => ({
+        onClick: () => onSelect([record.id]),
+        style: { cursor: 'pointer', height: rowHeight },
+      })}
+    />
+  )
+}
+
+export default memo(WorkOrderTable)

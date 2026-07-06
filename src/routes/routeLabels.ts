@@ -51,6 +51,7 @@ const routeToLabelMap: Record<string, string> = {
   'extrusion-production-daily-report': '挤压生产日报表',
   'packaging-process-employee-list': '包装工序 / 员工管理',
   'packaging-process-standard-time-list': '包装工序 / 标准工时',
+  'packaging-process-work-order-list': '包装工序 / 生产工单',
   'access-denied': '无权限',
 }
 

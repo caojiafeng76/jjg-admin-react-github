@@ -17,6 +17,7 @@ import {
   AccessManagement,
   PackagingEmployeeList,
   PackagingStandardTimeList,
+  PackagingWorkOrderList,
   VillaLiftOrderList,
   VillaLiftCuttingProcess,
   VillaLiftFinishingProcess,
@@ -676,6 +677,17 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:packaging-process-standard-time-list"
               element={<PackagingStandardTimeList />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'packaging-process-work-order-list',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:packaging-process-work-order-list"
+              element={<PackagingWorkOrderList />}
             />
           </Suspense>
         ),

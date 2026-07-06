@@ -268,6 +268,11 @@ const allMenuItems: MenuItemDef[] = [
         label: '标准工时',
         permission: 'page:packaging-process-standard-time-list',
       },
+      {
+        key: 'packaging-process-work-order-list',
+        label: '生产工单',
+        permission: 'page:packaging-process-work-order-list',
+      },
     ],
   },
   {
