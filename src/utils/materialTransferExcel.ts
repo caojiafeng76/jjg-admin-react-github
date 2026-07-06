@@ -1,6 +1,9 @@
 import * as XLSX from 'xlsx-js-style'
 
-import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
+import type {
+  MaterialTransferOrderProgress,
+  MaterialTransferWithEmployee,
+} from '@/services/apiMaterialTransfers'
 import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
@@ -25,10 +28,12 @@ const EXPORT_HEADERS = [
   '审核状态',
   '审核时间',
   '备注',
+  '订单进度',
+  '订单状态',
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  20, 14, 18, 9, 10, 28, 10, 14, 10, 8, 12, 8, 9, 10, 18, 16,
+  20, 14, 18, 9, 10, 28, 10, 14, 10, 8, 12, 8, 9, 10, 18, 16, 12, 10,
 ]
 const TRANSFER_QUANTITY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('转移数量')
 const TRANSFER_QUANTITY_TOTAL_LABEL_COLUMN_INDEX =
@@ -42,31 +47,58 @@ function formatDateTime(value: string | null | undefined) {
   return new Date(value).toLocaleString('zh-CN')
 }
 
+function formatOrderProgressCell(
+  progress: MaterialTransferOrderProgress | undefined,
+): string {
+  if (!progress || progress.completionRate == null) {
+    return ''
+  }
+  return `${progress.completionRate.toFixed(1)}%`
+}
+
+function formatOrderStatusCell(
+  progress: MaterialTransferOrderProgress | undefined,
+): string {
+  if (!progress || progress.orderQuantity == null) {
+    return ''
+  }
+  return progress.isCompleted ? '完工' : '未完工'
+}
+
 export function exportMaterialTransfersToExcel(
   records: MaterialTransferWithEmployee[],
+  orderProgressMap: Map<string, MaterialTransferOrderProgress> = new Map(),
 ) {
   const transferQuantityTotal = records.reduce(
     (sum, record) => sum + Number(record.transfer_quantity || 0),
     0,
   )
-  const rows = records.map((record) => [
-    formatDateTime(record.created_at),
-    record.project_no,
-    record.customer || '',
-    record.product_model || '',
-    record.length_mm ?? '',
-    record.customer_model || '',
-    record.transfer_quantity,
-    record.operator_names.join('、'),
-    record.target_workshop,
-    record.recipient_name,
-    record.shift_leader_name || '',
-    record.inspector_name || '',
-    record.uploaded_by_name || '',
-    record.is_audited ? '已审核' : '待审核',
-    formatDateTime(record.audited_at),
-    record.remark || '',
-  ])
+  const rows = records.map((record) => {
+    const projectKey = record.project_no?.trim()
+    const progress = projectKey
+      ? orderProgressMap.get(projectKey)
+      : undefined
+    return [
+      formatDateTime(record.created_at),
+      record.project_no,
+      record.customer || '',
+      record.product_model || '',
+      record.length_mm ?? '',
+      record.customer_model || '',
+      record.transfer_quantity,
+      record.operator_names.join('、'),
+      record.target_workshop,
+      record.recipient_name,
+      record.shift_leader_name || '',
+      record.inspector_name || '',
+      record.uploaded_by_name || '',
+      record.is_audited ? '已审核' : '待审核',
+      formatDateTime(record.audited_at),
+      record.remark || '',
+      formatOrderProgressCell(progress),
+      formatOrderStatusCell(progress),
+    ]
+  })
   const totalRow = EXPORT_HEADERS.map(() => '') as Array<string | number>
   totalRow[TRANSFER_QUANTITY_TOTAL_LABEL_COLUMN_INDEX] = '合计'
   totalRow[TRANSFER_QUANTITY_COLUMN_INDEX] = transferQuantityTotal
