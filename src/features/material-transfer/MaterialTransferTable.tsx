@@ -1,7 +1,11 @@
 import { memo, useCallback, useMemo } from 'react'
 import { Table, type TableColumnsType, type TableProps } from 'antd'
 
-import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
+import type {
+  MaterialTransferOrderProgress,
+  MaterialTransferWithEmployee,
+} from '@/services/apiMaterialTransfers'
+import { OrderProgressCell, OrderStatusCell } from './OrderProgressCell'
 
 interface Props {
   loading: boolean
@@ -14,6 +18,7 @@ interface Props {
   rowHeight?: number
   activeRowId?: string | null
   onRowClick?: (record: MaterialTransferWithEmployee) => void
+  orderProgressMap: Map<string, MaterialTransferOrderProgress>
 }
 
 function MaterialTransferTable({
@@ -27,6 +32,7 @@ function MaterialTransferTable({
   rowHeight = 40,
   activeRowId,
   onRowClick,
+  orderProgressMap,
 }: Props) {
   const currentPageTransferQuantity = useMemo(
     () =>
@@ -109,6 +115,30 @@ function MaterialTransferTable({
         defaultSortOrder: 'ascend',
       },
       {
+        title: '订单进度',
+        key: 'order_progress',
+        width: 130,
+        render: (_text, record) => {
+          const projectNo = record.project_no?.trim()
+          const progress = projectNo
+            ? orderProgressMap.get(projectNo)
+            : undefined
+          return <OrderProgressCell progress={progress} />
+        },
+      },
+      {
+        title: '订单状态',
+        key: 'order_status',
+        width: 100,
+        render: (_text, record) => {
+          const projectNo = record.project_no?.trim()
+          const progress = projectNo
+            ? orderProgressMap.get(projectNo)
+            : undefined
+          return <OrderStatusCell progress={progress} />
+        },
+      },
+      {
         title: '型号',
         dataIndex: 'product_model',
         key: 'product_model',
@@ -178,7 +208,7 @@ function MaterialTransferTable({
           ),
       },
     ],
-    [page, pageSize, data],
+    [page, pageSize, data, orderProgressMap],
   )
 
   const rowSelection: TableProps<MaterialTransferWithEmployee>['rowSelection'] =
@@ -209,7 +239,7 @@ function MaterialTransferTable({
       dataSource={data}
       rowSelection={rowSelection}
       onRow={handleRow}
-      scroll={{ x: 1120, y: scrollY }}
+      scroll={{ x: 1500, y: scrollY }}
       size="small"
       pagination={false}
       style={{ fontSize: '13px' }}
@@ -218,15 +248,15 @@ function MaterialTransferTable({
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50">
             <Table.Summary.Cell index={0} />
-            <Table.Summary.Cell index={1} colSpan={7}>
+            <Table.Summary.Cell index={1} colSpan={9}>
               <span className="font-medium text-slate-600">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={8}>
+            <Table.Summary.Cell index={10}>
               <span className="font-bold text-slate-900 tabular-nums">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={9} colSpan={2} />
+            <Table.Summary.Cell index={11} colSpan={2} />
           </Table.Summary.Row>
         </Table.Summary>
       )}

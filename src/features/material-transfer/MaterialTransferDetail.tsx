@@ -1,18 +1,24 @@
 import { Button, Descriptions } from 'antd'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
 
-import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
+import type {
+  MaterialTransferOrderProgress,
+  MaterialTransferWithEmployee,
+} from '@/services/apiMaterialTransfers'
+import { OrderProgressCell, OrderStatusCell } from './OrderProgressCell'
 
 interface Props {
   selectedRecord: MaterialTransferWithEmployee | null
   onEdit?: (record: MaterialTransferWithEmployee) => void
   editDisabled?: boolean
+  orderProgressMap: Map<string, MaterialTransferOrderProgress>
 }
 
 export default function MaterialTransferDetail({
   selectedRecord,
   onEdit,
   editDisabled = false,
+  orderProgressMap,
 }: Props) {
   if (!selectedRecord) {
     return (
@@ -52,6 +58,11 @@ export default function MaterialTransferDetail({
     audited_at,
     remark,
   } = selectedRecord
+
+  const projectKey = project_no?.trim()
+  const progress = projectKey
+    ? orderProgressMap.get(projectKey)
+    : undefined
 
   return (
     <div className="h-full overflow-auto p-4">
@@ -109,6 +120,21 @@ export default function MaterialTransferDetail({
               编辑
             </Button>
           )}
+        </div>
+        <div className="grid grid-cols-1 gap-4 border-b border-slate-100 bg-slate-50/40 p-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-slate-500">订单进度</span>
+            <OrderProgressCell progress={progress} />
+            {progress && progress.orderQuantity != null && (
+              <span className="text-xs text-slate-400">
+                转移 {progress.transferTotal} / 订单 {progress.orderQuantity}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-slate-500">订单状态</span>
+            <OrderStatusCell progress={progress} />
+          </div>
         </div>
         <Descriptions
           size="small"

@@ -709,3 +709,112 @@ export async function getTransferStatsByProjectNo(
 
   return { byWorkshop, totalOutbound, totalInWarehouse, totalTransferred }
 }
+
+/**
+ * 按项目号集合批量查询订单数量（sales_orders.order_quantity）。
+ * 仅取项目号维度，不含 precision_cutting_transfers 等其他口径。
+ */
+export async function getOrderQuantitiesByProjectNos(
+  projectNos: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>()
+  if (projectNos.length === 0) return map
+
+  const { data, error } = await supabase
+    .from('sales_orders')
+    .select('project_no, order_quantity')
+    .in('project_no', projectNos)
+
+  if (error) {
+    throw handleApiError(error, '获取订单数量失败')
+  }
+
+  for (const row of data || []) {
+    if (!row.project_no) continue
+    const key = row.project_no.trim()
+    if (!key) continue
+    map.set(key, Number(row.order_quantity ?? 0))
+  }
+
+  return map
+}
+
+/**
+ * 按项目号集合批量聚合 material_transfers.transfer_quantity 总和。
+ * 与 getTransferStatsByProjectNo(单号版) 互补，本函数一次查一组。
+ */
+export async function getTransferTotalByProjectNos(
+  projectNos: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>()
+  if (projectNos.length === 0) return map
+
+  const { data, error } = await supabase
+    .from('material_transfers')
+    .select('project_no, transfer_quantity')
+    .in('project_no', projectNos)
+
+  if (error) {
+    throw handleApiError(error, '获取转移数量聚合失败')
+  }
+
+  for (const row of data || []) {
+    if (!row.project_no) continue
+    const key = row.project_no.trim()
+    if (!key) continue
+    map.set(key, (map.get(key) ?? 0) + Number(row.transfer_quantity || 0))
+  }
+
+  return map
+}
+
+export interface MaterialTransferOrderProgress {
+  transferTotal: number
+  orderQuantity: number | null
+  completionRate: number | null
+  isCompleted: boolean
+}
+
+export function computeOrderProgress(
+  transferTotal: number,
+  orderQuantity: number | null,
+): MaterialTransferOrderProgress {
+  if (!orderQuantity || orderQuantity <= 0) {
+    return {
+      transferTotal,
+      orderQuantity: orderQuantity ?? null,
+      completionRate: null,
+      isCompleted: false,
+    }
+  }
+  const completionRate = (transferTotal / orderQuantity) * 100
+  return {
+    transferTotal,
+    orderQuantity,
+    completionRate,
+    isCompleted: completionRate >= 100,
+  }
+}
+
+export function buildOrderProgressMap(
+  orderQuantityMap: Map<string, number>,
+  transferTotalMap: Map<string, number>,
+): Map<string, MaterialTransferOrderProgress> {
+  const result = new Map<string, MaterialTransferOrderProgress>()
+  const keys = new Set<string>([
+    ...orderQuantityMap.keys(),
+    ...transferTotalMap.keys(),
+  ])
+  for (const key of keys) {
+    const orderQuantity = orderQuantityMap.get(key)
+    const transferTotal = transferTotalMap.get(key) ?? 0
+    result.set(
+      key,
+      computeOrderProgress(
+        transferTotal,
+        orderQuantity === undefined ? null : orderQuantity,
+      ),
+    )
+  }
+  return result
+}

@@ -15,6 +15,9 @@ import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useAuth } from '@/contexts/useAuth'
 import {
   getMaterialTransfersForExport,
+  getOrderQuantitiesByProjectNos,
+  getTransferTotalByProjectNos,
+  buildOrderProgressMap,
   type MaterialTransferFilters,
   type MaterialTransferInsert,
   type MaterialTransferUpdate,
@@ -27,6 +30,7 @@ import {
   useBatchUpdateMaterialTransfers,
   useDeleteMaterialTransfers,
   useMaterialTransfers,
+  useOrderProgressByProjectNos,
   useUpdateMaterialTransfer,
   useMaterialTransferLengths,
 } from './useMaterialTransfers'
@@ -35,6 +39,19 @@ import MaterialTransferForm from './MaterialTransferForm'
 import MaterialTransferMobileList from './MaterialTransferMobileList'
 import MaterialTransferSearch from './MaterialTransferSearch'
 import MaterialTransferTable from './MaterialTransferTable'
+
+function collectProjectNos(
+  records: Array<{ project_no: string | null | undefined }>,
+): string[] {
+  const set = new Set<string>()
+  for (const record of records) {
+    const raw = record.project_no
+    if (!raw) continue
+    const trimmed = raw.trim()
+    if (trimmed) set.add(trimmed)
+  }
+  return Array.from(set)
+}
 
 export default function MaterialTransferPage() {
   const { message, modal } = App.useApp()
@@ -89,6 +106,11 @@ export default function MaterialTransferPage() {
 
   const selectedCount = selectedRowKeys.length
   const records = useMemo(() => data?.items || [], [data?.items])
+  const currentPageProjectNos = useMemo(
+    () => collectProjectNos(records),
+    [records],
+  )
+  const orderProgressMap = useOrderProgressByProjectNos(currentPageProjectNos)
   const selectedSummary = useMemo(() => {
     if (selectedRowKeys.length === 0) {
       return { quantity: 0, matched: 0 }
@@ -228,7 +250,17 @@ export default function MaterialTransferPage() {
         return
       }
 
-      exportMaterialTransfersToExcel(exportRows)
+      const exportProjectNos = collectProjectNos(exportRows)
+      const [orderQtyMap, transferTotalMap] = await Promise.all([
+        getOrderQuantitiesByProjectNos(exportProjectNos),
+        getTransferTotalByProjectNos(exportProjectNos),
+      ])
+      const exportProgressMap = buildOrderProgressMap(
+        orderQtyMap,
+        transferTotalMap,
+      )
+
+      exportMaterialTransfersToExcel(exportRows, exportProgressMap)
       message.success(`已导出 ${exportRows.length} 条物料转移单`)
       setSelectedRowKeys([])
     } catch (error) {
@@ -511,6 +543,7 @@ export default function MaterialTransferPage() {
                   scrollY={scrollY}
                   activeRowId={activeRecord?.id ?? null}
                   onRowClick={setActiveRecord}
+                  orderProgressMap={orderProgressMap}
                 />
               </div>
               <div ref={paginationRef} className="flex shrink-0 justify-end">
@@ -524,6 +557,7 @@ export default function MaterialTransferPage() {
                 selectedRecord={activeRecord}
                 onEdit={openEditModal}
                 editDisabled={viewerDenied}
+                orderProgressMap={orderProgressMap}
               />
             </div>
           </Splitter.Panel>

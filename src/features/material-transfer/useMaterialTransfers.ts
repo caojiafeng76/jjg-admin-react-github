@@ -2,16 +2,20 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
   batchUpdateMaterialTransfers,
+  buildOrderProgressMap,
   getMaterialTransferQuantityStats,
   getMaterialTransfers,
   getMaterialTransferById,
   getMaterialTransferProjectNos,
   getMaterialTransferModels,
   getMaterialTransferLengths,
+  getOrderQuantitiesByProjectNos,
+  getTransferTotalByProjectNos,
   createMaterialTransfer,
   updateMaterialTransfer,
   deleteMaterialTransfers,
   type MaterialTransferFilters,
+  type MaterialTransferOrderProgress,
 } from '@/services/apiMaterialTransfers'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
@@ -64,6 +68,25 @@ export function useMaterialTransferQuantityStats({
     enabled,
     ...queryConfig.list,
   })
+}
+
+export function useOrderProgressByProjectNos(
+  projectNos: string[],
+): Map<string, MaterialTransferOrderProgress> {
+  const sortedKey = [...projectNos].sort().join('|')
+  const { data } = useQuery({
+    queryKey: [MATERIAL_TRANSFERS_KEY, 'order-progress', sortedKey],
+    queryFn: async () => {
+      const [orderQtyMap, transferTotalMap] = await Promise.all([
+        getOrderQuantitiesByProjectNos(projectNos),
+        getTransferTotalByProjectNos(projectNos),
+      ])
+      return buildOrderProgressMap(orderQtyMap, transferTotalMap)
+    },
+    enabled: projectNos.length > 0,
+    ...queryConfig.list,
+  })
+  return data ?? new Map<string, MaterialTransferOrderProgress>()
 }
 
 export function useMaterialTransferProjectNos() {
