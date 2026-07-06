@@ -73,4 +73,43 @@ export const PACKAGING_PROCESS_PERMISSIONS: PermissionDefinition[] = [
     surface: 'pc',
     label: '包装工序标准工时-删除',
   },
+
+  // 页面 - 生产工单
+  {
+    key: 'page:packaging-process-work-order-list',
+    scope: 'page',
+    module: 'packaging-process',
+    surface: 'pc',
+    label: '包装工序-生产工单',
+  },
+
+  // 操作 - 生产工单
+  {
+    key: 'feature:packaging-process-work-order-list.create',
+    scope: 'feature',
+    module: 'packaging-process',
+    surface: 'pc',
+    label: '包装工序生产工单-新建',
+  },
+  {
+    key: 'feature:packaging-process-work-order-list.edit',
+    scope: 'feature',
+    module: 'packaging-process',
+    surface: 'pc',
+    label: '包装工序生产工单-编辑',
+  },
+  {
+    key: 'feature:packaging-process-work-order-list.delete',
+    scope: 'feature',
+    module: 'packaging-process',
+    surface: 'pc',
+    label: '包装工序生产工单-删除',
+  },
+  {
+    key: 'feature:packaging-process-work-order-list.export',
+    scope: 'feature',
+    module: 'packaging-process',
+    surface: 'pc',
+    label: '包装工序生产工单-导出',
+  },
 ]

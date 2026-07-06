@@ -176,3 +176,7 @@ export const PackagingEmployeeList = lazy(
 export const PackagingStandardTimeList = lazy(
   () => import('@features/packaging-process/StandardTimeList'),
 )
+
+export const PackagingWorkOrderList = lazy(
+  () => import('@features/packaging-process/WorkOrderList'),
+)
