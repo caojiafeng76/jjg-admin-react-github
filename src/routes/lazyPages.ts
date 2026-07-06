@@ -168,3 +168,11 @@ export const VillaLiftCuttingProcess = lazy(
 export const VillaLiftFinishingProcess = lazy(
   () => import('@features/villa-lift/FinishingProcess'),
 )
+
+export const PackagingEmployeeList = lazy(
+  () => import('@features/packaging-process/EmployeeList'),
+)
+
+export const PackagingStandardTimeList = lazy(
+  () => import('@features/packaging-process/StandardTimeList'),
+)

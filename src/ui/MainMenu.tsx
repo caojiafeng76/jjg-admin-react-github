@@ -253,6 +253,24 @@ const allMenuItems: MenuItemDef[] = [
     ],
   },
   {
+    key: 'packaging-process',
+    label: '包装工序',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:packaging-process',
+    children: [
+      {
+        key: 'packaging-process-employee-list',
+        label: '员工管理',
+        permission: 'page:packaging-process-employee-list',
+      },
+      {
+        key: 'packaging-process-standard-time-list',
+        label: '标准工时',
+        permission: 'page:packaging-process-standard-time-list',
+      },
+    ],
+  },
+  {
     key: 'extrusion-production',
     label: '挤压生产',
     icon: <Square3Stack3DIcon className="size-4" />,
