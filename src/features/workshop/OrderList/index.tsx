@@ -106,7 +106,16 @@ const TAB_TO_STATUS: Record<WorkshopOrderTabKey, WorkshopOrderStatus> = {
 
 export default function WorkshopOrderList() {
   const { message, modal } = App.useApp()
-  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: [
+      'feature:workshop-order.create',
+      'feature:workshop-order.edit',
+      'feature:workshop-order.delete',
+      'feature:workshop-order.manage-status',
+    ],
+  })
+  const canCreate = usePermission('feature:workshop-order.create')
+  const canEdit = usePermission('feature:workshop-order.edit')
   const canDelete = usePermission('feature:workshop-order.delete')
   const canManageStatus = usePermission('feature:workshop-order.manage-status')
 
@@ -746,8 +755,10 @@ export default function WorkshopOrderList() {
         <div className="flex flex-wrap items-center gap-3">
           {/* 核心操作按钮组 */}
           <div className="flex items-center gap-2">
-            <AddButton handleCreate={handleCreate} />
-            <EditButton title="编辑" handleEdit={handleEdit} />
+            {canCreate ? <AddButton handleCreate={handleCreate} /> : null}
+            {canEdit ? (
+              <EditButton title="编辑" handleEdit={handleEdit} />
+            ) : null}
           </div>
 
           {/* 分隔线 */}

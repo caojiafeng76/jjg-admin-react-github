@@ -35,6 +35,22 @@ export const WORKSHOP_PERMISSIONS: PermissionDefinition[] = [
 
   // 订单管理 feature 权限
   {
+    key: 'feature:workshop-order.create',
+    scope: 'feature',
+    module: 'workshop-order-list',
+    surface: 'pc',
+    label: '订单管理-新建',
+    description: '控制订单列表中"添加"按钮与新建订单入口',
+  },
+  {
+    key: 'feature:workshop-order.edit',
+    scope: 'feature',
+    module: 'workshop-order-list',
+    surface: 'pc',
+    label: '订单管理-编辑',
+    description: '控制订单列表中"编辑"按钮与编辑订单入口',
+  },
+  {
     key: 'feature:workshop-order.delete',
     scope: 'feature',
     module: 'workshop-order-list',
