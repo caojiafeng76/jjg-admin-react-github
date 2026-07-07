@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { Form, type FormInstance, Input, InputNumber } from 'antd'
 
-import type {
-  PackagingEmployee,
-  PackagingEmployeeFormValues,
+import {
+  DEFAULT_PACKAGING_EMPLOYEE_HOURLY_WAGE,
+  type PackagingEmployee,
+  type PackagingEmployeeFormValues,
 } from '@/services/apiPackagingEmployees'
 
 interface Props {
@@ -17,6 +18,7 @@ const DEFAULT_VALUES: PackagingEmployeeFormValues = {
   username: '',
   name: '',
   position_salary: null,
+  hourly_wage: DEFAULT_PACKAGING_EMPLOYEE_HOURLY_WAGE,
   remark: null,
 }
 
@@ -39,6 +41,8 @@ export default function EmployeeForm({
         username: initialValues.username,
         name: initialValues.name,
         position_salary: initialValues.position_salary,
+        hourly_wage:
+          initialValues.hourly_wage ?? DEFAULT_PACKAGING_EMPLOYEE_HOURLY_WAGE,
         remark: initialValues.remark,
       })
       return
@@ -78,11 +82,24 @@ export default function EmployeeForm({
       </Form.Item>
 
       <Form.Item
+        name="hourly_wage"
+        label="时薪"
+        rules={[{ type: 'number', message: '请输入有效的数字' }]}
+      >
+        <InputNumber
+          min={0}
+          step={0.01}
+          precision={2}
+          suffix="元/小时"
+          style={{ width: '100%' }}
+          placeholder="请输入时薪"
+        />
+      </Form.Item>
+
+      <Form.Item
         name="position_salary"
         label="岗位工资"
-        rules={[
-          { type: 'number', message: '请输入有效的数字' },
-        ]}
+        rules={[{ type: 'number', message: '请输入有效的数字' }]}
       >
         <InputNumber
           min={0}
