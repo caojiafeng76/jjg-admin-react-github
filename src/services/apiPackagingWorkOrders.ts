@@ -24,7 +24,8 @@ export interface PackagingWorkOrder {
 
 export interface PackagingWorkOrderFormValues {
   work_date: string
-  employee_id: string | null
+  employee_id?: string | null
+  employee_ids?: string[]
   project_no: string | null
   product_model: string
   color_name: string | null
@@ -71,12 +72,24 @@ function normalizeUnit(value: string | null | undefined) {
   return PACKAGING_WORK_ORDER_UNITS.has(normalized) ? normalized : '支'
 }
 
+function normalizeEmployeeIds(values: PackagingWorkOrderFormValues) {
+  const ids = values.employee_ids?.filter(Boolean) ?? []
+  if (ids.length > 0) return Array.from(new Set(ids))
+  return values.employee_id ? [values.employee_id] : []
+}
+
+function roundToOneDecimal(value: number) {
+  return Math.round(value * 10) / 10
+}
+
 export function buildPackagingWorkOrderPayload(
   values: PackagingWorkOrderFormValues,
 ): PackagingWorkOrderFormValues {
+  const employeeIds = normalizeEmployeeIds(values)
+
   return {
     work_date: String(values.work_date ?? '').trim(),
-    employee_id: values.employee_id || null,
+    employee_id: employeeIds[0] || null,
     project_no: normalizeText(values.project_no) || null,
     product_model: String(values.product_model ?? '').trim(),
     color_name: normalizeText(values.color_name),
@@ -89,6 +102,25 @@ export function buildPackagingWorkOrderPayload(
     extra_qualified_hours: normalizeNumber(values.extra_qualified_hours),
     remark: normalizeText(values.remark),
   }
+}
+
+export function buildPackagingWorkOrderCreatePayloads(
+  values: PackagingWorkOrderFormValues,
+): PackagingWorkOrderFormValues[] {
+  const employeeIds = normalizeEmployeeIds(values)
+  const basePayload = buildPackagingWorkOrderPayload(values)
+
+  if (employeeIds.length === 0) {
+    return [basePayload]
+  }
+
+  const splitQuantity = roundToOneDecimal(basePayload.quantity / employeeIds.length)
+
+  return employeeIds.map((employeeId) => ({
+    ...basePayload,
+    employee_id: employeeId,
+    quantity: splitQuantity,
+  }))
 }
 
 export async function getPackagingWorkOrderList({
@@ -155,7 +187,7 @@ export async function getPackagingWorkOrderList({
 export async function createPackagingWorkOrder(
   values: PackagingWorkOrderFormValues,
 ) {
-  const payload = buildPackagingWorkOrderPayload(values)
+  const payload = buildPackagingWorkOrderCreatePayloads(values)
 
   const { error } = await packagingWorkOrderTable().insert(payload)
 

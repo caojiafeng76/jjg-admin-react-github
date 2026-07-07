@@ -19,6 +19,7 @@ interface Props {
 interface WorkOrderFormValues {
   work_date: dayjs.Dayjs
   employee_id: string | null
+  employee_ids: string[]
   project_no: string | null
   product_model: string
   color_name: string | null
@@ -40,6 +41,7 @@ const UNIT_OPTIONS = [
 const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
   work_date: dayjs(),
   employee_id: null,
+  employee_ids: [],
   project_no: null,
   product_model: '',
   color_name: null,
@@ -112,6 +114,7 @@ export default function WorkOrderForm({
         ...DEFAULT_FORM_VALUES,
         work_date: workDate,
         employee_id: initialValues.employee_id,
+        employee_ids: initialValues.employee_id ? [initialValues.employee_id] : [],
         project_no: initialValues.project_no,
         product_model: initialValues.product_model,
         color_name: initialValues.color_name,
@@ -169,17 +172,24 @@ export default function WorkOrderForm({
 
   const quantity = Form.useWatch('quantity', form) || 0
   const standardSeconds = Form.useWatch('standard_seconds', form) || 0
-  const workHours = useMemo(() => {
+  const employeeIds = Form.useWatch('employee_ids', form) || []
+  const employeeCount = employeeIds.length || 1
+  const averageQuantity = useMemo(() => {
     const q = Number(quantity) || 0
+    return (Math.round((q / employeeCount) * 10) / 10).toFixed(1)
+  }, [employeeCount, quantity])
+  const workHours = useMemo(() => {
+    const q = Number(averageQuantity) || 0
     const s = Number(standardSeconds) || 0
     return ((q * s) / 3600).toFixed(2)
-  }, [quantity, standardSeconds])
+  }, [averageQuantity, standardSeconds])
 
   const handleFinish = useCallback(
     (values: WorkOrderFormValues) => {
       const formValues: PackagingWorkOrderFormValues = {
         work_date: values.work_date.format('YYYY-MM-DD'),
-        employee_id: values.employee_id,
+        employee_id: values.employee_ids[0] || values.employee_id || null,
+        employee_ids: values.employee_ids,
         project_no: values.project_no,
         product_model: values.product_model,
         color_name: values.color_name,
@@ -205,9 +215,11 @@ export default function WorkOrderForm({
           <DatePicker className="w-full" />
         </Form.Item>
 
-        <Form.Item name="employee_id" label="人员" rules={[{ required: true, message: '请选择人员' }]}>
+        <Form.Item name="employee_ids" label="人员" rules={[{ required: true, message: '请选择人员' }]}>
           <Select
             allowClear
+            mode="multiple"
+            maxCount={initialValues ? 1 : undefined}
             showSearch={{ optionFilterProp: 'label' }}
             placeholder="请选择人员"
             options={employeeSelectOptions}
@@ -258,8 +270,12 @@ export default function WorkOrderForm({
           <Select placeholder="请选择单位" options={UNIT_OPTIONS} />
         </Form.Item>
 
-        <Form.Item name="quantity" label="数量" rules={[{ required: true, message: '请输入数量' }]}>
+        <Form.Item name="quantity" label="总数量" rules={[{ required: true, message: '请输入数量' }]}>
           <InputNumber min={0} step={1} className="w-full" placeholder="请输入数量" />
+        </Form.Item>
+
+        <Form.Item label="人均产量">
+          <Input disabled value={averageQuantity} />
         </Form.Item>
 
         <Form.Item name="standard_seconds" label="标准工时（秒）" rules={[{ required: true, message: '请输入标准工时' }]}>
@@ -276,7 +292,7 @@ export default function WorkOrderForm({
           />
         </Form.Item>
 
-        <Form.Item label="时间（小时）">
+        <Form.Item label="人均时间（小时）">
           <Input disabled value={workHours} />
         </Form.Item>
         </FormSection>
