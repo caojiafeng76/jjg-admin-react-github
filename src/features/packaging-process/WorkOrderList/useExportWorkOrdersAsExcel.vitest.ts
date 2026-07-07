@@ -23,7 +23,7 @@ describe('buildWorkbook', () => {
         weight_per_meter_kg: 1.2,
         unit: '支',
         quantity: 10,
-        defective_quantity: 1,
+        defective_quantity: 1.4,
         defective_weight_kg: 0,
         defect_reason: null,
         standard_seconds: 360,
