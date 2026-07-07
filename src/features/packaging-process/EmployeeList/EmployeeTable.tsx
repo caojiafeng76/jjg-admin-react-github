@@ -54,6 +54,14 @@ function EmployeeTable({
           value === null || value === undefined ? '-' : value,
       },
       {
+        title: '时薪',
+        dataIndex: 'hourly_wage',
+        key: 'hourly_wage',
+        width: 120,
+        render: (value: number | null) =>
+          value === null || value === undefined ? '-' : value,
+      },
+      {
         title: '备注',
         dataIndex: 'remark',
         key: 'remark',
@@ -88,7 +96,7 @@ function EmployeeTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 980, y: scrollY }}
+      scroll={{ x: 1100, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

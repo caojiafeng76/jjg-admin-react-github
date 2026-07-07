@@ -6,6 +6,7 @@ export interface PackagingEmployee {
   username: string
   name: string
   position_salary: number | null
+  hourly_wage: number
   remark: string | null
   created_at: string
   updated_at: string
@@ -15,8 +16,11 @@ export interface PackagingEmployeeFormValues {
   username: string
   name: string
   position_salary: number | null
+  hourly_wage?: number | null
   remark: string | null
 }
+
+export const DEFAULT_PACKAGING_EMPLOYEE_HOURLY_WAGE = 19
 
 type DynamicSupabaseTable = {
   from: (table: string) => any
@@ -37,18 +41,25 @@ function normalizeTextOrNull(value: string | null | undefined) {
   return trimmed || null
 }
 
-function normalizeNumber(value: number | null | undefined) {
+function normalizeNumber(
+  value: number | null | undefined,
+  fallback: number | null = null,
+) {
   const normalized = Number(value)
-  return Number.isFinite(normalized) ? normalized : null
+  return Number.isFinite(normalized) ? normalized : fallback
 }
 
-function normalizeFormValues(
+export function buildPackagingEmployeePayload(
   values: PackagingEmployeeFormValues,
 ): PackagingEmployeeFormValues {
   return {
     username: normalizeText(values.username),
     name: normalizeText(values.name),
     position_salary: normalizeNumber(values.position_salary),
+    hourly_wage: normalizeNumber(
+      values.hourly_wage,
+      DEFAULT_PACKAGING_EMPLOYEE_HOURLY_WAGE,
+    ),
     remark: normalizeTextOrNull(values.remark),
   }
 }
@@ -91,7 +102,7 @@ export async function getPackagingEmployeeList({
 export async function createPackagingEmployee(
   values: PackagingEmployeeFormValues,
 ) {
-  const payload = normalizeFormValues(values)
+  const payload = buildPackagingEmployeePayload(values)
 
   const { error } = await packagingEmployeeTable().insert(payload)
 
@@ -107,7 +118,7 @@ export async function updatePackagingEmployee({
   id: string
   values: PackagingEmployeeFormValues
 }) {
-  const payload = normalizeFormValues(values)
+  const payload = buildPackagingEmployeePayload(values)
 
   const { error } = await packagingEmployeeTable().update(payload).eq('id', id)
 
