@@ -28,6 +28,7 @@ const DETAIL_HEADERS = [
   '工艺',
   '长度(mm)',
   '料号',
+  '米重(kg/m)',
   '单位',
   '数量',
   '标时/s',
@@ -36,15 +37,48 @@ const DETAIL_HEADERS = [
   '合计(小时)',
 ] as const
 
-const DETAIL_COLUMN_WIDTHS = [12, 10, 14, 16, 8, 8, 12, 12, 6, 8, 8, 10, 10, 10] as const
+const DETAIL_COLUMN_WIDTHS = [
+  12, 10, 14, 16, 8, 8, 12, 12, 10, 6, 8, 8, 10, 10,
+] as const
+
+const DAILY_REPORT_HEADERS = [
+  '日期',
+  '班组',
+  '型号',
+  '项目号',
+  '长度（MM)',
+  '包装数量',
+  '表面处理',
+  '米重',
+  '合格重量',
+  '不良数',
+  '不良重量',
+  '',
+  '电梯料',
+] as const
+
+const DAILY_REPORT_COLUMN_WIDTHS = [
+  10, 18, 14, 16, 12, 10, 18, 8, 12, 10, 12, 4, 10,
+] as const
 
 function formatDate(value: string | null | undefined) {
   return value ? dayjs(value).format('MM-DD') : ''
 }
 
+function formatDailyDate(value: string | null | undefined) {
+  if (!value) return ''
+  const date = dayjs(value)
+  return `${date.month() + 1}.${date.date()}`
+}
+
 function formatHours(value: number | null | undefined) {
   if (value === null || value === undefined) return '0.00'
   return Number(value).toFixed(2)
+}
+
+function roundTo(value: number, precision = 2) {
+  const factor = 10 ** precision
+  return Math.round(value * factor) / factor
 }
 
 function formatMoney(value: number | null | undefined) {
@@ -59,9 +93,29 @@ function formatCellText(value: string | number | null | undefined) {
 
 function getTotalHours(order: PackagingWorkOrder) {
   return (
-    (Number(order.work_hours) || 0) +
-    (Number(order.extra_qualified_hours) || 0)
+    (Number(order.work_hours) || 0) + (Number(order.extra_qualified_hours) || 0)
   )
+}
+
+function getSurfaceTreatment(order: PackagingWorkOrder) {
+  return order.process_name || order.color_name || ''
+}
+
+function getQualifiedWeight(order: PackagingWorkOrder) {
+  const quantity = Number(order.quantity) || 0
+  const lengthMm = Number(order.length_mm) || 0
+  const weightPerMeterKg = Number(order.weight_per_meter_kg) || 0
+  return (quantity * lengthMm * weightPerMeterKg) / 1000
+}
+
+function getDefectiveWeight(order: PackagingWorkOrder) {
+  const defectiveWeight = Number(order.defective_weight_kg)
+  if (Number.isFinite(defectiveWeight)) return defectiveWeight
+
+  const defectiveQuantity = Number(order.defective_quantity) || 0
+  const lengthMm = Number(order.length_mm) || 0
+  const weightPerMeterKg = Number(order.weight_per_meter_kg) || 0
+  return (defectiveQuantity * lengthMm * weightPerMeterKg) / 1000
 }
 
 function downloadExcel(buffer: ArrayBuffer, filename: string) {
@@ -92,6 +146,7 @@ function buildDetailSheet(orders: PackagingWorkOrder[]) {
     formatCellText(order.process_name),
     formatCellText(order.length_mm),
     formatCellText(order.part_no),
+    formatCellText(order.weight_per_meter_kg),
     formatCellText(order.unit),
     formatCellText(order.quantity),
     formatCellText(order.standard_seconds),
@@ -112,6 +167,105 @@ function buildDetailSheet(orders: PackagingWorkOrder[]) {
   ]
   applyRegisterSheetStyles(worksheet, data, {
     columnWidths: Array.from(DETAIL_COLUMN_WIDTHS),
+  })
+
+  return worksheet
+}
+
+function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
+  const grouped = new Map<
+    string,
+    {
+      workDate: string
+      employees: Set<string>
+      productModel: string
+      projectNo: string
+      lengthMm: number
+      surfaceTreatment: string
+      weightPerMeterKg: number
+      quantity: number
+      qualifiedWeight: number
+      defectiveQuantity: number
+      defectiveWeight: number
+    }
+  >()
+
+  for (const order of orders) {
+    const workDate = order.work_date || ''
+    const productModel = order.product_model || ''
+    const projectNo = order.project_no || ''
+    const lengthMm = Number(order.length_mm) || 0
+    const surfaceTreatment = getSurfaceTreatment(order)
+    const weightPerMeterKg = Number(order.weight_per_meter_kg) || 0
+    const key = [
+      workDate,
+      productModel,
+      projectNo,
+      lengthMm,
+      surfaceTreatment,
+      weightPerMeterKg,
+    ].join('|')
+
+    const current = grouped.get(key) || {
+      workDate,
+      employees: new Set<string>(),
+      productModel,
+      projectNo,
+      lengthMm,
+      surfaceTreatment,
+      weightPerMeterKg,
+      quantity: 0,
+      qualifiedWeight: 0,
+      defectiveQuantity: 0,
+      defectiveWeight: 0,
+    }
+
+    if (order.employee_name) {
+      current.employees.add(order.employee_name)
+    }
+    current.quantity += Number(order.quantity) || 0
+    current.qualifiedWeight += getQualifiedWeight(order)
+    current.defectiveQuantity += Number(order.defective_quantity) || 0
+    current.defectiveWeight += getDefectiveWeight(order)
+    grouped.set(key, current)
+  }
+
+  const rows = Array.from(grouped.values())
+    .sort((a, b) => {
+      const dateCompare = a.workDate.localeCompare(b.workDate)
+      if (dateCompare !== 0) return dateCompare
+      return a.projectNo.localeCompare(b.projectNo)
+    })
+    .map((row, index, rows) => [
+      index === 0 || row.workDate !== rows[index - 1].workDate
+        ? formatDailyDate(row.workDate)
+        : '',
+      Array.from(row.employees).join('、'),
+      row.productModel,
+      row.projectNo,
+      row.lengthMm || '',
+      roundTo(row.quantity, 1),
+      row.surfaceTreatment,
+      roundTo(row.weightPerMeterKg, 4),
+      roundTo(row.qualifiedWeight, 2),
+      row.defectiveQuantity ? roundTo(row.defectiveQuantity, 1) : '',
+      roundTo(row.defectiveWeight, 2),
+      '',
+      '',
+    ])
+
+  const data: Array<Array<string | number>> = [
+    ['包装车间生产日报表', ...DAILY_REPORT_HEADERS.slice(1).map(() => '')],
+    Array.from(DAILY_REPORT_HEADERS),
+    ...rows,
+  ]
+
+  const worksheet = XLSX.utils.aoa_to_sheet(data)
+  worksheet['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: DAILY_REPORT_HEADERS.length - 1 } },
+  ]
+  applyRegisterSheetStyles(worksheet, data, {
+    columnWidths: Array.from(DAILY_REPORT_COLUMN_WIDTHS),
   })
 
   return worksheet
@@ -217,9 +371,7 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
 
   const worksheet = XLSX.utils.aoa_to_sheet(data)
   const lastCol = header.length - 1
-  worksheet['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } },
-  ]
+  worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } }]
 
   applyRegisterSheetStyles(worksheet, data, {
     freezeYSplit: 2,
@@ -231,6 +383,11 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
 export function buildWorkbook(orders: PackagingWorkOrder[]) {
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, buildDetailSheet(orders), '产量清单')
+  XLSX.utils.book_append_sheet(
+    workbook,
+    buildDailyReportSheet(orders),
+    '生产日报表',
+  )
   XLSX.utils.book_append_sheet(workbook, buildPivotSheet(orders), '工时工资表')
 
   return XLSX.write(workbook, {
@@ -257,8 +414,10 @@ export function useExportWorkOrdersAsExcel() {
         const buffer = buildWorkbook(orders)
 
         const start = searchParams?.startDate || orders[0]?.work_date
-        const end = searchParams?.endDate || orders[orders.length - 1]?.work_date
-        const dateLabel = start && end ? `${start}_${end}` : dayjs().format('YYYY-MM-DD')
+        const end =
+          searchParams?.endDate || orders[orders.length - 1]?.work_date
+        const dateLabel =
+          start && end ? `${start}_${end}` : dayjs().format('YYYY-MM-DD')
 
         downloadExcel(buffer, `包装生产工单_${dateLabel}.xlsx`)
         message.success('生产工单 Excel 导出成功')

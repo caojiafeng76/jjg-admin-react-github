@@ -14,8 +14,11 @@ export interface PackagingWorkOrder {
   process_name: string | null
   length_mm: number | null
   part_no: string | null
+  weight_per_meter_kg: number
   unit: string
   quantity: number
+  defective_quantity: number
+  defective_weight_kg: number
   standard_seconds: number
   work_hours: number
   extra_qualified_hours: number
@@ -34,8 +37,10 @@ export interface PackagingWorkOrderFormValues {
   process_name: string | null
   length_mm: number | null
   part_no: string | null
+  weight_per_meter_kg?: number | null
   unit: string
   quantity: number
+  defective_quantity?: number | null
   standard_seconds: number
   extra_qualified_hours?: number
   remark: string | null
@@ -98,8 +103,10 @@ export function buildPackagingWorkOrderPayload(
     process_name: normalizeText(values.process_name),
     length_mm: values.length_mm ?? null,
     part_no: normalizeText(values.part_no),
+    weight_per_meter_kg: normalizeNumber(values.weight_per_meter_kg),
     unit: normalizeUnit(values.unit),
     quantity: normalizeNumber(values.quantity),
+    defective_quantity: normalizeNumber(values.defective_quantity),
     standard_seconds: normalizeNumber(values.standard_seconds),
     extra_qualified_hours: normalizeNumber(values.extra_qualified_hours),
     remark: normalizeText(values.remark),
@@ -116,12 +123,18 @@ export function buildPackagingWorkOrderCreatePayloads(
     return [basePayload]
   }
 
-  const splitQuantity = roundToOneDecimal(basePayload.quantity / employeeIds.length)
+  const splitQuantity = roundToOneDecimal(
+    basePayload.quantity / employeeIds.length,
+  )
+  const splitDefectiveQuantity = roundToOneDecimal(
+    normalizeNumber(basePayload.defective_quantity) / employeeIds.length,
+  )
 
   return employeeIds.map((employeeId) => ({
     ...basePayload,
     employee_id: employeeId,
     quantity: splitQuantity,
+    defective_quantity: splitDefectiveQuantity,
   }))
 }
 
@@ -181,8 +194,7 @@ export async function getPackagingWorkOrderList({
     ...item,
     employee_name: item.packaging_employees?.name || null,
     employee_hourly_wage: item.packaging_employees?.hourly_wage ?? null,
-    employee_position_salary:
-      item.packaging_employees?.position_salary ?? null,
+    employee_position_salary: item.packaging_employees?.position_salary ?? null,
   }))
 
   return {
@@ -212,9 +224,7 @@ export async function updatePackagingWorkOrder({
 }) {
   const payload = buildPackagingWorkOrderPayload(values)
 
-  const { error } = await packagingWorkOrderTable()
-    .update(payload)
-    .eq('id', id)
+  const { error } = await packagingWorkOrderTable().update(payload).eq('id', id)
 
   if (error) {
     throw handleApiError(error, '更新生产工单失败')
@@ -222,9 +232,7 @@ export async function updatePackagingWorkOrder({
 }
 
 export async function deletePackagingWorkOrder(ids: string[]) {
-  const { error } = await packagingWorkOrderTable()
-    .delete()
-    .in('id', ids)
+  const { error } = await packagingWorkOrderTable().delete().in('id', ids)
 
   if (error) {
     throw handleApiError(error, '删除生产工单失败')
@@ -235,7 +243,7 @@ export async function getSalesOrderByProjectNo(projectNo: string) {
   const { data, error } = await supabase
     .from('sales_orders')
     .select(
-      'project_no, product_model, color_name, length_mm, material_code',
+      'project_no, product_model, color_name, length_mm, material_code, weight_per_meter_kg',
     )
     .eq('project_no', projectNo)
     .single()
@@ -254,6 +262,7 @@ export async function getSalesOrderByProjectNo(projectNo: string) {
     color_name: string | null
     length_mm: number | null
     material_code: string | null
+    weight_per_meter_kg: number | null
   }
 }
 

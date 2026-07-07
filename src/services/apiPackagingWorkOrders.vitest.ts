@@ -39,8 +39,10 @@ describe('buildPackagingWorkOrderPayload', () => {
         process_name: null,
         length_mm: null,
         part_no: null,
+        weight_per_meter_kg: 1.2345,
         unit: '千克',
         quantity: 12,
+        defective_quantity: 2,
         standard_seconds: 30,
         extra_qualified_hours: 1.5,
         remark: null,
@@ -48,11 +50,13 @@ describe('buildPackagingWorkOrderPayload', () => {
     ).toMatchObject({
       project_no: '26070601-01',
       unit: '千克',
+      weight_per_meter_kg: 1.2345,
+      defective_quantity: 2,
       extra_qualified_hours: 1.5,
     })
   })
 
-  it('defaults invalid unit to 支 and missing extra qualified hours to 0', () => {
+  it('defaults invalid unit and missing numeric fields to 0', () => {
     expect(
       buildPackagingWorkOrderPayload({
         work_date: '2026-07-07',
@@ -70,6 +74,8 @@ describe('buildPackagingWorkOrderPayload', () => {
       }),
     ).toMatchObject({
       unit: '支',
+      weight_per_meter_kg: 0,
+      defective_quantity: 0,
       extra_qualified_hours: 0,
     })
   })
@@ -88,6 +94,7 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       part_no: null,
       unit: '支',
       quantity: 100,
+      defective_quantity: 9,
       standard_seconds: 30,
       remark: null,
     })
@@ -99,9 +106,10 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       'employee-3',
     ])
     expect(payloads.map((payload) => payload.quantity)).toEqual([
-      33.3,
-      33.3,
-      33.3,
+      33.3, 33.3, 33.3,
+    ])
+    expect(payloads.map((payload) => payload.defective_quantity)).toEqual([
+      3, 3, 3,
     ])
   })
 
@@ -117,6 +125,7 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       part_no: null,
       unit: '支',
       quantity: 100,
+      defective_quantity: 2,
       standard_seconds: 30,
       remark: null,
     })
@@ -125,6 +134,7 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
     expect(payloads[0]).toMatchObject({
       employee_id: 'employee-1',
       quantity: 100,
+      defective_quantity: 2,
     })
   })
 })

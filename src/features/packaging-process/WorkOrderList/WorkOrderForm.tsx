@@ -1,9 +1,29 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { App, DatePicker, Form, Input, InputNumber, Select, type FormInstance } from 'antd'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
+import {
+  App,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  type FormInstance,
+} from 'antd'
 import dayjs from 'dayjs'
 
-import type { PackagingWorkOrder, PackagingWorkOrderFormValues } from '@/services/apiPackagingWorkOrders'
-import { getSalesOrderByProjectNo, getStandardSecondsByPartNo } from '@/services/apiPackagingWorkOrders'
+import type {
+  PackagingWorkOrder,
+  PackagingWorkOrderFormValues,
+} from '@/services/apiPackagingWorkOrders'
+import {
+  getSalesOrderByProjectNo,
+  getStandardSecondsByPartNo,
+} from '@/services/apiPackagingWorkOrders'
 import {
   usePackagingSalesOrdersProjectNos,
   usePackagingEmployeeOptions,
@@ -26,8 +46,10 @@ interface WorkOrderFormValues {
   process_name: string | null
   length_mm: number | null
   part_no: string | null
+  weight_per_meter_kg: number
   unit: string
   quantity: number
+  defective_quantity: number
   standard_seconds: number
   extra_qualified_hours: number
   remark: string | null
@@ -48,8 +70,10 @@ const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
   process_name: null,
   length_mm: null,
   part_no: null,
+  weight_per_meter_kg: 0,
   unit: '支',
   quantity: 0,
+  defective_quantity: 0,
   standard_seconds: 0,
   extra_qualified_hours: 0,
   remark: null,
@@ -78,7 +102,9 @@ export default function WorkOrderForm({
 }: Props) {
   const [form] = Form.useForm<WorkOrderFormValues>()
   const { message } = App.useApp()
-  const [projectNoValue, setProjectNoValue] = useState<string | undefined>(undefined)
+  const [projectNoValue, setProjectNoValue] = useState<string | undefined>(
+    undefined,
+  )
 
   const { data: projectNoOptions = [] } = usePackagingSalesOrdersProjectNos()
   const { data: employeeOptions } = usePackagingEmployeeOptions()
@@ -96,11 +122,7 @@ export default function WorkOrderForm({
           </div>
         ),
         value: option.project_no,
-        searchText: [
-          option.project_no,
-          option.product_model,
-          option.length_mm,
-        ]
+        searchText: [option.project_no, option.product_model, option.length_mm]
           .filter((value) => value !== null && value !== undefined)
           .join(' ')
           .toLowerCase(),
@@ -123,21 +145,27 @@ export default function WorkOrderForm({
 
   useEffect(() => {
     if (initialValues) {
-      const workDate = initialValues.work_date ? dayjs(initialValues.work_date) : dayjs()
+      const workDate = initialValues.work_date
+        ? dayjs(initialValues.work_date)
+        : dayjs()
 
       form.setFieldsValue({
         ...DEFAULT_FORM_VALUES,
         work_date: workDate,
         employee_id: initialValues.employee_id,
-        employee_ids: initialValues.employee_id ? [initialValues.employee_id] : [],
+        employee_ids: initialValues.employee_id
+          ? [initialValues.employee_id]
+          : [],
         project_no: initialValues.project_no,
         product_model: initialValues.product_model,
         color_name: initialValues.color_name,
         process_name: initialValues.process_name,
         length_mm: initialValues.length_mm,
         part_no: initialValues.part_no,
+        weight_per_meter_kg: initialValues.weight_per_meter_kg ?? 0,
         unit: initialValues.unit || '支',
         quantity: initialValues.quantity,
+        defective_quantity: initialValues.defective_quantity ?? 0,
         standard_seconds: initialValues.standard_seconds,
         extra_qualified_hours: initialValues.extra_qualified_hours ?? 0,
         remark: initialValues.remark,
@@ -161,6 +189,7 @@ export default function WorkOrderForm({
           color_name: null,
           length_mm: null,
           part_no: null,
+          weight_per_meter_kg: 0,
           standard_seconds: 0,
         })
         return
@@ -179,6 +208,7 @@ export default function WorkOrderForm({
           color_name: orderInfo.color_name ?? null,
           length_mm: orderInfo.length_mm ?? null,
           part_no: orderInfo.material_code ?? null,
+          weight_per_meter_kg: orderInfo.weight_per_meter_kg ?? 0,
           standard_seconds: standardSeconds,
         })
       } catch {
@@ -189,6 +219,9 @@ export default function WorkOrderForm({
   )
 
   const quantity = Form.useWatch('quantity', form) || 0
+  const defectiveQuantity = Form.useWatch('defective_quantity', form) || 0
+  const lengthMm = Form.useWatch('length_mm', form) || 0
+  const weightPerMeterKg = Form.useWatch('weight_per_meter_kg', form) || 0
   const standardSeconds = Form.useWatch('standard_seconds', form) || 0
   const employeeIds = Form.useWatch('employee_ids', form) || []
   const employeeCount = employeeIds.length || 1
@@ -201,6 +234,12 @@ export default function WorkOrderForm({
     const s = Number(standardSeconds) || 0
     return ((q * s) / 3600).toFixed(2)
   }, [averageQuantity, standardSeconds])
+  const defectiveWeightKg = useMemo(() => {
+    const defectiveCount = Number(defectiveQuantity) || 0
+    const length = Number(lengthMm) || 0
+    const meterWeight = Number(weightPerMeterKg) || 0
+    return ((defectiveCount * length * meterWeight) / 1000).toFixed(2)
+  }, [defectiveQuantity, lengthMm, weightPerMeterKg])
 
   const handleFinish = useCallback(
     (values: WorkOrderFormValues) => {
@@ -214,8 +253,10 @@ export default function WorkOrderForm({
         process_name: values.process_name,
         length_mm: values.length_mm,
         part_no: values.part_no,
+        weight_per_meter_kg: values.weight_per_meter_kg,
         unit: values.unit,
         quantity: values.quantity,
+        defective_quantity: values.defective_quantity,
         standard_seconds: values.standard_seconds,
         extra_qualified_hours: values.extra_qualified_hours,
         remark: values.remark,
@@ -226,100 +267,168 @@ export default function WorkOrderForm({
   )
 
   return (
-    <Form form={form} layout="vertical" onFinish={handleFinish} disabled={isSubmitting}>
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleFinish}
+      disabled={isSubmitting}
+    >
       <div className="flex flex-col gap-4">
         <FormSection title="基础信息">
-        <Form.Item name="work_date" label="日期" rules={[{ required: true, message: '请选择日期' }]}>
-          <DatePicker className="w-full" />
-        </Form.Item>
+          <Form.Item
+            name="work_date"
+            label="日期"
+            rules={[{ required: true, message: '请选择日期' }]}
+          >
+            <DatePicker className="w-full" />
+          </Form.Item>
 
-        <Form.Item name="employee_ids" label="人员" rules={[{ required: true, message: '请选择人员' }]}>
-          <Select
-            allowClear
-            mode="multiple"
-            maxCount={initialValues ? 1 : undefined}
-            showSearch={{ optionFilterProp: 'label' }}
-            placeholder="请选择人员"
-            options={employeeSelectOptions}
-          />
-        </Form.Item>
+          <Form.Item
+            name="employee_ids"
+            label="人员"
+            rules={[{ required: true, message: '请选择人员' }]}
+          >
+            <Select
+              allowClear
+              mode="multiple"
+              maxCount={initialValues ? 1 : undefined}
+              showSearch={{ optionFilterProp: 'label' }}
+              placeholder="请选择人员"
+              options={employeeSelectOptions}
+            />
+          </Form.Item>
 
           <Form.Item name="project_no" label="项目号" className="md:col-span-2">
-          <Select
-            allowClear
-            showSearch={{
-              filterOption: (input, option) =>
-                String(option?.searchText || '')
-                  .toLowerCase()
-                  .includes(input.trim().toLowerCase()),
-            }}
-            placeholder="请选择或搜索项目号"
-            value={projectNoValue}
-            onChange={handleProjectNoChange}
-            optionLabelProp="value"
-            options={projectNoSelectOptions}
-          />
-        </Form.Item>
+            <Select
+              allowClear
+              showSearch={{
+                filterOption: (input, option) =>
+                  String(option?.searchText || '')
+                    .toLowerCase()
+                    .includes(input.trim().toLowerCase()),
+              }}
+              placeholder="请选择或搜索项目号"
+              value={projectNoValue}
+              onChange={handleProjectNoChange}
+              optionLabelProp="value"
+              options={projectNoSelectOptions}
+            />
+          </Form.Item>
         </FormSection>
 
         <FormSection title="产品信息">
-        <Form.Item name="product_model" label="型号" rules={[{ required: true, message: '请输入型号' }]}>
-          <Input placeholder="请输入型号" allowClear />
-        </Form.Item>
+          <Form.Item
+            name="product_model"
+            label="型号"
+            rules={[{ required: true, message: '请输入型号' }]}
+          >
+            <Input placeholder="请输入型号" allowClear />
+          </Form.Item>
 
-        <Form.Item name="color_name" label="颜色">
-          <Input placeholder="请输入颜色" allowClear />
-        </Form.Item>
+          <Form.Item name="color_name" label="颜色">
+            <Input placeholder="请输入颜色" allowClear />
+          </Form.Item>
 
-        <Form.Item name="process_name" label="工艺">
-          <Input placeholder="请输入工艺" allowClear />
-        </Form.Item>
+          <Form.Item name="process_name" label="工艺">
+            <Input placeholder="请输入工艺" allowClear />
+          </Form.Item>
 
-        <Form.Item name="length_mm" label="长度(mm)">
-          <InputNumber min={0} step={0.01} className="w-full" placeholder="请输入长度" />
-        </Form.Item>
+          <Form.Item name="length_mm" label="长度(mm)">
+            <InputNumber
+              min={0}
+              step={0.01}
+              className="w-full"
+              placeholder="请输入长度"
+            />
+          </Form.Item>
 
-        <Form.Item name="part_no" label="料号">
-          <Input placeholder="请输入料号" allowClear />
-        </Form.Item>
+          <Form.Item name="part_no" label="料号">
+            <Input placeholder="请输入料号" allowClear />
+          </Form.Item>
+
+          <Form.Item name="weight_per_meter_kg" label="米重(kg/m)">
+            <InputNumber
+              min={0}
+              step={0.0001}
+              precision={4}
+              className="w-full"
+              placeholder="请输入米重"
+            />
+          </Form.Item>
         </FormSection>
 
         <FormSection title="工时产量">
-        <Form.Item name="unit" label="单位" rules={[{ required: true, message: '请选择单位' }]} initialValue="支">
-          <Select placeholder="请选择单位" options={UNIT_OPTIONS} />
-        </Form.Item>
+          <Form.Item
+            name="unit"
+            label="单位"
+            rules={[{ required: true, message: '请选择单位' }]}
+            initialValue="支"
+          >
+            <Select placeholder="请选择单位" options={UNIT_OPTIONS} />
+          </Form.Item>
 
-        <Form.Item name="quantity" label="总数量" rules={[{ required: true, message: '请输入数量' }]}>
-          <InputNumber min={0} step={1} className="w-full" placeholder="请输入数量" />
-        </Form.Item>
+          <Form.Item
+            name="quantity"
+            label="总数量"
+            rules={[{ required: true, message: '请输入数量' }]}
+          >
+            <InputNumber
+              min={0}
+              step={1}
+              className="w-full"
+              placeholder="请输入数量"
+            />
+          </Form.Item>
 
-        <Form.Item label="人均产量">
-          <Input disabled value={averageQuantity} />
-        </Form.Item>
+          <Form.Item name="defective_quantity" label="不良数量">
+            <InputNumber
+              min={0}
+              step={1}
+              className="w-full"
+              placeholder="请输入不良数量"
+            />
+          </Form.Item>
 
-        <Form.Item name="standard_seconds" label="标准工时（秒）" rules={[{ required: true, message: '请输入标准工时' }]}>
-          <InputNumber min={0} step={1} className="w-full" placeholder="请输入标准工时" />
-        </Form.Item>
+          <Form.Item label="不良重量(kg)">
+            <Input disabled value={defectiveWeightKg} />
+          </Form.Item>
 
-        <Form.Item name="extra_qualified_hours" label="零工（小时）">
-          <InputNumber
-            min={0}
-            step={0.5}
-            precision={2}
-            className="w-full"
-            placeholder="例如 1.5"
-          />
-        </Form.Item>
+          <Form.Item label="人均产量">
+            <Input disabled value={averageQuantity} />
+          </Form.Item>
 
-        <Form.Item label="人均时间（小时）">
-          <Input disabled value={workHours} />
-        </Form.Item>
+          <Form.Item
+            name="standard_seconds"
+            label="标准工时（秒）"
+            rules={[{ required: true, message: '请输入标准工时' }]}
+          >
+            <InputNumber
+              min={0}
+              step={1}
+              className="w-full"
+              placeholder="请输入标准工时"
+            />
+          </Form.Item>
+
+          <Form.Item name="extra_qualified_hours" label="零工（小时）">
+            <InputNumber
+              min={0}
+              step={0.5}
+              precision={2}
+              className="w-full"
+              placeholder="例如 1.5"
+            />
+          </Form.Item>
+
+          <Form.Item label="人均时间（小时）">
+            <Input disabled value={workHours} />
+          </Form.Item>
         </FormSection>
 
         <FormSection title="备注">
-        <Form.Item name="remark" label="备注" className="md:col-span-2">
-          <Input.TextArea rows={3} placeholder="请输入备注" />
-        </Form.Item>
+          <Form.Item name="remark" label="备注" className="md:col-span-2">
+            <Input.TextArea rows={3} placeholder="请输入备注" />
+          </Form.Item>
         </FormSection>
       </div>
     </Form>
