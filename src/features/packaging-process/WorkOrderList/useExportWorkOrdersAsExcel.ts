@@ -254,7 +254,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       row.surfaceTreatment,
       roundTo(row.weightPerMeterKg, 4),
       roundTo(row.qualifiedWeight, 2),
-      row.defectiveQuantity ? roundTo(row.defectiveQuantity, 1) : '',
+      row.defectiveQuantity ? Math.round(row.defectiveQuantity) : '',
       roundTo(row.defectiveWeight, 2),
       Array.from(row.defectReasons).join('\n'),
       '',
