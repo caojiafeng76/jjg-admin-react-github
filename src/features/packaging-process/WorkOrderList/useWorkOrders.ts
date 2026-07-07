@@ -13,6 +13,7 @@ import { getSalesOrdersProjectNos } from '@/services/apiProcessStandards'
 import { getPackagingEmployeeList } from '@/services/apiPackagingEmployees'
 
 const PACKAGING_WORK_ORDERS_KEY = 'packaging-work-orders-v3' as const
+const ORDER_STATUS_DASHBOARD_KEY = 'order-status-dashboard' as const
 const SALES_ORDERS_PROJECT_NOS_KEY = 'sales-orders-project-nos' as const
 const PACKAGING_EMPLOYEES_OPTIONS_KEY = 'packaging-employees-options' as const
 
@@ -41,21 +42,30 @@ export function usePackagingWorkOrderList({
 export function useCreatePackagingWorkOrder() {
   return useMutationWithInvalidation({
     mutationFn: createPackagingWorkOrder,
-    invalidateQueries: [[PACKAGING_WORK_ORDERS_KEY]],
+    invalidateQueries: [
+      [PACKAGING_WORK_ORDERS_KEY],
+      [ORDER_STATUS_DASHBOARD_KEY],
+    ],
   })
 }
 
 export function useUpdatePackagingWorkOrder() {
   return useMutationWithInvalidation({
     mutationFn: updatePackagingWorkOrder,
-    invalidateQueries: [[PACKAGING_WORK_ORDERS_KEY]],
+    invalidateQueries: [
+      [PACKAGING_WORK_ORDERS_KEY],
+      [ORDER_STATUS_DASHBOARD_KEY],
+    ],
   })
 }
 
 export function useDeletePackagingWorkOrder() {
   return useMutationWithInvalidation({
     mutationFn: deletePackagingWorkOrder,
-    invalidateQueries: [[PACKAGING_WORK_ORDERS_KEY]],
+    invalidateQueries: [
+      [PACKAGING_WORK_ORDERS_KEY],
+      [ORDER_STATUS_DASHBOARD_KEY],
+    ],
   })
 }
 

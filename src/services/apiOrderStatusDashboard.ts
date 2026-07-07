@@ -6,6 +6,7 @@ import supabase from './supabase'
 
 const LOOKUP_PAGE_SIZE = 1000
 const UNMATCHED_JOB_NAME = '未匹配岗位'
+const PACKAGING_JOB_NAME = '包装'
 const PROCESS_STANDARD_JOB_SELECT =
   'job_name, operation, model, length, part_no, record_type, is_last_process'
 
@@ -63,6 +64,31 @@ type ProcessStandardJobRow = Pick<
   'job_name' | 'operation' | 'model' | 'length' | 'part_no' | 'record_type'
 > & {
   is_last_process?: boolean | null
+}
+
+export type PackagingDashboardWorkOrderRow = {
+  id: string
+  work_date: string
+  employee_name?: string | null
+  project_no: string | null
+  product_model: string | null
+  color_name: string | null
+  process_name: string | null
+  length_mm: number | null
+  part_no: string | null
+  weight_per_meter_kg?: number | null
+  quantity: number | null
+  defective_quantity?: number | null
+  defective_weight_kg?: number | null
+  defect_reason?: string | null
+  standard_seconds: number | null
+  work_hours: number | null
+  extra_qualified_hours?: number | null
+  remark: string | null
+}
+
+type PackagingWorkOrderQueryRow = PackagingDashboardWorkOrderRow & {
+  packaging_employees?: { name?: string | null } | null
 }
 
 type OrderStatusDashboardRpcItem = WorkshopOrder & {
@@ -478,6 +504,164 @@ function buildProductionDetail(
   }
 }
 
+function roundTo(value: number, precision = 2) {
+  const factor = 10 ** precision
+  return Math.round(value * factor) / factor
+}
+
+function getPackagingSurfaceTreatment(row: PackagingDashboardWorkOrderRow) {
+  return row.process_name || row.color_name || ''
+}
+
+function getPackagingDefectiveWeight(row: PackagingDashboardWorkOrderRow) {
+  const defectiveWeight = Number(row.defective_weight_kg)
+
+  if (Number.isFinite(defectiveWeight)) {
+    return defectiveWeight
+  }
+
+  const defectiveQuantity = Number(row.defective_quantity) || 0
+  const lengthMm = Number(row.length_mm) || 0
+  const weightPerMeterKg = Number(row.weight_per_meter_kg) || 0
+
+  return (defectiveQuantity * lengthMm * weightPerMeterKg) / 1000
+}
+
+export function buildPackagingProductionDetailsForDashboard(
+  rows: PackagingDashboardWorkOrderRow[],
+): OrderStatusProductionDetail[] {
+  const grouped = new Map<
+    string,
+    {
+      createdAt: string
+      defectReasons: Set<string>
+      defectiveQuantity: number
+      defectiveWeight: number
+      employees: Set<string>
+      ids: string[]
+      lengthMm: number | null
+      partNo: string | null
+      productModel: string | null
+      projectNo: string
+      quantity: number
+      remarks: Set<string>
+      standardSeconds: number
+      surfaceTreatment: string
+      totalHours: number
+      weightPerMeterKg: number
+      workDate: string
+    }
+  >()
+
+  for (const row of rows) {
+    const workDate = row.work_date || ''
+    const productModel = row.product_model || ''
+    const projectNo = row.project_no || ''
+    const lengthMm = Number(row.length_mm) || 0
+    const surfaceTreatment = getPackagingSurfaceTreatment(row)
+    const weightPerMeterKg = Number(row.weight_per_meter_kg) || 0
+    const key = [
+      workDate,
+      productModel,
+      projectNo,
+      lengthMm,
+      surfaceTreatment,
+      weightPerMeterKg,
+    ].join('|')
+    const current = grouped.get(key) ?? {
+      createdAt: workDate,
+      defectReasons: new Set<string>(),
+      defectiveQuantity: 0,
+      defectiveWeight: 0,
+      employees: new Set<string>(),
+      ids: [],
+      lengthMm: row.length_mm,
+      partNo: row.part_no,
+      productModel: row.product_model,
+      projectNo,
+      quantity: 0,
+      remarks: new Set<string>(),
+      standardSeconds: 0,
+      surfaceTreatment,
+      totalHours: 0,
+      weightPerMeterKg,
+      workDate,
+    }
+
+    current.ids.push(row.id)
+    current.quantity += Number(row.quantity) || 0
+    current.defectiveQuantity += Number(row.defective_quantity) || 0
+    current.defectiveWeight += getPackagingDefectiveWeight(row)
+    current.standardSeconds = Math.max(
+      current.standardSeconds,
+      Number(row.standard_seconds) || 0,
+    )
+    current.totalHours +=
+      (Number(row.work_hours) || 0) +
+      (Number(row.extra_qualified_hours) || 0)
+
+    if (row.employee_name) {
+      current.employees.add(row.employee_name)
+    }
+    if (row.defect_reason?.trim()) {
+      current.defectReasons.add(row.defect_reason.trim())
+    }
+    if (row.remark?.trim()) {
+      current.remarks.add(row.remark.trim())
+    }
+
+    grouped.set(key, current)
+  }
+
+  return Array.from(grouped.values())
+    .sort((left, right) => {
+      const dateCompare = right.workDate.localeCompare(left.workDate)
+      if (dateCompare !== 0) return dateCompare
+      return left.projectNo.localeCompare(right.projectNo)
+    })
+    .map((row) => {
+      const totalHours = roundTo(row.totalHours, 2)
+
+      return {
+        id: `packaging:${row.ids.join(',')}`,
+        createdAt: row.createdAt,
+        updatedAt: row.createdAt,
+        dataCategory: '包装生产工单',
+        projectNo: row.projectNo,
+        productModel: row.productModel,
+        customerModel: null,
+        lengthMm: row.lengthMm,
+        operation: row.surfaceTreatment,
+        orderId: '',
+        orderDate: row.workDate,
+        shift: '',
+        operatorName: Array.from(row.employees).join('、') || null,
+        workHours: totalHours,
+        machineEquipmentId: null,
+        machineName: null,
+        unifiedDeviceNo: null,
+        jobName: PACKAGING_JOB_NAME,
+        incomingQualifiedQuantity: 0,
+        qualifiedQuantity: Math.round(row.quantity),
+        qualifiedHours: totalHours,
+        defectQuantity: Math.round(row.defectiveQuantity),
+        defectQuantity1: Math.round(row.defectiveQuantity),
+        defectQuantity2: 0,
+        defectReason1: Array.from(row.defectReasons).join('\n') || null,
+        defectReason2: null,
+        defectHours: roundTo(row.defectiveWeight, 2),
+        outsourceDefectQuantity: 0,
+        outsourceDefectReason: null,
+        outsourceUnit: null,
+        setupDefectQuantity: 0,
+        setupResponsible: null,
+        standardSeconds: row.standardSeconds,
+        theoreticalSeconds: row.standardSeconds,
+        remark: Array.from(row.remarks).join('\n') || null,
+      }
+    })
+}
+
 function buildReworkRepairInfo(
   reworkRepairRows:
     | {
@@ -838,18 +1022,123 @@ function isLastProcessProductionRow({
   )
 }
 
-function buildJobColumns({
+export function buildJobColumns({
   lastProcessJobNames,
   lastProcessJobOperations,
 }: Pick<
   ReturnType<typeof buildProcessJobIndex>,
   'lastProcessJobNames' | 'lastProcessJobOperations'
 >) {
-  return lastProcessJobNames.map((jobName) => ({
+  const jobColumns = lastProcessJobNames.map((jobName) => ({
     key: jobName,
     title: jobName,
     operations: lastProcessJobOperations.get(jobName) ?? [],
   }))
+
+  if (!jobColumns.some((column) => column.key === PACKAGING_JOB_NAME)) {
+    jobColumns.push({
+      key: PACKAGING_JOB_NAME,
+      title: PACKAGING_JOB_NAME,
+      operations: [],
+    })
+  }
+
+  return jobColumns
+}
+
+async function getPackagingWorkOrderRowsByProjectNos({
+  projectNos,
+  signal,
+}: {
+  projectNos: string[]
+  signal?: AbortSignal
+}) {
+  const rows: PackagingDashboardWorkOrderRow[] = []
+
+  for (let index = 0; index < projectNos.length; index += LOOKUP_PAGE_SIZE) {
+    const projectNoChunk = projectNos.slice(index, index + LOOKUP_PAGE_SIZE)
+    let from = 0
+
+    while (true) {
+      const to = from + LOOKUP_PAGE_SIZE - 1
+      let query = (
+        supabase as unknown as {
+          from: (table: string) => ReturnType<typeof supabase.from>
+        }
+      )
+        .from('packaging_work_orders')
+        .select(
+          `
+            id,
+            work_date,
+            employee_id,
+            project_no,
+            product_model,
+            color_name,
+            process_name,
+            length_mm,
+            part_no,
+            weight_per_meter_kg,
+            quantity,
+            defective_quantity,
+            defective_weight_kg,
+            defect_reason,
+            standard_seconds,
+            work_hours,
+            extra_qualified_hours,
+            remark,
+            packaging_employees (
+              name
+            )
+          `,
+        )
+        .in('project_no', projectNoChunk)
+        .order('work_date', { ascending: false })
+        .range(from, to)
+
+      if (signal) {
+        query = query.abortSignal(signal)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取包装生产工单数据失败')
+      }
+
+      const pageRows = (data || []) as unknown as PackagingWorkOrderQueryRow[]
+
+      for (const row of pageRows) {
+        rows.push({
+          ...row,
+          employee_name: row.employee_name ?? row.packaging_employees?.name,
+        })
+      }
+
+      if (pageRows.length < LOOKUP_PAGE_SIZE) {
+        break
+      }
+
+      from += LOOKUP_PAGE_SIZE
+    }
+  }
+
+  return rows
+}
+
+function groupPackagingRowsByProjectNo(rows: PackagingDashboardWorkOrderRow[]) {
+  const grouped = new Map<string, OrderStatusProductionDetail[]>()
+
+  for (const detail of buildPackagingProductionDetailsForDashboard(rows)) {
+    const projectNo = normalizeText(detail.projectNo)
+    if (!projectNo) continue
+
+    const current = grouped.get(projectNo) ?? []
+    current.push(detail)
+    grouped.set(projectNo, current)
+  }
+
+  return grouped
 }
 
 async function getOrderStatusDashboardRpcResult({
@@ -911,12 +1200,29 @@ export async function getOrderStatusDashboard({
   ])
   const orders = rpcResult.items ?? []
   const total = rpcResult.total ?? 0
+  const projectNos = Array.from(
+    new Set(
+      orders
+        .map((order) => normalizeText(order.project_no))
+        .filter((projectNo): projectNo is string => Boolean(projectNo)),
+    ),
+  )
+  const packagingRows =
+    projectNos.length > 0
+      ? await getPackagingWorkOrderRowsByProjectNos({ projectNos, signal })
+      : []
+  const packagingDetailsByProjectNo = groupPackagingRowsByProjectNo(
+    packagingRows,
+  )
   const processJobIndex = buildProcessJobIndex(processRows)
   const jobColumns = buildJobColumns(processJobIndex)
 
   const items = orders.map<OrderStatusDashboardItem>((order) => {
     const projectNo = normalizeText(order.project_no)
     const relatedRows = order.productionRows ?? []
+    const packagingDetails = projectNo
+      ? (packagingDetailsByProjectNo.get(projectNo) ?? [])
+      : []
     const jobOutputs = Object.fromEntries(
       jobColumns.map((column) => [column.key, 0]),
     ) as Record<string, number>
@@ -945,6 +1251,14 @@ export async function getOrderStatusDashboard({
 
         productionDetails.push(buildProductionDetail(row, jobName))
       }
+    }
+
+    if (packagingDetails.length > 0) {
+      jobOutputs[PACKAGING_JOB_NAME] = packagingDetails.reduce(
+        (total, detail) => total + Number(detail.qualifiedQuantity || 0),
+        0,
+      )
+      productionDetails.push(...packagingDetails)
     }
 
     productionDetails.sort((left, right) => {
@@ -988,7 +1302,8 @@ export async function getOrderStatusDashboard({
     items,
     total,
     jobColumns,
-    productionItemCount: rpcResult.productionItemCount ?? 0,
+    productionItemCount:
+      (rpcResult.productionItemCount ?? 0) + packagingRows.length,
     materialTransferCount: rpcResult.materialTransferCount ?? 0,
   }
 }
