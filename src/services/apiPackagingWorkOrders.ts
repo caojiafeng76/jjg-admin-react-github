@@ -250,15 +250,41 @@ export async function getSalesOrderByProjectNo(projectNo: string) {
   }
 }
 
-export async function getStandardSecondsByPartNo(partNo: string | null) {
-  if (!partNo) {
+export async function getStandardSecondsByPartNo(
+  partNo: string | null,
+  productModel?: string | null,
+) {
+  const normalizedPartNo = normalizeText(partNo)
+  const normalizedProductModel = normalizeText(productModel)
+
+  if (normalizedPartNo) {
+    const { data, error } = await (supabase as unknown as DynamicSupabaseTable)
+      .from('packaging_standard_times')
+      .select('standard_seconds')
+      .eq('part_no', normalizedPartNo)
+      .maybeSingle()
+
+    if (error) {
+      throw handleApiError(error, '获取标准工时失败')
+    }
+
+    const standardSeconds = (data as { standard_seconds?: number } | null)
+      ?.standard_seconds
+
+    if (standardSeconds !== undefined && standardSeconds !== null) {
+      return standardSeconds
+    }
+  }
+
+  if (!normalizedProductModel) {
     return 0
   }
 
   const { data, error } = await (supabase as unknown as DynamicSupabaseTable)
     .from('packaging_standard_times')
     .select('standard_seconds')
-    .eq('part_no', partNo)
+    .eq('model', normalizedProductModel)
+    .limit(1)
     .maybeSingle()
 
   if (error) {

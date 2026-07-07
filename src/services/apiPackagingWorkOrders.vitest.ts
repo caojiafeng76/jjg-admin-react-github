@@ -1,13 +1,31 @@
 import { describe, expect, it, vi } from 'vitest'
 
+const supabaseMock = vi.hoisted(() => ({
+  from: vi.fn(),
+}))
+
 vi.mock('./supabase', () => ({
-  default: {},
+  default: supabaseMock,
 }))
 
 import {
   buildPackagingWorkOrderCreatePayloads,
   buildPackagingWorkOrderPayload,
+  getStandardSecondsByPartNo,
 } from './apiPackagingWorkOrders'
+
+function mockStandardTimeQuery(
+  responses: Array<{ data: unknown; error: unknown }>,
+) {
+  let index = 0
+
+  supabaseMock.from.mockImplementation(() => ({
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn(async () => responses[index++]),
+  }))
+}
 
 describe('buildPackagingWorkOrderPayload', () => {
   it('normalizes selectable unit and extra qualified hours', () => {
@@ -108,5 +126,16 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       employee_id: 'employee-1',
       quantity: 100,
     })
+  })
+})
+
+describe('getStandardSecondsByPartNo', () => {
+  it('falls back to matching product model when part number has no standard time', async () => {
+    mockStandardTimeQuery([
+      { data: null, error: null },
+      { data: { standard_seconds: 45 }, error: null },
+    ])
+
+    await expect(getStandardSecondsByPartNo('PN-1', 'M-1')).resolves.toBe(45)
   })
 })
