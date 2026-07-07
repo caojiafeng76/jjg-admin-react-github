@@ -250,7 +250,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       row.productModel,
       row.projectNo,
       row.lengthMm || '',
-      roundTo(row.quantity, 1),
+      Math.round(row.quantity),
       row.surfaceTreatment,
       roundTo(row.weightPerMeterKg, 4),
       roundTo(row.qualifiedWeight, 2),
