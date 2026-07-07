@@ -12,10 +12,9 @@ import {
 import { getSalesOrdersProjectNos } from '@/services/apiProcessStandards'
 import { getPackagingEmployeeList } from '@/services/apiPackagingEmployees'
 
-const PACKAGING_WORK_ORDERS_KEY = 'packaging-work-orders' as const
+const PACKAGING_WORK_ORDERS_KEY = 'packaging-work-orders-v2' as const
 const SALES_ORDERS_PROJECT_NOS_KEY = 'sales-orders-project-nos' as const
-const PACKAGING_EMPLOYEES_OPTIONS_KEY =
-  'packaging-employees-options' as const
+const PACKAGING_EMPLOYEES_OPTIONS_KEY = 'packaging-employees-options' as const
 
 export function usePackagingWorkOrderList({
   page,

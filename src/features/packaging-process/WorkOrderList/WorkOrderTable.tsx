@@ -39,8 +39,7 @@ function WorkOrderTable({
         dataIndex: 'work_date',
         key: 'work_date',
         width: 120,
-        render: (value: string) =>
-          value ? dayjs(value).format('MM-DD') : '-',
+        render: (value: string) => (value ? dayjs(value).format('MM-DD') : '-'),
       },
       {
         title: '人员',
@@ -91,6 +90,17 @@ function WorkOrderTable({
         render: (value: string | null) => value || '-',
       },
       {
+        title: '米重',
+        dataIndex: 'weight_per_meter_kg',
+        key: 'weight_per_meter_kg',
+        width: 90,
+        align: 'right' as const,
+        render: (value: number | null | undefined) =>
+          value !== null && value !== undefined
+            ? Number(value).toFixed(4)
+            : '0.0000',
+      },
+      {
         title: '单位',
         dataIndex: 'unit',
         key: 'unit',
@@ -102,6 +112,28 @@ function WorkOrderTable({
         key: 'quantity',
         width: 80,
         align: 'right' as const,
+      },
+      {
+        title: '不良数量',
+        dataIndex: 'defective_quantity',
+        key: 'defective_quantity',
+        width: 100,
+        align: 'right' as const,
+        render: (value: number | null | undefined) =>
+          value !== null && value !== undefined
+            ? Number(value).toFixed(1)
+            : '0.0',
+      },
+      {
+        title: '不良重量',
+        dataIndex: 'defective_weight_kg',
+        key: 'defective_weight_kg',
+        width: 100,
+        align: 'right' as const,
+        render: (value: number | null | undefined) =>
+          value !== null && value !== undefined
+            ? Number(value).toFixed(2)
+            : '0.00',
       },
       {
         title: '标时/s',
@@ -117,7 +149,9 @@ function WorkOrderTable({
         width: 110,
         align: 'right' as const,
         render: (value: number) =>
-          value !== null && value !== undefined ? Number(value).toFixed(2) : '0.00',
+          value !== null && value !== undefined
+            ? Number(value).toFixed(2)
+            : '0.00',
       },
       {
         title: '零工',
@@ -126,7 +160,9 @@ function WorkOrderTable({
         width: 90,
         align: 'right' as const,
         render: (value: number | null | undefined) =>
-          value !== null && value !== undefined ? Number(value).toFixed(2) : '0.00',
+          value !== null && value !== undefined
+            ? Number(value).toFixed(2)
+            : '0.00',
       },
       {
         title: '备注',
@@ -163,7 +199,7 @@ function WorkOrderTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1690, y: scrollY }}
+      scroll={{ x: 1980, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
