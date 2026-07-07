@@ -136,6 +136,13 @@ function WorkOrderTable({
             : '0.00',
       },
       {
+        title: '不良原因',
+        dataIndex: 'defect_reason',
+        key: 'defect_reason',
+        width: 180,
+        render: (value: string | null) => value || '-',
+      },
+      {
         title: '标时/s',
         dataIndex: 'standard_seconds',
         key: 'standard_seconds',
@@ -199,7 +206,7 @@ function WorkOrderTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1980, y: scrollY }}
+      scroll={{ x: 2160, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

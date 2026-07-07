@@ -25,6 +25,7 @@ describe('buildWorkbook', () => {
         quantity: 10,
         defective_quantity: 1,
         defective_weight_kg: 0,
+        defect_reason: null,
         standard_seconds: 360,
         work_hours: 1,
         extra_qualified_hours: 0.5,
@@ -50,6 +51,7 @@ describe('buildWorkbook', () => {
         quantity: 5,
         defective_quantity: 0,
         defective_weight_kg: 0,
+        defect_reason: null,
         standard_seconds: 720,
         work_hours: 1,
         extra_qualified_hours: 0,
@@ -91,6 +93,7 @@ describe('buildWorkbook', () => {
         quantity: 10,
         defective_quantity: 1,
         defective_weight_kg: 1.2,
+        defect_reason: '划伤\n变形',
         standard_seconds: 360,
         work_hours: 1,
         extra_qualified_hours: 0,
@@ -116,6 +119,7 @@ describe('buildWorkbook', () => {
         quantity: 5,
         defective_quantity: 0,
         defective_weight_kg: 0,
+        defect_reason: '划伤\n变形',
         standard_seconds: 360,
         work_hours: 0.5,
         extra_qualified_hours: 0,
@@ -134,6 +138,7 @@ describe('buildWorkbook', () => {
     )
     expect(detailRows[1]).not.toContain('不良数量')
     expect(detailRows[1]).not.toContain('不良重量(kg)')
+    expect(detailRows[1]).not.toContain('不良原因')
 
     const dailyRows = XLSX.utils.sheet_to_json<Array<string | number>>(
       workbook.Sheets['生产日报表'],
@@ -151,6 +156,7 @@ describe('buildWorkbook', () => {
       '合格重量',
       '不良数',
       '不良重量',
+      '不良原因',
       '',
       '电梯料',
     ])
@@ -166,6 +172,7 @@ describe('buildWorkbook', () => {
       18,
       1,
       1.2,
+      '划伤\n变形',
       '',
       '',
     ])
