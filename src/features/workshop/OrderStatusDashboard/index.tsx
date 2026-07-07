@@ -96,6 +96,7 @@ const JOB_OUTPUT_COLUMN_ORDER = [
   '整形',
   '检验',
   '组装',
+  '包装',
 ] as const
 const JOB_OUTPUT_COLUMN_ORDER_MAP: ReadonlyMap<string, number> = new Map([
   ...JOB_OUTPUT_COLUMN_ORDER.map((jobName, index) => [jobName, index] as const),
