@@ -666,6 +666,140 @@ export type Database = {
         }
         Relationships: []
       }
+      packaging_employees: {
+        Row: {
+          created_at: string
+          hourly_wage: number
+          id: string
+          name: string
+          position_salary: number | null
+          remark: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          hourly_wage?: number
+          id?: string
+          name: string
+          position_salary?: number | null
+          remark?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          hourly_wage?: number
+          id?: string
+          name?: string
+          position_salary?: number | null
+          remark?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      packaging_standard_times: {
+        Row: {
+          created_at: string
+          id: string
+          length: number
+          model: string
+          part_no: string | null
+          remark: string | null
+          standard_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          length?: number
+          model: string
+          part_no?: string | null
+          remark?: string | null
+          standard_seconds?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          length?: number
+          model?: string
+          part_no?: string | null
+          remark?: string | null
+          standard_seconds?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      packaging_work_orders: {
+        Row: {
+          color_name: string | null
+          created_at: string
+          employee_id: string | null
+          extra_qualified_hours: number
+          id: string
+          length_mm: number | null
+          part_no: string | null
+          process_name: string | null
+          product_model: string
+          project_no: string | null
+          quantity: number
+          remark: string | null
+          standard_seconds: number
+          unit: string
+          updated_at: string
+          work_date: string
+          work_hours: number | null
+        }
+        Insert: {
+          color_name?: string | null
+          created_at?: string
+          employee_id?: string | null
+          extra_qualified_hours?: number
+          id?: string
+          length_mm?: number | null
+          part_no?: string | null
+          process_name?: string | null
+          product_model: string
+          project_no?: string | null
+          quantity: number
+          remark?: string | null
+          standard_seconds?: number
+          unit?: string
+          updated_at?: string
+          work_date: string
+          work_hours?: number | null
+        }
+        Update: {
+          color_name?: string | null
+          created_at?: string
+          employee_id?: string | null
+          extra_qualified_hours?: number
+          id?: string
+          length_mm?: number | null
+          part_no?: string | null
+          process_name?: string | null
+          product_model?: string
+          project_no?: string | null
+          quantity?: number
+          remark?: string | null
+          standard_seconds?: number
+          unit?: string
+          updated_at?: string
+          work_date?: string
+          work_hours?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packaging_work_orders_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "packaging_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permissions: {
         Row: {
           created_at: string
