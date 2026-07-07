@@ -755,9 +755,18 @@ export default function WorkshopOrderList() {
         <div className="flex flex-wrap items-center gap-3">
           {/* 核心操作按钮组 */}
           <div className="flex items-center gap-2">
-            {canCreate ? <AddButton handleCreate={handleCreate} /> : null}
+            {canCreate ? (
+              <AddButton
+                handleCreate={handleCreate}
+                permissionKey="feature:workshop-order.create"
+              />
+            ) : null}
             {canEdit ? (
-              <EditButton title="编辑" handleEdit={handleEdit} />
+              <EditButton
+                title="编辑"
+                handleEdit={handleEdit}
+                permissionKey="feature:workshop-order.edit"
+              />
             ) : null}
           </div>
 
@@ -799,6 +808,7 @@ export default function WorkshopOrderList() {
               onClick={handleDelete}
               isDeleting={deleteMutation.isPending}
               count={selectedRowKeys.length}
+              permissionKey="feature:workshop-order.delete"
             />
           ) : null}
 
