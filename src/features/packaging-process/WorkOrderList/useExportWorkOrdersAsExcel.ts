@@ -32,9 +32,11 @@ const DETAIL_HEADERS = [
   '数量',
   '标时/s',
   '时间(小时)',
+  '零工(小时)',
+  '合计(小时)',
 ] as const
 
-const DETAIL_COLUMN_WIDTHS = [12, 10, 14, 16, 8, 8, 12, 12, 6, 8, 8, 10] as const
+const DETAIL_COLUMN_WIDTHS = [12, 10, 14, 16, 8, 8, 12, 12, 6, 8, 8, 10, 10, 10] as const
 
 function formatDate(value: string | null | undefined) {
   return value ? dayjs(value).format('MM-DD') : ''
@@ -48,6 +50,13 @@ function formatHours(value: number | null | undefined) {
 function formatCellText(value: string | number | null | undefined) {
   if (value === null || value === undefined) return ''
   return String(value)
+}
+
+function getTotalHours(order: PackagingWorkOrder) {
+  return (
+    (Number(order.work_hours) || 0) +
+    (Number(order.extra_qualified_hours) || 0)
+  )
 }
 
 function downloadExcel(buffer: ArrayBuffer, filename: string) {
@@ -82,6 +91,8 @@ function buildDetailSheet(orders: PackagingWorkOrder[]) {
     formatCellText(order.quantity),
     formatCellText(order.standard_seconds),
     formatHours(order.work_hours),
+    formatHours(order.extra_qualified_hours),
+    formatHours(getTotalHours(order)),
   ])
 
   const data: Array<Array<string | number>> = [
@@ -120,7 +131,7 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
   let grandTotal = 0
 
   for (const order of orders) {
-    const hours = Number(order.work_hours) || 0
+    const hours = getTotalHours(order)
     const date = order.work_date
     const emp = order.employee_name
     if (!date || !emp) continue

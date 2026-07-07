@@ -81,9 +81,8 @@ export default function WorkOrderSearch({
       <Form.Item name="employeeId" className="mb-0" style={{ width: 160 }}>
         <Select
           allowClear
-          showSearch
+          showSearch={{ optionFilterProp: 'label' }}
           placeholder="选择人员"
-          optionFilterProp="label"
           options={employeeSelectOptions}
         />
       </Form.Item>
