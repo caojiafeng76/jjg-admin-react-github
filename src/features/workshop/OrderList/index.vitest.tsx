@@ -16,6 +16,12 @@ const tableHeightMock = vi.hoisted(() => ({
   tableContainerRef: { current: null as HTMLDivElement | null },
 }))
 
+const actionButtonProps = vi.hoisted(() => ({
+  add: [] as Record<string, unknown>[],
+  delete: [] as Record<string, unknown>[],
+  edit: [] as Record<string, unknown>[],
+}))
+
 vi.mock('antd', async () => {
   const actual = await vi.importActual<typeof import('antd')>('antd')
 
@@ -66,15 +72,24 @@ vi.mock('@/services/apiWorkshopOrders', () => ({
 }))
 
 vi.mock('@/ui/AddButton', () => ({
-  default: () => <button type="button">新增</button>,
+  default: (props: Record<string, unknown>) => {
+    actionButtonProps.add.push(props)
+    return <button type="button">新增</button>
+  },
 }))
 
 vi.mock('@/ui/DeleteButton', () => ({
-  default: () => <button type="button">删除</button>,
+  default: (props: Record<string, unknown>) => {
+    actionButtonProps.delete.push(props)
+    return <button type="button">删除</button>
+  },
 }))
 
 vi.mock('@/ui/EditButton', () => ({
-  default: () => <button type="button">编辑</button>,
+  default: (props: Record<string, unknown>) => {
+    actionButtonProps.edit.push(props)
+    return <button type="button">编辑</button>
+  },
 }))
 
 vi.mock('@/ui/PrintButton', () => ({
@@ -144,6 +159,9 @@ describe('WorkshopOrderList layout', () => {
     tableHeightMock.options = undefined
     tableHeightMock.paginationRef.current = null
     tableHeightMock.tableContainerRef.current = null
+    actionButtonProps.add.length = 0
+    actionButtonProps.delete.length = 0
+    actionButtonProps.edit.length = 0
   })
 
   afterEach(() => {
@@ -166,5 +184,19 @@ describe('WorkshopOrderList layout', () => {
     })
     expect(tableHeightMock.tableContainerRef.current).toBe(tableSlot)
     expect(screen.getByTestId('workshop-order-pagination')).toBeInTheDocument()
+  })
+
+  it('passes operation permission keys to shared action buttons', () => {
+    renderPage()
+
+    expect(actionButtonProps.add[0]).toMatchObject({
+      permissionKey: 'feature:workshop-order.create',
+    })
+    expect(actionButtonProps.edit[0]).toMatchObject({
+      permissionKey: 'feature:workshop-order.edit',
+    })
+    expect(actionButtonProps.delete[0]).toMatchObject({
+      permissionKey: 'feature:workshop-order.delete',
+    })
   })
 })
