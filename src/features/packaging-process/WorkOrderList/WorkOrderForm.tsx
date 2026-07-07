@@ -86,9 +86,24 @@ export default function WorkOrderForm({
   const projectNoSelectOptions = useMemo(
     () =>
       projectNoOptions.map((option) => ({
-        label: option.project_no,
+        label: (
+          <div className="flex flex-col py-1 leading-5">
+            <span className="font-medium">{option.project_no}</span>
+            <span className="text-xs text-slate-500">
+              型号：{option.product_model || '-'} / 长度：
+              {option.length_mm ?? '-'}
+            </span>
+          </div>
+        ),
         value: option.project_no,
-        searchText: option.project_no.toLowerCase(),
+        searchText: [
+          option.project_no,
+          option.product_model,
+          option.length_mm,
+        ]
+          .filter((value) => value !== null && value !== undefined)
+          .join(' ')
+          .toLowerCase(),
       })),
     [projectNoOptions],
   )
@@ -141,6 +156,7 @@ export default function WorkOrderForm({
       setProjectNoValue(projectNo)
       if (!projectNo) {
         form.setFieldsValue({
+          project_no: null,
           product_model: '',
           color_name: null,
           length_mm: null,
@@ -154,9 +170,11 @@ export default function WorkOrderForm({
         const orderInfo = await getSalesOrderByProjectNo(projectNo)
         const standardSeconds = await getStandardSecondsByPartNo(
           orderInfo.material_code,
+          orderInfo.product_model,
         )
 
         form.setFieldsValue({
+          project_no: orderInfo.project_no,
           product_model: orderInfo.product_model ?? '',
           color_name: orderInfo.color_name ?? null,
           length_mm: orderInfo.length_mm ?? null,
@@ -226,7 +244,7 @@ export default function WorkOrderForm({
           />
         </Form.Item>
 
-          <Form.Item label="项目号" className="md:col-span-2">
+          <Form.Item name="project_no" label="项目号" className="md:col-span-2">
           <Select
             allowClear
             showSearch={{
@@ -238,6 +256,7 @@ export default function WorkOrderForm({
             placeholder="请选择或搜索项目号"
             value={projectNoValue}
             onChange={handleProjectNoChange}
+            optionLabelProp="value"
             options={projectNoSelectOptions}
           />
         </Form.Item>
