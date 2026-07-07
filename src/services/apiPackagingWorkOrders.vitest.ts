@@ -4,7 +4,10 @@ vi.mock('./supabase', () => ({
   default: {},
 }))
 
-import { buildPackagingWorkOrderPayload } from './apiPackagingWorkOrders'
+import {
+  buildPackagingWorkOrderCreatePayloads,
+  buildPackagingWorkOrderPayload,
+} from './apiPackagingWorkOrders'
 
 describe('buildPackagingWorkOrderPayload', () => {
   it('normalizes selectable unit and extra qualified hours', () => {
@@ -50,6 +53,60 @@ describe('buildPackagingWorkOrderPayload', () => {
     ).toMatchObject({
       unit: '支',
       extra_qualified_hours: 0,
+    })
+  })
+})
+
+describe('buildPackagingWorkOrderCreatePayloads', () => {
+  it('splits quantity evenly across selected employees with one decimal place', () => {
+    const payloads = buildPackagingWorkOrderCreatePayloads({
+      work_date: '2026-07-07',
+      employee_ids: ['employee-1', 'employee-2', 'employee-3'],
+      project_no: '26070601-01',
+      product_model: '105-308',
+      color_name: null,
+      process_name: null,
+      length_mm: null,
+      part_no: null,
+      unit: '支',
+      quantity: 100,
+      standard_seconds: 30,
+      remark: null,
+    })
+
+    expect(payloads).toHaveLength(3)
+    expect(payloads.map((payload) => payload.employee_id)).toEqual([
+      'employee-1',
+      'employee-2',
+      'employee-3',
+    ])
+    expect(payloads.map((payload) => payload.quantity)).toEqual([
+      33.3,
+      33.3,
+      33.3,
+    ])
+  })
+
+  it('uses the single employee field as a fallback for edit-compatible values', () => {
+    const payloads = buildPackagingWorkOrderCreatePayloads({
+      work_date: '2026-07-07',
+      employee_id: 'employee-1',
+      project_no: null,
+      product_model: '105-308',
+      color_name: null,
+      process_name: null,
+      length_mm: null,
+      part_no: null,
+      unit: '支',
+      quantity: 100,
+      standard_seconds: 30,
+      remark: null,
+    })
+
+    expect(payloads).toHaveLength(1)
+    expect(payloads[0]).toMatchObject({
+      employee_id: 'employee-1',
+      quantity: 100,
     })
   })
 })
