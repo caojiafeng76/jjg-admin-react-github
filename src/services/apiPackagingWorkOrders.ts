@@ -19,6 +19,7 @@ export interface PackagingWorkOrder {
   quantity: number
   defective_quantity: number
   defective_weight_kg: number
+  defect_reason: string | null
   standard_seconds: number
   work_hours: number
   extra_qualified_hours: number
@@ -41,6 +42,7 @@ export interface PackagingWorkOrderFormValues {
   unit: string
   quantity: number
   defective_quantity?: number | null
+  defect_reason?: string | null
   standard_seconds: number
   extra_qualified_hours?: number
   remark: string | null
@@ -107,6 +109,7 @@ export function buildPackagingWorkOrderPayload(
     unit: normalizeUnit(values.unit),
     quantity: normalizeNumber(values.quantity),
     defective_quantity: normalizeNumber(values.defective_quantity),
+    defect_reason: normalizeText(values.defect_reason),
     standard_seconds: normalizeNumber(values.standard_seconds),
     extra_qualified_hours: normalizeNumber(values.extra_qualified_hours),
     remark: normalizeText(values.remark),

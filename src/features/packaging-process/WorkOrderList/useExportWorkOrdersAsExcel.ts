@@ -38,7 +38,7 @@ const DETAIL_HEADERS = [
 ] as const
 
 const DETAIL_COLUMN_WIDTHS = [
-  12, 10, 14, 16, 8, 8, 12, 12, 10, 6, 8, 8, 10, 10,
+  12, 10, 14, 16, 8, 8, 12, 12, 10, 6, 8, 8, 10, 10, 10,
 ] as const
 
 const DAILY_REPORT_HEADERS = [
@@ -53,12 +53,13 @@ const DAILY_REPORT_HEADERS = [
   '合格重量',
   '不良数',
   '不良重量',
+  '不良原因',
   '',
   '电梯料',
 ] as const
 
 const DAILY_REPORT_COLUMN_WIDTHS = [
-  10, 18, 14, 16, 12, 10, 18, 8, 12, 10, 12, 4, 10,
+  10, 18, 14, 16, 12, 10, 18, 8, 12, 10, 12, 24, 4, 10,
 ] as const
 
 function formatDate(value: string | null | undefined) {
@@ -187,6 +188,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       qualifiedWeight: number
       defectiveQuantity: number
       defectiveWeight: number
+      defectReasons: Set<string>
     }
   >()
 
@@ -218,10 +220,14 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       qualifiedWeight: 0,
       defectiveQuantity: 0,
       defectiveWeight: 0,
+      defectReasons: new Set<string>(),
     }
 
     if (order.employee_name) {
       current.employees.add(order.employee_name)
+    }
+    if (order.defect_reason?.trim()) {
+      current.defectReasons.add(order.defect_reason.trim())
     }
     current.quantity += Number(order.quantity) || 0
     current.qualifiedWeight += getQualifiedWeight(order)
@@ -250,6 +256,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       roundTo(row.qualifiedWeight, 2),
       row.defectiveQuantity ? roundTo(row.defectiveQuantity, 1) : '',
       roundTo(row.defectiveWeight, 2),
+      Array.from(row.defectReasons).join('\n'),
       '',
       '',
     ])

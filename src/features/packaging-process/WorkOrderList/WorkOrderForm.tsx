@@ -50,6 +50,7 @@ interface WorkOrderFormValues {
   unit: string
   quantity: number
   defective_quantity: number
+  defect_reason: string | null
   standard_seconds: number
   extra_qualified_hours: number
   remark: string | null
@@ -74,6 +75,7 @@ const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
   unit: '支',
   quantity: 0,
   defective_quantity: 0,
+  defect_reason: null,
   standard_seconds: 0,
   extra_qualified_hours: 0,
   remark: null,
@@ -166,6 +168,7 @@ export default function WorkOrderForm({
         unit: initialValues.unit || '支',
         quantity: initialValues.quantity,
         defective_quantity: initialValues.defective_quantity ?? 0,
+        defect_reason: initialValues.defect_reason ?? null,
         standard_seconds: initialValues.standard_seconds,
         extra_qualified_hours: initialValues.extra_qualified_hours ?? 0,
         remark: initialValues.remark,
@@ -257,6 +260,7 @@ export default function WorkOrderForm({
         unit: values.unit,
         quantity: values.quantity,
         defective_quantity: values.defective_quantity,
+        defect_reason: values.defect_reason,
         standard_seconds: values.standard_seconds,
         extra_qualified_hours: values.extra_qualified_hours,
         remark: values.remark,
@@ -391,6 +395,14 @@ export default function WorkOrderForm({
 
           <Form.Item label="不良重量(kg)">
             <Input disabled value={defectiveWeightKg} />
+          </Form.Item>
+
+          <Form.Item
+            name="defect_reason"
+            label="不良原因"
+            className="md:col-span-2"
+          >
+            <Input.TextArea rows={3} placeholder="请输入不良原因" />
           </Form.Item>
 
           <Form.Item label="人均产量">

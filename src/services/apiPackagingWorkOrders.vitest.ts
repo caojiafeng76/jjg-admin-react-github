@@ -43,6 +43,7 @@ describe('buildPackagingWorkOrderPayload', () => {
         unit: '千克',
         quantity: 12,
         defective_quantity: 2,
+        defect_reason: ' 划伤 ',
         standard_seconds: 30,
         extra_qualified_hours: 1.5,
         remark: null,
@@ -52,6 +53,7 @@ describe('buildPackagingWorkOrderPayload', () => {
       unit: '千克',
       weight_per_meter_kg: 1.2345,
       defective_quantity: 2,
+      defect_reason: '划伤',
       extra_qualified_hours: 1.5,
     })
   })
@@ -76,6 +78,7 @@ describe('buildPackagingWorkOrderPayload', () => {
       unit: '支',
       weight_per_meter_kg: 0,
       defective_quantity: 0,
+      defect_reason: null,
       extra_qualified_hours: 0,
     })
   })
