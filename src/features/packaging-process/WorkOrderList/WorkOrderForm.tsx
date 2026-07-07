@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { App, DatePicker, Form, Input, InputNumber, Select, type FormInstance } from 'antd'
 import dayjs from 'dayjs'
 
@@ -28,8 +28,14 @@ interface WorkOrderFormValues {
   unit: string
   quantity: number
   standard_seconds: number
+  extra_qualified_hours: number
   remark: string | null
 }
+
+const UNIT_OPTIONS = [
+  { label: '支', value: '支' },
+  { label: '千克', value: '千克' },
+]
 
 const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
   work_date: dayjs(),
@@ -43,7 +49,23 @@ const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
   unit: '支',
   quantity: 0,
   standard_seconds: 0,
+  extra_qualified_hours: 0,
   remark: null,
+}
+
+function FormSection({
+  title,
+  children,
+}: {
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <section className="rounded-md border border-slate-200 bg-slate-50/50 p-3">
+      <div className="mb-3 text-sm font-medium text-slate-700">{title}</div>
+      <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">{children}</div>
+    </section>
+  )
 }
 
 export default function WorkOrderForm({
@@ -99,6 +121,7 @@ export default function WorkOrderForm({
         unit: initialValues.unit || '支',
         quantity: initialValues.quantity,
         standard_seconds: initialValues.standard_seconds,
+        extra_qualified_hours: initialValues.extra_qualified_hours ?? 0,
         remark: initialValues.remark,
       })
       setProjectNoValue(initialValues.project_no || undefined)
@@ -137,7 +160,7 @@ export default function WorkOrderForm({
           part_no: orderInfo.material_code ?? null,
           standard_seconds: standardSeconds,
         })
-      } catch (error) {
+      } catch {
         message.warning('项目号信息获取失败，请手动填写')
       }
     },
@@ -166,6 +189,7 @@ export default function WorkOrderForm({
         unit: values.unit,
         quantity: values.quantity,
         standard_seconds: values.standard_seconds,
+        extra_qualified_hours: values.extra_qualified_hours,
         remark: values.remark,
       }
       onFinish(formValues)
@@ -175,7 +199,8 @@ export default function WorkOrderForm({
 
   return (
     <Form form={form} layout="vertical" onFinish={handleFinish} disabled={isSubmitting}>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex flex-col gap-4">
+        <FormSection title="基础信息">
         <Form.Item name="work_date" label="日期" rules={[{ required: true, message: '请选择日期' }]}>
           <DatePicker className="w-full" />
         </Form.Item>
@@ -183,29 +208,30 @@ export default function WorkOrderForm({
         <Form.Item name="employee_id" label="人员" rules={[{ required: true, message: '请选择人员' }]}>
           <Select
             allowClear
-            showSearch
+            showSearch={{ optionFilterProp: 'label' }}
             placeholder="请选择人员"
-            optionFilterProp="label"
             options={employeeSelectOptions}
           />
         </Form.Item>
 
-        <Form.Item label="项目号" className="col-span-2">
+          <Form.Item label="项目号" className="md:col-span-2">
           <Select
             allowClear
-            showSearch
+            showSearch={{
+              filterOption: (input, option) =>
+                String(option?.searchText || '')
+                  .toLowerCase()
+                  .includes(input.trim().toLowerCase()),
+            }}
             placeholder="请选择或搜索项目号"
             value={projectNoValue}
             onChange={handleProjectNoChange}
-            filterOption={(input, option) =>
-              String(option?.searchText || '')
-                .toLowerCase()
-                .includes(input.trim().toLowerCase())
-            }
             options={projectNoSelectOptions}
           />
         </Form.Item>
+        </FormSection>
 
+        <FormSection title="产品信息">
         <Form.Item name="product_model" label="型号" rules={[{ required: true, message: '请输入型号' }]}>
           <Input placeholder="请输入型号" allowClear />
         </Form.Item>
@@ -225,9 +251,11 @@ export default function WorkOrderForm({
         <Form.Item name="part_no" label="料号">
           <Input placeholder="请输入料号" allowClear />
         </Form.Item>
+        </FormSection>
 
-        <Form.Item name="unit" label="单位" rules={[{ required: true, message: '请输入单位' }]} initialValue="支">
-          <Input placeholder="单位" />
+        <FormSection title="工时产量">
+        <Form.Item name="unit" label="单位" rules={[{ required: true, message: '请选择单位' }]} initialValue="支">
+          <Select placeholder="请选择单位" options={UNIT_OPTIONS} />
         </Form.Item>
 
         <Form.Item name="quantity" label="数量" rules={[{ required: true, message: '请输入数量' }]}>
@@ -238,13 +266,26 @@ export default function WorkOrderForm({
           <InputNumber min={0} step={1} className="w-full" placeholder="请输入标准工时" />
         </Form.Item>
 
+        <Form.Item name="extra_qualified_hours" label="零工（小时）">
+          <InputNumber
+            min={0}
+            step={0.5}
+            precision={2}
+            className="w-full"
+            placeholder="例如 1.5"
+          />
+        </Form.Item>
+
         <Form.Item label="时间（小时）">
           <Input disabled value={workHours} />
         </Form.Item>
+        </FormSection>
 
-        <Form.Item name="remark" label="备注" className="col-span-2">
+        <FormSection title="备注">
+        <Form.Item name="remark" label="备注" className="md:col-span-2">
           <Input.TextArea rows={3} placeholder="请输入备注" />
         </Form.Item>
+        </FormSection>
       </div>
     </Form>
   )

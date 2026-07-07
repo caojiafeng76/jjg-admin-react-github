@@ -120,6 +120,15 @@ function WorkOrderTable({
           value !== null && value !== undefined ? Number(value).toFixed(2) : '0.00',
       },
       {
+        title: '零工',
+        dataIndex: 'extra_qualified_hours',
+        key: 'extra_qualified_hours',
+        width: 90,
+        align: 'right' as const,
+        render: (value: number | null | undefined) =>
+          value !== null && value !== undefined ? Number(value).toFixed(2) : '0.00',
+      },
+      {
         title: '备注',
         dataIndex: 'remark',
         key: 'remark',
@@ -154,7 +163,7 @@ function WorkOrderTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1600, y: scrollY }}
+      scroll={{ x: 1690, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

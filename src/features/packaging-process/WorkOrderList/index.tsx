@@ -225,10 +225,10 @@ export default function WorkOrderListPage() {
       if (exported) {
         setSelectedRowKeys([])
       }
-    } catch (error) {
+    } catch {
       // hook already handled error message
     }
-  }, [data?.items, exportAsExcel, message, searchParams, viewerDenied, viewerOperationTip])
+  }, [data, exportAsExcel, message, searchParams, viewerDenied, viewerOperationTip])
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
@@ -299,7 +299,7 @@ export default function WorkOrderListPage() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
-        destroyOnClose
+        destroyOnHidden
         width={760}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         okButtonProps={{

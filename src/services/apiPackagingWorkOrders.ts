@@ -16,6 +16,7 @@ export interface PackagingWorkOrder {
   quantity: number
   standard_seconds: number
   work_hours: number
+  extra_qualified_hours: number
   remark: string | null
   created_at: string
   updated_at: string
@@ -33,6 +34,7 @@ export interface PackagingWorkOrderFormValues {
   unit: string
   quantity: number
   standard_seconds: number
+  extra_qualified_hours?: number
   remark: string | null
 }
 
@@ -46,6 +48,8 @@ export interface PackagingWorkOrderSearchParams {
 type DynamicSupabaseTable = {
   from: (table: string) => any
 }
+
+const PACKAGING_WORK_ORDER_UNITS = new Set(['支', '千克'])
 
 function packagingWorkOrderTable() {
   return (supabase as unknown as DynamicSupabaseTable).from(
@@ -62,7 +66,12 @@ function normalizeNumber(value: number | null | undefined) {
   return Number.isFinite(normalized) ? normalized : 0
 }
 
-function normalizeFormValues(
+function normalizeUnit(value: string | null | undefined) {
+  const normalized = String(value ?? '').trim()
+  return PACKAGING_WORK_ORDER_UNITS.has(normalized) ? normalized : '支'
+}
+
+export function buildPackagingWorkOrderPayload(
   values: PackagingWorkOrderFormValues,
 ): PackagingWorkOrderFormValues {
   return {
@@ -74,9 +83,10 @@ function normalizeFormValues(
     process_name: normalizeText(values.process_name),
     length_mm: values.length_mm ?? null,
     part_no: normalizeText(values.part_no),
-    unit: String(values.unit ?? '支').trim() || '支',
+    unit: normalizeUnit(values.unit),
     quantity: normalizeNumber(values.quantity),
     standard_seconds: normalizeNumber(values.standard_seconds),
+    extra_qualified_hours: normalizeNumber(values.extra_qualified_hours),
     remark: normalizeText(values.remark),
   }
 }
@@ -145,7 +155,7 @@ export async function getPackagingWorkOrderList({
 export async function createPackagingWorkOrder(
   values: PackagingWorkOrderFormValues,
 ) {
-  const payload = normalizeFormValues(values)
+  const payload = buildPackagingWorkOrderPayload(values)
 
   const { error } = await packagingWorkOrderTable().insert(payload)
 
@@ -161,7 +171,7 @@ export async function updatePackagingWorkOrder({
   id: string
   values: PackagingWorkOrderFormValues
 }) {
-  const payload = normalizeFormValues(values)
+  const payload = buildPackagingWorkOrderPayload(values)
 
   const { error } = await packagingWorkOrderTable()
     .update(payload)
