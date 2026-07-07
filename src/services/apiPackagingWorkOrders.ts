@@ -6,6 +6,8 @@ export interface PackagingWorkOrder {
   work_date: string
   employee_id: string | null
   employee_name?: string
+  employee_hourly_wage?: number | null
+  employee_position_salary?: number | null
   project_no: string | null
   product_model: string
   color_name: string | null
@@ -139,7 +141,9 @@ export async function getPackagingWorkOrderList({
     `
       *,
       packaging_employees (
-        name
+        name,
+        hourly_wage,
+        position_salary
       )
     `,
     { count: 'exact' },
@@ -176,6 +180,9 @@ export async function getPackagingWorkOrderList({
   const items = (data || []).map((item: any) => ({
     ...item,
     employee_name: item.packaging_employees?.name || null,
+    employee_hourly_wage: item.packaging_employees?.hourly_wage ?? null,
+    employee_position_salary:
+      item.packaging_employees?.position_salary ?? null,
   }))
 
   return {

@@ -47,6 +47,11 @@ function formatHours(value: number | null | undefined) {
   return Number(value).toFixed(2)
 }
 
+function formatMoney(value: number | null | undefined) {
+  if (value === null || value === undefined) return '0.00'
+  return Number(value).toFixed(2)
+}
+
 function formatCellText(value: string | number | null | undefined) {
   if (value === null || value === undefined) return ''
   return String(value)
@@ -128,6 +133,8 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
   const totalByDateEmployee = new Map<string, number>()
   const totalByDate = new Map<string, number>()
   const totalByEmployee = new Map<string, number>()
+  const hourlyWageByEmployee = new Map<string, number>()
+  const positionSalaryByEmployee = new Map<string, number>()
   let grandTotal = 0
 
   for (const order of orders) {
@@ -143,6 +150,15 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
     )
     totalByDate.set(date, (totalByDate.get(date) || 0) + hours)
     totalByEmployee.set(emp, (totalByEmployee.get(emp) || 0) + hours)
+    if (!hourlyWageByEmployee.has(emp)) {
+      hourlyWageByEmployee.set(emp, Number(order.employee_hourly_wage) || 0)
+    }
+    if (!positionSalaryByEmployee.has(emp)) {
+      positionSalaryByEmployee.set(
+        emp,
+        Number(order.employee_position_salary) || 0,
+      )
+    }
     grandTotal += hours
   }
 
@@ -163,11 +179,40 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
   }
   totalRow.push(grandTotal.toFixed(2))
 
+  const hourlyWageRow: Array<string | number> = ['时薪']
+  for (const emp of employees) {
+    hourlyWageRow.push(formatMoney(hourlyWageByEmployee.get(emp) || 0))
+  }
+  hourlyWageRow.push('')
+
+  const positionSalaryRow: Array<string | number> = ['岗位工资']
+  let totalPositionSalary = 0
+  for (const emp of employees) {
+    const positionSalary = positionSalaryByEmployee.get(emp) || 0
+    totalPositionSalary += positionSalary
+    positionSalaryRow.push(formatMoney(positionSalary))
+  }
+  positionSalaryRow.push(formatMoney(totalPositionSalary))
+
+  const salaryRow: Array<string | number> = ['工资']
+  let totalSalary = 0
+  for (const emp of employees) {
+    const salary =
+      (totalByEmployee.get(emp) || 0) * (hourlyWageByEmployee.get(emp) || 0) +
+      (positionSalaryByEmployee.get(emp) || 0)
+    totalSalary += salary
+    salaryRow.push(formatMoney(salary))
+  }
+  salaryRow.push(formatMoney(totalSalary))
+
   const data: Array<Array<string | number>> = [
     ['包装车间工时表', ...header.slice(1).map(() => '')],
     header,
     ...bodyRows,
     totalRow,
+    hourlyWageRow,
+    positionSalaryRow,
+    salaryRow,
   ]
 
   const worksheet = XLSX.utils.aoa_to_sheet(data)
@@ -183,7 +228,7 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
   return worksheet
 }
 
-function buildWorkbook(orders: PackagingWorkOrder[]) {
+export function buildWorkbook(orders: PackagingWorkOrder[]) {
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, buildDetailSheet(orders), '产量清单')
   XLSX.utils.book_append_sheet(workbook, buildPivotSheet(orders), '工时工资表')
