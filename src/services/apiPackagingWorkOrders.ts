@@ -206,6 +206,31 @@ export async function getPackagingWorkOrderList({
   }
 }
 
+export async function getAllPackagingWorkOrders({
+  searchParams,
+}: {
+  searchParams: PackagingWorkOrderSearchParams
+}) {
+  const pageSize = 1000
+  const allItems: PackagingWorkOrder[] = []
+  let page = 1
+
+  while (true) {
+    const result = await getPackagingWorkOrderList({
+      page,
+      pageSize,
+      searchParams,
+    })
+
+    allItems.push(...result.items)
+    if (result.items.length === 0) break
+    if (allItems.length >= result.total) break
+    page += 1
+  }
+
+  return allItems
+}
+
 export async function createPackagingWorkOrder(
   values: PackagingWorkOrderFormValues,
 ) {

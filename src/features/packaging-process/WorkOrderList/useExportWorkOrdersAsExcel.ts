@@ -7,16 +7,14 @@ import {
   EXCEL_WRITE_OPTIONS,
   applyRegisterSheetStyles,
 } from '@/utils/excelStyleUtils'
-import type { PackagingWorkOrder } from '@/services/apiPackagingWorkOrders'
+import {
+  getAllPackagingWorkOrders,
+  type PackagingWorkOrder,
+  type PackagingWorkOrderSearchParams,
+} from '@/services/apiPackagingWorkOrders'
 
 interface ExportInput {
-  orders: PackagingWorkOrder[]
-  searchParams?: {
-    startDate?: string
-    endDate?: string
-    employeeId?: string
-    keyword?: string
-  }
+  searchParams: PackagingWorkOrderSearchParams
 }
 
 const DETAIL_HEADERS = [
@@ -409,20 +407,21 @@ export function useExportWorkOrdersAsExcel() {
   const [isExporting, setIsExporting] = useState(false)
 
   const exportAsExcel = useCallback(
-    async ({ orders, searchParams }: ExportInput) => {
-      if (!orders.length) {
-        message.warning('当前页没有可导出的数据')
-        return false
-      }
-
+    async ({ searchParams }: ExportInput) => {
       setIsExporting(true)
 
       try {
+        const orders = await getAllPackagingWorkOrders({ searchParams })
+
+        if (!orders.length) {
+          message.warning('当前筛选条件下没有可导出的数据')
+          return false
+        }
+
         const buffer = buildWorkbook(orders)
 
-        const start = searchParams?.startDate || orders[0]?.work_date
-        const end =
-          searchParams?.endDate || orders[orders.length - 1]?.work_date
+        const start = searchParams.startDate || orders[0]?.work_date
+        const end = searchParams.endDate || orders[orders.length - 1]?.work_date
         const dateLabel =
           start && end ? `${start}_${end}` : dayjs().format('YYYY-MM-DD')
 
