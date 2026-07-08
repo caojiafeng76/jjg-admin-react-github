@@ -219,7 +219,6 @@ export default function WorkOrderListPage() {
 
     try {
       const exported = await exportAsExcel({
-        orders: data?.items ?? [],
         searchParams,
       })
       if (exported) {
@@ -228,7 +227,7 @@ export default function WorkOrderListPage() {
     } catch {
       // hook already handled error message
     }
-  }, [data, exportAsExcel, message, searchParams, viewerDenied, viewerOperationTip])
+  }, [exportAsExcel, message, searchParams, viewerDenied, viewerOperationTip])
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
