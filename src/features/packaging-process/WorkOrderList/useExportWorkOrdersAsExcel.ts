@@ -46,6 +46,7 @@ const DAILY_REPORT_HEADERS = [
   '项目号',
   '长度（MM)',
   '包装数量',
+  '单位',
   '表面处理',
   '米重',
   '合格重量',
@@ -57,7 +58,7 @@ const DAILY_REPORT_HEADERS = [
 ] as const
 
 const DAILY_REPORT_COLUMN_WIDTHS = [
-  10, 18, 14, 16, 12, 10, 18, 8, 12, 10, 12, 24, 4, 10,
+  10, 18, 14, 16, 12, 10, 8, 18, 8, 12, 10, 12, 24, 4, 10,
 ] as const
 
 function formatDate(value: string | null | undefined) {
@@ -102,6 +103,8 @@ function getSurfaceTreatment(order: PackagingWorkOrder) {
 
 function getQualifiedWeight(order: PackagingWorkOrder) {
   const quantity = Number(order.quantity) || 0
+  if (order.unit === '千克') return quantity
+
   const lengthMm = Number(order.length_mm) || 0
   const weightPerMeterKg = Number(order.weight_per_meter_kg) || 0
   return (quantity * lengthMm * weightPerMeterKg) / 1000
@@ -184,6 +187,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       productModel: string
       projectNo: string
       lengthMm: number
+      unit: string
       surfaceTreatment: string
       weightPerMeterKg: number
       quantity: number
@@ -199,6 +203,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
     const productModel = order.product_model || ''
     const projectNo = order.project_no || ''
     const lengthMm = Number(order.length_mm) || 0
+    const unit = order.unit || ''
     const surfaceTreatment = getSurfaceTreatment(order)
     const weightPerMeterKg = Number(order.weight_per_meter_kg) || 0
     const key = [
@@ -206,6 +211,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       productModel,
       projectNo,
       lengthMm,
+      unit,
       surfaceTreatment,
       weightPerMeterKg,
     ].join('|')
@@ -216,6 +222,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       productModel,
       projectNo,
       lengthMm,
+      unit,
       surfaceTreatment,
       weightPerMeterKg,
       quantity: 0,
@@ -259,6 +266,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       row.projectNo,
       row.lengthMm || '',
       roundedQuantity,
+      row.unit,
       row.surfaceTreatment,
       roundTo(row.weightPerMeterKg, 4),
       roundTo(row.qualifiedWeight, 2),
@@ -296,6 +304,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
     '',
     '',
     Math.round(totalQuantity),
+    '',
     '',
     '',
     roundTo(totalQualifiedWeight, 2),

@@ -151,6 +151,7 @@ describe('buildWorkbook', () => {
       '项目号',
       '长度（MM)',
       '包装数量',
+      '单位',
       '表面处理',
       '米重',
       '合格重量',
@@ -167,6 +168,7 @@ describe('buildWorkbook', () => {
       'P-1',
       1000,
       15,
+      '支',
       '喷涂',
       1.2,
       18,
@@ -247,6 +249,7 @@ describe('buildWorkbook', () => {
       '',
       '',
       300,
+      '支',
       '喷涂',
       0,
       0,
@@ -265,12 +268,68 @@ describe('buildWorkbook', () => {
       310,
       '',
       '',
+      '',
       15,
       2,
       3,
       '',
       '',
       300,
+    ])
+  })
+
+  it('uses packaging quantity as qualified weight when unit is kilogram', () => {
+    const buffer = buildWorkbook([
+      {
+        id: 'order-1',
+        work_date: '2026-07-08',
+        employee_id: 'employee-1',
+        employee_name: '谭玉芳',
+        employee_hourly_wage: 20,
+        employee_position_salary: 100,
+        project_no: 'P-KG',
+        product_model: 'M-KG',
+        color_name: '喷涂',
+        process_name: null,
+        length_mm: 1000,
+        part_no: null,
+        weight_per_meter_kg: 2,
+        unit: '千克',
+        quantity: 2371,
+        defective_quantity: 0,
+        defective_weight_kg: 0,
+        defect_reason: null,
+        standard_seconds: 360,
+        work_hours: 1,
+        extra_qualified_hours: 0,
+        remark: null,
+        created_at: '2026-07-08T00:00:00Z',
+        updated_at: '2026-07-08T00:00:00Z',
+      },
+    ] as PackagingWorkOrder[])
+
+    const workbook = XLSX.read(buffer, { type: 'array' })
+    const dailyRows = XLSX.utils.sheet_to_json<Array<string | number>>(
+      workbook.Sheets['生产日报表'],
+      { header: 1 },
+    )
+
+    expect(dailyRows[2]).toEqual([
+      '7.8',
+      '谭玉芳',
+      'M-KG',
+      'P-KG',
+      1000,
+      2371,
+      '千克',
+      '喷涂',
+      2,
+      2371,
+      '',
+      0,
+      '',
+      '',
+      '',
     ])
   })
 })
