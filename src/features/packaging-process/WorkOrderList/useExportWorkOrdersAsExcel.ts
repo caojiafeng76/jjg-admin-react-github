@@ -117,6 +117,10 @@ function getDefectiveWeight(order: PackagingWorkOrder) {
   return (defectiveQuantity * lengthMm * weightPerMeterKg) / 1000
 }
 
+function isElevatorMaterial(productModel: string) {
+  return productModel.trim().includes('电梯料')
+}
+
 function downloadExcel(buffer: ArrayBuffer, filename: string) {
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -234,13 +238,19 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
     grouped.set(key, current)
   }
 
-  const rows = Array.from(grouped.values())
-    .sort((a, b) => {
-      const dateCompare = a.workDate.localeCompare(b.workDate)
-      if (dateCompare !== 0) return dateCompare
-      return a.projectNo.localeCompare(b.projectNo)
-    })
-    .map((row, index, rows) => [
+  const groupedRows = Array.from(grouped.values()).sort((a, b) => {
+    const dateCompare = a.workDate.localeCompare(b.workDate)
+    if (dateCompare !== 0) return dateCompare
+    return a.projectNo.localeCompare(b.projectNo)
+  })
+
+  const rows = groupedRows.map((row, index, rows) => {
+    const roundedQuantity = Math.round(row.quantity)
+    const elevatorQuantity = isElevatorMaterial(row.productModel)
+      ? roundedQuantity
+      : ''
+
+    return [
       index === 0 || row.workDate !== rows[index - 1].workDate
         ? formatDailyDate(row.workDate)
         : '',
@@ -248,7 +258,7 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       row.productModel,
       row.projectNo,
       row.lengthMm || '',
-      Math.round(row.quantity),
+      roundedQuantity,
       row.surfaceTreatment,
       roundTo(row.weightPerMeterKg, 4),
       roundTo(row.qualifiedWeight, 2),
@@ -256,13 +266,51 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
       roundTo(row.defectiveWeight, 2),
       Array.from(row.defectReasons).join('\n'),
       '',
-      '',
-    ])
+      elevatorQuantity,
+    ]
+  })
+
+  const totalQuantity = groupedRows.reduce((sum, row) => sum + row.quantity, 0)
+  const totalQualifiedWeight = groupedRows.reduce(
+    (sum, row) => sum + row.qualifiedWeight,
+    0,
+  )
+  const totalDefectiveQuantity = groupedRows.reduce(
+    (sum, row) => sum + row.defectiveQuantity,
+    0,
+  )
+  const totalDefectiveWeight = groupedRows.reduce(
+    (sum, row) => sum + row.defectiveWeight,
+    0,
+  )
+  const totalElevatorQuantity = groupedRows.reduce(
+    (sum, row) =>
+      sum + (isElevatorMaterial(row.productModel) ? row.quantity : 0),
+    0,
+  )
+
+  const totalRow = [
+    '合计',
+    '',
+    '',
+    '',
+    '',
+    Math.round(totalQuantity),
+    '',
+    '',
+    roundTo(totalQualifiedWeight, 2),
+    Math.round(totalDefectiveQuantity),
+    roundTo(totalDefectiveWeight, 2),
+    '',
+    '',
+    Math.round(totalElevatorQuantity),
+  ]
 
   const data: Array<Array<string | number>> = [
     ['包装车间生产日报表', ...DAILY_REPORT_HEADERS.slice(1).map(() => '')],
     Array.from(DAILY_REPORT_HEADERS),
     ...rows,
+    totalRow,
   ]
 
   const worksheet = XLSX.utils.aoa_to_sheet(data)

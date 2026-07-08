@@ -177,4 +177,100 @@ describe('buildWorkbook', () => {
       '',
     ])
   })
+
+  it('shows elevator quantity and adds daily report totals', () => {
+    const buffer = buildWorkbook([
+      {
+        id: 'order-1',
+        work_date: '2026-07-08',
+        employee_id: 'employee-1',
+        employee_name: '李自芬',
+        employee_hourly_wage: 20,
+        employee_position_salary: 100,
+        project_no: null,
+        product_model: '电梯料',
+        color_name: '喷涂',
+        process_name: null,
+        length_mm: null,
+        part_no: null,
+        weight_per_meter_kg: 0,
+        unit: '支',
+        quantity: 300,
+        defective_quantity: 0,
+        defective_weight_kg: 0,
+        defect_reason: null,
+        standard_seconds: 360,
+        work_hours: 1,
+        extra_qualified_hours: 0,
+        remark: null,
+        created_at: '2026-07-08T00:00:00Z',
+        updated_at: '2026-07-08T00:00:00Z',
+      },
+      {
+        id: 'order-2',
+        work_date: '2026-07-08',
+        employee_id: 'employee-2',
+        employee_name: '应采妹',
+        employee_hourly_wage: 20,
+        employee_position_salary: 100,
+        project_no: 'P-2',
+        product_model: 'M-2',
+        color_name: '氧化',
+        process_name: null,
+        length_mm: 1000,
+        part_no: null,
+        weight_per_meter_kg: 1.5,
+        unit: '支',
+        quantity: 10,
+        defective_quantity: 2,
+        defective_weight_kg: 3,
+        defect_reason: '划伤',
+        standard_seconds: 360,
+        work_hours: 1,
+        extra_qualified_hours: 0,
+        remark: null,
+        created_at: '2026-07-08T00:00:00Z',
+        updated_at: '2026-07-08T00:00:00Z',
+      },
+    ] as PackagingWorkOrder[])
+
+    const workbook = XLSX.read(buffer, { type: 'array' })
+    const dailyRows = XLSX.utils.sheet_to_json<Array<string | number>>(
+      workbook.Sheets['生产日报表'],
+      { header: 1 },
+    )
+
+    expect(dailyRows[2]).toEqual([
+      '7.8',
+      '李自芬',
+      '电梯料',
+      '',
+      '',
+      300,
+      '喷涂',
+      0,
+      0,
+      '',
+      0,
+      '',
+      '',
+      300,
+    ])
+    expect(dailyRows[4]).toEqual([
+      '合计',
+      '',
+      '',
+      '',
+      '',
+      310,
+      '',
+      '',
+      15,
+      2,
+      3,
+      '',
+      '',
+      300,
+    ])
+  })
 })
