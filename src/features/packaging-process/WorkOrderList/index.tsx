@@ -260,7 +260,7 @@ export default function WorkOrderListPage() {
         <ExportButton
           handleExport={handleExport}
           loading={isExporting}
-          count={data?.items.length || 0}
+          count={data?.total || 0}
           permissionKey={EXPORT_PERMISSION_KEY}
         />
       </div>
