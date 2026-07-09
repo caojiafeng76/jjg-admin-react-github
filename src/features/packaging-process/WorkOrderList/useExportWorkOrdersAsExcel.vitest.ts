@@ -73,7 +73,7 @@ describe('buildWorkbook', () => {
     expect(rows).toContainEqual(['工资', '150.00', '150.00'])
   })
 
-  it('adds daily report sheet without merging original work order rows', () => {
+  it('keeps separate input batches while merging employees from the same input', () => {
     const buffer = buildWorkbook([
       {
         id: 'order-1',
@@ -127,6 +127,32 @@ describe('buildWorkbook', () => {
         created_at: '2026-06-01T00:00:00Z',
         updated_at: '2026-06-01T00:00:00Z',
       },
+      {
+        id: 'order-3',
+        work_date: '2026-06-01',
+        employee_id: 'employee-3',
+        employee_name: '王五',
+        employee_hourly_wage: 20,
+        employee_position_salary: 100,
+        project_no: 'P-1',
+        product_model: 'M-1',
+        color_name: '喷涂',
+        process_name: null,
+        length_mm: 1000,
+        part_no: null,
+        weight_per_meter_kg: 1.2,
+        unit: '支',
+        quantity: 7,
+        defective_quantity: 0,
+        defective_weight_kg: 0,
+        defect_reason: null,
+        standard_seconds: 360,
+        work_hours: 0.7,
+        extra_qualified_hours: 0,
+        remark: null,
+        created_at: '2026-06-01T00:01:00Z',
+        updated_at: '2026-06-01T00:01:00Z',
+      },
     ] as PackagingWorkOrder[])
 
     const workbook = XLSX.read(buffer, { type: 'array' })
@@ -163,15 +189,15 @@ describe('buildWorkbook', () => {
     ])
     expect(dailyRows[2]).toEqual([
       '6.1',
-      '张三',
+      '张三、李四',
       'M-1',
       'P-1',
       1000,
-      10,
+      15,
       '支',
       '喷涂',
       1.2,
-      12,
+      18,
       1,
       1.2,
       '划伤\n变形',
@@ -180,18 +206,18 @@ describe('buildWorkbook', () => {
     ])
     expect(dailyRows[3]).toEqual([
       '',
-      '李四',
+      '王五',
       'M-1',
       'P-1',
       1000,
-      5,
+      7,
       '支',
       '喷涂',
       1.2,
-      6,
+      8.4,
       '',
       0,
-      '划伤\n变形',
+      '',
       '',
       '',
     ])
@@ -201,11 +227,11 @@ describe('buildWorkbook', () => {
       '',
       '',
       '',
-      15,
+      22,
       '',
       '',
       '',
-      18,
+      26.4,
       1,
       1.2,
       '',

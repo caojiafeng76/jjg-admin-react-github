@@ -124,6 +124,10 @@ function isElevatorMaterial(productModel: string) {
   return productModel.trim().includes('电梯料')
 }
 
+function getInputBatchKey(order: PackagingWorkOrder) {
+  return order.created_at || order.id
+}
+
 function downloadExcel(buffer: ArrayBuffer, filename: string) {
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -179,61 +183,129 @@ function buildDetailSheet(orders: PackagingWorkOrder[]) {
 }
 
 function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
-  const rows = orders.map((order, index) => {
+  const grouped = new Map<
+    string,
+    {
+      workDate: string
+      inputBatchKey: string
+      employees: Set<string>
+      productModel: string
+      projectNo: string
+      lengthMm: number
+      unit: string
+      surfaceTreatment: string
+      weightPerMeterKg: number
+      quantity: number
+      qualifiedWeight: number
+      defectiveQuantity: number
+      defectiveWeight: number
+      defectReasons: Set<string>
+    }
+  >()
+
+  for (const order of orders) {
     const workDate = order.work_date || ''
+    const inputBatchKey = getInputBatchKey(order)
     const productModel = order.product_model || ''
-    const quantity = Number(order.quantity) || 0
-    const roundedQuantity = Math.round(quantity)
-    const defectiveQuantity = Number(order.defective_quantity) || 0
-    const defectiveWeight = getDefectiveWeight(order)
-    const elevatorQuantity = isElevatorMaterial(productModel)
+    const projectNo = order.project_no || ''
+    const lengthMm = Number(order.length_mm) || 0
+    const unit = order.unit || ''
+    const surfaceTreatment = getSurfaceTreatment(order)
+    const weightPerMeterKg = Number(order.weight_per_meter_kg) || 0
+    const key = [
+      workDate,
+      inputBatchKey,
+      productModel,
+      projectNo,
+      lengthMm,
+      unit,
+      surfaceTreatment,
+      weightPerMeterKg,
+    ].join('|')
+
+    const current = grouped.get(key) || {
+      workDate,
+      inputBatchKey,
+      employees: new Set<string>(),
+      productModel,
+      projectNo,
+      lengthMm,
+      unit,
+      surfaceTreatment,
+      weightPerMeterKg,
+      quantity: 0,
+      qualifiedWeight: 0,
+      defectiveQuantity: 0,
+      defectiveWeight: 0,
+      defectReasons: new Set<string>(),
+    }
+
+    if (order.employee_name) {
+      current.employees.add(order.employee_name)
+    }
+    if (order.defect_reason?.trim()) {
+      current.defectReasons.add(order.defect_reason.trim())
+    }
+    current.quantity += Number(order.quantity) || 0
+    current.qualifiedWeight += getQualifiedWeight(order)
+    current.defectiveQuantity += Number(order.defective_quantity) || 0
+    current.defectiveWeight += getDefectiveWeight(order)
+    grouped.set(key, current)
+  }
+
+  const groupedRows = Array.from(grouped.values()).sort((a, b) => {
+    const dateCompare = a.workDate.localeCompare(b.workDate)
+    if (dateCompare !== 0) return dateCompare
+    const batchCompare = a.inputBatchKey.localeCompare(b.inputBatchKey)
+    if (batchCompare !== 0) return batchCompare
+    return a.projectNo.localeCompare(b.projectNo)
+  })
+
+  const rows = groupedRows.map((row, index, rows) => {
+    const roundedQuantity = Math.round(row.quantity)
+    const elevatorQuantity = isElevatorMaterial(row.productModel)
       ? roundedQuantity
       : ''
 
     return [
-      index === 0 || workDate !== (orders[index - 1].work_date || '')
-        ? formatDailyDate(workDate)
+      index === 0 || row.workDate !== rows[index - 1].workDate
+        ? formatDailyDate(row.workDate)
         : '',
-      formatCellText(order.employee_name),
-      productModel,
-      formatCellText(order.project_no),
-      Number(order.length_mm) || '',
+      Array.from(row.employees).join('、'),
+      row.productModel,
+      row.projectNo,
+      row.lengthMm || '',
       roundedQuantity,
-      order.unit || '',
-      getSurfaceTreatment(order),
-      roundTo(Number(order.weight_per_meter_kg) || 0, 4),
-      roundTo(getQualifiedWeight(order), 2),
-      defectiveQuantity ? Math.round(defectiveQuantity) : '',
-      roundTo(defectiveWeight, 2),
-      order.defect_reason?.trim() || '',
+      row.unit,
+      row.surfaceTreatment,
+      roundTo(row.weightPerMeterKg, 4),
+      roundTo(row.qualifiedWeight, 2),
+      row.defectiveQuantity ? Math.round(row.defectiveQuantity) : '',
+      roundTo(row.defectiveWeight, 2),
+      Array.from(row.defectReasons).join('\n'),
       '',
       elevatorQuantity,
     ]
   })
 
-  const totalQuantity = orders.reduce(
-    (sum, order) => sum + (Number(order.quantity) || 0),
+  const totalQuantity = groupedRows.reduce((sum, row) => sum + row.quantity, 0)
+  const totalQualifiedWeight = groupedRows.reduce(
+    (sum, row) => sum + row.qualifiedWeight,
     0,
   )
-  const totalQualifiedWeight = orders.reduce(
-    (sum, order) => sum + getQualifiedWeight(order),
+  const totalDefectiveQuantity = groupedRows.reduce(
+    (sum, row) => sum + row.defectiveQuantity,
     0,
   )
-  const totalDefectiveQuantity = orders.reduce(
-    (sum, order) => sum + (Number(order.defective_quantity) || 0),
+  const totalDefectiveWeight = groupedRows.reduce(
+    (sum, row) => sum + row.defectiveWeight,
     0,
   )
-  const totalDefectiveWeight = orders.reduce(
-    (sum, order) => sum + getDefectiveWeight(order),
+  const totalElevatorQuantity = groupedRows.reduce(
+    (sum, row) =>
+      sum + (isElevatorMaterial(row.productModel) ? row.quantity : 0),
     0,
   )
-  const totalElevatorQuantity = orders.reduce((sum, order) => {
-    const productModel = order.product_model || ''
-    return (
-      sum +
-      (isElevatorMaterial(productModel) ? Number(order.quantity) || 0 : 0)
-    )
-  }, 0)
 
   const totalRow = [
     '合计',
