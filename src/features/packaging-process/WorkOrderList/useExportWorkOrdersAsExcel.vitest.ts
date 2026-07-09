@@ -73,7 +73,7 @@ describe('buildWorkbook', () => {
     expect(rows).toContainEqual(['工资', '150.00', '150.00'])
   })
 
-  it('adds daily report sheet and keeps defect fields out of detail sheet', () => {
+  it('adds daily report sheet without merging original work order rows', () => {
     const buffer = buildWorkbook([
       {
         id: 'order-1',
@@ -163,20 +163,54 @@ describe('buildWorkbook', () => {
     ])
     expect(dailyRows[2]).toEqual([
       '6.1',
-      '张三、李四',
+      '张三',
       'M-1',
       'P-1',
       1000,
-      15,
+      10,
       '支',
       '喷涂',
       1.2,
-      18,
+      12,
       1,
       1.2,
       '划伤\n变形',
       '',
       '',
+    ])
+    expect(dailyRows[3]).toEqual([
+      '',
+      '李四',
+      'M-1',
+      'P-1',
+      1000,
+      5,
+      '支',
+      '喷涂',
+      1.2,
+      6,
+      '',
+      0,
+      '划伤\n变形',
+      '',
+      '',
+    ])
+    expect(dailyRows[4]).toEqual([
+      '合计',
+      '',
+      '',
+      '',
+      '',
+      15,
+      '',
+      '',
+      '',
+      18,
+      1,
+      1.2,
+      '',
+      '',
+      0,
     ])
   })
 
