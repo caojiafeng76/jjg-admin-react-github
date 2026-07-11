@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, render, screen } from '@testing-library/react'
 
 import {
   PermissionProtectedRoute,
@@ -32,6 +32,10 @@ vi.mock('react-router-dom', async () => {
 })
 
 describe('RouteGuards', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     mockUseLocation.mockReturnValue({
