@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 const supabaseMock = vi.hoisted(() => ({
   from: vi.fn(),
+  rpc: vi.fn(),
 }))
 
 vi.mock('./supabase', () => ({
@@ -11,6 +12,8 @@ vi.mock('./supabase', () => ({
 import {
   buildPackagingWorkOrderCreatePayloads,
   buildPackagingWorkOrderPayload,
+  createPackagingWorkOrder,
+  getPackagingWorkOrderList,
   getStandardSecondsByPartNo,
 } from './apiPackagingWorkOrders'
 
@@ -85,6 +88,32 @@ describe('buildPackagingWorkOrderPayload', () => {
 })
 
 describe('buildPackagingWorkOrderCreatePayloads', () => {
+  it('attaches one persisted input batch id to every split employee detail', () => {
+    const payloads = buildPackagingWorkOrderCreatePayloads(
+      {
+        work_date: '2026-07-07',
+        employee_ids: ['employee-1', 'employee-2'],
+        project_no: '26070601-01',
+        product_model: '105-308',
+        color_name: null,
+        process_name: null,
+        length_mm: null,
+        part_no: null,
+        unit: '支',
+        quantity: 100,
+        defective_quantity: 2,
+        standard_seconds: 30,
+        remark: null,
+      },
+      '11111111-1111-4111-8111-111111111111',
+    )
+
+    expect(payloads.map((payload) => payload.input_batch_id)).toEqual([
+      '11111111-1111-4111-8111-111111111111',
+      '11111111-1111-4111-8111-111111111111',
+    ])
+  })
+
   it('splits quantity evenly across selected employees with one decimal place', () => {
     const payloads = buildPackagingWorkOrderCreatePayloads({
       work_date: '2026-07-07',
@@ -138,6 +167,87 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       employee_id: 'employee-1',
       quantity: 100,
       defective_quantity: 2,
+    })
+  })
+})
+
+describe('batch data access', () => {
+  const values = {
+    work_date: '2026-07-07',
+    employee_ids: ['employee-1', 'employee-2'],
+    project_no: '26070601-01',
+    product_model: '105-308',
+    color_name: null,
+    process_name: null,
+    length_mm: null,
+    part_no: null,
+    weight_per_meter_kg: 1.2345,
+    unit: '支',
+    quantity: 100,
+    defective_quantity: 2,
+    standard_seconds: 30,
+    extra_qualified_hours: 0,
+    remark: null,
+  }
+
+  it('saves a new work order through the atomic batch RPC', async () => {
+    supabaseMock.rpc.mockResolvedValue({
+      data: '11111111-1111-4111-8111-111111111111',
+      error: null,
+    })
+
+    await createPackagingWorkOrder(values)
+
+    expect(supabaseMock.rpc).toHaveBeenCalledWith(
+      'save_packaging_work_order_batch',
+      expect.objectContaining({
+        p_input_batch_id: null,
+        p_values: expect.objectContaining({ employee_ids: values.employee_ids }),
+      }),
+    )
+  })
+
+  it('reads paginated work orders from the batch list RPC', async () => {
+    supabaseMock.rpc.mockResolvedValue({
+      data: [
+        {
+          id: '11111111-1111-4111-8111-111111111111',
+          input_batch_id: '11111111-1111-4111-8111-111111111111',
+          employee_ids: ['employee-1', 'employee-2'],
+          employee_names: ['张三', '李四'],
+          quantity: 100,
+          defective_quantity: 2,
+          total_count: 1,
+        },
+      ],
+      error: null,
+    })
+
+    const result = await getPackagingWorkOrderList({
+      page: 2,
+      pageSize: 10,
+      searchParams: { keyword: '张三' },
+    })
+
+    expect(supabaseMock.rpc).toHaveBeenCalledWith(
+      'get_packaging_work_order_batches',
+      {
+        p_page: 2,
+        p_page_size: 10,
+        p_keyword: '张三',
+        p_start_date: null,
+        p_end_date: null,
+        p_employee_id: null,
+      },
+    )
+    expect(result).toMatchObject({
+      total: 1,
+      items: [
+        {
+          employee_ids: ['employee-1', 'employee-2'],
+          employee_names: ['张三', '李四'],
+        },
+      ],
     })
   })
 })

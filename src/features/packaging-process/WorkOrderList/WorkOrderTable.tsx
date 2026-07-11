@@ -2,11 +2,11 @@ import { memo, useMemo } from 'react'
 import { Table, type TableColumnsType } from 'antd'
 import dayjs from 'dayjs'
 
-import type { PackagingWorkOrder } from '@/services/apiPackagingWorkOrders'
+import type { PackagingWorkOrderBatch } from '@/services/apiPackagingWorkOrders'
 
 interface Props {
   loading: boolean
-  data: PackagingWorkOrder[]
+  data: PackagingWorkOrderBatch[]
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   page: number
@@ -25,7 +25,7 @@ function WorkOrderTable({
   scrollY = 400,
   rowHeight = 40,
 }: Props) {
-  const columns: TableColumnsType<PackagingWorkOrder> = useMemo(
+  const columns: TableColumnsType<PackagingWorkOrderBatch> = useMemo(
     () => [
       {
         title: '#',
@@ -43,10 +43,10 @@ function WorkOrderTable({
       },
       {
         title: '人员',
-        dataIndex: 'employee_name',
-        key: 'employee_name',
-        width: 100,
-        render: (value: string | null | undefined) => value || '-',
+        dataIndex: 'employee_names',
+        key: 'employee_names',
+        width: 140,
+        render: (value: string[] | null | undefined) => value?.join('、') || '-',
       },
       {
         title: '项目号',
@@ -150,7 +150,7 @@ function WorkOrderTable({
         align: 'right' as const,
       },
       {
-        title: '时间(小时)',
+        title: '人均时间(小时)',
         dataIndex: 'work_hours',
         key: 'work_hours',
         width: 110,
@@ -159,6 +159,24 @@ function WorkOrderTable({
           value !== null && value !== undefined
             ? Number(value).toFixed(2)
             : '0.00',
+      },
+      {
+        title: '总工时(小时)',
+        dataIndex: 'total_work_hours',
+        key: 'total_work_hours',
+        width: 110,
+        align: 'right' as const,
+        render: (value: number) =>
+          value !== null && value !== undefined
+            ? Number(value).toFixed(2)
+            : '0.00',
+      },
+      {
+        title: '数据状态',
+        dataIndex: 'is_historical_inconsistent',
+        key: 'is_historical_inconsistent',
+        width: 130,
+        render: (value: boolean) => (value ? '历史数据不一致' : '-'),
       },
       {
         title: '零工',
@@ -199,14 +217,14 @@ function WorkOrderTable({
   )
 
   return (
-    <Table<PackagingWorkOrder>
+    <Table<PackagingWorkOrderBatch>
       rowKey="id"
       loading={loading}
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 2160, y: scrollY }}
+      scroll={{ x: 2380, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'

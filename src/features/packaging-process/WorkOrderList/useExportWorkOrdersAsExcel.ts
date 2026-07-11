@@ -125,7 +125,7 @@ function isElevatorMaterial(productModel: string) {
 }
 
 function getInputBatchKey(order: PackagingWorkOrder) {
-  return order.created_at || order.id
+  return order.input_batch_id || order.created_at || order.id
 }
 
 function downloadExcel(buffer: ArrayBuffer, filename: string) {

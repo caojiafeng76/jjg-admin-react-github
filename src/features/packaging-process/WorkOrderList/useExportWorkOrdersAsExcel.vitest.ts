@@ -5,6 +5,74 @@ import type { PackagingWorkOrder } from '@/services/apiPackagingWorkOrders'
 import { buildWorkbook } from './useExportWorkOrdersAsExcel'
 
 describe('buildWorkbook', () => {
+  it('keeps different persisted batches separate even when they share a creation time', () => {
+    const buffer = buildWorkbook([
+      {
+        id: 'order-1',
+        input_batch_id: 'batch-1',
+        work_date: '2026-06-01',
+        employee_id: 'employee-1',
+        employee_name: '张三',
+        employee_hourly_wage: 20,
+        employee_position_salary: 100,
+        project_no: 'P-1',
+        product_model: 'M-1',
+        color_name: null,
+        process_name: null,
+        length_mm: 1000,
+        part_no: null,
+        weight_per_meter_kg: 1,
+        unit: '支',
+        quantity: 10,
+        defective_quantity: 0,
+        defective_weight_kg: 0,
+        defect_reason: null,
+        standard_seconds: 360,
+        work_hours: 1,
+        extra_qualified_hours: 0,
+        remark: null,
+        created_at: '2026-06-01T00:00:00Z',
+        updated_at: '2026-06-01T00:00:00Z',
+      },
+      {
+        id: 'order-2',
+        input_batch_id: 'batch-2',
+        work_date: '2026-06-01',
+        employee_id: 'employee-2',
+        employee_name: '李四',
+        employee_hourly_wage: 20,
+        employee_position_salary: 100,
+        project_no: 'P-1',
+        product_model: 'M-1',
+        color_name: null,
+        process_name: null,
+        length_mm: 1000,
+        part_no: null,
+        weight_per_meter_kg: 1,
+        unit: '支',
+        quantity: 8,
+        defective_quantity: 0,
+        defective_weight_kg: 0,
+        defect_reason: null,
+        standard_seconds: 360,
+        work_hours: 0.8,
+        extra_qualified_hours: 0,
+        remark: null,
+        created_at: '2026-06-01T00:00:00Z',
+        updated_at: '2026-06-01T00:00:00Z',
+      },
+    ] as unknown as PackagingWorkOrder[])
+
+    const workbook = XLSX.read(buffer, { type: 'array' })
+    const rows = XLSX.utils.sheet_to_json(
+      workbook.Sheets['生产日报表'],
+      { header: 1 },
+    ) as Array<Array<string | number>>
+
+    expect(rows[2][5]).toBe(10)
+    expect(rows[3][5]).toBe(8)
+  })
+
   it('adds salary rows using total hours, hourly wage, and position salary', () => {
     const buffer = buildWorkbook([
       {

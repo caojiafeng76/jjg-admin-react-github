@@ -3,6 +3,7 @@ import { handleApiError } from '@/utils/errorHandler'
 
 export interface PackagingWorkOrder {
   id: string
+  input_batch_id?: string | null
   work_date: string
   employee_id: string | null
   employee_name?: string
@@ -28,6 +29,14 @@ export interface PackagingWorkOrder {
   updated_at: string
 }
 
+export interface PackagingWorkOrderBatch extends PackagingWorkOrder {
+  input_batch_id: string
+  employee_ids: string[]
+  employee_names: string[]
+  total_work_hours: number
+  is_historical_inconsistent: boolean
+}
+
 export interface PackagingWorkOrderFormValues {
   work_date: string
   employee_id?: string | null
@@ -48,6 +57,11 @@ export interface PackagingWorkOrderFormValues {
   remark: string | null
 }
 
+export interface PackagingWorkOrderDetailPayload
+  extends PackagingWorkOrderFormValues {
+  input_batch_id?: string
+}
+
 export interface PackagingWorkOrderSearchParams {
   keyword?: string
   startDate?: string
@@ -57,6 +71,10 @@ export interface PackagingWorkOrderSearchParams {
 
 type DynamicSupabaseTable = {
   from: (table: string) => any
+}
+
+type DynamicSupabaseRpc = {
+  rpc: (name: string, args: Record<string, unknown>) => Promise<any>
 }
 
 const PACKAGING_WORK_ORDER_UNITS = new Set(['支', '千克'])
@@ -118,7 +136,8 @@ export function buildPackagingWorkOrderPayload(
 
 export function buildPackagingWorkOrderCreatePayloads(
   values: PackagingWorkOrderFormValues,
-): PackagingWorkOrderFormValues[] {
+  inputBatchId?: string,
+): PackagingWorkOrderDetailPayload[] {
   const employeeIds = normalizeEmployeeIds(values)
   const basePayload = buildPackagingWorkOrderPayload(values)
 
@@ -135,10 +154,20 @@ export function buildPackagingWorkOrderCreatePayloads(
 
   return employeeIds.map((employeeId) => ({
     ...basePayload,
+    ...(inputBatchId ? { input_batch_id: inputBatchId } : {}),
     employee_id: employeeId,
     quantity: splitQuantity,
     defective_quantity: splitDefectiveQuantity,
   }))
+}
+
+function buildPackagingWorkOrderBatchPayload(
+  values: PackagingWorkOrderFormValues,
+) {
+  return {
+    ...buildPackagingWorkOrderPayload(values),
+    employee_ids: normalizeEmployeeIds(values),
+  }
 }
 
 export async function getPackagingWorkOrderList({
@@ -150,59 +179,30 @@ export async function getPackagingWorkOrderList({
   pageSize: number
   searchParams: PackagingWorkOrderSearchParams
 }) {
-  const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-
-  let query = packagingWorkOrderTable().select(
-    `
-      *,
-      packaging_employees (
-        name,
-        hourly_wage,
-        position_salary
-      )
-    `,
-    { count: 'exact' },
+  const { data, error } = await (supabase as unknown as DynamicSupabaseRpc).rpc(
+    'get_packaging_work_order_batches',
+    {
+      p_page: page,
+      p_page_size: pageSize,
+      p_keyword: searchParams.keyword?.trim() || null,
+      p_start_date: searchParams.startDate || null,
+      p_end_date: searchParams.endDate || null,
+      p_employee_id: searchParams.employeeId || null,
+    },
   )
-
-  if (searchParams.keyword?.trim()) {
-    const normalizedKeyword = searchParams.keyword.trim()
-    query = query.or(
-      `product_model.ilike.%${normalizedKeyword}%,project_no.ilike.%${normalizedKeyword}%,part_no.ilike.%${normalizedKeyword}%`,
-    )
-  }
-
-  if (searchParams.startDate) {
-    query = query.gte('work_date', searchParams.startDate)
-  }
-
-  if (searchParams.endDate) {
-    query = query.lte('work_date', searchParams.endDate)
-  }
-
-  if (searchParams.employeeId) {
-    query = query.eq('employee_id', searchParams.employeeId)
-  }
-
-  const { data, error, count } = await query
-    .order('work_date', { ascending: false })
-    .order('created_at', { ascending: false })
-    .range(from, to)
 
   if (error) {
     throw handleApiError(error, '获取生产工单列表失败')
   }
 
-  const items = (data || []).map((item: any) => ({
+  const items = (data || []).map((item: PackagingWorkOrderBatch) => ({
     ...item,
-    employee_name: item.packaging_employees?.name || null,
-    employee_hourly_wage: item.packaging_employees?.hourly_wage ?? null,
-    employee_position_salary: item.packaging_employees?.position_salary ?? null,
+    employee_name: item.employee_names.join('、'),
   }))
 
   return {
-    items: items as PackagingWorkOrder[],
-    total: count || 0,
+    items: items as PackagingWorkOrderBatch[],
+    total: Number(data?.[0]?.total_count || 0),
   }
 }
 
@@ -216,15 +216,41 @@ export async function getAllPackagingWorkOrders({
   let page = 1
 
   while (true) {
-    const result = await getPackagingWorkOrderList({
-      page,
-      pageSize,
-      searchParams,
-    })
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
+    let query = packagingWorkOrderTable().select(
+      `*, packaging_employees (name, hourly_wage, position_salary)`,
+      { count: 'exact' },
+    )
 
-    allItems.push(...result.items)
-    if (result.items.length === 0) break
-    if (allItems.length >= result.total) break
+    if (searchParams.keyword?.trim()) {
+      const keyword = searchParams.keyword.trim()
+      query = query.or(
+        `product_model.ilike.%${keyword}%,project_no.ilike.%${keyword}%,part_no.ilike.%${keyword}%`,
+      )
+    }
+    if (searchParams.startDate) query = query.gte('work_date', searchParams.startDate)
+    if (searchParams.endDate) query = query.lte('work_date', searchParams.endDate)
+    if (searchParams.employeeId) query = query.eq('employee_id', searchParams.employeeId)
+
+    const { data, error, count } = await query
+      .order('work_date', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取生产工单导出数据失败')
+    }
+
+    const items = (data || []).map((item: any) => ({
+      ...item,
+      employee_name: item.packaging_employees?.name || null,
+      employee_hourly_wage: item.packaging_employees?.hourly_wage ?? null,
+      employee_position_salary: item.packaging_employees?.position_salary ?? null,
+    })) as PackagingWorkOrder[]
+
+    allItems.push(...items)
+    if (items.length === 0 || allItems.length >= (count || 0)) break
     page += 1
   }
 
@@ -234,9 +260,13 @@ export async function getAllPackagingWorkOrders({
 export async function createPackagingWorkOrder(
   values: PackagingWorkOrderFormValues,
 ) {
-  const payload = buildPackagingWorkOrderCreatePayloads(values)
-
-  const { error } = await packagingWorkOrderTable().insert(payload)
+  const { error } = await (supabase as unknown as DynamicSupabaseRpc).rpc(
+    'save_packaging_work_order_batch',
+    {
+      p_input_batch_id: null,
+      p_values: buildPackagingWorkOrderBatchPayload(values),
+    },
+  )
 
   if (error) {
     throw handleApiError(error, '创建生产工单失败')
@@ -246,24 +276,61 @@ export async function createPackagingWorkOrder(
 export async function updatePackagingWorkOrder({
   id,
   values,
+  isHistoricalInconsistent = false,
 }: {
   id: string
   values: PackagingWorkOrderFormValues
+  isHistoricalInconsistent?: boolean
 }) {
-  const payload = buildPackagingWorkOrderPayload(values)
+  if (isHistoricalInconsistent) {
+    const { error } = await packagingWorkOrderTable()
+      .update(buildPackagingWorkOrderPayload(values))
+      .eq('id', id)
 
-  const { error } = await packagingWorkOrderTable().update(payload).eq('id', id)
+    if (error) {
+      throw handleApiError(error, '更新生产工单失败')
+    }
+    return
+  }
+
+  const { error } = await (supabase as unknown as DynamicSupabaseRpc).rpc(
+    'save_packaging_work_order_batch',
+    {
+      p_input_batch_id: id,
+      p_values: buildPackagingWorkOrderBatchPayload(values),
+    },
+  )
 
   if (error) {
     throw handleApiError(error, '更新生产工单失败')
   }
 }
 
-export async function deletePackagingWorkOrder(ids: string[]) {
-  const { error } = await packagingWorkOrderTable().delete().in('id', ids)
+export async function deletePackagingWorkOrder({
+  batchIds,
+  legacyDetailIds,
+}: {
+  batchIds: string[]
+  legacyDetailIds: string[]
+}) {
+  if (batchIds.length > 0) {
+    const { error } = await packagingWorkOrderTable()
+      .delete()
+      .in('input_batch_id', batchIds)
 
-  if (error) {
-    throw handleApiError(error, '删除生产工单失败')
+    if (error) {
+      throw handleApiError(error, '删除生产工单失败')
+    }
+  }
+
+  if (legacyDetailIds.length > 0) {
+    const { error } = await packagingWorkOrderTable()
+      .delete()
+      .in('id', legacyDetailIds)
+
+    if (error) {
+      throw handleApiError(error, '删除生产工单失败')
+    }
   }
 }
 

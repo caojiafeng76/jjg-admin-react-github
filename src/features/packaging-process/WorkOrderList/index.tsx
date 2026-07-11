@@ -12,7 +12,7 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
-  PackagingWorkOrder,
+  PackagingWorkOrderBatch,
   PackagingWorkOrderFormValues,
 } from '@/services/apiPackagingWorkOrders'
 import WorkOrderForm from './WorkOrderForm'
@@ -54,7 +54,7 @@ export default function WorkOrderListPage() {
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] =
-    useState<PackagingWorkOrder | null>(null)
+    useState<PackagingWorkOrderBatch | null>(null)
   const [formRef, setFormRef] =
     useState<FormInstance<PackagingWorkOrderFormValues> | null>(null)
 
@@ -123,7 +123,19 @@ export default function WorkOrderListPage() {
     }
 
     try {
-      await deleteMutation.mutateAsync(selectedRowKeys as string[])
+      const selectedRecords = data?.items.filter((item) =>
+        selectedRowKeys.includes(item.id),
+      )
+      await deleteMutation.mutateAsync({
+        batchIds:
+          selectedRecords
+            ?.filter((item) => !item.is_historical_inconsistent)
+            .map((item) => item.input_batch_id) || [],
+        legacyDetailIds:
+          selectedRecords
+            ?.filter((item) => item.is_historical_inconsistent)
+            .map((item) => item.id) || [],
+      })
       message.success('生产工单删除成功')
       setSelectedRowKeys([])
     } catch (error) {
@@ -133,7 +145,7 @@ export default function WorkOrderListPage() {
         message.error('删除生产工单失败，请稍后重试')
       }
     }
-  }, [deleteMutation, message, selectedRowKeys])
+  }, [data, deleteMutation, message, selectedRowKeys])
 
   const handleFinish = useCallback(
     async (rawValues: PackagingWorkOrderFormValues) => {
@@ -150,10 +162,12 @@ export default function WorkOrderListPage() {
       }
 
       try {
-        if (isEdit && selectedRowKeys[0]) {
+        if (isEdit && editingRecord) {
           await updateMutation.mutateAsync({
-            id: selectedRowKeys[0] as string,
+            id: editingRecord.id,
             values,
+            isHistoricalInconsistent:
+              editingRecord.is_historical_inconsistent,
           })
           message.success('生产工单更新成功')
         } else {
@@ -172,10 +186,10 @@ export default function WorkOrderListPage() {
     },
     [
       createMutation,
+      editingRecord,
       isEdit,
       message,
       resetFormState,
-      selectedRowKeys,
       updateMutation,
       viewerDenied,
       viewerOperationTip,
@@ -312,6 +326,9 @@ export default function WorkOrderListPage() {
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          isHistoricalInconsistent={
+            isEdit && editingRecord?.is_historical_inconsistent
+          }
         />
       </Modal>
     </div>

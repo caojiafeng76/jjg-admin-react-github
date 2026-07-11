@@ -18,6 +18,7 @@ import dayjs from 'dayjs'
 
 import type {
   PackagingWorkOrder,
+  PackagingWorkOrderBatch,
   PackagingWorkOrderFormValues,
 } from '@/services/apiPackagingWorkOrders'
 import {
@@ -33,7 +34,11 @@ interface Props {
   onFinish: (values: PackagingWorkOrderFormValues) => void
   setFormRef: (form: FormInstance<PackagingWorkOrderFormValues>) => void
   isSubmitting: boolean
-  initialValues?: PackagingWorkOrder | PackagingWorkOrderFormValues
+  initialValues?:
+    | PackagingWorkOrder
+    | PackagingWorkOrderBatch
+    | PackagingWorkOrderFormValues
+  isHistoricalInconsistent?: boolean
 }
 
 interface WorkOrderFormValues {
@@ -101,6 +106,7 @@ export default function WorkOrderForm({
   setFormRef,
   isSubmitting,
   initialValues,
+  isHistoricalInconsistent = false,
 }: Props) {
   const [form] = Form.useForm<WorkOrderFormValues>()
   const { message } = App.useApp()
@@ -155,9 +161,12 @@ export default function WorkOrderForm({
         ...DEFAULT_FORM_VALUES,
         work_date: workDate,
         employee_id: initialValues.employee_id,
-        employee_ids: initialValues.employee_id
-          ? [initialValues.employee_id]
-          : [],
+        employee_ids:
+          'employee_ids' in initialValues && initialValues.employee_ids
+            ? initialValues.employee_ids
+            : initialValues.employee_id
+              ? [initialValues.employee_id]
+              : [],
         project_no: initialValues.project_no,
         product_model: initialValues.product_model,
         color_name: initialValues.color_name,
@@ -295,7 +304,7 @@ export default function WorkOrderForm({
             <Select
               allowClear
               mode="multiple"
-              maxCount={initialValues ? 1 : undefined}
+              maxCount={isHistoricalInconsistent ? 1 : undefined}
               showSearch={{ optionFilterProp: 'label' }}
               placeholder="请选择人员"
               options={employeeSelectOptions}

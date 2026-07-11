@@ -736,9 +736,13 @@ export type Database = {
         Row: {
           color_name: string | null
           created_at: string
+          defect_reason: string | null
+          defective_quantity: number
+          defective_weight_kg: number | null
           employee_id: string | null
           extra_qualified_hours: number
           id: string
+          input_batch_id: string
           length_mm: number | null
           part_no: string | null
           process_name: string | null
@@ -749,15 +753,20 @@ export type Database = {
           standard_seconds: number
           unit: string
           updated_at: string
+          weight_per_meter_kg: number
           work_date: string
           work_hours: number | null
         }
         Insert: {
           color_name?: string | null
           created_at?: string
+          defect_reason?: string | null
+          defective_quantity?: number
+          defective_weight_kg?: number | null
           employee_id?: string | null
           extra_qualified_hours?: number
           id?: string
+          input_batch_id: string
           length_mm?: number | null
           part_no?: string | null
           process_name?: string | null
@@ -768,15 +777,20 @@ export type Database = {
           standard_seconds?: number
           unit?: string
           updated_at?: string
+          weight_per_meter_kg?: number
           work_date: string
           work_hours?: number | null
         }
         Update: {
           color_name?: string | null
           created_at?: string
+          defect_reason?: string | null
+          defective_quantity?: number
+          defective_weight_kg?: number | null
           employee_id?: string | null
           extra_qualified_hours?: number
           id?: string
+          input_batch_id?: string
           length_mm?: number | null
           part_no?: string | null
           process_name?: string | null
@@ -787,6 +801,7 @@ export type Database = {
           standard_seconds?: number
           unit?: string
           updated_at?: string
+          weight_per_meter_kg?: number
           work_date?: string
           work_hours?: number | null
         }
@@ -3162,6 +3177,44 @@ export type Database = {
         }
         Returns: Json
       }
+      get_packaging_work_order_batches: {
+        Args: {
+          p_employee_id?: string
+          p_end_date?: string
+          p_keyword?: string
+          p_page?: number
+          p_page_size?: number
+          p_start_date?: string
+        }
+        Returns: {
+          color_name: string
+          created_at: string
+          defect_reason: string
+          defective_quantity: number
+          defective_weight_kg: number
+          employee_ids: string[]
+          employee_names: string[]
+          extra_qualified_hours: number
+          id: string
+          input_batch_id: string
+          is_historical_inconsistent: boolean
+          length_mm: number
+          part_no: string
+          process_name: string
+          product_model: string
+          project_no: string
+          quantity: number
+          remark: string
+          standard_seconds: number
+          total_count: number
+          total_work_hours: number
+          unit: string
+          updated_at: string
+          weight_per_meter_kg: number
+          work_date: string
+          work_hours: number
+        }[]
+      }
       increment_serial_no: { Args: { increment_by: number }; Returns: number }
       is_admin: { Args: never; Returns: boolean }
       is_precision_cutting_admin: { Args: never; Returns: boolean }
@@ -3189,6 +3242,10 @@ export type Database = {
       refresh_youmai_inventory_pending_stock_out: {
         Args: { target_product_data_id: string }
         Returns: undefined
+      }
+      save_packaging_work_order_batch: {
+        Args: { p_input_batch_id: string; p_values: Json }
+        Returns: string
       }
       upsert_extrusion_production: {
         Args: { p_header: Json; p_items: Json }
