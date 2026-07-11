@@ -3,6 +3,18 @@ import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
+const fullSourceCoverage = {
+  all: true,
+  include: ['src/**/*.{ts,tsx}'],
+  exclude: [
+    'src/**/*.d.ts',
+    'src/**/*.test.{ts,tsx}',
+    'src/**/*.spec.{ts,tsx}',
+    'src/**/*.vitest.{ts,tsx}',
+    'src/test/**',
+  ],
+}
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -36,6 +48,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html'],
       reportsDirectory: './coverage',
+      ...fullSourceCoverage,
+      // Coverage gate only; it does not change application behavior.
+      thresholds: {
+        statements: 10,
+        branches: 7,
+        functions: 9,
+        lines: 10,
+      },
     },
   },
 })

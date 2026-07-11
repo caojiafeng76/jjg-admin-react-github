@@ -1,4 +1,5 @@
 import supabase from './supabase'
+import type { Database } from './database.types'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 import {
   buildOrIlikeFilter,
@@ -14,6 +15,9 @@ import {
 const WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE = 1000
 const WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE = 1000
 const WORKSHOP_ORDER_SKETCH_BUCKET = 'workshop-order-sketches'
+
+type SalesOrderInsert = Database['public']['Tables']['sales_orders']['Insert']
+type SalesOrderUpdate = Database['public']['Tables']['sales_orders']['Update']
 
 export interface WorkshopOrderDeleteBlocker {
   orderId: string
@@ -156,15 +160,23 @@ function assertWorkshopOrderHasMeaningfulContent(
 
 function buildSalesOrderPayload(
   values: WorkshopOrder,
+  mode: 'create',
+): SalesOrderInsert
+function buildSalesOrderPayload(
+  values: WorkshopOrder,
+  mode: 'update',
+): SalesOrderUpdate
+function buildSalesOrderPayload(
+  values: WorkshopOrder,
   mode: 'create' | 'update',
-) {
+): SalesOrderInsert | SalesOrderUpdate {
   const normalizedValues = normalizeWorkshopOrderInput(values)
   const hasClosedAtValue = Object.prototype.hasOwnProperty.call(
     values,
     'closed_at',
   )
 
-  const payload: Record<string, unknown> = {
+  const payload: SalesOrderUpdate = {
     product_delivery_date: normalizedValues.product_delivery_date,
     project_no: normalizedValues.project_no,
     product_model: normalizedValues.product_model,
@@ -185,8 +197,13 @@ function buildSalesOrderPayload(
   }
 
   if (mode === 'create') {
-    payload.status = normalizeWorkshopOrderStatus(normalizedValues.status)
-  } else if (normalizedValues.status != null) {
+    return {
+      ...payload,
+      status: normalizeWorkshopOrderStatus(normalizedValues.status),
+    }
+  }
+
+  if (normalizedValues.status != null) {
     payload.status = normalizeWorkshopOrderStatus(normalizedValues.status)
   } else {
     delete payload.status
@@ -202,7 +219,7 @@ function buildSalesOrderPayload(
 export function buildWorkshopOrderStatusUpdateValues(
   status: WorkshopOrder['status'],
   closedAt: Date | string = new Date(),
-) {
+): SalesOrderUpdate {
   const normalizedStatus = normalizeWorkshopOrderStatus(status)
   const normalizedClosedAt =
     typeof closedAt === 'string' ? closedAt : closedAt.toISOString()
@@ -731,15 +748,13 @@ export async function createWorkshopOrder(values: WorkshopOrder) {
     }
   }
 
-  const insertValues = {
-    ...buildSalesOrderPayload(
-      {
-        ...normalizedValues,
-        status: normalizedValues.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
-      },
-      'create',
-    ),
-  } as any
+  const insertValues = buildSalesOrderPayload(
+    {
+      ...normalizedValues,
+      status: normalizedValues.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
+    },
+    'create',
+  )
 
   const { error } = await supabase.from('sales_orders').insert(insertValues)
 
@@ -773,7 +788,7 @@ export async function updateWorkshopOrder({
   }
 
   // 处理 product_delivery_date 可能为 null 的情况
-  const updateValues = buildSalesOrderPayload(values, 'update') as any
+  const updateValues = buildSalesOrderPayload(values, 'update')
 
   const { error } = await supabase
     .from('sales_orders')
@@ -801,7 +816,7 @@ export async function updateWorkshopOrderStatuses({
   const updateValues = buildWorkshopOrderStatusUpdateValues(
     status,
     closed_at ?? new Date(),
-  ) as any
+  )
 
   const { error } = await supabase
     .from('sales_orders')
@@ -862,7 +877,7 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
           status: row.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
         },
         'create',
-      ) as any,
+      ),
   )
 
   const { error } = await supabase.from('sales_orders').insert(insertRows)
@@ -876,9 +891,8 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
 export async function deleteWorkshopOrders(ids: string[]) {
   await assertWorkshopOrdersNotReferenced(ids)
 
-  const { data: sketchRows, error: sketchError } = await (
-    supabase.from('sales_orders') as any
-  )
+  const { data: sketchRows, error: sketchError } = await supabase
+    .from('sales_orders')
     .select('sketch_file_path')
     .in('id', ids)
 
@@ -899,7 +913,7 @@ export async function deleteWorkshopOrders(ids: string[]) {
   }
 
   await removeWorkshopOrderSketchFiles(
-    ((sketchRows || []) as Array<{ sketch_file_path: string | null }>)
+    (sketchRows || [])
       .map((row) => row.sketch_file_path)
       .filter((path): path is string => Boolean(path)),
   )
