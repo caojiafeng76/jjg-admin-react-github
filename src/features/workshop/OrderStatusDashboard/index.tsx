@@ -30,7 +30,6 @@ import { useSearchParams } from 'react-router-dom'
 
 import { isAdminRole, isViewerRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
-import type { WorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
 import {
   useBatchUpdateWorkshopOrderStatuses,
   useWorkshopOrderModels,
@@ -57,27 +56,33 @@ import {
   REWORK_REPAIR_STATUS_LABELS,
   useOrderStatusDashboard,
 } from './useOrderStatusDashboard'
+import {
+  applyColumnWidths,
+  canCloseDashboardOrder,
+  DEFAULT_PAGE_SIZE,
+  EMPTY_SEARCH_VALUES,
+  extractNumberFilters,
+  extractTextFilters,
+  getColumnKey,
+  getTableColumnWidth,
+  MIN_RESIZABLE_COLUMN_WIDTH,
+  normalizeProductionStatusFilter,
+  normalizeStatusTab,
+  PRODUCTION_STATUS_OPTIONS,
+  STATUS_TABS,
+  type ColumnWidthMap,
+  type SearchValues,
+} from './dashboardUtils'
 
 const { Text, Title } = Typography
 
-const DEFAULT_PAGE_SIZE = 20
 const EMPTY_JOB_COLUMNS: OrderStatusJobColumn[] = []
-const MIN_RESIZABLE_COLUMN_WIDTH = 44
 
 const STATUS_COLOR: Record<OrderProductionStatus, string> = {
   正常: 'green',
   预警: 'gold',
   延期: 'red',
 }
-
-const PRODUCTION_STATUS_OPTIONS: Array<{
-  label: OrderProductionStatus
-  value: OrderProductionStatus
-}> = [
-  { label: '正常', value: '正常' },
-  { label: '预警', value: '预警' },
-  { label: '延期', value: '延期' },
-]
 
 const JOB_OUTPUT_COLUMN_WIDTH = 72
 const JOB_OUTPUT_COLUMN_ORDER = [
@@ -152,17 +157,6 @@ type SelectedPrecisionCuttingDetail = {
 type SelectedExtrusionDetail = {
   record: OrderStatusDashboardItem
 }
-
-type SearchValues = {
-  customer: string
-  materialCode: string
-  model: string
-  orderDate: string
-  productionStatus: OrderProductionStatus | ''
-  projectNo: string
-}
-
-type ColumnWidthMap = Record<string, number>
 
 type ResizableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement> & {
   columnKey?: string
@@ -272,97 +266,6 @@ const DENSE_TABLE_COMPONENTS = {
   body: { cell: DenseBodyCell },
   header: { cell: ResizableHeaderCell },
 } satisfies NonNullable<TableProps<OrderStatusDashboardItem>['components']>
-
-function getColumnKey<RecordType>(
-  column: TableColumnsType<RecordType>[number],
-) {
-  if (column.key !== undefined) {
-    return String(column.key)
-  }
-
-  if ('dataIndex' in column && column.dataIndex !== undefined) {
-    return Array.isArray(column.dataIndex)
-      ? column.dataIndex.join('.')
-      : String(column.dataIndex)
-  }
-
-  return ''
-}
-
-function applyColumnWidths<RecordType>(
-  columns: TableColumnsType<RecordType>,
-  columnWidths: ColumnWidthMap,
-  onResizeColumn: (columnKey: string, width: number) => void,
-): TableColumnsType<RecordType> {
-  return columns.map((column) => {
-    const columnKey = getColumnKey(column)
-    const defaultWidth = typeof column.width === 'number' ? column.width : 0
-    const width = columnKey
-      ? (columnWidths[columnKey] ?? defaultWidth)
-      : defaultWidth
-
-    return {
-      ...column,
-      width,
-      onHeaderCell: () =>
-        ({
-          columnKey,
-          minWidth: MIN_RESIZABLE_COLUMN_WIDTH,
-          onResizeColumn,
-          width,
-        }) as ResizableHeaderCellProps,
-    }
-  })
-}
-
-function getTableColumnWidth<RecordType>(
-  columns: TableColumnsType<RecordType>,
-) {
-  return columns.reduce((total, column) => {
-    const width = column.width
-
-    return total + (typeof width === 'number' ? width : 0)
-  }, 0)
-}
-
-const EMPTY_SEARCH_VALUES: SearchValues = {
-  customer: '',
-  materialCode: '',
-  model: '',
-  orderDate: '',
-  productionStatus: '',
-  projectNo: '',
-}
-
-const STATUS_TABS: Array<{ key: WorkshopOrderStatus; label: string }> = [
-  { key: '生产中', label: '生产中' },
-  { key: '已结案', label: '已结案' },
-]
-
-function normalizeStatusTab(value: string | null): WorkshopOrderStatus {
-  return value === '已结案' ? '已结案' : '生产中'
-}
-
-function canCloseDashboardOrder({
-  canManageStatus,
-  record,
-}: {
-  canManageStatus: boolean
-  record: OrderStatusDashboardItem
-}) {
-  return (
-    canManageStatus &&
-    Boolean(record.id) &&
-    normalizeStatusTab(record.status ?? null) !== '已结案' &&
-    (record.completionRate ?? 0) >= 100
-  )
-}
-
-function normalizeProductionStatusFilter(
-  value: string | null,
-): OrderProductionStatus | '' {
-  return value === '正常' || value === '预警' || value === '延期' ? value : ''
-}
 
 function renderText(value: string | number | null | undefined) {
   const text =
@@ -1674,39 +1577,6 @@ function ExtrusionDetailModal({
       )}
     </Modal>
   )
-}
-
-function extractTextFilters(
-  items: OrderStatusDashboardItem[],
-  getter: (item: OrderStatusDashboardItem) => string | null | undefined,
-) {
-  const values = Array.from(
-    new Set(
-      items
-        .map(getter)
-        .map((v) => (typeof v === 'string' ? v.trim() : v))
-        .filter((v): v is string => Boolean(v)),
-    ),
-  ).sort((a, b) => a.localeCompare(b, 'zh-CN'))
-  return values.map((v) => ({ text: v, value: v }))
-}
-
-function extractNumberFilters(
-  items: OrderStatusDashboardItem[],
-  getter: (item: OrderStatusDashboardItem) => number | null | undefined,
-  format?: (v: number) => string,
-) {
-  const values = Array.from(
-    new Set(
-      items
-        .map(getter)
-        .filter((v): v is number => v !== null && v !== undefined),
-    ),
-  ).sort((a, b) => a - b)
-  return values.map((v) => ({
-    text: format ? format(v) : String(v),
-    value: v,
-  }))
 }
 
 export default function OrderStatusDashboard() {

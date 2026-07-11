@@ -76,13 +76,7 @@ export function RoleHomeRedirect() {
 
   useEffect(() => {
     if (loading || permLoading || !user || !employeeProfile || !role) return
-    let cancelled = false
-    deriveDefaultHome(role, permissions).then((path) => {
-      if (!cancelled) setTarget(path)
-    })
-    return () => {
-      cancelled = true
-    }
+    setTarget(deriveDefaultHome(role, permissions))
   }, [loading, permLoading, user, employeeProfile, role, permissions])
 
   if (loading || permLoading) {
