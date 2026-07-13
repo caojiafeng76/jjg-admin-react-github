@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
   Alert,
@@ -16,6 +16,12 @@ import type {
   YoumaiProductDataOption,
 } from '@/services/apiYoumaiFinishedGoodsStockOut'
 
+import {
+  createProductOptionSnapshot,
+  useRemoteSelectOptions,
+} from '../remoteSelectOptions'
+import { useYoumaiProductDataOptions } from './useYoumaiFinishedGoodsStockOut'
+
 interface YoumaiFinishedGoodsStockOutFormFields {
   product_data_id: string
   purchase_order_no: string
@@ -30,7 +36,6 @@ interface Props {
   onFinish: (values: YoumaiFinishedGoodsStockOutFormValues) => void
   setFormRef: (form: FormInstance) => void
   isSubmitting: boolean
-  productOptions: YoumaiProductDataOption[]
   initialValues?:
     | YoumaiFinishedGoodsStockOut
     | YoumaiFinishedGoodsStockOutFormValues
@@ -51,16 +56,27 @@ export default function YoumaiFinishedGoodsStockOutForm({
   onFinish,
   setFormRef,
   isSubmitting,
-  productOptions,
   initialValues,
   isAuditLocked = false,
 }: Props) {
   const [form] = Form.useForm<YoumaiFinishedGoodsStockOutFormFields>()
+  const [productOptionKeyword, setProductOptionKeyword] = useState('')
+  const { data: productOptions = [], isFetching: areProductOptionsLoading } =
+    useYoumaiProductDataOptions(productOptionKeyword)
+  const initialProductSnapshot = useMemo(
+    () => createProductOptionSnapshot(initialValues),
+    [initialValues],
+  )
+  const { mergedOptions, rememberSelectedOption } =
+    useRemoteSelectOptions<YoumaiProductDataOption>(
+      productOptions,
+      initialProductSnapshot,
+    )
   const selectedProductId = Form.useWatch('product_data_id', form)
 
   const selectedProduct = useMemo(
-    () => productOptions.find((item) => item.id === selectedProductId),
-    [productOptions, selectedProductId],
+    () => mergedOptions.find((item) => item.id === selectedProductId),
+    [mergedOptions, selectedProductId],
   )
 
   useEffect(() => {
@@ -124,17 +140,17 @@ export default function YoumaiFinishedGoodsStockOutForm({
         <Select
           disabled={isAuditLocked}
           showSearch={{
-            filterOption: (input, option) =>
-              String(option?.label || '')
-                .toLowerCase()
-                .includes(input.toLowerCase()),
+            filterOption: false,
+            onSearch: setProductOptionKeyword,
           }}
+          onChange={rememberSelectedOption}
+          loading={areProductOptionsLoading}
           placeholder={
-            productOptions.length > 0
+            mergedOptions.length > 0
               ? '请选择优迈货品资料'
               : '暂无优迈货品资料，请先维护货品资料'
           }
-          options={productOptions.map((item) => ({
+          options={mergedOptions.map((item) => ({
             value: item.id,
             label: `${item.material_code} | ${item.material_name} | ${item.model} | ${item.specification}`,
           }))}

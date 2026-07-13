@@ -10,10 +10,7 @@ import {
   getToolingStockInList,
   updateToolingStockIn,
 } from '@/services/apiToolingStockIn'
-
-const TOOLING_STOCK_IN_KEY = 'tooling-stock-in' as const
-const TOOLING_INVENTORY_KEY = 'tooling-inventory' as const
-const TOOLING_DATA_OPTIONS_KEY = 'tooling-data-options' as const
+import { toolingKeys } from '../queryKeys'
 
 export function useToolingStockInList({
   page,
@@ -28,23 +25,29 @@ export function useToolingStockInList({
   }
 }) {
   return useQuery({
-    queryKey: [TOOLING_STOCK_IN_KEY, page, pageSize, searchParams],
-    queryFn: () =>
+    queryKey: toolingKeys.stockIn.list({
+      page,
+      pageSize,
+      keyword: searchParams.keyword,
+      status: searchParams.status,
+    }),
+    queryFn: ({ signal }) =>
       getToolingStockInList({
         page,
         pageSize,
         keyword: searchParams.keyword,
         status: searchParams.status,
+        signal,
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
   })
 }
 
-export function useToolingDataOptions() {
+export function useToolingDataOptions(keyword?: string) {
   return useQuery({
-    queryKey: [TOOLING_DATA_OPTIONS_KEY],
-    queryFn: () => getToolingDataOptions(),
+    queryKey: toolingKeys.data.options(keyword),
+    queryFn: ({ signal }) => getToolingDataOptions(keyword, signal),
     ...queryConfig.list,
   })
 }
@@ -52,27 +55,27 @@ export function useToolingDataOptions() {
 export function useCreateToolingStockIn() {
   return useMutationWithInvalidation({
     mutationFn: createToolingStockIn,
-    invalidateQueries: [[TOOLING_STOCK_IN_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockIn.all, toolingKeys.inventory.all],
   })
 }
 
 export function useUpdateToolingStockIn() {
   return useMutationWithInvalidation({
     mutationFn: updateToolingStockIn,
-    invalidateQueries: [[TOOLING_STOCK_IN_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockIn.all, toolingKeys.inventory.all],
   })
 }
 
 export function useBatchUpdateToolingStockInStatus() {
   return useMutationWithInvalidation({
     mutationFn: batchUpdateToolingStockInStatus,
-    invalidateQueries: [[TOOLING_STOCK_IN_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockIn.all, toolingKeys.inventory.all],
   })
 }
 
 export function useDeleteToolingStockIn() {
   return useMutationWithInvalidation({
     mutationFn: deleteToolingStockIn,
-    invalidateQueries: [[TOOLING_STOCK_IN_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockIn.all, toolingKeys.inventory.all],
   })
 }

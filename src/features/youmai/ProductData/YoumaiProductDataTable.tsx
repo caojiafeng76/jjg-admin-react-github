@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, TableColumnsType } from 'antd'
 
 import type { YoumaiProductData } from '@/services/apiYoumaiProductData'
@@ -107,6 +108,10 @@ export default function YoumaiProductDataTable({
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }
       onRow={(record) => ({
+        ...createKeyboardTableRowProps(
+          () => onSelect([record.id]),
+          `选择优迈产品 ${record.id}`,
+        ),
         onClick: () => onSelect([record.id]),
         style: { cursor: 'pointer', height: rowHeight },
       })}

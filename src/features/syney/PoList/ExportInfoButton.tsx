@@ -4,17 +4,17 @@ import { useExportSafePartInfoAsExcel } from './useExportSafePartInfoAsExcel'
 import { usePermission } from '@/hooks/usePermission'
 
 export default function ExportInfoButton() {
-  const { exportSafePartInfoAsExcel, contextHolder } =
+  const { exportSafePartInfoAsExcel, preloadExcel, contextHolder } =
     useExportSafePartInfoAsExcel()
   const allowed = usePermission('feature:syney-po-list.export')
   const denied = !allowed
   const btn = (
     <Button
       type="text"
-      icon={
-        <DocumentArrowDownIcon className="size-4 text-emerald-500/80!" />
-      }
+      icon={<DocumentArrowDownIcon className="size-4 text-emerald-500/80!" />}
       onClick={exportSafePartInfoAsExcel}
+      onMouseEnter={preloadExcel}
+      onFocus={preloadExcel}
       disabled={denied}
     >
       导出安全部件信息

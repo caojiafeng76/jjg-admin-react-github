@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, TableColumnsType, TableProps, Button, Tag, Tooltip } from 'antd'
 import { EyeIcon } from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
@@ -56,9 +57,7 @@ export default function ProductionOrderList({
         fixed: 'left',
         width: 100,
         render: (_text, record: ProductionOrderListItem) =>
-          record.employee?.name || (
-            <span className="text-slate-300">-</span>
-          ),
+          record.employee?.name || <span className="text-slate-300">-</span>,
       },
       {
         title: '审核',
@@ -97,7 +96,9 @@ export default function ProductionOrderList({
         key: 'work_hours',
         width: 90,
         render: (value: number | null) => (
-          <span className="font-mono text-slate-600">{(value ?? 0).toFixed(1)}h</span>
+          <span className="font-mono text-slate-600">
+            {(value ?? 0).toFixed(1)}h
+          </span>
         ),
       },
       {
@@ -207,7 +208,7 @@ export default function ProductionOrderList({
         width: 160,
         render: (value: string | null) =>
           value ? (
-            <span className="whitespace-nowrap text-xs text-slate-400">
+            <span className="text-xs whitespace-nowrap text-slate-400">
               {dayjs(value).format('MM-DD HH:mm')}
             </span>
           ) : (
@@ -225,6 +226,7 @@ export default function ProductionOrderList({
             size="small"
             icon={<EyeIcon className="h-4 w-4" />}
             onClick={() => onView(record)}
+            aria-label={`查看 ${record.order_date} 生产工单`}
             title="查看"
             className="rounded-lg text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
           />
@@ -248,6 +250,12 @@ export default function ProductionOrderList({
 
   const handleRow = useCallback(
     (record: ProductionOrderListItem) => ({
+      ...(onRowClick
+        ? createKeyboardTableRowProps(
+            () => onRowClick(record),
+            `打开生产单 ${record.id}`,
+          )
+        : {}),
       onClick: () => onRowClick?.(record),
       className: `transition-colors duration-150 ${
         onRowClick ? 'cursor-pointer' : ''

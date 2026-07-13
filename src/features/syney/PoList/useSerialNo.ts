@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
+import { syneyPoKeys } from '../queryKeys'
 
 export function useSerialNo() {
   const {
@@ -10,7 +11,7 @@ export function useSerialNo() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['serialNo'],
+    queryKey: syneyPoKeys.serialNumbers(),
     queryFn: getSerialNo,
     // 序列号数据变化较少，使用静态数据配置
     ...queryConfig.static,

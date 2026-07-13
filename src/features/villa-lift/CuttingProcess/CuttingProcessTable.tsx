@@ -147,6 +147,7 @@ function CuttingProcessTable({
                       type="text"
                       size="small"
                       icon={<PencilSquareIcon className="size-4" />}
+                      aria-label={`编辑切割记录 ${record.model || record.id}`}
                       onClick={() => onEdit(record)}
                     />
                   </Tooltip>

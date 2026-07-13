@@ -24,6 +24,7 @@ interface Props {
   emptyText?: string
   onClose: () => void
   onSelect: (value: string) => void
+  onSearch?: (keyword: string) => void
 }
 
 export default function MobileBottomSelectSheet({
@@ -35,6 +36,7 @@ export default function MobileBottomSelectSheet({
   emptyText = '暂无可选项',
   onClose,
   onSelect,
+  onSearch,
 }: Props) {
   const [searchInput, setSearchInput] = useState('')
   const [searchKeyword, setSearchKeyword] = useState('')
@@ -46,8 +48,9 @@ export default function MobileBottomSelectSheet({
       setSearchInput('')
       setSearchKeyword('')
       setIsComposing(false)
+      onSearch?.('')
     }
-  }, [open])
+  }, [onSearch, open])
 
   const filteredOptions = useMemo(() => {
     const keyword = deferredSearch.trim().toLowerCase()
@@ -67,7 +70,7 @@ export default function MobileBottomSelectSheet({
       open={open}
       title={title}
       placement="bottom"
-      height="72vh"
+      size="72vh"
       onClose={onClose}
       destroyOnHidden
       styles={{
@@ -89,6 +92,7 @@ export default function MobileBottomSelectSheet({
 
             startTransition(() => {
               setSearchKeyword(nextValue)
+              onSearch?.(nextValue)
             })
           }}
           onCompositionStart={() => setIsComposing(true)}
@@ -98,6 +102,7 @@ export default function MobileBottomSelectSheet({
             setIsComposing(false)
             startTransition(() => {
               setSearchKeyword(nextValue)
+              onSearch?.(nextValue)
             })
           }}
           placeholder={searchPlaceholder}

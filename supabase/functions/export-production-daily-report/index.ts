@@ -1,3 +1,5 @@
+import type {} from '../_shared/edge-runtime.d.ts'
+
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 
 import { assertAdmin } from '../_shared/admin.ts'

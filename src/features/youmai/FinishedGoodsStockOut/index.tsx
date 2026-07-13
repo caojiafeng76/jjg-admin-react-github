@@ -7,8 +7,6 @@ import {
 import { App, Button, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
-import { exportYoumaiFinishedGoodsStockOutToExcel } from '@/utils/youmaiFinishedGoodsStockOutExport'
-
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
@@ -36,8 +34,14 @@ import {
   useImportYoumaiFinishedGoodsStockOut,
   useUpdateYoumaiFinishedGoodsStockOut,
   useYoumaiFinishedGoodsStockOutList,
-  useYoumaiProductDataOptions,
 } from './useYoumaiFinishedGoodsStockOut'
+
+const loadYoumaiFinishedGoodsStockOutExport = () =>
+  import('@/utils/youmaiFinishedGoodsStockOutExport')
+
+function preloadYoumaiFinishedGoodsStockOutExport() {
+  void loadYoumaiFinishedGoodsStockOutExport()
+}
 
 export default function YoumaiFinishedGoodsStockOutPage() {
   const { message, modal } = App.useApp()
@@ -72,15 +76,18 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     pageSize,
     searchParams,
   })
-  const { data: productOptions = [] } = useYoumaiProductDataOptions()
-
   const createMutation = useCreateYoumaiFinishedGoodsStockOut()
   const updateMutation = useUpdateYoumaiFinishedGoodsStockOut()
   const batchStatusMutation = useBatchUpdateYoumaiFinishedGoodsStockOutStatus()
   const importMutation = useImportYoumaiFinishedGoodsStockOut()
   const deleteMutation = useDeleteYoumaiFinishedGoodsStockOut()
-  const { printSelected, isPrinting } = usePrintYoumaiFinishedGoodsStockOut()
-  const { printLabels, isPrinting: isLabelPrinting } = usePrintYoumaiLabel()
+  const { printSelected, isPrinting, preloadPrint } =
+    usePrintYoumaiFinishedGoodsStockOut()
+  const {
+    printLabels,
+    isPrinting: isLabelPrinting,
+    preloadPrint: preloadLabelPrint,
+  } = usePrintYoumaiLabel()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -135,9 +142,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
       await printLabels(selectedRecords)
     } catch (error) {
       console.error('打印优迈标签失败:', error)
-      message.error(
-        error instanceof Error ? error.message : '打印标签失败',
-      )
+      message.error(error instanceof Error ? error.message : '打印标签失败')
     }
   }, [
     message,
@@ -148,7 +153,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     viewerOperationTip,
   ])
 
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
     if (!canManageYoumai) {
       message.warning('无优迈模块操作权限')
       return
@@ -165,6 +170,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     }
 
     try {
+      const { exportYoumaiFinishedGoodsStockOutToExcel } =
+        await loadYoumaiFinishedGoodsStockOutExport()
       exportYoumaiFinishedGoodsStockOutToExcel(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条优迈成品出库`)
     } catch (error) {
@@ -453,6 +460,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           loading={isPrinting}
           count={selectedRowKeys.length}
           permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+          onPreload={preloadPrint}
         >
           打印选中项
         </PrintButton>
@@ -461,6 +469,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           loading={isLabelPrinting}
           count={selectedRowKeys.length}
           permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+          onPreload={preloadLabelPrint}
         >
           打印标签
         </PrintButton>
@@ -468,6 +477,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           type="text"
           icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
           onClick={handleExportExcel}
+          onMouseEnter={preloadYoumaiFinishedGoodsStockOutExport}
+          onFocus={preloadYoumaiFinishedGoodsStockOutExport}
           disabled={
             viewerDenied || !canManageYoumai || selectedRowKeys.length === 0
           }
@@ -545,7 +556,6 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
-          productOptions={productOptions}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
           isAuditLocked={editingRecord?.status === '已审核'}
         />

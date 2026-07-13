@@ -3,11 +3,9 @@ import { useMutation } from '@tanstack/react-query'
 import { App } from 'antd'
 
 import { fetchSyneyStoreReportFromScm } from '@/services/apiSyneyStoreReports'
-import {
-  buildSyneyStoreReceiptReport,
-  printSyneyStoreReceipt,
-  type SyneyStoreReceiptItem,
-} from '@/utils/syneyStoreReceiptPdf'
+import type { SyneyStoreReceiptItem } from '@/utils/syneyStoreReceiptPdf'
+
+const loadStoreReceiptPDF = () => import('@/utils/syneyStoreReceiptPdf')
 
 function renderPreparingWindow(printWindow: Window, storeInNo: string): void {
   printWindow.document.open()
@@ -70,6 +68,10 @@ export function usePrintSyneyStoreReceipt() {
     mutationFn: fetchSyneyStoreReportFromScm,
   })
 
+  function preloadStoreReceiptPDF() {
+    void loadStoreReceiptPDF()
+  }
+
   async function printByStoreInNo(storeInNo: string): Promise<boolean> {
     const trimmedStoreInNo = storeInNo.trim()
 
@@ -97,6 +99,8 @@ export function usePrintSyneyStoreReceipt() {
         return false
       }
 
+      const { buildSyneyStoreReceiptReport, printSyneyStoreReceipt } =
+        await loadStoreReceiptPDF()
       const report = buildSyneyStoreReceiptReport(items)
       const printed = await printSyneyStoreReceipt(report, printWindow)
 
@@ -119,6 +123,7 @@ export function usePrintSyneyStoreReceipt() {
 
   return {
     printByStoreInNo,
+    preloadStoreReceiptPDF,
     isPrintingStoreReceipt: isFetching || isGenerating,
   }
 }

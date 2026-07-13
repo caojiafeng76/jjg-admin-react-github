@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { message } from 'antd'
-import jsPDF from 'jspdf'
+import type jsPDF from 'jspdf'
 
 import { useSelectedPos } from './useSelectedPos'
-import { initializePDF, openPDFInNewWindow } from '@/utils/pdfUtils'
 import { ISyneyItem } from '@/services/types'
 import { hasUpFlag, hasDownFlag } from '@/utils/syneySafePartRules'
 import {
@@ -11,6 +10,8 @@ import {
   type DecompositionCell,
 } from '@/utils/syneyDecomposition'
 import type { SyneySafePartSetting } from '@/services/apiSyneySafePartSettings'
+
+const loadPDFUtils = () => import('@/utils/pdfUtils')
 
 interface ISyneyPoGroup {
   key: string
@@ -44,6 +45,10 @@ export function usePrintDecomposition(
   const { selectedPosList, isLoading } = useSelectedPos()
   const [messageApi, contextHolder] = message.useMessage()
   const [isPrinting, setIsPrinting] = useState(false)
+
+  function preloadPDF() {
+    void loadPDFUtils()
+  }
 
   /**
    * 绘制页面框架（表头、线条、固定文本）
@@ -440,6 +445,7 @@ export function usePrintDecomposition(
 
     try {
       setIsPrinting(true)
+      const { initializePDF, openPDFInNewWindow } = await loadPDFUtils()
       // 1. 初始化 PDF（现在是异步的）
       const doc = await initializePDF('l')
 
@@ -488,5 +494,11 @@ export function usePrintDecomposition(
     }
   }
 
-  return { printDecomposition, contextHolder, isPrinting, messageApi }
+  return {
+    printDecomposition,
+    preloadPDF,
+    contextHolder,
+    isPrinting,
+    messageApi,
+  }
 }

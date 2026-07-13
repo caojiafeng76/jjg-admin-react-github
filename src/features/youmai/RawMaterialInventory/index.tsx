@@ -15,7 +15,6 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
-import { exportYoumaiRawMaterialInventoryToExcel } from '@/utils/youmaiRawMaterialInventoryExcel'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiRawMaterialInventoryForm from './YoumaiRawMaterialInventoryForm'
 import YoumaiRawMaterialInventorySearch from './YoumaiRawMaterialInventorySearch'
@@ -26,6 +25,13 @@ import {
   useUpdateYoumaiRawMaterialInventory,
   useYoumaiRawMaterialInventoryList,
 } from './useYoumaiRawMaterialInventory'
+
+const loadYoumaiRawMaterialInventoryExcel = () =>
+  import('@/utils/youmaiRawMaterialInventoryExcel')
+
+function preloadYoumaiRawMaterialInventoryExcel() {
+  void loadYoumaiRawMaterialInventoryExcel()
+}
 
 export default function YoumaiRawMaterialInventoryPage() {
   const { message } = App.useApp()
@@ -199,9 +205,11 @@ export default function YoumaiRawMaterialInventoryPage() {
 
     try {
       setIsExporting(true)
-      const records = await getYoumaiRawMaterialInventoryForExport(
-        searchParams.keyword,
-      )
+      const [records, { exportYoumaiRawMaterialInventoryToExcel }] =
+        await Promise.all([
+          getYoumaiRawMaterialInventoryForExport(searchParams.keyword),
+          loadYoumaiRawMaterialInventoryExcel(),
+        ])
       if (records.length === 0) {
         message.warning('当前没有可导出的原料库存数据')
         return
@@ -254,6 +262,7 @@ export default function YoumaiRawMaterialInventoryPage() {
           loading={isExporting}
           count={data?.count}
           permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+          onPreload={preloadYoumaiRawMaterialInventoryExcel}
         >
           导出库存
         </ExportButton>

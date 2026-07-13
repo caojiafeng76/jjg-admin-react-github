@@ -86,7 +86,9 @@ function AttendanceDetailTable({
         key: 'time',
         width: 120,
         render: (value: string) => (
-          <span className="font-mono text-slate-600">{value?.slice(0, 5) ?? '-'}</span>
+          <span className="font-mono text-slate-600">
+            {value?.slice(0, 5) ?? '-'}
+          </span>
         ),
       },
       {
@@ -119,7 +121,6 @@ function AttendanceDetailTable({
       }}
       size="small"
       onRow={() => ({ style: { height: rowHeight } })}
-      className="[&_.ant-table-thead>tr>th]:!bg-slate-50 [&_.ant-table-thead>tr>th]:!font-medium [&_.ant-table-tbody>tr:hover>td]:!bg-blue-50/30"
     />
   )
 }

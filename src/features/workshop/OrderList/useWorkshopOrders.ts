@@ -2,9 +2,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 
 import {
   getWorkshopOrders,
-  getWorkshopOrderLengths,
-  getWorkshopOrderProjectNos,
-  getWorkshopOrderModels,
+  getWorkshopOrderOptions,
   createWorkshopOrder,
   updateWorkshopOrder,
   updateWorkshopOrderStatuses,
@@ -16,6 +14,10 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 import type { WorkshopOrderStatus } from './orderStatus'
 
 const WORKSHOP_ORDERS_KEY = 'workshop-orders' as const
+const WORKSHOP_ORDER_OPTIONS_KEY = [
+  WORKSHOP_ORDERS_KEY,
+  'options',
+] as const
 
 export function useWorkshopOrdersList({
   page,
@@ -47,24 +49,27 @@ export function useWorkshopOrdersList({
 
 export function useWorkshopOrderLengths() {
   return useQuery({
-    queryKey: [WORKSHOP_ORDERS_KEY, 'length-options'],
-    queryFn: getWorkshopOrderLengths,
-    ...queryConfig.list,
+    queryKey: WORKSHOP_ORDER_OPTIONS_KEY,
+    queryFn: ({ signal }) => getWorkshopOrderOptions(signal),
+    select: (options) => options.lengths,
+    ...queryConfig.static,
   })
 }
 
 export function useWorkshopOrderProjectNos() {
   return useQuery({
-    queryKey: [WORKSHOP_ORDERS_KEY, 'project-no-options'],
-    queryFn: getWorkshopOrderProjectNos,
-    ...queryConfig.list,
+    queryKey: WORKSHOP_ORDER_OPTIONS_KEY,
+    queryFn: ({ signal }) => getWorkshopOrderOptions(signal),
+    select: (options) => options.projectNos,
+    ...queryConfig.static,
   })
 }
 
 export function useWorkshopOrderModels() {
   return useQuery({
-    queryKey: [WORKSHOP_ORDERS_KEY, 'model-options'],
-    queryFn: getWorkshopOrderModels,
+    queryKey: WORKSHOP_ORDER_OPTIONS_KEY,
+    queryFn: ({ signal }) => getWorkshopOrderOptions(signal),
+    select: (options) => options.productModels,
     ...queryConfig.static,
   })
 }

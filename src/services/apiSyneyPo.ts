@@ -1,9 +1,16 @@
 import type { Database } from './database.types'
-import { ISyneyItem } from './types'
+import { ISyneyItem, ISyneyPo } from './types'
 import supabase from './supabase'
 import { handleApiError } from '@utils/errorHandler'
 
-type SyneyPoItemUpdate = Database['public']['Tables']['syney-po-items']['Update']
+type SyneyPoItemUpdate =
+  Database['public']['Tables']['syney-po-items']['Update']
+type UpdateSyneyPoItemsArgs =
+  Database['public']['Functions']['update_syney_po_items']['Args']
+
+export type SyneyPoDetail = ISyneyPo & {
+  items: ISyneyItem[]
+}
 
 function normalizeSyneyPoItemUpdatePayload(
   values: Partial<ISyneyItem>,
@@ -36,12 +43,17 @@ function normalizeSyneyPoItemUpdatePayload(
   return payload
 }
 
-export async function getSyneyPoDetail(PoId: string) {
-  const { data, error } = await supabase
+export async function getSyneyPoDetail(PoId: string, signal?: AbortSignal) {
+  let query = supabase
     .from('syney-pos')
     .select('*, items:syney-po-items(*)')
     .eq('id', +PoId)
-    .single()
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.single()
 
   if (error) {
     if (error.code === 'PGRST116') {
@@ -51,7 +63,7 @@ export async function getSyneyPoDetail(PoId: string) {
     throw handleApiError(error, '获取订单详情失败')
   }
 
-  return data
+  return data as unknown as SyneyPoDetail
 }
 
 export async function updatePoItems({
@@ -63,36 +75,15 @@ export async function updatePoItems({
 }) {
   const payload = normalizeSyneyPoItemUpdatePayload(values)
 
-  const { error } = await supabase
-    .from('syney-po-items')
-    .update(payload)
-    .in('id', ids)
+  const args: UpdateSyneyPoItemsArgs = {
+    p_ids: ids.map(Number),
+    p_values: payload,
+  }
+
+  const { error } = await supabase.rpc('update_syney_po_items', args)
 
   if (error) {
     throw handleApiError(error, '订单详情更新失败')
-  }
-
-  if (!values.PartNo) return
-
-  const { data: specFromRepo } = await supabase
-    .from('syney-specs')
-    .select('*')
-    .eq('PartNo', values.PartNo)
-    .single()
-
-  if (specFromRepo) return
-
-  const { error: insertSpecError } = await supabase.from('syney-specs').insert([
-    {
-      ParamSpec: values.ParamSpec,
-      PartName: values.PartName,
-      PartNo: values.PartNo,
-      Spec: values.Spec,
-    },
-  ])
-
-  if (insertSpecError) {
-    throw handleApiError(insertSpecError, '创建踏板规格失败')
   }
 }
 

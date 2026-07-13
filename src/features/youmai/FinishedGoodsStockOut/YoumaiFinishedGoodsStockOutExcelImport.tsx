@@ -11,17 +11,20 @@ import {
   Upload,
 } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
-import {
-  ArrowDownTrayIcon,
-  ArrowUpTrayIcon,
-} from '@heroicons/react/16/solid'
+import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 
 import type { YoumaiFinishedGoodsStockOutImportRow } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import { fetchYoumaiPurchaseOrder } from '@/services/apiYoumaiPurchaseOrder'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import ImportButton from '@/ui/ImportButton'
-import { parseYoumaiFinishedGoodsStockOutExcel } from '@/utils/youmaiFinishedGoodsStockOutExcel'
+
+const loadYoumaiFinishedGoodsStockOutExcel = () =>
+  import('@/utils/youmaiFinishedGoodsStockOutExcel')
+
+function preloadYoumaiFinishedGoodsStockOutExcel() {
+  void loadYoumaiFinishedGoodsStockOutExcel()
+}
 
 interface Props {
   onImport: (rows: YoumaiFinishedGoodsStockOutImportRow[]) => Promise<void>
@@ -114,6 +117,8 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
 
     setParsing(true)
     try {
+      const { parseYoumaiFinishedGoodsStockOutExcel } =
+        await loadYoumaiFinishedGoodsStockOutExcel()
       const { rows, errors } = await parseYoumaiFinishedGoodsStockOutExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
@@ -210,6 +215,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
       <ImportButton
         onClick={() => handleOpenModal('excel')}
         permissionKey={permissionKey}
+        onPreload={preloadYoumaiFinishedGoodsStockOutExcel}
       >
         导入Excel
       </ImportButton>
@@ -275,6 +281,8 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
               <Button
                 loading={parsing}
                 icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+                onMouseEnter={preloadYoumaiFinishedGoodsStockOutExcel}
+                onFocus={preloadYoumaiFinishedGoodsStockOutExcel}
               >
                 {parsing ? '解析中...' : '选择采购订单 Excel'}
               </Button>

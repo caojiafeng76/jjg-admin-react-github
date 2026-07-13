@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { Upload, Button, message } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
-import { parseWorkshopOrderExcel } from '@/utils/workshopExcel'
+import {
+  parseWorkshopOrderExcel,
+  preloadWorkshopExcel,
+} from '@/utils/workshopExcel'
 import type { WorkshopOrder } from './index'
 
 interface Props {
@@ -82,6 +85,8 @@ export default function WorkshopExcelUpload({ onParsed, disabled }: Props) {
           icon={<ArrowUpTrayIcon className="h-4 w-4" />}
           loading={loading}
           disabled={disabled}
+          onMouseEnter={preloadWorkshopExcel}
+          onFocus={preloadWorkshopExcel}
         >
           {loading ? '解析中...' : '选择Excel文件'}
         </Button>

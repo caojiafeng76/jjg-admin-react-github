@@ -134,10 +134,12 @@ export async function getToolingDataList({
   page,
   pageSize,
   keyword,
+  signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  signal?: AbortSignal
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -151,10 +153,15 @@ export async function getToolingDataList({
     )
   }
 
-  const { data, error, count } = await query
+  query = query
     .order('updated_at', { ascending: false })
     .order('tool_code', { ascending: true })
-    .range(from, to)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error, count } = await query.range(from, to)
 
   if (error) {
     throw handleApiError(error, '获取刀具资料列表失败')

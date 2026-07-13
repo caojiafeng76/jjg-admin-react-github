@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { App } from 'antd'
-import autoTable from 'jspdf-autotable'
 import dayjs from 'dayjs'
 
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
-import { initializePDF, printPDF } from '@/utils/pdfUtils'
 import { formatNumber } from '@/utils/format'
+
+const loadToolingStockOutPdfRuntime = () =>
+  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')] as const)
+
+function preloadPrint() {
+  void loadToolingStockOutPdfRuntime()
+}
 
 const MAX_ROWS_PER_PAGE = 8
 const TABLE_START_Y = 30
@@ -92,6 +97,8 @@ export function usePrintToolingStockOut() {
       `)
       printWindow.document.close()
 
+      const [{ default: autoTable }, { initializePDF, printPDF }] =
+        await loadToolingStockOutPdfRuntime()
       const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
       const doc = await initializePDF('l')
       doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
@@ -213,5 +220,6 @@ export function usePrintToolingStockOut() {
   return {
     printSelected,
     isPrinting,
+    preloadPrint,
   }
 }

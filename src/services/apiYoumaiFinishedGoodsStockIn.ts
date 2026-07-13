@@ -1,4 +1,8 @@
 import supabase from './supabase'
+import {
+  buildYoumaiProductDataOptionsQuery,
+  YOUMAI_PRODUCT_DATA_OPTION_SELECT,
+} from './youmaiOptions'
 import { handleApiError } from '@/utils/errorHandler'
 
 export type YoumaiFinishedGoodsStockInStatus = '待审核' | '已审核'
@@ -221,19 +225,15 @@ async function assertCanReverseAuditedStockIn(ids: string[]) {
   }
 }
 
-export async function getYoumaiProductDataOptions(keyword?: string) {
-  let query = productDataTable()
-    .select(
-      'id, material_code, material_name, model, specification, specific_gravity',
-    )
-    .order('material_code', { ascending: true })
-
-  if (keyword?.trim()) {
-    const normalizedKeyword = keyword.trim()
-    query = query.or(
-      `material_code.ilike.%${normalizedKeyword}%,material_name.ilike.%${normalizedKeyword}%,model.ilike.%${normalizedKeyword}%,specification.ilike.%${normalizedKeyword}%`,
-    )
-  }
+export async function getYoumaiProductDataOptions(
+  keyword?: string,
+  signal?: AbortSignal,
+  limit?: number,
+) {
+  const query = buildYoumaiProductDataOptionsQuery(
+    productDataTable().select(YOUMAI_PRODUCT_DATA_OPTION_SELECT),
+    { keyword, signal, limit },
+  )
 
   const { data, error } = await query
 

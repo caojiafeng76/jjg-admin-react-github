@@ -445,6 +445,7 @@ export default function VillaLiftOrderForm({
                     size="small"
                     danger
                     icon={<XMarkIcon className="size-4" />}
+                    aria-label={`删除订单明细 ${field.name + 1}`}
                     onClick={() => remove(field.name)}
                   />
                 ),

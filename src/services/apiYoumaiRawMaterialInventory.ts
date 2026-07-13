@@ -1,4 +1,8 @@
 import supabase from './supabase'
+import {
+  buildYoumaiRawMaterialOptionsQuery,
+  YOUMAI_RAW_MATERIAL_OPTION_SELECT,
+} from './youmaiOptions'
 import { handleApiError } from '@/utils/errorHandler'
 
 export interface YoumaiRawMaterialInventory {
@@ -63,16 +67,36 @@ export async function getYoumaiRawMaterialInventoryList({
   }
 }
 
-export async function getYoumaiRawMaterialInventoryOptions(): Promise<
-  YoumaiRawMaterialInventoryOption[]
-> {
-  const { data, error } = await inventoryTable()
-    .select('id, model, specification, quantity')
-    .order('model', { ascending: true })
-    .order('specification', { ascending: true })
+export async function getYoumaiRawMaterialInventoryOptions(
+  keyword?: string,
+  signal?: AbortSignal,
+  limit?: number,
+): Promise<YoumaiRawMaterialInventoryOption[]> {
+  const query = buildYoumaiRawMaterialOptionsQuery(
+    inventoryTable().select(YOUMAI_RAW_MATERIAL_OPTION_SELECT),
+    { keyword, signal, limit },
+  )
+
+  const { data, error } = await query
 
   if (error) throw handleApiError(error, '原料库存选项获取失败')
   return (data ?? []) as YoumaiRawMaterialInventoryOption[]
+}
+
+export async function getYoumaiRawMaterialInventoryOptionById(
+  id: string,
+  signal?: AbortSignal,
+): Promise<YoumaiRawMaterialInventoryOption | null> {
+  let query = inventoryTable()
+    .select(YOUMAI_RAW_MATERIAL_OPTION_SELECT)
+    .eq('id', id)
+
+  if (signal) query = query.abortSignal(signal)
+
+  const { data, error } = await query.maybeSingle()
+
+  if (error) throw handleApiError(error, '原料库存项获取失败')
+  return data as YoumaiRawMaterialInventoryOption | null
 }
 
 export async function createYoumaiRawMaterialInventory(

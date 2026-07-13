@@ -131,4 +131,38 @@ describe('AppLayout', () => {
       expect(onRootRedirectUnmount).toHaveBeenCalledTimes(1)
     })
   })
+
+  it('pauses effects for a cached outlet while its tab is hidden', async () => {
+    const onPollingPause = vi.fn()
+
+    function PollingOutlet() {
+      useEffect(() => onPollingPause, [])
+      return <div>polling outlet</div>
+    }
+
+    routerState.location = {
+      pathname: '/material-transfer',
+      search: '',
+      hash: '',
+    }
+    routerState.outlet = <PollingOutlet />
+    const { rerender } = render(<AppLayout />)
+
+    expect(screen.getByText('polling outlet')).toBeInTheDocument()
+
+    await act(async () => {
+      routerState.location = {
+        pathname: '/extrusion-production-order',
+        search: '',
+        hash: '',
+      }
+      routerState.outlet = <div>next outlet</div>
+      rerender(<AppLayout />)
+    })
+
+    expect(screen.getByText('next outlet')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(onPollingPause).toHaveBeenCalledTimes(1)
+    })
+  })
 })

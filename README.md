@@ -4,9 +4,9 @@
 
 ## 技术栈
 
-- React 19
-- TypeScript 5.7
-- Vite 7
+- React 19.2
+- TypeScript 6.0
+- Vite 8
 - Ant Design 6
 - Tailwind CSS 4
 - TanStack Query 5

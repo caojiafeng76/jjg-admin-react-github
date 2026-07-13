@@ -36,7 +36,6 @@ import type {
   ProductionSchedulingOrderUpdate,
 } from '@/services/apiProductionScheduling'
 import { getAllEmployees } from '@/services/apiEmployees'
-import { exportProductionScheduledPlanToExcel } from '@/utils/productionSchedulingPlanExcel'
 import {
   useProductionSchedulingLengthOptions,
   useProductionSchedulingOrders,
@@ -45,6 +44,13 @@ import {
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 
 const { Text, Title } = Typography
+
+const loadProductionSchedulingPlanExcel = () =>
+  import('@/utils/productionSchedulingPlanExcel')
+
+const preloadProductionSchedulingPlanExcel = () => {
+  void loadProductionSchedulingPlanExcel()
+}
 
 type SearchFormValues = {
   customer?: string
@@ -618,7 +624,7 @@ export default function ProductionScheduling() {
     }
   }, [editingOrder, message, schedulingForm, updateMutation, employeeMap])
 
-  const handleExport = useCallback(() => {
+  const handleExport = useCallback(async () => {
     if (selectedOrders.length === 0) {
       message.warning(
         selectedRowKeys.length > 0
@@ -628,6 +634,8 @@ export default function ProductionScheduling() {
       return
     }
 
+    const { exportProductionScheduledPlanToExcel } =
+      await loadProductionSchedulingPlanExcel()
     exportProductionScheduledPlanToExcel(selectedOrders)
   }, [message, selectedOrders, selectedRowKeys])
 
@@ -907,6 +915,7 @@ export default function ProductionScheduling() {
           <ExportButton
             handleExport={handleExport}
             count={selectedOrders.length}
+            onPreload={preloadProductionSchedulingPlanExcel}
           >
             {selectedRowKeys.length > 0
               ? `导出选中 (${selectedOrders.length})`
@@ -917,6 +926,7 @@ export default function ProductionScheduling() {
             icon={<ArrowPathIcon className="size-4" />}
             onClick={() => refetch()}
             loading={isFetching}
+            aria-label="刷新排产列表"
             className="text-slate-500 hover:text-blue-500"
           />
         </div>
@@ -941,7 +951,7 @@ export default function ProductionScheduling() {
             rowClassName={(_record, index) =>
               index % 2 === 0 ? 'bg-slate-50/40' : ''
             }
-            className="[&_.ant-table]:!font-medium"
+            classNames={{ root: 'font-medium' }}
           />
         </div>
         <div
@@ -1006,11 +1016,7 @@ export default function ProductionScheduling() {
             {getProductSpec(editingOrder)}
           </span>
         </div>
-        <Form<SchedulingFormValues>
-          form={schedulingForm}
-          layout="vertical"
-          className="[&_.ant-form-item-label>label]:!font-medium"
-        >
+        <Form<SchedulingFormValues> form={schedulingForm} layout="vertical">
           <div className="grid grid-cols-1 gap-x-4 gap-y-4 md:grid-cols-3">
             <Form.Item
               name="planned_start_date"
@@ -1019,7 +1025,6 @@ export default function ProductionScheduling() {
                   计划开工时间
                 </span>
               }
-              className="[&_.ant-picker]:!w-full"
             >
               <DatePicker className="!w-full" />
             </Form.Item>
@@ -1030,7 +1035,6 @@ export default function ProductionScheduling() {
                   计划完工时间
                 </span>
               }
-              className="[&_.ant-picker]:!w-full"
             >
               <DatePicker className="!w-full" />
             </Form.Item>
@@ -1041,7 +1045,6 @@ export default function ProductionScheduling() {
                   交付日期
                 </span>
               }
-              className="[&_.ant-picker]:!w-full"
             >
               <DatePicker className="!w-full" />
             </Form.Item>

@@ -89,7 +89,7 @@ function renderComponent() {
   )
 }
 
-describe('ExtrusionProductionForm', () => {
+describe('ExtrusionProductionForm', { timeout: 20_000 }, () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })

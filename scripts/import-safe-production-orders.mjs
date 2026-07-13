@@ -238,7 +238,11 @@ async function fetchExistingOrderIds(orderIds) {
 
 async function insertOrders(orders) {
   for (const orderBatch of chunk(orders, ORDER_BATCH_SIZE)) {
-    const payload = orderBatch.map(({ items, ...order }) => order)
+    const payload = orderBatch.map((order) => {
+      const orderPayload = { ...order }
+      delete orderPayload.items
+      return orderPayload
+    })
 
     const { error } = await supabase.from('production_orders').insert(payload)
 

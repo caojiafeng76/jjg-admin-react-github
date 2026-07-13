@@ -1,12 +1,11 @@
-import jsPDF from 'jspdf'
+import type jsPDF from 'jspdf'
 import dayjs from 'dayjs'
 import { message } from 'antd'
 import { useState } from 'react'
 
 import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { useSelectedPos } from './useSelectedPos'
-import { openPDFInNewWindow } from '@/utils/pdfUtils'
-import { SyneySafePartSetting } from '@services/apiSyneySafePartSettings'
+import type { SyneySafePartSetting } from '@services/apiSyneySafePartSettings'
 import {
   getLabelInfoBySettings,
   getLabelInfoFromStoredItem,
@@ -14,6 +13,9 @@ import {
 
 // Type for the Ant Design message API instance returned by message.useMessage()
 type MessageApi = ReturnType<typeof message.useMessage>[0]
+
+const loadPDFDependencies = () =>
+  Promise.all([import('jspdf'), import('@/utils/pdfUtils')])
 
 export function usePrintEnglish(
   safePartSettings: SyneySafePartSetting[] | undefined,
@@ -24,6 +26,10 @@ export function usePrintEnglish(
   const [internalMessageApi, contextHolder] = message.useMessage()
   const api = messageApi || internalMessageApi
   const [isPrinting, setIsPrinting] = useState(false)
+
+  function preloadPDF() {
+    void loadPDFDependencies()
+  }
 
   function drawBoldText(
     doc: jsPDF,
@@ -86,13 +92,19 @@ export function usePrintEnglish(
 
     try {
       setIsPrinting(true)
+      const [jsPDFModule, { openPDFInNewWindow }] = await loadPDFDependencies()
+      const jsPDF = jsPDFModule.default
       // 创建 PDF 文档
       const doc = new jsPDF({ orientation: 'l', unit: 'mm', format: [90, 30] })
 
       // 动态加载 Google Font
       const fontData = await loadGoogleFont()
       doc.addFileToVFS(GOOGLE_FONT_CONFIG.FONT_NAME, fontData)
-      doc.addFont(GOOGLE_FONT_CONFIG.FONT_NAME, GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
+      doc.addFont(
+        GOOGLE_FONT_CONFIG.FONT_NAME,
+        GOOGLE_FONT_CONFIG.FONT_FAMILY,
+        GOOGLE_FONT_CONFIG.FONT_STYLE,
+      )
       doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY)
 
       // 设置字体大小
@@ -106,11 +118,9 @@ export function usePrintEnglish(
 
         // 1. 打印 Item 标签
         for (const item of items) {
-          const labelInfo = getLabelInfoBySettings(
-            item.PartNo,
-            SerialNo,
-            safePartSettings,
-          ) ?? getLabelInfoFromStoredItem(item, safePartSettings)
+          const labelInfo =
+            getLabelInfoBySettings(item.PartNo, SerialNo, safePartSettings) ??
+            getLabelInfoFromStoredItem(item, safePartSettings)
 
           if (labelInfo) {
             for (let i = 0; i < (item.Qty || 1); i++) {
@@ -150,7 +160,12 @@ export function usePrintEnglish(
 
               drawBoldText(doc, `${item.SONo}`, 53, 11)
               drawBoldText(doc, labelInfo.partModel, 58, 16)
-              drawBoldText(doc, `${dayjs(EndDate).format('YYYY-MM-DD')}`, 58, 21)
+              drawBoldText(
+                doc,
+                `${dayjs(EndDate).format('YYYY-MM-DD')}`,
+                58,
+                21,
+              )
 
               pageCount++
               if (pageCount % 10 === 0) {
@@ -196,5 +211,10 @@ export function usePrintEnglish(
     }
   }
 
-  return { generateEnglishLabel, contextHolder: messageApi ? null : contextHolder, isPrinting }
+  return {
+    generateEnglishLabel,
+    preloadPDF,
+    contextHolder: messageApi ? null : contextHolder,
+    isPrinting,
+  }
 }

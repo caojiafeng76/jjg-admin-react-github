@@ -14,7 +14,6 @@ import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { exportQualityIssueRecordsToExcel } from '@/utils/qualityIssueRecordExcel'
 import { translateErrorMessage } from '@/utils/errorHandler'
 import {
   getQualityIssueRecordsForExport,
@@ -42,6 +41,13 @@ const BATCH_AUDIT_ACTION_LABELS: Record<QualityIssueAuditStatus, string> = {
 }
 
 const QUALITY_ISSUE_EXPORT_MESSAGE_KEY = 'quality-issue-record-export'
+
+const loadQualityIssueRecordExcel = () =>
+  import('@/utils/qualityIssueRecordExcel')
+
+const preloadQualityIssueRecordExcel = () => {
+  void loadQualityIssueRecordExcel()
+}
 
 export default function QualityIssueRecordPage() {
   const { message, modal } = App.useApp()
@@ -227,6 +233,8 @@ export default function QualityIssueRecordPage() {
         return
       }
 
+      const { exportQualityIssueRecordsToExcel } =
+        await loadQualityIssueRecordExcel()
       exportQualityIssueRecordsToExcel(exportRows)
       message.success({
         key: QUALITY_ISSUE_EXPORT_MESSAGE_KEY,
@@ -276,6 +284,7 @@ export default function QualityIssueRecordPage() {
             handleExport={handleExport}
             loading={isExporting}
             disabled={isLoading || total === 0}
+            onPreload={preloadQualityIssueRecordExcel}
           >
             导出当前筛选结果{total > 0 ? ` (${total})` : ''}
           </ExportButton>

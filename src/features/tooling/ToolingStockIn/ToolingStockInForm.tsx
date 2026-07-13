@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   Form,
@@ -13,12 +13,19 @@ import type {
   ToolingStockIn,
   ToolingStockInFormValues,
 } from '@/services/apiToolingStockIn'
+import {
+  createToolingOptionSnapshot,
+  mergeToolingOptions,
+  type RemoteToolingOption,
+} from '../remoteToolingOptions'
 
 interface Props {
   onFinish: (values: ToolingStockInFormValues) => void
   setFormRef: (form: FormInstance<ToolingStockInFormValues>) => void
   isSubmitting: boolean
   toolingOptions: ToolingDataOption[]
+  isToolingOptionsLoading: boolean
+  onToolingSearch: (keyword: string) => void
   initialValues?: ToolingStockIn | ToolingStockInFormValues
   isAuditLocked?: boolean
 }
@@ -35,15 +42,24 @@ export default function ToolingStockInForm({
   setFormRef,
   isSubmitting,
   toolingOptions,
+  isToolingOptionsLoading,
+  onToolingSearch,
   initialValues,
   isAuditLocked = false,
 }: Props) {
   const [form] = Form.useForm<ToolingStockInFormValues>()
+  const [selectedToolingSnapshot, setSelectedToolingSnapshot] =
+    useState<RemoteToolingOption>()
   const selectedToolingId = Form.useWatch('tooling_data_id', form)
 
+  const mergedToolingOptions = useMemo(
+    () => mergeToolingOptions(toolingOptions, selectedToolingSnapshot),
+    [selectedToolingSnapshot, toolingOptions],
+  )
+
   const selectedTooling = useMemo(
-    () => toolingOptions.find((item) => item.id === selectedToolingId),
-    [toolingOptions, selectedToolingId],
+    () => mergedToolingOptions.find((item) => item.id === selectedToolingId),
+    [mergedToolingOptions, selectedToolingId],
   )
 
   useEffect(() => {
@@ -51,6 +67,9 @@ export default function ToolingStockInForm({
   }, [form, setFormRef])
 
   useEffect(() => {
+    const initialSnapshot = createToolingOptionSnapshot(initialValues)
+    setSelectedToolingSnapshot(initialSnapshot)
+
     if (initialValues) {
       form.setFieldsValue({
         ...DEFAULT_VALUES,
@@ -65,6 +84,23 @@ export default function ToolingStockInForm({
     form.resetFields()
     form.setFieldsValue(DEFAULT_VALUES)
   }, [form, initialValues])
+
+  useEffect(() => {
+    setSelectedToolingSnapshot((snapshot) => {
+      if (!snapshot) return snapshot
+
+      return (
+        toolingOptions.find((option) => option.id === snapshot.id) ?? snapshot
+      )
+    })
+  }, [selectedToolingSnapshot?.id, toolingOptions])
+
+  const handleToolingChange = (toolingId: string) => {
+    const nextSnapshot = mergedToolingOptions.find(
+      (item) => item.id === toolingId,
+    )
+    setSelectedToolingSnapshot(nextSnapshot)
+  }
 
   return (
     <Form
@@ -89,18 +125,18 @@ export default function ToolingStockInForm({
       >
         <Select
           disabled={isAuditLocked}
+          loading={isToolingOptionsLoading}
           showSearch={{
-            filterOption: (input, option) =>
-              String(option?.label || '')
-                .toLowerCase()
-                .includes(input.toLowerCase()),
+            filterOption: false,
+            onSearch: onToolingSearch,
           }}
+          onChange={handleToolingChange}
           placeholder={
-            toolingOptions.length > 0
+            mergedToolingOptions.length > 0
               ? '请选择刀具资料'
               : '暂无刀具资料，请先维护刀具资料'
           }
-          options={toolingOptions.map((item) => ({
+          options={mergedToolingOptions.map((item) => ({
             value: item.id,
             label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
           }))}

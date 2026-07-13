@@ -5,8 +5,10 @@ import { useAppStore } from '@/store'
 
 export default function ExportPDFButton() {
   const { message } = App.useApp()
-  const { setTableSelectedKeys } = useAppStore()
-  const { generateSummaryPDF, isLoading } = useGenerateSummaryPDF()
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
+  const { generateSummaryPDF, preloadPDF, isLoading } = useGenerateSummaryPDF()
 
   const handleExport = async () => {
     // 如果正在加载，提示用户
@@ -30,6 +32,8 @@ export default function ExportPDFButton() {
       type="text"
       icon={<DocumentIcon className="size-4 text-red-500/80!" />}
       onClick={handleExport}
+      onMouseEnter={preloadPDF}
+      onFocus={preloadPDF}
       loading={isLoading}
       disabled={isLoading}
     >

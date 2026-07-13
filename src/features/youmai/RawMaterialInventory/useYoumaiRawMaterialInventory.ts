@@ -5,11 +5,12 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 import {
   createYoumaiRawMaterialInventory,
   deleteYoumaiRawMaterialInventory,
+  getYoumaiRawMaterialInventoryOptionById,
   getYoumaiRawMaterialInventoryList,
   updateYoumaiRawMaterialInventory,
 } from '@/services/apiYoumaiRawMaterialInventory'
 
-const RAW_MATERIAL_INVENTORY_KEY = 'youmai-raw-material-inventory' as const
+import { youmaiKeys } from '../queryKeys'
 
 export function useYoumaiRawMaterialInventoryList({
   page,
@@ -21,7 +22,11 @@ export function useYoumaiRawMaterialInventoryList({
   searchParams: { keyword?: string }
 }) {
   return useQuery({
-    queryKey: [RAW_MATERIAL_INVENTORY_KEY, page, pageSize, searchParams],
+    queryKey: youmaiKeys.rawMaterialInventory.list({
+      page,
+      pageSize,
+      keyword: searchParams.keyword,
+    }),
     queryFn: ({ signal }) =>
       getYoumaiRawMaterialInventoryList({
         page,
@@ -34,23 +39,35 @@ export function useYoumaiRawMaterialInventoryList({
   })
 }
 
+export function useYoumaiRawMaterialInventoryOption(id?: string) {
+  const normalizedId = id?.trim() ?? ''
+
+  return useQuery({
+    queryKey: youmaiKeys.rawMaterialInventory.detail(normalizedId),
+    queryFn: ({ signal }) =>
+      getYoumaiRawMaterialInventoryOptionById(normalizedId, signal),
+    enabled: normalizedId.length > 0,
+    ...queryConfig.detail,
+  })
+}
+
 export function useCreateYoumaiRawMaterialInventory() {
   return useMutationWithInvalidation({
     mutationFn: createYoumaiRawMaterialInventory,
-    invalidateQueries: [[RAW_MATERIAL_INVENTORY_KEY]],
+    invalidateQueries: [youmaiKeys.rawMaterialInventory.all],
   })
 }
 
 export function useUpdateYoumaiRawMaterialInventory() {
   return useMutationWithInvalidation({
     mutationFn: updateYoumaiRawMaterialInventory,
-    invalidateQueries: [[RAW_MATERIAL_INVENTORY_KEY]],
+    invalidateQueries: [youmaiKeys.rawMaterialInventory.all],
   })
 }
 
 export function useDeleteYoumaiRawMaterialInventory() {
   return useMutationWithInvalidation({
     mutationFn: deleteYoumaiRawMaterialInventory,
-    invalidateQueries: [[RAW_MATERIAL_INVENTORY_KEY]],
+    invalidateQueries: [youmaiKeys.rawMaterialInventory.all],
   })
 }

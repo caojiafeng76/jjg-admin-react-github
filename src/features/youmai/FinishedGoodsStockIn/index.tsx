@@ -24,7 +24,6 @@ import {
   useDeleteYoumaiFinishedGoodsStockIn,
   useUpdateYoumaiFinishedGoodsStockIn,
   useYoumaiFinishedGoodsStockInList,
-  useYoumaiProductDataOptions,
 } from './useYoumaiFinishedGoodsStockIn'
 
 export default function YoumaiFinishedGoodsStockInPage() {
@@ -61,8 +60,6 @@ export default function YoumaiFinishedGoodsStockInPage() {
     pageSize,
     searchParams,
   })
-  const { data: productOptions = [] } = useYoumaiProductDataOptions()
-
   const createMutation = useCreateYoumaiFinishedGoodsStockIn()
   const updateMutation = useUpdateYoumaiFinishedGoodsStockIn()
   const batchStatusMutation = useBatchUpdateYoumaiFinishedGoodsStockInStatus()
@@ -378,7 +375,6 @@ export default function YoumaiFinishedGoodsStockInPage() {
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
-          productOptions={productOptions}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
           isAuditLocked={editingRecord?.status === '已审核'}
         />

@@ -176,9 +176,11 @@ export async function getSyneyPos({
   SONo?: string
   signal?: AbortSignal
 }) {
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
   let query = supabase
-    .from('syney-pos')
-    // 选择所有必要字段
+    .from('syney_pos_sorted')
     .select(
       'id, No, SONo, Spec, EndDate, Status, Qty, Brand, Technique, SerialNo, Remark, BorderMaterial, created_at',
       { count: 'exact' },
@@ -202,12 +204,20 @@ export async function getSyneyPos({
     query = query.ilike('SONo', `%${SONo}%`)
   }
 
-  // 支持请求取消
+  query = query
+    .order('status_sort_weight', { ascending: true })
+    .order('end_date_sort_key', { ascending: true })
+    .order('no_natural_sort_key', { ascending: true })
+    .order('sono_natural_sort_key', { ascending: true })
+    .order('id', { ascending: true })
+    .range(from, to)
+
   if (signal) {
     query = query.abortSignal(signal)
   }
 
-  const { data: syneyPos, count, error } = await query
+  const { data: syneyPos, count, error } =
+    await query.overrideTypes<ISyneyPo[]>()
 
   if (error) {
     // 请求被取消时 Supabase 可能抛出 AbortError，这属于正常行为，这里直接返回空结果避免报错
@@ -221,62 +231,6 @@ export async function getSyneyPos({
     }
 
     throw handleApiError(error, '订单列表获取失败')
-  }
-
-  // 自定义排序：已创建在前，部分入库次之，然后已入库，按交货日期升序排序，同一订单号按合同号升序排序
-  if (syneyPos && syneyPos.length > 0) {
-    // 定义状态优先级
-    const getStatusPriority = (status: string | null | undefined): number => {
-      if (status === '已创建') return 1
-      if (status === '部分入库' || status === '部分送货') return 2
-      if (status === '已入库') return 3
-      return 4 // 其他状态排在最后
-    }
-
-    syneyPos.sort((a, b) => {
-      // 1. 先按状态排序：已创建 > 部分入库/部分送货 > 已入库
-      const statusPriorityA = getStatusPriority(a.Status)
-      const statusPriorityB = getStatusPriority(b.Status)
-      if (statusPriorityA !== statusPriorityB) {
-        return statusPriorityA - statusPriorityB
-      }
-
-      // 2. 同一状态下，按交货日期（EndDate）排序
-      // 已入库状态按降序排序（从晚到早），其他状态按升序排序（从早到晚）
-      const endDateA = a.EndDate || ''
-      const endDateB = b.EndDate || ''
-      const dateCompare = endDateA.localeCompare(endDateB, 'zh-CN')
-      if (dateCompare !== 0) {
-        // 如果状态是"已入库"，则降序排序（返回相反的比较结果）
-        if (a.Status === '已入库') {
-          return -dateCompare
-        }
-        return dateCompare
-      }
-
-      // 3. 同一交货日期，按订单号（No）排序
-      const noA = a.No || ''
-      const noB = b.No || ''
-      const noCompare = noA.localeCompare(noB, 'zh-CN', { numeric: true })
-      if (noCompare !== 0) {
-        return noCompare
-      }
-
-      // 4. 同一订单号，按合同号（SONo）升序排序
-      const sonoA = a.SONo || ''
-      const sonoB = b.SONo || ''
-      return sonoA.localeCompare(sonoB, 'zh-CN', { numeric: true })
-    })
-
-    // 分页处理
-    if (page && pageSize) {
-      const from = (page - 1) * pageSize
-      const to = from + pageSize
-      return {
-        syneyPos: syneyPos.slice(from, to),
-        count: count || 0,
-      }
-    }
   }
 
   return { syneyPos: syneyPos || [], count: count || 0 }

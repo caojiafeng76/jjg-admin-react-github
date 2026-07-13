@@ -20,10 +20,10 @@ export function isAbortError(error: unknown): boolean {
 const defaultQueryOptions: DefaultOptions['queries'] = {
   // 数据在 30 秒内视为新鲜，避免列表数据长时间不刷新
   staleTime: 1000 * 30,
-  
+
   // 缓存时间：10 分钟（原 cacheTime，v5 中改为 gcTime）
   gcTime: 1000 * 60 * 10,
-  
+
   // 重试策略
   retry: (failureCount, error) => {
     // 如果是 AbortError，不重试
@@ -33,19 +33,19 @@ const defaultQueryOptions: DefaultOptions['queries'] = {
     // 最多重试 2 次
     return failureCount < 2
   },
-  
+
   // 重试延迟：指数退避策略
   retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  
+
   // 窗口聚焦时不自动重新获取（避免用户切换标签页时触发不必要的请求）
   refetchOnWindowFocus: false,
-  
+
   // 网络重连时不自动重新获取
   refetchOnReconnect: false,
-  
+
   // 挂载时不自动重新获取（如果数据仍然新鲜）
   refetchOnMount: true,
-  
+
   // 错误处理：忽略 AbortError
   throwOnError: (error) => !isAbortError(error),
 }
@@ -54,12 +54,9 @@ const defaultQueryOptions: DefaultOptions['queries'] = {
  * 默认变更选项
  */
 const defaultMutationOptions: DefaultOptions['mutations'] = {
-  // 变更失败时重试 1 次
-  retry: 1,
-  
-  // 重试延迟
-  retryDelay: 1000,
-  
+  // Mutation 可能产生副作用，默认禁止自动重试
+  retry: false,
+
   // 不抛出错误，让错误通过 onError 回调处理
   // 这样可以避免未捕获的错误导致应用崩溃
   throwOnError: false,
@@ -92,7 +89,7 @@ export const queryConfig = {
     staleTime: 1000 * 30, // 30 秒
     gcTime: 1000 * 60 * 5, // 5 分钟
   },
-  
+
   /**
    * 详情查询配置（单个资源）
    * - 较长的 staleTime，因为详情数据变化较少
@@ -101,7 +98,7 @@ export const queryConfig = {
     staleTime: 1000 * 60 * 10, // 10 分钟
     gcTime: 1000 * 60 * 30, // 30 分钟
   },
-  
+
   /**
    * 实时数据查询配置（需要频繁更新）
    * - 很短的 staleTime
@@ -111,7 +108,7 @@ export const queryConfig = {
     gcTime: 1000 * 60, // 1 分钟
     refetchInterval: 1000 * 30, // 每 30 秒自动重新获取
   },
-  
+
   /**
    * 静态数据查询配置（很少变化的数据）
    * - 很长的 staleTime
@@ -121,4 +118,3 @@ export const queryConfig = {
     gcTime: 1000 * 60 * 60 * 24, // 24 小时
   },
 } as const
-

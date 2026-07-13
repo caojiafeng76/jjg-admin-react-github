@@ -476,7 +476,8 @@ export default function VillaLiftOrderListPage() {
   }
 
   // 搜索
-  const { exportAsExcel } = useExportVillaLiftOrdersAsExcel()
+  const { exportAsExcel, isExporting, preloadExportAsExcel } =
+    useExportVillaLiftOrdersAsExcel()
 
   function handleSearch() {
     const next = new URLSearchParams(searchParamsURL)
@@ -748,14 +749,17 @@ export default function VillaLiftOrderListPage() {
               icon={
                 <DocumentArrowDownIcon className="size-4 text-green-500/80!" />
               }
-              onClick={() => {
-                const success = exportAsExcel(data?.orders ?? [])
+              onClick={async () => {
+                const success = await exportAsExcel(data?.orders ?? [])
                 if (success) {
                   message.success(`已导出 ${data?.orders?.length ?? 0} 条订单`)
                 } else {
                   message.warning('当前列表无数据可导出')
                 }
               }}
+              onMouseEnter={preloadExportAsExcel}
+              onFocus={preloadExportAsExcel}
+              loading={isExporting}
             >
               导出Excel
             </Button>

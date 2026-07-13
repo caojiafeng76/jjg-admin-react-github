@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import * as XLSX from 'xlsx-js-style'
 
-import { createWorkshopOrderWorkbookBuffer } from './useExportWorkshopOrdersAsExcel'
+import { createWorkshopOrderWorkbookBuffer } from './workshopOrdersExcelDocument'
 
 describe('createWorkshopOrderWorkbookBuffer', () => {
   it('adds a centered title row above QR and sketch headers', () => {

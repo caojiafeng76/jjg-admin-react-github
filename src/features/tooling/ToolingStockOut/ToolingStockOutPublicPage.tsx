@@ -13,6 +13,7 @@ import dayjs from 'dayjs'
 
 import type { ToolingStockOutFormValues } from '@/services/apiToolingStockOut'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
+import type { RemoteToolingOption } from '../remoteToolingOptions'
 import ToolingStockOutForm from './ToolingStockOutForm'
 import {
   useCreatePublicToolingStockOut,
@@ -37,9 +38,14 @@ export default function ToolingStockOutPublicPage() {
   const { message } = App.useApp()
   const [formRef, setFormRef] = useState<FormInstance | null>(null)
   const [submitted, setSubmitted] = useState<SubmissionSnapshot | null>(null)
+  const [toolingOptionsKeyword, setToolingOptionsKeyword] = useState('')
+  const [selectedTooling, setSelectedTooling] = useState<RemoteToolingOption>()
 
-  const { data: toolingOptions = [], isLoading: isToolingOptionsLoading } =
-    usePublicToolingDataOptions()
+  const {
+    data: toolingOptions = [],
+    isLoading: isToolingOptionsQueryLoading,
+    isFetching: isToolingOptionsLoading,
+  } = usePublicToolingDataOptions(toolingOptionsKeyword)
   const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
     useMachineEquipmentOptions()
   const createMutation = useCreatePublicToolingStockOut()
@@ -62,9 +68,9 @@ export default function ToolingStockOutPublicPage() {
 
       await createMutation.mutateAsync(payload)
 
-      const selectedTooling = toolingOptions.find(
-        (item) => item.id === payload.tooling_data_id,
-      )
+      const submittedTooling =
+        selectedTooling ??
+        toolingOptions.find((item) => item.id === payload.tooling_data_id)
       const selectedMachine = machineOptions.find(
         (item) => item.id === payload.machine_equipment_id,
       )
@@ -72,8 +78,8 @@ export default function ToolingStockOutPublicPage() {
       setSubmitted({
         quantity: Number(payload.stock_out_quantity),
         recipient: payload.recipient.trim(),
-        toolLabel: selectedTooling
-          ? `${selectedTooling.tool_code} | ${selectedTooling.tool_name}`
+        toolLabel: submittedTooling
+          ? `${submittedTooling.tool_code} | ${submittedTooling.tool_name}`
           : '未命名刀具',
         machineLabel: selectedMachine
           ? `${selectedMachine.unified_device_no} | ${selectedMachine.machine_name}`
@@ -86,6 +92,13 @@ export default function ToolingStockOutPublicPage() {
       )
     }
   }
+
+  const hasToolingOptions =
+    toolingOptionsKeyword.trim().length > 0 ||
+    toolingOptions.length > 0 ||
+    Boolean(selectedTooling)
+  const isToolingOptionsInitialLoading =
+    toolingOptionsKeyword.trim().length === 0 && isToolingOptionsQueryLoading
 
   return (
     <div className="flex h-dvh flex-col bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_28%),linear-gradient(180deg,#f6fbfc_0%,#ffffff_42%,#e9eef1_100%)] text-slate-900">
@@ -131,6 +144,8 @@ export default function ToolingStockOutPublicPage() {
                   className="h-11 rounded-2xl px-6"
                   onClick={() => {
                     setSubmitted(null)
+                    setSelectedTooling(undefined)
+                    setToolingOptionsKeyword('')
                   }}
                 >
                   继续登记
@@ -155,14 +170,14 @@ export default function ToolingStockOutPublicPage() {
                 </div>
               </div>
 
-              {isToolingOptionsLoading || isMachineOptionsLoading ? (
+              {isToolingOptionsInitialLoading || isMachineOptionsLoading ? (
                 <div className="flex min-h-80 items-center justify-center">
                   <div className="flex flex-col items-center gap-4 text-sm text-slate-500">
                     <Spin size="large" />
                     <span>正在加载刀具资料和机器编号</span>
                   </div>
                 </div>
-              ) : toolingOptions.length === 0 ? (
+              ) : !hasToolingOptions ? (
                 <Alert
                   type="warning"
                   showIcon
@@ -175,6 +190,9 @@ export default function ToolingStockOutPublicPage() {
                   setFormRef={setFormRef}
                   isSubmitting={createMutation.isPending}
                   toolingOptions={toolingOptions}
+                  isToolingOptionsLoading={isToolingOptionsLoading}
+                  onToolingSearch={setToolingOptionsKeyword}
+                  onToolingSelect={setSelectedTooling}
                   machineOptions={machineOptions}
                   isMachineOptionsLoading={isMachineOptionsLoading}
                   toolingInputMode="bottom-sheet"
@@ -199,8 +217,8 @@ export default function ToolingStockOutPublicPage() {
             className="h-12 rounded-2xl"
             loading={createMutation.isPending}
             disabled={
-              toolingOptions.length === 0 ||
-              isToolingOptionsLoading ||
+              !hasToolingOptions ||
+              isToolingOptionsInitialLoading ||
               isMachineOptionsLoading
             }
             onClick={() => formRef?.submit()}

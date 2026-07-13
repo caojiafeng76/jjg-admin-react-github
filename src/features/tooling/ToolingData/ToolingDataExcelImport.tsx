@@ -14,10 +14,12 @@ import type { ToolingDataFormValues } from '@/services/apiToolingData'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
-import {
-  downloadToolingDataTemplate,
-  parseToolingDataExcel,
-} from '@/utils/toolingDataExcel'
+
+const loadToolingDataExcel = () => import('@/utils/toolingDataExcel')
+
+function preloadToolingDataExcel() {
+  void loadToolingDataExcel()
+}
 
 interface Props {
   onImport: (rows: ToolingDataFormValues[]) => Promise<void>
@@ -84,6 +86,7 @@ export default function ToolingDataExcelImport({
 
     setParsing(true)
     try {
+      const { parseToolingDataExcel } = await loadToolingDataExcel()
       const { rows, errors } = await parseToolingDataExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
@@ -108,6 +111,11 @@ export default function ToolingDataExcelImport({
     setParsedRows([])
     setParseErrors([])
     setFileList([])
+  }
+
+  const handleDownloadTemplate = async () => {
+    const { downloadToolingDataTemplate } = await loadToolingDataExcel()
+    downloadToolingDataTemplate()
   }
 
   const handleCancel = () => {
@@ -136,11 +144,13 @@ export default function ToolingDataExcelImport({
       <ImportButton
         onClick={handleOpenModal}
         permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        onPreload={preloadToolingDataExcel}
       />
 
       <DownloadTemplateButton
-        onClick={downloadToolingDataTemplate}
+        onClick={handleDownloadTemplate}
         permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        onPreload={preloadToolingDataExcel}
       />
 
       <Modal
@@ -178,6 +188,8 @@ export default function ToolingDataExcelImport({
             <Button
               loading={parsing}
               icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+              onMouseEnter={preloadToolingDataExcel}
+              onFocus={preloadToolingDataExcel}
             >
               {parsing ? '解析中...' : '选择 Excel 文件'}
             </Button>

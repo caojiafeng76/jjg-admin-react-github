@@ -14,7 +14,9 @@ type ReportStatus = 'confirmed' | 'unconfirmed'
  */
 export function useMarkReportsStatus() {
   const { message } = App.useApp()
-  const { setTableSelectedKeys } = useAppStore()
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
 
   const { mutate: mark, isPending } = useMutationWithMessage({
     mutationFn: updateSyneyStoreReports,
@@ -45,5 +47,4 @@ export function useMarkReportsStatus() {
     isPending,
   }
 }
-
 

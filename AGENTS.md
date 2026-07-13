@@ -4,7 +4,7 @@
 
 基于 React 19 + TypeScript + Vite 的企业管理后台系统，管理"西尼"扶梯踏板和"车间"生产业务。
 
-**技术栈**: React 19, TypeScript 5.7, Vite 7, Ant Design 6, Tailwind CSS 4, TanStack Query 5, Zustand 5, Supabase
+**技术栈**: React 19.2, TypeScript 6.0, Vite 8, Ant Design 6, Tailwind CSS 4, TanStack Query 5, Zustand 5, Supabase
 
 ---
 

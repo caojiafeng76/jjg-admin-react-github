@@ -11,11 +11,12 @@ import {
   updateYoumaiFinishedGoodsStockIn,
 } from '@/services/apiYoumaiFinishedGoodsStockIn'
 
+import { youmaiKeys } from '../queryKeys'
+
 const YOUMAI_FINISHED_GOODS_STOCK_IN_KEY =
   'youmai-finished-goods-stock-in' as const
 const YOUMAI_FINISHED_GOODS_INVENTORY_KEY =
   'youmai-finished-goods-inventory' as const
-const YOUMAI_PRODUCT_DATA_OPTIONS_KEY = 'youmai-product-data-options' as const
 
 export function useYoumaiFinishedGoodsStockInList({
   page,
@@ -48,10 +49,13 @@ export function useYoumaiFinishedGoodsStockInList({
   })
 }
 
-export function useYoumaiProductDataOptions() {
+export function useYoumaiProductDataOptions(keyword?: string) {
+  const normalizedKeyword = keyword?.trim()
+
   return useQuery({
-    queryKey: [YOUMAI_PRODUCT_DATA_OPTIONS_KEY],
-    queryFn: () => getYoumaiProductDataOptions(),
+    queryKey: youmaiKeys.productData.options(normalizedKeyword),
+    queryFn: ({ signal }) =>
+      getYoumaiProductDataOptions(normalizedKeyword, signal),
     ...queryConfig.list,
   })
 }

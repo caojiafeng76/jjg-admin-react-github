@@ -1,13 +1,21 @@
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 
-import { corsHeaders } from '../_shared/cors.ts'
+import {
+  authorizeEdgeProxyRequest,
+  consumeEdgeProxyRateLimit,
+  diagnosticErrorCategory,
+  getProxyCorsHeaders,
+  hasBearerAuthorization,
+  isProxyOriginAllowed,
+  parseProxyIdentifier,
+  readLimitedJsonBody,
+  safeErrorMetadata,
+} from '../_shared/proxy-security.ts'
 
 const YOUMAI_SRM_BASE_URL = 'https://srm.hzoptimax.com/saafbase'
 const LOGIN_URL = `${YOUMAI_SRM_BASE_URL}/restServer/saafLoginServlet/login`
-const ORDER_LIST_URL =
-  `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfoList`
-const ORDER_LINES_URL =
-  `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfo`
+const ORDER_LIST_URL = `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfoList`
+const ORDER_LINES_URL = `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfo`
 const REQUEST_TIMEOUT_MS = 20000
 
 type YoumaiPurchaseOrderPayload = {
@@ -45,35 +53,18 @@ type YoumaiSrmOrderLine = {
   packingItem?: string
 }
 
-function jsonResponse(body: Record<string, unknown>, status = 200) {
+function jsonResponse(
+  body: Record<string, unknown>,
+  status = 200,
+  headers: Record<string, string> = {},
+) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      ...corsHeaders,
+      ...headers,
       'Content-Type': 'application/json',
     },
   })
-}
-
-function getAuthorizationRole(authorization: string) {
-  const token = authorization.replace(/^Bearer\s+/i, '')
-  const payloadPart = token.split('.')[1]
-
-  if (!payloadPart) {
-    return ''
-  }
-
-  try {
-    const normalizedPayload = payloadPart
-      .replace(/-/g, '+')
-      .replace(/_/g, '/')
-      .padEnd(Math.ceil(payloadPart.length / 4) * 4, '=')
-    const payload = JSON.parse(atob(normalizedPayload)) as { role?: string }
-
-    return payload.role || ''
-  } catch {
-    return ''
-  }
 }
 
 function normalizeText(value: unknown) {
@@ -110,7 +101,10 @@ function getSetCookieValues(headers: Headers) {
   return setCookie ? [setCookie] : []
 }
 
-function appendResponseCookies(cookieMap: Map<string, string>, response: Response) {
+function appendResponseCookies(
+  cookieMap: Map<string, string>,
+  response: Response,
+) {
   getSetCookieValues(response.headers).forEach((setCookie) => {
     const [cookiePair] = setCookie.split(';')
     const separatorIndex = cookiePair.indexOf('=')
@@ -165,21 +159,19 @@ async function runDiagnosticStep(
 
   try {
     const response = await fetchWithTimeout(input, init, `${name} 超时`)
-    const body = await response.clone().text().catch(() => '')
 
     return {
       name,
       ok: response.ok,
       status: response.status,
       elapsedMs: Date.now() - startedAt,
-      bodyPreview: body.slice(0, 120),
     }
   } catch (error) {
     return {
       name,
       ok: false,
       elapsedMs: Date.now() - startedAt,
-      error: error instanceof Error ? error.message : String(error),
+      errorCategory: diagnosticErrorCategory(error),
     }
   }
 }
@@ -383,52 +375,88 @@ async function fetchYoumaiPurchaseOrder(purchaseOrderNo: string) {
   return items
 }
 
-serve(async (request) => {
+serve(async (request: Request) => {
+  const corsHeaders = getProxyCorsHeaders(request)
+  const respond = (body: Record<string, unknown>, status = 200) =>
+    jsonResponse(body, status, corsHeaders)
+
   if (request.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', {
+      status: isProxyOriginAllowed(request) ? 204 : 403,
+      headers: corsHeaders,
+    })
+  }
+
+  if (!isProxyOriginAllowed(request)) {
+    return respond({ error: 'Origin not allowed' }, 403)
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405)
+    return respond({ error: 'Method not allowed' }, 405)
   }
 
-  const authorization = request.headers.get('Authorization')
-  if (!authorization) {
-    return jsonResponse({ error: '未登录，无法获取优迈采购订单' }, 401)
+  if (!hasBearerAuthorization(request)) {
+    return respond({ error: '未登录，无法获取优迈采购订单' }, 401)
   }
 
-  if (getAuthorizationRole(authorization) !== 'authenticated') {
-    return jsonResponse({ error: '未登录，无法获取优迈采购订单' }, 401)
+  const bodyResult =
+    await readLimitedJsonBody<YoumaiPurchaseOrderPayload>(request)
+  if (!bodyResult.ok) {
+    return respond(
+      { error: bodyResult.status === 413 ? '请求体过大' : '请求体格式不正确' },
+      bodyResult.status,
+    )
   }
+  const payload = bodyResult.payload
 
-  let payload: YoumaiPurchaseOrderPayload
-
+  let access
   try {
-    payload = await request.json()
-  } catch {
-    return jsonResponse({ error: '请求体格式不正确' }, 400)
+    access = await authorizeEdgeProxyRequest(
+      request,
+      'page:youmai-finished-goods-stock-out',
+      payload.diagnose === true,
+    )
+  } catch (error) {
+    console.error('youmai_edge_auth_failure', safeErrorMetadata(error))
+    return respond({ error: '优迈采购订单代理服务暂不可用' }, 502)
+  }
+  if (!access.ok) {
+    return respond(
+      {
+        error:
+          access.status === 401 ? '未登录，无法获取优迈采购订单' : '无权访问',
+      },
+      access.status,
+    )
+  }
+  try {
+    if (!(await consumeEdgeProxyRateLimit(request, 'youmai-purchase-order'))) {
+      return respond({ error: '请求过于频繁，请稍后重试' }, 429)
+    }
+  } catch (error) {
+    console.error('youmai_edge_rate_limit_failure', safeErrorMetadata(error))
+    return respond({ error: '优迈采购订单代理服务暂不可用' }, 502)
   }
 
   try {
     if (payload.diagnose) {
-      return jsonResponse(await diagnoseYoumaiSrmAccess())
+      return respond(await diagnoseYoumaiSrmAccess())
     }
 
-    const purchaseOrderNo = payload.purchaseOrderNo?.trim()
+    const purchaseOrderNo = parseProxyIdentifier(payload.purchaseOrderNo)
     if (!purchaseOrderNo) {
-      return jsonResponse({ error: '请输入采购订单号' }, 400)
+      return respond({ error: '采购订单号长度必须为 1 到 64 个字符' }, 400)
     }
 
     const items = await fetchYoumaiPurchaseOrder(purchaseOrderNo)
 
-    return jsonResponse({
+    return respond({
       purchaseOrderNo,
       total: items.length,
       items,
     })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : '优迈采购订单获取失败'
-    return jsonResponse({ error: message }, 500)
+    console.error('youmai_edge_upstream_failure', safeErrorMetadata(error))
+    return respond({ error: '优迈采购订单代理服务暂不可用' }, 502)
   }
 })

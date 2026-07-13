@@ -1,3 +1,5 @@
+import type {} from '../_shared/edge-runtime.d.ts'
+
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 
 import { assertAdmin } from '../_shared/admin.ts'
@@ -153,15 +155,13 @@ async function getProductionOrderIdsPageByFilters(
   const hasItemFilters = Boolean(
     filters.dataCategory || filters.productModel || filters.customerModel,
   )
+  const selectColumns = hasItemFilters
+    ? 'id,item_filters:production_order_items!inner(id,data_category,product_model,customer_model)'
+    : 'id'
 
   let query = adminClient
     .from('production_orders')
-    .select(
-      `
-      id${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, data_category, product_model, customer_model)' : ''}
-    `,
-      { count: 'exact' },
-    )
+    .select<string, { id: string }>(selectColumns, { count: 'exact' })
     .order('created_at', { ascending: false })
     .order('order_date', { ascending: false })
 
@@ -210,7 +210,7 @@ async function getProductionOrderIdsPageByFilters(
   }
 
   return {
-    ids: ((data || []) as Array<{ id: string }>).map((item) => item.id),
+    ids: (data || []).map((item) => item.id),
     total: count || 0,
   }
 }

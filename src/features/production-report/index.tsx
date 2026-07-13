@@ -20,13 +20,19 @@ import {
   getProductionDailyReportForExportChunked,
   PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE,
 } from '@/services/apiProductionDailyReport'
-import { exportProductionDailyReportToExcel } from '@/utils/productionDailyReportExcel'
 import { isEmployeeSideRole } from '@/config/access'
 import ProductionDailyReportSearch from './ProductionDailyReportSearch'
 import ProductionDailyReportTable from './ProductionDailyReportTable'
 import ProductionDailyReportMobileList from './ProductionDailyReportMobileList'
 import { useProductionDailyReport } from './useProductionDailyReport'
 import { useAuth } from '@/contexts/useAuth'
+
+const loadProductionDailyReportExcel = () =>
+  import('@/utils/productionDailyReportExcel')
+
+const preloadProductionDailyReportExcel = () => {
+  void loadProductionDailyReportExcel()
+}
 
 function buildDateRange(filters: ProductionDailyReportFilters) {
   if (!filters.startDate || !filters.endDate) {
@@ -238,6 +244,8 @@ export default function ProductionDailyReportPage() {
         window.requestAnimationFrame(() => resolve())
       })
 
+      const { exportProductionDailyReportToExcel } =
+        await loadProductionDailyReportExcel()
       await exportProductionDailyReportToExcel(exportRows)
 
       message.success({
@@ -283,6 +291,8 @@ export default function ProductionDailyReportPage() {
             <button
               type="button"
               onClick={handleExport}
+              onMouseEnter={preloadProductionDailyReportExcel}
+              onFocus={preloadProductionDailyReportExcel}
               disabled={isExporting || (selectedCount === 0 && total === 0)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/60 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50/40 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >

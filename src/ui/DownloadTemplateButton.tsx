@@ -11,6 +11,7 @@ interface Props {
   loading?: boolean
   permissionKey?: string
   noPermissionTip?: string
+  onPreload?: () => void
 }
 
 export default function DownloadTemplateButton({
@@ -20,6 +21,7 @@ export default function DownloadTemplateButton({
   loading = false,
   permissionKey,
   noPermissionTip = '无下载模板权限',
+  onPreload,
 }: Props) {
   const allowed = usePermission(permissionKey ?? '')
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
@@ -32,6 +34,8 @@ export default function DownloadTemplateButton({
       type="text"
       icon={<ArrowDownTrayIcon className="size-4 text-cyan-600/80!" />}
       onClick={onClick}
+      onMouseEnter={onPreload}
+      onFocus={onPreload}
       disabled={denied || disabled}
       loading={loading}
     >

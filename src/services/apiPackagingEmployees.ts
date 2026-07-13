@@ -1,5 +1,6 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import { buildPostgrestOrIlikeFilter } from '@/utils/postgrestFilters'
+import supabase from './supabase'
 
 export interface PackagingEmployee {
   id: string
@@ -19,6 +20,11 @@ export interface PackagingEmployeeFormValues {
   hourly_wage?: number | null
   remark: string | null
 }
+
+export type PackagingEmployeeOption = Pick<
+  PackagingEmployee,
+  'id' | 'name' | 'username'
+>
 
 export const DEFAULT_PACKAGING_EMPLOYEE_HOURLY_WAGE = 19
 
@@ -68,10 +74,12 @@ export async function getPackagingEmployeeList({
   page,
   pageSize,
   keyword,
+  signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  signal?: AbortSignal
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -81,13 +89,17 @@ export async function getPackagingEmployeeList({
   if (keyword?.trim()) {
     const normalizedKeyword = keyword.trim()
     query = query.or(
-      `username.ilike.%${normalizedKeyword}%,name.ilike.%${normalizedKeyword}%`,
+      buildPostgrestOrIlikeFilter(['username', 'name'], normalizedKeyword),
     )
   }
 
-  const { data, error, count } = await query
-    .order('updated_at', { ascending: false })
-    .range(from, to)
+  let request = query.order('updated_at', { ascending: false }).range(from, to)
+
+  if (signal) {
+    request = request.abortSignal(signal)
+  }
+
+  const { data, error, count } = await request
 
   if (error) {
     throw handleApiError(error, '获取员工列表失败')
@@ -96,6 +108,48 @@ export async function getPackagingEmployeeList({
   return {
     items: (data || []) as PackagingEmployee[],
     total: count || 0,
+  }
+}
+
+export async function getPackagingEmployeeOptions({
+  keyword,
+  limit = 50,
+  signal,
+}: {
+  keyword?: string
+  limit?: number
+  signal?: AbortSignal
+}) {
+  const requestedLimit =
+    typeof limit === 'number' && Number.isFinite(limit) ? Math.trunc(limit) : 50
+  const normalizedLimit = Math.min(50, Math.max(1, requestedLimit))
+  const normalizedKeyword = keyword?.trim() ?? ''
+
+  let query = packagingEmployeeTable().select('id,name,username')
+
+  if (normalizedKeyword) {
+    query = query.or(
+      buildPostgrestOrIlikeFilter(['username', 'name'], normalizedKeyword),
+    )
+  }
+
+  let request = query
+    .order('name', { ascending: true })
+    .order('id', { ascending: true })
+    .limit(normalizedLimit)
+
+  if (signal) {
+    request = request.abortSignal(signal)
+  }
+
+  const { data, error } = await request
+
+  if (error) {
+    throw handleApiError(error, '获取员工选项失败')
+  }
+
+  return {
+    items: (data || []) as PackagingEmployeeOption[],
   }
 }
 

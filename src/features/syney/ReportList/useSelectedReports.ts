@@ -9,7 +9,7 @@ import { queryConfig } from '@/config/queryClient'
  * @param enabled - 是否启用查询（默认false，避免不必要的查询）
  */
 export function useSelectedReports(enabled: boolean = false) {
-  const { tableSelectedKeys: Nos } = useAppStore()
+  const Nos = useAppStore((state) => state.tableSelectedKeys)
 
   const {
     data: selectedMap,

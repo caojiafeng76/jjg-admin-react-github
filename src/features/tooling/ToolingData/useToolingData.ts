@@ -9,8 +9,7 @@ import {
   getToolingDataList,
   updateToolingData,
 } from '@/services/apiToolingData'
-
-const TOOLING_DATA_KEY = 'tooling-data' as const
+import { toolingKeys } from '../queryKeys'
 
 export function useToolingDataList({
   page,
@@ -24,12 +23,17 @@ export function useToolingDataList({
   }
 }) {
   return useQuery({
-    queryKey: [TOOLING_DATA_KEY, page, pageSize, searchParams],
-    queryFn: () =>
+    queryKey: toolingKeys.data.list({
+      page,
+      pageSize,
+      keyword: searchParams.keyword,
+    }),
+    queryFn: ({ signal }) =>
       getToolingDataList({
         page,
         pageSize,
         keyword: searchParams.keyword,
+        signal,
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
@@ -39,27 +43,27 @@ export function useToolingDataList({
 export function useCreateToolingData() {
   return useMutationWithInvalidation({
     mutationFn: createToolingData,
-    invalidateQueries: [[TOOLING_DATA_KEY]],
+    invalidateQueries: [toolingKeys.data.all],
   })
 }
 
 export function useUpdateToolingData() {
   return useMutationWithInvalidation({
     mutationFn: updateToolingData,
-    invalidateQueries: [[TOOLING_DATA_KEY]],
+    invalidateQueries: [toolingKeys.data.all],
   })
 }
 
 export function useImportToolingData() {
   return useMutationWithInvalidation({
     mutationFn: createToolingDataBatch,
-    invalidateQueries: [[TOOLING_DATA_KEY]],
+    invalidateQueries: [toolingKeys.data.all],
   })
 }
 
 export function useDeleteToolingData() {
   return useMutationWithInvalidation({
     mutationFn: deleteToolingData,
-    invalidateQueries: [[TOOLING_DATA_KEY]],
+    invalidateQueries: [toolingKeys.data.all],
   })
 }

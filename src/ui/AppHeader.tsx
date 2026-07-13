@@ -205,6 +205,7 @@ export default function AppHeader({
             )
           }
           onClick={onToggleCollapse}
+          aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
           style={{
             fontSize: 16,
             width: 64,

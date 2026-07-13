@@ -12,8 +12,12 @@ export default forwardRef<
 >(function DetailForm({ onClose }, ref) {
   const [form] = Form.useForm<ISyneyItem>()
 
-  const { tableSelectedKeys, setTableSelectedKeys, isLoading, setIsLoading } =
-    useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
+  const isLoading = useAppStore((state) => state.isLoading)
+  const setIsLoading = useAppStore((state) => state.setIsLoading)
   const { updateItems } = useUpdate()
 
   const layout = {

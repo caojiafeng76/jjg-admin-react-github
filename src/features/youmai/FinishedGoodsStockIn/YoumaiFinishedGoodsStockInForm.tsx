@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   Form,
@@ -14,11 +14,16 @@ import type {
   YoumaiProductDataOption,
 } from '@/services/apiYoumaiFinishedGoodsStockIn'
 
+import {
+  createProductOptionSnapshot,
+  useRemoteSelectOptions,
+} from '../remoteSelectOptions'
+import { useYoumaiProductDataOptions } from './useYoumaiFinishedGoodsStockIn'
+
 interface Props {
   onFinish: (values: YoumaiFinishedGoodsStockInFormValues) => void
   setFormRef: (form: FormInstance<YoumaiFinishedGoodsStockInFormValues>) => void
   isSubmitting: boolean
-  productOptions: YoumaiProductDataOption[]
   initialValues?:
     | YoumaiFinishedGoodsStockIn
     | YoumaiFinishedGoodsStockInFormValues
@@ -36,16 +41,27 @@ export default function YoumaiFinishedGoodsStockInForm({
   onFinish,
   setFormRef,
   isSubmitting,
-  productOptions,
   initialValues,
   isAuditLocked = false,
 }: Props) {
   const [form] = Form.useForm<YoumaiFinishedGoodsStockInFormValues>()
+  const [productOptionKeyword, setProductOptionKeyword] = useState('')
+  const { data: productOptions = [], isFetching: areProductOptionsLoading } =
+    useYoumaiProductDataOptions(productOptionKeyword)
+  const initialProductSnapshot = useMemo(
+    () => createProductOptionSnapshot(initialValues),
+    [initialValues],
+  )
+  const { mergedOptions, rememberSelectedOption } =
+    useRemoteSelectOptions<YoumaiProductDataOption>(
+      productOptions,
+      initialProductSnapshot,
+    )
   const selectedProductId = Form.useWatch('product_data_id', form)
 
   const selectedProduct = useMemo(
-    () => productOptions.find((item) => item.id === selectedProductId),
-    [productOptions, selectedProductId],
+    () => mergedOptions.find((item) => item.id === selectedProductId),
+    [mergedOptions, selectedProductId],
   )
 
   useEffect(() => {
@@ -80,7 +96,7 @@ export default function YoumaiFinishedGoodsStockInForm({
           className="mb-4"
           type="info"
           showIcon
-          message="当前记录已审核，仅允许修改备注。货品和入库数量已锁定；审核与反审请使用页面顶部按钮。"
+          title="当前记录已审核，仅允许修改备注。货品和入库数量已锁定；审核与反审请使用页面顶部按钮。"
         />
       )}
 
@@ -92,17 +108,17 @@ export default function YoumaiFinishedGoodsStockInForm({
         <Select
           disabled={isAuditLocked}
           showSearch={{
-            filterOption: (input, option) =>
-              String(option?.label || '')
-                .toLowerCase()
-                .includes(input.toLowerCase()),
+            filterOption: false,
+            onSearch: setProductOptionKeyword,
           }}
+          onChange={rememberSelectedOption}
+          loading={areProductOptionsLoading}
           placeholder={
-            productOptions.length > 0
+            mergedOptions.length > 0
               ? '请选择优迈货品资料'
               : '暂无优迈货品资料，请先维护货品资料'
           }
-          options={productOptions.map((item) => ({
+          options={mergedOptions.map((item) => ({
             value: item.id,
             label: `${item.material_code} | ${item.material_name} | ${item.model} | ${item.specification}`,
           }))}

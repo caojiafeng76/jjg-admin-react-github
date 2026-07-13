@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Key } from 'react'
 import { Table, type TableColumnsType, type TableProps } from 'antd'
 
@@ -82,6 +83,12 @@ export default function SpecTable({
   }
 
   const handleRow = (record: ISyneySpec) => ({
+    ...(onRowClick
+      ? createKeyboardTableRowProps(
+          () => onRowClick(record),
+          `打开西尼规格 ${record.PartNo || record.id}`,
+        )
+      : {}),
     onClick: () => onRowClick?.(record),
     style: {
       cursor: onRowClick ? 'pointer' : undefined,
@@ -103,7 +110,7 @@ export default function SpecTable({
       onRow={handleRow}
       scroll={{ x: 800, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600"
     />
   )
 }

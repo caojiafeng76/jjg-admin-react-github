@@ -1,3 +1,4 @@
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import type {
   CSSProperties,
   Key,
@@ -337,6 +338,12 @@ function WorkshopOrderTable({
       styles={DENSE_TABLE_STYLES}
       onChange={onChange}
       onRow={(record) => ({
+        ...(onRowClick
+          ? createKeyboardTableRowProps(
+              () => onRowClick(record),
+              `打开车间订单 ${record.id}`,
+            )
+          : {}),
         onClick: () => onRowClick?.(record),
         style: {
           cursor: 'pointer',

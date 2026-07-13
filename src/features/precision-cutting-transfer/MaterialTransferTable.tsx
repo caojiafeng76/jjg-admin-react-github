@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, type TableColumnsType, type TableProps } from 'antd'
 
 import type { PrecisionCuttingTransferRow } from '@/services/apiPrecisionCuttingTransfers'
@@ -199,6 +200,12 @@ export default function MaterialTransferTable({
 
   const handleRow = useCallback(
     (record: PrecisionCuttingTransferRow) => ({
+      ...(onRowClick
+        ? createKeyboardTableRowProps(
+            () => onRowClick(record),
+            `打开切割转序记录 ${record.id}`,
+          )
+        : {}),
       onClick: () => onRowClick?.(record),
       style: {
         cursor: onRowClick ? 'pointer' : undefined,

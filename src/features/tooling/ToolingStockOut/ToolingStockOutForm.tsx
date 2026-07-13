@@ -20,10 +20,12 @@ import MobileBottomSelectSheet, {
   type MobileBottomSelectOption,
 } from '@/ui/mobile/MobileBottomSelectSheet'
 import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
+import { buildToolingOptionKeywords } from '@/utils/toolingOptionSearch'
 import {
-  buildToolingOptionKeywords,
-  matchesToolingOptionKeyword,
-} from '@/utils/toolingOptionSearch'
+  createToolingOptionSnapshot,
+  mergeToolingOptions,
+  type RemoteToolingOption,
+} from '../remoteToolingOptions'
 
 interface ToolingStockOutFormFields {
   tooling_data_id: string
@@ -42,6 +44,9 @@ interface Props {
   setFormRef: (form: FormInstance) => void
   isSubmitting: boolean
   toolingOptions: ToolingDataOption[]
+  isToolingOptionsLoading: boolean
+  onToolingSearch: (keyword: string) => void
+  onToolingSelect?: (option?: RemoteToolingOption) => void
   machineOptions: MachineEquipmentOption[]
   isMachineOptionsLoading: boolean
   initialValues?: ToolingStockOut | ToolingStockOutFormValues
@@ -72,6 +77,9 @@ export default function ToolingStockOutForm({
   setFormRef,
   isSubmitting,
   toolingOptions,
+  isToolingOptionsLoading,
+  onToolingSearch,
+  onToolingSelect,
   machineOptions,
   isMachineOptionsLoading,
   initialValues,
@@ -82,17 +90,24 @@ export default function ToolingStockOutForm({
   const [form] = Form.useForm<ToolingStockOutFormFields>()
   const [isToolingSheetOpen, setIsToolingSheetOpen] = useState(false)
   const [isMachineSheetOpen, setIsMachineSheetOpen] = useState(false)
+  const [selectedToolingSnapshot, setSelectedToolingSnapshot] =
+    useState<RemoteToolingOption>()
   const selectedToolingId = Form.useWatch('tooling_data_id', form)
   const selectedMachineId = Form.useWatch('machine_equipment_id', form)
 
+  const mergedToolingOptions = useMemo(
+    () => mergeToolingOptions(toolingOptions, selectedToolingSnapshot),
+    [selectedToolingSnapshot, toolingOptions],
+  )
+
   const selectedTooling = useMemo(
-    () => toolingOptions.find((item) => item.id === selectedToolingId),
-    [toolingOptions, selectedToolingId],
+    () => mergedToolingOptions.find((item) => item.id === selectedToolingId),
+    [mergedToolingOptions, selectedToolingId],
   )
 
   const toolingSelectOptions = useMemo(
     () =>
-      toolingOptions.map((item) => ({
+      mergedToolingOptions.map((item) => ({
         value: item.id,
         label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
         keywords: buildToolingOptionKeywords([
@@ -102,12 +117,12 @@ export default function ToolingStockOutForm({
           item.material,
         ]),
       })),
-    [toolingOptions],
+    [mergedToolingOptions],
   )
 
   const toolingSheetOptions = useMemo<MobileBottomSelectOption[]>(
     () =>
-      toolingOptions.map((item) => ({
+      mergedToolingOptions.map((item) => ({
         value: item.id,
         label: `${item.tool_code} | ${item.tool_name}`,
         description: (
@@ -123,7 +138,7 @@ export default function ToolingStockOutForm({
           item.material,
         ]),
       })),
-    [toolingOptions],
+    [mergedToolingOptions],
   )
 
   const currentToolingLabel = selectedTooling
@@ -131,42 +146,40 @@ export default function ToolingStockOutForm({
     : ''
 
   const machineSelectOptions = useMemo(
-    () =>
-      [
-        NO_MACHINE_OPTION,
-        ...machineOptions.map((item) => ({
-          value: item.id,
-          label: `${item.unified_device_no} | ${item.machine_name}`,
-        })),
-      ],
+    () => [
+      NO_MACHINE_OPTION,
+      ...machineOptions.map((item) => ({
+        value: item.id,
+        label: `${item.unified_device_no} | ${item.machine_name}`,
+      })),
+    ],
     [machineOptions],
   )
 
   const machineSheetOptions = useMemo<MobileBottomSelectOption[]>(
-    () =>
-      [
-        {
-          value: '',
-          label: '无',
-          description: '不关联任何机器',
-          keywords: '无 不关联 机器',
-        },
-        ...machineOptions.map((item) => ({
-          value: item.id,
-          label: item.unified_device_no,
-          description: (
-            <div className="space-y-1">
-              <div>机器名称：{item.machine_name || '-'}</div>
-              <div>工序：{item.operation || '-'}</div>
-            </div>
-          ),
-          keywords: [
-            item.unified_device_no,
-            item.machine_name,
-            item.operation,
-          ].join(' '),
-        })),
-      ],
+    () => [
+      {
+        value: '',
+        label: '无',
+        description: '不关联任何机器',
+        keywords: '无 不关联 机器',
+      },
+      ...machineOptions.map((item) => ({
+        value: item.id,
+        label: item.unified_device_no,
+        description: (
+          <div className="space-y-1">
+            <div>机器名称：{item.machine_name || '-'}</div>
+            <div>工序：{item.operation || '-'}</div>
+          </div>
+        ),
+        keywords: [
+          item.unified_device_no,
+          item.machine_name,
+          item.operation,
+        ].join(' '),
+      })),
+    ],
     [machineOptions],
   )
 
@@ -186,6 +199,9 @@ export default function ToolingStockOutForm({
   }, [form, setFormRef])
 
   useEffect(() => {
+    const initialSnapshot = createToolingOptionSnapshot(initialValues)
+    setSelectedToolingSnapshot(initialSnapshot)
+
     if (initialValues) {
       form.setFieldsValue({
         ...DEFAULT_VALUES,
@@ -214,6 +230,27 @@ export default function ToolingStockOutForm({
         : DEFAULT_VALUES.stock_out_date,
     })
   }, [defaultValues, form, initialValues])
+
+  useEffect(() => {
+    setSelectedToolingSnapshot((snapshot) => {
+      if (!snapshot) return snapshot
+
+      return (
+        toolingOptions.find((option) => option.id === snapshot.id) ?? snapshot
+      )
+    })
+  }, [selectedToolingSnapshot?.id, toolingOptions])
+
+  useEffect(() => {
+    onToolingSelect?.(selectedToolingSnapshot)
+  }, [onToolingSelect, selectedToolingSnapshot])
+
+  const handleToolingChange = (toolingId: string) => {
+    const nextSnapshot = mergedToolingOptions.find(
+      (item) => item.id === toolingId,
+    )
+    setSelectedToolingSnapshot(nextSnapshot)
+  }
 
   const handleFinish = (values: ToolingStockOutFormFields) => {
     onFinish({
@@ -255,28 +292,29 @@ export default function ToolingStockOutForm({
             <button
               type="button"
               disabled={
-                isAuditLocked || isSubmitting || toolingOptions.length === 0
+                isAuditLocked ||
+                isSubmitting ||
+                mergedToolingOptions.length === 0
               }
               onClick={() => setIsToolingSheetOpen(true)}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {currentToolingLabel ||
-                (toolingOptions.length > 0
+                (mergedToolingOptions.length > 0
                   ? '请选择刀具资料'
                   : '暂无刀具资料，请先维护刀具资料')}
             </button>
           ) : (
             <Select
               disabled={isAuditLocked}
+              loading={isToolingOptionsLoading}
               showSearch={{
-                filterOption: (input, option) =>
-                  matchesToolingOptionKeyword(
-                    input,
-                    `${option?.label || ''} ${option?.keywords || ''}`,
-                  ),
+                filterOption: false,
+                onSearch: onToolingSearch,
               }}
+              onChange={handleToolingChange}
               placeholder={
-                toolingOptions.length > 0
+                mergedToolingOptions.length > 0
                   ? '请选择刀具资料'
                   : '暂无刀具资料，请先维护刀具资料'
               }
@@ -285,16 +323,11 @@ export default function ToolingStockOutForm({
           )}
         </Form.Item>
 
-        <Form.Item
-          name="machine_equipment_id"
-          label="机器编号"
-        >
+        <Form.Item name="machine_equipment_id" label="机器编号">
           {toolingInputMode === 'bottom-sheet' ? (
             <button
               type="button"
-              disabled={
-                isAuditLocked || isSubmitting
-              }
+              disabled={isAuditLocked || isSubmitting}
               onClick={() => setIsMachineSheetOpen(true)}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -442,9 +475,11 @@ export default function ToolingStockOutForm({
           value={selectedToolingId}
           searchPlaceholder="输入刀具编号、名称、规格或材质搜索"
           emptyText="暂无可选刀具资料"
+          onSearch={onToolingSearch}
           onClose={() => setIsToolingSheetOpen(false)}
           onSelect={(value) => {
             form.setFieldValue('tooling_data_id', value)
+            handleToolingChange(value)
           }}
         />
       ) : null}

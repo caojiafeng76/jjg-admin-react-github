@@ -10,10 +10,9 @@ import {
 } from '@/services/apiYoumaiRawMaterialStockIn'
 import { getYoumaiRawMaterialInventoryOptions } from '@/services/apiYoumaiRawMaterialInventory'
 
+import { youmaiKeys } from '../queryKeys'
+
 const RAW_MATERIAL_STOCK_IN_KEY = 'youmai-raw-material-stock-in' as const
-const RAW_MATERIAL_INVENTORY_KEY = 'youmai-raw-material-inventory' as const
-const RAW_MATERIAL_INVENTORY_OPTIONS_KEY =
-  'youmai-raw-material-inventory-options' as const
 
 export function useYoumaiRawMaterialStockInList({
   page,
@@ -38,10 +37,13 @@ export function useYoumaiRawMaterialStockInList({
   })
 }
 
-export function useYoumaiRawMaterialInventoryOptions() {
+export function useYoumaiRawMaterialInventoryOptions(keyword?: string) {
+  const normalizedKeyword = keyword?.trim()
+
   return useQuery({
-    queryKey: [RAW_MATERIAL_INVENTORY_OPTIONS_KEY],
-    queryFn: () => getYoumaiRawMaterialInventoryOptions(),
+    queryKey: youmaiKeys.rawMaterialInventory.options(normalizedKeyword),
+    queryFn: ({ signal }) =>
+      getYoumaiRawMaterialInventoryOptions(normalizedKeyword, signal),
     ...queryConfig.list,
   })
 }
@@ -51,8 +53,7 @@ export function useCreateYoumaiRawMaterialStockIn() {
     mutationFn: createYoumaiRawMaterialStockIn,
     invalidateQueries: [
       [RAW_MATERIAL_STOCK_IN_KEY],
-      [RAW_MATERIAL_INVENTORY_KEY],
-      [RAW_MATERIAL_INVENTORY_OPTIONS_KEY],
+      youmaiKeys.rawMaterialInventory.all,
     ],
   })
 }
@@ -62,8 +63,7 @@ export function useDeleteYoumaiRawMaterialStockIn() {
     mutationFn: deleteYoumaiRawMaterialStockIn,
     invalidateQueries: [
       [RAW_MATERIAL_STOCK_IN_KEY],
-      [RAW_MATERIAL_INVENTORY_KEY],
-      [RAW_MATERIAL_INVENTORY_OPTIONS_KEY],
+      youmaiKeys.rawMaterialInventory.all,
     ],
   })
 }

@@ -21,7 +21,10 @@ export default function ReportDetail() {
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
-  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)

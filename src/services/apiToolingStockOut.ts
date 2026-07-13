@@ -3,6 +3,10 @@ import dayjs from 'dayjs'
 import { handleApiError } from '@/utils/errorHandler'
 import publicSupabase from './publicSupabase'
 import supabase from './supabase'
+import {
+  buildToolingDataOptionsQuery,
+  TOOLING_DATA_OPTION_SELECT,
+} from './toolingDataOptions'
 
 export type ToolingStockOutStatus = '待审核' | '已审核'
 
@@ -221,34 +225,42 @@ function extractMachineInfo(
   }
 }
 
-export async function getToolingDataOptions(keyword?: string) {
+export async function getToolingDataOptions(
+  keyword?: string,
+  signal?: AbortSignal,
+  limit?: number,
+) {
   return getToolingDataOptionsWithClient(
     supabase as unknown as DynamicSupabaseTable,
     keyword,
+    signal,
+    limit,
   )
 }
 
-export async function getPublicToolingDataOptions(keyword?: string) {
+export async function getPublicToolingDataOptions(
+  keyword?: string,
+  signal?: AbortSignal,
+  limit?: number,
+) {
   return getToolingDataOptionsWithClient(
     publicSupabase as unknown as DynamicSupabaseTable,
     keyword,
+    signal,
+    limit,
   )
 }
 
 async function getToolingDataOptionsWithClient(
   client: DynamicSupabaseTable,
   keyword?: string,
+  signal?: AbortSignal,
+  limit?: number,
 ) {
-  let query = toolingDataTable(client)
-    .select('id, tool_code, tool_name, tool_spec, material, unit_price')
-    .order('tool_code', { ascending: true })
-
-  if (keyword?.trim()) {
-    const normalizedKeyword = keyword.trim()
-    query = query.or(
-      `tool_code.ilike.%${normalizedKeyword}%,tool_name.ilike.%${normalizedKeyword}%,tool_spec.ilike.%${normalizedKeyword}%,material.ilike.%${normalizedKeyword}%`,
-    )
-  }
+  const query = buildToolingDataOptionsQuery(
+    toolingDataTable(client).select(TOOLING_DATA_OPTION_SELECT),
+    { keyword, signal, limit },
+  )
 
   const { data, error } = await query
 
@@ -264,11 +276,13 @@ export async function getToolingStockOutList({
   pageSize,
   keyword,
   status,
+  signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
   status?: ToolingStockOutStatus
+  signal?: AbortSignal
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -288,12 +302,17 @@ export async function getToolingStockOutList({
     query = query.eq('status', status)
   }
 
-  const { data, error, count } = await query
+  query = query
     .order('status', { ascending: false })
     .order('stock_out_date', { ascending: false })
     .order('updated_at', { ascending: false })
     .order('tool_code', { ascending: true })
-    .range(from, to)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error, count } = await query.range(from, to)
 
   if (error) {
     throw handleApiError(error, '获取刀具出库列表失败')
@@ -306,12 +325,16 @@ export async function getToolingStockOutList({
   const inventoryMap = new Map<string, number>()
 
   if (toolingIds.length > 0) {
-    const { data: inventoryRows, error: inventoryError } = await (
-      supabase as unknown as DynamicSupabaseTable
-    )
+    let inventoryQuery = (supabase as unknown as DynamicSupabaseTable)
       .from('tooling_inventory')
       .select('tooling_data_id, final_stock')
       .in('tooling_data_id', toolingIds)
+
+    if (signal) {
+      inventoryQuery = inventoryQuery.abortSignal(signal)
+    }
+
+    const { data: inventoryRows, error: inventoryError } = await inventoryQuery
 
     if (inventoryError) {
       throw handleApiError(inventoryError, '获取刀具库存快照失败')

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { ConfigProvider, theme, App as AntdApp } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN'
@@ -26,7 +26,6 @@ const BASE_TOKENS = {
   fontFamily:
     "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
   fontSize: 14,
-  colorTextSecondary: 'rgba(0,0,0,0.45)', // 统一次要文字色
 }
 
 const TABLE_TOKENS = {
@@ -42,17 +41,41 @@ const TABLE_TOKENS = {
   selectionColumnWidth: 30,
 }
 
+const DATE_PICKER_CONFIG = {
+  classNames: {
+    popup: {
+      container: 'max-[599.98px]:[&_.ant-picker-panels]:flex-col',
+    },
+  },
+}
+
 export default function App() {
-  const { isDarkMode } = useAppStore()
+  const isDarkMode = useAppStore((state) => state.isDarkMode)
   const [isMobileViewport, setIsMobileViewport] = useState(false)
 
-  const themeConfig = {
-    ...(isDarkMode ? { algorithm: theme.darkAlgorithm } : {}),
-    token: BASE_TOKENS,
-    components: {
-      Table: TABLE_TOKENS,
-    },
-  }
+  const themeConfig = useMemo(
+    () => ({
+      ...(isDarkMode ? { algorithm: theme.darkAlgorithm } : {}),
+      token: {
+        ...BASE_TOKENS,
+        colorTextSecondary: isDarkMode
+          ? 'rgba(255,255,255,0.65)'
+          : 'rgba(0,0,0,0.45)',
+      },
+      components: {
+        Table: {
+          ...TABLE_TOKENS,
+          headerBg: isDarkMode ? '#1e293b' : '#f8fafc',
+          headerColor: isDarkMode ? '#cbd5e1' : '#475569',
+          rowHoverBg: isDarkMode ? '#172033' : '#f8fafc',
+          rowSelectedBg: isDarkMode ? '#172554' : '#eff6ff',
+          rowSelectedHoverBg: isDarkMode ? '#1e3a8a' : '#dbeafe',
+          borderColor: isDarkMode ? '#334155' : '#e2e8f0',
+        },
+      },
+    }),
+    [isDarkMode],
+  )
 
   // 同步 Tailwind 暗黑模式：在 <html> 标签上添加 / 移除 `dark` class
   useEffect(() => {
@@ -81,7 +104,11 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <ConfigProvider locale={zhCN} theme={themeConfig}>
+      <ConfigProvider
+        locale={zhCN}
+        theme={themeConfig}
+        datePicker={DATE_PICKER_CONFIG}
+      >
         <AntdApp>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>

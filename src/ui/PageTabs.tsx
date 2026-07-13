@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
@@ -69,11 +70,15 @@ interface PageTabsProps {
   onTabsChange?: (tabs: PageTab[]) => void
 }
 
+const MAX_CACHED_TABS = 8
+
 export default function PageTabs({ onTabsChange }: PageTabsProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const { role, loading: authLoading } = useAuth()
   const [tabs, setTabs] = useState<PageTab[]>([])
+  const visitSequenceRef = useRef(0)
+  const lastVisitedRef = useRef(new Map<string, number>())
   const {
     token: { colorBgContainer, colorBorderSecondary },
   } = theme.useToken()
@@ -83,6 +88,9 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
   const activeHref = getLocationHref(location, activeKey)
 
   useEffect(() => {
+    visitSequenceRef.current += 1
+    lastVisitedRef.current.set(activeKey, visitSequenceRef.current)
+
     setTabs((currentTabs) => {
       const nextTabs: PageTab[] = []
 
@@ -105,6 +113,27 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
         nextTabs.push(createPageTab(activeKey, activeHref, homeKey))
       } else {
         nextTabs[activeTabIndex] = createPageTab(activeKey, activeHref, homeKey)
+      }
+
+      while (nextTabs.length > MAX_CACHED_TABS) {
+        const evictionCandidate = nextTabs
+          .filter((tab) => tab.closable && tab.key !== activeKey)
+          .reduce<PageTab | null>((oldest, tab) => {
+            if (!oldest) return tab
+
+            const oldestVisit = lastVisitedRef.current.get(oldest.key) ?? 0
+            const tabVisit = lastVisitedRef.current.get(tab.key) ?? 0
+
+            return tabVisit < oldestVisit ? tab : oldest
+          }, null)
+
+        if (!evictionCandidate) break
+
+        nextTabs.splice(
+          nextTabs.findIndex((tab) => tab.key === evictionCandidate.key),
+          1,
+        )
+        lastVisitedRef.current.delete(evictionCandidate.key)
       }
 
       return areTabsEqual(currentTabs, nextTabs) ? currentTabs : nextTabs
@@ -138,6 +167,7 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
     const targetIndex = tabs.findIndex((tab) => tab.key === targetKey)
     const nextTabs = tabs.filter((tab) => tab.key !== targetKey)
     setTabs(nextTabs)
+    lastVisitedRef.current.delete(targetKey)
 
     if (targetKey === activeKey) {
       const nextActiveTab =

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Form, type FormInstance, Input, InputNumber, Select } from 'antd'
 
 import type {
@@ -6,12 +6,19 @@ import type {
   ToolingInventory,
   ToolingInventoryFormValues,
 } from '@/services/apiToolingInventory'
+import {
+  createToolingOptionSnapshot,
+  mergeToolingOptions,
+  type RemoteToolingOption,
+} from '../remoteToolingOptions'
 
 interface Props {
   onFinish: (values: ToolingInventoryFormValues) => void
   setFormRef: (form: FormInstance<ToolingInventoryFormValues>) => void
   isSubmitting: boolean
   toolingOptions: ToolingDataOption[]
+  isToolingOptionsLoading: boolean
+  onToolingSearch: (keyword: string) => void
   initialValues?: ToolingInventory | ToolingInventoryFormValues
 }
 
@@ -28,14 +35,23 @@ export default function ToolingInventoryForm({
   setFormRef,
   isSubmitting,
   toolingOptions,
+  isToolingOptionsLoading,
+  onToolingSearch,
   initialValues,
 }: Props) {
   const [form] = Form.useForm<ToolingInventoryFormValues>()
+  const [selectedToolingSnapshot, setSelectedToolingSnapshot] =
+    useState<RemoteToolingOption>()
   const selectedToolingId = Form.useWatch('tooling_data_id', form)
 
+  const mergedToolingOptions = useMemo(
+    () => mergeToolingOptions(toolingOptions, selectedToolingSnapshot),
+    [selectedToolingSnapshot, toolingOptions],
+  )
+
   const selectedTooling = useMemo(
-    () => toolingOptions.find((item) => item.id === selectedToolingId),
-    [toolingOptions, selectedToolingId],
+    () => mergedToolingOptions.find((item) => item.id === selectedToolingId),
+    [mergedToolingOptions, selectedToolingId],
   )
 
   useEffect(() => {
@@ -43,6 +59,9 @@ export default function ToolingInventoryForm({
   }, [form, setFormRef])
 
   useEffect(() => {
+    const initialSnapshot = createToolingOptionSnapshot(initialValues)
+    setSelectedToolingSnapshot(initialSnapshot)
+
     if (initialValues) {
       form.setFieldsValue({
         ...DEFAULT_VALUES,
@@ -59,6 +78,23 @@ export default function ToolingInventoryForm({
     form.setFieldsValue(DEFAULT_VALUES)
   }, [form, initialValues])
 
+  useEffect(() => {
+    setSelectedToolingSnapshot((snapshot) => {
+      if (!snapshot) return snapshot
+
+      return (
+        toolingOptions.find((option) => option.id === snapshot.id) ?? snapshot
+      )
+    })
+  }, [selectedToolingSnapshot?.id, toolingOptions])
+
+  const handleToolingChange = (toolingId: string) => {
+    const nextSnapshot = mergedToolingOptions.find(
+      (item) => item.id === toolingId,
+    )
+    setSelectedToolingSnapshot(nextSnapshot)
+  }
+
   return (
     <Form
       form={form}
@@ -72,18 +108,18 @@ export default function ToolingInventoryForm({
         rules={[{ required: true, message: '请选择刀具资料' }]}
       >
         <Select
+          loading={isToolingOptionsLoading}
           showSearch={{
-            filterOption: (input, option) =>
-              String(option?.label || '')
-                .toLowerCase()
-                .includes(input.toLowerCase()),
+            filterOption: false,
+            onSearch: onToolingSearch,
           }}
+          onChange={handleToolingChange}
           placeholder={
-            toolingOptions.length > 0
+            mergedToolingOptions.length > 0
               ? '请选择刀具资料'
               : '暂无刀具资料，请先维护刀具资料'
           }
-          options={toolingOptions.map((item) => ({
+          options={mergedToolingOptions.map((item) => ({
             value: item.id,
             label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
           }))}

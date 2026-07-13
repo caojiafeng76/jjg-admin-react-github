@@ -13,11 +13,7 @@ import {
   importToolingStockOut,
   updateToolingStockOut,
 } from '@/services/apiToolingStockOut'
-
-const TOOLING_STOCK_OUT_KEY = 'tooling-stock-out' as const
-const TOOLING_INVENTORY_KEY = 'tooling-inventory' as const
-const TOOLING_DATA_OPTIONS_KEY = 'tooling-data-options' as const
-const PUBLIC_TOOLING_DATA_OPTIONS_KEY = 'public-tooling-data-options' as const
+import { toolingKeys } from '../queryKeys'
 
 export function useToolingStockOutList({
   page,
@@ -32,31 +28,37 @@ export function useToolingStockOutList({
   }
 }) {
   return useQuery({
-    queryKey: [TOOLING_STOCK_OUT_KEY, page, pageSize, searchParams],
-    queryFn: () =>
+    queryKey: toolingKeys.stockOut.list({
+      page,
+      pageSize,
+      keyword: searchParams.keyword,
+      status: searchParams.status,
+    }),
+    queryFn: ({ signal }) =>
       getToolingStockOutList({
         page,
         pageSize,
         keyword: searchParams.keyword,
         status: searchParams.status,
+        signal,
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
   })
 }
 
-export function useToolingDataOptions() {
+export function useToolingDataOptions(keyword?: string) {
   return useQuery({
-    queryKey: [TOOLING_DATA_OPTIONS_KEY],
-    queryFn: () => getToolingDataOptions(),
+    queryKey: toolingKeys.data.options(keyword),
+    queryFn: ({ signal }) => getToolingDataOptions(keyword, signal),
     ...queryConfig.list,
   })
 }
 
-export function usePublicToolingDataOptions() {
+export function usePublicToolingDataOptions(keyword?: string) {
   return useQuery({
-    queryKey: [PUBLIC_TOOLING_DATA_OPTIONS_KEY],
-    queryFn: () => getPublicToolingDataOptions(),
+    queryKey: toolingKeys.data.publicOptions(keyword),
+    queryFn: ({ signal }) => getPublicToolingDataOptions(keyword, signal),
     ...queryConfig.list,
   })
 }
@@ -64,7 +66,7 @@ export function usePublicToolingDataOptions() {
 export function useCreateToolingStockOut() {
   return useMutationWithInvalidation({
     mutationFn: createToolingStockOut,
-    invalidateQueries: [[TOOLING_STOCK_OUT_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockOut.all, toolingKeys.inventory.all],
   })
 }
 
@@ -77,27 +79,27 @@ export function useCreatePublicToolingStockOut() {
 export function useUpdateToolingStockOut() {
   return useMutationWithInvalidation({
     mutationFn: updateToolingStockOut,
-    invalidateQueries: [[TOOLING_STOCK_OUT_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockOut.all, toolingKeys.inventory.all],
   })
 }
 
 export function useBatchUpdateToolingStockOutStatus() {
   return useMutationWithInvalidation({
     mutationFn: batchUpdateToolingStockOutStatus,
-    invalidateQueries: [[TOOLING_STOCK_OUT_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockOut.all, toolingKeys.inventory.all],
   })
 }
 
 export function useImportToolingStockOut() {
   return useMutationWithInvalidation({
     mutationFn: importToolingStockOut,
-    invalidateQueries: [[TOOLING_STOCK_OUT_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockOut.all, toolingKeys.inventory.all],
   })
 }
 
 export function useDeleteToolingStockOut() {
   return useMutationWithInvalidation({
     mutationFn: deleteToolingStockOut,
-    invalidateQueries: [[TOOLING_STOCK_OUT_KEY], [TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.stockOut.all, toolingKeys.inventory.all],
   })
 }

@@ -3,6 +3,7 @@ import { FunctionRegion } from '@supabase/supabase-js'
 import supabase from '@services/supabase'
 import { handleApiError } from '@utils/errorHandler'
 import { resolveSyneyStoreReportProxyUrl } from './syneyStoreReportProxy'
+import { getAuthenticatedProxyHeaders } from './proxyAuth'
 
 const FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS = 45000
 const SYNEY_STORE_REPORT_API_URL = import.meta.env
@@ -97,9 +98,12 @@ async function invokeSyneyStoreReportFunction(storeInNo: string) {
     )
   } catch (error) {
     if (isBrowserFetchFailure(error)) {
-      throw new Error('西尼入库单云函数连接失败，请检查网络或 Supabase 函数配置', {
-        cause: error,
-      })
+      throw new Error(
+        '西尼入库单云函数连接失败，请检查网络或 Supabase 函数配置',
+        {
+          cause: error,
+        },
+      )
     }
 
     throw error
@@ -144,9 +148,7 @@ export async function fetchSyneyStoreReportFromScm(storeInNo: string) {
     response = await withTimeout(
       fetch(proxyUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: await getAuthenticatedProxyHeaders(),
         body: JSON.stringify({ storeInNo }),
       }),
       FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
@@ -154,9 +156,12 @@ export async function fetchSyneyStoreReportFromScm(storeInNo: string) {
     )
   } catch (error) {
     if (isBrowserFetchFailure(error)) {
-      throw new Error('西尼入库单代理接口连接失败，请检查代理地址或开发服务器', {
-        cause: error,
-      })
+      throw new Error(
+        '西尼入库单代理接口连接失败，请检查代理地址或开发服务器',
+        {
+          cause: error,
+        },
+      )
     }
 
     throw error
@@ -240,10 +245,7 @@ export async function getSelectedSyneyStoreReports(Nos: string[]) {
       .select('*')
       .in('No', Nos)
       .order('No'),
-    supabase
-      .from('syney-store-reports')
-      .select('*')
-      .in('No', Nos)
+    supabase.from('syney-store-reports').select('*').in('No', Nos),
   ])
 
   const { data: itemsFromRepo, error: itemsError } = itemsResult
@@ -258,14 +260,12 @@ export async function getSelectedSyneyStoreReports(Nos: string[]) {
   }
 
   // 使用 Map 提升查找性能，避免重复过滤和查找
-  const reportsMap = new Map(
-    reports?.map(report => [report.No, report])
-  )
+  const reportsMap = new Map(reports?.map((report) => [report.No, report]))
 
   const itemsGroupMap = new Map<string, ISyneyItem[]>()
 
   // 一次性分组，提升性能
-  itemsFromRepo?.forEach(item => {
+  itemsFromRepo?.forEach((item) => {
     const items = itemsGroupMap.get(item.No || '') || []
     items.push(item)
     itemsGroupMap.set(item.No || '', items)
@@ -277,7 +277,7 @@ export async function getSelectedSyneyStoreReports(Nos: string[]) {
     { items: ISyneyItem[]; totalAmount: number; createdAt: string }
   >()
 
-  Nos.forEach(No => {
+  Nos.forEach((No) => {
     const items = itemsGroupMap.get(No) || []
     const report = reportsMap.get(No)
 

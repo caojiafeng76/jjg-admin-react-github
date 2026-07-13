@@ -180,8 +180,10 @@ export default function WorkshopOrderList() {
 
   const deleteMutation = useDeleteWorkshopOrders()
 
-  const { generatePDF, isPrinting } = usePrintWorkshopOrders()
-  const { exportAsExcel, isExporting } = useExportWorkshopOrdersAsExcel()
+  const { generatePDF, isPrinting, preloadWorkshopOrderPdf } =
+    usePrintWorkshopOrders()
+  const { exportAsExcel, isExporting, preloadExportAsExcel } =
+    useExportWorkshopOrdersAsExcel()
 
   // 动态计算表格高度（目标行数适应上半面板）
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
@@ -821,11 +823,14 @@ export default function WorkshopOrderList() {
               handlePrint={handlePrint}
               loading={isPrinting}
               count={selectedRowKeys.length}
+              onPreload={preloadWorkshopOrderPdf}
             />
             <Button
               type="text"
               icon={<DownloadOutlined />}
               onClick={handleExportExcel}
+              onMouseEnter={preloadExportAsExcel}
+              onFocus={preloadExportAsExcel}
               loading={isExporting}
               disabled={viewerDenied || selectedRowKeys.length === 0}
               className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20"

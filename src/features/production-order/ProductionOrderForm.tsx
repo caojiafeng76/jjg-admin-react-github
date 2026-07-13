@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   App,
   Modal,
@@ -974,6 +970,7 @@ export default function ProductionOrderForm({
                           type="text"
                           size="small"
                           icon={<PencilSquareIcon className="h-4 w-4" />}
+                          aria-label={`编辑工序 ${record.operation}`}
                           onClick={() => handleOpenItemModal(record.key)}
                         />
                         <Popconfirm
@@ -991,6 +988,7 @@ export default function ProductionOrderForm({
                             size="small"
                             danger
                             icon={<TrashIcon className="h-4 w-4" />}
+                            aria-label={`删除工序 ${record.operation}`}
                           />
                         </Popconfirm>
                       </Space>

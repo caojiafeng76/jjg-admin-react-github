@@ -9,10 +9,16 @@ import type {
 import {
   getExtrusionProductionDailyReportForExport,
 } from '@/services/apiExtrusionProductionDailyReport'
-import { exportExtrusionProductionDailyReportToExcel } from '@/utils/extrusionProductionDailyReportExcel'
 import ExtrusionProductionDailyReportSearch from './ExtrusionProductionDailyReportSearch'
 import ExtrusionProductionDailyReportTable from './ExtrusionProductionDailyReportTable'
 import { useExtrusionProductionDailyReport } from './useExtrusionProductionDailyReport'
+
+const loadExtrusionProductionDailyReportExcel = () =>
+  import('@/utils/extrusionProductionDailyReportExcel')
+
+const preloadExtrusionProductionDailyReportExcel = () => {
+  void loadExtrusionProductionDailyReportExcel()
+}
 
 export default function ExtrusionProductionDailyReportPage() {
   const { message } = App.useApp()
@@ -79,6 +85,8 @@ export default function ExtrusionProductionDailyReportPage() {
         return
       }
 
+      const { exportExtrusionProductionDailyReportToExcel } =
+        await loadExtrusionProductionDailyReportExcel()
       exportExtrusionProductionDailyReportToExcel(exportRows)
       message.success({ content: '导出成功', key: 'export' })
     } catch (error) {
@@ -120,7 +128,12 @@ export default function ExtrusionProductionDailyReportPage() {
           )}
         </div>
         <Space>
-          <Button onClick={handleExportExcel} loading={isExporting}>
+          <Button
+            onClick={handleExportExcel}
+            onMouseEnter={preloadExtrusionProductionDailyReportExcel}
+            onFocus={preloadExtrusionProductionDailyReportExcel}
+            loading={isExporting}
+          >
             导出Excel
           </Button>
         </Space>

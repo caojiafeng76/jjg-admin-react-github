@@ -25,7 +25,6 @@ import {
   useImportYoumaiFinishedGoodsInventory,
   useUpdateYoumaiFinishedGoodsInventory,
   useYoumaiFinishedGoodsInventoryList,
-  useYoumaiProductDataOptions,
 } from './useYoumaiFinishedGoodsInventory'
 
 export default function YoumaiFinishedGoodsInventoryPage() {
@@ -56,8 +55,6 @@ export default function YoumaiFinishedGoodsInventoryPage() {
     pageSize,
     searchParams,
   })
-  const { data: productOptions = [] } = useYoumaiProductDataOptions()
-
   const createMutation = useCreateYoumaiFinishedGoodsInventory()
   const updateMutation = useUpdateYoumaiFinishedGoodsInventory()
   const importMutation = useImportYoumaiFinishedGoodsInventory()
@@ -313,7 +310,6 @@ export default function YoumaiFinishedGoodsInventoryPage() {
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
-          productOptions={productOptions}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
         />
       </Modal>

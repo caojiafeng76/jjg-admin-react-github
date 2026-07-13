@@ -1,4 +1,3 @@
-import { utils, writeFile } from 'xlsx-js-style'
 import dayjs from 'dayjs'
 import {
   autoFitColumnWidths,
@@ -10,15 +9,21 @@ import {
 import { useSelectedReports } from './useSelectedReports'
 import { useAppStore } from '@/store'
 
+const loadExcel = () => import('xlsx-js-style')
+
 export function useExportReportsAsExcel() {
-  const { tableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
 
   // 只在有选中项时才查询数据
   const { selectedMap, selectedReportsLoading } = useSelectedReports(
     tableSelectedKeys.length > 0,
   )
 
-  function saveReportsAsExcel() {
+  function preloadExcel() {
+    void loadExcel()
+  }
+
+  async function saveReportsAsExcel() {
     // 如果数据还在加载，返回 false 表示未导出
     if (selectedReportsLoading) {
       return false
@@ -28,6 +33,8 @@ export function useExportReportsAsExcel() {
     if (!selectedMap || selectedMap.size === 0) {
       return false
     }
+
+    const { utils, writeFile } = await loadExcel()
 
     const wb = utils.book_new()
     const totalData: { 序号: string; 入库单号: string; 金额: number }[] = []
@@ -106,6 +113,7 @@ export function useExportReportsAsExcel() {
 
   return {
     saveReportsAsExcel,
+    preloadExcel,
     isLoading: selectedReportsLoading,
   }
 }

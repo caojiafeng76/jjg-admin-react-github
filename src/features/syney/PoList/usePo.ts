@@ -1,12 +1,13 @@
-import getSyneyPo from '@/services/apiSyneyPos'
+import { getSyneyPoDetail } from '@/services/apiSyneyPo'
 import { useAppStore } from '@/store'
 import { useQuery } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
+import { syneyPoKeys } from '../queryKeys'
 
 export function usePo(validPoIds?: number[]) {
-  const { tableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
 
   const id = tableSelectedKeys[0] || ''
   const numericId = Number(id)
@@ -14,9 +15,9 @@ export function usePo(validPoIds?: number[]) {
     validPoIds === undefined || validPoIds.includes(numericId)
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['po', id],
+    queryKey: syneyPoKeys.detail(String(id)),
     enabled: !!id && isSelectedPoInCurrentList,
-    queryFn: ({ signal }) => getSyneyPo(id.toString(), signal),
+    queryFn: ({ signal }) => getSyneyPoDetail(id.toString(), signal),
     ...queryConfig.detail,
   })
 

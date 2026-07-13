@@ -21,7 +21,6 @@ import {
   type PrecisionFinishingCuttingWithEmployee,
 } from '@/services/apiPrecisionFinishingCuttings'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import { exportPrecisionFinishingCuttingsToExcel } from '@/utils/precisionFinishingCuttingExcel'
 import PrecisionFinishingCuttingDetail from './PrecisionFinishingCuttingDetail'
 import PrecisionFinishingCuttingForm from './PrecisionFinishingCuttingForm'
 import PrecisionFinishingCuttingMobileList from './PrecisionFinishingCuttingMobileList'
@@ -34,6 +33,13 @@ import {
   usePrecisionFinishingCuttings,
   useUpdatePrecisionFinishingCutting,
 } from './usePrecisionFinishingCuttings'
+
+const loadPrecisionFinishingCuttingExcel = () =>
+  import('@/utils/precisionFinishingCuttingExcel')
+
+const preloadPrecisionFinishingCuttingExcel = () => {
+  void loadPrecisionFinishingCuttingExcel()
+}
 
 export default function PrecisionFinishingCuttingPage() {
   const { message, modal } = App.useApp()
@@ -212,6 +218,8 @@ export default function PrecisionFinishingCuttingPage() {
         return
       }
 
+      const { exportPrecisionFinishingCuttingsToExcel } =
+        await loadPrecisionFinishingCuttingExcel()
       exportPrecisionFinishingCuttingsToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条精加工切割单`)
       setSelectedRowKeys([])
@@ -411,7 +419,11 @@ export default function PrecisionFinishingCuttingPage() {
               title="编辑精加工切割单"
               handleEdit={() => openEditModal()}
             />
-            <ExportButton handleExport={handleExport} loading={isExporting}>
+            <ExportButton
+              handleExport={handleExport}
+              loading={isExporting}
+              onPreload={preloadPrecisionFinishingCuttingExcel}
+            >
               {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
             </ExportButton>
             <DeleteButton

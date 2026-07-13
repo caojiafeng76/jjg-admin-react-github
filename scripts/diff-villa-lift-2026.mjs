@@ -75,7 +75,6 @@ const otherFields = ['customer', 'product_name', 'color', 'quantity', 'remarks']
 
 const diffs = []
 const missingInDb = []
-const updates = []
 
 for (const t of truth) {
   let d = dbByPname.get(t.project_name)

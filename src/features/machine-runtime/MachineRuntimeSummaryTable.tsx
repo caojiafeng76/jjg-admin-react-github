@@ -1,4 +1,5 @@
 import { Table, TableColumnsType } from 'antd'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { useMemo } from 'react'
 
 import type { MachineRuntimeSummaryItem } from '@/services/apiMachineRuntime'
@@ -70,6 +71,10 @@ export default function MachineRuntimeSummaryTable({
           : 'cursor-pointer'
       }
       onRow={(record) => ({
+        ...createKeyboardTableRowProps(
+          () => onSelect(record.machine_equipment_id),
+          `打开设备运行记录 ${record.machine_equipment_id}`,
+        ),
         onClick: () => onSelect(record.machine_equipment_id),
         style: { cursor: 'pointer', height: rowHeight },
       })}

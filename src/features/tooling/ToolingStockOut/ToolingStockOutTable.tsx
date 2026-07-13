@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, Tag, type TableColumnsType } from 'antd'
 
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
@@ -164,6 +165,10 @@ function ToolingStockOutTable({
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }
       onRow={(record) => ({
+        ...createKeyboardTableRowProps(
+          () => onSelect([record.id]),
+          `选择刀具出库记录 ${record.id}`,
+        ),
         onClick: () => onSelect([record.id]),
         style: { cursor: 'pointer', height: rowHeight },
       })}

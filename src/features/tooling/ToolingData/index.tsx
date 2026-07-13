@@ -20,10 +20,6 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
-import {
-  exportToolingDataMonthlySummaryToExcel,
-  exportToolingDataToExcel,
-} from '@/utils/toolingDataExcel'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 import ToolingDataExcelImport from './ToolingDataExcelImport'
 import ToolingDataForm from './ToolingDataForm'
@@ -39,6 +35,12 @@ import {
 
 const DEFAULT_PAGE_SIZE = 20
 const MIN_TABLE_ROW_HEIGHT = 28
+
+const loadToolingDataExcel = () => import('@/utils/toolingDataExcel')
+
+function preloadToolingDataExcel() {
+  void loadToolingDataExcel()
+}
 
 export default function ToolingDataPage() {
   const { message } = App.useApp()
@@ -185,7 +187,10 @@ export default function ToolingDataPage() {
 
     try {
       setIsExporting(true)
-      const exportRows = await getToolingDataForExport()
+      const [exportRows, { exportToolingDataToExcel }] = await Promise.all([
+        getToolingDataForExport(),
+        loadToolingDataExcel(),
+      ])
 
       if (exportRows.length === 0) {
         message.warning('当前没有可导出的刀具资料')
@@ -227,7 +232,11 @@ export default function ToolingDataPage() {
 
     try {
       setIsMonthlySummaryExporting(true)
-      const exportRows = await getToolingDataMonthlySummary({ month })
+      const [exportRows, { exportToolingDataMonthlySummaryToExcel }] =
+        await Promise.all([
+          getToolingDataMonthlySummary({ month }),
+          loadToolingDataExcel(),
+        ])
 
       if (exportRows.length === 0) {
         message.warning('当前没有可导出的刀具月度汇总')
@@ -358,6 +367,7 @@ export default function ToolingDataPage() {
           handleExport={handleExport}
           loading={isExporting}
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+          onPreload={preloadToolingDataExcel}
         >
           导出资料
         </ExportButton>
@@ -376,6 +386,7 @@ export default function ToolingDataPage() {
           loading={isMonthlySummaryExporting}
           disabled={!monthlySummaryMonth}
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+          onPreload={preloadToolingDataExcel}
         >
           导出月度汇总
         </ExportButton>

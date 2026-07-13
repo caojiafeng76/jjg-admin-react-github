@@ -8,8 +8,7 @@ import {
   getPackagingEmployeeList,
   updatePackagingEmployee,
 } from '@/services/apiPackagingEmployees'
-
-const PACKAGING_EMPLOYEES_KEY = 'packaging-employees' as const
+import { packagingProcessKeys } from '../queryKeys'
 
 export function usePackagingEmployeeList({
   page,
@@ -23,12 +22,17 @@ export function usePackagingEmployeeList({
   }
 }) {
   return useQuery({
-    queryKey: [PACKAGING_EMPLOYEES_KEY, page, pageSize, searchParams],
-    queryFn: () =>
+    queryKey: packagingProcessKeys.employees.list({
+      page,
+      pageSize,
+      keyword: searchParams.keyword,
+    }),
+    queryFn: ({ signal }) =>
       getPackagingEmployeeList({
         page,
         pageSize,
         keyword: searchParams.keyword,
+        signal,
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
@@ -38,20 +42,20 @@ export function usePackagingEmployeeList({
 export function useCreatePackagingEmployee() {
   return useMutationWithInvalidation({
     mutationFn: createPackagingEmployee,
-    invalidateQueries: [[PACKAGING_EMPLOYEES_KEY]],
+    invalidateQueries: [packagingProcessKeys.employees.all],
   })
 }
 
 export function useUpdatePackagingEmployee() {
   return useMutationWithInvalidation({
     mutationFn: updatePackagingEmployee,
-    invalidateQueries: [[PACKAGING_EMPLOYEES_KEY]],
+    invalidateQueries: [packagingProcessKeys.employees.all],
   })
 }
 
 export function useDeletePackagingEmployee() {
   return useMutationWithInvalidation({
     mutationFn: deletePackagingEmployee,
-    invalidateQueries: [[PACKAGING_EMPLOYEES_KEY]],
+    invalidateQueries: [packagingProcessKeys.employees.all],
   })
 }

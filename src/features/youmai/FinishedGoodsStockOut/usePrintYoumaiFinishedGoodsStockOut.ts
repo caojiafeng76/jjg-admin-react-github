@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { App } from 'antd'
-import autoTable from 'jspdf-autotable'
 import dayjs from 'dayjs'
 
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
-import { initializePDF, printPDF } from '@/utils/pdfUtils'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
+
+const loadYoumaiFinishedGoodsStockOutPdfRuntime = () =>
+  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')] as const)
+
+function preloadPrint() {
+  void loadYoumaiFinishedGoodsStockOutPdfRuntime()
+}
 
 function formatNumber(value: number | null | undefined, digits = 3) {
   return Number(value ?? 0).toFixed(digits)
@@ -95,6 +100,8 @@ export function usePrintYoumaiFinishedGoodsStockOut() {
       `)
       printWindow.document.close()
 
+      const [{ default: autoTable }, { initializePDF, printPDF }] =
+        await loadYoumaiFinishedGoodsStockOutPdfRuntime()
       const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
       const doc = await initializePDF('l')
       doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
@@ -228,5 +235,6 @@ export function usePrintYoumaiFinishedGoodsStockOut() {
   return {
     printSelected,
     isPrinting,
+    preloadPrint,
   }
 }

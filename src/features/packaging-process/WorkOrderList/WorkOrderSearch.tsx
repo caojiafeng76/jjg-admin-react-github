@@ -1,7 +1,13 @@
-import { useEffect } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
 import dayjs from 'dayjs'
 
+import {
+  mergeEmployeeSelectOptions,
+  rememberEmployeeOptions,
+  toEmployeeSelectOption,
+  type EmployeeSelectOption,
+} from './employeeSelectOptions'
 import { usePackagingEmployeeOptions } from './useWorkOrders'
 
 const { RangePicker } = DatePicker
@@ -31,16 +37,42 @@ export default function WorkOrderSearch({
   initialValues,
 }: Props) {
   const [form] = Form.useForm<FormValues>()
-  const { data: employeeOptions } = usePackagingEmployeeOptions()
+  const selectedEmployeeId = Form.useWatch('employeeId', form)
+  const [employeeKeyword, setEmployeeKeyword] = useState('')
+  const deferredEmployeeKeyword = useDeferredValue(employeeKeyword)
+  const [selectedEmployeeSnapshots, setSelectedEmployeeSnapshots] = useState<
+    EmployeeSelectOption[]
+  >([])
+  const { data: employeeOptions, isFetching: isEmployeeOptionsFetching } =
+    usePackagingEmployeeOptions(deferredEmployeeKeyword)
 
-  const employeeSelectOptions = (employeeOptions?.items || []).map(
-    (employee) => ({
-      label: employee.name,
-      value: employee.id,
-    }),
+  const employeeSelectOptions = useMemo(
+    () =>
+      mergeEmployeeSelectOptions(
+        employeeOptions?.items ?? [],
+        selectedEmployeeSnapshots,
+        selectedEmployeeId ? [selectedEmployeeId] : [],
+      ),
+    [employeeOptions, selectedEmployeeId, selectedEmployeeSnapshots],
   )
 
   useEffect(() => {
+    if (!selectedEmployeeId) return
+
+    const selectedEmployee = employeeOptions?.items.find(
+      ({ id }) => id === selectedEmployeeId,
+    )
+    if (!selectedEmployee) return
+
+    setSelectedEmployeeSnapshots((previous) =>
+      rememberEmployeeOptions(previous, [
+        toEmployeeSelectOption(selectedEmployee),
+      ]),
+    )
+  }, [employeeOptions, selectedEmployeeId])
+
+  useEffect(() => {
+    setEmployeeKeyword('')
     form.setFieldsValue({
       keyword: initialValues?.keyword,
       employeeId: initialValues?.employeeId,
@@ -61,6 +93,8 @@ export default function WorkOrderSearch({
   }
 
   const handleReset = () => {
+    setEmployeeKeyword('')
+    setSelectedEmployeeSnapshots([])
     form.resetFields()
     onReset()
   }
@@ -81,7 +115,21 @@ export default function WorkOrderSearch({
       <Form.Item name="employeeId" className="mb-0" style={{ width: 160 }}>
         <Select
           allowClear
-          showSearch={{ optionFilterProp: 'label' }}
+          showSearch={{
+            filterOption: false,
+            onSearch: setEmployeeKeyword,
+          }}
+          loading={isEmployeeOptionsFetching}
+          onClear={() => setEmployeeKeyword('')}
+          onSelect={(_, option) => {
+            if (typeof option.label !== 'string') return
+
+            setSelectedEmployeeSnapshots((previous) =>
+              rememberEmployeeOptions(previous, [
+                { label: option.label, value: String(option.value) },
+              ]),
+            )
+          }}
           placeholder="选择人员"
           options={employeeSelectOptions}
         />

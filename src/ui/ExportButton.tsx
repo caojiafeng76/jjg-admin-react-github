@@ -11,6 +11,7 @@ interface Props {
   children?: React.ReactNode
   permissionKey?: string
   noPermissionTip?: string
+  onPreload?: () => void
 }
 
 export default function ExportButton({
@@ -21,6 +22,7 @@ export default function ExportButton({
   children,
   permissionKey,
   noPermissionTip = '无导出权限',
+  onPreload,
 }: Props) {
   const allowed = usePermission(permissionKey ?? '')
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
@@ -33,6 +35,8 @@ export default function ExportButton({
       type="text"
       icon={<ArrowDownTrayIcon className="size-4" />}
       onClick={handleExport}
+      onMouseEnter={onPreload}
+      onFocus={onPreload}
       disabled={
         denied || disabled || loading || (count !== undefined && count === 0)
       }

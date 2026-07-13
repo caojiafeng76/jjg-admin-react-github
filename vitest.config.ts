@@ -51,10 +51,11 @@ export default defineConfig({
       ...fullSourceCoverage,
       // Coverage gate only; it does not change application behavior.
       thresholds: {
-        statements: 10,
-        branches: 7,
-        functions: 9,
-        lines: 10,
+        statements: 12,
+        branches: 9,
+        functions: 11,
+        lines: 12,
+        'src/services/**': { lines: 10 },
       },
     },
   },

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, TableColumnsType, TableProps } from 'antd'
 import dayjs from 'dayjs'
 import { Link } from 'react-router-dom'
@@ -60,7 +61,10 @@ export default function ReportTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
   const { isLoading } = useReports()
 
   const currentPageTotalAmount = useMemo(
@@ -135,7 +139,7 @@ export default function ReportTable({
         align: 'right',
         sorter: (a, b) => (a.TotalAmount || 0) - (b.TotalAmount || 0),
         render: (text: number) => (
-          <span className="font-semibold tabular-nums text-slate-700">
+          <span className="font-semibold text-slate-700 tabular-nums">
             {formatNumber(text)}
           </span>
         ),
@@ -153,6 +157,12 @@ export default function ReportTable({
   }
 
   const handleRow = (record: ISyneyStoreReport) => ({
+    ...(onRowClick
+      ? createKeyboardTableRowProps(
+          () => onRowClick(record),
+          `打开西尼对账单 ${record.No}`,
+        )
+      : {}),
     onClick: () => onRowClick?.(record),
     style: {
       cursor: onRowClick ? 'pointer' : undefined,
@@ -174,7 +184,7 @@ export default function ReportTable({
       onRow={handleRow}
       scroll={{ x: 700, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50">

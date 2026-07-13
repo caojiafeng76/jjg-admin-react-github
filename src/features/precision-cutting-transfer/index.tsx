@@ -19,7 +19,6 @@ import {
   type PrecisionCuttingTransferUpdate,
 } from '@/services/apiPrecisionCuttingTransfers'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import { exportPrecisionCuttingTransfersToExcel } from '@/utils/precisionCuttingTransferExcel'
 import {
   useBatchUpdatePrecisionCuttingTransfers,
   useCreatePrecisionCuttingTransfer,
@@ -31,6 +30,13 @@ import MaterialTransferDetail from './MaterialTransferDetail'
 import MaterialTransferForm from './MaterialTransferForm'
 import MaterialTransferSearch from './MaterialTransferSearch'
 import MaterialTransferTable from './MaterialTransferTable'
+
+const loadPrecisionCuttingTransferExcel = () =>
+  import('@/utils/precisionCuttingTransferExcel')
+
+const preloadPrecisionCuttingTransferExcel = () => {
+  void loadPrecisionCuttingTransferExcel()
+}
 
 export default function MaterialTransferPage() {
   const { message, modal } = App.useApp()
@@ -177,6 +183,8 @@ export default function MaterialTransferPage() {
         return
       }
 
+      const { exportPrecisionCuttingTransfersToExcel } =
+        await loadPrecisionCuttingTransferExcel()
       exportPrecisionCuttingTransfersToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条精切转移单`)
       setSelectedRowKeys([])
@@ -326,7 +334,11 @@ export default function MaterialTransferPage() {
           批量反审核
         </Button>
         <EditButton title="编辑精切转移单" handleEdit={() => openEditModal()} />
-        <ExportButton handleExport={handleExport} loading={isExporting}>
+        <ExportButton
+          handleExport={handleExport}
+          loading={isExporting}
+          onPreload={preloadPrecisionCuttingTransferExcel}
+        >
           {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
         </ExportButton>
         <DeleteButton

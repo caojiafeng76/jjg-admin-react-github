@@ -10,9 +10,7 @@ import {
   importToolingInventory,
   updateToolingInventory,
 } from '@/services/apiToolingInventory'
-
-const TOOLING_INVENTORY_KEY = 'tooling-inventory' as const
-const TOOLING_DATA_OPTIONS_KEY = 'tooling-data-options' as const
+import { toolingKeys } from '../queryKeys'
 
 export function useToolingInventoryList({
   page,
@@ -26,22 +24,27 @@ export function useToolingInventoryList({
   }
 }) {
   return useQuery({
-    queryKey: [TOOLING_INVENTORY_KEY, page, pageSize, searchParams],
-    queryFn: () =>
+    queryKey: toolingKeys.inventory.list({
+      page,
+      pageSize,
+      keyword: searchParams.keyword,
+    }),
+    queryFn: ({ signal }) =>
       getToolingInventoryList({
         page,
         pageSize,
         keyword: searchParams.keyword,
+        signal,
       }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
   })
 }
 
-export function useToolingDataOptions() {
+export function useToolingDataOptions(keyword?: string) {
   return useQuery({
-    queryKey: [TOOLING_DATA_OPTIONS_KEY],
-    queryFn: () => getToolingDataOptions(),
+    queryKey: toolingKeys.data.options(keyword),
+    queryFn: ({ signal }) => getToolingDataOptions(keyword, signal),
     ...queryConfig.list,
   })
 }
@@ -49,27 +52,27 @@ export function useToolingDataOptions() {
 export function useCreateToolingInventory() {
   return useMutationWithInvalidation({
     mutationFn: createToolingInventory,
-    invalidateQueries: [[TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.inventory.all],
   })
 }
 
 export function useUpdateToolingInventory() {
   return useMutationWithInvalidation({
     mutationFn: updateToolingInventory,
-    invalidateQueries: [[TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.inventory.all],
   })
 }
 
 export function useImportToolingInventory() {
   return useMutationWithInvalidation({
     mutationFn: importToolingInventory,
-    invalidateQueries: [[TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.inventory.all],
   })
 }
 
 export function useDeleteToolingInventory() {
   return useMutationWithInvalidation({
     mutationFn: deleteToolingInventory,
-    invalidateQueries: [[TOOLING_INVENTORY_KEY]],
+    invalidateQueries: [toolingKeys.inventory.all],
   })
 }

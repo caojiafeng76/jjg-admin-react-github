@@ -11,23 +11,35 @@ Recommended function settings:
 - Request methods: `POST`, `OPTIONS`, `GET`
 - Internet access: enabled
 
-Environment variables:
+Configure all variables in the Function Compute environment. Never commit real
+credentials:
 
 ```env
-SYNEY_SCM_USERNAME=gy0045
-SYNEY_SCM_PASSWORD_MD5=e10adc3949ba59abbe56e057f20f883e
-ALLOWED_ORIGIN=https://wumalu.top
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+ALLOWED_ORIGIN=https://your-frontend.example.com
+SYNEY_SCM_USERNAME=your_syney_scm_username
+SYNEY_SCM_PASSWORD_MD5=your_syney_scm_password_md5
 SYNEY_SCM_REQUEST_TIMEOUT_MS=15000
 ```
 
-Request:
+Every request except CORS preflight requires a valid Supabase user access token.
+The user must have `page:syney-store-report-list`; diagnostic requests require
+an active employee account whose role is strictly `admin`.
+
+```http
+Authorization: Bearer <supabase-user-access-token>
+Content-Type: application/json
+```
+
+Request bodies are limited to 16 KiB and identifiers to 64 trimmed characters.
 
 ```json
-{"storeInNo":"K202604270032"}
+{ "storeInNo": "STORE-IN-NUMBER" }
 ```
 
 Diagnostic request:
 
 ```json
-{"diagnose":true}
+{ "diagnose": true }
 ```

@@ -158,6 +158,7 @@ function FinishingProcessTable({
                       type="text"
                       size="small"
                       icon={<PencilSquareIcon className="size-4" />}
+                      aria-label={`编辑加工记录 ${record.model || record.id}`}
                       onClick={() => onEdit(record)}
                     />
                   </Tooltip>

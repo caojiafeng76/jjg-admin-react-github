@@ -1,6 +1,7 @@
 import { FunctionRegion } from '@supabase/supabase-js'
 
 import type { YoumaiFinishedGoodsStockOutImportRow } from './apiYoumaiFinishedGoodsStockOut'
+import { getAuthenticatedProxyHeaders } from './proxyAuth'
 import supabase from './supabase'
 
 const FETCH_YOUMAI_PURCHASE_ORDER_TIMEOUT_MS = 45000
@@ -103,9 +104,7 @@ async function fetchYoumaiPurchaseOrderFromProxy(
   const response = await withTimeout(
     fetch(proxyUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: await getAuthenticatedProxyHeaders(),
       body: JSON.stringify({ purchaseOrderNo }),
     }),
     FETCH_YOUMAI_PURCHASE_ORDER_TIMEOUT_MS,

@@ -48,7 +48,6 @@ import type {
 } from '@/services/apiOrderStatusDashboard'
 import { getOrderStatusDashboardForExport } from '@/services/apiOrderStatusDashboard'
 import AppPagination from '@/ui/AppPagination'
-import { exportOrderStatusDashboardToExcel } from '@/utils/orderStatusDashboardExcel'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import {
   ORDER_STATUS_DASHBOARD_KEY,
@@ -75,6 +74,13 @@ import {
 } from './dashboardUtils'
 
 const { Text, Title } = Typography
+
+const loadOrderStatusDashboardExcel = () =>
+  import('@/utils/orderStatusDashboardExcel')
+
+const preloadOrderStatusDashboardExcel = () => {
+  void loadOrderStatusDashboardExcel()
+}
 
 const EMPTY_JOB_COLUMNS: OrderStatusJobColumn[] = []
 
@@ -2210,6 +2216,8 @@ export default function OrderStatusDashboard() {
         return
       }
 
+      const { exportOrderStatusDashboardToExcel } =
+        await loadOrderStatusDashboardExcel()
       exportOrderStatusDashboardToExcel(exportRows, jobColumns)
       message.success({
         key: 'order-status-dashboard-export',
@@ -2374,6 +2382,8 @@ export default function OrderStatusDashboard() {
                 loading={isExporting}
                 disabled={isDataLoading || (data?.total ?? 0) === 0}
                 onClick={() => void handleExportCurrentFilters()}
+                onMouseEnter={preloadOrderStatusDashboardExcel}
+                onFocus={preloadOrderStatusDashboardExcel}
                 className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md"
               >
                 导出当前筛选结果

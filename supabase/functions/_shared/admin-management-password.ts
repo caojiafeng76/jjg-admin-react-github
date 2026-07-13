@@ -27,7 +27,7 @@ function timingSafeEqual(left: Uint8Array, right: Uint8Array) {
   return diff === 0
 }
 
-async function deriveHash(password: string, salt: Uint8Array) {
+async function deriveHash(password: string, salt: Uint8Array<ArrayBuffer>) {
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(password),

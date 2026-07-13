@@ -13,10 +13,13 @@ import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 import type { YoumaiFinishedGoodsInventoryImportRow } from '@/services/apiYoumaiFinishedGoodsInventory'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
-import {
-  downloadYoumaiFinishedGoodsInventoryTemplate,
-  parseYoumaiFinishedGoodsInventoryExcel,
-} from '@/utils/youmaiFinishedGoodsInventoryExcel'
+
+const loadYoumaiFinishedGoodsInventoryExcel = () =>
+  import('@/utils/youmaiFinishedGoodsInventoryExcel')
+
+function preloadYoumaiFinishedGoodsInventoryExcel() {
+  void loadYoumaiFinishedGoodsInventoryExcel()
+}
 
 interface Props {
   onImport: (rows: YoumaiFinishedGoodsInventoryImportRow[]) => Promise<void>
@@ -77,6 +80,8 @@ export default function YoumaiFinishedGoodsInventoryExcelImport({
 
     setParsing(true)
     try {
+      const { parseYoumaiFinishedGoodsInventoryExcel } =
+        await loadYoumaiFinishedGoodsInventoryExcel()
       const { rows, errors } =
         await parseYoumaiFinishedGoodsInventoryExcel(file)
       setParsedRows(rows)
@@ -104,6 +109,12 @@ export default function YoumaiFinishedGoodsInventoryExcelImport({
     setFileList([])
   }
 
+  const handleDownloadTemplate = async () => {
+    const { downloadYoumaiFinishedGoodsInventoryTemplate } =
+      await loadYoumaiFinishedGoodsInventoryExcel()
+    downloadYoumaiFinishedGoodsInventoryTemplate()
+  }
+
   const handleCancel = () => {
     setModalOpen(false)
     setParsedRows([])
@@ -127,13 +138,18 @@ export default function YoumaiFinishedGoodsInventoryExcelImport({
 
   return (
     <>
-      <ImportButton onClick={handleOpenModal} permissionKey={permissionKey}>
+      <ImportButton
+        onClick={handleOpenModal}
+        permissionKey={permissionKey}
+        onPreload={preloadYoumaiFinishedGoodsInventoryExcel}
+      >
         导入库存
       </ImportButton>
 
       <DownloadTemplateButton
-        onClick={downloadYoumaiFinishedGoodsInventoryTemplate}
+        onClick={handleDownloadTemplate}
         permissionKey={permissionKey}
+        onPreload={preloadYoumaiFinishedGoodsInventoryExcel}
       >
         下载库存模板
       </DownloadTemplateButton>
@@ -173,6 +189,8 @@ export default function YoumaiFinishedGoodsInventoryExcelImport({
             <Button
               loading={parsing}
               icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+              onMouseEnter={preloadYoumaiFinishedGoodsInventoryExcel}
+              onFocus={preloadYoumaiFinishedGoodsInventoryExcel}
             >
               {parsing ? '解析中...' : '选择 Excel 文件'}
             </Button>

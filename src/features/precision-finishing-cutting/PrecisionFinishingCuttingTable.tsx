@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, Tag, type TableColumnsType, type TableProps } from 'antd'
 
 import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
@@ -163,6 +164,12 @@ export default function PrecisionFinishingCuttingTable({
 
   const handleRow = useCallback(
     (record: PrecisionFinishingCuttingWithEmployee) => ({
+      ...(onRowClick
+        ? createKeyboardTableRowProps(
+            () => onRowClick(record),
+            `打开精加工记录 ${record.id}`,
+          )
+        : {}),
       onClick: () => onRowClick?.(record),
       style: {
         cursor: onRowClick ? 'pointer' : undefined,

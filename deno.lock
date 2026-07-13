@@ -1,0 +1,65 @@
+{
+  "version": "5",
+  "remote": {
+    "https://deno.land/std@0.224.0/async/delay.ts": "f90dd685b97c2f142b8069082993e437b1602b8e2561134827eeb7c12b95c499",
+    "https://deno.land/std@0.224.0/http/server.ts": "f9313804bf6467a1704f45f76cb6cd0a3396a3b31c316035e6a4c2035d1ea514",
+    "https://esm.sh/@supabase/supabase-js@2.57.4": "05a369085eb4a4c99d85ccece97f0cf1e05357122e0e74373da1f0e91b014902"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@ant-design/cli@^6.4.4",
+        "npm:@ant-design/icons@^6.2.5",
+        "npm:@eslint/js@^10.0.1",
+        "npm:@heroicons/react@2.2.0",
+        "npm:@supabase/supabase-js@^2.108.0",
+        "npm:@tailwindcss/postcss@^4.3.0",
+        "npm:@tanstack/react-query-devtools@^5.101.0",
+        "npm:@tanstack/react-query@^5.101.0",
+        "npm:@testing-library/jest-dom@^6.9.1",
+        "npm:@testing-library/react@^16.3.2",
+        "npm:@testing-library/user-event@^14.6.1",
+        "npm:@types/node@^25.9.2",
+        "npm:@types/react-dom@^19.2.3",
+        "npm:@types/react@^19.2.17",
+        "npm:@vitejs/plugin-react@^6.0.2",
+        "npm:@vitest/coverage-v8@^4.1.8",
+        "npm:antd@6.3.7",
+        "npm:dayjs@^1.11.21",
+        "npm:eslint-plugin-react-hooks@^7.1.1",
+        "npm:eslint-plugin-react-refresh@~0.5.2",
+        "npm:eslint@^10.4.1",
+        "npm:globals@^17.6.0",
+        "npm:immer@^11.1.8",
+        "npm:jsdom@^29.1.1",
+        "npm:jspdf-autotable@^5.0.8",
+        "npm:jspdf@^4.2.1",
+        "npm:jszip@^3.10.1",
+        "npm:pinyin-pro@^3.28.1",
+        "npm:postcss@^8.5.15",
+        "npm:prettier-plugin-tailwindcss@0.8",
+        "npm:prettier@^3.8.3",
+        "npm:qr-scanner@^1.4.2",
+        "npm:react-dom@^19.2.7",
+        "npm:react-icons@^5.6.0",
+        "npm:react-qr-code@2.0.21",
+        "npm:react-router-dom@^7.17.0",
+        "npm:react@^19.2.7",
+        "npm:spec-workflow-mcp@^1.0.8",
+        "npm:supabase@^2.105.0",
+        "npm:tailwindcss@^4.3.0",
+        "npm:typescript-eslint@^8.61.0",
+        "npm:typescript@~6.0.3",
+        "npm:vite-plugin-compression@~0.5.1",
+        "npm:vite-plugin-mkcert@^2.1.0",
+        "npm:vite@^8.0.12",
+        "npm:vitest@^4.1.8",
+        "npm:xlsx-js-style@^1.2.0",
+        "npm:zustand@^5.0.14"
+      ],
+      "overrides": {
+        "dompurify": "3.4.12"
+      }
+    }
+  }
+}

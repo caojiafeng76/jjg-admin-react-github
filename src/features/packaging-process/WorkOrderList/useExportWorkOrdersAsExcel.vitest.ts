@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import * as XLSX from 'xlsx-js-style'
 
 import type { PackagingWorkOrder } from '@/services/apiPackagingWorkOrders'
-import { buildWorkbook } from './useExportWorkOrdersAsExcel'
+import { buildWorkbook } from './workOrdersExcelDocument'
 
 describe('buildWorkbook', () => {
   it('keeps different persisted batches separate even when they share a creation time', () => {

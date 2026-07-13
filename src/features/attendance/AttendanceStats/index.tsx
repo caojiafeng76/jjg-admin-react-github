@@ -16,9 +16,7 @@ import {
   CalendarDaysIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
-import {
-  ArrowDownTrayIcon as ArrowDownTrayIconSolid,
-} from '@heroicons/react/16/solid'
+import { ArrowDownTrayIcon as ArrowDownTrayIconSolid } from '@heroicons/react/16/solid'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
@@ -30,11 +28,6 @@ import {
   getAttendanceMonthlyExportData,
   getAttendanceLateEarlyStats,
 } from '@/services/apiAttendanceDetails'
-import {
-  exportAttendanceMonthlyExcel,
-  exportAttendanceLateEarlyExcel,
-} from '@/utils/attendanceMonthlyExcel'
-
 import {
   useAttendanceLateEarlyStats,
   useAttendanceShiftStats,
@@ -49,6 +42,13 @@ type SearchParams = {
 
 const SHIFT_STATS_TABLE_SCROLL_X = 530
 const LATE_EARLY_TABLE_SCROLL_X = 460
+
+const loadAttendanceMonthlyExcel = () =>
+  import('@/utils/attendanceMonthlyExcel')
+
+function preloadAttendanceMonthlyExcel() {
+  void loadAttendanceMonthlyExcel()
+}
 
 function DatesPopover({
   count,
@@ -190,20 +190,12 @@ const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
     align: 'center',
     sorter: (a, b) => a.early_leave_count - b.early_leave_count,
     render: (v: number, r) => (
-      <DatesPopover
-        count={v}
-        dates={r.early_leave_dates}
-        color="volcano"
-      />
+      <DatesPopover count={v} dates={r.early_leave_dates} color="volcano" />
     ),
   },
 ]
 
-function ShiftStatsTab({
-  searchParams,
-}: {
-  searchParams: SearchParams
-}) {
+function ShiftStatsTab({ searchParams }: { searchParams: SearchParams }) {
   const { data, isLoading } = useAttendanceShiftStats(searchParams)
   const { tableContainerRef, scrollY } = useTableHeight({ targetRowCount: 14 })
 
@@ -221,7 +213,6 @@ function ShiftStatsTab({
         scroll={{ x: SHIFT_STATS_TABLE_SCROLL_X, y: scrollY }}
         tableLayout="fixed"
         columns={shiftStatsColumns}
-        className="[&_.ant-table-thead>tr>th]:!bg-slate-50 [&_.ant-table-thead>tr>th]:!font-medium [&_.ant-table-tbody>tr:hover>td]:!bg-blue-50/30"
       />
     </div>
   )
@@ -245,7 +236,6 @@ function LateEarlyTab({ searchParams }: { searchParams: SearchParams }) {
         scroll={{ x: LATE_EARLY_TABLE_SCROLL_X, y: scrollY }}
         tableLayout="fixed"
         columns={lateEarlyColumns}
-        className="[&_.ant-table-thead>tr>th]:!bg-slate-50 [&_.ant-table-thead>tr>th]:!font-medium [&_.ant-table-tbody>tr:hover>td]:!bg-blue-50/30"
       />
     </div>
   )
@@ -267,7 +257,10 @@ export default function AttendanceStatsPage() {
 
     setExportingLateEarly(true)
     try {
-      const rows = await getAttendanceLateEarlyStats(searchParams)
+      const [rows, { exportAttendanceLateEarlyExcel }] = await Promise.all([
+        getAttendanceLateEarlyStats(searchParams),
+        loadAttendanceMonthlyExcel(),
+      ])
       if (!rows.length) {
         messageApi.warning('暂无迟到/早退数据')
         return
@@ -298,11 +291,14 @@ export default function AttendanceStatsPage() {
     const month = exportMonth.month() + 1
     setExporting(true)
     try {
-      const rows = await getAttendanceMonthlyExportData({
-        year,
-        month,
-        name: searchParams.name,
-      })
+      const [rows, { exportAttendanceMonthlyExcel }] = await Promise.all([
+        getAttendanceMonthlyExportData({
+          year,
+          month,
+          name: searchParams.name,
+        }),
+        loadAttendanceMonthlyExcel(),
+      ])
       if (!rows.length) {
         messageApi.warning('该月暂无出勤数据')
         return
@@ -347,6 +343,8 @@ export default function AttendanceStatsPage() {
               }
               loading={exportingLateEarly}
               onClick={handleExportLateEarly}
+              onMouseEnter={preloadAttendanceMonthlyExcel}
+              onFocus={preloadAttendanceMonthlyExcel}
               disabled={viewerDenied}
             >
               导出迟到/早退
@@ -358,6 +356,8 @@ export default function AttendanceStatsPage() {
               }
               loading={exporting}
               onClick={handleExport}
+              onMouseEnter={preloadAttendanceMonthlyExcel}
+              onFocus={preloadAttendanceMonthlyExcel}
               disabled={viewerDenied}
             >
               导出出勤月报

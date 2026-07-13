@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { App } from 'antd'
-import autoTable from 'jspdf-autotable'
 import dayjs from 'dayjs'
-import { initializePDF, printPDF } from '@/utils/pdfUtils'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { getWorkshopOrderQrPngDataUrl } from './workshopOrderQrImage'
 import type { WorkshopOrder } from './index'
@@ -35,6 +33,13 @@ const TABLE_COLUMNS = [
   '行备注',
   ' ',
 ] as const
+
+const loadWorkshopOrderPdf = () =>
+  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
+
+const preloadWorkshopOrderPdf = () => {
+  void loadWorkshopOrderPdf()
+}
 
 function formatCellText(value: string | number | null | undefined) {
   if (value === null || value === undefined) {
@@ -84,6 +89,9 @@ export function usePrintWorkshopOrders() {
         `)
         printWindow.document.close()
       }
+
+      const [{ default: autoTable }, { initializePDF, printPDF }] =
+        await loadWorkshopOrderPdf()
 
       const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
       const doc = await initializePDF('l')
@@ -265,5 +273,6 @@ export function usePrintWorkshopOrders() {
   return {
     generatePDF,
     isPrinting,
+    preloadWorkshopOrderPdf,
   }
 }

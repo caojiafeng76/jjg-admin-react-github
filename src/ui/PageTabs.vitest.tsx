@@ -69,7 +69,7 @@ vi.mock('@/routes/routeLabels', () => ({
     ({
       '/dashboard': '首页',
       '/material-transfer': '物料转移单',
-    })[key],
+    })[key] || key,
 }))
 
 describe('PageTabs', () => {
@@ -94,6 +94,44 @@ describe('PageTabs', () => {
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/dashboard')
+    })
+  })
+
+  it('keeps at most eight tabs and evicts the least recently visited page', async () => {
+    const { container, rerender } = render(<PageTabs />)
+
+    for (let page = 2; page <= 7; page += 1) {
+      routerState.location = {
+        pathname: `/page-${page}`,
+        search: '',
+        hash: '',
+      }
+      rerender(<PageTabs />)
+      await screen.findByTestId(`tab-/page-${page}`)
+    }
+
+    routerState.location = {
+      pathname: '/material-transfer',
+      search: '',
+      hash: '',
+    }
+    rerender(<PageTabs />)
+    await screen.findByTestId('tab-/material-transfer')
+
+    routerState.location = {
+      pathname: '/page-8',
+      search: '',
+      hash: '',
+    }
+    rerender(<PageTabs />)
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('[data-testid^="tab-"]')).toHaveLength(
+        8,
+      )
+      expect(screen.getByTestId('tab-/material-transfer')).toBeInTheDocument()
+      expect(screen.queryByTestId('tab-/page-2')).not.toBeInTheDocument()
+      expect(screen.getByTestId('tab-/page-8')).toBeInTheDocument()
     })
   })
 })

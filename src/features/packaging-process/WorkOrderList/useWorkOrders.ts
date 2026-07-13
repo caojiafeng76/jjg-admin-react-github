@@ -10,12 +10,12 @@ import {
   type PackagingWorkOrderSearchParams,
 } from '@/services/apiPackagingWorkOrders'
 import { getSalesOrdersProjectNos } from '@/services/apiProcessStandards'
-import { getPackagingEmployeeList } from '@/services/apiPackagingEmployees'
+import { getPackagingEmployeeOptions } from '@/services/apiPackagingEmployees'
+import { packagingProcessKeys } from '../queryKeys'
 
 const PACKAGING_WORK_ORDERS_KEY = 'packaging-work-orders-v3' as const
 const ORDER_STATUS_DASHBOARD_KEY = 'order-status-dashboard' as const
 const SALES_ORDERS_PROJECT_NOS_KEY = 'sales-orders-project-nos' as const
-const PACKAGING_EMPLOYEES_OPTIONS_KEY = 'packaging-employees-options' as const
 
 export function usePackagingWorkOrderList({
   page,
@@ -78,11 +78,14 @@ export function usePackagingSalesOrdersProjectNos() {
   })
 }
 
-export function usePackagingEmployeeOptions() {
+export function usePackagingEmployeeOptions(keyword?: string) {
   return useQuery({
-    queryKey: [PACKAGING_EMPLOYEES_OPTIONS_KEY],
-    queryFn: () =>
-      getPackagingEmployeeList({ page: 1, pageSize: 1000, keyword: undefined }),
+    queryKey: packagingProcessKeys.employees.options(keyword),
+    queryFn: ({ signal }) =>
+      getPackagingEmployeeOptions({
+        keyword,
+        signal,
+      }),
     ...queryConfig.list,
   })
 }

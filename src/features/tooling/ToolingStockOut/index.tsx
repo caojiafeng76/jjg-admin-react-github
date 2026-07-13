@@ -7,8 +7,6 @@ import {
 import { App, Button, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
-import { exportToolingStockOutToExcel } from '@/utils/toolingStockOutExport'
-
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
@@ -40,6 +38,12 @@ import {
   useUpdateToolingStockOut,
 } from './useToolingStockOut'
 
+const loadToolingStockOutExport = () => import('@/utils/toolingStockOutExport')
+
+function preloadToolingStockOutExport() {
+  void loadToolingStockOutExport()
+}
+
 export default function ToolingStockOutPage() {
   const { message, modal } = App.useApp()
   const canManageTooling = usePermission(TOOLING_MANAGE_PERMISSION_KEY)
@@ -55,6 +59,7 @@ export default function ToolingStockOutPage() {
     null,
   )
   const [formRef, setFormRef] = useState<FormInstance | null>(null)
+  const [toolingOptionsKeyword, setToolingOptionsKeyword] = useState('')
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -74,7 +79,8 @@ export default function ToolingStockOutPage() {
     pageSize,
     searchParams,
   })
-  const { data: toolingOptions = [] } = useToolingDataOptions()
+  const { data: toolingOptions = [], isFetching: isToolingOptionsLoading } =
+    useToolingDataOptions(toolingOptionsKeyword)
   const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
     useMachineEquipmentOptions()
 
@@ -83,7 +89,7 @@ export default function ToolingStockOutPage() {
   const batchStatusMutation = useBatchUpdateToolingStockOutStatus()
   const importMutation = useImportToolingStockOut()
   const deleteMutation = useDeleteToolingStockOut()
-  const { printSelected, isPrinting } = usePrintToolingStockOut()
+  const { printSelected, isPrinting, preloadPrint } = usePrintToolingStockOut()
   const {
     printPoster: printPublicQrPoster,
     isPrinting: isPrintingPublicQrPoster,
@@ -142,7 +148,7 @@ export default function ToolingStockOutPage() {
     viewerOperationTip,
   ])
 
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
     if (!canManageTooling) {
       message.warning('无刀具模块操作权限')
       return
@@ -159,6 +165,7 @@ export default function ToolingStockOutPage() {
     }
 
     try {
+      const { exportToolingStockOutToExcel } = await loadToolingStockOutExport()
       exportToolingStockOutToExcel(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条刀具出库`)
     } catch (error) {
@@ -178,6 +185,7 @@ export default function ToolingStockOutPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
+    setToolingOptionsKeyword('')
     formRef?.resetFields()
   }, [formRef])
 
@@ -185,6 +193,7 @@ export default function ToolingStockOutPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
+    setToolingOptionsKeyword('')
     setModalTitle('新建刀具出库')
     setIsModalOpen(true)
     formRef?.resetFields()
@@ -203,6 +212,7 @@ export default function ToolingStockOutPage() {
     }
 
     setEditingRecord(record)
+    setToolingOptionsKeyword('')
     setIsEdit(true)
     setModalTitle(
       record.status === '已审核' ? '编辑刀具出库备注' : '编辑刀具出库',
@@ -445,6 +455,7 @@ export default function ToolingStockOutPage() {
           loading={isPrinting}
           count={selectedRowKeys.length}
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+          onPreload={preloadPrint}
         >
           打印选中项
         </PrintButton>
@@ -459,6 +470,8 @@ export default function ToolingStockOutPage() {
           type="text"
           icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
           onClick={handleExportExcel}
+          onMouseEnter={preloadToolingStockOutExport}
+          onFocus={preloadToolingStockOutExport}
           disabled={
             viewerDenied || !canManageTooling || selectedRowKeys.length === 0
           }
@@ -530,6 +543,8 @@ export default function ToolingStockOutPage() {
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
           toolingOptions={toolingOptions}
+          isToolingOptionsLoading={isToolingOptionsLoading}
+          onToolingSearch={setToolingOptionsKeyword}
           machineOptions={machineOptions}
           isMachineOptionsLoading={isMachineOptionsLoading}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}

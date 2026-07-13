@@ -231,6 +231,7 @@ function ProductionOrderItemTable({
                     type="text"
                     size="small"
                     icon={<PencilSquareIcon className="h-4 w-4" />}
+                    aria-label={`编辑工序 ${record.operation}`}
                     onClick={() => onEdit(record)}
                   />
                   <Popconfirm
@@ -244,6 +245,7 @@ function ProductionOrderItemTable({
                       size="small"
                       danger
                       icon={<TrashIcon className="h-4 w-4" />}
+                      aria-label={`删除工序 ${record.operation}`}
                     />
                   </Popconfirm>
                 </Space>

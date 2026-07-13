@@ -4,7 +4,7 @@ import { useAppStore } from '@/store'
 import { useMarkReportsStatus } from './useMarkReportsStatus'
 
 export default function ConfirmButton() {
-  const { tableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
   const { markStatus, isPending } = useMarkReportsStatus()
 
   return (

@@ -10,7 +10,7 @@ import {
   updateYoumaiProductData,
 } from '@/services/apiYoumaiProductData'
 
-const YOUMAI_PRODUCT_DATA_KEY = 'youmai-product-data' as const
+import { youmaiKeys } from '../queryKeys'
 
 export function useYoumaiProductDataList({
   page,
@@ -24,7 +24,11 @@ export function useYoumaiProductDataList({
   }
 }) {
   return useQuery({
-    queryKey: [YOUMAI_PRODUCT_DATA_KEY, page, pageSize, searchParams],
+    queryKey: youmaiKeys.productData.list({
+      page,
+      pageSize,
+      keyword: searchParams.keyword,
+    }),
     queryFn: () =>
       getYoumaiProductDataList({
         page,
@@ -39,27 +43,27 @@ export function useYoumaiProductDataList({
 export function useCreateYoumaiProductData() {
   return useMutationWithInvalidation({
     mutationFn: createYoumaiProductData,
-    invalidateQueries: [[YOUMAI_PRODUCT_DATA_KEY]],
+    invalidateQueries: [youmaiKeys.productData.all],
   })
 }
 
 export function useUpdateYoumaiProductData() {
   return useMutationWithInvalidation({
     mutationFn: updateYoumaiProductData,
-    invalidateQueries: [[YOUMAI_PRODUCT_DATA_KEY]],
+    invalidateQueries: [youmaiKeys.productData.all],
   })
 }
 
 export function useImportYoumaiProductData() {
   return useMutationWithInvalidation({
     mutationFn: createYoumaiProductDataBatch,
-    invalidateQueries: [[YOUMAI_PRODUCT_DATA_KEY]],
+    invalidateQueries: [youmaiKeys.productData.all],
   })
 }
 
 export function useDeleteYoumaiProductData() {
   return useMutationWithInvalidation({
     mutationFn: deleteYoumaiProductData,
-    invalidateQueries: [[YOUMAI_PRODUCT_DATA_KEY]],
+    invalidateQueries: [youmaiKeys.productData.all],
   })
 }

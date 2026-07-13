@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, Tag, type TableColumnsType } from 'antd'
 
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
@@ -86,9 +87,7 @@ function YoumaiFinishedGoodsStockOutTable({
         key: 'purchase_order_no',
         width: 160,
         sorter: (a, b) =>
-          (a.purchase_order_no ?? '').localeCompare(
-            b.purchase_order_no ?? '',
-          ),
+          (a.purchase_order_no ?? '').localeCompare(b.purchase_order_no ?? ''),
         filters: uniqueFilters(data.map((r) => r.purchase_order_no)),
         onFilter: (value, record) =>
           String(record.purchase_order_no ?? '') === String(value),
@@ -165,8 +164,7 @@ function YoumaiFinishedGoodsStockOutTable({
         dataIndex: 'specific_gravity',
         key: 'specific_gravity',
         width: 100,
-        sorter: (a, b) =>
-          (a.specific_gravity ?? 0) - (b.specific_gravity ?? 0),
+        sorter: (a, b) => (a.specific_gravity ?? 0) - (b.specific_gravity ?? 0),
         filters: uniqueFilters(data.map((r) => r.specific_gravity)),
         onFilter: (value, record) =>
           String(record.specific_gravity ?? '') === String(value),
@@ -237,8 +235,7 @@ function YoumaiFinishedGoodsStockOutTable({
         dataIndex: 'remarks',
         key: 'remarks',
         width: 220,
-        sorter: (a, b) =>
-          (a.remarks ?? '').localeCompare(b.remarks ?? ''),
+        sorter: (a, b) => (a.remarks ?? '').localeCompare(b.remarks ?? ''),
         filters: uniqueFilters(data.map((r) => r.remarks)),
         onFilter: (value, record) =>
           String(record.remarks ?? '') === String(value),
@@ -283,6 +280,10 @@ function YoumaiFinishedGoodsStockOutTable({
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }
       onRow={(record) => ({
+        ...createKeyboardTableRowProps(
+          () => onSelect([record.id]),
+          `选择优迈成品出库 ${record.id}`,
+        ),
         onClick: () => onSelect([record.id]),
         style: { cursor: 'pointer', height: rowHeight },
       })}

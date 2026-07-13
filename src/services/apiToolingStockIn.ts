@@ -1,4 +1,8 @@
 import supabase from './supabase'
+import {
+  buildToolingDataOptionsQuery,
+  TOOLING_DATA_OPTION_SELECT,
+} from './toolingDataOptions'
 import { handleApiError } from '@/utils/errorHandler'
 
 export type ToolingStockInStatus = '待审核' | '已审核'
@@ -106,17 +110,15 @@ function buildStockInPayload(
   }
 }
 
-export async function getToolingDataOptions(keyword?: string) {
-  let query = toolingDataTable()
-    .select('id, tool_code, tool_name, tool_spec, material, unit_price')
-    .order('tool_code', { ascending: true })
-
-  if (keyword?.trim()) {
-    const normalizedKeyword = keyword.trim()
-    query = query.or(
-      `tool_code.ilike.%${normalizedKeyword}%,tool_name.ilike.%${normalizedKeyword}%,tool_spec.ilike.%${normalizedKeyword}%,material.ilike.%${normalizedKeyword}%`,
-    )
-  }
+export async function getToolingDataOptions(
+  keyword?: string,
+  signal?: AbortSignal,
+  limit?: number,
+) {
+  const query = buildToolingDataOptionsQuery(
+    toolingDataTable().select(TOOLING_DATA_OPTION_SELECT),
+    { keyword, signal, limit },
+  )
 
   const { data, error } = await query
 
@@ -132,11 +134,13 @@ export async function getToolingStockInList({
   pageSize,
   keyword,
   status,
+  signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
   status?: ToolingStockInStatus
+  signal?: AbortSignal
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -154,10 +158,15 @@ export async function getToolingStockInList({
     query = query.eq('status', status)
   }
 
-  const { data, error, count } = await query
+  query = query
     .order('updated_at', { ascending: false })
     .order('tool_code', { ascending: true })
-    .range(from, to)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error, count } = await query.range(from, to)
 
   if (error) {
     throw handleApiError(error, '获取刀具入库列表失败')

@@ -14,10 +14,12 @@ import type { ToolingInventoryImportRow } from '@/services/apiToolingInventory'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
-import {
-  downloadToolingInventoryTemplate,
-  parseToolingInventoryExcel,
-} from '@/utils/toolingInventoryExcel'
+
+const loadToolingInventoryExcel = () => import('@/utils/toolingInventoryExcel')
+
+function preloadToolingInventoryExcel() {
+  void loadToolingInventoryExcel()
+}
 
 interface Props {
   onImport: (rows: ToolingInventoryImportRow[]) => Promise<void>
@@ -74,6 +76,7 @@ export default function ToolingInventoryExcelImport({
 
     setParsing(true)
     try {
+      const { parseToolingInventoryExcel } = await loadToolingInventoryExcel()
       const { rows, errors } = await parseToolingInventoryExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
@@ -98,6 +101,12 @@ export default function ToolingInventoryExcelImport({
     setParsedRows([])
     setParseErrors([])
     setFileList([])
+  }
+
+  const handleDownloadTemplate = async () => {
+    const { downloadToolingInventoryTemplate } =
+      await loadToolingInventoryExcel()
+    downloadToolingInventoryTemplate()
   }
 
   const handleCancel = () => {
@@ -126,13 +135,15 @@ export default function ToolingInventoryExcelImport({
       <ImportButton
         onClick={handleOpenModal}
         permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        onPreload={preloadToolingInventoryExcel}
       >
         导入库存
       </ImportButton>
 
       <DownloadTemplateButton
-        onClick={downloadToolingInventoryTemplate}
+        onClick={handleDownloadTemplate}
         permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        onPreload={preloadToolingInventoryExcel}
       >
         下载库存模板
       </DownloadTemplateButton>
@@ -172,6 +183,8 @@ export default function ToolingInventoryExcelImport({
             <Button
               loading={parsing}
               icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+              onMouseEnter={preloadToolingInventoryExcel}
+              onFocus={preloadToolingInventoryExcel}
             >
               {parsing ? '解析中...' : '选择 Excel 文件'}
             </Button>

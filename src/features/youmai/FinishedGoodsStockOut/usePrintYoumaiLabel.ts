@@ -1,9 +1,15 @@
-import jsPDF from 'jspdf'
+import type jsPDF from 'jspdf'
 import { useState } from 'react'
 
 import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
-import { openPDFInNewWindow } from '@/utils/pdfUtils'
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
+
+const loadYoumaiLabelPdfRuntime = () =>
+  Promise.all([import('jspdf'), import('@/utils/pdfUtils')] as const)
+
+function preloadPrint() {
+  void loadYoumaiLabelPdfRuntime()
+}
 
 export function usePrintYoumaiLabel() {
   const [isPrinting, setIsPrinting] = useState(false)
@@ -28,9 +34,9 @@ export function usePrintYoumaiLabel() {
     doc.rect(3, 2, 84, 26)
 
     // 横线（分隔行）
-    doc.line(3, 10, 87, 10)  // ISO 行底部（公司名与 ISO 之间无横线）
-    doc.line(3, 15, 87, 15)  // 物料编码行底部
-    doc.line(3, 20, 87, 20)  // 产品名称行底部
+    doc.line(3, 10, 87, 10) // ISO 行底部（公司名与 ISO 之间无横线）
+    doc.line(3, 15, 87, 15) // 物料编码行底部
+    doc.line(3, 20, 87, 20) // 产品名称行底部
 
     // 竖线（分隔列，只在明细区域 10~20）
     doc.line(15, 10, 15, 20) // 物料编码/产品名称 标题列右边
@@ -53,24 +59,22 @@ export function usePrintYoumaiLabel() {
     try {
       setIsPrinting(true)
 
-      const doc = new jsPDF({
+      const [[{ default: JsPDF }, { openPDFInNewWindow }], fontData] =
+        await Promise.all([loadYoumaiLabelPdfRuntime(), loadGoogleFont()])
+      const doc = new JsPDF({
         orientation: 'l',
         unit: 'mm',
         format: [90, 30],
       })
 
       // 动态加载 Google Font
-      const fontData = await loadGoogleFont()
       doc.addFileToVFS(GOOGLE_FONT_CONFIG.FONT_NAME, fontData)
       doc.addFont(
         GOOGLE_FONT_CONFIG.FONT_NAME,
         GOOGLE_FONT_CONFIG.FONT_FAMILY,
         GOOGLE_FONT_CONFIG.FONT_STYLE,
       )
-      doc.setFont(
-        GOOGLE_FONT_CONFIG.FONT_FAMILY,
-        GOOGLE_FONT_CONFIG.FONT_STYLE,
-      )
+      doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY, GOOGLE_FONT_CONFIG.FONT_STYLE)
 
       // 设置字体大小
       doc.setFontSize(7)
@@ -132,5 +136,5 @@ export function usePrintYoumaiLabel() {
     }
   }
 
-  return { printLabels, isPrinting }
+  return { printLabels, isPrinting, preloadPrint }
 }

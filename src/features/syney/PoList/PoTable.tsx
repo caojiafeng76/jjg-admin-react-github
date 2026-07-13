@@ -1,4 +1,5 @@
 import { Key, useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Link } from 'react-router-dom'
 import { Table, TableColumnsType, TableProps } from 'antd'
 import dayjs from 'dayjs'
@@ -63,7 +64,10 @@ function PoTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
 
   const currentPageTotalQty = useMemo(
     () => data.reduce((total, record) => total + (record.Qty || 0), 0),
@@ -146,7 +150,7 @@ function PoTable({
         key: 'Qty',
         width: 80,
         render: (value: number) => (
-          <span className="font-semibold tabular-nums text-slate-700">
+          <span className="font-semibold text-slate-700 tabular-nums">
             {value ?? '-'}
           </span>
         ),
@@ -166,8 +170,7 @@ function PoTable({
         key: 'Technique',
         width: 180,
         ellipsis: true,
-        render: (text: string) =>
-          text ? text.replace(/,/g, ' ') : '-',
+        render: (text: string) => (text ? text.replace(/,/g, ' ') : '-'),
       },
       {
         title: '编号',
@@ -204,6 +207,12 @@ function PoTable({
   }
 
   const handleRow = (record: ISyneyPo) => ({
+    ...(onRowClick
+      ? createKeyboardTableRowProps(
+          () => onRowClick(record),
+          `打开西尼订单 ${record.No || record.id}`,
+        )
+      : {}),
     onClick: () => onRowClick?.(record),
     style: {
       cursor: onRowClick ? 'pointer' : undefined,
@@ -225,7 +234,7 @@ function PoTable({
       onRow={handleRow}
       scroll={{ x: 1480, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50">

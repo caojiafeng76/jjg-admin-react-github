@@ -44,6 +44,7 @@ export default function ToolingInventoryPage() {
   )
   const [formRef, setFormRef] =
     useState<FormInstance<ToolingInventoryFormValues> | null>(null)
+  const [toolingOptionsKeyword, setToolingOptionsKeyword] = useState('')
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -57,7 +58,8 @@ export default function ToolingInventoryPage() {
     pageSize,
     searchParams,
   })
-  const { data: toolingOptions = [] } = useToolingDataOptions()
+  const { data: toolingOptions = [], isFetching: isToolingOptionsLoading } =
+    useToolingDataOptions(toolingOptionsKeyword)
 
   const createMutation = useCreateToolingInventory()
   const updateMutation = useUpdateToolingInventory()
@@ -74,6 +76,7 @@ export default function ToolingInventoryPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
+    setToolingOptionsKeyword('')
     formRef?.resetFields()
   }, [formRef])
 
@@ -81,6 +84,7 @@ export default function ToolingInventoryPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
+    setToolingOptionsKeyword('')
     setModalTitle('新建刀具库存')
     setIsModalOpen(true)
     formRef?.resetFields()
@@ -99,6 +103,7 @@ export default function ToolingInventoryPage() {
     }
 
     setEditingRecord(record)
+    setToolingOptionsKeyword('')
     setIsEdit(true)
     setModalTitle('编辑刀具库存')
     setIsModalOpen(true)
@@ -309,6 +314,8 @@ export default function ToolingInventoryPage() {
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
           toolingOptions={toolingOptions}
+          isToolingOptionsLoading={isToolingOptionsLoading}
+          onToolingSearch={setToolingOptionsKeyword}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
         />
       </Modal>

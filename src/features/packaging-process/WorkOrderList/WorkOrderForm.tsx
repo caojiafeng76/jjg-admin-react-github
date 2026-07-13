@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useDeferredValue,
   useEffect,
   useMemo,
   useState,
@@ -25,6 +26,12 @@ import {
   getSalesOrderByProjectNo,
   getStandardSecondsByPartNo,
 } from '@/services/apiPackagingWorkOrders'
+import {
+  mergeEmployeeSelectOptions,
+  rememberEmployeeOptions,
+  toEmployeeSelectOption,
+  type EmployeeSelectOption,
+} from './employeeSelectOptions'
 import {
   usePackagingSalesOrdersProjectNos,
   usePackagingEmployeeOptions,
@@ -66,6 +73,8 @@ const UNIT_OPTIONS = [
   { label: '千克', value: '千克' },
 ]
 
+const EMPTY_EMPLOYEE_IDS: string[] = []
+
 const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
   work_date: dayjs(),
   employee_id: null,
@@ -84,6 +93,31 @@ const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
   standard_seconds: 0,
   extra_qualified_hours: 0,
   remark: null,
+}
+
+function getInitialEmployeeSnapshots(
+  initialValues: Props['initialValues'],
+): EmployeeSelectOption[] {
+  if (!initialValues) return []
+
+  if (
+    'employee_ids' in initialValues &&
+    Array.isArray(initialValues.employee_ids) &&
+    'employee_names' in initialValues &&
+    Array.isArray(initialValues.employee_names)
+  ) {
+    return initialValues.employee_ids.flatMap((employeeId, index) => {
+      const employeeName = initialValues.employee_names[index]
+      return employeeName ? [{ label: employeeName, value: employeeId }] : []
+    })
+  }
+
+  const employeeName =
+    'employee_name' in initialValues ? initialValues.employee_name : undefined
+
+  return initialValues.employee_id && employeeName
+    ? [{ label: employeeName, value: initialValues.employee_id }]
+    : []
 }
 
 function FormSection({
@@ -113,9 +147,16 @@ export default function WorkOrderForm({
   const [projectNoValue, setProjectNoValue] = useState<string | undefined>(
     undefined,
   )
+  const [employeeKeyword, setEmployeeKeyword] = useState('')
+  const deferredEmployeeKeyword = useDeferredValue(employeeKeyword)
+  const [selectedEmployeeSnapshots, setSelectedEmployeeSnapshots] = useState<
+    EmployeeSelectOption[]
+  >([])
+  const employeeIds = Form.useWatch('employee_ids', form) ?? EMPTY_EMPLOYEE_IDS
 
   const { data: projectNoOptions = [] } = usePackagingSalesOrdersProjectNos()
-  const { data: employeeOptions } = usePackagingEmployeeOptions()
+  const { data: employeeOptions, isFetching: isEmployeeOptionsFetching } =
+    usePackagingEmployeeOptions(deferredEmployeeKeyword)
 
   const projectNoSelectOptions = useMemo(
     () =>
@@ -140,18 +181,35 @@ export default function WorkOrderForm({
 
   const employeeSelectOptions = useMemo(
     () =>
-      (employeeOptions?.items ?? []).map((employee) => ({
-        label: employee.name,
-        value: employee.id,
-      })),
-    [employeeOptions],
+      mergeEmployeeSelectOptions(
+        employeeOptions?.items ?? [],
+        selectedEmployeeSnapshots,
+        employeeIds,
+      ),
+    [employeeIds, employeeOptions, selectedEmployeeSnapshots],
   )
+
+  useEffect(() => {
+    const selectedEmployeeIdSet = new Set(employeeIds)
+    const selectedOptions = (employeeOptions?.items ?? [])
+      .filter(({ id }) => selectedEmployeeIdSet.has(id))
+      .map(toEmployeeSelectOption)
+
+    if (selectedOptions.length === 0) return
+
+    setSelectedEmployeeSnapshots((previous) =>
+      rememberEmployeeOptions(previous, selectedOptions),
+    )
+  }, [employeeIds, employeeOptions])
 
   useEffect(() => {
     setFormRef(form as unknown as FormInstance<PackagingWorkOrderFormValues>)
   }, [form, setFormRef])
 
   useEffect(() => {
+    setEmployeeKeyword('')
+    setSelectedEmployeeSnapshots(getInitialEmployeeSnapshots(initialValues))
+
     if (initialValues) {
       const workDate = initialValues.work_date
         ? dayjs(initialValues.work_date)
@@ -235,7 +293,6 @@ export default function WorkOrderForm({
   const lengthMm = Form.useWatch('length_mm', form) || 0
   const weightPerMeterKg = Form.useWatch('weight_per_meter_kg', form) || 0
   const standardSeconds = Form.useWatch('standard_seconds', form) || 0
-  const employeeIds = Form.useWatch('employee_ids', form) || []
   const employeeCount = employeeIds.length || 1
   const averageQuantity = useMemo(() => {
     const q = Number(quantity) || 0
@@ -305,7 +362,21 @@ export default function WorkOrderForm({
               allowClear
               mode="multiple"
               maxCount={isHistoricalInconsistent ? 1 : undefined}
-              showSearch={{ optionFilterProp: 'label' }}
+              showSearch={{
+                filterOption: false,
+                onSearch: setEmployeeKeyword,
+              }}
+              loading={isEmployeeOptionsFetching}
+              onClear={() => setEmployeeKeyword('')}
+              onSelect={(_, option) => {
+                if (typeof option.label !== 'string') return
+
+                setSelectedEmployeeSnapshots((previous) =>
+                  rememberEmployeeOptions(previous, [
+                    { label: option.label, value: String(option.value) },
+                  ]),
+                )
+              }}
               placeholder="请选择人员"
               options={employeeSelectOptions}
             />

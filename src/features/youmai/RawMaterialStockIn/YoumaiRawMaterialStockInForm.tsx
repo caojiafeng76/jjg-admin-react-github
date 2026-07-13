@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Form, type FormInstance, Input, InputNumber, Select } from 'antd'
 
 import type {
@@ -7,11 +7,14 @@ import type {
 } from '@/services/apiYoumaiRawMaterialStockIn'
 import type { YoumaiRawMaterialInventoryOption } from '@/services/apiYoumaiRawMaterialInventory'
 
+import { useRemoteSelectOptions } from '../remoteSelectOptions'
+import { useYoumaiRawMaterialInventoryOption } from '../RawMaterialInventory/useYoumaiRawMaterialInventory'
+import { useYoumaiRawMaterialInventoryOptions } from './useYoumaiRawMaterialStockIn'
+
 interface Props {
   onFinish: (values: YoumaiRawMaterialStockInFormValues) => void
   setFormRef: (form: FormInstance<YoumaiRawMaterialStockInFormValues>) => void
   isSubmitting: boolean
-  inventoryOptions: YoumaiRawMaterialInventoryOption[]
   isEdit?: boolean
   editingRecord?: YoumaiRawMaterialStockIn | null
 }
@@ -26,16 +29,39 @@ export default function YoumaiRawMaterialStockInForm({
   onFinish,
   setFormRef,
   isSubmitting,
-  inventoryOptions,
   isEdit = false,
   editingRecord,
 }: Props) {
   const [form] = Form.useForm<YoumaiRawMaterialStockInFormValues>()
+  const [inventoryOptionKeyword, setInventoryOptionKeyword] = useState('')
+  const {
+    data: inventoryOptions = [],
+    isFetching: areInventoryOptionsLoading,
+  } = useYoumaiRawMaterialInventoryOptions(inventoryOptionKeyword)
+  const { data: editingInventoryOption } =
+    useYoumaiRawMaterialInventoryOption(
+      isEdit ? editingRecord?.inventory_id : undefined,
+    )
+  const initialInventorySnapshot = useMemo(
+    () =>
+      isEdit && editingRecord
+        ? editingInventoryOption ??
+          inventoryOptions.find(
+            (option) => option.id === editingRecord.inventory_id,
+          )
+        : undefined,
+    [editingInventoryOption, editingRecord, inventoryOptions, isEdit],
+  )
+  const { mergedOptions, rememberSelectedOption } =
+    useRemoteSelectOptions<YoumaiRawMaterialInventoryOption>(
+      inventoryOptions,
+      initialInventorySnapshot,
+    )
   const selectedInventoryId = Form.useWatch('inventory_id', form)
 
   const selectedOption = useMemo(
-    () => inventoryOptions.find((item) => item.id === selectedInventoryId),
-    [inventoryOptions, selectedInventoryId],
+    () => mergedOptions.find((item) => item.id === selectedInventoryId),
+    [mergedOptions, selectedInventoryId],
   )
 
   useEffect(() => {
@@ -57,13 +83,13 @@ export default function YoumaiRawMaterialStockInForm({
 
   const options = useMemo(
     () =>
-      inventoryOptions.map((item) => ({
+      mergedOptions.map((item) => ({
         value: item.id,
         label: `${item.model} - ${item.specification}（当前库存：${item.quantity}）`,
         model: item.model,
         specification: item.specification,
       })),
-    [inventoryOptions],
+    [mergedOptions],
   )
 
   return (
@@ -85,12 +111,14 @@ export default function YoumaiRawMaterialStockInForm({
           />
         ) : (
           <Select
-            showSearch
+            showSearch={{
+              filterOption: false,
+              onSearch: setInventoryOptionKeyword,
+            }}
+            onChange={rememberSelectedOption}
+            loading={areInventoryOptionsLoading}
             placeholder="请选择原料"
             options={options}
-            filterOption={(input, option) =>
-              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-            }
           />
         )}
       </Form.Item>

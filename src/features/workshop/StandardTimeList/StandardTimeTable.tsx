@@ -1,3 +1,4 @@
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import {
   memo,
   useCallback,
@@ -160,7 +161,9 @@ function applyColumnWidths<RecordType>(
   })
 }
 
-function getTableColumnWidth<RecordType>(columns: TableColumnsType<RecordType>) {
+function getTableColumnWidth<RecordType>(
+  columns: TableColumnsType<RecordType>,
+) {
   return columns.reduce((total, column) => {
     const width = column.width
     return total + (typeof width === 'number' ? width : 0)
@@ -182,17 +185,14 @@ const StandardTimeTable = memo(function StandardTimeTable({
 }: Props) {
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
 
-  const handleResizeColumn = useCallback(
-    (columnKey: string, width: number) => {
-      setColumnWidths((current) => {
-        if (current[columnKey] === width) {
-          return current
-        }
-        return { ...current, [columnKey]: width }
-      })
-    },
-    [],
-  )
+  const handleResizeColumn = useCallback((columnKey: string, width: number) => {
+    setColumnWidths((current) => {
+      if (current[columnKey] === width) {
+        return current
+      }
+      return { ...current, [columnKey]: width }
+    })
+  }, [])
 
   const baseColumns: TableColumnsType<StandardTime> = useMemo(() => {
     const cols: TableColumnsType<StandardTime> = [
@@ -337,7 +337,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
           key: 'standard_seconds',
           width: 140,
           render: (value: number | null | undefined) => (
-            <span className="font-medium text-indigo-600">{formatNumber(value)}</span>
+            <span className="font-medium text-indigo-600">
+              {formatNumber(value)}
+            </span>
           ),
         },
         {
@@ -346,7 +348,10 @@ const StandardTimeTable = memo(function StandardTimeTable({
           width: 120,
           render: (_value, record) => (
             <span className="font-medium text-emerald-600">
-              {formatNumber(calculateDailyStandardCapacity(record.standard_seconds), 2)}
+              {formatNumber(
+                calculateDailyStandardCapacity(record.standard_seconds),
+                2,
+              )}
             </span>
           ),
         },
@@ -356,7 +361,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
           key: 'theoretical_seconds',
           width: 140,
           render: (value: number | null | undefined) => (
-            <span className="font-medium text-cyan-600">{formatNumber(value)}</span>
+            <span className="font-medium text-cyan-600">
+              {formatNumber(value)}
+            </span>
           ),
         },
       )
@@ -409,6 +416,12 @@ const StandardTimeTable = memo(function StandardTimeTable({
 
   const handleRow = useCallback(
     (record: StandardTime) => ({
+      ...(onRowClick
+        ? createKeyboardTableRowProps(
+            () => onRowClick(record),
+            `打开标准工时 ${record.id}`,
+          )
+        : {}),
       onClick: () => onRowClick?.(record),
       style: {
         cursor: onRowClick ? 'pointer' : undefined,

@@ -10,6 +10,7 @@ interface Props {
   loading?: boolean
   permissionKey?: string
   noPermissionTip?: string
+  onPreload?: () => void
 }
 
 export default function ImportButton({
@@ -19,6 +20,7 @@ export default function ImportButton({
   loading = false,
   permissionKey,
   noPermissionTip = '无导入权限',
+  onPreload,
 }: Props) {
   const allowed = usePermission(permissionKey ?? '')
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
@@ -31,6 +33,8 @@ export default function ImportButton({
       type="text"
       icon={<ArrowUpTrayIcon className="size-4 text-sky-500/80!" />}
       onClick={onClick}
+      onMouseEnter={onPreload}
+      onFocus={onPreload}
       disabled={denied || disabled}
       loading={loading}
     >

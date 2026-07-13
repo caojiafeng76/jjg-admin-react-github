@@ -2,13 +2,14 @@ import { getSyneyPoDetail } from '@/services/apiSyneyPo'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { queryConfig } from '@/config/queryClient'
+import { syneyPoKeys } from '../queryKeys'
 
 export function useDetail() {
   const { PoId } = useParams()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['syney-Po', PoId],
-    queryFn: () => getSyneyPoDetail(PoId || ''),
+    queryKey: syneyPoKeys.detail(PoId || ''),
+    queryFn: ({ signal }) => getSyneyPoDetail(PoId || '', signal),
     enabled: !!PoId,
     ...queryConfig.detail,
   })
@@ -17,7 +18,7 @@ export function useDetail() {
     throw new Error('获取采购单详情失败')
   }
 
-  const items = (data as any)?.items || []
+  const items = data?.items ?? []
 
   return {
     items,

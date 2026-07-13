@@ -14,9 +14,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
 }
 
 async function findAuthUserByEmail(
-  adminClient: ReturnType<typeof assertAdmin> extends Promise<infer T>
-    ? T['adminClient']
-    : never,
+  adminClient: Awaited<ReturnType<typeof assertAdmin>>['adminClient'],
   email: string,
 ) {
   let page = 1

@@ -1,14 +1,22 @@
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 
-import { corsHeaders } from '../_shared/cors.ts'
+import {
+  authorizeEdgeProxyRequest,
+  consumeEdgeProxyRateLimit,
+  diagnosticErrorCategory,
+  getProxyCorsHeaders,
+  hasBearerAuthorization,
+  isProxyOriginAllowed,
+  parseProxyIdentifier,
+  readLimitedJsonBody,
+  safeErrorMetadata,
+} from '../_shared/proxy-security.ts'
 
 const SCM_BASE_URL = 'http://scm.syney.net:808'
 const LOGIN_URL = `${SCM_BASE_URL}/Business/UserLogin.aspx?method=Login`
-const STORE_REPORT_URL =
-  `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx?method=BindGrid`
+const STORE_REPORT_URL = `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx?method=BindGrid`
 const LOGIN_PAGE_URL = `${SCM_BASE_URL}/Business/UserLogin.aspx`
-const REPORT_PAGE_URL =
-  `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx`
+const REPORT_PAGE_URL = `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx`
 const SCM_REQUEST_TIMEOUT_MS = 15000
 
 const BIND_FIELDS = [
@@ -59,32 +67,15 @@ type SyneyStoreReportPayload = {
   diagnose?: boolean
 }
 
-function getAuthorizationRole(authorization: string) {
-  const token = authorization.replace(/^Bearer\s+/i, '')
-  const payloadPart = token.split('.')[1]
-
-  if (!payloadPart) {
-    return ''
-  }
-
-  try {
-    const normalizedPayload = payloadPart
-      .replace(/-/g, '+')
-      .replace(/_/g, '/')
-      .padEnd(Math.ceil(payloadPart.length / 4) * 4, '=')
-    const payload = JSON.parse(atob(normalizedPayload)) as { role?: string }
-
-    return payload.role || ''
-  } catch {
-    return ''
-  }
-}
-
-function jsonResponse(body: Record<string, unknown>, status = 200) {
+function jsonResponse(
+  body: Record<string, unknown>,
+  status = 200,
+  headers: Record<string, string> = {},
+) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      ...corsHeaders,
+      ...headers,
       'Content-Type': 'application/json',
     },
   })
@@ -104,7 +95,10 @@ function getSetCookieValues(headers: Headers) {
   return setCookie ? [setCookie] : []
 }
 
-function appendResponseCookies(cookieMap: Map<string, string>, response: Response) {
+function appendResponseCookies(
+  cookieMap: Map<string, string>,
+  response: Response,
+) {
   getSetCookieValues(response.headers).forEach((setCookie) => {
     const [cookiePair] = setCookie.split(';')
     const separatorIndex = cookiePair.indexOf('=')
@@ -150,10 +144,6 @@ async function fetchWithTimeout(
   }
 }
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error)
-}
-
 function getRuntimeRegion() {
   return Deno.env.get('SB_REGION') || Deno.env.get('DENO_REGION') || ''
 }
@@ -167,21 +157,19 @@ async function runDiagnosticStep(
 
   try {
     const response = await fetchWithTimeout(input, init, `${name} 超时`)
-    const body = await response.clone().text().catch(() => '')
 
     return {
       name,
       ok: response.ok,
       status: response.status,
       elapsedMs: Date.now() - startedAt,
-      bodyPreview: body.slice(0, 120),
     }
   } catch (error) {
     return {
       name,
       ok: false,
       elapsedMs: Date.now() - startedAt,
-      error: getErrorMessage(error),
+      errorCategory: diagnosticErrorCategory(error),
     }
   }
 }
@@ -247,7 +235,11 @@ function md5(input: string) {
 
   const view = new DataView(padded.buffer)
   view.setUint32(paddedLength - 8, originalBitLength, true)
-  view.setUint32(paddedLength - 4, Math.floor(originalBitLength / 0x100000000), true)
+  view.setUint32(
+    paddedLength - 4,
+    Math.floor(originalBitLength / 0x100000000),
+    true,
+  )
 
   let a0 = 0x67452301
   let b0 = 0xefcdab89
@@ -255,10 +247,10 @@ function md5(input: string) {
   let d0 = 0x10325476
 
   const shifts = [
-    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
-    5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
-    4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
-    6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
+    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5,
+    9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11,
+    16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10,
+    15, 21,
   ]
   const constants = Array.from({ length: 64 }, (_, i) =>
     Math.floor(Math.abs(Math.sin(i + 1)) * 0x100000000),
@@ -296,7 +288,10 @@ function md5(input: string) {
       c = b
       b = add32(
         b,
-        rotateLeft(add32(add32(a, f), add32(constants[i], words[g])), shifts[i]),
+        rotateLeft(
+          add32(add32(a, f), add32(constants[i], words[g])),
+          shifts[i],
+        ),
       )
       a = temp
     }
@@ -377,7 +372,10 @@ function extractDataArray(responseText: string) {
   }
 
   let startIndex = colonIndex + 1
-  while (startIndex < responseText.length && /\s/.test(responseText[startIndex])) {
+  while (
+    startIndex < responseText.length &&
+    /\s/.test(responseText[startIndex])
+  ) {
     startIndex++
   }
 
@@ -481,51 +479,87 @@ async function fetchStoreReport(storeInNo: string) {
   return parseStoreReportResponse(responseText)
 }
 
-serve(async (request) => {
+serve(async (request: Request) => {
+  const corsHeaders = getProxyCorsHeaders(request)
+  const respond = (body: Record<string, unknown>, status = 200) =>
+    jsonResponse(body, status, corsHeaders)
+
   if (request.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', {
+      status: isProxyOriginAllowed(request) ? 204 : 403,
+      headers: corsHeaders,
+    })
+  }
+
+  if (!isProxyOriginAllowed(request)) {
+    return respond({ error: 'Origin not allowed' }, 403)
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405)
+    return respond({ error: 'Method not allowed' }, 405)
   }
 
-  const authorization = request.headers.get('Authorization')
-  if (!authorization) {
-    return jsonResponse({ error: '未登录，无法获取西尼入库单' }, 401)
+  if (!hasBearerAuthorization(request)) {
+    return respond({ error: '未登录，无法获取西尼入库单' }, 401)
   }
 
-  if (getAuthorizationRole(authorization) !== 'authenticated') {
-    return jsonResponse({ error: '未登录，无法获取西尼入库单' }, 401)
+  const bodyResult = await readLimitedJsonBody<SyneyStoreReportPayload>(request)
+  if (!bodyResult.ok) {
+    return respond(
+      { error: bodyResult.status === 413 ? '请求体过大' : '请求体格式不正确' },
+      bodyResult.status,
+    )
   }
+  const payload = bodyResult.payload
 
-  let payload: SyneyStoreReportPayload
-
+  let access
   try {
-    payload = await request.json()
-  } catch {
-    return jsonResponse({ error: '请求体格式不正确' }, 400)
+    access = await authorizeEdgeProxyRequest(
+      request,
+      'page:syney-store-report-list',
+      payload.diagnose === true,
+    )
+  } catch (error) {
+    console.error('syney_edge_auth_failure', safeErrorMetadata(error))
+    return respond({ error: '西尼入库单代理服务暂不可用' }, 502)
+  }
+  if (!access.ok) {
+    return respond(
+      {
+        error:
+          access.status === 401 ? '未登录，无法获取西尼入库单' : '无权访问',
+      },
+      access.status,
+    )
+  }
+  try {
+    if (!(await consumeEdgeProxyRateLimit(request, 'syney-store-report'))) {
+      return respond({ error: '请求过于频繁，请稍后重试' }, 429)
+    }
+  } catch (error) {
+    console.error('syney_edge_rate_limit_failure', safeErrorMetadata(error))
+    return respond({ error: '西尼入库单代理服务暂不可用' }, 502)
   }
 
   try {
     if (payload.diagnose) {
-      return jsonResponse(await diagnoseScmAccess())
+      return respond(await diagnoseScmAccess())
     }
 
-    const storeInNo = payload.storeInNo?.trim()
+    const storeInNo = parseProxyIdentifier(payload.storeInNo)
     if (!storeInNo) {
-      return jsonResponse({ error: '请输入入库单号' }, 400)
+      return respond({ error: '入库单号长度必须为 1 到 64 个字符' }, 400)
     }
 
     const items = await fetchStoreReport(storeInNo)
 
-    return jsonResponse({
+    return respond({
       storeInNo,
       total: items.length,
       items,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : '西尼入库单获取失败'
-    return jsonResponse({ error: message }, 500)
+    console.error('syney_edge_upstream_failure', safeErrorMetadata(error))
+    return respond({ error: '西尼入库单代理服务暂不可用' }, 502)
   }
 })

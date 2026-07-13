@@ -42,7 +42,7 @@ function renderQualifiedRate(value: number | null | undefined) {
         : 'bg-amber-50 text-amber-600'
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium shadow-sm tabular-nums ${tone}`}
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums shadow-sm ${tone}`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
@@ -63,9 +63,7 @@ function renderDataCategory(value: string | null | undefined) {
     return '-'
   }
   const palette =
-    value === 'A'
-      ? 'bg-indigo-50 text-indigo-600'
-      : 'bg-cyan-50 text-cyan-600'
+    value === 'A' ? 'bg-indigo-50 text-indigo-600' : 'bg-cyan-50 text-cyan-600'
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium shadow-sm ${palette}`}
@@ -129,7 +127,7 @@ function ProductionDailyReportTable({
         defaultSortOrder: 'descend',
         sortDirections: ['descend', 'ascend'],
         render: (value: string) => (
-          <span className="tabular-nums text-slate-700">{value}</span>
+          <span className="text-slate-700 tabular-nums">{value}</span>
         ),
       },
       {
@@ -139,7 +137,7 @@ function ProductionDailyReportTable({
         width: 80,
         fixed: 'left',
         render: (value: number) => (
-          <span className="font-medium tabular-nums text-slate-700">
+          <span className="font-medium text-slate-700 tabular-nums">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -175,7 +173,7 @@ function ProductionDailyReportTable({
             sensitivity: 'base',
           }),
         render: (value: string) => (
-          <span className="font-mono text-[13px] font-semibold text-slate-800 tracking-tight">
+          <span className="font-mono text-[13px] font-semibold tracking-tight text-slate-800">
             {value}
           </span>
         ),
@@ -211,7 +209,9 @@ function ProductionDailyReportTable({
           .map((v) => ({ text: `${v}mm`, value: v })),
         onFilter: (value, record) => record.lengthMm === (value as number),
         render: (value: number | null) => (
-          <span className="tabular-nums text-slate-700">{renderNumber(value)}</span>
+          <span className="text-slate-700 tabular-nums">
+            {renderNumber(value)}
+          </span>
         ),
       },
       {
@@ -233,7 +233,7 @@ function ProductionDailyReportTable({
         key: 'incomingQualifiedCount',
         width: 100,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">{value}</span>
+          <span className="text-slate-700 tabular-nums">{value}</span>
         ),
       },
       {
@@ -242,7 +242,7 @@ function ProductionDailyReportTable({
         key: 'qualifiedCount',
         width: 100,
         render: (value: number) => (
-          <span className="font-semibold tabular-nums text-emerald-700">
+          <span className="font-semibold text-emerald-700 tabular-nums">
             {value}
           </span>
         ),
@@ -253,7 +253,7 @@ function ProductionDailyReportTable({
         key: 'defectCount',
         width: 100,
         render: (value: number) => (
-          <span className="font-semibold tabular-nums text-rose-600">
+          <span className="font-semibold text-rose-600 tabular-nums">
             {value}
           </span>
         ),
@@ -264,7 +264,7 @@ function ProductionDailyReportTable({
         key: 'rawMaterialDefectCount',
         width: 100,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">{value}</span>
+          <span className="text-slate-700 tabular-nums">{value}</span>
         ),
       },
       {
@@ -273,7 +273,7 @@ function ProductionDailyReportTable({
         key: 'processingDefectCount',
         width: 100,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">{value}</span>
+          <span className="text-slate-700 tabular-nums">{value}</span>
         ),
       },
       {
@@ -282,7 +282,7 @@ function ProductionDailyReportTable({
         key: 'outsourceDefectCount',
         width: 110,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">{value}</span>
+          <span className="text-slate-700 tabular-nums">{value}</span>
         ),
       },
       {
@@ -303,7 +303,7 @@ function ProductionDailyReportTable({
         key: 'setupDefectCount',
         width: 100,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">{value}</span>
+          <span className="text-slate-700 tabular-nums">{value}</span>
         ),
       },
       {
@@ -327,7 +327,7 @@ function ProductionDailyReportTable({
         key: 'rawMaterialDefectWeightKg',
         width: 130,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">
+          <span className="text-slate-700 tabular-nums">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -338,7 +338,7 @@ function ProductionDailyReportTable({
         key: 'processingDefectWeightKg',
         width: 130,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">
+          <span className="text-slate-700 tabular-nums">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -349,7 +349,7 @@ function ProductionDailyReportTable({
         key: 'outsourceDefectWeightKg',
         width: 140,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">
+          <span className="text-slate-700 tabular-nums">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -360,7 +360,7 @@ function ProductionDailyReportTable({
         key: 'setupDefectWeightKg',
         width: 140,
         render: (value: number) => (
-          <span className="tabular-nums text-slate-700">
+          <span className="text-slate-700 tabular-nums">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -413,21 +413,22 @@ function ProductionDailyReportTable({
       size="small"
       scroll={{ x: 2750, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50">
+          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800/80">
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={10}>
-              <span className="font-medium text-slate-600">当前页合计</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">
+                当前页合计
+              </span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={11}>
-              <span className="font-bold tabular-nums text-emerald-700">
+              <span className="font-bold text-emerald-700 tabular-nums">
                 {currentPageQualifiedCount.toLocaleString()}
               </span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={12}>
-              <span className="font-bold tabular-nums text-rose-600">
+              <span className="font-bold text-rose-600 tabular-nums">
                 {currentPageDefectCount.toLocaleString()}
               </span>
             </Table.Summary.Cell>

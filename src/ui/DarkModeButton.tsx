@@ -3,7 +3,8 @@ import { MoonIcon, SunIcon } from '@heroicons/react/16/solid'
 import { Button } from 'antd'
 
 export default function DarkModeButton() {
-  const { isDarkMode, setIsDarkMode } = useAppStore()
+  const isDarkMode = useAppStore((state) => state.isDarkMode)
+  const setIsDarkMode = useAppStore((state) => state.setIsDarkMode)
 
   return (
     <Button type="text" onClick={setIsDarkMode}>

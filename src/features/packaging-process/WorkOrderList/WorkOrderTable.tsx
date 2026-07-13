@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, type TableColumnsType } from 'antd'
 import dayjs from 'dayjs'
 
@@ -46,7 +47,8 @@ function WorkOrderTable({
         dataIndex: 'employee_names',
         key: 'employee_names',
         width: 140,
-        render: (value: string[] | null | undefined) => value?.join('、') || '-',
+        render: (value: string[] | null | undefined) =>
+          value?.join('、') || '-',
       },
       {
         title: '项目号',
@@ -230,6 +232,10 @@ function WorkOrderTable({
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }
       onRow={(record) => ({
+        ...createKeyboardTableRowProps(
+          () => onSelect([record.id]),
+          `选择包装工单 ${record.id}`,
+        ),
         onClick: () => onSelect([record.id]),
         style: { cursor: 'pointer', height: rowHeight },
       })}

@@ -13,10 +13,13 @@ import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 import type { YoumaiProductDataFormValues } from '@/services/apiYoumaiProductData'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
-import {
-  downloadYoumaiProductDataTemplate,
-  parseYoumaiProductDataExcel,
-} from '@/utils/youmaiProductDataExcel'
+
+const loadYoumaiProductDataExcel = () =>
+  import('@/utils/youmaiProductDataExcel')
+
+function preloadYoumaiProductDataExcel() {
+  void loadYoumaiProductDataExcel()
+}
 
 interface Props {
   onImport: (rows: YoumaiProductDataFormValues[]) => Promise<void>
@@ -92,6 +95,7 @@ export default function YoumaiProductDataExcelImport({
 
     setParsing(true)
     try {
+      const { parseYoumaiProductDataExcel } = await loadYoumaiProductDataExcel()
       const { rows, errors } = await parseYoumaiProductDataExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
@@ -118,6 +122,12 @@ export default function YoumaiProductDataExcelImport({
     setFileList([])
   }
 
+  const handleDownloadTemplate = async () => {
+    const { downloadYoumaiProductDataTemplate } =
+      await loadYoumaiProductDataExcel()
+    downloadYoumaiProductDataTemplate()
+  }
+
   const handleCancel = () => {
     setModalOpen(false)
     setParsedRows([])
@@ -141,11 +151,16 @@ export default function YoumaiProductDataExcelImport({
 
   return (
     <>
-      <ImportButton onClick={handleOpenModal} permissionKey={permissionKey} />
+      <ImportButton
+        onClick={handleOpenModal}
+        permissionKey={permissionKey}
+        onPreload={preloadYoumaiProductDataExcel}
+      />
 
       <DownloadTemplateButton
-        onClick={downloadYoumaiProductDataTemplate}
+        onClick={handleDownloadTemplate}
         permissionKey={permissionKey}
+        onPreload={preloadYoumaiProductDataExcel}
       />
 
       <Modal
@@ -183,6 +198,8 @@ export default function YoumaiProductDataExcelImport({
             <Button
               loading={parsing}
               icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+              onMouseEnter={preloadYoumaiProductDataExcel}
+              onFocus={preloadYoumaiProductDataExcel}
             >
               {parsing ? '解析中...' : '选择 Excel 文件'}
             </Button>

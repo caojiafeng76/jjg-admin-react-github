@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { App, FormInstance, Modal } from 'antd'
 import dayjs from 'dayjs'
-import { TransformedOrderData } from '@utils/excelUtils'
+import type { TransformedOrderData } from '@utils/excelUtils'
 
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -50,12 +50,12 @@ export default function PoList() {
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
   const { count, pos, isLoading: posLoading } = usePos()
-  const {
-    tableSelectedKeys,
-    setTableSelectedKeys,
-    isLoading: isCreating,
-    setIsLoading: setIsCreating,
-  } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
+  const isCreating = useAppStore((state) => state.isLoading)
+  const setIsCreating = useAppStore((state) => state.setIsLoading)
   const {
     deletePo,
     isDeleting,
@@ -81,13 +81,16 @@ export default function PoList() {
       staleTime: 5 * 60 * 1000,
     })
 
-  const { generateLabel, contextHolder: labelContextHolder } = usePrint(
-    safePartSettings,
-    isSafePartSettingsLoading,
-    messageApi,
-  )
-  const { generateEnglishLabel, contextHolder: englishLabelContextHolder } =
-    usePrintEnglish(safePartSettings, isSafePartSettingsLoading, messageApi)
+  const {
+    generateLabel,
+    preloadPDF: preloadChineseLabelPDF,
+    contextHolder: labelContextHolder,
+  } = usePrint(safePartSettings, isSafePartSettingsLoading, messageApi)
+  const {
+    generateEnglishLabel,
+    preloadPDF: preloadEnglishLabelPDF,
+    contextHolder: englishLabelContextHolder,
+  } = usePrintEnglish(safePartSettings, isSafePartSettingsLoading, messageApi)
 
   const records = useMemo(() => pos || [], [pos])
   const currentPoIds = useMemo(
@@ -102,8 +105,7 @@ export default function PoList() {
     [currentPoIds],
   )
   const validSelectedKeys = useMemo(
-    () =>
-      tableSelectedKeys.filter((key) => currentPoIdSet.has(String(key))),
+    () => tableSelectedKeys.filter((key) => currentPoIdSet.has(String(key))),
     [currentPoIdSet, tableSelectedKeys],
   )
   const selectedCount = validSelectedKeys.length
@@ -276,7 +278,12 @@ export default function PoList() {
         : `批量编辑 ${validSelectedKeys.length} 个订单`,
     )
     setIsModalOpen(true)
-  }, [messageApi, setTableSelectedKeys, tableSelectedKeys.length, validSelectedKeys])
+  }, [
+    messageApi,
+    setTableSelectedKeys,
+    tableSelectedKeys.length,
+    validSelectedKeys,
+  ])
 
   useEffect(() => {
     return () => {
@@ -324,8 +331,18 @@ export default function PoList() {
           permissionKey="feature:syney-po-list.delete"
         />
 
-        <PrintButton handlePrint={handlePrint}>打印中文标签</PrintButton>
-        <PrintButton handlePrint={handlePrintEnglish}>打印英文标签</PrintButton>
+        <PrintButton
+          handlePrint={handlePrint}
+          onPreload={preloadChineseLabelPDF}
+        >
+          打印中文标签
+        </PrintButton>
+        <PrintButton
+          handlePrint={handlePrintEnglish}
+          onPreload={preloadEnglishLabelPDF}
+        >
+          打印英文标签
+        </PrintButton>
 
         <ExportInfoButton />
 

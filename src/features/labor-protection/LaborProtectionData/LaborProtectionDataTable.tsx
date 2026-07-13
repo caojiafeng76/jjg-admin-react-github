@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, TableColumnsType } from 'antd'
 
 import type { LaborProtectionData } from '@/services/apiLaborProtectionData'
@@ -74,6 +75,10 @@ export default function LaborProtectionDataTable({
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }
       onRow={(record) => ({
+        ...createKeyboardTableRowProps(
+          () => onSelect([record.id]),
+          `选择劳保用品 ${record.id}`,
+        ),
         onClick: () => onSelect([record.id]),
         style: { cursor: 'pointer', height: rowHeight },
       })}

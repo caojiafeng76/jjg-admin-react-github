@@ -319,6 +319,7 @@ export default function CuttingProcessForm({
                   size="small"
                   danger
                   icon={<XMarkIcon className="size-4" />}
+                  aria-label={`删除切割明细 ${field.name + 1}`}
                   onClick={() => remove(field.name)}
                   disabled={fields.length <= 1}
                 />

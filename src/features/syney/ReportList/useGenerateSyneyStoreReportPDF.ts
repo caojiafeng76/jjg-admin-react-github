@@ -1,26 +1,18 @@
 import { useState } from 'react'
 import { App } from 'antd'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import type jsPDF from 'jspdf'
 
 import { ISyneyItem } from '@services/types'
 import { useSelectedReports } from './useSelectedReports'
 import { useAppStore } from '@/store'
 
-// 导入优化后的工具函数和常量
-import {
-  initializePDF,
-  createTableStyles,
-  processTableData,
-  calculateTotals,
-  addDocumentTitle,
-  addPageNumber,
-  addTableHeader,
-  processBatchWithProgress,
-  generateFilename,
-  previewPDF,
-} from '@/utils/pdfUtils'
 import { TABLE_CONFIG, TABLE_COLUMNS } from '@/utils/pdfConstants'
+
+type AutoTable = (typeof import('jspdf-autotable'))['default']
+type PDFUtils = typeof import('@/utils/pdfUtils')
+
+const loadPDFDependencies = () =>
+  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
 
 /**
  * 生成单个报告的 PDF 页面
@@ -31,9 +23,21 @@ import { TABLE_CONFIG, TABLE_COLUMNS } from '@/utils/pdfConstants'
 function generateReportPage(
   doc: jsPDF,
   reportNo: string,
-  reportData: { items: ISyneyItem[]; totalAmount: number; createdAt: string }
+  reportData: { items: ISyneyItem[]; totalAmount: number; createdAt: string },
+  autoTable: AutoTable,
+  pdfUtils: PDFUtils,
 ) {
-  const totalPage = Math.ceil((reportData.items.length + 1) / TABLE_CONFIG.ROWS_PER_PAGE)
+  const {
+    addDocumentTitle,
+    addPageNumber,
+    addTableHeader,
+    calculateTotals,
+    createTableStyles,
+    processTableData,
+  } = pdfUtils
+  const totalPage = Math.ceil(
+    (reportData.items.length + 1) / TABLE_CONFIG.ROWS_PER_PAGE,
+  )
 
   // 添加新页面并设置为当前页面
   doc.addPage()
@@ -56,7 +60,7 @@ function generateReportPage(
         doc,
         '西尼对账单',
         (tableData.cursor?.x ?? 0) + 120,
-        (tableData.cursor?.y ?? 0) - 22
+        (tableData.cursor?.y ?? 0) - 22,
       )
 
       // 添加表头信息
@@ -77,10 +81,16 @@ function generateReportPage(
  */
 async function generateAllReports(
   doc: jsPDF,
-  selectedMap: Map<string, { items: ISyneyItem[]; totalAmount: number; createdAt: string }>,
-  onProgress?: (processed: number, total: number) => void
+  selectedMap: Map<
+    string,
+    { items: ISyneyItem[]; totalAmount: number; createdAt: string }
+  >,
+  autoTable: AutoTable,
+  pdfUtils: PDFUtils,
+  onProgress?: (processed: number, total: number) => void,
 ) {
   const reports = Array.from(selectedMap.entries())
+  const { processBatchWithProgress } = pdfUtils
 
   // 如果数据量很大，使用批次处理
   if (reports.length > 50) {
@@ -89,11 +99,11 @@ async function generateAllReports(
       10, // 每批处理10个报告
       async (batch) => {
         batch.forEach(([reportNo, data]) => {
-          generateReportPage(doc, reportNo, data)
+          generateReportPage(doc, reportNo, data, autoTable, pdfUtils)
         })
         return []
       },
-      onProgress
+      onProgress,
     )
   } else {
     // 数据量不大，直接处理但仍有进度回调
@@ -101,27 +111,31 @@ async function generateAllReports(
     let processed = 0
 
     for (const [reportNo, data] of reports) {
-      generateReportPage(doc, reportNo, data)
+      generateReportPage(doc, reportNo, data, autoTable, pdfUtils)
       processed++
       onProgress?.(processed, total)
 
       // 让出控制权
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
     }
   }
 }
 
 export function useGenerateSyneyStoreReportPDF() {
-  const { tableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
   const { message } = App.useApp()
 
   // 只在有选中项时才查询数据
   const { selectedMap, selectedReportsLoading } = useSelectedReports(
-    tableSelectedKeys.length > 0
+    tableSelectedKeys.length > 0,
   )
 
   const [progress, setProgress] = useState(0)
   const [isGenerating, setIsGenerating] = useState(false)
+
+  function preloadPDF() {
+    void loadPDFDependencies()
+  }
 
   async function print() {
     // 改进错误处理
@@ -139,6 +153,10 @@ export function useGenerateSyneyStoreReportPDF() {
       setIsGenerating(true)
       setProgress(0)
 
+      const [autoTableModule, pdfUtils] = await loadPDFDependencies()
+      const autoTable = autoTableModule.default
+      const { generateFilename, initializePDF, previewPDF } = pdfUtils
+
       // 初始化 PDF 文档（异步加载字体）
       const doc = await initializePDF()
 
@@ -147,10 +165,12 @@ export function useGenerateSyneyStoreReportPDF() {
       await generateAllReports(
         doc,
         selectedMap,
+        autoTable,
+        pdfUtils,
         (processed, total) => {
           setProgress(Math.round((processed / total) * 100))
           message.loading(`正在生成PDF: ${processed}/${total}`, 0)
-        }
+        },
       )
 
       // 删除第一页（空白页）
@@ -170,7 +190,9 @@ export function useGenerateSyneyStoreReportPDF() {
     } catch (error) {
       console.error('生成 PDF 时发生错误:', error)
       message.destroy()
-      message.error(error instanceof Error ? error.message : 'PDF生成失败，请重试')
+      message.error(
+        error instanceof Error ? error.message : 'PDF生成失败，请重试',
+      )
       return false
     } finally {
       setIsGenerating(false)
@@ -180,6 +202,7 @@ export function useGenerateSyneyStoreReportPDF() {
 
   return {
     print,
+    preloadPDF,
     isLoading: selectedReportsLoading || isGenerating,
     progress,
   }

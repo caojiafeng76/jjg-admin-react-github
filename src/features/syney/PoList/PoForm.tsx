@@ -2,7 +2,7 @@ import { FC, Ref, memo, useState } from 'react'
 import { DatePicker, Form, FormInstance, Input, Select, Radio } from 'antd'
 import { ISyneyPo } from '@/types'
 import ExcelUpload from './ExcelUpload'
-import { TransformedOrderData } from '@utils/excelUtils'
+import type { TransformedOrderData } from '@utils/excelUtils'
 import dayjs from 'dayjs'
 import type { ISyneySpec } from '@services/types'
 
@@ -77,11 +77,7 @@ const PoForm: FC<PoFormProps> = ({
       initialValues={initialValues}
       className="[&_.ant-form-item]:mb-3"
     >
-      <Form.Item
-        name="No"
-        label="订单号"
-        rules={[{ required: true }]}
-      >
+      <Form.Item name="No" label="订单号" rules={[{ required: true }]}>
         <Input
           disabled={isCreating || importMode === 'excel'}
           className={fieldClassName}
@@ -98,11 +94,7 @@ const PoForm: FC<PoFormProps> = ({
           className={fieldClassName}
         />
       </Form.Item>
-      <Form.Item
-        name="EndDate"
-        label="交货日期"
-        rules={[{ required: true }]}
-      >
+      <Form.Item name="EndDate" label="交货日期" rules={[{ required: true }]}>
         <DatePicker
           disabled={isCreating || importMode === 'excel'}
           className={`${fieldClassName} w-full`}
@@ -123,11 +115,7 @@ const PoForm: FC<PoFormProps> = ({
           </Form.Item>
 
           {importMode === 'manual' && (
-            <Form.Item
-              name="Detail"
-              label="详情"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
               <Input.TextArea
                 rows={14}
                 disabled={isCreating}
@@ -172,11 +160,7 @@ const PoForm: FC<PoFormProps> = ({
               className={fieldClassName}
             />
           </Form.Item>
-          <Form.Item
-            name="Brand"
-            label="商标"
-            rules={[{ required: true }]}
-          >
+          <Form.Item name="Brand" label="商标" rules={[{ required: true }]}>
             <Input disabled={isCreating} className={fieldClassName} />
           </Form.Item>
           <Form.Item name="Technique" label="工艺要求">

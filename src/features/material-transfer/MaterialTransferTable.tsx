@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, type TableColumnsType, type TableProps } from 'antd'
 
 import type {
@@ -170,7 +171,7 @@ function MaterialTransferTable({
         key: 'transfer_quantity',
         width: 90,
         render: (value: number) => (
-          <span className="font-semibold tabular-nums text-slate-700">
+          <span className="font-semibold text-slate-700 tabular-nums">
             {value}
           </span>
         ),
@@ -220,6 +221,12 @@ function MaterialTransferTable({
 
   const handleRow = useCallback(
     (record: MaterialTransferWithEmployee) => ({
+      ...(onRowClick
+        ? createKeyboardTableRowProps(
+            () => onRowClick(record),
+            `打开转序记录 ${record.id}`,
+          )
+        : {}),
       onClick: () => onRowClick?.(record),
       style: {
         cursor: onRowClick ? 'pointer' : undefined,
@@ -243,16 +250,17 @@ function MaterialTransferTable({
       size="small"
       pagination={false}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50">
+          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800/80">
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={9}>
-              <span className="font-medium text-slate-600">当前页合计</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">
+                当前页合计
+              </span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={10}>
-              <span className="font-bold text-slate-900 tabular-nums">
+              <span className="font-bold text-slate-900 tabular-nums dark:text-slate-100">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>

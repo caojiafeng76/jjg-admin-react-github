@@ -29,7 +29,7 @@ const layout = {
 const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
   ({ handleCancel, onSpecsLoadingChange }, ref) => {
     const { message } = App.useApp()
-    const { setIsLoading } = useAppStore()
+    const setIsLoading = useAppStore((state) => state.setIsLoading)
 
     const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
       isAll: true,

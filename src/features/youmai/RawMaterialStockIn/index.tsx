@@ -19,7 +19,6 @@ import {
   useCreateYoumaiRawMaterialStockIn,
   useDeleteYoumaiRawMaterialStockIn,
   useUpdateYoumaiRawMaterialStockIn,
-  useYoumaiRawMaterialInventoryOptions,
   useYoumaiRawMaterialStockInList,
 } from './useYoumaiRawMaterialStockIn'
 
@@ -51,8 +50,6 @@ export default function YoumaiRawMaterialStockInPage() {
     pageSize,
     searchParams,
   })
-
-  const { data: inventoryOptions = [] } = useYoumaiRawMaterialInventoryOptions()
 
   const createMutation = useCreateYoumaiRawMaterialStockIn()
   const updateMutation = useUpdateYoumaiRawMaterialStockIn()
@@ -264,7 +261,6 @@ export default function YoumaiRawMaterialStockInPage() {
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
-          inventoryOptions={inventoryOptions}
           isEdit={isEdit}
           editingRecord={editingRecord}
         />

@@ -9,14 +9,16 @@ import {
   Upload,
 } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
-import {
-  ArrowUpTrayIcon,
-  TableCellsIcon,
-} from '@heroicons/react/16/solid'
+import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { parseAttendanceExcel } from '@/utils/attendanceExcel'
 import type { AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
+
+const loadAttendanceExcel = () => import('@/utils/attendanceExcel')
+
+function preloadAttendanceExcel() {
+  void loadAttendanceExcel()
+}
 
 interface Props {
   onImport: (rows: AttendanceDetailFormValues[]) => Promise<void>
@@ -51,7 +53,9 @@ const PREVIEW_COLUMNS: TableColumnsType<
     title: '时间',
     dataIndex: 'time',
     width: 100,
-    render: (v: string) => <span className="font-mono">{v?.slice(0, 5) ?? '-'}</span>,
+    render: (v: string) => (
+      <span className="font-mono">{v?.slice(0, 5) ?? '-'}</span>
+    ),
   },
 ]
 
@@ -87,6 +91,7 @@ export default function AttendanceExcelImport({
 
     setParsing(true)
     try {
+      const { parseAttendanceExcel } = await loadAttendanceExcel()
       const {
         rows,
         errors,
@@ -153,6 +158,8 @@ export default function AttendanceExcelImport({
         type="text"
         icon={<ArrowUpTrayIcon className="size-4 text-sky-500/80!" />}
         onClick={handleOpenModal}
+        onMouseEnter={preloadAttendanceExcel}
+        onFocus={preloadAttendanceExcel}
         disabled={viewerDenied}
       >
         导入 Excel
@@ -196,6 +203,8 @@ export default function AttendanceExcelImport({
                 icon={<ArrowUpTrayIcon className="h-5 w-5" />}
                 loading={parsing}
                 disabled={viewerDenied}
+                onMouseEnter={preloadAttendanceExcel}
+                onFocus={preloadAttendanceExcel}
                 size="large"
                 className="rounded-lg"
               >

@@ -74,7 +74,8 @@ export default function WorkOrderListPage() {
   const createMutation = useCreatePackagingWorkOrder()
   const updateMutation = useUpdatePackagingWorkOrder()
   const deleteMutation = useDeletePackagingWorkOrder()
-  const { exportAsExcel, isExporting } = useExportWorkOrdersAsExcel()
+  const { exportAsExcel, isExporting, preloadExportAsExcel } =
+    useExportWorkOrdersAsExcel()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -274,6 +275,7 @@ export default function WorkOrderListPage() {
         <ExportButton
           handleExport={handleExport}
           loading={isExporting}
+          onPreload={preloadExportAsExcel}
           count={data?.total || 0}
           permissionKey={EXPORT_PERMISSION_KEY}
         />

@@ -1,4 +1,3 @@
-import { utils, writeFile } from 'xlsx-js-style'
 import dayjs from 'dayjs'
 import { message } from 'antd'
 import {
@@ -19,6 +18,8 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
 
+const loadExcel = () => import('xlsx-js-style')
+
 // Excel 数据行类型
 type ExcelRow = {
   序号: number
@@ -33,7 +34,9 @@ type ExcelRow = {
 
 export function useExportSafePartInfoAsExcel() {
   const [messageApi, contextHolder] = message.useMessage()
-  const { setTableSelectedKeys } = useAppStore()
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
   const { isLoading, selectedPosList } = useSelectedPos()
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading } =
     useQuery({
@@ -42,7 +45,11 @@ export function useExportSafePartInfoAsExcel() {
       staleTime: 5 * 60 * 1000,
     })
 
-  function exportSafePartInfoAsExcel() {
+  function preloadExcel() {
+    void loadExcel()
+  }
+
+  async function exportSafePartInfoAsExcel() {
     // 数据验证
     if (isLoading) {
       messageApi.warning('数据加载中，请稍后再试')
@@ -60,6 +67,7 @@ export function useExportSafePartInfoAsExcel() {
     }
 
     try {
+      const { utils, writeFile } = await loadExcel()
       // 创建新的工作簿
       const wb = utils.book_new()
       const allSafeParts: ExcelRow[] = []
@@ -173,5 +181,5 @@ export function useExportSafePartInfoAsExcel() {
     }
   }
 
-  return { exportSafePartInfoAsExcel, contextHolder }
+  return { exportSafePartInfoAsExcel, preloadExcel, contextHolder }
 }

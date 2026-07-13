@@ -1,4 +1,5 @@
 import { memo, useMemo, type Key } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import dayjs from 'dayjs'
 import { Table, Tag, type TableColumnsType } from 'antd'
 
@@ -257,6 +258,10 @@ function IssueRecordTable({
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }
       onRow={(record) => ({
+        ...createKeyboardTableRowProps(
+          () => onSelect([record.id]),
+          `选择质量问题 ${record.id}`,
+        ),
         onClick: () => onSelect([record.id]),
         onDoubleClick: () => onEdit?.(record),
         style: { cursor: 'pointer', height: rowHeight },

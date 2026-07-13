@@ -5,16 +5,17 @@ import { useAppStore } from '@/store'
 import { getSelectedPosWithItems } from '@/services/apiSyneyPos'
 import { ISyneyItem } from '@/services/types'
 import { queryConfig } from '@/config/queryClient'
+import { syneyPoKeys } from '../queryKeys'
 
 export function useSelectedPos() {
-  const { tableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
 
   const {
     data: selectedMap,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['selected-pos', tableSelectedKeys],
+    queryKey: syneyPoKeys.selected(tableSelectedKeys.map(String)),
     queryFn: () => getSelectedPosWithItems(tableSelectedKeys.map(Number)),
     enabled: tableSelectedKeys.length > 0,
     ...queryConfig.detail,
@@ -44,8 +45,17 @@ export function useSelectedPos() {
     }[] = []
 
     selectedMap.forEach((items, key) => {
-      const [SONo, Spec, EndDate, No, SerialNo, Brand, Technique, Remark, BorderMaterial] =
-        key.split('~')
+      const [
+        SONo,
+        Spec,
+        EndDate,
+        No,
+        SerialNo,
+        Brand,
+        Technique,
+        Remark,
+        BorderMaterial,
+      ] = key.split('~')
       list.push({
         key,
         poInfo: {

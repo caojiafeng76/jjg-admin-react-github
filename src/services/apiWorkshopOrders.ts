@@ -12,8 +12,6 @@ import {
   normalizeWorkshopOrderStatus,
 } from '@/features/workshop/OrderList/orderStatus'
 
-const WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE = 1000
-const WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE = 1000
 const WORKSHOP_ORDER_SKETCH_BUCKET = 'workshop-order-sketches'
 
 type SalesOrderInsert = Database['public']['Tables']['sales_orders']['Insert']
@@ -566,93 +564,32 @@ export async function getWorkshopOrders({
   }
 }
 
-export async function getWorkshopOrderProjectNos() {
-  const values = new Set<string>()
-  let from = 0
-
-  while (true) {
-    const to = from + WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE - 1
-    const { data, error } = await supabase
-      .from('sales_orders')
-      .select('project_no')
-      .not('project_no', 'is', null)
-      .order('project_no', { ascending: true })
-      .range(from, to)
-
-    if (error) throw handleApiError(error, '获取项目号选项失败')
-
-    const rows = data || []
-    rows.forEach((item) => {
-      if (item.project_no) values.add(item.project_no.trim())
-    })
-
-    if (rows.length < WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE) break
-    from += WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE
-  }
-
-  return Array.from(values).sort((a, b) => a.localeCompare(b))
+export interface WorkshopOrderOptions {
+  projectNos: string[]
+  productModels: string[]
+  lengths: number[]
 }
 
-export async function getWorkshopOrderModels() {
-  const values = new Set<string>()
-  let from = 0
+export async function getWorkshopOrderOptions(
+  signal?: AbortSignal,
+): Promise<WorkshopOrderOptions> {
+  let query = supabase.rpc('get_workshop_order_options')
 
-  while (true) {
-    const to = from + WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE - 1
-    const { data, error } = await supabase
-      .from('sales_orders')
-      .select('product_model')
-      .not('product_model', 'is', null)
-      .order('product_model', { ascending: true })
-      .range(from, to)
-
-    if (error) throw handleApiError(error, '获取型号选项失败')
-
-    const rows = data || []
-    rows.forEach((item) => {
-      if (item.product_model) values.add(item.product_model.trim())
-    })
-
-    if (rows.length < WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE) break
-    from += WORKSHOP_ORDER_STRING_OPTIONS_PAGE_SIZE
+  if (signal) {
+    query = query.abortSignal(signal)
   }
 
-  return Array.from(values).sort((a, b) => a.localeCompare(b))
-}
+  const { data, error } = await query.single()
 
-export async function getWorkshopOrderLengths() {
-  const lengths = new Set<number>()
-  let from = 0
-
-  while (true) {
-    const to = from + WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE - 1
-    const { data, error } = await supabase
-      .from('sales_orders')
-      .select('length_mm')
-      .not('length_mm', 'is', null)
-      .order('length_mm', { ascending: true })
-      .range(from, to)
-
-    if (error) {
-      throw handleApiError(error, '获取订单长度选项失败')
-    }
-
-    const rows = data || []
-
-    rows.forEach((item) => {
-      if (item.length_mm !== null) {
-        lengths.add(item.length_mm)
-      }
-    })
-
-    if (rows.length < WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE) {
-      break
-    }
-
-    from += WORKSHOP_ORDER_LENGTH_OPTIONS_PAGE_SIZE
+  if (error) {
+    throw handleApiError(error, '获取车间订单选项失败')
   }
 
-  return Array.from(lengths).sort((left, right) => left - right)
+  return {
+    projectNos: data?.project_nos ?? [],
+    productModels: data?.product_models ?? [],
+    lengths: data?.lengths ?? [],
+  }
 }
 
 export async function getWorkshopOrderById(id: string) {

@@ -8,6 +8,7 @@ import { message } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
+import { syneyPoKeys } from '../queryKeys'
 
 export function usePos() {
   const queryClient = useQueryClient()
@@ -16,19 +17,34 @@ export function usePos() {
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
 
-  const Status = searchParams.get('Status') || '全部'
-  const startDate = searchParams.get('startDate') || undefined
-  const endDate = searchParams.get('endDate') || undefined
-  const SONo = searchParams.get('SONo') || undefined
+  const status = searchParams.get('Status')?.trim() || '全部'
+  const startDate = searchParams.get('startDate')?.trim() || undefined
+  const endDate = searchParams.get('endDate')?.trim() || undefined
+  const keyword = searchParams.get('SONo')?.trim() || undefined
 
   const {
     data: { syneyPos: pos, count } = { syneyPos: [], count: 0 },
     isFetching,
     error,
   } = useQuery({
-    queryKey: ['syney-pos', page, pageSize, Status, startDate, endDate, SONo],
+    queryKey: syneyPoKeys.list({
+      page,
+      pageSize,
+      status,
+      startDate,
+      endDate,
+      keyword,
+    }),
     queryFn: ({ signal }) =>
-      getSyneyPos({ page, pageSize, Status, startDate, endDate, SONo, signal }),
+      getSyneyPos({
+        page,
+        pageSize,
+        Status: status,
+        startDate,
+        endDate,
+        SONo: keyword,
+        signal,
+      }),
     // 使用列表查询配置预设
     ...queryConfig.list,
     placeholderData: keepPreviousData,
@@ -47,50 +63,48 @@ export function usePos() {
   useEffect(() => {
     if (page < pageCount) {
       queryClient.prefetchQuery({
-        queryKey: [
-          'syney-pos',
-          page + 1,
+        queryKey: syneyPoKeys.list({
+          page: page + 1,
           pageSize,
-          Status,
+          status,
           startDate,
           endDate,
-          SONo,
-        ],
+          keyword,
+        }),
         queryFn: () =>
           getSyneyPos({
             page: page + 1,
             pageSize,
-            Status,
+            Status: status,
             startDate,
             endDate,
-            SONo,
+            SONo: keyword,
           }),
       })
     }
 
     if (page > 1) {
       queryClient.prefetchQuery({
-        queryKey: [
-          'syney-pos',
-          page - 1,
+        queryKey: syneyPoKeys.list({
+          page: page - 1,
           pageSize,
-          Status,
+          status,
           startDate,
           endDate,
-          SONo,
-        ],
+          keyword,
+        }),
         queryFn: () =>
           getSyneyPos({
             page: page - 1,
             pageSize,
-            Status,
+            Status: status,
             startDate,
             endDate,
-            SONo,
+            SONo: keyword,
           }),
       })
     }
-  }, [page, pageCount, pageSize, Status, startDate, endDate, SONo, queryClient])
+  }, [page, pageCount, pageSize, status, startDate, endDate, keyword, queryClient])
 
   return {
     pos,

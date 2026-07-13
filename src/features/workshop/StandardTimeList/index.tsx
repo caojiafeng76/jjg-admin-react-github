@@ -19,7 +19,6 @@ import type {
   ProcessStandardRecordType,
 } from '@/services/apiStandardTimes'
 import { getAllStandardTimesForExport } from '@/services/apiStandardTimes'
-import { exportCostAccountingToExcel } from '@/utils/costAccountingExcel'
 import {
   useStandardTimesList,
   useCreateStandardTime,
@@ -32,6 +31,12 @@ import StandardTimeTable from './StandardTimeTable'
 import StandardTimeCostDetail from './StandardTimeCostDetail'
 import StandardTimeForm from './StandardTimeForm'
 import StandardTimeSearch from './StandardTimeSearch'
+
+const loadCostAccountingExcel = () => import('@/utils/costAccountingExcel')
+
+const preloadCostAccountingExcel = () => {
+  void loadCostAccountingExcel()
+}
 
 export default function StandardTimeList() {
   const { message, modal } = App.useApp()
@@ -216,6 +221,7 @@ export default function StandardTimeList() {
     // 先让 React 渲染 loading 状态，再执行同步的 Excel 生成
     await new Promise<void>((resolve) => setTimeout(resolve, 0))
     try {
+      const { exportCostAccountingToExcel } = await loadCostAccountingExcel()
       exportCostAccountingToExcel(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条成本核算数据`)
     } catch (error) {
@@ -238,6 +244,7 @@ export default function StandardTimeList() {
         return
       }
       await new Promise<void>((resolve) => setTimeout(resolve, 0))
+      const { exportCostAccountingToExcel } = await loadCostAccountingExcel()
       exportCostAccountingToExcel(records)
       message.success(`已按筛选条件导出 ${records.length} 条成本核算数据`)
     } catch (error) {
@@ -494,6 +501,7 @@ export default function StandardTimeList() {
             loading={isExporting}
             count={selectedRowKeys.length}
             permissionKey="feature:standard-time-list.export-cost"
+            onPreload={preloadCostAccountingExcel}
           >
             导出已选
           </ExportButton>
@@ -501,6 +509,7 @@ export default function StandardTimeList() {
             handleExport={handleFilterExport}
             loading={isFilterExporting}
             permissionKey="feature:standard-time-list.export-cost"
+            onPreload={preloadCostAccountingExcel}
           >
             按筛选条件导出
           </ExportButton>

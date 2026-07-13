@@ -1,28 +1,25 @@
 import { App } from 'antd'
-import autoTable from 'jspdf-autotable'
 
 import { useSelectedReports } from './useSelectedReports'
 import { useAppStore } from '@/store'
 
-// 导入优化后的工具函数和常量
-import {
-  initializePDF,
-  createTableStyles,
-  generateSummaryTableData,
-  generateFilename,
-  addPageNumber,
-  previewPDF,
-} from '@/utils/pdfUtils'
 import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
 
+const loadPDFDependencies = () =>
+  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
+
 export function useGenerateSummaryPDF() {
-  const { tableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
   const { message } = App.useApp()
 
   // 只在有选中项时才查询数据
   const { selectedReportsLoading, selectedMap } = useSelectedReports(
-    tableSelectedKeys.length > 0
+    tableSelectedKeys.length > 0,
   )
+
+  function preloadPDF() {
+    void loadPDFDependencies()
+  }
 
   async function generateSummaryPDF() {
     // 改进错误处理
@@ -37,14 +34,27 @@ export function useGenerateSummaryPDF() {
     }
 
     try {
+      const [autoTableModule, pdfUtils] = await loadPDFDependencies()
+      const autoTable = autoTableModule.default
+      const {
+        initializePDF,
+        createTableStyles,
+        generateSummaryTableData,
+        generateFilename,
+        addPageNumber,
+        previewPDF,
+      } = pdfUtils
+
       // 初始化 PDF 文档（异步加载字体）
       const doc = await initializePDF()
 
       // 准备汇总数据
-      const summaryData = Array.from(selectedMap.entries()).map(([No, data]) => ({
-        No,
-        totalAmount: data.totalAmount,
-      }))
+      const summaryData = Array.from(selectedMap.entries()).map(
+        ([No, data]) => ({
+          No,
+          totalAmount: data.totalAmount,
+        }),
+      )
 
       // 生成表格数据（使用优化后的函数）
       const tableData = generateSummaryTableData(summaryData)
@@ -80,13 +90,16 @@ export function useGenerateSummaryPDF() {
       return true // 返回 true 表示生成成功
     } catch (error) {
       console.error('生成汇总 PDF 时发生错误:', error)
-      message.error(error instanceof Error ? error.message : 'PDF生成失败，请重试')
+      message.error(
+        error instanceof Error ? error.message : 'PDF生成失败，请重试',
+      )
       return false
     }
   }
 
   return {
     generateSummaryPDF,
+    preloadPDF,
     isLoading: selectedReportsLoading,
   }
 }

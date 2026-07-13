@@ -11,6 +11,7 @@ interface Props {
   children?: React.ReactNode
   permissionKey?: string
   noPermissionTip?: string
+  onPreload?: () => void
 }
 
 export default function PrintButton({
@@ -21,6 +22,7 @@ export default function PrintButton({
   children,
   permissionKey,
   noPermissionTip = '无打印权限',
+  onPreload,
 }: Props) {
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
     bypassPermissionKey: permissionKey,
@@ -33,6 +35,8 @@ export default function PrintButton({
       type="text"
       icon={<PrinterIcon className="size-4" />}
       onClick={handlePrint}
+      onMouseEnter={onPreload}
+      onFocus={onPreload}
       disabled={
         denied || disabled || loading || (count !== undefined && count === 0)
       }

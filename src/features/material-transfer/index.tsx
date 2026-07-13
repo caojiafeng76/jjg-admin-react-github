@@ -24,7 +24,6 @@ import {
   type MaterialTransferWithEmployee,
 } from '@/services/apiMaterialTransfers'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import { exportMaterialTransfersToExcel } from '@/utils/materialTransferExcel'
 import {
   useCreateMaterialTransfer,
   useBatchUpdateMaterialTransfers,
@@ -39,6 +38,13 @@ import MaterialTransferForm from './MaterialTransferForm'
 import MaterialTransferMobileList from './MaterialTransferMobileList'
 import MaterialTransferSearch from './MaterialTransferSearch'
 import MaterialTransferTable from './MaterialTransferTable'
+
+const loadMaterialTransferExcel = () =>
+  import('@/utils/materialTransferExcel')
+
+const preloadMaterialTransferExcel = () => {
+  void loadMaterialTransferExcel()
+}
 
 function collectProjectNos(
   records: Array<{ project_no: string | null | undefined }>,
@@ -260,6 +266,8 @@ export default function MaterialTransferPage() {
         transferTotalMap,
       )
 
+      const { exportMaterialTransfersToExcel } =
+        await loadMaterialTransferExcel()
       exportMaterialTransfersToExcel(exportRows, exportProgressMap)
       message.success(`已导出 ${exportRows.length} 条物料转移单`)
       setSelectedRowKeys([])
@@ -456,7 +464,11 @@ export default function MaterialTransferPage() {
               title="编辑物料转移单"
               handleEdit={() => openEditModal()}
             />
-            <ExportButton handleExport={handleExport} loading={isExporting}>
+            <ExportButton
+              handleExport={handleExport}
+              loading={isExporting}
+              onPreload={preloadMaterialTransferExcel}
+            >
               {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
             </ExportButton>
             <DeleteButton

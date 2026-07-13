@@ -25,7 +25,10 @@ const STATUS_OPTIONS: Array<{
 
 export default function PoSelected() {
   const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
-  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
   const [selectedValue, setSelectedValue] = useState<string | undefined>(
     undefined,
   )

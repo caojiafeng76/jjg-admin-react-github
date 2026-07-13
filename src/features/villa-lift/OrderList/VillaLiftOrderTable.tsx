@@ -489,6 +489,7 @@ function VillaLiftOrderTable({
                 icon={
                   <PencilSquareIcon className="size-4 text-yellow-500/80!" />
                 }
+                aria-label={`编辑订单 ${record.project_name || record.id}`}
                 onClick={() => onEdit(record)}
               />
             </Tooltip>
@@ -519,6 +520,7 @@ function VillaLiftOrderTable({
             <ChevronRightIcon className="size-4 text-gray-400" />
           )
         }
+        aria-label={`${expanded ? '收起' : '展开'}订单 ${record.project_name || record.id} 明细`}
         onClick={(e) => onExpand(record, e)}
       />
     ),

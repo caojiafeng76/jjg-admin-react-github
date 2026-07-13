@@ -138,7 +138,7 @@ function isDangerousDatabaseDeletion(toolName, toolInput) {
     /\b(delete\s+from|drop\s+database|drop\s+schema|drop\s+table|drop\s+view|drop\s+materialized\s+view|truncate\s+table|truncate\b|alter\s+table\s+[^;]*\s+drop\s+column|alter\s+table\s+[^;]*\s+drop\s+constraint)\b/i
 
   const destructiveCliPattern =
-    /\b(supabase\s+db\s+reset|prisma\-migrate\-reset|psql\b|bun\s+run\s+db:query\b|drop\s+database|drop\s+table|truncate\b|delete\s+from)\b/i
+    /\b(supabase\s+db\s+reset|prisma-migrate-reset|psql\b|bun\s+run\s+db:query\b|drop\s+database|drop\s+table|truncate\b|delete\s+from)\b/i
 
   const dangerousToolNamePattern =
     /(mcp_supabase_execute_sql|mcp_supabase_apply_migration|mcp_supabase_reset_branch|mcp_supabase_delete_branch|prisma-migrate-reset|run_in_terminal|bash)/i

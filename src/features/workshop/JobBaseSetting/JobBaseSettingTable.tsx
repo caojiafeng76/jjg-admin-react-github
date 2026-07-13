@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, TableColumnsType } from 'antd'
 
 import type { JobBaseSetting } from '@/services/apiJobBaseSettings'
@@ -112,6 +113,10 @@ export default function JobBaseSettingTable({
         index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }
       onRow={(record) => ({
+        ...createKeyboardTableRowProps(
+          () => onSelect([record.id]),
+          `选择岗位基础设置 ${record.id}`,
+        ),
         onClick: () => onSelect([record.id]),
         style: { cursor: 'pointer', height: rowHeight },
       })}

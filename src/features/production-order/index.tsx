@@ -52,8 +52,6 @@ import type {
   ProductionOrderItem,
   ProductionOrderItemInsert,
 } from '@/services/apiProductionOrderItems'
-import { exportProductionOrdersToExcel } from '@/utils/productionOrderExcel'
-import { exportProductionOrderNightSnackDetailsToExcel } from '@/utils/productionOrderNightSnackExcel'
 import {
   useProductionOrders,
   useProductionOrder,
@@ -92,6 +90,18 @@ type ChangeManagementPasswordFormValues = {
 }
 
 const { Paragraph, Text, Title } = Typography
+
+const loadProductionOrderExcel = () => import('@/utils/productionOrderExcel')
+const loadProductionOrderNightSnackExcel = () =>
+  import('@/utils/productionOrderNightSnackExcel')
+
+const preloadProductionOrderExcel = () => {
+  void loadProductionOrderExcel()
+}
+
+const preloadProductionOrderNightSnackExcel = () => {
+  void loadProductionOrderNightSnackExcel()
+}
 
 async function syncOrderItemsSequentially({
   items,
@@ -490,6 +500,8 @@ export default function ProductionOrderPage() {
         duration: 0,
       })
 
+      const { exportProductionOrdersToExcel } =
+        await loadProductionOrderExcel()
       await exportProductionOrdersToExcel(exportOrders)
 
       message.success({
@@ -564,6 +576,8 @@ export default function ProductionOrderPage() {
         duration: 0,
       })
 
+      const { exportProductionOrderNightSnackDetailsToExcel } =
+        await loadProductionOrderNightSnackExcel()
       const result = exportProductionOrderNightSnackDetailsToExcel(
         exportOrders,
         {
@@ -1067,6 +1081,7 @@ export default function ProductionOrderPage() {
                   selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
                 }
                 loading={isExporting}
+                onPreload={preloadProductionOrderExcel}
               >
                 {selectedRowKeys.length > 0
                   ? `导出 (${selectedRowKeys.length})`
@@ -1078,6 +1093,7 @@ export default function ProductionOrderPage() {
                   selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
                 }
                 loading={isNightSnackExporting}
+                onPreload={preloadProductionOrderNightSnackExcel}
               >
                 夜宵明细
               </ExportButton>

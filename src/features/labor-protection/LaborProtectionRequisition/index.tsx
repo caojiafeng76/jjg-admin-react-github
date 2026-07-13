@@ -15,7 +15,6 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import PrintButton from '@/ui/PrintButton'
-import { exportLaborProtectionRequisitionsToExcel } from '@/utils/laborProtectionRequisitionExport'
 import { useLaborProtectionDataOptions } from '../LaborProtectionData/useLaborProtectionData'
 import LaborProtectionRequisitionForm from './LaborProtectionRequisitionForm'
 import LaborProtectionRequisitionSearch from './LaborProtectionRequisitionSearch'
@@ -28,6 +27,13 @@ import {
 } from './useLaborProtectionRequisition'
 import { usePrintLaborProtectionPublicQrPoster } from './usePrintLaborProtectionPublicQrPoster'
 import type { LaborProtectionRequisitionFormValues } from '@/services/apiLaborProtectionRequisitions'
+
+const loadLaborProtectionRequisitionExport = () =>
+  import('@/utils/laborProtectionRequisitionExport')
+
+function preloadLaborProtectionRequisitionExport() {
+  void loadLaborProtectionRequisitionExport()
+}
 
 export default function LaborProtectionRequisitionPage() {
   const { message } = App.useApp()
@@ -239,7 +245,11 @@ export default function LaborProtectionRequisitionPage() {
 
     setIsExporting(true)
     try {
-      const items = await getLaborProtectionRequisitionsForExport(searchParams)
+      const [items, { exportLaborProtectionRequisitionsToExcel }] =
+        await Promise.all([
+          getLaborProtectionRequisitionsForExport(searchParams),
+          loadLaborProtectionRequisitionExport(),
+        ])
       if (items.length === 0) {
         message.warning('当前筛选条件下没有可导出的劳保领料单')
         return
@@ -290,6 +300,8 @@ export default function LaborProtectionRequisitionPage() {
           type="text"
           icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
           onClick={handleExportExcel}
+          onMouseEnter={preloadLaborProtectionRequisitionExport}
+          onFocus={preloadLaborProtectionRequisitionExport}
           loading={isExporting}
           disabled={viewerDenied}
         >

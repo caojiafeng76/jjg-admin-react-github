@@ -279,13 +279,6 @@ export type Database = {
             referencedRelation: "machine_equipment_maintenances"
             referencedColumns: ["unified_device_no"]
           },
-          {
-            foreignKeyName: "extrusion_productions_machine_id_fkey"
-            columns: ["machine_id"]
-            isOneToOne: false
-            referencedRelation: "v_machine_runtime_items"
-            referencedColumns: ["unified_device_no"]
-          },
         ]
       }
       job_base_settings: {
@@ -1151,13 +1144,6 @@ export type Database = {
             referencedColumns: ["unified_device_no"]
           },
           {
-            foreignKeyName: "process_standards_equipment_no_fkey"
-            columns: ["equipment_no"]
-            isOneToOne: false
-            referencedRelation: "v_machine_runtime_items"
-            referencedColumns: ["unified_device_no"]
-          },
-          {
             foreignKeyName: "process_standards_job_name_fkey"
             columns: ["job_name"]
             isOneToOne: false
@@ -1947,6 +1933,13 @@ export type Database = {
           Unit?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "syney-po-items_PoId_fkey"
+            columns: ["PoId"]
+            isOneToOne: false
+            referencedRelation: "syney_pos_sorted"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "syney-po-items_PoId_fkey"
             columns: ["PoId"]
@@ -3021,6 +3014,66 @@ export type Database = {
         }
         Relationships: []
       }
+      syney_pos_sorted: {
+        Row: {
+          BorderMaterial: string | null
+          Brand: string | null
+          created_at: string | null
+          end_date_sort_key: number | null
+          EndDate: string | null
+          id: number | null
+          No: string | null
+          no_natural_sort_key: string | null
+          Qty: number | null
+          Remark: string | null
+          SerialNo: number | null
+          SONo: string | null
+          sono_natural_sort_key: string | null
+          Spec: string | null
+          Status: string | null
+          status_sort_weight: number | null
+          Technique: string | null
+        }
+        Insert: {
+          BorderMaterial?: string | null
+          Brand?: string | null
+          created_at?: string | null
+          end_date_sort_key?: never
+          EndDate?: string | null
+          id?: number | null
+          No?: string | null
+          no_natural_sort_key?: never
+          Qty?: number | null
+          Remark?: string | null
+          SerialNo?: number | null
+          SONo?: string | null
+          sono_natural_sort_key?: never
+          Spec?: string | null
+          Status?: string | null
+          status_sort_weight?: never
+          Technique?: string | null
+        }
+        Update: {
+          BorderMaterial?: string | null
+          Brand?: string | null
+          created_at?: string | null
+          end_date_sort_key?: never
+          EndDate?: string | null
+          id?: number | null
+          No?: string | null
+          no_natural_sort_key?: never
+          Qty?: number | null
+          Remark?: string | null
+          SerialNo?: number | null
+          SONo?: string | null
+          sono_natural_sort_key?: never
+          Spec?: string | null
+          Status?: string | null
+          status_sort_weight?: never
+          Technique?: string | null
+        }
+        Relationships: []
+      }
       v_machine_runtime_items: {
         Row: {
           customer_model: string | null
@@ -3041,29 +3094,7 @@ export type Database = {
           theoretical_seconds: number | null
           unified_device_no: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "production_order_items_machine_equipment_id_fkey"
-            columns: ["machine_equipment_id"]
-            isOneToOne: false
-            referencedRelation: "machine_equipment_maintenances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "production_order_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "production_orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "production_orders_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
@@ -3080,6 +3111,10 @@ export type Database = {
           target_stock_out_quantity: number
         }
         Returns: undefined
+      }
+      consume_proxy_rate_limit: {
+        Args: { p_ip: string; p_scope: string }
+        Returns: boolean
       }
       current_employee_id: { Args: never; Returns: string }
       current_user_has_permission: { Args: { p_key: string }; Returns: boolean }
@@ -3215,6 +3250,14 @@ export type Database = {
           work_hours: number
         }[]
       }
+      get_workshop_order_options: {
+        Args: never
+        Returns: {
+          lengths: number[]
+          product_models: string[]
+          project_nos: string[]
+        }[]
+      }
       increment_serial_no: { Args: { increment_by: number }; Returns: number }
       is_admin: { Args: never; Returns: boolean }
       is_precision_cutting_admin: { Args: never; Returns: boolean }
@@ -3246,6 +3289,10 @@ export type Database = {
       save_packaging_work_order_batch: {
         Args: { p_input_batch_id: string; p_values: Json }
         Returns: string
+      }
+      update_syney_po_items: {
+        Args: { p_ids: number[]; p_values: Json }
+        Returns: number
       }
       upsert_extrusion_production: {
         Args: { p_header: Json; p_items: Json }

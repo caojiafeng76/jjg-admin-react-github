@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, Tag, type TableColumnsType, type TableProps } from 'antd'
 
 import type { ExtrusionProduction } from '@/services/apiExtrusionProductions'
@@ -80,7 +81,8 @@ export default function ExtrusionProductionTable({
         title: '明细数',
         key: 'item_count',
         width: 88,
-        render: (_text, record) => record.extrusion_production_items?.length || 0,
+        render: (_text, record) =>
+          record.extrusion_production_items?.length || 0,
       },
       {
         title: '上传人',
@@ -114,6 +116,12 @@ export default function ExtrusionProductionTable({
       dataSource={data}
       rowSelection={rowSelection}
       onRow={(record) => ({
+        ...(onRowClick
+          ? createKeyboardTableRowProps(
+              () => onRowClick(record),
+              `打开挤压记录 ${record.id}`,
+            )
+          : {}),
         onClick: () => onRowClick?.(record),
         style: {
           cursor: onRowClick ? 'pointer' : undefined,

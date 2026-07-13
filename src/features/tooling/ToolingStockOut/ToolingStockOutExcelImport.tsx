@@ -14,10 +14,12 @@ import type { ToolingStockOutImportRow } from '@/services/apiToolingStockOut'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
-import {
-  downloadToolingStockOutTemplate,
-  parseToolingStockOutExcel,
-} from '@/utils/toolingStockOutExcel'
+
+const loadToolingStockOutExcel = () => import('@/utils/toolingStockOutExcel')
+
+function preloadToolingStockOutExcel() {
+  void loadToolingStockOutExcel()
+}
 
 interface Props {
   onImport: (rows: ToolingStockOutImportRow[]) => Promise<void>
@@ -99,6 +101,7 @@ export default function ToolingStockOutExcelImport({
 
     setParsing(true)
     try {
+      const { parseToolingStockOutExcel } = await loadToolingStockOutExcel()
       const { rows, errors } = await parseToolingStockOutExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
@@ -123,6 +126,11 @@ export default function ToolingStockOutExcelImport({
     setParsedRows([])
     setParseErrors([])
     setFileList([])
+  }
+
+  const handleDownloadTemplate = async () => {
+    const { downloadToolingStockOutTemplate } = await loadToolingStockOutExcel()
+    downloadToolingStockOutTemplate()
   }
 
   const handleCancel = () => {
@@ -151,13 +159,15 @@ export default function ToolingStockOutExcelImport({
       <ImportButton
         onClick={handleOpenModal}
         permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        onPreload={preloadToolingStockOutExcel}
       >
         导入出库
       </ImportButton>
 
       <DownloadTemplateButton
-        onClick={downloadToolingStockOutTemplate}
+        onClick={handleDownloadTemplate}
         permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+        onPreload={preloadToolingStockOutExcel}
       >
         下载出库模板
       </DownloadTemplateButton>
@@ -197,6 +207,8 @@ export default function ToolingStockOutExcelImport({
             <Button
               loading={parsing}
               icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+              onMouseEnter={preloadToolingStockOutExcel}
+              onFocus={preloadToolingStockOutExcel}
             >
               {parsing ? '解析中...' : '选择 Excel 文件'}
             </Button>

@@ -6,7 +6,7 @@
 
 ## 技术栈
 
-- **框架**: React 19, TypeScript 5.7, Vite 7
+- **框架**: React 19.2, TypeScript 6.0, Vite 8
 - **UI**: Ant Design 6, Tailwind CSS 4, Heroicons
 - **状态管理**: TanStack Query 5 (服务端状态), Zustand 5 (客户端状态)
 - **后端**: Supabase (PostgreSQL + Auth)

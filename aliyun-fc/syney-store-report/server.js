@@ -2,20 +2,29 @@
 
 const http = require('http')
 const crypto = require('crypto')
+const {
+  authorizeProxyRequest,
+  consumeDistributedRateLimit,
+  diagnosticErrorCategory,
+  extractBearerToken,
+  parseProxyIdentifier,
+  resolveAllowedOrigin,
+  safeErrorMetadata,
+} = require('./proxy-security')
 
 const SCM_BASE_URL = 'http://scm.syney.net:808'
 const LOGIN_URL = `${SCM_BASE_URL}/Business/UserLogin.aspx?method=Login`
-const STORE_REPORT_URL =
-  `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx?method=BindGrid`
+const STORE_REPORT_URL = `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx?method=BindGrid`
 const LOGIN_PAGE_URL = `${SCM_BASE_URL}/Business/UserLogin.aspx`
-const REPORT_PAGE_URL =
-  `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx`
+const REPORT_PAGE_URL = `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx`
 
 const PORT = Number(process.env.FC_SERVER_PORT || process.env.PORT || 9000)
 const SCM_REQUEST_TIMEOUT_MS = Number(
   process.env.SYNEY_SCM_REQUEST_TIMEOUT_MS || 15000,
 )
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*'
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || ''
+const MAX_JSON_BODY_BYTES = 16 * 1024
+const REQUIRED_PERMISSION = 'page:syney-store-report-list'
 
 const BIND_FIELDS = [
   '',
@@ -48,16 +57,14 @@ const BIND_FIELDS = [
 ].join(',')
 
 function getCorsOrigin(requestOrigin) {
-  if (!ALLOWED_ORIGIN || ALLOWED_ORIGIN === '*') {
-    return '*'
-  }
-
-  const origins = ALLOWED_ORIGIN.split(',').map((origin) => origin.trim())
-  return origins.includes(requestOrigin) ? requestOrigin : origins[0]
+  return resolveAllowedOrigin(requestOrigin, ALLOWED_ORIGIN)
 }
 
 function setCorsHeaders(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', getCorsOrigin(req.headers.origin))
+  const allowedOrigin = getCorsOrigin(req.headers.origin)
+  if (allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET')
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -77,16 +84,25 @@ function sendJson(req, res, statusCode, body) {
 function readRequestBody(req) {
   return new Promise((resolve, reject) => {
     let body = ''
+    let byteLength = 0
+    let rejected = false
 
     req.on('data', (chunk) => {
-      body += chunk
-      if (body.length > 1024 * 1024) {
-        reject(new Error('Request body is too large'))
-        req.destroy()
+      if (rejected) return
+      byteLength += Buffer.byteLength(chunk)
+      if (byteLength > MAX_JSON_BODY_BYTES) {
+        rejected = true
+        const error = new Error('Request body is too large')
+        error.statusCode = 413
+        reject(error)
+        return
       }
+      body += chunk
     })
 
-    req.on('end', () => resolve(body))
+    req.on('end', () => {
+      if (!rejected) resolve(body)
+    })
     req.on('error', reject)
   })
 }
@@ -97,10 +113,18 @@ async function readJsonBody(req) {
     return {}
   }
 
-  return JSON.parse(body)
+  const payload = JSON.parse(body)
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new Error('Request body must be a JSON object')
+  }
+  return payload
 }
 
-async function fetchWithTimeout(url, init = {}, timeoutMessage = 'SCM timeout') {
+async function fetchWithTimeout(
+  url,
+  init = {},
+  timeoutMessage = 'SCM timeout',
+) {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), SCM_REQUEST_TIMEOUT_MS)
 
@@ -111,7 +135,7 @@ async function fetchWithTimeout(url, init = {}, timeoutMessage = 'SCM timeout') 
     })
   } catch (error) {
     if (error && error.name === 'AbortError') {
-      throw new Error(timeoutMessage)
+      throw new Error(timeoutMessage, { cause: error })
     }
 
     throw error
@@ -127,9 +151,7 @@ function getPasswordHash() {
   }
 
   const password = process.env.SYNEY_SCM_PASSWORD?.trim()
-  return password
-    ? crypto.createHash('md5').update(password).digest('hex')
-    : ''
+  return password ? crypto.createHash('md5').update(password).digest('hex') : ''
 }
 
 function getSetCookieValues(headers) {
@@ -214,7 +236,10 @@ function extractDataArray(responseText) {
   }
 
   let startIndex = colonIndex + 1
-  while (startIndex < responseText.length && /\s/.test(responseText[startIndex])) {
+  while (
+    startIndex < responseText.length &&
+    /\s/.test(responseText[startIndex])
+  ) {
     startIndex += 1
   }
 
@@ -337,7 +362,7 @@ async function diagnoseScmAccess() {
     return {
       ok: false,
       scmBaseUrl: SCM_BASE_URL,
-      error: error instanceof Error ? error.message : String(error),
+      errorCategory: diagnosticErrorCategory(error),
       elapsedMs: Date.now() - startedAt,
     }
   }
@@ -347,8 +372,81 @@ async function handleRequest(req, res) {
   setCorsHeaders(req, res)
 
   if (req.method === 'OPTIONS') {
-    res.writeHead(204)
+    res.writeHead(getCorsOrigin(req.headers.origin) ? 204 : 403)
     res.end()
+    return
+  }
+
+  if (req.headers.origin && !getCorsOrigin(req.headers.origin)) {
+    sendJson(req, res, 403, { error: 'Origin not allowed' })
+    return
+  }
+
+  if (!['GET', 'POST'].includes(req.method)) {
+    sendJson(req, res, 405, { error: 'Method not allowed' })
+    return
+  }
+
+  if (!extractBearerToken(req.headers.authorization)) {
+    sendJson(req, res, 401, { error: '未登录' })
+    return
+  }
+
+  let payload = {}
+  if (req.method === 'POST') {
+    try {
+      payload = await readJsonBody(req)
+    } catch (error) {
+      const statusCode = error?.statusCode === 413 ? 413 : 400
+      sendJson(req, res, statusCode, {
+        error: statusCode === 413 ? '请求体过大' : '请求体格式不正确',
+      })
+      return
+    }
+  }
+
+  let access
+  try {
+    access = await authorizeProxyRequest({
+      authorization: req.headers.authorization,
+      diagnose: payload.diagnose === true,
+      env: process.env,
+      permission: REQUIRED_PERMISSION,
+    })
+  } catch (error) {
+    console.error('aliyun_auth_failure', safeErrorMetadata(error))
+    sendJson(req, res, 502, { error: '西尼入库单代理服务暂不可用' })
+    return
+  }
+  if (!access.ok) {
+    sendJson(req, res, access.status, {
+      error: access.status === 401 ? '未登录' : '无权访问',
+    })
+    return
+  }
+
+  const requestIp =
+    String(req.headers['x-forwarded-for'] || '')
+      .split(',')[0]
+      .trim() ||
+    String(req.headers['x-real-ip'] || '').trim() ||
+    req.socket.remoteAddress ||
+    'unknown'
+  try {
+    if (
+      !(await consumeDistributedRateLimit({
+        authorization: req.headers.authorization,
+        env: process.env,
+        ip: requestIp,
+        scope: 'syney-store-report',
+      }))
+    ) {
+      sendJson(req, res, 429, { error: '请求过于频繁，请稍后重试' })
+      return
+    }
+  } catch (error) {
+    console.error('aliyun_rate_limit_failure', safeErrorMetadata(error))
+    sendJson(req, res, 502, { error: '西尼入库单代理服务暂不可用' })
     return
   }
 
@@ -361,22 +459,15 @@ async function handleRequest(req, res) {
     return
   }
 
-  if (req.method !== 'POST') {
-    sendJson(req, res, 405, { error: 'Method not allowed' })
-    return
-  }
-
   try {
-    const payload = await readJsonBody(req)
-
     if (payload.diagnose) {
       sendJson(req, res, 200, await diagnoseScmAccess())
       return
     }
 
-    const storeInNo = String(payload.storeInNo || '').trim()
+    const storeInNo = parseProxyIdentifier(payload.storeInNo)
     if (!storeInNo) {
-      sendJson(req, res, 400, { error: '请输入入库单号' })
+      sendJson(req, res, 400, { error: '入库单号长度必须为 1 到 64 个字符' })
       return
     }
 
@@ -387,19 +478,15 @@ async function handleRequest(req, res) {
       items,
     })
   } catch (error) {
-    console.error(error)
-    sendJson(req, res, 500, {
-      error: error instanceof Error ? error.message : '西尼入库单获取失败',
-    })
+    console.error('aliyun_upstream_failure', safeErrorMetadata(error))
+    sendJson(req, res, 502, { error: '西尼入库单代理服务暂不可用' })
   }
 }
 
 const server = http.createServer((req, res) => {
   handleRequest(req, res).catch((error) => {
-    console.error(error)
-    sendJson(req, res, 500, {
-      error: error instanceof Error ? error.message : 'Internal server error',
-    })
+    console.error('aliyun_unhandled_failure', safeErrorMetadata(error))
+    sendJson(req, res, 502, { error: '西尼入库单代理服务暂不可用' })
   })
 })
 

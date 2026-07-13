@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Key } from 'react'
 import { Table, TableColumnsType, TableProps } from 'antd'
 
@@ -27,7 +28,10 @@ export default function DetailTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
 
   const currentPageTotalAmount = useMemo(
     () => data.reduce((sum, item) => sum + Number(item.TaxTotalPrice || 0), 0),
@@ -79,7 +83,7 @@ export default function DetailTable({
       width: 120,
       align: 'right',
       render: (text: number) => (
-        <span className="tabular-nums text-slate-700">
+        <span className="text-slate-700 tabular-nums">
           {formatNumber(text)}
         </span>
       ),
@@ -91,7 +95,7 @@ export default function DetailTable({
       width: 90,
       align: 'right',
       render: (value: number | null) => (
-        <span className="font-semibold tabular-nums text-slate-700">
+        <span className="font-semibold text-slate-700 tabular-nums">
           {value ?? '-'}
         </span>
       ),
@@ -110,7 +114,7 @@ export default function DetailTable({
       width: 130,
       align: 'right',
       render: (text: number) => (
-        <span className="font-semibold tabular-nums text-slate-700">
+        <span className="font-semibold text-slate-700 tabular-nums">
           {formatNumber(text)}
         </span>
       ),
@@ -126,6 +130,12 @@ export default function DetailTable({
   }
 
   const handleRow = (record: ISyneyItem) => ({
+    ...(onRowClick
+      ? createKeyboardTableRowProps(
+          () => onRowClick(record),
+          `打开对账明细 ${record.id}`,
+        )
+      : {}),
     onClick: () => onRowClick?.(record),
     style: {
       cursor: onRowClick ? 'pointer' : undefined,
@@ -147,7 +157,7 @@ export default function DetailTable({
       onRow={handleRow}
       scroll={{ x: 1100, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50">

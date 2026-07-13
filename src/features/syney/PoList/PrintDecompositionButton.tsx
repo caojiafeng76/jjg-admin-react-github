@@ -13,9 +13,12 @@ export default function PrintDecompositionButton({
   safePartSettings,
   isSafePartSettingsLoading,
 }: PrintDecompositionButtonProps) {
-  const { printDecomposition, contextHolder, messageApi } =
+  const { printDecomposition, preloadPDF, contextHolder, messageApi } =
     usePrintDecomposition(safePartSettings, isSafePartSettingsLoading)
-  const { tableSelectedKeys, setTableSelectedKeys } = useAppStore()
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
 
   function onClick() {
     if (tableSelectedKeys.length === 0) {
@@ -37,6 +40,8 @@ export default function PrintDecompositionButton({
         type="text"
         icon={<DocumentArrowDownIcon className="size-4 text-rose-500/80!" />}
         onClick={onClick}
+        onMouseEnter={preloadPDF}
+        onFocus={preloadPDF}
       >
         打印分解单
       </Button>

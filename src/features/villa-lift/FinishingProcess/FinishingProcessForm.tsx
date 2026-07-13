@@ -138,9 +138,7 @@ function OperationSelectCell({
         style={{ width: '100%' }}
         notFoundContent={
           model ? (
-            <span className="text-xs text-gray-400">
-              该型号无对应工序
-            </span>
+            <span className="text-xs text-gray-400">该型号无对应工序</span>
           ) : (
             <span className="text-xs text-gray-400">请先选择型号</span>
           )
@@ -408,6 +406,7 @@ export default function FinishingProcessForm({
                   size="small"
                   danger
                   icon={<XMarkIcon className="size-4" />}
+                  aria-label={`删除加工明细 ${field.name + 1}`}
                   onClick={() => remove(field.name)}
                   disabled={fields.length <= 1}
                 />

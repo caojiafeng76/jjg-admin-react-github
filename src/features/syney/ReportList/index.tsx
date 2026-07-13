@@ -43,18 +43,22 @@ export default function ReportList() {
   const [specsLoading, setSpecsLoading] = useState(false)
   const [storeInNo, setStoreInNo] = useState('')
 
+  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
+  const isCreating = useAppStore((state) => state.isLoading)
   const {
-    tableSelectedKeys,
-    setTableSelectedKeys,
-    isLoading: isCreating,
-  } = useAppStore()
-  const { print, isLoading: isPrinting } = useGenerateSyneyStoreReportPDF()
+    print,
+    preloadPDF,
+    isLoading: isPrinting,
+  } = useGenerateSyneyStoreReportPDF()
   const { syneySpecs, isLoading: importSpecsLoading } = useSyneySpecs({
     isAll: true,
   })
   const { fetchSyneyStoreReport, isFetching } = useFetchSyneyStoreReport()
   const { createReport, isCreating: isCreatingFromScm } = useCreateReport()
-  const { printByStoreInNo, isPrintingStoreReceipt } =
+  const { printByStoreInNo, preloadStoreReceiptPDF, isPrintingStoreReceipt } =
     usePrintSyneyStoreReceipt()
 
   const reportFormRef = useRef<ISyneyStoreReportFormRef>(null)
@@ -140,7 +144,9 @@ export default function ReportList() {
       },
       onError: (err) => {
         console.error(err)
-        messageApi.error(err instanceof Error ? err.message : '西尼入库单获取失败')
+        messageApi.error(
+          err instanceof Error ? err.message : '西尼入库单获取失败',
+        )
       },
     })
   }
@@ -205,7 +211,9 @@ export default function ReportList() {
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <DeleteButton onConfirm={handleDelete} isDeleting={isDeleting} />
-        <PrintButton handlePrint={handlePrint}>打印对账单</PrintButton>
+        <PrintButton handlePrint={handlePrint} onPreload={preloadPDF}>
+          打印对账单
+        </PrintButton>
         <ExportAsExcelButton />
         <ExportPDFButton />
         <ConfirmButton />
@@ -241,6 +249,7 @@ export default function ReportList() {
             disabled={!storeInNo.trim()}
             handlePrint={handlePrintStoreReceipt}
             loading={isPrintingStoreReceipt}
+            onPreload={preloadStoreReceiptPDF}
           >
             打印入库单
           </PrintButton>

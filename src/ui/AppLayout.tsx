@@ -1,4 +1,5 @@
 import {
+  Activity,
   useCallback,
   useEffect,
   useMemo,
@@ -147,9 +148,11 @@ export default function AppLayout() {
       {contextHolder}
       <Layout className="h-screen overflow-hidden">
         <Sider trigger={null} collapsible collapsed={collapsed}>
-          <AppLogo />
-          <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-            <MainMenu />
+          <div className="flex h-full flex-col overflow-hidden">
+            <AppLogo />
+            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+              <MainMenu />
+            </div>
           </div>
         </Sider>
         <Layout>
@@ -210,13 +213,16 @@ export default function AppLayout() {
               </div>
             )}
             {outletEntries.map(([key, cachedOutlet]) => (
-              <div
+              <Activity
                 key={key}
-                className="min-h-0 flex-1 flex-col overflow-hidden"
-                style={{ display: key === activeKey ? 'flex' : 'none' }}
+                mode={key === activeKey ? 'visible' : 'hidden'}
               >
-                {cachedOutlet}
-              </div>
+                <div
+                  className="flex min-h-0 flex-1 flex-col overflow-hidden"
+                >
+                  {cachedOutlet}
+                </div>
+              </Activity>
             ))}
           </Content>
         </Layout>

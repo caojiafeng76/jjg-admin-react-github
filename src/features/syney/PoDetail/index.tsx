@@ -20,7 +20,10 @@ export default function PoDetail() {
   const pageSize = Number(searchParams.get('pageSize')) || 10
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const { isLoading, setTableSelectedKeys } = useAppStore()
+  const isLoading = useAppStore((state) => state.isLoading)
+  const setTableSelectedKeys = useAppStore(
+    (state) => state.setTableSelectedKeys,
+  )
   const { items, isLoading: isDetailLoading } = useDetail()
 
   const detailFormRef = useRef<{
