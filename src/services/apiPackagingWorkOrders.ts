@@ -57,8 +57,7 @@ export interface PackagingWorkOrderFormValues {
   remark: string | null
 }
 
-export interface PackagingWorkOrderDetailPayload
-  extends PackagingWorkOrderFormValues {
+export interface PackagingWorkOrderDetailPayload extends PackagingWorkOrderFormValues {
   input_batch_id?: string
 }
 
@@ -105,8 +104,13 @@ function normalizeEmployeeIds(values: PackagingWorkOrderFormValues) {
   return values.employee_id ? [values.employee_id] : []
 }
 
-function roundToOneDecimal(value: number) {
-  return Math.round(value * 10) / 10
+function truncateToOneDecimal(value: number) {
+  // 先用 toPrecision 消除浮点尾差（如 0.7 * 10 === 6.999999999999999），再截断到 1 位小数
+  return Math.floor(Number((value * 10).toPrecision(12))) / 10
+}
+
+function roundToTwoDecimals(value: number) {
+  return Math.round(value * 100) / 100
 }
 
 export function buildPackagingWorkOrderPayload(
@@ -145,20 +149,35 @@ export function buildPackagingWorkOrderCreatePayloads(
     return [basePayload]
   }
 
-  const splitQuantity = roundToOneDecimal(
-    basePayload.quantity / employeeIds.length,
+  // 前 n-1 人取截断到 1 位小数的均分值，最后一人吸收余差，
+  // 保证明细之和恒等于录入总量（与 save_packaging_work_order_batch 口径一致）
+  const employeeCount = employeeIds.length
+  const quantityShare = truncateToOneDecimal(
+    basePayload.quantity / employeeCount,
   )
-  const splitDefectiveQuantity = roundToOneDecimal(
-    normalizeNumber(basePayload.defective_quantity) / employeeIds.length,
+  const defectiveQuantityShare = truncateToOneDecimal(
+    normalizeNumber(basePayload.defective_quantity) / employeeCount,
+  )
+  const lastQuantity = roundToTwoDecimals(
+    basePayload.quantity - quantityShare * (employeeCount - 1),
+  )
+  const lastDefectiveQuantity = roundToTwoDecimals(
+    normalizeNumber(basePayload.defective_quantity) -
+      defectiveQuantityShare * (employeeCount - 1),
   )
 
-  return employeeIds.map((employeeId) => ({
-    ...basePayload,
-    ...(inputBatchId ? { input_batch_id: inputBatchId } : {}),
-    employee_id: employeeId,
-    quantity: splitQuantity,
-    defective_quantity: splitDefectiveQuantity,
-  }))
+  return employeeIds.map((employeeId, index) => {
+    const isLast = index === employeeCount - 1
+    return {
+      ...basePayload,
+      ...(inputBatchId ? { input_batch_id: inputBatchId } : {}),
+      employee_id: employeeId,
+      quantity: isLast ? lastQuantity : quantityShare,
+      defective_quantity: isLast
+        ? lastDefectiveQuantity
+        : defectiveQuantityShare,
+    }
+  })
 }
 
 function buildPackagingWorkOrderBatchPayload(
@@ -229,9 +248,12 @@ export async function getAllPackagingWorkOrders({
         `product_model.ilike.%${keyword}%,project_no.ilike.%${keyword}%,part_no.ilike.%${keyword}%`,
       )
     }
-    if (searchParams.startDate) query = query.gte('work_date', searchParams.startDate)
-    if (searchParams.endDate) query = query.lte('work_date', searchParams.endDate)
-    if (searchParams.employeeId) query = query.eq('employee_id', searchParams.employeeId)
+    if (searchParams.startDate)
+      query = query.gte('work_date', searchParams.startDate)
+    if (searchParams.endDate)
+      query = query.lte('work_date', searchParams.endDate)
+    if (searchParams.employeeId)
+      query = query.eq('employee_id', searchParams.employeeId)
 
     const { data, error, count } = await query
       .order('work_date', { ascending: false })
@@ -246,7 +268,8 @@ export async function getAllPackagingWorkOrders({
       ...item,
       employee_name: item.packaging_employees?.name || null,
       employee_hourly_wage: item.packaging_employees?.hourly_wage ?? null,
-      employee_position_salary: item.packaging_employees?.position_salary ?? null,
+      employee_position_salary:
+        item.packaging_employees?.position_salary ?? null,
     })) as PackagingWorkOrder[]
 
     allItems.push(...items)

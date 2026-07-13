@@ -114,7 +114,7 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
     ])
   })
 
-  it('splits quantity evenly across selected employees with one decimal place', () => {
+  it('splits quantity evenly and lets the last employee absorb the rounding gap', () => {
     const payloads = buildPackagingWorkOrderCreatePayloads({
       work_date: '2026-07-07',
       employee_ids: ['employee-1', 'employee-2', 'employee-3'],
@@ -138,11 +138,36 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       'employee-3',
     ])
     expect(payloads.map((payload) => payload.quantity)).toEqual([
-      33.3, 33.3, 33.3,
+      33.3, 33.3, 33.4,
     ])
     expect(payloads.map((payload) => payload.defective_quantity)).toEqual([
       3, 3, 3,
     ])
+  })
+
+  it('keeps split details summing to the entered total (3447 across 4 employees)', () => {
+    const payloads = buildPackagingWorkOrderCreatePayloads({
+      work_date: '2026-07-12',
+      employee_ids: ['employee-1', 'employee-2', 'employee-3', 'employee-4'],
+      project_no: null,
+      product_model: '电梯料',
+      color_name: '喷涂',
+      process_name: null,
+      length_mm: null,
+      part_no: null,
+      unit: '千克',
+      quantity: 3447,
+      defective_quantity: 0,
+      standard_seconds: 0,
+      remark: null,
+    })
+
+    expect(payloads.map((payload) => payload.quantity)).toEqual([
+      861.7, 861.7, 861.7, 861.9,
+    ])
+    expect(
+      payloads.reduce((sum, payload) => sum + payload.quantity * 10, 0) / 10,
+    ).toBe(3447)
   })
 
   it('uses the single employee field as a fallback for edit-compatible values', () => {
@@ -202,7 +227,9 @@ describe('batch data access', () => {
       'save_packaging_work_order_batch',
       expect.objectContaining({
         p_input_batch_id: null,
-        p_values: expect.objectContaining({ employee_ids: values.employee_ids }),
+        p_values: expect.objectContaining({
+          employee_ids: values.employee_ids,
+        }),
       }),
     )
   })
