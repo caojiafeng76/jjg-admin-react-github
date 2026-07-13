@@ -114,7 +114,7 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
     ])
   })
 
-  it('splits quantity evenly and lets the last employee absorb the rounding gap', () => {
+  it('splits quantity evenly with simple rounding and keeps entered totals', () => {
     const payloads = buildPackagingWorkOrderCreatePayloads({
       work_date: '2026-07-07',
       employee_ids: ['employee-1', 'employee-2', 'employee-3'],
@@ -138,14 +138,20 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       'employee-3',
     ])
     expect(payloads.map((payload) => payload.quantity)).toEqual([
-      33.3, 33.3, 33.4,
+      33.3, 33.3, 33.3,
     ])
     expect(payloads.map((payload) => payload.defective_quantity)).toEqual([
       3, 3, 3,
     ])
+    expect(payloads.map((payload) => payload.total_quantity)).toEqual([
+      100, 100, 100,
+    ])
+    expect(payloads.map((payload) => payload.total_defective_quantity)).toEqual(
+      [9, 9, 9],
+    )
   })
 
-  it('keeps split details summing to the entered total (3447 across 4 employees)', () => {
+  it('keeps the entered total intact for display (3447 across 4 employees)', () => {
     const payloads = buildPackagingWorkOrderCreatePayloads({
       work_date: '2026-07-12',
       employee_ids: ['employee-1', 'employee-2', 'employee-3', 'employee-4'],
@@ -163,11 +169,11 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
     })
 
     expect(payloads.map((payload) => payload.quantity)).toEqual([
-      861.7, 861.7, 861.7, 861.9,
+      861.8, 861.8, 861.8, 861.8,
     ])
-    expect(
-      payloads.reduce((sum, payload) => sum + payload.quantity * 10, 0) / 10,
-    ).toBe(3447)
+    expect(payloads.map((payload) => payload.total_quantity)).toEqual([
+      3447, 3447, 3447, 3447,
+    ])
   })
 
   it('uses the single employee field as a fallback for edit-compatible values', () => {
@@ -192,6 +198,8 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       employee_id: 'employee-1',
       quantity: 100,
       defective_quantity: 2,
+      total_quantity: 100,
+      total_defective_quantity: 2,
     })
   })
 })

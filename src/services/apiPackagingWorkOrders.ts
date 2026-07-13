@@ -19,6 +19,8 @@ export interface PackagingWorkOrder {
   unit: string
   quantity: number
   defective_quantity: number
+  total_quantity?: number | null
+  total_defective_quantity?: number | null
   defective_weight_kg: number
   defect_reason: string | null
   standard_seconds: number
@@ -59,6 +61,8 @@ export interface PackagingWorkOrderFormValues {
 
 export interface PackagingWorkOrderDetailPayload extends PackagingWorkOrderFormValues {
   input_batch_id?: string
+  total_quantity?: number
+  total_defective_quantity?: number
 }
 
 export interface PackagingWorkOrderSearchParams {
@@ -104,13 +108,8 @@ function normalizeEmployeeIds(values: PackagingWorkOrderFormValues) {
   return values.employee_id ? [values.employee_id] : []
 }
 
-function truncateToOneDecimal(value: number) {
-  // 先用 toPrecision 消除浮点尾差（如 0.7 * 10 === 6.999999999999999），再截断到 1 位小数
-  return Math.floor(Number((value * 10).toPrecision(12))) / 10
-}
-
-function roundToTwoDecimals(value: number) {
-  return Math.round(value * 100) / 100
+function roundToOneDecimal(value: number) {
+  return Math.round(value * 10) / 10
 }
 
 export function buildPackagingWorkOrderPayload(
@@ -144,40 +143,36 @@ export function buildPackagingWorkOrderCreatePayloads(
 ): PackagingWorkOrderDetailPayload[] {
   const employeeIds = normalizeEmployeeIds(values)
   const basePayload = buildPackagingWorkOrderPayload(values)
+  const totalQuantity = basePayload.quantity
+  const totalDefectiveQuantity = normalizeNumber(basePayload.defective_quantity)
 
   if (employeeIds.length === 0) {
-    return [basePayload]
+    return [
+      {
+        ...basePayload,
+        total_quantity: totalQuantity,
+        total_defective_quantity: totalDefectiveQuantity,
+      },
+    ]
   }
 
-  // 前 n-1 人取截断到 1 位小数的均分值，最后一人吸收余差，
-  // 保证明细之和恒等于录入总量（与 save_packaging_work_order_batch 口径一致）
-  const employeeCount = employeeIds.length
-  const quantityShare = truncateToOneDecimal(
-    basePayload.quantity / employeeCount,
-  )
-  const defectiveQuantityShare = truncateToOneDecimal(
-    normalizeNumber(basePayload.defective_quantity) / employeeCount,
-  )
-  const lastQuantity = roundToTwoDecimals(
-    basePayload.quantity - quantityShare * (employeeCount - 1),
-  )
-  const lastDefectiveQuantity = roundToTwoDecimals(
-    normalizeNumber(basePayload.defective_quantity) -
-      defectiveQuantityShare * (employeeCount - 1),
+  // 录入总量原样存入 total_* 字段（列表显示以此为准）；
+  // 个人明细拆分为简单四舍五入，仅用于导出与工时计算
+  // （与 save_packaging_work_order_batch 口径一致）
+  const splitQuantity = roundToOneDecimal(totalQuantity / employeeIds.length)
+  const splitDefectiveQuantity = roundToOneDecimal(
+    totalDefectiveQuantity / employeeIds.length,
   )
 
-  return employeeIds.map((employeeId, index) => {
-    const isLast = index === employeeCount - 1
-    return {
-      ...basePayload,
-      ...(inputBatchId ? { input_batch_id: inputBatchId } : {}),
-      employee_id: employeeId,
-      quantity: isLast ? lastQuantity : quantityShare,
-      defective_quantity: isLast
-        ? lastDefectiveQuantity
-        : defectiveQuantityShare,
-    }
-  })
+  return employeeIds.map((employeeId) => ({
+    ...basePayload,
+    ...(inputBatchId ? { input_batch_id: inputBatchId } : {}),
+    employee_id: employeeId,
+    quantity: splitQuantity,
+    defective_quantity: splitDefectiveQuantity,
+    total_quantity: totalQuantity,
+    total_defective_quantity: totalDefectiveQuantity,
+  }))
 }
 
 function buildPackagingWorkOrderBatchPayload(
@@ -306,8 +301,14 @@ export async function updatePackagingWorkOrder({
   isHistoricalInconsistent?: boolean
 }) {
   if (isHistoricalInconsistent) {
+    const payload = buildPackagingWorkOrderPayload(values)
     const { error } = await packagingWorkOrderTable()
-      .update(buildPackagingWorkOrderPayload(values))
+      .update({
+        ...payload,
+        // 历史单人明细行：录入总量即该行数量，保持行内口径一致
+        total_quantity: payload.quantity,
+        total_defective_quantity: normalizeNumber(payload.defective_quantity),
+      })
       .eq('id', id)
 
     if (error) {

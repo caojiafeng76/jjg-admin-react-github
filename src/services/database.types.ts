@@ -744,6 +744,8 @@ export type Database = {
           quantity: number
           remark: string | null
           standard_seconds: number
+          total_defective_quantity: number | null
+          total_quantity: number | null
           unit: string
           updated_at: string
           weight_per_meter_kg: number
@@ -768,6 +770,8 @@ export type Database = {
           quantity: number
           remark?: string | null
           standard_seconds?: number
+          total_defective_quantity?: number | null
+          total_quantity?: number | null
           unit?: string
           updated_at?: string
           weight_per_meter_kg?: number
@@ -792,6 +796,8 @@ export type Database = {
           quantity?: number
           remark?: string | null
           standard_seconds?: number
+          total_defective_quantity?: number | null
+          total_quantity?: number | null
           unit?: string
           updated_at?: string
           weight_per_meter_kg?: number
