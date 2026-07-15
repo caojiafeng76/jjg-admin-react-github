@@ -1,5 +1,6 @@
 ﻿import { useCallback, useEffect, useState } from 'react'
-import { App, Button, DatePicker, FormInstance, Modal } from 'antd'
+import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
+import { App, Button, DatePicker, FormInstance, Modal, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
@@ -381,12 +382,20 @@ export default function ToolingDataPage() {
           handleEdit={handleEdit}
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
         />
-        <Button
-          disabled={viewerDenied || !canManageTooling}
-          onClick={handleCopyCreate}
+        <Tooltip
+          title={viewerDenied ? viewerOperationTip : '复制新增刀具资料'}
         >
-          复制新增
-        </Button>
+          <Button
+            type="text"
+            icon={
+              <DocumentDuplicateIcon className="size-4 text-indigo-500/80!" />
+            }
+            disabled={viewerDenied || !canManageTooling}
+            onClick={handleCopyCreate}
+          >
+            复制新增
+          </Button>
+        </Tooltip>
         <ToolingDataExcelImport
           onImport={handleImport}
           isImporting={importMutation.isPending}

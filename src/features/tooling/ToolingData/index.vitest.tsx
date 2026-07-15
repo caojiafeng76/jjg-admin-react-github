@@ -42,6 +42,7 @@ vi.mock('antd', () => ({
   ),
   DatePicker: () => null,
   FormInstance: class {},
+  Tooltip: (props: { children: React.ReactNode }) => props.children,
   Modal: (props: Record<string, any>) =>
     props.open ? (
       <div>
