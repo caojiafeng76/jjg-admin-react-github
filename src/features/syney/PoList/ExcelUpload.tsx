@@ -3,11 +3,13 @@ import { Upload, Button, message, Table, Alert, Space, Typography } from 'antd'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 import type { UploadFile } from 'antd/es/upload/interface'
 import type { ISyneySpec } from '@services/types'
-import type { TransformedOrderData } from '@utils/excelUtils'
+import {
+  importExcelOrder,
+  type TransformedOrderData,
+} from '@utils/excelUtils'
 import { getItemsWithParamSpec } from '@utils/syney'
 
 const { Text } = Typography
-const loadExcelUtils = () => import('@utils/excelUtils')
 
 type ExcelUploadItemRecord = TransformedOrderData['items'][number] & {
   ParamSpecInferred?: boolean | null
@@ -88,7 +90,6 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
     setLoading(true)
 
     try {
-      const { importExcelOrder } = await loadExcelUtils()
       // 解析Excel文件
       const orderData = await importExcelOrder(file)
 
@@ -204,8 +205,6 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
           icon={<ArrowUpTrayIcon className="h-4 w-4" />}
           loading={loading}
           disabled={disabled}
-          onMouseEnter={() => void loadExcelUtils()}
-          onFocus={() => void loadExcelUtils()}
         >
           {loading ? '解析中...' : '选择Excel文件'}
         </Button>
