@@ -1,5 +1,5 @@
 ﻿import { useCallback, useEffect, useState } from 'react'
-import { App, DatePicker, FormInstance, Modal } from 'antd'
+import { App, Button, DatePicker, FormInstance, Modal } from 'antd'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
 import { useSearchParams } from 'react-router-dom'
@@ -52,6 +52,7 @@ export default function ToolingDataPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建刀具资料')
   const [isEdit, setIsEdit] = useState(false)
+  const [isCopyCreate, setIsCopyCreate] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [isMonthlySummaryExporting, setIsMonthlySummaryExporting] =
     useState(false)
@@ -90,6 +91,7 @@ export default function ToolingDataPage() {
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
     setIsEdit(false)
+    setIsCopyCreate(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
     formRef?.resetFields()
@@ -97,12 +99,32 @@ export default function ToolingDataPage() {
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
+    setIsCopyCreate(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
     setModalTitle('新建刀具资料')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef])
+
+  const handleCopyCreate = useCallback(() => {
+    if (selectedRowKeys.length !== 1) {
+      message.warning('请选择一条数据进行复制新增')
+      return
+    }
+
+    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    if (!record) {
+      message.warning('请选择一条数据进行复制新增')
+      return
+    }
+
+    setEditingRecord(record)
+    setIsEdit(false)
+    setIsCopyCreate(true)
+    setModalTitle('复制新增刀具资料')
+    setIsModalOpen(true)
+  }, [data?.items, message, selectedRowKeys])
 
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
@@ -359,6 +381,12 @@ export default function ToolingDataPage() {
           handleEdit={handleEdit}
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
         />
+        <Button
+          disabled={viewerDenied || !canManageTooling}
+          onClick={handleCopyCreate}
+        >
+          复制新增
+        </Button>
         <ToolingDataExcelImport
           onImport={handleImport}
           isImporting={importMutation.isPending}
@@ -446,7 +474,11 @@ export default function ToolingDataPage() {
           onFinish={handleFinish}
           setFormRef={setFormRef}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          initialValues={
+            (isEdit || isCopyCreate) && editingRecord
+              ? editingRecord
+              : undefined
+          }
         />
       </Modal>
     </div>
