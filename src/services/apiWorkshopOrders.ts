@@ -32,6 +32,26 @@ function formatBlockedProjectNos(projectNos: string[], fallbackLabel: string) {
   return `${projectNos.slice(0, 3).join('、')} 等${projectNos.length}条订单`
 }
 
+export function findDuplicateProjectNos(
+  projectNos: (string | null)[],
+): string[] {
+  const seen = new Set<string>()
+  const duplicates = new Set<string>()
+
+  projectNos.forEach((projectNo) => {
+    if (!projectNo) return
+
+    if (seen.has(projectNo)) {
+      duplicates.add(projectNo)
+      return
+    }
+
+    seen.add(projectNo)
+  })
+
+  return Array.from(duplicates)
+}
+
 function normalizeOptionalText(value: string | null | undefined) {
   if (typeof value !== 'string') {
     return value ?? null
@@ -777,6 +797,14 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
 
   // 检查所有项目号是否已存在
   const projectNos = normalizedRows.map((row) => row.project_no)
+  const duplicateProjectNos = findDuplicateProjectNos(projectNos)
+
+  if (duplicateProjectNos.length > 0) {
+    throw new Error(
+      `导入数据存在重复项目号：${duplicateProjectNos.join('、')}`,
+    )
+  }
+
   const existingProjectNos = await checkProjectNosExist(projectNos)
 
   if (existingProjectNos.length > 0) {

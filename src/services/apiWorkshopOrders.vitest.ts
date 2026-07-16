@@ -4,7 +4,10 @@ vi.mock('./supabase', () => ({
   default: {},
 }))
 
-import { buildWorkshopOrderStatusUpdateValues } from './apiWorkshopOrders'
+import {
+  buildWorkshopOrderStatusUpdateValues,
+  findDuplicateProjectNos,
+} from './apiWorkshopOrders'
 
 describe('buildWorkshopOrderStatusUpdateValues', () => {
   it('sets closed_at when an order is closed', () => {
@@ -35,5 +38,13 @@ describe('buildWorkshopOrderStatusUpdateValues', () => {
       status: '生产中',
       closed_at: null,
     })
+  })
+})
+
+describe('findDuplicateProjectNos', () => {
+  it('returns each repeated non-empty project number once', () => {
+    expect(
+      findDuplicateProjectNos(['P-1', 'P-2', 'P-1', null, '', 'P-2', 'P-2']),
+    ).toEqual(['P-1', 'P-2'])
   })
 })
