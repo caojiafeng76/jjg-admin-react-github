@@ -13,6 +13,8 @@ interface QueryCall {
 
 interface QueryBuilder extends PromiseLike<QueryResult> {
   eq: (...args: unknown[]) => QueryBuilder
+  limit: (...args: unknown[]) => QueryBuilder
+  maybeSingle: (...args: unknown[]) => QueryBuilder
   not: (...args: unknown[]) => QueryBuilder
   order: (...args: unknown[]) => QueryBuilder
   range: (...args: unknown[]) => QueryBuilder
@@ -41,6 +43,8 @@ vi.mock('./supabase', () => ({
         }
 
       builder.eq = chain('eq')
+      builder.limit = chain('limit')
+      builder.maybeSingle = chain('maybeSingle')
       builder.not = chain('not')
       builder.order = chain('order')
       builder.range = chain('range')
@@ -195,7 +199,8 @@ describe('apiProcessStandards', () => {
       length_mm: 1000,
       material_code: `MAT-${index}`,
       product_model: 'M-1',
-      project_no: index === 500 ? null : `P-${index}`,
+      project_no:
+        index === 500 ? null : index === 999 ? 'P-0' : `P-${index}`,
     }))
     const finalRow = {
       created_at: '2026-07-12T00:00:00Z',
@@ -210,11 +215,12 @@ describe('apiProcessStandards', () => {
 
     const result = await getSalesOrdersProjectNos()
 
-    expect(result).toHaveLength(1000)
+    expect(result).toHaveLength(999)
     expect(result).not.toContainEqual(
       expect.objectContaining({ project_no: null }),
     )
     expect(result.at(-1)).toEqual(finalRow)
+    expect(result.filter((item) => item.project_no === 'P-0')).toHaveLength(1)
     expect(callsFor('range').map((call) => call.args)).toEqual([
       [0, 999],
       [1000, 1999],
@@ -236,7 +242,15 @@ describe('apiProcessStandards', () => {
 
     await expect(getSalesOrderByProjectNo('P-1')).resolves.toEqual(detail)
     expect(callsFor('eq').at(-1)?.args).toEqual(['project_no', 'P-1'])
-    expect(callsFor('single')).toHaveLength(1)
+    expect(callsFor('order')).toContainEqual(
+      expect.objectContaining({
+        args: ['created_at', { ascending: false }],
+      }),
+    )
+    expect(callsFor('limit')).toContainEqual(
+      expect.objectContaining({ args: [1] }),
+    )
+    expect(callsFor('maybeSingle')).toHaveLength(1)
 
     enqueue({ data: null, error: null })
     await expect(getSalesOrderByProjectNo('missing')).rejects.toThrow(

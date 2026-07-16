@@ -197,6 +197,7 @@ export async function getModels() {
 export async function getSalesOrdersProjectNos() {
   const PAGE_SIZE = 1000
   const allData: SalesOrderProjectNoOption[] = []
+  const projectNos = new Set<string>()
   let from = 0
 
   while (true) {
@@ -222,7 +223,14 @@ export async function getSalesOrdersProjectNos() {
     }
 
     const filtered = (data || []).filter(
-      (item): item is SalesOrderProjectNoOption => item.project_no !== null,
+      (item): item is SalesOrderProjectNoOption => {
+        if (!item.project_no || projectNos.has(item.project_no)) {
+          return false
+        }
+
+        projectNos.add(item.project_no)
+        return true
+      },
     )
     allData.push(...filtered)
 
@@ -240,7 +248,9 @@ export async function getSalesOrderByProjectNo(projectNo: string) {
       'project_no, product_model, length_mm, material_code, customer, customer_model',
     )
     .eq('project_no', projectNo)
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (error) {
     throw handleApiError(error, '获取销售订单信息失败')
