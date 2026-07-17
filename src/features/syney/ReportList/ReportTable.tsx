@@ -189,10 +189,10 @@ export default function ReportTable({
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50">
             <Table.Summary.Cell index={0} />
-            <Table.Summary.Cell index={1} colSpan={3}>
+            <Table.Summary.Cell index={1} colSpan={4}>
               <span className="font-medium text-slate-600">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={4}>
+            <Table.Summary.Cell index={5} align="right">
               <span className="font-bold text-slate-900 tabular-nums">
                 {formatNumber(currentPageTotalAmount)}
               </span>
