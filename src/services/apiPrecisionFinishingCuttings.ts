@@ -25,7 +25,6 @@ export const PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS = [
 
 export const PRECISION_FINISHING_CUTTING_RECIPIENTS = [
   '贾小勇',
-  '孟祥军',
   '鲁永祥',
   '胡中康',
   '吴雯雯',
