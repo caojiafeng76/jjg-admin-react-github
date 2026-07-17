@@ -27,7 +27,6 @@ export const MATERIAL_TRANSFER_AUDIT_OPTIONS = [
 
 export const MATERIAL_TRANSFER_RECIPIENTS = [
   '贾小勇',
-  '孟祥军',
   '鲁永祥',
   '胡中康',
   '吴雯雯',
