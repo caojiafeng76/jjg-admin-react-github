@@ -1,13 +1,45 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+const { mockFrom, mockRpc } = vi.hoisted(() => ({
+  mockFrom: vi.fn(),
+  mockRpc: vi.fn(),
+}))
 
 vi.mock('./supabase', () => ({
-  default: {},
+  default: {
+    from: mockFrom,
+    rpc: mockRpc,
+  },
 }))
 
 import {
   buildJobColumns,
   buildPackagingProductionDetailsForDashboard,
+  getOrderStatusDashboard,
 } from './apiOrderStatusDashboard'
+
+function createQuery<T>(data: T[]) {
+  const query = {
+    in: vi.fn(),
+    not: vi.fn(),
+    order: vi.fn(),
+    range: vi.fn(),
+    select: vi.fn(),
+  }
+
+  query.in.mockReturnValue(query)
+  query.not.mockReturnValue(query)
+  query.order.mockReturnValue(query)
+  query.select.mockReturnValue(query)
+  query.range.mockResolvedValue({ data, error: null })
+
+  return query
+}
+
+beforeEach(() => {
+  mockFrom.mockReset()
+  mockRpc.mockReset()
+})
 
 describe('buildJobColumns', () => {
   it('always includes the packaging process column', () => {
@@ -17,6 +49,89 @@ describe('buildJobColumns', () => {
         lastProcessJobOperations: new Map(),
       }),
     ).toEqual([{ key: '包装', title: '包装', operations: [] }])
+  })
+})
+
+describe('getOrderStatusDashboard', () => {
+  it('keeps a specific last CNC operation when a generic CNC standard is not last', async () => {
+    mockRpc.mockResolvedValue({
+      data: {
+        items: [
+          {
+            id: 'order-1',
+            length_mm: 645,
+            material_code: '02.105.304.2.263',
+            project_no: '26063003-02',
+            productionRows: [
+              {
+                created_at: '2026-07-04T00:00:00.000Z',
+                data_category: 'A',
+                id: 'old-cnc',
+                operation: 'CNC（四轴工装.2台同步）',
+                product_model: '105-304',
+                qualified_quantity: 1114,
+              },
+              {
+                created_at: '2026-07-16T00:00:00.000Z',
+                data_category: 'A',
+                id: 'new-cnc',
+                operation: 'CNC（四轴工装）2台同步',
+                product_model: '105-304',
+                qualified_quantity: 280,
+              },
+            ],
+          },
+        ],
+        materialTransferCount: 0,
+        productionItemCount: 2,
+        total: 1,
+      },
+      error: null,
+    })
+
+    const processStandardsQuery = createQuery([
+      {
+        is_last_process: false,
+        job_name: 'CNC',
+        length: 646.1,
+        model: '105-304',
+        operation: 'CNC',
+        part_no: null,
+        record_type: 'B',
+      },
+      {
+        is_last_process: true,
+        job_name: 'CNC',
+        length: 645,
+        model: '105-304',
+        operation: 'CNC（四轴工装.2台同步）',
+        part_no: '02.105.304.1.263',
+        record_type: 'A',
+      },
+      {
+        is_last_process: true,
+        job_name: 'CNC',
+        length: 645,
+        model: '105-304',
+        operation: 'CNC（四轴工装）2台同步',
+        part_no: '02.105.304.2.263',
+        record_type: 'A',
+      },
+    ])
+    const packagingWorkOrdersQuery = createQuery([])
+
+    mockFrom.mockImplementation((table: string) =>
+      table === 'process_standards'
+        ? processStandardsQuery
+        : packagingWorkOrdersQuery,
+    )
+
+    const result = await getOrderStatusDashboard({
+      page: 1,
+      pageSize: 20,
+    })
+
+    expect(result.items[0]?.jobOutputs.CNC).toBe(1394)
   })
 })
 

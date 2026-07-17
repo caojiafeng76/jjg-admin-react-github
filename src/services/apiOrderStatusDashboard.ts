@@ -1010,10 +1010,10 @@ function isLastProcessProductionRow({
         exactOperationMatchKey,
       ),
       processJobIndex.modelOperationTypeBLastProcessMap.get(modelOperationKey),
+      processJobIndex.modelOperationLastProcessMap.get(modelOperationKey),
       processJobIndex.modelOperationTypeBMatchLastProcessMap.get(
         modelOperationMatchKey,
       ),
-      processJobIndex.modelOperationLastProcessMap.get(modelOperationKey),
       processJobIndex.modelOperationMatchLastProcessMap.get(
         modelOperationMatchKey,
       ),
