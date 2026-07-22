@@ -17,19 +17,8 @@ command = "npx"
 env_vars = ["SUPABASE_ACCESS_TOKEN"]
 
 [mcp_servers.serena]
-startup_timeout_sec = 60
-args = [
-    "-p",
-    "3.13",
-    "--from",
-    "serena-agent",
-    "serena",
-    "start-mcp-server",
-    "--project",
-    "E:/code/jjg-admin-react-github",
-    "--context=codex",
-]
-command = "C:/Users/Administrator/.local/bin/uvx.exe"
+url = "http://127.0.0.1:9121/mcp"
+startup_timeout_sec = 20
 
 [mcp_servers.context7]
 args = [
