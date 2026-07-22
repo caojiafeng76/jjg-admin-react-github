@@ -8,6 +8,7 @@ import {
   deleteStandardTimes,
   type ProcessStandardRecordType,
 } from '@/services/apiStandardTimes'
+import { uploadProcessStandardImage } from '@/services/apiProcessStandardImages'
 import { getJobBaseSettingOptions } from '@/services/apiJobBaseSettings'
 import { getMachineEquipmentMaintenanceOptions } from '@/services/apiMachineEquipmentMaintenances'
 import { getSalesOrdersProjectNos } from '@/services/apiProcessStandards'
@@ -108,5 +109,12 @@ export function useSalesOrdersProjectNos() {
     queryFn: getSalesOrdersProjectNos,
     ...queryConfig.realtime,
     refetchOnMount: 'always',
+  })
+}
+
+export function useUploadProcessStandardImage() {
+  return useMutationWithInvalidation({
+    mutationFn: uploadProcessStandardImage,
+    invalidateQueries: [[STANDARD_TIMES_KEY]],
   })
 }

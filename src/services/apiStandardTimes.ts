@@ -1,7 +1,10 @@
 import supabase from './supabase'
 import dayjs from 'dayjs'
 import { handleApiError } from '@/utils/errorHandler'
-import { normalizeSearchKeywords, buildOrIlikeFilter } from '@/utils/searchKeywords'
+import {
+  normalizeSearchKeywords,
+  buildOrIlikeFilter,
+} from '@/utils/searchKeywords'
 import type { Database } from './database.types'
 import { getMachineEquipmentHourlyRate } from './apiMachineEquipmentMaintenances'
 
@@ -50,6 +53,16 @@ export type StandardTimeFormValues = Pick<
   | 'length'
   | 'part_no'
   | 'record_type'
+  | 'tooling_fixture'
+  | 'clamping_count'
+  | 'clamping_quantity'
+  | 'operator_count'
+  | 'process_image_path'
+  | 'process_image_name'
+  | 'process_image_mime_type'
+  | 'process_image_size'
+  | 'process_image_uploaded_at'
+  | 'process_note'
 >
 
 interface StandardTimeFilters {
@@ -98,9 +111,7 @@ function applyStandardTimeFilters<
 
   const partNoKeywords = normalizeSearchKeywords(filters.partNo)
   if (partNoKeywords?.length) {
-    nextQuery = nextQuery.or(
-      buildOrIlikeFilter(['part_no'], partNoKeywords),
-    )
+    nextQuery = nextQuery.or(buildOrIlikeFilter(['part_no'], partNoKeywords))
   }
 
   if (filters.unmatchedOnly) {
@@ -161,6 +172,16 @@ function normalizeStandardTimePayload(
     length: values.length ?? 0,
     part_no: values.part_no?.trim() || null,
     record_type: values.record_type ?? 'B',
+    tooling_fixture: values.tooling_fixture?.trim() || null,
+    clamping_count: values.clamping_count ?? null,
+    clamping_quantity: values.clamping_quantity ?? null,
+    operator_count: values.operator_count ?? null,
+    process_image_path: values.process_image_path ?? null,
+    process_image_name: values.process_image_name ?? null,
+    process_image_mime_type: values.process_image_mime_type ?? null,
+    process_image_size: values.process_image_size ?? null,
+    process_image_uploaded_at: values.process_image_uploaded_at ?? null,
+    process_note: values.process_note?.trim() || null,
   }
 }
 

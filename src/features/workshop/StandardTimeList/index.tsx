@@ -19,12 +19,14 @@ import type {
   ProcessStandardRecordType,
 } from '@/services/apiStandardTimes'
 import { getAllStandardTimesForExport } from '@/services/apiStandardTimes'
+import { getProcessStandardImageExportFile } from '@/services/apiProcessStandardImages'
 import {
   useStandardTimesList,
   useCreateStandardTime,
   useUpdateStandardTime,
   useUpdateStandardTimesLastProcess,
   useDeleteStandardTimes,
+  useUploadProcessStandardImage,
 } from './useStandardTimes'
 import StandardTimeMobileList from './StandardTimeMobileList'
 import StandardTimeTable from './StandardTimeTable'
@@ -38,6 +40,13 @@ const preloadCostAccountingExcel = () => {
   void loadCostAccountingExcel()
 }
 
+const loadPrecisionFinishingProcessExcel = () =>
+  import('@/utils/precisionFinishingProcessExcel')
+
+const preloadPrecisionFinishingProcessExcel = () => {
+  void loadPrecisionFinishingProcessExcel()
+}
+
 export default function StandardTimeList() {
   const { message, modal } = App.useApp()
   const { role, employeeProfile } = useAuth()
@@ -49,6 +58,10 @@ export default function StandardTimeList() {
   const [isEdit, setIsEdit] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [isFilterExporting, setIsFilterExporting] = useState(false)
+  const [isProcessExporting, setIsProcessExporting] = useState(false)
+  const [isProcessFilterExporting, setIsProcessFilterExporting] =
+    useState(false)
+  const [uploadingImageId, setUploadingImageId] = useState<string | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -89,6 +102,7 @@ export default function StandardTimeList() {
   const updateMutation = useUpdateStandardTime()
   const lastProcessMutation = useUpdateStandardTimesLastProcess()
   const deleteMutation = useDeleteStandardTimes()
+  const uploadImageMutation = useUploadProcessStandardImage()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -258,6 +272,102 @@ export default function StandardTimeList() {
     }
   }, [message, searchParams])
 
+  const exportProcessSheet = useCallback(async (records: StandardTime[]) => {
+    const { exportPrecisionFinishingProcessToExcel } =
+      await loadPrecisionFinishingProcessExcel()
+
+    await exportPrecisionFinishingProcessToExcel(records, async (record) => {
+      if (
+        !record.process_image_path ||
+        !record.process_image_name ||
+        !record.process_image_mime_type
+      ) {
+        return null
+      }
+
+      const image = await getProcessStandardImageExportFile({
+        filePath: record.process_image_path,
+        fileName: record.process_image_name,
+        mimeType: record.process_image_mime_type,
+      })
+
+      return { ...image, rowNumber: 0, columnNumber: 12 }
+    })
+  }, [])
+
+  const handleProcessExport = useCallback(async () => {
+    const selectedSet = new Set(selectedRowKeys)
+    const selectedRecords = (data?.items || []).filter((item) =>
+      selectedSet.has(item.id || ''),
+    )
+
+    if (selectedRecords.length === 0) {
+      message.warning('请先选择要导出的工艺数据')
+      return
+    }
+
+    setIsProcessExporting(true)
+    await new Promise<void>((resolve) => setTimeout(resolve, 0))
+    try {
+      await exportProcessSheet(selectedRecords)
+      message.success(`已导出 ${selectedRecords.length} 条工艺数据`)
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : '导出工艺表失败，请稍后重试',
+      )
+    } finally {
+      setIsProcessExporting(false)
+    }
+  }, [data?.items, exportProcessSheet, message, selectedRowKeys])
+
+  const handleProcessFilterExport = useCallback(async () => {
+    setIsProcessFilterExporting(true)
+    try {
+      const records = await getAllStandardTimesForExport(searchParams)
+      if (records.length === 0) {
+        message.warning('当前筛选条件下无工艺数据可导出')
+        return
+      }
+
+      await new Promise<void>((resolve) => setTimeout(resolve, 0))
+      await exportProcessSheet(records)
+      message.success(`已按筛选条件导出 ${records.length} 条工艺数据`)
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : '导出工艺表失败，请稍后重试',
+      )
+    } finally {
+      setIsProcessFilterExporting(false)
+    }
+  }, [exportProcessSheet, message, searchParams])
+
+  const handleUploadProcessImage = useCallback(
+    async (record: StandardTime, file: File) => {
+      if (!record.id) return
+
+      setUploadingImageId(record.id)
+      try {
+        await uploadImageMutation.mutateAsync({
+          standard: {
+            id: record.id,
+            process_image_path: record.process_image_path,
+          },
+          file,
+        })
+        message.success('工艺图示上传成功')
+      } catch (error) {
+        message.error(
+          error instanceof Error
+            ? error.message
+            : '工艺图示上传失败，请稍后重试',
+        )
+      } finally {
+        setUploadingImageId(null)
+      }
+    },
+    [message, uploadImageMutation],
+  )
+
   const handleFinish = useCallback(
     async (values: StandardTimeFormValues) => {
       try {
@@ -306,6 +416,27 @@ export default function StandardTimeList() {
               remark: editingRecord?.remark ?? values.remark ?? null,
               length: values.length ?? editingRecord?.length ?? 0,
               part_no: values.part_no ?? editingRecord?.part_no ?? null,
+              tooling_fixture:
+                values.tooling_fixture ??
+                editingRecord?.tooling_fixture ??
+                null,
+              clamping_count:
+                values.clamping_count ?? editingRecord?.clamping_count ?? null,
+              clamping_quantity:
+                values.clamping_quantity ??
+                editingRecord?.clamping_quantity ??
+                null,
+              operator_count:
+                values.operator_count ?? editingRecord?.operator_count ?? null,
+              process_image_path: editingRecord?.process_image_path ?? null,
+              process_image_name: editingRecord?.process_image_name ?? null,
+              process_image_mime_type:
+                editingRecord?.process_image_mime_type ?? null,
+              process_image_size: editingRecord?.process_image_size ?? null,
+              process_image_uploaded_at:
+                editingRecord?.process_image_uploaded_at ?? null,
+              process_note:
+                values.process_note ?? editingRecord?.process_note ?? null,
               record_type:
                 editingRecord?.record_type ?? values.record_type ?? 'B',
             }
@@ -513,6 +644,23 @@ export default function StandardTimeList() {
           >
             按筛选条件导出
           </ExportButton>
+          <ExportButton
+            handleExport={handleProcessExport}
+            loading={isProcessExporting}
+            count={selectedRowKeys.length}
+            permissionKey="feature:standard-time-list.export-cost"
+            onPreload={preloadPrecisionFinishingProcessExcel}
+          >
+            导出工艺表（已选）
+          </ExportButton>
+          <ExportButton
+            handleExport={handleProcessFilterExport}
+            loading={isProcessFilterExporting}
+            permissionKey="feature:standard-time-list.export-cost"
+            onPreload={preloadPrecisionFinishingProcessExcel}
+          >
+            按筛选条件导出工艺表
+          </ExportButton>
           <DeleteButton
             onConfirm={handleDelete}
             isDeleting={deleteMutation.isPending}
@@ -584,6 +732,8 @@ export default function StandardTimeList() {
                   rowHeight={rowHeight}
                   activeRowId={activeRecord?.id ?? null}
                   onRowClick={setActiveRecord}
+                  onUploadImage={handleUploadProcessImage}
+                  uploadingImageId={uploadingImageId}
                 />
               </div>
               <div

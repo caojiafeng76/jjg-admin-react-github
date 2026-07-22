@@ -2,15 +2,20 @@ import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import {
   memo,
   useCallback,
+  useEffect,
   useMemo,
   useState,
   type MouseEvent as ReactMouseEvent,
   type TdHTMLAttributes,
   type ThHTMLAttributes,
 } from 'react'
-import { Table, type TableColumnsType } from 'antd'
+import { Button, Image, Table, Upload, type TableColumnsType } from 'antd'
 
 import type { StandardTime } from '@/services/apiStandardTimes'
+import {
+  getProcessStandardImagePreviewUrl,
+  PROCESS_STANDARD_IMAGE_ACCEPT,
+} from '@/services/apiProcessStandardImages'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import { formatNumber } from '@/utils/format'
 
@@ -26,6 +31,8 @@ interface Props {
   hideStandardSeconds?: boolean
   activeRowId?: string | null
   onRowClick?: (record: StandardTime) => void
+  onUploadImage?: (record: StandardTime, file: File) => Promise<void>
+  uploadingImageId?: string | null
 }
 
 const MIN_RESIZABLE_COLUMN_WIDTH = 44
@@ -182,8 +189,41 @@ const StandardTimeTable = memo(function StandardTimeTable({
   hideStandardSeconds = false,
   activeRowId,
   onRowClick,
+  onUploadImage,
+  uploadingImageId = null,
 }: Props) {
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    let cancelled = false
+    const recordsWithImages = data.filter(
+      (record) => record.id && record.process_image_path,
+    )
+
+    void Promise.all(
+      recordsWithImages.map(async (record) => {
+        try {
+          const url = await getProcessStandardImagePreviewUrl(
+            record.process_image_path as string,
+          )
+          return [record.id as string, url] as const
+        } catch (error) {
+          console.warn('工艺图示预览地址获取失败:', error)
+          return null
+        }
+      }),
+    ).then((entries) => {
+      if (cancelled) return
+      setImageUrls(
+        Object.fromEntries(entries.filter(Boolean) as [string, string][]),
+      )
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [data])
 
   const handleResizeColumn = useCallback((columnKey: string, width: number) => {
     setColumnWidths((current) => {
@@ -327,6 +367,89 @@ const StandardTimeTable = memo(function StandardTimeTable({
             </span>
           ),
       },
+      {
+        title: '工装治具',
+        dataIndex: 'tooling_fixture',
+        key: 'tooling_fixture',
+        width: 150,
+        ellipsis: { showTitle: true },
+        render: (value?: string | null) => value || '-',
+      },
+      {
+        title: '装夹次数',
+        dataIndex: 'clamping_count',
+        key: 'clamping_count',
+        width: 100,
+        render: (value: number | null | undefined) => formatNumber(value),
+      },
+      {
+        title: '装夹数量（支）',
+        dataIndex: 'clamping_quantity',
+        key: 'clamping_quantity',
+        width: 120,
+        render: (value: number | null | undefined) => formatNumber(value),
+      },
+      {
+        title: '人数',
+        dataIndex: 'operator_count',
+        key: 'operator_count',
+        width: 80,
+        render: (value: number | null | undefined) => formatNumber(value),
+      },
+      {
+        title: '图示',
+        key: 'process_image',
+        width: 150,
+        render: (_value, record) => {
+          const imageUrl = record.id ? imageUrls[record.id] : undefined
+          const imageName = record.process_image_name || '工艺图示'
+
+          return (
+            <div className="flex min-w-0 items-center gap-2">
+              {imageUrl ? (
+                <Image
+                  alt={imageName}
+                  height={44}
+                  width={56}
+                  src={imageUrl}
+                  preview={{ src: imageUrl }}
+                  className="rounded border border-slate-200 object-cover"
+                />
+              ) : (
+                <span className="text-xs text-slate-400">暂无图片</span>
+              )}
+              {onUploadImage && record.id ? (
+                <Upload
+                  accept={PROCESS_STANDARD_IMAGE_ACCEPT}
+                  beforeUpload={(file) => {
+                    void onUploadImage(record, file)
+                    return Upload.LIST_IGNORE
+                  }}
+                  disabled={uploadingImageId === record.id}
+                  maxCount={1}
+                  showUploadList={false}
+                >
+                  <Button
+                    type="link"
+                    size="small"
+                    loading={uploadingImageId === record.id}
+                  >
+                    {record.process_image_path ? '替换' : '上传'}
+                  </Button>
+                </Upload>
+              ) : null}
+            </div>
+          )
+        },
+      },
+      {
+        title: '说明',
+        dataIndex: 'process_note',
+        key: 'process_note',
+        width: 180,
+        ellipsis: { showTitle: true },
+        render: (value?: string | null) => value || '-',
+      },
     ]
 
     if (!hideStandardSeconds) {
@@ -370,7 +493,14 @@ const StandardTimeTable = memo(function StandardTimeTable({
     }
 
     return cols
-  }, [hideStandardSeconds, page, pageSize])
+  }, [
+    hideStandardSeconds,
+    imageUrls,
+    onUploadImage,
+    page,
+    pageSize,
+    uploadingImageId,
+  ])
 
   const columns = useMemo(
     () => applyColumnWidths(baseColumns, columnWidths, handleResizeColumn),

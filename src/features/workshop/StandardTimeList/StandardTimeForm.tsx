@@ -68,6 +68,16 @@ const DEFAULT_VALUES: Omit<StandardTimeFormValues, 'operation' | 'model'> = {
   length: 0,
   part_no: null,
   record_type: 'B',
+  tooling_fixture: null,
+  clamping_count: null,
+  clamping_quantity: null,
+  operator_count: null,
+  process_image_path: null,
+  process_image_name: null,
+  process_image_mime_type: null,
+  process_image_size: null,
+  process_image_uploaded_at: null,
+  process_note: null,
 }
 
 function calculateCostPreview(values?: Partial<StandardTimeFormValues>) {
@@ -504,6 +514,24 @@ export default function StandardTimeForm({
           </>
         )}
       </div>
+      <Divider titlePlacement="left">工艺信息</Divider>
+      <div className="grid grid-cols-2 gap-x-4">
+        <Form.Item name="tooling_fixture" label="工装治具">
+          <Input placeholder="请输入工装治具" />
+        </Form.Item>
+        <Form.Item name="clamping_count" label="装夹次数">
+          <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item name="clamping_quantity" label="装夹数量（支）">
+          <InputNumber min={0} step={1} style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item name="operator_count" label="人数">
+          <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+        </Form.Item>
+      </div>
+      <Form.Item name="process_note" label="说明">
+        <Input.TextArea rows={2} placeholder="请输入工艺说明" />
+      </Form.Item>
       {isTeamLeaderMode ? null : (
         <>
           <Divider titlePlacement="left">工时信息</Divider>

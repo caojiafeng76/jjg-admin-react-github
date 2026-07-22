@@ -1043,6 +1043,8 @@ export type Database = {
       }
       process_standards: {
         Row: {
+          clamping_count: number | null
+          clamping_quantity: number | null
           created_at: string
           customer: string | null
           cutting_fluid_rate: number
@@ -1063,19 +1065,29 @@ export type Database = {
           length: number
           model: string
           operation: string
+          operator_count: number | null
           overhead_cost: number | null
           part_no: string | null
+          process_image_mime_type: string | null
+          process_image_name: string | null
+          process_image_path: string | null
+          process_image_size: number | null
+          process_image_uploaded_at: string | null
+          process_note: string | null
           record_type: string
           remark: string | null
           standard_seconds: number
           theoretical_seconds: number
           tool_rate: number
           tooling_consumable_cost: number | null
+          tooling_fixture: string | null
           total_cost: number | null
           updated_at: string
           uploaded_by_name: string | null
         }
         Insert: {
+          clamping_count?: number | null
+          clamping_quantity?: number | null
           created_at?: string
           customer?: string | null
           cutting_fluid_rate?: number
@@ -1096,19 +1108,29 @@ export type Database = {
           length?: number
           model: string
           operation: string
+          operator_count?: number | null
           overhead_cost?: number | null
           part_no?: string | null
+          process_image_mime_type?: string | null
+          process_image_name?: string | null
+          process_image_path?: string | null
+          process_image_size?: number | null
+          process_image_uploaded_at?: string | null
+          process_note?: string | null
           record_type?: string
           remark?: string | null
           standard_seconds: number
           theoretical_seconds?: number
           tool_rate?: number
           tooling_consumable_cost?: number | null
+          tooling_fixture?: string | null
           total_cost?: number | null
           updated_at?: string
           uploaded_by_name?: string | null
         }
         Update: {
+          clamping_count?: number | null
+          clamping_quantity?: number | null
           created_at?: string
           customer?: string | null
           cutting_fluid_rate?: number
@@ -1129,14 +1151,22 @@ export type Database = {
           length?: number
           model?: string
           operation?: string
+          operator_count?: number | null
           overhead_cost?: number | null
           part_no?: string | null
+          process_image_mime_type?: string | null
+          process_image_name?: string | null
+          process_image_path?: string | null
+          process_image_size?: number | null
+          process_image_uploaded_at?: string | null
+          process_note?: string | null
           record_type?: string
           remark?: string | null
           standard_seconds?: number
           theoretical_seconds?: number
           tool_rate?: number
           tooling_consumable_cost?: number | null
+          tooling_fixture?: string | null
           total_cost?: number | null
           updated_at?: string
           uploaded_by_name?: string | null
