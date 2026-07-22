@@ -577,6 +577,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
         rowSelection={rowSelection}
         onRow={handleRow}
         scroll={{ x: tableWidth, y: scrollY }}
+        sticky={{ offsetScroll: 0 }}
         size="small"
         pagination={false}
         className="font-[family-name:var(--font-sans)]"
