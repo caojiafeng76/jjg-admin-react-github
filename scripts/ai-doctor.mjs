@@ -143,7 +143,7 @@ checkEnvFromDotenv([
 commandVersion('bun')
 commandVersion('node')
 commandVersion('supabase')
-commandVersion('graphify')
+commandVersion('graphify', ['help'])
 commandVersion('docker', ['info'])
 checkGraphify()
 checkSpecWorkflow()

@@ -12,6 +12,7 @@ dist
 dist-ssr
 coverage
 *.local
+graphify-out/
 
 # Environment variables
 .env*
