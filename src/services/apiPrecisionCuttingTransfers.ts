@@ -31,6 +31,9 @@ export const PRECISION_CUTTING_TRANSFER_RECIPIENTS = [
   '吴雯雯',
   '王建莉',
   '顾鉴申',
+  '周弘凯',
+  '沈佳伟',
+  '张宏',
 ] as const
 
 export const PRECISION_CUTTING_TRANSFER_OPERATORS = [
