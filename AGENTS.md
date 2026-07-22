@@ -169,7 +169,7 @@ FeatureName/
 
 > **权威规则来源：[.github/copilot-instructions.md](.github/copilot-instructions.md)**。本节不再重复维护完整规则文本，仅保留一句话摘要，避免与权威文档出现内容漂移：
 >
-> 所有 AI 助手处理本项目任务时，必须遵循 `.github/copilot-instructions.md` 中定义的默认任务执行流程（复述目标 → Sequential Thinking 拆解 → 查找相关 skill → Serena 建立上下文 → 阅读代码 → 最小必要澄清 → 给出计划 → 最小化改动 → 更新根目录 `changelog.md` → 按任务类型完成最低验证 → 固定格式汇报）、附加强制规则（禁止盲改覆盖、必须验证、诚实报告验证状态、字段/缓存/路由/业务口径一致性检查等）、任务类型最低验证标准、MCP 与工具优先级约定（Sequential Thinking / Serena / Supabase / Figma）。如果该文档更新，本节无需同步复制，直接以其为准即可。
+> 所有 AI 助手处理本项目任务时，必须遵循 `.github/copilot-instructions.md` 中定义的默认任务执行流程（复述目标 → Sequential Thinking 拆解 → 查找相关 skill → Serena 建立上下文 → 阅读代码 → 最小必要澄清 → 给出计划 → 最小化改动 → 更新根目录 `CHANGELOG.MD` → 按任务类型完成最低验证 → 固定格式汇报）、附加强制规则（禁止盲改覆盖、必须验证、诚实报告验证状态、字段/缓存/路由/业务口径一致性检查等）、任务类型最低验证标准、MCP 与工具优先级约定（Sequential Thinking / Serena / Supabase / Figma）。如果该文档更新，本节无需同步复制，直接以其为准即可。
 
 ---
 
