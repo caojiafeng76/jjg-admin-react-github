@@ -2,9 +2,9 @@
 
 ## 项目概述
 
-基于 React 19 + TypeScript + Vite 的企业管理后台系统，管理"西尼"扶梯踏板和"车间"生产业务。
+基于 React 19 + TypeScript + Vite 的企业管理后台系统，覆盖"西尼"扶梯踏板、车间生产、优迈库存、别墅梯、质量、工具和权限管理等业务。
 
-**技术栈**: React 19.2, TypeScript 6.0, Vite 8, Ant Design 6, Tailwind CSS 4, TanStack Query 5, Zustand 5, Supabase
+**技术栈**: React 19.2, TypeScript 6.0, Vite 8, Ant Design 6, Tailwind CSS 4, TanStack Query 5, Zustand 5, Supabase, React Router 7, Heroicons
 
 ---
 
@@ -16,6 +16,8 @@ bun dev                    # 启动开发服务器
 
 # 构建
 bun run build             # TypeScript 编译 + Vite 构建
+bun run typecheck         # 仅 TypeScript 类型检查
+bun run check:bundle      # 检查构建产物体积预算
 bun preview               # 预览生产构建
 
 # 测试
@@ -27,6 +29,13 @@ bun run test:coverage     # 生成测试覆盖率报告
 bun lint                  # ESLint 检查
 bun lint:fix              # ESLint 自动修复
 bun format                # Prettier 格式化
+
+# AI / Spec / 数据库工具
+bun run ai:doctor          # 检查本地 AI 工具链
+bun run spec:list          # 查看 Spec Workflow 变更列表
+bun run spec:status        # 查看 Spec Workflow 状态
+bun run db:doctor          # 检查数据库连接与工具状态
+bun run db:types           # 根据已连接的 Supabase schema 重新生成数据库类型
 ```
 
 **注意**: 项目使用 `bun` 作为包管理器。测试框架使用 Vitest + Testing Library + jsdom；运行测试请使用 `bun run test`，不要用 Bun 内置的 `bun test` 代替。
@@ -43,7 +52,11 @@ bun format                # Prettier 格式化
    - `@features/` → `src/features/`
    - `@hooks/` → `src/hooks/`
    - `@services/` → `src/services/`
+   - `@contexts/` → `src/contexts/`
+   - `@pages/` → `src/pages/`
    - `@utils/` → `src/utils/`
+   - `@assets/` → `src/assets/`
+   - `@syney/` → `src/features/syney/`
 
 2. **导入顺序**:
    ```typescript
@@ -124,7 +137,7 @@ bun format                # Prettier 格式化
 
 ## Feature 模块结构
 
-每个 feature 模块完整 CRUD 结构:
+业务模块按功能域组织在 `src/features/` 下；涉及 CRUD 的模块通常采用以下结构，实际文件以模块现状为准：
 
 ```
 FeatureName/
