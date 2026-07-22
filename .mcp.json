@@ -19,18 +19,7 @@
       ]
     },
     "serena": {
-      "command": "uvx",
-      "args": [
-        "-p",
-        "3.13",
-        "--from",
-        "serena-agent",
-        "serena",
-        "start-mcp-server",
-        "--project",
-        ".",
-        "--context=codex"
-      ]
+      "url": "http://127.0.0.1:9121/mcp"
     },
     "context7": {
       "command": "npx",

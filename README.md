@@ -113,6 +113,14 @@ src/
 
 `.mcp.json` 同时接入了 Sequential Thinking MCP：使用 `npx -y @modelcontextprotocol/server-sequential-thinking` 启动，用于任务拆解、假设校验、风险分析和方案排序。
 
+Serena 使用固定的 Streamable HTTP 单例服务，避免每个任务重复创建进程。开始使用前运行一次：
+
+```bash
+bun run mcp:serena
+```
+
+之后各任务通过 `http://127.0.0.1:9121/mcp` 复用同一个 Serena 实例；脚本检测到服务已运行时不会再次启动，也不会自动打开 Dashboard。
+
 Codex Desktop 当前会话如果没有自动加载项目级 [.mcp.json](.mcp.json)，需要在本机 `~/.codex/config.toml` 同步注册：
 
 ```toml

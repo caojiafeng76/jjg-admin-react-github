@@ -85,6 +85,14 @@ bunx spec-workflow-mcp --help
 npx -y @modelcontextprotocol/server-sequential-thinking --help
 ```
 
+Serena 使用固定的 Streamable HTTP 单例服务。启动一次即可供当前项目的多个任务复用：
+
+```bash
+bun run mcp:serena
+```
+
+连接地址为 `http://127.0.0.1:9121/mcp`。启动脚本会检测端口，已运行时不会重复启动，也不会自动打开 Serena Dashboard。
+
 Codex Desktop 如果当前会话没有暴露 Sequential Thinking 工具，请确认本机 `~/.codex/config.toml` 中存在:
 
 ```toml

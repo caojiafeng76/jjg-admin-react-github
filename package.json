@@ -17,6 +17,7 @@
     "format": "prettier --write .",
     "preview": "vite preview",
     "ai:doctor": "bun scripts/ai-doctor.mjs",
+    "mcp:serena": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-serena-singleton.ps1",
     "graphify:build": "graphify build .",
     "graphify:update": "graphify auto-update .",
     "spec": "bun scripts/spec-workflow-cli.mjs",
