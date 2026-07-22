@@ -15,6 +15,11 @@
 
 ## 2026-07-22
 
+- **类别**：修复
+- **范围**：Serena MCP 配置、VS Code 用户级 MCP 配置、启动脚本
+- **摘要**：将 Serena 从每个任务独立启动的 stdio 模式统一切换为固定 Streamable HTTP 单例，避免重复创建 Serena Dashboard 和语言服务器进程。
+- **验证**：已验证单例启动脚本可启动 `http://127.0.0.1:9121/mcp`，重复执行不会创建第二个监听实例；MCP 端点可访问。
+
 - **类别**：文档
 - **范围**：项目更新日志规范与 AI 任务指令
 - **摘要**：新增根目录 `changelog.md`，并在 `AGENTS.md` 与 `.github/copilot-instructions.md` 中建立每次修改完成后记录更新日志的统一规则。
