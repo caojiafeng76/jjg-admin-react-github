@@ -32,9 +32,15 @@ bun format                # Prettier 格式化
 
 # AI / Spec / 数据库工具
 bun run ai:doctor          # 检查本地 AI 工具链
+bun run graphify:build     # 构建 Graphify 代码索引
+bun run graphify:update    # 增量更新 Graphify 代码索引
 bun run spec:list          # 查看 Spec Workflow 变更列表
 bun run spec:status        # 查看 Spec Workflow 状态
+bun run spec:instructions  # 查看 Spec Workflow 指令
 bun run db:doctor          # 检查数据库连接与工具状态
+bun run db:push            # 推送数据库 migration
+bun run db:push:dry-run    # 预览数据库 migration 推送
+bun run db:query -- --file <sql-file> # 执行仓库 SQL 查询脚本
 bun run db:types           # 根据已连接的 Supabase schema 重新生成数据库类型
 ```
 
