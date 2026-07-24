@@ -15,6 +15,13 @@
 
 ## 2026-07-24
 
+- **类别**：重构
+- **范围**：`src/routes/AppRoutes.tsx`、`src/ui/PageLoading.tsx`、`src/utils/format.ts`、`src/utils/googleFontLoader.ts`、`src/utils/pdfUtils.ts`
+- **摘要**：移除已确认无仓库消费者的旧路由占位文件、未使用加载组件及三个未使用导出，保留可能被外部调用或仅由文档引用的候选项。
+- **验证**：删除前后 `bun run typecheck`、`bun run test`、`bun lint`、`bun run build` 均通过；删除批次逐项完成零引用扫描与类型检查；`git diff --check` 通过。
+
+## 2026-07-24
+
 - **类别**：变更
 - **范围**：`src/features/workshop/StandardTimeList/StandardTimeTable.tsx`
 - **摘要**：调整标准工时列表列顺序，将标准工时、日标准产能、理论工时紧跟在料号列之后。

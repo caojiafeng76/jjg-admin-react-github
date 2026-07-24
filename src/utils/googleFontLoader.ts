@@ -84,15 +84,6 @@ export async function loadGoogleFont(): Promise<string> {
 }
 
 /**
- * 预加载字体（可在应用启动时调用）
- */
-export function preloadFont(): void {
-  loadGoogleFont().catch((error) => {
-    console.warn('Failed to preload font:', error)
-  })
-}
-
-/**
  * 清除字体缓存
  */
 export function clearFontCache(): void {

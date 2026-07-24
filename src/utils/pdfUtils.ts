@@ -451,28 +451,3 @@ export function generateSummaryTableData(
     ])
     .concat([['*', '合计', formatNumberWithCache(totalAmount)]])
 }
-
-/**
- * 批量处理大数据量
- * @param array 要处理的数组
- * @param batchSize 批次大小
- * @param processor 处理函数
- */
-export async function processBatch<T, R>(
-  array: T[],
-  batchSize: number,
-  processor: (batch: T[]) => Promise<R[]>,
-): Promise<R[]> {
-  const results: R[] = []
-
-  for (let i = 0; i < array.length; i += batchSize) {
-    const batch = array.slice(i, i + batchSize)
-    const batchResults = await processor(batch)
-    results.push(...batchResults)
-
-    // 让出控制权，避免阻塞UI
-    await new Promise((resolve) => setTimeout(resolve, 0))
-  }
-
-  return results
-}

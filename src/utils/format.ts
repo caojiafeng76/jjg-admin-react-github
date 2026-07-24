@@ -24,24 +24,3 @@ export function formatNumber(
 
   return Number(value).toFixed(digits)
 }
-
-/**
- * 将数字格式化为带千位分隔符的字符串（使用 Intl.NumberFormat）。
- * 适用于 Excel/PDF 导出等需要可读性格式的场景。
- *
- * @param value - 输入值
- * @param decimals - 小数位数，默认 2
- */
-export function formatNumberWithSeparator(
-  value: number | null | undefined,
-  decimals = 2,
-) {
-  if (value === null || value === undefined || Number.isNaN(value)) {
-    return ''
-  }
-
-  return new Intl.NumberFormat('zh-CN', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  }).format(Number(value))
-}

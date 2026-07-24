@@ -1,0 +1,16 @@
+Scenario: Remove confirmed orphan component src/ui/PageLoading.tsx
+
+Consumer verification:
+- `Get-Content -Raw src/ui/PageLoading.tsx` inspected the component before deletion.
+- `rg -n --hidden --glob '!.git' 'PageLoading' .` found only the component declaration.
+- `rg -n --hidden --glob '!.git' 'page[-_ ]?loading|Page[-_ ]?Loading' .` found only the stale generated path entry in tsconfig.app.tsbuildinfo plus the component before deletion; no source consumer.
+- `graphify query graphify-out/graph.json PageLoading` returned only `src/ui/PageLoading.tsx:1`.
+- Post-deletion source scan: `rg -n --glob '*.ts' --glob '*.tsx' --glob '*.js' --glob '*.jsx' 'PageLoading|page[-_ ]?loading|page_loading' .` returned no matches.
+
+Change verification:
+- Invocation: `git diff -- src/ui/PageLoading.tsx`
+- Binary observable: deleted file mode `100644`, with only `src/ui/PageLoading.tsx` in the targeted diff.
+
+Typecheck:
+- Invocation: `bun run typecheck`
+- Binary observable: `tsc -b` completed with exit code 0.

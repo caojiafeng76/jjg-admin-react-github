@@ -1,0 +1,13 @@
+Scenario: remove confirmed orphan src/routes/AppRoutes.tsx
+
+Invocation: git grep -n -I -e 'AppRoutes' -- . ':!src/routes/AppRoutes.tsx'
+Observable: exit code 0; output "git grep: no references"
+
+Invocation: inspect src/App.tsx and src/routes/router.tsx
+Observable: App.tsx imports RouterProvider and router from '@/routes/router'; router.tsx exports router via createBrowserRouter; no AppRoutes import.
+
+Invocation: git diff -- src/routes/AppRoutes.tsx
+Observable: targeted diff reports only deletion of src/routes/AppRoutes.tsx (2 lines removed).
+
+Invocation: bun run typecheck
+Observable: exit code 0; tsc -b completed successfully.

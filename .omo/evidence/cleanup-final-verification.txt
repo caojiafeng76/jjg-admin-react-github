@@ -1,0 +1,29 @@
+JJG Admin React cleanup — final verification receipt
+Date: 2026-07-24 (Asia/Shanghai)
+
+Commands and observed results:
+
+1. `bun run typecheck`
+   Result: EXIT:0 (`tsc -b`)
+
+2. `bun run test`
+   Result: EXIT:0; Test Files 97 passed (97); Tests 427 passed (427)
+   Note: one earlier parallel run had 1 failure in the unrelated
+   `src/features/packaging-process/WorkOrderList/remoteEmployeeSelect.vitest.tsx`;
+   that file passed in three isolated runs and the immediate full-suite rerun
+   above passed all 97 files / 427 tests.
+
+3. `bun lint`
+   Result: EXIT:0 (`eslint .`)
+
+4. `bun run build`
+   Result: EXIT:0 (`tsc -b && vite build`; Vite reported built in 1.91s)
+
+5. `git diff --check`
+   Result: PASS (no output)
+
+6. `rg -n 'formatNumberWithSeparator|preloadFont|processBatch\s*<' src`
+   Result: no matches
+
+Generated `tsconfig.app.tsbuildinfo` changes from verification builds were
+restored to HEAD; final diff contains only the intended cleanup and changelog.
