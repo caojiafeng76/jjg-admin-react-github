@@ -367,6 +367,45 @@ const StandardTimeTable = memo(function StandardTimeTable({
             </span>
           ),
       },
+      ...(hideStandardSeconds
+        ? []
+        : [
+            {
+              title: '标准工时（秒）',
+              dataIndex: 'standard_seconds',
+              key: 'standard_seconds',
+              width: 140,
+              render: (value: number | null | undefined) => (
+                <span className="font-medium text-indigo-600">
+                  {formatNumber(value)}
+                </span>
+              ),
+            },
+            {
+              title: '日标准产能',
+              key: 'daily_standard_capacity',
+              width: 120,
+              render: (_value: unknown, record: StandardTime) => (
+                <span className="font-medium text-emerald-600">
+                  {formatNumber(
+                    calculateDailyStandardCapacity(record.standard_seconds),
+                    2,
+                  )}
+                </span>
+              ),
+            },
+            {
+              title: '理论工时（秒）',
+              dataIndex: 'theoretical_seconds',
+              key: 'theoretical_seconds',
+              width: 140,
+              render: (value: number | null | undefined) => (
+                <span className="font-medium text-cyan-600">
+                  {formatNumber(value)}
+                </span>
+              ),
+            },
+          ]),
       {
         title: '工装治具',
         dataIndex: 'tooling_fixture',
@@ -451,46 +490,6 @@ const StandardTimeTable = memo(function StandardTimeTable({
         render: (value?: string | null) => value || '-',
       },
     ]
-
-    if (!hideStandardSeconds) {
-      cols.push(
-        {
-          title: '标准工时（秒）',
-          dataIndex: 'standard_seconds',
-          key: 'standard_seconds',
-          width: 140,
-          render: (value: number | null | undefined) => (
-            <span className="font-medium text-indigo-600">
-              {formatNumber(value)}
-            </span>
-          ),
-        },
-        {
-          title: '日标准产能',
-          key: 'daily_standard_capacity',
-          width: 120,
-          render: (_value, record) => (
-            <span className="font-medium text-emerald-600">
-              {formatNumber(
-                calculateDailyStandardCapacity(record.standard_seconds),
-                2,
-              )}
-            </span>
-          ),
-        },
-        {
-          title: '理论工时（秒）',
-          dataIndex: 'theoretical_seconds',
-          key: 'theoretical_seconds',
-          width: 140,
-          render: (value: number | null | undefined) => (
-            <span className="font-medium text-cyan-600">
-              {formatNumber(value)}
-            </span>
-          ),
-        },
-      )
-    }
 
     return cols
   }, [
