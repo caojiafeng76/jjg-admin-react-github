@@ -24,7 +24,6 @@ export default function SpecList() {
   const pageSize = Number(searchParams.get('pageSize')) || 10
 
   const specFormRef = useRef<ISyneySpecFormRef>(null)
-  const specFormInstance = specFormRef.current?.getInstance()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建规格')
@@ -32,7 +31,11 @@ export default function SpecList() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
   const { syneySpecs, isLoading, count } = useSyneySpecs()
-  const { isCreating, createSyneySpec } = useCreateSyneySpec()
+  const {
+    isCreating,
+    createSyneySpec,
+    contextHolder: createMessageContextHolder,
+  } = useCreateSyneySpec()
   const { isUpdating, updateSyneySpec } = useUpdateSyneySpec()
   const { isDeleting, deleteSyneySpecs } = useDeleteSyneySpecs()
 
@@ -40,7 +43,7 @@ export default function SpecList() {
   const spec = syneySpecs?.find((item) => item.id === specIds?.at(0))
 
   function showModal() {
-    specFormInstance?.resetFields()
+    specFormRef.current?.getInstance().resetFields()
     setIsModalOpen(true)
   }
 
@@ -67,13 +70,13 @@ export default function SpecList() {
   }
 
   function handleCancel() {
-    specFormInstance?.resetFields()
+    specFormRef.current?.getInstance().resetFields()
     setIsEditing(false)
     setIsModalOpen(false)
   }
 
   function handleOk() {
-    specFormInstance?.submit()
+    specFormRef.current?.getInstance().submit()
   }
 
   function handleCreate() {
@@ -105,10 +108,10 @@ export default function SpecList() {
 
   useEffect(() => {
     if (spec && isEditing) {
-      specFormInstance?.setFieldsValue({ ...spec })
+      specFormRef.current?.getInstance().setFieldsValue({ ...spec })
       setModalTitle('编辑规格')
     }
-  }, [spec, isEditing, specFormInstance])
+  }, [spec, isEditing])
 
   const records = useMemo(() => syneySpecs || [], [syneySpecs])
   const selectedCount = selectedRowKeys.length
@@ -120,6 +123,8 @@ export default function SpecList() {
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
+      {createMessageContextHolder}
+
       {/* 顶部工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
@@ -174,9 +179,7 @@ export default function SpecList() {
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
           <SpecTable
             data={records}
-            loading={
-              isLoading || isCreating || isUpdating || isDeleting
-            }
+            loading={isLoading || isCreating || isUpdating || isDeleting}
             onSelect={onSelect}
             selectedRowKeys={selectedRowKeys}
             page={page}
