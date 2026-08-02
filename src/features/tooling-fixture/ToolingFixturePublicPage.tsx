@@ -109,8 +109,8 @@ export default function ToolingFixturePublicPage() {
   const isInUse = fixture.status === '使用中'
 
   return (
-    <main className="min-h-dvh bg-[linear-gradient(180deg,#eaf5f5_0%,#f8fafc_44%,#eef2f5_100%)] px-4 py-5 sm:px-6 sm:py-8">
-      <div className="mx-auto w-full max-w-xl space-y-4">
+    <div className="flex h-dvh flex-col bg-[linear-gradient(180deg,#eaf5f5_0%,#f8fafc_44%,#eef2f5_100%)]">
+      <main className="mx-auto min-h-0 w-full max-w-xl flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-8">
         <Card className="overflow-hidden rounded-[28px] border-slate-200/80 shadow-[0_24px_70px_rgba(15,23,42,0.1)]">
           <div className="-mx-6 -mt-6 mb-6 bg-slate-900 px-6 py-7 text-white sm:-mx-6 sm:-mt-6">
             <div className="text-xs font-semibold tracking-[0.25em] text-cyan-200 uppercase">
@@ -193,7 +193,7 @@ export default function ToolingFixturePublicPage() {
             </div>
           </div>
         </Card>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }
