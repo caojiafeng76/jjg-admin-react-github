@@ -7,6 +7,7 @@ import Loading from '@ui/Loading'
 import RouteErrorPage from '@/pages/RouteErrorPage'
 import { LABOR_PROTECTION_PUBLIC_QR_PATH } from '@/features/labor-protection/LaborProtectionRequisition/laborProtectionPublicQr'
 import { TOOLING_STOCK_OUT_PUBLIC_QR_PATH } from '@/features/tooling/ToolingStockOut/toolingStockOutPublicQr'
+import { TOOLING_FIXTURE_PUBLIC_QR_PATH } from '@/features/tooling-fixture/toolingFixturePublicQr'
 import {
   PermissionProtectedRoute,
   ProtectedRoute,
@@ -61,6 +62,9 @@ import {
   SyneyStoreReportDetail,
   SyneyStoreReportList,
   ToolingData,
+  FixtureDataPage,
+  FixtureRecordsPage,
+  ToolingFixturePublicPage,
   ToolingInventory,
   ToolingStockIn,
   ToolingStockOut,
@@ -495,6 +499,28 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'fixture-data',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:fixture-data"
+              element={<FixtureDataPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'fixture-records',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:fixture-records"
+              element={<FixtureRecordsPage />}
+            />
+          </Suspense>
+        ),
+      },
+      {
         path: 'labor-protection-data',
         element: (
           <Suspense fallback={<Loading />}>
@@ -731,6 +757,15 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<Loading />}>
         <ToolingStockOutPublicPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: TOOLING_FIXTURE_PUBLIC_QR_PATH,
+    errorElement: <RouteErrorPage />,
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ToolingFixturePublicPage />
       </Suspense>
     ),
   },

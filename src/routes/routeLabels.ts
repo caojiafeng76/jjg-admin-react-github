@@ -31,6 +31,8 @@ const routeToLabelMap: Record<string, string> = {
   'tooling-inventory': '刀具库存',
   'tooling-stock-in': '刀具入库',
   'tooling-stock-out': '刀具出库',
+  'fixture-data': '工装资料',
+  'fixture-records': '工装出入记录',
   'labor-protection-data': '劳保资料',
   'labor-protection-requisition': '领料单',
   'youmai-product-data': '优迈 / 货品资料',

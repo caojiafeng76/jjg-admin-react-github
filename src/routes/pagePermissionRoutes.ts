@@ -35,6 +35,8 @@ export const PAGE_PERMISSION_ROUTES: PagePermissionRoute[] = [
   { path: '/tooling-inventory', permission: 'page:tooling-inventory' },
   { path: '/tooling-stock-in', permission: 'page:tooling-stock-in' },
   { path: '/tooling-stock-out', permission: 'page:tooling-stock-out' },
+  { path: '/fixture-data', permission: 'page:fixture-data' },
+  { path: '/fixture-records', permission: 'page:fixture-records' },
   { path: '/labor-protection-data', permission: 'page:labor-protection-data' },
   { path: '/labor-protection-requisition', permission: 'page:labor-protection-requisition' },
   { path: '/youmai-product-data', permission: 'page:youmai-product-data' },

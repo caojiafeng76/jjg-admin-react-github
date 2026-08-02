@@ -1,0 +1,15 @@
+export const TOOLING_FIXTURE_FORM_FIELDS = [
+  { name: 'fixture_no', label: '工装模具编号' },
+  { name: 'category', label: '类别' },
+  { name: 'applicable_product_drawing_no', label: '适用产品图号' },
+  { name: 'product_name', label: '产品名称' },
+  { name: 'applicable_equipment', label: '适用设备' },
+  { name: 'storage_location', label: '存放位置' },
+  { name: 'manufactured_date', label: '制作日期' },
+  { name: 'manufacturer', label: '制作厂商' },
+  { name: 'status', label: '状态' },
+  { name: 'last_maintenance_date', label: '上次保养日期' },
+  { name: 'maintenance_cycle_days', label: '保养周期（天）' },
+  { name: 'responsible_person', label: '责任人' },
+  { name: 'remarks', label: '备注' },
+] as const

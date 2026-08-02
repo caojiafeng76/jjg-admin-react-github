@@ -51,4 +51,26 @@ export const TOOLING_PERMISSIONS: PermissionDefinition[] = [
     label: '刀具模块-全部操作',
     description: '允许查看员绕过只读限制，执行刀具资料、库存、入库和出库操作',
   },
+
+  {
+    key: 'nav:tooling-fixture',
+    scope: 'nav',
+    module: 'tooling-fixture',
+    surface: 'pc',
+    label: '工装管理菜单分组',
+  },
+  {
+    key: 'page:fixture-data',
+    scope: 'page',
+    module: 'tooling-fixture',
+    surface: 'pc',
+    label: '工装资料',
+  },
+  {
+    key: 'page:fixture-records',
+    scope: 'page',
+    module: 'tooling-fixture',
+    surface: 'pc',
+    label: '工装出入记录',
+  },
 ]

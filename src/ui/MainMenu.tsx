@@ -230,6 +230,24 @@ const allMenuItems: MenuItemDef[] = [
     ],
   },
   {
+    key: 'tooling-fixture',
+    label: '工装管理',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:tooling-fixture',
+    children: [
+      {
+        key: 'fixture-data',
+        label: '工装资料',
+        permission: 'page:fixture-data',
+      },
+      {
+        key: 'fixture-records',
+        label: '出入记录',
+        permission: 'page:fixture-records',
+      },
+    ],
+  },
+  {
     key: 'villa-lift',
     label: '别墅梯',
     icon: <Square3Stack3DIcon className="size-4" />,

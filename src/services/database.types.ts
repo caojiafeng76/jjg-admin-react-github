@@ -281,6 +281,66 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount_cny: number | null
+          amount_original: number
+          created_at: string
+          currency: string
+          exchange_rate: number
+          id: string
+          invoice_date: string
+          invoice_number: string
+          is_archived: boolean
+          notes: string | null
+          pdf_name: string | null
+          pdf_path: string | null
+          pdf_size: number | null
+          purpose: string
+          reimbursement_status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cny?: number | null
+          amount_original: number
+          created_at?: string
+          currency: string
+          exchange_rate: number
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          is_archived?: boolean
+          notes?: string | null
+          pdf_name?: string | null
+          pdf_path?: string | null
+          pdf_size?: number | null
+          purpose: string
+          reimbursement_status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cny?: number | null
+          amount_original?: number
+          created_at?: string
+          currency?: string
+          exchange_rate?: number
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          is_archived?: boolean
+          notes?: string | null
+          pdf_name?: string | null
+          pdf_path?: string | null
+          pdf_size?: number | null
+          purpose?: string
+          reimbursement_status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       job_base_settings: {
         Row: {
           created_at: string
@@ -2200,6 +2260,98 @@ export type Database = {
         }
         Relationships: []
       }
+      tooling_fixture_usage_records: {
+        Row: {
+          action: string
+          created_at: string
+          fixture_id: string
+          id: string
+          operator_name: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          fixture_id: string
+          id?: string
+          operator_name: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          fixture_id?: string
+          id?: string
+          operator_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tooling_fixture_usage_records_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "tooling_fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tooling_fixtures: {
+        Row: {
+          applicable_equipment: string
+          applicable_product_drawing_no: string
+          category: string
+          created_at: string
+          fixture_no: string
+          id: string
+          last_maintenance_date: string | null
+          maintenance_cycle_days: number | null
+          manufactured_date: string | null
+          manufacturer: string
+          product_name: string
+          qr_token: string
+          remarks: string
+          responsible_person: string
+          status: string
+          storage_location: string
+          updated_at: string
+        }
+        Insert: {
+          applicable_equipment?: string
+          applicable_product_drawing_no?: string
+          category?: string
+          created_at?: string
+          fixture_no: string
+          id?: string
+          last_maintenance_date?: string | null
+          maintenance_cycle_days?: number | null
+          manufactured_date?: string | null
+          manufacturer?: string
+          product_name?: string
+          qr_token?: string
+          remarks?: string
+          responsible_person?: string
+          status?: string
+          storage_location?: string
+          updated_at?: string
+        }
+        Update: {
+          applicable_equipment?: string
+          applicable_product_drawing_no?: string
+          category?: string
+          created_at?: string
+          fixture_no?: string
+          id?: string
+          last_maintenance_date?: string | null
+          maintenance_cycle_days?: number | null
+          manufactured_date?: string | null
+          manufacturer?: string
+          product_name?: string
+          qr_token?: string
+          remarks?: string
+          responsible_person?: string
+          status?: string
+          storage_location?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tooling_inventory: {
         Row: {
           created_at: string
@@ -3286,6 +3438,25 @@ export type Database = {
           work_hours: number
         }[]
       }
+      get_tooling_fixture_by_qr_token: {
+        Args: { target_qr_token: string }
+        Returns: {
+          applicable_equipment: string
+          applicable_product_drawing_no: string
+          category: string
+          fixture_no: string
+          id: string
+          last_maintenance_date: string
+          maintenance_cycle_days: number
+          manufactured_date: string
+          manufacturer: string
+          product_name: string
+          remarks: string
+          responsible_person: string
+          status: string
+          storage_location: string
+        }[]
+      }
       get_workshop_order_options: {
         Args: never
         Returns: {
@@ -3305,6 +3476,14 @@ export type Database = {
       recalculate_production_order_totals: {
         Args: { target_order_id: string }
         Returns: undefined
+      }
+      record_tooling_fixture_action: {
+        Args: {
+          target_action: string
+          target_operator_name: string
+          target_qr_token: string
+        }
+        Returns: Json
       }
       refresh_tooling_inventory_pending_stock_in: {
         Args: { target_tooling_data_id: string }
