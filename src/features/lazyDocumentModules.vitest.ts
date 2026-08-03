@@ -48,6 +48,10 @@ const PAGE_DOCUMENT_MODULES = [
     '@/utils/toolingDataExcel',
   ],
   [
+    'src/features/tooling-fixture/ToolingFixtureExcelImport.tsx',
+    '@/utils/toolingFixtureExcel',
+  ],
+  [
     'src/features/tooling/ToolingInventory/ToolingInventoryExcelImport.tsx',
     '@/utils/toolingInventoryExcel',
   ],

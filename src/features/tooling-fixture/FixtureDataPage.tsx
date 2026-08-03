@@ -22,9 +22,11 @@ import PrintButton from '@ui/PrintButton'
 import {
   useCreateToolingFixture,
   useDeleteToolingFixtures,
+  useImportToolingFixtures,
   useToolingFixtureList,
   useUpdateToolingFixture,
 } from './useToolingFixtures'
+import ToolingFixtureExcelImport from './ToolingFixtureExcelImport'
 import ToolingFixtureForm from './ToolingFixtureForm'
 import ToolingFixtureTable from './ToolingFixtureTable'
 import { usePrintToolingFixtureQrLabels } from './usePrintToolingFixtureQrLabels'
@@ -52,6 +54,7 @@ export default function FixtureDataPage() {
   })
   const createMutation = useCreateToolingFixture()
   const updateMutation = useUpdateToolingFixture()
+  const importMutation = useImportToolingFixtures()
   const deleteMutation = useDeleteToolingFixtures()
   const { printLabels, isPrinting } = usePrintToolingFixtureQrLabels()
   const [isPrintLoading, setIsPrintLoading] = useState(false)
@@ -146,6 +149,22 @@ export default function FixtureDataPage() {
     setKeyword(value.trim())
   }, [])
 
+  const handleImport = useCallback(
+    async (rows: ToolingFixtureFormValues[]) => {
+      try {
+        await importMutation.mutateAsync(rows)
+        message.success(`工装资料导入成功，共 ${rows.length} 条`)
+        setSelectedRowKeys([])
+      } catch (error) {
+        message.error(
+          error instanceof Error ? error.message : '导入工装资料失败',
+        )
+        throw error
+      }
+    },
+    [importMutation, message],
+  )
+
   const handlePrintFiltered = useCallback(async () => {
     try {
       setIsPrintLoading(true)
@@ -187,13 +206,19 @@ export default function FixtureDataPage() {
             维护工装模具资料，并为每个工装生成现场扫码二维码。
           </Typography.Text>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusIcon className="size-4" />}
-          onClick={openCreate}
-        >
-          新增工装
-        </Button>
+        <div className="flex items-center gap-2">
+          <ToolingFixtureExcelImport
+            onImport={handleImport}
+            isImporting={importMutation.isPending}
+          />
+          <Button
+            type="primary"
+            icon={<PlusIcon className="size-4" />}
+            onClick={openCreate}
+          >
+            新增工装
+          </Button>
+        </div>
       </div>
 
       <Card>

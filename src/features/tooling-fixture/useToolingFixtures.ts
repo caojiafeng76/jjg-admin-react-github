@@ -5,11 +5,13 @@ import type { ToolingFixtureAction } from './fixtureDomain'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   createToolingFixture,
+  createToolingFixturesBatch,
   deleteToolingFixtures,
   getToolingFixtureList,
   updateToolingFixture,
 } from '@/services/apiToolingFixture'
 import {
+  deleteToolingFixtureUsageRecords,
   getPublicToolingFixture,
   getToolingFixtureUsageRecords,
   recordPublicToolingFixtureAction,
@@ -54,6 +56,13 @@ export function useUpdateToolingFixture() {
   })
 }
 
+export function useImportToolingFixtures() {
+  return useMutationWithInvalidation({
+    mutationFn: createToolingFixturesBatch,
+    invalidateQueries: [toolingFixtureKeys.all],
+  })
+}
+
 export function useDeleteToolingFixtures() {
   return useMutationWithInvalidation({
     mutationFn: deleteToolingFixtures,
@@ -76,6 +85,13 @@ export function useToolingFixtureUsageRecords({
       getToolingFixtureUsageRecords({ page, pageSize, action, signal }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
+  })
+}
+
+export function useDeleteToolingFixtureUsageRecords() {
+  return useMutationWithInvalidation({
+    mutationFn: deleteToolingFixtureUsageRecords,
+    invalidateQueries: [toolingFixtureKeys.all],
   })
 }
 

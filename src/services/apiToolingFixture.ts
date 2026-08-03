@@ -308,3 +308,47 @@ export async function deleteToolingFixtures(ids: string[]): Promise<void> {
     throw handleApiError(error, '删除工装资料失败')
   }
 }
+
+export async function createToolingFixturesBatch(
+  rows: ToolingFixtureFormValues[],
+): Promise<void> {
+  if (rows.length === 0) {
+    throw new Error('请选择至少一条工装资料')
+  }
+
+  const payload = rows.map(normalizeToolingFixtureFormValues)
+
+  const fixtureNoSet = new Set<string>()
+
+  for (const row of payload) {
+    if (fixtureNoSet.has(row.fixture_no)) {
+      throw new Error(`Excel 中存在重复工装模具编号“${row.fixture_no}”`)
+    }
+
+    fixtureNoSet.add(row.fixture_no)
+  }
+
+  const fixtureNos = payload.map((row) => row.fixture_no)
+  const { data: existingRows, error: existingError } = await supabase
+    .from('tooling_fixtures')
+    .select('fixture_no')
+    .in('fixture_no', fixtureNos)
+
+  if (existingError) {
+    throw handleApiError(existingError, '检查工装模具编号是否已存在失败')
+  }
+
+  if ((existingRows ?? []).length > 0) {
+    const duplicateNos = (existingRows as Array<{ fixture_no: string }>)
+      .map((row) => row.fixture_no)
+      .join('、')
+
+    throw new Error(`以下工装模具编号已存在，无法导入：${duplicateNos}`)
+  }
+
+  const { error } = await supabase.from('tooling_fixtures').insert(payload)
+
+  if (error) {
+    throw handleApiError(error, '批量导入工装资料失败')
+  }
+}

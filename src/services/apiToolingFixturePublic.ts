@@ -261,3 +261,22 @@ export async function getToolingFixtureUsageRecords({
 
   return { items: items ?? [], total: count ?? 0 }
 }
+
+export async function deleteToolingFixtureUsageRecords(
+  ids: string[],
+): Promise<void> {
+  const normalizedIds = ids.filter(Boolean)
+
+  if (normalizedIds.length === 0) {
+    throw new Error('请选择至少一条出入记录')
+  }
+
+  const { error } = await supabase
+    .from('tooling_fixture_usage_records')
+    .delete()
+    .in('id', normalizedIds)
+
+  if (error) {
+    throw handleApiError(error, '删除工装出入记录失败')
+  }
+}

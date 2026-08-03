@@ -9,6 +9,7 @@ vi.mock('./supabase', () => ({
 }))
 
 import {
+  createToolingFixturesBatch,
   getAllToolingFixtures,
   normalizeToolingFixtureFormValues,
 } from './apiToolingFixture'
@@ -23,6 +24,8 @@ interface FixtureQueryBuilder {
   eq: ReturnType<typeof vi.fn>
   abortSignal: ReturnType<typeof vi.fn>
   range: ReturnType<typeof vi.fn>
+  in: ReturnType<typeof vi.fn>
+  insert: ReturnType<typeof vi.fn>
 }
 
 function createFixtureQueryBuilder(): FixtureQueryBuilder {
@@ -36,6 +39,8 @@ function createFixtureQueryBuilder(): FixtureQueryBuilder {
     eq: vi.fn(),
     abortSignal: vi.fn(),
     range: vi.fn(),
+    in: vi.fn(),
+    insert: vi.fn(),
   } as FixtureQueryBuilder
 
   builder.select.mockReturnValue(builder)
@@ -47,6 +52,14 @@ function createFixtureQueryBuilder(): FixtureQueryBuilder {
     data: builder.data,
     error: builder.error,
     count: builder.count,
+  }))
+  builder.in.mockImplementation(() => ({
+    data: builder.data,
+    error: builder.error,
+  }))
+  builder.insert.mockImplementation(() => ({
+    data: null,
+    error: builder.error,
   }))
 
   return builder
@@ -184,6 +197,61 @@ describe('getAllToolingFixtures', () => {
 
     await expect(getAllToolingFixtures({})).rejects.toThrow(
       '工装状态无效，请联系管理员',
+    )
+  })
+})
+
+describe('createToolingFixturesBatch', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('normalizes and inserts rows when no numbers already exist', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = []
+
+    await createToolingFixturesBatch([
+      completeValues,
+      { ...completeValues, fixture_no: '  JG-002  ', manufactured_date: null },
+    ])
+
+    expect(fromMock).toHaveBeenCalledWith('tooling_fixtures')
+    expect(builder.select).toHaveBeenCalledWith('fixture_no')
+    expect(builder.in).toHaveBeenCalledWith('fixture_no', ['JG-001', 'JG-002'])
+    expect(builder.insert).toHaveBeenCalledWith([
+      expect.objectContaining({ fixture_no: 'JG-001' }),
+      expect.objectContaining({ fixture_no: 'JG-002', manufactured_date: null }),
+    ])
+  })
+
+  it('rejects duplicate numbers inside the batch', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+
+    await expect(
+      createToolingFixturesBatch([
+        completeValues,
+        { ...completeValues, fixture_no: '  JG-001  ' },
+      ]),
+    ).rejects.toThrow('Excel 中存在重复工装模具编号“JG-001”')
+    expect(builder.insert).not.toHaveBeenCalled()
+  })
+
+  it('rejects numbers that already exist in the database', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = [{ fixture_no: 'JG-001' }]
+
+    await expect(
+      createToolingFixturesBatch([completeValues]),
+    ).rejects.toThrow('以下工装模具编号已存在，无法导入：JG-001')
+    expect(builder.insert).not.toHaveBeenCalled()
+  })
+
+  it('rejects empty batches', async () => {
+    await expect(createToolingFixturesBatch([])).rejects.toThrow(
+      '请选择至少一条工装资料',
     )
   })
 })
