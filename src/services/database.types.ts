@@ -913,6 +913,7 @@ export type Database = {
           created_at: string
           customer: string | null
           customer_model: string | null
+          data_error_responsible: string | null
           defect_reason: string | null
           erp_long_material_quantity: number | null
           id: string
@@ -944,6 +945,7 @@ export type Database = {
           created_at?: string
           customer?: string | null
           customer_model?: string | null
+          data_error_responsible?: string | null
           defect_reason?: string | null
           erp_long_material_quantity?: number | null
           id?: string
@@ -975,6 +977,7 @@ export type Database = {
           created_at?: string
           customer?: string | null
           customer_model?: string | null
+          data_error_responsible?: string | null
           defect_reason?: string | null
           erp_long_material_quantity?: number | null
           id?: string

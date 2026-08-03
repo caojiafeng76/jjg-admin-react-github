@@ -29,6 +29,7 @@ function createRecord(
     created_at: '2026-08-03T08:00:00.000Z',
     customer: '客户A',
     customer_model: '客户型号A',
+    data_error_responsible: null,
     defect_reason: null,
     id: 'transfer-001',
     inspector_name: '检验员',
@@ -75,6 +76,7 @@ describe('exportPrecisionCuttingTransfersToExcel', () => {
     const record = Object.assign(createRecord(), {
       process_card_long_material_quantity: 12,
       erp_long_material_quantity: 8,
+      data_error_responsible: '张三',
     })
 
     exportPrecisionCuttingTransfersToExcel([record])
@@ -86,6 +88,7 @@ describe('exportPrecisionCuttingTransfersToExcel', () => {
     expect(worksheet.J2?.v).toBe('与流程卡长料数量差异')
     expect(worksheet.K2?.v).toBe('ERP长料数量')
     expect(worksheet.L2?.v).toBe('与ERP长料数量差异')
+    expect(worksheet.M2?.v).toBe('数据错误责任人')
     expect(worksheet.H3?.v).toBe(10)
     expect(worksheet.I3?.v).toBe(12)
     expect(worksheet.J3?.f).toBe('H3-I3')
@@ -93,6 +96,7 @@ describe('exportPrecisionCuttingTransfersToExcel', () => {
     expect(worksheet.K3?.v).toBe(8)
     expect(worksheet.L3?.f).toBe('H3-K3')
     expect(worksheet.L3?.v).toBe(2)
+    expect(worksheet.M3?.v).toBe('张三')
   })
 
   it('leaves differences blank when process-card or ERP quantities are absent', () => {

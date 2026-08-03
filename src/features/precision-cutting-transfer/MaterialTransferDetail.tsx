@@ -50,6 +50,7 @@ export default function MaterialTransferDetail({
     long_material_quantity,
     process_card_long_material_quantity,
     erp_long_material_quantity,
+    data_error_responsible,
     raw_material_defect_count,
     processing_defect_count,
     defect_reason,
@@ -152,6 +153,11 @@ export default function MaterialTransferDetail({
               key: 'erp_long_material_quantity',
               label: 'ERP长料数量',
               children: erp_long_material_quantity ?? '-',
+            },
+            {
+              key: 'data_error_responsible',
+              label: '数据错误责任人',
+              children: data_error_responsible || '-',
             },
             {
               key: 'raw_material_defect_count',

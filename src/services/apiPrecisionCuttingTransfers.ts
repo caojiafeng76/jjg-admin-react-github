@@ -50,6 +50,7 @@ export interface PrecisionCuttingTransferRow {
   created_at: string
   customer: string | null
   customer_model: string | null
+  data_error_responsible: string | null
   defect_reason: string | null
   id: string
   inspector_name: string | null
@@ -82,6 +83,7 @@ export interface PrecisionCuttingTransferInsertBase {
   created_at?: string
   customer?: string | null
   customer_model?: string | null
+  data_error_responsible?: string | null
   defect_reason?: string | null
   id?: string
   inspector_name?: string | null
@@ -114,6 +116,7 @@ export interface PrecisionCuttingTransferUpdateBase {
   created_at?: string
   customer?: string | null
   customer_model?: string | null
+  data_error_responsible?: string | null
   defect_reason?: string | null
   id?: string
   inspector_name?: string | null
@@ -370,6 +373,7 @@ function normalizePrecisionCuttingTransferInsertPayload(
     length_mm: values.length_mm ?? null,
     customer: values.customer?.trim() || null,
     customer_model: values.customer_model?.trim() || null,
+    data_error_responsible: values.data_error_responsible?.trim() || null,
     raw_material_defect_count: normalizeDefectCount(
       values.raw_material_defect_count,
       '原料不良数',
@@ -435,6 +439,11 @@ function normalizePrecisionCuttingTransferUpdatePayload(
 
   if (values.customer !== undefined) {
     payload.customer = values.customer?.trim() || null
+  }
+
+  if (values.data_error_responsible !== undefined) {
+    payload.data_error_responsible =
+      values.data_error_responsible?.trim() || null
   }
 
   if (values.raw_material_defect_count !== undefined) {

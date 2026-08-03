@@ -15,6 +15,13 @@
 
 ## 2026-08-03
 
+- **类别**：新增
+- **范围**：`src/features/precision-cutting-transfer/`（精切转移单）、`src/services/apiPrecisionCuttingTransfers.ts`、`src/utils/precisionCuttingTransferExcel.ts`、Supabase migration
+- **摘要**：精切转移单新增「数据错误责任人」字段（`data_error_responsible`），经 MCP 执行迁移并重新生成 `database.types.ts`，表单可编辑，表格/详情/导出同步展示；新增/编辑表单中「与流程卡长料数量差异」「与ERP长料数量差异」自动计算（实际长料数量 − 参考数量，参考为空时显示 `-`），只读不可编辑；导出报表新增「数据错误责任人」列。
+- **验证**：MCP 迁移应用成功；`bun run typecheck`、`bun lint` 通过；`precisionCuttingTransferExcel.vitest.ts` 2/2 通过（含新列断言）。
+
+## 2026-08-03
+
 - **类别**：变更
 - **范围**：`src/features/tooling-fixture/`（工装资料页）、`src/services/apiToolingFixture.ts`
 - **摘要**：工装资料二维码打印改为「直接打印当前筛选结果」：工具栏「打印二维码」按钮常驻，不再依赖勾选行，点击后按当前关键字/状态筛选条件全量查询（上限 1000 条，超限提示缩小范围）并打印；保留表格单行「打印」按钮与「删除选中」。

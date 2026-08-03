@@ -21,6 +21,7 @@ const EXPORT_HEADERS = [
   '与流程卡长料数量差异',
   'ERP长料数量',
   '与ERP长料数量差异',
+  '数据错误责任人',
   '原料不良数',
   '加工不良数',
   '外协不良数',
@@ -43,8 +44,8 @@ const EXPORT_HEADERS = [
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  20, 14, 18, 9, 10, 24, 12, 12, 12, 16, 12, 16, 10, 10, 10, 12, 12, 18, 18, 14, 14, 14,
-  10, 14, 10, 8, 8, 9, 10, 18, 16,
+  20, 14, 18, 9, 10, 24, 12, 12, 12, 16, 12, 16, 14, 10, 10, 10, 12, 12, 18,
+  18, 14, 14, 14, 10, 14, 10, 8, 8, 9, 10, 18, 16,
 ]
 
 function formatDateTime(value: string | null | undefined) {
@@ -71,6 +72,7 @@ export function exportPrecisionCuttingTransfersToExcel(
     '',
     record.erp_long_material_quantity ?? '',
     '',
+    record.data_error_responsible || '',
     record.raw_material_defect_count,
     record.processing_defect_count,
     record.outsource_defect_quantity,

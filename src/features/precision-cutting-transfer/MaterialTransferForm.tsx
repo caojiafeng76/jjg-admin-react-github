@@ -58,6 +58,23 @@ export default function MaterialTransferForm({
   const { data: projectNos, isLoading: isLoadingProjectNos } =
     useSalesOrdersProjectNos()
 
+  const longMaterialQuantity = Form.useWatch('long_material_quantity', form)
+  const processCardQuantity = Form.useWatch(
+    'process_card_long_material_quantity',
+    form,
+  )
+  const erpQuantity = Form.useWatch('erp_long_material_quantity', form)
+
+  const processCardDiff =
+    longMaterialQuantity == null || processCardQuantity == null
+      ? null
+      : longMaterialQuantity - processCardQuantity
+
+  const erpDiff =
+    longMaterialQuantity == null || erpQuantity == null
+      ? null
+      : longMaterialQuantity - erpQuantity
+
   const recipientOptions = useMemo(
     () =>
       PRECISION_CUTTING_TRANSFER_RECIPIENTS.map((name) => ({
@@ -106,6 +123,8 @@ export default function MaterialTransferForm({
           initialValues.process_card_long_material_quantity ?? undefined,
         erp_long_material_quantity:
           initialValues.erp_long_material_quantity ?? undefined,
+        data_error_responsible:
+          initialValues.data_error_responsible || undefined,
         transfer_quantity: initialValues.transfer_quantity,
         operator_names: initialValues.operator_names,
         target_workshop: initialValues.target_workshop,
@@ -172,6 +191,7 @@ export default function MaterialTransferForm({
       process_card_long_material_quantity:
         values.process_card_long_material_quantity ?? null,
       erp_long_material_quantity: values.erp_long_material_quantity ?? null,
+      data_error_responsible: values.data_error_responsible || null,
       transfer_quantity: values.transfer_quantity,
       operator_names: operatorNames,
       target_workshop: values.target_workshop,
@@ -197,6 +217,20 @@ export default function MaterialTransferForm({
   const sectionDot = (className = 'bg-blue-500') => (
     <span className={`h-1.5 w-1.5 rounded-full ${className}`} />
   )
+
+  const renderQuantityDiff = (value: number | null) =>
+    value === null ? (
+      <span className="text-slate-400">-</span>
+    ) : value !== 0 ? (
+      <span className="font-semibold text-amber-600 tabular-nums">
+        {value}
+      </span>
+    ) : (
+      <span className="text-slate-600 tabular-nums">{value}</span>
+    )
+
+  const readOnlyDiffFieldClassName =
+    'flex h-8 w-full items-center justify-center rounded-lg border border-dashed border-amber-200 bg-amber-50/60 px-2 text-sm'
 
   const outsourceSection = (
     <section className="rounded-2xl border border-red-200/80 bg-red-50/70 p-4 shadow-sm">
@@ -361,6 +395,35 @@ export default function MaterialTransferForm({
                 className={formItemClassName}
               >
                 <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
+
+              <Form.Item
+                label="与流程卡长料数量差异"
+                className={formItemClassName}
+                tooltip="自动计算：实际长料数量 − 流程卡长料数量"
+              >
+                <div className={readOnlyDiffFieldClassName}>
+                  {renderQuantityDiff(processCardDiff)}
+                </div>
+              </Form.Item>
+
+              <Form.Item
+                label="与ERP长料数量差异"
+                className={formItemClassName}
+                tooltip="自动计算：实际长料数量 − ERP长料数量"
+              >
+                <div className={readOnlyDiffFieldClassName}>
+                  {renderQuantityDiff(erpDiff)}
+                </div>
+              </Form.Item>
+
+              <Form.Item
+                name="data_error_responsible"
+                label="数据错误责任人"
+                className={formItemClassName}
+                tooltip="数量差异导致数据错误时填写"
+              >
+                <Input placeholder="可填写数据错误责任人" />
               </Form.Item>
 
               <Form.Item

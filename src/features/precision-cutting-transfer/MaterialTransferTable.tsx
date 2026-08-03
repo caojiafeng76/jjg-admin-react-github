@@ -172,6 +172,13 @@ export default function MaterialTransferTable({
         render: (value: number | null) => value ?? '-',
       },
       {
+        title: '数据错误责任人',
+        dataIndex: 'data_error_responsible',
+        key: 'data_error_responsible',
+        width: 120,
+        render: (value: string | null) => value || '-',
+      },
+      {
         title: '转移数量',
         dataIndex: 'transfer_quantity',
         key: 'transfer_quantity',
@@ -246,7 +253,7 @@ export default function MaterialTransferTable({
       dataSource={data}
       rowSelection={rowSelection}
       onRow={handleRow}
-      scroll={{ x: 1120, y: scrollY }}
+      scroll={{ x: 1240, y: scrollY }}
       size="small"
       pagination={false}
       style={{ fontSize: '13px' }}
