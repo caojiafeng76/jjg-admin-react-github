@@ -9,7 +9,7 @@ import {
 } from 'antd'
 
 import type { ToolingFixture } from '@/services/apiToolingFixture'
-import { buildToolingFixtureQrPath } from './fixtureDomain'
+import { getToolingFixtureQrValue } from './fixtureDomain'
 
 interface ToolingFixtureTableProps {
   loading: boolean
@@ -18,19 +18,10 @@ interface ToolingFixtureTableProps {
   onSelect: (keys: React.Key[]) => void
   onEdit: (record: ToolingFixture) => void
   onDelete: (record: ToolingFixture) => void
+  onPrint: (record: ToolingFixture) => void
   page: number
   pageSize: number
   scrollY?: number
-}
-
-function getQrValue(token: string): string {
-  const path = buildToolingFixtureQrPath(token)
-
-  if (typeof window === 'undefined') {
-    return path
-  }
-
-  return `${window.location.origin}${path}`
 }
 
 function formatDate(value: string | null): string {
@@ -48,6 +39,7 @@ function ToolingFixtureTable({
   onSelect,
   onEdit,
   onDelete,
+  onPrint,
   page,
   pageSize,
   scrollY = 520,
@@ -68,7 +60,7 @@ function ToolingFixtureTable({
         render: (_value, record) => (
           <Tooltip title="扫码打开工装操作页">
             <QRCode
-              value={getQrValue(record.qr_token)}
+              value={getToolingFixtureQrValue(record.qr_token)}
               size={76}
               bordered={false}
             />
@@ -175,9 +167,16 @@ function ToolingFixtureTable({
         title: '操作',
         key: 'actions',
         fixed: 'right',
-        width: 130,
+        width: 150,
         render: (_value, record) => (
           <div className="flex gap-2">
+            <Button
+              type="link"
+              size="small"
+              onClick={() => onPrint(record)}
+            >
+              打印
+            </Button>
             <Button type="link" size="small" onClick={() => onEdit(record)}>
               编辑
             </Button>
@@ -193,7 +192,7 @@ function ToolingFixtureTable({
         ),
       },
     ],
-    [onDelete, onEdit, page, pageSize],
+    [onDelete, onEdit, onPrint, page, pageSize],
   )
 
   return (

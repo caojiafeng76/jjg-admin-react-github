@@ -22,3 +22,13 @@ export function buildToolingFixtureQrPath(qrToken: string): string {
 
   return `${TOOLING_FIXTURE_PUBLIC_QR_PREFIX}${encodeURIComponent(normalizedToken)}`
 }
+
+export function getToolingFixtureQrValue(qrToken: string): string {
+  const path = buildToolingFixtureQrPath(qrToken)
+
+  if (typeof window === 'undefined') {
+    return path
+  }
+
+  return `${window.location.origin}${path}`
+}

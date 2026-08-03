@@ -17,6 +17,7 @@ import type {
   ToolingFixture,
   ToolingFixtureFormValues,
 } from '@/services/apiToolingFixture'
+import PrintButton from '@ui/PrintButton'
 import {
   useCreateToolingFixture,
   useDeleteToolingFixtures,
@@ -25,6 +26,7 @@ import {
 } from './useToolingFixtures'
 import ToolingFixtureForm from './ToolingFixtureForm'
 import ToolingFixtureTable from './ToolingFixtureTable'
+import { usePrintToolingFixtureQrLabels } from './usePrintToolingFixtureQrLabels'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -50,6 +52,7 @@ export default function FixtureDataPage() {
   const createMutation = useCreateToolingFixture()
   const updateMutation = useUpdateToolingFixture()
   const deleteMutation = useDeleteToolingFixtures()
+  const { printLabels, isPrinting } = usePrintToolingFixtureQrLabels()
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
   const closeModal = useCallback(() => {
@@ -141,6 +144,20 @@ export default function FixtureDataPage() {
     setKeyword(value.trim())
   }, [])
 
+  const handlePrintSelected = useCallback(() => {
+    const records = (data?.items ?? []).filter((item) =>
+      selectedRowKeys.includes(item.id),
+    )
+    void printLabels(records)
+  }, [data?.items, printLabels, selectedRowKeys])
+
+  const handlePrintRecord = useCallback(
+    (record: ToolingFixture) => {
+      void printLabels([record])
+    },
+    [printLabels],
+  )
+
   return (
     <div className="space-y-4 p-4 md:p-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -184,9 +201,18 @@ export default function FixtureDataPage() {
             }}
           />
           {selectedRowKeys.length > 0 ? (
-            <Button danger onClick={handleDeleteSelected}>
-              删除选中
-            </Button>
+            <>
+              <PrintButton
+                handlePrint={handlePrintSelected}
+                loading={isPrinting}
+                count={selectedRowKeys.length}
+              >
+                打印二维码
+              </PrintButton>
+              <Button danger onClick={handleDeleteSelected}>
+                删除选中
+              </Button>
+            </>
           ) : null}
         </Space>
 
@@ -197,6 +223,7 @@ export default function FixtureDataPage() {
           onSelect={setSelectedRowKeys}
           onEdit={openEdit}
           onDelete={handleDelete}
+          onPrint={handlePrintRecord}
           page={page}
           pageSize={DEFAULT_PAGE_SIZE}
         />
