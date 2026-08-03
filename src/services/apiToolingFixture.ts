@@ -137,6 +137,19 @@ async function fixtureNoExists(fixtureNo: string, excludeId?: string) {
   return Array.isArray(data) && data.length > 0
 }
 
+const TOOLING_FIXTURE_SEARCH_FIELDS = [
+  'fixture_no',
+  'category',
+  'applicable_product_drawing_no',
+  'product_name',
+  'applicable_equipment',
+  'storage_location',
+  'manufacturer',
+  'responsible_person',
+] as const
+
+const TOOLING_FIXTURE_ALL_LIMIT = 1000
+
 export async function getToolingFixtureList({
   page,
   pageSize,
@@ -158,16 +171,7 @@ export async function getToolingFixtureList({
   if (normalizedKeyword) {
     query = query.or(
       buildPostgrestOrIlikeFilter(
-        [
-          'fixture_no',
-          'category',
-          'applicable_product_drawing_no',
-          'product_name',
-          'applicable_equipment',
-          'storage_location',
-          'manufacturer',
-          'responsible_person',
-        ],
+        TOOLING_FIXTURE_SEARCH_FIELDS,
         normalizedKeyword,
       ),
     )
@@ -195,6 +199,57 @@ export async function getToolingFixtureList({
     items: (data ?? []).map(parseToolingFixture),
     total: count ?? 0,
   }
+}
+
+export async function getAllToolingFixtures({
+  keyword,
+  status,
+  signal,
+}: {
+  keyword?: string
+  status?: ToolingFixture['status']
+  signal?: AbortSignal
+}): Promise<ToolingFixture[]> {
+  const normalizedKeyword = normalizeText(keyword)
+  let query = supabase
+    .from('tooling_fixtures')
+    .select('*', { count: 'exact' })
+
+  if (normalizedKeyword) {
+    query = query.or(
+      buildPostgrestOrIlikeFilter(
+        TOOLING_FIXTURE_SEARCH_FIELDS,
+        normalizedKeyword,
+      ),
+    )
+  }
+
+  if (status) {
+    query = query.eq('status', status)
+  }
+
+  query = query
+    .order('updated_at', { ascending: false })
+    .order('fixture_no', { ascending: true })
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error, count } = await query.range(
+    0,
+    TOOLING_FIXTURE_ALL_LIMIT - 1,
+  )
+
+  if (error) {
+    throw handleApiError(error, '获取工装资料列表失败')
+  }
+
+  if ((count ?? 0) > TOOLING_FIXTURE_ALL_LIMIT) {
+    throw new Error('筛选结果超过 1000 条，请缩小筛选范围后重试')
+  }
+
+  return (data ?? []).map(parseToolingFixture)
 }
 
 export async function createToolingFixture(

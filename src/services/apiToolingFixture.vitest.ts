@@ -1,5 +1,56 @@
-import { describe, expect, it } from 'vitest'
-import { normalizeToolingFixtureFormValues } from './apiToolingFixture'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+const { fromMock } = vi.hoisted(() => ({
+  fromMock: vi.fn(),
+}))
+
+vi.mock('./supabase', () => ({
+  default: { from: fromMock },
+}))
+
+import {
+  getAllToolingFixtures,
+  normalizeToolingFixtureFormValues,
+} from './apiToolingFixture'
+
+interface FixtureQueryBuilder {
+  data: unknown[]
+  error: null
+  count: number
+  select: ReturnType<typeof vi.fn>
+  order: ReturnType<typeof vi.fn>
+  or: ReturnType<typeof vi.fn>
+  eq: ReturnType<typeof vi.fn>
+  abortSignal: ReturnType<typeof vi.fn>
+  range: ReturnType<typeof vi.fn>
+}
+
+function createFixtureQueryBuilder(): FixtureQueryBuilder {
+  const builder = {
+    data: [],
+    error: null,
+    count: 0,
+    select: vi.fn(),
+    order: vi.fn(),
+    or: vi.fn(),
+    eq: vi.fn(),
+    abortSignal: vi.fn(),
+    range: vi.fn(),
+  } as FixtureQueryBuilder
+
+  builder.select.mockReturnValue(builder)
+  builder.order.mockReturnValue(builder)
+  builder.or.mockReturnValue(builder)
+  builder.eq.mockReturnValue(builder)
+  builder.abortSignal.mockReturnValue(builder)
+  builder.range.mockImplementation(() => ({
+    data: builder.data,
+    error: builder.error,
+    count: builder.count,
+  }))
+
+  return builder
+}
 
 const completeValues = {
   fixture_no: '  JG-001  ',
@@ -52,5 +103,87 @@ describe('normalizeToolingFixtureFormValues', () => {
         manufactured_date: 'bad-date',
       }),
     ).toThrow('制作日期格式无效')
+  })
+})
+
+describe('getAllToolingFixtures', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('fetches all fixtures up to 1000 rows without filters', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = [
+      {
+        id: '1',
+        qr_token: 'token-1',
+        fixture_no: 'FIX-001',
+        product_name: '产品一',
+        status: '未使用',
+        lifecycle: '正常',
+      },
+    ]
+    builder.count = 1
+
+    const items = await getAllToolingFixtures({})
+
+    expect(fromMock).toHaveBeenCalledWith('tooling_fixtures')
+    expect(builder.select).toHaveBeenCalledWith('*', { count: 'exact' })
+    expect(builder.or).not.toHaveBeenCalled()
+    expect(builder.eq).not.toHaveBeenCalled()
+    expect(builder.order.mock.calls).toEqual([
+      ['updated_at', { ascending: false }],
+      ['fixture_no', { ascending: true }],
+    ])
+    expect(builder.range).toHaveBeenCalledWith(0, 999)
+    expect(items).toHaveLength(1)
+    expect(items[0].fixture_no).toBe('FIX-001')
+    expect(items[0].status).toBe('未使用')
+  })
+
+  it('applies keyword and status filters and forwards the abort signal', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = []
+    builder.count = 0
+    const signal = new AbortController().signal
+
+    await getAllToolingFixtures({ keyword: '  FIX  ', status: '使用中', signal })
+
+    expect(builder.or).toHaveBeenCalledWith(
+      'fixture_no.ilike."%FIX%",category.ilike."%FIX%",applicable_product_drawing_no.ilike."%FIX%",product_name.ilike."%FIX%",applicable_equipment.ilike."%FIX%",storage_location.ilike."%FIX%",manufacturer.ilike."%FIX%",responsible_person.ilike."%FIX%"',
+    )
+    expect(builder.eq).toHaveBeenCalledWith('status', '使用中')
+    expect(builder.abortSignal).toHaveBeenCalledWith(signal)
+  })
+
+  it('rejects filters that exceed the 1000-row cap', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = []
+    builder.count = 1001
+
+    await expect(getAllToolingFixtures({})).rejects.toThrow(
+      '筛选结果超过 1000 条',
+    )
+  })
+
+  it('rejects rows with an invalid status or lifecycle', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = [
+      {
+        id: '1',
+        fixture_no: 'FIX-001',
+        status: '已作废',
+        lifecycle: '正常',
+      },
+    ]
+    builder.count = 1
+
+    await expect(getAllToolingFixtures({})).rejects.toThrow(
+      '工装状态无效，请联系管理员',
+    )
   })
 })

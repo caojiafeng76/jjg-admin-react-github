@@ -13,9 +13,10 @@ import {
 } from 'antd'
 import type { FormInstance } from 'antd'
 
-import type {
-  ToolingFixture,
-  ToolingFixtureFormValues,
+import {
+  getAllToolingFixtures,
+  type ToolingFixture,
+  type ToolingFixtureFormValues,
 } from '@/services/apiToolingFixture'
 import PrintButton from '@ui/PrintButton'
 import {
@@ -53,6 +54,7 @@ export default function FixtureDataPage() {
   const updateMutation = useUpdateToolingFixture()
   const deleteMutation = useDeleteToolingFixtures()
   const { printLabels, isPrinting } = usePrintToolingFixtureQrLabels()
+  const [isPrintLoading, setIsPrintLoading] = useState(false)
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
   const closeModal = useCallback(() => {
@@ -144,12 +146,28 @@ export default function FixtureDataPage() {
     setKeyword(value.trim())
   }, [])
 
-  const handlePrintSelected = useCallback(() => {
-    const records = (data?.items ?? []).filter((item) =>
-      selectedRowKeys.includes(item.id),
-    )
-    void printLabels(records)
-  }, [data?.items, printLabels, selectedRowKeys])
+  const handlePrintFiltered = useCallback(async () => {
+    try {
+      setIsPrintLoading(true)
+      const items = await getAllToolingFixtures({
+        keyword: keyword || undefined,
+        status,
+      })
+
+      if (items.length === 0) {
+        message.warning('当前筛选条件下没有可打印的工装')
+        return
+      }
+
+      await printLabels(items)
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : '获取工装资料失败',
+      )
+    } finally {
+      setIsPrintLoading(false)
+    }
+  }, [keyword, message, printLabels, status])
 
   const handlePrintRecord = useCallback(
     (record: ToolingFixture) => {
@@ -200,19 +218,16 @@ export default function FixtureDataPage() {
               setStatus(value)
             }}
           />
+          <PrintButton
+            handlePrint={handlePrintFiltered}
+            loading={isPrinting || isPrintLoading}
+          >
+            打印二维码
+          </PrintButton>
           {selectedRowKeys.length > 0 ? (
-            <>
-              <PrintButton
-                handlePrint={handlePrintSelected}
-                loading={isPrinting}
-                count={selectedRowKeys.length}
-              >
-                打印二维码
-              </PrintButton>
-              <Button danger onClick={handleDeleteSelected}>
-                删除选中
-              </Button>
-            </>
+            <Button danger onClick={handleDeleteSelected}>
+              删除选中
+            </Button>
           ) : null}
         </Space>
 
