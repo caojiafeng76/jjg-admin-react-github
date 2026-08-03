@@ -3450,6 +3450,7 @@ export type Database = {
           fixture_no: string
           id: string
           last_maintenance_date: string
+          lifecycle: string
           maintenance_cycle_days: number
           manufactured_date: string
           manufacturer: string
