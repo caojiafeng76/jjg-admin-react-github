@@ -1,6 +1,10 @@
 import dayjs from 'dayjs'
 
-import type { ToolingFixtureStatus } from '@/features/tooling-fixture/fixtureDomain'
+import type {
+  ToolingFixtureLifecycle,
+  ToolingFixtureStatus,
+} from '@/features/tooling-fixture/fixtureDomain'
+import { TOOLING_FIXTURE_LIFECYCLES } from '@/features/tooling-fixture/fixtureDomain'
 import { handleApiError } from '@/utils/errorHandler'
 import { buildPostgrestOrIlikeFilter } from '@/utils/postgrestFilters'
 import type { Database } from './database.types'
@@ -8,8 +12,9 @@ import supabase from './supabase'
 
 type ToolingFixtureRow = Database['public']['Tables']['tooling_fixtures']['Row']
 
-export type ToolingFixture = Omit<ToolingFixtureRow, 'status'> & {
+export type ToolingFixture = Omit<ToolingFixtureRow, 'status' | 'lifecycle'> & {
   status: ToolingFixtureStatus
+  lifecycle: ToolingFixtureLifecycle
 }
 
 export interface ToolingFixtureFormValues {
@@ -21,6 +26,7 @@ export interface ToolingFixtureFormValues {
   storage_location: string
   manufactured_date: string | null
   manufacturer: string
+  lifecycle: ToolingFixtureLifecycle
   last_maintenance_date: string | null
   maintenance_cycle_days: number | null
   responsible_person: string
@@ -55,7 +61,15 @@ function parseToolingFixture(row: ToolingFixtureRow): ToolingFixture {
     throw new Error('工装状态无效，请联系管理员')
   }
 
-  return { ...row, status: row.status as ToolingFixtureStatus }
+  if (!TOOLING_FIXTURE_LIFECYCLES.includes(row.lifecycle as ToolingFixtureLifecycle)) {
+    throw new Error('工装寿命状态无效，请联系管理员')
+  }
+
+  return {
+    ...row,
+    status: row.status as ToolingFixtureStatus,
+    lifecycle: row.lifecycle as ToolingFixtureLifecycle,
+  }
 }
 
 export function normalizeToolingFixtureFormValues(
@@ -77,6 +91,10 @@ export function normalizeToolingFixtureFormValues(
     throw new Error('保养周期必须是大于 0 的整数天数')
   }
 
+  if (!TOOLING_FIXTURE_LIFECYCLES.includes(values.lifecycle)) {
+    throw new Error('工装寿命状态无效，请联系管理员')
+  }
+
   return {
     fixture_no: fixtureNo,
     category: normalizeText(values.category),
@@ -88,6 +106,7 @@ export function normalizeToolingFixtureFormValues(
     storage_location: normalizeText(values.storage_location),
     manufactured_date: normalizeDate(values.manufactured_date, '制作日期'),
     manufacturer: normalizeText(values.manufacturer),
+    lifecycle: values.lifecycle,
     last_maintenance_date: normalizeDate(
       values.last_maintenance_date,
       '上次保养日期',

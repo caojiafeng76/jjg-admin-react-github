@@ -7,6 +7,7 @@ export const TOOLING_FIXTURE_FORM_FIELDS = [
   { name: 'storage_location', label: '存放位置' },
   { name: 'manufactured_date', label: '制作日期' },
   { name: 'manufacturer', label: '制作厂商' },
+  { name: 'lifecycle', label: '寿命' },
   { name: 'status', label: '状态' },
   { name: 'last_maintenance_date', label: '上次保养日期' },
   { name: 'maintenance_cycle_days', label: '保养周期（天）' },

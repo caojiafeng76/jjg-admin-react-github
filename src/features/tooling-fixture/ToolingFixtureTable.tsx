@@ -130,6 +130,21 @@ function ToolingFixtureTable({
         ),
       },
       {
+        title: '寿命',
+        dataIndex: 'lifecycle',
+        key: 'lifecycle',
+        width: 90,
+        render: (lifecycle: ToolingFixture['lifecycle']) => {
+          const color =
+            lifecycle === '正常'
+              ? 'green'
+              : lifecycle === '维修'
+                ? 'orange'
+                : 'red'
+          return <Tag color={color}>{lifecycle}</Tag>
+        },
+      },
+      {
         title: '上次保养日期',
         dataIndex: 'last_maintenance_date',
         key: 'last_maintenance_date',

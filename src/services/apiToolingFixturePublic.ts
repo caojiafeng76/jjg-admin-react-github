@@ -1,7 +1,9 @@
 import {
   TOOLING_FIXTURE_ACTIONS,
+  TOOLING_FIXTURE_LIFECYCLES,
   TOOLING_FIXTURE_STATUSES,
   type ToolingFixtureAction,
+  type ToolingFixtureLifecycle,
   type ToolingFixtureStatus,
 } from '@/features/tooling-fixture/fixtureDomain'
 import { handleApiError } from '@/utils/errorHandler'
@@ -20,6 +22,7 @@ export interface PublicToolingFixture {
   manufactured_date: string | null
   manufacturer: string
   status: ToolingFixtureStatus
+  lifecycle: ToolingFixtureLifecycle
   last_maintenance_date: string | null
   maintenance_cycle_days: number | null
   responsible_person: string
@@ -63,7 +66,17 @@ function parsePublicToolingFixture(
     throw new Error('工装状态无效，请联系管理员')
   }
 
-  return { ...row, status: row.status as ToolingFixtureStatus }
+  if (
+    !TOOLING_FIXTURE_LIFECYCLES.includes(row.lifecycle as ToolingFixtureLifecycle)
+  ) {
+    throw new Error('工装寿命状态无效，请联系管理员')
+  }
+
+  return {
+    ...row,
+    status: row.status as ToolingFixtureStatus,
+    lifecycle: row.lifecycle as ToolingFixtureLifecycle,
+  }
 }
 
 function isJsonRecord(

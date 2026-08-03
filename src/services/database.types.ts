@@ -2301,6 +2301,7 @@ export type Database = {
           fixture_no: string
           id: string
           last_maintenance_date: string | null
+          lifecycle: string
           maintenance_cycle_days: number | null
           manufactured_date: string | null
           manufacturer: string
@@ -2320,6 +2321,7 @@ export type Database = {
           fixture_no: string
           id?: string
           last_maintenance_date?: string | null
+          lifecycle?: string
           maintenance_cycle_days?: number | null
           manufactured_date?: string | null
           manufacturer?: string
@@ -2339,6 +2341,7 @@ export type Database = {
           fixture_no?: string
           id?: string
           last_maintenance_date?: string | null
+          lifecycle?: string
           maintenance_cycle_days?: number | null
           manufactured_date?: string | null
           manufacturer?: string

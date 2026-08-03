@@ -24,6 +24,7 @@ vi.mock('./useToolingFixtures', () => ({
       responsible_person: '张三',
       remarks: '备注',
       status: '未使用',
+      lifecycle: '正常',
     } satisfies PublicToolingFixture,
     isLoading: false,
     isError: false,

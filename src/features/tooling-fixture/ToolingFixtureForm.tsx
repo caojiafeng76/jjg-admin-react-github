@@ -6,6 +6,7 @@ import {
   Input,
   InputNumber,
   Row,
+  Select,
   Tag,
   type FormInstance,
 } from 'antd'
@@ -15,6 +16,7 @@ import type {
   ToolingFixture,
   ToolingFixtureFormValues,
 } from '@/services/apiToolingFixture'
+import { TOOLING_FIXTURE_LIFECYCLES } from './fixtureDomain'
 import { TOOLING_FIXTURE_FORM_FIELDS } from './fixtureFormFields'
 
 interface ToolingFixtureFormProps {
@@ -34,6 +36,7 @@ const DEFAULT_VALUES: ToolingFixtureFormValues = {
   storage_location: '',
   manufactured_date: null,
   manufacturer: '',
+  lifecycle: '正常',
   last_maintenance_date: null,
   maintenance_cycle_days: null,
   responsible_person: '',
@@ -62,6 +65,7 @@ function getFormValues(
     storage_location: values.storage_location,
     manufactured_date: values.manufactured_date,
     manufacturer: values.manufacturer,
+    lifecycle: values.lifecycle,
     last_maintenance_date: values.last_maintenance_date,
     maintenance_cycle_days: values.maintenance_cycle_days,
     responsible_person: values.responsible_person,
@@ -159,6 +163,21 @@ export default function ToolingFixtureForm({
         <Col xs={24} md={12}>
           <Form.Item name="manufacturer" label={fieldLabel('manufacturer')}>
             <Input maxLength={120} placeholder="请输入制作厂商" />
+          </Form.Item>
+        </Col>
+        <Col xs={24} md={12}>
+          <Form.Item
+            name="lifecycle"
+            label={fieldLabel('lifecycle')}
+            rules={[{ required: true, message: '请选择寿命状态' }]}
+          >
+            <Select
+              placeholder="请选择寿命状态"
+              options={TOOLING_FIXTURE_LIFECYCLES.map((v) => ({
+                label: v,
+                value: v,
+              }))}
+            />
           </Form.Item>
         </Col>
         <Col xs={24} md={12}>

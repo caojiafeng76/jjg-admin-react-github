@@ -24,6 +24,7 @@ function FixtureDetails({ fixture }: { fixture: PublicToolingFixture }) {
     ['存放位置', fixture.storage_location],
     ['制作日期', fixture.manufactured_date],
     ['制作厂商', fixture.manufacturer],
+    ['寿命', fixture.lifecycle],
     ['上次保养日期', fixture.last_maintenance_date],
     [
       '保养周期',
