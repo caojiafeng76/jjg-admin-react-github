@@ -151,6 +151,27 @@ export default function MaterialTransferTable({
         render: (value: number | null) => value ?? '-',
       },
       {
+        title: '实际长料数量',
+        dataIndex: 'long_material_quantity',
+        key: 'long_material_quantity',
+        width: 110,
+        render: (value: number) => value,
+      },
+      {
+        title: '流程卡长料数量',
+        dataIndex: 'process_card_long_material_quantity',
+        key: 'process_card_long_material_quantity',
+        width: 120,
+        render: (value: number | null) => value ?? '-',
+      },
+      {
+        title: 'ERP长料数量',
+        dataIndex: 'erp_long_material_quantity',
+        key: 'erp_long_material_quantity',
+        width: 110,
+        render: (value: number | null) => value ?? '-',
+      },
+      {
         title: '转移数量',
         dataIndex: 'transfer_quantity',
         key: 'transfer_quantity',

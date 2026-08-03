@@ -140,10 +140,26 @@ export default function MaterialTransferMobileList({
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
-                  长料数量
+                  实际长料数量
                 </div>
                 <div className="mt-1 font-semibold">
                   {record.long_material_quantity}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  流程卡长料数量
+                </div>
+                <div className="mt-1 font-semibold">
+                  {record.process_card_long_material_quantity ?? '-'}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-black/5 px-3 py-3">
+                <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
+                  ERP长料数量
+                </div>
+                <div className="mt-1 font-semibold">
+                  {record.erp_long_material_quantity ?? '-'}
                 </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">

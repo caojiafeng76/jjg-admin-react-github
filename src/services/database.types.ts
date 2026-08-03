@@ -914,6 +914,7 @@ export type Database = {
           customer: string | null
           customer_model: string | null
           defect_reason: string | null
+          erp_long_material_quantity: number | null
           id: string
           inspector_name: string | null
           is_audited: boolean
@@ -924,6 +925,7 @@ export type Database = {
           outsource_defect_quantity: number
           outsource_defect_reason: string | null
           outsource_unit: string | null
+          process_card_long_material_quantity: number | null
           process_owner: string | null
           processing_defect_count: number
           product_model: string | null
@@ -943,6 +945,7 @@ export type Database = {
           customer?: string | null
           customer_model?: string | null
           defect_reason?: string | null
+          erp_long_material_quantity?: number | null
           id?: string
           inspector_name?: string | null
           is_audited?: boolean
@@ -953,6 +956,7 @@ export type Database = {
           outsource_defect_quantity?: number
           outsource_defect_reason?: string | null
           outsource_unit?: string | null
+          process_card_long_material_quantity?: number | null
           process_owner?: string | null
           processing_defect_count?: number
           product_model?: string | null
@@ -972,6 +976,7 @@ export type Database = {
           customer?: string | null
           customer_model?: string | null
           defect_reason?: string | null
+          erp_long_material_quantity?: number | null
           id?: string
           inspector_name?: string | null
           is_audited?: boolean
@@ -982,6 +987,7 @@ export type Database = {
           outsource_defect_quantity?: number
           outsource_defect_reason?: string | null
           outsource_unit?: string | null
+          process_card_long_material_quantity?: number | null
           process_owner?: string | null
           processing_defect_count?: number
           product_model?: string | null

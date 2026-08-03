@@ -48,6 +48,8 @@ export default function MaterialTransferDetail({
     customer_model,
     long_material_length_mm,
     long_material_quantity,
+    process_card_long_material_quantity,
+    erp_long_material_quantity,
     raw_material_defect_count,
     processing_defect_count,
     defect_reason,
@@ -138,8 +140,18 @@ export default function MaterialTransferDetail({
             },
             {
               key: 'long_material_quantity',
-              label: '长料数量',
+              label: '实际长料数量',
               children: long_material_quantity ?? '-',
+            },
+            {
+              key: 'process_card_long_material_quantity',
+              label: '流程卡长料数量',
+              children: process_card_long_material_quantity ?? '-',
+            },
+            {
+              key: 'erp_long_material_quantity',
+              label: 'ERP长料数量',
+              children: erp_long_material_quantity ?? '-',
             },
             {
               key: 'raw_material_defect_count',

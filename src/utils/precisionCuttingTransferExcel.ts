@@ -16,7 +16,11 @@ const EXPORT_HEADERS = [
   '长度(mm)',
   '客户型号',
   '长料长度(mm)',
-  '长料数量',
+  '实际长料数量',
+  '流程卡长料数量',
+  '与流程卡长料数量差异',
+  'ERP长料数量',
+  '与ERP长料数量差异',
   '原料不良数',
   '加工不良数',
   '外协不良数',
@@ -39,7 +43,7 @@ const EXPORT_HEADERS = [
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  20, 14, 18, 9, 10, 24, 12, 10, 10, 10, 10, 12, 12, 18, 18, 14, 14, 14,
+  20, 14, 18, 9, 10, 24, 12, 12, 12, 16, 12, 16, 10, 10, 10, 12, 12, 18, 18, 14, 14, 14,
   10, 14, 10, 8, 8, 9, 10, 18, 16,
 ]
 
@@ -63,6 +67,10 @@ export function exportPrecisionCuttingTransfersToExcel(
     record.customer_model || '',
     record.long_material_length_mm,
     record.long_material_quantity,
+    record.process_card_long_material_quantity ?? '',
+    '',
+    record.erp_long_material_quantity ?? '',
+    '',
     record.raw_material_defect_count,
     record.processing_defect_count,
     record.outsource_defect_quantity,
@@ -91,6 +99,26 @@ export function exportPrecisionCuttingTransfersToExcel(
   ]
   const workbook = XLSX.utils.book_new()
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData)
+
+  records.forEach((record, index) => {
+    const row = index + 3
+
+    if (record.process_card_long_material_quantity != null) {
+      worksheet[`J${row}`] = {
+        f: `H${row}-I${row}`,
+        t: 'n',
+        v: record.long_material_quantity - record.process_card_long_material_quantity,
+      }
+    }
+
+    if (record.erp_long_material_quantity != null) {
+      worksheet[`L${row}`] = {
+        f: `H${row}-K${row}`,
+        t: 'n',
+        v: record.long_material_quantity - record.erp_long_material_quantity,
+      }
+    }
+  })
 
   worksheet['!merges'] = [
     {

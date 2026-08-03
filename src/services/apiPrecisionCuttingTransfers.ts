@@ -57,6 +57,8 @@ export interface PrecisionCuttingTransferRow {
   length_mm: number | null
   long_material_length_mm: number
   long_material_quantity: number
+  process_card_long_material_quantity: number | null
+  erp_long_material_quantity: number | null
   operator_names: string[]
   outsource_defect_quantity: number
   outsource_defect_reason: string | null
@@ -87,6 +89,8 @@ export interface PrecisionCuttingTransferInsertBase {
   length_mm?: number | null
   long_material_length_mm: number
   long_material_quantity: number
+  process_card_long_material_quantity?: number | null
+  erp_long_material_quantity?: number | null
   operator_names: string[]
   outsource_defect_quantity?: number
   outsource_defect_reason?: string | null
@@ -117,6 +121,8 @@ export interface PrecisionCuttingTransferUpdateBase {
   length_mm?: number | null
   long_material_length_mm?: number
   long_material_quantity?: number
+  process_card_long_material_quantity?: number | null
+  erp_long_material_quantity?: number | null
   operator_names?: string[]
   outsource_defect_quantity?: number
   outsource_defect_reason?: string | null
@@ -318,6 +324,21 @@ function normalizeLongMaterialQuantity(quantity: number) {
   return quantity
 }
 
+function normalizeOptionalLongMaterialQuantity(
+  quantity: number | null | undefined,
+  fieldLabel: string,
+) {
+  if (quantity === null || quantity === undefined) {
+    return null
+  }
+
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new Error(`${fieldLabel}必须为大于 0 的整数`)
+  }
+
+  return quantity
+}
+
 function normalizeOperatorNames(operatorNames: string[]) {
   const normalizedOperatorNames = Array.from(
     new Set(operatorNames.map((name) => name.trim()).filter(Boolean)),
@@ -369,6 +390,15 @@ function normalizePrecisionCuttingTransferInsertPayload(
     ),
     long_material_quantity: normalizeLongMaterialQuantity(
       values.long_material_quantity,
+    ),
+    process_card_long_material_quantity:
+      normalizeOptionalLongMaterialQuantity(
+        values.process_card_long_material_quantity,
+        '流程卡长料数量',
+      ),
+    erp_long_material_quantity: normalizeOptionalLongMaterialQuantity(
+      values.erp_long_material_quantity,
+      'ERP长料数量',
     ),
     transfer_quantity: normalizeTransferQuantity(values.transfer_quantity),
     operator_names: operatorNames,
@@ -450,6 +480,21 @@ function normalizePrecisionCuttingTransferUpdatePayload(
   if (values.long_material_quantity !== undefined) {
     payload.long_material_quantity = normalizeLongMaterialQuantity(
       values.long_material_quantity,
+    )
+  }
+
+  if (values.process_card_long_material_quantity !== undefined) {
+    payload.process_card_long_material_quantity =
+      normalizeOptionalLongMaterialQuantity(
+        values.process_card_long_material_quantity,
+        '流程卡长料数量',
+      )
+  }
+
+  if (values.erp_long_material_quantity !== undefined) {
+    payload.erp_long_material_quantity = normalizeOptionalLongMaterialQuantity(
+      values.erp_long_material_quantity,
+      'ERP长料数量',
     )
   }
 

@@ -102,6 +102,10 @@ export default function MaterialTransferForm({
         long_material_length_mm:
           initialValues.long_material_length_mm ?? undefined,
         long_material_quantity: initialValues.long_material_quantity,
+        process_card_long_material_quantity:
+          initialValues.process_card_long_material_quantity ?? undefined,
+        erp_long_material_quantity:
+          initialValues.erp_long_material_quantity ?? undefined,
         transfer_quantity: initialValues.transfer_quantity,
         operator_names: initialValues.operator_names,
         target_workshop: initialValues.target_workshop,
@@ -165,6 +169,9 @@ export default function MaterialTransferForm({
       outsource_unit: values.outsource_unit || null,
       long_material_length_mm: values.long_material_length_mm,
       long_material_quantity: values.long_material_quantity,
+      process_card_long_material_quantity:
+        values.process_card_long_material_quantity ?? null,
+      erp_long_material_quantity: values.erp_long_material_quantity ?? null,
       transfer_quantity: values.transfer_quantity,
       operator_names: operatorNames,
       target_workshop: values.target_workshop,
@@ -333,9 +340,25 @@ export default function MaterialTransferForm({
 
               <Form.Item
                 name="long_material_quantity"
-                label="长料数量"
+                label="实际长料数量"
                 className={formItemClassName}
-                rules={[{ required: true, message: '请输入长料数量' }]}
+                rules={[{ required: true, message: '请输入实际长料数量' }]}
+              >
+                <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
+
+              <Form.Item
+                name="process_card_long_material_quantity"
+                label="流程卡长料数量"
+                className={formItemClassName}
+              >
+                <InputNumber min={1} precision={0} style={{ width: '100%' }} />
+              </Form.Item>
+
+              <Form.Item
+                name="erp_long_material_quantity"
+                label="ERP长料数量"
+                className={formItemClassName}
               >
                 <InputNumber min={1} precision={0} style={{ width: '100%' }} />
               </Form.Item>
