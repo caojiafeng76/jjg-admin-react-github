@@ -13,6 +13,7 @@ import {
 } from 'antd'
 import type { FormInstance } from 'antd'
 
+import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   getAllToolingFixtures,
   type ToolingFixture,
@@ -32,10 +33,12 @@ import ToolingFixtureTable from './ToolingFixtureTable'
 import { usePrintToolingFixtureQrLabels } from './usePrintToolingFixtureQrLabels'
 
 const DEFAULT_PAGE_SIZE = 10
+const PAGE_SIZE_OPTIONS = [10, 20, 50]
 
 export default function FixtureDataPage() {
   const { message, modal } = App.useApp()
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState<ToolingFixture['status']>()
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
@@ -48,7 +51,7 @@ export default function FixtureDataPage() {
 
   const { data, isLoading } = useToolingFixtureList({
     page,
-    pageSize: DEFAULT_PAGE_SIZE,
+    pageSize,
     keyword,
     status,
   })
@@ -56,6 +59,9 @@ export default function FixtureDataPage() {
   const updateMutation = useUpdateToolingFixture()
   const importMutation = useImportToolingFixtures()
   const deleteMutation = useDeleteToolingFixtures()
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: DEFAULT_PAGE_SIZE,
+  })
   const { printLabels, isPrinting } = usePrintToolingFixtureQrLabels()
   const [isPrintLoading, setIsPrintLoading] = useState(false)
   const isSubmitting = createMutation.isPending || updateMutation.isPending
@@ -196,7 +202,7 @@ export default function FixtureDataPage() {
   )
 
   return (
-    <div className="space-y-4 p-4 md:p-6">
+    <div className="flex h-full flex-col gap-4 overflow-hidden p-4 md:p-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <Typography.Title level={2} className="!mb-1">
@@ -221,7 +227,17 @@ export default function FixtureDataPage() {
         </div>
       </div>
 
-      <Card>
+      <Card
+        className="flex min-h-0 flex-1 flex-col"
+        styles={{
+          body: {
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        }}
+      >
         <Space wrap className="mb-4">
           <Input.Search
             allowClear
@@ -256,26 +272,38 @@ export default function FixtureDataPage() {
           ) : null}
         </Space>
 
-        <ToolingFixtureTable
-          loading={isLoading}
-          data={data?.items ?? []}
-          selectedRowKeys={selectedRowKeys}
-          onSelect={setSelectedRowKeys}
-          onEdit={openEdit}
-          onDelete={handleDelete}
-          onPrint={handlePrintRecord}
-          page={page}
-          pageSize={DEFAULT_PAGE_SIZE}
-        />
-
-        <div className="mt-4 flex justify-end">
-          <Pagination
-            current={page}
-            pageSize={DEFAULT_PAGE_SIZE}
-            total={data?.total ?? 0}
-            showSizeChanger={false}
-            onChange={(nextPage) => setPage(nextPage)}
-          />
+        <div
+          ref={tableContainerRef}
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        >
+          <div className="min-h-0 flex-1 overflow-x-auto">
+            <ToolingFixtureTable
+              loading={isLoading}
+              data={data?.items ?? []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+              onPrint={handlePrintRecord}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+            />
+          </div>
+          <div ref={paginationRef} className="mt-4 flex shrink-0 justify-end">
+            <Pagination
+              current={page}
+              pageSize={pageSize}
+              total={data?.total ?? 0}
+              showSizeChanger
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+              onChange={(nextPage) => setPage(nextPage)}
+              onShowSizeChange={(_current, size) => {
+                setPageSize(size)
+                setPage(1)
+              }}
+            />
+          </div>
         </div>
       </Card>
 
