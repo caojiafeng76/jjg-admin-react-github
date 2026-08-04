@@ -15,6 +15,13 @@
 
 ## 2026-08-04
 
+- **类别**：变更
+- **范围**：`coverage/`、`graphify-out/`
+- **摘要**：删除两个可再生的构建产物目录：`coverage/`（Vitest 测试覆盖率 HTML 报告，约 16.7MB，`bun run test:coverage` 生成）、`graphify-out/`（graphify 代码索引 `graph.json`，约 5.2MB，`bun run graphify:build` 生成）。两者均在 `.gitignore` 中、未被 git 跟踪，删除后可按需重新生成。
+- **验证**：删除后确认目录不存在；未运行测试/索引构建（无必要）。
+
+## 2026-08-04
+
 - **类别**：修复
 - **范围**：`src/features/syney/ReportDetail/DetailTable.tsx`、`src/features/syney/PoDetail/DetailTable.tsx`、`src/features/precision-cutting-transfer/MaterialTransferTable.tsx`
 - **摘要**：修复表格汇总行（`Table.Summary`）与列错位问题。根因：三张表均启用 `rowSelection`，antd 实际渲染列数 = 数据列 + 复选框列，而汇总行单元格的 `index` 是按含复选框列的 flattenColumns 计算的，原汇总行单元格数不足（各缺 1~4 格），导致金额/数量合计显示在左侧相邻列下方、末列无汇总格。现补齐单元格：入库单明细汇总金额归位"小计"列（`index 9`）、采购单明细数量合计归位"数量"列（`index 9`）、切割转序"转移数量"合计归位"转移数量"列（`index 12`），金额单元格补 `align="right"` 与列对齐一致。
