@@ -9,7 +9,7 @@ import {
   resolveAllowedOrigin,
   safeErrorMetadata,
   validateContentLength,
-} from './api/proxySecurity'
+} from '../api/proxySecurity'
 import { fetchSyneyStoreReportFromServer } from './syneyStoreReportServer'
 
 type SyneyProxyEnv = Record<string, string>

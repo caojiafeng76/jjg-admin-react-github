@@ -7,16 +7,16 @@ const serverMocks = vi.hoisted(() => ({
   fetchYoumaiPurchaseOrderFromServer: vi.fn(),
 }))
 
-vi.mock('../../syneyStoreReportServer', () => ({
+vi.mock('../../server/syneyStoreReportServer', () => ({
   fetchSyneyStoreReportFromServer: serverMocks.fetchSyneyStoreReportFromServer,
 }))
-vi.mock('../../youmaiPurchaseOrderServer', () => ({
+vi.mock('../../server/youmaiPurchaseOrderServer', () => ({
   fetchYoumaiPurchaseOrderFromServer:
     serverMocks.fetchYoumaiPurchaseOrderFromServer,
 }))
 
-import { syneyStoreReportProxy } from '../../viteSyneyStoreReportProxy'
-import { youmaiPurchaseOrderProxy } from '../../viteYoumaiPurchaseOrderProxy'
+import { syneyStoreReportProxy } from '../../server/viteSyneyStoreReportProxy'
+import { youmaiPurchaseOrderProxy } from '../../server/viteYoumaiPurchaseOrderProxy'
 
 type Middleware = (
   request: PassThrough,

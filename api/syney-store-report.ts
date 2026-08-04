@@ -1,4 +1,4 @@
-import { fetchSyneyStoreReportFromServer } from '../syneyStoreReportServer'
+import { fetchSyneyStoreReportFromServer } from '../server/syneyStoreReportServer'
 import {
   authorizeProxyRequest,
   consumeDistributedProxyRateLimit,

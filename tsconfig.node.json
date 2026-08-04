@@ -21,9 +21,8 @@
   },
   "include": [
     "api/**/*.ts",
-    "syneyStoreReportServer.ts",
+    "server/**/*.ts",
     "vite.config.ts",
-    "vitest.config.ts",
-    "viteSyneyStoreReportProxy.ts"
+    "vitest.config.ts"
   ]
 }

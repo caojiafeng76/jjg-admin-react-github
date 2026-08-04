@@ -9,7 +9,7 @@ import {
   resolveAllowedOrigin,
   safeErrorMetadata,
   validateContentLength,
-} from './api/proxySecurity'
+} from '../api/proxySecurity'
 import { fetchYoumaiPurchaseOrderFromServer } from './youmaiPurchaseOrderServer'
 
 type YoumaiProxyEnv = Record<string, string>

@@ -5,8 +5,8 @@ import viteCompression from 'vite-plugin-compression'
 import { fileURLToPath, URL } from 'node:url'
 
 import mkcert from 'vite-plugin-mkcert'
-import { syneyStoreReportProxy } from './viteSyneyStoreReportProxy'
-import { youmaiPurchaseOrderProxy } from './viteYoumaiPurchaseOrderProxy'
+import { syneyStoreReportProxy } from './server/viteSyneyStoreReportProxy'
+import { youmaiPurchaseOrderProxy } from './server/viteYoumaiPurchaseOrderProxy'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {

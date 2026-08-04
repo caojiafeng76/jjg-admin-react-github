@@ -7,10 +7,10 @@ const serverMocks = vi.hoisted(() => ({
   fetchYoumaiPurchaseOrderFromServer: vi.fn(),
 }))
 
-vi.mock('../../syneyStoreReportServer', () => ({
+vi.mock('../../server/syneyStoreReportServer', () => ({
   fetchSyneyStoreReportFromServer: serverMocks.fetchSyneyStoreReportFromServer,
 }))
-vi.mock('../../youmaiPurchaseOrderServer', () => ({
+vi.mock('../../server/youmaiPurchaseOrderServer', () => ({
   fetchYoumaiPurchaseOrderFromServer:
     serverMocks.fetchYoumaiPurchaseOrderFromServer,
 }))

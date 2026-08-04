@@ -1,4 +1,4 @@
-import { fetchYoumaiPurchaseOrderFromServer } from '../youmaiPurchaseOrderServer'
+import { fetchYoumaiPurchaseOrderFromServer } from '../server/youmaiPurchaseOrderServer'
 import {
   authorizeProxyRequest,
   consumeDistributedProxyRateLimit,
