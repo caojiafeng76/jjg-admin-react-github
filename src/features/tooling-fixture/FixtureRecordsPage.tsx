@@ -18,16 +18,17 @@ import {
   useToolingFixtureUsageRecords,
 } from './useToolingFixtures'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100]
 
 export default function FixtureRecordsPage() {
   const { message, modal } = App.useApp()
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [action, setAction] = useState<ToolingFixtureUsageRecord['action']>()
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { data, isLoading } = useToolingFixtureUsageRecords({
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
     action,
   })
   const deleteMutation = useDeleteToolingFixtureUsageRecords()
@@ -184,10 +185,15 @@ export default function FixtureRecordsPage() {
         <div className="mt-4 flex justify-end">
           <Pagination
             current={page}
-            pageSize={PAGE_SIZE}
+            pageSize={pageSize}
             total={data?.total ?? 0}
-            showSizeChanger={false}
+            showSizeChanger
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
             onChange={setPage}
+            onShowSizeChange={(_current, size) => {
+              setPage(1)
+              setPageSize(size)
+            }}
           />
         </div>
       </Card>

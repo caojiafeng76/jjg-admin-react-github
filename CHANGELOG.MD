@@ -16,6 +16,20 @@
 ## 2026-08-04
 
 - **类别**：变更
+- **范围**：`AGENTS.md`、`.github/copilot-instructions.md`、`.github/ai-task-matrix.md`、`.github/prompts/task-exec.prompt.md`、`.github/prompts/feature-impl.prompt.md`、`.github/prompts/bugfix.prompt.md`、`.github/prompts/db-change.prompt.md`
+- **摘要**：修复 AI 助手反复遗漏 `CHANGELOG.MD` 更新的问题。根因：日志规则只存在于 `copilot-instructions.md` 末尾独立小节，未纳入编号执行流程、Fast lane 清单、任务矩阵与各类 prompt。现改为多层强制：默认执行流程新增第 8 步（改动后必须更新 CHANGELOG）；最终汇报模板新增「是否已更新 CHANGELOG.MD」检查项；Fast lane 强制清单、任务矩阵 Fast Lane 段、4 个任务 prompt（task-exec / feature-impl / bugfix / db-change）同步补充；`AGENTS.md` 增加显式加粗强制项。
+- **验证**：文档类改动，无代码验证；已人工核对全部改动点与权威规则一致。
+
+## 2026-08-04
+
+- **类别**：变更
+- **范围**：`src/features/tooling-fixture/FixtureRecordsPage.tsx`
+- **摘要**：工装出入记录页分页新增每页条数选择器（10/20/50/100 条/页），切换页面大小后自动回到第 1 页。
+- **验证**：`bun run typecheck` 通过。
+
+## 2026-08-04
+
+- **类别**：变更
 - **范围**：`src/features/tooling-fixture/FixtureDataPage.tsx`
 - **摘要**：工装资料页分页优化：支持动态页面大小（10/20/50，切换后回到第 1 页），表格改为自适应高度布局（复用 `useTableHeight` 计算滚动区域高度），内容超高时表格内部滚动、分页器固定在底部。
 - **验证**：本条目仅补录日志，无代码变更（对应功能改动已于提交 `c2a9ad9` 完成）。
