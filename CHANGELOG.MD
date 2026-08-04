@@ -16,6 +16,13 @@
 ## 2026-08-04
 
 - **类别**：重构
+- **范围**：`.omo/`、`.codegraph/`、`.serena/cache/`
+- **摘要**：清理根目录点文件夹中的无用缓存与 AI 会话痕迹。删除 `.omo/`（oh-my-opencode 会话证据/便签/运行延续，13 个被追踪文件，无代码引用）；删除 `.codegraph/`（graphify 代码索引缓存约 30MB，未追踪，可 `bun run graphify:build` 重建）；删除 `.serena/cache/`（Serena TS 语言服务缓存约 42MB，未追踪，下次启动自动重建）。保留 `.git`、`.github`、`.agents`、`.claude`、`.opencode`（配置）、`.serena`（memories/project.yml）、`.spec-workflow`、`.vscode`、`.codex`、`.cursor`。
+- **验证**：`bun run typecheck`、`bun run lint` 通过；删除前后 `git status` 仅显示 `.omo` 13 个删除项（另两项未追踪不可见）。
+
+## 2026-08-04
+
+- **类别**：重构
 - **范围**：`src/test/testing-library.smoke.vitest.tsx`、`src/test/setup.vitest.ts`、`scripts/generate-round7-final-import.mjs`、`scripts/generate-tooling-data-import-20260504.mjs`、`scripts/generate-villa-lift-import.mjs`、`scripts/import-round3-missing-process-orders.mjs`、`scripts/import-safe-production-orders.mjs`、`scripts/diff-villa-lift-2026.mjs`、`scripts/compare-villa-lift-2026.mjs`、`temp_check.rcutil.ps1`、`excel_import_analysis.json`、`tmp-rc-util-10101/`
 - **摘要**：清理无效残留文件。删除 2 个环境冒烟测试（`testing-library.smoke.vitest.tsx`、`setup.vitest.ts`，仅验证测试环境本身、不覆盖业务代码）、7 个一次性数据导入/对比脚本（generate-*/import-*/diff-*/compare-*，无任何代码/文档引用）、1 个临时诊断脚本（`temp_check.rcutil.ps1`）、1 个一次性 Excel 导入分析产物（`excel_import_analysis.json`，业务数据已有 `docs/imports/` 存档）及未追踪的临时 node_modules 目录（`tmp-rc-util-10101/`，35MB）。保留全部真实业务测试（105 个文件）及 `src/test/setup.ts`、`src/test/vitest.d.ts` 等测试基础设施。
 - **验证**：`bun run typecheck`、`bun run lint` 通过；`bun run test` 通过（105 文件/461 用例，较删除前减少 2 个冒烟测试用例）。
