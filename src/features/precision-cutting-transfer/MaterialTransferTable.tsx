@@ -262,15 +262,16 @@ export default function MaterialTransferTable({
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50">
             <Table.Summary.Cell index={0} />
-            <Table.Summary.Cell index={1} colSpan={7}>
+            <Table.Summary.Cell index={1} colSpan={11}>
               <span className="font-medium text-slate-600">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={8}>
+            <Table.Summary.Cell index={12} align="right">
               <span className="font-bold text-slate-900 tabular-nums">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={9} colSpan={2} />
+            <Table.Summary.Cell index={13} />
+            <Table.Summary.Cell index={14} />
           </Table.Summary.Row>
         </Table.Summary>
       )}

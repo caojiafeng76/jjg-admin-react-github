@@ -165,7 +165,8 @@ export default function DetailTable({
             <Table.Summary.Cell index={1} colSpan={7}>
               <span className="font-medium text-slate-600">当前页小计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={8}>
+            <Table.Summary.Cell index={8} />
+            <Table.Summary.Cell index={9} align="right">
               <span className="font-bold text-slate-900 tabular-nums">
                 {formatNumber(currentPageTotalAmount)}
               </span>

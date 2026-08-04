@@ -168,15 +168,15 @@ export default function DetailTable({
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50">
             <Table.Summary.Cell index={0} />
-            <Table.Summary.Cell index={1} colSpan={7}>
+            <Table.Summary.Cell index={1} colSpan={8}>
               <span className="font-medium text-slate-600">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={8}>
+            <Table.Summary.Cell index={9} align="right">
               <span className="font-bold text-slate-900 tabular-nums">
                 {currentPageTotalQty}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={9} />
+            <Table.Summary.Cell index={10} />
           </Table.Summary.Row>
         </Table.Summary>
       )}

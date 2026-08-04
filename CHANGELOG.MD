@@ -15,6 +15,14 @@
 
 ## 2026-08-04
 
+- **类别**：修复
+- **范围**：`src/features/syney/ReportDetail/DetailTable.tsx`、`src/features/syney/PoDetail/DetailTable.tsx`、`src/features/precision-cutting-transfer/MaterialTransferTable.tsx`
+- **摘要**：修复表格汇总行（`Table.Summary`）与列错位问题。根因：三张表均启用 `rowSelection`，antd 实际渲染列数 = 数据列 + 复选框列，而汇总行单元格的 `index` 是按含复选框列的 flattenColumns 计算的，原汇总行单元格数不足（各缺 1~4 格），导致金额/数量合计显示在左侧相邻列下方、末列无汇总格。现补齐单元格：入库单明细汇总金额归位"小计"列（`index 9`）、采购单明细数量合计归位"数量"列（`index 9`）、切割转序"转移数量"合计归位"转移数量"列（`index 12`），金额单元格补 `align="right"` 与列对齐一致。
+- **验证**：`bun run typecheck`、`bun run lint` 通过；浏览器打开 `/syney-store-report-list/K202608030011` 截图核对汇总行对齐。
+
+
+## 2026-08-04
+
 - **类别**：重构
 - **范围**：`server/`（新目录）、`api/syney-store-report.ts`、`api/youmai-purchase-order.ts`、`vite.config.ts`、`tsconfig.node.json`、`src/services/viteProxySecurity.vitest.ts`、`src/services/proxyHandlers.vitest.ts`
 - **摘要**：将根目录 4 个外部系统对接/开发代理文件移入新建 `server/` 目录（`syneyStoreReportServer.ts`、`youmaiPurchaseOrderServer.ts`、`viteSyneyStoreReportProxy.ts`、`viteYoumaiPurchaseOrderProxy.ts`），保持根目录整洁。同步更新 `vite.config.ts`、`api/` 两个 Vercel handler、`tsconfig.node.json`（include 改为 `server/**/*.ts`）及两个 vitest 测试文件的引用路径。
