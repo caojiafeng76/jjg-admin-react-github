@@ -15,6 +15,13 @@
 
 ## 2026-08-04
 
+- **类别**：重构
+- **范围**：`src/test/testing-library.smoke.vitest.tsx`、`src/test/setup.vitest.ts`、`scripts/generate-round7-final-import.mjs`、`scripts/generate-tooling-data-import-20260504.mjs`、`scripts/generate-villa-lift-import.mjs`、`scripts/import-round3-missing-process-orders.mjs`、`scripts/import-safe-production-orders.mjs`、`scripts/diff-villa-lift-2026.mjs`、`scripts/compare-villa-lift-2026.mjs`、`temp_check.rcutil.ps1`、`excel_import_analysis.json`、`tmp-rc-util-10101/`
+- **摘要**：清理无效残留文件。删除 2 个环境冒烟测试（`testing-library.smoke.vitest.tsx`、`setup.vitest.ts`，仅验证测试环境本身、不覆盖业务代码）、7 个一次性数据导入/对比脚本（generate-*/import-*/diff-*/compare-*，无任何代码/文档引用）、1 个临时诊断脚本（`temp_check.rcutil.ps1`）、1 个一次性 Excel 导入分析产物（`excel_import_analysis.json`，业务数据已有 `docs/imports/` 存档）及未追踪的临时 node_modules 目录（`tmp-rc-util-10101/`，35MB）。保留全部真实业务测试（105 个文件）及 `src/test/setup.ts`、`src/test/vitest.d.ts` 等测试基础设施。
+- **验证**：`bun run typecheck`、`bun run lint` 通过；`bun run test` 通过（105 文件/461 用例，较删除前减少 2 个冒烟测试用例）。
+
+## 2026-08-04
+
 - **类别**：变更
 - **范围**：`package.json`、`bun.lock`、`scripts/fix-typescript6-alias.mjs`
 - **摘要**：全量升级 33 个依赖至最新版。生产依赖：antd 6.3.7→6.5.3、react/react-dom 19.2.7→19.2.8、@ant-design/icons→6.3.2、@supabase/supabase-js→2.112.0、supabase→2.111.0、@tanstack/react-query→5.101.4、react-router-dom→7.18.2、react-qr-code→2.2.0、immer→11.1.15、react-icons→5.7.0、pinyin-pro→3.28.2 等；开发依赖：typescript 6.0.3→7.0.2（Go 原生版，通过 npm alias 双编译器方案：`typescript` 指向 `@typescript/typescript6@6.0.2` 保留 TS6 API 供 typescript-eslint 与 AST 测试使用，新增 `@typescript/native`（TS7）提供 `tsc` 二进制）、jsdom 29→30、@testing-library/jest-dom 6→7、@types/node 25→26、vite 8.0.16→8.2.0、eslint 10.4→10.8、vitest 4.1.8→4.1.10、prettier 3.8→3.9、tailwindcss 4.3.0→4.3.3、typescript-eslint 8.61→8.66 等。新增 `postinstall` 脚本 `fix-typescript6-alias.mjs` 修复 bun 1.3.14 将 `@typescript/typescript6` 的内部依赖 `@typescript/old` 误解析为自身 shim 的问题（导致 TS7 无法解析 TS6 声明文件）。
