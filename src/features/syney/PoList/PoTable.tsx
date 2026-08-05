@@ -94,7 +94,6 @@ function PoTable({
           return at - bt
         },
         sortDirections: ['descend', 'ascend'],
-        defaultSortOrder: 'ascend',
         render: (text: string | null) =>
           text ? dayjs(new Date(text)).format('YYYY-MM-DD') : '-',
       },
