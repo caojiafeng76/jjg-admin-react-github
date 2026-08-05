@@ -121,7 +121,6 @@ export default function MaterialTransferTable({
             'zh-CN',
             { numeric: true, sensitivity: 'base' },
           ),
-        defaultSortOrder: 'ascend',
       },
       {
         title: '型号',
