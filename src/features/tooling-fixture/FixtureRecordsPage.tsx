@@ -121,12 +121,12 @@ export default function FixtureRecordsPage() {
         title: '操作',
         key: 'actions',
         fixed: 'right',
-        width: 100,
+        width: 80,
         render: (_value, record) => (
           <Button
-            type="text"
+            type="link"
+            danger
             size="small"
-            icon={<TrashIcon className="size-4 text-red-500/80!" />}
             onClick={() => handleDelete(record)}
           >
             删除

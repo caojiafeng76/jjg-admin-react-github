@@ -1,5 +1,4 @@
 import { memo, useMemo } from 'react'
-import { TrashIcon } from '@heroicons/react/16/solid'
 import {
   Button,
   QRCode,
@@ -182,9 +181,9 @@ function ToolingFixtureTable({
               编辑
             </Button>
             <Button
-              type="text"
+              type="link"
+              danger
               size="small"
-              icon={<TrashIcon className="size-4 text-red-500/80!" />}
               onClick={() => onDelete(record)}
             >
               删除

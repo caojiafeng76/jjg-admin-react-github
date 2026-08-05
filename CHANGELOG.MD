@@ -16,8 +16,8 @@
 ## 2026-08-05
 
 - **类别**：变更
-- **范围**：`src/features/tooling-fixture/ToolingFixtureTable.tsx`、`FixtureDataPage.tsx`、`FixtureRecordsPage.tsx`
-- **摘要**：美化工装资料与出入记录页面的删除按钮 UI。行内"删除"按钮由 `type="link" danger` 改为 `type="text"` + 红色 Heroicons `TrashIcon`（`text-red-500/80!`），对齐 `ExtrusionProductionItemTable.tsx` 的图标按钮风格；两页"删除选中"批量按钮改为 `type="text" danger` + `TrashIcon`，对齐 villa-lift 模块批量删除风格；出入记录表操作列宽度 80 → 100 以容纳图标。
+- **范围**：`src/features/tooling-fixture/FixtureDataPage.tsx`、`FixtureRecordsPage.tsx`
+- **摘要**：美化工装资料与出入记录页面的批量"删除选中"按钮 UI，改为 `type="text" danger` + Heroicons `TrashIcon`，对齐 villa-lift 模块批量删除风格；表格行内"删除"按钮保持原有 `type="link" danger` 纯文字样式不变。
 - **验证**：`bun run lint`、`bun run build` 通过。
 
 ## 2026-08-05
