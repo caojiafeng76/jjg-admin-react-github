@@ -31,7 +31,7 @@ argument-hint: [任务说明]
 - 字段改动 -> 类型、服务层、表格、表单、搜索、详情、导出
 - Query / Mutation 改动 -> queryKey、invalidateQueries、调用点、列表详情联动
 - 路由 / 菜单 / 权限改动 -> router、菜单、标题、access 配置
-- 脚本 / 配置改动 -> README、ENV_SETUP、相关 prompt / instructions
+- 脚本 / 配置改动 -> README、相关 prompt / instructions
 
 16. 改动后执行必要验证；除纯文档文本调整外，不能在未做任何验证的情况下结束任务。
 17. 修改代码、配置、脚本、SQL、指令或文档后，必须在根目录 `CHANGELOG.MD` 顶部追加一条记录（日期、类别、范围、摘要、验证），与本次改动在同一工作区变更中完成。

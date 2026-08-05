@@ -11,7 +11,7 @@ if (!envValidation.isValid) {
   const errorMessage = envValidation.error || '环境变量配置错误'
   console.error('❌ 环境变量验证失败:', errorMessage)
   console.error(
-    '请检查 .env 文件，确保已配置所有必需的环境变量。参考 ENV_SETUP.md 获取配置说明。',
+    '请检查 .env 文件，确保已配置所有必需的环境变量。参考 README.md 环境配置说明。',
   )
   
   // 在开发环境下显示更详细的错误信息
@@ -32,7 +32,7 @@ if (!envValidation.isValid) {
         <p style="color: #666; margin-bottom: 0.5rem;">${errorMessage}</p>
         <p style="color: #999; font-size: 0.9rem;">
           请检查 .env 文件，确保已配置所有必需的环境变量。<br/>
-          参考 ENV_SETUP.md 获取配置说明。
+          参考 README.md 环境配置说明。
         </p>
       </div>
     `

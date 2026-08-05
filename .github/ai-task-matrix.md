@@ -27,7 +27,7 @@ Fast lane 输出仍需说明：为什么跳过完整 Spec Workflow、改了什�
 | 业务规则、状态流转、数量/工时/成本 | Sequential Thinking, Serena, `business-rules-engine`          | 写入入口、展示入口、汇总入口、测试                                                   | 规则单测 + 受影响页面/汇总口径检查                              |
 | 手机端、H5、扫码、触屏             | Serena, `mobile-responsiveness`, `webapp-testing`             | 移动页面、路由、权限、扫码依赖                                                       | 移动 viewport 页面验证 + `bun run typecheck`                    |
 | 路由、菜单、标题、权限             | Serena                                                        | `router.tsx`, `routeLabels.ts`, `MainMenu.tsx`, `access.ts`, `permissionRegistry.ts` | 路由入口检查 + 权限边界回归                                     |
-| 脚本、MCP、开发流程配置            | Sequential Thinking, Serena 或文件搜索                        | `package.json`, `.mcp.json`, prompts, instructions, README/ENV_SETUP                 | 相关脚本 help/dry-run + JSON/配置解析                           |
+| 脚本、MCP、开发流程配置            | Sequential Thinking, Serena 或文件搜索                        | `package.json`, `.mcp.json`, prompts, instructions, README                              | 相关脚本 help/dry-run + JSON/配置解析                           |
 | 代码评审                           | Serena + review prompt                                        | diff、受影响调用链、测试覆盖                                                         | 不改代码；按严重程度列 findings                                 |
 
 ## Tool Health

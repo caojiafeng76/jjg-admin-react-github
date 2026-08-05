@@ -16,6 +16,13 @@
 ## 2026-08-05
 
 - **类别**：删除
+- **范围**：`ENV_SETUP.md`、`README.md`、`src/main.tsx`、`.github/copilot-instructions.md`、`.github/ai-task-matrix.md`、`.github/prompts/task-exec.prompt.md`
+- **摘要**：删除 `ENV_SETUP.md`（环境变量配置唯一文档），将其核心内容（`.env` 创建步骤、Supabase 变量说明表、`SUPABASE_DB_URL` 回退说明、安全注意事项）精简合并进 `README.md` 新增"环境配置"章节，并在"相关文件"补充 `.env.example`；`src/main.tsx` 环境变量错误提示由"参考 ENV_SETUP.md"改为"参考 README.md 环境配置说明"；同步清理 3 处规则文档中的 ENV_SETUP 引用。
+- **验证**：`bun run typecheck`、`bun run lint` 通过；`grep ENV_SETUP` 确认除 CHANGELOG 记录外无残留引用。
+
+## 2026-08-05
+
+- **类别**：删除
 - **范围**：`pack/`
 - **摘要**：删除 `pack/` 目录下的 Intel 芯片组驱动安装包（`SetupChipset.exe`、`InstUpd.exe`、`mup.xml`、`WEBInstall_info.xml`、`WixLicenseNote.txt`），该目录为误提交的第三方驱动文件，与项目业务无关；`git rm` 取消跟踪并删除本地文件。
 - **验证**：确认目录已删除（Test-Path 为 False），未执行构建/测试（纯文件删除，无代码影响）。

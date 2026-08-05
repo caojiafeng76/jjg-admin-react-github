@@ -343,6 +343,39 @@ npx -y @modelcontextprotocol/server-sequential-thinking --help
 - 明确涉及文件、切入点和数据边界
 - 做最小必要验证并说明剩余限制
 
+## 环境配置
+
+项目使用环境变量配置 Supabase 后端服务，环境变量存储在 `.env` 文件中，该文件不应提交到版本控制系统。
+
+### 配置步骤
+
+1. 复制 `.env.example` 并重命名为 `.env`：
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. 登录 [Supabase Dashboard](https://app.supabase.com/)，进入项目 **Settings** → **API**，填入以下配置：
+
+   | 变量名                        | 说明                          | 示例                        |
+   | ----------------------------- | ----------------------------- | --------------------------- |
+   | `VITE_REACT_APP_SUPABASE_URL` | Supabase 项目 URL             | `https://xxxxx.supabase.co` |
+   | `VITE_REACT_APP_SUPABASE_KEY` | Supabase 匿名密钥 (公开密钥)  | `eyJhbGci...`               |
+   | `SUPABASE_DB_URL`             | Supabase CLI 远程数据库连接串 | `postgresql://...`          |
+
+   > `SUPABASE_DB_URL` 可选：仅供 Supabase CLI 使用。如果 `bun run db:push` 的 linked 直连失败（如 WARP/代理环境 TLS 拦截），配置该回退值即可；一次性 SQL 仍可继续使用 `bun run db:query -- --file <sql-file>`。
+
+3. 启动开发服务器验证：`bun dev`；数据库 CLI 链路验证：`bun run db:doctor`。
+
+### 安全注意事项
+
+> [!WARNING]
+>
+> - **切勿**将 `.env` 文件提交到 Git 仓库
+> - **切勿**在代码中硬编码敏感信息
+> - 使用 `anon` 密钥而非 `service_role` 密钥
+> - 确保 `.gitignore` 包含 `.env`
+
 ## 使用建议
 
 - 不确定用哪一个时，优先使用 `/task-exec`
@@ -366,3 +399,4 @@ npx -y @modelcontextprotocol/server-sequential-thinking --help
 - [.github/skills/business-rules-engine/SKILL.md](.github/skills/business-rules-engine/SKILL.md)
 - [.github/skills/mobile-responsive-patterns/SKILL.md](.github/skills/mobile-responsive-patterns/SKILL.md)
 - [AGENTS.md](AGENTS.md)
+- [.env.example](.env.example)
