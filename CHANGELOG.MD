@@ -13,6 +13,20 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-05
+
+- **类别**：变更
+- **范围**：`src/features/tooling-fixture/ToolingFixtureTable.tsx`、`FixtureDataPage.tsx`、`FixtureRecordsPage.tsx`
+- **摘要**：美化工装资料与出入记录页面的删除按钮 UI。行内"删除"按钮由 `type="link" danger` 改为 `type="text"` + 红色 Heroicons `TrashIcon`（`text-red-500/80!`），对齐 `ExtrusionProductionItemTable.tsx` 的图标按钮风格；两页"删除选中"批量按钮改为 `type="text" danger` + `TrashIcon`，对齐 villa-lift 模块批量删除风格；出入记录表操作列宽度 80 → 100 以容纳图标。
+- **验证**：`bun run lint`、`bun run build` 通过。
+
+## 2026-08-05
+
+- **类别**：修复
+- **范围**：`src/features/syney/PoList/PoTable.tsx`、`src/features/precision-cutting-transfer/MaterialTransferTable.tsx`
+- **摘要**：移除 PoTable"入库日期"列与 MaterialTransferTable"转移单号"列的 `defaultSortOrder: 'ascend'` 默认排序，避免列表首次加载即强制升序、与用户预期及后续排序操作冲突。
+- **验证**：补记历史提交（commit e33e791、004dec4）；`bun run lint`、`bun run build` 于 2026-08-05 工装按钮美化验证时一并覆盖通过。
+
 ## 2026-08-04
 
 - **类别**：变更

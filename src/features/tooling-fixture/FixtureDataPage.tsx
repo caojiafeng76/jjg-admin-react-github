@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { PlusIcon } from '@heroicons/react/16/solid'
+import { PlusIcon, TrashIcon } from '@heroicons/react/16/solid'
 import {
   App,
   Button,
@@ -266,7 +266,12 @@ export default function FixtureDataPage() {
             打印二维码
           </PrintButton>
           {selectedRowKeys.length > 0 ? (
-            <Button danger onClick={handleDeleteSelected}>
+            <Button
+              type="text"
+              danger
+              icon={<TrashIcon className="size-4" />}
+              onClick={handleDeleteSelected}
+            >
               删除选中
             </Button>
           ) : null}

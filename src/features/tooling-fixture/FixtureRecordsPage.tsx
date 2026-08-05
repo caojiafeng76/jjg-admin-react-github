@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { TrashIcon } from '@heroicons/react/16/solid'
 import {
   App,
   Button,
@@ -120,12 +121,12 @@ export default function FixtureRecordsPage() {
         title: '操作',
         key: 'actions',
         fixed: 'right',
-        width: 80,
+        width: 100,
         render: (_value, record) => (
           <Button
-            type="link"
-            danger
+            type="text"
             size="small"
+            icon={<TrashIcon className="size-4 text-red-500/80!" />}
             onClick={() => handleDelete(record)}
           >
             删除
@@ -165,7 +166,12 @@ export default function FixtureRecordsPage() {
             }}
           />
           {selectedRowKeys.length > 0 ? (
-            <Button danger onClick={handleDeleteSelected}>
+            <Button
+              type="text"
+              danger
+              icon={<TrashIcon className="size-4" />}
+              onClick={handleDeleteSelected}
+            >
               删除选中
             </Button>
           ) : null}
