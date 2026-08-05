@@ -15,6 +15,13 @@
 
 ## 2026-08-05
 
+- **类别**：文档
+- **范围**：`openspec/changes/`、`openspec/specs/`
+- **摘要**：归档 2 个已完成的 OpenSpec change：`add-standard-time-process-fields`（16/16 任务）与 `packaging-work-order-batches`（9/9 任务），移至 `openspec/changes/archive/2026-08-05-*`；同步 delta specs 到 main specs，新增 `standard-time-process-fields`、`precision-finishing-process-export`、`packaging-work-order-batches` 3 个 capability spec。
+- **验证**：`bun run spec:list` 确认 active changes 为空（归档成功）。
+
+## 2026-08-05
+
 - **类别**：删除
 - **范围**：`ENV_SETUP.md`、`README.md`、`src/main.tsx`、`.github/copilot-instructions.md`、`.github/ai-task-matrix.md`、`.github/prompts/task-exec.prompt.md`
 - **摘要**：删除 `ENV_SETUP.md`（环境变量配置唯一文档），将其核心内容（`.env` 创建步骤、Supabase 变量说明表、`SUPABASE_DB_URL` 回退说明、安全注意事项）精简合并进 `README.md` 新增"环境配置"章节，并在"相关文件"补充 `.env.example`；`src/main.tsx` 环境变量错误提示由"参考 ENV_SETUP.md"改为"参考 README.md 环境配置说明"；同步清理 3 处规则文档中的 ENV_SETUP 引用。
