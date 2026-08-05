@@ -15,6 +15,13 @@
 
 ## 2026-08-05
 
+- **类别**：删除
+- **范围**：`pack/`
+- **摘要**：删除 `pack/` 目录下的 Intel 芯片组驱动安装包（`SetupChipset.exe`、`InstUpd.exe`、`mup.xml`、`WEBInstall_info.xml`、`WixLicenseNote.txt`），该目录为误提交的第三方驱动文件，与项目业务无关；`git rm` 取消跟踪并删除本地文件。
+- **验证**：确认目录已删除（Test-Path 为 False），未执行构建/测试（纯文件删除，无代码影响）。
+
+## 2026-08-05
+
 - **类别**：变更
 - **范围**：`src/features/tooling-fixture/FixtureDataPage.tsx`、`FixtureRecordsPage.tsx`
 - **摘要**：美化工装资料与出入记录页面的批量"删除选中"按钮 UI，改为 `type="text" danger` + Heroicons `TrashIcon`，对齐 villa-lift 模块批量删除风格；表格行内"删除"按钮保持原有 `type="link" danger` 纯文字样式不变。
