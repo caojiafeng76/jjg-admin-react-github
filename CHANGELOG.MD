@@ -16,6 +16,13 @@
 ## 2026-08-10
 
 - **类别**：修复
+- **范围**：`src/features/workshop/OrderStatusDashboard/index.tsx`（订单现状页面，路由 `/production-scheduling`）
+- **摘要**：修复订单现状页面暗黑模式适配：标题区、状态 Tabs、搜索区、表格区、分页区等所有硬编码浅色 Tailwind 类补充 `dark:` 变体（容器 `dark:bg-slate-800/*` + `dark:border-slate-700/*`，标题文字 `dark:text-slate-100/200`，次级文字 `dark:text-slate-400/500`）；统计胶囊（订单/岗位/明细/转移及四个明细弹窗内的各色胶囊）补 `dark:bg-*-900/30 dark:ring-*-900/50` 与 `dark:text-*-200/300`；搜索输入框/DatePicker/Select 显式浅色覆盖补 `dark:!bg-slate-900/60` 等，不再覆盖 antd 暗色主题；表格状态行（延期/预警）补 `dark:bg-*-950/30`；表头文字补 `dark:text-slate-400`；四个明细 Modal 的 header 渐变（`from-slate-50 to-white`）、统计摘要条、表容器全部补 dark 变体；同时清理 replaceAll 误生成的非法类 `dark:bg-slate-800/80/60` 与重复 `dark:` 类。
+- **验证**：`bun run typecheck` 通过；`bun run build` 通过；浏览器暗色模式实测主页面与明细弹窗均无浅色残留、文字对比正常。
+
+## 2026-08-10
+
+- **类别**：修复
 - **范围**：8 个页面的选中汇总条：`src/features/material-transfer/index.tsx`、`precision-cutting-transfer/index.tsx`、`production-report/index.tsx`、`syney/{SpecList,SafePartSetting,ReportList,PoList,ReportDetail}/index.tsx`(SafePartSetting 为 SafePartSettingPage.tsx)
 - **摘要**：修复选中数据后"已选 X 条 / 合计"汇总条在暗黑模式下背景仍为浅蓝渐变、文字对比度不足看不清的问题：汇总条容器补充 `dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60`，图标底块补 `dark:bg-*-900/40`，文字/数字补 `dark:text-slate-300` / `dark:text-blue-400` / `dark:text-rose-400` / `dark:text-emerald-400` / `dark:text-amber-400`。
 - **验证**：浏览器（暗色模式）实测选中行后汇总条背景变为深蓝、文字清晰可读；`bun run typecheck` 待跑（见汇报）。

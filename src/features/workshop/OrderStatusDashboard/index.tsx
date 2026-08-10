@@ -828,7 +828,7 @@ function ProductionDetailModal({
             </svg>
           </div>
           <div>
-            <span className="font-semibold text-slate-700">
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
               {detail
                 ? `${detail.record.project_no || '-'} / ${detail.jobName} 岗位生产工单明细`
                 : '生产工单明细'}
@@ -840,48 +840,48 @@ function ProductionDetailModal({
       width={1280}
       destroyOnHidden
       onCancel={onClose}
-      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white"
+      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white dark:[&_.ant-modal-header]:!border-slate-700 dark:[&_.ant-modal-header]:!from-slate-800 dark:[&_.ant-modal-header]:!to-slate-800"
     >
       {detail && (
         <div className="space-y-4">
           {/* 统计摘要 */}
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
-            <div className="flex items-center gap-1.5 rounded-lg bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80">
-              <span className="text-xs font-medium text-blue-600">明细</span>
-              <span className="text-xs font-bold text-blue-700 tabular-nums">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3 dark:border-slate-700/60 dark:from-slate-800/60 dark:via-slate-800 dark:to-slate-800/60">
+            <div className="flex items-center gap-1.5 rounded-lg bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80 dark:bg-blue-900/30 dark:ring-blue-900/50">
+              <span className="text-xs font-medium text-blue-600 dark:text-blue-300">明细</span>
+              <span className="text-xs font-bold text-blue-700 tabular-nums dark:text-blue-200">
                 {rows.length}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
-              <span className="text-xs font-medium text-cyan-600">工序</span>
-              <span className="text-xs font-bold text-cyan-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 dark:bg-cyan-900/30 dark:ring-cyan-900/50">
+              <span className="text-xs font-medium text-cyan-600 dark:text-cyan-300">工序</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums dark:text-cyan-200">
                 {operationSummaryRows.length}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
-              <span className="text-xs font-medium text-emerald-600">合格</span>
-              <span className="text-xs font-bold text-emerald-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 dark:bg-emerald-900/30 dark:ring-emerald-900/50">
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">合格</span>
+              <span className="text-xs font-bold text-emerald-700 tabular-nums dark:text-emerald-200">
                 {summary.qualifiedQuantity.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
-              <span className="text-xs font-medium text-amber-600">来料</span>
-              <span className="text-xs font-bold text-amber-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80 dark:bg-amber-900/30 dark:ring-amber-900/50">
+              <span className="text-xs font-medium text-amber-600 dark:text-amber-300">来料</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums dark:text-amber-200">
                 {summary.incomingQuantity.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-red-50/80 px-3 py-1.5 ring-1 ring-red-100/80">
-              <span className="text-xs font-medium text-red-600">不合格</span>
-              <span className="text-xs font-bold text-red-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-red-50/80 px-3 py-1.5 ring-1 ring-red-100/80 dark:bg-red-900/30 dark:ring-red-900/50">
+              <span className="text-xs font-medium text-red-600 dark:text-red-300">不合格</span>
+              <span className="text-xs font-bold text-red-700 tabular-nums dark:text-red-200">
                 {summary.defectQuantity.toLocaleString()}
               </span>
             </div>
           </div>
 
           {/* 工序汇总表 */}
-          <div className="rounded-xl border border-slate-200/60 bg-white">
-            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+          <div className="rounded-xl border border-slate-200/60 bg-white dark:border-slate-700/60 dark:bg-slate-800/80">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2 dark:border-slate-700/60 dark:from-slate-800/60 dark:to-transparent">
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
                 工序汇总
               </span>
             </div>
@@ -898,9 +898,9 @@ function ProductionDetailModal({
           </div>
 
           {/* 详细数据表 */}
-          <div className="rounded-xl border border-slate-200/60 bg-white">
-            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+          <div className="rounded-xl border border-slate-200/60 bg-white dark:border-slate-700/60 dark:bg-slate-800/80">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2 dark:border-slate-700/60 dark:from-slate-800/60 dark:to-transparent">
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
                 详细记录
               </span>
             </div>
@@ -1020,7 +1020,7 @@ function TransferDetailModal({
             </svg>
           </div>
           <div>
-            <span className="font-semibold text-slate-700">
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
               {detail
                 ? `${detail.record.project_no || '-'} 物料转移明细`
                 : '物料转移明细'}
@@ -1032,44 +1032,44 @@ function TransferDetailModal({
       width={920}
       destroyOnHidden
       onCancel={onClose}
-      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white"
+      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white dark:[&_.ant-modal-header]:!border-slate-700 dark:[&_.ant-modal-header]:!from-slate-800 dark:[&_.ant-modal-header]:!to-slate-800"
     >
       {detail && (
         <div className="space-y-4">
           {/* 统计摘要 */}
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
-            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
-              <span className="text-xs font-medium text-purple-600">记录</span>
-              <span className="text-xs font-bold text-purple-700 tabular-nums">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3 dark:border-slate-700/60 dark:from-slate-800/60 dark:via-slate-800 dark:to-slate-800/60">
+            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80 dark:bg-purple-900/30 dark:ring-purple-900/50">
+              <span className="text-xs font-medium text-purple-600 dark:text-purple-300">记录</span>
+              <span className="text-xs font-bold text-purple-700 tabular-nums dark:text-purple-200">
                 {rows.length}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80">
-              <span className="text-xs font-medium text-pink-600">转移</span>
-              <span className="text-xs font-bold text-pink-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80 dark:bg-pink-900/30 dark:ring-pink-900/50">
+              <span className="text-xs font-medium text-pink-600 dark:text-pink-300">转移</span>
+              <span className="text-xs font-bold text-pink-700 tabular-nums dark:text-pink-200">
                 {summary.transferQuantity.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
-              <span className="text-xs font-medium text-emerald-600">
+            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 dark:bg-emerald-900/30 dark:ring-emerald-900/50">
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">
                 已审核
               </span>
-              <span className="text-xs font-bold text-emerald-700 tabular-nums">
+              <span className="text-xs font-bold text-emerald-700 tabular-nums dark:text-emerald-200">
                 {summary.auditedCount}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
-              <span className="text-xs font-medium text-amber-600">未审核</span>
-              <span className="text-xs font-bold text-amber-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80 dark:bg-amber-900/30 dark:ring-amber-900/50">
+              <span className="text-xs font-medium text-amber-600 dark:text-amber-300">未审核</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums dark:text-amber-200">
                 {summary.unauditedCount}
               </span>
             </div>
           </div>
 
           {/* 数据表 */}
-          <div className="rounded-xl border border-slate-200/60 bg-white">
-            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+          <div className="rounded-xl border border-slate-200/60 bg-white dark:border-slate-700/60 dark:bg-slate-800/80">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2 dark:border-slate-700/60 dark:from-slate-800/60 dark:to-transparent">
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
                 转移记录
               </span>
             </div>
@@ -1269,7 +1269,7 @@ function PrecisionCuttingDetailModal({
             </svg>
           </div>
           <div>
-            <span className="font-semibold text-slate-700">
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
               {detail
                 ? `${detail.record.project_no || '-'} 精切明细`
                 : '精切明细'}
@@ -1281,56 +1281,56 @@ function PrecisionCuttingDetailModal({
       width={1180}
       destroyOnHidden
       onCancel={onClose}
-      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white"
+      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white dark:[&_.ant-modal-header]:!border-slate-700 dark:[&_.ant-modal-header]:!from-slate-800 dark:[&_.ant-modal-header]:!to-slate-800"
     >
       {detail && (
         <div className="space-y-4">
           {/* 统计摘要 */}
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
-            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
-              <span className="text-xs font-medium text-cyan-600">记录</span>
-              <span className="text-xs font-bold text-cyan-700 tabular-nums">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3 dark:border-slate-700/60 dark:from-slate-800/60 dark:via-slate-800 dark:to-slate-800/60">
+            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 dark:bg-cyan-900/30 dark:ring-cyan-900/50">
+              <span className="text-xs font-medium text-cyan-600 dark:text-cyan-300">记录</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums dark:text-cyan-200">
                 {rows.length}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
-              <span className="text-xs font-medium text-purple-600">精切</span>
-              <span className="text-xs font-bold text-purple-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80 dark:bg-purple-900/30 dark:ring-purple-900/50">
+              <span className="text-xs font-medium text-purple-600 dark:text-purple-300">精切</span>
+              <span className="text-xs font-bold text-purple-700 tabular-nums dark:text-purple-200">
                 {summary.transferQuantity.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-teal-50/80 px-3 py-1.5 ring-1 ring-teal-100/80">
-              <span className="text-xs font-medium text-teal-600">长料</span>
-              <span className="text-xs font-bold text-teal-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-teal-50/80 px-3 py-1.5 ring-1 ring-teal-100/80 dark:bg-teal-900/30 dark:ring-teal-900/50">
+              <span className="text-xs font-medium text-teal-600 dark:text-teal-300">长料</span>
+              <span className="text-xs font-bold text-teal-700 tabular-nums dark:text-teal-200">
                 {summary.longMaterialQuantity.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-red-50/80 px-3 py-1.5 ring-1 ring-red-100/80">
-              <span className="text-xs font-medium text-red-600">不良</span>
-              <span className="text-xs font-bold text-red-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-red-50/80 px-3 py-1.5 ring-1 ring-red-100/80 dark:bg-red-900/30 dark:ring-red-900/50">
+              <span className="text-xs font-medium text-red-600 dark:text-red-300">不良</span>
+              <span className="text-xs font-bold text-red-700 tabular-nums dark:text-red-200">
                 {summary.defectQuantity.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
-              <span className="text-xs font-medium text-emerald-600">
+            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 dark:bg-emerald-900/30 dark:ring-emerald-900/50">
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">
                 已审核
               </span>
-              <span className="text-xs font-bold text-emerald-700 tabular-nums">
+              <span className="text-xs font-bold text-emerald-700 tabular-nums dark:text-emerald-200">
                 {summary.auditedCount}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
-              <span className="text-xs font-medium text-amber-600">未审核</span>
-              <span className="text-xs font-bold text-amber-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80 dark:bg-amber-900/30 dark:ring-amber-900/50">
+              <span className="text-xs font-medium text-amber-600 dark:text-amber-300">未审核</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums dark:text-amber-200">
                 {summary.unauditedCount}
               </span>
             </div>
           </div>
 
           {/* 数据表 */}
-          <div className="rounded-xl border border-slate-200/60 bg-white">
-            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+          <div className="rounded-xl border border-slate-200/60 bg-white dark:border-slate-700/60 dark:bg-slate-800/80">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2 dark:border-slate-700/60 dark:from-slate-800/60 dark:to-transparent">
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
                 精切记录
               </span>
             </div>
@@ -1497,7 +1497,7 @@ function ExtrusionDetailModal({
             </svg>
           </div>
           <div>
-            <span className="font-semibold text-slate-700">
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
               {detail
                 ? `${detail.record.project_no || '-'} 挤压明细`
                 : '挤压明细'}
@@ -1509,62 +1509,62 @@ function ExtrusionDetailModal({
       width={1180}
       destroyOnHidden
       onCancel={onClose}
-      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white"
+      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white dark:[&_.ant-modal-header]:!border-slate-700 dark:[&_.ant-modal-header]:!from-slate-800 dark:[&_.ant-modal-header]:!to-slate-800"
     >
       {detail && (
         <div className="space-y-4">
           {/* 统计摘要 */}
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3">
-            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80">
-              <span className="text-xs font-medium text-amber-600">记录</span>
-              <span className="text-xs font-bold text-amber-700 tabular-nums">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/60 bg-gradient-to-r from-slate-50/50 via-white to-slate-50/50 p-3 dark:border-slate-700/60 dark:from-slate-800/60 dark:via-slate-800 dark:to-slate-800/60">
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-50/80 px-3 py-1.5 ring-1 ring-amber-100/80 dark:bg-amber-900/30 dark:ring-amber-900/50">
+              <span className="text-xs font-medium text-amber-600 dark:text-amber-300">记录</span>
+              <span className="text-xs font-bold text-amber-700 tabular-nums dark:text-amber-200">
                 {rows.length}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80">
-              <span className="text-xs font-medium text-purple-600">
+            <div className="flex items-center gap-1.5 rounded-lg bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80 dark:bg-purple-900/30 dark:ring-purple-900/50">
+              <span className="text-xs font-medium text-purple-600 dark:text-purple-300">
                 理论支数
               </span>
-              <span className="text-xs font-bold text-purple-700 tabular-nums">
+              <span className="text-xs font-bold text-purple-700 tabular-nums dark:text-purple-200">
                 {totalTheoreticalCount.toLocaleString()}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-orange-50/80 px-3 py-1.5 ring-1 ring-orange-100/80">
-              <span className="text-xs font-medium text-orange-600">
+            <div className="flex items-center gap-1.5 rounded-lg bg-orange-50/80 px-3 py-1.5 ring-1 ring-orange-100/80 dark:bg-orange-900/30 dark:ring-orange-900/50">
+              <span className="text-xs font-medium text-orange-600 dark:text-orange-300">
                 实际重量
               </span>
-              <span className="text-xs font-bold text-orange-700 tabular-nums">
+              <span className="text-xs font-bold text-orange-700 tabular-nums dark:text-orange-200">
                 {totalActualOutputWeight.toFixed(2)} kg
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
-              <span className="text-xs font-medium text-emerald-600">
+            <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 dark:bg-emerald-900/30 dark:ring-emerald-900/50">
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">
                 加权成材率
               </span>
-              <span className="text-xs font-bold text-emerald-700 tabular-nums">
+              <span className="text-xs font-bold text-emerald-700 tabular-nums dark:text-emerald-200">
                 {totalTheoreticalCount > 0
                   ? `${weightedYield.toFixed(2)}%`
                   : '-'}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80">
-              <span className="text-xs font-medium text-cyan-600">已审核</span>
-              <span className="text-xs font-bold text-cyan-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 dark:bg-cyan-900/30 dark:ring-cyan-900/50">
+              <span className="text-xs font-medium text-cyan-600 dark:text-cyan-300">已审核</span>
+              <span className="text-xs font-bold text-cyan-700 tabular-nums dark:text-cyan-200">
                 {rows.filter((item) => item.isAudited).length}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80">
-              <span className="text-xs font-medium text-pink-600">未审核</span>
-              <span className="text-xs font-bold text-pink-700 tabular-nums">
+            <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80 dark:bg-pink-900/30 dark:ring-pink-900/50">
+              <span className="text-xs font-medium text-pink-600 dark:text-pink-300">未审核</span>
+              <span className="text-xs font-bold text-pink-700 tabular-nums dark:text-pink-200">
                 {rows.filter((item) => !item.isAudited).length}
               </span>
             </div>
           </div>
 
           {/* 数据表 */}
-          <div className="rounded-xl border border-slate-200/60 bg-white">
-            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2">
-              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+          <div className="rounded-xl border border-slate-200/60 bg-white dark:border-slate-700/60 dark:bg-slate-800/80">
+            <div className="border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-3 py-2 dark:border-slate-700/60 dark:from-slate-800/60 dark:to-transparent">
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
                 挤压记录
               </span>
             </div>
@@ -2280,11 +2280,11 @@ export default function OrderStatusDashboard() {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-4">
       {/* 标题区 */}
-      <div className="relative overflow-hidden rounded-2xl border border-blue-100/50 bg-gradient-to-br from-white via-blue-50/30 to-slate-50/50 px-5 py-4 shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl border border-blue-100/50 bg-gradient-to-br from-white via-blue-50/30 to-slate-50/50 px-5 py-4 shadow-sm dark:border-blue-900/40 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/40">
         {/* 背景装饰元素 */}
-        <div className="absolute -top-8 -right-8 size-32 rounded-full bg-gradient-to-br from-blue-200/40 via-blue-100/30 to-transparent blur-3xl" />
-        <div className="absolute -bottom-6 -left-6 size-24 rounded-full bg-gradient-to-tr from-indigo-100/40 via-purple-50/30 to-transparent blur-2xl" />
-        <div className="absolute top-0 right-20 h-px w-48 bg-gradient-to-r from-transparent via-blue-200/60 to-transparent" />
+        <div className="absolute -top-8 -right-8 size-32 rounded-full bg-gradient-to-br from-blue-200/40 via-blue-100/30 to-transparent blur-3xl dark:from-blue-900/30 dark:via-blue-900/10 dark:to-transparent" />
+        <div className="absolute -bottom-6 -left-6 size-24 rounded-full bg-gradient-to-tr from-indigo-100/40 via-purple-50/30 to-transparent blur-2xl dark:from-indigo-900/30 dark:via-purple-900/20 dark:to-transparent" />
+        <div className="absolute top-0 right-20 h-px w-48 bg-gradient-to-r from-transparent via-blue-200/60 to-transparent dark:via-blue-800/40" />
 
         <div className="relative flex flex-wrap items-center justify-between gap-4">
           {/* 左侧：标题 */}
@@ -2315,11 +2315,11 @@ export default function OrderStatusDashboard() {
                 level={4}
                 className="mb-0! !text-xl !font-bold tracking-tight"
               >
-                <span className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text">
+                <span className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text dark:from-slate-100 dark:via-slate-200 dark:to-slate-400">
                   订单现状
                 </span>
               </Title>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
                 实时监控生产进度与订单状态
               </p>
             </div>
@@ -2329,10 +2329,12 @@ export default function OrderStatusDashboard() {
           <div className="flex flex-wrap items-center gap-2">
             {/* 订单统计 */}
             <div className="group relative">
-              <div className="flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80 transition-all duration-200 hover:bg-blue-100/80 hover:shadow-sm hover:shadow-blue-100">
+              <div className="flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80 transition-all duration-200 hover:bg-blue-100/80 hover:shadow-sm hover:shadow-blue-100 dark:bg-blue-900/30 dark:ring-blue-900/50 dark:hover:bg-blue-900/50 dark:hover:shadow-none">
                 <span className="size-1.5 animate-pulse rounded-full bg-blue-500" />
-                <span className="text-xs font-medium text-blue-600">订单</span>
-                <span className="text-xs font-bold text-blue-700 tabular-nums">
+                <span className="text-xs font-medium text-blue-600 dark:text-blue-300">
+                  订单
+                </span>
+                <span className="text-xs font-bold text-blue-700 tabular-nums dark:text-blue-200">
                   {data?.total ?? 0}
                 </span>
               </div>
@@ -2340,10 +2342,12 @@ export default function OrderStatusDashboard() {
 
             {/* 岗位统计 */}
             <div className="group relative">
-              <div className="flex items-center gap-1.5 rounded-full bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 transition-all duration-200 hover:bg-cyan-100/80 hover:shadow-sm hover:shadow-cyan-100">
+              <div className="flex items-center gap-1.5 rounded-full bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 transition-all duration-200 hover:bg-cyan-100/80 hover:shadow-sm hover:shadow-cyan-100 dark:bg-cyan-900/30 dark:ring-cyan-900/50 dark:hover:bg-cyan-900/50 dark:hover:shadow-none">
                 <span className="size-1.5 rounded-full bg-cyan-500" />
-                <span className="text-xs font-medium text-cyan-600">岗位</span>
-                <span className="text-xs font-bold text-cyan-700 tabular-nums">
+                <span className="text-xs font-medium text-cyan-600 dark:text-cyan-300">
+                  岗位
+                </span>
+                <span className="text-xs font-bold text-cyan-700 tabular-nums dark:text-cyan-200">
                   {jobColumns.length}
                 </span>
               </div>
@@ -2351,12 +2355,12 @@ export default function OrderStatusDashboard() {
 
             {/* 明细统计 */}
             <div className="group relative">
-              <div className="flex items-center gap-1.5 rounded-full bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 transition-all duration-200 hover:bg-emerald-100/80 hover:shadow-sm hover:shadow-emerald-100">
+              <div className="flex items-center gap-1.5 rounded-full bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 transition-all duration-200 hover:bg-emerald-100/80 hover:shadow-sm hover:shadow-emerald-100 dark:bg-emerald-900/30 dark:ring-emerald-900/50 dark:hover:bg-emerald-900/50 dark:hover:shadow-none">
                 <span className="size-1.5 rounded-full bg-emerald-500" />
-                <span className="text-xs font-medium text-emerald-600">
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">
                   明细
                 </span>
-                <span className="text-xs font-bold text-emerald-700 tabular-nums">
+                <span className="text-xs font-bold text-emerald-700 tabular-nums dark:text-emerald-200">
                   {data?.productionItemCount ?? 0}
                 </span>
               </div>
@@ -2364,12 +2368,12 @@ export default function OrderStatusDashboard() {
 
             {/* 转移统计 */}
             <div className="group relative">
-              <div className="flex items-center gap-1.5 rounded-full bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80 transition-all duration-200 hover:bg-purple-100/80 hover:shadow-sm hover:shadow-purple-100">
+              <div className="flex items-center gap-1.5 rounded-full bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80 transition-all duration-200 hover:bg-purple-100/80 hover:shadow-sm hover:shadow-purple-100 dark:bg-purple-900/30 dark:ring-purple-900/50 dark:hover:bg-purple-900/50 dark:hover:shadow-none">
                 <span className="size-1.5 rounded-full bg-purple-500" />
-                <span className="text-xs font-medium text-purple-600">
+                <span className="text-xs font-medium text-purple-600 dark:text-purple-300">
                   转移
                 </span>
-                <span className="text-xs font-bold text-purple-700 tabular-nums">
+                <span className="text-xs font-bold text-purple-700 tabular-nums dark:text-purple-200">
                   {data?.materialTransferCount ?? 0}
                 </span>
               </div>
@@ -2384,7 +2388,7 @@ export default function OrderStatusDashboard() {
                 onClick={() => void handleExportCurrentFilters()}
                 onMouseEnter={preloadOrderStatusDashboardExcel}
                 onFocus={preloadOrderStatusDashboardExcel}
-                className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md"
+                className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md dark:!border-slate-600/60 dark:!bg-slate-800/80 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-blue-900/30 dark:hover:!text-blue-400"
               >
                 导出当前筛选结果
               </Button>
@@ -2400,7 +2404,7 @@ export default function OrderStatusDashboard() {
               }
               loading={isFetching && !isLoading}
               onClick={() => void refetch()}
-              className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md"
+              className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md dark:!border-slate-600/60 dark:!bg-slate-800/80 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-blue-900/30 dark:hover:!text-blue-400"
             >
               刷新
             </Button>
@@ -2409,7 +2413,7 @@ export default function OrderStatusDashboard() {
       </div>
 
       {/* Tabs 标签页 */}
-      <div className="flex items-center gap-1 rounded-xl border border-slate-200/60 bg-white/60 p-1 shadow-sm backdrop-blur-sm">
+      <div className="flex items-center gap-1 rounded-xl border border-slate-200/60 bg-white/60 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.key}
@@ -2417,7 +2421,7 @@ export default function OrderStatusDashboard() {
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
               activeStatus === tab.key
                 ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/30'
-                : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-700'
+                : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-slate-200'
             }`}
           >
             {tab.label}
@@ -2426,16 +2430,16 @@ export default function OrderStatusDashboard() {
       </div>
 
       {/* 搜索区 */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-200 hover:shadow-md hover:shadow-slate-200/50">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-200 hover:shadow-md hover:shadow-slate-200/50 dark:border-slate-700/50 dark:bg-slate-800/80 dark:hover:shadow-none">
         {/* 顶部装饰线 */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-200/40 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-200/40 to-transparent dark:via-blue-800/40" />
 
         {/* 搜索标签 */}
-        <div className="flex items-center gap-2 border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-4 py-2.5">
-          <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80">
-            <MagnifyingGlassIcon className="size-3 text-blue-500" />
+        <div className="flex items-center gap-2 border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-4 py-2.5 dark:border-slate-700/60 dark:from-slate-800/60 dark:to-transparent">
+          <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80 dark:bg-blue-900/40">
+            <MagnifyingGlassIcon className="size-3 text-blue-500 dark:text-blue-400" />
           </div>
-          <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+          <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
             筛选条件
           </span>
         </div>
@@ -2447,7 +2451,7 @@ export default function OrderStatusDashboard() {
             <div className="group flex items-center gap-2.5">
               <Text
                 type="secondary"
-                className="!text-xs font-medium text-slate-400"
+                className="!text-xs font-medium text-slate-400 dark:text-slate-500"
               >
                 交货日期
               </Text>
@@ -2464,7 +2468,7 @@ export default function OrderStatusDashboard() {
                     date ? date.format('YYYY-MM-DD') : '',
                   )
                 }
-                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
+                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
               />
             </div>
 
@@ -2472,7 +2476,7 @@ export default function OrderStatusDashboard() {
             <div className="group flex items-center gap-2.5">
               <Text
                 type="secondary"
-                className="!text-xs font-medium text-slate-400"
+                className="!text-xs font-medium text-slate-400 dark:text-slate-500"
               >
                 项目号
               </Text>
@@ -2484,7 +2488,7 @@ export default function OrderStatusDashboard() {
                   updateSearchParamValue('projectNo', event.target.value)
                 }
                 onPressEnter={handleSearch}
-                className="!w-44 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
+                className="!w-44 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
               />
             </div>
 
@@ -2492,7 +2496,7 @@ export default function OrderStatusDashboard() {
             <div className="group flex items-center gap-2.5">
               <Text
                 type="secondary"
-                className="!text-xs font-medium text-slate-400"
+                className="!text-xs font-medium text-slate-400 dark:text-slate-500"
               >
                 客户
               </Text>
@@ -2504,7 +2508,7 @@ export default function OrderStatusDashboard() {
                   updateSearchParamValue('customer', event.target.value)
                 }
                 onPressEnter={handleSearch}
-                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
+                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
               />
             </div>
 
@@ -2512,7 +2516,7 @@ export default function OrderStatusDashboard() {
             <div className="group flex items-center gap-2.5">
               <Text
                 type="secondary"
-                className="!text-xs font-medium text-slate-400"
+                className="!text-xs font-medium text-slate-400 dark:text-slate-500"
               >
                 型号
               </Text>
@@ -2524,7 +2528,7 @@ export default function OrderStatusDashboard() {
                   updateSearchParamValue('model', event.target.value)
                 }
                 onPressEnter={handleSearch}
-                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
+                className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
               />
             </div>
 
@@ -2532,7 +2536,7 @@ export default function OrderStatusDashboard() {
             <div className="group flex items-center gap-2.5">
               <Text
                 type="secondary"
-                className="!text-xs font-medium text-slate-400"
+                className="!text-xs font-medium text-slate-400 dark:text-slate-500"
               >
                 料号
               </Text>
@@ -2544,7 +2548,7 @@ export default function OrderStatusDashboard() {
                   updateSearchParamValue('materialCode', event.target.value)
                 }
                 onPressEnter={handleSearch}
-                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white"
+                className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
               />
             </div>
 
@@ -2552,7 +2556,7 @@ export default function OrderStatusDashboard() {
             <div className="group flex items-center gap-2.5">
               <Text
                 type="secondary"
-                className="!text-xs font-medium text-slate-400"
+                className="!text-xs font-medium text-slate-400 dark:text-slate-500"
               >
                 状态
               </Text>
@@ -2564,7 +2568,7 @@ export default function OrderStatusDashboard() {
                 onChange={(value) =>
                   updateSearchParamValue('productionStatus', value ?? '')
                 }
-                className="!w-32 [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-slate-200/80 [&_.ant-select-selector]:!bg-slate-50/50"
+                className="!w-32 [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-slate-200/80 [&_.ant-select-selector]:!bg-slate-50/50 dark:[&_.ant-select-selector]:!border-slate-600/70 dark:[&_.ant-select-selector]:!bg-slate-900/60"
               />
             </div>
 
@@ -2582,7 +2586,7 @@ export default function OrderStatusDashboard() {
               <Button
                 icon={<XMarkIcon className="size-4" />}
                 onClick={handleResetSearch}
-                className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-500 !shadow-sm !transition-all !duration-200 hover:!border-slate-300 hover:!bg-slate-50 hover:!text-slate-600"
+                className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-500 !shadow-sm !transition-all !duration-200 hover:!border-slate-300 hover:!bg-slate-50 hover:!text-slate-600 dark:!border-slate-600/70 dark:!bg-slate-800/80 dark:!text-slate-400 dark:hover:!border-slate-500 dark:hover:!bg-slate-700 dark:hover:!text-slate-200"
               >
                 重置
               </Button>
@@ -2594,14 +2598,14 @@ export default function OrderStatusDashboard() {
       {/* 表格区域 */}
       <div
         ref={tableContainerRef}
-        className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm"
+        className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/50 dark:bg-slate-800/80"
       >
         {/* 表头装饰 */}
-        <div className="flex items-center justify-between border-b border-slate-100/60 bg-gradient-to-r from-slate-50/80 via-white to-slate-50/80 px-4 py-2.5">
+        <div className="flex items-center justify-between border-b border-slate-100/60 bg-gradient-to-r from-slate-50/80 via-white to-slate-50/80 px-4 py-2.5 dark:border-slate-700/60 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/80">
           <div className="flex items-center gap-2">
-            <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80">
+            <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80 dark:bg-blue-900/40">
               <svg
-                className="size-3 text-blue-500"
+                className="size-3 text-blue-500 dark:text-blue-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -2614,7 +2618,7 @@ export default function OrderStatusDashboard() {
                 />
               </svg>
             </div>
-            <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+            <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
               数据列表
             </span>
           </div>
@@ -2622,9 +2626,9 @@ export default function OrderStatusDashboard() {
           {/* 可结案订单提示 */}
           {canManageStatus && (
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80">
+              <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 dark:bg-emerald-900/30 dark:ring-emerald-900/50">
                 <svg
-                  className="size-3.5 text-emerald-500"
+                  className="size-3.5 text-emerald-500 dark:text-emerald-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -2636,7 +2640,7 @@ export default function OrderStatusDashboard() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="text-xs text-emerald-600">
+                <span className="text-xs text-emerald-600 dark:text-emerald-400">
                   {
                     rows.filter((r) =>
                       canCloseDashboardOrder({
@@ -2651,9 +2655,9 @@ export default function OrderStatusDashboard() {
             </div>
           )}
 
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-400 dark:text-slate-500">
             共{' '}
-            <span className="font-medium text-slate-600">
+            <span className="font-medium text-slate-600 dark:text-slate-300">
               {data?.total ?? 0}
             </span>{' '}
             条记录
@@ -2678,26 +2682,28 @@ export default function OrderStatusDashboard() {
           sticky={{ offsetHeader: 0 }}
           rowClassName={(record) =>
             record.productionStatus === '延期'
-              ? 'bg-red-50/50 hover:bg-red-50'
+              ? 'bg-red-50/50 hover:bg-red-50 dark:bg-red-950/30 dark:hover:bg-red-950/40'
               : record.productionStatus === '预警'
-                ? 'bg-amber-50/50 hover:bg-amber-50'
-                : 'hover:bg-blue-50/30'
+                ? 'bg-amber-50/50 hover:bg-amber-50 dark:bg-amber-950/30 dark:hover:bg-amber-950/40'
+                : 'hover:bg-blue-50/30 dark:hover:bg-blue-950/40'
           }
           onRow={() => ({
             style: { height: rowHeight },
             className: 'transition-colors duration-150',
           })}
-          className="[&_.ant-table]:!font-mono [&_.ant-table-thead>tr>th]:!text-xs [&_.ant-table-thead>tr>th]:!font-semibold [&_.ant-table-thead>tr>th]:!text-slate-500"
+          className="[&_.ant-table]:!font-mono [&_.ant-table-thead>tr>th]:!text-xs [&_.ant-table-thead>tr>th]:!font-semibold [&_.ant-table-thead>tr>th]:!text-slate-500 dark:[&_.ant-table-thead>tr>th]:!text-slate-400"
         />
       </div>
 
       {/* 分页区域 */}
       <div
         ref={paginationRef}
-        className="flex shrink-0 items-center justify-between rounded-xl border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm"
+        className="flex shrink-0 items-center justify-between rounded-xl border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/80"
       >
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <span className="font-medium text-slate-700">{data?.total ?? 0}</span>
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <span className="font-medium text-slate-700 dark:text-slate-200">
+            {data?.total ?? 0}
+          </span>
           <span>条记录</span>
         </div>
         <AppPagination
