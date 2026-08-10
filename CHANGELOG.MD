@@ -16,6 +16,13 @@
 ## 2026-08-10
 
 - **类别**：修复
+- **范围**：8 个页面的选中汇总条：`src/features/material-transfer/index.tsx`、`precision-cutting-transfer/index.tsx`、`production-report/index.tsx`、`syney/{SpecList,SafePartSetting,ReportList,PoList,ReportDetail}/index.tsx`(SafePartSetting 为 SafePartSettingPage.tsx)
+- **摘要**：修复选中数据后"已选 X 条 / 合计"汇总条在暗黑模式下背景仍为浅蓝渐变、文字对比度不足看不清的问题：汇总条容器补充 `dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60`，图标底块补 `dark:bg-*-900/40`，文字/数字补 `dark:text-slate-300` / `dark:text-blue-400` / `dark:text-rose-400` / `dark:text-emerald-400` / `dark:text-amber-400`。
+- **验证**：浏览器（暗色模式）实测选中行后汇总条背景变为深蓝、文字清晰可读；`bun run typecheck` 待跑（见汇报）。
+
+## 2026-08-10
+
+- **类别**：修复
 - **范围**：`src/index.css` 及 11 个表格组件（`syney/*`、`workshop/*`、`material-transfer`、`precision-cutting-transfer`、`precision-finishing-cutting`、`extrusion-production`）
 - **摘要**：全局修复表格 active 行高亮在暗黑模式下显示浅色的硬编码问题：在 `index.css` 新增 `--table-active-row-bg` / `--table-active-row-bg-alt` / `--table-warning-row-bg` 三个 CSS 变量（浅色为原值，`.dark` 下切换为 `#172554` 深蓝，与 antd 暗色 `rowSelectedBg` 一致），11 处表格内联样式中的 `#f0f7ff` / `#e6f4ff` / `#fffbeb` 全部替换为 `var()` 引用。
 - **验证**：`bun run typecheck` 通过；`bun run test` 全量通过（105 files / 461 tests）；grep 确认源码无残留硬编码颜色。
