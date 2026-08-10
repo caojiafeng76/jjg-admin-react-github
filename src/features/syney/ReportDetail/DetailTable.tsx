@@ -140,7 +140,9 @@ export default function DetailTable({
     style: {
       cursor: onRowClick ? 'pointer' : undefined,
       backgroundColor:
-        record.id && record.id === activeRowId ? '#f0f7ff' : undefined,
+        record.id && record.id === activeRowId
+          ? 'var(--table-active-row-bg)'
+          : undefined,
       height: rowHeight,
     },
   })

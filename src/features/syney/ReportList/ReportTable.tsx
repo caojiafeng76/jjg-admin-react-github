@@ -167,7 +167,9 @@ export default function ReportTable({
     style: {
       cursor: onRowClick ? 'pointer' : undefined,
       backgroundColor:
-        record.No && record.No === activeRowId ? '#f0f7ff' : undefined,
+        record.No && record.No === activeRowId
+          ? 'var(--table-active-row-bg)'
+          : undefined,
       height: rowHeight,
     },
   })

@@ -556,9 +556,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
         cursor: onRowClick ? 'pointer' : undefined,
         backgroundColor:
           record.id && record.id === activeRowId
-            ? '#f0f7ff'
+            ? 'var(--table-active-row-bg)'
             : !record.job_name
-              ? '#fffbeb'
+              ? 'var(--table-warning-row-bg)'
               : undefined,
         transition: 'all 0.15s ease',
       },

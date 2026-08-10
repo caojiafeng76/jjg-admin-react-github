@@ -13,6 +13,34 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-10
+
+- **类别**：修复
+- **范围**：`src/index.css` 及 11 个表格组件（`syney/*`、`workshop/*`、`material-transfer`、`precision-cutting-transfer`、`precision-finishing-cutting`、`extrusion-production`）
+- **摘要**：全局修复表格 active 行高亮在暗黑模式下显示浅色的硬编码问题：在 `index.css` 新增 `--table-active-row-bg` / `--table-active-row-bg-alt` / `--table-warning-row-bg` 三个 CSS 变量（浅色为原值，`.dark` 下切换为 `#172554` 深蓝，与 antd 暗色 `rowSelectedBg` 一致），11 处表格内联样式中的 `#f0f7ff` / `#e6f4ff` / `#fffbeb` 全部替换为 `var()` 引用。
+- **验证**：`bun run typecheck` 通过；`bun run test` 全量通过（105 files / 461 tests）；grep 确认源码无残留硬编码颜色。
+
+## 2026-08-10
+
+- **类别**：修复
+- **范围**：`src/features/precision-cutting-transfer/MaterialTransferTable.tsx`
+- **摘要**：修复精切转移单表格在暗黑模式下"当前页合计"汇总行显示白色的问题：`Table.Summary.Row` 背景 `bg-slate-50` 补充 `dark:bg-slate-800/80`，合计文字/数字补充 `dark:text-slate-300/100`；同步修复该表格表头覆写类（thead 背景、边框、文字、行 hover 高亮）无 dark 变体导致暗黑模式下的浅色问题。
+- **验证**：`bun run typecheck` 通过；`bun run test` 全量通过（105 files / 461 tests）。
+
+## 2026-08-10
+
+- **类别**：修复
+- **范围**：`src/features/precision-cutting-transfer/MaterialTransferDetail.tsx`
+- **摘要**：修复精切转移单详情面板（Splitter 底部面板）未适配暗色模式的问题：Header 卡片渐变背景、白底头部、审核状态徽章、Descriptions 标签与内容、空状态图标与文字均补充 `dark:` 变体（与物料转移单详情面板修复保持一致）。
+- **验证**：`bun run typecheck` 通过；`bun run test -- src/features/precision-cutting-transfer` 通过。
+
+## 2026-08-10
+
+- **类别**：修复
+- **范围**：`src/features/material-transfer/MaterialTransferDetail.tsx`
+- **摘要**：修复物料转移单详情面板（Splitter 底部面板）未适配暗色模式的问题：Header 卡片渐变背景、白底头部、进度/状态区块、审核状态徽章、Descriptions 标签与内容、空状态图标与文字均补充 `dark:` 变体（`dark:bg-slate-800` 系背景、`dark:text-slate-300/400` 系文字、`dark:bg-emerald-900/40` / `dark:bg-amber-900/40` 徽章）。
+- **验证**：`bun run typecheck` 通过；暗色模式视觉回归待页面级验证（详见汇报）。
+
 ## 2026-08-05
 
 - **类别**：文档

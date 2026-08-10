@@ -237,7 +237,9 @@ export default function MaterialTransferTable({
       style: {
         cursor: onRowClick ? 'pointer' : undefined,
         backgroundColor:
-          record.id && record.id === activeRowId ? '#f0f7ff' : undefined,
+          record.id && record.id === activeRowId
+            ? 'var(--table-active-row-bg)'
+            : undefined,
         height: rowHeight,
       },
     }),
@@ -256,16 +258,18 @@ export default function MaterialTransferTable({
       size="small"
       pagination={false}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-row:hover>td]:bg-blue-500/10 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-400"
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50">
+          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800/80">
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={11}>
-              <span className="font-medium text-slate-600">当前页合计</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">
+                当前页合计
+              </span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={12} align="right">
-              <span className="font-bold text-slate-900 tabular-nums">
+              <span className="font-bold text-slate-900 tabular-nums dark:text-slate-100">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>

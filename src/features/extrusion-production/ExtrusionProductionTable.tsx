@@ -126,7 +126,9 @@ export default function ExtrusionProductionTable({
         style: {
           cursor: onRowClick ? 'pointer' : undefined,
           backgroundColor:
-            record.id && record.id === activeRowId ? '#e6f4ff' : undefined,
+            record.id && record.id === activeRowId
+              ? 'var(--table-active-row-bg-alt)'
+              : undefined,
           height: rowHeight,
         },
       })}

@@ -349,7 +349,9 @@ function WorkshopOrderTable({
           cursor: 'pointer',
           height: rowHeight,
           background:
-            activeRowId && record.id === activeRowId ? '#e6f4ff' : undefined,
+            activeRowId && record.id === activeRowId
+              ? 'var(--table-active-row-bg-alt)'
+              : undefined,
         },
       })}
     />

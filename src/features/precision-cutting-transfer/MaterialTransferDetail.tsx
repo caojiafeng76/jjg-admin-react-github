@@ -17,9 +17,9 @@ export default function MaterialTransferDetail({
   if (!selectedRecord) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-6">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-slate-100 to-slate-50">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-700">
           <svg
-            className="h-8 w-8 text-slate-300"
+            className="h-8 w-8 text-slate-300 dark:text-slate-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -33,8 +33,12 @@ export default function MaterialTransferDetail({
           </svg>
         </div>
         <div className="text-center">
-          <p className="text-sm font-medium text-slate-500">点击上方表格行</p>
-          <p className="mt-1 text-sm text-slate-400">查看精切转移单详情</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            点击上方表格行
+          </p>
+          <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
+            查看精切转移单详情
+          </p>
         </div>
       </div>
     )
@@ -68,15 +72,15 @@ export default function MaterialTransferDetail({
 
   return (
     <div className="h-full overflow-auto p-4">
-      <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200/60 bg-linear-to-br from-white to-slate-50/80 shadow-sm">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-white/60 p-4 backdrop-blur-sm">
+      <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200/60 bg-linear-to-br from-white to-slate-50/80 shadow-sm dark:border-slate-700/60 dark:from-slate-800 dark:to-slate-800/60">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-white/60 p-4 backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-800/60">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <div className="flex items-center gap-2">
               <div
                 className={
                   is_audited
-                    ? 'flex h-7 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 pr-2 shadow-sm'
-                    : 'flex h-7 items-center gap-1.5 rounded-full bg-amber-50 px-2.5 pr-2 shadow-sm'
+                    ? 'flex h-7 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 pr-2 shadow-sm dark:bg-emerald-900/40'
+                    : 'flex h-7 items-center gap-1.5 rounded-full bg-amber-50 px-2.5 pr-2 shadow-sm dark:bg-amber-900/40'
                 }
               >
                 <div
@@ -89,24 +93,30 @@ export default function MaterialTransferDetail({
                 <span
                   className={
                     is_audited
-                      ? 'text-xs font-medium text-emerald-600'
-                      : 'text-xs font-medium text-amber-600'
+                      ? 'text-xs font-medium text-emerald-600 dark:text-emerald-300'
+                      : 'text-xs font-medium text-amber-600 dark:text-amber-300'
                   }
                 >
                   {is_audited ? '已审核' : '待审核'}
                 </span>
               </div>
               {customer && (
-                <span className="font-medium text-slate-700">{customer}</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  {customer}
+                </span>
               )}
               {customer && project_no && (
-                <span className="text-slate-300">·</span>
+                <span className="text-slate-300 dark:text-slate-600">·</span>
               )}
-              <span className="font-semibold text-slate-900">{project_no}</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
+                {project_no}
+              </span>
               {product_model && (
                 <>
-                  <span className="text-slate-300">·</span>
-                  <span className="text-slate-500">{product_model}</span>
+                  <span className="text-slate-300 dark:text-slate-600">·</span>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    {product_model}
+                  </span>
                 </>
               )}
             </div>
@@ -127,7 +137,7 @@ export default function MaterialTransferDetail({
         <Descriptions
           size="small"
           column={{ xs: 1, sm: 2, md: 3, lg: 4 }}
-          className="[&_.ant-descriptions-item-content]:pl-2 [&_.ant-descriptions-item-content]:text-slate-700 [&_.ant-descriptions-item-label]:pl-5 [&_.ant-descriptions-item-label]:text-slate-500"
+          className="[&_.ant-descriptions-item-content]:pl-2 [&_.ant-descriptions-item-content]:text-slate-700 [&_.ant-descriptions-item-label]:pl-5 [&_.ant-descriptions-item-label]:text-slate-500 dark:[&_.ant-descriptions-item-content]:text-slate-300 dark:[&_.ant-descriptions-item-label]:text-slate-400"
           items={[
             {
               key: 'customer_model',
@@ -178,7 +188,7 @@ export default function MaterialTransferDetail({
               key: 'recipient_name',
               label: '接收人',
               children: (
-                <span className="font-medium text-slate-700">
+                <span className="font-medium text-slate-700 dark:text-slate-300">
                   {recipient_name || '-'}
                 </span>
               ),
@@ -212,11 +222,11 @@ export default function MaterialTransferDetail({
               key: 'audited_at',
               label: '审核时间',
               children: audited_at ? (
-                <span className="text-slate-600">
+                <span className="text-slate-600 dark:text-slate-300">
                   {new Date(audited_at).toLocaleString('zh-CN')}
                 </span>
               ) : (
-                <span className="text-slate-400">-</span>
+                <span className="text-slate-400 dark:text-slate-500">-</span>
               ),
             },
             {

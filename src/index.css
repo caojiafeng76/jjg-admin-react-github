@@ -53,11 +53,18 @@ body {
     --scrollbar-size: 8px;
     --scrollbar-thumb: rgba(100, 116, 139, 0.34);
     --scrollbar-thumb-hover: rgba(71, 85, 105, 0.56);
+    /* 表格 active 行高亮（与 App.tsx rowSelectedBg 暗色值对应） */
+    --table-active-row-bg: #f0f7ff;
+    --table-active-row-bg-alt: #e6f4ff;
+    --table-warning-row-bg: #fffbeb;
   }
 
   .dark {
     --scrollbar-thumb: rgba(148, 163, 184, 0.34);
     --scrollbar-thumb-hover: rgba(203, 213, 225, 0.52);
+    --table-active-row-bg: #172554;
+    --table-active-row-bg-alt: #172554;
+    --table-warning-row-bg: #3a2c16;
   }
 
   *,
