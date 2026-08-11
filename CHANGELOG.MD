@@ -15,6 +15,13 @@
 
 ## 2026-08-11
 
+- **类别**：修复
+- **范围**：物料转移单模块：`src/features/material-transfer/MaterialTransferForm.tsx`
+- **摘要**：修复物料转移单添加/编辑表单暗黑模式适配：① 表单分区卡片 `sectionClassName` 补 `dark:border-slate-700 dark:bg-slate-800/90`；② 分区标题 `sectionTitleClassName` 补 `dark:text-slate-200`；③ 底部固定操作栏 Form.Item 补 `dark:border-slate-700 dark:bg-slate-900/95`。修复前卡片/标题/操作栏为硬编码浅色（`bg-white/90`、`text-slate-700`、`border-slate-100`），暗黑模式下与黑色输入框混搭、对比度不足。
+- **验证**：`bun run typecheck` 通过（`tsc -b` 无错误）；grep 确认该文件无剩余缺少 dark 变体的浅色硬编码类。
+
+## 2026-08-11
+
 - **类别**：变更
 - **范围**：生产工单模块桌面端：`src/features/production-order/{index.tsx, ProductionOrderList.tsx}`；删除 `ProductionOrderInlineDetail.tsx`；测试 `index.vitest.tsx`、`src/utils/keyboardTableIntegration.vitest.ts`
 - **摘要**：取消生产工单页面"点击表格行查看工单详情"功能：① index.tsx 移除行点击相关状态（`activeRecordId`/`activeRecord`/`handleRowClick`）、搜索/重置时清理逻辑与失效校验 effect，移除 `Splitter` 上下分栏布局及底部 `ProductionOrderInlineDetail` 详情面板，表格容器改为占满剩余高度；② ProductionOrderList.tsx 移除 `onRowClick`/`activeRowId` props、`handleRow` 行点击绑定与 `createKeyboardTableRowProps` 引用；③ 删除不再使用的 `ProductionOrderInlineDetail.tsx` 组件文件，并同步移除测试中对应 mock；④ `keyboardTableIntegration.vitest.ts` 将 ProductionOrderList 移出交互式表格清单（该表格已无行点击交互）。"眼睛"图标查看详情（弹窗）不受影响。

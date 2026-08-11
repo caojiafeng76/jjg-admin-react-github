@@ -286,9 +286,9 @@ export default function MaterialTransferForm({
 
   const formItemClassName = 'mb-0'
   const sectionClassName =
-    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm'
+    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/90'
   const sectionTitleClassName =
-    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700'
+    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
 
   const sectionDot = (className = 'bg-blue-500') => (
     <span className={`h-1.5 w-1.5 rounded-full ${className}`} />
@@ -534,7 +534,7 @@ export default function MaterialTransferForm({
             </div>
           </section>
 
-          <Form.Item className="sticky bottom-0 z-10 -mx-1 mb-0 border-t border-slate-100 bg-white/95 px-1 pt-3 backdrop-blur-sm">
+          <Form.Item className="sticky bottom-0 z-10 -mx-1 mb-0 border-t border-slate-100 bg-white/95 px-1 pt-3 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
             <Space className="flex justify-end">
               <Button onClick={onCancel}>取消</Button>
               <Button type="primary" htmlType="submit" loading={loading}>
