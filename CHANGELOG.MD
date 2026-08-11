@@ -16,6 +16,13 @@
 ## 2026-08-11
 
 - **类别**：修复
+- **范围**：`src/ui/Loading.tsx`
+- **摘要**：修复暗黑模式下加载画面出现黑色小方块：原实现用 Spin 嵌套模式包裹空 div，antd 会在容器上叠加 `colorBgContainer` 背景遮罩（spinning 时 opacity 0.4），暗色算法下呈近黑色块。改为非嵌套 `<Spin size="large" description="加载中..." />`（antd 6 已用 `description` 取代 `tip`），消除遮罩。
+- **验证**：`bun run typecheck` 通过；浏览器暗黑模式实测加载画面无黑色方块。
+
+## 2026-08-11
+
+- **类别**：修复
 - **范围**：`src/features/precision-cutting-transfer/MaterialTransferForm.tsx`
 - **摘要**：精切转移单添加/编辑表单适配暗黑模式：各 section 卡片、外协信息卡片、数量差异只读字段、底部操作栏补充 `dark:` 变体（slate 深色背景/边框、amber/red 深色主题色、文字颜色），与模块内表格/详情页暗色约定一致。
 - **验证**：`bun run typecheck` 通过。
