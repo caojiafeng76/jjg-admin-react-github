@@ -210,9 +210,9 @@ export default function MaterialTransferForm({
 
   const formItemClassName = 'mb-0'
   const sectionClassName =
-    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm'
+    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/90'
   const sectionTitleClassName =
-    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700'
+    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
 
   const sectionDot = (className = 'bg-blue-500') => (
     <span className={`h-1.5 w-1.5 rounded-full ${className}`} />
@@ -220,21 +220,21 @@ export default function MaterialTransferForm({
 
   const renderQuantityDiff = (value: number | null) =>
     value === null ? (
-      <span className="text-slate-400">-</span>
+      <span className="text-slate-400 dark:text-slate-500">-</span>
     ) : value !== 0 ? (
-      <span className="font-semibold text-amber-600 tabular-nums">
+      <span className="font-semibold text-amber-600 tabular-nums dark:text-amber-400">
         {value}
       </span>
     ) : (
-      <span className="text-slate-600 tabular-nums">{value}</span>
+      <span className="text-slate-600 tabular-nums dark:text-slate-300">{value}</span>
     )
 
   const readOnlyDiffFieldClassName =
-    'flex h-8 w-full items-center justify-center rounded-lg border border-dashed border-amber-200 bg-amber-50/60 px-2 text-sm'
+    'flex h-8 w-full items-center justify-center rounded-lg border border-dashed border-amber-200 bg-amber-50/60 px-2 text-sm dark:border-amber-800 dark:bg-amber-900/30'
 
   const outsourceSection = (
-    <section className="rounded-2xl border border-red-200/80 bg-red-50/70 p-4 shadow-sm">
-      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-red-600">
+    <section className="rounded-2xl border border-red-200/80 bg-red-50/70 p-4 shadow-sm dark:border-red-900/50 dark:bg-red-900/20">
+      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-red-600 dark:text-red-300">
         {sectionDot('bg-red-500')}
         外协相关信息
       </div>
@@ -616,7 +616,7 @@ export default function MaterialTransferForm({
 
           {mobile ? outsourceSection : null}
 
-          <Form.Item className="sticky bottom-0 z-10 -mx-1 mb-0 border-t border-slate-100 bg-white/95 px-1 pt-3 backdrop-blur-sm">
+          <Form.Item className="sticky bottom-0 z-10 -mx-1 mb-0 border-t border-slate-100 bg-white/95 px-1 pt-3 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
             <Space className="flex justify-end">
               <Button onClick={onCancel}>取消</Button>
               <Button type="primary" htmlType="submit" loading={loading}>

@@ -16,6 +16,20 @@
 ## 2026-08-11
 
 - **类别**：修复
+- **范围**：`src/features/precision-cutting-transfer/MaterialTransferForm.tsx`
+- **摘要**：精切转移单添加/编辑表单适配暗黑模式：各 section 卡片、外协信息卡片、数量差异只读字段、底部操作栏补充 `dark:` 变体（slate 深色背景/边框、amber/red 深色主题色、文字颜色），与模块内表格/详情页暗色约定一致。
+- **验证**：`bun run typecheck` 通过。
+
+## 2026-08-11
+
+- **类别**：变更
+- **范围**：AI 工具链配置：`opencode.jsonc`；新增 `.opencode/ponytail/`（`.opencode/plugins/`、`hooks/`、`skills/`）
+- **摘要**：安装 Ponytail skill（[DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)，让 AI agent 按"最懒资深工程师"模式写最小代码：YAGNI → 复用现有 → 标准库 → 原生平台能力 → 已装依赖 → 一行 → 最小可用；同时注册 `/ponytail lite|full|ultra|off`、`/ponytail-review`、`/ponytail-audit`、`/ponytail-debt`、`/ponytail-gain`、`/ponytail-help` 命令并注入 6 个 skill）。采用本地 checkout 方式：复制仓库 `.opencode/`、`hooks/`、`skills/` 到 `.opencode/ponytail/`（保持相对结构），`opencode.jsonc` 新增 `"plugin": ["./.opencode/ponytail/.opencode/plugins/ponytail.mjs"]`，由插件在每次对话注入规则集并注册命令，无需 npm 依赖。默认强度 `full`。
+- **验证**：`node --check` 通过全部插件/hook JS 文件；node 直接 require `ponytail-config`/`ponytail-instructions` 验证默认模式 `full` 与指令生成（含 ladder/YAGNI）；`parseCommandFile` 解析全部 6 个命令文件 OK。
+
+## 2026-08-11
+
+- **类别**：修复
 - **范围**：物料转移单模块：`src/features/material-transfer/MaterialTransferForm.tsx`
 - **摘要**：修复物料转移单添加/编辑表单暗黑模式适配：① 表单分区卡片 `sectionClassName` 补 `dark:border-slate-700 dark:bg-slate-800/90`；② 分区标题 `sectionTitleClassName` 补 `dark:text-slate-200`；③ 底部固定操作栏 Form.Item 补 `dark:border-slate-700 dark:bg-slate-900/95`。修复前卡片/标题/操作栏为硬编码浅色（`bg-white/90`、`text-slate-700`、`border-slate-100`），暗黑模式下与黑色输入框混搭、对比度不足。
 - **验证**：`bun run typecheck` 通过（`tsc -b` 无错误）；grep 确认该文件无剩余缺少 dark 变体的浅色硬编码类。
