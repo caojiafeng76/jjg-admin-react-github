@@ -16,6 +16,13 @@
 ## 2026-08-11
 
 - **类别**：修复
+- **范围**：刀具与劳保模块：`src/features/tooling/{ToolingData,ToolingInventory,ToolingStockIn,ToolingStockOut}/` 与 `src/features/labor-protection/{LaborProtectionData,LaborProtectionRequisition}/` 全部页面组件，及共享组件 `src/ui/mobile/MobileBottomSelectSheet.tsx`
+- **摘要**：修复刀具与劳保模块暗黑模式不适配问题（两模块此前 0 个 `dark:` 变体）：① 6 个 Table 斑马纹 `rowClassName` 由硬编码 `'bg-white' : 'bg-slate-50/60'` 补充 `dark:bg-slate-800` / `dark:bg-slate-800/60` 变体；② 3 个刀具表单"刀具信息"面板容器补 `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300`、15 处字段标签补 `dark:text-slate-500`，库存表待入库/待出库数字补 `dark:text-slate-500`；③ bottom-sheet 选择按钮（ToolingStockOutForm、LaborProtectionRequisitionForm）补 `dark:border-slate-700/stone-700 dark:bg-slate-800/stone-800 dark:text-slate-100`；④ 6 个页面"搜索："标签补 `dark:text-slate-400`；⑤ 2 个公开 H5 扫码页（刀具出库登记、劳保领用登记）背景渐变、卡片、徽章、说明框、底部栏全部补 `dark:` 变体；⑥ 共享组件 MobileBottomSelectSheet 选项按钮与描述文字补 dark 变体。打印海报/出库单（usePrint*）为打印输出保持浅色属设计意图，未改动。
+- **验证**：`bun run typecheck` 通过；`bun run test` 通过（105 文件 / 461 用例）；grep 确认两模块源码无缺少 dark 变体的浅色残留类。
+
+## 2026-08-11
+
+- **类别**：修复
 - **范围**：优迈 4 个模块：`src/features/youmai/{ProductData,FinishedGoodsInventory,FinishedGoodsStockIn,FinishedGoodsStockOut}/`（货品资料 / 成品库存 / 成品入库 / 成品出库）
 - **摘要**：修复上述模块暗黑模式下内容区表格/物料信息面板仍为白色背景的问题：4 个 Table 组件（`YoumaiProductDataTable.tsx`、`YoumaiFinishedGoodsInventoryTable.tsx`、`YoumaiFinishedGoodsStockInTable.tsx`、`YoumaiFinishedGoodsStockOutTable.tsx`）的斑马纹 `rowClassName` 由硬编码 `'bg-white' : 'bg-slate-50/60'` 补充 `dark:bg-slate-800` / `dark:bg-slate-800/60` 变体，暗色下不再覆盖 antd 深色行背景；3 个表单内"物料信息"面板（`YoumaiFinishedGoodsInventoryForm.tsx`、`YoumaiFinishedGoodsStockInForm.tsx`、`YoumaiFinishedGoodsStockOutForm.tsx`）的 `bg-slate-50` 补充 `dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700`，与 RawMaterial 系列既有暗色样式一致。
 - **验证**：`bun run typecheck` 通过；`bun run test` 通过（105 文件 / 461 用例）。

@@ -70,14 +70,14 @@ export default function LaborProtectionPublicRequisitionPage() {
   }
 
   return (
-    <div className="flex h-dvh flex-col bg-[radial-gradient(circle_at_top,rgba(217,119,6,0.16),transparent_28%),linear-gradient(180deg,#fbf7ef_0%,#fffdf8_42%,#f0ebe2_100%)] text-slate-900">
+    <div className="flex h-dvh flex-col bg-[radial-gradient(circle_at_top,rgba(217,119,6,0.16),transparent_28%),linear-gradient(180deg,#fbf7ef_0%,#fffdf8_42%,#f0ebe2_100%)] text-slate-900 dark:bg-[radial-gradient(circle_at_top,rgba(217,119,6,0.16),transparent_28%),linear-gradient(180deg,#171310_0%,#151310_42%,#100e0b_100%)] dark:text-slate-100">
       <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col overflow-y-auto px-4 pt-5 pb-[calc(theme(spacing.32)+env(safe-area-inset-bottom))] sm:px-6 sm:pt-7">
-        <section className="relative overflow-hidden rounded-4xl border border-stone-200/80 bg-white/88 px-5 py-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:px-6">
-          <div className="absolute top-0 right-0 h-24 w-24 rounded-full bg-amber-200/40 blur-3xl" />
-          <div className="absolute bottom-0 -left-8 h-20 w-20 rounded-full bg-stone-200/50 blur-3xl" />
+        <section className="relative overflow-hidden rounded-4xl border border-stone-200/80 bg-white/88 px-5 py-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-sm dark:border-stone-700/80 dark:bg-stone-900/80 sm:px-6">
+          <div className="absolute top-0 right-0 h-24 w-24 rounded-full bg-amber-200/40 blur-3xl dark:bg-amber-900/30" />
+          <div className="absolute bottom-0 -left-8 h-20 w-20 rounded-full bg-stone-200/50 blur-3xl dark:bg-stone-800/40" />
 
           <div className="relative">
-            <div className="text-[11px] font-semibold tracking-[0.34em] text-stone-400 uppercase">
+            <div className="text-[11px] font-semibold tracking-[0.34em] text-stone-400 uppercase dark:text-stone-500">
               Labor Protection Entry
             </div>
             <Title
@@ -86,19 +86,19 @@ export default function LaborProtectionPublicRequisitionPage() {
             >
               劳保领用登记
             </Title>
-            <Paragraph className="mb-0 text-sm leading-6 text-stone-600">
+            <Paragraph className="mb-0 text-sm leading-6 text-stone-600 dark:text-stone-400">
               扫码后直接登记领用信息。填写领取人、岗位、种类和数量，提交后系统会自动记录到劳保领料单。
             </Paragraph>
           </div>
         </section>
 
         {submitted ? (
-          <Card className="mt-4 rounded-4xl border-stone-200/80 bg-white/92 shadow-[0_22px_60px_rgba(15,23,42,0.08)]">
+          <Card className="mt-4 rounded-4xl border-stone-200/80 bg-white/92 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-stone-700/80 dark:bg-stone-900/90">
             <Result
               status="success"
               title="登记成功"
               subTitle={
-                <div className="space-y-1 text-sm text-slate-500">
+                <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400">
                   <div>{submitted.recipient} 已完成劳保领用登记</div>
                   <div>
                     {submitted.categoryLabel} x {submitted.quantity}，岗位：
@@ -122,24 +122,24 @@ export default function LaborProtectionPublicRequisitionPage() {
           </Card>
         ) : (
           <>
-            <Card className="mt-4 rounded-4xl border-stone-200/80 bg-white/92 shadow-[0_22px_60px_rgba(15,23,42,0.08)]">
+            <Card className="mt-4 rounded-4xl border-stone-200/80 bg-white/92 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-stone-700/80 dark:bg-stone-900/90">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-xs font-semibold tracking-[0.24em] text-stone-400 uppercase">
+                  <div className="text-xs font-semibold tracking-[0.24em] text-stone-400 uppercase dark:text-stone-500">
                     Open H5 Form
                   </div>
-                  <div className="mt-1 text-base font-semibold text-slate-900">
+                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                     现场扫码后填写
                   </div>
                 </div>
-                <div className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                <div className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
                   无需登录
                 </div>
               </div>
 
               {isCategoryOptionsLoading || isMachineOptionsLoading ? (
                 <div className="flex min-h-80 items-center justify-center">
-                  <div className="flex flex-col items-center gap-4 text-sm text-slate-500">
+                  <div className="flex flex-col items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                     <Spin size="large" />
                     <span>正在加载劳保种类和机器编号</span>
                   </div>
@@ -166,14 +166,14 @@ export default function LaborProtectionPublicRequisitionPage() {
               )}
             </Card>
 
-            <div className="mt-4 rounded-[28px] border border-stone-200/80 bg-stone-950/3 px-4 py-4 text-sm leading-6 text-stone-600 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+            <div className="mt-4 rounded-[28px] border border-stone-200/80 bg-stone-950/3 px-4 py-4 text-sm leading-6 text-stone-600 shadow-[0_18px_40px_rgba(15,23,42,0.05)] dark:border-stone-700/80 dark:bg-stone-950/40 dark:text-stone-400">
               提交后会立即写入劳保领料单。请确认领取人姓名、岗位、机器编号和数量无误，再点击底部“确认登记”。
             </div>
           </>
         )}
       </div>
 
-      <div className="sticky bottom-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+14px)] backdrop-blur-xl sm:px-6">
+      <div className="sticky bottom-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+14px)] backdrop-blur-xl dark:border-stone-800 dark:bg-stone-900/95 sm:px-6">
         <div className="mx-auto w-full max-w-xl">
           <Button
             type="primary"

@@ -331,7 +331,7 @@ export default function ToolingStockInPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
+        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">搜索：</span>
         <ToolingStockInSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}

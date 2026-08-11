@@ -82,7 +82,9 @@ function ToolingInventoryTable({
         key: 'pending_stock_in',
         width: 120,
         render: (value: number) => (
-          <span className="text-slate-400">{formatNumber(value)}</span>
+          <span className="text-slate-400 dark:text-slate-500">
+            {formatNumber(value)}
+          </span>
         ),
       },
       {
@@ -98,7 +100,9 @@ function ToolingInventoryTable({
         key: 'pending_stock_out',
         width: 120,
         render: (value: number) => (
-          <span className="text-slate-400">{formatNumber(value)}</span>
+          <span className="text-slate-400 dark:text-slate-500">
+            {formatNumber(value)}
+          </span>
         ),
       },
       {
@@ -150,7 +154,7 @@ function ToolingInventoryTable({
       scroll={{ x: 1680, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
+        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
       }
       onRow={(record) => ({
         ...createKeyboardTableRowProps(

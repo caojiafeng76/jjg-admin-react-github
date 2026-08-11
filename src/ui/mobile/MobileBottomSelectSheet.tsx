@@ -133,7 +133,7 @@ export default function MobileBottomSelectSheet({
                     className={
                       isActive
                         ? 'w-full rounded-3xl border border-slate-900 bg-slate-900 px-4 py-3 text-left text-white shadow-[0_14px_30px_rgba(15,23,42,0.2)]'
-                        : 'w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-left text-slate-900 shadow-[0_8px_20px_rgba(15,23,42,0.06)]'
+                        : 'w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-left text-slate-900 shadow-[0_8px_20px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
                     }
                   >
                     <div className="text-sm font-semibold tracking-tight">
@@ -144,7 +144,7 @@ export default function MobileBottomSelectSheet({
                         className={
                           isActive
                             ? 'mt-2 text-xs text-slate-200'
-                            : 'mt-2 text-xs text-slate-500'
+                            : 'mt-2 text-xs text-slate-500 dark:text-slate-400'
                         }
                       >
                         {option.description}

@@ -126,25 +126,25 @@ export default function ToolingInventoryForm({
         />
       </Form.Item>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2">
+      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 md:grid-cols-2">
         <div>
-          <div className="text-xs text-slate-400">刀具编号</div>
+          <div className="text-xs text-slate-400 dark:text-slate-500">刀具编号</div>
           <div>{selectedTooling?.tool_code || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">刀具名称</div>
+          <div className="text-xs text-slate-400 dark:text-slate-500">刀具名称</div>
           <div>{selectedTooling?.tool_name || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">刀具规格</div>
+          <div className="text-xs text-slate-400 dark:text-slate-500">刀具规格</div>
           <div>{selectedTooling?.tool_spec || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">材质</div>
+          <div className="text-xs text-slate-400 dark:text-slate-500">材质</div>
           <div>{selectedTooling?.material || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">单价</div>
+          <div className="text-xs text-slate-400 dark:text-slate-500">单价</div>
           <div>
             {selectedTooling
               ? Number(selectedTooling.unit_price).toFixed(2)
