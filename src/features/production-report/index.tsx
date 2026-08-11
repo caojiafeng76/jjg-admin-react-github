@@ -294,7 +294,7 @@ export default function ProductionDailyReportPage() {
               onMouseEnter={preloadProductionDailyReportExcel}
               onFocus={preloadProductionDailyReportExcel}
               disabled={isExporting || (selectedCount === 0 && total === 0)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/60 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50/40 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/60 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50/40 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-900 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
               {selectedCount > 0
@@ -302,7 +302,7 @@ export default function ProductionDailyReportPage() {
                 : `导出当前筛选结果${total > 0 ? ` (${total})` : ''}`}
             </button>
             {isExporting ? (
-              <span className="text-xs text-slate-400">正在生成文件...</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">正在生成文件...</span>
             ) : null}
           </>
         )}
@@ -385,8 +385,8 @@ export default function ProductionDailyReportPage() {
       <div
         className={
           isEmployeeView
-            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
-            : 'rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm'
+            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800'
+            : 'rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-800'
         }
       >
         <ProductionDailyReportSearch

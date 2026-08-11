@@ -182,7 +182,7 @@ export default function ProductionDailyReportSearch({
           block
           type="default"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="h-11 rounded-2xl border-slate-200 bg-slate-50 px-4 text-slate-700 shadow-none"
+          className="h-11 rounded-2xl border-slate-200 bg-slate-50 px-4 text-slate-700 shadow-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
         >
           <span className="flex w-full items-center justify-between text-sm font-medium">
             <span>{isExpanded ? '收起筛选条件' : '展开筛选条件'}</span>

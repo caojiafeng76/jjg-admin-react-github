@@ -875,7 +875,7 @@ export default function ProductionOrderPage() {
           <Card className="w-full max-w-md shadow-sm">
             <Space direction="vertical" size={16} className="w-full">
               <div className="flex items-center gap-3">
-                <div className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                <div className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   <LockClosedIcon className="size-5" />
                 </div>
                 <div>
@@ -1005,7 +1005,7 @@ export default function ProductionOrderPage() {
         className={
           isEmployeeView
             ? 'w-full'
-            : 'rounded-xl border border-slate-200/80 bg-gradient-to-r from-slate-50 via-white to-slate-50 p-4 shadow-sm'
+            : 'rounded-xl border border-slate-200/80 bg-gradient-to-r from-slate-50 via-white to-slate-50 p-4 shadow-sm dark:border-slate-700/80 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800 dark:shadow-none'
         }
       >
         {isEmployeeView ? (
@@ -1021,7 +1021,7 @@ export default function ProductionOrderPage() {
             >
               手动添加
             </Button>
-            <p className="text-center text-xs text-slate-400">
+            <p className="text-center text-xs text-slate-400 dark:text-slate-500">
               {hasOrderToday
                 ? '当前用户当天已存在工单，不能重复手动创建'
                 : '手动添加会先创建工单，再进入详情维护工序'}
@@ -1031,44 +1031,44 @@ export default function ProductionOrderPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-1">
               <AddButton handleCreate={handleCreate} />
-              <div className="mx-2 h-6 w-px bg-slate-200" />
+              <div className="mx-2 h-6 w-px bg-slate-200 dark:bg-slate-700" />
               <Button
                 type="text"
                 size="small"
-                icon={<KeyIcon className="size-4 text-slate-500" />}
+                icon={<KeyIcon className="size-4 text-slate-500 dark:text-slate-400" />}
                 onClick={() => setIsManagementPasswordModalOpen(true)}
-                className="h-8 rounded-lg px-3 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                className="h-8 rounded-lg px-3 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
               >
                 修改密码
               </Button>
               <Button
                 type="text"
                 size="small"
-                icon={<LockClosedIcon className="size-4 text-slate-400" />}
+                icon={<LockClosedIcon className="size-4 text-slate-400 dark:text-slate-500" />}
                 onClick={handleLockManagement}
-                className="h-8 rounded-lg px-3 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                className="h-8 rounded-lg px-3 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300"
               >
                 锁定
               </Button>
-              <div className="mx-2 h-6 w-px bg-slate-200" />
+              <div className="mx-2 h-6 w-px bg-slate-200 dark:bg-slate-700" />
               <Badge status="success" />
               <Button
                 type="text"
                 size="small"
-                icon={<ShieldCheckIcon className="size-4 text-emerald-500" />}
+                icon={<ShieldCheckIcon className="size-4 text-emerald-500 dark:text-emerald-400" />}
                 onClick={() => handleBatchAudit(true)}
                 loading={batchUpdateMutation.isPending}
-                className="h-8 rounded-lg px-3 text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
+                className="h-8 rounded-lg px-3 text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-300"
               >
                 批量审核
               </Button>
               <Button
                 type="text"
                 size="small"
-                icon={<ArrowPathIcon className="size-4 text-amber-500" />}
+                icon={<ArrowPathIcon className="size-4 text-amber-500 dark:text-amber-400" />}
                 onClick={() => handleBatchAudit(false)}
                 loading={batchUpdateMutation.isPending}
-                className="h-8 rounded-lg px-3 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                className="h-8 rounded-lg px-3 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30 dark:hover:text-amber-300"
               >
                 批量反审核
               </Button>
@@ -1112,12 +1112,12 @@ export default function ProductionOrderPage() {
       <div
         className={
           isEmployeeView
-            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
-            : 'rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md'
+            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none'
+            : 'rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none'
         }
       >
         {isEmployeeView ? null : (
-          <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-400">
+          <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
             筛选条件
           </span>
         )}
@@ -1165,29 +1165,29 @@ export default function ProductionOrderPage() {
               >
                 {/* 数据统计卡片 */}
                 {orderData && orderData.total > 0 && (
-                  <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200/60 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-4 py-2.5 text-sm transition-all duration-300">
+                  <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200/60 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-4 py-2.5 text-sm transition-all duration-300 dark:border-slate-700/80 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-slate-500">共</span>
-                      <span className="font-semibold text-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">共</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">
                         {orderData.total}
                       </span>
-                      <span className="text-slate-500">条记录</span>
+                      <span className="text-slate-500 dark:text-slate-400">条记录</span>
                     </div>
                     {selectedRowKeys.length > 0 && (
                       <>
-                        <div className="h-4 w-px bg-slate-200" />
+                        <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
                         <div className="flex items-center gap-1.5">
-                          <span className="text-slate-500">已选中</span>
-                          <span className="font-semibold text-blue-600">
+                          <span className="text-slate-500 dark:text-slate-400">已选中</span>
+                          <span className="font-semibold text-blue-600 dark:text-blue-400">
                             {selectedRowKeys.length}
                           </span>
-                          <span className="text-slate-500">项</span>
+                          <span className="text-slate-500 dark:text-slate-400">项</span>
                         </div>
                       </>
                     )}
                   </div>
                 )}
-                <div className="min-h-0 flex-1 overflow-x-auto rounded-lg border border-slate-200/60 bg-white shadow-sm">
+                <div className="min-h-0 flex-1 overflow-x-auto rounded-lg border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none">
                   <ProductionOrderList
                     loading={isLoading}
                     data={orderData?.items || []}
@@ -1203,9 +1203,9 @@ export default function ProductionOrderPage() {
                 </div>
                 <div
                   ref={paginationRef}
-                  className="flex shrink-0 items-center justify-between rounded-lg border border-slate-200/60 bg-white px-4 py-2 shadow-sm"
+                  className="flex shrink-0 items-center justify-between rounded-lg border border-slate-200/60 bg-white px-4 py-2 shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none"
                 >
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-slate-400 dark:text-slate-500">
                     每页显示条数
                   </span>
                   <AppPagination
@@ -1216,7 +1216,7 @@ export default function ProductionOrderPage() {
               </div>
             </Splitter.Panel>
             <Splitter.Panel min="20%">
-              <div className="h-full overflow-hidden rounded-lg border border-slate-200/60 bg-white shadow-sm">
+              <div className="h-full overflow-hidden rounded-lg border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none">
                 <ProductionOrderInlineDetail selectedRecord={activeRecord} />
               </div>
             </Splitter.Panel>

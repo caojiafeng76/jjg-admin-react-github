@@ -294,8 +294,8 @@ export default function ProductionOrderItemForm({
   }, [machineOptions])
 
   const outsourceSection = (
-    <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4">
-      <div className="mb-3 text-sm font-medium text-red-600">外协相关信息</div>
+    <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4 dark:border-red-900/60 dark:bg-red-950/40">
+      <div className="mb-3 text-sm font-medium text-red-600 dark:text-red-400">外协相关信息</div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <Form.Item
           name="outsource_defect_quantity"
@@ -362,7 +362,7 @@ export default function ProductionOrderItemForm({
           </Form.Item>
 
           {compact ? (
-            <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
               手机端建议先选择项目号，再补充工序、数量和不良数，便于自动带出型号与标准工时。
             </div>
           ) : null}
@@ -446,7 +446,7 @@ export default function ProductionOrderItemForm({
           </Form.Item>
 
           {productModel && operationMatchLevel ? (
-            <div className="-mt-3 mb-4 text-sm text-slate-600">
+            <div className="-mt-3 mb-4 text-sm text-slate-600 dark:text-slate-400">
               成本核算匹配：
               <Tag
                 color={MATCH_LEVEL_COLORS[operationMatchLevel]}
@@ -503,11 +503,11 @@ export default function ProductionOrderItemForm({
                   machine_name={m.machine_name}
                 >
                   {m.id === null ? (
-                    <span className="text-slate-400">无</span>
+                    <span className="text-slate-400 dark:text-slate-500">无</span>
                   ) : (
                     <div className="flex flex-col py-0.5">
                       <span>{m.unified_device_no}</span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
                         {m.operation} {m.machine_name}
                       </span>
                     </div>

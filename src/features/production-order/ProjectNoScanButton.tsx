@@ -369,7 +369,7 @@ export default function ProjectNoScanButton({
         width={420}
       >
         <div className="space-y-4">
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 dark:border-slate-700">
             <div className="relative aspect-square w-full">
               <video
                 ref={videoRef}
@@ -398,8 +398,8 @@ export default function ProjectNoScanButton({
             <Alert type="warning" showIcon message={scanError} />
           ) : null}
 
-          <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            <Paragraph className="mb-2 text-slate-700">
+          <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <Paragraph className="mb-2 text-slate-700 dark:text-slate-300">
               将二维码放入取景框内，系统会自动识别项目号并带出型号、长度、客户型号。
             </Paragraph>
             <Text type="secondary">

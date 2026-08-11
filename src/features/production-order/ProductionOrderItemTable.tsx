@@ -31,7 +31,7 @@ const RUNTIME_COL = {
     const seconds =
       (record.incoming_qualified_quantity ?? 0) *
       (record.theoretical_seconds ?? 0)
-    if (seconds === 0) return <span className="text-slate-400">—</span>
+    if (seconds === 0) return <span className="text-slate-400 dark:text-slate-500">—</span>
     return `${(seconds / 3600).toFixed(2)} h`
   },
 }
@@ -141,11 +141,11 @@ function ProductionOrderItemTable({
         width: 120,
         render: (_: unknown, record: ProductionOrderItemWithMachine) => {
           const m = record.machine_equipment_maintenances
-          if (!m) return <span className="text-slate-400">无</span>
+          if (!m) return <span className="text-slate-400 dark:text-slate-500">无</span>
           return (
             <div className="flex flex-col">
               <span>{m.unified_device_no}</span>
-              <span className="text-xs text-slate-400">{m.machine_name}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">{m.machine_name}</span>
             </div>
           )
         },

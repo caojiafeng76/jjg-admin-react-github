@@ -117,16 +117,16 @@ export default function ProductionOrderDetail({
   return (
     <div className="space-y-4">
       {compact ? (
-        <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
+        <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
+              <div className="text-xs tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
                 Order Summary
               </div>
-              <div className="mt-1 text-xl font-black tracking-tight text-slate-900">
+              <div className="mt-1 text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
                 {currentOrder.order_date}
               </div>
-              <div className="mt-1 text-sm text-slate-500">
+              <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 {orderWithEmployee.employee?.name || '-'}
               </div>
               <div className="mt-2">
@@ -141,36 +141,36 @@ export default function ProductionOrderDetail({
             </Button>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+          <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-400">
+            <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                 出勤工时
               </div>
-              <div className="mt-1 font-semibold text-slate-900">
+              <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                 {currentOrder.work_hours} 小时
               </div>
             </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+            <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                 班别
               </div>
-              <div className="mt-1 font-semibold text-slate-900">
+              <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                 {currentOrder.shift || '白班'}
               </div>
             </div>
-            <div className="rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+            <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                 审核时间
               </div>
-              <div className="mt-1 font-semibold text-slate-900">
+              <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                 {formattedAuditedAt || '未审核'}
               </div>
             </div>
-            <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3">
-              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+            <div className="col-span-2 rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+              <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                 备注
               </div>
-              <div className="mt-1 text-sm leading-6 font-medium wrap-break-word whitespace-pre-wrap text-slate-900">
+              <div className="mt-1 text-sm leading-6 font-medium wrap-break-word whitespace-pre-wrap text-slate-900 dark:text-slate-100">
                 {currentOrder.remark?.trim() || '无备注'}
               </div>
             </div>
@@ -226,13 +226,13 @@ export default function ProductionOrderDetail({
       )}
 
       {compact ? (
-        <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
+        <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="text-xs tracking-[0.24em] text-slate-400 uppercase">
+              <div className="text-xs tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
                 Process Items
               </div>
-              <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
+              <div className="mt-1 text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
                 工序明细
               </div>
             </div>

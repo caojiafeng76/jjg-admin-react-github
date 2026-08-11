@@ -34,7 +34,7 @@ export default function ProductionOrderMobileList({
             className={
               selected
                 ? 'rounded-3xl border border-slate-900 bg-slate-900 px-4 py-4 text-white shadow-[0_18px_40px_rgba(15,23,42,0.16)]'
-                : 'rounded-3xl border border-slate-200 bg-white px-4 py-4 text-slate-900 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
+                : 'rounded-3xl border border-slate-200 bg-white px-4 py-4 text-slate-900 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
             }
           >
             <div className="flex items-start justify-between gap-3">
@@ -43,7 +43,7 @@ export default function ProductionOrderMobileList({
                   className={
                     selected
                       ? 'text-xs text-slate-300'
-                      : 'text-xs text-slate-400'
+                      : 'text-xs text-slate-400 dark:text-slate-500'
                   }
                 >
                   {record.order_date}
@@ -71,10 +71,10 @@ export default function ProductionOrderMobileList({
               className={
                 selected
                   ? 'mt-4 grid grid-cols-1 gap-3 text-sm text-slate-100'
-                  : 'mt-4 grid grid-cols-1 gap-3 text-sm text-slate-600'
+                  : 'mt-4 grid grid-cols-1 gap-3 text-sm text-slate-600 dark:text-slate-400'
               }
             >
-              <div className="rounded-2xl bg-black/5 px-3 py-3">
+              <div className="rounded-2xl bg-black/5 px-3 py-3 dark:bg-white/10">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   出勤工时
                 </div>
@@ -82,7 +82,7 @@ export default function ProductionOrderMobileList({
                   {record.work_hours} h
                 </div>
               </div>
-              <div className="rounded-2xl bg-black/5 px-3 py-3">
+              <div className="rounded-2xl bg-black/5 px-3 py-3 dark:bg-white/10">
                 <div className="text-[11px] tracking-[0.18em] uppercase opacity-60">
                   备注
                 </div>

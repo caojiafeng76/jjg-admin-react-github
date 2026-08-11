@@ -301,7 +301,7 @@ export default function MobileProductionOrderScanPage() {
   if (!isEmployeeView || !employeeId) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+        <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
           <Title level={4}>当前账号不可使用扫码录入</Title>
           <Paragraph type="secondary">
             请使用员工端账号进入后再尝试录入工单。
@@ -456,10 +456,10 @@ export default function MobileProductionOrderScanPage() {
   return (
     <div className="h-full overflow-y-auto px-4 pt-4 pb-[calc(--spacing(16)+env(safe-area-inset-bottom))]">
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
-        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
+        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-[11px] font-semibold tracking-[0.24em] text-slate-400 uppercase">
+              <div className="text-[11px] font-semibold tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
                 Scan To Add
               </div>
               <Title level={4} style={{ marginTop: 8, marginBottom: 4 }}>
@@ -484,81 +484,81 @@ export default function MobileProductionOrderScanPage() {
             />
           </div>
 
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
             <div className="flex items-center justify-between gap-3">
               <span>当前录入日期</span>
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
                 {dayjs().format('YYYY-MM-DD')}
               </span>
             </div>
             <div className="mt-2 flex items-center justify-between gap-3">
               <span>录入员工</span>
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
                 {employeeName}
               </span>
             </div>
           </div>
         </section>
 
-        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
+        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
           <div className="flex flex-col gap-5">
             {/* 基本信息 */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300" />
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
                 基本信息
               </div>
 
               <div>
-                <div className="mb-1 text-sm font-semibold text-slate-700">
+                <div className="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   项目号
                 </div>
-                <div className="mb-2 text-xs text-slate-500">
+                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">
                   可扫码自动带出，也可手动修改
                 </div>
                 <button
                   type="button"
                   onClick={() => setActiveSheet('project')}
-                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm"
+                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm dark:border-slate-700/80 dark:bg-slate-900/90"
                 >
-                  <div className="text-base font-semibold text-slate-900">
+                  <div className="text-base font-semibold text-slate-900 dark:text-slate-100">
                     {projectNo || '请选择项目号'}
                   </div>
-                  <span className="text-sm font-medium text-slate-400">
+                  <span className="text-sm font-medium text-slate-400 dark:text-slate-500">
                     选择
                   </span>
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/60">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                     型号
                   </div>
-                  <div className="mt-1 text-sm font-semibold text-slate-900">
+                  <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {formatDisplayValue(currentProject?.product_model)}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/60">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                     长度(mm)
                   </div>
-                  <div className="mt-1 text-sm font-semibold text-slate-900">
+                  <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {formatDisplayValue(currentProject?.length_mm)}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/60">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
                     客户型号
                   </div>
-                  <div className="mt-1 text-sm font-semibold text-slate-900">
+                  <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {formatDisplayValue(currentProject?.customer_model)}
                   </div>
                 </div>
               </div>
 
               <div>
-                <div className="mb-1 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
+                <div className="mb-1 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <span>工序</span>
                   {operationMatch?.matchLevel ? (
                     <Tag
@@ -574,7 +574,7 @@ export default function MobileProductionOrderScanPage() {
                     </Tag>
                   ) : null}
                 </div>
-                <div className="mb-2 text-xs text-slate-500">
+                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">
                   {currentProductModel
                     ? '根据项目号自动匹配工序列表'
                     : '请先确定项目号'}
@@ -582,35 +582,35 @@ export default function MobileProductionOrderScanPage() {
                 <button
                   type="button"
                   onClick={() => setActiveSheet('operation')}
-                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700/80 dark:bg-slate-900/90"
                   disabled={!currentProductModel}
                 >
-                  <div className="text-base font-semibold text-slate-900">
+                  <div className="text-base font-semibold text-slate-900 dark:text-slate-100">
                     {operation || '请选择工序'}
                   </div>
-                  <span className="text-sm font-medium text-slate-400">
+                  <span className="text-sm font-medium text-slate-400 dark:text-slate-500">
                     选择
                   </span>
                 </button>
               </div>
 
               <div>
-                <div className="mb-1 text-sm font-semibold text-slate-700">
+                <div className="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   机器编号
                 </div>
-                <div className="mb-2 text-xs text-slate-500">
+                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">
                   {operation ? '从底部弹层中选择机器编号' : '请先选择工序'}
                 </div>
                 <button
                   type="button"
                   onClick={() => setActiveSheet('machine')}
-                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left shadow-sm disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700/80 dark:bg-slate-900/90"
                   disabled={!operation}
                 >
-                  <div className="text-base font-semibold text-slate-900">
+                  <div className="text-base font-semibold text-slate-900 dark:text-slate-100">
                     {currentMachineLabel}
                   </div>
-                  <span className="text-sm font-medium text-slate-400">
+                  <span className="text-sm font-medium text-slate-400 dark:text-slate-500">
                     选择
                   </span>
                 </button>
@@ -619,13 +619,13 @@ export default function MobileProductionOrderScanPage() {
 
             {/* 数量明细 */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300" />
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
                 数量明细
               </div>
 
               <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
+                <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   来料接收数
                 </div>
                 <MobileNumberInput
@@ -639,7 +639,7 @@ export default function MobileProductionOrderScanPage() {
               </div>
 
               <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
+                <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   成品合格数
                 </div>
                 <MobileNumberInput
@@ -651,7 +651,7 @@ export default function MobileProductionOrderScanPage() {
               </div>
 
               <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
+                <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   加工不良数量
                 </div>
                 <MobileNumberInput
@@ -663,7 +663,7 @@ export default function MobileProductionOrderScanPage() {
               </div>
 
               <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
+                <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   原料不良数量
                 </div>
                 <MobileNumberInput
@@ -677,13 +677,13 @@ export default function MobileProductionOrderScanPage() {
 
             {/* 调机与外协 */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300" />
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
                 调机与外协
               </div>
 
               <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
+                <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   调机不良
                 </div>
                 <MobileNumberInput
@@ -697,23 +697,23 @@ export default function MobileProductionOrderScanPage() {
               </div>
 
               <div>
-                <div className="mb-2 text-sm font-semibold text-slate-700">
+                <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   调机负责人
                 </div>
                 <Input
                   value={setupResponsible}
                   onChange={(event) => setSetupResponsible(event.target.value)}
                   placeholder="请输入调机负责人"
-                  className="h-12 w-full rounded-2xl border-slate-200"
+                  className="h-12 w-full rounded-2xl border-slate-200 dark:border-slate-700"
                 />
               </div>
 
-              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-                <div className="mb-3 text-xs text-slate-500">
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/60 dark:bg-rose-950/40">
+                <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
                   涉及外协工序时填写
                 </div>
                 <div>
-                  <div className="mb-2 text-sm font-semibold text-slate-700">
+                  <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                     外协不良数
                   </div>
                   <MobileNumberInput
@@ -727,19 +727,19 @@ export default function MobileProductionOrderScanPage() {
                 </div>
 
                 <div className="mt-3">
-                  <div className="mb-2 text-sm font-semibold text-slate-700">
+                  <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                     外协单位
                   </div>
                   <Input
                     value={outsourceUnit}
                     onChange={(event) => setOutsourceUnit(event.target.value)}
                     placeholder="请输入外协单位"
-                    className="h-12 w-full rounded-2xl border-slate-200"
+                    className="h-12 w-full rounded-2xl border-slate-200 dark:border-slate-700"
                   />
                 </div>
 
                 <div className="mt-3">
-                  <div className="mb-2 text-sm font-semibold text-slate-700">
+                  <div className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                     外协不良原因
                   </div>
                   <Input.TextArea
@@ -757,8 +757,8 @@ export default function MobileProductionOrderScanPage() {
 
             {/* 备注 */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300" />
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
                 备注
               </div>
 
@@ -777,7 +777,7 @@ export default function MobileProductionOrderScanPage() {
       </div>
 
       <div
-        className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl"
+        className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
       >
         <div className="mx-auto grid max-w-2xl grid-cols-[1fr_1.4fr] gap-3">

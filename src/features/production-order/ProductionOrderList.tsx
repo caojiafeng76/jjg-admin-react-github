@@ -48,7 +48,7 @@ export default function ProductionOrderList({
         key: 'order_date',
         width: 110,
         render: (value: string) => (
-          <span className="font-medium text-slate-700">{value}</span>
+          <span className="font-medium text-slate-700 dark:text-slate-300">{value}</span>
         ),
       },
       {
@@ -57,7 +57,7 @@ export default function ProductionOrderList({
         fixed: 'left',
         width: 100,
         render: (_text, record: ProductionOrderListItem) =>
-          record.employee?.name || <span className="text-slate-300">-</span>,
+          record.employee?.name || <span className="text-slate-300 dark:text-slate-600">-</span>,
       },
       {
         title: '审核',
@@ -82,8 +82,8 @@ export default function ProductionOrderList({
           <span
             className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
               value === '白班'
-                ? 'bg-amber-50 text-amber-600'
-                : 'bg-indigo-50 text-indigo-600'
+                ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300'
+                : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300'
             }`}
           >
             {value}
@@ -96,7 +96,7 @@ export default function ProductionOrderList({
         key: 'work_hours',
         width: 90,
         render: (value: number | null) => (
-          <span className="font-mono text-slate-600">
+          <span className="font-mono text-slate-600 dark:text-slate-400">
             {(value ?? 0).toFixed(1)}h
           </span>
         ),
@@ -107,7 +107,7 @@ export default function ProductionOrderList({
         key: 'positive_qualified_hours',
         width: 90,
         render: (value: number | null) => (
-          <span className="font-mono text-emerald-600">
+          <span className="font-mono text-emerald-600 dark:text-emerald-400">
             {(value ?? 0).toFixed(2)}
           </span>
         ),
@@ -118,7 +118,7 @@ export default function ProductionOrderList({
         key: 'extra_qualified_hours',
         width: 90,
         render: (value: number | null) => (
-          <span className="font-mono text-blue-600">
+          <span className="font-mono text-blue-600 dark:text-blue-400">
             {(value ?? 0).toFixed(2)}
           </span>
         ),
@@ -130,7 +130,7 @@ export default function ProductionOrderList({
         width: 100,
         render: (value: number | null, record: ProductionOrderListItem) => {
           if (value === null || value === undefined) {
-            return <span className="text-slate-300">-</span>
+            return <span className="text-slate-300 dark:text-slate-600">-</span>
           }
 
           return (
@@ -144,8 +144,8 @@ export default function ProductionOrderList({
               <span
                 className={`font-mono font-semibold ${
                   record.hasZeroStandardQualifiedItem
-                    ? 'text-red-500'
-                    : 'text-slate-700'
+                    ? 'text-red-500 dark:text-red-400'
+                    : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {value.toFixed(2)}
@@ -161,7 +161,7 @@ export default function ProductionOrderList({
         width: 100,
         render: (value: number | null) => {
           if (value === null || value === undefined) {
-            return <span className="text-slate-300">-</span>
+            return <span className="text-slate-300 dark:text-slate-600">-</span>
           }
 
           const efficiencyPercent = value * 100
@@ -172,10 +172,10 @@ export default function ProductionOrderList({
             <span
               className={`inline-flex items-center gap-1 font-mono font-medium ${
                 isGood
-                  ? 'text-emerald-600'
+                  ? 'text-emerald-600 dark:text-emerald-400'
                   : isWarning
-                    ? 'text-amber-600'
-                    : 'text-slate-600'
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-slate-600 dark:text-slate-400'
               }`}
             >
               {isWarning && (
@@ -195,10 +195,10 @@ export default function ProductionOrderList({
         render: (value: string | null) =>
           value ? (
             <Tooltip title={value}>
-              <span className="text-slate-500">{value}</span>
+              <span className="text-slate-500 dark:text-slate-400">{value}</span>
             </Tooltip>
           ) : (
-            <span className="text-slate-200">-</span>
+            <span className="text-slate-200 dark:text-slate-700">-</span>
           ),
       },
       {
@@ -208,11 +208,11 @@ export default function ProductionOrderList({
         width: 160,
         render: (value: string | null) =>
           value ? (
-            <span className="text-xs whitespace-nowrap text-slate-400">
+            <span className="text-xs whitespace-nowrap text-slate-400 dark:text-slate-500">
               {dayjs(value).format('MM-DD HH:mm')}
             </span>
           ) : (
-            <span className="text-slate-300">-</span>
+            <span className="text-slate-300 dark:text-slate-600">-</span>
           ),
       },
       {
@@ -228,7 +228,7 @@ export default function ProductionOrderList({
             onClick={() => onView(record)}
             aria-label={`查看 ${record.order_date} 生产工单`}
             title="查看"
-            className="rounded-lg text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+            className="rounded-lg text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-slate-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
           />
         ),
       },
@@ -261,8 +261,8 @@ export default function ProductionOrderList({
         onRowClick ? 'cursor-pointer' : ''
       } ${
         record.id && record.id === activeRowId
-          ? 'bg-blue-50/70'
-          : 'hover:bg-slate-50/60'
+          ? 'bg-blue-50/70 dark:bg-blue-900/30'
+          : 'hover:bg-slate-50/60 dark:hover:bg-slate-700/60'
       }`,
     }),
     [activeRowId, onRowClick],
@@ -274,7 +274,7 @@ export default function ProductionOrderList({
       loading={{
         spinning: loading,
         tip: (
-          <div className="flex items-center gap-2 text-slate-400">
+          <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
             <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
             <span className="animate-pulse">加载中...</span>
           </div>

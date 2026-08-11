@@ -37,17 +37,17 @@ export default function ProductionOrderItemMobileList({
         return (
           <article
             key={item.id}
-            className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]"
+            className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-xs tracking-[0.22em] text-slate-400 uppercase">
+                <div className="text-xs tracking-[0.22em] text-slate-400 uppercase dark:text-slate-500">
                   Step {index + 1}
                 </div>
-                <div className="mt-1 text-lg font-bold tracking-tight text-slate-900">
+                <div className="mt-1 text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
                   {item.operation}
                 </div>
-                <div className="mt-1 text-sm text-slate-500">
+                <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                   {item.project_no}
                   {item.product_model ? ` / ${item.product_model}` : ''}
                 </div>
@@ -61,52 +61,52 @@ export default function ProductionOrderItemMobileList({
               </Tag>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-400">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                   来料接收数
                 </div>
-                <div className="mt-1 font-semibold text-slate-900">
+                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                   {item.incoming_qualified_quantity}
                 </div>
               </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                   成品合格数
                 </div>
-                <div className="mt-1 font-semibold text-slate-900">
+                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                   {item.qualified_quantity}
                 </div>
               </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                   加工不良
                 </div>
-                <div className="mt-1 font-semibold text-slate-900">
+                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                   {item.defect_quantity_1 || 0}
                 </div>
               </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                   原料不良
                 </div>
-                <div className="mt-1 font-semibold text-slate-900">
+                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                   {item.defect_quantity_2 || 0}
                 </div>
               </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                   外协不良
                 </div>
-                <div className="mt-1 font-semibold text-slate-900">
+                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                   {item.outsource_defect_quantity || 0}
                 </div>
               </div>
-              <div className="rounded-2xl bg-slate-50 px-3 py-3">
-                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase">
+              <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
+                <div className="text-[11px] tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
                   调机不良
                 </div>
-                <div className="mt-1 font-semibold text-slate-900">
+                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                   {item.setup_defect_quantity || 0}
                 </div>
               </div>
@@ -115,11 +115,11 @@ export default function ProductionOrderItemMobileList({
             {item.outsource_defect_reason ||
             item.outsource_unit ||
             item.setup_responsible ? (
-              <div className="mt-4 space-y-2 text-sm text-slate-600">
+              <div className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 {item.outsource_defect_reason ? (
                   <div>
                     外协不良原因：
-                    <span className="font-medium text-slate-900">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">
                       {item.outsource_defect_reason}
                     </span>
                   </div>
@@ -127,7 +127,7 @@ export default function ProductionOrderItemMobileList({
                 {item.outsource_unit ? (
                   <div>
                     外协单位：
-                    <span className="font-medium text-slate-900">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">
                       {item.outsource_unit}
                     </span>
                   </div>
@@ -135,7 +135,7 @@ export default function ProductionOrderItemMobileList({
                 {item.setup_responsible ? (
                   <div>
                     调机负责人：
-                    <span className="font-medium text-slate-900">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">
                       {item.setup_responsible}
                     </span>
                   </div>

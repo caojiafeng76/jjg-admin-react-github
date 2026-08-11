@@ -153,9 +153,9 @@ export default function ProductionOrderSearch({
             value={fixedEmployee.name}
             disabled
             style={{ width: mobile ? '100%' : 160 }}
-            className="rounded-lg bg-slate-50"
+            className="rounded-lg bg-slate-50 dark:bg-slate-800"
             prefix={
-              <span className="mr-1 text-xs text-slate-400">操作人</span>
+              <span className="mr-1 text-xs text-slate-400 dark:text-slate-500">操作人</span>
             }
           />
         </Form.Item>
@@ -250,7 +250,7 @@ export default function ProductionOrderSearch({
             icon={<XMarkIcon className="h-4 w-4" />}
             onClick={handleReset}
             disabled={isSearching}
-            className="h-9 rounded-lg border-slate-200 bg-white px-5 text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 active:bg-slate-100"
+            className="h-9 rounded-lg border-slate-200 bg-white px-5 text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 active:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200 dark:active:bg-slate-700"
           >
             重置
           </Button>
@@ -266,15 +266,15 @@ export default function ProductionOrderSearch({
           block
           type="default"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="h-11 rounded-2xl border-slate-200 bg-white px-4 text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
+          className="h-11 rounded-2xl border-slate-200 bg-white px-4 text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700"
         >
           <span className="flex w-full items-center justify-between text-sm font-medium">
             <span className="flex items-center gap-2">
-              <AdjustmentsHorizontalIcon className="h-4 w-4 text-slate-400" />
+              <AdjustmentsHorizontalIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
               {isExpanded ? '收起筛选条件' : '展开筛选条件'}
             </span>
             <ChevronDownIcon
-              className={`h-4 w-4 text-slate-400 transition-transform duration-300 ${
+              className={`h-4 w-4 text-slate-400 transition-transform duration-300 dark:text-slate-500 ${
                 isExpanded ? '-rotate-180' : ''
               }`}
             />

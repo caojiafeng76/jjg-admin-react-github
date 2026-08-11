@@ -17,9 +17,9 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
   if (!selectedRecord) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-6">
-        <div className="rounded-full bg-slate-100 p-4">
+        <div className="rounded-full bg-slate-100 p-4 dark:bg-slate-800">
           <svg
-            className="h-8 w-8 text-slate-300"
+            className="h-8 w-8 text-slate-300 dark:text-slate-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -32,7 +32,7 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
             />
           </svg>
         </div>
-        <p className="text-sm text-slate-400">点击表格行查看工单详情</p>
+        <p className="text-sm text-slate-400 dark:text-slate-500">点击表格行查看工单详情</p>
       </div>
     )
   }
@@ -72,22 +72,22 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
   return (
     <div className="h-full overflow-auto p-4">
       {/* 头部信息卡片 */}
-      <div className="mb-4 rounded-xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-white p-4 shadow-sm transition-all duration-200">
+      <div className="mb-4 rounded-xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-white p-4 shadow-sm transition-all duration-200 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300">
               <CalendarDaysIcon className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-lg font-semibold text-slate-800">
+              <div className="text-lg font-semibold text-slate-800 dark:text-slate-200">
                 {order_date}
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                     shift === '白班'
-                      ? 'bg-amber-50 text-amber-600'
-                      : 'bg-indigo-50 text-indigo-600'
+                      ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300'
+                      : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300'
                   }`}
                 >
                   {shift}
@@ -102,8 +102,8 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
           <span
             className={`rounded-full px-3 py-0.5 text-xs font-medium ${
               is_audited
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-slate-100 text-slate-500'
+                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
+                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
             }`}
           >
             <span className="flex items-center gap-1">
@@ -114,7 +114,7 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
         </div>
 
         {is_audited && formattedAuditedAt && (
-          <div className="mt-2 border-t border-slate-100 pt-2 text-xs text-slate-400">
+          <div className="mt-2 border-t border-slate-100 pt-2 text-xs text-slate-400 dark:border-slate-700 dark:text-slate-500">
             审核时间：{formattedAuditedAt}
           </div>
         )}
@@ -125,10 +125,10 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
         <Col span={12}>
           <Card
             size="small"
-            className="rounded-xl border-slate-200/60 shadow-sm transition-shadow hover:shadow-md"
+            className="rounded-xl border-slate-200/60 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700"
           >
             <Statistic
-              title={<span className="text-xs text-slate-400">出勤工时</span>}
+              title={<span className="text-xs text-slate-400 dark:text-slate-500">出勤工时</span>}
               value={work_hours ?? 0}
               suffix="h"
               precision={1}
@@ -143,10 +143,10 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
         <Col span={12}>
           <Card
             size="small"
-            className="rounded-xl border-slate-200/60 shadow-sm transition-shadow hover:shadow-md"
+            className="rounded-xl border-slate-200/60 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700"
           >
             <Statistic
-              title={<span className="text-xs text-slate-400">工时效率</span>}
+              title={<span className="text-xs text-slate-400 dark:text-slate-500">工时效率</span>}
               value={efficiencyPercent ?? 0}
               suffix="%"
               precision={1}
@@ -165,32 +165,32 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
         size="small"
         title={
           <span className="flex items-center gap-2 text-sm font-medium">
-            <ClockIcon className="h-4 w-4 text-slate-400" />
+            <ClockIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
             工时明细
           </span>
         }
-        className="mb-4 rounded-xl border-slate-200/60 shadow-sm"
+        className="mb-4 rounded-xl border-slate-200/60 shadow-sm dark:border-slate-700"
       >
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-emerald-50/50 p-3 transition-colors hover:bg-emerald-50">
-            <div className="text-xs font-medium text-emerald-600">正工工时</div>
-            <div className="mt-1 font-mono text-lg font-semibold text-emerald-700">
+          <div className="rounded-lg bg-emerald-50/50 p-3 transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
+            <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">正工工时</div>
+            <div className="mt-1 font-mono text-lg font-semibold text-emerald-700 dark:text-emerald-400">
               {(positive_qualified_hours ?? 0).toFixed(2)}
-              <span className="ml-1 text-xs font-normal text-emerald-500">h</span>
+              <span className="ml-1 text-xs font-normal text-emerald-500 dark:text-emerald-400">h</span>
             </div>
           </div>
-          <div className="rounded-lg bg-blue-50/50 p-3 transition-colors hover:bg-blue-50">
-            <div className="text-xs font-medium text-blue-600">零工工时</div>
-            <div className="mt-1 font-mono text-lg font-semibold text-blue-700">
+          <div className="rounded-lg bg-blue-50/50 p-3 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/30">
+            <div className="text-xs font-medium text-blue-600 dark:text-blue-400">零工工时</div>
+            <div className="mt-1 font-mono text-lg font-semibold text-blue-700 dark:text-blue-400">
               {(extra_qualified_hours ?? 0).toFixed(2)}
-              <span className="ml-1 text-xs font-normal text-blue-500">h</span>
+              <span className="ml-1 text-xs font-normal text-blue-500 dark:text-blue-400">h</span>
             </div>
           </div>
-          <div className="col-span-2 rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100">
-            <div className="text-xs font-medium text-slate-500">总工时</div>
-            <div className="mt-1 font-mono text-xl font-bold text-slate-700">
+          <div className="col-span-2 rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700">
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">总工时</div>
+            <div className="mt-1 font-mono text-xl font-bold text-slate-700 dark:text-slate-300">
               {(total_qualified_hours ?? 0).toFixed(2)}
-              <span className="ml-1 text-sm font-normal text-slate-400">h</span>
+              <span className="ml-1 text-sm font-normal text-slate-400 dark:text-slate-500">h</span>
             </div>
           </div>
         </div>
@@ -201,11 +201,11 @@ export default function ProductionOrderInlineDetail({ selectedRecord }: Props) {
         <Card
           size="small"
           title={
-            <span className="text-sm font-medium text-slate-500">备注</span>
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">备注</span>
           }
-          className="rounded-xl border-slate-200/60 shadow-sm"
+          className="rounded-xl border-slate-200/60 shadow-sm dark:border-slate-700"
         >
-          <p className="text-sm text-slate-600">{remark}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{remark}</p>
         </Card>
       )}
     </div>

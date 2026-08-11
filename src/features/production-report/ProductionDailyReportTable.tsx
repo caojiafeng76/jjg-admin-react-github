@@ -36,21 +36,21 @@ function renderQualifiedRate(value: number | null | undefined) {
   const percent = value * 100
   const tone =
     percent >= 99
-      ? 'bg-emerald-50 text-emerald-600'
+      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
       : percent >= 95
-        ? 'bg-blue-50 text-blue-600'
-        : 'bg-amber-50 text-amber-600'
+        ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300'
+        : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300'
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums shadow-sm ${tone}`}
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums shadow-sm dark:shadow-none ${tone}`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
           percent >= 99
-            ? 'bg-emerald-500'
+            ? 'bg-emerald-500 dark:bg-emerald-400'
             : percent >= 95
-              ? 'bg-blue-500'
-              : 'bg-amber-500'
+              ? 'bg-blue-500 dark:bg-blue-400'
+              : 'bg-amber-500 dark:bg-amber-400'
         }`}
       />
       {percent.toFixed(2)}%
@@ -63,10 +63,12 @@ function renderDataCategory(value: string | null | undefined) {
     return '-'
   }
   const palette =
-    value === 'A' ? 'bg-indigo-50 text-indigo-600' : 'bg-cyan-50 text-cyan-600'
+    value === 'A'
+      ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300'
+      : 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-300'
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium shadow-sm ${palette}`}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium shadow-sm dark:shadow-none ${palette}`}
     >
       {value}
     </span>
@@ -75,7 +77,7 @@ function renderDataCategory(value: string | null | undefined) {
 
 function renderOperation(value: string) {
   return (
-    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
       {value}
     </span>
   )
@@ -127,7 +129,7 @@ function ProductionDailyReportTable({
         defaultSortOrder: 'descend',
         sortDirections: ['descend', 'ascend'],
         render: (value: string) => (
-          <span className="text-slate-700 tabular-nums">{value}</span>
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
       },
       {
@@ -137,7 +139,7 @@ function ProductionDailyReportTable({
         width: 80,
         fixed: 'left',
         render: (value: number) => (
-          <span className="font-medium text-slate-700 tabular-nums">
+          <span className="font-medium text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -173,7 +175,7 @@ function ProductionDailyReportTable({
             sensitivity: 'base',
           }),
         render: (value: string) => (
-          <span className="font-mono text-[13px] font-semibold tracking-tight text-slate-800">
+          <span className="font-mono text-[13px] font-semibold tracking-tight text-slate-800 dark:text-slate-200">
             {value}
           </span>
         ),
@@ -209,7 +211,7 @@ function ProductionDailyReportTable({
           .map((v) => ({ text: `${v}mm`, value: v })),
         onFilter: (value, record) => record.lengthMm === (value as number),
         render: (value: number | null) => (
-          <span className="text-slate-700 tabular-nums">
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value)}
           </span>
         ),
@@ -233,7 +235,7 @@ function ProductionDailyReportTable({
         key: 'incomingQualifiedCount',
         width: 100,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">{value}</span>
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
       },
       {
@@ -242,7 +244,7 @@ function ProductionDailyReportTable({
         key: 'qualifiedCount',
         width: 100,
         render: (value: number) => (
-          <span className="font-semibold text-emerald-700 tabular-nums">
+          <span className="font-semibold text-emerald-700 tabular-nums dark:text-emerald-400">
             {value}
           </span>
         ),
@@ -253,7 +255,7 @@ function ProductionDailyReportTable({
         key: 'defectCount',
         width: 100,
         render: (value: number) => (
-          <span className="font-semibold text-rose-600 tabular-nums">
+          <span className="font-semibold text-rose-600 tabular-nums dark:text-rose-400">
             {value}
           </span>
         ),
@@ -264,7 +266,7 @@ function ProductionDailyReportTable({
         key: 'rawMaterialDefectCount',
         width: 100,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">{value}</span>
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
       },
       {
@@ -273,7 +275,7 @@ function ProductionDailyReportTable({
         key: 'processingDefectCount',
         width: 100,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">{value}</span>
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
       },
       {
@@ -282,7 +284,7 @@ function ProductionDailyReportTable({
         key: 'outsourceDefectCount',
         width: 110,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">{value}</span>
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
       },
       {
@@ -303,7 +305,7 @@ function ProductionDailyReportTable({
         key: 'setupDefectCount',
         width: 100,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">{value}</span>
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
       },
       {
@@ -327,7 +329,7 @@ function ProductionDailyReportTable({
         key: 'rawMaterialDefectWeightKg',
         width: 130,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -338,7 +340,7 @@ function ProductionDailyReportTable({
         key: 'processingDefectWeightKg',
         width: 130,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -349,7 +351,7 @@ function ProductionDailyReportTable({
         key: 'outsourceDefectWeightKg',
         width: 140,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -360,7 +362,7 @@ function ProductionDailyReportTable({
         key: 'setupDefectWeightKg',
         width: 140,
         render: (value: number) => (
-          <span className="text-slate-700 tabular-nums">
+          <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
           </span>
         ),
@@ -423,12 +425,12 @@ function ProductionDailyReportTable({
               </span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={11}>
-              <span className="font-bold text-emerald-700 tabular-nums">
+              <span className="font-bold text-emerald-700 tabular-nums dark:text-emerald-400">
                 {currentPageQualifiedCount.toLocaleString()}
               </span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={12}>
-              <span className="font-bold text-rose-600 tabular-nums">
+              <span className="font-bold text-rose-600 tabular-nums dark:text-rose-400">
                 {currentPageDefectCount.toLocaleString()}
               </span>
             </Table.Summary.Cell>

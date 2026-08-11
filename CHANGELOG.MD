@@ -16,6 +16,34 @@
 ## 2026-08-11
 
 - **类别**：修复
+- **范围**：生产工单模块移动端列表/表单 5 个组件：`src/features/production-order/{ProductionOrderMobileList,ProductionOrderItemMobileList,ProductionOrderItemForm,projectNoSelect,ProjectNoScanButton}.tsx`；另补充桌面端 `ProductionOrderDetail.tsx` 备注行、移动端 `MobileProductionOrderDetailPage.tsx` 工序明细标题区、`ProductionOrderInlineDetail.tsx` 备注 Card 边框的遗漏项
+- **摘要**：修复生产工单移动端列表/表单暗黑模式适配：① MobileList 未选中卡片补 `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100`，信息行 `bg-black/5` 补 `dark:bg-white/10`（选中深色卡片保持不动）；② ItemMobileList 卡片补 `dark:border-slate-700 dark:bg-slate-800`、7 处标签 `dark:text-slate-500`、10 处数值 `dark:text-slate-100`、6 处信息行 `dark:bg-slate-800`；③ ItemForm 红色警示框补 `dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-400`、提示条补 `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300`；④ projectNoSelect 文字补 `dark:text-slate-200/400`；⑤ ProjectNoScanButton 深色容器仅补 `dark:border-slate-700`、提示条补 `dark:bg-slate-800 dark:text-slate-300`；另修复扫描验证发现的 3 处遗漏（Detail 备注行 `dark:bg-slate-800`、DetailPage 工序明细标题 `dark:text-slate-500/100`、InlineDetail 备注 Card `dark:border-slate-700`）。未改动已带 `dark:` 的行、深色选中卡片、antd 内部主题。
+- **验证**：`bun run typecheck` 通过（`tsc -b` 无错误）；grep 全模块扫描确认两模块无缺少 dark 变体的浅色残留类、无重复 `dark:` 类。
+
+## 2026-08-11
+
+- **类别**：修复
+- **范围**：生产工单模块桌面端 6 个组件：`src/features/production-order/{index,ProductionOrderList,ProductionOrderItemTable,ProductionOrderForm,ProductionOrderDetail,ProductionOrderSearch}.tsx`
+- **摘要**：修复生产工单桌面页面暗黑模式适配：为硬编码浅色 Tailwind 类追加 `dark:` 变体（遵循优迈模块既有约定）——① index.tsx 页面标题区渐变容器、搜索区/统计条/表格容器/分页条卡片补 `dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none` 与渐变 `dark:from-slate-800 dark:via-slate-800 dark:to-slate-800`，工具按钮（修改密码/锁定/批量审核/批量反审核）补 `dark:text-slate-400 dark:hover:bg-slate-700` 等 hover 变体，分隔线 `dark:bg-slate-700`，图标与弱标签 `dark:text-slate-400/500`；② ProductionOrderList 斑马 badge（白班/夜班）补 `dark:bg-amber-900/30 dark:text-amber-300` / `dark:bg-indigo-900/30 dark:text-indigo-300`，数值列 `dark:text-emerald-400`/`dark:text-blue-400`/`dark:text-red-400`，选中行 `dark:bg-blue-900/30`、hover 行 `dark:hover:bg-slate-700/60`，查看按钮 `dark:text-slate-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-300`；③ ItemTable 弱标签 `dark:text-slate-500`；④ Form 分区卡片补 `dark:border-slate-700 dark:bg-slate-800 dark:shadow-none`，6 个信息行补 `dark:bg-slate-800`、标签 `dark:text-slate-500`、数值 `dark:text-slate-100`，外协警告框补 `dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-400`；⑤ Detail 与 Form 相同模式；⑥ Search 重置按钮/移动端展开按钮补 `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300` 及 hover/active 变体，禁用操作人 Input 补 `dark:bg-slate-800`。antd 内部主题（Card/Table/Form 表面）由 darkAlgorithm 自动适配，未改动；未改动已带 `dark:` 的行与彩色主按钮。
+- **验证**：`bun run typecheck` 通过（`tsc -b` 无错误）。
+
+## 2026-08-11
+
+- **类别**：修复
+- **范围**：生产日报表模块（路由 `/production-daily-report`）：`src/features/production-report/{index.tsx, ProductionDailyReportTable.tsx, ProductionDailyReportSearch.tsx, ProductionDailyReportMobileList.tsx}`
+- **摘要**：修复生产日报表模块暗黑模式适配：为硬编码浅色 Tailwind 类补充 `dark:` 变体（遵循优迈模块既有约定）——① 导出按钮、筛选容器（index.tsx）补 `dark:border-slate-700/dark:bg-slate-800` 等；② Table 合格率/数据类别 tone 与 dot 字符串字面量补 `dark:bg-*-900/30 dark:text-*-300` / `dark:bg-*-400`、徽章容器补 `dark:shadow-none`、12 处 `text-slate-700 tabular-nums` 文本单元格补 `dark:text-slate-300`、合格/不良数值补 `dark:text-emerald-400` / `dark:text-rose-400`；③ Search 移动端展开按钮补 `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300`；④ MobileList 卡片、tiles（`dark:bg-slate-800/50`）、标签、数值、工序/工时徽章、空状态渐变全部补 `dark:` 变体。未改动已带 `dark:` 的行（index.tsx 选中汇总条 L312-378、Table 汇总行）与 antd 内部主题（由 darkAlgorithm 自动适配）；Excel 导出（utils/productionDailyReportExcel*）保持颜色中性，未改动。
+- **验证**：`bun run typecheck` 通过；grep 确认 4 个文件无缺少 dark 变体的目标浅色类残留（tone 字面量 6/6、`text-slate-700 tabular-nums` 12/12、tiles 11/11、labels 11/11、`text-slate-900` 10/10 均含 dark 变体，无重复 `dark:`）。
+
+## 2026-08-11
+
+- **类别**：修复
+- **范围**：生产工单模块 6 个移动端/内联组件：`src/features/production-order/{MobileScanHubPage,MobileProductionOrderScanPage,MobileProductionOrderEditPage,MobileProductionOrderDetailPage,MobileProductionOrderCreatePage,ProductionOrderInlineDetail}.tsx`
+- **摘要**：修复生产工单移动端页面暗黑模式不适配问题：为所有硬编码浅色 Tailwind 类追加 `dark:` 变体——页面卡片/分区容器补 `dark:border-slate-700/80 dark:bg-slate-900/90`，信息行补 `dark:border-slate-700 dark:bg-slate-800/60`，固定底部栏补 `dark:border-slate-700 dark:bg-slate-900/95`，主文字 `dark:text-slate-100`、次级 `dark:text-slate-300/400`、弱标签 `dark:text-slate-500`，步骤圆点 `dark:bg-slate-600`，徽章（蓝/绿/黄/靛/玫瑰/灰）补对应 `dark:bg-*-900/30 dark:text-*-300/400`，antd Card 仅补 `dark:border-slate-700` 与更暗阴影、Select/Input 补 `dark:border-slate-700`；内联详情卡补渐变 `dark:from-slate-800 dark:to-slate-800` 与 hover 变体。未改动效率计算/图表颜色（efficiencyColor）等业务逻辑。
+- **验证**：`bun run typecheck` 通过（`tsc -b` 无错误）。
+
+## 2026-08-11
+
+- **类别**：修复
 - **范围**：刀具与劳保模块：`src/features/tooling/{ToolingData,ToolingInventory,ToolingStockIn,ToolingStockOut}/` 与 `src/features/labor-protection/{LaborProtectionData,LaborProtectionRequisition}/` 全部页面组件，及共享组件 `src/ui/mobile/MobileBottomSelectSheet.tsx`
 - **摘要**：修复刀具与劳保模块暗黑模式不适配问题（两模块此前 0 个 `dark:` 变体）：① 6 个 Table 斑马纹 `rowClassName` 由硬编码 `'bg-white' : 'bg-slate-50/60'` 补充 `dark:bg-slate-800` / `dark:bg-slate-800/60` 变体；② 3 个刀具表单"刀具信息"面板容器补 `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300`、15 处字段标签补 `dark:text-slate-500`，库存表待入库/待出库数字补 `dark:text-slate-500`；③ bottom-sheet 选择按钮（ToolingStockOutForm、LaborProtectionRequisitionForm）补 `dark:border-slate-700/stone-700 dark:bg-slate-800/stone-800 dark:text-slate-100`；④ 6 个页面"搜索："标签补 `dark:text-slate-400`；⑤ 2 个公开 H5 扫码页（刀具出库登记、劳保领用登记）背景渐变、卡片、徽章、说明框、底部栏全部补 `dark:` 变体；⑥ 共享组件 MobileBottomSelectSheet 选项按钮与描述文字补 dark 变体。打印海报/出库单（usePrint*）为打印输出保持浅色属设计意图，未改动。
 - **验证**：`bun run typecheck` 通过；`bun run test` 通过（105 文件 / 461 用例）；grep 确认两模块源码无缺少 dark 变体的浅色残留类。

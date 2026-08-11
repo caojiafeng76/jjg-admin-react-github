@@ -44,7 +44,7 @@ export default function MobileProductionOrderCreatePage() {
   if (!isEmployeeView || !employeeProfile?.id) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+        <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
           <Title level={4}>当前账号不可手动创建工单</Title>
           <Paragraph type="secondary">
             请使用员工端账号进入后再尝试新增工单。
@@ -89,19 +89,19 @@ export default function MobileProductionOrderCreatePage() {
     <>
       <div className="h-full overflow-y-auto px-4 pt-4 pb-52">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
-          <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-            <div className="text-[11px] font-semibold tracking-[0.28em] text-slate-400 uppercase">
+          <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
+            <div className="text-[11px] font-semibold tracking-[0.28em] text-slate-400 uppercase dark:text-slate-500">
               Manual Create
             </div>
             <Title level={3} style={{ marginTop: 12, marginBottom: 8 }}>
               手动新建工单
             </Title>
-            <Paragraph className="mb-0 text-slate-500">
+            <Paragraph className="mb-0 text-slate-500 dark:text-slate-400">
               先创建工单主信息，保存后再进入详情页维护工序明细。同一日期只能创建一张工单。
             </Paragraph>
           </section>
 
-          <Card className="rounded-4xl border-slate-200 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+          <Card className="rounded-4xl border-slate-200 shadow-[0_18px_40px_rgba(15,23,42,0.06)] dark:border-slate-700">
             <Form
               form={form}
               layout="vertical"
@@ -138,7 +138,7 @@ export default function MobileProductionOrderCreatePage() {
                 <button
                   type="button"
                   onClick={() => setIsShiftSheetOpen(true)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                 >
                   {currentShift || '请选择班别'}
                 </button>
@@ -176,7 +176,7 @@ export default function MobileProductionOrderCreatePage() {
       </div>
 
       <div
-        className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl"
+        className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
       >
         <div className="mx-auto grid max-w-2xl grid-cols-2 gap-3">

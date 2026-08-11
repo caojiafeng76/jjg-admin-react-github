@@ -62,8 +62,8 @@ export const renderProjectNoOption: NonNullable<
 
   return (
     <div className="py-1">
-      <div className="font-medium text-slate-800">{data.label}</div>
-      <div className="mt-1 grid grid-cols-3 gap-3 text-xs text-slate-500">
+      <div className="font-medium text-slate-800 dark:text-slate-200">{data.label}</div>
+      <div className="mt-1 grid grid-cols-3 gap-3 text-xs text-slate-500 dark:text-slate-400">
         <span className="truncate">型号: {data.productModel}</span>
         <span className="truncate">长度: {data.lengthText}</span>
         <span className="truncate">客户型号: {data.customerModel}</span>
