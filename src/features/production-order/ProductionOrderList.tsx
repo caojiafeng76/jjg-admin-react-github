@@ -1,5 +1,4 @@
-import { useMemo, useCallback } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import { useMemo } from 'react'
 import { Table, TableColumnsType, TableProps, Button, Tag, Tooltip } from 'antd'
 import { EyeIcon } from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
@@ -14,8 +13,6 @@ interface Props {
   selectedRowKeys: React.Key[]
   onSelect: (keys: React.Key[]) => void
   onView: (record: ProductionOrderListItem) => void
-  onRowClick?: (record: ProductionOrderListItem) => void
-  activeRowId?: string | null
   scrollY?: number
 }
 
@@ -27,8 +24,6 @@ export default function ProductionOrderList({
   selectedRowKeys,
   onSelect,
   onView,
-  onRowClick,
-  activeRowId,
   scrollY = 400,
 }: Props) {
   const columns: TableColumnsType<ProductionOrderListItem> = useMemo(
@@ -48,7 +43,9 @@ export default function ProductionOrderList({
         key: 'order_date',
         width: 110,
         render: (value: string) => (
-          <span className="font-medium text-slate-700 dark:text-slate-300">{value}</span>
+          <span className="font-medium text-slate-700 dark:text-slate-300">
+            {value}
+          </span>
         ),
       },
       {
@@ -57,7 +54,9 @@ export default function ProductionOrderList({
         fixed: 'left',
         width: 100,
         render: (_text, record: ProductionOrderListItem) =>
-          record.employee?.name || <span className="text-slate-300 dark:text-slate-600">-</span>,
+          record.employee?.name || (
+            <span className="text-slate-300 dark:text-slate-600">-</span>
+          ),
       },
       {
         title: '审核',
@@ -195,7 +194,9 @@ export default function ProductionOrderList({
         render: (value: string | null) =>
           value ? (
             <Tooltip title={value}>
-              <span className="text-slate-500 dark:text-slate-400">{value}</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                {value}
+              </span>
             </Tooltip>
           ) : (
             <span className="text-slate-200 dark:text-slate-700">-</span>
@@ -248,26 +249,6 @@ export default function ProductionOrderList({
       [onSelect, selectedRowKeys],
     )
 
-  const handleRow = useCallback(
-    (record: ProductionOrderListItem) => ({
-      ...(onRowClick
-        ? createKeyboardTableRowProps(
-            () => onRowClick(record),
-            `打开生产单 ${record.id}`,
-          )
-        : {}),
-      onClick: () => onRowClick?.(record),
-      className: `transition-colors duration-150 ${
-        onRowClick ? 'cursor-pointer' : ''
-      } ${
-        record.id && record.id === activeRowId
-          ? 'bg-blue-50/70 dark:bg-blue-900/30'
-          : 'hover:bg-slate-50/60 dark:hover:bg-slate-700/60'
-      }`,
-    }),
-    [activeRowId, onRowClick],
-  )
-
   return (
     <Table<ProductionOrderListItem>
       rowKey={(record) => record.id}
@@ -283,7 +264,6 @@ export default function ProductionOrderList({
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      onRow={handleRow}
       scroll={{ y: scrollY, x: 1300 }}
       virtual
       size="small"

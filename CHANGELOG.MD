@@ -15,6 +15,13 @@
 
 ## 2026-08-11
 
+- **类别**：变更
+- **范围**：生产工单模块桌面端：`src/features/production-order/{index.tsx, ProductionOrderList.tsx}`；删除 `ProductionOrderInlineDetail.tsx`；测试 `index.vitest.tsx`、`src/utils/keyboardTableIntegration.vitest.ts`
+- **摘要**：取消生产工单页面"点击表格行查看工单详情"功能：① index.tsx 移除行点击相关状态（`activeRecordId`/`activeRecord`/`handleRowClick`）、搜索/重置时清理逻辑与失效校验 effect，移除 `Splitter` 上下分栏布局及底部 `ProductionOrderInlineDetail` 详情面板，表格容器改为占满剩余高度；② ProductionOrderList.tsx 移除 `onRowClick`/`activeRowId` props、`handleRow` 行点击绑定与 `createKeyboardTableRowProps` 引用；③ 删除不再使用的 `ProductionOrderInlineDetail.tsx` 组件文件，并同步移除测试中对应 mock；④ `keyboardTableIntegration.vitest.ts` 将 ProductionOrderList 移出交互式表格清单（该表格已无行点击交互）。"眼睛"图标查看详情（弹窗）不受影响。
+- **验证**：`bun run typecheck` 通过（`tsc -b` 无错误）；`bun run test` 通过。
+
+## 2026-08-11
+
 - **类别**：修复
 - **范围**：生产工单模块移动端列表/表单 5 个组件：`src/features/production-order/{ProductionOrderMobileList,ProductionOrderItemMobileList,ProductionOrderItemForm,projectNoSelect,ProjectNoScanButton}.tsx`；另补充桌面端 `ProductionOrderDetail.tsx` 备注行、移动端 `MobileProductionOrderDetailPage.tsx` 工序明细标题区、`ProductionOrderInlineDetail.tsx` 备注 Card 边框的遗漏项
 - **摘要**：修复生产工单移动端列表/表单暗黑模式适配：① MobileList 未选中卡片补 `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100`，信息行 `bg-black/5` 补 `dark:bg-white/10`（选中深色卡片保持不动）；② ItemMobileList 卡片补 `dark:border-slate-700 dark:bg-slate-800`、7 处标签 `dark:text-slate-500`、10 处数值 `dark:text-slate-100`、6 处信息行 `dark:bg-slate-800`；③ ItemForm 红色警示框补 `dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-400`、提示条补 `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300`；④ projectNoSelect 文字补 `dark:text-slate-200/400`；⑤ ProjectNoScanButton 深色容器仅补 `dark:border-slate-700`、提示条补 `dark:bg-slate-800 dark:text-slate-300`；另修复扫描验证发现的 3 处遗漏（Detail 备注行 `dark:bg-slate-800`、DetailPage 工序明细标题 `dark:text-slate-500/100`、InlineDetail 备注 Card `dark:border-slate-700`）。未改动已带 `dark:` 的行、深色选中卡片、antd 内部主题。

@@ -95,7 +95,6 @@ vi.mock('../workshop/EmployeeList/useEmployees', () => ({
 
 vi.mock('./ProductionOrderDetail', () => ({ default: () => null }))
 vi.mock('./ProductionOrderForm', () => ({ default: () => null }))
-vi.mock('./ProductionOrderInlineDetail', () => ({ default: () => null }))
 vi.mock('./ProductionOrderList', () => ({ default: () => null }))
 vi.mock('./ProductionOrderMobileList', () => ({ default: () => null }))
 vi.mock('./ProductionOrderSearch', () => ({ default: () => null }))

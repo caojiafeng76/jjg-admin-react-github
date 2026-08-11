@@ -25,7 +25,6 @@ import {
   Input,
   Modal,
   Space,
-  Splitter,
   Typography,
   Badge,
 } from 'antd'
@@ -45,7 +44,6 @@ import {
   type ProductionOrder,
   type ProductionOrderFilters,
   type ProductionOrderShift,
-  type ProductionOrderListItem,
 } from '@/services/apiProductionOrders'
 import type {
   ProductionOrderDataCategory,
@@ -70,7 +68,6 @@ import ProductionOrderList from './ProductionOrderList'
 import ProductionOrderMobileList from './ProductionOrderMobileList'
 import ProductionOrderForm from './ProductionOrderForm'
 import ProductionOrderDetail from './ProductionOrderDetail'
-import ProductionOrderInlineDetail from './ProductionOrderInlineDetail'
 import ProductionOrderSearch from './ProductionOrderSearch'
 import {
   updateAdminManagementPassword,
@@ -203,7 +200,6 @@ export default function ProductionOrderPage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [isExporting, setIsExporting] = useState(false)
   const [isNightSnackExporting, setIsNightSnackExporting] = useState(false)
-  const [activeRecordId, setActiveRecordId] = useState<string | null>(null)
   const [isManagementUnlocked, setIsManagementUnlocked] = useState(
     !isAdminManagementView,
   )
@@ -255,11 +251,6 @@ export default function ProductionOrderPage() {
       realtime: isEmployeeView && !isModalOpen,
     },
   })
-
-  const activeRecord = useMemo(
-    () => orderData?.items.find((item) => item.id === activeRecordId) || null,
-    [activeRecordId, orderData?.items],
-  )
 
   const { data: detailData, isLoading: isLoadingDetail } = useProductionOrder(
     editingRecord?.id,
@@ -444,12 +435,6 @@ export default function ProductionOrderPage() {
     })
   }, [])
 
-  const handleRowClick = useCallback((record: ProductionOrderListItem) => {
-    startTransition(() => {
-      setActiveRecordId(record.id)
-    })
-  }, [])
-
   const handleExport = useCallback(async () => {
     const exportTargetCount =
       selectedRowKeys.length > 0
@@ -500,8 +485,7 @@ export default function ProductionOrderPage() {
         duration: 0,
       })
 
-      const { exportProductionOrdersToExcel } =
-        await loadProductionOrderExcel()
+      const { exportProductionOrdersToExcel } = await loadProductionOrderExcel()
       await exportProductionOrdersToExcel(exportOrders)
 
       message.success({
@@ -616,13 +600,7 @@ export default function ProductionOrderPage() {
     } finally {
       setIsNightSnackExporting(false)
     }
-  }, [
-    employeeProfile,
-    filters,
-    message,
-    orderData?.total,
-    selectedRowKeys,
-  ])
+  }, [employeeProfile, filters, message, orderData?.total, selectedRowKeys])
 
   const handleBatchAudit = useCallback(
     (isAudited: boolean) => {
@@ -796,7 +774,6 @@ export default function ProductionOrderPage() {
         fixedEmployeeId ? { ...params, employeeId: fixedEmployeeId } : params,
       )
       setSelectedRowKeys([])
-      setActiveRecordId(null)
       searchParamsURL.set('page', '1')
       setSearchParamsURL(searchParamsURL)
     },
@@ -806,7 +783,6 @@ export default function ProductionOrderPage() {
   const handleResetSearch = useCallback(() => {
     setFilters(fixedEmployeeId ? { employeeId: fixedEmployeeId } : {})
     setSelectedRowKeys([])
-    setActiveRecordId(null)
     searchParamsURL.set('page', '1')
     setSearchParamsURL(searchParamsURL)
   }, [fixedEmployeeId, searchParamsURL, setSearchParamsURL])
@@ -846,20 +822,6 @@ export default function ProductionOrderPage() {
       })
     }
   }, [isFetching, isPlaceholderData, orderData, page, setSearchParamsURL])
-
-  useEffect(() => {
-    if (!activeRecordId) {
-      return
-    }
-
-    const hasActiveRecord = (orderData?.items || []).some(
-      (item) => item.id === activeRecordId,
-    )
-
-    if (!hasActiveRecord) {
-      setActiveRecordId(null)
-    }
-  }, [activeRecordId, orderData?.items])
 
   const detailOrder = (detailData || editingRecord) as
     | (ProductionOrder & {
@@ -1017,7 +979,7 @@ export default function ProductionOrderPage() {
               icon={<PlusCircleIcon className="size-4" />}
               onClick={handleCreate}
               disabled={hasOrderToday}
-              className="h-12 rounded-2xl shadow-lg shadow-blue-500/15 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0"
+              className="h-12 rounded-2xl shadow-lg shadow-blue-500/15 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/25 active:translate-y-0"
             >
               手动添加
             </Button>
@@ -1035,7 +997,9 @@ export default function ProductionOrderPage() {
               <Button
                 type="text"
                 size="small"
-                icon={<KeyIcon className="size-4 text-slate-500 dark:text-slate-400" />}
+                icon={
+                  <KeyIcon className="size-4 text-slate-500 dark:text-slate-400" />
+                }
                 onClick={() => setIsManagementPasswordModalOpen(true)}
                 className="h-8 rounded-lg px-3 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
               >
@@ -1044,7 +1008,9 @@ export default function ProductionOrderPage() {
               <Button
                 type="text"
                 size="small"
-                icon={<LockClosedIcon className="size-4 text-slate-400 dark:text-slate-500" />}
+                icon={
+                  <LockClosedIcon className="size-4 text-slate-400 dark:text-slate-500" />
+                }
                 onClick={handleLockManagement}
                 className="h-8 rounded-lg px-3 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300"
               >
@@ -1055,7 +1021,9 @@ export default function ProductionOrderPage() {
               <Button
                 type="text"
                 size="small"
-                icon={<ShieldCheckIcon className="size-4 text-emerald-500 dark:text-emerald-400" />}
+                icon={
+                  <ShieldCheckIcon className="size-4 text-emerald-500 dark:text-emerald-400" />
+                }
                 onClick={() => handleBatchAudit(true)}
                 loading={batchUpdateMutation.isPending}
                 className="h-8 rounded-lg px-3 text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-300"
@@ -1065,7 +1033,9 @@ export default function ProductionOrderPage() {
               <Button
                 type="text"
                 size="small"
-                icon={<ArrowPathIcon className="size-4 text-amber-500 dark:text-amber-400" />}
+                icon={
+                  <ArrowPathIcon className="size-4 text-amber-500 dark:text-amber-400" />
+                }
                 onClick={() => handleBatchAudit(false)}
                 loading={batchUpdateMutation.isPending}
                 className="h-8 rounded-lg px-3 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30 dark:hover:text-amber-300"
@@ -1117,7 +1087,7 @@ export default function ProductionOrderPage() {
         }
       >
         {isEmployeeView ? null : (
-          <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+          <span className="mb-2 block text-xs font-medium tracking-wide text-slate-400 uppercase dark:text-slate-500">
             筛选条件
           </span>
         )}
@@ -1156,72 +1126,65 @@ export default function ProductionOrderPage() {
           </div>
         </div>
       ) : (
-        <>
-          <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
-            <Splitter.Panel defaultSize="65%" min="30%">
-              <div
-                ref={tableContainerRef}
-                className="flex h-full flex-col gap-3 overflow-hidden"
-              >
-                {/* 数据统计卡片 */}
-                {orderData && orderData.total > 0 && (
-                  <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200/60 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-4 py-2.5 text-sm transition-all duration-300 dark:border-slate-700/80 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-slate-500 dark:text-slate-400">共</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {orderData.total}
-                      </span>
-                      <span className="text-slate-500 dark:text-slate-400">条记录</span>
-                    </div>
-                    {selectedRowKeys.length > 0 && (
-                      <>
-                        <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-slate-500 dark:text-slate-400">已选中</span>
-                          <span className="font-semibold text-blue-600 dark:text-blue-400">
-                            {selectedRowKeys.length}
-                          </span>
-                          <span className="text-slate-500 dark:text-slate-400">项</span>
-                        </div>
-                      </>
-                    )}
+        <div
+          ref={tableContainerRef}
+          className="flex h-full flex-col gap-3 overflow-hidden"
+        >
+          {/* 数据统计卡片 */}
+          {orderData && orderData.total > 0 && (
+            <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200/60 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-4 py-2.5 text-sm transition-all duration-300 dark:border-slate-700/80 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 dark:text-slate-400">共</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  {orderData.total}
+                </span>
+                <span className="text-slate-500 dark:text-slate-400">
+                  条记录
+                </span>
+              </div>
+              {selectedRowKeys.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">
+                      已选中
+                    </span>
+                    <span className="font-semibold text-blue-600 dark:text-blue-400">
+                      {selectedRowKeys.length}
+                    </span>
+                    <span className="text-slate-500 dark:text-slate-400">
+                      项
+                    </span>
                   </div>
-                )}
-                <div className="min-h-0 flex-1 overflow-x-auto rounded-lg border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none">
-                  <ProductionOrderList
-                    loading={isLoading}
-                    data={orderData?.items || []}
-                    page={page}
-                    pageSize={pageSize}
-                    selectedRowKeys={selectedRowKeys}
-                    onSelect={handleSelect}
-                    onView={handleView}
-                    onRowClick={handleRowClick}
-                    activeRowId={activeRecord?.id ?? null}
-                    scrollY={scrollY}
-                  />
-                </div>
-                <div
-                  ref={paginationRef}
-                  className="flex shrink-0 items-center justify-between rounded-lg border border-slate-200/60 bg-white px-4 py-2 shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none"
-                >
-                  <span className="text-xs text-slate-400 dark:text-slate-500">
-                    每页显示条数
-                  </span>
-                  <AppPagination
-                    total={orderData?.total || 0}
-                    pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
-                  />
-                </div>
-              </div>
-            </Splitter.Panel>
-            <Splitter.Panel min="20%">
-              <div className="h-full overflow-hidden rounded-lg border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none">
-                <ProductionOrderInlineDetail selectedRecord={activeRecord} />
-              </div>
-            </Splitter.Panel>
-          </Splitter>
-        </>
+                </>
+              )}
+            </div>
+          )}
+          <div className="min-h-0 flex-1 overflow-x-auto rounded-lg border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none">
+            <ProductionOrderList
+              loading={isLoading}
+              data={orderData?.items || []}
+              page={page}
+              pageSize={pageSize}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={handleSelect}
+              onView={handleView}
+              scrollY={scrollY}
+            />
+          </div>
+          <div
+            ref={paginationRef}
+            className="flex shrink-0 items-center justify-between rounded-lg border border-slate-200/60 bg-white px-4 py-2 shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none"
+          >
+            <span className="text-xs text-slate-400 dark:text-slate-500">
+              每页显示条数
+            </span>
+            <AppPagination
+              total={orderData?.total || 0}
+              pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
+            />
+          </div>
+        </div>
       )}
 
       {!isEmployeeView ? (

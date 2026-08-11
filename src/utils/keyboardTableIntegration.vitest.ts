@@ -14,7 +14,6 @@ const INTERACTIVE_TABLES = [
   'src/features/packaging-process/WorkOrderList/WorkOrderTable.tsx',
   'src/features/precision-cutting-transfer/MaterialTransferTable.tsx',
   'src/features/precision-finishing-cutting/PrecisionFinishingCuttingTable.tsx',
-  'src/features/production-order/ProductionOrderList.tsx',
   'src/features/quality/IssueRecord/IssueRecordTable.tsx',
   'src/features/quality/ReworkRepair/ReworkRepairTable.tsx',
   'src/features/syney/PoDetail/DetailTable.tsx',
