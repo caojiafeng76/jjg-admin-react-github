@@ -125,7 +125,7 @@ export default function YoumaiFinishedGoodsStockInForm({
         />
       </Form.Item>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2">
+      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 md:grid-cols-2">
         <div>
           <div className="text-xs text-slate-400">物料编码</div>
           <div>{selectedProduct?.material_code || '-'}</div>

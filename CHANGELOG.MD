@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-11
+
+- **类别**：修复
+- **范围**：优迈 4 个模块：`src/features/youmai/{ProductData,FinishedGoodsInventory,FinishedGoodsStockIn,FinishedGoodsStockOut}/`（货品资料 / 成品库存 / 成品入库 / 成品出库）
+- **摘要**：修复上述模块暗黑模式下内容区表格/物料信息面板仍为白色背景的问题：4 个 Table 组件（`YoumaiProductDataTable.tsx`、`YoumaiFinishedGoodsInventoryTable.tsx`、`YoumaiFinishedGoodsStockInTable.tsx`、`YoumaiFinishedGoodsStockOutTable.tsx`）的斑马纹 `rowClassName` 由硬编码 `'bg-white' : 'bg-slate-50/60'` 补充 `dark:bg-slate-800` / `dark:bg-slate-800/60` 变体，暗色下不再覆盖 antd 深色行背景；3 个表单内"物料信息"面板（`YoumaiFinishedGoodsInventoryForm.tsx`、`YoumaiFinishedGoodsStockInForm.tsx`、`YoumaiFinishedGoodsStockOutForm.tsx`）的 `bg-slate-50` 补充 `dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700`，与 RawMaterial 系列既有暗色样式一致。
+- **验证**：`bun run typecheck` 通过；`bun run test` 通过（105 文件 / 461 用例）。
+
 ## 2026-08-10
 
 - **类别**：修复
