@@ -13,33 +13,33 @@ const STATUS_STYLES: Record<
 > = {
   已创建: {
     label: '已创建',
-    bg: 'bg-rose-50',
-    text: 'text-rose-600',
+    bg: 'bg-rose-50 dark:bg-rose-900/40',
+    text: 'text-rose-600 dark:text-rose-400',
     dot: 'bg-rose-500',
   },
   部分送货: {
     label: '部分送货',
-    bg: 'bg-amber-50',
-    text: 'text-amber-600',
+    bg: 'bg-amber-50 dark:bg-amber-900/40',
+    text: 'text-amber-600 dark:text-amber-400',
     dot: 'bg-amber-500',
   },
   已入库: {
     label: '已入库',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-600',
+    bg: 'bg-emerald-50 dark:bg-emerald-900/40',
+    text: 'text-emerald-600 dark:text-emerald-400',
     dot: 'bg-emerald-500',
   },
   暂停: {
     label: '暂停',
-    bg: 'bg-pink-50',
-    text: 'text-pink-600',
+    bg: 'bg-pink-50 dark:bg-pink-900/40',
+    text: 'text-pink-600 dark:text-pink-400',
     dot: 'bg-pink-500',
   },
   作废: {
     label: '作废',
-    bg: 'bg-slate-100',
-    text: 'text-slate-500',
-    dot: 'bg-slate-400',
+    bg: 'bg-slate-100 dark:bg-slate-700/50',
+    text: 'text-slate-500 dark:text-slate-400',
+    dot: 'bg-slate-400 dark:bg-slate-500',
   },
 }
 
@@ -110,7 +110,7 @@ function PoTable({
         render: (text: string) => {
           const style = STATUS_STYLES[text]
           if (!style) {
-            return <span className="text-slate-400">-</span>
+            return <span className="text-slate-400 dark:text-slate-500">-</span>
           }
           return (
             <div
@@ -129,7 +129,7 @@ function PoTable({
         width: 240,
         render: (text: string, record: ISyneyPo) => (
           <Link
-            className="font-medium text-blue-600 hover:text-blue-700"
+            className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             to={`/syney-po-list/${record.id}`}
           >
             {`${text}-[${record.SONo?.split('-').at(-2)}-${record.SONo?.split('-').at(-1)}]`}
@@ -149,7 +149,7 @@ function PoTable({
         key: 'Qty',
         width: 80,
         render: (value: number) => (
-          <span className="font-semibold text-slate-700 tabular-nums">
+          <span className="font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
             {value ?? '-'}
           </span>
         ),
@@ -235,16 +235,16 @@ function PoTable({
       onRow={handleRow}
       scroll={{ x: 1480, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50">
+          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={5}>
-              <span className="font-medium text-slate-600">当前页合计</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={6}>
-              <span className="font-bold text-slate-900 tabular-nums">
+              <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                 {currentPageTotalQty}
               </span>
             </Table.Summary.Cell>

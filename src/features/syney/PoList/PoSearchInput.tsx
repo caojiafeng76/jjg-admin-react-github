@@ -42,9 +42,9 @@ export default function PoSearchInput() {
       onChange={handleChange}
       onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
       onClear={handleClear}
-      allowClear={{ clearIcon: <XMarkIcon className="h-3.5 w-3.5 text-slate-400" /> }}
+      allowClear={{ clearIcon: <XMarkIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" /> }}
       prefix={
-        <MagnifyingGlassIcon className="h-3.5 w-3.5 text-slate-400" />
+        <MagnifyingGlassIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
       }
       className="w-56 rounded-lg"
     />

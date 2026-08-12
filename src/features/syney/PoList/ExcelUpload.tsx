@@ -1,5 +1,5 @@
 import { FC, useEffect, useMemo, useState } from 'react'
-import { Upload, Button, message, Table, Alert, Space, Typography } from 'antd'
+import { Upload, Button, message, Table, Alert, Space, Typography, theme } from 'antd'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 import type { UploadFile } from 'antd/es/upload/interface'
 import type { ISyneySpec } from '@services/types'
@@ -43,6 +43,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
   syneySpecs,
   specsLoading = false,
 }) => {
+  const { token } = theme.useToken()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [loading, setLoading] = useState(false)
   const [rawParsedData, setRawParsedData] =
@@ -271,8 +272,8 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                       showIcon
                       style={{
                         marginTop: 8,
-                        border: '2px solid #faad14',
-                        backgroundColor: '#fffbe6',
+                        border: `2px solid ${token.colorWarningBorder}`,
+                        backgroundColor: token.colorWarningBg,
                       }}
                       banner
                     />
@@ -302,8 +303,8 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                       showIcon
                       style={{
                         marginTop: 8,
-                        border: '2px solid #faad14',
-                        backgroundColor: '#fffbe6',
+                        border: `2px solid ${token.colorWarningBorder}`,
+                        backgroundColor: token.colorWarningBg,
                       }}
                       banner
                     />

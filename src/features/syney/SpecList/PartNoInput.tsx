@@ -30,10 +30,10 @@ export default function PartNoInput() {
       value={value}
       onChange={handleChange}
       allowClear={{
-        clearIcon: <XMarkIcon className="h-3.5 w-3.5 text-slate-400" />,
+        clearIcon: <XMarkIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />,
       }}
       prefix={
-        <MagnifyingGlassIcon className="h-3.5 w-3.5 text-slate-400" />
+        <MagnifyingGlassIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
       }
       className="w-56 rounded-lg"
     />

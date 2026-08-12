@@ -339,13 +339,13 @@ export default function SafePartSettingPage() {
         width: 100,
         render: (v: boolean) =>
           v ? (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600 shadow-sm">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/40 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 shadow-sm">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               是
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm">
-              <div className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm">
+              <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
               否
             </div>
           ),
@@ -357,13 +357,13 @@ export default function SafePartSettingPage() {
         width: 100,
         render: (v: boolean) =>
           v ? (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600 shadow-sm">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/40 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 shadow-sm">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               是
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm">
-              <div className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm">
+              <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
               否
             </div>
           ),
@@ -376,7 +376,7 @@ export default function SafePartSettingPage() {
         render: (v: string | null) => {
           const label = DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v
           return label ? (
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+            <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
               {label}
             </span>
           ) : (
@@ -561,14 +561,14 @@ export default function SafePartSettingPage() {
       ) : null}
 
       {/* 搜索栏 */}
-      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div className="flex items-center gap-2">
           <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-          <span className="text-sm font-medium text-slate-600">筛选条件</span>
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">筛选条件</span>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-slate-600">件号：</span>
+            <span className="text-slate-600 dark:text-slate-300">件号：</span>
             <Input
               placeholder="搜索件号（前端过滤）"
               value={partNoFilter}
@@ -578,11 +578,11 @@ export default function SafePartSettingPage() {
               }}
               allowClear={{
                 clearIcon: (
-                  <XMarkIcon className="h-3.5 w-3.5 text-slate-400" />
+                  <XMarkIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
                 ),
               }}
               prefix={
-                <MagnifyingGlassIcon className="h-3.5 w-3.5 text-slate-400" />
+                <MagnifyingGlassIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
               }
               className="w-64 rounded-lg"
             />
@@ -607,7 +607,7 @@ export default function SafePartSettingPage() {
             pagination={false}
             scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
             style={{ fontSize: '13px' }}
-            className="[&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-row:hover>td]:bg-blue-50/50"
+            className="[&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30"
           />
         </div>
         <div className="flex shrink-0 justify-end">
@@ -726,7 +726,7 @@ export default function SafePartSettingPage() {
         onCancel={() => setPreviewDrawing(null)}
       >
         {previewDrawing?.mimeType?.startsWith('image/') ? (
-          <div className="flex max-h-[70vh] justify-center overflow-auto rounded border border-slate-200 bg-slate-50 p-3">
+          <div className="flex max-h-[70vh] justify-center overflow-auto rounded border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
             <img
               src={previewDrawing.url}
               alt={previewDrawing.fileName}
@@ -737,7 +737,7 @@ export default function SafePartSettingPage() {
           <iframe
             title={previewDrawing?.fileName ?? '图纸预览'}
             src={previewDrawing?.url}
-            className="h-[70vh] w-full rounded border border-slate-200"
+            className="h-[70vh] w-full rounded border border-slate-200 dark:border-slate-700"
           />
         )}
       </Modal>

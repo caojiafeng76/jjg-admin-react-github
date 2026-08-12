@@ -109,9 +109,9 @@ export default function DetailTable({
       width: 90,
       render: (value: number | null) =>
         value === null || value === undefined ? (
-          <span className="text-slate-400">-</span>
+          <span className="text-slate-400 dark:text-slate-500">-</span>
         ) : (
-          <span className="font-semibold text-slate-700 tabular-nums">
+          <span className="font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
             {value}
           </span>
         ),
@@ -165,16 +165,16 @@ export default function DetailTable({
       onRow={handleRow}
       scroll={{ x: 1380, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50">
+          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={8}>
-              <span className="font-medium text-slate-600">当前页合计</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={9} align="right">
-              <span className="font-bold text-slate-900 tabular-nums">
+              <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                 {currentPageTotalQty}
               </span>
             </Table.Summary.Cell>

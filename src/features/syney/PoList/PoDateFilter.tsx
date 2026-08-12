@@ -37,7 +37,7 @@ export default function PoDateFilter() {
       format="YYYY-MM-DD"
       placeholder={['开始日期', '结束日期']}
       allowClear
-      prefix={<CalendarDaysIcon className="h-3.5 w-3.5 text-slate-400" />}
+      prefix={<CalendarDaysIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />}
       className="w-64 rounded-lg"
     />
   )

@@ -9,12 +9,12 @@ const STATUS_OPTIONS: Array<{
   icon: React.ComponentType<{ className?: string }>
   color: string
 }> = [
-  { value: '全部', label: '全部', icon: CheckCircleIcon, color: 'text-slate-400' },
+  { value: '全部', label: '全部', icon: CheckCircleIcon, color: 'text-slate-400 dark:text-slate-500' },
   { value: '已创建', label: '已创建', icon: XCircleIcon, color: 'text-rose-500' },
   { value: '已入库', label: '已入库', icon: CheckCircleIcon, color: 'text-emerald-500' },
   { value: '部分送货', label: '部分送货', icon: ArrowPathIcon, color: 'text-amber-500' },
   { value: '暂停', label: '暂停', icon: PauseCircleIcon, color: 'text-pink-500' },
-  { value: '作废', label: '作废', icon: ExclamationTriangleIcon, color: 'text-slate-500' },
+  { value: '作废', label: '作废', icon: ExclamationTriangleIcon, color: 'text-slate-500 dark:text-slate-400' },
 ]
 
 export default function PoSelectedFilter() {

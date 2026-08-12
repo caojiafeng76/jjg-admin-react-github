@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-12
+
+- **类别**：修复
+- **范围**：`src/features/syney/`（SpecList、PoList、PoDetail、ReportList、ReportDetail、SafePartSetting 全部组件）
+- **摘要**：西尼模块暗黑模式适配：为表格（表头/行悬停/合计行）、筛选/搜索栏、状态徽章（slate/rose/amber/emerald/pink）、链接、图标与文字颜色补充 `dark:` Tailwind 变体（深色背景 slate-800/900 系、深色边框、浅色文字），遵循模块既有约定；`ExcelUpload.tsx` 警告 Alert 的硬编码 `#fffbe6`/`#faad14` 改为 antd 主题 token（`colorWarningBg`/`colorWarningBorder`），随暗黑算法自动切换。
+- **验证**：`bun run typecheck` 通过；`bun run test` 105 个文件 / 460 个用例全部通过（首次运行存在 1 个 packaging-process 异步用例偶发失败，复跑与隔离运行均通过，判定为 flaky 与本次改动无关）；`eslint` 检查通过。
+
 ## 2026-08-11
 
 - **类别**：修复

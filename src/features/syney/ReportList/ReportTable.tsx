@@ -27,26 +27,26 @@ const STATUS_STYLES: Record<
 > = {
   unconfirmed: {
     label: '未校对',
-    bg: 'bg-rose-50',
-    text: 'text-rose-600',
+    bg: 'bg-rose-50 dark:bg-rose-900/40',
+    text: 'text-rose-600 dark:text-rose-400',
     dot: 'bg-rose-500',
   },
   confirmed: {
     label: '已校对',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-600',
+    bg: 'bg-emerald-50 dark:bg-emerald-900/40',
+    text: 'text-emerald-600 dark:text-emerald-400',
     dot: 'bg-emerald-500',
   },
   未校对: {
     label: '未校对',
-    bg: 'bg-rose-50',
-    text: 'text-rose-600',
+    bg: 'bg-rose-50 dark:bg-rose-900/40',
+    text: 'text-rose-600 dark:text-rose-400',
     dot: 'bg-rose-500',
   },
   已校对: {
     label: '已校对',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-600',
+    bg: 'bg-emerald-50 dark:bg-emerald-900/40',
+    text: 'text-emerald-600 dark:text-emerald-400',
     dot: 'bg-emerald-500',
   },
 }
@@ -124,7 +124,7 @@ export default function ReportTable({
         width: 200,
         render: (text: string) => (
           <Link
-            className="font-medium text-blue-600 hover:text-blue-700"
+            className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             to={`/syney-store-report-list/${text}`}
           >
             {text}
@@ -139,7 +139,7 @@ export default function ReportTable({
         align: 'right',
         sorter: (a, b) => (a.TotalAmount || 0) - (b.TotalAmount || 0),
         render: (text: number) => (
-          <span className="font-semibold text-slate-700 tabular-nums">
+          <span className="font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
             {formatNumber(text)}
           </span>
         ),
@@ -186,16 +186,16 @@ export default function ReportTable({
       onRow={handleRow}
       scroll={{ x: 700, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50">
+          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={4}>
-              <span className="font-medium text-slate-600">当前页合计</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={5} align="right">
-              <span className="font-bold text-slate-900 tabular-nums">
+              <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                 {formatNumber(currentPageTotalAmount)}
               </span>
             </Table.Summary.Cell>

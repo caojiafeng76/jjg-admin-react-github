@@ -404,29 +404,29 @@ export default function PoList() {
       ) : null}
 
       {/* 搜索 / 过滤栏 */}
-      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div className="flex items-center gap-2">
           <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-          <span className="text-sm font-medium text-slate-600">筛选条件</span>
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">筛选条件</span>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-slate-600">交货日期：</span>
+            <span className="text-slate-600 dark:text-slate-300">交货日期：</span>
             <PoDateFilter />
           </div>
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
           <div className="flex items-center gap-2">
-            <span className="text-slate-600">状态：</span>
+            <span className="text-slate-600 dark:text-slate-300">状态：</span>
             <PoSelectedFilter />
           </div>
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
           <div className="flex items-center gap-2">
-            <span className="text-slate-600">搜索：</span>
+            <span className="text-slate-600 dark:text-slate-300">搜索：</span>
             <PoSearchInput />
           </div>
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
           <div className="flex items-center gap-2">
-            <span className="text-slate-600">操作：</span>
+            <span className="text-slate-600 dark:text-slate-300">操作：</span>
             <PoSelected />
           </div>
         </div>
