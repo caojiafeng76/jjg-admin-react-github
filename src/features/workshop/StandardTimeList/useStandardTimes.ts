@@ -107,7 +107,8 @@ export function useSalesOrdersProjectNos() {
   return useQuery({
     queryKey: [PROCESS_STANDARDS_KEY, 'project-nos'],
     queryFn: getSalesOrdersProjectNos,
-    ...queryConfig.realtime,
+    // 生产号选项低变更，仅在表单打开挂载时刷新（refetchOnMount: 'always'），常驻页面不轮询
+    ...queryConfig.list,
     refetchOnMount: 'always',
   })
 }

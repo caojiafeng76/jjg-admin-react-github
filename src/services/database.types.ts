@@ -589,50 +589,6 @@ export type Database = {
           },
         ]
       }
-      notifications: {
-        Row: {
-          action_type: string
-          actor_employee_id: string
-          actor_name: string
-          created_at: string
-          entity_id: string
-          entity_type: string
-          id: string
-          is_read: boolean
-          read_at: string | null
-        }
-        Insert: {
-          action_type: string
-          actor_employee_id: string
-          actor_name: string
-          created_at?: string
-          entity_id: string
-          entity_type: string
-          id?: string
-          is_read?: boolean
-          read_at?: string | null
-        }
-        Update: {
-          action_type?: string
-          actor_employee_id?: string
-          actor_name?: string
-          created_at?: string
-          entity_id?: string
-          entity_type?: string
-          id?: string
-          is_read?: boolean
-          read_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_actor_employee_id_fkey"
-            columns: ["actor_employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       order_scheduling_items: {
         Row: {
           created_at: string | null

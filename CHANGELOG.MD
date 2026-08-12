@@ -15,6 +15,24 @@
 
 ## 2026-08-12
 
+- **类别**：删除（数据库）
+- **范围**：`supabase` 远程库（notifications 表、3 个触发器、3 个函数、realtime publication、权限种子数据）、`docs/sql-drafts/20260812_cleanup_notifications.sql`、`src/services/database.types.ts`
+- **摘要**：经用户 3 次确认后清理通知功能数据库残留：从 supabase_realtime publication 移除 notifications；删除 create_notification_for_production_order / create_notification_for_material_transfer / sync_notification_read_at 三个触发器与函数；DROP notifications 表（级联 RLS 策略与索引）；删除 permissions 中 feature:admin-notifications.view 行及 role_permissions 的 admin 关联。清理脚本保留在 docs/sql-drafts/ 备查
+- **验证**：数据库核对全部为 0（表/触发器/函数/权限行/角色关联/realtime 成员）；`bun run db:types` 重新生成类型（notifications 残留 0）；`bun run typecheck` 通过
+## 2026-08-12
+
+- **类别**：删除 / 修改
+- **范围**：`src/services/apiNotifications.ts`（删除）、`src/hooks/useAdminNotifications.ts`（删除）、`src/ui/AppHeader.tsx`、`src/config/permissionRegistry.ts`
+- **摘要**：应业务要求整体移除管理端通知功能：删除通知服务层与 hooks（含 30s 轮询查询、postgres_changes realtime 订阅、已读/全部已读 mutation）；AppHeader 移除通知铃按钮、Popover 通知列表、realtime 系统弹窗及 NotificationItem 组件；permissionRegistry 移除 `feature:admin-notifications.view` 权限注册。数据库 notifications 表与历史 migration 种子数据保留（已执行迁移不改动，前端不再引用）
+- **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过
+## 2026-08-12
+
+- **类别**：重构 / 修改
+- **范围**：`src/hooks/useAdminNotifications.ts`、`src/features/workshop/StandardTimeList/useStandardTimes.ts`、`src/features/packaging-process/WorkOrderList/useWorkOrders.ts`、`src/features/packaging-process/StandardTimeList/useStandardTimes.ts`
+- **摘要**：执行第二周期"网络瘦身"：(1) 通知双通道合一——管理端通知查询从 30s 轮询（queryConfig.realtime）改为 queryConfig.detail，由 realtime postgres_changes 通道的 invalidate 驱动刷新，消除 App 常驻期间每 30s 2 个冗余请求；(2) 三个"生产号选项"查询（workshop/packaging 标准工时、包装工单）从 30s 轮询降级为 queryConfig.list + refetchOnMount: 'always'，仅在表单打开时刷新，常驻页面不再轮询；(3) keep-alive 隐藏页轮询问题随前两项降级消除（剩余轮询仅存于员工手机端生产工单视图，为合理实时业务场景，且不走 keep-alive 布局）
+- **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过
+## 2026-08-12
+
 - **类别**：重构 / 删除 / 修复
 - **范围**：`src/pages/`（删除 10 个未引用页面组件）、`src/routes/lazyPages.ts`、`src/ui/AppHeader.tsx`、`src/store/index.ts`、`src/features/syney/`（PoList / ReportList / PoDetail）、`src/hooks/useMutationWithMessage.ts`、`useMutationWithInvalidation.ts`
 - **摘要**：执行第一周期优化：(1) 删除 10 个无引用页面组件（EmployeeList/StandardTimeList/SyneyPoList/SyneyPoDetail/SyneySpecList/SyneyStoreReportList/SyneyStoreReportDetail/WorkshopOrderList/ComingSoonPage/WorkshopOrderClosed）及 lazyPages 中 3 个未路由导出，缩小打包体积；(2) AppHeader 退出登录失败时弹出错误提示（原为空 catch 吞错）；(3) 移除全局 Zustand isLoading 标志，PoList/ReportList/PoDetail 改为组件本地 state + 回调通知，消除跨页串扰；(4) useMutationWithInvalidation 改为 useMutationWithMessage 薄包装（新增 showErrorMessage 参数），统一 mutation 单一实现
