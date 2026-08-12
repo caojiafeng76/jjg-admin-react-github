@@ -52,7 +52,7 @@ export function useStandardTimesList({
 export function useCreateStandardTime() {
   return useMutationWithInvalidation({
     mutationFn: createStandardTime,
-    invalidateQueries: [[STANDARD_TIMES_KEY]],
+    invalidateQueries: [[STANDARD_TIMES_KEY], [PROCESS_STANDARDS_KEY]],
   })
 }
 
@@ -99,7 +99,7 @@ export function useUpdateStandardTimesLastProcess() {
 export function useDeleteStandardTimes() {
   return useMutationWithInvalidation({
     mutationFn: deleteStandardTimes,
-    invalidateQueries: [[STANDARD_TIMES_KEY]],
+    invalidateQueries: [[STANDARD_TIMES_KEY], [PROCESS_STANDARDS_KEY]],
   })
 }
 

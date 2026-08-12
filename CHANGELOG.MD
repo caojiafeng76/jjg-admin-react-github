@@ -15,6 +15,13 @@
 
 ## 2026-08-12
 
+- **类别**：性能 / 变更
+- **范围**：`src/services/apiOrderStatusDashboard.ts`、`src/features/workshop/OrderStatusDashboard/useOrderStatusDashboard.ts`（含新增 vitest）、`src/features/workshop/StandardTimeList/useStandardTimes.ts`（含新增 vitest）、`src/services/apiOrderStatusDashboard.vitest.ts`
+- **摘要**：订单现状仪表盘岗位行（process_standards 全表，现 1387 行/1000 行每页循环拉取）缓存优化：新增 `useProcessStandardJobRows()`，以 `['process-standards', 'job-rows']` 为 queryKey + `queryConfig.static`（1h staleTime），上提至 hook 层由 React Query 缓存，`getOrderStatusDashboard` 增加可选 `processRows` 参数（传入时跳过内部全表查询），dashboard 查询以 `enabled: processRows !== undefined` 等待岗位行就绪——翻页/改筛选不再重复拉取岗位行；为保证数据更新后缓存立即刷新，`useCreateStandardTime`/`useDeleteStandardTimes` 的 invalidateQueries 补充 `['process-standards']` 前缀（与既有 update/末道标记一致，前缀命中 job-rows 缓存立即重拉），编辑/新增/删除/末道标记后仪表盘岗位列即时重算，无需等 staleTime 过期
+- **验证**：`bun run test` 全量通过（466/466）；`bun run typecheck` 通过
+
+## 2026-08-12
+
 - **类别**：修复
 - **范围**：`src/features/workshop/StandardTimeList/`（index.tsx、StandardTimeTable.tsx、StandardTimeCostDetail.tsx、StandardTimeSearch.tsx、StandardTimeMobileList.tsx、StandardTimeForm.tsx）
 - **摘要**：standard-time-list 成本核算页面补齐暗黑模式适配：所有硬编码浅色 Tailwind 类（容器 bg-white/bg-slate-50、边框 border-slate-200、文字 text-slate-500~900、彩色强调 text-*-600）按项目惯例追加 `dark:` 变体——容器 `dark:border-slate-700 dark:bg-slate-800`、正文 `dark:text-slate-300`、标题 `dark:text-slate-100`、徽章 `dark:bg-slate-600/700`、彩色文字 `dark:text-*-400`、彩色渐变卡 `dark:from-*-500/10` 等；覆盖管理端（表格+成本详情+表单）与班组长移动端（筛选面板+卡片列表）。表格行高亮/警示背景由 index.css 的 CSS 变量自动适配，未改动

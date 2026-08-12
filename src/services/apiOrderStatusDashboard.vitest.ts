@@ -133,6 +133,56 @@ describe('getOrderStatusDashboard', () => {
 
     expect(result.items[0]?.jobOutputs.CNC).toBe(1394)
   })
+
+  it('uses provided processRows without querying process_standards', async () => {
+    mockRpc.mockResolvedValue({
+      data: {
+        items: [
+          {
+            id: 'order-1',
+            length_mm: 645,
+            material_code: '02.105.304.2.263',
+            project_no: '26063003-02',
+            productionRows: [],
+          },
+        ],
+        materialTransferCount: 0,
+        productionItemCount: 0,
+        total: 1,
+      },
+      error: null,
+    })
+
+    const packagingWorkOrdersQuery = createQuery([])
+    const fromTableCalls: string[] = []
+    mockFrom.mockImplementation((table: string) => {
+      fromTableCalls.push(table)
+      return packagingWorkOrdersQuery
+    })
+
+    const result = await getOrderStatusDashboard({
+      page: 1,
+      pageSize: 20,
+      processRows: [
+        {
+          is_last_process: true,
+          job_name: 'CNC',
+          length: 645,
+          model: '105-304',
+          operation: 'CNC（四轴工装）2台同步',
+          part_no: '02.105.304.2.263',
+          record_type: 'A',
+        },
+      ],
+    })
+
+    expect(fromTableCalls).not.toContain('process_standards')
+    expect(fromTableCalls).toEqual(['packaging_work_orders'])
+    expect(result.jobColumns).toEqual([
+      { key: 'CNC', title: 'CNC', operations: ['CNC（四轴工装）2台同步'] },
+      { key: '包装', title: '包装', operations: [] },
+    ])
+  })
 })
 
 describe('buildPackagingProductionDetailsForDashboard', () => {

@@ -59,7 +59,7 @@ type ProductionOrderItemDetailRow = ProductionOrderItemRow & {
   production_orders: ProductionOrderRelation | ProductionOrderRelation[] | null
 }
 
-type ProcessStandardJobRow = Pick<
+export type ProcessStandardJobRow = Pick<
   Database['public']['Tables']['process_standards']['Row'],
   'job_name' | 'operation' | 'model' | 'length' | 'part_no' | 'record_type'
 > & {
@@ -404,7 +404,7 @@ function resolveLastProcessStatus(
   return undefined
 }
 
-async function getAllProcessStandardJobRows(signal?: AbortSignal) {
+export async function getAllProcessStandardJobRows(signal?: AbortSignal) {
   const rows: ProcessStandardJobRow[] = []
   let from = 0
 
@@ -1187,16 +1187,20 @@ export async function getOrderStatusDashboard({
   page,
   pageSize,
   filters,
+  processRows,
   signal,
 }: {
   page: number
   pageSize: number
   filters?: OrderStatusDashboardFilters
+  processRows?: ProcessStandardJobRow[]
   signal?: AbortSignal
 }): Promise<OrderStatusDashboardResult> {
-  const [rpcResult, processRows] = await Promise.all([
+  // 外部（如 React Query 缓存）已提供岗位行时跳过全表查询；
+  // 未提供时保持原行为（内部按 1000 行/页循环拉取）。
+  const [rpcResult, resolvedProcessRows] = await Promise.all([
     getOrderStatusDashboardRpcResult({ page, pageSize, filters, signal }),
-    getAllProcessStandardJobRows(signal),
+    processRows ?? getAllProcessStandardJobRows(signal),
   ])
   const orders = rpcResult.items ?? []
   const total = rpcResult.total ?? 0
@@ -1214,7 +1218,7 @@ export async function getOrderStatusDashboard({
   const packagingDetailsByProjectNo = groupPackagingRowsByProjectNo(
     packagingRows,
   )
-  const processJobIndex = buildProcessJobIndex(processRows)
+  const processJobIndex = buildProcessJobIndex(resolvedProcessRows)
   const jobColumns = buildJobColumns(processJobIndex)
 
   const items = orders.map<OrderStatusDashboardItem>((order) => {
