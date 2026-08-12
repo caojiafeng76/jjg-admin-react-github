@@ -266,50 +266,29 @@ export async function getModels() {
 }
 
 export async function getSalesOrdersProjectNos() {
-  const PAGE_SIZE = 1000
-  const allData: SalesOrderProjectNoOption[] = []
-  const projectNos = new Set<string>()
-  let from = 0
-
-  while (true) {
-    const query = supabase
-      .from('sales_orders')
-      .select(
-        'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
-      )
-
-    const { data, error } = await (
-      query as typeof query & {
-        eq(column: string, value: string): typeof query
-      }
+  // 查 v_sales_order_project_options 视图（服务端按 project_no 去重），替代 while 分页全表扫描
+  const { data, error } = await supabase
+    .from('v_sales_order_project_options')
+    .select(
+      'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
     )
-      .eq('status', '生产中')
-      .not('project_no', 'is', null)
-      .order('created_at', { ascending: false })
-      .order('project_no', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1)
+    .eq('status', '生产中')
+    .order('created_at', { ascending: false })
+    .order('project_no', { ascending: true })
 
-    if (error) {
-      throw handleApiError(error, '获取项目号列表失败')
-    }
-
-    const filtered = (data || []).filter(
-      (item): item is SalesOrderProjectNoOption => {
-        if (!item.project_no || projectNos.has(item.project_no)) {
-          return false
-        }
-
-        projectNos.add(item.project_no)
-        return true
-      },
-    )
-    allData.push(...filtered)
-
-    if (!data || data.length < PAGE_SIZE) break
-    from += PAGE_SIZE
+  if (error) {
+    throw handleApiError(error, '获取项目号列表失败')
   }
 
-  return allData
+  const projectNos = new Set<string>()
+  return (data || []).filter((item): item is SalesOrderProjectNoOption => {
+    if (!item.project_no || projectNos.has(item.project_no)) {
+      return false
+    }
+
+    projectNos.add(item.project_no)
+    return true
+  })
 }
 
 export async function getSalesOrderByProjectNo(projectNo: string) {

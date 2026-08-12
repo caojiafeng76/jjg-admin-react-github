@@ -196,8 +196,8 @@ describe('apiProcessStandards', () => {
     await expect(getModels()).rejects.toThrow('获取型号列表失败: offline')
   })
 
-  it('loads every production sales-order page without dropping valid rows', async () => {
-    const firstPage = Array.from({ length: 1000 }, (_, index) => ({
+  it('loads sales-order project options from the deduplicated view', async () => {
+    const rows = Array.from({ length: 1000 }, (_, index) => ({
       created_at: `2026-07-13T00:${String(index % 60).padStart(2, '0')}:00Z`,
       customer: '客户',
       customer_model: null,
@@ -207,31 +207,21 @@ describe('apiProcessStandards', () => {
       project_no:
         index === 500 ? null : index === 999 ? 'P-0' : `P-${index}`,
     }))
-    const finalRow = {
-      created_at: '2026-07-12T00:00:00Z',
-      customer: '客户',
-      customer_model: 'C-1',
-      length_mm: 900,
-      material_code: 'MAT-1000',
-      product_model: 'M-2',
-      project_no: 'P-1000',
-    }
-    enqueue({ data: firstPage, error: null }, { data: [finalRow], error: null })
+    enqueue({ data: rows, error: null })
 
     const result = await getSalesOrdersProjectNos()
 
-    expect(result).toHaveLength(999)
+    expect(result).toHaveLength(998)
     expect(result).not.toContainEqual(
       expect.objectContaining({ project_no: null }),
     )
-    expect(result.at(-1)).toEqual(finalRow)
     expect(result.filter((item) => item.project_no === 'P-0')).toHaveLength(1)
-    expect(callsFor('range').map((call) => call.args)).toEqual([
-      [0, 999],
-      [1000, 1999],
-    ])
+    // 单次视图查询（v_sales_order_project_options 服务端按 project_no 去重），不再 while 分页循环
+    expect(callsFor('range')).toEqual([])
+    expect(callsFor('select')[0]?.table).toBe(
+      'v_sales_order_project_options',
+    )
     expect(callsFor('eq')[0]?.args).toEqual(['status', '生产中'])
-    expect(callsFor('not')[0]?.args).toEqual(['project_no', 'is', null])
   })
 
   it('returns a sales order by project number and rejects missing data', async () => {

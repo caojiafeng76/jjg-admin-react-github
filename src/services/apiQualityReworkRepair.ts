@@ -11,8 +11,6 @@ export const QUALITY_REWORK_REPAIR_CATEGORIES = [
 export type QualityReworkRepairCategory =
   (typeof QUALITY_REWORK_REPAIR_CATEGORIES)[number]
 
-const ORDER_OPTIONS_PAGE_SIZE = 1000
-
 export const QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES = [
   'workshop_pending',
   'production_pending',
@@ -255,46 +253,36 @@ export async function getQualityReworkRepairList({
 }
 
 export async function getQualityReworkRepairOrderOptions() {
+  // 查 v_sales_order_project_options 视图（服务端按 project_no 去重），替代 while 分页全表扫描
   const optionMap = new Map<string, QualityReworkRepairOrderOption>()
-  let from = 0
 
-  while (true) {
-    const { data, error } = await supabase
-      .from('sales_orders')
-      .select(
-        'project_no, product_model, length_mm, material_code, customer, customer_model',
-      )
-      .not('project_no', 'is', null)
-      .order('created_at', { ascending: false })
-      .order('project_no', { ascending: true })
-      .range(from, from + ORDER_OPTIONS_PAGE_SIZE - 1)
+  const { data, error } = await supabase
+    .from('v_sales_order_project_options')
+    .select(
+      'project_no, product_model, length_mm, material_code, customer, customer_model',
+    )
+    .order('created_at', { ascending: false })
+    .order('project_no', { ascending: true })
 
-    if (error) {
-      throw handleApiError(error, '获取订单项目号选项失败')
+  if (error) {
+    throw handleApiError(error, '获取订单项目号选项失败')
+  }
+
+  for (const item of data || []) {
+    const projectNo = item.project_no?.trim()
+
+    if (!projectNo || optionMap.has(projectNo)) {
+      continue
     }
 
-    for (const item of data || []) {
-      const projectNo = item.project_no?.trim()
-
-      if (!projectNo || optionMap.has(projectNo)) {
-        continue
-      }
-
-      optionMap.set(projectNo, {
-        project_no: projectNo,
-        product_model: item.product_model,
-        length_mm: item.length_mm,
-        material_code: item.material_code,
-        customer: item.customer,
-        customer_model: item.customer_model,
-      })
-    }
-
-    if (!data || data.length < ORDER_OPTIONS_PAGE_SIZE) {
-      break
-    }
-
-    from += ORDER_OPTIONS_PAGE_SIZE
+    optionMap.set(projectNo, {
+      project_no: projectNo,
+      product_model: item.product_model,
+      length_mm: item.length_mm,
+      material_code: item.material_code,
+      customer: item.customer,
+      customer_model: item.customer_model,
+    })
   }
 
   return Array.from(optionMap.values()).sort((left, right) =>

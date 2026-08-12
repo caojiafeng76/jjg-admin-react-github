@@ -74,8 +74,8 @@ export function usePackagingSalesOrdersProjectNos() {
   return useQuery({
     queryKey: SALES_ORDERS_PROJECT_NOS_KEY,
     queryFn: getSalesOrdersProjectNos,
-    // 生产号选项低变更，仅在表单打开挂载时刷新（refetchOnMount: 'always'），常驻页面不轮询
-    ...queryConfig.list,
+    // 生产号选项低变更，长 TTL 缓存；仅在表单打开挂载时刷新（refetchOnMount: 'always'），常驻页面不轮询
+    ...queryConfig.static,
     refetchOnMount: 'always',
   })
 }

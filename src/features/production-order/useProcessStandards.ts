@@ -71,7 +71,9 @@ export function useSalesOrdersProjectNos() {
   return useQuery({
     queryKey: [PROCESS_STANDARDS_KEY, 'project-nos'],
     queryFn: getSalesOrdersProjectNos,
-    ...queryConfig.list,
+    // 与 workshop StandardTimeList 共享同一查询键；生产号选项低变更，长 TTL 缓存 + 挂载时刷新
+    ...queryConfig.static,
+    refetchOnMount: 'always',
   })
 }
 

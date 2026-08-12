@@ -147,8 +147,6 @@ export interface UpsertExtrusionProductionPayload {
   items: ExtrusionProductionItemInput[]
 }
 
-const EXTRUSION_PROJECT_OPTIONS_PAGE_SIZE = 1000
-
 function extrusionProductionsTable() {
   return supabase.from('extrusion_productions')
 }
@@ -342,38 +340,23 @@ function applyExtrusionProductionFilters<
 }
 
 export async function getExtrusionSalesOrdersProjectNos() {
-  const allData: ExtrusionSalesOrderOption[] = []
-  let fromIndex = 0
-
-  while (true) {
-    const { data, error } = await supabase
-      .from('sales_orders')
-      .select(
-        'project_no, product_model, length_mm, material_code, customer, customer_model, weight_per_meter_kg, created_at',
-      )
-      .eq('status', '生产中')
-      .not('project_no', 'is', null)
-      .order('created_at', { ascending: false })
-      .order('project_no', { ascending: true })
-      .range(fromIndex, fromIndex + EXTRUSION_PROJECT_OPTIONS_PAGE_SIZE - 1)
-
-    if (error) {
-      throw handleApiError(error, '获取挤压项目号列表失败')
-    }
-
-    const filtered = (data || []).filter(
-      (item): item is ExtrusionSalesOrderOption => item.project_no !== null,
+  // 查 v_sales_order_project_options 视图（服务端按 project_no 去重），替代 while 分页全表扫描
+  const { data, error } = await supabase
+    .from('v_sales_order_project_options')
+    .select(
+      'project_no, product_model, length_mm, material_code, customer, customer_model, weight_per_meter_kg, created_at',
     )
-    allData.push(...filtered)
+    .eq('status', '生产中')
+    .order('created_at', { ascending: false })
+    .order('project_no', { ascending: true })
 
-    if (!data || data.length < EXTRUSION_PROJECT_OPTIONS_PAGE_SIZE) {
-      break
-    }
-
-    fromIndex += EXTRUSION_PROJECT_OPTIONS_PAGE_SIZE
+  if (error) {
+    throw handleApiError(error, '获取挤压项目号列表失败')
   }
 
-  return allData
+  return (data || []).filter(
+    (item): item is ExtrusionSalesOrderOption => item.project_no !== null,
+  )
 }
 
 export async function getExtrusionSalesOrderByProjectNo(projectNo: string) {

@@ -15,6 +15,13 @@
 
 ## 2026-08-12
 
+- **类别**：性能
+- **范围**：`supabase/migrations/20260812100000_add_sales_order_project_options_view.sql`（新建）、`src/services/database.types.ts`（自动生成）、`src/services/apiProcessStandards.ts`、`src/services/apiExtrusionProductions.ts`、`src/services/apiQualityIssueRecords.ts`、`src/services/apiQualityReworkRepair.ts`、`src/services/apiProcessStandards.vitest.ts`、7 个 options hook（`workshop/StandardTimeList/useStandardTimes.ts`、`production-order/useProcessStandards.ts`、`packaging-process/WorkOrderList/useWorkOrders.ts`、`packaging-process/StandardTimeList/useStandardTimes.ts`、`extrusion-production/useExtrusionProductions.ts`、`quality/IssueRecord/useQualityIssueRecords.ts`、`quality/ReworkRepair/useQualityReworkRepair.ts`）
+- **摘要**：优化清单 #4 落地：消除 4 处 `sales_orders` 项目号选项 while 分页全表扫描。(1) 新建视图 `v_sales_order_project_options`（覆盖 `project_no/product_model/length_mm/material_code/customer/customer_model/weight_per_meter_kg/order_quantity/created_at/status`，`where project_no 非空`；`sales_orders.project_no` 已有 partial unique 索引，视图天然一行一项目号，并显式 `grant select` 给 anon/authenticated），migration 已应用、`bun run db:types` 已重新生成类型。(2) `getSalesOrdersProjectNos`（保留 `status='生产中'` 过滤与 Set 去重）、`getExtrusionSalesOrdersProjectNos`（保留 status 过滤）、`getQualityIssueRecordOrderOptions`、`getQualityReworkRepairOrderOptions`（后两者保留 trim+Map 去重与 project_no 排序）全部改为单次查视图，删除 while 循环、`range` 分页与 `PAGE_SIZE` 常量（`EXTRUSION_PROJECT_OPTIONS_PAGE_SIZE`、两处 `ORDER_OPTIONS_PAGE_SIZE`）；查询排序保持原 `created_at desc, project_no asc` 不变，下拉选项顺序与原来一致。(3) 7 个 options hook 统一由 `queryConfig.list`（30s）改为 `queryConfig.static`（1h 长 TTL）+ `refetchOnMount: 'always'`（挂载时取最新、常驻不轮询），与清单 #1 岗位字典模式对齐。(4) 测试：`apiProcessStandards.vitest.ts` 分页用例重写为单次视图查询（断言无 `range` 调用、查 `v_sales_order_project_options`、去重与 status 过滤保留）
+- **验证**：`bun run db:push` 应用 migration（API 模式，直连超时自动回退）；`bun run db:types` 成功；`bun run typecheck` 通过；`bun run test` 全量通过（480/480）；`bunx eslint` 12 个改动文件无错误
+
+## 2026-08-12
+
 - **类别**：变更
 - **范围**：`opencode.jsonc`、本地开发环境（npm 全局）
 - **摘要**：安装 TypeScript LSP：全局安装 `typescript-language-server@5.3.0` 与 `typescript@5.9.3`（项目 typescript@6.0.3 为原生版无 `tsserver.js`，7.0.2 亦无，LSP 后端需经典版），并在 `opencode.jsonc` 新增 `lsp.typescript` 配置（`--tsserver-path` 指向全局 5.9.3 的 tsserver.js，覆盖同名内置配置）；`lsp_diagnostics` 对 apiProcessStandards/apiProductionOrderItems/apiStandardTimes 及其测试文件均返回无诊断

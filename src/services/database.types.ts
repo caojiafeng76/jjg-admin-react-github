@@ -3269,12 +3269,58 @@ export type Database = {
         }
         Relationships: []
       }
+      v_sales_order_project_options: {
+        Row: {
+          created_at: string | null
+          customer: string | null
+          customer_model: string | null
+          length_mm: number | null
+          material_code: string | null
+          order_quantity: number | null
+          product_model: string | null
+          project_no: string | null
+          status: string | null
+          weight_per_meter_kg: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer?: string | null
+          customer_model?: string | null
+          length_mm?: number | null
+          material_code?: string | null
+          order_quantity?: number | null
+          product_model?: string | null
+          project_no?: string | null
+          status?: string | null
+          weight_per_meter_kg?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          customer?: string | null
+          customer_model?: string | null
+          length_mm?: number | null
+          material_code?: string | null
+          order_quantity?: number | null
+          product_model?: string | null
+          project_no?: string | null
+          status?: string | null
+          weight_per_meter_kg?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       apply_tooling_stock_out_audit: {
         Args: {
           target_stock_out_quantity: number
           target_tooling_data_id: string
+        }
+        Returns: undefined
+      }
+      apply_youmai_finished_goods_stock_in_reversal: {
+        Args: {
+          target_product_data_id: string
+          target_stock_in_quantity: number
         }
         Returns: undefined
       }

@@ -50,7 +50,9 @@ export function useQualityIssueRecordOrderOptions() {
   return useQuery({
     queryKey: [QUALITY_ISSUE_RECORDS_KEY, 'order-options'],
     queryFn: getQualityIssueRecordOrderOptions,
-    ...queryConfig.list,
+    // 订单项目号选项低变更，长 TTL 缓存；仅在页面挂载时刷新（refetchOnMount: 'always'），常驻不轮询
+    ...queryConfig.static,
+    refetchOnMount: 'always',
   })
 }
 
