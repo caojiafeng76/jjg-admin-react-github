@@ -123,7 +123,7 @@ export async function getProductionOrders({
   }
 
   const selectClause = `
-      *,
+      id, order_date, employee_id, is_audited, shift, work_hours, extra_qualified_hours, remark, updated_at,
       employee:employees(id, name),
       items:production_order_items(standard_seconds, qualified_quantity, qualified_hours, defect_hours)${hasItemFilters ? ',\n      item_filters:production_order_items!inner(id, data_category, product_model, customer_model)' : ''}
     `

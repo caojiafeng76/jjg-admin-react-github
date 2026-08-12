@@ -16,6 +16,13 @@
 ## 2026-08-12
 
 - **类别**：性能
+- **范围**：`src/services/apiWorkshopOrders.ts`、`src/services/apiProductionOrders.ts`、`src/services/apiMaterialTransfers.ts`、`src/services/apiPrecisionFinishingCuttings.ts`、`src/services/apiPrecisionCuttingTransfers.ts`
+- **摘要**：优化清单 #6 落地（5/6）：5 处列表查询由 `select('*')` 改为显式指定列，避免大字段（如 `sales_orders.process_schedules` JSON）随列表全量下传。`getWorkshopOrders` 指定 20 列（核对表格 dataIndex、编辑表单回填、打印/Excel 消费字段后选定，删除字段无消费端）；`getProductionOrders` 主表指定 9 列（employee/items join 保持原样）；`getMaterialTransfers` 指定 18 列、`getPrecisionFinishingCuttings` 指定 29 列、`getPrecisionCuttingTransfers` 指定 30 列（逐一核对桌面/移动表格与编辑表单字段，`audited_at` 为移动列表消费已补入）。`getExtrusionProductions` 保留 `*`：表仅 1 行 + 编辑表单需明细全字段回填，指定列无收益
+- **验证**：`bun run typecheck` 通过；`bun run test` 全量通过（480/480）
+
+## 2026-08-12
+
+- **类别**：性能
 - **范围**：`src/services/apiMachineRuntime.ts`
 - **摘要**：优化清单 #5 落地：`getMachineRuntimeSummary` 消除无界拉行 JS 聚合。原实现把日期范围内全部 `v_machine_runtime_items` 明细行（实测 6058 行）拉回前端逐个求和；改为 PostgREST 原生聚合 `select('machine_equipment_id, total_runtime_seconds:runtime_seconds.sum()')`（SQL 侧 GROUP BY `machine_equipment_id`，过滤条件不变），删除前端 Map 循环求和；聚合后每台设备一行（≤80 行），纯前端查询改写，无 DB/migration 改动。返回结构 `MachineRuntimeSummaryItem` 与调用方 `useMachineRuntimeSummary` 不变
 - **验证**：`bun run typecheck` 通过；`bun run test` 全量通过（480/480）；MCP 只读 SQL 核对 `production_order_items` 明细 6058 行、去重后 80 台设备，聚合行数上限与预期一致（MCP 会话无 `page:machine-runtime` 权限故视图聚合查询返回空，属预期权限行为）

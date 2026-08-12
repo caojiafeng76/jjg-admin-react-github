@@ -423,7 +423,11 @@ export async function getWorkshopOrders({
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
-  let query = supabase.from('sales_orders').select('*', { count: 'exact' })
+  // 列表所需列（表格 + 编辑表单 + 打印/导出共用字段，排除 process_schedules 等大字段）
+  let query = supabase.from('sales_orders').select(
+    'id, status, closed_at, sketch_file_path, product_delivery_date, process_flow, customer, project_no, product_model, customer_model, weight_per_meter_kg, length_mm, length_tolerance, order_quantity, product_category, color_name, package_name, material_name, material_code, row_remark',
+    { count: 'exact' },
+  )
 
   const projectNoKeywords = normalizeSearchKeywords(project_no_search)
   const modelSearchKeywords = normalizeSearchKeywords(model_search)

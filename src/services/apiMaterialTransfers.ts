@@ -463,9 +463,13 @@ export async function getMaterialTransfers({
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
+  // 列表所需列（表格 + 编辑表单/移动编辑共用字段）
   let query = supabase
     .from('material_transfers')
-    .select('*', { count: 'exact' })
+    .select(
+      'id, created_at, audited_at, is_audited, project_no, customer, product_model, customer_model, length_mm, transfer_quantity, operator_employee_ids, operator_names, target_workshop, recipient_name, shift_leader_name, inspector_name, uploaded_by_name, remark',
+      { count: 'exact' },
+    )
     .order('created_at', { ascending: false })
 
   query = applyMaterialTransferFilters(query, filters)

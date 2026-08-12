@@ -563,8 +563,12 @@ export async function getPrecisionCuttingTransfers({
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
+  // 列表所需列（表格 + 编辑表单/移动编辑共用字段）
   let query = getPrecisionCuttingTransfersQuery()
-    .select('*', { count: 'exact' })
+    .select(
+      'id, created_at, audited_at, is_audited, customer, customer_model, project_no, product_model, length_mm, transfer_quantity, target_workshop, operator_names, outsource_defect_quantity, outsource_unit, outsource_defect_reason, long_material_length_mm, long_material_quantity, process_card_long_material_quantity, erp_long_material_quantity, data_error_responsible, raw_material_defect_count, processing_defect_count, defect_reason, responsible_process, process_owner, recipient_name, inspector_name, uploaded_by_name, remark',
+      { count: 'exact' },
+    )
     .order('created_at', { ascending: false })
 
   query = applyPrecisionCuttingTransferFilters(query, filters)
