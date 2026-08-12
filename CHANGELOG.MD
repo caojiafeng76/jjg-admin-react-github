@@ -15,6 +15,20 @@
 
 ## 2026-08-12
 
+- **类别**：变更
+- **范围**：`src/features/syney/PoList/shippingListExcelDocument.ts`、`shippingListExcelDocument.vitest.ts`
+- **摘要**：发货清单标题日期由导出当天改为导出日期往后一天（如 8.12 导出 → 标题"8.13发货清单"），文件名仍用当天日期。
+- **验证**：`bun run test`（shippingListExcelDocument 2 用例通过）；`bun run typecheck` 通过。
+
+## 2026-08-12
+
+- **类别**：修复
+- **范围**：`src/features/syney/PoList/shippingListExcelDocument.ts`、`shippingListExcelDocument.vitest.ts`
+- **摘要**：修复导出发货清单时工艺等空字段显示字面 `null`：数据库 null 经 `getSelectedPosWithItems` 的 key 模板字符串拼接后变成字符串 `"null"`，现于导出层统一归一化为空字符串（`null`/`undefined`/`"null"` 均转空）。
+- **验证**：`bun run test`（shippingListExcelDocument 2 用例通过，含 `"null"` 归一化场景）；`bun run typecheck` 通过。
+
+## 2026-08-12
+
 - **类别**：新建
 - **范围**：`src/features/syney/PoList/`（`shippingListExcelDocument.ts`、`useExportShippingListAsExcel.ts`、`ExportShippingListButton.tsx`、`index.tsx`、`shippingListExcelDocument.vitest.ts`、`lazyDocumentModules.vitest.ts`）
 - **摘要**：西尼订单列表页新增"导出发货清单"功能：勾选订单后导出 Excel（标题行 `{M.D}发货清单` + 表头 序号/采购单号/生产编号/送货单号/商标/规格/工艺/备注），字段映射自选中订单（No/SONo/Brand/Spec/Technique/Remark），送货单号列留空由用户导出后自行填写；宋体边框样式、自动列宽、冻结前两行、工艺/备注列自动换行；按钮复用 `feature:syney-po-list.export` 权限，Excel 模块动态加载（lazy import + hover 预加载），导出成功清空选中。

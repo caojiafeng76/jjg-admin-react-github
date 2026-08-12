@@ -92,6 +92,15 @@ function applyBodyStyle(
 }
 
 /**
+ * 归一化导出值：数据库 null 经 key 拼接后变成字面 "null"，
+ * 统一转为空字符串，避免用户看到 "null"。
+ */
+function normalize(value: string | null | undefined): string {
+  if (value === null || value === undefined || value === 'null') return ''
+  return value
+}
+
+/**
  * 导出发货清单 Excel。
  * 送货单号列留空，由用户导出后自行填写。
  */
@@ -108,19 +117,20 @@ export function exportShippingListAsExcel(
     const order = orders[i]
     const row: (string | number)[] = [
       i + 1,
-      order.No ?? '',
-      order.SONo ?? '',
+      normalize(order.No),
+      normalize(order.SONo),
       '', // 送货单号：留空，由用户填写
-      order.Brand ?? '',
-      order.Spec ?? '',
-      order.Technique ?? '',
-      order.Remark ?? '',
+      normalize(order.Brand),
+      normalize(order.Spec),
+      normalize(order.Technique),
+      normalize(order.Remark),
     ]
     rows.push(row)
   }
 
   const data: (string | number)[][] = [
-    [`${dayjs(date).format('M.D')}发货清单`],
+    // 标题日期为当前日期往后一天（如 8.12 导出 → 8.13 发货）
+    [`${dayjs(date).add(1, 'day').format('M.D')}发货清单`],
     Array.from(EXCEL_HEADERS),
     ...rows,
   ]

@@ -39,7 +39,7 @@ describe('exportShippingListAsExcel', () => {
           SONo: 'JD-FZ26-101-0250',
           Brand: '永大电梯设备(中国)有限公司',
           Spec: '1000型-室外-扶梯',
-          Technique: '',
+          Technique: 'null', // 数据库 null 经 key 拼接后的字面值，应归一化为空
           Remark: '贴牌梯,注意不要出现西尼字样',
         },
       ],
@@ -58,8 +58,8 @@ describe('exportShippingListAsExcel', () => {
     })
 
     expect(rows).toHaveLength(4)
-    // 标题行：合并单元格，仅首列有值
-    expect(rows[0][0]).toBe('8.13发货清单')
+    // 标题行：合并单元格，仅首列有值；日期为导出日往后一天（8.13 导出 → 8.14 发货）
+    expect(rows[0][0]).toBe('8.14发货清单')
     expect(rows[1]).toEqual([
       '序号',
       '采购单号',
@@ -81,7 +81,7 @@ describe('exportShippingListAsExcel', () => {
       '前：商标\n中：雷达孔',
       '',
     ])
-    // 第二行数据：备注正确写入
+    // 第二行数据：备注正确写入，字面 "null" 归一化为空
     expect(rows[3]).toEqual([
       2,
       'P202608030361',
