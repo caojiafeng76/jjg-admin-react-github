@@ -83,7 +83,7 @@ bun run db:types           # 根据已连接的 Supabase schema 重新生成数�
 - **组件**: PascalCase (如 `WorkshopOrderList`, `PoTable`)
 - **Hooks**: camelCase 前缀 `use` (如 `useMutationWithMessage`, `useTableHeight`)
 - **工具函数**: camelCase (如 `handleApiError`, `extractSpecFromItems`)
-- **类型/接口**: PascalCase 前缀 `I` (如 `ISyneySpec`, `ISyneyItem`)
+- **类型/接口**: PascalCase 无前缀（如 `Employee`, `ToolingStockOut`；legacy syney 类型保留 `I` 前缀历史命名，如 `ISyneySpec`）
 - **常量**: SCREAMING_SNAKE_CASE (如 `PDF_CONFIG`)
 
 ### TypeScript 规范

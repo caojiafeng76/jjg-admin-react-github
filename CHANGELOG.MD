@@ -15,6 +15,12 @@
 
 ## 2026-08-12
 
+- **类别**：重构 / 修改
+- **范围**：`src/features/workshop/OrderStatusDashboard/`（index.tsx 拆分 + 新增 dashboardRenderUtils.tsx / ProductionDetailModal.tsx / TransferDetailModal.tsx / PrecisionCuttingDetailModal.tsx / ExtrusionDetailModal.tsx）、`package.json`、`AGENTS.md`
+- **摘要**：执行第四周期：(1) OrderStatusDashboard 2741 行巨型组件拆分——4 个明细弹窗（生产/物料转移/精切/挤压，共 ~1080 行）拆为独立文件，共享渲染基础设施（render helpers、密集表格组件、类型、VIEWER 隐藏列常量）收拢到 dashboardRenderUtils.tsx，主组件 index.tsx 降至 ~1150 行，消除循环依赖；(2) 依赖清单瘦身——@tanstack/react-query-devtools（DEV 条件渲染）与 supabase CLI 从 dependencies 移至 devDependencies；react-icons 与双 QR 库经核查用途真实（4 处 BiScan 图标 / 扫码 vs 生成），保留；(3) 经用户决策，AGENTS.md 废除接口 I 前缀要求（与 ~230 个无前缀接口现状对齐，legacy syney 8 个 I 前缀接口保留为历史命名）
+- **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过；eslint 拆分文件 0 错误（13 个 fast-refresh 警告与拆分前一致，非新增问题）
+## 2026-08-12
+
 - **类别**：重构
 - **范围**：`src/services/functionInvokeHelpers.ts`（新增）、`apiSyneyStoreReports.ts`、`apiYoumaiPurchaseOrder.ts`、`apiEmployees.ts`、`apiAdminManagementPassword.ts`、`apiProductionOrderExport.ts`、`src/features/syney/useSyneySafePartSettings.ts`（新增）、`PoList/index.tsx`、`PoList/useExportSafePartInfoAsExcel.ts`、`SafePartSetting/SafePartSettingPage.tsx`、`src/utils/helps.ts`、`utils/pdfUtils.ts`、`syney/ReportList/ReportTable.tsx`、`syney/ReportDetail/DetailTable.tsx`
 - **摘要**：执行第三周期"一致性"：(1) 新建共享 hook useSyneySafePartSettings（queryConfig.static 1h 缓存 + 常量键），替换 3 处重复的 syney_safe_part_settings 裸 useQuery（原 5min/5min/30s 三种配置），设置变更仍由 SafePartSettingPage 的 invalidate 驱动刷新；(2) 新建 functionInvokeHelpers.ts 收拢 5 个服务文件重复的 Edge Function 错误提取（extractFunctionInvokeErrorMessage 合并 JSON body.error + 401/403/404 状态码映射，401 文案参数化）、withTimeout、getFunctionRegion；(3) helps.ts 的 formatNumber 改名 formatNumberPadded（消除与 format.ts 展示版 formatNumber 的同名不同义），更新 3 个调用文件
