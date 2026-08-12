@@ -16,6 +16,13 @@
 ## 2026-08-12
 
 - **类别**：性能
+- **范围**：`src/services/apiMachineRuntime.ts`
+- **摘要**：优化清单 #5 落地：`getMachineRuntimeSummary` 消除无界拉行 JS 聚合。原实现把日期范围内全部 `v_machine_runtime_items` 明细行（实测 6058 行）拉回前端逐个求和；改为 PostgREST 原生聚合 `select('machine_equipment_id, total_runtime_seconds:runtime_seconds.sum()')`（SQL 侧 GROUP BY `machine_equipment_id`，过滤条件不变），删除前端 Map 循环求和；聚合后每台设备一行（≤80 行），纯前端查询改写，无 DB/migration 改动。返回结构 `MachineRuntimeSummaryItem` 与调用方 `useMachineRuntimeSummary` 不变
+- **验证**：`bun run typecheck` 通过；`bun run test` 全量通过（480/480）；MCP 只读 SQL 核对 `production_order_items` 明细 6058 行、去重后 80 台设备，聚合行数上限与预期一致（MCP 会话无 `page:machine-runtime` 权限故视图聚合查询返回空，属预期权限行为）
+
+## 2026-08-12
+
+- **类别**：性能
 - **范围**：`supabase/migrations/20260812100000_add_sales_order_project_options_view.sql`（新建）、`src/services/database.types.ts`（自动生成）、`src/services/apiProcessStandards.ts`、`src/services/apiExtrusionProductions.ts`、`src/services/apiQualityIssueRecords.ts`、`src/services/apiQualityReworkRepair.ts`、`src/services/apiProcessStandards.vitest.ts`、7 个 options hook（`workshop/StandardTimeList/useStandardTimes.ts`、`production-order/useProcessStandards.ts`、`packaging-process/WorkOrderList/useWorkOrders.ts`、`packaging-process/StandardTimeList/useStandardTimes.ts`、`extrusion-production/useExtrusionProductions.ts`、`quality/IssueRecord/useQualityIssueRecords.ts`、`quality/ReworkRepair/useQualityReworkRepair.ts`）
 - **摘要**：优化清单 #4 落地：消除 4 处 `sales_orders` 项目号选项 while 分页全表扫描。(1) 新建视图 `v_sales_order_project_options`（覆盖 `project_no/product_model/length_mm/material_code/customer/customer_model/weight_per_meter_kg/order_quantity/created_at/status`，`where project_no 非空`；`sales_orders.project_no` 已有 partial unique 索引，视图天然一行一项目号，并显式 `grant select` 给 anon/authenticated），migration 已应用、`bun run db:types` 已重新生成类型。(2) `getSalesOrdersProjectNos`（保留 `status='生产中'` 过滤与 Set 去重）、`getExtrusionSalesOrdersProjectNos`（保留 status 过滤）、`getQualityIssueRecordOrderOptions`、`getQualityReworkRepairOrderOptions`（后两者保留 trim+Map 去重与 project_no 排序）全部改为单次查视图，删除 while 循环、`range` 分页与 `PAGE_SIZE` 常量（`EXTRUSION_PROJECT_OPTIONS_PAGE_SIZE`、两处 `ORDER_OPTIONS_PAGE_SIZE`）；查询排序保持原 `created_at desc, project_no asc` 不变，下拉选项顺序与原来一致。(3) 7 个 options hook 统一由 `queryConfig.list`（30s）改为 `queryConfig.static`（1h 长 TTL）+ `refetchOnMount: 'always'`（挂载时取最新、常驻不轮询），与清单 #1 岗位字典模式对齐。(4) 测试：`apiProcessStandards.vitest.ts` 分页用例重写为单次视图查询（断言无 `range` 调用、查 `v_sales_order_project_options`、去重与 status 过滤保留）
 - **验证**：`bun run db:push` 应用 migration（API 模式，直连超时自动回退）；`bun run db:types` 成功；`bun run typecheck` 通过；`bun run test` 全量通过（480/480）；`bunx eslint` 12 个改动文件无错误

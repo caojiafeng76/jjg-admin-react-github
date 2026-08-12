@@ -132,10 +132,10 @@ export async function getMachineRuntimeSummary(
     throw handleApiError(machineError, '获取设备列表失败')
   }
 
-  // 2. 获取符合日期/筛选条件的运行明细，汇总 runtime_seconds
+  // 2. 按 machine_equipment_id 分组聚合 runtime_seconds（SQL 侧 GROUP BY，不拉全量明细）
   let query = supabase
     .from('v_machine_runtime_items')
-    .select('machine_equipment_id, runtime_seconds')
+    .select('machine_equipment_id, total_runtime_seconds:runtime_seconds.sum()')
     .not('machine_equipment_id', 'is', null)
 
   if (filters.dateFrom) {
@@ -151,14 +151,11 @@ export async function getMachineRuntimeSummary(
     throw handleApiError(runtimeError, '获取设备运行汇总失败')
   }
 
-  // 3. 按 machine_equipment_id 汇总运行秒数
+  // 3. 组装每台设备的运行秒数
   const runtimeMap = new Map<string, number>()
   for (const row of runtimeRows || []) {
     const key = row.machine_equipment_id as string
-    runtimeMap.set(
-      key,
-      (runtimeMap.get(key) ?? 0) + Number(row.runtime_seconds || 0),
-    )
+    runtimeMap.set(key, Number(row.total_runtime_seconds || 0))
   }
 
   // 4. 合并：全部设备 LEFT JOIN 运行数据
