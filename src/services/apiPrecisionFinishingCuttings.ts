@@ -188,7 +188,7 @@ export interface PrecisionFinishingCuttingExportRow
 }
 
 function getPrecisionFinishingCuttingsQuery() {
-  return (supabase as any).from(PRECISION_FINISHING_CUTTINGS_TABLE)
+  return supabase.from(PRECISION_FINISHING_CUTTINGS_TABLE)
 }
 
 function applyPrecisionFinishingCuttingFilters<

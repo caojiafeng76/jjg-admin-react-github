@@ -3252,6 +3252,23 @@ export type Database = {
         }
         Relationships: []
       }
+      v_material_transfer_summary_by_project: {
+        Row: {
+          latest_created_at: string | null
+          latest_workshop: string | null
+          project_no: string | null
+          record_count: number | null
+          total_transfer_quantity: number | null
+        }
+        Relationships: []
+      }
+      v_production_quantity_by_project: {
+        Row: {
+          project_no: string | null
+          total_qualified_quantity: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       apply_tooling_stock_out_audit: {

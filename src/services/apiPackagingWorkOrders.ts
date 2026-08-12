@@ -39,6 +39,19 @@ export interface PackagingWorkOrderBatch extends PackagingWorkOrder {
   is_historical_inconsistent: boolean
 }
 
+/** 导出/全量查询行：包装工单 + 内嵌员工关联 */
+export type PackagingWorkOrderExportRow = PackagingWorkOrder & {
+  packaging_employees?: {
+    name: string | null
+    hourly_wage: number | null
+    position_salary: number | null
+  } | null
+}
+
+export type PackagingWorkOrderBatchRow = PackagingWorkOrderBatch & {
+  total_count: number
+}
+
 export interface PackagingWorkOrderFormValues {
   work_date: string
   employee_id?: string | null
@@ -77,7 +90,10 @@ type DynamicSupabaseTable = {
 }
 
 type DynamicSupabaseRpc = {
-  rpc: (name: string, args: Record<string, unknown>) => Promise<any>
+  rpc: <TData = unknown>(
+    name: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: TData | null; error: unknown }>
 }
 
 const PACKAGING_WORK_ORDER_UNITS = new Set(['支', '千克'])
@@ -193,7 +209,9 @@ export async function getPackagingWorkOrderList({
   pageSize: number
   searchParams: PackagingWorkOrderSearchParams
 }) {
-  const { data, error } = await (supabase as unknown as DynamicSupabaseRpc).rpc(
+  const { data, error } = await (
+    supabase as unknown as DynamicSupabaseRpc
+  ).rpc<PackagingWorkOrderBatchRow[]>(
     'get_packaging_work_order_batches',
     {
       p_page: page,
@@ -209,7 +227,7 @@ export async function getPackagingWorkOrderList({
     throw handleApiError(error, '获取生产工单列表失败')
   }
 
-  const items = (data || []).map((item: PackagingWorkOrderBatch) => ({
+  const items = (data || []).map((item: PackagingWorkOrderBatchRow) => ({
     ...item,
     employee_name: item.employee_names.join('、'),
   }))
@@ -259,7 +277,7 @@ export async function getAllPackagingWorkOrders({
       throw handleApiError(error, '获取生产工单导出数据失败')
     }
 
-    const items = (data || []).map((item: any) => ({
+    const items = (data || []).map((item: PackagingWorkOrderExportRow) => ({
       ...item,
       employee_name: item.packaging_employees?.name || null,
       employee_hourly_wage: item.packaging_employees?.hourly_wage ?? null,

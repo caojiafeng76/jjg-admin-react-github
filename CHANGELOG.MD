@@ -15,6 +15,34 @@
 
 ## 2026-08-12
 
+- **类别**：性能 / 数据库
+- **范围**：`supabase/migrations/20260812090000_add_production_scheduling_aggregate_views.sql`（新增）、`src/services/apiProductionScheduling.ts`、`src/services/database.types.ts`（重新生成）、`src/services/apiExtrusionProductions.ts`
+- **摘要**：优化清单 #2 落地：新增聚合视图 `v_production_quantity_by_project`（production_order_items 按 project_no SUM qualified_quantity）与 `v_material_transfer_summary_by_project`（material_transfers 按 project_no 统计条数/总量/最近转移时间与车间，latest_workshop 取最近 created_at 子查询），migration 已应用；`fetchProductionQuantities`/`fetchTransferSummaries` 改为查询视图（每个 project_no 一行聚合结果，去掉原 1000 行/页循环拉取 + JS 求和），`fetchProcessStandardCapacityRows` 保留（按 model 过滤小查询）；`bun run db:types` 重新生成类型。连带修复 `apiExtrusionProductions.ts`：其 `SupabaseTableClient = ReturnType<typeof supabase.from>` 会解析到 `from` 的 Views 重载，新增视图（无 id 列）破坏了原视图集公共键交集导致 `.eq('id', id)` 报 never 类型错误——改为直接类型化 `supabase.from('extrusion_productions')`（表本就在 database.types.ts 中）
+- **验证**：`bun run typecheck` 通过（EXIT 0）；`bun run test` 全量通过（478/478）；视图 SQL 实测返回正确聚合数据
+
+## 2026-08-12
+
+- **类别**：规范
+- **范围**：`src/utils/excelUtils.ts`、`src/services/apiPrecisionFinishingCuttings.ts`、`src/services/apiPrecisionCuttingTransfers.ts`、`src/services/youmaiOptions.ts`、`src/services/toolingDataOptions.ts`、`src/services/apiPackagingWorkOrders.ts`
+- **摘要**：优化清单 #15 落地：消除 10 处 `any` 类型断言/注解。(1) excelUtils 用局部变量 `specInferred` 替代 `(excelData as any)` 中间标记（2 处）；(2) 两个 precision 表名确认在 database.types.ts 中，`(supabase as any).from(...)` 直接改为类型化 `supabase.from(...)`（2 处，顺带消除了原本会推断为"所有表 Row 联合"的逃生舱写法）；(3) youmaiOptions/toolingDataOptions 的 `initialQuery: any` 改为最小结构接口 `OptionsQueryBuilder`（声明 or/order/limit/abortSignal 链式方法 + PromiseLike<{data,error}> 结果形态，4 处）；(4) apiPackagingWorkOrders 的 `Promise<any>` RPC 泛型化 `rpc<TData>`（新增 `PackagingWorkOrderBatchRow` 类型）、`(item: any)` 改为 `PackagingWorkOrderExportRow` 行类型（2 处）
+- **验证**：`bun run typecheck` 通过（EXIT 0）；`bun run test` 全量通过（478/478）
+
+## 2026-08-12
+
+- **类别**：性能 / 规范
+- **范围**：`src/contexts/PermissionProvider.tsx`、`src/features/workshop/ProductionScheduling/index.tsx`、`src/features/production-order/index.tsx`、`src/services/apiSyneySpecs.ts`
+- **摘要**：优化清单 #16、#19 落地：(1) 3 处内联 staleTime 的 useQuery 统一改用 queryConfig 预设——权限查询改 `queryConfig.detail`（10min）、排产页员工全量映射改 `queryConfig.detail`、员工端"今日是否已录工单"检查改 `queryConfig.realtime` 并显式 `refetchInterval: undefined`（保留 staleTime:0 挂载即最新语义、不引入 30s 轮询，创建工单后已有 invalidate 联动）；(2) 删除 `apiSyneySpecs.ts:62` 注释残留 `// console.log(newSyneySpec);`。复查确认 #18 为误报（ReportForm/ReportList 的 4 处 console.error 均已配套 message 提示），未改动
+- **验证**：`bun run test` 全量通过（478/478）；`bun run typecheck` 通过
+
+## 2026-08-12
+
+- **类别**：文档
+- **范围**：`docs/性能与代码规范优化清单.md`（新增）
+- **摘要**：新增性能与代码规范优化跟踪清单：汇总此前调研发现的 19 项问题（P0-P3 性能项 14 项 + 规范项 5 项，含文件位置与优化建议），并写入使用规则——修复问题时携带本文档、完成一项勾一项（`[ ]`→`[x]`）、同步更新 CHANGELOG.MD；#1（dashboard 岗位行缓存化）已勾选完成
+- **验证**：纯文档新增，无代码改动
+
+## 2026-08-12
+
 - **类别**：性能 / 变更
 - **范围**：`src/services/apiOrderStatusDashboard.ts`、`src/features/workshop/OrderStatusDashboard/useOrderStatusDashboard.ts`（含新增 vitest）、`src/features/workshop/StandardTimeList/useStandardTimes.ts`（含新增 vitest）、`src/services/apiOrderStatusDashboard.vitest.ts`
 - **摘要**：订单现状仪表盘岗位行（process_standards 全表，现 1387 行/1000 行每页循环拉取）缓存优化：新增 `useProcessStandardJobRows()`，以 `['process-standards', 'job-rows']` 为 queryKey + `queryConfig.static`（1h staleTime），上提至 hook 层由 React Query 缓存，`getOrderStatusDashboard` 增加可选 `processRows` 参数（传入时跳过内部全表查询），dashboard 查询以 `enabled: processRows !== undefined` 等待岗位行就绪——翻页/改筛选不再重复拉取岗位行；为保证数据更新后缓存立即刷新，`useCreateStandardTime`/`useDeleteStandardTimes` 的 invalidateQueries 补充 `['process-standards']` 前缀（与既有 update/末道标记一致，前缀命中 job-rows 缓存立即重拉），编辑/新增/删除/末道标记后仪表盘岗位列即时重算，无需等 staleTime 过期

@@ -59,8 +59,6 @@ export async function getSyneySpec(id: number) {
 }
 
 export async function createSyneySpec(newSyneySpec: ISyneySpec) {
-  // console.log(newSyneySpec);
-
   const { data, error } = await supabase
     .from('syney-specs')
     .insert([newSyneySpec])

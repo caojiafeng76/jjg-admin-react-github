@@ -5,6 +5,18 @@ export const TOOLING_DATA_OPTION_SELECT =
 
 export const TOOLING_DATA_OPTION_MAX_LIMIT = 50
 
+/**
+ * Postgrest 查询构建器的最小结构接口（替代 any）：
+ * 仅声明选项构建链路用到的链式方法 + await 结果形态。
+ */
+interface OptionsQueryBuilder
+  extends PromiseLike<{ data: unknown; error: unknown }> {
+  or: (filter: string) => OptionsQueryBuilder
+  order: (column: string, options?: { ascending?: boolean }) => OptionsQueryBuilder
+  limit: (limit: number) => OptionsQueryBuilder
+  abortSignal: (signal: AbortSignal) => OptionsQueryBuilder
+}
+
 function clampLimit(limit: number | undefined): number {
   if (typeof limit !== 'number' || !Number.isFinite(limit)) {
     return TOOLING_DATA_OPTION_MAX_LIMIT
@@ -14,7 +26,7 @@ function clampLimit(limit: number | undefined): number {
 }
 
 export function buildToolingDataOptionsQuery(
-  initialQuery: any,
+  initialQuery: OptionsQueryBuilder,
   {
     keyword,
     signal,

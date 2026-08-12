@@ -50,14 +50,18 @@ type SalesOrderDateField = Extract<
   | 'planned_finish_date'
 >
 
-type ProductionQuantityRow = Pick<
-  Database['public']['Tables']['production_order_items']['Row'],
-  'project_no' | 'qualified_quantity'
+type ProductionQuantityViewRow = Pick<
+  Database['public']['Views']['v_production_quantity_by_project']['Row'],
+  'project_no' | 'total_qualified_quantity'
 >
 
-type TransferQuantityRow = Pick<
-  Database['public']['Tables']['material_transfers']['Row'],
-  'created_at' | 'project_no' | 'target_workshop' | 'transfer_quantity'
+type TransferSummaryViewRow = Pick<
+  Database['public']['Views']['v_material_transfer_summary_by_project']['Row'],
+  | 'latest_created_at'
+  | 'latest_workshop'
+  | 'project_no'
+  | 'record_count'
+  | 'total_transfer_quantity'
 >
 
 interface TransferSummary {
@@ -548,40 +552,25 @@ async function fetchProductionQuantities(
   const quantities = new Map<string, number>()
 
   for (const projectNoChunk of chunkValues(projectNos)) {
-    let from = 0
+    let query = supabase
+      .from('v_production_quantity_by_project')
+      .select('project_no, total_qualified_quantity')
+      .in('project_no', projectNoChunk)
 
-    while (true) {
-      const to = from + METRIC_PAGE_SIZE - 1
-      let query = supabase
-        .from('production_order_items')
-        .select('project_no, qualified_quantity')
-        .in('project_no', projectNoChunk)
-        .range(from, to)
+    if (signal) {
+      query = query.abortSignal(signal)
+    }
 
-      if (signal) {
-        query = query.abortSignal(signal)
-      }
+    const { data, error } = await query
 
-      const { data, error } = await query
+    if (error) {
+      throw handleApiError(error, '获取已加工数量失败')
+    }
 
-      if (error) {
-        throw handleApiError(error, '获取已加工数量失败')
-      }
-
-      for (const row of (data || []) as ProductionQuantityRow[]) {
-        const projectNo = row.project_no?.trim()
-        if (!projectNo) continue
-        quantities.set(
-          projectNo,
-          (quantities.get(projectNo) || 0) + toQuantity(row.qualified_quantity),
-        )
-      }
-
-      if ((data || []).length < METRIC_PAGE_SIZE) {
-        break
-      }
-
-      from += METRIC_PAGE_SIZE
+    for (const row of (data || []) as ProductionQuantityViewRow[]) {
+      const projectNo = row.project_no?.trim()
+      if (!projectNo) continue
+      quantities.set(projectNo, toQuantity(row.total_qualified_quantity))
     }
   }
 
@@ -595,57 +584,33 @@ async function fetchTransferSummaries(
   const summaries = new Map<string, TransferSummary>()
 
   for (const projectNoChunk of chunkValues(projectNos)) {
-    let from = 0
+    let query = supabase
+      .from('v_material_transfer_summary_by_project')
+      .select(
+        'project_no, record_count, total_transfer_quantity, latest_created_at, latest_workshop',
+      )
+      .in('project_no', projectNoChunk)
 
-    while (true) {
-      const to = from + METRIC_PAGE_SIZE - 1
-      let query = supabase
-        .from('material_transfers')
-        .select('project_no, transfer_quantity, target_workshop, created_at')
-        .in('project_no', projectNoChunk)
-        .range(from, to)
+    if (signal) {
+      query = query.abortSignal(signal)
+    }
 
-      if (signal) {
-        query = query.abortSignal(signal)
-      }
+    const { data, error } = await query
 
-      const { data, error } = await query
+    if (error) {
+      throw handleApiError(error, '获取转移数量失败')
+    }
 
-      if (error) {
-        throw handleApiError(error, '获取转移数量失败')
-      }
+    for (const row of (data || []) as TransferSummaryViewRow[]) {
+      const projectNo = row.project_no?.trim()
+      if (!projectNo) continue
 
-      for (const row of (data || []) as TransferQuantityRow[]) {
-        const projectNo = row.project_no?.trim()
-        if (!projectNo) continue
-
-        const current = summaries.get(projectNo) ?? {
-          latestDate: null,
-          latestWorkshop: null,
-          recordCount: 0,
-          totalQuantity: 0,
-        }
-        const createdAt = row.created_at || null
-
-        current.recordCount += 1
-        current.totalQuantity += toQuantity(row.transfer_quantity)
-
-        if (
-          createdAt &&
-          (!current.latestDate || createdAt > current.latestDate)
-        ) {
-          current.latestDate = createdAt
-          current.latestWorkshop = row.target_workshop || null
-        }
-
-        summaries.set(projectNo, current)
-      }
-
-      if ((data || []).length < METRIC_PAGE_SIZE) {
-        break
-      }
-
-      from += METRIC_PAGE_SIZE
+      summaries.set(projectNo, {
+        latestDate: row.latest_created_at ?? null,
+        latestWorkshop: row.latest_workshop ?? null,
+        recordCount: Number(row.record_count || 0),
+        totalQuantity: toQuantity(row.total_transfer_quantity),
+      })
     }
   }
 

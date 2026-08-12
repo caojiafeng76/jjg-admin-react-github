@@ -196,7 +196,7 @@ const PRECISION_CUTTING_TRANSFER_OPERATOR_SET = new Set<string>(
 )
 
 function getPrecisionCuttingTransfersQuery() {
-  return (supabase as any).from(PRECISION_CUTTING_TRANSFERS_TABLE)
+  return supabase.from(PRECISION_CUTTING_TRANSFERS_TABLE)
 }
 
 function applyPrecisionCuttingTransferFilters<

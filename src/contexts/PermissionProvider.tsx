@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { queryConfig } from '@/config/queryClient'
 import {
   getMyPermissions,
   syncPermissionRegistry,
@@ -18,7 +19,7 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
     queryKey: ['my-permissions', user?.id ?? null],
     queryFn: getMyPermissions,
     enabled,
-    staleTime: 5 * 60 * 1000,
+    ...queryConfig.detail,
   })
 
   const isLoading = enabled && isPending

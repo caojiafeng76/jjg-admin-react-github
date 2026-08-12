@@ -441,6 +441,7 @@ export function transformToOrderData(
   }
 
   const firstRow = excelData.rows[0]
+  let specInferred = false
 
   // 构建订单主表数据
   const po: Partial<ISyneyPo> = {
@@ -468,7 +469,7 @@ export function transformToOrderData(
       const fallbackSpec = extractSpecFromAllRows(excelData.rows)
       if (fallbackSpec) {
         // 标记为推断的规格，需要用户确认
-        ;(excelData as any).specInferred = true
+        specInferred = true
         return fallbackSpec
       }
       // 如果推断失败，检查Excel规格列是否是有效格式（包含"型"字）
@@ -514,7 +515,7 @@ export function transformToOrderData(
   return {
     po,
     items: itemsWithInferredParamSpec,
-    specInferred: (excelData as any).specInferred || false,
+    specInferred,
   }
 }
 

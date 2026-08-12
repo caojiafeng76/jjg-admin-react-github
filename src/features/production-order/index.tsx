@@ -74,6 +74,7 @@ import {
   verifyAdminManagementPassword,
 } from '@/services/apiAdminManagementPassword'
 import { isAdminRole, isEmployeeSideRole } from '@/config/access'
+import { queryConfig } from '@/config/queryClient'
 import { useAuth } from '@/contexts/useAuth'
 
 type UnlockManagementFormValues = {
@@ -268,7 +269,10 @@ export default function ProductionOrderPage() {
     queryKey: ['production-orders-today-check', fixedEmployee?.id, todayStr],
     queryFn: () => checkEmployeeOrderExistsOnDate(fixedEmployee!.id, todayStr),
     enabled: isEmployeeView && Boolean(fixedEmployee?.id),
-    staleTime: 0,
+    // 今日工单检查必须每次进入都最新；创建工单成功后已有 invalidate 联动，
+    // 因此复用 realtime 的 staleTime:0 语义，但不引入 30s 轮询
+    ...queryConfig.realtime,
+    refetchInterval: undefined,
   })
 
   const createMutation = useCreateProductionOrder()

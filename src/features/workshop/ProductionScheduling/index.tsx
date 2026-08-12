@@ -28,6 +28,7 @@ import zhCN from 'antd/es/locale/zh_CN'
 import { WORKSHOP_ORDER_STATUS_OPTIONS } from '@/features/workshop/OrderList/orderStatus'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { queryConfig } from '@/config/queryClient'
 import ExportButton from '@/ui/ExportButton'
 import { getErrorDisplayInfo } from '@/utils/errorHandler'
 import type {
@@ -496,7 +497,7 @@ export default function ProductionScheduling() {
   const { data: employees = [] } = useQuery({
     queryKey: ['employees', 'all'],
     queryFn: getAllEmployees,
-    staleTime: 5 * 60 * 1000,
+    ...queryConfig.detail,
   })
   const { data: lengthOptions = [] } = useProductionSchedulingLengthOptions()
   const { data: machineOptions = [] } = useMachineEquipmentOptions()

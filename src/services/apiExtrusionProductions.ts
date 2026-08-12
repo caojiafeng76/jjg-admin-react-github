@@ -11,7 +11,6 @@ import {
 import type { Database } from './database.types'
 
 type SalesOrderRow = Database['public']['Tables']['sales_orders']['Row']
-type SupabaseTableClient = ReturnType<typeof supabase.from>
 
 export interface ExtrusionProductionItem {
   id: string
@@ -150,8 +149,8 @@ export interface UpsertExtrusionProductionPayload {
 
 const EXTRUSION_PROJECT_OPTIONS_PAGE_SIZE = 1000
 
-function extrusionProductionsTable(): SupabaseTableClient {
-  return supabase.from('extrusion_productions' as never) as unknown as SupabaseTableClient
+function extrusionProductionsTable() {
+  return supabase.from('extrusion_productions')
 }
 
 function normalizeOptionalText(value: string | null | undefined) {

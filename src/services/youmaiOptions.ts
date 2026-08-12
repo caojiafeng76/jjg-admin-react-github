@@ -7,6 +7,18 @@ export const YOUMAI_RAW_MATERIAL_OPTION_SELECT =
 
 const YOUMAI_OPTION_MAX_LIMIT = 50
 
+/**
+ * Postgrest 查询构建器的最小结构接口（替代 any）：
+ * 仅声明选项构建链路用到的链式方法 + await 结果形态。
+ */
+interface OptionsQueryBuilder
+  extends PromiseLike<{ data: unknown; error: unknown }> {
+  or: (filter: string) => OptionsQueryBuilder
+  order: (column: string, options?: { ascending?: boolean }) => OptionsQueryBuilder
+  limit: (limit: number) => OptionsQueryBuilder
+  abortSignal: (signal: AbortSignal) => OptionsQueryBuilder
+}
+
 function clampLimit(limit: number | undefined): number {
   if (typeof limit !== 'number' || !Number.isFinite(limit)) {
     return YOUMAI_OPTION_MAX_LIMIT
@@ -22,7 +34,7 @@ interface OptionsQueryParams {
 }
 
 function applyLimitAndSignal(
-  initialQuery: any,
+  initialQuery: OptionsQueryBuilder,
   { signal, limit }: Pick<OptionsQueryParams, 'signal' | 'limit'>,
 ) {
   let query = initialQuery.limit(clampLimit(limit))
@@ -35,7 +47,7 @@ function applyLimitAndSignal(
 }
 
 export function buildYoumaiProductDataOptionsQuery(
-  initialQuery: any,
+  initialQuery: OptionsQueryBuilder,
   { keyword, signal, limit }: OptionsQueryParams,
 ) {
   let query = initialQuery
@@ -58,7 +70,7 @@ export function buildYoumaiProductDataOptionsQuery(
 }
 
 export function buildYoumaiRawMaterialOptionsQuery(
-  initialQuery: any,
+  initialQuery: OptionsQueryBuilder,
   { keyword, signal, limit }: OptionsQueryParams,
 ) {
   let query = initialQuery
