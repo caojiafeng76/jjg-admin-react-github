@@ -1,6 +1,7 @@
 import type { Database } from './database.types'
 import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
+import { extractFunctionInvokeErrorMessage } from './functionInvokeHelpers'
 
 type EmployeeInsert = Database['public']['Tables']['employees']['Insert']
 type EmployeeUpdate = Database['public']['Tables']['employees']['Update']
@@ -48,58 +49,15 @@ export interface EmployeeAuthEmailResult {
   email: string | null
 }
 
-async function extractFunctionInvokeErrorMessage(error: unknown) {
-  if (!error || typeof error !== 'object') {
-    return null
-  }
-
-  const maybeContext = (
-    error as {
-      context?: {
-        json?: () => Promise<unknown>
-        status?: number
-        statusText?: string
-      }
-    }
-  ).context
-
-  if (maybeContext?.json) {
-    try {
-      const payload = await maybeContext.json()
-
-      if (
-        payload &&
-        typeof payload === 'object' &&
-        'error' in payload &&
-        typeof payload.error === 'string' &&
-        payload.error.trim()
-      ) {
-        return payload.error.trim()
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  // Handle non-JSON responses (e.g. 404 returns plain text instead of JSON).
-  // When context.json() is absent, fall back to HTTP status.
-  if (maybeContext?.status) {
-    const status = maybeContext.status
-    if (status === 401) return '未登录，无法创建账号'
-    if (status === 403) return '权限校验失败，无权执行此操作'
-    if (status === 404) return 'Edge Function 不存在或未部署'
-  }
-
-  return null
-}
-
 async function throwFunctionInvokeError(
   error: unknown,
   fallbackMessage: string,
   code: string,
   functionName: string,
 ): Promise<never> {
-  const message = await extractFunctionInvokeErrorMessage(error)
+  const message = await extractFunctionInvokeErrorMessage(error, {
+    unauthorizedMessage: '未登录，无法创建账号',
+  })
 
   if (message) {
     throw new AppError(message, code)

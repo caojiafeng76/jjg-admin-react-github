@@ -1,8 +1,11 @@
-import { FunctionRegion } from '@supabase/supabase-js'
-
 import type { YoumaiFinishedGoodsStockOutImportRow } from './apiYoumaiFinishedGoodsStockOut'
 import { getAuthenticatedProxyHeaders } from './proxyAuth'
 import supabase from './supabase'
+import {
+  extractFunctionInvokeErrorMessage,
+  getFunctionRegion,
+  withTimeout,
+} from './functionInvokeHelpers'
 
 const FETCH_YOUMAI_PURCHASE_ORDER_TIMEOUT_MS = 45000
 const YOUMAI_PURCHASE_ORDER_API_URL = import.meta.env
@@ -10,58 +13,8 @@ const YOUMAI_PURCHASE_ORDER_API_URL = import.meta.env
 const YOUMAI_PURCHASE_ORDER_FUNCTION_REGION = import.meta.env
   .VITE_SUPABASE_FUNCTION_REGION as string | undefined
 
-async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  timeoutMessage: string,
-) {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined
-  const timeoutPromise = new Promise<T>((_, reject) => {
-    timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs)
-  })
-
-  try {
-    return await Promise.race([promise, timeoutPromise])
-  } finally {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-  }
-}
-
-async function getFunctionErrorMessage(error: unknown) {
-  if (!error || typeof error !== 'object' || !('context' in error)) {
-    return null
-  }
-
-  const context = (error as { context?: Response }).context
-  if (!context) {
-    return null
-  }
-
-  try {
-    const body = (await context.clone().json()) as { error?: string }
-    return body.error || null
-  } catch {
-    return null
-  }
-}
-
-function getFunctionRegion() {
-  const region = YOUMAI_PURCHASE_ORDER_FUNCTION_REGION?.trim()
-  if (!region) {
-    return undefined
-  }
-
-  if (!Object.values(FunctionRegion).includes(region as FunctionRegion)) {
-    throw new Error(`Supabase Edge Function 区域配置不正确：${region}`)
-  }
-
-  return region as FunctionRegion
-}
-
 async function invokeYoumaiPurchaseOrderFunction(purchaseOrderNo: string) {
-  const region = getFunctionRegion()
+  const region = getFunctionRegion(YOUMAI_PURCHASE_ORDER_FUNCTION_REGION)
 
   const { data, error } = await withTimeout(
     supabase.functions.invoke<{
@@ -78,7 +31,7 @@ async function invokeYoumaiPurchaseOrderFunction(purchaseOrderNo: string) {
   )
 
   if (error) {
-    const functionErrorMessage = await getFunctionErrorMessage(error)
+    const functionErrorMessage = await extractFunctionInvokeErrorMessage(error)
     if (functionErrorMessage) {
       throw new Error(functionErrorMessage)
     }

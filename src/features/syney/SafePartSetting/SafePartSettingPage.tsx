@@ -24,17 +24,20 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   deleteSyneySafePartSettings,
   getSyneySafePartDrawingDownloadUrl,
   getSyneySafePartDrawingPreviewUrl,
-  getSyneySafePartSettings,
   SAFE_PART_DRAWING_ACCEPT,
   upsertSyneySafePartSetting,
   SyneySafePartSetting,
   uploadSyneySafePartDrawing,
 } from '@services/apiSyneySafePartSettings'
+import {
+  SYNEY_SAFE_PART_SETTINGS_KEY,
+  useSyneySafePartSettings,
+} from '../useSyneySafePartSettings'
 
 const DECOMPOSITION_ROLE_LABELS: Record<string, string> = {
   side_frame: '侧围',
@@ -115,16 +118,13 @@ export default function SafePartSettingPage() {
     form.resetFields()
   }
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['syney_safe_part_settings'],
-    queryFn: getSyneySafePartSettings,
-  })
+  const { data, isLoading } = useSyneySafePartSettings()
 
   const saveMutation = useMutation({
     mutationFn: upsertSyneySafePartSetting,
     onSuccess: () => {
       message.success('保存成功')
-      queryClient.invalidateQueries({ queryKey: ['syney_safe_part_settings'] })
+      queryClient.invalidateQueries({ queryKey: [SYNEY_SAFE_PART_SETTINGS_KEY] })
       closeModal()
     },
   })
@@ -134,7 +134,7 @@ export default function SafePartSettingPage() {
     onSuccess: () => {
       message.success('删除成功')
       setSelectedRowKeys([])
-      queryClient.invalidateQueries({ queryKey: ['syney_safe_part_settings'] })
+      queryClient.invalidateQueries({ queryKey: [SYNEY_SAFE_PART_SETTINGS_KEY] })
     },
   })
 
@@ -150,7 +150,7 @@ export default function SafePartSettingPage() {
         await drawingUploadMutation.mutateAsync({ setting: record, file })
         message.success('图纸上传成功')
         queryClient.invalidateQueries({
-          queryKey: ['syney_safe_part_settings'],
+          queryKey: [SYNEY_SAFE_PART_SETTINGS_KEY],
         })
       } catch (error) {
         message.error(error instanceof Error ? error.message : '图纸上传失败')

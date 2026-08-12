@@ -32,8 +32,7 @@ import PoSelectedFilter from './PoSelectedFilter'
 import { usePrintEnglish } from './usePrintEnglish'
 import PoDateFilter from './PoDateFilter'
 import PoSearchInput from './PoSearchInput'
-import { useQuery } from '@tanstack/react-query'
-import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
+import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useSearchParams } from 'react-router-dom'
 
@@ -75,11 +74,7 @@ export default function PoList() {
     useCreatePo(messageApi)
 
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading } =
-    useQuery({
-      queryKey: ['syney_safe_part_settings'],
-      queryFn: getSyneySafePartSettings,
-      staleTime: 5 * 60 * 1000,
-    })
+    useSyneySafePartSettings()
 
   const {
     generateLabel,

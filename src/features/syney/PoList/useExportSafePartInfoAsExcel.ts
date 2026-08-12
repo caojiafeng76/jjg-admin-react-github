@@ -14,9 +14,7 @@ import {
   getLabelInfoBySettings,
   getLabelInfoFromStoredItem,
 } from '@/utils/syneySafePartRules'
-
-import { useQuery } from '@tanstack/react-query'
-import { getSyneySafePartSettings } from '@services/apiSyneySafePartSettings'
+import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 
 const loadExcel = () => import('xlsx-js-style')
 
@@ -39,11 +37,7 @@ export function useExportSafePartInfoAsExcel() {
   )
   const { isLoading, selectedPosList } = useSelectedPos()
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading } =
-    useQuery({
-      queryKey: ['syney_safe_part_settings'],
-      queryFn: getSyneySafePartSettings,
-      staleTime: 5 * 60 * 1000,
-    })
+    useSyneySafePartSettings()
 
   function preloadExcel() {
     void loadExcel()

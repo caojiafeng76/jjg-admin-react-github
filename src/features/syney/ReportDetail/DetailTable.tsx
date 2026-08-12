@@ -4,7 +4,7 @@ import { Key } from 'react'
 import { Table, TableColumnsType, TableProps } from 'antd'
 
 import { ISyneyItem } from '@/types'
-import { formatNumber } from '@utils/helps'
+import { formatNumberPadded } from '@utils/helps'
 import { useAppStore } from '@/store'
 
 interface Props {
@@ -84,7 +84,7 @@ export default function DetailTable({
       align: 'right',
       render: (text: number) => (
         <span className="text-slate-700 dark:text-slate-200 tabular-nums">
-          {formatNumber(text)}
+          {formatNumberPadded(text)}
         </span>
       ),
     },
@@ -115,7 +115,7 @@ export default function DetailTable({
       align: 'right',
       render: (text: number) => (
         <span className="font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
-          {formatNumber(text)}
+          {formatNumberPadded(text)}
         </span>
       ),
     },
@@ -170,7 +170,7 @@ export default function DetailTable({
             <Table.Summary.Cell index={8} />
             <Table.Summary.Cell index={9} align="right">
               <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                {formatNumber(currentPageTotalAmount)}
+                {formatNumberPadded(currentPageTotalAmount)}
               </span>
             </Table.Summary.Cell>
           </Table.Summary.Row>

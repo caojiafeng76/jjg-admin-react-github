@@ -14,7 +14,7 @@ import {
   FILENAME_CONFIG,
 } from './pdfConstants'
 import { loadGoogleFont, GOOGLE_FONT_CONFIG } from './googleFontLoader'
-import { formatNumber } from './helps'
+import { formatNumberPadded } from './helps'
 import { ISyneyItem } from '@services/types'
 
 /**
@@ -67,7 +67,7 @@ export function formatNumberWithCache(number: number): string {
   }
 
   // 计算并缓存
-  const formatted = formatNumber(number)
+  const formatted = formatNumberPadded(number)
 
   // 清理缓存（如果超过阈值）
   if (CACHE_CONFIG.FORMATTED_NUMBERS.size > CACHE_CONFIG.MAX_CACHE_SIZE) {

@@ -15,6 +15,12 @@
 
 ## 2026-08-12
 
+- **类别**：重构
+- **范围**：`src/services/functionInvokeHelpers.ts`（新增）、`apiSyneyStoreReports.ts`、`apiYoumaiPurchaseOrder.ts`、`apiEmployees.ts`、`apiAdminManagementPassword.ts`、`apiProductionOrderExport.ts`、`src/features/syney/useSyneySafePartSettings.ts`（新增）、`PoList/index.tsx`、`PoList/useExportSafePartInfoAsExcel.ts`、`SafePartSetting/SafePartSettingPage.tsx`、`src/utils/helps.ts`、`utils/pdfUtils.ts`、`syney/ReportList/ReportTable.tsx`、`syney/ReportDetail/DetailTable.tsx`
+- **摘要**：执行第三周期"一致性"：(1) 新建共享 hook useSyneySafePartSettings（queryConfig.static 1h 缓存 + 常量键），替换 3 处重复的 syney_safe_part_settings 裸 useQuery（原 5min/5min/30s 三种配置），设置变更仍由 SafePartSettingPage 的 invalidate 驱动刷新；(2) 新建 functionInvokeHelpers.ts 收拢 5 个服务文件重复的 Edge Function 错误提取（extractFunctionInvokeErrorMessage 合并 JSON body.error + 401/403/404 状态码映射，401 文案参数化）、withTimeout、getFunctionRegion；(3) helps.ts 的 formatNumber 改名 formatNumberPadded（消除与 format.ts 展示版 formatNumber 的同名不同义），更新 3 个调用文件
+- **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过；eslint 改动文件 0 错误
+## 2026-08-12
+
 - **类别**：删除（数据库）
 - **范围**：`supabase` 远程库（notifications 表、3 个触发器、3 个函数、realtime publication、权限种子数据）、`docs/sql-drafts/20260812_cleanup_notifications.sql`、`src/services/database.types.ts`
 - **摘要**：经用户 3 次确认后清理通知功能数据库残留：从 supabase_realtime publication 移除 notifications；删除 create_notification_for_production_order / create_notification_for_material_transfer / sync_notification_read_at 三个触发器与函数；DROP notifications 表（级联 RLS 策略与索引）；删除 permissions 中 feature:admin-notifications.view 行及 role_permissions 的 admin 关联。清理脚本保留在 docs/sql-drafts/ 备查

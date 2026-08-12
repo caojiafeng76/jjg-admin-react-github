@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import { Link } from 'react-router-dom'
 
 import { ISyneyStoreReport } from '@/types'
-import { formatNumber } from '@/utils/helps'
+import { formatNumberPadded } from '@/utils/helps'
 import { useAppStore } from '@/store'
 import { useReports } from './useReports'
 import { Key } from 'react'
@@ -140,7 +140,7 @@ export default function ReportTable({
         sorter: (a, b) => (a.TotalAmount || 0) - (b.TotalAmount || 0),
         render: (text: number) => (
           <span className="font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
-            {formatNumber(text)}
+            {formatNumberPadded(text)}
           </span>
         ),
       },
@@ -196,7 +196,7 @@ export default function ReportTable({
             </Table.Summary.Cell>
             <Table.Summary.Cell index={5} align="right">
               <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                {formatNumber(currentPageTotalAmount)}
+                {formatNumberPadded(currentPageTotalAmount)}
               </span>
             </Table.Summary.Cell>
           </Table.Summary.Row>
