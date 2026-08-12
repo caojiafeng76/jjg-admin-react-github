@@ -15,6 +15,13 @@
 
 ## 2026-08-12
 
+- **类别**：修复
+- **范围**：`src/features/workshop/ProductionScheduling/index.tsx`（路由 `/order-scheduling` 订单排产页）
+- **摘要**：适配暗黑模式：页面根容器、标题区、搜索区、摘要卡、操作条、表格区、分页条、Modal 及表单 label 的硬编码浅色 Tailwind 类（bg-white、text-slate-*、border-slate-*、ring-white 等）全部补充 `dark:` 变体；Modal header 硬编码颜色 `#f1f5f9/#fafbfc/#ffffff` 改用 `theme.useToken()` 的 `colorBgElevated`/`colorBorderSecondary`/`colorFillQuaternary`，随主题自动切换
+- **验证**：`bun run typecheck` 通过；`bun run test` 478 个测试全部通过
+
+## 2026-08-12
+
 - **类别**：文档
 - **范围**：`docs/性能与代码规范优化清单.md`
 - **摘要**：使用规则新增第 6 条：修复完一个问题并验证通过后，须停下向用户汇报，经用户确认后才能开始修复下一个问题，禁止连续批量修复多个问题

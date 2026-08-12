@@ -20,6 +20,7 @@ import {
   Select,
   Table,
   Tag,
+  theme,
   Typography,
 } from 'antd'
 import dayjs from 'dayjs'
@@ -449,7 +450,7 @@ interface SummaryCardProps {
 
 function SummaryCard({ dotColor, label, value, valueClass }: SummaryCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300/80 hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300/80 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
       <div
         className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-current to-transparent opacity-20 transition-opacity duration-200 group-hover:opacity-40"
         style={{ color: dotColor.replace('bg-', '').replace('-500', '-400') }}
@@ -457,14 +458,15 @@ function SummaryCard({ dotColor, label, value, valueClass }: SummaryCardProps) {
       <div className="flex items-center justify-between">
         <Text
           type="secondary"
-          className="!text-xs font-medium tracking-wide text-slate-500 uppercase"
+          className="!text-xs font-medium tracking-wide text-slate-500 uppercase dark:!text-slate-400"
         >
           {label}
         </Text>
         <span
           aria-hidden
           className={
-            'inline-flex size-2.5 rounded-full ring-2 ring-white ' + dotColor
+            'inline-flex size-2.5 rounded-full ring-2 ring-white dark:ring-slate-800 ' +
+            dotColor
           }
         />
       </div>
@@ -480,6 +482,7 @@ function SummaryCard({ dotColor, label, value, valueClass }: SummaryCardProps) {
 }
 
 export default function ProductionScheduling() {
+  const { token } = theme.useToken()
   const { message } = App.useApp()
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [searchForm] = Form.useForm<SearchFormValues>()
@@ -649,9 +652,9 @@ export default function ProductionScheduling() {
   ]
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 bg-gradient-to-br from-slate-50 via-slate-50 to-blue-50/30 p-3">
+    <div className="flex h-full min-h-0 flex-col gap-3 bg-gradient-to-br from-slate-50 via-slate-50 to-blue-50/30 p-3 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
       {/* 标题区 + 进度快捷标签 */}
-      <div className="relative overflow-hidden rounded-xl border border-blue-100/50 bg-white px-4 py-4 shadow-sm">
+      <div className="relative overflow-hidden rounded-xl border border-blue-100/50 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/80">
         {/* 背景装饰 */}
         <div className="absolute -top-6 -right-6 size-24 rounded-full bg-gradient-to-br from-blue-100/40 to-blue-50/20 blur-2xl" />
         <div className="absolute -bottom-4 -left-4 size-16 rounded-full bg-gradient-to-tr from-blue-50/30 to-transparent blur-xl" />
@@ -665,13 +668,16 @@ export default function ProductionScheduling() {
               <Title
                 level={4}
                 style={{ margin: 0 }}
-                className="!text-xl !font-bold !text-slate-800"
+                className="!text-xl !font-bold !text-slate-800 dark:!text-slate-100"
               >
-                <span className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text">
+                <span className="bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text dark:from-slate-100 dark:to-slate-400">
                   订单排产
                 </span>
               </Title>
-              <Text type="secondary" className="!text-sm text-slate-500">
+              <Text
+                type="secondary"
+                className="!text-sm text-slate-500 dark:!text-slate-400"
+              >
                 基础版排产表，仅维护订单、计划时间、设备人员、进度和备注。
               </Text>
             </div>
@@ -679,7 +685,7 @@ export default function ProductionScheduling() {
           <div className="flex flex-wrap items-center gap-2">
             <Text
               type="secondary"
-              className="mr-1 !text-xs font-medium tracking-wide text-slate-400 uppercase"
+              className="mr-1 !text-xs font-medium tracking-wide text-slate-400 uppercase dark:!text-slate-500"
             >
               快速筛选
             </Text>
@@ -704,8 +710,8 @@ export default function ProductionScheduling() {
                   className={
                     '!m-0 rounded-full border px-3.5 !text-xs font-medium transition-all duration-200 ' +
                     (active
-                      ? '!border-[#1677ff] !bg-gradient-to-r !from-[#1677ff] !to-blue-400 !text-white !shadow-sm !shadow-blue-200'
-                      : '!border-slate-200 !bg-white !text-slate-600 hover:!border-blue-300 hover:!bg-blue-50/50 hover:!text-blue-600')
+                      ? '!border-[#1677ff] !bg-gradient-to-r !from-[#1677ff] !to-blue-400 !text-white !shadow-sm !shadow-blue-200 dark:!shadow-blue-900/40'
+                      : '!border-slate-200 !bg-white !text-slate-600 hover:!border-blue-300 hover:!bg-blue-50/50 hover:!text-blue-600 dark:!border-slate-600 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-slate-700/60 dark:hover:!text-blue-400')
                   }
                 >
                   {tag.label}
@@ -717,9 +723,9 @@ export default function ProductionScheduling() {
       </div>
 
       {/* 搜索区 */}
-      <div className="rounded-xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-sm">
-        <div className="border-b border-slate-100 px-4 py-2">
-          <span className="text-xs font-medium tracking-wide text-slate-400 uppercase">
+      <div className="rounded-xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/60">
+        <div className="border-b border-slate-100 px-4 py-2 dark:border-slate-700">
+          <span className="text-xs font-medium tracking-wide text-slate-400 uppercase dark:text-slate-500">
             筛选条件
           </span>
         </div>
@@ -733,7 +739,7 @@ export default function ProductionScheduling() {
           >
             <Form.Item
               name="projectNo"
-              label={<span className="!text-xs text-slate-500">项目号</span>}
+              label={<span className="!text-xs text-slate-500 dark:text-slate-400">项目号</span>}
               className="!mb-0"
             >
               <Input
@@ -744,14 +750,14 @@ export default function ProductionScheduling() {
             </Form.Item>
             <Form.Item
               name="model"
-              label={<span className="!text-xs text-slate-500">型号</span>}
+              label={<span className="!text-xs text-slate-500 dark:text-slate-400">型号</span>}
               className="!mb-0"
             >
               <Input allowClear placeholder="产品/客户型号" className="!w-36" />
             </Form.Item>
             <Form.Item
               name="materialCode"
-              label={<span className="text-xs! text-slate-500">料号</span>}
+              label={<span className="text-xs! text-slate-500 dark:text-slate-400">料号</span>}
               className="mb-0!"
             >
               <Input
@@ -762,7 +768,7 @@ export default function ProductionScheduling() {
             </Form.Item>
             <Form.Item
               name="lengthMm"
-              label={<span className="text-xs! text-slate-500">长度</span>}
+              label={<span className="text-xs! text-slate-500 dark:text-slate-400">长度</span>}
               className="mb-0!"
             >
               <Select
@@ -780,14 +786,14 @@ export default function ProductionScheduling() {
             </Form.Item>
             <Form.Item
               name="customer"
-              label={<span className="!text-xs text-slate-500">客户</span>}
+              label={<span className="!text-xs text-slate-500 dark:text-slate-400">客户</span>}
               className="!mb-0"
             >
               <Input allowClear className="!w-32" />
             </Form.Item>
             <Form.Item
               name="status"
-              label={<span className="!text-xs text-slate-500">订单状态</span>}
+              label={<span className="!text-xs text-slate-500 dark:text-slate-400">订单状态</span>}
               className="!mb-0"
             >
               <Select
@@ -803,7 +809,7 @@ export default function ProductionScheduling() {
             </Form.Item>
             <Form.Item
               name="progressStatus"
-              label={<span className="!text-xs text-slate-500">当前进度</span>}
+              label={<span className="!text-xs text-slate-500 dark:text-slate-400">当前进度</span>}
               className="!mb-0"
             >
               <Select
@@ -820,7 +826,7 @@ export default function ProductionScheduling() {
             </Form.Item>
             <Form.Item
               name="plannedStartDateRange"
-              label={<span className="!text-xs text-slate-500">计划开工</span>}
+              label={<span className="!text-xs text-slate-500 dark:text-slate-400">计划开工</span>}
               className="!mb-0"
             >
               <DatePicker.RangePicker
@@ -831,7 +837,7 @@ export default function ProductionScheduling() {
             </Form.Item>
             <Form.Item
               name="orderDateRange"
-              label={<span className="!text-xs text-slate-500">订单日期</span>}
+              label={<span className="!text-xs text-slate-500 dark:text-slate-400">订单日期</span>}
               className="!mb-0"
             >
               <DatePicker.RangePicker
@@ -868,46 +874,46 @@ export default function ProductionScheduling() {
           label="订单数"
           value={summary.totalOrders}
           dotColor="bg-slate-400"
-          valueClass="text-slate-700"
+          valueClass="text-slate-700 dark:text-slate-200"
         />
         <SummaryCard
           label="订单数量"
           value={renderQuantity(summary.totalQuantity)}
           dotColor="bg-slate-400"
-          valueClass="text-slate-700"
+          valueClass="text-slate-700 dark:text-slate-200"
         />
         <SummaryCard
           label="进行中"
           value={summary.inProgressOrders}
           dotColor="bg-sky-500"
-          valueClass="text-sky-600"
+          valueClass="text-sky-600 dark:text-sky-400"
         />
         <SummaryCard
           label="已完工"
           value={summary.finishedOrders}
           dotColor="bg-emerald-500"
-          valueClass="text-emerald-600"
+          valueClass="text-emerald-600 dark:text-emerald-400"
         />
         <SummaryCard
           label="延期"
           value={summary.delayedOrders}
           dotColor="bg-rose-500"
-          valueClass="text-rose-600"
+          valueClass="text-rose-600 dark:text-rose-400"
         />
       </div>
 
       {/* 操作条 */}
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white/80 px-4 py-2.5 shadow-sm backdrop-blur-sm">
+      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white/80 px-4 py-2.5 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/60">
         <div className="flex items-center gap-3 text-sm">
-          <span className="font-medium text-slate-600">
-            <span className="text-slate-400">共</span>
-            <span className="ml-1 font-semibold text-slate-800">
+          <span className="font-medium text-slate-600 dark:text-slate-300">
+            <span className="text-slate-400 dark:text-slate-500">共</span>
+            <span className="ml-1 font-semibold text-slate-800 dark:text-slate-100">
               {summary.totalOrders}
             </span>
-            <span className="ml-1 text-slate-400">条</span>
+            <span className="ml-1 text-slate-400 dark:text-slate-500">条</span>
           </span>
           {selectedRowKeys.length > 0 && (
-            <span className="rounded-full bg-gradient-to-r from-blue-500/10 to-blue-400/10 px-3 py-0.5 text-xs font-medium text-blue-600 ring-1 ring-blue-200/50">
+            <span className="rounded-full bg-gradient-to-r from-blue-500/10 to-blue-400/10 px-3 py-0.5 text-xs font-medium text-blue-600 ring-1 ring-blue-200/50 dark:text-blue-400 dark:ring-blue-800/50">
               已选 {selectedOrders.length} 条
             </span>
           )}
@@ -928,7 +934,7 @@ export default function ProductionScheduling() {
             onClick={() => refetch()}
             loading={isFetching}
             aria-label="刷新排产列表"
-            className="text-slate-500 hover:text-blue-500"
+            className="text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400"
           />
         </div>
       </div>
@@ -936,7 +942,7 @@ export default function ProductionScheduling() {
       {/* 表格区 */}
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
           <Table<ProductionSchedulingOrder>
@@ -950,14 +956,14 @@ export default function ProductionScheduling() {
             tableLayout="fixed"
             rowSelection={rowSelection}
             rowClassName={(_record, index) =>
-              index % 2 === 0 ? 'bg-slate-50/40' : ''
+              index % 2 === 0 ? 'bg-slate-50/40 dark:bg-slate-700/30' : ''
             }
             classNames={{ root: 'font-medium' }}
           />
         </div>
         <div
           ref={paginationRef}
-          className="flex shrink-0 justify-end border-t border-slate-100 px-3 py-2"
+          className="flex shrink-0 justify-end border-t border-slate-100 px-3 py-2 dark:border-slate-700"
         >
           <ConfigProvider locale={zhCN}>
             <Pagination
@@ -996,10 +1002,10 @@ export default function ProductionScheduling() {
         }}
         styles={{
           header: {
-            borderBottom: '1px solid #f1f5f9',
+            borderBottom: `1px solid ${token.colorBorderSecondary}`,
             paddingBottom: 12,
             marginBottom: 16,
-            background: 'linear-gradient(to bottom, #fafbfc, #ffffff)',
+            background: `linear-gradient(to bottom, ${token.colorFillQuaternary}, ${token.colorBgElevated})`,
           },
           body: {
             padding: '0 4px 4px',
@@ -1011,9 +1017,9 @@ export default function ProductionScheduling() {
         }}
         onOk={handleSave}
       >
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-blue-100/50 bg-gradient-to-r from-blue-50/50 to-white px-4 py-2.5 shadow-sm">
-          <TableCellsIcon className="size-4 text-blue-500" />
-          <span className="text-sm font-medium text-slate-700">
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-blue-100/50 bg-gradient-to-r from-blue-50/50 to-white px-4 py-2.5 shadow-sm dark:border-blue-900/50 dark:from-blue-950/40 dark:to-slate-800">
+          <TableCellsIcon className="size-4 text-blue-500 dark:text-blue-400" />
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
             {getProductSpec(editingOrder)}
           </span>
         </div>
@@ -1022,7 +1028,7 @@ export default function ProductionScheduling() {
             <Form.Item
               name="planned_start_date"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   计划开工时间
                 </span>
               }
@@ -1032,7 +1038,7 @@ export default function ProductionScheduling() {
             <Form.Item
               name="planned_finish_date"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   计划完工时间
                 </span>
               }
@@ -1042,7 +1048,7 @@ export default function ProductionScheduling() {
             <Form.Item
               name="product_delivery_date"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   交付日期
                 </span>
               }
@@ -1052,7 +1058,7 @@ export default function ProductionScheduling() {
             <Form.Item
               name="tooling_status"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   分配设备(ERP编号)
                 </span>
               }
@@ -1073,7 +1079,7 @@ export default function ProductionScheduling() {
             <Form.Item
               name="responsible_person_ids"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   负责班组/人员
                 </span>
               }
@@ -1093,12 +1099,12 @@ export default function ProductionScheduling() {
             <Form.Item
               name="progress_status"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   当前进度
                 </span>
               }
               extra={
-                <span className="!text-xs text-slate-400">
+                <span className="!text-xs text-slate-400 dark:!text-slate-500">
                   有转移记录时按转移数量自动计算；选择"延期"可覆盖自动进度。
                 </span>
               }
@@ -1108,7 +1114,7 @@ export default function ProductionScheduling() {
             <Form.Item
               name="progress_percent"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   进度百分比
                 </span>
               }
@@ -1124,7 +1130,7 @@ export default function ProductionScheduling() {
             <Form.Item
               name="process_requirement"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   合格标准
                 </span>
               }
@@ -1135,7 +1141,7 @@ export default function ProductionScheduling() {
             <Form.Item
               name="scheduling_remark"
               label={
-                <span className="!text-xs !font-medium !text-slate-500">
+                <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                   备注
                 </span>
               }
