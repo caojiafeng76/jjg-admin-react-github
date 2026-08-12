@@ -55,6 +55,52 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       // Excel workers and spreadsheet libraries are intentionally large and loaded on demand.
       chunkSizeWarningLimit: 900,
+      // Vite 8 (Rolldown) 手动分包：manualChunks 已移除/弃用，改用 codeSplitting.groups。
+      // 目标：核心 vendor 稳定 chunk（缓存友好）；重型组件（table/date-picker/select）
+      // 与 PDF/XLSX 库不分组，保持按需懒加载拆分，避免首屏拉取整包 antd。
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              // React 生态核心：入口与所有页面共享
+              {
+                name: 'vendor-react',
+                test: /node_modules[\\/](?:react|react-dom|scheduler|react-router|react-router-dom|zustand|immer)[\\/]/,
+                priority: 30,
+              },
+              // antd 基础组件（入口/绝大多数页面使用）
+              {
+                name: 'vendor-antd-core',
+                test: /node_modules[\\/]antd[\\/]es[\\/](?:app|button|modal|form|input|message|notification|config-provider|typography|tabs|card|spin|space|tag|skeleton|empty|alert|result|popconfirm|dropdown|tooltip|badge|avatar|divider|flex|grid|checkbox|radio|switch|input-number|descriptions|progress|pagination|watermark|drawer|popover|list|statistic|wave|locale|version)[\\/]/,
+                priority: 20,
+              },
+              // antd 体系依赖（icons、cssinjs、@rc-component、rc-*）
+              {
+                name: 'vendor-antd-deps',
+                test: /node_modules[\\/](?:@ant-design|@rc-component|rc-)[\\/]/,
+                priority: 15,
+              },
+              // 服务端状态与数据请求
+              {
+                name: 'vendor-query',
+                test: /node_modules[\\/]@tanstack[\\/]/,
+                priority: 15,
+              },
+              {
+                name: 'vendor-supabase',
+                test: /node_modules[\\/]@supabase[\\/]/,
+                priority: 15,
+              },
+              // 日期库
+              {
+                name: 'vendor-dayjs',
+                test: /node_modules[\\/]dayjs[\\/]/,
+                priority: 10,
+              },
+            ],
+          },
+        },
+      },
     },
   }
 })

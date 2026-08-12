@@ -16,6 +16,13 @@
 ## 2026-08-12
 
 - **类别**：性能
+- **范围**：`vite.config.ts`
+- **摘要**：优化清单 #8 落地：Vite 8（Rolldown 内核）下 `manualChunks` 已移除/弃用，改用 `build.rolldownOptions.output.codeSplitting.groups` 手动分包，为核心 vendor 提供稳定 chunk（内容不变则 hash 不变，浏览器缓存友好）：`vendor-react`（react/react-dom/react-router/zustand/immer）、`vendor-antd-core`（antd 基础组件，入口链常用白名单）、`vendor-antd-deps`（@ant-design/@rc-component/rc-* 依赖树，dayjs 亦归入此组）、`vendor-query`（@tanstack）、`vendor-supabase`。重型组件（table/date-picker/select 等）与 PDF/XLSX 库不匹配任何组，保持 Rolldown 按需懒加载拆分，避免首屏拉取整包 antd；入口静态依赖由原先 30+ 散件收敛为 5 个 vendor chunk + 业务链，入口 index gzip 24.85 KB
+- **验证**：`bun run build` 成功（tsc -b + vite build，无循环依赖/警告）；`bun run check:bundle` 仍失败但为**基线既有问题**（HEAD 配置构建同样报 `PoList -> xlsx.min` 静态依赖违规，xlsx 不匹配任何分组、行为未变，已在清单追加 #20）；`bun run test` 全量通过（480/480）
+
+## 2026-08-12
+
+- **类别**：性能
 - **范围**：`supabase/migrations/20260812110000_add_missing_indexes.sql`（新建）、`src/services/database.types.ts`（自动生成，无 diff）
 - **摘要**：优化清单 #7 落地：为 4 张业务表补充高频组合查询复合索引（核对 `pg_indexes` 现有索引后确认均缺失）。(1) `production_order_items(product_model, customer_model, data_category)` —— 生产工单列表 inner join `item_filters` 过滤与生产日报按型号/类别过滤的组合路径；(2) `production_orders(order_date, created_at)` —— 工单列表按 `order_date` 范围过滤 + `created_at DESC, order_date DESC` 排序（原仅有 `order_date` 单列索引，排序仍需额外 sort）；(3) `sales_orders(order_date, project_no)` —— 车间订单/排产页日期范围与项目号组合过滤（原仅单列索引）；(4) `material_transfers(project_no, created_at)` —— 物料转移单按项目号过滤 + `created_at DESC` 排序。4 张表均 <1 万行，索引构建即时完成，均为 CREATE INDEX IF NOT EXISTS 幂等写法；仅加索引，无应用代码改动
 - **验证**：`bun run db:push` 应用 migration（API 模式，直连超时自动回退，推送 1 个 migration 成功）；MCP 只读 SQL 确认 4 个索引已存在于 `pg_indexes`；`bun run db:types` 成功（database.types.ts 无 diff）；`bun run typecheck` 通过；`bun run test` 全量通过（480/480）
