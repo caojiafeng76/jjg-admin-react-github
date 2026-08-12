@@ -214,15 +214,15 @@ export default function StandardTimeSearch({
           block
           type="default"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm font-medium shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
+          className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm font-medium shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
         >
           <span className="flex w-full items-center justify-between">
             <span className="flex items-center gap-2">
               <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-              <span className="text-slate-600">筛选条件</span>
+              <span className="text-slate-600 dark:text-slate-300">筛选条件</span>
             </span>
             <ChevronDownIcon
-              className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${
+              className={`h-4 w-4 text-slate-400 transition-transform duration-200 dark:text-slate-500 ${
                 isExpanded ? 'rotate-180' : ''
               }`}
             />
@@ -230,7 +230,7 @@ export default function StandardTimeSearch({
         </Button>
 
         {isExpanded ? (
-          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             {formContent}
           </div>
         ) : null}

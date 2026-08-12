@@ -595,7 +595,7 @@ export default function StandardTimeList() {
           新建理论工时
         </Button>
       ) : (
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/80 bg-white/60 p-3 shadow-sm backdrop-blur-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/80 bg-white/60 p-3 shadow-sm backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-800/60">
           <AddButton
             handleCreate={handleCreate}
             permissionKey="feature:standard-time-list.create"
@@ -605,7 +605,7 @@ export default function StandardTimeList() {
             handleEdit={() => handleEdit()}
             permissionKey="feature:standard-time-list.edit"
           />
-          <div className="h-4 w-px bg-slate-200" />
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
           <PermissionButton
             type="text"
             icon={<CheckCircleIcon className="size-4 text-emerald-500" />}
@@ -626,7 +626,7 @@ export default function StandardTimeList() {
           >
             取消末道
           </PermissionButton>
-          <div className="h-4 w-px bg-slate-200" />
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
           <ExportButton
             handleExport={handleExport}
             loading={isExporting}
@@ -676,12 +676,12 @@ export default function StandardTimeList() {
       <div
         className={
           isTeamLeaderMode
-            ? 'rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_4px_20px_rgba(15,23,42,0.06)]'
+            ? 'rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_4px_20px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800'
             : 'flex items-center gap-2'
         }
       >
         {isTeamLeaderMode ? null : (
-          <span className="text-sm font-medium whitespace-nowrap text-slate-500">
+          <span className="text-sm font-medium whitespace-nowrap text-slate-500 dark:text-slate-300">
             搜索：
           </span>
         )}
@@ -718,7 +718,7 @@ export default function StandardTimeList() {
           <Splitter.Panel defaultSize="65%" min="30%">
             <div
               ref={tableContainerRef}
-              className="flex h-full flex-col gap-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+              className="flex h-full flex-col gap-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
             >
               <div className="min-h-0 flex-1 overflow-x-auto">
                 <StandardTimeTable
@@ -738,7 +738,7 @@ export default function StandardTimeList() {
               </div>
               <div
                 ref={paginationRef}
-                className="flex shrink-0 justify-end border-t border-slate-100 pt-3"
+                className="flex shrink-0 justify-end border-t border-slate-100 pt-3 dark:border-slate-700"
               >
                 <AppPagination
                   total={data?.total || 0}
@@ -748,7 +748,7 @@ export default function StandardTimeList() {
             </div>
           </Splitter.Panel>
           <Splitter.Panel min="20%">
-            <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <PermissionGate permissionKey="field:standard-time-list.cost-detail.view">
                 <StandardTimeCostDetail selectedRecord={activeRecord} />
               </PermissionGate>

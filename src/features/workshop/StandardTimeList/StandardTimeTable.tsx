@@ -251,18 +251,18 @@ const StandardTimeTable = memo(function StandardTimeTable({
         render: (value: string | null | undefined) => {
           if (value === 'A')
             return (
-              <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
+              <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm dark:bg-slate-600">
                 A类
               </span>
             )
           if (value === 'B')
             return (
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-600">
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200">
                 B类
               </span>
             )
           return (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
               -
             </span>
           )
@@ -275,11 +275,11 @@ const StandardTimeTable = memo(function StandardTimeTable({
         width: 90,
         render: (value: boolean | null | undefined) =>
           value ? (
-            <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm">
+            <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm dark:bg-slate-600">
               末道
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
               非末道
             </span>
           ),
@@ -291,7 +291,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
         width: 150,
         ellipsis: { showTitle: true },
         render: (value: string) => (
-          <span className="font-medium text-slate-800">{value || '-'}</span>
+          <span className="font-medium text-slate-800 dark:text-slate-100">{value || '-'}</span>
         ),
       },
       {
@@ -310,9 +310,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
         width: 120,
         render: (value?: string | null) =>
           value ? (
-            <span className="text-slate-700">{value}</span>
+            <span className="text-slate-700 dark:text-slate-300">{value}</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600">
+            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
               未匹配
             </span>
           ),
@@ -324,9 +324,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
         width: 180,
         render: (value?: string | null) =>
           value ? (
-            <span className="text-slate-600">{value}</span>
+            <span className="text-slate-600 dark:text-slate-300">{value}</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
               留空
             </span>
           ),
@@ -338,9 +338,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
         width: 140,
         render: (value?: string | null) =>
           value ? (
-            <span className="font-mono text-slate-600">{value}</span>
+            <span className="font-mono text-slate-600 dark:text-slate-300">{value}</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
               留空
             </span>
           ),
@@ -360,9 +360,9 @@ const StandardTimeTable = memo(function StandardTimeTable({
         ellipsis: { showTitle: true },
         render: (value?: string | null) =>
           value ? (
-            <span className="font-mono text-slate-600">{value}</span>
+            <span className="font-mono text-slate-600 dark:text-slate-300">{value}</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
               留空
             </span>
           ),
@@ -376,7 +376,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
               key: 'standard_seconds',
               width: 140,
               render: (value: number | null | undefined) => (
-                <span className="font-medium text-indigo-600">
+                <span className="font-medium text-indigo-600 dark:text-indigo-400">
                   {formatNumber(value)}
                 </span>
               ),
@@ -386,7 +386,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
               key: 'daily_standard_capacity',
               width: 120,
               render: (_value: unknown, record: StandardTime) => (
-                <span className="font-medium text-emerald-600">
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">
                   {formatNumber(
                     calculateDailyStandardCapacity(record.standard_seconds),
                     2,
@@ -400,7 +400,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
               key: 'theoretical_seconds',
               width: 140,
               render: (value: number | null | undefined) => (
-                <span className="font-medium text-cyan-600">
+                <span className="font-medium text-cyan-600 dark:text-cyan-400">
                   {formatNumber(value)}
                 </span>
               ),
@@ -452,10 +452,10 @@ const StandardTimeTable = memo(function StandardTimeTable({
                   width={56}
                   src={imageUrl}
                   preview={{ src: imageUrl }}
-                  className="rounded border border-slate-200 object-cover"
+                  className="rounded border border-slate-200 object-cover dark:border-slate-700"
                 />
               ) : (
-                <span className="text-xs text-slate-400">暂无图片</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">暂无图片</span>
               )}
               {onUploadImage && record.id ? (
                 <Upload

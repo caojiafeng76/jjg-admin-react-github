@@ -615,10 +615,10 @@ export default function StandardTimeForm({
           </Form.Item>
 
           <Divider titlePlacement="left">成本预览</Divider>
-          <div className="grid grid-cols-3 gap-3 rounded-2xl bg-slate-50 p-4">
+          <div className="grid grid-cols-3 gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
             <div>
               <Typography.Text type="secondary">日标准产能</Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900">
+              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                 {formatMoney(costPreview.dailyStandardCapacity)}
               </div>
             </div>
@@ -626,7 +626,7 @@ export default function StandardTimeForm({
               <Typography.Text type="secondary">
                 人工成本（元/支）
               </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900">
+              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                 {formatMoney(costPreview.laborCost)}
               </div>
             </div>
@@ -634,7 +634,7 @@ export default function StandardTimeForm({
               <Typography.Text type="secondary">
                 设备成本（元/支）
               </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900">
+              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                 {formatMoney(costPreview.equipmentCost)}
               </div>
             </div>
@@ -642,7 +642,7 @@ export default function StandardTimeForm({
               <Typography.Text type="secondary">
                 刀具辅料成本（元/支）
               </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900">
+              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                 {formatMoney(costPreview.toolingConsumableCost)}
               </div>
             </div>
@@ -650,7 +650,7 @@ export default function StandardTimeForm({
               <Typography.Text type="secondary">
                 检验成本（元/支）
               </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900">
+              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                 {formatMoney(costPreview.inspectionCost)}
               </div>
             </div>
@@ -658,13 +658,13 @@ export default function StandardTimeForm({
               <Typography.Text type="secondary">
                 单品分摊额（元/支）
               </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900">
+              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                 {formatMoney(costPreview.overheadCost)}
               </div>
             </div>
             <div>
               <Typography.Text type="secondary">合计（元/支）</Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900">
+              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                 {formatMoney(costPreview.totalCost)}
               </div>
             </div>

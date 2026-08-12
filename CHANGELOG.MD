@@ -15,6 +15,13 @@
 
 ## 2026-08-12
 
+- **类别**：修复
+- **范围**：`src/features/workshop/StandardTimeList/`（index.tsx、StandardTimeTable.tsx、StandardTimeCostDetail.tsx、StandardTimeSearch.tsx、StandardTimeMobileList.tsx、StandardTimeForm.tsx）
+- **摘要**：standard-time-list 成本核算页面补齐暗黑模式适配：所有硬编码浅色 Tailwind 类（容器 bg-white/bg-slate-50、边框 border-slate-200、文字 text-slate-500~900、彩色强调 text-*-600）按项目惯例追加 `dark:` 变体——容器 `dark:border-slate-700 dark:bg-slate-800`、正文 `dark:text-slate-300`、标题 `dark:text-slate-100`、徽章 `dark:bg-slate-600/700`、彩色文字 `dark:text-*-400`、彩色渐变卡 `dark:from-*-500/10` 等；覆盖管理端（表格+成本详情+表单）与班组长移动端（筛选面板+卡片列表）。表格行高亮/警示背景由 index.css 的 CSS 变量自动适配，未改动
+- **验证**：`bun run typecheck` 通过；全目录 grep 确认无遗漏浅色类；未跑全量测试（纯样式类名改动，无逻辑变更）
+
+## 2026-08-12
+
 - **类别**：变更
 - **范围**：`src/features/workshop/OrderStatusDashboard/dashboardRenderUtils.tsx`（renderJobOutputCell）、`src/features/workshop/OrderStatusDashboard/dashboardRenderUtils.test.tsx`（新增）
 - **摘要**：订单现状主列表工序列单元格补齐"非末道工序有数据时可点击查看"：主列表数字口径保持不变（jobOutputs 仅累加末道工序合格数量，非末道本就显示 '-'）；本次在 quantity<=0 但有生产明细（productionDetails 存在该岗位记录）时，单元格由 '-' 改为可点击"查看"链接，打开现有岗位生产工单明细弹窗（含非末道工序汇总与明细）；无任何明细时仍显示 '-'。不涉及服务层聚合逻辑、列集、路由与导出
