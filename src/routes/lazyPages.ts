@@ -4,7 +4,6 @@ export const Dashboard = lazy(() => import('@pages/Dashboard'))
 export const Login = lazy(() => import('@pages/Login'))
 export const PageNotFound = lazy(() => import('@pages/PageNotFound'))
 export const AccessDenied = lazy(() => import('@pages/AccessDenied'))
-export const ComingSoonPage = lazy(() => import('@pages/ComingSoonPage'))
 export const EmployeeMobileChangePasswordPage = lazy(
   () => import('@ui/EmployeeMobileChangePasswordPage'),
 )
@@ -23,14 +22,8 @@ export const SafePartSettingPage = lazy(
 )
 export const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
 
-export const WorkshopOrderList = lazy(
-  () => import('@features/workshop/OrderList'),
-)
 export const WorkshopOrderProduction = lazy(
   () => import('@pages/WorkshopOrderProduction'),
-)
-export const WorkshopOrderClosed = lazy(
-  () => import('@pages/WorkshopOrderClosed'),
 )
 export const WorkshopOrderQrDetail = lazy(
   () => import('@pages/WorkshopOrderQrDetail'),

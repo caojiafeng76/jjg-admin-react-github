@@ -6,7 +6,6 @@ import {
   ISyneyStoreReport,
   ISyneyStoreReportFormRef,
 } from '@/types'
-import { useAppStore } from '@/store'
 import { useSyneySpecs } from '@syney/SpecList/useSyneySpecs'
 import { jsonToArray } from '@utils/syney'
 import {
@@ -19,6 +18,7 @@ import { useCreateReport } from './useCreateReport'
 type ReportFormProps = {
   handleCancel: () => void
   onSpecsLoadingChange: (loading: boolean) => void
+  onCreatingChange?: (creating: boolean) => void
 }
 
 const layout = {
@@ -27,9 +27,8 @@ const layout = {
 }
 
 const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
-  ({ handleCancel, onSpecsLoadingChange }, ref) => {
+  ({ handleCancel, onSpecsLoadingChange, onCreatingChange }, ref) => {
     const { message } = App.useApp()
-    const setIsLoading = useAppStore((state) => state.setIsLoading)
 
     const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
       isAll: true,
@@ -77,8 +76,8 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
     })
 
     useEffect(() => {
-      setIsLoading(isCreating)
-    }, [isCreating, setIsLoading])
+      onCreatingChange?.(isCreating)
+    }, [isCreating, onCreatingChange])
 
     useEffect(() => {
       onSpecsLoadingChange(specsLoading)

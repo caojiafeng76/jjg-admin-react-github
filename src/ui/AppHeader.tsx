@@ -255,7 +255,7 @@ export default function AppHeader({
                 await signOut()
                 navigate('/login', { replace: true })
               } catch {
-                // 可以在这里接入全局 message 提示
+                message.error('退出登录失败，请重试')
               }
             }}
           >

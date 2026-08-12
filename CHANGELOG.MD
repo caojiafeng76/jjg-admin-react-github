@@ -1,4 +1,4 @@
-# 更新日志
+﻿# 更新日志
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
@@ -13,6 +13,12 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-12
+
+- **类别**：重构 / 删除 / 修复
+- **范围**：`src/pages/`（删除 10 个未引用页面组件）、`src/routes/lazyPages.ts`、`src/ui/AppHeader.tsx`、`src/store/index.ts`、`src/features/syney/`（PoList / ReportList / PoDetail）、`src/hooks/useMutationWithMessage.ts`、`useMutationWithInvalidation.ts`
+- **摘要**：执行第一周期优化：(1) 删除 10 个无引用页面组件（EmployeeList/StandardTimeList/SyneyPoList/SyneyPoDetail/SyneySpecList/SyneyStoreReportList/SyneyStoreReportDetail/WorkshopOrderList/ComingSoonPage/WorkshopOrderClosed）及 lazyPages 中 3 个未路由导出，缩小打包体积；(2) AppHeader 退出登录失败时弹出错误提示（原为空 catch 吞错）；(3) 移除全局 Zustand isLoading 标志，PoList/ReportList/PoDetail 改为组件本地 state + 回调通知，消除跨页串扰；(4) useMutationWithInvalidation 改为 useMutationWithMessage 薄包装（新增 showErrorMessage 参数），统一 mutation 单一实现
+- **验证**：`bun run typecheck` 通过；`bun run test` 通过
 ## 2026-08-12
 
 - **类别**：变更

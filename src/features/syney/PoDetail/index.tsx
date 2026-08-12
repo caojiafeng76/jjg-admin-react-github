@@ -20,7 +20,7 @@ export default function PoDetail() {
   const pageSize = Number(searchParams.get('pageSize')) || 10
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const isLoading = useAppStore((state) => state.isLoading)
+  const [isLoading, setIsLoading] = useState(false)
   const setTableSelectedKeys = useAppStore(
     (state) => state.setTableSelectedKeys,
   )
@@ -100,6 +100,7 @@ export default function PoDetail() {
         <DetailForm
           ref={detailFormRef}
           onClose={() => setIsModalOpen(false)}
+          onLoadingChange={setIsLoading}
         />
       </Modal>
     </div>

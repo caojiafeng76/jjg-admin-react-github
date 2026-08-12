@@ -47,7 +47,7 @@ export default function ReportList() {
   const setTableSelectedKeys = useAppStore(
     (state) => state.setTableSelectedKeys,
   )
-  const isCreating = useAppStore((state) => state.isLoading)
+  const [isCreating, setIsCreating] = useState(false)
   const {
     print,
     preloadPDF,
@@ -348,6 +348,7 @@ export default function ReportList() {
           ref={reportFormRef}
           handleCancel={handleCancel}
           onSpecsLoadingChange={setSpecsLoading}
+          onCreatingChange={setIsCreating}
         />
       </Modal>
     </div>

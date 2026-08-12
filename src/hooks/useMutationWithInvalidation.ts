@@ -1,9 +1,6 @@
-import {
-  useMutation,
-  useQueryClient,
-  UseMutationOptions,
-} from '@tanstack/react-query'
-import { QueryKey } from '@tanstack/react-query'
+import { QueryKey, UseMutationOptions } from '@tanstack/react-query'
+
+import { useMutationWithMessage } from './useMutationWithMessage'
 
 /**
  * Mutation 配置选项
@@ -39,9 +36,10 @@ export interface MutationWithInvalidationOptions<TData, TError, TVariables> {
 }
 
 /**
- * 带查询失效功能的 Mutation Hook
+ * 带查询失效功能的 Mutation Hook（静默版，不显示消息）
  *
- * 自动在成功时失效指定的查询缓存
+ * 自动在成功时失效指定的查询缓存。实现复用 useMutationWithMessage，
+ * 通过 showErrorMessage: false 抑制错误弹窗，保持无消息语义。
  *
  * @example
  * ```typescript
@@ -58,23 +56,12 @@ export function useMutationWithInvalidation<TData, TError, TVariables>({
   onError,
   mutationOptions,
 }: MutationWithInvalidationOptions<TData, TError, TVariables>) {
-  const queryClient = useQueryClient()
-
-  return useMutation<TData, TError, TVariables>({
+  return useMutationWithMessage<TData, TError, TVariables>({
     mutationFn,
-    ...mutationOptions,
-    onSuccess: async (data, variables) => {
-      await Promise.all(
-        invalidateQueries.map((queryKey) =>
-          queryClient.invalidateQueries({ queryKey }),
-        ),
-      )
-
-      await onSuccess?.(data, variables)
-    },
-    onError: (error, variables) => {
-      // 调用用户自定义的错误回调
-      onError?.(error, variables)
-    },
+    invalidateQueries,
+    onSuccess,
+    onError,
+    mutationOptions,
+    showErrorMessage: false,
   })
 }

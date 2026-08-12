@@ -42,6 +42,12 @@ export interface MutationWithMessageOptions<TData, TError, TVariables> {
   messageApi?: MessageApi
 
   /**
+   * 是否在失败时显示错误消息（默认 true）
+   * 传 false 可抑制错误弹窗（例如静默失效场景）
+   */
+  showErrorMessage?: boolean
+
+  /**
    * 成功时的回调
    */
   onSuccess?: (data: TData, variables: TVariables) => void | Promise<void>
@@ -82,6 +88,7 @@ export function useMutationWithMessage<TData, TError, TVariables>({
   successMessage,
   errorMessage,
   messageApi: externalMessageApi,
+  showErrorMessage = true,
   onSuccess,
   onError,
   mutationOptions,
@@ -117,12 +124,14 @@ export function useMutationWithMessage<TData, TError, TVariables>({
     },
     onError: (error, variables) => {
       // 显示错误消息
-      const msg =
-        typeof errorMessage === 'function'
-          ? errorMessage(error, variables)
-          : errorMessage ||
-            (error instanceof Error ? error.message : '操作失败，请稍后重试')
-      messageApi.error(msg)
+      if (showErrorMessage) {
+        const msg =
+          typeof errorMessage === 'function'
+            ? errorMessage(error, variables)
+            : errorMessage ||
+              (error instanceof Error ? error.message : '操作失败，请稍后重试')
+        messageApi.error(msg)
+      }
 
       // 调用用户自定义的错误回调
       onError?.(error, variables)

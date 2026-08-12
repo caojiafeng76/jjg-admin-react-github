@@ -1,23 +1,22 @@
 import { useAppStore } from '@/store'
 import { ISyneyItem } from '@/types'
 import { Form, FormInstance, Input } from 'antd'
-import { forwardRef, useImperativeHandle } from 'react'
+import { forwardRef, useImperativeHandle, useState } from 'react'
 import { useUpdate } from './useUpdate'
 
 export default forwardRef<
   {
     getInstance: () => FormInstance<ISyneyItem>
   },
-  { onClose: () => void }
->(function DetailForm({ onClose }, ref) {
+  { onClose: () => void; onLoadingChange?: (loading: boolean) => void }
+>(function DetailForm({ onClose, onLoadingChange }, ref) {
   const [form] = Form.useForm<ISyneyItem>()
+  const [isLoading, setIsLoading] = useState(false)
 
   const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
   const setTableSelectedKeys = useAppStore(
     (state) => state.setTableSelectedKeys,
   )
-  const isLoading = useAppStore((state) => state.isLoading)
-  const setIsLoading = useAppStore((state) => state.setIsLoading)
   const { updateItems } = useUpdate()
 
   const layout = {
@@ -27,12 +26,14 @@ export default forwardRef<
 
   async function onFinish(values: ISyneyItem) {
     setIsLoading(true)
+    onLoadingChange?.(true)
     await updateItems(
       { ids: tableSelectedKeys.map(Number), values },
       {
         onSettled: () => {
           setTableSelectedKeys([])
           setIsLoading(false)
+          onLoadingChange?.(false)
           onClose()
         },
       },

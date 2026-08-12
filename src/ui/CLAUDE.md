@@ -273,18 +273,16 @@ ErrorBoundary 只能捕获**组件生命周期**中的错误，无法捕获：
 - 异步代码中的错误（使用 `.catch()` 或 `async/await` + `try-catch`）
 - 服务端渲染错误
 
-### 4. 如何统一管理全局 Loading 状态？
-使用 Zustand 全局状态：
-```typescript
-// store/index.ts
-export const useAppStore = create<State & Actions>()((set) => ({
-  isLoading: false,
-  setIsLoading: (isLoading) => set({ isLoading }),
-}))
+### 4. 组件内 Loading 状态如何管理？
 
-// 在组件中使用
-const { isLoading, setIsLoading } = useAppStore()
-setIsLoading(true)
+使用组件本地状态或 Mutation 的 `isPending`，不要写入全局 store（全局标志会造成跨页串扰）：
+
+```typescript
+// 本地状态
+const [isLoading, setIsLoading] = useState(false)
+
+// 或 Mutation 的 pending 状态
+const { mutate, isPending } = useMutationWithMessage({ ... })
 ```
 
 ---

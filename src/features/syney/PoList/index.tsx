@@ -55,8 +55,7 @@ export default function PoList() {
   const setTableSelectedKeys = useAppStore(
     (state) => state.setTableSelectedKeys,
   )
-  const isCreating = useAppStore((state) => state.isLoading)
-  const setIsCreating = useAppStore((state) => state.setIsLoading)
+  const [isCreating, setIsCreating] = useState(false)
   const {
     deletePo,
     isDeleting,

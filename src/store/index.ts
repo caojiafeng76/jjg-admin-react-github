@@ -5,13 +5,11 @@ import { immer } from 'zustand/middleware/immer'
 
 type State = {
   tableSelectedKeys: Key[]
-  isLoading: boolean
   isDarkMode: boolean
 }
 
 type Actions = {
   setTableSelectedKeys: (keys: Key[]) => void
-  setIsLoading: (isLoading: boolean) => void
   setIsDarkMode: () => void
 }
 
@@ -20,7 +18,6 @@ export const useAppStore = create<State & Actions>()(
     persist(
       immer((set) => ({
         tableSelectedKeys: [] as Key[],
-        isLoading: false,
         isDarkMode: false,
 
         setIsDarkMode: () => {
@@ -32,11 +29,6 @@ export const useAppStore = create<State & Actions>()(
         setTableSelectedKeys: (keys) =>
           set((state) => {
             state.tableSelectedKeys = keys
-          }),
-
-        setIsLoading: (isLoading) =>
-          set((state) => {
-            state.isLoading = isLoading
           }),
       })),
       {
