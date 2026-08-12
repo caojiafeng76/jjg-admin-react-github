@@ -15,6 +15,13 @@
 
 ## 2026-08-12
 
+- **类别**：变更
+- **范围**：`src/features/workshop/OrderStatusDashboard/dashboardRenderUtils.tsx`（renderJobOutputCell）、`src/features/workshop/OrderStatusDashboard/dashboardRenderUtils.test.tsx`（新增）
+- **摘要**：订单现状主列表工序列单元格补齐"非末道工序有数据时可点击查看"：主列表数字口径保持不变（jobOutputs 仅累加末道工序合格数量，非末道本就显示 '-'）；本次在 quantity<=0 但有生产明细（productionDetails 存在该岗位记录）时，单元格由 '-' 改为可点击"查看"链接，打开现有岗位生产工单明细弹窗（含非末道工序汇总与明细）；无任何明细时仍显示 '-'。不涉及服务层聚合逻辑、列集、路由与导出
+- **验证**：`bun run test -- dashboardRenderUtils` 新增 4 条用例通过（- / 查看链接 / 纯数字 / 可点数字）；`bun run test` 全量通过；`bun run typecheck` 通过
+
+## 2026-08-12
+
 - **类别**：重构 / 修改
 - **范围**：`src/features/syney/SafePartSetting/SafePartSettingPage.tsx`、`src/features/packaging-process/WorkOrderList/useWorkOrders.ts`、`src/features/packaging-process/StandardTimeList/useStandardTimes.ts`
 - **摘要**：收尾遗留优化项：(1) SafePartSettingPage 的 3 个裸 useMutation（保存/删除/图纸上传）迁移到 useMutationWithMessage——复用 App.useApp() 的 messageApi，成功提示/错误提示/缓存失效统一由共享 hook 处理，移除手写 message 与 invalidate 样板及 useMutation/useQueryClient 依赖；(2) packaging 两个"生产号选项"查询键统一为 ['process-standards', 'project-nos']，与 workshop 共享同一缓存，消除同接口（getSalesOrdersProjectNos）跨域重复请求，workshop 侧失效可联动刷新

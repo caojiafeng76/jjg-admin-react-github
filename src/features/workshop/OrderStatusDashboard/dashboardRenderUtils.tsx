@@ -399,7 +399,24 @@ export function renderJobOutputCell({
   ).length
 
   if (quantity <= 0) {
-    return <Text type="secondary">-</Text>
+    if (detailCount === 0) {
+      return <Text type="secondary">-</Text>
+    }
+
+    // 该订单在此岗位只有非末道工序数据：主列表不显示数字，但保留点击查看入口
+    return (
+      <Button
+        type="link"
+        size="small"
+        className="h-auto! px-0! text-xs!"
+        onClick={(event) => {
+          event.stopPropagation()
+          onOpen(record, jobName)
+        }}
+      >
+        查看
+      </Button>
+    )
   }
 
   if (detailCount === 0) {
