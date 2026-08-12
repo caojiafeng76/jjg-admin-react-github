@@ -16,6 +16,13 @@
 ## 2026-08-12
 
 - **类别**：性能
+- **范围**：`supabase/migrations/20260812110000_add_missing_indexes.sql`（新建）、`src/services/database.types.ts`（自动生成，无 diff）
+- **摘要**：优化清单 #7 落地：为 4 张业务表补充高频组合查询复合索引（核对 `pg_indexes` 现有索引后确认均缺失）。(1) `production_order_items(product_model, customer_model, data_category)` —— 生产工单列表 inner join `item_filters` 过滤与生产日报按型号/类别过滤的组合路径；(2) `production_orders(order_date, created_at)` —— 工单列表按 `order_date` 范围过滤 + `created_at DESC, order_date DESC` 排序（原仅有 `order_date` 单列索引，排序仍需额外 sort）；(3) `sales_orders(order_date, project_no)` —— 车间订单/排产页日期范围与项目号组合过滤（原仅单列索引）；(4) `material_transfers(project_no, created_at)` —— 物料转移单按项目号过滤 + `created_at DESC` 排序。4 张表均 <1 万行，索引构建即时完成，均为 CREATE INDEX IF NOT EXISTS 幂等写法；仅加索引，无应用代码改动
+- **验证**：`bun run db:push` 应用 migration（API 模式，直连超时自动回退，推送 1 个 migration 成功）；MCP 只读 SQL 确认 4 个索引已存在于 `pg_indexes`；`bun run db:types` 成功（database.types.ts 无 diff）；`bun run typecheck` 通过；`bun run test` 全量通过（480/480）
+
+## 2026-08-12
+
+- **类别**：性能
 - **范围**：`src/services/apiWorkshopOrders.ts`、`src/services/apiProductionOrders.ts`、`src/services/apiMaterialTransfers.ts`、`src/services/apiPrecisionFinishingCuttings.ts`、`src/services/apiPrecisionCuttingTransfers.ts`
 - **摘要**：优化清单 #6 落地（5/6）：5 处列表查询由 `select('*')` 改为显式指定列，避免大字段（如 `sales_orders.process_schedules` JSON）随列表全量下传。`getWorkshopOrders` 指定 20 列（核对表格 dataIndex、编辑表单回填、打印/Excel 消费字段后选定，删除字段无消费端）；`getProductionOrders` 主表指定 9 列（employee/items join 保持原样）；`getMaterialTransfers` 指定 18 列、`getPrecisionFinishingCuttings` 指定 29 列、`getPrecisionCuttingTransfers` 指定 30 列（逐一核对桌面/移动表格与编辑表单字段，`audited_at` 为移动列表消费已补入）。`getExtrusionProductions` 保留 `*`：表仅 1 行 + 编辑表单需明细全字段回填，指定列无收益
 - **验证**：`bun run typecheck` 通过；`bun run test` 全量通过（480/480）
