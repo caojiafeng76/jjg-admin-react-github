@@ -7,6 +7,7 @@ import {
 } from '@/utils/searchKeywords'
 import type { Database } from './database.types'
 import { getMachineEquipmentHourlyRate } from './apiMachineEquipmentMaintenances'
+import { clearStandardSecondsCache } from './apiProcessStandards'
 
 type ProcessStandardRow =
   Database['public']['Tables']['process_standards']['Row']
@@ -421,6 +422,8 @@ export async function createStandardTime(values: StandardTimeFormValues) {
   if (error) {
     throw handleApiError(error, '创建成本核算失败')
   }
+
+  clearStandardSecondsCache()
 }
 
 export async function ensureStandardTimeExists({
@@ -464,6 +467,7 @@ export async function ensureStandardTimeExists({
     throw handleApiError(error, '创建成本核算失败')
   }
 
+  clearStandardSecondsCache()
   return true
 }
 
@@ -501,6 +505,8 @@ export async function updateStandardTime({
   if (error) {
     throw handleApiError(error, '更新成本核算失败')
   }
+
+  clearStandardSecondsCache()
 }
 
 export async function deleteStandardTimes(ids: string[]) {
@@ -516,6 +522,8 @@ export async function deleteStandardTimes(ids: string[]) {
 
     throw handleApiError(error, '删除成本核算失败')
   }
+
+  clearStandardSecondsCache()
 }
 
 export async function updateStandardTimesLastProcess({

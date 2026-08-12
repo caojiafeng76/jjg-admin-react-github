@@ -15,6 +15,13 @@
 
 ## 2026-08-12
 
+- **类别**：性能
+- **范围**：`src/services/apiProcessStandards.ts`、`src/services/apiProductionOrderItems.ts`、`src/services/apiStandardTimes.ts`、`src/services/apiProcessStandards.vitest.ts`
+- **摘要**：优化清单 #3 落地：消除标准秒解析 N+1 查询。(1) `apiProcessStandards.ts` 新增模块级标准秒缓存（key=归一化的 model::operation::length::partNo，TTL 1h 对齐 queryConfig.static 语义，上限 1000 条满则清空）与 `clearStandardSecondsCache()` 导出；`getStandardSeconds` 接入缓存（单组场景不再重复查库）；新增 `resolveStandardSecondsBatch`——按 (model, operation) 组合去重后一次 `in()` 预取全部 A/B 候选行，JS 内按与 `fetchMatchedProcessStandards` 一致的匹配口径（A 类型料号+长度精确优先，B 类型型号回退取首行）解析，批量预取失败整体静默降级 0（与原逐组 try/catch 语义一致）不写缓存。(2) `apiProductionOrderItems.ts` 的 `resolveProductionOrderItemStandardSeconds` 由逐组 `getStandardSeconds`（每组最多 2 次查询）改为单次批量预取，原函数内批级缓存删除，跨详情页/列表/写操作共享模块级缓存。(3) `apiStandardTimes.ts` 的 `createStandardTime`/`ensureStandardTimeExists`/`updateStandardTime`/`deleteStandardTimes` 写入成功后调 `clearStandardSecondsCache()`，避免"改完标准秒页面仍显示旧值"；`updateStandardTimesLastProcess`（仅 is_last_process）与工艺图上传（仅图片字段）不影响秒数匹配，无需清缓存。(4) 测试：mock QueryBuilder 补 `in` 方法、`beforeEach` 清缓存防用例污染，新增批量匹配/缓存复用/失败降级 2 个用例
+- **验证**：`bun run typecheck` 通过（EXIT 0）；`bun run test` 全量通过（480/480，含新增 2 例）
+
+## 2026-08-12
+
 - **类别**：修复
 - **范围**：`src/features/workshop/ProductionScheduling/index.tsx`（路由 `/order-scheduling` 订单排产页）
 - **摘要**：适配暗黑模式：页面根容器、标题区、搜索区、摘要卡、操作条、表格区、分页条、Modal 及表单 label 的硬编码浅色 Tailwind 类（bg-white、text-slate-*、border-slate-*、ring-white 等）全部补充 `dark:` 变体；Modal header 硬编码颜色 `#f1f5f9/#fafbfc/#ffffff` 改用 `theme.useToken()` 的 `colorBgElevated`/`colorBorderSecondary`/`colorFillQuaternary`，随主题自动切换

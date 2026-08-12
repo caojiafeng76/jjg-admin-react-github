@@ -13,6 +13,7 @@ interface QueryCall {
 
 interface QueryBuilder extends PromiseLike<QueryResult> {
   eq: (...args: unknown[]) => QueryBuilder
+  in: (...args: unknown[]) => QueryBuilder
   limit: (...args: unknown[]) => QueryBuilder
   maybeSingle: (...args: unknown[]) => QueryBuilder
   not: (...args: unknown[]) => QueryBuilder
@@ -43,6 +44,7 @@ vi.mock('./supabase', () => ({
         }
 
       builder.eq = chain('eq')
+      builder.in = chain('in')
       builder.limit = chain('limit')
       builder.maybeSingle = chain('maybeSingle')
       builder.not = chain('not')
@@ -64,11 +66,13 @@ vi.mock('@/utils/errorHandler', () => ({
 }))
 
 import {
+  clearStandardSecondsCache,
   getModels,
   getOperationsByModel,
   getSalesOrderByProjectNo,
   getSalesOrdersProjectNos,
   getStandardSeconds,
+  resolveStandardSecondsBatch,
 } from './apiProcessStandards'
 
 function enqueue(...responses: QueryResult[]) {
@@ -83,6 +87,7 @@ describe('apiProcessStandards', () => {
   beforeEach(() => {
     database.calls.length = 0
     database.responses.length = 0
+    clearStandardSecondsCache()
   })
 
   it('returns no match without querying when the model is blank', async () => {
@@ -268,5 +273,97 @@ describe('apiProcessStandards', () => {
     await expect(getSalesOrdersProjectNos()).rejects.toThrow(
       '获取项目号列表失败: sales failed',
     )
+  })
+
+  it('resolves a batch of standard seconds with one query and reuses the cache', async () => {
+    enqueue({
+      data: [
+        {
+          model: 'M-A',
+          operation: '切割',
+          record_type: 'A',
+          part_no: 'P-1',
+          length: 1200,
+          standard_seconds: 42,
+        },
+        {
+          model: 'M-A',
+          operation: '切割',
+          record_type: 'B',
+          part_no: null,
+          length: null,
+          standard_seconds: 18,
+        },
+        {
+          model: 'M-B',
+          operation: '包装',
+          record_type: 'B',
+          part_no: null,
+          length: null,
+          standard_seconds: 7,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      resolveStandardSecondsBatch([
+        { model: 'M-A', operation: '切割', length: 1200, partNo: 'P-1' },
+        { model: 'M-A', operation: '切割', length: 900, partNo: 'P-9' },
+        { model: 'M-B', operation: '包装', length: 1200, partNo: 'P-1' },
+        { model: 'M-X', operation: '检验' },
+      ]),
+    ).resolves.toEqual([42, 18, 7, 0])
+
+    // 组合去重后一次预取查询：M-A 切割、M-B 包装、M-X 检验
+    expect(callsFor('select')[0]?.args).toEqual([
+      'model, operation, record_type, part_no, length, standard_seconds',
+    ])
+    expect(callsFor('in').map((call) => call.args)).toEqual([
+      ['model', ['M-A', 'M-B', 'M-X']],
+      ['operation', ['切割', '包装', '检验']],
+      ['record_type', ['A', 'B']],
+    ])
+
+    // 第二次调用全部命中模块级缓存，不再查询
+    await expect(
+      resolveStandardSecondsBatch([
+        { model: 'M-A', operation: '切割', length: 1200, partNo: 'P-1' },
+      ]),
+    ).resolves.toEqual([42])
+    expect(callsFor('select')).toHaveLength(1)
+
+    // 显式清缓存后重新查询，取到更新后的值
+    clearStandardSecondsCache()
+    enqueue({
+      data: [
+        {
+          model: 'M-A',
+          operation: '切割',
+          record_type: 'A',
+          part_no: 'P-1',
+          length: 1200,
+          standard_seconds: 99,
+        },
+      ],
+      error: null,
+    })
+    await expect(
+      resolveStandardSecondsBatch([
+        { model: 'M-A', operation: '切割', length: 1200, partNo: 'P-1' },
+      ]),
+    ).resolves.toEqual([99])
+    expect(callsFor('select')).toHaveLength(2)
+  })
+
+  it('degrades the whole batch to zero when the prefetch fails', async () => {
+    enqueue({ data: null, error: { message: 'batch failed' } })
+
+    await expect(
+      resolveStandardSecondsBatch([
+        { model: 'M-D', operation: '检验' },
+        { model: 'M-E', operation: '包装' },
+      ]),
+    ).resolves.toEqual([0, 0])
   })
 })

@@ -1,7 +1,7 @@
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import { Database } from './database.types'
-import { getStandardSeconds } from './apiProcessStandards'
+import { resolveStandardSecondsBatch } from './apiProcessStandards'
 
 export type ProductionOrderDataCategory = 'A' | 'B'
 
@@ -184,56 +184,56 @@ async function resolveProductionOrderItemStandardSeconds<
     })
   }
 
-  const standardSecondsCache = new Map<string, number>()
+  const requests: Array<{
+    index: number
+    model: string
+    operation: string
+    length: number | null
+    partNo: string | null
+  }> = []
 
-  return Promise.all(
-    items.map(async (item) => {
-      if (Number(item.standard_seconds || 0) > 0) {
-        return applyDerivedHours(item)
-      }
+  items.forEach((item, index) => {
+    if (Number(item.standard_seconds || 0) > 0) {
+      return
+    }
 
-      const normalizedProjectNo = item.project_no?.trim()
-      const normalizedModel = item.product_model?.trim()
-      const normalizedOperation = item.operation?.trim()
+    const normalizedProjectNo = item.project_no?.trim()
+    const normalizedModel = item.product_model?.trim()
+    const normalizedOperation = item.operation?.trim()
 
-      if (!normalizedProjectNo || !normalizedModel || !normalizedOperation) {
-        return item
-      }
+    if (!normalizedProjectNo || !normalizedModel || !normalizedOperation) {
+      return
+    }
 
-      const salesOrderContext = salesOrderContextMap.get(normalizedProjectNo)
-      const length = salesOrderContext?.length_mm ?? item.length_mm
-      const partNo = salesOrderContext?.material_code ?? null
-      const cacheKey = [
-        normalizedModel,
-        normalizedOperation,
-        length ?? '',
-        partNo ?? '',
-      ].join('::')
+    const salesOrderContext = salesOrderContextMap.get(normalizedProjectNo)
+    requests.push({
+      index,
+      model: normalizedModel,
+      operation: normalizedOperation,
+      length: salesOrderContext?.length_mm ?? item.length_mm,
+      partNo: salesOrderContext?.material_code ?? null,
+    })
+  })
 
-      let resolvedStandardSeconds = standardSecondsCache.get(cacheKey)
+  const resolvedSeconds = await resolveStandardSecondsBatch(requests)
+  const resolvedSecondsByIndex = new Map<number, number>()
+  requests.forEach((request, requestIndex) => {
+    resolvedSecondsByIndex.set(request.index, resolvedSeconds[requestIndex])
+  })
 
-      if (resolvedStandardSeconds === undefined) {
-        try {
-          resolvedStandardSeconds = await getStandardSeconds({
-            model: normalizedModel,
-            operation: normalizedOperation,
-            length,
-            partNo,
-          })
-        } catch {
-          resolvedStandardSeconds = 0
-        }
+  return items.map((item, index) => {
+    if (Number(item.standard_seconds || 0) > 0) {
+      return applyDerivedHours(item)
+    }
 
-        standardSecondsCache.set(cacheKey, resolvedStandardSeconds)
-      }
+    const resolvedStandardSeconds = resolvedSecondsByIndex.get(index)
 
-      if (resolvedStandardSeconds > 0) {
-        return applyDerivedHours(item, resolvedStandardSeconds)
-      }
-
+    if (resolvedStandardSeconds === undefined || resolvedStandardSeconds <= 0) {
       return item
-    }),
-  )
+    }
+
+    return applyDerivedHours(item, resolvedStandardSeconds)
+  })
 }
 
 function buildProductionOrderItemInsertPayload(
