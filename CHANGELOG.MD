@@ -15,6 +15,13 @@
 
 ## 2026-08-12
 
+- **类别**：文档
+- **范围**：`docs/性能与代码规范优化清单.md`
+- **摘要**：使用规则新增第 6 条：修复完一个问题并验证通过后，须停下向用户汇报，经用户确认后才能开始修复下一个问题，禁止连续批量修复多个问题
+- **验证**：纯文档文本调整，无代码验证
+
+## 2026-08-12
+
 - **类别**：性能 / 数据库
 - **范围**：`supabase/migrations/20260812090000_add_production_scheduling_aggregate_views.sql`（新增）、`src/services/apiProductionScheduling.ts`、`src/services/database.types.ts`（重新生成）、`src/services/apiExtrusionProductions.ts`
 - **摘要**：优化清单 #2 落地：新增聚合视图 `v_production_quantity_by_project`（production_order_items 按 project_no SUM qualified_quantity）与 `v_material_transfer_summary_by_project`（material_transfers 按 project_no 统计条数/总量/最近转移时间与车间，latest_workshop 取最近 created_at 子查询），migration 已应用；`fetchProductionQuantities`/`fetchTransferSummaries` 改为查询视图（每个 project_no 一行聚合结果，去掉原 1000 行/页循环拉取 + JS 求和），`fetchProcessStandardCapacityRows` 保留（按 model 过滤小查询）；`bun run db:types` 重新生成类型。连带修复 `apiExtrusionProductions.ts`：其 `SupabaseTableClient = ReturnType<typeof supabase.from>` 会解析到 `from` 的 Views 重载，新增视图（无 id 列）破坏了原视图集公共键交集导致 `.eq('id', id)` 报 never 类型错误——改为直接类型化 `supabase.from('extrusion_productions')`（表本就在 database.types.ts 中）
