@@ -38,6 +38,18 @@ describe('Syney PO document modules', () => {
     expect(excelButton).toContain('onFocus={preloadExcel}')
   })
 
+  it('loads the shipping-list Excel document on demand', () => {
+    const excel = readLocalFile('useExportShippingListAsExcel.ts')
+    const excelButton = readLocalFile('ExportShippingListButton.tsx')
+
+    expect(excel).not.toMatch(/from ['"]xlsx-js-style['"]/)
+    expect(excel).toContain(
+      "import('./shippingListExcelDocument')",
+    )
+    expect(excelButton).toContain('onMouseEnter={preloadExcel}')
+    expect(excelButton).toContain('onFocus={preloadExcel}')
+  })
+
   it('loads the Excel parser with the order page to avoid upload-time chunk fetch failures', () => {
     const upload = readLocalFile('ExcelUpload.tsx')
     const form = readLocalFile('PoForm.tsx')

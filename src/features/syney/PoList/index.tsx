@@ -15,6 +15,7 @@ import { usePos } from './usePos'
 import PrintButton from '@/ui/PrintButton'
 import { usePrint } from './usePrint'
 import ExportInfoButton from './ExportInfoButton'
+import ExportShippingListButton from './ExportShippingListButton'
 import { useSyneySpecs } from '../SpecList/useSyneySpecs'
 import { useCreatePo } from './useCreatePo'
 import {
@@ -345,6 +346,8 @@ export default function PoList() {
         </PrintButton>
 
         <ExportInfoButton />
+
+        <ExportShippingListButton />
 
         <PrintDecompositionButton
           safePartSettings={safePartSettings}

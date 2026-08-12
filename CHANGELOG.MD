@@ -15,6 +15,13 @@
 
 ## 2026-08-12
 
+- **类别**：新建
+- **范围**：`src/features/syney/PoList/`（`shippingListExcelDocument.ts`、`useExportShippingListAsExcel.ts`、`ExportShippingListButton.tsx`、`index.tsx`、`shippingListExcelDocument.vitest.ts`、`lazyDocumentModules.vitest.ts`）
+- **摘要**：西尼订单列表页新增"导出发货清单"功能：勾选订单后导出 Excel（标题行 `{M.D}发货清单` + 表头 序号/采购单号/生产编号/送货单号/商标/规格/工艺/备注），字段映射自选中订单（No/SONo/Brand/Spec/Technique/Remark），送货单号列留空由用户导出后自行填写；宋体边框样式、自动列宽、冻结前两行、工艺/备注列自动换行；按钮复用 `feature:syney-po-list.export` 权限，Excel 模块动态加载（lazy import + hover 预加载），导出成功清空选中。
+- **验证**：`bun run typecheck` 通过；`bun run test` 通过（新增 shippingListExcelDocument 2 个用例 + lazyDocumentModules 断言更新）。
+
+## 2026-08-12
+
 - **类别**：修复
 - **范围**：`src/features/syney/`（SpecList、PoList、PoDetail、ReportList、ReportDetail、SafePartSetting 全部组件）
 - **摘要**：西尼模块暗黑模式适配：为表格（表头/行悬停/合计行）、筛选/搜索栏、状态徽章（slate/rose/amber/emerald/pink）、链接、图标与文字颜色补充 `dark:` Tailwind 变体（深色背景 slate-800/900 系、深色边框、浅色文字），遵循模块既有约定；`ExcelUpload.tsx` 警告 Alert 的硬编码 `#fffbe6`/`#faad14` 改为 antd 主题 token（`colorWarningBg`/`colorWarningBorder`），随暗黑算法自动切换。
