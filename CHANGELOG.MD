@@ -16,6 +16,13 @@
 ## 2026-08-12
 
 - **类别**：性能
+- **范围**：`src/features/syney/PoList/ExcelUpload.tsx`、`src/features/syney/PoList/lazyDocumentModules.vitest.ts`
+- **摘要**：优化清单 #20 落地：修复 `check:bundle` 基线失败（CI 红）。根因：`PoList` 页面静态依赖链含 `xlsx-js-style`（约 800KB）——`ExcelUpload.tsx` 静态 import `@utils/excelUtils`（其静态依赖 xlsx），导致 xlsx 进入 PoList 动态页面静态依赖图，触发预算脚本 "动态页面静态依赖图不应包含 PDF/XLSX 模块"。改法：`ExcelUpload.tsx` 将 `importExcelOrder` 改为 `import('@utils/excelUtils')` 动态加载（`TransformedOrderData` 保持 type-only import），并新增挂载即 `void loadExcelUtils()` 预加载——保留原"避免上传时才拉 chunk 失败"的设计意图（挂载时预热，用户选文件时已缓存）；同步更新 `lazyDocumentModules.vitest.ts` 保护测试（断言动态 import + 预加载 + type-only 保持）
+- **验证**：`bun run build` 成功；`bun run check:bundle` 通过（`Bundle budget passed: assets/index-*.js gzip 25.0 KB`，此前基线失败）；`bun run test` 全量通过（480/480）；未做浏览器端 Excel 上传流程回归（需登录态与测试环境，缺口说明）
+
+## 2026-08-12
+
+- **类别**：性能
 - **范围**：`vite.config.ts`
 - **摘要**：优化清单 #8 落地：Vite 8（Rolldown 内核）下 `manualChunks` 已移除/弃用，改用 `build.rolldownOptions.output.codeSplitting.groups` 手动分包，为核心 vendor 提供稳定 chunk（内容不变则 hash 不变，浏览器缓存友好）：`vendor-react`（react/react-dom/react-router/zustand/immer）、`vendor-antd-core`（antd 基础组件，入口链常用白名单）、`vendor-antd-deps`（@ant-design/@rc-component/rc-* 依赖树，dayjs 亦归入此组）、`vendor-query`（@tanstack）、`vendor-supabase`。重型组件（table/date-picker/select 等）与 PDF/XLSX 库不匹配任何组，保持 Rolldown 按需懒加载拆分，避免首屏拉取整包 antd；入口静态依赖由原先 30+ 散件收敛为 5 个 vendor chunk + 业务链，入口 index gzip 24.85 KB
 - **验证**：`bun run build` 成功（tsc -b + vite build，无循环依赖/警告）；`bun run check:bundle` 仍失败但为**基线既有问题**（HEAD 配置构建同样报 `PoList -> xlsx.min` 静态依赖违规，xlsx 不匹配任何分组、行为未变，已在清单追加 #20）；`bun run test` 全量通过（480/480）

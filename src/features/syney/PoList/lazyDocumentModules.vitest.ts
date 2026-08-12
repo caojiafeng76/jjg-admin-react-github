@@ -50,15 +50,16 @@ describe('Syney PO document modules', () => {
     expect(excelButton).toContain('onFocus={preloadExcel}')
   })
 
-  it('loads the Excel parser with the order page to avoid upload-time chunk fetch failures', () => {
+  it('loads the Excel parser on demand and preloads it with the order page', () => {
     const upload = readLocalFile('ExcelUpload.tsx')
     const form = readLocalFile('PoForm.tsx')
     const page = readLocalFile('index.tsx')
 
-    expect(upload).toMatch(
+    expect(upload).toContain("import('@utils/excelUtils')")
+    expect(upload).not.toMatch(
       /import \{[^}]*importExcelOrder[^}]*\} from ['"]@utils\/excelUtils['"]/,
     )
-    expect(upload).not.toContain("import('@utils/excelUtils')")
+    expect(upload).toContain('useEffect')
     expect(form).toContain(
       "import type { TransformedOrderData } from '@utils/excelUtils'",
     )

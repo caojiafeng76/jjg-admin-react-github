@@ -3,11 +3,11 @@ import { Upload, Button, message, Table, Alert, Space, Typography, theme } from 
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 import type { UploadFile } from 'antd/es/upload/interface'
 import type { ISyneySpec } from '@services/types'
-import {
-  importExcelOrder,
-  type TransformedOrderData,
-} from '@utils/excelUtils'
+import type { TransformedOrderData } from '@utils/excelUtils'
 import { getItemsWithParamSpec } from '@utils/syney'
+
+// xlsx-js-style 约 800KB，独立 chunk 挂载即预加载（避免上传时临时拉取失败）
+const loadExcelUtils = () => import('@utils/excelUtils')
 
 const { Text } = Typography
 
@@ -49,6 +49,11 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
   const [rawParsedData, setRawParsedData] =
     useState<TransformedOrderData | null>(null)
   const [previewVisible, setPreviewVisible] = useState(false)
+
+  // 挂载即预加载 Excel 解析 chunk，避免用户上传时才发起网络请求
+  useEffect(() => {
+    void loadExcelUtils()
+  }, [])
 
   const parsedData = useMemo(() => {
     if (!rawParsedData) {
@@ -92,6 +97,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
 
     try {
       // 解析Excel文件
+      const { importExcelOrder } = await loadExcelUtils()
       const orderData = await importExcelOrder(file)
 
       // 保存解析结果
