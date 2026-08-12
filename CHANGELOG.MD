@@ -16,6 +16,12 @@
 ## 2026-08-12
 
 - **类别**：重构 / 修改
+- **范围**：`src/features/syney/SafePartSetting/SafePartSettingPage.tsx`、`src/features/packaging-process/WorkOrderList/useWorkOrders.ts`、`src/features/packaging-process/StandardTimeList/useStandardTimes.ts`
+- **摘要**：收尾遗留优化项：(1) SafePartSettingPage 的 3 个裸 useMutation（保存/删除/图纸上传）迁移到 useMutationWithMessage——复用 App.useApp() 的 messageApi，成功提示/错误提示/缓存失效统一由共享 hook 处理，移除手写 message 与 invalidate 样板及 useMutation/useQueryClient 依赖；(2) packaging 两个"生产号选项"查询键统一为 ['process-standards', 'project-nos']，与 workshop 共享同一缓存，消除同接口（getSalesOrdersProjectNos）跨域重复请求，workshop 侧失效可联动刷新
+- **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过；eslint 改动文件 0 错误
+## 2026-08-12
+
+- **类别**：重构 / 修改
 - **范围**：`src/features/workshop/OrderStatusDashboard/`（index.tsx 拆分 + 新增 dashboardRenderUtils.tsx / ProductionDetailModal.tsx / TransferDetailModal.tsx / PrecisionCuttingDetailModal.tsx / ExtrusionDetailModal.tsx）、`package.json`、`AGENTS.md`
 - **摘要**：执行第四周期：(1) OrderStatusDashboard 2741 行巨型组件拆分——4 个明细弹窗（生产/物料转移/精切/挤压，共 ~1080 行）拆为独立文件，共享渲染基础设施（render helpers、密集表格组件、类型、VIEWER 隐藏列常量）收拢到 dashboardRenderUtils.tsx，主组件 index.tsx 降至 ~1150 行，消除循环依赖；(2) 依赖清单瘦身——@tanstack/react-query-devtools（DEV 条件渲染）与 supabase CLI 从 dependencies 移至 devDependencies；react-icons 与双 QR 库经核查用途真实（4 处 BiScan 图标 / 扫码 vs 生成），保留；(3) 经用户决策，AGENTS.md 废除接口 I 前缀要求（与 ~230 个无前缀接口现状对齐，legacy syney 8 个 I 前缀接口保留为历史命名）
 - **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过；eslint 拆分文件 0 错误（13 个 fast-refresh 警告与拆分前一致，非新增问题）

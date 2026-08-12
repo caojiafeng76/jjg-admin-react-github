@@ -11,7 +11,8 @@ import {
 import { getSalesOrdersProjectNos } from '@/services/apiProcessStandards'
 
 const PACKAGING_STANDARD_TIMES_KEY = 'packaging-standard-times' as const
-const SALES_ORDERS_PROJECT_NOS_KEY = 'sales-orders-project-nos' as const
+// 与 workshop StandardTimeList 共享同一查询键（queryFn 同为 getSalesOrdersProjectNos），避免同接口重复请求
+const SALES_ORDERS_PROJECT_NOS_KEY = ['process-standards', 'project-nos'] as const
 
 export function usePackagingStandardTimeList({
   page,
@@ -60,7 +61,7 @@ export function useDeletePackagingStandardTime() {
 
 export function usePackagingSalesOrdersProjectNos() {
   return useQuery({
-    queryKey: [SALES_ORDERS_PROJECT_NOS_KEY],
+    queryKey: SALES_ORDERS_PROJECT_NOS_KEY,
     queryFn: getSalesOrdersProjectNos,
     // 生产号选项低变更，仅在表单打开挂载时刷新（refetchOnMount: 'always'），常驻页面不轮询
     ...queryConfig.list,

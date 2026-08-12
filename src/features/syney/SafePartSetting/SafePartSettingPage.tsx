@@ -24,7 +24,6 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   deleteSyneySafePartSettings,
   getSyneySafePartDrawingDownloadUrl,
@@ -38,6 +37,7 @@ import {
   SYNEY_SAFE_PART_SETTINGS_KEY,
   useSyneySafePartSettings,
 } from '../useSyneySafePartSettings'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 
 const DECOMPOSITION_ROLE_LABELS: Record<string, string> = {
   side_frame: '侧围',
@@ -67,7 +67,6 @@ type DrawingPreview = {
 
 export default function SafePartSettingPage() {
   const { message } = App.useApp()
-  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<SyneySafePartSetting | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
@@ -120,26 +119,27 @@ export default function SafePartSettingPage() {
 
   const { data, isLoading } = useSyneySafePartSettings()
 
-  const saveMutation = useMutation({
+  const saveMutation = useMutationWithMessage({
     mutationFn: upsertSyneySafePartSetting,
-    onSuccess: () => {
-      message.success('保存成功')
-      queryClient.invalidateQueries({ queryKey: [SYNEY_SAFE_PART_SETTINGS_KEY] })
-      closeModal()
-    },
+    invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
+    successMessage: '保存成功',
+    messageApi: message,
+    onSuccess: () => closeModal(),
   })
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutationWithMessage({
     mutationFn: deleteSyneySafePartSettings,
-    onSuccess: () => {
-      message.success('删除成功')
-      setSelectedRowKeys([])
-      queryClient.invalidateQueries({ queryKey: [SYNEY_SAFE_PART_SETTINGS_KEY] })
-    },
+    invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
+    successMessage: '删除成功',
+    messageApi: message,
+    onSuccess: () => setSelectedRowKeys([]),
   })
 
-  const drawingUploadMutation = useMutation({
+  const drawingUploadMutation = useMutationWithMessage({
     mutationFn: uploadSyneySafePartDrawing,
+    invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
+    successMessage: '图纸上传成功',
+    messageApi: message,
   })
 
   const handleDrawingUpload = useCallback(
@@ -148,17 +148,13 @@ export default function SafePartSettingPage() {
 
       try {
         await drawingUploadMutation.mutateAsync({ setting: record, file })
-        message.success('图纸上传成功')
-        queryClient.invalidateQueries({
-          queryKey: [SYNEY_SAFE_PART_SETTINGS_KEY],
-        })
-      } catch (error) {
-        message.error(error instanceof Error ? error.message : '图纸上传失败')
+      } catch {
+        // 错误消息已由 useMutationWithMessage 统一提示
       } finally {
         setUploadingDrawingId(null)
       }
     },
-    [drawingUploadMutation, message, queryClient],
+    [drawingUploadMutation],
   )
 
   const handlePreviewDrawing = useCallback(
