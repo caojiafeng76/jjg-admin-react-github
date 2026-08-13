@@ -15,6 +15,13 @@
 
 ## 2026-08-13
 
+- **类别**：文档
+- **范围**：`docs/UI设计调研与改版指南.md`（新建）
+- **摘要**：调研 2025-2026 年主流后台管理系统 UI 设计趋势（Calm Design 克制极简、Bento Grid、密度分层、暗色标配、微交互、决策优先看板等），结合本项目 React 19 + antd 6 + Tailwind 4 技术栈与现有代码（`App.tsx` 主题 token、`AppLayout`、`AppHeader`）做现状诊断，产出可落地的 UI 改版指南：品牌色/圆角/表格密度等 token 规格、antd 与 Tailwind 的 `@layer` + CSS 变量桥接方案、布局与组件细化方向、P0-P3 优先级路线图。作为全站视觉升级的参考规范，不改动任何运行代码
+- **验证**：纯文档新增，无需构建/测试；已核对与既有 `docs/UI设计风格.md`（物料转移单局部规范）不冲突、互相引用
+
+## 2026-08-13
+
 - **类别**：修复
 - **范围**：`src/services/apiProcessStandards.ts`、`src/services/apiExtrusionProductions.ts`、`src/services/apiQualityReworkRepair.ts`、`src/services/apiQualityIssueRecords.ts`、`src/services/apiProcessStandards.vitest.ts`
 - **摘要**：修复"生产工单 / 成本核算"输入项目号 105-350 带不出来的 bug。根因：`getSalesOrdersProjectNos()` 等 4 个选项查询改为单次查 `v_sales_order_project_options` 视图后丢失了分页，而项目配置了 PostgREST `db-max-rows = 1000`（显式 limit 也无法突破），按 `created_at DESC` 排序只返回最新 1000 条"生产中"订单（共 2822 条），105-350（`26052603-01/02`，创建于 5 月 26 日，排第 1391 位）及所有 6 月 22 日前创建的订单均被截断。修复：恢复 while + `.range()` 分页循环拉取（同 `apiMaterialTransfers` 既有模式），保留视图去重逻辑；同步修复同款问题的 `getExtrusionSalesOrdersProjectNos()`（挤压生产单）、`getQualityReworkRepairOrderOptions()`（质量返工）、`getQualityIssueRecordOrderOptions()`（质量问题记录，无 status 过滤、全量 4111 行，截断最严重）。更新 `apiProcessStandards.vitest.ts` 分页测试（断言跨页 range 调用与去重）
