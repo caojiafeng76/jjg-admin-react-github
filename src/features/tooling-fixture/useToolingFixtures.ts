@@ -18,6 +18,7 @@ import {
 } from '@/services/apiToolingFixturePublic'
 import type {
   ToolingFixture,
+  ToolingFixtureDateRange,
   ToolingFixtureFormValues,
 } from '@/services/apiToolingFixture'
 import { toolingFixtureKeys } from './queryKeys'
@@ -27,16 +28,31 @@ export function useToolingFixtureList({
   pageSize,
   keyword,
   status,
+  manufacturedDateRange,
 }: {
   page: number
   pageSize: number
   keyword?: string
   status?: ToolingFixture['status']
+  manufacturedDateRange?: ToolingFixtureDateRange
 }) {
   return useQuery({
-    queryKey: toolingFixtureKeys.list({ page, pageSize, keyword, status }),
+    queryKey: toolingFixtureKeys.list({
+      page,
+      pageSize,
+      keyword,
+      status,
+      manufacturedDateRange,
+    }),
     queryFn: ({ signal }) =>
-      getToolingFixtureList({ page, pageSize, keyword, status, signal }),
+      getToolingFixtureList({
+        page,
+        pageSize,
+        keyword,
+        status,
+        manufacturedDateRange,
+        signal,
+      }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
   })

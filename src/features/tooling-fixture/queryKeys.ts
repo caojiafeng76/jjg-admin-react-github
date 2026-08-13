@@ -2,6 +2,7 @@ import type {
   ToolingFixtureAction,
   ToolingFixtureStatus,
 } from './fixtureDomain'
+import type { ToolingFixtureDateRange } from '@/services/apiToolingFixture'
 
 export const toolingFixtureKeys = {
   all: ['tooling-fixtures'] as const,
@@ -11,6 +12,7 @@ export const toolingFixtureKeys = {
     pageSize: number
     keyword?: string
     status?: ToolingFixtureStatus
+    manufacturedDateRange?: ToolingFixtureDateRange
   }) =>
     [
       ...toolingFixtureKeys.lists(),
@@ -19,6 +21,8 @@ export const toolingFixtureKeys = {
         pageSize: params.pageSize,
         keyword: params.keyword?.trim() ?? '',
         status: params.status ?? '',
+        dateStart: params.manufacturedDateRange?.start ?? '',
+        dateEnd: params.manufacturedDateRange?.end ?? '',
       },
     ] as const,
   records: () => [...toolingFixtureKeys.all, 'records'] as const,

@@ -17,6 +17,11 @@ export type ToolingFixture = Omit<ToolingFixtureRow, 'status' | 'lifecycle'> & {
   lifecycle: ToolingFixtureLifecycle
 }
 
+export interface ToolingFixtureDateRange {
+  start?: string
+  end?: string
+}
+
 export interface ToolingFixtureFormValues {
   fixture_no: string
   category: string
@@ -155,12 +160,14 @@ export async function getToolingFixtureList({
   pageSize,
   keyword,
   status,
+  manufacturedDateRange,
   signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
   status?: ToolingFixture['status']
+  manufacturedDateRange?: ToolingFixtureDateRange
   signal?: AbortSignal
 }): Promise<{ items: ToolingFixture[]; total: number }> {
   const from = (page - 1) * pageSize
@@ -179,6 +186,14 @@ export async function getToolingFixtureList({
 
   if (status) {
     query = query.eq('status', status)
+  }
+
+  if (manufacturedDateRange?.start) {
+    query = query.gte('manufactured_date', manufacturedDateRange.start)
+  }
+
+  if (manufacturedDateRange?.end) {
+    query = query.lte('manufactured_date', manufacturedDateRange.end)
   }
 
   query = query
@@ -204,10 +219,12 @@ export async function getToolingFixtureList({
 export async function getAllToolingFixtures({
   keyword,
   status,
+  manufacturedDateRange,
   signal,
 }: {
   keyword?: string
   status?: ToolingFixture['status']
+  manufacturedDateRange?: ToolingFixtureDateRange
   signal?: AbortSignal
 }): Promise<ToolingFixture[]> {
   const normalizedKeyword = normalizeText(keyword)
@@ -226,6 +243,14 @@ export async function getAllToolingFixtures({
 
   if (status) {
     query = query.eq('status', status)
+  }
+
+  if (manufacturedDateRange?.start) {
+    query = query.gte('manufactured_date', manufacturedDateRange.start)
+  }
+
+  if (manufacturedDateRange?.end) {
+    query = query.lte('manufactured_date', manufacturedDateRange.end)
   }
 
   query = query

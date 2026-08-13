@@ -22,6 +22,8 @@ interface FixtureQueryBuilder {
   order: ReturnType<typeof vi.fn>
   or: ReturnType<typeof vi.fn>
   eq: ReturnType<typeof vi.fn>
+  gte: ReturnType<typeof vi.fn>
+  lte: ReturnType<typeof vi.fn>
   abortSignal: ReturnType<typeof vi.fn>
   range: ReturnType<typeof vi.fn>
   in: ReturnType<typeof vi.fn>
@@ -37,6 +39,8 @@ function createFixtureQueryBuilder(): FixtureQueryBuilder {
     order: vi.fn(),
     or: vi.fn(),
     eq: vi.fn(),
+    gte: vi.fn(),
+    lte: vi.fn(),
     abortSignal: vi.fn(),
     range: vi.fn(),
     in: vi.fn(),
@@ -47,6 +51,8 @@ function createFixtureQueryBuilder(): FixtureQueryBuilder {
   builder.order.mockReturnValue(builder)
   builder.or.mockReturnValue(builder)
   builder.eq.mockReturnValue(builder)
+  builder.gte.mockReturnValue(builder)
+  builder.lte.mockReturnValue(builder)
   builder.abortSignal.mockReturnValue(builder)
   builder.range.mockImplementation(() => ({
     data: builder.data,
@@ -169,6 +175,20 @@ describe('getAllToolingFixtures', () => {
     )
     expect(builder.eq).toHaveBeenCalledWith('status', '使用中')
     expect(builder.abortSignal).toHaveBeenCalledWith(signal)
+  })
+
+  it('applies manufactured date range filters', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = []
+    builder.count = 0
+
+    await getAllToolingFixtures({
+      manufacturedDateRange: { start: '2026-01-01', end: '2026-06-30' },
+    })
+
+    expect(builder.gte).toHaveBeenCalledWith('manufactured_date', '2026-01-01')
+    expect(builder.lte).toHaveBeenCalledWith('manufactured_date', '2026-06-30')
   })
 
   it('rejects filters that exceed the 1000-row cap', async () => {

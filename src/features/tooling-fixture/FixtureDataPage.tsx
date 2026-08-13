@@ -4,6 +4,7 @@ import {
   App,
   Button,
   Card,
+  DatePicker,
   Input,
   Modal,
   Pagination,
@@ -12,6 +13,7 @@ import {
   Typography,
 } from 'antd'
 import type { FormInstance } from 'antd'
+import type { Dayjs } from 'dayjs'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import {
@@ -41,6 +43,9 @@ export default function FixtureDataPage() {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState<ToolingFixture['status']>()
+  const [manufacturedDateRange, setManufacturedDateRange] = useState<
+    [Dayjs, Dayjs] | null
+  >(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] = useState<ToolingFixture | null>(
     null,
@@ -54,6 +59,12 @@ export default function FixtureDataPage() {
     pageSize,
     keyword,
     status,
+    manufacturedDateRange: manufacturedDateRange
+      ? {
+          start: manufacturedDateRange[0].format('YYYY-MM-DD'),
+          end: manufacturedDateRange[1].format('YYYY-MM-DD'),
+        }
+      : undefined,
   })
   const createMutation = useCreateToolingFixture()
   const updateMutation = useUpdateToolingFixture()
@@ -177,6 +188,12 @@ export default function FixtureDataPage() {
       const items = await getAllToolingFixtures({
         keyword: keyword || undefined,
         status,
+        manufacturedDateRange: manufacturedDateRange
+          ? {
+              start: manufacturedDateRange[0].format('YYYY-MM-DD'),
+              end: manufacturedDateRange[1].format('YYYY-MM-DD'),
+            }
+          : undefined,
       })
 
       if (items.length === 0) {
@@ -192,7 +209,7 @@ export default function FixtureDataPage() {
     } finally {
       setIsPrintLoading(false)
     }
-  }, [keyword, message, printLabels, status])
+  }, [keyword, manufacturedDateRange, message, printLabels, status])
 
   const handlePrintRecord = useCallback(
     (record: ToolingFixture) => {
@@ -257,6 +274,19 @@ export default function FixtureDataPage() {
             onChange={(value: ToolingFixture['status'] | undefined) => {
               setPage(1)
               setStatus(value)
+            }}
+          />
+          <DatePicker.RangePicker
+            allowClear
+            format="YYYY-MM-DD"
+            placeholder={['制作开始日期', '制作结束日期']}
+            value={manufacturedDateRange}
+            style={{ width: 260 }}
+            onChange={(value) => {
+              setPage(1)
+              setManufacturedDateRange(
+                value?.[0] && value?.[1] ? [value[0], value[1]] : null,
+              )
             }}
           />
           <PrintButton

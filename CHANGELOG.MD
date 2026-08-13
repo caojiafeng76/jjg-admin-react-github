@@ -15,6 +15,13 @@
 
 ## 2026-08-13
 
+- **类别**：变更
+- **范围**：`src/features/tooling-fixture/FixtureDataPage.tsx`、`useToolingFixtures.ts`、`queryKeys.ts`、`src/services/apiToolingFixture.ts`（含 `apiToolingFixture.vitest.ts`）
+- **摘要**：工装资料页新增"按制作日期范围筛选"。页面搜索栏增加 `DatePicker.RangePicker`（占位"制作开始日期 / 制作结束日期"），选择后按 `manufactured_date` 的 `gte`/`lte` 过滤列表；`getToolingFixtureList` 与 `getAllToolingFixtures`（打印二维码路径）均支持 `manufacturedDateRange` 参数，queryKey 同步纳入日期范围以保证缓存隔离；补测试覆盖日期范围筛选
+- **验证**：`bun run test` 通过（apiToolingFixture 相关 14 用例）、`bun run typecheck` 通过（0 错误）
+
+## 2026-08-13
+
 - **类别**：修复
 - **范围**：`src/App.tsx`
 - **摘要**：修复 B1 遗留风险 —— antd cssVar 变量默认挂在组件根元素（`.css-var-*`）上，作用域外元素（脱离 antd 组件的裸 DOM、portal 内容）解析不到 `--jjg-*` 变量、会回退到 CSS 兜底值。新增 `SyncThemeTokens` 组件（置于 `AntdApp` 内），用 `theme.useToken()` 获取计算后的 token，将 `@theme inline` 引用的 11 个变量（主色/语义色/圆角/文本灰/分割线）显式写入 `document.documentElement`（:root），任意位置均可解析；主题/暗色切换时 token 变化自动同步，值仍以 `App.tsx BASE_TOKENS` 为唯一来源。顺带修正：`--color-text-tertiary` 旧硬编码 `rgba(0,0,0,0.25)` 与 antd 6 默认 `0.45` 不一致（旧值实为 quaternary 语义），桥接后以 antd 为准
