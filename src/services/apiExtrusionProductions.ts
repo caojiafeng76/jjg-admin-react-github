@@ -103,6 +103,9 @@ export interface ExtrusionSalesOrderOption
   project_no: string
 }
 
+// PostgREST 默认 db-max-rows 为 1000，选项查询必须按此大小分页循环拉取
+const SALES_ORDER_OPTIONS_PAGE_SIZE = 1000
+
 export interface ExtrusionProductionHeaderInput {
   id?: string
   production_date: string
@@ -340,23 +343,37 @@ function applyExtrusionProductionFilters<
 }
 
 export async function getExtrusionSalesOrdersProjectNos() {
-  // 查 v_sales_order_project_options 视图（服务端按 project_no 去重），替代 while 分页全表扫描
-  const { data, error } = await supabase
-    .from('v_sales_order_project_options')
-    .select(
-      'project_no, product_model, length_mm, material_code, customer, customer_model, weight_per_meter_kg, created_at',
-    )
-    .eq('status', '生产中')
-    .order('created_at', { ascending: false })
-    .order('project_no', { ascending: true })
+  // PostgREST 默认 db-max-rows 为 1000，单次查询会截断生产中订单选项，必须分页循环拉取
+  const options: ExtrusionSalesOrderOption[] = []
+  let from = 0
 
-  if (error) {
-    throw handleApiError(error, '获取挤压项目号列表失败')
+  while (true) {
+    const to = from + SALES_ORDER_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('v_sales_order_project_options')
+      .select(
+        'project_no, product_model, length_mm, material_code, customer, customer_model, weight_per_meter_kg, created_at',
+      )
+      .eq('status', '生产中')
+      .order('created_at', { ascending: false })
+      .order('project_no', { ascending: true })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取挤压项目号列表失败')
+    }
+
+    options.push(
+      ...(data || []).filter(
+        (item): item is ExtrusionSalesOrderOption => item.project_no !== null,
+      ),
+    )
+
+    if ((data || []).length < SALES_ORDER_OPTIONS_PAGE_SIZE) break
+    from += SALES_ORDER_OPTIONS_PAGE_SIZE
   }
 
-  return (data || []).filter(
-    (item): item is ExtrusionSalesOrderOption => item.project_no !== null,
-  )
+  return options
 }
 
 export async function getExtrusionSalesOrderByProjectNo(projectNo: string) {

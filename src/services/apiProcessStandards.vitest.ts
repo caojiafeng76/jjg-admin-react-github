@@ -196,28 +196,53 @@ describe('apiProcessStandards', () => {
     await expect(getModels()).rejects.toThrow('获取型号列表失败: offline')
   })
 
-  it('loads sales-order project options from the deduplicated view', async () => {
-    const rows = Array.from({ length: 1000 }, (_, index) => ({
+  it('loads sales-order project options across pages with dedup', async () => {
+    // 第一页 1000 条（含 null 项目号与重复项目号），第二页不足 1000 条触发终止
+    const firstPage = Array.from({ length: 1000 }, (_, index) => ({
       created_at: `2026-07-13T00:${String(index % 60).padStart(2, '0')}:00Z`,
       customer: '客户',
       customer_model: null,
       length_mm: 1000,
       material_code: `MAT-${index}`,
       product_model: 'M-1',
-      project_no:
-        index === 500 ? null : index === 999 ? 'P-0' : `P-${index}`,
+      project_no: index === 500 ? null : index === 999 ? 'P-0' : `P-${index}`,
     }))
-    enqueue({ data: rows, error: null })
+    const secondPage = [
+      {
+        created_at: '2026-07-13T01:00:00Z',
+        customer: '客户2',
+        customer_model: null,
+        length_mm: 2000,
+        material_code: 'MAT-1001',
+        product_model: 'M-2',
+        project_no: 'P-1001',
+      },
+      // 跨页重复项目号应被去重
+      {
+        created_at: '2026-07-13T01:00:00Z',
+        customer: '客户2',
+        customer_model: null,
+        length_mm: 2000,
+        material_code: 'MAT-1001',
+        product_model: 'M-2',
+        project_no: 'P-1001',
+      },
+    ]
+    enqueue({ data: firstPage, error: null }, { data: secondPage, error: null })
 
     const result = await getSalesOrdersProjectNos()
 
-    expect(result).toHaveLength(998)
+    expect(result).toHaveLength(998 + 1)
     expect(result).not.toContainEqual(
       expect.objectContaining({ project_no: null }),
     )
     expect(result.filter((item) => item.project_no === 'P-0')).toHaveLength(1)
-    // 单次视图查询（v_sales_order_project_options 服务端按 project_no 去重），不再 while 分页循环
-    expect(callsFor('range')).toEqual([])
+    expect(result.filter((item) => item.project_no === 'P-1001')).toHaveLength(1)
+    // 分页循环拉取（PostgREST 默认 db-max-rows=1000），两页 range 连续
+    expect(callsFor('range')).toEqual([
+      expect.objectContaining({ args: [0, 999] }),
+      expect.objectContaining({ args: [1000, 1999] }),
+    ])
     expect(callsFor('select')[0]?.table).toBe(
       'v_sales_order_project_options',
     )

@@ -265,30 +265,45 @@ export async function getModels() {
   return uniqueModels as string[]
 }
 
+// PostgREST 默认 db-max-rows 为 1000，单次查询会截断生产中订单选项，
+// 必须按 1000 一页循环拉取（同 apiMaterialTransfers 的分页模式）
+const SALES_ORDER_OPTIONS_PAGE_SIZE = 1000
+
 export async function getSalesOrdersProjectNos() {
-  // 查 v_sales_order_project_options 视图（服务端按 project_no 去重），替代 while 分页全表扫描
-  const { data, error } = await supabase
-    .from('v_sales_order_project_options')
-    .select(
-      'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
-    )
-    .eq('status', '生产中')
-    .order('created_at', { ascending: false })
-    .order('project_no', { ascending: true })
-
-  if (error) {
-    throw handleApiError(error, '获取项目号列表失败')
-  }
-
   const projectNos = new Set<string>()
-  return (data || []).filter((item): item is SalesOrderProjectNoOption => {
-    if (!item.project_no || projectNos.has(item.project_no)) {
-      return false
+  const options: SalesOrderProjectNoOption[] = []
+  let from = 0
+
+  while (true) {
+    const to = from + SALES_ORDER_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('v_sales_order_project_options')
+      .select(
+        'project_no, product_model, length_mm, material_code, customer, customer_model, created_at',
+      )
+      .eq('status', '生产中')
+      .order('created_at', { ascending: false })
+      .order('project_no', { ascending: true })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取项目号列表失败')
     }
 
-    projectNos.add(item.project_no)
-    return true
-  })
+    for (const item of data || []) {
+      if (!item.project_no || projectNos.has(item.project_no)) {
+        continue
+      }
+
+      projectNos.add(item.project_no)
+      options.push(item as SalesOrderProjectNoOption)
+    }
+
+    if ((data || []).length < SALES_ORDER_OPTIONS_PAGE_SIZE) break
+    from += SALES_ORDER_OPTIONS_PAGE_SIZE
+  }
+
+  return options
 }
 
 export async function getSalesOrderByProjectNo(projectNo: string) {

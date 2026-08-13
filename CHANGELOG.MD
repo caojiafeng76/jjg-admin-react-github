@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-13
+
+- **类别**：修复
+- **范围**：`src/services/apiProcessStandards.ts`、`src/services/apiExtrusionProductions.ts`、`src/services/apiQualityReworkRepair.ts`、`src/services/apiQualityIssueRecords.ts`、`src/services/apiProcessStandards.vitest.ts`
+- **摘要**：修复"生产工单 / 成本核算"输入项目号 105-350 带不出来的 bug。根因：`getSalesOrdersProjectNos()` 等 4 个选项查询改为单次查 `v_sales_order_project_options` 视图后丢失了分页，而项目配置了 PostgREST `db-max-rows = 1000`（显式 limit 也无法突破），按 `created_at DESC` 排序只返回最新 1000 条"生产中"订单（共 2822 条），105-350（`26052603-01/02`，创建于 5 月 26 日，排第 1391 位）及所有 6 月 22 日前创建的订单均被截断。修复：恢复 while + `.range()` 分页循环拉取（同 `apiMaterialTransfers` 既有模式），保留视图去重逻辑；同步修复同款问题的 `getExtrusionSalesOrdersProjectNos()`（挤压生产单）、`getQualityReworkRepairOrderOptions()`（质量返工）、`getQualityIssueRecordOrderOptions()`（质量问题记录，无 status 过滤、全量 4111 行，截断最严重）。更新 `apiProcessStandards.vitest.ts` 分页测试（断言跨页 range 调用与去重）
+- **验证**：`bun run test` 全量通过（480/480）；`bun run typecheck` 通过；lint 与基线一致（25 errors 均为既有问题，本次改动未新增）；PostgREST 分页实测 3 页拉满 2822 条且含 26052603-01/02（105-350）
+
 ## 2026-08-12
 
 - **类别**：性能

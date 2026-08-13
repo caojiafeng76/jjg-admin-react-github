@@ -419,36 +419,44 @@ export async function getQualityIssueRecordById(id: string) {
 }
 
 export async function getQualityIssueRecordOrderOptions() {
-  // 查 v_sales_order_project_options 视图（服务端按 project_no 去重），替代 while 分页全表扫描
+  // PostgREST 默认 db-max-rows 为 1000，选项查询必须分页循环拉取（同 getQualityIssueRecordsForExport）
   const optionMap = new Map<string, QualityIssueOrderOption>()
+  let from = 0
 
-  const { data, error } = await supabase
-    .from('v_sales_order_project_options')
-    .select(
-      'project_no, customer, product_model, length_mm, customer_model, order_quantity, created_at',
-    )
-    .order('created_at', { ascending: false })
-    .order('project_no', { ascending: true })
+  while (true) {
+    const to = from + EXPORT_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('v_sales_order_project_options')
+      .select(
+        'project_no, customer, product_model, length_mm, customer_model, order_quantity, created_at',
+      )
+      .order('created_at', { ascending: false })
+      .order('project_no', { ascending: true })
+      .range(from, to)
 
-  if (error) {
-    throw handleApiError(error, '获取订单项目号选项失败')
-  }
-
-  for (const item of data || []) {
-    const projectNo = item.project_no?.trim()
-
-    if (!projectNo || optionMap.has(projectNo)) {
-      continue
+    if (error) {
+      throw handleApiError(error, '获取订单项目号选项失败')
     }
 
-    optionMap.set(projectNo, {
-      customer: item.customer,
-      customer_model: item.customer_model,
-      length_mm: item.length_mm,
-      order_quantity: item.order_quantity,
-      product_model: item.product_model,
-      project_no: projectNo,
-    })
+    for (const item of data || []) {
+      const projectNo = item.project_no?.trim()
+
+      if (!projectNo || optionMap.has(projectNo)) {
+        continue
+      }
+
+      optionMap.set(projectNo, {
+        customer: item.customer,
+        customer_model: item.customer_model,
+        length_mm: item.length_mm,
+        order_quantity: item.order_quantity,
+        product_model: item.product_model,
+        project_no: projectNo,
+      })
+    }
+
+    if ((data || []).length < EXPORT_PAGE_SIZE) break
+    from += EXPORT_PAGE_SIZE
   }
 
   return Array.from(optionMap.values()).sort((left, right) =>
