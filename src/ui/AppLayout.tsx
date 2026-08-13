@@ -40,7 +40,7 @@ export default function AppLayout() {
   const prevPathnameRef = useRef(location.pathname)
   const cachedOutletsRef = useRef(cachedOutlets)
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer },
   } = theme.useToken()
 
   const homeKey = role ? getDefaultHomeByRole(role) : null
@@ -146,16 +146,23 @@ export default function AppLayout() {
   return (
     <>
       {contextHolder}
-      <Layout className="h-screen overflow-hidden">
-        <Sider trigger={null} collapsible collapsed={collapsed}>
+      <Layout className="h-screen overflow-hidden bg-slate-100 dark:bg-slate-900">
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          theme="light"
+          collapsedWidth={64}
+          className="bg-white dark:bg-slate-900"
+        >
           <div className="flex h-full flex-col overflow-hidden">
-            <AppLogo />
+            <AppLogo collapsed={collapsed} />
             <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
               <MainMenu />
             </div>
           </div>
         </Sider>
-        <Layout>
+        <Layout className="bg-slate-100 dark:bg-slate-900">
           <AppHeader
             colorBgContainer={colorBgContainer}
             collapsed={collapsed}
@@ -163,12 +170,10 @@ export default function AppLayout() {
           />
           <PageTabs onTabsChange={handleTabsChange} />
           <Content
-            className="flex flex-col overflow-hidden"
+            className="app-card flex flex-col overflow-hidden"
             style={{
               margin: '12px 8px',
               padding: 12,
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
               position: 'relative',
             }}
           >
@@ -185,7 +190,7 @@ export default function AppLayout() {
                   justifyContent: 'center',
                   alignItems: 'center',
                   zIndex: 10,
-                  borderRadius: borderRadiusLG,
+                  borderRadius: 12,
                   backdropFilter: 'blur(2px)',
                 }}
               >
@@ -205,7 +210,7 @@ export default function AppLayout() {
                   justifyContent: 'center',
                   alignItems: 'center',
                   zIndex: 11,
-                  borderRadius: borderRadiusLG,
+                  borderRadius: 12,
                   backdropFilter: 'blur(2px)',
                 }}
               >

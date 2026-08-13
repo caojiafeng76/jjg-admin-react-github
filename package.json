@@ -33,6 +33,7 @@
     "db:types": "supabase gen types --lang typescript --linked --schema public > src/services/database.types.ts"
   },
   "dependencies": {
+    "@ant-design/cssinjs": "^2.1.2",
     "@ant-design/icons": "^6.3.2",
     "@heroicons/react": "2.2.0",
     "@supabase/supabase-js": "^2.112.0",

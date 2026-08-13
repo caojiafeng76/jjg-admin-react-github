@@ -3,7 +3,7 @@ import {
   Bars3BottomRightIcon,
 } from '@heroicons/react/16/solid'
 import { KeyIcon } from '@heroicons/react/24/outline'
-import { App, Button, Form, Input, Modal } from 'antd'
+import { App, Button, Form, Input, Modal, theme } from 'antd'
 import { Header } from 'antd/es/layout/layout'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -25,6 +25,7 @@ export default function AppHeader({
   onToggleCollapse: () => void
 }) {
   const { message } = App.useApp()
+  const { token } = theme.useToken()
   const location = useLocation()
   const navigate = useNavigate()
   const { user, role, employeeProfile, signOut } = useAuth()
@@ -73,7 +74,7 @@ export default function AppHeader({
   return (
     <>
       <Header
-        className="flex items-center"
+        className="flex items-center border-b border-slate-200 dark:border-slate-700"
         style={{ padding: 0, background: colorBgContainer }}
       >
         <Button
@@ -94,7 +95,10 @@ export default function AppHeader({
           }}
         />
         {pageName && (
-          <span className="ml-2 text-base font-semibold text-neutral-900 dark:text-neutral-50">
+          <span
+            className="ml-2 text-base font-semibold"
+            style={{ color: token.colorText }}
+          >
             {pageName}
           </span>
         )}

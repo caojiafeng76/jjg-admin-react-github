@@ -15,6 +15,69 @@
 
 ## 2026-08-13
 
+- **类别**：修复
+- **范围**：`src/App.tsx`
+- **摘要**：修复 B1 遗留风险 —— antd cssVar 变量默认挂在组件根元素（`.css-var-*`）上，作用域外元素（脱离 antd 组件的裸 DOM、portal 内容）解析不到 `--jjg-*` 变量、会回退到 CSS 兜底值。新增 `SyncThemeTokens` 组件（置于 `AntdApp` 内），用 `theme.useToken()` 获取计算后的 token，将 `@theme inline` 引用的 11 个变量（主色/语义色/圆角/文本灰/分割线）显式写入 `document.documentElement`（:root），任意位置均可解析；主题/暗色切换时 token 变化自动同步，值仍以 `App.tsx BASE_TOKENS` 为唯一来源。顺带修正：`--color-text-tertiary` 旧硬编码 `rgba(0,0,0,0.25)` 与 antd 6 默认 `0.45` 不一致（旧值实为 quaternary 语义），桥接后以 antd 为准
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（109 文件 / 480 用例）、页面回归（:root 上 11 个变量齐全；body 直挂元素 `bg-primary` 解析为 `#2563eb`、`rounded-lg` 为 12px；暗色切换后 `--jjg-color-text-secondary` 自动更新为 `rgba(255,255,255,0.65)`）
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/index.css`、`src/App.tsx`、`package.json`
+- **摘要**：UI 改版 B1 —— antd 与 Tailwind 主题打通：① `index.css` 顶部声明 `@layer theme, base, antd, components, utilities;`（在 `@import 'tailwindcss'` 之前），antd 样式经 `StyleProvider layer` 包入 `@layer antd`，Tailwind utilities 可覆盖 antd 样式；② `App.tsx` 的 `ConfigProvider` 开启 `cssVar: { prefix: 'jjg' }`，token 输出为 `--jjg-*` CSS 变量（暗色模式自动切换）；③ `index.css` 的 `@theme inline` 改为桥接引用 antd 变量（`--color-primary: var(--jjg-color-primary, #2563eb)` 等，含语义色/圆角/文本灰/分割线，均带与 App.tsx 一致的兜底值），消除 CSS 侧硬编码色值——修复 A1 遗留的 `--color-primary: #1677ff` 与 App.tsx `#2563eb` 不一致问题，颜色/圆角以 `App.tsx BASE_TOKENS` 为唯一来源；④ `package.json` 显式声明 `@ant-design/cssinjs`（antd 已有依赖，供 `StyleProvider` 直接引用）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（109 文件 / 480 用例）、页面级回归（dev server 确认 `@layer antd` 生效、`--jjg-color-primary` 变量生成、主色/圆角渲染正常）
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/App.tsx`（Menu token）、`src/ui/MainMenu.tsx`
+- **摘要**：UI 改版 A7 —— 菜单激活态改圆角高亮块：Menu 组件 token 配置 `itemBorderRadius: 8` + `itemSelectedBg: rgba(37,99,235,0.08)`（主色 8%）+ `itemSelectedColor: #2563eb`；暗色模式激活块 `darkItemSelectedBg: rgba(37,99,235,0.16)` + `darkItemSelectedColor: #bfdbfe`，并统一暗色菜单背景 `darkItemBg/darkSubMenuItemBg/darkPopupBg: #0f172a` 与 Sider slate-900 一致；分组标题：`MainMenu` 过滤逻辑中带子菜单的父级（submenu 分组）label 包装为 12px 灰字（`text-xs text-slate-500`，暗色 slate-400）与叶子导航项区分；`groupTitle*` token 预留（当前菜单为 submenu 结构、无 group type）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/ui/AppHeader.tsx`
+- **摘要**：UI 改版 A6 —— Header 精简定制：底部增加 1px 分割线（`border-b border-slate-200`，暗色 `dark:border-slate-700`，与卡片边框色系一致）；页面标题由硬编码 `text-neutral-900/dark:text-neutral-50` 改为 antd token 色 `token.colorText`（随主题自动深浅切换）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/ui/AppLayout.tsx`、`src/ui/MainMenu.tsx`、`src/ui/AppLogo.tsx`
+- **摘要**：UI 改版 A5 —— 侧边栏定制：Sider 由 antd 默认深色改 `theme="light"` + 背景 `bg-white`（暗色 `dark:bg-slate-900`），与 Header 同色系；`collapsedWidth={64}`；MainMenu 菜单主题由写死 `theme="dark"` 改为跟随 `isDarkMode`（浅色模式菜单浅底深字，暗色保持深底）；AppLogo 适配浅色（亮色浅底深字卡片，暗色保持原深色样式）并支持折叠态（collapsed 时隐藏文字只留图标，避免 64px 下溢出）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/ui/AppLayout.tsx`、`src/index.css`
+- **摘要**：UI 改版 A4 —— 内容区页面背景与卡片分层：外层/内容区 Layout 背景改 `bg-slate-100`（暗色 `bg-slate-900`），Content 由纯白无边框改为 `app-card` 业务卡片（白底 + 1px slate-200 边框 + 浅影 `0 1px 3px rgba(0,0,0,0.08)` + 12px 圆角；暗色 slate-800 底 + slate-700 边框）；`index.css` 新增 `--shadow-card` token 与 `@utility app-card` 通用卡片类，供后续页面搜索栏/表格/表单容器统一复用
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/index.css`（全局表格样式）
+- **摘要**：UI 改版 A3 —— 表格数字列全局启用 `tabular-nums`：对所有表格单元格（`table > thead > tr > th` / `table > tbody > tr > td` / `table > tfoot > tr > td`，含 antd 表格）应用 `font-variant-numeric: tabular-nums`，金额/数量/工时/百分比等数字列自动等宽防跳动。仅影响数字字形，中文/字母文本无影响。使用通用元素选择器而非 `.ant-*` 私有类，规避 `appShellConfig.vitest.ts` 架构守卫（全局 CSS 禁 `.ant-`）且不依赖 antd 内部 DOM；列级右对齐按业务语义留待逐页改造通过 `column.align` 处理。已手工使用 `tabular-nums` 的 span 不受影响（叠加）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 最终全量 109 文件 / 480 用例通过。过程记录：临时 `.ant-` 选择器方案违反 `appShellConfig.vitest.ts` 架构守卫（全局 CSS 禁 `.ant-`）被否决，改用通用元素选择器并通过；`remoteEmployeeSelect.vitest.tsx` 选项顺序断言在全量并发下偶发失败（单独运行通过，与本次 CSS 改动无关，属既有 flaky）
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/App.tsx`（TABLE_TOKENS）
+- **摘要**：UI 改版 A2 —— 表格密度 token 升级：默认/中等密度由 12px 字 / 4px 行高 / 6px 内边距放松为 13px / 8px / 12px；SM 变体（`size="small"`）保留原紧凑密度（12/4/6）作为密集页面局部降级档
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/App.tsx`（BASE_TOKENS）
+- **摘要**：UI 改版 A1 —— 全局主题 token 升级：主色 `#1677ff`（antd 出厂默认蓝）→ 品牌色 `#2563eb`，并新增 `colorInfo: '#2563eb'` 跟随主色；圆角基准 6→8（SM 4→6 / LG 8→12）；新增 `controlHeight: 34`（默认 32 升级，更舒展）。改动后全站 antd 主色与登录页 Tailwind `blue-600/700`（= #2563eb）统一，消除"两套蓝并存"。src 其余硬编码 `#1677ff`（ProductionScheduling / WorkshopOrderProductionStats / SafePartSetting / index.css `--color-primary`）分别由后续 E3 / E1 / D6 / B1 任务处理
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（见下方命令输出）
+
+## 2026-08-13
+
 - **类别**：重构
 - **范围**：`src/features/syney/ReportList/usePrintSyneyStoreReceipt.ts`、`useFetchSyneyStoreReport.ts`
 - **摘要**：优化清单 #17 —— 评估 2 处原始 `useMutation` 是否迁移 `useMutationWithMessage`，结论为**保留并注释说明原因**：两处 `mutationFn` 均为 `fetchSyneyStoreReportFromScm`（只读「从 SCM 拉取入库单数据」，非 CRUD 写入），无缓存失效需求，且提示逻辑高度定制——`usePrintSyneyStoreReceipt` 需先 `printWindow?.close()` 再提示并含多个 warning 分支（未获取到数据/浏览器阻止弹窗/回退 PDF 预览）、`useFetchSyneyStoreReport` 的成功/失败提示由 `index.tsx` 的 `handleFetchStoreReport` 按业务分支处理；`useMutationWithMessage` 的「自动失效 + 自动提示」语义不适用，分别加注释说明

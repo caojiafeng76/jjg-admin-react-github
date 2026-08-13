@@ -1,6 +1,20 @@
+@layer theme, base, antd, components, utilities;
 @import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
+
+/* =============================================
+   表格数字列全局等宽数字（A3: tabular-nums）
+   金额/数量/工时/百分比等数字列自动等宽，防止翻页/排序时数字跳动。
+   font-variant-numeric 仅影响数字字形，对中文/字母文本无影响。
+   使用通用元素选择器（不依赖 antd 内部 DOM 类名），升级更健壮；
+   列级"右对齐"按业务语义在逐页改造中通过 column.align 处理。
+   ============================================= */
+table > thead > tr > th,
+table > tbody > tr > td,
+table > tfoot > tr > td {
+  font-variant-numeric: tabular-nums;
+}
 
 /* =============================================
    浏览器兼容性与全局重置
@@ -21,23 +35,55 @@ body {
 }
 
 /* =============================================
-   设计 Token —— 与 App.tsx BASE_TOKENS 保持同步
-   修改颜色/圆角时，两处同步修改
+   设计 Token —— 桥接到 antd CSS 变量（B1）
+   颜色/圆角等不再在 CSS 侧硬编码，统一引用
+   ConfigProvider cssVar（prefix: jjg）输出的
+   CSS 变量；App.tsx BASE_TOKENS 是唯一色值来源。
+   变量挂在 antd 组件根元素（.css-var-root）上，
+   故用 @theme inline 内联 var() 引用 + 兜底值，
+   避免 :root 上解析不到 antd 变量。
+   修改颜色时只需改 App.tsx，本文件无需再动。
    ============================================= */
 @theme inline {
-  /* 主色 */
-  --color-primary: #1677ff;
-  --color-primary-hover: #4096ff;
+  /* 主色（跟随 antd colorPrimary，A1 品牌色 #2563eb） */
+  --color-primary: var(--jjg-color-primary, #2563eb);
+  --color-primary-hover: var(--jjg-color-primary-hover, #3b82f6);
 
-  /* 圆角基准（对应 antd borderRadius: 6） */
-  --radius-sm: 4px;
-  --radius-base: 6px;
-  --radius-lg: 8px;
+  /* 语义色（跟随 antd token，暗色模式自动切换） */
+  --color-success: var(--jjg-color-success, #16a34a);
+  --color-warning: var(--jjg-color-warning, #d97706);
+  --color-error: var(--jjg-color-error, #dc2626);
+  --color-info: var(--jjg-color-info, #2563eb);
 
-  /* 统一语义灰色（全站用 slate，不用 gray） */
-  --color-text-secondary: rgba(0, 0, 0, 0.45);
-  --color-text-tertiary: rgba(0, 0, 0, 0.25);
-  --color-divider: rgba(0, 0, 0, 0.06);
+  /* 圆角基准（对应 App.tsx borderRadius 8 / SM 6 / LG 12） */
+  --radius-sm: var(--jjg-border-radius-sm, 6px);
+  --radius-base: var(--jjg-border-radius, 8px);
+  --radius-lg: var(--jjg-border-radius-lg, 12px);
+
+  /* 统一语义灰色（跟随 antd token，暗色模式自动切换） */
+  --color-text-secondary: var(--jjg-color-text-secondary, rgba(0, 0, 0, 0.45));
+  --color-text-tertiary: var(--jjg-color-text-tertiary, rgba(0, 0, 0, 0.25));
+  --color-divider: var(--jjg-color-split, rgba(0, 0, 0, 0.06));
+
+  /* 卡片浅影（A4: 1px 边框 + 浅影分层，替代重投影） */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* =============================================
+   业务卡片统一样式（A4）
+   白底 + 1px 边框 + 浅影 + 12px 圆角，页面内搜索栏/表格/表单容器复用；
+   暗色模式自动降为 slate-800 底 + slate-700 边框。
+   ============================================= */
+@utility app-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+
+  &:is(.dark *) {
+    background-color: #1e293b;
+    border-color: #334155;
+  }
 }
 
 /*

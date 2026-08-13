@@ -5,6 +5,7 @@
     "": {
       "name": "jjg-admin-react",
       "dependencies": {
+        "@ant-design/cssinjs": "^2.1.2",
         "@ant-design/icons": "^6.3.2",
         "@heroicons/react": "2.2.0",
         "@supabase/supabase-js": "^2.112.0",

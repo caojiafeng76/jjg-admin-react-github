@@ -13,13 +13,13 @@
 
 ## A. P0 全局基建（先做，影响所有页面）
 
-- [ ] **A1** `App.tsx` BASE_TOKENS：主色 `#1677ff`→品牌色 `#2563eb`（`colorInfo` 跟随），圆角 6→8（SM 6 / LG 12），`controlHeight` 32→34
-- [ ] **A2** `App.tsx` TABLE_TOKENS：表格密度 12px/4px/6px → 13px/8px/12px（密集页面后续用 `size="small"` 局部降级）
-- [ ] **A3** 数字列全局 `tabular-nums`（金额/数量/工时/百分比右对齐）
-- [ ] **A4** `AppLayout.tsx` Content：页面背景改 slate-100，业务卡片白底 + 1px 边框 + 浅影分层
-- [ ] **A5** `AppLayout.tsx` Sider：浅色模式改白/浅灰与 Header 同色系，`collapsedWidth=64`
-- [ ] **A6** `AppHeader.tsx`：底部加 1px 分割线；页面标题改 antd token 色
-- [ ] **A7** `MainMenu.tsx`：菜单激活态改圆角高亮块（主色 8% 背景），分组标题 12px 灰字
+- [x] **A1** `App.tsx` BASE_TOKENS：主色 `#1677ff`→品牌色 `#2563eb`（`colorInfo` 跟随），圆角 6→8（SM 6 / LG 12），`controlHeight` 32→34
+- [x] **A2** `App.tsx` TABLE_TOKENS：表格密度 12px/4px/6px → 13px/8px/12px（密集页面后续用 `size="small"` 局部降级）
+- [x] **A3** 数字列全局 `tabular-nums`（金额/数量/工时/百分比右对齐）
+- [x] **A4** `AppLayout.tsx` Content：页面背景改 slate-100，业务卡片白底 + 1px 边框 + 浅影分层
+- [x] **A5** `AppLayout.tsx` Sider：浅色模式改白/浅灰与 Header 同色系，`collapsedWidth=64`
+- [x] **A6** `AppHeader.tsx`：底部加 1px 分割线；页面标题改 antd token 色
+- [x] **A7** `MainMenu.tsx`：菜单激活态改圆角高亮块（主色 8% 背景），分组标题 12px 灰字
 
 ## B. P0 基建：antd 与 Tailwind 打通
 

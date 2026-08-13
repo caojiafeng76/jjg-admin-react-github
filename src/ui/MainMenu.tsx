@@ -12,6 +12,7 @@ import {
 import { usePermissionContext } from '@/contexts'
 import { useAuth } from '@/contexts'
 import { isViewerRole } from '@/config/access'
+import { useAppStore } from '@/store'
 
 // ----------------------------------------------------------------
 // 菜单项类型扩展：新增可选 permission 字段
@@ -408,7 +409,12 @@ function filterMenuByPermissions(
 
       result.push({
         key: item.key,
-        label: item.label,
+        // A7: 分组（submenu）标题 12px 灰字弱化，与叶子导航项区分
+        label: (
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            {item.label}
+          </span>
+        ),
         icon: item.icon,
         children: filteredChildren,
       } as MenuItemBase)
@@ -456,6 +462,7 @@ const MainMenu: React.FC = () => {
   const { can, isLoading } = usePermissionContext()
   const { role } = useAuth()
   const isViewer = isViewerRole(role)
+  const isDarkMode = useAppStore((state) => state.isDarkMode)
 
   const items = useMemo(() => {
     // 权限加载中时返回空（避免闪烁），PermissionContext 内部有 staleTime 缓存
@@ -508,7 +515,7 @@ const MainMenu: React.FC = () => {
       selectedKeys={[selectedKey]}
       openKeys={openKeys}
       onOpenChange={onOpenChange}
-      theme="dark"
+      theme={isDarkMode ? 'dark' : 'light'}
       mode="inline"
       items={items}
     />
