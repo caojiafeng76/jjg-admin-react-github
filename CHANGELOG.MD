@@ -16,6 +16,13 @@
 ## 2026-08-13
 
 - **类别**：性能
+- **范围**：`src/features/access-management/UserPermissionList/index.tsx`、`UserPermissionDetail.tsx`、`PermissionRegistry/index.tsx`
+- **摘要**：优化清单 #11 —— 权限管理 3 处 `columns` 与内联 `filter` 用 `useMemo` 包裹消除每次渲染全量重算：(1) `UserPermissionList` 的 `filtered`（`allEmployees.filter` 每次渲染重算）与 `columns` 均 `useMemo`（依赖 `[allEmployees, search]` / `[getRoleLabel]`），并把 `columns` 定义从 `if (selectedEmployee) return` 之后上提到 return 之前（修正潜在条件 Hook 隐患）；(2) `UserPermissionDetail` 的 `columns` `useMemo`（依赖 `[rolePermissionIds, overrideMap]`）；(3) `PermissionRegistry` 的 `filtered` 与 `columns` 均 `useMemo`（依赖 `[allPermissions, keyword, scopeFilter]` / `[]`）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过（首次运行 `remoteEmployeeSelect.vitest.tsx` 1 例并发 flaky 失败，重跑全量通过，确认与本次改动无关）
+
+## 2026-08-13
+
+- **类别**：性能
 - **范围**：`src/features/workshop/EmployeeList/index.tsx`、`src/features/workshop/StandardTimeList/index.tsx`、`src/features/workshop/JobBaseSetting/index.tsx`、`src/features/workshop/OrderList/index.tsx`、`src/features/workshop/MachineEquipmentMaintenance/index.tsx`
 - **摘要**：优化清单 #10 —— 全部 5 个 workshop 列表页把 `FormInstance` 存在 `useState` 的问题改为 `useRef`：EmployeeList 4 个表单实例（员工/开通账号/重置密码/重新绑定）、StandardTimeList 1 个、JobBaseSetting 1 个、OrderList 1 个、MachineEquipmentMaintenance 1 个，均改为 `useRef` + 稳定的 `useCallback` setter（`formRef.current = form`），消除表单实例写入时触发的父组件多余重渲染；所有 `formRef?.xxx()` 调用点改为 `formRef.current?.xxx()`，`useCallback` 依赖数组同步精简（移除不再变化的 `formRef` 依赖）
 - **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过

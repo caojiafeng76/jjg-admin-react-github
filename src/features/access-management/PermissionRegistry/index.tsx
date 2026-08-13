@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Input, Select, Table, Tag } from 'antd'
 import { useAllPermissions } from '../RolePermissionList/useRolePermissions'
 import type { PermissionRow } from '@/services/apiPermissions'
@@ -24,58 +24,67 @@ export default function PermissionRegistry() {
 
   const { data: allPermissions = [], isLoading } = useAllPermissions()
 
-  const filtered = allPermissions.filter((p) => {
-    const matchesKeyword =
-      !keyword ||
-      p.key.toLowerCase().includes(keyword.toLowerCase()) ||
-      p.label.toLowerCase().includes(keyword.toLowerCase()) ||
-      p.module.toLowerCase().includes(keyword.toLowerCase())
-    const matchesScope = !scopeFilter || p.scope === scopeFilter
-    return matchesKeyword && matchesScope
-  })
+  const filtered = useMemo(
+    () =>
+      allPermissions.filter((p) => {
+        const matchesKeyword =
+          !keyword ||
+          p.key.toLowerCase().includes(keyword.toLowerCase()) ||
+          p.label.toLowerCase().includes(keyword.toLowerCase()) ||
+          p.module.toLowerCase().includes(keyword.toLowerCase())
+        const matchesScope = !scopeFilter || p.scope === scopeFilter
+        return matchesKeyword && matchesScope
+      }),
+    [allPermissions, keyword, scopeFilter],
+  )
 
-  const columns = [
-    {
-      title: '权限 Key',
-      dataIndex: 'key',
-      key: 'key',
-      render: (key: string) => <span className="font-mono text-xs">{key}</span>,
-    },
-    {
-      title: '名称',
-      dataIndex: 'label',
-      key: 'label',
-    },
-    {
-      title: '模块',
-      dataIndex: 'module',
-      key: 'module',
-      width: 160,
-    },
-    {
-      title: '范围',
-      dataIndex: 'scope',
-      key: 'scope',
-      width: 80,
-      render: (scope: string) => <Tag>{SCOPE_LABELS[scope] ?? scope}</Tag>,
-    },
-    {
-      title: '端',
-      dataIndex: 'surface',
-      key: 'surface',
-      width: 80,
-      render: (surface: string) => (
-        <Tag color={SURFACE_COLORS[surface]}>{surface}</Tag>
-      ),
-    },
-    {
-      title: '描述',
-      dataIndex: 'description',
-      key: 'description',
-      render: (desc: string | null) =>
-        desc ?? <span className="text-gray-400">—</span>,
-    },
-  ]
+  const columns = useMemo(
+    () => [
+      {
+        title: '权限 Key',
+        dataIndex: 'key',
+        key: 'key',
+        render: (key: string) => (
+          <span className="font-mono text-xs">{key}</span>
+        ),
+      },
+      {
+        title: '名称',
+        dataIndex: 'label',
+        key: 'label',
+      },
+      {
+        title: '模块',
+        dataIndex: 'module',
+        key: 'module',
+        width: 160,
+      },
+      {
+        title: '范围',
+        dataIndex: 'scope',
+        key: 'scope',
+        width: 80,
+        render: (scope: string) => <Tag>{SCOPE_LABELS[scope] ?? scope}</Tag>,
+      },
+      {
+        title: '端',
+        dataIndex: 'surface',
+        key: 'surface',
+        width: 80,
+        render: (surface: string) => (
+          <Tag color={SURFACE_COLORS[surface]}>{surface}</Tag>
+        ),
+      },
+      {
+        title: '描述',
+        dataIndex: 'description',
+        key: 'description',
+        render: (desc: string | null) =>
+          desc ?? <span className="text-gray-400">—</span>,
+      },
+    ],
+    [],
+  )
 
   return (
     <div className="flex flex-col gap-4">

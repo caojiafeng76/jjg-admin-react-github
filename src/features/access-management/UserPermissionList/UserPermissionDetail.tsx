@@ -64,78 +64,81 @@ export default function UserPermissionDetail({
     return false
   }, [overrideMap, userOverrides])
 
-  const columns = [
-    {
-      title: '权限',
-      dataIndex: 'label',
-      key: 'label',
-      render: (label: string, record: PermissionRow) => (
-        <div>
-          <div className="font-medium">{label}</div>
-          <div className="text-xs text-gray-400">{record.key}</div>
-        </div>
-      ),
-    },
-    {
-      title: '模块',
-      dataIndex: 'module',
-      key: 'module',
-      width: 160,
-    },
-    {
-      title: '角色默认',
-      key: 'role',
-      width: 90,
-      render: (_: unknown, record: PermissionRow) => {
-        const hasRole = rolePermissionIds.includes(record.id)
-        return hasRole ? (
-          <Tag color="success">允许</Tag>
-        ) : (
-          <Tag color="default">无</Tag>
-        )
+  const columns = useMemo(
+    () => [
+      {
+        title: '权限',
+        dataIndex: 'label',
+        key: 'label',
+        render: (label: string, record: PermissionRow) => (
+          <div>
+            <div className="font-medium">{label}</div>
+            <div className="text-xs text-gray-400">{record.key}</div>
+          </div>
+        ),
       },
-    },
-    {
-      title: '用户覆盖',
-      key: 'override',
-      width: 150,
-      render: (_: unknown, record: PermissionRow) => {
-        const current = overrideMap.get(record.id) ?? 'default'
-        return (
-          <Select
-            size="small"
-            value={current}
-            options={OVERRIDE_OPTIONS}
-            onChange={(val: OverrideValue) => {
-              setOverrideMap((prev) => {
-                const next = new Map(prev)
-                if (val === 'default') next.delete(record.id)
-                else next.set(record.id, val)
-                return next
-              })
-            }}
-            style={{ width: 120 }}
-          />
-        )
+      {
+        title: '模块',
+        dataIndex: 'module',
+        key: 'module',
+        width: 160,
       },
-    },
-    {
-      title: '最终结果',
-      key: 'effective',
-      width: 100,
-      render: (_: unknown, record: PermissionRow) => {
-        const override = overrideMap.get(record.id)
-        const hasRole = rolePermissionIds.includes(record.id)
-        const effective =
-          override === 'allow' ? true : override === 'deny' ? false : hasRole
-        return effective ? (
-          <Tag color="success">允许</Tag>
-        ) : (
-          <Tag color="error">拒绝</Tag>
-        )
+      {
+        title: '角色默认',
+        key: 'role',
+        width: 90,
+        render: (_: unknown, record: PermissionRow) => {
+          const hasRole = rolePermissionIds.includes(record.id)
+          return hasRole ? (
+            <Tag color="success">允许</Tag>
+          ) : (
+            <Tag color="default">无</Tag>
+          )
+        },
       },
-    },
-  ]
+      {
+        title: '用户覆盖',
+        key: 'override',
+        width: 150,
+        render: (_: unknown, record: PermissionRow) => {
+          const current = overrideMap.get(record.id) ?? 'default'
+          return (
+            <Select
+              size="small"
+              value={current}
+              options={OVERRIDE_OPTIONS}
+              onChange={(val: OverrideValue) => {
+                setOverrideMap((prev) => {
+                  const next = new Map(prev)
+                  if (val === 'default') next.delete(record.id)
+                  else next.set(record.id, val)
+                  return next
+                })
+              }}
+              style={{ width: 120 }}
+            />
+          )
+        },
+      },
+      {
+        title: '最终结果',
+        key: 'effective',
+        width: 100,
+        render: (_: unknown, record: PermissionRow) => {
+          const override = overrideMap.get(record.id)
+          const hasRole = rolePermissionIds.includes(record.id)
+          const effective =
+            override === 'allow' ? true : override === 'deny' ? false : hasRole
+          return effective ? (
+            <Tag color="success">允许</Tag>
+          ) : (
+            <Tag color="error">拒绝</Tag>
+          )
+        },
+      },
+    ],
+    [rolePermissionIds, overrideMap],
+  )
 
   const handleSave = () => {
     const overrides: Array<{ permissionId: string; enabled: boolean }> = []

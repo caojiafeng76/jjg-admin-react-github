@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button, Input, Table, Tag } from 'antd'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useRoleOptions } from '@/hooks/useRoleOptions'
@@ -65,8 +65,58 @@ export default function UserPermissionList() {
   const { data: allEmployees = [], isLoading } = useAllEmployees()
   const { getLabel: getRoleLabel } = useRoleOptions()
 
-  const filtered = allEmployees.filter(
-    (e) => !search || e.name?.toLowerCase().includes(search.toLowerCase()),
+  const filtered = useMemo(
+    () =>
+      allEmployees.filter(
+        (e) => !search || e.name?.toLowerCase().includes(search.toLowerCase()),
+      ),
+    [allEmployees, search],
+  )
+
+  const columns = useMemo(
+    () => [
+      {
+        title: '姓名',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      {
+        title: '角色',
+        dataIndex: 'role',
+        key: 'role',
+        render: (role: AppRole | null) =>
+          role ? (
+            <Tag>{getRoleLabel(role)}</Tag>
+          ) : (
+            <span className="text-gray-400">—</span>
+          ),
+      },
+      {
+        title: '状态',
+        dataIndex: 'is_active',
+        key: 'is_active',
+        render: (val: boolean) =>
+          val !== false ? (
+            <Tag color="success">在职</Tag>
+          ) : (
+            <Tag color="default">离职</Tag>
+          ),
+      },
+      {
+        title: '操作',
+        key: 'action',
+        render: (_: unknown, record: EmployeeRow) => (
+          <Button
+            type="link"
+            size="small"
+            onClick={() => setSelectedEmployee(record)}
+          >
+            管理权限覆盖
+          </Button>
+        ),
+      },
+    ],
+    [getRoleLabel],
   )
 
   if (selectedEmployee) {
@@ -78,49 +128,6 @@ export default function UserPermissionList() {
       />
     )
   }
-
-  const columns = [
-    {
-      title: '姓名',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: '角色',
-      dataIndex: 'role',
-      key: 'role',
-      render: (role: AppRole | null) =>
-        role ? (
-          <Tag>{getRoleLabel(role)}</Tag>
-        ) : (
-          <span className="text-gray-400">—</span>
-        ),
-    },
-    {
-      title: '状态',
-      dataIndex: 'is_active',
-      key: 'is_active',
-      render: (val: boolean) =>
-        val !== false ? (
-          <Tag color="success">在职</Tag>
-        ) : (
-          <Tag color="default">离职</Tag>
-        ),
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: unknown, record: EmployeeRow) => (
-        <Button
-          type="link"
-          size="small"
-          onClick={() => setSelectedEmployee(record)}
-        >
-          管理权限覆盖
-        </Button>
-      ),
-    },
-  ]
 
   return (
     <div className="flex flex-col gap-4">
