@@ -1,9 +1,8 @@
-import { Button, Card, Space, Typography } from 'antd'
+import { LogoutOutlined, LoginOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/contexts/useAuth'
-
-const { Paragraph, Title, Text } = Typography
+import AppErrorView from '@ui/AppErrorView'
 
 export default function AccessDenied() {
   const navigate = useNavigate()
@@ -20,39 +19,34 @@ export default function AccessDenied() {
           : '当前账号暂无访问该页面的权限。'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-      <Card className="w-full max-w-xl shadow-lg">
-        <Space direction="vertical" size={12} className="w-full">
-          <Title level={3} style={{ marginBottom: 0 }}>
-            当前账号暂无可用前端入口
-          </Title>
-          <Paragraph
-            className="text-sm text-slate-600"
-            style={{ marginBottom: 0 }}
-          >
-            {description}
-          </Paragraph>
-          <Text type="secondary">账号邮箱：{user?.email || '未登录'}</Text>
-          <Space>
-            <Button
-              type="primary"
-              onClick={() => navigate('/login', { replace: true })}
-            >
-              返回登录页
-            </Button>
-            {user ? (
-              <Button
-                onClick={async () => {
+    <AppErrorView
+      variant="permission"
+      title="当前账号暂无可用前端入口"
+      badge="权限限制"
+      description={description}
+      detail={`账号邮箱：${user?.email || '未登录'}`}
+      actions={[
+        {
+          key: 'login',
+          label: '返回登录页',
+          type: 'primary',
+          icon: <LoginOutlined />,
+          onClick: () => navigate('/login', { replace: true }),
+        },
+        ...(user
+          ? [
+              {
+                key: 'signout',
+                label: '退出当前账号',
+                icon: <LogoutOutlined />,
+                onClick: async () => {
                   await signOut()
                   navigate('/login', { replace: true })
-                }}
-              >
-                退出当前账号
-              </Button>
-            ) : null}
-          </Space>
-        </Space>
-      </Card>
-    </div>
+                },
+              },
+            ]
+          : []),
+      ]}
+    />
   )
 }

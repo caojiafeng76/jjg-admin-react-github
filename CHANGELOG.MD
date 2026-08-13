@@ -16,6 +16,13 @@
 ## 2026-08-13
 
 - **类别**：变更
+- **范围**：`src/pages/AccessDenied.tsx`
+- **摘要**：UI 改版 C3 —— 403 无权限页与 404 / 错误页视觉统一：`AccessDenied` 从独立 antd Card（默认 8px 圆角、无插画、固定 `bg-slate-100` 背景、暗色不适配）改为复用 `AppErrorView`（variant="permission"，rose 语义色系 + 盾牌插画 + 渐变背景 + 32px 圆角卡片 + 明暗适配）；动态描述（未登录/未绑定员工/账号停用/无角色/无权限）映射到"错误摘要"，账号邮箱映射到"诊断信息"，按钮组映射到操作区（返回登录页 + 有登录态时显示退出当前账号）。至此 404（PageNotFound）、403（AccessDenied）、运行时错误（RouteErrorPage）三个兜底页全部由 `AppErrorView` 统一渲染
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）、eslint 0 告警、页面级回归（dev server：`/access-denied` 未登录态渲染 permission 变体 —— 权限限制徽章、盾牌插画、动态描述"当前登录信息已失效"、诊断"账号邮箱：未登录"、32px 圆角卡片、rose 渐变背景；404 页同源渲染正常）
+
+## 2026-08-13
+
+- **类别**：变更
 - **范围**：`src/pages/Login.tsx`
 - **摘要**：UI 改版 C2 —— 登录页硬编码蓝色替换为品牌 token：`bg-blue-600`（2 处 JJG logo）→ `bg-primary`、`hover:bg-blue-700`（登录按钮）→ `hover:bg-primary-hover`、`focus:border-blue-500`（邮箱/密码输入框）→ `focus:border-primary`；3 处按钮/logo 阴影的硬编码 `rgba(37,99,235,…)` 改为 `color-mix(in_srgb,var(--jjg-color-primary)_xx%,transparent)` 动态引用品牌色。色值来源统一为 `App.tsx BASE_TOKENS`（当前 `#2563eb`），后续换主色登录页自动跟随
 - **验证**：`bun run typecheck` 通过（0 错误）、`bun run build` 通过、`bun run test` 通过（110 文件 / 488 用例）、eslint 0 告警、页面级回归（dev server 登录页：2 处 logo 与登录按钮实际渲染 `rgb(37,99,235)` = `#2563eb`，阴影为品牌色 20%/32%/40% 透明度，主色变量 `--jjg-color-primary` 正确）
