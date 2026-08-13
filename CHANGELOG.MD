@@ -16,6 +16,13 @@
 ## 2026-08-13
 
 - **类别**：变更
+- **范围**：`src/pages/Dashboard.tsx`、`src/services/apiDashboard.ts`（含 `apiDashboard.vitest.ts`）
+- **摘要**：UI 改版 C1 —— 首页 Dashboard 由"欢迎使用"空卡改为决策优先看板：新增 `apiDashboard.ts` 聚合查询（5 张核心业务表 sales_orders / production_orders / syney-pos / material_transfers / employees，并行 count 总数 + 近 14 天每日新增），纯函数 `buildDailyTrend`（按日桶计数，忽略 null/非法/越界日期）与 `computeDeltaPercent`（后 7 天 vs 前 7 天环比，前段为 0 返回 null）；`Dashboard.tsx` 重写为 KPI 卡 Grid（CSS Grid `repeat(auto-fill, minmax(200px,1fr))`），每卡 = 28px 粗体 tabular-nums 大数字 + 环比标签（▲绿/▼红/持平）+ 内联 SVG 趋势迷你图（无第三方图表依赖，面积填充 + 折线 + 末点高亮），卡片复用 `app-card` 统一样式；含加载骨架屏、错误 Alert + 重试、AbortSignal 传递（queryClient 全局处理）
+- **验证**：`bun run test` 通过（110 文件 / 488 用例，新增 7 用例）、`bun run typecheck` 通过（0 错误）、eslint 0 告警、页面级回归（dev server 登录后 /dashboard 渲染 5 张 KPI 卡真实数据：车间订单 4,136 / 生产工单 4,755 / 西尼订单 542 / 物料转移 2,732 / 员工 69，环比与迷你图正常，控制台无新增错误）
+
+## 2026-08-13
+
+- **类别**：变更
 - **范围**：`src/features/tooling-fixture/FixtureDataPage.tsx`、`useToolingFixtures.ts`、`queryKeys.ts`、`src/services/apiToolingFixture.ts`（含 `apiToolingFixture.vitest.ts`）
 - **摘要**：工装资料页新增"按制作日期范围筛选"。页面搜索栏增加 `DatePicker.RangePicker`（占位"制作开始日期 / 制作结束日期"），选择后按 `manufactured_date` 的 `gte`/`lte` 过滤列表；`getToolingFixtureList` 与 `getAllToolingFixtures`（打印二维码路径）均支持 `manufacturedDateRange` 参数，queryKey 同步纳入日期范围以保证缓存隔离；补测试覆盖日期范围筛选
 - **验证**：`bun run test` 通过（apiToolingFixture 相关 14 用例）、`bun run typecheck` 通过（0 错误）
