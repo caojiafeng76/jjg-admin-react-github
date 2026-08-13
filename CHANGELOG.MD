@@ -15,6 +15,13 @@
 
 ## 2026-08-13
 
+- **类别**：性能
+- **范围**：`src/features/villa-lift/OrderList/index.tsx`
+- **摘要**：优化清单 #9 —— 别墅梯订单列表 3 个文本搜索框（客户/项目名称/产品名称）由受控 `useState` 改为 uncontrolled（`defaultValue` + `InputRef` + 重挂载 `key`），消除"每击键重渲染整个 827 行父组件"的问题；提交时从 ref 读取值（`handleSearch`），重置与切换 Tab 时递增 `searchInputKey` 使输入框重挂载清空；日期范围选择器保持受控不变（仅选择时触发查询，非逐击键场景）；表格本身已由 `memo` 保护不受影响
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过
+
+## 2026-08-13
+
 - **类别**：文档
 - **范围**：`docs/UI改版-逐页问题分析与改进方案.md`（新建）、`todolist.md`（新建）
 - **摘要**：基于 `docs/UI设计调研与改版指南.md` 与现有代码（`App.tsx` 主题 token、`AppLayout`、`AppHeader`、`MainMenu`、`Login`、`Dashboard`、路由/菜单）做全站逐页 UI 问题诊断：确认 4 个全局根因（默认蓝 `#1677ff`、表格 12px/4px 过紧、Content 纯白无分层、Sider 深色未定制）+ 登录页与主站两套蓝并存问题；产出 21 个功能域约 60 页的逐页"问题+方案"表，并按 P0/P1/P2 整理为可勾选执行清单 `todolist.md`（规则：完成一项打勾 → 用户确认 → 再继续下一项）。不改动任何运行代码

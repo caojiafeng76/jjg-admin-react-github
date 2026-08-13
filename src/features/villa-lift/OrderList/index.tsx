@@ -8,6 +8,7 @@ import {
   DatePicker,
   FormInstance,
   Input,
+  InputRef,
   Modal,
   Popconfirm,
   Tabs,
@@ -175,10 +176,12 @@ export default function VillaLiftOrderListPage() {
   const activeStatus = (searchParamsURL.get('status') ??
     'open') as VillaLiftOrderStatus
 
-  // 搜索输入框本地状态（未提交）
-  const [localCustomer, setLocalCustomer] = useState('')
-  const [localProjectName, setLocalProjectName] = useState('')
-  const [localProductName, setLocalProductName] = useState('')
+  // 搜索输入框为 uncontrolled（提交时才读取），避免每次击键重渲染整页
+  const customerInputRef = useRef<InputRef>(null)
+  const projectNameInputRef = useRef<InputRef>(null)
+  const productNameInputRef = useRef<InputRef>(null)
+  // 重置时递增，使 uncontrolled 输入框重挂载以清空
+  const [searchInputKey, setSearchInputKey] = useState(0)
   const [deliveryDateRange, setDeliveryDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
   >(null)
@@ -463,9 +466,7 @@ export default function VillaLiftOrderListPage() {
     next.set('status', key)
     next.set('page', '1')
     setSearchParamsURL(next)
-    setLocalCustomer('')
-    setLocalProjectName('')
-    setLocalProductName('')
+    setSearchInputKey((k) => k + 1)
     setDeliveryDateRange(null)
     setScheduleDateRange(null)
     setProcessingRequiredDateRange(null)
@@ -483,15 +484,19 @@ export default function VillaLiftOrderListPage() {
     const next = new URLSearchParams(searchParamsURL)
     next.set('page', '1')
     setSearchParamsURL(next)
-    setSubmittedCustomer(localCustomer.trim() || undefined)
-    setSubmittedProjectName(localProjectName.trim() || undefined)
-    setSubmittedProductName(localProductName.trim() || undefined)
+    setSubmittedCustomer(
+      customerInputRef.current?.input?.value?.trim() || undefined,
+    )
+    setSubmittedProjectName(
+      projectNameInputRef.current?.input?.value?.trim() || undefined,
+    )
+    setSubmittedProductName(
+      productNameInputRef.current?.input?.value?.trim() || undefined,
+    )
   }
 
   function handleSearchReset() {
-    setLocalCustomer('')
-    setLocalProjectName('')
-    setLocalProductName('')
+    setSearchInputKey((k) => k + 1)
     setDeliveryDateRange(null)
     setScheduleDateRange(null)
     setProcessingRequiredDateRange(null)
@@ -684,25 +689,25 @@ export default function VillaLiftOrderListPage() {
           )}
           <div className="flex flex-wrap items-center gap-2">
             <Input
+              key={`customer-${searchInputKey}`}
+              ref={customerInputRef}
               placeholder="客户"
-              value={localCustomer}
-              onChange={(e) => setLocalCustomer(e.target.value)}
               onPressEnter={handleSearch}
               allowClear
               style={{ width: 150 }}
             />
             <Input
+              key={`projectName-${searchInputKey}`}
+              ref={projectNameInputRef}
               placeholder="项目名称"
-              value={localProjectName}
-              onChange={(e) => setLocalProjectName(e.target.value)}
               onPressEnter={handleSearch}
               allowClear
               style={{ width: 160 }}
             />
             <Input
+              key={`productName-${searchInputKey}`}
+              ref={productNameInputRef}
               placeholder="产品名称"
-              value={localProductName}
-              onChange={(e) => setLocalProductName(e.target.value)}
               onPressEnter={handleSearch}
               allowClear
               style={{ width: 150 }}
