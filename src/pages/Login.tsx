@@ -141,7 +141,7 @@ export default function Login() {
 
         <div className="relative flex h-full w-full flex-col justify-between px-12 py-12 text-white xl:px-16 xl:py-14">
           <div className="inline-flex w-fit items-center gap-3 rounded-2xl border border-white/18 bg-white/10 px-4 py-3 backdrop-blur-md">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-[11px] font-bold tracking-[0.18em] text-white shadow-[0_14px_30px_rgba(37,99,235,0.4)]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-[11px] font-bold tracking-[0.18em] text-white shadow-[0_14px_30px_color-mix(in_srgb,var(--jjg-color-primary)_40%,transparent)]">
               JJG
             </div>
             <div>
@@ -168,7 +168,7 @@ export default function Login() {
       <div className="flex flex-1 items-center justify-center bg-slate-50/60 px-6 py-12 lg:px-8">
         <div className="w-full max-w-md rounded-[28px] border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-10">
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-[15px] font-bold tracking-[0.18em] text-white shadow-[0_16px_36px_rgba(37,99,235,0.32)]">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-[15px] font-bold tracking-[0.18em] text-white shadow-[0_16px_36px_color-mix(in_srgb,var(--jjg-color-primary)_32%,transparent)]">
               JJG
             </div>
             <Title level={3} className="mb-1! text-slate-900!">
@@ -215,7 +215,7 @@ export default function Login() {
                 prefix={<MailOutlined className="text-slate-400" />}
                 placeholder="admin@example.com"
                 autoComplete="username"
-                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-blue-500!"
+                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-primary!"
               />
             </Form.Item>
 
@@ -228,7 +228,7 @@ export default function Login() {
                 prefix={<LockOutlined className="text-slate-400" />}
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-blue-500!"
+                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-primary!"
               />
             </Form.Item>
 
@@ -246,7 +246,7 @@ export default function Login() {
                 htmlType="submit"
                 block
                 loading={submitting}
-                className="h-11! rounded-xl! border-0! bg-blue-600! text-base! font-medium! shadow-[0_16px_32px_rgba(37,99,235,0.2)] hover:bg-blue-700!"
+                className="h-11! rounded-xl! border-0! bg-primary! text-base! font-medium! shadow-[0_16px_32px_color-mix(in_srgb,var(--jjg-color-primary)_20%,transparent)] hover:bg-primary-hover!"
               >
                 登 录
               </Button>

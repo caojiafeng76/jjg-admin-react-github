@@ -16,6 +16,13 @@
 ## 2026-08-13
 
 - **类别**：变更
+- **范围**：`src/pages/Login.tsx`
+- **摘要**：UI 改版 C2 —— 登录页硬编码蓝色替换为品牌 token：`bg-blue-600`（2 处 JJG logo）→ `bg-primary`、`hover:bg-blue-700`（登录按钮）→ `hover:bg-primary-hover`、`focus:border-blue-500`（邮箱/密码输入框）→ `focus:border-primary`；3 处按钮/logo 阴影的硬编码 `rgba(37,99,235,…)` 改为 `color-mix(in_srgb,var(--jjg-color-primary)_xx%,transparent)` 动态引用品牌色。色值来源统一为 `App.tsx BASE_TOKENS`（当前 `#2563eb`），后续换主色登录页自动跟随
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run build` 通过、`bun run test` 通过（110 文件 / 488 用例）、eslint 0 告警、页面级回归（dev server 登录页：2 处 logo 与登录按钮实际渲染 `rgb(37,99,235)` = `#2563eb`，阴影为品牌色 20%/32%/40% 透明度，主色变量 `--jjg-color-primary` 正确）
+
+## 2026-08-13
+
+- **类别**：变更
 - **范围**：`src/pages/Dashboard.tsx`、`src/services/apiDashboard.ts`（含 `apiDashboard.vitest.ts`）
 - **摘要**：UI 改版 C1 —— 首页 Dashboard 由"欢迎使用"空卡改为决策优先看板：新增 `apiDashboard.ts` 聚合查询（5 张核心业务表 sales_orders / production_orders / syney-pos / material_transfers / employees，并行 count 总数 + 近 14 天每日新增），纯函数 `buildDailyTrend`（按日桶计数，忽略 null/非法/越界日期）与 `computeDeltaPercent`（后 7 天 vs 前 7 天环比，前段为 0 返回 null）；`Dashboard.tsx` 重写为 KPI 卡 Grid（CSS Grid `repeat(auto-fill, minmax(200px,1fr))`），每卡 = 28px 粗体 tabular-nums 大数字 + 环比标签（▲绿/▼红/持平）+ 内联 SVG 趋势迷你图（无第三方图表依赖，面积填充 + 折线 + 末点高亮），卡片复用 `app-card` 统一样式；含加载骨架屏、错误 Alert + 重试、AbortSignal 传递（queryClient 全局处理）
 - **验证**：`bun run test` 通过（110 文件 / 488 用例，新增 7 用例）、`bun run typecheck` 通过（0 错误）、eslint 0 告警、页面级回归（dev server 登录后 /dashboard 渲染 5 张 KPI 卡真实数据：车间订单 4,136 / 生产工单 4,755 / 西尼订单 542 / 物料转移 2,732 / 员工 69，环比与迷你图正常，控制台无新增错误）
