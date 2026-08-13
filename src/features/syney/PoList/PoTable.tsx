@@ -81,7 +81,12 @@ function PoTable({
         key: 'index',
         width: 50,
         fixed: 'left',
-        render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
+        align: 'right',
+        render: (_text, _record, index) => (
+          <span className="tabular-nums">
+            {(page - 1) * pageSize + index + 1}
+          </span>
+        ),
       },
       {
         title: '交货日期',
@@ -148,6 +153,7 @@ function PoTable({
         dataIndex: 'Qty',
         key: 'Qty',
         width: 80,
+        align: 'right',
         render: (value: number) => (
           <span className="font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
             {value ?? '-'}
@@ -176,7 +182,10 @@ function PoTable({
         dataIndex: 'SerialNo',
         key: 'SerialNo',
         width: 80,
-        render: (value: number | null) => value ?? '-',
+        align: 'right',
+        render: (value: number | null) => (
+          <span className="tabular-nums">{value ?? '-'}</span>
+        ),
       },
       {
         title: '生产号',
@@ -245,7 +254,7 @@ function PoTable({
             </Table.Summary.Cell>
             <Table.Summary.Cell index={6}>
               <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                {currentPageTotalQty}
+                {currentPageTotalQty.toLocaleString()}
               </span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={7} colSpan={4} />

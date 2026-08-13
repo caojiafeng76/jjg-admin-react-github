@@ -1,5 +1,14 @@
 import { FC, useEffect, useMemo, useState } from 'react'
-import { Upload, Button, message, Table, Alert, Space, Typography, theme } from 'antd'
+import {
+  App,
+  Upload,
+  Button,
+  Table,
+  Alert,
+  Space,
+  Typography,
+  theme,
+} from 'antd'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 import type { UploadFile } from 'antd/es/upload/interface'
 import type { ISyneySpec } from '@services/types'
@@ -44,6 +53,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
   specsLoading = false,
 }) => {
   const { token } = theme.useToken()
+  const { message: messageApi } = App.useApp()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [loading, setLoading] = useState(false)
   const [rawParsedData, setRawParsedData] =
@@ -82,14 +92,18 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
     if (!isExcel) {
-      message.error('只能上传Excel文件(.xlsx或.xls)')
+      messageApi.error(
+        '文件格式不支持：仅支持 .xlsx 或 .xls 格式的 Excel 文件，请更换文件后重试',
+      )
       return false
     }
 
     // 检查文件大小 (限制10MB)
     const isLt10M = file.size / 1024 / 1024 < 10
     if (!isLt10M) {
-      message.error('文件大小不能超过10MB')
+      messageApi.error(
+        '文件过大：单文件不能超过 10MB，请压缩或拆分后重新上传',
+      )
       return false
     }
 
@@ -104,10 +118,12 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       setRawParsedData(orderData)
       setPreviewVisible(true)
 
-      message.success('Excel文件解析成功')
+      messageApi.success(
+        `Excel 解析成功：共 ${orderData.items?.length ?? 0} 条明细，请核对预览数据后提交`,
+      )
     } catch (error) {
-      message.error(
-        `Excel导入失败: ${error instanceof Error ? error.message : '未知错误'}`,
+      messageApi.error(
+        `Excel 解析失败：${error instanceof Error ? error.message : '未知错误'}。请检查文件内容是否符合模板格式后重新上传`,
       )
       setRawParsedData(null)
       setPreviewVisible(false)

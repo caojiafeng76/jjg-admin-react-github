@@ -47,7 +47,12 @@ export default function DetailTable({
       key: 'index',
       width: 50,
       fixed: 'left',
-      render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
+      align: 'right',
+      render: (_text, _record, index) => (
+        <span className="tabular-nums">
+          {(page - 1) * pageSize + index + 1}
+        </span>
+      ),
     },
     {
       title: '件号',
@@ -107,6 +112,7 @@ export default function DetailTable({
       dataIndex: 'Qty',
       key: 'Qty',
       width: 90,
+      align: 'right',
       render: (value: number | null) =>
         value === null || value === undefined ? (
           <span className="text-slate-400 dark:text-slate-500">-</span>

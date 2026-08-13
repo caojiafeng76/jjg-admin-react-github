@@ -16,6 +16,20 @@
 ## 2026-08-13
 
 - **类别**：变更
+- **范围**：`src/features/syney/PoList/ExcelUpload.tsx`、`src/features/syney/PoList/PoTable.tsx`
+- **摘要**：UI 改版 D1 —— 订单列表 PoList 过通用列表核对清单：① 导入反馈统一 —— `ExcelUpload` 从 antd 静态 `message`（不走主题 context）改为 `App.useApp()` 的 `messageApi`（与主容器一致），错误文案升级为"原因+影响+建议"（文件格式不支持/文件过大/解析失败均说明原因与处理建议），成功反馈带解析条数（"共 N 条明细，请核对预览数据后提交"）；② 数字列右对齐 —— `PoTable` 的 `#` 序号列、数量（Qty）、编号（SerialNo）加 `align: 'right'`，序号与编号补 `tabular-nums`，汇总行数量加千分位 `toLocaleString()`。核对结论：状态列已是 pill 徽章（✅）、表格密度随全局 G3 token 改善（✅）、新增/编辑保持 Modal 720（含 Excel 预览大表，Drawer 不必要）、加载/空态/错误重试三态属 S1 表格三态通用化范围（本项未重复实施）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例；首次运行 1 例"选择人员 Select loading"时序 flaky 失败，重跑全绿，与本次改动无交集）、lsp_diagnostics 0 诊断
+
+## 2026-08-13
+
+- **类别**：变更
+- **范围**：`src/features/syney/PoDetail/index.tsx`、`src/features/syney/PoDetail/DetailTable.tsx`
+- **摘要**：UI 改版 D2 —— 订单详情 PoDetail：① 详情分区卡片 —— 顶部新增"订单信息"卡片（复用 `app-card` 统一样式：白底/边框/浅影/12px 圆角，暗色适配），字段按 2/4 列响应式 grid 展示订单号/生产号/规格/交货日期/商标/工艺要求/编号/备注，数量列用 18px 粗体 `tabular-nums` 大数字突出，右上角状态 pill 徽章（语义色与 PoTable STATUS_STYLES 一致：已创建=rose / 部分送货=amber / 已入库=emerald / 暂停=pink / 作废=slate）；② 操作区吸底 —— 原顶部工具栏改为页面底部固定操作条（`border-t` 分割线）：左侧"返回列表"按钮（ArrowLeft + `navigate(-1)`），右侧"编辑"按钮；③ 数字列右对齐 —— `DetailTable` 的 `#` 序号列补 `align: 'right'` + `tabular-nums`，数量列补 `align: 'right'`（汇总行此前已右对齐）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）、lsp_diagnostics 0 诊断
+
+## 2026-08-13
+
+- **类别**：变更
 - **范围**：`src/pages/AccessDenied.tsx`
 - **摘要**：UI 改版 C3 —— 403 无权限页与 404 / 错误页视觉统一：`AccessDenied` 从独立 antd Card（默认 8px 圆角、无插画、固定 `bg-slate-100` 背景、暗色不适配）改为复用 `AppErrorView`（variant="permission"，rose 语义色系 + 盾牌插画 + 渐变背景 + 32px 圆角卡片 + 明暗适配）；动态描述（未登录/未绑定员工/账号停用/无角色/无权限）映射到"错误摘要"，账号邮箱映射到"诊断信息"，按钮组映射到操作区（返回登录页 + 有登录态时显示退出当前账号）。至此 404（PageNotFound）、403（AccessDenied）、运行时错误（RouteErrorPage）三个兜底页全部由 `AppErrorView` 统一渲染
 - **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）、eslint 0 告警、页面级回归（dev server：`/access-denied` 未登录态渲染 permission 变体 —— 权限限制徽章、盾牌插画、动态描述"当前登录信息已失效"、诊断"账号邮箱：未登录"、32px 圆角卡片、rose 渐变背景；404 页同源渲染正常）
