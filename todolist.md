@@ -23,7 +23,7 @@
 
 ## B. P0 基建：antd 与 Tailwind 打通
 
-- [ ] **B1** `index.css` 加 `@layer theme, base, antd, components, utilities;` + `StyleProvider`；`ConfigProvider` 开 `cssVar`，`@theme` 桥接 token，消除两套色值
+- [x] **B1** `index.css` 加 `@layer theme, base, antd, components, utilities;` + `StyleProvider`；`ConfigProvider` 开 `cssVar`，`@theme` 桥接 token，消除两套色值
 
 ## C. 首页 / 登录 / 兜底页
 
