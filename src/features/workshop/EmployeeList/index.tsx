@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { App, Button, FormInstance, Modal } from 'antd'
 import {
@@ -60,14 +60,37 @@ export default function EmployeeList() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [formRef, setFormRef] =
-    useState<FormInstance<EmployeeFormValues> | null>(null)
-  const [authFormRef, setAuthFormRef] =
-    useState<FormInstance<EmployeeAuthAccountValues> | null>(null)
-  const [resetPasswordFormRef, setResetPasswordFormRef] =
-    useState<FormInstance<EmployeeResetPasswordValues> | null>(null)
-  const [rebindFormRef, setRebindFormRef] =
-    useState<FormInstance<EmployeeRebindAccountValues> | null>(null)
+  const formRef = useRef<FormInstance<EmployeeFormValues> | null>(null)
+  const authFormRef = useRef<FormInstance<EmployeeAuthAccountValues> | null>(
+    null,
+  )
+  const resetPasswordFormRef = useRef<FormInstance<EmployeeResetPasswordValues> | null>(
+    null,
+  )
+  const rebindFormRef = useRef<FormInstance<EmployeeRebindAccountValues> | null>(
+    null,
+  )
+  const setFormRef = useCallback((form: FormInstance<EmployeeFormValues>) => {
+    formRef.current = form
+  }, [])
+  const setAuthFormRef = useCallback(
+    (form: FormInstance<EmployeeAuthAccountValues>) => {
+      authFormRef.current = form
+    },
+    [],
+  )
+  const setResetPasswordFormRef = useCallback(
+    (form: FormInstance<EmployeeResetPasswordValues>) => {
+      resetPasswordFormRef.current = form
+    },
+    [],
+  )
+  const setRebindFormRef = useCallback(
+    (form: FormInstance<EmployeeRebindAccountValues>) => {
+      rebindFormRef.current = form
+    },
+    [],
+  )
   const [searchParams, setSearchParams] = useState<{
     name?: string
     role?: string
@@ -110,8 +133,8 @@ export default function EmployeeList() {
     setIsEdit(false)
     setModalTitle('创建员工')
     setIsModalOpen(true)
-    formRef?.resetFields()
-  }, [formRef])
+    formRef.current?.resetFields()
+  }, [])
 
   const [editingRecord, setEditingRecord] = useState<Employee | null>(null)
 
@@ -120,8 +143,8 @@ export default function EmployeeList() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    formRef?.resetFields()
-  }, [formRef])
+    formRef.current?.resetFields()
+  }, [])
 
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
@@ -558,7 +581,7 @@ export default function EmployeeList() {
         setSelectedRowKeys([])
         setIsAuthModalOpen(false)
         setAuthTargetEmployee(null)
-        authFormRef?.resetFields()
+        authFormRef.current?.resetFields()
       } catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
@@ -567,7 +590,7 @@ export default function EmployeeList() {
         }
       }
     },
-    [authFormRef, authTargetEmployee, createEmployeeAuthMutation, message],
+    [authTargetEmployee, createEmployeeAuthMutation, message],
   )
 
   const handleResetPassword = useCallback(
@@ -586,7 +609,7 @@ export default function EmployeeList() {
         message.success(`已重置员工 ${result.employeeName} 的登录密码`)
         setSelectedRowKeys([])
         setIsResetPasswordModalOpen(false)
-        resetPasswordFormRef?.resetFields()
+        resetPasswordFormRef.current?.resetFields()
       } catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
@@ -595,12 +618,7 @@ export default function EmployeeList() {
         }
       }
     },
-    [
-      authTargetEmployee,
-      message,
-      resetEmployeeAuthPasswordMutation,
-      resetPasswordFormRef,
-    ],
+    [authTargetEmployee, message, resetEmployeeAuthPasswordMutation],
   )
 
   const handleRebindAccount = useCallback(
@@ -621,7 +639,7 @@ export default function EmployeeList() {
         )
         setSelectedRowKeys([])
         setIsRebindModalOpen(false)
-        rebindFormRef?.resetFields()
+        rebindFormRef.current?.resetFields()
       } catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
@@ -630,12 +648,7 @@ export default function EmployeeList() {
         }
       }
     },
-    [
-      authTargetEmployee,
-      message,
-      rebindEmployeeAuthAccountMutation,
-      rebindFormRef,
-    ],
+    [authTargetEmployee, message, rebindEmployeeAuthAccountMutation],
   )
 
   const handleSearch = useCallback(
@@ -756,7 +769,7 @@ export default function EmployeeList() {
         width={640}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         destroyOnClose
-        onOk={() => formRef?.submit()}
+        onOk={() => formRef.current?.submit()}
         onCancel={() => {
           resetFormState()
         }}
@@ -776,11 +789,11 @@ export default function EmployeeList() {
         width={560}
         destroyOnClose
         confirmLoading={createEmployeeAuthMutation.isPending}
-        onOk={() => authFormRef?.submit()}
+        onOk={() => authFormRef.current?.submit()}
         onCancel={() => {
           setIsAuthModalOpen(false)
           setAuthTargetEmployee(null)
-          authFormRef?.resetFields()
+          authFormRef.current?.resetFields()
         }}
       >
         {authTargetEmployee ? (
@@ -799,10 +812,10 @@ export default function EmployeeList() {
         width={520}
         destroyOnClose
         confirmLoading={resetEmployeeAuthPasswordMutation.isPending}
-        onOk={() => resetPasswordFormRef?.submit()}
+        onOk={() => resetPasswordFormRef.current?.submit()}
         onCancel={() => {
           setIsResetPasswordModalOpen(false)
-          resetPasswordFormRef?.resetFields()
+          resetPasswordFormRef.current?.resetFields()
         }}
       >
         {authTargetEmployee ? (
@@ -821,10 +834,10 @@ export default function EmployeeList() {
         width={520}
         destroyOnClose
         confirmLoading={rebindEmployeeAuthAccountMutation.isPending}
-        onOk={() => rebindFormRef?.submit()}
+        onOk={() => rebindFormRef.current?.submit()}
         onCancel={() => {
           setIsRebindModalOpen(false)
-          rebindFormRef?.resetFields()
+          rebindFormRef.current?.resetFields()
         }}
       >
         {authTargetEmployee ? (

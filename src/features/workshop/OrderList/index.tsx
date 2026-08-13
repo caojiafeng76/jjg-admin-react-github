@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
 import { DownloadOutlined } from '@ant-design/icons'
 import type { FormInstance, TableProps } from 'antd'
@@ -131,9 +131,10 @@ export default function WorkshopOrderList() {
   const activeTab: WorkshopOrderTabKey =
     searchParamsURL.get('status') === 'closed' ? 'closed' : 'production'
   const fixedStatus: WorkshopOrderStatus = TAB_TO_STATUS[activeTab]
-  const [formRef, setFormRef] = useState<FormInstance<WorkshopOrder> | null>(
-    null,
-  )
+  const formRef = useRef<FormInstance<WorkshopOrder> | null>(null)
+  const setFormRef = useCallback((form: FormInstance<WorkshopOrder>) => {
+    formRef.current = form
+  }, [])
   const [searchParams, setSearchParams] = useState<{
     project_no?: string
     product_model?: string
@@ -256,8 +257,8 @@ export default function WorkshopOrderList() {
     setIsEdit(false)
     setModalTitle('创建订单')
     setIsModalOpen(true)
-    formRef?.resetFields()
-  }, [formRef, message, viewerDenied, viewerOperationTip])
+    formRef.current?.resetFields()
+  }, [message, viewerDenied, viewerOperationTip])
 
   const [editingRecord, setEditingRecord] = useState<WorkshopOrder | null>(null)
 
@@ -266,8 +267,8 @@ export default function WorkshopOrderList() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    formRef?.resetFields()
-  }, [formRef])
+    formRef.current?.resetFields()
+  }, [])
 
   const handleEdit = useCallback(() => {
     if (viewerDenied) {
@@ -949,7 +950,7 @@ export default function WorkshopOrderList() {
           batchCreateMutation.isPending
         }
         destroyOnHidden
-        onOk={() => formRef?.submit()}
+        onOk={() => formRef.current?.submit()}
         okButtonProps={{ disabled: viewerDenied }}
         onCancel={() => {
           resetFormState()

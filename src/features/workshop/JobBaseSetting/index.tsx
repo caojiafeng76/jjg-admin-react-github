@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { App, FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
@@ -31,8 +31,13 @@ export default function JobBaseSettingPage() {
   const [editingRecord, setEditingRecord] = useState<JobBaseSetting | null>(
     null,
   )
-  const [formRef, setFormRef] =
-    useState<FormInstance<JobBaseSettingFormValues> | null>(null)
+  const formRef = useRef<FormInstance<JobBaseSettingFormValues> | null>(null)
+  const setFormRef = useCallback(
+    (form: FormInstance<JobBaseSettingFormValues>) => {
+      formRef.current = form
+    },
+    [],
+  )
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -63,8 +68,8 @@ export default function JobBaseSettingPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    formRef?.resetFields()
-  }, [formRef])
+    formRef.current?.resetFields()
+  }, [])
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -72,8 +77,8 @@ export default function JobBaseSettingPage() {
     setSelectedRowKeys([])
     setModalTitle('新建岗位基础数值')
     setIsModalOpen(true)
-    formRef?.resetFields()
-  }, [formRef])
+    formRef.current?.resetFields()
+  }, [])
 
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
@@ -231,7 +236,7 @@ export default function JobBaseSettingPage() {
         open={isModalOpen}
         destroyOnClose
         confirmLoading={createMutation.isPending || updateMutation.isPending}
-        onOk={() => formRef?.submit()}
+        onOk={() => formRef.current?.submit()}
         onCancel={resetFormState}
       >
         <JobBaseSettingForm

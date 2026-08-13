@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/16/solid'
 import { App, Modal, FormInstance, Button, Splitter } from 'antd'
 import { useSearchParams } from 'react-router-dom'
@@ -66,8 +66,13 @@ export default function StandardTimeList() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [formRef, setFormRef] =
-    useState<FormInstance<StandardTimeFormValues> | null>(null)
+  const formRef = useRef<FormInstance<StandardTimeFormValues> | null>(null)
+  const setFormRef = useCallback(
+    (form: FormInstance<StandardTimeFormValues>) => {
+      formRef.current = form
+    },
+    [],
+  )
   const [searchParams, setSearchParams] = useState<{
     operation?: string
     model?: string
@@ -115,16 +120,16 @@ export default function StandardTimeList() {
     setSelectedRowKeys([])
     setModalTitle(isTeamLeaderMode ? '创建理论工时' : '新建成本核算')
     setIsModalOpen(true)
-    formRef?.resetFields()
-  }, [formRef, isTeamLeaderMode])
+    formRef.current?.resetFields()
+  }, [isTeamLeaderMode])
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    formRef?.resetFields()
-  }, [formRef])
+    formRef.current?.resetFields()
+  }, [])
 
   const handleEdit = useCallback(
     (record?: StandardTime) => {
@@ -764,7 +769,7 @@ export default function StandardTimeList() {
         destroyOnHidden
         width={isTeamLeaderMode ? 'calc(100vw - 24px)' : 900}
         style={isTeamLeaderMode ? { top: 16, maxWidth: 520 } : undefined}
-        onOk={() => formRef?.submit()}
+        onOk={() => formRef.current?.submit()}
         onCancel={resetFormState}
       >
         <StandardTimeForm

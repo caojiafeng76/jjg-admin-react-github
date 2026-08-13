@@ -16,6 +16,13 @@
 ## 2026-08-13
 
 - **类别**：性能
+- **范围**：`src/features/workshop/EmployeeList/index.tsx`、`src/features/workshop/StandardTimeList/index.tsx`、`src/features/workshop/JobBaseSetting/index.tsx`、`src/features/workshop/OrderList/index.tsx`、`src/features/workshop/MachineEquipmentMaintenance/index.tsx`
+- **摘要**：优化清单 #10 —— 全部 5 个 workshop 列表页把 `FormInstance` 存在 `useState` 的问题改为 `useRef`：EmployeeList 4 个表单实例（员工/开通账号/重置密码/重新绑定）、StandardTimeList 1 个、JobBaseSetting 1 个、OrderList 1 个、MachineEquipmentMaintenance 1 个，均改为 `useRef` + 稳定的 `useCallback` setter（`formRef.current = form`），消除表单实例写入时触发的父组件多余重渲染；所有 `formRef?.xxx()` 调用点改为 `formRef.current?.xxx()`，`useCallback` 依赖数组同步精简（移除不再变化的 `formRef` 依赖）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过
+
+## 2026-08-13
+
+- **类别**：性能
 - **范围**：`src/features/villa-lift/OrderList/index.tsx`
 - **摘要**：优化清单 #9 —— 别墅梯订单列表 3 个文本搜索框（客户/项目名称/产品名称）由受控 `useState` 改为 uncontrolled（`defaultValue` + `InputRef` + 重挂载 `key`），消除"每击键重渲染整个 827 行父组件"的问题；提交时从 ref 读取值（`handleSearch`），重置与切换 Tab 时递增 `searchInputKey` 使输入框重挂载清空；日期范围选择器保持受控不变（仅选择时触发查询，非逐击键场景）；表格本身已由 `memo` 保护不受影响
 - **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过

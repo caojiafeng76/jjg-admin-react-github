@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { App, FormInstance, Modal, Splitter } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
@@ -33,8 +33,15 @@ export default function MachineEquipmentMaintenancePage() {
     useState<MachineEquipmentMaintenance | null>(null)
   const [activeRecord, setActiveRecord] =
     useState<MachineEquipmentMaintenance | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<MachineEquipmentMaintenanceFormValues> | null>(null)
+  const formRef = useRef<FormInstance<MachineEquipmentMaintenanceFormValues> | null>(
+    null,
+  )
+  const setFormRef = useCallback(
+    (form: FormInstance<MachineEquipmentMaintenanceFormValues>) => {
+      formRef.current = form
+    },
+    [],
+  )
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -70,8 +77,8 @@ export default function MachineEquipmentMaintenancePage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
-    formRef?.resetFields()
-  }, [formRef])
+    formRef.current?.resetFields()
+  }, [])
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -79,8 +86,8 @@ export default function MachineEquipmentMaintenancePage() {
     setSelectedRowKeys([])
     setModalTitle('新建机器设备维护')
     setIsModalOpen(true)
-    formRef?.resetFields()
-  }, [formRef])
+    formRef.current?.resetFields()
+  }, [])
 
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
@@ -268,7 +275,7 @@ export default function MachineEquipmentMaintenancePage() {
         destroyOnClose
         width={960}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
-        onOk={() => formRef?.submit()}
+        onOk={() => formRef.current?.submit()}
         onCancel={resetFormState}
       >
         <MachineEquipmentMaintenanceForm
