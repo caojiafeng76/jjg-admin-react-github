@@ -15,6 +15,13 @@
 
 ## 2026-08-13
 
+- **类别**：修复
+- **范围**：`supabase/migrations/20260813100000_fix_tooling_stock_out_public_insert_allow_no_machine.sql`（新建）、`tooling_stock_out` 表 RLS 策略
+- **摘要**：修复刀具出库扫码登记 H5 页面（无需登录）提交时报"没有权限执行当前操作"的问题。根因：H5 表单提供"无机器"选项（`machine_equipment_id` 为 null），但远程库中 `Tooling stock out public insert` 策略漂移回严格校验 `machine_equipment_id is not null`（20260510084535 已放宽过该策略，远程库其后被改回），RLS 校验失败被 `errorHandler` 映射为权限错误。修复：重建该策略，允许 `machine_equipment_id is null`，非空时校验其存在于 `machine_equipment_maintenances`，其余校验（刀具资料、领用人、用途、数量、状态、领用方式）保持不变
+- **验证**：`anon` 角色实测——无机器插入成功、伪造机器 UUID 插入仍被 RLS 拒绝；策略已同步到远程 Supabase 并记录迁移
+
+## 2026-08-13
+
 - **类别**：文档
 - **范围**：`docs/UI设计调研与改版指南.md`（新建）
 - **摘要**：调研 2025-2026 年主流后台管理系统 UI 设计趋势（Calm Design 克制极简、Bento Grid、密度分层、暗色标配、微交互、决策优先看板等），结合本项目 React 19 + antd 6 + Tailwind 4 技术栈与现有代码（`App.tsx` 主题 token、`AppLayout`、`AppHeader`）做现状诊断，产出可落地的 UI 改版指南：品牌色/圆角/表格密度等 token 规格、antd 与 Tailwind 的 `@layer` + CSS 变量桥接方案、布局与组件细化方向、P0-P3 优先级路线图。作为全站视觉升级的参考规范，不改动任何运行代码
