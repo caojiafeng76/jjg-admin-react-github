@@ -252,12 +252,12 @@ function PoTable({
             <Table.Summary.Cell index={1} colSpan={5}>
               <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={6}>
+            <Table.Summary.Cell index={6} align="right">
               <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                 {currentPageTotalQty.toLocaleString()}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={7} colSpan={4} />
+            <Table.Summary.Cell index={7} colSpan={5} />
           </Table.Summary.Row>
         </Table.Summary>
       )}

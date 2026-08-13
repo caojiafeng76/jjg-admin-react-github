@@ -181,7 +181,7 @@ export default function DetailTable({
             </Table.Summary.Cell>
             <Table.Summary.Cell index={9} align="right">
               <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                {currentPageTotalQty}
+                {currentPageTotalQty.toLocaleString()}
               </span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={10} />
