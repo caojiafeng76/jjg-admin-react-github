@@ -110,6 +110,19 @@ const MATCH_LEVEL_COLORS: Record<ProcessStandardMatchLevel, string> = {
   'type-b': 'processing',
 }
 
+const ITEM_FORM_INITIAL_VALUES = {
+  incoming_qualified_quantity: 0,
+  qualified_quantity: 0,
+  defect_quantity_1: 0,
+  defect_quantity_2: 0,
+  outsource_defect_quantity: 0,
+  outsource_defect_reason: null,
+  outsource_unit: null,
+  setup_defect_quantity: 0,
+  setup_responsible: null,
+  remark: null,
+}
+
 export default function ProductionOrderForm({
   open,
   onCancel,
@@ -137,6 +150,17 @@ export default function ProductionOrderForm({
   const [itemForm] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
   const isCreateMode = !initialValues
+
+  const orderFormInitialValues = useMemo(
+    () => ({
+      order_date: dayjs(),
+      work_hours: 11,
+      extra_qualified_hours: 0,
+      is_audited: false,
+      shift: '白班',
+    }),
+    [],
+  )
 
   const selectedItemProductModel = Form.useWatch('product_model', itemForm)
   const selectedItemProjectNo = Form.useWatch('project_no', itemForm)
@@ -534,13 +558,7 @@ export default function ProductionOrderForm({
           form={form}
           layout="vertical"
           onFinish={handleFinish}
-          initialValues={{
-            order_date: dayjs(),
-            work_hours: 11,
-            extra_qualified_hours: 0,
-            is_audited: false,
-            shift: '白班',
-          }}
+          initialValues={orderFormInitialValues}
         >
           <div
             className={
@@ -1028,18 +1046,7 @@ export default function ProductionOrderForm({
             form={itemForm}
             layout="vertical"
             onFinish={handleItemFinish}
-            initialValues={{
-              incoming_qualified_quantity: 0,
-              qualified_quantity: 0,
-              defect_quantity_1: 0,
-              defect_quantity_2: 0,
-              outsource_defect_quantity: 0,
-              outsource_defect_reason: null,
-              outsource_unit: null,
-              setup_defect_quantity: 0,
-              setup_responsible: null,
-              remark: null,
-            }}
+            initialValues={ITEM_FORM_INITIAL_VALUES}
           >
             {compact || hideCostColumns ? null : (
               <Form.Item

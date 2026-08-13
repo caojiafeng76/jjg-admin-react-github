@@ -174,6 +174,8 @@ const DEFAULT_ROW: VillaLiftFinishingRecordFormValues = {
   remarks: '',
 }
 
+const DEFAULT_FORM_INITIAL_VALUES = { rows: [{ ...DEFAULT_ROW }] }
+
 export default function FinishingProcessForm({
   orders,
   onFinish,
@@ -234,7 +236,7 @@ export default function FinishingProcessForm({
       form={form}
       layout="vertical"
       onFinish={onFinish}
-      initialValues={{ rows: [{ ...DEFAULT_ROW }] }}
+      initialValues={DEFAULT_FORM_INITIAL_VALUES}
     >
       {/* 订单选择 */}
       <Form.Item

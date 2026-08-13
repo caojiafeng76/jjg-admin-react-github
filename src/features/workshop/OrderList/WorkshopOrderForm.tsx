@@ -13,7 +13,7 @@ import {
 } from 'antd'
 import type { TableColumnsType } from 'antd'
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { WorkshopOrder } from './index'
 import WorkshopExcelUpload from './WorkshopExcelUpload'
 import {
@@ -54,6 +54,13 @@ export default function WorkshopOrderForm({
 }: Props) {
   const { message } = App.useApp()
   const [form] = Form.useForm<WorkshopOrder>()
+  const formInitialValues = useMemo(
+    () => ({
+      status: DEFAULT_WORKSHOP_ORDER_STATUS,
+      ...initialValues,
+    }),
+    [initialValues],
+  )
   const [importMode, setImportMode] = useState<'manual' | 'excel'>('manual')
   const [excelRows, setExcelRows] = useState<WorkshopOrder[]>([])
 
@@ -191,10 +198,7 @@ export default function WorkshopOrderForm({
       form={form}
       layout="vertical"
       onFinish={handleFinish}
-      initialValues={{
-        status: DEFAULT_WORKSHOP_ORDER_STATUS,
-        ...initialValues,
-      }}
+      initialValues={formInitialValues}
     >
       {/* 导入方式选择 (仅在新建时显示) */}
       {!isEdit && (

@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Button, DatePicker, Form, Input, Space } from 'antd'
 import dayjs from 'dayjs'
 
@@ -18,6 +18,16 @@ interface Props {
 
 export default function MachineRuntimeSearch({ onSearch, onReset }: Props) {
   const [form] = Form.useForm()
+
+  const initialValues = useMemo(
+    () => ({
+      dateRange: [dayjs().subtract(30, 'day'), dayjs()] as [
+        dayjs.Dayjs,
+        dayjs.Dayjs,
+      ],
+    }),
+    [],
+  )
 
   const handleFinish = useCallback(
     (values: {
@@ -48,9 +58,7 @@ export default function MachineRuntimeSearch({ onSearch, onReset }: Props) {
       layout="inline"
       onFinish={handleFinish}
       className="flex flex-wrap gap-2"
-      initialValues={{
-        dateRange: [dayjs().subtract(30, 'day'), dayjs()],
-      }}
+      initialValues={initialValues}
     >
       <Form.Item name="dateRange" label="日期范围">
         <RangePicker format="YYYY-MM-DD" allowClear style={{ width: 240 }} />

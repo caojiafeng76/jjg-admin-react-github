@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { App, Button, Card, DatePicker, Form, Input, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
@@ -37,6 +37,15 @@ export default function MobileProductionOrderCreatePage() {
   const isEmployeeView = isEmployeeSideRole(role)
   const createMutation = useCreateProductionOrder()
   const [form] = Form.useForm<OrderFormValues>()
+  const formInitialValues = useMemo<Partial<OrderFormValues>>(
+    () => ({
+      order_date: dayjs(),
+      shift: '白班',
+      work_hours: 0,
+      extra_qualified_hours: 0,
+    }),
+    [],
+  )
   const [isShiftSheetOpen, setIsShiftSheetOpen] = useState(false)
 
   const currentShift = Form.useWatch('shift', form)
@@ -105,12 +114,7 @@ export default function MobileProductionOrderCreatePage() {
             <Form
               form={form}
               layout="vertical"
-              initialValues={{
-                order_date: dayjs(),
-                shift: '白班',
-                work_hours: 0,
-                extra_qualified_hours: 0,
-              }}
+              initialValues={formInitialValues}
               onFinish={handleSubmit}
             >
               <Form.Item

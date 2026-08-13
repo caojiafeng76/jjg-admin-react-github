@@ -124,6 +124,8 @@ const DEFAULT_ROW: VillaLiftCuttingRecordFormValues = {
   remarks: '',
 }
 
+const DEFAULT_FORM_INITIAL_VALUES = { rows: [{ ...DEFAULT_ROW }] }
+
 export default function CuttingProcessForm({
   orders,
   onFinish,
@@ -162,7 +164,7 @@ export default function CuttingProcessForm({
       form={form}
       layout="vertical"
       onFinish={onFinish}
-      initialValues={{ rows: [{ ...DEFAULT_ROW }] }}
+      initialValues={DEFAULT_FORM_INITIAL_VALUES}
     >
       {/* 订单选择 */}
       <Form.Item

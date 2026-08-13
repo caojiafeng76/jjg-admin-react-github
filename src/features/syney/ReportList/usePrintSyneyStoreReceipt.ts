@@ -64,6 +64,12 @@ function renderPreparingWindow(printWindow: Window, storeInNo: string): void {
 export function usePrintSyneyStoreReceipt() {
   const { message } = App.useApp()
   const [isGenerating, setIsGenerating] = useState(false)
+  // 保留原始 useMutation（mutateAsync）而非 useMutationWithMessage：本操作为
+  // 只读的「从 SCM 拉取入库单数据」（fetchSyneyStoreReportFromScm），无缓存失效
+  // 需求；错误处理需先关闭已打开的打印窗口（printWindow?.close()）再提示，并有
+  // 多个 warning 分支（未获取到数据、浏览器阻止弹窗、回退 PDF 预览），与
+  // useMutationWithMessage 的「自动失效 + 自动 error 提示」语义冲突，故保留原始
+  // useMutation 由 printByStoreInNo 自行 try/catch 处理。
   const { mutateAsync: fetchStoreReport, isPending: isFetching } = useMutation({
     mutationFn: fetchSyneyStoreReportFromScm,
   })

@@ -56,6 +56,24 @@ export default function ProductionOrderItemForm({
   compact = false,
 }: Props) {
   const [form] = Form.useForm()
+  const formInitialValues = useMemo(
+    () => ({
+      order_id: orderId,
+      data_category: 'A' as const,
+      incoming_qualified_quantity: 0,
+      qualified_quantity: 0,
+      defect_reason_1: '加工',
+      defect_quantity_1: 0,
+      defect_reason_2: '原料',
+      defect_quantity_2: 0,
+      outsource_defect_quantity: 0,
+      outsource_defect_reason: null,
+      outsource_unit: null,
+      setup_defect_quantity: 0,
+      setup_responsible: null,
+    }),
+    [orderId],
+  )
   const { data: projectNos, isLoading: loadingProjectNos } =
     useSalesOrdersProjectNos()
   const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
@@ -341,21 +359,7 @@ export default function ProductionOrderItemForm({
           form={form}
           layout="vertical"
           onFinish={handleFinish}
-          initialValues={{
-            order_id: orderId,
-            data_category: 'A',
-            incoming_qualified_quantity: 0,
-            qualified_quantity: 0,
-            defect_reason_1: '加工',
-            defect_quantity_1: 0,
-            defect_reason_2: '原料',
-            defect_quantity_2: 0,
-            outsource_defect_quantity: 0,
-            outsource_defect_reason: null,
-            outsource_unit: null,
-            setup_defect_quantity: 0,
-            setup_responsible: null,
-          }}
+          initialValues={formInitialValues}
         >
           <Form.Item name="order_id" hidden>
             <Input />

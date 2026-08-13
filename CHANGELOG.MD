@@ -15,6 +15,27 @@
 
 ## 2026-08-13
 
+- **类别**：重构
+- **范围**：`src/features/syney/ReportList/usePrintSyneyStoreReceipt.ts`、`useFetchSyneyStoreReport.ts`
+- **摘要**：优化清单 #17 —— 评估 2 处原始 `useMutation` 是否迁移 `useMutationWithMessage`，结论为**保留并注释说明原因**：两处 `mutationFn` 均为 `fetchSyneyStoreReportFromScm`（只读「从 SCM 拉取入库单数据」，非 CRUD 写入），无缓存失效需求，且提示逻辑高度定制——`usePrintSyneyStoreReceipt` 需先 `printWindow?.close()` 再提示并含多个 warning 分支（未获取到数据/浏览器阻止弹窗/回退 PDF 预览）、`useFetchSyneyStoreReport` 的成功/失败提示由 `index.tsx` 的 `handleFetchStoreReport` 按业务分支处理；`useMutationWithMessage` 的「自动失效 + 自动提示」语义不适用，分别加注释说明
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过
+
+## 2026-08-13
+
+- **类别**：性能
+- **范围**：`src/features/quality/ReworkRepair/index.tsx`
+- **摘要**：优化清单 #14 —— 返工返修页 4 个内联 render 函数（`renderWorkshopFields`/`renderProductionFields`/`renderTechnicalFields`/`renderQualityFields`）抽取为模块级 `memo` 子组件（`WorkshopFields`/`ProductionFields`/`TechnicalFields`/`QualityFields`），消除每次父组件渲染重建 JSX 树：3 个无 props 组件（生产/技术/质量）memo 后父组件重渲染完全跳过；`WorkshopFields` 以 props 传入 4 个依赖（`isFetchingDocumentNo`/`isLoadingOrderOptions`/`projectNoOptions`/`onProjectNoChange`）；删除 `renderModalFields` 调度函数，改为 Modal 内 JSX 按 `processingStageKey` 条件渲染对应组件
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过
+
+## 2026-08-13
+
+- **类别**：性能
+- **范围**：`src/features/production-order/ProductionOrderForm.tsx`、`ProductionOrderItemForm.tsx`、`MobileProductionOrderCreatePage.tsx`、`workshop/OrderList/WorkshopOrderForm.tsx`、`villa-lift/CuttingProcess/CuttingProcessForm.tsx`、`villa-lift/FinishingProcess/FinishingProcessForm.tsx`、`machine-runtime/MachineRuntimeSearch.tsx`
+- **摘要**：优化清单 #13 —— 8 处 `initialValues` 每次渲染新建对象改为按内容分类缓存：(1) 纯静态提为模块级常量（`ProductionOrderForm` 工序明细 `ITEM_FORM_INITIAL_VALUES`、`CuttingProcessForm`/`FinishingProcessForm` 的 `{ rows: [{...DEFAULT_ROW}] }` → `DEFAULT_FORM_INITIAL_VALUES`）；(2) 含 `dayjs()` 动态日期改 `useMemo` 空依赖（`ProductionOrderForm` 主表单、`MobileProductionOrderCreatePage`、`MachineRuntimeSearch`，消除每次渲染新建 dayjs）；(3) 含动态 prop 改 `useMemo` 依赖 prop（`ProductionOrderItemForm` `[orderId]`、`WorkshopOrderForm` `[initialValues]`）。destroyOnClose 场景已核对：`ProductionOrderForm` 主表单 `order_date` 由 useEffect 在 open 时 `setFieldsValue(dayjs())` 覆盖，initialValues 中 dayjs 冗余、无跨天风险
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过
+
+## 2026-08-13
+
 - **类别**：性能
 - **范围**：`src/features/machine-runtime/MachineRuntimeSearch.tsx`、`syney/SpecList/SpecForm.tsx`、`syney/ReportList/ReportForm.tsx`、`attendance/AttendanceDetail/AttendanceDetailForm.tsx`、`tooling/ToolingStockOut/ToolingStockOutForm.tsx`、`youmai/FinishedGoodsStockOut/YoumaiFinishedGoodsStockOutForm.tsx`、`villa-lift/OrderList/VillaLiftOrderForm.tsx`、`quality/IssueRecord/IssueRecordForm.tsx`、`production-order/ProductionOrderForm.tsx`
 - **摘要**：优化清单 #12 —— 9 处 Form `onFinish`/`handleFinish` 由每次渲染重建改为 `useCallback` 包裹并补全依赖数组：`MachineRuntimeSearch`（`[onSearch]`）、`SpecForm`（`[onFinishFunc]`）、`ReportForm`（`[message, syneySpecs, createReport, handleCancel]`）、`AttendanceDetailForm`（`[onFinish]`）、`ToolingStockOutForm`（`[onFinish]`）、`YoumaiFinishedGoodsStockOutForm`（`[onFinish]`）、`VillaLiftOrderForm`（`[onFinish]`）、`IssueRecordForm`（`[onSubmit, employeeNameMap]`）、`ProductionOrderForm` 两处 `handleFinish`（`[onSubmit, items, form]`）与 `handleItemFinish`（`[modelsMap, itemForm, editingItemIndex, items]`）
