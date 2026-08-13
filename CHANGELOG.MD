@@ -15,6 +15,13 @@
 
 ## 2026-08-13
 
+- **类别**：文档
+- **范围**：`docs/UI改版-逐页问题分析与改进方案.md`（新建）、`todolist.md`（新建）
+- **摘要**：基于 `docs/UI设计调研与改版指南.md` 与现有代码（`App.tsx` 主题 token、`AppLayout`、`AppHeader`、`MainMenu`、`Login`、`Dashboard`、路由/菜单）做全站逐页 UI 问题诊断：确认 4 个全局根因（默认蓝 `#1677ff`、表格 12px/4px 过紧、Content 纯白无分层、Sider 深色未定制）+ 登录页与主站两套蓝并存问题；产出 21 个功能域约 60 页的逐页"问题+方案"表，并按 P0/P1/P2 整理为可勾选执行清单 `todolist.md`（规则：完成一项打勾 → 用户确认 → 再继续下一项）。不改动任何运行代码
+- **验证**：纯文档新增，无需构建/测试；已核对页面清单与 `router.tsx`、`MainMenu.tsx`、`lazyPages.ts` 中路由/菜单一一对应
+
+## 2026-08-13
+
 - **类别**：修复
 - **范围**：`supabase/migrations/20260813100000_fix_tooling_stock_out_public_insert_allow_no_machine.sql`（新建）、`tooling_stock_out` 表 RLS 策略
 - **摘要**：修复刀具出库扫码登记 H5 页面（无需登录）提交时报"没有权限执行当前操作"的问题。根因：H5 表单提供"无机器"选项（`machine_equipment_id` 为 null），但远程库中 `Tooling stock out public insert` 策略漂移回严格校验 `machine_equipment_id is not null`（20260510084535 已放宽过该策略，远程库其后被改回），RLS 校验失败被 `errorHandler` 映射为权限错误。修复：重建该策略，允许 `machine_equipment_id is null`，非空时校验其存在于 `machine_equipment_maintenances`，其余校验（刀具资料、领用人、用途、数量、状态、领用方式）保持不变
