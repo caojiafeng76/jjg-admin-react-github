@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import {
   Button,
   DatePicker,
@@ -155,18 +155,21 @@ export default function VillaLiftOrderForm({
     }
   }, [form, initialValues, orderOnly])
 
-  function handleFinish(raw: VillaLiftOrderFormValues) {
-    onFinish({
-      ...raw,
-      items: (raw.items ?? []).map((item) => ({
-        model: item.model ?? '',
-        name: item.name ?? '',
-        spec: item.spec ?? '',
-        quantity: Number(item.quantity ?? 0),
-        remarks: item.remarks ?? '',
-      })),
-    })
-  }
+  const handleFinish = useCallback(
+    (raw: VillaLiftOrderFormValues) => {
+      onFinish({
+        ...raw,
+        items: (raw.items ?? []).map((item) => ({
+          model: item.model ?? '',
+          name: item.name ?? '',
+          spec: item.spec ?? '',
+          quantity: Number(item.quantity ?? 0),
+          remarks: item.remarks ?? '',
+        })),
+      })
+    },
+    [onFinish],
+  )
 
   return (
     <Form

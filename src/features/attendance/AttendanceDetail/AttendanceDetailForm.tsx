@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { AutoComplete, DatePicker, Form, FormInstance, TimePicker } from 'antd'
 import dayjs from 'dayjs'
 
@@ -42,13 +42,16 @@ export default function AttendanceDetailForm({
     }
   }, [form, initialValues])
 
-  const handleFinish = (values: AttendanceDetailFormValues) => {
-    onFinish({
-      name: values.name.trim(),
-      date: values.date,
-      time: values.time,
-    })
-  }
+  const handleFinish = useCallback(
+    (values: AttendanceDetailFormValues) => {
+      onFinish({
+        name: values.name.trim(),
+        date: values.date,
+        time: values.time,
+      })
+    },
+    [onFinish],
+  )
 
   return (
     <Form<AttendanceDetailFormValues>

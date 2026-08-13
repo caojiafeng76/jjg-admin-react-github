@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
   Alert,
@@ -104,17 +104,20 @@ export default function YoumaiFinishedGoodsStockOutForm({
     form.setFieldsValue(DEFAULT_VALUES)
   }, [form, initialValues])
 
-  const handleFinish = (values: YoumaiFinishedGoodsStockOutFormFields) => {
-    onFinish({
-      product_data_id: values.product_data_id,
-      purchase_order_no: values.purchase_order_no.trim(),
-      purchase_order_line_no: values.purchase_order_line_no.trim(),
-      delivery_date: values.delivery_date?.format('YYYY-MM-DD') || '',
-      status: values.status,
-      stock_out_quantity: Number(values.stock_out_quantity || 0),
-      remarks: values.remarks.trim(),
-    })
-  }
+  const handleFinish = useCallback(
+    (values: YoumaiFinishedGoodsStockOutFormFields) => {
+      onFinish({
+        product_data_id: values.product_data_id,
+        purchase_order_no: values.purchase_order_no.trim(),
+        purchase_order_line_no: values.purchase_order_line_no.trim(),
+        delivery_date: values.delivery_date?.format('YYYY-MM-DD') || '',
+        status: values.status,
+        stock_out_quantity: Number(values.stock_out_quantity || 0),
+        remarks: values.remarks.trim(),
+      })
+    },
+    [onFinish],
+  )
 
   return (
     <Form

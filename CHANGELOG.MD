@@ -16,6 +16,13 @@
 ## 2026-08-13
 
 - **类别**：性能
+- **范围**：`src/features/machine-runtime/MachineRuntimeSearch.tsx`、`syney/SpecList/SpecForm.tsx`、`syney/ReportList/ReportForm.tsx`、`attendance/AttendanceDetail/AttendanceDetailForm.tsx`、`tooling/ToolingStockOut/ToolingStockOutForm.tsx`、`youmai/FinishedGoodsStockOut/YoumaiFinishedGoodsStockOutForm.tsx`、`villa-lift/OrderList/VillaLiftOrderForm.tsx`、`quality/IssueRecord/IssueRecordForm.tsx`、`production-order/ProductionOrderForm.tsx`
+- **摘要**：优化清单 #12 —— 9 处 Form `onFinish`/`handleFinish` 由每次渲染重建改为 `useCallback` 包裹并补全依赖数组：`MachineRuntimeSearch`（`[onSearch]`）、`SpecForm`（`[onFinishFunc]`）、`ReportForm`（`[message, syneySpecs, createReport, handleCancel]`）、`AttendanceDetailForm`（`[onFinish]`）、`ToolingStockOutForm`（`[onFinish]`）、`YoumaiFinishedGoodsStockOutForm`（`[onFinish]`）、`VillaLiftOrderForm`（`[onFinish]`）、`IssueRecordForm`（`[onSubmit, employeeNameMap]`）、`ProductionOrderForm` 两处 `handleFinish`（`[onSubmit, items, form]`）与 `handleItemFinish`（`[modelsMap, itemForm, editingItemIndex, items]`）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过
+
+## 2026-08-13
+
+- **类别**：性能
 - **范围**：`src/features/access-management/UserPermissionList/index.tsx`、`UserPermissionDetail.tsx`、`PermissionRegistry/index.tsx`
 - **摘要**：优化清单 #11 —— 权限管理 3 处 `columns` 与内联 `filter` 用 `useMemo` 包裹消除每次渲染全量重算：(1) `UserPermissionList` 的 `filtered`（`allEmployees.filter` 每次渲染重算）与 `columns` 均 `useMemo`（依赖 `[allEmployees, search]` / `[getRoleLabel]`），并把 `columns` 定义从 `if (selectedEmployee) return` 之后上提到 return 之前（修正潜在条件 Hook 隐患）；(2) `UserPermissionDetail` 的 `columns` `useMemo`（依赖 `[rolePermissionIds, overrideMap]`）；(3) `PermissionRegistry` 的 `filtered` 与 `columns` 均 `useMemo`（依赖 `[allPermissions, keyword, scopeFilter]` / `[]`）
 - **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 480/480 通过（首次运行 `remoteEmployeeSelect.vitest.tsx` 1 例并发 flaky 失败，重跑全量通过，确认与本次改动无关）

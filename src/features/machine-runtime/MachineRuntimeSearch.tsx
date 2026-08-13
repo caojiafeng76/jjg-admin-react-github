@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { Button, DatePicker, Form, Input, Space } from 'antd'
 import dayjs from 'dayjs'
 
@@ -18,20 +19,23 @@ interface Props {
 export default function MachineRuntimeSearch({ onSearch, onReset }: Props) {
   const [form] = Form.useForm()
 
-  const handleFinish = (values: {
-    dateRange?: [dayjs.Dayjs, dayjs.Dayjs]
-    unifiedDeviceNo?: string
-    deviceOperation?: string
-    machineName?: string
-  }) => {
-    onSearch({
-      dateFrom: values.dateRange?.[0]?.format('YYYY-MM-DD'),
-      dateTo: values.dateRange?.[1]?.format('YYYY-MM-DD'),
-      unifiedDeviceNo: values.unifiedDeviceNo?.trim() || undefined,
-      deviceOperation: values.deviceOperation?.trim() || undefined,
-      machineName: values.machineName?.trim() || undefined,
-    })
-  }
+  const handleFinish = useCallback(
+    (values: {
+      dateRange?: [dayjs.Dayjs, dayjs.Dayjs]
+      unifiedDeviceNo?: string
+      deviceOperation?: string
+      machineName?: string
+    }) => {
+      onSearch({
+        dateFrom: values.dateRange?.[0]?.format('YYYY-MM-DD'),
+        dateTo: values.dateRange?.[1]?.format('YYYY-MM-DD'),
+        unifiedDeviceNo: values.unifiedDeviceNo?.trim() || undefined,
+        deviceOperation: values.deviceOperation?.trim() || undefined,
+        machineName: values.machineName?.trim() || undefined,
+      })
+    },
+    [onSearch],
+  )
 
   const handleReset = () => {
     form.resetFields()

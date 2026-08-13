@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   App,
   Modal,
@@ -314,30 +314,33 @@ export default function ProductionOrderForm({
     }
   }, [selectedItemOperation, operations, itemForm])
 
-  const handleFinish = async (values: {
-    order_date: dayjs.Dayjs
-    work_hours: number
-    extra_qualified_hours?: number
-    remark?: string
-    employee_id: string
-    shift: ProductionOrderShift
-    is_audited?: boolean
-  }) => {
-    setSubmitting(true)
-    try {
-      await onSubmit({
-        order: {
-          ...values,
-          order_date: values.order_date.format('YYYY-MM-DD'),
-        },
-        items: [...items],
-      })
-      form.resetFields()
-      setItems([])
-    } finally {
-      setSubmitting(false)
-    }
-  }
+  const handleFinish = useCallback(
+    async (values: {
+      order_date: dayjs.Dayjs
+      work_hours: number
+      extra_qualified_hours?: number
+      remark?: string
+      employee_id: string
+      shift: ProductionOrderShift
+      is_audited?: boolean
+    }) => {
+      setSubmitting(true)
+      try {
+        await onSubmit({
+          order: {
+            ...values,
+            order_date: values.order_date.format('YYYY-MM-DD'),
+          },
+          items: [...items],
+        })
+        form.resetFields()
+        setItems([])
+      } finally {
+        setSubmitting(false)
+      }
+    },
+    [onSubmit, items, form],
+  )
 
   const handleOpenItemModal = (index?: number) => {
     if (index !== undefined) {
@@ -387,64 +390,68 @@ export default function ProductionOrderForm({
     setIsItemModalOpen(true)
   }
 
-  const handleItemFinish = async (values: OrderItem) => {
-    const data = modelsMap[values.project_no]
-    const operation = values.operation.trim()
-    const productModel = data?.product_model ?? values.product_model ?? null
+  const handleItemFinish = useCallback(
+    async (values: OrderItem) => {
+      const data = modelsMap[values.project_no]
+      const operation = values.operation.trim()
+      const productModel = data?.product_model ?? values.product_model ?? null
 
-    const newItem: OrderItem = {
-      id: editingItemIndex !== null ? items[editingItemIndex]?.id : undefined,
-      data_category:
-        values.data_category ||
-        (editingItemIndex !== null
-          ? items[editingItemIndex]?.data_category
-          : undefined) ||
-        'A',
-      project_no: values.project_no,
-      product_model: productModel,
-      length_mm: data?.length_mm ?? values.length_mm ?? null,
-      customer_model: data?.customer_model ?? values.customer_model ?? null,
-      operation,
-      standard_seconds: Number(
-        values.standard_seconds ??
-          itemForm.getFieldValue('standard_seconds') ??
-          0,
-      ),
-      theoretical_seconds: Number(
-        values.theoretical_seconds ??
-          itemForm.getFieldValue('theoretical_seconds') ??
-          0,
-      ),
-      machine_equipment_id: values.machine_equipment_id ?? null,
-      incoming_qualified_quantity:
-        Number(values.incoming_qualified_quantity) || 0,
-      qualified_quantity: values.qualified_quantity || 0,
-      defect_reason_1: '加工',
-      defect_quantity_1: Number(values.defect_quantity_1) || 0,
-      defect_reason_2: '原料',
-      defect_quantity_2: Number(values.defect_quantity_2) || 0,
-      outsource_defect_quantity: Number(values.outsource_defect_quantity) || 0,
-      outsource_defect_reason: values.outsource_defect_reason?.trim() || null,
-      outsource_unit: values.outsource_unit?.trim() || null,
-      setup_defect_quantity: Number(values.setup_defect_quantity) || 0,
-      setup_responsible: values.setup_responsible?.trim() || null,
-      remark: values.remark || null,
-    }
+      const newItem: OrderItem = {
+        id: editingItemIndex !== null ? items[editingItemIndex]?.id : undefined,
+        data_category:
+          values.data_category ||
+          (editingItemIndex !== null
+            ? items[editingItemIndex]?.data_category
+            : undefined) ||
+          'A',
+        project_no: values.project_no,
+        product_model: productModel,
+        length_mm: data?.length_mm ?? values.length_mm ?? null,
+        customer_model: data?.customer_model ?? values.customer_model ?? null,
+        operation,
+        standard_seconds: Number(
+          values.standard_seconds ??
+            itemForm.getFieldValue('standard_seconds') ??
+            0,
+        ),
+        theoretical_seconds: Number(
+          values.theoretical_seconds ??
+            itemForm.getFieldValue('theoretical_seconds') ??
+            0,
+        ),
+        machine_equipment_id: values.machine_equipment_id ?? null,
+        incoming_qualified_quantity:
+          Number(values.incoming_qualified_quantity) || 0,
+        qualified_quantity: values.qualified_quantity || 0,
+        defect_reason_1: '加工',
+        defect_quantity_1: Number(values.defect_quantity_1) || 0,
+        defect_reason_2: '原料',
+        defect_quantity_2: Number(values.defect_quantity_2) || 0,
+        outsource_defect_quantity:
+          Number(values.outsource_defect_quantity) || 0,
+        outsource_defect_reason: values.outsource_defect_reason?.trim() || null,
+        outsource_unit: values.outsource_unit?.trim() || null,
+        setup_defect_quantity: Number(values.setup_defect_quantity) || 0,
+        setup_responsible: values.setup_responsible?.trim() || null,
+        remark: values.remark || null,
+      }
 
-    if (editingItemIndex !== null) {
-      setItems((prev) => {
-        const next = [...prev]
-        next[editingItemIndex] = newItem
-        return next
-      })
-    } else {
-      setItems((prev) => [...prev, newItem])
-    }
+      if (editingItemIndex !== null) {
+        setItems((prev) => {
+          const next = [...prev]
+          next[editingItemIndex] = newItem
+          return next
+        })
+      } else {
+        setItems((prev) => [...prev, newItem])
+      }
 
-    setIsItemModalOpen(false)
-    itemForm.resetFields()
-    setEditingItemIndex(null)
-  }
+      setIsItemModalOpen(false)
+      itemForm.resetFields()
+      setEditingItemIndex(null)
+    },
+    [modelsMap, itemForm, editingItemIndex, items],
+  )
 
   const handleItemModalCancel = () => {
     setIsItemModalOpen(false)

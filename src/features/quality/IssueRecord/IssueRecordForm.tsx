@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
   Button,
@@ -272,9 +272,12 @@ export default function IssueRecordForm({
     })
   }
 
-  const handleFinish = async (values: QualityIssueRecordFormFields) => {
-    await onSubmit(toSubmitValues(values, employeeNameMap))
-  }
+  const handleFinish = useCallback(
+    async (values: QualityIssueRecordFormFields) => {
+      await onSubmit(toSubmitValues(values, employeeNameMap))
+    },
+    [onSubmit, employeeNameMap],
+  )
 
   const getPopupContainer = (triggerNode: HTMLElement) =>
     triggerNode.parentElement || document.body

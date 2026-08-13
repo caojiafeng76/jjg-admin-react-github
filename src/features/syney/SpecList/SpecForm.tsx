@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle } from 'react'
+import { forwardRef, useCallback, useImperativeHandle } from 'react'
 import { Form, Input } from 'antd'
 
 import { ISyneySpec, ISyneySpecFormRef } from '@/types'
@@ -14,9 +14,12 @@ const SpecForm = forwardRef<
 >(({ onFinishFunc, isEditing }, ref) => {
   const [form] = Form.useForm<ISyneySpec>()
 
-  const onFinish = (values: ISyneySpec) => {
-    onFinishFunc(values)
-  }
+  const onFinish = useCallback(
+    (values: ISyneySpec) => {
+      onFinishFunc(values)
+    },
+    [onFinishFunc],
+  )
 
   useImperativeHandle(ref, () => {
     return {

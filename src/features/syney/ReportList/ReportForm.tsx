@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle } from 'react'
 import { App, Form, Input } from 'antd'
 
 import {
@@ -37,35 +37,38 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
 
     const [form] = Form.useForm<ISyneyStoreReport>()
 
-    const onFinish = (values: ISyneyStoreReport) => {
-      const detailData = jsonToArray(values.Detail || '') || []
+    const onFinish = useCallback(
+      (values: ISyneyStoreReport) => {
+        const detailData = jsonToArray(values.Detail || '') || []
 
-      if (detailData.length === 0) {
-        message.error('详情数据为空，请粘贴有效的 JSON 数据')
-        return
-      }
+        if (detailData.length === 0) {
+          message.error('详情数据为空，请粘贴有效的 JSON 数据')
+          return
+        }
 
-      let payload: SyneyStoreReportPayload
+        let payload: SyneyStoreReportPayload
 
-      try {
-        payload = buildSyneyStoreReportPayload(
-          detailData as ISyneyItem[],
-          syneySpecs || [],
-        )
-      } catch (error) {
-        message.error(error instanceof Error ? error.message : '入库单数据解析失败')
-        return
-      }
+        try {
+          payload = buildSyneyStoreReportPayload(
+            detailData as ISyneyItem[],
+            syneySpecs || [],
+          )
+        } catch (error) {
+          message.error(error instanceof Error ? error.message : '入库单数据解析失败')
+          return
+        }
 
-      createReport(payload, {
-        onSettled: () => handleCancel(),
-        onSuccess: () => message.success('创建入库单成功'),
-        onError: (err) => {
-          console.error(err)
-          message.error('创建入库单失败')
-        },
-      })
-    }
+        createReport(payload, {
+          onSettled: () => handleCancel(),
+          onSuccess: () => message.success('创建入库单成功'),
+          onError: (err) => {
+            console.error(err)
+            message.error('创建入库单失败')
+          },
+        })
+      },
+      [message, syneySpecs, createReport, handleCancel],
+    )
 
     useImperativeHandle(ref, () => {
       return {
