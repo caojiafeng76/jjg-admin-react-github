@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
-import { App, Modal } from 'antd'
+import { useRef, useState, useMemo } from 'react'
+import { App, Button, Modal } from 'antd'
+import { ArrowLeftIcon } from '@heroicons/react/16/solid'
+import dayjs from 'dayjs'
 
 import { useDetail } from '@syney/ReportDetail/useDetail'
 
@@ -14,10 +16,44 @@ import { FormInstance } from 'antd/lib'
 import { useAppStore } from '@/store'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+
+// 状态 pill 语义色（与 ReportList ReportTable STATUS_STYLES 一致）
+const STATUS_PILL: Record<string, string> = {
+  confirmed: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
+  unconfirmed: 'bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400',
+  已校对: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
+  未校对: 'bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  confirmed: '已校对',
+  unconfirmed: '未校对',
+  已校对: '已校对',
+  未校对: '未校对',
+}
+
+function InfoItem({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="min-w-0">
+      <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
+      <div className="mt-0.5 truncate text-sm font-medium text-slate-800 dark:text-slate-100">
+        {children}
+      </div>
+    </div>
+  )
+}
 
 export default function ReportDetail() {
   const { message } = App.useApp()
+  const navigate = useNavigate()
+  const { reportNo } = useParams()
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
@@ -29,7 +65,7 @@ export default function ReportDetail() {
 
   const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)
 
-  const { report, reportLoading } = useDetail()
+  const { report, reportInfo, reportLoading } = useDetail()
   const { updateItem, isUpdating } = useUpdateDetail()
   const { isDeleting, deleteDetail } = useDeleteDetail()
 
@@ -40,6 +76,20 @@ export default function ReportDetail() {
 
   const records = useMemo(() => report || [], [report])
   const total = records.length
+
+  const reportFields = useMemo(
+    () => [
+      { label: '对账单号', value: reportInfo?.No ?? reportNo ?? '-' },
+      {
+        label: '创建日期',
+        value: reportInfo?.created_at
+          ? dayjs(reportInfo.created_at).format('YYYY-MM-DD')
+          : '-',
+      },
+      { label: '明细条数', value: records.length },
+    ],
+    [reportInfo, reportNo, records.length],
+  )
 
   const selectedCount = tableSelectedKeys.length
   const selectedAmount = useMemo(() => {
@@ -82,12 +132,6 @@ export default function ReportDetail() {
     updateItem({ item: values }, { onSettled: handleCancel })
   }
 
-  useEffect(() => {
-    if (isModalOpen) {
-      detailFormRef?.current?.setFieldsValue(reportItem || {})
-    }
-  }, [isModalOpen, reportItem])
-
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 12,
     summaryRowHeight: 39,
@@ -95,23 +139,40 @@ export default function ReportDetail() {
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
-      {/* 顶部工具栏 */}
-      <div className="flex flex-wrap items-center gap-2">
-        <EditButton title="请选择一条数据" handleEdit={handleEdit} />
-        <DeleteButton
-          isDeleting={isDeleting}
-          onConfirm={() => {
-            if (tableSelectedKeys.length === 0) {
-              message.error('请选择要删除的数据')
-              return
-            }
-            deleteDetail(tableSelectedKeys.map(String), {
-              onSettled: () => {
-                setTableSelectedKeys([])
-              },
-            })
-          }}
-        />
+      {/* 对账单信息分区卡片 */}
+      <div className="app-card p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+              对账单信息
+            </span>
+          </div>
+          {reportInfo?.Status && STATUS_PILL[reportInfo.Status] ? (
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[reportInfo.Status]}`}
+            >
+              {STATUS_LABEL[reportInfo.Status]}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
+          {reportFields.map((item) => (
+            <InfoItem key={item.label} label={item.label}>
+              {item.label === '明细条数' ? (
+                <span className="tabular-nums">{item.value}</span>
+              ) : (
+                item.value
+              )}
+            </InfoItem>
+          ))}
+          <InfoItem label="总金额">
+            <span className="text-lg font-bold text-slate-900 tabular-nums dark:text-slate-100">
+              {reportInfo?.TotalAmount?.toLocaleString() ?? '-'}
+            </span>
+          </InfoItem>
+        </div>
       </div>
 
       {/* 选中摘要条 */}
@@ -181,6 +242,33 @@ export default function ReportDetail() {
         </div>
       </div>
 
+      {/* 底部吸底操作区 */}
+      <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200/60 pt-3 dark:border-slate-700">
+        <Button
+          icon={<ArrowLeftIcon className="h-4 w-4" />}
+          onClick={() => navigate(-1)}
+        >
+          返回列表
+        </Button>
+        <div className="flex items-center gap-2">
+          <EditButton title="请选择一条数据" handleEdit={handleEdit} />
+          <DeleteButton
+            isDeleting={isDeleting}
+            onConfirm={() => {
+              if (tableSelectedKeys.length === 0) {
+                message.error('请选择要删除的数据')
+                return
+              }
+              deleteDetail(tableSelectedKeys.map(String), {
+                onSettled: () => {
+                  setTableSelectedKeys([])
+                },
+              })
+            }}
+          />
+        </div>
+      </div>
+
       <Modal
         title={'编辑参数规格'}
         open={isModalOpen}
@@ -188,6 +276,11 @@ export default function ReportDetail() {
         width={560}
         onOk={handleOk}
         onCancel={handleCancel}
+        afterOpenChange={(open) => {
+          if (open) {
+            detailFormRef.current?.setFieldsValue(reportItem || {})
+          }
+        }}
       >
         <DetailForm ref={detailFormRef} onFinishFuc={onFinishFuc} />
       </Modal>

@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { getSyneyStoreReport } from '@/services/apiSyneyStoreReports'
+import {
+  getSyneyStoreReport,
+  getSyneyStoreReportHeader,
+} from '@/services/apiSyneyStoreReports'
 import { queryConfig } from '@/config/queryClient'
 
 export function useDetail() {
@@ -17,12 +20,20 @@ export function useDetail() {
     ...queryConfig.detail,
   })
 
+  const { data: reportInfo, isLoading: reportInfoLoading } = useQuery({
+    queryKey: ['syney-store-report-info', reportNo],
+    queryFn: () => getSyneyStoreReportHeader(reportNo || ''),
+    enabled: !!reportNo,
+    ...queryConfig.detail,
+  })
+
   if (reportError) {
     throw new Error('获取入库单详情失败')
   }
 
   return {
     report,
-    reportLoading,
+    reportInfo,
+    reportLoading: reportLoading || reportInfoLoading,
   }
 }

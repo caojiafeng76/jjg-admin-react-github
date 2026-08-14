@@ -44,7 +44,12 @@ export default function DetailTable({
       key: 'index',
       width: 50,
       fixed: 'left',
-      render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
+      align: 'right',
+      render: (_text, _record, index) => (
+        <span className="tabular-nums">
+          {(page - 1) * pageSize + index + 1}
+        </span>
+      ),
     },
     {
       title: '件号',

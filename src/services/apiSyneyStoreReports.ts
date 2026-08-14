@@ -1,4 +1,4 @@
-import { ISyneyItem } from './types'
+import { ISyneyItem, ISyneyStoreReport } from './types'
 import supabase from '@services/supabase'
 import { handleApiError } from '@utils/errorHandler'
 import { resolveSyneyStoreReportProxyUrl } from './syneyStoreReportProxy'
@@ -189,6 +189,22 @@ export async function getSyneyStoreReport(No: string) {
   }
 
   return syneyStoreReport
+}
+
+export async function getSyneyStoreReportHeader(
+  No: string,
+): Promise<ISyneyStoreReport> {
+  const { data, error } = await supabase
+    .from('syney-store-reports')
+    .select('id, No, Status, TotalAmount, created_at')
+    .eq('No', No)
+    .single()
+
+  if (error) {
+    throw handleApiError(error, '入库单信息获取失败')
+  }
+
+  return data as ISyneyStoreReport
 }
 
 export async function getSelectedSyneyStoreReports(Nos: string[]) {

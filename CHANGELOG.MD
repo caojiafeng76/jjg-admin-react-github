@@ -13,6 +13,27 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-14
+
+- **类别**：修复
+- **范围**：`src/features/syney/ReportDetail/index.tsx`
+- **摘要**：修复入库单详情"首次加载选中数据后点击编辑，表单无数据填充"的 bug。根因：antd Modal 默认惰性挂载（`forceRender=false`），首次打开时表单实例尚未挂载，原 `useEffect([isModalOpen, reportItem])` 触发时 `detailFormRef.current` 仍为 null，导致 `setFieldsValue` 落空；后续打开因表单已挂载而正常。修复：移除该 `useEffect`，改用 Modal `afterOpenChange` 回调（与 villa-lift `FinishingRecordEditModal` 同款模式）在弹窗真正打开后填充表单，`reportItem` 由选中行即时计算保证闭包值正确
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）、lsp_diagnostics 0 诊断
+
+## 2026-08-14
+
+- **类别**：变更
+- **范围**：`src/features/syney/ReportDetail/index.tsx`、`src/features/syney/ReportDetail/useDetail.ts`、`src/features/syney/ReportDetail/DetailTable.tsx`、`src/services/apiSyneyStoreReports.ts`
+- **摘要**：UI 改版 D4 —— 入库单详情 ReportDetail：① 字段分区 —— 顶部新增"对账单信息"卡片（复用 `app-card` 统一样式），字段按 2/4 列响应式 grid 展示对账单号/创建日期/明细条数，总金额用 18px 粗体 `tabular-nums` 大数字突出，右上角状态 pill 徽章（语义色与 ReportList STATUS_STYLES 一致：已校对=emerald / 未校对=rose）；为支撑卡片新增 `getSyneyStoreReportHeader`（查询 `syney-store-reports` 的 `id, No, Status, TotalAmount, created_at`），`useDetail` 并行追加 `reportInfo` 查询（queryKey `syney-store-report-info`）；② 操作区吸底 —— 原顶部工具栏改为底部固定操作条（`border-t` 分割线）：左侧"返回列表"按钮（ArrowLeft + `navigate(-1)`），右侧"编辑"+"删除"；③ 数字列右对齐 —— `DetailTable` 的 `#` 序号列补 `align: 'right'` + `tabular-nums`。打印入口说明：详情页无独立打印入口（打印统一在列表页"打印对账单/打印入库单"走 PrintButton），本项无打印改动
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）、lsp_diagnostics 0 诊断
+
+## 2026-08-14
+
+- **类别**：变更
+- **范围**：`src/features/syney/ReportList/ReportTable.tsx`
+- **摘要**：UI 改版 D3 —— 入库单列表 ReportList 过通用列表核对清单：`#` 序号列补 `align: 'right'` + `tabular-nums`（与 PoTable/DetailTable 已确立的数字列右对齐标准一致）。核对结论：对账金额列已右对齐 + `tabular-nums`（✅）、汇总行已 `tabular-nums`（✅）、状态列已是 pill 徽章（✅）、新增走 Modal、按钮反馈均已走 `App.useApp()` 主题 context（✅）、加载/空态/错误重试三态属 S1 表格三态通用化范围（本项未重复实施）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）、lsp_diagnostics 0 诊断
+
 ## 2026-08-13
 
 - **类别**：变更

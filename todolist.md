@@ -35,8 +35,8 @@
 
 - [x] **D1** 订单列表 PoList（含导入按钮反馈统一）
 - [x] **D2** 订单详情 PoDetail（详情分区卡片 + 数字列 tabular-nums + 操作区吸底）
-- [ ] **D3** 入库单列表 ReportList
-- [ ] **D4** 入库单详情 ReportDetail（打印入口统一）
+- [x] **D3** 入库单列表 ReportList
+- [x] **D4** 入库单详情 ReportDetail（打印入口统一）
 - [ ] **D5** 踏板规格列表 SpecList
 - [ ] **D6** 件号配置 SafePartSetting（长表单分组 + 内联校验）
 - [ ] **D7** 编号设置 SyneySetting（同上）
