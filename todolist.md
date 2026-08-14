@@ -38,8 +38,8 @@
 - [x] **D3** 入库单列表 ReportList
 - [x] **D4** 入库单详情 ReportDetail（打印入口统一）
 - [x] **D5** 踏板规格列表 SpecList
-- [ ] **D6** 件号配置 SafePartSetting（长表单分组 + 内联校验）
-- [ ] **D7** 编号设置 SyneySetting（同上）
+- [x] **D6** 件号配置 SafePartSetting（长表单分组 + 内联校验）
+- [x] **D7** 编号设置 SyneySetting（同上）
 
 ## E. 车间 / 基础资料（workshop）
 

@@ -1,6 +1,7 @@
 import { useCallback, useState, useMemo, type Key } from 'react'
 import {
   Button,
+  Divider,
   Form,
   Input,
   Modal,
@@ -246,8 +247,12 @@ export default function SafePartSettingPage() {
         key: 'index',
         width: 60,
         fixed: 'left',
-        render: (_: unknown, __: SyneySafePartSetting, index: number) =>
-          (page - 1) * pageSize + index + 1,
+        align: 'right',
+        render: (_: unknown, __: SyneySafePartSetting, index: number) => (
+          <span className="tabular-nums">
+            {(page - 1) * pageSize + index + 1}
+          </span>
+        ),
       },
       {
         title: '件号(包含)',
@@ -642,12 +647,20 @@ export default function SafePartSettingPage() {
           onFinish={handleSubmit}
           className="pt-2"
         >
+          <Divider titlePlacement="left">基本信息</Divider>
           <Form.Item
             label="件号(包含)"
             name="part_no"
-            rules={[{ required: true, message: '请输入件号' }]}
+            rules={[
+              { required: true, whitespace: true, message: '请输入件号' },
+            ]}
           >
-            <Input allowClear placeholder="如 XN2808EB" className="rounded-lg" />
+            <Input
+              allowClear
+              disabled={Boolean(editing)}
+              placeholder="如 XN2808EB"
+              className="rounded-lg"
+            />
           </Form.Item>
           <Form.Item label="名称" name="name">
             <Select
@@ -679,6 +692,7 @@ export default function SafePartSettingPage() {
               className="rounded-lg"
             />
           </Form.Item>
+          <Divider titlePlacement="left">配置说明</Divider>
           <div className="flex gap-8">
             <Form.Item
               label="需打印标签"

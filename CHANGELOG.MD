@@ -16,6 +16,20 @@
 ## 2026-08-14
 
 - **类别**：变更
+- **范围**：`src/pages/SyneySetting.tsx`
+- **摘要**：UI 改版 D7 —— 编号设置 SyneySetting 重构：① 页面改版为 `app-card` 业务卡片（白底 + 1px 边框 + 浅影 + 12px 圆角，暗色自动降级）；② 裸 Input + onBlur 直存改为 antd Form + 内联校验（编号 required + `whitespace` + 非负整数 `pattern`，错误内联展示）；③ 显式"保存"按钮提交（替代 onBlur 静默保存），保存成功经 `App.useApp()` message 提示；加载态 Spin 居中保留。页面标题"编号设置"由 AppHeader 展示，卡片内保留"西尼相关设置"小标题
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）
+
+## 2026-08-14
+
+- **类别**：变更
+- **范围**：`src/features/syney/SafePartSetting/SafePartSettingPage.tsx`
+- **摘要**：UI 改版 D6 —— 件号配置 SafePartSetting 长表单分组 + 内联校验：① 新增/编辑 Modal 内表单按 Divider 分两组（"基本信息"：件号/名称/产品型号/编号前缀/英文名称；"配置说明"：需打印标签/为安全部件/分解单列/备注），与 StandardTimeForm/EmployeeForm 已确立的长表单分组模式一致（`titlePlacement="left"`）；② 内联校验 —— 件号规则补 `whitespace: true`（防纯空格提交），编辑态禁用件号输入（`disabled={Boolean(editing)}`，与 SpecForm 编辑锁件号惯例一致，避免 upsert `onConflict: 'part_no'` 误新建记录）；③ 表格 `#` 序号列补 `align: 'right'` + `tabular-nums`（通用清单第②条）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）
+
+## 2026-08-14
+
+- **类别**：变更
 - **范围**：`src/features/syney/SpecList/SpecTable.tsx`
 - **摘要**：UI 改版 D5 —— 踏板规格列表 SpecList 过通用列表核对清单：`#` 序号列补 `align: 'right'` + `tabular-nums`（与 PoTable/ReportTable/DetailTable 已确立的数字列右对齐标准一致）。核对结论：规格表无数字/金额/状态列（②③项跳过）、新增/编辑走 Modal（✅）、件号搜索走筛选条件栏（✅）、选中摘要条与 PoList/ReportList 同款（✅）、表格密度/表头样式与基准一致（✅）、加载/空态/错误重试三态属 S1 表格三态通用化范围（本项未重复实施）
 - **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）
