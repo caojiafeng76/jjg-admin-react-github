@@ -105,7 +105,7 @@ export default function EmployeeList() {
   const [isRebindModalOpen, setIsRebindModalOpen] = useState(false)
   const [isBatchCreatingAuth, setIsBatchCreatingAuth] = useState(false)
 
-  const { data, isLoading } = useEmployeesList({
+  const { data, isFetching } = useEmployeesList({
     page,
     pageSize,
     searchParams,
@@ -676,79 +676,82 @@ export default function EmployeeList() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
-      {/* 工具栏 */}
-      <div className="flex flex-wrap items-center gap-2">
-        <AddButton
-          handleCreate={handleCreate}
-          permissionKey="feature:employee-list.create"
-        />
-        <Button
-          type="text"
-          icon={<KeyIcon className="size-4 text-sky-500" />}
-          onClick={handleOpenCreateAuthModal}
-        >
-          为现有员工开通账号
-        </Button>
-        <Button
-          type="text"
-          icon={<KeyIcon className="size-4 text-cyan-600" />}
-          onClick={handleBatchCreateAuthAccounts}
-          loading={isBatchCreatingAuth}
-        >
-          批量开通账号
-        </Button>
-        <PermissionButton
-          permissionKey="feature:employee-list.reset-password"
-          type="text"
-          icon={<ShieldCheckIcon className="size-4 text-amber-500" />}
-          onClick={handleOpenResetPasswordModal}
-        >
-          重置密码
-        </PermissionButton>
-        <Button
-          type="text"
-          icon={<LinkSlashIcon className="size-4 text-rose-500" />}
-          onClick={handleUnbindAuthAccount}
-        >
-          解绑账号
-        </Button>
-        <Button
-          type="text"
-          icon={<ArrowPathIcon className="size-4 text-violet-500" />}
-          onClick={handleOpenRebindModal}
-        >
-          重新绑定
-        </Button>
-        <EditButton
-          title="编辑"
-          handleEdit={handleEdit}
-          permissionKey="feature:employee-list.edit"
-        />
-        <DeleteButton
-          onClick={handleDelete}
-          isDeleting={deleteMutation.isPending}
-          count={selectedRowKeys.length}
-          title="删除员工"
-          itemName="员工"
-          permissionKey="feature:employee-list.delete"
-        />
-      </div>
+    <div className="grid h-full grid-rows-[auto_1fr] gap-2">
+      {/* 工具栏 + 搜索栏（合并一行，宽屏单行、窄屏自动换行） */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1">
+          <AddButton
+            handleCreate={handleCreate}
+            permissionKey="feature:employee-list.create"
+          />
+          <Button
+            type="text"
+            icon={<KeyIcon className="size-4 text-sky-500" />}
+            onClick={handleOpenCreateAuthModal}
+          >
+            为现有员工开通账号
+          </Button>
+          <Button
+            type="text"
+            icon={<KeyIcon className="size-4 text-cyan-600" />}
+            onClick={handleBatchCreateAuthAccounts}
+            loading={isBatchCreatingAuth}
+          >
+            批量开通账号
+          </Button>
+          <PermissionButton
+            permissionKey="feature:employee-list.reset-password"
+            type="text"
+            icon={<ShieldCheckIcon className="size-4 text-amber-500" />}
+            onClick={handleOpenResetPasswordModal}
+          >
+            重置密码
+          </PermissionButton>
+          <Button
+            type="text"
+            icon={<LinkSlashIcon className="size-4 text-rose-500" />}
+            onClick={handleUnbindAuthAccount}
+          >
+            解绑账号
+          </Button>
+          <Button
+            type="text"
+            icon={<ArrowPathIcon className="size-4 text-violet-500" />}
+            onClick={handleOpenRebindModal}
+          >
+            重新绑定
+          </Button>
+          <EditButton
+            title="编辑"
+            handleEdit={handleEdit}
+            permissionKey="feature:employee-list.edit"
+          />
+          <DeleteButton
+            onClick={handleDelete}
+            isDeleting={deleteMutation.isPending}
+            count={selectedRowKeys.length}
+            title="删除员工"
+            itemName="员工"
+            permissionKey="feature:employee-list.delete"
+          />
+        </div>
 
-      {/* 搜索栏 */}
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
-        <EmployeeSearch onSearch={handleSearch} onReset={handleResetSearch} />
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="text-xs whitespace-nowrap text-slate-500">
+            搜索：
+          </span>
+          <EmployeeSearch onSearch={handleSearch} onReset={handleResetSearch} />
+        </div>
       </div>
 
       {/* 表格和分页 */}
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
           <EmployeeTable
-            loading={isLoading}
+            loading={isFetching}
             data={data?.items || []}
             selectedRowKeys={selectedRowKeys}
             onSelect={setSelectedRowKeys}

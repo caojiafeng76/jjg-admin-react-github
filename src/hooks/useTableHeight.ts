@@ -26,8 +26,10 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
 
   const tableContainerRef = useRef<HTMLDivElement>(null)
   const paginationRef = useRef<HTMLDivElement>(null)
-  const [scrollY, setScrollY] = useState<number>(400)
-  const [rowHeight, setRowHeight] = useState<number>(40)
+  // scrollY（表体视口高度）与 rowHeight（行高）配套计算，合成单一 state 原子更新，
+  // 避免二者分属两个 state 时在连续重算中交叉不同步（如行高 50px 而视口仅 435px，
+  // 导致 10 行×50px 的内容被视口截断末行）
+  const [tableSize, setTableSize] = useState({ scrollY: 400, rowHeight: 40 })
   const isUpdatingRef = useRef<boolean>(false) // 防止更新期间触发新的计算
   const lastCalculatedHeightRef = useRef<{
     container: number
@@ -109,21 +111,15 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
             // 设置更新标志，防止在更新期间触发新的计算
             isUpdatingRef.current = true
 
-            setRowHeight((prev) => {
-              // 只有当变化超过2px时才更新，避免循环
-              if (Math.abs(prev - newRowHeight) <= 2) {
-                isUpdatingRef.current = false
+            setTableSize((prev) => {
+              // 两个值均低于 2px 阈值时保持不变，避免循环更新
+              if (
+                Math.abs(prev.rowHeight - newRowHeight) <= 2 &&
+                Math.abs(prev.scrollY - newScrollY) <= 2
+              ) {
                 return prev
               }
-              return newRowHeight
-            })
-            setScrollY((prev) => {
-              // 只有当变化超过2px时才更新，避免循环
-              if (Math.abs(prev - newScrollY) <= 2) {
-                isUpdatingRef.current = false
-                return prev
-              }
-              return newScrollY
+              return { rowHeight: newRowHeight, scrollY: newScrollY }
             })
 
             // 记录当前计算的高度，用于下次比较
@@ -197,7 +193,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
   return {
     tableContainerRef,
     paginationRef,
-    scrollY,
-    rowHeight,
+    scrollY: tableSize.scrollY,
+    rowHeight: tableSize.rowHeight,
   }
 }

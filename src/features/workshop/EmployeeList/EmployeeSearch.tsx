@@ -37,28 +37,31 @@ export default function EmployeeSearch({ onSearch, onReset }: Props) {
   return (
     <Space wrap size={8}>
       <Input
+        size="small"
         placeholder="请输入姓名"
         value={name}
         onChange={(e) => setName(e.target.value)}
         onPressEnter={handleSearch}
         allowClear
-        style={{ width: 220 }}
+        style={{ width: 180 }}
       />
       <Select
+        size="small"
         placeholder="角色"
         value={role}
         onChange={(value) => setRole(value)}
         allowClear
         loading={roleOptionsLoading}
-        style={{ width: 140 }}
+        style={{ width: 120 }}
         options={roleOptions}
       />
       <Select
+        size="small"
         placeholder="状态"
         value={status}
         onChange={(value) => setStatus(value)}
         allowClear
-        style={{ width: 140 }}
+        style={{ width: 120 }}
         options={[
           { label: '启用', value: 'active' },
           { label: '停用', value: 'inactive' },

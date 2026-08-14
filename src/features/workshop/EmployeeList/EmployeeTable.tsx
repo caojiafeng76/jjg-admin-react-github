@@ -41,13 +41,13 @@ function BoundAccountCell({ employeeId, authUserId }: BoundAccountCellProps) {
     email || `${authUserId.slice(0, 8)}...${authUserId.slice(-6)}`
 
   return (
-    <div className="flex flex-col gap-1">
-      <Tag color="processing" className="mr-0 w-fit">
+    <div className="flex items-center gap-1.5">
+      <Tag color="processing" className="mr-0 w-fit shrink-0">
         已绑定
       </Tag>
       <Typography.Text
         copyable={{ text: email || authUserId }}
-        className="text-xs text-slate-500"
+        className="truncate text-xs text-slate-500"
       >
         {isFetching && !email ? '加载中...' : displayText}
       </Typography.Text>
@@ -72,6 +72,7 @@ export default function EmployeeTable({
         title: '#',
         render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
         width: 60,
+        align: 'right',
         fixed: 'left',
         key: '#',
       },
@@ -126,6 +127,7 @@ export default function EmployeeTable({
         dataIndex: 'hourly_wage',
         key: 'hourly_wage',
         width: 120,
+        align: 'right',
         render: (value: number | null | undefined) => formatNumber(value),
       },
       {
@@ -133,6 +135,7 @@ export default function EmployeeTable({
         dataIndex: 'coefficient',
         key: 'coefficient',
         width: 100,
+        align: 'right',
         render: (value: number | null | undefined) => formatNumber(value),
       },
       {

@@ -15,6 +15,27 @@
 
 ## 2026-08-14
 
+- **类别**：变更
+- **范围**：`src/features/workshop/ProductionScheduling/index.tsx`
+- **摘要**：UI 改版 E3 布局改版 —— 订单排产 ProductionScheduling 一屏 10 行：① 布局压缩 —— 外层 `gap-3 p-3` → `gap-1.5 p-1`；标题卡去掉副标题 + `py-2`→`py-1` + 竖条缩小（仅留标题一行）；搜索区移除"筛选条件"标签行 + `p-2`→`p-1` + 全部控件 `size="small"` + label 缩短（订单状态→状态、当前进度→进度、计划开工→开工、订单日期→日期）收紧为 2 行；② 摘要卡（5 张 KPI 卡）合并进操作条 —— 删除 `SummaryCard` 组件，汇总统计（订单数/数量/进行中/已完工/延期）改为操作条左侧内联数字；③ 紧凑行高 —— `components.body.cell` 注入 `paddingTop/Bottom: 2px`（行高 35→31px；经 components 注入而非 index.css `.ant-` 全局覆盖，避免触发 `appShellConfig.vitest` 约定）；④ 客户名称、负责班组/人员列补 `ellipsis: true`（修复长文本在窄列换行成 2 行把整行撑高、导致首行 43px 异常）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（490 用例中 489 通过，1 个 pre-existing 并发 flaky `remoteEmployeeSelect.vitest`——与本次改动零交集、单独运行通过）、浏览器实测 1366×768 一屏 10 行完整显示（scrollY 311、行高统一 31px、第 10 行 bottom 657 ≤ 表体 662、分页完整）
+
+## 2026-08-14
+
+- **类别**：修复
+- **范围**：`src/hooks/useTableHeight.ts`、`src/features/workshop/EmployeeList/`（`index.tsx`、`EmployeeTable.tsx`、`EmployeeSearch.tsx`）
+- **摘要**：UI 改版 E4 —— 员工管理 EmployeeList 布局改版 + 修复一屏 10 行截断：① **useTableHeight 根因修复** —— `scrollY` 与 `rowHeight` 由两个独立 state 改为合成单一对象 state 原子更新（原实现连续重算时可能交叉不同步，出现"行高 50px 而表体视口仅 435px"，10 行内容被截断末行；共享 hook，全页面受益）；② **绑定账号列单行化** —— `flex flex-col`（Tag+邮箱两行堆叠，内容高度 51px 把 43px 计算行高撑开）改为 `flex items-center` 单行（Tag + 截断邮箱），行高 43px 真正落地；③ 布局压缩 —— 外层 `grid-rows-[auto_auto_1fr] gap-4` → `[auto_1fr] gap-2`，工具栏与搜索栏合并为一行（`justify-between` + `flex-wrap`，宽屏单行、窄屏自动换行），表格容器内 `gap-4`→`gap-2`；④ 搜索控件 `size="small"` + 宽度收紧（Input 220→180、Select 140→120）；⑤ 通用清单核对 —— `#` 序号列、岗位时薪、系数列补 `align: 'right'`（tabular-nums 由 A3 全局覆盖），查询/搜索即时反馈 `loading` 由 `isLoading` 改 `isFetching`
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 490 用例，含 useTableHeight 2 用例）、`bun run build` 通过（exit 0）、浏览器实测 1366×768（10 行完整可见、第 10 行 bottom 682 ≤ 表体 687、分页完整）与 1920×768（工具栏+搜索合并一行、10 行完整、无滚动溢出）
+
+## 2026-08-14
+
+- **类别**：变更
+- **范围**：`src/features/workshop/ProductionScheduling/index.tsx`
+- **摘要**：UI 改版 E3 —— 订单排产 ProductionScheduling：① 操作反馈 <300ms —— 表格 `loading` 由仅首屏（`isLoading && orders.length === 0`）改为任意请求中即遮罩（`isFetching`），查询/筛选切换/翻页/刷新时旧数据上立即出现加载反馈；移除不再使用的 `isLoading` 解构；② 修正 A1 遗留旧主色 —— 标题装饰条 `from-[#1677ff]`、快速筛选激活态 `!border-[#1677ff] !from-[#1677ff]` 改用 B1 桥接的 `-primary` 工具类（跟随 antd `colorPrimary` #2563eb，暗色自动切换）；③ 数字列 tabular-nums 由 A3 全局 `index.css` 表格等宽数字样式覆盖（本页订单数量/转移数量/转移进度列已右对齐），核对无需逐列处理；编辑保存已有 modal `confirmLoading` 即时反馈（核对确认）
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 490 用例）、`bun lint` 本次改动文件 0 error、`bun run build` 通过（exit 0）
+
+## 2026-08-14
+
 - **类别**：修复
 - **范围**：`src/hooks/useTableHeight.ts`（+`useTableHeight.vitest.tsx`）、`src/features/workshop/OrderStatusDashboard/index.tsx`
 - **摘要**：修复表格最后一行被视口截成"半行"：① `useTableHeight` 行高计算由 `Math.round` 改为 `Math.floor`（保证 `rowHeight × targetRowCount ≤ 表体高度`，消除所有使用页面的半行风险；共享 hook，其他页面行高仅 0-1px 差异、语义更正确）；② 订单现状页 `minRowHeight` 30→24（表体 <300px 时允许更矮行高，保证 10 行完整）；③ 更新 `useTableHeight.vitest.tsx` 断言（33→32，并新增 `rowHeight × 10 ≤ scrollY` 不变量断言）
