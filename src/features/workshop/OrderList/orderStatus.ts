@@ -40,3 +40,26 @@ export function getWorkshopOrderStatusColor(
     ? 'success'
     : 'processing'
 }
+
+/** 状态 pill 语义色（S2 体系：进行中=琥珀 / 完成=绿） */
+export const WORKSHOP_ORDER_STATUS_PILL: Record<
+  WorkshopOrderStatus,
+  { bg: string; text: string; dot: string }
+> = {
+  生产中: {
+    bg: 'bg-amber-50 dark:bg-amber-900/40',
+    text: 'text-amber-600 dark:text-amber-400',
+    dot: 'bg-amber-500',
+  },
+  已结案: {
+    bg: 'bg-emerald-50 dark:bg-emerald-900/40',
+    text: 'text-emerald-600 dark:text-emerald-400',
+    dot: 'bg-emerald-500',
+  },
+}
+
+export function getWorkshopOrderStatusPill(
+  status?: WorkshopOrderStatus | null,
+) {
+  return WORKSHOP_ORDER_STATUS_PILL[normalizeWorkshopOrderStatus(status)]
+}

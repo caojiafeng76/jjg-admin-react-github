@@ -12,7 +12,7 @@ import dayjs from 'dayjs'
 import type { WorkshopOrder } from './index'
 import WorkshopOrderQrCell from './WorkshopOrderQrCell'
 import {
-  getWorkshopOrderStatusColor,
+  getWorkshopOrderStatusPill,
   normalizeWorkshopOrderStatus,
 } from './orderStatus'
 
@@ -149,16 +149,17 @@ function WorkshopOrderTable({
         dataIndex: 'status',
         fixed: 'left',
         key: 'status',
-        width: 66,
+        width: 78,
         render: (value: WorkshopOrder['status']) => {
           const status = normalizeWorkshopOrderStatus(value)
+          const pill = getWorkshopOrderStatusPill(status)
           return (
-            <Tag
-              color={getWorkshopOrderStatusColor(status)}
-              style={DENSE_TAG_STYLE}
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${pill.bg} ${pill.text}`}
             >
+              <span className={`size-1.5 rounded-full ${pill.dot}`} />
               {status}
-            </Tag>
+            </span>
           )
         },
       },

@@ -23,7 +23,7 @@ import { useWorkshopOrderTransfers } from './useWorkshopOrderTransfers'
 import type { WorkshopOrderStatus } from './orderStatus'
 import {
   canWorkshopOrderBeClosed,
-  getWorkshopOrderStatusColor,
+  getWorkshopOrderStatusPill,
   normalizeWorkshopOrderStatus,
 } from './orderStatus'
 
@@ -592,9 +592,14 @@ function OrderInfoHeader({
           </div>
           <div>
             <p className="text-xs text-slate-500">状态</p>
-            <Tag color={getWorkshopOrderStatusColor(status)} className="mt-0.5">
+            <span
+              className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${getWorkshopOrderStatusPill(status).bg} ${getWorkshopOrderStatusPill(status).text}`}
+            >
+              <span
+                className={`size-1.5 rounded-full ${getWorkshopOrderStatusPill(status).dot}`}
+              />
               {status}
-            </Tag>
+            </span>
           </div>
         </div>
 

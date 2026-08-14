@@ -15,6 +15,20 @@
 
 ## 2026-08-14
 
+- **类别**：修复
+- **范围**：`eslint.config.js`
+- **摘要**：ESLint ignores 增加 `.opencode/ponytail` —— 该目录为 ponytail skill 的运行时钩子脚本（`catch (e) {}` 吞错误等有意写法），不属于应用代码；此前仅忽略 `dist`，导致 `bun lint` 报 25 个 pre-existing error。排除后 `bun lint` 0 errors
+- **验证**：`bun lint` 通过（0 errors，13 warnings 均为 pre-existing 的 react-refresh 提示）
+
+## 2026-08-14
+
+- **类别**：变更
+- **范围**：`src/features/workshop/OrderList/`（`orderStatus.ts`、`WorkshopOrderTable.tsx`、`WorkshopOrderProductionStats.tsx`）
+- **摘要**：UI 改版 E1 —— 订单管理 OrderList 状态流转 pill 徽章：① `orderStatus.ts` 新增 `WORKSHOP_ORDER_STATUS_PILL` / `getWorkshopOrderStatusPill` 语义色映射（生产中=琥珀、已结案=绿，含 `bg/text/dot` 三组类名，S2 状态徽章体系落地）；② `WorkshopOrderTable.tsx` 状态列由 antd `Tag`（`color=success/processing`）改为 pill 徽章（`rounded-full` + 语义色底 + 圆点，与 syney PoTable/PoDetail 已确立模式一致），列宽 66→78 适配；③ `WorkshopOrderProductionStats.tsx` 下半面板订单状态同步改 pill 徽章；④ 数字列右对齐 + tabular-nums 由 A3 全局样式覆盖（`index.css` 表格 `font-variant-numeric: tabular-nums`），核对无需逐列处理
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 488 用例）、`bun lint` 本次改动文件 0 error（其余 25 error 均来自 `.opencode/ponytail/` 插件目录，pre-existing）
+
+## 2026-08-14
+
 - **类别**：变更
 - **范围**：`src/pages/SyneySetting.tsx`
 - **摘要**：UI 改版 D7 —— 编号设置 SyneySetting 重构：① 页面改版为 `app-card` 业务卡片（白底 + 1px 边框 + 浅影 + 12px 圆角，暗色自动降级）；② 裸 Input + onBlur 直存改为 antd Form + 内联校验（编号 required + `whitespace` + 非负整数 `pattern`，错误内联展示）；③ 显式"保存"按钮提交（替代 onBlur 静默保存），保存成功经 `App.useApp()` message 提示；加载态 Spin 居中保留。页面标题"编号设置"由 AppHeader 展示，卡片内保留"西尼相关设置"小标题
