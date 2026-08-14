@@ -128,7 +128,7 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white dark:bg-slate-950">
       <div className="relative hidden overflow-hidden bg-slate-950 lg:flex lg:w-1/2">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -165,16 +165,16 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-slate-50/60 px-6 py-12 lg:px-8">
-        <div className="w-full max-w-md rounded-[28px] border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-10">
+      <div className="flex flex-1 items-center justify-center bg-slate-50/60 px-6 py-12 dark:bg-slate-900/60 lg:px-8">
+        <div className="w-full max-w-md rounded-[28px] border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-none sm:p-10">
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-[15px] font-bold tracking-[0.18em] text-white shadow-[0_16px_36px_color-mix(in_srgb,var(--jjg-color-primary)_32%,transparent)]">
               JJG
             </div>
-            <Title level={3} className="mb-1! text-slate-900!">
+            <Title level={3} className="mb-1! text-slate-900! dark:text-slate-100!">
               欢迎回来
             </Title>
-            <Text className="text-slate-500!">请输入您的邮箱和密码以登录</Text>
+            <Text className="text-slate-500! dark:text-slate-400!">请输入您的邮箱和密码以登录</Text>
           </div>
 
           {errorMessage && (
@@ -204,7 +204,7 @@ export default function Login() {
             size="large"
           >
             <Form.Item
-              label={<span className="font-medium text-slate-700">邮箱</span>}
+              label={<span className="font-medium text-slate-700 dark:text-slate-300">邮箱</span>}
               name="email"
               rules={[
                 { required: true, message: '请输入邮箱' },
@@ -215,12 +215,12 @@ export default function Login() {
                 prefix={<MailOutlined className="text-slate-400" />}
                 placeholder="admin@example.com"
                 autoComplete="username"
-                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-primary!"
+                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-primary! dark:border-slate-700! dark:bg-slate-800! dark:text-slate-100! dark:placeholder:text-slate-500! dark:hover:border-slate-600!"
               />
             </Form.Item>
 
             <Form.Item
-              label={<span className="font-medium text-slate-700">密码</span>}
+              label={<span className="font-medium text-slate-700 dark:text-slate-300">密码</span>}
               name="password"
               rules={[{ required: true, message: '请输入密码' }]}
             >
@@ -228,7 +228,7 @@ export default function Login() {
                 prefix={<LockOutlined className="text-slate-400" />}
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-primary!"
+                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-primary! dark:border-slate-700! dark:bg-slate-800! dark:text-slate-100! dark:placeholder:text-slate-500! dark:hover:border-slate-600!"
               />
             </Form.Item>
 
@@ -237,7 +237,7 @@ export default function Login() {
               valuePropName="checked"
               className="mb-6!"
             >
-              <Checkbox className="text-slate-600">记住我</Checkbox>
+              <Checkbox className="text-slate-600 dark:text-slate-300">记住我</Checkbox>
             </Form.Item>
 
             <Form.Item className="mb-0!">

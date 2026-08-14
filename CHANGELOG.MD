@@ -29,6 +29,13 @@
 
 ## 2026-08-13
 
+- **类别**：修复
+- **范围**：`src/pages/Login.tsx`
+- **摘要**：修复登录页暗黑模式下背景未适配：页面根 `bg-white`、右侧表单区 `bg-slate-50/60`、登录卡片 `bg-white`/`border-slate-100` 等硬编码浅色值补 `dark:` 变体（根 `dark:bg-slate-950`、表单区 `dark:bg-slate-900/60`、卡片 `dark:bg-slate-900`/`dark:border-slate-800`/`dark:shadow-none`）；标题 `dark:text-slate-100`、副标题 `dark:text-slate-400`、表单标签 `dark:text-slate-300`、复选框 `dark:text-slate-300`；邮箱/密码输入框补 `dark:border-slate-700`/`dark:bg-slate-800`/`dark:text-slate-100`/`dark:placeholder:text-slate-500`/`dark:hover:border-slate-600`
+- **验证**：`bun run typecheck` 通过（0 错误）、lsp_diagnostics 0 诊断、页面级回归（浏览器实测：`html.dark` 生效，根背景 oklch(0.129)=slate-950、表单区 slate-900/60、卡片 slate-900，暗色下文字/输入框对比度正常）
+
+## 2026-08-13
+
 - **类别**：变更
 - **范围**：`src/pages/AccessDenied.tsx`
 - **摘要**：UI 改版 C3 —— 403 无权限页与 404 / 错误页视觉统一：`AccessDenied` 从独立 antd Card（默认 8px 圆角、无插画、固定 `bg-slate-100` 背景、暗色不适配）改为复用 `AppErrorView`（variant="permission"，rose 语义色系 + 盾牌插画 + 渐变背景 + 32px 圆角卡片 + 明暗适配）；动态描述（未登录/未绑定员工/账号停用/无角色/无权限）映射到"错误摘要"，账号邮箱映射到"诊断信息"，按钮组映射到操作区（返回登录页 + 有登录态时显示退出当前账号）。至此 404（PageNotFound）、403（AccessDenied）、运行时错误（RouteErrorPage）三个兜底页全部由 `AppErrorView` 统一渲染
