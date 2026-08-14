@@ -44,7 +44,7 @@
 ## E. 车间 / 基础资料（workshop）
 
 - [x] **E1** 订单管理 OrderList（状态流转 pill 徽章）
-- [ ] **E2** 订单现状 OrderStatusDashboard（Bento Grid KPI/图表，图表配色随主题）
+- [x] **E2** 订单现状 OrderStatusDashboard（Bento Grid KPI/图表，图表配色随主题）
 - [ ] **E3** 订单排产 ProductionScheduling（数字列 tabular-nums + 操作反馈 <300ms）
 - [ ] **E4** 员工管理 EmployeeList
 - [ ] **E5** 成本核算 StandardTimeList（成本/金额列右对齐）

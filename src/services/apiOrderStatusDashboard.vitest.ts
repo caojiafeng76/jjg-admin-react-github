@@ -15,6 +15,7 @@ vi.mock('./supabase', () => ({
 import {
   buildJobColumns,
   buildPackagingProductionDetailsForDashboard,
+  EMPTY_ORDER_STATUS_DASHBOARD_KPIS,
   getOrderStatusDashboard,
 } from './apiOrderStatusDashboard'
 
@@ -182,6 +183,64 @@ describe('getOrderStatusDashboard', () => {
       { key: 'CNC', title: 'CNC', operations: ['CNC（四轴工装）2台同步'] },
       { key: '包装', title: '包装', operations: [] },
     ])
+  })
+
+  it('maps global kpis from the RPC result', async () => {
+    mockRpc.mockResolvedValue({
+      data: {
+        items: [],
+        kpis: {
+          normalOrderCount: 10,
+          warningOrderCount: 3,
+          overdueOrderCount: 2,
+          avgCompletionRate: 87.5,
+          avgYieldRate: 96.2,
+          productionItemCount: 200,
+          materialTransferCount: 45,
+        },
+        materialTransferCount: 0,
+        productionItemCount: 0,
+        total: 15,
+      },
+      error: null,
+    })
+
+    const result = await getOrderStatusDashboard({
+      page: 1,
+      pageSize: 20,
+      processRows: [],
+    })
+
+    expect(result.kpis).toEqual({
+      totalOrderCount: 15,
+      normalOrderCount: 10,
+      warningOrderCount: 3,
+      overdueOrderCount: 2,
+      avgCompletionRate: 87.5,
+      avgYieldRate: 96.2,
+      productionItemCount: 200,
+      materialTransferCount: 45,
+    })
+  })
+
+  it('falls back to zero kpis when the RPC omits them', async () => {
+    mockRpc.mockResolvedValue({
+      data: {
+        items: [],
+        materialTransferCount: 0,
+        productionItemCount: 0,
+        total: 0,
+      },
+      error: null,
+    })
+
+    const result = await getOrderStatusDashboard({
+      page: 1,
+      pageSize: 20,
+      processRows: [],
+    })
+
+    expect(result.kpis).toEqual(EMPTY_ORDER_STATUS_DASHBOARD_KPIS)
   })
 })
 

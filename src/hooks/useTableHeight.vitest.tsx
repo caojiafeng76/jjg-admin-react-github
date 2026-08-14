@@ -59,7 +59,12 @@ describe('useTableHeight', () => {
       vi.runAllTimers()
     })
 
-    expect(result.current.rowHeight).toBe(33)
+    // 行高向下取整（32 而非四舍五入的 33）：保证 10 行完整放入 329px 表体，
+    // 不出现最后一行被视口截成半行（32 × 10 = 320 ≤ 329）
+    expect(result.current.rowHeight).toBe(32)
     expect(result.current.scrollY).toBe(329)
+    expect(result.current.rowHeight * 10).toBeLessThanOrEqual(
+      result.current.scrollY,
+    )
   })
 })

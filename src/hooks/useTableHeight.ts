@@ -80,14 +80,15 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
           // antd的scroll.y只控制tbody区域，表头是独立的，所以需要减去表头高度
           const tableBodyHeight = scrollableHeight - headerHeight
 
-          // 使用更精确的计算，确保10行能完全显示
+          // 使用更精确的计算，确保目标行数能完整放下
           const calculatedRowHeight = tableBodyHeight / targetRowCount
 
-          // 使用四舍五入确保行高为整数
+          // 向下取整（而非四舍五入）：保证 rowHeight × targetRowCount ≤ 表体高度，
+          // 避免最后一行被视口截成"半行"；不低于 minRowHeight
           const newRowHeight = Math.max(
             minRowHeight,
-            Math.round(calculatedRowHeight),
-          ) // 四舍五入，不低于 minRowHeight
+            Math.floor(calculatedRowHeight),
+          )
 
           // scroll.y 表示 tbody 的视口高度，必须受容器可用高度约束。
           // 行数较多时通过表格内部滚动展示，不能反向撑高外层容器。

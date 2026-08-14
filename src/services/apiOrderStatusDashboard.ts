@@ -123,6 +123,7 @@ type OrderStatusDashboardRpcItem = WorkshopOrder & {
 
 interface OrderStatusDashboardRpcResult {
   items?: OrderStatusDashboardRpcItem[]
+  kpis?: Partial<OrderStatusDashboardKpis>
   materialTransferCount?: number
   productionItemCount?: number
   total?: number
@@ -276,12 +277,40 @@ export interface OrderStatusDashboardItem extends WorkshopOrder {
   reworkRepairInfo: ReworkRepairInfo
 }
 
+/**
+ * 订单现状看板全局 KPI（在 RPC 的完整筛选集上聚合，非当前分页切片）。
+ * - 状态分布 / 平均完工率 / 平均成品率 / 明细数 / 转移数均随筛选条件联动。
+ * - avgCompletionRate / avgYieldRate 为 0-100 百分数。
+ */
+export interface OrderStatusDashboardKpis {
+  totalOrderCount: number
+  normalOrderCount: number
+  warningOrderCount: number
+  overdueOrderCount: number
+  avgCompletionRate: number
+  avgYieldRate: number
+  productionItemCount: number
+  materialTransferCount: number
+}
+
+export const EMPTY_ORDER_STATUS_DASHBOARD_KPIS: OrderStatusDashboardKpis = {
+  totalOrderCount: 0,
+  normalOrderCount: 0,
+  warningOrderCount: 0,
+  overdueOrderCount: 0,
+  avgCompletionRate: 0,
+  avgYieldRate: 0,
+  productionItemCount: 0,
+  materialTransferCount: 0,
+}
+
 export interface OrderStatusDashboardResult {
   items: OrderStatusDashboardItem[]
   total: number
   jobColumns: OrderStatusJobColumn[]
   productionItemCount: number
   materialTransferCount: number
+  kpis: OrderStatusDashboardKpis
 }
 
 export interface OrderStatusDashboardFilters {
@@ -1309,6 +1338,18 @@ export async function getOrderStatusDashboard({
     productionItemCount:
       (rpcResult.productionItemCount ?? 0) + packagingRows.length,
     materialTransferCount: rpcResult.materialTransferCount ?? 0,
+    kpis: {
+      totalOrderCount: total,
+      normalOrderCount: Number(rpcResult.kpis?.normalOrderCount ?? 0),
+      warningOrderCount: Number(rpcResult.kpis?.warningOrderCount ?? 0),
+      overdueOrderCount: Number(rpcResult.kpis?.overdueOrderCount ?? 0),
+      avgCompletionRate: Number(rpcResult.kpis?.avgCompletionRate ?? 0),
+      avgYieldRate: Number(rpcResult.kpis?.avgYieldRate ?? 0),
+      productionItemCount: Number(rpcResult.kpis?.productionItemCount ?? 0),
+      materialTransferCount: Number(
+        rpcResult.kpis?.materialTransferCount ?? 0,
+      ),
+    },
   }
 }
 

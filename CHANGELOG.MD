@@ -16,6 +16,34 @@
 ## 2026-08-14
 
 - **类别**：修复
+- **范围**：`src/hooks/useTableHeight.ts`（+`useTableHeight.vitest.tsx`）、`src/features/workshop/OrderStatusDashboard/index.tsx`
+- **摘要**：修复表格最后一行被视口截成"半行"：① `useTableHeight` 行高计算由 `Math.round` 改为 `Math.floor`（保证 `rowHeight × targetRowCount ≤ 表体高度`，消除所有使用页面的半行风险；共享 hook，其他页面行高仅 0-1px 差异、语义更正确）；② 订单现状页 `minRowHeight` 30→24（表体 <300px 时允许更矮行高，保证 10 行完整）；③ 更新 `useTableHeight.vitest.tsx` 断言（33→32，并新增 `rowHeight × 10 ≤ scrollY` 不变量断言）
+- **验证**：`bun run test` 通过（110 文件 / 490 用例）、`bun run typecheck` 通过（0 错误）、`bun lint` 改动文件 0 error、`bun run build` 通过（exit 0）
+
+## 2026-08-14
+
+- **类别**：变更
+- **范围**：`src/features/workshop/OrderStatusDashboard/index.tsx`
+- **摘要**：E2 布局调整 —— 表格一屏展示 10 条：① `useTableHeight` 目标行数 14 → 10（行高按 10 行撑满容器计算）；② 压缩全部固定区高度（外层 `gap-3 p-4`→`gap-2 p-3`、header 卡片 `py-4`→`py-2.5` + 图标 `size-12`→`size-9` + 标题 `text-xl`→`text-base`、搜索区移除"筛选条件"标签行 + 表单 `p-4`→`p-3`、Tabs 按钮 `py-2`→`py-1.5`、表格表头装饰行与分页 `py-2.5`/`py-3`→`py-2`），KPI 收起态下 1366×768 一屏可完整显示 10 行
+- **验证**：`bun run typecheck` 通过（0 错误）、受影响用例 `bun run test` 20/20 通过、`bun lint` 改动文件 0 error、`bun run build` 通过（exit 0）
+
+## 2026-08-14
+
+- **类别**：修复
+- **范围**：`src/features/workshop/OrderStatusDashboard/`（`OrderStatusKpiGrid.tsx`、`index.tsx`）
+- **摘要**：E2 布局回归修复 —— 主表格被 KPI 看板挤压不可见：① KPI 区由 2 行大卡改为紧凑一行（5 数字卡 `grid-cols-10` + 生产状态分布通栏条），高度约 240px → 130px；② 页头新增"看板"开关按钮（`DocumentChartBarIcon`），默认按可视高度自适应（≥800px 展开、小屏收起保表格），收起时 KPI 区不渲染、表格获得全部空间，`useTableHeight` 的 ResizeObserver 自动重算表格高度
+- **验证**：`bun run typecheck` 通过（0 错误）、受影响用例 `bun run test` 20/20 通过、`bun lint` 改动文件 0 error、`bun run build` 通过
+
+## 2026-08-14
+
+- **类别**：变更
+- **范围**：`supabase/migrations/20260814120000_add_order_status_dashboard_kpis.sql`、`src/services/apiOrderStatusDashboard.ts`、`src/features/workshop/OrderStatusDashboard/`（`OrderStatusKpiGrid.tsx` 新增、`index.tsx`）
+- **摘要**：UI 改版 E2 —— 订单现状 OrderStatusDashboard Bento Grid KPI 看板：① RPC `get_order_status_dashboard_v2` 新增 `kpis` 全局聚合输出（在完整筛选集上统计 正常/预警/延期 订单数、平均完工率、平均成品率、生产明细数、物料转移数，随筛选条件联动、非分页切片），直连 push 链路不可用按 db:doctor 建议改走 Supabase MCP 应用；② 服务层新增 `OrderStatusDashboardKpis` 类型 + `EMPTY_ORDER_STATUS_DASHBOARD_KPIS` 兜底 + kpis 映射；③ 页面新增 `OrderStatusKpiGrid` Bento Grid KPI 区（6 卡：订单总数 / 生产状态分布分段条 / 平均完工率 / 生产明细 / 平均成品率 / 物料转移，图表配色走 antd `theme.useToken()` 随主题切换，数字 tabular-nums，加载态骨架屏）；④ 移除头部 4 个冗余统计 pill，岗位数移至表格头部
+- **验证**：`bun run typecheck` 通过（0 错误）、`bun run test` 通过（110 文件 / 490 用例，+2 新增 kpis 映射用例）、`bun lint` 改动文件 0 error、`bun run build` 通过；RPC 远程执行验证 kpis 返回正常（totalOrderCount=4144 等）
+
+## 2026-08-14
+
+- **类别**：修复
 - **范围**：`eslint.config.js`
 - **摘要**：ESLint ignores 增加 `.opencode/ponytail` —— 该目录为 ponytail skill 的运行时钩子脚本（`catch (e) {}` 吞错误等有意写法），不属于应用代码；此前仅忽略 `dist`，导致 `bun lint` 报 25 个 pre-existing error。排除后 `bun lint` 0 errors
 - **验证**：`bun lint` 通过（0 errors，13 warnings 均为 pre-existing 的 react-refresh 提示）

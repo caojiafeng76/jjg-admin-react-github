@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
+  DocumentChartBarIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
@@ -75,6 +76,7 @@ import {
   Title,
 } from './dashboardRenderUtils'
 import { ExtrusionDetailModal } from './ExtrusionDetailModal'
+import { OrderStatusKpiGrid } from './OrderStatusKpiGrid'
 import { PrecisionCuttingDetailModal } from './PrecisionCuttingDetailModal'
 import { ProductionDetailModal } from './ProductionDetailModal'
 import { TransferDetailModal } from './TransferDetailModal'
@@ -137,6 +139,9 @@ export default function OrderStatusDashboard() {
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
   const [closingOrderId, setClosingOrderId] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
+  // KPI 看板默认策略：可视高度 ≥800px（1080p 及以上）默认展开，小屏默认收起保表格；
+  // 用户可随时通过页头"看板"按钮切换。
+  const [showKpis, setShowKpis] = useState(() => window.innerHeight >= 800)
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE
@@ -176,8 +181,8 @@ export default function OrderStatusDashboard() {
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
       headerHeight: 32,
-      targetRowCount: Math.min(pageSize, 14),
-      minRowHeight: 30,
+      targetRowCount: Math.min(pageSize, 10),
+      minRowHeight: 24,
       gap: 12,
     })
   const { data, isLoading, isFetching, refetch } = useOrderStatusDashboard({
@@ -811,9 +816,9 @@ export default function OrderStatusDashboard() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-4">
+    <div className="flex h-full min-h-0 flex-col gap-1.5 p-3">
       {/* 标题区 */}
-      <div className="relative overflow-hidden rounded-2xl border border-blue-100/50 bg-gradient-to-br from-white via-blue-50/30 to-slate-50/50 px-5 py-4 shadow-sm dark:border-blue-900/40 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/40">
+      <div className="relative overflow-hidden rounded-2xl border border-blue-100/50 bg-gradient-to-br from-white via-blue-50/30 to-slate-50/50 px-4 py-2 shadow-sm dark:border-blue-900/40 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/40">
         {/* 背景装饰元素 */}
         <div className="absolute -top-8 -right-8 size-32 rounded-full bg-gradient-to-br from-blue-200/40 via-blue-100/30 to-transparent blur-3xl dark:from-blue-900/30 dark:via-blue-900/10 dark:to-transparent" />
         <div className="absolute -bottom-6 -left-6 size-24 rounded-full bg-gradient-to-tr from-indigo-100/40 via-purple-50/30 to-transparent blur-2xl dark:from-indigo-900/30 dark:via-purple-900/20 dark:to-transparent" />
@@ -824,9 +829,9 @@ export default function OrderStatusDashboard() {
           <div className="flex items-center gap-4">
             {/* 装饰性图标容器 */}
             <div className="relative">
-              <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/30">
                 <svg
-                  className="size-6 text-white"
+                  className="size-4 text-white"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -846,72 +851,28 @@ export default function OrderStatusDashboard() {
             <div>
               <Title
                 level={4}
-                className="mb-0! !text-xl !font-bold tracking-tight"
+                className="mb-0! !text-base !font-bold tracking-tight"
               >
                 <span className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text dark:from-slate-100 dark:via-slate-200 dark:to-slate-400">
                   订单现状
                 </span>
               </Title>
-              <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+              <p className="mt-0 text-[11px] text-slate-400 dark:text-slate-500">
                 实时监控生产进度与订单状态
               </p>
             </div>
           </div>
 
-          {/* 右侧：统计标签组 */}
+          {/* 右侧：看板开关 / 导出 / 刷新 */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* 订单统计 */}
-            <div className="group relative">
-              <div className="flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3 py-1.5 ring-1 ring-blue-100/80 transition-all duration-200 hover:bg-blue-100/80 hover:shadow-sm hover:shadow-blue-100 dark:bg-blue-900/30 dark:ring-blue-900/50 dark:hover:bg-blue-900/50 dark:hover:shadow-none">
-                <span className="size-1.5 animate-pulse rounded-full bg-blue-500" />
-                <span className="text-xs font-medium text-blue-600 dark:text-blue-300">
-                  订单
-                </span>
-                <span className="text-xs font-bold text-blue-700 tabular-nums dark:text-blue-200">
-                  {data?.total ?? 0}
-                </span>
-              </div>
-            </div>
-
-            {/* 岗位统计 */}
-            <div className="group relative">
-              <div className="flex items-center gap-1.5 rounded-full bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 transition-all duration-200 hover:bg-cyan-100/80 hover:shadow-sm hover:shadow-cyan-100 dark:bg-cyan-900/30 dark:ring-cyan-900/50 dark:hover:bg-cyan-900/50 dark:hover:shadow-none">
-                <span className="size-1.5 rounded-full bg-cyan-500" />
-                <span className="text-xs font-medium text-cyan-600 dark:text-cyan-300">
-                  岗位
-                </span>
-                <span className="text-xs font-bold text-cyan-700 tabular-nums dark:text-cyan-200">
-                  {jobColumns.length}
-                </span>
-              </div>
-            </div>
-
-            {/* 明细统计 */}
-            <div className="group relative">
-              <div className="flex items-center gap-1.5 rounded-full bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 transition-all duration-200 hover:bg-emerald-100/80 hover:shadow-sm hover:shadow-emerald-100 dark:bg-emerald-900/30 dark:ring-emerald-900/50 dark:hover:bg-emerald-900/50 dark:hover:shadow-none">
-                <span className="size-1.5 rounded-full bg-emerald-500" />
-                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-300">
-                  明细
-                </span>
-                <span className="text-xs font-bold text-emerald-700 tabular-nums dark:text-emerald-200">
-                  {data?.productionItemCount ?? 0}
-                </span>
-              </div>
-            </div>
-
-            {/* 转移统计 */}
-            <div className="group relative">
-              <div className="flex items-center gap-1.5 rounded-full bg-purple-50/80 px-3 py-1.5 ring-1 ring-purple-100/80 transition-all duration-200 hover:bg-purple-100/80 hover:shadow-sm hover:shadow-purple-100 dark:bg-purple-900/30 dark:ring-purple-900/50 dark:hover:bg-purple-900/50 dark:hover:shadow-none">
-                <span className="size-1.5 rounded-full bg-purple-500" />
-                <span className="text-xs font-medium text-purple-600 dark:text-purple-300">
-                  转移
-                </span>
-                <span className="text-xs font-bold text-purple-700 tabular-nums dark:text-purple-200">
-                  {data?.materialTransferCount ?? 0}
-                </span>
-              </div>
-            </div>
-
+            <Button
+              size="small"
+              icon={<DocumentChartBarIcon className="size-3.5" />}
+              onClick={() => setShowKpis((current) => !current)}
+              className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md dark:!border-slate-600/60 dark:!bg-slate-800/80 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-blue-900/30 dark:hover:!text-blue-400"
+            >
+              {showKpis ? '收起看板' : '展开看板'}
+            </Button>
             {canExportCurrentFilters && (
               <Button
                 size="small"
@@ -945,13 +906,18 @@ export default function OrderStatusDashboard() {
         </div>
       </div>
 
+      {/* KPI 看板（Bento Grid，图表配色随主题 token；可收起以让位表格） */}
+      {showKpis && (
+        <OrderStatusKpiGrid kpis={data?.kpis} loading={isDataLoading} />
+      )}
+
       {/* Tabs 标签页 */}
       <div className="flex items-center gap-1 rounded-xl border border-slate-200/60 bg-white/60 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => handleStatusTabChange(tab.key)}
-            className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 rounded-lg px-4 py-1 text-sm font-medium transition-all duration-200 ${
               activeStatus === tab.key
                 ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/30'
                 : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-slate-200'
@@ -964,22 +930,9 @@ export default function OrderStatusDashboard() {
 
       {/* 搜索区 */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-200 hover:shadow-md hover:shadow-slate-200/50 dark:border-slate-700/50 dark:bg-slate-800/80 dark:hover:shadow-none">
-        {/* 顶部装饰线 */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-200/40 to-transparent dark:via-blue-800/40" />
-
-        {/* 搜索标签 */}
-        <div className="flex items-center gap-2 border-b border-slate-100/60 bg-gradient-to-r from-slate-50/50 to-transparent px-4 py-2.5 dark:border-slate-700/60 dark:from-slate-800/60 dark:to-transparent">
-          <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80 dark:bg-blue-900/40">
-            <MagnifyingGlassIcon className="size-3 text-blue-500 dark:text-blue-400" />
-          </div>
-          <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
-            筛选条件
-          </span>
-        </div>
-
-        {/* 搜索表单 */}
-        <div className="p-4">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        {/* 搜索表单（不换行：窄屏横向滚动，恒为一行高度） */}
+        <div className="p-2.5">
+          <div className="flex items-center gap-x-6 overflow-x-auto [&>*]:shrink-0">
             {/* 交货日期 */}
             <div className="group flex items-center gap-2.5">
               <Text
@@ -1134,7 +1087,7 @@ export default function OrderStatusDashboard() {
         className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/50 dark:bg-slate-800/80"
       >
         {/* 表头装饰 */}
-        <div className="flex items-center justify-between border-b border-slate-100/60 bg-gradient-to-r from-slate-50/80 via-white to-slate-50/80 px-4 py-2.5 dark:border-slate-700/60 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/80">
+        <div className="flex items-center justify-between border-b border-slate-100/60 bg-gradient-to-r from-slate-50/80 via-white to-slate-50/80 px-4 py-1.5 dark:border-slate-700/60 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/80">
           <div className="flex items-center gap-2">
             <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80 dark:bg-blue-900/40">
               <svg
@@ -1189,7 +1142,11 @@ export default function OrderStatusDashboard() {
           )}
 
           <span className="text-xs text-slate-400 dark:text-slate-500">
-            共{' '}
+            岗位{' '}
+            <span className="font-medium text-slate-600 dark:text-slate-300">
+              {jobColumns.length}
+            </span>{' '}
+            · 共{' '}
             <span className="font-medium text-slate-600 dark:text-slate-300">
               {data?.total ?? 0}
             </span>{' '}
@@ -1231,7 +1188,7 @@ export default function OrderStatusDashboard() {
       {/* 分页区域 */}
       <div
         ref={paginationRef}
-        className="flex shrink-0 items-center justify-between rounded-xl border border-slate-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/80"
+        className="flex shrink-0 items-center justify-between rounded-xl border border-slate-200/60 bg-white/80 px-4 py-2 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/80"
       >
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <span className="font-medium text-slate-700 dark:text-slate-200">
