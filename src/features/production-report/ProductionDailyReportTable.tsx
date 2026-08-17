@@ -138,6 +138,7 @@ function ProductionDailyReportTable({
         key: 'workHours',
         width: 80,
         fixed: 'left',
+        align: 'right',
         render: (value: number) => (
           <span className="font-medium text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
@@ -202,6 +203,7 @@ function ProductionDailyReportTable({
         dataIndex: 'lengthMm',
         key: 'lengthMm',
         width: 90,
+        align: 'right',
         filters: Array.from(
           new Set(
             data.map((r) => r.lengthMm).filter((v): v is number => v !== null),
@@ -234,6 +236,7 @@ function ProductionDailyReportTable({
         dataIndex: 'incomingQualifiedCount',
         key: 'incomingQualifiedCount',
         width: 100,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
@@ -243,6 +246,7 @@ function ProductionDailyReportTable({
         dataIndex: 'qualifiedCount',
         key: 'qualifiedCount',
         width: 100,
+        align: 'right',
         render: (value: number) => (
           <span className="font-semibold text-emerald-700 tabular-nums dark:text-emerald-400">
             {value}
@@ -254,6 +258,7 @@ function ProductionDailyReportTable({
         dataIndex: 'defectCount',
         key: 'defectCount',
         width: 100,
+        align: 'right',
         render: (value: number) => (
           <span className="font-semibold text-rose-600 tabular-nums dark:text-rose-400">
             {value}
@@ -265,6 +270,7 @@ function ProductionDailyReportTable({
         dataIndex: 'rawMaterialDefectCount',
         key: 'rawMaterialDefectCount',
         width: 100,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
@@ -274,6 +280,7 @@ function ProductionDailyReportTable({
         dataIndex: 'processingDefectCount',
         key: 'processingDefectCount',
         width: 100,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
@@ -283,6 +290,7 @@ function ProductionDailyReportTable({
         dataIndex: 'outsourceDefectCount',
         key: 'outsourceDefectCount',
         width: 110,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
@@ -304,6 +312,7 @@ function ProductionDailyReportTable({
         dataIndex: 'setupDefectCount',
         key: 'setupDefectCount',
         width: 100,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">{value}</span>
         ),
@@ -319,6 +328,7 @@ function ProductionDailyReportTable({
         dataIndex: 'qualifiedRate',
         key: 'qualifiedRate',
         width: 110,
+        align: 'right',
         sorter: (a, b) => a.qualifiedRate - b.qualifiedRate,
         sortDirections: ['descend', 'ascend'],
         render: (value: number) => renderQualifiedRate(value),
@@ -328,6 +338,7 @@ function ProductionDailyReportTable({
         dataIndex: 'rawMaterialDefectWeightKg',
         key: 'rawMaterialDefectWeightKg',
         width: 130,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
@@ -339,6 +350,7 @@ function ProductionDailyReportTable({
         dataIndex: 'processingDefectWeightKg',
         key: 'processingDefectWeightKg',
         width: 130,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
@@ -350,6 +362,7 @@ function ProductionDailyReportTable({
         dataIndex: 'outsourceDefectWeightKg',
         key: 'outsourceDefectWeightKg',
         width: 140,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
@@ -361,6 +374,7 @@ function ProductionDailyReportTable({
         dataIndex: 'setupDefectWeightKg',
         key: 'setupDefectWeightKg',
         width: 140,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">
             {renderNumber(value, 2)}
@@ -424,12 +438,12 @@ function ProductionDailyReportTable({
                 当前页合计
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={11}>
+            <Table.Summary.Cell index={11} className="text-right">
               <span className="font-bold text-emerald-700 tabular-nums dark:text-emerald-400">
                 {currentPageQualifiedCount.toLocaleString()}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={12}>
+            <Table.Summary.Cell index={12} className="text-right">
               <span className="font-bold text-rose-600 tabular-nums dark:text-rose-400">
                 {currentPageDefectCount.toLocaleString()}
               </span>

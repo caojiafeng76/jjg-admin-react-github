@@ -16,6 +16,13 @@
 ## 2026-08-17
 
 - **类别**：变更
+- **范围**：`src/features/production-report/`（`ProductionDailyReportTable.tsx` / `index.tsx`）、`src/ui/SelectedSummaryBar.tsx`（复用，无改动）
+- **摘要**：UI 改版 F3 —— 生产日报表 ProductionDailyReport 过通用清单：① 数字列加 `align: 'right'`（工时/长度/来料合格数/成品合格数/不良数量/原料/加工/外协/调机/合格率/4 个重量列，共 15 列），保留原 tabular-nums + 语义色（成品合格数 emerald、不良数量 rose、合格率三档语义色 pill）；② 汇总行（当前页合计）数字 cell 加 `text-right`，与右对齐的列对齐，`bg-slate-50` 底色 + 加粗数字保持突出；③ 选中摘要条由内联渐变蓝条替换为 F1 提炼的通用组件 `<SelectedSummaryBar />`（selectedCount / matchedCount / stats：合格数合计 tone=success + CheckCircleIcon、不良数合计 tone=error + XCircleIcon），颜色走 antd token、暗色模式自动切换，删除约 70 行内联 JSX；核对通过项：合格率已是语义色 pill 徽章、加载/空态/错误态保持现状（S1 独立任务）、导出按钮已有分片进度反馈。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 495/495 通过；`lsp_diagnostics` production-report 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-17
+
+- **类别**：变更
 - **范围**：`src/features/production-order/`（`ProductionOrderList.tsx` / `ProductionOrderItemTable.tsx` / `ProductionOrderForm.tsx` / `ProductionOrderDetail.tsx` / `index.tsx`）
 - **摘要**：UI 改版 F2 —— 生产工单 ProductionOrder 过通用清单，数字列右对齐 + tabular-nums：① 列表页 5 个数字列（出勤/正工/零工/总工时/效率）加 `align: 'right'`，`font-mono` 换全站 A3 规范 `tabular-nums` 风格（保留语义色）；② 详情工序表数字列（长度/标准工时/合格工时/减分工时/来料接收数/成品合格数/不良数量/外协/调机/运行时间）与表单工序明细表格数字列加 `align: 'right'`；③ 详情页 Descriptions 与 compact 卡片工时数字、列表页统计卡数字（共 N 条/已选中 N 项）补 `tabular-nums`（非表格区域不受全局 CSS 覆盖）；④ 状态 pill 徽章、Modal 选型、反馈文案核对通过，无需改动。`ProductionOrderForm.tsx` 内联 columns 条件展开数组丢失 `TableColumnsType` 上下文类型，`align` 用 `as const` 保持字面量类型（与 `StandardTimeTable.tsx` 既有处理一致）。
 - **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 495/495 通过；`lsp_diagnostics` production-order 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。

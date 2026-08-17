@@ -7,10 +7,12 @@ import {
 } from 'react'
 import { App } from 'antd'
 import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 
 import AppPagination from '@/ui/AppPagination'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
   ProductionDailyReportFilters,
@@ -309,77 +311,24 @@ export default function ProductionDailyReportPage() {
       </div>
 
       {!isEmployeeView && selectedCount > 0 ? (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
-          <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-              <svg
-                className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            已选
-            <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-              {selectedCount}
-            </span>
-            条
-            {selectedSummary.matched < selectedCount ? (
-              <span className="ml-1 text-xs text-amber-600 dark:text-amber-400">
-                （当前页参与合计 {selectedSummary.matched} 条）
-              </span>
-            ) : null}
-          </span>
-          <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-              <svg
-                className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            合格数合计：
-            <span className="text-xl font-bold text-emerald-600 tabular-nums dark:text-emerald-400">
-              {selectedSummary.qualifiedCount.toLocaleString()}
-            </span>
-          </span>
-          <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
-              <svg
-                className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
-              </svg>
-            </div>
-            不良数合计：
-            <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
-              {selectedSummary.defectCount.toLocaleString()}
-            </span>
-          </span>
-        </div>
+        <SelectedSummaryBar
+          selectedCount={selectedCount}
+          matchedCount={selectedSummary.matched}
+          stats={[
+            {
+              label: '合格数合计',
+              value: selectedSummary.qualifiedCount,
+              tone: 'success',
+              icon: <CheckCircleIcon className="size-3.5" />,
+            },
+            {
+              label: '不良数合计',
+              value: selectedSummary.defectCount,
+              tone: 'error',
+              icon: <XCircleIcon className="size-3.5" />,
+            },
+          ]}
+        />
       ) : null}
 
       <div
