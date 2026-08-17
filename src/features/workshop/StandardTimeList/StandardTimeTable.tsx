@@ -235,11 +235,59 @@ const StandardTimeTable = memo(function StandardTimeTable({
   }, [])
 
   const baseColumns: TableColumnsType<StandardTime> = useMemo(() => {
+    // 标准工时相关列：条件展开 `...(hideStandardSeconds ? [] : [...])` 时
+    // 数组字面量失去 `TableColumnsType` 上下文类型，`align: 'right'` 会被
+    // 推断为 string，故提前用类型注解声明，保证 align 字面量类型正确。
+    const standardTimeColumns: TableColumnsType<StandardTime> =
+      hideStandardSeconds
+        ? []
+        : [
+            {
+              title: '标准工时（秒）',
+              dataIndex: 'standard_seconds',
+              key: 'standard_seconds',
+              width: 140,
+              align: 'right',
+              render: (value: number | null | undefined) => (
+                <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                  {formatNumber(value)}
+                </span>
+              ),
+            },
+            {
+              title: '日标准产能',
+              key: 'daily_standard_capacity',
+              width: 120,
+              align: 'right',
+              render: (_value: unknown, record: StandardTime) => (
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                  {formatNumber(
+                    calculateDailyStandardCapacity(record.standard_seconds),
+                    2,
+                  )}
+                </span>
+              ),
+            },
+            {
+              title: '理论工时（秒）',
+              dataIndex: 'theoretical_seconds',
+              key: 'theoretical_seconds',
+              width: 140,
+              align: 'right',
+              render: (value: number | null | undefined) => (
+                <span className="font-medium text-cyan-600 dark:text-cyan-400">
+                  {formatNumber(value)}
+                </span>
+              ),
+            },
+          ]
+
     const cols: TableColumnsType<StandardTime> = [
       {
         title: '#',
         render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
         width: 60,
+        align: 'right',
         fixed: 'left',
         key: '#',
       },
@@ -350,6 +398,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
         dataIndex: 'length',
         key: 'length',
         width: 100,
+        align: 'right',
         render: (value: number | null | undefined) => formatNumber(value, 2),
       },
       {
@@ -367,45 +416,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
             </span>
           ),
       },
-      ...(hideStandardSeconds
-        ? []
-        : [
-            {
-              title: '标准工时（秒）',
-              dataIndex: 'standard_seconds',
-              key: 'standard_seconds',
-              width: 140,
-              render: (value: number | null | undefined) => (
-                <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                  {formatNumber(value)}
-                </span>
-              ),
-            },
-            {
-              title: '日标准产能',
-              key: 'daily_standard_capacity',
-              width: 120,
-              render: (_value: unknown, record: StandardTime) => (
-                <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                  {formatNumber(
-                    calculateDailyStandardCapacity(record.standard_seconds),
-                    2,
-                  )}
-                </span>
-              ),
-            },
-            {
-              title: '理论工时（秒）',
-              dataIndex: 'theoretical_seconds',
-              key: 'theoretical_seconds',
-              width: 140,
-              render: (value: number | null | undefined) => (
-                <span className="font-medium text-cyan-600 dark:text-cyan-400">
-                  {formatNumber(value)}
-                </span>
-              ),
-            },
-          ]),
+      ...standardTimeColumns,
       {
         title: '工装治具',
         dataIndex: 'tooling_fixture',
@@ -419,6 +430,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
         dataIndex: 'clamping_count',
         key: 'clamping_count',
         width: 100,
+        align: 'right',
         render: (value: number | null | undefined) => formatNumber(value),
       },
       {
@@ -426,6 +438,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
         dataIndex: 'clamping_quantity',
         key: 'clamping_quantity',
         width: 120,
+        align: 'right',
         render: (value: number | null | undefined) => formatNumber(value),
       },
       {
@@ -433,6 +446,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
         dataIndex: 'operator_count',
         key: 'operator_count',
         width: 80,
+        align: 'right',
         render: (value: number | null | undefined) => formatNumber(value),
       },
       {

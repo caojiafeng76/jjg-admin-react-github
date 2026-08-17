@@ -47,7 +47,7 @@
 - [x] **E2** 订单现状 OrderStatusDashboard（Bento Grid KPI/图表，图表配色随主题）
 - [x] **E3** 订单排产 ProductionScheduling（数字列 tabular-nums + 操作反馈 <300ms）
 - [x] **E4** 员工管理 EmployeeList
-- [ ] **E5** 成本核算 StandardTimeList（成本/金额列右对齐）
+- [x] **E5** 成本核算 StandardTimeList（成本/金额列右对齐）
 - [ ] **E6** 岗位基础数值设定 JobBaseSetting（数值列 tabular-nums + 内联校验）
 - [ ] **E7** 机器设备维护 MachineEquipmentMaintenance
 - [ ] **E8** 设备运行时间 MachineRuntime（时长 tabular-nums + 图表配色随主题）

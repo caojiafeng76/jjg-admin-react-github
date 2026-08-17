@@ -44,7 +44,7 @@ export async function getSyneySpecs({
   // 按 1000/页循环拉取，避免规格数据超过 1000 条时被截断。
   const PAGE_SIZE = 1000
   const allSpecs: ISyneySpec[] = []
-  let totalCount = 0
+  let totalCount: number
   let from = 0
 
   while (true) {

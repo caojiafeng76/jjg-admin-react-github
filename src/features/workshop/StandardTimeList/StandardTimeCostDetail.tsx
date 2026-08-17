@@ -121,7 +121,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
             人工成本
           </div>
-          <div className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          <div className="text-lg font-bold text-slate-800 tabular-nums dark:text-slate-100">
             {formatNumber(labor_cost)}
           </div>
           <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
@@ -134,7 +134,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
             设备成本
           </div>
-          <div className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          <div className="text-lg font-bold text-slate-800 tabular-nums dark:text-slate-100">
             {formatNumber(equipment_cost)}
           </div>
           <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
@@ -147,7 +147,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
             刀具辅料
           </div>
-          <div className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          <div className="text-lg font-bold text-slate-800 tabular-nums dark:text-slate-100">
             {formatNumber(tooling_consumable_cost)}
           </div>
           <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
@@ -160,7 +160,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
             检验成本
           </div>
-          <div className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          <div className="text-lg font-bold text-slate-800 tabular-nums dark:text-slate-100">
             {formatNumber(inspection_cost)}
           </div>
           <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">
@@ -176,7 +176,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-amber-600 dark:text-amber-400">
             单品分摊额
           </div>
-          <div className="text-lg font-bold text-amber-700 dark:text-amber-300">
+          <div className="text-lg font-bold text-amber-700 tabular-nums dark:text-amber-300">
             {formatNumber(overhead_cost)}
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
             合计成本
           </div>
-          <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
+          <div className="text-2xl font-bold text-indigo-700 tabular-nums dark:text-indigo-300">
             {formatNumber(total_cost)}
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
             日管理总费用
           </div>
-          <div className="text-lg font-semibold text-slate-700 dark:text-slate-200">
+          <div className="text-lg font-semibold text-slate-700 tabular-nums dark:text-slate-200">
             {formatNumber(daily_management_cost, 2)}
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
             日总工时
           </div>
-          <div className="text-lg font-semibold text-slate-700 dark:text-slate-200">
+          <div className="text-lg font-semibold text-slate-700 tabular-nums dark:text-slate-200">
             {formatNumber(daily_total_hours, 2)} h
           </div>
         </div>

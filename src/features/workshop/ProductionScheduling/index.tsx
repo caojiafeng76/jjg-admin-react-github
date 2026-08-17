@@ -521,7 +521,7 @@ export default function ProductionScheduling() {
 
   // E3 排产表紧凑行高：固定区较高，压缩 cell 上下内边距到 2px，
   // 使行高约 31px，1366×768 下一屏完整显示 10 行（经 components 注入，
-  // 避免在 index.css 用 .ant- 全局覆盖触发 appShellConfig 约定）
+  // 避免在 index.css 全局覆盖 antd 私有 DOM 类而触发 appShellConfig 约定）
   const components = useMemo(
     () => ({
       body: {

@@ -15,6 +15,21 @@
 
 ## 2026-08-17
 
+- **类别**：修复
+- **范围**：`src/features/workshop/ProductionScheduling/index.tsx`（仅注释）
+- **摘要**：修复 `bun run test` 唯一失败项 —— `src/ui/antdSemanticStyles.vitest.ts` 的整文件正则 `not.toMatch(/\.ant-/)` 误匹配到 E3 注释中的 `.ant-` 文字（该注释只是解释为何不覆盖 antd 私有 DOM 类，并非实际使用）；将注释措辞由 `.ant-` 改为「antd 私有 DOM 类」，测试守卫逻辑与覆盖面不变。
+- **验证**：`bun run test` 全量 492/492 通过（110 文件，此前唯一失败项消除）；`bun run test src/ui/antdSemanticStyles.vitest.ts` 7/7 通过；`bun run typecheck` 通过。
+
+- **类别**：修复
+- **范围**：`src/services/apiSyneySpecs.ts`
+- **摘要**：修复 `bun lint` 失败 —— `getSyneySpecs` 全量分页循环中 `let totalCount = 0` 的初始值从未被读取（`while (true)` 每轮都先执行 `totalCount = count ?? 0` 再可能 `break`），触发 `no-useless-assignment`；改为纯声明 `let totalCount: number`（TS 确定性赋值分析可证明 return 处必已赋值），运行时行为不变。
+- **验证**：`bun lint` 0 errors（仅剩 `dashboardRenderUtils.tsx` 13 个既有 react-refresh warnings，不阻断）；`bun run typecheck` 通过；`bun run test` 全量 491/492，唯一失败仍为既有 `antdSemanticStyles.vitest.ts` 的 `.ant-` 断言（与本次无关）。
+
+- **类别**：变更
+- **范围**：`src/features/workshop/StandardTimeList/`（`StandardTimeTable.tsx`、`StandardTimeCostDetail.tsx`）
+- **摘要**：UI 改版 E5 —— 成本核算 StandardTimeList 成本/金额列右对齐：① 表格 8 个数字列补 `align: 'right'`（`#` 序号、长度、标准工时（秒）、日标准产能、理论工时（秒）、装夹次数、装夹数量（支）、人数），等宽数字 tabular-nums 由 A3 全局 `index.css` 表格样式覆盖；② 标准工时相关 3 列从条件展开 `...(hideStandardSeconds ? [] : [...])` 中提取为带 `TableColumnsType<StandardTime>` 类型注解的局部变量 `standardTimeColumns`（条件展开让数组字面量失去上下文类型，`align: 'right'` 会被推断为 string 触发 TS2322，提取后保证字面量类型正确）；③ 成本详情面板 `StandardTimeCostDetail` 的金额数字（人工/设备/刀具辅料/检验成本、单品分摊额、合计成本、日管理总费用、日总工时）补 `tabular-nums`（这些金额在卡片而非 `<table>` 内，A3 的 `table >` 选择器不覆盖）。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 491/492 通过，唯一失败为既有 `src/ui/antdSemanticStyles.vitest.ts` 对 `ProductionScheduling/index.tsx` 的 `.ant-` 断言（匹配到该文件内注释文字，与本次改动无关），`StandardTimeList` 模块用例 5/5 通过；`bun run build` 通过（exit 0）；`bun lint` 改动文件 0 问题（全量 lint 仍有既有 `apiSyneySpecs.ts` `no-useless-assignment` 1 error 与 `dashboardRenderUtils.tsx` 13 react-refresh warnings，均非本次改动文件）。
+
 - **类别**：变更
 - **范围**：`src/features/tooling-fixture/FixtureDataPage.tsx`、`ToolingFixtureTable.tsx`、`useToolingFixtures.ts`、`queryKeys.ts`、`src/services/apiToolingFixture.ts`（+`apiToolingFixture.vitest.ts`）
 - **摘要**：工装资料列表新增首列“更新日期”，并在搜索条件中新增“更新日期”范围筛选；筛选参数同步接入 TanStack Query key、分页列表查询和“打印二维码”的当前筛选全量查询。`updated_at` 为时间戳字段，结束日期按 `< 次日` 处理，保证用户选择的结束日期整天都被包含。
