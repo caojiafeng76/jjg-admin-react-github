@@ -16,6 +16,13 @@
 ## 2026-08-17
 
 - **类别**：变更
+- **范围**：`src/features/production-order/`（`ProductionOrderList.tsx` / `ProductionOrderItemTable.tsx` / `ProductionOrderForm.tsx` / `ProductionOrderDetail.tsx` / `index.tsx`）
+- **摘要**：UI 改版 F2 —— 生产工单 ProductionOrder 过通用清单，数字列右对齐 + tabular-nums：① 列表页 5 个数字列（出勤/正工/零工/总工时/效率）加 `align: 'right'`，`font-mono` 换全站 A3 规范 `tabular-nums` 风格（保留语义色）；② 详情工序表数字列（长度/标准工时/合格工时/减分工时/来料接收数/成品合格数/不良数量/外协/调机/运行时间）与表单工序明细表格数字列加 `align: 'right'`；③ 详情页 Descriptions 与 compact 卡片工时数字、列表页统计卡数字（共 N 条/已选中 N 项）补 `tabular-nums`（非表格区域不受全局 CSS 覆盖）；④ 状态 pill 徽章、Modal 选型、反馈文案核对通过，无需改动。`ProductionOrderForm.tsx` 内联 columns 条件展开数组丢失 `TableColumnsType` 上下文类型，`align` 用 `as const` 保持字面量类型（与 `StandardTimeTable.tsx` 既有处理一致）。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 495/495 通过；`lsp_diagnostics` production-order 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-17
+
+- **类别**：变更
 - **范围**：`src/features/workshop/StandardTimeList/StandardTimeTable.tsx`
 - **摘要**：成本核算表格空值占位「留空」徽章改为 `-`（客户/设备编号/料号 3 列），去掉 rounded-full 边框徽章样式，保留 muted 灰色文字，与同表「工装治具/说明」列的 `|| '-'` 空值惯例统一。
 - **验证**：`bun run test src/features/workshop/StandardTimeList` 5/5 通过；`bun run typecheck` 通过；`bun lint` 该文件 0 问题（全量 lint 仍仅有 `dashboardRenderUtils.tsx` 13 个既有 react-refresh warnings）。

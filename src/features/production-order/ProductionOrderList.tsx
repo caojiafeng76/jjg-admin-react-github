@@ -94,8 +94,9 @@ export default function ProductionOrderList({
         dataIndex: 'work_hours',
         key: 'work_hours',
         width: 90,
+        align: 'right',
         render: (value: number | null) => (
-          <span className="font-mono text-slate-600 dark:text-slate-400">
+          <span className="text-slate-600 tabular-nums dark:text-slate-400">
             {(value ?? 0).toFixed(1)}h
           </span>
         ),
@@ -105,8 +106,9 @@ export default function ProductionOrderList({
         dataIndex: 'positive_qualified_hours',
         key: 'positive_qualified_hours',
         width: 90,
+        align: 'right',
         render: (value: number | null) => (
-          <span className="font-mono text-emerald-600 dark:text-emerald-400">
+          <span className="text-emerald-600 tabular-nums dark:text-emerald-400">
             {(value ?? 0).toFixed(2)}
           </span>
         ),
@@ -116,8 +118,9 @@ export default function ProductionOrderList({
         dataIndex: 'extra_qualified_hours',
         key: 'extra_qualified_hours',
         width: 90,
+        align: 'right',
         render: (value: number | null) => (
-          <span className="font-mono text-blue-600 dark:text-blue-400">
+          <span className="text-blue-600 tabular-nums dark:text-blue-400">
             {(value ?? 0).toFixed(2)}
           </span>
         ),
@@ -127,6 +130,7 @@ export default function ProductionOrderList({
         dataIndex: 'total_qualified_hours',
         key: 'total_qualified_hours',
         width: 100,
+        align: 'right',
         render: (value: number | null, record: ProductionOrderListItem) => {
           if (value === null || value === undefined) {
             return <span className="text-slate-300 dark:text-slate-600">-</span>
@@ -141,7 +145,7 @@ export default function ProductionOrderList({
               }
             >
               <span
-                className={`font-mono font-semibold ${
+                className={`font-semibold tabular-nums ${
                   record.hasZeroStandardQualifiedItem
                     ? 'text-red-500 dark:text-red-400'
                     : 'text-slate-700 dark:text-slate-300'
@@ -158,6 +162,7 @@ export default function ProductionOrderList({
         dataIndex: 'efficiency',
         key: 'efficiency',
         width: 100,
+        align: 'right',
         render: (value: number | null) => {
           if (value === null || value === undefined) {
             return <span className="text-slate-300 dark:text-slate-600">-</span>
@@ -169,7 +174,7 @@ export default function ProductionOrderList({
 
           return (
             <span
-              className={`inline-flex items-center gap-1 font-mono font-medium ${
+              className={`inline-flex items-center gap-1 font-medium tabular-nums ${
                 isGood
                   ? 'text-emerald-600 dark:text-emerald-400'
                   : isWarning

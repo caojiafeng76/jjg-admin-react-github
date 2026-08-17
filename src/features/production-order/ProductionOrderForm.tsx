@@ -898,6 +898,7 @@ export default function ProductionOrderForm({
                     title: '长度',
                     dataIndex: 'length_mm',
                     width: 80,
+                    align: 'right',
                   },
                   {
                     title: '客户型号',
@@ -923,34 +924,40 @@ export default function ProductionOrderForm({
                           title: '标准工时(秒)',
                           dataIndex: 'standard_seconds',
                           width: 100,
+                          align: 'right' as const,
                         },
                       ]),
                   {
                     title: '来料接收数',
                     dataIndex: 'incoming_qualified_quantity',
                     width: 100,
+                    align: 'right',
                   },
                   {
                     title: '成品合格数',
                     dataIndex: 'qualified_quantity',
                     width: 80,
+                    align: 'right',
                   },
                   {
                     title: '加工不良数量',
                     dataIndex: 'defect_quantity_1',
                     width: 100,
+                    align: 'right',
                     render: (value: number) => value || 0,
                   },
                   {
                     title: '原料不良数量',
                     dataIndex: 'defect_quantity_2',
                     width: 100,
+                    align: 'right',
                     render: (value: number) => value || 0,
                   },
                   {
                     title: '外协不良数',
                     dataIndex: 'outsource_defect_quantity',
                     width: 100,
+                    align: 'right',
                     render: (value: number) => value || 0,
                   },
                   {
@@ -969,6 +976,7 @@ export default function ProductionOrderForm({
                     title: '调机不良',
                     dataIndex: 'setup_defect_quantity',
                     width: 100,
+                    align: 'right',
                     render: (value: number) => value || 0,
                   },
                   {

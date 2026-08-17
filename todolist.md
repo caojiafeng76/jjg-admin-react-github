@@ -55,7 +55,7 @@
 ## F. 报表（reports）
 
 - [x] **F1** 物料转移单 MaterialTransfer（选中摘要条提炼为通用组件 + 颜色走 token）
-- [ ] **F2** 生产工单 ProductionOrder
+- [x] **F2** 生产工单 ProductionOrder
 - [ ] **F3** 生产日报表 ProductionDailyReport（汇总行突出 + 数字列 tabular-nums）
 
 ## G. 质量（quality）

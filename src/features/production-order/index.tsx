@@ -1139,7 +1139,7 @@ export default function ProductionOrderPage() {
             <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200/60 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-4 py-2.5 text-sm transition-all duration-300 dark:border-slate-700/80 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
               <div className="flex items-center gap-1.5">
                 <span className="text-slate-500 dark:text-slate-400">共</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                <span className="font-semibold text-slate-800 tabular-nums dark:text-slate-200">
                   {orderData.total}
                 </span>
                 <span className="text-slate-500 dark:text-slate-400">
@@ -1153,7 +1153,7 @@ export default function ProductionOrderPage() {
                     <span className="text-slate-500 dark:text-slate-400">
                       已选中
                     </span>
-                    <span className="font-semibold text-blue-600 dark:text-blue-400">
+                    <span className="font-semibold text-blue-600 tabular-nums dark:text-blue-400">
                       {selectedRowKeys.length}
                     </span>
                     <span className="text-slate-500 dark:text-slate-400">

@@ -27,6 +27,7 @@ const RUNTIME_COL = {
   title: '运行时间',
   key: 'runtime',
   width: 100,
+  align: 'right' as const,
   render: (_: unknown, record: ProductionOrderItemWithMachine) => {
     const seconds =
       (record.incoming_qualified_quantity ?? 0) *
@@ -42,12 +43,14 @@ const COST_COLUMNS: TableColumnsType<ProductionOrderItemWithMachine> = [
     dataIndex: 'standard_seconds',
     key: 'standard_seconds',
     width: 110,
+    align: 'right',
   },
   {
     title: '合格工时(h)',
     dataIndex: 'qualified_hours',
     key: 'qualified_hours',
     width: 100,
+    align: 'right',
     render: (value: number | null, record: ProductionOrderItem) => {
       if (value === null || value === undefined) {
         return '-'
@@ -66,6 +69,7 @@ const COST_COLUMNS: TableColumnsType<ProductionOrderItemWithMachine> = [
     dataIndex: 'defect_hours',
     key: 'defect_hours',
     width: 100,
+    align: 'right',
     render: (value: number | null) => value?.toFixed(2) || '-',
   },
   {
@@ -116,6 +120,7 @@ function ProductionOrderItemTable({
         dataIndex: 'length_mm',
         key: 'length_mm',
         width: 100,
+        align: 'right',
       },
       {
         title: '客户型号',
@@ -156,30 +161,35 @@ function ProductionOrderItemTable({
         dataIndex: 'incoming_qualified_quantity',
         key: 'incoming_qualified_quantity',
         width: 100,
+        align: 'right',
       },
       {
         title: '成品合格数',
         dataIndex: 'qualified_quantity',
         key: 'qualified_quantity',
         width: 90,
+        align: 'right',
       },
       {
         title: '加工不良数量',
         dataIndex: 'defect_quantity_1',
         key: 'defect_quantity_1',
         width: 100,
+        align: 'right',
       },
       {
         title: '原料不良数量',
         dataIndex: 'defect_quantity_2',
         key: 'defect_quantity_2',
         width: 100,
+        align: 'right',
       },
       {
         title: '外协不良数',
         dataIndex: 'outsource_defect_quantity',
         key: 'outsource_defect_quantity',
         width: 100,
+        align: 'right',
         render: (value: number | null) => value || 0,
       },
       {
@@ -201,6 +211,7 @@ function ProductionOrderItemTable({
         dataIndex: 'setup_defect_quantity',
         key: 'setup_defect_quantity',
         width: 100,
+        align: 'right',
         render: (value: number | null) => value || 0,
       },
       {

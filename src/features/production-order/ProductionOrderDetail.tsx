@@ -147,7 +147,8 @@ export default function ProductionOrderDetail({
                 出勤工时
               </div>
               <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-                {currentOrder.work_hours} 小时
+                <span className="tabular-nums">{currentOrder.work_hours}</span>{' '}
+                小时
               </div>
             </div>
             <div className="rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-800">
@@ -201,22 +202,35 @@ export default function ProductionOrderDetail({
               {formattedAuditedAt || '-'}
             </Descriptions.Item>
             <Descriptions.Item label="出勤工时">
-              {currentOrder.work_hours} 小时
+              <span className="tabular-nums">{currentOrder.work_hours}</span>{' '}
+              小时
             </Descriptions.Item>
             <Descriptions.Item label="班别">
               {currentOrder.shift || '白班'}
             </Descriptions.Item>
             <Descriptions.Item label="正工工时">
-              {positiveQualifiedHours.toFixed(2)} 小时
+              <span className="tabular-nums">
+                {positiveQualifiedHours.toFixed(2)}
+              </span>{' '}
+              小时
             </Descriptions.Item>
             <Descriptions.Item label="零工工时">
-              {(currentOrder.extra_qualified_hours ?? 0).toFixed(2)} 小时
+              <span className="tabular-nums">
+                {(currentOrder.extra_qualified_hours ?? 0).toFixed(2)}
+              </span>{' '}
+              小时
             </Descriptions.Item>
             <Descriptions.Item label="总工时">
-              {displayedTotalQualifiedHours.toFixed(2)} 小时
+              <span className="tabular-nums">
+                {displayedTotalQualifiedHours.toFixed(2)}
+              </span>{' '}
+              小时
             </Descriptions.Item>
             <Descriptions.Item label="工时效率">
-              {(displayedEfficiency * 100).toFixed(2)}%
+              <span className="tabular-nums">
+                {(displayedEfficiency * 100).toFixed(2)}
+              </span>
+              %
             </Descriptions.Item>
             <Descriptions.Item label="备注" span={2}>
               {currentOrder.remark || '-'}
