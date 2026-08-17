@@ -11,6 +11,7 @@ vi.mock('./supabase', () => ({
 import {
   createToolingFixturesBatch,
   getAllToolingFixtures,
+  getToolingFixtureList,
   normalizeToolingFixtureFormValues,
 } from './apiToolingFixture'
 
@@ -24,6 +25,7 @@ interface FixtureQueryBuilder {
   eq: ReturnType<typeof vi.fn>
   gte: ReturnType<typeof vi.fn>
   lte: ReturnType<typeof vi.fn>
+  lt: ReturnType<typeof vi.fn>
   abortSignal: ReturnType<typeof vi.fn>
   range: ReturnType<typeof vi.fn>
   in: ReturnType<typeof vi.fn>
@@ -41,6 +43,7 @@ function createFixtureQueryBuilder(): FixtureQueryBuilder {
     eq: vi.fn(),
     gte: vi.fn(),
     lte: vi.fn(),
+    lt: vi.fn(),
     abortSignal: vi.fn(),
     range: vi.fn(),
     in: vi.fn(),
@@ -53,6 +56,7 @@ function createFixtureQueryBuilder(): FixtureQueryBuilder {
   builder.eq.mockReturnValue(builder)
   builder.gte.mockReturnValue(builder)
   builder.lte.mockReturnValue(builder)
+  builder.lt.mockReturnValue(builder)
   builder.abortSignal.mockReturnValue(builder)
   builder.range.mockImplementation(() => ({
     data: builder.data,
@@ -189,6 +193,36 @@ describe('getAllToolingFixtures', () => {
 
     expect(builder.gte).toHaveBeenCalledWith('manufactured_date', '2026-01-01')
     expect(builder.lte).toHaveBeenCalledWith('manufactured_date', '2026-06-30')
+  })
+
+  it('applies updated date range filters', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = []
+    builder.count = 0
+
+    await getAllToolingFixtures({
+      updatedDateRange: { start: '2026-07-01', end: '2026-07-31' },
+    })
+
+    expect(builder.gte).toHaveBeenCalledWith('updated_at', '2026-07-01')
+    expect(builder.lt).toHaveBeenCalledWith('updated_at', '2026-08-01')
+  })
+
+  it('applies updated date range filters to paged fixture lists', async () => {
+    const builder = createFixtureQueryBuilder()
+    fromMock.mockReturnValue(builder)
+    builder.data = []
+    builder.count = 0
+
+    await getToolingFixtureList({
+      page: 1,
+      pageSize: 10,
+      updatedDateRange: { start: '2026-07-01', end: '2026-07-31' },
+    })
+
+    expect(builder.gte).toHaveBeenCalledWith('updated_at', '2026-07-01')
+    expect(builder.lt).toHaveBeenCalledWith('updated_at', '2026-08-01')
   })
 
   it('keeps paginating until fewer than 1000 rows are returned', async () => {

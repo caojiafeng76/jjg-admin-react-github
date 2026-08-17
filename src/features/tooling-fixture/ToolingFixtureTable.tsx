@@ -28,6 +28,10 @@ function formatDate(value: string | null): string {
   return value ? value : '-'
 }
 
+function formatDateOnly(value: string | null): string {
+  return value ? value.slice(0, 10) : '-'
+}
+
 function getStatusColor(status: ToolingFixture['status']): string {
   return status === '使用中' ? 'orange' : 'green'
 }
@@ -46,6 +50,14 @@ function ToolingFixtureTable({
 }: ToolingFixtureTableProps) {
   const columns = useMemo<TableColumnsType<ToolingFixture>>(
     () => [
+      {
+        title: '更新日期',
+        dataIndex: 'updated_at',
+        key: 'updated_at',
+        width: 120,
+        fixed: 'left',
+        render: formatDateOnly,
+      },
       {
         title: '序号',
         key: 'index',
@@ -206,7 +218,7 @@ function ToolingFixtureTable({
         selectedRowKeys,
         onChange: onSelect,
       }}
-      scroll={{ x: 2100, y: scrollY }}
+      scroll={{ x: 2220, y: scrollY }}
       size="small"
     />
   )

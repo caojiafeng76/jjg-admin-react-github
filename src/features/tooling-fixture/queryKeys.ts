@@ -13,6 +13,7 @@ export const toolingFixtureKeys = {
     keyword?: string
     status?: ToolingFixtureStatus
     manufacturedDateRange?: ToolingFixtureDateRange
+    updatedDateRange?: ToolingFixtureDateRange
   }) =>
     [
       ...toolingFixtureKeys.lists(),
@@ -23,6 +24,8 @@ export const toolingFixtureKeys = {
         status: params.status ?? '',
         dateStart: params.manufacturedDateRange?.start ?? '',
         dateEnd: params.manufacturedDateRange?.end ?? '',
+        updatedStart: params.updatedDateRange?.start ?? '',
+        updatedEnd: params.updatedDateRange?.end ?? '',
       },
     ] as const,
   records: () => [...toolingFixtureKeys.all, 'records'] as const,

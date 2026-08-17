@@ -19,6 +19,7 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   getAllToolingFixtures,
   type ToolingFixture,
+  type ToolingFixtureDateRange,
   type ToolingFixtureFormValues,
 } from '@/services/apiToolingFixture'
 import PrintButton from '@ui/PrintButton'
@@ -37,6 +38,17 @@ import { usePrintToolingFixtureQrLabels } from './usePrintToolingFixtureQrLabels
 const DEFAULT_PAGE_SIZE = 10
 const PAGE_SIZE_OPTIONS = [10, 20, 50]
 
+function toFixtureDateRange(
+  range: [Dayjs, Dayjs] | null,
+): ToolingFixtureDateRange | undefined {
+  return range
+    ? {
+        start: range[0].format('YYYY-MM-DD'),
+        end: range[1].format('YYYY-MM-DD'),
+      }
+    : undefined
+}
+
 export default function FixtureDataPage() {
   const { message, modal } = App.useApp()
   const [page, setPage] = useState(1)
@@ -44,6 +56,9 @@ export default function FixtureDataPage() {
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState<ToolingFixture['status']>()
   const [manufacturedDateRange, setManufacturedDateRange] = useState<
+    [Dayjs, Dayjs] | null
+  >(null)
+  const [updatedDateRange, setUpdatedDateRange] = useState<
     [Dayjs, Dayjs] | null
   >(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
@@ -59,12 +74,8 @@ export default function FixtureDataPage() {
     pageSize,
     keyword,
     status,
-    manufacturedDateRange: manufacturedDateRange
-      ? {
-          start: manufacturedDateRange[0].format('YYYY-MM-DD'),
-          end: manufacturedDateRange[1].format('YYYY-MM-DD'),
-        }
-      : undefined,
+    manufacturedDateRange: toFixtureDateRange(manufacturedDateRange),
+    updatedDateRange: toFixtureDateRange(updatedDateRange),
   })
   const createMutation = useCreateToolingFixture()
   const updateMutation = useUpdateToolingFixture()
@@ -188,12 +199,8 @@ export default function FixtureDataPage() {
       const items = await getAllToolingFixtures({
         keyword: keyword || undefined,
         status,
-        manufacturedDateRange: manufacturedDateRange
-          ? {
-              start: manufacturedDateRange[0].format('YYYY-MM-DD'),
-              end: manufacturedDateRange[1].format('YYYY-MM-DD'),
-            }
-          : undefined,
+        manufacturedDateRange: toFixtureDateRange(manufacturedDateRange),
+        updatedDateRange: toFixtureDateRange(updatedDateRange),
       })
 
       if (items.length === 0) {
@@ -209,7 +216,14 @@ export default function FixtureDataPage() {
     } finally {
       setIsPrintLoading(false)
     }
-  }, [keyword, manufacturedDateRange, message, printLabels, status])
+  }, [
+    keyword,
+    manufacturedDateRange,
+    message,
+    printLabels,
+    status,
+    updatedDateRange,
+  ])
 
   const handlePrintRecord = useCallback(
     (record: ToolingFixture) => {
@@ -285,6 +299,19 @@ export default function FixtureDataPage() {
             onChange={(value) => {
               setPage(1)
               setManufacturedDateRange(
+                value?.[0] && value?.[1] ? [value[0], value[1]] : null,
+              )
+            }}
+          />
+          <DatePicker.RangePicker
+            allowClear
+            format="YYYY-MM-DD"
+            placeholder={['更新开始日期', '更新结束日期']}
+            value={updatedDateRange}
+            style={{ width: 260 }}
+            onChange={(value) => {
+              setPage(1)
+              setUpdatedDateRange(
                 value?.[0] && value?.[1] ? [value[0], value[1]] : null,
               )
             }}

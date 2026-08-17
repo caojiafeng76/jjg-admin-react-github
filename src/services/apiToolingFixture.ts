@@ -61,6 +61,10 @@ function normalizeDate(
   return parsed.format('YYYY-MM-DD')
 }
 
+function nextDate(value: string): string {
+  return dayjs(value).add(1, 'day').format('YYYY-MM-DD')
+}
+
 function parseToolingFixture(row: ToolingFixtureRow): ToolingFixture {
   if (!['未使用', '使用中'].includes(row.status)) {
     throw new Error('工装状态无效，请联系管理员')
@@ -161,6 +165,7 @@ export async function getToolingFixtureList({
   keyword,
   status,
   manufacturedDateRange,
+  updatedDateRange,
   signal,
 }: {
   page: number
@@ -168,6 +173,7 @@ export async function getToolingFixtureList({
   keyword?: string
   status?: ToolingFixture['status']
   manufacturedDateRange?: ToolingFixtureDateRange
+  updatedDateRange?: ToolingFixtureDateRange
   signal?: AbortSignal
 }): Promise<{ items: ToolingFixture[]; total: number }> {
   const from = (page - 1) * pageSize
@@ -196,6 +202,14 @@ export async function getToolingFixtureList({
     query = query.lte('manufactured_date', manufacturedDateRange.end)
   }
 
+  if (updatedDateRange?.start) {
+    query = query.gte('updated_at', updatedDateRange.start)
+  }
+
+  if (updatedDateRange?.end) {
+    query = query.lt('updated_at', nextDate(updatedDateRange.end))
+  }
+
   query = query
     .order('updated_at', { ascending: false })
     .order('fixture_no', { ascending: true })
@@ -220,11 +234,13 @@ export async function getAllToolingFixtures({
   keyword,
   status,
   manufacturedDateRange,
+  updatedDateRange,
   signal,
 }: {
   keyword?: string
   status?: ToolingFixture['status']
   manufacturedDateRange?: ToolingFixtureDateRange
+  updatedDateRange?: ToolingFixtureDateRange
   signal?: AbortSignal
 }): Promise<ToolingFixture[]> {
   const normalizedKeyword = normalizeText(keyword)
@@ -254,6 +270,14 @@ export async function getAllToolingFixtures({
 
     if (manufacturedDateRange?.end) {
       query = query.lte('manufactured_date', manufacturedDateRange.end)
+    }
+
+    if (updatedDateRange?.start) {
+      query = query.gte('updated_at', updatedDateRange.start)
+    }
+
+    if (updatedDateRange?.end) {
+      query = query.lt('updated_at', nextDate(updatedDateRange.end))
     }
 
     query = query

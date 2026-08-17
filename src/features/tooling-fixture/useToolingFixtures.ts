@@ -29,12 +29,14 @@ export function useToolingFixtureList({
   keyword,
   status,
   manufacturedDateRange,
+  updatedDateRange,
 }: {
   page: number
   pageSize: number
   keyword?: string
   status?: ToolingFixture['status']
   manufacturedDateRange?: ToolingFixtureDateRange
+  updatedDateRange?: ToolingFixtureDateRange
 }) {
   return useQuery({
     queryKey: toolingFixtureKeys.list({
@@ -43,6 +45,7 @@ export function useToolingFixtureList({
       keyword,
       status,
       manufacturedDateRange,
+      updatedDateRange,
     }),
     queryFn: ({ signal }) =>
       getToolingFixtureList({
@@ -51,6 +54,7 @@ export function useToolingFixtureList({
         keyword,
         status,
         manufacturedDateRange,
+        updatedDateRange,
         signal,
       }),
     placeholderData: keepPreviousData,

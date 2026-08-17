@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-17
+
+- **类别**：变更
+- **范围**：`src/features/tooling-fixture/FixtureDataPage.tsx`、`ToolingFixtureTable.tsx`、`useToolingFixtures.ts`、`queryKeys.ts`、`src/services/apiToolingFixture.ts`（+`apiToolingFixture.vitest.ts`）
+- **摘要**：工装资料列表新增首列“更新日期”，并在搜索条件中新增“更新日期”范围筛选；筛选参数同步接入 TanStack Query key、分页列表查询和“打印二维码”的当前筛选全量查询。`updated_at` 为时间戳字段，结束日期按 `< 次日` 处理，保证用户选择的结束日期整天都被包含。
+- **验证**：`bun run test src/services/apiToolingFixture.vitest.ts` 通过（13/13，新增 updated_at 范围 red-green 用例）；`bun run typecheck` 通过；`bun run build` 通过；`bunx antd lint src/features/tooling-fixture/FixtureDataPage.tsx --format json` 与 `bunx antd lint src/features/tooling-fixture/ToolingFixtureTable.tsx --format json` 均 0 issues；`bun run test` 全量仍失败于既有 `src/ui/antdSemanticStyles.vitest.ts` 对 `src/features/workshop/ProductionScheduling/index.tsx` 的 `.ant-*` 断言，`bun lint` 仍失败于既有 `src/services/apiSyneySpecs.ts` 的 `no-useless-assignment`（另有 13 个既有 react-refresh warnings），均非本次改动文件；浏览器访问 `/fixture-data` 因无认证会话重定向到 `/login?redirect=%2Ffixture-data`，未能直接目测受保护表格。
+
 ## 2026-08-14
 
 - **类别**：修复
