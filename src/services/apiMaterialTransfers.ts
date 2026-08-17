@@ -511,24 +511,49 @@ export async function getMaterialTransfersForExport({
     return [] as MaterialTransferWithEmployee[]
   }
 
-  let query = supabase
-    .from('material_transfers')
-    .select('*')
-    .order('created_at', { ascending: true })
+  const rows: MaterialTransferWithEmployee[] = []
 
   if (ids && ids.length > 0) {
-    query = query.in('id', ids)
+    const { data, error } = await supabase
+      .from('material_transfers')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .in('id', ids)
+
+    if (error) {
+      throw handleApiError(error, '获取物料转移单导出数据失败')
+    }
+
+    rows.push(...((data || []) as unknown as MaterialTransferWithEmployee[]))
   } else if (filters) {
-    query = applyMaterialTransferFilters(query, filters)
+    let from = 0
+
+    while (true) {
+      const to = from + MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE - 1
+      let query = supabase
+        .from('material_transfers')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .range(from, to)
+
+      query = applyMaterialTransferFilters(query, filters)
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取物料转移单导出数据失败')
+      }
+
+      const pageRows = (data || []) as unknown as MaterialTransferWithEmployee[]
+      rows.push(...pageRows)
+
+      if (pageRows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) {
+        break
+      }
+
+      from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
+    }
   }
-
-  const { data, error } = await query
-
-  if (error) {
-    throw handleApiError(error, '获取物料转移单导出数据失败')
-  }
-
-  const rows = (data || []) as unknown as MaterialTransferWithEmployee[]
 
   if (!ids || ids.length === 0) {
     return rows
@@ -548,23 +573,49 @@ export async function getMaterialTransferQuantityStats({
   ids?: string[]
   filters?: MaterialTransferFilters
 } = {}): Promise<MaterialTransferQuantityStats> {
-  let query = supabase
-    .from('material_transfers')
-    .select('id, transfer_quantity')
+  const rows: Array<{ transfer_quantity: number | null }> = []
 
   if (ids && ids.length > 0) {
-    query = query.in('id', ids)
+    const { data, error } = await supabase
+      .from('material_transfers')
+      .select('id, transfer_quantity')
+      .in('id', ids)
+
+    if (error) {
+      throw handleApiError(error, '获取物料转移单数量统计失败')
+    }
+
+    rows.push(...((data || []) as Array<{ transfer_quantity: number | null }>))
   } else if (filters) {
-    query = applyMaterialTransferFilters(query, filters)
+    let from = 0
+
+    while (true) {
+      const to = from + MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE - 1
+      let query = supabase
+        .from('material_transfers')
+        .select('id, transfer_quantity')
+        .range(from, to)
+
+      query = applyMaterialTransferFilters(query, filters)
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取物料转移单数量统计失败')
+      }
+
+      const pageRows = (data || []) as Array<{
+        transfer_quantity: number | null
+      }>
+      rows.push(...pageRows)
+
+      if (pageRows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) {
+        break
+      }
+
+      from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
+    }
   }
-
-  const { data, error } = await query
-
-  if (error) {
-    throw handleApiError(error, '获取物料转移单数量统计失败')
-  }
-
-  const rows = data || []
 
   return {
     totalQuantity: rows.reduce(
@@ -667,20 +718,37 @@ export interface ProjectTransferStats {
 export async function getTransferStatsByProjectNo(
   projectNo: string,
 ): Promise<ProjectTransferStats> {
-  const { data, error } = await supabase
-    .from('material_transfers')
-    .select('target_workshop, transfer_quantity')
-    .eq('project_no', projectNo.trim())
-    .order('target_workshop', { ascending: true })
-
-  if (error) {
-    throw handleApiError(error, '获取转移单统计失败')
-  }
-
-  const rows = (data || []) as {
+  const rows: {
     target_workshop: string
     transfer_quantity: number
-  }[]
+  }[] = []
+  let from = 0
+
+  while (true) {
+    const to = from + MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('material_transfers')
+      .select('target_workshop, transfer_quantity')
+      .eq('project_no', projectNo.trim())
+      .order('target_workshop', { ascending: true })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取转移单统计失败')
+    }
+
+    const pageRows = (data || []) as {
+      target_workshop: string
+      transfer_quantity: number
+    }[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) {
+      break
+    }
+
+    from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
+  }
 
   const workshopMap = new Map<string, { total: number; count: number }>()
   for (const row of rows) {
@@ -752,20 +820,40 @@ export async function getTransferTotalByProjectNos(
   const map = new Map<string, number>()
   if (projectNos.length === 0) return map
 
-  const { data, error } = await supabase
-    .from('material_transfers')
-    .select('project_no, transfer_quantity')
-    .in('project_no', projectNos)
+  // .in() 只能过滤项目号，不能限制每个项目的转移记录行数；
+  // 多个项目合计记录数可能超过 1000，需分页循环拉全后再聚合。
+  let from = 0
 
-  if (error) {
-    throw handleApiError(error, '获取转移数量聚合失败')
-  }
+  while (true) {
+    const to = from + MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('material_transfers')
+      .select('project_no, transfer_quantity')
+      .in('project_no', projectNos)
+      .order('project_no', { ascending: true })
+      .range(from, to)
 
-  for (const row of data || []) {
-    if (!row.project_no) continue
-    const key = row.project_no.trim()
-    if (!key) continue
-    map.set(key, (map.get(key) ?? 0) + Number(row.transfer_quantity || 0))
+    if (error) {
+      throw handleApiError(error, '获取转移数量聚合失败')
+    }
+
+    const pageRows = (data || []) as Array<{
+      project_no: string | null
+      transfer_quantity: number | null
+    }>
+
+    for (const row of pageRows) {
+      if (!row.project_no) continue
+      const key = row.project_no.trim()
+      if (!key) continue
+      map.set(key, (map.get(key) ?? 0) + Number(row.transfer_quantity || 0))
+    }
+
+    if (pageRows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) {
+      break
+    }
+
+    from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
   }
 
   return map

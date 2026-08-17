@@ -148,18 +148,36 @@ export async function deleteYoumaiRawMaterialInventory(
 export async function getYoumaiRawMaterialInventoryForExport(
   keyword?: string,
 ): Promise<YoumaiRawMaterialInventory[]> {
-  let query = inventoryTable()
-    .select('*')
-    .order('model', { ascending: true })
-    .order('specification', { ascending: true })
+  const PAGE_SIZE = 1000
+  const rows: YoumaiRawMaterialInventory[] = []
+  let from = 0
 
-  if (keyword) {
-    query = query.or(
-      `model.ilike.%${keyword}%,specification.ilike.%${keyword}%`,
-    )
+  while (true) {
+    const to = from + PAGE_SIZE - 1
+    let query = inventoryTable()
+      .select('*')
+      .order('model', { ascending: true })
+      .order('specification', { ascending: true })
+      .range(from, to)
+
+    if (keyword) {
+      query = query.or(
+        `model.ilike.%${keyword}%,specification.ilike.%${keyword}%`,
+      )
+    }
+
+    const { data, error } = await query
+    if (error) throw handleApiError(error, '原料库存导出数据获取失败')
+
+    const pageRows = (data ?? []) as YoumaiRawMaterialInventory[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < PAGE_SIZE) {
+      break
+    }
+
+    from += PAGE_SIZE
   }
 
-  const { data, error } = await query
-  if (error) throw handleApiError(error, '原料库存导出数据获取失败')
-  return (data ?? []) as YoumaiRawMaterialInventory[]
+  return rows
 }

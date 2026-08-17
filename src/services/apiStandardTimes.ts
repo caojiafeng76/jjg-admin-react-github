@@ -555,28 +555,45 @@ export async function getAllStandardTimesForExport({
   updatedEndDate,
   recordType,
 }: StandardTimeFilters): Promise<StandardTime[]> {
-  const query = applyStandardTimeFilters(
-    supabase.from('process_standards').select('*'),
-    {
-      operation,
-      model,
-      partNo,
-      unmatchedOnly,
-      partNoOnly,
-      updatedStartDate,
-      updatedEndDate,
-      recordType,
-    },
-  )
-    .order('standard_seconds', { ascending: true })
-    .order('operation', { ascending: true })
-    .order('model', { ascending: true })
+  const PAGE_SIZE = 1000
+  const rows: StandardTime[] = []
+  let from = 0
 
-  const { data, error } = await query
+  while (true) {
+    const to = from + PAGE_SIZE - 1
+    const query = applyStandardTimeFilters(
+      supabase.from('process_standards').select('*'),
+      {
+        operation,
+        model,
+        partNo,
+        unmatchedOnly,
+        partNoOnly,
+        updatedStartDate,
+        updatedEndDate,
+        recordType,
+      },
+    )
+      .order('standard_seconds', { ascending: true })
+      .order('operation', { ascending: true })
+      .order('model', { ascending: true })
+      .range(from, to)
 
-  if (error) {
-    throw handleApiError(error, '获取成本核算导出数据失败')
+    const { data, error } = await query
+
+    if (error) {
+      throw handleApiError(error, '获取成本核算导出数据失败')
+    }
+
+    const pageRows = (data || []) as StandardTime[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < PAGE_SIZE) {
+      break
+    }
+
+    from += PAGE_SIZE
   }
 
-  return (data || []) as StandardTime[]
+  return rows
 }

@@ -15,6 +15,14 @@
 
 ## 2026-08-14
 
+- **类别**：修复
+- **范围**：`src/services/apiPrecisionCuttingTransfers.ts`、`apiMaterialTransfers.ts`、`apiPrecisionFinishingCuttings.ts`、`apiOrderStatusDashboard.ts`、`apiLaborProtectionRequisitions.ts`、`apiStandardTimes.ts`、`apiYoumaiRawMaterialInventory.ts`、`apiEmployees.ts`、`apiAttendanceDetails.ts`、`apiSyneySpecs.ts`、`apiToolingFixture.ts`（+`apiToolingFixture.vitest.ts`）、`apiProductionOrders.ts`、`apiWorkshopOrders.ts`、`apiDashboard.ts`
+- **摘要**：修复"订单数据超过 1000 条无法获取"问题（PostgREST `db-max-rows=1000`，显式 limit 也无法突破）：① 用户点名两处 —— 精切转移单导出（`getPrecisionCuttingTransfersForExport` filters 分支）与数量统计（`getPrecisionCuttingTransferQuantityStats`）改为 while+range 1000/页循环拉取；订单现状导出（`getOrderStatusDashboardForExport`）原传 `pageSize: total` 但 RPC 内部 `least(...,200)` 截断，改为按 200/页循环调用 RPC 直至 total。② 全库排查同类问题并修复 13 个文件 16 处：物料转移单/精加工切割单的导出与统计 filters 分支（同构双分支仅补 filters 分支、ids 分支保持不动）、劳保领料单导出、成本核算导出、优迈原料库存导出、`getAllEmployees` 全表下拉、考勤月度导出（两分支合并为分页循环）、西尼规格 `isAll` 分支 `limit(1000)` 改循环、工装 `getAllToolingFixtures` 由"超 1000 直接抛错"改为分页拉全（同步更新 vitest：断言 `select('*')` 无 count、新增翻页终止断言）、`getProductionItemsByProjectNo`/`getPrecisionCuttingTransferItemsByProjectNo` 单项目明细循环、车间订单出库统计（`material_transfers` 多项目 in 聚合）循环、首页 KPI 近 14 天 created_at 扫描循环。全部复用项目既有 `while(true) + .range(from, to)` 模式（PAGE_SIZE=1000）
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 489/490 通过（唯一失败为 pre-existing `antdSemanticStyles.vitest.ts`，stash 验证与本次改动无关；`apiToolingFixture.vitest.ts` 3 个旧断言已随行为变更更新并单独跑通 11/11）；未做浏览器端导出回归（需登录态与测试环境，缺口说明）
+
+
+## 2026-08-14
+
 - **类别**：变更
 - **范围**：`src/features/workshop/ProductionScheduling/index.tsx`
 - **摘要**：UI 改版 E3 布局改版 —— 订单排产 ProductionScheduling 一屏 10 行：① 布局压缩 —— 外层 `gap-3 p-3` → `gap-1.5 p-1`；标题卡去掉副标题 + `py-2`→`py-1` + 竖条缩小（仅留标题一行）；搜索区移除"筛选条件"标签行 + `p-2`→`p-1` + 全部控件 `size="small"` + label 缩短（订单状态→状态、当前进度→进度、计划开工→开工、订单日期→日期）收紧为 2 行；② 摘要卡（5 张 KPI 卡）合并进操作条 —— 删除 `SummaryCard` 组件，汇总统计（订单数/数量/进行中/已完工/延期）改为操作条左侧内联数字；③ 紧凑行高 —— `components.body.cell` 注入 `paddingTop/Bottom: 2px`（行高 35→31px；经 components 注入而非 index.css `.ant-` 全局覆盖，避免触发 `appShellConfig.vitest` 约定）；④ 客户名称、负责班组/人员列补 `ellipsis: true`（修复长文本在窄列换行成 2 行把整行撑高、导致首行 43px 异常）

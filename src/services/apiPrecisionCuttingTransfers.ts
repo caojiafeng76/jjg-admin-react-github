@@ -598,19 +598,37 @@ export async function getPrecisionCuttingTransferById(id: string) {
   return data as PrecisionCuttingTransferRow
 }
 
+const EXPORT_PAGE_SIZE = 1000
+
 export async function getPrecisionCuttingTransferItemsByProjectNo(
   projectNo: string,
 ): Promise<ProductionItemWithOrderDetail[]> {
-  const { data, error } = await getPrecisionCuttingTransfersQuery()
-    .select('*')
-    .eq('project_no', projectNo.trim())
-    .order('created_at', { ascending: true })
+  const rows: PrecisionCuttingTransferRow[] = []
+  let from = 0
 
-  if (error) {
-    throw handleApiError(error, '获取精切转移单明细失败')
+  while (true) {
+    const to = from + EXPORT_PAGE_SIZE - 1
+    const { data, error } = await getPrecisionCuttingTransfersQuery()
+      .select('*')
+      .eq('project_no', projectNo.trim())
+      .order('created_at', { ascending: true })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取精切转移单明细失败')
+    }
+
+    const pageRows = (data || []) as PrecisionCuttingTransferRow[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < EXPORT_PAGE_SIZE) {
+      break
+    }
+
+    from += EXPORT_PAGE_SIZE
   }
 
-  return ((data || []) as PrecisionCuttingTransferRow[]).map((item) => {
+  return rows.map((item) => {
     const processingDefectCount = Number(item.processing_defect_count || 0)
     const rawMaterialDefectCount = Number(item.raw_material_defect_count || 0)
     const outsourceDefectQuantity = Number(item.outsource_defect_quantity || 0)
@@ -658,23 +676,47 @@ export async function getPrecisionCuttingTransfersForExport({
     return []
   }
 
-  let query = getPrecisionCuttingTransfersQuery()
-    .select('*')
-    .order('created_at', { ascending: true })
+  const rows: PrecisionCuttingTransferRow[] = []
 
   if (ids && ids.length > 0) {
-    query = query.in('id', ids)
+    const { data, error } = await getPrecisionCuttingTransfersQuery()
+      .select('*')
+      .order('created_at', { ascending: true })
+      .in('id', ids)
+
+    if (error) {
+      throw handleApiError(error, '获取精切转移单导出数据失败')
+    }
+
+    rows.push(...((data || []) as PrecisionCuttingTransferRow[]))
   } else if (filters) {
-    query = applyPrecisionCuttingTransferFilters(query, filters)
+    let from = 0
+
+    while (true) {
+      const to = from + EXPORT_PAGE_SIZE - 1
+      let query = getPrecisionCuttingTransfersQuery()
+        .select('*')
+        .order('created_at', { ascending: true })
+        .range(from, to)
+
+      query = applyPrecisionCuttingTransferFilters(query, filters)
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取精切转移单导出数据失败')
+      }
+
+      const pageRows = (data || []) as PrecisionCuttingTransferRow[]
+      rows.push(...pageRows)
+
+      if (pageRows.length < EXPORT_PAGE_SIZE) {
+        break
+      }
+
+      from += EXPORT_PAGE_SIZE
+    }
   }
-
-  const { data, error } = await query
-
-  if (error) {
-    throw handleApiError(error, '获取精切转移单导出数据失败')
-  }
-
-  const rows = (data || []) as PrecisionCuttingTransferRow[]
 
   const weightMap = await getProjectWeightMap(rows.map((row) => row.project_no))
 
@@ -717,23 +759,45 @@ export async function getPrecisionCuttingTransferQuantityStats({
   ids?: string[]
   filters?: PrecisionCuttingTransferFilters
 } = {}): Promise<PrecisionCuttingTransferQuantityStats> {
-  let query = getPrecisionCuttingTransfersQuery().select(
-    'id, transfer_quantity',
-  )
+  const rows: Array<{ transfer_quantity: number | null }> = []
 
   if (ids && ids.length > 0) {
-    query = query.in('id', ids)
+    const { data, error } = await getPrecisionCuttingTransfersQuery()
+      .select('id, transfer_quantity')
+      .in('id', ids)
+
+    if (error) {
+      throw handleApiError(error, '获取精切转移单数量统计失败')
+    }
+
+    rows.push(...((data || []) as Array<{ transfer_quantity: number | null }>))
   } else if (filters) {
-    query = applyPrecisionCuttingTransferFilters(query, filters)
+    let from = 0
+
+    while (true) {
+      const to = from + EXPORT_PAGE_SIZE - 1
+      let query = getPrecisionCuttingTransfersQuery()
+        .select('id, transfer_quantity')
+        .range(from, to)
+
+      query = applyPrecisionCuttingTransferFilters(query, filters)
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取精切转移单数量统计失败')
+      }
+
+      const pageRows = (data || []) as Array<{ transfer_quantity: number | null }>
+      rows.push(...pageRows)
+
+      if (pageRows.length < EXPORT_PAGE_SIZE) {
+        break
+      }
+
+      from += EXPORT_PAGE_SIZE
+    }
   }
-
-  const { data, error } = await query
-
-  if (error) {
-    throw handleApiError(error, '获取精切转移单数量统计失败')
-  }
-
-  const rows = (data || []) as Array<{ transfer_quantity: number | null }>
 
   return {
     totalQuantity: rows.reduce(

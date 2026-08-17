@@ -228,53 +228,61 @@ export async function getAllToolingFixtures({
   signal?: AbortSignal
 }): Promise<ToolingFixture[]> {
   const normalizedKeyword = normalizeText(keyword)
-  let query = supabase
-    .from('tooling_fixtures')
-    .select('*', { count: 'exact' })
+  const rows: ToolingFixture[] = []
+  let from = 0
 
-  if (normalizedKeyword) {
-    query = query.or(
-      buildPostgrestOrIlikeFilter(
-        TOOLING_FIXTURE_SEARCH_FIELDS,
-        normalizedKeyword,
-      ),
-    )
+  while (true) {
+    const to = from + TOOLING_FIXTURE_ALL_LIMIT - 1
+    let query = supabase.from('tooling_fixtures').select('*')
+
+    if (normalizedKeyword) {
+      query = query.or(
+        buildPostgrestOrIlikeFilter(
+          TOOLING_FIXTURE_SEARCH_FIELDS,
+          normalizedKeyword,
+        ),
+      )
+    }
+
+    if (status) {
+      query = query.eq('status', status)
+    }
+
+    if (manufacturedDateRange?.start) {
+      query = query.gte('manufactured_date', manufacturedDateRange.start)
+    }
+
+    if (manufacturedDateRange?.end) {
+      query = query.lte('manufactured_date', manufacturedDateRange.end)
+    }
+
+    query = query
+      .order('updated_at', { ascending: false })
+      .order('fixture_no', { ascending: true })
+
+    if (signal) {
+      query = query.abortSignal(signal)
+    }
+
+    query = query.range(from, to)
+
+    const { data, error } = await query
+
+    if (error) {
+      throw handleApiError(error, '获取工装资料列表失败')
+    }
+
+    const pageRows = (data ?? []).map(parseToolingFixture)
+    rows.push(...pageRows)
+
+    if (pageRows.length < TOOLING_FIXTURE_ALL_LIMIT) {
+      break
+    }
+
+    from += TOOLING_FIXTURE_ALL_LIMIT
   }
 
-  if (status) {
-    query = query.eq('status', status)
-  }
-
-  if (manufacturedDateRange?.start) {
-    query = query.gte('manufactured_date', manufacturedDateRange.start)
-  }
-
-  if (manufacturedDateRange?.end) {
-    query = query.lte('manufactured_date', manufacturedDateRange.end)
-  }
-
-  query = query
-    .order('updated_at', { ascending: false })
-    .order('fixture_no', { ascending: true })
-
-  if (signal) {
-    query = query.abortSignal(signal)
-  }
-
-  const { data, error, count } = await query.range(
-    0,
-    TOOLING_FIXTURE_ALL_LIMIT - 1,
-  )
-
-  if (error) {
-    throw handleApiError(error, '获取工装资料列表失败')
-  }
-
-  if ((count ?? 0) > TOOLING_FIXTURE_ALL_LIMIT) {
-    throw new Error('筛选结果超过 1000 条，请缩小筛选范围后重试')
-  }
-
-  return (data ?? []).map(parseToolingFixture)
+  return rows
 }
 
 export async function createToolingFixture(

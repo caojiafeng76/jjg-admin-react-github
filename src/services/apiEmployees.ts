@@ -364,16 +364,33 @@ export async function batchCreateEmployees(names: string[]) {
 }
 
 export async function getAllEmployees() {
-  const { data, error } = await supabase
-    .from('employees')
-    .select('id, name')
-    .order('name', { ascending: true })
+  const PAGE_SIZE = 1000
+  const rows: { id: string; name: string }[] = []
+  let from = 0
 
-  if (error) {
-    throw handleApiError(error, '获取员工列表失败')
+  while (true) {
+    const to = from + PAGE_SIZE - 1
+    const { data, error } = await supabase
+      .from('employees')
+      .select('id, name')
+      .order('name', { ascending: true })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '获取员工列表失败')
+    }
+
+    const pageRows = (data || []) as { id: string; name: string }[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < PAGE_SIZE) {
+      break
+    }
+
+    from += PAGE_SIZE
   }
 
-  return (data || []) as { id: string; name: string }[]
+  return rows
 }
 
 export async function getCurrentEmployeeProfile(authUserId: string) {

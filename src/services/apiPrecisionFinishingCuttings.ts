@@ -5,6 +5,8 @@ import { handleApiError } from '@/utils/errorHandler'
 
 const PRECISION_FINISHING_CUTTINGS_TABLE = 'precision_finishing_cuttings'
 
+const EXPORT_PAGE_SIZE = 1000
+
 export const PRECISION_FINISHING_CUTTING_WORKSHOPS = [
   '挤压',
   '时效',
@@ -572,23 +574,48 @@ export async function getPrecisionFinishingCuttingsForExport({
     return []
   }
 
-  let query = getPrecisionFinishingCuttingsQuery()
-    .select('*')
-    .order('created_at', { ascending: true })
+  const rows: PrecisionFinishingCuttingRow[] = []
 
   if (ids && ids.length > 0) {
-    query = query.in('id', ids)
+    const { data, error } = await getPrecisionFinishingCuttingsQuery()
+      .select('*')
+      .order('created_at', { ascending: true })
+      .in('id', ids)
+
+    if (error) {
+      throw handleApiError(error, '获取精加工切割单导出数据失败')
+    }
+
+    rows.push(...((data || []) as PrecisionFinishingCuttingRow[]))
   } else if (filters) {
-    query = applyPrecisionFinishingCuttingFilters(query, filters)
+    let from = 0
+
+    while (true) {
+      const to = from + EXPORT_PAGE_SIZE - 1
+      let query = getPrecisionFinishingCuttingsQuery()
+        .select('*')
+        .order('created_at', { ascending: true })
+        .range(from, to)
+
+      query = applyPrecisionFinishingCuttingFilters(query, filters)
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取精加工切割单导出数据失败')
+      }
+
+      const pageRows = (data || []) as PrecisionFinishingCuttingRow[]
+      rows.push(...pageRows)
+
+      if (pageRows.length < EXPORT_PAGE_SIZE) {
+        break
+      }
+
+      from += EXPORT_PAGE_SIZE
+    }
   }
 
-  const { data, error } = await query
-
-  if (error) {
-    throw handleApiError(error, '获取精加工切割单导出数据失败')
-  }
-
-  const rows = (data || []) as PrecisionFinishingCuttingRow[]
   const weightMap = await getProjectWeightMap(rows.map((row) => row.project_no))
 
   const rowsWithWeight = rows.map((row) => {
@@ -626,23 +653,47 @@ export async function getPrecisionFinishingCuttingQuantityStats({
   ids?: string[]
   filters?: PrecisionFinishingCuttingFilters
 } = {}): Promise<PrecisionFinishingCuttingQuantityStats> {
-  let query = getPrecisionFinishingCuttingsQuery().select(
-    'id, transfer_quantity',
-  )
+  const rows: Array<{ transfer_quantity: number | null }> = []
 
   if (ids && ids.length > 0) {
-    query = query.in('id', ids)
+    const { data, error } = await getPrecisionFinishingCuttingsQuery()
+      .select('id, transfer_quantity')
+      .in('id', ids)
+
+    if (error) {
+      throw handleApiError(error, '获取精加工切割单数量统计失败')
+    }
+
+    rows.push(...((data || []) as Array<{ transfer_quantity: number | null }>))
   } else if (filters) {
-    query = applyPrecisionFinishingCuttingFilters(query, filters)
+    let from = 0
+
+    while (true) {
+      const to = from + EXPORT_PAGE_SIZE - 1
+      let query = getPrecisionFinishingCuttingsQuery()
+        .select('id, transfer_quantity')
+        .range(from, to)
+
+      query = applyPrecisionFinishingCuttingFilters(query, filters)
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取精加工切割单数量统计失败')
+      }
+
+      const pageRows = (data || []) as Array<{
+        transfer_quantity: number | null
+      }>
+      rows.push(...pageRows)
+
+      if (pageRows.length < EXPORT_PAGE_SIZE) {
+        break
+      }
+
+      from += EXPORT_PAGE_SIZE
+    }
   }
-
-  const { data, error } = await query
-
-  if (error) {
-    throw handleApiError(error, '获取精加工切割单数量统计失败')
-  }
-
-  const rows = (data || []) as Array<{ transfer_quantity: number | null }>
 
   return {
     totalQuantity: rows.reduce(

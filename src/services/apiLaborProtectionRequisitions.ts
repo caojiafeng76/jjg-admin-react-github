@@ -245,46 +245,61 @@ export async function getLaborProtectionRequisitionsForExport({
   updatedStartDate?: string
   updatedEndDate?: string
 }) {
-  let query = laborProtectionRequisitionTable().select(
-    LABOR_PROTECTION_REQUISITION_SELECT,
-  )
+  const PAGE_SIZE = 1000
+  const rows: LaborProtectionRequisitionRow[] = []
+  let from = 0
 
-  if (keyword?.trim()) {
-    const normalizedKeyword = keyword.trim()
-    query = query.or(
-      `job_title.ilike.%${normalizedKeyword}%,recipient.ilike.%${normalizedKeyword}%`,
+  while (true) {
+    const to = from + PAGE_SIZE - 1
+    let query = laborProtectionRequisitionTable().select(
+      LABOR_PROTECTION_REQUISITION_SELECT,
     )
+
+    if (keyword?.trim()) {
+      const normalizedKeyword = keyword.trim()
+      query = query.or(
+        `job_title.ilike.%${normalizedKeyword}%,recipient.ilike.%${normalizedKeyword}%`,
+      )
+    }
+
+    if (categoryId) {
+      query = query.eq('labor_protection_data_id', categoryId)
+    }
+
+    if (updatedStartDate) {
+      query = query.gte(
+        'updated_at',
+        dayjs(updatedStartDate).startOf('day').toISOString(),
+      )
+    }
+
+    if (updatedEndDate) {
+      query = query.lte(
+        'updated_at',
+        dayjs(updatedEndDate).endOf('day').toISOString(),
+      )
+    }
+
+    const { data, error } = await query
+      .order('updated_at', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range(from, to)
+
+    if (error) {
+      throw handleApiError(error, '导出劳保领料单失败')
+    }
+
+    const pageRows = (data || []) as LaborProtectionRequisitionRow[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < PAGE_SIZE) {
+      break
+    }
+
+    from += PAGE_SIZE
   }
 
-  if (categoryId) {
-    query = query.eq('labor_protection_data_id', categoryId)
-  }
-
-  if (updatedStartDate) {
-    query = query.gte(
-      'updated_at',
-      dayjs(updatedStartDate).startOf('day').toISOString(),
-    )
-  }
-
-  if (updatedEndDate) {
-    query = query.lte(
-      'updated_at',
-      dayjs(updatedEndDate).endOf('day').toISOString(),
-    )
-  }
-
-  const { data, error } = await query
-    .order('updated_at', { ascending: false })
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    throw handleApiError(error, '导出劳保领料单失败')
-  }
-
-  return ((data || []) as LaborProtectionRequisitionRow[]).map(
-    mapLaborProtectionRequisition,
-  )
+  return rows.map(mapLaborProtectionRequisition)
 }
 
 export async function createLaborProtectionRequisition(

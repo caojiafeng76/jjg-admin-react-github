@@ -88,26 +88,53 @@ export async function getDashboardKpis(signal?: AbortSignal): Promise<DashboardK
       let countQuery = supabase
         .from(source.table)
         .select('id', { count: 'exact', head: true })
-      let trendQuery = supabase
-        .from(source.table)
-        .select('created_at')
-        .gte('created_at', startDate)
 
       if (signal) {
         countQuery = countQuery.abortSignal(signal)
-        trendQuery = trendQuery.abortSignal(signal)
       }
 
-      const [countResult, trendResult] = await Promise.all([countQuery, trendQuery])
+      const countResult = await countQuery
 
       if (countResult.error) {
         throw handleApiError(countResult.error, `${source.label}数量统计失败`)
       }
-      if (trendResult.error) {
-        throw handleApiError(trendResult.error, `${source.label}趋势统计失败`)
+
+      // 近 14 天 created_at 扫描：PostgREST 单次最多返回 1000 行（db-max-rows=1000），
+      // 按 1000/页循环拉取，避免繁忙表（如生产工单/物料转移）趋势被截断。
+      const PAGE_SIZE = 1000
+      const dates: (string | null)[] = []
+      let from = 0
+
+      while (true) {
+        const to = from + PAGE_SIZE - 1
+        let trendQuery = supabase
+          .from(source.table)
+          .select('created_at')
+          .gte('created_at', startDate)
+          .range(from, to)
+
+        if (signal) {
+          trendQuery = trendQuery.abortSignal(signal)
+        }
+
+        const trendResult = await trendQuery
+
+        if (trendResult.error) {
+          throw handleApiError(trendResult.error, `${source.label}趋势统计失败`)
+        }
+
+        const pageRows = (trendResult.data ?? []).map(
+          (row) => row.created_at as string | null,
+        )
+        dates.push(...pageRows)
+
+        if (pageRows.length < PAGE_SIZE) {
+          break
+        }
+
+        from += PAGE_SIZE
       }
 
-      const dates = (trendResult.data ?? []).map((row) => row.created_at as string | null)
       const trend = buildDailyTrend(dates, KPI_TREND_DAYS)
 
       return {

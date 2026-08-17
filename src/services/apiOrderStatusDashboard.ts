@@ -1353,6 +1353,10 @@ export async function getOrderStatusDashboard({
   }
 }
 
+// RPC get_order_status_dashboard_v2 内部对 page_size 做了 least(..., 200) 截断，
+// 导出必须按 200/页循环拉取，避免超过 200 条订单时导出不全。
+const ORDER_STATUS_DASHBOARD_EXPORT_PAGE_SIZE = 200
+
 export async function getOrderStatusDashboardForExport({
   filters,
   total,
@@ -1366,12 +1370,29 @@ export async function getOrderStatusDashboardForExport({
     return []
   }
 
-  const result = await getOrderStatusDashboard({
-    filters,
-    page: 1,
-    pageSize: total,
-    signal,
-  })
+  const items: OrderStatusDashboardItem[] = []
+  let collected = 0
 
-  return result.items
+  while (collected < total) {
+    const result = await getOrderStatusDashboard({
+      filters,
+      page: collected / ORDER_STATUS_DASHBOARD_EXPORT_PAGE_SIZE + 1,
+      pageSize: ORDER_STATUS_DASHBOARD_EXPORT_PAGE_SIZE,
+      signal,
+    })
+    const pageItems = result.items ?? []
+
+    if (pageItems.length === 0) {
+      break
+    }
+
+    items.push(...pageItems)
+    collected += pageItems.length
+
+    if (pageItems.length < ORDER_STATUS_DASHBOARD_EXPORT_PAGE_SIZE) {
+      break
+    }
+  }
+
+  return items
 }

@@ -232,6 +232,21 @@ export async function getAttendanceMonthlyExportData({
     new Date(year, month, 0).getDate(),
   )
   const normalizedName = name?.trim()
+  const PAGE_SIZE = 1000
+
+  type AttendanceQueryRow = {
+    order_date: string
+    work_hours: number
+    shift: string
+    remark?: string | null
+    employee?: {
+      name?: string | null
+      job_name?: string | null
+      is_external?: boolean | null
+    } | null
+  }
+
+  let employeeIds: string[] | null = null
 
   if (normalizedName) {
     const { data: employees, error: employeeError } = await supabase
@@ -243,84 +258,49 @@ export async function getAttendanceMonthlyExportData({
       throw handleApiError(employeeError, '获取月度出勤数据失败')
     }
 
-    const employeeIds = (employees || []).map((employee) => employee.id)
+    employeeIds = (employees || []).map((employee) => employee.id)
 
     if (!employeeIds.length) {
       return [] as AttendanceMonthlyRow[]
     }
+  }
 
-    const { data, error } = await supabase
+  const rows: AttendanceQueryRow[] = []
+  let from = 0
+
+  while (true) {
+    const to = from + PAGE_SIZE - 1
+    let query = supabase
       .from('production_orders')
       .select(
         'order_date, work_hours, shift, remark, employee:employees!inner(name, job_name, is_external)',
       )
-      .in('employee_id', employeeIds)
       .gte('order_date', startDate)
       .lte('order_date', endDate)
       .order('order_date', { ascending: true })
+      .range(from, to)
+
+    if (employeeIds) {
+      query = query.in('employee_id', employeeIds)
+    }
+
+    const { data, error } = await query
 
     if (error) {
       throw handleApiError(error, '获取月度出勤数据失败')
     }
 
-    return (
-      (data || []) as Array<{
-        order_date: string
-        work_hours: number
-        shift: string
-        remark?: string | null
-        employee?: {
-          name?: string | null
-          job_name?: string | null
-          is_external?: boolean | null
-        } | null
-      }>
-    )
-      .filter((row) => Boolean(row.employee?.name))
-      .sort(
-        (left, right) =>
-          String(left.employee?.name || '').localeCompare(
-            String(right.employee?.name || ''),
-            'zh-CN',
-          ) || left.order_date.localeCompare(right.order_date),
-      )
-      .map((row) => ({
-        employee_name: row.employee?.name || '',
-        job_name: row.employee?.job_name || '',
-        order_date: row.order_date,
-        work_hours: Number(row.work_hours || 0),
-        shift: row.shift,
-        remark: row.remark,
-        is_external: row.employee?.is_external ?? false,
-      }))
+    const pageRows = (data || []) as AttendanceQueryRow[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < PAGE_SIZE) {
+      break
+    }
+
+    from += PAGE_SIZE
   }
 
-  const { data, error } = await supabase
-    .from('production_orders')
-    .select(
-      'order_date, work_hours, shift, remark, employee:employees!inner(name, job_name, is_external)',
-    )
-    .gte('order_date', startDate)
-    .lte('order_date', endDate)
-    .order('order_date', { ascending: true })
-
-  if (error) {
-    throw handleApiError(error, '获取月度出勤数据失败')
-  }
-
-  return (
-    (data || []) as Array<{
-      order_date: string
-      work_hours: number
-      shift: string
-      remark?: string | null
-      employee?: {
-        name?: string | null
-        job_name?: string | null
-        is_external?: boolean | null
-      } | null
-    }>
-  )
+  return rows
     .filter((row) => Boolean(row.employee?.name))
     .sort(
       (left, right) =>

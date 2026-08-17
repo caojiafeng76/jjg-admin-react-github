@@ -518,38 +518,55 @@ export async function getWorkshopOrders({
   )
 
   if (includeOutboundSummary && projectNos.length > 0) {
-    let transferQuery = supabase
-      .from('material_transfers')
-      .select('project_no, transfer_quantity')
-      .in('project_no', projectNos)
-
-    if (signal) {
-      transferQuery = transferQuery.abortSignal(signal)
-    }
-
-    const { data: transferRows, error: transferError } = await transferQuery
-
-    if (transferError) {
-      throw handleApiError(transferError, '获取订单出库统计失败')
-    }
-
+    // 出库记录按项目号 in 过滤，多个项目的合计记录数可能超过 1000（db-max-rows），
+    // 按 1000/页循环拉取后聚合，避免出库统计缺失。
+    const OUTBOUND_PAGE_SIZE = 1000
     const outboundTotalByProjectNo = new Map<string, number>()
+    let transferFrom = 0
 
-    for (const row of (transferRows || []) as Array<{
-      project_no: string
-      transfer_quantity: number | null
-    }>) {
-      const projectNo = row.project_no?.trim()
+    while (true) {
+      const transferTo = transferFrom + OUTBOUND_PAGE_SIZE - 1
+      let transferQuery = supabase
+        .from('material_transfers')
+        .select('project_no, transfer_quantity')
+        .in('project_no', projectNos)
+        .order('project_no', { ascending: true })
+        .range(transferFrom, transferTo)
 
-      if (!projectNo) {
-        continue
+      if (signal) {
+        transferQuery = transferQuery.abortSignal(signal)
       }
 
-      outboundTotalByProjectNo.set(
-        projectNo,
-        (outboundTotalByProjectNo.get(projectNo) || 0) +
-          Number(row.transfer_quantity || 0),
-      )
+      const { data: transferRows, error: transferError } = await transferQuery
+
+      if (transferError) {
+        throw handleApiError(transferError, '获取订单出库统计失败')
+      }
+
+      const pageRows = (transferRows || []) as Array<{
+        project_no: string
+        transfer_quantity: number | null
+      }>
+
+      for (const row of pageRows) {
+        const projectNo = row.project_no?.trim()
+
+        if (!projectNo) {
+          continue
+        }
+
+        outboundTotalByProjectNo.set(
+          projectNo,
+          (outboundTotalByProjectNo.get(projectNo) || 0) +
+            Number(row.transfer_quantity || 0),
+        )
+      }
+
+      if (pageRows.length < OUTBOUND_PAGE_SIZE) {
+        break
+      }
+
+      transferFrom += OUTBOUND_PAGE_SIZE
     }
 
     for (const item of items) {

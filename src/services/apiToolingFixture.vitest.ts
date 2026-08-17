@@ -130,7 +130,7 @@ describe('getAllToolingFixtures', () => {
     vi.clearAllMocks()
   })
 
-  it('fetches all fixtures up to 1000 rows without filters', async () => {
+  it('fetches all fixtures across pages without filters', async () => {
     const builder = createFixtureQueryBuilder()
     fromMock.mockReturnValue(builder)
     builder.data = [
@@ -148,7 +148,7 @@ describe('getAllToolingFixtures', () => {
     const items = await getAllToolingFixtures({})
 
     expect(fromMock).toHaveBeenCalledWith('tooling_fixtures')
-    expect(builder.select).toHaveBeenCalledWith('*', { count: 'exact' })
+    expect(builder.select).toHaveBeenCalledWith('*')
     expect(builder.or).not.toHaveBeenCalled()
     expect(builder.eq).not.toHaveBeenCalled()
     expect(builder.order.mock.calls).toEqual([
@@ -191,15 +191,32 @@ describe('getAllToolingFixtures', () => {
     expect(builder.lte).toHaveBeenCalledWith('manufactured_date', '2026-06-30')
   })
 
-  it('rejects filters that exceed the 1000-row cap', async () => {
+  it('keeps paginating until fewer than 1000 rows are returned', async () => {
     const builder = createFixtureQueryBuilder()
     fromMock.mockReturnValue(builder)
-    builder.data = []
-    builder.count = 1001
+    const fullPage = Array.from({ length: 1000 }, (_, index) => ({
+      id: String(index),
+      qr_token: `token-${index}`,
+      fixture_no: `FIX-${String(index).padStart(3, '0')}`,
+      product_name: '产品',
+      status: '未使用',
+      lifecycle: '正常',
+    }))
+    // 第一页返回 1000 条（触发继续翻页），第二页返回 0 条（终止循环）
+    builder.range.mockImplementation((from: number) => ({
+      data: from === 0 ? fullPage : [],
+      error: null,
+      count: 1001,
+    }))
 
-    await expect(getAllToolingFixtures({})).rejects.toThrow(
-      '筛选结果超过 1000 条',
-    )
+    const items = await getAllToolingFixtures({})
+
+    // 翻页两次：range(0,999) + range(1000,1999)
+    expect(builder.range.mock.calls).toEqual([
+      [0, 999],
+      [1000, 1999],
+    ])
+    expect(items).toHaveLength(1000)
   })
 
   it('rejects rows with an invalid status or lifecycle', async () => {
