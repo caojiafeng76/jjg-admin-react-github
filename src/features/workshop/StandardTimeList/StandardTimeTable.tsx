@@ -374,9 +374,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
           value ? (
             <span className="text-slate-600 dark:text-slate-300">{value}</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
-              留空
-            </span>
+            <span className="text-slate-400 dark:text-slate-500">-</span>
           ),
       },
       {
@@ -388,9 +386,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
           value ? (
             <span className="font-mono text-slate-600 dark:text-slate-300">{value}</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
-              留空
-            </span>
+            <span className="text-slate-400 dark:text-slate-500">-</span>
           ),
       },
       {
@@ -411,9 +407,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
           value ? (
             <span className="font-mono text-slate-600 dark:text-slate-300">{value}</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
-              留空
-            </span>
+            <span className="text-slate-400 dark:text-slate-500">-</span>
           ),
       },
       ...standardTimeColumns,
