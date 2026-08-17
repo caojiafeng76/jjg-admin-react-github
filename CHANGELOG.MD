@@ -15,6 +15,11 @@
 
 ## 2026-08-17
 
+- **类别**：变更
+- **范围**：`src/ui/SelectedSummaryBar.tsx`（新增）、`src/ui/SelectedSummaryBar.vitest.tsx`（新增）、`src/features/material-transfer/index.tsx`
+- **摘要**：UI 改版 F1 —— 物料转移单 MaterialTransfer 选中摘要条通用化 + 颜色走 token：① 新建通用组件 `SelectedSummaryBar`（props：`selectedCount` / `matchedCount` / `stats[{label,value,tone,icon}]`），提炼自物料转移单的渐变选中摘要条：主色渐变底（`from-primary/10 via-info/10 to-primary/10`）+ 主色 20% 边框 + `color-mix` 主色辉光阴影，数量 chip / 统计项按 `tone`（primary/success/warning/error）映射 `bg-{tone}/10 text-{tone}`；文字用 `text-text-secondary`；跨页选中提示（当前页参与合计 N 条）保留为 `text-warning`。颜色全部经 `@theme inline` 桥接引用 antd token（`--jjg-color-primary/success/warning/error/text-secondary`），暗色模式由 token 自动切换，删除原 `dark:` 变体；② 物料转移单页内联摘要条替换为 `<SelectedSummaryBar />`（转移数量合计 tone=error，图标沿用原 svg path）；③ 视觉与改动前一致（渐变底、辉光、已选条数、数量合计大字）。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 新增组件用例 3/3 通过，`material-transfer` 相关用例 11/11 通过；`bun run test` 全量 494/495 通过，唯一失败为既有并发 flaky `remoteEmployeeSelect.vitest`（CHANGELOG 已有记录，单独运行 2/2 通过，与本次改动零交集）；未做浏览器目测（需登录态，缺口说明）。后续 F3 生产日报表 / H1 精切转移单可复用该组件替换各自内联摘要条。
+
 - **类别**：修复
 - **范围**：`src/features/workshop/ProductionScheduling/index.tsx`（仅注释）
 - **摘要**：修复 `bun run test` 唯一失败项 —— `src/ui/antdSemanticStyles.vitest.ts` 的整文件正则 `not.toMatch(/\.ant-/)` 误匹配到 E3 注释中的 `.ant-` 文字（该注释只是解释为何不覆盖 antd 私有 DOM 类，并非实际使用）；将注释措辞由 `.ant-` 改为「antd 私有 DOM 类」，测试守卫逻辑与覆盖面不变。
