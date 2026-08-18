@@ -1,15 +1,29 @@
 import { useEffect } from 'react'
 import { Button, Form, Input, Select, Space } from 'antd'
 
+const SEARCH_FIELDS = [
+  { name: 'purchaseOrderNo', placeholder: '采购订单号', width: 150 },
+  { name: 'materialCode', placeholder: '物料编码', width: 130 },
+  { name: 'materialName', placeholder: '物料名称', width: 140 },
+  { name: 'model', placeholder: '型号', width: 110 },
+  { name: 'specification', placeholder: '规格', width: 140 },
+  { name: 'remarks', placeholder: '备注', width: 160 },
+] as const
+
 interface SearchValues {
-  keyword?: string
+  purchaseOrderNo?: string
+  materialCode?: string
+  materialName?: string
+  model?: string
+  specification?: string
+  remarks?: string
   status?: '待审核' | '已审核'
 }
 
 interface Props {
-  onSearch: (params: { keyword?: string; status?: '待审核' | '已审核' }) => void
+  onSearch: (params: SearchValues) => void
   onReset: () => void
-  initialValues?: { keyword?: string; status?: '待审核' | '已审核' }
+  initialValues?: SearchValues
 }
 
 export default function YoumaiFinishedGoodsStockOutSearch({
@@ -21,14 +35,24 @@ export default function YoumaiFinishedGoodsStockOutSearch({
 
   useEffect(() => {
     form.setFieldsValue({
-      keyword: initialValues?.keyword,
+      purchaseOrderNo: initialValues?.purchaseOrderNo,
+      materialCode: initialValues?.materialCode,
+      materialName: initialValues?.materialName,
+      model: initialValues?.model,
+      specification: initialValues?.specification,
+      remarks: initialValues?.remarks,
       status: initialValues?.status,
     })
   }, [form, initialValues])
 
   const handleSearch = (values: SearchValues) => {
     onSearch({
-      keyword: values.keyword?.trim() || undefined,
+      purchaseOrderNo: values.purchaseOrderNo?.trim() || undefined,
+      materialCode: values.materialCode?.trim() || undefined,
+      materialName: values.materialName?.trim() || undefined,
+      model: values.model?.trim() || undefined,
+      specification: values.specification?.trim() || undefined,
+      remarks: values.remarks?.trim() || undefined,
       status: values.status,
     })
   }
@@ -44,14 +68,21 @@ export default function YoumaiFinishedGoodsStockOutSearch({
       onFinish={handleSearch}
       className="flex flex-1 flex-wrap items-center gap-3"
     >
-      <Form.Item name="keyword" className="mb-0" style={{ width: 360 }}>
-        <Input
-          placeholder="请输入采购订单号、物料编码、名称、型号、规格或备注"
-          allowClear
-          onPressEnter={() => form.submit()}
-          className="rounded-lg"
-        />
-      </Form.Item>
+      {SEARCH_FIELDS.map((field) => (
+        <Form.Item
+          key={field.name}
+          name={field.name}
+          className="mb-0"
+          style={{ width: field.width }}
+        >
+          <Input
+            placeholder={field.placeholder}
+            allowClear
+            onPressEnter={() => form.submit()}
+            className="rounded-lg"
+          />
+        </Form.Item>
+      ))}
       <Form.Item name="status" className="mb-0" style={{ width: 160 }}>
         <Select
           allowClear
@@ -65,7 +96,11 @@ export default function YoumaiFinishedGoodsStockOutSearch({
       </Form.Item>
       <Form.Item className="mb-0">
         <Space>
-          <Button type="primary" htmlType="submit" className="rounded-lg font-medium shadow-sm">
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="rounded-lg font-medium shadow-sm"
+          >
             搜索
           </Button>
           <Button onClick={handleReset} className="rounded-lg">

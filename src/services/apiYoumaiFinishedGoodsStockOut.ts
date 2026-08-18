@@ -202,12 +202,22 @@ export async function getYoumaiProductDataOptions(
 export async function getYoumaiFinishedGoodsStockOutList({
   page,
   pageSize,
-  keyword,
+  purchaseOrderNo,
+  materialCode,
+  materialName,
+  model,
+  specification,
+  remarks,
   status,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  purchaseOrderNo?: string
+  materialCode?: string
+  materialName?: string
+  model?: string
+  specification?: string
+  remarks?: string
   status?: YoumaiFinishedGoodsStockOutStatus
 }) {
   const from = (page - 1) * pageSize
@@ -215,11 +225,20 @@ export async function getYoumaiFinishedGoodsStockOutList({
 
   let query = stockOutTable().select('*', { count: 'exact' })
 
-  if (keyword?.trim()) {
-    const normalizedKeyword = keyword.trim()
-    query = query.or(
-      `purchase_order_no.ilike.%${normalizedKeyword}%,purchase_order_line_no.ilike.%${normalizedKeyword}%,material_code.ilike.%${normalizedKeyword}%,material_name.ilike.%${normalizedKeyword}%,model.ilike.%${normalizedKeyword}%,specification.ilike.%${normalizedKeyword}%,remarks.ilike.%${normalizedKeyword}%`,
-    )
+  const textFilters: Array<[string, string | undefined]> = [
+    ['purchase_order_no', purchaseOrderNo],
+    ['material_code', materialCode],
+    ['material_name', materialName],
+    ['model', model],
+    ['specification', specification],
+    ['remarks', remarks],
+  ]
+
+  for (const [column, value] of textFilters) {
+    const normalized = value?.trim()
+    if (normalized) {
+      query = query.ilike(column, `%${normalized}%`)
+    }
   }
 
   if (status) {

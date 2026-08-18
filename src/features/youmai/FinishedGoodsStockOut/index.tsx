@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/16/solid'
+import { ScaleIcon } from '@heroicons/react/24/outline'
 import { App, Button, type FormInstance, Modal } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
@@ -20,6 +21,8 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import PrintButton from '@/ui/PrintButton'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiFinishedGoodsStockOutExcelImport from './YoumaiFinishedGoodsStockOutExcelImport'
 import YoumaiFinishedGoodsStockOutForm from './YoumaiFinishedGoodsStockOutForm'
@@ -43,6 +46,15 @@ function preloadYoumaiFinishedGoodsStockOutExport() {
   void loadYoumaiFinishedGoodsStockOutExport()
 }
 
+const SEARCH_TEXT_FIELDS = [
+  'purchaseOrderNo',
+  'materialCode',
+  'materialName',
+  'model',
+  'specification',
+  'remarks',
+] as const
+
 export default function YoumaiFinishedGoodsStockOutPage() {
   const { message, modal } = App.useApp()
   const canManageYoumai = usePermission(YOUMAI_MANAGE_PERMISSION_KEY)
@@ -62,10 +74,20 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const [searchParams, setSearchParams] = useState<{
-    keyword?: string
+    purchaseOrderNo?: string
+    materialCode?: string
+    materialName?: string
+    model?: string
+    specification?: string
+    remarks?: string
     status?: '待审核' | '已审核'
   }>({
-    keyword: searchParamsURL.get('keyword') || undefined,
+    purchaseOrderNo: searchParamsURL.get('purchaseOrderNo') || undefined,
+    materialCode: searchParamsURL.get('materialCode') || undefined,
+    materialName: searchParamsURL.get('materialName') || undefined,
+    model: searchParamsURL.get('model') || undefined,
+    specification: searchParamsURL.get('specification') || undefined,
+    remarks: searchParamsURL.get('remarks') || undefined,
     status:
       (searchParamsURL.get('status') as '待审核' | '已审核' | null) ||
       undefined,
@@ -100,6 +122,23 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   const hasAuditedSelection = selectedRecords.some(
     (item) => item.status === '已审核',
   )
+
+  const totalSelectedWeight = useMemo(() => {
+    let sum = 0
+    let hasValid = false
+    for (const item of selectedRecords) {
+      const weight = calculateYoumaiWeightKg({
+        specification: item.specification,
+        specificGravity: item.specific_gravity,
+        quantity: item.stock_out_quantity,
+      })
+      if (weight !== null) {
+        sum += weight
+        hasValid = true
+      }
+    }
+    return hasValid ? sum : null
+  }, [selectedRecords])
 
   const handlePrint = useCallback(() => {
     if (!canManageYoumai) {
@@ -387,10 +426,13 @@ export default function YoumaiFinishedGoodsStockOutPage() {
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
       nextSearchParamsURL.set('page', '1')
 
-      if (params.keyword) {
-        nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
-        nextSearchParamsURL.delete('keyword')
+      for (const key of SEARCH_TEXT_FIELDS) {
+        const value = params[key]
+        if (value) {
+          nextSearchParamsURL.set(key, value)
+        } else {
+          nextSearchParamsURL.delete(key)
+        }
       }
 
       if (params.status) {
@@ -410,7 +452,9 @@ export default function YoumaiFinishedGoodsStockOutPage() {
 
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
-    nextSearchParamsURL.delete('keyword')
+    for (const key of SEARCH_TEXT_FIELDS) {
+      nextSearchParamsURL.delete(key)
+    }
     nextSearchParamsURL.delete('status')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
@@ -503,6 +547,25 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
       </div>
+
+      {selectedRowKeys.length > 0 ? (
+        <SelectedSummaryBar
+          selectedCount={selectedRowKeys.length}
+          matchedCount={selectedRecords.length}
+          stats={
+            totalSelectedWeight === null
+              ? []
+              : [
+                  {
+                    label: '总出库重量(KG)',
+                    value: totalSelectedWeight,
+                    tone: 'primary',
+                    icon: <ScaleIcon className="size-3.5" />,
+                  },
+                ]
+          }
+        />
+      ) : null}
 
       <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div className="flex items-center gap-2">

@@ -27,7 +27,12 @@ export function useYoumaiFinishedGoodsStockOutList({
   page: number
   pageSize: number
   searchParams: {
-    keyword?: string
+    purchaseOrderNo?: string
+    materialCode?: string
+    materialName?: string
+    model?: string
+    specification?: string
+    remarks?: string
     status?: '待审核' | '已审核'
   }
 }) {
@@ -42,7 +47,12 @@ export function useYoumaiFinishedGoodsStockOutList({
       getYoumaiFinishedGoodsStockOutList({
         page,
         pageSize,
-        keyword: searchParams.keyword,
+        purchaseOrderNo: searchParams.purchaseOrderNo,
+        materialCode: searchParams.materialCode,
+        materialName: searchParams.materialName,
+        model: searchParams.model,
+        specification: searchParams.specification,
+        remarks: searchParams.remarks,
         status: searchParams.status,
       }),
     placeholderData: keepPreviousData,

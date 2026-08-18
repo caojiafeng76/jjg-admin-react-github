@@ -16,6 +16,13 @@
 ## 2026-08-18
 
 - **类别**：变更
+- **范围**：`src/features/youmai/FinishedGoodsStockOut/`（`index.tsx`、`YoumaiFinishedGoodsStockOutSearch.tsx`、`useYoumaiFinishedGoodsStockOut.ts`）、`src/services/apiYoumaiFinishedGoodsStockOut.ts`
+- **摘要**：优迈成品出库页面：① 搜索栏单一 keyword 输入框拆分为 6 个独立输入框（采购订单号/物料编码/物料名称/型号/规格/备注），服务层由 `.or()` 全文模糊查询改为逐字段 `.ilike()`（AND 组合），URL 参数由 `keyword` 改为 `purchaseOrderNo/materialCode/materialName/model/specification/remarks`，搜索与重置逻辑同步遍历；② 选中条目后自动计算总出库重量：复用通用组件 `SelectedSummaryBar`（与表格"重量(KG)"列同口径 `calculateYoumaiWeightKg`，按已选记录求和），显示"已选 N 条 + 总出库重量(KG)"，跨页选中时仅统计当前页可见数据（与打印/导出行为一致）。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` 四个改动文件 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
 - **范围**：`src/features/syney/SpecList/index.tsx`、`src/features/syney/SafePartSetting/SafePartSettingPage.tsx`、`src/ui/SelectedSummaryBar.tsx`（复用，无改动）
 - **摘要**：UI 改版 S4 —— 选中摘要条通用化收尾：F1 已提炼 `SelectedSummaryBar` 通用组件（物料转移单 + 生产日报表已接入），本次把西尼模块两处残留的内联旧版摘要条（蓝色渐变卡 + 仅显示"已选 N 条"）替换为通用组件：SpecList 踏板规格列表与 SafePartSetting 件号配置页，各删除约 25 行内联 JSX（渐变底 + 图标 + 计数），改用 `<SelectedSummaryBar selectedCount={selectedCount} matchedCount={selectedCount} stats={[]} />`，视觉升级为 F1 规范（主色渐变底 + 辉光 + 计数 chip），颜色走 antd token、暗色模式自动切换。
 - **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过（syney 相关用例 5/5）；`lsp_diagnostics` syney 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
