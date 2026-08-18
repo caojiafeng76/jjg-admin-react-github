@@ -20,8 +20,10 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import PrintButton from '@/ui/PrintButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiFinishedGoodsStockOutExcelImport from './YoumaiFinishedGoodsStockOutExcelImport'
@@ -69,6 +71,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   const [editingRecord, setEditingRecord] =
     useState<YoumaiFinishedGoodsStockOut | null>(null)
   const [formRef, setFormRef] = useState<FormInstance | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -93,7 +96,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
       undefined,
   })
 
-  const { data, isLoading } = useYoumaiFinishedGoodsStockOutList({
+  const { data, isLoading, error, refetch } = useYoumaiFinishedGoodsStockOutList({
     page,
     pageSize,
     searchParams,
@@ -137,7 +140,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         hasValid = true
       }
     }
-    return hasValid ? sum : null
+    return hasValid ? Number(sum.toFixed(3)) : null
   }, [selectedRecords])
 
   const handlePrint = useCallback(() => {
@@ -230,6 +233,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
+    setFormError(null)
     formRef?.resetFields()
   }, [formRef])
 
@@ -398,11 +402,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
 
         resetFormState()
       } catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        } else {
-          message.error('操作失败，请稍后重试')
-        }
+        // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
+        setFormError(error)
       }
     },
     [
@@ -586,16 +587,28 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <YoumaiFinishedGoodsStockOutTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <YoumaiFinishedGoodsStockOutTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+              emptyAction={
+                <AddButton
+                  handleCreate={handleCreate}
+                  permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+                />
+              }
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -615,13 +628,16 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <YoumaiFinishedGoodsStockOutForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-          isAuditLocked={editingRecord?.status === '已审核'}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <YoumaiFinishedGoodsStockOutForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+            isAuditLocked={editingRecord?.status === '已审核'}
+          />
+        </div>
       </Modal>
     </div>
   )

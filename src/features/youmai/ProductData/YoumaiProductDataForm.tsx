@@ -111,7 +111,7 @@ export default function YoumaiProductDataForm({
         <InputNumber
           min={0}
           step={0.001}
-          precision={6}
+          precision={3}
           style={{ width: '100%' }}
           placeholder="请输入比重"
         />

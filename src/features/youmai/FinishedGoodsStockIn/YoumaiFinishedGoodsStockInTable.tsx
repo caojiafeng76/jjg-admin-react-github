@@ -3,6 +3,7 @@ import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, Tag, type TableColumnsType } from 'antd'
 
 import type { YoumaiFinishedGoodsStockIn } from '@/services/apiYoumaiFinishedGoodsStockIn'
+import { TableEmpty } from '@/ui/TableState'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { formatNumber } from '@/utils/format'
 
@@ -15,6 +16,8 @@ interface Props {
   pageSize: number
   scrollY?: number
   rowHeight?: number
+  /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
+  emptyAction?: React.ReactNode
 }
 
 export default function YoumaiFinishedGoodsStockInTable({
@@ -26,6 +29,7 @@ export default function YoumaiFinishedGoodsStockInTable({
   pageSize,
   scrollY = 400,
   rowHeight = 40,
+  emptyAction,
 }: Props) {
   const columns: TableColumnsType<YoumaiFinishedGoodsStockIn> = useMemo(
     () => [
@@ -76,19 +80,22 @@ export default function YoumaiFinishedGoodsStockInTable({
         dataIndex: 'specific_gravity',
         key: 'specific_gravity',
         width: 120,
-        render: (value: number) => formatNumber(value, 6),
+        align: 'right',
+        render: (value: number) => formatNumber(value, 3),
       },
       {
         title: '入库数量',
         dataIndex: 'stock_in_quantity',
         key: 'stock_in_quantity',
         width: 120,
-        render: (value: number) => formatNumber(value),
+        align: 'right',
+        render: (value: number) => formatNumber(value, 0),
       },
       {
         title: '重量(KG)',
         key: 'weight_kg',
         width: 140,
+        align: 'right',
         render: (_value, record) => {
           const weight = calculateYoumaiWeightKg({
             specification: record.specification,
@@ -96,7 +103,7 @@ export default function YoumaiFinishedGoodsStockInTable({
             quantity: record.stock_in_quantity,
           })
 
-          return weight === null ? '-' : formatNumber(weight)
+          return weight === null ? '-' : formatNumber(weight, 3)
         },
       },
       {
@@ -136,6 +143,15 @@ export default function YoumaiFinishedGoodsStockInTable({
       pagination={false}
       scroll={{ x: 1760, y: scrollY }}
       size="small"
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无优迈成品入库"
+            description="点击下方按钮创建第一条优迈成品入库"
+            action={emptyAction}
+          />
+        ),
+      }}
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
       }

@@ -106,11 +106,11 @@
 
 - [x] **O1** 货品资料 ProductData
 - [x] **O2** 成品库存 FinishedGoodsInventory（数量列 + 预警语义色）
-- [ ] **O3** 成品入库 FinishedGoodsStockIn
-- [ ] **O4** 成品出库 FinishedGoodsStockOut
-- [ ] **O5** 原料库存 RawMaterialInventory（数量列 tabular-nums）
-- [ ] **O6** 原料入库 RawMaterialStockIn
-- [ ] **O7** 原料出库 RawMaterialStockOut
+- [x] **O3** 成品入库 FinishedGoodsStockIn
+- [x] **O4** 成品出库 FinishedGoodsStockOut
+- [x] **O5** 原料库存 RawMaterialInventory（数量列 tabular-nums）
+- [x] **O6** 原料入库 RawMaterialStockIn
+- [x] **O7** 原料出库 RawMaterialStockOut
 
 ## P. 考勤（attendance）
 

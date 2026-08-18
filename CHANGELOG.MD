@@ -16,6 +16,62 @@
 ## 2026-08-18
 
 - **类别**：变更
+- **范围**：优迈重量统一保留三位小数：`src/features/youmai/FinishedGoodsStockIn/YoumaiFinishedGoodsStockInTable.tsx`、`src/features/youmai/FinishedGoodsStockOut/`（`YoumaiFinishedGoodsStockOutTable.tsx` / `index.tsx`）、`src/features/youmai/FinishedGoodsInventory/YoumaiFinishedGoodsInventoryTable.tsx`
+- **摘要**：用户要求重量统一保留三位小数：① 三个成品表的「重量(KG)」列由 `formatNumber(weight)`（默认 2 位）改为 `formatNumber(weight, 3)`；② 成品出库重量列的表头过滤选项文案与 onFilter 比较值同步改为 3 位（过滤下拉与列显示口径一致）；③ 成品出库选中摘要条「总出库重量(KG)」由原始浮点和改为 `Number(sum.toFixed(3))`（SelectedSummaryBar 用 toLocaleString 显示，避免长小数）。打印 `usePrintYoumaiFinishedGoodsStockOut` 自定义 formatNumber 默认已为 3 位（重量合计/每行重量），无需改动。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` youmai 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
+- **范围**：优迈比重统一保留三位小数：`src/features/youmai/ProductData/`（`YoumaiProductDataTable.tsx` / `YoumaiProductDataForm.tsx`）、`src/features/youmai/FinishedGoodsStockIn/`（`YoumaiFinishedGoodsStockInTable.tsx` / `YoumaiFinishedGoodsStockInForm.tsx`）、`src/features/youmai/FinishedGoodsStockOut/`（`YoumaiFinishedGoodsStockOutTable.tsx` / `YoumaiFinishedGoodsStockOutForm.tsx`）、`src/features/youmai/FinishedGoodsInventory/`（`YoumaiFinishedGoodsInventoryTable.tsx` / `YoumaiFinishedGoodsInventoryForm.tsx`）
+- **摘要**：用户要求比重统一保留三位小数：① 表格比重列由不一致精度改为 `formatNumber(value, 3)`：成品入库/成品出库/成品库存原来 6 位、货品资料原来默认 2 位，统一为 3 位；② 三个成品表单选产品后展示的比重由 `toFixed(6)` 改为 `toFixed(3)`；③ 货品资料表单比重 InputNumber 由 `precision={6}` 改为 `precision={3}`（step 0.001 不变）。原料模块（RawMaterial*）无比重列，未涉及。导出/重量计算用原始数值，不受显示精度影响。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` youmai 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
+- **范围**：优迈成品模块数量格式统一为整数：`src/features/youmai/FinishedGoodsStockIn/`（`YoumaiFinishedGoodsStockInTable.tsx` / `YoumaiFinishedGoodsStockInForm.tsx`）、`src/features/youmai/FinishedGoodsStockOut/`（`YoumaiFinishedGoodsStockOutTable.tsx` / `YoumaiFinishedGoodsStockOutForm.tsx` / `usePrintYoumaiFinishedGoodsStockOut.ts`）、`src/features/youmai/FinishedGoodsInventory/`（`YoumaiFinishedGoodsInventoryTable.tsx` / `YoumaiFinishedGoodsInventoryForm.tsx`）
+- **摘要**：用户反馈优迈数量显示形如 `1.00`，要求改为整数 `1`（含库存数量），并同步修改相关表单：① 表格数量列 `formatNumber(value)`（默认 2 位）改为 `formatNumber(value, 0)`：成品入库「入库数量」、成品出库「出库数量/最终库存」、成品库存「待入库/现有库存/待出库/最终库存」；② 对应表单 InputNumber 数量字段由 `precision={3}`（step 0.001）改为 `precision={0}`（min 1）：成品入库/成品出库/成品库存「现有库存」；③ 打印 `usePrintYoumaiFinishedGoodsStockOut` 的出库数量/最终库存同步改为整数（重量合计保留小数）。保留不变：比重列（`formatNumber(value, 6)` / 默认）、重量列（KG 带小数）、原料模块（RawMaterial* 库存/入库/出库本就 `precision={0}` + `{quantity}` 整数显示，无需改动）。导出链路用 `Number()` 取值，本就为整数，无需改。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` youmai 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
+- **范围**：`src/features/youmai/RawMaterialStockOut/`（`index.tsx` / `YoumaiRawMaterialStockOutTable.tsx` / `useYoumaiRawMaterialStockOut.ts`）
+- **摘要**：UI 改版 O7 —— 优迈原料出库 RawMaterialStockOut 过通用列表页清单：① 数字列右对齐：出库数量列加 `align: 'right'`（tabular-nums 已由全局 A3 规则覆盖，红色 -N 语义保留）；② 表格三态：列表查询加 `throwOnError: false`，页面用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格，`locale.emptyText` 注入 `<TableEmpty>` 引导式空态（含新建按钮）；③ 表单反馈：新建/编辑提交失败改为 Modal 内 `<FormErrorAlert>` 三段式展示，关闭/重开清空。核对通过项：新增/编辑仍用 Modal、表格已 `size="small"`、搜索区白卡样式符合 A4。至此优迈（O1–O7）全部完成。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` RawMaterialStockOut 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
+- **范围**：`src/features/youmai/RawMaterialStockIn/`（`index.tsx` / `YoumaiRawMaterialStockInTable.tsx` / `useYoumaiRawMaterialStockIn.ts`）
+- **摘要**：UI 改版 O6 —— 优迈原料入库 RawMaterialStockIn 过通用列表页清单：① 数字列右对齐：入库数量列加 `align: 'right'`（tabular-nums 已由全局 A3 规则覆盖，绿色 +N 语义保留）；② 表格三态：列表查询加 `throwOnError: false`，页面用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格，`locale.emptyText` 注入 `<TableEmpty>` 引导式空态（含新建按钮）；③ 表单反馈：新建/编辑提交失败改为 Modal 内 `<FormErrorAlert>` 三段式展示，关闭/重开清空。核对通过项：新增/编辑仍用 Modal、表格已 `size="small"`、搜索区白卡样式符合 A4。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` RawMaterialStockIn 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
+- **范围**：`src/features/youmai/RawMaterialInventory/`（`index.tsx` / `YoumaiRawMaterialInventoryTable.tsx` / `useYoumaiRawMaterialInventory.ts`）
+- **摘要**：UI 改版 O5 —— 优迈原料库存 RawMaterialInventory 过通用列表页清单：① 数量列 tabular-nums：库存数量列加 `align: 'right'`（tabular-nums 已由全局 A3 规则覆盖，该列预警 `<Tag>` 保留）；② 表格三态：列表查询加 `throwOnError: false`，页面用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格，`locale.emptyText` 注入 `<TableEmpty>` 引导式空态（含新建按钮）；③ 表单反馈：新建/编辑提交失败改为 Modal 内 `<FormErrorAlert>` 三段式展示，关闭/重开清空。核对通过项：库存数量列预警语义色已有（<50 红 / <100 金 `Tag`，符合语义色徽章规范）、导出入口带权限与 viewer 守卫、新增/编辑仍用 Modal、表格已 `size="small"`、搜索区白卡样式符合 A4。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` RawMaterialInventory 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
+- **范围**：`src/features/youmai/FinishedGoodsStockOut/`（`index.tsx` / `YoumaiFinishedGoodsStockOutTable.tsx` / `useYoumaiFinishedGoodsStockOut.ts`）
+- **摘要**：UI 改版 O4 —— 优迈成品出库 FinishedGoodsStockOut 过通用列表页清单：① 数字列右对齐：行号/出库数量/比重/重量(KG)/最终库存 5 列加 `align: 'right'`（tabular-nums 已由全局 A3 规则覆盖）；② 表格三态：列表查询加 `throwOnError: false`，页面用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格，`locale.emptyText` 注入 `<TableEmpty>` 引导式空态（含新建按钮）；③ 表单反馈：新建/编辑提交失败改为 Modal 内 `<FormErrorAlert>` 三段式展示，关闭/重开清空。核对通过项：状态列已是 antd `Tag` pill + 语义色（S2）、选中摘要条已复用通用 `SelectedSummaryBar`（含总出库重量，F1/S4）、批量审核/反审核带权限与 viewer 守卫、打印/导出/导入入口齐全、新增/编辑仍用 Modal、表格已 `size="small"`、搜索区白卡样式符合 A4。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` FinishedGoodsStockOut 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
+- **范围**：`src/features/youmai/FinishedGoodsStockIn/`（`index.tsx` / `YoumaiFinishedGoodsStockInTable.tsx` / `useYoumaiFinishedGoodsStockIn.ts`）
+- **摘要**：UI 改版 O3 —— 优迈成品入库 FinishedGoodsStockIn 过通用列表页清单：① 数字列右对齐：比重/入库数量/重量(KG) 3 列加 `align: 'right'`（tabular-nums 已由全局 A3 规则覆盖）；② 表格三态：列表查询加 `throwOnError: false`，页面用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格，`locale.emptyText` 注入 `<TableEmpty>` 引导式空态（含新建按钮）；③ 表单反馈：新建/编辑提交失败改为 Modal 内 `<FormErrorAlert>` 三段式展示，关闭/重开清空。核对通过项：状态列已是 antd `Tag` pill 形态 + 语义色（已审核=success / 待审核=default，符合 S2 语义）、批量审核/反审核按钮带权限与 viewer 守卫、新增/编辑仍用 Modal、表格已 `size="small"`、搜索区白卡样式符合 A4。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` FinishedGoodsStockIn 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
 - **范围**：`src/features/youmai/FinishedGoodsInventory/`（`index.tsx` / `YoumaiFinishedGoodsInventoryTable.tsx` / `useYoumaiFinishedGoodsInventory.ts`）
 - **摘要**：UI 改版 O2 —— 优迈成品库存 FinishedGoodsInventory 过通用列表页清单：① 数字列右对齐：比重/待入库/现有库存/重量(KG)/待出库/最终库存 6 列加 `align: 'right'`（tabular-nums 已由全局 A3 规则覆盖）；② 库存预警语义色补暗色适配：`getFinalStockColorClass` 各档（<20 红 / <50 黄 / <100 橙 / 正常绿）追加 `dark:` 变体，暗色模式下预警色保持可辨（与既有 F3 语义 Tailwind 色惯例一致，未改预警阈值）；③ 表格三态：列表查询加 `throwOnError: false`，页面用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格，`locale.emptyText` 注入 `<TableEmpty>` 引导式空态（含新建按钮）；④ 表单反馈：新建/编辑提交失败改为 Modal 内 `<FormErrorAlert>` 三段式展示，关闭/重开清空。核对通过项：新增/编辑仍用 Modal、表格已 `size="small"`、搜索区白卡样式符合 A4。
 - **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` FinishedGoodsInventory 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。

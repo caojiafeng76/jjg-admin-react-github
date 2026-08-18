@@ -70,7 +70,7 @@ export default function YoumaiProductDataTable({
         key: 'specific_gravity',
         width: 120,
         align: 'right',
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => formatNumber(value, 3),
       },
       {
         title: '备注',

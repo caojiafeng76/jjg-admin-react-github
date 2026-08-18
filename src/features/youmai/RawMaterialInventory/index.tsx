@@ -15,6 +15,8 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
 import YoumaiRawMaterialInventoryForm from './YoumaiRawMaterialInventoryForm'
 import YoumaiRawMaterialInventorySearch from './YoumaiRawMaterialInventorySearch'
@@ -49,6 +51,7 @@ export default function YoumaiRawMaterialInventoryPage() {
   const [formRef, setFormRef] =
     useState<FormInstance<YoumaiRawMaterialInventoryFormValues> | null>(null)
   const [isExporting, setIsExporting] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -57,7 +60,7 @@ export default function YoumaiRawMaterialInventoryPage() {
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = useYoumaiRawMaterialInventoryList({
+  const { data, isLoading, error, refetch } = useYoumaiRawMaterialInventoryList({
     page,
     pageSize,
     searchParams,
@@ -75,6 +78,7 @@ export default function YoumaiRawMaterialInventoryPage() {
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
+    setFormError(null)
     formRef?.resetFields()
   }, [formRef])
 
@@ -147,11 +151,8 @@ export default function YoumaiRawMaterialInventoryPage() {
         }
         resetFormState()
       } catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        } else {
-          message.error('操作失败，请稍后重试')
-        }
+        // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
+        setFormError(error)
       }
     },
     [
@@ -287,16 +288,28 @@ export default function YoumaiRawMaterialInventoryPage() {
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <YoumaiRawMaterialInventoryTable
-            loading={isLoading}
-            data={data?.rawMaterialInventory || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <YoumaiRawMaterialInventoryTable
+              loading={isLoading}
+              data={data?.rawMaterialInventory || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+              emptyAction={
+                <AddButton
+                  handleCreate={handleCreate}
+                  permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
+                />
+              }
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.count || 0} />
@@ -312,13 +325,16 @@ export default function YoumaiRawMaterialInventoryPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <YoumaiRawMaterialInventoryForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          isEdit={isEdit}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <YoumaiRawMaterialInventoryForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            isEdit={isEdit}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          />
+        </div>
       </Modal>
     </div>
   )

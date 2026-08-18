@@ -80,7 +80,7 @@ function YoumaiFinishedGoodsInventoryTable({
         key: 'specific_gravity',
         width: 120,
         align: 'right',
-        render: (value: number) => formatNumber(value, 6),
+        render: (value: number) => formatNumber(value, 3),
       },
       {
         title: '待入库',
@@ -89,7 +89,7 @@ function YoumaiFinishedGoodsInventoryTable({
         width: 120,
         align: 'right',
         render: (value: number) => (
-          <span className="text-slate-400">{formatNumber(value)}</span>
+          <span className="text-slate-400">{formatNumber(value, 0)}</span>
         ),
       },
       {
@@ -98,7 +98,7 @@ function YoumaiFinishedGoodsInventoryTable({
         key: 'current_stock',
         width: 120,
         align: 'right',
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => formatNumber(value, 0),
       },
       {
         title: '重量(KG)',
@@ -112,7 +112,7 @@ function YoumaiFinishedGoodsInventoryTable({
             quantity: record.current_stock,
           })
 
-          return weight === null ? '-' : formatNumber(weight)
+          return weight === null ? '-' : formatNumber(weight, 3)
         },
       },
       {
@@ -122,7 +122,7 @@ function YoumaiFinishedGoodsInventoryTable({
         width: 120,
         align: 'right',
         render: (value: number) => (
-          <span className="text-slate-400">{formatNumber(value)}</span>
+          <span className="text-slate-400">{formatNumber(value, 0)}</span>
         ),
       },
       {
@@ -133,7 +133,7 @@ function YoumaiFinishedGoodsInventoryTable({
         align: 'right',
         render: (value: number) => (
           <span className={`${getFinalStockColorClass(value)} font-medium`}>
-            {formatNumber(value)}
+            {formatNumber(value, 0)}
           </span>
         ),
       },

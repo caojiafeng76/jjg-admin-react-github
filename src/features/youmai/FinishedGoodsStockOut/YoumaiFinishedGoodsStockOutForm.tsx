@@ -181,7 +181,7 @@ export default function YoumaiFinishedGoodsStockOutForm({
           <div className="text-xs text-slate-400">比重</div>
           <div>
             {selectedProduct
-              ? Number(selectedProduct.specific_gravity).toFixed(6)
+              ? Number(selectedProduct.specific_gravity).toFixed(3)
               : '-'}
           </div>
         </div>
@@ -224,9 +224,8 @@ export default function YoumaiFinishedGoodsStockOutForm({
       >
         <InputNumber
           disabled={isAuditLocked}
-          min={0.001}
-          step={0.001}
-          precision={3}
+          min={1}
+          precision={0}
           style={{ width: '100%' }}
           placeholder="请输入出库数量"
         />

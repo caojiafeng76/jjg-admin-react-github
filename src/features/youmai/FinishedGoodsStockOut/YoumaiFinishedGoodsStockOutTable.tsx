@@ -3,6 +3,7 @@ import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, Tag, type TableColumnsType } from 'antd'
 
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
+import { TableEmpty } from '@/ui/TableState'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { formatNumber } from '@/utils/format'
 
@@ -31,6 +32,8 @@ interface Props {
   pageSize: number
   scrollY?: number
   rowHeight?: number
+  /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
+  emptyAction?: React.ReactNode
 }
 
 function YoumaiFinishedGoodsStockOutTable({
@@ -42,6 +45,7 @@ function YoumaiFinishedGoodsStockOutTable({
   pageSize,
   scrollY = 400,
   rowHeight = 40,
+  emptyAction,
 }: Props) {
   const columns: TableColumnsType<YoumaiFinishedGoodsStockOut> = useMemo(
     () => [
@@ -97,6 +101,7 @@ function YoumaiFinishedGoodsStockOutTable({
         dataIndex: 'purchase_order_line_no',
         key: 'purchase_order_line_no',
         width: 72,
+        align: 'right',
         sorter: (a, b) =>
           Number(a.purchase_order_line_no ?? 0) -
           Number(b.purchase_order_line_no ?? 0),
@@ -152,28 +157,31 @@ function YoumaiFinishedGoodsStockOutTable({
         dataIndex: 'stock_out_quantity',
         key: 'stock_out_quantity',
         width: 100,
+        align: 'right',
         sorter: (a, b) =>
           (a.stock_out_quantity ?? 0) - (b.stock_out_quantity ?? 0),
         filters: uniqueFilters(data.map((r) => r.stock_out_quantity)),
         onFilter: (value, record) =>
           String(record.stock_out_quantity ?? '') === String(value),
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => formatNumber(value, 0),
       },
       {
         title: '比重',
         dataIndex: 'specific_gravity',
         key: 'specific_gravity',
         width: 100,
+        align: 'right',
         sorter: (a, b) => (a.specific_gravity ?? 0) - (b.specific_gravity ?? 0),
         filters: uniqueFilters(data.map((r) => r.specific_gravity)),
         onFilter: (value, record) =>
           String(record.specific_gravity ?? '') === String(value),
-        render: (value: number) => formatNumber(value, 6),
+        render: (value: number) => formatNumber(value, 3),
       },
       {
         title: '重量(KG)',
         key: 'weight_kg',
         width: 110,
+        align: 'right',
         sorter: (a, b) => {
           const wa =
             calculateYoumaiWeightKg({
@@ -196,7 +204,7 @@ function YoumaiFinishedGoodsStockOutTable({
               specificGravity: r.specific_gravity,
               quantity: r.stock_out_quantity,
             })
-            return w === null ? '-' : formatNumber(w)
+            return w === null ? '-' : formatNumber(w, 3)
           }),
         ),
         onFilter: (value, record) => {
@@ -205,7 +213,7 @@ function YoumaiFinishedGoodsStockOutTable({
             specificGravity: record.specific_gravity,
             quantity: record.stock_out_quantity,
           })
-          const text = w === null ? '-' : formatNumber(w)
+          const text = w === null ? '-' : formatNumber(w, 3)
           return text === String(value)
         },
         render: (_value, record) => {
@@ -215,7 +223,7 @@ function YoumaiFinishedGoodsStockOutTable({
             quantity: record.stock_out_quantity,
           })
 
-          return weight === null ? '-' : formatNumber(weight)
+          return weight === null ? '-' : formatNumber(weight, 3)
         },
       },
       {
@@ -223,12 +231,13 @@ function YoumaiFinishedGoodsStockOutTable({
         dataIndex: 'final_stock',
         key: 'final_stock',
         width: 100,
+        align: 'right',
         sorter: (a, b) => (a.final_stock ?? 0) - (b.final_stock ?? 0),
         filters: uniqueFilters(data.map((r) => r.final_stock)),
         onFilter: (value, record) =>
           String(record.final_stock ?? '') === String(value),
         render: (value: number | null | undefined) =>
-          value === null || value === undefined ? '-' : formatNumber(value),
+          value === null || value === undefined ? '-' : formatNumber(value, 0),
       },
       {
         title: '备注',
@@ -276,6 +285,15 @@ function YoumaiFinishedGoodsStockOutTable({
       pagination={false}
       scroll={{ x: 1692, y: scrollY }}
       size="small"
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无优迈成品出库"
+            description="点击下方按钮创建第一条优迈成品出库"
+            action={emptyAction}
+          />
+        ),
+      }}
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
       }

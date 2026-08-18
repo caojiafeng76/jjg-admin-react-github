@@ -35,6 +35,8 @@ export function useYoumaiRawMaterialInventoryList({
         signal,
       }),
     placeholderData: keepPreviousData,
+    // 不抛错到 ErrorBoundary，让列表页用 TableState 展示错误态 + 重试
+    throwOnError: false,
     ...queryConfig.list,
   })
 }

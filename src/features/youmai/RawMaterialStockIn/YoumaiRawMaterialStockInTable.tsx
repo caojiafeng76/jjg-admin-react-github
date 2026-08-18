@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Table, type TableColumnsType } from 'antd'
 
 import type { YoumaiRawMaterialStockIn } from '@/services/apiYoumaiRawMaterialStockIn'
+import { TableEmpty } from '@/ui/TableState'
 
 interface Props {
   loading: boolean
@@ -12,6 +13,8 @@ interface Props {
   pageSize: number
   scrollY?: number
   rowHeight?: number
+  /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
+  emptyAction?: React.ReactNode
 }
 
 export default function YoumaiRawMaterialStockInTable({
@@ -23,6 +26,7 @@ export default function YoumaiRawMaterialStockInTable({
   pageSize,
   scrollY = 400,
   rowHeight = 40,
+  emptyAction,
 }: Props) {
   const columns: TableColumnsType<YoumaiRawMaterialStockIn> = useMemo(
     () => [
@@ -51,6 +55,7 @@ export default function YoumaiRawMaterialStockInTable({
         dataIndex: 'quantity',
         key: 'quantity',
         width: 120,
+        align: 'right',
         render: (value: number) => (
           <span className="font-medium text-green-600">+{value}</span>
         ),
@@ -84,6 +89,15 @@ export default function YoumaiRawMaterialStockInTable({
       dataSource={data}
       pagination={false}
       scroll={{ x: 900, y: estimatedHeight || scrollY }}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无原料入库"
+            description="点击下方按钮创建第一条原料入库"
+            action={emptyAction}
+          />
+        ),
+      }}
       rowSelection={{
         selectedRowKeys,
         onChange: onSelect,

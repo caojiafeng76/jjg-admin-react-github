@@ -154,11 +154,11 @@ export function usePrintYoumaiFinishedGoodsStockOut() {
             formatCellText(item.material_name),
             formatCellText(item.model),
             formatCellText(item.specification),
-            formatNumber(item.stock_out_quantity),
+            formatNumber(item.stock_out_quantity, 0),
             weight === null ? '-' : formatNumber(weight),
             item.final_stock === null || item.final_stock === undefined
               ? '-'
-              : formatNumber(item.final_stock),
+              : formatNumber(item.final_stock, 0),
           ]
         })
 
