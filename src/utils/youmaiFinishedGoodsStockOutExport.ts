@@ -64,7 +64,7 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
   titleRow[0] = TITLE
 
   const infoRow = Array.from({ length: colCount }, () => '' as string | number)
-  infoRow[0] = `重量合计: ${formatNumber(totalWeight)} KG`
+  infoRow[0] = `重量合计: ${formatNumber(totalWeight, 3)} KG`
   infoRow[halfCol] = `打印日期: ${printDate}`
 
   const headerRow = [...TABLE_HEADERS] as (string | number)[]
@@ -85,11 +85,11 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
       formatCellText(item.material_name),
       formatCellText(item.model),
       formatCellText(item.specification),
-      Number(formatNumber(item.stock_out_quantity)),
-      weight === null ? '-' : Number(formatNumber(weight)),
+      Number(formatNumber(item.stock_out_quantity, 0)),
+      weight === null ? '-' : Number(formatNumber(weight, 3)),
       item.final_stock === null || item.final_stock === undefined
         ? '-'
-        : Number(formatNumber(item.final_stock)),
+        : Number(formatNumber(item.final_stock, 0)),
       '',
       '',
     ]
@@ -174,10 +174,19 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
     }
   }
 
-  // 数值列保留 3 位
-  const numericColumns = [8, 9, 10]
+  // 数值列格式：数量/库存整数，重量保留 3 位
+  const integerColumns = [8, 10]
   for (let r = 3; r < totalRows; r += 1) {
-    numericColumns.forEach((c) => {
+    integerColumns.forEach((c) => {
+      const ref = `${colLetter(c)}${r + 1}`
+      if (ws[ref] && typeof ws[ref].v === 'number') {
+        ws[ref].z = '0'
+      }
+    })
+  }
+  const weightColumn = [9]
+  for (let r = 3; r < totalRows; r += 1) {
+    weightColumn.forEach((c) => {
       const ref = `${colLetter(c)}${r + 1}`
       if (ws[ref] && typeof ws[ref].v === 'number') {
         ws[ref].z = '0.000'

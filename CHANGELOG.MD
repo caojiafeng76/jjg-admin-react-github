@@ -16,6 +16,13 @@
 ## 2026-08-18
 
 - **类别**：变更
+- **范围**：`src/utils/youmaiFinishedGoodsStockOutExport.ts`（优迈成品出库 Excel 导出）
+- **摘要**：修复优迈成品出库导出的 Excel 数值格式与页面口径一致：① 数据行「出库数量」「最终库存」由 `Number(formatNumber(value))`（默认 2 位）改为 `Number(formatNumber(value, 0))` 取整数；「重量(KG)」改为 `Number(formatNumber(weight, 3))` 取 3 位；② 单元格数字格式 `ws[].z` 由统一 `'0.000'` 拆分为：出库数量/最终库存列 `'0'`（整数）、重量列 `'0.000'`（3 位），修复 Excel 中数量仍显示 `1.000` 的问题；③ 信息行「重量合计: XX KG」改为 3 位。已全量核查优迈导出工具：`youmaiProductDataExcel.ts`（导入模板）、`youmaiFinishedGoodsInventoryExcel.ts`（导入模板）、`youmaiRawMaterialInventoryExcel.ts`（原料库存导出，数量本就是整数）均无需改，唯一数据导出为成品出库。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` 该文件 0 错误。未做浏览器/Excel 实测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：变更
 - **范围**：优迈重量统一保留三位小数：`src/features/youmai/FinishedGoodsStockIn/YoumaiFinishedGoodsStockInTable.tsx`、`src/features/youmai/FinishedGoodsStockOut/`（`YoumaiFinishedGoodsStockOutTable.tsx` / `index.tsx`）、`src/features/youmai/FinishedGoodsInventory/YoumaiFinishedGoodsInventoryTable.tsx`
 - **摘要**：用户要求重量统一保留三位小数：① 三个成品表的「重量(KG)」列由 `formatNumber(weight)`（默认 2 位）改为 `formatNumber(weight, 3)`；② 成品出库重量列的表头过滤选项文案与 onFilter 比较值同步改为 3 位（过滤下拉与列显示口径一致）；③ 成品出库选中摘要条「总出库重量(KG)」由原始浮点和改为 `Number(sum.toFixed(3))`（SelectedSummaryBar 用 toLocaleString 显示，避免长小数）。打印 `usePrintYoumaiFinishedGoodsStockOut` 自定义 formatNumber 默认已为 3 位（重量合计/每行重量），无需改动。
 - **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` youmai 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
