@@ -16,7 +16,11 @@
 ## 2026-08-18
 
 - **类别**：变更
-- **范围**：`src/features/youmai/FinishedGoodsStockOut/`（`index.tsx`、`YoumaiFinishedGoodsStockOutSearch.tsx`、`useYoumaiFinishedGoodsStockOut.ts`）、`src/services/apiYoumaiFinishedGoodsStockOut.ts`
+- **范围**：`src/features/access-management/RolePermissionList/RolePermissionDetail.tsx`
+- **摘要**：UI 改版 Q1 —— 权限管理 角色权限树展开态优化：① Collapse 权限树由 `defaultActiveKey={全部模块}`（默认全展开，模块多时一屏铺满）改为受控 `activeKey` + `onChange`，**默认收起**，减少首屏冗余；② 顶部工具栏新增"展开全部 / 收起全部"切换按钮（带 Right/Down 图标 + Tooltip），并显示"共 N 个模块，展开 M"进度，方便整体浏览与快速定位；③ 切换角色时重置展开态为默认收起，避免旧角色展开状态残留。核对通过项：模块级全选/半选 checkbox、scope/surface 标签、已选计数与保存校验均保持现状。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过（access-management 模块无既有测试文件）；`lsp_diagnostics` RolePermissionDetail.tsx 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
 - **摘要**：优迈成品出库页面：① 搜索栏单一 keyword 输入框拆分为 6 个独立输入框（采购订单号/物料编码/物料名称/型号/规格/备注），服务层由 `.or()` 全文模糊查询改为逐字段 `.ilike()`（AND 组合），URL 参数由 `keyword` 改为 `purchaseOrderNo/materialCode/materialName/model/specification/remarks`，搜索与重置逻辑同步遍历；② 选中条目后自动计算总出库重量：复用通用组件 `SelectedSummaryBar`（与表格"重量(KG)"列同口径 `calculateYoumaiWeightKg`，按已选记录求和），显示"已选 N 条 + 总出库重量(KG)"，跨页选中时仅统计当前页可见数据（与打印/导出行为一致）。
 - **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` 四个改动文件 0 错误。未做浏览器目测（需登录态，缺口说明）。
 

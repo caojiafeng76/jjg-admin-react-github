@@ -119,7 +119,7 @@
 
 ## Q. 权限管理（access-management）
 
-- [ ] **Q1** 权限管理 AccessManagement（权限树展开态优化）
+- [x] **Q1** 权限管理 AccessManagement（权限树展开态优化）
 
 ## R. 员工手机端 / 扫码（移动端）
 

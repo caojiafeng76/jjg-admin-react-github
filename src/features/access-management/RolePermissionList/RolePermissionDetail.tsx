@@ -1,5 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Button, Checkbox, Collapse, Empty, Modal, Skeleton, Tag } from 'antd'
+import {
+  Button,
+  Checkbox,
+  Collapse,
+  Empty,
+  Modal,
+  Skeleton,
+  Tag,
+  Tooltip,
+} from 'antd'
+import { DownOutlined, RightOutlined } from '@ant-design/icons'
 import type { PermissionRow } from '@/services/apiPermissions'
 
 interface Props {
@@ -37,11 +47,18 @@ export default function RolePermissionDetail({
   const [localChecked, setLocalChecked] = useState<Set<string>>(
     new Set(checkedIds),
   )
+  // 权限树展开态：默认收起，避免模块多时一屏铺满
+  const [activeKeys, setActiveKeys] = useState<string[]>([])
 
   // 当外部数据变化（换角色等），同步本地状态
   useEffect(() => {
     setLocalChecked(new Set(checkedIds))
   }, [checkedIds, role])
+
+  // 切换角色时重置权限树展开态为默认收起
+  useEffect(() => {
+    setActiveKeys([])
+  }, [role])
 
   const isDirty = useMemo(() => {
     if (localChecked.size !== checkedIds.length) return true
@@ -151,9 +168,36 @@ export default function RolePermissionDetail({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-500">
-          已选 {localChecked.size} / {allPermissions.length} 项权限
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500">
+            已选 {localChecked.size} / {allPermissions.length} 项权限
+          </span>
+          <span className="text-xs text-gray-400">
+            {grouped.size} 个模块，展开 {activeKeys.length}
+          </span>
+          <Tooltip title={activeKeys.length === grouped.size ? '收起全部模块' : '展开全部模块'}>
+            <Button
+              type="link"
+              size="small"
+              icon={
+                activeKeys.length === grouped.size ? (
+                  <DownOutlined />
+                ) : (
+                  <RightOutlined />
+                )
+              }
+              onClick={() =>
+                setActiveKeys(
+                  activeKeys.length === grouped.size
+                    ? []
+                    : Array.from(grouped.keys()),
+                )
+              }
+            >
+              {activeKeys.length === grouped.size ? '收起全部' : '展开全部'}
+            </Button>
+          </Tooltip>
+        </div>
         <Button
           type="primary"
           loading={saving}
@@ -166,7 +210,8 @@ export default function RolePermissionDetail({
 
       <Collapse
         items={collapseItems}
-        defaultActiveKey={Array.from(grouped.keys())}
+        activeKey={activeKeys}
+        onChange={(keys) => setActiveKeys(keys as string[])}
         size="small"
       />
     </div>
