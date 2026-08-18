@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, type TableColumnsType } from 'antd'
 
+import { TableEmpty } from '@/ui/TableState'
 import type { ToolingData } from '@/services/apiToolingData'
 
 type FilterValue = string | number
@@ -66,6 +67,8 @@ interface Props {
   pageSize: number
   scrollY?: number
   rowHeight?: number
+  /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
+  emptyAction?: React.ReactNode
 }
 
 function ToolingDataTable({
@@ -77,6 +80,7 @@ function ToolingDataTable({
   pageSize,
   scrollY = 400,
   rowHeight = 40,
+  emptyAction,
 }: Props) {
   const columns: TableColumnsType<ToolingData> = useMemo(() => {
     const getRowNumber = (record: ToolingData): number => {
@@ -212,6 +216,15 @@ function ToolingDataTable({
       pagination={false}
       scroll={{ x: 1480, y: scrollY }}
       size="small"
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无刀具资料"
+            description="点击下方按钮创建第一条刀具资料"
+            action={emptyAction}
+          />
+        ),
+      }}
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
       }

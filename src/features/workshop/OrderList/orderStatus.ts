@@ -41,25 +41,17 @@ export function getWorkshopOrderStatusColor(
     : 'processing'
 }
 
-/** 状态 pill 语义色（S2 体系：进行中=琥珀 / 完成=绿） */
-export const WORKSHOP_ORDER_STATUS_PILL: Record<
+/** 状态 pill 语义 tone（S2 体系：进行中=警告琥珀 / 完成=成功绿） */
+export const WORKSHOP_ORDER_STATUS_TONE: Record<
   WorkshopOrderStatus,
-  { bg: string; text: string; dot: string }
+  'warning' | 'success'
 > = {
-  生产中: {
-    bg: 'bg-amber-50 dark:bg-amber-900/40',
-    text: 'text-amber-600 dark:text-amber-400',
-    dot: 'bg-amber-500',
-  },
-  已结案: {
-    bg: 'bg-emerald-50 dark:bg-emerald-900/40',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    dot: 'bg-emerald-500',
-  },
+  生产中: 'warning',
+  已结案: 'success',
 }
 
-export function getWorkshopOrderStatusPill(
+export function getWorkshopOrderStatusTone(
   status?: WorkshopOrderStatus | null,
-) {
-  return WORKSHOP_ORDER_STATUS_PILL[normalizeWorkshopOrderStatus(status)]
+): 'warning' | 'success' {
+  return WORKSHOP_ORDER_STATUS_TONE[normalizeWorkshopOrderStatus(status)]
 }

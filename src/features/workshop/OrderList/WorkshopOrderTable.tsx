@@ -9,10 +9,11 @@ import { memo, useMemo } from 'react'
 import { Table, Tag } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
 import dayjs from 'dayjs'
+import StatusPill from '@/ui/StatusPill'
 import type { WorkshopOrder } from './index'
 import WorkshopOrderQrCell from './WorkshopOrderQrCell'
 import {
-  getWorkshopOrderStatusPill,
+  getWorkshopOrderStatusTone,
   normalizeWorkshopOrderStatus,
 } from './orderStatus'
 
@@ -152,14 +153,10 @@ function WorkshopOrderTable({
         width: 78,
         render: (value: WorkshopOrder['status']) => {
           const status = normalizeWorkshopOrderStatus(value)
-          const pill = getWorkshopOrderStatusPill(status)
           return (
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${pill.bg} ${pill.text}`}
-            >
-              <span className={`size-1.5 rounded-full ${pill.dot}`} />
+            <StatusPill tone={getWorkshopOrderStatusTone(status)}>
               {status}
-            </span>
+            </StatusPill>
           )
         },
       },

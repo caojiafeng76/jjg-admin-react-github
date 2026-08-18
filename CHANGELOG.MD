@@ -13,6 +13,34 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-18
+
+- **类别**：变更
+- **范围**：`src/features/syney/SpecList/index.tsx`、`src/features/syney/SafePartSetting/SafePartSettingPage.tsx`、`src/ui/SelectedSummaryBar.tsx`（复用，无改动）
+- **摘要**：UI 改版 S4 —— 选中摘要条通用化收尾：F1 已提炼 `SelectedSummaryBar` 通用组件（物料转移单 + 生产日报表已接入），本次把西尼模块两处残留的内联旧版摘要条（蓝色渐变卡 + 仅显示"已选 N 条"）替换为通用组件：SpecList 踏板规格列表与 SafePartSetting 件号配置页，各删除约 25 行内联 JSX（渐变底 + 图标 + 计数），改用 `<SelectedSummaryBar selectedCount={selectedCount} matchedCount={selectedCount} stats={[]} />`，视觉升级为 F1 规范（主色渐变底 + 辉光 + 计数 chip），颜色走 antd token、暗色模式自动切换。
+- **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过（syney 相关用例 5/5）；`lsp_diagnostics` syney 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：新建 / 变更
+- **范围**：`src/ui/FormErrorAlert.tsx`（新增）、`src/ui/FormErrorAlert.vitest.tsx`（新增）、`src/features/tooling/ToolingData/index.tsx`
+- **摘要**：UI 改版 S3 —— 表单反馈文案体系化：① 新建通用组件 `FormErrorAlert.tsx`，把"操作失败"升级为"失败原因 + 影响 + 建议"三段式 Alert：失败原因自动经 `getErrorDisplayInfo` 提取（复用英转中映射 + detail），影响/建议提供默认文案（「本次操作未生效，已填写的内容不会保存。」/「请根据失败原因调整后重试；若问题持续，请联系管理员。」）且可按业务覆盖；② 刀具资料 ToolingData 表单示范接入：新建/编辑提交失败不再弹 `message.error` 顶部队列，改为 Modal 内 `<FormErrorAlert error={formError} />` 常驻展示（含失败详情，便于核对与重试），关闭/重开 Modal 时清空；③ 组件供后续所有表单（D6/D7 长表单、R4 移动端表单等）复用。
+- **验证**：`bun run test` 全量 515/515 通过（新增 FormErrorAlert 用例 4/4，ToolingData 相关 3/3）；`bun run typecheck` 通过（0 错误）；`lsp_diagnostics` FormErrorAlert.tsx / ToolingData 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：新建 / 变更
+- **范围**：`src/ui/StatusPill.tsx`（新增）、`src/ui/StatusPill.vitest.tsx`（新增）、`src/features/workshop/OrderList/`（`orderStatus.ts` / `WorkshopOrderTable.tsx` / `WorkshopOrderProductionStats.tsx`）
+- **摘要**：UI 改版 S2 —— 状态徽章体系化：① 新建通用组件 `StatusPill.tsx`，四档语义 tone（`success`=绿 / `warning`=琥珀 / `danger`=红 / `neutral`=灰），pill 形态 = 圆角 + 语义色浅底 + 前置色点（`dot` 可关），尺寸 `px-2 py-0.5 text-xs`，颜色走 antd token（`bg-success/10 text-success` 等，暗色模式自动切换，中性灰保留 slate + dark: 变体）；② 车间订单管理 OrderList 示范接入：`orderStatus.ts` 的 `WORKSHOP_ORDER_STATUS_PILL`（硬编码 Tailwind 类 + dark: 变体）替换为语义 tone 映射 `WORKSHOP_ORDER_STATUS_TONE` + `getWorkshopOrderStatusTone`（生产中=warning / 已结案=success），`WorkshopOrderTable.tsx` 状态列与 `WorkshopOrderProductionStats.tsx` 状态卡两处渲染改用 `<StatusPill />`，删除约 25 行硬编码类拼接；③ 组件供后续所有状态列（G1 返工返修、G2 严重等级、L2/L3 工序状态等）复用。
+- **验证**：`bun run test` 全量 511/511 通过（新增 StatusPill 用例 7/7，workshop OrderList 相关 6/6）；`bun run typecheck` 通过（0 错误）；`lsp_diagnostics` StatusPill.tsx / workshop OrderList 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-18
+
+- **类别**：新建 / 变更
+- **范围**：`src/ui/TableState.tsx`（新增）、`src/ui/TableState.vitest.tsx`（新增）、`src/features/tooling/ToolingData/`（`useToolingData.ts` / `index.tsx` / `ToolingDataTable.tsx`）
+- **摘要**：UI 改版 S1 —— 表格三态通用化：① 新建通用组件 `TableState.tsx`，导出 4 个件：`TableSkeleton`（表头行 + 渐变数据行的骨架屏，替代 antd 默认 spinner）、`TableEmpty`（图标 + 一句话 + 引导动作，用于 Table 的 `locale.emptyText`）、`TableError`（错误说明 + 重试按钮，保留已填数据）、`TableState`（组合件：`loading → 骨架屏`、`error → 错误重试`、否则渲染 children；`loading` 建议传 `isLoading && !data`，分页/刷新用 keepPreviousData 时已有数据不闪骨架屏）；② 刀具资料 ToolingData 作为示范页接入：列表 hook 加 `throwOnError: false`（错误不再抛到 ErrorBoundary，改由页面展示错误态 + 重试）、index 用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格、表格 `locale.emptyText` 注入 `<TableEmpty title="暂无刀具资料" description="点击下方按钮创建第一条刀具资料" action={<AddButton />} />`；③ 三态组件供后续所有 CRUD 列表页（E6 起及 G1–Q1）复用。
+- **验证**：`bun run test` 全量 504/504 通过（新增 TableState 用例 9/9）；`bun run typecheck` 通过（0 错误）；`lsp_diagnostics` TableState.tsx / ToolingData 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
 ## 2026-08-17
 
 - **类别**：变更

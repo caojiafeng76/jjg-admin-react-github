@@ -39,6 +39,7 @@ import {
   useSyneySafePartSettings,
 } from '../useSyneySafePartSettings'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 
 const DECOMPOSITION_ROLE_LABELS: Record<string, string> = {
   side_frame: '侧围',
@@ -533,32 +534,13 @@ export default function SafePartSettingPage() {
         </Tooltip>
       </div>
 
-      {/* 选中摘要条 */}
+      {/* 选中摘要条（S4 通用组件） */}
       {selectedCount > 0 ? (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
-          <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-              <svg
-                className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            已选
-            <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-              {selectedCount}
-            </span>
-            条
-          </span>
-        </div>
+        <SelectedSummaryBar
+          selectedCount={selectedCount}
+          matchedCount={selectedCount}
+          stats={[]}
+        />
       ) : null}
 
       {/* 搜索栏 */}

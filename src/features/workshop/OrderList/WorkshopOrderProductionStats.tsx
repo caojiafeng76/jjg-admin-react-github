@@ -18,12 +18,13 @@ import {
 import type { WorkshopOrder } from './index'
 import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrders'
 import type { TransferWorkshopStat } from '@/services/apiMaterialTransfers'
+import StatusPill from '@/ui/StatusPill'
 import { useWorkshopOrderProductionItems } from './useWorkshopOrderProductionItems'
 import { useWorkshopOrderTransfers } from './useWorkshopOrderTransfers'
 import type { WorkshopOrderStatus } from './orderStatus'
 import {
   canWorkshopOrderBeClosed,
-  getWorkshopOrderStatusPill,
+  getWorkshopOrderStatusTone,
   normalizeWorkshopOrderStatus,
 } from './orderStatus'
 
@@ -592,14 +593,12 @@ function OrderInfoHeader({
           </div>
           <div>
             <p className="text-xs text-slate-500">状态</p>
-            <span
-              className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${getWorkshopOrderStatusPill(status).bg} ${getWorkshopOrderStatusPill(status).text}`}
+            <StatusPill
+              tone={getWorkshopOrderStatusTone(status)}
+              className="mt-0.5"
             >
-              <span
-                className={`size-1.5 rounded-full ${getWorkshopOrderStatusPill(status).dot}`}
-              />
               {status}
-            </span>
+            </StatusPill>
           </div>
         </div>
 

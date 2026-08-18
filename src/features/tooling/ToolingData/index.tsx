@@ -21,6 +21,8 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 import ToolingDataExcelImport from './ToolingDataExcelImport'
 import ToolingDataForm from './ToolingDataForm'
@@ -64,6 +66,7 @@ export default function ToolingDataPage() {
   const [editingRecord, setEditingRecord] = useState<ToolingData | null>(null)
   const [formRef, setFormRef] =
     useState<FormInstance<ToolingDataFormValues> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -72,7 +75,7 @@ export default function ToolingDataPage() {
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = useToolingDataList({
+  const { data, isLoading, error, refetch } = useToolingDataList({
     page,
     pageSize,
     searchParams,
@@ -95,6 +98,7 @@ export default function ToolingDataPage() {
     setIsCopyCreate(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
+    setFormError(null)
     formRef?.resetFields()
   }, [formRef])
 
@@ -313,18 +317,14 @@ export default function ToolingDataPage() {
 
         resetFormState()
       } catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        } else {
-          message.error('操作失败，请稍后重试')
-        }
+        // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
+        setFormError(error)
       }
     },
     [
       createMutation,
       canManageTooling,
       isEdit,
-      message,
       resetFormState,
       selectedRowKeys,
       updateMutation,
@@ -451,16 +451,24 @@ export default function ToolingDataPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <ToolingDataTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+            <ToolingDataTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+              emptyAction={
+                <AddButton
+                  handleCreate={handleCreate}
+                  permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
+                />
+              }
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination
@@ -479,16 +487,19 @@ export default function ToolingDataPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <ToolingDataForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          initialValues={
-            (isEdit || isCopyCreate) && editingRecord
-              ? editingRecord
-              : undefined
-          }
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <ToolingDataForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            initialValues={
+              (isEdit || isCopyCreate) && editingRecord
+                ? editingRecord
+                : undefined
+            }
+          />
+        </div>
       </Modal>
     </div>
   )
