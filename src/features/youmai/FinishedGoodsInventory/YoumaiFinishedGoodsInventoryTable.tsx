@@ -3,16 +3,17 @@ import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, type TableColumnsType } from 'antd'
 
 import type { YoumaiFinishedGoodsInventory } from '@/services/apiYoumaiFinishedGoodsInventory'
+import { TableEmpty } from '@/ui/TableState'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { formatNumber } from '@/utils/format'
 
 function getFinalStockColorClass(value: number | null | undefined) {
   const stock = Number(value ?? 0)
 
-  if (stock < 20) return 'text-red-600'
-  if (stock < 50) return 'text-yellow-600'
-  if (stock < 100) return 'text-orange-600'
-  return 'text-green-600'
+  if (stock < 20) return 'text-red-600 dark:text-red-400'
+  if (stock < 50) return 'text-yellow-600 dark:text-yellow-400'
+  if (stock < 100) return 'text-orange-600 dark:text-orange-400'
+  return 'text-green-600 dark:text-green-400'
 }
 
 interface Props {
@@ -24,6 +25,8 @@ interface Props {
   pageSize: number
   scrollY?: number
   rowHeight?: number
+  /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
+  emptyAction?: React.ReactNode
 }
 
 function YoumaiFinishedGoodsInventoryTable({
@@ -35,6 +38,7 @@ function YoumaiFinishedGoodsInventoryTable({
   pageSize,
   scrollY = 400,
   rowHeight = 40,
+  emptyAction,
 }: Props) {
   const columns: TableColumnsType<YoumaiFinishedGoodsInventory> = useMemo(
     () => [
@@ -75,6 +79,7 @@ function YoumaiFinishedGoodsInventoryTable({
         dataIndex: 'specific_gravity',
         key: 'specific_gravity',
         width: 120,
+        align: 'right',
         render: (value: number) => formatNumber(value, 6),
       },
       {
@@ -82,6 +87,7 @@ function YoumaiFinishedGoodsInventoryTable({
         dataIndex: 'pending_stock_in',
         key: 'pending_stock_in',
         width: 120,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-400">{formatNumber(value)}</span>
         ),
@@ -91,12 +97,14 @@ function YoumaiFinishedGoodsInventoryTable({
         dataIndex: 'current_stock',
         key: 'current_stock',
         width: 120,
+        align: 'right',
         render: (value: number) => formatNumber(value),
       },
       {
         title: '重量(KG)',
         key: 'weight_kg',
         width: 140,
+        align: 'right',
         render: (_value, record) => {
           const weight = calculateYoumaiWeightKg({
             specification: record.specification,
@@ -112,6 +120,7 @@ function YoumaiFinishedGoodsInventoryTable({
         dataIndex: 'pending_stock_out',
         key: 'pending_stock_out',
         width: 120,
+        align: 'right',
         render: (value: number) => (
           <span className="text-slate-400">{formatNumber(value)}</span>
         ),
@@ -121,6 +130,7 @@ function YoumaiFinishedGoodsInventoryTable({
         dataIndex: 'final_stock',
         key: 'final_stock',
         width: 120,
+        align: 'right',
         render: (value: number) => (
           <span className={`${getFinalStockColorClass(value)} font-medium`}>
             {formatNumber(value)}
@@ -164,6 +174,15 @@ function YoumaiFinishedGoodsInventoryTable({
       pagination={false}
       scroll={{ x: 1960, y: scrollY }}
       size="small"
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无优迈成品库存"
+            description="点击下方按钮创建第一条优迈成品库存"
+            action={emptyAction}
+          />
+        ),
+      }}
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
       }

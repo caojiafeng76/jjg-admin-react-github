@@ -3,6 +3,7 @@ import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, TableColumnsType } from 'antd'
 
 import type { YoumaiProductData } from '@/services/apiYoumaiProductData'
+import { TableEmpty } from '@/ui/TableState'
 import { formatNumber } from '@/utils/format'
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
   pageSize: number
   scrollY?: number
   rowHeight?: number
+  /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
+  emptyAction?: React.ReactNode
 }
 
 export default function YoumaiProductDataTable({
@@ -25,6 +28,7 @@ export default function YoumaiProductDataTable({
   pageSize,
   scrollY = 400,
   rowHeight = 40,
+  emptyAction,
 }: Props) {
   const columns: TableColumnsType<YoumaiProductData> = useMemo(
     () => [
@@ -65,6 +69,7 @@ export default function YoumaiProductDataTable({
         dataIndex: 'specific_gravity',
         key: 'specific_gravity',
         width: 120,
+        align: 'right',
         render: (value: number) => formatNumber(value),
       },
       {
@@ -104,6 +109,15 @@ export default function YoumaiProductDataTable({
       pagination={false}
       scroll={{ x: 1320, y: scrollY }}
       size="small"
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无优迈货品资料"
+            description="点击下方按钮创建第一条优迈货品资料"
+            action={emptyAction}
+          />
+        ),
+      }}
       rowClassName={(_, index) =>
         index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
       }

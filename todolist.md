@@ -104,8 +104,8 @@
 
 ## O. 优迈（youmai）
 
-- [ ] **O1** 货品资料 ProductData
-- [ ] **O2** 成品库存 FinishedGoodsInventory（数量列 + 预警语义色）
+- [x] **O1** 货品资料 ProductData
+- [x] **O2** 成品库存 FinishedGoodsInventory（数量列 + 预警语义色）
 - [ ] **O3** 成品入库 FinishedGoodsStockIn
 - [ ] **O4** 成品出库 FinishedGoodsStockOut
 - [ ] **O5** 原料库存 RawMaterialInventory（数量列 tabular-nums）
