@@ -13,6 +13,20 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-19
+
+- **类别**：变更
+- **范围**：`.gitignore`、`.omo/run-continuation/`
+- **摘要**：将 AI 会话续跑产物目录 `.omo/run-continuation/` 加入 `.gitignore`，并 `git rm -r --cached` 移除已跟踪的 78 个会话 json 文件（工作区文件保留，不再纳入版本控制）。
+- **验证**：`git check-ignore` 确认忽略规则生效；`git status` 无该目录 untracked 残留。
+
+## 2026-08-19
+
+- **类别**：变更
+- **范围**：`src/features/material-transfer/`（物料转移单列表页）
+- **摘要**：物料转移单表格适配骨架屏：① `useMaterialTransfers` 列表查询增加 `throwOnError: false`，错误不抛到 ErrorBoundary，交给页面 `TableState` 展示错误态 + 重试；② 列表页 `index.tsx` 用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹 `MaterialTransferTable`，首屏加载显示骨架屏（替代 antd 默认 spinner），分页/刷新因 keepPreviousData 已有数据不闪骨架屏，表格自带 loading 兜底。对齐 youmai 各列表页既有 `TableState` 三态模式。
+- **验证**：`bun run typecheck` 通过；`bun run test` 全量通过；`lsp_diagnostics` 改动文件 0 错误。
+
 ## 2026-08-18
 
 - **类别**：变更
@@ -98,6 +112,7 @@
 - **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过（access-management 模块无既有测试文件）；`lsp_diagnostics` RolePermissionDetail.tsx 0 错误。未做浏览器目测（需登录态，缺口说明）。
 
 ## 2026-08-18
+
 - **摘要**：优迈成品出库页面：① 搜索栏单一 keyword 输入框拆分为 6 个独立输入框（采购订单号/物料编码/物料名称/型号/规格/备注），服务层由 `.or()` 全文模糊查询改为逐字段 `.ilike()`（AND 组合），URL 参数由 `keyword` 改为 `purchaseOrderNo/materialCode/materialName/model/specification/remarks`，搜索与重置逻辑同步遍历；② 选中条目后自动计算总出库重量：复用通用组件 `SelectedSummaryBar`（与表格"重量(KG)"列同口径 `calculateYoumaiWeightKg`，按已选记录求和），显示"已选 N 条 + 总出库重量(KG)"，跨页选中时仅统计当前页可见数据（与打印/导出行为一致）。
 - **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 515/515 通过；`lsp_diagnostics` 四个改动文件 0 错误。未做浏览器目测（需登录态，缺口说明）。
 
@@ -181,7 +196,6 @@
 - **范围**：`src/services/apiPrecisionCuttingTransfers.ts`、`apiMaterialTransfers.ts`、`apiPrecisionFinishingCuttings.ts`、`apiOrderStatusDashboard.ts`、`apiLaborProtectionRequisitions.ts`、`apiStandardTimes.ts`、`apiYoumaiRawMaterialInventory.ts`、`apiEmployees.ts`、`apiAttendanceDetails.ts`、`apiSyneySpecs.ts`、`apiToolingFixture.ts`（+`apiToolingFixture.vitest.ts`）、`apiProductionOrders.ts`、`apiWorkshopOrders.ts`、`apiDashboard.ts`
 - **摘要**：修复"订单数据超过 1000 条无法获取"问题（PostgREST `db-max-rows=1000`，显式 limit 也无法突破）：① 用户点名两处 —— 精切转移单导出（`getPrecisionCuttingTransfersForExport` filters 分支）与数量统计（`getPrecisionCuttingTransferQuantityStats`）改为 while+range 1000/页循环拉取；订单现状导出（`getOrderStatusDashboardForExport`）原传 `pageSize: total` 但 RPC 内部 `least(...,200)` 截断，改为按 200/页循环调用 RPC 直至 total。② 全库排查同类问题并修复 13 个文件 16 处：物料转移单/精加工切割单的导出与统计 filters 分支（同构双分支仅补 filters 分支、ids 分支保持不动）、劳保领料单导出、成本核算导出、优迈原料库存导出、`getAllEmployees` 全表下拉、考勤月度导出（两分支合并为分页循环）、西尼规格 `isAll` 分支 `limit(1000)` 改循环、工装 `getAllToolingFixtures` 由"超 1000 直接抛错"改为分页拉全（同步更新 vitest：断言 `select('*')` 无 count、新增翻页终止断言）、`getProductionItemsByProjectNo`/`getPrecisionCuttingTransferItemsByProjectNo` 单项目明细循环、车间订单出库统计（`material_transfers` 多项目 in 聚合）循环、首页 KPI 近 14 天 created_at 扫描循环。全部复用项目既有 `while(true) + .range(from, to)` 模式（PAGE_SIZE=1000）
 - **验证**：`bun run typecheck` 通过（0 错误）；`bun run test` 全量 489/490 通过（唯一失败为 pre-existing `antdSemanticStyles.vitest.ts`，stash 验证与本次改动无关；`apiToolingFixture.vitest.ts` 3 个旧断言已随行为变更更新并单独跑通 11/11）；未做浏览器端导出回归（需登录态与测试环境，缺口说明）
-
 
 ## 2026-08-14
 
@@ -537,7 +551,7 @@
 
 - **类别**：修复
 - **范围**：`src/features/workshop/ProductionScheduling/index.tsx`（路由 `/order-scheduling` 订单排产页）
-- **摘要**：适配暗黑模式：页面根容器、标题区、搜索区、摘要卡、操作条、表格区、分页条、Modal 及表单 label 的硬编码浅色 Tailwind 类（bg-white、text-slate-*、border-slate-*、ring-white 等）全部补充 `dark:` 变体；Modal header 硬编码颜色 `#f1f5f9/#fafbfc/#ffffff` 改用 `theme.useToken()` 的 `colorBgElevated`/`colorBorderSecondary`/`colorFillQuaternary`，随主题自动切换
+- **摘要**：适配暗黑模式：页面根容器、标题区、搜索区、摘要卡、操作条、表格区、分页条、Modal 及表单 label 的硬编码浅色 Tailwind 类（bg-white、text-slate-_、border-slate-_、ring-white 等）全部补充 `dark:` 变体；Modal header 硬编码颜色 `#f1f5f9/#fafbfc/#ffffff` 改用 `theme.useToken()` 的 `colorBgElevated`/`colorBorderSecondary`/`colorFillQuaternary`，随主题自动切换
 - **验证**：`bun run typecheck` 通过；`bun run test` 478 个测试全部通过
 
 ## 2026-08-12
@@ -602,42 +616,49 @@
 - **范围**：`src/features/syney/SafePartSetting/SafePartSettingPage.tsx`、`src/features/packaging-process/WorkOrderList/useWorkOrders.ts`、`src/features/packaging-process/StandardTimeList/useStandardTimes.ts`
 - **摘要**：收尾遗留优化项：(1) SafePartSettingPage 的 3 个裸 useMutation（保存/删除/图纸上传）迁移到 useMutationWithMessage——复用 App.useApp() 的 messageApi，成功提示/错误提示/缓存失效统一由共享 hook 处理，移除手写 message 与 invalidate 样板及 useMutation/useQueryClient 依赖；(2) packaging 两个"生产号选项"查询键统一为 ['process-standards', 'project-nos']，与 workshop 共享同一缓存，消除同接口（getSalesOrdersProjectNos）跨域重复请求，workshop 侧失效可联动刷新
 - **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过；eslint 改动文件 0 错误
+
 ## 2026-08-12
 
 - **类别**：重构 / 修改
 - **范围**：`src/features/workshop/OrderStatusDashboard/`（index.tsx 拆分 + 新增 dashboardRenderUtils.tsx / ProductionDetailModal.tsx / TransferDetailModal.tsx / PrecisionCuttingDetailModal.tsx / ExtrusionDetailModal.tsx）、`package.json`、`AGENTS.md`
 - **摘要**：执行第四周期：(1) OrderStatusDashboard 2741 行巨型组件拆分——4 个明细弹窗（生产/物料转移/精切/挤压，共 ~1080 行）拆为独立文件，共享渲染基础设施（render helpers、密集表格组件、类型、VIEWER 隐藏列常量）收拢到 dashboardRenderUtils.tsx，主组件 index.tsx 降至 ~1150 行，消除循环依赖；(2) 依赖清单瘦身——@tanstack/react-query-devtools（DEV 条件渲染）与 supabase CLI 从 dependencies 移至 devDependencies；react-icons 与双 QR 库经核查用途真实（4 处 BiScan 图标 / 扫码 vs 生成），保留；(3) 经用户决策，AGENTS.md 废除接口 I 前缀要求（与 ~230 个无前缀接口现状对齐，legacy syney 8 个 I 前缀接口保留为历史命名）
 - **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过；eslint 拆分文件 0 错误（13 个 fast-refresh 警告与拆分前一致，非新增问题）
+
 ## 2026-08-12
 
 - **类别**：重构
 - **范围**：`src/services/functionInvokeHelpers.ts`（新增）、`apiSyneyStoreReports.ts`、`apiYoumaiPurchaseOrder.ts`、`apiEmployees.ts`、`apiAdminManagementPassword.ts`、`apiProductionOrderExport.ts`、`src/features/syney/useSyneySafePartSettings.ts`（新增）、`PoList/index.tsx`、`PoList/useExportSafePartInfoAsExcel.ts`、`SafePartSetting/SafePartSettingPage.tsx`、`src/utils/helps.ts`、`utils/pdfUtils.ts`、`syney/ReportList/ReportTable.tsx`、`syney/ReportDetail/DetailTable.tsx`
 - **摘要**：执行第三周期"一致性"：(1) 新建共享 hook useSyneySafePartSettings（queryConfig.static 1h 缓存 + 常量键），替换 3 处重复的 syney_safe_part_settings 裸 useQuery（原 5min/5min/30s 三种配置），设置变更仍由 SafePartSettingPage 的 invalidate 驱动刷新；(2) 新建 functionInvokeHelpers.ts 收拢 5 个服务文件重复的 Edge Function 错误提取（extractFunctionInvokeErrorMessage 合并 JSON body.error + 401/403/404 状态码映射，401 文案参数化）、withTimeout、getFunctionRegion；(3) helps.ts 的 formatNumber 改名 formatNumberPadded（消除与 format.ts 展示版 formatNumber 的同名不同义），更新 3 个调用文件
 - **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过；eslint 改动文件 0 错误
+
 ## 2026-08-12
 
 - **类别**：删除（数据库）
 - **范围**：`supabase` 远程库（notifications 表、3 个触发器、3 个函数、realtime publication、权限种子数据）、`docs/sql-drafts/20260812_cleanup_notifications.sql`、`src/services/database.types.ts`
 - **摘要**：经用户 3 次确认后清理通知功能数据库残留：从 supabase_realtime publication 移除 notifications；删除 create_notification_for_production_order / create_notification_for_material_transfer / sync_notification_read_at 三个触发器与函数；DROP notifications 表（级联 RLS 策略与索引）；删除 permissions 中 feature:admin-notifications.view 行及 role_permissions 的 admin 关联。清理脚本保留在 docs/sql-drafts/ 备查
 - **验证**：数据库核对全部为 0（表/触发器/函数/权限行/角色关联/realtime 成员）；`bun run db:types` 重新生成类型（notifications 残留 0）；`bun run typecheck` 通过
+
 ## 2026-08-12
 
 - **类别**：删除 / 修改
 - **范围**：`src/services/apiNotifications.ts`（删除）、`src/hooks/useAdminNotifications.ts`（删除）、`src/ui/AppHeader.tsx`、`src/config/permissionRegistry.ts`
 - **摘要**：应业务要求整体移除管理端通知功能：删除通知服务层与 hooks（含 30s 轮询查询、postgres_changes realtime 订阅、已读/全部已读 mutation）；AppHeader 移除通知铃按钮、Popover 通知列表、realtime 系统弹窗及 NotificationItem 组件；permissionRegistry 移除 `feature:admin-notifications.view` 权限注册。数据库 notifications 表与历史 migration 种子数据保留（已执行迁移不改动，前端不再引用）
 - **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过
+
 ## 2026-08-12
 
 - **类别**：重构 / 修改
 - **范围**：`src/hooks/useAdminNotifications.ts`、`src/features/workshop/StandardTimeList/useStandardTimes.ts`、`src/features/packaging-process/WorkOrderList/useWorkOrders.ts`、`src/features/packaging-process/StandardTimeList/useStandardTimes.ts`
 - **摘要**：执行第二周期"网络瘦身"：(1) 通知双通道合一——管理端通知查询从 30s 轮询（queryConfig.realtime）改为 queryConfig.detail，由 realtime postgres_changes 通道的 invalidate 驱动刷新，消除 App 常驻期间每 30s 2 个冗余请求；(2) 三个"生产号选项"查询（workshop/packaging 标准工时、包装工单）从 30s 轮询降级为 queryConfig.list + refetchOnMount: 'always'，仅在表单打开时刷新，常驻页面不再轮询；(3) keep-alive 隐藏页轮询问题随前两项降级消除（剩余轮询仅存于员工手机端生产工单视图，为合理实时业务场景，且不走 keep-alive 布局）
 - **验证**：`bun run typecheck` 通过；`bun run test` 463/463 通过
+
 ## 2026-08-12
 
 - **类别**：重构 / 删除 / 修复
 - **范围**：`src/pages/`（删除 10 个未引用页面组件）、`src/routes/lazyPages.ts`、`src/ui/AppHeader.tsx`、`src/store/index.ts`、`src/features/syney/`（PoList / ReportList / PoDetail）、`src/hooks/useMutationWithMessage.ts`、`useMutationWithInvalidation.ts`
 - **摘要**：执行第一周期优化：(1) 删除 10 个无引用页面组件（EmployeeList/StandardTimeList/SyneyPoList/SyneyPoDetail/SyneySpecList/SyneyStoreReportList/SyneyStoreReportDetail/WorkshopOrderList/ComingSoonPage/WorkshopOrderClosed）及 lazyPages 中 3 个未路由导出，缩小打包体积；(2) AppHeader 退出登录失败时弹出错误提示（原为空 catch 吞错）；(3) 移除全局 Zustand isLoading 标志，PoList/ReportList/PoDetail 改为组件本地 state + 回调通知，消除跨页串扰；(4) useMutationWithInvalidation 改为 useMutationWithMessage 薄包装（新增 showErrorMessage 参数），统一 mutation 单一实现
 - **验证**：`bun run typecheck` 通过；`bun run test` 通过
+
 ## 2026-08-12
 
 - **类别**：变更
@@ -834,7 +855,6 @@
 - **摘要**：修复表格汇总行（`Table.Summary`）与列错位问题。根因：三张表均启用 `rowSelection`，antd 实际渲染列数 = 数据列 + 复选框列，而汇总行单元格的 `index` 是按含复选框列的 flattenColumns 计算的，原汇总行单元格数不足（各缺 1~4 格），导致金额/数量合计显示在左侧相邻列下方、末列无汇总格。现补齐单元格：入库单明细汇总金额归位"小计"列（`index 9`）、采购单明细数量合计归位"数量"列（`index 9`）、切割转序"转移数量"合计归位"转移数量"列（`index 12`），金额单元格补 `align="right"` 与列对齐一致。
 - **验证**：`bun run typecheck`、`bun run lint` 通过；浏览器打开 `/syney-store-report-list/K202608030011` 截图核对汇总行对齐。
 
-
 ## 2026-08-04
 
 - **类别**：重构
@@ -853,7 +873,7 @@
 
 - **类别**：重构
 - **范围**：`src/test/testing-library.smoke.vitest.tsx`、`src/test/setup.vitest.ts`、`scripts/generate-round7-final-import.mjs`、`scripts/generate-tooling-data-import-20260504.mjs`、`scripts/generate-villa-lift-import.mjs`、`scripts/import-round3-missing-process-orders.mjs`、`scripts/import-safe-production-orders.mjs`、`scripts/diff-villa-lift-2026.mjs`、`scripts/compare-villa-lift-2026.mjs`、`temp_check.rcutil.ps1`、`excel_import_analysis.json`、`tmp-rc-util-10101/`
-- **摘要**：清理无效残留文件。删除 2 个环境冒烟测试（`testing-library.smoke.vitest.tsx`、`setup.vitest.ts`，仅验证测试环境本身、不覆盖业务代码）、7 个一次性数据导入/对比脚本（generate-*/import-*/diff-*/compare-*，无任何代码/文档引用）、1 个临时诊断脚本（`temp_check.rcutil.ps1`）、1 个一次性 Excel 导入分析产物（`excel_import_analysis.json`，业务数据已有 `docs/imports/` 存档）及未追踪的临时 node_modules 目录（`tmp-rc-util-10101/`，35MB）。保留全部真实业务测试（105 个文件）及 `src/test/setup.ts`、`src/test/vitest.d.ts` 等测试基础设施。
+- **摘要**：清理无效残留文件。删除 2 个环境冒烟测试（`testing-library.smoke.vitest.tsx`、`setup.vitest.ts`，仅验证测试环境本身、不覆盖业务代码）、7 个一次性数据导入/对比脚本（generate-_/import-_/diff-_/compare-_，无任何代码/文档引用）、1 个临时诊断脚本（`temp_check.rcutil.ps1`）、1 个一次性 Excel 导入分析产物（`excel_import_analysis.json`，业务数据已有 `docs/imports/` 存档）及未追踪的临时 node_modules 目录（`tmp-rc-util-10101/`，35MB）。保留全部真实业务测试（105 个文件）及 `src/test/setup.ts`、`src/test/vitest.d.ts` 等测试基础设施。
 - **验证**：`bun run typecheck`、`bun run lint` 通过；`bun run test` 通过（105 文件/461 用例，较删除前减少 2 个冒烟测试用例）。
 
 ## 2026-08-04

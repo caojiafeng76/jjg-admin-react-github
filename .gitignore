@@ -28,3 +28,6 @@ graphify-out/
 *.njsproj
 *.sln
 *.sw?
+
+# AI tooling runtime artifacts (session continuation files)
+.omo/run-continuation/

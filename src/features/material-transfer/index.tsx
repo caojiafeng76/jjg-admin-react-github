@@ -9,6 +9,7 @@ import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
 import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
@@ -96,7 +97,7 @@ export default function MaterialTransferPage() {
 
   const { data: employeeOptions = [] } = useAllEmployees(!isOwnOnlyView)
   const { data: lengthOptions = [] } = useMaterialTransferLengths()
-  const { data, isLoading } = useMaterialTransfers({
+  const { data, isLoading, error, refetch } = useMaterialTransfers({
     page,
     pageSize,
     filters: searchFilters,
@@ -542,18 +543,24 @@ export default function MaterialTransferPage() {
               className="flex h-full flex-col gap-2 overflow-hidden"
             >
               <div className="min-h-0 flex-1 overflow-hidden">
-                <MaterialTransferTable
-                  loading={isLoading}
-                  data={records}
-                  page={page}
-                  pageSize={pageSize}
-                  selectedRowKeys={selectedRowKeys}
-                  onSelect={setSelectedRowKeys}
-                  scrollY={scrollY}
-                  activeRowId={activeRecord?.id ?? null}
-                  onRowClick={setActiveRecord}
-                  orderProgressMap={orderProgressMap}
-                />
+                <TableState
+                  loading={isLoading && !data}
+                  error={error}
+                  onRetry={refetch}
+                >
+                  <MaterialTransferTable
+                    loading={isLoading}
+                    data={records}
+                    page={page}
+                    pageSize={pageSize}
+                    selectedRowKeys={selectedRowKeys}
+                    onSelect={setSelectedRowKeys}
+                    scrollY={scrollY}
+                    activeRowId={activeRecord?.id ?? null}
+                    onRowClick={setActiveRecord}
+                    orderProgressMap={orderProgressMap}
+                  />
+                </TableState>
               </div>
               <div ref={paginationRef} className="flex shrink-0 justify-end">
                 <AppPagination total={data?.total || 0} defaultPageSize={50} />
