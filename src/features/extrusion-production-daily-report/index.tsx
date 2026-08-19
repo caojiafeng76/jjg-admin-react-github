@@ -3,6 +3,7 @@ import { App, Button, Space } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { TableState } from '@/ui/TableState'
 import type {
   ExtrusionProductionDailyReportFilters,
 } from '@/services/apiExtrusionProductionDailyReport'
@@ -30,11 +31,12 @@ export default function ExtrusionProductionDailyReportPage() {
     useState<ExtrusionProductionDailyReportFilters>({})
   const [isExporting, setIsExporting] = useState(false)
 
-  const { data, isLoading, isFetching } = useExtrusionProductionDailyReport({
-    page,
-    pageSize,
-    filters: searchFilters,
-  })
+  const { data, isLoading, isFetching, error, refetch } =
+    useExtrusionProductionDailyReport({
+      page,
+      pageSize,
+      filters: searchFilters,
+    })
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 10,
@@ -140,15 +142,17 @@ export default function ExtrusionProductionDailyReportPage() {
       </div>
 
       <div ref={tableContainerRef} className="flex-1">
-        <ExtrusionProductionDailyReportTable
-          loading={isLoading || isFetching}
-          data={records}
-          page={page}
-          pageSize={pageSize}
-          selectedRowKeys={selectedRowKeys}
-          onRowSelectionChange={handleRowSelectionChange}
-          scrollY={scrollY}
-        />
+        <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+          <ExtrusionProductionDailyReportTable
+            loading={isLoading || isFetching}
+            data={records}
+            page={page}
+            pageSize={pageSize}
+            selectedRowKeys={selectedRowKeys}
+            onRowSelectionChange={handleRowSelectionChange}
+            scrollY={scrollY}
+          />
+        </TableState>
       </div>
 
       <div ref={paginationRef}>

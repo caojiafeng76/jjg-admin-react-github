@@ -13,6 +13,7 @@ import dayjs from 'dayjs'
 
 import AppPagination from '@/ui/AppPagination'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import type {
   ProductionDailyReportFilters,
@@ -72,7 +73,7 @@ export default function ProductionDailyReportPage() {
   )
   const [isExporting, setIsExporting] = useState(false)
 
-  const { data, isLoading, isFetching } = useProductionDailyReport({
+  const { data, isLoading, isFetching, error, refetch } = useProductionDailyReport({
     page,
     pageSize,
     filters,
@@ -354,22 +355,24 @@ export default function ProductionDailyReportPage() {
             : 'min-h-0 flex-1 overflow-hidden'
         }
       >
-        {isEmployeeView ? (
-          <ProductionDailyReportMobileList
-            loading={isLoading || isFetching}
-            data={currentPageRows}
-          />
-        ) : (
-          <ProductionDailyReportTable
-            loading={isLoading || isFetching || isExporting}
-            data={currentPageRows}
-            page={page}
-            pageSize={pageSize}
-            selectedRowKeys={selectedRowKeys}
-            onRowSelectionChange={handleRowSelectionChange}
-            scrollY={scrollY}
-          />
-        )}
+        <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+          {isEmployeeView ? (
+            <ProductionDailyReportMobileList
+              loading={isLoading || isFetching}
+              data={currentPageRows}
+            />
+          ) : (
+            <ProductionDailyReportTable
+              loading={isLoading || isFetching || isExporting}
+              data={currentPageRows}
+              page={page}
+              pageSize={pageSize}
+              selectedRowKeys={selectedRowKeys}
+              onRowSelectionChange={handleRowSelectionChange}
+              scrollY={scrollY}
+            />
+          )}
+        </TableState>
       </div>
 
       <div
