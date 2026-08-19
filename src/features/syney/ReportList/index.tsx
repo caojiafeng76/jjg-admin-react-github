@@ -19,6 +19,7 @@ import { useAppStore } from '@/store'
 import ConfirmButton from './ConfirmButton'
 import UnConfirmedButton from './UnConfirmedButton'
 import AppPagination from '@/ui/AppPagination'
+import { TableState } from '@/ui/TableState'
 import { useReports } from './useReports'
 import ExportAsExcelButton from './ExportAsExcelButton'
 import { useGenerateSyneyStoreReportPDF } from './useGenerateSyneyStoreReportPDF'
@@ -64,7 +65,7 @@ export default function ReportList() {
   const reportFormRef = useRef<ISyneyStoreReportFormRef>(null)
 
   const { isDeleting, deleteReport } = useDeleteReport()
-  const { count, reports, isLoading: reportsLoading } = useReports()
+  const { count, reports, isLoading: reportsLoading, error, refetch } = useReports()
 
   function handleCreate() {
     reportFormRef.current?.getInstance().resetFields()
@@ -324,13 +325,19 @@ export default function ReportList() {
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <ReportTable
-            loading={reportsLoading}
-            data={records}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-          />
+          <TableState
+            loading={reportsLoading && records.length === 0}
+            error={error}
+            onRetry={refetch}
+          >
+            <ReportTable
+              loading={reportsLoading}
+              data={records}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={count || 0} />

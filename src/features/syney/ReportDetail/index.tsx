@@ -16,6 +16,7 @@ import { FormInstance } from 'antd/lib'
 import { useAppStore } from '@/store'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
+import { TableState } from '@/ui/TableState'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 // 状态 pill 语义色（与 ReportList ReportTable STATUS_STYLES 一致）
@@ -229,13 +230,15 @@ export default function ReportDetail() {
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <DetailTable
-            data={records}
-            loading={reportLoading || isUpdating || isDeleting}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-          />
+          <TableState loading={reportLoading && records.length === 0}>
+            <DetailTable
+              data={records}
+              loading={reportLoading || isUpdating || isDeleting}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={total} />

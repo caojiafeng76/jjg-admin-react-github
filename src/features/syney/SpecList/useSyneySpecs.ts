@@ -20,6 +20,7 @@ export function useSyneySpecs(
     data: { syneySpecs, count } = { syneySpecs: [], count: 0 },
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ['syney-Specs', PartNo, page, pageSize, isAll],
     queryFn: () => getSyneySpecs({ PartNo, page, pageSize, isAll }),
@@ -55,5 +56,5 @@ export function useSyneySpecs(
     }
   }, [page, pageCount, pageSize, PartNo, isAll, queryClient])
 
-  return { syneySpecs, isLoading, error, count }
+  return { syneySpecs, isLoading, error, count, refetch }
 }

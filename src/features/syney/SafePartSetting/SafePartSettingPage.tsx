@@ -40,6 +40,7 @@ import {
 } from '../useSyneySafePartSettings'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
 
 const DECOMPOSITION_ROLE_LABELS: Record<string, string> = {
   side_frame: '侧围',
@@ -119,7 +120,7 @@ export default function SafePartSettingPage() {
     form.resetFields()
   }
 
-  const { data, isLoading } = useSyneySafePartSettings()
+  const { data, isLoading, error, refetch } = useSyneySafePartSettings()
 
   const saveMutation = useMutationWithMessage({
     mutationFn: upsertSyneySafePartSetting,
@@ -576,22 +577,24 @@ export default function SafePartSettingPage() {
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div className="min-h-0 overflow-hidden">
-          <Table
-            rowKey="id"
-            loading={
-              isLoading ||
-              saveMutation.isPending ||
-              deleteMutation.isPending
-            }
-            dataSource={pagedData}
-            columns={columns}
-            rowSelection={rowSelection}
-            size="small"
-            pagination={false}
-            scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
-            style={{ fontSize: '13px' }}
-            className="[&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30"
-          />
+          <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+            <Table
+              rowKey="id"
+              loading={
+                isLoading ||
+                saveMutation.isPending ||
+                deleteMutation.isPending
+              }
+              dataSource={pagedData}
+              columns={columns}
+              rowSelection={rowSelection}
+              size="small"
+              pagination={false}
+              scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
+              style={{ fontSize: '13px' }}
+              className="[&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30"
+            />
+          </TableState>
         </div>
         <div className="flex shrink-0 justify-end">
           <Pagination

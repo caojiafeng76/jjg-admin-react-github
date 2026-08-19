@@ -26,6 +26,7 @@ export function usePos() {
     data: { syneyPos: pos, count } = { syneyPos: [], count: 0 },
     isFetching,
     error,
+    refetch,
   } = useQuery({
     queryKey: syneyPoKeys.list({
       page,
@@ -111,5 +112,6 @@ export function usePos() {
     count,
     isLoading: isFetching,
     error,
+    refetch,
   }
 }

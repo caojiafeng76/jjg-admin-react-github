@@ -16,6 +16,13 @@
 ## 2026-08-19
 
 - **类别**：变更
+- **范围**：西尼模块表格骨架屏适配：`src/features/syney/` 下 PoList、SpecList、ReportList、ReportDetail、PoDetail、SafePartSetting 六个列表页
+- **摘要**：西尼相关模块表格适配骨架屏，对齐 youmai/material-transfer 既有 `TableState` 三态模式：① 六个列表页容器用 `<TableState loading={首屏无数据}>` 包裹表格，首屏加载显示骨架屏（替代 antd 默认 spinner），分页/刷新因 keepPreviousData 已有数据不闪骨架屏，表格自带 loading 兜底；② 三个列表 hook（`usePos`、`useSyneySpecs`、`useReports`）返回对象增量补充 `refetch`，配合已暴露的 `error` 接入 `TableState` 错误态 + 重试；SafePartSetting 直接复用 `useSyneySafePartSettings` 原生 `error`/`refetch`；③ ReportDetail/PoDetail 错误仍抛 ErrorBoundary，仅接入骨架屏加载态。
+- **验证**：`bun run typecheck` 通过；`bun run test` 全量通过；`lsp_diagnostics` 改动文件 0 错误。
+
+## 2026-08-19
+
+- **类别**：变更
 - **范围**：`.gitignore`、`.omo/run-continuation/`
 - **摘要**：将 AI 会话续跑产物目录 `.omo/run-continuation/` 加入 `.gitignore`，并 `git rm -r --cached` 移除已跟踪的 78 个会话 json 文件（工作区文件保留，不再纳入版本控制）。
 - **验证**：`git check-ignore` 确认忽略规则生效；`git status` 无该目录 untracked 残留。

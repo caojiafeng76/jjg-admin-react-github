@@ -14,6 +14,7 @@ import DeleteButton from '@ui/DeleteButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import PartNoInput from './PartNoInput'
 import AppPagination from '@/ui/AppPagination'
+import { TableState } from '@/ui/TableState'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useSearchParams } from 'react-router-dom'
 import { Key } from 'react'
@@ -31,7 +32,7 @@ export default function SpecList() {
   const [isEditing, setIsEditing] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
-  const { syneySpecs, isLoading, count } = useSyneySpecs()
+  const { syneySpecs, isLoading, error, count, refetch } = useSyneySpecs()
   const {
     isCreating,
     createSyneySpec,
@@ -159,15 +160,21 @@ export default function SpecList() {
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <SpecTable
-            data={records}
-            loading={isLoading || isCreating || isUpdating || isDeleting}
-            onSelect={onSelect}
-            selectedRowKeys={selectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-          />
+          <TableState
+            loading={isLoading && records.length === 0}
+            error={error}
+            onRetry={refetch}
+          >
+            <SpecTable
+              data={records}
+              loading={isLoading || isCreating || isUpdating || isDeleting}
+              onSelect={onSelect}
+              selectedRowKeys={selectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={count || 0} />

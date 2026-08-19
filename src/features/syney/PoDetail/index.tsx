@@ -10,6 +10,7 @@ import { useItem } from './useItem'
 import { useDetail } from './useDetail'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
+import { TableState } from '@/ui/TableState'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeftIcon } from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
@@ -139,13 +140,15 @@ export default function PoDetail() {
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <DetailTable
-            loading={isLoading || isDetailLoading}
-            data={records}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-          />
+          <TableState loading={isDetailLoading && records.length === 0}>
+            <DetailTable
+              loading={isLoading || isDetailLoading}
+              data={records}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={total} />

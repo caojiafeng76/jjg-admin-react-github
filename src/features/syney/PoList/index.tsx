@@ -5,6 +5,7 @@ import type { TransformedOrderData } from '@utils/excelUtils'
 
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
+import { TableState } from '@/ui/TableState'
 import PoTable from './PoTable'
 import PoForm from './PoForm'
 import { useAppStore } from '@/store'
@@ -49,7 +50,7 @@ export default function PoList() {
 
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
-  const { count, pos, isLoading: posLoading } = usePos()
+  const { count, pos, isLoading: posLoading, error: posError, refetch: posRefetch } = usePos()
   const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
   const setTableSelectedKeys = useAppStore(
     (state) => state.setTableSelectedKeys,
@@ -432,13 +433,19 @@ export default function PoList() {
       {/* 表格和分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <PoTable
-            loading={posLoading || isCreating || isPoUpdating}
-            data={records}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-          />
+          <TableState
+            loading={posLoading && records.length === 0}
+            error={posError}
+            onRetry={posRefetch}
+          >
+            <PoTable
+              loading={posLoading || isCreating || isPoUpdating}
+              data={records}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={count || 0} />

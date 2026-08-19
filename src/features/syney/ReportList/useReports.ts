@@ -21,6 +21,7 @@ export function useReports() {
       count: 0,
     },
     error,
+    refetch,
   } = useQuery({
     queryKey: ['syney-reports', status, page, pageSize],
     queryFn: () => getSyneyStoreReports({ status, page, pageSize }),
@@ -62,5 +63,6 @@ export function useReports() {
     reports,
     count,
     error,
+    refetch,
   }
 }
