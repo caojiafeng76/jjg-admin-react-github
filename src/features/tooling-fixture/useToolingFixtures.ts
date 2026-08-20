@@ -57,6 +57,7 @@ export function useToolingFixtureList({
         updatedDateRange,
         signal,
       }),
+    throwOnError: false,
     placeholderData: keepPreviousData,
     ...queryConfig.list,
   })
@@ -122,7 +123,6 @@ export function usePublicToolingFixture(qrToken: string) {
     enabled: Boolean(qrToken),
     ...queryConfig.detail,
     retry: false,
-    throwOnError: false,
   })
 }
 

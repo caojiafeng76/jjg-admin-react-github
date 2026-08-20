@@ -16,6 +16,13 @@
 ## 2026-08-20
 
 - **类别**：变更
+- **范围**：工装资料 FixtureData（K1），`src/features/tooling-fixture/`、`todolist.md`
+- **摘要**：完成工装资料列表页改版：查询错误交由 `TableState` 展示错误/重试，空态引导新增，状态与寿命统一使用 `StatusPill`，表单失败反馈改为 Modal 内 `FormErrorAlert`，保养周期数字列右对齐并使用 `tabular-nums`；桌面保留完整横向表格，`md` 以下切换为可操作的移动端卡片，并使用 Ant Design theme token 适配亮暗主题；产品名称列增加省略，避免中文逐字断行。K1 已在 `todolist.md` 标记完成，K2 未改动。
+- **验证**：`bun run test` 通过（116 个测试文件、519 个用例）；`bun run typecheck` 通过；`bun lint` 0 错误（仓库原有 15 条警告）；Prettier、TypeScript no-excuse audit、4 个受影响文件 `antd lint` 均通过；`bun run build` 通过（仅保留 Vite 配置扩展名既有警告）；Playwright 桌面/移动组件页面验证与两轮独立视觉 QA 均通过。真实 `/fixture-data` 路由已验证会因无 Auth session 重定向登录页。
+
+## 2026-08-20
+
+- **类别**：变更
 - **范围**：精加工切割单 `src/features/precision-finishing-cutting/`（H2）
 - **摘要**：精加工切割单 PrecisionFinishingCutting 过通用列表页清单：① 数字列右对齐 + tabular-nums：`#`、长度、转移数量 3 列加 `align: right` 与 `<span className="tabular-nums">` 包裹（含汇总行右对齐），`fontSize 12px→13px` 对齐全局表；② 状态 pill 徽章化：审核状态列由 antd `Tag`（success/default）改为通用 `<StatusPill tone=success/neutral>`（S2 体系）；③ 选中摘要条补齐：桌面端新增 `<SelectedSummaryBar>`（token 渐变底+辉光，tone=error 转移数量合计，跨页提示），原页面无摘要条；④ 表格三态：列表查询加 `throwOnError:false`，桌面端用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格（骨架屏/错误重试），表格 `locale.emptyText` 注入 `<TableEmpty title="暂无精加工切割单">`（含新建按钮），容器加 `rounded-xl border shadow-sm` 业务卡样式，表头/汇总行补 hover/暗色样式对齐 H1；⑤ 表单反馈：新建/编辑失败由 `message.error` 改为 Modal 内 `<FormErrorAlert>` 三段式，关闭/重开清空；表单分段卡补 `dark:` 变体。核对通过项：新增/编辑仍用 Modal（员工端走扫码页，不改）、表格已 `size="small"`、搜索区白卡样式符合 A4、Splitter 详情面板保留。
 - **验证**：`bun run typecheck` 通过；`bun run test` 114/114 通过（515 用例）；`lsp_diagnostics` precision-finishing-cutting 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。

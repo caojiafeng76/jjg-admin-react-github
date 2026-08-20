@@ -1,17 +1,5 @@
 import { useCallback, useState } from 'react'
-import { PlusIcon, TrashIcon } from '@heroicons/react/16/solid'
-import {
-  App,
-  Button,
-  Card,
-  DatePicker,
-  Input,
-  Modal,
-  Pagination,
-  Select,
-  Space,
-  Typography,
-} from 'antd'
+import { App } from 'antd'
 import type { FormInstance } from 'antd'
 import type { Dayjs } from 'dayjs'
 
@@ -22,7 +10,6 @@ import {
   type ToolingFixtureDateRange,
   type ToolingFixtureFormValues,
 } from '@/services/apiToolingFixture'
-import PrintButton from '@ui/PrintButton'
 import {
   useCreateToolingFixture,
   useDeleteToolingFixtures,
@@ -30,13 +17,10 @@ import {
   useToolingFixtureList,
   useUpdateToolingFixture,
 } from './useToolingFixtures'
-import ToolingFixtureExcelImport from './ToolingFixtureExcelImport'
-import ToolingFixtureForm from './ToolingFixtureForm'
-import ToolingFixtureTable from './ToolingFixtureTable'
+import FixtureDataView from './FixtureDataView'
 import { usePrintToolingFixtureQrLabels } from './usePrintToolingFixtureQrLabels'
 
 const DEFAULT_PAGE_SIZE = 10
-const PAGE_SIZE_OPTIONS = [10, 20, 50]
 
 function toFixtureDateRange(
   range: [Dayjs, Dayjs] | null,
@@ -68,8 +52,9 @@ export default function FixtureDataPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [formRef, setFormRef] =
     useState<FormInstance<ToolingFixtureFormValues> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
-  const { data, isLoading } = useToolingFixtureList({
+  const { data, isLoading, error, refetch } = useToolingFixtureList({
     page,
     pageSize,
     keyword,
@@ -91,6 +76,7 @@ export default function FixtureDataPage() {
   const closeModal = useCallback(() => {
     setModalOpen(false)
     setEditingRecord(null)
+    setFormError(null)
     formRef?.resetFields()
   }, [formRef])
 
@@ -107,8 +93,8 @@ export default function FixtureDataPage() {
         closeModal()
         setSelectedRowKeys([])
       } catch (error) {
-        message.error(
-          error instanceof Error ? error.message : '保存工装资料失败',
+        setFormError(
+          error instanceof Error ? error : new Error('保存工装资料失败'),
         )
       }
     },
@@ -164,11 +150,13 @@ export default function FixtureDataPage() {
 
   const openCreate = useCallback(() => {
     setEditingRecord(null)
+    setFormError(null)
     setModalOpen(true)
   }, [])
 
   const openEdit = useCallback((record: ToolingFixture) => {
     setEditingRecord(record)
+    setFormError(null)
     setModalOpen(true)
   }, [])
 
@@ -210,9 +198,7 @@ export default function FixtureDataPage() {
 
       await printLabels(items)
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : '获取工装资料失败',
-      )
+      message.error(error instanceof Error ? error.message : '获取工装资料失败')
     } finally {
       setIsPrintLoading(false)
     }
@@ -233,161 +219,58 @@ export default function FixtureDataPage() {
   )
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-hidden p-4 md:p-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <Typography.Title level={2} className="!mb-1">
-            工装资料
-          </Typography.Title>
-          <Typography.Text type="secondary">
-            维护工装模具资料，并为每个工装生成现场扫码二维码。
-          </Typography.Text>
-        </div>
-        <div className="flex items-center gap-2">
-          <ToolingFixtureExcelImport
-            onImport={handleImport}
-            isImporting={importMutation.isPending}
-          />
-          <Button
-            type="primary"
-            icon={<PlusIcon className="size-4" />}
-            onClick={openCreate}
-          >
-            新增工装
-          </Button>
-        </div>
-      </div>
-
-      <Card
-        className="flex min-h-0 flex-1 flex-col"
-        styles={{
-          body: {
-            flex: 1,
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        }}
-      >
-        <Space wrap className="mb-4">
-          <Input.Search
-            allowClear
-            placeholder="搜索编号、产品、设备、责任人"
-            onSearch={handleSearch}
-            style={{ width: 320, maxWidth: '85vw' }}
-          />
-          <Select
-            allowClear
-            placeholder="按状态筛选"
-            value={status}
-            style={{ width: 140 }}
-            options={[
-              { label: '未使用', value: '未使用' },
-              { label: '使用中', value: '使用中' },
-            ]}
-            onChange={(value: ToolingFixture['status'] | undefined) => {
-              setPage(1)
-              setStatus(value)
-            }}
-          />
-          <DatePicker.RangePicker
-            allowClear
-            format="YYYY-MM-DD"
-            placeholder={['制作开始日期', '制作结束日期']}
-            value={manufacturedDateRange}
-            style={{ width: 260 }}
-            onChange={(value) => {
-              setPage(1)
-              setManufacturedDateRange(
-                value?.[0] && value?.[1] ? [value[0], value[1]] : null,
-              )
-            }}
-          />
-          <DatePicker.RangePicker
-            allowClear
-            format="YYYY-MM-DD"
-            placeholder={['更新开始日期', '更新结束日期']}
-            value={updatedDateRange}
-            style={{ width: 260 }}
-            onChange={(value) => {
-              setPage(1)
-              setUpdatedDateRange(
-                value?.[0] && value?.[1] ? [value[0], value[1]] : null,
-              )
-            }}
-          />
-          <PrintButton
-            handlePrint={handlePrintFiltered}
-            loading={isPrinting || isPrintLoading}
-          >
-            打印二维码
-          </PrintButton>
-          {selectedRowKeys.length > 0 ? (
-            <Button
-              type="text"
-              danger
-              icon={<TrashIcon className="size-4" />}
-              onClick={handleDeleteSelected}
-            >
-              删除选中
-            </Button>
-          ) : null}
-        </Space>
-
-        <div
-          ref={tableContainerRef}
-          className="flex min-h-0 flex-1 flex-col overflow-hidden"
-        >
-          <div className="min-h-0 flex-1 overflow-x-auto">
-            <ToolingFixtureTable
-              loading={isLoading}
-              data={data?.items ?? []}
-              selectedRowKeys={selectedRowKeys}
-              onSelect={setSelectedRowKeys}
-              onEdit={openEdit}
-              onDelete={handleDelete}
-              onPrint={handlePrintRecord}
-              page={page}
-              pageSize={pageSize}
-              scrollY={scrollY}
-            />
-          </div>
-          <div ref={paginationRef} className="mt-4 flex shrink-0 justify-end">
-            <Pagination
-              current={page}
-              pageSize={pageSize}
-              total={data?.total ?? 0}
-              showSizeChanger
-              pageSizeOptions={PAGE_SIZE_OPTIONS}
-              onChange={(nextPage) => setPage(nextPage)}
-              onShowSizeChange={(_current, size) => {
-                setPageSize(size)
-                setPage(1)
-              }}
-            />
-          </div>
-        </div>
-      </Card>
-
-      <Modal
-        open={modalOpen}
-        title={editingRecord ? '编辑工装资料' : '新增工装资料'}
-        width={860}
-        destroyOnHidden
-        onCancel={closeModal}
-        onOk={() => formRef?.submit()}
-        okText="保存"
-        cancelText="取消"
-        confirmLoading={isSubmitting}
-      >
-        <ToolingFixtureForm
-          setFormRef={setFormRef}
-          onFinish={handleFinish}
-          isSubmitting={isSubmitting}
-          initialValues={editingRecord ?? undefined}
-          status={editingRecord?.status ?? '未使用'}
-        />
-      </Modal>
-    </div>
+    <FixtureDataView
+      data={data}
+      isLoading={isLoading}
+      error={error}
+      refetch={refetch}
+      keyword={keyword}
+      status={status}
+      manufacturedDateRange={manufacturedDateRange}
+      updatedDateRange={updatedDateRange}
+      selectedRowKeys={selectedRowKeys}
+      page={page}
+      pageSize={pageSize}
+      editingRecord={editingRecord}
+      modalOpen={modalOpen}
+      formError={formError}
+      isSubmitting={isSubmitting}
+      isImporting={importMutation.isPending}
+      isPrinting={isPrinting}
+      isPrintLoading={isPrintLoading}
+      tableContainerRef={tableContainerRef}
+      paginationRef={paginationRef}
+      scrollY={scrollY}
+      onCreate={openCreate}
+      onImport={handleImport}
+      onSearch={handleSearch}
+      onStatusChange={(value) => {
+        setPage(1)
+        setStatus(value)
+      }}
+      onManufacturedDateChange={(value) => {
+        setPage(1)
+        setManufacturedDateRange(value)
+      }}
+      onUpdatedDateChange={(value) => {
+        setPage(1)
+        setUpdatedDateRange(value)
+      }}
+      onPrintFiltered={handlePrintFiltered}
+      onDeleteSelected={handleDeleteSelected}
+      onSelect={setSelectedRowKeys}
+      onEdit={openEdit}
+      onDelete={handleDelete}
+      onPrint={handlePrintRecord}
+      onPageChange={setPage}
+      onPageSizeChange={(size) => {
+        setPageSize(size)
+        setPage(1)
+      }}
+      onClose={closeModal}
+      onSubmit={() => formRef?.submit()}
+      onFinish={handleFinish}
+      onSetFormRef={setFormRef}
+    />
   )
 }

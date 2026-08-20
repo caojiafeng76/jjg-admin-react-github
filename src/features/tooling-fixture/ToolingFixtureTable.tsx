@@ -1,15 +1,23 @@
 import { memo, useMemo } from 'react'
 import {
   Button,
+  Grid,
   QRCode,
   Table,
-  Tag,
   Tooltip,
   type TableColumnsType,
 } from 'antd'
 
 import type { ToolingFixture } from '@/services/apiToolingFixture'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
 import { getToolingFixtureQrValue } from './fixtureDomain'
+import ToolingFixtureMobileList from './ToolingFixtureMobileList'
+import {
+  formatDateOnly,
+  getLifecycleTone,
+  getStatusTone,
+} from './toolingFixturePresentation'
 
 interface ToolingFixtureTableProps {
   loading: boolean
@@ -22,18 +30,11 @@ interface ToolingFixtureTableProps {
   page: number
   pageSize: number
   scrollY?: number
+  emptyAction?: React.ReactNode
 }
 
 function formatDate(value: string | null): string {
   return value ? value : '-'
-}
-
-function formatDateOnly(value: string | null): string {
-  return value ? value.slice(0, 10) : '-'
-}
-
-function getStatusColor(status: ToolingFixture['status']): string {
-  return status === '使用中' ? 'orange' : 'green'
 }
 
 function ToolingFixtureTable({
@@ -47,7 +48,9 @@ function ToolingFixtureTable({
   page,
   pageSize,
   scrollY = 520,
+  emptyAction,
 }: ToolingFixtureTableProps) {
+  const screens = Grid.useBreakpoint()
   const columns = useMemo<TableColumnsType<ToolingFixture>>(
     () => [
       {
@@ -98,6 +101,7 @@ function ToolingFixtureTable({
         dataIndex: 'product_name',
         key: 'product_name',
         width: 140,
+        ellipsis: true,
       },
       {
         title: '适用设备',
@@ -130,7 +134,7 @@ function ToolingFixtureTable({
         key: 'status',
         width: 100,
         render: (status: ToolingFixture['status']) => (
-          <Tag color={getStatusColor(status)}>{status}</Tag>
+          <StatusPill tone={getStatusTone(status)}>{status}</StatusPill>
         ),
       },
       {
@@ -139,13 +143,11 @@ function ToolingFixtureTable({
         key: 'lifecycle',
         width: 90,
         render: (lifecycle: ToolingFixture['lifecycle']) => {
-          const color =
-            lifecycle === '正常'
-              ? 'green'
-              : lifecycle === '维修'
-                ? 'orange'
-                : 'red'
-          return <Tag color={color}>{lifecycle}</Tag>
+          return (
+            <StatusPill tone={getLifecycleTone(lifecycle)}>
+              {lifecycle}
+            </StatusPill>
+          )
         },
       },
       {
@@ -160,7 +162,10 @@ function ToolingFixtureTable({
         dataIndex: 'maintenance_cycle_days',
         key: 'maintenance_cycle_days',
         width: 130,
-        render: (value: number | null) => value ?? '-',
+        align: 'right',
+        render: (value: number | null) => (
+          <span className="tabular-nums">{value ?? '-'}</span>
+        ),
       },
       {
         title: '责任人',
@@ -182,11 +187,7 @@ function ToolingFixtureTable({
         width: 150,
         render: (_value, record) => (
           <div className="flex gap-2">
-            <Button
-              type="link"
-              size="small"
-              onClick={() => onPrint(record)}
-            >
+            <Button type="link" size="small" onClick={() => onPrint(record)}>
               打印
             </Button>
             <Button type="link" size="small" onClick={() => onEdit(record)}>
@@ -207,6 +208,21 @@ function ToolingFixtureTable({
     [onDelete, onEdit, onPrint, page, pageSize],
   )
 
+  if (!screens.md) {
+    return (
+      <ToolingFixtureMobileList
+        data={data}
+        loading={loading}
+        selectedRowKeys={selectedRowKeys}
+        onSelect={onSelect}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onPrint={onPrint}
+        emptyAction={emptyAction}
+      />
+    )
+  }
+
   return (
     <Table<ToolingFixture>
       rowKey="id"
@@ -220,6 +236,15 @@ function ToolingFixtureTable({
       }}
       scroll={{ x: 2220, y: scrollY }}
       size="small"
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无工装资料"
+            description="点击下方按钮创建第一条工装资料"
+            action={emptyAction}
+          />
+        ),
+      }}
     />
   )
 }

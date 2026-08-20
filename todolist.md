@@ -82,7 +82,7 @@
 
 ## K. 工装管理（tooling-fixture）
 
-- [ ] **K1** 工装资料 FixtureData
+- [x] **K1** 工装资料 FixtureData
 - [ ] **K2** 出入记录 FixtureRecords（进出方向语义色区分）
 
 ## L. 别墅梯（villa-lift）
