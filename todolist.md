@@ -66,7 +66,7 @@
 ## H. 精切（precision-cutting）
 
 - [x] **H1** 精切转移单 PrecisionCuttingTransfer
-- [ ] **H2** 精加工切割单 PrecisionFinishingCutting
+- [x] **H2** 精加工切割单 PrecisionFinishingCutting
 
 ## I. 刀具（tooling）
 

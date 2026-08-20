@@ -29,6 +29,8 @@ export function usePrecisionFinishingCuttings({
     queryKey: [PRECISION_FINISHING_CUTTINGS_KEY, page, pageSize, filters],
     queryFn: () => getPrecisionFinishingCuttings({ page, pageSize, ...filters }),
     placeholderData: keepPreviousData,
+    // 不抛错到 ErrorBoundary，让列表页用 TableState 展示错误态 + 重试
+    throwOnError: false,
     ...queryConfig.list,
   })
 }

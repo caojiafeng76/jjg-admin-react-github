@@ -12,6 +12,8 @@ import {
   Switch,
 } from 'antd'
 
+import FormErrorAlert from '@/ui/FormErrorAlert'
+
 import {
   buildProjectNoSelectOptions,
   filterProjectNoOption,
@@ -43,6 +45,7 @@ interface Props {
   currentUploader?: string | null
   canAudit?: boolean
   mobile?: boolean
+  formError?: unknown
 }
 
 const DEFAULT_INSPECTOR_NAME = '崔路路'
@@ -72,6 +75,7 @@ export default function PrecisionFinishingCuttingForm({
   currentUploader = null,
   canAudit = true,
   mobile = false,
+  formError,
 }: Props) {
   const { message } = App.useApp()
   const [form] = Form.useForm<PrecisionFinishingCuttingFormValues>()
@@ -298,17 +302,17 @@ export default function PrecisionFinishingCuttingForm({
 
   const formItemClassName = 'mb-0'
   const sectionClassName =
-    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm'
+    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/90'
   const sectionTitleClassName =
-    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700'
+    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
 
   const sectionDot = (className = 'bg-blue-500') => (
     <span className={`h-1.5 w-1.5 rounded-full ${className}`} />
   )
 
   const outsourceSection = (
-    <section className="rounded-2xl border border-red-200/80 bg-red-50/70 p-4 shadow-sm">
-      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-red-600">
+    <section className="rounded-2xl border border-red-200/80 bg-red-50/70 p-4 shadow-sm dark:border-red-900/50 dark:bg-red-900/20">
+      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-red-600 dark:text-red-300">
         {sectionDot('bg-red-500')}
         外协相关信息
       </div>
@@ -358,6 +362,11 @@ export default function PrecisionFinishingCuttingForm({
       destroyOnHidden
     >
       <div className={mobile ? 'overscroll-contain pr-1' : undefined}>
+        {formError ? (
+          <div className="mb-4">
+            <FormErrorAlert error={formError} />
+          </div>
+        ) : null}
         <Form
           form={form}
           layout="vertical"
@@ -650,7 +659,7 @@ export default function PrecisionFinishingCuttingForm({
 
           {mobile ? outsourceSection : null}
 
-          <Form.Item className="sticky bottom-0 z-10 -mx-1 mb-0 border-t border-slate-100 bg-white/95 px-1 pt-3 backdrop-blur-sm">
+          <Form.Item className="sticky bottom-0 z-10 -mx-1 mb-0 border-t border-slate-100 bg-white/95 px-1 pt-3 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
             <Space className="flex justify-end">
               <Button onClick={onCancel}>取消</Button>
               <Button type="primary" htmlType="submit" loading={loading}>

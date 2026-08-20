@@ -1,8 +1,10 @@
 import { useCallback, useMemo } from 'react'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, Tag, type TableColumnsType, type TableProps } from 'antd'
+import { Table, type TableColumnsType, type TableProps } from 'antd'
 
 import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
 
 interface Props {
   loading: boolean
@@ -15,6 +17,8 @@ interface Props {
   rowHeight?: number
   activeRowId?: string | null
   onRowClick?: (record: PrecisionFinishingCuttingWithEmployee) => void
+  /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
+  emptyAction?: React.ReactNode
 }
 
 export default function PrecisionFinishingCuttingTable({
@@ -28,6 +32,7 @@ export default function PrecisionFinishingCuttingTable({
   rowHeight = 40,
   activeRowId,
   onRowClick,
+  emptyAction,
 }: Props) {
   const currentPageTransferQuantity = useMemo(
     () =>
@@ -46,7 +51,10 @@ export default function PrecisionFinishingCuttingTable({
           key: 'index',
           width: 50,
           fixed: 'left',
-          render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
+          align: 'right',
+          render: (_text, _record, index) => (
+            <span className="tabular-nums">{(page - 1) * pageSize + index + 1}</span>
+          ),
         },
         {
           title: '创建时间',
@@ -69,9 +77,9 @@ export default function PrecisionFinishingCuttingTable({
           ],
           onFilter: (value, record) => record.is_audited === value,
           render: (value: boolean) => (
-            <Tag color={value ? 'success' : 'default'}>
+            <StatusPill tone={value ? 'success' : 'neutral'}>
               {value ? '已审核' : '待审核'}
-            </Tag>
+            </StatusPill>
           ),
         },
         {
@@ -115,6 +123,7 @@ export default function PrecisionFinishingCuttingTable({
           dataIndex: 'length_mm',
           key: 'length_mm',
           width: 80,
+          align: 'right',
           filters: Array.from(
             new Set(
               data
@@ -125,13 +134,24 @@ export default function PrecisionFinishingCuttingTable({
             .sort((a, b) => a - b)
             .map((v) => ({ text: `${v}mm`, value: v })),
           onFilter: (value, record) => record.length_mm === (value as number),
-          render: (value: number | null) => value ?? '-',
+          render: (value: number | null) =>
+            value == null ? (
+              '-'
+            ) : (
+              <span className="tabular-nums">{value}</span>
+            ),
         },
         {
           title: '转移数量',
           dataIndex: 'transfer_quantity',
           key: 'transfer_quantity',
           width: 90,
+          align: 'right',
+          render: (value: number) => (
+            <span className="font-semibold text-slate-700 tabular-nums dark:text-slate-200">
+              {value}
+            </span>
+          ),
         },
         {
           title: '操作人',
@@ -194,16 +214,26 @@ export default function PrecisionFinishingCuttingTable({
       scroll={{ x: 1120, y: scrollY }}
       size="small"
       pagination={false}
-      style={{ fontSize: '12px' }}
+      style={{ fontSize: '13px' }}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无精加工切割单"
+            description="点击下方按钮创建第一条精加工切割单"
+            action={emptyAction}
+          />
+        ),
+      }}
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-row:hover>td]:bg-blue-500/10 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-400"
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row>
+          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800/80">
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={7}>
-              <span className="font-medium text-slate-600">当前页合计</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={8}>
-              <span className="font-semibold text-slate-900">
+            <Table.Summary.Cell index={8} align="right">
+              <span className="font-bold text-slate-900 tabular-nums dark:text-slate-100">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>

@@ -16,6 +16,13 @@
 ## 2026-08-20
 
 - **类别**：变更
+- **范围**：精加工切割单 `src/features/precision-finishing-cutting/`（H2）
+- **摘要**：精加工切割单 PrecisionFinishingCutting 过通用列表页清单：① 数字列右对齐 + tabular-nums：`#`、长度、转移数量 3 列加 `align: right` 与 `<span className="tabular-nums">` 包裹（含汇总行右对齐），`fontSize 12px→13px` 对齐全局表；② 状态 pill 徽章化：审核状态列由 antd `Tag`（success/default）改为通用 `<StatusPill tone=success/neutral>`（S2 体系）；③ 选中摘要条补齐：桌面端新增 `<SelectedSummaryBar>`（token 渐变底+辉光，tone=error 转移数量合计，跨页提示），原页面无摘要条；④ 表格三态：列表查询加 `throwOnError:false`，桌面端用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格（骨架屏/错误重试），表格 `locale.emptyText` 注入 `<TableEmpty title="暂无精加工切割单">`（含新建按钮），容器加 `rounded-xl border shadow-sm` 业务卡样式，表头/汇总行补 hover/暗色样式对齐 H1；⑤ 表单反馈：新建/编辑失败由 `message.error` 改为 Modal 内 `<FormErrorAlert>` 三段式，关闭/重开清空；表单分段卡补 `dark:` 变体。核对通过项：新增/编辑仍用 Modal（员工端走扫码页，不改）、表格已 `size="small"`、搜索区白卡样式符合 A4、Splitter 详情面板保留。
+- **验证**：`bun run typecheck` 通过；`bun run test` 114/114 通过（515 用例）；`lsp_diagnostics` precision-finishing-cutting 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-20
+
+- **类别**：变更
 - **范围**：精切转移单 `src/features/precision-cutting-transfer/`（H1）
 - **摘要**：精切转移单 PrecisionCuttingTransfer 过通用列表页清单：① 数字列右对齐 + tabular-nums：`#`、长度、实际长料数量、流程卡长料数量、ERP长料数量、转移数量 6 列加 `align: right` 与 `<span className="tabular-nums">` 包裹（含汇总行右对齐），全局 A3 表格等宽数字兜底；② 状态 pill 徽章化：审核状态列由 inline-flex 硬编码（emerald/slate）改为通用 `<StatusPill tone=success/neutral>`（S2 体系）；③ 选中摘要条通用化：内联蓝渐变条（含 rose 数量合计）替换为通用 `<SelectedSummaryBar>`（token 渐变底 + 辉光、tone=error，stats 转移数量合计），颜色走 antd token；④ 表格三态：列表查询加 `throwOnError:false`，页面用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格（首屏骨架屏 / 错误重试），表格 `locale.emptyText` 注入 `<TableEmpty title="暂无精切转移单">` 引导式空态（含新建按钮），表格容器加 `rounded-xl border shadow-sm` 业务卡样式；⑤ 表单反馈：新建/编辑失败由 `message.error` 顶部队列改为 Modal 内 `<FormErrorAlert>` 三段式（失败原因+影响+建议），关闭/重开清空。核对通过项：新增/编辑仍用 Modal、表格已 `size="small"`、搜索区白卡样式符合 A4、Splitter 详情面板保留。
 - **验证**：`bun run typecheck` 通过；`bun run test` 114/114 通过（515 用例）；`lsp_diagnostics` precision-cutting-transfer 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。

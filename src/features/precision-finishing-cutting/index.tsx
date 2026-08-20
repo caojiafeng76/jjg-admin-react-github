@@ -20,7 +20,8 @@ import {
   type PrecisionFinishingCuttingUpdate,
   type PrecisionFinishingCuttingWithEmployee,
 } from '@/services/apiPrecisionFinishingCuttings'
-import { translateErrorMessage } from '@/utils/errorHandler'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
 import PrecisionFinishingCuttingDetail from './PrecisionFinishingCuttingDetail'
 import PrecisionFinishingCuttingForm from './PrecisionFinishingCuttingForm'
 import PrecisionFinishingCuttingMobileList from './PrecisionFinishingCuttingMobileList'
@@ -72,9 +73,10 @@ export default function PrecisionFinishingCuttingPage() {
   const [activeRecord, setActiveRecord] =
     useState<PrecisionFinishingCuttingWithEmployee | null>(null)
   const [isExporting, setIsExporting] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const { data: employeeOptions = [] } = useAllEmployees(!isOwnOnlyView)
-  const { data, isLoading } = usePrecisionFinishingCuttings({
+  const { data, isLoading, error, refetch } = usePrecisionFinishingCuttings({
     page,
     pageSize,
     filters: searchFilters,
@@ -95,6 +97,24 @@ export default function PrecisionFinishingCuttingPage() {
     [selectedRowKeys],
   )
   const records = useMemo(() => data?.items || [], [data?.items])
+  const selectedSummary = useMemo(() => {
+    if (selectedRowKeys.length === 0) {
+      return { quantity: 0, matched: 0 }
+    }
+
+    const keySet = new Set(selectedRowKeys.map((key) => String(key)))
+    let quantity = 0
+    let matched = 0
+
+    for (const item of records) {
+      if (keySet.has(String(item.id))) {
+        quantity += Number(item.transfer_quantity || 0)
+        matched += 1
+      }
+    }
+
+    return { quantity, matched }
+  }, [records, selectedRowKeys])
   const employees = useMemo(
     () => (fixedEmployee ? [fixedEmployee] : employeeOptions),
     [employeeOptions, fixedEmployee],
@@ -113,6 +133,7 @@ export default function PrecisionFinishingCuttingPage() {
     }
 
     setEditingRecord(null)
+    setFormError(null)
     setIsModalOpen(true)
   }, [isEmployeeView, navigate])
 
@@ -147,6 +168,7 @@ export default function PrecisionFinishingCuttingPage() {
       }
 
       setEditingRecord(targetRecord)
+      setFormError(null)
       setIsModalOpen(true)
     },
     [isEmployeeView, message, navigate, records, selectedRowKeys],
@@ -155,6 +177,7 @@ export default function PrecisionFinishingCuttingPage() {
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
     setEditingRecord(null)
+    setFormError(null)
   }, [])
 
   const handleSearch = useCallback(
@@ -350,14 +373,10 @@ export default function PrecisionFinishingCuttingPage() {
 
         handleCloseModal()
         setSelectedRowKeys([])
+        setFormError(null)
       } catch (error) {
-        message.error(
-          error instanceof Error
-            ? translateErrorMessage(error.message)
-            : editingRecord
-              ? '更新失败'
-              : '创建失败',
-        )
+        // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
+        setFormError(error)
       }
     },
     [
@@ -367,7 +386,6 @@ export default function PrecisionFinishingCuttingPage() {
       fixedEmployee,
       handleCloseModal,
       isEmployeeView,
-      message,
       updateMutation,
       viewerDenied,
       viewerOperationTip,
@@ -454,6 +472,35 @@ export default function PrecisionFinishingCuttingPage() {
         />
       </div>
 
+      {!isEmployeeView && selectedCount > 0 ? (
+        <SelectedSummaryBar
+          selectedCount={selectedCount}
+          matchedCount={selectedSummary.matched}
+          stats={[
+            {
+              label: '转移数量合计',
+              value: selectedSummary.quantity,
+              tone: 'error',
+              icon: (
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                  />
+                </svg>
+              ),
+            },
+          ]}
+        />
+      ) : null}
+
       {isEmployeeView ? (
         <>
           <div
@@ -484,18 +531,21 @@ export default function PrecisionFinishingCuttingPage() {
               ref={tableContainerRef}
               className="flex h-full flex-col gap-2 overflow-hidden"
             >
-              <div className="min-h-0 flex-1 overflow-hidden">
-                <PrecisionFinishingCuttingTable
-                  loading={isLoading}
-                  data={records}
-                  page={page}
-                  pageSize={pageSize}
-                  selectedRowKeys={selectedRowKeys}
-                  onSelect={setSelectedRowKeys}
-                  scrollY={scrollY}
-                  activeRowId={activeRecord?.id ?? null}
-                  onRowClick={setActiveRecord}
-                />
+              <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <TableState loading={isLoading && !data} error={error} onRetry={() => void refetch()}>
+                  <PrecisionFinishingCuttingTable
+                    loading={isLoading}
+                    data={records}
+                    page={page}
+                    pageSize={pageSize}
+                    selectedRowKeys={selectedRowKeys}
+                    onSelect={setSelectedRowKeys}
+                    scrollY={scrollY}
+                    activeRowId={activeRecord?.id ?? null}
+                    onRowClick={setActiveRecord}
+                    emptyAction={<AddButton handleCreate={openCreateModal} />}
+                  />
+                </TableState>
               </div>
               <div ref={paginationRef} className="flex shrink-0 justify-end">
                 <AppPagination total={data?.total || 0} />
@@ -526,6 +576,7 @@ export default function PrecisionFinishingCuttingPage() {
           currentUploader={currentUploader}
           canAudit={!isEmployeeView}
           mobile={false}
+          formError={formError}
         />
       ) : null}
     </div>
