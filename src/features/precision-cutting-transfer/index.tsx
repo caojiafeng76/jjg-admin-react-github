@@ -18,7 +18,8 @@ import {
   type PrecisionCuttingTransferRow,
   type PrecisionCuttingTransferUpdate,
 } from '@/services/apiPrecisionCuttingTransfers'
-import { translateErrorMessage } from '@/utils/errorHandler'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
 import {
   useBatchUpdatePrecisionCuttingTransfers,
   useCreatePrecisionCuttingTransfer,
@@ -56,8 +57,9 @@ export default function MaterialTransferPage() {
   const [activeRecord, setActiveRecord] =
     useState<PrecisionCuttingTransferRow | null>(null)
   const [isExporting, setIsExporting] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
 
-  const { data, isLoading } = usePrecisionCuttingTransfers({
+  const { data, isLoading, error, refetch } = usePrecisionCuttingTransfers({
     page,
     pageSize,
     filters: searchFilters,
@@ -99,6 +101,7 @@ export default function MaterialTransferPage() {
 
   const openCreateModal = useCallback(() => {
     setEditingRecord(null)
+    setFormError(null)
     setIsModalOpen(true)
   }, [])
 
@@ -118,6 +121,7 @@ export default function MaterialTransferPage() {
       }
 
       setEditingRecord(targetRecord)
+      setFormError(null)
       setIsModalOpen(true)
     },
     [message, records, selectedRowKeys],
@@ -126,6 +130,7 @@ export default function MaterialTransferPage() {
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
     setEditingRecord(null)
+    setFormError(null)
   }, [])
 
   const handleSearch = useCallback(
@@ -289,14 +294,10 @@ export default function MaterialTransferPage() {
 
         handleCloseModal()
         setSelectedRowKeys([])
+        setFormError(null)
       } catch (error) {
-        message.error(
-          error instanceof Error
-            ? translateErrorMessage(error.message)
-            : editingRecord
-              ? '更新失败'
-              : '创建失败',
-        )
+        // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
+        setFormError(error)
       }
     },
     [
@@ -359,56 +360,32 @@ export default function MaterialTransferPage() {
       </div>
 
       {selectedCount > 0 ? (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-linear-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
-          <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-              <svg
-                className="h-3.5 w-3.5 text-blue-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            已选
-            <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-              {selectedCount}
-            </span>
-            条
-            {selectedSummary.matched < selectedCount ? (
-              <span className="ml-1 text-xs text-amber-600 dark:text-amber-400">
-                （当前页参与合计 {selectedSummary.matched} 条）
-              </span>
-            ) : null}
-          </span>
-          <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
-              <svg
-                className="h-3.5 w-3.5 text-rose-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                />
-              </svg>
-            </div>
-            转移数量合计：
-            <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
-              {selectedSummary.quantity.toLocaleString()}
-            </span>
-          </span>
-        </div>
+        <SelectedSummaryBar
+          selectedCount={selectedCount}
+          matchedCount={selectedSummary.matched}
+          stats={[
+            {
+              label: '转移数量合计',
+              value: selectedSummary.quantity,
+              tone: 'error',
+              icon: (
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                  />
+                </svg>
+              ),
+            },
+          ]}
+        />
       ) : null}
 
       <Splitter
@@ -421,18 +398,21 @@ export default function MaterialTransferPage() {
             ref={tableContainerRef}
             className="flex h-full flex-col gap-2 overflow-hidden"
           >
-            <div className="min-h-0 flex-1 overflow-hidden">
-              <MaterialTransferTable
-                loading={isLoading}
-                data={records}
-                page={page}
-                pageSize={pageSize}
-                selectedRowKeys={selectedRowKeys}
-                onSelect={setSelectedRowKeys}
-                scrollY={scrollY}
-                activeRowId={activeRecord?.id ?? null}
-                onRowClick={setActiveRecord}
-              />
+            <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <TableState loading={isLoading && !data} error={error} onRetry={() => void refetch()}>
+                <MaterialTransferTable
+                  loading={isLoading}
+                  data={records}
+                  page={page}
+                  pageSize={pageSize}
+                  selectedRowKeys={selectedRowKeys}
+                  onSelect={setSelectedRowKeys}
+                  scrollY={scrollY}
+                  activeRowId={activeRecord?.id ?? null}
+                  onRowClick={setActiveRecord}
+                  emptyAction={<AddButton handleCreate={openCreateModal} />}
+                />
+              </TableState>
             </div>
             <div ref={paginationRef} className="flex shrink-0 justify-end">
               <AppPagination total={data?.total || 0} defaultPageSize={50} />
@@ -458,6 +438,7 @@ export default function MaterialTransferPage() {
         loading={isSubmitting}
         currentUploader={currentUploader}
         canAudit
+        formError={formError}
       />
     </div>
   )

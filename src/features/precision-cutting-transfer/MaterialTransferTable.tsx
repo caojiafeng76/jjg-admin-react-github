@@ -3,6 +3,8 @@ import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { Table, type TableColumnsType, type TableProps } from 'antd'
 
 import type { PrecisionCuttingTransferRow } from '@/services/apiPrecisionCuttingTransfers'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
 
 interface Props {
   loading: boolean
@@ -15,6 +17,8 @@ interface Props {
   rowHeight?: number
   activeRowId?: string | null
   onRowClick?: (record: PrecisionCuttingTransferRow) => void
+  /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
+  emptyAction?: React.ReactNode
 }
 
 export default function MaterialTransferTable({
@@ -28,6 +32,7 @@ export default function MaterialTransferTable({
   rowHeight = 40,
   activeRowId,
   onRowClick,
+  emptyAction,
 }: Props) {
   const currentPageTransferQuantity = useMemo(
     () =>
@@ -45,7 +50,10 @@ export default function MaterialTransferTable({
         key: 'index',
         width: 50,
         fixed: 'left',
-        render: (_text, _record, index) => (page - 1) * pageSize + index + 1,
+        align: 'right',
+        render: (_text, _record, index) => (
+          <span className="tabular-nums">{(page - 1) * pageSize + index + 1}</span>
+        ),
       },
       {
         title: '创建时间',
@@ -74,18 +82,9 @@ export default function MaterialTransferTable({
         ],
         onFilter: (value, record) => record.is_audited === value,
         render: (value: boolean) => (
-          <div
-            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium shadow-sm ${
-              value
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-slate-100 text-slate-500'
-            }`}
-          >
-            <div
-              className={`h-1.5 w-1.5 rounded-full ${value ? 'bg-emerald-500' : 'bg-slate-400'}`}
-            />
+          <StatusPill tone={value ? 'success' : 'neutral'}>
             {value ? '已审核' : '待审核'}
-          </div>
+          </StatusPill>
         ),
       },
       {
@@ -139,6 +138,7 @@ export default function MaterialTransferTable({
         dataIndex: 'length_mm',
         key: 'length_mm',
         width: 80,
+        align: 'right',
         filters: Array.from(
           new Set(
             data.map((r) => r.length_mm).filter((v): v is number => v !== null),
@@ -147,28 +147,48 @@ export default function MaterialTransferTable({
           .sort((a, b) => a - b)
           .map((v) => ({ text: `${v}mm`, value: v })),
         onFilter: (value, record) => record.length_mm === (value as number),
-        render: (value: number | null) => value ?? '-',
+        render: (value: number | null) =>
+          value == null ? (
+            '-'
+          ) : (
+            <span className="tabular-nums">{value}</span>
+          ),
       },
       {
         title: '实际长料数量',
         dataIndex: 'long_material_quantity',
         key: 'long_material_quantity',
         width: 110,
-        render: (value: number) => value,
+        align: 'right',
+        render: (value: number) => (
+          <span className="tabular-nums">{value}</span>
+        ),
       },
       {
         title: '流程卡长料数量',
         dataIndex: 'process_card_long_material_quantity',
         key: 'process_card_long_material_quantity',
         width: 120,
-        render: (value: number | null) => value ?? '-',
+        align: 'right',
+        render: (value: number | null) =>
+          value == null ? (
+            '-'
+          ) : (
+            <span className="tabular-nums">{value}</span>
+          ),
       },
       {
         title: 'ERP长料数量',
         dataIndex: 'erp_long_material_quantity',
         key: 'erp_long_material_quantity',
         width: 110,
-        render: (value: number | null) => value ?? '-',
+        align: 'right',
+        render: (value: number | null) =>
+          value == null ? (
+            '-'
+          ) : (
+            <span className="tabular-nums">{value}</span>
+          ),
       },
       {
         title: '数据错误责任人',
@@ -182,6 +202,7 @@ export default function MaterialTransferTable({
         dataIndex: 'transfer_quantity',
         key: 'transfer_quantity',
         width: 90,
+        align: 'right',
         render: (value: number) => (
           <span className="font-semibold text-slate-700 tabular-nums">
             {value}
@@ -258,6 +279,15 @@ export default function MaterialTransferTable({
       size="small"
       pagination={false}
       style={{ fontSize: '13px' }}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无精切转移单"
+            description="点击下方按钮创建第一条精切转移单"
+            action={emptyAction}
+          />
+        ),
+      }}
       className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-row:hover>td]:bg-blue-500/10 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-400"
       summary={() => (
         <Table.Summary fixed>

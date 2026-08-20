@@ -12,6 +12,8 @@ import {
   Switch,
 } from 'antd'
 
+import FormErrorAlert from '@/ui/FormErrorAlert'
+
 import {
   buildProjectNoSelectOptions,
   filterProjectNoOption,
@@ -39,6 +41,7 @@ interface Props {
   currentUploader?: string | null
   canAudit?: boolean
   mobile?: boolean
+  formError?: unknown
 }
 
 type PrecisionCuttingTransferFormValues = PrecisionCuttingTransferInsert
@@ -52,6 +55,7 @@ export default function MaterialTransferForm({
   currentUploader = null,
   canAudit = true,
   mobile = false,
+  formError,
 }: Props) {
   const { message } = App.useApp()
   const [form] = Form.useForm<PrecisionCuttingTransferFormValues>()
@@ -285,6 +289,11 @@ export default function MaterialTransferForm({
       destroyOnHidden
     >
       <div className={mobile ? 'overscroll-contain pr-1' : undefined}>
+        {formError ? (
+          <div className="mb-4">
+            <FormErrorAlert error={formError} />
+          </div>
+        ) : null}
         <Form
           form={form}
           layout="vertical"

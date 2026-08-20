@@ -48,7 +48,7 @@
 - [x] **E3** 订单排产 ProductionScheduling（数字列 tabular-nums + 操作反馈 <300ms）
 - [x] **E4** 员工管理 EmployeeList
 - [x] **E5** 成本核算 StandardTimeList（成本/金额列右对齐）
-- [ ] **E6** 岗位基础数值设定 JobBaseSetting（数值列 tabular-nums + 内联校验）
+- [x] **E6** 岗位基础数值设定 JobBaseSetting（数值列 tabular-nums + 内联校验）
 - [ ] **E7** 机器设备维护 MachineEquipmentMaintenance
 - [ ] **E8** 设备运行时间 MachineRuntime（时长 tabular-nums + 图表配色随主题）
 
@@ -65,7 +65,7 @@
 
 ## H. 精切（precision-cutting）
 
-- [ ] **H1** 精切转移单 PrecisionCuttingTransfer
+- [x] **H1** 精切转移单 PrecisionCuttingTransfer
 - [ ] **H2** 精加工切割单 PrecisionFinishingCutting
 
 ## I. 刀具（tooling）

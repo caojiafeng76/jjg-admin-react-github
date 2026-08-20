@@ -36,7 +36,12 @@ export default function JobBaseSettingTable({
         key: '#',
         width: 60,
         fixed: 'left',
-        render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
+        align: 'right' as const,
+        render: (_value, _record, index) => (
+          <span className="tabular-nums">
+            {(page - 1) * pageSize + index + 1}
+          </span>
+        ),
       },
       {
         title: '工种',
@@ -50,34 +55,50 @@ export default function JobBaseSettingTable({
         dataIndex: 'standard_income',
         key: 'standard_income',
         width: 140,
-        render: (value: number) => formatAmount(value),
+        align: 'right' as const,
+        render: (value: number) => (
+          <span className="tabular-nums">{formatAmount(value)}</span>
+        ),
       },
       {
         title: '工时费（元/小时）',
         dataIndex: 'hourly_fee',
         key: 'hourly_fee',
         width: 160,
-        render: (value: number) => formatAmount(value, 8),
+        align: 'right' as const,
+        render: (value: number) => (
+          <span className="tabular-nums">{formatAmount(value, 8)}</span>
+        ),
       },
       {
         title: '每日工作时间（小时）',
         dataIndex: 'daily_work_hours',
         key: 'daily_work_hours',
         width: 160,
-        render: (value: number) => formatAmount(value),
+        align: 'right' as const,
+        render: (value: number) => (
+          <span className="tabular-nums">{formatAmount(value)}</span>
+        ),
       },
       {
         title: '工作天数',
         dataIndex: 'working_days',
         key: 'working_days',
         width: 120,
+        align: 'right' as const,
+        render: (value: number) => (
+          <span className="tabular-nums">{String(value ?? '-')}</span>
+        ),
       },
       {
         title: '月标准工作时间（小时）',
         dataIndex: 'monthly_standard_hours',
         key: 'monthly_standard_hours',
         width: 180,
-        render: (value: number) => formatAmount(value),
+        align: 'right' as const,
+        render: (value: number) => (
+          <span className="tabular-nums">{formatAmount(value)}</span>
+        ),
       },
       {
         title: '更新时间',

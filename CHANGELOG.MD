@@ -13,6 +13,20 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-20
+
+- **类别**：变更
+- **范围**：精切转移单 `src/features/precision-cutting-transfer/`（H1）
+- **摘要**：精切转移单 PrecisionCuttingTransfer 过通用列表页清单：① 数字列右对齐 + tabular-nums：`#`、长度、实际长料数量、流程卡长料数量、ERP长料数量、转移数量 6 列加 `align: right` 与 `<span className="tabular-nums">` 包裹（含汇总行右对齐），全局 A3 表格等宽数字兜底；② 状态 pill 徽章化：审核状态列由 inline-flex 硬编码（emerald/slate）改为通用 `<StatusPill tone=success/neutral>`（S2 体系）；③ 选中摘要条通用化：内联蓝渐变条（含 rose 数量合计）替换为通用 `<SelectedSummaryBar>`（token 渐变底 + 辉光、tone=error，stats 转移数量合计），颜色走 antd token；④ 表格三态：列表查询加 `throwOnError:false`，页面用 `<TableState loading={isLoading && !data} error={error} onRetry={refetch}>` 包裹表格（首屏骨架屏 / 错误重试），表格 `locale.emptyText` 注入 `<TableEmpty title="暂无精切转移单">` 引导式空态（含新建按钮），表格容器加 `rounded-xl border shadow-sm` 业务卡样式；⑤ 表单反馈：新建/编辑失败由 `message.error` 顶部队列改为 Modal 内 `<FormErrorAlert>` 三段式（失败原因+影响+建议），关闭/重开清空。核对通过项：新增/编辑仍用 Modal、表格已 `size="small"`、搜索区白卡样式符合 A4、Splitter 详情面板保留。
+- **验证**：`bun run typecheck` 通过；`bun run test` 114/114 通过（515 用例）；`lsp_diagnostics` precision-cutting-transfer 目录 0 错误。未做浏览器目测（需登录态，缺口说明）。
+
+## 2026-08-20
+
+- **类别**：变更
+- **范围**：车间-岗位基础数值设定 `src/features/workshop/JobBaseSetting/`（E6）
+- **摘要**：表格数值列统一右对齐 + `tabular-nums` 等宽数字：`#`、标准收入、工时费、每日工作时间、工作天数、月标准工时 6 列增加 `align: right` 与 `<span className="tabular-nums">` 包裹；表单数值项内联校验体系化：`job_name` 加 `whitespace` 与 `hasFeedback`，`standard_income` 0–9999999 区间校验、`daily_work_hours` 0.5–24 小时校验、`working_days` 整数 1–31 校验，`validateTrigger` 设为 `onChange+onBlur`，预览卡片数字加 `tabular-nums`。
+- **验证**：`bun run typecheck` 通过；`bun run test` 114/114 通过（515 用例）；`lsp_diagnostics` 改动文件 0 错误。
+
 ## 2026-08-19
 
 - **类别**：变更

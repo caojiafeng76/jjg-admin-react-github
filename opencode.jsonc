@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "opencode-go/muse-spark-1.2-contributor",
   "plugin": ["./.opencode/ponytail/.opencode/plugins/ponytail.mjs"],
   "lsp": {
     "typescript": {
