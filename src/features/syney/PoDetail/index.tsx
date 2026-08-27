@@ -63,15 +63,20 @@ export default function PoDetail() {
   }>(null)
 
   const records = useMemo(() => (items as ISyneyItem[]) || [], [items])
-  const currentItemIds = useMemo(
+  const total = records.length
+  const paginatedRecords = useMemo(
+    () => records.slice((page - 1) * pageSize, page * pageSize),
+    [records, page, pageSize],
+  )
+  // 编辑校验需基于全量 records，避免切页后跨页选中被误判为无效
+  const allItemIds = useMemo(
     () =>
       records
         .map((item) => item.id)
         .filter((id): id is number => typeof id === 'number'),
     [records],
   )
-  const { data } = useItem(currentItemIds)
-  const total = records.length
+  const { data } = useItem(allItemIds)
 
   useEffect(() => {
     setTableSelectedKeys([])
@@ -143,7 +148,7 @@ export default function PoDetail() {
           <TableState loading={isDetailLoading && records.length === 0}>
             <DetailTable
               loading={isLoading || isDetailLoading}
-              data={records}
+              data={paginatedRecords}
               page={page}
               pageSize={pageSize}
               scrollY={scrollY}

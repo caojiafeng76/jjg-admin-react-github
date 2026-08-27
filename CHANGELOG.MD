@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-27
+
+- **类别**：修复
+- **范围**：西尼订单详情 `src/features/syney/PoDetail/index.tsx`、订单创建 `src/features/syney/PoList/index.tsx`、数据层 `src/services/apiSyneyPos.ts`
+- **摘要**：修复“列表 14 条、详情显示 24 条”两处根因：① 详情页假分页——`PoDetail/index.tsx` 解析 `page/pageSize` 并渲染 `AppPagination` 但从未对 `records` 切片，全量 `records` 直接传给 `DetailTable` 导致分页控件显示 24 条且表格一次性渲染 24 行，现改为 `records.slice((page-1)*pageSize, page*pageSize)` 的客户端分页，`total` 仍为全量，校验 `tableSelectedKeys` 改用全量 `allItemIds` 避免跨页选中失效；② 明细入库重复——Excel 同 `SONo` 内相同 `PartNo+TaxUnitPrice` 的重复行未合并导致 14 膨胀至 24，按用户确认的去重键 `PartNo-TaxUnitPrice` 在 `PoList/index.tsx` 按 `SONo` 分组后调用 `distinctItems` 去重并合并 `Qty/TaxTotalPrice`，并在 `apiSyneyPos.ts#createPo` 内按同键对每个 `SONo~SerialNo` 分组做防御性去重，存量脏数据需用 SQL 核查 `group by PartNo having count(*)>1` 后按需手工清理。
+- **验证**：`bun run typecheck` 通过；`bun run test src/features/syney` 通过；`bun run test src/services/apiSyneyPos.vitest.ts src/services/apiSyneyPo.vitest.ts src/utils/syney*` 通过；`bun run build` 通过；`bun lint` 受改动文件 0 新增错误。手工：列表进入某订单详情翻页核对 `total==select count(*) where PoId=:id` 且分页切片行号连续。
+
 ## 2026-08-21
 
 - **类别**：修复
