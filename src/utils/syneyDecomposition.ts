@@ -187,6 +187,9 @@ export function buildDecompositionCells(
         addCell(cells, rearKey, item)
         return
       }
+      // 无旗标的后板候选直接进入均分队列，跳过单一 rear_upper 配置，避免 XN2808FN 下头部被固化到上格
+      unassignedRearItems.push(item)
+      return
     }
 
     if (isLegacyMiddlePlateCandidate(item)) {
@@ -195,6 +198,9 @@ export function buildDecompositionCells(
         addCell(cells, middleKey, item)
         return
       }
+      // 无旗标的中板候选直接进入均分队列，跳过单一 upper_middle 配置，避免 XN3024DA 单条只进上格
+      unassignedMiddleItems.push(item)
+      return
     }
 
     const configuredKey = getConfiguredCellKey(item, settings)
@@ -207,13 +213,6 @@ export function buildDecompositionCells(
     if (legacyKey) {
       addCell(cells, legacyKey, item)
       return
-    }
-
-    if (isLegacyRearPlateCandidate(item)) {
-      unassignedRearItems.push(item)
-    }
-    if (isLegacyMiddlePlateCandidate(item)) {
-      unassignedMiddleItems.push(item)
     }
   })
 

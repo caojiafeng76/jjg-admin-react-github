@@ -75,14 +75,15 @@
     ```
     并保持 `getLegacyRearCellKey` 的旗标优先（上头部/上部/上下→rearUpper/rearLower），已确认 FN 完全等同 AF。
 
-- [ ] **修中板 DA（已定 1+1）**：在 `buildDecompositionCells` 新增与后板对称的 `unassignedMiddleItems` 收集：
+- [ ] **修中板 DA（已定 1+1，迭代 2 补跳过配置）**：在 `buildDecompositionCells` 对 `isLegacyMiddlePlateCandidate(XN3024DA/XN2808DA)` 实行 **旗标优先→否则直接进 unassigned 跳过配置**：
     ```ts
-    // 识别中板：role 为 upper_middle/lower_middle 或前缀命中 DA/BS/BT/DA 等，或配置为 upper_middle 的单件号中板
-    // 旗标分流：Remark 含上→upperMiddle，下→lowerMiddle（复用 hasUpFlag/hasDownFlag，已确认等同 AF）
-    // 无旗标单件按 1+1 拆：Qty 2 → 上1/下1，Qty 4 → 上2/下2，Qty 1 → 上1/下1 各1（与后板 unassignedRear 一致，用 qtyOverride）
-    // 2 条以上无旗标按出现顺序上/下交替
+    if (isLegacyMiddlePlateCandidate(item)) {
+      const k = getLegacyMiddleCellKey(item); // hasUpFlag/hasDownFlag
+      if (k) { addCell(cells, k, item); return }
+      unassignedMiddleItems.push(item); return // 无旗标不再走 getConfiguredCellKey，避免被 upper_middle 单角色固化
+    }
     ```
-    已确认口径，无需再问。
+    后续 `unassignedMiddleItems: 1→上1+下1 (qtyOverride 1), >=2→上/下 各一`，使图中 `DA2 Qty1` 与合并后 `1244*550*2` 均能 `1/1` 均分。已确认口径，无需再问。
 
 - [ ] **补单测**：在 `syneyDecomposition.test.ts` 追加 `FN` 上/下、`DA` 单件 Qty2→上/下 各1、`DA` 双件、`FN` 无旗标单件拆分 四组。
 
@@ -122,4 +123,11 @@
 - **DA2 拆分口径 = 1+1**（用户确认“选这个”）：单中板件号（如 `XN3024DA Qty 2` 无备注）按后板同构逻辑拆为 `上1 / 下1`（`qtyOverride: 1` 各一），`Qty 4 → 上2/下2` 以此类推；若 `Remark` 含 `上/下` 则优先按旗标分流，无旗标再均分。
 - **FN2 等同 AF**（用户确认“是”）：`XN2808FN` 完全复用 `AF` 的后板旗标链路（`上头部/上部/独立上 → rearUpper`，`下头部/下部/独立下 → rearLower`，经 `hasUpFlag/hasDownFlag`），无旗标单件按 `1→上1+下1`。
 - **配置 vs 代码**：DA 采用代码零配置的 `unassignedMiddle` 自动拆分，运营无需在 `SafePartSettingPage` 手补 `lower_middle`；仅当未来需显式覆盖时再通过 `decomposition_role` 配置覆盖。
+
+## 迭代 2：中板仍单行（2026-08-27 补充）
+
+- **新截图**：四单 5252~5255（SONo 0296~0299）均 `前板 860*446*2 / 中板 1244*550*2 / 后板 1244*540*1+1 / 加长空`。印证：**FN 后板已修复**——现 4 单后板均 `1/1` 上下（上一版硬编码补 `XN2808FN` 已生效），**但中板仍 `2/空`** 未拆。
+- **库核对**：`PoId 797(0296)` 中板仅 1 条 `XN3024DA2 Qty1 Remark 中板不剪角 L1=550`（无上/下旗标）；`PoId 798/796/799` 同类 `DA2` 各 1 条 Qty1，1 条对应截图 `2` 为合并显示（两组中板 `1244*550` 同 spec 在 `addCell` 合并则 `qty 1+1=2` 落上格）。因此“2/空”实为 1 条 DA 被 `decomposition_role=upper_middle` 的配置捕获，未进入 `unassignedMiddle` 拆分路径。
+- **根因细化**：上一版虽新增 `isLegacyMiddlePlateCandidate` 与 `getLegacyMiddleCellKey`，但在 `buildDecompositionCells` 中顺序为 **旗标→配置→legacy→unassigned**。DA 无旗标时未命中 `middleKey`，随即命中 `getConfiguredCellKey`（库中 `XN3024DA→upper_middle`）并 `return`，从未落入 `unassignedMiddleItems`，故不触发 `1→1+1`。测试 `DA` 用例因 `settings=undefined` 绕过配置而通过，线上 `settings` 有值则失败。
+- **修正策略**：对中板候选（`XN3024DA/XN2808DA`）**无旗标时跳过配置**，直接进入 `unassignedMiddle` 队列，再由 `1→1+1 / 2→上/下` 统一均分；有旗标时仍走旗标分支。对后板已生效，保持不变。具体改为：`if(isLegacyMiddlePlateCandidate){ const k=getLegacyMiddleCellKey(); if(k){addCell; return} else { unassignedMiddle.push(item); return } }` 再走配置/legacy，避免被 `upper_middle` 单角色固化。
 
