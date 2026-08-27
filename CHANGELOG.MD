@@ -16,6 +16,13 @@
 ## 2026-08-27
 
 - **类别**：修复
+- **范围**：踏板分解单 `src/utils/syneyDecomposition.ts`、`src/utils/syneySafePartRules.ts`、`src/utils/syneyDecomposition.test.ts`
+- **摘要**：修复分解单上下分布不一致：① 后板 FN2（`XN2808FN`）未纳入后板旗标分流，导致 `下头部` 仍落上格，现将 `isLegacyRearPlateCandidate` 扩展包含 `XN2808FN` 并复用 `hasUpFlag/hasDownFlag`（`上头部/上部/上下` ↔ `下头部/下部`），单条无旗标按 `1→上1+下1` 均分，与 `XN2808AF` 完全等同（已确认）；② 中板 DA2（`XN3024DA`）仅 `upper_middle` 单角色导致 `1244*550*2` 只进上格，现新增 `isLegacyMiddlePlateCandidate`（`XN3024DA/XN2808DA`）与 `getLegacyMiddleCellKey` 旗标分流，无旗标单件按 `1+1`（`Qty 1→上1+下1`、`Qty 2→上1+下1`）均分，双件按序上/下，已确认 `1+1` 口径；③ 补充 5 组单测覆盖 `FN` 上/下、`DA` 单件 `Qty1/2` 均分、`DA` 旗标、`FN` 单件均分。
+- **验证**：`bun run typecheck` 通过；`bun run test src/utils/syneyDecomposition.test.ts` 8/8 通过；`bun run test` 全量 524/524 通过；`bun run build` 通过；`bun lint` 受改动文件 0 新增错误。手工：选中 `XNJD-FZ26-120-0289`（AF 双条）与 `XNJD-FZ26-123-0296`（FN 双条+DA 单条）打印分解单，核对中板由 `2/空` 变为 `1/1`、后板上下各 1。
+
+## 2026-08-27
+
+- **类别**：修复
 - **范围**：西尼订单详情 `src/features/syney/PoDetail/index.tsx`、订单创建 `src/features/syney/PoList/index.tsx`、数据层 `src/services/apiSyneyPos.ts`
 - **摘要**：修复“列表 14 条、详情显示 24 条”两处根因：① 详情页假分页——`PoDetail/index.tsx` 解析 `page/pageSize` 并渲染 `AppPagination` 但从未对 `records` 切片，全量 `records` 直接传给 `DetailTable` 导致分页控件显示 24 条且表格一次性渲染 24 行，现改为 `records.slice((page-1)*pageSize, page*pageSize)` 的客户端分页，`total` 仍为全量，校验 `tableSelectedKeys` 改用全量 `allItemIds` 避免跨页选中失效；② 明细入库重复——Excel 同 `SONo` 内相同 `PartNo+TaxUnitPrice` 的重复行未合并导致 14 膨胀至 24，按用户确认的去重键 `PartNo-TaxUnitPrice` 在 `PoList/index.tsx` 按 `SONo` 分组后调用 `distinctItems` 去重并合并 `Qty/TaxTotalPrice`，并在 `apiSyneyPos.ts#createPo` 内按同键对每个 `SONo~SerialNo` 分组做防御性去重，存量脏数据需用 SQL 核查 `group by PartNo having count(*)>1` 后按需手工清理。
 - **验证**：`bun run typecheck` 通过；`bun run test src/features/syney` 通过；`bun run test src/services/apiSyneyPos.vitest.ts src/services/apiSyneyPo.vitest.ts src/utils/syney*` 通过；`bun run build` 通过；`bun lint` 受改动文件 0 新增错误。手工：列表进入某订单详情翻页核对 `total==select count(*) where PoId=:id` 且分页切片行号连续。

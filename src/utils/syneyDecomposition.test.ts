@@ -93,4 +93,86 @@ describe('buildDecompositionCells', () => {
     expect(cells.rearUpper).toEqual({ spec: '1525*540', qty: 1 })
     expect(cells.rearLower).toEqual({ spec: '1525*612', qty: 1 })
   })
+
+  it('routes FN rear plates by remark direction like AF', () => {
+    const cells = buildDecompositionCells([
+      item({
+        PartNo: 'XN2808FN2',
+        ParamSpec: '1244*540',
+        Qty: 1,
+        Remark: 'XNJD-FZ26-123-0296 后板右下角 品牌:西尼 L1=540mm  上头部',
+      }),
+      item({
+        PartNo: 'XN2808FN2',
+        ParamSpec: '1244*540',
+        Qty: 1,
+        Remark: 'XNJD-FZ26-123-0296 后板右下角 品牌:西尼 L1=540mm  下头部',
+      }),
+    ])
+
+    expect(cells.rearUpper).toEqual({ spec: '1244*540', qty: 1 })
+    expect(cells.rearLower).toEqual({ spec: '1244*540', qty: 1 })
+  })
+
+  it('splits a single DA middle plate into upper and lower 1+1', () => {
+    const cells = buildDecompositionCells([
+      item({
+        PartNo: 'XN3024DA2',
+        ParamSpec: '1244*550',
+        Qty: 1,
+        Remark: 'XNJD-FZ26-123-0296 中板不剪角 L1=550mm',
+      }),
+    ])
+
+    expect(cells.upperMiddle).toEqual({ spec: '1244*550', qty: 1 })
+    expect(cells.lowerMiddle).toEqual({ spec: '1244*550', qty: 1 })
+  })
+
+  it('splits a single DA middle plate with Qty 2 into 1+1', () => {
+    const cells = buildDecompositionCells([
+      item({
+        PartNo: 'XN3024DA2',
+        ParamSpec: '1244*550',
+        Qty: 2,
+        Remark: 'XNJD-FZ26-123-0296 中板 L1=550mm',
+      }),
+    ])
+
+    expect(cells.upperMiddle).toEqual({ spec: '1244*550', qty: 1 })
+    expect(cells.lowerMiddle).toEqual({ spec: '1244*550', qty: 1 })
+  })
+
+  it('routes DA middle plates by remark direction when flagged', () => {
+    const cells = buildDecompositionCells([
+      item({
+        PartNo: 'XN3024DA2',
+        ParamSpec: '1244*550',
+        Qty: 1,
+        Remark: '上部',
+      }),
+      item({
+        PartNo: 'XN3024DA2',
+        ParamSpec: '1244*550',
+        Qty: 1,
+        Remark: '下部',
+      }),
+    ])
+
+    expect(cells.upperMiddle).toEqual({ spec: '1244*550', qty: 1 })
+    expect(cells.lowerMiddle).toEqual({ spec: '1244*550', qty: 1 })
+  })
+
+  it('splits an unflagged single FN rear plate into upper and lower 1+1', () => {
+    const cells = buildDecompositionCells([
+      item({
+        PartNo: 'XN2808FN2',
+        ParamSpec: '1244*540',
+        Qty: 1,
+        Remark: 'XNJD-FZ26-123-0296 后板',
+      }),
+    ])
+
+    expect(cells.rearUpper).toEqual({ spec: '1244*540', qty: 1 })
+    expect(cells.rearLower).toEqual({ spec: '1244*540', qty: 1 })
+  })
 })

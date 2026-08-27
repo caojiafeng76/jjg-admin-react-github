@@ -1,110 +1,109 @@
-# 计划：修复 西尼订单列表/详情 条数不一致（14 vs 24）
+# 计划：修复踏板分解单 AF1 / FN2 / DA2 上下分布不一致
 
 ## Context
 
-- **现象**：用户反馈“西尼订单列表 订单明明只有14条数据，详情显示24条”。即从 `syney-po-list` 进入某个订单详情 `syney-po-list/:PoId` 后，详情页的明细条数/分页总数显示 24，与列表侧或业务预期的 14 条不一致。
-- **业务背景**：
-  - 西尼订单（`syney-pos`）与明细（`syney-po-items`, `PoId` FK）为 1:N。
-  - 典型一次上载的订单 Excel 按 `生产编号(SONo)` 分组，每个 `SONo` 对应 1 个 `syney-pos` 行，其明细数业务上常为 14（见 `src/features/syney/PoList/ExcelUpload.tsx` 中 `parsedData.items.length % 14 === 0` 的校验色），但 Excel、去重、插入任一环节出错都会导致明细数膨胀。
-  - 列表页 `PoList` 的数据走 `syney_pos_sorted` 视图 + `getSyneyPos` 的 `range+count` 分页；详情页 `PoDetail` 走 `getSyneyPoDetail` 的嵌入查询 `select('*, items:syney-po-items(*)')` 全量拉取，再在前端用 `AppPagination` 展示。
-- **目标**：让详情页展示的明细条数与数据库真实归属该 `PoId` 的明细数一致，且分页/汇总口径与表格数据一致，消除“列表 14 / 详情 24”的错觉或真实脏数据。
-- **非目标**：不改列表页的排序/筛选语义，不改 `syney_pos_sorted` 视图的排序键。
+- **用户反馈**：同为“踏板分解单”打印（`usePrintDecomposition`），图中订单 5251 的“中/后板”上下两格均有值，而 5252 的“中板”只有上格 `1244*550*2`、下格空白；用户追问：*为什么 AF1 在分解时能填入上下，FN2 却没有；且中板的 DA2 也想上下分布*。
+- **截图证据**：`5251: 中板 1525*550*1 / 1525*550*1，后板 1525*540*1 / 1525*540*1` 正常；`5252: 中板 1244*550*2 / 空，后板 1244*540*2 / 空` 缺下格。AF ≈ `AF1`、FN ≈ `FN2`、DA ≈ `DA2` 为件号缩写（实际库中为 `XN2808AF`、`XN2808FN`、`XN3024DA` 等）。
+- **期望**：`FN2` 应像 `AF1` 一样基于备注 `上头部/下头部` 或独立 `上/下` 字自动落到“上后板/下后板”两格；`DA2`（`XN3024DA`）作为中板应能同时填“上中板/下中板”（而非仅上）。
 
-## Approach（推荐方案）
+## Root Cause 分析（代码实证）
 
-**先定性，再修前端分页，最后修数据口径**。不盲目加 `distinct`，先用只读查询确认 14 vs 24 的来源，再做最小修复。
+- **打印入口**：`src/features/syney/PoList/usePrintDecomposition.ts#fillPageData` → `src/utils/syneyDecomposition.ts#buildDecompositionCells` → `src/utils/syneySafePartRules.ts#{hasUpFlag,hasDownFlag,findSafePartRule}` + `syney_safe_part_settings.decomposition_role`。
+- **AF1 为什么能上下**：
+  - `syneyDecomposition.ts:isLegacyRearPlateCandidate` 仅对 `XN2808AF` / `XN3024Y997` 生效。`buildDecompositionCells` 对这类“后板候选”**优先**走 `getLegacyRearCellKey(item)`：通过 `Remark` 的 `上头部/上部/上` vs `下头部/下部/下`（`hasUpFlag/hasDownFlag`）路由到 `rearUpper` / `rearLower`。
+  - 单条未标注方向时走 `unassignedRearItems` 兜底：`1 条 → 上1+下1`，`>=2 条 → 第0条上/第1条下`。现有单测 `syneyDecomposition.test.ts: 52/76 行` 覆盖 AF 的上/下分流。
+  - 结论：AF 享受“旗标优先 + 单件拆 1+1”两重保障，所以能填满上下。
+- **FN2 为什么不能**：
+  - `syney_safe_part_settings` 中 `XN2808FN → rear_upper` 单一角色（`bun run db:query` 实测只有 `rear_upper` 一条），且 `isLegacyRearPlateCandidate` **未包含 `FN`**。因此 FN 完全绕过旗标分流，`getConfiguredCellKey` 直接命中 `rearUpper`，备注里的 `下头部` 被忽略，下格永远空白。同理图中 5252 后板 `1244*540*2` 只进上格。
+  - 硬编码是根因：`XN2808FN` 未被视作后板候选。
+- **DA2 为什么只有上**：
+  - 库中 `XN3024DA → upper_middle` 唯一角色（实测），无 `lower_middle` 对应条目。`getLegacyCellKey` 对中板的映射是固定前缀：`XN3024BS/DA/...` 上、`XN3024BT/DG/...` 下，`DA` 仅命中上；未标注旗标时也无中板的 `unassigned` 拆分逻辑（仅后板有），所以单件 `Qty 2` 整体落上格 `1244*550*2`。
+  - 截图中 5251 能上下，是因为其 `XN3024AE→upper` 与 `XN3024AF→lower` 是两条不同件号；5252 的 `DA2` 只有一条件号，自然无法像 AF 那样自动拆分。
 
-### 假设分级（按排查优先级）
+## Approach（推荐方案，最小改动）
 
-1. **A — 前端分页“假分页”**（高概率命中显示错觉）：
-   - `src/features/syney/PoDetail/index.tsx` 解析 `page/pageSize`、计算 `total = records.length`、渲染 `<AppPagination total={total} />`，但 **从未对 `records` 做 `slice((page-1)*pageSize, page*pageSize)`**。
-   - `src/features/syney/PoDetail/DetailTable.tsx` 直接 `dataSource={data}` 全量渲染，`DetailTable` 内部又另行 `useDetail()` 取全量 `items` 算汇总 `currentPageTotalQty`（用全量而非当前页），导致“分页控件显示 24 条”与“表格实际渲染行数/汇总”口径不一致。对比 `src/features/syney/SafePartSetting/SafePartSettingPage.tsx:241` 的正确做法是 `filteredData.slice(start, start + pageSize)`。
-   - 若用户在第 1 页看到“共 24 条”却主观认为应为 14（或表格滚动区内实际多于一页），会报此 bug。
+> **保持“配置优先、旗标优于配置”原则，复用后板已有的旗标+单件拆分模式，推广到 FN 与中板 DA。**
 
-2. **B — 明细入库重复/未去重**（高概率命中真实脏数据）：
-   - `src/services/apiSyneyPos.ts#createPo` 按 `getItemsWithExtraInfo` 以 `SONo~SerialNo` 分组后批量 `insert`，**未调用** `src/utils/syney.ts#distinctItems`（该函数仅在 `src/utils/syneyStoreReport.ts` 生成对账单时使用），若 Excel 同一 `SONo` 内存在相同 `PartNo+TaxUnitPrice` 的重复行，或 `getItemsWithParamSpec` 后的重复未合并，则会多插行导致 14 → 24。
-   - 需要对比 `syney-po-items` 中该 `PoId` 的 `count` 与 `count(distinct PartNo)`、`group by PartNo` 的结果来确认。
+1. **后板侧：让 FN 具备与 AF 相同的旗标分流**
+   - 将 `isLegacyRearPlateCandidate` 从 `XN2808AF | XN3024Y997` 扩展为包含 `XN2808FN`（及可选 `XN3024FN` 变体），或更通用地：若 `findSafePartRule(...).decomposition_role` 起止为 `rear_*`，则视为后板候选。推荐前者（最小风险）+ 后者作为兜底。
+   - 不改 `XN2808FN` 的 DB 角色（仍 `rear_upper`），逻辑上旗标会覆盖配置：`上头部→rearUpper`、`下头部→rearLower`，无旗标时复用现有 `unassignedRearItems` 的 `1→1+1 / 2→上/下`。
+   - 若希望 FN 长期可配置，也可在 `SafePartSettingPage` 新增一条 `XN2808FN-下` → `rear_lower` 的配置行作为显式方案，但代码层旗标分流仍需。
 
-3. **C — 查询/视图口径不一致**（中概率）：
-   - 列表 `getSyneyPos` 查视图 `syney_pos_sorted` 带 `count: exact` + `range`；详情 `getSyneyPoDetail` 查基表 `syney-pos` 的嵌入 `items`。若 `syney-po-items` 存在孤儿行、`PoId` 外键未加 `ON DELETE CASCADE` 且被误用，或 `supabase .select('*, items:syney-po-items(*)')` 因缺少 `order` 导致前端误判重复，需要核对视图与基表的 `count` 是否一致。
-   - 已知 `supabase/migrations/20260713040208` / `20260713044250` 中 `syney_pos_sorted` 仅是排序视图，不涉及 `join`，不会产生笛卡尔积，但值得用 `select count(*)` 互校。
+2. **中板侧：让 DA2（及同类单件号中板）支持上下分布**
+   - 方案 A（推荐，零配置）：为中板增加与后板同构的 `unassignedMiddleItems` 兜底。
+     - 识别：`XN3024DA` 当前在 `upper_middle` 组（`XN2808BP/BT/DA/DF/BS...`）；单件 `Qty ≥2` 时拆成 `ceil(Qty/2)` 上 + `floor(Qty/2)` 下，或复用后板的 `1→1+1` 语义（`Qty 2 → 上1/下1 + Qty 保持 2→1+1 的商用口径需确认`）。
+     - 或旗标驱动：若 Remark 含 `上`/`下` 则按旗标分流，否则走拆分。
+   - 方案 B（纯配置）：在 `syney_safe_part_settings` 新增 `XN3024DA-下` → `lower_middle`（或为 `DA2` 拆成两条前缀如 `XN3024DAU/DAA`）。优点无需代码，缺点每新增单件号都要补两行配置，且无法处理单件 `Qty 2` 拆上下。
+   - 推荐 **A 为主 + B 为辅**：代码层支持单件拆分与旗标分流，配置层保留显式两行以便运营自行覆盖。
 
-> **执行顺序**：先用只读 SQL 定性 A/B/C，再决定是只修 A（前端切片）还是 A+B（前端+入库去重/清理脚本）。不直接改 DB schema，无 migration 除非确认需要。
+3. **不改动**：`syney_pos_sorted` 视图、`distinctItems` 去重、`PoDetail` 分页等已修复域。
 
 ## Files to modify（关键文件）
 
-- `src/features/syney/PoDetail/index.tsx` — 增加客户端分页切片，或改为服务端分页；同步修复 `total` 与 `data` 的口径。
-- `src/features/syney/PoDetail/DetailTable.tsx` — 移除内部重复 `useDetail()` 调用，汇总改为基于 `data`（当前页）或明确标注“全部合计”；行号 `render: (page-1)*pageSize + index +1` 已正确，但需保证 `data` 已是切片后数据。
-- `src/services/apiSyneyPo.ts` — 可选：为 `getSyneyPoDetail` 增加 `items` 的确定性排序（如 `order by PartNo, id`）或分页参数；评估是否需要 `range`/`count` 的服务端分页替代前端全量拉取。
-- `src/utils/syney.ts` / `src/services/apiSyneyPos.ts` — 若定性为 B，则在 `createPo` 插入前对 `items` 应用 `distinctItems` 或以 `PartNo+ParamSpec` 等业务键去重，并补充单测。
-- `src/features/syney/queryKeys.ts` / `src/features/syney/PoDetail/useDetail.ts` — 若详情改为服务端分页，需扩展 queryKey 以包含 `page/pageSize`。
-- `CHANGELOG.MD` — 按 `AGENTS.md` 强制要求：任何代码/配置/脚本/SQL/文档改动后在顶部追加记录（日期/类别/范围/摘要/验证）。
+- `src/utils/syneyDecomposition.ts` — 扩展后板候选集（含 FN）、新增中板 `unassigned` 拆分（上限/下限）；保持 `ROLE_TO_CELL_KEY` 不变。
+- `src/utils/syneySafePartRules.ts` — 若采用“角色前缀即候选”的通用化，需把 `UP_KEYWORDS/DOWN_KEYWORDS` 复用（已存在），不新增文件。
+- `src/utils/syneyDecomposition.test.ts` — 补充用例：`XN2808FN` 上/下旗标分流、`XN3024DA` 单件 Qty2 拆上/下、`DA` 双件上/下。
+- `src/features/syney/SafePartSetting/SafePartSettingPage.tsx` — 可选：仅改文案/校验提示，无强制代码变更；若走纯配置方案则提供运营指导。
+- `supabase/migrations/*_syney_safe_part_settings_*.sql` — 仅当选择“新增配置行”时追加 `insert on conflict` 的配置迁移（`decomposition_role`），否则不新增 migration。
+- `CHANGELOG.MD` — 顶部追加记录（日期/类别/范围/摘要/验证）。
 
-> 仅列关键文件，实际以最小改动为准；不碰 `src/services/database.types.ts`（自动生成）。
+> 不碰 `src/services/database.types.ts`（自动生成）、`usePrintDecomposition.ts` 的框架绘制（仅消费 `buildDecompositionCells`）。
 
 ## Reuse（已存在可复用）
 
-- `src/utils/syney.ts#distinctItems(items)` — 按 `PartNo-TaxUnitPrice` 合并 `Qty` 并重算 `TaxTotalPrice`。
-- `src/utils/syney.ts#getItemsWithParamSpec(items, specs)` / `getItemsWithExtraInfo(items, startSerialNo, safePartSettings)` — 已在 `PoList/index.tsx` 与 `ExcelUpload.tsx` 使用，保持调用点不变。
-- `src/ui/AppPagination.tsx` — 基于 `useSearchParams` 的分页控件，`total` 为总数，已在列表与详情复用。
-- `src/hooks/useTableHeight.ts` — 计算 `scrollY`，无需改动。
-- `src/features/syney/queryKeys.ts#syneyPoKeys.detail(id)` / `item(id)` — 详情与明细的缓存键。
-- `src/features/syney/SafePartSetting/SafePartSettingPage.tsx:241` 的 `slice` 模式 — 详情分页修复的参考实现。
-- `supabase/migrations/20260713040208_add_syney_atomic_update_and_sorted_view.sql` 中的 `syney_pos_sorted` 定义 — 列表 count 的权威口径。
+- `src/utils/syneySafePartRules.ts#hasUpFlag/hasDownFlag` — 已支持 `上头部/上部/独立上` 与 `下头部/下部/独立下` 的分隔符容错。
+- `src/utils/syneySafePartRules.ts#findSafePartRule` — 最长前缀匹配，已用于 `getConfiguredCellKey`。
+- `src/utils/syneyDecomposition.ts#buildDecompositionCells` — 现有 `addCell` 的同 `spec` 合并与 `qtyOverride` 拆分逻辑。
+- `src/utils/syneyDecomposition.test.ts` — 既有 `rearUpper/rearLower` 旗标测试模板。
+- `syney_safe_part_settings.decomposition_role` 枚举：`front_plate/upper_middle/lower_middle/rear_upper/rear_lower/extension_upper/extension_lower/side_frame/cross_frame`。
+- `bun run db:query "select part_no, decomposition_role from syney_safe_part_settings ..."` — 线上配置核查已验证。
 
 ## Steps（实施清单）
 
-- [ ] **只读定性**：用 `bun run db:query -- --file <sql>` 或 Supabase Dashboard 对问题 `PoId` 执行：
+- [ ] **复现/核对**：用截图对应的两单 `Contract No: XNJD-FZ26-120-0289 / 0296` 查库核对明细与 Remark：
   ```sql
-  -- 1) 详情真实明细数
-  select count(*) from "syney-po-items" where "PoId" = :poId;
-  -- 2) 去重后数量
-  select count(distinct "PartNo") from "syney-po-items" where "PoId" = :poId;
-  -- 3) 重复行定位
-  select "PartNo", "ParamSpec", count(*), sum("Qty")
-  from "syney-po-items" where "PoId" = :poId
-  group by "PartNo", "ParamSpec" having count(*) > 1 order by count(*) desc;
-  -- 4) 列表视图 vs 基表总数互校（分页外）
-  select count(*) from "syney-pos";
-  select count(*) from syney_pos_sorted;
-  -- 5) 该 PoId 的 items 是否含孤儿/重复 PoId
-  select id, "No", "SONo", "PoId", "PartNo" from "syney-po-items" where "PoId" = :poId order by id;
+  select "PoId","PartNo","PartName","ParamSpec","Qty","Remark" from "syney-po-items"
+  where "PoId" in (select id from "syney-pos" where "SONo" in ('XNJD-FZ26-120-0289','XNJD-FZ26-123-0296'))
+  order by "PoId","PartNo";
+  select part_no, decomposition_role from syney_safe_part_settings where part_no in ('XN2808AF','XN2808FN','XN3024DA','XN3024AF','XN3024AE');
   ```
-  根据结果判定 A/B/C 主因（若 `count(*) = 24` 且 `count(distinct PartNo) = 14` 则 B；若 `count(*) = 14` 但前端仍显示 24 则 A）。
+  预期：289 单含 `AF` 两条（上/下 各1），296 单含 `FN` 与 `DA` 各 1 条（无下旗标或单条 Qty2）。
 
-- [ ] **修复 A — 详情假分页**（无论 B 是否命中都需修，避免显示错觉）：
-  - 在 `PoDetail/index.tsx` 增加
+- [ ] **修后板 FN（已确认等同 AF）**：`syneyDecomposition.ts#isLegacyRearPlateCandidate` 改为
     ```ts
-    const paginatedRecords = useMemo(() =>
-      records.slice((page - 1) * pageSize, page * pageSize),
-      [records, page, pageSize]
-    )
+    return partNo.startsWith('XN2808AF') || partNo.startsWith('XN2808FN') || partNo.startsWith('XN3024Y997')
     ```
-    并将 `<DetailTable data={paginatedRecords} ...>` 传入；`total` 仍为 `records.length`。
-  - 在 `DetailTable.tsx` 移除 `const { items, isLoading } = useDetail()`，汇总改为基于 `data`（当前页）或保留全量但重命名为“全部合计”并修正文案；`loading` 仅依赖 props，不再叠加内部 `isLoading`。
-  - 核对行号与汇总：行号已用 `(page-1)*pageSize + index +1`，汇总若要“当前页合计”则用 `data`，若要“全部合计”则用 `records` 并改 label。
+    并保持 `getLegacyRearCellKey` 的旗标优先（上头部/上部/上下→rearUpper/rearLower），已确认 FN 完全等同 AF。
 
-- [ ] **修复 B — 入库去重（若定性命中）**：
-  - 决策点：是否应在 `createPo` 前对每组 `soItems` 调用 `distinctItems`。注意 `distinctItems` 的键是 `PartNo-TaxUnitPrice`，与踏板业务的去重键是否一致需与产品确认；若不一致，改用 `PartNo+ParamSpec` 或 `PartNo+Spec`。
-  - 实现：`src/services/apiSyneyPos.ts#createPo` 中 `soItems` 处理后、`getItemsWithParamSpec` 之后插入 `distinctItems`，并补充 `apiSyneyPos.vitest.ts` 用例覆盖重复行合并。
-  - 存量脏数据：提供一次性只读核查 SQL + 可选清理脚本（需产品确认后再执行 `delete`，默认不自动删）。
+- [ ] **修中板 DA（已定 1+1）**：在 `buildDecompositionCells` 新增与后板对称的 `unassignedMiddleItems` 收集：
+    ```ts
+    // 识别中板：role 为 upper_middle/lower_middle 或前缀命中 DA/BS/BT/DA 等，或配置为 upper_middle 的单件号中板
+    // 旗标分流：Remark 含上→upperMiddle，下→lowerMiddle（复用 hasUpFlag/hasDownFlag，已确认等同 AF）
+    // 无旗标单件按 1+1 拆：Qty 2 → 上1/下1，Qty 4 → 上2/下2，Qty 1 → 上1/下1 各1（与后板 unassignedRear 一致，用 qtyOverride）
+    // 2 条以上无旗标按出现顺序上/下交替
+    ```
+    已确认口径，无需再问。
 
-- [ ] **可选：服务端分页**（若单订单明细可能 > 1000 触及 PostgREST `db-max-rows`）：
-  - 参考 `src/services/apiSyneySpecs.ts` 的 `while+range` 循环或为 `getSyneyPoDetail` 增加 `range` 分页参数，前端 `useDetail` 传入 `page/pageSize` 并回传 `count`。若当前明细均 < 100，无需此步。
+- [ ] **补单测**：在 `syneyDecomposition.test.ts` 追加 `FN` 上/下、`DA` 单件 Qty2→上/下 各1、`DA` 双件、`FN` 无旗标单件拆分 四组。
 
-- [ ] **回归与验证**（见下）。
+- [ ] **可选配置迁移**：若运营希望显式可配，新增 `supabase/migrations/XXXX_add_fn_da_decomposition_roles.sql`：
+    ```sql
+    insert into syney_safe_part_settings(part_no, name, decomposition_role, is_safe_part, need_print_label)
+    values ('XN2808FN-LOW','…','rear_lower',true,true) on conflict(part_no) do nothing;
+    -- DA lower 同理，或文档化运营在 SafePartSettingPage 手动新增 XN3024DA 低位
+    ```
 
-- [ ] **更新 `CHANGELOG.MD`**：在文件顶部追加一条记录（日期/类别/范围/摘要/验证），与代码改动同一次提交。
+- [ ] **更新 `CHANGELOG.MD`**：顶部追加（日期/类别 修复/范围 decomposition/摘要 含 AF/FN/DA/验证）。
 
 ## Verification（最低验证）
 
 - **类型与单测**：
   ```bash
   bun run typecheck
-  bun run test src/services/apiSyneyPo.vitest.ts src/features/syney/queryKeys.vitest.tsx
-  bun run test src/utils/syney*  # 若改动去重逻辑
+  bun run test src/utils/syneyDecomposition.test.ts
+  bun run test src/utils/syneySafePartRules*
   ```
-- **构建体积**：
+- **构建**：
   ```bash
   bun run build
   bun run check:bundle
@@ -113,14 +112,14 @@
   ```bash
   bun lint
   ```
-- **手工验证**（需登录态）：
-  1. 进入 `syney-po-list`，记录问题订单的 `PoId`/`SONo`/`No`，确认列表分页总数与筛选后总数。
-  2. 进入 `syney-po-list/:PoId`，翻页（10/20/50/100），核对：分页总数 `total` == 表格行数总数（跨页求和）== `select count(*) where PoId=:id`；当前页表格行号连续且 `summary` 标注与实际求和一致。
-  3. 若修复了去重：用同一 Excel 重复上传（ dry-run 或测试环境），确认新创建订单的明细数回到 14 且无重复 `PartNo`。
-  4. 回归：列表的 `status/date/SONo` 筛选与预取（`usePos` 的 `prefetchQuery`）仍正常；`ReportDetail` 的同构分页未被误改。
+- **手工验证**（需登录态，选两单打印分解单）：
+  1. 选中 `XNJD-FZ26-120-0289`（含 AF）与 `XNJD-FZ26-123-0296`（含 FN/DA）→ 打印 → 核对 中板：`296` 的 `1244*550` 由 `2/空` 变为 `1244*550*1 / 1244*550*1`；后板：`FN` 的 `下` 落下格。
+  2. 构造边界：单中板 `XN3024DA Qty2 无备注` → 上1+下1；双中板 `DA各1` → 上/下各1；`DA` 备注含 `上`/`下` → 按旗标。
+  3. 回归：`AF` 原有上/下、`BS/BT` 等中板、`侧围/横围`、`加长板` 不受影响。
 
-## Open Questions（已最小化，需用户确认一项）
+## Decisions（已确认）
 
-- **去重键确认**：`distinctItems` 当前键为 `PartNo-TaxUnitPrice`，是否即为西尼踏板“14 条为一组”的正确去重键？还是应按 `PartNo` / `PartNo+ParamSpec` 去重？请确认，避免误合并不同规格的同件号。
-- **汇总口径**：详情页底部的“当前页合计”应为**当前页 Qty 求和**还是**全部 24 条的合计**？当前 `DetailTable` 的实现与文案不一致（代码用全量 `items` 算但文案写“当前页合计”），需定口径后统一。
+- **DA2 拆分口径 = 1+1**（用户确认“选这个”）：单中板件号（如 `XN3024DA Qty 2` 无备注）按后板同构逻辑拆为 `上1 / 下1`（`qtyOverride: 1` 各一），`Qty 4 → 上2/下2` 以此类推；若 `Remark` 含 `上/下` 则优先按旗标分流，无旗标再均分。
+- **FN2 等同 AF**（用户确认“是”）：`XN2808FN` 完全复用 `AF` 的后板旗标链路（`上头部/上部/独立上 → rearUpper`，`下头部/下部/独立下 → rearLower`，经 `hasUpFlag/hasDownFlag`），无旗标单件按 `1→上1+下1`。
+- **配置 vs 代码**：DA 采用代码零配置的 `unassignedMiddle` 自动拆分，运营无需在 `SafePartSettingPage` 手补 `lower_middle`；仅当未来需显式覆盖时再通过 `decomposition_role` 配置覆盖。
 

@@ -116,7 +116,27 @@ function getLegacyCellKey(item: ISyneyItem): CellKey | undefined {
 
 function isLegacyRearPlateCandidate(item: ISyneyItem) {
   const partNo = normalizePartNo(item.PartNo)
-  return partNo.startsWith('XN2808AF') || partNo.startsWith('XN3024Y997')
+  return (
+    partNo.startsWith('XN2808AF') ||
+    partNo.startsWith('XN2808FN') ||
+    partNo.startsWith('XN3024Y997')
+  )
+}
+
+function isLegacyMiddlePlateCandidate(item: ISyneyItem) {
+  const partNo = normalizePartNo(item.PartNo)
+  return partNo.startsWith('XN3024DA') || partNo.startsWith('XN2808DA')
+}
+
+function getLegacyMiddleCellKey(item: ISyneyItem): CellKey | undefined {
+  const remark = item.Remark || ''
+  const isUp = hasUpFlag(remark)
+  const isDown = hasDownFlag(remark)
+
+  if (isUp && !isDown) return 'upperMiddle'
+  if (isDown && !isUp) return 'lowerMiddle'
+
+  return undefined
 }
 
 function getLegacyRearCellKey(item: ISyneyItem): CellKey | undefined {
@@ -158,12 +178,21 @@ export function buildDecompositionCells(
 ): DecompositionCells {
   const cells: DecompositionCells = {}
   const unassignedRearItems: ISyneyItem[] = []
+  const unassignedMiddleItems: ISyneyItem[] = []
 
   items.forEach((item) => {
     if (isLegacyRearPlateCandidate(item)) {
       const rearKey = getLegacyRearCellKey(item)
       if (rearKey) {
         addCell(cells, rearKey, item)
+        return
+      }
+    }
+
+    if (isLegacyMiddlePlateCandidate(item)) {
+      const middleKey = getLegacyMiddleCellKey(item)
+      if (middleKey) {
+        addCell(cells, middleKey, item)
         return
       }
     }
@@ -183,6 +212,9 @@ export function buildDecompositionCells(
     if (isLegacyRearPlateCandidate(item)) {
       unassignedRearItems.push(item)
     }
+    if (isLegacyMiddlePlateCandidate(item)) {
+      unassignedMiddleItems.push(item)
+    }
   })
 
   if (unassignedRearItems.length === 1) {
@@ -192,6 +224,15 @@ export function buildDecompositionCells(
   } else if (unassignedRearItems.length >= 2) {
     addCell(cells, 'rearUpper', unassignedRearItems[0])
     addCell(cells, 'rearLower', unassignedRearItems[1])
+  }
+
+  if (unassignedMiddleItems.length === 1) {
+    const item = unassignedMiddleItems[0]
+    addCell(cells, 'upperMiddle', item, 1)
+    addCell(cells, 'lowerMiddle', item, 1)
+  } else if (unassignedMiddleItems.length >= 2) {
+    addCell(cells, 'upperMiddle', unassignedMiddleItems[0])
+    addCell(cells, 'lowerMiddle', unassignedMiddleItems[1])
   }
 
   return cells
