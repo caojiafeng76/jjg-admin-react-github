@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-08-28
+
+- **类别**：修复
+- **范围**：西尼踏板分解单 `src/utils/syneyDecomposition.ts`、`src/features/syney/PoList/usePrintDecomposition.ts`、`src/utils/syneyDecomposition.test.ts`
+- **摘要**：修复 P202608270133 分解单横框不显示：`XN2808FD` 已在安全件配置中标记为 `cross_frame`，但分解单打印仍只硬编码识别 `XN2808EC/XN2838CP`，现将 `cross_frame` 纳入分解单格子映射，并保留旧横围前缀 fallback；PDF 横围列改为读取统一的 `crossFrame` 结果，确保 `XN2808FD2` 横框组件按 `1260*2` 显示。
+- **验证**：先运行 `bun run test src/utils/syneyDecomposition.test.ts` 确认新增用例 2 失败（`crossFrame` 为 `undefined`）；修复后 `bun run test src/utils/syneyDecomposition.test.ts` 10/10 通过；`bun run test` 全量 116 个测试文件、526 个用例通过（保留仓库既有 act/Ant Design deprecated warning）；`bun run typecheck` 通过；`bun run build` 通过（保留 Vite config native import extension 既有 warning）；Bun 运行时用 P202608270133 的 `XN2808FD2` 明细验证输出 `crossFrame={spec:"L=1260",qty:2}`、打印文本 `1260*2`；`bunx eslint src/utils/syneyDecomposition.ts src/utils/syneyDecomposition.test.ts src/features/syney/PoList/usePrintDecomposition.ts` 通过，`bun lint` 因既有 `.pi/extensions/serena-singleton.ts:108 prefer-const` 失败。
+
 ## 2026-08-27
 
 - **类别**：修复

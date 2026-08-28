@@ -20,6 +20,7 @@ export type DecompositionCells = {
   rearLower?: DecompositionCell
   extensionUpper?: DecompositionCell
   extensionLower?: DecompositionCell
+  crossFrame?: DecompositionCell
 }
 
 type CellKey = keyof DecompositionCells
@@ -32,6 +33,7 @@ const ROLE_TO_CELL_KEY: Partial<Record<DecompositionRole, CellKey>> = {
   rear_lower: 'rearLower',
   extension_upper: 'extensionUpper',
   extension_lower: 'extensionLower',
+  cross_frame: 'crossFrame',
 }
 
 function normalizePartNo(partNo: string | null | undefined) {
@@ -109,6 +111,10 @@ function getLegacyCellKey(item: ISyneyItem): CellKey | undefined {
     (partNo.startsWith('XN3024X997') && hasDownFlag(remark))
   ) {
     return 'extensionLower'
+  }
+
+  if (startsWithAny(partNo, ['XN2808EC', 'XN2838CP'])) {
+    return 'crossFrame'
   }
 
   return undefined

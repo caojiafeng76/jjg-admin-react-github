@@ -410,20 +410,16 @@ export function usePrintDecomposition(
         yBase - 4,
       )
 
-      // 遍历所有items，处理横围（侧围和板件已在上面处理）
-      items.forEach((item: ISyneyItem) => {
-        const { PartNo, ParamSpec, Qty } = item
-        const specText = ParamSpec ? ParamSpec : ''
-
-        // 横围
-        if (PartNo?.includes('XN2808EC') || PartNo?.includes('XN2838CP')) {
+      const crossFrame = decompositionCells.crossFrame
+      if (crossFrame) {
+        const crossFrameSpec = crossFrame.spec.includes('=')
+          ? crossFrame.spec.slice(crossFrame.spec.indexOf('=') + 1)
+          : crossFrame.spec
+        if (crossFrameSpec) {
           doc.setFontSize(8)
-          const specVal = specText.includes('=')
-            ? specText.slice(specText.indexOf('=') + 1)
-            : specText
-          doc.text(`${specVal}*${Qty}`, 244, yBase - 9)
+          doc.text(`${crossFrameSpec}*${crossFrame.qty}`, 244, yBase - 9)
         }
-      })
+      }
     })
   }
 

@@ -1,6 +1,6 @@
-model = "gpt-5.6-luna"
+model = "gpt-5.5"
 model_context_window = 372000
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "xhigh"
 [mcp_servers.spec-workflow]
 args = [

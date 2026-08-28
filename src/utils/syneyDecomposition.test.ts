@@ -10,6 +10,7 @@ const settings: SyneySafePartRule[] = [
   { part_no: 'XN3024AD', decomposition_role: 'rear_lower' },
   { part_no: 'XN3024AE', decomposition_role: 'upper_middle' },
   { part_no: 'XN3024AF', decomposition_role: 'lower_middle' },
+  { part_no: 'XN2808FD', decomposition_role: 'cross_frame' },
 ]
 
 function item(values: Partial<ISyneyItem>): ISyneyItem {
@@ -174,5 +175,30 @@ describe('buildDecompositionCells', () => {
 
     expect(cells.rearUpper).toEqual({ spec: '1244*540', qty: 1 })
     expect(cells.rearLower).toEqual({ spec: '1244*540', qty: 1 })
+  })
+
+  it('routes configured cross frame parts into the cross frame cell', () => {
+    const cells = buildDecompositionCells(
+      [
+        item({
+          PartNo: 'XN2808FD2',
+          PartName: '横框组件',
+          ParamSpec: 'L=1260',
+          Qty: 2,
+        }),
+      ],
+      settings,
+    )
+
+    expect(cells.crossFrame).toEqual({ spec: 'L=1260', qty: 2 })
+  })
+
+  it('keeps legacy cross frame prefixes mapped without settings', () => {
+    const cells = buildDecompositionCells([
+      item({ PartNo: 'XN2808EC1', ParamSpec: 'L=900', Qty: 1 }),
+      item({ PartNo: 'XN2838CP1', ParamSpec: 'L=900', Qty: 2 }),
+    ])
+
+    expect(cells.crossFrame).toEqual({ spec: 'L=900', qty: 3 })
   })
 })
