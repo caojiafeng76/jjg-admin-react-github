@@ -1,7 +1,16 @@
 # Syney store report Aliyun FC Web function
 
-Upload this folder as the code package for an Aliyun Function Compute Web
-function.
+Stage the code package before uploading it to an Aliyun Function Compute Web
+function:
+
+```bash
+bun run fc:package:syney-store-report
+```
+
+Upload `dist/aliyun-fc/syney-store-report` as the function code package. The
+staged package includes both `server.js` and the required `proxy-security.js`
+runtime module; uploading only `server.js` will make the function fail during
+startup with `Cannot find module './proxy-security'`.
 
 Recommended function settings:
 

@@ -1,5 +1,7 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { spawnSync } from 'node:child_process'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
@@ -25,4 +27,44 @@ describe('Syney store report SCM fields', () => {
       expect(readBindFields(path)).toContain('TaxUnitPrice')
     },
   )
+
+  it('stages the Aliyun FC proxy-security module with the server entrypoint', () => {
+    const outputDir = mkdtempSync(join(tmpdir(), 'syney-store-report-fc-'))
+
+    try {
+      const packageResult = spawnSync(
+        'bun',
+        ['scripts/package-syney-store-report-fc.mjs', '--out', outputDir],
+        {
+          cwd: process.cwd(),
+          encoding: 'utf8',
+        },
+      )
+
+      expect(
+        packageResult.status,
+        packageResult.stderr || packageResult.stdout,
+      ).toBe(0)
+      expect(existsSync(join(outputDir, 'server.js'))).toBe(true)
+      expect(existsSync(join(outputDir, 'proxy-security.js'))).toBe(true)
+
+      const smokeResult = spawnSync(
+        'node',
+        [
+          '-e',
+          "require('./proxy-security'); console.log('proxy-security resolved')",
+        ],
+        {
+          cwd: outputDir,
+          encoding: 'utf8',
+        },
+      )
+
+      expect(smokeResult.status, smokeResult.stderr || smokeResult.stdout).toBe(
+        0,
+      )
+    } finally {
+      rmSync(outputDir, { recursive: true, force: true })
+    }
+  })
 })

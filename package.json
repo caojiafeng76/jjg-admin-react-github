@@ -17,6 +17,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "preview": "vite preview",
+    "fc:package:syney-store-report": "bun scripts/package-syney-store-report-fc.mjs",
     "ai:doctor": "bun scripts/ai-doctor.mjs",
     "mcp:serena": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-serena-singleton.ps1",
     "graphify:build": "graphify build .",

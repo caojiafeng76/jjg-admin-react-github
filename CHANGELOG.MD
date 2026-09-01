@@ -16,6 +16,13 @@
 ## 2026-09-01
 
 - **类别**：修复
+- **范围**：西尼入库单 Aliyun FC 发布包 `scripts/package-syney-store-report-fc.mjs`、`package.json`、`aliyun-fc/syney-store-report/README.md`、`src/services/syneyStoreReportFields.vitest.ts`
+- **摘要**：修复入库单列表点击“获取”时远端云函数 `CAExited`：云函数返回的完整日志显示 `/code/server.js` 启动时 `Cannot find module './proxy-security'`，根因是线上发布包漏传 `proxy-security.js`，而非入库单 `K202608310096` 源数据或单价字段问题。新增标准发布包 staging 命令 `bun run fc:package:syney-store-report`，固定把 `server.js`、`proxy-security.js`、`package.json`、`bootstrap`、`README.md` 一起输出到 `dist/aliyun-fc/syney-store-report`，并补充回归测试与部署说明，避免只上传 `server.js` 再次导致函数启动失败。
+- **验证**：先运行 `bun run test src/services/syneyStoreReportFields.vitest.ts` 确认新增发布包用例因缺少 `scripts/package-syney-store-report-fc.mjs` 失败；修复后该测试 4/4 通过；`node --test aliyun-fc/syney-store-report/proxy-security.test.js` 5/5 通过；`bun run fc:package:syney-store-report` 成功生成包含 `proxy-security.js` 的发布目录；从 `dist/aliyun-fc/syney-store-report` 设置 `PORT=19001` 启动 `node server.js` 并请求 `GET /`，服务正常监听且返回预期 `401 未登录`，未再出现模块缺失崩溃；`bun run build` 通过（保留 Vite config native import extension 既有 warning）；`bun run test` 全量执行时本次相关 `src/services/syneyStoreReportFields.vitest.ts` 通过，但既有/无关用例 `src/features/packaging-process/WorkOrderList/remoteEmployeeSelect.vitest.tsx` 仍失败，单独复跑同样失败。
+
+## 2026-09-01
+
+- **类别**：修复
 - **范围**：西尼入库单 SCM 代理字段 `server/syneyStoreReportServer.ts`、`supabase/functions/fetch-syney-store-report/index.ts`、`aliyun-fc/syney-store-report/server.js`、`src/services/syneyStoreReportFields.vitest.ts`
 - **摘要**：排查入库单 `K202608310096` 单价显示异常：数据库当前保存的 17 条入库明细与 SCM 实时返回的 28 条源明细均未发现零单价；同时发现三个代理源码的 SCM `BindFields` 未显式请求 `TaxUnitPrice`，现补齐该字段并增加字段回归测试，避免后续 SCM 不再隐式返回单价时导入明细落成 0。
 - **验证**：`bun run test src/services/syneyStoreReportFields.vitest.ts` 已先确认 3 个用例因缺少 `TaxUnitPrice` 失败，修复后 3/3 通过；本地代理函数实时拉取 `K202608310096` 返回源明细 28 条、零单价 0 条，按页面逻辑合并后 17 条、零单价 0 条、金额 `11609.35`；`bun run test` 全量 117 个测试文件、529 个用例通过（保留仓库既有 React `act(...)` 与 Ant Design deprecated warning）；`bun run build` 通过（保留 Vite config native import extension 既有 warning）。
