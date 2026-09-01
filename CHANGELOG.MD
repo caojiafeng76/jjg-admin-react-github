@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-09-01
+
+- **类别**：修复
+- **范围**：西尼入库单 SCM 代理字段 `server/syneyStoreReportServer.ts`、`supabase/functions/fetch-syney-store-report/index.ts`、`aliyun-fc/syney-store-report/server.js`、`src/services/syneyStoreReportFields.vitest.ts`
+- **摘要**：排查入库单 `K202608310096` 单价显示异常：数据库当前保存的 17 条入库明细与 SCM 实时返回的 28 条源明细均未发现零单价；同时发现三个代理源码的 SCM `BindFields` 未显式请求 `TaxUnitPrice`，现补齐该字段并增加字段回归测试，避免后续 SCM 不再隐式返回单价时导入明细落成 0。
+- **验证**：`bun run test src/services/syneyStoreReportFields.vitest.ts` 已先确认 3 个用例因缺少 `TaxUnitPrice` 失败，修复后 3/3 通过；本地代理函数实时拉取 `K202608310096` 返回源明细 28 条、零单价 0 条，按页面逻辑合并后 17 条、零单价 0 条、金额 `11609.35`；`bun run test` 全量 117 个测试文件、529 个用例通过（保留仓库既有 React `act(...)` 与 Ant Design deprecated warning）；`bun run build` 通过（保留 Vite config native import extension 既有 warning）。
+
 ## 2026-08-28
 
 - **类别**：修复

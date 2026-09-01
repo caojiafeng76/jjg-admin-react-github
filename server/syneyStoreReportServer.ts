@@ -23,6 +23,7 @@ const BIND_FIELDS = [
   'ParamSpec',
   'Qty',
   'Unit',
+  'TaxUnitPrice',
   'SupplierWeight',
   'SyneyWeight',
   'CalculateUnit',
