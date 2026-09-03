@@ -70,22 +70,6 @@ describe('buildDecompositionCells', () => {
     expect(cells.rearLower).toEqual({ spec: '1525*612', qty: 1 })
   })
 
-  it('splits a Qty 2 AF rear plate into upper and lower despite an upper-head remark', () => {
-    const cells = buildDecompositionCells([
-      item({
-        PartNo: 'XN2808AF1',
-        PartName: '前沿后板组件',
-        ParamSpec: '1525*540',
-        Qty: 2,
-        Remark:
-          'JD-FZ26-127-0307 前沿板中间 品牌:永大电梯设备(中国)有限公司 L1=540mm 上头部',
-      }),
-    ])
-
-    expect(cells.rearUpper).toEqual({ spec: '1525*540', qty: 1 })
-    expect(cells.rearLower).toEqual({ spec: '1525*540', qty: 1 })
-  })
-
   it('uses rear plate remark direction before a broad configured rear role', () => {
     const cells = buildDecompositionCells(
       [

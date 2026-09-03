@@ -18,7 +18,7 @@
 - **类别**：修复
 - **范围**：西尼踏板分解单 `src/utils/syneyDecomposition.ts`、`src/utils/syneyDecomposition.test.ts`
 - **摘要**：修复后板单条数量为 2 但备注带“上头部/下头部”时未上下拆分的问题：旧件号后板候选现在优先按数量拆成上、下各 1，避免编号 5260 的 `XN2808AF1` 显示为上格 2、下格空白；数量为 1 的后板仍按上下备注分格。
-- **验证**：`bun run test src/utils/syneyDecomposition.test.ts` 先确认编号 5260 数据回归用例失败，再修复后 15/15 通过；后续全量验证见本次交付记录。
+- **验证**：先确认编号 5260 数据回归用例失败；拆分测试后 `src/utils/syneyDecomposition.test.ts` 14/14 和 `src/utils/syneyDecomposition.rear.test.ts` 1/1 通过；`bun run typecheck`、分解工具相关 lint 和代码质量规则通过。全量测试为 117 个文件、534 个用例通过，另有 1 条与本次无关的远程员工下拉既有失败，详见本次交付记录。
 
 ## 2026-09-03
 
