@@ -17,6 +17,13 @@
 
 - **类别**：修复
 - **范围**：西尼踏板分解单 `src/utils/syneyDecomposition.ts`、`src/utils/syneyDecomposition.test.ts`
+- **摘要**：修复后板单条数量为 2 但备注带“上头部/下头部”时未上下拆分的问题：旧件号后板候选现在优先按数量拆成上、下各 1，避免编号 5260 的 `XN2808AF1` 显示为上格 2、下格空白；数量为 1 的后板仍按上下备注分格。
+- **验证**：`bun run test src/utils/syneyDecomposition.test.ts` 先确认编号 5260 数据回归用例失败，再修复后 15/15 通过；后续全量验证见本次交付记录。
+
+## 2026-09-03
+
+- **类别**：修复
+- **范围**：西尼踏板分解单 `src/utils/syneyDecomposition.ts`、`src/utils/syneyDecomposition.test.ts`
 - **摘要**：修复分解单后板上下未分开：配置命中 `rear_upper/rear_lower` 的新后板件号现在也会优先按备注中的 `上头部/下头部` 分流；无上下备注但数量为 2 的后板配置项（包括 `PartName` 为空、只靠安全件配置识别为后板的明细）纳入既有后板均分逻辑；旧件号 `XN3024BX/XN3024BY` 也进入后板候选拆分队列，避免第 3、4 行这类 `XN3024BX` 单条同规格后板被固定到上格并显示 `2`。
 - **验证**：先运行 `bun run test src/utils/syneyDecomposition.test.ts` 确认新增“配置后板按备注分流”、“配置单条后板 Qty 2 均分”、“配置后板 PartName 为空仍均分”和“单条 BX 后板 Qty 2 均分”用例失败；修复后同命令 14/14 通过；`bun run test` 全量 117 个测试文件、534 个用例通过（保留仓库既有 act/Ant Design deprecated/font fallback 日志）；`bun run typecheck` 通过；`bun run build` 通过（保留仓库既有 Vite native import extension warning）；`bunx eslint src/utils/syneyDecomposition.ts src/utils/syneyDecomposition.test.ts` 通过。
 

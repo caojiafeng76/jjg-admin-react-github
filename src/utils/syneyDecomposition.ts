@@ -194,6 +194,12 @@ export function buildDecompositionCells(
 
   items.forEach((item) => {
     if (isLegacyRearPlateCandidate(item)) {
+      if (item.Qty === 2) {
+        addCell(cells, 'rearUpper', item, 1)
+        addCell(cells, 'rearLower', item, 1)
+        return
+      }
+
       const rearKey = getLegacyRearCellKey(item)
       if (rearKey) {
         addCell(cells, rearKey, item)
