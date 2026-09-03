@@ -17,8 +17,8 @@
 
 - **类别**：修复
 - **范围**：西尼踏板分解单 `src/utils/syneyDecomposition.ts`、`src/utils/syneyDecomposition.test.ts`
-- **摘要**：修复分解单后板上下未分开：配置命中 `rear_upper/rear_lower` 的新后板件号现在也会优先按备注中的 `上头部/下头部` 分流；无上下备注但数量为 2 的后板配置项纳入既有后板均分逻辑，按上 1、下 1 显示，与中板拆分口径一致，避免同规格后板被汇总为上格 `2`、下格空白。
-- **验证**：先运行 `bun run test src/utils/syneyDecomposition.test.ts` 确认新增“配置后板按备注分流”和“配置单条后板 Qty 2 均分”用例失败；修复后同命令 12/12 通过；`bun run test` 全量 117 个测试文件、532 个用例通过（保留仓库既有 act/Ant Design deprecated/font fallback 日志）；`bun run typecheck` 通过；`bun run build` 通过（保留仓库既有 Vite native import extension warning）；`bunx eslint src/utils/syneyDecomposition.ts src/utils/syneyDecomposition.test.ts` 通过。
+- **摘要**：修复分解单后板上下未分开：配置命中 `rear_upper/rear_lower` 的新后板件号现在也会优先按备注中的 `上头部/下头部` 分流；无上下备注但数量为 2 的后板配置项（包括 `PartName` 为空、只靠安全件配置识别为后板的明细）纳入既有后板均分逻辑，按上 1、下 1 显示，与中板拆分口径一致，避免同规格后板被汇总为上格 `2`、下格空白。
+- **验证**：先运行 `bun run test src/utils/syneyDecomposition.test.ts` 确认新增“配置后板按备注分流”、“配置单条后板 Qty 2 均分”和“配置后板 PartName 为空仍均分”用例失败；修复后同命令 13/13 通过；`bun run test` 全量 117 个测试文件、533 个用例通过（保留仓库既有 act/Ant Design deprecated/font fallback 日志）；`bun run typecheck` 通过；`bun run build` 通过（保留仓库既有 Vite native import extension warning）；`bunx eslint src/utils/syneyDecomposition.ts src/utils/syneyDecomposition.test.ts` 通过。
 
 ## 2026-09-01
 
