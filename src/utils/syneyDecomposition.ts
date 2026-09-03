@@ -156,6 +156,14 @@ function getLegacyRearCellKey(item: ISyneyItem): CellKey | undefined {
   return undefined
 }
 
+function isRearCellKey(key: CellKey): key is 'rearUpper' | 'rearLower' {
+  return key === 'rearUpper' || key === 'rearLower'
+}
+
+function isRearPlateByName(item: ISyneyItem) {
+  return (item.PartName || '').includes('后板')
+}
+
 function addCell(
   cells: DecompositionCells,
   key: CellKey,
@@ -211,6 +219,19 @@ export function buildDecompositionCells(
 
     const configuredKey = getConfiguredCellKey(item, settings)
     if (configuredKey) {
+      const rearKey = isRearCellKey(configuredKey)
+        ? getLegacyRearCellKey(item)
+        : undefined
+      if (rearKey) {
+        addCell(cells, rearKey, item)
+        return
+      }
+
+      if (isRearCellKey(configuredKey) && isRearPlateByName(item)) {
+        unassignedRearItems.push(item)
+        return
+      }
+
       addCell(cells, configuredKey, item)
       return
     }

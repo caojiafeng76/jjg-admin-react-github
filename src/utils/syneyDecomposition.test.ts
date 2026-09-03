@@ -95,6 +95,49 @@ describe('buildDecompositionCells', () => {
     expect(cells.rearLower).toEqual({ spec: '1525*612', qty: 1 })
   })
 
+  it('uses rear plate remark direction before a configured rear role for new part numbers', () => {
+    const cells = buildDecompositionCells(
+      [
+        item({
+          PartNo: 'XN3024ZZ1',
+          PartName: '前沿后板组件',
+          ParamSpec: '1525*540',
+          Qty: 1,
+          Remark: 'XNJD-FZ26-126-0305 后板 L1=540mm 上头部',
+        }),
+        item({
+          PartNo: 'XN3024ZZ1',
+          PartName: '前沿后板组件',
+          ParamSpec: '1525*540',
+          Qty: 1,
+          Remark: 'XNJD-FZ26-126-0305 后板 L1=540mm 下头部',
+        }),
+      ],
+      [{ part_no: 'XN3024ZZ', decomposition_role: 'rear_upper' }],
+    )
+
+    expect(cells.rearUpper).toEqual({ spec: '1525*540', qty: 1 })
+    expect(cells.rearLower).toEqual({ spec: '1525*540', qty: 1 })
+  })
+
+  it('splits a configured single rear plate with Qty 2 into upper and lower 1+1', () => {
+    const cells = buildDecompositionCells(
+      [
+        item({
+          PartNo: 'XN3024ZZ1',
+          PartName: '前沿后板组件',
+          ParamSpec: '1525*540',
+          Qty: 2,
+          Remark: 'XNJD-FZ26-126-0305 后板 L1=540mm',
+        }),
+      ],
+      [{ part_no: 'XN3024ZZ', decomposition_role: 'rear_upper' }],
+    )
+
+    expect(cells.rearUpper).toEqual({ spec: '1525*540', qty: 1 })
+    expect(cells.rearLower).toEqual({ spec: '1525*540', qty: 1 })
+  })
+
   it('routes FN rear plates by remark direction like AF', () => {
     const cells = buildDecompositionCells([
       item({
