@@ -155,6 +155,20 @@ describe('buildDecompositionCells', () => {
     expect(cells.rearLower).toEqual({ spec: '1525*540', qty: 1 })
   })
 
+  it('splits a single BX rear plate with Qty 2 into upper and lower 1+1', () => {
+    const cells = buildDecompositionCells([
+      item({
+        PartNo: 'XN3024BX1',
+        ParamSpec: '1525*540',
+        Qty: 2,
+        Remark: 'XNJD-FZ26-126-0305 后板 L1=540mm',
+      }),
+    ])
+
+    expect(cells.rearUpper).toEqual({ spec: '1525*540', qty: 1 })
+    expect(cells.rearLower).toEqual({ spec: '1525*540', qty: 1 })
+  })
+
   it('routes FN rear plates by remark direction like AF', () => {
     const cells = buildDecompositionCells([
       item({

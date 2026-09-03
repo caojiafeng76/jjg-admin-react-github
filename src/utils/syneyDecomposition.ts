@@ -125,6 +125,8 @@ function isLegacyRearPlateCandidate(item: ISyneyItem) {
   return (
     partNo.startsWith('XN2808AF') ||
     partNo.startsWith('XN2808FN') ||
+    partNo.startsWith('XN3024BX') ||
+    partNo.startsWith('XN3024BY') ||
     partNo.startsWith('XN3024Y997')
   )
 }
