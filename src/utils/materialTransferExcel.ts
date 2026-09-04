@@ -8,6 +8,10 @@ import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
 } from '@/utils/excelStyleUtils'
+import {
+  buildMaterialTransferSummaryWorksheet,
+  MATERIAL_TRANSFER_SUMMARY_SHEET_NAME,
+} from './materialTransferSummaryWorksheet'
 
 const SHEET_TITLE = '精加工车间物料转移登记表'
 
@@ -75,9 +79,7 @@ export function exportMaterialTransfersToExcel(
   )
   const rows = records.map((record) => {
     const projectKey = record.project_no?.trim()
-    const progress = projectKey
-      ? orderProgressMap.get(projectKey)
-      : undefined
+    const progress = projectKey ? orderProgressMap.get(projectKey) : undefined
     return [
       formatDateTime(record.created_at),
       record.project_no,
@@ -125,6 +127,11 @@ export function exportMaterialTransfersToExcel(
   applyTransferQuantityTotalFormula(worksheet, records.length)
 
   XLSX.utils.book_append_sheet(workbook, worksheet, '物料转移单')
+  XLSX.utils.book_append_sheet(
+    workbook,
+    buildMaterialTransferSummaryWorksheet(records, orderProgressMap),
+    MATERIAL_TRANSFER_SUMMARY_SHEET_NAME,
+  )
   XLSX.writeFile(
     workbook,
     `物料转移单_${new Date().toISOString().slice(0, 10)}.xlsx`,

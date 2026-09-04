@@ -123,4 +123,33 @@ describe('exportMaterialTransfersToExcel', () => {
     expect(worksheet.Q3?.v).toBe('')
     expect(worksheet.R3?.v).toBe('')
   })
+
+  it('adds a summary worksheet that groups the same product in the same workshop', () => {
+    exportMaterialTransfersToExcel([
+      createRecord('001', 12, 'P-001'),
+      {
+        ...createRecord('002', 8, 'P-001'),
+        operator_names: ['李四'],
+      },
+      {
+        ...createRecord('003', 5, 'P-001'),
+        target_workshop: '装配车间',
+      },
+      createRecord('004', 7, 'P-002'),
+    ])
+
+    const workbook = vi.mocked(XLSX.writeFile).mock.calls[0][0] as XLSX.WorkBook
+    const worksheet = workbook.Sheets['汇总表']
+
+    expect(workbook.SheetNames).toEqual(['物料转移单', '汇总表'])
+    expect(worksheet.A1?.v).toBe(
+      '5月28日精加工车间订单物料转移、进度、状态汇总表',
+    )
+    expect(worksheet.G3?.v).toBe(20)
+    expect(worksheet.H3?.v).toBe('张三、李四')
+    expect(worksheet.I3?.v).toBe('仓库')
+    expect(worksheet.G4?.v).toBe(5)
+    expect(worksheet.I4?.v).toBe('装配车间')
+    expect(worksheet.G5?.v).toBe(7)
+  })
 })

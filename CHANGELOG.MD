@@ -16,6 +16,13 @@
 ## 2026-09-04
 
 - **类别**：变更
+- **范围**：物料转移单 Excel 导出 `src/utils/materialTransferExcel.ts`、`src/utils/materialTransferSummaryWorksheet.ts`、`src/utils/materialTransferExcel.vitest.ts`
+- **摘要**：物料转移单导出新增“汇总表”sheet，按项目号、客户、型号、长度、客户型号和接收车间聚合相同物料，自动汇总转移数量，并去重合并人员、审核、备注等展示信息；明细页和其原有合计行保持不变。
+- **验证**：新增汇总表用例已先确认因 workbook 缺少“汇总表”失败；修复后执行物料转移导出单测、类型检查、全量测试和生产构建。
+
+## 2026-09-04
+
+- **类别**：变更
 - **范围**：生产日报表 Excel 导出 `src/utils/productionDailyReportExcelWorkbook.ts`、`src/utils/productionDailyReportSummaryWorksheet.ts`、`supabase/functions/_shared/production-daily-report-export-workbook.ts`、`supabase/functions/_shared/production-daily-report-summary-worksheet.ts`、`src/utils/productionDailyReportExcelWorkbook.vitest.ts`
 - **摘要**：生产日报表导出新增“汇总表”sheet，按日报明细汇总来料合格数、成品合格数、不良数量、原料/加工/外协/调机不良及重量，合格率按成品合格数除以来料合格数整体计算；外协不良原因、外协单位、调机负责人和备注去重后合并展示。前端即时导出与后台异步导出共享相同汇总口径。
 - **验证**：先运行新增用例确认当前 workbook 缺少“汇总表”失败；修复后 `bun run test -- src/utils/productionDailyReportExcelWorkbook.vitest.ts` 通过，`bun run typecheck` 通过，`bun run test` 全量 119 个测试文件、536 个用例通过，`bun run build` 通过（保留既有 Vite native import extension warning）。`deno check supabase/functions/export-production-daily-report/index.ts` 因本机未安装 `deno` 未执行成功。
