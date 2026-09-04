@@ -1,4 +1,9 @@
 import XLSX from 'npm:xlsx-js-style@1.2.0'
+import { buildProductionDailyReportAbnormalDisplays } from './production-daily-report-abnormal-display.ts'
+import {
+  centerAllCells,
+  setRowHeight,
+} from './production-daily-report-excel-style.ts'
 
 export const PRODUCTION_DAILY_REPORT_SUMMARY_SHEET_NAME = '汇总表'
 
@@ -32,62 +37,6 @@ const SUMMARY_HEADERS = [
   '异常显示说明',
   '备注',
 ] as const
-
-function getColumnLetter(columnIndex: number) {
-  let letter = ''
-  let currentIndex = columnIndex
-
-  while (currentIndex >= 0) {
-    letter = String.fromCharCode((currentIndex % 26) + 65) + letter
-    currentIndex = Math.floor(currentIndex / 26) - 1
-  }
-
-  return letter
-}
-
-function setRowHeight(
-  worksheet: XLSX.WorkSheet,
-  rowHeight: number,
-  rowCount: number,
-) {
-  worksheet['!rows'] = Array.from({ length: rowCount }, () => ({
-    hpt: rowHeight,
-    hpx: rowHeight,
-  }))
-}
-
-function centerAllCells(
-  worksheet: XLSX.WorkSheet,
-  data: Array<Array<unknown>>,
-) {
-  if (data.length === 0) {
-    return
-  }
-
-  for (let rowIndex = 0; rowIndex < data.length; rowIndex += 1) {
-    for (let columnIndex = 0; columnIndex < data[0].length; columnIndex += 1) {
-      const cellRef = `${getColumnLetter(columnIndex)}${rowIndex + 1}`
-
-      if (!worksheet[cellRef]) {
-        worksheet[cellRef] = { v: '' }
-      }
-
-      worksheet[cellRef].s = {
-        ...(worksheet[cellRef].s || {}),
-        font: {
-          ...(worksheet[cellRef].s?.font || {}),
-          name: '宋体',
-          sz: 11,
-        },
-        alignment: {
-          ...(worksheet[cellRef].s?.alignment || {}),
-          horizontal: 'center',
-          vertical: 'center',
-        },
-      }
-    }
-  }
-}
 
 function sumReportRows(
   rows: ProductionDailyReportSummaryRow[],
@@ -132,42 +81,66 @@ function buildSummaryWorksheetData(rows: ProductionDailyReportSummaryRow[]) {
   const qualifiedCount = sumReportRows(rows, (row) => row.qualifiedCount)
   const qualifiedRate =
     incomingQualifiedCount > 0 ? qualifiedCount / incomingQualifiedCount : 0
+  const abnormalDisplays = buildProductionDailyReportAbnormalDisplays(rows)
   const summaryRows = [
-    ['来料合格数', incomingQualifiedCount],
-    ['成品合格数', qualifiedCount],
-    ['不良数量', sumReportRows(rows, (row) => row.defectCount)],
-    ['原料不良', sumReportRows(rows, (row) => row.rawMaterialDefectCount)],
-    ['加工不良', sumReportRows(rows, (row) => row.processingDefectCount)],
-    ['外协不良数', sumReportRows(rows, (row) => row.outsourceDefectCount)],
-    ['外协不良原因', joinUniqueText(rows, (row) => row.outsourceDefectReason)],
-    ['外协单位', joinUniqueText(rows, (row) => row.outsourceUnit)],
-    ['调机不良', sumReportRows(rows, (row) => row.setupDefectCount)],
-    ['调机负责人', joinUniqueText(rows, (row) => row.setupResponsible)],
-    ['合格率', qualifiedRate],
+    ['来料合格数', incomingQualifiedCount, ''],
+    ['成品合格数', qualifiedCount, ''],
+    ['不良数量', sumReportRows(rows, (row) => row.defectCount), ''],
+    [
+      '原料不良',
+      sumReportRows(rows, (row) => row.rawMaterialDefectCount),
+      abnormalDisplays.rawMaterialDefect,
+    ],
+    [
+      '加工不良',
+      sumReportRows(rows, (row) => row.processingDefectCount),
+      abnormalDisplays.processingDefect,
+    ],
+    [
+      '外协不良数',
+      sumReportRows(rows, (row) => row.outsourceDefectCount),
+      abnormalDisplays.outsourceDefect,
+    ],
+    [
+      '外协不良原因',
+      joinUniqueText(rows, (row) => row.outsourceDefectReason),
+      '',
+    ],
+    ['外协单位', joinUniqueText(rows, (row) => row.outsourceUnit), ''],
+    ['调机不良', sumReportRows(rows, (row) => row.setupDefectCount), ''],
+    ['调机负责人', joinUniqueText(rows, (row) => row.setupResponsible), ''],
+    ['合格率', qualifiedRate, ''],
     [
       '原料不良重量kg',
       sumReportRows(rows, (row) => row.rawMaterialDefectWeightKg),
+      '',
     ],
     [
       '加工不良重量kg',
       sumReportRows(rows, (row) => row.processingDefectWeightKg),
+      '',
     ],
     [
       '外协不良重量kg',
       sumReportRows(rows, (row) => row.outsourceDefectWeightKg),
+      '',
     ],
-    ['调机不良重量kg', sumReportRows(rows, (row) => row.setupDefectWeightKg)],
-    ['备注', joinUniqueText(rows, (row) => row.remark)],
+    [
+      '调机不良重量kg',
+      sumReportRows(rows, (row) => row.setupDefectWeightKg),
+      '',
+    ],
+    ['备注', joinUniqueText(rows, (row) => row.remark), ''],
   ] as const
 
   return [
     [buildSummaryTitle(rows), '', '', '', ''],
     [...SUMMARY_HEADERS],
-    ...summaryRows.map(([label, value], index) => [
+    ...summaryRows.map(([label, value, abnormalDisplay], index) => [
       index + 1,
       label,
       value,
-      '',
+      abnormalDisplay,
       '',
     ]),
   ]

@@ -66,7 +66,8 @@ describe('buildProductionDailyReportExcelBuffer', () => {
         processingDefectWeightKg: 0.75,
         outsourceDefectWeightKg: 0.5,
         setupDefectWeightKg: 0.25,
-        remark: '首件复核',
+        remark:
+          '16支加工坏，56支表面不良、原料表面不良120\n倒角大13、原料表面不良178',
       }),
       createReportRow('002', 50, 35, {
         rawMaterialDefectCount: 5,
@@ -80,7 +81,8 @@ describe('buildProductionDailyReportExcelBuffer', () => {
         processingDefectWeightKg: 3,
         outsourceDefectWeightKg: 4,
         setupDefectWeightKg: 5,
-        remark: '尾件抽检',
+        remark:
+          '倒角大11、1支加工坏，4支表面不良、原料有伤、有接头印子、2支铣坏',
       }),
     ])
     const workbook = XLSX.read(buffer, { type: 'array' })
@@ -101,6 +103,7 @@ describe('buildProductionDailyReportExcelBuffer', () => {
     expect(summary.C5?.v).toBe(25)
     expect(summary.B8?.v).toBe('外协不良数')
     expect(summary.C8?.v).toBe(5)
+    expect(summary.D8?.v).toBe('划伤、磕碰')
     expect(summary.C9?.v).toBe('划伤、磕碰')
     expect(summary.C10?.v).toBe('外协一、外协二')
     expect(summary.C11?.v).toBe(2)
@@ -110,6 +113,11 @@ describe('buildProductionDailyReportExcelBuffer', () => {
     expect(summary.C15?.v).toBe(3.75)
     expect(summary.C16?.v).toBe(4.5)
     expect(summary.C17?.v).toBe(5.25)
-    expect(summary.C18?.v).toBe('首件复核、尾件抽检')
+    expect(summary.C18?.v).toBe(
+      '16支加工坏，56支表面不良、原料表面不良120\n倒角大13、原料表面不良178、倒角大11、1支加工坏，4支表面不良、原料有伤、有接头印子、2支铣坏',
+    )
+    expect(summary.D7?.v).toContain('16支加工坏')
+    expect(summary.D7?.v).toContain('倒角大13')
+    expect(summary.D7?.v).not.toContain('原料表面不良120')
   })
 })

@@ -15,6 +15,13 @@
 
 ## 2026-09-04
 
+- **类别**：修复
+- **范围**：生产日报表 Excel 汇总表 `src/utils/productionDailyReportSummaryWorksheet.ts`、`src/utils/productionDailyReportAbnormalDisplay.ts`、`supabase/functions/_shared/production-daily-report-summary-worksheet.ts`、`supabase/functions/_shared/production-daily-report-abnormal-display.ts`、`supabase/functions/_shared/production-daily-report-excel-style.ts`、`src/utils/productionDailyReportExcelWorkbook.vitest.ts`
+- **摘要**：修复生产日报表汇总表把异常说明留空的问题：原料/加工不良行现在会从备注拆分并提取对应异常片段写入“异常显示说明”列，外协不良数行同步显示外协不良原因，汇总结果列继续保留数值、合格率和原有备注汇总。
+- **验证**：新增回归断言已先确认当前 workbook 的“异常显示说明”列为空而失败；修复后 `bun run test -- src/utils/productionDailyReportExcelWorkbook.vitest.ts` 通过，LSP 无新增诊断，`bun run test` 全量 119 个测试文件、537 个用例通过，`bun run typecheck` 通过，改动前端文件 ESLint 通过，`bun run build` 通过（保留既有 Vite native import extension warning）。本机未安装 `deno`，Supabase Deno 类型检查未执行。
+
+## 2026-09-04
+
 - **类别**：变更
 - **范围**：物料转移单 Excel 导出 `src/utils/materialTransferExcel.ts`、`src/utils/materialTransferSummaryWorksheet.ts`、`src/utils/materialTransferExcel.vitest.ts`
 - **摘要**：物料转移单导出新增“汇总表”sheet，按项目号、客户、型号、长度、客户型号和接收车间聚合相同物料，自动汇总转移数量，并去重合并人员、审核、备注等展示信息；明细页和其原有合计行保持不变。

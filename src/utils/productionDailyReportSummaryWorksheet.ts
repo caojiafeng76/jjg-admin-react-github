@@ -2,6 +2,7 @@ import XLSX from 'xlsx-js-style'
 
 import type { ProductionDailyReportRow } from '@/services/apiProductionDailyReport'
 import { centerAllCells, setRowHeight } from '@utils/excelStyleUtils'
+import { buildProductionDailyReportAbnormalDisplays } from './productionDailyReportAbnormalDisplay'
 
 export const PRODUCTION_DAILY_REPORT_SUMMARY_SHEET_NAME = '汇总表'
 
@@ -59,42 +60,66 @@ function buildSummaryWorksheetData(rows: ProductionDailyReportRow[]) {
   const qualifiedCount = sumReportRows(rows, (row) => row.qualifiedCount)
   const qualifiedRate =
     incomingQualifiedCount > 0 ? qualifiedCount / incomingQualifiedCount : 0
+  const abnormalDisplays = buildProductionDailyReportAbnormalDisplays(rows)
   const summaryRows = [
-    ['来料合格数', incomingQualifiedCount],
-    ['成品合格数', qualifiedCount],
-    ['不良数量', sumReportRows(rows, (row) => row.defectCount)],
-    ['原料不良', sumReportRows(rows, (row) => row.rawMaterialDefectCount)],
-    ['加工不良', sumReportRows(rows, (row) => row.processingDefectCount)],
-    ['外协不良数', sumReportRows(rows, (row) => row.outsourceDefectCount)],
-    ['外协不良原因', joinUniqueText(rows, (row) => row.outsourceDefectReason)],
-    ['外协单位', joinUniqueText(rows, (row) => row.outsourceUnit)],
-    ['调机不良', sumReportRows(rows, (row) => row.setupDefectCount)],
-    ['调机负责人', joinUniqueText(rows, (row) => row.setupResponsible)],
-    ['合格率', qualifiedRate],
+    ['来料合格数', incomingQualifiedCount, ''],
+    ['成品合格数', qualifiedCount, ''],
+    ['不良数量', sumReportRows(rows, (row) => row.defectCount), ''],
+    [
+      '原料不良',
+      sumReportRows(rows, (row) => row.rawMaterialDefectCount),
+      abnormalDisplays.rawMaterialDefect,
+    ],
+    [
+      '加工不良',
+      sumReportRows(rows, (row) => row.processingDefectCount),
+      abnormalDisplays.processingDefect,
+    ],
+    [
+      '外协不良数',
+      sumReportRows(rows, (row) => row.outsourceDefectCount),
+      abnormalDisplays.outsourceDefect,
+    ],
+    [
+      '外协不良原因',
+      joinUniqueText(rows, (row) => row.outsourceDefectReason),
+      '',
+    ],
+    ['外协单位', joinUniqueText(rows, (row) => row.outsourceUnit), ''],
+    ['调机不良', sumReportRows(rows, (row) => row.setupDefectCount), ''],
+    ['调机负责人', joinUniqueText(rows, (row) => row.setupResponsible), ''],
+    ['合格率', qualifiedRate, ''],
     [
       '原料不良重量kg',
       sumReportRows(rows, (row) => row.rawMaterialDefectWeightKg),
+      '',
     ],
     [
       '加工不良重量kg',
       sumReportRows(rows, (row) => row.processingDefectWeightKg),
+      '',
     ],
     [
       '外协不良重量kg',
       sumReportRows(rows, (row) => row.outsourceDefectWeightKg),
+      '',
     ],
-    ['调机不良重量kg', sumReportRows(rows, (row) => row.setupDefectWeightKg)],
-    ['备注', joinUniqueText(rows, (row) => row.remark)],
+    [
+      '调机不良重量kg',
+      sumReportRows(rows, (row) => row.setupDefectWeightKg),
+      '',
+    ],
+    ['备注', joinUniqueText(rows, (row) => row.remark), ''],
   ] as const
 
   return [
     [buildSummaryTitle(rows), '', '', '', ''],
     [...SUMMARY_HEADERS],
-    ...summaryRows.map(([label, value], index) => [
+    ...summaryRows.map(([label, value, abnormalDisplay], index) => [
       index + 1,
       label,
       value,
-      '',
+      abnormalDisplay,
       '',
     ]),
   ]
