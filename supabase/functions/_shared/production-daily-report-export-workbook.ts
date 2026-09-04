@@ -1,4 +1,8 @@
 import XLSX from 'npm:xlsx-js-style@1.2.0'
+import {
+  buildProductionDailyReportSummaryWorksheet,
+  PRODUCTION_DAILY_REPORT_SUMMARY_SHEET_NAME,
+} from './production-daily-report-summary-worksheet.ts'
 
 export interface ProductionDailyReportExportRow {
   key: string
@@ -76,7 +80,6 @@ const REPORT_HEADERS = [
 ] as const
 
 const REPORT_TITLE = '精加工车间日产量汇总'
-
 function getColumnLetter(columnIndex: number) {
   let letter = ''
   let currentIndex = columnIndex
@@ -413,6 +416,11 @@ function createProductionDailyReportWorkbook(
   }
 
   XLSX.utils.book_append_sheet(workbook, worksheet, '生产日报表')
+  XLSX.utils.book_append_sheet(
+    workbook,
+    buildProductionDailyReportSummaryWorksheet(rows),
+    PRODUCTION_DAILY_REPORT_SUMMARY_SHEET_NAME,
+  )
 
   return workbook
 }

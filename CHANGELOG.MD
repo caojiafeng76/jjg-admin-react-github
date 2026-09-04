@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-09-04
+
+- **类别**：变更
+- **范围**：生产日报表 Excel 导出 `src/utils/productionDailyReportExcelWorkbook.ts`、`src/utils/productionDailyReportSummaryWorksheet.ts`、`supabase/functions/_shared/production-daily-report-export-workbook.ts`、`supabase/functions/_shared/production-daily-report-summary-worksheet.ts`、`src/utils/productionDailyReportExcelWorkbook.vitest.ts`
+- **摘要**：生产日报表导出新增“汇总表”sheet，按日报明细汇总来料合格数、成品合格数、不良数量、原料/加工/外协/调机不良及重量，合格率按成品合格数除以来料合格数整体计算；外协不良原因、外协单位、调机负责人和备注去重后合并展示。前端即时导出与后台异步导出共享相同汇总口径。
+- **验证**：先运行新增用例确认当前 workbook 缺少“汇总表”失败；修复后 `bun run test -- src/utils/productionDailyReportExcelWorkbook.vitest.ts` 通过，`bun run typecheck` 通过，`bun run test` 全量 119 个测试文件、536 个用例通过，`bun run build` 通过（保留既有 Vite native import extension warning）。`deno check supabase/functions/export-production-daily-report/index.ts` 因本机未安装 `deno` 未执行成功。
+
 ## 2026-09-03
 
 - **类别**：修复
@@ -67,7 +74,7 @@
 - **类别**：修复
 - **范围**：Pi Serena MCP 连接（`.mcp.json` 单例 HTTP、`scripts/start-serena-singleton.ps1`、`.pi/extensions/serena-singleton.ts`）
 - **摘要**：修复 Pi 中 Serena 连接失败：根因为 `.mcp.json` 已于 1db4700 切换为单例 HTTP `http://127.0.0.1:9121/mcp` 但未自动拉起，Pi 启动时端口无监听导致 `mcp-cache.json` 中 serena 缺失；复现验证为 `netstat` 无 9121 监听、`curl` 空响应、`mcp-cache.json` 仅 5 个服务。修复为新增 Pi 扩展 `.pi/extensions/serena-singleton.ts` 在工厂与 `session_start` 双阶段检测 9121 端口，未监听时自动以 detached 方式拉起 `uvx -p 3.13 --from serena-agent serena start-mcp-server --transport streamable-http --host 127.0.0.1 --port 9121 --project <root> --context=codex`（Windows 优先复用 `scripts/start-serena-singleton.ps1`），轮询 60s 等待监听，成功后在 Pi footer 显示 `Serena: http://127.0.0.1:9121/mcp`，失败则提示手动执行 `bun run mcp:serena`；新增 `/serena status|start|restart` 命令。已手动拉起并验证 `StreamableHTTPClientTransport` 连接成功（`Client.listTools` 返回 24 个工具，含 `replace_in_files` 等）及 `loadMcpConfig` 正确加载 6 个服务（含 serena URL）。
-- **验证**：`netstat` 确认 9121 Listening (PID 17864)；`curl -X POST http://127.0.0.1:9121/mcp -H "Accept: application/json, text/event-stream"` 返回 200 `text/event-stream` 且 `protocolVersion 2024-11-05`、`serverInfo Serena 1.28.1`；`node` 直连 `StreamableHTTPClientTransport` 成功 `listTools 24`；`jiti` 加载 `loadMcpConfig` 显示 6  servers 含 serena URL；杀进程后 `bun run mcp:serena`/`ensureSerenaSingleton` 可自动重建；`jiti` 加载扩展语法检查通过。
+- **验证**：`netstat` 确认 9121 Listening (PID 17864)；`curl -X POST http://127.0.0.1:9121/mcp -H "Accept: application/json, text/event-stream"` 返回 200 `text/event-stream` 且 `protocolVersion 2024-11-05`、`serverInfo Serena 1.28.1`；`node` 直连 `StreamableHTTPClientTransport` 成功 `listTools 24`；`jiti` 加载 `loadMcpConfig` 显示 6 servers 含 serena URL；杀进程后 `bun run mcp:serena`/`ensureSerenaSingleton` 可自动重建；`jiti` 加载扩展语法检查通过。
 
 ## 2026-08-20
 

@@ -7,6 +7,10 @@ import {
   EXCEL_WRITE_OPTIONS,
   setRowHeight,
 } from '@utils/excelStyleUtils'
+import {
+  buildProductionDailyReportSummaryWorksheet,
+  PRODUCTION_DAILY_REPORT_SUMMARY_SHEET_NAME,
+} from './productionDailyReportSummaryWorksheet'
 
 const WORK_HOURS_COLUMN_INDEX = 1
 const INCOMING_QUALIFIED_COUNT_COLUMN_INDEX = 8
@@ -51,7 +55,6 @@ const REPORT_HEADERS = [
 ] as const
 
 const REPORT_TITLE = '精加工车间日产量汇总'
-
 function getColumnLetter(columnIndex: number) {
   let letter = ''
   let currentIndex = columnIndex
@@ -281,6 +284,11 @@ function createProductionDailyReportWorkbook(rows: ProductionDailyReportRow[]) {
   }
 
   XLSX.utils.book_append_sheet(workbook, worksheet, '生产日报表')
+  XLSX.utils.book_append_sheet(
+    workbook,
+    buildProductionDailyReportSummaryWorksheet(rows),
+    PRODUCTION_DAILY_REPORT_SUMMARY_SHEET_NAME,
+  )
 
   return workbook
 }
