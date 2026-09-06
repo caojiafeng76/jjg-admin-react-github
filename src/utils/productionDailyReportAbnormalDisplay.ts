@@ -1,4 +1,5 @@
 interface ProductionDailyReportAbnormalDisplayRow {
+  readonly productModel: string
   readonly remark: string
   readonly outsourceDefectReason: string
 }
@@ -36,15 +37,28 @@ function splitRemarkSegments(remark: string): string[] {
     .filter((segment) => segment && segment !== '-')
 }
 
+function formatAbnormalSegment(
+  productModel: string,
+  segment: string,
+): string {
+  const normalizedProductModel = productModel.trim()
+
+  return normalizedProductModel && normalizedProductModel !== '-'
+    ? `${normalizedProductModel} ${segment}`
+    : segment
+}
+
 function joinRemarkSegmentsByKeywords(
   rows: readonly ProductionDailyReportAbnormalDisplayRow[],
   keywords: readonly string[],
 ): string {
   return joinUniqueValues(
     rows.flatMap((row) =>
-      splitRemarkSegments(row.remark).filter((segment) =>
-        keywords.some((keyword) => segment.includes(keyword)),
-      ),
+      splitRemarkSegments(row.remark)
+        .filter((segment) =>
+          keywords.some((keyword) => segment.includes(keyword)),
+        )
+        .map((segment) => formatAbnormalSegment(row.productModel, segment)),
     ),
   )
 }

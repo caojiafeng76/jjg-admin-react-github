@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-09-06
+
+- **类别**：修复
+- **范围**：`src/utils/productionDailyReportAbnormalDisplay.ts`、`supabase/functions/_shared/production-daily-report-abnormal-display.ts`、`src/utils/productionDailyReportExcelWorkbook.vitest.ts`
+- **摘要**：生产日报表 Excel 汇总中的“异常显示说明”按异常所在日报行补充产品型号，例如 `113-53 倒角大13`，并同步 Supabase 导出共享逻辑；无型号时保留原异常文本。
+- **验证**：新增断言先按预期失败；随后 `bun run test` 通过（119 文件 / 537 用例）、`bun run typecheck` 通过、`bun run build` 通过；目标导出工作簿测试确认“异常显示说明”包含型号前缀
+
 ## 2026-09-04
 
 - **类别**：修复

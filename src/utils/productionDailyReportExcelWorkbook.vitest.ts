@@ -116,8 +116,11 @@ describe('buildProductionDailyReportExcelBuffer', () => {
     expect(summary.C18?.v).toBe(
       '16支加工坏，56支表面不良、原料表面不良120\n倒角大13、原料表面不良178、倒角大11、1支加工坏，4支表面不良、原料有伤、有接头印子、2支铣坏',
     )
-    expect(summary.D7?.v).toContain('16支加工坏')
-    expect(summary.D7?.v).toContain('倒角大13')
-    expect(summary.D7?.v).not.toContain('原料表面不良120')
+    expect(summary.D6?.v).toContain('113-53 原料表面不良120')
+    expect(summary.D6?.v).toContain('113-53 原料有伤')
+    expect(summary.D7?.v).toContain('113-53 16支加工坏')
+    expect(summary.D7?.v).toContain('113-53 倒角大13')
+    expect(summary.D7?.v).toContain('113-53 倒角大11')
+    expect(summary.D7?.v).not.toContain('113-53 原料表面不良120')
   })
 })
