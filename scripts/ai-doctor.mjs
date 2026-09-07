@@ -90,8 +90,13 @@ function checkMcpConfig() {
   ]
 
   for (const name of expected) {
-    if (mcp.mcpServers[name]) {
-      add('ok', `mcp:${name}`, basename(mcp.mcpServers[name].command))
+    const server = mcp.mcpServers[name]
+
+    if (server) {
+      const transport = server.command
+        ? basename(server.command)
+        : server.url || 'configured'
+      add('ok', `mcp:${name}`, transport)
     } else {
       add('warn', `mcp:${name}`, 'not configured')
     }

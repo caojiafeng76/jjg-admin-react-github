@@ -207,6 +207,7 @@ Fast lane 仍必须完成：复述目标、建立必要上下文、检查待编�
 - 所有任务在开始执行前，必须先调用 Sequential Thinking MCP 和 Serena MCP；不要跳过其中任一项。
 - 即使任务很小，也至少要先调用一次 Sequential Thinking MCP，用来明确当前目标、假设或执行路径；复杂任务则必须用它拆解问题、校验假设、分析风险并排序执行步骤。
 - 所有任务建立上下文时，必须先调用 Serena MCP 做符号概览、定义查找、引用分析或精确定位；不要直接跳过 Serena 进入常规搜索。
+- Codex 代码模式下，Serena 和 Sequential Thinking 可能作为延迟嵌套工具仅出现在 `ALL_TOOLS` 中；顶层工具声明未展示时，必须先在 `ALL_TOOLS` 中查找 `mcp__serena__*` 与 `mcp__sequential_thinking__*`，不得据此直接判断 MCP 不可用。
 - 如果 Serena 返回 `No active project`、工具缺失或无法定位目标，仍然视为“已调用 Serena MCP”；此时必须明确说明已降级，再退回常规搜索工具继续推进。
 
 关于 skills 的使用约定：

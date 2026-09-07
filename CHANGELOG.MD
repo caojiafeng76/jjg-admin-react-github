@@ -15,6 +15,13 @@
 
 ## 2026-09-07
 
+- **类别**：修复
+- **范围**：Serena MCP 工具发现说明、`scripts/ai-doctor.mjs`
+- **摘要**：明确 Codex 代码模式需从 `ALL_TOOLS` 发现延迟加载的 Serena/Sequential Thinking 工具，避免因顶层工具列表未展示而误判不可用；同时修复 AI doctor 假设所有 MCP 都有 `command` 字段、遇到 Serena URL transport 时崩溃的问题。
+- **验证**：真实调用 Serena `initial_instructions`、`get_current_config` 与符号工具成功；`bun run ai:doctor`、`bun run test`、`bun run build`
+
+## 2026-09-07
+
 - **类别**：变更
 - **范围**：`src/features/workshop/OrderStatusDashboard/index.tsx`（订单现状分页器）
 - **摘要**：订单现状分页器新增每页 100 条和 500 条选项，保留原有 10、20、50 条选项与默认分页行为。
