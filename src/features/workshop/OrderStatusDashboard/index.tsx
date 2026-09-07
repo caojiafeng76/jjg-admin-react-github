@@ -1199,7 +1199,7 @@ export default function OrderStatusDashboard() {
         <AppPagination
           total={data?.total ?? 0}
           defaultPageSize={DEFAULT_PAGE_SIZE}
-          pageSizeOptions={['10', '20', '50']}
+          pageSizeOptions={['10', '20', '50', '100', '500']}
         />
       </div>
 

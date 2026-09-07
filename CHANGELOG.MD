@@ -13,6 +13,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-09-07
+
+- **类别**：变更
+- **范围**：`src/features/workshop/OrderStatusDashboard/index.tsx`（订单现状分页器）
+- **摘要**：订单现状分页器新增每页 100 条和 500 条选项，保留原有 10、20、50 条选项与默认分页行为。
+- **验证**：`bunx antd lint src/features/workshop/OrderStatusDashboard/index.tsx --format json`、`bun run test`、`bun run typecheck`
+
 ## 2026-09-06
 
 - **类别**：修复
