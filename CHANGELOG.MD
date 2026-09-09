@@ -15,6 +15,13 @@
 
 ## 2026-09-09
 
+- **类别**：配置
+- **范围**：Git 隔离工作区 `.gitignore`
+- **摘要**：忽略项目内 `.worktrees/` 目录，确保按隔离工作区执行实现计划时不会把 worktree 内容误纳入版本控制。
+- **验证**：`git check-ignore -v .worktrees/workshop-order-auto-close` 命中 `.gitignore` 规则。
+
+## 2026-09-09
+
 - **类别**：文档
 - **范围**：车间订单自动结案实施计划 `docs/superpowers/plans/2026-09-09-workshop-order-auto-close.md`
 - **摘要**：将已确认的自动结案设计拆分为 Spec Workflow、迁移契约测试、数据库触发器与 Cron、存量数据补齐、类型生成、生产验证和页面回归的可执行步骤。
