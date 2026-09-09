@@ -15,6 +15,13 @@
 
 ## 2026-09-09
 
+- **类别**：变更
+- **范围**：车间订单自动结案 `sales_orders`、`material_transfers`、Supabase Cron、数据库类型与 Spec Workflow
+- **摘要**：新增订单连续达到 100% 出库完成度的时间与反结案永久豁免标志；数据库触发器在订单数量或物料转移变化时维护达标时间，每 15 分钟自动结案已满 2 天且未豁免的订单。迁移已按现有转移历史回填并将 448 个当前符合条件的生产中订单结案，另有 19 个未满 2 天的订单继续等待；原有手动结案/反结案权限和页面入口未修改。
+- **验证**：迁移契约 4 个用例先红后绿；Supabase migration API 应用成功；生产库仅有 1 个启用的 `workshop-order-auto-close` Cron，逾期合格但仍生产中的订单为 0，新增 5 个私有函数对 `anon/authenticated` 均无执行权；回滚事务覆盖达到 100%、跌破、重新达标、满 2 天结案与反结案永久豁免，测试行残留 0；安全/性能顾问未报告本次新增对象问题；`bunx eslint src/services/workshopOrderAutoCloseMigration.vitest.ts`、`bun run test`（120 文件 / 541 用例）、`bun run typecheck`、`bun run build` 通过。生产构建浏览器验证可启动并正确进入登录守卫；无可复用登录态，订单页控件由未改动源码及既有组件测试覆盖。`db:push:dry-run` 因远程历史表未登记旧迁移而显示 190 个待推送文件，已避免使用该路径并仅应用本次迁移。
+
+## 2026-09-09
+
 - **类别**：配置
 - **范围**：Git 隔离工作区 `.gitignore`
 - **摘要**：忽略项目内 `.worktrees/` 目录，确保按隔离工作区执行实现计划时不会把 worktree 内容误纳入版本控制。
