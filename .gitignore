@@ -32,3 +32,6 @@ graphify-out/
 
 # AI tooling runtime artifacts (session continuation files)
 .omo/run-continuation/
+
+# Retired code-index cache
+.serena/cache/

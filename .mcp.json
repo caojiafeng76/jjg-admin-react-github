@@ -1,13 +1,5 @@
 {
   "mcpServers": {
-    "spec-workflow": {
-      "command": "npx",
-      "args": ["--no-install", "spec-workflow-mcp", "."]
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
     "supabase": {
       "command": "powershell",
       "args": [
@@ -18,16 +10,19 @@
         "$env:SUPABASE_ACCESS_TOKEN = [Environment]::GetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', 'User'); npx -y @supabase/mcp-server-supabase --project-ref mlcptrkvkseyqxxlfcme"
       ]
     },
-    "serena": {
-      "url": "http://127.0.0.1:9121/mcp"
-    },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
     },
     "chrome-devtools": {
       "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@latest"]
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
     }
   }
 }

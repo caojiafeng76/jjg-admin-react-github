@@ -34,7 +34,6 @@ bun run db:push
 bun run db:push:dry-run
 bun run db:query -- --file docs/sql-drafts/example.sql
 bun run db:types
-bunx spec-workflow-mcp --help
 ```
 
 说明：
@@ -45,7 +44,7 @@ bunx spec-workflow-mcp --help
 - 完成任务后必须确保测试通过才能交付；涉及前端或 TypeScript 改动时，继续按风险补充 `bun run build`、lint 和局部回归
 - `bun run typecheck` 只做 TypeScript 项目级类型检查（`tsc -b`），比完整 `bun run build` 快，适合作为改动后的快速校验
 - 推送到 GitHub 后，CI（`.github/workflows/ci.yml`）会自动执行 lint、typecheck、test、build 兜底校验
-- `bun run ai:doctor` 用于检查 AI 工具链、MCP 配置、环境变量、Spec Workflow 和 Graphify 索引状态
+- `bun run ai:doctor` 用于检查 AI 工具链、MCP 配置、环境变量 和 Graphify 索引状态
 
 Supabase 数据库命令补充：
 
@@ -94,84 +93,28 @@ src/
 本仓库已经为 VS Code Copilot 配置了项目级固定执行流程，目标是让 AI 在日常任务里尽量遵循一致的方法：
 
 1. 先复述目标、约束和预期输出
-2. 复杂任务必须先用 thinking 拆解问题、假设、风险和执行顺序
-3. 建立上下文时必须优先使用 Serena 做符号级检索和引用分析
-4. Serena 不可用时立即退回常规搜索，不在工具层卡住
+2. 复杂任务先分析问题、假设、风险和执行顺序
+3. 使用文件搜索、`rg` 或可用的语言服务建立上下文
+4. 根据任务类型使用相关 skill
 5. 仅在信息不足时提出最少必要澄清问题
 6. 实施前给出简短计划
 7. 保持改动最小化，优先修复根因
 8. 改动后做必要验证，完成任务后必须确保 `bun run test` 通过才能交付
 9. 最终按固定结构汇报结果
 
-补充基础规则：所有任务开始前，必须先调用 Sequential Thinking MCP 和 Serena MCP。即使任务很小，也不能跳过；如果 Serena 不可用或返回 `No active project`，需要明确说明已降级后再退回常规搜索。
-
 默认规则定义在 [.github/copilot-instructions.md](.github/copilot-instructions.md)，任务类型分流和最低验证矩阵见 [.github/ai-task-matrix.md](.github/ai-task-matrix.md)。工具状态不确定时，先运行 `bun run ai:doctor`。
 
-## Spec Workflow Integration
+## MCP 配置
 
-仓库已安装 `spec-workflow-mcp`，并在根目录提供 [.mcp.json](.mcp.json) 配置。
+项目级配置位于 [.mcp.json](.mcp.json)、[.codex/config.toml](.codex/config.toml) 和 [opencode.jsonc](opencode.jsonc)，保留 Supabase、Context7 和 Chrome DevTools。
 
-`.mcp.json` 同时接入了 Sequential Thinking MCP：使用 `npx -y @modelcontextprotocol/server-sequential-thinking` 启动，用于任务拆解、假设校验、风险分析和方案排序。
+Supabase MCP 使用本机 `SUPABASE_ACCESS_TOKEN` 环境变量，不要把 token 写入仓库。修改配置后重启相应客户端或新建会话，以刷新工具列表。
 
-Serena 使用固定的 Streamable HTTP 单例服务，避免每个任务重复创建进程。开始使用前运行一次：
-
-```bash
-bun run mcp:serena
-```
-
-之后各任务通过 `http://127.0.0.1:9121/mcp` 复用同一个 Serena 实例；脚本检测到服务已运行时不会再次启动，也不会自动打开 Dashboard。
-
-Codex Desktop 当前会话如果没有自动加载项目级 [.mcp.json](.mcp.json)，需要在本机 `~/.codex/config.toml` 同步注册：
-
-```toml
-[mcp_servers."sequential-thinking"]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-```
-
-`.mcp.json` 同时接入了 Supabase MCP：使用 `npx -y @supabase/mcp-server-supabase --project-ref mlcptrkvkseyqxxlfcme` 启动，运行前需要在本机环境变量中配置 `SUPABASE_ACCESS_TOKEN`，不要把访问 token 写入仓库。
-
-当前约定：对会修改应用代码、脚本、SQL、配置或指令文件的任务，默认按 Spec Workflow 顺序推进。
-
-阶段状态、active change、apply readiness、archive readiness 的单一事实来源是 repo-local CLI wrapper：
-
-- `bun run spec:list`
-- `bun run spec -- status --change <name> --json`
-- `bun run spec -- instructions apply --change <name> --json`
-
-`spec-workflow-mcp` 只负责 VS Code MCP 接入与可视化，不作为独立状态来源；如果 MCP 展示与 CLI wrapper 输出不一致，一律以 CLI wrapper 为准。
-
-执行顺序固定为：
-
-1. `explore`：需求不清、范围未定、仍在讨论时先探索，不直接实现
-2. `propose`：准备写代码前先建立 change 与 artifacts
-3. `apply`：按 tasks 顺序实现，不跳过 proposal / tasks 直接编码
-4. `archive`：实现完成且 change 收尾后归档
-
-补充约定：
-
-- 很小且低风险的任务（如单文件小改、文案/说明调整、小范围配置变更）可以跳过完整 Spec Workflow，但需要明确说明原因
-- 是否适用小任务 fast lane，优先按 [.github/ai-task-matrix.md](.github/ai-task-matrix.md) 判断
-- 如果用户已经显式使用 `/opsx:explore`、`/opsx:propose`、`/opsx:apply` 或 `/opsx:archive`，则对应 opsx prompt 视为当前权威流程，不再重复做同一轮阶段判断
-- `/opsx:archive` 在只有一个 active change 时可自动选中，只有存在多个候选时才要求用户手动选择
-
-最小验证命令：
-
-```bash
-bun run spec:list
-bunx spec-workflow-mcp --help
-npx -y @modelcontextprotocol/server-sequential-thinking --help
-```
-
-其中：
-
-- thinking 用于复杂任务拆解、假设校验、风险分析和方案排序
-- Serena 用于符号概览、定义查找、引用分析和精确定位
-- 如果 Serena 当前环境不可用，Copilot 会退回常规文件搜索与文本搜索继续推进
+历史业务规格保留在 `openspec/`，历史工具笔记保留在 `docs/ai-notes/`，仅供查阅；当前任务执行规则以 `.github/copilot-instructions.md` 为准。
 
 ## Skill 使用约定
 
-除了 thinking 与 Serena，这个仓库现在还约定在对应场景主动使用 skill，而不是只靠自然语言临时发挥。
+根据任务类型选择相关 skill，复用项目已有实现和约定。
 
 优先使用的 skill 如下：
 
@@ -186,57 +129,11 @@ npx -y @modelcontextprotocol/server-sequential-thinking --help
 - [.github/skills/mobile-responsive-patterns/SKILL.md](.github/skills/mobile-responsive-patterns/SKILL.md)
   适用于员工手机端、H5 页面、扫码流程、响应式改造、触屏交互。
 
-推荐理解为一条固定顺序：
+推荐顺序：选择相关 skill → 搜索并阅读代码 → 按需计划 → 实施、验证和汇报。
 
-1. 先用 thinking 拆解问题
-2. 再用 Serena 建立上下文
-3. 然后根据任务类型加载对应 skill
-4. 最后再实施、验证和汇报
+## 在 VS Code 中使用项目 Prompt
 
-## 在 VS Code 里怎么用 Thinking 和 Serena
-
-这套流程不要求你每次手动点某个按钮。正常情况下，你直接在 VS Code Copilot Chat 里使用项目级 prompt，Copilot 会按仓库规则自行决定先走 thinking，再优先尝试 Serena。
-
-推荐用法：
-
-```text
-/task-exec 给生产工单列表增加按车间筛选
-/bugfix 修复订单详情页切换分页后数据错乱
-/review 检查最近对员工权限模块的改动风险
-/db-change 为员工手机端相关表补充 RLS 策略
-/feature-impl 新增员工手机端工单详情页
-```
-
-实际执行顺序应当是：
-
-1. 先做 thinking，拆清楚问题、风险和顺序
-2. 再优先尝试 Serena 做符号级定位和引用分析
-3. Serena 不可用时，再退回普通搜索
-4. 建立足够上下文后，再开始实施或评审
-
-你可以通过 Copilot 的中间进度信息判断它是否按规则执行。正常表现通常包括：
-
-- 先说明会先拆解问题或先收集上下文
-- 明确提到要先检查相关符号、调用链、引用关系或模块
-- Serena 不可用时，会说明退回常规搜索，而不是停住
-
-如果你发现 Copilot 直接跳过分析开始改代码，通常有三种处理方式：
-
-1. 直接改用对应的项目级 prompt，而不是只发自然语言
-2. 在任务里补一句“按仓库固定流程执行，先 thinking，再 Serena”
-3. 如果仍未遵守，再把任务描述得更明确一些，例如补上范围、目标文件或预期结果
-
-如果你发现 Copilot 已经进入对应领域，但没有主动利用 skill，可以直接在任务里点明：
-
-```text
-按仓库固定流程执行，先 thinking，再 Serena；如果涉及缓存与 Mutation，使用 tanstack-query skill。
-```
-
-或者：
-
-```text
-按仓库固定流程执行，先 thinking，再 Serena；这是 RLS 与员工隔离场景，使用 supabase-rls-patterns skill。
-```
+直接描述任务，或使用下列入口；AI 会先读取相关代码与文档，再按任务风险安排实施和验证。
 
 ## Copilot 项目级 Prompt
 

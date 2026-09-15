@@ -137,8 +137,8 @@ bun run db:types # migration 后重新生成 database.types.ts
 > 任务分流速查见 `.github/ai-task-matrix.md`。开始较大任务或工具状态不确定时，先运行 `bun run ai:doctor` 检查本地 AI 工具链健康状态。
 
 1. 先用 1-2 句话复述目标、约束和预期输出
-2. 中等及以上复杂度任务，必须先使用 thinking 工具拆解问题、明确假设、风险和执行顺序，再进入实施
-3. 建立上下文时必须优先使用 Serena 做符号级检索、引用关系和定位；若 Serena 当前不可用，再退回文件搜索与文本搜索
+2. 中等及以上复杂度任务，先拆解问题、明确假设、风险和执行顺序，再进入实施
+3. 建立上下文时优先使用 `rg`、文件搜索或可用的语言服务定位符号、调用点和引用关系
 4. 先搜索并阅读相关代码、文档或配置，禁止在未建立上下文时直接修改
 5. 仅在信息不足以继续时，提出最少必要澄清问题；若可合理决策则直接推进
 6. 开始实施前给出简短计划，说明将检查哪些文件、准备做什么改动、如何验证
@@ -157,23 +157,9 @@ bun run db:types # migration 后重新生成 database.types.ts
 
 ### Fast lane 小任务路径
 
-如果任务范围明确、风险低，且不涉及数据库、权限、状态流转、业务计算、路由菜单或跨模块联动，可以跳过完整 Spec Workflow，直接走最小化实现。常见例子包括少量文档、单文件文案、局部样式或小范围脚本配置调整。
+如果任务范围明确、风险低，且不涉及数据库、权限、状态流转、业务计算、路由菜单或跨模块联动，可以直接给出简短计划并做最小化实现。常见例子包括少量文档、单文件文案、局部样式或小范围脚本配置调整。
 
 Fast lane 仍必须完成：复述目标、建立必要上下文、检查待编辑文件当前状态、说明验证方式、执行验证并如实汇报，并在同一变更中更新根目录 `CHANGELOG.MD`。是否适用 fast lane 的具体判断以 `.github/ai-task-matrix.md` 为准。
-
-关于 Spec Workflow 的状态来源与接入约定：
-
-- 对于会修改应用代码、脚本、SQL、配置或指令文件的任务，默认按 Spec Workflow 的执行顺序推进，除非用户明确要求跳过。
-- Spec Workflow 的阶段状态、active change、apply readiness、archive readiness，一律以 repo-local CLI wrapper 输出为准：`bun run spec:list`、`bun run spec -- status --change <name> --json`、`bun run spec -- instructions apply --change <name> --json`。
-- `spec-workflow-mcp` 只负责 VS Code MCP 接入、工具暴露与可视化，不作为独立状态来源；不要同时维护一套“按 MCP 判断阶段”和一套“按 openspec CLI 判断阶段”的逻辑。
-- 如果 MCP 展示与 CLI wrapper 输出不一致，一律以 CLI wrapper 为准，并提示重新加载 VS Code 窗口或重新连接 MCP。
-- 执行顺序固定为：`explore -> propose -> apply -> archive`。
-- 需求仍在讨论、范围不清、方案未定时，先走 `explore`，不要直接开始实现。
-- 一旦准备写代码，先检查是否已有可继续的 change；若没有，就先通过 `propose` 建立 change 和所需 artifacts，再进入实现。
-- 真正写代码时，只在 `apply` 阶段按 tasks 顺序实施；不要跳过 proposal / tasks 直接进入大段实现。
-- 任务完成后，如果对应 change 已完成，实现阶段应提示进入 `archive`；不要长期停留在“代码改完但变更未归档”的状态。
-- 如果任务非常小或低风险（如单文件小改、文案/说明调整、小范围配置变更），可走最小化实现；但必须在回复中说明本次为何跳过完整 Spec Workflow。
-- 如果用户已显式使用 `/opsx:explore`、`/opsx:propose`、`/opsx:apply` 或 `/opsx:archive`，则对应 opsx prompt 视为当前权威流程；其他通用 prompt 和默认流程不再重复做阶段判断或重复查询同一状态。
 
 ## 更新日志规则
 
@@ -192,7 +178,6 @@ Fast lane 仍必须完成：复述目标、建立必要上下文、检查待编�
 6. 修改 Query / Mutation / queryKey / invalidateQueries / 缓存联动时，必须检查相关 hook、调用点和失效键是否一致，避免出现“请求成功但界面不刷新”。
 7. 修改路由、菜单、页面标题、权限或角色判断时，必须同步检查 `router`、`MainMenu`、`AppHeader`、access 配置和受影响页面入口。
 8. 修改业务规则、状态流转、数量/工时/成本/时长计算时，必须检查写入入口、展示入口和汇总口径是否一致，避免局部修复导致口径分裂。
-9. 涉及 Spec Workflow 的阶段判断时，统一使用 repo-local CLI wrapper 查询状态，不要从 `.mcp.json`、MCP 可用性、文件目录是否存在或历史对话中自行猜测阶段；在阶段未就绪时不要直接跳到后续阶段。
 
 ## 任务类型最低验证标准
 
@@ -201,14 +186,6 @@ Fast lane 仍必须完成：复述目标、建立必要上下文、检查待编�
 - 路由 / 表单 / 列表 / 权限相关改动：除 `bun run test` 与构建外，优先补充一次目标页面、关键提交流程或权限边界的回归验证；做不到时要明确说明缺口。
 - 脚本 / CLI / MCP / 配置改动：至少执行一次 `bun run test` 或相关命令、dry-run、help、关键字扫描或等价校验，确认改动后的流程仍可用。
 - 数据库变更：至少验证 migration / SQL 是否成功执行，以及受影响对象或查询结果是否符合预期；如果用户要求的是“落地执行”，不要只停在写出 SQL。migration 成功后必须运行 `bun run db:types` 重新生成 `database.types.ts`，避免类型与 schema 漂移。
-
-关于 Sequential Thinking MCP 与 Serena MCP 的使用约定：
-
-- 所有任务在开始执行前，必须先调用 Sequential Thinking MCP 和 Serena MCP；不要跳过其中任一项。
-- 即使任务很小，也至少要先调用一次 Sequential Thinking MCP，用来明确当前目标、假设或执行路径；复杂任务则必须用它拆解问题、校验假设、分析风险并排序执行步骤。
-- 所有任务建立上下文时，必须先调用 Serena MCP 做符号概览、定义查找、引用分析或精确定位；不要直接跳过 Serena 进入常规搜索。
-- Codex 代码模式下，Serena 和 Sequential Thinking 可能作为延迟嵌套工具仅出现在 `ALL_TOOLS` 中；顶层工具声明未展示时，必须先在 `ALL_TOOLS` 中查找 `mcp__serena__*` 与 `mcp__sequential_thinking__*`，不得据此直接判断 MCP 不可用。
-- 如果 Serena 返回 `No active project`、工具缺失或无法定位目标，仍然视为“已调用 Serena MCP”；此时必须明确说明已降级，再退回常规搜索工具继续推进。
 
 关于 skills 的使用约定：
 

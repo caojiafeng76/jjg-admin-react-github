@@ -1,7 +1,7 @@
 # 开发流程规范（Claude Agent 执行准则）
 
 > 本文件是 Claude Agent 的执行准则。每次开发任务前必须阅读并遵循。
-> 核心原则：Spec Workflow + 任务类型 Prompt + 固定汇报格式
+> 核心原则：读取代码 + 按需计划 + 实施验证 + 固定汇报格式
 >
 > 本文件是规范汇总，原文请参考：
 >
@@ -11,35 +11,9 @@
 
 ---
 
-## 1. 核心开发流程（Spec Workflow）
+## 1. 核心开发流程
 
-每个开发任务必须按以下阶段执行：
-
-```
-explore → propose → apply → archive
-```
-
-```bash
-bun run spec:list                                    # 查看所有 change 状态
-bun run spec -- status --change <name> --json     # 查看单个 change 详情
-bun run spec -- instructions apply --change <name> # 查看 apply 阶段任务
-```
-
-### 阶段说明
-
-| 阶段        | 触发条件                     | 产物                                                  |
-| ----------- | ---------------------------- | ----------------------------------------------------- |
-| **explore** | 需求不清、范围未定、仍在讨论 | -                                                     |
-| **propose** | 准备写代码前                 | `changes/<name>/proposal.md`, `design.md`, `tasks.md` |
-| **apply**   | proposal 获批后              | 按 tasks 顺序实施                                     |
-| **archive** | 实现完成                     | -                                                     |
-
-### 执行顺序（强制）
-
-```
-1. 先 reading + thinking（Sequential Thinking MCP）
-2. 后 actions（coding）
-```
+先明确目标，搜索并阅读相关代码与文档，再给出与任务风险相称的计划、实施改动并验证。简单任务直接做最小化实现，复杂任务按步骤推进。
 
 ---
 
@@ -57,7 +31,7 @@ bun run spec -- instructions apply --change <name> # 查看 apply 阶段任务
 
 ## 3. 统一执行流程
 
-> 完整的逐步执行流程（复述目标 → Sequential Thinking → Serena → 选 skill → 建立上下文 → 计划 → 检查工作区 → 最小化改动 → 联动风险检查 → 验证 → 固定汇报）以 `.github/copilot-instructions.md` 为准，本文不再重复。
+> 完整的逐步执行流程（复述目标 → 分析任务 → 选 skill → 文件搜索建立上下文 → 计划 → 检查工作区 → 最小化改动 → 联动风险检查 → 验证 → 固定汇报）以 `.github/copilot-instructions.md` 为准，本文不再重复。
 
 ---
 
@@ -110,7 +84,6 @@ bun run spec -- instructions apply --change <name> # 查看 apply 阶段任务
 ## 7. 禁止事项
 
 - 禁止在未建立上下文时直接修改代码
-- 禁止跳过 proposal/tasks 直接进入大段实现
 - 禁止为"做完功能"而顺手重构无关模块
 - 禁止放宽 RLS/删除约束来绕过报错
 - 禁止把前端按钮隐藏当作鉴权手段
@@ -125,9 +98,9 @@ bun run spec -- instructions apply --change <name> # 查看 apply 阶段任务
 | ------------------------------------------ | ---------------------------------- |
 | `AGENTS.md`                                | 代码风格指南、导入规范、命名规范   |
 | `.github/copilot-instructions.md`          | 详细 Copilot 执行规则              |
-| `.github/prompts/task-exec.prompt.md`      | 通用任务执行（含 19 条详细要求）   |
-| `.github/prompts/db-change.prompt.md`      | 数据库变更流程（含 17 条详细要求） |
-| `.github/prompts/feature-impl.prompt.md`   | 新功能开发（含 21 条详细要求）     |
+| `.github/prompts/task-exec.prompt.md`      | 通用任务执行   |
+| `.github/prompts/db-change.prompt.md`      | 数据库变更流程 |
+| `.github/prompts/feature-impl.prompt.md`   | 新功能开发     |
 | `.github/prompts/bugfix.prompt.md`         | 缺陷修复流程                       |
 | `.github/prompts/review.prompt.md`         | 代码评审流程                       |
 | `.github/skills/tanstack-query/`           | TanStack Query 专项 skill          |

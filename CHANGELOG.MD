@@ -15,6 +15,13 @@
 
 ## 2026-09-15
 
+- **类别**：配置 / 文档
+- **范围**：项目 MCP、AI 指令与 skills、开发脚本和依赖
+- **摘要**：移除项目内 Sequential Thinking、Serena、Spec Workflow 的 MCP 注册、Pi 自动启动扩展、启动/阶段脚本、OpenSpec skills/prompts/commands 与模板；删除相关依赖并更新 Bun/Deno 锁文件。同步 AGENTS、README、Copilot/Claude/Cursor 指令、任务矩阵、通用 prompts 和页面查询 skill，改用文件搜索与按需计划。保留历史业务规格和计划并标明停用，业务笔记迁至 docs/ai-notes；不修改全局工具配置。
+- **验证**：JSON/JSONC/TOML 解析及保留/移除 MCP 断言通过；现行配置、指令、依赖残留引用扫描通过；ai:doctor 为 0 错误/1 个 Docker 缺失警告；bun lint 为 0 错误/15 条既有警告；bun run build、冻结锁文件安装和 git diff --check 通过。bun run test 为 120 文件通过/1 文件失败，544 用例通过/1 失败；remoteEmployeeSelect.vitest.tsx:148 的远程员工选项保留断言单独重跑仍失败，本次没有业务源码改动，未扩大范围修改该用例。
+
+## 2026-09-15
+
 - **类别**：变更
 - **范围**：物料转移单 PC 列表、订单字段读取与 Excel 导出
 - **摘要**：在客户型号后增加表面处理和颜色两列，按项目号批量读取订单 product_category/color_name；无关联值显示 -；同步横向滚动宽度、合计行列位置和导出字段。采用低风险局部展示调整的最小实现流程，未新增数据库字段或编辑入口。

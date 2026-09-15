@@ -2,14 +2,6 @@ model = "gpt-6-astra"
 model_context_window = 372000
 model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "medium"
-[mcp_servers.spec-workflow]
-args = [
-    "--no-install",
-    "spec-workflow-mcp",
-    ".",
-]
-command = "npx"
-
 [mcp_servers.supabase]
 args = [
     "-y",
@@ -19,10 +11,6 @@ args = [
 ]
 command = "npx"
 env_vars = ["SUPABASE_ACCESS_TOKEN"]
-
-[mcp_servers.serena]
-url = "http://127.0.0.1:9121/mcp"
-startup_timeout_sec = 20
 
 [mcp_servers.context7]
 args = [

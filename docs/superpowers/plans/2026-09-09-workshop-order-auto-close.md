@@ -1,3 +1,5 @@
+> 历史开发计划：文中的旧工具和阶段命令仅记录当时的执行方式，现已停用。当前任务请遵循 `.github/copilot-instructions.md`，保留以下业务设计与验证依据供查阅。
+
 # Workshop Order Auto-Close Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

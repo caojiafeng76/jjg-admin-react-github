@@ -81,10 +81,7 @@ function checkMcpConfig() {
   if (!mcp?.mcpServers) return
 
   const expected = [
-    'spec-workflow',
-    'sequential-thinking',
     'supabase',
-    'serena',
     'context7',
     'chrome-devtools',
   ]
@@ -116,23 +113,7 @@ function checkGraphify() {
   add('ok', 'graphify index', `updated ${ageHours}h ago`)
 }
 
-function checkSpecWorkflow() {
-  const result = spawnSync('bun', ['run', 'spec:list'], {
-    cwd: root,
-    encoding: 'utf8',
-    shell: true,
-    timeout: 20000,
-  })
-
-  if (result.status !== 0) {
-    add('warn', 'spec:list', result.stderr?.trim() || 'failed')
-    return
-  }
-
-  add('ok', 'spec:list', 'available')
-}
-
-console.log('AI workflow doctor\n')
+console.log('AI toolchain doctor\n')
 
 checkFile('package.json')
 checkFile('.github/copilot-instructions.md')
@@ -151,7 +132,6 @@ commandVersion('supabase')
 commandVersion('graphify', ['help'])
 commandVersion('docker', ['info'])
 checkGraphify()
-checkSpecWorkflow()
 
 let hasError = false
 

@@ -45,7 +45,6 @@
         "npm:react-qr-code@2.0.21",
         "npm:react-router-dom@^7.17.0",
         "npm:react@^19.2.7",
-        "npm:spec-workflow-mcp@^1.0.8",
         "npm:supabase@^2.105.0",
         "npm:tailwindcss@^4.3.0",
         "npm:typescript-eslint@^8.61.0",
