@@ -132,6 +132,8 @@ export type MaterialTransferUpdate = MaterialTransferUpdateBase & {
 } & Partial<MaterialTransferExtraFields>
 
 export interface MaterialTransferWithEmployee extends MaterialTransfer {
+  product_category?: string | null
+  color_name?: string | null
   employee?: {
     id: string
     name: string
@@ -452,6 +454,40 @@ function normalizeMaterialTransferUpdatePayload(
   return payload
 }
 
+async function attachOrderAppearance(
+  rows: MaterialTransferWithEmployee[],
+): Promise<MaterialTransferWithEmployee[]> {
+  const projectNos = [
+    ...new Set(rows.map((row) => row.project_no.trim()).filter(Boolean)),
+  ]
+  const appearance = new Map<
+    string,
+    { product_category: string | null; color_name: string | null }
+  >()
+
+  for (let offset = 0; offset < projectNos.length; offset += 100) {
+    const { data, error } = await supabase
+      .from('sales_orders')
+      .select('project_no, product_category, color_name')
+      .in('project_no', projectNos.slice(offset, offset + 100))
+
+    if (error) throw handleApiError(error, '获取订单表面处理和颜色失败')
+
+    for (const order of data || []) {
+      if (order.project_no) appearance.set(order.project_no.trim(), order)
+    }
+  }
+
+  return rows.map((row) => {
+    const order = appearance.get(row.project_no.trim())
+    return {
+      ...row,
+      product_category: order?.product_category ?? null,
+      color_name: order?.color_name ?? null,
+    }
+  })
+}
+
 export async function getMaterialTransfers({
   page,
   pageSize,
@@ -481,7 +517,9 @@ export async function getMaterialTransfers({
   }
 
   return {
-    items: (data || []) as unknown as MaterialTransferWithEmployee[],
+    items: await attachOrderAppearance(
+      (data || []) as unknown as MaterialTransferWithEmployee[],
+    ),
     total: count || 0,
   }
 }
@@ -556,14 +594,16 @@ export async function getMaterialTransfersForExport({
   }
 
   if (!ids || ids.length === 0) {
-    return rows
+    return attachOrderAppearance(rows)
   }
 
   const rowMap = new Map(rows.map((row) => [row.id, row]))
 
-  return ids
-    .map((id) => rowMap.get(id))
-    .filter((row): row is MaterialTransferWithEmployee => Boolean(row))
+  return attachOrderAppearance(
+    ids
+      .map((id) => rowMap.get(id))
+      .filter((row): row is MaterialTransferWithEmployee => Boolean(row)),
+  )
 }
 
 export async function getMaterialTransferQuantityStats({

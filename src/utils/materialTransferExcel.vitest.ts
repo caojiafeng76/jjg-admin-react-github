@@ -80,6 +80,28 @@ describe('exportMaterialTransfersToExcel', () => {
     writeFileMock.mockClear()
   })
 
+  it('exports order appearance and leaves missing values empty', () => {
+    const records = [
+      {
+        ...createRecord('001', 12),
+        product_category: '氧化',
+        color_name: '银白',
+      },
+      createRecord('002', 8),
+    ]
+
+    exportMaterialTransfersToExcel(records)
+
+    const workbook = writeFileMock.mock.calls[0]?.[0]
+    const worksheet = workbook.Sheets['物料转移单']
+    expect(worksheet.S2?.v).toBe('表面处理')
+    expect(worksheet.T2?.v).toBe('颜色')
+    expect(worksheet.S3?.v).toBe('氧化')
+    expect(worksheet.T3?.v).toBe('银白')
+    expect(worksheet.S4?.v).toBe('')
+    expect(worksheet.T4?.v).toBe('')
+  })
+
   it('adds a final total row for transfer quantity', () => {
     exportMaterialTransfersToExcel([
       createRecord('001', 12),

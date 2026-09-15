@@ -34,10 +34,12 @@ const EXPORT_HEADERS = [
   '备注',
   '订单进度',
   '订单状态',
+  '表面处理',
+  '颜色',
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  20, 14, 18, 9, 10, 28, 10, 14, 10, 8, 12, 8, 9, 10, 18, 16, 12, 10,
+  20, 14, 18, 9, 10, 28, 10, 14, 10, 8, 12, 8, 9, 10, 18, 16, 12, 10, 14, 14,
 ]
 const TRANSFER_QUANTITY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('转移数量')
 const TRANSFER_QUANTITY_TOTAL_LABEL_COLUMN_INDEX =
@@ -99,6 +101,8 @@ export function exportMaterialTransfersToExcel(
       record.remark || '',
       formatOrderProgressCell(progress),
       formatOrderStatusCell(progress),
+      record.product_category || '',
+      record.color_name || '',
     ]
   })
   const totalRow = EXPORT_HEADERS.map(() => '') as Array<string | number>

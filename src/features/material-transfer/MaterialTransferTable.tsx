@@ -159,6 +159,20 @@ function MaterialTransferTable({
         render: (value: string | null) => value || '-',
       },
       {
+        title: '表面处理',
+        dataIndex: 'product_category',
+        key: 'product_category',
+        width: 110,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
+        title: '颜色',
+        dataIndex: 'color_name',
+        key: 'color_name',
+        width: 110,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
         title: '长度',
         dataIndex: 'length_mm',
         key: 'length_mm',
@@ -248,7 +262,7 @@ function MaterialTransferTable({
       dataSource={data}
       rowSelection={rowSelection}
       onRow={handleRow}
-      scroll={{ x: 1500, y: scrollY }}
+      scroll={{ x: 1720, y: scrollY }}
       size="small"
       pagination={false}
       style={{ fontSize: '13px' }}
@@ -256,17 +270,17 @@ function MaterialTransferTable({
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800/80">
             <Table.Summary.Cell index={0} />
-            <Table.Summary.Cell index={1} colSpan={9}>
+            <Table.Summary.Cell index={1} colSpan={11}>
               <span className="font-medium text-slate-600 dark:text-slate-300">
                 当前页合计
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={10}>
+            <Table.Summary.Cell index={12}>
               <span className="font-bold text-slate-900 tabular-nums dark:text-slate-100">
                 {currentPageTransferQuantity}
               </span>
             </Table.Summary.Cell>
-            <Table.Summary.Cell index={11} colSpan={2} />
+            <Table.Summary.Cell index={13} colSpan={2} />
           </Table.Summary.Row>
         </Table.Summary>
       )}
