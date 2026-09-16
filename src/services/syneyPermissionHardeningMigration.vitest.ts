@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 const migrationPath = resolve(
   process.cwd(),
-  'supabase/migrations/20260713060000_harden_syney_and_workshop_permissions.sql',
+  'supabase/migrations/20260713065523_harden_syney_and_workshop_permissions.sql',
 )
 
 function readMigration(): string {

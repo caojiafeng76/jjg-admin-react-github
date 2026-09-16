@@ -1,13 +1,5 @@
 -- ============================================================
 -- 吴雯雯加开订单管理和包装工序全部权限
---
--- 背景：
--- - 吴雯雯当前为 viewer，常规 viewer 只读。
--- - 本次只通过用户级权限覆盖授予订单管理和包装工序权限，
---   不扩大 viewer 角色的默认权限面。
--- - 订单管理底层 sales_orders 已挂 viewer DML 防护触发器，
---   因此同步允许同时拥有订单管理删除和状态变更权限的 viewer
---   对 sales_orders 执行对应页面操作。
 -- ============================================================
 
 insert into public.user_permission_overrides (employee_id, permission_id, enabled)
@@ -149,4 +141,4 @@ begin
 
   return new;
 end;
-$function$;
+$function$;;

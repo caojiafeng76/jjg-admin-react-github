@@ -105,4 +105,4 @@ where e.id = '91e20061-7058-4ddb-8aaf-ea33ea141857'::uuid
     'feature:workshop-order.manage-status'
   )
 on conflict (employee_id, permission_id) do update
-set enabled = excluded.enabled;
+set enabled = excluded.enabled;;

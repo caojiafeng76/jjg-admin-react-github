@@ -1,11 +1,5 @@
 -- ============================================================
 -- 修复吴雯雯订单管理增改删权限与包装工序数据可见性
---
--- 根因：
--- - 订单管理此前只有 delete / manage-status 两个 feature 权限点，
---   缺少 create / edit，权限管理无法精确授予新增和编辑。
--- - packaging_employees / packaging_standard_times 只有 admin RLS，
---   viewer 即使拥有对应 page 权限也查不到数据。
 -- ============================================================
 
 insert into public.permissions (key, scope, module, surface, label, description)
@@ -178,7 +172,7 @@ begin
         and new.packaging_date is not distinct from old.packaging_date
         and new.planned_delivery_date is not distinct from old.planned_delivery_date
         and new.cabin_processing_date is not distinct from old.cabin_processing_date
-        and new.middle_door_processing_date is not distinct from old.middle_door_processing_date
+        and new.middle_door_processing_date is not distinct from old.cabin_processing_date
         and new.frame_processing_date is not distinct from old.frame_processing_date
       then
         return new;
@@ -195,4 +189,4 @@ begin
 
   return new;
 end;
-$function$;
+$function$;;

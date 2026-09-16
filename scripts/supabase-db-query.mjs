@@ -1,55 +1,41 @@
+import { withSqlSnapshot } from './db-sql-snapshot.mjs'
+import { readFileSync } from 'node:fs'
+import { confirmSqlExecution, parseQueryArgs } from './db-sql-guard.mjs'
 import {
-  buildCombinedOutput,
-  printFailureDiagnosis,
-  printUsageAndExit,
+  describeDatabaseTarget,
   resolveTargetArgs,
   runSupabaseCli,
 } from './supabase-cli-utils.mjs'
 
 const args = process.argv.slice(2)
-
 if (args.includes('--help') || args.includes('-h')) {
-  printUsageAndExit(`用法:
+  console.log(`用法:
   bun run db:query -- --file docs/sql-drafts/example.sql
   bun run db:query -- "select now();"
   bun run db:query -- --db-url <postgres-url> --file path/to/file.sql
 
-说明:
-  - 默认自动追加 --linked；如果设置了 SUPABASE_DB_URL，则优先改走 --db-url
-  - 一次性数据修复、规则校验、只读核对脚本优先走 db query --file
-  - DDL、RLS、约束、索引不要直接用 query 裸跑，优先写入 migration 后再 db push
-  - 如果尚未绑定远程项目，先执行: bunx supabase login && bunx supabase link --project-ref <project-ref>
-  - 如果 linked 直连远程库失败，可改为设置 SUPABASE_DB_URL 后重试`)
+默认 --linked 通过 Management API 查询；显式目标保持不变。
+SQL 文件只读取一次，执行已检查的内容，避免文件在确认后被替换。
+删除、清空、删结构或动态执行需要用户在交互终端核对并连续确认三次。
+非交互执行遇到危险 SQL 直接失败，不接受 --yes、环境变量或旧 hook 状态跳过。
+结构变更请优先写 migration，再使用 db:push。`)
+  process.exit(0)
 }
-
-const hasFile = args.includes('--file') || args.includes('-f')
-const hasSqlText = args.some((arg) => !arg.startsWith('-'))
-
-if (!hasFile && !hasSqlText) {
-  console.error(
-    '缺少 SQL 输入。请传入 --file <sql文件> 或直接传入 SQL 字符串。',
+try {
+  const parsed = parseQueryArgs(args)
+  const sql =
+    parsed.file === undefined ? parsed.sql : readFileSync(parsed.file, 'utf8')
+  if (!sql.trim()) throw new Error('SQL 内容不能为空。')
+  const { forwardArgs } = resolveTargetArgs(parsed.forwardArgs)
+  const target = describeDatabaseTarget(forwardArgs)
+  await confirmSqlExecution(sql, target)
+  if (target !== describeDatabaseTarget(forwardArgs))
+    throw new Error('数据库绑定在确认期间发生变化，请重新检查。')
+  const result = withSqlSnapshot(sql, (file) =>
+    runSupabaseCli(['db', 'query', ...forwardArgs, '--file', file]),
   )
-  console.error(
-    '示例: bun run db:query -- --file docs/sql-drafts/20260321_day3_add_employee_scoped_rls.sql',
-  )
+  process.exit(result.error ? 1 : (result.status ?? 1))
+} catch (error) {
+  console.error(error instanceof Error ? error.message : 'SQL 执行失败。')
   process.exit(1)
 }
-
-const { forwardArgs, targetMode } = resolveTargetArgs(args)
-
-const result = runSupabaseCli(['db', 'query', ...forwardArgs])
-
-if (result.error) {
-  console.error(`执行 Supabase db query 失败: ${result.error.message}`)
-  process.exit(1)
-}
-
-if ((result.status ?? 1) !== 0) {
-  printFailureDiagnosis({
-    commandLabel: 'Supabase db query',
-    targetMode,
-    output: buildCombinedOutput(result),
-  })
-}
-
-process.exit(result.status ?? 1)

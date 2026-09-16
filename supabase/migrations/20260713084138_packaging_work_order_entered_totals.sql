@@ -364,4 +364,4 @@ limit greatest(p_page_size, 1);
 $$;
 revoke execute on function public.get_packaging_work_order_batches(integer, integer, text, date, date, uuid)
 from public;
-grant execute on function public.get_packaging_work_order_batches(integer, integer, text, date, date, uuid) to authenticated;
+grant execute on function public.get_packaging_work_order_batches(integer, integer, text, date, date, uuid) to authenticated;;

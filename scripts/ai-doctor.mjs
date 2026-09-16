@@ -80,11 +80,7 @@ function checkMcpConfig() {
   const mcp = readJson('.mcp.json')
   if (!mcp?.mcpServers) return
 
-  const expected = [
-    'supabase',
-    'context7',
-    'chrome-devtools',
-  ]
+  const expected = ['context7', 'chrome-devtools']
 
   for (const name of expected) {
     const server = mcp.mcpServers[name]

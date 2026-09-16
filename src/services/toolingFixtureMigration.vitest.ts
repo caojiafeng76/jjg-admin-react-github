@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 const migrationPath = resolve(
   process.cwd(),
-  'supabase/migrations/20260802090000_create_tooling_fixtures.sql',
+  'supabase/migrations/20260802072303_create_tooling_fixtures.sql',
 )
 
 describe('tooling fixture migration contract', () => {

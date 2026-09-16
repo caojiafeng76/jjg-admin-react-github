@@ -36,4 +36,4 @@ where e.id = '89946107-62cb-49db-af0c-25a0caed6c8e'::uuid
   and e.is_active = true
   and p.key in ('nav:quality', 'page:quality-issue-record')
 on conflict (employee_id, permission_id) do update
-set enabled = excluded.enabled;
+set enabled = excluded.enabled;;

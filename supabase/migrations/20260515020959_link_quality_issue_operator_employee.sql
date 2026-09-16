@@ -5,3 +5,4 @@ comment on column public.quality_issue_records.operator_employee_id is '操作�
 
 create index if not exists idx_quality_issue_records_operator_employee_id
 on public.quality_issue_records (operator_employee_id);
+;

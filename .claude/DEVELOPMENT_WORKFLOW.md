@@ -51,16 +51,17 @@
 
 ### 两类执行路径
 
-| 类型                          | 工具                                       | 路径                        |
-| ----------------------------- | ------------------------------------------ | --------------------------- |
-| DDL/RLS/约束/索引/函数/触发器 | MCP `apply_migration` 或 `bun run db:push` | `supabase/migrations/*.sql` |
-| 一次性数据修复/只读校验       | MCP `execute_sql` 或 `bun run db:query`    | `docs/sql-drafts/*.sql`     |
+| 类型                          | 工具                                          | 路径                        |
+| ----------------------------- | --------------------------------------------- | --------------------------- |
+| DDL/RLS/约束/索引/函数/触发器 | `bun run db:push:dry-run` → `bun run db:push` | `supabase/migrations/*.sql` |
+| 一次性数据修复/只读校验       | `bun run db:query`（SQL 内容保护）            | `docs/sql-drafts/*.sql`     |
 
 ### 强制规则
 
 - **禁止**手改 `src/services/database.types.ts`
 - DDL 不要混进临时 SQL
-- 删除/清空/重置操作必须用户确认 3 次
+- 删除/清空等危险 SQL 必须由用户本人在交互终端按本次目标/SQL 指纹确认 3 次；非交互直接拦截，助手不得代填；不提供自动 reset 入口
+- 数据库仅使用仓库 CLI；不回退到数据库 MCP 或裸命令
 - Docker 不可用时用远程链路
 - 涉及 RLS/鉴权/员工隔离时必须显式检查读写边界
 
@@ -94,17 +95,17 @@
 
 ## 8. 参考文档
 
-| 文件                                       | 说明                               |
-| ------------------------------------------ | ---------------------------------- |
-| `AGENTS.md`                                | 代码风格指南、导入规范、命名规范   |
-| `.github/copilot-instructions.md`          | 详细 Copilot 执行规则              |
-| `.github/prompts/task-exec.prompt.md`      | 通用任务执行   |
-| `.github/prompts/db-change.prompt.md`      | 数据库变更流程 |
-| `.github/prompts/feature-impl.prompt.md`   | 新功能开发     |
-| `.github/prompts/bugfix.prompt.md`         | 缺陷修复流程                       |
-| `.github/prompts/review.prompt.md`         | 代码评审流程                       |
-| `.github/skills/tanstack-query/`           | TanStack Query 专项 skill          |
-| `.github/skills/supabase-rls-patterns/`    | Supabase RLS 专项 skill            |
-| `.github/skills/supabase-bulk-operations/` | 批量操作专项 skill                 |
-| `.github/skills/business-rules-engine/`    | 业务规则专项 skill                 |
-| `docs/Supabase数据库脚本执行说明.md`       | 数据库操作规范                     |
+| 文件                                       | 说明                             |
+| ------------------------------------------ | -------------------------------- |
+| `AGENTS.md`                                | 代码风格指南、导入规范、命名规范 |
+| `.github/copilot-instructions.md`          | 详细 Copilot 执行规则            |
+| `.github/prompts/task-exec.prompt.md`      | 通用任务执行                     |
+| `.github/prompts/db-change.prompt.md`      | 数据库变更流程                   |
+| `.github/prompts/feature-impl.prompt.md`   | 新功能开发                       |
+| `.github/prompts/bugfix.prompt.md`         | 缺陷修复流程                     |
+| `.github/prompts/review.prompt.md`         | 代码评审流程                     |
+| `.github/skills/tanstack-query/`           | TanStack Query 专项 skill        |
+| `.github/skills/supabase-rls-patterns/`    | Supabase RLS 专项 skill          |
+| `.github/skills/supabase-bulk-operations/` | 批量操作专项 skill               |
+| `.github/skills/business-rules-engine/`    | 业务规则专项 skill               |
+| `docs/Supabase数据库脚本执行说明.md`       | 数据库操作规范                   |

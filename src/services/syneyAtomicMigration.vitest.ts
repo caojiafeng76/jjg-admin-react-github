@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 const migrationSql = readFileSync(
   resolve(
-    'supabase/migrations/20260713040208_add_syney_atomic_update_and_sorted_view.sql',
+    'supabase/migrations/20260713042349_add_syney_atomic_update_and_sorted_view.sql',
   ),
   'utf8',
 )

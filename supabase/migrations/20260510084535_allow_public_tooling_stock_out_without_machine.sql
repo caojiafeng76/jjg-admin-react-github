@@ -28,4 +28,4 @@ for insert to anon, authenticated with check (
   and stock_out_quantity > 0
   and status = '待审核'
   and collection_method in ('新领取', '以旧换新')
-);
+);;

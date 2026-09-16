@@ -45,4 +45,4 @@ for insert to anon with check (
   and unit_price >= 0
   and stock_out_quantity > 0
   and status = '待审核'
-);
+);;

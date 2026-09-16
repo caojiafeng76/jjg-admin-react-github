@@ -48,13 +48,14 @@ bun run db:types
 
 Supabase 数据库命令补充：
 
-- `bun run db:push`: 默认走远程 linked 项目，执行 migration
+- `bun run db:push`: 默认通过已绑定项目的 Session Pooler 运行标准 CLI migration
 - `bun run db:push:dry-run`: 预演待执行 migration
-- `bun run db:query -- --file <sql-file>`: 执行单个 SQL 文件，适合数据修复或只读核对
+- `bun run db:push:api`: 兼容别名，执行与 `db:push` 相同的标准迁移流程
+- `bun run db:query -- --file <sql-file>`: 检查实际 SQL 后执行；危险操作必须由用户在交互终端核对并连续确认三次，非交互直接拦截
 - `bun run db:doctor`: 检查 CLI、登录、query 链路、push 链路分别是否正常
 - `bun run db:types`: 从远程 linked 项目重新生成 `src/services/database.types.ts`；任何 migration 执行成功后都应运行一次，保持类型与 schema 一致
 
-说明：本仓库已确认 `supabase start/status` 的本地容器模式依赖 Docker Desktop；如果 Docker 未运行，不影响远程 CLI 和 MCP 路径继续执行数据库脚本。若 `db:push` 失败但 `db:query` 正常，通常不是没登录，而是 linked 直连远程数据库链路失败；这时优先执行 `bun run db:doctor`，必要时配置 `SUPABASE_DB_URL` 作为回退。详见 [docs/Supabase数据库脚本执行说明.md](docs/Supabase数据库脚本执行说明.md)。
+说明：本仓库已确认 `supabase start/status` 的本地容器模式依赖 Docker Desktop；如果 Docker 未运行，不影响远程 CLI 继续执行数据库脚本。`db:push` 使用本机 `SUPABASE_ACCESS_TOKEN` 获取临时登录角色，并将密码仅放入子进程 `PGPASSWORD`，避免代理 Fake-IP 造成的直连误判。`db:doctor` 验证同一入口；显式 `SUPABASE_DB_URL` / `--db-url` / `--local` 仍保留原目标。迁移版本不一致会失败，不会自动改写远程历史或切换 API 裸执行。详见 [docs/Supabase数据库脚本执行说明.md](docs/Supabase数据库脚本执行说明.md)。
 
 ## 目录结构
 
@@ -108,7 +109,7 @@ src/
 
 项目级配置位于 [.mcp.json](.mcp.json)、[.codex/config.toml](.codex/config.toml) 和 [opencode.jsonc](opencode.jsonc)，保留 Supabase、Context7 和 Chrome DevTools。
 
-Supabase MCP 使用本机 `SUPABASE_ACCESS_TOKEN` 环境变量，不要把 token 写入仓库。修改配置后重启相应客户端或新建会话，以刷新工具列表。
+项目已移除 Supabase MCP 注册，数据库统一走仓库 CLI；保留 Context7 和 Chrome DevTools。CLI 继续使用本机 `SUPABASE_ACCESS_TOKEN`，不要删除凭据或写入仓库。修改 MCP 配置后重启相应客户端或新建会话，以刷新工具列表。
 
 历史业务规格保留在 `openspec/`，历史工具笔记保留在 `docs/ai-notes/`，仅供查阅；当前任务执行规则以 `.github/copilot-instructions.md` 为准。
 

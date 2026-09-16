@@ -15,6 +15,27 @@
 
 ## 2026-09-16
 
+- **类别**：修复 / 配置 / 文档
+- **范围**：数据库 CLI 迁移与 SQL 保护、项目 MCP 注册、AI 规则和说明文档
+- **摘要**：将 db:push:api 改为标准 db:push 兼容入口，删除自制表格解析、同名跳过和 SQL/历史分两次写入逻辑。db:query 直接检查 SQL 内容，使用临时快照保证执行检查过的内容并兼容大文件；正式 db:push 先解析结构化 dry-run，仅审查待执行迁移并核对文件变化。危险/动态 SQL 必须用户交互终端按目标与 SQL 指纹连续确认三次，非交互失败，不接受跳过参数或旧 hook 确认状态；拒绝重复目标参数，保留可选 raw-command hook。移除 .mcp.json 与 .codex/config.toml 中 Supabase 注册，保留其他配置和 CLI 凭据；同步 README、AGENTS、Copilot/Claude 规则、任务矩阵、数据库 prompt、数据库与 MCP 指南及 ai:doctor。
+- **验证**：bun run test 的 Node 脚本 31 用例、Vitest 121 文件/545 用例全部通过；改动脚本 ESLint、JSON/TOML 解析及注册保留断言、git diff --check 通过。移除注册后 db:doctor 4 项全通过；db:push:api -- --dry-run 返回 upToDate=true、migrations=[]；带保护查询确认远程历史仍为 240 条。ai:doctor 为 0 错误/1 个既有 Docker 缺失警告。危险 SQL 拦截、三次确认绑定、文件变化、快照清理、重复目标及旧命令错误退出均有本地回归；未对生产库执行删除或迁移，未修改远程历史。该保护为防误操作层，不替代数据库权限或通用 SQL 沙箱；客户端需新会话/重启刷新 MCP 工具列表，全局连接器与其他项目配置未改动。
+
+## 2026-09-16
+
+- **类别**：修复 / 配置 / 文档
+- **范围**：Supabase CLI 数据库脚本、migration 本地历史、迁移测试和使用说明
+- **摘要**：db:push 默认通过已绑定项目 Session Pooler 执行标准 CLI，临时角色密码只进入子进程 PGPASSWORD；保留显式目标与原生连接选项，移除自动 API 裸执行回退。doctor 改为验证同一入口，CLI 结构化错误即使退出码为 0 也按失败处理并脱敏。经用户确认，将原 190 个 migration 完整归档，以生产库 240 条版本恢复活动目录；203 条采用官方历史 SQL，37 条因远程缺少 statements 而采用原仓库同名 SQL，逐条记录来源及规范化 SHA-256。仅更新 6 个测试的文件路径，未放宽 SQL 断言；未执行迁移、未修改远程历史、未变更代理或 hosts。
+- **验证**：bun run db:push:dry-run 返回 Remote database is up to date；bun run db:doctor 4 项全部 PASS；bun run test 的 7 个 Node 脚本/归档校验及 Vitest 121 文件/545 用例全部通过；bun run build、改动文件 ESLint、git diff --check 通过。独立逐条比对确认归档 190 个 SQL 与原 Git 内容一致（仅规范化换行）。37 条历史重建 SQL 不视为已证明当时执行内容，空库完整重放未验证；本次无 schema 执行，未重新生成数据库类型。独立代码审查代理因额度限制未完成，已在本任务自行检查目标选择、凭据和错误处理。
+
+## 2026-09-16
+
+- **类别**：文档 / 诊断
+- **范围**：Supabase CLI migration 预演与代理连接
+- **摘要**：定位 Fake-IP 与 CLI 直连探测不兼容；通过 Session Pooler 和临时 CLI 登录角色连接成功。原仓库另有远程迁移版本缺少本地文件问题；未修改代理、hosts、业务数据、数据库结构或迁移历史。
+- **验证**：原路径重现连接中断；显式连接池进入迁移历史校验；临时目录通过官方 migration fetch 拉取 240 条历史后，标准 db push --dry-run 返回 exit 0、upToDate=true、migrations=[]。原仓库默认命令尚未修复；远程 37 条历史缺少 statements，正式对齐需另行核对。临时目录 jjg-supabase-dryrun-20260916 清理被自动安全策略阻止，未继续删除。
+
+## 2026-09-16
+
 - **类别**：变更 / 数据修复
 - **范围**：生产数据库 `sales_orders` 车间订单状态
 - **摘要**：按用户要求，将客户为“优迈”“杭州优迈科技有限公司”或产品型号以 `286` 开头的订单统一设为“生产中”；仅更新原状态不同的记录，共 173 条，其余 127 条保持生产中。沿用数据库反结案触发器清空结案时间，并对恢复生产的订单禁用自动结案；未修改数据库结构或应用代码。

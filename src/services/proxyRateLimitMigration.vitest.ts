@@ -6,21 +6,21 @@ import { describe, expect, it } from 'vitest'
 const migration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260713062000_add_distributed_proxy_rate_limit.sql',
+    'supabase/migrations/20260713070629_add_distributed_proxy_rate_limit.sql',
   ),
   'utf8',
 )
 const hardeningMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260713062500_hide_proxy_rate_limit_definer.sql',
+    'supabase/migrations/20260713070856_hide_proxy_rate_limit_definer.sql',
   ),
   'utf8',
 )
 const poisoningPreventionMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260713063000_prevent_proxy_rate_limit_ip_poisoning.sql',
+    'supabase/migrations/20260713071842_prevent_proxy_rate_limit_ip_poisoning.sql',
   ),
   'utf8',
 )

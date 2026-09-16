@@ -20,3 +20,4 @@ where e.id = '89946107-62cb-49db-af0c-25a0caed6c8e'::uuid
   and p.key in ('page:youmai-raw-material-stock-out', 'feature:youmai.manage')
 on conflict (employee_id, permission_id) do update
 set enabled = excluded.enabled;
+;

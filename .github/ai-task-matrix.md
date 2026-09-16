@@ -17,18 +17,18 @@ Fast lane 输出仍需说明：任务范围、改了什么、如何验证、剩�
 
 ## Task Routing
 
-| 任务类型                           | 必选工具 / skill                                              | 优先查看                                                                             | 最低验证                                                        |
-| ---------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| 页面、表单、列表、详情             | `query-before-page-edit`, `ant-design`                | feature 目录、服务层、路由、菜单、权限                                               | `bun run typecheck` + 相关测试；影响流程时补页面验证            |
-| Query / Mutation / 缓存联动        | `tanstack-query`                                      | hook、queryKey、invalidateQueries、调用点                                            | `bun run test` + 缓存刷新链路检查                               |
-| 数据库、RLS、索引、迁移            | Supabase MCP, `db-change` prompt | migration、服务层、类型、权限策略                                                    | SQL / migration 验证；执行 schema 变更后运行 `bun run db:types` |
-| Excel 导入、批量 upsert、数据修复  | `supabase-bulk-operations`                            | utils、导入入口、服务层、唯一键/冲突键                                               | 单元测试 + 小样本导入或 dry-run                                 |
-| PDF / Excel 导出                   | 文件搜索                                                        | utils、导出 hook、表格字段、中文字体初始化                                           | 相关单测；必要时手动导出验证                                    |
-| 业务规则、状态流转、数量/工时/成本 | `business-rules-engine`          | 写入入口、展示入口、汇总入口、测试                                                   | 规则单测 + 受影响页面/汇总口径检查                              |
-| 手机端、H5、扫码、触屏             | `mobile-responsiveness`, `webapp-testing`             | 移动页面、路由、权限、扫码依赖                                                       | 移动 viewport 页面验证 + `bun run typecheck`                    |
-| 路由、菜单、标题、权限             | 文件搜索                                                        | `router.tsx`, `routeLabels.ts`, `MainMenu.tsx`, `access.ts`, `permissionRegistry.ts` | 路由入口检查 + 权限边界回归                                     |
-| 脚本、MCP、开发流程配置            | 文件搜索                        | `package.json`, `.mcp.json`, prompts, instructions, README                              | 相关脚本 help/dry-run + JSON/配置解析                           |
-| 代码评审                           | 文件搜索 + review prompt                                        | diff、受影响调用链、测试覆盖                                                         | 不改代码；按严重程度列 findings                                 |
+| 任务类型                           | 必选工具 / skill                          | 优先查看                                                                             | 最低验证                                                        |
+| ---------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| 页面、表单、列表、详情             | `query-before-page-edit`, `ant-design`    | feature 目录、服务层、路由、菜单、权限                                               | `bun run typecheck` + 相关测试；影响流程时补页面验证            |
+| Query / Mutation / 缓存联动        | `tanstack-query`                          | hook、queryKey、invalidateQueries、调用点                                            | `bun run test` + 缓存刷新链路检查                               |
+| 数据库、RLS、索引、迁移            | 仓库 Supabase CLI, `db-change` prompt     | migration、服务层、类型、权限策略                                                    | SQL / migration 验证；执行 schema 变更后运行 `bun run db:types` |
+| Excel 导入、批量 upsert、数据修复  | `supabase-bulk-operations`                | utils、导入入口、服务层、唯一键/冲突键                                               | 单元测试 + 小样本导入或 dry-run                                 |
+| PDF / Excel 导出                   | 文件搜索                                  | utils、导出 hook、表格字段、中文字体初始化                                           | 相关单测；必要时手动导出验证                                    |
+| 业务规则、状态流转、数量/工时/成本 | `business-rules-engine`                   | 写入入口、展示入口、汇总入口、测试                                                   | 规则单测 + 受影响页面/汇总口径检查                              |
+| 手机端、H5、扫码、触屏             | `mobile-responsiveness`, `webapp-testing` | 移动页面、路由、权限、扫码依赖                                                       | 移动 viewport 页面验证 + `bun run typecheck`                    |
+| 路由、菜单、标题、权限             | 文件搜索                                  | `router.tsx`, `routeLabels.ts`, `MainMenu.tsx`, `access.ts`, `permissionRegistry.ts` | 路由入口检查 + 权限边界回归                                     |
+| 脚本、MCP、开发流程配置            | 文件搜索                                  | `package.json`, `.mcp.json`, prompts, instructions, README                           | 相关脚本 help/dry-run + JSON/配置解析                           |
+| 代码评审                           | 文件搜索 + review prompt                  | diff、受影响调用链、测试覆盖                                                         | 不改代码；按严重程度列 findings                                 |
 
 ## Tool Health
 

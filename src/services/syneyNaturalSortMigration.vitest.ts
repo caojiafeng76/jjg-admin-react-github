@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 const migrationSql = readFileSync(
   resolve(
-    'supabase/migrations/20260713044250_add_syney_natural_sort_collation.sql',
+    'supabase/migrations/20260713045736_add_syney_natural_sort_collation.sql',
   ),
   'utf8',
 )

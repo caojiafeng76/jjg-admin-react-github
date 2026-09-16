@@ -10,7 +10,7 @@
     "build": "tsc -b && vite build",
     "check:bundle": "bun scripts/check-bundle-budget.mjs",
     "typecheck": "tsc -b",
-    "test": "vitest run",
+    "test": "node --test scripts/supabase-pooler.test.mjs scripts/db-sql-guard.test.mjs && vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",

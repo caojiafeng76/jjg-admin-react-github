@@ -18,4 +18,4 @@ for insert to anon, authenticated with check (
   and quantity > 0
   and btrim(recipient) <> ''
   and collection_method in ('新领取', '以旧换新')
-);
+);;

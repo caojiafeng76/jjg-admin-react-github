@@ -1,0 +1,1930 @@
+{
+  "projectRef": "mlcptrkvkseyqxxlfcme",
+  "date": "2026-09-16",
+  "remoteCount": 240,
+  "archivedCount": 190,
+  "reconstructedCount": 37,
+  "migrations": [
+    {
+      "file": "20240101000001_insert_employees_test_data.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20240101000001_insert_employees_test_data.sql",
+      "sha256": "2c30fa024273715e5042b23ad31909fbcb6ee2fd90d50ca8aa7fde29f991c93a",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "2c30fa024273715e5042b23ad31909fbcb6ee2fd90d50ca8aa7fde29f991c93a"
+    },
+    {
+      "file": "20250101000010_enable_rls_and_policies.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20250101000010_enable_rls_and_policies.sql",
+      "sha256": "9c97cece0698893408cc36627fde418a327962e4bc7156dc73635cc4ddf39f0f",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "9c97cece0698893408cc36627fde418a327962e4bc7156dc73635cc4ddf39f0f"
+    },
+    {
+      "file": "20250101000020_create_production_sheets.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20250101000020_create_production_sheets.sql",
+      "sha256": "ccafe39b5821e82c7abe0df0af0e84d19b695ddebec85a89ca4009cae5c0c280",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "ccafe39b5821e82c7abe0df0af0e84d19b695ddebec85a89ca4009cae5c0c280"
+    },
+    {
+      "file": "20250317000000_drop_workshop_tables.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20250317000000_drop_workshop_tables.sql",
+      "sha256": "907fe2e890420d0ee3a2816795f546f64bf091fbd6fc8ea1c0634df7aa28a678",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "907fe2e890420d0ee3a2816795f546f64bf091fbd6fc8ea1c0634df7aa28a678"
+    },
+    {
+      "file": "20250320000000_drop_production_orders_status.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20250320000000_drop_production_orders_status.sql",
+      "sha256": "d6bb3486cee4fe6d71fb6f5d3536313ea665c14ce19edae1c50911afd3b3be22",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "d6bb3486cee4fe6d71fb6f5d3536313ea665c14ce19edae1c50911afd3b3be22"
+    },
+    {
+      "file": "20250320000001_update_defect_reason_defaults.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20250320000001_update_defect_reason_defaults.sql",
+      "sha256": "2ea3a6dee6c5a92feb763606bb8b9f48a8140f1e842c253657aa81dc50d7a5f5",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "2ea3a6dee6c5a92feb763606bb8b9f48a8140f1e842c253657aa81dc50d7a5f5"
+    },
+    {
+      "file": "20251129045906_create_sales_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "53d7a53f5a401a9793d257980ba1e7b098a2ed7fa1bb8508ad6dd68f14ffd652",
+      "remoteSha256": "53d7a53f5a401a9793d257980ba1e7b098a2ed7fa1bb8508ad6dd68f14ffd652",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251130061554_create_workshop_processes_table.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "fa7eb1435b170b556558c4ec56f363ff84e61ff14b2cc0d8cd429ea9d646c507",
+      "remoteSha256": "fa7eb1435b170b556558c4ec56f363ff84e61ff14b2cc0d8cd429ea9d646c507",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251130064337_add_unique_constraint_process_name.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "7cd525a081855f175878b80ab9a7e0c9f8a34dedde6d4817b790e5ed7ba00fad",
+      "remoteSha256": "7cd525a081855f175878b80ab9a7e0c9f8a34dedde6d4817b790e5ed7ba00fad",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251130064639_create_workshop_defect_reasons_table.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "306c5c0c086bb1ad6922739af805bd704a819367c555f2738ac0941d77dacaf2",
+      "remoteSha256": "306c5c0c086bb1ad6922739af805bd704a819367c555f2738ac0941d77dacaf2",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251130071225_create_employees_table.sql",
+      "source": "remote-history",
+      "archivedFile": "20240101000000_create_employees_table.sql",
+      "sha256": "3f51a8da52a230e7e91a754ace01c7c698482f07e50641d4725ed48958c4a5d4",
+      "remoteSha256": "3f51a8da52a230e7e91a754ace01c7c698482f07e50641d4725ed48958c4a5d4",
+      "archivedSha256": "5ca6b3a80bd1a610169a7a0cacbbca3572327dea240a726049e4568f95ecd672"
+    },
+    {
+      "file": "20251130071402_create_production_records_table.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "0620786b217cf6fdeda06a7f9e9b17ca442d130ddc71a71804f2f286ae62d471",
+      "remoteSha256": "0620786b217cf6fdeda06a7f9e9b17ca442d130ddc71a71804f2f286ae62d471",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251130073415_update_production_records_defect_reasons.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "04b510d1da97914efc82890ff09cd450f23d6cfd70ef5ccd3db248af66c1558a",
+      "remoteSha256": "04b510d1da97914efc82890ff09cd450f23d6cfd70ef5ccd3db248af66c1558a",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251130161337_add_working_hours_to_production_records.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "4b715baf01614cb0a271f12c479ebef2a599f028a80691ae9286ff6da0def765",
+      "remoteSha256": "4b715baf01614cb0a271f12c479ebef2a599f028a80691ae9286ff6da0def765",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251130163312_make_product_delivery_date_nullable.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "4acba8c33b849a64dd6af3a0c0e42e09d863f41fa7986bba226f996837e7dbb6",
+      "remoteSha256": "4acba8c33b849a64dd6af3a0c0e42e09d863f41fa7986bba226f996837e7dbb6",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251201052636_insert_employees_list.sql",
+      "source": "remote-history",
+      "archivedFile": "20240101000002_insert_employees_list.sql",
+      "sha256": "1a9f485357516e22b4fe39dfe95745bc2ce8b0f4b0c646691b8e71a50b240bea",
+      "remoteSha256": "1a9f485357516e22b4fe39dfe95745bc2ce8b0f4b0c646691b8e71a50b240bea",
+      "archivedSha256": "d68b2544b76f4be83ed81fff196b0c8babd8402e80264531f305c97ddf722b07"
+    },
+    {
+      "file": "20251201055614_insert_sales_orders_from_image.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "4f8c9141c68dbb4f89ca76430de491fb8b1bb593052559522b8d972448e2387a",
+      "remoteSha256": "4f8c9141c68dbb4f89ca76430de491fb8b1bb593052559522b8d972448e2387a",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251205063922_20250101000020_create_production_sheets.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "5273080b0047f80949e9e9a72b551a49b1d3e2864d5a0471472f1bb4df0c19a7",
+      "remoteSha256": "5273080b0047f80949e9e9a72b551a49b1d3e2864d5a0471472f1bb4df0c19a7",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251206073158_backup_working_hours_data.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "b2e9ddc39e53fbfede4190238da95a34c4ad1635062de72c602e94723c889181",
+      "remoteSha256": "b2e9ddc39e53fbfede4190238da95a34c4ad1635062de72c602e94723c889181",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251206073206_add_working_hours_to_production_sheets.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "20a970bda5fc43d1d3aa8b1e209fb76851d5ca7ab591a4bd1d3ad8596bd56c05",
+      "remoteSha256": "20a970bda5fc43d1d3aa8b1e209fb76851d5ca7ab591a4bd1d3ad8596bd56c05",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251206073212_remove_working_hours_from_production_records.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "9de92fd342e56145c34bbe0e88dc1dc0a644f92fa72907dcf5b5d4539599c309",
+      "remoteSha256": "9de92fd342e56145c34bbe0e88dc1dc0a644f92fa72907dcf5b5d4539599c309",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251218070952_create_safe_part_settings_table.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "738cf3175c2607d5e6c9616cdc3e1c86d72177356aa033eefdf6f4911e682041",
+      "remoteSha256": "738cf3175c2607d5e6c9616cdc3e1c86d72177356aa033eefdf6f4911e682041",
+      "archivedSha256": null
+    },
+    {
+      "file": "20251218072934_add_name_to_syney_safe_part_settings.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "261e3c0009579a59bf1bb21988c156186a26c7e272d3df5ffef110d4a1297b94",
+      "remoteSha256": "261e3c0009579a59bf1bb21988c156186a26c7e272d3df5ffef110d4a1297b94",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260318062848_create_process_standards_table.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "0bf152d784ef2ac4a7710f65c4a291e2261e09d74795c6da9f26093d234fed71",
+      "remoteSha256": "0bf152d784ef2ac4a7710f65c4a291e2261e09d74795c6da9f26093d234fed71",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260318063552_drop_process_standards_unique_constraint.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "f692a6decc1ab649f64ac577331b4cc62f143fb014a227b9b698b8014f171302",
+      "remoteSha256": "f692a6decc1ab649f64ac577331b4cc62f143fb014a227b9b698b8014f171302",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260318070020_add_process_standards_rls_policies.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "04f3bb3c8d540759d66ff3f00e3b2ebf54443165127a669b96bfc3731689a4c6",
+      "remoteSha256": "04f3bb3c8d540759d66ff3f00e3b2ebf54443165127a669b96bfc3731689a4c6",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260318083416_create_production_orders_table.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "0be52af5076814c404de2b9b6f6c49edcf75b8a57e1cedf301f73ddd660c0dec",
+      "remoteSha256": "0be52af5076814c404de2b9b6f6c49edcf75b8a57e1cedf301f73ddd660c0dec",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260318083437_create_production_order_items_table.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "74a33c8b73c26805b45f9aa23a458ac33a1f94f53be51a874ba9c5af565d5234",
+      "remoteSha256": "74a33c8b73c26805b45f9aa23a458ac33a1f94f53be51a874ba9c5af565d5234",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260318083452_create_trigger_for_production_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "3ce4b056b81acb6eb99da4a7a05f762882971c854a31216c0cf6a8c5ebf549a5",
+      "remoteSha256": "3ce4b056b81acb6eb99da4a7a05f762882971c854a31216c0cf6a8c5ebf549a5",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260318083502_add_indexes_production_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "81a75fa8e7a8825a9c55f7d9ea89c35c09266155bdfb411fa93c9361bc83892c",
+      "remoteSha256": "81a75fa8e7a8825a9c55f7d9ea89c35c09266155bdfb411fa93c9361bc83892c",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260320063343_sync_production_order_items_with_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260320070000_sync_production_order_items_with_process_standards.sql",
+      "sha256": "0e37cce2fb6462a66c7d64fb9f55ee0a189ef963e829d9797a611d7fbf6666f3",
+      "remoteSha256": "0e37cce2fb6462a66c7d64fb9f55ee0a189ef963e829d9797a611d7fbf6666f3",
+      "archivedSha256": "c3c4e3d841577b8d6a56ca57c232c0ccef2c0e1a6fc01aebf5e684a9d7f259f8"
+    },
+    {
+      "file": "20260320092452_add_remark_to_production_order_items.sql",
+      "source": "remote-history",
+      "archivedFile": "20260320080000_add_remark_to_production_order_items.sql",
+      "sha256": "6d08a04f287b19eb507d90afe821e3ae23f6ae95bd80f25415c91c6b7ae498bb",
+      "remoteSha256": "6d08a04f287b19eb507d90afe821e3ae23f6ae95bd80f25415c91c6b7ae498bb",
+      "archivedSha256": "0204f167ec2007710b97b48e0a2f782268fca45ca12d9fcdff74fff800f8b1e5"
+    },
+    {
+      "file": "20260321021744_enforce_process_standards_uniqueness_and_fk.sql",
+      "source": "remote-history",
+      "archivedFile": "20260321000000_enforce_process_standards_uniqueness_and_fk.sql",
+      "sha256": "64a819f0b221a5e1bc93fd0b0829ece37b58168c669f80be6f622fc20b4e1ae2",
+      "remoteSha256": "64a819f0b221a5e1bc93fd0b0829ece37b58168c669f80be6f622fc20b4e1ae2",
+      "archivedSha256": "4a6f8b5e51c59faa7e7415d8dcfd767f252aab944d880634a7772afc2234889e"
+    },
+    {
+      "file": "20260321123048_add_employee_auth_fields_and_bootstrap_admin.sql",
+      "source": "remote-history",
+      "archivedFile": "20260321010200_add_employee_auth_fields_and_bootstrap_admin.sql",
+      "sha256": "9d28b8c8b88b9ee8bcdc4569567ea05eeddb88671a43b5a36dcf06a35bf23cb5",
+      "remoteSha256": "9d28b8c8b88b9ee8bcdc4569567ea05eeddb88671a43b5a36dcf06a35bf23cb5",
+      "archivedSha256": "0481a79f4b3866b85d2a0935ef4f84eaa58463c3f8483a4683a82aa4dea75f95"
+    },
+    {
+      "file": "20260321135833_enable_strict_employee_scoped_rls.sql",
+      "source": "remote-history",
+      "archivedFile": "20260321010300_enable_strict_employee_scoped_rls.sql",
+      "sha256": "891720d7bbe4b6430dcd5b6e3c7b3c2c310cf256f33502509a10ab765977c84e",
+      "remoteSha256": "891720d7bbe4b6430dcd5b6e3c7b3c2c310cf256f33502509a10ab765977c84e",
+      "archivedSha256": "c9a55338d55ae0d78a5fff6440a88c17a3671e215b369b8e6ceeeff80c4f561a"
+    },
+    {
+      "file": "20260321135914_drop_legacy_permissive_production_rls.sql",
+      "source": "remote-history",
+      "archivedFile": "20260321140500_drop_legacy_permissive_production_rls.sql",
+      "sha256": "c27825491df39aac78b51d37981a77f93af1e2cb4223e224687b7c17d00ea5e5",
+      "remoteSha256": "c27825491df39aac78b51d37981a77f93af1e2cb4223e224687b7c17d00ea5e5",
+      "archivedSha256": "2853dec94efd48e2d4eebf2345e7cf06014eed1da227bcff84cf182b4130251f"
+    },
+    {
+      "file": "20260323015537_fix_production_order_total_recalculation_race.sql",
+      "source": "remote-history",
+      "archivedFile": "20260323093000_fix_production_order_total_recalculation_race.sql",
+      "sha256": "56f2bae54d6abde2b8eb9f9a338443ebae5f589ed15b3b5454250a1384dcf186",
+      "remoteSha256": "56f2bae54d6abde2b8eb9f9a338443ebae5f589ed15b3b5454250a1384dcf186",
+      "archivedSha256": "75015ca5f0bd78cda8a42caa68558cc892d2b38cdc214373b33fde7db681f3ae"
+    },
+    {
+      "file": "20260323061220_create_material_transfers.sql",
+      "source": "remote-history",
+      "archivedFile": "20260323110000_create_material_transfers.sql",
+      "sha256": "92107d0df63d5ecf82747d988c94088410e1480082273f7f6b0c0455b09be67e",
+      "remoteSha256": "92107d0df63d5ecf82747d988c94088410e1480082273f7f6b0c0455b09be67e",
+      "archivedSha256": "d3d368b65d83784843535df8bb33f3f0444bf001ae673988df78fb96e8a13482"
+    },
+    {
+      "file": "20260323071554_add_production_order_audit_fields.sql",
+      "source": "remote-history",
+      "archivedFile": "20260323123000_add_production_order_audit_fields.sql",
+      "sha256": "3d77c9ca28ba4b222be530fe246c9de08101909576701da47aea627fac6f0922",
+      "remoteSha256": "3d77c9ca28ba4b222be530fe246c9de08101909576701da47aea627fac6f0922",
+      "archivedSha256": "d4dd03fcc1be710b8aa0e5fe10990b34ced232f3ab298ca6d049625482685c39"
+    },
+    {
+      "file": "20260323073713_add_production_order_extra_qualified_hours.sql",
+      "source": "remote-history",
+      "archivedFile": "20260323153000_add_production_order_extra_qualified_hours.sql",
+      "sha256": "b4ec78bfaf9a72f89f321dc3108953e7ad0408b18b6f036df72811b10caf709d",
+      "remoteSha256": "b4ec78bfaf9a72f89f321dc3108953e7ad0408b18b6f036df72811b10caf709d",
+      "archivedSha256": "7dfa72b6805474670e2ac36d2b202ec0c41c6703345110e85333ac3fd0de3ea1"
+    },
+    {
+      "file": "20260323080433_migrate_bonus_seconds_to_extra_hours_and_drop_bonus.sql",
+      "source": "remote-history",
+      "archivedFile": "20260323170000_migrate_bonus_seconds_to_extra_hours_and_drop_bonus.sql",
+      "sha256": "28abb8b78332d00d8cf9c285cd662f4864935654cb24d9d1b8191474951e54d4",
+      "remoteSha256": "28abb8b78332d00d8cf9c285cd662f4864935654cb24d9d1b8191474951e54d4",
+      "archivedSha256": "27ec4e95ee34cc53b1fd640df647d50818f0193ce1a9c851181ea34c775041d1"
+    },
+    {
+      "file": "20260323084514_add_material_transfer_audit_fields.sql",
+      "source": "remote-history",
+      "archivedFile": "20260323183000_add_material_transfer_audit_fields.sql",
+      "sha256": "53373ada03266e563c00d36b5bd174db31480d5361d428a032f4de86770faf14",
+      "remoteSha256": "53373ada03266e563c00d36b5bd174db31480d5361d428a032f4de86770faf14",
+      "archivedSha256": "ef9a241d4c47c4a94eca5644ad08a8cb607237bdd702c7f5a17f4781830bc638"
+    },
+    {
+      "file": "20260324053654_enable_employee_material_transfer_rls.sql",
+      "source": "remote-history",
+      "archivedFile": "20260324053654_enable_employee_material_transfer_rls.sql",
+      "sha256": "364be5e8f7b78b2a1b9b7bdd49c7a28b436bd10d9628d0eefe426f32658e1944",
+      "remoteSha256": "364be5e8f7b78b2a1b9b7bdd49c7a28b436bd10d9628d0eefe426f32658e1944",
+      "archivedSha256": "524165a8cade5d8664c7b678e99abe953f2d4d594f62975ae30a5eb59a4843d5"
+    },
+    {
+      "file": "20260324055509_add_theoretical_seconds_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260324090000_add_theoretical_seconds_to_process_standards.sql",
+      "sha256": "7b410d4ade4f5bdeff80ef4398afcace2df370c56ad3677e4332bd16e7193e31",
+      "remoteSha256": "7b410d4ade4f5bdeff80ef4398afcace2df370c56ad3677e4332bd16e7193e31",
+      "archivedSha256": "22623d63423b0b5ccf32d17a8180624f279094b1966a34a9f2ccdce28dfac96f"
+    },
+    {
+      "file": "20260324070256_repair_employees_role_check_for_team_leader.sql",
+      "source": "remote-history",
+      "archivedFile": "20260324114000_repair_employees_role_check_for_team_leader.sql",
+      "sha256": "6d8f9f4e42014fe26393a78e318dc264e2c010fb14d1025a457a69d14134d5fa",
+      "remoteSha256": "6d8f9f4e42014fe26393a78e318dc264e2c010fb14d1025a457a69d14134d5fa",
+      "archivedSha256": "6d4e4cd4256599cce2fd7cd6d5c35d8f41e1d3736e3873fedd9129fa29a7d434"
+    },
+    {
+      "file": "20260324070827_enable_team_leader_material_transfer_access.sql",
+      "source": "remote-history",
+      "archivedFile": "20260324100500_enable_team_leader_material_transfer_access.sql",
+      "sha256": "0ef5d93710b4c91fa6560e0868ffd3317c58e76a335cc8162b76e3213f764b15",
+      "remoteSha256": "0ef5d93710b4c91fa6560e0868ffd3317c58e76a335cc8162b76e3213f764b15",
+      "archivedSha256": "198ac3c2ce8258b8fbd9893eead9b6b841f989fef8bfef05eb4f087aa4411440"
+    },
+    {
+      "file": "20260324093000_add_team_leader_role.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260324093000_add_team_leader_role.sql",
+      "sha256": "6d4e4cd4256599cce2fd7cd6d5c35d8f41e1d3736e3873fedd9129fa29a7d434",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "6d4e4cd4256599cce2fd7cd6d5c35d8f41e1d3736e3873fedd9129fa29a7d434"
+    },
+    {
+      "file": "20260325085356_add_cost_accounting_fields_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260325120000_add_cost_accounting_fields_to_process_standards.sql",
+      "sha256": "17571fbbac7f7db9325a501b0681db562067c564757045d66c0f588f0671745a",
+      "remoteSha256": "17571fbbac7f7db9325a501b0681db562067c564757045d66c0f588f0671745a",
+      "archivedSha256": "cfda16b89b842cdb8b0f36771110e4464b80dbeed23472086c2d87d80ceb1b91"
+    },
+    {
+      "file": "20260326052657_add_material_transfer_shift_leader_inspector_uploader_fields.sql",
+      "source": "remote-history",
+      "archivedFile": "20260326113000_add_material_transfer_shift_leader_inspector_uploader_fields.sql",
+      "sha256": "7811641a16b4fd405e4033df34de3ee6902eb12018c22edd99c28f08a5cf57c4",
+      "remoteSha256": "7811641a16b4fd405e4033df34de3ee6902eb12018c22edd99c28f08a5cf57c4",
+      "archivedSha256": "79bbd15ce72922c288abddc45edb21ce13de24fc09f13c41f9a1f6a4c784bd8c"
+    },
+    {
+      "file": "20260326060507_add_incoming_qualified_quantity_to_production_order_items.sql",
+      "source": "remote-history",
+      "archivedFile": "20260326100000_add_incoming_qualified_quantity_to_production_order_items.sql",
+      "sha256": "3fbfcdaabbb18ae0ef3a8079afd13bc5cb47c8d082ebdc835c040dec16501a58",
+      "remoteSha256": "3fbfcdaabbb18ae0ef3a8079afd13bc5cb47c8d082ebdc835c040dec16501a58",
+      "archivedSha256": "215fb805211969d1cc5123c8169f83ff948f1bf058a25b3a29aa8e915428c346"
+    },
+    {
+      "file": "20260326061629_add_incoming_qualified_quantity_check.sql",
+      "source": "remote-history",
+      "archivedFile": "20260326103000_add_incoming_qualified_quantity_check.sql",
+      "sha256": "81721d91b770e770b356b48e9f4f3ecf11c011294365de2a97346e0c4fbcf06f",
+      "remoteSha256": "81721d91b770e770b356b48e9f4f3ecf11c011294365de2a97346e0c4fbcf06f",
+      "archivedSha256": "c1e269c6220c991914605899e30c7d79baaaf462250f20ec4c2d939ca2de387f"
+    },
+    {
+      "file": "20260326064737_create_admin_management_passwords.sql",
+      "source": "remote-history",
+      "archivedFile": "20260326000100_create_admin_management_passwords.sql",
+      "sha256": "ebabd947fc959a4ccfce5062dc09a8dc63c9bf6d9f05cf6a5a184b4581b1080f",
+      "remoteSha256": "ebabd947fc959a4ccfce5062dc09a8dc63c9bf6d9f05cf6a5a184b4581b1080f",
+      "archivedSha256": "cc35f8e99db7688ddaee5b24967496f7a99f19a3080954c05537928c964ecca4"
+    },
+    {
+      "file": "20260326082932_add_customer_to_sales_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260326110000_add_customer_to_sales_orders.sql",
+      "sha256": "c9e957df4c21551ac8e577b8fd0e043b80664c776a492f0551e2b3090649e22e",
+      "remoteSha256": "c9e957df4c21551ac8e577b8fd0e043b80664c776a492f0551e2b3090649e22e",
+      "archivedSha256": "195e857fe0d11e10feaf719b2ed896f7946965d23943f05a74f3ad9cad85afda"
+    },
+    {
+      "file": "20260327013455_add_material_transfer_multi_operator_fields.sql",
+      "source": "remote-history",
+      "archivedFile": "20260327103000_add_material_transfer_multi_operator_fields.sql",
+      "sha256": "10ca3598f1214840b637d87f88ab471982612a4846c8297c4e73e9d21ad5d5cd",
+      "remoteSha256": "10ca3598f1214840b637d87f88ab471982612a4846c8297c4e73e9d21ad5d5cd",
+      "archivedSha256": "0dee4b1f852d82ef52112b1793e9d9a2c0083b3300441e1d3a207444d6d4f7a1"
+    },
+    {
+      "file": "20260327021248_add_customer_to_material_transfers.sql",
+      "source": "remote-history",
+      "archivedFile": "20260327150000_add_customer_to_material_transfers.sql",
+      "sha256": "c46ac101f10aafa058bccb18342fda148e7cb004b3838e43a5968c7d6d5c728b",
+      "remoteSha256": "c46ac101f10aafa058bccb18342fda148e7cb004b3838e43a5968c7d6d5c728b",
+      "archivedSha256": "bd804a66d1077923208105bb5f9c6a3db806322b4cbdcdfb66b2fad2155d2160"
+    },
+    {
+      "file": "20260327030355_add_shift_to_production_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260327170000_add_shift_to_production_orders.sql",
+      "sha256": "72798d86c3f5756f637a8a0e2c63a80295028117db771444ef04436f19e7aa98",
+      "remoteSha256": "72798d86c3f5756f637a8a0e2c63a80295028117db771444ef04436f19e7aa98",
+      "archivedSha256": "a9da4c1fa51d544c5b57975aea2c1c7be22da800eb3a617fa1ab03d073b8ee5e"
+    },
+    {
+      "file": "20260327055157_create_job_base_settings.sql",
+      "source": "remote-history",
+      "archivedFile": "20260327213000_create_job_base_settings.sql",
+      "sha256": "20c08ed7f7e3dd38a56ea0d33e4da4c00d903a03d9a8a26930067748d89a8c27",
+      "remoteSha256": "20c08ed7f7e3dd38a56ea0d33e4da4c00d903a03d9a8a26930067748d89a8c27",
+      "archivedSha256": "ba4fd39b78df0bdc6b187e2f60832854811e9c532af80f95e4a6c1689a7bf559"
+    },
+    {
+      "file": "20260327070940_add_job_name_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260327120000_add_job_name_to_process_standards.sql",
+      "sha256": "e861fcafd635a8339ca175249183fe02e9ea67528e43fa6c9ca8e03b7a41276c",
+      "remoteSha256": "e861fcafd635a8339ca175249183fe02e9ea67528e43fa6c9ca8e03b7a41276c",
+      "archivedSha256": "c464aa1c6239431aba45a07dcdabdefba765f3d223ba60132521f8d08b1508c7"
+    },
+    {
+      "file": "20260327082227_create_notifications.sql",
+      "source": "remote-history",
+      "archivedFile": "20260327230000_create_notifications.sql",
+      "sha256": "2a4f2c502b48eccd74032737a13806f839b96d3701efa7dd429fcd70019be015",
+      "remoteSha256": "2a4f2c502b48eccd74032737a13806f839b96d3701efa7dd429fcd70019be015",
+      "archivedSha256": "1d5708e5a4803dc71198e25b0ead0b45cc6fe5a0632c40f7a70edaf91ec0af35"
+    },
+    {
+      "file": "20260328042224_add_job_base_settings_read_rpcs.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328103000_add_job_base_settings_read_rpcs.sql",
+      "sha256": "b1c77735d2cb79b176b168e363e55cdbf1e85f6eb3fbfa6a0ca9a2dcbf46f691",
+      "remoteSha256": "b1c77735d2cb79b176b168e363e55cdbf1e85f6eb3fbfa6a0ca9a2dcbf46f691",
+      "archivedSha256": "e9ea47360736b21ce80894f9e01ac781f42fd0d0c9654fc90dfd51d95611ba31"
+    },
+    {
+      "file": "20260328054141_add_data_category_to_production_order_items.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328110000_add_data_category_to_production_order_items.sql",
+      "sha256": "51818e897089caece7667ad6e3f2639ca5828ee25da31a205b424a403e355440",
+      "remoteSha256": "51818e897089caece7667ad6e3f2639ca5828ee25da31a205b424a403e355440",
+      "archivedSha256": "50097408d4a8f4c97f0a6adcfc61832a7247f351d78e6b10892f62dfa17f6a4a"
+    },
+    {
+      "file": "20260328062004_sync_process_standard_labor_rate_from_job_base_settings.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328123000_sync_process_standard_labor_rate_from_job_base_settings.sql",
+      "sha256": "6f6ef9afd79ad9ab6404a2a7b5c491dde1d27fb275b09b8be41a76bc6efa9136",
+      "remoteSha256": "6f6ef9afd79ad9ab6404a2a7b5c491dde1d27fb275b09b8be41a76bc6efa9136",
+      "archivedSha256": "ca3b18d42da49b7715e1fba0c2b999525f66affb092d207b6a89260097ca15b0"
+    },
+    {
+      "file": "20260328064002_create_machine_equipment_maintenances.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328153000_create_machine_equipment_maintenances.sql",
+      "sha256": "4d1609e27bcb29ab783d5cd367216f5b909ba3548f5113194ec20d32b451fe43",
+      "remoteSha256": "4d1609e27bcb29ab783d5cd367216f5b909ba3548f5113194ec20d32b451fe43",
+      "archivedSha256": "3850f885dfc59e98d26b43fb6a918be1ff38264307f2bc5955fc10f15bd9a1b0"
+    },
+    {
+      "file": "20260328065100_seed_machine_equipment_maintenances.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328165000_seed_machine_equipment_maintenances.sql",
+      "sha256": "007106156fbb3b85ae5d16d811379b75665c84a4f1c72ed441e6d292a8445f83",
+      "remoteSha256": "007106156fbb3b85ae5d16d811379b75665c84a4f1c72ed441e6d292a8445f83",
+      "archivedSha256": "40624999283f0171ef8e4f2e49e89c6ec0c9a2a4d200c45d4e19250ec8a02b2b"
+    },
+    {
+      "file": "20260328071503_add_equipment_no_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328190000_add_equipment_no_to_process_standards.sql",
+      "sha256": "3ed9aadc3e8b58dbea308eb2c263da97c4183e65c084d810e3b8496fbd45fd49",
+      "remoteSha256": "3ed9aadc3e8b58dbea308eb2c263da97c4183e65c084d810e3b8496fbd45fd49",
+      "archivedSha256": "a9cecbfdebbff14e9152c19ac00776253db23aae51df109e5133732af9f6b791"
+    },
+    {
+      "file": "20260328072542_force_sync_equipment_rate_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328203000_force_sync_equipment_rate_to_process_standards.sql",
+      "sha256": "b856b9211f1a703ef4e3d68430359f8c59f80c9905374d8f83509306c14f7321",
+      "remoteSha256": "b856b9211f1a703ef4e3d68430359f8c59f80c9905374d8f83509306c14f7321",
+      "archivedSha256": "10c3f022d8a6cd7b4c84c93134d7ddf1ae92b86b6df00bf47fed981fe30e3c56"
+    },
+    {
+      "file": "20260328075523_add_customer_to_cost_accounting_and_machine_equipment.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328200000_add_customer_to_cost_accounting_and_machine_equipment.sql",
+      "sha256": "a1ea5e1e59924b7ed0b001911ef4daf3f2be5ed6067ac95b09f2edde59bb3361",
+      "remoteSha256": "a1ea5e1e59924b7ed0b001911ef4daf3f2be5ed6067ac95b09f2edde59bb3361",
+      "archivedSha256": "5fafb576473c72fe7cf3b90ccbeba336ebd08e31de35b1c842fa98e61a85609a"
+    },
+    {
+      "file": "20260328080456_remove_customer_link_from_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260328203000_remove_customer_link_from_process_standards.sql",
+      "sha256": "da13067075f49e47b992d3233aa6342e3cc880f4ece3d433e3370dadddfb58b5",
+      "remoteSha256": "da13067075f49e47b992d3233aa6342e3cc880f4ece3d433e3370dadddfb58b5",
+      "archivedSha256": "9e9595cea8e776b907bbc93ea637e3d206bcb2392673dfe492a20f721d7c29b3"
+    },
+    {
+      "file": "20260329020932_add_employee_hourly_wage_and_performance.sql",
+      "source": "remote-history",
+      "archivedFile": "20260329120000_add_employee_hourly_wage_and_performance.sql",
+      "sha256": "90c9ba3b0190677fe1a69125f81a025c7d56c7fb1d74548fbee1f1a1f9966240",
+      "remoteSha256": "90c9ba3b0190677fe1a69125f81a025c7d56c7fb1d74548fbee1f1a1f9966240",
+      "archivedSha256": "b75e40326a39c659c08ea7a3fea3e0931b50dd37fffa88c21db42170228eb46d"
+    },
+    {
+      "file": "20260329023014_add_uploaded_by_name_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260329183000_add_uploaded_by_name_to_process_standards.sql",
+      "sha256": "22995b79513217a2f5261572191c79dc3388bd051c8be83bbf54269a8f9074ce",
+      "remoteSha256": "22995b79513217a2f5261572191c79dc3388bd051c8be83bbf54269a8f9074ce",
+      "archivedSha256": "3d8723f0c30bdedff3342c306d881360f2d06852fcb5aeee9308b1d502a00576"
+    },
+    {
+      "file": "20260329075556_enable_team_leader_reference_data_for_standard_times.sql",
+      "source": "remote-history",
+      "archivedFile": "20260329190000_enable_team_leader_reference_data_for_standard_times.sql",
+      "sha256": "85999de1dc56a1c73fa1ec0975fb2ba5de5ea7bcfa5f95c6b998c652a5f45a42",
+      "remoteSha256": "85999de1dc56a1c73fa1ec0975fb2ba5de5ea7bcfa5f95c6b998c652a5f45a42",
+      "archivedSha256": "1858c801878c31d9b814714349cf11f10fae9b1d320dc21fbf4df59311c1dde6"
+    },
+    {
+      "file": "20260402015538_sync_employee_job_base_fields.sql",
+      "source": "remote-history",
+      "archivedFile": "20260402100000_sync_employee_job_base_fields.sql",
+      "sha256": "80a43aeb9ad46ad42d09a999aa22e81942053be44d000ec80e4e6eedf468fc1d",
+      "remoteSha256": "80a43aeb9ad46ad42d09a999aa22e81942053be44d000ec80e4e6eedf468fc1d",
+      "archivedSha256": "157f503e37fafc916bfa3d9e3dddc8f49868efd37c97e550abaf2faa1c36b1b0"
+    },
+    {
+      "file": "20260402062558_create_precision_cutting_transfers.sql",
+      "source": "remote-history",
+      "archivedFile": "20260402103000_create_precision_cutting_transfers.sql",
+      "sha256": "a02804dcd737d3f44900d14e9eb79133b7661b710418871730faaec164844dee",
+      "remoteSha256": "a02804dcd737d3f44900d14e9eb79133b7661b710418871730faaec164844dee",
+      "archivedSha256": "a9a3d67ccf936bd32ff5c21228bfb14d7b04ffa81ddafdd25bd1f01dc8d868e2"
+    },
+    {
+      "file": "20260402064853_add_precision_cutting_transfer_defect_fields.sql",
+      "source": "remote-history",
+      "archivedFile": "20260402113000_add_precision_cutting_transfer_defect_fields.sql",
+      "sha256": "e1b02aecf5f9e77fe94cd178ae2555247d7dbd3ae1680aba994bdc857bf24651",
+      "remoteSha256": "e1b02aecf5f9e77fe94cd178ae2555247d7dbd3ae1680aba994bdc857bf24651",
+      "archivedSha256": "184822708c70ca96df30fa03dc741bdbfdbc728436a7a82171015c153734d631"
+    },
+    {
+      "file": "20260402065500_drop_shift_leader_from_precision_cutting_transfers.sql",
+      "source": "remote-history",
+      "archivedFile": "20260402120000_drop_shift_leader_from_precision_cutting_transfers.sql",
+      "sha256": "85c12303a25d56feab8efdfbe52adff8834fbb74b20ced9bf2187d9d04f237b9",
+      "remoteSha256": "85c12303a25d56feab8efdfbe52adff8834fbb74b20ced9bf2187d9d04f237b9",
+      "archivedSha256": "8a617683ada7c162ecbf816364fbc76e5172fc41cbd9b4e84a37ca0d0c8f1f80"
+    },
+    {
+      "file": "20260402071403_add_precision_cutting_admin_role.sql",
+      "source": "remote-history",
+      "archivedFile": "20260402143000_add_precision_cutting_admin_role.sql",
+      "sha256": "efa164b76641bb6a91478f40e1a6d80b52ba8ed71880c81279b15f53c4cad417",
+      "remoteSha256": "efa164b76641bb6a91478f40e1a6d80b52ba8ed71880c81279b15f53c4cad417",
+      "archivedSha256": "7fa5341817a8ce7483215cfda86b3c4d82e180ea6cd4bddf99d4e0e7cb1059fd"
+    },
+    {
+      "file": "20260403054233_add_label_template_fields_to_syney_safe_part_settings.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "a792b39902c2cbf0db56004be872f2d130d9d4157670bc4abe7c695451477229",
+      "remoteSha256": "a792b39902c2cbf0db56004be872f2d130d9d4157670bc4abe7c695451477229",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260403061121_add_length_and_part_no_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260403000000_add_length_and_part_no_to_process_standards.sql",
+      "sha256": "d6fcc94a7b69334e9cad0634ffe17c7d2487a165c295d85b4b1c54a468dec0d1",
+      "remoteSha256": "d6fcc94a7b69334e9cad0634ffe17c7d2487a165c295d85b4b1c54a468dec0d1",
+      "archivedSha256": "d77c781f83cf33938f1168b2c390948dbcff5017aa39c9af22de5fd5e02936a5"
+    },
+    {
+      "file": "20260403072449_extend_safe_part_settings_and_add_border_material.sql",
+      "source": "remote-history",
+      "archivedFile": "20260403100000_extend_safe_part_settings_and_add_border_material.sql",
+      "sha256": "3d361a774615f86c3b67190ad03345e377f68d4f060ee4d86e377944e8437897",
+      "remoteSha256": "3d361a774615f86c3b67190ad03345e377f68d4f060ee4d86e377944e8437897",
+      "archivedSha256": "3959bc98a687765d5ba7b92c4fa4df95a0af4f0ea8b5942cd2ba89f0bdc31fc9"
+    },
+    {
+      "file": "20260404050048_create_attendance_details.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "c579383280de6894bddc962f6dd4c341b6a9e1d4f1e3e4659dfc7347eba997b8",
+      "remoteSha256": "c579383280de6894bddc962f6dd4c341b6a9e1d4f1e3e4659dfc7347eba997b8",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260404050100_seed_attendance_details.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "f6a93edff85667c19cbf4f313537c754acaa974b6bcc8cc81efd0718df26285f",
+      "remoteSha256": "f6a93edff85667c19cbf4f313537c754acaa974b6bcc8cc81efd0718df26285f",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260404062221_add_attendance_shift_view_and_stats.sql",
+      "source": "remote-history",
+      "archivedFile": "20260404100000_add_attendance_shift_view_and_stats.sql",
+      "sha256": "1f1c6946e12b0d5191e559a5098cd56102fe2f5b75f8e42277bcfd16006adbf3",
+      "remoteSha256": "1f1c6946e12b0d5191e559a5098cd56102fe2f5b75f8e42277bcfd16006adbf3",
+      "archivedSha256": "41a225c2f006e5da090cde689b42a34d86590e38732004e7f946debe1dc4ba91"
+    },
+    {
+      "file": "20260404064807_add_attendance_late_early_stats_rpc.sql",
+      "source": "remote-history",
+      "archivedFile": "20260404110000_add_attendance_late_early_stats_rpc.sql",
+      "sha256": "e497d1abb0376c7fa62af938b83afda5e403be2fd508008f490d18504f6bf871",
+      "remoteSha256": "e497d1abb0376c7fa62af938b83afda5e403be2fd508008f490d18504f6bf871",
+      "archivedSha256": "9982a84916bb8f643b5701856e1d4f464d6eac9e57eafb383a1a28c414876c5f"
+    },
+    {
+      "file": "20260404070502_add_attendance_monthly_export_rpc.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "364bd199852afebc962ef7410493463a6ca04530768e3b3cb1201e380125145e",
+      "remoteSha256": "364bd199852afebc962ef7410493463a6ca04530768e3b3cb1201e380125145e",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260404131007_enable_notifications_realtime.sql",
+      "source": "remote-history",
+      "archivedFile": "20260404120000_enable_notifications_realtime.sql",
+      "sha256": "5743f44e773a3787eee6bb1c82df9eca8f52032d0620ee39c2c80c3a4e7bb62d",
+      "remoteSha256": "5743f44e773a3787eee6bb1c82df9eca8f52032d0620ee39c2c80c3a4e7bb62d",
+      "archivedSha256": "4a9ccd187d5354fea6c0cf3302209a8a5a1daf2e53b1e4dc5dca98e9654ccb6d"
+    },
+    {
+      "file": "20260404133231_fix_notification_triggers_security_definer.sql",
+      "source": "remote-history",
+      "archivedFile": "20260404130000_fix_notification_triggers_security_definer.sql",
+      "sha256": "296c73a5e5345649b833841b8d4db134d5fc186645b7e4c1246ebe2a70aed361",
+      "remoteSha256": "296c73a5e5345649b833841b8d4db134d5fc186645b7e4c1246ebe2a70aed361",
+      "archivedSha256": "f30c98e17e09fe9507971f5ba692288fa5c9933353a86e8865fb62fb8c58bb0d"
+    },
+    {
+      "file": "20260404134218_fix_notification_trigger_skip_condition.sql",
+      "source": "remote-history",
+      "archivedFile": "20260404140000_fix_notification_trigger_skip_condition.sql",
+      "sha256": "ea1252802e8f0afdc65a08093dd86477684142ed841686f4d91d0bfb821e00fc",
+      "remoteSha256": "ea1252802e8f0afdc65a08093dd86477684142ed841686f4d91d0bfb821e00fc",
+      "archivedSha256": "f55302822a778442d37e325fb4485eeb1b25999405bd045871ab30ef7d924aa7"
+    },
+    {
+      "file": "20260406013329_create_precision_finishing_cuttings.sql",
+      "source": "remote-history",
+      "archivedFile": "20260406100000_create_precision_finishing_cuttings.sql",
+      "sha256": "b6698d6af23dd2e1804bfc64376f687a431fe27bb4b5c936b348a2a3a394669d",
+      "remoteSha256": "b6698d6af23dd2e1804bfc64376f687a431fe27bb4b5c936b348a2a3a394669d",
+      "archivedSha256": "bce7e95f74e5af78b728cf72baa86b0c8a88cfa1aee72915dcdccd40c331d987"
+    },
+    {
+      "file": "20260406030015_allow_zero_work_hours_for_production_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260406113000_allow_zero_work_hours_for_production_orders.sql",
+      "sha256": "cb6a281b3531e413b5d049d64738a55de9a3a91c6b9dcc80beafc30019e3cccc",
+      "remoteSha256": "cb6a281b3531e413b5d049d64738a55de9a3a91c6b9dcc80beafc30019e3cccc",
+      "archivedSha256": "e93aad973ed0daf8acb61aebc85199e060b3d9de01aee5b03c1403898e7ba619"
+    },
+    {
+      "file": "20260406030031_fix_production_orders_work_hours_check_nonnegative.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "0aa1ee8bf87f52939f41a1c7d7b0087e65d10970b688a08c28ae0048775c8b7a",
+      "remoteSha256": "0aa1ee8bf87f52939f41a1c7d7b0087e65d10970b688a08c28ae0048775c8b7a",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260406080553_change_process_standards_unique_to_include_part_no.sql",
+      "source": "remote-history",
+      "archivedFile": "20260406120000_change_process_standards_unique_to_include_part_no.sql",
+      "sha256": "16873e6fa2a921afd3f5ecdac2cb55cb88db1a7fb66282dc4f2f75a2076084dc",
+      "remoteSha256": "16873e6fa2a921afd3f5ecdac2cb55cb88db1a7fb66282dc4f2f75a2076084dc",
+      "archivedSha256": "1e17690ca2d3cb3db44c6de0406d80b82430ba60ad3fd548ae25e3972a8928be"
+    },
+    {
+      "file": "20260407014552_add_record_type_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260407100000_add_record_type_to_process_standards.sql",
+      "sha256": "47110c1442bc940c7b6ffebd566335b099facb6580604b28f31d38d411ed6eeb",
+      "remoteSha256": "47110c1442bc940c7b6ffebd566335b099facb6580604b28f31d38d411ed6eeb",
+      "archivedSha256": "6f1e0ac07f036fd6e4bc1d93c2c3c1591a936e900902bc56ee006b94c13a1ff0"
+    },
+    {
+      "file": "20260407065111_create_tooling_data.sql",
+      "source": "remote-history",
+      "archivedFile": "20260407110000_create_tooling_data.sql",
+      "sha256": "83cb03650576e66c90327e388c1e22e2698ce05dc8f31869e6a9f351b834457d",
+      "remoteSha256": "83cb03650576e66c90327e388c1e22e2698ce05dc8f31869e6a9f351b834457d",
+      "archivedSha256": "4bf1d70ff903de2d52cd6c074b9b5079aa5d16120fd559a262784bdbad117c34"
+    },
+    {
+      "file": "20260407072749_import_machine_equipment_maintenances_from_excel.sql",
+      "source": "remote-history",
+      "archivedFile": "20260407153000_import_machine_equipment_maintenances_from_excel.sql",
+      "sha256": "3e9c56300895bd4033e9f7ece18071e18c021018e25ae3427936f22b97d4405a",
+      "remoteSha256": "3e9c56300895bd4033e9f7ece18071e18c021018e25ae3427936f22b97d4405a",
+      "archivedSha256": "c5ee5f996c2b5fedb70ea46bcbf6e125b6aeb2fabbf84c2f40be246c2b72a120"
+    },
+    {
+      "file": "20260408073430_add_machine_runtime_fields.sql",
+      "source": "remote-history",
+      "archivedFile": "20260408_add_machine_runtime_fields.sql",
+      "sha256": "d8ebec422c78e3dcdeab14f371ca163e40fb1340e5bb408bec76adbf85ca8ecd",
+      "remoteSha256": "d8ebec422c78e3dcdeab14f371ca163e40fb1340e5bb408bec76adbf85ca8ecd",
+      "archivedSha256": "3efc3744ae18a88eaa0ef1aeb4c53bc28c5d65e7048ffb206de42d7f3a61a907"
+    },
+    {
+      "file": "20260408073536_create_machine_runtime_view.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "3899be76c5f52d1e616323de43197c6c15b01bfee986fad626abd74be853efe1",
+      "remoteSha256": "3899be76c5f52d1e616323de43197c6c15b01bfee986fad626abd74be853efe1",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260409004254_enable_machine_equipment_read_for_authenticated.sql",
+      "source": "remote-history",
+      "archivedFile": "20260409103000_enable_machine_equipment_read_for_authenticated.sql",
+      "sha256": "4dcb97ef29bb124856c0752947df7906362c55271561fdb9a15bafad5e755bca",
+      "remoteSha256": "4dcb97ef29bb124856c0752947df7906362c55271561fdb9a15bafad5e755bca",
+      "archivedSha256": "f0cdeaa89959b7ef6f1754b2d26738fe77ee89c1306348db69a76e3230071922"
+    },
+    {
+      "file": "20260409082039_add_status_to_sales_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260409110000_add_status_to_sales_orders.sql",
+      "sha256": "0a3714b04acf14f6a6e3cd537413a1c17fd2c1504522b3f9418346bdefec3d72",
+      "remoteSha256": "0a3714b04acf14f6a6e3cd537413a1c17fd2c1504522b3f9418346bdefec3d72",
+      "archivedSha256": "3ff448eabdcb83ffbb0d557f047fc96e163241b2784fd67ca157c126de30edcc"
+    },
+    {
+      "file": "20260411022824_add_outsource_and_setup_defect_fields_to_production_order_items.sql",
+      "source": "remote-history",
+      "archivedFile": "20260411103000_add_outsource_and_setup_defect_fields_to_production_order_items.sql",
+      "sha256": "56277c097a383a999ced08855ea544895aeb1f55c9bdb75536ce3d4b59712413",
+      "remoteSha256": "56277c097a383a999ced08855ea544895aeb1f55c9bdb75536ce3d4b59712413",
+      "archivedSha256": "94c604d5e560bdf7c00d239f87dd6c0e0fc9ae3f653eb4ebaec39665cc41d99b"
+    },
+    {
+      "file": "20260411060346_add_outsource_responsibility_fields_to_precision_forms.sql",
+      "source": "remote-history",
+      "archivedFile": "20260411113000_add_outsource_responsibility_fields_to_precision_forms.sql",
+      "sha256": "393b3496b4eaf8850a66aa7872317b0e3932c32bb76e359847ebfe6b481a7afd",
+      "remoteSha256": "393b3496b4eaf8850a66aa7872317b0e3932c32bb76e359847ebfe6b481a7afd",
+      "archivedSha256": "2f984432152ab8099de488ff5ef03b0b0e42b97f2e84cc88712ed6fe1ea4b98e"
+    },
+    {
+      "file": "20260412091443_enforce_one_production_order_per_employee_per_day.sql",
+      "source": "remote-history",
+      "archivedFile": "20260412143000_enforce_one_production_order_per_employee_per_day.sql",
+      "sha256": "3c7a0444e9d9715b454e7802e52360780b612866c91f9b2aa2e5752349dba9a1",
+      "remoteSha256": "3c7a0444e9d9715b454e7802e52360780b612866c91f9b2aa2e5752349dba9a1",
+      "archivedSha256": "276940a6a0c281b11b7e455104ab8326275d70cb375587e5c1d117711835f006"
+    },
+    {
+      "file": "20260413063038_create_production_order_export_jobs.sql",
+      "source": "remote-history",
+      "archivedFile": "20260413170000_create_production_order_export_jobs.sql",
+      "sha256": "55cd2a9e6062002138cee0b2ad12a2edca26a02917cfa22c7c693cd7c1d0251e",
+      "remoteSha256": "55cd2a9e6062002138cee0b2ad12a2edca26a02917cfa22c7c693cd7c1d0251e",
+      "archivedSha256": "0719a9b1e9fa635e448db6210bde7b836387e3ef6888c60c41aa9d04c5a96cd6"
+    },
+    {
+      "file": "20260413070132_create_production_daily_report_export_jobs.sql",
+      "source": "remote-history",
+      "archivedFile": "20260413193000_create_production_daily_report_export_jobs.sql",
+      "sha256": "189d8443482ee2ee0ec5d4bb4e283cdf6eb46eeb90b8d64be33a7b65c197e010",
+      "remoteSha256": "189d8443482ee2ee0ec5d4bb4e283cdf6eb46eeb90b8d64be33a7b65c197e010",
+      "archivedSha256": "5c7e9fc4b57598c4e575ba19a7eee57696ed7812d866aa15b2c10a56300a551b"
+    },
+    {
+      "file": "20260414065615_create_youmai_product_data.sql",
+      "source": "remote-history",
+      "archivedFile": "20260414143000_create_youmai_product_data.sql",
+      "sha256": "239e883f793e280df027ce7d20e8ca3a4720baf411234d48caf5da5e500e989c",
+      "remoteSha256": "239e883f793e280df027ce7d20e8ca3a4720baf411234d48caf5da5e500e989c",
+      "archivedSha256": "c8d8ac85b8d78e045efb9631fb014c6f462ec6d61c2522563d25543ec6125512"
+    },
+    {
+      "file": "20260414190000_create_youmai_finished_goods_inventory.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260414190000_create_youmai_finished_goods_inventory.sql",
+      "sha256": "fc6ba756b7f2b225e542d6c5aea460e04cc5091b8ffaa1a366da0cc38bda4e0e",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "fc6ba756b7f2b225e542d6c5aea460e04cc5091b8ffaa1a366da0cc38bda4e0e"
+    },
+    {
+      "file": "20260414203000_create_youmai_finished_goods_stock_in.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260414203000_create_youmai_finished_goods_stock_in.sql",
+      "sha256": "c80a265622a8585bb3930db9d395dfb0e7720c010589dab3c4b35e4f75733dda",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "c80a265622a8585bb3930db9d395dfb0e7720c010589dab3c4b35e4f75733dda"
+    },
+    {
+      "file": "20260414213000_enforce_youmai_finished_goods_stock_in_audit_lock.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260414213000_enforce_youmai_finished_goods_stock_in_audit_lock.sql",
+      "sha256": "d92d68bcc5eb100ddfa802195829d73da5334d1568b8cda897ade29376a9a945",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "d92d68bcc5eb100ddfa802195829d73da5334d1568b8cda897ade29376a9a945"
+    },
+    {
+      "file": "20260415100000_create_youmai_finished_goods_stock_out.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260415100000_create_youmai_finished_goods_stock_out.sql",
+      "sha256": "76a891bdb0683bc0204653f3387f6bf844500870de7b4387c148cc817f417617",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "76a891bdb0683bc0204653f3387f6bf844500870de7b4387c148cc817f417617"
+    },
+    {
+      "file": "20260415101000_enforce_youmai_finished_goods_stock_out_audit_lock.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260415101000_enforce_youmai_finished_goods_stock_out_audit_lock.sql",
+      "sha256": "eb0ec50a6645b93553df0a0f793f3b3dbc647d42797c7eddbe75aed7e1ef86f1",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "eb0ec50a6645b93553df0a0f793f3b3dbc647d42797c7eddbe75aed7e1ef86f1"
+    },
+    {
+      "file": "20260415110000_add_process_flow_and_length_tolerance_to_sales_orders.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260415110000_add_process_flow_and_length_tolerance_to_sales_orders.sql",
+      "sha256": "e64f962ba736acb2c0a060fdca788074917240921f8a75af6df9bbeb3a5a793a",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "e64f962ba736acb2c0a060fdca788074917240921f8a75af6df9bbeb3a5a793a"
+    },
+    {
+      "file": "20260415173000_allow_youmai_finished_goods_status_toggle.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260415173000_allow_youmai_finished_goods_status_toggle.sql",
+      "sha256": "20f4c7a9827e189da36a29d47c2a82a6d7fa21616600ef59496693b3e1f62ea5",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "20f4c7a9827e189da36a29d47c2a82a6d7fa21616600ef59496693b3e1f62ea5"
+    },
+    {
+      "file": "20260416103000_create_labor_protection_data.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260416103000_create_labor_protection_data.sql",
+      "sha256": "c74c5528eb078ae7f3ef072aa97012775742b72d9bb9b4496d24aef9a4d09398",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "c74c5528eb078ae7f3ef072aa97012775742b72d9bb9b4496d24aef9a4d09398"
+    },
+    {
+      "file": "20260416113000_auto_unbind_deleted_auth_users.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260416113000_auto_unbind_deleted_auth_users.sql",
+      "sha256": "14928205c6df8981bc6e6f01cbae09fedf949bc389ad88f2bfbfddbbff349a4c",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "14928205c6df8981bc6e6f01cbae09fedf949bc389ad88f2bfbfddbbff349a4c"
+    },
+    {
+      "file": "20260420011442_add_labor_cost_coefficient_column_only.sql",
+      "source": "remote-history",
+      "archivedFile": "20260420011442_add_labor_cost_coefficient_column_only.sql",
+      "sha256": "d4abc5c2ed644291d1042458ca6592caf586fe8d21ee272eb31d35c09fc3f281",
+      "remoteSha256": "d4abc5c2ed644291d1042458ca6592caf586fe8d21ee272eb31d35c09fc3f281",
+      "archivedSha256": "757fe3b74dcadbebfd06847bb6e149eb3c3b54deee126d0b113ccb901e9265cc"
+    },
+    {
+      "file": "20260420012100_sync_process_standards_cost_fields_with_coefficient_trigger.sql",
+      "source": "remote-history",
+      "archivedFile": "20260420012100_sync_process_standards_cost_fields_with_coefficient_trigger.sql",
+      "sha256": "ee72f1c2e6b5aae822ec8c12f72c885c8eda0e7014cfa24a8b5ba7c802229ae4",
+      "remoteSha256": "ee72f1c2e6b5aae822ec8c12f72c885c8eda0e7014cfa24a8b5ba7c802229ae4",
+      "archivedSha256": "7d07f757800a92c4ab413bf4dc0dc8278c2479834e6579f5468c913e719cdb4b"
+    },
+    {
+      "file": "20260420045654_enable_public_labor_protection_requisition_access.sql",
+      "source": "remote-history",
+      "archivedFile": "20260420123000_enable_public_labor_protection_requisition_access.sql",
+      "sha256": "96576b583f5a0da17702db060ace02840b3469ca17814e106c2f20d76640cda7",
+      "remoteSha256": "96576b583f5a0da17702db060ace02840b3469ca17814e106c2f20d76640cda7",
+      "archivedSha256": "dedaeac03ec9bfbc1df9b796d824b057e9b93dea606f9497b8d8aa85cc07a08d"
+    },
+    {
+      "file": "20260420085434_prevent_blank_sales_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "a1618dd9b757e7e282dbee7e6fa4c34516952d257d606a003709df710f76a7b4",
+      "remoteSha256": "a1618dd9b757e7e282dbee7e6fa4c34516952d257d606a003709df710f76a7b4",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260420110000_create_labor_protection_requisitions.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260420110000_create_labor_protection_requisitions.sql",
+      "sha256": "235f2551abb175efc8bd43b8a8a4abf086551e6a253a62d24ba8aba777963986",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "235f2551abb175efc8bd43b8a8a4abf086551e6a253a62d24ba8aba777963986"
+    },
+    {
+      "file": "20260421021724_add_row_remark_to_sales_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260421100000_add_row_remark_to_sales_orders.sql",
+      "sha256": "85928f07cbcf771519ccb8a6c0aee13f5ea03ec6ac02ec7d2cc1e3dfaa3031e4",
+      "remoteSha256": "85928f07cbcf771519ccb8a6c0aee13f5ea03ec6ac02ec7d2cc1e3dfaa3031e4",
+      "archivedSha256": "6f47605fc0fdc5ec759a539b04836bc95adcc58fda1332c658781d2ff878b1ed"
+    },
+    {
+      "file": "20260421081046_create_rbac_permission_system.sql",
+      "source": "remote-history",
+      "archivedFile": "20260421110000_create_rbac_permission_system.sql",
+      "sha256": "e17b959d7a52d2f5481646377a8b5c8462c40319f62d932e08d463527f39dc29",
+      "remoteSha256": "e17b959d7a52d2f5481646377a8b5c8462c40319f62d932e08d463527f39dc29",
+      "archivedSha256": "d9027160a075c888f4e91ec2b723b09e0c83cab64a4607bf6d12433bacbfb911"
+    },
+    {
+      "file": "20260421095054_create_roles_table.sql",
+      "source": "remote-history",
+      "archivedFile": "20260421120000_create_roles_table.sql",
+      "sha256": "5527cc5f473f2e38e81bbcaf67bc1bcf62f50fa6b47a9613f6c534e3e6bddc8a",
+      "remoteSha256": "5527cc5f473f2e38e81bbcaf67bc1bcf62f50fa6b47a9613f6c534e3e6bddc8a",
+      "archivedSha256": "10debd9defa58dd76b49b00bd6d313e4911aa678ab910c322bea4f6d4d8b7500"
+    },
+    {
+      "file": "20260421100815_employees_role_fk_to_roles.sql",
+      "source": "remote-history",
+      "archivedFile": "20260421120100_employees_role_fk_to_roles.sql",
+      "sha256": "3b3234210d01ff80669ef9a2e2da6146f99a84e4c97d10524c59dc1d363d53b1",
+      "remoteSha256": "3b3234210d01ff80669ef9a2e2da6146f99a84e4c97d10524c59dc1d363d53b1",
+      "archivedSha256": "6e0ac8ba2b7783633f0130bbe96b9416a2c09f20581e9aa826cc159b011416ff"
+    },
+    {
+      "file": "20260422010923_add_current_user_has_permission_function.sql",
+      "source": "remote-history",
+      "archivedFile": "20260422090000_add_current_user_has_permission_function.sql",
+      "sha256": "08dd54a33795ca6774453a0d33abf2795ad218046add4371d17e0248e179058a",
+      "remoteSha256": "08dd54a33795ca6774453a0d33abf2795ad218046add4371d17e0248e179058a",
+      "archivedSha256": "545d135630bb4e04f7cfc9d719405eae1c266110188190f836ae6d2f78700930"
+    },
+    {
+      "file": "20260422010945_youmai_tables_permission_based_rls.sql",
+      "source": "remote-history",
+      "archivedFile": "20260422090100_youmai_tables_permission_based_rls.sql",
+      "sha256": "c25f80dc80c2f14453116e499c953be7283d2e7afdf8c84a350107cd288eaa5a",
+      "remoteSha256": "c25f80dc80c2f14453116e499c953be7283d2e7afdf8c84a350107cd288eaa5a",
+      "archivedSha256": "60a64ea02b8dbec4dc1575f2959bb316b78a475fec94d4eea5f6c146f70f00ae"
+    },
+    {
+      "file": "20260422013657_page_permission_based_rls_for_business_tables.sql",
+      "source": "remote-history",
+      "archivedFile": "20260422100000_page_permission_based_rls_for_business_tables.sql",
+      "sha256": "771417e9fc52279b71e9ec6f5c5fc7cb0409a5841cb6d43edfb611c780c551e4",
+      "remoteSha256": "771417e9fc52279b71e9ec6f5c5fc7cb0409a5841cb6d43edfb611c780c551e4",
+      "archivedSha256": "2673e1b7a3eaea9dc5625b50e3689bb5879eaa93f118f4c2f68ef8b39249904e"
+    },
+    {
+      "file": "20260422081023_youmai_raw_material_inventory_select_for_stock_ops.sql",
+      "source": "remote-history",
+      "archivedFile": "20260422150000_youmai_raw_material_inventory_select_for_stock_ops.sql",
+      "sha256": "dd9efcf0ed7d84d18ce8761bac9c4124ec9db9af6804b95aa8c7ab1bdbd286ad",
+      "remoteSha256": "dd9efcf0ed7d84d18ce8761bac9c4124ec9db9af6804b95aa8c7ab1bdbd286ad",
+      "archivedSha256": "5bf6189d254f6aed63f3c54aa6d72aa02ad0995266cbe64e59d19e49aa9efcf8"
+    },
+    {
+      "file": "20260422120000_add_admin_feature_permissions.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260422120000_add_admin_feature_permissions.sql",
+      "sha256": "266296fa5acb77341a4312ed9368d74c6f082110bef968967c6c55c067ff9098",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "266296fa5acb77341a4312ed9368d74c6f082110bef968967c6c55c067ff9098"
+    },
+    {
+      "file": "20260422130000_create_youmai_raw_material_tables.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260422130000_create_youmai_raw_material_tables.sql",
+      "sha256": "20ffe96f0ab97339df22fb942306927c79efb946889937c48b7fa4a00bc8de5d",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "20ffe96f0ab97339df22fb942306927c79efb946889937c48b7fa4a00bc8de5d"
+    },
+    {
+      "file": "20260422140000_youmai_raw_material_permissions_and_rls.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260422140000_youmai_raw_material_permissions_and_rls.sql",
+      "sha256": "00138f83cfe66a6bac0849afe70225debeee53eca3507aa4f78f2a31b100d155",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "00138f83cfe66a6bac0849afe70225debeee53eca3507aa4f78f2a31b100d155"
+    },
+    {
+      "file": "20260423061535_create_villa_lift_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "525bd80c2f353db0c9d23ec009fd9a12a1919b725751a7e5f723902b5cf1e12b",
+      "remoteSha256": "525bd80c2f353db0c9d23ec009fd9a12a1919b725751a7e5f723902b5cf1e12b",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260423065757_add_status_to_villa_lift_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "f9ec8e33df04a18d922e428abb28028a5f965a254d1f10dfd47d997ab741bb69",
+      "remoteSha256": "f9ec8e33df04a18d922e428abb28028a5f965a254d1f10dfd47d997ab741bb69",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260423070755_add_unique_project_name_to_villa_lift_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "80fbdfe7001b29dcad8b1013f994509b7b4e20bf207fca1bde329bb9faaed0a5",
+      "remoteSha256": "80fbdfe7001b29dcad8b1013f994509b7b4e20bf207fca1bde329bb9faaed0a5",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260423072955_create_villa_lift_cutting_records.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "1d470ba1bbfdb18f119a3f4a4c68b16e778061bfc7acb39c14441bb33e3ab8b5",
+      "remoteSha256": "1d470ba1bbfdb18f119a3f4a4c68b16e778061bfc7acb39c14441bb33e3ab8b5",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260423075655_add_spec_operator_to_villa_lift_cutting_records.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "5fe99c0a19af6e379e56c370942c961a7a37e3e8cf28b5ee3ded53d7979bbe09",
+      "remoteSha256": "5fe99c0a19af6e379e56c370942c961a7a37e3e8cf28b5ee3ded53d7979bbe09",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260423081015_add_name_to_villa_lift_cutting_records.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "26fec2ecdea5ed9bfe0e07bc1cebfa7d19b5dbe24e977703ce52b3c74dd839a7",
+      "remoteSha256": "26fec2ecdea5ed9bfe0e07bc1cebfa7d19b5dbe24e977703ce52b3c74dd839a7",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260423083450_create_villa_lift_finishing_records.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "daea048b490da724764ad7e89c98d65212c55bd7565aefb84a5bfab490a0103d",
+      "remoteSha256": "daea048b490da724764ad7e89c98d65212c55bd7565aefb84a5bfab490a0103d",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260423090000_add_standard_time_list_fine_grained_permissions.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260423090000_add_standard_time_list_fine_grained_permissions.sql",
+      "sha256": "5671954964799dd07418f52c3f83c3a3e1e4c6ae17e9cfc16b8e3e99c721b841",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "5671954964799dd07418f52c3f83c3a3e1e4c6ae17e9cfc16b8e3e99c721b841"
+    },
+    {
+      "file": "20260424013851_add_date_fields_to_villa_lift_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260424100000_add_date_fields_to_villa_lift_orders.sql",
+      "sha256": "5f6f43e7d515c939511ac6cc2b1fcee242cf074d0d550ea6a0154468863203c0",
+      "remoteSha256": "5f6f43e7d515c939511ac6cc2b1fcee242cf074d0d550ea6a0154468863203c0",
+      "archivedSha256": "e634aad441907a097aab48f29d25542c39ccd3175d2e59c2eda88b1648516613"
+    },
+    {
+      "file": "20260424044614_add_villa_lift_order_plan_dates.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "190520477a9556e0a0f46b5c43b9977329e655db56aad0606e8f6fa3ab509d3e",
+      "remoteSha256": "190520477a9556e0a0f46b5c43b9977329e655db56aad0606e8f6fa3ab509d3e",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260424045754_add_planned_delivery_date_to_villa_lift_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "fabf4c104608fd0cd4c13637c16b3d6bd4c3b5fec4928f75126c50f8e21bd0a0",
+      "remoteSha256": "fabf4c104608fd0cd4c13637c16b3d6bd4c3b5fec4928f75126c50f8e21bd0a0",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260424074231_add_villa_lift_fine_grained_permissions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260424110000_add_villa_lift_fine_grained_permissions.sql",
+      "sha256": "7c689fbcaa1b4a73c7723575df8300e1388aa3b414d40f1ec829379f867f96ce",
+      "remoteSha256": "7c689fbcaa1b4a73c7723575df8300e1388aa3b414d40f1ec829379f867f96ce",
+      "archivedSha256": "b03246053a73feb2c12d3f1d83adab882f1305c5b76273eb0cb470bcfcb407f3"
+    },
+    {
+      "file": "20260424080849_add_villa_lift_mark_date_permissions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260424120000_add_villa_lift_mark_date_permissions.sql",
+      "sha256": "2254ff003035a03238c47c1de53ea2aaa4099b81f5da2b3ba7ca04e87d820d5b",
+      "remoteSha256": "2254ff003035a03238c47c1de53ea2aaa4099b81f5da2b3ba7ca04e87d820d5b",
+      "archivedSha256": "b5bb03fa99a311e64be2ee8bb0c9e4e49704ffa7794655c8740cb36f1a99b548"
+    },
+    {
+      "file": "20260425011543_add_villa_lift_mark_processing_permission.sql",
+      "source": "remote-history",
+      "archivedFile": "20260425100000_add_villa_lift_mark_processing_permission.sql",
+      "sha256": "6c681ee59590e505a87ce0530b6cb4d122a5e2c94856a801227d6020d4945a75",
+      "remoteSha256": "6c681ee59590e505a87ce0530b6cb4d122a5e2c94856a801227d6020d4945a75",
+      "archivedSha256": "8607f3ab558ba5327d27694b3078d1b0b19284a49ec6e71d6c3d65e5286ee6b9"
+    },
+    {
+      "file": "20260425013321_add_villa_lift_subprocess_dates.sql",
+      "source": "remote-history",
+      "archivedFile": "20260425110000_add_villa_lift_subprocess_dates.sql",
+      "sha256": "4e7ad39d43a0aa5efde00a890063ef5277543403f803f7ee81e9a0ab6bcae77a",
+      "remoteSha256": "4e7ad39d43a0aa5efde00a890063ef5277543403f803f7ee81e9a0ab6bcae77a",
+      "archivedSha256": "28dbc144634090e773249123bae2d85b69d14666117423a014b113e39a8ae178"
+    },
+    {
+      "file": "20260425064640_youmai_raw_material_triggers_security_definer.sql",
+      "source": "remote-history",
+      "archivedFile": "20260425100000_youmai_raw_material_triggers_security_definer.sql",
+      "sha256": "b3c2971e47ea396deb89872470ecaa8ff7f14e531c27edceb6bbbf9923b9517a",
+      "remoteSha256": "b3c2971e47ea396deb89872470ecaa8ff7f14e531c27edceb6bbbf9923b9517a",
+      "archivedSha256": "bd0214e166556dd96fca40fb120ab4eb04ba4e5ea970d244d6b5dd4149933813"
+    },
+    {
+      "file": "20260426090637_add_last_process_flag_to_process_standards.sql",
+      "source": "remote-history",
+      "archivedFile": "20260426090000_add_last_process_flag_to_process_standards.sql",
+      "sha256": "2489cff28365086aa7a9ef0ca32e13ad7fbec6470ee34cca7702c01401da8764",
+      "remoteSha256": "2489cff28365086aa7a9ef0ca32e13ad7fbec6470ee34cca7702c01401da8764",
+      "archivedSha256": "028d83db30e79e15cf4ae647c76ba97d50367056ce24e236a84549cefccae497"
+    },
+    {
+      "file": "20260428013641_create_quality_rework_repairs.sql",
+      "source": "remote-history",
+      "archivedFile": "20260428100000_create_quality_rework_repairs.sql",
+      "sha256": "bbdbbf600b8c8b5c11d11adc3ffa9c9e4d52d13ae607b144074ed8ef0a0347a8",
+      "remoteSha256": "bbdbbf600b8c8b5c11d11adc3ffa9c9e4d52d13ae607b144074ed8ef0a0347a8",
+      "archivedSha256": "879b1f59d273a03dff2f1fe3249b7a086876d52bddc5193e16db2f574a4f2ee7"
+    },
+    {
+      "file": "20260428013757_optimize_quality_rework_repair_rls_policies.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "e9c2f50795bbed2cb28b58c5e2d9da3c47d9ed33ecfaf1cf675ef4de1962f753",
+      "remoteSha256": "e9c2f50795bbed2cb28b58c5e2d9da3c47d9ed33ecfaf1cf675ef4de1962f753",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260428053254_add_safe_part_drawing_upload.sql",
+      "source": "remote-history",
+      "archivedFile": "20260428110000_add_safe_part_drawing_upload.sql",
+      "sha256": "912185861e36de3de541fa7b790455a7face4c5d3fb7f4607d3ad3e4cd92bbdd",
+      "remoteSha256": "912185861e36de3de541fa7b790455a7face4c5d3fb7f4607d3ad3e4cd92bbdd",
+      "archivedSha256": "65dfd921287ab964da9163f32575c9677d90ea8b5cf3cea4a58f769fc4c28957"
+    },
+    {
+      "file": "20260428070430_optimize_order_status_dashboard_queries.sql",
+      "source": "remote-history",
+      "archivedFile": "20260428120000_optimize_order_status_dashboard_queries.sql",
+      "sha256": "bff7a180f20e2ecdb2c59ce6e11099b90ff0eb80462aa26b4141458125b9a22e",
+      "remoteSha256": "bff7a180f20e2ecdb2c59ce6e11099b90ff0eb80462aa26b4141458125b9a22e",
+      "archivedSha256": "f4eefe7e5d30af475b31211dfb6d71e59906a2dab6319f26297ff1896f56b4b7"
+    },
+    {
+      "file": "20260428071653_create_order_status_dashboard_rpc.sql",
+      "source": "remote-history",
+      "archivedFile": "20260428130000_create_order_status_dashboard_rpc.sql",
+      "sha256": "0d09579f24beebd1681d9bdb2cc26fc1ef653d2cc71dbb1c4a685ad20e53b2b7",
+      "remoteSha256": "0d09579f24beebd1681d9bdb2cc26fc1ef653d2cc71dbb1c4a685ad20e53b2b7",
+      "archivedSha256": "54d80b2018fc369792a9b676292c13e338e8f267020bebc07b9a7f6885ccb220"
+    },
+    {
+      "file": "20260428071931_fix_order_status_dashboard_latest_operator_names.sql",
+      "source": "remote-history",
+      "archivedFile": "20260428131000_fix_order_status_dashboard_latest_operator_names.sql",
+      "sha256": "b1b2977cca70085dfd07c96dc9ceef67ab0714bc452100087c76fb8033f1bfa1",
+      "remoteSha256": "b1b2977cca70085dfd07c96dc9ceef67ab0714bc452100087c76fb8033f1bfa1",
+      "archivedSha256": "8c219172fba4267c0bf57a3e1d3861434994787a84379ae4095586139eac0344"
+    },
+    {
+      "file": "20260428072111_fix_order_status_dashboard_rpc_latest_operator_names.sql",
+      "source": "remote-history",
+      "archivedFile": "20260428132000_fix_order_status_dashboard_rpc_latest_operator_names.sql",
+      "sha256": "43adeb00fa3267c289c6442bf0c6c7ec8e37d752b1fa2cd46eb5e89f5f443740",
+      "remoteSha256": "43adeb00fa3267c289c6442bf0c6c7ec8e37d752b1fa2cd46eb5e89f5f443740",
+      "archivedSha256": "455035cebe3c8f8a4bb94c68fc5deeae2211054ed251c2726be3c5021d8dc3e1"
+    },
+    {
+      "file": "20260429052133_add_order_status_dashboard_customer_filter.sql",
+      "source": "remote-history",
+      "archivedFile": "20260429093000_add_order_status_dashboard_customer_filter.sql",
+      "sha256": "bff6c4400f87c7bb71bf0089fe7b615fdf75f7d2f6d904df786296dba8a70795",
+      "remoteSha256": "bff6c4400f87c7bb71bf0089fe7b615fdf75f7d2f6d904df786296dba8a70795",
+      "archivedSha256": "d2a414e4b1a426e0ca1d2afe10ac4b623d1df80ec86049d93f57f2dcd9b9a7fc"
+    },
+    {
+      "file": "20260429053621_add_quality_rework_repair_order_link_and_numbering.sql",
+      "source": "remote-history",
+      "archivedFile": "20260429110000_add_quality_rework_repair_order_link_and_numbering.sql",
+      "sha256": "d305cf6b1e009c3f077cdb866dc3cd157679096919c2dd2df0e940e1a1b91f34",
+      "remoteSha256": "d305cf6b1e009c3f077cdb866dc3cd157679096919c2dd2df0e940e1a1b91f34",
+      "archivedSha256": "f2cef499be1f0f1918e9d3654b3ac578006521a3d1b05da8f719a9e6c9a4001a"
+    },
+    {
+      "file": "20260429060353_add_production_review_opinion.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "5c908de6fe3a0a72574faa8467d34fd8614cfe3b2ba877d472aba0b3743ed568",
+      "remoteSha256": "5c908de6fe3a0a72574faa8467d34fd8614cfe3b2ba877d472aba0b3743ed568",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260429060517_add_workflow_status.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "498f5b0a7ae4c52f1f5e204f82403b1fee1518d83e3af4f698abc1b025ee10cf",
+      "remoteSha256": "498f5b0a7ae4c52f1f5e204f82403b1fee1518d83e3af4f698abc1b025ee10cf",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260429080355_add_rework_repair_to_order_status_dashboard.sql",
+      "source": "remote-history",
+      "archivedFile": "20260429100000_add_rework_repair_to_order_status_dashboard.sql",
+      "sha256": "2518c8cf159c9d2b12b66ef54a8882dd439e075d1d36be7dc41ed09207f3a0a7",
+      "remoteSha256": "2518c8cf159c9d2b12b66ef54a8882dd439e075d1d36be7dc41ed09207f3a0a7",
+      "archivedSha256": "e2e86edc40744df80e45a78f6ee30b37694259390ede8ea2ee45c63488a5c13b"
+    },
+    {
+      "file": "20260429170000_add_viewer_role.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260429170000_add_viewer_role.sql",
+      "sha256": "df00e76c5d3bbdf41c3e1ebb9e939a9b8054e8e85c6c645315df1962f969f114",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "df00e76c5d3bbdf41c3e1ebb9e939a9b8054e8e85c6c645315df1962f969f114"
+    },
+    {
+      "file": "20260430100000_restrict_viewer_menu_permissions.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260430100000_restrict_viewer_menu_permissions.sql",
+      "sha256": "38f664b1a28a89c87736b2843b7375deb01e313587e23b6394434153efe51b39",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "38f664b1a28a89c87736b2843b7375deb01e313587e23b6394434153efe51b39"
+    },
+    {
+      "file": "20260430110000_enforce_viewer_readonly.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260430110000_enforce_viewer_readonly.sql",
+      "sha256": "acfec5a8a36beac2044512572c35dfb9217f3fc240d63646e5a2a532fc974557",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "acfec5a8a36beac2044512572c35dfb9217f3fc240d63646e5a2a532fc974557"
+    },
+    {
+      "file": "20260430120000_allow_production_scheduling_read_production_jobs.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260430120000_allow_production_scheduling_read_production_jobs.sql",
+      "sha256": "67761acc0e3e6ef440bceb1be6583d78927205998ee4d28de355973f23ebcb6e",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "67761acc0e3e6ef440bceb1be6583d78927205998ee4d28de355973f23ebcb6e"
+    },
+    {
+      "file": "20260504031528_create_order_scheduling_tables.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "a152b729d35fb714233f85ae5e04ff335714e4ad074943659e821a60a4ef69f2",
+      "remoteSha256": "a152b729d35fb714233f85ae5e04ff335714e4ad074943659e821a60a4ef69f2",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260504072310_create_tooling_inventory_stock_flow.sql",
+      "source": "remote-history",
+      "archivedFile": "20260504143000_create_tooling_inventory_stock_flow.sql",
+      "sha256": "b11a7dffad64f365ad512dc8bbd177281b2a4a72e6125838c773a42fdbf2eb2c",
+      "remoteSha256": "b11a7dffad64f365ad512dc8bbd177281b2a4a72e6125838c773a42fdbf2eb2c",
+      "archivedSha256": "806a9a5951b6bf486d11c1d06ce1c03d58a6e878eaf05f747e9d6ebda3bbbc85"
+    },
+    {
+      "file": "20260504073521_allow_viewer_mark_villa_lift_film.sql",
+      "source": "remote-history",
+      "archivedFile": "20260504153000_allow_viewer_mark_villa_lift_film.sql",
+      "sha256": "435b8552154586a48b1af496769d30171b47ad0626d25897fc314b7ae5f08568",
+      "remoteSha256": "435b8552154586a48b1af496769d30171b47ad0626d25897fc314b7ae5f08568",
+      "archivedSha256": "85b258474ebb77e851de389dad21c07dd46b404e4f93d7ab40fb53d895406693"
+    },
+    {
+      "file": "20260504073618_harden_viewer_mark_villa_lift_film_trigger.sql",
+      "source": "remote-history",
+      "archivedFile": "20260504154000_harden_viewer_mark_villa_lift_film_trigger.sql",
+      "sha256": "3237de4e44a932313b2cf98ddf548a24ac3636d5dcfe03804f2c0c17ec641bfd",
+      "remoteSha256": "3237de4e44a932313b2cf98ddf548a24ac3636d5dcfe03804f2c0c17ec641bfd",
+      "archivedSha256": "355e4a4e1971180cf8ae7a9af0c702062cb1b9c2baa68170a75bce1a38f7c9d5"
+    },
+    {
+      "file": "20260504120000_add_production_scheduling_fields_to_sales_orders.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260504120000_add_production_scheduling_fields_to_sales_orders.sql",
+      "sha256": "8c16cb11e1d6253578eaef98c7a2605bfd9f616a9ab8497819b9f516bfc212f7",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "8c16cb11e1d6253578eaef98c7a2605bfd9f616a9ab8497819b9f516bfc212f7"
+    },
+    {
+      "file": "20260504123000_restore_order_status_and_add_order_scheduling_permissions.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260504123000_restore_order_status_and_add_order_scheduling_permissions.sql",
+      "sha256": "29e4737cef308f19ee53763a4bd90e829908d5431b841e5ffcf9bfaa7d10cc26",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "29e4737cef308f19ee53763a4bd90e829908d5431b841e5ffcf9bfaa7d10cc26"
+    },
+    {
+      "file": "20260504124000_grant_order_scheduling_permissions_to_admin.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260504124000_grant_order_scheduling_permissions_to_admin.sql",
+      "sha256": "d3e79d45766b49ba54217b854b2279f82f06110609119438a8842fec0da4ec2b",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "d3e79d45766b49ba54217b854b2279f82f06110609119438a8842fec0da4ec2b"
+    },
+    {
+      "file": "20260504133000_import_tooling_data_from_template.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260504133000_import_tooling_data_from_template.sql",
+      "sha256": "168ee779477c6c47bfb01efc51d8163a6df16bc6d5d20f7193321ee0925a66b0",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "168ee779477c6c47bfb01efc51d8163a6df16bc6d5d20f7193321ee0925a66b0"
+    },
+    {
+      "file": "20260505041010_allow_gui_guolong_tooling_permissions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260504160000_allow_gui_guolong_tooling_permissions.sql",
+      "sha256": "5e7a1a1e25b8954d358dbc58221cb7619a11b2ca498bab7e260283fc7f464168",
+      "remoteSha256": "5e7a1a1e25b8954d358dbc58221cb7619a11b2ca498bab7e260283fc7f464168",
+      "archivedSha256": "196469f9c4f666ca147b5ad04b8051c011d3f7e3a604f0e103fbb46aa9780c9a"
+    },
+    {
+      "file": "20260506055631_add_machine_no_to_tooling_and_labor_requisitions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260506055631_add_machine_no_to_tooling_and_labor_requisitions.sql",
+      "sha256": "d98978041b2c4ee41cada2393610237733a4a7f67057b053f4560e490554b3a5",
+      "remoteSha256": "d98978041b2c4ee41cada2393610237733a4a7f67057b053f4560e490554b3a5",
+      "archivedSha256": "683e7683cb251dfa776e83ef29fe6e36219b3dc1cd7b90fdd5a336818ffde55f"
+    },
+    {
+      "file": "20260507073856_add_responsible_person_ids_to_sales_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260507150000_add_responsible_person_ids_to_sales_orders.sql",
+      "sha256": "6f7ccefbed5a7bd2ae633ec666a187c2cb597525e68967737d13a458049e0416",
+      "remoteSha256": "6f7ccefbed5a7bd2ae633ec666a187c2cb597525e68967737d13a458049e0416",
+      "archivedSha256": "0001f6c539e0506fd8bd8e228e036a6952622135c97538285299bddc933257b1"
+    },
+    {
+      "file": "20260507083358_add_collection_method_to_requisitions_and_stock_out.sql",
+      "source": "remote-history",
+      "archivedFile": "20260507153000_add_collection_method_to_requisitions_and_stock_out.sql",
+      "sha256": "629bd5ab0e158bd20ae1761320a8a1d93a4bd2f8bbc7f55887da016fd66b8ce5",
+      "remoteSha256": "629bd5ab0e158bd20ae1761320a8a1d93a4bd2f8bbc7f55887da016fd66b8ce5",
+      "archivedSha256": "f5333e3096e385d87d544e36e1c2ccb01adff312fa0f34368ad7358244fb9fc4"
+    },
+    {
+      "file": "20260507100000_simplify_order_scheduling_fields.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260507100000_simplify_order_scheduling_fields.sql",
+      "sha256": "37b6d4406c4768bf5b95cabeab3f4bd25ef53d09f3f666af09748dbb6dba5f59",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "37b6d4406c4768bf5b95cabeab3f4bd25ef53d09f3f666af09748dbb6dba5f59"
+    },
+    {
+      "file": "20260508014830_fix_tooling_public_stock_out_access.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260508014830_fix_tooling_public_stock_out_access.sql",
+      "sha256": "187726b2ea29d9a9261cf9fb19d243aca3ee22849869b5b03edfc515eff38922",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "187726b2ea29d9a9261cf9fb19d243aca3ee22849869b5b03edfc515eff38922"
+    },
+    {
+      "file": "20260510084535_allow_public_tooling_stock_out_without_machine.sql",
+      "source": "remote-history",
+      "archivedFile": "20260510084535_allow_public_tooling_stock_out_without_machine.sql",
+      "sha256": "938b45c4d52b8cd22f86fc76de0a89211e6a2fba11cd9570a65a469c95d3365c",
+      "remoteSha256": "938b45c4d52b8cd22f86fc76de0a89211e6a2fba11cd9570a65a469c95d3365c",
+      "archivedSha256": "831797add1c2cb6a6590fc7d95bde1ff5bc2c9071d0787b44ee5ee1542854a19"
+    },
+    {
+      "file": "20260510084715_allow_public_labor_protection_requisition_without_machine.sql",
+      "source": "remote-history",
+      "archivedFile": "20260510084715_allow_public_labor_protection_requisition_without_machine.sql",
+      "sha256": "78c0d01015c6a9e77d4653cd99d29dce32a1c8250b0e9ff73327a17308536422",
+      "remoteSha256": "78c0d01015c6a9e77d4653cd99d29dce32a1c8250b0e9ff73327a17308536422",
+      "archivedSha256": "960a00d8abfbb27106c01863228007ee00eee4c8182cfc9e658e7165bc4fe32c"
+    },
+    {
+      "file": "20260510085525_run_tooling_inventory_sync_as_definer_for_public_stock_out.sql",
+      "source": "remote-history",
+      "archivedFile": "20260510085525_run_tooling_inventory_sync_as_definer_for_public_stock_out.sql",
+      "sha256": "98aba8f626f849c2eed64e06433de8376450e0dbf0ddcdeb7c4807fb19488b1a",
+      "remoteSha256": "98aba8f626f849c2eed64e06433de8376450e0dbf0ddcdeb7c4807fb19488b1a",
+      "archivedSha256": "ee441dc806d218dd36f14fe5dbbc191c952de9a90441be865a4213d02d1daa8d"
+    },
+    {
+      "file": "20260514045408_allow_viewer_youmai_manage.sql",
+      "source": "remote-history",
+      "archivedFile": "20260514130000_allow_viewer_youmai_manage.sql",
+      "sha256": "403cb705084c2bed71a491faff549eb7b95ceff30058e589ac3d5aa0a8123723",
+      "remoteSha256": "403cb705084c2bed71a491faff549eb7b95ceff30058e589ac3d5aa0a8123723",
+      "archivedSha256": "d5aebeae4a75583601bbd93c3d689e259f447ddd530d15cb0691566de86a71a6"
+    },
+    {
+      "file": "20260515015953_create_quality_issue_records.sql",
+      "source": "remote-history",
+      "archivedFile": "20260515015953_create_quality_issue_records.sql",
+      "sha256": "69892f4255442950183448347896a85dd92eccadde02db5154150eead97dd86b",
+      "remoteSha256": "69892f4255442950183448347896a85dd92eccadde02db5154150eead97dd86b",
+      "archivedSha256": "56250c3852c38b132511fb56af407e0bbd296b15ceca958dcc151111fe853dde"
+    },
+    {
+      "file": "20260515020959_link_quality_issue_operator_employee.sql",
+      "source": "remote-history",
+      "archivedFile": "20260515020959_link_quality_issue_operator_employee.sql",
+      "sha256": "ea40285da55645253d0e2d1782d9aa1a8a5d3f0c07fd4f9ac556a6b030ee060b",
+      "remoteSha256": "ea40285da55645253d0e2d1782d9aa1a8a5d3f0c07fd4f9ac556a6b030ee060b",
+      "archivedSha256": "9d205546d3affaa13fb3bcb9122ef4ccc3175732c5e4f9a19f8019d071a0e8b3"
+    },
+    {
+      "file": "20260520073753_allow_deng_zhonglan_quality_issue_record.sql",
+      "source": "remote-history",
+      "archivedFile": "20260520073753_allow_deng_zhonglan_quality_issue_record.sql",
+      "sha256": "dce273bc1c398ce15ab6b6526575a75c5dd3953abca8193bbf98367f31462836",
+      "remoteSha256": "dce273bc1c398ce15ab6b6526575a75c5dd3953abca8193bbf98367f31462836",
+      "archivedSha256": "56070915d233dd9632154b3372ab941b6e8a02937b131aca6edc93fee4486fbf"
+    },
+    {
+      "file": "20260521075405_add_workshop_order_sketch_upload.sql",
+      "source": "remote-history",
+      "archivedFile": "20260521075405_add_workshop_order_sketch_upload.sql",
+      "sha256": "1d885c8b75d099e661fb8cd934c0bdf04db845d54b68e23afe6574bf3f2ae5c5",
+      "remoteSha256": "1d885c8b75d099e661fb8cd934c0bdf04db845d54b68e23afe6574bf3f2ae5c5",
+      "archivedSha256": "2f7f17bc46e90770d814b9ad6d6d0cda67b6e07b8f0585394d0b714c55ba185b"
+    },
+    {
+      "file": "20260609062202_create_extrusion_production.sql",
+      "source": "remote-history",
+      "archivedFile": "20260609142000_create_extrusion_production.sql",
+      "sha256": "3fcf87f2af5147ede1dc6a21846459e4e055462f38e27b05efe92886cde03f35",
+      "remoteSha256": "3fcf87f2af5147ede1dc6a21846459e4e055462f38e27b05efe92886cde03f35",
+      "archivedSha256": "c197ea76ab4a1768b0ae67e093d4769ba8c9e31e10869b122fcdbea40a769a26"
+    },
+    {
+      "file": "20260610041721_rename_extrusion_employee_columns_to_names.sql",
+      "source": "remote-history",
+      "archivedFile": "20260610115000_rename_extrusion_employee_columns_to_names.sql",
+      "sha256": "e1c6c40d610ca021d82b8ca92e8839d6702fff7b5f0b01c606bfa37718f05526",
+      "remoteSha256": "e1c6c40d610ca021d82b8ca92e8839d6702fff7b5f0b01c606bfa37718f05526",
+      "archivedSha256": "08e8b151fa6da68f44dbfbeecdc76e4ec27d24d44bd0a2070de18ffb47f83d32"
+    },
+    {
+      "file": "20260610090233_drop_operator_inspector_from_extrusion_productions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260610170000_drop_operator_inspector_from_extrusion_productions.sql",
+      "sha256": "1eeb9ad29bf16a150923c900949fa3ec7d34939d74fa0ec00c57981a155370a0",
+      "remoteSha256": "1eeb9ad29bf16a150923c900949fa3ec7d34939d74fa0ec00c57981a155370a0",
+      "archivedSha256": "ba5f5746fa17854f0dc334bf65d1378bcf039ee9080de6bf2b4122e2a3fdb294"
+    },
+    {
+      "file": "20260610090517_update_upsert_extrusion_production_function.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "57895584562a279f71e9f8b6b3b3f0aba31d6515dcdf8552278ee017c6434826",
+      "remoteSha256": "57895584562a279f71e9f8b6b3b3f0aba31d6515dcdf8552278ee017c6434826",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260611154000_seed_extrusion_machine_equipment.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260611154000_seed_extrusion_machine_equipment.sql",
+      "sha256": "3b12b87767e9547a1b55188b8ff24f069f86dd74f4ab4db99b8b973ce7ae776b",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "3b12b87767e9547a1b55188b8ff24f069f86dd74f4ab4db99b8b973ce7ae776b"
+    },
+    {
+      "file": "20260611170000_change_extrusion_machine_id_to_text.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260611170000_change_extrusion_machine_id_to_text.sql",
+      "sha256": "d841402c606333e89abcff3aadd37fd1fc1060129ec17edf8c22bd0e12c9b2da",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "d841402c606333e89abcff3aadd37fd1fc1060129ec17edf8c22bd0e12c9b2da"
+    },
+    {
+      "file": "20260612045958_fix_extrusion_legacy_operator_nullable.sql",
+      "source": "remote-history",
+      "archivedFile": "20260612045958_fix_extrusion_legacy_operator_nullable.sql",
+      "sha256": "4b22c0db0ff7658c2d064f32cb1c00a39a45a83d49576d468eb32e340bf718e7",
+      "remoteSha256": "4b22c0db0ff7658c2d064f32cb1c00a39a45a83d49576d468eb32e340bf718e7",
+      "archivedSha256": "28554ec44dd2c2b0525d736b23f13ad49d59832f77572aba9340ab33fd01d67a"
+    },
+    {
+      "file": "20260612051131_allow_multiple_extrusion_productions_per_schedule.sql",
+      "source": "remote-history",
+      "archivedFile": "20260612051131_allow_multiple_extrusion_productions_per_schedule.sql",
+      "sha256": "8c721699273352844d275cbfc21aa18d1bfdfc45880a0e69f3b7076dffd60d02",
+      "remoteSha256": "8c721699273352844d275cbfc21aa18d1bfdfc45880a0e69f3b7076dffd60d02",
+      "archivedSha256": "a0b731a7cad0d26279185c88fdaf1c21ff570e6e9f18d42956e3e0e07d05fdb8"
+    },
+    {
+      "file": "20260612053658_add_extrusion_to_order_status_dashboard.sql",
+      "source": "remote-history",
+      "archivedFile": "20260612140000_add_extrusion_to_order_status_dashboard.sql",
+      "sha256": "2743dc89d82e8568a246593694c541935b7fa64a8917ce1cfff06445ec41d5d2",
+      "remoteSha256": "2743dc89d82e8568a246593694c541935b7fa64a8917ce1cfff06445ec41d5d2",
+      "archivedSha256": "384228f05303c98d8a9259597f4e1cf36934c1cad01aeed8e55f7d3a61b77ed4"
+    },
+    {
+      "file": "20260612065320_add_extrusion_admin_role.sql",
+      "source": "remote-history",
+      "archivedFile": "20250612150000_add_extrusion_admin_role.sql",
+      "sha256": "1657320abf08a1f8523a9224dd514d24e81e309f422589e48673f69224f23bcc",
+      "remoteSha256": "1657320abf08a1f8523a9224dd514d24e81e309f422589e48673f69224f23bcc",
+      "archivedSha256": "a2e7dbe6f122bf4538039ac9639d145b08024870be5cfc632bb9a5e81dac74c3"
+    },
+    {
+      "file": "20260621005356_add_sales_order_closed_at.sql",
+      "source": "remote-history",
+      "archivedFile": "20260621004634_add_sales_order_closed_at.sql",
+      "sha256": "b95cb576d48701071ccb7681c3e1262aefe49d49aa7c9ea9f1314be408262549",
+      "remoteSha256": "b95cb576d48701071ccb7681c3e1262aefe49d49aa7c9ea9f1314be408262549",
+      "archivedSha256": "90c20ad1618a1b60ea43b8793e7c443d2320b0f88f12d04c95b55362450f5910"
+    },
+    {
+      "file": "20260621005855_clear_backfilled_sales_order_closed_at.sql",
+      "source": "remote-history",
+      "archivedFile": "20260621005823_clear_backfilled_sales_order_closed_at.sql",
+      "sha256": "ed5f7ca6d35ae521135a098b551517f59108ab22c2c6807332d8cccfc4891708",
+      "remoteSha256": "ed5f7ca6d35ae521135a098b551517f59108ab22c2c6807332d8cccfc4891708",
+      "archivedSha256": "947bd9e07ce0a7e3979c36875b74441fa34c3d8721920529df56fccde4614b02"
+    },
+    {
+      "file": "20260624143000_guard_youmai_finished_goods_stock_in_reaudit.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260624143000_guard_youmai_finished_goods_stock_in_reaudit.sql",
+      "sha256": "9ca360e4a484ec9700a4ffdb2cd7a3b1da1b0f9027574df0096b8e691605afe6",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "9ca360e4a484ec9700a4ffdb2cd7a3b1da1b0f9027574df0096b8e691605afe6"
+    },
+    {
+      "file": "20260630054436_add_employee_is_external.sql",
+      "source": "remote-history",
+      "archivedFile": "20260630130000_add_employee_is_external.sql",
+      "sha256": "cbce09e75e4c392fa3267ac9ad6a095d9c4cc8119db27fe2c5d7a37c8c8a94ce",
+      "remoteSha256": "cbce09e75e4c392fa3267ac9ad6a095d9c4cc8119db27fe2c5d7a37c8c8a94ce",
+      "archivedSha256": "10362debddfcf22c74f89d36be911e9386513b31b9b40276058108276e59c37b"
+    },
+    {
+      "file": "20260701054301_grant_deng_zhonglan_youmai_raw_material_stock_out_manage.sql",
+      "source": "remote-history",
+      "archivedFile": "20260701054301_grant_deng_zhonglan_youmai_raw_material_stock_out_manage.sql",
+      "sha256": "04a4454bc6a19bcc9b23488870d5bc369fa6678e8ee36cb66444f6324f2b7173",
+      "remoteSha256": "04a4454bc6a19bcc9b23488870d5bc369fa6678e8ee36cb66444f6324f2b7173",
+      "archivedSha256": "39e4c4270050f99ab25feaa183df42ddda5d9dcace61b201941fee91078fab1d"
+    },
+    {
+      "file": "20260706053124_create_packaging_employees.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "7ccdf9f7a823e91a81f9267dee5907652e4a4f5a264a43c239cccddb45817b00",
+      "remoteSha256": "7ccdf9f7a823e91a81f9267dee5907652e4a4f5a264a43c239cccddb45817b00",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260706061557_create_packaging_standard_times.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "b7605857d9aaf0dedf6f890d13a27e521602b5613188d4c94d888b9bb4380e80",
+      "remoteSha256": "b7605857d9aaf0dedf6f890d13a27e521602b5613188d4c94d888b9bb4380e80",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260706064030_add_position_salary_remark_to_packaging_employees.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "2e3cc914fb72533893bc5307dc188d639dcd948320a3ab6f5a18e565bb36f525",
+      "remoteSha256": "2e3cc914fb72533893bc5307dc188d639dcd948320a3ab6f5a18e565bb36f525",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260706080908_20260706150000_create_packaging_work_orders.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "ffef7185d2d2acd7b98b8487b1a9abe9112022594ed30dbe531c0f0c65530e84",
+      "remoteSha256": "ffef7185d2d2acd7b98b8487b1a9abe9112022594ed30dbe531c0f0c65530e84",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260706150000_create_packaging_work_orders.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260706150000_create_packaging_work_orders.sql",
+      "sha256": "ddfbafc2e65c3e333253e1877cba950e304095822fc4157a02f67fef28c5bf27",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "ddfbafc2e65c3e333253e1877cba950e304095822fc4157a02f67fef28c5bf27"
+    },
+    {
+      "file": "20260707043840_add_hourly_wage_to_packaging_employees.sql",
+      "source": "remote-history",
+      "archivedFile": "20260707120000_add_hourly_wage_to_packaging_employees.sql",
+      "sha256": "e93425419634650850a190296159d37dbd6b2635e3db309820d6d8764643f3e1",
+      "remoteSha256": "e93425419634650850a190296159d37dbd6b2635e3db309820d6d8764643f3e1",
+      "archivedSha256": "4107712e44e58417f6b9451bf6899f109c21644c3ac26cc73d26b53a9d9e861f"
+    },
+    {
+      "file": "20260707045951_add_extra_qualified_hours_to_packaging_work_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260707103000_add_extra_qualified_hours_to_packaging_work_orders.sql",
+      "sha256": "d61dbcfea79401195b159be363a75b853d21445c5b4c0383c48f0a26a4bb5bfc",
+      "remoteSha256": "d61dbcfea79401195b159be363a75b853d21445c5b4c0383c48f0a26a4bb5bfc",
+      "archivedSha256": "c603af35e015c1a87a6f6d39813d24799ecb944879267cc28d4bdff4c38e00a3"
+    },
+    {
+      "file": "20260707060726_add_defect_weight_fields_to_packaging_work_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260707113000_add_defect_weight_fields_to_packaging_work_orders.sql",
+      "sha256": "2e10208ba0fe66134421d9f36c995ff5c60f2934cf04eebf03637bbe327eacda",
+      "remoteSha256": "2e10208ba0fe66134421d9f36c995ff5c60f2934cf04eebf03637bbe327eacda",
+      "archivedSha256": "f4cf6a3a44a284e44ef80a5f2d255dc94cbc593293ac758287c09cb631f309d2"
+    },
+    {
+      "file": "20260707061952_add_defect_reason_to_packaging_work_orders.sql",
+      "source": "remote-history",
+      "archivedFile": "20260707121500_add_defect_reason_to_packaging_work_orders.sql",
+      "sha256": "24e294f1e72fb0e665fb9dfc8fdf7ddf2f7ef68a3494feecf946e065583570f2",
+      "remoteSha256": "24e294f1e72fb0e665fb9dfc8fdf7ddf2f7ef68a3494feecf946e065583570f2",
+      "archivedSha256": "38061b25722efa5bcc1433ce68b48ac34e9c4c5fa82a10681c3f9d33edeeb130"
+    },
+    {
+      "file": "20260707063103_grant_wu_wenwen_order_packaging_permissions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260707063103_grant_wu_wenwen_order_packaging_permissions.sql",
+      "sha256": "a8104c27acb469a33c2597e4800854b6e17b5973430dfa7ebd34f549771948aa",
+      "remoteSha256": "a8104c27acb469a33c2597e4800854b6e17b5973430dfa7ebd34f549771948aa",
+      "archivedSha256": "6a676012d3aac9609ebc3d9bcc9f9ebd752dce30d2f57f04b05c3fcb5548d160"
+    },
+    {
+      "file": "20260707063926_fix_wu_wenwen_order_packaging_access.sql",
+      "source": "remote-history",
+      "archivedFile": "20260707063926_fix_wu_wenwen_order_packaging_access.sql",
+      "sha256": "2ed612ce84d90ed4cb2a7c2ce0f3528adc61a9561c55f4d8d8f7cbc19f890bff",
+      "remoteSha256": "2ed612ce84d90ed4cb2a7c2ce0f3528adc61a9561c55f4d8d8f7cbc19f890bff",
+      "archivedSha256": "7140eb53b3b795507c6fce90a2b3aa5c449e74635532714ea9ac2fa554ce0b6a"
+    },
+    {
+      "file": "20260707064026_fix_prevent_viewer_dml_villa_lift_middle_door_check.sql",
+      "source": "remote-history",
+      "archivedFile": "20260707064026_fix_prevent_viewer_dml_villa_lift_middle_door_check.sql",
+      "sha256": "2b7d399a40f5246e1015de93095985c352ba43aad6e253e4c901ac5c934e2a96",
+      "remoteSha256": "2b7d399a40f5246e1015de93095985c352ba43aad6e253e4c901ac5c934e2a96",
+      "archivedSha256": "934d879d973857caab7bff0e74ae3a7bcf76e5eb84e81d5a0fc860ccf9f69f60"
+    },
+    {
+      "file": "20260707072815_fix_wu_wenwen_workshop_order_full_permissions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260707072815_fix_wu_wenwen_workshop_order_full_permissions.sql",
+      "sha256": "c83a989154ebcd58ecd9c75edb29eaf7276db1c63d49b188a1fe2a22303b9409",
+      "remoteSha256": "c83a989154ebcd58ecd9c75edb29eaf7276db1c63d49b188a1fe2a22303b9409",
+      "archivedSha256": "3c710b61de65578d5f0e847244fbc1af24539c800a0b492d9cc55039fec98781"
+    },
+    {
+      "file": "20260711074936_packaging_work_order_batches.sql",
+      "source": "remote-history",
+      "archivedFile": "20260711074654_packaging_work_order_batches.sql",
+      "sha256": "3b6934a27c174bd98d58c9235a203788661f17160fc21960f87c28215ac2513c",
+      "remoteSha256": "3b6934a27c174bd98d58c9235a203788661f17160fc21960f87c28215ac2513c",
+      "archivedSha256": "b956ecb95e4f55d669caf3179ac728d267e7468d4bf7a1c1a6efa022d2f60122"
+    },
+    {
+      "file": "20260713040756_harden_villa_lift_records_and_reporting_views.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713034501_harden_villa_lift_records_and_reporting_views.sql",
+      "sha256": "92e8904af2fa824fb6d5c0597651ca9024ad515a8edfa4083f52144fb9d699d8",
+      "remoteSha256": "92e8904af2fa824fb6d5c0597651ca9024ad515a8edfa4083f52144fb9d699d8",
+      "archivedSha256": "0a689250dd2621db560a023cdd8dc4a5ff1a3e625c3484c86087691020a2ef37"
+    },
+    {
+      "file": "20260713042349_add_syney_atomic_update_and_sorted_view.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713040208_add_syney_atomic_update_and_sorted_view.sql",
+      "sha256": "e3640c84a35cff2cc62c5fdac93c3195c11436f2b591be4e4a4f9c256566c183",
+      "remoteSha256": "e3640c84a35cff2cc62c5fdac93c3195c11436f2b591be4e4a4f9c256566c183",
+      "archivedSha256": "1e7f910078fb4f718b2e328dab6bca99d994575507cfe927f38abe4e76208434"
+    },
+    {
+      "file": "20260713045736_add_syney_natural_sort_collation.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713044250_add_syney_natural_sort_collation.sql",
+      "sha256": "28c37d1ef6fbf0bd0335d9d7c62a58e9fcd073708c0baa0395bf10c7a14f455e",
+      "remoteSha256": "28c37d1ef6fbf0bd0335d9d7c62a58e9fcd073708c0baa0395bf10c7a14f455e",
+      "archivedSha256": "d5446ce91cd64e3f1d4596a8b3a879f0d50516a074187bdbeb7fd1f0127bc4d9"
+    },
+    {
+      "file": "20260713054649_add_workshop_order_options_rpc.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713050000_add_workshop_order_options_rpc.sql",
+      "sha256": "6e943a0eb9baa1891cac7f78421aef777bd06219b72226580fdd07795fccde20",
+      "remoteSha256": "6e943a0eb9baa1891cac7f78421aef777bd06219b72226580fdd07795fccde20",
+      "archivedSha256": "06e4fcaef2904cfb4b9af038c3230e978dc6b6ab06e50860dfb9e9c3a7fb8a01"
+    },
+    {
+      "file": "20260713065523_harden_syney_and_workshop_permissions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713060000_harden_syney_and_workshop_permissions.sql",
+      "sha256": "11001b54ae82e25fcc39ab91e7ed3e8dca41016d04db1aca1e036d21038a9a65",
+      "remoteSha256": "11001b54ae82e25fcc39ab91e7ed3e8dca41016d04db1aca1e036d21038a9a65",
+      "archivedSha256": "121606f79cf90fa11fe9d3af3e84217e0e453fa97dbd9600ad034256a3896bbb"
+    },
+    {
+      "file": "20260713070629_add_distributed_proxy_rate_limit.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713062000_add_distributed_proxy_rate_limit.sql",
+      "sha256": "40c43746d8da9c89c1bfd51a692b725f2e940e98c109d9022065914f2deebf50",
+      "remoteSha256": "40c43746d8da9c89c1bfd51a692b725f2e940e98c109d9022065914f2deebf50",
+      "archivedSha256": "8469ad9a364007b4afc47177a0a423c31383e6ae9f436413e213e0e1d2ebb6cd"
+    },
+    {
+      "file": "20260713070856_hide_proxy_rate_limit_definer.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713062500_hide_proxy_rate_limit_definer.sql",
+      "sha256": "fd952488de196499404d8506b690020b2ffa2d13a64779c2695e30d6bfbde57b",
+      "remoteSha256": "fd952488de196499404d8506b690020b2ffa2d13a64779c2695e30d6bfbde57b",
+      "archivedSha256": "fe12c91d43f7ce8c898e8a935112292186b2fabc28959df54b695dfac6cbb64d"
+    },
+    {
+      "file": "20260713071842_prevent_proxy_rate_limit_ip_poisoning.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713063000_prevent_proxy_rate_limit_ip_poisoning.sql",
+      "sha256": "908b1e567073cbd1f9697d828a42fb1a9a1a8e9c13aa389e5c2aff8c7e6967a1",
+      "remoteSha256": "908b1e567073cbd1f9697d828a42fb1a9a1a8e9c13aa389e5c2aff8c7e6967a1",
+      "archivedSha256": "1865b084b778aa4daaece9fff5e72a9a36b7a3f4cda8740ba0c97d2594e23c35"
+    },
+    {
+      "file": "20260713075829_fix_packaging_work_order_quantity_split.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713075829_fix_packaging_work_order_quantity_split.sql",
+      "sha256": "982f44786dd0f4cbc3e951103a0c4ecd9fe72afc50f794496adad0c380135f7b",
+      "remoteSha256": "982f44786dd0f4cbc3e951103a0c4ecd9fe72afc50f794496adad0c380135f7b",
+      "archivedSha256": "14457a437ff84a3312868007ce4ea5bc9bc54a099d28fe01059df934e1a80544"
+    },
+    {
+      "file": "20260713084138_packaging_work_order_entered_totals.sql",
+      "source": "remote-history",
+      "archivedFile": "20260713084138_packaging_work_order_entered_totals.sql",
+      "sha256": "df2f0f7b42d714e784df14d517d1badf1ccb4bcdf6e4afa47e2684b79b6db4d0",
+      "remoteSha256": "df2f0f7b42d714e784df14d517d1badf1ccb4bcdf6e4afa47e2684b79b6db4d0",
+      "archivedSha256": "0bd14b8f4e6535db836f3f2737410011ebd32db78cb0cf9e8a8db88af26d5c57"
+    },
+    {
+      "file": "20260716020240_enforce_unique_sales_order_project_no.sql",
+      "source": "remote-history",
+      "archivedFile": "20260716000000_enforce_unique_sales_order_project_no.sql",
+      "sha256": "1474b19674085ae11661b2da73ce46bb1cec183863eb0e8f7d3d7ac1230088fa",
+      "remoteSha256": "1474b19674085ae11661b2da73ce46bb1cec183863eb0e8f7d3d7ac1230088fa",
+      "archivedSha256": "f4d9e2d7ad0e62f9ba40bbf139770a0deaa8876506d9cc5e7987bc4dbf6102ed"
+    },
+    {
+      "file": "20260722030342_add_standard_time_process_fields.sql",
+      "source": "remote-history",
+      "archivedFile": "20260722030106_add_standard_time_process_fields.sql",
+      "sha256": "3a5f807fa51a2b1c87b51eec7458ff89ec92b3cbab19c108b8055bf69f0bed01",
+      "remoteSha256": "3a5f807fa51a2b1c87b51eec7458ff89ec92b3cbab19c108b8055bf69f0bed01",
+      "archivedSha256": "0d1fb7536e77b1fbaa4c5527d9aa7815519984809fbe74aad1d627b693a6ac2f"
+    },
+    {
+      "file": "20260723062520_create_unauthenticated_invoices.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "4d6b3657e5fb7b35b7c436aa76971e78d09d711c3a3c9b0d9b4a89ca6c16c446",
+      "remoteSha256": "4d6b3657e5fb7b35b7c436aa76971e78d09d711c3a3c9b0d9b4a89ca6c16c446",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260723082600_add_reimbursement_status_trigger_consistency.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "3cf5b913d3090229c1e9bf2ca4bd1b998aeac8535eaf001c1ec6255a96eab663",
+      "remoteSha256": "3cf5b913d3090229c1e9bf2ca4bd1b998aeac8535eaf001c1ec6255a96eab663",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260724012916_add_invoice_auth_ownership.sql",
+      "source": "remote-history",
+      "archivedFile": null,
+      "sha256": "71857f3a3280eaca1802ef6d5d27216ae76f2e337659a4b495133d4bddb34b59",
+      "remoteSha256": "71857f3a3280eaca1802ef6d5d27216ae76f2e337659a4b495133d4bddb34b59",
+      "archivedSha256": null
+    },
+    {
+      "file": "20260802072303_create_tooling_fixtures.sql",
+      "source": "remote-history",
+      "archivedFile": "20260802090000_create_tooling_fixtures.sql",
+      "sha256": "cea498a3a66ad45a1515438bfe7e5a0ce825014960ba6a69716bbcf99f2108a0",
+      "remoteSha256": "cea498a3a66ad45a1515438bfe7e5a0ce825014960ba6a69716bbcf99f2108a0",
+      "archivedSha256": "ccd2b5dfc027be1c63851e0dae85b936fe9e39a180ef92fad64cde62fd753ae7"
+    },
+    {
+      "file": "20260802073815_seed_tooling_fixture_permissions.sql",
+      "source": "remote-history",
+      "archivedFile": "20260802091000_seed_tooling_fixture_permissions.sql",
+      "sha256": "584bb6f4e73b1353acc5a5bd93393a6992ec69c068eb45482cad0090cac6ca1b",
+      "remoteSha256": "584bb6f4e73b1353acc5a5bd93393a6992ec69c068eb45482cad0090cac6ca1b",
+      "archivedSha256": "266697b50ccbac7476d66a0b2f3259d5965f7ed990b8620db8e9e7daac80994c"
+    },
+    {
+      "file": "20260802074505_restrict_tooling_fixture_rpc_roles.sql",
+      "source": "remote-history",
+      "archivedFile": "20260802092000_restrict_tooling_fixture_rpc_roles.sql",
+      "sha256": "c3471e0c4b50330ba4aac0dd17f27df94cf2d6dbae8909c0714322d7457b4c09",
+      "remoteSha256": "c3471e0c4b50330ba4aac0dd17f27df94cf2d6dbae8909c0714322d7457b4c09",
+      "archivedSha256": "6d98fa8564d27c24e08cf40e0bbbe35eaf077ca5ce746e557e3ef34bf4f954a3"
+    },
+    {
+      "file": "20260803013454_add_tooling_fixture_lifecycle.sql",
+      "source": "remote-history",
+      "archivedFile": "20260803000000_add_tooling_fixture_lifecycle.sql",
+      "sha256": "4dd49789521e6a89c32fbb1df7bf796372df861e9145fc5c91f1e5f70556f720",
+      "remoteSha256": "4dd49789521e6a89c32fbb1df7bf796372df861e9145fc5c91f1e5f70556f720",
+      "archivedSha256": "096d5f0ff7c190b2a4a002b80f1d6a6b1a291710f2759074e55540b083ce397c"
+    },
+    {
+      "file": "20260803023950_add_precision_cutting_transfer_long_material_quantities.sql",
+      "source": "remote-history",
+      "archivedFile": "20260803102500_add_precision_cutting_transfer_long_material_quantities.sql",
+      "sha256": "f324eb0e3e468720a99ecd6c3bfbecb5f5e3d6e0c567f7866234e1c6d643b31a",
+      "remoteSha256": "f324eb0e3e468720a99ecd6c3bfbecb5f5e3d6e0c567f7866234e1c6d643b31a",
+      "archivedSha256": "9b25118fe75116117052f606c61126cf7388e952e6bf95523e81f1b88af17a53"
+    },
+    {
+      "file": "20260803062021_add_data_error_responsible_to_precision_cutting_transfers.sql",
+      "source": "remote-history",
+      "archivedFile": "20260803150000_add_data_error_responsible_to_precision_cutting_transfers.sql",
+      "sha256": "3415190f240fcce46d512df656507165a34132cf87117d79c87759bb88a3160a",
+      "remoteSha256": "3415190f240fcce46d512df656507165a34132cf87117d79c87759bb88a3160a",
+      "archivedSha256": "07ddeed20958ef85f970731bfe3e9310cce2b1dd4f0cb73ae3c478d31cff1e1e"
+    },
+    {
+      "file": "20260812063730_add_production_scheduling_aggregate_views.sql",
+      "source": "remote-history",
+      "archivedFile": "20260812090000_add_production_scheduling_aggregate_views.sql",
+      "sha256": "9f8583d76b3964aefef789e31b8aecf6f80ceff2dcc35ca8982c7f395ae5c40d",
+      "remoteSha256": "9f8583d76b3964aefef789e31b8aecf6f80ceff2dcc35ca8982c7f395ae5c40d",
+      "archivedSha256": "6c720c1f613a3a7fc6f99dbb3e193e5e5e7290a6ef500e774cd4f74cbad9fa13"
+    },
+    {
+      "file": "20260812100000_add_sales_order_project_options_view.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260812100000_add_sales_order_project_options_view.sql",
+      "sha256": "941b690e123fe6e48fe1daf94daf3d4e6280a8ba8c9cde507d0d803baef3fbe0",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "941b690e123fe6e48fe1daf94daf3d4e6280a8ba8c9cde507d0d803baef3fbe0"
+    },
+    {
+      "file": "20260812110000_add_missing_indexes.sql",
+      "source": "local-reconstruction",
+      "archivedFile": "20260812110000_add_missing_indexes.sql",
+      "sha256": "d16e8c82b4b4a6f5ab542ecdca38617da45795696a0586c38e9bbcf3a94f4e77",
+      "remoteSha256": "d8a957038679125d4840554fc43375697e662283121561afdefc2c3fbecaf729",
+      "archivedSha256": "d16e8c82b4b4a6f5ab542ecdca38617da45795696a0586c38e9bbcf3a94f4e77"
+    },
+    {
+      "file": "20260813023612_fix_tooling_stock_out_public_insert_allow_no_machine.sql",
+      "source": "remote-history",
+      "archivedFile": "20260813100000_fix_tooling_stock_out_public_insert_allow_no_machine.sql",
+      "sha256": "b67e3ae297d340d93b943a6e50b77e02562f60ab81c9868e8f121cd9fcb9fb5f",
+      "remoteSha256": "b67e3ae297d340d93b943a6e50b77e02562f60ab81c9868e8f121cd9fcb9fb5f",
+      "archivedSha256": "7589a5c2954914da12c3071185a3558369241b2971a311ae75c6f8316d3da808"
+    },
+    {
+      "file": "20260814060605_add_order_status_dashboard_kpis.sql",
+      "source": "remote-history",
+      "archivedFile": "20260814120000_add_order_status_dashboard_kpis.sql",
+      "sha256": "514caea35da79be6ec57d7d5e6725b0e7698ef8caad352ed86c3ac88f61de850",
+      "remoteSha256": "514caea35da79be6ec57d7d5e6725b0e7698ef8caad352ed86c3ac88f61de850",
+      "archivedSha256": "2b557770d7e9445f1c6a3fc755471582a9e222bcd5ae3705f989ce6839bbd2e3"
+    },
+    {
+      "file": "20260909060639_workshop_order_auto_close.sql",
+      "source": "remote-history",
+      "archivedFile": "20260909055944_workshop_order_auto_close.sql",
+      "sha256": "ff28fc1f87f9e3579d8da99f8f425675476443f6b5b762abe423134dc4818001",
+      "remoteSha256": "ff28fc1f87f9e3579d8da99f8f425675476443f6b5b762abe423134dc4818001",
+      "archivedSha256": "ae6a30cb9bdd3ccd93358bd4cc04fa2198a3eb8e733cc07df3fd4d4d1e80ca38"
+    }
+  ],
+  "hashEncoding": "UTF-8 with CRLF normalized to LF"
+}

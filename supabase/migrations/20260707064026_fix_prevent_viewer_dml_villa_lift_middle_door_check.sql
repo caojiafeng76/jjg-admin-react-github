@@ -1,6 +1,3 @@
--- 修正上一条远程迁移中 prevent_viewer_dml 的别墅梯字段比较。
--- middle_door_processing_date 必须与 old.middle_door_processing_date 比较。
-
 create or replace function public.prevent_viewer_dml()
 returns trigger
 language plpgsql
@@ -129,4 +126,4 @@ begin
 
   return new;
 end;
-$function$;
+$function$;;

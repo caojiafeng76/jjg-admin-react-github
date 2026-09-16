@@ -99,3 +99,4 @@ for all
 to authenticated
 using (public.current_user_has_permission('page:quality-issue-record'))
 with check (public.current_user_has_permission('page:quality-issue-record'));
+;

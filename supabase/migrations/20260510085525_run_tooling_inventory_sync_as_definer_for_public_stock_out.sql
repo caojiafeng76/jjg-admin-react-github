@@ -20,4 +20,4 @@ alter function public.handle_tooling_stock_out_inventory_sync()
 
 drop policy if exists "Tooling data public select" on public.tooling_data;
 create policy "Tooling data public select" on public.tooling_data
-for select to anon, authenticated using (true);
+for select to anon, authenticated using (true);;

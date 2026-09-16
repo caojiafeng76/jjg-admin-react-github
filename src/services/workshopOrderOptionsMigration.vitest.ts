@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 const migrationPath = resolve(
   process.cwd(),
-  'supabase/migrations/20260713050000_add_workshop_order_options_rpc.sql',
+  'supabase/migrations/20260713054649_add_workshop_order_options_rpc.sql',
 )
 
 function readMigration(): string {

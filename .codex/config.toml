@@ -2,16 +2,6 @@ model = "gpt-6-astra"
 model_context_window = 372000
 model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "medium"
-[mcp_servers.supabase]
-args = [
-    "-y",
-    "@supabase/mcp-server-supabase",
-    "--project-ref",
-    "mlcptrkvkseyqxxlfcme",
-]
-command = "npx"
-env_vars = ["SUPABASE_ACCESS_TOKEN"]
-
 [mcp_servers.context7]
 args = [
     "-y",

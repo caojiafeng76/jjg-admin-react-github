@@ -198,20 +198,21 @@ Fast lane 仍必须完成：复述目标、建立必要上下文、检查待编�
 
 关于工具优先级的总原则：
 
-- **默认情况下优先使用 CLI 工具**（bun 脚本、Supabase CLI 等）完成；只有当 CLI 无法完成（如连接失败、命令不支持、Docker 不可用等）时，才回退到 MCP 作为补充。
-- **例外：涉及 Supabase 数据库操作时，优先使用 Supabase MCP**；如果 MCP 无法完成、返回能力不足，或需要复用仓库内既有脚本与流程，再结合 CLI 执行。
+- **默认情况下优先使用 CLI 工具**（bun 脚本、Supabase CLI 等）完成；非数据库任务在 CLI 无法完成时，可按任务使用已有 MCP 补充；Supabase 数据库任务遵循下一条 CLI 专用流程。
+- **Supabase 数据库任务统一使用仓库 CLI 入口**：本项目已移除数据库 MCP 注册；CLI 失败时先运行 `bun run db:doctor` 修复连接，不回退到无保护的裸 SQL 执行。
 - **例外：涉及 Figma 设计稿、Figma 链接或 Figma 资源时，直接使用官方 Figma MCP** 获取设计上下文或资源内容，不要先用 CLI、手工转述或截图猜测来替代。
 
 关于 Supabase CLI 与数据库脚本执行的约定：
 
 - 本仓库的 `supabase start`、`supabase status`、`supabase db reset` 等本地容器模式依赖 Docker Desktop；如果 Docker 未运行或本地 CLI 启动失败，不要把数据库任务卡在本地环境上。
 - 遇到数据库任务时，优先区分两类执行路径：
-  - DDL / RLS / 约束 / 索引 / 函数 / 触发器 -> 优先 Supabase MCP `apply_migration`；需要复用仓库 migration 流程、补充验证或 MCP 不足时，再结合 `bun run db:push`
-  - 一次性数据修复 / 只读校验 / 临时 SQL -> 优先 Supabase MCP `execute_sql`；需要复用仓库 SQL 文件、批处理脚本或 MCP 不足时，再结合 `bun run db:query -- --file <sql-file>`
+  - DDL / RLS / 约束 / 索引 / 函数 / 触发器 -> 写入 migration，先 `bun run db:push:dry-run`，再通过标准 CLI 入口 `bun run db:push` 执行
+  - 一次性数据修复 / 只读校验 / 临时 SQL -> 使用带保护的 `bun run db:query -- --file <sql-file>` 执行；只读表结构核对也走该入口
 - 不要把结构变更直接塞进临时 SQL 裸跑；优先保持 migration 可追踪、可回滚。
-- 如果本地 Docker 不可用，但远程 linked CLI 或 MCP 可用，应继续推进数据库任务，不要因为 `supabase start` 失败而中断。
+- 如果本地 Docker 不可用，但远程 CLI 可用，应继续推进数据库任务，不要因为 `supabase start` 失败而中断。
 - 任何涉及数据库删除、清空或重置的危险操作（如 `DELETE`、`DROP`、`TRUNCATE`、`db reset`、批量清理）在真正执行前，必须由用户本人明确确认至少 3 次；未达到 3 次确认前，禁止执行。
-- 破坏性 SQL 不允许直接走 Supabase MCP `execute_sql` 裸跑；必须优先通过 `bun run db:query -- --file <sql-file>` 执行，让仓库内 destructive guard 生效。Supabase MCP `execute_sql` 仅用于只读校验或已明确不含破坏性语句的临时查询。
+- `db:query` 直接检查实际 SQL 内容；正式 `db:push` 先解析标准 CLI 的结构化预演并检查待执行文件。危险 SQL 或动态执行必须由用户本人在交互终端按本次目标/SQL 指纹连续确认三次；非交互调用直接拦截，禁止助手代填、管道输入、参数/环境变量跳过或复用旧 hook 确认。
+- 不要绕过仓库入口调用裸 `supabase db query/push/reset` 或 `psql`。`db:push:api` 仅是标准迁移入口的兼容别名，不再自行执行 SQL、解析终端表格或手工补写历史。seed/roles 需拆成可审查 migration；数据库 reset 不提供自动执行入口。
 
 关于 Figma 资源的使用约定：
 

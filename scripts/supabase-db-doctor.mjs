@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import {
   buildCombinedOutput,
   printFailureDiagnosis,
@@ -27,7 +29,21 @@ function runCheck(
 }
 
 const queryTarget = resolveTargetArgs([])
-const pushTarget = resolveTargetArgs(['--dry-run'])
+function checkMigrationPush() {
+  console.log(`
+=== Migration 预演链路检查 ===`)
+  const result = spawnSync(
+    process.execPath,
+    [
+      fileURLToPath(new URL('./supabase-db-push.mjs', import.meta.url)),
+      '--dry-run',
+    ],
+    { stdio: 'inherit', windowsHide: true },
+  )
+  const ok = result.status === 0 && !result.error
+  console.log(`结果: ${ok ? 'PASS' : 'FAIL'}`)
+  return ok
+}
 
 const checks = [
   runCheck('CLI 版本检查', ['--version']),
@@ -40,14 +56,7 @@ const checks = [
       targetMode: queryTarget.targetMode,
     },
   ),
-  runCheck(
-    'Migration 预演链路检查',
-    ['db', 'push', ...pushTarget.forwardArgs],
-    {
-      diagnose: true,
-      targetMode: pushTarget.targetMode,
-    },
-  ),
+  checkMigrationPush(),
 ]
 
 const failedCount = checks.filter((item) => !item).length

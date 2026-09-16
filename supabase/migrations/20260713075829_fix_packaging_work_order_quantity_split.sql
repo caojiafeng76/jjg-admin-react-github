@@ -105,4 +105,4 @@ end;
 $$;
 revoke execute on function public.save_packaging_work_order_batch(uuid, jsonb)
 from public;
-grant execute on function public.save_packaging_work_order_batch(uuid, jsonb) to authenticated;
+grant execute on function public.save_packaging_work_order_batch(uuid, jsonb) to authenticated;;
