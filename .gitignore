@@ -29,6 +29,3 @@ graphify-out/
 *.njsproj
 *.sln
 *.sw?
-
-# Retired code-index cache
-.serena/cache/

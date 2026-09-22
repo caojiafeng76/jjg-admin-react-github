@@ -14,6 +14,7 @@ import { VILLA_LIFT_PERMISSIONS } from '@/features/villa-lift/permissions'
 import { QUALITY_PERMISSIONS } from '@/features/quality/permissions'
 import { EXTRUSION_PRODUCTION_PERMISSIONS } from '@/features/extrusion-production/permissions'
 import { PACKAGING_PROCESS_PERMISSIONS } from '@/features/packaging-process/permissions'
+import { JINTAN_PERMISSIONS } from '@/features/jintan/permissions'
 
 /** 全局页面权限（没有独立 feature 目录的权限） */
 const GLOBAL_PERMISSIONS: PermissionDefinition[] = [
@@ -71,4 +72,5 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
   ...QUALITY_PERMISSIONS,
   ...EXTRUSION_PRODUCTION_PERMISSIONS,
   ...PACKAGING_PROCESS_PERMISSIONS,
+  ...JINTAN_PERMISSIONS,
 ]

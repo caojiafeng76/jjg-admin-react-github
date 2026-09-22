@@ -57,4 +57,8 @@ export const PAGE_PERMISSION_ROUTES: PagePermissionRoute[] = [
   { path: '/packaging-process-work-order-list', permission: 'page:packaging-process-work-order-list' },
   { path: '/extrusion-production-order', permission: 'page:extrusion-production' },
   { path: '/extrusion-production-daily-report', permission: 'page:extrusion-production-daily-report' },
+  { path: '/jintan-parts-data', permission: 'page:jintan-parts-data' },
+  { path: '/jintan-parts-inventory', permission: 'page:jintan-parts-inventory' },
+  { path: '/jintan-parts-stock-in', permission: 'page:jintan-parts-stock-in' },
+  { path: '/jintan-parts-stock-out', permission: 'page:jintan-parts-stock-out' },
 ]

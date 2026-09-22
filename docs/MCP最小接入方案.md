@@ -1,6 +1,6 @@
 # MCP 最小接入方案
 
-本项目的数据库工作流已切换为 Supabase CLI，不再配置数据库 MCP。当前项目注册以根目录 `.mcp.json` 与 `.codex/config.toml` 为准，保留 Context7 和 Chrome DevTools。
+本项目的数据库工作流已切换为 Supabase CLI，不再配置数据库 MCP。当前项目注册以根目录 `.mcp.json`、`.codex/config.toml` 与 `opencode.jsonc` 为准，保留 Context7 和 Chrome DevTools。
 
 ## 当前分工
 

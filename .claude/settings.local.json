@@ -1,8 +1,6 @@
 {
   "enabledMcpjsonServers": [
     "spec-workflow",
-    "supabase",
-    "serena",
     "context7",
     "chrome-devtools"
   ]

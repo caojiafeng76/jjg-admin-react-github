@@ -341,6 +341,39 @@ export type Database = {
         }
         Relationships: []
       }
+      jintan_parts_data: {
+        Row: {
+          created_at: string
+          id: string
+          material: string
+          part_name: string
+          remarks: string
+          specification: string
+          supplier: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material?: string
+          part_name: string
+          remarks?: string
+          specification?: string
+          supplier?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material?: string
+          part_name?: string
+          remarks?: string
+          specification?: string
+          supplier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_base_settings: {
         Row: {
           created_at: string

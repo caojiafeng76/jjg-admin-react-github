@@ -356,6 +356,34 @@ const allMenuItems: MenuItemDef[] = [
     ],
   },
   {
+    key: 'jintan',
+    label: '金檀木业',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:jintan',
+    children: [
+      {
+        key: 'jintan-parts-data',
+        label: '配件资料',
+        permission: 'page:jintan-parts-data',
+      },
+      {
+        key: 'jintan-parts-inventory',
+        label: '配件库存',
+        permission: 'page:jintan-parts-inventory',
+      },
+      {
+        key: 'jintan-parts-stock-in',
+        label: '配件入库',
+        permission: 'page:jintan-parts-stock-in',
+      },
+      {
+        key: 'jintan-parts-stock-out',
+        label: '配件出库',
+        permission: 'page:jintan-parts-stock-out',
+      },
+    ],
+  },
+  {
     key: 'attendance',
     label: '考勤',
     icon: <Square3Stack3DIcon className="size-4" />,

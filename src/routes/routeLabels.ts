@@ -54,6 +54,10 @@ const routeToLabelMap: Record<string, string> = {
   'packaging-process-employee-list': '包装工序 / 员工管理',
   'packaging-process-standard-time-list': '包装工序 / 标准工时',
   'packaging-process-work-order-list': '包装工序 / 生产工单',
+  'jintan-parts-data': '金檀木业 / 配件资料',
+  'jintan-parts-inventory': '金檀木业 / 配件库存',
+  'jintan-parts-stock-in': '金檀木业 / 配件入库',
+  'jintan-parts-stock-out': '金檀木业 / 配件出库',
   'access-denied': '无权限',
 }
 

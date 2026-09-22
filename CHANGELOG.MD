@@ -4,6 +4,64 @@
 
 ## 2026-09-22
 
+- **类别**：新建 / 页面
+- **范围**：金檀木业「配件资料」页面完整 CRUD（服务层、queryKeys、hooks、表单、搜索、表格、容器）
+- **摘要**：把 `src/features/jintan/PartsData/index.tsx` 占位页换成完整 CRUD 列表页，结构同构于 `src/features/youmai/ProductData`。新建 `src/services/apiJintanPartsData.ts`（`JintanPartsData` / `JintanPartsDataFormValues` 类型 + 列表分页、4 列 `or ilike` 关键词搜索、`updated_at desc, part_name asc` 排序、增删改，创建/更新前预检 `(part_name, specification)` 重复并给中文提示，对应唯一约束 `jintan_parts_data_name_spec_unique`）；新建 `src/features/jintan/queryKeys.ts`（`jintanKeys.partsData.{all,list}`，keyword 归一化，只留用到的 list 键）；新建 `PartsData/useJintanPartsData.ts`（列表 `keepPreviousData` + `throwOnError:false` + `queryConfig.list`，增删改走 `useMutationWithInvalidation`）；新建 `JintanPartsDataForm.tsx`（名称必填、规格/材质/采购厂家可选，均 ≤100；备注 ≤500，`Input.TextArea autoSize 3–5`）、`JintanPartsDataSearch.tsx`、`JintanPartsDataTable.tsx`（7 列 + 行选择 + 键盘行 + 斑马纹 + `TableEmpty` 空态引导）。`src/features/jintan/permissions.ts` 导出 `JINTAN_PARTS_DATA_PERMISSION_KEY = 'page:jintan-parts-data'` 并在注册表内复用，按钮权限与 RLS 一致，不新增 `feature:jintan.manage`。
+- **UI 设计指南落点**：按 `docs/UI设计调研与改版指南.md` 与 `docs/UI改版-逐页问题分析与改进方案.md` 的「通用列表页核对清单」落地：卡片分层（白底 + 1px 边框 + 浅影 + `dark:` 适配）、表格三态（`TableState` 骨架/错误重试 + `TableEmpty` 图标+说明+新建引导）、`FormErrorAlert` 三段式错误文案、slate 冷灰中性色。指南 6.2.3 建议编辑用 Drawer，经用户确认本次沿用全站既有 **Modal**（与优迈货品资料一致）；指南 4.2 的表格默认密度同理沿用优迈 `size="small"`。本表无数字列与状态列，`tabular-nums` 与 pill 徽章不适用。经用户确认本次不做 Excel 批量导入（数据已随迁移落库 37 行）。
+- **权限与查看员**：`useViewerOperationGuard()` 不传 bypass，查看员一律禁用写操作并提示「查看员仅可查看数据」，与 `prevent_viewer_dml_trigger` 在本表无旁路分支的行为对齐。
+- **验证**：`bunx antd info Modal/Input --format json` 核对 `destroyOnHidden`、`confirmLoading`、`okButtonProps`、`Input.TextArea.autoSize` 均存在（未虚构 props）；`bun run typecheck` 通过；`bun lint` 0 错误 / 15 个既有警告（均在未改动文件）；`bunx antd lint src/features/jintan --format json` 0 问题；`bun run test` 脚本 31 项 + 122 个 Vitest 文件 / 549 项全部通过；`bun run build` 通过；`git diff --check` 无问题。未改路由/菜单/标签/权限路由/`database.types.ts`（均已就绪）。前端代码尚未发布。
+
+## 2026-09-22
+
+- **类别**：数据库 / 验证
+- **范围**：`jintan_parts_data` 迁移落库核验、`database.types.ts` 重新生成
+- **摘要**：用户在交互终端执行 `bun run db:push` 并连续确认三次后，`20260922040000_create_jintan_parts_data.sql` 与 `20260922040100_seed_jintan_parts_data.sql` 已落库。远程核验与设计一致，无偏差。`bun run db:types` 重新生成 `database.types.ts`，diff 仅 +33 行（只有新表定义，无删改、无其他表变化）。
+- **验证**：`db:query` 实测 `jintan_parts_data` 共 37 行、37 个互不重复的 `(part_name, specification)` 组合；采购厂家非空 29 行（南浔螺丝店 16 / 自制 3 / 蓝工 1 / 吴江菀坪 2 / 烨煜塑料厂 3 / 林总 1 / 海盐金佑 1 / 海达 2），规格为空 15 行、材质为空 8 行，与源 xlsx 展开结果一致；`pg_policies` 确认 2 条策略（`Jintan parts data admin all` / `Jintan parts data permission rw`）；`pg_trigger` 确认 2 个触发器（`prevent_viewer_dml_trigger` / `update_jintan_parts_data_updated_at`）；`pg_constraint` 确认 3 个约束（pkey / `jintan_parts_data_name_spec_unique` 唯一 / `jintan_parts_data_part_name_not_blank` 检查）；`information_schema.columns` 确认 8 列类型与可空性符合设计（无 quantity 列）。`bun run typecheck` 通过。本次未改业务代码，沿用上一条已通过的 lint 结果。
+
+## 2026-09-22
+
+- **类别**：新建 / 数据库
+- **范围**：金檀木业配件资料表 `jintan_parts_data`（结构、RLS、触发器、37 行种子数据）
+- **摘要**：按用户提供的《凉亭所需配件清单》（xlsx，标题+表头+37 行，6 列：名称/规格/材质/数量/采购厂家/备注）新建 `public.jintan_parts_data`。字段：`part_name`（非空，`btrim` 校验）、`specification` / `material` / `supplier` / `remarks`（`not null default ''`），唯一约束 `(part_name, specification)`，`updated_at desc` 索引。管理员可 CRUD：`Jintan parts data admin all`（`is_admin()`）+ `Jintan parts data permission rw`（`current_user_has_permission('page:jintan-parts-data')`），并挂 `update_jintan_parts_data_updated_at` 与 `prevent_viewer_dml_trigger`（仓库里 `20260430110000` 是一次性循环建触发器，新表须手动挂）。经用户确认：**去掉数量列**（37 行全空，库存/用量归配件库存模块）；**手摇机规格留空**（原值 0.0527777777777778 系 Excel 把「1:16」存成时间格式的污染值）。种子数据处理：采购厂家合并单元格已展开（南浔螺丝店×16、自制×3、蓝工×1、吴江菀坪×2、烨煜塑料厂×3、林总×1、海盐金佑×1、海达×2、无厂家×8）；材质 `6063`/`3003` 在 Excel 中是数字，已按文本写入；丢弃第 30 行杂散备注 `` ` ``。本次不含前端 CRUD（用户确认仅数据库表）。迁移拆为 `20260922040000_create_jintan_parts_data.sql` 与 `20260922040100_seed_jintan_parts_data.sql`。
+- **验证**：`db:query` 确认 `update_updated_at_column()` 已存在、`prevent_viewer_dml_trigger` 命名与既有表一致、上一条 `page:jintan-parts-data` 权限已落库；37 行 `(part_name, specification)` 无重复，唯一约束不会与种子数据冲突。`db:push:dry-run` 仅列出本次 2 个迁移。迁移尚未推送：SQL 含 TRIGGER/FUNCTION/DROP 关键字，`bun run db:push` 交互确认门禁要求用户本人连续确认三次；落库后需执行 `bun run db:types` 重新生成类型（`database.types.ts` 禁止手改）。
+
+## 2026-09-22
+
+- **类别**：新建 / 菜单
+- **范围**：金檀木业新增「配件资料」子菜单、路由、权限、占位页面、seed migration
+- **摘要**：在「金檀木业」分组下新增「配件资料」子菜单，位置排在配件库存之前（参照优迈分组「货品资料」在前的顺序）。新建占位页 `src/features/jintan/PartsData/index.tsx`（antd Empty「配件资料（建设中）」）；同步更新 `jintan/permissions.ts`（新增 `page:jintan-parts-data`）、`lazyPages.ts`、`router.tsx`（路由 `/jintan-parts-data`，含 PermissionProtectedRoute + Suspense）、`pagePermissionRoutes.ts`、`routeLabels.ts`、`MainMenu.tsx`。新增 `supabase/migrations/20260922033000_seed_jintan_parts_data_permission.sql` 仅插入 1 行权限，依赖既有 `auto_grant_to_admin` 触发器授权 admin；原因为前端注册表同步仍被 `permissions` 表无 INSERT 策略的 RLS 拒绝（见下一条）。
+- **验证**：`bun lint` 0 错误 / 15 个既有警告；`bun run typecheck` 通过；`bun run test` 覆盖 `pageHome.test.ts`、`RouteGuards.test.tsx`、`AppLayout.test.tsx` 的 3 个 Vitest 文件 / 7 项测试通过，脚本测试 31 项通过；`db:push:dry-run` 仅列出本次迁移。迁移尚未推送：`bun run db:push` 交互确认门禁阻止非交互执行（`on conflict ... do nothing` 命中 DO 关键字复核），待用户交互确认后再核验落库与菜单显示。
+
+## 2026-09-22
+
+- **类别**：修复 / 权限
+- **范围**：金檀木业（jintan）权限未落库导致菜单不显示；新增 seed migration
+- **摘要**：定位到菜单不显示的根因：`permissions` 表仅存在 `permissions authenticated select` 一条 SELECT 策略，无 INSERT 策略，前端 `syncPermissionRegistry` 的 upsert 被 RLS 拒绝并静默失败，因此 `nav:jintan` 及 3 个 `page:jintan-*` 从未写入数据库，`get_my_permissions()` 无对应行，`MainMenu` 按 `can('nav:jintan')` 过滤后整组隐藏。上一条记录中「admin 由注册表自动同步」的假设不成立。按仓库既有约定（参照 `20260802073815_seed_tooling_fixture_permissions.sql`）新增 `supabase/migrations/20260922021500_seed_jintan_permissions.sql`，仅插入 4 行权限（无危险语句），依赖既有 `auto_grant_to_admin` 触发器授权 admin。前端代码无需改动。
+- **验证**：`db:query` 确认 `permissions` 表无任何 `jintan` 行，`pg_policies` 确认 `permissions` 仅 SELECT 策略；`db:push:dry-run` 仅列出本次新增迁移。迁移尚未推送：`bun run db:push` 的交互确认门禁要求用户本人在终端连续确认三次，被非交互执行阻止（`on conflict ... do nothing` 触发 DO 关键字复核）。待用户交互执行后再核验 `nav:jintan` 落库与菜单显示。
+
+## 2026-09-22
+
+- **类别**：新建 / 路由
+- **范围**：金檀木业（jintan）菜单、路由、权限注册、占位页面
+- **摘要**：新增父菜单「金檀木业」及 3 个子页面「配件库存 / 配件入库 / 配件出库」。新建 `src/features/jintan/permissions.ts`（`nav:jintan` + 3 个 `page:*`）并注册进 `permissionRegistry.ts`；新建 3 个占位页面（antd Empty「建设中」）；同步更新 `lazyPages.ts`、`router.tsx`、`pagePermissionRoutes.ts`、`routeLabels.ts`、`MainMenu.tsx`。路由 path 为 `/jintan-parts-inventory`、`/jintan-parts-stock-in`、`/jintan-parts-stock-out`。未加 seed migration，admin 由注册表自动同步，其他角色后续在权限管理页勾选。
+- **验证**：`bun lint` 0 错误 / 15 个既有警告（均在未改动文件）；`bun run typecheck` 通过。
+
+## 2026-09-22
+
+- **类别**：配置 / 清理
+- **范围**：.claude/settings.local.json、.gitignore、.serena/、jiti 缓存
+- **摘要**：彻底移除 Serena 残留：删除 .claude/settings.local.json 中孤儿 `serena` MCP 启用项、.gitignore 的 `.serena/cache/` 忽略规则、未跟踪的 `.serena/` 目录（cache 约 32MB + 空 memories）及 node_modules jiti 中 serena-singleton 构建缓存。`.mcp.json`、`opencode.jsonc`、`package.json`、scripts 本已无 Serena 注册，未改动；CHANGELOG 历史条目保留。
+- **验证**：全库 grep 仅 CHANGELOG 历史记录与业务 SQL 无关哈希提及 serena/9121；`.serena/` 与 jiti 缓存文件已不存在；`git status` 仅含预期改动。
+
+## 2026-09-22
+
+- **类别**：配置 / 文档
+- **范围**：opencode.jsonc MCP 注册、.claude/settings.local.json、MCP 指南
+- **摘要**：补删 opencode.jsonc 中残留的 Supabase MCP（`@supabase/mcp-server-supabase`）注册，移除 .claude/settings.local.json 中已无对应 server 的孤儿 `supabase` 启用项，保留 Context7 与 Chrome DevTools；MCP 指南补记 opencode.jsonc 为注册文件。数据库任务继续统一走既有 Supabase CLI 入口（db:doctor/push/query/types），CLI 凭据与项目 link 不变。
+- **验证**：确认仓库内无 `mcp-server-supabase` 残留；opencode.jsonc JSONC 解析通过；`bun run ai:doctor` 检查通过。未改动 CLI 脚本、package.json 及历史文档记录。
+
+## 2026-09-22
+
 - **类别**：权限 / 验证
 - **范围**：吴雯雯精切转移单授权迁移落地核验
 - **摘要**：用户完成交互确认并执行迁移后，远程确认 20260922015617 已落库，吴雯雯账号有效、角色仍为 viewer，精切菜单、精切转移单页面与全部操作三项覆盖权限均为 true，数据库查看员触发器中的单表授权例外已生效。前端修改仍在工作区，尚未发布；仓库仅发现 Vercel 重写配置与 CI 校验流程，无已绑定发布项目，需要确认现有发布方式。
