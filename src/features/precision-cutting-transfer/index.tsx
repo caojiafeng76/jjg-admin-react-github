@@ -11,6 +11,8 @@ import ExportButton from '@/ui/ExportButton'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { useAuth } from '@/contexts/useAuth'
+import { isViewerRole } from '@/config/access'
+import { PRECISION_CUTTING_TRANSFER_MANAGE_PERMISSION_KEY } from './permissions'
 import {
   getPrecisionCuttingTransfersForExport,
   type PrecisionCuttingTransferFilters,
@@ -41,9 +43,14 @@ const preloadPrecisionCuttingTransferExcel = () => {
 
 export default function MaterialTransferPage() {
   const { message, modal } = App.useApp()
-  const { user } = useAuth()
+  const { user, role } = useAuth()
   const currentUploader = user?.email || null
-  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: PRECISION_CUTTING_TRANSFER_MANAGE_PERMISSION_KEY,
+  })
+  const operationPermissionKey = isViewerRole(role)
+    ? PRECISION_CUTTING_TRANSFER_MANAGE_PERMISSION_KEY
+    : undefined
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 50
@@ -315,7 +322,10 @@ export default function MaterialTransferPage() {
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
       <div className="flex flex-wrap items-center gap-2">
-        <AddButton handleCreate={openCreateModal} />
+        <AddButton
+          handleCreate={openCreateModal}
+          permissionKey={operationPermissionKey}
+        />
         <Button
           type="text"
           icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
@@ -334,8 +344,13 @@ export default function MaterialTransferPage() {
         >
           批量反审核
         </Button>
-        <EditButton title="编辑精切转移单" handleEdit={() => openEditModal()} />
+        <EditButton
+          title="编辑精切转移单"
+          handleEdit={() => openEditModal()}
+          permissionKey={operationPermissionKey}
+        />
         <ExportButton
+          permissionKey={operationPermissionKey}
           handleExport={handleExport}
           loading={isExporting}
           onPreload={preloadPrecisionCuttingTransferExcel}
@@ -343,6 +358,7 @@ export default function MaterialTransferPage() {
           {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
         </ExportButton>
         <DeleteButton
+          permissionKey={operationPermissionKey}
           onConfirm={() => handleDelete()}
           isDeleting={deleteMutation.isPending}
           count={selectedCount}
@@ -399,7 +415,11 @@ export default function MaterialTransferPage() {
             className="flex h-full flex-col gap-2 overflow-hidden"
           >
             <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-              <TableState loading={isLoading && !data} error={error} onRetry={() => void refetch()}>
+              <TableState
+                loading={isLoading && !data}
+                error={error}
+                onRetry={() => void refetch()}
+              >
                 <MaterialTransferTable
                   loading={isLoading}
                   data={records}
@@ -410,7 +430,12 @@ export default function MaterialTransferPage() {
                   scrollY={scrollY}
                   activeRowId={activeRecord?.id ?? null}
                   onRowClick={setActiveRecord}
-                  emptyAction={<AddButton handleCreate={openCreateModal} />}
+                  emptyAction={
+                    <AddButton
+                      handleCreate={openCreateModal}
+                      permissionKey={operationPermissionKey}
+                    />
+                  }
                 />
               </TableState>
             </div>
