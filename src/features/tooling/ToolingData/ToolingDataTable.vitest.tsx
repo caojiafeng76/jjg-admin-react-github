@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import type { TableColumnsType } from 'antd'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -13,6 +13,14 @@ const capturedTable = vi.hoisted(() => ({
 }))
 
 vi.mock('antd', () => ({
+  Button: (props: {
+    children?: React.ReactNode
+    onClick?: (event: React.MouseEvent) => void
+  }) => (
+    <button type="button" onClick={props.onClick}>
+      {props.children}
+    </button>
+  ),
   Table: (props: { columns: TableColumnsType<ToolingData> }) => {
     capturedTable.columns = props.columns as CapturedColumn[]
     return null
@@ -109,5 +117,46 @@ describe('ToolingDataTable', () => {
       right: ToolingData,
     ) => number
     expect(unitPriceSorter(data[0], data[1])).toBeCloseTo(2.7)
+  })
+
+  it('appends an inventory detail action column only when onOpenDetail is provided', () => {
+    const onOpenDetail = vi.fn()
+    const data = [createRecord()]
+
+    render(
+      <ToolingDataTable
+        loading={false}
+        data={data}
+        selectedRowKeys={[]}
+        onSelect={vi.fn()}
+        page={1}
+        pageSize={10}
+        onOpenDetail={onOpenDetail}
+      />,
+    )
+
+    expect(capturedTable.columns.map((column) => column.key)).toEqual([
+      '#',
+      'tool_code',
+      'tool_name',
+      'tool_spec',
+      'material',
+      'unit_price',
+      'usage',
+      'remarks',
+      'updated_at',
+      'inventory-detail',
+    ])
+
+    const detailRender = getColumn('inventory-detail').render as (
+      value: unknown,
+      record: ToolingData,
+      index: number,
+    ) => React.ReactElement
+
+    render(detailRender(undefined, data[0], 0))
+    fireEvent.click(screen.getByRole('button', { name: '查看' }))
+
+    expect(onOpenDetail).toHaveBeenCalledWith(data[0])
   })
 })

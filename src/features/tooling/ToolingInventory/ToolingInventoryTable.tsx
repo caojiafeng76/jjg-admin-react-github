@@ -4,15 +4,7 @@ import { Table, type TableColumnsType } from 'antd'
 
 import type { ToolingInventory } from '@/services/apiToolingInventory'
 import { formatNumber } from '@/utils/format'
-
-function getFinalStockColorClass(value: number | null | undefined) {
-  const stock = Number(value ?? 0)
-
-  if (stock < 5) return 'text-red-600'
-  if (stock < 10) return 'text-yellow-600'
-  if (stock < 20) return 'text-orange-600'
-  return 'text-green-600'
-}
+import { getFinalStockColorClass } from '../inventoryPresentation'
 
 interface Props {
   loading: boolean
@@ -154,7 +146,9 @@ function ToolingInventoryTable({
       scroll={{ x: 1680, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
+        index % 2 === 0
+          ? 'bg-white dark:bg-slate-800'
+          : 'bg-slate-50/60 dark:bg-slate-800/60'
       }
       onRow={(record) => ({
         ...createKeyboardTableRowProps(

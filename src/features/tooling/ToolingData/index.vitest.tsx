@@ -30,11 +30,16 @@ const updateMutation = vi.hoisted(() => ({
 }))
 const formState = vi.hoisted(() => ({
   initialValues: undefined as unknown,
-  onFinish: undefined as ((values: Record<string, unknown>) => void) | undefined,
+  onFinish: undefined as
+    ((values: Record<string, unknown>) => void) | undefined,
 }))
 
 vi.mock('antd', () => ({
-  App: { useApp: () => ({ message: { ...messages, error: vi.fn(), success: vi.fn() } }) },
+  App: {
+    useApp: () => ({
+      message: { ...messages, error: vi.fn(), success: vi.fn() },
+    }),
+  },
   Button: (props: Record<string, any>) => (
     <button type="button" disabled={props.disabled} onClick={props.onClick}>
       {props.children}
@@ -47,7 +52,9 @@ vi.mock('antd', () => ({
     props.open ? (
       <div>
         <div>{props.title}</div>
-        <button type="button" onClick={props.onOk}>提交</button>
+        <button type="button" onClick={props.onOk}>
+          提交
+        </button>
         {props.children}
       </div>
     ) : null,
@@ -55,7 +62,10 @@ vi.mock('antd', () => ({
 
 vi.mock('@/hooks/usePermission', () => ({ usePermission: () => true }))
 vi.mock('@/hooks/useViewerOperationGuard', () => ({
-  useViewerOperationGuard: () => ({ viewerDenied: false, viewerOperationTip: '无操作权限' }),
+  useViewerOperationGuard: () => ({
+    viewerDenied: false,
+    viewerOperationTip: '无操作权限',
+  }),
 }))
 vi.mock('@/hooks/useTableHeight', () => ({
   useTableHeight: () => ({
@@ -71,13 +81,22 @@ vi.mock('@/services/apiToolingData', () => ({
 }))
 vi.mock('@/ui/AddButton', () => ({
   default: (props: Record<string, any>) => (
-    <button type="button" onClick={props.handleCreate}>新增</button>
+    <button type="button" onClick={props.handleCreate}>
+      新增
+    </button>
   ),
 }))
-vi.mock('@/ui/EditButton', () => ({ default: () => <button type="button">编辑</button> }))
-vi.mock('@/ui/DeleteButton', () => ({ default: () => <button type="button">删除</button> }))
-vi.mock('@/ui/ExportButton', () => ({ default: () => <button type="button">导出</button> }))
+vi.mock('@/ui/EditButton', () => ({
+  default: () => <button type="button">编辑</button>,
+}))
+vi.mock('@/ui/DeleteButton', () => ({
+  default: () => <button type="button">删除</button>,
+}))
+vi.mock('@/ui/ExportButton', () => ({
+  default: () => <button type="button">导出</button>,
+}))
 vi.mock('@/ui/AppPagination', () => ({ default: () => null }))
+vi.mock('./ToolingDataDetailDrawer', () => ({ default: () => null }))
 vi.mock('./ToolingDataExcelImport', () => ({ default: () => null }))
 vi.mock('./ToolingDataSearch', () => ({ default: () => null }))
 vi.mock('./ToolingDataTable', () => ({
@@ -88,7 +107,10 @@ vi.mock('./ToolingDataTable', () => ({
   ),
 }))
 vi.mock('./ToolingDataForm', () => ({
-  default: (props: { initialValues?: unknown; onFinish: (values: Record<string, unknown>) => void }) => {
+  default: (props: {
+    initialValues?: unknown
+    onFinish: (values: Record<string, unknown>) => void
+  }) => {
     formState.initialValues = props.initialValues
     formState.onFinish = props.onFinish
     return null
@@ -98,7 +120,10 @@ vi.mock('./useToolingData', () => ({
   useCreateToolingData: () => createMutation,
   useDeleteToolingData: () => ({ isPending: false, mutateAsync: vi.fn() }),
   useImportToolingData: () => ({ isPending: false, mutateAsync: vi.fn() }),
-  useToolingDataList: () => ({ data: { items: records, total: 1 }, isLoading: false }),
+  useToolingDataList: () => ({
+    data: { items: records, total: 1 },
+    isLoading: false,
+  }),
   useUpdateToolingData: () => updateMutation,
 }))
 
@@ -137,7 +162,9 @@ describe('ToolingDataPage copy create', () => {
     expect(formState.initialValues).toEqual(records[0])
 
     formState.onFinish?.({ ...records[0], id: undefined })
-    await vi.waitFor(() => expect(createMutation.mutateAsync).toHaveBeenCalled())
+    await vi.waitFor(() =>
+      expect(createMutation.mutateAsync).toHaveBeenCalled(),
+    )
     expect(updateMutation.mutateAsync).not.toHaveBeenCalled()
   })
 })

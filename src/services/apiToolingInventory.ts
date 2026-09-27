@@ -213,6 +213,28 @@ export async function getToolingInventoryList({
   }
 }
 
+export async function getToolingInventoryByToolingDataId(
+  toolingDataId: string,
+  signal?: AbortSignal,
+) {
+  let query = inventoryTable()
+    .select('*')
+    .eq('tooling_data_id', toolingDataId)
+    .limit(1)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取刀具库存详情失败')
+  }
+
+  return (data as ToolingInventory | null) ?? null
+}
+
 export async function createToolingInventory(
   values: ToolingInventoryFormValues,
 ) {

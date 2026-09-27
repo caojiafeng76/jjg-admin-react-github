@@ -28,6 +28,8 @@ interface Props {
   onToolingSearch: (keyword: string) => void
   initialValues?: ToolingStockIn | ToolingStockInFormValues
   isAuditLocked?: boolean
+  /** 快捷建单场景：锁定关联刀具，不允许改选其它刀具 */
+  lockTooling?: boolean
 }
 
 const DEFAULT_VALUES: ToolingStockInFormValues = {
@@ -46,6 +48,7 @@ export default function ToolingStockInForm({
   onToolingSearch,
   initialValues,
   isAuditLocked = false,
+  lockTooling = false,
 }: Props) {
   const [form] = Form.useForm<ToolingStockInFormValues>()
   const [selectedToolingSnapshot, setSelectedToolingSnapshot] =
@@ -124,7 +127,7 @@ export default function ToolingStockInForm({
         rules={[{ required: true, message: '请选择刀具资料' }]}
       >
         <Select
-          disabled={isAuditLocked}
+          disabled={isAuditLocked || lockTooling}
           loading={isToolingOptionsLoading}
           showSearch={{
             filterOption: false,
@@ -143,17 +146,23 @@ export default function ToolingStockInForm({
         />
       </Form.Item>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 md:grid-cols-2">
+      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
         <div>
-          <div className="text-xs text-slate-400 dark:text-slate-500">刀具编号</div>
+          <div className="text-xs text-slate-400 dark:text-slate-500">
+            刀具编号
+          </div>
           <div>{selectedTooling?.tool_code || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400 dark:text-slate-500">刀具名称</div>
+          <div className="text-xs text-slate-400 dark:text-slate-500">
+            刀具名称
+          </div>
           <div>{selectedTooling?.tool_name || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400 dark:text-slate-500">刀具规格</div>
+          <div className="text-xs text-slate-400 dark:text-slate-500">
+            刀具规格
+          </div>
           <div>{selectedTooling?.tool_spec || '-'}</div>
         </div>
         <div>

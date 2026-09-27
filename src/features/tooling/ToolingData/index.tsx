@@ -23,7 +23,13 @@ import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
-import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
+import {
+  TOOLING_INVENTORY_PAGE_PERMISSION_KEY,
+  TOOLING_MANAGE_PERMISSION_KEY,
+  TOOLING_STOCK_IN_PAGE_PERMISSION_KEY,
+  TOOLING_STOCK_OUT_PAGE_PERMISSION_KEY,
+} from '../permissions'
+import ToolingDataDetailDrawer from './ToolingDataDetailDrawer'
 import ToolingDataExcelImport from './ToolingDataExcelImport'
 import ToolingDataForm from './ToolingDataForm'
 import ToolingDataSearch from './ToolingDataSearch'
@@ -48,10 +54,15 @@ function preloadToolingDataExcel() {
 export default function ToolingDataPage() {
   const { message } = App.useApp()
   const canManageTooling = usePermission(TOOLING_MANAGE_PERMISSION_KEY)
+  const canViewInventory = usePermission(TOOLING_INVENTORY_PAGE_PERMISSION_KEY)
+  const canViewStockIn = usePermission(TOOLING_STOCK_IN_PAGE_PERMISSION_KEY)
+  const canViewStockOut = usePermission(TOOLING_STOCK_OUT_PAGE_PERMISSION_KEY)
+  const canOpenDetail = canViewInventory || canViewStockIn || canViewStockOut
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
     bypassPermissionKey: TOOLING_MANAGE_PERMISSION_KEY,
   })
 
+  const [detailRecord, setDetailRecord] = useState<ToolingData | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建刀具资料')
   const [isEdit, setIsEdit] = useState(false)
@@ -167,6 +178,14 @@ export default function ToolingDataPage() {
       }
     }
   }, [deleteMutation, message, selectedRowKeys])
+
+  const handleOpenDetail = useCallback((record: ToolingData) => {
+    setDetailRecord(record)
+  }, [])
+
+  const handleCloseDetail = useCallback(() => {
+    setDetailRecord(null)
+  }, [])
 
   const handleImport = useCallback(
     async (rows: ToolingDataFormValues[]) => {
@@ -382,9 +401,7 @@ export default function ToolingDataPage() {
           handleEdit={handleEdit}
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
         />
-        <Tooltip
-          title={viewerDenied ? viewerOperationTip : '复制新增刀具资料'}
-        >
+        <Tooltip title={viewerDenied ? viewerOperationTip : '复制新增刀具资料'}>
           <Button
             type="text"
             icon={
@@ -438,7 +455,9 @@ export default function ToolingDataPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">搜索：</span>
+        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">
+          搜索：
+        </span>
         <ToolingDataSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
@@ -451,7 +470,11 @@ export default function ToolingDataPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
             <ToolingDataTable
               loading={isLoading}
               data={data?.items || []}
@@ -461,6 +484,7 @@ export default function ToolingDataPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
+              onOpenDetail={canOpenDetail ? handleOpenDetail : undefined}
               emptyAction={
                 <AddButton
                   handleCreate={handleCreate}
@@ -501,6 +525,14 @@ export default function ToolingDataPage() {
           />
         </div>
       </Modal>
+
+      {detailRecord ? (
+        <ToolingDataDetailDrawer
+          open
+          record={detailRecord}
+          onClose={handleCloseDetail}
+        />
+      ) : null}
     </div>
   )
 }

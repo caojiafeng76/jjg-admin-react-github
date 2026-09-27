@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType } from 'antd'
+import { Button, Table, type TableColumnsType } from 'antd'
 
 import { TableEmpty } from '@/ui/TableState'
 import type { ToolingData } from '@/services/apiToolingData'
@@ -69,6 +69,8 @@ interface Props {
   rowHeight?: number
   /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
   emptyAction?: React.ReactNode
+  /** 打开行详情抽屉（库存/出入库）；不传时不渲染操作列 */
+  onOpenDetail?: (record: ToolingData) => void
 }
 
 function ToolingDataTable({
@@ -81,6 +83,7 @@ function ToolingDataTable({
   scrollY = 400,
   rowHeight = 40,
   emptyAction,
+  onOpenDetail,
 }: Props) {
   const columns: TableColumnsType<ToolingData> = useMemo(() => {
     const getRowNumber = (record: ToolingData): number => {
@@ -89,7 +92,7 @@ function ToolingDataTable({
       return index === -1 ? 0 : (page - 1) * pageSize + index + 1
     }
 
-    return [
+    const columns: TableColumnsType<ToolingData> = [
       {
         title: '#',
         key: '#',
@@ -196,7 +199,30 @@ function ToolingDataTable({
         render: (value: string) => formatDateTime(value),
       },
     ]
-  }, [data, page, pageSize])
+
+    if (onOpenDetail) {
+      columns.push({
+        title: '库存/出入库',
+        key: 'inventory-detail',
+        width: 120,
+        fixed: 'right',
+        render: (_value, record) => (
+          <Button
+            type="link"
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation()
+              onOpenDetail(record)
+            }}
+          >
+            查看
+          </Button>
+        ),
+      })
+    }
+
+    return columns
+  }, [data, onOpenDetail, page, pageSize])
 
   const rowSelection = useMemo(
     () => ({
@@ -214,7 +240,7 @@ function ToolingDataTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1480, y: scrollY }}
+      scroll={{ x: onOpenDetail ? 1600 : 1480, y: scrollY }}
       size="small"
       locale={{
         emptyText: (
@@ -226,7 +252,9 @@ function ToolingDataTable({
         ),
       }}
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
+        index % 2 === 0
+          ? 'bg-white dark:bg-slate-800'
+          : 'bg-slate-50/60 dark:bg-slate-800/60'
       }
       onRow={(record) => ({
         ...createKeyboardTableRowProps(

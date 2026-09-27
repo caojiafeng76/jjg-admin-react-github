@@ -276,12 +276,14 @@ export async function getToolingStockOutList({
   pageSize,
   keyword,
   status,
+  toolingDataId,
   signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
   status?: ToolingStockOutStatus
+  toolingDataId?: string
   signal?: AbortSignal
 }) {
   const from = (page - 1) * pageSize
@@ -300,6 +302,10 @@ export async function getToolingStockOutList({
 
   if (status) {
     query = query.eq('status', status)
+  }
+
+  if (toolingDataId) {
+    query = query.eq('tooling_data_id', toolingDataId)
   }
 
   query = query

@@ -5,6 +5,7 @@ const {
   useMutationWithInvalidationMock,
   getToolingDataListMock,
   getToolingInventoryListMock,
+  getToolingInventoryByToolingDataIdMock,
   getInventoryToolingDataOptionsMock,
   getToolingStockInListMock,
   getStockInToolingDataOptionsMock,
@@ -16,6 +17,7 @@ const {
   useMutationWithInvalidationMock: vi.fn((options) => options),
   getToolingDataListMock: vi.fn(),
   getToolingInventoryListMock: vi.fn(),
+  getToolingInventoryByToolingDataIdMock: vi.fn(),
   getInventoryToolingDataOptionsMock: vi.fn(),
   getToolingStockInListMock: vi.fn(),
   getStockInToolingDataOptionsMock: vi.fn(),
@@ -45,6 +47,7 @@ vi.mock('@/services/apiToolingInventory', () => ({
   createToolingInventory: vi.fn(),
   deleteToolingInventory: vi.fn(),
   getToolingDataOptions: getInventoryToolingDataOptionsMock,
+  getToolingInventoryByToolingDataId: getToolingInventoryByToolingDataIdMock,
   getToolingInventoryList: getToolingInventoryListMock,
   importToolingInventory: vi.fn(),
   updateToolingInventory: vi.fn(),
@@ -72,6 +75,11 @@ vi.mock('@/services/apiToolingStockOut', () => ({
 }))
 
 import {
+  useToolingInventoryDetail,
+  useToolingStockInRecords,
+  useToolingStockOutRecords,
+} from './ToolingData/useToolingDataDetail'
+import {
   useCreateToolingData,
   useToolingDataList,
 } from './ToolingData/useToolingData'
@@ -95,6 +103,7 @@ import { toolingKeys } from './queryKeys'
 interface CapturedQueryOptions {
   queryKey: readonly unknown[]
   queryFn: (context: { signal: AbortSignal }) => Promise<unknown>
+  enabled?: boolean
 }
 
 function lastQueryOptions(): CapturedQueryOptions {
@@ -141,6 +150,33 @@ describe('tooling query key factories', () => {
     ).toEqual([
       ...toolingKeys.stockOut.lists(),
       { page: 3, pageSize: 10, keyword: '', status: '' },
+    ])
+    expect(toolingKeys.inventory.detail('tool-1')).toEqual([
+      ...toolingKeys.inventory.all,
+      'detail',
+      'tool-1',
+    ])
+    expect(
+      toolingKeys.stockIn.byTooling({
+        toolingDataId: 'tool-1',
+        page: 2,
+        pageSize: 20,
+      }),
+    ).toEqual([
+      ...toolingKeys.stockIn.all,
+      'by-tooling',
+      { toolingDataId: 'tool-1', page: 2, pageSize: 20 },
+    ])
+    expect(
+      toolingKeys.stockOut.byTooling({
+        toolingDataId: 'tool-2',
+        page: 1,
+        pageSize: 10,
+      }),
+    ).toEqual([
+      ...toolingKeys.stockOut.all,
+      'by-tooling',
+      { toolingDataId: 'tool-2', page: 1, pageSize: 10 },
     ])
   })
 
@@ -249,6 +285,73 @@ describe('tooling hooks', () => {
       status: '已审核',
       signal: controller.signal,
     })
+  })
+
+  it('nests row-detail queries under their domain roots and forwards tooling filters', async () => {
+    const controller = new AbortController()
+
+    useToolingInventoryDetail('tool-1')
+    let options = lastQueryOptions()
+    expect(options.queryKey).toEqual(toolingKeys.inventory.detail('tool-1'))
+    expect(options.enabled).toBe(true)
+    await options.queryFn({ signal: controller.signal })
+    expect(getToolingInventoryByToolingDataIdMock).toHaveBeenCalledWith(
+      'tool-1',
+      controller.signal,
+    )
+
+    useToolingStockInRecords({
+      toolingDataId: 'tool-1',
+      page: 2,
+      pageSize: 10,
+    })
+    options = lastQueryOptions()
+    expect(options.queryKey).toEqual(
+      toolingKeys.stockIn.byTooling({
+        toolingDataId: 'tool-1',
+        page: 2,
+        pageSize: 10,
+      }),
+    )
+    await options.queryFn({ signal: controller.signal })
+    expect(getToolingStockInListMock).toHaveBeenCalledWith({
+      toolingDataId: 'tool-1',
+      page: 2,
+      pageSize: 10,
+      signal: controller.signal,
+    })
+
+    useToolingStockOutRecords({
+      toolingDataId: 'tool-1',
+      page: 3,
+      pageSize: 5,
+    })
+    options = lastQueryOptions()
+    expect(options.queryKey).toEqual(
+      toolingKeys.stockOut.byTooling({
+        toolingDataId: 'tool-1',
+        page: 3,
+        pageSize: 5,
+      }),
+    )
+    await options.queryFn({ signal: controller.signal })
+    expect(getToolingStockOutListMock).toHaveBeenCalledWith({
+      toolingDataId: 'tool-1',
+      page: 3,
+      pageSize: 5,
+      signal: controller.signal,
+    })
+  })
+
+  it('disables row-detail queries without a tooling id', () => {
+    useToolingInventoryDetail(undefined)
+    expect(lastQueryOptions().enabled).toBe(false)
+
+    useToolingStockInRecords({ toolingDataId: '', page: 1 })
+    expect(lastQueryOptions().enabled).toBe(false)
+
+    useToolingStockOutRecords({ toolingDataId: '', page: 1 })
+    expect(lastQueryOptions().enabled).toBe(false)
   })
 
   it('shares option caches across authenticated hooks and forwards signals', async () => {

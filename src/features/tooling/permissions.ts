@@ -1,6 +1,10 @@
 import type { PermissionDefinition } from '@/types/permission'
 
 export const TOOLING_MANAGE_PERMISSION_KEY = 'feature:tooling.manage'
+export const TOOLING_DATA_PAGE_PERMISSION_KEY = 'page:tooling-data'
+export const TOOLING_INVENTORY_PAGE_PERMISSION_KEY = 'page:tooling-inventory'
+export const TOOLING_STOCK_IN_PAGE_PERMISSION_KEY = 'page:tooling-stock-in'
+export const TOOLING_STOCK_OUT_PAGE_PERMISSION_KEY = 'page:tooling-stock-out'
 
 export const TOOLING_PERMISSIONS: PermissionDefinition[] = [
   // 导航
@@ -14,28 +18,28 @@ export const TOOLING_PERMISSIONS: PermissionDefinition[] = [
 
   // 页面
   {
-    key: 'page:tooling-data',
+    key: TOOLING_DATA_PAGE_PERMISSION_KEY,
     scope: 'page',
     module: 'consumables',
     surface: 'pc',
     label: '刀具资料',
   },
   {
-    key: 'page:tooling-inventory',
+    key: TOOLING_INVENTORY_PAGE_PERMISSION_KEY,
     scope: 'page',
     module: 'consumables',
     surface: 'pc',
     label: '刀具库存',
   },
   {
-    key: 'page:tooling-stock-in',
+    key: TOOLING_STOCK_IN_PAGE_PERMISSION_KEY,
     scope: 'page',
     module: 'consumables',
     surface: 'pc',
     label: '刀具入库',
   },
   {
-    key: 'page:tooling-stock-out',
+    key: TOOLING_STOCK_OUT_PAGE_PERMISSION_KEY,
     scope: 'page',
     module: 'consumables',
     surface: 'pc',

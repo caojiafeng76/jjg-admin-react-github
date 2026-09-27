@@ -10,6 +10,12 @@ export interface ToolingMovementListKeyParams extends ToolingDataListKeyParams {
   status?: '待审核' | '已审核'
 }
 
+export interface ToolingMovementByToolingKeyParams {
+  toolingDataId: string
+  page: number
+  pageSize: number
+}
+
 function normalizeKeyword(keyword?: string): string {
   return keyword?.trim() ?? ''
 }
@@ -54,6 +60,8 @@ const inventoryKeys = {
         keyword: normalizeKeyword(params.keyword),
       },
     ] as const,
+  detail: (toolingDataId: QueryId) =>
+    [...inventoryKeys.all, 'detail', String(toolingDataId)] as const,
 } as const
 
 function createMovementKeys(root: 'tooling-stock-in' | 'tooling-stock-out') {
@@ -68,6 +76,16 @@ function createMovementKeys(root: 'tooling-stock-in' | 'tooling-stock-out') {
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
           status: params.status ?? '',
+        },
+      ] as const,
+    byTooling: (params: ToolingMovementByToolingKeyParams) =>
+      [
+        ...keys.all,
+        'by-tooling',
+        {
+          toolingDataId: String(params.toolingDataId),
+          page: params.page,
+          pageSize: params.pageSize,
         },
       ] as const,
   } as const
