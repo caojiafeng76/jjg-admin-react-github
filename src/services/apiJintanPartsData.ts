@@ -20,6 +20,8 @@ export interface JintanPartsDataFormValues {
   remarks: string
 }
 
+const JINTAN_PARTS_EXPORT_PAGE_SIZE = 1000
+
 function normalizePayload(
   values: JintanPartsDataFormValues,
 ): JintanPartsDataFormValues {
@@ -30,6 +32,17 @@ function normalizePayload(
     supplier: values.supplier.trim(),
     remarks: values.remarks.trim(),
   }
+}
+
+function partsKeyOf(row: {
+  part_name: string
+  specification: string
+}): string {
+  return `${row.part_name}\u0000${row.specification}`
+}
+
+function keywordFilter(keyword: string) {
+  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%`
 }
 
 async function checkJintanPartsDataExists(
@@ -72,10 +85,7 @@ export async function getJintanPartsDataList({
   let query = supabase.from('jintan_parts_data').select('*', { count: 'exact' })
 
   if (keyword) {
-    const normalizedKeyword = keyword.trim()
-    query = query.or(
-      `part_name.ilike.%${normalizedKeyword}%,specification.ilike.%${normalizedKeyword}%,material.ilike.%${normalizedKeyword}%,supplier.ilike.%${normalizedKeyword}%`,
-    )
+    query = query.or(keywordFilter(keyword.trim()))
   }
 
   const { data, error, count } = await query
@@ -91,6 +101,39 @@ export async function getJintanPartsDataList({
     items: (data || []) as JintanPartsData[],
     total: count || 0,
   }
+}
+
+export async function getJintanPartsDataForExport(keyword?: string) {
+  const rows: JintanPartsData[] = []
+  let from = 0
+
+  while (true) {
+    let query = supabase.from('jintan_parts_data').select('*')
+
+    if (keyword) {
+      query = query.or(keywordFilter(keyword.trim()))
+    }
+
+    const { data, error } = await query
+      .order('updated_at', { ascending: false })
+      .order('part_name', { ascending: true })
+      .range(from, from + JINTAN_PARTS_EXPORT_PAGE_SIZE - 1)
+
+    if (error) {
+      throw handleApiError(error, '获取配件资料导出数据失败')
+    }
+
+    const pageRows = (data || []) as JintanPartsData[]
+    rows.push(...pageRows)
+
+    if (pageRows.length < JINTAN_PARTS_EXPORT_PAGE_SIZE) {
+      break
+    }
+
+    from += JINTAN_PARTS_EXPORT_PAGE_SIZE
+  }
+
+  return rows
 }
 
 export async function createJintanPartsData(values: JintanPartsDataFormValues) {
@@ -110,6 +153,50 @@ export async function createJintanPartsData(values: JintanPartsDataFormValues) {
 
   if (error) {
     throw handleApiError(error, '创建配件资料失败')
+  }
+}
+
+export async function createJintanPartsDataBatch(
+  rows: JintanPartsDataFormValues[],
+) {
+  const payload = rows.map(normalizePayload)
+
+  const seenKeys = new Set<string>()
+  for (const row of payload) {
+    const key = partsKeyOf(row)
+    if (seenKeys.has(key)) {
+      throw new Error(
+        `名称“${row.part_name}”规格“${row.specification}”重复，无法导入`,
+      )
+    }
+    seenKeys.add(key)
+  }
+
+  const partNames = Array.from(new Set(payload.map((row) => row.part_name)))
+  const { data: existingRows, error: existingError } = await supabase
+    .from('jintan_parts_data')
+    .select('part_name, specification')
+    .in('part_name', partNames)
+
+  if (existingError) {
+    throw handleApiError(existingError, '检查配件是否存在失败')
+  }
+
+  const existingKeys = new Set(
+    (existingRows || []).map((row) => partsKeyOf(row)),
+  )
+  const duplicated = payload.filter((row) => existingKeys.has(partsKeyOf(row)))
+  if (duplicated.length > 0) {
+    const labels = duplicated
+      .map((row) => `“${row.part_name}”/“${row.specification}”`)
+      .join('、')
+    throw new Error(`以下配件已存在，无法导入：${labels}`)
+  }
+
+  const { error } = await supabase.from('jintan_parts_data').insert(payload)
+
+  if (error) {
+    throw handleApiError(error, '批量导入配件资料失败')
   }
 }
 
@@ -144,7 +231,10 @@ export async function updateJintanPartsData({
 }
 
 export async function deleteJintanPartsData(ids: string[]) {
-  const { error } = await supabase.from('jintan_parts_data').delete().in('id', ids)
+  const { error } = await supabase
+    .from('jintan_parts_data')
+    .delete()
+    .in('id', ids)
 
   if (error) {
     throw handleApiError(error, '删除配件资料失败')

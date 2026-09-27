@@ -5,26 +5,36 @@ import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import type {
-  JintanPartsData,
-  JintanPartsDataFormValues,
+import {
+  getJintanPartsDataForExport,
+  type JintanPartsData,
+  type JintanPartsDataFormValues,
 } from '@/services/apiJintanPartsData'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import ExportButton from '@/ui/ExportButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
 import { JINTAN_PARTS_DATA_PERMISSION_KEY } from '../permissions'
+import JintanPartsDataExcelImport from './JintanPartsDataExcelImport'
 import JintanPartsDataForm from './JintanPartsDataForm'
 import JintanPartsDataSearch from './JintanPartsDataSearch'
 import JintanPartsDataTable from './JintanPartsDataTable'
 import {
   useCreateJintanPartsData,
   useDeleteJintanPartsData,
+  useImportJintanPartsData,
   useJintanPartsDataList,
   useUpdateJintanPartsData,
 } from './useJintanPartsData'
+
+const loadJintanPartsDataExcel = () => import('@/utils/jintanPartsDataExcel')
+
+function preloadJintanPartsDataExcel() {
+  void loadJintanPartsDataExcel()
+}
 
 export default function JintanPartsDataPage() {
   const { message } = App.useApp()
@@ -34,6 +44,7 @@ export default function JintanPartsDataPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建金檀木业配件资料')
   const [isEdit, setIsEdit] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] = useState<JintanPartsData | null>(
     null,
@@ -57,6 +68,7 @@ export default function JintanPartsDataPage() {
 
   const createMutation = useCreateJintanPartsData()
   const updateMutation = useUpdateJintanPartsData()
+  const importMutation = useImportJintanPartsData()
   const deleteMutation = useDeleteJintanPartsData()
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
@@ -118,6 +130,73 @@ export default function JintanPartsDataPage() {
       }
     }
   }, [deleteMutation, message, selectedRowKeys])
+
+  const handleImport = useCallback(
+    async (rows: JintanPartsDataFormValues[]) => {
+      if (!canManageParts) {
+        message.warning('无金檀木业模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
+      try {
+        await importMutation.mutateAsync(rows)
+        message.success(`配件资料导入成功，共 ${rows.length} 条`)
+        setSelectedRowKeys([])
+      } catch (error) {
+        if (error instanceof Error) {
+          message.error(error.message)
+        } else {
+          message.error('导入配件资料失败，请稍后重试')
+        }
+      }
+    },
+    [canManageParts, importMutation, message, viewerDenied, viewerOperationTip],
+  )
+
+  const handleExport = useCallback(async () => {
+    if (!canManageParts) {
+      message.warning('无金檀木业模块操作权限')
+      return
+    }
+
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
+    setIsExporting(true)
+    try {
+      const [exportRows, { exportJintanPartsDataToExcel }] = await Promise.all([
+        getJintanPartsDataForExport(searchParams.keyword),
+        loadJintanPartsDataExcel(),
+      ])
+
+      if (exportRows.length === 0) {
+        message.warning('当前没有可导出的配件资料')
+        return
+      }
+
+      exportJintanPartsDataToExcel(exportRows)
+      message.success(`已导出 ${exportRows.length} 条配件资料`)
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : '导出配件资料失败，请稍后重试',
+      )
+    } finally {
+      setIsExporting(false)
+    }
+  }, [
+    canManageParts,
+    message,
+    searchParams.keyword,
+    viewerDenied,
+    viewerOperationTip,
+  ])
 
   const handleFinish = useCallback(
     async (values: JintanPartsDataFormValues) => {
@@ -208,6 +287,19 @@ export default function JintanPartsDataPage() {
         <EditButton
           title="编辑金檀木业配件资料"
           handleEdit={handleEdit}
+          permissionKey={JINTAN_PARTS_DATA_PERMISSION_KEY}
+        />
+        <ExportButton
+          handleExport={handleExport}
+          loading={isExporting}
+          permissionKey={JINTAN_PARTS_DATA_PERMISSION_KEY}
+          onPreload={preloadJintanPartsDataExcel}
+        >
+          导出 Excel
+        </ExportButton>
+        <JintanPartsDataExcelImport
+          onImport={handleImport}
+          isImporting={importMutation.isPending}
           permissionKey={JINTAN_PARTS_DATA_PERMISSION_KEY}
         />
         <DeleteButton

@@ -4,6 +4,7 @@ import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
 import {
   createJintanPartsData,
+  createJintanPartsDataBatch,
   deleteJintanPartsData,
   getJintanPartsDataList,
   updateJintanPartsData,
@@ -43,6 +44,13 @@ export function useJintanPartsDataList({
 export function useCreateJintanPartsData() {
   return useMutationWithInvalidation({
     mutationFn: createJintanPartsData,
+    invalidateQueries: [jintanKeys.partsData.all],
+  })
+}
+
+export function useImportJintanPartsData() {
+  return useMutationWithInvalidation({
+    mutationFn: createJintanPartsDataBatch,
     invalidateQueries: [jintanKeys.partsData.all],
   })
 }
