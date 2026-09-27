@@ -1,6 +1,8 @@
 import type { PermissionDefinition } from '@/types/permission'
 
 export const JINTAN_PARTS_DATA_PERMISSION_KEY = 'page:jintan-parts-data'
+export const JINTAN_PARTS_INVENTORY_PERMISSION_KEY =
+  'page:jintan-parts-inventory'
 
 export const JINTAN_PERMISSIONS: PermissionDefinition[] = [
   // 导航
@@ -21,7 +23,7 @@ export const JINTAN_PERMISSIONS: PermissionDefinition[] = [
     label: '配件资料',
   },
   {
-    key: 'page:jintan-parts-inventory',
+    key: JINTAN_PARTS_INVENTORY_PERMISSION_KEY,
     scope: 'page',
     module: 'jintan',
     surface: 'pc',

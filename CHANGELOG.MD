@@ -2,6 +2,14 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
+## 2026-09-27
+
+- **类别**：新建 / 页面 / 数据库
+- **范围**：金檀木业「配件库存」数据库表、完整列表页、Excel 导入导出与模板
+- **摘要**：新建 `supabase/migrations/20260927000000_create_jintan_parts_inventory.sql`：`public.jintan_parts_inventory`（`part_data_id` 外键 → `jintan_parts_data(id)`，`on update cascade on delete cascade`，唯一约束一对一；快照列 `part_name/specification/material/supplier`；`quantity integer not null default 0` 非负检查；`remarks`；`created_at/updated_at`），RLS 为 `is_admin()` 与 `current_user_has_permission('page:jintan-parts-inventory')` 两条策略，挂 `update_updated_at_column`、`prevent_viewer_dml` 触发器，并新增 `handle_jintan_parts_data_inventory_sync()` 触发器：配件资料新增自动建 0 库存行、名称/规格/材质/采购厂家变更时同步快照（`is distinct from` 守卫避免无谓更新时间变动）。`20260927000100_seed_jintan_parts_inventory.sql` 为既有 37 条配件资料补 0 库存行（`on conflict do nothing` 幂等）。前端新建 `src/services/apiJintanPartsInventory.ts`（列表分页 + 4 列关键词 `or ilike` + `updated_at desc, part_name asc`、导出按 1000 条分页、更新数量/备注、Excel 批量导入按 `(名称,规格)` 匹配库存行后按主键 upsert 覆盖数量与备注，未匹配/Excel 内重复给中文错误）；`src/features/jintan/queryKeys.ts` 增加 `partsInventory.{all,list}`；`src/features/jintan/permissions.ts` 导出 `JINTAN_PARTS_INVENTORY_PERMISSION_KEY` 并在注册表复用；新建 `src/features/jintan/PartsInventory/`（`index.tsx` 工具栏=编辑/导出/导入、筛选卡片、`TableState` 三态、编辑 Modal；8 列表格库存数量右对齐 `tabular-nums`、键盘行、斑马纹、`TableEmpty` 空态提示；搜索关键词覆盖名称/规格/材质/采购厂家；编辑表单 `InputNumber min=0 precision=0` + 备注 ≤500；导入 Modal=Upload→解析→错误列表截前 10 + 预览 10 行/页 + 确认导入；查看员守卫不传 bypass）；新建 `src/utils/jintanPartsInventoryExcel.ts`（模板 4 列 名称/规格/库存数量/备注，文件名 `金檀木业配件库存模板.xlsx`；解析 `header:1, blankrows:true` 行号对齐、非负整数校验；导出标题行「金檀木业配件库存」+ 8 列、`freezeYSplit: 2`，文件名 `金檀木业配件库存_N条_YYYY-MM-DD_HH-mm-ss.xlsx`）与 7 项单测；`src/features/lazyDocumentModules.vitest.ts` 增加 4 条（金檀木业配件资料 2 条补齐历史缺口 + 配件库存 2 条）。
+- **经用户确认的取舍**：库存行与配件资料一对一自动生成，故页面**不设新增/删除**（新增随配件资料创建、删除随配件资料级联），只保留编辑/导入/导出；库存数量为整数（件）；Excel 导入为**覆盖**语义（仅匹配已有配件，未匹配报错）；本页数量可直接编辑，后续入库/出库模块再做自动增减。
+- **验证**：用户交互执行 `bun run db:push` 落库后，`db:query` 确认库存表 37 行（与配件资料 37 行一一对应、数量全 0）、策略 2 条、库存表触发器 2 个 + 配件资料触发器 3 个、5 个约束（含 `ON UPDATE CASCADE ON DELETE CASCADE` 外键与 `quantity >= 0` 检查）；事务内实测插入配件自动建 0 库存行、改名后快照同步（synced=1 / stale=0），`rollback` 后无残留（leftover 0 / 库存仍 37 行）；`bun run db:types` 重新生成 `database.types.ts`（diff 仅 +47 行新表定义）；`bunx antd info InputNumber/Alert --format json` 核对 `min/precision/style/placeholder/title/description` 均存在；`bun run typecheck` 通过（期间修复批量导入 upsert payload 缺必填列的类型错误）；`bun lint` 0 错误 / 15 个既有警告（均在未改动文件）；`bunx antd lint src/features/jintan --format json` 仅 2 条 `Upload with controlled fileList should provide onChange` 已知误报（与既有 8 个导入模块同形）；`bun run test` 31 项脚本测试 + **124 个 Vitest 文件 / 566 项**全部通过（较上轮 +1 文件 / +11 项：新增库存 Excel 7 项 + lazy 清单 4 项）；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 26.0 KB）；`git diff --check` 无问题。未做浏览器端页面级回归（需登录凭据），前端改动仍在工作区、尚未发布。
+
 ## 2026-09-22
 
 - **类别**：新建 / 页面

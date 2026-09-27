@@ -16,6 +16,22 @@ const PAGE_DOCUMENT_MODULES = [
     'src/features/extrusion-production-daily-report/index.tsx',
     '@/utils/extrusionProductionDailyReportExcel',
   ],
+  [
+    'src/features/jintan/PartsData/index.tsx',
+    '@/utils/jintanPartsDataExcel',
+  ],
+  [
+    'src/features/jintan/PartsData/JintanPartsDataExcelImport.tsx',
+    '@/utils/jintanPartsDataExcel',
+  ],
+  [
+    'src/features/jintan/PartsInventory/index.tsx',
+    '@/utils/jintanPartsInventoryExcel',
+  ],
+  [
+    'src/features/jintan/PartsInventory/JintanPartsInventoryExcelImport.tsx',
+    '@/utils/jintanPartsInventoryExcel',
+  ],
   ['src/features/material-transfer/index.tsx', '@/utils/materialTransferExcel'],
   [
     'src/features/precision-cutting-transfer/index.tsx',
