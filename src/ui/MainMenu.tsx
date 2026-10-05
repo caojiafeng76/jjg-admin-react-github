@@ -381,6 +381,26 @@ const allMenuItems: MenuItemDef[] = [
         label: '配件出库',
         permission: 'page:jintan-parts-stock-out',
       },
+      {
+        key: 'jintan-profiles-data',
+        label: '型材资料',
+        permission: 'page:jintan-profiles-data',
+      },
+      {
+        key: 'jintan-profiles-inventory',
+        label: '型材库存',
+        permission: 'page:jintan-profiles-inventory',
+      },
+      {
+        key: 'jintan-profiles-stock-in',
+        label: '型材入库',
+        permission: 'page:jintan-profiles-stock-in',
+      },
+      {
+        key: 'jintan-profiles-stock-out',
+        label: '型材出库',
+        permission: 'page:jintan-profiles-stock-out',
+      },
     ],
   },
   {

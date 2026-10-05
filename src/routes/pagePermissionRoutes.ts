@@ -61,4 +61,17 @@ export const PAGE_PERMISSION_ROUTES: PagePermissionRoute[] = [
   { path: '/jintan-parts-inventory', permission: 'page:jintan-parts-inventory' },
   { path: '/jintan-parts-stock-in', permission: 'page:jintan-parts-stock-in' },
   { path: '/jintan-parts-stock-out', permission: 'page:jintan-parts-stock-out' },
+  { path: '/jintan-profiles-data', permission: 'page:jintan-profiles-data' },
+  {
+    path: '/jintan-profiles-inventory',
+    permission: 'page:jintan-profiles-inventory',
+  },
+  {
+    path: '/jintan-profiles-stock-in',
+    permission: 'page:jintan-profiles-stock-in',
+  },
+  {
+    path: '/jintan-profiles-stock-out',
+    permission: 'page:jintan-profiles-stock-out',
+  },
 ]

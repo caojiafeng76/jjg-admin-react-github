@@ -32,6 +32,22 @@ const PAGE_DOCUMENT_MODULES = [
     'src/features/jintan/PartsInventory/JintanPartsInventoryExcelImport.tsx',
     '@/utils/jintanPartsInventoryExcel',
   ],
+  [
+    'src/features/jintan/ProfilesData/index.tsx',
+    '@/utils/jintanProfilesDataExcel',
+  ],
+  [
+    'src/features/jintan/ProfilesData/JintanProfilesDataExcelImport.tsx',
+    '@/utils/jintanProfilesDataExcel',
+  ],
+  [
+    'src/features/jintan/ProfilesInventory/index.tsx',
+    '@/utils/jintanProfilesInventoryExcel',
+  ],
+  [
+    'src/features/jintan/ProfilesInventory/JintanProfilesInventoryExcelImport.tsx',
+    '@/utils/jintanProfilesInventoryExcel',
+  ],
   ['src/features/material-transfer/index.tsx', '@/utils/materialTransferExcel'],
   [
     'src/features/precision-cutting-transfer/index.tsx',

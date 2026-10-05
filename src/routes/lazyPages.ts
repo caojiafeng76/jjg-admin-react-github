@@ -195,3 +195,15 @@ export const JintanPartsStockIn = lazy(
 export const JintanPartsStockOut = lazy(
   () => import('@features/jintan/PartsStockOut'),
 )
+export const JintanProfilesData = lazy(
+  () => import('@features/jintan/ProfilesData'),
+)
+export const JintanProfilesInventory = lazy(
+  () => import('@features/jintan/ProfilesInventory'),
+)
+export const JintanProfilesStockIn = lazy(
+  () => import('@features/jintan/ProfilesStockIn'),
+)
+export const JintanProfilesStockOut = lazy(
+  () => import('@features/jintan/ProfilesStockOut'),
+)

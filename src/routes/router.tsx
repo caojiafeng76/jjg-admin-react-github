@@ -34,6 +34,10 @@ import {
   JintanPartsInventory,
   JintanPartsStockIn,
   JintanPartsStockOut,
+  JintanProfilesData,
+  JintanProfilesInventory,
+  JintanProfilesStockIn,
+  JintanProfilesStockOut,
   LaborProtectionData,
   LaborProtectionPublicRequisitionPage,
   LaborProtectionRequisition,
@@ -784,6 +788,50 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:jintan-parts-stock-out"
               element={<JintanPartsStockOut />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'jintan-profiles-data',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:jintan-profiles-data"
+              element={<JintanProfilesData />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'jintan-profiles-inventory',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:jintan-profiles-inventory"
+              element={<JintanProfilesInventory />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'jintan-profiles-stock-in',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:jintan-profiles-stock-in"
+              element={<JintanProfilesStockIn />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'jintan-profiles-stock-out',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:jintan-profiles-stock-out"
+              element={<JintanProfilesStockOut />}
             />
           </Suspense>
         ),
