@@ -203,3 +203,28 @@ export async function createJintanPartsInventoryBatch(
     throw handleApiError(error, '批量导入配件库存失败')
   }
 }
+
+export interface JintanPartsInventoryOption {
+  id: string
+  part_name: string
+  specification: string
+  material: string
+  supplier: string
+  quantity: number
+}
+
+export async function getJintanPartsInventoryOptions(
+  keyword?: string,
+): Promise<JintanPartsInventoryOption[]> {
+  let query = supabase
+    .from('jintan_parts_inventory')
+    .select('id, part_name, specification, material, supplier, quantity')
+  if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
+
+  const { data, error } = await query
+    .order('part_name', { ascending: true })
+    .limit(50)
+
+  if (error) throw handleApiError(error, '获取配件库存选项失败')
+  return data ?? []
+}

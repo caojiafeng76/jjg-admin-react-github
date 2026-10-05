@@ -6,7 +6,6 @@ import {
   createJintanPartsStockIn,
   deleteJintanPartsStockIn,
   getJintanPartsStockInList,
-  getJintanPartsStockInOptions,
   updateJintanPartsStockInRemarks,
 } from '@/services/apiJintanPartsStockIn'
 import { jintanKeys } from '../queryKeys'
@@ -25,14 +24,6 @@ export function useJintanPartsStockInList({
     queryFn: () => getJintanPartsStockInList({ page, pageSize, keyword }),
     placeholderData: keepPreviousData,
     throwOnError: false,
-    ...queryConfig.list,
-  })
-}
-
-export function useJintanPartsStockInOptions(keyword?: string) {
-  return useQuery({
-    queryKey: jintanKeys.partsStockIn.options(keyword),
-    queryFn: () => getJintanPartsStockInOptions(keyword),
     ...queryConfig.list,
   })
 }

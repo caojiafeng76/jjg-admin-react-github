@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { JintanPartsStockInFormValues } from '@/services/apiJintanPartsStockIn'
 import JintanPartsStockInForm from './JintanPartsStockInForm'
 
-vi.mock('./useJintanPartsStockIn', () => ({
-  useJintanPartsStockInOptions: () => ({
+vi.mock('../PartsInventory/useJintanPartsInventory', () => ({
+  useJintanPartsInventoryOptions: () => ({
     data: [
       {
         id: 'inventory-1',

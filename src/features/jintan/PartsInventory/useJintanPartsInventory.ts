@@ -5,6 +5,7 @@ import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
 import {
   createJintanPartsInventoryBatch,
   getJintanPartsInventoryList,
+  getJintanPartsInventoryOptions,
   updateJintanPartsInventory,
 } from '@services/apiJintanPartsInventory'
 
@@ -43,6 +44,14 @@ export function useUpdateJintanPartsInventory() {
   return useMutationWithInvalidation({
     mutationFn: updateJintanPartsInventory,
     invalidateQueries: [jintanKeys.partsInventory.all],
+  })
+}
+
+export function useJintanPartsInventoryOptions(keyword?: string) {
+  return useQuery({
+    queryKey: jintanKeys.partsInventory.options(keyword),
+    queryFn: () => getJintanPartsInventoryOptions(keyword),
+    ...queryConfig.list,
   })
 }
 

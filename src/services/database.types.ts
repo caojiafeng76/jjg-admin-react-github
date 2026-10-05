@@ -468,6 +468,53 @@ export type Database = {
           },
         ]
       }
+      jintan_parts_stock_out: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_id: string
+          material: string
+          part_name: string
+          quantity: number
+          remarks: string
+          specification: string
+          supplier: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_id: string
+          material?: string
+          part_name?: string
+          quantity: number
+          remarks?: string
+          specification?: string
+          supplier?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_id?: string
+          material?: string
+          part_name?: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          supplier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jintan_parts_stock_out_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "jintan_parts_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_base_settings: {
         Row: {
           created_at: string

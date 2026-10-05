@@ -9,31 +9,31 @@ import {
 } from 'antd'
 
 import type {
-  JintanPartsStockIn,
-  JintanPartsStockInFormValues,
-} from '@/services/apiJintanPartsStockIn'
+  JintanPartsStockOut,
+  JintanPartsStockOutFormValues,
+} from '@/services/apiJintanPartsStockOut'
 import { useJintanPartsInventoryOptions } from '../PartsInventory/useJintanPartsInventory'
 
 interface Props {
-  onFinish: (values: JintanPartsStockInFormValues) => void
-  setFormRef: (form: FormInstance<JintanPartsStockInFormValues>) => void
+  onFinish: (values: JintanPartsStockOutFormValues) => void
+  setFormRef: (form: FormInstance<JintanPartsStockOutFormValues>) => void
   isSubmitting: boolean
-  editingRecord?: JintanPartsStockIn | null
+  editingRecord?: JintanPartsStockOut | null
 }
 
-const DEFAULT_VALUES: JintanPartsStockInFormValues = {
+const DEFAULT_VALUES: JintanPartsStockOutFormValues = {
   inventory_id: '',
   quantity: 1,
   remarks: '',
 }
 
-export default function JintanPartsStockInForm({
+export default function JintanPartsStockOutForm({
   onFinish,
   setFormRef,
   isSubmitting,
   editingRecord,
 }: Props) {
-  const [form] = Form.useForm<JintanPartsStockInFormValues>()
+  const [form] = Form.useForm<JintanPartsStockOutFormValues>()
   const [keyword, setKeyword] = useState('')
   const {
     data: options = [],
@@ -117,17 +117,34 @@ export default function JintanPartsStockInForm({
       )}
       <Form.Item
         name="quantity"
-        label="入库数量"
+        label="出库数量"
+        dependencies={['inventory_id']}
         rules={[
-          { required: true, message: '请输入入库数量' },
-          { type: 'integer', min: 1, message: '入库数量必须为正整数' },
+          { required: true, message: '请输入出库数量' },
+          { type: 'integer', min: 1, message: '出库数量必须为正整数' },
+          {
+            validator: async (_rule, value: number) => {
+              const currentOption = options.find(
+                (option) => option.id === form.getFieldValue('inventory_id'),
+              )
+              if (
+                !editingRecord &&
+                currentOption &&
+                value > currentOption.quantity
+              ) {
+                throw new Error(
+                  `库存不足，当前库存为 ${currentOption.quantity}`,
+                )
+              }
+            },
+          },
         ]}
       >
         <InputNumber
           min={1}
           precision={0}
           className="w-full"
-          placeholder="请输入入库数量"
+          placeholder="请输入出库数量"
           disabled={Boolean(editingRecord)}
         />
       </Form.Item>

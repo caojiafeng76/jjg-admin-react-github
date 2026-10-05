@@ -16,6 +16,12 @@ export interface JintanPartsStockInListKeyParams {
   keyword?: string
 }
 
+export interface JintanPartsStockOutListKeyParams {
+  page: number
+  pageSize: number
+  keyword?: string
+}
+
 function normalizeKeyword(keyword?: string): string {
   return keyword?.trim() ?? ''
 }
@@ -23,6 +29,7 @@ function normalizeKeyword(keyword?: string): string {
 const PARTS_DATA_ROOT = 'jintan-parts-data'
 const PARTS_INVENTORY_ROOT = 'jintan-parts-inventory'
 const PARTS_STOCK_IN_ROOT = 'jintan-parts-stock-in'
+const PARTS_STOCK_OUT_ROOT = 'jintan-parts-stock-out'
 
 export const jintanKeys = {
   partsData: {
@@ -40,6 +47,8 @@ export const jintanKeys = {
   },
   partsInventory: {
     all: [PARTS_INVENTORY_ROOT] as const,
+    options: (keyword?: string) =>
+      [PARTS_INVENTORY_ROOT, 'options', normalizeKeyword(keyword)] as const,
     list: (params: JintanPartsInventoryListKeyParams) =>
       [
         PARTS_INVENTORY_ROOT,
@@ -63,7 +72,14 @@ export const jintanKeys = {
           keyword: normalizeKeyword(params.keyword),
         },
       ] as const,
-    options: (keyword?: string) =>
-      [PARTS_STOCK_IN_ROOT, 'options', normalizeKeyword(keyword)] as const,
+  },
+  partsStockOut: {
+    all: [PARTS_STOCK_OUT_ROOT] as const,
+    list: (params: JintanPartsStockOutListKeyParams) =>
+      [
+        PARTS_STOCK_OUT_ROOT,
+        'list',
+        { ...params, keyword: normalizeKeyword(params.keyword) },
+      ] as const,
   },
 } as const
