@@ -4,6 +4,13 @@
 
 ## 2026-10-06
 
+- **类别**：UI / 导航菜单
+- **范围**：金檀木业导航菜单按「配件 / 型材 / 素材」分为三个子分组
+- **摘要**：按用户确认口径（子项保留完整名称；分组不设独立权限、按子项权限自动显隐；页签/标题保持「金檀木业 / ××」现状）将金檀木业原 12 个平铺页面项重构为三级菜单：`jintan-parts`「配件」/ `jintan-profiles`「型材」/ `jintan-materials`「素材」各 4 项，叶子 key/label/permission、路由、权限注册与 `routeLabels.ts` 全部未改。把菜单定义与过滤/查找纯函数（`MenuItemDef`、`allMenuItems`、`filterMenuByPermissions`、`findAncestorMenuKeys`）从 `MainMenu.tsx` 抽出到新文件 `src/ui/mainMenuItems.tsx`，`MainMenu.tsx` 仅保留组件（消除 react-refresh/only-export-components 告警并便于单测）。原只查一层的 `findParentMenuKey` 改为递归 `findAncestorMenuKeys` 返回祖先 key 链（如 `jintan-parts-data` → `['jintan','jintan-parts']`），组件初始 `openKeys` 与路径变化 effect 同步展开整条链，保证直接刷新/打开子页面时「金檀木业 + 对应分组」自动展开。新增 `src/ui/MainMenu.vitest.tsx`（7 项：分组顺序与 12 项、仅素材权限只显示素材组、无权限/缺 nav:jintan 整组隐藏、三级祖先链、未知 key 空数组）。
+- **验证**：菜单 12 个叶子 key 与 `pagePermissionRoutes.ts` 路径/权限逐项核对一致（路由入口检查）。`bun run typecheck` 通过；`bun run test` 31 项脚本测试 + 151 个 Vitest 文件 / 694 项全部通过（较上轮 +1 文件 / +7 项 = 本次菜单单测）；`bun lint` 0 错误 / 15 个既有警告（均在未改文件，本次改动文件 0 告警）；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 26.8 KB）；`git diff --check` 无问题。未做浏览器登录后端到端点击验证（前端未发布），多级展开链与权限边界已由单测覆盖。
+
+## 2026-10-06
+
 - **类别**：新建 / 页面 / 数据库
 - **范围**：金檀木业「素材资料 / 素材库存 / 素材入库 / 素材出库」四模块与素材数据表
 - **摘要**：按用户确认口径（仿照型材模块全套 4 页；字段=型号/名称/规格/材质/备注，唯一键=型号+名称+规格；空模块无初始数据，库存行由触发器在素材资料新增时自动建 0 行，后续用 Excel 导入）新增素材模块。数据库新增 5 个迁移：`jintan_materials_data` / `jintan_materials_inventory` / `jintan_materials_stock_in` / `jintan_materials_stock_out` 四表（资料→库存同步触发器、出入库同事务联动触发器、10 条 RLS 策略含出入库页对库存表只读、14 条约束、3 个函数、索引与 updated_at/查看员防 DML 触发器）与 4 条页面权限种子（`page:jintan-materials-*`，admin 由既有触发器自动授权）。前端仿照型材模块新增 4 个页面（资料 CRUD/多选删除/模板导入导出，库存编辑/模板导入导出，入库、出库新增/改备注/删除）：新建 `src/features/jintan/MaterialsData|MaterialsInventory|MaterialsStockIn|MaterialsStockOut` 共 27 个文件、4 个服务 `apiJintanMaterials*.ts`、2 个 Excel 工具 `jintanMaterials*Excel.ts`（模板/解析/导出，文件名与标题为「金檀木业素材××」）及配套测试；同步更新 `jintan/permissions.ts`（+4 权限键与定义）、`jintan/queryKeys.ts`（+4 键组含 options）、`lazyPages.ts`、`router.tsx`、`routeLabels.ts`、`pagePermissionRoutes.ts`、`MainMenu.tsx`（型材出库后追加 4 项）、`lazyDocumentModules.vitest.ts`（+4 条懒加载登记）。英文标识统一为 materials（表 `jintan_materials_*`、路由 `/jintan-materials-*`）。既有历史文件保持最小 diff，未做无关格式重排。
