@@ -46,6 +46,30 @@ export interface JintanProfilesStockOutListKeyParams {
   keyword?: string
 }
 
+export interface JintanMaterialsListKeyParams {
+  page: number
+  pageSize: number
+  keyword?: string
+}
+
+export interface JintanMaterialsInventoryListKeyParams {
+  page: number
+  pageSize: number
+  keyword?: string
+}
+
+export interface JintanMaterialsStockInListKeyParams {
+  page: number
+  pageSize: number
+  keyword?: string
+}
+
+export interface JintanMaterialsStockOutListKeyParams {
+  page: number
+  pageSize: number
+  keyword?: string
+}
+
 function normalizeKeyword(keyword?: string): string {
   return keyword?.trim() ?? ''
 }
@@ -59,6 +83,11 @@ const PROFILES_DATA_ROOT = 'jintan-profiles-data'
 const PROFILES_INVENTORY_ROOT = 'jintan-profiles-inventory'
 const PROFILES_STOCK_IN_ROOT = 'jintan-profiles-stock-in'
 const PROFILES_STOCK_OUT_ROOT = 'jintan-profiles-stock-out'
+
+const MATERIALS_DATA_ROOT = 'jintan-materials-data'
+const MATERIALS_INVENTORY_ROOT = 'jintan-materials-inventory'
+const MATERIALS_STOCK_IN_ROOT = 'jintan-materials-stock-in'
+const MATERIALS_STOCK_OUT_ROOT = 'jintan-materials-stock-out'
 
 export const jintanKeys = {
   partsData: {
@@ -157,6 +186,56 @@ export const jintanKeys = {
     list: (params: JintanProfilesStockOutListKeyParams) =>
       [
         PROFILES_STOCK_OUT_ROOT,
+        'list',
+        { ...params, keyword: normalizeKeyword(params.keyword) },
+      ] as const,
+  },
+  materialsData: {
+    all: [MATERIALS_DATA_ROOT] as const,
+    list: (params: JintanMaterialsListKeyParams) =>
+      [
+        MATERIALS_DATA_ROOT,
+        'list',
+        {
+          page: params.page,
+          pageSize: params.pageSize,
+          keyword: normalizeKeyword(params.keyword),
+        },
+      ] as const,
+  },
+  materialsInventory: {
+    all: [MATERIALS_INVENTORY_ROOT] as const,
+    options: (keyword?: string) =>
+      [MATERIALS_INVENTORY_ROOT, 'options', normalizeKeyword(keyword)] as const,
+    list: (params: JintanMaterialsInventoryListKeyParams) =>
+      [
+        MATERIALS_INVENTORY_ROOT,
+        'list',
+        {
+          page: params.page,
+          pageSize: params.pageSize,
+          keyword: normalizeKeyword(params.keyword),
+        },
+      ] as const,
+  },
+  materialsStockIn: {
+    all: [MATERIALS_STOCK_IN_ROOT] as const,
+    list: (params: JintanMaterialsStockInListKeyParams) =>
+      [
+        MATERIALS_STOCK_IN_ROOT,
+        'list',
+        {
+          page: params.page,
+          pageSize: params.pageSize,
+          keyword: normalizeKeyword(params.keyword),
+        },
+      ] as const,
+  },
+  materialsStockOut: {
+    all: [MATERIALS_STOCK_OUT_ROOT] as const,
+    list: (params: JintanMaterialsStockOutListKeyParams) =>
+      [
+        MATERIALS_STOCK_OUT_ROOT,
         'list',
         { ...params, keyword: normalizeKeyword(params.keyword) },
       ] as const,

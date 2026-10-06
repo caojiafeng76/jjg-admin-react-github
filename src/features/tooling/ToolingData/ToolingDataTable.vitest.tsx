@@ -94,6 +94,7 @@ describe('ToolingDataTable', () => {
       'unit_price',
       'usage',
       'remarks',
+      'created_at',
       'updated_at',
     ])
 
@@ -144,6 +145,7 @@ describe('ToolingDataTable', () => {
       'unit_price',
       'usage',
       'remarks',
+      'created_at',
       'updated_at',
       'inventory-detail',
     ])

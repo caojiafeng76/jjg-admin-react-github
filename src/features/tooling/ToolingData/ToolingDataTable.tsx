@@ -185,6 +185,20 @@ function ToolingDataTable({
         onFilter: (value, record) => matchesFilter(value, record.remarks),
       },
       {
+        title: '创建时间',
+        dataIndex: 'created_at',
+        key: 'created_at',
+        width: 180,
+        sorter: (a, b) => compareText(a.created_at, b.created_at),
+        filters: uniqueFilters(
+          data.map((record) => record.created_at),
+          (value) => formatDateTime(String(value)),
+        ),
+        filterSearch: true,
+        onFilter: (value, record) => matchesFilter(value, record.created_at),
+        render: (value: string) => formatDateTime(value),
+      },
+      {
         title: '更新时间',
         dataIndex: 'updated_at',
         key: 'updated_at',
@@ -240,7 +254,7 @@ function ToolingDataTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: onOpenDetail ? 1600 : 1480, y: scrollY }}
+      scroll={{ x: onOpenDetail ? 1780 : 1660, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

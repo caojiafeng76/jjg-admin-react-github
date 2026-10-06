@@ -2,6 +2,27 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
+## 2026-10-06
+
+- **类别**：新建 / 页面 / 数据库
+- **范围**：金檀木业「素材资料 / 素材库存 / 素材入库 / 素材出库」四模块与素材数据表
+- **摘要**：按用户确认口径（仿照型材模块全套 4 页；字段=型号/名称/规格/材质/备注，唯一键=型号+名称+规格；空模块无初始数据，库存行由触发器在素材资料新增时自动建 0 行，后续用 Excel 导入）新增素材模块。数据库新增 5 个迁移：`jintan_materials_data` / `jintan_materials_inventory` / `jintan_materials_stock_in` / `jintan_materials_stock_out` 四表（资料→库存同步触发器、出入库同事务联动触发器、10 条 RLS 策略含出入库页对库存表只读、14 条约束、3 个函数、索引与 updated_at/查看员防 DML 触发器）与 4 条页面权限种子（`page:jintan-materials-*`，admin 由既有触发器自动授权）。前端仿照型材模块新增 4 个页面（资料 CRUD/多选删除/模板导入导出，库存编辑/模板导入导出，入库、出库新增/改备注/删除）：新建 `src/features/jintan/MaterialsData|MaterialsInventory|MaterialsStockIn|MaterialsStockOut` 共 27 个文件、4 个服务 `apiJintanMaterials*.ts`、2 个 Excel 工具 `jintanMaterials*Excel.ts`（模板/解析/导出，文件名与标题为「金檀木业素材××」）及配套测试；同步更新 `jintan/permissions.ts`（+4 权限键与定义）、`jintan/queryKeys.ts`（+4 键组含 options）、`lazyPages.ts`、`router.tsx`、`routeLabels.ts`、`pagePermissionRoutes.ts`、`MainMenu.tsx`（型材出库后追加 4 项）、`lazyDocumentModules.vitest.ts`（+4 条懒加载登记）。英文标识统一为 materials（表 `jintan_materials_*`、路由 `/jintan-materials-*`）。既有历史文件保持最小 diff，未做无关格式重排。
+- **验证**：`bun run db:push:dry-run` 仅列出 5 个迁移；用户本人在交互终端确认后推送成功；`bun run db:types` 自动生成新表类型（+174 行，仅新增）；只读复查（information_schema / pg_policies / pg_constraint / pg_proc / permissions / role_permissions）：四表结构与列、10 条策略、24 项触发器、14 条约束、3 个函数、4 条权限及 admin 自动授权全部与设计一致，四表 0 行；复查 dry-run 为 `Remote database is up to date`。`bun run test` 31 项脚本测试 + 150 个 Vitest 文件 / 687 项全部通过（较上轮 +9 文件 / +44 项：素材 Excel 13、服务 12、表单 10、缓存 5、懒加载登记 4）；`bun run typecheck`、`bun run build`、`bun run check:bundle`（入口 gzip 26.8 KB）通过；`bun lint` 0 错误 / 15 个既有警告（未改文件）；`bunx antd lint` 素材资料、库存各 1 条与既有模块同源的 Upload 受控告警，入库/出库 0 问题；新建文件已 Prettier 格式化；`git diff --check` 无问题。未做浏览器登录后端到端操作验证，前端尚未发布。
+
+## 2026-10-05
+
+- **类别**：页面 / UI
+- **范围**：刀具菜单组前端表格补「创建时间」数据列（刀具资料 / 刀具库存 / 刀具入库 / 刀具出库 / 刀具资料详情抽屉「出库记录」Tab）
+- **摘要**：按用户确认口径（范围=仅刀具菜单组，不含工装管理；格式=跟随各表现有「更新时间」）在「更新时间」之前插入 `created_at` 列：`ToolingDataTable.tsx`、`ToolingStockInTable.tsx` 沿用本表「全列排序+筛选」约定（sorter + filters + filterSearch + onFilter + `toLocaleString('zh-CN')`，宽 180）；`ToolingInventoryTable.tsx`、`ToolingStockOutTable.tsx` 与本表「更新时间」同款纯渲染（宽 180/170）；`ToolingStockRecordsTabs.tsx` 详情抽屉「出库记录」Tab 补 170 宽创建时间列（「入库记录」Tab 原本已有）。各表 `scroll.x` 随新增列宽同步 +180/+170（资料 1480→1660、含操作列 1600→1780；库存 1680→1860；入库 1570→1750；出库 2260→2430；抽屉出库 Tab 1040→1210）。同步更新 `ToolingDataTable.vitest.tsx`（2 处）与 `ToolingStockInTable.vitest.tsx` 的列清单断言。无服务层/类型/数据库改动（`created_at` 已在各类型与 `select('*')` 返回中）。
+- **验证**：`bunx antd info Table --format json` 核对列 props；`bun run typecheck` 通过；`bunx antd lint src/features/tooling --format json` 仅 3 条既有 Upload 受控告警（均在未改文件）；`bun run test` 31 项脚本测试 + 141 个 Vitest 文件 / 643 项全部通过（目标用例 4 文件 / 8 项先单独复跑通过，较上轮总数不变，仅改列断言）；`bun lint` 0 错误 / 15 个既有警告（未改文件）；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 26.5 KB）；改动文件经 Prettier 格式化（`ToolingStockInTable.tsx` / `ToolingStockOutTable.tsx` 顺带归一 2 处既有超长行），`git diff --check` 无问题。未做浏览器登录后的端到端页面回归，前端改动仍在工作区、尚未发布。
+
+## 2026-10-05
+
+- **类别**：数据 / 数据库
+- **范围**：金檀木业型材「凉亭」初始库存与出库数据填充（来源：桌面《凉亭.xlsx》Sheet1）
+- **摘要**：新增数据迁移 `20261005135441_seed_jintan_profiles_liangting_inventory_stock_out.sql`，覆盖表格内 37 个型材（35 条 + 已补建的 YDJ222-159-3、YDT-026）。按用户确认口径：目标结余 = 表格入库（合计 83）；已录入的出库按同一表格计入，本次补录差额 = 表格出库 − 已录出库；库存设为「表格入库 + 补录出库」，出库由数据库触发器同事务扣减。迁移用临时表动态统计已录出库并做三重断言（库存行全部匹配、已录出库不得超过表格出库、结余与累计出库校验），失败整体回滚、重复执行不会重复扣减。预检发现用户已手工录入 14 条出库（其中 11 条恰为表格出库的一半，3 条为表格外的 155-1/173/175-1），按「保留已有、差额补录」处理，表格外型材与其库存保持不动；`水槽配件 YDJ222-159-2` 库存按公式重置。共补录出库 37 条 / 493，出库累计 51 条 / 556，37 个型材结余合计 83，全系统库存合计 94；未录入任何入库数据。
+- **验证**：`bun run db:push:dry-run` 仅列出该迁移；用户本人在交互终端三次确认后推送成功。只读复查：37/37 个型材结余等于表格入库、匹配数与期望数一致、无缺失；出库流水 51 条 / 556（旧记录 14 条/63 + 本次 37 条/493）；入库 0 条；表格外 155-1/173/175-1 库存保持 3/4/4；库存行 49 条、合计 94。`git diff --check` 无问题。未做浏览器页面端操作验证（数据层面已完整核对）。
+
 ## 2026-10-05
 
 - **类别**：新建 / 页面 / 数据库

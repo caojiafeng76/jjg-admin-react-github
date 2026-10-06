@@ -116,6 +116,14 @@ function ToolingInventoryTable({
         render: (value: string | null | undefined) => value || '-',
       },
       {
+        title: '创建时间',
+        dataIndex: 'created_at',
+        key: 'created_at',
+        width: 180,
+        render: (value: string) =>
+          value ? new Date(value).toLocaleString('zh-CN') : '-',
+      },
+      {
         title: '更新时间',
         dataIndex: 'updated_at',
         key: 'updated_at',
@@ -143,7 +151,7 @@ function ToolingInventoryTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1680, y: scrollY }}
+      scroll={{ x: 1860, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
         index % 2 === 0

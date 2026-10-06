@@ -341,6 +341,180 @@ export type Database = {
         }
         Relationships: []
       }
+      jintan_materials_data: {
+        Row: {
+          created_at: string
+          id: string
+          material: string
+          material_model: string
+          material_name: string
+          remarks: string
+          specification: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material?: string
+          material_model?: string
+          material_name: string
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material?: string
+          material_model?: string
+          material_name?: string
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      jintan_materials_inventory: {
+        Row: {
+          created_at: string
+          id: string
+          material: string
+          material_data_id: string
+          material_model: string
+          material_name: string
+          quantity: number
+          remarks: string
+          specification: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material?: string
+          material_data_id: string
+          material_model?: string
+          material_name: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material?: string
+          material_data_id?: string
+          material_model?: string
+          material_name?: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jintan_materials_inventory_material_data_id_fkey"
+            columns: ["material_data_id"]
+            isOneToOne: true
+            referencedRelation: "jintan_materials_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jintan_materials_stock_in: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_id: string
+          material: string
+          material_model: string
+          material_name: string
+          quantity: number
+          remarks: string
+          specification: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_id: string
+          material?: string
+          material_model?: string
+          material_name?: string
+          quantity: number
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_id?: string
+          material?: string
+          material_model?: string
+          material_name?: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jintan_materials_stock_in_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "jintan_materials_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jintan_materials_stock_out: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_id: string
+          material: string
+          material_model: string
+          material_name: string
+          quantity: number
+          remarks: string
+          specification: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_id: string
+          material?: string
+          material_model?: string
+          material_name?: string
+          quantity: number
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_id?: string
+          material?: string
+          material_model?: string
+          material_name?: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jintan_materials_stock_out_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "jintan_materials_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jintan_parts_data: {
         Row: {
           created_at: string

@@ -197,6 +197,20 @@ function ToolingStockInTable({
         render: (value: string | null | undefined) => value || '-',
       },
       {
+        title: '创建时间',
+        dataIndex: 'created_at',
+        key: 'created_at',
+        width: 180,
+        sorter: (a, b) => compareText(a.created_at, b.created_at),
+        filters: uniqueFilters(
+          data.map((record) => record.created_at),
+          (value) => formatDateTime(String(value)),
+        ),
+        filterSearch: true,
+        onFilter: (value, record) => matchesFilter(value, record.created_at),
+        render: (value: string) => formatDateTime(value),
+      },
+      {
         title: '更新时间',
         dataIndex: 'updated_at',
         key: 'updated_at',
@@ -229,10 +243,12 @@ function ToolingStockInTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1570, y: scrollY }}
+      scroll={{ x: 1750, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
+        index % 2 === 0
+          ? 'bg-white dark:bg-slate-800'
+          : 'bg-slate-50/60 dark:bg-slate-800/60'
       }
       onRow={(record) => ({
         ...createKeyboardTableRowProps(

@@ -30,6 +30,10 @@ import {
   ExtrusionProduction,
   ExtrusionProductionDailyReport,
   JobBaseSetting,
+  JintanMaterialsData,
+  JintanMaterialsInventory,
+  JintanMaterialsStockIn,
+  JintanMaterialsStockOut,
   JintanPartsData,
   JintanPartsInventory,
   JintanPartsStockIn,
@@ -832,6 +836,50 @@ export const router = createBrowserRouter([
             <PermissionProtectedRoute
               permissionKey="page:jintan-profiles-stock-out"
               element={<JintanProfilesStockOut />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'jintan-materials-data',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:jintan-materials-data"
+              element={<JintanMaterialsData />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'jintan-materials-inventory',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:jintan-materials-inventory"
+              element={<JintanMaterialsInventory />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'jintan-materials-stock-in',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:jintan-materials-stock-in"
+              element={<JintanMaterialsStockIn />}
+            />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'jintan-materials-stock-out',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PermissionProtectedRoute
+              permissionKey="page:jintan-materials-stock-out"
+              element={<JintanMaterialsStockOut />}
             />
           </Suspense>
         ),

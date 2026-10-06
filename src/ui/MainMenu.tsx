@@ -401,6 +401,26 @@ const allMenuItems: MenuItemDef[] = [
         label: '型材出库',
         permission: 'page:jintan-profiles-stock-out',
       },
+      {
+        key: 'jintan-materials-data',
+        label: '素材资料',
+        permission: 'page:jintan-materials-data',
+      },
+      {
+        key: 'jintan-materials-inventory',
+        label: '素材库存',
+        permission: 'page:jintan-materials-inventory',
+      },
+      {
+        key: 'jintan-materials-stock-in',
+        label: '素材入库',
+        permission: 'page:jintan-materials-stock-in',
+      },
+      {
+        key: 'jintan-materials-stock-out',
+        label: '素材出库',
+        permission: 'page:jintan-materials-stock-out',
+      },
     ],
   },
   {

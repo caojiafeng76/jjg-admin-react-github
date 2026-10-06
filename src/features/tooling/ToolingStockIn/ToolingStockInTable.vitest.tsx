@@ -91,6 +91,7 @@ describe('ToolingStockInTable', () => {
       'unit_price',
       'stock_in_quantity',
       'remarks',
+      'created_at',
       'updated_at',
     ])
 

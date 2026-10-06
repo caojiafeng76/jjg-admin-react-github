@@ -225,6 +225,13 @@ export function ToolingStockOutRecordsTab({
         render: (value: string | null | undefined) => value || '-',
       },
       {
+        title: '创建时间',
+        dataIndex: 'created_at',
+        key: 'created_at',
+        width: 170,
+        render: (value: string) => formatDateTime(value),
+      },
+      {
         title: '更新时间',
         dataIndex: 'updated_at',
         key: 'updated_at',
@@ -253,7 +260,7 @@ export function ToolingStockOutRecordsTab({
         columns={columns}
         dataSource={data?.items || []}
         pagination={false}
-        scroll={{ x: 1040 }}
+        scroll={{ x: 1210 }}
         size="small"
         locale={{
           emptyText: (

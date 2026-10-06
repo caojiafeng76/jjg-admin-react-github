@@ -13,6 +13,13 @@ export const JINTAN_PROFILES_STOCK_IN_PERMISSION_KEY =
   'page:jintan-profiles-stock-in'
 export const JINTAN_PROFILES_STOCK_OUT_PERMISSION_KEY =
   'page:jintan-profiles-stock-out'
+export const JINTAN_MATERIALS_DATA_PERMISSION_KEY = 'page:jintan-materials-data'
+export const JINTAN_MATERIALS_INVENTORY_PERMISSION_KEY =
+  'page:jintan-materials-inventory'
+export const JINTAN_MATERIALS_STOCK_IN_PERMISSION_KEY =
+  'page:jintan-materials-stock-in'
+export const JINTAN_MATERIALS_STOCK_OUT_PERMISSION_KEY =
+  'page:jintan-materials-stock-out'
 
 export const JINTAN_PERMISSIONS: PermissionDefinition[] = [
   // 导航
@@ -80,5 +87,33 @@ export const JINTAN_PERMISSIONS: PermissionDefinition[] = [
     module: 'jintan',
     surface: 'pc',
     label: '型材出库',
+  },
+  {
+    key: JINTAN_MATERIALS_DATA_PERMISSION_KEY,
+    scope: 'page',
+    module: 'jintan',
+    surface: 'pc',
+    label: '素材资料',
+  },
+  {
+    key: JINTAN_MATERIALS_INVENTORY_PERMISSION_KEY,
+    scope: 'page',
+    module: 'jintan',
+    surface: 'pc',
+    label: '素材库存',
+  },
+  {
+    key: JINTAN_MATERIALS_STOCK_IN_PERMISSION_KEY,
+    scope: 'page',
+    module: 'jintan',
+    surface: 'pc',
+    label: '素材入库',
+  },
+  {
+    key: JINTAN_MATERIALS_STOCK_OUT_PERMISSION_KEY,
+    scope: 'page',
+    module: 'jintan',
+    surface: 'pc',
+    label: '素材出库',
   },
 ]
