@@ -14,11 +14,13 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
+import PrintButton from '@/ui/PrintButton'
 import { TableState } from '@/ui/TableState'
 import { JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY } from '../permissions'
 import JintanPartsStockOutForm from './JintanPartsStockOutForm'
 import JintanPartsStockOutSearch from './JintanPartsStockOutSearch'
 import JintanPartsStockOutTable from './JintanPartsStockOutTable'
+import { usePrintJintanPartsStockOutPublicQrPoster } from './usePrintJintanPartsStockOutPublicQrPoster'
 import {
   useCreateJintanPartsStockOut,
   useDeleteJintanPartsStockOut,
@@ -51,6 +53,10 @@ export default function JintanPartsStockOutPage() {
   const createMutation = useCreateJintanPartsStockOut()
   const updateMutation = useUpdateJintanPartsStockOutRemarks()
   const deleteMutation = useDeleteJintanPartsStockOut()
+  const {
+    printPoster: printPublicQrPoster,
+    isPrinting: isPrintingPublicQrPoster,
+  } = usePrintJintanPartsStockOutPublicQrPoster()
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({ targetRowCount: 10 })
 
@@ -149,6 +155,26 @@ export default function JintanPartsStockOutPage() {
     viewerOperationTip,
   ])
 
+  const handlePrintPublicQrPoster = useCallback(() => {
+    if (!canManage) {
+      message.warning('无配件出库操作权限')
+      return
+    }
+
+    if (viewerDenied) {
+      message.warning(viewerOperationTip)
+      return
+    }
+
+    void printPublicQrPoster()
+  }, [
+    canManage,
+    message,
+    printPublicQrPoster,
+    viewerDenied,
+    viewerOperationTip,
+  ])
+
   const handleSearch = useCallback(
     (nextKeyword?: string) => {
       const next = new URLSearchParams(urlParams)
@@ -190,6 +216,13 @@ export default function JintanPartsStockOutPage() {
           itemName="配件出库记录"
           permissionKey={JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY}
         />
+        <PrintButton
+          handlePrint={handlePrintPublicQrPoster}
+          loading={isPrintingPublicQrPoster}
+          permissionKey={JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY}
+        >
+          打印二维码
+        </PrintButton>
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">

@@ -5,6 +5,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
 import RouteErrorPage from '@/pages/RouteErrorPage'
+import { JINTAN_PARTS_STOCK_OUT_PUBLIC_QR_PATH } from '@/features/jintan/PartsStockOut/jintanPartsStockOutPublicQr'
 import { LABOR_PROTECTION_PUBLIC_QR_PATH } from '@/features/labor-protection/LaborProtectionRequisition/laborProtectionPublicQr'
 import { TOOLING_STOCK_OUT_PUBLIC_QR_PATH } from '@/features/tooling/ToolingStockOut/toolingStockOutPublicQr'
 import { TOOLING_FIXTURE_PUBLIC_QR_PATH } from '@/features/tooling-fixture/toolingFixturePublicQr'
@@ -38,6 +39,7 @@ import {
   JintanPartsInventory,
   JintanPartsStockIn,
   JintanPartsStockOut,
+  JintanPartsStockOutPublicPage,
   JintanProfilesData,
   JintanProfilesInventory,
   JintanProfilesStockIn,
@@ -901,6 +903,15 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<Loading />}>
         <ToolingStockOutPublicPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: JINTAN_PARTS_STOCK_OUT_PUBLIC_QR_PATH,
+    errorElement: <RouteErrorPage />,
+    element: (
+      <Suspense fallback={<Loading />}>
+        <JintanPartsStockOutPublicPage />
       </Suspense>
     ),
   },

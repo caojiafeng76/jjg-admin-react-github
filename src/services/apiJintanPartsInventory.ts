@@ -1,3 +1,4 @@
+import publicSupabase from './publicSupabase'
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 
@@ -216,10 +217,33 @@ export interface JintanPartsInventoryOption {
 export async function getJintanPartsInventoryOptions(
   keyword?: string,
 ): Promise<JintanPartsInventoryOption[]> {
-  let query = supabase
+  return getJintanPartsInventoryOptionsWithClient(supabase, keyword)
+}
+
+export async function getPublicJintanPartsInventoryOptions(
+  keyword?: string,
+  signal?: AbortSignal,
+): Promise<JintanPartsInventoryOption[]> {
+  return getJintanPartsInventoryOptionsWithClient(
+    publicSupabase,
+    keyword,
+    signal,
+  )
+}
+
+async function getJintanPartsInventoryOptionsWithClient(
+  client: typeof supabase,
+  keyword?: string,
+  signal?: AbortSignal,
+): Promise<JintanPartsInventoryOption[]> {
+  let query = client
     .from('jintan_parts_inventory')
     .select('id, part_name, specification, material, supplier, quantity')
   if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
 
   const { data, error } = await query
     .order('part_name', { ascending: true })

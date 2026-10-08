@@ -6,6 +6,7 @@ import {
   createJintanPartsInventoryBatch,
   getJintanPartsInventoryList,
   getJintanPartsInventoryOptions,
+  getPublicJintanPartsInventoryOptions,
   updateJintanPartsInventory,
 } from '@services/apiJintanPartsInventory'
 
@@ -51,6 +52,15 @@ export function useJintanPartsInventoryOptions(keyword?: string) {
   return useQuery({
     queryKey: jintanKeys.partsInventory.options(keyword),
     queryFn: () => getJintanPartsInventoryOptions(keyword),
+    ...queryConfig.list,
+  })
+}
+
+export function usePublicJintanPartsInventoryOptions(keyword?: string) {
+  return useQuery({
+    queryKey: jintanKeys.partsInventory.publicOptions(keyword),
+    queryFn: ({ signal }) =>
+      getPublicJintanPartsInventoryOptions(keyword, signal),
     ...queryConfig.list,
   })
 }

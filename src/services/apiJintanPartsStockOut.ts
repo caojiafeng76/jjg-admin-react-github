@@ -1,3 +1,4 @@
+import publicSupabase from './publicSupabase'
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 
@@ -49,17 +50,31 @@ export async function getJintanPartsStockOutList({
 export async function createJintanPartsStockOut(
   values: JintanPartsStockOutFormValues,
 ): Promise<void> {
+  await insertJintanPartsStockOut(supabase, values, '新增配件出库失败')
+}
+
+export async function createPublicJintanPartsStockOut(
+  values: JintanPartsStockOutFormValues,
+): Promise<void> {
+  await insertJintanPartsStockOut(publicSupabase, values, '创建配件出库失败')
+}
+
+async function insertJintanPartsStockOut(
+  client: typeof supabase,
+  values: JintanPartsStockOutFormValues,
+  errorMessage: string,
+): Promise<void> {
   if (!Number.isSafeInteger(values.quantity) || values.quantity <= 0) {
     throw new Error('出库数量必须为正整数')
   }
   if (!values.inventory_id) throw new Error('请选择配件')
 
-  const { error } = await supabase.from('jintan_parts_stock_out').insert({
+  const { error } = await client.from('jintan_parts_stock_out').insert({
     inventory_id: values.inventory_id,
     quantity: values.quantity,
     remarks: (values.remarks ?? '').trim(),
   })
-  if (error) throw handleApiError(error, '新增配件出库失败')
+  if (error) throw handleApiError(error, errorMessage)
 }
 
 export async function updateJintanPartsStockOutRemarks({

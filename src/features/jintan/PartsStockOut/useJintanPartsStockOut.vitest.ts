@@ -12,6 +12,7 @@ vi.mock('@/hooks/useMutationWithInvalidation', () => ({
 import { jintanKeys } from '../queryKeys'
 import {
   useCreateJintanPartsStockOut,
+  useCreatePublicJintanPartsStockOut,
   useDeleteJintanPartsStockOut,
   useUpdateJintanPartsStockOutRemarks,
 } from './useJintanPartsStockOut'
@@ -35,5 +36,10 @@ describe('配件出库缓存联动', () => {
     expect(mutationMock.mock.calls[0][0].invalidateQueries).toEqual([
       jintanKeys.partsStockOut.all,
     ])
+  })
+
+  it('公开扫码新增不触发后台缓存失效', () => {
+    useCreatePublicJintanPartsStockOut()
+    expect(mutationMock.mock.calls[0][0].invalidateQueries ?? []).toEqual([])
   })
 })

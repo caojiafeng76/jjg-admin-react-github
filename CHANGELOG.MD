@@ -2,6 +2,37 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
+## 2026-10-08
+
+- **类别**：新建 / 页面 / 数据库
+- **范围**：金檀木业配件出库免登录扫码登记（仿刀具出库 H5），仅配件出库、复用现有三字段
+- **摘要**：新增固定二维码公开页 `/h5/jintan-parts-stock-out`，扫码后无需登录即可选择配件、填写出库数量和备注并提交，提交后由数据库触发器自动扣减库存、超库存报错。数据库新增迁移 `20261008030000_allow_public_jintan_parts_stock_out.sql`：给 anon 开库存表 SELECT 与出库表 INSERT（`grant select/insert`），新增两条 RLS 策略（库存公开读全行、出库公开插入校验 `inventory_id 非空、quantity > 0、备注 ≤500 字`）；不改表结构，库存扣减复用已有 `security definer` 触发器。前端仿刀具出库全套：`jintanPartsStockOutPublicQr.ts`（路径与取值）、`JintanPartsStockOutPublicPage.tsx`（移动端卡片 + 底部 sticky 确认登记 + 成功继续登记，数量做当前库存上限校验）、`usePrintJintanPartsStockOutPublicQrPoster.tsx`（A4 海报打印）；PC 出库页工具栏加「打印二维码」按钮（同权限键管控）；`lazyPages.ts` + `router.tsx` 注册免登录公开路由。服务层 `apiJintanPartsInventory.ts` / `apiJintanPartsStockOut.ts` 拆出 `*WithClient` 并新增 `getPublicJintanPartsInventoryOptions` / `createPublicJintanPartsStockOut`（走 `publicSupabase`）；`queryKeys.ts` 加 `partsInventory.publicOptions`；hooks 加 `usePublicJintanPartsInventoryOptions` / `useCreatePublicJintanPartsStockOut`。PC 端原有表单与权限逻辑未动。
+- **验证**：`bun run typecheck` 通过；`bun run test` 31 项脚本测试 + 152 个 Vitest 文件 / 697 项全部通过（新增 QR 常量 2 项 + 公开 mutation 缓存 1 项）；目标文件 `bunx eslint` 0 问题；改动文件 Prettier 格式化；`bun run build` 通过（新 chunk `JintanPartsStockOutPublicPage` 7.42 kB）；`bun run check:bundle` 通过（入口 gzip 26.9 KB）；`bun run db:push:dry-run` 仅列出本迁移。正式 `bun run db:push` 待用户在交互终端执行（推送脚本含 SQL 指纹三次确认门槛，非交互调用会被拦截），推送后需真机扫码走一遍正常提交与超库存报错。无 `database.types.ts` 变更（无表结构改动）。
+
+## 2026-10-08
+
+- **类别**：数据 / 数据库
+- **范围**：金檀木业配件出库流水补录（来源：《金檀木业配件资料_37条_2026-10-06_10-56-32 - 副本.xlsx》出库列），库存不动
+- **摘要**：按用户确认口径（仅 20 行有出库数的行记流水，28 行空白=无出库不建记录；库存最终不动）新增数据迁移 `20261008020000_seed_jintan_parts_stock_out_20261006_excel.sql`。库内出库原为 0 条。20 行出库数由公式求值：转轴固定座 1、固定轴套 29、4mm 扳手 2、5mm 扳手 1、圆头 M8*25 18、沉头 M6*16 46 / M6*25 28 / M8*25 4、十字圆头 168、垫片 22/6、手摇机 1、连接杆套件 1、膨胀螺栓 32、衬套 20/3、防松 M6 3 / M8 34、圆头 M6*25 5、防松 M10 1，合计 425（出库表 `quantity > 0` 约束，空白行只能跳过）。机制：出库 BEFORE INSERT 触发器必然扣减库存，本迁移同事务内等额补回，触发器全程保持启用；迁移前对全库库存做快照，终态逐行比对保证零变化。单个 DO 块实现幂等：20 行已存在则 NOTICE 跳过、部分存在则报错；前置断言（行数/全匹配/足额）与终态断言（出库 20 行合计 425、库存快照一致），失败整体回滚。备注与表格一致留空，快照由触发器从库存行填写。无 schema 变更，无需 `db:types`。
+- **验证**：生成器自检通过（20 行、键唯一且全在 48 行库存内、逐行足额、合计 425）；迁移文件已逐行读审；`bun run db:push:dry-run` 仅列出本迁移且远端连接正常。正式 `bun run db:push` 与推送后数据复查待用户在交互终端执行（推送脚本含 SQL 指纹三次确认门槛，非交互调用会被拦截）。
+- **推送结果（2026-10-08 补记）**：用户在交互终端推送成功。只读复查（`bun run db:query`）：出库 20 行合计 425，库存 48 行合计 17197 与推送前一致、零变化；`bun run db:push:dry-run` 显示 `Remote database is up to date`（首次 dry-run 撞上临时登录密码失效，重试通过，属工具层瞬态问题）。无 schema 变更，未跑 `db:types`。
+
+## 2026-10-08
+
+- **类别**：数据 / 数据库
+- **范围**：金檀木业型材库存数据更新（来源：《金檀木业型材库存_49条_2026-10-08_10-01-36.xlsx》，实际 57 行）
+- **摘要**：按用户确认口径（57 行全量覆盖数量/备注；4 格公式按求值入库；8 个新品自动补型材资料）新增数据迁移 `20261008010000_seed_jintan_profiles_inventory_20261008_excel.sql`。文件名“49条”为旧数，表格实际 57 个不同自然键（编号 1–49 有复用：#28×3、#32×2、#33×3、#48×3、#49×2，但型号+名称+规格无重复）。迁移用临时表暂存表格：A. 从暂存表 `INSERT … ON CONFLICT (profile_model, profile_name, specification) DO NOTHING` 补 8 个新品资料（水槽 2227/2229、YDG222-179/手摇机固定座/80、百叶片左/右、盖板 1/2/3 孔；INSERT 触发器自动建 0 库存行）；B. 兜底补 0 库存行；C. 前置断言 57 行全部匹配到库存行；D. 全量更新数量/备注（快照字段以型材资料为准不覆盖）；E. 事后复核一致，否则整体回滚。公式求值：百叶片左 333、百叶片右 392、盖板 1 孔 801、盖板 2 孔 521；数字型规格按文本入库（'2227'/'2229'/'80'/'0'）；备注全空。表格总量 3426（库内原 49 行合计 94；入库 0 条、出库 51 条为凉亭历史，不动）。迁移由表格提取脚本逐行生成（非手工转录），生成器已与库内 49 行键集合交叉核对（全命中、新品恰为预期 8 个）。无 schema 变更，无需 `db:types`。
+- **验证**：生成器自检通过（57 行、自然键唯一、库内 49 键全命中、新品 8 个吻合、公式 333/392/521/801、总量 3426）；迁移文件已逐行读审；`bun run db:push:dry-run` 仅列出本迁移且远端连接正常。正式 `bun run db:push` 与推送后数据复查待用户在交互终端执行（推送脚本含 SQL 指纹三次确认门槛，非交互调用会被拦截）。
+- **推送结果（2026-10-08 补记）**：用户在交互终端推送成功。只读复查（`bun run db:query`）：57 行逐行核对不符数为 0，对应库存总量 3426 与表格一致（其中一次总量查询撞上 CLI 登录角色并发竞态 `tuple concurrently updated`，串行重跑后通过，属工具层瞬态问题）；`bun run db:push:dry-run` 显示 `Remote database is up to date`。无 schema 变更，未跑 `db:types`。
+
+## 2026-10-08
+
+- **类别**：数据 / 数据库
+- **范围**：金檀木业配件库存数据补录（来源：《金檀木业配件资料_37条_2026-10-06_10-56-32.xlsx》，实际 48 行）
+- **摘要**：按用户确认口径（空库存数量按 0 入库；缺失新品自动补配件资料；全量覆盖数量/备注）新增数据迁移 `20261008000000_seed_jintan_parts_inventory_20261006_excel.sql`。迁移用临时表暂存表格 48 行：A. 从暂存表 `INSERT … ON CONFLICT (part_name, specification) DO NOTHING` 补 11 个新品资料（内六角圆头 M6*20/M6*25/M8*35/M5*18、十字平头 M6*16、防松螺母 M10、衬套 φ8*10*22、轴套 φ8*10*8、无规格轴套、水槽折弯件、水槽焊接铝片；INSERT 触发器自动建 0 库存行）；B. 兜底补 0 库存行；C. 前置断言 48 行全部匹配到库存行；D. 按表格全量更新数量/备注（快照字段以配件资料为准不覆盖）；E. 事后复核数量/备注一致，否则整体回滚。5 行空数量按 0 计（手摇杆 1.5m、毛巾、纸箱、线手套、转轴销 φ14*31），表格库存总量 17197。迁移由表格提取脚本逐行生成（非手工转录），Excel 规格中的 `φ`（U+03C6）已与既有 seed 逐字节核对一致。无 schema 变更，无需 `db:types`。
+- **验证**：生成器自检通过（48 行、名称+规格唯一、与 seed 差集恰为 11 新品、总量 17197）；迁移文件已逐行读审；`bun run db:push:dry-run` 仅列出本迁移且远端连接正常。正式 `bun run db:push` 与推送后数据复查待用户在交互终端执行（推送脚本含 SQL 指纹三次确认门槛，非交互调用会被拦截）。
+- **推送结果（2026-10-08 补记）**：用户在交互终端推送成功。只读复查（`bun run db:query`）：48 行逐行核对不符数为 0，48 行对应库存总量 17197 与表格一致；`bun run db:push:dry-run` 显示 `Remote database is up to date`。无 schema 变更，未跑 `db:types`。
+
 ## 2026-10-06
 
 - **类别**：UI / 导航菜单

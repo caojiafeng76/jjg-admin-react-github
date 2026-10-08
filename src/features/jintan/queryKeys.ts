@@ -107,6 +107,12 @@ export const jintanKeys = {
     all: [PARTS_INVENTORY_ROOT] as const,
     options: (keyword?: string) =>
       [PARTS_INVENTORY_ROOT, 'options', normalizeKeyword(keyword)] as const,
+    publicOptions: (keyword?: string) =>
+      [
+        PARTS_INVENTORY_ROOT,
+        'public-options',
+        normalizeKeyword(keyword),
+      ] as const,
     list: (params: JintanPartsInventoryListKeyParams) =>
       [
         PARTS_INVENTORY_ROOT,

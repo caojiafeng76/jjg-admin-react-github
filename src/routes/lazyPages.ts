@@ -183,9 +183,7 @@ export const PackagingWorkOrderList = lazy(
   () => import('@features/packaging-process/WorkOrderList'),
 )
 
-export const JintanPartsData = lazy(
-  () => import('@features/jintan/PartsData'),
-)
+export const JintanPartsData = lazy(() => import('@features/jintan/PartsData'))
 export const JintanPartsInventory = lazy(
   () => import('@features/jintan/PartsInventory'),
 )
@@ -194,6 +192,9 @@ export const JintanPartsStockIn = lazy(
 )
 export const JintanPartsStockOut = lazy(
   () => import('@features/jintan/PartsStockOut'),
+)
+export const JintanPartsStockOutPublicPage = lazy(
+  () => import('@features/jintan/PartsStockOut/JintanPartsStockOutPublicPage'),
 )
 export const JintanProfilesData = lazy(
   () => import('@features/jintan/ProfilesData'),

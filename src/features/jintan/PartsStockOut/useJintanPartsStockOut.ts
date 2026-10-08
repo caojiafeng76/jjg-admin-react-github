@@ -4,6 +4,7 @@ import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   createJintanPartsStockOut,
+  createPublicJintanPartsStockOut,
   deleteJintanPartsStockOut,
   getJintanPartsStockOutList,
   updateJintanPartsStockOutRemarks,
@@ -35,6 +36,12 @@ export function useCreateJintanPartsStockOut() {
       jintanKeys.partsStockOut.all,
       jintanKeys.partsInventory.all,
     ],
+  })
+}
+
+export function useCreatePublicJintanPartsStockOut() {
+  return useMutationWithInvalidation({
+    mutationFn: createPublicJintanPartsStockOut,
   })
 }
 
