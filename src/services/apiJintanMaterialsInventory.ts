@@ -85,6 +85,29 @@ export async function getJintanMaterialsInventoryList({
   }
 }
 
+export async function getJintanMaterialsInventoryByDataId(
+  materialDataId: string,
+  signal?: AbortSignal,
+): Promise<JintanMaterialsInventory | null> {
+  let query = supabase
+    .from('jintan_materials_inventory')
+    .select('*')
+    .eq('material_data_id', materialDataId)
+    .limit(1)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取素材库存详情失败')
+  }
+
+  return (data as JintanMaterialsInventory | null) ?? null
+}
+
 export async function getJintanMaterialsInventoryForExport(keyword?: string) {
   const rows: JintanMaterialsInventory[] = []
   let from = 0

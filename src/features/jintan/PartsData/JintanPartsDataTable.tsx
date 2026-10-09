@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Table, TableColumnsType } from 'antd'
+import { Button, Table, TableColumnsType } from 'antd'
 
 import type { JintanPartsData } from '@/services/apiJintanPartsData'
 import { TableEmpty } from '@/ui/TableState'
@@ -15,6 +15,8 @@ interface Props {
   scrollY?: number
   rowHeight?: number
   emptyAction?: React.ReactNode
+  /** 打开行详情抽屉（库存/出入库）；不传时不渲染操作列 */
+  onOpenDetail?: (record: JintanPartsData) => void
 }
 
 export default function JintanPartsDataTable({
@@ -27,9 +29,10 @@ export default function JintanPartsDataTable({
   scrollY = 400,
   rowHeight = 40,
   emptyAction,
+  onOpenDetail,
 }: Props) {
-  const columns: TableColumnsType<JintanPartsData> = useMemo(
-    () => [
+  const columns: TableColumnsType<JintanPartsData> = useMemo(() => {
+    const base: TableColumnsType<JintanPartsData> = [
       {
         title: '#',
         key: '#',
@@ -80,9 +83,31 @@ export default function JintanPartsDataTable({
         render: (value: string) =>
           value ? new Date(value).toLocaleString('zh-CN') : '-',
       },
-    ],
-    [page, pageSize],
-  )
+    ]
+
+    if (onOpenDetail) {
+      base.push({
+        title: '库存/出入库',
+        key: 'inventory-detail',
+        width: 120,
+        fixed: 'right',
+        render: (_value, record) => (
+          <Button
+            type="link"
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation()
+              onOpenDetail(record)
+            }}
+          >
+            查看
+          </Button>
+        ),
+      })
+    }
+
+    return base
+  }, [onOpenDetail, page, pageSize])
 
   const rowSelection = useMemo(
     () => ({
@@ -100,7 +125,7 @@ export default function JintanPartsDataTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1120, y: scrollY }}
+      scroll={{ x: onOpenDetail ? 1240 : 1120, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

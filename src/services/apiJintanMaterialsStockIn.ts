@@ -28,15 +28,21 @@ export async function getJintanMaterialsStockInList({
   page,
   pageSize,
   keyword,
+  inventoryId,
+  signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  inventoryId?: string
+  signal?: AbortSignal
 }): Promise<{ items: JintanMaterialsStockIn[]; total: number }> {
   let query = supabase
     .from('jintan_materials_stock_in')
     .select('*', { count: 'exact' })
   if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
+  if (inventoryId) query = query.eq('inventory_id', inventoryId)
+  if (signal) query = query.abortSignal(signal)
 
   const { data, error, count } = await query
     .order('created_at', { ascending: false })

@@ -5,6 +5,13 @@
 ## 2026-10-09
 
 - **类别**：页面 / UI
+- **范围**：金檀木业素材资料、型材资料、配件资料加「查看」行详情抽屉与快捷新建入库/出库（参考刀具资料抽屉）
+- **摘要**：三张资料表（`JintanParts/Profiles/MaterialsDataTable.tsx`）加右侧「库存/出入库」查看列（有任一库存/出入库权限才渲染，`scroll.x` 补 120）；三页 `index.tsx` 加 `detailRecord` 与 `canOpenDetail` 并挂载抽屉。新建 `Jintan*DataDetailDrawer.tsx`（资料头 + 当前库存摘要/错误重试 + 快捷新建入库/出库 + 入库/出库记录 Tabs，成功留在抽屉内刷新，无审核、建单直接更新库存）与 `Jintan*StockRecordsTabs.tsx`（数量/备注/创建时间，10 条分页）及 `useJintan*DataDetail.ts`（库存详情 + 出入库记录，键挂在库存/出入库根下以沿用 mutation 失效链）。服务层：3 个 `getJintan*InventoryByDataId`（`maybeSingle`，缺行返回 null，抽屉内提示暂不能建单）与 6 个出入库列表函数加可选 `inventoryId` + `signal` 筛选；`queryKeys.ts` 加 3 个 `detail` 与 6 个 `byInventory` 键。6 个出入库表单加 `quickInventory` 快捷锁定模式（隐藏选择器、出库保留 `≤当前库存` 上限校验），原独立页面表单行为不变。测试：3 个 `index.vitest` 各 +1 查看打开用例，新增 3 个抽屉 `vitest`（头/库存/Tab + 快捷建单走 create）。
+- **验证**：`bun run typecheck` 通过；目标 6 文件 `bunx vitest run` 18 项通过；改动目录 `bunx eslint` 0 错误 0 警告；改动文件 Prettier 格式化；`bun run test` 31 项脚本测试 + 158 个 Vitest 文件 / 715 项全部通过（较上轮 +3 文件 / +12 项）；`bun run build` 通过；`git diff --check` 无问题。未做浏览器登录后端到端操作验证，前端尚未发布。
+
+## 2026-10-09
+
+- **类别**：页面 / UI
 - **范围**：金檀木业素材资料、型材资料、配件资料加「复制新增」（参考刀具资料，全字段原样带出、全部可改）
 - **摘要**：三页 `PartsData/ProfilesData/MaterialsData/index.tsx` 同构仿照 `ToolingData/index.tsx`：新增 `isCopyCreate` 状态与 `handleCopyCreate`（非单选提示「请选择一条数据进行复制新增」）、工具栏编辑按钮后加 `DocumentDuplicateIcon`「复制新增」按钮（同页权限键 + 查看员守卫）、Modal 标题「复制新增金檀木业××资料」、表单 `initialValues` 改为 `(isEdit || isCopyCreate) && editingRecord`、提交沿用创建分支与既有唯一键中文校验（配件名称+规格、型材/素材型号+名称+规格）。表单组件未加禁用，按确认口径全部可改。新增三页 `index.vitest.tsx`（单选校验 + 标题/initialValues + 只调 create 不调 update）。
 - **验证**：`bun run typecheck` 通过；目标 4 文件 `bunx vitest run` 8 项通过；`bunx eslint` 目标 6 文件 0 问题；改动文件 Prettier 格式化；`bun run test` 31 项脚本测试 + 155 个 Vitest 文件 / 703 项全部通过（较上轮 +3 文件 / +6 项）；`bun run build` 通过。未做浏览器登录后端到端操作验证，前端尚未发布。

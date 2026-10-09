@@ -18,7 +18,13 @@ import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
-import { JINTAN_PROFILES_DATA_PERMISSION_KEY } from '../permissions'
+import {
+  JINTAN_PROFILES_DATA_PERMISSION_KEY,
+  JINTAN_PROFILES_INVENTORY_PERMISSION_KEY,
+  JINTAN_PROFILES_STOCK_IN_PERMISSION_KEY,
+  JINTAN_PROFILES_STOCK_OUT_PERMISSION_KEY,
+} from '../permissions'
+import JintanProfilesDataDetailDrawer from './JintanProfilesDataDetailDrawer'
 import JintanProfilesDataExcelImport from './JintanProfilesDataExcelImport'
 import JintanProfilesDataForm from './JintanProfilesDataForm'
 import JintanProfilesDataSearch from './JintanProfilesDataSearch'
@@ -41,7 +47,19 @@ function preloadJintanProfilesDataExcel() {
 export default function JintanProfilesDataPage() {
   const { message } = App.useApp()
   const canManageProfiles = usePermission(JINTAN_PROFILES_DATA_PERMISSION_KEY)
+  const canViewInventory = usePermission(
+    JINTAN_PROFILES_INVENTORY_PERMISSION_KEY,
+  )
+  const canViewStockIn = usePermission(JINTAN_PROFILES_STOCK_IN_PERMISSION_KEY)
+  const canViewStockOut = usePermission(
+    JINTAN_PROFILES_STOCK_OUT_PERMISSION_KEY,
+  )
+  const canOpenDetail = canViewInventory || canViewStockIn || canViewStockOut
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+
+  const [detailRecord, setDetailRecord] = useState<JintanProfilesData | null>(
+    null,
+  )
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建金檀木业型材资料')
@@ -135,6 +153,14 @@ export default function JintanProfilesDataPage() {
     setModalTitle('编辑金檀木业型材资料')
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
+
+  const handleOpenDetail = useCallback((record: JintanProfilesData) => {
+    setDetailRecord(record)
+  }, [])
+
+  const handleCloseDetail = useCallback(() => {
+    setDetailRecord(null)
+  }, [])
 
   const handleDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
@@ -390,6 +416,7 @@ export default function JintanProfilesDataPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
+              onOpenDetail={canOpenDetail ? handleOpenDetail : undefined}
               emptyAction={
                 <AddButton
                   handleCreate={handleCreate}
@@ -427,6 +454,14 @@ export default function JintanProfilesDataPage() {
           />
         </div>
       </Modal>
+
+      {detailRecord ? (
+        <JintanProfilesDataDetailDrawer
+          open
+          record={detailRecord}
+          onClose={handleCloseDetail}
+        />
+      ) : null}
     </div>
   )
 }

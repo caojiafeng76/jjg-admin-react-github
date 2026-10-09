@@ -18,7 +18,13 @@ import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
-import { JINTAN_MATERIALS_DATA_PERMISSION_KEY } from '../permissions'
+import {
+  JINTAN_MATERIALS_DATA_PERMISSION_KEY,
+  JINTAN_MATERIALS_INVENTORY_PERMISSION_KEY,
+  JINTAN_MATERIALS_STOCK_IN_PERMISSION_KEY,
+  JINTAN_MATERIALS_STOCK_OUT_PERMISSION_KEY,
+} from '../permissions'
+import JintanMaterialsDataDetailDrawer from './JintanMaterialsDataDetailDrawer'
 import JintanMaterialsDataExcelImport from './JintanMaterialsDataExcelImport'
 import JintanMaterialsDataForm from './JintanMaterialsDataForm'
 import JintanMaterialsDataSearch from './JintanMaterialsDataSearch'
@@ -41,7 +47,19 @@ function preloadJintanMaterialsDataExcel() {
 export default function JintanMaterialsDataPage() {
   const { message } = App.useApp()
   const canManageMaterials = usePermission(JINTAN_MATERIALS_DATA_PERMISSION_KEY)
+  const canViewInventory = usePermission(
+    JINTAN_MATERIALS_INVENTORY_PERMISSION_KEY,
+  )
+  const canViewStockIn = usePermission(JINTAN_MATERIALS_STOCK_IN_PERMISSION_KEY)
+  const canViewStockOut = usePermission(
+    JINTAN_MATERIALS_STOCK_OUT_PERMISSION_KEY,
+  )
+  const canOpenDetail = canViewInventory || canViewStockIn || canViewStockOut
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+
+  const [detailRecord, setDetailRecord] = useState<JintanMaterialsData | null>(
+    null,
+  )
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建金檀木业素材资料')
@@ -134,6 +152,14 @@ export default function JintanMaterialsDataPage() {
     setModalTitle('编辑金檀木业素材资料')
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
+
+  const handleOpenDetail = useCallback((record: JintanMaterialsData) => {
+    setDetailRecord(record)
+  }, [])
+
+  const handleCloseDetail = useCallback(() => {
+    setDetailRecord(null)
+  }, [])
 
   const handleDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
@@ -389,6 +415,7 @@ export default function JintanMaterialsDataPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
+              onOpenDetail={canOpenDetail ? handleOpenDetail : undefined}
               emptyAction={
                 <AddButton
                   handleCreate={handleCreate}
@@ -426,6 +453,14 @@ export default function JintanMaterialsDataPage() {
           />
         </div>
       </Modal>
+
+      {detailRecord ? (
+        <JintanMaterialsDataDetailDrawer
+          open
+          record={detailRecord}
+          onClose={handleCloseDetail}
+        />
+      ) : null}
     </div>
   )
 }

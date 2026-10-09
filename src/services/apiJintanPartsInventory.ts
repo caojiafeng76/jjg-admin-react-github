@@ -84,6 +84,29 @@ export async function getJintanPartsInventoryList({
   }
 }
 
+export async function getJintanPartsInventoryByDataId(
+  partDataId: string,
+  signal?: AbortSignal,
+): Promise<JintanPartsInventory | null> {
+  let query = supabase
+    .from('jintan_parts_inventory')
+    .select('*')
+    .eq('part_data_id', partDataId)
+    .limit(1)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取配件库存详情失败')
+  }
+
+  return (data as JintanPartsInventory | null) ?? null
+}
+
 export async function getJintanPartsInventoryForExport(keyword?: string) {
   const rows: JintanPartsInventory[] = []
   let from = 0

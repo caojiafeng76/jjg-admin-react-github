@@ -85,6 +85,29 @@ export async function getJintanProfilesInventoryList({
   }
 }
 
+export async function getJintanProfilesInventoryByDataId(
+  profileDataId: string,
+  signal?: AbortSignal,
+): Promise<JintanProfilesInventory | null> {
+  let query = supabase
+    .from('jintan_profiles_inventory')
+    .select('*')
+    .eq('profile_data_id', profileDataId)
+    .limit(1)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取型材库存详情失败')
+  }
+
+  return (data as JintanProfilesInventory | null) ?? null
+}
+
 export async function getJintanProfilesInventoryForExport(keyword?: string) {
   const rows: JintanProfilesInventory[] = []
   let from = 0

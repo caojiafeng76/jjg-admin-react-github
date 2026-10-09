@@ -18,7 +18,13 @@ import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
-import { JINTAN_PARTS_DATA_PERMISSION_KEY } from '../permissions'
+import {
+  JINTAN_PARTS_DATA_PERMISSION_KEY,
+  JINTAN_PARTS_INVENTORY_PERMISSION_KEY,
+  JINTAN_PARTS_STOCK_IN_PERMISSION_KEY,
+  JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY,
+} from '../permissions'
+import JintanPartsDataDetailDrawer from './JintanPartsDataDetailDrawer'
 import JintanPartsDataExcelImport from './JintanPartsDataExcelImport'
 import JintanPartsDataForm from './JintanPartsDataForm'
 import JintanPartsDataSearch from './JintanPartsDataSearch'
@@ -40,7 +46,13 @@ function preloadJintanPartsDataExcel() {
 export default function JintanPartsDataPage() {
   const { message } = App.useApp()
   const canManageParts = usePermission(JINTAN_PARTS_DATA_PERMISSION_KEY)
+  const canViewInventory = usePermission(JINTAN_PARTS_INVENTORY_PERMISSION_KEY)
+  const canViewStockIn = usePermission(JINTAN_PARTS_STOCK_IN_PERMISSION_KEY)
+  const canViewStockOut = usePermission(JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY)
+  const canOpenDetail = canViewInventory || canViewStockIn || canViewStockOut
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
+
+  const [detailRecord, setDetailRecord] = useState<JintanPartsData | null>(null)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建金檀木业配件资料')
@@ -134,6 +146,14 @@ export default function JintanPartsDataPage() {
     setModalTitle('编辑金檀木业配件资料')
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
+
+  const handleOpenDetail = useCallback((record: JintanPartsData) => {
+    setDetailRecord(record)
+  }, [])
+
+  const handleCloseDetail = useCallback(() => {
+    setDetailRecord(null)
+  }, [])
 
   const handleDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
@@ -382,6 +402,7 @@ export default function JintanPartsDataPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
+              onOpenDetail={canOpenDetail ? handleOpenDetail : undefined}
               emptyAction={
                 <AddButton
                   handleCreate={handleCreate}
@@ -419,6 +440,14 @@ export default function JintanPartsDataPage() {
           />
         </div>
       </Modal>
+
+      {detailRecord ? (
+        <JintanPartsDataDetailDrawer
+          open
+          record={detailRecord}
+          onClose={handleCloseDetail}
+        />
+      ) : null}
     </div>
   )
 }

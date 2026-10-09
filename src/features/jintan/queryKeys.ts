@@ -70,6 +70,12 @@ export interface JintanMaterialsStockOutListKeyParams {
   keyword?: string
 }
 
+export interface JintanStockByInventoryKeyParams {
+  inventoryId: string
+  page: number
+  pageSize: number
+}
+
 function normalizeKeyword(keyword?: string): string {
   return keyword?.trim() ?? ''
 }
@@ -105,6 +111,8 @@ export const jintanKeys = {
   },
   partsInventory: {
     all: [PARTS_INVENTORY_ROOT] as const,
+    detail: (dataId: string) =>
+      [PARTS_INVENTORY_ROOT, 'detail', dataId] as const,
     options: (keyword?: string) =>
       [PARTS_INVENTORY_ROOT, 'options', normalizeKeyword(keyword)] as const,
     publicOptions: (keyword?: string) =>
@@ -126,6 +134,16 @@ export const jintanKeys = {
   },
   partsStockIn: {
     all: [PARTS_STOCK_IN_ROOT] as const,
+    byInventory: (params: JintanStockByInventoryKeyParams) =>
+      [
+        PARTS_STOCK_IN_ROOT,
+        'by-inventory',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
     list: (params: JintanPartsStockInListKeyParams) =>
       [
         PARTS_STOCK_IN_ROOT,
@@ -139,6 +157,16 @@ export const jintanKeys = {
   },
   partsStockOut: {
     all: [PARTS_STOCK_OUT_ROOT] as const,
+    byInventory: (params: JintanStockByInventoryKeyParams) =>
+      [
+        PARTS_STOCK_OUT_ROOT,
+        'by-inventory',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
     list: (params: JintanPartsStockOutListKeyParams) =>
       [
         PARTS_STOCK_OUT_ROOT,
@@ -161,6 +189,8 @@ export const jintanKeys = {
   },
   profilesInventory: {
     all: [PROFILES_INVENTORY_ROOT] as const,
+    detail: (dataId: string) =>
+      [PROFILES_INVENTORY_ROOT, 'detail', dataId] as const,
     options: (keyword?: string) =>
       [PROFILES_INVENTORY_ROOT, 'options', normalizeKeyword(keyword)] as const,
     list: (params: JintanProfilesInventoryListKeyParams) =>
@@ -176,6 +206,16 @@ export const jintanKeys = {
   },
   profilesStockIn: {
     all: [PROFILES_STOCK_IN_ROOT] as const,
+    byInventory: (params: JintanStockByInventoryKeyParams) =>
+      [
+        PROFILES_STOCK_IN_ROOT,
+        'by-inventory',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
     list: (params: JintanProfilesStockInListKeyParams) =>
       [
         PROFILES_STOCK_IN_ROOT,
@@ -189,6 +229,16 @@ export const jintanKeys = {
   },
   profilesStockOut: {
     all: [PROFILES_STOCK_OUT_ROOT] as const,
+    byInventory: (params: JintanStockByInventoryKeyParams) =>
+      [
+        PROFILES_STOCK_OUT_ROOT,
+        'by-inventory',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
     list: (params: JintanProfilesStockOutListKeyParams) =>
       [
         PROFILES_STOCK_OUT_ROOT,
@@ -211,6 +261,8 @@ export const jintanKeys = {
   },
   materialsInventory: {
     all: [MATERIALS_INVENTORY_ROOT] as const,
+    detail: (dataId: string) =>
+      [MATERIALS_INVENTORY_ROOT, 'detail', dataId] as const,
     options: (keyword?: string) =>
       [MATERIALS_INVENTORY_ROOT, 'options', normalizeKeyword(keyword)] as const,
     list: (params: JintanMaterialsInventoryListKeyParams) =>
@@ -226,6 +278,16 @@ export const jintanKeys = {
   },
   materialsStockIn: {
     all: [MATERIALS_STOCK_IN_ROOT] as const,
+    byInventory: (params: JintanStockByInventoryKeyParams) =>
+      [
+        MATERIALS_STOCK_IN_ROOT,
+        'by-inventory',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
     list: (params: JintanMaterialsStockInListKeyParams) =>
       [
         MATERIALS_STOCK_IN_ROOT,
@@ -239,6 +301,16 @@ export const jintanKeys = {
   },
   materialsStockOut: {
     all: [MATERIALS_STOCK_OUT_ROOT] as const,
+    byInventory: (params: JintanStockByInventoryKeyParams) =>
+      [
+        MATERIALS_STOCK_OUT_ROOT,
+        'by-inventory',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
     list: (params: JintanMaterialsStockOutListKeyParams) =>
       [
         MATERIALS_STOCK_OUT_ROOT,

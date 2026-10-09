@@ -19,6 +19,17 @@ interface Props {
   setFormRef: (form: FormInstance<JintanProfilesStockOutFormValues>) => void
   isSubmitting: boolean
   editingRecord?: JintanProfilesStockOut | null
+  /**
+   * 快捷建单模式：锁定为指定库存行（行详情抽屉内新建出库时使用）。
+   * 与 editingRecord 互斥，存在时不再展示库存选择器，出库数量以上限校验。
+   */
+  quickInventory?: JintanProfilesQuickInventory | null
+}
+
+export interface JintanProfilesQuickInventory {
+  id: string
+  label: string
+  quantity: number
 }
 
 const DEFAULT_VALUES: JintanProfilesStockOutFormValues = {
@@ -32,6 +43,7 @@ export default function JintanProfilesStockOutForm({
   setFormRef,
   isSubmitting,
   editingRecord,
+  quickInventory,
 }: Props) {
   const [form] = Form.useForm<JintanProfilesStockOutFormValues>()
   const [keyword, setKeyword] = useState('')
@@ -56,16 +68,24 @@ export default function JintanProfilesStockOutForm({
 
   useEffect(() => {
     form.resetFields()
-    form.setFieldsValue(
-      editingRecord
-        ? {
-            inventory_id: editingRecord.inventory_id,
-            quantity: editingRecord.quantity,
-            remarks: editingRecord.remarks,
-          }
-        : DEFAULT_VALUES,
-    )
-  }, [form, editingRecord])
+    if (editingRecord) {
+      form.setFieldsValue({
+        inventory_id: editingRecord.inventory_id,
+        quantity: editingRecord.quantity,
+        remarks: editingRecord.remarks,
+      })
+      return
+    }
+    if (quickInventory) {
+      form.setFieldsValue({
+        inventory_id: quickInventory.id,
+        quantity: 1,
+        remarks: '',
+      })
+      return
+    }
+    form.setFieldsValue(DEFAULT_VALUES)
+  }, [form, editingRecord, quickInventory])
 
   return (
     <Form
@@ -86,6 +106,15 @@ export default function JintanProfilesStockOutForm({
             />
           </Form.Item>
         </>
+      ) : quickInventory ? (
+        <>
+          <Form.Item name="inventory_id" hidden>
+            <Input />
+          </Form.Item>
+          <Form.Item label="型材资料">
+            <Input disabled value={quickInventory.label} />
+          </Form.Item>
+        </>
       ) : (
         <Form.Item
           name="inventory_id"
@@ -100,10 +129,10 @@ export default function JintanProfilesStockOutForm({
           />
         </Form.Item>
       )}
-      {!editingRecord && error && (
+      {!editingRecord && !quickInventory && error && (
         <Alert type="error" showIcon title="型材列表加载失败，请重试" />
       )}
-      {!editingRecord && selected && (
+      {!editingRecord && !quickInventory && selected && (
         <div className="mb-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-700 dark:text-slate-200">
           <div>
             型号：{selected.profile_model || '-'} / 名称：
@@ -125,17 +154,20 @@ export default function JintanProfilesStockOutForm({
           { type: 'integer', min: 1, message: '出库数量必须为正整数' },
           {
             validator: async (_rule, value: number) => {
-              const currentOption = options.find(
-                (option) => option.id === form.getFieldValue('inventory_id'),
-              )
-              if (
-                !editingRecord &&
-                currentOption &&
-                value > currentOption.quantity
-              ) {
-                throw new Error(
-                  `库存不足，当前库存为 ${currentOption.quantity}`,
+              if (!editingRecord && typeof value === 'number') {
+                if (quickInventory && value > quickInventory.quantity) {
+                  throw new Error(
+                    `库存不足，当前库存为 ${quickInventory.quantity}`,
+                  )
+                }
+                const currentOption = options.find(
+                  (option) => option.id === form.getFieldValue('inventory_id'),
                 )
+                if (currentOption && value > currentOption.quantity) {
+                  throw new Error(
+                    `库存不足，当前库存为 ${currentOption.quantity}`,
+                  )
+                }
               }
             },
           },

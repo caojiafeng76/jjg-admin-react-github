@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Table, TableColumnsType } from 'antd'
+import { Button, Table, TableColumnsType } from 'antd'
 
 import type { JintanProfilesData } from '@/services/apiJintanProfilesData'
 import { TableEmpty } from '@/ui/TableState'
@@ -15,6 +15,8 @@ interface Props {
   scrollY?: number
   rowHeight?: number
   emptyAction?: React.ReactNode
+  /** 打开行详情抽屉（库存/出入库）；不传时不渲染操作列 */
+  onOpenDetail?: (record: JintanProfilesData) => void
 }
 
 export default function JintanProfilesDataTable({
@@ -27,9 +29,10 @@ export default function JintanProfilesDataTable({
   scrollY = 400,
   rowHeight = 40,
   emptyAction,
+  onOpenDetail,
 }: Props) {
-  const columns: TableColumnsType<JintanProfilesData> = useMemo(
-    () => [
+  const columns: TableColumnsType<JintanProfilesData> = useMemo(() => {
+    const base: TableColumnsType<JintanProfilesData> = [
       {
         title: '#',
         key: '#',
@@ -81,9 +84,31 @@ export default function JintanProfilesDataTable({
         render: (value: string) =>
           value ? new Date(value).toLocaleString('zh-CN') : '-',
       },
-    ],
-    [page, pageSize],
-  )
+    ]
+
+    if (onOpenDetail) {
+      base.push({
+        title: '库存/出入库',
+        key: 'inventory-detail',
+        width: 120,
+        fixed: 'right',
+        render: (_value, record) => (
+          <Button
+            type="link"
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation()
+              onOpenDetail(record)
+            }}
+          >
+            查看
+          </Button>
+        ),
+      })
+    }
+
+    return base
+  }, [onOpenDetail, page, pageSize])
 
   const rowSelection = useMemo(
     () => ({
@@ -101,7 +126,7 @@ export default function JintanProfilesDataTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1090, y: scrollY }}
+      scroll={{ x: onOpenDetail ? 1210 : 1090, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

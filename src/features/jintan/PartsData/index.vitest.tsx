@@ -95,10 +95,18 @@ vi.mock('@/ui/AppPagination', () => ({ default: () => null }))
 vi.mock('./JintanPartsDataExcelImport', () => ({ default: () => null }))
 vi.mock('./JintanPartsDataSearch', () => ({ default: () => null }))
 vi.mock('./JintanPartsDataTable', () => ({
-  default: (props: { onSelect: (keys: React.Key[]) => void }) => (
-    <button type="button" onClick={() => props.onSelect(['part-1'])}>
-      选择记录
-    </button>
+  default: (props: {
+    onSelect: (keys: React.Key[]) => void
+    onOpenDetail?: (record: unknown) => void
+  }) => (
+    <>
+      <button type="button" onClick={() => props.onSelect(['part-1'])}>
+        选择记录
+      </button>
+      <button type="button" onClick={() => props.onOpenDetail?.(records[0])}>
+        查看
+      </button>
+    </>
   ),
 }))
 vi.mock('./JintanPartsDataForm', () => ({
@@ -109,6 +117,15 @@ vi.mock('./JintanPartsDataForm', () => ({
     formState.initialValues = props.initialValues
     formState.onFinish = props.onFinish
     return null
+  },
+}))
+const detailState = vi.hoisted(() => ({
+  record: undefined as unknown,
+}))
+vi.mock('./JintanPartsDataDetailDrawer', () => ({
+  default: (props: { record?: unknown }) => {
+    detailState.record = props.record
+    return <div>配件详情抽屉</div>
   },
 }))
 vi.mock('./useJintanPartsData', () => ({
@@ -161,5 +178,14 @@ describe('JintanPartsDataPage copy create', () => {
       expect(createMutation.mutateAsync).toHaveBeenCalled(),
     )
     expect(updateMutation.mutateAsync).not.toHaveBeenCalled()
+  })
+
+  it('opens the detail drawer with the clicked record', () => {
+    renderPage()
+
+    fireEvent.click(screen.getByRole('button', { name: '查看' }))
+
+    expect(screen.getByText('配件详情抽屉')).toBeInTheDocument()
+    expect(detailState.record).toEqual(records[0])
   })
 })
