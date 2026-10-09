@@ -2,6 +2,13 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
+## 2026-10-09
+
+- **类别**：页面 / UI
+- **范围**：金檀木业素材资料、型材资料、配件资料加「复制新增」（参考刀具资料，全字段原样带出、全部可改）
+- **摘要**：三页 `PartsData/ProfilesData/MaterialsData/index.tsx` 同构仿照 `ToolingData/index.tsx`：新增 `isCopyCreate` 状态与 `handleCopyCreate`（非单选提示「请选择一条数据进行复制新增」）、工具栏编辑按钮后加 `DocumentDuplicateIcon`「复制新增」按钮（同页权限键 + 查看员守卫）、Modal 标题「复制新增金檀木业××资料」、表单 `initialValues` 改为 `(isEdit || isCopyCreate) && editingRecord`、提交沿用创建分支与既有唯一键中文校验（配件名称+规格、型材/素材型号+名称+规格）。表单组件未加禁用，按确认口径全部可改。新增三页 `index.vitest.tsx`（单选校验 + 标题/initialValues + 只调 create 不调 update）。
+- **验证**：`bun run typecheck` 通过；目标 4 文件 `bunx vitest run` 8 项通过；`bunx eslint` 目标 6 文件 0 问题；改动文件 Prettier 格式化；`bun run test` 31 项脚本测试 + 155 个 Vitest 文件 / 703 项全部通过（较上轮 +3 文件 / +6 项）；`bun run build` 通过。未做浏览器登录后端到端操作验证，前端尚未发布。
+
 ## 2026-10-08
 
 - **类别**：新建 / 页面 / 数据库

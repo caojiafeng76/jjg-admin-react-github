@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
+import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
+import { App, Button, FormInstance, Modal, Tooltip } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { usePermission } from '@/hooks/usePermission'
@@ -45,6 +46,7 @@ export default function JintanMaterialsDataPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建金檀木业素材资料')
   const [isEdit, setIsEdit] = useState(false)
+  const [isCopyCreate, setIsCopyCreate] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] =
@@ -79,6 +81,7 @@ export default function JintanMaterialsDataPage() {
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
     setIsEdit(false)
+    setIsCopyCreate(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
     setFormError(null)
@@ -87,12 +90,32 @@ export default function JintanMaterialsDataPage() {
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
+    setIsCopyCreate(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
     setModalTitle('新建金檀木业素材资料')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef])
+
+  const handleCopyCreate = useCallback(() => {
+    if (selectedRowKeys.length !== 1) {
+      message.warning('请选择一条数据进行复制新增')
+      return
+    }
+
+    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    if (!record) {
+      message.warning('请选择一条数据进行复制新增')
+      return
+    }
+
+    setEditingRecord(record)
+    setIsEdit(false)
+    setIsCopyCreate(true)
+    setModalTitle('复制新增金檀木业素材资料')
+    setIsModalOpen(true)
+  }, [data?.items, message, selectedRowKeys])
 
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
@@ -296,6 +319,20 @@ export default function JintanMaterialsDataPage() {
           handleEdit={handleEdit}
           permissionKey={JINTAN_MATERIALS_DATA_PERMISSION_KEY}
         />
+        <Tooltip
+          title={viewerDenied ? viewerOperationTip : '复制新增金檀木业素材资料'}
+        >
+          <Button
+            type="text"
+            icon={
+              <DocumentDuplicateIcon className="size-4 text-indigo-500/80!" />
+            }
+            disabled={viewerDenied || !canManageMaterials}
+            onClick={handleCopyCreate}
+          >
+            复制新增
+          </Button>
+        </Tooltip>
         <ExportButton
           handleExport={handleExport}
           loading={isExporting}
@@ -381,7 +418,11 @@ export default function JintanMaterialsDataPage() {
             onFinish={handleFinish}
             setFormRef={setFormRef}
             isSubmitting={createMutation.isPending || updateMutation.isPending}
-            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+            initialValues={
+              (isEdit || isCopyCreate) && editingRecord
+                ? editingRecord
+                : undefined
+            }
           />
         </div>
       </Modal>
