@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
+import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
+import { App, Button, FormInstance, Modal, Tooltip } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { usePermission } from '@/hooks/usePermission'
@@ -38,6 +39,7 @@ export default function YoumaiProductDataPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建优迈货品资料')
   const [isEdit, setIsEdit] = useState(false)
+  const [isCopyCreate, setIsCopyCreate] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] = useState<YoumaiProductData | null>(
     null,
@@ -72,6 +74,7 @@ export default function YoumaiProductDataPage() {
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
     setIsEdit(false)
+    setIsCopyCreate(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
     setFormError(null)
@@ -80,12 +83,32 @@ export default function YoumaiProductDataPage() {
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
+    setIsCopyCreate(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
     setModalTitle('新建优迈货品资料')
     setIsModalOpen(true)
     formRef?.resetFields()
   }, [formRef])
+
+  const handleCopyCreate = useCallback(() => {
+    if (selectedRowKeys.length !== 1) {
+      message.warning('请选择一条数据进行复制新增')
+      return
+    }
+
+    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    if (!record) {
+      message.warning('请选择一条数据进行复制新增')
+      return
+    }
+
+    setEditingRecord(record)
+    setIsEdit(false)
+    setIsCopyCreate(true)
+    setModalTitle('复制新增优迈货品资料')
+    setIsModalOpen(true)
+  }, [data?.items, message, selectedRowKeys])
 
   const handleEdit = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
@@ -249,6 +272,20 @@ export default function YoumaiProductDataPage() {
           handleEdit={handleEdit}
           permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
         />
+        <Tooltip
+          title={viewerDenied ? viewerOperationTip : '复制新增优迈货品资料'}
+        >
+          <Button
+            type="text"
+            icon={
+              <DocumentDuplicateIcon className="size-4 text-indigo-500/80!" />
+            }
+            disabled={viewerDenied || !canManageYoumai}
+            onClick={handleCopyCreate}
+          >
+            复制新增
+          </Button>
+        </Tooltip>
         <YoumaiProductDataExcelImport
           onImport={handleImport}
           isImporting={importMutation.isPending}
@@ -283,7 +320,11 @@ export default function YoumaiProductDataPage() {
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
             <YoumaiProductDataTable
               loading={isLoading}
               data={data?.items || []}
@@ -322,7 +363,11 @@ export default function YoumaiProductDataPage() {
             onFinish={handleFinish}
             setFormRef={setFormRef}
             isSubmitting={createMutation.isPending || updateMutation.isPending}
-            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+            initialValues={
+              (isEdit || isCopyCreate) && editingRecord
+                ? editingRecord
+                : undefined
+            }
           />
         </div>
       </Modal>

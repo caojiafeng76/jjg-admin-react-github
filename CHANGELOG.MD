@@ -2,6 +2,13 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
+## 2026-10-12
+
+- **类别**：页面 / UI
+- **范围**：优迈货品资料加「复制新增」（参考刀具资料，全字段原样带出、全部可改）
+- **摘要**：`youmai/ProductData/index.tsx` 仿照 `tooling/ToolingData/index.tsx`：新增 `isCopyCreate` 状态与 `handleCopyCreate`（非单选提示「请选择一条数据进行复制新增」）、工具栏编辑按钮后加 `DocumentDuplicateIcon`「复制新增」按钮（`YOUMAI_MANAGE_PERMISSION_KEY` + 查看员守卫）、Modal 标题「复制新增优迈货品资料」、表单 `initialValues` 改为 `(isEdit || isCopyCreate) && editingRecord`、提交沿用创建分支与既有物料编码唯一中文校验（`material_code` 保留原值由用户改）。表单组件未动。新增 `ProductData/index.vitest.tsx`（单选校验 + 标题/initialValues + 只调 create 不调 update）。
+- **验证**：`bun run typecheck` 通过；目标文件 `bunx vitest run` 2 项通过；目标 2 文件 `bunx eslint` 无输出；改动文件 Prettier 格式化；`bun run test` 31 项脚本测试 + 159 个 Vitest 文件 / 717 项全部通过（较上轮 +1 文件 / +2 项）；未跑 `bun run build`；未做浏览器登录后端到端操作验证。
+
 ## 2026-10-09
 
 - **类别**：页面 / UI
