@@ -2,6 +2,36 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
+- **范围**：`src/features/production-order/index.tsx`（1295 行）拆分；`src/features/lazyDocumentModules.vitest.ts` 守卫路径更新；新增 `ProductionOrderManagementControls.vitest.tsx`
+- **摘要**：拆出三个 hook：`useProductionOrderManagementAccess.ts`（管理锁定/解锁、改密码状态与回调、员工视图自动锁定效果）、`useProductionOrderExport.ts`（工单导出与夜宵明细导出、Excel 动态加载与预加载）、`useProductionOrderSubmit.ts`（工单创建/编辑提交，含工序同步 `syncOrderItemsSequentially`，原 5 个 mutation 移入该 hook）；拆出三个组件：`ProductionOrderManagementLock.tsx`（管理锁定界面）、`ProductionOrderManagementPasswordModal.tsx`（改密码弹窗，原页面内两处重复实现合并为一份）、`ProductionOrderAdminToolbar.tsx`（管理工具栏）；`productionOrderPageUtils.ts` 承载表单类型与 `isAuditedRecord`。页面保留筛选、表格、分页、批量审核、删除与详情弹窗，降至约 590 行。函数体与 JSX 原样搬运，仅替换为 props/hook 返回值；导出 `useCallback` 依赖补入 `setSelectedRowKeys`。`lazyDocumentModules.vitest.ts` 中两条工单 Excel 动态 import 的源文件改为 `useProductionOrderExport.ts`，预加载触发断言指向 `ProductionOrderAdminToolbar.tsx`（断言条数与语义不变）。
+- **测试**：新增 `ProductionOrderManagementControls.vitest.tsx`（4 项），覆盖锁定界面修改密码按钮、提交管理密码回调 `onUnlock`、工具栏批量审核/反审核/锁定、工具栏修改密码按钮；此前这些回调连接没有渲染覆盖。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/production-order src/features/lazyDocumentModules.vitest.ts` 0 错误 0 警告；目录内 `bunx vitest run` 11 项通过（既有 3 项 + 表单 4 项 + 管理控件 4 项）；`bun run test` 31 项脚本测试 + 161 个 Vitest 文件 / 725 项通过（期间有两次全量运行失败：一次为守卫路径未更新，已修复；另一次偶发失败未能定位到具体用例，此后三次完整运行均通过）；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
+- **范围**：`src/features/production-order/ProductionOrderForm.tsx`（1364 行）拆分；新增 `ProductionOrderForm.vitest.tsx`
+- **摘要**：拆出 `productionOrderFormTypes.ts`（`ProductionOrderFormProps`、`OrderItem`、`ProjectNoData`、匹配等级标签/颜色、工序表单初始值）、`ProductionOrderFormBaseFields.tsx`（日期、操作人、班别、工时、备注等基础字段）、`ProductionOrderFormItemsMobileList.tsx`（紧凑模式工序卡片列表）、`ProductionOrderFormItemsTable.tsx`（桌面模式工序表格，列定义原样保留）、`ProductionOrderFormItemModal.tsx`（添加/编辑工序弹窗，`itemForm` 仍由父组件持有）。父组件保留订单表单状态、工序增删改回调与主 `Form`，降至约 500 行；删除工序统一经 `handleDeleteItem`，桌面表格与移动端的删除确认方式保持原有差异。新建组件命名统一加 `ProductionOrderForm` 前缀，避免与同目录既有的 `ProductionOrderItem*` 文件混淆。
+- **测试**：新增 `ProductionOrderForm.vitest.tsx`（4 项），覆盖桌面模式基础字段与添加弹窗、编辑弹窗、删除工序后行移除、紧凑模式移动端添加；此前该表单在测试中一直被 mock，拆分后的回调连接没有真正的渲染覆盖。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/production-order` 0 问题；`bunx vitest run` 目录内 4 项新增 + 3 项既有通过；`bun run test` 31 项脚本测试 + 160 个 Vitest 文件 / 721 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
+- **范围**：`src/features/workshop/OrderStatusDashboard/index.tsx`（1231 行）拆分；`src/features/lazyDocumentModules.vitest.ts` 守卫路径更新
+- **摘要**：拆出 `dashboardColumns.tsx`（`createOrderStatusDashboardColumns` 纯函数，承接原 270 行列定义 useMemo，常量 `STATUS_COLOR` 与岗位列顺序一并迁入）、`OrderStatusDashboardHeader.tsx`（标题与「看板/导出/刷新」按钮区）、`OrderStatusDashboardSearchBar.tsx`（搜索表单区）、`useOrderStatusDashboardExport.ts`（导出当前筛选结果逻辑与 Excel 动态加载、悬停/聚焦预加载）；`index.tsx` 保留 URL 参数状态、表格、分页、弹窗与结案逻辑，降至约 550 行。JSX 与回调以原样搬运，仅替换为 props 名称；导出的 `total` 判断保持 `data?.total` 语义。`lazyDocumentModules.vitest.ts` 中该页动态 import 的源文件改为 hook 文件，并新增 `PRELOAD_TRIGGER_FILES` 映射，使悬停/聚焦预加载断言指向 Header 组件，断言条数与语义不变。
+- **验证**：`bun run typecheck` 通过；改动目录 `bunx eslint` 0 错误（剩余 13 条 warning 均来自未改动的 `dashboardRenderUtils.tsx`）；目录相关 `bunx vitest run` 8 文件 26 项通过；`bun run test` 31 项脚本测试 + 159 个 Vitest 文件 / 717 项全部通过（首次全量运行时 `lazyDocumentModules.vitest.ts` 因源文件路径变更失败，已修正后通过）；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证（列表、弹窗、导出、结案未在页面上手动点击）。
+
+## 2026-10-13
+
+- **类别**：重构 / 服务层
+- **范围**：`src/services/apiOrderStatusDashboard.ts`（1398 行）拆分为三个文件
+- **摘要**：拆出 `apiOrderStatusDashboardTypes.ts`（类型、常量、REWORK 状态颜色/标签、EMPTY KPIs）与 `apiOrderStatusDashboardCalculations.ts`（工序匹配索引、生产/包装明细、返工汇总、岗位列等纯计算函数）；原文件仅保留请求函数（`getAllProcessStandardJobRows`、`getPackagingWorkOrderRowsByProjectNos`、`getOrderStatusDashboard`、`getOrderStatusDashboardForExport`），并 `export *` 重新导出类型与原有公开函数，6 个引用方与测试的导入路径均未改动。函数体按行号原样搬运，业务逻辑未改，仅经过 Prettier 格式化。
+- **验证**：`bun run typecheck` 通过；目标文件 `bunx eslint` 无输出；`bunx vitest run` 覆盖订单现状看板相关 4 个测试文件 20 项通过；`bun run test` 31 项脚本测试 + 159 个 Vitest 文件 / 717 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
 ## 2026-10-12
 
 - **类别**：页面 / UI

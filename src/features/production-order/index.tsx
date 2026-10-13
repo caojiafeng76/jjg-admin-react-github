@@ -5,41 +5,15 @@ import {
   useEffect,
   useMemo,
 } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
-import {
-  ArrowPathIcon,
-  PlusCircleIcon,
-  ShieldCheckIcon,
-} from '@heroicons/react/16/solid'
-import {
-  KeyIcon,
-  LockClosedIcon,
-  LockOpenIcon,
-} from '@heroicons/react/24/outline'
-import {
-  App,
-  Button,
-  Card,
-  Form,
-  Input,
-  Modal,
-  Space,
-  Typography,
-  Badge,
-} from 'antd'
+import { PlusCircleIcon } from '@heroicons/react/16/solid'
+import { App, Button, Modal } from 'antd'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import AddButton from '@/ui/AddButton'
-import EditButton from '@/ui/EditButton'
-import DeleteButton from '@/ui/DeleteButton'
-import ExportButton from '@/ui/ExportButton'
 import AppPagination from '@/ui/AppPagination'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import {
-  getProductionOrdersForExportByFiltersChunked,
-  getProductionOrdersForExportChunked,
-  PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE,
   checkEmployeeOrderExistsOnDate,
   type ProductionOrder,
   type ProductionOrderFilters,
@@ -48,133 +22,32 @@ import {
 import type {
   ProductionOrderDataCategory,
   ProductionOrderItem,
-  ProductionOrderItemInsert,
 } from '@/services/apiProductionOrderItems'
 import {
   useProductionOrders,
   useProductionOrder,
-  useCreateProductionOrder,
-  useUpdateProductionOrder,
   useBatchUpdateProductionOrders,
   useDeleteProductionOrders,
 } from './useProductionOrders'
-import {
-  useAddProductionOrderItem,
-  useUpdateProductionOrderItem,
-  useDeleteProductionOrderItems,
-} from './useProductionOrderItems'
 import { useAllEmployees } from '../workshop/EmployeeList/useEmployees'
 import ProductionOrderList from './ProductionOrderList'
 import ProductionOrderMobileList from './ProductionOrderMobileList'
 import ProductionOrderForm from './ProductionOrderForm'
 import ProductionOrderDetail from './ProductionOrderDetail'
 import ProductionOrderSearch from './ProductionOrderSearch'
-import {
-  updateAdminManagementPassword,
-  verifyAdminManagementPassword,
-} from '@/services/apiAdminManagementPassword'
+import ProductionOrderAdminToolbar from './ProductionOrderAdminToolbar'
+import ProductionOrderManagementLock from './ProductionOrderManagementLock'
+import ProductionOrderManagementPasswordModal from './ProductionOrderManagementPasswordModal'
+import { useProductionOrderExport } from './useProductionOrderExport'
+import { useProductionOrderManagementAccess } from './useProductionOrderManagementAccess'
+import { useProductionOrderSubmit } from './useProductionOrderSubmit'
+import { isAuditedRecord } from './productionOrderPageUtils'
 import { isAdminRole, isEmployeeSideRole } from '@/config/access'
 import { queryConfig } from '@/config/queryClient'
 import { useAuth } from '@/contexts/useAuth'
-
-type UnlockManagementFormValues = {
-  password: string
-}
-
-type ChangeManagementPasswordFormValues = {
-  currentPassword: string
-  nextPassword: string
-  confirmPassword: string
-}
-
-const { Paragraph, Text, Title } = Typography
-
-const loadProductionOrderExcel = () => import('@/utils/productionOrderExcel')
-const loadProductionOrderNightSnackExcel = () =>
-  import('@/utils/productionOrderNightSnackExcel')
-
-const preloadProductionOrderExcel = () => {
-  void loadProductionOrderExcel()
-}
-
-const preloadProductionOrderNightSnackExcel = () => {
-  void loadProductionOrderNightSnackExcel()
-}
-
-async function syncOrderItemsSequentially({
-  items,
-  orderId,
-  addItem,
-  updateItem,
-}: {
-  items: {
-    id?: string
-    project_no: string
-    product_model: string | null
-    length_mm: number | null
-    customer_model: string | null
-    data_category?: ProductionOrderDataCategory
-    operation: string
-    standard_seconds: number
-    incoming_qualified_quantity: number
-    qualified_quantity: number
-    defect_reason_1: string | null
-    defect_quantity_1: number
-    defect_reason_2: string | null
-    defect_quantity_2: number
-    outsource_defect_quantity: number
-    outsource_defect_reason: string | null
-    outsource_unit: string | null
-    setup_defect_quantity: number
-    setup_responsible: string | null
-  }[]
-  orderId: string
-  addItem: (item: ProductionOrderItemInsert) => Promise<unknown>
-  updateItem: (params: {
-    id: string
-    values: Partial<ProductionOrderItem>
-  }) => Promise<unknown>
-}) {
-  for (const item of items) {
-    if (item.id) {
-      await updateItem({
-        id: item.id,
-        values: {
-          project_no: item.project_no,
-          product_model: item.product_model,
-          length_mm: item.length_mm,
-          customer_model: item.customer_model,
-          data_category: item.data_category || 'A',
-          operation: item.operation,
-          standard_seconds: item.standard_seconds,
-          incoming_qualified_quantity: item.incoming_qualified_quantity,
-          qualified_quantity: item.qualified_quantity,
-          defect_reason_1: item.defect_reason_1,
-          defect_quantity_1: item.defect_quantity_1,
-          defect_reason_2: item.defect_reason_2,
-          defect_quantity_2: item.defect_quantity_2,
-          outsource_defect_quantity: item.outsource_defect_quantity,
-          outsource_defect_reason: item.outsource_defect_reason,
-          outsource_unit: item.outsource_unit,
-          setup_defect_quantity: item.setup_defect_quantity,
-          setup_responsible: item.setup_responsible,
-        },
-      })
-      continue
-    }
-
-    await addItem({
-      ...item,
-      data_category: item.data_category || 'A',
-      order_id: orderId,
-    })
-  }
-}
-
 export default function ProductionOrderPage() {
   const { message, modal } = App.useApp()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { role, employeeProfile } = useAuth()
   const isEmployeeView = isEmployeeSideRole(role)
   const isAdminManagementView = isAdminRole(role) && !isEmployeeView
@@ -187,10 +60,6 @@ export default function ProductionOrderPage() {
   )
   const fixedEmployeeId = fixedEmployee?.id
 
-  const isAuditedRecord = (
-    record?: Partial<ProductionOrder> & { is_audited?: boolean },
-  ) => Boolean(record?.is_audited)
-
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建工单')
   const [isEdit, setIsEdit] = useState(false)
@@ -199,20 +68,30 @@ export default function ProductionOrderPage() {
     null,
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [isExporting, setIsExporting] = useState(false)
-  const [isNightSnackExporting, setIsNightSnackExporting] = useState(false)
-  const [isManagementUnlocked, setIsManagementUnlocked] = useState(
-    !isAdminManagementView,
-  )
-  const [isUnlockingManagement, setIsUnlockingManagement] = useState(false)
-  const [isManagementPasswordModalOpen, setIsManagementPasswordModalOpen] =
-    useState(false)
-  const [isUpdatingManagementPassword, setIsUpdatingManagementPassword] =
-    useState(false)
-  const [unlockForm] = Form.useForm<UnlockManagementFormValues>()
-  const [changePasswordForm] =
-    Form.useForm<ChangeManagementPasswordFormValues>()
-  const isManagementLocked = isAdminManagementView && !isManagementUnlocked
+  const resetFormState = useCallback(() => {
+    setIsModalOpen(false)
+    setIsEdit(false)
+    setIsView(false)
+    setEditingRecord(null)
+    setSelectedRowKeys([])
+  }, [])
+  const {
+    changePasswordForm,
+    closePasswordModal,
+    handleChangeManagementPassword,
+    handleLockManagement,
+    handleUnlockManagement,
+    isManagementLocked,
+    isManagementPasswordModalOpen,
+    isUnlockingManagement,
+    isUpdatingManagementPassword,
+    openPasswordModal,
+    unlockForm,
+  } = useProductionOrderManagementAccess({
+    isAdminManagementView,
+    isEmployeeView,
+    resetFormState,
+  })
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -275,81 +154,33 @@ export default function ProductionOrderPage() {
     refetchInterval: undefined,
   })
 
-  const createMutation = useCreateProductionOrder()
-  const updateMutation = useUpdateProductionOrder()
   const batchUpdateMutation = useBatchUpdateProductionOrders()
   const deleteMutation = useDeleteProductionOrders()
-  const addItemMutation = useAddProductionOrderItem()
-  const updateItemMutation = useUpdateProductionOrderItem()
-  const deleteItemMutation = useDeleteProductionOrderItems()
-
+  const handleFinish = useProductionOrderSubmit({
+    detailData,
+    editingRecord,
+    fixedEmployeeId,
+    isEdit,
+    isEmployeeView,
+    resetFormState,
+  })
+  const {
+    handleExport,
+    handleNightSnackExport,
+    isExporting,
+    isNightSnackExporting,
+    preloadProductionOrderExcel,
+    preloadProductionOrderNightSnackExcel,
+  } = useProductionOrderExport({
+    employeeName: employeeProfile?.name,
+    filters,
+    selectedRowKeys,
+    setSelectedRowKeys,
+    total: orderData?.total,
+  })
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 10,
   })
-
-  const resetFormState = useCallback(() => {
-    setIsModalOpen(false)
-    setIsEdit(false)
-    setIsView(false)
-    setEditingRecord(null)
-    setSelectedRowKeys([])
-  }, [])
-
-  const handleLockManagement = useCallback(() => {
-    resetFormState()
-    unlockForm.resetFields()
-    setIsManagementUnlocked(false)
-    setIsManagementPasswordModalOpen(false)
-    message.success('生产工单管理已锁定')
-  }, [message, resetFormState, unlockForm])
-
-  const handleUnlockManagement = useCallback(
-    async (values: UnlockManagementFormValues) => {
-      setIsUnlockingManagement(true)
-
-      try {
-        await verifyAdminManagementPassword(values.password)
-        setIsManagementUnlocked(true)
-        unlockForm.resetFields()
-        message.success('管理权限已解锁')
-      } catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        } else {
-          message.error('管理密码验证失败')
-        }
-      } finally {
-        setIsUnlockingManagement(false)
-      }
-    },
-    [message, unlockForm],
-  )
-
-  const handleChangeManagementPassword = useCallback(
-    async (values: ChangeManagementPasswordFormValues) => {
-      setIsUpdatingManagementPassword(true)
-
-      try {
-        await updateAdminManagementPassword({
-          currentPassword: values.currentPassword,
-          nextPassword: values.nextPassword,
-        })
-        changePasswordForm.resetFields()
-        setIsManagementPasswordModalOpen(false)
-        message.success('管理密码修改成功')
-      } catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        } else {
-          message.error('管理密码修改失败')
-        }
-      } finally {
-        setIsUpdatingManagementPassword(false)
-      }
-    },
-    [changePasswordForm, message],
-  )
-
   const handleCreate = useCallback(() => {
     if (isEmployeeView) {
       navigate('/production-order/create')
@@ -439,173 +270,6 @@ export default function ProductionOrderPage() {
     })
   }, [])
 
-  const handleExport = useCallback(async () => {
-    const exportTargetCount =
-      selectedRowKeys.length > 0
-        ? selectedRowKeys.length
-        : (orderData?.total ?? 0)
-
-    if (exportTargetCount === 0) {
-      message.warning('当前没有可导出的工单')
-      return
-    }
-
-    try {
-      setIsExporting(true)
-      let exportCount = exportTargetCount
-      const updateProgress = (loaded: number, total: number) => {
-        message.open({
-          key: 'production-order-export',
-          type: 'loading',
-          content: `正在分片读取工单 ${loaded}/${total}，每批 ${PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE} 条...`,
-          duration: 0,
-        })
-      }
-
-      updateProgress(0, exportTargetCount)
-
-      const exportOrders =
-        selectedRowKeys.length > 0
-          ? await getProductionOrdersForExportChunked(
-              selectedRowKeys.map((key) => String(key)),
-              {
-                onProgress: ({ loaded, total }) => {
-                  updateProgress(loaded, total)
-                },
-              },
-            )
-          : await getProductionOrdersForExportByFiltersChunked(filters, {
-              onProgress: ({ loaded, total }) => {
-                updateProgress(loaded, total)
-              },
-            })
-
-      exportCount = exportOrders.length
-
-      message.open({
-        key: 'production-order-export',
-        type: 'loading',
-        content: `已读取 ${exportCount} 张工单，正在合并生成 Excel...`,
-        duration: 0,
-      })
-
-      const { exportProductionOrdersToExcel } = await loadProductionOrderExcel()
-      await exportProductionOrdersToExcel(exportOrders)
-
-      message.success({
-        key: 'production-order-export',
-        content: `已导出 ${exportCount} 张工单`,
-      })
-
-      if (selectedRowKeys.length > 0) {
-        setSelectedRowKeys([])
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        message.error({
-          key: 'production-order-export',
-          content: error.message,
-        })
-      } else {
-        message.error({
-          key: 'production-order-export',
-          content: '导出失败，请稍后重试',
-        })
-      }
-    } finally {
-      setIsExporting(false)
-    }
-  }, [filters, message, orderData?.total, selectedRowKeys])
-
-  const handleNightSnackExport = useCallback(async () => {
-    const exportTargetCount =
-      selectedRowKeys.length > 0
-        ? selectedRowKeys.length
-        : (orderData?.total ?? 0)
-
-    if (exportTargetCount === 0) {
-      message.warning('当前没有可导出的工单')
-      return
-    }
-
-    try {
-      setIsNightSnackExporting(true)
-      const updateProgress = (loaded: number, total: number) => {
-        message.open({
-          key: 'production-order-night-snack-export',
-          type: 'loading',
-          content: `正在分片读取夜宵明细 ${loaded}/${total}，每批 ${PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE} 条...`,
-          duration: 0,
-        })
-      }
-
-      updateProgress(0, exportTargetCount)
-
-      const exportOrders =
-        selectedRowKeys.length > 0
-          ? await getProductionOrdersForExportChunked(
-              selectedRowKeys.map((key) => String(key)),
-              {
-                onProgress: ({ loaded, total }) => {
-                  updateProgress(loaded, total)
-                },
-              },
-            )
-          : await getProductionOrdersForExportByFiltersChunked(filters, {
-              onProgress: ({ loaded, total }) => {
-                updateProgress(loaded, total)
-              },
-            })
-
-      message.open({
-        key: 'production-order-night-snack-export',
-        type: 'loading',
-        content: `已读取 ${exportOrders.length} 张工单，正在生成夜宵明细表...`,
-        duration: 0,
-      })
-
-      const { exportProductionOrderNightSnackDetailsToExcel } =
-        await loadProductionOrderNightSnackExcel()
-      const result = exportProductionOrderNightSnackDetailsToExcel(
-        exportOrders,
-        {
-          statistician: employeeProfile?.name || '',
-        },
-      )
-
-      if (result.nightShiftCount === 0) {
-        message.warning({
-          key: 'production-order-night-snack-export',
-          content: '当前工单中没有可导出的夜班记录',
-        })
-        return
-      }
-
-      message.success({
-        key: 'production-order-night-snack-export',
-        content: `已导出 ${result.employeeCount} 名员工、${result.nightShiftCount} 个夜班`,
-      })
-
-      if (selectedRowKeys.length > 0) {
-        setSelectedRowKeys([])
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        message.error({
-          key: 'production-order-night-snack-export',
-          content: error.message,
-        })
-      } else {
-        message.error({
-          key: 'production-order-night-snack-export',
-          content: '夜宵明细导出失败，请稍后重试',
-        })
-      }
-    } finally {
-      setIsNightSnackExporting(false)
-    }
-  }, [employeeProfile, filters, message, orderData?.total, selectedRowKeys])
-
   const handleBatchAudit = useCallback(
     (isAudited: boolean) => {
       if (selectedRowKeys.length === 0) {
@@ -644,134 +308,6 @@ export default function ProductionOrderPage() {
     [batchUpdateMutation, message, modal, selectedRowKeys],
   )
 
-  const handleFinish = useCallback(
-    async (values: {
-      order: Partial<ProductionOrder>
-      items: {
-        id?: string
-        project_no: string
-        product_model: string | null
-        length_mm: number | null
-        customer_model: string | null
-        data_category?: ProductionOrderDataCategory
-        operation: string
-        standard_seconds: number
-        incoming_qualified_quantity: number
-        qualified_quantity: number
-        defect_reason_1: string | null
-        defect_quantity_1: number
-        defect_reason_2: string | null
-        defect_quantity_2: number
-        outsource_defect_quantity: number
-        outsource_defect_reason: string | null
-        outsource_unit: string | null
-        setup_defect_quantity: number
-        setup_responsible: string | null
-      }[]
-    }) => {
-      try {
-        let orderId: string
-
-        if (
-          isEmployeeView &&
-          isAuditedRecord(detailData || editingRecord || undefined)
-        ) {
-          message.warning('已审核工单员工无法编辑')
-          return
-        }
-
-        if (isEdit && editingRecord) {
-          await updateMutation.mutateAsync({
-            id: editingRecord.id,
-            values: values.order,
-          })
-          orderId = editingRecord.id
-
-          const existingItems = detailData?.items || []
-          const currentItems = values.items
-          const currentItemIds = new Set(
-            currentItems
-              .map((item) => item.id)
-              .filter((id): id is string => Boolean(id)),
-          )
-          const deletedIds = existingItems
-            .filter((item) => !currentItemIds.has(item.id))
-            .map((item) => item.id)
-
-          if (deletedIds.length > 0) {
-            await deleteItemMutation.mutateAsync(deletedIds)
-          }
-
-          await syncOrderItemsSequentially({
-            items: currentItems,
-            orderId,
-            addItem: addItemMutation.mutateAsync,
-            updateItem: updateItemMutation.mutateAsync,
-          })
-          message.success('工单更新成功')
-        } else {
-          if (isEmployeeView) {
-            const orderDate = values.order.order_date as string
-            const employeeId =
-              (values.order.employee_id as string) || fixedEmployeeId
-            if (employeeId && orderDate) {
-              const exists = await checkEmployeeOrderExistsOnDate(
-                employeeId,
-                orderDate,
-              )
-              if (exists) {
-                message.error('该员工当天已有工单，同一天只能创建一张工单')
-                return
-              }
-            }
-          }
-
-          const newOrder = await createMutation.mutateAsync(
-            values.order as Parameters<typeof createMutation.mutateAsync>[0],
-          )
-          orderId = newOrder.id
-
-          if (values.items.length > 0) {
-            await syncOrderItemsSequentially({
-              items: values.items,
-              orderId,
-              addItem: addItemMutation.mutateAsync,
-              updateItem: updateItemMutation.mutateAsync,
-            })
-          }
-
-          message.success('工单创建成功')
-          queryClient.invalidateQueries({
-            queryKey: ['production-orders-today-check'],
-          })
-        }
-
-        resetFormState()
-      } catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        } else {
-          message.error('操作失败，请稍后重试')
-        }
-      }
-    },
-    [
-      createMutation,
-      fixedEmployeeId,
-      isEdit,
-      editingRecord,
-      isEmployeeView,
-      message,
-      queryClient,
-      resetFormState,
-      updateMutation,
-      addItemMutation,
-      updateItemMutation,
-      deleteItemMutation,
-      detailData,
-    ],
-  )
-
   const handleSearch = useCallback(
     (params: ProductionOrderFilters) => {
       setFilters(
@@ -796,19 +332,6 @@ export default function ProductionOrderPage() {
       setFilters((prev) => ({ ...prev, employeeId: fixedEmployeeId }))
     }
   }, [fixedEmployeeId])
-
-  useEffect(() => {
-    if (isEmployeeView) {
-      setIsManagementUnlocked(true)
-      return
-    }
-
-    setIsManagementUnlocked(false)
-    setIsManagementPasswordModalOpen(false)
-    unlockForm.resetFields()
-    changePasswordForm.resetFields()
-    resetFormState()
-  }, [changePasswordForm, isEmployeeView, resetFormState, unlockForm])
 
   useEffect(() => {
     if (
@@ -837,127 +360,22 @@ export default function ProductionOrderPage() {
   if (isManagementLocked) {
     return (
       <>
-        <div className="flex h-full items-center justify-center px-4 py-8">
-          <Card className="w-full max-w-md shadow-sm">
-            <Space direction="vertical" size={16} className="w-full">
-              <div className="flex items-center gap-3">
-                <div className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                  <LockClosedIcon className="size-5" />
-                </div>
-                <div>
-                  <Title level={4} style={{ marginBottom: 0 }}>
-                    生产工单管理已锁定
-                  </Title>
-                  <Text type="secondary">管理员进入页面后需先输入管理密码</Text>
-                </div>
-              </div>
-
-              <Paragraph style={{ marginBottom: 0 }}>
-                首次默认管理密码为 123456。密码正确后才会加载工单管理界面。
-              </Paragraph>
-
-              <Form
-                form={unlockForm}
-                layout="vertical"
-                onFinish={handleUnlockManagement}
-              >
-                <Form.Item
-                  name="password"
-                  label="管理密码"
-                  rules={[{ required: true, message: '请输入管理密码' }]}
-                >
-                  <Input.Password
-                    autoFocus
-                    placeholder="请输入管理密码"
-                    autoComplete="current-password"
-                  />
-                </Form.Item>
-
-                <div className="flex gap-3">
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={isUnlockingManagement}
-                    icon={<LockOpenIcon className="size-4" />}
-                    className="flex-1"
-                  >
-                    解锁管理
-                  </Button>
-                  <Button
-                    icon={<KeyIcon className="size-4" />}
-                    className="flex-1"
-                    onClick={() => setIsManagementPasswordModalOpen(true)}
-                  >
-                    修改我的密码
-                  </Button>
-                </div>
-              </Form>
-            </Space>
-          </Card>
-        </div>
-
-        <Modal
-          title="修改我的管理密码"
-          open={isManagementPasswordModalOpen}
-          destroyOnClose
+        <ProductionOrderManagementLock
+          isUnlocking={isUnlockingManagement}
+          onOpenPasswordModal={openPasswordModal}
+          onUnlock={handleUnlockManagement}
+          unlockForm={unlockForm}
+        />
+        <ProductionOrderManagementPasswordModal
           confirmLoading={isUpdatingManagementPassword}
-          onOk={() => changePasswordForm.submit()}
-          onCancel={() => {
-            setIsManagementPasswordModalOpen(false)
-            changePasswordForm.resetFields()
-          }}
-        >
-          <Form
-            form={changePasswordForm}
-            layout="vertical"
-            onFinish={handleChangeManagementPassword}
-          >
-            <Form.Item
-              name="currentPassword"
-              label="当前管理密码"
-              rules={[{ required: true, message: '请输入当前管理密码' }]}
-            >
-              <Input.Password autoComplete="current-password" />
-            </Form.Item>
-
-            <Form.Item
-              name="nextPassword"
-              label="新管理密码"
-              rules={[
-                { required: true, message: '请输入新管理密码' },
-                { min: 6, message: '新管理密码至少需要 6 位' },
-              ]}
-            >
-              <Input.Password autoComplete="new-password" />
-            </Form.Item>
-
-            <Form.Item
-              name="confirmPassword"
-              label="确认新管理密码"
-              dependencies={['nextPassword']}
-              rules={[
-                { required: true, message: '请再次输入新管理密码' },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue('nextPassword') === value) {
-                      return Promise.resolve()
-                    }
-
-                    return Promise.reject(
-                      new Error('两次输入的新管理密码不一致'),
-                    )
-                  },
-                }),
-              ]}
-            >
-              <Input.Password autoComplete="new-password" />
-            </Form.Item>
-          </Form>
-        </Modal>
+          form={changePasswordForm}
+          onCancel={closePasswordModal}
+          onSubmit={handleChangeManagementPassword}
+          open={isManagementPasswordModalOpen}
+        />
       </>
     )
   }
-
   return (
     <div
       className={
@@ -994,94 +412,28 @@ export default function ProductionOrderPage() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-1">
-              <AddButton handleCreate={handleCreate} />
-              <div className="mx-2 h-6 w-px bg-slate-200 dark:bg-slate-700" />
-              <Button
-                type="text"
-                size="small"
-                icon={
-                  <KeyIcon className="size-4 text-slate-500 dark:text-slate-400" />
-                }
-                onClick={() => setIsManagementPasswordModalOpen(true)}
-                className="h-8 rounded-lg px-3 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-              >
-                修改密码
-              </Button>
-              <Button
-                type="text"
-                size="small"
-                icon={
-                  <LockClosedIcon className="size-4 text-slate-400 dark:text-slate-500" />
-                }
-                onClick={handleLockManagement}
-                className="h-8 rounded-lg px-3 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300"
-              >
-                锁定
-              </Button>
-              <div className="mx-2 h-6 w-px bg-slate-200 dark:bg-slate-700" />
-              <Badge status="success" />
-              <Button
-                type="text"
-                size="small"
-                icon={
-                  <ShieldCheckIcon className="size-4 text-emerald-500 dark:text-emerald-400" />
-                }
-                onClick={() => handleBatchAudit(true)}
-                loading={batchUpdateMutation.isPending}
-                className="h-8 rounded-lg px-3 text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-300"
-              >
-                批量审核
-              </Button>
-              <Button
-                type="text"
-                size="small"
-                icon={
-                  <ArrowPathIcon className="size-4 text-amber-500 dark:text-amber-400" />
-                }
-                onClick={() => handleBatchAudit(false)}
-                loading={batchUpdateMutation.isPending}
-                className="h-8 rounded-lg px-3 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30 dark:hover:text-amber-300"
-              >
-                批量反审核
-              </Button>
-              <EditButton title="编辑" handleEdit={() => handleEdit()} />
-            </div>
-            <div className="flex flex-wrap items-center gap-1">
-              <ExportButton
-                handleExport={handleExport}
-                disabled={
-                  selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
-                }
-                loading={isExporting}
-                onPreload={preloadProductionOrderExcel}
-              >
-                {selectedRowKeys.length > 0
-                  ? `导出 (${selectedRowKeys.length})`
-                  : `导出${orderData?.total ? ` (${orderData.total})` : ''}`}
-              </ExportButton>
-              <ExportButton
-                handleExport={handleNightSnackExport}
-                disabled={
-                  selectedRowKeys.length === 0 && (orderData?.total || 0) === 0
-                }
-                loading={isNightSnackExporting}
-                onPreload={preloadProductionOrderNightSnackExcel}
-              >
-                夜宵明细
-              </ExportButton>
-              <DeleteButton
-                onConfirm={handleDelete}
-                isDeleting={deleteMutation.isPending}
-                count={selectedRowKeys.length}
-                itemName="工单"
-              />
-            </div>
-          </div>
+          <ProductionOrderAdminToolbar
+            handleBatchAudit={handleBatchAudit}
+            handleCreate={handleCreate}
+            handleDelete={handleDelete}
+            handleEdit={handleEdit}
+            handleExport={handleExport}
+            handleLockManagement={handleLockManagement}
+            handleNightSnackExport={handleNightSnackExport}
+            isBatchUpdating={batchUpdateMutation.isPending}
+            isDeleting={deleteMutation.isPending}
+            isExporting={isExporting}
+            isNightSnackExporting={isNightSnackExporting}
+            onOpenPasswordModal={openPasswordModal}
+            preloadProductionOrderExcel={preloadProductionOrderExcel}
+            preloadProductionOrderNightSnackExcel={
+              preloadProductionOrderNightSnackExcel
+            }
+            selectedRowKeys={selectedRowKeys}
+            total={orderData?.total}
+          />
         )}
       </div>
-
       {/* 搜索区域 */}
       <div
         className={
@@ -1104,7 +456,6 @@ export default function ProductionOrderPage() {
           mobile={isEmployeeView}
         />
       </div>
-
       {isEmployeeView ? (
         <div
           ref={tableContainerRef}
@@ -1190,7 +541,6 @@ export default function ProductionOrderPage() {
           </div>
         </div>
       )}
-
       {!isEmployeeView ? (
         <>
           <ProductionOrderForm
@@ -1233,63 +583,13 @@ export default function ProductionOrderPage() {
           </Modal>
         </>
       ) : null}
-
-      <Modal
-        title="修改我的管理密码"
-        open={isManagementPasswordModalOpen}
-        destroyOnClose
+      <ProductionOrderManagementPasswordModal
         confirmLoading={isUpdatingManagementPassword}
-        onOk={() => changePasswordForm.submit()}
-        onCancel={() => {
-          setIsManagementPasswordModalOpen(false)
-          changePasswordForm.resetFields()
-        }}
-      >
-        <Form
-          form={changePasswordForm}
-          layout="vertical"
-          onFinish={handleChangeManagementPassword}
-        >
-          <Form.Item
-            name="currentPassword"
-            label="当前管理密码"
-            rules={[{ required: true, message: '请输入当前管理密码' }]}
-          >
-            <Input.Password autoComplete="current-password" />
-          </Form.Item>
-
-          <Form.Item
-            name="nextPassword"
-            label="新管理密码"
-            rules={[
-              { required: true, message: '请输入新管理密码' },
-              { min: 6, message: '新管理密码至少需要 6 位' },
-            ]}
-          >
-            <Input.Password autoComplete="new-password" />
-          </Form.Item>
-
-          <Form.Item
-            name="confirmPassword"
-            label="确认新管理密码"
-            dependencies={['nextPassword']}
-            rules={[
-              { required: true, message: '请再次输入新管理密码' },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('nextPassword') === value) {
-                    return Promise.resolve()
-                  }
-
-                  return Promise.reject(new Error('两次输入的新管理密码不一致'))
-                },
-              }),
-            ]}
-          >
-            <Input.Password autoComplete="new-password" />
-          </Form.Item>
-        </Form>
-      </Modal>
+        form={changePasswordForm}
+        onCancel={closePasswordModal}
+        onSubmit={handleChangeManagementPassword}
+        open={isManagementPasswordModalOpen}
+      />{' '}
     </div>
   )
 }

@@ -32,10 +32,7 @@ const PAGE_DOCUMENT_MODULES = [
     'src/features/jintan/MaterialsInventory/JintanMaterialsInventoryExcelImport.tsx',
     '@/utils/jintanMaterialsInventoryExcel',
   ],
-  [
-    'src/features/jintan/PartsData/index.tsx',
-    '@/utils/jintanPartsDataExcel',
-  ],
+  ['src/features/jintan/PartsData/index.tsx', '@/utils/jintanPartsDataExcel'],
   [
     'src/features/jintan/PartsData/JintanPartsDataExcelImport.tsx',
     '@/utils/jintanPartsDataExcel',
@@ -77,9 +74,12 @@ const PAGE_DOCUMENT_MODULES = [
     'src/features/production-report/index.tsx',
     '@/utils/productionDailyReportExcel',
   ],
-  ['src/features/production-order/index.tsx', '@/utils/productionOrderExcel'],
   [
-    'src/features/production-order/index.tsx',
+    'src/features/production-order/useProductionOrderExport.ts',
+    '@/utils/productionOrderExcel',
+  ],
+  [
+    'src/features/production-order/useProductionOrderExport.ts',
     '@/utils/productionOrderNightSnackExcel',
   ],
   [
@@ -140,7 +140,7 @@ const PAGE_DOCUMENT_MODULES = [
     '@/utils/productionSchedulingPlanExcel',
   ],
   [
-    'src/features/workshop/OrderStatusDashboard/index.tsx',
+    'src/features/workshop/OrderStatusDashboard/useOrderStatusDashboardExport.ts',
     '@/utils/orderStatusDashboardExcel',
   ],
 ] as const
@@ -182,16 +182,25 @@ function getStaticImportSpecifiers(source: string): string[] {
   )
 }
 
+// 导出按钮的悬停/聚焦预加载绑定在 Header 组件上，动态 import 位于 hook 中。
+const PRELOAD_TRIGGER_FILES: Partial<Record<string, string>> = {
+  'src/features/workshop/OrderStatusDashboard/useOrderStatusDashboardExport.ts':
+    'src/features/workshop/OrderStatusDashboard/OrderStatusDashboardHeader.tsx',
+  'src/features/production-order/useProductionOrderExport.ts':
+    'src/features/production-order/ProductionOrderAdminToolbar.tsx',
+}
+
 describe('lazy document modules', () => {
   it.each(PAGE_DOCUMENT_MODULES)(
     '%s loads %s only after an export interaction',
     (file, documentModule) => {
       const source = readProjectFile(file)
+      const triggerSource = readProjectFile(PRELOAD_TRIGGER_FILES[file] ?? file)
 
       expect(getStaticImportSpecifiers(source)).not.toContain(documentModule)
       expect(source).toContain(`import('${documentModule}')`)
-      expect(source).toMatch(/onPreload|onMouseEnter/)
-      expect(source).toMatch(/onPreload|onFocus/)
+      expect(triggerSource).toMatch(/onPreload|onMouseEnter/)
+      expect(triggerSource).toMatch(/onPreload|onFocus/)
     },
   )
 
