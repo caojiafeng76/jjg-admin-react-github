@@ -1,133 +1,28 @@
-import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
-import { useCallback, useRef, useState } from 'react'
-import dayjs from 'dayjs'
-import type { Dayjs } from 'dayjs'
-import {
-  App,
-  Button,
-  DatePicker,
-  FormInstance,
-  Input,
-  InputRef,
-  Modal,
-  Popconfirm,
-  Tabs,
-} from 'antd'
+import { useCallback, useState } from 'react'
+import { App, FormInstance, Modal, Tabs } from 'antd'
 import { useSearchParams } from 'react-router-dom'
-import {
-  ArrowUturnLeftIcon,
-  CheckCircleIcon,
-  CubeIcon,
-  FilmIcon,
-  PaintBrushIcon,
-  ScissorsIcon,
-  TrashIcon,
-  WrenchScrewdriverIcon,
-} from '@heroicons/react/16/solid'
 
 import { usePermissions } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import type {
-  VillaLiftMarkDateField,
   VillaLiftOrder,
   VillaLiftOrderFormValues,
-  VillaLiftOrderItemFormValues,
   VillaLiftOrderStatus,
 } from '@/services/apiVillaLiftOrders'
-import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import {
-  useBatchDeleteVillaLiftOrders,
-  useBatchMarkVillaLiftOrdersDate,
-  useBatchUpdateVillaLiftOrdersStatus,
   useCreateVillaLiftOrder,
   useUpdateVillaLiftOrder,
-  useUpsertVillaLiftOrderItems,
-  useVillaLiftOrderItems,
   useVillaLiftOrders,
 } from './useVillaLiftOrders'
 import VillaLiftOrderForm from './VillaLiftOrderForm'
+import VillaLiftOrderItemsModal from './VillaLiftOrderItemsModal'
 import VillaLiftOrderTable from './VillaLiftOrderTable'
+import VillaLiftOrderToolbar from './VillaLiftOrderToolbar'
 import { useExportVillaLiftOrdersAsExcel } from './useExportVillaLiftOrdersAsExcel'
-
-// ----------------------------------------------------------------
-// 明细编辑子弹窗
-// ----------------------------------------------------------------
-interface ItemsModalProps {
-  open: boolean
-  orderId: string | null
-  onClose: () => void
-}
-
-function ItemsModal({ open, orderId, onClose }: ItemsModalProps) {
-  const { message } = App.useApp()
-  const { data: items = [], isLoading } = useVillaLiftOrderItems(
-    open ? orderId : null,
-  )
-  const upsertMutation = useUpsertVillaLiftOrderItems()
-  const formRef = useRef<FormInstance<{
-    items: VillaLiftOrderItemFormValues[]
-  }> | null>(null)
-
-  async function handleOk() {
-    if (!orderId || !formRef.current) return
-    try {
-      const values = await formRef.current.validateFields()
-      await upsertMutation.mutateAsync({
-        orderId,
-        items: values.items ?? [],
-      })
-      message.success('明细保存成功')
-      onClose()
-    } catch (err) {
-      if (err instanceof Error) {
-        message.error(err.message)
-      }
-    }
-  }
-
-  return (
-    <Modal
-      title="编辑订单明细"
-      open={open}
-      onOk={handleOk}
-      onCancel={onClose}
-      confirmLoading={upsertMutation.isPending}
-      width={800}
-      destroyOnClose
-    >
-      <VillaLiftOrderForm
-        onFinish={() => {}}
-        setFormRef={(f) => {
-          formRef.current = f as unknown as FormInstance<{
-            items: VillaLiftOrderItemFormValues[]
-          }>
-        }}
-        isSubmitting={upsertMutation.isPending}
-        initialValues={
-          orderId
-            ? ({
-                id: orderId,
-                schedule_date: null,
-                delivery_date: null,
-                customer: '',
-                project_name: '',
-                product_name: '',
-                color: '',
-                quantity: 0,
-                remarks: '',
-                created_at: '',
-                updated_at: '',
-                items: isLoading ? [] : items,
-              } as VillaLiftOrder)
-            : null
-        }
-        itemsOnly
-      />
-    </Modal>
-  )
-}
+import { useVillaLiftOrderBatchActions } from './useVillaLiftOrderBatchActions'
+import { useVillaLiftOrderSearch } from './useVillaLiftOrderSearch'
 
 // ----------------------------------------------------------------
 // 主页面
@@ -176,32 +71,6 @@ export default function VillaLiftOrderListPage() {
   const activeStatus = (searchParamsURL.get('status') ??
     'open') as VillaLiftOrderStatus
 
-  // 搜索输入框为 uncontrolled（提交时才读取），避免每次击键重渲染整页
-  const customerInputRef = useRef<InputRef>(null)
-  const projectNameInputRef = useRef<InputRef>(null)
-  const productNameInputRef = useRef<InputRef>(null)
-  // 重置时递增，使 uncontrolled 输入框重挂载以清空
-  const [searchInputKey, setSearchInputKey] = useState(0)
-  const [deliveryDateRange, setDeliveryDateRange] = useState<
-    [Dayjs | null, Dayjs | null] | null
-  >(null)
-  const [scheduleDateRange, setScheduleDateRange] = useState<
-    [Dayjs | null, Dayjs | null] | null
-  >(null)
-  const [processingRequiredDateRange, setProcessingRequiredDateRange] =
-    useState<[Dayjs | null, Dayjs | null] | null>(null)
-
-  // 已提交（触发查询）的筛选值
-  const [submittedCustomer, setSubmittedCustomer] = useState<
-    string | undefined
-  >()
-  const [submittedProjectName, setSubmittedProjectName] = useState<
-    string | undefined
-  >()
-  const [submittedProductName, setSubmittedProductName] = useState<
-    string | undefined
-  >()
-
   // 订单弹窗
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建订单')
@@ -219,21 +88,23 @@ export default function VillaLiftOrderListPage() {
   // 批量操作选中行
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([])
 
-  // 发货日期范围（YYYY-MM-DD 字符串，传给服务层）
-  const deliveryDateFrom =
-    deliveryDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
-  const deliveryDateTo =
-    deliveryDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
-  // 排产日期范围
-  const scheduleDateFrom =
-    scheduleDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
-  const scheduleDateTo =
-    scheduleDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
-  // 计划加工日期（加工要求完成日期）范围
-  const processingRequiredDateFrom =
-    processingRequiredDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
-  const processingRequiredDateTo =
-    processingRequiredDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
+  const search = useVillaLiftOrderSearch({
+    searchParamsURL,
+    setSearchParamsURL,
+    setSelectedRowKeys,
+  })
+  const {
+    submittedCustomer,
+    submittedProjectName,
+    submittedProductName,
+    deliveryDateFrom,
+    deliveryDateTo,
+    scheduleDateFrom,
+    scheduleDateTo,
+    processingRequiredDateFrom,
+    processingRequiredDateTo,
+    handleTabChange,
+  } = search
 
   // 数据
   const { data, isLoading } = useVillaLiftOrders({
@@ -252,9 +123,21 @@ export default function VillaLiftOrderListPage() {
   })
   const createMutation = useCreateVillaLiftOrder()
   const updateMutation = useUpdateVillaLiftOrder()
-  const batchDeleteMutation = useBatchDeleteVillaLiftOrders()
-  const batchStatusMutation = useBatchUpdateVillaLiftOrdersStatus()
-  const batchMarkMutation = useBatchMarkVillaLiftOrdersDate()
+  const {
+    handleBatchDelete,
+    handleBatchClose,
+    handleBatchReopen,
+    handleBatchMarkDate,
+    isBatchDeleting,
+    isBatchUpdatingStatus,
+    isBatchMarking,
+  } = useVillaLiftOrderBatchActions({
+    selectedRowKeys,
+    setSelectedRowKeys,
+    viewerDenied,
+    viewerOperationTip,
+    canMarkFilm,
+  })
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight } =
     useTableHeight({
@@ -300,78 +183,6 @@ export default function VillaLiftOrderListPage() {
     [message, viewerDenied, viewerOperationTip],
   )
 
-  // 批量删除
-  const handleBatchDelete = useCallback(async () => {
-    if (viewerDenied) {
-      message.warning(viewerOperationTip)
-      return
-    }
-
-    try {
-      await batchDeleteMutation.mutateAsync(selectedRowKeys)
-      message.success(`已删除 ${selectedRowKeys.length} 条订单`)
-      setSelectedRowKeys([])
-    } catch (err) {
-      if (err instanceof Error) message.error(err.message)
-    }
-  }, [
-    batchDeleteMutation,
-    selectedRowKeys,
-    message,
-    viewerDenied,
-    viewerOperationTip,
-  ])
-
-  // 批量结案
-  const handleBatchClose = useCallback(async () => {
-    if (viewerDenied) {
-      message.warning(viewerOperationTip)
-      return
-    }
-
-    try {
-      await batchStatusMutation.mutateAsync({
-        ids: selectedRowKeys,
-        status: 'closed',
-      })
-      message.success(`已结案 ${selectedRowKeys.length} 条订单`)
-      setSelectedRowKeys([])
-    } catch (err) {
-      if (err instanceof Error) message.error(err.message)
-    }
-  }, [
-    batchStatusMutation,
-    selectedRowKeys,
-    message,
-    viewerDenied,
-    viewerOperationTip,
-  ])
-
-  // 批量反结案
-  const handleBatchReopen = useCallback(async () => {
-    if (viewerDenied) {
-      message.warning(viewerOperationTip)
-      return
-    }
-
-    try {
-      await batchStatusMutation.mutateAsync({
-        ids: selectedRowKeys,
-        status: 'open',
-      })
-      message.success(`已复开 ${selectedRowKeys.length} 条订单`)
-      setSelectedRowKeys([])
-    } catch (err) {
-      if (err instanceof Error) message.error(err.message)
-    }
-  }, [
-    batchStatusMutation,
-    selectedRowKeys,
-    message,
-    viewerDenied,
-    viewerOperationTip,
-  ])
-
   // 弹出明细编辑弹窗
   const handleEditItems = useCallback(
     (orderId: string) => {
@@ -384,39 +195,6 @@ export default function VillaLiftOrderListPage() {
       setItemsModalOpen(true)
     },
     [message, viewerDenied, viewerOperationTip],
-  )
-
-  // 标记完成日期（批量）
-  const handleBatchMarkDate = useCallback(
-    async (field: VillaLiftMarkDateField, label: string) => {
-      const canBypassViewerGuard = field === 'film_date' && canMarkFilm
-
-      if (viewerDenied && !canBypassViewerGuard) {
-        message.warning(viewerOperationTip)
-        return
-      }
-
-      if (selectedRowKeys.length === 0) return
-      try {
-        await batchMarkMutation.mutateAsync({
-          ids: selectedRowKeys,
-          field,
-          date: dayjs().format('YYYY-MM-DD'),
-        })
-        message.success(`已将 ${selectedRowKeys.length} 条订单标记为${label}`)
-        setSelectedRowKeys([])
-      } catch (err) {
-        if (err instanceof Error) message.error(err.message)
-      }
-    },
-    [
-      batchMarkMutation,
-      canMarkFilm,
-      selectedRowKeys,
-      message,
-      viewerDenied,
-      viewerOperationTip,
-    ],
   )
 
   // 提交订单表单
@@ -460,52 +238,17 @@ export default function VillaLiftOrderListPage() {
     ],
   )
 
-  // 切换 Tab（未结案 / 已结案）
-  function handleTabChange(key: string) {
-    const next = new URLSearchParams(searchParamsURL)
-    next.set('status', key)
-    next.set('page', '1')
-    setSearchParamsURL(next)
-    setSearchInputKey((k) => k + 1)
-    setDeliveryDateRange(null)
-    setScheduleDateRange(null)
-    setProcessingRequiredDateRange(null)
-    setSubmittedCustomer(undefined)
-    setSubmittedProjectName(undefined)
-    setSubmittedProductName(undefined)
-    setSelectedRowKeys([])
-  }
-
   // 搜索
   const { exportAsExcel, isExporting, preloadExportAsExcel } =
     useExportVillaLiftOrdersAsExcel()
 
-  function handleSearch() {
-    const next = new URLSearchParams(searchParamsURL)
-    next.set('page', '1')
-    setSearchParamsURL(next)
-    setSubmittedCustomer(
-      customerInputRef.current?.input?.value?.trim() || undefined,
-    )
-    setSubmittedProjectName(
-      projectNameInputRef.current?.input?.value?.trim() || undefined,
-    )
-    setSubmittedProductName(
-      productNameInputRef.current?.input?.value?.trim() || undefined,
-    )
-  }
-
-  function handleSearchReset() {
-    setSearchInputKey((k) => k + 1)
-    setDeliveryDateRange(null)
-    setScheduleDateRange(null)
-    setProcessingRequiredDateRange(null)
-    setSubmittedCustomer(undefined)
-    setSubmittedProjectName(undefined)
-    setSubmittedProductName(undefined)
-    const next = new URLSearchParams(searchParamsURL)
-    next.set('page', '1')
-    setSearchParamsURL(next)
+  async function handleExportExcel() {
+    const success = await exportAsExcel(data?.orders ?? [])
+    if (success) {
+      message.success(`已导出 ${data?.orders?.length ?? 0} 条订单`)
+    } else {
+      message.warning('当前列表无数据可导出')
+    }
   }
 
   return (
@@ -522,254 +265,37 @@ export default function VillaLiftOrderListPage() {
           className="mb-0!"
         />
         {/* 工具栏 */}
-        <div className="flex flex-wrap items-center gap-2">
-          {canCreate && <AddButton handleCreate={handleCreate} />}
-          {selectedRowKeys.length > 0 && (
-            <>
-              {canDelete && (
-                <Popconfirm
-                  title={`确认删除选中的 ${selectedRowKeys.length} 条订单？`}
-                  description="删除后不可恢复，同时删除所有明细。"
-                  okText="删除"
-                  cancelText="取消"
-                  okButtonProps={{ danger: true, disabled: viewerDenied }}
-                  onConfirm={handleBatchDelete}
-                >
-                  <Button
-                    type="text"
-                    danger
-                    icon={<TrashIcon className="size-4" />}
-                    loading={batchDeleteMutation.isPending}
-                    disabled={viewerDenied}
-                  >
-                    批量删除 ({selectedRowKeys.length})
-                  </Button>
-                </Popconfirm>
-              )}
-              {canClose && activeStatus === 'open' && (
-                <Button
-                  type="text"
-                  icon={
-                    <CheckCircleIcon className="size-4 text-green-500/80!" />
-                  }
-                  loading={batchStatusMutation.isPending}
-                  onClick={handleBatchClose}
-                  disabled={viewerDenied}
-                >
-                  批量结案 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canReopen && activeStatus === 'closed' && (
-                <Button
-                  type="text"
-                  icon={
-                    <ArrowUturnLeftIcon className="size-4 text-blue-400/80!" />
-                  }
-                  loading={batchStatusMutation.isPending}
-                  onClick={handleBatchReopen}
-                  disabled={viewerDenied}
-                >
-                  批量反结案 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canMarkMaterial && (
-                <Button
-                  type="text"
-                  icon={<CubeIcon className="size-4 text-purple-500/80!" />}
-                  loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied}
-                  onClick={() =>
-                    handleBatchMarkDate('material_selection_date', '挑料完成')
-                  }
-                >
-                  挑料完成 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canMarkPainting && (
-                <Button
-                  type="text"
-                  icon={<PaintBrushIcon className="size-4 text-blue-500/80!" />}
-                  loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied}
-                  onClick={() =>
-                    handleBatchMarkDate('painting_date', '喷涂完成')
-                  }
-                >
-                  喷涂完成 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canMarkFilm && (
-                <Button
-                  type="text"
-                  icon={<FilmIcon className="size-4 text-cyan-500/80!" />}
-                  loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied && !canMarkFilm}
-                  onClick={() => handleBatchMarkDate('film_date', '贴膜完成')}
-                >
-                  贴膜完成 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canMarkCutting && (
-                <Button
-                  type="text"
-                  icon={<ScissorsIcon className="size-4 text-orange-500/80!" />}
-                  loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied}
-                  onClick={() =>
-                    handleBatchMarkDate('cutting_actual_date', '切割完成')
-                  }
-                >
-                  切割完成 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canMarkProcessing && (
-                <Button
-                  type="text"
-                  icon={
-                    <WrenchScrewdriverIcon className="size-4 text-amber-600/80!" />
-                  }
-                  loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied}
-                  onClick={() =>
-                    handleBatchMarkDate('processing_actual_date', '加工完成')
-                  }
-                >
-                  加工完成 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canMarkCabinProcessing && (
-                <Button
-                  type="text"
-                  icon={
-                    <WrenchScrewdriverIcon className="size-4 text-rose-500/80!" />
-                  }
-                  loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied}
-                  onClick={() =>
-                    handleBatchMarkDate('cabin_processing_date', '轿箱加工完成')
-                  }
-                >
-                  轿箱加工完成 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canMarkMiddleDoorProcessing && (
-                <Button
-                  type="text"
-                  icon={
-                    <WrenchScrewdriverIcon className="size-4 text-emerald-500/80!" />
-                  }
-                  loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied}
-                  onClick={() =>
-                    handleBatchMarkDate(
-                      'middle_door_processing_date',
-                      '中分门加工完成',
-                    )
-                  }
-                >
-                  中分门加工完成 ({selectedRowKeys.length})
-                </Button>
-              )}
-              {canMarkFrameProcessing && (
-                <Button
-                  type="text"
-                  icon={
-                    <WrenchScrewdriverIcon className="size-4 text-indigo-500/80!" />
-                  }
-                  loading={batchMarkMutation.isPending}
-                  disabled={viewerDenied}
-                  onClick={() =>
-                    handleBatchMarkDate('frame_processing_date', '井架加工完成')
-                  }
-                >
-                  井架加工完成 ({selectedRowKeys.length})
-                </Button>
-              )}
-            </>
-          )}
-          <div className="flex flex-wrap items-center gap-2">
-            <Input
-              key={`customer-${searchInputKey}`}
-              ref={customerInputRef}
-              placeholder="客户"
-              onPressEnter={handleSearch}
-              allowClear
-              style={{ width: 150 }}
-            />
-            <Input
-              key={`projectName-${searchInputKey}`}
-              ref={projectNameInputRef}
-              placeholder="项目名称"
-              onPressEnter={handleSearch}
-              allowClear
-              style={{ width: 160 }}
-            />
-            <Input
-              key={`productName-${searchInputKey}`}
-              ref={productNameInputRef}
-              placeholder="产品名称"
-              onPressEnter={handleSearch}
-              allowClear
-              style={{ width: 150 }}
-            />
-            <DatePicker.RangePicker
-              placeholder={['发货日期从', '发货日期至']}
-              value={deliveryDateRange}
-              onChange={(dates) =>
-                setDeliveryDateRange(
-                  dates ? [dates[0] ?? null, dates[1] ?? null] : null,
-                )
-              }
-              style={{ width: 240 }}
-              allowClear
-            />
-            <DatePicker.RangePicker
-              placeholder={['排产日期从', '排产日期至']}
-              value={scheduleDateRange}
-              onChange={(dates) =>
-                setScheduleDateRange(
-                  dates ? [dates[0] ?? null, dates[1] ?? null] : null,
-                )
-              }
-              style={{ width: 240 }}
-              allowClear
-            />
-            <DatePicker.RangePicker
-              placeholder={['计划加工日期从', '计划加工日期至']}
-              value={processingRequiredDateRange}
-              onChange={(dates) =>
-                setProcessingRequiredDateRange(
-                  dates ? [dates[0] ?? null, dates[1] ?? null] : null,
-                )
-              }
-              style={{ width: 260 }}
-              allowClear
-            />
-            <Button type="primary" onClick={handleSearch}>
-              搜索
-            </Button>
-            <Button onClick={handleSearchReset}>重置</Button>
-            <Button
-              type="text"
-              icon={
-                <DocumentArrowDownIcon className="size-4 text-green-500/80!" />
-              }
-              onClick={async () => {
-                const success = await exportAsExcel(data?.orders ?? [])
-                if (success) {
-                  message.success(`已导出 ${data?.orders?.length ?? 0} 条订单`)
-                } else {
-                  message.warning('当前列表无数据可导出')
-                }
-              }}
-              onMouseEnter={preloadExportAsExcel}
-              onFocus={preloadExportAsExcel}
-              loading={isExporting}
-            >
-              导出Excel
-            </Button>
-          </div>
-        </div>
+        <VillaLiftOrderToolbar
+          permissions={{
+            canCreate,
+            canDelete,
+            canClose,
+            canReopen,
+            canMarkMaterial,
+            canMarkPainting,
+            canMarkFilm,
+            canMarkCutting,
+            canMarkProcessing,
+            canMarkCabinProcessing,
+            canMarkMiddleDoorProcessing,
+            canMarkFrameProcessing,
+          }}
+          activeStatus={activeStatus}
+          viewerDenied={viewerDenied}
+          selectedCount={selectedRowKeys.length}
+          isBatchDeleting={isBatchDeleting}
+          isBatchUpdatingStatus={isBatchUpdatingStatus}
+          isBatchMarking={isBatchMarking}
+          isExporting={isExporting}
+          search={search}
+          handleCreate={handleCreate}
+          handleBatchDelete={handleBatchDelete}
+          handleBatchClose={handleBatchClose}
+          handleBatchReopen={handleBatchReopen}
+          handleBatchMarkDate={handleBatchMarkDate}
+          handleExportExcel={handleExportExcel}
+          preloadExportAsExcel={preloadExportAsExcel}
+        />
       </div>
 
       {/* 表格区域 */}
@@ -819,7 +345,7 @@ export default function VillaLiftOrderListPage() {
       </Modal>
 
       {/* 明细编辑弹窗 */}
-      <ItemsModal
+      <VillaLiftOrderItemsModal
         open={itemsModalOpen}
         orderId={itemsOrderId}
         onClose={() => {

@@ -5,6 +5,31 @@
 ## 2026-10-13
 
 - **类别**：重构 / 页面 / UI
+- **范围**：`src/features/villa-lift/OrderList/index.tsx`（832 行）拆分；新增 `index.vitest.tsx`
+- **摘要**：拆出 `VillaLiftOrderItemsModal.tsx`（原文件内 `ItemsModal` 明细编辑子弹窗，改名）、`useVillaLiftOrderBatchActions.ts`（批量删除、结案、反结案与标记完成日期，三个批量 mutation 移入）、`useVillaLiftOrderSearch.ts`（客户/项目/产品非受控输入框、三组日期范围、已提交筛选值与日期字符串、搜索/重置/切换页签）、`VillaLiftOrderToolbar.tsx`（新建、批量操作、搜索条件与导出按钮，权限开关以 `permissions` 对象传入）。`index.tsx` 保留权限、URL 状态、订单/明细弹窗状态、列表查询、新建/编辑/提交、导出提示（原内联 onClick 改为 `handleExportExcel`，函数体不变）、表格与分页，降至约 360 行。代码用脚本按原行号搬运，经忽略首尾空白后与 Prettier 格式化后的原文件逐行比对，差异仅为 import 拆分、props 改名（`selectedRowKeys.length` → `selectedCount` 等）、因缩进变浅合并的折行与原子弹窗分隔注释。批量操作 hook 的 `useCallback` 依赖补入作为参数传入的 `setSelectedRowKeys`（state setter 引用稳定，行为不变）。
+- **测试**：新增 `index.vitest.tsx`（4 项），覆盖选中后显示批量按钮并批量结案、标记喷涂完成写入当天日期、搜索按输入值查询且切换已结案页签清空筛选、导出当前列表并提示条数；同一组测试临时指向拆分前的原组件也全部通过（临时文件已删除）。此前该页面没有测试。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/villa-lift/OrderList` 0 问题；`bun run test` 31 项脚本测试 + 174 个 Vitest 文件 / 778 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 服务层
+- **范围**：`src/services/apiProductionOrders.ts`（832 行）拆分为四个文件；新增 `apiProductionOrders.vitest.ts`
+- **摘要**：拆出 `apiProductionOrderTypes.ts`（班别、工单行/新增/更新、带员工、列表项、导出、筛选、导出进度、按项目号生产明细类型）、`apiProductionOrderExportData.ts`（前端 Excel 导出取数：导出 select、按 ID 分批、按筛选分页取 ID、分块导出与进度回调、排序；与既有服务端导出任务文件 `apiProductionOrderExport.ts` 区分）、`apiProductionOrderProjectItems.ts`（`getProductionItemsByProjectNo` 按项目号分页查询明细并带出工单日期/班别/员工）。原文件保留列表（含正工时/合格工时/效率汇总）、详情、增删改、批量更新与当天工单查询，`export *` 重新导出类型，并显式重新导出 5 个导出函数/常量与 `getProductionItemsByProjectNo`，29 个引用方（含 Excel worker 的类型导入）与两处 `vi.mock('@/services/apiProductionOrders')` 均未改动。列表与导出取数中重复的筛选逻辑本次未合并，保持原样。函数体按行号原样搬运，经与 Prettier 格式化后的原文件逐行比对：原文件代码行全部保留，新增内容只有 import/export 行。
+- **测试**：新增 `apiProductionOrders.vitest.ts`（3 项，链式 supabase mock），覆盖列表工时/效率汇总与标准工时为 0 的合格明细标记、分块导出去重排序与进度回调、按项目号明细的工单字段带出；此前该服务没有直接的单元测试。
+- **验证**：`bun run typecheck` 通过；四个服务文件 `bunx eslint` 0 问题；`bun run test` 31 项脚本测试 + 173 个 Vitest 文件 / 774 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证（未实际导出工单 Excel）。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
+- **范围**：`src/features/production-order/MobileProductionOrderScanPage.tsx`（842 行）拆分；新增 `MobileProductionOrderScanPage.vitest.tsx`
+- **摘要**：拆出 `mobileProductionOrderScanTypes.ts`（弹层类型、项目号数据、路由 state 类型、`formatDisplayValue`）、`useMobileProductionOrderScanForm.ts`（项目号/工序/机器与 10 个数量、外协、调机、备注字段 state 及 `resetForm`）、`useMobileProductionOrderScanOptions.tsx`（项目号/机器查询、工序匹配查询与项目号/工序/机器选项、当前机器显示文本）、`MobileProductionOrderScanHeader.tsx`（标题、扫码按钮、录入日期与员工）、`MobileProductionOrderScanBasicInfo.tsx`（项目号/型号/工序/机器选择区）、`MobileProductionOrderScanQuantitySections.tsx`（数量明细、调机与外协、备注）。页面保留员工端权限判断、扫码/编辑带入、提交（含当天工单查找/创建与缓存失效）、底部按钮与三个选择弹层，降至约 450 行。代码用脚本按原行号搬运，经忽略首尾空白后与 Prettier 格式化后的原文件逐行比对，差异仅为 import 拆分、因缩进变浅合并的折行与两个 `useEffect` 依赖数组；两个 `useEffect` 依赖补入从表单 hook 取得的 state setter（引用稳定，不会多触发）。
+- **测试**：新增 `MobileProductionOrderScanPage.vitest.tsx`（3 项），覆盖非员工端提示、编辑模式带出原明细并保存后调用更新与返回、新建时项目号/工序/机器/来料数量的依次校验；同一组测试临时指向拆分前的原组件也全部通过（临时文件已删除）。此前该页面没有测试。
+- **发现但未修改**：编辑模式带入明细时 `setMachineEquipmentId(editingItem.machine_equipment_id ?? undefined)` 会把「机器编号为无（null）」的明细变成「未选择」，保存时提示「请选择机器编号」需重新选「无」；原代码即如此，本次重构保持不变，待确认是否需要修复。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/production-order` 0 问题；`bun run test` 31 项脚本测试 + 172 个 Vitest 文件 / 771 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做手机端浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
 - **范围**：`src/features/workshop/EmployeeList/index.tsx`（859 行）拆分；新增 `index.vitest.tsx`
 - **摘要**：拆出 `useEmployeeAuthAccountActions.ts`（为现有员工开通账号、重置密码、解绑、重新绑定的弹窗状态、表单 ref、mutation 与回调，三个弹窗的取消逻辑收为 `handleCancel*`）、`useEmployeeBatchAuthAccounts.tsx`（批量开通账号确认与逐个创建、失败汇总弹窗）、`useEmployeeDelete.tsx`（删除前生产工单引用检查与确认删除）、`EmployeeToolbar.tsx`（工具栏与搜索）、`EmployeeAccountModals.tsx`（三个账号弹窗）。`index.tsx` 保留分页/搜索/选择状态、员工新建/编辑表单与提交（新建时同时开通账号复用 hook 返回的 `createEmployeeAuthMutation`）、表格与分页，降至约 255 行。代码用脚本按原行号搬运，经忽略首尾空白后与 Prettier 格式化后的原文件逐行比对，差异仅为 import 拆分、props 改名、弹窗取消回调改为 hook 函数及依赖数组。三个 hook 的 `useCallback` 依赖补入作为参数传入的 `setSelectedRowKeys`（state setter 引用稳定，行为不变）。
 - **测试**：新增 `index.vitest.tsx`（4 项），覆盖未选择时解绑/批量开通的提示、未绑定员工可打开开通弹窗但不能重置密码、已绑定员工不能重复开通且解绑弹出确认；同一组测试临时指向拆分前的原组件也全部通过，确认行为一致（临时文件已删除）。此前该页面没有测试。

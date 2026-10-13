@@ -119,49 +119,46 @@ function applyBodyStyle(
 export function exportVillaLiftOrdersAsExcel(orders: VillaLiftOrder[]) {
   if (!orders || orders.length === 0) return false
 
-    const wb = utils.book_new()
-    const rows: (string | number)[][] = []
+  const wb = utils.book_new()
+  const rows: (string | number)[][] = []
 
-    for (let i = 0; i < orders.length; i++) {
-      const order = orders[i]
-      const row: (string | number)[] = [i + 1]
+  for (let i = 0; i < orders.length; i++) {
+    const order = orders[i]
+    const row: (string | number)[] = [i + 1]
 
-      for (const header of EXCEL_HEADERS.slice(1)) {
-        const field = FIELD_MAP[header]
-        let value: string | number = ''
-        const raw = order[field] as string | number | null | undefined
-        if (raw != null) {
-          if (field === 'status') {
-            value = raw === 'closed' ? '已结案' : '未结案'
-          } else {
-            value = raw
-          }
+    for (const header of EXCEL_HEADERS.slice(1)) {
+      const field = FIELD_MAP[header]
+      let value: string | number = ''
+      const raw = order[field] as string | number | null | undefined
+      if (raw != null) {
+        if (field === 'status') {
+          value = raw === 'closed' ? '已结案' : '未结案'
+        } else {
+          value = raw
         }
-        row.push(value)
       }
-      rows.push(row)
+      row.push(value)
     }
+    rows.push(row)
+  }
 
-    const data: (string | number)[][] = [
-      Array.from(EXCEL_HEADERS),
-      ...rows,
-    ]
-    const ws = utils.aoa_to_sheet(data)
+  const data: (string | number)[][] = [Array.from(EXCEL_HEADERS), ...rows]
+  const ws = utils.aoa_to_sheet(data)
 
-    autoFitColumnWidths(ws, data, 8, 60)
-    setRowHeight(ws, HEADER_ROW_HEIGHT, 1)
-    setRowHeight(ws, BODY_ROW_HEIGHT, rows.length)
+  autoFitColumnWidths(ws, data, 8, 60)
+  setRowHeight(ws, HEADER_ROW_HEIGHT, 1)
+  setRowHeight(ws, BODY_ROW_HEIGHT, rows.length)
 
-    applyHeaderStyle(ws, EXCEL_HEADERS.length)
-    applyBodyStyle(ws, rows.length + 1, EXCEL_HEADERS.length)
+  applyHeaderStyle(ws, EXCEL_HEADERS.length)
+  applyBodyStyle(ws, rows.length + 1, EXCEL_HEADERS.length)
 
-    ws['!freeze'] = { xSplit: 0, ySplit: 1 }
+  ws['!freeze'] = { xSplit: 0, ySplit: 1 }
 
-    utils.book_append_sheet(wb, ws, '别墅梯订单')
-    writeFile(
-      wb,
-      `别墅梯订单_${dayjs(new Date()).format('YYYY-MM-DD')}.xlsx`,
-      EXCEL_WRITE_OPTIONS,
-    )
+  utils.book_append_sheet(wb, ws, '别墅梯订单')
+  writeFile(
+    wb,
+    `别墅梯订单_${dayjs(new Date()).format('YYYY-MM-DD')}.xlsx`,
+    EXCEL_WRITE_OPTIONS,
+  )
   return true
 }
