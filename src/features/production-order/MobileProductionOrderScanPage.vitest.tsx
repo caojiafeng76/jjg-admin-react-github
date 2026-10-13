@@ -183,6 +183,27 @@ describe('MobileProductionOrderScanPage', () => {
     expect(await screen.findByText('已返回')).toBeTruthy()
   })
 
+  it('编辑机器编号为「无」的明细时显示「无」，可直接保存', async () => {
+    const user = userEvent.setup()
+    mocks.updateProductionOrderItem.mockResolvedValue(undefined)
+    renderPage({
+      editingItem: { ...EDITING_ITEM, machine_equipment_id: null },
+      returnTo: '/back',
+    })
+
+    expect(screen.getByRole('button', { name: /^无/ })).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: /保存工序明细/ }))
+
+    await waitFor(() =>
+      expect(mocks.updateProductionOrderItem).toHaveBeenCalledWith({
+        id: 'item1',
+        values: expect.objectContaining({ machine_equipment_id: null }),
+      }),
+    )
+    expect(mocks.message.error).not.toHaveBeenCalledWith('请选择机器编号')
+  })
+
   it('新建时依次校验项目号、工序、机器与来料数量', async () => {
     const user = userEvent.setup()
     renderPage()

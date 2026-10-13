@@ -4,6 +4,14 @@
 
 ## 2026-10-13
 
+- **类别**：修复 / 页面
+- **范围**：`src/features/production-order/MobileProductionOrderScanPage.tsx` 编辑模式机器编号带入
+- **摘要**：编辑机器编号为「无」（`machine_equipment_id` 为 `null`）的工序明细时，原代码 `editingItem.machine_equipment_id ?? undefined` 把 `null` 转成「未选择」，页面显示「请选择机器编号」，直接保存会被拦截提示「请选择机器编号」，必须重新选一次「无」。改为原样带入 `null`（页面以 `null` 表示「无」、`undefined` 表示未选择，与新建选「无」及桌面端表单保存 `?? null` 的口径一致）。仅影响编辑已有明细的带入，新建与提交逻辑不变。
+- **测试**：`MobileProductionOrderScanPage.vitest.tsx` 新增 1 项「编辑机器编号为「无」的明细时显示「无」，可直接保存」，修复前该用例失败、修复后通过。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/production-order` 0 问题；该测试文件 4 项通过；`bun run test` 31 项脚本测试 + 174 个 Vitest 文件 / 779 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未在手机端浏览器实际编辑明细验证。
+
+## 2026-10-13
+
 - **类别**：重构 / 页面 / UI
 - **范围**：`src/features/villa-lift/OrderList/index.tsx`（832 行）拆分；新增 `index.vitest.tsx`
 - **摘要**：拆出 `VillaLiftOrderItemsModal.tsx`（原文件内 `ItemsModal` 明细编辑子弹窗，改名）、`useVillaLiftOrderBatchActions.ts`（批量删除、结案、反结案与标记完成日期，三个批量 mutation 移入）、`useVillaLiftOrderSearch.ts`（客户/项目/产品非受控输入框、三组日期范围、已提交筛选值与日期字符串、搜索/重置/切换页签）、`VillaLiftOrderToolbar.tsx`（新建、批量操作、搜索条件与导出按钮，权限开关以 `permissions` 对象传入）。`index.tsx` 保留权限、URL 状态、订单/明细弹窗状态、列表查询、新建/编辑/提交、导出提示（原内联 onClick 改为 `handleExportExcel`，函数体不变）、表格与分页，降至约 360 行。代码用脚本按原行号搬运，经忽略首尾空白后与 Prettier 格式化后的原文件逐行比对，差异仅为 import 拆分、props 改名（`selectedRowKeys.length` → `selectedCount` 等）、因缩进变浅合并的折行与原子弹窗分隔注释。批量操作 hook 的 `useCallback` 依赖补入作为参数传入的 `setSelectedRowKeys`（state setter 引用稳定，行为不变）。

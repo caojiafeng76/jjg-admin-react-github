@@ -170,7 +170,8 @@ export default function MobileProductionOrderScanPage() {
 
     setProjectNo(editingItem.project_no)
     setOperation(editingItem.operation)
-    setMachineEquipmentId(editingItem.machine_equipment_id ?? undefined)
+    // null 表示原明细选择了「无」，原样带入；undefined 才表示未选择
+    setMachineEquipmentId(editingItem.machine_equipment_id)
     setIncomingQualifiedQuantity(editingItem.incoming_qualified_quantity || 0)
     setQualifiedQuantity(editingItem.qualified_quantity || 0)
     setDefectQuantity1(editingItem.defect_quantity_1 || 0)
