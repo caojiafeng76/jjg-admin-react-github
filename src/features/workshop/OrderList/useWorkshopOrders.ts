@@ -14,10 +14,7 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 import type { WorkshopOrderStatus } from './orderStatus'
 
 const WORKSHOP_ORDERS_KEY = 'workshop-orders' as const
-const WORKSHOP_ORDER_OPTIONS_KEY = [
-  WORKSHOP_ORDERS_KEY,
-  'options',
-] as const
+const WORKSHOP_ORDER_OPTIONS_KEY = [WORKSHOP_ORDERS_KEY, 'options'] as const
 
 export function useWorkshopOrdersList({
   page,

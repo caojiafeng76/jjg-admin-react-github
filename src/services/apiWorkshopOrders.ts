@@ -1,5 +1,4 @@
 import supabase from './supabase'
-import type { Database } from './database.types'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 import {
   buildOrIlikeFilter,
@@ -11,381 +10,29 @@ import {
   canWorkshopOrderBeClosed,
   normalizeWorkshopOrderStatus,
 } from '@/features/workshop/OrderList/orderStatus'
+import {
+  assertWorkshopOrderHasMeaningfulContent,
+  buildSalesOrderPayload,
+  buildWorkshopOrderStatusUpdateValues,
+  findDuplicateProjectNos,
+  normalizeOptionalText,
+  normalizeWorkshopOrderInput,
+} from './apiWorkshopOrdersCalculations'
+import { assertWorkshopOrdersNotReferenced } from './apiWorkshopOrderDeleteBlockers'
+import {
+  removeWorkshopOrderSketchFiles,
+  uploadWorkshopOrderSketch,
+} from './apiWorkshopOrderSketches'
 
-const WORKSHOP_ORDER_SKETCH_BUCKET = 'workshop-order-sketches'
-
-type SalesOrderInsert = Database['public']['Tables']['sales_orders']['Insert']
-type SalesOrderUpdate = Database['public']['Tables']['sales_orders']['Update']
-
-export interface WorkshopOrderDeleteBlocker {
-  orderId: string
-  projectNo: string | null
-  productionItemCount: number
-  extrusionProductionItemCount: number
-  orderDates: string[]
-}
-
-function formatBlockedProjectNos(projectNos: string[], fallbackLabel: string) {
-  if (projectNos.length === 0) return fallbackLabel
-  if (projectNos.length <= 3) return projectNos.join('、')
-
-  return `${projectNos.slice(0, 3).join('、')} 等${projectNos.length}条订单`
-}
-
-export function findDuplicateProjectNos(
-  projectNos: (string | null)[],
-): string[] {
-  const seen = new Set<string>()
-  const duplicates = new Set<string>()
-
-  projectNos.forEach((projectNo) => {
-    if (!projectNo) return
-
-    if (seen.has(projectNo)) {
-      duplicates.add(projectNo)
-      return
-    }
-
-    seen.add(projectNo)
-  })
-
-  return Array.from(duplicates)
-}
-
-function normalizeOptionalText(value: string | null | undefined) {
-  if (typeof value !== 'string') {
-    return value ?? null
-  }
-
-  const trimmed = value.trim()
-  return trimmed ? trimmed : null
-}
-
-function normalizeOptionalNumber(value: number | null | undefined) {
-  if (value === null || value === undefined || Number.isNaN(value)) {
-    return null
-  }
-
-  return value
-}
-
-function sanitizeStoragePathPart(value: string) {
-  return value
-    .trim()
-    .replace(/[^a-zA-Z0-9._-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
-function buildSketchPath(row: WorkshopOrder, index: number) {
-  const projectNo = sanitizeStoragePathPart(row.project_no || '') || 'unknown'
-  const fileName =
-    sanitizeStoragePathPart(row.sketch_file?.fileName || '') ||
-    `sketch.${row.sketch_file?.extension || 'emf'}`
-
-  return `${projectNo}/${Date.now()}-${index + 1}-${fileName}`
-}
-
-async function removeWorkshopOrderSketchFiles(paths: string[]) {
-  const uniquePaths = Array.from(new Set(paths.filter(Boolean)))
-  if (uniquePaths.length === 0) return
-
-  const { error } = await supabase.storage
-    .from(WORKSHOP_ORDER_SKETCH_BUCKET)
-    .remove(uniquePaths)
-
-  if (error) {
-    console.warn('订单简图删除失败:', error)
-  }
-}
-
-async function uploadWorkshopOrderSketch(
-  row: WorkshopOrder,
-  index: number,
-): Promise<{ path: string | null; uploadedPath: string | null }> {
-  const sketchFile = row.sketch_file
-  if (!sketchFile) {
-    return { path: row.sketch_file_path ?? null, uploadedPath: null }
-  }
-
-  const filePath = buildSketchPath(row, index)
-  const { error } = await supabase.storage
-    .from(WORKSHOP_ORDER_SKETCH_BUCKET)
-    .upload(
-      filePath,
-      new Blob([sketchFile.data], { type: sketchFile.mimeType }),
-      {
-        contentType: sketchFile.mimeType,
-        upsert: false,
-      },
-    )
-
-  if (error) {
-    throw handleApiError(error, '订单简图上传失败')
-  }
-
-  return { path: filePath, uploadedPath: filePath }
-}
-
-function normalizeWorkshopOrderInput(values: WorkshopOrder): WorkshopOrder {
-  return {
-    ...values,
-    product_delivery_date: normalizeOptionalText(values.product_delivery_date),
-    project_no: normalizeOptionalText(values.project_no),
-    product_model: normalizeOptionalText(values.product_model),
-    length_mm: normalizeOptionalNumber(values.length_mm),
-    length_tolerance: normalizeOptionalText(values.length_tolerance),
-    process_flow: normalizeOptionalText(values.process_flow),
-    customer: normalizeOptionalText(values.customer),
-    customer_model: normalizeOptionalText(values.customer_model),
-    order_quantity: normalizeOptionalNumber(values.order_quantity),
-    weight_per_meter_kg: normalizeOptionalNumber(values.weight_per_meter_kg),
-    color_name: normalizeOptionalText(values.color_name),
-    package_name: normalizeOptionalText(values.package_name),
-    product_category: normalizeOptionalText(values.product_category),
-    material_name: normalizeOptionalText(values.material_name),
-    material_code: normalizeOptionalText(values.material_code),
-    row_remark: normalizeOptionalText(values.row_remark),
-    sketch_file_path: normalizeOptionalText(values.sketch_file_path),
-  }
-}
-
-function hasMeaningfulWorkshopOrderContent(values: WorkshopOrder) {
-  return Boolean(
-    values.project_no ||
-    values.product_model ||
-    values.customer ||
-    values.customer_model ||
-    values.process_flow ||
-    values.material_code ||
-    values.length_mm !== null ||
-    values.order_quantity !== null ||
-    values.weight_per_meter_kg !== null,
-  )
-}
-
-function assertWorkshopOrderHasMeaningfulContent(
-  values: WorkshopOrder,
-  label: string,
-) {
-  if (hasMeaningfulWorkshopOrderContent(values)) {
-    return
-  }
-
-  throw new Error(
-    `${label}没有任何有效内容，请先填写项目号、产品型号、长度、订支数等信息后再提交`,
-  )
-}
-
-function buildSalesOrderPayload(
-  values: WorkshopOrder,
-  mode: 'create',
-): SalesOrderInsert
-function buildSalesOrderPayload(
-  values: WorkshopOrder,
-  mode: 'update',
-): SalesOrderUpdate
-function buildSalesOrderPayload(
-  values: WorkshopOrder,
-  mode: 'create' | 'update',
-): SalesOrderInsert | SalesOrderUpdate {
-  const normalizedValues = normalizeWorkshopOrderInput(values)
-  const hasClosedAtValue = Object.prototype.hasOwnProperty.call(
-    values,
-    'closed_at',
-  )
-
-  const payload: SalesOrderUpdate = {
-    product_delivery_date: normalizedValues.product_delivery_date,
-    project_no: normalizedValues.project_no,
-    product_model: normalizedValues.product_model,
-    length_mm: normalizedValues.length_mm,
-    length_tolerance: normalizedValues.length_tolerance,
-    process_flow: normalizedValues.process_flow,
-    customer: normalizedValues.customer,
-    customer_model: normalizedValues.customer_model,
-    order_quantity: normalizedValues.order_quantity,
-    weight_per_meter_kg: normalizedValues.weight_per_meter_kg,
-    color_name: normalizedValues.color_name,
-    package_name: normalizedValues.package_name,
-    product_category: normalizedValues.product_category,
-    material_name: normalizedValues.material_name,
-    material_code: normalizedValues.material_code,
-    row_remark: normalizedValues.row_remark ?? null,
-    sketch_file_path: normalizedValues.sketch_file_path ?? null,
-  }
-
-  if (mode === 'create') {
-    return {
-      ...payload,
-      status: normalizeWorkshopOrderStatus(normalizedValues.status),
-    }
-  }
-
-  if (normalizedValues.status != null) {
-    payload.status = normalizeWorkshopOrderStatus(normalizedValues.status)
-  } else {
-    delete payload.status
-  }
-
-  if (mode === 'update' && hasClosedAtValue) {
-    payload.closed_at = normalizeOptionalText(values.closed_at)
-  }
-
-  return payload
-}
-
-export function buildWorkshopOrderStatusUpdateValues(
-  status: WorkshopOrder['status'],
-  closedAt: Date | string = new Date(),
-): SalesOrderUpdate {
-  const normalizedStatus = normalizeWorkshopOrderStatus(status)
-  const normalizedClosedAt =
-    typeof closedAt === 'string' ? closedAt : closedAt.toISOString()
-
-  return {
-    status: normalizedStatus,
-    closed_at: normalizedStatus === '已结案' ? normalizedClosedAt : null,
-  }
-}
-
-async function assertWorkshopOrdersNotReferenced(ids: string[]) {
-  const blockers = await getWorkshopOrderDeleteBlockers(ids)
-
-  if (blockers.length === 0) {
-    return
-  }
-
-  throw new AppError(
-    `订单 ${formatBlockedProjectNos(
-      blockers
-        .map((item) => item.projectNo?.trim())
-        .filter((projectNo): projectNo is string => Boolean(projectNo)),
-      '所选订单',
-    )} 已关联生产工单明细，无法删除`,
-    'FOREIGN_KEY_CONSTRAINT',
-  )
-}
-
-export async function getWorkshopOrderDeleteBlockers(
-  ids: string[],
-): Promise<WorkshopOrderDeleteBlocker[]> {
-  const { data: orders, error: ordersError } = await supabase
-    .from('sales_orders')
-    .select('id, project_no')
-    .in('id', ids)
-
-  if (ordersError) {
-    throw handleApiError(ordersError, '检查订单引用失败')
-  }
-
-  const selectedProjectNos = (orders || [])
-    .map((order) => order.project_no?.trim())
-    .filter((projectNo): projectNo is string => Boolean(projectNo))
-
-  if (selectedProjectNos.length === 0) {
-    return []
-  }
-
-  const { data: productionItems, error: referenceError } = await supabase
-    .from('production_order_items')
-    .select(
-      `
-      project_no,
-      order_id,
-      production_orders(order_date)
-    `,
-    )
-    .in('project_no', selectedProjectNos)
-
-  if (referenceError) {
-    throw handleApiError(referenceError, '检查订单引用失败')
-  }
-
-  const orderMap = new Map(
-    (orders || [])
-      .filter((order) => order.project_no?.trim())
-      .map((order) => [order.project_no!.trim(), order]),
-  )
-  const grouped = new Map<
-    string,
-    { count: number; dates: Set<string>; extrusionCount: number }
-  >()
-
-  ;(
-    (productionItems || []) as Array<{
-      project_no: string
-      order_id: string
-      production_orders:
-        | {
-            order_date: string
-          }
-        | Array<{ order_date: string }>
-        | null
-    }>
-  ).forEach((item) => {
-    const projectNo = item.project_no?.trim()
-
-    if (!projectNo || !orderMap.has(projectNo)) {
-      return
-    }
-
-    const current = grouped.get(projectNo) || {
-      count: 0,
-      dates: new Set<string>(),
-      extrusionCount: 0,
-    }
-
-    current.count += 1
-
-    const productionOrder = Array.isArray(item.production_orders)
-      ? item.production_orders[0]
-      : item.production_orders
-
-    if (productionOrder?.order_date) {
-      current.dates.add(productionOrder.order_date)
-    }
-
-    grouped.set(projectNo, current)
-  })
-
-  const { data: extrusionItems, error: extrusionError } = await supabase
-    .from('extrusion_production_items')
-    .select('project_no')
-    .in('project_no', selectedProjectNos)
-
-  if (extrusionError) {
-    throw handleApiError(extrusionError, '检查挤压明细引用失败')
-  }
-
-  ;((extrusionItems || []) as Array<{ project_no: string | null }>).forEach(
-    (item) => {
-      const projectNo = item.project_no?.trim()
-
-      if (!projectNo || !orderMap.has(projectNo)) {
-        return
-      }
-
-      const current = grouped.get(projectNo) || {
-        count: 0,
-        dates: new Set<string>(),
-        extrusionCount: 0,
-      }
-
-      current.extrusionCount += 1
-      grouped.set(projectNo, current)
-    },
-  )
-
-  return Array.from(grouped.entries()).map(([projectNo, info]) => ({
-    orderId: orderMap.get(projectNo)?.id || projectNo,
-    projectNo,
-    productionItemCount: info.count,
-    extrusionProductionItemCount: info.extrusionCount ?? 0,
-    orderDates: Array.from(info.dates).sort((left, right) =>
-      right.localeCompare(left),
-    ),
-  }))
-}
+export {
+  buildWorkshopOrderStatusUpdateValues,
+  findDuplicateProjectNos,
+} from './apiWorkshopOrdersCalculations'
+export {
+  getWorkshopOrderDeleteBlockers,
+  type WorkshopOrderDeleteBlocker,
+} from './apiWorkshopOrderDeleteBlockers'
+export { downloadWorkshopOrderSketchFile } from './apiWorkshopOrderSketches'
 
 export async function getWorkshopOrders({
   page,
@@ -424,10 +71,12 @@ export async function getWorkshopOrders({
   const to = from + pageSize - 1
 
   // 列表所需列（表格 + 编辑表单 + 打印/导出共用字段，排除 process_schedules 等大字段）
-  let query = supabase.from('sales_orders').select(
-    'id, status, closed_at, sketch_file_path, product_delivery_date, process_flow, customer, project_no, product_model, customer_model, weight_per_meter_kg, length_mm, length_tolerance, order_quantity, product_category, color_name, package_name, material_name, material_code, row_remark',
-    { count: 'exact' },
-  )
+  let query = supabase
+    .from('sales_orders')
+    .select(
+      'id, status, closed_at, sketch_file_path, product_delivery_date, process_flow, customer, project_no, product_model, customer_model, weight_per_meter_kg, length_mm, length_tolerance, order_quantity, product_category, color_name, package_name, material_name, material_code, row_remark',
+      { count: 'exact' },
+    )
 
   const projectNoKeywords = normalizeSearchKeywords(project_no_search)
   const modelSearchKeywords = normalizeSearchKeywords(model_search)
@@ -655,18 +304,6 @@ export async function getWorkshopOrderById(id: string) {
   return data as WorkshopOrder
 }
 
-export async function downloadWorkshopOrderSketchFile(filePath: string) {
-  const { data, error } = await supabase.storage
-    .from(WORKSHOP_ORDER_SKETCH_BUCKET)
-    .download(filePath)
-
-  if (error) {
-    throw handleApiError(error, '订单简图下载失败')
-  }
-
-  return data.arrayBuffer()
-}
-
 /**
  * 检查项目号是否已存在
  */
@@ -821,9 +458,7 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
   const duplicateProjectNos = findDuplicateProjectNos(projectNos)
 
   if (duplicateProjectNos.length > 0) {
-    throw new Error(
-      `导入数据存在重复项目号：${duplicateProjectNos.join('、')}`,
-    )
+    throw new Error(`导入数据存在重复项目号：${duplicateProjectNos.join('、')}`)
   }
 
   const existingProjectNos = await checkProjectNosExist(projectNos)
@@ -855,15 +490,14 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
     throw error
   }
 
-  const insertRows = rowsWithSketchPaths.map(
-    (row) =>
-      buildSalesOrderPayload(
-        {
-          ...row,
-          status: row.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
-        },
-        'create',
-      ),
+  const insertRows = rowsWithSketchPaths.map((row) =>
+    buildSalesOrderPayload(
+      {
+        ...row,
+        status: row.status ?? DEFAULT_WORKSHOP_ORDER_STATUS,
+      },
+      'create',
+    ),
   )
 
   const { error } = await supabase.from('sales_orders').insert(insertRows)

@@ -5,6 +5,86 @@
 ## 2026-10-13
 
 - **类别**：重构 / 页面 / UI
+- **范围**：`src/features/workshop/EmployeeList/index.tsx`（859 行）拆分；新增 `index.vitest.tsx`
+- **摘要**：拆出 `useEmployeeAuthAccountActions.ts`（为现有员工开通账号、重置密码、解绑、重新绑定的弹窗状态、表单 ref、mutation 与回调，三个弹窗的取消逻辑收为 `handleCancel*`）、`useEmployeeBatchAuthAccounts.tsx`（批量开通账号确认与逐个创建、失败汇总弹窗）、`useEmployeeDelete.tsx`（删除前生产工单引用检查与确认删除）、`EmployeeToolbar.tsx`（工具栏与搜索）、`EmployeeAccountModals.tsx`（三个账号弹窗）。`index.tsx` 保留分页/搜索/选择状态、员工新建/编辑表单与提交（新建时同时开通账号复用 hook 返回的 `createEmployeeAuthMutation`）、表格与分页，降至约 255 行。代码用脚本按原行号搬运，经忽略首尾空白后与 Prettier 格式化后的原文件逐行比对，差异仅为 import 拆分、props 改名、弹窗取消回调改为 hook 函数及依赖数组。三个 hook 的 `useCallback` 依赖补入作为参数传入的 `setSelectedRowKeys`（state setter 引用稳定，行为不变）。
+- **测试**：新增 `index.vitest.tsx`（4 项），覆盖未选择时解绑/批量开通的提示、未绑定员工可打开开通弹窗但不能重置密码、已绑定员工不能重复开通且解绑弹出确认；同一组测试临时指向拆分前的原组件也全部通过，确认行为一致（临时文件已删除）。此前该页面没有测试。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/workshop/EmployeeList` 0 问题；目录 `bunx vitest run` 4 项通过；`bun run test` 31 项脚本测试 + 171 个 Vitest 文件 / 768 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证（未实际开通/解绑账号）。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
+- **范围**：`src/features/workshop/OrderList/WorkshopOrderProductionStats.tsx`（865 行）拆分；新增 `WorkshopOrderProductionStats.vitest.tsx`
+- **摘要**：拆出 `workshopOrderProductionStatsColumns.tsx`（工序颜色、`getOperationColor`、生产记录列定义 `recordColumns`、`OperationSummary` 类型）、`WorkshopOrderOperationRecordsTable.tsx`（单个工序的记录表与不良合计行，原内联在页签 `children` 中）、`WorkshopOrderInfoHeader.tsx`（原文件内 `OrderInfoHeader`：结案提醒、订单基础信息、出库进度、车间流转，改名为 `WorkshopOrderInfoHeader`）。主组件保留工序分组、未选中/加载中/无记录状态与页签，降至约 245 行；`index.tsx` 引用与 `index.vitest.tsx` 的 mock 未改动。代码用脚本按原行号搬运，经忽略首尾空白后与 Prettier 格式化后的原文件逐行比对，差异仅为组件改名、antd 导入拆分与记录表改为组件调用。
+- **测试**：新增 `WorkshopOrderProductionStats.vitest.tsx`（3 项），覆盖未选中订单提示、按工序分组的合格汇总与合计行、出库已满时结案提醒并回调「已结案」；此前该组件在测试中一直被 mock，没有渲染覆盖。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/workshop/OrderList` 0 问题；目录 `bunx vitest run` 6 文件 13 项通过；`bun run test` 31 项脚本测试 + 170 个 Vitest 文件 / 764 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 服务层
+- **范围**：`src/services/apiPrecisionCuttingTransfers.ts`（883 行）拆分为三个文件；新增 `apiPrecisionCuttingTransfersCalculations.vitest.ts`
+- **摘要**：拆出 `apiPrecisionCuttingTransfersTypes.ts`（车间/审核/接收人/操作人常量与精切转移行、新增、更新、筛选、统计、导出类型）与 `apiPrecisionCuttingTransfersCalculations.ts`（固定操作人名单校验、筛选条件拼装、转移数量/不良数/长料长度与数量校验、新增/更新数据规整、`roundTo`、`chunkArray`）。原文件保留 Supabase 取数与增删改（列表、详情、按项目号生产明细映射、导出含不良重量、数量统计、增删改、项目比重查询），`export *` 重新导出类型与常量，11 个引用方与 `permissions.vitest.tsx` 的模块 mock 均未改动。函数体按行号原样搬运，经与 Prettier 格式化后的原文件逐行比对：原文件代码行全部保留，新增内容只有 import/export 行。
+- **测试**：新增 `apiPrecisionCuttingTransfersCalculations.vitest.ts`（5 项），覆盖新增数据规整与默认值、操作人名单/不良数/长料校验中文错误、更新数据只规整传入字段、筛选条件转查询调用、分块与保留小数；此前这些函数没有直接的单元测试。
+- **验证**：`bun run typecheck` 通过；三个服务文件 `bunx eslint` 0 问题；精切转移与车间订单相关 `bunx vitest run` 8 文件 21 项通过；`bun run test` 31 项脚本测试 + 169 个 Vitest 文件 / 761 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 工具函数
+- **范围**：`src/utils/excelUtils.ts`（888 行）拆分为四个文件；新增 `syneyExcelOrderInference.vitest.ts`
+- **摘要**：拆出 `excelUtilsTypes.ts`（`ExcelData`、`ExcelRow`、`ValidationResult`、`TransformedOrderData`，`excelUtils.ts` 以 `export type *` 重新导出）、`excelZip64.ts`（ZIP64 常量与 `normalizeZip64ExcelBuffer` 本地文件头/中央目录大小回填）、`syneyExcelOrderInference.ts`（西尼采购单按生产编号推断规格、后备规格推断、后板商标提取、前/后/中板工艺要求提取）。`excelUtils.ts` 保留 xlsx 解析与有效区域计算、数据校验、Excel 日期转换、订单数据转换与导入流程。`@utils/excelUtils` 的类型导入与 `ExcelUpload.tsx` 的动态 import 均未改动；构建后三个新模块仍只打进 `excelUtils` 懒加载 chunk，入口包不含。函数体按行号原样搬运，经与 Prettier 格式化后的原文件逐行比对，差异仅为 `inferConsistentSpecFromRows` 加 `export` 后签名折行。
+- **测试**：新增 `syneyExcelOrderInference.vitest.ts`（6 项），覆盖后板商标提取、工艺要求否定词排除与汇总、后备规格推断、按前沿板件号与中板规格推断、非 ZIP 数据原样返回、ZIP64 本地文件头大小回填；此前推断规则仅经 `transformToOrderData` 1 项间接覆盖，ZIP64 处理无测试。
+- **验证**：`bun run typecheck` 通过；四个文件 `bunx eslint` 0 问题；Excel 与采购单相关 `bunx vitest run` 7 文件 64 项通过（含两处懒加载守卫）；`bun run test` 31 项脚本测试 + 168 个 Vitest 文件 / 756 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证（未实际上传采购单 Excel）。
+
+## 2026-10-13
+
+- **类别**：重构 / 服务层
+- **范围**：`src/services/apiWorkshopOrders.ts`（906 行）拆分为四个文件；新增 `apiWorkshopOrdersCalculations.vitest.ts`
+- **摘要**：拆出 `apiWorkshopOrdersCalculations.ts`（被引用项目号文案、重复项目号查找、文本/数字规整、简图存储路径、订单输入规整与有效内容校验、`buildSalesOrderPayload` 新建/更新数据、`buildWorkshopOrderStatusUpdateValues`）、`apiWorkshopOrderDeleteBlockers.ts`（`WorkshopOrderDeleteBlocker`、删除前生产/挤压明细引用检查 `getWorkshopOrderDeleteBlockers` 与 `assertWorkshopOrdersNotReferenced`）、`apiWorkshopOrderSketches.ts`（订单简图存储桶上传/删除/下载）。原文件保留订单列表（含出库汇总与可结案排序）、选项、详情、项目号查重与增删改，并重新导出 `findDuplicateProjectNos`、`buildWorkshopOrderStatusUpdateValues`、`getWorkshopOrderDeleteBlockers`、`WorkshopOrderDeleteBlocker`、`downloadWorkshopOrderSketchFile`，引用方与 `vi.mock('@/services/apiWorkshopOrders')` 的测试均未改动。`SalesOrderInsert/Update` 内部类型随 payload 构造移入计算文件，未对外导出。函数体按行号原样搬运；原文件此前未完全经过 Prettier，搬运后统一格式化，经与 Prettier 格式化后的原文件逐行比对，差异仅为两处函数签名因加 `export` 折行。
+- **测试**：新增 `apiWorkshopOrdersCalculations.vitest.ts`（4 项），覆盖订单输入规整、无有效内容报错、新建/更新 payload 的 status 与 closed_at 写入规则、被引用项目号文案省略；既有 `apiWorkshopOrders.vitest.ts`、`apiWorkshopOrderOptions.vitest.ts` 不改动仍通过。
+- **验证**：`bun run typecheck` 通过；四个服务文件 `bunx eslint` 0 问题；`bun run test` 31 项脚本测试 + 167 个 Vitest 文件 / 750 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。中途按目录并行运行时 `ProductionOrderForm.vitest.tsx` 有 1 项因机器负载超时（单项 17 秒，导入阶段 44 秒），该目录本轮未改动，单独重跑 4 项通过，随后全量运行全部通过。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 服务层
+- **范围**：`src/services/apiMaterialTransfers.ts`（951 行）拆分为三个文件；新增 `apiMaterialTransfersCalculations.vitest.ts`
+- **摘要**：拆出 `apiMaterialTransfersTypes.ts`（车间/审核/接收人常量、物料转移行/新增/更新/筛选/统计类型、`TransferWorkshopStat`、`ProjectTransferStats`、`MaterialTransferOrderProgress`）与 `apiMaterialTransfersCalculations.ts`（`applyMaterialTransferFilters` 筛选条件拼装、转移数量与操作人校验、新增/更新数据规整、`computeOrderProgress`、`buildOrderProgressMap`）。原文件保留 Supabase 取数与增删改（项目号/型号/长度选项、列表与订单外观补充、详情、导出、数量统计、增删改、按项目号统计与批量聚合），`export *` 重新导出类型与常量，并显式重新导出 `computeOrderProgress`、`buildOrderProgressMap`，15 个引用方与测试的导入路径均未改动。函数体按行号原样搬运，经逐行比对：原文件代码行全部保留，新增内容只有 import/export 行。
+- **测试**：新增 `apiMaterialTransfersCalculations.vitest.ts`（5 项），覆盖新增数据去空格与操作人去重、数量/操作人校验中文错误、更新数据只规整传入字段、筛选条件转查询调用、订单进度合并；此前这些函数没有直接的单元测试。
+- **验证**：`bun run typecheck` 通过；三个服务文件 `bunx eslint` 0 问题；物料转移相关 `bunx vitest run` 4 文件 14 项通过；`bun run test` 31 项脚本测试 + 166 个 Vitest 文件 / 746 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
+- **范围**：`src/features/workshop/OrderList/index.tsx`（970 行）拆分；新增 `WorkshopOrderControls.vitest.tsx`
+- **摘要**：拆出 `types.ts`（`WorkshopOrder`、`WorkshopOrderProcessSchedule`、`WorkshopOrderProcessScheduleStatus`，`index.tsx` 以 `export type` 重新导出，外部 10 处 `@/features/workshop/OrderList` 与目录内 `./index` 的类型导入均未改动）、`useWorkshopOrderDelete.tsx`（删除前关联校验弹窗与确认删除，删除 mutation 移入）、`useWorkshopOrderStatusActions.ts`（单条结案/改回生产中与批量状态修改，批量状态 mutation 移入）、`WorkshopOrderStatusTabs.tsx`（生产中/已结案页签与数量徽标）、`WorkshopOrderToolbar.tsx`（新增/编辑/批量状态/删除/打印/导出按钮与已选数量）、`WorkshopOrderSearchPanel.tsx`（筛选条件面板）。`index.tsx` 保留 URL 与筛选状态、列表查询、打印/导出/新建/编辑/提交/表格筛选回调、上下分栏表格与生产统计、表单弹窗，降至约 550 行。函数体与 JSX 用脚本按原行号搬运，仅替换为 props；经逐行比对，原文件中仅 props 改名涉及的行不同。两个 hook 的 `useCallback` 依赖补入作为参数传入的 `setSelectedRowKeys`/`setActiveOrder`（state setter 引用稳定，行为不变）。
+- **测试**：新增 `WorkshopOrderControls.vitest.tsx`（4 项），覆盖批量改为生产中/批量结案回调、无状态权限时隐藏批量按钮与导出回调、未选中时导出禁用、状态页签数量徽标与切换回调；既有 `index.vitest.tsx` 的布局与按钮权限 key 断言不改动仍通过。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/workshop/OrderList` 0 问题；目录 `bunx vitest run` 通过；`bun run test` 31 项脚本测试 + 165 个 Vitest 文件 / 741 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
+- **范围**：`src/features/quality/ReworkRepair/index.tsx`（1004 行）拆分；新增 `ReworkRepairControls.vitest.tsx`
+- **摘要**：拆出 `reworkRepairFormUtils.ts`（流程阶段类型与配置 `WORKFLOW_STAGES` 及按 key/状态索引、表单字段类型、默认表单值、URL 参数解析、订单带出文本、`toFormValues`/`buildPayload`）、`ReworkRepairStageFields.tsx`（车间/生产部/技术部/质量部四个 `memo` 字段分组组件）、`ReworkRepairToolbar.tsx`（新建/处理/删除按钮）、`ReworkRepairFormModal.tsx`（按处理阶段切换字段分组的表单弹窗，`form` 仍由父组件持有）。`index.tsx` 保留 URL 参数、列表与选择状态、新建/处理/删除/提交/页签切换/搜索回调、项目号带出与编号回填，降至约 400 行。工具函数、字段组件与页面逻辑用脚本按原行号搬运；工具栏与弹窗 JSX 经替换回原变量名后与原文件逐行比对一致。
+- **测试**：新增 `ReworkRepairControls.vitest.tsx`（4 项），覆盖车间页签新建/处理回调、非车间页签隐藏新建并显示阶段文案、弹窗按阶段渲染字段分组、`buildPayload` 去空格与日期格式化；此前该页面没有渲染测试。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/quality/ReworkRepair` 0 问题；目录及 `keyboardTableIntegration.vitest.ts` `bunx vitest run` 2 文件 33 项通过；`bun run test` 31 项脚本测试 + 164 个 Vitest 文件 / 737 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 服务层
+- **范围**：`src/services/apiProductionScheduling.ts`（1073 行）拆分为三个文件；新增 `apiProductionSchedulingCalculations.vitest.ts`
+- **摘要**：拆出 `apiProductionSchedulingTypes.ts`（`ProductionSchedulingFilters`、`ProductionSchedulingOrder`、`ProductionSchedulingOrderUpdate` 等公开类型、`PRODUCTION_SCHEDULING_PROCESS_OPTIONS` 工序常量，以及取数与计算共用的 `ProcessStandardCapacityRow`）与 `apiProductionSchedulingCalculations.ts`（文本/数量规整、工序解析、工序排程初始化与按工艺流程对齐、已排数量、标准产能匹配、排程行展开等纯函数）。原文件保留 Supabase 取数与保存（已加工数量、转移汇总、标准产能分页取数、筛选查询、订单列表、长度选项、保存排产），`export *` 重新导出类型，并显式重新导出原有 6 个公开工序函数，7 个引用方导入路径均未改动。仅在取数/保存中使用的内部类型与分页常量留在原文件，不对外暴露。函数体按行号原样搬运，经逐行比对：原文件代码行全部保留，新增内容只有 import/export 行。
+- **测试**：新增 `apiProductionSchedulingCalculations.vitest.ts`（4 项），覆盖工序编号/名称解析（含"自动切"归为切割）、已排不足时补余排记录、订单已排数量取各工序最大值、百分比计算；此前该服务没有单元测试。
+- **验证**：`bun run typecheck` 通过；三个服务文件 `bunx eslint` 0 问题；相关 `bunx vitest run` 3 文件 9 项通过；`bun run test` 31 项脚本测试 + 163 个 Vitest 文件 / 733 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
+- **范围**：`src/features/workshop/ProductionScheduling/index.tsx`（1122 行）拆分；新增 `ProductionSchedulingControls.vitest.tsx`
+- **摘要**：拆出 `productionSchedulingUtils.tsx`（搜索/排产表单类型、默认筛选与分页常量、进度选项与快速筛选标签、渲染函数、进度计算、订单日期解析、表单初始值与保存 payload、汇总统计）、`productionSchedulingColumns.tsx`（`makeOrderColumns` 列定义）、`ProductionSchedulingHeader.tsx`（标题与进度快速筛选标签）、`ProductionSchedulingSearchBar.tsx`（搜索表单）、`ProductionSchedulingSummaryBar.tsx`（汇总统计、导出与刷新）、`ProductionSchedulingEditModal.tsx`（排产编辑弹窗，`schedulingForm` 仍由父组件持有）。`index.tsx` 保留筛选/分页/选择状态、查询与保存、导出（Excel 动态 import 与预加载仍在页面内，`lazyDocumentModules.vitest.ts` 无需改动）、紧凑行表格与分页，降至约 340 行。函数体与 JSX 原样搬运，仅替换为 props；快速筛选标签的点击逻辑原样收进 `handleProgressStatusChange`，原组件内每次渲染重建的 `PROGRESS_STATUS_TAGS` 改为模块常量。
+- **测试**：新增 `ProductionSchedulingControls.vitest.tsx`（4 项），覆盖快速筛选标签回调、搜索栏提交值与重置、汇总条选中导出/刷新、编辑弹窗保存/取消；此前该页面没有渲染测试。
+- **验证**：`bun run typecheck` 通过；`bunx eslint src/features/workshop/ProductionScheduling` 0 问题；Prettier 检查通过；目录及相关守卫测试 `bunx vitest run` 4 文件 60 项通过；`bun run test` 31 项脚本测试 + 162 个 Vitest 文件 / 729 项全部通过；`bun run build` 通过；`bun run check:bundle` 通过（入口 gzip 27.1 KB）。未做浏览器端到端验证。
+
+## 2026-10-13
+
+- **类别**：重构 / 页面 / UI
 - **范围**：`src/features/production-order/index.tsx`（1295 行）拆分；`src/features/lazyDocumentModules.vitest.ts` 守卫路径更新；新增 `ProductionOrderManagementControls.vitest.tsx`
 - **摘要**：拆出三个 hook：`useProductionOrderManagementAccess.ts`（管理锁定/解锁、改密码状态与回调、员工视图自动锁定效果）、`useProductionOrderExport.ts`（工单导出与夜宵明细导出、Excel 动态加载与预加载）、`useProductionOrderSubmit.ts`（工单创建/编辑提交，含工序同步 `syncOrderItemsSequentially`，原 5 个 mutation 移入该 hook）；拆出三个组件：`ProductionOrderManagementLock.tsx`（管理锁定界面）、`ProductionOrderManagementPasswordModal.tsx`（改密码弹窗，原页面内两处重复实现合并为一份）、`ProductionOrderAdminToolbar.tsx`（管理工具栏）；`productionOrderPageUtils.ts` 承载表单类型与 `isAuditedRecord`。页面保留筛选、表格、分页、批量审核、删除与详情弹窗，降至约 590 行。函数体与 JSX 原样搬运，仅替换为 props/hook 返回值；导出 `useCallback` 依赖补入 `setSelectedRowKeys`。`lazyDocumentModules.vitest.ts` 中两条工单 Excel 动态 import 的源文件改为 `useProductionOrderExport.ts`，预加载触发断言指向 `ProductionOrderAdminToolbar.tsx`（断言条数与语义不变）。
 - **测试**：新增 `ProductionOrderManagementControls.vitest.tsx`（4 项），覆盖锁定界面修改密码按钮、提交管理密码回调 `onUnlock`、工具栏批量审核/反审核/锁定、工具栏修改密码按钮；此前这些回调连接没有渲染覆盖。

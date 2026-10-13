@@ -101,7 +101,7 @@ export default function WorkshopOrderSearch({
           format="YYYY-MM-DD"
           placeholder={['开始日期', '结束日期']}
           allowClear
-          className="rounded-md border-slate-200 bg-white/80 shadow-sm transition-all hover:border-blue-300 focus-within:border-blue-400 dark:border-slate-600 dark:bg-slate-700/50"
+          className="rounded-md border-slate-200 bg-white/80 shadow-sm transition-all focus-within:border-blue-400 hover:border-blue-300 dark:border-slate-600 dark:bg-slate-700/50"
           style={{ width: 220 }}
         />
       </Form.Item>
