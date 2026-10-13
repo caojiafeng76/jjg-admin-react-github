@@ -4,6 +4,14 @@
 
 ## 2026-10-13
 
+- **类别**：修复 / 服务层 / 部署
+- **范围**：新增 `aliyun-fc/supabase-proxy/`（FC Web 函数反代）、`scripts/package-supabase-proxy-fc.mjs`、`src/services/supabaseFetch.ts`；修改 `src/utils/env.ts`、`src/services/supabase.ts`、`src/services/publicSupabase.ts`、`package.json`、`.env.example`、`src/services/CLAUDE.md`
+- **摘要**：中国移动网络访问 `*.supabase.co`（Cloudflare 前置、新加坡区域）偶发 `Failed to fetch`。① 新增阿里云 FC 香港区域透明反代：只放行 `/rest/v1/`、`/auth/v1/`、`/storage/v1/`、`/functions/v1/`，流式转发请求/响应并剥离 hop-by-hop 头，可选 `ALLOWED_ORIGINS` 白名单，上游失败返回 502，不新增鉴权（仍由 anon key + JWT + RLS 负责）；`bun run fc:package:supabase-proxy` 打包。② 前端新增可选 `VITE_REACT_APP_SUPABASE_PROXY_URL`，配置后两个 Supabase 客户端改走代理；登录态 `storageKey` 固定按 `VITE_REACT_APP_SUPABASE_URL` 的 project ref 生成（与 supabase-js 默认规则一致），切换或撤销代理不会掉登录。未配置时行为与原来一致（直连）。③ 两个客户端注入 `createRetryingFetch`：fetch 抛出网络错误时对 GET/HEAD 按 300ms/1000ms 重试 2 次；HTTP 错误响应、写操作与 RPC（POST）、已取消的请求不重试；token 刷新沿用 auth-js 自带的网络错误重试。
+- **测试**：新增 `aliyun-fc/supabase-proxy/server.test.js`（7 项，含本地上游端到端转发、路径/Origin 拦截、上游失败 502，已纳入 `bun run test` 的 node 脚本测试）、`src/services/supabaseFetch.vitest.ts`（9 项）、`src/utils/env.vitest.ts`（4 项）。
+- **验证**：`bun run typecheck` 通过；改动文件 `bunx eslint` 0 问题（`bun lint` 余 15 条警告均在无关的既有文件）；`bun run test` 38 项脚本测试 + 176 个 Vitest 文件 / 792 项全部通过（首次全量运行时 `ProductionOrderForm.vitest.tsx` 1 项失败，单独运行与第二次全量运行均通过，与本次改动无关）；`bun run build`、`bun run check:bundle`（入口 gzip 27.1 KB）通过；`bun run fc:package:supabase-proxy` 打包成功。本地启动代理对接真实项目：`/auth/v1/health` 200、REST 查询响应与直连一致、CORS 预检透传、非白名单路径 404。未部署到阿里云 FC，未在中国移动网络实测，未在浏览器中经代理登录验证。
+
+## 2026-10-13
+
 - **类别**：修复 / 页面
 - **范围**：`src/features/production-order/MobileProductionOrderScanPage.tsx` 编辑模式机器编号带入
 - **摘要**：编辑机器编号为「无」（`machine_equipment_id` 为 `null`）的工序明细时，原代码 `editingItem.machine_equipment_id ?? undefined` 把 `null` 转成「未选择」，页面显示「请选择机器编号」，直接保存会被拦截提示「请选择机器编号」，必须重新选一次「无」。改为原样带入 `null`（页面以 `null` 表示「无」、`undefined` 表示未选择，与新建选「无」及桌面端表单保存 `?? null` 的口径一致）。仅影响编辑已有明细的带入，新建与提交逻辑不变。

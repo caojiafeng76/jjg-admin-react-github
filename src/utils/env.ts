@@ -50,10 +50,50 @@ export function validateSupabaseEnv() {
     )
   }
 
+  const proxyUrl = resolveSupabaseProxyUrl(
+    import.meta.env.VITE_REACT_APP_SUPABASE_PROXY_URL,
+  )
+
   return {
     supabaseUrl,
     supabaseKey,
+    // 实际请求地址：配置了反代（如阿里云 FC 香港）时走反代，否则直连 Supabase
+    apiUrl: proxyUrl ?? supabaseUrl,
+    authStorageKey: getSupabaseAuthStorageKey(supabaseUrl),
   }
+}
+
+/**
+ * 解析可选的 Supabase 反向代理地址，未设置时返回 null
+ * @throws Error 如果地址格式无效
+ */
+export function resolveSupabaseProxyUrl(
+  value: string | undefined,
+): string | null {
+  const proxyUrl = value?.trim()
+  if (!proxyUrl) {
+    return null
+  }
+
+  try {
+    new URL(proxyUrl)
+  } catch {
+    throw new Error(
+      `环境变量 VITE_REACT_APP_SUPABASE_PROXY_URL 格式无效: ${proxyUrl}`,
+    )
+  }
+
+  return proxyUrl.replace(/\/+$/, '')
+}
+
+/**
+ * 按直连 Supabase 地址生成登录态 localStorage key。
+ * supabase-js 默认按客户端 URL 的 hostname 生成 key，切换到反代域名会让用户掉登录，
+ * 因此固定使用直连地址的 project ref，与 supabase-js 默认规则一致。
+ */
+export function getSupabaseAuthStorageKey(supabaseUrl: string): string {
+  const projectRef = new URL(supabaseUrl).hostname.split('.')[0]
+  return `sb-${projectRef}-auth-token`
 }
 
 /**
@@ -81,5 +121,3 @@ export function validateAllEnvVars() {
     }
   }
 }
-
-

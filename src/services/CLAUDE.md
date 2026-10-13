@@ -18,19 +18,21 @@ Services 模块是应用的数据访问层，负责：
 
 ### 1. supabase.ts - Supabase 客户端初始化
 ```typescript
-import { createClient } from '@supabase/supabase-js'
-import { Database } from './database.types'
+const { supabaseUrl, supabaseKey, apiUrl, authStorageKey } =
+  validateSupabaseEnv()
 
-export const supabaseUrl = import.meta.env.VITE_REACT_APP_SUPABASE_URL
-const supabaseKey = import.meta.env.VITE_REACT_APP_SUPABASE_KEY
-
-const supabase = createClient<Database>(supabaseUrl, supabaseKey)
-export default supabase
+const supabase = createClient<Database>(apiUrl, supabaseKey, {
+  auth: { storageKey: authStorageKey },
+  global: { fetch: createRetryingFetch() },
+})
 ```
 
 **环境变量**：
-- `VITE_REACT_APP_SUPABASE_URL`：Supabase 项目 URL
+- `VITE_REACT_APP_SUPABASE_URL`：Supabase 项目 URL（同时用于生成登录态 localStorage key）
 - `VITE_REACT_APP_SUPABASE_KEY`：Supabase Anon Key（公开密钥）
+- `VITE_REACT_APP_SUPABASE_PROXY_URL`：可选，Supabase 反向代理地址（阿里云 FC 香港，见 `aliyun-fc/supabase-proxy`），配置后所有请求走代理
+
+**网络重试**：`supabaseFetch.ts` 的 `createRetryingFetch` 在 fetch 抛出网络错误（Failed to fetch）时对 GET/HEAD 自动重试 2 次；写操作和 RPC 不重试。`publicSupabase.ts` 使用相同配置。
 
 ### 2. database.types.ts - 数据库类型定义
 **⚠️ 此文件由 Supabase CLI 自动生成，请勿手动修改！**
