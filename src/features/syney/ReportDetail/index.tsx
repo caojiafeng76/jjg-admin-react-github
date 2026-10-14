@@ -77,6 +77,10 @@ export default function ReportDetail() {
 
   const records = useMemo(() => report || [], [report])
   const total = records.length
+  const pagedRecords = useMemo(
+    () => records.slice((page - 1) * pageSize, page * pageSize),
+    [records, page, pageSize],
+  )
 
   const reportFields = useMemo(
     () => [
@@ -232,7 +236,7 @@ export default function ReportDetail() {
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
           <TableState loading={reportLoading && records.length === 0}>
             <DetailTable
-              data={records}
+              data={pagedRecords}
               loading={reportLoading || isUpdating || isDeleting}
               page={page}
               pageSize={pageSize}
