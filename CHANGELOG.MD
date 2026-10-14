@@ -4,6 +4,11 @@
 
 ## 2026-10-14
 
+- **类别**：修复 / CI
+- **范围**：`.github/workflows/ci.yml`、`package.json`、`bun.lock`、`scripts/engineering-guards.vitest.ts`、`supabase/functions/_shared/production-daily-report-summary-worksheet.ts`
+- **摘要**：修复 CI 的三个既有失败（main 最近几次推送的 CI 都失败）：① gitleaks-action 在 `pull_request` 事件下必须提供 token，给 Secret scan 步骤加上 `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`；② `deno check` 报 TS2345：7dc4d43 给 `ProductionDailyReportAbnormalDisplayRow` 新增了必填字段 `productModel`，但 Edge 版汇总表的 `ProductionDailyReportSummaryRow` 没有同步。运行时数据本来就带这个字段（`export-production-daily-report/index.ts` 组装行时会设置 `productModel`），所以只补了类型声明，不影响运行行为；③ `bun audit --production` 报 dompurify 3.4.12 有 GHSA-55q2-fjhq-7xh7（中危）和 GHSA-6688-9rhm-gjv2（低危），把 overrides 升到 3.4.17（在 jspdf 要求的 `^3.3.1` 范围内），工程守卫测试里的固定版本断言同步更新。
+- **验证**：`bunx deno check supabase/functions/*/index.ts` 通过；`bun audit --production` 无漏洞；`bun run lint`、`bun run typecheck`、`bun run build`、`bun run check:bundle` 通过；`bun run test:coverage` 跑了两次，都是 178 文件 / 800 项中 798 项通过，但每次失败的 2 项都不一样（第一次是 dompurify 守卫断言 + `MobileProductionOrderScanPage` 超时，守卫断言修正后第二次是 `remoteEmployeeSelect` + 另一个超时），失败的文件单独运行均通过，判断为覆盖率模式下负载导致的偶发超时。
+
 - **类别**：变更 / 依赖
 - **范围**：`package.json`、`bun.lock`
 - **摘要**：依赖升级第 3 批：antd 6.5.3 → 6.6.6（继续精确锁定）、@ant-design/cli → 6.6.6。antd 6.6.6 依赖 `@rc-component/util@^1.13.0`，但 bun 把顶层那份留在 1.12.0、只在 `antd/node_modules` 下另装 1.14.0；而 `vite.config.ts` 用 alias + dedupe 强制所有包使用顶层副本，导致构建报 79 个 `MISSING_EXPORT`（如 `isReactRenderable`）。执行 `bun update @rc-component/util` 把顶层副本升到 1.14.0（所有依赖方的版本范围均为 ^1.x，均满足），重复副本随之消失，package.json 无额外改动。

@@ -10,6 +10,7 @@ export const PRODUCTION_DAILY_REPORT_SUMMARY_SHEET_NAME = '汇总表'
 interface ProductionDailyReportSummaryRow {
   key: string
   orderDate: string
+  productModel: string
   incomingQualifiedCount: number
   qualifiedCount: number
   defectCount: number

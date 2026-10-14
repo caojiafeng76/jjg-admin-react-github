@@ -73,7 +73,7 @@ describe('P3 engineering guards', () => {
       overrides?: Record<string, string>
     }
 
-    expect(packageJson.overrides?.dompurify).toBe('3.4.12')
+    expect(packageJson.overrides?.dompurify).toBe('3.4.17')
     expect(packageJson.scripts?.['check:bundle']).toBe(
       'bun scripts/check-bundle-budget.mjs',
     )
