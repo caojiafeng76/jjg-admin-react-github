@@ -19,6 +19,12 @@ Recommended function settings:
 - Listen port: `9000`
 - Request methods: `POST`, `OPTIONS`, `GET`
 - Internet access: enabled
+- Minimum instances: `0` (do not configure provisioned/always-on instances).
+  The function is only called when a user manually fetches or prints a store
+  report. With minimum instances >= 1 the instance stays alive 24/7 and its
+  memory is billed even while idle (0.15 CU/GB·s, about CNY 21/month for
+  512 MB). With `0`, a cold start only adds a few seconds, well within the
+  frontend's 45-second timeout.
 
 Configure all variables in the Function Compute environment. Never commit real
 credentials:

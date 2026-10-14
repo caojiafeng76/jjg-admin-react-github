@@ -4,6 +4,13 @@
 
 ## 2026-10-14
 
+- **类别**：文档 / 部署
+- **范围**：`aliyun-fc/syney-store-report/README.md`、`aliyun-fc/supabase-proxy/README.md` 最小实例数建议
+- **摘要**：用量明细显示 `syney-store-report` 10/1–10/14 每小时都有出账（含国庆凌晨），原因是控制台最小实例数 ≥ 1，实例常驻，闲置时内存仍计费。该函数只在手动拉取/打印入库单时调用，README 补充「最小实例数设为 0」及原因。`supabase-proxy` README 原写「预留实例建议 1 个」，改为写清 0（无请求不计费、有冷启动）与 1（无冷启动、7×24 计费）的取舍与费用估算。
+- **验证**：仅文档改动，未运行测试；`bunx prettier --check`：`CHANGELOG.MD`、`supabase-proxy/README.md` 通过，`syney-store-report/README.md` 有格式告警，但改动前就已存在，未处理。控制台最小实例数由用户手动调整。
+
+## 2026-10-14
+
 - **类别**：修复 / 页面
 - **范围**：`src/features/syney/ReportDetail/index.tsx` 入库单详情前端分页
 - **摘要**：详情页把全部明细传给 `DetailTable`，未按当前页切片：pageSize=10、共 14 条时第 1 页显示全部 14 条，第 2 页仍是这 14 条但序号按页偏移成 11–24；"当前页小计"也合计了全部数据。pageSize=20 时只有一页，问题不显现。改为按 `page`/`pageSize` 切片后再传入表格（与 `PoDetail` 写法一致）；明细条数、选中金额、编辑行查找仍基于全部数据。
