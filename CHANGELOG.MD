@@ -4,6 +4,14 @@
 
 ## 2026-10-14
 
+- **类别**：重构 / 路由
+- **范围**：`src/routes/router.tsx`；新增 `src/routes/routeHelpers.tsx`、`src/routes/modules/*Routes.ts`（system、syney、workshop、production、tooling、inventory〔优迈 + 金坛〕、process〔别墅梯 + 包装〕）、`src/routes/router.vitest.ts`
+- **摘要**：`router.tsx` 原有 953 行，70 个页面路由都重复写一遍 `Suspense` + `PermissionProtectedRoute` 包装。新增 `permissionRoute(path, permissionKey, Page)`、`redirectRoute`、`publicRoute` 三个辅助函数，路由按业务域拆到 `modules/` 下，`router.tsx` 只负责组合（约 75 行，路由相关文件合计约 520 行）。`permissionRoute` 额外在路由 `handle` 上记录 `permission`，便于测试和后续按路由读取权限。纯重构，路由行为不变。
+- **测试**：新增 `router.vitest.ts`：布局内路由路径不重复；`PAGE_PERMISSION_ROUTES` 中每一项都存在同路径、同权限 key 的路由。已人为改错一个权限 key，确认该测试会失败。
+- **验证**：重构前后各导出一次完整路由树快照（路径、errorElement、元素树、守卫的 permissionKey、懒加载页面组件），81 条路由逐行比对完全一致（临时脚本，已删除）。`bun run typecheck` 通过；`bunx eslint .` 0 问题；Vitest 178 个文件 / 800 项中 799 项通过，失败的是已知偶发超时用例 `ProductionOrderForm.vitest.tsx`，单独运行通过；`bun run build`、`check:bundle`（入口 gzip 26.0 KB）通过。未在浏览器中逐页点击验证。
+
+## 2026-10-14
+
 - **类别**：优化 / 服务层 / 配置
 - **范围**：`src/services/supabase.ts`、`src/services/publicSupabase.ts`、`src/services/supabaseFetch.ts`（注释）、`src/config/queryClient.ts`；新增 `src/services/supabaseClients.vitest.ts`
 - **摘要**：GET 查询遇到网络错误时原来有三层重试叠加：`createRetryingFetch` 3 次 × postgrest-js 2.112 内置重试 4 次（间隔 1s/2s/4s）× React Query 3 次，最坏 36 次请求、约 40 秒后用户才看到错误。① 两个 Supabase 客户端设置 `db: { retry: false }`，关闭 postgrest-js 内置重试，网络错误重试由 `createRetryingFetch` 负责。② React Query 对网络类错误（复用 `getErrorDisplayInfo` 的 `network` 分类）只再重试 1 次，同时兜底不经过 fetch 重试的 RPC/POST 查询；其他临时错误仍最多重试 2 次。最坏情况变为 6 次请求、约 4 秒。③ 修正上一条记录中 `isNonRetryableError` 的过度判断：`PGRST0xx`（连接失败、schema 缓存未加载等 503/504 临时错误）恢复为可重试，弥补关闭 postgrest-js 内置 503 重试后的空缺。
