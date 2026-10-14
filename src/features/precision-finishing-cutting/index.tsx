@@ -386,6 +386,7 @@ export default function PrecisionFinishingCuttingPage() {
       fixedEmployee,
       handleCloseModal,
       isEmployeeView,
+      message,
       updateMutation,
       viewerDenied,
       viewerOperationTip,

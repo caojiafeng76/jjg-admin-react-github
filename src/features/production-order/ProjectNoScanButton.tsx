@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Alert, App, Button, Modal, Tooltip, Typography } from 'antd'
 import { useEffect, useRef, useState } from 'react'
-import { BiScan } from 'react-icons/bi'
+import { ViewfinderCircleIcon } from '@heroicons/react/24/outline'
 import qrScannerWorkerPath from 'qr-scanner/qr-scanner-worker.min.js?url'
 
 import { getSalesOrderByProjectNo } from '@/services/apiProcessStandards'
@@ -345,7 +345,7 @@ export default function ProjectNoScanButton({
       ) : (
         <Tooltip title="扫码填充项目号">
           <Button
-            icon={<BiScan className="size-5" />}
+            icon={<ViewfinderCircleIcon className="size-5" />}
             aria-label="扫码填充项目号"
             onClick={() => setOpen(true)}
             disabled={disabled}

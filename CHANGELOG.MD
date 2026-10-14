@@ -4,6 +4,14 @@
 
 ## 2026-10-14
 
+- **类别**：优化 / 配置 / 依赖 / 仓库卫生
+- **范围**：`src/config/queryClient.ts`（+ 测试）、`src/features/workshop/OrderStatusDashboard/`（新增 `dashboardTableCells.tsx`）、`src/features/precision-finishing-cutting/index.tsx`、`src/features/tooling/ToolingData/index.tsx`、4 处扫码图标、`package.json`/`bun.lock`、`.gitignore`
+- **摘要**：① React Query 默认配置：查询失败只有在没有缓存数据时才抛到路由错误边界，后台刷新失败不会再整页变成错误页；权限、参数、约束类确定性错误（HTTP 4xx，408/429 除外；`PGRST*`；SQLSTATE 22/23/42 类，如 `42501`）不再重试；`refetchOnReconnect` 改为 `true`，网络恢复后自动刷新过期数据。② ESLint 15 条警告清零：两个 `useCallback` 补上 `message` 依赖；`dashboardRenderUtils.tsx` 不再转发导出 `Text`/`Title`（调用方改为本地解构 `Typography`），可拖拽表头单元格和紧凑单元格两个组件拆到 `dashboardTableCells.tsx`。③ 仅 4 处使用的 `react-icons` `BiScan` 换成 heroicons `ViewfinderCircleIcon`，移除 `react-icons` 依赖。④ `*.tsbuildinfo` 加入 `.gitignore` 并取消跟踪。
+- **测试**：`src/config/queryClient.vitest.ts` 新增 3 项（不重试的错误、错误边界抛出条件、408/429/网络错误仍可重试）。
+- **验证**：`bun run typecheck` 通过；`bunx eslint .` 0 错误 0 警告；`bun run test` 脚本测试 0 失败，176 个 Vitest 文件 / 795 项全部通过；`bun run build`、`bun run check:bundle`（入口 gzip 26.2 KB）通过。未在浏览器中手动验证扫码图标显示和断网恢复刷新。
+
+## 2026-10-14
+
 - **类别**：文档 / 部署
 - **范围**：`aliyun-fc/syney-store-report/README.md`、`aliyun-fc/supabase-proxy/README.md` 最小实例数建议
 - **摘要**：用量明细显示 `syney-store-report` 10/1–10/14 每小时都有出账（含国庆凌晨），原因是控制台最小实例数 ≥ 1，实例常驻，闲置时内存仍计费。该函数只在手动拉取/打印入库单时调用，README 补充「最小实例数设为 0」及原因。`supabase-proxy` README 原写「预留实例建议 1 个」，改为写清 0（无请求不计费、有冷启动）与 1（无冷启动、7×24 计费）的取舍与费用估算。

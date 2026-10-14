@@ -7,8 +7,8 @@ import {
   DocumentChartBarIcon,
   KeyIcon,
   ScissorsIcon,
+  ViewfinderCircleIcon,
 } from '@heroicons/react/24/outline'
-import { BiScan } from 'react-icons/bi'
 import { useMemo } from 'react'
 import type { ElementType } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -30,7 +30,7 @@ const allMobileNavItems: MobileNavItemDef[] = [
   {
     key: '/scan',
     label: '扫码',
-    icon: BiScan,
+    icon: ViewfinderCircleIcon,
     permission: 'nav:mobile-scan',
   },
   {

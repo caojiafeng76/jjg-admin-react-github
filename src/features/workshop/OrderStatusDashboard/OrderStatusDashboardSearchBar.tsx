@@ -1,8 +1,9 @@
-import { Button, DatePicker, Input, Select } from 'antd'
+import { Button, DatePicker, Input, Select, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
-import { Text } from './dashboardRenderUtils'
 import { PRODUCTION_STATUS_OPTIONS, type SearchValues } from './dashboardUtils'
+
+const { Text } = Typography
 
 export interface OrderStatusDashboardSearchBarProps {
   isSearching: boolean

@@ -344,6 +344,7 @@ export default function ToolingDataPage() {
       createMutation,
       canManageTooling,
       isEdit,
+      message,
       resetFormState,
       selectedRowKeys,
       updateMutation,

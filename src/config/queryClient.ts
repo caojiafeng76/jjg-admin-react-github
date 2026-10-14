@@ -15,6 +15,40 @@ export function isAbortError(error: unknown): boolean {
 }
 
 /**
+ * 判断是否为重试也无法恢复的确定性错误（权限、参数、约束、资源不存在等）
+ * - HTTP 4xx（408/429 除外）
+ * - PostgREST 错误码 PGRST*
+ * - Postgres SQLSTATE 22xxx（数据异常）/ 23xxx（约束冲突）/ 42xxx（语法或权限，如 42501 RLS 拒绝）
+ */
+export function isNonRetryableError(error: unknown): boolean {
+  if (error === null || typeof error !== 'object') return false
+
+  const statusCode =
+    'statusCode' in error && typeof error.statusCode === 'number'
+      ? error.statusCode
+      : 'status' in error && typeof error.status === 'number'
+        ? error.status
+        : undefined
+  if (
+    statusCode !== undefined &&
+    statusCode >= 400 &&
+    statusCode < 500 &&
+    statusCode !== 408 &&
+    statusCode !== 429
+  ) {
+    return true
+  }
+
+  const code =
+    'code' in error && typeof error.code === 'string' ? error.code : ''
+  return (
+    /^PGRST/i.test(code) ||
+    /^(22|23|42)[0-9A-Z]{3}$/.test(code) ||
+    ['UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND'].includes(code.toUpperCase())
+  )
+}
+
+/**
  * 默认查询选项
  */
 const defaultQueryOptions: DefaultOptions['queries'] = {
@@ -26,8 +60,8 @@ const defaultQueryOptions: DefaultOptions['queries'] = {
 
   // 重试策略
   retry: (failureCount, error) => {
-    // 如果是 AbortError，不重试
-    if (isAbortError(error)) {
+    // AbortError 或确定性错误（权限/参数/约束）不重试
+    if (isAbortError(error) || isNonRetryableError(error)) {
       return false
     }
     // 最多重试 2 次
@@ -40,14 +74,16 @@ const defaultQueryOptions: DefaultOptions['queries'] = {
   // 窗口聚焦时不自动重新获取（避免用户切换标签页时触发不必要的请求）
   refetchOnWindowFocus: false,
 
-  // 网络重连时不自动重新获取
-  refetchOnReconnect: false,
+  // 网络重连时重新获取已过期的查询（车间移动端网络不稳定，避免展示旧数据）
+  refetchOnReconnect: true,
 
   // 挂载时不自动重新获取（如果数据仍然新鲜）
   refetchOnMount: true,
 
-  // 错误处理：忽略 AbortError
-  throwOnError: (error) => !isAbortError(error),
+  // 错误处理：忽略 AbortError；已有缓存数据时（后台刷新失败）不抛到错误边界，
+  // 避免一次刷新失败就让整页切换为错误页
+  throwOnError: (error, query) =>
+    !isAbortError(error) && query.state.data === undefined,
 }
 
 /**

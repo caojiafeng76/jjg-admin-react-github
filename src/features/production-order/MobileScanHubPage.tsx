@@ -1,5 +1,5 @@
 import { Button, Card, Typography } from 'antd'
-import { BiScan } from 'react-icons/bi'
+import { ViewfinderCircleIcon } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
 
 import { isEmployeeSideRole } from '@/config/access'
@@ -71,7 +71,7 @@ export default function MobileScanHubPage() {
                 disabled={disabled}
                 className="flex min-h-44 w-full flex-col items-center justify-center rounded-4xl border-[3px] border-slate-950 bg-white px-4 py-6 text-slate-950 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900 dark:text-slate-100"
               >
-                <BiScan className="size-16" />
+                <ViewfinderCircleIcon className="size-16" />
                 <span className="mt-5 text-lg font-semibold tracking-tight">
                   工单扫描
                 </span>
@@ -87,7 +87,7 @@ export default function MobileScanHubPage() {
             onClick={() => openAutoScanPage('/material-transfer/scan')}
             className="flex min-h-44 w-full flex-col items-center justify-center rounded-4xl border-[3px] border-slate-200 bg-white px-4 py-6 text-slate-950 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           >
-            <BiScan className="size-16" />
+            <ViewfinderCircleIcon className="size-16" />
             <span className="mt-5 text-lg font-semibold tracking-tight">
               物料转移
             </span>
@@ -103,7 +103,7 @@ export default function MobileScanHubPage() {
             }
             className="flex min-h-44 w-full flex-col items-center justify-center rounded-4xl border-[3px] border-slate-200 bg-white px-4 py-6 text-slate-950 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           >
-            <BiScan className="size-16" />
+            <ViewfinderCircleIcon className="size-16" />
             <span className="mt-5 text-lg font-semibold tracking-tight">
               精加工切割
             </span>

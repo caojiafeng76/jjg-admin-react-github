@@ -1,6 +1,7 @@
 import { MutationObserver } from '@tanstack/react-query'
 import { describe, expect, it, vi } from 'vitest'
-import { createQueryClient } from './queryClient'
+import { AppError } from '@/utils/errorHandler'
+import { createQueryClient, isNonRetryableError } from './queryClient'
 
 describe('createQueryClient', () => {
   it('calls a failed mutation exactly once by default', async () => {
@@ -12,5 +13,44 @@ describe('createQueryClient', () => {
 
     expect(mutationFn).toHaveBeenCalledTimes(1)
     queryClient.clear()
+  })
+
+  it('does not retry deterministic errors', () => {
+    const queryClient = createQueryClient()
+    const retry = queryClient.getDefaultOptions().queries?.retry as (
+      failureCount: number,
+      error: unknown,
+    ) => boolean
+
+    expect(retry(0, new AppError('denied', '42501'))).toBe(false)
+    expect(retry(0, new AppError('bad', 'PGRST116'))).toBe(false)
+    expect(retry(0, new AppError('forbidden', undefined, 403))).toBe(false)
+    expect(retry(0, new Error('Failed to fetch'))).toBe(true)
+    expect(retry(2, new Error('Failed to fetch'))).toBe(false)
+  })
+
+  it('only throws query errors to the boundary when there is no cached data', () => {
+    const queryClient = createQueryClient()
+    const throwOnError = queryClient.getDefaultOptions().queries
+      ?.throwOnError as (
+      error: unknown,
+      query: { state: { data: unknown } },
+    ) => boolean
+    const error = new Error('boom')
+
+    expect(throwOnError(error, { state: { data: undefined } })).toBe(true)
+    expect(throwOnError(error, { state: { data: [] } })).toBe(false)
+    const abort = new Error('aborted')
+    abort.name = 'AbortError'
+    expect(throwOnError(abort, { state: { data: undefined } })).toBe(false)
+  })
+})
+
+describe('isNonRetryableError', () => {
+  it('treats 408/429 and network errors as retryable', () => {
+    expect(isNonRetryableError({ status: 429 })).toBe(false)
+    expect(isNonRetryableError({ statusCode: 408 })).toBe(false)
+    expect(isNonRetryableError({ code: '08006' })).toBe(false)
+    expect(isNonRetryableError({ code: '23505' })).toBe(true)
   })
 })

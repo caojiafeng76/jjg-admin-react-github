@@ -1,10 +1,11 @@
-import { Button } from 'antd'
+import { Button, Typography } from 'antd'
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
   DocumentChartBarIcon,
 } from '@heroicons/react/16/solid'
-import { Title } from './dashboardRenderUtils'
+
+const { Title } = Typography
 
 export interface OrderStatusDashboardHeaderProps {
   canExportCurrentFilters: boolean
