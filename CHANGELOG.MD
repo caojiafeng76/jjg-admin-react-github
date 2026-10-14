@@ -4,6 +4,14 @@
 
 ## 2026-10-14
 
+- **类别**：优化 / 服务层 / 配置
+- **范围**：`src/services/supabase.ts`、`src/services/publicSupabase.ts`、`src/services/supabaseFetch.ts`（注释）、`src/config/queryClient.ts`；新增 `src/services/supabaseClients.vitest.ts`
+- **摘要**：GET 查询遇到网络错误时原来有三层重试叠加：`createRetryingFetch` 3 次 × postgrest-js 2.112 内置重试 4 次（间隔 1s/2s/4s）× React Query 3 次，最坏 36 次请求、约 40 秒后用户才看到错误。① 两个 Supabase 客户端设置 `db: { retry: false }`，关闭 postgrest-js 内置重试，网络错误重试由 `createRetryingFetch` 负责。② React Query 对网络类错误（复用 `getErrorDisplayInfo` 的 `network` 分类）只再重试 1 次，同时兜底不经过 fetch 重试的 RPC/POST 查询；其他临时错误仍最多重试 2 次。最坏情况变为 6 次请求、约 4 秒。③ 修正上一条记录中 `isNonRetryableError` 的过度判断：`PGRST0xx`（连接失败、schema 缓存未加载等 503/504 临时错误）恢复为可重试，弥补关闭 postgrest-js 内置 503 重试后的空缺。
+- **测试**：`queryClient.vitest.ts` 新增网络错误只重试 1 次、`PGRST002/003` 可重试的用例；新增 `supabaseClients.vitest.ts`，断言两个客户端都关闭了 `db.retry` 并注入了自定义 fetch。
+- **验证**：`bun run typecheck` 通过；`bunx eslint .` 0 问题；Vitest 177 个文件 / 798 项全部通过。首次 `bun run test` 全量运行时 `ProductionOrderForm.vitest.tsx`、`remoteEmployeeSelect.vitest.tsx` 各 1 项超时失败，单独运行均通过，第二次全量运行全部通过，属于负载下的偶发超时，与本次改动无关。未在真实弱网环境下实测。
+
+## 2026-10-14
+
 - **类别**：优化 / 构建产物
 - **范围**：新增 `src/utils/excelExport.worker.ts`、`src/utils/excelExportWorker.ts`；改写 `src/utils/productionOrderExcel.ts`、`src/utils/productionDailyReportExcel.ts`；删除 `productionOrderExcel.worker.ts`、`productionDailyReportExcel.worker.ts`
 - **摘要**：原来生产工单导出和生产日报表导出各用一个 Worker，每个都完整打包了一份 `xlsx-js-style`（各约 852 KB）。现在合并为一个共享 Worker，按 `kind`（`productionOrder` / `productionDailyReport`）分派；启动 Worker 和下载文件的重复代码收进 `excelExportWorker.ts`。主线程兜底路径改为动态 `import()` 生成工作簿的模块，Worker 正常时主线程不再额外下载一份 xlsx（约 863 KB）。对外导出函数名、调用方式、文件名规则和 Worker 失败回退主线程的行为都不变。

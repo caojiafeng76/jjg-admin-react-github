@@ -1,5 +1,7 @@
 import { QueryClient, DefaultOptions } from '@tanstack/react-query'
 
+import { getErrorDisplayInfo } from '@/utils/errorHandler'
+
 /**
  * 检查是否为 AbortError（请求被取消）
  */
@@ -17,7 +19,7 @@ export function isAbortError(error: unknown): boolean {
 /**
  * 判断是否为重试也无法恢复的确定性错误（权限、参数、约束、资源不存在等）
  * - HTTP 4xx（408/429 除外）
- * - PostgREST 错误码 PGRST*
+ * - PostgREST 错误码 PGRST*（PGRST0xx 连接/schema 缓存类 503/504 除外，属于临时错误）
  * - Postgres SQLSTATE 22xxx（数据异常）/ 23xxx（约束冲突）/ 42xxx（语法或权限，如 42501 RLS 拒绝）
  */
 export function isNonRetryableError(error: unknown): boolean {
@@ -42,7 +44,7 @@ export function isNonRetryableError(error: unknown): boolean {
   const code =
     'code' in error && typeof error.code === 'string' ? error.code : ''
   return (
-    /^PGRST/i.test(code) ||
+    /^PGRST[1-9]/i.test(code) ||
     /^(22|23|42)[0-9A-Z]{3}$/.test(code) ||
     ['UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND'].includes(code.toUpperCase())
   )
@@ -64,7 +66,11 @@ const defaultQueryOptions: DefaultOptions['queries'] = {
     if (isAbortError(error) || isNonRetryableError(error)) {
       return false
     }
-    // 最多重试 2 次
+    // 网络错误：GET 请求已在 createRetryingFetch 中重试过，这里只补 1 次
+    //（同时兜底不经过 fetch 重试的 RPC/POST 查询）；其他临时错误最多重试 2 次
+    if (getErrorDisplayInfo(error).category === 'network') {
+      return failureCount < 1
+    }
     return failureCount < 2
   },
 

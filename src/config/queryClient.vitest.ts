@@ -29,6 +29,24 @@ describe('createQueryClient', () => {
     expect(retry(2, new Error('Failed to fetch'))).toBe(false)
   })
 
+  it('retries network errors only once because the fetch layer already retried', () => {
+    const queryClient = createQueryClient()
+    const retry = queryClient.getDefaultOptions().queries?.retry as (
+      failureCount: number,
+      error: unknown,
+    ) => boolean
+    const networkError = new AppError(
+      '查询失败: TypeError: Failed to fetch',
+      '',
+    )
+    const serverError = new AppError('upstream timeout', undefined, 502)
+
+    expect(retry(0, networkError)).toBe(true)
+    expect(retry(1, networkError)).toBe(false)
+    expect(retry(1, serverError)).toBe(true)
+    expect(retry(2, serverError)).toBe(false)
+  })
+
   it('only throws query errors to the boundary when there is no cached data', () => {
     const queryClient = createQueryClient()
     const throwOnError = queryClient.getDefaultOptions().queries
@@ -52,5 +70,9 @@ describe('isNonRetryableError', () => {
     expect(isNonRetryableError({ statusCode: 408 })).toBe(false)
     expect(isNonRetryableError({ code: '08006' })).toBe(false)
     expect(isNonRetryableError({ code: '23505' })).toBe(true)
+    // PGRST0xx 为连接/schema 缓存类临时错误（503/504），应重试
+    expect(isNonRetryableError({ code: 'PGRST002' })).toBe(false)
+    expect(isNonRetryableError({ code: 'PGRST003' })).toBe(false)
+    expect(isNonRetryableError({ code: 'PGRST116' })).toBe(true)
   })
 })

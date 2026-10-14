@@ -5,6 +5,8 @@
  * - 只重试 GET/HEAD 等幂等请求，写操作和 RPC（POST）不重试，避免重复写入
  * - 登录态刷新由 supabase auth-js 自带的网络错误重试负责，这里不重复处理
  * - 请求被取消（AbortSignal）时立即停止，不再重试
+ * - 这是网络错误的主要重试层：postgrest-js 内置重试已在客户端关闭（db.retry: false），
+ *   React Query 对网络错误只再补 1 次（见 src/config/queryClient.ts）
  */
 
 export interface RetryingFetchOptions {
