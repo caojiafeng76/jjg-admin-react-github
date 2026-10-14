@@ -6,6 +6,13 @@
 
 - **类别**：变更 / 依赖
 - **范围**：`package.json`、`bun.lock`
+- **摘要**：依赖升级第 3 批：antd 6.5.3 → 6.6.6（继续精确锁定）、@ant-design/cli → 6.6.6。antd 6.6.6 依赖 `@rc-component/util@^1.13.0`，但 bun 把顶层那份留在 1.12.0、只在 `antd/node_modules` 下另装 1.14.0；而 `vite.config.ts` 用 alias + dedupe 强制所有包使用顶层副本，导致构建报 79 个 `MISSING_EXPORT`（如 `isReactRenderable`）。执行 `bun update @rc-component/util` 把顶层副本升到 1.14.0（所有依赖方的版本范围均为 ^1.x，均满足），重复副本随之消失，package.json 无额外改动。
+- **构建产物变化**：vendor-antd-core gzip 241.7 → 243.1 KB，首屏 JS 总量 571.3 → 573.0 KB。
+- **验证**：`bun run typecheck` 通过；`bun lint` 0 问题；`bun run test` 178 文件 / 800 项全部通过；`bun run build`、`bun run check:bundle`（入口 gzip 31.1 KB）通过；`bunx antd lint src` 共 125 条，与用 6.5.3 规则跑出的结果逐类一致，6.6 没有新增废弃告警（这 125 条均为既有问题，本次未处理）。未在浏览器中逐页验证样式。
+- **后续注意**：以后升级 antd 时，如果构建报 `@rc-component/util` 缺少导出，先检查顶层副本版本，原因是 `vite.config.ts` 的 alias / dedupe。
+
+- **类别**：变更 / 依赖
+- **范围**：`package.json`、`bun.lock`
 - **摘要**：依赖升级第 2 批：react / react-dom 19.2.8 → 19.3.0，@types/react / @types/react-dom → 19.3.0，四者同步升级。
 - **构建产物变化**：vendor-react chunk gzip 147.6 KB → 160.1 KB，首屏 JS 总量 558.8 KB → 571.3 KB（+12.5 KB，约 +2%）。已确认打包的是生产版（无开发版标记），增量来自 react-dom 19.3 本身。如需回退，单独 revert 本提交即可。
 - **验证**：`bun run typecheck` 通过；`bun lint` 0 问题；`bun run test` 178 文件 / 800 项全部通过；`bun run build`、`bun run check:bundle`（入口 gzip 31.1 KB）通过。未在浏览器中逐页验证。
