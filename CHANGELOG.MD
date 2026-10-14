@@ -4,6 +4,13 @@
 
 ## 2026-10-14
 
+- **类别**：优化 / 构建产物
+- **范围**：新增 `src/utils/excelExport.worker.ts`、`src/utils/excelExportWorker.ts`；改写 `src/utils/productionOrderExcel.ts`、`src/utils/productionDailyReportExcel.ts`；删除 `productionOrderExcel.worker.ts`、`productionDailyReportExcel.worker.ts`
+- **摘要**：原来生产工单导出和生产日报表导出各用一个 Worker，每个都完整打包了一份 `xlsx-js-style`（各约 852 KB）。现在合并为一个共享 Worker，按 `kind`（`productionOrder` / `productionDailyReport`）分派；启动 Worker 和下载文件的重复代码收进 `excelExportWorker.ts`。主线程兜底路径改为动态 `import()` 生成工作簿的模块，Worker 正常时主线程不再额外下载一份 xlsx（约 863 KB）。对外导出函数名、调用方式、文件名规则和 Worker 失败回退主线程的行为都不变。
+- **验证**：`bun run typecheck` 通过；`bunx eslint .` 0 问题；`bun run build` 产物中两个 852 KB 的 Worker 变为一个 `excelExport.worker` 878 KB，`check:bundle` 通过（入口 gzip 26.2 KB）；`bun run test` 脚本测试 0 失败，Vitest 794/795 通过，失败的 `ProductionOrderForm.vitest.tsx` 是已记录的偶发超时用例，与本次改动无关，单独运行 4 项全部通过。未在浏览器中实际点导出验证下载文件。
+
+## 2026-10-14
+
 - **类别**：优化 / 配置 / 依赖 / 仓库卫生
 - **范围**：`src/config/queryClient.ts`（+ 测试）、`src/features/workshop/OrderStatusDashboard/`（新增 `dashboardTableCells.tsx`）、`src/features/precision-finishing-cutting/index.tsx`、`src/features/tooling/ToolingData/index.tsx`、4 处扫码图标、`package.json`/`bun.lock`、`.gitignore`
 - **摘要**：① React Query 默认配置：查询失败只有在没有缓存数据时才抛到路由错误边界，后台刷新失败不会再整页变成错误页；权限、参数、约束类确定性错误（HTTP 4xx，408/429 除外；`PGRST*`；SQLSTATE 22/23/42 类，如 `42501`）不再重试；`refetchOnReconnect` 改为 `true`，网络恢复后自动刷新过期数据。② ESLint 15 条警告清零：两个 `useCallback` 补上 `message` 依赖；`dashboardRenderUtils.tsx` 不再转发导出 `Text`/`Title`（调用方改为本地解构 `Typography`），可拖拽表头单元格和紧凑单元格两个组件拆到 `dashboardTableCells.tsx`。③ 仅 4 处使用的 `react-icons` `BiScan` 换成 heroicons `ViewfinderCircleIcon`，移除 `react-icons` 依赖。④ `*.tsbuildinfo` 加入 `.gitignore` 并取消跟踪。
