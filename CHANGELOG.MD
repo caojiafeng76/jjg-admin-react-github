@@ -6,6 +6,12 @@
 
 - **类别**：变更 / 依赖
 - **范围**：`package.json`、`bun.lock`
+- **摘要**：依赖升级第 2 批：react / react-dom 19.2.8 → 19.3.0，@types/react / @types/react-dom → 19.3.0，四者同步升级。
+- **构建产物变化**：vendor-react chunk gzip 147.6 KB → 160.1 KB，首屏 JS 总量 558.8 KB → 571.3 KB（+12.5 KB，约 +2%）。已确认打包的是生产版（无开发版标记），增量来自 react-dom 19.3 本身。如需回退，单独 revert 本提交即可。
+- **验证**：`bun run typecheck` 通过；`bun lint` 0 问题；`bun run test` 178 文件 / 800 项全部通过；`bun run build`、`bun run check:bundle`（入口 gzip 31.1 KB）通过。未在浏览器中逐页验证。
+
+- **类别**：变更 / 依赖
+- **范围**：`package.json`、`bun.lock`
 - **摘要**：依赖升级第 1 批（补丁 / 小版本，semver 兼容）。生产依赖：@ant-design/icons 6.3.4、@supabase/supabase-js 2.117.3、@tanstack/react-query 5.104.2、dayjs 1.11.23、immer 11.1.21、jszip 3.10.2、pinyin-pro 3.29.5、react-router-dom 7.18.4、zustand 5.0.15；开发依赖：@tanstack/react-query-devtools 5.104.2、@testing-library/jest-dom 7.0.1、@testing-library/react 16.3.3、@testing-library/user-event 14.6.8、@types/node 26.6.5、@vitejs/plugin-react 6.1.2、eslint 10.12.0、eslint-plugin-react-refresh 0.5.7、globals 17.13.0、jsdom 30.1.2、postcss 8.5.30、prettier 3.9.10、supabase 2.120.0、typescript-eslint 8.71.2、vite 8.3.4、vitest / @vitest/coverage-v8 4.1.11。`bun outdated` 里 typescript 6.0.3→7.0.2 属于误报（`typescript` 有意指向 TS6，TS7 由 `@typescript/native` 提供），未改动；vitest 5 为大版本，另行处理。
 - **构建产物变化**：入口 chunk gzip 26.0 KB → 31.1 KB。逐个回退定位到 rolldown 1.2.2 → 1.2.13（vite 的间接依赖，单独回退 vite / @vitejs/plugin-react 均不影响）：新版把 contexts、queryClient、apiPermissions、access 等小共享 chunk 合并进入口。按 manifest 统计首屏 JS 总量 560.3 KB → 558.8 KB、请求数 15 → 11，不是退化。
 - **验证**：`bun run typecheck` 通过；`bun lint` 0 问题；`bun run test` 首次 178 文件 / 800 项中 799 项通过，失败的是已知偶发用例 `remoteEmployeeSelect.vitest.tsx`，单独运行通过，全量复跑 800/800 通过；`bun run build`、`bun run check:bundle` 通过。未在浏览器中逐页验证。
