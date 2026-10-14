@@ -22,6 +22,9 @@ jobs:
 
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2
+        env:
+          # pull_request 事件下 gitleaks-action 必须提供 token 才能扫描 PR 提交
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: oven-sh/setup-bun@v2
         with:

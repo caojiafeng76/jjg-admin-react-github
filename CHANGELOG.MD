@@ -4,6 +4,30 @@
 
 ## 2026-10-14
 
+- **类别**：修复 / CI
+- **范围**：`.github/workflows/ci.yml`、`package.json`、`bun.lock`、`scripts/engineering-guards.vitest.ts`、`supabase/functions/_shared/production-daily-report-summary-worksheet.ts`
+- **摘要**：修复 CI 的三个既有失败（main 最近几次推送的 CI 都失败）：① gitleaks-action 在 `pull_request` 事件下必须提供 token，给 Secret scan 步骤加上 `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`；② `deno check` 报 TS2345：7dc4d43 给 `ProductionDailyReportAbnormalDisplayRow` 新增了必填字段 `productModel`，但 Edge 版汇总表的 `ProductionDailyReportSummaryRow` 没有同步。运行时数据本来就带这个字段（`export-production-daily-report/index.ts` 组装行时会设置 `productModel`），所以只补了类型声明，不影响运行行为；③ `bun audit --production` 报 dompurify 3.4.12 有 GHSA-55q2-fjhq-7xh7（中危）和 GHSA-6688-9rhm-gjv2（低危），把 overrides 升到 3.4.17（在 jspdf 要求的 `^3.3.1` 范围内），工程守卫测试里的固定版本断言同步更新。
+- **验证**：`bunx deno check supabase/functions/*/index.ts` 通过；`bun audit --production` 无漏洞；`bun run lint`、`bun run typecheck`、`bun run build`、`bun run check:bundle` 通过；`bun run test:coverage` 跑了两次，都是 178 文件 / 800 项中 798 项通过，但每次失败的 2 项都不一样（第一次是 dompurify 守卫断言 + `MobileProductionOrderScanPage` 超时，守卫断言修正后第二次是 `remoteEmployeeSelect` + 另一个超时），失败的文件单独运行均通过，判断为覆盖率模式下负载导致的偶发超时。
+
+- **类别**：变更 / 依赖
+- **范围**：`package.json`、`bun.lock`
+- **摘要**：依赖升级第 3 批：antd 6.5.3 → 6.6.6（继续精确锁定）、@ant-design/cli → 6.6.6。antd 6.6.6 依赖 `@rc-component/util@^1.13.0`，但 bun 把顶层那份留在 1.12.0、只在 `antd/node_modules` 下另装 1.14.0；而 `vite.config.ts` 用 alias + dedupe 强制所有包使用顶层副本，导致构建报 79 个 `MISSING_EXPORT`（如 `isReactRenderable`）。执行 `bun update @rc-component/util` 把顶层副本升到 1.14.0（所有依赖方的版本范围均为 ^1.x，均满足），重复副本随之消失，package.json 无额外改动。
+- **构建产物变化**：vendor-antd-core gzip 241.7 → 243.1 KB，首屏 JS 总量 571.3 → 573.0 KB。
+- **验证**：`bun run typecheck` 通过；`bun lint` 0 问题；`bun run test` 178 文件 / 800 项全部通过；`bun run build`、`bun run check:bundle`（入口 gzip 31.1 KB）通过；`bunx antd lint src` 共 125 条，与用 6.5.3 规则跑出的结果逐类一致，6.6 没有新增废弃告警（这 125 条均为既有问题，本次未处理）。未在浏览器中逐页验证样式。
+- **后续注意**：以后升级 antd 时，如果构建报 `@rc-component/util` 缺少导出，先检查顶层副本版本，原因是 `vite.config.ts` 的 alias / dedupe。
+
+- **类别**：变更 / 依赖
+- **范围**：`package.json`、`bun.lock`
+- **摘要**：依赖升级第 2 批：react / react-dom 19.2.8 → 19.3.0，@types/react / @types/react-dom → 19.3.0，四者同步升级。
+- **构建产物变化**：vendor-react chunk gzip 147.6 KB → 160.1 KB，首屏 JS 总量 558.8 KB → 571.3 KB（+12.5 KB，约 +2%）。已确认打包的是生产版（无开发版标记），增量来自 react-dom 19.3 本身。如需回退，单独 revert 本提交即可。
+- **验证**：`bun run typecheck` 通过；`bun lint` 0 问题；`bun run test` 178 文件 / 800 项全部通过；`bun run build`、`bun run check:bundle`（入口 gzip 31.1 KB）通过。未在浏览器中逐页验证。
+
+- **类别**：变更 / 依赖
+- **范围**：`package.json`、`bun.lock`
+- **摘要**：依赖升级第 1 批（补丁 / 小版本，semver 兼容）。生产依赖：@ant-design/icons 6.3.4、@supabase/supabase-js 2.117.3、@tanstack/react-query 5.104.2、dayjs 1.11.23、immer 11.1.21、jszip 3.10.2、pinyin-pro 3.29.5、react-router-dom 7.18.4、zustand 5.0.15；开发依赖：@tanstack/react-query-devtools 5.104.2、@testing-library/jest-dom 7.0.1、@testing-library/react 16.3.3、@testing-library/user-event 14.6.8、@types/node 26.6.5、@vitejs/plugin-react 6.1.2、eslint 10.12.0、eslint-plugin-react-refresh 0.5.7、globals 17.13.0、jsdom 30.1.2、postcss 8.5.30、prettier 3.9.10、supabase 2.120.0、typescript-eslint 8.71.2、vite 8.3.4、vitest / @vitest/coverage-v8 4.1.11。`bun outdated` 里 typescript 6.0.3→7.0.2 属于误报（`typescript` 有意指向 TS6，TS7 由 `@typescript/native` 提供），未改动；vitest 5 为大版本，另行处理。
+- **构建产物变化**：入口 chunk gzip 26.0 KB → 31.1 KB。逐个回退定位到 rolldown 1.2.2 → 1.2.13（vite 的间接依赖，单独回退 vite / @vitejs/plugin-react 均不影响）：新版把 contexts、queryClient、apiPermissions、access 等小共享 chunk 合并进入口。按 manifest 统计首屏 JS 总量 560.3 KB → 558.8 KB、请求数 15 → 11，不是退化。
+- **验证**：`bun run typecheck` 通过；`bun lint` 0 问题；`bun run test` 首次 178 文件 / 800 项中 799 项通过，失败的是已知偶发用例 `remoteEmployeeSelect.vitest.tsx`，单独运行通过，全量复跑 800/800 通过；`bun run build`、`bun run check:bundle` 通过。未在浏览器中逐页验证。
+
 - **类别**：重构 / 路由
 - **范围**：`src/routes/router.tsx`；新增 `src/routes/routeHelpers.tsx`、`src/routes/modules/*Routes.ts`（system、syney、workshop、production、tooling、inventory〔优迈 + 金坛〕、process〔别墅梯 + 包装〕）、`src/routes/router.vitest.ts`
 - **摘要**：`router.tsx` 原有 953 行，70 个页面路由都重复写一遍 `Suspense` + `PermissionProtectedRoute` 包装。新增 `permissionRoute(path, permissionKey, Page)`、`redirectRoute`、`publicRoute` 三个辅助函数，路由按业务域拆到 `modules/` 下，`router.tsx` 只负责组合（约 75 行，路由相关文件合计约 520 行）。`permissionRoute` 额外在路由 `handle` 上记录 `permission`，便于测试和后续按路由读取权限。纯重构，路由行为不变。
