@@ -115,12 +115,20 @@ export default function OrderStatusDashboard() {
       minRowHeight: 24,
       gap: 12,
     })
-  const { data, isLoading, isFetching, refetch } = useOrderStatusDashboard({
-    page,
-    pageSize,
-    filters,
-  })
-  const isDataLoading = isLoading || isFetching
+  const { data, isLoading, isPlaceholderData, refetch } =
+    useOrderStatusDashboard({
+      page,
+      pageSize,
+      filters,
+    })
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false)
+  // 查询/翻页/手动刷新时显示遮罩；30 秒定时轮询（库存等动态更新）静默进行
+  const isUserFetching = isPlaceholderData || isManualRefreshing
+  const isDataLoading = isLoading || isUserFetching
+  const handleRefetch = useCallback(() => {
+    setIsManualRefreshing(true)
+    void refetch().finally(() => setIsManualRefreshing(false))
+  }, [refetch])
 
   const rows = useMemo(() => data?.items ?? [], [data?.items])
   const jobColumns = data?.jobColumns ?? EMPTY_JOB_COLUMNS
@@ -359,11 +367,11 @@ export default function OrderStatusDashboard() {
         canExportCurrentFilters={canExportCurrentFilters}
         exportDisabled={isDataLoading || (data?.total ?? 0) === 0}
         isExporting={isExporting}
-        isFetching={isFetching}
+        isFetching={isDataLoading}
         isLoading={isLoading}
         onExport={handleExportCurrentFilters}
         onPreloadExport={preloadOrderStatusDashboardExcel}
-        onRefetch={() => void refetch()}
+        onRefetch={handleRefetch}
         onToggleKpis={() => setShowKpis((current) => !current)}
         showKpis={showKpis}
       />
@@ -391,7 +399,7 @@ export default function OrderStatusDashboard() {
       </div>
 
       <OrderStatusDashboardSearchBar
-        isSearching={isFetching && !isLoading}
+        isSearching={isUserFetching && !isLoading}
         onReset={handleResetSearch}
         onSearch={handleSearch}
         onUpdateValue={updateSearchParamValue}

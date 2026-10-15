@@ -18,6 +18,10 @@ import {
   EMPTY_ORDER_STATUS_DASHBOARD_KPIS,
   getOrderStatusDashboard,
 } from './apiOrderStatusDashboard'
+import {
+  calculateInventoryQuantity,
+  getAutoCutQuantity,
+} from './apiOrderStatusDashboardCalculations'
 
 function createQuery<T>(data: T[]) {
   const query = {
@@ -133,6 +137,71 @@ describe('getOrderStatusDashboard', () => {
     })
 
     expect(result.items[0]?.jobOutputs.CNC).toBe(1394)
+  })
+
+  it('computes inventory from precision cutting, last-process auto cut, defects and transfers', async () => {
+    mockRpc.mockResolvedValue({
+      data: {
+        items: [
+          {
+            id: 'order-1',
+            precisionCuttingQuantity: 100,
+            productionRows: [
+              {
+                created_at: '2026-10-01T00:00:00.000Z',
+                data_category: 'A',
+                id: 'cut-first',
+                operation: '切割45°（第1刀）',
+                product_model: '105-304',
+                qualified_quantity: 30,
+              },
+              {
+                created_at: '2026-10-02T00:00:00.000Z',
+                data_category: 'A',
+                id: 'cut-last',
+                operation: '切割45°上',
+                product_model: '105-304',
+                qualified_quantity: 30,
+              },
+            ],
+            project_no: '26100101-01',
+            totalDefectQuantity: 5,
+            transferQuantity: 120,
+          },
+        ],
+        total: 1,
+      },
+      error: null,
+    })
+    mockFrom.mockImplementation(() => createQuery([]))
+
+    const result = await getOrderStatusDashboard({
+      page: 1,
+      pageSize: 20,
+      processRows: [
+        {
+          is_last_process: false,
+          job_name: '切割',
+          length: 0,
+          model: '105-304',
+          operation: '切割45°（第1刀）',
+          part_no: null,
+          record_type: 'B',
+        },
+        {
+          is_last_process: true,
+          job_name: '切割',
+          length: 0,
+          model: '105-304',
+          operation: '切割45°上',
+          part_no: null,
+          record_type: 'B',
+        },
+      ],
+    })
+
+    expect(result.items[0]?.autoCutQuantity).toBe(30)
+    expect(result.items[0]?.inventoryQuantity).toBe(5)
   })
 
   it('uses provided processRows without querying process_standards', async () => {
@@ -331,5 +400,31 @@ describe('buildPackagingProductionDetailsForDashboard', () => {
       operatorName: '王五',
       qualifiedQuantity: 5,
     })
+  })
+})
+
+describe('inventory calculations', () => {
+  it('sums 切割 and 自动切 job outputs as auto cut quantity', () => {
+    expect(getAutoCutQuantity({ 切割: 12, 自动切: 3, CNC: 99 })).toBe(15)
+    expect(getAutoCutQuantity({ CNC: 99 })).toBe(0)
+  })
+
+  it('keeps negative inventory and treats missing values as zero', () => {
+    expect(
+      calculateInventoryQuantity({
+        autoCutQuantity: 50,
+        defectQuantity: 5,
+        precisionCuttingQuantity: 100,
+        transferQuantity: 120,
+      }),
+    ).toBe(25)
+    expect(
+      calculateInventoryQuantity({
+        autoCutQuantity: Number.NaN,
+        defectQuantity: 2,
+        precisionCuttingQuantity: 10,
+        transferQuantity: 12,
+      }),
+    ).toBe(-4)
   })
 })

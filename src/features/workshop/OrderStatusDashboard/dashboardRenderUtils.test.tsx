@@ -3,7 +3,11 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { OrderStatusDashboardItem } from '@/services/apiOrderStatusDashboard'
-import { renderJobOutputCell } from './dashboardRenderUtils'
+import {
+  getInventoryBreakdownText,
+  renderInventoryQuantityCell,
+  renderJobOutputCell,
+} from './dashboardRenderUtils'
 
 afterEach(cleanup)
 
@@ -62,5 +66,34 @@ describe('renderJobOutputCell', () => {
     const link = screen.getByRole('button', { name: '42' })
     await userEvent.click(link)
     expect(onOpen).toHaveBeenCalledWith(record, '焊接')
+  })
+})
+
+describe('renderInventoryQuantityCell', () => {
+  const makeInventoryRecord = (inventoryQuantity: number) =>
+    ({
+      autoCutQuantity: 50,
+      inventoryQuantity,
+      precisionCuttingQuantity: 100,
+      totalDefectQuantity: 5,
+      transferQuantity: 120,
+    }) as unknown as OrderStatusDashboardItem
+
+  it('builds the breakdown text', () => {
+    expect(getInventoryBreakdownText(makeInventoryRecord(25))).toBe(
+      '精切 100 + 自动切 50 - 报废 5 - 转移 120',
+    )
+  })
+
+  it('renders negative inventory in danger style', () => {
+    render(<>{renderInventoryQuantityCell(makeInventoryRecord(-4))}</>)
+    expect(screen.getByText('-4').closest('.ant-typography-danger')).not.toBe(
+      null,
+    )
+  })
+
+  it('renders "-" for zero inventory', () => {
+    render(<>{renderInventoryQuantityCell(makeInventoryRecord(0))}</>)
+    expect(screen.getByText('-')).toBeTruthy()
   })
 })

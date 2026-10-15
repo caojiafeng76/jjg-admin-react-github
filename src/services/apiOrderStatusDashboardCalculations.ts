@@ -10,6 +10,8 @@ import type {
 
 const UNMATCHED_JOB_NAME = '未匹配岗位'
 export const PACKAGING_JOB_NAME = '包装'
+// 看板「自动切」岗位列：process_standards 中岗位名为 切割 / 自动切 的末道工序产量
+export const AUTO_CUT_JOB_NAMES = ['切割', '自动切'] as const
 
 export function normalizeText(value: string | null | undefined) {
   return value?.trim() || null
@@ -190,6 +192,42 @@ export function buildProductionDetail(
 export function roundTo(value: number, precision = 2) {
   const factor = 10 ** precision
   return Math.round(value * factor) / factor
+}
+
+export function getAutoCutQuantity(jobOutputs: Record<string, number>) {
+  return roundTo(
+    AUTO_CUT_JOB_NAMES.reduce(
+      (total, jobName) => total + toFiniteNumber(jobOutputs[jobName]),
+      0,
+    ),
+    3,
+  )
+}
+
+/** 库存 = 精切转入 + 自动切合格 - 各工序报废 - 转移出去（允许为负，如实暴露数据异常） */
+export function calculateInventoryQuantity({
+  autoCutQuantity,
+  defectQuantity,
+  precisionCuttingQuantity,
+  transferQuantity,
+}: {
+  autoCutQuantity: number
+  defectQuantity: number
+  precisionCuttingQuantity: number
+  transferQuantity: number
+}) {
+  return roundTo(
+    toFiniteNumber(precisionCuttingQuantity) +
+      toFiniteNumber(autoCutQuantity) -
+      toFiniteNumber(defectQuantity) -
+      toFiniteNumber(transferQuantity),
+    3,
+  )
+}
+
+function toFiniteNumber(value: unknown) {
+  const numberValue = Number(value || 0)
+  return Number.isFinite(numberValue) ? numberValue : 0
 }
 
 export function getPackagingSurfaceTreatment(

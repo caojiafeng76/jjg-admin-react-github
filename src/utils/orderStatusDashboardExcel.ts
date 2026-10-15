@@ -56,6 +56,7 @@ function toExportRows(
 
     exportRow.物料转移数量 = Number(row.transferQuantity || 0)
     exportRow.接收车间 = formatCellText(row.transferWorkshops)
+    exportRow.库存 = Number(row.inventoryQuantity || 0)
     exportRow.返工待生产 = row.reworkRepairInfo.pendingProductionCount
     exportRow.返工待技术 = row.reworkRepairInfo.pendingTechnicalCount
     exportRow.返工待品质 = row.reworkRepairInfo.pendingQualityCount

@@ -251,6 +251,10 @@ export interface OrderStatusDashboardItem extends WorkshopOrder {
   totalDefectQuantity: number
   precisionCuttingQuantity: number
   precisionCuttingDetails: OrderStatusPrecisionCuttingTransferDetail[]
+  /** 自动切合格数（看板「自动切」岗位列，末道工序） */
+  autoCutQuantity: number
+  /** 库存 = 精切转入 + 自动切合格 - 各工序报废 - 转移出去 */
+  inventoryQuantity: number
   extrusionQuantity: number
   extrusionDetails: OrderStatusExtrusionDetail[]
   transferQuantity: number

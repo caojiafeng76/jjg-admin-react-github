@@ -1,5 +1,5 @@
 import type { TableProps } from 'antd'
-import { Button, Space, Tag, Typography } from 'antd'
+import { Button, Space, Tag, Tooltip, Typography } from 'antd'
 
 import type {
   OrderStatusDashboardItem,
@@ -128,6 +128,32 @@ export function renderTransferWorkshops(value: string[]) {
         <Tag key={workshop}>{workshop}</Tag>
       ))}
     </Space>
+  )
+}
+
+export function getInventoryBreakdownText(record: OrderStatusDashboardItem) {
+  return [
+    `精切 ${renderDetailQuantity(record.precisionCuttingQuantity)}`,
+    `+ 自动切 ${renderDetailQuantity(record.autoCutQuantity)}`,
+    `- 报废 ${renderDetailQuantity(record.totalDefectQuantity)}`,
+    `- 转移 ${renderDetailQuantity(record.transferQuantity)}`,
+  ].join(' ')
+}
+
+/** 库存：0 显示 -，负数标红（数据异常提示），悬停显示计算明细 */
+export function renderInventoryQuantityCell(record: OrderStatusDashboardItem) {
+  const quantity = Number(record.inventoryQuantity || 0)
+
+  return (
+    <Tooltip title={getInventoryBreakdownText(record)}>
+      {quantity === 0 ? (
+        <Text type="secondary">-</Text>
+      ) : (
+        <Text strong type={quantity < 0 ? 'danger' : undefined}>
+          {quantity.toLocaleString()}
+        </Text>
+      )}
+    </Tooltip>
   )
 }
 

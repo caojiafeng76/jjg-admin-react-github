@@ -2,6 +2,15 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
+## 2026-10-15
+
+- **类别**：功能 / 车间
+- **范围**：`src/services/apiOrderStatusDashboard{,Calculations,Types}.ts`（含 vitest）、`src/features/workshop/OrderStatusDashboard/`（`dashboardColumns.tsx`、`dashboardRenderUtils.tsx`（含 test）、`index.tsx`、`useOrderStatusDashboard.ts`）、`src/utils/orderStatusDashboardExcel.ts`
+- **摘要**：订单现状页（`/production-scheduling`，`OrderStatusDashboard`）新增「库存」列，按项目号计算：库存 = 精切转入（`precisionCuttingQuantity`）+ 自动切合格（看板「切割 / 自动切」岗位末道工序产量）− 各工序报废（`totalDefectQuantity`）− 物料转移数量（`transferQuantity`）。所有输入都来自看板已有的 RPC 数据，不新增查询，也没有数据库迁移。列序调整为 返工返修 → 成品率 → 完工率 → 物料转移数量 → 接收车间 → 库存（固定右侧）→ 生产状态（固定右侧）。负数库存标红，悬停显示四项明细。Excel 导出在「接收车间」后面新增「库存」列。动态更新：看板每 30 秒自动刷新，切回窗口时也会刷新；后台刷新不显示遮罩，只有查询、翻页和手动刷新时才显示 loading。
+- **撤销**：提交 4ee4614 误把库存列加到了订单排产页（`/order-scheduling`，`ProductionScheduling`），本次通过 `git revert --no-commit 4ee4614` 将其完整撤销（包括该提交写入的 CHANGELOG 条目）。
+- **数据提示**：抽查生产库，非关闭订单中约 996 / 5495 个项目号的库存为负数。这些订单有转移记录，但没有精切转入或自动切报工数据。
+- **验证**：`bun run typecheck` 通过；相关 vitest 全部通过（apiOrderStatusDashboard、OrderStatusDashboard 共 4 个文件 / 26 项；撤销后的订单排产相关测试也已通过）；改动文件 eslint 0 问题，没有引入新的 Prettier 问题。未在浏览器中验证页面效果（需要登录）。
+
 ## 2026-10-14
 
 - **类别**：修复 / CI

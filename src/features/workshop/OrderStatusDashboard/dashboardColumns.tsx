@@ -16,6 +16,7 @@ import {
 } from './dashboardUtils'
 import {
   renderExtrusionQuantityCell,
+  renderInventoryQuantityCell,
   renderJobOutputCell,
   renderPercent,
   renderPrecisionCuttingQuantityCell,
@@ -295,39 +296,6 @@ export function createOrderStatusDashboardColumns({
 
   const statusColumns: TableColumnsType<OrderStatusDashboardItem> = [
     {
-      title: '物料转移数量',
-      dataIndex: 'transferQuantity',
-      key: 'transferQuantity',
-      width: 94,
-      align: 'right',
-      filters: extractNumberFilters(rows, (r) =>
-        Number(r.transferQuantity || 0),
-      ),
-      onFilter: (value, record) =>
-        Number(record.transferQuantity || 0) === (value as number),
-      filterSearch: true,
-      render: (_value, record) =>
-        renderTransferQuantityCell({
-          onOpen: openTransferDetail,
-          record,
-        }),
-    },
-    {
-      title: '接收车间',
-      dataIndex: 'transferWorkshops',
-      key: 'transferWorkshops',
-      width: 118,
-      filters: extractTextFilters(rows, (r) =>
-        r.transferWorkshops?.length ? r.transferWorkshops.join('、') : null,
-      ),
-      onFilter: (value, record) =>
-        (record.transferWorkshops?.length
-          ? record.transferWorkshops.join('、')
-          : '') === (value as string),
-      filterSearch: true,
-      render: renderTransferWorkshops,
-    },
-    {
       title: '返工返修',
       key: 'reworkRepairStatus',
       width: 260,
@@ -374,6 +342,54 @@ export function createOrderStatusDashboardColumns({
       onFilter: (value, record) => record.completionRate === (value as number),
       filterSearch: true,
       render: renderPercent,
+    },
+    {
+      title: '物料转移数量',
+      dataIndex: 'transferQuantity',
+      key: 'transferQuantity',
+      width: 94,
+      align: 'right',
+      filters: extractNumberFilters(rows, (r) =>
+        Number(r.transferQuantity || 0),
+      ),
+      onFilter: (value, record) =>
+        Number(record.transferQuantity || 0) === (value as number),
+      filterSearch: true,
+      render: (_value, record) =>
+        renderTransferQuantityCell({
+          onOpen: openTransferDetail,
+          record,
+        }),
+    },
+    {
+      title: '接收车间',
+      dataIndex: 'transferWorkshops',
+      key: 'transferWorkshops',
+      width: 118,
+      filters: extractTextFilters(rows, (r) =>
+        r.transferWorkshops?.length ? r.transferWorkshops.join('、') : null,
+      ),
+      onFilter: (value, record) =>
+        (record.transferWorkshops?.length
+          ? record.transferWorkshops.join('、')
+          : '') === (value as string),
+      filterSearch: true,
+      render: renderTransferWorkshops,
+    },
+    {
+      title: '库存',
+      dataIndex: 'inventoryQuantity',
+      key: 'inventoryQuantity',
+      width: 80,
+      align: 'right',
+      fixed: 'right',
+      filters: extractNumberFilters(rows, (r) =>
+        Number(r.inventoryQuantity || 0),
+      ),
+      onFilter: (value, record) =>
+        Number(record.inventoryQuantity || 0) === (value as number),
+      filterSearch: true,
+      render: (_value, record) => renderInventoryQuantityCell(record),
     },
     {
       title: '生产状态',

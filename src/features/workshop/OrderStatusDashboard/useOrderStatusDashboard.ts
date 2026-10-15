@@ -12,6 +12,8 @@ import {
 export const ORDER_STATUS_DASHBOARD_KEY = 'order-status-dashboard' as const
 export const PROCESS_STANDARDS_KEY = 'process-standards' as const
 export const PROCESS_STANDARD_JOB_ROWS_KEY = 'job-rows' as const
+// 库存/转移/报工数据来自扫码、精切、转移等其他页面和设备，看板定时轮询保持动态更新
+export const ORDER_STATUS_DASHBOARD_REFETCH_INTERVAL = 1000 * 30
 export { REWORK_REPAIR_STATUS_COLORS, REWORK_REPAIR_STATUS_LABELS }
 
 /**
@@ -50,5 +52,7 @@ export function useOrderStatusDashboard({
     enabled: processRows !== undefined,
     placeholderData: keepPreviousData,
     ...queryConfig.list,
+    refetchInterval: ORDER_STATUS_DASHBOARD_REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
   })
 }

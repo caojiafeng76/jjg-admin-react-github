@@ -6,6 +6,8 @@ import {
   buildProcessJobIndex,
   buildProductionDetail,
   buildReworkRepairInfo,
+  calculateInventoryQuantity,
+  getAutoCutQuantity,
   groupPackagingRowsByProjectNo,
   isLastProcessProductionRow,
   normalizeStringArray,
@@ -283,6 +285,11 @@ export async function getOrderStatusDashboard({
       return rightDate.localeCompare(leftDate)
     })
 
+    const precisionCuttingQuantity = Number(order.precisionCuttingQuantity || 0)
+    const totalDefectQuantity = Number(order.totalDefectQuantity || 0)
+    const transferQuantity = Number(order.transferQuantity || 0)
+    const autoCutQuantity = getAutoCutQuantity(jobOutputs)
+
     return {
       ...order,
       id: order.id || projectNo || crypto.randomUUID(),
@@ -290,12 +297,19 @@ export async function getOrderStatusDashboard({
       productionDetails,
       totalIncomingQuantity: Number(order.totalIncomingQuantity || 0),
       totalQualifiedQuantity: Number(order.totalQualifiedQuantity || 0),
-      totalDefectQuantity: Number(order.totalDefectQuantity || 0),
-      precisionCuttingQuantity: Number(order.precisionCuttingQuantity || 0),
+      totalDefectQuantity,
+      precisionCuttingQuantity,
       precisionCuttingDetails: order.precisionCuttingDetails ?? [],
+      autoCutQuantity,
+      inventoryQuantity: calculateInventoryQuantity({
+        autoCutQuantity,
+        defectQuantity: totalDefectQuantity,
+        precisionCuttingQuantity,
+        transferQuantity,
+      }),
       extrusionQuantity: Number(order.extrusionQuantity || 0),
       extrusionDetails: order.extrusionDetails ?? [],
-      transferQuantity: Number(order.transferQuantity || 0),
+      transferQuantity,
       warehouseTransferQuantity: Number(order.warehouseTransferQuantity || 0),
       transferRecordCount: Number(order.transferRecordCount || 0),
       transferWorkshops: order.transferWorkshops ?? [],
