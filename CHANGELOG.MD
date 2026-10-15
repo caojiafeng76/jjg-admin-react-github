@@ -2,14 +2,6 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
-## 2026-10-15
-
-- **类别**：功能 / 车间
-- **范围**：`src/services/apiProductionScheduling.ts`、`apiProductionSchedulingTypes.ts`、`apiProductionSchedulingCalculations.ts`（含 vitest）、`src/features/workshop/ProductionScheduling/`（`index.tsx`、`productionSchedulingColumns.tsx`、`useProductionScheduling.ts`）、`src/utils/productionSchedulingPlanExcel.ts`（含 vitest）
-- **摘要**：订单现状页（`production-scheduling`）新增「库存」列。按项目号计算：库存 = 精切转入数（`precision_cutting_transfers.transfer_quantity`）+ 自动切合格数 − 各工序报废数 − 转移出去数（`material_transfers`）。自动切合格数沿用订单看板「自动切」岗位列的口径：生产报表行通过 `process_standards` 匹配到「切割 / 自动切」岗位，且只取末道工序，避免 45° 多刀、第 1 / 2 刀被重复计数。报废数为生产报表所有工序的 不良1 + 不良2 + 外协不良 + 调机不良，转移数和报废数都排除 `data_category = 'B'`。库存列放在「最近转移时间」后面并固定在右侧、紧挨「操作」列（「备注」挪到转移数据之前）。负数库存标红，悬停显示四项明细。Excel 导出的明细表也新增了「库存」列。动态更新：订单列表每 30 秒自动刷新，切回窗口时也会刷新；后台刷新不显示遮罩，只有首屏、筛选、翻页和手动刷新时才显示 loading。本次没有数据库迁移。
-- **数据提示**：抽查生产库，非关闭订单中约 996 / 5495 个项目号的库存为负数。这些订单有转移记录，但没有精切转入或自动切报工数据。
-- **验证**：`bun run typecheck` 通过；相关 vitest（排产计算、Excel 导出、ProductionScheduling、OrderStatusDashboard，共 6 个文件 / 26 项）全部通过；改动文件 eslint 0 问题；用 `bun run db:query` 抽查样本项目号，SQL 近似口径结果符合预期。未在浏览器中验证页面效果。`productionSchedulingPlanExcel.ts` 中有几处既有的 Prettier 格式问题，不在本次改动行内，未处理。
-
 ## 2026-10-14
 
 - **类别**：修复 / CI

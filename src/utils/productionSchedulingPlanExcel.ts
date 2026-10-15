@@ -232,7 +232,6 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
     '转移进度',
     '最近转移车间',
     '最近转移时间',
-    '库存',
     '备注',
   ]
   const data: WorksheetData = [
@@ -262,7 +261,6 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
       `${Number(order.transfer_rate || 0).toFixed(1)}%`,
       order.transfer_latest_workshop || '',
       formatDate(order.transfer_latest_date),
-      normalizeNumber(order.inventory_quantity),
       order.scheduling_remark || '',
     ]),
     [
@@ -275,10 +273,7 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
   applyCommonStyles(
     worksheet,
     data,
-    [
-      12, 16, 14, 14, 14, 14, 14, 10, 10, 12, 20, 16, 16, 16, 22, 18, 20, 12,
-      12, 16, 18, 12, 28,
-    ],
+    [12, 16, 14, 14, 14, 14, 14, 10, 10, 12, 20, 16, 16, 16, 22, 18, 20, 12, 12, 16, 18, 28],
     headers.length - 1,
   )
   worksheet['!merges'] = [

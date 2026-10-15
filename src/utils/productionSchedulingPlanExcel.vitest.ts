@@ -11,7 +11,6 @@ function createOrder(
     id,
     customer: `客户${id}`,
     customer_model: null,
-    inventory_quantity: Number(id),
     material_code: materialCode,
     material_name: '踏板',
     order_quantity: 1,
@@ -55,17 +54,5 @@ describe('createProductionScheduledPlanWorkbook', () => {
     expect(workbook.Sheets['02.'].G4?.v).toBe('02.BP-800')
     expect(workbook.Sheets['03.'].G3?.v).toBe('03.CNC-1000')
     expect(workbook.Sheets['其他'].G3?.v).toBe('AB-OTHER')
-  })
-
-  it('exports inventory column right after latest transfer time', () => {
-    const workbook = createProductionScheduledPlanWorkbook([
-      createOrder('007', '01.EB-800'),
-    ])
-    const sheet = workbook.Sheets['01.']
-
-    expect(sheet.U2?.v).toBe('最近转移时间')
-    expect(sheet.V2?.v).toBe('库存')
-    expect(sheet.V3?.v).toBe(7)
-    expect(sheet.W2?.v).toBe('备注')
   })
 })

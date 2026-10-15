@@ -5,7 +5,6 @@ import type {
   WorkshopOrderProcessSchedule,
 } from '@/features/workshop/OrderList'
 import {
-  calculateInventoryQuantity,
   getOrderScheduledQuantity,
   parseSchedulingProcesses,
   percent,
@@ -82,35 +81,5 @@ describe('订单排产计算函数', () => {
   it('百分比保留一位小数，总数为 0 时返回 0', () => {
     expect(percent(1, 3)).toBe(33.3)
     expect(percent(5, 0)).toBe(0)
-  })
-
-  it('库存 = 精切转入 + 自动切合格 - 各工序报废 - 转移出去', () => {
-    expect(
-      calculateInventoryQuantity({
-        precisionCuttingQuantity: 100,
-        autoCutQuantity: 50,
-        defectQuantity: 5,
-        transferQuantity: 120,
-      }),
-    ).toBe(25)
-  })
-
-  it('库存缺失数据按 0 计算，转移超出时保留负数', () => {
-    expect(
-      calculateInventoryQuantity({
-        precisionCuttingQuantity: Number.NaN,
-        autoCutQuantity: 10,
-        defectQuantity: 0,
-        transferQuantity: 0,
-      }),
-    ).toBe(10)
-    expect(
-      calculateInventoryQuantity({
-        precisionCuttingQuantity: 10,
-        autoCutQuantity: 0,
-        defectQuantity: 2,
-        transferQuantity: 12,
-      }),
-    ).toBe(-4)
   })
 })

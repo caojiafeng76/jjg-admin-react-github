@@ -6,7 +6,6 @@ import type {
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import {
   PRODUCTION_SCHEDULING_PROCESS_OPTIONS,
-  type InventoryQuantityInput,
   type ProcessStandardCapacityRow,
   type ProductionSchedulingOrder,
   type ProductionSchedulingProcessRow,
@@ -60,21 +59,6 @@ export function percent(part: number, total: number) {
   }
 
   return Math.round((part / total) * 1000) / 10
-}
-
-/** 库存 = 精切转入 + 自动切合格 - 各工序报废 - 转移出去（允许为负，如实暴露数据异常） */
-export function calculateInventoryQuantity({
-  autoCutQuantity,
-  defectQuantity,
-  precisionCuttingQuantity,
-  transferQuantity,
-}: InventoryQuantityInput) {
-  return roundQuantity(
-    toQuantity(precisionCuttingQuantity) +
-      toQuantity(autoCutQuantity) -
-      toQuantity(defectQuantity) -
-      toQuantity(transferQuantity),
-  )
 }
 
 function createScheduleId() {
