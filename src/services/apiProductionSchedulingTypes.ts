@@ -56,6 +56,18 @@ export interface ProductionSchedulingOrder extends WorkshopOrder {
   remaining_schedule_quantity: number
   remaining_schedule_rate: number
   processed_rate: number
+  /** 库存 = 精切转入 + 自动切合格 - 各工序报废 - 转移出去 */
+  inventory_quantity: number
+  inventory_precision_cutting_quantity: number
+  inventory_auto_cut_quantity: number
+  inventory_defect_quantity: number
+}
+
+export interface InventoryQuantityInput {
+  autoCutQuantity: number
+  defectQuantity: number
+  precisionCuttingQuantity: number
+  transferQuantity: number
 }
 
 export interface ProductionSchedulingProcessRow {

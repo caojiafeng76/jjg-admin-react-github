@@ -6,7 +6,19 @@ import {
   PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER,
   isProductionSchedulingMaterialCode,
 } from './productionSchedulingMaterialFilter'
+import { getAllProcessStandardJobRows } from './apiOrderStatusDashboard'
 import {
+  buildProcessJobIndex,
+  getDefectQuantity,
+  isLastProcessProductionRow,
+  resolveProductionJobName,
+} from './apiOrderStatusDashboardCalculations'
+import type {
+  ProcessStandardJobRow,
+  ProductionOrderItemRow,
+} from './apiOrderStatusDashboardTypes'
+import {
+  calculateInventoryQuantity,
   getMatchedDailyStandardCapacity,
   getOrderScheduledQuantity,
   getOrderScheduleRows,
@@ -94,6 +106,27 @@ interface TransferSummary {
   totalQuantity: number
 }
 
+type InventoryProductionRow = Pick<
+  ProductionOrderItemRow,
+  | 'project_no'
+  | 'product_model'
+  | 'length_mm'
+  | 'operation'
+  | 'qualified_quantity'
+  | 'defect_quantity_1'
+  | 'defect_quantity_2'
+  | 'outsource_defect_quantity'
+  | 'setup_defect_quantity'
+>
+
+interface InventorySummary {
+  autoCutQuantity: number
+  defectQuantity: number
+}
+
+// 与订单看板「自动切」岗位列同口径（看板把 切割 / 自动切 归为同一列）
+const AUTO_CUT_JOB_NAMES = new Set(['自动切', '切割'])
+
 function chunkValues(values: string[]) {
   const chunks: string[][] = []
   for (let index = 0; index < values.length; index += PROJECT_NO_CHUNK_SIZE) {
@@ -169,6 +202,136 @@ async function fetchTransferSummaries(
         totalQuantity: toQuantity(row.total_transfer_quantity),
       })
     }
+  }
+
+  return summaries
+}
+
+async function fetchPrecisionCuttingQuantities(
+  projectNos: string[],
+  signal?: AbortSignal,
+) {
+  const quantities = new Map<string, number>()
+
+  for (const projectNoChunk of chunkValues(projectNos)) {
+    let from = 0
+
+    while (true) {
+      let query = supabase
+        .from('precision_cutting_transfers')
+        .select('project_no, transfer_quantity')
+        .in('project_no', projectNoChunk)
+        .order('id', { ascending: true })
+        .range(from, from + METRIC_PAGE_SIZE - 1)
+
+      if (signal) {
+        query = query.abortSignal(signal)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取精切转入数量失败')
+      }
+
+      const rows = data || []
+
+      for (const row of rows) {
+        const projectNo = row.project_no?.trim()
+        if (!projectNo) continue
+        quantities.set(
+          projectNo,
+          (quantities.get(projectNo) || 0) + toQuantity(row.transfer_quantity),
+        )
+      }
+
+      if (rows.length < METRIC_PAGE_SIZE) break
+      from += METRIC_PAGE_SIZE
+    }
+  }
+
+  return quantities
+}
+
+async function fetchInventoryProductionRows(
+  projectNos: string[],
+  signal?: AbortSignal,
+) {
+  const rows: InventoryProductionRow[] = []
+
+  for (const projectNoChunk of chunkValues(projectNos)) {
+    let from = 0
+
+    while (true) {
+      let query = supabase
+        .from('production_order_items')
+        .select(
+          'project_no, product_model, length_mm, operation, qualified_quantity, defect_quantity_1, defect_quantity_2, outsource_defect_quantity, setup_defect_quantity',
+        )
+        .in('project_no', projectNoChunk)
+        .neq('data_category', 'B')
+        .order('id', { ascending: true })
+        .range(from, from + METRIC_PAGE_SIZE - 1)
+
+      if (signal) {
+        query = query.abortSignal(signal)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        throw handleApiError(error, '获取生产报表库存数据失败')
+      }
+
+      const pageRows = (data || []) as InventoryProductionRow[]
+      rows.push(...pageRows)
+
+      if (pageRows.length < METRIC_PAGE_SIZE) break
+      from += METRIC_PAGE_SIZE
+    }
+  }
+
+  return rows
+}
+
+function summarizeInventoryRows({
+  orders,
+  processRows,
+  rows,
+}: {
+  orders: WorkshopOrder[]
+  processRows: ProcessStandardJobRow[]
+  rows: InventoryProductionRow[]
+}) {
+  const processJobIndex = buildProcessJobIndex(processRows)
+  const orderByProjectNo = new Map(
+    orders.map((order) => [order.project_no?.trim() || '', order]),
+  )
+  const summaries = new Map<string, InventorySummary>()
+
+  for (const inventoryRow of rows) {
+    const projectNo = inventoryRow.project_no?.trim()
+    if (!projectNo) continue
+
+    const row = inventoryRow as ProductionOrderItemRow
+    const order = orderByProjectNo.get(projectNo) ?? null
+    const summary = summaries.get(projectNo) ?? {
+      autoCutQuantity: 0,
+      defectQuantity: 0,
+    }
+
+    summary.defectQuantity += getDefectQuantity(row)
+
+    if (
+      AUTO_CUT_JOB_NAMES.has(
+        resolveProductionJobName({ order, processJobIndex, row }),
+      ) &&
+      isLastProcessProductionRow({ order, processJobIndex, row })
+    ) {
+      summary.autoCutQuantity += toQuantity(row.qualified_quantity)
+    }
+
+    summaries.set(projectNo, summary)
   }
 
   return summaries
@@ -326,11 +489,14 @@ export async function getProductionSchedulingOrders({
   filters,
   page,
   pageSize,
+  processRows,
   signal,
 }: {
   filters?: ProductionSchedulingFilters
   page: number
   pageSize: number
+  /** 外部（React Query 缓存）已提供岗位行时跳过 process_standards 全表查询 */
+  processRows?: ProcessStandardJobRow[]
   signal?: AbortSignal
 }): Promise<ProductionSchedulingOrdersResult> {
   const currentPage = Math.max(page, 1)
@@ -363,12 +529,26 @@ export async function getProductionSchedulingOrders({
         .filter((projectNo): projectNo is string => Boolean(projectNo)),
     ),
   )
-  const [productionQuantities, transferSummaries, standardCapacityRows] =
-    await Promise.all([
-      fetchProductionQuantities(projectNos, signal),
-      fetchTransferSummaries(projectNos, signal),
-      fetchProcessStandardCapacityRows(rows, signal),
-    ])
+  const [
+    productionQuantities,
+    transferSummaries,
+    standardCapacityRows,
+    precisionCuttingQuantities,
+    inventoryProductionRows,
+    resolvedProcessRows,
+  ] = await Promise.all([
+    fetchProductionQuantities(projectNos, signal),
+    fetchTransferSummaries(projectNos, signal),
+    fetchProcessStandardCapacityRows(rows, signal),
+    fetchPrecisionCuttingQuantities(projectNos, signal),
+    fetchInventoryProductionRows(projectNos, signal),
+    processRows ?? getAllProcessStandardJobRows(signal),
+  ])
+  const inventorySummaries = summarizeInventoryRows({
+    orders: rows,
+    processRows: resolvedProcessRows,
+    rows: inventoryProductionRows,
+  })
 
   const orders = rows
     .map((order) => {
@@ -391,6 +571,16 @@ export async function getProductionSchedulingOrders({
       const transferQuantity = roundQuantity(
         transferSummary?.totalQuantity || 0,
       )
+      const inventorySummary = inventorySummaries.get(projectNo)
+      const precisionCuttingQuantity = roundQuantity(
+        precisionCuttingQuantities.get(projectNo) || 0,
+      )
+      const autoCutQuantity = roundQuantity(
+        inventorySummary?.autoCutQuantity || 0,
+      )
+      const defectQuantity = roundQuantity(
+        inventorySummary?.defectQuantity || 0,
+      )
 
       return {
         ...order,
@@ -412,6 +602,15 @@ export async function getProductionSchedulingOrders({
         ),
         processed_rate: percent(processedQuantity, orderQuantity),
         transfer_rate: percent(transferQuantity, orderQuantity),
+        inventory_quantity: calculateInventoryQuantity({
+          autoCutQuantity,
+          defectQuantity,
+          precisionCuttingQuantity,
+          transferQuantity,
+        }),
+        inventory_precision_cutting_quantity: precisionCuttingQuantity,
+        inventory_auto_cut_quantity: autoCutQuantity,
+        inventory_defect_quantity: defectQuantity,
       } satisfies ProductionSchedulingOrder
     })
     .filter((order) => {

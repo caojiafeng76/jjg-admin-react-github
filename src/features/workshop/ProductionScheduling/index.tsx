@@ -80,17 +80,24 @@ export default function ProductionScheduling() {
 
   const {
     data: schedulingResult,
-    isFetching,
+    isPending,
+    isPlaceholderData,
     refetch,
   } = useProductionSchedulingOrders({ filters, page, pageSize })
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false)
   const updateMutation = useUpdateProductionSchedulingOrder()
   const orders = useMemo(
     () => schedulingResult?.orders ?? [],
     [schedulingResult?.orders],
   )
   const total = schedulingResult?.total ?? 0
-  // 任何请求中（首屏/查询/筛选/翻页/刷新）立即遮罩反馈，满足操作反馈 <300ms
-  const tableLoading = isFetching
+  // 首屏/查询/筛选/翻页/手动刷新时立即遮罩反馈，满足操作反馈 <300ms；
+  // 30 秒定时轮询（库存等动态更新）静默进行，不打断用户操作
+  const tableLoading = isPending || isPlaceholderData || isManualRefreshing
+  const handleRefresh = useCallback(() => {
+    setIsManualRefreshing(true)
+    void refetch().finally(() => setIsManualRefreshing(false))
+  }, [refetch])
   const summary = useMemo(() => getSummary(orders), [orders])
   const selectedOrders = useMemo(() => {
     if (selectedRowKeys.length === 0) return orders
@@ -275,10 +282,10 @@ export default function ProductionScheduling() {
         summary={summary}
         hasSelection={selectedRowKeys.length > 0}
         selectedCount={selectedOrders.length}
-        isFetching={isFetching}
+        isFetching={tableLoading}
         onExport={handleExport}
         onPreload={preloadProductionSchedulingPlanExcel}
-        onRefresh={() => refetch()}
+        onRefresh={handleRefresh}
       />
 
       {/* 表格区 */}

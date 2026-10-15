@@ -1,6 +1,6 @@
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
 import type { TableColumnsType } from 'antd'
-import { Button } from 'antd'
+import { Button, Tooltip } from 'antd'
 
 import type { ProductionSchedulingOrder } from '@/services/apiProductionScheduling'
 import {
@@ -13,6 +13,23 @@ import {
   renderQuantity,
   renderText,
 } from './productionSchedulingUtils'
+
+function renderInventoryQuantity(record: ProductionSchedulingOrder) {
+  const inventory = Number(record.inventory_quantity || 0)
+  const detail = `精切 ${renderQuantity(record.inventory_precision_cutting_quantity)} + 自动切 ${renderQuantity(record.inventory_auto_cut_quantity)} - 报废 ${renderQuantity(record.inventory_defect_quantity)} - 转移 ${renderQuantity(record.transfer_quantity)}`
+
+  return (
+    <Tooltip title={detail}>
+      <span
+        className={
+          inventory < 0 ? 'font-medium text-(--color-error)' : 'font-medium'
+        }
+      >
+        {renderQuantity(inventory)}
+      </span>
+    </Tooltip>
+  )
+}
 
 export function makeOrderColumns({
   onEdit,
@@ -118,6 +135,14 @@ export function makeOrderColumns({
       render: (_value, record) => renderText(getProgressText(record)),
     },
     {
+      title: '备注',
+      dataIndex: 'scheduling_remark',
+      key: 'scheduling_remark',
+      width: 180,
+      ellipsis: true,
+      render: renderText,
+    },
+    {
       title: '转移数量',
       dataIndex: 'transfer_quantity',
       key: 'transfer_quantity',
@@ -148,12 +173,13 @@ export function makeOrderColumns({
       render: renderDateTime,
     },
     {
-      title: '备注',
-      dataIndex: 'scheduling_remark',
-      key: 'scheduling_remark',
-      width: 180,
-      ellipsis: true,
-      render: renderText,
+      title: '库存',
+      dataIndex: 'inventory_quantity',
+      key: 'inventory_quantity',
+      width: 100,
+      align: 'right',
+      fixed: 'right',
+      render: (_value, record) => renderInventoryQuantity(record),
     },
     {
       title: '操作',
