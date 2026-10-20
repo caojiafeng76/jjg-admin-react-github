@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import * as XLSX from 'xlsx-js-style'
 
+import { JINTAN_PARTS_STOCK_STATUS_CONFIG } from '@/features/jintan/PartsInventory/stockStatus'
 import type {
   JintanPartsInventory,
   JintanPartsInventoryImportRow,
@@ -27,10 +28,17 @@ const EXPORT_HEADERS = [
   '材质',
   '采购厂家',
   '库存数量',
+  '单台数量',
+  '安全库存',
+  '阈值',
+  '状态',
   '备注',
   '更新时间',
 ] as const
-const EXPORT_COLUMN_WIDTHS = [6, 20, 18, 14, 18, 12, 28, 20]
+const EXPORT_COLUMN_WIDTHS = [6, 20, 18, 14, 18, 12, 10, 10, 10, 10, 28, 20]
+const EXPORT_QUANTITY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('库存数量')
+const EXPORT_STATUS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('状态')
+const EXPORT_BODY_START_ROW = 2
 
 export interface ParseJintanPartsInventoryExcelResult {
   rows: JintanPartsInventoryImportRow[]
@@ -64,6 +72,10 @@ export function createJintanPartsInventoryExportWorkbook(
     item.material,
     item.supplier,
     item.quantity,
+    item.unit_quantity ?? '',
+    item.safety_stock ?? '',
+    item.threshold_stock ?? '',
+    JINTAN_PARTS_STOCK_STATUS_CONFIG[item.stock_status]?.label ?? '',
     item.remarks,
     formatDateTime(item.updated_at),
   ])
@@ -79,6 +91,7 @@ export function createJintanPartsInventoryExportWorkbook(
     columnWidths: EXPORT_COLUMN_WIDTHS,
     freezeYSplit: 2,
   })
+  applyStockStatusFills(worksheet, items)
 
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME)
@@ -162,6 +175,32 @@ export async function parseJintanPartsInventoryExcel(
   }
 
   return { rows, errors }
+}
+
+function applyStockStatusFills(
+  worksheet: XLSX.WorkSheet,
+  items: JintanPartsInventory[],
+) {
+  items.forEach((item, index) => {
+    const config = JINTAN_PARTS_STOCK_STATUS_CONFIG[item.stock_status]
+    if (!config?.excelFill) {
+      return
+    }
+
+    const row = EXPORT_BODY_START_ROW + index
+    for (const col of [
+      EXPORT_QUANTITY_COLUMN_INDEX,
+      EXPORT_STATUS_COLUMN_INDEX,
+    ]) {
+      const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })]
+      if (!cell) continue
+      cell.s = {
+        ...cell.s,
+        font: { ...cell.s?.font, color: { rgb: config.excelFont } },
+        fill: { patternType: 'solid', fgColor: { rgb: config.excelFill } },
+      }
+    }
+  })
 }
 
 function validateTemplateHeaders(

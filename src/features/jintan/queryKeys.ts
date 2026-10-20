@@ -8,6 +8,7 @@ export interface JintanPartsInventoryListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  status?: string
 }
 
 export interface JintanPartsStockInListKeyParams {
@@ -129,8 +130,11 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          status: params.status ?? '',
         },
       ] as const,
+    summary: (keyword?: string) =>
+      [PARTS_INVENTORY_ROOT, 'summary', normalizeKeyword(keyword)] as const,
   },
   partsStockIn: {
     all: [PARTS_STOCK_IN_ROOT] as const,

@@ -2,6 +2,14 @@
 
 本文件记录项目的所有重要修改。每次修改完成后，必须在本文件顶部追加一条记录，最新记录置顶；仅修改本文件以补充日志时无需重复记录。
 
+## 2026-10-20
+
+- **类别**：功能 / 金檀木业
+- **范围**：`supabase/migrations/20261020000000_add_jintan_parts_inventory_safety_stock.sql`、`supabase/migrations/20261020000100_seed_jintan_parts_safety_stock_20261020_excel.sql`、`src/services/apiJintanPartsInventory.ts`、`src/services/database.types.ts`（重新生成）、`src/features/jintan/queryKeys.ts`、`src/features/jintan/PartsInventory/`（`index.tsx`、`JintanPartsInventoryTable.tsx`（含 vitest）、`JintanPartsInventorySearch.tsx`、`JintanPartsInventoryForm.tsx`、`useJintanPartsInventory.ts`、新增 `stockStatus.ts`（含 vitest）、`inventoryOptions.vitest.ts`）、`src/utils/jintanPartsInventoryExcel.ts`（含 vitest）
+- **摘要**：配件库存按安全库存三色显示。`jintan_parts_inventory` 新增 `unit_quantity`（单台数量，空 = 未设置）和 `safety_multiple`（倍数，默认 10，至少 5），以及生成列 `safety_stock`（单台 × 倍数）、`threshold_stock`（单台 × 5）、`stock_status`（库存 ≥ 安全库存为 safe，< 阈值为 danger，介于两者之间为 warning，未设置为 unset）和 `stock_status_rank`。出入库只改 quantity，状态会自动重算。页面：库存数量显示为红/黄/绿 Tag，新增单台数量、安全库存、阈值三列；顶部状态统计可点击筛选；搜索栏加"库存状态"下拉（同步到 URL `status` 参数）；列表把不足的排在最前面；编辑弹窗可改单台数量和倍数，并实时预览。导出 Excel 增加单台数量、安全库存、阈值、状态四列，库存数量和状态单元格按状态填底色。导入模板不变。
+- **数据**：按《凉亭螺丝安全库存.xlsx》（220U凉亭 + 140U凉亭 两个工作表，只取"倍数"列有值的行）写入 40 个配件的单台数量和倍数。口径已由用户确认：表格"倍数"列 = 单台 × 10；同一配件多行或跨型号时单台数量全部相加；扳手倍数按表格合计反推（4mm 2×15，5mm 1×20）；17 项名称或规格写法不一致的按同一配件合并（如 内六角沉头螺钉 → 内六角沉头螺丝、润滑油 → 润滑脂）。新增 8 个配件资料（库存 0）：玻璃胶、外六角螺钉 M10*55、毛刷 2883、手摇杆 2.2m、转角盖板 50*50*2.5、横梁盖板、转角组件、叶片固定盖板组件。型材件（铝合金固定座、固定座封头板）、叶片固定盖板、叶片弹簧盖板跳过。推送后库内共 56 条：不足 16 / 偏低 5 / 充足 19 / 未设置 16。已知：140U橡胶密封条库存按"卷"记、安全库存按根算，会一直显示红色（用户已知悉）。
+- **验证**：`bun run db:push`（用户在交互终端确认后执行）成功，`db:push:dry-run` 显示已是最新；只读查询核对 40 行数值与表格一致；`bun run db:types` 已重新生成（CLI 同时把 `PostgrestVersion` 从 "14.5" 改为 "13.0.5"，未手动改回）；`bun run typecheck` 通过；`bun lint` 0 问题；`bun run test` 180 文件 / 811 项全部通过；`bun run build`、`bun run check:bundle`（入口 gzip 31.1 KB）通过。未在浏览器中验证页面效果（需要登录）。
+
 ## 2026-10-15
 
 - **类别**：功能 / 车间

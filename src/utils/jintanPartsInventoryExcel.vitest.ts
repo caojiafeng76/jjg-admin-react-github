@@ -50,6 +50,30 @@ describe('createJintanPartsInventoryExportWorkbook', () => {
         supplier: '南浔螺丝店',
         quantity: 120,
         remarks: '常用',
+        unit_quantity: 14,
+        safety_multiple: 10,
+        safety_stock: 140,
+        threshold_stock: 70,
+        stock_status: 'warning',
+        stock_status_rank: 1,
+        created_at: '2026-09-27T08:00:00',
+        updated_at: '2026-09-27T09:30:00',
+      },
+      {
+        id: 'inventory-2',
+        part_data_id: 'part-2',
+        part_name: '纸箱',
+        specification: '',
+        material: '',
+        supplier: '',
+        quantity: 0,
+        remarks: '',
+        unit_quantity: null,
+        safety_multiple: 10,
+        safety_stock: null,
+        threshold_stock: null,
+        stock_status: 'unset',
+        stock_status_rank: 3,
         created_at: '2026-09-27T08:00:00',
         updated_at: '2026-09-27T09:30:00',
       },
@@ -66,11 +90,24 @@ describe('createJintanPartsInventoryExportWorkbook', () => {
     expect(worksheet.D3?.v).toBe('SUS304')
     expect(worksheet.E3?.v).toBe('南浔螺丝店')
     expect(worksheet.F3?.v).toBe(120)
-    expect(worksheet.G3?.v).toBe('常用')
-    expect(worksheet.H3?.v).toBe('2026-09-27 09:30')
+    expect(worksheet.G2?.v).toBe('单台数量')
+    expect(worksheet.G3?.v).toBe(14)
+    expect(worksheet.H3?.v).toBe(140)
+    expect(worksheet.I3?.v).toBe(70)
+    expect(worksheet.J3?.v).toBe('偏低')
+    expect(worksheet.K3?.v).toBe('常用')
+    expect(worksheet.L3?.v).toBe('2026-09-27 09:30')
     expect(worksheet['!merges']).toEqual([
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } },
     ])
+
+    // 库存数量 / 状态按状态填底色，未设置保持白底
+    expect(worksheet.F3?.s?.fill?.fgColor?.rgb).toBe('FFEB9C')
+    expect(worksheet.J3?.s?.fill?.fgColor?.rgb).toBe('FFEB9C')
+    expect(worksheet.F3?.s?.border?.top?.style).toBe('thin')
+    expect(worksheet.G4?.v).toBe('')
+    expect(worksheet.J4?.v).toBe('未设置')
+    expect(worksheet.F4?.s?.fill?.fgColor?.rgb).toBe('FFFFFF')
   })
 })
 
@@ -152,10 +189,7 @@ describe('parseJintanPartsInventoryExcel', () => {
   })
 
   it('throws when the sheet has no importable data', async () => {
-    const file = createExcelFile([
-      TEMPLATE_HEADERS,
-      [null, null, null, null],
-    ])
+    const file = createExcelFile([TEMPLATE_HEADERS, [null, null, null, null]])
 
     await expect(parseJintanPartsInventoryExcel(file)).rejects.toThrow(
       'Excel 中没有可导入的数据',

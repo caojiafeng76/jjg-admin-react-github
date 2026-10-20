@@ -1,14 +1,18 @@
 import { useEffect } from 'react'
-import { Button, Form, Input, Space } from 'antd'
+import { Button, Form, Input, Select, Space } from 'antd'
 
-interface SearchValues {
+import type { JintanPartsStockStatus } from '@/services/apiJintanPartsInventory'
+import { JINTAN_PARTS_STOCK_STATUS_OPTIONS } from './stockStatus'
+
+export interface JintanPartsInventorySearchValues {
   keyword?: string
+  status?: JintanPartsStockStatus
 }
 
 interface Props {
-  onSearch: (params: { keyword?: string }) => void
+  onSearch: (params: JintanPartsInventorySearchValues) => void
   onReset: () => void
-  initialValues?: { keyword?: string }
+  initialValues?: JintanPartsInventorySearchValues
 }
 
 export default function JintanPartsInventorySearch({
@@ -16,17 +20,19 @@ export default function JintanPartsInventorySearch({
   onReset,
   initialValues,
 }: Props) {
-  const [form] = Form.useForm<SearchValues>()
+  const [form] = Form.useForm<JintanPartsInventorySearchValues>()
 
   useEffect(() => {
     form.setFieldsValue({
       keyword: initialValues?.keyword,
+      status: initialValues?.status,
     })
   }, [form, initialValues])
 
-  const handleSearch = (values: SearchValues) => {
+  const handleSearch = (values: JintanPartsInventorySearchValues) => {
     onSearch({
       keyword: values.keyword?.trim() || undefined,
+      status: values.status || undefined,
     })
   }
 
@@ -47,6 +53,14 @@ export default function JintanPartsInventorySearch({
           allowClear
           onPressEnter={() => form.submit()}
           className="rounded-lg"
+        />
+      </Form.Item>
+      <Form.Item name="status" className="mb-0" style={{ width: 160 }}>
+        <Select
+          placeholder="库存状态"
+          allowClear
+          options={JINTAN_PARTS_STOCK_STATUS_OPTIONS}
+          onChange={() => form.submit()}
         />
       </Form.Item>
       <Form.Item className="mb-0">

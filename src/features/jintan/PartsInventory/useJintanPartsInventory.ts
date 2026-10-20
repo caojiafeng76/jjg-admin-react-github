@@ -6,7 +6,9 @@ import {
   createJintanPartsInventoryBatch,
   getJintanPartsInventoryList,
   getJintanPartsInventoryOptions,
+  getJintanPartsInventoryStatusSummary,
   getPublicJintanPartsInventoryOptions,
+  type JintanPartsStockStatus,
   updateJintanPartsInventory,
 } from '@services/apiJintanPartsInventory'
 
@@ -21,6 +23,7 @@ export function useJintanPartsInventoryList({
   pageSize: number
   searchParams: {
     keyword?: string
+    status?: JintanPartsStockStatus
   }
 }) {
   return useQuery({
@@ -28,13 +31,25 @@ export function useJintanPartsInventoryList({
       page,
       pageSize,
       keyword: searchParams.keyword,
+      status: searchParams.status,
     }),
     queryFn: () =>
       getJintanPartsInventoryList({
         page,
         pageSize,
         keyword: searchParams.keyword,
+        status: searchParams.status,
       }),
+    placeholderData: keepPreviousData,
+    throwOnError: false,
+    ...queryConfig.list,
+  })
+}
+
+export function useJintanPartsInventorySummary(keyword?: string) {
+  return useQuery({
+    queryKey: jintanKeys.partsInventory.summary(keyword),
+    queryFn: () => getJintanPartsInventoryStatusSummary(keyword),
     placeholderData: keepPreviousData,
     throwOnError: false,
     ...queryConfig.list,

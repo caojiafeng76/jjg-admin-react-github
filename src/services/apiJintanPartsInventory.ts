@@ -2,6 +2,15 @@ import publicSupabase from './publicSupabase'
 import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 
+export type JintanPartsStockStatus = 'danger' | 'warning' | 'safe' | 'unset'
+
+export const JINTAN_PARTS_STOCK_STATUSES: readonly JintanPartsStockStatus[] = [
+  'danger',
+  'warning',
+  'safe',
+  'unset',
+]
+
 export interface JintanPartsInventory {
   id: string
   part_data_id: string
@@ -11,6 +20,12 @@ export interface JintanPartsInventory {
   supplier: string
   quantity: number
   remarks: string
+  unit_quantity: number | null
+  safety_multiple: number
+  safety_stock: number | null
+  threshold_stock: number | null
+  stock_status: JintanPartsStockStatus
+  stock_status_rank: number
   created_at: string
   updated_at: string
 }
@@ -18,7 +33,14 @@ export interface JintanPartsInventory {
 export interface JintanPartsInventoryFormValues {
   quantity: number
   remarks: string
+  unit_quantity: number | null
+  safety_multiple: number
 }
+
+export type JintanPartsStockStatusSummary = Record<
+  JintanPartsStockStatus,
+  number
+>
 
 export interface JintanPartsInventoryImportRow {
   part_name: string
@@ -35,6 +57,8 @@ function normalizeFormValues(
   return {
     quantity: values.quantity,
     remarks: values.remarks.trim(),
+    unit_quantity: values.unit_quantity ?? null,
+    safety_multiple: values.safety_multiple,
   }
 }
 
@@ -53,10 +77,12 @@ export async function getJintanPartsInventoryList({
   page,
   pageSize,
   keyword,
+  status,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  status?: JintanPartsStockStatus
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -69,7 +95,12 @@ export async function getJintanPartsInventoryList({
     query = query.or(keywordFilter(keyword.trim()))
   }
 
+  if (status) {
+    query = query.eq('stock_status', status)
+  }
+
   const { data, error, count } = await query
+    .order('stock_status_rank', { ascending: true })
     .order('updated_at', { ascending: false })
     .order('part_name', { ascending: true })
     .range(from, to)
@@ -107,7 +138,13 @@ export async function getJintanPartsInventoryByDataId(
   return (data as JintanPartsInventory | null) ?? null
 }
 
-export async function getJintanPartsInventoryForExport(keyword?: string) {
+export async function getJintanPartsInventoryForExport({
+  keyword,
+  status,
+}: {
+  keyword?: string
+  status?: JintanPartsStockStatus
+} = {}) {
   const rows: JintanPartsInventory[] = []
   let from = 0
 
@@ -118,7 +155,12 @@ export async function getJintanPartsInventoryForExport(keyword?: string) {
       query = query.or(keywordFilter(keyword.trim()))
     }
 
+    if (status) {
+      query = query.eq('stock_status', status)
+    }
+
     const { data, error } = await query
+      .order('stock_status_rank', { ascending: true })
       .order('updated_at', { ascending: false })
       .order('part_name', { ascending: true })
       .range(from, from + JINTAN_PARTS_INVENTORY_EXPORT_PAGE_SIZE - 1)
@@ -138,6 +180,32 @@ export async function getJintanPartsInventoryForExport(keyword?: string) {
   }
 
   return rows
+}
+
+export async function getJintanPartsInventoryStatusSummary(
+  keyword?: string,
+): Promise<JintanPartsStockStatusSummary> {
+  const results = await Promise.all(
+    JINTAN_PARTS_STOCK_STATUSES.map(async (status) => {
+      let query = supabase
+        .from('jintan_parts_inventory')
+        .select('id', { count: 'exact', head: true })
+        .eq('stock_status', status)
+
+      if (keyword) {
+        query = query.or(keywordFilter(keyword.trim()))
+      }
+
+      const { count, error } = await query
+      if (error) {
+        throw handleApiError(error, '获取配件库存状态统计失败')
+      }
+
+      return [status, count || 0] as const
+    }),
+  )
+
+  return Object.fromEntries(results) as JintanPartsStockStatusSummary
 }
 
 export async function updateJintanPartsInventory({

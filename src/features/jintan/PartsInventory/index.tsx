@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
+import { App, FormInstance, Modal, Tag, Tooltip } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { usePermission } from '@/hooks/usePermission'
@@ -10,6 +10,8 @@ import {
   type JintanPartsInventory,
   type JintanPartsInventoryFormValues,
   type JintanPartsInventoryImportRow,
+  JINTAN_PARTS_STOCK_STATUSES,
+  type JintanPartsStockStatus,
 } from '@/services/apiJintanPartsInventory'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
@@ -19,11 +21,18 @@ import { TableState } from '@/ui/TableState'
 import { JINTAN_PARTS_INVENTORY_PERMISSION_KEY } from '../permissions'
 import JintanPartsInventoryExcelImport from './JintanPartsInventoryExcelImport'
 import JintanPartsInventoryForm from './JintanPartsInventoryForm'
-import JintanPartsInventorySearch from './JintanPartsInventorySearch'
+import JintanPartsInventorySearch, {
+  type JintanPartsInventorySearchValues,
+} from './JintanPartsInventorySearch'
 import JintanPartsInventoryTable from './JintanPartsInventoryTable'
+import {
+  isJintanPartsStockStatus,
+  JINTAN_PARTS_STOCK_STATUS_CONFIG,
+} from './stockStatus'
 import {
   useImportJintanPartsInventory,
   useJintanPartsInventoryList,
+  useJintanPartsInventorySummary,
   useUpdateJintanPartsInventory,
 } from './useJintanPartsInventory'
 
@@ -32,6 +41,13 @@ const loadJintanPartsInventoryExcel = () =>
 
 function preloadJintanPartsInventoryExcel() {
   void loadJintanPartsInventoryExcel()
+}
+
+const STATUS_DOT_CLASS: Record<JintanPartsStockStatus, string> = {
+  danger: 'bg-red-500',
+  warning: 'bg-amber-400',
+  safe: 'bg-green-500',
+  unset: 'bg-slate-300 dark:bg-slate-500',
 }
 
 export default function JintanPartsInventoryPage() {
@@ -53,15 +69,21 @@ export default function JintanPartsInventoryPage() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [searchParams, setSearchParams] = useState<{ keyword?: string }>({
-    keyword: searchParamsURL.get('keyword') || undefined,
-  })
+  const statusParam = searchParamsURL.get('status')
+  const [searchParams, setSearchParams] =
+    useState<JintanPartsInventorySearchValues>({
+      keyword: searchParamsURL.get('keyword') || undefined,
+      status: isJintanPartsStockStatus(statusParam) ? statusParam : undefined,
+    })
 
   const { data, isLoading, error, refetch } = useJintanPartsInventoryList({
     page,
     pageSize,
     searchParams,
   })
+  const { data: statusSummary } = useJintanPartsInventorySummary(
+    searchParams.keyword,
+  )
 
   const updateMutation = useUpdateJintanPartsInventory()
   const importMutation = useImportJintanPartsInventory()
@@ -110,7 +132,10 @@ export default function JintanPartsInventoryPage() {
     try {
       const [exportRows, { exportJintanPartsInventoryToExcel }] =
         await Promise.all([
-          getJintanPartsInventoryForExport(searchParams.keyword),
+          getJintanPartsInventoryForExport({
+            keyword: searchParams.keyword,
+            status: searchParams.status,
+          }),
           loadJintanPartsInventoryExcel(),
         ])
 
@@ -132,6 +157,7 @@ export default function JintanPartsInventoryPage() {
     canManageInventory,
     message,
     searchParams.keyword,
+    searchParams.status,
     viewerDenied,
     viewerOperationTip,
   ])
@@ -218,6 +244,12 @@ export default function JintanPartsInventoryPage() {
         nextSearchParamsURL.delete('keyword')
       }
 
+      if (params.status) {
+        nextSearchParamsURL.set('status', params.status)
+      } else {
+        nextSearchParamsURL.delete('status')
+      }
+
       setSearchParamsURL(nextSearchParamsURL)
     },
     [searchParamsURL, setSearchParamsURL],
@@ -230,8 +262,19 @@ export default function JintanPartsInventoryPage() {
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
     nextSearchParamsURL.delete('keyword')
+    nextSearchParamsURL.delete('status')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
+
+  const handleStatusClick = useCallback(
+    (status: JintanPartsStockStatus) => {
+      handleSearch({
+        keyword: searchParams.keyword,
+        status: searchParams.status === status ? undefined : status,
+      })
+    },
+    [handleSearch, searchParams.keyword, searchParams.status],
+  )
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
@@ -262,6 +305,37 @@ export default function JintanPartsInventoryPage() {
           isImporting={importMutation.isPending}
           permissionKey={JINTAN_PARTS_INVENTORY_PERMISSION_KEY}
         />
+        <div
+          className="ml-auto flex flex-wrap items-center gap-2"
+          aria-label="库存状态统计"
+        >
+          {JINTAN_PARTS_STOCK_STATUSES.map((status) => {
+            const config = JINTAN_PARTS_STOCK_STATUS_CONFIG[status]
+            const active = searchParams.status === status
+            return (
+              <Tooltip
+                key={status}
+                title={`${config.description}，点击${active ? '取消' : ''}筛选`}
+              >
+                <Tag.CheckableTag
+                  checked={active}
+                  onChange={() => handleStatusClick(status)}
+                  className="me-0 rounded-md border border-slate-200 px-2 py-0.5 dark:border-slate-600"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className={`h-2 w-2 rounded-full ${STATUS_DOT_CLASS[status]}`}
+                    />
+                    {config.label}
+                    <span className="font-semibold tabular-nums">
+                      {statusSummary?.[status] ?? '-'}
+                    </span>
+                  </span>
+                </Tag.CheckableTag>
+              </Tooltip>
+            )
+          })}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
