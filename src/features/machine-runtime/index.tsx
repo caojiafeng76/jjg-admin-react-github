@@ -85,7 +85,7 @@ export default function MachineRuntime() {
 
       {/* 上下布局：汇总 + 明细 */}
       <div className="flex-1 overflow-hidden">
-        <Splitter layout="vertical" className="h-full">
+        <Splitter orientation="vertical" className="h-full">
           <Splitter.Panel defaultSize="40%" min="20%">
             <Card
               size="small"

@@ -101,7 +101,8 @@ function getRemoteSearchConfig(props: CapturedSelectProps) {
   return props.showSearch
 }
 
-describe('packaging work-order remote employee selects', () => {
+// 覆盖率模式下 antd Select 远程搜索偶发超过默认 5s，单独放宽
+describe('packaging work-order remote employee selects', { timeout: 15_000 }, () => {
   beforeEach(() => {
     vi.clearAllMocks()
     selectMock.props.length = 0
@@ -139,16 +140,20 @@ describe('packaging work-order remote employee selects', () => {
       initialSearch.onSearch?.('远程关键字')
     })
 
+    // 关键字经 useDeferredValue、已选项经 Form.useWatch + effect 回写，会分多次渲染才稳定，
+    // 断言要等到最终状态，不能取刚触发查询的那一帧
     await waitFor(() => {
       expect(employeeOptionsMock.calls).toContain('远程关键字')
+      expect(latestSelect('选择人员')).toMatchObject({
+        loading: true,
+        options: [
+          { label: '李四', value: 'employee-2' },
+          { label: '张三', value: 'employee-1' },
+        ],
+      })
     })
 
     const searchedSelect = latestSelect('选择人员')
-    expect(searchedSelect.loading).toBe(true)
-    expect(searchedSelect.options).toEqual([
-      { label: '李四', value: 'employee-2' },
-      { label: '张三', value: 'employee-1' },
-    ])
     expect(
       searchedSelect.options?.filter(({ value }) => value === 'employee-1'),
     ).toHaveLength(1)
@@ -219,13 +224,13 @@ describe('packaging work-order remote employee selects', () => {
 
     await waitFor(() => {
       expect(employeeOptionsMock.calls).toContain('王')
-    })
-    expect(latestSelect('请选择人员')).toMatchObject({
-      loading: true,
-      options: [
-        { label: '王五', value: 'employee-3' },
-        { label: '张三', value: 'employee-1' },
-      ],
+      expect(latestSelect('请选择人员')).toMatchObject({
+        loading: true,
+        options: [
+          { label: '王五', value: 'employee-3' },
+          { label: '张三', value: 'employee-1' },
+        ],
+      })
     })
   })
 })

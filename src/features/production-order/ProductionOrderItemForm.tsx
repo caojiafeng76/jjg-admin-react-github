@@ -347,7 +347,7 @@ export default function ProductionOrderItemForm({
       onOk={() => form.submit()}
       width={compact ? 'calc(100vw - 20px)' : 700}
       style={compact ? { top: 12, maxWidth: 560 } : undefined}
-      destroyOnClose
+      destroyOnHidden
     >
       <div
         className={
@@ -399,13 +399,12 @@ export default function ProductionOrderItemForm({
                 rules={[{ required: true, message: '请选择项目号' }]}
               >
                 <Select
-                  showSearch
+                  showSearch={{ filterOption: filterProjectNoOption }}
                   placeholder="请选择项目号"
                   loading={loadingProjectNos}
                   getPopupContainer={getPopupContainer}
                   onChange={handleProjectNoChange}
                   options={mergedProjectNoOptions}
-                  filterOption={filterProjectNoOption}
                   optionRender={renderProjectNoOption}
                   listHeight={320}
                 />
@@ -435,21 +434,22 @@ export default function ProductionOrderItemForm({
             rules={[{ required: true, message: '请选择工序' }]}
           >
             <Select
-              showSearch
+              showSearch={{
+                filterOption: (input, option) => {
+                  if (!option)
+                    return false
+                  return (
+                    option.value
+                      ?.toString()
+                      .toLowerCase()
+                      .includes(input.toLowerCase()) ?? false
+                  )
+                },
+              }}
               placeholder="请选择工序"
               onChange={handleOperationChange}
               options={operationOptions}
               getPopupContainer={getPopupContainer}
-              filterOption={(input, option) => {
-                if (!option)
-                  return false
-                return (
-                  option.value
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase()) ?? false
-                )
-              }}
               style={{ width: '100%' }}
               disabled={!productModel}
             />
@@ -483,53 +483,50 @@ export default function ProductionOrderItemForm({
             ]}
           >
             <Select
-              showSearch
+              showSearch={{
+                filterOption: (input, option) => {
+                  if (!option)
+                    return false
+                  const search = input.toLowerCase()
+                  return (
+                    (option.unified_device_no as string)
+                      ?.toLowerCase()
+                      .includes(search)
+                      || (option.operation as string)
+                        ?.toLowerCase()
+                        .includes(search)
+                        || (option.machine_name as string)
+                          ?.toLowerCase()
+                          .includes(search)
+                  )
+                },
+              }}
               placeholder="请选择机器编号"
               getPopupContainer={getPopupContainer}
               disabled={!selectedOperation}
               optionLabelProp="label"
-              filterOption={(input, option) => {
-                if (!option)
-                  return false
-                const search = input.toLowerCase()
-                return (
-                  (option.unified_device_no as string)
-                    ?.toLowerCase()
-                    .includes(search)
-                    || (option.operation as string)
-                      ?.toLowerCase()
-                      .includes(search)
-                      || (option.machine_name as string)
-                        ?.toLowerCase()
-                        .includes(search)
-                )
-              }}
               style={{ width: '100%' }}
-            >
-              {filteredMachineOptions.map(m => (
-                <Select.Option
-                  key={m.id ?? '__none__'}
-                  value={m.id}
-                  label={m.id === null ? '无' : m.unified_device_no}
-                  unified_device_no={m.unified_device_no}
-                  operation={m.operation}
-                  machine_name={m.machine_name}
-                >
-                  {m.id === null
-                    ? (
-                        <span className="text-slate-400 dark:text-slate-500">无</span>
-                      )
-                    : (
-                        <div className="flex flex-col py-0.5">
-                          <span>{m.unified_device_no}</span>
-                          <span className="text-xs text-slate-400 dark:text-slate-500">
-                            {m.operation} {m.machine_name}
-                          </span>
-                        </div>
-                      )}
-                </Select.Option>
-              ))}
-            </Select>
+              options={filteredMachineOptions.map(m => ({
+                value: m.id,
+                label: m.id === null ? '无' : m.unified_device_no,
+                unified_device_no: m.unified_device_no,
+                operation: m.operation,
+                machine_name: m.machine_name,
+              }))}
+              optionRender={({ data }) =>
+                data.value === null
+                  ? (
+                      <span className="text-slate-400 dark:text-slate-500">无</span>
+                    )
+                  : (
+                      <div className="flex flex-col py-0.5">
+                        <span>{data.unified_device_no}</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500">
+                          {data.operation} {data.machine_name}
+                        </span>
+                      </div>
+                    )}
+            />
           </Form.Item>
 
           <Form.Item name="theoretical_seconds" hidden>

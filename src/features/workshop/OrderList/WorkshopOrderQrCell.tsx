@@ -33,7 +33,7 @@ export default function WorkshopOrderQrCell({
   const qrValue = useMemo(() => getWorkshopOrderQrValue(orderId), [orderId])
 
   if (!orderId) {
-    return <Tag bordered={false}>无</Tag>
+    return <Tag variant="filled">无</Tag>
   }
 
   return (
@@ -41,7 +41,7 @@ export default function WorkshopOrderQrCell({
       trigger="hover"
       placement="right"
       content={(
-        <Space direction="vertical" size={12} className="items-center">
+        <Space orientation="vertical" size={12} className="items-center">
           <div
             className="rounded-lg bg-white p-2 shadow-sm"
             style={qrPreviewStyle}

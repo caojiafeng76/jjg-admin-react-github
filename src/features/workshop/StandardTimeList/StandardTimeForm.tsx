@@ -348,16 +348,17 @@ export default function StandardTimeForm({
             >
               <Select
                 allowClear
-                showSearch
+                showSearch={{
+                  filterOption: (input, option) =>
+                    String(option?.searchText || '')
+                      .toLowerCase()
+                      .includes(input.toLowerCase()),
+                }}
                 disabled={isCreating}
                 loading={isSalesOrderOptionsLoading}
                 placeholder="请选择或搜索项目号"
                 value={projectNoValue}
                 onChange={handleProjectNoChange}
-                filterOption={(input, option) =>
-                  String(option?.searchText || '')
-                    .toLowerCase()
-                    .includes(input.toLowerCase())}
                 options={salesOrderProjectNoSelectOptions}
               />
               {selectedSalesOrder?.customer_model && (
@@ -392,16 +393,17 @@ export default function StandardTimeForm({
         >
           <Select
             allowClear
-            showSearch
+            showSearch={{
+              filterOption: (input, option) =>
+                String(option?.searchText || '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase()),
+            }}
             disabled={isCreating}
             loading={isSalesOrderOptionsLoading}
             placeholder="请选择或搜索项目号"
             value={projectNoValue}
             onChange={handleProjectNoChange}
-            filterOption={(input, option) =>
-              String(option?.searchText || '')
-                .toLowerCase()
-                .includes(input.toLowerCase())}
             options={salesOrderProjectNoSelectOptions}
           />
         </Form.Item>
@@ -458,10 +460,9 @@ export default function StandardTimeForm({
         >
           <Select
             allowClear={!isJobNameRequired}
-            showSearch
+            showSearch={{ optionFilterProp: 'label' }}
             loading={isJobOptionsLoading}
             placeholder="请选择工种"
-            optionFilterProp="label"
             options={jobSelectOptions}
             onChange={handleJobChange}
           />
@@ -481,13 +482,14 @@ export default function StandardTimeForm({
         >
           <Select
             allowClear={!isEquipmentNoRequired}
-            showSearch
+            showSearch={{
+              filterOption: (input, option) =>
+                String(option?.searchText || '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase()),
+            }}
             loading={isEquipmentOptionsLoading}
             placeholder="请选择设备编号"
-            filterOption={(input, option) =>
-              String(option?.searchText || '')
-                .toLowerCase()
-                .includes(input.toLowerCase())}
             options={equipmentSelectOptions}
             onChange={handleEquipmentChange}
           />

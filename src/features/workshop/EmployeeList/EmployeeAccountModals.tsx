@@ -42,7 +42,7 @@ export default function EmployeeAccountModals({
         title="为现有员工开通账号"
         open={isAuthModalOpen}
         width={560}
-        destroyOnClose
+        destroyOnHidden
         confirmLoading={createEmployeeAuthMutation.isPending}
         onOk={() => authFormRef.current?.submit()}
         onCancel={handleCancelAuthModal}
@@ -63,7 +63,7 @@ export default function EmployeeAccountModals({
         title="重置员工登录密码"
         open={isResetPasswordModalOpen}
         width={520}
-        destroyOnClose
+        destroyOnHidden
         confirmLoading={resetEmployeeAuthPasswordMutation.isPending}
         onOk={() => resetPasswordFormRef.current?.submit()}
         onCancel={handleCancelResetPasswordModal}
@@ -84,7 +84,7 @@ export default function EmployeeAccountModals({
         title="重新绑定员工账号"
         open={isRebindModalOpen}
         width={520}
-        destroyOnClose
+        destroyOnHidden
         confirmLoading={rebindEmployeeAuthAccountMutation.isPending}
         onOk={() => rebindFormRef.current?.submit()}
         onCancel={handleCancelRebindModal}

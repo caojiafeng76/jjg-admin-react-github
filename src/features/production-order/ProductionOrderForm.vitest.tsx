@@ -82,7 +82,8 @@ const existingOrder = {
   ],
 } as unknown as NonNullable<FormProps['initialValues']>
 
-describe('ProductionOrderForm 拆分后的组件连接', () => {
+// 覆盖率模式下 antd Modal + userEvent 交互偶发超过默认 5s，单独放宽
+describe('ProductionOrderForm 拆分后的组件连接', { timeout: 15_000 }, () => {
   afterEach(() => {
     cleanup()
   })

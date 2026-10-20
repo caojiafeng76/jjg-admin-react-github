@@ -1,6 +1,6 @@
 import type { AppRole } from '@/config/access'
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Modal, Radio, Skeleton, Tag } from 'antd'
+import { App, Button, Radio, Skeleton, Tag } from 'antd'
 import { useEffect, useState } from 'react'
 import { ROLE_LABELS } from '@/config/access'
 import RoleCreateModal from './RoleCreateModal'
@@ -10,6 +10,7 @@ import { useDeleteRole, useRoles } from './useRoles'
 import { useUpdateRolePermissions } from './useUpdateRolePermissions'
 
 export default function RolePermissionList() {
+  const { modal } = App.useApp()
   const [selectedRole, setSelectedRole] = useState<string>('admin')
   const [createOpen, setCreateOpen] = useState(false)
 
@@ -49,7 +50,7 @@ export default function RolePermissionList() {
   const handleDelete = () => {
     if (!currentRole || currentRole.is_builtin)
       return
-    Modal.confirm({
+    modal.confirm({
       title: `删除角色「${currentRole.label}」`,
       content:
         '此操作会同时删除该角色的所有权限绑定，且不可恢复。已分配该角色的员工将失去对应权限。确认删除？',

@@ -46,8 +46,8 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   const canAll = (keys: string[]) => keys.every(k => permissions[k] === true)
 
   return (
-    <PermissionContext.Provider value={{ permissions, isLoading, can, canAll }}>
+    <PermissionContext value={{ permissions, isLoading, can, canAll }}>
       {children}
-    </PermissionContext.Provider>
+    </PermissionContext>
   )
 }

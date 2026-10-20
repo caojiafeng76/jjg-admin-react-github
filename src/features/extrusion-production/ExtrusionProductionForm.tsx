@@ -336,11 +336,11 @@ export default function ExtrusionProductionForm({
                 rules={[{ required: true, message: '请选择设备' }]}
               >
                 <Select
-                  showSearch
+                  showSearch={{ optionFilterProp: 'label' }}
                   options={machineSelectOptions}
                   loading={isLoadingMachines}
                   placeholder="请选择设备"
-                  optionFilterProp="label"
+
                 />
               </Form.Item>
 
@@ -406,11 +406,10 @@ export default function ExtrusionProductionForm({
               rules={[{ required: true, message: '请选择项目号' }]}
             >
               <Select
-                showSearch
+                showSearch={{ filterOption: filterProjectNoOption }}
                 placeholder="请选择项目号"
                 loading={isLoadingProjectNos}
                 options={projectNoOptions}
-                filterOption={filterProjectNoOption}
                 optionRender={renderProjectNoOption}
                 listHeight={320}
                 onChange={handleProjectChange}

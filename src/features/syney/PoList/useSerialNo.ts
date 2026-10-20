@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { message } from 'antd'
+import { App } from 'antd'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
 import { getSerialNo } from '@/services/apiSyneySerialNo'
 import { syneyPoKeys } from '../queryKeys'
 
 export function useSerialNo() {
+  const { message } = App.useApp()
   const {
     data: serialNo,
     isLoading,
@@ -22,7 +23,7 @@ export function useSerialNo() {
     if (error && !isAbortError(error)) {
       message.error('获取序列号失败，请稍后重试')
     }
-  }, [error])
+  }, [error, message])
 
   return {
     serialNo,

@@ -31,16 +31,17 @@ export default function ProductionOrderFormBaseFields({
         rules={[{ required: true, message: '请选择操作人' }]}
       >
         <Select
-          showSearch
-          placeholder="请选择操作人"
-          optionFilterProp="children"
-          disabled={Boolean(fixedEmployee)}
-          filterOption={(input, option) => {
-            if (!option)
-              return false
-            const label = option.label?.toString() ?? ''
-            return label.toLowerCase().includes(input.toLowerCase())
+          showSearch={{
+            filterOption: (input, option) => {
+              if (!option)
+                return false
+              const label = option.label?.toString() ?? ''
+              return label.toLowerCase().includes(input.toLowerCase())
+            },
+            optionFilterProp: 'children',
           }}
+          placeholder="请选择操作人"
+          disabled={Boolean(fixedEmployee)}
           options={employees.map(emp => ({
             label: emp.name,
             value: emp.id,

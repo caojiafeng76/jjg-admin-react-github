@@ -44,11 +44,10 @@ export const WorkshopFields = memo(({
           rules={[{ required: true, message: '请选择项目号' }]}
         >
           <Select
-            showSearch
+            showSearch={{ filterOption: filterProjectNoOption }}
             placeholder="请选择订单项目号"
             loading={isLoadingOrderOptions}
             options={projectNoOptions}
-            filterOption={filterProjectNoOption}
             optionRender={renderProjectNoOption}
             listHeight={320}
             onChange={onProjectNoChange}

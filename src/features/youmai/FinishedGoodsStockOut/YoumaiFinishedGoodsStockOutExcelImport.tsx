@@ -13,11 +13,12 @@ import {
   Tooltip,
   Upload,
 } from 'antd'
-
 import { useState } from 'react'
+
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { fetchYoumaiPurchaseOrder } from '@/services/apiYoumaiPurchaseOrder'
+import ExcelParseErrorList from '@/ui/ExcelParseErrorList'
 import ImportButton from '@/ui/ImportButton'
 
 function loadYoumaiFinishedGoodsStockOutExcel() {
@@ -319,14 +320,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
               showIcon
               title={`解析时发现 ${parseErrors.length} 条问题`}
               description={(
-                <ul className="mt-1 list-inside list-disc text-xs">
-                  {parseErrors.slice(0, 10).map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                  {parseErrors.length > 10 && (
-                    <li>...还有 {parseErrors.length - 10} 条</li>
-                  )}
-                </ul>
+                <ExcelParseErrorList errors={parseErrors} />
               )}
             />
           )}

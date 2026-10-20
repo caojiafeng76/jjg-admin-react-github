@@ -20,6 +20,7 @@
     "fc:package:syney-store-report": "bun scripts/package-syney-store-report-fc.mjs",
     "fc:package:supabase-proxy": "bun scripts/package-supabase-proxy-fc.mjs",
     "ai:doctor": "bun scripts/ai-doctor.mjs",
+    "skills:sync": "bun scripts/sync-skills.mjs",
     "graphify:build": "graphify build .",
     "graphify:update": "graphify auto-update .",
     "db:doctor": "bun scripts/supabase-db-doctor.mjs",

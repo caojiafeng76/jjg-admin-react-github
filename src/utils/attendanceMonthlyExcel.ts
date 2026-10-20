@@ -326,6 +326,8 @@ export function exportAttendanceMonthlyExcel(
  * 导出迟到/早退统计表 Excel
  * @param data   RPC 返回的迟到/早退统计数据
  * @param dateRange 用于标题显示的日期范围（可选）
+ * @param dateRange.startDate 开始日期
+ * @param dateRange.endDate 结束日期
  */
 export function exportAttendanceLateEarlyExcel(
   data: AttendanceLateEarlyStat[],

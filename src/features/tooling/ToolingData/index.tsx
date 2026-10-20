@@ -72,7 +72,7 @@ export default function ToolingDataPage() {
   const [isMonthlySummaryExporting, setIsMonthlySummaryExporting]
     = useState(false)
   const [monthlySummaryMonth, setMonthlySummaryMonth] = useState<Dayjs | null>(
-    dayjs(),
+    () => dayjs(),
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] = useState<ToolingData | null>(null)

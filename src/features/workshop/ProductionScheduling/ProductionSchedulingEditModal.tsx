@@ -10,6 +10,7 @@ import {
   InputNumber,
   Modal,
   Select,
+  Space,
   theme,
 } from 'antd'
 import {
@@ -124,12 +125,13 @@ export default function ProductionSchedulingEditModal({
           >
             <Select
               allowClear
-              showSearch
+              showSearch={{
+                filterOption: (input, option) =>
+                  String(option?.label ?? '')
+                    .toLowerCase()
+                    .includes(input.toLowerCase()),
+              }}
               placeholder="选择机器编号"
-              filterOption={(input, option) =>
-                String(option?.label ?? '')
-                  .toLowerCase()
-                  .includes(input.toLowerCase())}
               options={machineSelectOptions}
             />
           </Form.Item>
@@ -144,9 +146,8 @@ export default function ProductionSchedulingEditModal({
             <Select
               mode="multiple"
               allowClear
-              showSearch
+              showSearch={{ optionFilterProp: 'label' }}
               placeholder="选择负责该订单的员工"
-              optionFilterProp="label"
               options={employees.map(e => ({
                 label: e.name,
                 value: e.id,
@@ -169,20 +170,23 @@ export default function ProductionSchedulingEditModal({
             <Select allowClear options={PROGRESS_STATUS_OPTIONS} />
           </Form.Item>
           <Form.Item
-            name="progress_percent"
             label={(
               <span className="!text-xs !font-medium !text-slate-500 dark:!text-slate-400">
                 进度百分比
               </span>
             )}
           >
-            <InputNumber
-              disabled={Number(editingOrder?.transfer_rate || 0) > 0}
-              min={0}
-              max={100}
-              addonAfter="%"
-              className="!w-full"
-            />
+            <Space.Compact block>
+              <Form.Item name="progress_percent" noStyle>
+                <InputNumber
+                  disabled={Number(editingOrder?.transfer_rate || 0) > 0}
+                  min={0}
+                  max={100}
+                  className="!w-full"
+                />
+              </Form.Item>
+              <Space.Addon>%</Space.Addon>
+            </Space.Compact>
           </Form.Item>
           <Form.Item
             name="process_requirement"

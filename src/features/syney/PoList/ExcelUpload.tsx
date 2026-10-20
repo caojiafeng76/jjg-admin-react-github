@@ -253,9 +253,9 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       {previewVisible && parsedData && (
         <div style={{ marginTop: 16 }}>
           <Alert
-            message="Excel文件解析成功"
+            title="Excel文件解析成功"
             description={(
-              <Space direction="vertical" style={{ width: '100%' }}>
+              <Space orientation="vertical" style={{ width: '100%' }}>
                 <div>
                   <Text strong>订单号: </Text>
                   <Text>{parsedData.po.No}</Text>
@@ -277,7 +277,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                   <Text>{parsedData.po.Spec || '未识别，请手动选择'}</Text>
                   {parsedData.specInferred && (
                     <Alert
-                      message={(
+                      title={(
                         <Text strong style={{ fontSize: 14 }}>
                           ⚠️ 规格已通过后备逻辑推断，请仔细核对！
                         </Text>
@@ -314,7 +314,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                 {!specsLoading
                   && parsedData.items.some(item => item.ParamSpecInferred) && (
                   <Alert
-                    message={(
+                    title={(
                       <Text strong style={{ fontSize: 14 }}>
                         ⚠️ 部分参数规格为系统根据备注推测，请仔细核对
                       </Text>
@@ -350,6 +350,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                     <div style={{ marginTop: 4 }}>
                       {parsedData.po.Technique.split(',').map((item, index) => (
                         <div
+                          // eslint-disable-next-line react/no-array-index-key -- 工艺要求按逗号拆分的只读列表，条目可能重复
                           key={index}
                           style={{
                             marginBottom:

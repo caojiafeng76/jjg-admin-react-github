@@ -12,9 +12,10 @@ import {
   Table,
   Upload,
 } from 'antd'
-
 import { useState } from 'react'
+
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import ExcelParseErrorList from '@/ui/ExcelParseErrorList'
 
 const loadAttendanceExcel = () => import('@/utils/attendanceExcel')
 
@@ -226,7 +227,7 @@ export default function AttendanceExcelImport({
             <Alert
               type="info"
               showIcon
-              message={`自动去重：已合并 ${removedCount} 条重复打卡记录（同一人同一天 10 分钟内保留最晚一条）`}
+              title={`自动去重：已合并 ${removedCount} 条重复打卡记录（同一人同一天 10 分钟内保留最晚一条）`}
               className="rounded-lg"
             />
           )}
@@ -235,16 +236,9 @@ export default function AttendanceExcelImport({
             <Alert
               type="warning"
               showIcon
-              message={`解析时发现 ${parseErrors.length} 条问题（已跳过）`}
+              title={`解析时发现 ${parseErrors.length} 条问题（已跳过）`}
               description={(
-                <ul className="mt-1 list-inside list-disc text-xs">
-                  {parseErrors.slice(0, 10).map((e, i) => (
-                    <li key={i}>{e}</li>
-                  ))}
-                  {parseErrors.length > 10 && (
-                    <li>...还有 {parseErrors.length - 10} 条</li>
-                  )}
-                </ul>
+                <ExcelParseErrorList errors={parseErrors} />
               )}
               className="rounded-lg"
             />

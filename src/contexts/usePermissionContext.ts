@@ -1,6 +1,6 @@
 import type { PermissionMap } from '@/types/permission'
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 export interface PermissionContextValue {
   permissions: PermissionMap
@@ -14,7 +14,7 @@ export const PermissionContext = createContext<PermissionContextValue | undefine
 )
 
 export function usePermissionContext(): PermissionContextValue {
-  const ctx = useContext(PermissionContext)
+  const ctx = use(PermissionContext)
   if (!ctx) {
     throw new Error(
       'usePermissionContext must be used within a PermissionProvider',

@@ -48,7 +48,7 @@ export default function EmployeeRebindAccountForm({
         type="info"
         showIcon
         className="mb-4"
-        message={`将为员工“${employee.name}”绑定一个已存在的 Auth 账号。`}
+        title={`将为员工“${employee.name}”绑定一个已存在的 Auth 账号。`}
       />
 
       <Form.Item label="员工姓名">

@@ -241,7 +241,7 @@ export default function JobBaseSettingPage() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
-        destroyOnClose
+        destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         onOk={() => formRef.current?.submit()}
         onCancel={resetFormState}

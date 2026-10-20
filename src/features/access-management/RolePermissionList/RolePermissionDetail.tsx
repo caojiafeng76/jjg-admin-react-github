@@ -1,11 +1,11 @@
 import type { PermissionRow } from '@/services/apiPermissions'
 import { DownOutlined, RightOutlined } from '@ant-design/icons'
 import {
+  App,
   Button,
   Checkbox,
   Collapse,
   Empty,
-  Modal,
   Skeleton,
   Tag,
   Tooltip,
@@ -44,8 +44,9 @@ export default function RolePermissionDetail({
   saving,
   onSave,
 }: Props) {
+  const { modal } = App.useApp()
   const [localChecked, setLocalChecked] = useState<Set<string>>(
-    new Set(checkedIds),
+    () => new Set(checkedIds),
   )
   // 权限树展开态：默认收起，避免模块多时一屏铺满
   const [activeKeys, setActiveKeys] = useState<string[]>([])
@@ -96,7 +97,7 @@ export default function RolePermissionDetail({
   }
 
   const handleSave = () => {
-    Modal.confirm({
+    modal.confirm({
       title: `保存「${roleLabel}」角色权限`,
       content: '此操作将立即更新该角色的所有权限绑定，确认保存？',
       okText: '确认保存',

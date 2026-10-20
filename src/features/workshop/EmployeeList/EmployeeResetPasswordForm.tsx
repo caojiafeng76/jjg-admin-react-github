@@ -43,7 +43,7 @@ export default function EmployeeResetPasswordForm({
         type="warning"
         showIcon
         className="mb-4"
-        message={`将重置员工“${employee.name}”的登录密码。`}
+        title={`将重置员工“${employee.name}”的登录密码。`}
       />
 
       <Form.Item label="员工姓名">

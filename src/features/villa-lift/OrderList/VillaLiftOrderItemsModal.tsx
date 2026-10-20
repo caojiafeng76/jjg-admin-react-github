@@ -59,7 +59,7 @@ export default function VillaLiftOrderItemsModal({
       onCancel={onClose}
       confirmLoading={upsertMutation.isPending}
       width={800}
-      destroyOnClose
+      destroyOnHidden
     >
       <VillaLiftOrderForm
         onFinish={() => {}}

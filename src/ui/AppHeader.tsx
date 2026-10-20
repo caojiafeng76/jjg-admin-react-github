@@ -145,7 +145,7 @@ export default function AppHeader({
       <Modal
         title="修改我的管理密码"
         open={isManagementPasswordModalOpen}
-        destroyOnClose
+        destroyOnHidden
         confirmLoading={isUpdatingManagementPassword}
         onOk={() => managementPasswordForm.submit()}
         onCancel={() => {

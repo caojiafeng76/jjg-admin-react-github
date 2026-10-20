@@ -38,6 +38,7 @@ export default function PermissionField({
     return (
       <Form.Item {...formItemProps}>
         {isValidElement(children)
+          // eslint-disable-next-line react/no-clone-element -- 组件契约就是给任意子元素注入 disabled；ConfigProvider componentDisabled 只对 antd 组件生效
           ? cloneElement(children as ReactElement<{ disabled?: boolean }>, {
               disabled: true,
             })

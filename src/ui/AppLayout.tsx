@@ -201,7 +201,7 @@ export default function AppLayout() {
                   backdropFilter: 'blur(2px)',
                 }}
               >
-                <Spin size="large" tip="切换中..." />
+                <Spin size="large" description="切换中..." />
               </div>
             )}
             {permLoadBlock && (
@@ -221,7 +221,7 @@ export default function AppLayout() {
                   backdropFilter: 'blur(2px)',
                 }}
               >
-                <Spin size="large" tip="权限加载中..." />
+                <Spin size="large" description="权限加载中..." />
               </div>
             )}
             {outletEntries.map(([key, cachedOutlet]) => (

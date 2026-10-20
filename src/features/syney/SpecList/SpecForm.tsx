@@ -1,17 +1,21 @@
+import type { Ref } from 'react'
 import type { ISyneySpec, ISyneySpecFormRef } from '@/types'
 import { Form, Input } from 'antd'
 
-import { forwardRef, useCallback, useImperativeHandle } from 'react'
+import { useCallback, useImperativeHandle } from 'react'
 
 const layout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 18 },
 }
 
-const SpecForm = forwardRef<
-  ISyneySpecFormRef,
-  { onFinishFunc: (values: ISyneySpec) => void, isEditing: boolean }
->(({ onFinishFunc, isEditing }, ref) => {
+export interface SpecFormProps {
+  ref?: Ref<ISyneySpecFormRef>
+  onFinishFunc: (values: ISyneySpec) => void
+  isEditing: boolean
+}
+
+export default function SpecForm({ ref, onFinishFunc, isEditing }: SpecFormProps) {
   const [form] = Form.useForm<ISyneySpec>()
 
   const onFinish = useCallback(
@@ -67,6 +71,4 @@ const SpecForm = forwardRef<
       </Form.Item>
     </Form>
   )
-})
-
-export default SpecForm
+}

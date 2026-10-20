@@ -298,7 +298,7 @@ export default function AttendanceDetailPage() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
-        destroyOnClose
+        destroyOnHidden
         width={480}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         onOk={() => formRef?.submit()}

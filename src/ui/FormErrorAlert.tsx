@@ -42,7 +42,7 @@ export default function FormErrorAlert({
       type="error"
       showIcon
       className={className}
-      message="操作失败"
+      title="操作失败"
       description={(
         <div className="space-y-1.5 text-sm">
           <p>

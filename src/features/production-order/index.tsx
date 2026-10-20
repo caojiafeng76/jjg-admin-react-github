@@ -571,7 +571,7 @@ export default function ProductionOrderPage() {
                 onCancel={resetFormState}
                 footer={[]}
                 width={900}
-                destroyOnClose
+                destroyOnHidden
               >
                 {detailOrder
                   ? (

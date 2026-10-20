@@ -40,7 +40,7 @@ export default function CuttingRecordEditModal({
       onCancel={onCancel}
       confirmLoading={isSubmitting}
       width={480}
-      destroyOnClose
+      destroyOnHidden
       afterOpenChange={(visible) => {
         if (visible && initialValues) {
           form.setFieldsValue(initialValues)

@@ -199,12 +199,11 @@ export default function CuttingProcessPage() {
         )}
         <Select
           allowClear
-          showSearch
+          showSearch={{ optionFilterProp: 'search' }}
           placeholder="按项目筛选"
           style={{ width: 240 }}
           value={filterOrderId}
           onChange={handleOrderFilter}
-          optionFilterProp="search"
           options={ordersData.map(o => ({
             value: o.id,
             label: `${o.project_name} · ${o.customer}`,
@@ -246,7 +245,7 @@ export default function CuttingProcessPage() {
         confirmLoading={createMutation.isPending}
         okButtonProps={{ disabled: viewerDenied }}
         width={800}
-        destroyOnClose
+        destroyOnHidden
       >
         <CuttingProcessForm
           orders={ordersData}

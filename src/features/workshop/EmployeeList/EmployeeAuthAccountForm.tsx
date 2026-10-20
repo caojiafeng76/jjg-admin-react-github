@@ -43,7 +43,7 @@ export default function EmployeeAuthAccountForm({
         type="info"
         showIcon
         className="mb-4"
-        message={`将为现有员工“${employee.name}”创建 Supabase Auth 登录账号，并自动绑定到当前员工记录。默认密码为 ${DEFAULT_EMPLOYEE_AUTH_PASSWORD}。`}
+        title={`将为现有员工“${employee.name}”创建 Supabase Auth 登录账号，并自动绑定到当前员工记录。默认密码为 ${DEFAULT_EMPLOYEE_AUTH_PASSWORD}。`}
       />
 
       <Form.Item label="员工姓名">

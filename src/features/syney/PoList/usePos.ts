@@ -3,7 +3,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { message } from 'antd'
+import { App } from 'antd'
 import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { isAbortError, queryConfig } from '@/config/queryClient'
@@ -11,6 +11,7 @@ import { getSyneyPos } from '@/services/apiSyneyPos'
 import { syneyPoKeys } from '../queryKeys'
 
 export function usePos() {
+  const { message } = App.useApp()
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
 
@@ -58,7 +59,7 @@ export function usePos() {
     if (error && !isAbortError(error)) {
       message.error('获取订单列表失败，请稍后重试')
     }
-  }, [error])
+  }, [error, message])
 
   // 优化预取逻辑:将副作用移到 useEffect 中,避免在渲染阶段执行
   useEffect(() => {

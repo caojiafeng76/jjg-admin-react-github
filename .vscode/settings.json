@@ -32,5 +32,6 @@
     "jsonc",
     "yaml",
     "toml"
-  ]
+  ],
+  "python.terminal.useEnvFile": true
 }

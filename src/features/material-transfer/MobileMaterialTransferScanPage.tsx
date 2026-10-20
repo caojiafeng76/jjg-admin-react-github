@@ -2,7 +2,7 @@ import type { ScannedProjectPayload } from '@/features/production-order/ProjectN
 import type { MaterialTransferInsert, MaterialTransferUpdate, MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
 import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
 
-import { App, Button, Card, Form, Input, Typography } from 'antd'
+import { App, Button, Card, Form, Input, Space, Typography } from 'antd'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
@@ -483,14 +483,16 @@ export default function MobileMaterialTransferScanPage() {
                   </button>
                 </Form.Item>
 
-                <Form.Item
-                  name="recipient_name"
-                  label="接收人"
-                  rules={[{ required: true, message: '请输入接收人' }]}
-                >
-                  <Input
-                    placeholder="可手动输入"
-                    addonAfter={(
+                <Form.Item label="接收人" required>
+                  <Space.Compact block>
+                    <Form.Item
+                      name="recipient_name"
+                      noStyle
+                      rules={[{ required: true, message: '请输入接收人' }]}
+                    >
+                      <Input placeholder="可手动输入" />
+                    </Form.Item>
+                    <Space.Addon>
                       <button
                         type="button"
                         onClick={() => setActiveSheet('recipient')}
@@ -498,16 +500,18 @@ export default function MobileMaterialTransferScanPage() {
                       >
                         常用
                       </button>
-                    )}
-                  />
+                    </Space.Addon>
+                  </Space.Compact>
                 </Form.Item>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Form.Item name="shift_leader_name" label="当班负责人">
-                  <Input
-                    placeholder="可手动输入"
-                    addonAfter={(
+                <Form.Item label="当班负责人">
+                  <Space.Compact block>
+                    <Form.Item name="shift_leader_name" noStyle>
+                      <Input placeholder="可手动输入" />
+                    </Form.Item>
+                    <Space.Addon>
                       <button
                         type="button"
                         onClick={() => setActiveSheet('shiftLeader')}
@@ -515,8 +519,8 @@ export default function MobileMaterialTransferScanPage() {
                       >
                         常用
                       </button>
-                    )}
-                  />
+                    </Space.Addon>
+                  </Space.Compact>
                 </Form.Item>
 
                 <Form.Item name="inspector_name" label="检验人">

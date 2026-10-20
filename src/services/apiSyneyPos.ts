@@ -82,15 +82,15 @@ function extractBrandFromItems(items: ISyneyItem[]): string | null {
   return null
 }
 
+function normalizePartNo(partNo: string) {
+  return partNo.replace(/^[^A-Z0-9]+/i, '')
+}
+
 /**
  * 从订单条目中提取规格信息
  * @param items - 订单明细数组
  * @returns 推断的规格,如果无法推断则返回 null
  */
-function normalizePartNo(partNo: string) {
-  return partNo.replace(/^[^A-Z0-9]+/i, '')
-}
-
 function extractSpecFromItems(items: ISyneyItem[]): string | null {
   // 1. 查找前沿板组件
   const frontPlateItem = items.find(

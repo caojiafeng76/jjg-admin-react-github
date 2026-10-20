@@ -108,10 +108,9 @@ export default function ExtrusionProductionSearch({
         <Select
           placeholder="设备"
           allowClear
-          showSearch
+          showSearch={{ optionFilterProp: 'label' }}
           loading={isLoadingMachines}
           options={machineOptions}
-          optionFilterProp="label"
           style={{ width: 180 }}
         />
       </Form.Item>

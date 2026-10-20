@@ -25,7 +25,7 @@ export default function ProductionOrderManagementLock({
   return (
     <div className="flex h-full items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md shadow-sm">
-        <Space direction="vertical" size={16} className="w-full">
+        <Space orientation="vertical" size={16} className="w-full">
           <div className="flex items-center gap-3">
             <div className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
               <LockClosedIcon className="size-5" />

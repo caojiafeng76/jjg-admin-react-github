@@ -132,8 +132,12 @@ const PAGE_DOCUMENT_MODULES = [
     '@/utils/youmaiFinishedGoodsStockOutExcel',
   ],
   [
-    'src/features/workshop/StandardTimeList/index.tsx',
+    'src/features/workshop/StandardTimeList/useStandardTimeExport.ts',
     '@/utils/costAccountingExcel',
+  ],
+  [
+    'src/features/workshop/StandardTimeList/useStandardTimeExport.ts',
+    '@/utils/precisionFinishingProcessExcel',
   ],
   [
     'src/features/workshop/ProductionScheduling/index.tsx',
@@ -189,6 +193,8 @@ const PRELOAD_TRIGGER_FILES: Partial<Record<string, string>> = {
     'src/features/workshop/OrderStatusDashboard/OrderStatusDashboardHeader.tsx',
   'src/features/production-order/useProductionOrderExport.ts':
     'src/features/production-order/ProductionOrderAdminToolbar.tsx',
+  'src/features/workshop/StandardTimeList/useStandardTimeExport.ts':
+    'src/features/workshop/StandardTimeList/index.tsx',
 }
 
 describe('lazy document modules', () => {

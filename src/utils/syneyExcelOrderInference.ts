@@ -212,16 +212,16 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
   return techniqueList.length > 0 ? techniqueList.join(',') : null
 }
 
+function normalizePartNo(partNo: string) {
+  return partNo.replace(/^[^A-Z0-9]+/i, '')
+}
+
 /**
  * 从所有行中搜索规格信息（后备逻辑）
  * 在所有条目的spec和remark字段中匹配1000型/800型/600型和室内/室外
  * @param rows Excel行数据
  * @returns 推断的规格,如果无法推断则返回 null
  */
-function normalizePartNo(partNo: string) {
-  return partNo.replace(/^[^A-Z0-9]+/i, '')
-}
-
 export function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
   let model = ''
   let environment = '室内' // 默认室内

@@ -1,6 +1,7 @@
 import type {
   SyneyStoreReportPayload,
 } from '@utils/syneyStoreReport'
+import type { Ref } from 'react'
 import type {
   ISyneyItem,
   ISyneyStoreReport,
@@ -13,11 +14,12 @@ import {
   buildSyneyStoreReportPayload,
 } from '@utils/syneyStoreReport'
 import { App, Form, Input } from 'antd'
-import { forwardRef, useCallback, useEffect, useImperativeHandle } from 'react'
+import { useCallback, useEffect, useImperativeHandle } from 'react'
 
 import { useCreateReport } from './useCreateReport'
 
 interface ReportFormProps {
+  ref?: Ref<ISyneyStoreReportFormRef>
   handleCancel: () => void
   onSpecsLoadingChange: (loading: boolean) => void
   onCreatingChange?: (creating: boolean) => void
@@ -28,75 +30,76 @@ const layout = {
   wrapperCol: { span: 20 },
 }
 
-const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
-  ({ handleCancel, onSpecsLoadingChange, onCreatingChange }, ref) => {
-    const { message } = App.useApp()
+export default function ReportForm({
+  ref,
+  handleCancel,
+  onSpecsLoadingChange,
+  onCreatingChange,
+}: ReportFormProps) {
+  const { message } = App.useApp()
 
-    const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
-      isAll: true,
-    })
-    const { createReport, isCreating } = useCreateReport()
+  const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
+    isAll: true,
+  })
+  const { createReport, isCreating } = useCreateReport()
 
-    const [form] = Form.useForm<ISyneyStoreReport>()
+  const [form] = Form.useForm<ISyneyStoreReport>()
 
-    const onFinish = useCallback(
-      (values: ISyneyStoreReport) => {
-        const detailData = jsonToArray(values.Detail || '') || []
+  const onFinish = useCallback(
+    (values: ISyneyStoreReport) => {
+      const detailData = jsonToArray(values.Detail || '') || []
 
-        if (detailData.length === 0) {
-          message.error('详情数据为空，请粘贴有效的 JSON 数据')
-          return
-        }
-
-        let payload: SyneyStoreReportPayload
-
-        try {
-          payload = buildSyneyStoreReportPayload(
-            detailData as ISyneyItem[],
-            syneySpecs || [],
-          )
-        }
-        catch (error) {
-          message.error(error instanceof Error ? error.message : '入库单数据解析失败')
-          return
-        }
-
-        createReport(payload, {
-          onSettled: () => handleCancel(),
-          onSuccess: () => message.success('创建入库单成功'),
-          onError: (err) => {
-            console.error(err)
-            message.error('创建入库单失败')
-          },
-        })
-      },
-      [message, syneySpecs, createReport, handleCancel],
-    )
-
-    useImperativeHandle(ref, () => {
-      return {
-        getInstance() {
-          return form
-        },
+      if (detailData.length === 0) {
+        message.error('详情数据为空，请粘贴有效的 JSON 数据')
+        return
       }
-    })
 
-    useEffect(() => {
-      onCreatingChange?.(isCreating)
-    }, [isCreating, onCreatingChange])
+      let payload: SyneyStoreReportPayload
 
-    useEffect(() => {
-      onSpecsLoadingChange(specsLoading)
-    }, [specsLoading, onSpecsLoadingChange])
+      try {
+        payload = buildSyneyStoreReportPayload(
+          detailData as ISyneyItem[],
+          syneySpecs || [],
+        )
+      }
+      catch (error) {
+        message.error(error instanceof Error ? error.message : '入库单数据解析失败')
+        return
+      }
 
-    return (
-      <Form {...layout} form={form} name="report-form" onFinish={onFinish}>
-        <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
-          <Input.TextArea rows={20} cols={30} disabled={isCreating} />
-        </Form.Item>
-      </Form>
-    )
-  },
-)
+      createReport(payload, {
+        onSettled: () => handleCancel(),
+        onSuccess: () => message.success('创建入库单成功'),
+        onError: (err) => {
+          console.error(err)
+          message.error('创建入库单失败')
+        },
+      })
+    },
+    [message, syneySpecs, createReport, handleCancel],
+  )
 
-export default ReportForm
+  useImperativeHandle(ref, () => {
+    return {
+      getInstance() {
+        return form
+      },
+    }
+  })
+
+  useEffect(() => {
+    onCreatingChange?.(isCreating)
+  }, [isCreating, onCreatingChange])
+
+  useEffect(() => {
+    onSpecsLoadingChange(specsLoading)
+  }, [specsLoading, onSpecsLoadingChange])
+
+  return (
+    <Form {...layout} form={form} name="report-form" onFinish={onFinish}>
+      <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
+        <Input.TextArea rows={20} cols={30} disabled={isCreating} />
+      </Form.Item>
+    </Form>
+  )
+}

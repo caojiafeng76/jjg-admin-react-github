@@ -243,7 +243,7 @@ export default function MachineEquipmentMaintenancePage() {
       </div>
 
       <div className="min-h-0 flex-1 overflow-hidden">
-        <Splitter layout="vertical" style={{ flex: 1, minHeight: 0 }}>
+        <Splitter orientation="vertical" style={{ flex: 1, minHeight: 0 }}>
           <Splitter.Panel defaultSize="65%" min="34%">
             <div
               ref={tableContainerRef}
@@ -281,7 +281,7 @@ export default function MachineEquipmentMaintenancePage() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
-        destroyOnClose
+        destroyOnHidden
         width={960}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         onOk={() => formRef.current?.submit()}

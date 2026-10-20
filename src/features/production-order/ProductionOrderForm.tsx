@@ -452,7 +452,7 @@ export default function ProductionOrderForm({
         okButtonProps={{ loading: submitting }}
         width={compact ? 'calc(100vw - 20px)' : 1200}
         style={compact ? { top: 12, maxWidth: 560 } : undefined}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}

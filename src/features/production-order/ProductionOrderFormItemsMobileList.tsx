@@ -58,6 +58,7 @@ export default function ProductionOrderFormItemsMobileList({
 
                   return (
                     <article
+                      // eslint-disable-next-line react/no-array-index-key -- 卡片无内部状态，新增工序尚无 id，编辑/删除也按下标定位（与桌面表格一致）
                       key={`${item.project_no}-${item.operation}-${index}`}
                       className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none"
                     >

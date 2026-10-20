@@ -2,7 +2,7 @@ import type { ScannedProjectPayload } from '@/features/production-order/ProjectN
 import type { PrecisionFinishingCuttingInsert, PrecisionFinishingCuttingUpdate, PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
 import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
 
-import { App, Button, Card, Form, Input, Typography } from 'antd'
+import { App, Button, Card, Form, Input, Space, Typography } from 'antd'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
@@ -562,14 +562,16 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                   </button>
                 </Form.Item>
 
-                <Form.Item
-                  name="recipient_name"
-                  label="接收人"
-                  rules={[{ required: true, message: '请输入接收人' }]}
-                >
-                  <Input
-                    placeholder="可手动输入"
-                    addonAfter={(
+                <Form.Item label="接收人" required>
+                  <Space.Compact block>
+                    <Form.Item
+                      name="recipient_name"
+                      noStyle
+                      rules={[{ required: true, message: '请输入接收人' }]}
+                    >
+                      <Input placeholder="可手动输入" />
+                    </Form.Item>
+                    <Space.Addon>
                       <button
                         type="button"
                         onClick={() => setActiveSheet('recipient')}
@@ -577,8 +579,8 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                       >
                         常用
                       </button>
-                    )}
-                  />
+                    </Space.Addon>
+                  </Space.Compact>
                 </Form.Item>
               </div>
 

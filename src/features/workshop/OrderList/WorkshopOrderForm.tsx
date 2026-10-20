@@ -344,7 +344,7 @@ export default function WorkshopOrderForm({
           {excelRows.length > 0 && (
             <Form.Item label="解析结果">
               <Alert
-                message="Excel文件解析成功"
+                title="Excel文件解析成功"
                 description={(
                   <div>
                     <Text strong>

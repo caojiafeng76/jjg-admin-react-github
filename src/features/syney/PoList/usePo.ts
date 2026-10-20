@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { message } from 'antd'
+import { App } from 'antd'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
 import { getSyneyPoDetail } from '@/services/apiSyneyPo'
@@ -7,6 +7,7 @@ import { useAppStore } from '@/store'
 import { syneyPoKeys } from '../queryKeys'
 
 export function usePo(validPoIds?: number[]) {
+  const { message } = App.useApp()
   const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
 
   const id = tableSelectedKeys[0] || ''
@@ -26,7 +27,7 @@ export function usePo(validPoIds?: number[]) {
     if (error && !isAbortError(error)) {
       message.error('获取入库单失败，请稍后重试')
     }
-  }, [error])
+  }, [error, message])
 
   return { data, isLoading }
 }

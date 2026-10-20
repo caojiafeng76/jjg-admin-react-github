@@ -169,8 +169,7 @@ export default function ProductionOrderSearch({
                 placeholder="选择操作人"
                 allowClear
                 style={{ width: mobile ? '100%' : 160 }}
-                showSearch
-                optionFilterProp="label"
+                showSearch={{ optionFilterProp: 'label' }}
                 className="rounded-lg"
                 options={employees.map(emp => ({
                   label: emp.name,

@@ -1,16 +1,26 @@
 import type { FormInstance } from 'antd'
+import type { Ref } from 'react'
 import type { ISyneyItem } from '@/types'
 import { Form, Input } from 'antd'
-import { forwardRef, useImperativeHandle, useState } from 'react'
+import { useImperativeHandle, useState } from 'react'
 import { useAppStore } from '@/store'
 import { useUpdate } from './useUpdate'
 
-export default forwardRef<
-  {
-    getInstance: () => FormInstance<ISyneyItem>
-  },
-  { onClose: () => void, onLoadingChange?: (loading: boolean) => void }
->(({ onClose, onLoadingChange }, ref) => {
+export interface DetailFormRef {
+  getInstance: () => FormInstance<ISyneyItem>
+}
+
+export interface DetailFormProps {
+  ref?: Ref<DetailFormRef>
+  onClose: () => void
+  onLoadingChange?: (loading: boolean) => void
+}
+
+export default function DetailForm({
+  ref,
+  onClose,
+  onLoadingChange,
+}: DetailFormProps) {
   const [form] = Form.useForm<ISyneyItem>()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -85,4 +95,4 @@ export default forwardRef<
       </Form.Item>
     </Form>
   )
-})
+}

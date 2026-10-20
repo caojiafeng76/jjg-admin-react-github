@@ -338,7 +338,7 @@ export default function VillaLiftOrderListPage() {
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         okButtonProps={{ disabled: viewerDenied }}
         width={760}
-        destroyOnClose
+        destroyOnHidden
       >
         <VillaLiftOrderForm
           onFinish={handleFinish}

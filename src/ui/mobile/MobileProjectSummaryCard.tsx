@@ -73,7 +73,7 @@ export default function MobileProjectSummaryCard({
             <Alert
               type="info"
               showIcon
-              message={emptyMessage}
+              title={emptyMessage}
               description={emptyDescription}
             />
           )}

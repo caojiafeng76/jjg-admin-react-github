@@ -77,9 +77,8 @@ export default function IssueRecordSearch({
       <Form.Item name="reporterEmployeeId" className="mb-0">
         <Select
           allowClear
-          showSearch
+          showSearch={{ optionFilterProp: 'label' }}
           placeholder="上报人"
-          optionFilterProp="label"
           style={{ width: 160 }}
           options={employees.map(employee => ({
             label: employee.name,
@@ -91,9 +90,8 @@ export default function IssueRecordSearch({
       <Form.Item name="operatorEmployeeId" className="mb-0">
         <Select
           allowClear
-          showSearch
+          showSearch={{ optionFilterProp: 'label' }}
           placeholder="操作人"
-          optionFilterProp="label"
           style={{ width: 160 }}
           options={employees.map(employee => ({
             label: employee.name,

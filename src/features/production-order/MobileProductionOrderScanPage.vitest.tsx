@@ -139,7 +139,8 @@ function renderPage(state?: Record<string, unknown>) {
   )
 }
 
-describe('MobileProductionOrderScanPage', () => {
+// 覆盖率模式下 userEvent 多步表单交互偶发超过默认 5s，单独放宽
+describe('MobileProductionOrderScanPage', { timeout: 15_000 }, () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.role = 'employee'

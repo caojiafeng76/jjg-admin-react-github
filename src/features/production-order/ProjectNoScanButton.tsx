@@ -192,6 +192,7 @@ export default function ProjectNoScanButton({
   const scannerRef = useRef<ScannerController | null>(null)
   const resolvingRef = useRef(false)
   const lastRawValueRef = useRef('')
+  const resetRawValueTimerRef = useRef<number | null>(null)
   const autoOpenedRef = useRef(false)
 
   useEffect(() => {
@@ -208,6 +209,12 @@ export default function ProjectNoScanButton({
     scannerRef.current?.destroy()
     scannerRef.current = null
   }
+
+  useEffect(() => () => {
+    if (resetRawValueTimerRef.current !== null) {
+      window.clearTimeout(resetRawValueTimerRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (!open || !scannerReady) {
@@ -288,7 +295,11 @@ export default function ProjectNoScanButton({
                     ? error.message
                     : '二维码解析失败，请重试',
                 )
-                window.setTimeout(() => {
+                if (resetRawValueTimerRef.current !== null) {
+                  window.clearTimeout(resetRawValueTimerRef.current)
+                }
+                resetRawValueTimerRef.current = window.setTimeout(() => {
+                  resetRawValueTimerRef.current = null
                   lastRawValueRef.current = ''
                 }, 1500)
               }
@@ -372,7 +383,7 @@ export default function ProjectNoScanButton({
           setScannerReady(visible)
         }}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
         forceRender
         width={420}
       >
@@ -408,7 +419,7 @@ export default function ProjectNoScanButton({
 
           {scanError
             ? (
-                <Alert type="warning" showIcon message={scanError} />
+                <Alert type="warning" showIcon title={scanError} />
               )
             : null}
 

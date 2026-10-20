@@ -1,5 +1,5 @@
 import type { PermissionRow, UserOverrideRow } from '@/services/apiPermissions'
-import { Button, Modal, Select, Skeleton, Table, Tag } from 'antd'
+import { App, Button, Select, Skeleton, Table, Tag } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 
 type OverrideValue = 'default' | 'allow' | 'deny'
@@ -31,6 +31,7 @@ export default function UserPermissionDetail({
   onSave,
   onBack,
 }: Props) {
+  const { modal } = App.useApp()
   // 初始化：从 userOverrides 还原 map
   const buildInitialMap = () => {
     const map = new Map<string, OverrideValue>()
@@ -151,7 +152,7 @@ export default function UserPermissionDetail({
     for (const [permId, val] of overrideMap) {
       overrides.push({ permissionId: permId, enabled: val === 'allow' })
     }
-    Modal.confirm({
+    modal.confirm({
       title: `保存「${employee.name}」的权限覆盖`,
       content: `将为该用户保存 ${overrides.length} 条权限覆盖记录，确认？`,
       okText: '确认保存',

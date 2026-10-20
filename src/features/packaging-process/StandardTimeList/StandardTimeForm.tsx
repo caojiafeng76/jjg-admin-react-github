@@ -114,16 +114,17 @@ export default function StandardTimeForm({
       >
         <Select
           allowClear
-          showSearch
+          showSearch={{
+            filterOption: (input, option) =>
+              String(option?.searchText || '')
+                .toLowerCase()
+                .includes(input.toLowerCase()),
+          }}
           disabled={isSubmitting}
           loading={isSalesOrderOptionsLoading}
           placeholder="请选择或搜索项目号"
           value={projectNoValue}
           onChange={handleProjectNoChange}
-          filterOption={(input, option) =>
-            String(option?.searchText || '')
-              .toLowerCase()
-              .includes(input.toLowerCase())}
           options={salesOrderProjectNoSelectOptions}
         />
       </Form.Item>

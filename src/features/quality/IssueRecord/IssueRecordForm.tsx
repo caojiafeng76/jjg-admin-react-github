@@ -307,9 +307,8 @@ export default function IssueRecordForm({
             rules={[{ required: true, message: '请选择上报人' }]}
           >
             <Select
-              showSearch
+              showSearch={{ optionFilterProp: 'label' }}
               placeholder="请选择上报人"
-              optionFilterProp="label"
               getPopupContainer={getPopupContainer}
               options={employees.map(employee => ({
                 label: employee.name,
@@ -337,15 +336,16 @@ export default function IssueRecordForm({
             rules={[{ required: true, message: '请选择项目号' }]}
           >
             <Select
-              showSearch
+              showSearch={{
+                filterOption: (input, option) =>
+                  String(option?.searchText || '').includes(
+                    input.trim().toLowerCase(),
+                  ),
+              }}
               placeholder="输入或选择项目号"
               loading={loadingOrders}
               getPopupContainer={getPopupContainer}
               options={projectOptions}
-              filterOption={(input, option) =>
-                String(option?.searchText || '').includes(
-                  input.trim().toLowerCase(),
-                )}
               optionRender={(option) => {
                 const data = option.data as ProjectSelectOption
 
@@ -433,9 +433,8 @@ export default function IssueRecordForm({
             rules={[{ required: true, message: '请选择操作人' }]}
           >
             <Select
-              showSearch
+              showSearch={{ optionFilterProp: 'label' }}
               placeholder="请选择操作人"
-              optionFilterProp="label"
               getPopupContainer={getPopupContainer}
               options={employees.map(employee => ({
                 label: employee.name,

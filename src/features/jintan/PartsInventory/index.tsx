@@ -70,10 +70,10 @@ export default function JintanPartsInventoryPage() {
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const statusParam = searchParamsURL.get('status')
   const [searchParams, setSearchParams]
-    = useState<JintanPartsInventorySearchValues>({
+    = useState<JintanPartsInventorySearchValues>(() => ({
       keyword: searchParamsURL.get('keyword') || undefined,
       status: isJintanPartsStockStatus(statusParam) ? statusParam : undefined,
-    })
+    }))
 
   const { data, isLoading, error, refetch } = useJintanPartsInventoryList({
     page,

@@ -147,7 +147,7 @@ export default function AppErrorView({
 
           <div className="grid gap-8 p-2 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:p-4">
             <div className="rounded-[28px] bg-white/65 p-6 sm:p-8 dark:bg-white/5">
-              <Space direction="vertical" size={20} className="w-full">
+              <Space orientation="vertical" size={20} className="w-full">
                 <div className="flex items-center gap-3">
                   <div
                     className={`flex h-12 w-12 items-center justify-center rounded-2xl text-[22px] ${variantConfig.iconBox}`}
@@ -212,7 +212,7 @@ export default function AppErrorView({
                   处理建议
                 </p>
                 <Space
-                  direction="vertical"
+                  orientation="vertical"
                   size={14}
                   className="mt-4 flex w-full"
                 >

@@ -17,9 +17,9 @@ vi.mock('antd', async () => {
 
   return {
     ...actual,
-    message: {
-      ...actual.message,
-      error: vi.fn(),
+    App: {
+      ...actual.App,
+      useApp: () => ({ message: { error: vi.fn() } }),
     },
   }
 })

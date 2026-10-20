@@ -1,6 +1,6 @@
 import { getSyneySpecs } from '@services/apiSyneySpecs'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
-import { message } from 'antd'
+import { App } from 'antd'
 import { useEffect } from 'react'
 
 import { useSearchParams } from 'react-router-dom'
@@ -9,6 +9,7 @@ import { isAbortError, queryConfig } from '@/config/queryClient'
 export function useSyneySpecs(
   { isAll }: { isAll: boolean } = { isAll: false },
 ) {
+  const { message } = App.useApp()
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
 
@@ -33,7 +34,7 @@ export function useSyneySpecs(
     if (error && !isAbortError(error)) {
       message.error('获取规格列表失败，请稍后重试')
     }
-  }, [error])
+  }, [error, message])
 
   const pageCount = Math.ceil((count || 0) / pageSize)
 

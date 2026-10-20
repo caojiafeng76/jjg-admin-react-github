@@ -184,7 +184,7 @@ export default function Login() {
           {errorMessage && (
             <Alert
               type="error"
-              message={errorMessage}
+              title={errorMessage}
               showIcon
               className="mb-4! rounded-xl!"
             />
@@ -193,7 +193,7 @@ export default function Login() {
           {successMessage && (
             <Alert
               type="success"
-              message={successMessage}
+              title={successMessage}
               showIcon
               className="mb-4! rounded-xl!"
             />

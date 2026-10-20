@@ -21,7 +21,7 @@ export default function ProductionOrderManagementPasswordModal({
     <Modal
       title="修改我的管理密码"
       open={open}
-      destroyOnClose
+      destroyOnHidden
       confirmLoading={confirmLoading}
       onOk={() => form.submit()}
       onCancel={onCancel}

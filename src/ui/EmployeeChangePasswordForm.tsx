@@ -31,7 +31,7 @@ export default function EmployeeChangePasswordForm({
         type="info"
         showIcon
         className="mb-4 rounded-2xl"
-        message={`正在为${employeeName || '当前账号'}修改登录密码，请先验证原密码。`}
+        title={`正在为${employeeName || '当前账号'}修改登录密码，请先验证原密码。`}
       />
 
       <Form.Item

@@ -128,8 +128,7 @@ export default function PrecisionFinishingCuttingSearch({
               <Select
                 placeholder="操作人"
                 allowClear
-                showSearch
-                optionFilterProp="label"
+                showSearch={{ optionFilterProp: 'label' }}
                 getPopupContainer={getPopupContainer}
                 style={{ width: mobile ? '100%' : 180 }}
                 options={employees.map(employee => ({

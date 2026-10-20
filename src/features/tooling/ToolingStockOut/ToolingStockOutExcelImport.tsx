@@ -10,9 +10,10 @@ import {
 
   Upload,
 } from 'antd'
-
 import { useState } from 'react'
+
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
+import ExcelParseErrorList from '@/ui/ExcelParseErrorList'
 import ImportButton from '@/ui/ImportButton'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 
@@ -229,14 +230,7 @@ export default function ToolingStockOutExcelImport({
               showIcon
               title={`解析时发现 ${parseErrors.length} 条问题`}
               description={(
-                <ul className="mt-1 list-inside list-disc text-xs">
-                  {parseErrors.slice(0, 10).map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                  {parseErrors.length > 10 && (
-                    <li>...还有 {parseErrors.length - 10} 条</li>
-                  )}
-                </ul>
+                <ExcelParseErrorList errors={parseErrors} />
               )}
             />
           )}

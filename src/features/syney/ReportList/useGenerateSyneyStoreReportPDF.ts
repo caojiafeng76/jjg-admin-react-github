@@ -20,6 +20,11 @@ function loadPDFDependencies() {
  * @param doc PDF 文档实例
  * @param reportNo 报告编号
  * @param reportData 报告数据
+ * @param reportData.items 报告明细
+ * @param reportData.totalAmount 报告合计数量
+ * @param reportData.createdAt 报告创建时间
+ * @param autoTable jspdf-autotable 绘表函数
+ * @param pdfUtils PDF 工具函数模块
  */
 function generateReportPage(
   doc: jsPDF,
@@ -78,6 +83,8 @@ function generateReportPage(
  * 批量生成报告（处理大数据量优化）
  * @param doc PDF 文档实例
  * @param selectedMap 选中的报告数据
+ * @param autoTable jspdf-autotable 绘表函数
+ * @param pdfUtils PDF 工具函数模块
  * @param onProgress 进度回调
  */
 async function generateAllReports(

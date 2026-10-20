@@ -242,7 +242,7 @@ export default function EmployeeList() {
         open={isModalOpen}
         width={640}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
-        destroyOnClose
+        destroyOnHidden
         onOk={() => formRef.current?.submit()}
         onCancel={() => {
           resetFormState()

@@ -87,14 +87,15 @@ function CombinedItemSelect({
 
   return (
     <Select
-      showSearch
+      showSearch={{
+        filterOption: (input, opt) =>
+          (opt?.search ?? '').toLowerCase().includes(input.toLowerCase()),
+      }}
       allowClear
       value={compositeValue}
       options={options}
       onChange={handleChange}
       placeholder="选择型号 / 名称 / 规格"
-      filterOption={(input, opt) =>
-        (opt?.search ?? '').toLowerCase().includes(input.toLowerCase())}
       disabled={disabled}
       style={{ width: '100%' }}
     />
@@ -175,10 +176,9 @@ export default function CuttingProcessForm({
         rules={[{ required: true, message: '请选择项目' }]}
       >
         <Select
-          showSearch
+          showSearch={{ optionFilterProp: 'search' }}
           placeholder="搜索项目名称 / 客户 / 产品"
           onChange={handleOrderChange}
-          optionFilterProp="search"
           options={orderOptions.map(opt => ({
             value: opt.value,
             label: (

@@ -1,19 +1,11 @@
-import type { FormInstance } from 'antd'
-import type {
-  ProcessStandardRecordType,
-  StandardTime,
-  StandardTimeFormValues,
-} from '@/services/apiStandardTimes'
+import type { StandardTime } from '@/services/apiStandardTimes'
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/16/solid'
-import { App, Button, Modal, Splitter } from 'antd'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Button, Modal, Splitter } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
 
-import { useSearchParams } from 'react-router-dom'
 import { isTeamLeaderOnly } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { getProcessStandardImageExportFile } from '@/services/apiProcessStandardImages'
-import { getAllStandardTimesForExport } from '@/services/apiStandardTimes'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -26,78 +18,32 @@ import StandardTimeForm from './StandardTimeForm'
 import StandardTimeMobileList from './StandardTimeMobileList'
 import StandardTimeSearch from './StandardTimeSearch'
 import StandardTimeTable from './StandardTimeTable'
+import { useStandardTimeBatchActions } from './useStandardTimeBatchActions'
 import {
-  useCreateStandardTime,
-  useDeleteStandardTimes,
-  useStandardTimesList,
-  useUpdateStandardTime,
-  useUpdateStandardTimesLastProcess,
-  useUploadProcessStandardImage,
-} from './useStandardTimes'
-
-const loadCostAccountingExcel = () => import('@/utils/costAccountingExcel')
-
-function preloadCostAccountingExcel() {
-  void loadCostAccountingExcel()
-}
-
-function loadPrecisionFinishingProcessExcel() {
-  return import('@/utils/precisionFinishingProcessExcel')
-}
-
-function preloadPrecisionFinishingProcessExcel() {
-  void loadPrecisionFinishingProcessExcel()
-}
+  preloadCostAccountingExcel,
+  preloadPrecisionFinishingProcessExcel,
+  useStandardTimeExport,
+} from './useStandardTimeExport'
+import { useStandardTimeFormActions } from './useStandardTimeFormActions'
+import { useStandardTimesList } from './useStandardTimes'
+import { useStandardTimeSearchParams } from './useStandardTimeSearchParams'
 
 export default function StandardTimeList() {
-  const { message, modal } = App.useApp()
   const { role, employeeProfile } = useAuth()
   const isTeamLeaderMode = isTeamLeaderOnly(role)
   const currentUploader = employeeProfile?.name || null
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalTitle, setModalTitle] = useState('新建成本核算')
-  const [isEdit, setIsEdit] = useState(false)
-  const [isExporting, setIsExporting] = useState(false)
-  const [isFilterExporting, setIsFilterExporting] = useState(false)
-  const [isProcessExporting, setIsProcessExporting] = useState(false)
-  const [isProcessFilterExporting, setIsProcessFilterExporting]
-    = useState(false)
-  const [uploadingImageId, setUploadingImageId] = useState<string | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [searchParamsURL, setSearchParamsURL] = useSearchParams()
-  const page = Number(searchParamsURL.get('page')) || 1
-  const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const formRef = useRef<FormInstance<StandardTimeFormValues> | null>(null)
-  const setFormRef = useCallback(
-    (form: FormInstance<StandardTimeFormValues>) => {
-      formRef.current = form
-    },
-    [],
-  )
-  const [searchParams, setSearchParams] = useState<{
-    operation?: string
-    model?: string
-    partNo?: string
-    unmatchedOnly?: boolean
-    partNoOnly?: boolean
-    updatedStartDate?: string
-    updatedEndDate?: string
-    recordType?: ProcessStandardRecordType
-  }>({
-    operation: searchParamsURL.get('operation') || undefined,
-    model: searchParamsURL.get('model') || undefined,
-    partNo: searchParamsURL.get('partNo') || undefined,
-    unmatchedOnly: searchParamsURL.get('unmatchedOnly') === 'true' || undefined,
-    partNoOnly: searchParamsURL.get('partNoOnly') === 'true' || undefined,
-    updatedStartDate: searchParamsURL.get('updatedStartDate') || undefined,
-    updatedEndDate: searchParamsURL.get('updatedEndDate') || undefined,
-    recordType:
-      (searchParamsURL.get('recordType') as ProcessStandardRecordType)
-      || undefined,
-  })
-  const [editingRecord, setEditingRecord] = useState<StandardTime | null>(null)
   const [activeRecord, setActiveRecord] = useState<StandardTime | null>(null)
+  const {
+    page,
+    pageSize,
+    searchParams,
+    searchParamsURL,
+    setSearchParamsURL,
+    applySearch,
+    resetSearch,
+  } = useStandardTimeSearchParams()
 
   const { data, isLoading } = useStandardTimesList({
     page,
@@ -105,510 +51,73 @@ export default function StandardTimeList() {
     searchParams,
   })
 
-  const createMutation = useCreateStandardTime()
-  const updateMutation = useUpdateStandardTime()
-  const lastProcessMutation = useUpdateStandardTimesLastProcess()
-  const deleteMutation = useDeleteStandardTimes()
-  const uploadImageMutation = useUploadProcessStandardImage()
+  const {
+    isModalOpen,
+    modalTitle,
+    isEdit,
+    editingRecord,
+    isSubmitting,
+    isCreating,
+    uploadingImageId,
+    formRef,
+    setFormRef,
+    handleCreate,
+    handleEdit,
+    handleFinish,
+    handleUploadProcessImage,
+    resetFormState,
+  } = useStandardTimeFormActions({
+    items: data?.items,
+    isTeamLeaderMode,
+    currentUploader,
+    selectedRowKeys,
+    setSelectedRowKeys,
+  })
+
+  const {
+    handleDelete,
+    handleBatchLastProcess,
+    isDeleting,
+    isUpdatingLastProcess,
+  } = useStandardTimeBatchActions({
+    isTeamLeaderMode,
+    selectedRowKeys,
+    setSelectedRowKeys,
+    setActiveRecord,
+  })
+
+  const {
+    handleExport,
+    handleFilterExport,
+    handleProcessExport,
+    handleProcessFilterExport,
+    isExporting,
+    isFilterExporting,
+    isProcessExporting,
+    isProcessFilterExporting,
+  } = useStandardTimeExport({
+    items: data?.items,
+    selectedRowKeys,
+    searchParams,
+  })
 
   const { tableContainerRef, paginationRef, scrollY, rowHeight }
     = useTableHeight({
       targetRowCount: 10,
     })
 
-  const handleCreate = useCallback(() => {
-    setIsEdit(false)
-    setEditingRecord(null)
-    setSelectedRowKeys([])
-    setModalTitle(isTeamLeaderMode ? '创建理论工时' : '新建成本核算')
-    setIsModalOpen(true)
-    formRef.current?.resetFields()
-  }, [isTeamLeaderMode])
-
-  const resetFormState = useCallback(() => {
-    setIsModalOpen(false)
-    setIsEdit(false)
-    setEditingRecord(null)
-    setSelectedRowKeys([])
-    formRef.current?.resetFields()
-  }, [])
-
-  const handleEdit = useCallback(
-    (record?: StandardTime) => {
-      const targetRecord
-        = record || data?.items.find(item => item.id === selectedRowKeys[0])
-
-      if (!record && selectedRowKeys.length !== 1) {
-        message.warning('请选择一条数据进行编辑')
-        return
-      }
-
-      if (!targetRecord) {
-        message.warning('请选择一条数据进行编辑')
-        return
-      }
-
-      setEditingRecord(targetRecord)
-      setSelectedRowKeys(targetRecord.id ? [targetRecord.id] : [])
-      setIsEdit(true)
-      setModalTitle(isTeamLeaderMode ? '编辑理论工时' : '编辑成本核算')
-      setIsModalOpen(true)
-    },
-    [data?.items, isTeamLeaderMode, message, selectedRowKeys],
-  )
-
-  const handleDelete = useCallback(async () => {
-    if (isTeamLeaderMode) {
-      message.warning('班组长不能删除成本核算')
-      return
-    }
-
-    if (selectedRowKeys.length === 0) {
-      message.warning('请选择至少一条数据')
-      return
-    }
-
-    try {
-      await deleteMutation.mutateAsync(selectedRowKeys as string[])
-      message.success('成本核算删除成功')
-      setSelectedRowKeys([])
-    }
-    catch (error) {
-      if (error instanceof Error) {
-        message.error(error.message)
-      }
-      else {
-        message.error('删除成本核算失败，请稍后重试')
-      }
-    }
-  }, [deleteMutation, isTeamLeaderMode, message, selectedRowKeys])
-
-  const handleBatchLastProcess = useCallback(
-    (isLastProcess: boolean) => {
-      if (isTeamLeaderMode) {
-        message.warning('班组长不能批量修改末道状态')
-        return
-      }
-
-      if (selectedRowKeys.length === 0) {
-        message.warning('请选择至少一条成本核算数据')
-        return
-      }
-
-      const selectedIds = selectedRowKeys.map(String)
-      const actionLabel = isLastProcess ? '设为末道' : '取消末道'
-
-      modal.confirm({
-        title: actionLabel,
-        content: `确认将已选 ${selectedIds.length} 条成本核算${actionLabel}？`,
-        okText: '确认',
-        cancelText: '取消',
-        onOk: async () => {
-          try {
-            await lastProcessMutation.mutateAsync({
-              ids: selectedIds,
-              isLastProcess,
-            })
-            message.success(`已${actionLabel} ${selectedIds.length} 条成本核算`)
-            setActiveRecord(current =>
-              current?.id && selectedIds.includes(current.id)
-                ? { ...current, is_last_process: isLastProcess }
-                : current,
-            )
-            setSelectedRowKeys([])
-          }
-          catch (error) {
-            if (error instanceof Error) {
-              message.error(error.message)
-            }
-            else {
-              message.error('更新末道状态失败，请稍后重试')
-            }
-          }
-        },
-      })
-    },
-    [isTeamLeaderMode, lastProcessMutation, message, modal, selectedRowKeys],
-  )
-
-  const handleExport = useCallback(async () => {
-    const selectedSet = new Set(selectedRowKeys)
-    const selectedRecords = (data?.items || []).filter(item =>
-      selectedSet.has(item.id || ''),
-    )
-
-    if (selectedRecords.length === 0) {
-      message.warning('请先选择要导出的成本核算数据')
-      return
-    }
-
-    setIsExporting(true)
-    // 先让 React 渲染 loading 状态，再执行同步的 Excel 生成
-    await new Promise<void>(resolve => setTimeout(resolve, 0))
-    try {
-      const { exportCostAccountingToExcel } = await loadCostAccountingExcel()
-      exportCostAccountingToExcel(selectedRecords)
-      message.success(`已导出 ${selectedRecords.length} 条成本核算数据`)
-    }
-    catch (error) {
-      if (error instanceof Error) {
-        message.error(error.message)
-      }
-      else {
-        message.error('导出成本核算失败，请稍后重试')
-      }
-    }
-    finally {
-      setIsExporting(false)
-    }
-  }, [data?.items, message, selectedRowKeys])
-
-  const handleFilterExport = useCallback(async () => {
-    setIsFilterExporting(true)
-    try {
-      const records = await getAllStandardTimesForExport(searchParams)
-      if (records.length === 0) {
-        message.warning('当前筛选条件下无数据可导出')
-        return
-      }
-      await new Promise<void>(resolve => setTimeout(resolve, 0))
-      const { exportCostAccountingToExcel } = await loadCostAccountingExcel()
-      exportCostAccountingToExcel(records)
-      message.success(`已按筛选条件导出 ${records.length} 条成本核算数据`)
-    }
-    catch (error) {
-      if (error instanceof Error) {
-        message.error(error.message)
-      }
-      else {
-        message.error('导出成本核算失败，请稍后重试')
-      }
-    }
-    finally {
-      setIsFilterExporting(false)
-    }
-  }, [message, searchParams])
-
-  const exportProcessSheet = useCallback(async (records: StandardTime[]) => {
-    const { exportPrecisionFinishingProcessToExcel }
-      = await loadPrecisionFinishingProcessExcel()
-
-    await exportPrecisionFinishingProcessToExcel(records, async (record) => {
-      if (
-        !record.process_image_path
-        || !record.process_image_name
-        || !record.process_image_mime_type
-      ) {
-        return null
-      }
-
-      const image = await getProcessStandardImageExportFile({
-        filePath: record.process_image_path,
-        fileName: record.process_image_name,
-        mimeType: record.process_image_mime_type,
-      })
-
-      return { ...image, rowNumber: 0, columnNumber: 12 }
-    })
-  }, [])
-
-  const handleProcessExport = useCallback(async () => {
-    const selectedSet = new Set(selectedRowKeys)
-    const selectedRecords = (data?.items || []).filter(item =>
-      selectedSet.has(item.id || ''),
-    )
-
-    if (selectedRecords.length === 0) {
-      message.warning('请先选择要导出的工艺数据')
-      return
-    }
-
-    setIsProcessExporting(true)
-    await new Promise<void>(resolve => setTimeout(resolve, 0))
-    try {
-      await exportProcessSheet(selectedRecords)
-      message.success(`已导出 ${selectedRecords.length} 条工艺数据`)
-    }
-    catch (error) {
-      message.error(
-        error instanceof Error ? error.message : '导出工艺表失败，请稍后重试',
-      )
-    }
-    finally {
-      setIsProcessExporting(false)
-    }
-  }, [data?.items, exportProcessSheet, message, selectedRowKeys])
-
-  const handleProcessFilterExport = useCallback(async () => {
-    setIsProcessFilterExporting(true)
-    try {
-      const records = await getAllStandardTimesForExport(searchParams)
-      if (records.length === 0) {
-        message.warning('当前筛选条件下无工艺数据可导出')
-        return
-      }
-
-      await new Promise<void>(resolve => setTimeout(resolve, 0))
-      await exportProcessSheet(records)
-      message.success(`已按筛选条件导出 ${records.length} 条工艺数据`)
-    }
-    catch (error) {
-      message.error(
-        error instanceof Error ? error.message : '导出工艺表失败，请稍后重试',
-      )
-    }
-    finally {
-      setIsProcessFilterExporting(false)
-    }
-  }, [exportProcessSheet, message, searchParams])
-
-  const handleUploadProcessImage = useCallback(
-    async (record: StandardTime, file: File) => {
-      if (!record.id)
-        return
-
-      setUploadingImageId(record.id)
-      try {
-        await uploadImageMutation.mutateAsync({
-          standard: {
-            id: record.id,
-            process_image_path: record.process_image_path,
-          },
-          file,
-        })
-        message.success('工艺图示上传成功')
-      }
-      catch (error) {
-        message.error(
-          error instanceof Error
-            ? error.message
-            : '工艺图示上传失败，请稍后重试',
-        )
-      }
-      finally {
-        setUploadingImageId(null)
-      }
-    },
-    [message, uploadImageMutation],
-  )
-
-  const handleFinish = useCallback(
-    async (values: StandardTimeFormValues) => {
-      try {
-        const nextValues: StandardTimeFormValues = isTeamLeaderMode
-          ? {
-              customer: editingRecord?.customer ?? values.customer,
-              job_name: editingRecord?.job_name ?? values.job_name,
-              equipment_no: editingRecord?.equipment_no ?? values.equipment_no,
-              operation: values.operation,
-              model: isEdit
-                ? editingRecord?.model || values.model
-                : values.model,
-              standard_seconds: isEdit
-                ? editingRecord?.standard_seconds || 0
-                : 0,
-              theoretical_seconds: values.theoretical_seconds,
-              labor_rate: editingRecord?.labor_rate ?? values.labor_rate ?? 0,
-              labor_cost_coefficient:
-                editingRecord?.labor_cost_coefficient
-                ?? values.labor_cost_coefficient
-                ?? 1,
-              equipment_rate:
-                editingRecord?.equipment_rate ?? values.equipment_rate ?? 0,
-              tool_rate: editingRecord?.tool_rate ?? values.tool_rate ?? 0,
-              cutting_fluid_rate:
-                editingRecord?.cutting_fluid_rate
-                ?? values.cutting_fluid_rate
-                ?? 0,
-              fixture_rate:
-                editingRecord?.fixture_rate ?? values.fixture_rate ?? 0,
-              inspection_seconds:
-                editingRecord?.inspection_seconds
-                ?? values.inspection_seconds
-                ?? 0,
-              daily_management_cost:
-                editingRecord?.daily_management_cost
-                ?? values.daily_management_cost
-                ?? 0,
-              daily_total_hours:
-                editingRecord?.daily_total_hours
-                ?? values.daily_total_hours
-                ?? 0,
-              uploaded_by_name: isEdit
-                ? editingRecord?.uploaded_by_name || null
-                : currentUploader || values.uploaded_by_name || null,
-              remark: editingRecord?.remark ?? values.remark ?? null,
-              length: values.length ?? editingRecord?.length ?? 0,
-              part_no: values.part_no ?? editingRecord?.part_no ?? null,
-              tooling_fixture:
-                values.tooling_fixture
-                ?? editingRecord?.tooling_fixture
-                ?? null,
-              clamping_count:
-                values.clamping_count ?? editingRecord?.clamping_count ?? null,
-              clamping_quantity:
-                values.clamping_quantity
-                ?? editingRecord?.clamping_quantity
-                ?? null,
-              operator_count:
-                values.operator_count ?? editingRecord?.operator_count ?? null,
-              process_image_path: editingRecord?.process_image_path ?? null,
-              process_image_name: editingRecord?.process_image_name ?? null,
-              process_image_mime_type:
-                editingRecord?.process_image_mime_type ?? null,
-              process_image_size: editingRecord?.process_image_size ?? null,
-              process_image_uploaded_at:
-                editingRecord?.process_image_uploaded_at ?? null,
-              process_note:
-                values.process_note ?? editingRecord?.process_note ?? null,
-              record_type:
-                editingRecord?.record_type ?? values.record_type ?? 'B',
-            }
-          : {
-              ...values,
-              uploaded_by_name: isEdit
-                ? editingRecord?.uploaded_by_name || null
-                : currentUploader || values.uploaded_by_name || null,
-            }
-
-        if (isEdit && selectedRowKeys[0]) {
-          const standardSecondsChanged
-            = editingRecord?.standard_seconds !== nextValues.standard_seconds
-          const operationChanged
-            = editingRecord?.operation !== nextValues.operation
-          const modelChanged = editingRecord?.model !== nextValues.model
-          const relatedOrdersSynced
-            = standardSecondsChanged || operationChanged || modelChanged
-
-          await updateMutation.mutateAsync({
-            id: selectedRowKeys[0] as string,
-            values: nextValues,
-          })
-          message.success(
-            relatedOrdersSynced
-              ? '成本核算更新成功，关联工单已同步修正'
-              : isTeamLeaderMode
-                ? '理论工时更新成功'
-                : '成本核算更新成功',
-          )
-        }
-        else {
-          await createMutation.mutateAsync(nextValues)
-          message.success(
-            isTeamLeaderMode ? '理论工时创建成功' : '成本核算创建成功',
-          )
-        }
-
-        resetFormState()
-      }
-      catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
-      }
-    },
-    [
-      createMutation,
-      editingRecord,
-      isEdit,
-      isTeamLeaderMode,
-      message,
-      resetFormState,
-      selectedRowKeys,
-      currentUploader,
-      updateMutation,
-    ],
-  )
-
   const handleSearch = useCallback(
     (params: typeof searchParams) => {
-      setSearchParams(params)
       setSelectedRowKeys([])
-      const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
-
-      nextSearchParamsURL.set('page', '1')
-
-      if (params.operation) {
-        nextSearchParamsURL.set('operation', params.operation)
-      }
-      else {
-        nextSearchParamsURL.delete('operation')
-      }
-
-      if (params.model) {
-        nextSearchParamsURL.set('model', params.model)
-      }
-      else {
-        nextSearchParamsURL.delete('model')
-      }
-
-      if (params.partNo) {
-        nextSearchParamsURL.set('partNo', params.partNo)
-      }
-      else {
-        nextSearchParamsURL.delete('partNo')
-      }
-
-      if (params.unmatchedOnly) {
-        nextSearchParamsURL.set('unmatchedOnly', 'true')
-      }
-      else {
-        nextSearchParamsURL.delete('unmatchedOnly')
-      }
-
-      if (params.partNoOnly) {
-        nextSearchParamsURL.set('partNoOnly', 'true')
-      }
-      else {
-        nextSearchParamsURL.delete('partNoOnly')
-      }
-
-      if (params.recordType) {
-        nextSearchParamsURL.set('recordType', params.recordType)
-      }
-      else {
-        nextSearchParamsURL.delete('recordType')
-      }
-
-      if (params.updatedStartDate) {
-        nextSearchParamsURL.set('updatedStartDate', params.updatedStartDate)
-      }
-      else {
-        nextSearchParamsURL.delete('updatedStartDate')
-      }
-
-      if (params.updatedEndDate) {
-        nextSearchParamsURL.set('updatedEndDate', params.updatedEndDate)
-      }
-      else {
-        nextSearchParamsURL.delete('updatedEndDate')
-      }
-
-      setSearchParamsURL(nextSearchParamsURL)
+      applySearch(params)
     },
-    [searchParamsURL, setSearchParamsURL],
+    [applySearch],
   )
 
   const handleResetSearch = useCallback(() => {
-    setSearchParams({})
     setSelectedRowKeys([])
-    const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
-
-    nextSearchParamsURL.set('page', '1')
-    nextSearchParamsURL.delete('operation')
-    nextSearchParamsURL.delete('model')
-    nextSearchParamsURL.delete('partNo')
-    nextSearchParamsURL.delete('unmatchedOnly')
-    nextSearchParamsURL.delete('partNoOnly')
-    nextSearchParamsURL.delete('recordType')
-    nextSearchParamsURL.delete('updatedStartDate')
-    nextSearchParamsURL.delete('updatedEndDate')
-
-    setSearchParamsURL(nextSearchParamsURL)
-  }, [searchParamsURL, setSearchParamsURL])
+    resetSearch()
+  }, [resetSearch])
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
@@ -646,7 +155,7 @@ export default function StandardTimeList() {
               <PermissionButton
                 type="text"
                 icon={<CheckCircleIcon className="size-4 text-emerald-500" />}
-                loading={lastProcessMutation.isPending}
+                loading={isUpdatingLastProcess}
                 permissionKey="feature:standard-time-list.edit"
                 noPermissionTip="无编辑权限"
                 onClick={() => handleBatchLastProcess(true)}
@@ -656,7 +165,7 @@ export default function StandardTimeList() {
               <PermissionButton
                 type="text"
                 icon={<XCircleIcon className="size-4 text-red-400" />}
-                loading={lastProcessMutation.isPending}
+                loading={isUpdatingLastProcess}
                 permissionKey="feature:standard-time-list.edit"
                 noPermissionTip="无编辑权限"
                 onClick={() => handleBatchLastProcess(false)}
@@ -700,7 +209,7 @@ export default function StandardTimeList() {
               </ExportButton>
               <DeleteButton
                 onConfirm={handleDelete}
-                isDeleting={deleteMutation.isPending}
+                isDeleting={isDeleting}
                 count={selectedRowKeys.length}
                 title="删除成本核算"
                 itemName="成本核算"
@@ -801,7 +310,7 @@ export default function StandardTimeList() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
-        confirmLoading={createMutation.isPending || updateMutation.isPending}
+        confirmLoading={isSubmitting}
         destroyOnHidden
         width={isTeamLeaderMode ? 'calc(100vw - 24px)' : 900}
         style={isTeamLeaderMode ? { top: 16, maxWidth: 520 } : undefined}
@@ -811,7 +320,7 @@ export default function StandardTimeList() {
         <StandardTimeForm
           onFinish={handleFinish}
           setFormRef={setFormRef}
-          isCreating={createMutation.isPending}
+          isCreating={isCreating}
           isEdit={isEdit}
           initialValues={isEdit && editingRecord ? editingRecord : undefined}
           mode={isTeamLeaderMode ? 'team_leader' : 'admin'}

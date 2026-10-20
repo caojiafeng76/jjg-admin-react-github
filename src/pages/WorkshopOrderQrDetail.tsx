@@ -59,7 +59,7 @@ export default function WorkshopOrderQrDetail() {
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Spin size="large" tip="订单信息加载中" />
+        <Spin size="large" description="订单信息加载中" />
       </div>
     )
   }
@@ -91,7 +91,7 @@ export default function WorkshopOrderQrDetail() {
       </Space>
 
       <Card className="shadow-sm">
-        <Space direction="vertical" size={12} className="w-full">
+        <Space orientation="vertical" size={12} className="w-full">
           <Space align="start" className="w-full justify-between gap-4">
             <div>
               <Title level={3} style={{ marginBottom: 8 }}>
@@ -116,7 +116,7 @@ export default function WorkshopOrderQrDetail() {
             type="info"
             showIcon
             icon={<ViewfinderCircleIcon className="size-4" />}
-            message={`项目号：${formatText(data.project_no)}`}
+            title={`项目号：${formatText(data.project_no)}`}
             description="当前页面为订单只读信息页，不提供编辑操作。"
           />
 
@@ -124,7 +124,7 @@ export default function WorkshopOrderQrDetail() {
             bordered
             column={1}
             size="middle"
-            labelStyle={{ width: 120 }}
+            styles={{ label: { width: 120 } }}
             items={[
               {
                 key: 'project_no',

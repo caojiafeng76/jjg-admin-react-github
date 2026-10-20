@@ -32,6 +32,7 @@ bun format                # 等同 eslint . --fix（项目不再使用 Prettier�
 
 # AI / Spec / 数据库工具
 bun run ai:doctor          # 检查本地 AI 工具链
+bun run skills:sync        # 以 .agents/skills 为准镜像到 .claude/skills（守卫测试会校验两者一致）
 bun run graphify:build     # 构建 Graphify 代码索引
 bun run graphify:update    # 增量更新 Graphify 代码索引
 bun run db:doctor          # 检查数据库连接与工具状态

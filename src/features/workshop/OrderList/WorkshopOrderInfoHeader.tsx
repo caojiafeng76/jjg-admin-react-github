@@ -53,7 +53,7 @@ export default function WorkshopOrderInfoHeader({
           showIcon
           type="warning"
           className="mb-3"
-          message={(
+          title={(
             <span className="flex items-center gap-2">
               <span className="flex size-5 items-center justify-center rounded-full bg-amber-100">
                 <svg
@@ -318,7 +318,7 @@ export default function WorkshopOrderInfoHeader({
             '0%': '#3b82f6',
             '100%': progressPercent >= 100 ? '#22c55e' : '#60a5fa',
           }}
-          trailColor="#e5e7eb"
+          railColor="#e5e7eb"
           format={pct => (
             <span className="text-xs font-medium text-slate-600">
               {outbound} / {orderQty} ({pct}%)

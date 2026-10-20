@@ -63,7 +63,7 @@ export function TableEmpty({
   return (
     <Empty
       image={<InboxOutlined className="text-slate-300 dark:text-slate-600" />}
-      imageStyle={{ height: 48 }}
+      styles={{ image: { height: 48 } }}
       description={(
         <span className="text-slate-500 dark:text-slate-400">
           {title}

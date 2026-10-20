@@ -1,6 +1,6 @@
 import type { Dispatch, ReactNode } from 'react'
 import { useLocalStorage } from '@hooks/useLocalStorage'
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 const DarkModeContext = createContext<{
   darkMode: boolean | Dispatch<React.SetStateAction<boolean>>
@@ -14,19 +14,19 @@ function DarkModeProvider({ children }: { children: ReactNode }) {
   const [darkMode, setDarkMode] = useLocalStorage(false, 'darkMode')
 
   return (
-    <DarkModeContext.Provider
+    <DarkModeContext
       value={{
         darkMode,
         setDarkMode,
       }}
     >
       {children}
-    </DarkModeContext.Provider>
+    </DarkModeContext>
   )
 }
 
 function useDarkMode() {
-  const context = useContext(DarkModeContext)
+  const context = use(DarkModeContext)
   if (context === undefined)
     throw new Error('useDarkMode must be used within a DarkModeProvider')
   return context

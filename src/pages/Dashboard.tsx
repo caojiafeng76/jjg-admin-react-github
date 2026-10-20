@@ -159,7 +159,7 @@ export default function Dashboard() {
         <Alert
           type="error"
           showIcon
-          message="看板数据加载失败"
+          title="看板数据加载失败"
           description={(error as Error)?.message || '请稍后重试'}
           action={(
             <Button size="small" loading={isFetching} onClick={() => refetch()}>

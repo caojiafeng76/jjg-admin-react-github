@@ -12,7 +12,7 @@ interface UseTableHeightOptions {
 /**
  * 动态计算表格高度和行高，确保指定数量的行撑满容器
  * @param options 配置选项
- * @returns { tableContainerRef, paginationRef, scrollY, rowHeight }
+ * @returns 表格容器 ref、分页器 ref、表体滚动高度 scrollY 与行高 rowHeight
  */
 export function useTableHeight(options: UseTableHeightOptions = {}) {
   const {
@@ -39,6 +39,8 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
   } | null>(null)
 
   useEffect(() => {
+    let resetUpdatingTimer: ReturnType<typeof setTimeout> | null = null
+
     const updateTableHeight = () => {
       // 如果正在更新中，跳过本次计算，避免循环
       if (isUpdatingRef.current)
@@ -133,7 +135,7 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
             }
 
             // 使用 setTimeout 确保状态更新完成后再重置标志
-            setTimeout(() => {
+            resetUpdatingTimer = setTimeout(() => {
               isUpdatingRef.current = false
             }, 0)
           }
@@ -177,6 +179,11 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
 
     return () => {
       clearTimeout(timeoutId)
+      if (resetUpdatingTimer) {
+        clearTimeout(resetUpdatingTimer)
+        // 定时器被取消时同步复位，避免下一轮计算一直被跳过
+        isUpdatingRef.current = false
+      }
       if (debounceTimer) {
         clearTimeout(debounceTimer)
       }

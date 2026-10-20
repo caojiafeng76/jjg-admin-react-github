@@ -3,6 +3,12 @@ import { resolve } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import {
+  diffSkillDirs,
+  SKILLS_MIRROR_DIRS,
+  SKILLS_SOURCE_DIR,
+} from './sync-skills.mjs'
+
 function readWorkspaceFile(path: string): string {
   return readFileSync(resolve(process.cwd(), path), 'utf8')
 }
@@ -84,6 +90,24 @@ describe('P3 engineering guards', () => {
     expect(packageJson.scripts?.['check:bundle']).toBe(
       'bun scripts/check-bundle-budget.mjs',
     )
+  })
+
+  it('keeps mirrored AI skill directories identical to .agents/skills', () => {
+    const packageJson = JSON.parse(readWorkspaceFile('package.json')) as {
+      scripts?: Record<string, string>
+    }
+    expect(packageJson.scripts?.['skills:sync']).toBe(
+      'bun scripts/sync-skills.mjs',
+    )
+
+    const sourceDir = resolve(process.cwd(), SKILLS_SOURCE_DIR)
+    for (const mirror of SKILLS_MIRROR_DIRS) {
+      // 不一致时执行 bun run skills:sync
+      expect(
+        diffSkillDirs(sourceDir, resolve(process.cwd(), mirror)),
+        `${mirror} 与 ${SKILLS_SOURCE_DIR} 不一致，请执行 bun run skills:sync`,
+      ).toEqual({ missing: [], extra: [], changed: [] })
+    }
   })
 
   it('keeps a single generated Supabase database type source', () => {

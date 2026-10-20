@@ -58,7 +58,7 @@ export default function RoleCreateModal({ open, onClose, onCreated }: Props) {
         okText="创建"
         cancelText="取消"
         confirmLoading={isPending}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item

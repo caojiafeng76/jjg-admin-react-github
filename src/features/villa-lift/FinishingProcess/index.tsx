@@ -198,12 +198,11 @@ export default function FinishingProcessPage() {
         )}
         <Select
           allowClear
-          showSearch
+          showSearch={{ optionFilterProp: 'search' }}
           placeholder="按项目筛选"
           style={{ width: 240 }}
           value={filterOrderId}
           onChange={handleOrderFilter}
-          optionFilterProp="search"
           options={ordersData.map(o => ({
             value: o.id,
             label: `${o.project_name} · ${o.customer}`,
@@ -245,7 +244,7 @@ export default function FinishingProcessPage() {
         confirmLoading={createMutation.isPending}
         okButtonProps={{ disabled: viewerDenied }}
         width={800}
-        destroyOnClose
+        destroyOnHidden
       >
         <FinishingProcessForm
           orders={ordersData}

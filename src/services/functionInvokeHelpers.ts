@@ -12,6 +12,7 @@ import { FunctionRegion } from '@supabase/supabase-js'
  * - 无 JSON 时按 HTTP 状态码映射为中文提示
  *
  * @param error - supabase.functions.invoke 抛出的 error
+ * @param options - 可选配置
  * @param options.unauthorizedMessage - 401 状态码文案（默认「未登录，无法执行此操作」）
  * @returns 错误信息；无法提取时返回 null
  */

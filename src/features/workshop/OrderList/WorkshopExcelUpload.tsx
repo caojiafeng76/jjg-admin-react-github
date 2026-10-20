@@ -1,7 +1,7 @@
 import type { UploadFile } from 'antd/es/upload/interface'
 import type { WorkshopOrder } from './index'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
-import { Button, message, Upload } from 'antd'
+import { App, Button, Upload } from 'antd'
 import { useState } from 'react'
 import {
   parseWorkshopOrderExcel,
@@ -14,6 +14,7 @@ interface Props {
 }
 
 export default function WorkshopExcelUpload({ onParsed, disabled }: Props) {
+  const { message } = App.useApp()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [loading, setLoading] = useState(false)
 

@@ -265,7 +265,7 @@ export default function PackagingStandardTimeListPage() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
-        destroyOnClose
+        destroyOnHidden
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         okButtonProps={{
           disabled: viewerDenied || (isEdit ? !canEdit : !canCreate),

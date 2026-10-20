@@ -73,8 +73,10 @@ export default function AttendanceDetailForm({
         <AutoComplete
           options={nameOptions}
           placeholder="请选择或输入姓名"
-          filterOption={(input, option) =>
-            (option?.value ?? '').includes(input)}
+          showSearch={{
+            filterOption: (input, option) =>
+              (option?.value ?? '').includes(input),
+          }}
           allowClear
         />
       </Form.Item>
