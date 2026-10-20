@@ -2,16 +2,16 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const MAX_JSON_BODY_BYTES = 16 * 1024
 
-export type EdgeProxyRateLimitScope =
-  | 'syney-store-report'
-  | 'youmai-purchase-order'
+export type EdgeProxyRateLimitScope
+  = | 'syney-store-report'
+    | 'youmai-purchase-order'
 
-export type EdgeProxyAuthorizationResult =
-  | { ok: true; userId: string }
-  | { ok: false; status: 401 | 403 }
+export type EdgeProxyAuthorizationResult
+  = | { ok: true, userId: string }
+    | { ok: false, status: 401 | 403 }
 
 export function hasBearerAuthorization(request: Request): boolean {
-  return /^Bearer\s+[^\s]+$/i.test(request.headers.get('Authorization') ?? '')
+  return /^Bearer\s+\S+$/i.test(request.headers.get('Authorization') ?? '')
 }
 
 export function getProxyCorsHeaders(request: Request): Record<string, string> {
@@ -25,7 +25,7 @@ export function getProxyCorsHeaders(request: Request): Record<string, string> {
       'authorization, x-client-info, apikey, content-type, x-region',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Expose-Headers': 'x-sb-edge-region',
-    Vary: 'Origin',
+    'Vary': 'Origin',
   }
 
   if (allowedOrigins.includes(requestOrigin)) {
@@ -37,14 +37,14 @@ export function getProxyCorsHeaders(request: Request): Record<string, string> {
 
 export function isProxyOriginAllowed(request: Request): boolean {
   return (
-    !request.headers.has('Origin') ||
-    Boolean(getProxyCorsHeaders(request)['Access-Control-Allow-Origin'])
+    !request.headers.has('Origin')
+    || Boolean(getProxyCorsHeaders(request)['Access-Control-Allow-Origin'])
   )
 }
 
 export async function readLimitedJsonBody<T>(
   request: Request,
-): Promise<{ ok: true; payload: T } | { ok: false; status: 400 | 413 }> {
+): Promise<{ ok: true, payload: T } | { ok: false, status: 400 | 413 }> {
   const declaredLength = Number(request.headers.get('Content-Length'))
   if (Number.isFinite(declaredLength) && declaredLength > MAX_JSON_BODY_BYTES) {
     return { ok: false, status: 413 }
@@ -60,7 +60,8 @@ export async function readLimitedJsonBody<T>(
 
   while (true) {
     const { done, value } = await reader.read()
-    if (done) break
+    if (done)
+      break
     byteLength += value.byteLength
     if (byteLength > MAX_JSON_BODY_BYTES) {
       await reader.cancel()
@@ -85,7 +86,8 @@ export async function readLimitedJsonBody<T>(
       ok: true,
       payload: payload as T,
     }
-  } catch {
+  }
+  catch {
     return { ok: false, status: 400 }
   }
 }
@@ -96,15 +98,15 @@ export async function authorizeEdgeProxyRequest(
   diagnose: boolean,
 ): Promise<EdgeProxyAuthorizationResult> {
   const authorization = request.headers.get('Authorization') ?? ''
-  const token = authorization.match(/^Bearer\s+([^\s]+)$/i)?.[1]
+  const token = authorization.match(/^Bearer\s+(\S+)$/i)?.[1]
   if (!token) {
     return { ok: false, status: 401 }
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')?.trim()
-  const publishableKey =
-    Deno.env.get('SUPABASE_PUBLISHABLE_KEY')?.trim() ||
-    Deno.env.get('SUPABASE_ANON_KEY')?.trim()
+  const publishableKey
+    = Deno.env.get('SUPABASE_PUBLISHABLE_KEY')?.trim()
+      || Deno.env.get('SUPABASE_ANON_KEY')?.trim()
   if (!supabaseUrl || !publishableKey) {
     throw new Error('Supabase Edge authentication is not configured')
   }
@@ -157,26 +159,26 @@ export async function consumeEdgeProxyRateLimit(
   scope: EdgeProxyRateLimitScope,
 ): Promise<boolean> {
   const authorization = request.headers.get('Authorization') ?? ''
-  const token = authorization.match(/^Bearer\s+([^\s]+)$/i)?.[1]
+  const token = authorization.match(/^Bearer\s+(\S+)$/i)?.[1]
   const supabaseUrl = Deno.env.get('SUPABASE_URL')?.trim().replace(/\/$/, '')
-  const publishableKey =
-    Deno.env.get('SUPABASE_PUBLISHABLE_KEY')?.trim() ||
-    Deno.env.get('SUPABASE_ANON_KEY')?.trim()
+  const publishableKey
+    = Deno.env.get('SUPABASE_PUBLISHABLE_KEY')?.trim()
+      || Deno.env.get('SUPABASE_ANON_KEY')?.trim()
   if (!token || !supabaseUrl || !publishableKey) {
     throw new Error('Supabase Edge rate limiting is not configured')
   }
 
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip')?.trim() ||
-    'unknown'
+  const ip
+    = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')?.trim()
+      || 'unknown'
   const response = await fetch(
     `${supabaseUrl}/rest/v1/rpc/consume_proxy_rate_limit`,
     {
       method: 'POST',
       headers: {
-        apikey: publishableKey,
-        Authorization: `Bearer ${token}`,
+        'apikey': publishableKey,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -193,7 +195,8 @@ export async function consumeEdgeProxyRateLimit(
 }
 
 export function parseProxyIdentifier(value: unknown): string | null {
-  if (typeof value !== 'string') return null
+  if (typeof value !== 'string')
+    return null
   const identifier = value.trim()
   return identifier.length >= 1 && identifier.length <= 64 ? identifier : null
 }
@@ -202,22 +205,22 @@ export function safeErrorMetadata(error: unknown): {
   name: string
   status?: number
 } {
-  const candidateName =
-    error && typeof error === 'object' && 'name' in error
+  const candidateName
+    = error && typeof error === 'object' && 'name' in error
       ? String(error.name)
       : 'UnknownError'
-  const name = /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(candidateName)
+  const name = /^[A-Z][A-Z0-9]{0,63}$/i.test(candidateName)
     ? candidateName
     : 'UnknownError'
-  const candidateStatus =
-    error && typeof error === 'object' && 'status' in error
+  const candidateStatus
+    = error && typeof error === 'object' && 'status' in error
       ? Number(error.status)
       : undefined
 
-  return Number.isInteger(candidateStatus) &&
-    candidateStatus !== undefined &&
-    candidateStatus >= 100 &&
-    candidateStatus <= 599
+  return Number.isInteger(candidateStatus)
+    && candidateStatus !== undefined
+    && candidateStatus >= 100
+    && candidateStatus <= 599
     ? { name, status: candidateStatus }
     : { name }
 }
@@ -225,11 +228,13 @@ export function safeErrorMetadata(error: unknown): {
 export function diagnosticErrorCategory(
   error: unknown,
 ): 'network' | 'request_failed' | 'timeout' {
-  const name =
-    error && typeof error === 'object' && 'name' in error
+  const name
+    = error && typeof error === 'object' && 'name' in error
       ? String(error.name)
       : ''
-  if (name === 'TimeoutError' || name === 'AbortError') return 'timeout'
-  if (name === 'TypeError') return 'network'
+  if (name === 'TimeoutError' || name === 'AbortError')
+    return 'timeout'
+  if (name === 'TypeError')
+    return 'network'
   return 'request_failed'
 }

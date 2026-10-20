@@ -1,7 +1,7 @@
 import { Tabs } from 'antd'
+import PermissionRegistry from './PermissionRegistry'
 import RolePermissionList from './RolePermissionList'
 import UserPermissionList from './UserPermissionList'
-import PermissionRegistry from './PermissionRegistry'
 
 export default function AccessManagement() {
   const items = [

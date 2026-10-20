@@ -1,5 +1,5 @@
-import { updateSyneyStoreReport } from '@/services/apiSyneyStoreReport'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { updateSyneyStoreReport } from '@/services/apiSyneyStoreReport'
 
 export function useUpdateDetail() {
   const { mutate: updateItem, isPending: isUpdating } = useMutationWithMessage({

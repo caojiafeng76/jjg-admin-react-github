@@ -31,11 +31,11 @@ export function calculateYoumaiWeightKg({
   const normalizedQuantity = Number(quantity ?? 0)
 
   if (
-    length === null ||
-    !Number.isFinite(normalizedSpecificGravity) ||
-    normalizedSpecificGravity <= 0 ||
-    !Number.isFinite(normalizedQuantity) ||
-    normalizedQuantity <= 0
+    length === null
+    || !Number.isFinite(normalizedSpecificGravity)
+    || normalizedSpecificGravity <= 0
+    || !Number.isFinite(normalizedQuantity)
+    || normalizedQuantity <= 0
   ) {
     return null
   }

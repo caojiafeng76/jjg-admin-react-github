@@ -1,9 +1,10 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { ToolingInventory } from '@/services/apiToolingInventory'
+import { Table } from 'antd'
+import { memo, useMemo } from 'react'
+
 import { formatNumber } from '@/utils/format'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { getFinalStockColorClass } from '../inventoryPresentation'
 
 interface Props {
@@ -156,9 +157,8 @@ function ToolingInventoryTable({
       rowClassName={(_, index) =>
         index % 2 === 0
           ? 'bg-white dark:bg-slate-800'
-          : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+          : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择刀具库存 ${record.tool_code || record.id}`,

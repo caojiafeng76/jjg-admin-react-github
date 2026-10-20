@@ -1,5 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  buildJobColumns,
+  buildPackagingProductionDetailsForDashboard,
+  EMPTY_ORDER_STATUS_DASHBOARD_KPIS,
+  getOrderStatusDashboard,
+} from './apiOrderStatusDashboard'
+import {
+  calculateInventoryQuantity,
+  getAutoCutQuantity,
+} from './apiOrderStatusDashboardCalculations'
+
 const { mockFrom, mockRpc } = vi.hoisted(() => ({
   mockFrom: vi.fn(),
   mockRpc: vi.fn(),
@@ -11,17 +22,6 @@ vi.mock('./supabase', () => ({
     rpc: mockRpc,
   },
 }))
-
-import {
-  buildJobColumns,
-  buildPackagingProductionDetailsForDashboard,
-  EMPTY_ORDER_STATUS_DASHBOARD_KPIS,
-  getOrderStatusDashboard,
-} from './apiOrderStatusDashboard'
-import {
-  calculateInventoryQuantity,
-  getAutoCutQuantity,
-} from './apiOrderStatusDashboardCalculations'
 
 function createQuery<T>(data: T[]) {
   const query = {

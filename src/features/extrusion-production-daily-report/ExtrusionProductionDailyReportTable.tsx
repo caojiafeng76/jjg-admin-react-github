@@ -1,7 +1,8 @@
-import { memo, useMemo } from 'react'
-import { Table, type TableColumnsType, type TableProps } from 'antd'
-
+import type { TableColumnsType, TableProps } from 'antd'
 import type { ExtrusionProductionDailyReportRow } from '@/services/apiExtrusionProductionDailyReport'
+import { Table } from 'antd'
+
+import { memo, useMemo } from 'react'
 
 interface Props {
   loading: boolean
@@ -30,7 +31,7 @@ function renderPercentage(value: number | null | undefined) {
   return `${value.toFixed(2)}%`
 }
 
-const ExtrusionProductionDailyReportTable = memo(function ExtrusionProductionDailyReportTable({
+const ExtrusionProductionDailyReportTable = memo(({
   loading,
   data,
   page,
@@ -38,7 +39,7 @@ const ExtrusionProductionDailyReportTable = memo(function ExtrusionProductionDai
   selectedRowKeys,
   onRowSelectionChange,
   scrollY = 400,
-}: Props) {
+}: Props) => {
   const columns: TableColumnsType<ExtrusionProductionDailyReportRow> = useMemo(
     () => [
       {
@@ -225,8 +226,8 @@ const ExtrusionProductionDailyReportTable = memo(function ExtrusionProductionDai
     [page, pageSize],
   )
 
-  const rowSelection: TableProps<ExtrusionProductionDailyReportRow>['rowSelection'] =
-    {
+  const rowSelection: TableProps<ExtrusionProductionDailyReportRow>['rowSelection']
+    = {
       selectedRowKeys,
       onChange: (keys, rows) => {
         onRowSelectionChange(keys, rows)

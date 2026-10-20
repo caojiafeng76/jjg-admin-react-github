@@ -1,12 +1,12 @@
-import XLSX from 'xlsx-js-style'
-
 import type { ProductionDailyReportRow } from '@/services/apiProductionDailyReport'
+
 import {
   autoFitColumnWidths,
   centerAllCells,
   EXCEL_WRITE_OPTIONS,
   setRowHeight,
 } from '@utils/excelStyleUtils'
+import XLSX from 'xlsx-js-style'
 import {
   buildProductionDailyReportSummaryWorksheet,
   PRODUCTION_DAILY_REPORT_SUMMARY_SHEET_NAME,
@@ -71,7 +71,7 @@ function buildWorksheetData(rows: ProductionDailyReportRow[]) {
   return [
     [REPORT_TITLE, ...REPORT_HEADERS.slice(1).map(() => '')],
     [...REPORT_HEADERS],
-    ...rows.map((row) => [
+    ...rows.map(row => [
       row.orderDate,
       row.workHours,
       row.dataCategory,
@@ -147,11 +147,11 @@ function createProductionDailyReportWorkbook(rows: ProductionDailyReportRow[]) {
       t: 'n',
       f: `SUM(${columnLetter}${firstDataRow}:${columnLetter}${lastDataRow})`,
       z:
-        columnIndex === WORK_HOURS_COLUMN_INDEX ||
-        columnIndex === RAW_MATERIAL_DEFECT_WEIGHT_COLUMN_INDEX ||
-        columnIndex === PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX ||
-        columnIndex === OUTSOURCE_DEFECT_WEIGHT_COLUMN_INDEX ||
-        columnIndex === SETUP_DEFECT_WEIGHT_COLUMN_INDEX
+        columnIndex === WORK_HOURS_COLUMN_INDEX
+        || columnIndex === RAW_MATERIAL_DEFECT_WEIGHT_COLUMN_INDEX
+        || columnIndex === PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX
+        || columnIndex === OUTSOURCE_DEFECT_WEIGHT_COLUMN_INDEX
+        || columnIndex === SETUP_DEFECT_WEIGHT_COLUMN_INDEX
           ? '0.00'
           : '0',
       s: worksheet[cellRef]?.s,

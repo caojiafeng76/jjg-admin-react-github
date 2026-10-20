@@ -1,13 +1,14 @@
-import { useState } from 'react'
-import { App } from 'antd'
 import type {
   OrderStatusDashboardFilters,
   OrderStatusJobColumn,
 } from '@/services/apiOrderStatusDashboard'
+import { App } from 'antd'
+import { useState } from 'react'
 import { getOrderStatusDashboardForExport } from '@/services/apiOrderStatusDashboard'
 
-const loadOrderStatusDashboardExcel = () =>
-  import('@/utils/orderStatusDashboardExcel')
+function loadOrderStatusDashboardExcel() {
+  return import('@/utils/orderStatusDashboardExcel')
+}
 
 export function preloadOrderStatusDashboardExcel() {
   void loadOrderStatusDashboardExcel()
@@ -53,19 +54,21 @@ export function useOrderStatusDashboardExport({
         return
       }
 
-      const { exportOrderStatusDashboardToExcel } =
-        await loadOrderStatusDashboardExcel()
+      const { exportOrderStatusDashboardToExcel }
+        = await loadOrderStatusDashboardExcel()
       exportOrderStatusDashboardToExcel(exportRows, jobColumns)
       message.success({
         key: 'order-status-dashboard-export',
         content: `已导出 ${exportRows.length} 条订单现状数据`,
       })
-    } catch (error) {
+    }
+    catch (error) {
       message.error({
         key: 'order-status-dashboard-export',
         content: error instanceof Error ? error.message : '导出失败',
       })
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }

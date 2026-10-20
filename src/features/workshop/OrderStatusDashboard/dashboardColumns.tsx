@@ -1,19 +1,12 @@
 import type { TableColumnsType } from 'antd'
-import { Space, Tag } from 'antd'
+import type { ColumnWidthMap } from './dashboardUtils'
 import type {
   OrderProductionStatus,
   OrderStatusDashboardItem,
   OrderStatusJobColumn,
   ReworkRepairInfo,
 } from '@/services/apiOrderStatusDashboard'
-import {
-  applyColumnWidths,
-  canCloseDashboardOrder,
-  type ColumnWidthMap,
-  extractNumberFilters,
-  extractTextFilters,
-  PRODUCTION_STATUS_OPTIONS,
-} from './dashboardUtils'
+import { Space, Tag } from 'antd'
 import {
   renderExtrusionQuantityCell,
   renderInventoryQuantityCell,
@@ -26,6 +19,14 @@ import {
   renderTransferQuantityCell,
   renderTransferWorkshops,
 } from './dashboardRenderUtils'
+import {
+  applyColumnWidths,
+  canCloseDashboardOrder,
+
+  extractNumberFilters,
+  extractTextFilters,
+  PRODUCTION_STATUS_OPTIONS,
+} from './dashboardUtils'
 
 const STATUS_COLOR: Record<OrderProductionStatus, string> = {
   正常: 'green',
@@ -109,7 +110,7 @@ export function createOrderStatusDashboardColumns({
       key: 'project_no',
       width: 132,
       fixed: 'left',
-      filters: extractTextFilters(rows, (r) => r.project_no),
+      filters: extractTextFilters(rows, r => r.project_no),
       onFilter: (value, record) =>
         (record.project_no?.trim() ?? '') === (value as string),
       filterSearch: true,
@@ -131,7 +132,7 @@ export function createOrderStatusDashboardColumns({
       key: 'product_model',
       width: 94,
       fixed: 'left',
-      filters: modelOptions.map((model) => ({ text: model, value: model })),
+      filters: modelOptions.map(model => ({ text: model, value: model })),
       filteredValue: modelFilterValues.length ? modelFilterValues : null,
       filterMultiple: true,
       filterSearch: true,
@@ -144,7 +145,7 @@ export function createOrderStatusDashboardColumns({
       width: 64,
       fixed: 'left',
       align: 'right',
-      filters: extractNumberFilters(rows, (r) => Number(r.length_mm || 0)),
+      filters: extractNumberFilters(rows, r => Number(r.length_mm || 0)),
       onFilter: (value, record) =>
         Number(record.length_mm || 0) === (value as number),
       filterSearch: true,
@@ -157,7 +158,7 @@ export function createOrderStatusDashboardColumns({
       width: 76,
       fixed: 'left',
       align: 'right',
-      filters: extractNumberFilters(rows, (r) => Number(r.order_quantity || 0)),
+      filters: extractNumberFilters(rows, r => Number(r.order_quantity || 0)),
       onFilter: (value, record) =>
         Number(record.order_quantity || 0) === (value as number),
       filterSearch: true,
@@ -168,7 +169,7 @@ export function createOrderStatusDashboardColumns({
       dataIndex: 'customer',
       key: 'customer',
       width: 88,
-      filters: extractTextFilters(rows, (r) => r.customer),
+      filters: extractTextFilters(rows, r => r.customer),
       onFilter: (value, record) =>
         (record.customer?.trim() ?? '') === (value as string),
       filterSearch: true,
@@ -179,7 +180,7 @@ export function createOrderStatusDashboardColumns({
       dataIndex: 'customer_model',
       key: 'customer_model',
       width: 108,
-      filters: extractTextFilters(rows, (r) => r.customer_model),
+      filters: extractTextFilters(rows, r => r.customer_model),
       onFilter: (value, record) =>
         (record.customer_model?.trim() ?? '') === (value as string),
       filterSearch: true,
@@ -190,7 +191,7 @@ export function createOrderStatusDashboardColumns({
       dataIndex: 'product_delivery_date',
       key: 'product_delivery_date',
       width: 88,
-      filters: extractTextFilters(rows, (r) => r.product_delivery_date),
+      filters: extractTextFilters(rows, r => r.product_delivery_date),
       onFilter: (value, record) =>
         (record.product_delivery_date ?? '') === (value as string),
       filterSearch: true,
@@ -201,7 +202,7 @@ export function createOrderStatusDashboardColumns({
       dataIndex: 'material_code',
       key: 'material_code',
       width: 112,
-      filters: extractTextFilters(rows, (r) => r.material_code),
+      filters: extractTextFilters(rows, r => r.material_code),
       onFilter: (value, record) =>
         (record.material_code?.trim() ?? '') === (value as string),
       filterSearch: true,
@@ -212,7 +213,7 @@ export function createOrderStatusDashboardColumns({
       dataIndex: 'material_name',
       key: 'material_name',
       width: 88,
-      filters: extractTextFilters(rows, (r) => r.material_name),
+      filters: extractTextFilters(rows, r => r.material_name),
       onFilter: (value, record) =>
         (record.material_name?.trim() ?? '') === (value as string),
       filterSearch: true,
@@ -221,12 +222,12 @@ export function createOrderStatusDashboardColumns({
   ]
 
   const sortedJobColumns = [...jobColumns]
-    .filter((column) => column.key !== '精切')
+    .filter(column => column.key !== '精切')
     .sort((left, right) => {
-      const leftOrder =
-        JOB_OUTPUT_COLUMN_ORDER_MAP.get(left.key) ?? Number.MAX_SAFE_INTEGER
-      const rightOrder =
-        JOB_OUTPUT_COLUMN_ORDER_MAP.get(right.key) ?? Number.MAX_SAFE_INTEGER
+      const leftOrder
+        = JOB_OUTPUT_COLUMN_ORDER_MAP.get(left.key) ?? Number.MAX_SAFE_INTEGER
+      const rightOrder
+        = JOB_OUTPUT_COLUMN_ORDER_MAP.get(right.key) ?? Number.MAX_SAFE_INTEGER
 
       if (leftOrder !== rightOrder) {
         return leftOrder - rightOrder
@@ -234,15 +235,14 @@ export function createOrderStatusDashboardColumns({
 
       return left.title.localeCompare(right.title, 'zh-Hans-CN')
     })
-  const sortedJobOutputColumns: TableColumnsType<OrderStatusDashboardItem> =
-    sortedJobColumns.map((column) => ({
+  const sortedJobOutputColumns: TableColumnsType<OrderStatusDashboardItem>
+    = sortedJobColumns.map(column => ({
       title: column.title,
       key: `job-${column.key}`,
       width: JOB_OUTPUT_COLUMN_WIDTH,
       align: 'right',
-      filters: extractNumberFilters(rows, (r) =>
-        Number(r.jobOutputs[column.key] || 0),
-      ),
+      filters: extractNumberFilters(rows, r =>
+        Number(r.jobOutputs[column.key] || 0)),
       onFilter: (value, record) =>
         Number(record.jobOutputs[column.key] || 0) === (value as number),
       filterSearch: true,
@@ -261,9 +261,8 @@ export function createOrderStatusDashboardColumns({
       key: 'extrusionQuantity',
       width: 68,
       align: 'right',
-      filters: extractNumberFilters(rows, (r) =>
-        Number(r.extrusionQuantity || 0),
-      ),
+      filters: extractNumberFilters(rows, r =>
+        Number(r.extrusionQuantity || 0)),
       onFilter: (value, record) =>
         Number(record.extrusionQuantity || 0) === (value as number),
       filterSearch: true,
@@ -279,9 +278,8 @@ export function createOrderStatusDashboardColumns({
       key: 'precisionCuttingQuantity',
       width: 68,
       align: 'right',
-      filters: extractNumberFilters(rows, (r) =>
-        Number(r.precisionCuttingQuantity || 0),
-      ),
+      filters: extractNumberFilters(rows, r =>
+        Number(r.precisionCuttingQuantity || 0)),
       onFilter: (value, record) =>
         Number(record.precisionCuttingQuantity || 0) === (value as number),
       filterSearch: true,
@@ -321,8 +319,8 @@ export function createOrderStatusDashboardColumns({
       align: 'right',
       filters: extractNumberFilters(
         rows,
-        (r) => r.yieldRate,
-        (v) => `${v}%`,
+        r => r.yieldRate,
+        v => `${v}%`,
       ),
       onFilter: (value, record) => record.yieldRate === (value as number),
       filterSearch: true,
@@ -336,8 +334,8 @@ export function createOrderStatusDashboardColumns({
       align: 'right',
       filters: extractNumberFilters(
         rows,
-        (r) => r.completionRate,
-        (v) => `${v}%`,
+        r => r.completionRate,
+        v => `${v}%`,
       ),
       onFilter: (value, record) => record.completionRate === (value as number),
       filterSearch: true,
@@ -349,9 +347,8 @@ export function createOrderStatusDashboardColumns({
       key: 'transferQuantity',
       width: 94,
       align: 'right',
-      filters: extractNumberFilters(rows, (r) =>
-        Number(r.transferQuantity || 0),
-      ),
+      filters: extractNumberFilters(rows, r =>
+        Number(r.transferQuantity || 0)),
       onFilter: (value, record) =>
         Number(record.transferQuantity || 0) === (value as number),
       filterSearch: true,
@@ -366,9 +363,8 @@ export function createOrderStatusDashboardColumns({
       dataIndex: 'transferWorkshops',
       key: 'transferWorkshops',
       width: 118,
-      filters: extractTextFilters(rows, (r) =>
-        r.transferWorkshops?.length ? r.transferWorkshops.join('、') : null,
-      ),
+      filters: extractTextFilters(rows, r =>
+        r.transferWorkshops?.length ? r.transferWorkshops.join('、') : null),
       onFilter: (value, record) =>
         (record.transferWorkshops?.length
           ? record.transferWorkshops.join('、')
@@ -383,9 +379,8 @@ export function createOrderStatusDashboardColumns({
       width: 80,
       align: 'right',
       fixed: 'right',
-      filters: extractNumberFilters(rows, (r) =>
-        Number(r.inventoryQuantity || 0),
-      ),
+      filters: extractNumberFilters(rows, r =>
+        Number(r.inventoryQuantity || 0)),
       onFilter: (value, record) =>
         Number(record.inventoryQuantity || 0) === (value as number),
       filterSearch: true,
@@ -398,7 +393,7 @@ export function createOrderStatusDashboardColumns({
       width: 156,
       fixed: 'right',
       align: 'center',
-      filters: PRODUCTION_STATUS_OPTIONS.map((opt) => ({
+      filters: PRODUCTION_STATUS_OPTIONS.map(opt => ({
         text: opt.label,
         value: opt.value,
       })),
@@ -421,54 +416,58 @@ export function createOrderStatusDashboardColumns({
             {record.status && (
               <Tag className="!rounded-full">{record.status}</Tag>
             )}
-            {canCloseOrder ? (
-              <button
-                type="button"
-                disabled={isUpdatingOrderStatus && closingOrderId === record.id}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  handleCloseOrder(record)
-                }}
-                className="group flex items-center gap-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-2.5 py-1 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:from-emerald-600 hover:to-teal-600 hover:shadow-md hover:shadow-emerald-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isUpdatingOrderStatus && closingOrderId === record.id ? (
-                  <svg
-                    className="size-3 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
+            {canCloseOrder
+              ? (
+                  <button
+                    type="button"
+                    disabled={isUpdatingOrderStatus && closingOrderId === record.id}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      handleCloseOrder(record)
+                    }}
+                    className="group flex items-center gap-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-2.5 py-1 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:from-emerald-600 hover:to-teal-600 hover:shadow-md hover:shadow-emerald-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="size-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
-                <span>结案</span>
-              </button>
-            ) : null}
+                    {isUpdatingOrderStatus && closingOrderId === record.id
+                      ? (
+                          <svg
+                            className="size-3 animate-spin"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            />
+                          </svg>
+                        )
+                      : (
+                          <svg
+                            className="size-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        )}
+                    <span>结案</span>
+                  </button>
+                )
+              : null}
           </Space>
         )
       },

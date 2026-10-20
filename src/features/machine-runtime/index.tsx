@@ -1,14 +1,14 @@
-import { startTransition, useState } from 'react'
+import type { MachineRuntimeFilters } from '@/services/apiMachineRuntime'
 import { Card, Splitter } from 'antd'
 import dayjs from 'dayjs'
 
+import { startTransition, useState } from 'react'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import type { MachineRuntimeFilters } from '@/services/apiMachineRuntime'
+import MachineRuntimeDetailTable from './MachineRuntimeDetailTable'
 import MachineRuntimeSearch from './MachineRuntimeSearch'
 import MachineRuntimeSummaryTable from './MachineRuntimeSummaryTable'
-import MachineRuntimeDetailTable from './MachineRuntimeDetailTable'
-import { useMachineRuntimeSummary } from './useMachineRuntimeSummary'
 import { useMachineRuntimeDetail } from './useMachineRuntimeDetail'
+import { useMachineRuntimeSummary } from './useMachineRuntimeSummary'
 
 type SummaryFilters = Omit<
   MachineRuntimeFilters,
@@ -21,21 +21,21 @@ const DEFAULT_FILTERS: SummaryFilters = {
 }
 
 export default function MachineRuntime() {
-  const [summaryFilters, setSummaryFilters] =
-    useState<SummaryFilters>(DEFAULT_FILTERS)
+  const [summaryFilters, setSummaryFilters]
+    = useState<SummaryFilters>(DEFAULT_FILTERS)
   const [selectedMachineId, setSelectedMachineId] = useState<string | null>(
     null,
   )
   const [detailPage, setDetailPage] = useState(1)
   const [detailPageSize, setDetailPageSize] = useState(20)
 
-  const { tableContainerRef: summaryContainerRef, scrollY: summaryScrollY } =
-    useTableHeight({ targetRowCount: 6 })
-  const { tableContainerRef: detailContainerRef, scrollY: detailScrollY } =
-    useTableHeight({ targetRowCount: 8 })
+  const { tableContainerRef: summaryContainerRef, scrollY: summaryScrollY }
+    = useTableHeight({ targetRowCount: 6 })
+  const { tableContainerRef: detailContainerRef, scrollY: detailScrollY }
+    = useTableHeight({ targetRowCount: 8 })
 
-  const { data: summaryData, isLoading: summaryLoading } =
-    useMachineRuntimeSummary(summaryFilters)
+  const { data: summaryData, isLoading: summaryLoading }
+    = useMachineRuntimeSummary(summaryFilters)
 
   const detailFilters: MachineRuntimeFilters = {
     ...summaryFilters,
@@ -43,8 +43,8 @@ export default function MachineRuntime() {
     page: detailPage,
     pageSize: detailPageSize,
   }
-  const { data: detailResult, isLoading: detailLoading } =
-    useMachineRuntimeDetail(detailFilters)
+  const { data: detailResult, isLoading: detailLoading }
+    = useMachineRuntimeDetail(detailFilters)
 
   const handleSearch = (filters: SummaryFilters) => {
     startTransition(() => {
@@ -64,7 +64,7 @@ export default function MachineRuntime() {
 
   const handleSelectMachine = (id: string) => {
     startTransition(() => {
-      setSelectedMachineId((prev) => (prev === id ? null : id))
+      setSelectedMachineId(prev => (prev === id ? null : id))
       setDetailPage(1)
     })
   }
@@ -111,10 +111,10 @@ export default function MachineRuntime() {
               title={
                 selectedMachineId
                   ? `运行明细（${
-                      summaryData?.find(
-                        (s) => s.machine_equipment_id === selectedMachineId,
-                      )?.unified_device_no ?? ''
-                    }）`
+                    summaryData?.find(
+                      s => s.machine_equipment_id === selectedMachineId,
+                    )?.unified_device_no ?? ''
+                  }）`
                   : '运行明细（点击上方设备行筛选）'
               }
               className="h-full"

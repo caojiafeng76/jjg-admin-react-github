@@ -1,8 +1,8 @@
-import { Button, DatePicker, Form, Input, Space } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
+import { UserIcon } from '@heroicons/react/24/outline'
+import { Button, DatePicker, Form, Input, Space } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect } from 'react'
-import { UserIcon } from '@heroicons/react/24/outline'
 
 const { RangePicker } = DatePicker
 
@@ -18,7 +18,7 @@ interface Props {
     endDate?: string
   }) => void
   onReset: () => void
-  initialValues?: { name?: string; startDate?: string; endDate?: string }
+  initialValues?: { name?: string, startDate?: string, endDate?: string }
 }
 
 export default function AttendanceDetailSearch({
@@ -54,7 +54,7 @@ export default function AttendanceDetailSearch({
     onReset()
   }
 
-  const disabledDate: RangePickerProps['disabledDate'] = (current) =>
+  const disabledDate: RangePickerProps['disabledDate'] = current =>
     current && current > dayjs().endOf('day')
 
   return (

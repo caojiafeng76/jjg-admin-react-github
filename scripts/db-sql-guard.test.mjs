@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
-  inspectSql,
   confirmSqlExecution,
-  parseQueryArgs,
+  inspectSql,
   parseMigrationPreview,
+  parseQueryArgs,
 } from './db-sql-guard.mjs'
 
 for (const sql of [
@@ -12,27 +12,27 @@ for (const sql of [
   'WITH gone AS (DELETE FROM orders RETURNING *) SELECT * FROM gone',
   'TRUNCATE orders',
   'ALTER TABLE orders DROP COLUMN status',
-  "DO $$ BEGIN EXECUTE 'DEL' || 'ETE FROM orders'; END $$",
+  'DO $$ BEGIN EXECUTE \'DEL\' || \'ETE FROM orders\'; END $$',
   'CALL clear_orders()',
-  "COPY orders TO PROGRAM 'rm file'",
+  'COPY orders TO PROGRAM \'rm file\'',
 ]) {
   test(`requires review: ${sql.slice(0, 45)}`, () =>
     assert.equal(inspectSql(sql).requiresConfirmation, true))
 }
 for (const sql of [
-  "select 'DELETE FROM orders'",
+  'select \'DELETE FROM orders\'',
   '-- DELETE FROM orders\nselect 1',
   '/* outer /* DELETE */ comment */ select 1',
-  "update orders set status='生产中' where customer='优迈'",
+  'update orders set status=\'生产中\' where customer=\'优迈\'',
   'select "delete" from logs',
 ]) {
   test(`allows ordinary SQL: ${sql.slice(0, 40)}`, () =>
     assert.equal(inspectSql(sql).requiresConfirmation, false))
 }
 test('unterminated SQL is rejected rather than hiding later tokens', () => {
-  assert.throws(() => inspectSql("select 'unterminated"))
+  assert.throws(() => inspectSql('select \'unterminated'))
   assert.throws(() => inspectSql('/* unterminated'))
-  assert.throws(() => inspectSql(String.fromCharCode(92) + 'i other.sql'))
+  assert.throws(() => inspectSql(`${String.fromCharCode(92)}i other.sql`))
 })
 test('noninteractive destructive SQL never prompts or executes', async () => {
   await assert.rejects(
@@ -103,8 +103,8 @@ test('migration preview must be complete structured JSON with safe filenames', (
 })
 
 test('migration review detects new or modified files before execution', async () => {
-  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } =
-    await import('node:fs')
+  const { mkdtempSync, mkdirSync, writeFileSync, rmSync }
+    = await import('node:fs')
   const { tmpdir } = await import('node:os')
   const { join } = await import('node:path')
   const { captureMigrationPlan } = await import('./db-migration-guard.mjs')
@@ -126,7 +126,8 @@ test('migration review detects new or modified files before execution', async ()
       'drop table orders;',
     )
     assert.throws(() => plan.assertUnchanged(), /变化/)
-  } finally {
+  }
+  finally {
     rmSync(dir, { recursive: true, force: true })
   }
 })
@@ -149,14 +150,15 @@ test('real query entry rejects a dangerous file before invoking the database CLI
       [
         fileURLToPath(new URL('./supabase-db-query.mjs', import.meta.url)),
         '--db-url=postgresql://localhost:1/postgres',
-        '--file=' + file,
+        `--file=${file}`,
       ],
       { encoding: 'utf8', timeout: 5000 },
     )
     assert.equal(result.status, 1)
     assert.match(result.stderr, /三次/)
     assert.doesNotMatch(result.stderr, /Connecting|ECONNREFUSED/)
-  } finally {
+  }
+  finally {
     rmSync(dir, { recursive: true, force: true })
   }
 })
@@ -164,7 +166,7 @@ test('real query entry rejects a dangerous file before invoking the database CLI
 test('large checked SQL uses a private snapshot that is cleaned on failure', async () => {
   const { readFileSync, existsSync } = await import('node:fs')
   const { withSqlSnapshot } = await import('./db-sql-snapshot.mjs')
-  const sql = "select '" + 'a'.repeat(100000) + "';"
+  const sql = `select '${'a'.repeat(100000)}';`
   let snapshot
   assert.throws(
     () =>

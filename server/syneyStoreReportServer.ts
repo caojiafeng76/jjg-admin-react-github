@@ -2,11 +2,11 @@ import { createHash } from 'node:crypto'
 
 const SCM_BASE_URL = 'http://scm.syney.net:808'
 const LOGIN_URL = `${SCM_BASE_URL}/Business/UserLogin.aspx?method=Login`
-const STORE_REPORT_URL =
-  `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx?method=BindGrid`
+const STORE_REPORT_URL
+  = `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx?method=BindGrid`
 const LOGIN_PAGE_URL = `${SCM_BASE_URL}/Business/UserLogin.aspx`
-const REPORT_PAGE_URL =
-  `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx`
+const REPORT_PAGE_URL
+  = `${SCM_BASE_URL}/Business/Supplier/SupplierStoreInReport.aspx`
 const REQUEST_TIMEOUT_MS = 20000
 
 const BIND_FIELDS = [
@@ -99,13 +99,15 @@ async function fetchWithTimeout(
       ...init,
       signal: controller.signal,
     })
-  } catch (error) {
+  }
+  catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new Error(timeoutMessage, { cause: error })
     }
 
     throw error
-  } finally {
+  }
+  finally {
     clearTimeout(timeoutId)
   }
 }
@@ -129,7 +131,7 @@ async function loginToScm(env: SyneyServerEnv) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Referer: LOGIN_PAGE_URL,
+        'Referer': LOGIN_PAGE_URL,
         'X-Requested-With': 'XMLHttpRequest',
       },
       body: loginBody,
@@ -195,7 +197,8 @@ function extractDataArray(responseText: string) {
 
     if (char === '[') {
       depth++
-    } else if (char === ']') {
+    }
+    else if (char === ']') {
       depth--
       if (depth === 0) {
         return responseText.substring(startIndex, i + 1)
@@ -246,11 +249,11 @@ export async function fetchSyneyStoreReportFromServer(
     {
       method: 'POST',
       headers: {
-        Accept: 'text/plain, */*; q=0.01',
+        'Accept': 'text/plain, */*; q=0.01',
         'Content-Type': 'application/x-www-form-urlencoded',
-        Cookie: cookie,
-        Origin: SCM_BASE_URL,
-        Referer: REPORT_PAGE_URL,
+        'Cookie': cookie,
+        'Origin': SCM_BASE_URL,
+        'Referer': REPORT_PAGE_URL,
         'X-Requested-With': 'XMLHttpRequest',
       },
       body,

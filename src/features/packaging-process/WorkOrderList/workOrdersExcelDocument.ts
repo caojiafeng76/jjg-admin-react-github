@@ -1,15 +1,15 @@
+import type { PackagingWorkOrder, PackagingWorkOrderSearchParams } from '@/services/apiPackagingWorkOrders'
 import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
 
-import {
-  EXCEL_WRITE_OPTIONS,
-  applyRegisterSheetStyles,
-} from '@/utils/excelStyleUtils'
+import * as XLSX from 'xlsx-js-style'
 import {
   getAllPackagingWorkOrders,
-  type PackagingWorkOrder,
-  type PackagingWorkOrderSearchParams,
+
 } from '@/services/apiPackagingWorkOrders'
+import {
+  applyRegisterSheetStyles,
+  EXCEL_WRITE_OPTIONS,
+} from '@/utils/excelStyleUtils'
 
 interface ExportInput {
   searchParams: PackagingWorkOrderSearchParams
@@ -34,7 +34,21 @@ const DETAIL_HEADERS = [
 ] as const
 
 const DETAIL_COLUMN_WIDTHS = [
-  12, 10, 14, 16, 8, 8, 12, 12, 10, 6, 8, 8, 10, 10, 10,
+  12,
+  10,
+  14,
+  16,
+  8,
+  8,
+  12,
+  12,
+  10,
+  6,
+  8,
+  8,
+  10,
+  10,
+  10,
 ] as const
 
 const DAILY_REPORT_HEADERS = [
@@ -56,7 +70,21 @@ const DAILY_REPORT_HEADERS = [
 ] as const
 
 const DAILY_REPORT_COLUMN_WIDTHS = [
-  10, 18, 14, 16, 12, 10, 8, 18, 8, 12, 10, 12, 24, 4, 10,
+  10,
+  18,
+  14,
+  16,
+  12,
+  10,
+  8,
+  18,
+  8,
+  12,
+  10,
+  12,
+  24,
+  4,
+  10,
 ] as const
 
 function formatDate(value: string | null | undefined) {
@@ -64,13 +92,15 @@ function formatDate(value: string | null | undefined) {
 }
 
 function formatDailyDate(value: string | null | undefined) {
-  if (!value) return ''
+  if (!value)
+    return ''
   const date = dayjs(value)
   return `${date.month() + 1}.${date.date()}`
 }
 
 function formatHours(value: number | null | undefined) {
-  if (value === null || value === undefined) return '0.00'
+  if (value === null || value === undefined)
+    return '0.00'
   return Number(value).toFixed(2)
 }
 
@@ -80,12 +110,14 @@ function roundTo(value: number, precision = 2) {
 }
 
 function formatMoney(value: number | null | undefined) {
-  if (value === null || value === undefined) return '0.00'
+  if (value === null || value === undefined)
+    return '0.00'
   return Number(value).toFixed(2)
 }
 
 function formatCellText(value: string | number | null | undefined) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined)
+    return ''
   return String(value)
 }
 
@@ -101,7 +133,8 @@ function getSurfaceTreatment(order: PackagingWorkOrder) {
 
 function getQualifiedWeight(order: PackagingWorkOrder) {
   const quantity = Number(order.quantity) || 0
-  if (order.unit === '千克') return quantity
+  if (order.unit === '千克')
+    return quantity
 
   const lengthMm = Number(order.length_mm) || 0
   const weightPerMeterKg = Number(order.weight_per_meter_kg) || 0
@@ -110,7 +143,8 @@ function getQualifiedWeight(order: PackagingWorkOrder) {
 
 function getDefectiveWeight(order: PackagingWorkOrder) {
   const defectiveWeight = Number(order.defective_weight_kg)
-  if (Number.isFinite(defectiveWeight)) return defectiveWeight
+  if (Number.isFinite(defectiveWeight))
+    return defectiveWeight
 
   const defectiveQuantity = Number(order.defective_quantity) || 0
   const lengthMm = Number(order.length_mm) || 0
@@ -141,11 +175,12 @@ function downloadExcel(buffer: ArrayBuffer, filename: string) {
 function buildDetailSheet(orders: PackagingWorkOrder[]) {
   const sorted = [...orders].sort((a, b) => {
     const dateCompare = (a.work_date || '').localeCompare(b.work_date || '')
-    if (dateCompare !== 0) return dateCompare
+    if (dateCompare !== 0)
+      return dateCompare
     return (a.employee_name || '').localeCompare(b.employee_name || '', 'zh-CN')
   })
 
-  const rows = sorted.map((order) => [
+  const rows = sorted.map(order => [
     formatDate(order.work_date),
     formatCellText(order.employee_name),
     formatCellText(order.project_no),
@@ -253,9 +288,11 @@ function buildDailyReportSheet(orders: PackagingWorkOrder[]) {
 
   const groupedRows = Array.from(grouped.values()).sort((a, b) => {
     const dateCompare = a.workDate.localeCompare(b.workDate)
-    if (dateCompare !== 0) return dateCompare
+    if (dateCompare !== 0)
+      return dateCompare
     const batchCompare = a.inputBatchKey.localeCompare(b.inputBatchKey)
-    if (batchCompare !== 0) return batchCompare
+    if (batchCompare !== 0)
+      return batchCompare
     return a.projectNo.localeCompare(b.projectNo)
   })
 
@@ -345,13 +382,13 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
   const employees = Array.from(
     new Set(
       orders
-        .map((order) => order.employee_name)
+        .map(order => order.employee_name)
         .filter((name): name is string => !!name),
     ),
   )
 
   const dates = Array.from(
-    new Set(orders.map((order) => order.work_date).filter(Boolean)),
+    new Set(orders.map(order => order.work_date).filter(Boolean)),
   ).sort()
 
   const totalByDateEmployee = new Map<string, number>()
@@ -365,7 +402,8 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
     const hours = getTotalHours(order)
     const date = order.work_date
     const emp = order.employee_name
-    if (!date || !emp) continue
+    if (!date || !emp)
+      continue
 
     const dateEmpKey = `${date}|${emp}`
     totalByDateEmployee.set(
@@ -421,9 +459,9 @@ function buildPivotSheet(orders: PackagingWorkOrder[]) {
   const salaryRow: Array<string | number> = ['工资']
   let totalSalary = 0
   for (const emp of employees) {
-    const salary =
-      (totalByEmployee.get(emp) || 0) * (hourlyWageByEmployee.get(emp) || 0) +
-      (positionSalaryByEmployee.get(emp) || 0)
+    const salary
+      = (totalByEmployee.get(emp) || 0) * (hourlyWageByEmployee.get(emp) || 0)
+        + (positionSalaryByEmployee.get(emp) || 0)
     totalSalary += salary
     salaryRow.push(formatMoney(salary))
   }
@@ -480,8 +518,8 @@ export async function exportWorkOrdersAsExcel({
 
   const start = searchParams.startDate || orders[0]?.work_date
   const end = searchParams.endDate || orders[orders.length - 1]?.work_date
-  const dateLabel =
-    start && end ? `${start}_${end}` : dayjs().format('YYYY-MM-DD')
+  const dateLabel
+    = start && end ? `${start}_${end}` : dayjs().format('YYYY-MM-DD')
 
   downloadExcel(buffer, `包装生产工单_${dateLabel}.xlsx`)
   return true

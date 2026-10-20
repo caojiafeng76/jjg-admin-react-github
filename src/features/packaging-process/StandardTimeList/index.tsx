@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   PackagingStandardTime,
   PackagingStandardTimeFormValues,
 } from '@/services/apiPackagingStandardTimes'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -23,11 +24,11 @@ import {
   useUpdatePackagingStandardTime,
 } from './useStandardTimes'
 
-const CREATE_PERMISSION_KEY =
-  'feature:packaging-process-standard-time-list.create'
+const CREATE_PERMISSION_KEY
+  = 'feature:packaging-process-standard-time-list.create'
 const EDIT_PERMISSION_KEY = 'feature:packaging-process-standard-time-list.edit'
-const DELETE_PERMISSION_KEY =
-  'feature:packaging-process-standard-time-list.delete'
+const DELETE_PERMISSION_KEY
+  = 'feature:packaging-process-standard-time-list.delete'
 
 export default function PackagingStandardTimeListPage() {
   const { message } = App.useApp()
@@ -45,10 +46,10 @@ export default function PackagingStandardTimeListPage() {
   const [modalTitle, setModalTitle] = useState('新建标准工时')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<PackagingStandardTime | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<PackagingStandardTimeFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<PackagingStandardTime | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<PackagingStandardTimeFormValues> | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -67,8 +68,8 @@ export default function PackagingStandardTimeListPage() {
   const updateMutation = useUpdatePackagingStandardTime()
   const deleteMutation = useDeletePackagingStandardTime()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -95,7 +96,7 @@ export default function PackagingStandardTimeListPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -117,10 +118,12 @@ export default function PackagingStandardTimeListPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('标准工时删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除标准工时失败，请稍后重试')
       }
     }
@@ -140,16 +143,19 @@ export default function PackagingStandardTimeListPage() {
             values,
           })
           message.success('标准工时更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('标准工时创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -176,7 +182,8 @@ export default function PackagingStandardTimeListPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 

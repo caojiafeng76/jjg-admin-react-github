@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { Alert, App, Button, Modal, Tooltip, Typography } from 'antd'
-import { useEffect, useRef, useState } from 'react'
 import { ViewfinderCircleIcon } from '@heroicons/react/24/outline'
+import { Alert, App, Button, Modal, Tooltip, Typography } from 'antd'
 import qrScannerWorkerPath from 'qr-scanner/qr-scanner-worker.min.js?url'
+import { useEffect, useRef, useState } from 'react'
 
 import { getSalesOrderByProjectNo } from '@/services/apiProcessStandards'
 import { getWorkshopOrderById } from '@/services/apiWorkshopOrders'
@@ -10,8 +10,8 @@ import { getWorkshopOrderById } from '@/services/apiWorkshopOrders'
 const { Paragraph, Text } = Typography
 
 const QR_ORDER_PATH_PATTERN = /\/workshop-order-list\/qr\/([^/?#]+)/i
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const UUID_PATTERN
+  = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 interface SalesOrderProjectNoSource {
   project_no: string
@@ -81,7 +81,7 @@ async function resolveProjectByProjectNo(
 ) {
   const normalizedProjectNo = normalizeText(projectNo)
   const existing = projectNos?.find(
-    (item) => normalizeText(item.project_no) === normalizedProjectNo,
+    item => normalizeText(item.project_no) === normalizedProjectNo,
   )
 
   if (existing) {
@@ -121,7 +121,7 @@ async function resolveScannedProject(
   }
 
   const projectNoFromList = projectNos?.find(
-    (item) => normalizeText(item.project_no) === normalizedRawValue,
+    item => normalizeText(item.project_no) === normalizedRawValue,
   )
 
   if (projectNoFromList) {
@@ -131,14 +131,15 @@ async function resolveScannedProject(
   const parsedUrl = (() => {
     try {
       return new URL(normalizedRawValue)
-    } catch {
+    }
+    catch {
       return null
     }
   })()
 
-  const projectNoFromUrl =
-    parsedUrl?.searchParams.get('project_no') ||
-    parsedUrl?.searchParams.get('projectNo')
+  const projectNoFromUrl
+    = parsedUrl?.searchParams.get('project_no')
+      || parsedUrl?.searchParams.get('projectNo')
 
   if (projectNoFromUrl) {
     return resolveProjectByProjectNo(rawValue, projectNoFromUrl, projectNos)
@@ -154,9 +155,9 @@ async function resolveScannedProject(
     )
   }
 
-  const orderIdFromUrl =
-    parsedUrl?.searchParams.get('order_id') ||
-    parsedUrl?.searchParams.get('orderId')
+  const orderIdFromUrl
+    = parsedUrl?.searchParams.get('order_id')
+      || parsedUrl?.searchParams.get('orderId')
 
   if (orderIdFromUrl) {
     return resolveProjectByOrderId(rawValue, orderIdFromUrl)
@@ -165,7 +166,8 @@ async function resolveScannedProject(
   if (UUID_PATTERN.test(normalizedRawValue)) {
     try {
       return await resolveProjectByOrderId(rawValue, normalizedRawValue)
-    } catch {
+    }
+    catch {
       return resolveProjectByProjectNo(rawValue, normalizedRawValue, projectNos)
     }
   }
@@ -279,7 +281,8 @@ export default function ProjectNoScanButton({
                 onResolved(payload)
                 message.success(`已识别项目号 ${payload.projectNo}`)
                 setOpen(false)
-              } catch (error) {
+              }
+              catch (error) {
                 setScanError(
                   error instanceof Error
                     ? error.message
@@ -288,7 +291,8 @@ export default function ProjectNoScanButton({
                 window.setTimeout(() => {
                   lastRawValueRef.current = ''
                 }, 1500)
-              } finally {
+              }
+              finally {
                 setResolving(false)
                 resolvingRef.current = false
               }
@@ -299,8 +303,8 @@ export default function ProjectNoScanButton({
             maxScansPerSecond: 5,
             returnDetailedScanResult: true,
             onDecodeError: (error) => {
-              const errorMessage =
-                typeof error === 'string' ? error : error.message
+              const errorMessage
+                = typeof error === 'string' ? error : error.message
 
               if (errorMessage === 'No QR code found') {
                 return
@@ -318,11 +322,13 @@ export default function ProjectNoScanButton({
 
         scannerRef.current = scanner
         await scanner.start()
-      } catch (error) {
+      }
+      catch (error) {
         setScanError(
           error instanceof Error ? error.message : '摄像头启动失败，请检查权限',
         )
-      } finally {
+      }
+      finally {
         setStarting(false)
       }
     }
@@ -337,21 +343,23 @@ export default function ProjectNoScanButton({
 
   return (
     <>
-      {renderTrigger ? (
-        renderTrigger({
-          disabled,
-          openScanner: () => setOpen(true),
-        })
-      ) : (
-        <Tooltip title="扫码填充项目号">
-          <Button
-            icon={<ViewfinderCircleIcon className="size-5" />}
-            aria-label="扫码填充项目号"
-            onClick={() => setOpen(true)}
-            disabled={disabled}
-          />
-        </Tooltip>
-      )}
+      {renderTrigger
+        ? (
+            renderTrigger({
+              disabled,
+              openScanner: () => setOpen(true),
+            })
+          )
+        : (
+            <Tooltip title="扫码填充项目号">
+              <Button
+                icon={<ViewfinderCircleIcon className="size-5" />}
+                aria-label="扫码填充项目号"
+                onClick={() => setOpen(true)}
+                disabled={disabled}
+              />
+            </Tooltip>
+          )}
 
       <Modal
         title="扫码识别项目号"
@@ -381,22 +389,28 @@ export default function ProjectNoScanButton({
               <div className="pointer-events-none absolute inset-x-10 top-1/2 h-44 -translate-y-1/2 overflow-hidden rounded-3xl border-2 border-emerald-300/90 shadow-[0_0_0_9999px_rgba(15,23,42,0.35)]">
                 <div className="scanner-sweep-line absolute inset-x-3 top-0 h-4 rounded-full" />
               </div>
-              {starting ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/65 text-sm text-white">
-                  正在启动摄像头...
-                </div>
-              ) : null}
-              {resolving ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/65 text-sm text-white">
-                  正在解析二维码...
-                </div>
-              ) : null}
+              {starting
+                ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-950/65 text-sm text-white">
+                      正在启动摄像头...
+                    </div>
+                  )
+                : null}
+              {resolving
+                ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-950/65 text-sm text-white">
+                      正在解析二维码...
+                    </div>
+                  )
+                : null}
             </div>
           </div>
 
-          {scanError ? (
-            <Alert type="warning" showIcon message={scanError} />
-          ) : null}
+          {scanError
+            ? (
+                <Alert type="warning" showIcon message={scanError} />
+              )
+            : null}
 
           <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <Paragraph className="mb-2 text-slate-700 dark:text-slate-300">

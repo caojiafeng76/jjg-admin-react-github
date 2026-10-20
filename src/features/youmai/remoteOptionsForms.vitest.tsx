@@ -1,7 +1,13 @@
 import type { ComponentType } from 'react'
-import { act, createElement } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
+import { act, createElement } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import YoumaiFinishedGoodsInventoryForm from './FinishedGoodsInventory/YoumaiFinishedGoodsInventoryForm'
+import YoumaiFinishedGoodsStockInForm from './FinishedGoodsStockIn/YoumaiFinishedGoodsStockInForm'
+import YoumaiFinishedGoodsStockOutForm from './FinishedGoodsStockOut/YoumaiFinishedGoodsStockOutForm'
+import YoumaiRawMaterialStockInForm from './RawMaterialStockIn/YoumaiRawMaterialStockInForm'
+import YoumaiRawMaterialStockOutForm from './RawMaterialStockOut/YoumaiRawMaterialStockOutForm'
 
 const {
   inventoryProductOptionsHook,
@@ -60,12 +66,6 @@ vi.mock('./RawMaterialStockOut/useYoumaiRawMaterialStockOut', () => ({
 vi.mock('./RawMaterialInventory/useYoumaiRawMaterialInventory', () => ({
   useYoumaiRawMaterialInventoryOption: rawInventoryDetailHook,
 }))
-
-import YoumaiFinishedGoodsInventoryForm from './FinishedGoodsInventory/YoumaiFinishedGoodsInventoryForm'
-import YoumaiFinishedGoodsStockInForm from './FinishedGoodsStockIn/YoumaiFinishedGoodsStockInForm'
-import YoumaiFinishedGoodsStockOutForm from './FinishedGoodsStockOut/YoumaiFinishedGoodsStockOutForm'
-import YoumaiRawMaterialStockInForm from './RawMaterialStockIn/YoumaiRawMaterialStockInForm'
-import YoumaiRawMaterialStockOutForm from './RawMaterialStockOut/YoumaiRawMaterialStockOutForm'
 
 const productOption = {
   id: 'product-1',

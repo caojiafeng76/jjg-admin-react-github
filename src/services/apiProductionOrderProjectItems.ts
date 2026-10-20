@@ -1,6 +1,6 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 import type { ProductionItemWithOrderDetail } from './apiProductionOrderTypes'
+import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export async function getProductionItemsByProjectNo(
   projectNo: string,
@@ -98,7 +98,7 @@ export async function getProductionItemsByProjectNo(
     from += PAGE_SIZE
   }
 
-  return rows.map((item) => ({
+  return rows.map(item => ({
     id: item.id,
     operation: item.operation,
     project_no: item.project_no,

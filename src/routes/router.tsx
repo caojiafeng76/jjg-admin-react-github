@@ -1,14 +1,13 @@
-import { Suspense } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
-
 import AppLayout from '@ui/AppLayout'
 import Loading from '@ui/Loading'
-import RouteErrorPage from '@/pages/RouteErrorPage'
+
+import { Suspense } from 'react'
+import { createBrowserRouter } from 'react-router-dom'
 import { JINTAN_PARTS_STOCK_OUT_PUBLIC_QR_PATH } from '@/features/jintan/PartsStockOut/jintanPartsStockOutPublicQr'
 import { LABOR_PROTECTION_PUBLIC_QR_PATH } from '@/features/labor-protection/LaborProtectionRequisition/laborProtectionPublicQr'
-import { TOOLING_STOCK_OUT_PUBLIC_QR_PATH } from '@/features/tooling/ToolingStockOut/toolingStockOutPublicQr'
 import { TOOLING_FIXTURE_PUBLIC_QR_PATH } from '@/features/tooling-fixture/toolingFixturePublicQr'
-import { ProtectedRoute, RoleHomeRedirect } from './RouteGuards'
+import { TOOLING_STOCK_OUT_PUBLIC_QR_PATH } from '@/features/tooling/ToolingStockOut/toolingStockOutPublicQr'
+import RouteErrorPage from '@/pages/RouteErrorPage'
 import {
   AccessDenied,
   JintanPartsStockOutPublicPage,
@@ -25,6 +24,7 @@ import { syneyRoutes } from './modules/syneyRoutes'
 import { systemRoutes } from './modules/systemRoutes'
 import { toolingRoutes } from './modules/toolingRoutes'
 import { workshopRoutes } from './modules/workshopRoutes'
+import { ProtectedRoute, RoleHomeRedirect } from './RouteGuards'
 import { publicRoute } from './routeHelpers'
 
 // 新增页面：在对应业务域的 modules/*Routes.ts 中用 permissionRoute 注册，

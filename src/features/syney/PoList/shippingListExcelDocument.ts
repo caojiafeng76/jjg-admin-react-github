@@ -1,11 +1,11 @@
-import { utils, writeFile } from 'xlsx-js-style'
-import dayjs from 'dayjs'
-
 import {
   autoFitColumnWidths,
-  setRowHeight,
   EXCEL_WRITE_OPTIONS,
+  setRowHeight,
 } from '@utils/excelStyleUtils'
+import dayjs from 'dayjs'
+
+import { utils, writeFile } from 'xlsx-js-style'
 
 const HEADER_ROW_HEIGHT = 28
 const BODY_ROW_HEIGHT = 22
@@ -43,7 +43,8 @@ function applyTitleStyle(
 ) {
   for (let col = 0; col < colCount; col++) {
     const cellRef = `${String.fromCharCode(65 + col)}1`
-    if (!ws[cellRef]) ws[cellRef] = { v: '' }
+    if (!ws[cellRef])
+      ws[cellRef] = { v: '' }
     ws[cellRef].s = {
       ...(ws[cellRef].s || {}),
       font: { name: '宋体', sz: 14, bold: true },
@@ -61,7 +62,8 @@ function applyHeaderStyle(
 ) {
   for (let col = 0; col < colCount; col++) {
     const cellRef = `${String.fromCharCode(65 + col)}2`
-    if (!ws[cellRef]) ws[cellRef] = { v: '' }
+    if (!ws[cellRef])
+      ws[cellRef] = { v: '' }
     ws[cellRef].s = {
       ...(ws[cellRef].s || {}),
       font: { name: '宋体', sz: 11, bold: true },
@@ -80,7 +82,8 @@ function applyBodyStyle(
   for (let row = 2; row < rowCount; row++) {
     for (let col = 0; col < colCount; col++) {
       const cellRef = `${String.fromCharCode(65 + col)}${row + 1}`
-      if (!ws[cellRef]) ws[cellRef] = { v: '' }
+      if (!ws[cellRef])
+        ws[cellRef] = { v: '' }
       ws[cellRef].s = {
         ...(ws[cellRef].s || {}),
         font: { name: '宋体', sz: 10 },
@@ -96,7 +99,8 @@ function applyBodyStyle(
  * 统一转为空字符串，避免用户看到 "null"。
  */
 function normalize(value: string | null | undefined): string {
-  if (value === null || value === undefined || value === 'null') return ''
+  if (value === null || value === undefined || value === 'null')
+    return ''
   return value
 }
 
@@ -108,7 +112,8 @@ export function exportShippingListAsExcel(
   orders: ShippingListRow[],
   date = new Date(),
 ) {
-  if (!orders || orders.length === 0) return false
+  if (!orders || orders.length === 0)
+    return false
 
   const wb = utils.book_new()
   const rows: (string | number)[][] = []

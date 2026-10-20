@@ -1,22 +1,22 @@
-import { Form, Input, InputNumber, Modal, Select, Space, Tag } from 'antd'
 import type { FormInstance } from 'antd'
-import { filterProjectNoOption, renderProjectNoOption } from './projectNoSelect'
+import type { OrderItem } from './productionOrderFormTypes'
+import type { ScannedProjectPayload } from './ProjectNoScanButton'
 import type { buildProjectNoSelectOptions } from './projectNoSelect'
-import ProjectNoScanButton, {
-  type ScannedProjectPayload,
-} from './ProjectNoScanButton'
 import type {
   ProcessStandardMatchLevel,
   useSalesOrdersProjectNos,
 } from './useProcessStandards'
+import { Form, Input, InputNumber, Modal, Select, Space, Tag } from 'antd'
 import {
   ITEM_FORM_INITIAL_VALUES,
   MATCH_LEVEL_COLORS,
   MATCH_LEVEL_LABELS,
-  type OrderItem,
-} from './productionOrderFormTypes'
 
-export type ProductionOrderMachineOption = {
+} from './productionOrderFormTypes'
+import ProjectNoScanButton from './ProjectNoScanButton'
+import { filterProjectNoOption, renderProjectNoOption } from './projectNoSelect'
+
+export interface ProductionOrderMachineOption {
   id: string | null
   unified_device_no: string | null
   operation: string | null
@@ -40,7 +40,7 @@ export interface ProductionOrderFormItemModalProps {
   onProjectNoScanResolved: (payload: ScannedProjectPayload) => void
   open: boolean
   operationMatchLevel: ProcessStandardMatchLevel | null
-  operationOptions: { label: string; value: string }[]
+  operationOptions: { label: string, value: string }[]
   projectNos: ReturnType<typeof useSalesOrdersProjectNos>['data']
 }
 
@@ -90,21 +90,23 @@ export default function ProductionOrderFormItemModal({
           onFinish={onFinish}
           initialValues={ITEM_FORM_INITIAL_VALUES}
         >
-          {compact || hideCostColumns ? null : (
-            <Form.Item
-              name="data_category"
-              label="数据类别"
-              initialValue="A"
-              rules={[{ required: true, message: '请选择数据类别' }]}
-            >
-              <Select
-                options={[
-                  { label: 'A', value: 'A' },
-                  { label: 'B', value: 'B' },
-                ]}
-              />
-            </Form.Item>
-          )}
+          {compact || hideCostColumns
+            ? null
+            : (
+                <Form.Item
+                  name="data_category"
+                  label="数据类别"
+                  initialValue="A"
+                  rules={[{ required: true, message: '请选择数据类别' }]}
+                >
+                  <Select
+                    options={[
+                      { label: 'A', value: 'A' },
+                      { label: 'B', value: 'B' },
+                    ]}
+                  />
+                </Form.Item>
+              )}
 
           <Form.Item label="项目号" required>
             <Space.Compact block>
@@ -158,7 +160,8 @@ export default function ProductionOrderFormItemModal({
               getPopupContainer={getPopupContainer}
               disabled={!isProductModelSelected}
               filterOption={(input, option) => {
-                if (!option) return false
+                if (!option)
+                  return false
                 return (
                   option.value
                     ?.toString()
@@ -170,17 +173,19 @@ export default function ProductionOrderFormItemModal({
             />
           </Form.Item>
 
-          {isProductModelSelected && operationMatchLevel ? (
-            <div className="-mt-3 mb-4 text-sm text-slate-600 dark:text-slate-400">
-              成本核算匹配：
-              <Tag
-                color={MATCH_LEVEL_COLORS[operationMatchLevel]}
-                className="mr-0 ml-2"
-              >
-                {MATCH_LEVEL_LABELS[operationMatchLevel]}
-              </Tag>
-            </div>
-          ) : null}
+          {isProductModelSelected && operationMatchLevel
+            ? (
+                <div className="-mt-3 mb-4 text-sm text-slate-600 dark:text-slate-400">
+                  成本核算匹配：
+                  <Tag
+                    color={MATCH_LEVEL_COLORS[operationMatchLevel]}
+                    className="mr-0 ml-2"
+                  >
+                    {MATCH_LEVEL_LABELS[operationMatchLevel]}
+                  </Tag>
+                </div>
+              )
+            : null}
 
           <Form.Item
             name="machine_equipment_id"
@@ -202,23 +207,24 @@ export default function ProductionOrderFormItemModal({
               disabled={!isOperationSelected}
               optionLabelProp="label"
               filterOption={(input, option) => {
-                if (!option) return false
+                if (!option)
+                  return false
                 const search = input.toLowerCase()
                 return (
                   (option.unified_device_no as string)
                     ?.toLowerCase()
-                    .includes(search) ||
-                  (option.operation as string)
-                    ?.toLowerCase()
-                    .includes(search) ||
-                  (option.machine_name as string)
-                    ?.toLowerCase()
                     .includes(search)
+                    || (option.operation as string)
+                      ?.toLowerCase()
+                      .includes(search)
+                      || (option.machine_name as string)
+                        ?.toLowerCase()
+                        .includes(search)
                 )
               }}
               style={{ width: '100%' }}
             >
-              {filteredMachineOptions.map((m) => (
+              {filteredMachineOptions.map(m => (
                 <Select.Option
                   key={m.id ?? '__none__'}
                   value={m.id}
@@ -227,18 +233,20 @@ export default function ProductionOrderFormItemModal({
                   operation={m.operation}
                   machine_name={m.machine_name}
                 >
-                  {m.id === null ? (
-                    <span className="text-slate-400 dark:text-slate-500">
-                      无
-                    </span>
-                  ) : (
-                    <div className="flex flex-col py-0.5">
-                      <span>{m.unified_device_no}</span>
-                      <span className="text-xs text-slate-400 dark:text-slate-500">
-                        {m.operation} {m.machine_name}
-                      </span>
-                    </div>
-                  )}
+                  {m.id === null
+                    ? (
+                        <span className="text-slate-400 dark:text-slate-500">
+                          无
+                        </span>
+                      )
+                    : (
+                        <div className="flex flex-col py-0.5">
+                          <span>{m.unified_device_no}</span>
+                          <span className="text-xs text-slate-400 dark:text-slate-500">
+                            {m.operation} {m.machine_name}
+                          </span>
+                        </div>
+                      )}
                 </Select.Option>
               ))}
             </Select>
@@ -248,20 +256,22 @@ export default function ProductionOrderFormItemModal({
             <Input />
           </Form.Item>
 
-          {!compact && !hideCostColumns ? (
-            <Form.Item
-              name="standard_seconds"
-              label="标准工时(秒)"
-              rules={[{ required: true, message: '请输入标准工时' }]}
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                min={0}
-                placeholder="根据工序自动带出"
-                disabled
-              />
-            </Form.Item>
-          ) : null}
+          {!compact && !hideCostColumns
+            ? (
+                <Form.Item
+                  name="standard_seconds"
+                  label="标准工时(秒)"
+                  rules={[{ required: true, message: '请输入标准工时' }]}
+                >
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    min={0}
+                    placeholder="根据工序自动带出"
+                    disabled
+                  />
+                </Form.Item>
+              )
+            : null}
 
           <Form.Item
             name="incoming_qualified_quantity"
@@ -293,12 +303,12 @@ export default function ProductionOrderFormItemModal({
                   const setupDefectQuantity = Number(
                     getFieldValue('setup_defect_quantity') || 0,
                   )
-                  const minimumQuantity =
-                    qualifiedQuantity +
-                    defectQuantity1 +
-                    defectQuantity2 +
-                    outsourceDefectQuantity +
-                    setupDefectQuantity
+                  const minimumQuantity
+                    = qualifiedQuantity
+                      + defectQuantity1
+                      + defectQuantity2
+                      + outsourceDefectQuantity
+                      + setupDefectQuantity
 
                   if (incomingQualifiedQuantity < minimumQuantity) {
                     throw new Error('来料接收数不能小于成品合格数与不良数之和')

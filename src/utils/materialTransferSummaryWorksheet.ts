@@ -1,9 +1,9 @@
-import * as XLSX from 'xlsx-js-style'
-
 import type {
   MaterialTransferOrderProgress,
   MaterialTransferWithEmployee,
 } from '@/services/apiMaterialTransfers'
+
+import * as XLSX from 'xlsx-js-style'
 import { applyRegisterSheetStyles } from '@/utils/excelStyleUtils'
 
 export const MATERIAL_TRANSFER_SUMMARY_SHEET_NAME = '汇总表'
@@ -31,7 +31,24 @@ const SUMMARY_HEADERS = [
 ] as const
 
 const SUMMARY_COLUMN_WIDTHS = [
-  20, 14, 18, 9, 10, 28, 10, 14, 10, 8, 12, 8, 9, 10, 18, 16, 12, 10,
+  20,
+  14,
+  18,
+  9,
+  10,
+  28,
+  10,
+  14,
+  10,
+  8,
+  12,
+  8,
+  9,
+  10,
+  18,
+  16,
+  12,
+  10,
 ]
 
 function formatDateTime(value: string | null | undefined): string {
@@ -66,7 +83,7 @@ function joinUniqueText(values: Array<string | null | undefined>): string {
   const uniqueValues = Array.from(
     new Set(
       values
-        .map((value) => value?.trim())
+        .map(value => value?.trim())
         .filter((value): value is string => Boolean(value)),
     ),
   )
@@ -108,8 +125,8 @@ function groupRecordsByProductAndWorkshop(
 function getSummaryTitle(records: MaterialTransferWithEmployee[]): string {
   const dates = new Set(
     records
-      .map((record) => record.created_at.slice(0, 10))
-      .filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value)),
+      .map(record => record.created_at.slice(0, 10))
+      .filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value)),
   )
 
   if (dates.size !== 1) {
@@ -117,13 +134,13 @@ function getSummaryTitle(records: MaterialTransferWithEmployee[]): string {
   }
 
   const [date] = Array.from(dates)
-  const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
+  const dateParts = /^\d{4}-(\d{2})-(\d{2})$/.exec(date)
 
   if (!dateParts) {
     return SUMMARY_TITLE_FALLBACK
   }
 
-  return `${Number(dateParts[2])}月${Number(dateParts[3])}日精加工车间订单物料转移、进度、状态汇总表`
+  return `${Number(dateParts[1])}月${Number(dateParts[2])}日精加工车间订单物料转移、进度、状态汇总表`
 }
 
 function buildSummaryWorksheetData(
@@ -135,7 +152,7 @@ function buildSummaryWorksheetData(
     const progress = orderProgressMap.get(representative.project_no.trim())
 
     return [
-      joinUniqueText(group.map((record) => formatDateTime(record.created_at))),
+      joinUniqueText(group.map(record => formatDateTime(record.created_at))),
       representative.project_no,
       representative.customer || '',
       representative.product_model || '',
@@ -145,17 +162,17 @@ function buildSummaryWorksheetData(
         (total, record) => total + Number(record.transfer_quantity || 0),
         0,
       ),
-      joinUniqueText(group.flatMap((record) => record.operator_names)),
+      joinUniqueText(group.flatMap(record => record.operator_names)),
       representative.target_workshop,
-      joinUniqueText(group.map((record) => record.recipient_name)),
-      joinUniqueText(group.map((record) => record.shift_leader_name)),
-      joinUniqueText(group.map((record) => record.inspector_name)),
-      joinUniqueText(group.map((record) => record.uploaded_by_name)),
+      joinUniqueText(group.map(record => record.recipient_name)),
+      joinUniqueText(group.map(record => record.shift_leader_name)),
+      joinUniqueText(group.map(record => record.inspector_name)),
+      joinUniqueText(group.map(record => record.uploaded_by_name)),
       joinUniqueText(
-        group.map((record) => (record.is_audited ? '已审核' : '待审核')),
+        group.map(record => (record.is_audited ? '已审核' : '待审核')),
       ),
-      joinUniqueText(group.map((record) => formatDateTime(record.audited_at))),
-      joinUniqueText(group.map((record) => record.remark)),
+      joinUniqueText(group.map(record => formatDateTime(record.audited_at))),
+      joinUniqueText(group.map(record => record.remark)),
       formatOrderProgressCell(progress),
       formatOrderStatusCell(progress),
     ]

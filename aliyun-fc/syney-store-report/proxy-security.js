@@ -1,7 +1,7 @@
 'use strict'
 
 function extractBearerToken(authorization) {
-  return String(authorization || '').match(/^Bearer\s+([^\s]+)$/i)?.[1] || null
+  return String(authorization || '').match(/^Bearer\s+(\S+)$/i)?.[1] || null
 }
 
 async function authorizeProxyRequest({
@@ -12,7 +12,8 @@ async function authorizeProxyRequest({
   permission,
 }) {
   const token = extractBearerToken(authorization)
-  if (!token) return { ok: false, status: 401 }
+  if (!token)
+    return { ok: false, status: 401 }
 
   const supabaseUrl = String(env.SUPABASE_URL || '')
     .trim()
@@ -29,7 +30,8 @@ async function authorizeProxyRequest({
   const userResponse = await fetchImpl(`${supabaseUrl}/auth/v1/user`, {
     headers,
   })
-  if (!userResponse.ok) return { ok: false, status: 401 }
+  if (!userResponse.ok)
+    return { ok: false, status: 401 }
 
   const user = await userResponse.json()
   if (!user || typeof user.id !== 'string' || !user.id) {
@@ -45,17 +47,20 @@ async function authorizeProxyRequest({
         body: JSON.stringify({ p_key: permissionKey }),
       },
     )
-    if (!response.ok) throw new Error('Supabase permission check failed')
+    if (!response.ok)
+      throw new Error('Supabase permission check failed')
     return (await response.json()) === true
   }
 
-  if (!(await hasPermission(permission))) return { ok: false, status: 403 }
+  if (!(await hasPermission(permission)))
+    return { ok: false, status: 403 }
   if (diagnose) {
     const employeeResponse = await fetchImpl(
       `${supabaseUrl}/rest/v1/employees?select=role%2Cis_active&auth_user_id=eq.${encodeURIComponent(user.id)}&limit=1`,
       { headers },
     )
-    if (!employeeResponse.ok) throw new Error('Supabase admin check failed')
+    if (!employeeResponse.ok)
+      throw new Error('Supabase admin check failed')
     const employees = await employeeResponse.json()
     const employee = Array.isArray(employees) ? employees[0] : undefined
     if (employee?.role !== 'admin' || employee.is_active !== true) {
@@ -87,8 +92,8 @@ async function consumeDistributedRateLimit({
     {
       method: 'POST',
       headers: {
-        apikey: publishableKey,
-        Authorization: `Bearer ${token}`,
+        'apikey': publishableKey,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -97,52 +102,57 @@ async function consumeDistributedRateLimit({
       }),
     },
   )
-  if (!response.ok) throw new Error('Supabase rate limit check failed')
+  if (!response.ok)
+    throw new Error('Supabase rate limit check failed')
   return (await response.json()) === true
 }
 
 function parseProxyIdentifier(value) {
-  if (typeof value !== 'string') return null
+  if (typeof value !== 'string')
+    return null
   const identifier = value.trim()
   return identifier.length >= 1 && identifier.length <= 64 ? identifier : null
 }
 
 function resolveAllowedOrigin(requestOrigin, configuredOrigins) {
-  if (!requestOrigin || !configuredOrigins) return null
+  if (!requestOrigin || !configuredOrigins)
+    return null
   const origins = String(configuredOrigins)
     .split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin && origin !== '*')
+    .map(origin => origin.trim())
+    .filter(origin => origin && origin !== '*')
   return origins.includes(requestOrigin) ? requestOrigin : null
 }
 
 function safeErrorMetadata(error) {
-  const candidateName =
-    error && typeof error === 'object' && 'name' in error
+  const candidateName
+    = error && typeof error === 'object' && 'name' in error
       ? String(error.name)
       : 'UnknownError'
-  const name = /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(candidateName)
+  const name = /^[A-Z][A-Z0-9]{0,63}$/i.test(candidateName)
     ? candidateName
     : 'UnknownError'
-  const candidateStatus =
-    error && typeof error === 'object' && 'status' in error
+  const candidateStatus
+    = error && typeof error === 'object' && 'status' in error
       ? Number(error.status)
       : undefined
 
-  return Number.isInteger(candidateStatus) &&
-    candidateStatus >= 100 &&
-    candidateStatus <= 599
+  return Number.isInteger(candidateStatus)
+    && candidateStatus >= 100
+    && candidateStatus <= 599
     ? { name, status: candidateStatus }
     : { name }
 }
 
 function diagnosticErrorCategory(error) {
-  const name =
-    error && typeof error === 'object' && 'name' in error
+  const name
+    = error && typeof error === 'object' && 'name' in error
       ? String(error.name)
       : ''
-  if (name === 'TimeoutError' || name === 'AbortError') return 'timeout'
-  if (name === 'TypeError') return 'network'
+  if (name === 'TimeoutError' || name === 'AbortError')
+    return 'timeout'
+  if (name === 'TypeError')
+    return 'network'
   return 'request_failed'
 }
 

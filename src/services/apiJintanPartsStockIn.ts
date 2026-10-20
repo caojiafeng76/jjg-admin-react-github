@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface JintanPartsStockIn {
   id: string
@@ -36,19 +36,23 @@ export async function getJintanPartsStockInList({
   keyword?: string
   inventoryId?: string
   signal?: AbortSignal
-}): Promise<{ items: JintanPartsStockIn[]; total: number }> {
+}): Promise<{ items: JintanPartsStockIn[], total: number }> {
   let query = supabase
     .from('jintan_parts_stock_in')
     .select('*', { count: 'exact' })
-  if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
-  if (inventoryId) query = query.eq('inventory_id', inventoryId)
-  if (signal) query = query.abortSignal(signal)
+  if (keyword?.trim())
+    query = query.or(keywordFilter(keyword.trim()))
+  if (inventoryId)
+    query = query.eq('inventory_id', inventoryId)
+  if (signal)
+    query = query.abortSignal(signal)
 
   const { data, error, count } = await query
     .order('created_at', { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1)
 
-  if (error) throw handleApiError(error, '获取配件入库列表失败')
+  if (error)
+    throw handleApiError(error, '获取配件入库列表失败')
   return { items: data ?? [], total: count ?? 0 }
 }
 
@@ -58,14 +62,16 @@ export async function createJintanPartsStockIn(
   if (!Number.isSafeInteger(values.quantity) || values.quantity <= 0) {
     throw new Error('入库数量必须为正整数')
   }
-  if (!values.inventory_id) throw new Error('请选择配件')
+  if (!values.inventory_id)
+    throw new Error('请选择配件')
 
   const { error } = await supabase.from('jintan_parts_stock_in').insert({
     inventory_id: values.inventory_id,
     quantity: values.quantity,
     remarks: (values.remarks ?? '').trim(),
   })
-  if (error) throw handleApiError(error, '新增配件入库失败')
+  if (error)
+    throw handleApiError(error, '新增配件入库失败')
 }
 
 export async function updateJintanPartsStockInRemarks({
@@ -81,7 +87,8 @@ export async function updateJintanPartsStockInRemarks({
     .eq('id', id)
     .select('id')
     .single()
-  if (error) throw handleApiError(error, '修改配件入库备注失败')
+  if (error)
+    throw handleApiError(error, '修改配件入库备注失败')
 }
 
 export async function deleteJintanPartsStockIn(id: string): Promise<void> {
@@ -91,5 +98,6 @@ export async function deleteJintanPartsStockIn(id: string): Promise<void> {
     .eq('id', id)
     .select('id')
     .single()
-  if (error) throw handleApiError(error, '删除配件入库记录失败')
+  if (error)
+    throw handleApiError(error, '删除配件入库记录失败')
 }

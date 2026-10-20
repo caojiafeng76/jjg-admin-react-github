@@ -1,27 +1,24 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { OrderItem, ProductionOrderFormProps, ProjectNoData } from './productionOrderFormTypes'
+import type { ScannedProjectPayload } from './ProjectNoScanButton'
+import type { ProductionOrderShift } from '@/services/apiProductionOrders'
+
 import { Form, Modal } from 'antd'
 import dayjs from 'dayjs'
-
-import type { ProductionOrderShift } from '@/services/apiProductionOrders'
-import { buildProjectNoSelectOptions } from './projectNoSelect'
-import type { ScannedProjectPayload } from './ProjectNoScanButton'
-import {
-  useOperationsByModel,
-  useSalesOrdersProjectNos,
-  useSalesOrderByProjectNo,
-} from './useProcessStandards'
-import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
-import { useAuth } from '@/contexts/useAuth'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { isViewerRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
 import ProductionOrderFormBaseFields from './ProductionOrderFormBaseFields'
 import ProductionOrderFormItemModal from './ProductionOrderFormItemModal'
 import ProductionOrderFormItemsMobileList from './ProductionOrderFormItemsMobileList'
 import ProductionOrderFormItemsTable from './ProductionOrderFormItemsTable'
+import { buildProjectNoSelectOptions } from './projectNoSelect'
+import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
 import {
-  type OrderItem,
-  type ProductionOrderFormProps,
-  type ProjectNoData,
-} from './productionOrderFormTypes'
+  useOperationsByModel,
+  useSalesOrderByProjectNo,
+  useSalesOrdersProjectNos,
+} from './useProcessStandards'
+
 export default function ProductionOrderForm({
   open,
   onCancel,
@@ -34,8 +31,8 @@ export default function ProductionOrderForm({
   showAuditField = false,
 }: ProductionOrderFormProps) {
   const [form] = Form.useForm()
-  const { data: projectNos, isLoading: loadingProjectNos } =
-    useSalesOrdersProjectNos()
+  const { data: projectNos, isLoading: loadingProjectNos }
+    = useSalesOrdersProjectNos()
   const { role } = useAuth()
   const hideCostColumns = isViewerRole(role)
   const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
@@ -89,7 +86,7 @@ export default function ProductionOrderForm({
   )
   const mergedProjectNoOptions = useMemo(() => {
     const existingProjectNos = new Set(
-      projectNoOptions.map((item) => item.value),
+      projectNoOptions.map(item => item.value),
     )
     const scannedProjectNos = Object.entries(scannedProjectDataMap)
       .filter(([projectNo]) => !existingProjectNos.has(projectNo))
@@ -107,16 +104,16 @@ export default function ProductionOrderForm({
   }, [projectNoOptions, projectNos, scannedProjectDataMap])
 
   const selectedProjectData = selectedItemProjectNo
-    ? (modelsMap[selectedItemProjectNo] ??
-      scannedProjectDataMap[selectedItemProjectNo])
+    ? (modelsMap[selectedItemProjectNo]
+      ?? scannedProjectDataMap[selectedItemProjectNo])
     : undefined
 
   const { data: selectedSalesOrderDetail } = useSalesOrderByProjectNo(
     selectedItemProjectNo || undefined,
   )
 
-  const resolvedSelectedProjectData =
-    selectedProjectData ?? selectedSalesOrderDetail
+  const resolvedSelectedProjectData
+    = selectedProjectData ?? selectedSalesOrderDetail
 
   const { data: operationMatch } = useOperationsByModel({
     model: selectedItemProductModel || undefined,
@@ -129,7 +126,7 @@ export default function ProductionOrderForm({
 
   const operationOptions = useMemo(
     () =>
-      operations?.map((item) => ({
+      operations?.map(item => ({
         label: item.operation,
         value: item.operation,
       })) || [],
@@ -152,7 +149,7 @@ export default function ProductionOrderForm({
   useEffect(() => {
     if (initialValues) {
       setItems(
-        (initialValues.items || []).map((item) => ({
+        (initialValues.items || []).map(item => ({
           id: item.id,
           data_category: item.data_category,
           project_no: item.project_no,
@@ -186,7 +183,8 @@ export default function ProductionOrderForm({
           ? dayjs(initialValues.order_date)
           : undefined,
       })
-    } else {
+    }
+    else {
       setItems([])
       setScannedProjectDataMap({})
       form.resetFields()
@@ -202,8 +200,8 @@ export default function ProductionOrderForm({
   }, [fixedEmployee, initialValues, form, open])
 
   useEffect(() => {
-    const normalizedOperation =
-      typeof selectedItemOperation === 'string'
+    const normalizedOperation
+      = typeof selectedItemOperation === 'string'
         ? selectedItemOperation.trim()
         : ''
 
@@ -212,7 +210,7 @@ export default function ProductionOrderForm({
     }
 
     const operationData = operations?.find(
-      (item) => item.operation === normalizedOperation,
+      item => item.operation === normalizedOperation,
     )
 
     const currentStandardSeconds = itemForm.getFieldValue('standard_seconds')
@@ -228,9 +226,9 @@ export default function ProductionOrderForm({
     }
 
     if (
-      currentStandardSeconds === undefined ||
-      currentStandardSeconds === null ||
-      currentStandardSeconds === ''
+      currentStandardSeconds === undefined
+      || currentStandardSeconds === null
+      || currentStandardSeconds === ''
     ) {
       itemForm.setFieldsValue({ standard_seconds: 0 })
     }
@@ -257,7 +255,8 @@ export default function ProductionOrderForm({
         })
         form.resetFields()
         setItems([])
-      } finally {
+      }
+      finally {
         setSubmitting(false)
       }
     },
@@ -290,7 +289,8 @@ export default function ProductionOrderForm({
         setup_responsible: item?.setup_responsible || null,
         remark: item?.remark || null,
       })
-    } else {
+    }
+    else {
       setEditingItemIndex(null)
       itemForm.resetFields()
       itemForm.setFieldsValue({
@@ -321,25 +321,25 @@ export default function ProductionOrderForm({
       const newItem: OrderItem = {
         id: editingItemIndex !== null ? items[editingItemIndex]?.id : undefined,
         data_category:
-          values.data_category ||
-          (editingItemIndex !== null
+          values.data_category
+          || (editingItemIndex !== null
             ? items[editingItemIndex]?.data_category
-            : undefined) ||
-          'A',
+            : undefined)
+          || 'A',
         project_no: values.project_no,
         product_model: productModel,
         length_mm: data?.length_mm ?? values.length_mm ?? null,
         customer_model: data?.customer_model ?? values.customer_model ?? null,
         operation,
         standard_seconds: Number(
-          values.standard_seconds ??
-            itemForm.getFieldValue('standard_seconds') ??
-            0,
+          values.standard_seconds
+          ?? itemForm.getFieldValue('standard_seconds')
+          ?? 0,
         ),
         theoretical_seconds: Number(
-          values.theoretical_seconds ??
-            itemForm.getFieldValue('theoretical_seconds') ??
-            0,
+          values.theoretical_seconds
+          ?? itemForm.getFieldValue('theoretical_seconds')
+          ?? 0,
         ),
         machine_equipment_id: values.machine_equipment_id ?? null,
         incoming_qualified_quantity:
@@ -364,8 +364,9 @@ export default function ProductionOrderForm({
           next[editingItemIndex] = newItem
           return next
         })
-      } else {
-        setItems((prev) => [...prev, newItem])
+      }
+      else {
+        setItems(prev => [...prev, newItem])
       }
 
       setIsItemModalOpen(false)
@@ -406,7 +407,7 @@ export default function ProductionOrderForm({
       customer_model: payload.customerModel,
     }
 
-    setScannedProjectDataMap((prev) => ({
+    setScannedProjectDataMap(prev => ({
       ...prev,
       [payload.projectNo]: nextProjectData,
     }))
@@ -424,13 +425,13 @@ export default function ProductionOrderForm({
   }
 
   const handleDeleteItem = (index: number) => {
-    setItems((prev) => prev.filter((_, itemIndex) => itemIndex !== index))
+    setItems(prev => prev.filter((_, itemIndex) => itemIndex !== index))
   }
 
   const handleOperationChangeForItem = (value: string) => {
     const normalizedOperation = value.trim()
     const operationData = operations?.find(
-      (item) => item.operation === normalizedOperation,
+      item => item.operation === normalizedOperation,
     )
 
     itemForm.setFieldsValue({
@@ -465,24 +466,28 @@ export default function ProductionOrderForm({
             fixedEmployee={fixedEmployee}
             showAuditField={showAuditField}
           />
-          {compact && isCreateMode ? (
-            <ProductionOrderFormItemsMobileList
-              items={items}
-              onAdd={() => handleOpenItemModal()}
-              onDelete={handleDeleteItem}
-              onEdit={handleOpenItemModal}
-            />
-          ) : null}
-          {!compact ? (
-            <ProductionOrderFormItemsTable
-              hideCostColumns={hideCostColumns}
-              items={items}
-              loading={loading}
-              onAdd={() => handleOpenItemModal()}
-              onDelete={handleDeleteItem}
-              onEdit={handleOpenItemModal}
-            />
-          ) : null}{' '}
+          {compact && isCreateMode
+            ? (
+                <ProductionOrderFormItemsMobileList
+                  items={items}
+                  onAdd={() => handleOpenItemModal()}
+                  onDelete={handleDeleteItem}
+                  onEdit={handleOpenItemModal}
+                />
+              )
+            : null}
+          {!compact
+            ? (
+                <ProductionOrderFormItemsTable
+                  hideCostColumns={hideCostColumns}
+                  items={items}
+                  loading={loading}
+                  onAdd={() => handleOpenItemModal()}
+                  onDelete={handleDeleteItem}
+                  onEdit={handleOpenItemModal}
+                />
+              )
+            : null}{' '}
         </Form>
       </Modal>
       <ProductionOrderFormItemModal

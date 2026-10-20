@@ -1,9 +1,10 @@
+import type { TableColumnsType } from 'antd'
+import type { ToolingData } from '@/services/apiToolingData'
+import { Button, Table } from 'antd'
 import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Button, Table, type TableColumnsType } from 'antd'
 
 import { TableEmpty } from '@/ui/TableState'
-import type { ToolingData } from '@/services/apiToolingData'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 type FilterValue = string | number
 
@@ -33,8 +34,8 @@ function compareNumber(
 
 function uniqueFilters(
   values: (string | number | null | undefined)[],
-  formatText: (value: FilterValue) => string = (value) => String(value),
-): { text: string; value: FilterValue }[] {
+  formatText: (value: FilterValue) => string = value => String(value),
+): { text: string, value: FilterValue }[] {
   const set = new Set<FilterValue>()
 
   values.forEach((value) => {
@@ -45,7 +46,7 @@ function uniqueFilters(
 
   return Array.from(set)
     .sort((left, right) => compareText(left, right))
-    .map((value) => ({
+    .map(value => ({
       text: formatText(value),
       value,
     }))
@@ -87,7 +88,7 @@ function ToolingDataTable({
 }: Props) {
   const columns: TableColumnsType<ToolingData> = useMemo(() => {
     const getRowNumber = (record: ToolingData): number => {
-      const index = data.findIndex((item) => item.id === record.id)
+      const index = data.findIndex(item => item.id === record.id)
 
       return index === -1 ? 0 : (page - 1) * pageSize + index + 1
     }
@@ -117,7 +118,7 @@ function ToolingDataTable({
         width: 140,
         fixed: 'left',
         sorter: (a, b) => compareText(a.tool_code, b.tool_code),
-        filters: uniqueFilters(data.map((record) => record.tool_code)),
+        filters: uniqueFilters(data.map(record => record.tool_code)),
         filterSearch: true,
         onFilter: (value, record) => matchesFilter(value, record.tool_code),
       },
@@ -127,7 +128,7 @@ function ToolingDataTable({
         key: 'tool_name',
         width: 180,
         sorter: (a, b) => compareText(a.tool_name, b.tool_name),
-        filters: uniqueFilters(data.map((record) => record.tool_name)),
+        filters: uniqueFilters(data.map(record => record.tool_name)),
         filterSearch: true,
         onFilter: (value, record) => matchesFilter(value, record.tool_name),
       },
@@ -137,7 +138,7 @@ function ToolingDataTable({
         key: 'tool_spec',
         width: 180,
         sorter: (a, b) => compareText(a.tool_spec, b.tool_spec),
-        filters: uniqueFilters(data.map((record) => record.tool_spec)),
+        filters: uniqueFilters(data.map(record => record.tool_spec)),
         filterSearch: true,
         onFilter: (value, record) => matchesFilter(value, record.tool_spec),
       },
@@ -147,7 +148,7 @@ function ToolingDataTable({
         key: 'material',
         width: 140,
         sorter: (a, b) => compareText(a.material, b.material),
-        filters: uniqueFilters(data.map((record) => record.material)),
+        filters: uniqueFilters(data.map(record => record.material)),
         filterSearch: true,
         onFilter: (value, record) => matchesFilter(value, record.material),
       },
@@ -158,8 +159,8 @@ function ToolingDataTable({
         width: 120,
         sorter: (a, b) => compareNumber(a.unit_price, b.unit_price),
         filters: uniqueFilters(
-          data.map((record) => record.unit_price),
-          (value) => formatAmount(Number(value)),
+          data.map(record => record.unit_price),
+          value => formatAmount(Number(value)),
         ),
         onFilter: (value, record) => matchesFilter(value, record.unit_price),
         render: (value: number) => formatAmount(value),
@@ -170,7 +171,7 @@ function ToolingDataTable({
         key: 'usage',
         width: 220,
         sorter: (a, b) => compareText(a.usage, b.usage),
-        filters: uniqueFilters(data.map((record) => record.usage)),
+        filters: uniqueFilters(data.map(record => record.usage)),
         filterSearch: true,
         onFilter: (value, record) => matchesFilter(value, record.usage),
       },
@@ -180,7 +181,7 @@ function ToolingDataTable({
         key: 'remarks',
         width: 260,
         sorter: (a, b) => compareText(a.remarks, b.remarks),
-        filters: uniqueFilters(data.map((record) => record.remarks)),
+        filters: uniqueFilters(data.map(record => record.remarks)),
         filterSearch: true,
         onFilter: (value, record) => matchesFilter(value, record.remarks),
       },
@@ -191,8 +192,8 @@ function ToolingDataTable({
         width: 180,
         sorter: (a, b) => compareText(a.created_at, b.created_at),
         filters: uniqueFilters(
-          data.map((record) => record.created_at),
-          (value) => formatDateTime(String(value)),
+          data.map(record => record.created_at),
+          value => formatDateTime(String(value)),
         ),
         filterSearch: true,
         onFilter: (value, record) => matchesFilter(value, record.created_at),
@@ -205,8 +206,8 @@ function ToolingDataTable({
         width: 180,
         sorter: (a, b) => compareText(a.updated_at, b.updated_at),
         filters: uniqueFilters(
-          data.map((record) => record.updated_at),
-          (value) => formatDateTime(String(value)),
+          data.map(record => record.updated_at),
+          value => formatDateTime(String(value)),
         ),
         filterSearch: true,
         onFilter: (value, record) => matchesFilter(value, record.updated_at),
@@ -268,9 +269,8 @@ function ToolingDataTable({
       rowClassName={(_, index) =>
         index % 2 === 0
           ? 'bg-white dark:bg-slate-800'
-          : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+          : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择刀具资料 ${record.tool_code || record.id}`,

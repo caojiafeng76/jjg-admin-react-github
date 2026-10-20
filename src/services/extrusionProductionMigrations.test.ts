@@ -7,9 +7,9 @@ describe('extrusion production migrations', () => {
   function readMigrationSql(): string {
     const migrationsDirectory = resolve('supabase/migrations')
     return readdirSync(migrationsDirectory)
-      .filter((fileName) => fileName.endsWith('.sql'))
+      .filter(fileName => fileName.endsWith('.sql'))
       .sort()
-      .map((fileName) =>
+      .map(fileName =>
         readFileSync(join(migrationsDirectory, fileName), 'utf8'),
       )
       .join('\n')

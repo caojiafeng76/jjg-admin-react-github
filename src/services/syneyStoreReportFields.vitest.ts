@@ -52,7 +52,7 @@ describe('Syney store report SCM fields', () => {
         'node',
         [
           '-e',
-          "require('./proxy-security'); console.log('proxy-security resolved')",
+          'require(\'./proxy-security\'); console.log(\'proxy-security resolved\')',
         ],
         {
           cwd: outputDir,
@@ -63,7 +63,8 @@ describe('Syney store report SCM fields', () => {
       expect(smokeResult.status, smokeResult.stderr || smokeResult.stdout).toBe(
         0,
       )
-    } finally {
+    }
+    finally {
       rmSync(outputDir, { recursive: true, force: true })
     }
   })

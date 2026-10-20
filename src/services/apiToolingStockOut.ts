@@ -50,15 +50,15 @@ interface ToolingInventorySnapshot {
 type ToolingStockOutRow = ToolingStockOut & {
   machine_equipment_maintenances?:
     | {
-        id: string
-        unified_device_no: string
-        machine_name: string
-      }
+      id: string
+      unified_device_no: string
+      machine_name: string
+    }
     | Array<{
-        id: string
-        unified_device_no: string
-        machine_name: string
-      }>
+      id: string
+      unified_device_no: string
+      machine_name: string
+    }>
     | null
 }
 
@@ -90,7 +90,7 @@ export interface ToolingStockOutImportRow {
   remarks: string
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 
@@ -326,7 +326,7 @@ export async function getToolingStockOutList({
 
   const items = (data || []) as ToolingStockOutRow[]
   const toolingIds = Array.from(
-    new Set(items.map((item) => item.tooling_data_id)),
+    new Set(items.map(item => item.tooling_data_id)),
   )
   const inventoryMap = new Map<string, number>()
 
@@ -352,7 +352,7 @@ export async function getToolingStockOutList({
   }
 
   return {
-    items: items.map((item) => ({
+    items: items.map(item => ({
       ...item,
       ...extractMachineInfo(item.machine_equipment_maintenances),
       final_stock: inventoryMap.get(item.tooling_data_id) ?? null,
@@ -434,7 +434,7 @@ export async function batchUpdateToolingStockOutStatus({
 export async function importToolingStockOut(rows: ToolingStockOutImportRow[]) {
   const normalizedRows = rows.map(normalizeImportRow)
   const toolCodes = Array.from(
-    new Set(normalizedRows.map((row) => row.tool_code)),
+    new Set(normalizedRows.map(row => row.tool_code)),
   )
 
   const { data: toolingRows, error: toolingError } = await toolingDataTable()
@@ -446,13 +446,13 @@ export async function importToolingStockOut(rows: ToolingStockOutImportRow[]) {
   }
 
   const toolingMap = new Map(
-    ((toolingRows || []) as ToolingDataOption[]).map((row) => [
+    ((toolingRows || []) as ToolingDataOption[]).map(row => [
       row.tool_code,
       row,
     ]),
   )
 
-  const missingCodes = toolCodes.filter((code) => !toolingMap.has(code))
+  const missingCodes = toolCodes.filter(code => !toolingMap.has(code))
   if (missingCodes.length > 0) {
     throw new Error(
       `以下刀具编号未在刀具资料中维护，无法导入出库：${missingCodes.join('、')}`,

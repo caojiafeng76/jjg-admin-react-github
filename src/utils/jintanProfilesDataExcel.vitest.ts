@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
-import * as XLSX from 'xlsx-js-style'
-
 import type { JintanProfilesData } from '@/services/apiJintanProfilesData'
+import { describe, expect, it, vi } from 'vitest'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   createJintanProfilesDataExportWorkbook,
   downloadJintanProfilesDataTemplate,

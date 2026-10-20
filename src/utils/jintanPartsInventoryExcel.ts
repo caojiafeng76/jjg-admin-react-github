@@ -1,11 +1,11 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
-
-import { JINTAN_PARTS_STOCK_STATUS_CONFIG } from '@/features/jintan/PartsInventory/stockStatus'
 import type {
   JintanPartsInventory,
   JintanPartsInventoryImportRow,
 } from '@/services/apiJintanPartsInventory'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
+import { JINTAN_PARTS_STOCK_STATUS_CONFIG } from '@/features/jintan/PartsInventory/stockStatus'
 import {
   applyRegisterSheetStyles,
   autoFitColumnWidths,
@@ -193,7 +193,8 @@ function applyStockStatusFills(
       EXPORT_STATUS_COLUMN_INDEX,
     ]) {
       const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })]
-      if (!cell) continue
+      if (!cell)
+        continue
       cell.s = {
         ...cell.s,
         font: { ...cell.s?.font, color: { rgb: config.excelFont } },
@@ -206,7 +207,7 @@ function applyStockStatusFills(
 function validateTemplateHeaders(
   headerCells: Array<string | number | null> = [],
 ) {
-  const headerRow = headerCells.map((cell) => normalizeText(cell))
+  const headerRow = headerCells.map(cell => normalizeText(cell))
   const templateHeaders = Array.from(TEMPLATE_HEADERS)
 
   const matches = templateHeaders.every(

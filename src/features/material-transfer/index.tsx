@@ -1,8 +1,21 @@
-import { useCallback, useMemo, useState } from 'react'
-import { App, Button, Splitter } from 'antd'
+import type { MaterialTransferFilters, MaterialTransferInsert, MaterialTransferUpdate, MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
 import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { App, Button, Splitter } from 'antd'
+import { useCallback, useMemo, useState } from 'react'
 
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
+import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import {
+  buildOrderProgressMap,
+  getMaterialTransfersForExport,
+  getOrderQuantitiesByProjectNos,
+  getTransferTotalByProjectNos,
+
+} from '@/services/apiMaterialTransfers'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -10,41 +23,27 @@ import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
-import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
-import { useAuth } from '@/contexts/useAuth'
-import {
-  getMaterialTransfersForExport,
-  getOrderQuantitiesByProjectNos,
-  getTransferTotalByProjectNos,
-  buildOrderProgressMap,
-  type MaterialTransferFilters,
-  type MaterialTransferInsert,
-  type MaterialTransferUpdate,
-  type MaterialTransferWithEmployee,
-} from '@/services/apiMaterialTransfers'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import {
-  useCreateMaterialTransfer,
-  useBatchUpdateMaterialTransfers,
-  useDeleteMaterialTransfers,
-  useMaterialTransfers,
-  useOrderProgressByProjectNos,
-  useUpdateMaterialTransfer,
-  useMaterialTransferLengths,
-} from './useMaterialTransfers'
 import MaterialTransferDetail from './MaterialTransferDetail'
 import MaterialTransferForm from './MaterialTransferForm'
 import MaterialTransferMobileList from './MaterialTransferMobileList'
 import MaterialTransferSearch from './MaterialTransferSearch'
 import MaterialTransferTable from './MaterialTransferTable'
+import {
+  useBatchUpdateMaterialTransfers,
+  useCreateMaterialTransfer,
+  useDeleteMaterialTransfers,
+  useMaterialTransferLengths,
+  useMaterialTransfers,
+  useOrderProgressByProjectNos,
+  useUpdateMaterialTransfer,
+} from './useMaterialTransfers'
 
-const loadMaterialTransferExcel = () =>
-  import('@/utils/materialTransferExcel')
+function loadMaterialTransferExcel() {
+  return import('@/utils/materialTransferExcel')
+}
 
-const preloadMaterialTransferExcel = () => {
+function preloadMaterialTransferExcel() {
   void loadMaterialTransferExcel()
 }
 
@@ -54,9 +53,11 @@ function collectProjectNos(
   const set = new Set<string>()
   for (const record of records) {
     const raw = record.project_no
-    if (!raw) continue
+    if (!raw)
+      continue
     const trimmed = raw.trim()
-    if (trimmed) set.add(trimmed)
+    if (trimmed)
+      set.add(trimmed)
   }
   return Array.from(set)
 }
@@ -89,10 +90,10 @@ export default function MaterialTransferPage() {
     }),
   )
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingRecord, setEditingRecord] =
-    useState<MaterialTransferWithEmployee | null>(null)
-  const [activeRecord, setActiveRecord] =
-    useState<MaterialTransferWithEmployee | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<MaterialTransferWithEmployee | null>(null)
+  const [activeRecord, setActiveRecord]
+    = useState<MaterialTransferWithEmployee | null>(null)
   const [isExporting, setIsExporting] = useState(false)
 
   const { data: employeeOptions = [] } = useAllEmployees(!isOwnOnlyView)
@@ -123,7 +124,7 @@ export default function MaterialTransferPage() {
     if (selectedRowKeys.length === 0) {
       return { quantity: 0, matched: 0 }
     }
-    const keySet = new Set(selectedRowKeys.map((key) => String(key)))
+    const keySet = new Set(selectedRowKeys.map(key => String(key)))
     let quantity = 0
     let matched = 0
     for (const item of records) {
@@ -157,8 +158,8 @@ export default function MaterialTransferPage() {
 
   const openEditModal = useCallback(
     (record?: MaterialTransferWithEmployee) => {
-      const targetRecord =
-        record || records.find((item) => item.id === selectedRowKeys[0])
+      const targetRecord
+        = record || records.find(item => item.id === selectedRowKeys[0])
 
       if (!targetRecord) {
         message.warning('请选择一条数据进行编辑')
@@ -246,7 +247,7 @@ export default function MaterialTransferPage() {
   const handleExport = useCallback(async () => {
     try {
       setIsExporting(true)
-      const selectedIds = selectedRowKeys.map((key) => String(key))
+      const selectedIds = selectedRowKeys.map(key => String(key))
       const exportRows = await getMaterialTransfersForExport(
         selectedIds.length > 0
           ? { ids: selectedIds }
@@ -268,14 +269,16 @@ export default function MaterialTransferPage() {
         transferTotalMap,
       )
 
-      const { exportMaterialTransfersToExcel } =
-        await loadMaterialTransferExcel()
+      const { exportMaterialTransfersToExcel }
+        = await loadMaterialTransferExcel()
       exportMaterialTransfersToExcel(exportRows, exportProgressMap)
       message.success(`已导出 ${exportRows.length} 条物料转移单`)
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '导出失败')
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [message, searchFilters, selectedRowKeys])
@@ -308,7 +311,8 @@ export default function MaterialTransferPage() {
             })
             message.success(`批量${isAudited ? '审核' : '反审核'}成功`)
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error
                 ? error.message
@@ -368,7 +372,8 @@ export default function MaterialTransferPage() {
             },
           })
           message.success('更新成功')
-        } else {
+        }
+        else {
           const createValues = values as MaterialTransferInsert
           const operatorEmployeeIds = fixedEmployeeId
             ? [fixedEmployeeId]
@@ -396,7 +401,8 @@ export default function MaterialTransferPage() {
 
         handleCloseModal()
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error
             ? translateErrorMessage(error.message)
@@ -432,86 +438,90 @@ export default function MaterialTransferPage() {
       <div
         className={isEmployeeView ? '' : 'flex flex-wrap items-center gap-2'}
       >
-        {isEmployeeView ? (
-          <Button
-            block
-            type="primary"
-            className="h-11 rounded-2xl"
-            onClick={openCreateModal}
-          >
-            新建
-          </Button>
-        ) : (
-          <>
-            <AddButton handleCreate={openCreateModal} />
-            <Button
-              type="text"
-              icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
-              onClick={() => handleBatchAudit(true)}
-              loading={batchUpdateMutation.isPending}
-              disabled={viewerDenied}
-            >
-              批量审核
-            </Button>
-            <Button
-              type="text"
-              icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
-              onClick={() => handleBatchAudit(false)}
-              loading={batchUpdateMutation.isPending}
-              disabled={viewerDenied}
-            >
-              批量反审核
-            </Button>
-            <EditButton
-              title="编辑物料转移单"
-              handleEdit={() => openEditModal()}
-            />
-            <ExportButton
-              handleExport={handleExport}
-              loading={isExporting}
-              onPreload={preloadMaterialTransferExcel}
-            >
-              {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
-            </ExportButton>
-            <DeleteButton
-              onConfirm={() => handleDelete()}
-              isDeleting={deleteMutation.isPending}
-              count={selectedCount}
-              title="删除物料转移单"
-              itemName="转移单"
-            />
-          </>
-        )}
+        {isEmployeeView
+          ? (
+              <Button
+                block
+                type="primary"
+                className="h-11 rounded-2xl"
+                onClick={openCreateModal}
+              >
+                新建
+              </Button>
+            )
+          : (
+              <>
+                <AddButton handleCreate={openCreateModal} />
+                <Button
+                  type="text"
+                  icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+                  onClick={() => handleBatchAudit(true)}
+                  loading={batchUpdateMutation.isPending}
+                  disabled={viewerDenied}
+                >
+                  批量审核
+                </Button>
+                <Button
+                  type="text"
+                  icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+                  onClick={() => handleBatchAudit(false)}
+                  loading={batchUpdateMutation.isPending}
+                  disabled={viewerDenied}
+                >
+                  批量反审核
+                </Button>
+                <EditButton
+                  title="编辑物料转移单"
+                  handleEdit={() => openEditModal()}
+                />
+                <ExportButton
+                  handleExport={handleExport}
+                  loading={isExporting}
+                  onPreload={preloadMaterialTransferExcel}
+                >
+                  {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
+                </ExportButton>
+                <DeleteButton
+                  onConfirm={() => handleDelete()}
+                  isDeleting={deleteMutation.isPending}
+                  count={selectedCount}
+                  title="删除物料转移单"
+                  itemName="转移单"
+                />
+              </>
+            )}
       </div>
 
-      {!isEmployeeView && selectedCount > 0 ? (
-        <SelectedSummaryBar
-          selectedCount={selectedCount}
-          matchedCount={selectedSummary.matched}
-          stats={[
-            {
-              label: '转移数量合计',
-              value: selectedSummary.quantity,
-              tone: 'error',
-              icon: (
-                <svg
-                  className="size-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                  />
-                </svg>
-              ),
-            },
-          ]}
-        />
-      ) : null}
+      {!isEmployeeView && selectedCount > 0
+        ? (
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedSummary.matched}
+              stats={[
+                {
+                  label: '转移数量合计',
+                  value: selectedSummary.quantity,
+                  tone: 'error',
+                  icon: (
+                    <svg
+                      className="size-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                      />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
+          )
+        : null}
 
       <div
         className={
@@ -531,54 +541,56 @@ export default function MaterialTransferPage() {
         />
       </div>
 
-      {isEmployeeView ? null : (
-        <Splitter
-          orientation="vertical"
-          style={{ flex: 1, minHeight: 0 }}
-          styles={{ panel: { overflow: 'hidden' } }}
-        >
-          <Splitter.Panel defaultSize="65%" min="30%">
-            <div
-              ref={tableContainerRef}
-              className="flex h-full flex-col gap-2 overflow-hidden"
+      {isEmployeeView
+        ? null
+        : (
+            <Splitter
+              orientation="vertical"
+              style={{ flex: 1, minHeight: 0 }}
+              styles={{ panel: { overflow: 'hidden' } }}
             >
-              <div className="min-h-0 flex-1 overflow-hidden">
-                <TableState
-                  loading={isLoading && !data}
-                  error={error}
-                  onRetry={refetch}
+              <Splitter.Panel defaultSize="65%" min="30%">
+                <div
+                  ref={tableContainerRef}
+                  className="flex h-full flex-col gap-2 overflow-hidden"
                 >
-                  <MaterialTransferTable
-                    loading={isLoading}
-                    data={records}
-                    page={page}
-                    pageSize={pageSize}
-                    selectedRowKeys={selectedRowKeys}
-                    onSelect={setSelectedRowKeys}
-                    scrollY={scrollY}
-                    activeRowId={activeRecord?.id ?? null}
-                    onRowClick={setActiveRecord}
+                  <div className="min-h-0 flex-1 overflow-hidden">
+                    <TableState
+                      loading={isLoading && !data}
+                      error={error}
+                      onRetry={refetch}
+                    >
+                      <MaterialTransferTable
+                        loading={isLoading}
+                        data={records}
+                        page={page}
+                        pageSize={pageSize}
+                        selectedRowKeys={selectedRowKeys}
+                        onSelect={setSelectedRowKeys}
+                        scrollY={scrollY}
+                        activeRowId={activeRecord?.id ?? null}
+                        onRowClick={setActiveRecord}
+                        orderProgressMap={orderProgressMap}
+                      />
+                    </TableState>
+                  </div>
+                  <div ref={paginationRef} className="flex shrink-0 justify-end">
+                    <AppPagination total={data?.total || 0} defaultPageSize={50} />
+                  </div>
+                </div>
+              </Splitter.Panel>
+              <Splitter.Panel min="20%">
+                <div className="h-full overflow-hidden">
+                  <MaterialTransferDetail
+                    selectedRecord={activeRecord}
+                    onEdit={openEditModal}
+                    editDisabled={viewerDenied}
                     orderProgressMap={orderProgressMap}
                   />
-                </TableState>
-              </div>
-              <div ref={paginationRef} className="flex shrink-0 justify-end">
-                <AppPagination total={data?.total || 0} defaultPageSize={50} />
-              </div>
-            </div>
-          </Splitter.Panel>
-          <Splitter.Panel min="20%">
-            <div className="h-full overflow-hidden">
-              <MaterialTransferDetail
-                selectedRecord={activeRecord}
-                onEdit={openEditModal}
-                editDisabled={viewerDenied}
-                orderProgressMap={orderProgressMap}
-              />
-            </div>
-          </Splitter.Panel>
-        </Splitter>
-      )}
+                </div>
+              </Splitter.Panel>
+            </Splitter>
+          )}
 
       {isEmployeeView && (
         <>
@@ -601,20 +613,22 @@ export default function MaterialTransferPage() {
         </>
       )}
 
-      {!isEmployeeView ? (
-        <MaterialTransferForm
-          open={isModalOpen}
-          onCancel={handleCloseModal}
-          onSubmit={handleSubmit}
-          initialValues={initialFormValues}
-          employees={employees}
-          loading={isSubmitting}
-          fixedOperator={fixedEmployee}
-          currentUploader={currentUploader}
-          canAudit={!isEmployeeView}
-          mobile={false}
-        />
-      ) : null}
+      {!isEmployeeView
+        ? (
+            <MaterialTransferForm
+              open={isModalOpen}
+              onCancel={handleCloseModal}
+              onSubmit={handleSubmit}
+              initialValues={initialFormValues}
+              employees={employees}
+              loading={isSubmitting}
+              fixedOperator={fixedEmployee}
+              currentUploader={currentUploader}
+              canAudit={!isEmployeeView}
+              mobile={false}
+            />
+          )
+        : null}
     </div>
   )
 }

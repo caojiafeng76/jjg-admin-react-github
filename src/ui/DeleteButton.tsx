@@ -3,7 +3,7 @@ import { Button, Popconfirm, Tooltip } from 'antd'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 
-type SharedProps = {
+interface SharedProps {
   isDeleting: boolean
   count?: number // 要删除的数量
   title?: string // 自定义标题，默认为"删除订单"
@@ -12,15 +12,15 @@ type SharedProps = {
   noPermissionTip?: string // 无权限提示文案
 }
 
-type Props =
+type Props
+  = | (SharedProps & {
+    onConfirm: () => void | Promise<void>
+    onClick?: never
+  })
   | (SharedProps & {
-      onConfirm: () => void | Promise<void>
-      onClick?: never
-    })
-  | (SharedProps & {
-      onClick: () => void | Promise<void>
-      onConfirm?: never
-    })
+    onClick: () => void | Promise<void>
+    onConfirm?: never
+  })
 
 export default function DeleteButton({
   onClick,
@@ -54,19 +54,21 @@ export default function DeleteButton({
     return denied ? <Tooltip title={deniedTip}>{btn}</Tooltip> : btn
   }
 
-  const description =
-    count !== undefined && count > 0 ? (
-      <div>
-        <p>
-          确定删除选中的 <strong>{count}</strong> 个{itemName}吗？
-        </p>
-        <p style={{ color: 'red', fontSize: '12px', marginTop: '8px' }}>
-          此操作不可撤销，将同时删除{itemName}及其所有明细。
-        </p>
-      </div>
-    ) : (
-      `确定删除选中的${itemName}吗？此操作不可撤销。`
-    )
+  const description
+    = count !== undefined && count > 0
+      ? (
+          <div>
+            <p>
+              确定删除选中的 <strong>{count}</strong> 个{itemName}吗？
+            </p>
+            <p style={{ color: 'red', fontSize: '12px', marginTop: '8px' }}>
+              此操作不可撤销，将同时删除{itemName}及其所有明细。
+            </p>
+          </div>
+        )
+      : (
+          `确定删除选中的${itemName}吗？此操作不可撤销。`
+        )
 
   // 如果传入了 count 且为 0，则不弹出二次确认，直接执行 onConfirm
   if (count !== undefined && count <= 0) {

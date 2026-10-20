@@ -1,7 +1,7 @@
 import type { PermissionDefinition } from '@/types/permission'
 
-export const PRECISION_CUTTING_TRANSFER_MANAGE_PERMISSION_KEY =
-  'feature:precision-cutting-transfer.manage'
+export const PRECISION_CUTTING_TRANSFER_MANAGE_PERMISSION_KEY
+  = 'feature:precision-cutting-transfer.manage'
 
 export const PRECISION_CUTTING_PERMISSIONS: PermissionDefinition[] = [
   {

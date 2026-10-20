@@ -1,5 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import {
+  buildPackagingWorkOrderCreatePayloads,
+  buildPackagingWorkOrderPayload,
+  createPackagingWorkOrder,
+  getPackagingWorkOrderList,
+  getStandardSecondsByPartNo,
+} from './apiPackagingWorkOrders'
+
 const supabaseMock = vi.hoisted(() => ({
   from: vi.fn(),
   rpc: vi.fn(),
@@ -9,16 +17,8 @@ vi.mock('./supabase', () => ({
   default: supabaseMock,
 }))
 
-import {
-  buildPackagingWorkOrderCreatePayloads,
-  buildPackagingWorkOrderPayload,
-  createPackagingWorkOrder,
-  getPackagingWorkOrderList,
-  getStandardSecondsByPartNo,
-} from './apiPackagingWorkOrders'
-
 function mockStandardTimeQuery(
-  responses: Array<{ data: unknown; error: unknown }>,
+  responses: Array<{ data: unknown, error: unknown }>,
 ) {
   let index = 0
 
@@ -108,7 +108,7 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       '11111111-1111-4111-8111-111111111111',
     )
 
-    expect(payloads.map((payload) => payload.input_batch_id)).toEqual([
+    expect(payloads.map(payload => payload.input_batch_id)).toEqual([
       '11111111-1111-4111-8111-111111111111',
       '11111111-1111-4111-8111-111111111111',
     ])
@@ -132,21 +132,27 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
     })
 
     expect(payloads).toHaveLength(3)
-    expect(payloads.map((payload) => payload.employee_id)).toEqual([
+    expect(payloads.map(payload => payload.employee_id)).toEqual([
       'employee-1',
       'employee-2',
       'employee-3',
     ])
-    expect(payloads.map((payload) => payload.quantity)).toEqual([
-      33.3, 33.3, 33.3,
+    expect(payloads.map(payload => payload.quantity)).toEqual([
+      33.3,
+      33.3,
+      33.3,
     ])
-    expect(payloads.map((payload) => payload.defective_quantity)).toEqual([
-      3, 3, 3,
+    expect(payloads.map(payload => payload.defective_quantity)).toEqual([
+      3,
+      3,
+      3,
     ])
-    expect(payloads.map((payload) => payload.total_quantity)).toEqual([
-      100, 100, 100,
+    expect(payloads.map(payload => payload.total_quantity)).toEqual([
+      100,
+      100,
+      100,
     ])
-    expect(payloads.map((payload) => payload.total_defective_quantity)).toEqual(
+    expect(payloads.map(payload => payload.total_defective_quantity)).toEqual(
       [9, 9, 9],
     )
   })
@@ -168,11 +174,17 @@ describe('buildPackagingWorkOrderCreatePayloads', () => {
       remark: null,
     })
 
-    expect(payloads.map((payload) => payload.quantity)).toEqual([
-      861.8, 861.8, 861.8, 861.8,
+    expect(payloads.map(payload => payload.quantity)).toEqual([
+      861.8,
+      861.8,
+      861.8,
+      861.8,
     ])
-    expect(payloads.map((payload) => payload.total_quantity)).toEqual([
-      3447, 3447, 3447, 3447,
+    expect(payloads.map(payload => payload.total_quantity)).toEqual([
+      3447,
+      3447,
+      3447,
+      3447,
     ])
   })
 

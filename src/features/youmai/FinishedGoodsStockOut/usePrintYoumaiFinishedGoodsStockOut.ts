@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import { App } from 'antd'
 import dayjs from 'dayjs'
 
-import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
+import { useState } from 'react'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 
-const loadYoumaiFinishedGoodsStockOutPdfRuntime = () =>
-  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')] as const)
+function loadYoumaiFinishedGoodsStockOutPdfRuntime() {
+  return Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')] as const)
+}
 
 function preloadPrint() {
   void loadYoumaiFinishedGoodsStockOutPdfRuntime()
@@ -100,8 +101,8 @@ export function usePrintYoumaiFinishedGoodsStockOut() {
       `)
       printWindow.document.close()
 
-      const [{ default: autoTable }, { initializePDF, printPDF }] =
-        await loadYoumaiFinishedGoodsStockOutPdfRuntime()
+      const [{ default: autoTable }, { initializePDF, printPDF }]
+        = await loadYoumaiFinishedGoodsStockOutPdfRuntime()
       const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
       const doc = await initializePDF('l')
       doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
@@ -221,13 +222,16 @@ export function usePrintYoumaiFinishedGoodsStockOut() {
 
       if (printed) {
         message.success('已打开浏览器打印窗口')
-      } else {
+      }
+      else {
         message.warning('浏览器阻止了直接打印，已回退为 PDF 预览')
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('打印优迈成品出库失败:', error)
       message.error('打印失败，请稍后重试')
-    } finally {
+    }
+    finally {
       setIsPrinting(false)
     }
   }

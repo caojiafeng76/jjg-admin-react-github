@@ -1,27 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { App, Button, Card, Form, Input, Typography } from 'antd'
-import { useLocation, useNavigate } from 'react-router-dom'
+import type { ScannedProjectPayload } from '@/features/production-order/ProjectNoScanButton'
+import type { PrecisionFinishingCuttingInsert, PrecisionFinishingCuttingUpdate, PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
+import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
 
+import { App, Button, Card, Form, Input, Typography } from 'antd'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
-import ProjectNoScanButton, {
-  type ScannedProjectPayload,
-} from '@/features/production-order/ProjectNoScanButton'
+import ProjectNoScanButton from '@/features/production-order/ProjectNoScanButton'
 import { useSalesOrdersProjectNos } from '@/features/production-order/useProcessStandards'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
-import MobileBottomSelectSheet, {
-  type MobileBottomSelectOption,
-} from '@/ui/mobile/MobileBottomSelectSheet'
-import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
-import MobileProjectSummaryCard from '@/ui/mobile/MobileProjectSummaryCard'
-import MobileScanPageShell from '@/ui/mobile/MobileScanPageShell'
 import {
   PRECISION_FINISHING_CUTTING_RECIPIENTS,
   PRECISION_FINISHING_CUTTING_WORKSHOPS,
-  type PrecisionFinishingCuttingInsert,
-  type PrecisionFinishingCuttingUpdate,
-  type PrecisionFinishingCuttingWithEmployee,
+
 } from '@/services/apiPrecisionFinishingCuttings'
+import MobileBottomSelectSheet from '@/ui/mobile/MobileBottomSelectSheet'
+import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
+import MobileProjectSummaryCard from '@/ui/mobile/MobileProjectSummaryCard'
+import MobileScanPageShell from '@/ui/mobile/MobileScanPageShell'
 import { translateErrorMessage } from '@/utils/errorHandler'
 import {
   useCreatePrecisionFinishingCutting,
@@ -125,7 +122,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
   )
 
   const employeeNameMap = useMemo(
-    () => new Map(employees.map((employee) => [employee.id, employee.name])),
+    () => new Map(employees.map(employee => [employee.id, employee.name])),
     [employees],
   )
 
@@ -136,7 +133,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
   const currentProject = projectNo ? projectInfoMap.get(projectNo) : undefined
 
   const projectOptions = useMemo<MobileBottomSelectOption[]>(() => {
-    return Array.from(projectInfoMap.values()).map((item) => ({
+    return Array.from(projectInfoMap.values()).map(item => ({
       value: item.project_no,
       label: item.project_no,
       keywords: [
@@ -160,7 +157,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
   }, [projectInfoMap])
 
   const operatorOptions = useMemo<MobileBottomSelectOption[]>(() => {
-    return employees.map((employee) => ({
+    return employees.map(employee => ({
       value: employee.id,
       label: employee.name,
       keywords: `${employee.name} ${employee.id}`,
@@ -168,14 +165,14 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
   }, [employees])
 
   const workshopOptions = useMemo<MobileBottomSelectOption[]>(() => {
-    return PRECISION_FINISHING_CUTTING_WORKSHOPS.map((workshop) => ({
+    return PRECISION_FINISHING_CUTTING_WORKSHOPS.map(workshop => ({
       value: workshop,
       label: workshop,
     }))
   }, [])
 
   const recipientOptions = useMemo<MobileBottomSelectOption[]>(() => {
-    return PRECISION_FINISHING_CUTTING_RECIPIENTS.map((recipient) => ({
+    return PRECISION_FINISHING_CUTTING_RECIPIENTS.map(recipient => ({
       value: recipient,
       label: recipient,
     }))
@@ -195,7 +192,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
 
   const handleProjectResolved = useCallback(
     (payload: ScannedProjectPayload) => {
-      setScannedProjectDataMap((prev) => ({
+      setScannedProjectDataMap(prev => ({
         ...prev,
         [payload.projectNo]: {
           project_no: payload.projectNo,
@@ -231,7 +228,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
 
   useEffect(() => {
     if (editingRecord) {
-      setScannedProjectDataMap((prev) => ({
+      setScannedProjectDataMap(prev => ({
         ...prev,
         [editingRecord.project_no]: {
           project_no: editingRecord.project_no,
@@ -351,13 +348,15 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
           values: updateValues,
         })
         message.success('精加工切割单更新成功')
-      } else {
+      }
+      else {
         await createMutation.mutateAsync(payload)
         message.success('精加工切割单创建成功')
       }
 
       navigate(returnTo)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error
           ? translateErrorMessage(error.message)
@@ -402,13 +401,13 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
             : '扫码后自动带出项目信息，员工端在当前页面直接完成精加工切割单录入。'
         }
         scanTrigger={null}
-        summary={
+        summary={(
           <MobileProjectSummaryCard
             project={currentProject}
             emptyDescription="进入页面后会直接拉起扫码；若未识别成功，也可手动选择项目号继续录入。"
           />
-        }
-        content={
+        )}
+        content={(
           <Card className="rounded-4xl border-slate-200 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
             <Form
               form={form}
@@ -570,7 +569,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                 >
                   <Input
                     placeholder="可手动输入"
-                    addonAfter={
+                    addonAfter={(
                       <button
                         type="button"
                         onClick={() => setActiveSheet('recipient')}
@@ -578,7 +577,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                       >
                         常用
                       </button>
-                    }
+                    )}
                   />
                 </Form.Item>
               </div>
@@ -593,8 +592,8 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
               </div>
             </Form>
           </Card>
-        }
-        footer={
+        )}
+        footer={(
           <div className="grid grid-cols-2 gap-3">
             <Button
               className="h-11 rounded-2xl"
@@ -611,7 +610,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
               {isEditMode ? '提交更新' : '提交创建'}
             </Button>
           </div>
-        }
+        )}
         secondaryAction={{
           label: '返回扫码导航',
           onClick: () => navigate('/scan'),

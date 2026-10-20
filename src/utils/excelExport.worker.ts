@@ -1,5 +1,9 @@
 /// <reference lib="webworker" />
 
+import type {
+  ExcelExportWorkerRequest,
+  ExcelExportWorkerResponse,
+} from './excelExportWorker'
 import {
   buildProductionDailyReportExcelBuffer,
   getProductionDailyReportExportFilename,
@@ -8,10 +12,6 @@ import {
   buildProductionOrderExcelBuffer,
   getProductionOrderExportFilename,
 } from './productionOrderExcelWorkbook'
-import type {
-  ExcelExportWorkerRequest,
-  ExcelExportWorkerResponse,
-} from './excelExportWorker'
 
 // 所有 Excel 导出共用一个 Worker，xlsx-js-style 只打包一份
 function buildExcel(request: ExcelExportWorkerRequest) {
@@ -35,7 +35,8 @@ self.onmessage = (event: MessageEvent<ExcelExportWorkerRequest>) => {
     const response: ExcelExportWorkerResponse = { buffer, filename }
 
     self.postMessage(response, [buffer])
-  } catch (error) {
+  }
+  catch (error) {
     const response: ExcelExportWorkerResponse = {
       error: error instanceof Error ? error.message : 'Excel 导出失败',
     }

@@ -28,7 +28,7 @@ export type PackagingEmployeeOption = Pick<
 
 export const DEFAULT_PACKAGING_EMPLOYEE_HOURLY_WAGE = 19
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 
@@ -120,8 +120,8 @@ export async function getPackagingEmployeeOptions({
   limit?: number
   signal?: AbortSignal
 }) {
-  const requestedLimit =
-    typeof limit === 'number' && Number.isFinite(limit) ? Math.trunc(limit) : 50
+  const requestedLimit
+    = typeof limit === 'number' && Number.isFinite(limit) ? Math.trunc(limit) : 50
   const normalizedLimit = Math.min(50, Math.max(1, requestedLimit))
   const normalizedKeyword = keyword?.trim() ?? ''
 

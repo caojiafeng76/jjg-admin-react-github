@@ -1,22 +1,24 @@
-import { useEffect, useState } from 'react'
-import {
-  Button,
-  Form,
+import type {
   FormInstance,
-  Input,
-  InputNumber,
-  Select,
-  Spin,
 } from 'antd'
-import { PlusCircleIcon, XMarkIcon } from '@heroicons/react/16/solid'
-
 import type {
   VillaLiftCuttingBatchFormValues,
   VillaLiftCuttingRecordFormValues,
   VillaLiftOrderSelectOption,
 } from '@/services/apiVillaLiftCutting'
 import type { VillaLiftOrderItem } from '@/services/apiVillaLiftOrders'
+
 import { useVillaLiftOrderItems } from '@features/villa-lift/OrderList/useVillaLiftOrders'
+import { PlusCircleIcon, XMarkIcon } from '@heroicons/react/16/solid'
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Spin,
+} from 'antd'
+import { useEffect, useState } from 'react'
 
 // ----------------------------------------------------------------
 // Sub-components
@@ -53,11 +55,12 @@ function CombinedItemSelect({
   const options = orderItems
     .filter((item) => {
       const key = `${item.model}|${item.name}|${item.spec}`
-      if (seen.has(key)) return false
+      if (seen.has(key))
+        return false
       seen.add(key)
       return true
     })
-    .map((item) => ({
+    .map(item => ({
       value: `${item.model}|${item.name}|${item.spec}`,
       label: (
         <span className="flex gap-2 text-sm">
@@ -91,8 +94,7 @@ function CombinedItemSelect({
       onChange={handleChange}
       placeholder="选择型号 / 名称 / 规格"
       filterOption={(input, opt) =>
-        (opt?.search ?? '').toLowerCase().includes(input.toLowerCase())
-      }
+        (opt?.search ?? '').toLowerCase().includes(input.toLowerCase())}
       disabled={disabled}
       style={{ width: '100%' }}
     />
@@ -139,10 +141,10 @@ export default function CuttingProcessForm({
   }, [form, setFormRef])
 
   // 获取选中订单的型号列表
-  const { data: orderItems = [], isFetching: loadingItems } =
-    useVillaLiftOrderItems(selectedOrderId ?? null)
+  const { data: orderItems = [], isFetching: loadingItems }
+    = useVillaLiftOrderItems(selectedOrderId ?? null)
 
-  const orderOptions = orders.map((o) => ({
+  const orderOptions = orders.map(o => ({
     value: o.id,
     label: `${o.project_name}`,
     order: o,
@@ -151,11 +153,11 @@ export default function CuttingProcessForm({
   function handleOrderChange(value: string) {
     setSelectedOrderId(value)
     // 清空所有行的型号和规格
-    const rows: VillaLiftCuttingRecordFormValues[] =
-      form.getFieldValue('rows') ?? []
+    const rows: VillaLiftCuttingRecordFormValues[]
+      = form.getFieldValue('rows') ?? []
     form.setFieldValue(
       'rows',
-      rows.map((r) => ({ ...r, model: '', name: '', spec: '' })),
+      rows.map(r => ({ ...r, model: '', name: '', spec: '' })),
     )
   }
 
@@ -177,7 +179,7 @@ export default function CuttingProcessForm({
           placeholder="搜索项目名称 / 客户 / 产品"
           onChange={handleOrderChange}
           optionFilterProp="search"
-          options={orderOptions.map((opt) => ({
+          options={orderOptions.map(opt => ({
             value: opt.value,
             label: (
               <span className="flex flex-wrap items-center gap-x-3 gap-y-0">
@@ -339,18 +341,18 @@ export default function CuttingProcessForm({
 
               {/* 表头 */}
               <div className="mb-1 grid grid-cols-[3fr_1fr_1fr_1fr_1.5fr_36px] gap-x-2 px-0 text-sm text-gray-500">
-                {columns.map((col) => (
+                {columns.map(col => (
                   <div key={String(col.key)}>{col.title}</div>
                 ))}
               </div>
 
               {/* 行 */}
-              {fields.map((field) => (
+              {fields.map(field => (
                 <div
                   key={field.key}
                   className="mb-2 grid grid-cols-[3fr_1fr_1fr_1fr_1.5fr_36px] items-start gap-x-2"
                 >
-                  {columns.map((col) => (
+                  {columns.map(col => (
                     <div key={String(col.key)}>
                       {col.render(undefined, field)}
                     </div>

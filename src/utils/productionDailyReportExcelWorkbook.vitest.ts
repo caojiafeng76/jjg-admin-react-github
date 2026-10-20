@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
-import * as XLSX from 'xlsx-js-style'
-
 import type { ProductionDailyReportRow } from '@/services/apiProductionDailyReport'
+import { describe, expect, it } from 'vitest'
+
+import * as XLSX from 'xlsx-js-style'
 import { buildProductionDailyReportExcelBuffer } from './productionDailyReportExcelWorkbook'
 
 function createReportRow(
@@ -27,10 +27,10 @@ function createReportRow(
     operation: 'CNC',
     qualifiedCount,
     defectCount:
-      rawMaterialDefectCount +
-      processingDefectCount +
-      outsourceDefectCount +
-      setupDefectCount,
+      rawMaterialDefectCount
+      + processingDefectCount
+      + outsourceDefectCount
+      + setupDefectCount,
     workHours: 8,
     employeeName: '张三',
     rawMaterialDefectCount,

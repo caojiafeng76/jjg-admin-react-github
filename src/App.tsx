@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
-
-import { ConfigProvider, theme, App as AntdApp } from 'antd'
 import { StyleProvider } from '@ant-design/cssinjs'
-import zhCN from 'antd/es/locale/zh_CN'
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { RouterProvider } from 'react-router-dom'
-
 import ErrorBoundary from '@ui/ErrorBoundary'
-import { useAppStore } from '@/store'
-import { AuthProvider } from '@/contexts'
-import { PermissionProvider } from '@/contexts'
-import { router } from '@/routes/router'
+import { App as AntdApp, ConfigProvider, theme } from 'antd'
+import zhCN from 'antd/es/locale/zh_CN'
+import { useEffect, useMemo, useState } from 'react'
+
+import { RouterProvider } from 'react-router-dom'
 import { createQueryClient } from '@/config/queryClient'
+import { AuthProvider, PermissionProvider } from '@/contexts'
+
+import { router } from '@/routes/router'
+import { useAppStore } from '@/store'
 
 // 创建 QueryClient 实例
 const queryClient = createQueryClient()
@@ -27,7 +27,7 @@ const BASE_TOKENS = {
   borderRadiusLG: 12,
   controlHeight: 34, // 控件高度 32 → 34，更舒展
   fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
+    '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, \'Noto Sans\', \'PingFang SC\', \'Hiragino Sans GB\', \'Microsoft YaHei\', sans-serif',
   fontSize: 14,
 }
 
@@ -86,7 +86,7 @@ function SyncThemeTokens() {
 }
 
 export default function App() {
-  const isDarkMode = useAppStore((state) => state.isDarkMode)
+  const isDarkMode = useAppStore(state => state.isDarkMode)
   const [isMobileViewport, setIsMobileViewport] = useState(false)
 
   const themeConfig = useMemo(
@@ -138,7 +138,8 @@ export default function App() {
     const root = document.documentElement
     if (isDarkMode) {
       root.classList.add('dark')
-    } else {
+    }
+    else {
       root.classList.remove('dark')
     }
   }, [isDarkMode])

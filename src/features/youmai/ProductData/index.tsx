@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
-import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
-import { App, Button, FormInstance, Modal, Tooltip } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   YoumaiProductData,
   YoumaiProductDataFormValues,
 } from '@/services/apiYoumaiProductData'
+import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
+import { App, Button, Modal, Tooltip } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -17,10 +18,6 @@ import EditButton from '@/ui/EditButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
-import YoumaiProductDataExcelImport from './YoumaiProductDataExcelImport'
-import YoumaiProductDataForm from './YoumaiProductDataForm'
-import YoumaiProductDataSearch from './YoumaiProductDataSearch'
-import YoumaiProductDataTable from './YoumaiProductDataTable'
 import {
   useCreateYoumaiProductData,
   useDeleteYoumaiProductData,
@@ -28,6 +25,10 @@ import {
   useUpdateYoumaiProductData,
   useYoumaiProductDataList,
 } from './useYoumaiProductData'
+import YoumaiProductDataExcelImport from './YoumaiProductDataExcelImport'
+import YoumaiProductDataForm from './YoumaiProductDataForm'
+import YoumaiProductDataSearch from './YoumaiProductDataSearch'
+import YoumaiProductDataTable from './YoumaiProductDataTable'
 
 export default function YoumaiProductDataPage() {
   const { message } = App.useApp()
@@ -44,8 +45,8 @@ export default function YoumaiProductDataPage() {
   const [editingRecord, setEditingRecord] = useState<YoumaiProductData | null>(
     null,
   )
-  const [formRef, setFormRef] =
-    useState<FormInstance<YoumaiProductDataFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<YoumaiProductDataFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -66,8 +67,8 @@ export default function YoumaiProductDataPage() {
   const importMutation = useImportYoumaiProductData()
   const deleteMutation = useDeleteYoumaiProductData()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -97,7 +98,7 @@ export default function YoumaiProductDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行复制新增')
       return
@@ -116,7 +117,7 @@ export default function YoumaiProductDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -138,10 +139,12 @@ export default function YoumaiProductDataPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('优迈货品资料删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除优迈货品资料失败，请稍后重试')
       }
     }
@@ -163,10 +166,12 @@ export default function YoumaiProductDataPage() {
         await importMutation.mutateAsync(rows)
         message.success(`优迈货品资料导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入优迈货品资料失败，请稍后重试')
         }
       }
@@ -199,13 +204,15 @@ export default function YoumaiProductDataPage() {
             values,
           })
           message.success('优迈货品资料更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('优迈货品资料创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
         setFormError(error)
       }
@@ -233,7 +240,8 @@ export default function YoumaiProductDataPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
@@ -334,12 +342,12 @@ export default function YoumaiProductDataPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>

@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
-import * as XLSX from 'xlsx-js-style'
-
 import type { PackagingWorkOrder } from '@/services/apiPackagingWorkOrders'
+import { describe, expect, it } from 'vitest'
+
+import * as XLSX from 'xlsx-js-style'
 import { buildWorkbook } from './workOrdersExcelDocument'
 
 describe('buildWorkbook', () => {

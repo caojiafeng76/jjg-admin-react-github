@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
-import { Form, FormInstance, Input, InputNumber } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   ToolingData,
   ToolingDataFormValues,
 } from '@/services/apiToolingData'
+import { Form, Input, InputNumber } from 'antd'
+
+import { useEffect } from 'react'
 
 interface Props {
   onFinish: (values: ToolingDataFormValues) => void

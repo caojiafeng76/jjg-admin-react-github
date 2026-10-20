@@ -1,12 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-  Alert,
-  Form,
-  type FormInstance,
-  Input,
-  InputNumber,
-  Select,
-} from 'antd'
+import type { FormInstance } from 'antd'
+import type { RemoteToolingOption } from '../remoteToolingOptions'
 
 import type {
   ToolingDataOption,
@@ -14,9 +7,18 @@ import type {
   ToolingStockInFormValues,
 } from '@/services/apiToolingStockIn'
 import {
+  Alert,
+  Form,
+
+  Input,
+  InputNumber,
+  Select,
+} from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import {
   createToolingOptionSnapshot,
   mergeToolingOptions,
-  type RemoteToolingOption,
+
 } from '../remoteToolingOptions'
 
 interface Props {
@@ -51,8 +53,8 @@ export default function ToolingStockInForm({
   lockTooling = false,
 }: Props) {
   const [form] = Form.useForm<ToolingStockInFormValues>()
-  const [selectedToolingSnapshot, setSelectedToolingSnapshot] =
-    useState<RemoteToolingOption>()
+  const [selectedToolingSnapshot, setSelectedToolingSnapshot]
+    = useState<RemoteToolingOption>()
   const selectedToolingId = Form.useWatch('tooling_data_id', form)
 
   const mergedToolingOptions = useMemo(
@@ -61,7 +63,7 @@ export default function ToolingStockInForm({
   )
 
   const selectedTooling = useMemo(
-    () => mergedToolingOptions.find((item) => item.id === selectedToolingId),
+    () => mergedToolingOptions.find(item => item.id === selectedToolingId),
     [mergedToolingOptions, selectedToolingId],
   )
 
@@ -90,17 +92,18 @@ export default function ToolingStockInForm({
 
   useEffect(() => {
     setSelectedToolingSnapshot((snapshot) => {
-      if (!snapshot) return snapshot
+      if (!snapshot)
+        return snapshot
 
       return (
-        toolingOptions.find((option) => option.id === snapshot.id) ?? snapshot
+        toolingOptions.find(option => option.id === snapshot.id) ?? snapshot
       )
     })
   }, [selectedToolingSnapshot?.id, toolingOptions])
 
   const handleToolingChange = (toolingId: string) => {
     const nextSnapshot = mergedToolingOptions.find(
-      (item) => item.id === toolingId,
+      item => item.id === toolingId,
     )
     setSelectedToolingSnapshot(nextSnapshot)
   }
@@ -139,7 +142,7 @@ export default function ToolingStockInForm({
               ? '请选择刀具资料'
               : '暂无刀具资料，请先维护刀具资料'
           }
-          options={mergedToolingOptions.map((item) => ({
+          options={mergedToolingOptions.map(item => ({
             value: item.id,
             label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
           }))}

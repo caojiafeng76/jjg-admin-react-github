@@ -15,6 +15,8 @@ Fast lane 输出仍需说明：任务范围、改了什么、如何验证、剩�
 
 **无论 Fast lane 还是完整流程，任何实际改动都必须在同一变更中更新根目录 `CHANGELOG.MD`（顶部追加：日期/类别/范围/摘要/验证），并在最终汇报中说明；这是任务完成条件。**
 
+**所有代码 / 配置改动在下表最低验证之外，还必须先执行 `bunx eslint --fix <改动的文件或目录>` 格式化（基于 `@antfu/eslint-config`，已移除 Prettier），并确认 `bun lint` 0 error。**
+
 ## Task Routing
 
 | 任务类型                           | 必选工具 / skill                          | 优先查看                                                                             | 最低验证                                                        |

@@ -1,27 +1,29 @@
-import { useCallback, useMemo, useState } from 'react'
-import { App, Button, Splitter } from 'antd'
+import type { PrecisionCuttingTransferFilters, PrecisionCuttingTransferInsert, PrecisionCuttingTransferRow, PrecisionCuttingTransferUpdate } from '@/services/apiPrecisionCuttingTransfers'
 import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
-import { useSearchParams } from 'react-router-dom'
+import { App, Button, Splitter } from 'antd'
+import { useCallback, useMemo, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
+import { isViewerRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import {
+  getPrecisionCuttingTransfersForExport,
+
+} from '@/services/apiPrecisionCuttingTransfers'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { useAuth } from '@/contexts/useAuth'
-import { isViewerRole } from '@/config/access'
-import { PRECISION_CUTTING_TRANSFER_MANAGE_PERMISSION_KEY } from './permissions'
-import {
-  getPrecisionCuttingTransfersForExport,
-  type PrecisionCuttingTransferFilters,
-  type PrecisionCuttingTransferInsert,
-  type PrecisionCuttingTransferRow,
-  type PrecisionCuttingTransferUpdate,
-} from '@/services/apiPrecisionCuttingTransfers'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
+import MaterialTransferDetail from './MaterialTransferDetail'
+import MaterialTransferForm from './MaterialTransferForm'
+import MaterialTransferSearch from './MaterialTransferSearch'
+import MaterialTransferTable from './MaterialTransferTable'
+import { PRECISION_CUTTING_TRANSFER_MANAGE_PERMISSION_KEY } from './permissions'
 import {
   useBatchUpdatePrecisionCuttingTransfers,
   useCreatePrecisionCuttingTransfer,
@@ -29,15 +31,12 @@ import {
   usePrecisionCuttingTransfers,
   useUpdatePrecisionCuttingTransfer,
 } from './useMaterialTransfers'
-import MaterialTransferDetail from './MaterialTransferDetail'
-import MaterialTransferForm from './MaterialTransferForm'
-import MaterialTransferSearch from './MaterialTransferSearch'
-import MaterialTransferTable from './MaterialTransferTable'
 
-const loadPrecisionCuttingTransferExcel = () =>
-  import('@/utils/precisionCuttingTransferExcel')
+function loadPrecisionCuttingTransferExcel() {
+  return import('@/utils/precisionCuttingTransferExcel')
+}
 
-const preloadPrecisionCuttingTransferExcel = () => {
+function preloadPrecisionCuttingTransferExcel() {
   void loadPrecisionCuttingTransferExcel()
 }
 
@@ -56,13 +55,13 @@ export default function MaterialTransferPage() {
   const pageSize = Number(searchParamsURL.get('pageSize')) || 50
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [searchFilters, setSearchFilters] =
-    useState<PrecisionCuttingTransferFilters>({})
+  const [searchFilters, setSearchFilters]
+    = useState<PrecisionCuttingTransferFilters>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingRecord, setEditingRecord] =
-    useState<PrecisionCuttingTransferRow | null>(null)
-  const [activeRecord, setActiveRecord] =
-    useState<PrecisionCuttingTransferRow | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<PrecisionCuttingTransferRow | null>(null)
+  const [activeRecord, setActiveRecord]
+    = useState<PrecisionCuttingTransferRow | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [formError, setFormError] = useState<unknown>(null)
 
@@ -88,7 +87,7 @@ export default function MaterialTransferPage() {
       return { quantity: 0, matched: 0 }
     }
 
-    const keySet = new Set(selectedRowKeys.map((key) => String(key)))
+    const keySet = new Set(selectedRowKeys.map(key => String(key)))
     let quantity = 0
     let matched = 0
 
@@ -114,8 +113,8 @@ export default function MaterialTransferPage() {
 
   const openEditModal = useCallback(
     (record?: PrecisionCuttingTransferRow) => {
-      const targetRecord =
-        record || records.find((item) => item.id === selectedRowKeys[0])
+      const targetRecord
+        = record || records.find(item => item.id === selectedRowKeys[0])
 
       if (!targetRecord) {
         message.warning('请选择一条数据进行编辑')
@@ -183,7 +182,7 @@ export default function MaterialTransferPage() {
   const handleExport = useCallback(async () => {
     try {
       setIsExporting(true)
-      const selectedIds = selectedRowKeys.map((key) => String(key))
+      const selectedIds = selectedRowKeys.map(key => String(key))
       const exportRows = await getPrecisionCuttingTransfersForExport(
         selectedIds.length > 0
           ? { ids: selectedIds }
@@ -195,14 +194,16 @@ export default function MaterialTransferPage() {
         return
       }
 
-      const { exportPrecisionCuttingTransfersToExcel } =
-        await loadPrecisionCuttingTransferExcel()
+      const { exportPrecisionCuttingTransfersToExcel }
+        = await loadPrecisionCuttingTransferExcel()
       exportPrecisionCuttingTransfersToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条精切转移单`)
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '导出失败')
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [message, searchFilters, selectedRowKeys])
@@ -235,7 +236,8 @@ export default function MaterialTransferPage() {
             })
             message.success(`批量${isAudited ? '审核' : '反审核'}成功`)
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error
                 ? error.message
@@ -281,7 +283,8 @@ export default function MaterialTransferPage() {
             },
           })
           message.success('更新成功')
-        } else {
+        }
+        else {
           const createValues = values as PrecisionCuttingTransferInsert
 
           if (!createValues.operator_names?.length) {
@@ -302,7 +305,8 @@ export default function MaterialTransferPage() {
         handleCloseModal()
         setSelectedRowKeys([])
         setFormError(null)
-      } catch (error) {
+      }
+      catch (error) {
         // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
         setFormError(error)
       }
@@ -375,34 +379,36 @@ export default function MaterialTransferPage() {
         />
       </div>
 
-      {selectedCount > 0 ? (
-        <SelectedSummaryBar
-          selectedCount={selectedCount}
-          matchedCount={selectedSummary.matched}
-          stats={[
-            {
-              label: '转移数量合计',
-              value: selectedSummary.quantity,
-              tone: 'error',
-              icon: (
-                <svg
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                  />
-                </svg>
-              ),
-            },
-          ]}
-        />
-      ) : null}
+      {selectedCount > 0
+        ? (
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedSummary.matched}
+              stats={[
+                {
+                  label: '转移数量合计',
+                  value: selectedSummary.quantity,
+                  tone: 'error',
+                  icon: (
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                      />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
+          )
+        : null}
 
       <Splitter
         orientation="vertical"
@@ -430,12 +436,12 @@ export default function MaterialTransferPage() {
                   scrollY={scrollY}
                   activeRowId={activeRecord?.id ?? null}
                   onRowClick={setActiveRecord}
-                  emptyAction={
+                  emptyAction={(
                     <AddButton
                       handleCreate={openCreateModal}
                       permissionKey={operationPermissionKey}
                     />
-                  }
+                  )}
                 />
               </TableState>
             </div>

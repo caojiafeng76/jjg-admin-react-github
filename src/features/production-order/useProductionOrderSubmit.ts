@@ -1,15 +1,20 @@
-import { useCallback } from 'react'
-import { App } from 'antd'
-import { useQueryClient } from '@tanstack/react-query'
-import {
-  checkEmployeeOrderExistsOnDate,
-  type ProductionOrder,
-} from '@/services/apiProductionOrders'
+import type {
+  useProductionOrder,
+} from './useProductionOrders'
 import type {
   ProductionOrderDataCategory,
   ProductionOrderItem,
   ProductionOrderItemInsert,
 } from '@/services/apiProductionOrderItems'
+import type { ProductionOrder } from '@/services/apiProductionOrders'
+import { useQueryClient } from '@tanstack/react-query'
+import { App } from 'antd'
+import { useCallback } from 'react'
+import {
+  checkEmployeeOrderExistsOnDate,
+
+} from '@/services/apiProductionOrders'
+import { isAuditedRecord } from './productionOrderPageUtils'
 import {
   useAddProductionOrderItem,
   useDeleteProductionOrderItems,
@@ -17,10 +22,9 @@ import {
 } from './useProductionOrderItems'
 import {
   useCreateProductionOrder,
-  useProductionOrder,
   useUpdateProductionOrder,
 } from './useProductionOrders'
-import { isAuditedRecord } from './productionOrderPageUtils'
+
 async function syncOrderItemsSequentially({
   items,
   orderId,
@@ -141,8 +145,8 @@ export function useProductionOrderSubmit({
         let orderId: string
 
         if (
-          isEmployeeView &&
-          isAuditedRecord(detailData || editingRecord || undefined)
+          isEmployeeView
+          && isAuditedRecord(detailData || editingRecord || undefined)
         ) {
           message.warning('已审核工单员工无法编辑')
           return
@@ -159,12 +163,12 @@ export function useProductionOrderSubmit({
           const currentItems = values.items
           const currentItemIds = new Set(
             currentItems
-              .map((item) => item.id)
+              .map(item => item.id)
               .filter((id): id is string => Boolean(id)),
           )
           const deletedIds = existingItems
-            .filter((item) => !currentItemIds.has(item.id))
-            .map((item) => item.id)
+            .filter(item => !currentItemIds.has(item.id))
+            .map(item => item.id)
 
           if (deletedIds.length > 0) {
             await deleteItemMutation.mutateAsync(deletedIds)
@@ -177,11 +181,12 @@ export function useProductionOrderSubmit({
             updateItem: updateItemMutation.mutateAsync,
           })
           message.success('工单更新成功')
-        } else {
+        }
+        else {
           if (isEmployeeView) {
             const orderDate = values.order.order_date as string
-            const employeeId =
-              (values.order.employee_id as string) || fixedEmployeeId
+            const employeeId
+              = (values.order.employee_id as string) || fixedEmployeeId
             if (employeeId && orderDate) {
               const exists = await checkEmployeeOrderExistsOnDate(
                 employeeId,
@@ -215,10 +220,12 @@ export function useProductionOrderSubmit({
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }

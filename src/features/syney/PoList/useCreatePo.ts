@@ -1,6 +1,6 @@
-import { message } from 'antd'
-import { createPo as createPoApi } from '@/services/apiSyneyPos'
+import type { message } from 'antd'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { createPo as createPoApi } from '@/services/apiSyneyPos'
 import { syneyPoKeys } from '../queryKeys'
 
 // Type for the Ant Design message API instance returned by message.useMessage()

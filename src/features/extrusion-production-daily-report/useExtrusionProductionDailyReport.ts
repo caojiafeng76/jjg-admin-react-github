@@ -1,12 +1,13 @@
+import type { ExtrusionProductionDailyReportFilters } from '@/services/apiExtrusionProductionDailyReport'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import {
+
   getExtrusionProductionDailyReport,
-  type ExtrusionProductionDailyReportFilters,
 } from '@/services/apiExtrusionProductionDailyReport'
 
-export const EXTRUSION_PRODUCTION_DAILY_REPORT_KEY =
-  'extrusion-production-daily-report' as const
+export const EXTRUSION_PRODUCTION_DAILY_REPORT_KEY
+  = 'extrusion-production-daily-report' as const
 
 interface UseExtrusionProductionDailyReportOptions {
   page?: number

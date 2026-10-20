@@ -1,14 +1,15 @@
-import { useEffect } from 'react'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type { ExtrusionProductionDailyReportFilters } from '@/services/apiExtrusionProductionDailyReport'
 import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import dayjs, { type Dayjs } from 'dayjs'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import dayjs from 'dayjs'
 
-import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
-import type { ExtrusionProductionDailyReportFilters } from '@/services/apiExtrusionProductionDailyReport'
+import { useEffect } from 'react'
 import { buildExtrusionMachineOptions } from '@/features/extrusion-production/extrusionMachineOptions'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 
 const { RangePicker } = DatePicker
 
@@ -39,8 +40,8 @@ export default function ExtrusionProductionDailyReportSearch({
   initialValues,
 }: Props) {
   const [form] = Form.useForm<ExtrusionProductionDailyReportSearchValues>()
-  const { data: machines, isLoading: isLoadingMachines } =
-    useMachineEquipmentOptions()
+  const { data: machines, isLoading: isLoadingMachines }
+    = useMachineEquipmentOptions()
   const machineOptions = buildExtrusionMachineOptions(machines)
 
   useEffect(() => {

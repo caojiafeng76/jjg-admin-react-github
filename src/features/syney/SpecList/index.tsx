@@ -1,23 +1,23 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
-import { App, Modal } from 'antd'
+import type { Key } from 'react'
+import type { ISyneySpec, ISyneySpecFormRef } from '@/types'
 
-import { ISyneySpec, ISyneySpecFormRef } from '@/types'
-import SpecTable from './SpecTable'
-import { useSyneySpecs } from './useSyneySpecs'
-import SpecForm from './SpecForm'
-import { useCreateSyneySpec } from './useCreateSpec'
-import { useUpdateSyneySpec } from './useUpdateSyneySpec'
-import { useDeleteSyneySpecs } from './useDeleteSyneySpecs'
-import EditButton from '@ui/EditButton'
 import AddButton from '@ui/AddButton'
 import DeleteButton from '@ui/DeleteButton'
-import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
-import PartNoInput from './PartNoInput'
-import AppPagination from '@/ui/AppPagination'
-import { TableState } from '@/ui/TableState'
-import { useTableHeight } from '@/hooks/useTableHeight'
+import EditButton from '@ui/EditButton'
+import { App, Modal } from 'antd'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Key } from 'react'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import AppPagination from '@/ui/AppPagination'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
+import PartNoInput from './PartNoInput'
+import SpecForm from './SpecForm'
+import SpecTable from './SpecTable'
+import { useCreateSyneySpec } from './useCreateSpec'
+import { useDeleteSyneySpecs } from './useDeleteSyneySpecs'
+import { useSyneySpecs } from './useSyneySpecs'
+import { useUpdateSyneySpec } from './useUpdateSyneySpec'
 
 export default function SpecList() {
   const { message } = App.useApp()
@@ -41,8 +41,8 @@ export default function SpecList() {
   const { isUpdating, updateSyneySpec } = useUpdateSyneySpec()
   const { isDeleting, deleteSyneySpecs } = useDeleteSyneySpecs()
 
-  const specIds = selectedRowKeys.map((id) => Number(id))
-  const spec = syneySpecs?.find((item) => item.id === specIds?.at(0))
+  const specIds = selectedRowKeys.map(id => Number(id))
+  const spec = syneySpecs?.find(item => item.id === specIds?.at(0))
 
   function showModal() {
     specFormRef.current?.getInstance().resetFields()
@@ -61,7 +61,8 @@ export default function SpecList() {
           handleCancel()
         },
       })
-    } else {
+    }
+    else {
       createSyneySpec(spec, {
         onSuccess: () => {
           setSelectedRowKeys([])
@@ -135,13 +136,15 @@ export default function SpecList() {
       </div>
 
       {/* 选中摘要条（S4 通用组件） */}
-      {selectedCount > 0 ? (
-        <SelectedSummaryBar
-          selectedCount={selectedCount}
-          matchedCount={selectedCount}
-          stats={[]}
-        />
-      ) : null}
+      {selectedCount > 0
+        ? (
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedCount}
+              stats={[]}
+            />
+          )
+        : null}
 
       {/* 搜索 / 过滤栏 */}
       <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">

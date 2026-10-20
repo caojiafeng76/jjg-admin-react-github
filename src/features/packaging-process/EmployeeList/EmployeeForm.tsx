@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
-import { Form, type FormInstance, Input, InputNumber } from 'antd'
+import type { FormInstance } from 'antd'
+import type { PackagingEmployee, PackagingEmployeeFormValues } from '@/services/apiPackagingEmployees'
+import { Form, Input, InputNumber } from 'antd'
 
+import { useEffect } from 'react'
 import {
   DEFAULT_PACKAGING_EMPLOYEE_HOURLY_WAGE,
-  type PackagingEmployee,
-  type PackagingEmployeeFormValues,
+
 } from '@/services/apiPackagingEmployees'
 
 interface Props {

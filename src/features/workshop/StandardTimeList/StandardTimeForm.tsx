@@ -1,24 +1,26 @@
+import type {
+  FormInstance,
+} from 'antd'
+import type { SalesOrderProjectNoOption } from '@/services/apiProcessStandards'
+import type {
+  StandardTime,
+  StandardTimeFormValues,
+} from '@/services/apiStandardTimes'
 import {
   Divider,
   Form,
-  FormInstance,
   Input,
   InputNumber,
   Select,
   Typography,
 } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type {
-  StandardTime,
-  StandardTimeFormValues,
-} from '@/services/apiStandardTimes'
-import type { SalesOrderProjectNoOption } from '@/services/apiProcessStandards'
+import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import {
   useJobBaseSettingOptions,
   useMachineEquipmentMaintenanceOptions,
   useSalesOrdersProjectNos,
 } from './useStandardTimes'
-import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 
 interface JobSelectOption {
   label: string
@@ -93,21 +95,21 @@ function calculateCostPreview(values?: Partial<StandardTimeFormValues>) {
   const dailyManagementCost = Number(values?.daily_management_cost || 0)
   const dailyTotalHours = Number(values?.daily_total_hours || 0)
 
-  const laborCost =
-    ((standardSeconds * laborRate) / 3600) * laborCostCoefficient
+  const laborCost
+    = ((standardSeconds * laborRate) / 3600) * laborCostCoefficient
   const equipmentCost = (theoreticalSeconds * equipmentRate) / 3600
   const toolingConsumableCost = toolRate + cuttingFluidRate + fixtureRate
   const inspectionCost = (inspectionSeconds * laborRate) / 3600
-  const overheadCost =
-    dailyTotalHours > 0
+  const overheadCost
+    = dailyTotalHours > 0
       ? (dailyManagementCost * standardSeconds) / 3600 / dailyTotalHours
       : 0
-  const totalCost =
-    laborCost +
-    equipmentCost +
-    toolingConsumableCost +
-    inspectionCost +
-    overheadCost
+  const totalCost
+    = laborCost
+      + equipmentCost
+      + toolingConsumableCost
+      + inspectionCost
+      + overheadCost
   const dailyStandardCapacity = calculateDailyStandardCapacity(standardSeconds)
 
   return {
@@ -136,10 +138,10 @@ export default function StandardTimeForm({
 }: Props) {
   const [form] = Form.useForm<StandardTimeFormValues>()
   const isTeamLeaderMode = mode === 'team_leader'
-  const { data: jobOptions = [], isLoading: isJobOptionsLoading } =
-    useJobBaseSettingOptions()
-  const { data: equipmentOptions = [], isLoading: isEquipmentOptionsLoading } =
-    useMachineEquipmentMaintenanceOptions()
+  const { data: jobOptions = [], isLoading: isJobOptionsLoading }
+    = useJobBaseSettingOptions()
+  const { data: equipmentOptions = [], isLoading: isEquipmentOptionsLoading }
+    = useMachineEquipmentMaintenanceOptions()
   const {
     data: salesOrderOptions = [],
     isLoading: isSalesOrderOptionsLoading,
@@ -158,7 +160,7 @@ export default function StandardTimeForm({
   )
   const jobSelectOptions = useMemo<JobSelectOption[]>(
     () =>
-      jobOptions.map((option) => ({
+      jobOptions.map(option => ({
         label: option.job_name,
         value: option.job_name,
         searchText: option.job_name.toLowerCase(),
@@ -167,7 +169,7 @@ export default function StandardTimeForm({
   )
   const machineEquipmentSelectOptions = useMemo<MachineEquipmentSelectOption[]>(
     () =>
-      equipmentOptions.map((option) => ({
+      equipmentOptions.map(option => ({
         value: option.unified_device_no,
         label: option.unified_device_no,
         operation: option.operation,
@@ -192,7 +194,7 @@ export default function StandardTimeForm({
         value: NO_EQUIPMENT_OPTION_VALUE,
         searchText: '无 不关联设备',
       },
-      ...machineEquipmentSelectOptions.map((option) => ({
+      ...machineEquipmentSelectOptions.map(option => ({
         label: `${option.value} (${option.operation} / ${option.machineName})`,
         value: option.value,
         searchText: option.searchText,
@@ -203,7 +205,7 @@ export default function StandardTimeForm({
   const jobRateMap = useMemo(
     () =>
       new Map(
-        jobOptions.map((option) => [
+        jobOptions.map(option => [
           option.job_name,
           Number(option.hourly_fee || 0),
         ]),
@@ -213,7 +215,7 @@ export default function StandardTimeForm({
   const equipmentRateMap = useMemo(
     () =>
       new Map(
-        machineEquipmentSelectOptions.map((option) => [
+        machineEquipmentSelectOptions.map(option => [
           option.value,
           {
             customer: option.customer,
@@ -266,7 +268,8 @@ export default function StandardTimeForm({
         ...initialValues,
       })
       setProjectNoValue(undefined)
-    } else {
+    }
+    else {
       form.resetFields()
       form.setFieldsValue({
         ...DEFAULT_VALUES,
@@ -297,7 +300,8 @@ export default function StandardTimeForm({
   const handleProjectNoChange = useCallback(
     (projectNo: string | undefined) => {
       setProjectNoValue(projectNo)
-      if (!projectNo) return
+      if (!projectNo)
+        return
       const salesOrder = salesOrderOptions.find(
         (o: SalesOrderProjectNoOption) => o.project_no === projectNo,
       )
@@ -353,8 +357,7 @@ export default function StandardTimeForm({
                 filterOption={(input, option) =>
                   String(option?.searchText || '')
                     .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
+                    .includes(input.toLowerCase())}
                 options={salesOrderProjectNoSelectOptions}
               />
               {selectedSalesOrder?.customer_model && (
@@ -398,8 +401,7 @@ export default function StandardTimeForm({
             filterOption={(input, option) =>
               String(option?.searchText || '')
                 .toLowerCase()
-                .includes(input.toLowerCase())
-            }
+                .includes(input.toLowerCase())}
             options={salesOrderProjectNoSelectOptions}
           />
         </Form.Item>
@@ -485,8 +487,7 @@ export default function StandardTimeForm({
             filterOption={(input, option) =>
               String(option?.searchText || '')
                 .toLowerCase()
-                .includes(input.toLowerCase())
-            }
+                .includes(input.toLowerCase())}
             options={equipmentSelectOptions}
             onChange={handleEquipmentChange}
           />
@@ -532,145 +533,147 @@ export default function StandardTimeForm({
       <Form.Item name="process_note" label="说明">
         <Input.TextArea rows={2} placeholder="请输入工艺说明" />
       </Form.Item>
-      {isTeamLeaderMode ? null : (
-        <>
-          <Divider titlePlacement="left">工时信息</Divider>
-          <div className="grid grid-cols-2 gap-x-4">
-            <Form.Item
-              name="standard_seconds"
-              label="标准工时（秒）"
-              rules={[{ required: true, message: '请输入标准工时' }]}
-            >
-              <InputNumber
-                placeholder="请输入标准工时"
-                disabled={isCreating}
-                min={0}
-                style={{ width: '100%' }}
-              />
-            </Form.Item>
-            <Form.Item
-              name="theoretical_seconds"
-              label="理论工时（秒）"
-              rules={[{ required: true, message: '请输入理论工时' }]}
-            >
-              <InputNumber
-                placeholder="请输入理论工时"
-                disabled={isCreating}
-                min={0}
-                style={{ width: '100%' }}
-              />
-            </Form.Item>
-          </div>
+      {isTeamLeaderMode
+        ? null
+        : (
+            <>
+              <Divider titlePlacement="left">工时信息</Divider>
+              <div className="grid grid-cols-2 gap-x-4">
+                <Form.Item
+                  name="standard_seconds"
+                  label="标准工时（秒）"
+                  rules={[{ required: true, message: '请输入标准工时' }]}
+                >
+                  <InputNumber
+                    placeholder="请输入标准工时"
+                    disabled={isCreating}
+                    min={0}
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="theoretical_seconds"
+                  label="理论工时（秒）"
+                  rules={[{ required: true, message: '请输入理论工时' }]}
+                >
+                  <InputNumber
+                    placeholder="请输入理论工时"
+                    disabled={isCreating}
+                    min={0}
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
+              </div>
 
-          <Divider titlePlacement="left">费率与管理参数</Divider>
-          <div className="grid grid-cols-3 gap-x-4">
-            <Form.Item name="labor_rate" label="人工费率（元/小时）">
-              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="labor_cost_coefficient" label="人工成本系数">
-              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="equipment_rate" label="设备费率（元/小时）">
-              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="tool_rate" label="刀具费率（元/支）">
-              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="cutting_fluid_rate" label="切削液费率（元/支）">
-              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="fixture_rate" label="工装费率（元/支）">
-              <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="inspection_seconds" label="检验工时（秒）">
-              <InputNumber min={0} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="daily_management_cost" label="日管理总费用（元）">
-              <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="daily_total_hours" label="日总工时（小时）">
-              <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
-            </Form.Item>
-          </div>
+              <Divider titlePlacement="left">费率与管理参数</Divider>
+              <div className="grid grid-cols-3 gap-x-4">
+                <Form.Item name="labor_rate" label="人工费率（元/小时）">
+                  <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="labor_cost_coefficient" label="人工成本系数">
+                  <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="equipment_rate" label="设备费率（元/小时）">
+                  <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="tool_rate" label="刀具费率（元/支）">
+                  <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="cutting_fluid_rate" label="切削液费率（元/支）">
+                  <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="fixture_rate" label="工装费率（元/支）">
+                  <InputNumber min={0} step={0.0001} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="inspection_seconds" label="检验工时（秒）">
+                  <InputNumber min={0} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="daily_management_cost" label="日管理总费用（元）">
+                  <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item name="daily_total_hours" label="日总工时（小时）">
+                  <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+                </Form.Item>
+              </div>
 
-          <Divider titlePlacement="left">其他信息</Divider>
-          <div className="grid grid-cols-3 gap-x-4">
-            <Form.Item name="uploaded_by_name" label="数据上传">
-              <Input disabled placeholder="自动记录当前登录用户" />
-            </Form.Item>
-            <Form.Item name="length" label="长度">
-              <InputNumber
-                min={0}
-                step={0.01}
-                style={{ width: '100%' }}
-                placeholder="请输入长度"
-              />
-            </Form.Item>
-            <Form.Item name="part_no" label="料号">
-              <Input placeholder="请输入料号" />
-            </Form.Item>
-          </div>
-          <Form.Item name="remark" label="备注">
-            <Input.TextArea rows={3} placeholder="请输入备注" />
-          </Form.Item>
+              <Divider titlePlacement="left">其他信息</Divider>
+              <div className="grid grid-cols-3 gap-x-4">
+                <Form.Item name="uploaded_by_name" label="数据上传">
+                  <Input disabled placeholder="自动记录当前登录用户" />
+                </Form.Item>
+                <Form.Item name="length" label="长度">
+                  <InputNumber
+                    min={0}
+                    step={0.01}
+                    style={{ width: '100%' }}
+                    placeholder="请输入长度"
+                  />
+                </Form.Item>
+                <Form.Item name="part_no" label="料号">
+                  <Input placeholder="请输入料号" />
+                </Form.Item>
+              </div>
+              <Form.Item name="remark" label="备注">
+                <Input.TextArea rows={3} placeholder="请输入备注" />
+              </Form.Item>
 
-          <Divider titlePlacement="left">成本预览</Divider>
-          <div className="grid grid-cols-3 gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
-            <div>
-              <Typography.Text type="secondary">日标准产能</Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                {formatMoney(costPreview.dailyStandardCapacity)}
+              <Divider titlePlacement="left">成本预览</Divider>
+              <div className="grid grid-cols-3 gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
+                <div>
+                  <Typography.Text type="secondary">日标准产能</Typography.Text>
+                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    {formatMoney(costPreview.dailyStandardCapacity)}
+                  </div>
+                </div>
+                <div>
+                  <Typography.Text type="secondary">
+                    人工成本（元/支）
+                  </Typography.Text>
+                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    {formatMoney(costPreview.laborCost)}
+                  </div>
+                </div>
+                <div>
+                  <Typography.Text type="secondary">
+                    设备成本（元/支）
+                  </Typography.Text>
+                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    {formatMoney(costPreview.equipmentCost)}
+                  </div>
+                </div>
+                <div>
+                  <Typography.Text type="secondary">
+                    刀具辅料成本（元/支）
+                  </Typography.Text>
+                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    {formatMoney(costPreview.toolingConsumableCost)}
+                  </div>
+                </div>
+                <div>
+                  <Typography.Text type="secondary">
+                    检验成本（元/支）
+                  </Typography.Text>
+                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    {formatMoney(costPreview.inspectionCost)}
+                  </div>
+                </div>
+                <div>
+                  <Typography.Text type="secondary">
+                    单品分摊额（元/支）
+                  </Typography.Text>
+                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    {formatMoney(costPreview.overheadCost)}
+                  </div>
+                </div>
+                <div>
+                  <Typography.Text type="secondary">合计（元/支）</Typography.Text>
+                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    {formatMoney(costPreview.totalCost)}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <Typography.Text type="secondary">
-                人工成本（元/支）
-              </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                {formatMoney(costPreview.laborCost)}
-              </div>
-            </div>
-            <div>
-              <Typography.Text type="secondary">
-                设备成本（元/支）
-              </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                {formatMoney(costPreview.equipmentCost)}
-              </div>
-            </div>
-            <div>
-              <Typography.Text type="secondary">
-                刀具辅料成本（元/支）
-              </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                {formatMoney(costPreview.toolingConsumableCost)}
-              </div>
-            </div>
-            <div>
-              <Typography.Text type="secondary">
-                检验成本（元/支）
-              </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                {formatMoney(costPreview.inspectionCost)}
-              </div>
-            </div>
-            <div>
-              <Typography.Text type="secondary">
-                单品分摊额（元/支）
-              </Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                {formatMoney(costPreview.overheadCost)}
-              </div>
-            </div>
-            <div>
-              <Typography.Text type="secondary">合计（元/支）</Typography.Text>
-              <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                {formatMoney(costPreview.totalCost)}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+            </>
+          )}
       {isTeamLeaderMode && (
         <Form.Item
           name="theoretical_seconds"

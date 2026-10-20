@@ -12,8 +12,8 @@ let fontLoadingPromise: Promise<ArrayBuffer> | null = null
 const LOCAL_FONT_TTF_URL = '/fonts/NotoSansSC.ttf'
 
 // Google Fonts 思源黑体 TTF 链接
-const GOOGLE_FONT_TTF_URL =
-  'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_FnYxNbPzS5HE.ttf'
+const GOOGLE_FONT_TTF_URL
+  = 'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_FnYxNbPzS5HE.ttf'
 
 const FONT_SOURCE_URLS = [LOCAL_FONT_TTF_URL, GOOGLE_FONT_TTF_URL]
 
@@ -32,7 +32,8 @@ async function fetchFontFromSources(): Promise<ArrayBuffer> {
   for (const url of FONT_SOURCE_URLS) {
     try {
       return await fetchFont(url)
-    } catch (error) {
+    }
+    catch (error) {
       console.warn('Font source unavailable:', url, error)
     }
   }
@@ -77,7 +78,8 @@ export async function loadGoogleFont(): Promise<string> {
   try {
     fontCache = await fontLoadingPromise
     return arrayBufferToBase64(fontCache)
-  } catch (error) {
+  }
+  catch (error) {
     fontLoadingPromise = null
     throw error
   }

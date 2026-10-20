@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
+
+import { describe, expect, it } from 'vitest'
 import {
   assertWorkshopOrderHasMeaningfulContent,
   buildSalesOrderPayload,

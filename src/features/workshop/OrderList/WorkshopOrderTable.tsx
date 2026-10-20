@@ -1,21 +1,21 @@
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import type { TableColumnsType, TableProps } from 'antd'
 import type {
   CSSProperties,
   Key,
   TdHTMLAttributes,
   ThHTMLAttributes,
 } from 'react'
-import { memo, useMemo } from 'react'
-import { Table, Tag } from 'antd'
-import type { TableColumnsType, TableProps } from 'antd'
-import dayjs from 'dayjs'
-import StatusPill from '@/ui/StatusPill'
 import type { WorkshopOrder } from './index'
-import WorkshopOrderQrCell from './WorkshopOrderQrCell'
+import { Table, Tag } from 'antd'
+import dayjs from 'dayjs'
+import { memo, useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import {
   getWorkshopOrderStatusTone,
   normalizeWorkshopOrderStatus,
 } from './orderStatus'
+import WorkshopOrderQrCell from './WorkshopOrderQrCell'
 
 const SELECTION_COLUMN_WIDTH = 30
 
@@ -205,7 +205,7 @@ function WorkshopOrderTable({
         fixed: 'left',
         key: 'project_no',
         width: 102,
-        filters: projectNoOptions.map((projectNo) => ({
+        filters: projectNoOptions.map(projectNo => ({
           text: projectNo,
           value: projectNo,
         })),
@@ -221,7 +221,7 @@ function WorkshopOrderTable({
         fixed: 'left',
         key: 'product_model',
         width: 82,
-        filters: modelOptions.map((model) => ({
+        filters: modelOptions.map(model => ({
           text: model,
           value: model,
         })),
@@ -324,7 +324,7 @@ function WorkshopOrderTable({
 
   return (
     <Table<WorkshopOrder>
-      rowKey={(record) => record.id || ''}
+      rowKey={record => record.id || ''}
       loading={loading}
       columns={columns}
       dataSource={data}
@@ -335,7 +335,7 @@ function WorkshopOrderTable({
       components={DENSE_TABLE_COMPONENTS}
       styles={DENSE_TABLE_STYLES}
       onChange={onChange}
-      onRow={(record) => ({
+      onRow={record => ({
         ...(onRowClick
           ? createKeyboardTableRowProps(
               () => onRowClick(record),

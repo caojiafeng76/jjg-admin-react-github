@@ -1,10 +1,10 @@
+import type { WorkshopOrder } from './index'
 import { LinkOutlined } from '@ant-design/icons'
+import AppQRCode from '@ui/AppQRCode'
 import { Button, Popover, Space, Tag, Typography } from 'antd'
+
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-import AppQRCode from '@ui/AppQRCode'
-import type { WorkshopOrder } from './index'
 import {
   getWorkshopOrderQrPath,
   getWorkshopOrderQrValue,
@@ -40,7 +40,7 @@ export default function WorkshopOrderQrCell({
     <Popover
       trigger="hover"
       placement="right"
-      content={
+      content={(
         <Space direction="vertical" size={12} className="items-center">
           <div
             className="rounded-lg bg-white p-2 shadow-sm"
@@ -64,7 +64,7 @@ export default function WorkshopOrderQrCell({
             打开详情
           </Button>
         </Space>
-      }
+      )}
     >
       <div className="inline-flex rounded border border-slate-200 bg-white p-0.5 shadow-sm">
         <div style={qrWrapperStyle}>

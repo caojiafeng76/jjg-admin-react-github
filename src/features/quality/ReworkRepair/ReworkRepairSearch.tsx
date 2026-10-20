@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import type { QualityReworkRepairCategory } from '@/services/apiQualityReworkRepair'
 import { Button, Form, Input, Select, Space } from 'antd'
 
+import { useEffect } from 'react'
 import {
   QUALITY_REWORK_REPAIR_CATEGORIES,
-  type QualityReworkRepairCategory,
+
 } from '@/services/apiQualityReworkRepair'
 
 interface SearchValues {
@@ -59,7 +60,7 @@ export default function ReworkRepairSearch({
         <Select
           allowClear
           placeholder="返工返修类别"
-          options={QUALITY_REWORK_REPAIR_CATEGORIES.map((item) => ({
+          options={QUALITY_REWORK_REPAIR_CATEGORIES.map(item => ({
             value: item,
             label: item,
           }))}

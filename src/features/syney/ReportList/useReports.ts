@@ -1,9 +1,9 @@
-import { useSearchParams } from 'react-router-dom'
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
+import { getSyneyStoreReports } from '@services/apiSyneyStoreReports'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useEffect } from 'react'
 
-import { getSyneyStoreReports } from '@services/apiSyneyStoreReports'
+import { useSearchParams } from 'react-router-dom'
 import { isAbortError, queryConfig } from '@/config/queryClient'
 
 export function useReports() {

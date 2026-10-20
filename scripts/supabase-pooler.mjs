@@ -1,19 +1,19 @@
+import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { resolve } from 'node:path'
-import { spawnSync } from 'node:child_process'
 
 export function buildPoolerConnection(cachedUrl, projectRef, login) {
   const url = new URL(cachedUrl.trim())
   if (
-    url.protocol !== 'postgresql:' ||
-    !url.hostname.endsWith('.pooler.supabase.com') ||
-    decodeURIComponent(url.username) !== `postgres.${projectRef}` ||
-    !login ||
-    typeof login.role !== 'string' ||
-    !login.role ||
-    typeof login.password !== 'string' ||
-    !login.password
+    url.protocol !== 'postgresql:'
+    || !url.hostname.endsWith('.pooler.supabase.com')
+    || decodeURIComponent(url.username) !== `postgres.${projectRef}`
+    || !login
+    || typeof login.role !== 'string'
+    || !login.role
+    || typeof login.password !== 'string'
+    || !login.password
   ) {
     throw new Error('连接池项目或临时登录凭据无效，已停止执行。')
   }
@@ -32,25 +32,25 @@ export function resolvePushTarget(args, env = process.env) {
     '--profile',
   ]) {
     if (
-      args.filter((arg) => arg === flag || arg.startsWith(flag + '=')).length >
-      1
+      args.filter(arg => arg === flag || arg.startsWith(`${flag}=`)).length
+      > 1
     ) {
       throw new Error(`参数 ${flag} 不能重复。`)
     }
   }
   if (
     args.some(
-      (arg) => arg.startsWith('--linked=') || arg.startsWith('--local='),
+      arg => arg.startsWith('--linked=') || arg.startsWith('--local='),
     )
   ) {
     throw new Error('数据库目标开关请使用独立的 --linked 或 --local 参数。')
   }
-  const has = (flag) =>
-    args.some((arg) => arg === flag || arg.startsWith(`${flag}=`))
+  const has = flag =>
+    args.some(arg => arg === flag || arg.startsWith(`${flag}=`))
   if (['--local', '--linked', '--db-url'].filter(has).length > 1) {
     throw new Error('不能同时指定多个数据库目标。')
   }
-  const forwarded = args.filter((arg) => arg !== '--no-fallback')
+  const forwarded = args.filter(arg => arg !== '--no-fallback')
   if (has('--local') || has('--db-url'))
     return { mode: 'native', args: forwarded }
   if (env.SUPABASE_DB_URL?.trim() && !has('--linked')) {
@@ -70,7 +70,7 @@ export function resolvePushTarget(args, env = process.env) {
       '连接池模式请使用 SUPABASE_ACCESS_TOKEN；自定义 CLI profile 请加 --no-fallback。',
     )
   }
-  return { mode: 'pooler', args: forwarded.filter((arg) => arg !== '--linked') }
+  return { mode: 'pooler', args: forwarded.filter(arg => arg !== '--linked') }
 }
 
 function readAccessToken() {
@@ -83,7 +83,7 @@ function readAccessToken() {
         '-NoProfile',
         '-NonInteractive',
         '-Command',
-        "[Environment]::GetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', 'User')",
+        '[Environment]::GetEnvironmentVariable(\'SUPABASE_ACCESS_TOKEN\', \'User\')',
       ],
       { encoding: 'utf8', windowsHide: true, timeout: 10000 },
     )
@@ -95,8 +95,10 @@ function readAccessToken() {
       resolve(homedir(), '.supabase/access-token'),
       'utf8',
     ).trim()
-    if (token) return token
-  } catch {
+    if (token)
+      return token
+  }
+  catch {
     /* CLI may store login credentials in the OS keychain instead. */
   }
   throw new Error(
@@ -121,7 +123,7 @@ export async function createPoolerConnection(workdir = process.cwd()) {
     {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ read_only: false }),

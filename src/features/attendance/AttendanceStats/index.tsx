@@ -1,32 +1,34 @@
-import { useState } from 'react'
+import type {
+  TableColumnsType,
+} from 'antd'
+import type { Dayjs } from 'dayjs'
+import type {
+  AttendanceLateEarlyStat,
+  AttendanceShiftStat,
+} from '@/services/apiAttendanceDetails'
+import { ArrowDownTrayIcon as ArrowDownTrayIconSolid } from '@heroicons/react/16/solid'
+import {
+  CalendarDaysIcon,
+  ClipboardDocumentListIcon,
+  MagnifyingGlassIcon,
+  UserCircleIcon,
+} from '@heroicons/react/24/outline'
 import {
   Button,
   DatePicker,
   message,
   Popover,
   Table,
-  TableColumnsType,
   Tabs,
   Tag,
 } from 'antd'
-import type { Dayjs } from 'dayjs'
-import {
-  ClipboardDocumentListIcon,
-  UserCircleIcon,
-  CalendarDaysIcon,
-  MagnifyingGlassIcon,
-} from '@heroicons/react/24/outline'
-import { ArrowDownTrayIcon as ArrowDownTrayIconSolid } from '@heroicons/react/16/solid'
 
+import { useState } from 'react'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import type {
-  AttendanceLateEarlyStat,
-  AttendanceShiftStat,
-} from '@/services/apiAttendanceDetails'
 import {
-  getAttendanceMonthlyExportData,
   getAttendanceLateEarlyStats,
+  getAttendanceMonthlyExportData,
 } from '@/services/apiAttendanceDetails'
 import {
   useAttendanceLateEarlyStats,
@@ -34,7 +36,7 @@ import {
 } from '../AttendanceDetail/useAttendanceDetails'
 import AttendanceStatsSearch from './AttendanceStatsSearch'
 
-type SearchParams = {
+interface SearchParams {
   name?: string
   startDate?: string
   endDate?: string
@@ -43,8 +45,9 @@ type SearchParams = {
 const SHIFT_STATS_TABLE_SCROLL_X = 530
 const LATE_EARLY_TABLE_SCROLL_X = 460
 
-const loadAttendanceMonthlyExcel = () =>
-  import('@/utils/attendanceMonthlyExcel')
+function loadAttendanceMonthlyExcel() {
+  return import('@/utils/attendanceMonthlyExcel')
+}
 
 function preloadAttendanceMonthlyExcel() {
   void loadAttendanceMonthlyExcel()
@@ -59,18 +62,19 @@ function DatesPopover({
   dates: string[]
   color: string
 }) {
-  if (count === 0) return <span className="text-slate-400">0</span>
+  if (count === 0)
+    return <span className="text-slate-400">0</span>
   return (
     <Popover
-      content={
+      content={(
         <div className="flex max-w-xs flex-wrap gap-1">
-          {dates.map((d) => (
+          {dates.map(d => (
             <Tag key={d} color={color} className="mb-1">
               {d}
             </Tag>
           ))}
         </div>
-      }
+      )}
       title="涉及日期"
       trigger="click"
     >
@@ -270,9 +274,11 @@ export default function AttendanceStatsPage() {
         endDate: searchParams.endDate,
       })
       messageApi.success('导出成功')
-    } catch (e) {
+    }
+    catch (e) {
       messageApi.error(e instanceof Error ? e.message : '导出失败')
-    } finally {
+    }
+    finally {
       setExportingLateEarly(false)
     }
   }
@@ -305,9 +311,11 @@ export default function AttendanceStatsPage() {
       }
       exportAttendanceMonthlyExcel(rows, year, month)
       messageApi.success('导出成功')
-    } catch (e) {
+    }
+    catch (e) {
       messageApi.error(e instanceof Error ? e.message : '导出失败')
-    } finally {
+    }
+    finally {
       setExporting(false)
     }
   }

@@ -1,5 +1,6 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { PrecisionFinishingCuttingFilters } from '@/services/apiPrecisionFinishingCuttings'
 
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
@@ -9,12 +10,12 @@ import {
   getPrecisionFinishingCuttingById,
   getPrecisionFinishingCuttingQuantityStats,
   getPrecisionFinishingCuttings,
+
   updatePrecisionFinishingCutting,
-  type PrecisionFinishingCuttingFilters,
 } from '@/services/apiPrecisionFinishingCuttings'
 
-const PRECISION_FINISHING_CUTTINGS_KEY =
-  'precision-finishing-cuttings' as const
+const PRECISION_FINISHING_CUTTINGS_KEY
+  = 'precision-finishing-cuttings' as const
 
 export function usePrecisionFinishingCuttings({
   page,

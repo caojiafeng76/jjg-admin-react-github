@@ -15,8 +15,8 @@ describe('Syney PO document modules', () => {
 
       expect(source).not.toMatch(/import jsPDF from ['"]jspdf['"]/)
       expect(source).not.toMatch(/from ['"]@\/utils\/pdfUtils['"]/)
-      expect(source).toContain("import('jspdf')")
-      expect(source).toContain("import('@/utils/pdfUtils')")
+      expect(source).toContain('import(\'jspdf\')')
+      expect(source).toContain('import(\'@/utils/pdfUtils\')')
       expect(source).toContain('preloadPDF')
     },
   )
@@ -28,12 +28,12 @@ describe('Syney PO document modules', () => {
     const excelButton = readLocalFile('ExportInfoButton.tsx')
 
     expect(decomposition).not.toMatch(/from ['"]@\/utils\/pdfUtils['"]/)
-    expect(decomposition).toContain("import('@/utils/pdfUtils')")
+    expect(decomposition).toContain('import(\'@/utils/pdfUtils\')')
     expect(decompositionButton).toContain('onMouseEnter={preloadPDF}')
     expect(decompositionButton).toContain('onFocus={preloadPDF}')
 
     expect(excel).not.toMatch(/from ['"]xlsx-js-style['"]/)
-    expect(excel).toContain("import('xlsx-js-style')")
+    expect(excel).toContain('import(\'xlsx-js-style\')')
     expect(excelButton).toContain('onMouseEnter={preloadExcel}')
     expect(excelButton).toContain('onFocus={preloadExcel}')
   })
@@ -44,7 +44,7 @@ describe('Syney PO document modules', () => {
 
     expect(excel).not.toMatch(/from ['"]xlsx-js-style['"]/)
     expect(excel).toContain(
-      "import('./shippingListExcelDocument')",
+      'import(\'./shippingListExcelDocument\')',
     )
     expect(excelButton).toContain('onMouseEnter={preloadExcel}')
     expect(excelButton).toContain('onFocus={preloadExcel}')
@@ -55,16 +55,16 @@ describe('Syney PO document modules', () => {
     const form = readLocalFile('PoForm.tsx')
     const page = readLocalFile('index.tsx')
 
-    expect(upload).toContain("import('@utils/excelUtils')")
+    expect(upload).toContain('import(\'@utils/excelUtils\')')
     expect(upload).not.toMatch(
       /import \{[^}]*importExcelOrder[^}]*\} from ['"]@utils\/excelUtils['"]/,
     )
     expect(upload).toContain('useEffect')
     expect(form).toContain(
-      "import type { TransformedOrderData } from '@utils/excelUtils'",
+      'import type { TransformedOrderData } from \'@utils/excelUtils\'',
     )
     expect(page).toContain(
-      "import type { TransformedOrderData } from '@utils/excelUtils'",
+      'import type { TransformedOrderData } from \'@utils/excelUtils\'',
     )
   })
 })

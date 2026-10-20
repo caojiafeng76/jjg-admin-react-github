@@ -1,13 +1,15 @@
-import { useMemo } from 'react'
 import type { TableColumnsType } from 'antd'
+import type {
+  SelectedTransferDetail,
+  TransferDetailRow,
+} from './dashboardRenderUtils'
 import { Modal, Table, Tag } from 'antd'
 import dayjs from 'dayjs'
 
+import { useMemo } from 'react'
 import {
   renderDetailQuantity,
   renderText,
-  SelectedTransferDetail,
-  TransferDetailRow,
 } from './dashboardRenderUtils'
 
 export function TransferDetailModal({
@@ -27,12 +29,12 @@ export function TransferDetailModal({
   )
   const summary = useMemo(
     () => ({
-      auditedCount: rows.filter((item) => item.isAudited).length,
+      auditedCount: rows.filter(item => item.isAudited).length,
       transferQuantity: rows.reduce(
         (total, item) => total + item.transferQuantity,
         0,
       ),
-      unauditedCount: rows.filter((item) => !item.isAudited).length,
+      unauditedCount: rows.filter(item => !item.isAudited).length,
     }),
     [rows],
   )
@@ -91,7 +93,7 @@ export function TransferDetailModal({
   return (
     <Modal
       open={Boolean(detail)}
-      title={
+      title={(
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-md shadow-purple-500/30">
             <svg
@@ -116,7 +118,7 @@ export function TransferDetailModal({
             </span>
           </div>
         </div>
-      }
+      )}
       footer={null}
       width={920}
       destroyOnHidden

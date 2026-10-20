@@ -22,7 +22,7 @@ export interface StatusPillProps {
   className?: string
 }
 
-const TONE_CLASSES: Record<StatusTone, { pill: string; dot: string }> = {
+const TONE_CLASSES: Record<StatusTone, { pill: string, dot: string }> = {
   success: { pill: 'bg-success/10 text-success', dot: 'bg-success' },
   warning: { pill: 'bg-warning/10 text-warning', dot: 'bg-warning' },
   danger: { pill: 'bg-error/10 text-error', dot: 'bg-error' },

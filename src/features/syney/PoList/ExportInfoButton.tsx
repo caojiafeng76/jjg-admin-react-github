@@ -1,11 +1,11 @@
 import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
 import { Button, Tooltip } from 'antd'
-import { useExportSafePartInfoAsExcel } from './useExportSafePartInfoAsExcel'
 import { usePermission } from '@/hooks/usePermission'
+import { useExportSafePartInfoAsExcel } from './useExportSafePartInfoAsExcel'
 
 export default function ExportInfoButton() {
-  const { exportSafePartInfoAsExcel, preloadExcel, contextHolder } =
-    useExportSafePartInfoAsExcel()
+  const { exportSafePartInfoAsExcel, preloadExcel, contextHolder }
+    = useExportSafePartInfoAsExcel()
   const allowed = usePermission('feature:syney-po-list.export')
   const denied = !allowed
   const btn = (

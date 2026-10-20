@@ -1,21 +1,23 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle } from 'react'
-import { App, Form, Input } from 'antd'
-
-import {
+import type {
+  SyneyStoreReportPayload,
+} from '@utils/syneyStoreReport'
+import type {
   ISyneyItem,
   ISyneyStoreReport,
   ISyneyStoreReportFormRef,
 } from '@/types'
+
 import { useSyneySpecs } from '@syney/SpecList/useSyneySpecs'
 import { jsonToArray } from '@utils/syney'
 import {
   buildSyneyStoreReportPayload,
-  SyneyStoreReportPayload,
 } from '@utils/syneyStoreReport'
+import { App, Form, Input } from 'antd'
+import { forwardRef, useCallback, useEffect, useImperativeHandle } from 'react'
 
 import { useCreateReport } from './useCreateReport'
 
-type ReportFormProps = {
+interface ReportFormProps {
   handleCancel: () => void
   onSpecsLoadingChange: (loading: boolean) => void
   onCreatingChange?: (creating: boolean) => void
@@ -53,7 +55,8 @@ const ReportForm = forwardRef<ISyneyStoreReportFormRef, ReportFormProps>(
             detailData as ISyneyItem[],
             syneySpecs || [],
           )
-        } catch (error) {
+        }
+        catch (error) {
           message.error(error instanceof Error ? error.message : '入库单数据解析失败')
           return
         }

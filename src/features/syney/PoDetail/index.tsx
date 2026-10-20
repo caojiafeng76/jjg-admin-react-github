@@ -1,19 +1,19 @@
-import EditButton from '@/ui/EditButton'
-import DetailTable from './DetailTable'
-import { App, Button, Modal } from 'antd'
-import DetailForm from './DetailForm'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useAppStore } from '@/store'
-import { FormInstance } from 'antd/lib'
-import { ISyneyItem, ISyneyPo } from '@/types'
-import { useItem } from './useItem'
-import { useDetail } from './useDetail'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import AppPagination from '@/ui/AppPagination'
-import { TableState } from '@/ui/TableState'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import type { FormInstance } from 'antd/lib'
+import type { ISyneyItem, ISyneyPo } from '@/types'
 import { ArrowLeftIcon } from '@heroicons/react/16/solid'
+import { App, Button, Modal } from 'antd'
 import dayjs from 'dayjs'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useAppStore } from '@/store'
+import AppPagination from '@/ui/AppPagination'
+import EditButton from '@/ui/EditButton'
+import { TableState } from '@/ui/TableState'
+import DetailForm from './DetailForm'
+import DetailTable from './DetailTable'
+import { useDetail } from './useDetail'
+import { useItem } from './useItem'
 
 // 状态 pill 语义色（与 PoTable STATUS_STYLES 一致）
 const STATUS_PILL: Record<string, string> = {
@@ -54,7 +54,7 @@ export default function PoDetail() {
 
   const [isLoading, setIsLoading] = useState(false)
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const { items, po, isLoading: isDetailLoading } = useDetail()
 
@@ -72,7 +72,7 @@ export default function PoDetail() {
   const allItemIds = useMemo(
     () =>
       records
-        .map((item) => item.id)
+        .map(item => item.id)
         .filter((id): id is number => typeof id === 'number'),
     [records],
   )
@@ -115,23 +115,27 @@ export default function PoDetail() {
               订单信息
             </span>
           </div>
-          {po?.Status && STATUS_PILL[po.Status] ? (
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[po.Status]}`}
-            >
-              {po.Status}
-            </span>
-          ) : null}
+          {po?.Status && STATUS_PILL[po.Status]
+            ? (
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[po.Status]}`}
+                >
+                  {po.Status}
+                </span>
+              )
+            : null}
         </div>
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
-          {orderInfo.map((item) => (
+          {orderInfo.map(item => (
             <InfoItem key={item.label} label={item.label}>
-              {item.label === '编号' ? (
-                <span className="tabular-nums">{item.value}</span>
-              ) : (
-                item.value
-              )}
+              {item.label === '编号'
+                ? (
+                    <span className="tabular-nums">{item.value}</span>
+                  )
+                : (
+                    item.value
+                  )}
             </InfoItem>
           ))}
           <InfoItem label="数量">

@@ -1,13 +1,15 @@
-import { useMemo } from 'react'
 import type { TableColumnsType } from 'antd'
+import type {
+  PrecisionCuttingDetailRow,
+  SelectedPrecisionCuttingDetail,
+} from './dashboardRenderUtils'
 import { Modal, Table, Tag } from 'antd'
 import dayjs from 'dayjs'
 
+import { useMemo } from 'react'
 import {
-  PrecisionCuttingDetailRow,
   renderDetailQuantity,
   renderText,
-  SelectedPrecisionCuttingDetail,
 } from './dashboardRenderUtils'
 
 export function PrecisionCuttingDetailModal({
@@ -19,7 +21,7 @@ export function PrecisionCuttingDetailModal({
 }) {
   const rows = useMemo<PrecisionCuttingDetailRow[]>(
     () =>
-      (detail?.record.precisionCuttingDetails ?? []).map((item) => ({
+      (detail?.record.precisionCuttingDetails ?? []).map(item => ({
         ...item,
         key: item.id,
       })),
@@ -27,13 +29,13 @@ export function PrecisionCuttingDetailModal({
   )
   const summary = useMemo(
     () => ({
-      auditedCount: rows.filter((item) => item.isAudited).length,
+      auditedCount: rows.filter(item => item.isAudited).length,
       defectQuantity: rows.reduce(
         (total, item) =>
-          total +
-          item.rawMaterialDefectCount +
-          item.processingDefectCount +
-          item.outsourceDefectQuantity,
+          total
+          + item.rawMaterialDefectCount
+          + item.processingDefectCount
+          + item.outsourceDefectQuantity,
         0,
       ),
       longMaterialQuantity: rows.reduce(
@@ -44,7 +46,7 @@ export function PrecisionCuttingDetailModal({
         (total, item) => total + item.transferQuantity,
         0,
       ),
-      unauditedCount: rows.filter((item) => !item.isAudited).length,
+      unauditedCount: rows.filter(item => !item.isAudited).length,
     }),
     [rows],
   )
@@ -171,7 +173,7 @@ export function PrecisionCuttingDetailModal({
   return (
     <Modal
       open={Boolean(detail)}
-      title={
+      title={(
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 shadow-md shadow-cyan-500/30">
             <svg
@@ -196,7 +198,7 @@ export function PrecisionCuttingDetailModal({
             </span>
           </div>
         </div>
-      }
+      )}
       footer={null}
       width={1180}
       destroyOnHidden

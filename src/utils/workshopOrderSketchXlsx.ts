@@ -1,19 +1,19 @@
 import JSZip from 'jszip'
 
-const CONTENT_TYPES_NS =
-  'http://schemas.openxmlformats.org/package/2006/content-types'
-const RELATIONSHIPS_NS =
-  'http://schemas.openxmlformats.org/package/2006/relationships'
-const OFFICE_RELATIONSHIPS_NS =
-  'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
-const SPREADSHEET_DRAWING_NS =
-  'http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing'
+const CONTENT_TYPES_NS
+  = 'http://schemas.openxmlformats.org/package/2006/content-types'
+const RELATIONSHIPS_NS
+  = 'http://schemas.openxmlformats.org/package/2006/relationships'
+const OFFICE_RELATIONSHIPS_NS
+  = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+const SPREADSHEET_DRAWING_NS
+  = 'http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing'
 const DRAWING_MAIN_NS = 'http://schemas.openxmlformats.org/drawingml/2006/main'
 
 const DRAWING_RELATIONSHIP_TYPE = `${OFFICE_RELATIONSHIPS_NS}/drawing`
 const IMAGE_RELATIONSHIP_TYPE = `${OFFICE_RELATIONSHIPS_NS}/image`
-const DRAWING_CONTENT_TYPE =
-  'application/vnd.openxmlformats-officedocument.drawing+xml'
+const DRAWING_CONTENT_TYPE
+  = 'application/vnd.openxmlformats-officedocument.drawing+xml'
 
 export interface WorkshopOrderSketchFile {
   fileName: string
@@ -48,7 +48,7 @@ function getElementsByLocalName(
   localName: string,
 ): Element[] {
   return Array.from(node.getElementsByTagName('*')).filter(
-    (element) => element.localName === localName,
+    element => element.localName === localName,
   )
 }
 
@@ -61,17 +61,17 @@ function getFirstElementByLocalName(
 
 function getRelationshipId(element: Element): string | null {
   return (
-    element.getAttributeNS(OFFICE_RELATIONSHIPS_NS, 'id') ||
-    element.getAttribute('r:id') ||
-    element.getAttribute('id')
+    element.getAttributeNS(OFFICE_RELATIONSHIPS_NS, 'id')
+    || element.getAttribute('r:id')
+    || element.getAttribute('id')
   )
 }
 
 function getEmbedRelationshipId(element: Element): string | null {
   return (
-    element.getAttributeNS(OFFICE_RELATIONSHIPS_NS, 'embed') ||
-    element.getAttribute('r:embed') ||
-    element.getAttribute('embed')
+    element.getAttributeNS(OFFICE_RELATIONSHIPS_NS, 'embed')
+    || element.getAttribute('r:embed')
+    || element.getAttribute('embed')
   )
 }
 
@@ -79,7 +79,8 @@ function normalizeZipPath(path: string): string {
   const segments: string[] = []
 
   for (const segment of path.replace(/\\/g, '/').split('/')) {
-    if (!segment || segment === '.') continue
+    if (!segment || segment === '.')
+      continue
     if (segment === '..') {
       segments.pop()
       continue
@@ -159,7 +160,7 @@ async function getFirstWorksheetPath(zip: JSZip): Promise<string | null> {
   const relationship = getElementsByLocalName(
     workbookRelsDoc,
     'Relationship',
-  ).find((item) => item.getAttribute('Id') === firstSheetRelId)
+  ).find(item => item.getAttribute('Id') === firstSheetRelId)
   const target = relationship?.getAttribute('Target')
 
   return target ? resolveRelationshipTarget('xl/workbook.xml', target) : null
@@ -171,7 +172,7 @@ function getRelationshipTarget(
 ): string | null {
   const document = parseXml(relationshipsXml)
   const relationship = getElementsByLocalName(document, 'Relationship').find(
-    (item) => item.getAttribute('Id') === relationshipId,
+    item => item.getAttribute('Id') === relationshipId,
   )
 
   return relationship?.getAttribute('Target') ?? null
@@ -271,14 +272,14 @@ function ensureWorksheetRelationship(
   worksheetRelsXml: string | null,
   worksheetPath: string,
   drawingPath: string,
-): { xml: string; relationshipId: string } {
+): { xml: string, relationshipId: string } {
   const xmlDocument = worksheetRelsXml
     ? parseXml(worksheetRelsXml)
     : documentWithRoot('Relationships', RELATIONSHIPS_NS)
   const root = xmlDocument.documentElement
   const relationships = getElementsByLocalName(xmlDocument, 'Relationship')
   const existingDrawingRel = relationships.find(
-    (item) => item.getAttribute('Type') === DRAWING_RELATIONSHIP_TYPE,
+    item => item.getAttribute('Type') === DRAWING_RELATIONSHIP_TYPE,
   )
 
   if (existingDrawingRel) {
@@ -361,7 +362,7 @@ function ensureContentTypesXml(
 
   if (
     !getElementsByLocalName(document, 'Override').some(
-      (item) => item.getAttribute('PartName') === `/${drawingPath}`,
+      item => item.getAttribute('PartName') === `/${drawingPath}`,
     )
   ) {
     const override = document.createElementNS(CONTENT_TYPES_NS, 'Override')
@@ -373,7 +374,7 @@ function ensureContentTypesXml(
   for (const image of images) {
     const extension = image.extension.toLowerCase()
     const existingDefault = getElementsByLocalName(document, 'Default').some(
-      (item) => item.getAttribute('Extension') === extension,
+      item => item.getAttribute('Extension') === extension,
     )
 
     if (existingDefault) {
@@ -514,7 +515,7 @@ function createAnchor(
 function createDrawingXml(images: WorksheetSketchPlacement[]): {
   drawingXml: string
   drawingRelsXml: string
-  media: Array<{ path: string; data: ArrayBuffer }>
+  media: Array<{ path: string, data: ArrayBuffer }>
 } {
   const drawingDoc = document.implementation.createDocument(
     SPREADSHEET_DRAWING_NS,
@@ -525,7 +526,7 @@ function createDrawingXml(images: WorksheetSketchPlacement[]): {
   drawingRoot.setAttribute('xmlns:r', OFFICE_RELATIONSHIPS_NS)
 
   const relsDoc = documentWithRoot('Relationships', RELATIONSHIPS_NS)
-  const media: Array<{ path: string; data: ArrayBuffer }> = []
+  const media: Array<{ path: string, data: ArrayBuffer }> = []
 
   images.forEach((image, index) => {
     const relationshipId = `rId${index + 1}`
@@ -558,15 +559,15 @@ export async function embedSketchFilesIntoFirstWorksheet(
   workbookBuffer: ArrayBuffer,
   images: WorksheetSketchPlacement[],
 ): Promise<ArrayBuffer> {
-  const validImages = images.filter((image) => image.data.byteLength > 0)
+  const validImages = images.filter(image => image.data.byteLength > 0)
 
   if (validImages.length === 0) {
     return workbookBuffer
   }
 
   const zip = await JSZip.loadAsync(workbookBuffer)
-  const worksheetPath =
-    (await getFirstWorksheetPath(zip)) || 'xl/worksheets/sheet1.xml'
+  const worksheetPath
+    = (await getFirstWorksheetPath(zip)) || 'xl/worksheets/sheet1.xml'
   const worksheetXml = await readZipText(zip, worksheetPath)
   const contentTypesXml = await readZipText(zip, '[Content_Types].xml')
 

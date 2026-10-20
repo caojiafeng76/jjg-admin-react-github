@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
-import type { Dayjs } from 'dayjs'
 import type { InputRef } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type { Dispatch, SetStateAction } from 'react'
 import type { SetURLSearchParams } from 'react-router-dom'
+import { useRef, useState } from 'react'
 
 interface UseVillaLiftOrderSearchOptions {
   searchParamsURL: URLSearchParams
@@ -27,8 +27,8 @@ export function useVillaLiftOrderSearch({
   const [scheduleDateRange, setScheduleDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
   >(null)
-  const [processingRequiredDateRange, setProcessingRequiredDateRange] =
-    useState<[Dayjs | null, Dayjs | null] | null>(null)
+  const [processingRequiredDateRange, setProcessingRequiredDateRange]
+    = useState<[Dayjs | null, Dayjs | null] | null>(null)
 
   // 已提交（触发查询）的筛选值
   const [submittedCustomer, setSubmittedCustomer] = useState<
@@ -42,20 +42,20 @@ export function useVillaLiftOrderSearch({
   >()
 
   // 发货日期范围（YYYY-MM-DD 字符串，传给服务层）
-  const deliveryDateFrom =
-    deliveryDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
-  const deliveryDateTo =
-    deliveryDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
+  const deliveryDateFrom
+    = deliveryDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
+  const deliveryDateTo
+    = deliveryDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
   // 排产日期范围
-  const scheduleDateFrom =
-    scheduleDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
-  const scheduleDateTo =
-    scheduleDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
+  const scheduleDateFrom
+    = scheduleDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
+  const scheduleDateTo
+    = scheduleDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
   // 计划加工日期（加工要求完成日期）范围
-  const processingRequiredDateFrom =
-    processingRequiredDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
-  const processingRequiredDateTo =
-    processingRequiredDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
+  const processingRequiredDateFrom
+    = processingRequiredDateRange?.[0]?.format('YYYY-MM-DD') ?? undefined
+  const processingRequiredDateTo
+    = processingRequiredDateRange?.[1]?.format('YYYY-MM-DD') ?? undefined
 
   // 切换 Tab（未结案 / 已结案）
   function handleTabChange(key: string) {
@@ -63,7 +63,7 @@ export function useVillaLiftOrderSearch({
     next.set('status', key)
     next.set('page', '1')
     setSearchParamsURL(next)
-    setSearchInputKey((k) => k + 1)
+    setSearchInputKey(k => k + 1)
     setDeliveryDateRange(null)
     setScheduleDateRange(null)
     setProcessingRequiredDateRange(null)
@@ -89,7 +89,7 @@ export function useVillaLiftOrderSearch({
   }
 
   function handleSearchReset() {
-    setSearchInputKey((k) => k + 1)
+    setSearchInputKey(k => k + 1)
     setDeliveryDateRange(null)
     setScheduleDateRange(null)
     setProcessingRequiredDateRange(null)

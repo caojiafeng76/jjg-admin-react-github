@@ -1,15 +1,16 @@
-import { useMemo } from 'react'
+import type { ProjectNoData } from './mobileProductionOrderScanTypes'
 
 import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
-import {
-  useSalesOrdersProjectNos,
-  useOperationsByModel,
-} from './useProcessStandards'
-import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
+import { useMemo } from 'react'
 import {
   formatDisplayValue,
-  type ProjectNoData,
+
 } from './mobileProductionOrderScanTypes'
+import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
+import {
+  useOperationsByModel,
+  useSalesOrdersProjectNos,
+} from './useProcessStandards'
 
 interface UseMobileProductionOrderScanOptionsParams {
   scannedProjectDataMap: Record<string, ProjectNoData>
@@ -55,11 +56,11 @@ export function useMobileProductionOrderScanOptions({
     [operationMatch?.records],
   )
   const selectedOperationRecord = operationRecords.find(
-    (item) => item.operation === operation,
+    item => item.operation === operation,
   )
 
   const projectOptions = useMemo<MobileBottomSelectOption[]>(() => {
-    return Array.from(projectInfoMap.values()).map((item) => ({
+    return Array.from(projectInfoMap.values()).map(item => ({
       value: item.project_no,
       label: item.project_no,
       keywords: [
@@ -85,7 +86,7 @@ export function useMobileProductionOrderScanOptions({
   }, [projectInfoMap])
 
   const operationOptions = useMemo<MobileBottomSelectOption[]>(() => {
-    return operationRecords.map((item) => ({
+    return operationRecords.map(item => ({
       value: item.operation,
       label: item.operation,
       keywords: [
@@ -104,7 +105,7 @@ export function useMobileProductionOrderScanOptions({
         keywords: '无 none',
         description: '不指定机器编号',
       },
-      ...((machineOptions || []).map((item) => ({
+      ...((machineOptions || []).map(item => ({
         value: item.id,
         label: item.unified_device_no,
         keywords: [
@@ -127,7 +128,7 @@ export function useMobileProductionOrderScanOptions({
     }
 
     return (
-      machineOptions?.find((item) => item.id === machineEquipmentId)
+      machineOptions?.find(item => item.id === machineEquipmentId)
         ?.unified_device_no || '请选择机器编号'
     )
   }, [machineEquipmentId, machineOptions])

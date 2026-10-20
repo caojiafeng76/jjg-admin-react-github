@@ -15,8 +15,8 @@ export default function EmployeeSearch({ onSearch, onReset }: Props) {
   const [name, setName] = useState('')
   const [role, setRole] = useState<string | undefined>()
   const [status, setStatus] = useState<'active' | 'inactive' | undefined>()
-  const { options: roleOptions, isLoading: roleOptionsLoading } =
-    useRoleOptions()
+  const { options: roleOptions, isLoading: roleOptionsLoading }
+    = useRoleOptions()
 
   const handleSearch = () => {
     onSearch({
@@ -40,7 +40,7 @@ export default function EmployeeSearch({ onSearch, onReset }: Props) {
         size="small"
         placeholder="请输入姓名"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={e => setName(e.target.value)}
         onPressEnter={handleSearch}
         allowClear
         style={{ width: 180 }}
@@ -49,7 +49,7 @@ export default function EmployeeSearch({ onSearch, onReset }: Props) {
         size="small"
         placeholder="角色"
         value={role}
-        onChange={(value) => setRole(value)}
+        onChange={value => setRole(value)}
         allowClear
         loading={roleOptionsLoading}
         style={{ width: 120 }}
@@ -59,7 +59,7 @@ export default function EmployeeSearch({ onSearch, onReset }: Props) {
         size="small"
         placeholder="状态"
         value={status}
-        onChange={(value) => setStatus(value)}
+        onChange={value => setStatus(value)}
         allowClear
         style={{ width: 120 }}
         options={[

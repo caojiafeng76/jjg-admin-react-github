@@ -3,13 +3,13 @@ import {
   HomeOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
+import AppErrorView from '@ui/AppErrorView'
+
 import {
   isRouteErrorResponse,
   useNavigate,
   useRouteError,
 } from 'react-router-dom'
-
-import AppErrorView from '@ui/AppErrorView'
 import { getErrorDisplayInfo } from '@/utils/errorHandler'
 
 interface RouteErrorContent {
@@ -25,13 +25,13 @@ interface RouteErrorContent {
 function getRouteErrorContent(routeError: unknown): RouteErrorContent {
   if (isRouteErrorResponse(routeError)) {
     const routeData = routeError.data
-    const errorMessage =
-      typeof routeData === 'string'
+    const errorMessage
+      = typeof routeData === 'string'
         ? routeData
-        : routeData &&
-            typeof routeData === 'object' &&
-            'message' in routeData &&
-            typeof routeData.message === 'string'
+        : routeData
+          && typeof routeData === 'object'
+          && 'message' in routeData
+          && typeof routeData.message === 'string'
           ? routeData.message
           : routeError.statusText || `请求失败（${routeError.status}）`
 

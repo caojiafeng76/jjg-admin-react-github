@@ -25,8 +25,8 @@ export const MATERIAL_TRANSFER_RECIPIENTS = [
   '顾鉴申',
 ] as const
 
-export type MaterialTransferWorkshop =
-  (typeof MATERIAL_TRANSFER_WORKSHOPS)[number]
+export type MaterialTransferWorkshop
+  = (typeof MATERIAL_TRANSFER_WORKSHOPS)[number]
 
 export interface MaterialTransferRow {
   audited_at: string | null
@@ -108,9 +108,9 @@ export interface MaterialTransferAuditFields {
   audited_at: string | null
 }
 
-export type MaterialTransfer = MaterialTransferRow &
-  MaterialTransferAuditFields &
-  MaterialTransferExtraFields
+export type MaterialTransfer = MaterialTransferRow
+  & MaterialTransferAuditFields
+  & MaterialTransferExtraFields
 
 export type MaterialTransferInsert = MaterialTransferInsertBase & {
   is_audited?: boolean

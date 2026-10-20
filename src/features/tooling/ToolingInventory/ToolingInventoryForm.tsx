@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Form, type FormInstance, Input, InputNumber, Select } from 'antd'
+import type { FormInstance } from 'antd'
+import type { RemoteToolingOption } from '../remoteToolingOptions'
 
 import type {
   ToolingDataOption,
   ToolingInventory,
   ToolingInventoryFormValues,
 } from '@/services/apiToolingInventory'
+import { Form, Input, InputNumber, Select } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
 import {
   createToolingOptionSnapshot,
   mergeToolingOptions,
-  type RemoteToolingOption,
+
 } from '../remoteToolingOptions'
 
 interface Props {
@@ -40,8 +42,8 @@ export default function ToolingInventoryForm({
   initialValues,
 }: Props) {
   const [form] = Form.useForm<ToolingInventoryFormValues>()
-  const [selectedToolingSnapshot, setSelectedToolingSnapshot] =
-    useState<RemoteToolingOption>()
+  const [selectedToolingSnapshot, setSelectedToolingSnapshot]
+    = useState<RemoteToolingOption>()
   const selectedToolingId = Form.useWatch('tooling_data_id', form)
 
   const mergedToolingOptions = useMemo(
@@ -50,7 +52,7 @@ export default function ToolingInventoryForm({
   )
 
   const selectedTooling = useMemo(
-    () => mergedToolingOptions.find((item) => item.id === selectedToolingId),
+    () => mergedToolingOptions.find(item => item.id === selectedToolingId),
     [mergedToolingOptions, selectedToolingId],
   )
 
@@ -80,17 +82,18 @@ export default function ToolingInventoryForm({
 
   useEffect(() => {
     setSelectedToolingSnapshot((snapshot) => {
-      if (!snapshot) return snapshot
+      if (!snapshot)
+        return snapshot
 
       return (
-        toolingOptions.find((option) => option.id === snapshot.id) ?? snapshot
+        toolingOptions.find(option => option.id === snapshot.id) ?? snapshot
       )
     })
   }, [selectedToolingSnapshot?.id, toolingOptions])
 
   const handleToolingChange = (toolingId: string) => {
     const nextSnapshot = mergedToolingOptions.find(
-      (item) => item.id === toolingId,
+      item => item.id === toolingId,
     )
     setSelectedToolingSnapshot(nextSnapshot)
   }
@@ -119,14 +122,14 @@ export default function ToolingInventoryForm({
               ? '请选择刀具资料'
               : '暂无刀具资料，请先维护刀具资料'
           }
-          options={mergedToolingOptions.map((item) => ({
+          options={mergedToolingOptions.map(item => ({
             value: item.id,
             label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
           }))}
         />
       </Form.Item>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 md:grid-cols-2">
+      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
         <div>
           <div className="text-xs text-slate-400 dark:text-slate-500">刀具编号</div>
           <div>{selectedTooling?.tool_code || '-'}</div>

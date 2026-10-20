@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Pagination, Table, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { JintanMaterialsStockIn } from '@/services/apiJintanMaterialsStockIn'
+
 import type { JintanMaterialsStockOut } from '@/services/apiJintanMaterialsStockOut'
+import { Alert, Button, Pagination, Table } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
 import { TableEmpty } from '@/ui/TableState'
 import {
   JINTAN_MATERIALS_DETAIL_RECORDS_PAGE_SIZE,
@@ -31,7 +32,7 @@ function RecordsPagination({
         pageSize={JINTAN_MATERIALS_DETAIL_RECORDS_PAGE_SIZE}
         total={total}
         showSizeChanger={false}
-        showTotal={(value) => `共 ${value} 条`}
+        showTotal={value => `共 ${value} 条`}
         onChange={onChange}
       />
     </div>
@@ -44,11 +45,11 @@ function RecordsError({ onRetry }: { onRetry: () => void }) {
       type="error"
       showIcon
       title="获取素材出入库记录失败"
-      action={
+      action={(
         <Button size="small" onClick={onRetry}>
           重试
         </Button>
-      }
+      )}
     />
   )
 }
@@ -115,7 +116,7 @@ export function JintanMaterialsStockInRecordsTab({
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
-      setPage((current) => Math.max(current - 1, 1))
+      setPage(current => Math.max(current - 1, 1))
     }
   }, [data, page])
 
@@ -144,8 +145,7 @@ export function JintanMaterialsStockInRecordsTab({
         rowClassName={(_, index) =>
           index % 2 === 0
             ? 'bg-white dark:bg-slate-800'
-            : 'bg-slate-50/60 dark:bg-slate-800/60'
-        }
+            : 'bg-slate-50/60 dark:bg-slate-800/60'}
       />
       <RecordsPagination
         page={page}
@@ -172,7 +172,7 @@ export function JintanMaterialsStockOutRecordsTab({
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
-      setPage((current) => Math.max(current - 1, 1))
+      setPage(current => Math.max(current - 1, 1))
     }
   }, [data, page])
 
@@ -201,8 +201,7 @@ export function JintanMaterialsStockOutRecordsTab({
         rowClassName={(_, index) =>
           index % 2 === 0
             ? 'bg-white dark:bg-slate-800'
-            : 'bg-slate-50/60 dark:bg-slate-800/60'
-        }
+            : 'bg-slate-50/60 dark:bg-slate-800/60'}
       />
       <RecordsPagination
         page={page}

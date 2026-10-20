@@ -20,7 +20,8 @@ export async function exportProductionDailyReportToExcel(
     )
     downloadExcelBuffer(result.buffer, result.filename)
     return
-  } catch {
+  }
+  catch {
     // Worker 异常时回退主线程导出，保证功能可用。
   }
 

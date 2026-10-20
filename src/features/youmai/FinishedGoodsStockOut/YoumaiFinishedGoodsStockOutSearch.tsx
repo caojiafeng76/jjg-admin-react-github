@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { Button, Form, Input, Select, Space } from 'antd'
+import { useEffect } from 'react'
 
 const SEARCH_FIELDS = [
   { name: 'purchaseOrderNo', placeholder: '采购订单号', width: 150 },
@@ -68,7 +68,7 @@ export default function YoumaiFinishedGoodsStockOutSearch({
       onFinish={handleSearch}
       className="flex flex-1 flex-wrap items-center gap-3"
     >
-      {SEARCH_FIELDS.map((field) => (
+      {SEARCH_FIELDS.map(field => (
         <Form.Item
           key={field.name}
           name={field.name}

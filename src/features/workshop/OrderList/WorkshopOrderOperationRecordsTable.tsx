@@ -1,9 +1,10 @@
-import { Table } from 'antd'
+import type { OperationSummary } from './workshopOrderProductionStatsColumns'
 
 import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrders'
+import { Table } from 'antd'
 import {
+
   recordColumns,
-  type OperationSummary,
 } from './workshopOrderProductionStatsColumns'
 
 export interface WorkshopOrderOperationRecordsTableProps {
@@ -62,43 +63,51 @@ export default function WorkshopOrderOperationRecordsTable({
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={5} />
                 <Table.Summary.Cell index={6} align="right">
-                  {totalDefect1 > 0 ? (
-                    <span className="text-xs font-semibold text-red-500">
-                      {totalDefect1}
-                    </span>
-                  ) : (
-                    '-'
-                  )}
+                  {totalDefect1 > 0
+                    ? (
+                        <span className="text-xs font-semibold text-red-500">
+                          {totalDefect1}
+                        </span>
+                      )
+                    : (
+                        '-'
+                      )}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={7} />
                 <Table.Summary.Cell index={8} align="right">
-                  {totalDefect2 > 0 ? (
-                    <span className="text-xs font-semibold text-red-500">
-                      {totalDefect2}
-                    </span>
-                  ) : (
-                    '-'
-                  )}
+                  {totalDefect2 > 0
+                    ? (
+                        <span className="text-xs font-semibold text-red-500">
+                          {totalDefect2}
+                        </span>
+                      )
+                    : (
+                        '-'
+                      )}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={9} align="right">
-                  {totalOutsourceDefect > 0 ? (
-                    <span className="text-xs font-semibold text-red-500">
-                      {totalOutsourceDefect}
-                    </span>
-                  ) : (
-                    '-'
-                  )}
+                  {totalOutsourceDefect > 0
+                    ? (
+                        <span className="text-xs font-semibold text-red-500">
+                          {totalOutsourceDefect}
+                        </span>
+                      )
+                    : (
+                        '-'
+                      )}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={10} />
                 <Table.Summary.Cell index={11} />
                 <Table.Summary.Cell index={12} align="right">
-                  {totalSetupDefect > 0 ? (
-                    <span className="text-xs font-semibold text-red-500">
-                      {totalSetupDefect}
-                    </span>
-                  ) : (
-                    '-'
-                  )}
+                  {totalSetupDefect > 0
+                    ? (
+                        <span className="text-xs font-semibold text-red-500">
+                          {totalSetupDefect}
+                        </span>
+                      )
+                    : (
+                        '-'
+                      )}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={13} />
                 <Table.Summary.Cell index={14} />

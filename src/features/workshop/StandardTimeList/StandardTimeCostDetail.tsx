@@ -1,5 +1,5 @@
-import { Empty } from 'antd'
 import type { StandardTime } from '@/services/apiStandardTimes'
+import { Empty } from 'antd'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import { formatNumber } from '@/utils/format'
 
@@ -12,11 +12,11 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
     return (
       <div className="flex h-full items-center justify-center">
         <Empty
-          description={
+          description={(
             <span className="text-slate-400 dark:text-slate-500">
               点击上方表格行查看成本详情
             </span>
-          }
+          )}
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         />
       </div>
@@ -118,7 +118,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {/* Labor Cost */}
         <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <div className="mb-1 text-[11px] font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
             人工成本
           </div>
           <div className="text-lg font-bold text-slate-800 tabular-nums dark:text-slate-100">
@@ -131,7 +131,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
 
         {/* Equipment Cost */}
         <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <div className="mb-1 text-[11px] font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
             设备成本
           </div>
           <div className="text-lg font-bold text-slate-800 tabular-nums dark:text-slate-100">
@@ -144,7 +144,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
 
         {/* Tooling Cost */}
         <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <div className="mb-1 text-[11px] font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
             刀具辅料
           </div>
           <div className="text-lg font-bold text-slate-800 tabular-nums dark:text-slate-100">
@@ -157,7 +157,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
 
         {/* Inspection Cost */}
         <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <div className="mb-1 text-[11px] font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
             检验成本
           </div>
           <div className="text-lg font-bold text-slate-800 tabular-nums dark:text-slate-100">
@@ -173,7 +173,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
       <div className="mb-4 grid grid-cols-2 gap-3">
         {/* Overhead Cost */}
         <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3 dark:border-amber-500/30 dark:from-amber-500/10 dark:to-orange-500/10">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-amber-600 dark:text-amber-400">
+          <div className="mb-1 text-[11px] font-medium tracking-wider text-amber-600 uppercase dark:text-amber-400">
             单品分摊额
           </div>
           <div className="text-lg font-bold text-amber-700 tabular-nums dark:text-amber-300">
@@ -183,7 +183,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
 
         {/* Total Cost - Highlighted */}
         <div className="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-3 shadow-md dark:border-indigo-500/40 dark:from-indigo-500/10 dark:to-purple-500/10">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+          <div className="mb-1 text-[11px] font-medium tracking-wider text-indigo-600 uppercase dark:text-indigo-400">
             合计成本
           </div>
           <div className="text-2xl font-bold text-indigo-700 tabular-nums dark:text-indigo-300">
@@ -195,7 +195,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
       {/* Management Info */}
       <div className="mb-4 grid grid-cols-2 gap-3">
         <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <div className="mb-1 text-[11px] font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
             日管理总费用
           </div>
           <div className="text-lg font-semibold text-slate-700 tabular-nums dark:text-slate-200">
@@ -203,7 +203,7 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           </div>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <div className="mb-1 text-[11px] font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
             日总工时
           </div>
           <div className="text-lg font-semibold text-slate-700 tabular-nums dark:text-slate-200">

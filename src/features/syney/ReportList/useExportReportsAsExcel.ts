@@ -1,18 +1,18 @@
-import dayjs from 'dayjs'
 import {
   autoFitColumnWidths,
-  setRowHeight,
   centerAllCells,
   EXCEL_WRITE_OPTIONS,
+  setRowHeight,
 } from '@utils/excelStyleUtils'
+import dayjs from 'dayjs'
 
-import { useSelectedReports } from './useSelectedReports'
 import { useAppStore } from '@/store'
+import { useSelectedReports } from './useSelectedReports'
 
 const loadExcel = () => import('xlsx-js-style')
 
 export function useExportReportsAsExcel() {
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
 
   // 只在有选中项时才查询数据
   const { selectedMap, selectedReportsLoading } = useSelectedReports(
@@ -37,11 +37,11 @@ export function useExportReportsAsExcel() {
     const { utils, writeFile } = await loadExcel()
 
     const wb = utils.book_new()
-    const totalData: { 序号: string; 入库单号: string; 金额: number }[] = []
+    const totalData: { 序号: string, 入库单号: string, 金额: number }[] = []
 
     selectedMap?.forEach((data, No) => {
       totalData.push({
-        序号: totalData.length + 1 + '',
+        序号: `${totalData.length + 1}`,
         入库单号: No,
         金额: data.totalAmount,
       })
@@ -63,8 +63,8 @@ export function useExportReportsAsExcel() {
         const headers = Object.keys(excelData[0])
         const data = [
           headers,
-          ...excelData.map((row) =>
-            headers.map((h) => row[h as keyof (typeof excelData)[0]]),
+          ...excelData.map(row =>
+            headers.map(h => row[h as keyof (typeof excelData)[0]]),
           ),
         ]
         const ws = utils.aoa_to_sheet(data)
@@ -89,8 +89,8 @@ export function useExportReportsAsExcel() {
       const headers = Object.keys(totalData[0])
       const data = [
         headers,
-        ...totalData.map((row) =>
-          headers.map((h) => row[h as keyof (typeof totalData)[0]]),
+        ...totalData.map(row =>
+          headers.map(h => row[h as keyof (typeof totalData)[0]]),
         ),
       ]
       const summaryWs = utils.aoa_to_sheet(data)

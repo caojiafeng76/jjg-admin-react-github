@@ -1,11 +1,11 @@
 import dayjs from 'dayjs'
 
+import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 import {
   buildYoumaiProductDataOptionsQuery,
   YOUMAI_PRODUCT_DATA_OPTION_SELECT,
 } from './youmaiOptions'
-import { handleApiError } from '@/utils/errorHandler'
 
 export type YoumaiFinishedGoodsStockOutStatus = '待审核' | '已审核'
 
@@ -67,7 +67,7 @@ export interface YoumaiFinishedGoodsStockOutImportRow {
   remarks: string
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 
@@ -259,7 +259,7 @@ export async function getYoumaiFinishedGoodsStockOutList({
 
   const items = (data || []) as YoumaiFinishedGoodsStockOut[]
   const productIds = Array.from(
-    new Set(items.map((item) => item.product_data_id)),
+    new Set(items.map(item => item.product_data_id)),
   )
   const inventoryMap = new Map<string, number>()
 
@@ -286,7 +286,7 @@ export async function getYoumaiFinishedGoodsStockOutList({
   }
 
   return {
-    items: items.map((item) => ({
+    items: items.map(item => ({
       ...item,
       final_stock: inventoryMap.get(item.product_data_id) ?? null,
     })),
@@ -372,7 +372,7 @@ export async function importYoumaiFinishedGoodsStockOut(
   }
 
   const materialCodes = Array.from(
-    new Set(normalizedRows.map((row) => row.material_code)),
+    new Set(normalizedRows.map(row => row.material_code)),
   )
   const { data: productRows, error: productError } = await productDataTable()
     .select(
@@ -385,13 +385,13 @@ export async function importYoumaiFinishedGoodsStockOut(
   }
 
   const productMap = new Map(
-    ((productRows || []) as YoumaiProductDataOption[]).map((row) => [
+    ((productRows || []) as YoumaiProductDataOption[]).map(row => [
       row.material_code,
       row,
     ]),
   )
 
-  const missingCodes = materialCodes.filter((code) => !productMap.has(code))
+  const missingCodes = materialCodes.filter(code => !productMap.has(code))
   if (missingCodes.length > 0) {
     throw new Error(
       `以下物料编码未在优迈货品资料中维护，无法导入出库：${missingCodes.join('、')}`,
@@ -399,10 +399,10 @@ export async function importYoumaiFinishedGoodsStockOut(
   }
 
   const purchaseOrderNos = Array.from(
-    new Set(normalizedRows.map((row) => row.purchase_order_no)),
+    new Set(normalizedRows.map(row => row.purchase_order_no)),
   )
   const purchaseOrderLineNos = Array.from(
-    new Set(normalizedRows.map((row) => row.purchase_order_line_no)),
+    new Set(normalizedRows.map(row => row.purchase_order_line_no)),
   )
 
   let existingQuery = stockOutTable().select(
@@ -427,7 +427,7 @@ export async function importYoumaiFinishedGoodsStockOut(
   }
 
   const existingMap = new Map(
-    ((existingRows || []) as YoumaiFinishedGoodsStockOut[]).map((row) => [
+    ((existingRows || []) as YoumaiFinishedGoodsStockOut[]).map(row => [
       getOrderLineKey(row.purchase_order_no, row.purchase_order_line_no),
       row,
     ]),

@@ -1,1 +1,1 @@
-Before handing off a change: run `bun lint` and `bun run build` (or dev sanity check). No automated tests configured. Ensure formatting via `bun format` if you touched many files. Provide manual verification notes for affected features.
+Before handing off a change: format the changed files with `bunx eslint --fix <files>` (or `bun lint:fix`), then run `bun lint` (0 errors), `bun run typecheck`, `bun run test` and `bun run build`. Formatting is done only by ESLint (`@antfu/eslint-config`); Prettier has been removed. Provide manual verification notes for affected features.

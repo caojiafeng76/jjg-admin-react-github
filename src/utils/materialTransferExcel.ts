@@ -1,9 +1,9 @@
-import * as XLSX from 'xlsx-js-style'
-
 import type {
   MaterialTransferOrderProgress,
   MaterialTransferWithEmployee,
 } from '@/services/apiMaterialTransfers'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
@@ -39,11 +39,30 @@ const EXPORT_HEADERS = [
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  20, 14, 18, 9, 10, 28, 10, 14, 10, 8, 12, 8, 9, 10, 18, 16, 12, 10, 14, 14,
+  20,
+  14,
+  18,
+  9,
+  10,
+  28,
+  10,
+  14,
+  10,
+  8,
+  12,
+  8,
+  9,
+  10,
+  18,
+  16,
+  12,
+  10,
+  14,
+  14,
 ]
 const TRANSFER_QUANTITY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('转移数量')
-const TRANSFER_QUANTITY_TOTAL_LABEL_COLUMN_INDEX =
-  TRANSFER_QUANTITY_COLUMN_INDEX - 1
+const TRANSFER_QUANTITY_TOTAL_LABEL_COLUMN_INDEX
+  = TRANSFER_QUANTITY_COLUMN_INDEX - 1
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) {

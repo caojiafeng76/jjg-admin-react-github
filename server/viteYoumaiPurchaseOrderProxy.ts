@@ -26,10 +26,10 @@ function getHeader(request: IncomingMessage, name: string): string | undefined {
 
 function getRequestIp(request: IncomingMessage): string {
   return (
-    getHeader(request, 'x-forwarded-for')?.split(',')[0]?.trim() ||
-    getHeader(request, 'x-real-ip')?.trim() ||
-    request.socket.remoteAddress ||
-    'unknown'
+    getHeader(request, 'x-forwarded-for')?.split(',')[0]?.trim()
+    || getHeader(request, 'x-real-ip')?.trim()
+    || request.socket.remoteAddress
+    || 'unknown'
   )
 }
 
@@ -40,7 +40,8 @@ function readRequestBody(request: IncomingMessage) {
     let rejected = false
 
     request.on('data', (chunk: Buffer | string) => {
-      if (rejected) return
+      if (rejected)
+        return
       const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
       byteLength += buffer.byteLength
       if (byteLength > MAX_JSON_BODY_BYTES) {
@@ -51,7 +52,8 @@ function readRequestBody(request: IncomingMessage) {
       chunks.push(buffer)
     })
     request.on('end', () => {
-      if (!rejected) resolve(Buffer.concat(chunks).toString('utf8'))
+      if (!rejected)
+        resolve(Buffer.concat(chunks).toString('utf8'))
     })
     request.on('error', reject)
   })
@@ -122,7 +124,8 @@ function configureMiddleware(server: ViteDevServer, env: YoumaiProxyEnv) {
       let requestBody: string
       try {
         requestBody = await readRequestBody(request)
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof RequestBodyTooLargeError) {
           sendJson(response, 413, { error: '请求体过大' })
           return
@@ -187,7 +190,8 @@ function configureMiddleware(server: ViteDevServer, env: YoumaiProxyEnv) {
           total: items.length,
           items,
         })
-      } catch (error) {
+      }
+      catch (error) {
         console.error('vite_youmai_proxy_failure', safeErrorMetadata(error))
         sendJson(response, 502, { error: '优迈采购订单代理服务暂不可用' })
       }

@@ -1,8 +1,8 @@
-import { PencilSquareIcon } from '@heroicons/react/16/solid'
 import type { TableColumnsType } from 'antd'
-import { Button } from 'antd'
-
 import type { ProductionSchedulingOrder } from '@/services/apiProductionScheduling'
+import { PencilSquareIcon } from '@heroicons/react/16/solid'
+
+import { Button } from 'antd'
 import {
   getProductSpec,
   getProgressText,
@@ -131,7 +131,7 @@ export function makeOrderColumns({
       key: 'transfer_rate',
       width: 100,
       align: 'right',
-      render: (value) => `${Number(value || 0).toFixed(1)}%`,
+      render: value => `${Number(value || 0).toFixed(1)}%`,
     },
     {
       title: '最近转移车间',

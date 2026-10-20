@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  updateAdminManagementPassword,
+  verifyAdminManagementPassword,
+} from './apiAdminManagementPassword'
+
 const functions = vi.hoisted(() => ({
   invoke: vi.fn(),
 }))
@@ -7,11 +12,6 @@ const functions = vi.hoisted(() => ({
 vi.mock('./supabase', () => ({
   default: { functions },
 }))
-
-import {
-  updateAdminManagementPassword,
-  verifyAdminManagementPassword,
-} from './apiAdminManagementPassword'
 
 describe('apiAdminManagementPassword', () => {
   beforeEach(() => {

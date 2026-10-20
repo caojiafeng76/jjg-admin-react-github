@@ -1,23 +1,25 @@
-import { useCallback, useMemo, useState } from 'react'
+import type { FormInstance, TabsProps } from 'antd'
+import type { RemoteToolingOption } from '../remoteToolingOptions'
+import type { ToolingData } from '@/services/apiToolingData'
+
+import type { ToolingStockInFormValues } from '@/services/apiToolingStockIn'
+import type { ToolingStockOutFormValues } from '@/services/apiToolingStockOut'
 import {
   Alert,
   App,
   Button,
   Drawer,
+
   Modal,
   Tabs,
+
   Tooltip,
-  type FormInstance,
-  type TabsProps,
 } from 'antd'
 import dayjs from 'dayjs'
-
+import { useCallback, useMemo, useState } from 'react'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import type { ToolingData } from '@/services/apiToolingData'
-import type { ToolingStockInFormValues } from '@/services/apiToolingStockIn'
-import type { ToolingStockOutFormValues } from '@/services/apiToolingStockOut'
 import { formatNumber } from '@/utils/format'
 import { getFinalStockColorClass } from '../inventoryPresentation'
 import {
@@ -26,7 +28,6 @@ import {
   TOOLING_STOCK_IN_PAGE_PERMISSION_KEY,
   TOOLING_STOCK_OUT_PAGE_PERMISSION_KEY,
 } from '../permissions'
-import type { RemoteToolingOption } from '../remoteToolingOptions'
 import ToolingStockInForm from '../ToolingStockIn/ToolingStockInForm'
 import { useCreateToolingStockIn } from '../ToolingStockIn/useToolingStockIn'
 import ToolingStockOutForm from '../ToolingStockOut/ToolingStockOutForm'
@@ -38,8 +39,8 @@ import {
 import { useToolingInventoryDetail } from './useToolingDataDetail'
 
 type QuickStockInInitialValues = ToolingStockInFormValues & RemoteToolingOption
-type QuickStockOutInitialValues = ToolingStockOutFormValues &
-  RemoteToolingOption
+type QuickStockOutInitialValues = ToolingStockOutFormValues
+  & RemoteToolingOption
 
 interface InventoryStat {
   label: string
@@ -49,8 +50,8 @@ interface InventoryStat {
 }
 
 function InventorySummary({ toolingDataId }: { toolingDataId: string }) {
-  const { data, isLoading, error, refetch } =
-    useToolingInventoryDetail(toolingDataId)
+  const { data, isLoading, error, refetch }
+    = useToolingInventoryDetail(toolingDataId)
 
   if (error) {
     return (
@@ -58,11 +59,11 @@ function InventorySummary({ toolingDataId }: { toolingDataId: string }) {
         type="error"
         showIcon
         title="获取刀具库存失败"
-        action={
+        action={(
           <Button size="small" onClick={() => refetch()}>
             重试
           </Button>
-        }
+        )}
       />
     )
   }
@@ -77,7 +78,7 @@ function InventorySummary({ toolingDataId }: { toolingDataId: string }) {
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {stats.map((stat) => (
+        {stats.map(stat => (
           <div
             key={stat.label}
             className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-800/60"
@@ -100,16 +101,20 @@ function InventorySummary({ toolingDataId }: { toolingDataId: string }) {
           </div>
         ))}
       </div>
-      {data?.remarks ? (
-        <div className="text-xs text-slate-400 dark:text-slate-500">
-          库存备注：{data.remarks}
-        </div>
-      ) : null}
-      {!isLoading && !data ? (
-        <div className="text-xs text-amber-600 dark:text-amber-500">
-          尚未产生库存记录，入库/出库单保存后将自动建立库存行
-        </div>
-      ) : null}
+      {data?.remarks
+        ? (
+            <div className="text-xs text-slate-400 dark:text-slate-500">
+              库存备注：{data.remarks}
+            </div>
+          )
+        : null}
+      {!isLoading && !data
+        ? (
+            <div className="text-xs text-amber-600 dark:text-amber-500">
+              尚未产生库存记录，入库/出库单保存后将自动建立库存行
+            </div>
+          )
+        : null}
     </div>
   )
 }
@@ -137,28 +142,29 @@ export default function ToolingDataDetailDrawer({
   const [quickMode, setQuickMode] = useState<'stock-in' | 'stock-out' | null>(
     null,
   )
-  const [stockInFormRef, setStockInFormRef] =
-    useState<FormInstance<ToolingStockInFormValues> | null>(null)
+  const [stockInFormRef, setStockInFormRef]
+    = useState<FormInstance<ToolingStockInFormValues> | null>(null)
   const [stockOutFormRef, setStockOutFormRef] = useState<FormInstance | null>(
     null,
   )
 
   const createStockInMutation = useCreateToolingStockIn()
   const createStockOutMutation = useCreateToolingStockOut()
-  const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
-    useMachineEquipmentOptions()
+  const { data: machineOptions = [], isLoading: isMachineOptionsLoading }
+    = useMachineEquipmentOptions()
 
   const quickCreateDisabled = viewerDenied || !canManageTooling
   const quickCreateTip = viewerDenied
     ? viewerOperationTip
     : !canManageTooling
-      ? '无刀具模块操作权限'
-      : null
+        ? '无刀具模块操作权限'
+        : null
 
   const quickStockInInitialValues = useMemo<
     QuickStockInInitialValues | undefined
   >(() => {
-    if (!record) return undefined
+    if (!record)
+      return undefined
 
     return {
       id: record.id,
@@ -177,7 +183,8 @@ export default function ToolingDataDetailDrawer({
   const quickStockOutInitialValues = useMemo<
     QuickStockOutInitialValues | undefined
   >(() => {
-    if (!record) return undefined
+    if (!record)
+      return undefined
 
     return {
       id: record.id,
@@ -225,7 +232,8 @@ export default function ToolingDataDetailDrawer({
         await createStockInMutation.mutateAsync(values)
         message.success('刀具入库创建成功，当前为待审核')
         closeQuickModal()
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error
             ? error.message
@@ -259,7 +267,8 @@ export default function ToolingDataDetailDrawer({
         await createStockOutMutation.mutateAsync(values)
         message.success('刀具出库创建成功，当前为待审核')
         closeQuickModal()
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error
             ? error.message
@@ -278,7 +287,8 @@ export default function ToolingDataDetailDrawer({
   )
 
   const tabItems = useMemo<NonNullable<TabsProps['items']>>(() => {
-    if (!record) return []
+    if (!record)
+      return []
 
     const items: NonNullable<TabsProps['items']> = []
 
@@ -311,78 +321,90 @@ export default function ToolingDataDetailDrawer({
       destroyOnHidden
       onClose={handleClose}
     >
-      {record ? (
-        <div className="space-y-4">
-          <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
-            <div className="text-base font-medium text-slate-900 dark:text-slate-100">
-              {record.tool_code} | {record.tool_name}
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-600 md:grid-cols-3 dark:text-slate-300">
-              <div>规格：{record.tool_spec || '-'}</div>
-              <div>材质：{record.material || '-'}</div>
-              <div>单价：{Number(record.unit_price ?? 0).toFixed(2)} 元</div>
-              <div>用途：{record.usage || '-'}</div>
-              <div className="col-span-2">备注：{record.remarks || '-'}</div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              库存
-            </div>
-            {canViewInventory ? (
-              <InventorySummary toolingDataId={record.id} />
-            ) : (
-              <div className="text-xs text-slate-400 dark:text-slate-500">
-                无刀具库存页面权限，暂不能查看库存
+      {record
+        ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+                <div className="text-base font-medium text-slate-900 dark:text-slate-100">
+                  {record.tool_code} | {record.tool_name}
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-600 md:grid-cols-3 dark:text-slate-300">
+                  <div>规格：{record.tool_spec || '-'}</div>
+                  <div>材质：{record.material || '-'}</div>
+                  <div>单价：{Number(record.unit_price ?? 0).toFixed(2)} 元</div>
+                  <div>用途：{record.usage || '-'}</div>
+                  <div className="col-span-2">备注：{record.remarks || '-'}</div>
+                </div>
               </div>
-            )}
-          </div>
 
-          {canQuickCreate ? (
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                {canViewStockIn ? (
-                  <Tooltip title={quickCreateTip}>
-                    <Button
-                      type="primary"
-                      disabled={quickCreateDisabled}
-                      onClick={() => setQuickMode('stock-in')}
-                    >
-                      新建入库
-                    </Button>
-                  </Tooltip>
-                ) : null}
-                {canViewStockOut ? (
-                  <Tooltip title={quickCreateTip}>
-                    <Button
-                      disabled={quickCreateDisabled}
-                      onClick={() => setQuickMode('stock-out')}
-                    >
-                      新建出库
-                    </Button>
-                  </Tooltip>
-                ) : null}
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  库存
+                </div>
+                {canViewInventory
+                  ? (
+                      <InventorySummary toolingDataId={record.id} />
+                    )
+                  : (
+                      <div className="text-xs text-slate-400 dark:text-slate-500">
+                        无刀具库存页面权限，暂不能查看库存
+                      </div>
+                    )}
               </div>
-              <div className="text-xs text-slate-400 dark:text-slate-500">
-                新建单据默认为待审核，审核通过后自动更新库存；审核请前往刀具入库
-                / 刀具出库页面操作。
-              </div>
-            </div>
-          ) : null}
 
-          {tabItems.length > 0 ? (
-            <Tabs
-              defaultActiveKey={String(tabItems[0]?.key ?? '')}
-              items={tabItems}
-            />
-          ) : (
-            <div className="text-xs text-slate-400 dark:text-slate-500">
-              无刀具入库 / 出库页面权限，暂不能查看出入库记录
+              {canQuickCreate
+                ? (
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {canViewStockIn
+                          ? (
+                              <Tooltip title={quickCreateTip}>
+                                <Button
+                                  type="primary"
+                                  disabled={quickCreateDisabled}
+                                  onClick={() => setQuickMode('stock-in')}
+                                >
+                                  新建入库
+                                </Button>
+                              </Tooltip>
+                            )
+                          : null}
+                        {canViewStockOut
+                          ? (
+                              <Tooltip title={quickCreateTip}>
+                                <Button
+                                  disabled={quickCreateDisabled}
+                                  onClick={() => setQuickMode('stock-out')}
+                                >
+                                  新建出库
+                                </Button>
+                              </Tooltip>
+                            )
+                          : null}
+                      </div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500">
+                        新建单据默认为待审核，审核通过后自动更新库存；审核请前往刀具入库
+                        / 刀具出库页面操作。
+                      </div>
+                    </div>
+                  )
+                : null}
+
+              {tabItems.length > 0
+                ? (
+                    <Tabs
+                      defaultActiveKey={String(tabItems[0]?.key ?? '')}
+                      items={tabItems}
+                    />
+                  )
+                : (
+                    <div className="text-xs text-slate-400 dark:text-slate-500">
+                      无刀具入库 / 出库页面权限，暂不能查看出入库记录
+                    </div>
+                  )}
             </div>
-          )}
-        </div>
-      ) : null}
+          )
+        : null}
 
       <Modal
         title="新建刀具入库"

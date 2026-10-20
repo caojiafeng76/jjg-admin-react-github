@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
-import { Table, TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { JintanProfilesInventory } from '@/services/apiJintanProfilesInventory'
+import { Table } from 'antd'
+
+import { useMemo } from 'react'
 import { TableEmpty } from '@/ui/TableState'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
@@ -122,9 +123,8 @@ export default function JintanProfilesInventoryTable({
       rowClassName={(_, index) =>
         index % 2 === 0
           ? 'bg-white dark:bg-slate-800'
-          : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+          : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择型材 ${record.profile_name}`,

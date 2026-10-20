@@ -1,17 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import type { FormInstance } from 'antd'
+import type {
+  JintanProfilesStockIn,
+  JintanProfilesStockInFormValues,
+} from '@/services/apiJintanProfilesStockIn'
 import {
   Alert,
   Form,
-  type FormInstance,
+
   Input,
   InputNumber,
   Select,
 } from 'antd'
 
-import type {
-  JintanProfilesStockIn,
-  JintanProfilesStockInFormValues,
-} from '@/services/apiJintanProfilesStockIn'
+import { useEffect, useMemo, useState } from 'react'
 import { useJintanProfilesInventoryOptions } from '../ProfilesInventory/useJintanProfilesInventory'
 
 interface Props {
@@ -53,11 +54,11 @@ export default function JintanProfilesStockInForm({
     error,
   } = useJintanProfilesInventoryOptions(keyword)
   const selectedInventoryId = Form.useWatch('inventory_id', form)
-  const selected = options.find((option) => option.id === selectedInventoryId)
+  const selected = options.find(option => option.id === selectedInventoryId)
 
   const selectOptions = useMemo(
     () =>
-      options.map((option) => ({
+      options.map(option => ({
         value: option.id,
         label: `${option.profile_model ? `${option.profile_model} / ` : ''}${option.profile_name} / ${option.specification || '无规格'}（库存 ${option.quantity}）`,
       })),
@@ -94,41 +95,45 @@ export default function JintanProfilesStockInForm({
       onFinish={onFinish}
       disabled={isSubmitting}
     >
-      {editingRecord ? (
-        <>
-          <Form.Item name="inventory_id" hidden>
-            <Input />
-          </Form.Item>
-          <Form.Item label="型材资料">
-            <Input
-              disabled
-              value={`${editingRecord.profile_model ? `${editingRecord.profile_model} / ` : ''}${editingRecord.profile_name} / ${editingRecord.specification || '无规格'}`}
-            />
-          </Form.Item>
-        </>
-      ) : quickInventory ? (
-        <>
-          <Form.Item name="inventory_id" hidden>
-            <Input />
-          </Form.Item>
-          <Form.Item label="型材资料">
-            <Input disabled value={quickInventory.label} />
-          </Form.Item>
-        </>
-      ) : (
-        <Form.Item
-          name="inventory_id"
-          label="型材资料"
-          rules={[{ required: true, message: '请选择型材' }]}
-        >
-          <Select
-            showSearch={{ filterOption: false, onSearch: setKeyword }}
-            options={selectOptions}
-            loading={isFetching}
-            placeholder="按型号、名称、规格或材质查找型材"
-          />
-        </Form.Item>
-      )}
+      {editingRecord
+        ? (
+            <>
+              <Form.Item name="inventory_id" hidden>
+                <Input />
+              </Form.Item>
+              <Form.Item label="型材资料">
+                <Input
+                  disabled
+                  value={`${editingRecord.profile_model ? `${editingRecord.profile_model} / ` : ''}${editingRecord.profile_name} / ${editingRecord.specification || '无规格'}`}
+                />
+              </Form.Item>
+            </>
+          )
+        : quickInventory
+          ? (
+              <>
+                <Form.Item name="inventory_id" hidden>
+                  <Input />
+                </Form.Item>
+                <Form.Item label="型材资料">
+                  <Input disabled value={quickInventory.label} />
+                </Form.Item>
+              </>
+            )
+          : (
+              <Form.Item
+                name="inventory_id"
+                label="型材资料"
+                rules={[{ required: true, message: '请选择型材' }]}
+              >
+                <Select
+                  showSearch={{ filterOption: false, onSearch: setKeyword }}
+                  options={selectOptions}
+                  loading={isFetching}
+                  placeholder="按型号、名称、规格或材质查找型材"
+                />
+              </Form.Item>
+            )}
       {!editingRecord && !quickInventory && error && (
         <Alert type="error" showIcon title="型材列表加载失败，请重试" />
       )}

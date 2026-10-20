@@ -1,4 +1,9 @@
-import { Button, DatePicker, Input, Popconfirm } from 'antd'
+import type { VillaLiftOrderSearch } from './useVillaLiftOrderSearch'
+import type {
+  VillaLiftMarkDateField,
+  VillaLiftOrderStatus,
+} from '@/services/apiVillaLiftOrders'
+
 import {
   ArrowUturnLeftIcon,
   CheckCircleIcon,
@@ -10,13 +15,8 @@ import {
   TrashIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/16/solid'
-
-import type {
-  VillaLiftMarkDateField,
-  VillaLiftOrderStatus,
-} from '@/services/apiVillaLiftOrders'
+import { Button, DatePicker, Input, Popconfirm } from 'antd'
 import AddButton from '@/ui/AddButton'
-import type { VillaLiftOrderSearch } from './useVillaLiftOrderSearch'
 
 export interface VillaLiftOrderToolbarPermissions {
   canCreate: boolean
@@ -156,8 +156,7 @@ export default function VillaLiftOrderToolbar({
               loading={isBatchMarking}
               disabled={viewerDenied}
               onClick={() =>
-                handleBatchMarkDate('material_selection_date', '挑料完成')
-              }
+                handleBatchMarkDate('material_selection_date', '挑料完成')}
             >
               挑料完成 ({selectedCount})
             </Button>
@@ -191,8 +190,7 @@ export default function VillaLiftOrderToolbar({
               loading={isBatchMarking}
               disabled={viewerDenied}
               onClick={() =>
-                handleBatchMarkDate('cutting_actual_date', '切割完成')
-              }
+                handleBatchMarkDate('cutting_actual_date', '切割完成')}
             >
               切割完成 ({selectedCount})
             </Button>
@@ -206,8 +204,7 @@ export default function VillaLiftOrderToolbar({
               loading={isBatchMarking}
               disabled={viewerDenied}
               onClick={() =>
-                handleBatchMarkDate('processing_actual_date', '加工完成')
-              }
+                handleBatchMarkDate('processing_actual_date', '加工完成')}
             >
               加工完成 ({selectedCount})
             </Button>
@@ -221,8 +218,7 @@ export default function VillaLiftOrderToolbar({
               loading={isBatchMarking}
               disabled={viewerDenied}
               onClick={() =>
-                handleBatchMarkDate('cabin_processing_date', '轿箱加工完成')
-              }
+                handleBatchMarkDate('cabin_processing_date', '轿箱加工完成')}
             >
               轿箱加工完成 ({selectedCount})
             </Button>
@@ -239,8 +235,7 @@ export default function VillaLiftOrderToolbar({
                 handleBatchMarkDate(
                   'middle_door_processing_date',
                   '中分门加工完成',
-                )
-              }
+                )}
             >
               中分门加工完成 ({selectedCount})
             </Button>
@@ -254,8 +249,7 @@ export default function VillaLiftOrderToolbar({
               loading={isBatchMarking}
               disabled={viewerDenied}
               onClick={() =>
-                handleBatchMarkDate('frame_processing_date', '井架加工完成')
-              }
+                handleBatchMarkDate('frame_processing_date', '井架加工完成')}
             >
               井架加工完成 ({selectedCount})
             </Button>
@@ -290,33 +284,30 @@ export default function VillaLiftOrderToolbar({
         <DatePicker.RangePicker
           placeholder={['发货日期从', '发货日期至']}
           value={deliveryDateRange}
-          onChange={(dates) =>
+          onChange={dates =>
             setDeliveryDateRange(
               dates ? [dates[0] ?? null, dates[1] ?? null] : null,
-            )
-          }
+            )}
           style={{ width: 240 }}
           allowClear
         />
         <DatePicker.RangePicker
           placeholder={['排产日期从', '排产日期至']}
           value={scheduleDateRange}
-          onChange={(dates) =>
+          onChange={dates =>
             setScheduleDateRange(
               dates ? [dates[0] ?? null, dates[1] ?? null] : null,
-            )
-          }
+            )}
           style={{ width: 240 }}
           allowClear
         />
         <DatePicker.RangePicker
           placeholder={['计划加工日期从', '计划加工日期至']}
           value={processingRequiredDateRange}
-          onChange={(dates) =>
+          onChange={dates =>
             setProcessingRequiredDateRange(
               dates ? [dates[0] ?? null, dates[1] ?? null] : null,
-            )
-          }
+            )}
           style={{ width: 260 }}
           allowClear
         />

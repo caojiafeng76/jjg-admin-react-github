@@ -1,16 +1,19 @@
+import type { QualityIssueRecord } from '@/services/apiQualityIssueRecords'
 import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
 
+import * as XLSX from 'xlsx-js-style'
 import {
   getQualityIssueOperatorName,
   getQualityIssueReporterName,
   QUALITY_ISSUE_AUDIT_STATUS_LABELS,
-  type QualityIssueRecord,
+
 } from '@/services/apiQualityIssueRecords'
 import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
 } from '@/utils/excelStyleUtils'
+
+import { formatNumber } from '@/utils/format'
 
 const SHEET_TITLE = '质量问题记录单'
 
@@ -42,8 +45,30 @@ const EXPORT_HEADERS = [
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  8, 10, 12, 12, 14, 16, 14, 10, 18, 10, 10, 10, 10, 10, 26, 22, 22, 12, 22, 12,
-  12, 10, 18, 20,
+  8,
+  10,
+  12,
+  12,
+  14,
+  16,
+  14,
+  10,
+  18,
+  10,
+  10,
+  10,
+  10,
+  10,
+  26,
+  22,
+  22,
+  12,
+  22,
+  12,
+  12,
+  10,
+  18,
+  20,
 ]
 
 function formatDate(value: string | null | undefined) {
@@ -54,15 +79,13 @@ function formatDateTime(value: string | null | undefined) {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : ''
 }
 
-import { formatNumber } from '@/utils/format'
-
 export function exportQualityIssueRecordsToExcel(
   records: QualityIssueRecord[],
 ) {
   const rows = records.map((record, index) => [
     index + 1,
-    QUALITY_ISSUE_AUDIT_STATUS_LABELS[record.audit_status] ||
-      record.audit_status,
+    QUALITY_ISSUE_AUDIT_STATUS_LABELS[record.audit_status]
+    || record.audit_status,
     formatDate(record.production_date),
     getQualityIssueReporterName(record),
     record.project_no,

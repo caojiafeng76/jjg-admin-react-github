@@ -1,9 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import type { TableProps } from 'antd'
-import { App, Table } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import type {
+  SelectedExtrusionDetail,
+  SelectedJobDetail,
+  SelectedPrecisionCuttingDetail,
+  SelectedTransferDetail,
+} from './dashboardRenderUtils'
+import type { ColumnWidthMap, SearchValues } from './dashboardUtils'
+import type {
+  OrderStatusDashboardItem,
+  OrderStatusJobColumn,
+} from '@/services/apiOrderStatusDashboard'
+import { useQueryClient } from '@tanstack/react-query'
 
+import { App, Table } from 'antd'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { isAdminRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import {
@@ -12,35 +23,23 @@ import {
 } from '@/features/workshop/OrderList/useWorkshopOrders'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import type {
-  OrderStatusDashboardItem,
-  OrderStatusJobColumn,
-} from '@/services/apiOrderStatusDashboard'
 import AppPagination from '@/ui/AppPagination'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
+import { createOrderStatusDashboardColumns } from './dashboardColumns'
 import {
-  ORDER_STATUS_DASHBOARD_KEY,
-  useOrderStatusDashboard,
-} from './useOrderStatusDashboard'
+  DENSE_TABLE_COMPONENTS,
+} from './dashboardRenderUtils'
 import {
   canCloseDashboardOrder,
+
   DEFAULT_PAGE_SIZE,
   EMPTY_SEARCH_VALUES,
   getTableColumnWidth,
   normalizeProductionStatusFilter,
   normalizeStatusTab,
+
   STATUS_TABS,
-  type ColumnWidthMap,
-  type SearchValues,
 } from './dashboardUtils'
-import {
-  DENSE_TABLE_COMPONENTS,
-  SelectedExtrusionDetail,
-  SelectedJobDetail,
-  SelectedPrecisionCuttingDetail,
-  SelectedTransferDetail,
-} from './dashboardRenderUtils'
-import { createOrderStatusDashboardColumns } from './dashboardColumns'
 import { ExtrusionDetailModal } from './ExtrusionDetailModal'
 import { OrderStatusDashboardHeader } from './OrderStatusDashboardHeader'
 import { OrderStatusDashboardSearchBar } from './OrderStatusDashboardSearchBar'
@@ -48,6 +47,10 @@ import { OrderStatusKpiGrid } from './OrderStatusKpiGrid'
 import { PrecisionCuttingDetailModal } from './PrecisionCuttingDetailModal'
 import { ProductionDetailModal } from './ProductionDetailModal'
 import { TransferDetailModal } from './TransferDetailModal'
+import {
+  ORDER_STATUS_DASHBOARD_KEY,
+  useOrderStatusDashboard,
+} from './useOrderStatusDashboard'
 import { useOrderStatusDashboardExport } from './useOrderStatusDashboardExport'
 
 const EMPTY_JOB_COLUMNS: OrderStatusJobColumn[] = []
@@ -57,16 +60,16 @@ export default function OrderStatusDashboard() {
   const queryClient = useQueryClient()
   const canManageStatus = usePermission('feature:workshop-order.manage-status')
   const canExportCurrentFilters = isAdminRole(role)
-  const { mutateAsync: updateOrderStatuses, isPending: isUpdatingOrderStatus } =
-    useBatchUpdateWorkshopOrderStatuses()
-  const [selectedJobDetail, setSelectedJobDetail] =
-    useState<SelectedJobDetail | null>(null)
-  const [selectedTransferDetail, setSelectedTransferDetail] =
-    useState<SelectedTransferDetail | null>(null)
-  const [selectedPrecisionCuttingDetail, setSelectedPrecisionCuttingDetail] =
-    useState<SelectedPrecisionCuttingDetail | null>(null)
-  const [selectedExtrusionDetail, setSelectedExtrusionDetail] =
-    useState<SelectedExtrusionDetail | null>(null)
+  const { mutateAsync: updateOrderStatuses, isPending: isUpdatingOrderStatus }
+    = useBatchUpdateWorkshopOrderStatuses()
+  const [selectedJobDetail, setSelectedJobDetail]
+    = useState<SelectedJobDetail | null>(null)
+  const [selectedTransferDetail, setSelectedTransferDetail]
+    = useState<SelectedTransferDetail | null>(null)
+  const [selectedPrecisionCuttingDetail, setSelectedPrecisionCuttingDetail]
+    = useState<SelectedPrecisionCuttingDetail | null>(null)
+  const [selectedExtrusionDetail, setSelectedExtrusionDetail]
+    = useState<SelectedExtrusionDetail | null>(null)
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
   const [closingOrderId, setClosingOrderId] = useState<string | null>(null)
   // KPI 看板默认策略：可视高度 ≥800px（1080p 及以上）默认展开，小屏默认收起保表格；
@@ -89,8 +92,8 @@ export default function OrderStatusDashboard() {
     }),
     [searchParams],
   )
-  const [searchValues, setSearchValues] =
-    useState<SearchValues>(searchParamValues)
+  const [searchValues, setSearchValues]
+    = useState<SearchValues>(searchParamValues)
   const { data: modelOptions = [] } = useWorkshopOrderModels()
   const modelFilterValues = useMemo(
     () => normalizeSearchKeywords(searchParamValues.model) ?? [],
@@ -108,15 +111,15 @@ export default function OrderStatusDashboard() {
     }),
     [activeStatus, searchParamValues],
   )
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       headerHeight: 32,
       targetRowCount: Math.min(pageSize, 10),
       minRowHeight: 24,
       gap: 12,
     })
-  const { data, isLoading, isPlaceholderData, refetch } =
-    useOrderStatusDashboard({
+  const { data, isLoading, isPlaceholderData, refetch }
+    = useOrderStatusDashboard({
       page,
       pageSize,
       filters,
@@ -183,8 +186,8 @@ export default function OrderStatusDashboard() {
       modal.confirm({
         title: '确认结案',
         content:
-          `确定将订单 ${orderLabel} 标记为已结案吗？` +
-          '结案后新增生产工单时将无法再关联该订单。',
+          `确定将订单 ${orderLabel} 标记为已结案吗？`
+          + '结案后新增生产工单时将无法再关联该订单。',
         okText: '确认结案',
         cancelText: '取消',
         okButtonProps: { danger: true },
@@ -200,13 +203,15 @@ export default function OrderStatusDashboard() {
               queryKey: [ORDER_STATUS_DASHBOARD_KEY],
             })
             message.success('订单已结案')
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error
                 ? error.message
                 : '订单结案失败，请稍后重试',
             )
-          } finally {
+          }
+          finally {
             setClosingOrderId(null)
           }
         },
@@ -265,7 +270,7 @@ export default function OrderStatusDashboard() {
     key: TKey,
     value: SearchValues[TKey],
   ) {
-    setSearchValues((current) => ({ ...current, [key]: value }))
+    setSearchValues(current => ({ ...current, [key]: value }))
   }
 
   function setOrDeleteParam(
@@ -277,7 +282,8 @@ export default function OrderStatusDashboard() {
 
     if (normalizedValue) {
       params.set(key, normalizedValue)
-    } else {
+    }
+    else {
       params.delete(key)
     }
   }
@@ -335,7 +341,7 @@ export default function OrderStatusDashboard() {
 
     setOrDeleteParam(next, 'model', modelValue)
     next.set('page', '1')
-    setSearchValues((current) => ({ ...current, model: modelValue }))
+    setSearchValues(current => ({ ...current, model: modelValue }))
     setSearchParams(next)
     setSelectedJobDetail(null)
     setSelectedPrecisionCuttingDetail(null)
@@ -349,7 +355,8 @@ export default function OrderStatusDashboard() {
 
     if (normalizedStatus === '生产中') {
       next.delete('status')
-    } else {
+    }
+    else {
       next.set('status', normalizedStatus)
     }
 
@@ -372,7 +379,7 @@ export default function OrderStatusDashboard() {
         onExport={handleExportCurrentFilters}
         onPreloadExport={preloadOrderStatusDashboardExcel}
         onRefetch={handleRefetch}
-        onToggleKpis={() => setShowKpis((current) => !current)}
+        onToggleKpis={() => setShowKpis(current => !current)}
         showKpis={showKpis}
       />
 
@@ -383,7 +390,7 @@ export default function OrderStatusDashboard() {
 
       {/* Tabs 标签页 */}
       <div className="flex items-center gap-1 rounded-xl border border-slate-200/60 bg-white/60 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
-        {STATUS_TABS.map((tab) => (
+        {STATUS_TABS.map(tab => (
           <button
             key={tab.key}
             onClick={() => handleStatusTabChange(tab.key)}
@@ -453,7 +460,7 @@ export default function OrderStatusDashboard() {
                 </svg>
                 <span className="text-xs text-emerald-600 dark:text-emerald-400">
                   {
-                    rows.filter((r) =>
+                    rows.filter(r =>
                       canCloseDashboardOrder({
                         canManageStatus: true,
                         record: r,
@@ -495,13 +502,12 @@ export default function OrderStatusDashboard() {
           }}
           onChange={handleTableChange}
           sticky={{ offsetHeader: 0 }}
-          rowClassName={(record) =>
+          rowClassName={record =>
             record.productionStatus === '延期'
               ? 'bg-red-50/50 hover:bg-red-50 dark:bg-red-950/30 dark:hover:bg-red-950/40'
               : record.productionStatus === '预警'
                 ? 'bg-amber-50/50 hover:bg-amber-50 dark:bg-amber-950/30 dark:hover:bg-amber-950/40'
-                : 'hover:bg-blue-50/30 dark:hover:bg-blue-950/40'
-          }
+                : 'hover:bg-blue-50/30 dark:hover:bg-blue-950/40'}
           onRow={() => ({
             style: { height: rowHeight },
             className: 'transition-colors duration-150',

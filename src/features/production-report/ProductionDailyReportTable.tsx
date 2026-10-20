@@ -1,7 +1,8 @@
-import { memo, useCallback, useMemo } from 'react'
-import { Table, type TableColumnsType, type TableProps } from 'antd'
-
+import type { TableColumnsType, TableProps } from 'antd'
 import type { ProductionDailyReportRow } from '@/services/apiProductionDailyReport'
+import { Table } from 'antd'
+
+import { memo, useCallback, useMemo } from 'react'
 
 interface Props {
   loading: boolean
@@ -34,8 +35,8 @@ function renderQualifiedRate(value: number | null | undefined) {
     return '-'
   }
   const percent = value * 100
-  const tone =
-    percent >= 99
+  const tone
+    = percent >= 99
       ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
       : percent >= 95
         ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300'
@@ -62,8 +63,8 @@ function renderDataCategory(value: string | null | undefined) {
   if (value !== 'A' && value !== 'B') {
     return '-'
   }
-  const palette =
-    value === 'A'
+  const palette
+    = value === 'A'
       ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300'
       : 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-300'
   return (
@@ -164,7 +165,7 @@ function ProductionDailyReportTable({
         key: 'projectNo',
         width: 140,
         fixed: 'left',
-        filters: Array.from(new Set(data.map((r) => r.projectNo))).map((v) => ({
+        filters: Array.from(new Set(data.map(r => r.projectNo))).map(v => ({
           text: v,
           value: v,
         })),
@@ -186,8 +187,8 @@ function ProductionDailyReportTable({
         dataIndex: 'productModel',
         key: 'productModel',
         width: 120,
-        filters: Array.from(new Set(data.map((r) => r.productModel))).map(
-          (v) => ({ text: v, value: v }),
+        filters: Array.from(new Set(data.map(r => r.productModel))).map(
+          v => ({ text: v, value: v }),
         ),
         onFilter: (value, record) => record.productModel === (value as string),
         filterSearch: true,
@@ -206,11 +207,11 @@ function ProductionDailyReportTable({
         align: 'right',
         filters: Array.from(
           new Set(
-            data.map((r) => r.lengthMm).filter((v): v is number => v !== null),
+            data.map(r => r.lengthMm).filter((v): v is number => v !== null),
           ),
         )
           .sort((a, b) => a - b)
-          .map((v) => ({ text: `${v}mm`, value: v })),
+          .map(v => ({ text: `${v}mm`, value: v })),
         onFilter: (value, record) => record.lengthMm === (value as number),
         render: (value: number | null) => (
           <span className="text-slate-700 tabular-nums dark:text-slate-300">
@@ -223,7 +224,7 @@ function ProductionDailyReportTable({
         dataIndex: 'operation',
         key: 'operation',
         width: 110,
-        filters: Array.from(new Set(data.map((r) => r.operation))).map((v) => ({
+        filters: Array.from(new Set(data.map(r => r.operation))).map(v => ({
           text: v,
           value: v,
         })),
@@ -397,8 +398,8 @@ function ProductionDailyReportTable({
     [page, pageSize, data],
   )
 
-  const rowSelection: TableProps<ProductionDailyReportRow>['rowSelection'] =
-    useMemo(
+  const rowSelection: TableProps<ProductionDailyReportRow>['rowSelection']
+    = useMemo(
       () => ({
         selectedRowKeys,
         onChange: (keys, rows) => onRowSelectionChange(keys, rows),
@@ -418,7 +419,7 @@ function ProductionDailyReportTable({
 
   return (
     <Table<ProductionDailyReportRow>
-      rowKey={(record) => record.key}
+      rowKey={record => record.key}
       loading={loading}
       columns={columns}
       dataSource={data}

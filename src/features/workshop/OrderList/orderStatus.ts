@@ -27,9 +27,9 @@ export function canWorkshopOrderBeClosed({
   const normalizedTotalOutbound = totalOutbound ?? 0
 
   return (
-    normalizedStatus === '生产中' &&
-    normalizedOrderQuantity > 0 &&
-    normalizedTotalOutbound >= normalizedOrderQuantity
+    normalizedStatus === '生产中'
+    && normalizedOrderQuantity > 0
+    && normalizedTotalOutbound >= normalizedOrderQuantity
   )
 }
 

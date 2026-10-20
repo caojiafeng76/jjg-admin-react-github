@@ -1,11 +1,12 @@
-import { useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, Tag, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { YoumaiFinishedGoodsStockIn } from '@/services/apiYoumaiFinishedGoodsStockIn'
+import { Table, Tag } from 'antd'
+import { useMemo } from 'react'
+
 import { TableEmpty } from '@/ui/TableState'
-import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { formatNumber } from '@/utils/format'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 
 interface Props {
   loading: boolean
@@ -153,9 +154,8 @@ export default function YoumaiFinishedGoodsStockInTable({
         ),
       }}
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择优迈成品入库 ${record.id}`,

@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import type { Dayjs } from 'dayjs'
+import type { BilletDiameterPreset } from './extrusionMachineTonnage'
+import type {
+  ExtrusionProduction,
+  ExtrusionProductionItemInput,
+  UpsertExtrusionProductionPayload,
+} from '@/services/apiExtrusionProductions'
+
+import type { MachineEquipmentOption } from '@/services/apiMachineEquipmentMaintenances'
 import {
   App,
   Button,
@@ -10,8 +18,10 @@ import {
   Select,
   Switch,
 } from 'antd'
-import dayjs, { type Dayjs } from 'dayjs'
-
+import dayjs from 'dayjs'
+import { useEffect, useMemo, useState } from 'react'
+import { buildProjectNoSelectOptions, filterProjectNoOption, renderProjectNoOption } from '@/features/production-order/projectNoSelect'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import {
   calculateActualOutputWeight,
   calculateBilletInputWeight,
@@ -19,24 +29,16 @@ import {
   calculateTheoreticalOutputCount,
   calculateTheoreticalOutputWeight,
 } from '@/utils/extrusionCalculations'
-import { buildProjectNoSelectOptions, filterProjectNoOption, renderProjectNoOption } from '@/features/production-order/projectNoSelect'
-import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
-import type {
-  ExtrusionProduction,
-  ExtrusionProductionItemInput,
-  UpsertExtrusionProductionPayload,
-} from '@/services/apiExtrusionProductions'
-import type { MachineEquipmentOption } from '@/services/apiMachineEquipmentMaintenances'
+import { buildExtrusionMachineOptions } from './extrusionMachineOptions'
+import {
+
+  extractExtrusionTonnage,
+  getBilletDiameterPreset,
+} from './extrusionMachineTonnage'
+import ExtrusionProductionItemTable from './ExtrusionProductionItemTable'
 import {
   useExtrusionSalesOrdersProjectNos,
 } from './useExtrusionProductions'
-import ExtrusionProductionItemTable from './ExtrusionProductionItemTable'
-import { buildExtrusionMachineOptions } from './extrusionMachineOptions'
-import {
-  extractExtrusionTonnage,
-  getBilletDiameterPreset,
-  type BilletDiameterPreset,
-} from './extrusionMachineTonnage'
 
 interface Props {
   open: boolean
@@ -90,10 +92,10 @@ export default function ExtrusionProductionForm({
   const { message } = App.useApp()
   const [headerForm] = Form.useForm<HeaderFormValues>()
   const [itemForm] = Form.useForm<ItemFormValues>()
-  const { data: projectNos, isLoading: isLoadingProjectNos } =
-    useExtrusionSalesOrdersProjectNos()
-  const { data: machines, isLoading: isLoadingMachines } =
-    useMachineEquipmentOptions()
+  const { data: projectNos, isLoading: isLoadingProjectNos }
+    = useExtrusionSalesOrdersProjectNos()
+  const { data: machines, isLoading: isLoadingMachines }
+    = useMachineEquipmentOptions()
   const [items, setItems] = useState<ExtrusionProductionItemInput[]>([])
   const [itemModalOpen, setItemModalOpen] = useState(false)
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null)
@@ -104,7 +106,7 @@ export default function ExtrusionProductionForm({
   )
 
   const projectInfoMap = useMemo(() => {
-    return new Map((projectNos || []).map((item) => [item.project_no, item]))
+    return new Map((projectNos || []).map(item => [item.project_no, item]))
   }, [projectNos])
 
   const machineSelectOptions = useMemo(
@@ -127,7 +129,7 @@ export default function ExtrusionProductionForm({
 
   const machineLookupByUnifiedDeviceNo = useMemo(() => {
     return new Map(
-      (machines || []).map((machine) => [
+      (machines || []).map(machine => [
         machine.unified_device_no.trim(),
         machine,
       ]),
@@ -252,7 +254,7 @@ export default function ExtrusionProductionForm({
   }
 
   function handleDeleteItem(index: number) {
-    setItems((prev) => prev.filter((_, currentIndex) => currentIndex !== index))
+    setItems(prev => prev.filter((_, currentIndex) => currentIndex !== index))
   }
 
   async function handleSaveItem() {
@@ -464,31 +466,32 @@ export default function ExtrusionProductionForm({
               label="铝棒直径(mm)"
               rules={[{ required: true, message: '请输入铝棒直径' }]}
               extra={
-                currentBilletDiameterPreset &&
-                currentBilletDiameterPreset.quickPickDiametersMm.length > 1 ? (
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-slate-500">建议直径：</span>
-                    {currentBilletDiameterPreset.quickPickDiametersMm.map(
-                      (diameter) => (
-                        <Button
-                          key={diameter}
-                          size="small"
-                          type={
-                            watchedBilletDiameterMm === diameter
-                              ? 'primary'
-                              : 'default'
-                          }
-                          data-testid={`quick-pick-billet-diameter-${diameter}`}
-                          onClick={() =>
-                            handleQuickPickBilletDiameter(diameter)
-                          }
-                        >
-                          {diameter}mm
-                        </Button>
-                      ),
-                    )}
-                  </div>
-                ) : null
+                currentBilletDiameterPreset
+                && currentBilletDiameterPreset.quickPickDiametersMm.length > 1
+                  ? (
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <span className="text-xs text-slate-500">建议直径：</span>
+                        {currentBilletDiameterPreset.quickPickDiametersMm.map(
+                          diameter => (
+                            <Button
+                              key={diameter}
+                              size="small"
+                              type={
+                                watchedBilletDiameterMm === diameter
+                                  ? 'primary'
+                                  : 'default'
+                              }
+                              data-testid={`quick-pick-billet-diameter-${diameter}`}
+                              onClick={() =>
+                                handleQuickPickBilletDiameter(diameter)}
+                            >
+                              {diameter}mm
+                            </Button>
+                          ),
+                        )}
+                      </div>
+                    )
+                  : null
               }
             >
               <InputNumber

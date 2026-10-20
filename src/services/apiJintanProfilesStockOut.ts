@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface JintanProfilesStockOut {
   id: string
@@ -36,19 +36,23 @@ export async function getJintanProfilesStockOutList({
   keyword?: string
   inventoryId?: string
   signal?: AbortSignal
-}): Promise<{ items: JintanProfilesStockOut[]; total: number }> {
+}): Promise<{ items: JintanProfilesStockOut[], total: number }> {
   let query = supabase
     .from('jintan_profiles_stock_out')
     .select('*', { count: 'exact' })
-  if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
-  if (inventoryId) query = query.eq('inventory_id', inventoryId)
-  if (signal) query = query.abortSignal(signal)
+  if (keyword?.trim())
+    query = query.or(keywordFilter(keyword.trim()))
+  if (inventoryId)
+    query = query.eq('inventory_id', inventoryId)
+  if (signal)
+    query = query.abortSignal(signal)
 
   const { data, error, count } = await query
     .order('created_at', { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1)
 
-  if (error) throw handleApiError(error, '获取型材出库列表失败')
+  if (error)
+    throw handleApiError(error, '获取型材出库列表失败')
   return { items: data ?? [], total: count ?? 0 }
 }
 
@@ -58,14 +62,16 @@ export async function createJintanProfilesStockOut(
   if (!Number.isSafeInteger(values.quantity) || values.quantity <= 0) {
     throw new Error('出库数量必须为正整数')
   }
-  if (!values.inventory_id) throw new Error('请选择型材')
+  if (!values.inventory_id)
+    throw new Error('请选择型材')
 
   const { error } = await supabase.from('jintan_profiles_stock_out').insert({
     inventory_id: values.inventory_id,
     quantity: values.quantity,
     remarks: (values.remarks ?? '').trim(),
   })
-  if (error) throw handleApiError(error, '新增型材出库失败')
+  if (error)
+    throw handleApiError(error, '新增型材出库失败')
 }
 
 export async function updateJintanProfilesStockOutRemarks({
@@ -81,7 +87,8 @@ export async function updateJintanProfilesStockOutRemarks({
     .eq('id', id)
     .select('id')
     .single()
-  if (error) throw handleApiError(error, '修改型材出库备注失败')
+  if (error)
+    throw handleApiError(error, '修改型材出库备注失败')
 }
 
 export async function deleteJintanProfilesStockOut(id: string): Promise<void> {
@@ -91,5 +98,6 @@ export async function deleteJintanProfilesStockOut(id: string): Promise<void> {
     .eq('id', id)
     .select('id')
     .single()
-  if (error) throw handleApiError(error, '删除型材出库记录失败')
+  if (error)
+    throw handleApiError(error, '删除型材出库记录失败')
 }

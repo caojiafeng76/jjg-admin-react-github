@@ -1,13 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { fromMock } = vi.hoisted(() => ({
-  fromMock: vi.fn(),
-}))
-
-vi.mock('./supabase', () => ({
-  default: { from: fromMock },
-}))
-
 import { getYoumaiProductDataOptions as getInventoryProductOptions } from './apiYoumaiFinishedGoodsInventory'
 import { getYoumaiProductDataOptions as getStockInProductOptions } from './apiYoumaiFinishedGoodsStockIn'
 import { getYoumaiProductDataOptions as getStockOutProductOptions } from './apiYoumaiFinishedGoodsStockOut'
@@ -16,8 +8,16 @@ import {
   getYoumaiRawMaterialInventoryOptions,
 } from './apiYoumaiRawMaterialInventory'
 
-const PRODUCT_OPTION_SELECT =
-  'id, material_code, material_name, model, specification, specific_gravity'
+const { fromMock } = vi.hoisted(() => ({
+  fromMock: vi.fn(),
+}))
+
+vi.mock('./supabase', () => ({
+  default: { from: fromMock },
+}))
+
+const PRODUCT_OPTION_SELECT
+  = 'id, material_code, material_name, model, specification, specific_gravity'
 const RAW_MATERIAL_OPTION_SELECT = 'id, model, specification, quantity'
 
 interface QueryBuilder {

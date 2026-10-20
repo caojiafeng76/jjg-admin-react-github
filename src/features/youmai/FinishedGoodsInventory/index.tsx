@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsInventoryFormValues,
   YoumaiFinishedGoodsInventoryImportRow,
 } from '@/services/apiYoumaiFinishedGoodsInventory'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -17,10 +18,6 @@ import EditButton from '@/ui/EditButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
-import YoumaiFinishedGoodsInventoryExcelImport from './YoumaiFinishedGoodsInventoryExcelImport'
-import YoumaiFinishedGoodsInventoryForm from './YoumaiFinishedGoodsInventoryForm'
-import YoumaiFinishedGoodsInventorySearch from './YoumaiFinishedGoodsInventorySearch'
-import YoumaiFinishedGoodsInventoryTable from './YoumaiFinishedGoodsInventoryTable'
 import {
   useCreateYoumaiFinishedGoodsInventory,
   useDeleteYoumaiFinishedGoodsInventory,
@@ -28,6 +25,10 @@ import {
   useUpdateYoumaiFinishedGoodsInventory,
   useYoumaiFinishedGoodsInventoryList,
 } from './useYoumaiFinishedGoodsInventory'
+import YoumaiFinishedGoodsInventoryExcelImport from './YoumaiFinishedGoodsInventoryExcelImport'
+import YoumaiFinishedGoodsInventoryForm from './YoumaiFinishedGoodsInventoryForm'
+import YoumaiFinishedGoodsInventorySearch from './YoumaiFinishedGoodsInventorySearch'
+import YoumaiFinishedGoodsInventoryTable from './YoumaiFinishedGoodsInventoryTable'
 
 export default function YoumaiFinishedGoodsInventoryPage() {
   const { message } = App.useApp()
@@ -40,10 +41,10 @@ export default function YoumaiFinishedGoodsInventoryPage() {
   const [modalTitle, setModalTitle] = useState('新建优迈成品库存')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<YoumaiFinishedGoodsInventory | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<YoumaiFinishedGoodsInventoryFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<YoumaiFinishedGoodsInventory | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<YoumaiFinishedGoodsInventoryFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -63,8 +64,8 @@ export default function YoumaiFinishedGoodsInventoryPage() {
   const importMutation = useImportYoumaiFinishedGoodsInventory()
   const deleteMutation = useDeleteYoumaiFinishedGoodsInventory()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -92,7 +93,7 @@ export default function YoumaiFinishedGoodsInventoryPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -114,10 +115,12 @@ export default function YoumaiFinishedGoodsInventoryPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('优迈成品库存删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除优迈成品库存失败，请稍后重试')
       }
     }
@@ -139,10 +142,12 @@ export default function YoumaiFinishedGoodsInventoryPage() {
         await importMutation.mutateAsync(rows)
         message.success(`优迈成品库存导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入优迈成品库存失败，请稍后重试')
         }
       }
@@ -175,13 +180,15 @@ export default function YoumaiFinishedGoodsInventoryPage() {
             values,
           })
           message.success('优迈成品库存更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('优迈成品库存创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
         setFormError(error)
       }
@@ -209,7 +216,8 @@ export default function YoumaiFinishedGoodsInventoryPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
@@ -296,12 +304,12 @@ export default function YoumaiFinishedGoodsInventoryPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>

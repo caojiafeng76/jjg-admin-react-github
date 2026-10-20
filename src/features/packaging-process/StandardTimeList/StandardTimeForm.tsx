@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Form, type FormInstance, Input, InputNumber, Select } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   PackagingStandardTime,
   PackagingStandardTimeFormValues,
 } from '@/services/apiPackagingStandardTimes'
+
 import type { SalesOrderProjectNoOption } from '@/services/apiProcessStandards'
+import { Form, Input, InputNumber, Select } from 'antd'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePackagingSalesOrdersProjectNos } from './useStandardTimes'
 
 interface Props {
@@ -84,7 +85,8 @@ export default function StandardTimeForm({
   const handleProjectNoChange = useCallback(
     (projectNo: string | undefined) => {
       setProjectNoValue(projectNo)
-      if (!projectNo) return
+      if (!projectNo)
+        return
       const salesOrder = salesOrderOptions.find(
         (o: SalesOrderProjectNoOption) => o.project_no === projectNo,
       )
@@ -121,8 +123,7 @@ export default function StandardTimeForm({
           filterOption={(input, option) =>
             String(option?.searchText || '')
               .toLowerCase()
-              .includes(input.toLowerCase())
-          }
+              .includes(input.toLowerCase())}
           options={salesOrderProjectNoSelectOptions}
         />
       </Form.Item>

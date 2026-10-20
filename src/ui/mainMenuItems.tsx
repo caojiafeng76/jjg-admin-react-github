@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import type { MenuProps } from 'antd'
+import type { ReactNode } from 'react'
 import {
   DocumentChartBarIcon,
   HomeIcon,
@@ -472,7 +472,8 @@ export function filterMenuByPermissions(
   const result: MenuItemBase[] = []
 
   for (const item of items) {
-    if (isViewer && item.hiddenForViewer) continue
+    if (isViewer && item.hiddenForViewer)
+      continue
 
     // 有子菜单
     if (item.children && item.children.length > 0) {
@@ -482,9 +483,11 @@ export function filterMenuByPermissions(
         isViewer,
       )
       // 子项全被过滤掉 → 隐藏父分组
-      if (filteredChildren.length === 0) continue
+      if (filteredChildren.length === 0)
+        continue
       // 父分组有 permission → 需要额外检查（并存期保留：permission 不存在或有权限）
-      if (item.permission && !can(item.permission)) continue
+      if (item.permission && !can(item.permission))
+        continue
 
       result.push({
         key: item.key,
@@ -501,7 +504,8 @@ export function filterMenuByPermissions(
     }
 
     // 叶子节点
-    if (item.permission && !can(item.permission)) continue
+    if (item.permission && !can(item.permission))
+      continue
     result.push({
       key: item.key,
       label: item.label,
@@ -522,10 +526,10 @@ export function findAncestorMenuKeys(
 ): string[] {
   for (const item of menuItems) {
     if (
-      !item ||
-      !('children' in item) ||
-      !item.children ||
-      item.children.length === 0
+      !item
+      || !('children' in item)
+      || !item.children
+      || item.children.length === 0
     ) {
       continue
     }

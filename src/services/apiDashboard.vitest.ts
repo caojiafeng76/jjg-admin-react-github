@@ -1,9 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
 import dayjs from 'dayjs'
-
-vi.mock('./supabase', () => ({
-  default: {},
-}))
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   buildDailyTrend,
@@ -11,8 +7,13 @@ import {
   KPI_TREND_DAYS,
 } from './apiDashboard'
 
-const daysAgo = (n: number, hour = 10) =>
-  dayjs().startOf('day').subtract(n, 'day').hour(hour).toISOString()
+vi.mock('./supabase', () => ({
+  default: {},
+}))
+
+function daysAgo(n: number, hour = 10) {
+  return dayjs().startOf('day').subtract(n, 'day').hour(hour).toISOString()
+}
 
 describe('buildDailyTrend', () => {
   it('aggregates dates into daily buckets ending today', () => {

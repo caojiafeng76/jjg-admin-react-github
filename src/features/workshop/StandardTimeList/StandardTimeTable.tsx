@@ -1,23 +1,23 @@
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import type { TableColumnsType } from 'antd'
+import type { MouseEvent as ReactMouseEvent, TdHTMLAttributes, ThHTMLAttributes } from 'react'
+import type { StandardTime } from '@/services/apiStandardTimes'
+import { Button, Image, Table, Upload } from 'antd'
 import {
   memo,
+
   useCallback,
   useEffect,
   useMemo,
   useState,
-  type MouseEvent as ReactMouseEvent,
-  type TdHTMLAttributes,
-  type ThHTMLAttributes,
 } from 'react'
-import { Button, Image, Table, Upload, type TableColumnsType } from 'antd'
 
-import type { StandardTime } from '@/services/apiStandardTimes'
 import {
   getProcessStandardImagePreviewUrl,
   PROCESS_STANDARD_IMAGE_ACCEPT,
 } from '@/services/apiProcessStandardImages'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import { formatNumber } from '@/utils/format'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -100,23 +100,25 @@ function ResizableHeaderCell({
         }}
       >
         {children}
-        {columnKey && onResizeColumn ? (
-          <span
-            aria-label="调整列宽"
-            role="separator"
-            aria-orientation="vertical"
-            onMouseDown={handleResizeStart}
-            style={{
-              bottom: 0,
-              cursor: 'col-resize',
-              position: 'absolute',
-              right: -3,
-              top: 0,
-              width: 6,
-              zIndex: 3,
-            }}
-          />
-        ) : null}
+        {columnKey && onResizeColumn
+          ? (
+              <span
+                aria-label="调整列宽"
+                role="separator"
+                aria-orientation="vertical"
+                onMouseDown={handleResizeStart}
+                style={{
+                  bottom: 0,
+                  cursor: 'col-resize',
+                  position: 'absolute',
+                  right: -3,
+                  top: 0,
+                  width: 6,
+                  zIndex: 3,
+                }}
+              />
+            )
+          : null}
       </div>
     </th>
   )
@@ -177,7 +179,7 @@ function getTableColumnWidth<RecordType>(
   }, 0)
 }
 
-const StandardTimeTable = memo(function StandardTimeTable({
+const StandardTimeTable = memo(({
   loading,
   data,
   selectedRowKeys,
@@ -191,14 +193,14 @@ const StandardTimeTable = memo(function StandardTimeTable({
   onRowClick,
   onUploadImage,
   uploadingImageId = null,
-}: Props) {
+}: Props) => {
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({})
 
   useEffect(() => {
     let cancelled = false
     const recordsWithImages = data.filter(
-      (record) => record.id && record.process_image_path,
+      record => record.id && record.process_image_path,
     )
 
     void Promise.all(
@@ -208,13 +210,15 @@ const StandardTimeTable = memo(function StandardTimeTable({
             record.process_image_path as string,
           )
           return [record.id as string, url] as const
-        } catch (error) {
+        }
+        catch (error) {
           console.warn('工艺图示预览地址获取失败:', error)
           return null
         }
       }),
     ).then((entries) => {
-      if (cancelled) return
+      if (cancelled)
+        return
       setImageUrls(
         Object.fromEntries(entries.filter(Boolean) as [string, string][]),
       )
@@ -238,8 +242,8 @@ const StandardTimeTable = memo(function StandardTimeTable({
     // 标准工时相关列：条件展开 `...(hideStandardSeconds ? [] : [...])` 时
     // 数组字面量失去 `TableColumnsType` 上下文类型，`align: 'right'` 会被
     // 推断为 string，故提前用类型注解声明，保证 align 字面量类型正确。
-    const standardTimeColumns: TableColumnsType<StandardTime> =
-      hideStandardSeconds
+    const standardTimeColumns: TableColumnsType<StandardTime>
+      = hideStandardSeconds
         ? []
         : [
             {
@@ -297,18 +301,20 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'record_type',
         width: 90,
         render: (value: string | null | undefined) => {
-          if (value === 'A')
+          if (value === 'A') {
             return (
               <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm dark:bg-slate-600">
                 A类
               </span>
             )
-          if (value === 'B')
+          }
+          if (value === 'B') {
             return (
               <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200">
                 B类
               </span>
             )
+          }
           return (
             <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
               -
@@ -322,15 +328,17 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'is_last_process',
         width: 90,
         render: (value: boolean | null | undefined) =>
-          value ? (
-            <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm dark:bg-slate-600">
-              末道
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
-              非末道
-            </span>
-          ),
+          value
+            ? (
+                <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-white shadow-sm dark:bg-slate-600">
+                  末道
+                </span>
+              )
+            : (
+                <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                  非末道
+                </span>
+              ),
       },
       {
         title: '型号',
@@ -357,13 +365,15 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'job_name',
         width: 120,
         render: (value?: string | null) =>
-          value ? (
-            <span className="text-slate-700 dark:text-slate-300">{value}</span>
-          ) : (
-            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
-              未匹配
-            </span>
-          ),
+          value
+            ? (
+                <span className="text-slate-700 dark:text-slate-300">{value}</span>
+              )
+            : (
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
+                  未匹配
+                </span>
+              ),
       },
       {
         title: '客户',
@@ -371,11 +381,13 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'customer',
         width: 180,
         render: (value?: string | null) =>
-          value ? (
-            <span className="text-slate-600 dark:text-slate-300">{value}</span>
-          ) : (
-            <span className="text-slate-400 dark:text-slate-500">-</span>
-          ),
+          value
+            ? (
+                <span className="text-slate-600 dark:text-slate-300">{value}</span>
+              )
+            : (
+                <span className="text-slate-400 dark:text-slate-500">-</span>
+              ),
       },
       {
         title: '设备编号',
@@ -383,11 +395,13 @@ const StandardTimeTable = memo(function StandardTimeTable({
         key: 'equipment_no',
         width: 140,
         render: (value?: string | null) =>
-          value ? (
-            <span className="font-mono text-slate-600 dark:text-slate-300">{value}</span>
-          ) : (
-            <span className="text-slate-400 dark:text-slate-500">-</span>
-          ),
+          value
+            ? (
+                <span className="font-mono text-slate-600 dark:text-slate-300">{value}</span>
+              )
+            : (
+                <span className="text-slate-400 dark:text-slate-500">-</span>
+              ),
       },
       {
         title: '长度',
@@ -404,11 +418,13 @@ const StandardTimeTable = memo(function StandardTimeTable({
         width: 120,
         ellipsis: { showTitle: true },
         render: (value?: string | null) =>
-          value ? (
-            <span className="font-mono text-slate-600 dark:text-slate-300">{value}</span>
-          ) : (
-            <span className="text-slate-400 dark:text-slate-500">-</span>
-          ),
+          value
+            ? (
+                <span className="font-mono text-slate-600 dark:text-slate-300">{value}</span>
+              )
+            : (
+                <span className="text-slate-400 dark:text-slate-500">-</span>
+              ),
       },
       ...standardTimeColumns,
       {
@@ -453,38 +469,42 @@ const StandardTimeTable = memo(function StandardTimeTable({
 
           return (
             <div className="flex min-w-0 items-center gap-2">
-              {imageUrl ? (
-                <Image
-                  alt={imageName}
-                  height={44}
-                  width={56}
-                  src={imageUrl}
-                  preview={{ src: imageUrl }}
-                  className="rounded border border-slate-200 object-cover dark:border-slate-700"
-                />
-              ) : (
-                <span className="text-xs text-slate-400 dark:text-slate-500">暂无图片</span>
-              )}
-              {onUploadImage && record.id ? (
-                <Upload
-                  accept={PROCESS_STANDARD_IMAGE_ACCEPT}
-                  beforeUpload={(file) => {
-                    void onUploadImage(record, file)
-                    return Upload.LIST_IGNORE
-                  }}
-                  disabled={uploadingImageId === record.id}
-                  maxCount={1}
-                  showUploadList={false}
-                >
-                  <Button
-                    type="link"
-                    size="small"
-                    loading={uploadingImageId === record.id}
-                  >
-                    {record.process_image_path ? '替换' : '上传'}
-                  </Button>
-                </Upload>
-              ) : null}
+              {imageUrl
+                ? (
+                    <Image
+                      alt={imageName}
+                      height={44}
+                      width={56}
+                      src={imageUrl}
+                      preview={{ src: imageUrl }}
+                      className="rounded border border-slate-200 object-cover dark:border-slate-700"
+                    />
+                  )
+                : (
+                    <span className="text-xs text-slate-400 dark:text-slate-500">暂无图片</span>
+                  )}
+              {onUploadImage && record.id
+                ? (
+                    <Upload
+                      accept={PROCESS_STANDARD_IMAGE_ACCEPT}
+                      beforeUpload={(file) => {
+                        void onUploadImage(record, file)
+                        return Upload.LIST_IGNORE
+                      }}
+                      disabled={uploadingImageId === record.id}
+                      maxCount={1}
+                      showUploadList={false}
+                    >
+                      <Button
+                        type="link"
+                        size="small"
+                        loading={uploadingImageId === record.id}
+                      >
+                        {record.process_image_path ? '替换' : '上传'}
+                      </Button>
+                    </Upload>
+                  )
+                : null}
             </div>
           )
         },
@@ -566,8 +586,8 @@ const StandardTimeTable = memo(function StandardTimeTable({
           record.id && record.id === activeRowId
             ? 'var(--table-active-row-bg)'
             : !record.job_name
-              ? 'var(--table-warning-row-bg)'
-              : undefined,
+                ? 'var(--table-warning-row-bg)'
+                : undefined,
         transition: 'all 0.15s ease',
       },
     }),
@@ -577,7 +597,7 @@ const StandardTimeTable = memo(function StandardTimeTable({
   return (
     <div className="standard-time-table">
       <Table<StandardTime>
-        rowKey={(record) => record.id || ''}
+        rowKey={record => record.id || ''}
         loading={loading}
         columns={columns}
         dataSource={data}

@@ -1,6 +1,6 @@
 import QRCodeImport from 'react-qr-code'
 
-type QRCodeProps = {
+interface QRCodeProps {
   value: string
   size?: number
   style?: React.CSSProperties

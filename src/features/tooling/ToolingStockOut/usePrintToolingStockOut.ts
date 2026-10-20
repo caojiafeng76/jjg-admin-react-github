@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import type { ToolingStockOut } from '@/services/apiToolingStockOut'
 import { App } from 'antd'
 import dayjs from 'dayjs'
 
-import type { ToolingStockOut } from '@/services/apiToolingStockOut'
-import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
+import { useState } from 'react'
 import { formatNumber } from '@/utils/format'
+import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 
-const loadToolingStockOutPdfRuntime = () =>
-  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')] as const)
+function loadToolingStockOutPdfRuntime() {
+  return Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')] as const)
+}
 
 function preloadPrint() {
   void loadToolingStockOutPdfRuntime()
@@ -97,8 +98,8 @@ export function usePrintToolingStockOut() {
       `)
       printWindow.document.close()
 
-      const [{ default: autoTable }, { initializePDF, printPDF }] =
-        await loadToolingStockOutPdfRuntime()
+      const [{ default: autoTable }, { initializePDF, printPDF }]
+        = await loadToolingStockOutPdfRuntime()
       const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
       const doc = await initializePDF('l')
       doc.setFont(fontFamily, GOOGLE_FONT_CONFIG.FONT_STYLE)
@@ -206,13 +207,16 @@ export function usePrintToolingStockOut() {
 
       if (printed) {
         message.success('已打开浏览器打印窗口')
-      } else {
+      }
+      else {
         message.warning('浏览器阻止了直接打印，已回退为 PDF 预览')
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('打印刀具出库失败:', error)
       message.error('打印失败，请稍后重试')
-    } finally {
+    }
+    finally {
       setIsPrinting(false)
     }
   }

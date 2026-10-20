@@ -1,7 +1,7 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-
-import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
+
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { queryConfig } from '@/config/queryClient'
 import {
   createJintanProfilesStockOut,
   deleteJintanProfilesStockOut,

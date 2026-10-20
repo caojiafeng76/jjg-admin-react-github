@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo } from 'react'
-import dayjs, { type Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs'
+import type { QualityIssueAuditStatus, QualityIssueOrderOption, QualityIssueRecord, QualityIssueRecordFormValues, QualityIssueType } from '@/services/apiQualityIssueRecords'
 import {
   Button,
   DatePicker,
@@ -10,16 +10,14 @@ import {
   Select,
   Space,
 } from 'antd'
+import dayjs from 'dayjs'
 
+import { useCallback, useEffect, useMemo } from 'react'
 import {
   calculateQualityIssueDefectRate,
   QUALITY_ISSUE_AUDIT_STATUSES,
   QUALITY_ISSUE_TYPES,
-  type QualityIssueAuditStatus,
-  type QualityIssueOrderOption,
-  type QualityIssueRecord,
-  type QualityIssueRecordFormValues,
-  type QualityIssueType,
+
 } from '@/services/apiQualityIssueRecords'
 import { AUDIT_STATUS_LABELS } from './IssueRecordSearch'
 
@@ -60,7 +58,7 @@ interface ProjectSelectOption {
 }
 
 interface Props {
-  employees: Array<{ id: string; name: string }>
+  employees: Array<{ id: string, name: string }>
   initialValues?: QualityIssueRecord | null
   loadingOrders?: boolean
   onCancel: () => void
@@ -217,7 +215,7 @@ export default function IssueRecordForm({
   const processedQuantity = Form.useWatch('processed_quantity', form)
   const defectiveQuantity = Form.useWatch('defective_quantity', form)
   const employeeNameMap = useMemo(
-    () => new Map(employees.map((employee) => [employee.id, employee.name])),
+    () => new Map(employees.map(employee => [employee.id, employee.name])),
     [employees],
   )
 
@@ -243,7 +241,7 @@ export default function IssueRecordForm({
   )
 
   const orderMap = useMemo(
-    () => new Map(mergedOrderOptions.map((order) => [order.project_no, order])),
+    () => new Map(mergedOrderOptions.map(order => [order.project_no, order])),
     [mergedOrderOptions],
   )
 
@@ -255,7 +253,8 @@ export default function IssueRecordForm({
   useEffect(() => {
     if (open) {
       form.setFieldsValue(toFormFields(initialValues))
-    } else {
+    }
+    else {
       form.resetFields()
     }
   }, [form, initialValues, open])
@@ -312,7 +311,7 @@ export default function IssueRecordForm({
               placeholder="请选择上报人"
               optionFilterProp="label"
               getPopupContainer={getPopupContainer}
-              options={employees.map((employee) => ({
+              options={employees.map(employee => ({
                 label: employee.name,
                 value: employee.id,
               }))}
@@ -322,7 +321,7 @@ export default function IssueRecordForm({
           <Form.Item name="audit_status" label="审核状态">
             <Select
               getPopupContainer={getPopupContainer}
-              options={QUALITY_ISSUE_AUDIT_STATUSES.map((status) => ({
+              options={QUALITY_ISSUE_AUDIT_STATUSES.map(status => ({
                 label: AUDIT_STATUS_LABELS[status],
                 value: status,
               }))}
@@ -346,8 +345,7 @@ export default function IssueRecordForm({
               filterOption={(input, option) =>
                 String(option?.searchText || '').includes(
                   input.trim().toLowerCase(),
-                )
-              }
+                )}
               optionRender={(option) => {
                 const data = option.data as ProjectSelectOption
 
@@ -439,7 +437,7 @@ export default function IssueRecordForm({
               placeholder="请选择操作人"
               optionFilterProp="label"
               getPopupContainer={getPopupContainer}
-              options={employees.map((employee) => ({
+              options={employees.map(employee => ({
                 label: employee.name,
                 value: employee.id,
               }))}
@@ -462,7 +460,7 @@ export default function IssueRecordForm({
               allowClear
               placeholder="请选择问题类型"
               getPopupContainer={getPopupContainer}
-              options={QUALITY_ISSUE_TYPES.map((type) => ({
+              options={QUALITY_ISSUE_TYPES.map(type => ({
                 label: type,
                 value: type,
               }))}

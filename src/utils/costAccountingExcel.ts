@@ -1,7 +1,9 @@
-import * as XLSX from 'xlsx-js-style'
-
 import type { StandardTime } from '@/services/apiStandardTimes'
+
+import * as XLSX from 'xlsx-js-style'
 import { EXCEL_WRITE_OPTIONS } from '@/utils/excelStyleUtils'
+
+import { formatNumber } from '@/utils/format'
 
 const EXPORT_TITLE = '精加工产品成本核算表'
 
@@ -62,8 +64,31 @@ const GROUP_HEADER_ROW = [
 ] as const
 
 const COLUMN_WIDTHS = [
-  8, 16, 18, 16, 10, 18, 12, 10, 10, 12, 12, 16, 12, 12, 10, 10, 13, 10, 12, 10,
-  10, 12, 10, 18, 10,
+  8,
+  16,
+  18,
+  16,
+  10,
+  18,
+  12,
+  10,
+  10,
+  12,
+  12,
+  16,
+  12,
+  12,
+  10,
+  10,
+  13,
+  10,
+  12,
+  10,
+  10,
+  12,
+  10,
+  18,
+  10,
 ]
 
 const GROUP_FILL_BY_COLUMN: Record<number, string> = {
@@ -109,8 +134,6 @@ const BODY_STYLE = {
   alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
   border: BORDER_STYLE,
 }
-
-import { formatNumber } from '@/utils/format'
 
 function setCellStyle(
   worksheet: XLSX.WorkSheet,
@@ -195,7 +218,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
   ])
 
   const worksheetData = [
-    [EXPORT_TITLE, ...Array(DETAIL_HEADERS.length - 1).fill('')],
+    [EXPORT_TITLE, ...Array.from({ length: DETAIL_HEADERS.length - 1 }, () => '')],
     [...GROUP_HEADER_ROW],
     ['', '', '', '', '', '', ...DETAIL_HEADERS.slice(6)],
     ...rows,
@@ -221,7 +244,7 @@ export function exportCostAccountingToExcel(records: StandardTime[]) {
     { s: { r: 1, c: 24 }, e: { r: 2, c: 24 } },
   ]
 
-  worksheet['!cols'] = COLUMN_WIDTHS.map((width) => ({ wch: width }))
+  worksheet['!cols'] = COLUMN_WIDTHS.map(width => ({ wch: width }))
   worksheet['!rows'] = [
     { hpt: 26, hpx: 26 },
     { hpt: 24, hpx: 24 },

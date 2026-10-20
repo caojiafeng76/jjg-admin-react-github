@@ -1,21 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { FormInstance } from 'antd'
+import type {
+  YoumaiFinishedGoodsStockOut,
+  YoumaiFinishedGoodsStockOutFormValues,
+  YoumaiFinishedGoodsStockOutImportRow,
+} from '@/services/apiYoumaiFinishedGoodsStockOut'
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/16/solid'
 import { ScaleIcon } from '@heroicons/react/24/outline'
-import { App, Button, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import { App, Button, Modal } from 'antd'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import type {
-  YoumaiFinishedGoodsStockOut,
-  YoumaiFinishedGoodsStockOutFormValues,
-  YoumaiFinishedGoodsStockOutImportRow,
-} from '@/services/apiYoumaiFinishedGoodsStockOut'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -26,10 +27,6 @@ import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
-import YoumaiFinishedGoodsStockOutExcelImport from './YoumaiFinishedGoodsStockOutExcelImport'
-import YoumaiFinishedGoodsStockOutForm from './YoumaiFinishedGoodsStockOutForm'
-import YoumaiFinishedGoodsStockOutSearch from './YoumaiFinishedGoodsStockOutSearch'
-import YoumaiFinishedGoodsStockOutTable from './YoumaiFinishedGoodsStockOutTable'
 import { usePrintYoumaiFinishedGoodsStockOut } from './usePrintYoumaiFinishedGoodsStockOut'
 import { usePrintYoumaiLabel } from './usePrintYoumaiLabel'
 import {
@@ -40,9 +37,14 @@ import {
   useUpdateYoumaiFinishedGoodsStockOut,
   useYoumaiFinishedGoodsStockOutList,
 } from './useYoumaiFinishedGoodsStockOut'
+import YoumaiFinishedGoodsStockOutExcelImport from './YoumaiFinishedGoodsStockOutExcelImport'
+import YoumaiFinishedGoodsStockOutForm from './YoumaiFinishedGoodsStockOutForm'
+import YoumaiFinishedGoodsStockOutSearch from './YoumaiFinishedGoodsStockOutSearch'
+import YoumaiFinishedGoodsStockOutTable from './YoumaiFinishedGoodsStockOutTable'
 
-const loadYoumaiFinishedGoodsStockOutExport = () =>
-  import('@/utils/youmaiFinishedGoodsStockOutExport')
+function loadYoumaiFinishedGoodsStockOutExport() {
+  return import('@/utils/youmaiFinishedGoodsStockOutExport')
+}
 
 function preloadYoumaiFinishedGoodsStockOutExport() {
   void loadYoumaiFinishedGoodsStockOutExport()
@@ -68,8 +70,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   const [modalTitle, setModalTitle] = useState('新建优迈成品出库')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<YoumaiFinishedGoodsStockOut | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<YoumaiFinishedGoodsStockOut | null>(null)
   const [formRef, setFormRef] = useState<FormInstance | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
@@ -92,8 +94,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     specification: searchParamsURL.get('specification') || undefined,
     remarks: searchParamsURL.get('remarks') || undefined,
     status:
-      (searchParamsURL.get('status') as '待审核' | '已审核' | null) ||
-      undefined,
+      (searchParamsURL.get('status') as '待审核' | '已审核' | null)
+      || undefined,
   })
 
   const { data, isLoading, error, refetch } = useYoumaiFinishedGoodsStockOutList({
@@ -106,24 +108,24 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   const batchStatusMutation = useBatchUpdateYoumaiFinishedGoodsStockOutStatus()
   const importMutation = useImportYoumaiFinishedGoodsStockOut()
   const deleteMutation = useDeleteYoumaiFinishedGoodsStockOut()
-  const { printSelected, isPrinting, preloadPrint } =
-    usePrintYoumaiFinishedGoodsStockOut()
+  const { printSelected, isPrinting, preloadPrint }
+    = usePrintYoumaiFinishedGoodsStockOut()
   const {
     printLabels,
     isPrinting: isLabelPrinting,
     preloadPrint: preloadLabelPrint,
   } = usePrintYoumaiLabel()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
-  const selectedRecords = (data?.items || []).filter((item) =>
+  const selectedRecords = (data?.items || []).filter(item =>
     selectedRowKeys.includes(item.id),
   )
   const hasAuditedSelection = selectedRecords.some(
-    (item) => item.status === '已审核',
+    item => item.status === '已审核',
   )
 
   const totalSelectedWeight = useMemo(() => {
@@ -182,7 +184,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
 
     try {
       await printLabels(selectedRecords)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('打印优迈标签失败:', error)
       message.error(error instanceof Error ? error.message : '打印标签失败')
     }
@@ -212,11 +215,12 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     }
 
     try {
-      const { exportYoumaiFinishedGoodsStockOutToExcel } =
-        await loadYoumaiFinishedGoodsStockOutExport()
+      const { exportYoumaiFinishedGoodsStockOutToExcel }
+        = await loadYoumaiFinishedGoodsStockOutExport()
       exportYoumaiFinishedGoodsStockOutToExcel(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条优迈成品出库`)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('导出优迈成品出库失败:', error)
       message.error('导出失败，请稍后重试')
     }
@@ -252,7 +256,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -281,10 +285,12 @@ export default function YoumaiFinishedGoodsStockOutPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('优迈成品出库删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除优迈成品出库失败，请稍后重试')
       }
     }
@@ -322,7 +328,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
             })
             message.success(`批量${status === '已审核' ? '审核' : '反审'}成功`)
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error
                 ? error.message
@@ -359,10 +366,12 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         await importMutation.mutateAsync(rows)
         message.success(`优迈成品出库导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入优迈成品出库失败，请稍后重试')
         }
       }
@@ -395,13 +404,15 @@ export default function YoumaiFinishedGoodsStockOutPage() {
             values,
           })
           message.success('优迈成品出库更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('优迈成品出库创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
         setFormError(error)
       }
@@ -431,14 +442,16 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         const value = params[key]
         if (value) {
           nextSearchParamsURL.set(key, value)
-        } else {
+        }
+        else {
           nextSearchParamsURL.delete(key)
         }
       }
 
       if (params.status) {
         nextSearchParamsURL.set('status', params.status)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('status')
       }
 
@@ -549,24 +562,26 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         />
       </div>
 
-      {selectedRowKeys.length > 0 ? (
-        <SelectedSummaryBar
-          selectedCount={selectedRowKeys.length}
-          matchedCount={selectedRecords.length}
-          stats={
-            totalSelectedWeight === null
-              ? []
-              : [
-                  {
-                    label: '总出库重量(KG)',
-                    value: totalSelectedWeight,
-                    tone: 'primary',
-                    icon: <ScaleIcon className="size-3.5" />,
-                  },
-                ]
-          }
-        />
-      ) : null}
+      {selectedRowKeys.length > 0
+        ? (
+            <SelectedSummaryBar
+              selectedCount={selectedRowKeys.length}
+              matchedCount={selectedRecords.length}
+              stats={
+                totalSelectedWeight === null
+                  ? []
+                  : [
+                      {
+                        label: '总出库重量(KG)',
+                        value: totalSelectedWeight,
+                        tone: 'primary',
+                        icon: <ScaleIcon className="size-3.5" />,
+                      },
+                    ]
+              }
+            />
+          )
+        : null}
 
       <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div className="flex items-center gap-2">
@@ -601,12 +616,12 @@ export default function YoumaiFinishedGoodsStockOutPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>
@@ -620,9 +635,9 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={
-          createMutation.isPending ||
-          updateMutation.isPending ||
-          batchStatusMutation.isPending
+          createMutation.isPending
+          || updateMutation.isPending
+          || batchStatusMutation.isPending
         }
         okButtonProps={{ disabled: viewerDenied || !canManageYoumai }}
         onOk={() => formRef?.submit()}

@@ -38,15 +38,16 @@ export async function extractFunctionInvokeErrorMessage(
       const payload = await maybeContext.json()
 
       if (
-        payload &&
-        typeof payload === 'object' &&
-        'error' in payload &&
-        typeof payload.error === 'string' &&
-        payload.error.trim()
+        payload
+        && typeof payload === 'object'
+        && 'error' in payload
+        && typeof payload.error === 'string'
+        && payload.error.trim()
       ) {
         return payload.error.trim()
       }
-    } catch {
+    }
+    catch {
       // JSON 解析失败时回退到状态码分支
     }
   }
@@ -55,9 +56,12 @@ export async function extractFunctionInvokeErrorMessage(
   // When context.json() is absent, fall back to HTTP status.
   if (maybeContext?.status) {
     const status = maybeContext.status
-    if (status === 401) return options?.unauthorizedMessage ?? '未登录，无法执行此操作'
-    if (status === 403) return '权限校验失败，无权执行此操作'
-    if (status === 404) return 'Edge Function 不存在或未部署'
+    if (status === 401)
+      return options?.unauthorizedMessage ?? '未登录，无法执行此操作'
+    if (status === 403)
+      return '权限校验失败，无权执行此操作'
+    if (status === 404)
+      return 'Edge Function 不存在或未部署'
   }
 
   return null
@@ -78,7 +82,8 @@ export async function withTimeout<T>(
 
   try {
     return await Promise.race([promise, timeoutPromise])
-  } finally {
+  }
+  finally {
     if (timeoutId) {
       clearTimeout(timeoutId)
     }

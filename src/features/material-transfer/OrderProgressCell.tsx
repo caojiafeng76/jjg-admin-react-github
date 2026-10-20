@@ -1,7 +1,7 @@
-import { memo } from 'react'
+import type { MaterialTransferOrderProgress } from '@/services/apiMaterialTransfers'
 import { Progress, Tag } from 'antd'
 
-import type { MaterialTransferOrderProgress } from '@/services/apiMaterialTransfers'
+import { memo } from 'react'
 
 interface ProgressCellProps {
   progress: MaterialTransferOrderProgress | undefined
@@ -29,15 +29,17 @@ function OrderStatusCellBase({ progress }: ProgressCellProps) {
   if (!progress || progress.orderQuantity == null) {
     return <span className="text-slate-400">-</span>
   }
-  return progress.isCompleted ? (
-    <Tag color="green" className="m-0">
-      完工
-    </Tag>
-  ) : (
-    <Tag color="default" className="m-0">
-      未完工
-    </Tag>
-  )
+  return progress.isCompleted
+    ? (
+        <Tag color="green" className="m-0">
+          完工
+        </Tag>
+      )
+    : (
+        <Tag color="default" className="m-0">
+          未完工
+        </Tag>
+      )
 }
 
 export const OrderStatusCell = memo(OrderStatusCellBase)

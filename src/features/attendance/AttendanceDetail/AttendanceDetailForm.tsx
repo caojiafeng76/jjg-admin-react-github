@@ -1,12 +1,13 @@
-import { useCallback, useEffect } from 'react'
-import { AutoComplete, DatePicker, Form, FormInstance, TimePicker } from 'antd'
-import dayjs from 'dayjs'
-
-import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
+import type { FormInstance } from 'antd'
 import type {
   AttendanceDetail,
   AttendanceDetailFormValues,
 } from '@/services/apiAttendanceDetails'
+import { AutoComplete, DatePicker, Form, TimePicker } from 'antd'
+import dayjs from 'dayjs'
+
+import { useCallback, useEffect } from 'react'
+import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 
 interface Props {
   onFinish: (values: AttendanceDetailFormValues) => void
@@ -24,7 +25,7 @@ export default function AttendanceDetailForm({
   const [form] = Form.useForm<AttendanceDetailFormValues>()
   const { data: employees = [] } = useAllEmployees()
 
-  const nameOptions = employees.map((e) => ({ value: e.name }))
+  const nameOptions = employees.map(e => ({ value: e.name }))
 
   useEffect(() => {
     setFormRef(form)
@@ -37,7 +38,8 @@ export default function AttendanceDetailForm({
         date: initialValues.date,
         time: initialValues.time,
       })
-    } else {
+    }
+    else {
       form.resetFields()
     }
   }, [form, initialValues])
@@ -72,8 +74,7 @@ export default function AttendanceDetailForm({
           options={nameOptions}
           placeholder="请选择或输入姓名"
           filterOption={(input, option) =>
-            (option?.value ?? '').includes(input)
-          }
+            (option?.value ?? '').includes(input)}
           allowClear
         />
       </Form.Item>
@@ -82,12 +83,11 @@ export default function AttendanceDetailForm({
         name="date"
         label="日期"
         rules={[{ required: true, message: '请选择日期' }]}
-        getValueProps={(value) => ({
+        getValueProps={value => ({
           value: value ? dayjs(value as string) : null,
         })}
         getValueFromEvent={(date: dayjs.Dayjs | null) =>
-          date ? date.format('YYYY-MM-DD') : ''
-        }
+          date ? date.format('YYYY-MM-DD') : ''}
       >
         <DatePicker className="w-full" placeholder="请选择日期" />
       </Form.Item>
@@ -96,12 +96,11 @@ export default function AttendanceDetailForm({
         name="time"
         label="时间"
         rules={[{ required: true, message: '请选择时间' }]}
-        getValueProps={(value) => ({
+        getValueProps={value => ({
           value: value ? dayjs(`2000-01-01 ${value as string}`) : null,
         })}
         getValueFromEvent={(time: dayjs.Dayjs | null) =>
-          time ? time.format('HH:mm:ss') : ''
-        }
+          time ? time.format('HH:mm:ss') : ''}
       >
         <TimePicker
           className="w-full"

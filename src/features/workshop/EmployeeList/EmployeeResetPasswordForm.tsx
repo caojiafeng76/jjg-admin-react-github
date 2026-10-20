@@ -1,7 +1,8 @@
-import { Alert, Form, FormInstance, Input } from 'antd'
-import { useEffect } from 'react'
-
+import type { FormInstance } from 'antd'
 import type { Employee } from '@/services/apiEmployees'
+import { Alert, Form, Input } from 'antd'
+
+import { useEffect } from 'react'
 
 export interface EmployeeResetPasswordValues {
   password: string

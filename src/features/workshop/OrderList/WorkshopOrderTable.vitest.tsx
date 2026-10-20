@@ -1,8 +1,8 @@
-import { cleanup, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-
-import WorkshopOrderTable from './WorkshopOrderTable'
 import type { WorkshopOrder } from './index'
+import { cleanup, render, screen } from '@testing-library/react'
+
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import WorkshopOrderTable from './WorkshopOrderTable'
 
 vi.mock('./WorkshopOrderQrCell', () => ({
   default: () => <span data-testid="workshop-order-qr-cell" />,

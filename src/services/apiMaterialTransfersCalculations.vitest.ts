@@ -1,12 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
+import type { MaterialTransferInsert } from './apiMaterialTransfersTypes'
 
+import { describe, expect, it, vi } from 'vitest'
 import {
   applyMaterialTransferFilters,
   buildOrderProgressMap,
   normalizeMaterialTransferInsertPayload,
   normalizeMaterialTransferUpdatePayload,
 } from './apiMaterialTransfersCalculations'
-import type { MaterialTransferInsert } from './apiMaterialTransfersTypes'
 
 function createQueryRecorder() {
   const calls: Array<[string, ...unknown[]]> = []

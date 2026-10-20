@@ -1,16 +1,17 @@
-import { useMemo } from 'react'
-import { Tabs, Tag, Spin, Empty } from 'antd'
-
 import type { WorkshopOrder } from './index'
+import type { WorkshopOrderStatus } from './orderStatus'
+
+import type { OperationSummary } from './workshopOrderProductionStatsColumns'
 import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrders'
+import { Empty, Spin, Tabs, Tag } from 'antd'
+import { useMemo } from 'react'
 import { useWorkshopOrderProductionItems } from './useWorkshopOrderProductionItems'
 import { useWorkshopOrderTransfers } from './useWorkshopOrderTransfers'
-import type { WorkshopOrderStatus } from './orderStatus'
 import WorkshopOrderInfoHeader from './WorkshopOrderInfoHeader'
 import WorkshopOrderOperationRecordsTable from './WorkshopOrderOperationRecordsTable'
 import {
   getOperationColor,
-  type OperationSummary,
+
 } from './workshopOrderProductionStatsColumns'
 
 interface Props {
@@ -29,11 +30,12 @@ export default function WorkshopOrderProductionStats({
   const projectNo = selectedOrder?.project_no ?? null
 
   const { data: items, isLoading } = useWorkshopOrderProductionItems(projectNo)
-  const { data: transferStats, isLoading: isTransferLoading } =
-    useWorkshopOrderTransfers(projectNo)
+  const { data: transferStats, isLoading: isTransferLoading }
+    = useWorkshopOrderTransfers(projectNo)
 
   const operationGroups = useMemo<OperationSummary[]>(() => {
-    if (!items || items.length === 0) return []
+    if (!items || items.length === 0)
+      return []
 
     const groupMap = new Map<string, ProductionItemWithOrderDetail[]>()
     for (const item of items) {
@@ -55,11 +57,11 @@ export default function WorkshopOrderProductionStats({
       ),
       totalDefect: groupItems.reduce(
         (sum, i) =>
-          sum +
-          (i.defect_quantity_1 ?? 0) +
-          (i.defect_quantity_2 ?? 0) +
-          (i.outsource_defect_quantity ?? 0) +
-          (i.setup_defect_quantity ?? 0),
+          sum
+          + (i.defect_quantity_1 ?? 0)
+          + (i.defect_quantity_2 ?? 0)
+          + (i.outsource_defect_quantity ?? 0)
+          + (i.setup_defect_quantity ?? 0),
         0,
       ),
     }))
@@ -85,7 +87,7 @@ export default function WorkshopOrderProductionStats({
         </div>
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={
+          description={(
             <div className="text-center">
               <p className="font-medium text-slate-600 dark:text-slate-300">
                 点击上方订单行查看详情
@@ -94,7 +96,7 @@ export default function WorkshopOrderProductionStats({
                 选择订单后可在下方查看生产工单统计
               </p>
             </div>
-          }
+          )}
         />
       </div>
     )
@@ -108,7 +110,7 @@ export default function WorkshopOrderProductionStats({
           <Spin
             size="large"
             className="relative"
-            indicator={
+            indicator={(
               <div className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30">
                 <svg
                   className="size-6 animate-spin text-white"
@@ -130,7 +132,7 @@ export default function WorkshopOrderProductionStats({
                   />
                 </svg>
               </div>
-            }
+            )}
           />
         </div>
         <p className="text-sm font-medium text-slate-500">
@@ -168,7 +170,7 @@ export default function WorkshopOrderProductionStats({
           </div>
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={
+            description={(
               <div className="text-center">
                 <p className="font-medium text-slate-600 dark:text-slate-300">
                   暂无生产工单记录
@@ -177,14 +179,14 @@ export default function WorkshopOrderProductionStats({
                   该订单暂无关联的生产工单数据
                 </p>
               </div>
-            }
+            )}
           />
         </div>
       </div>
     )
   }
 
-  const tabItems = operationGroups.map((group) => ({
+  const tabItems = operationGroups.map(group => ({
     key: group.operation,
     label: (
       <span className="flex items-center gap-2">

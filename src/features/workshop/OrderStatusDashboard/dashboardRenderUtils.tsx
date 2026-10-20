@@ -1,6 +1,4 @@
 import type { TableProps } from 'antd'
-import { Button, Space, Tag, Tooltip, Typography } from 'antd'
-
 import type {
   OrderStatusDashboardItem,
   OrderStatusExtrusionDetail,
@@ -9,6 +7,8 @@ import type {
   OrderStatusProductionDetail,
   ReworkRepairInfo,
 } from '@/services/apiOrderStatusDashboard'
+
+import { Button, Space, Tag, Tooltip, Typography } from 'antd'
 import { DenseBodyCell, ResizableHeaderCell } from './dashboardTableCells'
 import {
   REWORK_REPAIR_STATUS_COLORS,
@@ -25,12 +25,12 @@ export type TransferDetailRow = OrderStatusMaterialTransferDetail & {
   key: string
 }
 
-export type PrecisionCuttingDetailRow =
-  OrderStatusPrecisionCuttingTransferDetail & {
+export type PrecisionCuttingDetailRow
+  = OrderStatusPrecisionCuttingTransferDetail & {
     key: string
   }
 
-export type OperationSummaryRow = {
+export interface OperationSummaryRow {
   detailCount: number
   key: string
   operation: string
@@ -41,26 +41,26 @@ export type ExtrusionDetailRow = OrderStatusExtrusionDetail & {
   key: string
 }
 
-export type SelectedJobDetail = {
+export interface SelectedJobDetail {
   jobName: string
   record: OrderStatusDashboardItem
 }
 
-export type SelectedTransferDetail = {
+export interface SelectedTransferDetail {
   record: OrderStatusDashboardItem
 }
 
-export type SelectedPrecisionCuttingDetail = {
+export interface SelectedPrecisionCuttingDetail {
   record: OrderStatusDashboardItem
 }
 
-export type SelectedExtrusionDetail = {
+export interface SelectedExtrusionDetail {
   record: OrderStatusDashboardItem
 }
 
 /** Viewer 角色在岗位生产工单明细弹窗中隐藏的列（工时/成本相关） */
-export const VIEWER_PRODUCTION_DETAIL_HIDDEN_COLUMN_KEYS: ReadonlySet<string> =
-  new Set([
+export const VIEWER_PRODUCTION_DETAIL_HIDDEN_COLUMN_KEYS: ReadonlySet<string>
+  = new Set([
     'standardSeconds',
     'qualifiedHours',
     'defectHours',
@@ -74,8 +74,8 @@ export const DENSE_TABLE_COMPONENTS = {
 } satisfies NonNullable<TableProps<OrderStatusDashboardItem>['components']>
 
 export function renderText(value: string | number | null | undefined) {
-  const text =
-    value === null || value === undefined || value === '' ? '-' : value
+  const text
+    = value === null || value === undefined || value === '' ? '-' : value
 
   return (
     <span
@@ -124,7 +124,7 @@ export function renderTransferWorkshops(value: string[]) {
 
   return (
     <Space size={4} wrap>
-      {value.map((workshop) => (
+      {value.map(workshop => (
         <Tag key={workshop}>{workshop}</Tag>
       ))}
     </Space>
@@ -146,13 +146,15 @@ export function renderInventoryQuantityCell(record: OrderStatusDashboardItem) {
 
   return (
     <Tooltip title={getInventoryBreakdownText(record)}>
-      {quantity === 0 ? (
-        <Text type="secondary">-</Text>
-      ) : (
-        <Text strong type={quantity < 0 ? 'danger' : undefined}>
-          {quantity.toLocaleString()}
-        </Text>
-      )}
+      {quantity === 0
+        ? (
+            <Text type="secondary">-</Text>
+          )
+        : (
+            <Text strong type={quantity < 0 ? 'danger' : undefined}>
+              {quantity.toLocaleString()}
+            </Text>
+          )}
     </Tooltip>
   )
 }
@@ -261,11 +263,11 @@ const REWORK_REPAIR_STATUS_KEYS = [
 ] as const
 
 export function renderReworkRepairStatus(reworkRepairInfo: ReworkRepairInfo) {
-  const total =
-    reworkRepairInfo.pendingProductionCount +
-    reworkRepairInfo.pendingTechnicalCount +
-    reworkRepairInfo.pendingQualityCount +
-    reworkRepairInfo.completedCount
+  const total
+    = reworkRepairInfo.pendingProductionCount
+      + reworkRepairInfo.pendingTechnicalCount
+      + reworkRepairInfo.pendingQualityCount
+      + reworkRepairInfo.completedCount
 
   if (total === 0) {
     return <Text type="secondary">-</Text>
@@ -305,7 +307,7 @@ export function renderJobOutputCell({
 }) {
   const quantity = Number(record.jobOutputs[jobName] || 0)
   const detailCount = record.productionDetails.filter(
-    (item) => item.jobName === jobName,
+    item => item.jobName === jobName,
   ).length
 
   if (quantity <= 0) {

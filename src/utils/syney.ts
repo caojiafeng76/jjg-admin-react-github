@@ -1,11 +1,11 @@
-import { ISyneyItem, ISyneySpec } from '@/types'
+import type { ISyneyItem, ISyneySpec } from '@/types'
 import { getLabelInfoBySettings } from './syneySafePartRules'
 
 // 正则表达式常量,避免重复创建
-const LENGTH_PATTERN = /(L1=|L=)(\d+)/g
+const LENGTH_PATTERN = /(?:L1=|L=)(\d+)/g
 const L_PATTERN = /L=(\d+)/i // 匹配 L=数字
 const L1_PATTERN = /L1=(\d+)/i // 匹配 L1=数字
-const MODEL_PATTERN = /(1000(?:型)?|800(?:型)?|600(?:型)?)/ // 允许没有"型"的写法
+const MODEL_PATTERN = /(1000型?|800型?|600型?)/ // 允许没有"型"的写法
 const MM_NUMBER_PATTERN = /(\d+(?:\.\d+)?)\s*mm/i
 
 // 基于型号的默认规格宽度映射
@@ -16,7 +16,7 @@ const MODEL_BASE_WIDTH_MAP: Record<string, number> = {
 }
 
 // 备注中提取宽度的正则
-const WIDTH_PATTERN = /宽[=：:\s]*?(\d+(?:\.\d+)?)/i
+const WIDTH_PATTERN = /宽[=：:\s]*(\d+(?:\.\d+)?)/
 const NUMBER_FALLBACK_PATTERN = /(\d+(?:\.\d+)?)/ // 兜底提取数字
 
 /**
@@ -24,30 +24,32 @@ const NUMBER_FALLBACK_PATTERN = /(\d+(?:\.\d+)?)/ // 兜底提取数字
  * @param remark 备注文本
  * @returns 返回包含 L 和 L1 值的对象，如果不存在则返回 null
  */
-function extractLAndL1(remark: string): { L: string; L1: string } | null {
+function extractLAndL1(remark: string): { L: string, L1: string } | null {
   const lMatch = remark.match(L_PATTERN)
   const l1Match = remark.match(L1_PATTERN)
-  
+
   if (lMatch && l1Match) {
     // 同时存在 L 和 L1，返回两者
     return {
       L: lMatch[1],
       L1: l1Match[1],
     }
-  } else if (lMatch) {
+  }
+  else if (lMatch) {
     // 只有 L
     return {
       L: lMatch[1],
       L1: '',
     }
-  } else if (l1Match) {
+  }
+  else if (l1Match) {
     // 只有 L1
     return {
       L: '',
       L1: l1Match[1],
     }
   }
-  
+
   return null
 }
 
@@ -84,7 +86,7 @@ export function inferParamSpecFromRemark(item: ISyneyItem): {
   }
 
   const remark = item.Remark || ''
-  
+
   // 优先尝试提取 L 和 L1
   const lengths = extractLAndL1(remark)
   if (lengths && lengths.L && lengths.L1) {
@@ -94,7 +96,7 @@ export function inferParamSpecFromRemark(item: ISyneyItem): {
       inferred: true,
     }
   }
-  
+
   // 优先匹配"宽=数字"
   const widthMatch = remark.match(WIDTH_PATTERN)
 
@@ -106,21 +108,22 @@ export function inferParamSpecFromRemark(item: ISyneyItem): {
   if (!widthMatch && !mmMatch) {
     if (lengths) {
       lengthMatchValue = lengths.L || lengths.L1
-    } else {
+    }
+    else {
       LENGTH_PATTERN.lastIndex = 0
       const lengthMatch = LENGTH_PATTERN.exec(remark)
-      lengthMatchValue = lengthMatch?.[2]
+      lengthMatchValue = lengthMatch?.[1]
     }
   }
 
   // 最后兜底数字匹配（避免过早匹配订单号中的小数字）
-  const fallbackMatch =
-    !widthMatch && !mmMatch && !lengthMatchValue
+  const fallbackMatch
+    = !widthMatch && !mmMatch && !lengthMatchValue
       ? remark.match(NUMBER_FALLBACK_PATTERN)
       : null
 
-  const remarkWidth =
-    widthMatch?.[1] || mmMatch?.[1] || lengthMatchValue || fallbackMatch?.[1]
+  const remarkWidth
+    = widthMatch?.[1] || mmMatch?.[1] || lengthMatchValue || fallbackMatch?.[1]
 
   if (!remarkWidth) {
     return { paramSpec: null, inferred: false }
@@ -147,7 +150,7 @@ export function getItemsWithParamSpec(
 ) {
   // 创建规格映射,用于 O(1) 查找零件号对应的参数规格
   const specMap = new Map<string | null, string | null>(
-    specs.map((spec) => [spec.PartNo, spec.ParamSpec]),
+    specs.map(spec => [spec.PartNo, spec.ParamSpec]),
   )
 
   // 遍历物品列表,生成带有参数规格的物品列表
@@ -158,9 +161,9 @@ export function getItemsWithParamSpec(
 
     // 处理参数规格中的长度占位符
     if (
-      baseParamSpec &&
-      item.Remark &&
-      (baseParamSpec.includes('实际宽度') || baseParamSpec.includes('实际长度'))
+      baseParamSpec
+      && item.Remark
+      && (baseParamSpec.includes('实际宽度') || baseParamSpec.includes('实际长度'))
     ) {
       // 提取备注中的长度信息（支持 L 和 L1）
       const lengths = extractLAndL1(item.Remark)
@@ -169,13 +172,14 @@ export function getItemsWithParamSpec(
         // 业务约定：当同时存在 L 和 L1 时，参数规格统一解析为「L*L1」
         // 例如：L=1575,L1=684 => 1575*684
         paramSpec = `${lengths.L}*${lengths.L1}`
-      } else {
+      }
+      else {
         // 保持原有占位符替换逻辑（仅单个长度值场景）
-        const singleLength =
-          lengths?.L || lengths?.L1 || (() => {
+        const singleLength
+          = lengths?.L || lengths?.L1 || (() => {
             LENGTH_PATTERN.lastIndex = 0
             const match = LENGTH_PATTERN.exec(item.Remark)
-            return match?.[2]
+            return match?.[1]
           })()
 
         if (singleLength) {
@@ -188,8 +192,8 @@ export function getItemsWithParamSpec(
 
     // 如果无法从规格库解析到参数规格,尝试根据备注推测
     if (!paramSpec) {
-      const { paramSpec: inferredParamSpec, inferred } =
-        inferParamSpecFromRemark(item)
+      const { paramSpec: inferredParamSpec, inferred }
+        = inferParamSpecFromRemark(item)
 
       if (inferredParamSpec) {
         paramSpec = inferredParamSpec
@@ -246,7 +250,8 @@ export function distinctItems(items: ISyneyItem[]): ISyneyItem[] {
 
       existingItem.Qty = newQty
       existingItem.TaxTotalPrice = newQty * unitPrice
-    } else {
+    }
+    else {
       // 添加新物品条目
       const qty = item.Qty || 0
       const unitPrice = item.TaxUnitPrice || 0
@@ -267,11 +272,13 @@ export function distinctItems(items: ISyneyItem[]): ISyneyItem[] {
 function extractDataArray(jsonString: string) {
   // 找到"data"键的起始位置
   const dataKeyStart = jsonString.indexOf('data')
-  if (dataKeyStart === -1) return ''
+  if (dataKeyStart === -1)
+    return ''
 
   // 找到冒号:
   const colonIndex = jsonString.indexOf(':', dataKeyStart)
-  if (colonIndex === -1) return ''
+  if (colonIndex === -1)
+    return ''
 
   // 跳过空白字符
   let startIndex = colonIndex + 1
@@ -280,14 +287,16 @@ function extractDataArray(jsonString: string) {
   }
 
   // 检查是否以[开始
-  if (jsonString[startIndex] !== '[') return ''
+  if (jsonString[startIndex] !== '[')
+    return ''
 
   // 开始计数
   let count = 1
   for (let i = startIndex + 1; i < jsonString.length; i++) {
     if (jsonString[i] === '[') {
       count++
-    } else if (jsonString[i] === ']') {
+    }
+    else if (jsonString[i] === ']') {
       count--
       if (count === 0) {
         return jsonString.substring(startIndex, i + 1)
@@ -324,7 +333,8 @@ export function jsonToArray(json: string): ISyneyItem[] {
       PartCode: item.PartCode || '',
       PartModel: item.PartModel || '',
     }))
-  } catch (error) {
+  }
+  catch (error) {
     console.error('JSON解析失败:', error)
     return []
   }
@@ -346,7 +356,7 @@ export function getItemsWithExtraInfo(
     name?: string | null
     need_print_label?: boolean
   }[],
-): { map: Map<string, ISyneyItem[]>; tmpSerialNo: number } {
+): { map: Map<string, ISyneyItem[]>, tmpSerialNo: number } {
   // 创建一个 Map，用于按销售订单号（SONo）和序列号分组存储物品
   const map = new Map<string, ISyneyItem[]>()
 

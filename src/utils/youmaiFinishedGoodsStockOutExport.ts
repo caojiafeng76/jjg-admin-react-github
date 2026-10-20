@@ -1,10 +1,10 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
-
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@/utils/excelStyleUtils'
-import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { formatNumber } from '@/utils/format'
+import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 
 const SHEET_NAME = '优迈成品出库'
 const TITLE = '优迈成品出库'
@@ -141,7 +141,8 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
   // 表头（第 3 行）
   for (let c = 0; c < colCount; c += 1) {
     const ref = `${colLetter(c)}3`
-    if (!ws[ref]) ws[ref] = { v: '' }
+    if (!ws[ref])
+      ws[ref] = { v: '' }
     ws[ref].s = {
       font: { name: '宋体', sz: 11, bold: true },
       alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
@@ -160,7 +161,8 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
   for (let r = 3; r < totalRows; r += 1) {
     for (let c = 0; c < colCount; c += 1) {
       const ref = `${colLetter(c)}${r + 1}`
-      if (!ws[ref]) ws[ref] = { v: '' }
+      if (!ws[ref])
+        ws[ref] = { v: '' }
       ws[ref].s = {
         font: { name: '宋体', sz: 10.5 },
         alignment: { horizontal: 'center', vertical: 'center', wrapText: true },

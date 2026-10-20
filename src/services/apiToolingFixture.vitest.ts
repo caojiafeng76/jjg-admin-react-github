@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  createToolingFixturesBatch,
+  getAllToolingFixtures,
+  getToolingFixtureList,
+  normalizeToolingFixtureFormValues,
+} from './apiToolingFixture'
+
 const { fromMock } = vi.hoisted(() => ({
   fromMock: vi.fn(),
 }))
@@ -7,13 +14,6 @@ const { fromMock } = vi.hoisted(() => ({
 vi.mock('./supabase', () => ({
   default: { from: fromMock },
 }))
-
-import {
-  createToolingFixturesBatch,
-  getAllToolingFixtures,
-  getToolingFixtureList,
-  normalizeToolingFixtureFormValues,
-} from './apiToolingFixture'
 
 interface FixtureQueryBuilder {
   data: unknown[]

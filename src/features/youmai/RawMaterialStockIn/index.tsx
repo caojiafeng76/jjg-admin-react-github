@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import type { FormInstance } from 'antd'
 
+import type { YoumaiRawMaterialStockIn, YoumaiRawMaterialStockInFormValues } from '@/services/apiYoumaiRawMaterialStockIn'
+import { App, Modal } from 'antd'
+
+import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import type { YoumaiRawMaterialStockInFormValues } from '@/services/apiYoumaiRawMaterialStockIn'
-import type { YoumaiRawMaterialStockIn } from '@/services/apiYoumaiRawMaterialStockIn'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -14,15 +15,15 @@ import EditButton from '@/ui/EditButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
-import YoumaiRawMaterialStockInForm from './YoumaiRawMaterialStockInForm'
-import YoumaiRawMaterialStockInSearch from './YoumaiRawMaterialStockInSearch'
-import YoumaiRawMaterialStockInTable from './YoumaiRawMaterialStockInTable'
 import {
   useCreateYoumaiRawMaterialStockIn,
   useDeleteYoumaiRawMaterialStockIn,
   useUpdateYoumaiRawMaterialStockIn,
   useYoumaiRawMaterialStockInList,
 } from './useYoumaiRawMaterialStockIn'
+import YoumaiRawMaterialStockInForm from './YoumaiRawMaterialStockInForm'
+import YoumaiRawMaterialStockInSearch from './YoumaiRawMaterialStockInSearch'
+import YoumaiRawMaterialStockInTable from './YoumaiRawMaterialStockInTable'
 
 export default function YoumaiRawMaterialStockInPage() {
   const { message } = App.useApp()
@@ -34,11 +35,11 @@ export default function YoumaiRawMaterialStockInPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建原料入库')
-  const [editingRecord, setEditingRecord] =
-    useState<YoumaiRawMaterialStockIn | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<YoumaiRawMaterialStockIn | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [formRef, setFormRef] =
-    useState<FormInstance<YoumaiRawMaterialStockInFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<YoumaiRawMaterialStockInFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -58,8 +59,8 @@ export default function YoumaiRawMaterialStockInPage() {
   const updateMutation = useUpdateYoumaiRawMaterialStockIn()
   const deleteMutation = useDeleteYoumaiRawMaterialStockIn()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({ targetRowCount: 10 })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({ targetRowCount: 10 })
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
@@ -85,7 +86,7 @@ export default function YoumaiRawMaterialStockInPage() {
       return
     }
     const record = data?.rawMaterialStockIn.find(
-      (item) => item.id === selectedRowKeys[0],
+      item => item.id === selectedRowKeys[0],
     )
     if (!record) {
       message.warning('请选择一条数据进行编辑')
@@ -108,10 +109,12 @@ export default function YoumaiRawMaterialStockInPage() {
       }
       message.success('原料入库记录删除成功（库存已自动回滚）')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除失败，请稍后重试')
       }
     }
@@ -136,12 +139,14 @@ export default function YoumaiRawMaterialStockInPage() {
             remarks: values.remarks,
           })
           message.success('原料入库备注已更新')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('原料入库成功，库存已更新')
         }
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
         setFormError(error)
       }
@@ -167,7 +172,8 @@ export default function YoumaiRawMaterialStockInPage() {
       next.set('page', '1')
       if (params.keyword) {
         next.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         next.delete('keyword')
       }
       setSearchParamsURL(next)
@@ -247,12 +253,12 @@ export default function YoumaiRawMaterialStockInPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>

@@ -1,10 +1,10 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 import type {
   ProductionOrderExportProgress,
   ProductionOrderFilters,
   ProductionOrderForExport,
 } from './apiProductionOrderTypes'
+import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 const PRODUCTION_ORDER_EXPORT_SELECT = `
       id,
@@ -71,14 +71,14 @@ export async function getProductionOrdersForExport(ids: string[]) {
 
   const rows = (
     await Promise.all(
-      batches.map((batchIds) => getProductionOrdersForExportBatch(batchIds)),
+      batches.map(batchIds => getProductionOrdersForExportBatch(batchIds)),
     )
   ).flat()
-  const rowMap = new Map(rows.map((row) => [row.id, row]))
+  const rowMap = new Map(rows.map(row => [row.id, row]))
 
   return sortProductionOrdersForExport(
     uniqueIds
-      .map((id) => rowMap.get(id))
+      .map(id => rowMap.get(id))
       .filter((row): row is ProductionOrderForExport => Boolean(row)),
   )
 }
@@ -186,7 +186,7 @@ async function getProductionOrderIdsPageByFilters({
 
   return {
     ids: ((data || []) as unknown as Array<{ id: string }>).map(
-      (item) => item.id,
+      item => item.id,
     ),
     total: count ?? 0,
   }
@@ -204,8 +204,8 @@ export async function getProductionOrdersForExportChunked(
   }
 
   const uniqueIds = Array.from(new Set(ids.filter(Boolean)))
-  const chunkSize =
-    options?.chunkSize ?? PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE
+  const chunkSize
+    = options?.chunkSize ?? PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE
   const rows: ProductionOrderForExport[] = []
 
   for (let index = 0; index < uniqueIds.length; index += chunkSize) {
@@ -227,8 +227,8 @@ export async function getProductionOrdersForExportByFiltersChunked(
     onProgress?: (progress: ProductionOrderExportProgress) => void
   },
 ) {
-  const pageSize =
-    options?.pageSize ?? PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE
+  const pageSize
+    = options?.pageSize ?? PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE
   const firstPage = await getProductionOrderIdsPageByFilters({
     page: 1,
     pageSize,
@@ -306,7 +306,7 @@ export async function getProductionOrdersForExportByFilters(
       index + PRODUCTION_ORDER_FILTER_EXPORT_PAGE_CONCURRENCY,
     )
     const pageResults = await Promise.all(
-      pageChunk.map((page) =>
+      pageChunk.map(page =>
         getProductionOrderIdsPageByFilters({
           page,
           pageSize: PRODUCTION_ORDER_FILTER_EXPORT_PAGE_SIZE,

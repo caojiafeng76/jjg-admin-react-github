@@ -55,37 +55,43 @@ export default function MobileScanPageShell({
 
         {content}
 
-        {!hasCustomFooter ? (
-          <div className="grid grid-cols-2 gap-3">
-            {secondaryAction ? (
-              <Button
-                className="h-11 rounded-2xl"
-                onClick={secondaryAction.onClick}
-              >
-                {secondaryAction.label}
-              </Button>
-            ) : (
-              <Card className="rounded-2xl border-dashed border-slate-200 shadow-none" />
-            )}
-            <Button
-              type={primaryAction.type || 'primary'}
-              className="h-11 rounded-2xl"
-              onClick={primaryAction.onClick}
-            >
-              {primaryAction.label}
-            </Button>
-          </div>
-        ) : null}
+        {!hasCustomFooter
+          ? (
+              <div className="grid grid-cols-2 gap-3">
+                {secondaryAction
+                  ? (
+                      <Button
+                        className="h-11 rounded-2xl"
+                        onClick={secondaryAction.onClick}
+                      >
+                        {secondaryAction.label}
+                      </Button>
+                    )
+                  : (
+                      <Card className="rounded-2xl border-dashed border-slate-200 shadow-none" />
+                    )}
+                <Button
+                  type={primaryAction.type || 'primary'}
+                  className="h-11 rounded-2xl"
+                  onClick={primaryAction.onClick}
+                >
+                  {primaryAction.label}
+                </Button>
+              </div>
+            )
+          : null}
       </div>
 
-      {hasCustomFooter ? (
-        <div
-          className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl"
-          style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
-        >
-          <div className="mx-auto max-w-2xl">{footer}</div>
-        </div>
-      ) : null}
+      {hasCustomFooter
+        ? (
+            <div
+              className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl"
+              style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
+            >
+              <div className="mx-auto max-w-2xl">{footer}</div>
+            </div>
+          )
+        : null}
     </div>
   )
 }

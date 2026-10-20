@@ -1,20 +1,20 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
-import {
-  getEmployees,
-  getAllEmployees,
-  getEmployeeAuthEmail,
-  createEmployee,
-  updateEmployee,
-  deleteEmployees,
-  createEmployeeAuthAccount,
-  resetEmployeeAuthPassword,
-  unbindEmployeeAuthAccount,
-  rebindEmployeeAuthAccount,
-} from '@/services/apiEmployees'
-import { getJobBaseSettingOptions } from '@/services/apiJobBaseSettings'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
+import {
+  createEmployee,
+  createEmployeeAuthAccount,
+  deleteEmployees,
+  getAllEmployees,
+  getEmployeeAuthEmail,
+  getEmployees,
+  rebindEmployeeAuthAccount,
+  resetEmployeeAuthPassword,
+  unbindEmployeeAuthAccount,
+  updateEmployee,
+} from '@/services/apiEmployees'
+import { getJobBaseSettingOptions } from '@/services/apiJobBaseSettings'
 
 const EMPLOYEES_KEY = 'employees' as const
 const JOB_BASE_SETTINGS_KEY = 'job-base-settings' as const

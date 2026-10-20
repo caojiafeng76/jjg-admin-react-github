@@ -1,8 +1,8 @@
-import { act, render, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import type { PackagingWorkOrderBatch } from '@/services/apiPackagingWorkOrders'
+import { act, render, waitFor } from '@testing-library/react'
+
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import WorkOrderForm from './WorkOrderForm'
 import WorkOrderSearch from './WorkOrderSearch'
 
@@ -30,9 +30,9 @@ interface CapturedSelectProps {
   showSearch?:
     | boolean
     | {
-        filterOption?: boolean
-        onSearch?: (value: string) => void
-      }
+      filterOption?: boolean
+      onSearch?: (value: string) => void
+    }
 }
 
 const selectMock = vi.hoisted(() => ({
@@ -84,7 +84,7 @@ vi.mock('./useWorkOrders', () => ({
 function latestSelect(placeholder: string): CapturedSelectProps {
   const props = [...selectMock.props]
     .reverse()
-    .find((candidate) => candidate.placeholder === placeholder)
+    .find(candidate => candidate.placeholder === placeholder)
 
   if (!props) {
     throw new Error(`未捕获到 Select：${placeholder}`)

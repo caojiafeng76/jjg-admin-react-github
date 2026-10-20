@@ -1,5 +1,5 @@
-import { Pagination, ConfigProvider } from 'antd'
 import type { PaginationProps } from 'antd'
+import { ConfigProvider, Pagination } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN'
 import { useSearchParams } from 'react-router-dom'
 
@@ -22,10 +22,10 @@ export default function AppPagination({
 }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
   const currentPage = Number(searchParams.get('page')) || 1
-  const currentPageSize =
-    Number(searchParams.get('pageSize')) || defaultPageSize
+  const currentPageSize
+    = Number(searchParams.get('pageSize')) || defaultPageSize
   const normalizedPageSizeOptions = pageSizeOptions.some(
-    (option) => Number(option) === currentPageSize,
+    option => Number(option) === currentPageSize,
   )
     ? pageSizeOptions
     : [...pageSizeOptions, currentPageSize.toString()].sort(
@@ -59,7 +59,7 @@ export default function AppPagination({
             getPopupContainer: () => document.body,
           }}
           pageSizeOptions={normalizedPageSizeOptions}
-          showTotal={(total) => `共 ${total} 条`}
+          showTotal={total => `共 ${total} 条`}
         />
       </ConfigProvider>
     </div>

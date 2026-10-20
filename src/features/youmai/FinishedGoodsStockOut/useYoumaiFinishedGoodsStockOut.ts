@@ -14,10 +14,10 @@ import {
 
 import { youmaiKeys } from '../queryKeys'
 
-const YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY =
-  'youmai-finished-goods-stock-out' as const
-const YOUMAI_FINISHED_GOODS_INVENTORY_KEY =
-  'youmai-finished-goods-inventory' as const
+const YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY
+  = 'youmai-finished-goods-stock-out' as const
+const YOUMAI_FINISHED_GOODS_INVENTORY_KEY
+  = 'youmai-finished-goods-inventory' as const
 
 export function useYoumaiFinishedGoodsStockOutList({
   page,

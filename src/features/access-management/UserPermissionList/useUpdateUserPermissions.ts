@@ -8,7 +8,7 @@ export function useUpdateUserPermissions() {
       overrides,
     }: {
       employeeId: string
-      overrides: Array<{ permissionId: string; enabled: boolean }>
+      overrides: Array<{ permissionId: string, enabled: boolean }>
     }) => setUserPermissionOverrides(employeeId, overrides),
     invalidateQueries: [['user-permission-overrides'], ['my-permissions']],
     successMessage: '用户权限覆盖已保存',

@@ -1,8 +1,4 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
-import { Database } from './database.types'
 import type { ProductionOrderItem } from './apiProductionOrderItems'
-import { resolveProductionOrderItemStandardSeconds } from './apiProductionOrderItems'
 import type {
   ProductionOrder,
   ProductionOrderFilters,
@@ -10,16 +6,20 @@ import type {
   ProductionOrderUpdate,
   ProductionOrderWithEmployee,
 } from './apiProductionOrderTypes'
+import type { Database } from './database.types'
+import { handleApiError } from '@/utils/errorHandler'
+import { resolveProductionOrderItemStandardSeconds } from './apiProductionOrderItems'
+import supabase from './supabase'
 
-export * from './apiProductionOrderTypes'
 export {
-  PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE,
   getProductionOrdersForExport,
   getProductionOrdersForExportByFilters,
   getProductionOrdersForExportByFiltersChunked,
   getProductionOrdersForExportChunked,
+  PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE,
 } from './apiProductionOrderExportData'
 export { getProductionItemsByProjectNo } from './apiProductionOrderProjectItems'
+export * from './apiProductionOrderTypes'
 
 const PRODUCTION_ORDER_DETAIL_SELECT = `
       *,
@@ -133,9 +133,9 @@ export async function getProductionOrders({
       const extraQualifiedHours = Number(order.extra_qualified_hours ?? 0)
       const totalQualifiedHours = Number(
         (
-          positiveQualifiedHours -
-          totalDefectHours +
-          extraQualifiedHours
+          positiveQualifiedHours
+          - totalDefectHours
+          + extraQualifiedHours
         ).toFixed(2),
       )
       const workHours = Number(order.work_hours || 0)
@@ -147,9 +147,9 @@ export async function getProductionOrders({
         total_qualified_hours: totalQualifiedHours,
         efficiency,
         hasZeroStandardQualifiedItem: orderItems.some(
-          (item) =>
-            Number(item.qualified_hours || 0) === 0 &&
-            Number(item.qualified_quantity || 0) > 0,
+          item =>
+            Number(item.qualified_hours || 0) === 0
+            && Number(item.qualified_quantity || 0) > 0,
         ),
       }
     },
@@ -184,17 +184,17 @@ export async function getProductionOrderById(id: string) {
 
 export async function createProductionOrder(values: ProductionOrderInsert) {
   if (
-    values.work_hours === null ||
-    values.work_hours === undefined ||
-    values.work_hours < 0
+    values.work_hours === null
+    || values.work_hours === undefined
+    || values.work_hours < 0
   ) {
     throw new Error('出勤工时不能小于0')
   }
 
   if (
-    values.extra_qualified_hours !== undefined &&
-    values.extra_qualified_hours !== null &&
-    values.extra_qualified_hours < 0
+    values.extra_qualified_hours !== undefined
+    && values.extra_qualified_hours !== null
+    && values.extra_qualified_hours < 0
   ) {
     throw new Error('零工工时不能小于0')
   }
@@ -207,8 +207,8 @@ export async function createProductionOrder(values: ProductionOrderInsert) {
 
   if (error) {
     if (
-      error.code === '23505' &&
-      error.message.includes('production_orders_employee_id_order_date_unique')
+      error.code === '23505'
+      && error.message.includes('production_orders_employee_id_order_date_unique')
     ) {
       throw new Error('该员工当天已有工单，同一天只能创建一张工单')
     }
@@ -227,17 +227,17 @@ export async function updateProductionOrder({
   values: ProductionOrderUpdate
 }) {
   if (
-    values.work_hours !== undefined &&
-    values.work_hours !== null &&
-    values.work_hours < 0
+    values.work_hours !== undefined
+    && values.work_hours !== null
+    && values.work_hours < 0
   ) {
     throw new Error('出勤工时不能小于0')
   }
 
   if (
-    values.extra_qualified_hours !== undefined &&
-    values.extra_qualified_hours !== null &&
-    values.extra_qualified_hours < 0
+    values.extra_qualified_hours !== undefined
+    && values.extra_qualified_hours !== null
+    && values.extra_qualified_hours < 0
   ) {
     throw new Error('零工工时不能小于0')
   }

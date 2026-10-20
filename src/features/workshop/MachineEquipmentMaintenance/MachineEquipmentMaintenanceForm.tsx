@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from 'react'
-import { Card, Form, FormInstance, Input, InputNumber, Typography } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   MachineEquipmentMaintenance,
   MachineEquipmentMaintenanceFormValues,
 } from '@/services/apiMachineEquipmentMaintenances'
+import { Card, Form, Input, InputNumber, Typography } from 'antd'
+
+import { useEffect, useMemo } from 'react'
 
 const { TextArea } = Input
 
@@ -58,12 +59,12 @@ export default function MachineEquipmentMaintenanceForm({
     const machineValue = Number(watchedValues?.machine_value || 0)
     const depreciationYears = Number(watchedValues?.depreciation_years || 0)
     const annualRuntimeHours = Number(watchedValues?.annual_runtime_hours || 0)
-    const hourlyElectricityFee =
-      syncWorkQuantity > 0
+    const hourlyElectricityFee
+      = syncWorkQuantity > 0
         ? (powerKW * electricityUnitPrice) / syncWorkQuantity
         : 0
-    const depreciationRate =
-      depreciationYears > 0 && annualRuntimeHours > 0
+    const depreciationRate
+      = depreciationYears > 0 && annualRuntimeHours > 0
         ? machineValue / depreciationYears / annualRuntimeHours
         : 0
 

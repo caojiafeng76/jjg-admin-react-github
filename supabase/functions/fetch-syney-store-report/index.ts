@@ -50,7 +50,7 @@ const BIND_FIELDS = [
   'Remark',
 ].join(',')
 
-type SyneyStoreReportItem = {
+interface SyneyStoreReportItem {
   No: string | null
   ParamSpec: string | null
   PartName: string | null
@@ -63,7 +63,7 @@ type SyneyStoreReportItem = {
   Unit: string | null
 }
 
-type SyneyStoreReportPayload = {
+interface SyneyStoreReportPayload {
   storeInNo?: string
   diagnose?: boolean
 }
@@ -134,13 +134,15 @@ async function fetchWithTimeout(
       ...init,
       signal: controller.signal,
     })
-  } catch (error) {
+  }
+  catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new Error(timeoutMessage, { cause: error })
     }
 
     throw error
-  } finally {
+  }
+  finally {
     clearTimeout(timeoutId)
   }
 }
@@ -165,7 +167,8 @@ async function runDiagnosticStep(
       status: response.status,
       elapsedMs: Date.now() - startedAt,
     }
-  } catch (error) {
+  }
+  catch (error) {
     return {
       name,
       ok: false,
@@ -198,7 +201,7 @@ async function diagnoseScmAccess() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          Referer: LOGIN_PAGE_URL,
+          'Referer': LOGIN_PAGE_URL,
           'X-Requested-With': 'XMLHttpRequest',
         },
         body: loginBody,
@@ -219,7 +222,7 @@ async function diagnoseScmAccess() {
 }
 
 function add32(a: number, b: number) {
-  return (a + b) & 0xffffffff
+  return (a + b) & 0xFFFFFFFF
 }
 
 function rotateLeft(value: number, shift: number) {
@@ -243,19 +246,78 @@ function md5(input: string) {
   )
 
   let a0 = 0x67452301
-  let b0 = 0xefcdab89
-  let c0 = 0x98badcfe
+  let b0 = 0xEFCDAB89
+  let c0 = 0x98BADCFE
   let d0 = 0x10325476
 
   const shifts = [
-    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5,
-    9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11,
-    16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10,
-    15, 21,
+    7,
+    12,
+    17,
+    22,
+    7,
+    12,
+    17,
+    22,
+    7,
+    12,
+    17,
+    22,
+    7,
+    12,
+    17,
+    22,
+    5,
+    9,
+    14,
+    20,
+    5,
+    9,
+    14,
+    20,
+    5,
+    9,
+    14,
+    20,
+    5,
+    9,
+    14,
+    20,
+    4,
+    11,
+    16,
+    23,
+    4,
+    11,
+    16,
+    23,
+    4,
+    11,
+    16,
+    23,
+    4,
+    11,
+    16,
+    23,
+    6,
+    10,
+    15,
+    21,
+    6,
+    10,
+    15,
+    21,
+    6,
+    10,
+    15,
+    21,
+    6,
+    10,
+    15,
+    21,
   ]
   const constants = Array.from({ length: 64 }, (_, i) =>
-    Math.floor(Math.abs(Math.sin(i + 1)) * 0x100000000),
-  )
+    Math.floor(Math.abs(Math.sin(i + 1)) * 0x100000000))
 
   for (let offset = 0; offset < paddedLength; offset += 64) {
     let a = a0
@@ -263,8 +325,7 @@ function md5(input: string) {
     let c = c0
     let d = d0
     const words = Array.from({ length: 16 }, (_, i) =>
-      view.getUint32(offset + i * 4, true),
-    )
+      view.getUint32(offset + i * 4, true))
 
     for (let i = 0; i < 64; i++) {
       let f: number
@@ -273,13 +334,16 @@ function md5(input: string) {
       if (i < 16) {
         f = (b & c) | (~b & d)
         g = i
-      } else if (i < 32) {
+      }
+      else if (i < 32) {
         f = (d & b) | (~d & c)
         g = (5 * i + 1) % 16
-      } else if (i < 48) {
+      }
+      else if (i < 48) {
         f = b ^ c ^ d
         g = (3 * i + 5) % 16
-      } else {
+      }
+      else {
         f = c ^ (b | ~d)
         g = (7 * i) % 16
       }
@@ -304,10 +368,9 @@ function md5(input: string) {
   }
 
   return [a0, b0, c0, d0]
-    .map((word) =>
+    .map(word =>
       Array.from({ length: 4 }, (_, i) =>
-        ((word >>> (i * 8)) & 0xff).toString(16).padStart(2, '0'),
-      ).join(''),
+        ((word >>> (i * 8)) & 0xFF).toString(16).padStart(2, '0')).join(''),
     )
     .join('')
 }
@@ -343,8 +406,8 @@ async function loginToScm() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Cookie: serializeCookies(cookieMap),
-        Referer: LOGIN_PAGE_URL,
+        'Cookie': serializeCookies(cookieMap),
+        'Referer': LOGIN_PAGE_URL,
         'X-Requested-With': 'XMLHttpRequest',
       },
       body: loginBody,
@@ -374,8 +437,8 @@ function extractDataArray(responseText: string) {
 
   let startIndex = colonIndex + 1
   while (
-    startIndex < responseText.length &&
-    /\s/.test(responseText[startIndex])
+    startIndex < responseText.length
+    && /\s/.test(responseText[startIndex])
   ) {
     startIndex++
   }
@@ -412,7 +475,8 @@ function extractDataArray(responseText: string) {
 
     if (char === '[') {
       depth++
-    } else if (char === ']') {
+    }
+    else if (char === ']') {
       depth--
       if (depth === 0) {
         return responseText.substring(startIndex, i + 1)
@@ -460,11 +524,11 @@ async function fetchStoreReport(storeInNo: string) {
     {
       method: 'POST',
       headers: {
-        Accept: 'text/plain, */*; q=0.01',
+        'Accept': 'text/plain, */*; q=0.01',
         'Content-Type': 'application/x-www-form-urlencoded',
-        Cookie: cookie,
-        Origin: SCM_BASE_URL,
-        Referer: REPORT_PAGE_URL,
+        'Cookie': cookie,
+        'Origin': SCM_BASE_URL,
+        'Referer': REPORT_PAGE_URL,
         'X-Requested-With': 'XMLHttpRequest',
       },
       body,
@@ -520,7 +584,8 @@ serve(async (request: Request) => {
       'page:syney-store-report-list',
       payload.diagnose === true,
     )
-  } catch (error) {
+  }
+  catch (error) {
     console.error('syney_edge_auth_failure', safeErrorMetadata(error))
     return respond({ error: '西尼入库单代理服务暂不可用' }, 502)
   }
@@ -537,7 +602,8 @@ serve(async (request: Request) => {
     if (!(await consumeEdgeProxyRateLimit(request, 'syney-store-report'))) {
       return respond({ error: '请求过于频繁，请稍后重试' }, 429)
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('syney_edge_rate_limit_failure', safeErrorMetadata(error))
     return respond({ error: '西尼入库单代理服务暂不可用' }, 502)
   }
@@ -559,7 +625,8 @@ serve(async (request: Request) => {
       total: items.length,
       items,
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('syney_edge_upstream_failure', safeErrorMetadata(error))
     return respond({ error: '西尼入库单代理服务暂不可用' }, 502)
   }

@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { App, Button, Card, Input, Result, Spin, Tag, Typography } from 'antd'
-import { useParams } from 'react-router-dom'
-
 import type { PublicToolingFixture } from '@/services/apiToolingFixturePublic'
+import { App, Button, Card, Input, Result, Spin, Tag, Typography } from 'antd'
+import { useState } from 'react'
+
+import { useParams } from 'react-router-dom'
 import {
   usePublicToolingFixture,
   useRecordPublicToolingFixtureAction,
@@ -77,7 +77,8 @@ export default function ToolingFixturePublicPage() {
       })
       setOperatorName('')
       message.success(action === '使用' ? '工装已登记使用' : '工装已登记归还')
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '工装操作失败')
     }
   }
@@ -154,7 +155,7 @@ export default function ToolingFixturePublicPage() {
               size="large"
               maxLength={50}
               value={operatorName}
-              onChange={(event) => setOperatorName(event.target.value)}
+              onChange={event => setOperatorName(event.target.value)}
               placeholder="请输入姓名后操作"
               className="rounded-xl"
             />
@@ -165,8 +166,8 @@ export default function ToolingFixturePublicPage() {
                 block
                 disabled={isInUse}
                 loading={
-                  actionMutation.isPending &&
-                  actionMutation.variables?.action === '使用'
+                  actionMutation.isPending
+                  && actionMutation.variables?.action === '使用'
                 }
                 onClick={() => void handleAction('使用')}
                 className="h-12 rounded-xl"
@@ -178,8 +179,8 @@ export default function ToolingFixturePublicPage() {
                 block
                 disabled={!isInUse}
                 loading={
-                  actionMutation.isPending &&
-                  actionMutation.variables?.action === '归还'
+                  actionMutation.isPending
+                  && actionMutation.variables?.action === '归还'
                 }
                 onClick={() => void handleAction('归还')}
                 className="h-12 rounded-xl"

@@ -1,11 +1,11 @@
 import dayjs from 'dayjs'
 
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
 import {
   buildOrIlikeFilter,
   normalizeSearchKeywords,
 } from '@/utils/searchKeywords'
+import supabase from './supabase'
 
 /**
  * 审核状态口径说明：
@@ -43,8 +43,8 @@ export const QUALITY_ISSUE_AUDIT_STATUSES = [
   'rejected',
 ] as const
 
-export type QualityIssueAuditStatus =
-  (typeof QUALITY_ISSUE_AUDIT_STATUSES)[number]
+export type QualityIssueAuditStatus
+  = (typeof QUALITY_ISSUE_AUDIT_STATUSES)[number]
 
 export const QUALITY_ISSUE_AUDIT_STATUS_LABELS: Record<
   QualityIssueAuditStatus,
@@ -170,7 +170,7 @@ type QualityIssueRecordPayload = Omit<
   shift_leader_name: string
 }
 
-type QualityIssueRecordTable = {
+interface QualityIssueRecordTable {
   from: (table: string) => any
 }
 
@@ -194,7 +194,7 @@ function trimText(value: string | undefined | null) {
 
 function emptyToNull(value: string | undefined | null) {
   const normalized = value?.trim()
-  return normalized ? normalized : null
+  return normalized || null
 }
 
 function optionalNumber(value: number | null | undefined) {
@@ -455,7 +455,8 @@ export async function getQualityIssueRecordOrderOptions() {
       })
     }
 
-    if ((data || []).length < EXPORT_PAGE_SIZE) break
+    if ((data || []).length < EXPORT_PAGE_SIZE)
+      break
     from += EXPORT_PAGE_SIZE
   }
 

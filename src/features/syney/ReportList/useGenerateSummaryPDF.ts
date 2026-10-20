@@ -1,15 +1,16 @@
 import { App } from 'antd'
 
-import { useSelectedReports } from './useSelectedReports'
 import { useAppStore } from '@/store'
-
 import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
 
-const loadPDFDependencies = () =>
-  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
+import { useSelectedReports } from './useSelectedReports'
+
+function loadPDFDependencies() {
+  return Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
+}
 
 export function useGenerateSummaryPDF() {
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
   const { message } = App.useApp()
 
   // 只在有选中项时才查询数据
@@ -88,7 +89,8 @@ export function useGenerateSummaryPDF() {
 
       message.success(`PDF生成完成: ${filename}`)
       return true // 返回 true 表示生成成功
-    } catch (error) {
+    }
+    catch (error) {
       console.error('生成汇总 PDF 时发生错误:', error)
       message.error(
         error instanceof Error ? error.message : 'PDF生成失败，请重试',

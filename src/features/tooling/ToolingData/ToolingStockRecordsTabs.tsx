@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Pagination, Table, Tag } from 'antd'
 import type { TableColumnsType } from 'antd'
-
 import type { ToolingStockIn } from '@/services/apiToolingStockIn'
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
+
+import { Alert, Button, Pagination, Table, Tag } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
 import { TableEmpty } from '@/ui/TableState'
 import { formatNumber } from '@/utils/format'
 import {
@@ -37,7 +37,7 @@ function RecordsPagination({
         pageSize={TOOLING_DETAIL_RECORDS_PAGE_SIZE}
         total={total}
         showSizeChanger={false}
-        showTotal={(value) => `共 ${value} 条`}
+        showTotal={value => `共 ${value} 条`}
         onChange={onChange}
       />
     </div>
@@ -50,11 +50,11 @@ function RecordsError({ onRetry }: { onRetry: () => void }) {
       type="error"
       showIcon
       title="获取刀具出入库记录失败"
-      action={
+      action={(
         <Button size="small" onClick={onRetry}>
           重试
         </Button>
-      }
+      )}
     />
   )
 }
@@ -113,7 +113,7 @@ export function ToolingStockInRecordsTab({
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
-      setPage((current) => Math.max(current - 1, 1))
+      setPage(current => Math.max(current - 1, 1))
     }
   }, [data, page])
 
@@ -142,8 +142,7 @@ export function ToolingStockInRecordsTab({
         rowClassName={(_, index) =>
           index % 2 === 0
             ? 'bg-white dark:bg-slate-800'
-            : 'bg-slate-50/60 dark:bg-slate-800/60'
-        }
+            : 'bg-slate-50/60 dark:bg-slate-800/60'}
       />
       <RecordsPagination
         page={page}
@@ -244,7 +243,7 @@ export function ToolingStockOutRecordsTab({
 
   useEffect(() => {
     if (page > 1 && data && data.items.length === 0) {
-      setPage((current) => Math.max(current - 1, 1))
+      setPage(current => Math.max(current - 1, 1))
     }
   }, [data, page])
 
@@ -273,8 +272,7 @@ export function ToolingStockOutRecordsTab({
         rowClassName={(_, index) =>
           index % 2 === 0
             ? 'bg-white dark:bg-slate-800'
-            : 'bg-slate-50/60 dark:bg-slate-800/60'
-        }
+            : 'bg-slate-50/60 dark:bg-slate-800/60'}
       />
       <RecordsPagination
         page={page}

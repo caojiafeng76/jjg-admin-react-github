@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface JintanPartsData {
   id: string
@@ -172,7 +172,7 @@ export async function createJintanPartsDataBatch(
     seenKeys.add(key)
   }
 
-  const partNames = Array.from(new Set(payload.map((row) => row.part_name)))
+  const partNames = Array.from(new Set(payload.map(row => row.part_name)))
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_parts_data')
     .select('part_name, specification')
@@ -183,12 +183,12 @@ export async function createJintanPartsDataBatch(
   }
 
   const existingKeys = new Set(
-    (existingRows || []).map((row) => partsKeyOf(row)),
+    (existingRows || []).map(row => partsKeyOf(row)),
   )
-  const duplicated = payload.filter((row) => existingKeys.has(partsKeyOf(row)))
+  const duplicated = payload.filter(row => existingKeys.has(partsKeyOf(row)))
   if (duplicated.length > 0) {
     const labels = duplicated
-      .map((row) => `“${row.part_name}”/“${row.specification}”`)
+      .map(row => `“${row.part_name}”/“${row.specification}”`)
       .join('、')
     throw new Error(`以下配件已存在，无法导入：${labels}`)
   }

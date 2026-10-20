@@ -1,21 +1,23 @@
-import { useState } from 'react'
+import type { TableColumnsType } from 'antd'
+import type { UploadFile } from 'antd/es/upload/interface'
+import type { JintanProfilesDataFormValues } from '@/services/apiJintanProfilesData'
+import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 import {
   Alert,
   Button,
   Modal,
   Table,
-  type TableColumnsType,
+
   Upload,
 } from 'antd'
-import type { UploadFile } from 'antd/es/upload/interface'
-import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 
-import type { JintanProfilesDataFormValues } from '@/services/apiJintanProfilesData'
+import { useState } from 'react'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
 
-const loadJintanProfilesDataExcel = () =>
-  import('@/utils/jintanProfilesDataExcel')
+function loadJintanProfilesDataExcel() {
+  return import('@/utils/jintanProfilesDataExcel')
+}
 
 function preloadJintanProfilesDataExcel() {
   void loadJintanProfilesDataExcel()
@@ -77,12 +79,12 @@ export default function JintanProfilesDataExcelImport({
   const [parsing, setParsing] = useState(false)
 
   const handleBeforeUpload = async (file: File) => {
-    const isExcel =
-      file.type === 'application/vnd.ms-excel' ||
-      file.type ===
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-      file.name.endsWith('.xls') ||
-      file.name.endsWith('.xlsx')
+    const isExcel
+      = file.type === 'application/vnd.ms-excel'
+        || file.type
+        === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        || file.name.endsWith('.xls')
+        || file.name.endsWith('.xlsx')
 
     if (!isExcel) {
       return Upload.LIST_IGNORE
@@ -90,21 +92,23 @@ export default function JintanProfilesDataExcelImport({
 
     setParsing(true)
     try {
-      const { parseJintanProfilesDataExcel } =
-        await loadJintanProfilesDataExcel()
+      const { parseJintanProfilesDataExcel }
+        = await loadJintanProfilesDataExcel()
       const { rows, errors } = await parseJintanProfilesDataExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
       setFileList([
         { uid: file.name, name: file.name, status: 'done' } as UploadFile,
       ])
-    } catch (error) {
+    }
+    catch (error) {
       setParseErrors([
         error instanceof Error ? error.message : 'Excel 解析失败',
       ])
       setParsedRows([])
       setFileList([])
-    } finally {
+    }
+    finally {
       setParsing(false)
     }
 
@@ -119,8 +123,8 @@ export default function JintanProfilesDataExcelImport({
   }
 
   const handleDownloadTemplate = async () => {
-    const { downloadJintanProfilesDataTemplate } =
-      await loadJintanProfilesDataExcel()
+    const { downloadJintanProfilesDataTemplate }
+      = await loadJintanProfilesDataExcel()
     downloadJintanProfilesDataTemplate()
   }
 
@@ -212,7 +216,7 @@ export default function JintanProfilesDataExcelImport({
               type="warning"
               showIcon
               title={`解析时发现 ${parseErrors.length} 个问题`}
-              description={
+              description={(
                 <ul className="mt-1 list-inside list-disc text-xs">
                   {parseErrors.slice(0, 10).map((error, index) => (
                     <li key={index}>{error}</li>
@@ -221,7 +225,7 @@ export default function JintanProfilesDataExcelImport({
                     <li>...还有 {parseErrors.length - 10} 条</li>
                   )}
                 </ul>
-              }
+              )}
             />
           )}
 

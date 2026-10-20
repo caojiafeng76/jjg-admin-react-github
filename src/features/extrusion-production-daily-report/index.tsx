@@ -1,23 +1,24 @@
-import { useCallback, useMemo, useState } from 'react'
-import { App, Button, Space } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { TableState } from '@/ui/TableState'
 import type {
   ExtrusionProductionDailyReportFilters,
 } from '@/services/apiExtrusionProductionDailyReport'
+import { App, Button, Space } from 'antd'
+import { useCallback, useMemo, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   getExtrusionProductionDailyReportForExport,
 } from '@/services/apiExtrusionProductionDailyReport'
+import { TableState } from '@/ui/TableState'
 import ExtrusionProductionDailyReportSearch from './ExtrusionProductionDailyReportSearch'
 import ExtrusionProductionDailyReportTable from './ExtrusionProductionDailyReportTable'
 import { useExtrusionProductionDailyReport } from './useExtrusionProductionDailyReport'
 
-const loadExtrusionProductionDailyReportExcel = () =>
-  import('@/utils/extrusionProductionDailyReportExcel')
+function loadExtrusionProductionDailyReportExcel() {
+  return import('@/utils/extrusionProductionDailyReportExcel')
+}
 
-const preloadExtrusionProductionDailyReportExcel = () => {
+function preloadExtrusionProductionDailyReportExcel() {
   void loadExtrusionProductionDailyReportExcel()
 }
 
@@ -27,12 +28,12 @@ export default function ExtrusionProductionDailyReportPage() {
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [searchFilters, setSearchFilters] =
-    useState<ExtrusionProductionDailyReportFilters>({})
+  const [searchFilters, setSearchFilters]
+    = useState<ExtrusionProductionDailyReportFilters>({})
   const [isExporting, setIsExporting] = useState(false)
 
-  const { data, isLoading, isFetching, error, refetch } =
-    useExtrusionProductionDailyReport({
+  const { data, isLoading, isFetching, error, refetch }
+    = useExtrusionProductionDailyReport({
       page,
       pageSize,
       filters: searchFilters,
@@ -87,16 +88,18 @@ export default function ExtrusionProductionDailyReportPage() {
         return
       }
 
-      const { exportExtrusionProductionDailyReportToExcel } =
-        await loadExtrusionProductionDailyReportExcel()
+      const { exportExtrusionProductionDailyReportToExcel }
+        = await loadExtrusionProductionDailyReportExcel()
       exportExtrusionProductionDailyReportToExcel(exportRows)
       message.success({ content: '导出成功', key: 'export' })
-    } catch (error) {
+    }
+    catch (error) {
       message.error({
         content: error instanceof Error ? error.message : '导出失败',
         key: 'export',
       })
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [message, searchFilters])
@@ -184,8 +187,7 @@ export default function ExtrusionProductionDailyReportPage() {
             </Button>
             <Button
               onClick={() =>
-                handlePageChange(Math.ceil(total / pageSize), pageSize)
-              }
+                handlePageChange(Math.ceil(total / pageSize), pageSize)}
               disabled={page >= Math.ceil(total / pageSize)}
               size="small"
             >

@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync, rmSync, rmdirSync } from 'node:fs'
+import { mkdtempSync, rmdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -8,10 +8,12 @@ export function withSqlSnapshot(sql, execute) {
   try {
     writeFileSync(file, sql, { encoding: 'utf8', mode: 0o600, flag: 'wx' })
     return execute(file)
-  } finally {
+  }
+  finally {
     try {
       rmSync(file, { force: true })
-    } finally {
+    }
+    finally {
       rmdirSync(directory)
     }
   }

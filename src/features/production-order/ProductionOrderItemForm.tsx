@@ -1,24 +1,24 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Modal, Form, InputNumber, Select, Input, Tag, Space } from 'antd'
+import type { ScannedProjectPayload } from './ProjectNoScanButton'
+import type { ProcessStandardMatchLevel } from './useProcessStandards'
 
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import { Form, Input, InputNumber, Modal, Select, Space, Tag } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import { isViewerRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
+import ProjectNoScanButton from './ProjectNoScanButton'
 import {
   buildProjectNoSelectOptions,
   filterProjectNoOption,
   renderProjectNoOption,
 } from './projectNoSelect'
-import ProjectNoScanButton, {
-  type ScannedProjectPayload,
-} from './ProjectNoScanButton'
-import {
-  useSalesOrdersProjectNos,
-  useSalesOrderByProjectNo,
-  useOperationsByModel,
-  type ProcessStandardMatchLevel,
-} from './useProcessStandards'
 import { useMachineEquipmentOptions } from './useMachineEquipmentOptions'
-import { useAuth } from '@/contexts/useAuth'
-import { isViewerRole } from '@/config/access'
+import {
+
+  useOperationsByModel,
+  useSalesOrderByProjectNo,
+  useSalesOrdersProjectNos,
+} from './useProcessStandards'
 
 interface Props {
   open: boolean
@@ -74,8 +74,8 @@ export default function ProductionOrderItemForm({
     }),
     [orderId],
   )
-  const { data: projectNos, isLoading: loadingProjectNos } =
-    useSalesOrdersProjectNos()
+  const { data: projectNos, isLoading: loadingProjectNos }
+    = useSalesOrdersProjectNos()
   const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
     Record<string, ProjectNoData>
   >({})
@@ -93,11 +93,11 @@ export default function ProductionOrderItemForm({
 
   const projectNoData = useMemo(() => {
     const existing = projectNos?.find(
-      (item) => item.project_no === selectedProjectNo,
+      item => item.project_no === selectedProjectNo,
     )
-    return (existing ||
-      selectedSalesOrderDetail ||
-      (selectedProjectNo
+    return (existing
+      || selectedSalesOrderDetail
+      || (selectedProjectNo
         ? scannedProjectDataMap[selectedProjectNo]
         : undefined)) as ProjectNoData | undefined
   }, [
@@ -112,7 +112,7 @@ export default function ProductionOrderItemForm({
   )
   const mergedProjectNoOptions = useMemo(() => {
     const existingProjectNos = new Set(
-      projectNoOptions.map((item) => item.value),
+      projectNoOptions.map(item => item.value),
     )
     const scannedProjectNos = Object.entries(scannedProjectDataMap)
       .filter(([projectNo]) => !existingProjectNos.has(projectNo))
@@ -128,11 +128,11 @@ export default function ProductionOrderItemForm({
       ...scannedProjectNos,
     ])
   }, [projectNoOptions, projectNos, scannedProjectDataMap])
-  const productModel =
-    projectNoData?.product_model ||
-    selectedProductModel ||
-    initialValues?.product_model ||
-    ''
+  const productModel
+    = projectNoData?.product_model
+      || selectedProductModel
+      || initialValues?.product_model
+      || ''
 
   const { data: operationMatch } = useOperationsByModel({
     model: productModel || undefined,
@@ -145,7 +145,7 @@ export default function ProductionOrderItemForm({
 
   const operationOptions = useMemo(
     () =>
-      operations?.map((item) => ({
+      operations?.map(item => ({
         label: item.operation,
         value: item.operation,
       })) || [],
@@ -155,7 +155,8 @@ export default function ProductionOrderItemForm({
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues)
-    } else {
+    }
+    else {
       setScannedProjectDataMap({})
       form.resetFields()
       form.setFieldsValue({
@@ -187,15 +188,15 @@ export default function ProductionOrderItemForm({
   }, [projectNoData, form])
 
   useEffect(() => {
-    const normalizedOperation =
-      typeof selectedOperation === 'string' ? selectedOperation.trim() : ''
+    const normalizedOperation
+      = typeof selectedOperation === 'string' ? selectedOperation.trim() : ''
 
     if (!normalizedOperation) {
       return
     }
 
     const operationData = operations?.find(
-      (op) => op.operation === normalizedOperation,
+      op => op.operation === normalizedOperation,
     )
     const currentStandardSeconds = form.getFieldValue('standard_seconds')
 
@@ -210,9 +211,9 @@ export default function ProductionOrderItemForm({
     }
 
     if (
-      currentStandardSeconds === undefined ||
-      currentStandardSeconds === null ||
-      currentStandardSeconds === ''
+      currentStandardSeconds === undefined
+      || currentStandardSeconds === null
+      || currentStandardSeconds === ''
     ) {
       form.setFieldsValue({ standard_seconds: 0 })
     }
@@ -233,9 +234,9 @@ export default function ProductionOrderItemForm({
         values.standard_seconds ?? form.getFieldValue('standard_seconds') ?? 0,
       ),
       theoretical_seconds: Number(
-        values.theoretical_seconds ??
-          form.getFieldValue('theoretical_seconds') ??
-          0,
+        values.theoretical_seconds
+        ?? form.getFieldValue('theoretical_seconds')
+        ?? 0,
       ),
       machine_equipment_id: values.machine_equipment_id ?? null,
       outsource_defect_quantity: Number(values.outsource_defect_quantity ?? 0),
@@ -258,7 +259,7 @@ export default function ProductionOrderItemForm({
   }
 
   const handleProjectNoScanResolved = (payload: ScannedProjectPayload) => {
-    setScannedProjectDataMap((prev) => ({
+    setScannedProjectDataMap(prev => ({
       ...prev,
       [payload.projectNo]: {
         project_no: payload.projectNo,
@@ -284,7 +285,7 @@ export default function ProductionOrderItemForm({
   const handleOperationChange = (value: string) => {
     const normalizedOperation = value.trim()
     const operationData = operations?.find(
-      (item) => item.operation === normalizedOperation,
+      item => item.operation === normalizedOperation,
     )
 
     form.setFieldsValue({
@@ -365,26 +366,30 @@ export default function ProductionOrderItemForm({
             <Input />
           </Form.Item>
 
-          {compact ? (
-            <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-              手机端建议先选择项目号，再补充工序、数量和不良数，便于自动带出型号与标准工时。
-            </div>
-          ) : null}
+          {compact
+            ? (
+                <div className="mb-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  手机端建议先选择项目号，再补充工序、数量和不良数，便于自动带出型号与标准工时。
+                </div>
+              )
+            : null}
 
-          {compact || hideCostColumns ? null : (
-            <Form.Item
-              name="data_category"
-              label="数据类别"
-              rules={[{ required: true, message: '请选择数据类别' }]}
-            >
-              <Select
-                options={[
-                  { label: 'A', value: 'A' },
-                  { label: 'B', value: 'B' },
-                ]}
-              />
-            </Form.Item>
-          )}
+          {compact || hideCostColumns
+            ? null
+            : (
+                <Form.Item
+                  name="data_category"
+                  label="数据类别"
+                  rules={[{ required: true, message: '请选择数据类别' }]}
+                >
+                  <Select
+                    options={[
+                      { label: 'A', value: 'A' },
+                      { label: 'B', value: 'B' },
+                    ]}
+                  />
+                </Form.Item>
+              )}
 
           <Form.Item label="项目号" required>
             <Space.Compact block>
@@ -436,7 +441,8 @@ export default function ProductionOrderItemForm({
               options={operationOptions}
               getPopupContainer={getPopupContainer}
               filterOption={(input, option) => {
-                if (!option) return false
+                if (!option)
+                  return false
                 return (
                   option.value
                     ?.toString()
@@ -449,17 +455,19 @@ export default function ProductionOrderItemForm({
             />
           </Form.Item>
 
-          {productModel && operationMatchLevel ? (
-            <div className="-mt-3 mb-4 text-sm text-slate-600 dark:text-slate-400">
-              成本核算匹配：
-              <Tag
-                color={MATCH_LEVEL_COLORS[operationMatchLevel]}
-                className="mr-0 ml-2"
-              >
-                {MATCH_LEVEL_LABELS[operationMatchLevel]}
-              </Tag>
-            </div>
-          ) : null}
+          {productModel && operationMatchLevel
+            ? (
+                <div className="-mt-3 mb-4 text-sm text-slate-600 dark:text-slate-400">
+                  成本核算匹配：
+                  <Tag
+                    color={MATCH_LEVEL_COLORS[operationMatchLevel]}
+                    className="mr-0 ml-2"
+                  >
+                    {MATCH_LEVEL_LABELS[operationMatchLevel]}
+                  </Tag>
+                </div>
+              )
+            : null}
 
           <Form.Item
             name="machine_equipment_id"
@@ -481,23 +489,24 @@ export default function ProductionOrderItemForm({
               disabled={!selectedOperation}
               optionLabelProp="label"
               filterOption={(input, option) => {
-                if (!option) return false
+                if (!option)
+                  return false
                 const search = input.toLowerCase()
                 return (
                   (option.unified_device_no as string)
                     ?.toLowerCase()
-                    .includes(search) ||
-                  (option.operation as string)
-                    ?.toLowerCase()
-                    .includes(search) ||
-                  (option.machine_name as string)
-                    ?.toLowerCase()
                     .includes(search)
+                    || (option.operation as string)
+                      ?.toLowerCase()
+                      .includes(search)
+                      || (option.machine_name as string)
+                        ?.toLowerCase()
+                        .includes(search)
                 )
               }}
               style={{ width: '100%' }}
             >
-              {filteredMachineOptions.map((m) => (
+              {filteredMachineOptions.map(m => (
                 <Select.Option
                   key={m.id ?? '__none__'}
                   value={m.id}
@@ -506,16 +515,18 @@ export default function ProductionOrderItemForm({
                   operation={m.operation}
                   machine_name={m.machine_name}
                 >
-                  {m.id === null ? (
-                    <span className="text-slate-400 dark:text-slate-500">无</span>
-                  ) : (
-                    <div className="flex flex-col py-0.5">
-                      <span>{m.unified_device_no}</span>
-                      <span className="text-xs text-slate-400 dark:text-slate-500">
-                        {m.operation} {m.machine_name}
-                      </span>
-                    </div>
-                  )}
+                  {m.id === null
+                    ? (
+                        <span className="text-slate-400 dark:text-slate-500">无</span>
+                      )
+                    : (
+                        <div className="flex flex-col py-0.5">
+                          <span>{m.unified_device_no}</span>
+                          <span className="text-xs text-slate-400 dark:text-slate-500">
+                            {m.operation} {m.machine_name}
+                          </span>
+                        </div>
+                      )}
                 </Select.Option>
               ))}
             </Select>
@@ -525,21 +536,23 @@ export default function ProductionOrderItemForm({
             <Input />
           </Form.Item>
 
-          {!compact && !hideCostColumns ? (
-            <Form.Item
-              name="standard_seconds"
-              label="标准工时(秒)"
-              rules={[{ required: true, message: '请输入标准工时' }]}
-            >
-              <InputNumber
-                min={0}
-                step={1}
-                style={{ width: '100%' }}
-                placeholder="根据工序自动带出"
-                disabled
-              />
-            </Form.Item>
-          ) : null}
+          {!compact && !hideCostColumns
+            ? (
+                <Form.Item
+                  name="standard_seconds"
+                  label="标准工时(秒)"
+                  rules={[{ required: true, message: '请输入标准工时' }]}
+                >
+                  <InputNumber
+                    min={0}
+                    step={1}
+                    style={{ width: '100%' }}
+                    placeholder="根据工序自动带出"
+                    disabled
+                  />
+                </Form.Item>
+              )
+            : null}
 
           <Form.Item
             name="incoming_qualified_quantity"
@@ -571,12 +584,12 @@ export default function ProductionOrderItemForm({
                   const setupDefectQuantity = Number(
                     getFieldValue('setup_defect_quantity') || 0,
                   )
-                  const minimumQuantity =
-                    qualifiedQuantity +
-                    defectQuantity1 +
-                    defectQuantity2 +
-                    outsourceDefectQuantity +
-                    setupDefectQuantity
+                  const minimumQuantity
+                    = qualifiedQuantity
+                      + defectQuantity1
+                      + defectQuantity2
+                      + outsourceDefectQuantity
+                      + setupDefectQuantity
 
                   if (incomingQualifiedQuantity < minimumQuantity) {
                     throw new Error('来料接收数不能小于成品合格数与不良数之和')

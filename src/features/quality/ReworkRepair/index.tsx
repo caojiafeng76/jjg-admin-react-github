@@ -1,20 +1,19 @@
-import { type Key, useCallback, useEffect, useMemo, useState } from 'react'
-import dayjs from 'dayjs'
-import { App, Form, Tabs } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { buildProjectNoSelectOptions } from '@/features/production-order/projectNoSelect'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { Key } from 'react'
+import type { QualityReworkRepairFormFields, WorkflowStageKey } from './reworkRepairFormUtils'
 import type {
   QualityReworkRepairOrderOption,
   QualityReworkRepairSearchParams,
 } from '@/services/apiQualityReworkRepair'
+import { App, Form, Tabs } from 'antd'
+import dayjs from 'dayjs'
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { buildProjectNoSelectOptions } from '@/features/production-order/projectNoSelect'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AppPagination from '@/ui/AppPagination'
 import ReworkRepairFormModal from './ReworkRepairFormModal'
-import ReworkRepairSearch from './ReworkRepairSearch'
-import ReworkRepairTable from './ReworkRepairTable'
-import ReworkRepairToolbar from './ReworkRepairToolbar'
 import {
   buildPayload,
   buildSpecificationModel,
@@ -23,13 +22,16 @@ import {
   formatOrderText,
   parseCategory,
   parseWorkflowStatus,
+
   toFormValues,
   WORKFLOW_STAGE_BY_KEY,
   WORKFLOW_STAGE_BY_STATUS,
   WORKFLOW_STAGES,
-  type QualityReworkRepairFormFields,
-  type WorkflowStageKey,
+
 } from './reworkRepairFormUtils'
+import ReworkRepairSearch from './ReworkRepairSearch'
+import ReworkRepairTable from './ReworkRepairTable'
+import ReworkRepairToolbar from './ReworkRepairToolbar'
 import {
   useCreateQualityReworkRepair,
   useDeleteQualityReworkRepair,
@@ -47,9 +49,9 @@ export default function QualityReworkRepairPage() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const activeWorkflowStatus =
-    parseWorkflowStatus(searchParamsURL.get('workflowStatus')) ||
-    DEFAULT_WORKFLOW_STATUS
+  const activeWorkflowStatus
+    = parseWorkflowStatus(searchParamsURL.get('workflowStatus'))
+      || DEFAULT_WORKFLOW_STATUS
   const activeStage = WORKFLOW_STAGE_BY_STATUS[activeWorkflowStatus]
 
   const searchParams = useMemo<QualityReworkRepairSearchParams>(
@@ -69,8 +71,8 @@ export default function QualityReworkRepairPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
-  const [processingStageKey, setProcessingStageKey] =
-    useState<WorkflowStageKey>('workshop')
+  const [processingStageKey, setProcessingStageKey]
+    = useState<WorkflowStageKey>('workshop')
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
   const { data, isLoading } = useQualityReworkRepairList({
@@ -79,17 +81,17 @@ export default function QualityReworkRepairPage() {
     searchParams: listSearchParams,
   })
 
-  const { data: orderOptions = [], isLoading: isLoadingOrderOptions } =
-    useQualityReworkRepairOrderOptions()
-  const { data: nextDocumentNo, isFetching: isFetchingDocumentNo } =
-    useNextQualityReworkRepairDocumentNo(isModalOpen && !isEdit)
+  const { data: orderOptions = [], isLoading: isLoadingOrderOptions }
+    = useQualityReworkRepairOrderOptions()
+  const { data: nextDocumentNo, isFetching: isFetchingDocumentNo }
+    = useNextQualityReworkRepairDocumentNo(isModalOpen && !isEdit)
 
   const createMutation = useCreateQualityReworkRepair()
   const updateMutation = useUpdateQualityReworkRepair()
   const deleteMutation = useDeleteQualityReworkRepair()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -142,7 +144,7 @@ export default function QualityReworkRepairPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条返工返修记录进行处理')
       return
@@ -184,10 +186,12 @@ export default function QualityReworkRepairPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('返工返修记录删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除返工返修记录失败，请稍后重试')
       }
     }
@@ -218,16 +222,19 @@ export default function QualityReworkRepairPage() {
           values: payload,
         })
         message.success(`${processingStage.label}处理成功`)
-      } else {
+      }
+      else {
         await createMutation.mutateAsync(payload)
         message.success('返工返修记录已保存到车间发起')
       }
 
       resetFormState()
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('操作失败，请稍后重试')
       }
     }
@@ -268,13 +275,15 @@ export default function QualityReworkRepairPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
       if (params.reworkCategory) {
         nextSearchParamsURL.set('reworkCategory', params.reworkCategory)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('reworkCategory')
       }
 
@@ -339,7 +348,7 @@ export default function QualityReworkRepairPage() {
 
       <Tabs
         activeKey={activeStage.key}
-        items={WORKFLOW_STAGES.map((stage) => ({
+        items={WORKFLOW_STAGES.map(stage => ({
           key: stage.key,
           label: stage.label,
         }))}

@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import type { JintanPartsStockStatus } from '@/services/apiJintanPartsInventory'
 import { Button, Form, Input, Select, Space } from 'antd'
 
-import type { JintanPartsStockStatus } from '@/services/apiJintanPartsInventory'
+import { useEffect } from 'react'
 import { JINTAN_PARTS_STOCK_STATUS_OPTIONS } from './stockStatus'
 
 export interface JintanPartsInventorySearchValues {

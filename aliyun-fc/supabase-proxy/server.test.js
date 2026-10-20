@@ -21,7 +21,7 @@ function listen(server) {
 }
 
 function close(server) {
-  return new Promise((resolve) => server.close(resolve))
+  return new Promise(resolve => server.close(resolve))
 }
 
 async function withProxy(upstreamHandler, options, run) {
@@ -40,7 +40,8 @@ async function withProxy(upstreamHandler, options, run) {
 
   try {
     await run(`http://127.0.0.1:${proxyPort}`)
-  } finally {
+  }
+  finally {
     agent.destroy()
     await close(proxy)
     await close(upstream)
@@ -62,10 +63,10 @@ test('hop-by-hop headers are stripped and host is rewritten', () => {
   const upstreamUrl = new URL('https://project.supabase.co')
   const headers = buildUpstreamHeaders(
     {
-      apikey: 'key',
-      authorization: 'Bearer token',
-      connection: 'keep-alive, x-custom-hop',
-      host: 'proxy.example.com',
+      'apikey': 'key',
+      'authorization': 'Bearer token',
+      'connection': 'keep-alive, x-custom-hop',
+      'host': 'proxy.example.com',
       'keep-alive': 'timeout=5',
       'transfer-encoding': 'chunked',
       'x-custom-hop': '1',
@@ -81,7 +82,7 @@ test('hop-by-hop headers are stripped and host is rewritten', () => {
   assert.deepEqual(
     filterResponseHeaders({
       'access-control-allow-origin': '*',
-      connection: 'close',
+      'connection': 'close',
       'content-type': 'application/json',
     }),
     {
@@ -118,7 +119,7 @@ test('requests are forwarded with method, path, headers and body', async () => {
   await withProxy(
     (req, res) => {
       const chunks = []
-      req.on('data', (chunk) => chunks.push(chunk))
+      req.on('data', chunk => chunks.push(chunk))
       req.on('end', () => {
         received = {
           body: Buffer.concat(chunks).toString(),
@@ -138,7 +139,7 @@ test('requests are forwarded with method, path, headers and body', async () => {
     async (proxyUrl) => {
       const response = await fetch(`${proxyUrl}/rest/v1/items?select=id`, {
         body: '{"name":"a"}',
-        headers: { apikey: 'key', 'content-type': 'application/json' },
+        headers: { 'apikey': 'key', 'content-type': 'application/json' },
         method: 'POST',
       })
 
@@ -201,7 +202,8 @@ test('upstream failures return 502', async () => {
     assert.deepEqual(await response.json(), {
       message: 'Upstream request failed',
     })
-  } finally {
+  }
+  finally {
     console.error = originalConsoleError
     await close(proxy)
   }

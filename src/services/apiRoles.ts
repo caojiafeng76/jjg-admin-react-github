@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface RoleRow {
   key: string
@@ -16,7 +16,8 @@ export async function getRoles(): Promise<RoleRow[]> {
     .select('*')
     .order('is_builtin', { ascending: false })
     .order('created_at', { ascending: true })
-  if (error) throw handleApiError(error, '角色列表加载失败')
+  if (error)
+    throw handleApiError(error, '角色列表加载失败')
   return data ?? []
 }
 
@@ -40,17 +41,19 @@ export async function createRole(input: CreateRoleInput): Promise<RoleRow> {
     })
     .select()
     .single()
-  if (error) throw handleApiError(error, '角色创建失败')
+  if (error)
+    throw handleApiError(error, '角色创建失败')
 
   if (permissionIds && permissionIds.length > 0) {
-    const rows = permissionIds.map((permission_id) => ({
+    const rows = permissionIds.map(permission_id => ({
       role: key,
       permission_id,
     }))
     const { error: rpError } = await supabase
       .from('role_permissions')
       .insert(rows)
-    if (rpError) throw handleApiError(rpError, '角色权限初始化失败')
+    if (rpError)
+      throw handleApiError(rpError, '角色权限初始化失败')
   }
 
   return data as RoleRow
@@ -59,5 +62,6 @@ export async function createRole(input: CreateRoleInput): Promise<RoleRow> {
 /** 删除自定义角色（内置角色由 RLS 拦截） */
 export async function deleteRole(key: string): Promise<void> {
   const { error } = await supabase.from('roles').delete().eq('key', key)
-  if (error) throw handleApiError(error, '角色删除失败')
+  if (error)
+    throw handleApiError(error, '角色删除失败')
 }

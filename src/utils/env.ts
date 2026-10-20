@@ -36,8 +36,10 @@ export function validateSupabaseEnv() {
 
   // 验证 URL 格式
   try {
+    // eslint-disable-next-line no-new -- 仅用构造函数校验 URL 格式
     new URL(supabaseUrl)
-  } catch {
+  }
+  catch {
     throw new Error(
       `环境变量 VITE_REACT_APP_SUPABASE_URL 格式无效: ${supabaseUrl}`,
     )
@@ -76,8 +78,10 @@ export function resolveSupabaseProxyUrl(
   }
 
   try {
+    // eslint-disable-next-line no-new -- 仅用构造函数校验 URL 格式
     new URL(proxyUrl)
-  } catch {
+  }
+  catch {
     throw new Error(
       `环境变量 VITE_REACT_APP_SUPABASE_PROXY_URL 格式无效: ${proxyUrl}`,
     )
@@ -108,7 +112,8 @@ export function validateAllEnvVars() {
       supabaseKey,
       isValid: true,
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('环境变量验证失败:', error)
     if (error instanceof Error) {
       console.error(error.message)

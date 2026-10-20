@@ -1,4 +1,4 @@
-import XLSX from 'npm:xlsx-js-style@1.2.0'
+import type XLSX from 'npm:xlsx-js-style@1.2.0'
 
 function getColumnLetter(columnIndex: number): string {
   let letter = ''

@@ -1,18 +1,19 @@
-import { useState } from 'react'
-import { App } from 'antd'
+import type { ISyneyItem } from '@services/types'
 import type jsPDF from 'jspdf'
+import { App } from 'antd'
 
-import { ISyneyItem } from '@services/types'
-import { useSelectedReports } from './useSelectedReports'
+import { useState } from 'react'
 import { useAppStore } from '@/store'
+import { TABLE_COLUMNS, TABLE_CONFIG } from '@/utils/pdfConstants'
 
-import { TABLE_CONFIG, TABLE_COLUMNS } from '@/utils/pdfConstants'
+import { useSelectedReports } from './useSelectedReports'
 
 type AutoTable = (typeof import('jspdf-autotable'))['default']
 type PDFUtils = typeof import('@/utils/pdfUtils')
 
-const loadPDFDependencies = () =>
-  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
+function loadPDFDependencies() {
+  return Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
+}
 
 /**
  * 生成单个报告的 PDF 页面
@@ -23,7 +24,7 @@ const loadPDFDependencies = () =>
 function generateReportPage(
   doc: jsPDF,
   reportNo: string,
-  reportData: { items: ISyneyItem[]; totalAmount: number; createdAt: string },
+  reportData: { items: ISyneyItem[], totalAmount: number, createdAt: string },
   autoTable: AutoTable,
   pdfUtils: PDFUtils,
 ) {
@@ -83,7 +84,7 @@ async function generateAllReports(
   doc: jsPDF,
   selectedMap: Map<
     string,
-    { items: ISyneyItem[]; totalAmount: number; createdAt: string }
+    { items: ISyneyItem[], totalAmount: number, createdAt: string }
   >,
   autoTable: AutoTable,
   pdfUtils: PDFUtils,
@@ -105,7 +106,8 @@ async function generateAllReports(
       },
       onProgress,
     )
-  } else {
+  }
+  else {
     // 数据量不大，直接处理但仍有进度回调
     const total = reports.length
     let processed = 0
@@ -116,13 +118,13 @@ async function generateAllReports(
       onProgress?.(processed, total)
 
       // 让出控制权
-      await new Promise((resolve) => setTimeout(resolve, 0))
+      await new Promise(resolve => setTimeout(resolve, 0))
     }
   }
 }
 
 export function useGenerateSyneyStoreReportPDF() {
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
   const { message } = App.useApp()
 
   // 只在有选中项时才查询数据
@@ -187,14 +189,16 @@ export function useGenerateSyneyStoreReportPDF() {
       message.success(`PDF生成完成: ${filename}`)
 
       return true // 返回 true 表示打印成功
-    } catch (error) {
+    }
+    catch (error) {
       console.error('生成 PDF 时发生错误:', error)
       message.destroy()
       message.error(
         error instanceof Error ? error.message : 'PDF生成失败，请重试',
       )
       return false
-    } finally {
+    }
+    finally {
       setIsGenerating(false)
       setProgress(0)
     }

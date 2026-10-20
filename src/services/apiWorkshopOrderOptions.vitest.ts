@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getWorkshopOrderOptions } from './apiWorkshopOrders'
+
 const { abortSignalMock, rpcMock, singleMock } = vi.hoisted(() => ({
   abortSignalMock: vi.fn(),
   rpcMock: vi.fn(),
@@ -11,8 +13,6 @@ vi.mock('./supabase', () => ({
     rpc: rpcMock,
   },
 }))
-
-import { getWorkshopOrderOptions } from './apiWorkshopOrders'
 
 describe('getWorkshopOrderOptions', () => {
   beforeEach(() => {

@@ -1,6 +1,6 @@
-import { message } from 'antd'
-import { updatePos as updatePosApi } from '@/services/apiSyneyPos'
+import type { message } from 'antd'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { updatePos as updatePosApi } from '@/services/apiSyneyPos'
 import { syneyPoKeys } from '../queryKeys'
 
 // Type for the Ant Design message API instance returned by message.useMessage()
@@ -15,7 +15,7 @@ export function useUpdatePos(messageApi?: MessageApi) {
     mutationFn: updatePosApi,
     invalidateQueries: [syneyPoKeys.all],
     successMessage: '更新成功',
-    errorMessage: (error) =>
+    errorMessage: error =>
       error instanceof Error ? error.message : '更新失败',
     messageApi,
   })

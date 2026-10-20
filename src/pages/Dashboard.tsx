@@ -1,12 +1,13 @@
-import { useMemo } from 'react'
-import { Alert, Button, Skeleton, theme, Typography } from 'antd'
+import type { DashboardKpi } from '@/services/apiDashboard'
 import { useQuery } from '@tanstack/react-query'
+import { Alert, Button, Skeleton, theme, Typography } from 'antd'
 
+import { useMemo } from 'react'
 import { queryConfig } from '@/config/queryClient'
 import {
+
   getDashboardKpis,
   KPI_TREND_DAYS,
-  type DashboardKpi,
 } from '@/services/apiDashboard'
 
 const { Text, Title } = Typography
@@ -97,7 +98,7 @@ function KpiCard({ kpi }: { kpi: DashboardKpi }) {
   } = theme.useToken()
 
   return (
-    <div className="app-card flex flex-col gap-2 p-4">
+    <div className="flex flex-col gap-2 app-card p-4">
       <Text style={{ color: colorTextSecondary }} className="text-sm">
         {kpi.label}
       </Text>
@@ -160,11 +161,11 @@ export default function Dashboard() {
           showIcon
           message="看板数据加载失败"
           description={(error as Error)?.message || '请稍后重试'}
-          action={
+          action={(
             <Button size="small" loading={isFetching} onClick={() => refetch()}>
               重试
             </Button>
-          }
+          )}
         />
       </div>
     )
@@ -184,7 +185,7 @@ export default function Dashboard() {
         className="grid gap-4"
         style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}
       >
-        {data.map((kpi) => (
+        {data.map(kpi => (
           <KpiCard key={kpi.key} kpi={kpi} />
         ))}
       </div>

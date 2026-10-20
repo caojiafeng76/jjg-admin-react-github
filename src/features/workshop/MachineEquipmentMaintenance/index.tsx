@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { App, FormInstance, Modal, Splitter } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import AddButton from '@/ui/AddButton'
-import AppPagination from '@/ui/AppPagination'
-import DeleteButton from '@/ui/DeleteButton'
-import EditButton from '@/ui/EditButton'
-import { useTableHeight } from '@/hooks/useTableHeight'
+import type { FormInstance } from 'antd'
 import type {
   MachineEquipmentMaintenance,
   MachineEquipmentMaintenanceFormValues,
 } from '@/services/apiMachineEquipmentMaintenances'
+import { App, Modal, Splitter } from 'antd'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import AddButton from '@/ui/AddButton'
+import AppPagination from '@/ui/AppPagination'
+import DeleteButton from '@/ui/DeleteButton'
+import EditButton from '@/ui/EditButton'
 import MachineEquipmentMaintenanceDetail from './MachineEquipmentMaintenanceDetail'
 import MachineEquipmentMaintenanceForm from './MachineEquipmentMaintenanceForm'
 import MachineEquipmentMaintenanceSearch from './MachineEquipmentMaintenanceSearch'
@@ -29,10 +30,10 @@ export default function MachineEquipmentMaintenancePage() {
   const [modalTitle, setModalTitle] = useState('新建机器设备维护')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<MachineEquipmentMaintenance | null>(null)
-  const [activeRecord, setActiveRecord] =
-    useState<MachineEquipmentMaintenance | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<MachineEquipmentMaintenance | null>(null)
+  const [activeRecord, setActiveRecord]
+    = useState<MachineEquipmentMaintenance | null>(null)
   const formRef = useRef<FormInstance<MachineEquipmentMaintenanceFormValues> | null>(
     null,
   )
@@ -66,8 +67,8 @@ export default function MachineEquipmentMaintenancePage() {
   const updateMutation = useUpdateMachineEquipmentMaintenance()
   const deleteMutation = useDeleteMachineEquipmentMaintenances()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
       minRowHeight: 28,
     })
@@ -95,7 +96,7 @@ export default function MachineEquipmentMaintenancePage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -117,10 +118,12 @@ export default function MachineEquipmentMaintenancePage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('机器设备维护删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除机器设备维护失败，请稍后重试')
       }
     }
@@ -135,16 +138,19 @@ export default function MachineEquipmentMaintenancePage() {
             values,
           })
           message.success('机器设备维护更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('机器设备维护创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -169,19 +175,22 @@ export default function MachineEquipmentMaintenancePage() {
 
       if (params.unifiedDeviceNo) {
         nextSearchParamsURL.set('unifiedDeviceNo', params.unifiedDeviceNo)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('unifiedDeviceNo')
       }
 
       if (params.operation) {
         nextSearchParamsURL.set('operation', params.operation)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('operation')
       }
 
       if (params.machineName) {
         nextSearchParamsURL.set('machineName', params.machineName)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('machineName')
       }
 

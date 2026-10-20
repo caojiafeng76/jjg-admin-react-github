@@ -1,7 +1,7 @@
-import XLSX from 'xlsx-js-style'
-
 import type { ProductionOrderForExport } from '@/services/apiProductionOrders'
+
 import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@utils/excelStyleUtils'
+import XLSX from 'xlsx-js-style'
 
 const NIGHT_SNACK_SHEET_NAME = '夜宵明细表'
 const NIGHT_SNACK_HEADERS = [
@@ -42,14 +42,14 @@ function shouldCountNightSnackOrder(order: ProductionOrderForExport) {
     return true
   }
 
-  return !NIGHT_SNACK_EXCLUDED_REMARK_KEYWORDS.some((keyword) =>
+  return !NIGHT_SNACK_EXCLUDED_REMARK_KEYWORDS.some(keyword =>
     remark.includes(keyword),
   )
 }
 
 function getEmployeeJobName(orders: ProductionOrderForExport[]) {
   return (
-    orders.find((order) => order.employee?.job_name)?.employee?.job_name || ''
+    orders.find(order => order.employee?.job_name)?.employee?.job_name || ''
   )
 }
 
@@ -69,7 +69,7 @@ function compareEmployeeGroupsByMissingJobFirst(
 
 function getReportMonthParts(orders: ProductionOrderForExport[]) {
   const orderDate = [...orders]
-    .map((order) => order.order_date)
+    .map(order => order.order_date)
     .filter(Boolean)
     .sort()[0]
   const fallbackDate = new Date().toISOString().slice(0, 10)
@@ -211,10 +211,10 @@ function applyNightSnackSheetStyles(
       }
 
       if (
-        column >= 3 &&
-        column <= 5 &&
-        row >= 2 &&
-        typeof worksheet[cellRef].v === 'number'
+        column >= 3
+        && column <= 5
+        && row >= 2
+        && typeof worksheet[cellRef].v === 'number'
       ) {
         worksheet[cellRef].z = '0'
       }
@@ -242,8 +242,8 @@ export function exportProductionOrderNightSnackDetailsToExcel(
   orders: ProductionOrderForExport[],
   options: { statistician?: string } = {},
 ): ProductionOrderNightSnackExportResult {
-  const { employeeCount, filename, nightShiftCount, rows } =
-    buildNightSnackRows(orders, options.statistician || '')
+  const { employeeCount, filename, nightShiftCount, rows }
+    = buildNightSnackRows(orders, options.statistician || '')
 
   if (nightShiftCount === 0) {
     return { employeeCount, nightShiftCount }

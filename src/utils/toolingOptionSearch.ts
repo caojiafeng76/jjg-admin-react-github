@@ -9,7 +9,7 @@ function buildPinyinInitials(value: string): string {
     toneType: 'none',
     type: 'array',
   })
-    .map((item) => item[0] || '')
+    .map(item => item[0] || '')
     .join('')
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '')

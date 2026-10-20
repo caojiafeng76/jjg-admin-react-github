@@ -1,9 +1,9 @@
-import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import type { VillaLiftMarkDateField } from '@/services/apiVillaLiftOrders'
 import { App } from 'antd'
 import dayjs from 'dayjs'
 
-import type { VillaLiftMarkDateField } from '@/services/apiVillaLiftOrders'
+import { useCallback } from 'react'
 import {
   useBatchDeleteVillaLiftOrders,
   useBatchMarkVillaLiftOrdersDate,
@@ -41,8 +41,10 @@ export function useVillaLiftOrderBatchActions({
       await batchDeleteMutation.mutateAsync(selectedRowKeys)
       message.success(`已删除 ${selectedRowKeys.length} 条订单`)
       setSelectedRowKeys([])
-    } catch (err) {
-      if (err instanceof Error) message.error(err.message)
+    }
+    catch (err) {
+      if (err instanceof Error)
+        message.error(err.message)
     }
   }, [
     batchDeleteMutation,
@@ -67,8 +69,10 @@ export function useVillaLiftOrderBatchActions({
       })
       message.success(`已结案 ${selectedRowKeys.length} 条订单`)
       setSelectedRowKeys([])
-    } catch (err) {
-      if (err instanceof Error) message.error(err.message)
+    }
+    catch (err) {
+      if (err instanceof Error)
+        message.error(err.message)
     }
   }, [
     batchStatusMutation,
@@ -93,8 +97,10 @@ export function useVillaLiftOrderBatchActions({
       })
       message.success(`已复开 ${selectedRowKeys.length} 条订单`)
       setSelectedRowKeys([])
-    } catch (err) {
-      if (err instanceof Error) message.error(err.message)
+    }
+    catch (err) {
+      if (err instanceof Error)
+        message.error(err.message)
     }
   }, [
     batchStatusMutation,
@@ -115,7 +121,8 @@ export function useVillaLiftOrderBatchActions({
         return
       }
 
-      if (selectedRowKeys.length === 0) return
+      if (selectedRowKeys.length === 0)
+        return
       try {
         await batchMarkMutation.mutateAsync({
           ids: selectedRowKeys,
@@ -124,8 +131,10 @@ export function useVillaLiftOrderBatchActions({
         })
         message.success(`已将 ${selectedRowKeys.length} 条订单标记为${label}`)
         setSelectedRowKeys([])
-      } catch (err) {
-        if (err instanceof Error) message.error(err.message)
+      }
+      catch (err) {
+        if (err instanceof Error)
+          message.error(err.message)
       }
     },
     [

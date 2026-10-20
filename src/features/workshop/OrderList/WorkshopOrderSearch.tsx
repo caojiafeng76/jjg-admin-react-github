@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { DatePicker, Button, Form, Input, Space, Select } from 'antd'
 import type { Dayjs } from 'dayjs'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { useState } from 'react'
 
 const { RangePicker } = DatePicker
 
@@ -61,14 +61,14 @@ export default function WorkshopOrderSearch({
 
     setIsSearching(true)
     onSearch(params)
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   const handleReset = () => {
     form.resetFields()
     setIsSearching(true)
     onReset()
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   return (
@@ -115,7 +115,7 @@ export default function WorkshopOrderSearch({
               String(option?.label || '').includes(input),
           }}
           className="min-w-[160px]"
-          options={lengthOptions.map((length) => ({
+          options={lengthOptions.map(length => ({
             label: `${length}`,
             value: length,
           }))}
@@ -132,7 +132,7 @@ export default function WorkshopOrderSearch({
         <Space>
           <Button
             type="primary"
-            icon={
+            icon={(
               <svg
                 className="h-4 w-4"
                 fill="none"
@@ -146,7 +146,7 @@ export default function WorkshopOrderSearch({
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
-            }
+            )}
             htmlType="submit"
             loading={isSearching}
             className="shadow-sm transition-all hover:shadow-md"
@@ -154,7 +154,7 @@ export default function WorkshopOrderSearch({
             搜索
           </Button>
           <Button
-            icon={
+            icon={(
               <svg
                 className="h-4 w-4"
                 fill="none"
@@ -168,7 +168,7 @@ export default function WorkshopOrderSearch({
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
-            }
+            )}
             onClick={handleReset}
             disabled={isSearching}
             className="shadow-sm transition-all hover:shadow-md"

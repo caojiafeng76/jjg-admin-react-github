@@ -1,10 +1,9 @@
+import type { ProjectNoData } from './mobileProductionOrderScanTypes'
+import type { ScannedProjectPayload } from './ProjectNoScanButton'
+
 import { Typography } from 'antd'
 import dayjs from 'dayjs'
-
-import ProjectNoScanButton, {
-  type ScannedProjectPayload,
-} from './ProjectNoScanButton'
-import type { ProjectNoData } from './mobileProductionOrderScanTypes'
+import ProjectNoScanButton from './ProjectNoScanButton'
 
 const { Text, Title } = Typography
 

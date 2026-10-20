@@ -1,11 +1,12 @@
-import { memo, useMemo } from 'react'
-import { Table, TableColumnsType, Button, Popconfirm, Space } from 'antd'
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/16/solid'
-
+import type { TableColumnsType } from 'antd'
 import type {
   ProductionOrderItem,
   ProductionOrderItemWithMachine,
 } from '@/services/apiProductionOrderItems'
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/16/solid'
+import { Button, Popconfirm, Space, Table } from 'antd'
+
+import { memo, useMemo } from 'react'
 
 const dangerTextStyle = {
   color: '#cf1322',
@@ -29,10 +30,11 @@ const RUNTIME_COL = {
   width: 100,
   align: 'right' as const,
   render: (_: unknown, record: ProductionOrderItemWithMachine) => {
-    const seconds =
-      (record.incoming_qualified_quantity ?? 0) *
-      (record.theoretical_seconds ?? 0)
-    if (seconds === 0) return <span className="text-slate-400 dark:text-slate-500">—</span>
+    const seconds
+      = (record.incoming_qualified_quantity ?? 0)
+        * (record.theoretical_seconds ?? 0)
+    if (seconds === 0)
+      return <span className="text-slate-400 dark:text-slate-500">—</span>
     return `${(seconds / 3600).toFixed(2)} h`
   },
 }
@@ -55,8 +57,8 @@ const COST_COLUMNS: TableColumnsType<ProductionOrderItemWithMachine> = [
       if (value === null || value === undefined) {
         return '-'
       }
-      const shouldHighlight =
-        record.standard_seconds === 0 && record.qualified_quantity > 0
+      const shouldHighlight
+        = record.standard_seconds === 0 && record.qualified_quantity > 0
       return (
         <span style={shouldHighlight ? dangerTextStyle : undefined}>
           {value.toFixed(2)}
@@ -146,7 +148,8 @@ function ProductionOrderItemTable({
         width: 120,
         render: (_: unknown, record: ProductionOrderItemWithMachine) => {
           const m = record.machine_equipment_maintenances
-          if (!m) return <span className="text-slate-400 dark:text-slate-500">无</span>
+          if (!m)
+            return <span className="text-slate-400 dark:text-slate-500">无</span>
           return (
             <div className="flex flex-col">
               <span>{m.unified_device_no}</span>
@@ -270,7 +273,7 @@ function ProductionOrderItemTable({
 
   return (
     <Table<ProductionOrderItemWithMachine>
-      rowKey={(record) => record.id}
+      rowKey={record => record.id}
       loading={loading}
       columns={columns}
       dataSource={data}

@@ -1,6 +1,6 @@
-import * as XLSX from 'xlsx-js-style'
-
 import type { PrecisionCuttingTransferExportRow } from '@/services/apiPrecisionCuttingTransfers'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
@@ -44,8 +44,38 @@ const EXPORT_HEADERS = [
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  20, 14, 18, 9, 10, 24, 12, 12, 12, 16, 12, 16, 14, 10, 10, 10, 12, 12, 18,
-  18, 14, 14, 14, 10, 14, 10, 8, 8, 9, 10, 18, 16,
+  20,
+  14,
+  18,
+  9,
+  10,
+  24,
+  12,
+  12,
+  12,
+  16,
+  12,
+  16,
+  14,
+  10,
+  10,
+  10,
+  12,
+  12,
+  18,
+  18,
+  14,
+  14,
+  14,
+  10,
+  14,
+  10,
+  8,
+  8,
+  9,
+  10,
+  18,
+  16,
 ]
 
 function formatDateTime(value: string | null | undefined) {
@@ -59,7 +89,7 @@ function formatDateTime(value: string | null | undefined) {
 export function exportPrecisionCuttingTransfersToExcel(
   records: PrecisionCuttingTransferExportRow[],
 ) {
-  const rows = records.map((record) => [
+  const rows = records.map(record => [
     formatDateTime(record.created_at),
     record.project_no,
     record.customer || '',

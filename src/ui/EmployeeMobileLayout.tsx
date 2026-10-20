@@ -1,4 +1,4 @@
-import { Layout, Button, theme } from 'antd'
+import type { ElementType } from 'react'
 import {
   ArrowRightStartOnRectangleIcon,
   ArrowsRightLeftIcon,
@@ -9,16 +9,15 @@ import {
   ScissorsIcon,
   ViewfinderCircleIcon,
 } from '@heroicons/react/24/outline'
+import { Button, Layout, theme } from 'antd'
 import { useMemo } from 'react'
-import type { ElementType } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { useAuth } from '@/contexts'
-import { usePermissionContext } from '@/contexts'
+import { useAuth, usePermissionContext } from '@/contexts'
 
 const { Content } = Layout
 
-type MobileNavItemDef = {
+interface MobileNavItemDef {
   key: string
   label: string
   icon: ElementType
@@ -75,9 +74,10 @@ export default function EmployeeMobileLayout() {
   } = theme.useToken()
 
   const navItems = useMemo(() => {
-    if (isLoading) return []
+    if (isLoading)
+      return []
     return allMobileNavItems.filter(
-      (item) => !item.permission || can(item.permission),
+      item => !item.permission || can(item.permission),
     )
   }, [can, isLoading])
 

@@ -1,7 +1,7 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
-
 import type { ToolingFixtureFormValues } from '@/services/apiToolingFixture'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   autoFitColumnWidths,
   centerAllCells,
@@ -24,19 +24,19 @@ const TEMPLATE_HEADERS = [
   '备注',
 ] as const
 
-type FixtureExcelField =
-  | 'fixture_no'
-  | 'category'
-  | 'applicable_product_drawing_no'
-  | 'product_name'
-  | 'applicable_equipment'
-  | 'storage_location'
-  | 'manufactured_date'
-  | 'manufacturer'
-  | 'last_maintenance_date'
-  | 'maintenance_cycle_days'
-  | 'responsible_person'
-  | 'remarks'
+type FixtureExcelField
+  = | 'fixture_no'
+    | 'category'
+    | 'applicable_product_drawing_no'
+    | 'product_name'
+    | 'applicable_equipment'
+    | 'storage_location'
+    | 'manufactured_date'
+    | 'manufacturer'
+    | 'last_maintenance_date'
+    | 'maintenance_cycle_days'
+    | 'responsible_person'
+    | 'remarks'
 
 type RawFixtureRow = Record<FixtureExcelField, unknown>
 
@@ -164,11 +164,11 @@ function findHeaderRowIndex(matrix: Array<Array<unknown>>): number {
   let headerRowIndex = -1
 
   matrix.forEach((row, index) => {
-    const headers = (row ?? []).map((cell) => normalizeText(cell))
+    const headers = (row ?? []).map(cell => normalizeText(cell))
 
     if (
-      headers.includes('工装模具编号') &&
-      keyHeaders.some((header) => headers.includes(header))
+      headers.includes('工装模具编号')
+      && keyHeaders.some(header => headers.includes(header))
     ) {
       headerRowIndex = index
     }
@@ -222,7 +222,7 @@ function readRow(
 }
 
 function isEmptyRow(row: RawFixtureRow): boolean {
-  return Object.values(row).every((value) => !hasContent(value))
+  return Object.values(row).every(value => !hasContent(value))
 }
 
 function hasContent(value: unknown): boolean {
@@ -253,12 +253,12 @@ function parseMonthDate(value: unknown): string | null {
   const month = parts.length > 1 ? Number(parts[1]) : 1
 
   if (
-    !Number.isInteger(year) ||
-    year < 1970 ||
-    year > 2100 ||
-    !Number.isInteger(month) ||
-    month < 1 ||
-    month > 12
+    !Number.isInteger(year)
+    || year < 1970
+    || year > 2100
+    || !Number.isInteger(month)
+    || month < 1
+    || month > 12
   ) {
     return null
   }

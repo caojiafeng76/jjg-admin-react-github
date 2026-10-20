@@ -1,22 +1,24 @@
-import { useEffect, useMemo, useState } from 'react'
+import type {
+  FormInstance,
+} from 'antd'
+import type { VillaLiftOrderSelectOption } from '@/services/apiVillaLiftCutting'
+import type {
+  VillaLiftFinishingBatchFormValues,
+  VillaLiftFinishingRecordFormValues,
+} from '@/services/apiVillaLiftFinishing'
+
+import type { VillaLiftOrderItem } from '@/services/apiVillaLiftOrders'
+import { useVillaLiftOrderItems } from '@features/villa-lift/OrderList/useVillaLiftOrders'
+import { PlusCircleIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import {
   Button,
   Form,
-  FormInstance,
   Input,
   InputNumber,
   Select,
   Spin,
 } from 'antd'
-import { PlusCircleIcon, XMarkIcon } from '@heroicons/react/16/solid'
-
-import type {
-  VillaLiftFinishingBatchFormValues,
-  VillaLiftFinishingRecordFormValues,
-} from '@/services/apiVillaLiftFinishing'
-import type { VillaLiftOrderSelectOption } from '@/services/apiVillaLiftCutting'
-import type { VillaLiftOrderItem } from '@/services/apiVillaLiftOrders'
-import { useVillaLiftOrderItems } from '@features/villa-lift/OrderList/useVillaLiftOrders'
+import { useEffect, useMemo, useState } from 'react'
 import { useProcessOperationsByModels } from './useFinishingProcess'
 
 // ----------------------------------------------------------------
@@ -54,11 +56,12 @@ function CombinedItemSelect({
   const options = orderItems
     .filter((item) => {
       const key = `${item.model}|${item.name}|${item.spec}`
-      if (seen.has(key)) return false
+      if (seen.has(key))
+        return false
       seen.add(key)
       return true
     })
-    .map((item) => ({
+    .map(item => ({
       value: `${item.model}|${item.name}|${item.spec}`,
       label: (
         <span className="flex gap-2 text-sm">
@@ -86,7 +89,8 @@ function CombinedItemSelect({
     const ops = operationsByModel.get(m) ?? []
     if (ops.length === 1) {
       form.setFieldValue(['rows', fieldName, 'operation'], ops[0])
-    } else {
+    }
+    else {
       form.setFieldValue(['rows', fieldName, 'operation'], '')
     }
   }
@@ -100,8 +104,7 @@ function CombinedItemSelect({
       onChange={handleChange}
       placeholder="选择型号 / 名称 / 规格"
       filterOption={(input, opt) =>
-        (opt?.search ?? '').toLowerCase().includes(input.toLowerCase())
-      }
+        (opt?.search ?? '').toLowerCase().includes(input.toLowerCase())}
       disabled={disabled}
       style={{ width: '100%' }}
     />
@@ -121,7 +124,7 @@ function OperationSelectCell({
   const model = Form.useWatch(['rows', fieldName, 'model'])
   const ops = model ? (operationsByModel.get(model) ?? []) : []
 
-  const options = ops.map((op) => ({ value: op, label: op }))
+  const options = ops.map(op => ({ value: op, label: op }))
 
   return (
     <Form.Item
@@ -137,11 +140,13 @@ function OperationSelectCell({
         disabled={!model}
         style={{ width: '100%' }}
         notFoundContent={
-          model ? (
-            <span className="text-xs text-gray-400">该型号无对应工序</span>
-          ) : (
-            <span className="text-xs text-gray-400">请先选择型号</span>
-          )
+          model
+            ? (
+                <span className="text-xs text-gray-400">该型号无对应工序</span>
+              )
+            : (
+                <span className="text-xs text-gray-400">请先选择型号</span>
+              )
         }
       />
     </Form.Item>
@@ -189,12 +194,12 @@ export default function FinishingProcessForm({
   }, [form, setFormRef])
 
   // 获取选中订单的型号列表
-  const { data: orderItems = [], isFetching: loadingItems } =
-    useVillaLiftOrderItems(selectedOrderId ?? null)
+  const { data: orderItems = [], isFetching: loadingItems }
+    = useVillaLiftOrderItems(selectedOrderId ?? null)
 
   // 提取当前订单所有型号，查询对应工序
   const models = useMemo(
-    () => [...new Set(orderItems.map((item) => item.model).filter(Boolean))],
+    () => [...new Set(orderItems.map(item => item.model).filter(Boolean))],
     [orderItems],
   )
   const { data: opsData = [] } = useProcessOperationsByModels(models)
@@ -203,13 +208,14 @@ export default function FinishingProcessForm({
   const operationsByModel = useMemo(() => {
     const map = new Map<string, string[]>()
     for (const { model, operation } of opsData) {
-      if (!map.has(model)) map.set(model, [])
+      if (!map.has(model))
+        map.set(model, [])
       map.get(model)!.push(operation)
     }
     return map
   }, [opsData])
 
-  const orderOptions = orders.map((o) => ({
+  const orderOptions = orders.map(o => ({
     value: o.id,
     label: `${o.project_name}`,
     order: o,
@@ -217,11 +223,11 @@ export default function FinishingProcessForm({
 
   function handleOrderChange(value: string) {
     setSelectedOrderId(value)
-    const rows: VillaLiftFinishingRecordFormValues[] =
-      form.getFieldValue('rows') ?? []
+    const rows: VillaLiftFinishingRecordFormValues[]
+      = form.getFieldValue('rows') ?? []
     form.setFieldValue(
       'rows',
-      rows.map((r) => ({
+      rows.map(r => ({
         ...r,
         model: '',
         name: '',
@@ -249,7 +255,7 @@ export default function FinishingProcessForm({
           placeholder="搜索项目名称 / 客户 / 产品"
           onChange={handleOrderChange}
           optionFilterProp="search"
-          options={orderOptions.map((opt) => ({
+          options={orderOptions.map(opt => ({
             value: opt.value,
             label: (
               <span className="flex flex-wrap items-center gap-x-3 gap-y-0">
@@ -426,18 +432,18 @@ export default function FinishingProcessForm({
 
               {/* 表头 */}
               <div className="mb-1 grid grid-cols-[3fr_1.5fr_1fr_1fr_1fr_1.5fr_36px] gap-x-2 px-0 text-sm text-gray-500">
-                {columns.map((col) => (
+                {columns.map(col => (
                   <div key={String(col.key)}>{col.title}</div>
                 ))}
               </div>
 
               {/* 行 */}
-              {fields.map((field) => (
+              {fields.map(field => (
                 <div
                   key={field.key}
                   className="mb-2 grid grid-cols-[3fr_1.5fr_1fr_1fr_1fr_1.5fr_36px] items-start gap-x-2"
                 >
-                  {columns.map((col) => (
+                  {columns.map(col => (
                     <div key={String(col.key)}>
                       {col.render(undefined, field)}
                     </div>

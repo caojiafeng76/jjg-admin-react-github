@@ -1,3 +1,5 @@
+import type { ButtonProps } from 'antd'
+import type { ReactNode } from 'react'
 import {
   CompassOutlined,
   DisconnectOutlined,
@@ -5,8 +7,6 @@ import {
   SafetyCertificateOutlined,
 } from '@ant-design/icons'
 import { Button, Card, Space, Tag, Typography } from 'antd'
-import type { ButtonProps } from 'antd'
-import type { ReactNode } from 'react'
 
 const { Paragraph, Text, Title } = Typography
 
@@ -186,21 +186,23 @@ export default function AppErrorView({
                   </Paragraph>
                 </div>
 
-                {actions.length > 0 ? (
-                  <Space wrap size={12}>
-                    {actions.map((action) => (
-                      <Button
-                        key={action.key}
-                        type={action.type}
-                        size="large"
-                        icon={action.icon}
-                        onClick={action.onClick}
-                      >
-                        {action.label}
-                      </Button>
-                    ))}
-                  </Space>
-                ) : null}
+                {actions.length > 0
+                  ? (
+                      <Space wrap size={12}>
+                        {actions.map(action => (
+                          <Button
+                            key={action.key}
+                            type={action.type}
+                            size="large"
+                            icon={action.icon}
+                            onClick={action.onClick}
+                          >
+                            {action.label}
+                          </Button>
+                        ))}
+                      </Space>
+                    )
+                  : null}
               </Space>
             </div>
 
@@ -234,32 +236,38 @@ export default function AppErrorView({
                 </Space>
               </div>
 
-              {detail || code ? (
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
-                    诊断信息
-                  </p>
-                  {code ? (
-                    <Tag className="mt-3 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-sky-200">
-                      {code}
-                    </Tag>
-                  ) : null}
-                  {detail ? (
-                    <Paragraph className="mt-3! mb-0! font-mono text-xs leading-6 break-all text-slate-300">
-                      {detail}
-                    </Paragraph>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
-                    当前状态
-                  </p>
-                  <Paragraph className="mt-3! mb-0! text-sm leading-7 text-slate-300">
-                    系统已经拦截异常并停止继续渲染，当前不会把不完整数据写入页面。
-                  </Paragraph>
-                </div>
-              )}
+              {detail || code
+                ? (
+                    <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+                      <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
+                        诊断信息
+                      </p>
+                      {code
+                        ? (
+                            <Tag className="mt-3 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-sky-200">
+                              {code}
+                            </Tag>
+                          )
+                        : null}
+                      {detail
+                        ? (
+                            <Paragraph className="mt-3! mb-0! font-mono text-xs leading-6 break-all text-slate-300">
+                              {detail}
+                            </Paragraph>
+                          )
+                        : null}
+                    </div>
+                  )
+                : (
+                    <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+                      <p className="block text-[11px] tracking-[0.3em] text-slate-400 uppercase">
+                        当前状态
+                      </p>
+                      <Paragraph className="mt-3! mb-0! text-sm leading-7 text-slate-300">
+                        系统已经拦截异常并停止继续渲染，当前不会把不完整数据写入页面。
+                      </Paragraph>
+                    </div>
+                  )}
             </div>
           </div>
         </Card>

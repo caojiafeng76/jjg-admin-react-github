@@ -1,40 +1,40 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, Modal, type FormInstance } from 'antd'
-import dayjs from 'dayjs'
-import { useSearchParams } from 'react-router-dom'
-
-import AddButton from '@/ui/AddButton'
-import DeleteButton from '@/ui/DeleteButton'
-import EditButton from '@/ui/EditButton'
-import ExportButton from '@/ui/ExportButton'
-import AppPagination from '@/ui/AppPagination'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { usePermission } from '@/hooks/usePermission'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
+import type { WorkOrderSearchValues } from './WorkOrderSearch'
 import type {
   PackagingWorkOrderBatch,
   PackagingWorkOrderFormValues,
 } from '@/services/apiPackagingWorkOrders'
-import WorkOrderForm from './WorkOrderForm'
-import WorkOrderSearch, {
-  type WorkOrderSearchValues,
-} from './WorkOrderSearch'
-import WorkOrderTable from './WorkOrderTable'
+import { App, Modal } from 'antd'
+import dayjs from 'dayjs'
+
+import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import AddButton from '@/ui/AddButton'
+import AppPagination from '@/ui/AppPagination'
+import DeleteButton from '@/ui/DeleteButton'
+import EditButton from '@/ui/EditButton'
+import ExportButton from '@/ui/ExportButton'
+import { useExportWorkOrdersAsExcel } from './useExportWorkOrdersAsExcel'
 import {
   useCreatePackagingWorkOrder,
   useDeletePackagingWorkOrder,
   usePackagingWorkOrderList,
   useUpdatePackagingWorkOrder,
 } from './useWorkOrders'
-import { useExportWorkOrdersAsExcel } from './useExportWorkOrdersAsExcel'
+import WorkOrderForm from './WorkOrderForm'
+import WorkOrderSearch from './WorkOrderSearch'
+import WorkOrderTable from './WorkOrderTable'
 
-const CREATE_PERMISSION_KEY =
-  'feature:packaging-process-work-order-list.create'
+const CREATE_PERMISSION_KEY
+  = 'feature:packaging-process-work-order-list.create'
 const EDIT_PERMISSION_KEY = 'feature:packaging-process-work-order-list.edit'
-const DELETE_PERMISSION_KEY =
-  'feature:packaging-process-work-order-list.delete'
-const EXPORT_PERMISSION_KEY =
-  'feature:packaging-process-work-order-list.export'
+const DELETE_PERMISSION_KEY
+  = 'feature:packaging-process-work-order-list.delete'
+const EXPORT_PERMISSION_KEY
+  = 'feature:packaging-process-work-order-list.export'
 
 export default function WorkOrderListPage() {
   const { message } = App.useApp()
@@ -53,10 +53,10 @@ export default function WorkOrderListPage() {
   const [modalTitle, setModalTitle] = useState('新建生产工单')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<PackagingWorkOrderBatch | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<PackagingWorkOrderFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<PackagingWorkOrderBatch | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<PackagingWorkOrderFormValues> | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -74,11 +74,11 @@ export default function WorkOrderListPage() {
   const createMutation = useCreatePackagingWorkOrder()
   const updateMutation = useUpdatePackagingWorkOrder()
   const deleteMutation = useDeletePackagingWorkOrder()
-  const { exportAsExcel, isExporting, preloadExportAsExcel } =
-    useExportWorkOrdersAsExcel()
+  const { exportAsExcel, isExporting, preloadExportAsExcel }
+    = useExportWorkOrdersAsExcel()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -105,7 +105,7 @@ export default function WorkOrderListPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -124,25 +124,27 @@ export default function WorkOrderListPage() {
     }
 
     try {
-      const selectedRecords = data?.items.filter((item) =>
+      const selectedRecords = data?.items.filter(item =>
         selectedRowKeys.includes(item.id),
       )
       await deleteMutation.mutateAsync({
         batchIds:
           selectedRecords
-            ?.filter((item) => !item.is_historical_inconsistent)
-            .map((item) => item.input_batch_id) || [],
+            ?.filter(item => !item.is_historical_inconsistent)
+            .map(item => item.input_batch_id) || [],
         legacyDetailIds:
           selectedRecords
-            ?.filter((item) => item.is_historical_inconsistent)
-            .map((item) => item.id) || [],
+            ?.filter(item => item.is_historical_inconsistent)
+            .map(item => item.id) || [],
       })
       message.success('生产工单删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除生产工单失败，请稍后重试')
       }
     }
@@ -171,16 +173,19 @@ export default function WorkOrderListPage() {
               editingRecord.is_historical_inconsistent,
           })
           message.success('生产工单更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('生产工单创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -207,7 +212,8 @@ export default function WorkOrderListPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
@@ -239,7 +245,8 @@ export default function WorkOrderListPage() {
       if (exported) {
         setSelectedRowKeys([])
       }
-    } catch {
+    }
+    catch {
       // hook already handled error message
     }
   }, [exportAsExcel, message, searchParams, viewerDenied, viewerOperationTip])

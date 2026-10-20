@@ -1,13 +1,13 @@
 import { createHash } from 'node:crypto'
-import { readFileSync, readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parseMigrationPreview } from './db-sql-guard.mjs'
 
 function snapshot(directory) {
   return readdirSync(directory)
-    .filter((name) => name.endsWith('.sql'))
+    .filter(name => name.endsWith('.sql'))
     .sort()
-    .map((name) => [
+    .map(name => [
       name,
       createHash('sha256')
         .update(readFileSync(resolve(directory, name)))
@@ -27,7 +27,7 @@ export function captureMigrationPlan(preview, workdir, beforePreview) {
     throw new Error('迁移文件在预演期间发生变化，已停止执行。')
   const sql = names
     .map(
-      (name) =>
+      name =>
         `-- Migration: ${name}\n${readFileSync(resolve(directory, name), 'utf8')}`,
     )
     .join('\n')

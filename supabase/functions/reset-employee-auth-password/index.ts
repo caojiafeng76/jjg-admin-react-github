@@ -32,17 +32,19 @@ serve(async (request) => {
 
   try {
     ;({ adminClient } = await assertAdmin(authorization))
-  } catch (error) {
+  }
+  catch (error) {
     const message = error instanceof Error ? error.message : '权限校验失败'
     const status = message.includes('登录状态') ? 401 : 403
     return jsonResponse({ error: message }, status)
   }
 
-  let payload: { employeeId?: string; password?: string }
+  let payload: { employeeId?: string, password?: string }
 
   try {
     payload = await request.json()
-  } catch {
+  }
+  catch {
     return jsonResponse({ error: '请求体格式不正确' }, 400)
   }
 
@@ -75,8 +77,8 @@ serve(async (request) => {
     return jsonResponse({ error: '该员工尚未绑定账号' }, 409)
   }
 
-  const { data: authUserData, error: authUserError } =
-    await adminClient.auth.admin.getUserById(employee.auth_user_id)
+  const { data: authUserData, error: authUserError }
+    = await adminClient.auth.admin.getUserById(employee.auth_user_id)
 
   if (authUserError) {
     const message = authUserError.message || ''

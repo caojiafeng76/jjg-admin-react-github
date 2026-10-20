@@ -1,9 +1,9 @@
-import type { ProductionOrder } from '@/services/apiProductionOrders'
+import type { ProcessStandardMatchLevel } from './useProcessStandards'
 import type {
   ProductionOrderDataCategory,
   ProductionOrderItem,
 } from '@/services/apiProductionOrderItems'
-import type { ProcessStandardMatchLevel } from './useProcessStandards'
+import type { ProductionOrder } from '@/services/apiProductionOrders'
 
 export type ProductionOrderFormInitialValues = ProductionOrder & {
   items?: ProductionOrderItem[]
@@ -17,8 +17,8 @@ export interface ProductionOrderFormProps {
     items: OrderItem[]
   }) => Promise<void> | void
   initialValues?: ProductionOrderFormInitialValues
-  employees: { id: string; name: string }[]
-  fixedEmployee?: { id: string; name: string } | null
+  employees: { id: string, name: string }[]
+  fixedEmployee?: { id: string, name: string } | null
   loading?: boolean
   compact?: boolean
   showAuditField?: boolean

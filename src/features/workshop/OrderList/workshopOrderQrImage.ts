@@ -52,7 +52,8 @@ async function svgMarkupToPngDataUrl(svgMarkup: string) {
 
       image.src = objectUrl
     })
-  } finally {
+  }
+  finally {
     URL.revokeObjectURL(objectUrl)
   }
 }

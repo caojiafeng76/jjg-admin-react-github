@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface MachineEquipmentMaintenance {
   id: string
@@ -45,7 +45,7 @@ export interface MachineEquipmentMaintenanceOption {
   equipment_hourly_rate: number
 }
 
-type MachineEquipmentMaintenancesTable = {
+interface MachineEquipmentMaintenancesTable {
   from: (table: string) => any
 }
 
@@ -57,7 +57,7 @@ function machineEquipmentMaintenancesTable() {
 
 function normalizeOptionalText(value?: string) {
   const nextValue = value?.trim()
-  return nextValue ? nextValue : null
+  return nextValue || null
 }
 
 function normalizePayload(

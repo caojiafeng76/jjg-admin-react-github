@@ -1,9 +1,9 @@
+import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 import {
   buildToolingDataOptionsQuery,
   TOOLING_DATA_OPTION_SELECT,
 } from './toolingDataOptions'
-import { handleApiError } from '@/utils/errorHandler'
 
 export interface ToolingInventory {
   id: string
@@ -45,7 +45,7 @@ export interface ToolingDataOption {
   unit_price: number
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 
@@ -286,7 +286,7 @@ export async function importToolingInventory(
     toolCodeSet.add(row.tool_code)
   }
 
-  const toolCodes = normalizedRows.map((row) => row.tool_code)
+  const toolCodes = normalizedRows.map(row => row.tool_code)
   const { data: toolingRows, error: toolingError } = await toolingDataTable()
     .select('id, tool_code, tool_name, tool_spec, material, unit_price')
     .in('tool_code', toolCodes)
@@ -296,13 +296,13 @@ export async function importToolingInventory(
   }
 
   const toolingMap = new Map(
-    ((toolingRows || []) as ToolingDataOption[]).map((row) => [
+    ((toolingRows || []) as ToolingDataOption[]).map(row => [
       row.tool_code,
       row,
     ]),
   )
 
-  const missingCodes = toolCodes.filter((code) => !toolingMap.has(code))
+  const missingCodes = toolCodes.filter(code => !toolingMap.has(code))
   if (missingCodes.length > 0) {
     throw new Error(
       `以下刀具编号未在刀具资料中维护，无法导入库存：${missingCodes.join('、')}`,
@@ -328,7 +328,7 @@ export async function importToolingInventory(
         pending_stock_in: number
         pending_stock_out: number
       }>
-    ).map((row) => [row.tooling_data_id, row]),
+    ).map(row => [row.tooling_data_id, row]),
   )
 
   const payload = normalizedRows.map((row) => {

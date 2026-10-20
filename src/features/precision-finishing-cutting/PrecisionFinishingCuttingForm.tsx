@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import type { ScannedProjectPayload } from '@/features/production-order/ProjectNoScanButton'
+import type { PrecisionFinishingCuttingInsert, PrecisionFinishingCuttingUpdate, PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
+
 import {
-  AutoComplete,
   App,
+  AutoComplete,
   Button,
   Form,
   Input,
@@ -11,26 +13,22 @@ import {
   Space,
   Switch,
 } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
 
-import FormErrorAlert from '@/ui/FormErrorAlert'
-
+import ProjectNoScanButton from '@/features/production-order/ProjectNoScanButton'
 import {
   buildProjectNoSelectOptions,
   filterProjectNoOption,
   renderProjectNoOption,
 } from '@/features/production-order/projectNoSelect'
-import ProjectNoScanButton, {
-  type ScannedProjectPayload,
-} from '@/features/production-order/ProjectNoScanButton'
 import { useSalesOrdersProjectNos } from '@/features/production-order/useProcessStandards'
 import {
   PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS,
   PRECISION_FINISHING_CUTTING_RECIPIENTS,
   PRECISION_FINISHING_CUTTING_WORKSHOPS,
-  type PrecisionFinishingCuttingInsert,
-  type PrecisionFinishingCuttingUpdate,
-  type PrecisionFinishingCuttingWithEmployee,
+
 } from '@/services/apiPrecisionFinishingCuttings'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 
 interface Props {
   open: boolean
@@ -39,9 +37,9 @@ interface Props {
     values: PrecisionFinishingCuttingInsert | PrecisionFinishingCuttingUpdate,
   ) => Promise<void> | void
   initialValues?: PrecisionFinishingCuttingWithEmployee | null
-  employees: { id: string; name: string }[]
+  employees: { id: string, name: string }[]
   loading?: boolean
-  fixedOperator?: { id: string; name: string } | null
+  fixedOperator?: { id: string, name: string } | null
   currentUploader?: string | null
   canAudit?: boolean
   mobile?: boolean
@@ -79,20 +77,20 @@ export default function PrecisionFinishingCuttingForm({
 }: Props) {
   const { message } = App.useApp()
   const [form] = Form.useForm<PrecisionFinishingCuttingFormValues>()
-  const { data: projectNos, isLoading: isLoadingProjectNos } =
-    useSalesOrdersProjectNos()
+  const { data: projectNos, isLoading: isLoadingProjectNos }
+    = useSalesOrdersProjectNos()
   const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
     Record<string, ProjectNoData>
   >({})
 
   const employeeNameMap = useMemo(
-    () => new Map(employees.map((employee) => [employee.id, employee.name])),
+    () => new Map(employees.map(employee => [employee.id, employee.name])),
     [employees],
   )
 
   const recipientOptions = useMemo(
     () =>
-      PRECISION_FINISHING_CUTTING_RECIPIENTS.map((name) => ({
+      PRECISION_FINISHING_CUTTING_RECIPIENTS.map(name => ({
         label: name,
         value: name,
       })),
@@ -105,7 +103,7 @@ export default function PrecisionFinishingCuttingForm({
   )
   const mergedProjectNoOptions = useMemo(() => {
     const existingProjectNos = new Set(
-      projectNoOptions.map((item) => item.value),
+      projectNoOptions.map(item => item.value),
     )
     const scannedProjectNos = Object.entries(scannedProjectDataMap)
       .filter(([projectNo]) => !existingProjectNos.has(projectNo))
@@ -144,7 +142,7 @@ export default function PrecisionFinishingCuttingForm({
     if (initialValues) {
       setScannedProjectDataMap((prev) => {
         const existsInProjectNos = (projectNos || []).some(
-          (item) => item.project_no === initialValues.project_no,
+          item => item.project_no === initialValues.project_no,
         )
 
         if (existsInProjectNos || prev[initialValues.project_no]) {
@@ -229,7 +227,7 @@ export default function PrecisionFinishingCuttingForm({
   }
 
   function handleProjectScanResolved(payload: ScannedProjectPayload) {
-    setScannedProjectDataMap((prev) => ({
+    setScannedProjectDataMap(prev => ({
       ...prev,
       [payload.projectNo]: {
         project_no: payload.projectNo,
@@ -260,7 +258,7 @@ export default function PrecisionFinishingCuttingForm({
       ? [fixedOperator.id]
       : values.operator_employee_ids || []
     const operatorNames = operatorEmployeeIds
-      .map((id) => employeeNameMap.get(id))
+      .map(id => employeeNameMap.get(id))
       .filter((name): name is string => Boolean(name))
 
     if (operatorEmployeeIds.length === 0) {
@@ -301,10 +299,10 @@ export default function PrecisionFinishingCuttingForm({
     triggerNode.parentElement || document.body
 
   const formItemClassName = 'mb-0'
-  const sectionClassName =
-    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/90'
-  const sectionTitleClassName =
-    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
+  const sectionClassName
+    = 'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/90'
+  const sectionTitleClassName
+    = 'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
 
   const sectionDot = (className = 'bg-blue-500') => (
     <span className={`h-1.5 w-1.5 rounded-full ${className}`} />
@@ -362,11 +360,13 @@ export default function PrecisionFinishingCuttingForm({
       destroyOnHidden
     >
       <div className={mobile ? 'overscroll-contain pr-1' : undefined}>
-        {formError ? (
-          <div className="mb-4">
-            <FormErrorAlert error={formError} />
-          </div>
-        ) : null}
+        {formError
+          ? (
+              <div className="mb-4">
+                <FormErrorAlert error={formError} />
+              </div>
+            )
+          : null}
         <Form
           form={form}
           layout="vertical"
@@ -561,7 +561,7 @@ export default function PrecisionFinishingCuttingForm({
                   showSearch={{ optionFilterProp: 'label' }}
                   getPopupContainer={getPopupContainer}
                   disabled={Boolean(fixedOperator)}
-                  options={employees.map((employee) => ({
+                  options={employees.map(employee => ({
                     label: employee.name,
                     value: employee.id,
                   }))}
@@ -578,7 +578,7 @@ export default function PrecisionFinishingCuttingForm({
                   placeholder="请选择接收车间"
                   getPopupContainer={getPopupContainer}
                   options={PRECISION_FINISHING_CUTTING_WORKSHOPS.map(
-                    (workshop) => ({
+                    workshop => ({
                       label: workshop,
                       value: workshop,
                     }),
@@ -619,33 +619,37 @@ export default function PrecisionFinishingCuttingForm({
               备注与审核
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {mobile ? null : (
-                <Form.Item
-                  name="uploaded_by_name"
-                  label="数据上传"
-                  className={formItemClassName}
-                >
-                  <Input disabled placeholder="自动记录当前登录用户" />
-                </Form.Item>
-              )}
+              {mobile
+                ? null
+                : (
+                    <Form.Item
+                      name="uploaded_by_name"
+                      label="数据上传"
+                      className={formItemClassName}
+                    >
+                      <Input disabled placeholder="自动记录当前登录用户" />
+                    </Form.Item>
+                  )}
 
-              {canAudit ? (
-                <Form.Item
-                  name="is_audited"
-                  label="审核状态"
-                  valuePropName="checked"
-                  className={formItemClassName}
-                >
-                  <Switch
-                    checkedChildren={
-                      PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[1].label
-                    }
-                    unCheckedChildren={
-                      PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[0].label
-                    }
-                  />
-                </Form.Item>
-              ) : null}
+              {canAudit
+                ? (
+                    <Form.Item
+                      name="is_audited"
+                      label="审核状态"
+                      valuePropName="checked"
+                      className={formItemClassName}
+                    >
+                      <Switch
+                        checkedChildren={
+                          PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[1].label
+                        }
+                        unCheckedChildren={
+                          PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS[0].label
+                        }
+                      />
+                    </Form.Item>
+                  )
+                : null}
 
               <Form.Item
                 name="remark"

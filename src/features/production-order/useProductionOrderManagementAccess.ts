@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, Form } from 'antd'
-import {
-  updateAdminManagementPassword,
-  verifyAdminManagementPassword,
-} from '@/services/apiAdminManagementPassword'
 import type {
   ChangeManagementPasswordFormValues,
   UnlockManagementFormValues,
 } from './productionOrderPageUtils'
+import { App, Form } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  updateAdminManagementPassword,
+  verifyAdminManagementPassword,
+} from '@/services/apiAdminManagementPassword'
 
 export function useProductionOrderManagementAccess({
   isAdminManagementView,
@@ -23,13 +23,13 @@ export function useProductionOrderManagementAccess({
     !isAdminManagementView,
   )
   const [isUnlockingManagement, setIsUnlockingManagement] = useState(false)
-  const [isManagementPasswordModalOpen, setIsManagementPasswordModalOpen] =
-    useState(false)
-  const [isUpdatingManagementPassword, setIsUpdatingManagementPassword] =
-    useState(false)
+  const [isManagementPasswordModalOpen, setIsManagementPasswordModalOpen]
+    = useState(false)
+  const [isUpdatingManagementPassword, setIsUpdatingManagementPassword]
+    = useState(false)
   const [unlockForm] = Form.useForm<UnlockManagementFormValues>()
-  const [changePasswordForm] =
-    Form.useForm<ChangeManagementPasswordFormValues>()
+  const [changePasswordForm]
+    = Form.useForm<ChangeManagementPasswordFormValues>()
   const isManagementLocked = isAdminManagementView && !isManagementUnlocked
 
   const handleLockManagement = useCallback(() => {
@@ -49,13 +49,16 @@ export function useProductionOrderManagementAccess({
         setIsManagementUnlocked(true)
         unlockForm.resetFields()
         message.success('管理权限已解锁')
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('管理密码验证失败')
         }
-      } finally {
+      }
+      finally {
         setIsUnlockingManagement(false)
       }
     },
@@ -74,13 +77,16 @@ export function useProductionOrderManagementAccess({
         changePasswordForm.resetFields()
         setIsManagementPasswordModalOpen(false)
         message.success('管理密码修改成功')
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('管理密码修改失败')
         }
-      } finally {
+      }
+      finally {
         setIsUpdatingManagementPassword(false)
       }
     },

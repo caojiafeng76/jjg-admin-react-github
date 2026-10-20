@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { JobBaseSetting } from '@/services/apiJobBaseSettings'
+import { Table } from 'antd'
+import { useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 function formatAmount(value: number | null | undefined, digits = 2) {
   return Number(value || 0).toFixed(digits)
@@ -131,9 +132,8 @@ export default function JobBaseSettingTable({
       scroll={{ x: 1160, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择岗位基础设置 ${record.id}`,

@@ -1,7 +1,7 @@
 import { ArrowLeftOutlined, HomeOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
-
 import AppErrorView from '@ui/AppErrorView'
+
+import { useNavigate } from 'react-router-dom'
 
 export default function PageNotFound() {
   const navigate = useNavigate()

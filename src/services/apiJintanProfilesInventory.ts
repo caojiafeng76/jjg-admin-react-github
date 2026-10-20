@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface JintanProfilesInventory {
   id: string
@@ -178,7 +178,7 @@ export async function createJintanProfilesInventoryBatch(
     seenKeys.add(key)
   }
 
-  const profileNames = Array.from(new Set(rows.map((row) => row.profile_name)))
+  const profileNames = Array.from(new Set(rows.map(row => row.profile_name)))
   const { data: inventoryRows, error: inventoryError } = await supabase
     .from('jintan_profiles_inventory')
     .select(
@@ -191,14 +191,14 @@ export async function createJintanProfilesInventoryBatch(
   }
 
   const inventoryByKey = new Map(
-    (inventoryRows || []).map((row) => [inventoryKeyOf(row), row]),
+    (inventoryRows || []).map(row => [inventoryKeyOf(row), row]),
   )
 
-  const missing = rows.filter((row) => !inventoryByKey.has(inventoryKeyOf(row)))
+  const missing = rows.filter(row => !inventoryByKey.has(inventoryKeyOf(row)))
   if (missing.length > 0) {
     const labels = missing
       .map(
-        (row) =>
+        row =>
           `“${row.profile_model}”/“${row.profile_name}”/“${row.specification}”`,
       )
       .join('、')
@@ -251,13 +251,15 @@ export async function getJintanProfilesInventoryOptions(
     .select(
       'id, profile_model, profile_name, specification, material, quantity',
     )
-  if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
+  if (keyword?.trim())
+    query = query.or(keywordFilter(keyword.trim()))
 
   const { data, error } = await query
     .order('profile_name', { ascending: true })
     .order('profile_model', { ascending: true })
     .limit(50)
 
-  if (error) throw handleApiError(error, '获取型材库存选项失败')
+  if (error)
+    throw handleApiError(error, '获取型材库存选项失败')
   return data ?? []
 }

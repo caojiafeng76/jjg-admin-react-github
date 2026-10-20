@@ -1,14 +1,14 @@
+import type { ISyneyItem } from '@/services/types'
 import { useQuery } from '@tanstack/react-query'
-import { useMemo } from 'react'
 
-import { useAppStore } from '@/store'
-import { getSelectedPosWithItems } from '@/services/apiSyneyPos'
-import { ISyneyItem } from '@/services/types'
+import { useMemo } from 'react'
 import { queryConfig } from '@/config/queryClient'
+import { getSelectedPosWithItems } from '@/services/apiSyneyPos'
+import { useAppStore } from '@/store'
 import { syneyPoKeys } from '../queryKeys'
 
 export function useSelectedPos() {
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
 
   const {
     data: selectedMap,
@@ -27,7 +27,8 @@ export function useSelectedPos() {
 
   // 转换数据结构，避免在消费端重复解析 key
   const selectedPosList = useMemo(() => {
-    if (!selectedMap) return []
+    if (!selectedMap)
+      return []
     const list: {
       key: string
       poInfo: {

@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  getExtrusionProductionDailyReport,
+  getExtrusionProductionDailyReportForExport,
+} from './apiExtrusionProductionDailyReport'
+
 const mocks = vi.hoisted(() => {
   const response = {
     current: { data: [] as unknown[], error: null as unknown, count: 0 },
@@ -49,11 +54,6 @@ const mocks = vi.hoisted(() => {
 vi.mock('./supabase', () => ({
   default: { from: mocks.from },
 }))
-
-import {
-  getExtrusionProductionDailyReport,
-  getExtrusionProductionDailyReportForExport,
-} from './apiExtrusionProductionDailyReport'
 
 const EXPECTED_ORDER_CALLS = [
   ['extrusion_productions(production_date)', { ascending: false }],
@@ -145,8 +145,7 @@ describe('extrusion production daily report queries', () => {
 
   it('exports more than 1000 rows without gaps or duplicates using the same stable order', async () => {
     const firstPage = Array.from({ length: 1000 }, (_, index) =>
-      createReportItem(index),
-    )
+      createReportItem(index))
     const secondPage = [createReportItem(1000), createReportItem(1001)]
     const signal = new AbortController().signal
     mocks.response.queue = [

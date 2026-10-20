@@ -1,7 +1,7 @@
 'use strict'
 
-const http = require('http')
-const https = require('https')
+const http = require('node:http')
+const https = require('node:https')
 
 const PORT = Number(process.env.FC_SERVER_PORT || process.env.PORT || 9000)
 const UPSTREAM_TIMEOUT_MS = Number(process.env.UPSTREAM_TIMEOUT_MS || 60000)
@@ -43,7 +43,7 @@ function parseUpstreamUrl(value) {
 function parseAllowedOrigins(value) {
   return String(value || '')
     .split(',')
-    .map((origin) => origin.trim().replace(/\/$/, ''))
+    .map(origin => origin.trim().replace(/\/$/, ''))
     .filter(Boolean)
 }
 
@@ -54,7 +54,7 @@ function isAllowedPath(path) {
     return false
   }
 
-  return ALLOWED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  return ALLOWED_PATH_PREFIXES.some(prefix => pathname.startsWith(prefix))
 }
 
 function isOriginAllowed(origin, allowedOrigins) {
@@ -79,7 +79,7 @@ function connectionHeaderTokens(headers) {
   return new Set(
     String(value)
       .split(',')
-      .map((token) => token.trim().toLowerCase())
+      .map(token => token.trim().toLowerCase())
       .filter(Boolean),
   )
 }
@@ -91,9 +91,9 @@ function stripHopByHopHeaders(headers) {
   for (const [name, value] of Object.entries(headers)) {
     const lowerName = name.toLowerCase()
     if (
-      value === undefined ||
-      HOP_BY_HOP_HEADERS.has(lowerName) ||
-      extraTokens.has(lowerName)
+      value === undefined
+      || HOP_BY_HOP_HEADERS.has(lowerName)
+      || extraTokens.has(lowerName)
     ) {
       continue
     }

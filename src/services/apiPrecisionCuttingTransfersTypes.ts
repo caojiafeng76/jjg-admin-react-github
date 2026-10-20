@@ -34,8 +34,8 @@ export const PRECISION_CUTTING_TRANSFER_OPERATORS = [
   '姚利祥',
 ] as const
 
-export type PrecisionCuttingTransferWorkshop =
-  (typeof PRECISION_CUTTING_TRANSFER_WORKSHOPS)[number]
+export type PrecisionCuttingTransferWorkshop
+  = (typeof PRECISION_CUTTING_TRANSFER_WORKSHOPS)[number]
 
 export interface PrecisionCuttingTransferRow {
   audited_at: string | null
@@ -146,18 +146,18 @@ export interface PrecisionCuttingTransferAuditFields {
   audited_at: string | null
 }
 
-export type PrecisionCuttingTransfer = PrecisionCuttingTransferRow &
-  PrecisionCuttingTransferAuditFields &
-  PrecisionCuttingTransferExtraFields
+export type PrecisionCuttingTransfer = PrecisionCuttingTransferRow
+  & PrecisionCuttingTransferAuditFields
+  & PrecisionCuttingTransferExtraFields
 
-export type PrecisionCuttingTransferInsert =
-  PrecisionCuttingTransferInsertBase & {
+export type PrecisionCuttingTransferInsert
+  = PrecisionCuttingTransferInsertBase & {
     is_audited?: boolean
     audited_at?: string | null
   } & Partial<PrecisionCuttingTransferExtraFields>
 
-export type PrecisionCuttingTransferUpdate =
-  PrecisionCuttingTransferUpdateBase & {
+export type PrecisionCuttingTransferUpdate
+  = PrecisionCuttingTransferUpdateBase & {
     is_audited?: boolean
     audited_at?: string | null
   } & Partial<PrecisionCuttingTransferExtraFields>

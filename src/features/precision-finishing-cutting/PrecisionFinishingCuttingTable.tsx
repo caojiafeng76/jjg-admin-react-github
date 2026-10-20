@@ -1,10 +1,11 @@
-import { useCallback, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType, type TableProps } from 'antd'
-
+import type { TableColumnsType, TableProps } from 'antd'
 import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
+import { Table } from 'antd'
+import { useCallback, useMemo } from 'react'
+
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -43,8 +44,8 @@ export default function PrecisionFinishingCuttingTable({
     [data],
   )
 
-  const columns: TableColumnsType<PrecisionFinishingCuttingWithEmployee> =
-    useMemo(
+  const columns: TableColumnsType<PrecisionFinishingCuttingWithEmployee>
+    = useMemo(
       () => [
         {
           title: '#',
@@ -62,7 +63,8 @@ export default function PrecisionFinishingCuttingTable({
           key: 'created_at',
           width: 165,
           render: (text: string) => {
-            if (!text) return '-'
+            if (!text)
+              return '-'
             return new Date(text).toLocaleString('zh-CN')
           },
         },
@@ -88,8 +90,8 @@ export default function PrecisionFinishingCuttingTable({
           key: 'customer',
           width: 120,
           filters: Array.from(
-            new Set(data.map((r) => r.customer).filter(Boolean)),
-          ).map((v) => ({ text: v as string, value: v as string })),
+            new Set(data.map(r => r.customer).filter(Boolean)),
+          ).map(v => ({ text: v as string, value: v as string })),
           onFilter: (value, record) => record.customer === (value as string),
           filterSearch: true,
           render: (value: string | null) => value || '-',
@@ -99,8 +101,8 @@ export default function PrecisionFinishingCuttingTable({
           dataIndex: 'project_no',
           key: 'project_no',
           width: 130,
-          filters: Array.from(new Set(data.map((r) => r.project_no))).map(
-            (v) => ({ text: v, value: v }),
+          filters: Array.from(new Set(data.map(r => r.project_no))).map(
+            v => ({ text: v, value: v }),
           ),
           onFilter: (value, record) => record.project_no === (value as string),
           filterSearch: true,
@@ -111,8 +113,8 @@ export default function PrecisionFinishingCuttingTable({
           key: 'product_model',
           width: 130,
           filters: Array.from(
-            new Set(data.map((r) => r.product_model).filter(Boolean)),
-          ).map((v) => ({ text: v as string, value: v as string })),
+            new Set(data.map(r => r.product_model).filter(Boolean)),
+          ).map(v => ({ text: v as string, value: v as string })),
           onFilter: (value, record) =>
             record.product_model === (value as string),
           filterSearch: true,
@@ -127,19 +129,21 @@ export default function PrecisionFinishingCuttingTable({
           filters: Array.from(
             new Set(
               data
-                .map((r) => r.length_mm)
+                .map(r => r.length_mm)
                 .filter((v): v is number => v !== null),
             ),
           )
             .sort((a, b) => a - b)
-            .map((v) => ({ text: `${v}mm`, value: v })),
+            .map(v => ({ text: `${v}mm`, value: v })),
           onFilter: (value, record) => record.length_mm === (value as number),
           render: (value: number | null) =>
-            value == null ? (
-              '-'
-            ) : (
-              <span className="tabular-nums">{value}</span>
-            ),
+            value == null
+              ? (
+                  '-'
+                )
+              : (
+                  <span className="tabular-nums">{value}</span>
+                ),
         },
         {
           title: '转移数量',
@@ -166,8 +170,8 @@ export default function PrecisionFinishingCuttingTable({
           width: 100,
           fixed: 'right',
           filters: Array.from(
-            new Set(data.map((r) => r.target_workshop).filter(Boolean)),
-          ).map((v) => ({ text: v, value: v })),
+            new Set(data.map(r => r.target_workshop).filter(Boolean)),
+          ).map(v => ({ text: v, value: v })),
           onFilter: (value, record) =>
             record.target_workshop === (value as string),
         },
@@ -175,8 +179,8 @@ export default function PrecisionFinishingCuttingTable({
       [page, pageSize, data],
     )
 
-  const rowSelection: TableProps<PrecisionFinishingCuttingWithEmployee>['rowSelection'] =
-    {
+  const rowSelection: TableProps<PrecisionFinishingCuttingWithEmployee>['rowSelection']
+    = {
       selectedRowKeys,
       onChange: onSelect,
       preserveSelectedRowKeys: true,
@@ -205,7 +209,7 @@ export default function PrecisionFinishingCuttingTable({
 
   return (
     <Table<PrecisionFinishingCuttingWithEmployee>
-      rowKey={(record) => record.id}
+      rowKey={record => record.id}
       loading={loading}
       columns={columns}
       dataSource={data}
@@ -224,7 +228,7 @@ export default function PrecisionFinishingCuttingTable({
           />
         ),
       }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-row:hover>td]:bg-blue-500/10 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-400"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-500/10 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-400"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800/80">

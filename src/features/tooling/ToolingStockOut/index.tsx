@@ -1,21 +1,22 @@
-import { useCallback, useEffect, useState } from 'react'
-import {
-  ArrowDownTrayIcon,
-  ArrowPathIcon,
-  ShieldCheckIcon,
-} from '@heroicons/react/16/solid'
-import { App, Button, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
+import type { FormInstance } from 'antd'
 import type {
   ToolingStockOut,
   ToolingStockOutFormValues,
   ToolingStockOutImportRow,
 } from '@/services/apiToolingStockOut'
+import {
+  ArrowDownTrayIcon,
+  ArrowPathIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/16/solid'
+import { App, Button, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -70,8 +71,8 @@ export default function ToolingStockOutPage() {
   }>({
     keyword: searchParamsURL.get('keyword') || undefined,
     status:
-      (searchParamsURL.get('status') as '待审核' | '已审核' | null) ||
-      undefined,
+      (searchParamsURL.get('status') as '待审核' | '已审核' | null)
+      || undefined,
   })
 
   const { data, isLoading } = useToolingStockOutList({
@@ -79,10 +80,10 @@ export default function ToolingStockOutPage() {
     pageSize,
     searchParams,
   })
-  const { data: toolingOptions = [], isFetching: isToolingOptionsLoading } =
-    useToolingDataOptions(toolingOptionsKeyword)
-  const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
-    useMachineEquipmentOptions()
+  const { data: toolingOptions = [], isFetching: isToolingOptionsLoading }
+    = useToolingDataOptions(toolingOptionsKeyword)
+  const { data: machineOptions = [], isLoading: isMachineOptionsLoading }
+    = useMachineEquipmentOptions()
 
   const createMutation = useCreateToolingStockOut()
   const updateMutation = useUpdateToolingStockOut()
@@ -95,16 +96,16 @@ export default function ToolingStockOutPage() {
     isPrinting: isPrintingPublicQrPoster,
   } = usePrintToolingStockOutPublicQrPoster()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
-  const selectedRecords = (data?.items || []).filter((item) =>
+  const selectedRecords = (data?.items || []).filter(item =>
     selectedRowKeys.includes(item.id),
   )
   const hasAuditedSelection = selectedRecords.some(
-    (item) => item.status === '已审核',
+    item => item.status === '已审核',
   )
 
   const handlePrint = useCallback(() => {
@@ -168,7 +169,8 @@ export default function ToolingStockOutPage() {
       const { exportToolingStockOutToExcel } = await loadToolingStockOutExport()
       exportToolingStockOutToExcel(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条刀具出库`)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('导出刀具出库失败:', error)
       message.error('导出失败，请稍后重试')
     }
@@ -205,7 +207,7 @@ export default function ToolingStockOutPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -235,10 +237,12 @@ export default function ToolingStockOutPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('刀具出库删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除刀具出库失败，请稍后重试')
       }
     }
@@ -276,7 +280,8 @@ export default function ToolingStockOutPage() {
             })
             message.success(`批量${status === '已审核' ? '审核' : '反审'}成功`)
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error
                 ? error.message
@@ -313,10 +318,12 @@ export default function ToolingStockOutPage() {
         await importMutation.mutateAsync(rows)
         message.success(`刀具出库导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入刀具出库失败，请稍后重试')
         }
       }
@@ -349,16 +356,19 @@ export default function ToolingStockOutPage() {
             values,
           })
           message.success('刀具出库更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('刀具出库创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -386,13 +396,15 @@ export default function ToolingStockOutPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
       if (params.status) {
         nextSearchParamsURL.set('status', params.status)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('status')
       }
 
@@ -530,9 +542,9 @@ export default function ToolingStockOutPage() {
         open={isModalOpen}
         destroyOnHidden
         confirmLoading={
-          createMutation.isPending ||
-          updateMutation.isPending ||
-          batchStatusMutation.isPending
+          createMutation.isPending
+          || updateMutation.isPending
+          || batchStatusMutation.isPending
         }
         okButtonProps={{ disabled: viewerDenied || !canManageTooling }}
         onOk={() => formRef?.submit()}

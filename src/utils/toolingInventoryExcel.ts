@@ -1,7 +1,7 @@
-import * as XLSX from 'xlsx-js-style'
 import type { WorkSheet } from 'xlsx-js-style'
-
 import type { ToolingInventoryImportRow } from '@/services/apiToolingInventory'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   autoFitColumnWidths,
   centerAllCells,
@@ -73,9 +73,9 @@ export async function parseToolingInventoryExcel(
     }
 
     if (
-      currentStock === null ||
-      Number.isNaN(currentStock) ||
-      currentStock < 0
+      currentStock === null
+      || Number.isNaN(currentStock)
+      || currentStock < 0
     ) {
       errors.push(`第 ${rowNumber} 行现有库存格式无效，需为大于等于 0 的数字`)
       return
@@ -103,7 +103,7 @@ function validateTemplateHeaders(sheet: WorkSheet) {
     blankrows: false,
   })
 
-  const headerRow = (rows[0] || []).map((cell) => normalizeText(cell))
+  const headerRow = (rows[0] || []).map(cell => normalizeText(cell))
   const templateHeaders = Array.from(TEMPLATE_HEADERS)
 
   const matches = templateHeaders.every(

@@ -1,9 +1,9 @@
+import type { PublicToolingFixture } from '@/services/apiToolingFixturePublic'
 import { render, screen } from '@testing-library/react'
 import { App } from 'antd'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
 
-import type { PublicToolingFixture } from '@/services/apiToolingFixturePublic'
+import { describe, expect, it, vi } from 'vitest'
 
 import ToolingFixturePublicPage from './ToolingFixturePublicPage'
 

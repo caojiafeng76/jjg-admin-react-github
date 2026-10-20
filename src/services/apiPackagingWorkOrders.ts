@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface PackagingWorkOrder {
   id: string
@@ -85,15 +85,15 @@ export interface PackagingWorkOrderSearchParams {
   employeeId?: string
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 
-type DynamicSupabaseRpc = {
+interface DynamicSupabaseRpc {
   rpc: <TData = unknown>(
     name: string,
     args: Record<string, unknown>,
-  ) => Promise<{ data: TData | null; error: unknown }>
+  ) => Promise<{ data: TData | null, error: unknown }>
 }
 
 const PACKAGING_WORK_ORDER_UNITS = new Set(['支', '千克'])
@@ -120,7 +120,8 @@ function normalizeUnit(value: string | null | undefined) {
 
 function normalizeEmployeeIds(values: PackagingWorkOrderFormValues) {
   const ids = values.employee_ids?.filter(Boolean) ?? []
-  if (ids.length > 0) return Array.from(new Set(ids))
+  if (ids.length > 0)
+    return Array.from(new Set(ids))
   return values.employee_id ? [values.employee_id] : []
 }
 
@@ -180,7 +181,7 @@ export function buildPackagingWorkOrderCreatePayloads(
     totalDefectiveQuantity / employeeIds.length,
   )
 
-  return employeeIds.map((employeeId) => ({
+  return employeeIds.map(employeeId => ({
     ...basePayload,
     ...(inputBatchId ? { input_batch_id: inputBatchId } : {}),
     employee_id: employeeId,
@@ -286,7 +287,8 @@ export async function getAllPackagingWorkOrders({
     })) as PackagingWorkOrder[]
 
     allItems.push(...items)
-    if (items.length === 0 || allItems.length >= (count || 0)) break
+    if (items.length === 0 || allItems.length >= (count || 0))
+      break
     page += 1
   }
 

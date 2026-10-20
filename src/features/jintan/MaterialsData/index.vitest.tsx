@@ -46,15 +46,17 @@ vi.mock('antd', () => ({
   FormInstance: class {},
   Tooltip: (props: { children: React.ReactNode }) => props.children,
   Modal: (props: Record<string, any>) =>
-    props.open ? (
-      <div>
-        <div>{props.title}</div>
-        <button type="button" onClick={props.onOk}>
-          提交
-        </button>
-        {props.children}
-      </div>
-    ) : null,
+    props.open
+      ? (
+          <div>
+            <div>{props.title}</div>
+            <button type="button" onClick={props.onOk}>
+              提交
+            </button>
+            {props.children}
+          </div>
+        )
+      : null,
 }))
 
 vi.mock('@/hooks/usePermission', () => ({ usePermission: () => true }))

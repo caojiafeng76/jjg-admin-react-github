@@ -1,10 +1,12 @@
-import { Navigate, useLocation } from 'react-router-dom'
-import { useEffect, useState, type ReactNode } from 'react'
-
+import type { ReactNode } from 'react'
+import type { AppRole } from '@/config/access'
 import Loading from '@ui/Loading'
-import { useAuth } from '@/contexts'
-import { usePermissionContext } from '@/contexts'
-import { getDefaultHomeByRole, type AppRole } from '@/config/access'
+
+import { useEffect, useState } from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
+import { getDefaultHomeByRole } from '@/config/access'
+import { useAuth, usePermissionContext } from '@/contexts'
+
 import { deriveDefaultHome } from './pageHome'
 
 function buildLoginRedirectPath(targetPath: string) {
@@ -75,7 +77,8 @@ export function RoleHomeRedirect() {
   const [target, setTarget] = useState<string | null>(null)
 
   useEffect(() => {
-    if (loading || permLoading || !user || !employeeProfile || !role) return
+    if (loading || permLoading || !user || !employeeProfile || !role)
+      return
     setTarget(deriveDefaultHome(role, permissions))
   }, [loading, permLoading, user, employeeProfile, role, permissions])
 

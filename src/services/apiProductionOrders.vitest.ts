@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  getProductionItemsByProjectNo,
+  getProductionOrders,
+  getProductionOrdersForExportChunked,
+} from './apiProductionOrders'
+
 type ChainCall = [method: string, ...args: unknown[]]
 type Resolver = (table: string, calls: ChainCall[]) => unknown
 
@@ -11,12 +17,12 @@ vi.mock('./supabase', () => {
   function createChain(table: string) {
     const calls: ChainCall[] = []
     const chain: Record<string, unknown> = {}
-    const record =
-      (method: string) =>
-      (...args: unknown[]) => {
-        calls.push([method, ...args])
-        return chain
-      }
+    const record
+      = (method: string) =>
+        (...args: unknown[]) => {
+          calls.push([method, ...args])
+          return chain
+        }
 
     for (const method of [
       'select',
@@ -44,12 +50,6 @@ vi.mock('./supabase', () => {
 vi.mock('./apiProductionOrderItems', () => ({
   resolveProductionOrderItemStandardSeconds: vi.fn(),
 }))
-
-import {
-  getProductionItemsByProjectNo,
-  getProductionOrders,
-  getProductionOrdersForExportChunked,
-} from './apiProductionOrders'
 
 describe('apiProductionOrders', () => {
   beforeEach(() => {
@@ -94,7 +94,7 @@ describe('apiProductionOrders', () => {
     supabaseMock.resolver = (_table, calls) => {
       const inCall = calls.find(([method]) => method === 'in')
       const ids = (inCall?.[2] ?? []) as string[]
-      return { data: ids.map((id) => rowsById[id]), error: null }
+      return { data: ids.map(id => rowsById[id]), error: null }
     }
     const onProgress = vi.fn()
 
@@ -103,7 +103,7 @@ describe('apiProductionOrders', () => {
       onProgress,
     })
 
-    expect(rows.map((row) => row.id)).toEqual(['b', 'a'])
+    expect(rows.map(row => row.id)).toEqual(['b', 'a'])
     expect(onProgress.mock.calls).toEqual([
       [{ loaded: 1, total: 2 }],
       [{ loaded: 2, total: 2 }],

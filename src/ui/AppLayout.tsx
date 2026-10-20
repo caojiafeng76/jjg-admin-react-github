@@ -1,25 +1,27 @@
+import type { ReactNode } from 'react'
+import type { PageTab } from './pageTabsUtils'
+import AppHeader from '@ui/AppHeader'
+
+import MainMenu from '@ui/MainMenu'
+import { Layout, message, Spin, theme } from 'antd'
 import {
   Activity,
+
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from 'react'
-import { theme, Layout, message, Spin } from 'antd'
 import { useLocation, useOutlet } from 'react-router-dom'
-
-import MainMenu from '@ui/MainMenu'
-import AppHeader from '@ui/AppHeader'
-import AppLogo from './AppLogo'
-import EmployeeMobileLayout from './EmployeeMobileLayout'
-import PageTabs from './PageTabs'
-import { getLocationKey, type PageTab } from './pageTabsUtils'
 import { getDefaultHomeByRole, isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import { usePermissionContext } from '@/contexts/usePermissionContext'
 import { translateErrorMessage } from '@/utils/errorHandler'
+import AppLogo from './AppLogo'
+import EmployeeMobileLayout from './EmployeeMobileLayout'
+import PageTabs from './PageTabs'
+import { getLocationKey } from './pageTabsUtils'
 
 const { Content, Sider } = Layout
 
@@ -49,7 +51,8 @@ export default function AppLayout() {
   // 计算可见的 outlet：用 useMemo 同步计算，确保路由变化时立即显示内容。
   // useEffect 负责将 outlet 同步到 state，供其他依赖 cachedOutlets 的逻辑使用。
   const visibleOutlets = useMemo<Record<string, ReactNode>>(() => {
-    if (!outlet) return cachedOutlets
+    if (!outlet)
+      return cachedOutlets
 
     return {
       ...cachedOutlets,
@@ -76,10 +79,12 @@ export default function AppLayout() {
 
   useEffect(() => {
     // 根路径只承载异步首页重定向，缓存后会在隐藏状态继续触发 Navigate。
-    if (!outlet || location.pathname === '/') return
+    if (!outlet || location.pathname === '/')
+      return
 
     setCachedOutlets((currentOutlets) => {
-      if (currentOutlets[activeKey]) return currentOutlets
+      if (currentOutlets[activeKey])
+        return currentOutlets
 
       return {
         ...currentOutlets,
@@ -89,7 +94,7 @@ export default function AppLayout() {
   }, [activeKey, location.pathname, outlet])
 
   useEffect(() => {
-    const availableKeys = new Set(pageTabs.map((tab) => tab.key))
+    const availableKeys = new Set(pageTabs.map(tab => tab.key))
     availableKeys.add(activeKey)
 
     setCachedOutlets((currentOutlets) => {
@@ -120,14 +125,16 @@ export default function AppLayout() {
   useEffect(() => {
     if (permLoading && !prevPermLoadingRef.current) {
       setPermLoadBlock(true)
-    } else if (!permLoading && prevPermLoadingRef.current) {
+    }
+    else if (!permLoading && prevPermLoadingRef.current) {
       setPermLoadBlock(false)
     }
     prevPermLoadingRef.current = permLoading
   }, [permLoading])
 
   useEffect(() => {
-    if (!error) return
+    if (!error)
+      return
 
     const message = error.message || '认证出现问题，请稍后重试'
     messageApi.error(translateErrorMessage(message))
@@ -170,7 +177,7 @@ export default function AppLayout() {
           />
           <PageTabs onTabsChange={handleTabsChange} />
           <Content
-            className="app-card flex flex-col overflow-hidden"
+            className="flex flex-col overflow-hidden app-card"
             style={{
               margin: '12px 8px',
               padding: 12,

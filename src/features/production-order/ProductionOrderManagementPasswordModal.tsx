@@ -1,6 +1,6 @@
-import { Form, Input, Modal } from 'antd'
 import type { FormInstance } from 'antd'
 import type { ChangeManagementPasswordFormValues } from './productionOrderPageUtils'
+import { Form, Input, Modal } from 'antd'
 
 export interface ProductionOrderManagementPasswordModalProps {
   confirmLoading: boolean

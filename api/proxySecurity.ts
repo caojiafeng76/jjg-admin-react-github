@@ -2,7 +2,7 @@ export const MAX_JSON_BODY_BYTES = 16 * 1024
 
 export type ProxyRateLimitScope = 'syney-store-report' | 'youmai-purchase-order'
 
-type AuthorizeProxyRequestOptions = {
+interface AuthorizeProxyRequestOptions {
   authorization: string | undefined
   diagnose?: boolean
   fetchImpl?: typeof fetch
@@ -11,12 +11,12 @@ type AuthorizeProxyRequestOptions = {
   supabaseUrl: string | undefined
 }
 
-export type ProxyAuthorizationResult =
-  | { ok: true; userId: string }
-  | { ok: false; status: 401 | 403 }
+export type ProxyAuthorizationResult
+  = | { ok: true, userId: string }
+    | { ok: false, status: 401 | 403 }
 
 function extractBearerToken(authorization: string | undefined): string | null {
-  const match = authorization?.match(/^Bearer\s+([^\s]+)$/i)
+  const match = authorization?.match(/^Bearer\s+(\S+)$/i)
   return match?.[1] ?? null
 }
 
@@ -94,7 +94,7 @@ export async function authorizeProxyRequest({
   return { ok: true, userId: user.id }
 }
 
-type DistributedProxyRateLimitOptions = {
+interface DistributedProxyRateLimitOptions {
   authorization: string | undefined
   fetchImpl?: typeof fetch
   ip: string | undefined
@@ -123,8 +123,8 @@ export async function consumeDistributedProxyRateLimit({
     {
       method: 'POST',
       headers: {
-        apikey: publishableKey,
-        Authorization: `Bearer ${token}`,
+        'apikey': publishableKey,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -145,16 +145,18 @@ export type ContentLengthValidation = 'ok' | 'invalid' | 'too-large'
 export function validateContentLength(
   contentLength: string | undefined,
 ): ContentLengthValidation {
-  if (contentLength === undefined) return 'ok'
+  if (contentLength === undefined)
+    return 'ok'
 
   const value = Number(contentLength)
-  if (!Number.isInteger(value) || value < 0) return 'invalid'
+  if (!Number.isInteger(value) || value < 0)
+    return 'invalid'
   return value <= MAX_JSON_BODY_BYTES ? 'ok' : 'too-large'
 }
 
-export type JsonObjectBodyResult =
-  | { ok: true; body: Record<string, unknown> }
-  | { ok: false; status: 400 | 413 }
+export type JsonObjectBodyResult
+  = | { ok: true, body: Record<string, unknown> }
+    | { ok: false, status: 400 | 413 }
 
 export function parseJsonObjectBody(body: unknown): JsonObjectBodyResult {
   if (!isJsonBodyWithinLimit(body)) {
@@ -165,7 +167,8 @@ export function parseJsonObjectBody(body: unknown): JsonObjectBodyResult {
   if (typeof body === 'string') {
     try {
       parsed = JSON.parse(body) as unknown
-    } catch {
+    }
+    catch {
       return { ok: false, status: 400 }
     }
   }
@@ -177,7 +180,7 @@ export function parseJsonObjectBody(body: unknown): JsonObjectBodyResult {
   return { ok: true, body: parsed as Record<string, unknown> }
 }
 
-type JsonBodyRequest = {
+interface JsonBodyRequest {
   body?: unknown
   on?: unknown
 }
@@ -212,13 +215,15 @@ export async function readJsonObjectBody(
     let settled = false
 
     const finish = (result: JsonObjectBodyResult) => {
-      if (settled) return
+      if (settled)
+        return
       settled = true
       resolve(result)
     }
 
     stream.on('data', (chunk) => {
-      if (settled) return
+      if (settled)
+        return
 
       const buffer = toRawBodyBuffer(chunk)
       if (!buffer) {
@@ -234,7 +239,8 @@ export async function readJsonObjectBody(
       chunks.push(buffer)
     })
     stream.on('end', () => {
-      if (settled) return
+      if (settled)
+        return
       finish(
         parseJsonObjectBody(Buffer.concat(chunks, byteLength).toString('utf8')),
       )
@@ -247,22 +253,22 @@ export function safeErrorMetadata(error: unknown): {
   name: string
   status?: number
 } {
-  const candidateName =
-    error && typeof error === 'object' && 'name' in error
+  const candidateName
+    = error && typeof error === 'object' && 'name' in error
       ? String(error.name)
       : 'UnknownError'
-  const name = /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(candidateName)
+  const name = /^[A-Z][A-Z0-9]{0,63}$/i.test(candidateName)
     ? candidateName
     : 'UnknownError'
-  const candidateStatus =
-    error && typeof error === 'object' && 'status' in error
+  const candidateStatus
+    = error && typeof error === 'object' && 'status' in error
       ? Number(error.status)
       : undefined
 
-  return Number.isInteger(candidateStatus) &&
-    candidateStatus !== undefined &&
-    candidateStatus >= 100 &&
-    candidateStatus <= 599
+  return Number.isInteger(candidateStatus)
+    && candidateStatus !== undefined
+    && candidateStatus >= 100
+    && candidateStatus <= 599
     ? { name, status: candidateStatus }
     : { name }
 }
@@ -271,10 +277,11 @@ export function isJsonBodyWithinLimit(body: unknown): boolean {
   try {
     const serialized = typeof body === 'string' ? body : JSON.stringify(body)
     return (
-      new TextEncoder().encode(serialized ?? '').byteLength <=
-      MAX_JSON_BODY_BYTES
+      new TextEncoder().encode(serialized ?? '').byteLength
+        <= MAX_JSON_BODY_BYTES
     )
-  } catch {
+  }
+  catch {
     return false
   }
 }
@@ -298,7 +305,7 @@ export function resolveAllowedOrigin(
 
   const origins = configuredOrigins
     .split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin && origin !== '*')
+    .map(origin => origin.trim())
+    .filter(origin => origin && origin !== '*')
   return origins.includes(requestOrigin) ? requestOrigin : null
 }

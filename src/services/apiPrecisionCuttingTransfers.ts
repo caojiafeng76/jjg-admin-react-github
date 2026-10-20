@@ -1,15 +1,3 @@
-import dayjs from 'dayjs'
-
-import supabase from './supabase'
-import type { ProductionItemWithOrderDetail } from './apiProductionOrders'
-import { handleApiError } from '@/utils/errorHandler'
-import {
-  applyPrecisionCuttingTransferFilters,
-  chunkArray,
-  normalizePrecisionCuttingTransferInsertPayload,
-  normalizePrecisionCuttingTransferUpdatePayload,
-  roundTo,
-} from './apiPrecisionCuttingTransfersCalculations'
 import type {
   PrecisionCuttingTransferExportRow,
   PrecisionCuttingTransferFilters,
@@ -20,6 +8,18 @@ import type {
   PrecisionCuttingTransferUpdate,
   PrecisionCuttingTransferUpdateBase,
 } from './apiPrecisionCuttingTransfersTypes'
+
+import type { ProductionItemWithOrderDetail } from './apiProductionOrders'
+import dayjs from 'dayjs'
+import { handleApiError } from '@/utils/errorHandler'
+import {
+  applyPrecisionCuttingTransferFilters,
+  chunkArray,
+  normalizePrecisionCuttingTransferInsertPayload,
+  normalizePrecisionCuttingTransferUpdatePayload,
+  roundTo,
+} from './apiPrecisionCuttingTransfersCalculations'
+import supabase from './supabase'
 
 export * from './apiPrecisionCuttingTransfersTypes'
 
@@ -138,8 +138,8 @@ export async function getPrecisionCuttingTransferItemsByProjectNo(
     const processingDefectCount = Number(item.processing_defect_count || 0)
     const rawMaterialDefectCount = Number(item.raw_material_defect_count || 0)
     const outsourceDefectQuantity = Number(item.outsource_defect_quantity || 0)
-    const totalDefect =
-      processingDefectCount + rawMaterialDefectCount + outsourceDefectQuantity
+    const totalDefect
+      = processingDefectCount + rawMaterialDefectCount + outsourceDefectQuantity
 
     return {
       id: `precision-cutting-transfer:${item.id}`,
@@ -195,7 +195,8 @@ export async function getPrecisionCuttingTransfersForExport({
     }
 
     rows.push(...((data || []) as PrecisionCuttingTransferRow[]))
-  } else if (filters) {
+  }
+  else if (filters) {
     let from = 0
 
     while (true) {
@@ -224,7 +225,7 @@ export async function getPrecisionCuttingTransfersForExport({
     }
   }
 
-  const weightMap = await getProjectWeightMap(rows.map((row) => row.project_no))
+  const weightMap = await getProjectWeightMap(rows.map(row => row.project_no))
 
   const rowsWithWeight = rows.map((row) => {
     const weightPerMeterKg = weightMap.get(row.project_no) || 0
@@ -233,16 +234,16 @@ export async function getPrecisionCuttingTransfersForExport({
     return {
       ...row,
       raw_material_defect_weight_kg: roundTo(
-        (Number(row.raw_material_defect_count || 0) *
-          lengthMm *
-          weightPerMeterKg) /
-          1000,
+        (Number(row.raw_material_defect_count || 0)
+          * lengthMm
+          * weightPerMeterKg)
+        / 1000,
       ),
       processing_defect_weight_kg: roundTo(
-        (Number(row.processing_defect_count || 0) *
-          lengthMm *
-          weightPerMeterKg) /
-          1000,
+        (Number(row.processing_defect_count || 0)
+          * lengthMm
+          * weightPerMeterKg)
+        / 1000,
       ),
     }
   })
@@ -251,10 +252,10 @@ export async function getPrecisionCuttingTransfersForExport({
     return rowsWithWeight
   }
 
-  const rowMap = new Map(rowsWithWeight.map((row) => [row.id, row]))
+  const rowMap = new Map(rowsWithWeight.map(row => [row.id, row]))
 
   return ids
-    .map((id) => rowMap.get(id))
+    .map(id => rowMap.get(id))
     .filter((row): row is PrecisionCuttingTransferExportRow => Boolean(row))
 }
 
@@ -277,7 +278,8 @@ export async function getPrecisionCuttingTransferQuantityStats({
     }
 
     rows.push(...((data || []) as Array<{ transfer_quantity: number | null }>))
-  } else if (filters) {
+  }
+  else if (filters) {
     let from = 0
 
     while (true) {

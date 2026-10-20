@@ -1,12 +1,12 @@
-import { utils, writeFile } from 'xlsx-js-style'
-import dayjs from 'dayjs'
-
+import type { VillaLiftOrder } from '@/services/apiVillaLiftOrders'
 import {
   autoFitColumnWidths,
-  setRowHeight,
   EXCEL_WRITE_OPTIONS,
+  setRowHeight,
 } from '@utils/excelStyleUtils'
-import type { VillaLiftOrder } from '@/services/apiVillaLiftOrders'
+
+import dayjs from 'dayjs'
+import { utils, writeFile } from 'xlsx-js-style'
 
 const HEADER_ROW_HEIGHT = 28
 const BODY_ROW_HEIGHT = 22
@@ -76,7 +76,8 @@ function applyHeaderStyle(
 ) {
   for (let col = 0; col < colCount; col++) {
     const cellRef = `${String.fromCharCode(65 + col)}1`
-    if (!ws[cellRef]) ws[cellRef] = { v: '' }
+    if (!ws[cellRef])
+      ws[cellRef] = { v: '' }
     ws[cellRef].s = {
       ...(ws[cellRef].s || {}),
       font: { name: '宋体', sz: 11, bold: true },
@@ -100,7 +101,8 @@ function applyBodyStyle(
   for (let row = 1; row < rowCount; row++) {
     for (let col = 0; col < colCount; col++) {
       const cellRef = `${String.fromCharCode(65 + col)}${row + 1}`
-      if (!ws[cellRef]) ws[cellRef] = { v: '' }
+      if (!ws[cellRef])
+        ws[cellRef] = { v: '' }
       ws[cellRef].s = {
         ...(ws[cellRef].s || {}),
         font: { name: '宋体', sz: 10 },
@@ -117,7 +119,8 @@ function applyBodyStyle(
 }
 
 export function exportVillaLiftOrdersAsExcel(orders: VillaLiftOrder[]) {
-  if (!orders || orders.length === 0) return false
+  if (!orders || orders.length === 0)
+    return false
 
   const wb = utils.book_new()
   const rows: (string | number)[][] = []
@@ -133,7 +136,8 @@ export function exportVillaLiftOrdersAsExcel(orders: VillaLiftOrder[]) {
       if (raw != null) {
         if (field === 'status') {
           value = raw === 'closed' ? '已结案' : '未结案'
-        } else {
+        }
+        else {
           value = raw
         }
       }

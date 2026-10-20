@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest'
-
 import type {
   WorkshopOrder,
   WorkshopOrderProcessSchedule,
 } from '@/features/workshop/OrderList'
+
+import { describe, expect, it } from 'vitest'
 import {
   getOrderScheduledQuantity,
   parseSchedulingProcesses,

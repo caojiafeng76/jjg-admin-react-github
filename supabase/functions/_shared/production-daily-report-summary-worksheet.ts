@@ -51,87 +51,87 @@ function joinUniqueText(
   getValue: (row: ProductionDailyReportSummaryRow) => string,
 ) {
   const values = rows
-    .map((row) => getValue(row).trim())
-    .filter((value) => value && value !== '-')
+    .map(row => getValue(row).trim())
+    .filter(value => value && value !== '-')
 
   return Array.from(new Set(values)).join('、') || '-'
 }
 
 function buildSummaryTitle(rows: ProductionDailyReportSummaryRow[]) {
-  const dates = new Set(rows.map((row) => row.orderDate).filter(Boolean))
+  const dates = new Set(rows.map(row => row.orderDate).filter(Boolean))
 
   if (dates.size !== 1) {
     return SUMMARY_TITLE_FALLBACK
   }
 
   const [orderDate] = Array.from(dates)
-  const dateParts = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(orderDate)
+  const dateParts = /^\d{4}-(\d{1,2})-(\d{1,2})$/.exec(orderDate)
 
   if (!dateParts) {
     return SUMMARY_TITLE_FALLBACK
   }
 
-  return `精加工车间${Number(dateParts[2])}月${Number(dateParts[3])}日日报表汇总明细`
+  return `精加工车间${Number(dateParts[1])}月${Number(dateParts[2])}日日报表汇总明细`
 }
 
 function buildSummaryWorksheetData(rows: ProductionDailyReportSummaryRow[]) {
   const incomingQualifiedCount = sumReportRows(
     rows,
-    (row) => row.incomingQualifiedCount,
+    row => row.incomingQualifiedCount,
   )
-  const qualifiedCount = sumReportRows(rows, (row) => row.qualifiedCount)
-  const qualifiedRate =
-    incomingQualifiedCount > 0 ? qualifiedCount / incomingQualifiedCount : 0
+  const qualifiedCount = sumReportRows(rows, row => row.qualifiedCount)
+  const qualifiedRate
+    = incomingQualifiedCount > 0 ? qualifiedCount / incomingQualifiedCount : 0
   const abnormalDisplays = buildProductionDailyReportAbnormalDisplays(rows)
   const summaryRows = [
     ['来料合格数', incomingQualifiedCount, ''],
     ['成品合格数', qualifiedCount, ''],
-    ['不良数量', sumReportRows(rows, (row) => row.defectCount), ''],
+    ['不良数量', sumReportRows(rows, row => row.defectCount), ''],
     [
       '原料不良',
-      sumReportRows(rows, (row) => row.rawMaterialDefectCount),
+      sumReportRows(rows, row => row.rawMaterialDefectCount),
       abnormalDisplays.rawMaterialDefect,
     ],
     [
       '加工不良',
-      sumReportRows(rows, (row) => row.processingDefectCount),
+      sumReportRows(rows, row => row.processingDefectCount),
       abnormalDisplays.processingDefect,
     ],
     [
       '外协不良数',
-      sumReportRows(rows, (row) => row.outsourceDefectCount),
+      sumReportRows(rows, row => row.outsourceDefectCount),
       abnormalDisplays.outsourceDefect,
     ],
     [
       '外协不良原因',
-      joinUniqueText(rows, (row) => row.outsourceDefectReason),
+      joinUniqueText(rows, row => row.outsourceDefectReason),
       '',
     ],
-    ['外协单位', joinUniqueText(rows, (row) => row.outsourceUnit), ''],
-    ['调机不良', sumReportRows(rows, (row) => row.setupDefectCount), ''],
-    ['调机负责人', joinUniqueText(rows, (row) => row.setupResponsible), ''],
+    ['外协单位', joinUniqueText(rows, row => row.outsourceUnit), ''],
+    ['调机不良', sumReportRows(rows, row => row.setupDefectCount), ''],
+    ['调机负责人', joinUniqueText(rows, row => row.setupResponsible), ''],
     ['合格率', qualifiedRate, ''],
     [
       '原料不良重量kg',
-      sumReportRows(rows, (row) => row.rawMaterialDefectWeightKg),
+      sumReportRows(rows, row => row.rawMaterialDefectWeightKg),
       '',
     ],
     [
       '加工不良重量kg',
-      sumReportRows(rows, (row) => row.processingDefectWeightKg),
+      sumReportRows(rows, row => row.processingDefectWeightKg),
       '',
     ],
     [
       '外协不良重量kg',
-      sumReportRows(rows, (row) => row.outsourceDefectWeightKg),
+      sumReportRows(rows, row => row.outsourceDefectWeightKg),
       '',
     ],
     [
       '调机不良重量kg',
-      sumReportRows(rows, (row) => row.setupDefectWeightKg),
+      sumReportRows(rows, row => row.setupDefectWeightKg),
       '',
     ],
-    ['备注', joinUniqueText(rows, (row) => row.remark), ''],
+    ['备注', joinUniqueText(rows, row => row.remark), ''],
   ] as const
 
   return [

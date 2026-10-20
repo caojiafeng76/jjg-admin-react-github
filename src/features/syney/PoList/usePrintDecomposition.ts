@@ -1,15 +1,16 @@
-import { useState } from 'react'
-import { message } from 'antd'
 import type jsPDF from 'jspdf'
+import type { SyneySafePartSetting } from '@/services/apiSyneySafePartSettings'
+import type { ISyneyItem } from '@/services/types'
 
-import { useSelectedPos } from './useSelectedPos'
-import { ISyneyItem } from '@/services/types'
-import { hasUpFlag, hasDownFlag } from '@/utils/syneySafePartRules'
+import type { DecompositionCell } from '@/utils/syneyDecomposition'
+import { message } from 'antd'
+import { useState } from 'react'
 import {
   buildDecompositionCells,
-  type DecompositionCell,
+
 } from '@/utils/syneyDecomposition'
-import type { SyneySafePartSetting } from '@/services/apiSyneySafePartSettings'
+import { hasDownFlag, hasUpFlag } from '@/utils/syneySafePartRules'
+import { useSelectedPos } from './useSelectedPos'
 
 const loadPDFUtils = () => import('@/utils/pdfUtils')
 
@@ -145,8 +146,24 @@ export function usePrintDecomposition(
 
     // 绘制 4 行的表格框架
     const xCoords = [
-      50, 62, 74, 89, 98, 110, 125, 134, 146, 161, 170, 182, 197, 206, 220, 242,
-      257, 270,
+      50,
+      62,
+      74,
+      89,
+      98,
+      110,
+      125,
+      134,
+      146,
+      161,
+      170,
+      182,
+      197,
+      206,
+      220,
+      242,
+      257,
+      270,
     ]
 
     for (let i = 0; i < CONFIG.ROWS_PER_PAGE; i++) {
@@ -168,7 +185,7 @@ export function usePrintDecomposition(
       const vLineStart = yBase - 20
       const vLineEnd = yBase
 
-      xCoords.forEach((x) => doc.line(x, vLineStart, x, vLineEnd))
+      xCoords.forEach(x => doc.line(x, vLineStart, x, vLineEnd))
     }
 
     // 批量绘制文字以减少 setFontSize 调用次数
@@ -252,7 +269,7 @@ export function usePrintDecomposition(
 
       if (Technique && Technique !== 'null') {
         // 将工艺要求按逗号分割，每个条件另起一行
-        const techniqueLines = Technique.split(',').filter((line) =>
+        const techniqueLines = Technique.split(',').filter(line =>
           line.trim(),
         )
         // 显示所有条件，每个条件另起一行（最多3个，因为只有3个位置）
@@ -290,7 +307,8 @@ export function usePrintDecomposition(
         qtyX: number,
         y: number,
       ) => {
-        if (!cell) return
+        if (!cell)
+          return
 
         doc.setFontSize(8)
         doc.text(cell.spec, specX, y)
@@ -309,8 +327,8 @@ export function usePrintDecomposition(
       // 先处理侧围：收集所有侧围item，确定分配，分组汇总
       const sideFrameItems = items.filter(
         (item: ISyneyItem) =>
-          item.PartNo?.includes('XN2808ED') ||
-          item.PartNo?.includes('XN2838CQ'),
+          item.PartNo?.includes('XN2808ED')
+          || item.PartNo?.includes('XN2838CQ'),
       )
 
       // 确定每个侧围item的分配（上/下）
@@ -330,14 +348,17 @@ export function usePrintDecomposition(
 
         if (isUp && !isDown) {
           isUpper = true
-        } else if (isDown && !isUp) {
+        }
+        else if (isDown && !isUp) {
           isLower = true
-        } else {
+        }
+        else {
           // 无明确标志，交替分配
           const assignToTop = genericSideFrameIndex % 2 === 0
           if (assignToTop) {
             isUpper = true
-          } else {
+          }
+          else {
             isLower = true
           }
           genericSideFrameIndex += 1
@@ -347,8 +368,8 @@ export function usePrintDecomposition(
       })
 
       // 汇总上侧围和下侧围的数量和规格
-      const upperSideFrameItems = sideFrameAssignments.filter((a) => a.isUpper)
-      const lowerSideFrameItems = sideFrameAssignments.filter((a) => a.isLower)
+      const upperSideFrameItems = sideFrameAssignments.filter(a => a.isUpper)
+      const lowerSideFrameItems = sideFrameAssignments.filter(a => a.isLower)
 
       const upperSideFrameQty = upperSideFrameItems.reduce(
         (sum, a) => sum + (a.item.Qty || 0),
@@ -475,17 +496,19 @@ export function usePrintDecomposition(
 
         // 让出控制权，避免阻塞 UI，每 5 页让出一次
         if (pageIndex % 5 === 0) {
-          await new Promise((resolve) => setTimeout(resolve, 0))
+          await new Promise(resolve => setTimeout(resolve, 0))
         }
       }
 
       // 6. 输出 PDF
       openPDFInNewWindow(doc)
       messageApi.success('打印完成')
-    } catch (error) {
+    }
+    catch (error) {
       console.error('打印分解单失败:', error)
       messageApi.error('打印失败，请重试')
-    } finally {
+    }
+    finally {
       setIsPrinting(false)
     }
   }

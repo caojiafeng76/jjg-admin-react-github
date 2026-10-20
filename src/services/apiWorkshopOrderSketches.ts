@@ -1,13 +1,14 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
+import { handleApiError } from '@/utils/errorHandler'
 import { buildSketchPath } from './apiWorkshopOrdersCalculations'
+import supabase from './supabase'
 
 const WORKSHOP_ORDER_SKETCH_BUCKET = 'workshop-order-sketches'
 
 export async function removeWorkshopOrderSketchFiles(paths: string[]) {
   const uniquePaths = Array.from(new Set(paths.filter(Boolean)))
-  if (uniquePaths.length === 0) return
+  if (uniquePaths.length === 0)
+    return
 
   const { error } = await supabase.storage
     .from(WORKSHOP_ORDER_SKETCH_BUCKET)
@@ -21,7 +22,7 @@ export async function removeWorkshopOrderSketchFiles(paths: string[]) {
 export async function uploadWorkshopOrderSketch(
   row: WorkshopOrder,
   index: number,
-): Promise<{ path: string | null; uploadedPath: string | null }> {
+): Promise<{ path: string | null, uploadedPath: string | null }> {
   const sketchFile = row.sketch_file
   if (!sketchFile) {
     return { path: row.sketch_file_path ?? null, uploadedPath: null }

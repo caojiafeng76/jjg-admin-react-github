@@ -1,5 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  clearStandardSecondsCache,
+  getModels,
+  getOperationsByModel,
+  getSalesOrderByProjectNo,
+  getSalesOrdersProjectNos,
+  getStandardSeconds,
+  resolveStandardSecondsBatch,
+} from './apiProcessStandards'
+
 interface QueryResult {
   data: unknown
   error: { message: string } | null
@@ -36,12 +46,12 @@ vi.mock('./supabase', () => ({
         error: null,
       }
       const builder = {} as QueryBuilder
-      const chain =
-        (method: string) =>
-        (...args: unknown[]): QueryBuilder => {
-          database.calls.push({ args, method, table })
-          return builder
-        }
+      const chain
+        = (method: string) =>
+          (...args: unknown[]): QueryBuilder => {
+            database.calls.push({ args, method, table })
+            return builder
+          }
 
       builder.eq = chain('eq')
       builder.in = chain('in')
@@ -65,22 +75,12 @@ vi.mock('@/utils/errorHandler', () => ({
     new Error(`${message}: ${error.message}`),
 }))
 
-import {
-  clearStandardSecondsCache,
-  getModels,
-  getOperationsByModel,
-  getSalesOrderByProjectNo,
-  getSalesOrdersProjectNos,
-  getStandardSeconds,
-  resolveStandardSecondsBatch,
-} from './apiProcessStandards'
-
 function enqueue(...responses: QueryResult[]) {
   database.responses.push(...responses)
 }
 
 function callsFor(method: string) {
-  return database.calls.filter((call) => call.method === method)
+  return database.calls.filter(call => call.method === method)
 }
 
 describe('apiProcessStandards', () => {
@@ -120,7 +120,7 @@ describe('apiProcessStandards', () => {
       }),
     ).resolves.toEqual({ records: [exactRecord], matchLevel: 'type-a' })
 
-    expect(callsFor('eq').map((call) => call.args)).toEqual([
+    expect(callsFor('eq').map(call => call.args)).toEqual([
       ['model', 'M-1'],
       ['record_type', 'A'],
       ['part_no', 'P-1'],
@@ -143,7 +143,7 @@ describe('apiProcessStandards', () => {
     ).resolves.toEqual({ records: [fallbackRecord], matchLevel: 'type-b' })
 
     expect(
-      callsFor('eq').filter((call) => call.args[0] === 'record_type'),
+      callsFor('eq').filter(call => call.args[0] === 'record_type'),
     ).toEqual([
       expect.objectContaining({ args: ['record_type', 'A'] }),
       expect.objectContaining({ args: ['record_type', 'B'] }),
@@ -180,7 +180,7 @@ describe('apiProcessStandards', () => {
       }),
     ).resolves.toBe(0)
 
-    expect(callsFor('eq').some((call) => call.args[0] === 'part_no')).toBe(
+    expect(callsFor('eq').some(call => call.args[0] === 'part_no')).toBe(
       false,
     )
   })
@@ -236,8 +236,8 @@ describe('apiProcessStandards', () => {
     expect(result).not.toContainEqual(
       expect.objectContaining({ project_no: null }),
     )
-    expect(result.filter((item) => item.project_no === 'P-0')).toHaveLength(1)
-    expect(result.filter((item) => item.project_no === 'P-1001')).toHaveLength(1)
+    expect(result.filter(item => item.project_no === 'P-0')).toHaveLength(1)
+    expect(result.filter(item => item.project_no === 'P-1001')).toHaveLength(1)
     // 分页循环拉取（PostgREST 默认 db-max-rows=1000），两页 range 连续
     expect(callsFor('range')).toEqual([
       expect.objectContaining({ args: [0, 999] }),
@@ -334,7 +334,7 @@ describe('apiProcessStandards', () => {
     expect(callsFor('select')[0]?.args).toEqual([
       'model, operation, record_type, part_no, length, standard_seconds',
     ])
-    expect(callsFor('in').map((call) => call.args)).toEqual([
+    expect(callsFor('in').map(call => call.args)).toEqual([
       ['model', ['M-A', 'M-B', 'M-X']],
       ['operation', ['切割', '包装', '检验']],
       ['record_type', ['A', 'B']],

@@ -20,7 +20,7 @@ describe('tooling fixture migration contract', () => {
       'create table if not exists public.tooling_fixture_usage_records',
     )
     expect(migration).toContain('qr_token text not null')
-    expect(migration).toContain("status text not null default '未使用'")
+    expect(migration).toContain('status text not null default \'未使用\'')
   })
 
   it('exposes only restricted RPCs for anonymous scan actions', () => {

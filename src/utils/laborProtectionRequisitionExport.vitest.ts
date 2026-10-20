@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import * as XLSX from 'xlsx-js-style'
-
 import type { LaborProtectionRequisition } from '@/services/apiLaborProtectionRequisitions'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import * as XLSX from 'xlsx-js-style'
 import { exportLaborProtectionRequisitionsToExcel } from './laborProtectionRequisitionExport'
 
 const writeFileMock = vi.hoisted(() => vi.fn())

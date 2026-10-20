@@ -1,6 +1,6 @@
-import supabase from './supabase'
 import dayjs from 'dayjs'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface LaborProtectionRequisition {
   id: string
@@ -26,11 +26,11 @@ export interface LaborProtectionRequisitionFormValues {
   collection_method: string
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 
-type LaborProtectionRequisitionRow = {
+interface LaborProtectionRequisitionRow {
   id: string
   labor_protection_data_id: string
   machine_equipment_id: string | null
@@ -42,25 +42,25 @@ type LaborProtectionRequisitionRow = {
   updated_at: string
   labor_protection_data?:
     | {
-        id: string
-        category: string
-      }
+      id: string
+      category: string
+    }
     | Array<{
-        id: string
-        category: string
-      }>
+      id: string
+      category: string
+    }>
     | null
   machine_equipment_maintenances?:
     | {
-        id: string
-        unified_device_no: string
-        machine_name: string
-      }
+      id: string
+      unified_device_no: string
+      machine_name: string
+    }
     | Array<{
-        id: string
-        unified_device_no: string
-        machine_name: string
-      }>
+      id: string
+      unified_device_no: string
+      machine_name: string
+    }>
     | null
 }
 

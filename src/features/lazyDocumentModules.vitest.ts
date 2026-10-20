@@ -177,8 +177,9 @@ function readProjectFile(path: string): string {
 
 function getStaticImportSpecifiers(source: string): string[] {
   return Array.from(
+    // eslint-disable-next-line regexp/no-super-linear-backtracking -- 仅测试用的源码扫描
     source.matchAll(/^import\s+(?!type\b)[\s\S]*?\sfrom\s+['"]([^'"]+)['"]/gm),
-    (match) => match[1],
+    match => match[1],
   )
 }
 

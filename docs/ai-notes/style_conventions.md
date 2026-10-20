@@ -1,4 +1,4 @@
-- ESLint: @eslint/js recommended + typescript-eslint recommended; react-hooks recommended; react-refresh only-export-components warn. Ignores dist. ECMA 2020 globals browser. Files: \*_/_.{ts,tsx}.
-- Formatting: Prettier with tailwindcss plugin. Prefer bun scripts `bun format` (prettier --write .).
+- ESLint: `@antfu/eslint-config`（`react: true`、`typescript: true`，单引号 / 无分号 / 2 空格），配置见 `eslint.config.js`；Tailwind 类名由 `eslint-plugin-better-tailwindcss` 排序、去重。Markdown 与 `docs/**` 不参与 lint，`src/services/database.types.ts` 为生成文件已忽略。
+- Formatting: 只用 ESLint 格式化，项目已移除 Prettier。写完代码后执行 `bunx eslint --fix <改动的文件>`（或 `bun lint:fix` / `bun format`），再用 `bun lint` 确认 0 error。
 - Tailwind v3 config minimal; darkMode 'class'.
 - TypeScript: tsconfig.app/node present (not strict info). Keep React + TS patterns; functional components with hooks; Zustand store; TanStack Query for data fetching.

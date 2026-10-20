@@ -1,5 +1,5 @@
 const routeToLabelMap: Record<string, string> = {
-  dashboard: '首页',
+  'dashboard': '首页',
   'syney-po-list': '订单列表',
   'syney-store-report-list': '入库单列表',
   'syney-spec-list': '踏板规格列表',
@@ -17,7 +17,7 @@ const routeToLabelMap: Record<string, string> = {
   'machine-equipment-maintenance': '机器设备维护',
   'material-transfer': '物料转移单',
   'material-transfer/scan': '扫码物料转移单',
-  scan: '扫码导航',
+  'scan': '扫码导航',
   'production-order': '生产工单',
   'production-order/create': '手动新建工单',
   'production-order/scan': '扫码工单',

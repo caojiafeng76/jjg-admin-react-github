@@ -1,3 +1,12 @@
+import type { FormInstance } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type {
+  ToolingFixture,
+  ToolingFixtureFormValues,
+} from '@/services/apiToolingFixture'
+
+import { PlusIcon, TrashIcon } from '@heroicons/react/16/solid'
+import PrintButton from '@ui/PrintButton'
 import {
   Button,
   Card,
@@ -9,17 +18,8 @@ import {
   Space,
   Typography,
 } from 'antd'
-import type { FormInstance } from 'antd'
-import type { Dayjs } from 'dayjs'
-
-import { PlusIcon, TrashIcon } from '@heroicons/react/16/solid'
-import type {
-  ToolingFixture,
-  ToolingFixtureFormValues,
-} from '@/services/apiToolingFixture'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
-import PrintButton from '@ui/PrintButton'
 import ToolingFixtureExcelImport from './ToolingFixtureExcelImport'
 import ToolingFixtureForm from './ToolingFixtureForm'
 import ToolingFixtureTable from './ToolingFixtureTable'
@@ -27,7 +27,7 @@ import ToolingFixtureTable from './ToolingFixtureTable'
 const PAGE_SIZE_OPTIONS = [10, 20, 50]
 
 interface FixtureDataViewProps {
-  data: { items: ToolingFixture[]; total: number } | undefined
+  data: { items: ToolingFixture[], total: number } | undefined
   isLoading: boolean
   error: unknown
   refetch: () => void
@@ -171,11 +171,10 @@ export default function FixtureDataView({
             placeholder={['制作开始日期', '制作结束日期']}
             value={manufacturedDateRange}
             style={{ width: 260 }}
-            onChange={(value) =>
+            onChange={value =>
               onManufacturedDateChange(
                 value?.[0] && value?.[1] ? [value[0], value[1]] : null,
-              )
-            }
+              )}
           />
           <DatePicker.RangePicker
             allowClear
@@ -183,11 +182,10 @@ export default function FixtureDataView({
             placeholder={['更新开始日期', '更新结束日期']}
             value={updatedDateRange}
             style={{ width: 260 }}
-            onChange={(value) =>
+            onChange={value =>
               onUpdatedDateChange(
                 value?.[0] && value?.[1] ? [value[0], value[1]] : null,
-              )
-            }
+              )}
           />
           <PrintButton
             handlePrint={onPrintFiltered}
@@ -195,16 +193,18 @@ export default function FixtureDataView({
           >
             打印二维码
           </PrintButton>
-          {selectedRowKeys.length > 0 ? (
-            <Button
-              type="text"
-              danger
-              icon={<TrashIcon className="size-4" />}
-              onClick={onDeleteSelected}
-            >
-              删除选中
-            </Button>
-          ) : null}
+          {selectedRowKeys.length > 0
+            ? (
+                <Button
+                  type="text"
+                  danger
+                  icon={<TrashIcon className="size-4" />}
+                  onClick={onDeleteSelected}
+                >
+                  删除选中
+                </Button>
+              )
+            : null}
         </Space>
 
         <div
@@ -228,11 +228,11 @@ export default function FixtureDataView({
                 page={page}
                 pageSize={pageSize}
                 scrollY={scrollY}
-                emptyAction={
+                emptyAction={(
                   <Button type="primary" icon={<PlusIcon />} onClick={onCreate}>
                     新增工装
                   </Button>
-                }
+                )}
               />
             </TableState>
           </div>

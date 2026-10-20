@@ -1,6 +1,6 @@
-import { Form, Input, InputNumber, Modal } from 'antd'
-
 import type { VillaLiftFinishingRecordFormValues } from '@/services/apiVillaLiftFinishing'
+
+import { Form, Input, InputNumber, Modal } from 'antd'
 
 // ----------------------------------------------------------------
 // Types

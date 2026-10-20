@@ -80,23 +80,25 @@ export function ResizableHeaderCell({
         }}
       >
         {children}
-        {columnKey && onResizeColumn ? (
-          <span
-            aria-label="调整列宽"
-            role="separator"
-            aria-orientation="vertical"
-            onMouseDown={handleResizeStart}
-            style={{
-              bottom: 0,
-              cursor: 'col-resize',
-              position: 'absolute',
-              right: -3,
-              top: 0,
-              width: 6,
-              zIndex: 3,
-            }}
-          />
-        ) : null}
+        {columnKey && onResizeColumn
+          ? (
+              <span
+                aria-label="调整列宽"
+                role="separator"
+                aria-orientation="vertical"
+                onMouseDown={handleResizeStart}
+                style={{
+                  bottom: 0,
+                  cursor: 'col-resize',
+                  position: 'absolute',
+                  right: -3,
+                  top: 0,
+                  width: 6,
+                  zIndex: 3,
+                }}
+              />
+            )
+          : null}
       </div>
     </th>
   )

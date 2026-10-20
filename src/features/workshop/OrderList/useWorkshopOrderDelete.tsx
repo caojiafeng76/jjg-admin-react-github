@@ -1,6 +1,6 @@
-import { useCallback } from 'react'
 import type { Dispatch, Key, SetStateAction } from 'react'
 import { App } from 'antd'
+import { useCallback } from 'react'
 
 import { getWorkshopOrderDeleteBlockers } from '@/services/apiWorkshopOrders'
 import { useDeleteWorkshopOrders } from './useWorkshopOrders'
@@ -46,22 +46,22 @@ export function useWorkshopOrderDelete({
             <div className="space-y-3">
               <p>以下订单已被生产记录引用，请先处理关联数据：</p>
               <ul className="list-disc space-y-2 pl-5">
-                {blockers.map((item) => (
+                {blockers.map(item => (
                   <li key={item.orderId}>
                     <div className="font-medium text-slate-800">
                       {item.projectNo?.trim() || '未填写项目号'}
                     </div>
                     <div className="text-sm text-slate-500">
-                      {item.productionItemCount > 0 &&
-                        `已关联 ${item.productionItemCount} 条生产工单明细`}
-                      {item.productionItemCount > 0 &&
-                        item.extrusionProductionItemCount > 0 &&
-                        '，'}
-                      {item.extrusionProductionItemCount > 0 &&
-                        `已关联 ${item.extrusionProductionItemCount} 条挤压明细`}
-                      {(item.productionItemCount > 0 ||
-                        item.extrusionProductionItemCount > 0) &&
-                      item.orderDates.length > 0
+                      {item.productionItemCount > 0
+                        && `已关联 ${item.productionItemCount} 条生产工单明细`}
+                      {item.productionItemCount > 0
+                        && item.extrusionProductionItemCount > 0
+                        && '，'}
+                      {item.extrusionProductionItemCount > 0
+                        && `已关联 ${item.extrusionProductionItemCount} 条挤压明细`}
+                      {(item.productionItemCount > 0
+                        || item.extrusionProductionItemCount > 0)
+                      && item.orderDates.length > 0
                         ? `，工单日期：${item.orderDates.slice(0, 3).join('、')}`
                         : ''}
                     </div>
@@ -94,10 +94,12 @@ export function useWorkshopOrderDelete({
             await deleteMutation.mutateAsync(ids)
             message.success('删除成功')
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             if (error instanceof Error) {
               message.error(error.message)
-            } else {
+            }
+            else {
               message.error('删除失败，请稍后重试')
             }
 
@@ -105,10 +107,12 @@ export function useWorkshopOrderDelete({
           }
         },
       })
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除失败，请稍后重试')
       }
     }

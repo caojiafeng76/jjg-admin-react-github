@@ -27,12 +27,12 @@ export const EMPTY_SEARCH_VALUES: SearchValues = {
   projectNo: '',
 }
 
-export const STATUS_TABS: Array<{ key: WorkshopOrderStatus; label: string }> = [
+export const STATUS_TABS: Array<{ key: WorkshopOrderStatus, label: string }> = [
   { key: '生产中', label: '生产中' },
   { key: '已结案', label: '已结案' },
 ]
 
-export type SearchValues = {
+export interface SearchValues {
   customer: string
   materialCode: string
   model: string
@@ -106,10 +106,10 @@ export function canCloseDashboardOrder({
   record: OrderStatusDashboardItem
 }) {
   return (
-    canManageStatus &&
-    Boolean(record.id) &&
-    normalizeStatusTab(record.status ?? null) !== '已结案' &&
-    (record.completionRate ?? 0) >= 100
+    canManageStatus
+    && Boolean(record.id)
+    && normalizeStatusTab(record.status ?? null) !== '已结案'
+    && (record.completionRate ?? 0) >= 100
   )
 }
 
@@ -127,12 +127,12 @@ export function extractTextFilters(
     new Set(
       items
         .map(getter)
-        .map((value) => (typeof value === 'string' ? value.trim() : value))
+        .map(value => (typeof value === 'string' ? value.trim() : value))
         .filter((value): value is string => Boolean(value)),
     ),
   ).sort((left, right) => left.localeCompare(right, 'zh-CN'))
 
-  return values.map((value) => ({ text: value, value }))
+  return values.map(value => ({ text: value, value }))
 }
 
 export function extractNumberFilters(
@@ -148,7 +148,7 @@ export function extractNumberFilters(
     ),
   ).sort((left, right) => left - right)
 
-  return values.map((value) => ({
+  return values.map(value => ({
     text: format ? format(value) : String(value),
     value,
   }))

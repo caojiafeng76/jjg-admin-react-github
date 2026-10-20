@@ -1,49 +1,51 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import type { FormInstance } from 'antd'
+import type {
+  ProcessStandardRecordType,
+  StandardTime,
+  StandardTimeFormValues,
+} from '@/services/apiStandardTimes'
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/16/solid'
-import { App, Modal, FormInstance, Button, Splitter } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import { App, Button, Modal, Splitter } from 'antd'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
+import { isTeamLeaderOnly } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { getProcessStandardImageExportFile } from '@/services/apiProcessStandardImages'
+import { getAllStandardTimesForExport } from '@/services/apiStandardTimes'
 import AddButton from '@/ui/AddButton'
-import EditButton from '@/ui/EditButton'
+import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
+import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
 import PermissionButton from '@/ui/PermissionButton'
 import PermissionGate from '@/ui/PermissionGate'
-import AppPagination from '@/ui/AppPagination'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { isTeamLeaderOnly } from '@/config/access'
-import { useAuth } from '@/contexts/useAuth'
-import type {
-  StandardTime,
-  StandardTimeFormValues,
-  ProcessStandardRecordType,
-} from '@/services/apiStandardTimes'
-import { getAllStandardTimesForExport } from '@/services/apiStandardTimes'
-import { getProcessStandardImageExportFile } from '@/services/apiProcessStandardImages'
-import {
-  useStandardTimesList,
-  useCreateStandardTime,
-  useUpdateStandardTime,
-  useUpdateStandardTimesLastProcess,
-  useDeleteStandardTimes,
-  useUploadProcessStandardImage,
-} from './useStandardTimes'
-import StandardTimeMobileList from './StandardTimeMobileList'
-import StandardTimeTable from './StandardTimeTable'
 import StandardTimeCostDetail from './StandardTimeCostDetail'
 import StandardTimeForm from './StandardTimeForm'
+import StandardTimeMobileList from './StandardTimeMobileList'
 import StandardTimeSearch from './StandardTimeSearch'
+import StandardTimeTable from './StandardTimeTable'
+import {
+  useCreateStandardTime,
+  useDeleteStandardTimes,
+  useStandardTimesList,
+  useUpdateStandardTime,
+  useUpdateStandardTimesLastProcess,
+  useUploadProcessStandardImage,
+} from './useStandardTimes'
 
 const loadCostAccountingExcel = () => import('@/utils/costAccountingExcel')
 
-const preloadCostAccountingExcel = () => {
+function preloadCostAccountingExcel() {
   void loadCostAccountingExcel()
 }
 
-const loadPrecisionFinishingProcessExcel = () =>
-  import('@/utils/precisionFinishingProcessExcel')
+function loadPrecisionFinishingProcessExcel() {
+  return import('@/utils/precisionFinishingProcessExcel')
+}
 
-const preloadPrecisionFinishingProcessExcel = () => {
+function preloadPrecisionFinishingProcessExcel() {
   void loadPrecisionFinishingProcessExcel()
 }
 
@@ -59,8 +61,8 @@ export default function StandardTimeList() {
   const [isExporting, setIsExporting] = useState(false)
   const [isFilterExporting, setIsFilterExporting] = useState(false)
   const [isProcessExporting, setIsProcessExporting] = useState(false)
-  const [isProcessFilterExporting, setIsProcessFilterExporting] =
-    useState(false)
+  const [isProcessFilterExporting, setIsProcessFilterExporting]
+    = useState(false)
   const [uploadingImageId, setUploadingImageId] = useState<string | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -91,8 +93,8 @@ export default function StandardTimeList() {
     updatedStartDate: searchParamsURL.get('updatedStartDate') || undefined,
     updatedEndDate: searchParamsURL.get('updatedEndDate') || undefined,
     recordType:
-      (searchParamsURL.get('recordType') as ProcessStandardRecordType) ||
-      undefined,
+      (searchParamsURL.get('recordType') as ProcessStandardRecordType)
+      || undefined,
   })
   const [editingRecord, setEditingRecord] = useState<StandardTime | null>(null)
   const [activeRecord, setActiveRecord] = useState<StandardTime | null>(null)
@@ -109,8 +111,8 @@ export default function StandardTimeList() {
   const deleteMutation = useDeleteStandardTimes()
   const uploadImageMutation = useUploadProcessStandardImage()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -133,8 +135,8 @@ export default function StandardTimeList() {
 
   const handleEdit = useCallback(
     (record?: StandardTime) => {
-      const targetRecord =
-        record || data?.items.find((item) => item.id === selectedRowKeys[0])
+      const targetRecord
+        = record || data?.items.find(item => item.id === selectedRowKeys[0])
 
       if (!record && selectedRowKeys.length !== 1) {
         message.warning('请选择一条数据进行编辑')
@@ -170,10 +172,12 @@ export default function StandardTimeList() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('成本核算删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除成本核算失败，请稍后重试')
       }
     }
@@ -206,16 +210,18 @@ export default function StandardTimeList() {
               isLastProcess,
             })
             message.success(`已${actionLabel} ${selectedIds.length} 条成本核算`)
-            setActiveRecord((current) =>
+            setActiveRecord(current =>
               current?.id && selectedIds.includes(current.id)
                 ? { ...current, is_last_process: isLastProcess }
                 : current,
             )
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             if (error instanceof Error) {
               message.error(error.message)
-            } else {
+            }
+            else {
               message.error('更新末道状态失败，请稍后重试')
             }
           }
@@ -227,7 +233,7 @@ export default function StandardTimeList() {
 
   const handleExport = useCallback(async () => {
     const selectedSet = new Set(selectedRowKeys)
-    const selectedRecords = (data?.items || []).filter((item) =>
+    const selectedRecords = (data?.items || []).filter(item =>
       selectedSet.has(item.id || ''),
     )
 
@@ -238,18 +244,21 @@ export default function StandardTimeList() {
 
     setIsExporting(true)
     // 先让 React 渲染 loading 状态，再执行同步的 Excel 生成
-    await new Promise<void>((resolve) => setTimeout(resolve, 0))
+    await new Promise<void>(resolve => setTimeout(resolve, 0))
     try {
       const { exportCostAccountingToExcel } = await loadCostAccountingExcel()
       exportCostAccountingToExcel(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条成本核算数据`)
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('导出成本核算失败，请稍后重试')
       }
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [data?.items, message, selectedRowKeys])
@@ -262,30 +271,33 @@ export default function StandardTimeList() {
         message.warning('当前筛选条件下无数据可导出')
         return
       }
-      await new Promise<void>((resolve) => setTimeout(resolve, 0))
+      await new Promise<void>(resolve => setTimeout(resolve, 0))
       const { exportCostAccountingToExcel } = await loadCostAccountingExcel()
       exportCostAccountingToExcel(records)
       message.success(`已按筛选条件导出 ${records.length} 条成本核算数据`)
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('导出成本核算失败，请稍后重试')
       }
-    } finally {
+    }
+    finally {
       setIsFilterExporting(false)
     }
   }, [message, searchParams])
 
   const exportProcessSheet = useCallback(async (records: StandardTime[]) => {
-    const { exportPrecisionFinishingProcessToExcel } =
-      await loadPrecisionFinishingProcessExcel()
+    const { exportPrecisionFinishingProcessToExcel }
+      = await loadPrecisionFinishingProcessExcel()
 
     await exportPrecisionFinishingProcessToExcel(records, async (record) => {
       if (
-        !record.process_image_path ||
-        !record.process_image_name ||
-        !record.process_image_mime_type
+        !record.process_image_path
+        || !record.process_image_name
+        || !record.process_image_mime_type
       ) {
         return null
       }
@@ -302,7 +314,7 @@ export default function StandardTimeList() {
 
   const handleProcessExport = useCallback(async () => {
     const selectedSet = new Set(selectedRowKeys)
-    const selectedRecords = (data?.items || []).filter((item) =>
+    const selectedRecords = (data?.items || []).filter(item =>
       selectedSet.has(item.id || ''),
     )
 
@@ -312,15 +324,17 @@ export default function StandardTimeList() {
     }
 
     setIsProcessExporting(true)
-    await new Promise<void>((resolve) => setTimeout(resolve, 0))
+    await new Promise<void>(resolve => setTimeout(resolve, 0))
     try {
       await exportProcessSheet(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条工艺数据`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '导出工艺表失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsProcessExporting(false)
     }
   }, [data?.items, exportProcessSheet, message, selectedRowKeys])
@@ -334,21 +348,24 @@ export default function StandardTimeList() {
         return
       }
 
-      await new Promise<void>((resolve) => setTimeout(resolve, 0))
+      await new Promise<void>(resolve => setTimeout(resolve, 0))
       await exportProcessSheet(records)
       message.success(`已按筛选条件导出 ${records.length} 条工艺数据`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '导出工艺表失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsProcessFilterExporting(false)
     }
   }, [exportProcessSheet, message, searchParams])
 
   const handleUploadProcessImage = useCallback(
     async (record: StandardTime, file: File) => {
-      if (!record.id) return
+      if (!record.id)
+        return
 
       setUploadingImageId(record.id)
       try {
@@ -360,13 +377,15 @@ export default function StandardTimeList() {
           file,
         })
         message.success('工艺图示上传成功')
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error
             ? error.message
             : '工艺图示上传失败，请稍后重试',
         )
-      } finally {
+      }
+      finally {
         setUploadingImageId(null)
       }
     },
@@ -391,30 +410,30 @@ export default function StandardTimeList() {
               theoretical_seconds: values.theoretical_seconds,
               labor_rate: editingRecord?.labor_rate ?? values.labor_rate ?? 0,
               labor_cost_coefficient:
-                editingRecord?.labor_cost_coefficient ??
-                values.labor_cost_coefficient ??
-                1,
+                editingRecord?.labor_cost_coefficient
+                ?? values.labor_cost_coefficient
+                ?? 1,
               equipment_rate:
                 editingRecord?.equipment_rate ?? values.equipment_rate ?? 0,
               tool_rate: editingRecord?.tool_rate ?? values.tool_rate ?? 0,
               cutting_fluid_rate:
-                editingRecord?.cutting_fluid_rate ??
-                values.cutting_fluid_rate ??
-                0,
+                editingRecord?.cutting_fluid_rate
+                ?? values.cutting_fluid_rate
+                ?? 0,
               fixture_rate:
                 editingRecord?.fixture_rate ?? values.fixture_rate ?? 0,
               inspection_seconds:
-                editingRecord?.inspection_seconds ??
-                values.inspection_seconds ??
-                0,
+                editingRecord?.inspection_seconds
+                ?? values.inspection_seconds
+                ?? 0,
               daily_management_cost:
-                editingRecord?.daily_management_cost ??
-                values.daily_management_cost ??
-                0,
+                editingRecord?.daily_management_cost
+                ?? values.daily_management_cost
+                ?? 0,
               daily_total_hours:
-                editingRecord?.daily_total_hours ??
-                values.daily_total_hours ??
-                0,
+                editingRecord?.daily_total_hours
+                ?? values.daily_total_hours
+                ?? 0,
               uploaded_by_name: isEdit
                 ? editingRecord?.uploaded_by_name || null
                 : currentUploader || values.uploaded_by_name || null,
@@ -422,15 +441,15 @@ export default function StandardTimeList() {
               length: values.length ?? editingRecord?.length ?? 0,
               part_no: values.part_no ?? editingRecord?.part_no ?? null,
               tooling_fixture:
-                values.tooling_fixture ??
-                editingRecord?.tooling_fixture ??
-                null,
+                values.tooling_fixture
+                ?? editingRecord?.tooling_fixture
+                ?? null,
               clamping_count:
                 values.clamping_count ?? editingRecord?.clamping_count ?? null,
               clamping_quantity:
-                values.clamping_quantity ??
-                editingRecord?.clamping_quantity ??
-                null,
+                values.clamping_quantity
+                ?? editingRecord?.clamping_quantity
+                ?? null,
               operator_count:
                 values.operator_count ?? editingRecord?.operator_count ?? null,
               process_image_path: editingRecord?.process_image_path ?? null,
@@ -453,13 +472,13 @@ export default function StandardTimeList() {
             }
 
         if (isEdit && selectedRowKeys[0]) {
-          const standardSecondsChanged =
-            editingRecord?.standard_seconds !== nextValues.standard_seconds
-          const operationChanged =
-            editingRecord?.operation !== nextValues.operation
+          const standardSecondsChanged
+            = editingRecord?.standard_seconds !== nextValues.standard_seconds
+          const operationChanged
+            = editingRecord?.operation !== nextValues.operation
           const modelChanged = editingRecord?.model !== nextValues.model
-          const relatedOrdersSynced =
-            standardSecondsChanged || operationChanged || modelChanged
+          const relatedOrdersSynced
+            = standardSecondsChanged || operationChanged || modelChanged
 
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
@@ -472,7 +491,8 @@ export default function StandardTimeList() {
                 ? '理论工时更新成功'
                 : '成本核算更新成功',
           )
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(nextValues)
           message.success(
             isTeamLeaderMode ? '理论工时创建成功' : '成本核算创建成功',
@@ -480,10 +500,12 @@ export default function StandardTimeList() {
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -511,49 +533,57 @@ export default function StandardTimeList() {
 
       if (params.operation) {
         nextSearchParamsURL.set('operation', params.operation)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('operation')
       }
 
       if (params.model) {
         nextSearchParamsURL.set('model', params.model)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('model')
       }
 
       if (params.partNo) {
         nextSearchParamsURL.set('partNo', params.partNo)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('partNo')
       }
 
       if (params.unmatchedOnly) {
         nextSearchParamsURL.set('unmatchedOnly', 'true')
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('unmatchedOnly')
       }
 
       if (params.partNoOnly) {
         nextSearchParamsURL.set('partNoOnly', 'true')
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('partNoOnly')
       }
 
       if (params.recordType) {
         nextSearchParamsURL.set('recordType', params.recordType)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('recordType')
       }
 
       if (params.updatedStartDate) {
         nextSearchParamsURL.set('updatedStartDate', params.updatedStartDate)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('updatedStartDate')
       }
 
       if (params.updatedEndDate) {
         nextSearchParamsURL.set('updatedEndDate', params.updatedEndDate)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('updatedEndDate')
       }
 
@@ -590,92 +620,94 @@ export default function StandardTimeList() {
   return (
     <div className="flex h-full flex-col gap-3">
       {/* Action Bar */}
-      {isTeamLeaderMode ? (
-        <Button
-          block
-          type="primary"
-          className="h-11 rounded-xl font-medium shadow-md transition-all hover:shadow-lg"
-          onClick={handleCreate}
-        >
-          新建理论工时
-        </Button>
-      ) : (
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/80 bg-white/60 p-3 shadow-sm backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-800/60">
-          <AddButton
-            handleCreate={handleCreate}
-            permissionKey="feature:standard-time-list.create"
-          />
-          <EditButton
-            title="编辑"
-            handleEdit={() => handleEdit()}
-            permissionKey="feature:standard-time-list.edit"
-          />
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-          <PermissionButton
-            type="text"
-            icon={<CheckCircleIcon className="size-4 text-emerald-500" />}
-            loading={lastProcessMutation.isPending}
-            permissionKey="feature:standard-time-list.edit"
-            noPermissionTip="无编辑权限"
-            onClick={() => handleBatchLastProcess(true)}
-          >
-            设为末道
-          </PermissionButton>
-          <PermissionButton
-            type="text"
-            icon={<XCircleIcon className="size-4 text-red-400" />}
-            loading={lastProcessMutation.isPending}
-            permissionKey="feature:standard-time-list.edit"
-            noPermissionTip="无编辑权限"
-            onClick={() => handleBatchLastProcess(false)}
-          >
-            取消末道
-          </PermissionButton>
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-          <ExportButton
-            handleExport={handleExport}
-            loading={isExporting}
-            count={selectedRowKeys.length}
-            permissionKey="feature:standard-time-list.export-cost"
-            onPreload={preloadCostAccountingExcel}
-          >
-            导出已选
-          </ExportButton>
-          <ExportButton
-            handleExport={handleFilterExport}
-            loading={isFilterExporting}
-            permissionKey="feature:standard-time-list.export-cost"
-            onPreload={preloadCostAccountingExcel}
-          >
-            按筛选条件导出
-          </ExportButton>
-          <ExportButton
-            handleExport={handleProcessExport}
-            loading={isProcessExporting}
-            count={selectedRowKeys.length}
-            permissionKey="feature:standard-time-list.export-cost"
-            onPreload={preloadPrecisionFinishingProcessExcel}
-          >
-            导出工艺表（已选）
-          </ExportButton>
-          <ExportButton
-            handleExport={handleProcessFilterExport}
-            loading={isProcessFilterExporting}
-            permissionKey="feature:standard-time-list.export-cost"
-            onPreload={preloadPrecisionFinishingProcessExcel}
-          >
-            按筛选条件导出工艺表
-          </ExportButton>
-          <DeleteButton
-            onConfirm={handleDelete}
-            isDeleting={deleteMutation.isPending}
-            count={selectedRowKeys.length}
-            title="删除成本核算"
-            itemName="成本核算"
-            permissionKey="feature:standard-time-list.delete"
-          />
-        </div>
-      )}
+      {isTeamLeaderMode
+        ? (
+            <Button
+              block
+              type="primary"
+              className="h-11 rounded-xl font-medium shadow-md transition-all hover:shadow-lg"
+              onClick={handleCreate}
+            >
+              新建理论工时
+            </Button>
+          )
+        : (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/80 bg-white/60 p-3 shadow-sm backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-800/60">
+              <AddButton
+                handleCreate={handleCreate}
+                permissionKey="feature:standard-time-list.create"
+              />
+              <EditButton
+                title="编辑"
+                handleEdit={() => handleEdit()}
+                permissionKey="feature:standard-time-list.edit"
+              />
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+              <PermissionButton
+                type="text"
+                icon={<CheckCircleIcon className="size-4 text-emerald-500" />}
+                loading={lastProcessMutation.isPending}
+                permissionKey="feature:standard-time-list.edit"
+                noPermissionTip="无编辑权限"
+                onClick={() => handleBatchLastProcess(true)}
+              >
+                设为末道
+              </PermissionButton>
+              <PermissionButton
+                type="text"
+                icon={<XCircleIcon className="size-4 text-red-400" />}
+                loading={lastProcessMutation.isPending}
+                permissionKey="feature:standard-time-list.edit"
+                noPermissionTip="无编辑权限"
+                onClick={() => handleBatchLastProcess(false)}
+              >
+                取消末道
+              </PermissionButton>
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+              <ExportButton
+                handleExport={handleExport}
+                loading={isExporting}
+                count={selectedRowKeys.length}
+                permissionKey="feature:standard-time-list.export-cost"
+                onPreload={preloadCostAccountingExcel}
+              >
+                导出已选
+              </ExportButton>
+              <ExportButton
+                handleExport={handleFilterExport}
+                loading={isFilterExporting}
+                permissionKey="feature:standard-time-list.export-cost"
+                onPreload={preloadCostAccountingExcel}
+              >
+                按筛选条件导出
+              </ExportButton>
+              <ExportButton
+                handleExport={handleProcessExport}
+                loading={isProcessExporting}
+                count={selectedRowKeys.length}
+                permissionKey="feature:standard-time-list.export-cost"
+                onPreload={preloadPrecisionFinishingProcessExcel}
+              >
+                导出工艺表（已选）
+              </ExportButton>
+              <ExportButton
+                handleExport={handleProcessFilterExport}
+                loading={isProcessFilterExporting}
+                permissionKey="feature:standard-time-list.export-cost"
+                onPreload={preloadPrecisionFinishingProcessExcel}
+              >
+                按筛选条件导出工艺表
+              </ExportButton>
+              <DeleteButton
+                onConfirm={handleDelete}
+                isDeleting={deleteMutation.isPending}
+                count={selectedRowKeys.length}
+                title="删除成本核算"
+                itemName="成本核算"
+                permissionKey="feature:standard-time-list.delete"
+              />
+            </div>
+          )}
 
       {/* Search Bar */}
       <div
@@ -685,11 +717,13 @@ export default function StandardTimeList() {
             : 'flex items-center gap-2'
         }
       >
-        {isTeamLeaderMode ? null : (
-          <span className="text-sm font-medium whitespace-nowrap text-slate-500 dark:text-slate-300">
-            搜索：
-          </span>
-        )}
+        {isTeamLeaderMode
+          ? null
+          : (
+              <span className="text-sm font-medium whitespace-nowrap text-slate-500 dark:text-slate-300">
+                搜索：
+              </span>
+            )}
         <StandardTimeSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
@@ -699,68 +733,70 @@ export default function StandardTimeList() {
       </div>
 
       {/* Content Area */}
-      {isTeamLeaderMode ? (
-        <div
-          ref={tableContainerRef}
-          className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
-        >
-          <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            <StandardTimeMobileList
-              loading={isLoading}
-              data={data?.items || []}
-              onEdit={handleEdit}
-            />
-          </div>
-          <div ref={paginationRef} className="flex shrink-0 justify-end">
-            <AppPagination
-              total={data?.total || 0}
-              pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
-            />
-          </div>
-        </div>
-      ) : (
-        <Splitter orientation="vertical" style={{ flex: 1, minHeight: 0 }}>
-          <Splitter.Panel defaultSize="65%" min="30%">
+      {isTeamLeaderMode
+        ? (
             <div
               ref={tableContainerRef}
-              className="flex h-full flex-col gap-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+              className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
             >
-              <div className="min-h-0 flex-1 overflow-x-auto">
-                <StandardTimeTable
+              <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                <StandardTimeMobileList
                   loading={isLoading}
                   data={data?.items || []}
-                  selectedRowKeys={selectedRowKeys}
-                  onSelect={setSelectedRowKeys}
-                  page={page}
-                  pageSize={pageSize}
-                  scrollY={scrollY}
-                  rowHeight={rowHeight}
-                  activeRowId={activeRecord?.id ?? null}
-                  onRowClick={setActiveRecord}
-                  onUploadImage={handleUploadProcessImage}
-                  uploadingImageId={uploadingImageId}
+                  onEdit={handleEdit}
                 />
               </div>
-              <div
-                ref={paginationRef}
-                className="flex shrink-0 justify-end border-t border-slate-100 pt-3 dark:border-slate-700"
-              >
+              <div ref={paginationRef} className="flex shrink-0 justify-end">
                 <AppPagination
                   total={data?.total || 0}
                   pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
                 />
               </div>
             </div>
-          </Splitter.Panel>
-          <Splitter.Panel min="20%">
-            <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-              <PermissionGate permissionKey="field:standard-time-list.cost-detail.view">
-                <StandardTimeCostDetail selectedRecord={activeRecord} />
-              </PermissionGate>
-            </div>
-          </Splitter.Panel>
-        </Splitter>
-      )}
+          )
+        : (
+            <Splitter orientation="vertical" style={{ flex: 1, minHeight: 0 }}>
+              <Splitter.Panel defaultSize="65%" min="30%">
+                <div
+                  ref={tableContainerRef}
+                  className="flex h-full flex-col gap-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                >
+                  <div className="min-h-0 flex-1 overflow-x-auto">
+                    <StandardTimeTable
+                      loading={isLoading}
+                      data={data?.items || []}
+                      selectedRowKeys={selectedRowKeys}
+                      onSelect={setSelectedRowKeys}
+                      page={page}
+                      pageSize={pageSize}
+                      scrollY={scrollY}
+                      rowHeight={rowHeight}
+                      activeRowId={activeRecord?.id ?? null}
+                      onRowClick={setActiveRecord}
+                      onUploadImage={handleUploadProcessImage}
+                      uploadingImageId={uploadingImageId}
+                    />
+                  </div>
+                  <div
+                    ref={paginationRef}
+                    className="flex shrink-0 justify-end border-t border-slate-100 pt-3 dark:border-slate-700"
+                  >
+                    <AppPagination
+                      total={data?.total || 0}
+                      pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
+                    />
+                  </div>
+                </div>
+              </Splitter.Panel>
+              <Splitter.Panel min="20%">
+                <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                  <PermissionGate permissionKey="field:standard-time-list.cost-detail.view">
+                    <StandardTimeCostDetail selectedRecord={activeRecord} />
+                  </PermissionGate>
+                </div>
+              </Splitter.Panel>
+            </Splitter>
+          )}
 
       <Modal
         title={modalTitle}

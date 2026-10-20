@@ -1,30 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { ReactNode, TdHTMLAttributes } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import type { TableProps } from 'antd'
-import { App, ConfigProvider, Form, Pagination, Table } from 'antd'
-import zhCN from 'antd/es/locale/zh_CN'
-
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { queryConfig } from '@/config/queryClient'
-import { getErrorDisplayInfo } from '@/utils/errorHandler'
+import type { ReactNode, TdHTMLAttributes } from 'react'
+import type { SchedulingFormValues, SearchFormValues } from './productionSchedulingUtils'
 import type {
   ProductionSchedulingFilters,
   ProductionSchedulingOrder,
 } from '@/services/apiProductionScheduling'
-import { getAllEmployees } from '@/services/apiEmployees'
-import {
-  useProductionSchedulingLengthOptions,
-  useProductionSchedulingOrders,
-  useUpdateProductionSchedulingOrder,
-} from './useProductionScheduling'
+import { useQuery } from '@tanstack/react-query'
+import { App, ConfigProvider, Form, Pagination, Table } from 'antd'
+
+import zhCN from 'antd/es/locale/zh_CN'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { queryConfig } from '@/config/queryClient'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { getAllEmployees } from '@/services/apiEmployees'
+import { getErrorDisplayInfo } from '@/utils/errorHandler'
+import { makeOrderColumns } from './productionSchedulingColumns'
 import ProductionSchedulingEditModal from './ProductionSchedulingEditModal'
 import ProductionSchedulingHeader from './ProductionSchedulingHeader'
 import ProductionSchedulingSearchBar from './ProductionSchedulingSearchBar'
 import ProductionSchedulingSummaryBar from './ProductionSchedulingSummaryBar'
-import { makeOrderColumns } from './productionSchedulingColumns'
 import {
   DEFAULT_FILTERS,
   DEFAULT_PAGE_SIZE,
@@ -32,14 +28,19 @@ import {
   getOrderRowKey,
   getSummary,
   makeSchedulingInitialValues,
-  type SchedulingFormValues,
-  type SearchFormValues,
+
 } from './productionSchedulingUtils'
+import {
+  useProductionSchedulingLengthOptions,
+  useProductionSchedulingOrders,
+  useUpdateProductionSchedulingOrder,
+} from './useProductionScheduling'
 
-const loadProductionSchedulingPlanExcel = () =>
-  import('@/utils/productionSchedulingPlanExcel')
+function loadProductionSchedulingPlanExcel() {
+  return import('@/utils/productionSchedulingPlanExcel')
+}
 
-const preloadProductionSchedulingPlanExcel = () => {
+function preloadProductionSchedulingPlanExcel() {
   void loadProductionSchedulingPlanExcel()
 }
 
@@ -49,12 +50,12 @@ export default function ProductionScheduling() {
   const [searchForm] = Form.useForm<SearchFormValues>()
   const [schedulingForm] = Form.useForm<SchedulingFormValues>()
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight()
-  const [filters, setFilters] =
-    useState<ProductionSchedulingFilters>(DEFAULT_FILTERS)
+  const [filters, setFilters]
+    = useState<ProductionSchedulingFilters>(DEFAULT_FILTERS)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
-  const [editingOrder, setEditingOrder] =
-    useState<ProductionSchedulingOrder | null>(null)
+  const [editingOrder, setEditingOrder]
+    = useState<ProductionSchedulingOrder | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
@@ -66,12 +67,12 @@ export default function ProductionScheduling() {
   const { data: lengthOptions = [] } = useProductionSchedulingLengthOptions()
   const { data: machineOptions = [] } = useMachineEquipmentOptions()
   const employeeMap = useMemo(
-    () => new Map(employees.map((e) => [e.id, e.name])),
+    () => new Map(employees.map(e => [e.id, e.name])),
     [employees],
   )
   const machineSelectOptions = useMemo(
     () =>
-      machineOptions.map((item) => ({
+      machineOptions.map(item => ({
         value: item.unified_device_no,
         label: `${item.unified_device_no} | ${item.machine_name}`,
       })),
@@ -93,9 +94,10 @@ export default function ProductionScheduling() {
   const tableLoading = isFetching
   const summary = useMemo(() => getSummary(orders), [orders])
   const selectedOrders = useMemo(() => {
-    if (selectedRowKeys.length === 0) return orders
+    if (selectedRowKeys.length === 0)
+      return orders
     const keySet = new Set(selectedRowKeys.map(String))
-    return orders.filter((o) => keySet.has(String(getOrderRowKey(o))))
+    return orders.filter(o => keySet.has(String(getOrderRowKey(o))))
   }, [orders, selectedRowKeys])
 
   const openEditModal = useCallback(
@@ -147,11 +149,11 @@ export default function ProductionScheduling() {
     [],
   )
 
-  const rowSelection: TableProps<ProductionSchedulingOrder>['rowSelection'] =
-    useMemo(
+  const rowSelection: TableProps<ProductionSchedulingOrder>['rowSelection']
+    = useMemo(
       () => ({
         selectedRowKeys,
-        onChange: (keys) => setSelectedRowKeys(keys),
+        onChange: keys => setSelectedRowKeys(keys),
         fixed: true,
         columnWidth: 40,
         preserveSelectedRowKeys: true,
@@ -200,7 +202,7 @@ export default function ProductionScheduling() {
     (progressStatus: string | null) => {
       const nextProgress = progressStatus ?? undefined
       setPage(1)
-      setFilters((prev) => ({
+      setFilters(prev => ({
         ...prev,
         progressStatus: nextProgress,
       }))
@@ -225,7 +227,8 @@ export default function ProductionScheduling() {
       message.success('订单排产信息已保存')
       setModalOpen(false)
       setEditingOrder(null)
-    } catch (error) {
+    }
+    catch (error) {
       const { message: errorMessage } = getErrorDisplayInfo(
         error,
         '订单排产信息保存失败',
@@ -249,8 +252,8 @@ export default function ProductionScheduling() {
       return
     }
 
-    const { exportProductionScheduledPlanToExcel } =
-      await loadProductionSchedulingPlanExcel()
+    const { exportProductionScheduledPlanToExcel }
+      = await loadProductionSchedulingPlanExcel()
     exportProductionScheduledPlanToExcel(selectedOrders)
   }, [message, selectedOrders, selectedRowKeys])
 
@@ -299,8 +302,7 @@ export default function ProductionScheduling() {
             rowSelection={rowSelection}
             components={components}
             rowClassName={(_record, index) =>
-              index % 2 === 0 ? 'bg-slate-50/40 dark:bg-slate-700/30' : ''
-            }
+              index % 2 === 0 ? 'bg-slate-50/40 dark:bg-slate-700/30' : ''}
             classNames={{ root: 'font-medium' }}
           />
         </div>
@@ -314,7 +316,7 @@ export default function ProductionScheduling() {
               pageSize={pageSize}
               total={total}
               showSizeChanger={{ getPopupContainer: () => document.body }}
-              showTotal={(value) => `共 ${value} 条`}
+              showTotal={value => `共 ${value} 条`}
               onChange={(nextPage, nextPageSize) => {
                 setPage(nextPage)
                 setPageSize(nextPageSize || DEFAULT_PAGE_SIZE)

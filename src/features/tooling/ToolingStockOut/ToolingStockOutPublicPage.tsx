@@ -1,19 +1,20 @@
-import { useMemo, useState } from 'react'
+import type { FormInstance } from 'antd'
+import type { RemoteToolingOption } from '../remoteToolingOptions'
+import type { ToolingStockOutFormValues } from '@/services/apiToolingStockOut'
 import {
   Alert,
   App,
   Button,
   Card,
-  type FormInstance,
+
   Result,
   Spin,
   Typography,
 } from 'antd'
-import dayjs from 'dayjs'
 
-import type { ToolingStockOutFormValues } from '@/services/apiToolingStockOut'
+import dayjs from 'dayjs'
+import { useMemo, useState } from 'react'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
-import type { RemoteToolingOption } from '../remoteToolingOptions'
 import ToolingStockOutForm from './ToolingStockOutForm'
 import {
   useCreatePublicToolingStockOut,
@@ -23,7 +24,7 @@ import {
 const { Paragraph, Title } = Typography
 
 const displayFontStyle = {
-  fontFamily: "'STSong', 'SimSun', 'Noto Serif SC', serif",
+  fontFamily: '\'STSong\', \'SimSun\', \'Noto Serif SC\', serif',
 }
 
 interface SubmissionSnapshot {
@@ -46,8 +47,8 @@ export default function ToolingStockOutPublicPage() {
     isLoading: isToolingOptionsQueryLoading,
     isFetching: isToolingOptionsLoading,
   } = usePublicToolingDataOptions(toolingOptionsKeyword)
-  const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
-    useMachineEquipmentOptions()
+  const { data: machineOptions = [], isLoading: isMachineOptionsLoading }
+    = useMachineEquipmentOptions()
   const createMutation = useCreatePublicToolingStockOut()
 
   const defaultValues = useMemo<Partial<ToolingStockOutFormValues>>(
@@ -68,11 +69,11 @@ export default function ToolingStockOutPublicPage() {
 
       await createMutation.mutateAsync(payload)
 
-      const submittedTooling =
-        selectedTooling ??
-        toolingOptions.find((item) => item.id === payload.tooling_data_id)
+      const submittedTooling
+        = selectedTooling
+          ?? toolingOptions.find(item => item.id === payload.tooling_data_id)
       const selectedMachine = machineOptions.find(
-        (item) => item.id === payload.machine_equipment_id,
+        item => item.id === payload.machine_equipment_id,
       )
 
       setSubmitted({
@@ -86,24 +87,25 @@ export default function ToolingStockOutPublicPage() {
           : '无',
         purpose: payload.purpose.trim(),
       })
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '登记失败，请稍后重试',
       )
     }
   }
 
-  const hasToolingOptions =
-    toolingOptionsKeyword.trim().length > 0 ||
-    toolingOptions.length > 0 ||
-    Boolean(selectedTooling)
-  const isToolingOptionsInitialLoading =
-    toolingOptionsKeyword.trim().length === 0 && isToolingOptionsQueryLoading
+  const hasToolingOptions
+    = toolingOptionsKeyword.trim().length > 0
+      || toolingOptions.length > 0
+      || Boolean(selectedTooling)
+  const isToolingOptionsInitialLoading
+    = toolingOptionsKeyword.trim().length === 0 && isToolingOptionsQueryLoading
 
   return (
     <div className="flex h-dvh flex-col bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_28%),linear-gradient(180deg,#f6fbfc_0%,#ffffff_42%,#e9eef1_100%)] text-slate-900 dark:bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.18),transparent_28%),linear-gradient(180deg,#0f172a_0%,#111827_42%,#0b1220_100%)] dark:text-slate-100">
       <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col overflow-y-auto px-4 pt-5 pb-[calc(theme(spacing.32)+env(safe-area-inset-bottom))] sm:px-6 sm:pt-7">
-        <section className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/90 px-5 py-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-900/80 sm:px-6">
+        <section className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/90 px-5 py-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:px-6 dark:border-slate-700/80 dark:bg-slate-900/80">
           <div className="absolute top-0 right-0 h-24 w-24 rounded-full bg-sky-200/40 blur-3xl dark:bg-sky-900/30" />
           <div className="absolute bottom-0 -left-8 h-20 w-20 rounded-full bg-slate-200/50 blur-3xl dark:bg-slate-800/40" />
 
@@ -123,92 +125,98 @@ export default function ToolingStockOutPublicPage() {
           </div>
         </section>
 
-        {submitted ? (
-          <Card className="mt-4 rounded-[28px] border-slate-200/80 bg-white/92 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
-            <Result
-              status="success"
-              title="登记成功"
-              subTitle={
-                <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400">
-                  <div>{submitted.recipient} 已完成刀具出库登记</div>
-                  <div>
-                    {submitted.toolLabel} x {submitted.quantity}，用途：
-                    {submitted.purpose}，机器：{submitted.machineLabel}
-                  </div>
-                </div>
-              }
-              extra={
-                <Button
-                  type="primary"
-                  size="large"
-                  className="h-11 rounded-2xl px-6"
-                  onClick={() => {
-                    setSubmitted(null)
-                    setSelectedTooling(undefined)
-                    setToolingOptionsKeyword('')
-                  }}
-                >
-                  继续登记
-                </Button>
-              }
-            />
-          </Card>
-        ) : (
-          <>
-            <Card className="mt-4 rounded-[28px] border-slate-200/80 bg-white/92 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-xs font-semibold tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
-                    Open H5 Form
-                  </div>
-                  <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                    现场扫码后填写
-                  </div>
-                </div>
-                <div className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
-                  无需登录
-                </div>
-              </div>
-
-              {isToolingOptionsInitialLoading || isMachineOptionsLoading ? (
-                <div className="flex min-h-80 items-center justify-center">
-                  <div className="flex flex-col items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                    <Spin size="large" />
-                    <span>正在加载刀具资料和机器编号</span>
-                  </div>
-                </div>
-              ) : !hasToolingOptions ? (
-                <Alert
-                  type="warning"
-                  showIcon
-                  title="暂未配置可出库的刀具资料"
-                  description="请联系管理员先在后台维护刀具资料后，再重新扫码登记。"
+        {submitted
+          ? (
+              <Card className="mt-4 rounded-[28px] border-slate-200/80 bg-white/92 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
+                <Result
+                  status="success"
+                  title="登记成功"
+                  subTitle={(
+                    <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400">
+                      <div>{submitted.recipient} 已完成刀具出库登记</div>
+                      <div>
+                        {submitted.toolLabel} x {submitted.quantity}，用途：
+                        {submitted.purpose}，机器：{submitted.machineLabel}
+                      </div>
+                    </div>
+                  )}
+                  extra={(
+                    <Button
+                      type="primary"
+                      size="large"
+                      className="h-11 rounded-2xl px-6"
+                      onClick={() => {
+                        setSubmitted(null)
+                        setSelectedTooling(undefined)
+                        setToolingOptionsKeyword('')
+                      }}
+                    >
+                      继续登记
+                    </Button>
+                  )}
                 />
-              ) : (
-                <ToolingStockOutForm
-                  onFinish={handleFinish}
-                  setFormRef={setFormRef}
-                  isSubmitting={createMutation.isPending}
-                  toolingOptions={toolingOptions}
-                  isToolingOptionsLoading={isToolingOptionsLoading}
-                  onToolingSearch={setToolingOptionsKeyword}
-                  onToolingSelect={setSelectedTooling}
-                  machineOptions={machineOptions}
-                  isMachineOptionsLoading={isMachineOptionsLoading}
-                  toolingInputMode="bottom-sheet"
-                  defaultValues={defaultValues}
-                />
-              )}
-            </Card>
+              </Card>
+            )
+          : (
+              <>
+                <Card className="mt-4 rounded-[28px] border-slate-200/80 bg-white/92 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs font-semibold tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
+                        Open H5 Form
+                      </div>
+                      <div className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                        现场扫码后填写
+                      </div>
+                    </div>
+                    <div className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+                      无需登录
+                    </div>
+                  </div>
 
-            <div className="mt-4 rounded-[24px] border border-slate-200/80 bg-slate-950/3 px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_18px_40px_rgba(15,23,42,0.05)] dark:border-slate-700/80 dark:bg-slate-950/40 dark:text-slate-400">
-              提交后会立即写入刀具出库，并保持“待审核”状态。请确认刀具、机器编号、领用人、用途和数量无误，再点击底部“确认登记”。
-            </div>
-          </>
-        )}
+                  {isToolingOptionsInitialLoading || isMachineOptionsLoading
+                    ? (
+                        <div className="flex min-h-80 items-center justify-center">
+                          <div className="flex flex-col items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                            <Spin size="large" />
+                            <span>正在加载刀具资料和机器编号</span>
+                          </div>
+                        </div>
+                      )
+                    : !hasToolingOptions
+                        ? (
+                            <Alert
+                              type="warning"
+                              showIcon
+                              title="暂未配置可出库的刀具资料"
+                              description="请联系管理员先在后台维护刀具资料后，再重新扫码登记。"
+                            />
+                          )
+                        : (
+                            <ToolingStockOutForm
+                              onFinish={handleFinish}
+                              setFormRef={setFormRef}
+                              isSubmitting={createMutation.isPending}
+                              toolingOptions={toolingOptions}
+                              isToolingOptionsLoading={isToolingOptionsLoading}
+                              onToolingSearch={setToolingOptionsKeyword}
+                              onToolingSelect={setSelectedTooling}
+                              machineOptions={machineOptions}
+                              isMachineOptionsLoading={isMachineOptionsLoading}
+                              toolingInputMode="bottom-sheet"
+                              defaultValues={defaultValues}
+                            />
+                          )}
+                </Card>
+
+                <div className="mt-4 rounded-[24px] border border-slate-200/80 bg-slate-950/3 px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_18px_40px_rgba(15,23,42,0.05)] dark:border-slate-700/80 dark:bg-slate-950/40 dark:text-slate-400">
+                  提交后会立即写入刀具出库，并保持“待审核”状态。请确认刀具、机器编号、领用人、用途和数量无误，再点击底部“确认登记”。
+                </div>
+              </>
+            )}
       </div>
 
-      <div className="sticky bottom-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+14px)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95 sm:px-6">
+      <div className="sticky bottom-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+14px)] backdrop-blur-xl sm:px-6 dark:border-slate-800 dark:bg-slate-900/95">
         <div className="mx-auto w-full max-w-xl">
           <Button
             type="primary"
@@ -217,9 +225,9 @@ export default function ToolingStockOutPublicPage() {
             className="h-12 rounded-2xl"
             loading={createMutation.isPending}
             disabled={
-              !hasToolingOptions ||
-              isToolingOptionsInitialLoading ||
-              isMachineOptionsLoading
+              !hasToolingOptions
+              || isToolingOptionsInitialLoading
+              || isMachineOptionsLoading
             }
             onClick={() => formRef?.submit()}
           >

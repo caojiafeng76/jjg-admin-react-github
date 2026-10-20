@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
-import { Input, Select, Table, Tag } from 'antd'
-import { useAllPermissions } from '../RolePermissionList/useRolePermissions'
 import type { PermissionRow } from '@/services/apiPermissions'
+import { Input, Select, Table, Tag } from 'antd'
+import { useMemo, useState } from 'react'
+import { useAllPermissions } from '../RolePermissionList/useRolePermissions'
 
 const SCOPE_LABELS: Record<string, string> = {
   nav: '导航',
@@ -27,11 +27,11 @@ export default function PermissionRegistry() {
   const filtered = useMemo(
     () =>
       allPermissions.filter((p) => {
-        const matchesKeyword =
-          !keyword ||
-          p.key.toLowerCase().includes(keyword.toLowerCase()) ||
-          p.label.toLowerCase().includes(keyword.toLowerCase()) ||
-          p.module.toLowerCase().includes(keyword.toLowerCase())
+        const matchesKeyword
+          = !keyword
+            || p.key.toLowerCase().includes(keyword.toLowerCase())
+            || p.label.toLowerCase().includes(keyword.toLowerCase())
+            || p.module.toLowerCase().includes(keyword.toLowerCase())
         const matchesScope = !scopeFilter || p.scope === scopeFilter
         return matchesKeyword && matchesScope
       }),

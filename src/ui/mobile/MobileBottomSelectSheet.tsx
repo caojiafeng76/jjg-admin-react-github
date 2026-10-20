@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+import { Drawer, Empty, Input } from 'antd'
 import {
   startTransition,
   useDeferredValue,
@@ -5,8 +7,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import type { ReactNode } from 'react'
-import { Drawer, Empty, Input } from 'antd'
 
 export interface MobileBottomSelectOption {
   value: string
@@ -110,51 +110,55 @@ export default function MobileBottomSelectSheet({
         />
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          {filteredOptions.length === 0 ? (
-            <div className="flex h-full items-center justify-center">
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description={emptyText}
-              />
-            </div>
-          ) : (
-            <div className="space-y-2 pb-2">
-              {filteredOptions.map((option) => {
-                const isActive = option.value === value
+          {filteredOptions.length === 0
+            ? (
+                <div className="flex h-full items-center justify-center">
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description={emptyText}
+                  />
+                </div>
+              )
+            : (
+                <div className="space-y-2 pb-2">
+                  {filteredOptions.map((option) => {
+                    const isActive = option.value === value
 
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      onSelect(option.value)
-                      onClose()
-                    }}
-                    className={
-                      isActive
-                        ? 'w-full rounded-3xl border border-slate-900 bg-slate-900 px-4 py-3 text-left text-white shadow-[0_14px_30px_rgba(15,23,42,0.2)]'
-                        : 'w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-left text-slate-900 shadow-[0_8px_20px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
-                    }
-                  >
-                    <div className="text-sm font-semibold tracking-tight">
-                      {option.label}
-                    </div>
-                    {option.description ? (
-                      <div
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          onSelect(option.value)
+                          onClose()
+                        }}
                         className={
                           isActive
-                            ? 'mt-2 text-xs text-slate-200'
-                            : 'mt-2 text-xs text-slate-500 dark:text-slate-400'
+                            ? 'w-full rounded-3xl border border-slate-900 bg-slate-900 px-4 py-3 text-left text-white shadow-[0_14px_30px_rgba(15,23,42,0.2)]'
+                            : 'w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-left text-slate-900 shadow-[0_8px_20px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
                         }
                       >
-                        {option.description}
-                      </div>
-                    ) : null}
-                  </button>
-                )
-              })}
-            </div>
-          )}
+                        <div className="text-sm font-semibold tracking-tight">
+                          {option.label}
+                        </div>
+                        {option.description
+                          ? (
+                              <div
+                                className={
+                                  isActive
+                                    ? 'mt-2 text-xs text-slate-200'
+                                    : 'mt-2 text-xs text-slate-500 dark:text-slate-400'
+                                }
+                              >
+                                {option.description}
+                              </div>
+                            )
+                          : null}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
         </div>
       </div>
     </Drawer>

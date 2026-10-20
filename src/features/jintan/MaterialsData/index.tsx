@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
+import type { FormInstance } from 'antd'
+import type { JintanMaterialsData, JintanMaterialsDataFormValues } from '@/services/apiJintanMaterialsData'
 import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
-import { App, Button, FormInstance, Modal, Tooltip } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import { App, Button, Modal, Tooltip } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import {
   getJintanMaterialsDataForExport,
-  type JintanMaterialsData,
-  type JintanMaterialsDataFormValues,
+
 } from '@/services/apiJintanMaterialsData'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -37,8 +38,9 @@ import {
   useUpdateJintanMaterialsData,
 } from './useJintanMaterialsData'
 
-const loadJintanMaterialsDataExcel = () =>
-  import('@/utils/jintanMaterialsDataExcel')
+function loadJintanMaterialsDataExcel() {
+  return import('@/utils/jintanMaterialsDataExcel')
+}
 
 function preloadJintanMaterialsDataExcel() {
   void loadJintanMaterialsDataExcel()
@@ -67,10 +69,10 @@ export default function JintanMaterialsDataPage() {
   const [isCopyCreate, setIsCopyCreate] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<JintanMaterialsData | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<JintanMaterialsDataFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<JintanMaterialsData | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<JintanMaterialsDataFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -91,8 +93,8 @@ export default function JintanMaterialsDataPage() {
   const importMutation = useImportJintanMaterialsData()
   const deleteMutation = useDeleteJintanMaterialsData()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -122,7 +124,7 @@ export default function JintanMaterialsDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行复制新增')
       return
@@ -141,7 +143,7 @@ export default function JintanMaterialsDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -171,10 +173,12 @@ export default function JintanMaterialsDataPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('素材资料删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除素材资料失败，请稍后重试')
       }
     }
@@ -196,10 +200,12 @@ export default function JintanMaterialsDataPage() {
         await importMutation.mutateAsync(rows)
         message.success(`素材资料导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入素材资料失败，请稍后重试')
         }
       }
@@ -226,8 +232,8 @@ export default function JintanMaterialsDataPage() {
 
     setIsExporting(true)
     try {
-      const [exportRows, { exportJintanMaterialsDataToExcel }] =
-        await Promise.all([
+      const [exportRows, { exportJintanMaterialsDataToExcel }]
+        = await Promise.all([
           getJintanMaterialsDataForExport(searchParams.keyword),
           loadJintanMaterialsDataExcel(),
         ])
@@ -239,11 +245,13 @@ export default function JintanMaterialsDataPage() {
 
       exportJintanMaterialsDataToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条素材资料`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '导出素材资料失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [
@@ -273,13 +281,15 @@ export default function JintanMaterialsDataPage() {
             values,
           })
           message.success('素材资料更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('素材资料创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         setFormError(error)
       }
     },
@@ -306,7 +316,8 @@ export default function JintanMaterialsDataPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
@@ -416,12 +427,12 @@ export default function JintanMaterialsDataPage() {
               scrollY={scrollY}
               rowHeight={rowHeight}
               onOpenDetail={canOpenDetail ? handleOpenDetail : undefined}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={JINTAN_MATERIALS_DATA_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>
@@ -454,13 +465,15 @@ export default function JintanMaterialsDataPage() {
         </div>
       </Modal>
 
-      {detailRecord ? (
-        <JintanMaterialsDataDetailDrawer
-          open
-          record={detailRecord}
-          onClose={handleCloseDetail}
-        />
-      ) : null}
+      {detailRecord
+        ? (
+            <JintanMaterialsDataDetailDrawer
+              open
+              record={detailRecord}
+              onClose={handleCloseDetail}
+            />
+          )
+        : null}
     </div>
   )
 }

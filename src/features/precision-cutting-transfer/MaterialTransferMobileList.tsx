@@ -1,7 +1,7 @@
-import { Button, Empty, Tag } from 'antd'
+import type { PrecisionCuttingTransferRow } from '@/services/apiPrecisionCuttingTransfers'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
-import type { PrecisionCuttingTransferRow } from '@/services/apiPrecisionCuttingTransfers'
+import { Button, Empty, Tag } from 'antd'
 
 interface Props {
   loading: boolean

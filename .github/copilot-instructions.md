@@ -125,8 +125,9 @@ bun run build  # 构建生产版本
 bun run typecheck # 仅 TypeScript 类型检查（tsc -b，比 build 快）
 bun run test   # Vitest 单元/组件测试
 bun run test:coverage # 生成测试覆盖率报告
-bun lint:fix   # ESLint 自动修复
-bun format     # Prettier 格式化
+bun lint       # ESLint 检查（@antfu/eslint-config）
+bun lint:fix   # ESLint 自动修复（同时完成格式化）
+bun format     # 等同 eslint . --fix（项目不再使用 Prettier）
 bun run db:types # migration 后重新生成 database.types.ts
 ```
 
@@ -144,8 +145,9 @@ bun run db:types # migration 后重新生成 database.types.ts
 6. 开始实施前给出简短计划，说明将检查哪些文件、准备做什么改动、如何验证
 7. 实施时保持改动最小化，优先修复根因，不顺手重构无关代码
 8. 修改代码、配置、脚本、SQL、指令或文档后，必须在根目录 `CHANGELOG.MD` 顶部追加一条记录（日期、类别、范围、摘要、验证），与本次改动在同一工作区变更中完成；禁止把日志留到后续任务
-9. 改动后执行必要验证，优先使用与任务匹配的最小验证手段，如 `bun run test`、类型检查、lint、build、局部回归验证；完成任务后必须确保测试通过才能交付，测试未通过时不得声称任务完成
-10. 最终回复必须明确说明：
+9. 写完或修改代码（含 TS/TSX/JS/JSON/YAML/TOML 配置）后，必须先执行 `bunx eslint --fix <改动的文件或目录>`（或全量 `bun lint:fix`）完成格式化，再执行 `bun lint` 确认 0 error；项目使用 `@antfu/eslint-config` 统一 lint 与格式化，已移除 Prettier，禁止再用 Prettier 格式化
+10. 改动后执行必要验证，优先使用与任务匹配的最小验证手段，如 `bun run test`、类型检查、lint、build、局部回归验证；完成任务后必须确保测试通过才能交付，测试未通过时不得声称任务完成
+11. 最终回复必须明确说明：
 
 - 完成了什么
 - 关键改动是什么
@@ -181,6 +183,7 @@ Fast lane 仍必须完成：复述目标、建立必要上下文、检查待编�
 
 ## 任务类型最低验证标准
 
+- 所有代码 / 配置改动：先用 `bunx eslint --fix <改动的文件或目录>` 格式化，再确认 `bun lint` 0 error（CI 会执行 `bun run lint`）。
 - 前端 / TypeScript / React 代码改动：至少执行一次 `bun run test`，并执行 `bun run typecheck`（快速）或 `bun run build`（完整）作为类型校验；如果改动影响用户操作流程，尽量补充一次页面或流程级验证。
 - 查询 / 服务层 / Mutation / 缓存相关改动：除 `bun run test` 与构建或类型检查外，还应验证关键调用链或缓存失效链是否覆盖到受影响页面。
 - 路由 / 表单 / 列表 / 权限相关改动：除 `bun run test` 与构建外，优先补充一次目标页面、关键提交流程或权限边界的回归验证；做不到时要明确说明缺口。

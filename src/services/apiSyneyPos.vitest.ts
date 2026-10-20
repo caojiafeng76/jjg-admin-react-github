@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getSyneyPos } from './apiSyneyPos'
+
 interface SyneyPoFixture {
   BorderMaterial: string | null
   Brand: string | null
@@ -46,13 +48,17 @@ vi.mock('./supabase', async () => {
             .replace(/%$/, '')
 
           let rows = requests.sourceRows.filter((row) => {
-            if (statusFilter && row.Status !== statusFilter) return false
+            if (statusFilter && row.Status !== statusFilter)
+              return false
 
             for (const filter of endDateFilters) {
               const [operator, date] = filter.split('.', 2)
-              if (!row.EndDate) return false
-              if (operator === 'gte' && row.EndDate < date) return false
-              if (operator === 'lte' && row.EndDate > date) return false
+              if (!row.EndDate)
+                return false
+              if (operator === 'gte' && row.EndDate < date)
+                return false
+              if (operator === 'lte' && row.EndDate > date)
+                return false
             }
 
             return !sonoFilter || row.SONo?.includes(sonoFilter) === true
@@ -83,11 +89,9 @@ vi.mock('./supabase', async () => {
   return { default: client }
 })
 
-import { getSyneyPos } from './apiSyneyPos'
-
-const EXPECTED_NATURAL_ORDER =
-  'status_sort_weight.asc,end_date_sort_key.asc,' +
-  'no_natural_sort_key.asc,sono_natural_sort_key.asc,id.asc'
+const EXPECTED_NATURAL_ORDER
+  = 'status_sort_weight.asc,end_date_sort_key.asc,'
+    + 'no_natural_sort_key.asc,sono_natural_sort_key.asc,id.asc'
 const naturalCollator = new Intl.Collator('zh-CN', { numeric: true })
 
 function createPo(
@@ -113,9 +117,12 @@ function createPo(
 }
 
 function statusWeight(status: string | null): number {
-  if (status === '已创建') return 1
-  if (status === '部分入库' || status === '部分送货') return 2
-  if (status === '已入库') return 3
+  if (status === '已创建')
+    return 1
+  if (status === '部分入库' || status === '部分送货')
+    return 2
+  if (status === '已入库')
+    return 3
   return 4
 }
 
@@ -130,21 +137,21 @@ function endDateSortKey(row: SyneyPoFixture): number {
 
 function compareNaturalRows(a: SyneyPoFixture, b: SyneyPoFixture): number {
   return (
-    statusWeight(a.Status) - statusWeight(b.Status) ||
-    endDateSortKey(a) - endDateSortKey(b) ||
-    naturalCollator.compare(a.No ?? '', b.No ?? '') ||
-    naturalCollator.compare(a.SONo ?? '', b.SONo ?? '') ||
-    a.id - b.id
+    statusWeight(a.Status) - statusWeight(b.Status)
+    || endDateSortKey(a) - endDateSortKey(b)
+    || naturalCollator.compare(a.No ?? '', b.No ?? '')
+    || naturalCollator.compare(a.SONo ?? '', b.SONo ?? '')
+    || a.id - b.id
   )
 }
 
 function compareLexicalRows(a: SyneyPoFixture, b: SyneyPoFixture): number {
   return (
-    statusWeight(a.Status) - statusWeight(b.Status) ||
-    endDateSortKey(a) - endDateSortKey(b) ||
-    (a.No ?? '').localeCompare(b.No ?? '', 'zh-CN') ||
-    (a.SONo ?? '').localeCompare(b.SONo ?? '', 'zh-CN') ||
-    a.id - b.id
+    statusWeight(a.Status) - statusWeight(b.Status)
+    || endDateSortKey(a) - endDateSortKey(b)
+    || (a.No ?? '').localeCompare(b.No ?? '', 'zh-CN')
+    || (a.SONo ?? '').localeCompare(b.SONo ?? '', 'zh-CN')
+    || a.id - b.id
   )
 }
 
@@ -157,8 +164,7 @@ function createConflictingRows(count: number): SyneyPoFixture[] {
       No: index % 43 === 0 ? null : `PO-${(index % 24) + 1}`,
       SONo: index % 47 === 0 ? null : `SO-${(Math.floor(index / 6) % 18) + 1}`,
       Status: statuses[index % statuses.length],
-    }),
-  )
+    }))
 
   for (let index = rows.length - 1; index > 0; index -= 1) {
     const swapIndex = (index * 37 + 17) % (index + 1)
@@ -189,8 +195,7 @@ describe('getSyneyPos', () => {
       createPo(index + 1, {
         EndDate: '2026-07-15',
         Status: '已创建',
-      }),
-    )
+      }))
 
     const result = await getSyneyPos({
       page: 21,
@@ -234,22 +239,22 @@ describe('getSyneyPos', () => {
       Status: '全部',
     })
 
-    expect(result.syneyPos.map((po) => po.No)).toEqual(['PO-2', 'PO-10'])
+    expect(result.syneyPos.map(po => po.No)).toEqual(['PO-2', 'PO-10'])
   })
 
   it('paginates 1050 conflicting shuffled rows without duplicates or gaps', async () => {
     requests.sourceRows = createConflictingRows(1050)
     const expectedIds = [...requests.sourceRows]
       .sort(compareNaturalRows)
-      .map((row) => row.id)
+      .map(row => row.id)
 
-    expect(new Set(requests.sourceRows.map((row) => row.Status)).size).toBe(4)
-    expect(new Set(requests.sourceRows.map((row) => row.EndDate)).size).toBe(4)
-    expect(new Set(requests.sourceRows.map((row) => row.No)).size).toBeLessThan(
+    expect(new Set(requests.sourceRows.map(row => row.Status)).size).toBe(4)
+    expect(new Set(requests.sourceRows.map(row => row.EndDate)).size).toBe(4)
+    expect(new Set(requests.sourceRows.map(row => row.No)).size).toBeLessThan(
       1050,
     )
     expect(
-      new Set(requests.sourceRows.map((row) => row.SONo)).size,
+      new Set(requests.sourceRows.map(row => row.SONo)).size,
     ).toBeLessThan(1050)
 
     const pages = await Promise.all(
@@ -258,18 +263,17 @@ describe('getSyneyPos', () => {
           page: index + 1,
           pageSize: 50,
           Status: '全部',
-        }),
-      ),
+        })),
     )
     const actualIds = pages.flatMap(({ syneyPos }) =>
-      syneyPos.map((row) => row.id),
+      syneyPos.map(row => row.id),
     )
 
     expect(actualIds).toEqual(expectedIds)
     expect(actualIds).toHaveLength(1050)
     expect(new Set(actualIds)).toHaveLength(1050)
     expect(
-      requests.urls.map((url) => new URL(url).searchParams.get('offset')),
+      requests.urls.map(url => new URL(url).searchParams.get('offset')),
     ).toEqual(Array.from({ length: 21 }, (_, index) => String(index * 50)))
   })
 })

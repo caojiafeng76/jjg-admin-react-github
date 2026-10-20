@@ -1,6 +1,6 @@
+import type { ReactNode } from 'react'
 import { InboxOutlined, ReloadOutlined } from '@ant-design/icons'
 import { Button, Empty, Result, Skeleton } from 'antd'
-import type { ReactNode } from 'react'
 
 /**
  * 表格三态通用组件（S1 UI 改版）
@@ -64,14 +64,16 @@ export function TableEmpty({
     <Empty
       image={<InboxOutlined className="text-slate-300 dark:text-slate-600" />}
       imageStyle={{ height: 48 }}
-      description={
+      description={(
         <span className="text-slate-500 dark:text-slate-400">
           {title}
-          {description ? (
-            <span className="mt-1 block text-xs opacity-70">{description}</span>
-          ) : null}
+          {description
+            ? (
+                <span className="mt-1 block text-xs opacity-70">{description}</span>
+              )
+            : null}
         </span>
-      }
+      )}
     >
       {action}
     </Empty>
@@ -100,11 +102,13 @@ export function TableError({
       subTitle={description}
       className="py-8"
       extra={
-        onRetry ? (
-          <Button type="primary" icon={<ReloadOutlined />} onClick={onRetry}>
-            重试
-          </Button>
-        ) : undefined
+        onRetry
+          ? (
+              <Button type="primary" icon={<ReloadOutlined />} onClick={onRetry}>
+                重试
+              </Button>
+            )
+          : undefined
       }
     />
   )

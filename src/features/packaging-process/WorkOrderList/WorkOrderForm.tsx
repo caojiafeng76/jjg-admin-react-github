@@ -1,40 +1,43 @@
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react'
-import {
-  App,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  type FormInstance,
-} from 'antd'
-import dayjs from 'dayjs'
-
+import type { FormInstance } from 'antd'
+import type { ReactNode } from 'react'
+import type { EmployeeSelectOption } from './employeeSelectOptions'
 import type {
   PackagingWorkOrder,
   PackagingWorkOrderBatch,
   PackagingWorkOrderFormValues,
 } from '@/services/apiPackagingWorkOrders'
+
+import {
+  App,
+  DatePicker,
+  Form,
+
+  Input,
+  InputNumber,
+  Select,
+} from 'antd'
+import dayjs from 'dayjs'
+import {
+
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   getSalesOrderByProjectNo,
   getStandardSecondsByPartNo,
 } from '@/services/apiPackagingWorkOrders'
 import {
+
   mergeEmployeeSelectOptions,
   rememberEmployeeOptions,
   toEmployeeSelectOption,
-  type EmployeeSelectOption,
 } from './employeeSelectOptions'
 import {
-  usePackagingSalesOrdersProjectNos,
   usePackagingEmployeeOptions,
+  usePackagingSalesOrdersProjectNos,
 } from './useWorkOrders'
 
 interface Props {
@@ -98,13 +101,14 @@ const DEFAULT_FORM_VALUES: WorkOrderFormValues = {
 function getInitialEmployeeSnapshots(
   initialValues: Props['initialValues'],
 ): EmployeeSelectOption[] {
-  if (!initialValues) return []
+  if (!initialValues)
+    return []
 
   if (
-    'employee_ids' in initialValues &&
-    Array.isArray(initialValues.employee_ids) &&
-    'employee_names' in initialValues &&
-    Array.isArray(initialValues.employee_names)
+    'employee_ids' in initialValues
+    && Array.isArray(initialValues.employee_ids)
+    && 'employee_names' in initialValues
+    && Array.isArray(initialValues.employee_names)
   ) {
     return initialValues.employee_ids.flatMap((employeeId, index) => {
       const employeeName = initialValues.employee_names[index]
@@ -112,8 +116,8 @@ function getInitialEmployeeSnapshots(
     })
   }
 
-  const employeeName =
-    'employee_name' in initialValues ? initialValues.employee_name : undefined
+  const employeeName
+    = 'employee_name' in initialValues ? initialValues.employee_name : undefined
 
   return initialValues.employee_id && employeeName
     ? [{ label: employeeName, value: initialValues.employee_id }]
@@ -155,12 +159,12 @@ export default function WorkOrderForm({
   const employeeIds = Form.useWatch('employee_ids', form) ?? EMPTY_EMPLOYEE_IDS
 
   const { data: projectNoOptions = [] } = usePackagingSalesOrdersProjectNos()
-  const { data: employeeOptions, isFetching: isEmployeeOptionsFetching } =
-    usePackagingEmployeeOptions(deferredEmployeeKeyword)
+  const { data: employeeOptions, isFetching: isEmployeeOptionsFetching }
+    = usePackagingEmployeeOptions(deferredEmployeeKeyword)
 
   const projectNoSelectOptions = useMemo(
     () =>
-      projectNoOptions.map((option) => ({
+      projectNoOptions.map(option => ({
         label: (
           <div className="flex flex-col py-1 leading-5">
             <span className="font-medium">{option.project_no}</span>
@@ -172,7 +176,7 @@ export default function WorkOrderForm({
         ),
         value: option.project_no,
         searchText: [option.project_no, option.product_model, option.length_mm]
-          .filter((value) => value !== null && value !== undefined)
+          .filter(value => value !== null && value !== undefined)
           .join(' ')
           .toLowerCase(),
       })),
@@ -195,9 +199,10 @@ export default function WorkOrderForm({
       .filter(({ id }) => selectedEmployeeIdSet.has(id))
       .map(toEmployeeSelectOption)
 
-    if (selectedOptions.length === 0) return
+    if (selectedOptions.length === 0)
+      return
 
-    setSelectedEmployeeSnapshots((previous) =>
+    setSelectedEmployeeSnapshots(previous =>
       rememberEmployeeOptions(previous, selectedOptions),
     )
   }, [employeeIds, employeeOptions])
@@ -281,7 +286,8 @@ export default function WorkOrderForm({
           weight_per_meter_kg: orderInfo.weight_per_meter_kg ?? 0,
           standard_seconds: standardSeconds,
         })
-      } catch {
+      }
+      catch {
         message.warning('项目号信息获取失败，请手动填写')
       }
     },
@@ -369,9 +375,10 @@ export default function WorkOrderForm({
               loading={isEmployeeOptionsFetching}
               onClear={() => setEmployeeKeyword('')}
               onSelect={(_, option) => {
-                if (typeof option.label !== 'string') return
+                if (typeof option.label !== 'string')
+                  return
 
-                setSelectedEmployeeSnapshots((previous) =>
+                setSelectedEmployeeSnapshots(previous =>
                   rememberEmployeeOptions(previous, [
                     { label: option.label, value: String(option.value) },
                   ]),

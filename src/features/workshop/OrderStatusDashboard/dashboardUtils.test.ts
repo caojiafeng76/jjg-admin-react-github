@@ -1,7 +1,7 @@
 import type { TableColumnsType } from 'antd'
-import { describe, expect, it } from 'vitest'
-
 import type { OrderStatusDashboardItem } from '@/services/apiOrderStatusDashboard'
+
+import { describe, expect, it } from 'vitest'
 import {
   applyColumnWidths,
   canCloseDashboardOrder,
@@ -50,18 +50,18 @@ describe('dashboardUtils', () => {
       { material_code: '', completionRate: null },
     ] as unknown as OrderStatusDashboardItem[]
 
-    expect(extractTextFilters(items, (item) => item.material_code)).toEqual([
+    expect(extractTextFilters(items, item => item.material_code)).toEqual([
       { text: 'A', value: 'A' },
       { text: 'B', value: 'B' },
     ])
-    expect(extractNumberFilters(items, (item) => item.completionRate)).toEqual([
+    expect(extractNumberFilters(items, item => item.completionRate)).toEqual([
       { text: '3', value: 3 },
       { text: '12', value: 12 },
     ])
   })
 
   it('uses stored widths and preserves table width totals', () => {
-    type Row = { name: string; quantity: number }
+    interface Row { name: string, quantity: number }
     const columns = [
       { dataIndex: 'name', width: 120 },
       { key: 'quantity', width: 80 },
@@ -69,7 +69,7 @@ describe('dashboardUtils', () => {
 
     const resized = applyColumnWidths(columns, { name: 160 }, () => undefined)
 
-    expect(resized.map((column) => column.width)).toEqual([160, 80])
+    expect(resized.map(column => column.width)).toEqual([160, 80])
     expect(getTableColumnWidth(resized)).toBe(240)
   })
 })

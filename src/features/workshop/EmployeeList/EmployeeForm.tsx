@@ -1,19 +1,21 @@
+import type {
+  FormInstance,
+} from 'antd'
+import type { Employee } from '@/services/apiEmployees'
 import {
   Alert,
   Divider,
   Form,
-  FormInstance,
   Input,
   InputNumber,
   Select,
   Switch,
 } from 'antd'
 import { useEffect, useMemo } from 'react'
-import { useRoleOptions } from '@/hooks/useRoleOptions'
-import type { Employee } from '@/services/apiEmployees'
-import { useEmployeeJobBaseSettingOptions } from './useEmployees'
-import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 import { usePermission } from '@/hooks/usePermission'
+import { useRoleOptions } from '@/hooks/useRoleOptions'
+import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
+import { useEmployeeJobBaseSettingOptions } from './useEmployees'
 
 const NO_JOB_OPTION = { label: '无', value: '' }
 
@@ -53,14 +55,14 @@ export default function EmployeeForm({
   // 编辑模式下，"修改角色" 受独立 feature 权限控制；新建时由 create 权限保护
   const canEditRole = usePermission('feature:employee-list.edit-role')
   const roleSelectDisabled = isCreating || (isEdit && !canEditRole)
-  const { options: roleOptions, isLoading: roleOptionsLoading } =
-    useRoleOptions()
-  const { data: jobOptions = [], isLoading: isJobOptionsLoading } =
-    useEmployeeJobBaseSettingOptions()
+  const { options: roleOptions, isLoading: roleOptionsLoading }
+    = useRoleOptions()
+  const { data: jobOptions = [], isLoading: isJobOptionsLoading }
+    = useEmployeeJobBaseSettingOptions()
   const jobSelectOptions = useMemo(
     () => [
       NO_JOB_OPTION,
-      ...jobOptions.map((option) => ({
+      ...jobOptions.map(option => ({
         label: option.job_name,
         value: option.job_name,
       })),
@@ -70,7 +72,7 @@ export default function EmployeeForm({
   const jobRateMap = useMemo(
     () =>
       new Map(
-        jobOptions.map((option) => [
+        jobOptions.map(option => [
           option.job_name,
           Number(option.hourly_fee || 0),
         ]),
@@ -91,7 +93,8 @@ export default function EmployeeForm({
         hourly_wage: Number(initialValues.hourly_wage ?? 0),
         coefficient: Number(initialValues.coefficient ?? 1),
       })
-    } else {
+    }
+    else {
       form.setFieldsValue(DEFAULT_FORM_VALUES)
     }
   }, [form, initialValues])
@@ -209,51 +212,57 @@ export default function EmployeeForm({
         />
       </Form.Item>
 
-      {isEdit ? null : (
-        <>
-          <Divider className="my-4">登录账号</Divider>
-
-          <Form.Item
-            name="createAuthAccount"
-            label="同时创建登录账号"
-            valuePropName="checked"
-          >
-            <Switch
-              checkedChildren="创建账号"
-              unCheckedChildren="仅建员工"
-              disabled={isCreating}
-            />
-          </Form.Item>
-
-          {createAuthAccount ? (
+      {isEdit
+        ? null
+        : (
             <>
+              <Divider className="my-4">登录账号</Divider>
+
               <Form.Item
-                name="authEmail"
-                label="登录邮箱"
-                rules={[
-                  { required: true, message: '请输入登录邮箱' },
-                  { type: 'email', message: '请输入有效的邮箱地址' },
-                ]}
+                name="createAuthAccount"
+                label="同时创建登录账号"
+                valuePropName="checked"
               >
-                <Input placeholder="请输入员工登录邮箱" autoComplete="off" />
+                <Switch
+                  checkedChildren="创建账号"
+                  unCheckedChildren="仅建员工"
+                  disabled={isCreating}
+                />
               </Form.Item>
 
-              <div className="rounded-lg border border-dashed border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-6 text-sky-700">
-                系统将自动使用默认密码 {DEFAULT_EMPLOYEE_AUTH_PASSWORD}{' '}
-                创建账号，员工登录后可自行修改密码。
-              </div>
-            </>
-          ) : null}
-        </>
-      )}
+              {createAuthAccount
+                ? (
+                    <>
+                      <Form.Item
+                        name="authEmail"
+                        label="登录邮箱"
+                        rules={[
+                          { required: true, message: '请输入登录邮箱' },
+                          { type: 'email', message: '请输入有效的邮箱地址' },
+                        ]}
+                      >
+                        <Input placeholder="请输入员工登录邮箱" autoComplete="off" />
+                      </Form.Item>
 
-      {isEdit ? null : (
-        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-6 text-slate-500">
-          新建员工时默认角色为“员工”、状态为“启用”、是否外来为“否”。如果本次创建账号，默认密码为{' '}
-          {DEFAULT_EMPLOYEE_AUTH_PASSWORD}
-          。如果本次不创建账号，后续仍可使用工具栏中的“为现有员工开通账号”补做绑定。
-        </div>
-      )}
+                      <div className="rounded-lg border border-dashed border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-6 text-sky-700">
+                        系统将自动使用默认密码 {DEFAULT_EMPLOYEE_AUTH_PASSWORD}{' '}
+                        创建账号，员工登录后可自行修改密码。
+                      </div>
+                    </>
+                  )
+                : null}
+            </>
+          )}
+
+      {isEdit
+        ? null
+        : (
+            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-6 text-slate-500">
+              新建员工时默认角色为“员工”、状态为“启用”、是否外来为“否”。如果本次创建账号，默认密码为{' '}
+              {DEFAULT_EMPLOYEE_AUTH_PASSWORD}
+              。如果本次不创建账号，后续仍可使用工具栏中的“为现有员工开通账号”补做绑定。
+            </div>
+          )}
     </Form>
   )
 }

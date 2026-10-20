@@ -1,7 +1,7 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
-
 import type { LaborProtectionRequisition } from '@/services/apiLaborProtectionRequisitions'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@/utils/excelStyleUtils'
 
 const DETAIL_SHEET_NAME = '领料明细'
@@ -51,18 +51,20 @@ function formatCellText(value: string | number | null | undefined) {
 }
 
 function formatDateTime(value: string | null | undefined) {
-  if (!value) return '-'
+  if (!value)
+    return '-'
   const d = new Date(value)
-  if (Number.isNaN(d.getTime())) return '-'
+  if (Number.isNaN(d.getTime()))
+    return '-'
   return dayjs(d).format('YYYY-MM-DD HH:mm')
 }
 
 function isSawBladeCategory(category: string | null | undefined) {
   return Boolean(
-    category &&
-      SAW_BLADE_SUMMARY_CATEGORY_KEYWORDS.some((keyword) =>
-        category.includes(keyword),
-      ),
+    category
+    && SAW_BLADE_SUMMARY_CATEGORY_KEYWORDS.some(keyword =>
+      category.includes(keyword),
+    ),
   )
 }
 
@@ -82,7 +84,8 @@ function summarizeByCategory(
     if (existing) {
       existing.quantity += Number(item.quantity || 0)
       existing.count += 1
-    } else {
+    }
+    else {
       map.set(key, {
         category: key,
         quantity: Number(item.quantity || 0),
@@ -104,8 +107,10 @@ interface FilterInfo {
 
 function buildFilterText(filters: FilterInfo) {
   const parts: string[] = []
-  if (filters.keyword) parts.push(`关键字: ${filters.keyword}`)
-  if (filters.categoryName) parts.push(`种类: ${filters.categoryName}`)
+  if (filters.keyword)
+    parts.push(`关键字: ${filters.keyword}`)
+  if (filters.categoryName)
+    parts.push(`种类: ${filters.categoryName}`)
   if (filters.updatedStartDate || filters.updatedEndDate) {
     parts.push(
       `更新时间: ${filters.updatedStartDate || '不限'} ~ ${
@@ -128,7 +133,8 @@ function setBorderedCenterStyle(
   } = {},
 ) {
   const { bold = false, sz = 10.5, fill, align = 'center', numFmt } = options
-  if (!ws[ref]) ws[ref] = { v: '' }
+  if (!ws[ref])
+    ws[ref] = { v: '' }
   ws[ref].s = {
     font: { name: '宋体', sz, bold },
     alignment: { horizontal: align, vertical: 'center', wrapText: true },
@@ -140,7 +146,8 @@ function setBorderedCenterStyle(
       right: { style: 'thin', color: { rgb: BORDER_COLOR } },
     },
   }
-  if (numFmt) ws[ref].z = numFmt
+  if (numFmt)
+    ws[ref].z = numFmt
 }
 
 function buildHeaderRows(
@@ -148,22 +155,16 @@ function buildHeaderRows(
   title: string,
   filterText: string,
   exportTime: string,
-): { data: (string | number)[][]; merges: XLSX.Range[] } {
+): { data: (string | number)[][], merges: XLSX.Range[] } {
   const data: (string | number)[][] = []
   const merges: XLSX.Range[] = []
 
-  const titleRow: (string | number)[] = Array.from(
-    { length: colCount },
-    () => '',
-  )
+  const titleRow: (string | number)[] = Array.from({ length: colCount }, () => '')
   titleRow[0] = title
   data.push(titleRow)
   merges.push({ s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } })
 
-  const infoRow: (string | number)[] = Array.from(
-    { length: colCount },
-    () => '',
-  )
+  const infoRow: (string | number)[] = Array.from({ length: colCount }, () => '')
   infoRow[0] = filterText
   infoRow[colCount - 1] = `导出时间: ${exportTime}`
   data.push(infoRow)
@@ -175,8 +176,8 @@ function buildHeaderRows(
 }
 
 function applyHeaderStyles(ws: XLSX.WorkSheet, colCount: number) {
-  if (ws['A1']) {
-    ws['A1'].s = {
+  if (ws.A1) {
+    ws.A1.s = {
       font: { name: '宋体', sz: 16, bold: true },
       alignment: { horizontal: 'center', vertical: 'center' },
     }
@@ -225,10 +226,7 @@ function buildDetailSheet(
   })
   const endIdx = data.length - 1
 
-  const totalRow: (string | number)[] = Array.from(
-    { length: colCount },
-    () => '',
-  )
+  const totalRow: (string | number)[] = Array.from({ length: colCount }, () => '')
   totalRow[0] = '合计'
   totalRow[5] = totalQuantity
   data.push(totalRow)
@@ -246,7 +244,7 @@ function buildDetailSheet(
   ws['!merges'] = merges
   setColumnWidths(ws, DETAIL_COLUMN_WIDTHS)
 
-  const rows: { hpt?: number; hpx?: number }[] = []
+  const rows: { hpt?: number, hpx?: number }[] = []
   rows[0] = { hpt: 30, hpx: 30 }
   for (let i = 1; i < data.length; i += 1) {
     rows[i] = { hpt: 22, hpx: 22 }
@@ -311,10 +309,7 @@ function buildSummarySheet(
   })
   const endIdx = data.length - 1
 
-  const totalRow: (string | number)[] = Array.from(
-    { length: colCount },
-    () => '',
-  )
+  const totalRow: (string | number)[] = Array.from({ length: colCount }, () => '')
   totalRow[0] = '合计'
   totalRow[2] = totalQuantity
   totalRow[3] = items.length
@@ -329,7 +324,7 @@ function buildSummarySheet(
   ws['!merges'] = merges
   setColumnWidths(ws, SUMMARY_COLUMN_WIDTHS)
 
-  const rows: { hpt?: number; hpx?: number }[] = []
+  const rows: { hpt?: number, hpx?: number }[] = []
   rows[0] = { hpt: 30, hpx: 30 }
   for (let i = 1; i < data.length; i += 1) {
     rows[i] = { hpt: 22, hpx: 22 }
@@ -374,9 +369,9 @@ function buildWorkbook(
 
   const detailWs = buildDetailSheet(items, filterText, exportTime)
   const regularItems = items.filter(
-    (item) => !isSawBladeCategory(item.category),
+    item => !isSawBladeCategory(item.category),
   )
-  const sawBladeItems = items.filter((item) =>
+  const sawBladeItems = items.filter(item =>
     isSawBladeCategory(item.category),
   )
   const summaryWs = buildSummarySheet(regularItems, filterText, exportTime)

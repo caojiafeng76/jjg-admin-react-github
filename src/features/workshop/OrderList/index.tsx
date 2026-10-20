@@ -1,35 +1,35 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import type { FormInstance, TableProps } from 'antd'
+import type { WorkshopOrderStatus } from './orderStatus'
+import type { WorkshopOrder } from './types'
 import { App, Modal, Splitter } from 'antd'
 import dayjs from 'dayjs'
-import { useSearchParams } from 'react-router-dom'
 
-import AppPagination from '@/ui/AppPagination'
-import { useTableHeight } from '@/hooks/useTableHeight'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import AppPagination from '@/ui/AppPagination'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
+import { useExportWorkshopOrdersAsExcel } from './useExportWorkshopOrdersAsExcel'
+import { usePrintWorkshopOrders } from './usePrintWorkshopOrders'
+import { useWorkshopOrderDelete } from './useWorkshopOrderDelete'
 import {
-  useWorkshopOrdersList,
-  useWorkshopOrderLengths,
-  useWorkshopOrderProjectNos,
-  useWorkshopOrderModels,
   useCreateWorkshopOrder,
-  useUpdateWorkshopOrder,
   useCreateWorkshopOrdersBatch,
+  useUpdateWorkshopOrder,
+  useWorkshopOrderLengths,
+  useWorkshopOrderModels,
+  useWorkshopOrderProjectNos,
+  useWorkshopOrdersList,
 } from './useWorkshopOrders'
-import WorkshopOrderTable from './WorkshopOrderTable'
+import { useWorkshopOrderStatusActions } from './useWorkshopOrderStatusActions'
 import WorkshopOrderForm from './WorkshopOrderForm'
 import WorkshopOrderProductionStats from './WorkshopOrderProductionStats'
 import WorkshopOrderSearchPanel from './WorkshopOrderSearchPanel'
 import WorkshopOrderStatusTabs from './WorkshopOrderStatusTabs'
+import WorkshopOrderTable from './WorkshopOrderTable'
 import WorkshopOrderToolbar from './WorkshopOrderToolbar'
-import { usePrintWorkshopOrders } from './usePrintWorkshopOrders'
-import { useExportWorkshopOrdersAsExcel } from './useExportWorkshopOrdersAsExcel'
-import { useWorkshopOrderDelete } from './useWorkshopOrderDelete'
-import { useWorkshopOrderStatusActions } from './useWorkshopOrderStatusActions'
-import type { WorkshopOrderStatus } from './orderStatus'
-import type { WorkshopOrder } from './types'
 
 export type {
   WorkshopOrder,
@@ -68,8 +68,8 @@ export default function WorkshopOrderList() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const activeTab: WorkshopOrderTabKey =
-    searchParamsURL.get('status') === 'closed' ? 'closed' : 'production'
+  const activeTab: WorkshopOrderTabKey
+    = searchParamsURL.get('status') === 'closed' ? 'closed' : 'production'
   const fixedStatus: WorkshopOrderStatus = TAB_TO_STATUS[activeTab]
   const formRef = useRef<FormInstance<WorkshopOrder> | null>(null)
   const setFormRef = useCallback((form: FormInstance<WorkshopOrder>) => {
@@ -117,14 +117,14 @@ export default function WorkshopOrderList() {
 
   const batchCreateMutation = useCreateWorkshopOrdersBatch()
 
-  const { generatePDF, isPrinting, preloadWorkshopOrderPdf } =
-    usePrintWorkshopOrders()
-  const { exportAsExcel, isExporting, preloadExportAsExcel } =
-    useExportWorkshopOrdersAsExcel()
+  const { generatePDF, isPrinting, preloadWorkshopOrderPdf }
+    = usePrintWorkshopOrders()
+  const { exportAsExcel, isExporting, preloadExportAsExcel }
+    = useExportWorkshopOrdersAsExcel()
 
   // 动态计算表格高度（目标行数适应上半面板）
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       headerHeight: 30,
       minRowHeight: 30,
       reservePaginationHeight: false,
@@ -141,9 +141,9 @@ export default function WorkshopOrderList() {
       message.warning('请选择要打印的订单')
       return
     }
-    const selectedOrders =
-      data?.items.filter((item) => selectedRowKeys.includes(item.id || '')) ||
-      []
+    const selectedOrders
+      = data?.items.filter(item => selectedRowKeys.includes(item.id || ''))
+        || []
     const printed = await generatePDF(selectedOrders)
     if (printed) {
       setSelectedRowKeys([])
@@ -168,9 +168,9 @@ export default function WorkshopOrderList() {
       return
     }
 
-    const selectedOrders =
-      data?.items.filter((item) => selectedRowKeys.includes(item.id || '')) ||
-      []
+    const selectedOrders
+      = data?.items.filter(item => selectedRowKeys.includes(item.id || ''))
+        || []
     const exported = await exportAsExcel(selectedOrders)
     if (exported) {
       setSelectedRowKeys([])
@@ -216,8 +216,9 @@ export default function WorkshopOrderList() {
       message.warning('请选择一条数据进行编辑')
       return
     }
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
-    if (!record) return
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
+    if (!record)
+      return
 
     // 将日期字符串转换为 dayjs 对象用于表单显示
     const formValues: WorkshopOrder & {
@@ -255,7 +256,8 @@ export default function WorkshopOrderList() {
       const handleError = (error: unknown) => {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -272,13 +274,15 @@ export default function WorkshopOrderList() {
             onError: handleError,
           },
         )
-      } else if (Array.isArray(values)) {
+      }
+      else if (Array.isArray(values)) {
         // 新建模式：Excel 批量导入
         batchCreateMutation.mutate(values, {
           onSuccess: () => handleSuccess('订单批量导入成功'),
           onError: handleError,
         })
-      } else {
+      }
+      else {
         // 新建模式：手动输入单条
         createMutation.mutate(values, {
           onSuccess: () => handleSuccess('订单创建成功'),
@@ -315,9 +319,9 @@ export default function WorkshopOrderList() {
    */
   useEffect(() => {
     if (
-      createMutation.isSuccess ||
-      updateMutation.isSuccess ||
-      batchCreateMutation.isSuccess
+      createMutation.isSuccess
+      || updateMutation.isSuccess
+      || batchCreateMutation.isSuccess
     ) {
       resetFormState()
       createMutation.reset()
@@ -359,13 +363,15 @@ export default function WorkshopOrderList() {
 
         if (selectedProjectNos.length) {
           next.project_no_search = selectedProjectNos
-        } else {
+        }
+        else {
           delete next.project_no_search
         }
 
         if (selectedModels.length) {
           next.model_search = selectedModels
-        } else {
+        }
+        else {
           delete next.model_search
         }
 
@@ -397,7 +403,7 @@ export default function WorkshopOrderList() {
       return
     }
 
-    const latestOrder = data.items.find((item) => item.id === activeOrder.id)
+    const latestOrder = data.items.find(item => item.id === activeOrder.id)
     if (!latestOrder) {
       setActiveOrder(null)
       return
@@ -408,8 +414,8 @@ export default function WorkshopOrderList() {
     }
   }, [activeOrder, data?.items])
 
-  const { handleStatusChange, handleBatchStatusChange, isBatchUpdating } =
-    useWorkshopOrderStatusActions({
+  const { handleStatusChange, handleBatchStatusChange, isBatchUpdating }
+    = useWorkshopOrderStatusActions({
       activeOrder,
       setActiveOrder,
       selectedRowKeys,
@@ -423,7 +429,8 @@ export default function WorkshopOrderList() {
     const next = new URLSearchParams(searchParamsURL)
     if (key === 'closed') {
       next.set('status', 'closed')
-    } else {
+    }
+    else {
       next.delete('status')
     }
     next.set('page', '1')
@@ -526,9 +533,9 @@ export default function WorkshopOrderList() {
         open={isModalOpen}
         width={960}
         confirmLoading={
-          createMutation.isPending ||
-          updateMutation.isPending ||
-          batchCreateMutation.isPending
+          createMutation.isPending
+          || updateMutation.isPending
+          || batchCreateMutation.isPending
         }
         destroyOnHidden
         onOk={() => formRef.current?.submit()}

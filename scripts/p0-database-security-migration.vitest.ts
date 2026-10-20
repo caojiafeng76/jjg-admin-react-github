@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -7,7 +7,7 @@ const MIGRATION_SUFFIX = 'harden_villa_lift_records_and_reporting_views.sql'
 const MIGRATIONS_DIR = resolve(process.cwd(), 'supabase/migrations')
 
 function loadMigration(): string {
-  const migrationFiles = readdirSync(MIGRATIONS_DIR).filter((file) =>
+  const migrationFiles = readdirSync(MIGRATIONS_DIR).filter(file =>
     file.endsWith(MIGRATION_SUFFIX),
   )
 
@@ -45,7 +45,7 @@ function functionStatement(sql: string, qualifiedName: string): string {
 function permissionKeys(sql: string): string[] {
   return Array.from(
     sql.matchAll(/current_user_has_permission\('([^']+)'\)/gi),
-    (match) => match[1],
+    match => match[1],
   )
 }
 
@@ -119,7 +119,7 @@ describe('P0 database security migration', () => {
 
     for (const expected of expectedPolicies) {
       const statement = policies.find(
-        (policy) =>
+        policy =>
           new RegExp(
             `on public\\.villa_lift_${expected.table}_records for ${expected.operation}`,
             'i',
@@ -209,7 +209,7 @@ describe('P0 database security migration', () => {
       /grant execute on function private\.get_machine_runtime_items\(\) to authenticated, service_role;/i,
     )
     expect(sql).not.toMatch(
-      /grant (?:usage|execute)[\s\S]*? to (?:public|anon)(?:[,;]|\s)/i,
+      /grant (?:usage|execute)[\s\S]*? to (?:public|anon)[,;\s]/i,
     )
   })
 
@@ -243,7 +243,7 @@ describe('P0 database security migration', () => {
       /grant select on public\.v_machine_runtime_items to authenticated, service_role;/i,
     )
     expect(sql).not.toMatch(
-      /grant select on public\.(?:attendance_details_with_shift|v_machine_runtime_items) to (?:public|anon)(?:[,;]|\s)/i,
+      /grant select on public\.(?:attendance_details_with_shift|v_machine_runtime_items) to (?:public|anon)[,;\s]/i,
     )
   })
 

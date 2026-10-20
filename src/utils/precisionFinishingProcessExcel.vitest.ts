@@ -1,14 +1,14 @@
 // @vitest-environment jsdom
 
-import { describe, expect, it } from 'vitest'
-import * as XLSX from 'xlsx-js-style'
-
 import type { StandardTime } from '@/services/apiStandardTimes'
-import { extractFirstWorksheetSketchFiles } from './workshopOrderSketchXlsx'
+import { describe, expect, it } from 'vitest'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   buildPrecisionFinishingProcessExcelBuffer,
   PROCESS_SHEET_HEADERS,
 } from './precisionFinishingProcessExcel'
+import { extractFirstWorksheetSketchFiles } from './workshopOrderSketchXlsx'
 
 const baseRecord = {
   id: 'row-1',

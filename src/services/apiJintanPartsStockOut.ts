@@ -1,6 +1,6 @@
+import { handleApiError } from '@/utils/errorHandler'
 import publicSupabase from './publicSupabase'
 import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 
 export interface JintanPartsStockOut {
   id: string
@@ -37,19 +37,23 @@ export async function getJintanPartsStockOutList({
   keyword?: string
   inventoryId?: string
   signal?: AbortSignal
-}): Promise<{ items: JintanPartsStockOut[]; total: number }> {
+}): Promise<{ items: JintanPartsStockOut[], total: number }> {
   let query = supabase
     .from('jintan_parts_stock_out')
     .select('*', { count: 'exact' })
-  if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
-  if (inventoryId) query = query.eq('inventory_id', inventoryId)
-  if (signal) query = query.abortSignal(signal)
+  if (keyword?.trim())
+    query = query.or(keywordFilter(keyword.trim()))
+  if (inventoryId)
+    query = query.eq('inventory_id', inventoryId)
+  if (signal)
+    query = query.abortSignal(signal)
 
   const { data, error, count } = await query
     .order('created_at', { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1)
 
-  if (error) throw handleApiError(error, '获取配件出库列表失败')
+  if (error)
+    throw handleApiError(error, '获取配件出库列表失败')
   return { items: data ?? [], total: count ?? 0 }
 }
 
@@ -73,14 +77,16 @@ async function insertJintanPartsStockOut(
   if (!Number.isSafeInteger(values.quantity) || values.quantity <= 0) {
     throw new Error('出库数量必须为正整数')
   }
-  if (!values.inventory_id) throw new Error('请选择配件')
+  if (!values.inventory_id)
+    throw new Error('请选择配件')
 
   const { error } = await client.from('jintan_parts_stock_out').insert({
     inventory_id: values.inventory_id,
     quantity: values.quantity,
     remarks: (values.remarks ?? '').trim(),
   })
-  if (error) throw handleApiError(error, errorMessage)
+  if (error)
+    throw handleApiError(error, errorMessage)
 }
 
 export async function updateJintanPartsStockOutRemarks({
@@ -96,7 +102,8 @@ export async function updateJintanPartsStockOutRemarks({
     .eq('id', id)
     .select('id')
     .single()
-  if (error) throw handleApiError(error, '修改配件出库备注失败')
+  if (error)
+    throw handleApiError(error, '修改配件出库备注失败')
 }
 
 export async function deleteJintanPartsStockOut(id: string): Promise<void> {
@@ -106,5 +113,6 @@ export async function deleteJintanPartsStockOut(id: string): Promise<void> {
     .eq('id', id)
     .select('id')
     .single()
-  if (error) throw handleApiError(error, '删除配件出库记录失败')
+  if (error)
+    throw handleApiError(error, '删除配件出库记录失败')
 }

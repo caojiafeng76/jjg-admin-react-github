@@ -1,33 +1,33 @@
-import { useCallback, useMemo, useState } from 'react'
+import type { FormInstance, TabsProps } from 'antd'
+import type { JintanProfilesQuickInventory } from '../ProfilesStockIn/JintanProfilesStockInForm'
+
+import type { JintanProfilesData } from '@/services/apiJintanProfilesData'
+import type { JintanProfilesStockInFormValues } from '@/services/apiJintanProfilesStockIn'
+import type { JintanProfilesStockOutFormValues } from '@/services/apiJintanProfilesStockOut'
 import {
   Alert,
   App,
   Button,
   Drawer,
+
   Modal,
   Tabs,
-  Tooltip,
-  type FormInstance,
-  type TabsProps,
-} from 'antd'
 
+  Tooltip,
+} from 'antd'
+import { useCallback, useMemo, useState } from 'react'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import type { JintanProfilesData } from '@/services/apiJintanProfilesData'
-import type { JintanProfilesStockInFormValues } from '@/services/apiJintanProfilesStockIn'
-import type { JintanProfilesStockOutFormValues } from '@/services/apiJintanProfilesStockOut'
 import {
   JINTAN_PROFILES_DATA_PERMISSION_KEY,
   JINTAN_PROFILES_INVENTORY_PERMISSION_KEY,
   JINTAN_PROFILES_STOCK_IN_PERMISSION_KEY,
   JINTAN_PROFILES_STOCK_OUT_PERMISSION_KEY,
 } from '../permissions'
+import JintanProfilesStockInForm from '../ProfilesStockIn/JintanProfilesStockInForm'
 import { useCreateJintanProfilesStockIn } from '../ProfilesStockIn/useJintanProfilesStockIn'
-import JintanProfilesStockInForm, {
-  type JintanProfilesQuickInventory,
-} from '../ProfilesStockIn/JintanProfilesStockInForm'
-import { useCreateJintanProfilesStockOut } from '../ProfilesStockOut/useJintanProfilesStockOut'
 import JintanProfilesStockOutForm from '../ProfilesStockOut/JintanProfilesStockOutForm'
+import { useCreateJintanProfilesStockOut } from '../ProfilesStockOut/useJintanProfilesStockOut'
 import {
   JintanProfilesStockInRecordsTab,
   JintanProfilesStockOutRecordsTab,
@@ -59,10 +59,10 @@ export default function JintanProfilesDataDetailDrawer({
   const [quickMode, setQuickMode] = useState<'stock-in' | 'stock-out' | null>(
     null,
   )
-  const [stockInFormRef, setStockInFormRef] =
-    useState<FormInstance<JintanProfilesStockInFormValues> | null>(null)
-  const [stockOutFormRef, setStockOutFormRef] =
-    useState<FormInstance<JintanProfilesStockOutFormValues> | null>(null)
+  const [stockInFormRef, setStockInFormRef]
+    = useState<FormInstance<JintanProfilesStockInFormValues> | null>(null)
+  const [stockOutFormRef, setStockOutFormRef]
+    = useState<FormInstance<JintanProfilesStockOutFormValues> | null>(null)
 
   const {
     data: inventory,
@@ -74,7 +74,8 @@ export default function JintanProfilesDataDetailDrawer({
   const createStockOutMutation = useCreateJintanProfilesStockOut()
 
   const quickInventory = useMemo<JintanProfilesQuickInventory | null>(() => {
-    if (!inventory) return null
+    if (!inventory)
+      return null
 
     return {
       id: inventory.id,
@@ -83,15 +84,15 @@ export default function JintanProfilesDataDetailDrawer({
     }
   }, [inventory])
 
-  const quickCreateDisabled =
-    viewerDenied || !canManageProfiles || !quickInventory
+  const quickCreateDisabled
+    = viewerDenied || !canManageProfiles || !quickInventory
   const quickCreateTip = viewerDenied
     ? viewerOperationTip
     : !canManageProfiles
-      ? '无金檀木业模块操作权限'
-      : !quickInventory
-        ? '尚未产生库存记录，暂不能建单'
-        : null
+        ? '无金檀木业模块操作权限'
+        : !quickInventory
+            ? '尚未产生库存记录，暂不能建单'
+            : null
 
   const closeQuickModal = useCallback(() => {
     setQuickMode(null)
@@ -120,7 +121,8 @@ export default function JintanProfilesDataDetailDrawer({
         await createStockInMutation.mutateAsync(values)
         message.success('型材入库创建成功，库存已更新')
         closeQuickModal()
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error
             ? error.message
@@ -154,7 +156,8 @@ export default function JintanProfilesDataDetailDrawer({
         await createStockOutMutation.mutateAsync(values)
         message.success('型材出库创建成功，库存已更新')
         closeQuickModal()
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error
             ? error.message
@@ -173,7 +176,8 @@ export default function JintanProfilesDataDetailDrawer({
   )
 
   const tabItems = useMemo<NonNullable<TabsProps['items']>>(() => {
-    if (!inventory) return []
+    if (!inventory)
+      return []
 
     const items: NonNullable<TabsProps['items']> = []
 
@@ -210,116 +214,134 @@ export default function JintanProfilesDataDetailDrawer({
       destroyOnHidden
       onClose={handleClose}
     >
-      {record ? (
-        <div className="space-y-4">
-          <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
-            <div className="text-base font-medium text-slate-900 dark:text-slate-100">
-              {record.profile_model ? `${record.profile_model} / ` : ''}
-              {record.profile_name} / {record.specification || '无规格'}
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-600 md:grid-cols-3 dark:text-slate-300">
-              <div>材质：{record.material || '-'}</div>
-              <div className="col-span-2">备注：{record.remarks || '-'}</div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              库存
-            </div>
-            {canViewInventory ? (
-              inventoryError ? (
-                <Alert
-                  type="error"
-                  showIcon
-                  title="获取型材库存失败"
-                  action={
-                    <Button size="small" onClick={() => refetchInventory()}>
-                      重试
-                    </Button>
-                  }
-                />
-              ) : (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-800/60">
-                      <div className="text-xs text-slate-400 dark:text-slate-500">
-                        当前库存
-                      </div>
-                      <div className="mt-1 text-lg font-medium text-slate-800 tabular-nums dark:text-slate-100">
-                        {isInventoryLoading
-                          ? '-'
-                          : Number(inventory?.quantity ?? 0).toLocaleString(
-                              'zh-CN',
-                            )}
-                      </div>
-                    </div>
-                  </div>
-                  {inventory?.remarks ? (
-                    <div className="text-xs text-slate-400 dark:text-slate-500">
-                      库存备注：{inventory.remarks}
-                    </div>
-                  ) : null}
-                  {!isInventoryLoading && !inventory ? (
-                    <div className="text-xs text-amber-600 dark:text-amber-500">
-                      尚未产生库存记录，暂不能新建出入库单
-                    </div>
-                  ) : null}
+      {record
+        ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+                <div className="text-base font-medium text-slate-900 dark:text-slate-100">
+                  {record.profile_model ? `${record.profile_model} / ` : ''}
+                  {record.profile_name} / {record.specification || '无规格'}
                 </div>
-              )
-            ) : (
-              <div className="text-xs text-slate-400 dark:text-slate-500">
-                无型材库存页面权限，暂不能查看库存
+                <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-600 md:grid-cols-3 dark:text-slate-300">
+                  <div>材质：{record.material || '-'}</div>
+                  <div className="col-span-2">备注：{record.remarks || '-'}</div>
+                </div>
               </div>
-            )}
-          </div>
 
-          {canQuickCreate ? (
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                {canViewStockIn ? (
-                  <Tooltip title={quickCreateTip}>
-                    <Button
-                      type="primary"
-                      disabled={quickCreateDisabled}
-                      onClick={() => setQuickMode('stock-in')}
-                    >
-                      新建入库
-                    </Button>
-                  </Tooltip>
-                ) : null}
-                {canViewStockOut ? (
-                  <Tooltip title={quickCreateTip}>
-                    <Button
-                      disabled={quickCreateDisabled}
-                      onClick={() => setQuickMode('stock-out')}
-                    >
-                      新建出库
-                    </Button>
-                  </Tooltip>
-                ) : null}
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  库存
+                </div>
+                {canViewInventory
+                  ? (
+                      inventoryError
+                        ? (
+                            <Alert
+                              type="error"
+                              showIcon
+                              title="获取型材库存失败"
+                              action={(
+                                <Button size="small" onClick={() => refetchInventory()}>
+                                  重试
+                                </Button>
+                              )}
+                            />
+                          )
+                        : (
+                            <div className="space-y-2">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+                                  <div className="text-xs text-slate-400 dark:text-slate-500">
+                                    当前库存
+                                  </div>
+                                  <div className="mt-1 text-lg font-medium text-slate-800 tabular-nums dark:text-slate-100">
+                                    {isInventoryLoading
+                                      ? '-'
+                                      : Number(inventory?.quantity ?? 0).toLocaleString(
+                                          'zh-CN',
+                                        )}
+                                  </div>
+                                </div>
+                              </div>
+                              {inventory?.remarks
+                                ? (
+                                    <div className="text-xs text-slate-400 dark:text-slate-500">
+                                      库存备注：{inventory.remarks}
+                                    </div>
+                                  )
+                                : null}
+                              {!isInventoryLoading && !inventory
+                                ? (
+                                    <div className="text-xs text-amber-600 dark:text-amber-500">
+                                      尚未产生库存记录，暂不能新建出入库单
+                                    </div>
+                                  )
+                                : null}
+                            </div>
+                          )
+                    )
+                  : (
+                      <div className="text-xs text-slate-400 dark:text-slate-500">
+                        无型材库存页面权限，暂不能查看库存
+                      </div>
+                    )}
               </div>
-              <div className="text-xs text-slate-400 dark:text-slate-500">
-                新建单据将直接更新库存；历史单据请前往型材入库 /
-                型材出库页面管理。
-              </div>
-            </div>
-          ) : null}
 
-          {tabItems.length > 0 ? (
-            <Tabs
-              defaultActiveKey={String(tabItems[0]?.key ?? '')}
-              items={tabItems}
-            />
-          ) : (
-            <div className="text-xs text-slate-400 dark:text-slate-500">
-              {inventory
-                ? '无型材入库 / 出库页面权限，暂不能查看出入库记录'
-                : '暂无出入库记录可查看'}
+              {canQuickCreate
+                ? (
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {canViewStockIn
+                          ? (
+                              <Tooltip title={quickCreateTip}>
+                                <Button
+                                  type="primary"
+                                  disabled={quickCreateDisabled}
+                                  onClick={() => setQuickMode('stock-in')}
+                                >
+                                  新建入库
+                                </Button>
+                              </Tooltip>
+                            )
+                          : null}
+                        {canViewStockOut
+                          ? (
+                              <Tooltip title={quickCreateTip}>
+                                <Button
+                                  disabled={quickCreateDisabled}
+                                  onClick={() => setQuickMode('stock-out')}
+                                >
+                                  新建出库
+                                </Button>
+                              </Tooltip>
+                            )
+                          : null}
+                      </div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500">
+                        新建单据将直接更新库存；历史单据请前往型材入库 /
+                        型材出库页面管理。
+                      </div>
+                    </div>
+                  )
+                : null}
+
+              {tabItems.length > 0
+                ? (
+                    <Tabs
+                      defaultActiveKey={String(tabItems[0]?.key ?? '')}
+                      items={tabItems}
+                    />
+                  )
+                : (
+                    <div className="text-xs text-slate-400 dark:text-slate-500">
+                      {inventory
+                        ? '无型材入库 / 出库页面权限，暂不能查看出入库记录'
+                        : '暂无出入库记录可查看'}
+                    </div>
+                  )}
             </div>
-          )}
-        </div>
-      ) : null}
+          )
+        : null}
 
       <Modal
         title="新建型材入库"

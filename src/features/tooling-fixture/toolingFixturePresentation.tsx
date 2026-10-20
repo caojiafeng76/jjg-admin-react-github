@@ -1,5 +1,5 @@
-import type { StatusTone } from '@/ui/StatusPill'
 import type { ToolingFixture } from '@/services/apiToolingFixture'
+import type { StatusTone } from '@/ui/StatusPill'
 
 export function assertNever(value: never): never {
   throw new Error(`Unexpected fixture value: ${String(value)}`)

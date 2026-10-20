@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface MachineRuntimeFilters {
   dateFrom?: string
@@ -159,7 +159,7 @@ export async function getMachineRuntimeSummary(
   }
 
   // 4. 合并：全部设备 LEFT JOIN 运行数据
-  const result: MachineRuntimeSummaryItem[] = (allMachines || []).map((m) => ({
+  const result: MachineRuntimeSummaryItem[] = (allMachines || []).map(m => ({
     machine_equipment_id: m.id,
     unified_device_no: m.unified_device_no || '',
     device_operation: m.operation || '',

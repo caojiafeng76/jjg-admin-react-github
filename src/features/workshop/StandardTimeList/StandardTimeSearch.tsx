@@ -1,9 +1,10 @@
-import { Button, Checkbox, DatePicker, Form, Input, Select, Space } from 'antd'
-import { ChevronDownIcon } from '@heroicons/react/16/solid'
-import { useEffect, useState } from 'react'
-import dayjs, { type Dayjs } from 'dayjs'
-
+import type { Dayjs } from 'dayjs'
 import type { ProcessStandardRecordType } from '@/services/apiStandardTimes'
+import { ChevronDownIcon } from '@heroicons/react/16/solid'
+import { Button, Checkbox, DatePicker, Form, Input, Select, Space } from 'antd'
+import dayjs from 'dayjs'
+
+import { useEffect, useState } from 'react'
 
 const { RangePicker } = DatePicker
 
@@ -213,7 +214,7 @@ export default function StandardTimeSearch({
         <Button
           block
           type="default"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={() => setIsExpanded(prev => !prev)}
           className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm font-medium shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
         >
           <span className="flex w-full items-center justify-between">
@@ -229,11 +230,13 @@ export default function StandardTimeSearch({
           </span>
         </Button>
 
-        {isExpanded ? (
-          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            {formContent}
-          </div>
-        ) : null}
+        {isExpanded
+          ? (
+              <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                {formContent}
+              </div>
+            )
+          : null}
       </div>
     )
   }

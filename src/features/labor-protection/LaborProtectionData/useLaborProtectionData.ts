@@ -5,8 +5,8 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 import {
   createLaborProtectionData,
   deleteLaborProtectionData,
-  getLaborProtectionDataOptions,
   getLaborProtectionDataList,
+  getLaborProtectionDataOptions,
   updateLaborProtectionData,
 } from '@/services/apiLaborProtectionData'
 

@@ -1,25 +1,23 @@
-import { useCallback, useMemo, useState } from 'react'
-import { App, Button, Splitter } from 'antd'
+import type { PrecisionFinishingCuttingFilters, PrecisionFinishingCuttingInsert, PrecisionFinishingCuttingUpdate, PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
 import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { App, Button, Splitter } from 'antd'
+import { useCallback, useMemo, useState } from 'react'
 
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
+import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import {
+  getPrecisionFinishingCuttingsForExport,
+
+} from '@/services/apiPrecisionFinishingCuttings'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
-import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
-import { useAuth } from '@/contexts/useAuth'
-import {
-  getPrecisionFinishingCuttingsForExport,
-  type PrecisionFinishingCuttingFilters,
-  type PrecisionFinishingCuttingInsert,
-  type PrecisionFinishingCuttingUpdate,
-  type PrecisionFinishingCuttingWithEmployee,
-} from '@/services/apiPrecisionFinishingCuttings'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
 import PrecisionFinishingCuttingDetail from './PrecisionFinishingCuttingDetail'
@@ -35,10 +33,11 @@ import {
   useUpdatePrecisionFinishingCutting,
 } from './usePrecisionFinishingCuttings'
 
-const loadPrecisionFinishingCuttingExcel = () =>
-  import('@/utils/precisionFinishingCuttingExcel')
+function loadPrecisionFinishingCuttingExcel() {
+  return import('@/utils/precisionFinishingCuttingExcel')
+}
 
-const preloadPrecisionFinishingCuttingExcel = () => {
+function preloadPrecisionFinishingCuttingExcel() {
   void loadPrecisionFinishingCuttingExcel()
 }
 
@@ -63,15 +62,15 @@ export default function PrecisionFinishingCuttingPage() {
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [searchFilters, setSearchFilters] =
-    useState<PrecisionFinishingCuttingFilters>(() => ({
+  const [searchFilters, setSearchFilters]
+    = useState<PrecisionFinishingCuttingFilters>(() => ({
       employeeId: fixedEmployeeId,
     }))
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingRecord, setEditingRecord] =
-    useState<PrecisionFinishingCuttingWithEmployee | null>(null)
-  const [activeRecord, setActiveRecord] =
-    useState<PrecisionFinishingCuttingWithEmployee | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<PrecisionFinishingCuttingWithEmployee | null>(null)
+  const [activeRecord, setActiveRecord]
+    = useState<PrecisionFinishingCuttingWithEmployee | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [formError, setFormError] = useState<unknown>(null)
 
@@ -93,7 +92,7 @@ export default function PrecisionFinishingCuttingPage() {
 
   const selectedCount = selectedRowKeys.length
   const selectedIds = useMemo(
-    () => selectedRowKeys.map((key) => String(key)),
+    () => selectedRowKeys.map(key => String(key)),
     [selectedRowKeys],
   )
   const records = useMemo(() => data?.items || [], [data?.items])
@@ -102,7 +101,7 @@ export default function PrecisionFinishingCuttingPage() {
       return { quantity: 0, matched: 0 }
     }
 
-    const keySet = new Set(selectedRowKeys.map((key) => String(key)))
+    const keySet = new Set(selectedRowKeys.map(key => String(key)))
     let quantity = 0
     let matched = 0
 
@@ -139,8 +138,8 @@ export default function PrecisionFinishingCuttingPage() {
 
   const openEditModal = useCallback(
     (record?: PrecisionFinishingCuttingWithEmployee) => {
-      const targetRecord =
-        record || records.find((item) => item.id === selectedRowKeys[0])
+      const targetRecord
+        = record || records.find(item => item.id === selectedRowKeys[0])
 
       if (!targetRecord) {
         message.warning('请选择一条数据进行编辑')
@@ -241,14 +240,16 @@ export default function PrecisionFinishingCuttingPage() {
         return
       }
 
-      const { exportPrecisionFinishingCuttingsToExcel } =
-        await loadPrecisionFinishingCuttingExcel()
+      const { exportPrecisionFinishingCuttingsToExcel }
+        = await loadPrecisionFinishingCuttingExcel()
       exportPrecisionFinishingCuttingsToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条精加工切割单`)
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '导出失败')
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [message, searchFilters, selectedIds])
@@ -283,7 +284,8 @@ export default function PrecisionFinishingCuttingPage() {
             })
             message.success(`批量${isAudited ? '审核' : '反审核'}成功`)
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error
                 ? error.message
@@ -345,7 +347,8 @@ export default function PrecisionFinishingCuttingPage() {
             },
           })
           message.success('更新成功')
-        } else {
+        }
+        else {
           const createValues = values as PrecisionFinishingCuttingInsert
           const operatorEmployeeIds = fixedEmployee?.id
             ? [fixedEmployee.id]
@@ -374,7 +377,8 @@ export default function PrecisionFinishingCuttingPage() {
         handleCloseModal()
         setSelectedRowKeys([])
         setFormError(null)
-      } catch (error) {
+      }
+      catch (error) {
         // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
         setFormError(error)
       }
@@ -404,56 +408,58 @@ export default function PrecisionFinishingCuttingPage() {
       <div
         className={isEmployeeView ? '' : 'flex flex-wrap items-center gap-2'}
       >
-        {isEmployeeView ? (
-          <Button
-            block
-            type="primary"
-            className="h-11 rounded-2xl"
-            onClick={openCreateModal}
-          >
-            新建
-          </Button>
-        ) : (
-          <>
-            <AddButton handleCreate={openCreateModal} />
-            <Button
-              type="text"
-              icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
-              onClick={() => handleBatchAudit(true)}
-              loading={batchUpdateMutation.isPending}
-              disabled={viewerDenied}
-            >
-              批量审核
-            </Button>
-            <Button
-              type="text"
-              icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
-              onClick={() => handleBatchAudit(false)}
-              loading={batchUpdateMutation.isPending}
-              disabled={viewerDenied}
-            >
-              批量反审核
-            </Button>
-            <EditButton
-              title="编辑精加工切割单"
-              handleEdit={() => openEditModal()}
-            />
-            <ExportButton
-              handleExport={handleExport}
-              loading={isExporting}
-              onPreload={preloadPrecisionFinishingCuttingExcel}
-            >
-              {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
-            </ExportButton>
-            <DeleteButton
-              onConfirm={() => handleDelete()}
-              isDeleting={deleteMutation.isPending}
-              count={selectedCount}
-              title="删除精加工切割单"
-              itemName="切割单"
-            />
-          </>
-        )}
+        {isEmployeeView
+          ? (
+              <Button
+                block
+                type="primary"
+                className="h-11 rounded-2xl"
+                onClick={openCreateModal}
+              >
+                新建
+              </Button>
+            )
+          : (
+              <>
+                <AddButton handleCreate={openCreateModal} />
+                <Button
+                  type="text"
+                  icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+                  onClick={() => handleBatchAudit(true)}
+                  loading={batchUpdateMutation.isPending}
+                  disabled={viewerDenied}
+                >
+                  批量审核
+                </Button>
+                <Button
+                  type="text"
+                  icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+                  onClick={() => handleBatchAudit(false)}
+                  loading={batchUpdateMutation.isPending}
+                  disabled={viewerDenied}
+                >
+                  批量反审核
+                </Button>
+                <EditButton
+                  title="编辑精加工切割单"
+                  handleEdit={() => openEditModal()}
+                />
+                <ExportButton
+                  handleExport={handleExport}
+                  loading={isExporting}
+                  onPreload={preloadPrecisionFinishingCuttingExcel}
+                >
+                  {selectedCount > 0 ? '导出选中项' : '导出当前筛选结果'}
+                </ExportButton>
+                <DeleteButton
+                  onConfirm={() => handleDelete()}
+                  isDeleting={deleteMutation.isPending}
+                  count={selectedCount}
+                  title="删除精加工切割单"
+                  itemName="切割单"
+                />
+              </>
+            )}
       </div>
 
       <div
@@ -473,113 +479,119 @@ export default function PrecisionFinishingCuttingPage() {
         />
       </div>
 
-      {!isEmployeeView && selectedCount > 0 ? (
-        <SelectedSummaryBar
-          selectedCount={selectedCount}
-          matchedCount={selectedSummary.matched}
-          stats={[
-            {
-              label: '转移数量合计',
-              value: selectedSummary.quantity,
-              tone: 'error',
-              icon: (
-                <svg
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                  />
-                </svg>
-              ),
-            },
-          ]}
-        />
-      ) : null}
-
-      {isEmployeeView ? (
-        <>
-          <div
-            ref={tableContainerRef}
-            className="no-scrollbar min-h-0 overflow-y-auto overscroll-contain"
-          >
-            <PrecisionFinishingCuttingMobileList
-              loading={isLoading}
-              data={records}
-              selectedRowKeys={selectedRowKeys}
-              onSelect={setSelectedRowKeys}
-              onEdit={openEditModal}
-              editDisabled={viewerDenied}
+      {!isEmployeeView && selectedCount > 0
+        ? (
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedSummary.matched}
+              stats={[
+                {
+                  label: '转移数量合计',
+                  value: selectedSummary.quantity,
+                  tone: 'error',
+                  icon: (
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                      />
+                    </svg>
+                  ),
+                },
+              ]}
             />
-          </div>
-          <div className="flex justify-center pb-1">
-            <AppPagination total={data?.total || 0} />
-          </div>
-        </>
-      ) : (
-        <Splitter
-          orientation="vertical"
-          style={{ flex: 1, minHeight: 0 }}
-          styles={{ panel: { overflow: 'hidden' } }}
-        >
-          <Splitter.Panel defaultSize="65%" min="30%">
-            <div
-              ref={tableContainerRef}
-              className="flex h-full flex-col gap-2 overflow-hidden"
-            >
-              <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                <TableState loading={isLoading && !data} error={error} onRetry={() => void refetch()}>
-                  <PrecisionFinishingCuttingTable
-                    loading={isLoading}
-                    data={records}
-                    page={page}
-                    pageSize={pageSize}
-                    selectedRowKeys={selectedRowKeys}
-                    onSelect={setSelectedRowKeys}
-                    scrollY={scrollY}
-                    activeRowId={activeRecord?.id ?? null}
-                    onRowClick={setActiveRecord}
-                    emptyAction={<AddButton handleCreate={openCreateModal} />}
-                  />
-                </TableState>
+          )
+        : null}
+
+      {isEmployeeView
+        ? (
+            <>
+              <div
+                ref={tableContainerRef}
+                className="no-scrollbar min-h-0 overflow-y-auto overscroll-contain"
+              >
+                <PrecisionFinishingCuttingMobileList
+                  loading={isLoading}
+                  data={records}
+                  selectedRowKeys={selectedRowKeys}
+                  onSelect={setSelectedRowKeys}
+                  onEdit={openEditModal}
+                  editDisabled={viewerDenied}
+                />
               </div>
-              <div ref={paginationRef} className="flex shrink-0 justify-end">
+              <div className="flex justify-center pb-1">
                 <AppPagination total={data?.total || 0} />
               </div>
-            </div>
-          </Splitter.Panel>
-          <Splitter.Panel min="20%">
-            <div className="h-full overflow-hidden">
-              <PrecisionFinishingCuttingDetail
-                selectedRecord={activeRecord}
-                onEdit={openEditModal}
-                editDisabled={viewerDenied}
-              />
-            </div>
-          </Splitter.Panel>
-        </Splitter>
-      )}
+            </>
+          )
+        : (
+            <Splitter
+              orientation="vertical"
+              style={{ flex: 1, minHeight: 0 }}
+              styles={{ panel: { overflow: 'hidden' } }}
+            >
+              <Splitter.Panel defaultSize="65%" min="30%">
+                <div
+                  ref={tableContainerRef}
+                  className="flex h-full flex-col gap-2 overflow-hidden"
+                >
+                  <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    <TableState loading={isLoading && !data} error={error} onRetry={() => void refetch()}>
+                      <PrecisionFinishingCuttingTable
+                        loading={isLoading}
+                        data={records}
+                        page={page}
+                        pageSize={pageSize}
+                        selectedRowKeys={selectedRowKeys}
+                        onSelect={setSelectedRowKeys}
+                        scrollY={scrollY}
+                        activeRowId={activeRecord?.id ?? null}
+                        onRowClick={setActiveRecord}
+                        emptyAction={<AddButton handleCreate={openCreateModal} />}
+                      />
+                    </TableState>
+                  </div>
+                  <div ref={paginationRef} className="flex shrink-0 justify-end">
+                    <AppPagination total={data?.total || 0} />
+                  </div>
+                </div>
+              </Splitter.Panel>
+              <Splitter.Panel min="20%">
+                <div className="h-full overflow-hidden">
+                  <PrecisionFinishingCuttingDetail
+                    selectedRecord={activeRecord}
+                    onEdit={openEditModal}
+                    editDisabled={viewerDenied}
+                  />
+                </div>
+              </Splitter.Panel>
+            </Splitter>
+          )}
 
-      {!isEmployeeView ? (
-        <PrecisionFinishingCuttingForm
-          open={isModalOpen}
-          onCancel={handleCloseModal}
-          onSubmit={handleSubmit}
-          initialValues={initialFormValues}
-          employees={employees}
-          loading={isSubmitting}
-          fixedOperator={fixedEmployee}
-          currentUploader={currentUploader}
-          canAudit={!isEmployeeView}
-          mobile={false}
-          formError={formError}
-        />
-      ) : null}
+      {!isEmployeeView
+        ? (
+            <PrecisionFinishingCuttingForm
+              open={isModalOpen}
+              onCancel={handleCloseModal}
+              onSubmit={handleSubmit}
+              initialValues={initialFormValues}
+              employees={employees}
+              loading={isSubmitting}
+              fixedOperator={fixedEmployee}
+              currentUploader={currentUploader}
+              canAudit={!isEmployeeView}
+              mobile={false}
+              formError={formError}
+            />
+          )
+        : null}
     </div>
   )
 }

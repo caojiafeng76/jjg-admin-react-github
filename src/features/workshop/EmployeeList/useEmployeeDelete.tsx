@@ -1,6 +1,6 @@
-import { useCallback } from 'react'
 import type { Dispatch, Key, SetStateAction } from 'react'
 import { App } from 'antd'
+import { useCallback } from 'react'
 
 import { getEmployeeDeleteBlockers } from '@/services/apiEmployees'
 import { useDeleteEmployees } from './useEmployees'
@@ -37,7 +37,7 @@ export function useEmployeeDelete({
             <div className="space-y-3">
               <p>以下员工已被生产工单引用，请先处理关联数据：</p>
               <ul className="list-disc space-y-2 pl-5">
-                {blockers.map((item) => (
+                {blockers.map(item => (
                   <li key={item.employeeId}>
                     <div className="font-medium text-slate-800">
                       {item.employeeName}
@@ -75,10 +75,12 @@ export function useEmployeeDelete({
             await deleteMutation.mutateAsync(ids)
             message.success('删除成功')
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             if (error instanceof Error) {
               message.error(error.message)
-            } else {
+            }
+            else {
               message.error('删除失败，请稍后重试')
             }
 
@@ -86,10 +88,12 @@ export function useEmployeeDelete({
           }
         },
       })
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除失败，请稍后重试')
       }
     }

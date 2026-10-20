@@ -1,10 +1,3 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
-import {
-  applyMaterialTransferFilters,
-  normalizeMaterialTransferInsertPayload,
-  normalizeMaterialTransferUpdatePayload,
-} from './apiMaterialTransfersCalculations'
 import type {
   MaterialTransferFilters,
   MaterialTransferInsert,
@@ -16,12 +9,19 @@ import type {
   ProjectTransferStats,
   TransferWorkshopStat,
 } from './apiMaterialTransfersTypes'
+import { handleApiError } from '@/utils/errorHandler'
+import {
+  applyMaterialTransferFilters,
+  normalizeMaterialTransferInsertPayload,
+  normalizeMaterialTransferUpdatePayload,
+} from './apiMaterialTransfersCalculations'
+import supabase from './supabase'
 
-export * from './apiMaterialTransfersTypes'
 export {
   buildOrderProgressMap,
   computeOrderProgress,
 } from './apiMaterialTransfersCalculations'
+export * from './apiMaterialTransfersTypes'
 
 const MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE = 1000
 
@@ -38,14 +38,17 @@ export async function getMaterialTransferProjectNos() {
       .order('project_no', { ascending: true })
       .range(from, to)
 
-    if (error) throw handleApiError(error, '获取项目号选项失败')
+    if (error)
+      throw handleApiError(error, '获取项目号选项失败')
 
     const rows = data || []
     rows.forEach((item) => {
-      if (item.project_no) values.add(item.project_no.trim())
+      if (item.project_no)
+        values.add(item.project_no.trim())
     })
 
-    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) break
+    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE)
+      break
     from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
   }
 
@@ -65,14 +68,17 @@ export async function getMaterialTransferModels() {
       .order('product_model', { ascending: true })
       .range(from, to)
 
-    if (error) throw handleApiError(error, '获取型号选项失败')
+    if (error)
+      throw handleApiError(error, '获取型号选项失败')
 
     const rows = data || []
     rows.forEach((item) => {
-      if (item.product_model) values.add(item.product_model.trim())
+      if (item.product_model)
+        values.add(item.product_model.trim())
     })
 
-    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) break
+    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE)
+      break
     from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
   }
 
@@ -92,14 +98,17 @@ export async function getMaterialTransferLengths() {
       .order('length_mm', { ascending: true })
       .range(from, to)
 
-    if (error) throw handleApiError(error, '获取长度选项失败')
+    if (error)
+      throw handleApiError(error, '获取长度选项失败')
 
     const rows = data || []
     rows.forEach((item) => {
-      if (item.length_mm !== null) values.add(item.length_mm as number)
+      if (item.length_mm !== null)
+        values.add(item.length_mm as number)
     })
 
-    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE) break
+    if (rows.length < MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE)
+      break
     from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
   }
 
@@ -110,11 +119,11 @@ async function attachOrderAppearance(
   rows: MaterialTransferWithEmployee[],
 ): Promise<MaterialTransferWithEmployee[]> {
   const projectNos = [
-    ...new Set(rows.map((row) => row.project_no.trim()).filter(Boolean)),
+    ...new Set(rows.map(row => row.project_no.trim()).filter(Boolean)),
   ]
   const appearance = new Map<
     string,
-    { product_category: string | null; color_name: string | null }
+    { product_category: string | null, color_name: string | null }
   >()
 
   for (let offset = 0; offset < projectNos.length; offset += 100) {
@@ -123,10 +132,12 @@ async function attachOrderAppearance(
       .select('project_no, product_category, color_name')
       .in('project_no', projectNos.slice(offset, offset + 100))
 
-    if (error) throw handleApiError(error, '获取订单表面处理和颜色失败')
+    if (error)
+      throw handleApiError(error, '获取订单表面处理和颜色失败')
 
     for (const order of data || []) {
-      if (order.project_no) appearance.set(order.project_no.trim(), order)
+      if (order.project_no)
+        appearance.set(order.project_no.trim(), order)
     }
   }
 
@@ -215,7 +226,8 @@ export async function getMaterialTransfersForExport({
     }
 
     rows.push(...((data || []) as unknown as MaterialTransferWithEmployee[]))
-  } else if (filters) {
+  }
+  else if (filters) {
     let from = 0
 
     while (true) {
@@ -249,11 +261,11 @@ export async function getMaterialTransfersForExport({
     return attachOrderAppearance(rows)
   }
 
-  const rowMap = new Map(rows.map((row) => [row.id, row]))
+  const rowMap = new Map(rows.map(row => [row.id, row]))
 
   return attachOrderAppearance(
     ids
-      .map((id) => rowMap.get(id))
+      .map(id => rowMap.get(id))
       .filter((row): row is MaterialTransferWithEmployee => Boolean(row)),
   )
 }
@@ -278,7 +290,8 @@ export async function getMaterialTransferQuantityStats({
     }
 
     rows.push(...((data || []) as Array<{ transfer_quantity: number | null }>))
-  } else if (filters) {
+  }
+  else if (filters) {
     let from = 0
 
     while (true) {
@@ -429,7 +442,7 @@ export async function getTransferStatsByProjectNo(
     from += MATERIAL_TRANSFER_OPTIONS_PAGE_SIZE
   }
 
-  const workshopMap = new Map<string, { total: number; count: number }>()
+  const workshopMap = new Map<string, { total: number, count: number }>()
   for (const row of rows) {
     const current = workshopMap.get(row.target_workshop) ?? {
       total: 0,
@@ -468,7 +481,8 @@ export async function getOrderQuantitiesByProjectNos(
   projectNos: string[],
 ): Promise<Map<string, number>> {
   const map = new Map<string, number>()
-  if (projectNos.length === 0) return map
+  if (projectNos.length === 0)
+    return map
 
   const { data, error } = await supabase
     .from('sales_orders')
@@ -480,9 +494,11 @@ export async function getOrderQuantitiesByProjectNos(
   }
 
   for (const row of data || []) {
-    if (!row.project_no) continue
+    if (!row.project_no)
+      continue
     const key = row.project_no.trim()
-    if (!key) continue
+    if (!key)
+      continue
     map.set(key, Number(row.order_quantity ?? 0))
   }
 
@@ -497,7 +513,8 @@ export async function getTransferTotalByProjectNos(
   projectNos: string[],
 ): Promise<Map<string, number>> {
   const map = new Map<string, number>()
-  if (projectNos.length === 0) return map
+  if (projectNos.length === 0)
+    return map
 
   // .in() 只能过滤项目号，不能限制每个项目的转移记录行数；
   // 多个项目合计记录数可能超过 1000，需分页循环拉全后再聚合。
@@ -522,9 +539,11 @@ export async function getTransferTotalByProjectNos(
     }>
 
     for (const row of pageRows) {
-      if (!row.project_no) continue
+      if (!row.project_no)
+        continue
       const key = row.project_no.trim()
-      if (!key) continue
+      if (!key)
+        continue
       map.set(key, (map.get(key) ?? 0) + Number(row.transfer_quantity || 0))
     }
 

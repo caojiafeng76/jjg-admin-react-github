@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Form, type FormInstance, Input, InputNumber, Select } from 'antd'
+import type { FormInstance } from 'antd'
+import type { YoumaiRawMaterialInventoryOption } from '@/services/apiYoumaiRawMaterialInventory'
 
 import type {
   YoumaiRawMaterialStockIn,
   YoumaiRawMaterialStockInFormValues,
 } from '@/services/apiYoumaiRawMaterialStockIn'
-import type { YoumaiRawMaterialInventoryOption } from '@/services/apiYoumaiRawMaterialInventory'
+import { Form, Input, InputNumber, Select } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
 
-import { useRemoteSelectOptions } from '../remoteSelectOptions'
 import { useYoumaiRawMaterialInventoryOption } from '../RawMaterialInventory/useYoumaiRawMaterialInventory'
+import { useRemoteSelectOptions } from '../remoteSelectOptions'
 import { useYoumaiRawMaterialInventoryOptions } from './useYoumaiRawMaterialStockIn'
 
 interface Props {
@@ -38,29 +39,29 @@ export default function YoumaiRawMaterialStockInForm({
     data: inventoryOptions = [],
     isFetching: areInventoryOptionsLoading,
   } = useYoumaiRawMaterialInventoryOptions(inventoryOptionKeyword)
-  const { data: editingInventoryOption } =
-    useYoumaiRawMaterialInventoryOption(
+  const { data: editingInventoryOption }
+    = useYoumaiRawMaterialInventoryOption(
       isEdit ? editingRecord?.inventory_id : undefined,
     )
   const initialInventorySnapshot = useMemo(
     () =>
       isEdit && editingRecord
-        ? editingInventoryOption ??
-          inventoryOptions.find(
-            (option) => option.id === editingRecord.inventory_id,
-          )
+        ? editingInventoryOption
+        ?? inventoryOptions.find(
+          option => option.id === editingRecord.inventory_id,
+        )
         : undefined,
     [editingInventoryOption, editingRecord, inventoryOptions, isEdit],
   )
-  const { mergedOptions, rememberSelectedOption } =
-    useRemoteSelectOptions<YoumaiRawMaterialInventoryOption>(
+  const { mergedOptions, rememberSelectedOption }
+    = useRemoteSelectOptions<YoumaiRawMaterialInventoryOption>(
       inventoryOptions,
       initialInventorySnapshot,
     )
   const selectedInventoryId = Form.useWatch('inventory_id', form)
 
   const selectedOption = useMemo(
-    () => mergedOptions.find((item) => item.id === selectedInventoryId),
+    () => mergedOptions.find(item => item.id === selectedInventoryId),
     [mergedOptions, selectedInventoryId],
   )
 
@@ -83,7 +84,7 @@ export default function YoumaiRawMaterialStockInForm({
 
   const options = useMemo(
     () =>
-      mergedOptions.map((item) => ({
+      mergedOptions.map(item => ({
         value: item.id,
         label: `${item.model} - ${item.specification}（当前库存：${item.quantity}）`,
         model: item.model,
@@ -104,23 +105,25 @@ export default function YoumaiRawMaterialStockInForm({
         label="原料（型号 - 规格）"
         rules={[{ required: true, message: '请选择原料' }]}
       >
-        {isEdit && editingRecord ? (
-          <Input
-            disabled
-            value={`${editingRecord.model} - ${editingRecord.specification}`}
-          />
-        ) : (
-          <Select
-            showSearch={{
-              filterOption: false,
-              onSearch: setInventoryOptionKeyword,
-            }}
-            onChange={rememberSelectedOption}
-            loading={areInventoryOptionsLoading}
-            placeholder="请选择原料"
-            options={options}
-          />
-        )}
+        {isEdit && editingRecord
+          ? (
+              <Input
+                disabled
+                value={`${editingRecord.model} - ${editingRecord.specification}`}
+              />
+            )
+          : (
+              <Select
+                showSearch={{
+                  filterOption: false,
+                  onSearch: setInventoryOptionKeyword,
+                }}
+                onChange={rememberSelectedOption}
+                loading={areInventoryOptionsLoading}
+                placeholder="请选择原料"
+                options={options}
+              />
+            )}
       </Form.Item>
 
       {!isEdit && selectedOption && (

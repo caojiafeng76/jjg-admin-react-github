@@ -1,29 +1,29 @@
-import { useEffect, useRef, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { App, Button, Card, Typography } from 'antd'
-import dayjs from 'dayjs'
-import { useLocation, useNavigate } from 'react-router-dom'
-
-import { useAuth } from '@/contexts/useAuth'
-import { isEmployeeSideRole } from '@/config/access'
-import {
-  createProductionOrder,
-  getEmployeeOrderByDate,
-} from '@/services/apiProductionOrders'
-import {
-  addProductionOrderItem,
-  updateProductionOrderItem,
-} from '@/services/apiProductionOrderItems'
-import type { ScannedProjectPayload } from './ProjectNoScanButton'
-import MobileBottomSelectSheet from '@/ui/mobile/MobileBottomSelectSheet'
-import MobileProductionOrderScanBasicInfo from './MobileProductionOrderScanBasicInfo'
-import MobileProductionOrderScanHeader from './MobileProductionOrderScanHeader'
-import MobileProductionOrderScanQuantitySections from './MobileProductionOrderScanQuantitySections'
 import type {
   ActiveSheet,
   ProjectNoData,
   ScanPageLocationState,
 } from './mobileProductionOrderScanTypes'
+import type { ScannedProjectPayload } from './ProjectNoScanButton'
+import { useQueryClient } from '@tanstack/react-query'
+import { App, Button, Card, Typography } from 'antd'
+import dayjs from 'dayjs'
+
+import { useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { isEmployeeSideRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
+import {
+  addProductionOrderItem,
+  updateProductionOrderItem,
+} from '@/services/apiProductionOrderItems'
+import {
+  createProductionOrder,
+  getEmployeeOrderByDate,
+} from '@/services/apiProductionOrders'
+import MobileBottomSelectSheet from '@/ui/mobile/MobileBottomSelectSheet'
+import MobileProductionOrderScanBasicInfo from './MobileProductionOrderScanBasicInfo'
+import MobileProductionOrderScanHeader from './MobileProductionOrderScanHeader'
+import MobileProductionOrderScanQuantitySections from './MobileProductionOrderScanQuantitySections'
 import { useMobileProductionOrderScanForm } from './useMobileProductionOrderScanForm'
 import { useMobileProductionOrderScanOptions } from './useMobileProductionOrderScanOptions'
 
@@ -107,7 +107,7 @@ export default function MobileProductionOrderScanPage() {
   }
 
   const handleProjectNoScanResolved = (payload: ScannedProjectPayload) => {
-    setScannedProjectDataMap((prev) => ({
+    setScannedProjectDataMap(prev => ({
       ...prev,
       [payload.projectNo]: {
         project_no: payload.projectNo,
@@ -132,7 +132,7 @@ export default function MobileProductionOrderScanPage() {
 
     appliedScanRef.current = scannedProjectFromNavigation.rawValue
 
-    setScannedProjectDataMap((prev) => ({
+    setScannedProjectDataMap(prev => ({
       ...prev,
       [scannedProjectFromNavigation.projectNo]: {
         project_no: scannedProjectFromNavigation.projectNo,
@@ -158,7 +158,7 @@ export default function MobileProductionOrderScanPage() {
       return
     }
 
-    setScannedProjectDataMap((prev) => ({
+    setScannedProjectDataMap(prev => ({
       ...prev,
       [editingItem.project_no]: {
         project_no: editingItem.project_no,
@@ -231,12 +231,12 @@ export default function MobileProductionOrderScanPage() {
       return
     }
 
-    const minimumIncomingQuantity =
-      qualifiedQuantity +
-      defectQuantity1 +
-      defectQuantity2 +
-      outsourceDefectQuantity +
-      setupDefectQuantity
+    const minimumIncomingQuantity
+      = qualifiedQuantity
+        + defectQuantity1
+        + defectQuantity2
+        + outsourceDefectQuantity
+        + setupDefectQuantity
 
     if (incomingQualifiedQuantity < minimumIncomingQuantity) {
       message.error('来料接收数不能小于成品合格数与不良数之和')
@@ -281,7 +281,8 @@ export default function MobileProductionOrderScanPage() {
           id: editingItem.id,
           values: itemPayload,
         })
-      } else {
+      }
+      else {
         let orderId = targetOrderId
 
         if (!orderId) {
@@ -299,14 +300,16 @@ export default function MobileProductionOrderScanPage() {
                 remark: null,
                 extra_qualified_hours: 0,
               })
-            } catch (error) {
+            }
+            catch (error) {
               if (
-                error instanceof Error &&
-                error.message.includes('同一天只能创建一张工单')
+                error instanceof Error
+                && error.message.includes('同一天只能创建一张工单')
               ) {
                 createdNewOrder = false
                 order = await getEmployeeOrderByDate(employeeId, orderDate)
-              } else {
+              }
+              else {
                 throw error
               }
             }
@@ -345,11 +348,13 @@ export default function MobileProductionOrderScanPage() {
 
       resetForm()
       navigate(returnTo)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '提交失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsSubmitting(false)
     }
   }

@@ -14,9 +14,9 @@ function findTsxFiles(directory: string): string[] {
     }
 
     if (
-      entry.name.endsWith('.tsx') &&
-      !entry.name.includes('.test.') &&
-      !entry.name.includes('.vitest.')
+      entry.name.endsWith('.tsx')
+      && !entry.name.includes('.test.')
+      && !entry.name.includes('.vitest.')
     ) {
       return [fullPath]
     }
@@ -30,10 +30,10 @@ function getAntdButtonNames(sourceFile: ts.SourceFile): Set<string> {
 
   sourceFile.statements.forEach((statement) => {
     if (
-      !ts.isImportDeclaration(statement) ||
-      statement.moduleSpecifier.getText(sourceFile) !== "'antd'" ||
-      !statement.importClause?.namedBindings ||
-      !ts.isNamedImports(statement.importClause.namedBindings)
+      !ts.isImportDeclaration(statement)
+      || statement.moduleSpecifier.getText(sourceFile) !== '\'antd\''
+      || !statement.importClause?.namedBindings
+      || !ts.isNamedImports(statement.importClause.namedBindings)
     ) {
       return
     }
@@ -50,7 +50,7 @@ function getAntdButtonNames(sourceFile: ts.SourceFile): Set<string> {
 
 function getAttributeNames(attributes: ts.JsxAttributes): Set<string> {
   return new Set(
-    attributes.properties.flatMap((attribute) =>
+    attributes.properties.flatMap(attribute =>
       ts.isJsxAttribute(attribute) ? [attribute.name.getText()] : [],
     ),
   )
@@ -93,18 +93,18 @@ function findUnnamedIconButtons(filePath: string): string[] {
 
     if (opening && buttonNames.has(opening.tagName.getText(sourceFile))) {
       const attributes = getAttributeNames(opening.attributes)
-      const hasAccessibleName =
-        attributes.has('aria-label') || attributes.has('aria-labelledby')
+      const hasAccessibleName
+        = attributes.has('aria-label') || attributes.has('aria-labelledby')
       const visibleText = ts.isJsxElement(node)
         ? node.children.some(hasVisibleText)
         : false
-      const rendersOnlyAnIcon =
-        attributes.has('icon') ||
-        (ts.isJsxElement(node) &&
-          node.children.some(
-            (child) =>
-              ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child),
-          ))
+      const rendersOnlyAnIcon
+        = attributes.has('icon')
+          || (ts.isJsxElement(node)
+            && node.children.some(
+              child =>
+                ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child),
+            ))
 
       if (rendersOnlyAnIcon && !visibleText && !hasAccessibleName) {
         const { line } = sourceFile.getLineAndCharacterOfPosition(

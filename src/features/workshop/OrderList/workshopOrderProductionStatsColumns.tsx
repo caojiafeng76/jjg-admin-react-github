@@ -1,7 +1,7 @@
-import { Tag, Typography } from 'antd'
 import type { TableColumnsType } from 'antd'
-
 import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrders'
+
+import { Tag, Typography } from 'antd'
 
 const { Text } = Typography
 
@@ -18,7 +18,8 @@ const operationColors: Record<string, string> = {
 
 export function getOperationColor(operation: string) {
   for (const key of Object.keys(operationColors)) {
-    if (operation.includes(key)) return operationColors[key]
+    if (operation.includes(key))
+      return operationColors[key]
   }
   return 'default'
 }

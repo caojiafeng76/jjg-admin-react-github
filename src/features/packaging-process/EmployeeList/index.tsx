@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   PackagingEmployee,
   PackagingEmployeeFormValues,
 } from '@/services/apiPackagingEmployees'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -46,8 +47,8 @@ export default function PackagingEmployeeListPage() {
   const [editingRecord, setEditingRecord] = useState<PackagingEmployee | null>(
     null,
   )
-  const [formRef, setFormRef] =
-    useState<FormInstance<PackagingEmployeeFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<PackagingEmployeeFormValues> | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -66,8 +67,8 @@ export default function PackagingEmployeeListPage() {
   const updateMutation = useUpdatePackagingEmployee()
   const deleteMutation = useDeletePackagingEmployee()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -94,7 +95,7 @@ export default function PackagingEmployeeListPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -116,10 +117,12 @@ export default function PackagingEmployeeListPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('员工删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除员工失败，请稍后重试')
       }
     }
@@ -139,16 +142,19 @@ export default function PackagingEmployeeListPage() {
             values,
           })
           message.success('员工更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('员工创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -175,7 +181,8 @@ export default function PackagingEmployeeListPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 

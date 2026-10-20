@@ -1,7 +1,7 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
-type AttendanceDetailsTable = {
+interface AttendanceDetailsTable {
   from: (table: string) => any
   rpc: (fn: string, params?: Record<string, unknown>) => any
 }
@@ -234,7 +234,7 @@ export async function getAttendanceMonthlyExportData({
   const normalizedName = name?.trim()
   const PAGE_SIZE = 1000
 
-  type AttendanceQueryRow = {
+  interface AttendanceQueryRow {
     order_date: string
     work_hours: number
     shift: string
@@ -258,7 +258,7 @@ export async function getAttendanceMonthlyExportData({
       throw handleApiError(employeeError, '获取月度出勤数据失败')
     }
 
-    employeeIds = (employees || []).map((employee) => employee.id)
+    employeeIds = (employees || []).map(employee => employee.id)
 
     if (!employeeIds.length) {
       return [] as AttendanceMonthlyRow[]
@@ -301,7 +301,7 @@ export async function getAttendanceMonthlyExportData({
   }
 
   return rows
-    .filter((row) => Boolean(row.employee?.name))
+    .filter(row => Boolean(row.employee?.name))
     .sort(
       (left, right) =>
         String(left.employee?.name || '').localeCompare(
@@ -309,7 +309,7 @@ export async function getAttendanceMonthlyExportData({
           'zh-CN',
         ) || left.order_date.localeCompare(right.order_date),
     )
-    .map((row) => ({
+    .map(row => ({
       employee_name: row.employee?.name || '',
       job_name: row.employee?.job_name || '',
       order_date: row.order_date,

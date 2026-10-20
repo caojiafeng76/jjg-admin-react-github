@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { Button, Form, Input, Select, Space } from 'antd'
+import { useEffect } from 'react'
 
 interface SearchValues {
   keyword?: string
@@ -7,9 +7,9 @@ interface SearchValues {
 }
 
 interface Props {
-  onSearch: (params: { keyword?: string; status?: '待审核' | '已审核' }) => void
+  onSearch: (params: { keyword?: string, status?: '待审核' | '已审核' }) => void
   onReset: () => void
-  initialValues?: { keyword?: string; status?: '待审核' | '已审核' }
+  initialValues?: { keyword?: string, status?: '待审核' | '已审核' }
 }
 
 export default function YoumaiFinishedGoodsStockInSearch({

@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
-import { Table, TableColumnsType, TableProps, Button, Tag, Tooltip } from 'antd'
+import type { TableColumnsType, TableProps } from 'antd'
+import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
 import { EyeIcon } from '@heroicons/react/16/solid'
+import { Button, Table, Tag, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 
-import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
+import { useMemo } from 'react'
 
 interface Props {
   loading: boolean
@@ -197,15 +198,17 @@ export default function ProductionOrderList({
         ellipsis: true,
         width: 140,
         render: (value: string | null) =>
-          value ? (
-            <Tooltip title={value}>
-              <span className="text-slate-500 dark:text-slate-400">
-                {value}
-              </span>
-            </Tooltip>
-          ) : (
-            <span className="text-slate-200 dark:text-slate-700">-</span>
-          ),
+          value
+            ? (
+                <Tooltip title={value}>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    {value}
+                  </span>
+                </Tooltip>
+              )
+            : (
+                <span className="text-slate-200 dark:text-slate-700">-</span>
+              ),
       },
       {
         title: '更新时间',
@@ -213,13 +216,15 @@ export default function ProductionOrderList({
         key: 'updated_at',
         width: 160,
         render: (value: string | null) =>
-          value ? (
-            <span className="text-xs whitespace-nowrap text-slate-400 dark:text-slate-500">
-              {dayjs(value).format('MM-DD HH:mm')}
-            </span>
-          ) : (
-            <span className="text-slate-300 dark:text-slate-600">-</span>
-          ),
+          value
+            ? (
+                <span className="text-xs whitespace-nowrap text-slate-400 dark:text-slate-500">
+                  {dayjs(value).format('MM-DD HH:mm')}
+                </span>
+              )
+            : (
+                <span className="text-slate-300 dark:text-slate-600">-</span>
+              ),
       },
       {
         title: '操作',
@@ -242,8 +247,8 @@ export default function ProductionOrderList({
     [onView, page, pageSize],
   )
 
-  const rowSelection: TableProps<ProductionOrderListItem>['rowSelection'] =
-    useMemo(
+  const rowSelection: TableProps<ProductionOrderListItem>['rowSelection']
+    = useMemo(
       () => ({
         selectedRowKeys,
         onChange: onSelect,
@@ -256,7 +261,7 @@ export default function ProductionOrderList({
 
   return (
     <Table<ProductionOrderListItem>
-      rowKey={(record) => record.id}
+      rowKey={record => record.id}
       loading={{
         spinning: loading,
         tip: (

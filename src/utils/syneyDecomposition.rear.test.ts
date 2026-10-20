@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-
 import type { ISyneyItem } from '@/services/types'
+
+import { describe, expect, it } from 'vitest'
 
 import { buildDecompositionCells } from './syneyDecomposition'
 

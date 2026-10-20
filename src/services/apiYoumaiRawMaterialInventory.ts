@@ -1,9 +1,9 @@
+import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 import {
   buildYoumaiRawMaterialOptionsQuery,
   YOUMAI_RAW_MATERIAL_OPTION_SELECT,
 } from './youmaiOptions'
-import { handleApiError } from '@/utils/errorHandler'
 
 export interface YoumaiRawMaterialInventory {
   id: string
@@ -27,7 +27,7 @@ export interface YoumaiRawMaterialInventoryOption {
   quantity: number
 }
 
-type DynamicSupabaseTable = { from: (table: string) => any }
+interface DynamicSupabaseTable { from: (table: string) => any }
 
 function inventoryTable() {
   return (supabase as unknown as DynamicSupabaseTable).from(
@@ -57,10 +57,12 @@ export async function getYoumaiRawMaterialInventoryList({
     )
   }
 
-  if (signal) query = query.abortSignal(signal)
+  if (signal)
+    query = query.abortSignal(signal)
 
   const { data, error, count } = await query
-  if (error) throw handleApiError(error, '原料库存列表获取失败')
+  if (error)
+    throw handleApiError(error, '原料库存列表获取失败')
   return {
     rawMaterialInventory: (data ?? []) as YoumaiRawMaterialInventory[],
     count: count ?? 0,
@@ -79,7 +81,8 @@ export async function getYoumaiRawMaterialInventoryOptions(
 
   const { data, error } = await query
 
-  if (error) throw handleApiError(error, '原料库存选项获取失败')
+  if (error)
+    throw handleApiError(error, '原料库存选项获取失败')
   return (data ?? []) as YoumaiRawMaterialInventoryOption[]
 }
 
@@ -91,11 +94,13 @@ export async function getYoumaiRawMaterialInventoryOptionById(
     .select(YOUMAI_RAW_MATERIAL_OPTION_SELECT)
     .eq('id', id)
 
-  if (signal) query = query.abortSignal(signal)
+  if (signal)
+    query = query.abortSignal(signal)
 
   const { data, error } = await query.maybeSingle()
 
-  if (error) throw handleApiError(error, '原料库存项获取失败')
+  if (error)
+    throw handleApiError(error, '原料库存项获取失败')
   return data as YoumaiRawMaterialInventoryOption | null
 }
 
@@ -111,7 +116,8 @@ export async function createYoumaiRawMaterialInventory(
     .select()
     .single()
 
-  if (error) throw handleApiError(error, '原料库存新建失败')
+  if (error)
+    throw handleApiError(error, '原料库存新建失败')
   return data as YoumaiRawMaterialInventory
 }
 
@@ -123,10 +129,12 @@ export async function updateYoumaiRawMaterialInventory({
   values: Partial<YoumaiRawMaterialInventoryFormValues>
 }): Promise<YoumaiRawMaterialInventory> {
   const payload: Record<string, unknown> = {}
-  if (values.model !== undefined) payload.model = values.model.trim()
+  if (values.model !== undefined)
+    payload.model = values.model.trim()
   if (values.specification !== undefined)
     payload.specification = values.specification.trim()
-  if (values.quantity !== undefined) payload.quantity = values.quantity
+  if (values.quantity !== undefined)
+    payload.quantity = values.quantity
 
   const { data, error } = await inventoryTable()
     .update(payload)
@@ -134,7 +142,8 @@ export async function updateYoumaiRawMaterialInventory({
     .select()
     .single()
 
-  if (error) throw handleApiError(error, '原料库存更新失败')
+  if (error)
+    throw handleApiError(error, '原料库存更新失败')
   return data as YoumaiRawMaterialInventory
 }
 
@@ -142,7 +151,8 @@ export async function deleteYoumaiRawMaterialInventory(
   id: string,
 ): Promise<void> {
   const { error } = await inventoryTable().delete().eq('id', id)
-  if (error) throw handleApiError(error, '原料库存删除失败')
+  if (error)
+    throw handleApiError(error, '原料库存删除失败')
 }
 
 export async function getYoumaiRawMaterialInventoryForExport(
@@ -167,7 +177,8 @@ export async function getYoumaiRawMaterialInventoryForExport(
     }
 
     const { data, error } = await query
-    if (error) throw handleApiError(error, '原料库存导出数据获取失败')
+    if (error)
+      throw handleApiError(error, '原料库存导出数据获取失败')
 
     const pageRows = (data ?? []) as YoumaiRawMaterialInventory[]
     rows.push(...pageRows)

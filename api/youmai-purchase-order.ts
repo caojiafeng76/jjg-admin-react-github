@@ -12,7 +12,7 @@ import {
 const REQUIRED_PERMISSION = 'page:youmai-finished-goods-stock-out'
 const RATE_LIMIT_SCOPE = 'youmai-purchase-order' as const
 
-type VercelRequest = {
+interface VercelRequest {
   method?: string
   body?: unknown
   headers?: Record<string, string | string[] | undefined>
@@ -20,7 +20,7 @@ type VercelRequest = {
   socket?: { remoteAddress?: string }
 }
 
-type VercelResponse = {
+interface VercelResponse {
   setHeader: (name: string, value: string) => void
   status: (statusCode: number) => {
     end: () => void
@@ -37,11 +37,11 @@ function getHeader(request: VercelRequest, name: string): string | undefined {
 
 function getRequestIp(request: VercelRequest): string {
   return (
-    getHeader(request, 'x-vercel-forwarded-for')?.split(',')[0]?.trim() ||
-    getHeader(request, 'x-forwarded-for')?.split(',')[0]?.trim() ||
-    getHeader(request, 'x-real-ip')?.trim() ||
-    request.socket?.remoteAddress ||
-    'unknown'
+    getHeader(request, 'x-vercel-forwarded-for')?.split(',')[0]?.trim()
+    || getHeader(request, 'x-forwarded-for')?.split(',')[0]?.trim()
+    || getHeader(request, 'x-real-ip')?.trim()
+    || request.socket?.remoteAddress
+    || 'unknown'
   )
 }
 
@@ -143,7 +143,8 @@ export default async function handler(
       total: items.length,
       items,
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('youmai_proxy_failure', safeErrorMetadata(error))
     response.status(502).json({ error: '优迈采购订单代理服务暂不可用' })
   }

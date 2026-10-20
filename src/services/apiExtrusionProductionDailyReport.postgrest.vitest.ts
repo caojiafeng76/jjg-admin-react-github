@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  getExtrusionProductionDailyReport,
+  getExtrusionProductionDailyReportForExport,
+} from './apiExtrusionProductionDailyReport'
+
 const requests = vi.hoisted(() => ({ urls: [] as string[] }))
 
 vi.mock('./supabase', async () => {
@@ -26,15 +31,10 @@ vi.mock('./supabase', async () => {
   return { default: client }
 })
 
-import {
-  getExtrusionProductionDailyReport,
-  getExtrusionProductionDailyReportForExport,
-} from './apiExtrusionProductionDailyReport'
-
-const EXPECTED_TOP_LEVEL_ORDER =
-  'extrusion_productions(production_date).desc,' +
-  'extrusion_productions(id).asc,' +
-  'sort_order.asc,id.asc'
+const EXPECTED_TOP_LEVEL_ORDER
+  = 'extrusion_productions(production_date).desc,'
+    + 'extrusion_productions(id).asc,'
+    + 'sort_order.asc,id.asc'
 
 describe('extrusion production daily report PostgREST request', () => {
   beforeEach(() => {

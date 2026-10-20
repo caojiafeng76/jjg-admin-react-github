@@ -1,6 +1,6 @@
-import supabase from './supabase'
 import { AppError } from '@/utils/errorHandler'
 import { extractFunctionInvokeErrorMessage } from './functionInvokeHelpers'
+import supabase from './supabase'
 
 async function throwFunctionInvokeError(
   error: unknown,
@@ -78,5 +78,5 @@ export async function updateAdminManagementPassword(values: {
     )
   }
 
-  return data as { employeeId: string; employeeName: string }
+  return data as { employeeId: string, employeeName: string }
 }

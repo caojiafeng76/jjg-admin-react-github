@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface YoumaiRawMaterialStockIn {
   id: string
@@ -18,7 +18,7 @@ export interface YoumaiRawMaterialStockInFormValues {
   remarks: string
 }
 
-type DynamicSupabaseTable = { from: (table: string) => any }
+interface DynamicSupabaseTable { from: (table: string) => any }
 
 function stockInTable() {
   return (supabase as unknown as DynamicSupabaseTable).from(
@@ -40,7 +40,7 @@ async function getInventorySnapshot(inventoryId: string) {
 
   if (error || !data)
     throw handleApiError(error ?? new Error('库存行不存在'), '原料库存项不存在')
-  return data as { id: string; model: string; specification: string }
+  return data as { id: string, model: string, specification: string }
 }
 
 export async function getYoumaiRawMaterialStockInList({
@@ -65,10 +65,12 @@ export async function getYoumaiRawMaterialStockInList({
     )
   }
 
-  if (signal) query = query.abortSignal(signal)
+  if (signal)
+    query = query.abortSignal(signal)
 
   const { data, error, count } = await query
-  if (error) throw handleApiError(error, '原料入库列表获取失败')
+  if (error)
+    throw handleApiError(error, '原料入库列表获取失败')
   return {
     rawMaterialStockIn: (data ?? []) as YoumaiRawMaterialStockIn[],
     count: count ?? 0,
@@ -91,7 +93,8 @@ export async function createYoumaiRawMaterialStockIn(
     .select()
     .single()
 
-  if (error) throw handleApiError(error, '原料入库新建失败')
+  if (error)
+    throw handleApiError(error, '原料入库新建失败')
   return data as YoumaiRawMaterialStockIn
 }
 
@@ -99,7 +102,8 @@ export async function deleteYoumaiRawMaterialStockIn(
   id: string,
 ): Promise<void> {
   const { error } = await stockInTable().delete().eq('id', id)
-  if (error) throw handleApiError(error, '原料入库记录删除失败')
+  if (error)
+    throw handleApiError(error, '原料入库记录删除失败')
 }
 
 export async function updateYoumaiRawMaterialStockIn({
@@ -115,6 +119,7 @@ export async function updateYoumaiRawMaterialStockIn({
     .select()
     .single()
 
-  if (error) throw handleApiError(error, '原料入库记录更新失败')
+  if (error)
+    throw handleApiError(error, '原料入库记录更新失败')
   return data as YoumaiRawMaterialStockIn
 }

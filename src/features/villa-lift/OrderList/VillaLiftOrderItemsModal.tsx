@@ -1,10 +1,11 @@
-import { useRef } from 'react'
-import { App, FormInstance, Modal } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   VillaLiftOrder,
   VillaLiftOrderItemFormValues,
 } from '@/services/apiVillaLiftOrders'
+import { App, Modal } from 'antd'
+
+import { useRef } from 'react'
 import {
   useUpsertVillaLiftOrderItems,
   useVillaLiftOrderItems,
@@ -32,7 +33,8 @@ export default function VillaLiftOrderItemsModal({
   }> | null>(null)
 
   async function handleOk() {
-    if (!orderId || !formRef.current) return
+    if (!orderId || !formRef.current)
+      return
     try {
       const values = await formRef.current.validateFields()
       await upsertMutation.mutateAsync({
@@ -41,7 +43,8 @@ export default function VillaLiftOrderItemsModal({
       })
       message.success('明细保存成功')
       onClose()
-    } catch (err) {
+    }
+    catch (err) {
       if (err instanceof Error) {
         message.error(err.message)
       }

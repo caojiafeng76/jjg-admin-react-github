@@ -1,11 +1,12 @@
-import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/16/solid'
 import type { FormInstance } from 'antd'
-import { Button, DatePicker, Form, Input, Select } from 'antd'
+import type { SearchFormValues } from './productionSchedulingUtils'
+import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/16/solid'
 
+import { Button, DatePicker, Form, Input, Select } from 'antd'
 import { WORKSHOP_ORDER_STATUS_OPTIONS } from '@/features/workshop/OrderList/orderStatus'
 import {
   DEFAULT_FILTERS,
-  type SearchFormValues,
+
 } from './productionSchedulingUtils'
 
 export interface ProductionSchedulingSearchBarProps {
@@ -33,11 +34,11 @@ export default function ProductionSchedulingSearchBar({
         >
           <Form.Item
             name="projectNo"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 项目号
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <Input
@@ -49,11 +50,11 @@ export default function ProductionSchedulingSearchBar({
           </Form.Item>
           <Form.Item
             name="model"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 型号
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <Input
@@ -65,11 +66,11 @@ export default function ProductionSchedulingSearchBar({
           </Form.Item>
           <Form.Item
             name="materialCode"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 料号
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <Input
@@ -81,11 +82,11 @@ export default function ProductionSchedulingSearchBar({
           </Form.Item>
           <Form.Item
             name="lengthMm"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 长度
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <Select
@@ -94,7 +95,7 @@ export default function ProductionSchedulingSearchBar({
               className="!w-36"
               maxTagCount="responsive"
               mode="multiple"
-              options={lengthOptions.map((length) => ({
+              options={lengthOptions.map(length => ({
                 label: `${length}mm`,
                 value: length,
               }))}
@@ -104,22 +105,22 @@ export default function ProductionSchedulingSearchBar({
           </Form.Item>
           <Form.Item
             name="customer"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 客户
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <Input size="small" allowClear className="!w-28" />
           </Form.Item>
           <Form.Item
             name="status"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 状态
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <Select
@@ -127,7 +128,7 @@ export default function ProductionSchedulingSearchBar({
               className="!w-24"
               options={[
                 { label: '全部', value: '全部' },
-                ...WORKSHOP_ORDER_STATUS_OPTIONS.map((item) => ({
+                ...WORKSHOP_ORDER_STATUS_OPTIONS.map(item => ({
                   label: item.label,
                   value: item.value,
                 })),
@@ -136,11 +137,11 @@ export default function ProductionSchedulingSearchBar({
           </Form.Item>
           <Form.Item
             name="progressStatus"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 进度
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <Select
@@ -158,11 +159,11 @@ export default function ProductionSchedulingSearchBar({
           </Form.Item>
           <Form.Item
             name="plannedStartDateRange"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 开工
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <DatePicker.RangePicker
@@ -174,11 +175,11 @@ export default function ProductionSchedulingSearchBar({
           </Form.Item>
           <Form.Item
             name="orderDateRange"
-            label={
+            label={(
               <span className="!text-xs text-slate-500 dark:text-slate-400">
                 日期
               </span>
-            }
+            )}
             className="!mb-0"
           >
             <DatePicker.RangePicker

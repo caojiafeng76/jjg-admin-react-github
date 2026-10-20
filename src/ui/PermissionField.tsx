@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react'
-import { cloneElement, isValidElement } from 'react'
-import type { ReactElement } from 'react'
-import { Form } from 'antd'
 import type { FormItemProps } from 'antd'
+import type { ReactElement, ReactNode } from 'react'
+
+import { Form } from 'antd'
+import { cloneElement, isValidElement } from 'react'
 import { useFieldPermission } from '@/hooks/usePermission'
 
 interface PermissionFieldProps extends FormItemProps {
@@ -31,7 +31,8 @@ export default function PermissionField({
 }: PermissionFieldProps) {
   const state = useFieldPermission(module, fieldName)
 
-  if (state === 'hidden') return null
+  if (state === 'hidden')
+    return null
 
   if (state === 'readonly') {
     return (

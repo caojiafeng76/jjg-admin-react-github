@@ -1,8 +1,8 @@
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import type { FormInstance } from 'antd'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-
 import type { JintanMaterialsStockOutFormValues } from '@/services/apiJintanMaterialsStockOut'
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
+
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import JintanMaterialsStockOutForm from './JintanMaterialsStockOutForm'
 
 vi.mock('../MaterialsInventory/useJintanMaterialsInventory', () => ({

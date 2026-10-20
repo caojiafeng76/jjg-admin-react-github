@@ -1,9 +1,10 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType } from 'antd'
-import dayjs from 'dayjs'
-
+import type { TableColumnsType } from 'antd'
 import type { PackagingWorkOrderBatch } from '@/services/apiPackagingWorkOrders'
+import { Table } from 'antd'
+import dayjs from 'dayjs'
+import { memo, useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -229,9 +230,8 @@ function WorkOrderTable({
       scroll={{ x: 2380, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择包装工单 ${record.id}`,

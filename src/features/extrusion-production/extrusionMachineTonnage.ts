@@ -11,7 +11,7 @@ const BILLET_DIAMETER_PRESETS: Record<ExtrusionTonnage, BilletDiameterPreset> = 
   1400: { defaultDiameterMm: 150, quickPickDiametersMm: [150, 180] },
 }
 
-const TONNAGE_PATTERN = /(\d{3,4})\s*[Tt]/
+const TONNAGE_PATTERN = /(\d{3,4})\s*T/i
 
 export function extractExtrusionTonnage(
   machineName: string | null | undefined,

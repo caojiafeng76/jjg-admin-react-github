@@ -1,12 +1,13 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import dayjs from 'dayjs'
-import { Table, Tag, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type {
   QualityReworkRepair,
   QualityReworkRepairWorkflowStatus,
 } from '@/services/apiQualityReworkRepair'
+import { Table, Tag } from 'antd'
+import dayjs from 'dayjs'
+import { memo, useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 function formatDate(value: string | null | undefined) {
   return value ? dayjs(value).format('YYYY-MM-DD') : '-'
@@ -18,7 +19,7 @@ function formatDateTime(value: string | null | undefined) {
 
 const WORKFLOW_STATUS_MAP: Record<
   QualityReworkRepairWorkflowStatus,
-  { label: string; color: string }
+  { label: string, color: string }
 > = {
   workshop_pending: { label: '车间发起', color: 'default' },
   production_pending: { label: '生产部待确认', color: 'processing' },
@@ -198,9 +199,8 @@ function ReworkRepairTable({
       scroll={{ x: 2800, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择返工返修记录 ${record.id}`,

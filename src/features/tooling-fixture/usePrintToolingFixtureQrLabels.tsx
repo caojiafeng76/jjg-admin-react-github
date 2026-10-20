@@ -1,15 +1,15 @@
-import { useState } from 'react'
-import { App } from 'antd'
-import { renderToStaticMarkup } from 'react-dom/server'
-
-import AppQRCode from '@ui/AppQRCode'
 import type { ToolingFixture } from '@/services/apiToolingFixture'
+import AppQRCode from '@ui/AppQRCode'
+import { App } from 'antd'
+
+import { useState } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { getToolingFixtureQrValue } from './fixtureDomain'
 
 const LABELS_PER_PAGE = 10
 
-const labelFont =
-  "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif"
+const labelFont
+  = '\'Microsoft YaHei\', \'PingFang SC\', \'Noto Sans SC\', sans-serif'
 
 function escapeHtml(value: string) {
   return value
@@ -17,7 +17,7 @@ function escapeHtml(value: string) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
+    .replaceAll('\'', '&#39;')
 }
 
 export function buildToolingFixtureQrLabelsHtml(items: ToolingFixture[]) {
@@ -188,13 +188,15 @@ export function usePrintToolingFixtureQrLabels() {
       message.success(`已打开打印窗口，共 ${items.length} 个二维码标签`)
 
       return true
-    } catch (error) {
+    }
+    catch (error) {
       console.error('打印工装二维码标签失败:', error)
       message.error(
         error instanceof Error ? error.message : '打印失败，请稍后重试',
       )
       return false
-    } finally {
+    }
+    finally {
       setIsPrinting(false)
     }
   }

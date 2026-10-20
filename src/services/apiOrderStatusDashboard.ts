@@ -1,6 +1,15 @@
+import type {
+  OrderStatusDashboardFilters,
+  OrderStatusDashboardItem,
+  OrderStatusDashboardResult,
+  OrderStatusDashboardRpcResult,
+  OrderStatusProductionDetail,
+  PackagingDashboardWorkOrderRow,
+  PackagingWorkOrderQueryRow,
+  ProcessStandardJobRow,
+} from './apiOrderStatusDashboardTypes'
 import { handleApiError } from '@/utils/errorHandler'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
-import supabase from './supabase'
 import {
   buildJobColumns,
   buildProcessJobIndex,
@@ -15,26 +24,17 @@ import {
   PACKAGING_JOB_NAME,
   resolveProductionJobName,
 } from './apiOrderStatusDashboardCalculations'
-import type {
-  OrderStatusDashboardFilters,
-  OrderStatusDashboardItem,
-  OrderStatusDashboardResult,
-  OrderStatusDashboardRpcResult,
-  OrderStatusProductionDetail,
-  PackagingDashboardWorkOrderRow,
-  PackagingWorkOrderQueryRow,
-  ProcessStandardJobRow,
-} from './apiOrderStatusDashboardTypes'
+import supabase from './supabase'
 
-export * from './apiOrderStatusDashboardTypes'
 export {
   buildJobColumns,
   buildPackagingProductionDetailsForDashboard,
 } from './apiOrderStatusDashboardCalculations'
+export * from './apiOrderStatusDashboardTypes'
 
 const LOOKUP_PAGE_SIZE = 1000
-const PROCESS_STANDARD_JOB_SELECT =
-  'job_name, operation, model, length, part_no, record_type, is_last_process'
+const PROCESS_STANDARD_JOB_SELECT
+  = 'job_name, operation, model, length, part_no, record_type, is_last_process'
 
 export async function getAllProcessStandardJobRows(signal?: AbortSignal) {
   const rows: ProcessStandardJobRow[] = []
@@ -221,16 +221,16 @@ export async function getOrderStatusDashboard({
   const projectNos = Array.from(
     new Set(
       orders
-        .map((order) => normalizeText(order.project_no))
+        .map(order => normalizeText(order.project_no))
         .filter((projectNo): projectNo is string => Boolean(projectNo)),
     ),
   )
-  const packagingRows =
-    projectNos.length > 0
+  const packagingRows
+    = projectNos.length > 0
       ? await getPackagingWorkOrderRowsByProjectNos({ projectNos, signal })
       : []
-  const packagingDetailsByProjectNo =
-    groupPackagingRowsByProjectNo(packagingRows)
+  const packagingDetailsByProjectNo
+    = groupPackagingRowsByProjectNo(packagingRows)
   const processJobIndex = buildProcessJobIndex(resolvedProcessRows)
   const jobColumns = buildJobColumns(processJobIndex)
 
@@ -241,7 +241,7 @@ export async function getOrderStatusDashboard({
       ? (packagingDetailsByProjectNo.get(projectNo) ?? [])
       : []
     const jobOutputs = Object.fromEntries(
-      jobColumns.map((column) => [column.key, 0]),
+      jobColumns.map(column => [column.key, 0]),
     ) as Record<string, number>
     const productionDetails: OrderStatusProductionDetail[] = []
 
@@ -260,8 +260,8 @@ export async function getOrderStatusDashboard({
             order,
             processJobIndex,
             row,
-          }) &&
-          Object.prototype.hasOwnProperty.call(jobOutputs, jobName)
+          })
+          && Object.hasOwn(jobOutputs, jobName)
         ) {
           jobOutputs[jobName] = (jobOutputs[jobName] || 0) + qualifiedQuantity
         }

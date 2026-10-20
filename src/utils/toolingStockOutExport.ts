@@ -1,7 +1,7 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
-
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@/utils/excelStyleUtils'
 import { formatNumber } from '@/utils/format'
 
@@ -126,7 +126,8 @@ function buildWorkbook(items: ToolingStockOut[]) {
 
   for (let c = 0; c < colCount; c += 1) {
     const ref = `${colLetter(c)}3`
-    if (!ws[ref]) ws[ref] = { v: '' }
+    if (!ws[ref])
+      ws[ref] = { v: '' }
     ws[ref].s = {
       font: { name: '宋体', sz: 11, bold: true },
       alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
@@ -144,7 +145,8 @@ function buildWorkbook(items: ToolingStockOut[]) {
   for (let r = 3; r < totalRows; r += 1) {
     for (let c = 0; c < colCount; c += 1) {
       const ref = `${colLetter(c)}${r + 1}`
-      if (!ws[ref]) ws[ref] = { v: '' }
+      if (!ws[ref])
+        ws[ref] = { v: '' }
       ws[ref].s = {
         font: { name: '宋体', sz: 10.5 },
         alignment: { horizontal: 'center', vertical: 'center', wrapText: true },

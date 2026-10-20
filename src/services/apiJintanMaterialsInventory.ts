@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface JintanMaterialsInventory {
   id: string
@@ -179,7 +179,7 @@ export async function createJintanMaterialsInventoryBatch(
   }
 
   const materialNames = Array.from(
-    new Set(rows.map((row) => row.material_name)),
+    new Set(rows.map(row => row.material_name)),
   )
   const { data: inventoryRows, error: inventoryError } = await supabase
     .from('jintan_materials_inventory')
@@ -193,14 +193,14 @@ export async function createJintanMaterialsInventoryBatch(
   }
 
   const inventoryByKey = new Map(
-    (inventoryRows || []).map((row) => [inventoryKeyOf(row), row]),
+    (inventoryRows || []).map(row => [inventoryKeyOf(row), row]),
   )
 
-  const missing = rows.filter((row) => !inventoryByKey.has(inventoryKeyOf(row)))
+  const missing = rows.filter(row => !inventoryByKey.has(inventoryKeyOf(row)))
   if (missing.length > 0) {
     const labels = missing
       .map(
-        (row) =>
+        row =>
           `“${row.material_model}”/“${row.material_name}”/“${row.specification}”`,
       )
       .join('、')
@@ -253,13 +253,15 @@ export async function getJintanMaterialsInventoryOptions(
     .select(
       'id, material_model, material_name, specification, material, quantity',
     )
-  if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
+  if (keyword?.trim())
+    query = query.or(keywordFilter(keyword.trim()))
 
   const { data, error } = await query
     .order('material_name', { ascending: true })
     .order('material_model', { ascending: true })
     .limit(50)
 
-  if (error) throw handleApiError(error, '获取素材库存选项失败')
+  if (error)
+    throw handleApiError(error, '获取素材库存选项失败')
   return data ?? []
 }

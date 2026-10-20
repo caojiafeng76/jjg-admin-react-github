@@ -1,17 +1,15 @@
-import dayjs, { type Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs'
+import type { QualityReworkRepair, QualityReworkRepairCategory, QualityReworkRepairFormValues, QualityReworkRepairOrderOption, QualityReworkRepairWorkflowStatus } from '@/services/apiQualityReworkRepair'
 
+import dayjs from 'dayjs'
 import {
   QUALITY_REWORK_REPAIR_CATEGORIES,
   QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES,
-  type QualityReworkRepair,
-  type QualityReworkRepairCategory,
-  type QualityReworkRepairFormValues,
-  type QualityReworkRepairOrderOption,
-  type QualityReworkRepairWorkflowStatus,
+
 } from '@/services/apiQualityReworkRepair'
 
-export type WorkflowStageKey =
-  'workshop' | 'production' | 'technical' | 'quality' | 'completed'
+export type WorkflowStageKey
+  = 'workshop' | 'production' | 'technical' | 'quality' | 'completed'
 
 export interface WorkflowStageConfig {
   key: WorkflowStageKey
@@ -51,8 +49,8 @@ export interface QualityReworkRepairFormFields {
   verification_date?: Dayjs | null
 }
 
-export const DEFAULT_WORKFLOW_STATUS: QualityReworkRepairWorkflowStatus =
-  'workshop_pending'
+export const DEFAULT_WORKFLOW_STATUS: QualityReworkRepairWorkflowStatus
+  = 'workshop_pending'
 
 export const WORKFLOW_STAGES: WorkflowStageConfig[] = [
   {

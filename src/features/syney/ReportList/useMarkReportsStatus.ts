@@ -1,8 +1,8 @@
 import { App } from 'antd'
 
-import { useAppStore } from '@/store'
-import { updateSyneyStoreReports } from '@/services/apiSyneyStoreReports'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { updateSyneyStoreReports } from '@/services/apiSyneyStoreReports'
+import { useAppStore } from '@/store'
 
 type ReportStatus = 'confirmed' | 'unconfirmed'
 
@@ -15,7 +15,7 @@ type ReportStatus = 'confirmed' | 'unconfirmed'
 export function useMarkReportsStatus() {
   const { message } = App.useApp()
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
 
   const { mutate: mark, isPending } = useMutationWithMessage({
@@ -32,8 +32,8 @@ export function useMarkReportsStatus() {
 
   const markStatus = (Nos: string[], Status: ReportStatus) => {
     if (!Nos.length) {
-      const tip =
-        Status === 'confirmed'
+      const tip
+        = Status === 'confirmed'
           ? '请选择要标记已校对的条目'
           : '请选择要标记未校对的条目'
       message.warning(tip)
@@ -47,4 +47,3 @@ export function useMarkReportsStatus() {
     isPending,
   }
 }
-

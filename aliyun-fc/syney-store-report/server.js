@@ -1,7 +1,7 @@
 'use strict'
 
-const http = require('http')
-const crypto = require('crypto')
+const crypto = require('node:crypto')
+const http = require('node:http')
 const {
   authorizeProxyRequest,
   consumeDistributedRateLimit,
@@ -89,7 +89,8 @@ function readRequestBody(req) {
     let rejected = false
 
     req.on('data', (chunk) => {
-      if (rejected) return
+      if (rejected)
+        return
       byteLength += Buffer.byteLength(chunk)
       if (byteLength > MAX_JSON_BODY_BYTES) {
         rejected = true
@@ -102,7 +103,8 @@ function readRequestBody(req) {
     })
 
     req.on('end', () => {
-      if (!rejected) resolve(body)
+      if (!rejected)
+        resolve(body)
     })
     req.on('error', reject)
   })
@@ -134,13 +136,15 @@ async function fetchWithTimeout(
       ...init,
       signal: controller.signal,
     })
-  } catch (error) {
+  }
+  catch (error) {
     if (error && error.name === 'AbortError') {
       throw new Error(timeoutMessage, { cause: error })
     }
 
     throw error
-  } finally {
+  }
+  finally {
     clearTimeout(timeoutId)
   }
 }
@@ -206,8 +210,8 @@ async function loginToScm() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Cookie: serializeCookies(cookieMap),
-        Referer: LOGIN_PAGE_URL,
+        'Cookie': serializeCookies(cookieMap),
+        'Referer': LOGIN_PAGE_URL,
         'X-Requested-With': 'XMLHttpRequest',
       },
       body: loginBody,
@@ -238,8 +242,8 @@ function extractDataArray(responseText) {
 
   let startIndex = colonIndex + 1
   while (
-    startIndex < responseText.length &&
-    /\s/.test(responseText[startIndex])
+    startIndex < responseText.length
+    && /\s/.test(responseText[startIndex])
   ) {
     startIndex += 1
   }
@@ -276,7 +280,8 @@ function extractDataArray(responseText) {
 
     if (char === '[') {
       depth += 1
-    } else if (char === ']') {
+    }
+    else if (char === ']') {
       depth -= 1
       if (depth === 0) {
         return responseText.substring(startIndex, i + 1)
@@ -325,11 +330,11 @@ async function fetchStoreReport(storeInNo) {
     {
       method: 'POST',
       headers: {
-        Accept: 'text/plain, */*; q=0.01',
+        'Accept': 'text/plain, */*; q=0.01',
         'Content-Type': 'application/x-www-form-urlencoded',
-        Cookie: cookie,
-        Origin: SCM_BASE_URL,
-        Referer: REPORT_PAGE_URL,
+        'Cookie': cookie,
+        'Origin': SCM_BASE_URL,
+        'Referer': REPORT_PAGE_URL,
         'X-Requested-With': 'XMLHttpRequest',
       },
       body,
@@ -359,7 +364,8 @@ async function diagnoseScmAccess() {
       loginElapsedMs: Date.now() - loginStartedAt,
       elapsedMs: Date.now() - startedAt,
     }
-  } catch (error) {
+  }
+  catch (error) {
     return {
       ok: false,
       scmBaseUrl: SCM_BASE_URL,
@@ -397,7 +403,8 @@ async function handleRequest(req, res) {
   if (req.method === 'POST') {
     try {
       payload = await readJsonBody(req)
-    } catch (error) {
+    }
+    catch (error) {
       const statusCode = error?.statusCode === 413 ? 413 : 400
       sendJson(req, res, statusCode, {
         error: statusCode === 413 ? '请求体过大' : '请求体格式不正确',
@@ -414,7 +421,8 @@ async function handleRequest(req, res) {
       env: process.env,
       permission: REQUIRED_PERMISSION,
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('aliyun_auth_failure', safeErrorMetadata(error))
     sendJson(req, res, 502, { error: '西尼入库单代理服务暂不可用' })
     return
@@ -426,13 +434,13 @@ async function handleRequest(req, res) {
     return
   }
 
-  const requestIp =
-    String(req.headers['x-forwarded-for'] || '')
+  const requestIp
+    = String(req.headers['x-forwarded-for'] || '')
       .split(',')[0]
-      .trim() ||
-    String(req.headers['x-real-ip'] || '').trim() ||
-    req.socket.remoteAddress ||
-    'unknown'
+      .trim()
+      || String(req.headers['x-real-ip'] || '').trim()
+      || req.socket.remoteAddress
+      || 'unknown'
   try {
     if (
       !(await consumeDistributedRateLimit({
@@ -445,7 +453,8 @@ async function handleRequest(req, res) {
       sendJson(req, res, 429, { error: '请求过于频繁，请稍后重试' })
       return
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('aliyun_rate_limit_failure', safeErrorMetadata(error))
     sendJson(req, res, 502, { error: '西尼入库单代理服务暂不可用' })
     return
@@ -478,7 +487,8 @@ async function handleRequest(req, res) {
       total: items.length,
       items,
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('aliyun_upstream_failure', safeErrorMetadata(error))
     sendJson(req, res, 502, { error: '西尼入库单代理服务暂不可用' })
   }

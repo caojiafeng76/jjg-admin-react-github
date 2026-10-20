@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import type { WorkshopOrder } from './index'
 import { App } from 'antd'
 import dayjs from 'dayjs'
+import { useState } from 'react'
 import { GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import { getWorkshopOrderQrPngDataUrl } from './workshopOrderQrImage'
-import type { WorkshopOrder } from './index'
 
 const MAX_ROWS_PER_PAGE = 6
 const TABLE_START_Y = 26
@@ -15,7 +15,20 @@ const META_FONT_SIZE = 11
 const TABLE_FONT_SIZE = 10
 const FOOTER_FONT_SIZE = 11
 const COLUMN_WIDTHS = [
-  22, 21, 24, 21, 17, 29, 14, 14, 18, 28, 15, 12, 12, 20,
+  22,
+  21,
+  24,
+  21,
+  17,
+  29,
+  14,
+  14,
+  18,
+  28,
+  15,
+  12,
+  12,
+  20,
 ] as const
 const TABLE_COLUMNS = [
   '二维码',
@@ -34,10 +47,11 @@ const TABLE_COLUMNS = [
   ' ',
 ] as const
 
-const loadWorkshopOrderPdf = () =>
-  Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
+function loadWorkshopOrderPdf() {
+  return Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
+}
 
-const preloadWorkshopOrderPdf = () => {
+function preloadWorkshopOrderPdf() {
   void loadWorkshopOrderPdf()
 }
 
@@ -90,8 +104,8 @@ export function usePrintWorkshopOrders() {
         printWindow.document.close()
       }
 
-      const [{ default: autoTable }, { initializePDF, printPDF }] =
-        await loadWorkshopOrderPdf()
+      const [{ default: autoTable }, { initializePDF, printPDF }]
+        = await loadWorkshopOrderPdf()
 
       const fontFamily = GOOGLE_FONT_CONFIG.FONT_FAMILY
       const doc = await initializePDF('l')
@@ -114,8 +128,8 @@ export function usePrintWorkshopOrders() {
       {
         const pageWidth = doc.internal.pageSize.getWidth()
         const pageHeight = doc.internal.pageSize.getHeight()
-        const bodyAreaHeight =
-          pageHeight - TABLE_START_Y - TABLE_BOTTOM_MARGIN - HEADER_CELL_HEIGHT
+        const bodyAreaHeight
+          = pageHeight - TABLE_START_Y - TABLE_BOTTOM_MARGIN - HEADER_CELL_HEIGHT
         const minCellHeight = Math.max(
           20,
           Math.floor(bodyAreaHeight / MAX_ROWS_PER_PAGE),
@@ -132,7 +146,7 @@ export function usePrintWorkshopOrders() {
           })
         }
 
-        const tableData = selectedOrders.map((order) => [
+        const tableData = selectedOrders.map(order => [
           '',
           formatCellText(order.product_delivery_date),
           formatCellText(order.process_flow),
@@ -196,15 +210,15 @@ export function usePrintWorkshopOrders() {
           columnStyles: COLUMN_WIDTHS.reduce<
             Record<
               number,
-              { cellWidth: number; halign?: 'left' | 'center' | 'right' }
+              { cellWidth: number, halign?: 'left' | 'center' | 'right' }
             >
           >((styles, width, columnIndex) => {
-            const halign =
-              columnIndex === 2 ||
-              columnIndex === 3 ||
-              columnIndex === 5 ||
-              columnIndex === 9 ||
-              columnIndex === 12
+            const halign
+              = columnIndex === 2
+                || columnIndex === 3
+                || columnIndex === 5
+                || columnIndex === 9
+                || columnIndex === 12
                 ? 'left'
                 : 'center'
 
@@ -254,18 +268,21 @@ export function usePrintWorkshopOrders() {
 
       if (printed) {
         message.success('已打开浏览器打印窗口')
-      } else {
+      }
+      else {
         message.warning('浏览器阻止了直接打印，已回退为 PDF 预览')
       }
 
       return true
-    } catch (error) {
+    }
+    catch (error) {
       console.error('生成PDF时发生错误:', error)
       message.error(
         error instanceof Error ? error.message : 'PDF生成失败，请重试',
       )
       return false
-    } finally {
+    }
+    finally {
       setIsPrinting(false)
     }
   }

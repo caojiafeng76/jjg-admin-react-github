@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { getMachineEquipmentOptions } from '@/services/apiMachineEquipmentMaintenances'
 import { queryConfig } from '@/config/queryClient'
+import { getMachineEquipmentOptions } from '@/services/apiMachineEquipmentMaintenances'
 
 export function useMachineEquipmentOptions() {
   return useQuery({

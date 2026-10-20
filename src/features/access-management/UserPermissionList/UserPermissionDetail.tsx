@@ -1,18 +1,17 @@
-import { useMemo, useState, useEffect } from 'react'
+import type { PermissionRow, UserOverrideRow } from '@/services/apiPermissions'
 import { Button, Modal, Select, Skeleton, Table, Tag } from 'antd'
-import type { PermissionRow } from '@/services/apiPermissions'
-import type { UserOverrideRow } from '@/services/apiPermissions'
+import { useEffect, useMemo, useState } from 'react'
 
 type OverrideValue = 'default' | 'allow' | 'deny'
 
 interface Props {
-  employee: { id: string; name: string; role: string | null }
+  employee: { id: string, name: string, role: string | null }
   allPermissions: PermissionRow[]
   rolePermissionIds: string[]
   userOverrides: UserOverrideRow[]
   loadingPerms: boolean
   saving: boolean
-  onSave: (overrides: Array<{ permissionId: string; enabled: boolean }>) => void
+  onSave: (overrides: Array<{ permissionId: string, enabled: boolean }>) => void
   onBack: () => void
 }
 
@@ -41,25 +40,27 @@ export default function UserPermissionDetail({
     return map
   }
 
-  const [overrideMap, setOverrideMap] =
-    useState<Map<string, OverrideValue>>(buildInitialMap)
+  const [overrideMap, setOverrideMap]
+    = useState<Map<string, OverrideValue>>(buildInitialMap)
 
   useEffect(() => {
     setOverrideMap(buildInitialMap())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react/exhaustive-deps
   }, [userOverrides, employee.id])
 
   const isDirty = useMemo(() => {
     // 比较 overrideMap 与原始 userOverrides
     const originalMap = new Map(
-      userOverrides.map((ov) => [
+      userOverrides.map(ov => [
         ov.permission_id,
         ov.enabled ? 'allow' : 'deny',
       ]),
     )
-    if (overrideMap.size !== originalMap.size) return true
+    if (overrideMap.size !== originalMap.size)
+      return true
     for (const [id, val] of overrideMap) {
-      if (originalMap.get(id) !== val) return true
+      if (originalMap.get(id) !== val)
+        return true
     }
     return false
   }, [overrideMap, userOverrides])
@@ -89,11 +90,13 @@ export default function UserPermissionDetail({
         width: 90,
         render: (_: unknown, record: PermissionRow) => {
           const hasRole = rolePermissionIds.includes(record.id)
-          return hasRole ? (
-            <Tag color="success">允许</Tag>
-          ) : (
-            <Tag color="default">无</Tag>
-          )
+          return hasRole
+            ? (
+                <Tag color="success">允许</Tag>
+              )
+            : (
+                <Tag color="default">无</Tag>
+              )
         },
       },
       {
@@ -110,7 +113,8 @@ export default function UserPermissionDetail({
               onChange={(val: OverrideValue) => {
                 setOverrideMap((prev) => {
                   const next = new Map(prev)
-                  if (val === 'default') next.delete(record.id)
+                  if (val === 'default')
+                    next.delete(record.id)
                   else next.set(record.id, val)
                   return next
                 })
@@ -127,13 +131,15 @@ export default function UserPermissionDetail({
         render: (_: unknown, record: PermissionRow) => {
           const override = overrideMap.get(record.id)
           const hasRole = rolePermissionIds.includes(record.id)
-          const effective =
-            override === 'allow' ? true : override === 'deny' ? false : hasRole
-          return effective ? (
-            <Tag color="success">允许</Tag>
-          ) : (
-            <Tag color="error">拒绝</Tag>
-          )
+          const effective
+            = override === 'allow' ? true : override === 'deny' ? false : hasRole
+          return effective
+            ? (
+                <Tag color="success">允许</Tag>
+              )
+            : (
+                <Tag color="error">拒绝</Tag>
+              )
         },
       },
     ],
@@ -141,7 +147,7 @@ export default function UserPermissionDetail({
   )
 
   const handleSave = () => {
-    const overrides: Array<{ permissionId: string; enabled: boolean }> = []
+    const overrides: Array<{ permissionId: string, enabled: boolean }> = []
     for (const [permId, val] of overrideMap) {
       overrides.push({ permissionId: permId, enabled: val === 'allow' })
     }

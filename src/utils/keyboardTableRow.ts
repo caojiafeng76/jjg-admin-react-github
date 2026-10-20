@@ -10,11 +10,13 @@ export function createKeyboardTableRowProps(
   accessibleName?: string,
 ): KeyboardTableRowProps {
   return {
-    tabIndex: 0,
+    'tabIndex': 0,
     'aria-label': accessibleName,
-    onKeyDown: (event) => {
-      if (event.target !== event.currentTarget) return
-      if (event.key !== 'Enter' && event.key !== ' ') return
+    'onKeyDown': (event) => {
+      if (event.target !== event.currentTarget)
+        return
+      if (event.key !== 'Enter' && event.key !== ' ')
+        return
 
       event.preventDefault()
       onActivate()

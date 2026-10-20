@@ -1,12 +1,11 @@
+import type { WorkshopOrderToolbarProps } from './WorkshopOrderToolbar'
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App } from 'antd'
-import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import WorkshopOrderStatusTabs from './WorkshopOrderStatusTabs'
-import WorkshopOrderToolbar, {
-  type WorkshopOrderToolbarProps,
-} from './WorkshopOrderToolbar'
+import WorkshopOrderToolbar from './WorkshopOrderToolbar'
 
 vi.mock('@/hooks/usePermission', () => ({ usePermission: () => true }))
 vi.mock('@/hooks/useViewerOperationGuard', () => ({

@@ -1,7 +1,5 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-
-import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
+
 import {
   createJintanMaterialsData,
   createJintanMaterialsDataBatch,
@@ -9,6 +7,8 @@ import {
   getJintanMaterialsDataList,
   updateJintanMaterialsData,
 } from '@services/apiJintanMaterialsData'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { queryConfig } from '@/config/queryClient'
 
 import { jintanKeys } from '../queryKeys'
 

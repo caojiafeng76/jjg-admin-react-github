@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import supabase from './supabase'
 import {
   buildAuthenticatedProxyHeaders,
   getAuthenticatedProxyHeaders,
 } from './proxyAuth'
+import supabase from './supabase'
 
 vi.mock('./supabase', () => ({
   default: {
@@ -17,7 +17,7 @@ vi.mock('./supabase', () => ({
 describe('buildAuthenticatedProxyHeaders', () => {
   it('attaches the current Supabase access token as a Bearer header', () => {
     expect(buildAuthenticatedProxyHeaders('current-access-token')).toEqual({
-      Authorization: 'Bearer current-access-token',
+      'Authorization': 'Bearer current-access-token',
       'Content-Type': 'application/json',
     })
   })

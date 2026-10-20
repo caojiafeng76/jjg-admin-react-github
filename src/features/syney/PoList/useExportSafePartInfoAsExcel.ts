@@ -1,25 +1,25 @@
-import dayjs from 'dayjs'
-import { message } from 'antd'
 import {
   autoFitColumnWidths,
-  setRowHeight,
   centerAllCells,
   EXCEL_WRITE_OPTIONS,
+  setRowHeight,
 } from '@utils/excelStyleUtils'
+import { message } from 'antd'
+import dayjs from 'dayjs'
 
-import { useSelectedPos } from './useSelectedPos'
 import { useAppStore } from '@/store'
 import {
-  isSafePartBySettings,
   getLabelInfoBySettings,
   getLabelInfoFromStoredItem,
+  isSafePartBySettings,
 } from '@/utils/syneySafePartRules'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
+import { useSelectedPos } from './useSelectedPos'
 
 const loadExcel = () => import('xlsx-js-style')
 
 // Excel 数据行类型
-type ExcelRow = {
+interface ExcelRow {
   序号: number
   采购单号: string | null
   日期: string | null
@@ -33,11 +33,11 @@ type ExcelRow = {
 export function useExportSafePartInfoAsExcel() {
   const [messageApi, contextHolder] = message.useMessage()
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const { isLoading, selectedPosList } = useSelectedPos()
-  const { data: safePartSettings, isLoading: isSafePartSettingsLoading } =
-    useSyneySafePartSettings()
+  const { data: safePartSettings, isLoading: isSafePartSettingsLoading }
+    = useSyneySafePartSettings()
 
   function preloadExcel() {
     void loadExcel()
@@ -73,11 +73,11 @@ export function useExportSafePartInfoAsExcel() {
 
         // 过滤安全件并转换为 Excel 数据格式
         const excelData: ExcelRow[] = items
-          .filter((item) => isSafePartBySettings(item.PartNo, safePartSettings))
+          .filter(item => isSafePartBySettings(item.PartNo, safePartSettings))
           .map((item) => {
             // 当 DB 存储字段为空时（新零件号尚未写入），从 settings 推导
-            const labelInfo =
-              item.PartCode && item.PartModel && item.PartName2
+            const labelInfo
+              = item.PartCode && item.PartModel && item.PartName2
                 ? null
                 : (getLabelInfoBySettings(
                     item.PartNo,
@@ -110,8 +110,8 @@ export function useExportSafePartInfoAsExcel() {
           const headers = Object.keys(sheetData[0])
           const data = [
             headers,
-            ...sheetData.map((row) =>
-              headers.map((h) => row[h as keyof ExcelRow]),
+            ...sheetData.map(row =>
+              headers.map(h => row[h as keyof ExcelRow]),
             ),
           ]
           const ws = utils.aoa_to_sheet(data)
@@ -138,7 +138,7 @@ export function useExportSafePartInfoAsExcel() {
 
       // 添加汇总表
       if (allSafeParts.length > 0) {
-        const summaryData = allSafeParts.map((row) => ({
+        const summaryData = allSafeParts.map(row => ({
           ...row,
           序号: row.序号, // 使用全局序号
         }))
@@ -146,8 +146,8 @@ export function useExportSafePartInfoAsExcel() {
         const headers = Object.keys(summaryData[0])
         const data = [
           headers,
-          ...summaryData.map((row) =>
-            headers.map((h) => row[h as keyof ExcelRow]),
+          ...summaryData.map(row =>
+            headers.map(h => row[h as keyof ExcelRow]),
           ),
         ]
         const summaryWs = utils.aoa_to_sheet(data)
@@ -168,7 +168,8 @@ export function useExportSafePartInfoAsExcel() {
       writeFile(wb, fileName, EXCEL_WRITE_OPTIONS)
       messageApi.success(`导出成功！共 ${allSafeParts.length} 条安全部件数据`)
       setTableSelectedKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       console.error('导出失败:', error)
       const errorMessage = error instanceof Error ? error.message : '未知错误'
       messageApi.error(`导出失败: ${errorMessage}`)

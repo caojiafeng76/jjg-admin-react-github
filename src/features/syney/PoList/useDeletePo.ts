@@ -1,8 +1,8 @@
+import type { message } from 'antd'
 import { useQueryClient } from '@tanstack/react-query'
-import { message } from 'antd'
 
-import { deletePo as deletePoApi } from '@/services/apiSyneyPos'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { deletePo as deletePoApi } from '@/services/apiSyneyPos'
 import { syneyPoKeys } from '../queryKeys'
 
 // Type for the Ant Design message API instance returned by message.useMessage()
@@ -34,7 +34,7 @@ export function useDeletePo(messageApi?: MessageApi) {
       const count = result?.deletedCount || 0
       return count > 0 ? `成功删除 ${count} 个订单` : '删除订单成功'
     },
-    errorMessage: (err) =>
+    errorMessage: err =>
       err instanceof Error ? err.message : '删除订单失败，请稍后重试',
     messageApi,
   })

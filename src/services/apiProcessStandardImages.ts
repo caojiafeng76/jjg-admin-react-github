@@ -1,6 +1,6 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 import type { StandardTime } from './apiStandardTimes'
+import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 const PROCESS_STANDARD_IMAGE_BUCKET = 'process-standard-images'
 
@@ -27,7 +27,7 @@ export function isSupportedProcessStandardImage(file: File) {
 function sanitizeFileName(fileName: string) {
   return fileName
     .trim()
-    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/[^\w.-]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
 

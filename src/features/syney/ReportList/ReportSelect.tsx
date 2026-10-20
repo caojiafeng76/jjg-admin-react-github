@@ -13,7 +13,7 @@ export default function ReportSelect() {
     <Select
       className="w-32"
       options={options}
-      defaultValue={'all'}
+      defaultValue="all"
       onChange={(value) => {
         searchParams.set('status', value)
         setSearchParams(searchParams)

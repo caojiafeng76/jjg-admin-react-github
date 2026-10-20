@@ -25,7 +25,8 @@ export default function PermissionGate({
 }: PermissionGateProps) {
   const allowed = usePermission(permissionKey)
 
-  if (allowed) return <>{children}</>
+  if (allowed)
+    return <>{children}</>
 
   if (mode === 'disable') {
     if (isValidElement(children)) {

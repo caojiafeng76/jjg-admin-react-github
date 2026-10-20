@@ -1,14 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import dayjs, { type Dayjs } from 'dayjs'
-import {
-  Alert,
-  DatePicker,
-  Form,
-  type FormInstance,
-  Input,
-  InputNumber,
-  Select,
-} from 'antd'
+import type { FormInstance } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type { RemoteToolingOption } from '../remoteToolingOptions'
 
 import type { MachineEquipmentOption } from '@/services/apiMachineEquipmentMaintenances'
 import type {
@@ -16,15 +8,25 @@ import type {
   ToolingStockOut,
   ToolingStockOutFormValues,
 } from '@/services/apiToolingStockOut'
-import MobileBottomSelectSheet, {
-  type MobileBottomSelectOption,
-} from '@/ui/mobile/MobileBottomSelectSheet'
+import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
+import {
+  Alert,
+  DatePicker,
+  Form,
+
+  Input,
+  InputNumber,
+  Select,
+} from 'antd'
+import dayjs from 'dayjs'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import MobileBottomSelectSheet from '@/ui/mobile/MobileBottomSelectSheet'
 import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 import { buildToolingOptionKeywords } from '@/utils/toolingOptionSearch'
 import {
   createToolingOptionSnapshot,
   mergeToolingOptions,
-  type RemoteToolingOption,
+
 } from '../remoteToolingOptions'
 
 interface ToolingStockOutFormFields {
@@ -93,8 +95,8 @@ export default function ToolingStockOutForm({
   const [form] = Form.useForm<ToolingStockOutFormFields>()
   const [isToolingSheetOpen, setIsToolingSheetOpen] = useState(false)
   const [isMachineSheetOpen, setIsMachineSheetOpen] = useState(false)
-  const [selectedToolingSnapshot, setSelectedToolingSnapshot] =
-    useState<RemoteToolingOption>()
+  const [selectedToolingSnapshot, setSelectedToolingSnapshot]
+    = useState<RemoteToolingOption>()
   const selectedToolingId = Form.useWatch('tooling_data_id', form)
   const selectedMachineId = Form.useWatch('machine_equipment_id', form)
 
@@ -104,13 +106,13 @@ export default function ToolingStockOutForm({
   )
 
   const selectedTooling = useMemo(
-    () => mergedToolingOptions.find((item) => item.id === selectedToolingId),
+    () => mergedToolingOptions.find(item => item.id === selectedToolingId),
     [mergedToolingOptions, selectedToolingId],
   )
 
   const toolingSelectOptions = useMemo(
     () =>
-      mergedToolingOptions.map((item) => ({
+      mergedToolingOptions.map(item => ({
         value: item.id,
         label: `${item.tool_code} | ${item.tool_name} | ${item.tool_spec}`,
         keywords: buildToolingOptionKeywords([
@@ -125,7 +127,7 @@ export default function ToolingStockOutForm({
 
   const toolingSheetOptions = useMemo<MobileBottomSelectOption[]>(
     () =>
-      mergedToolingOptions.map((item) => ({
+      mergedToolingOptions.map(item => ({
         value: item.id,
         label: `${item.tool_code} | ${item.tool_name}`,
         description: (
@@ -151,7 +153,7 @@ export default function ToolingStockOutForm({
   const machineSelectOptions = useMemo(
     () => [
       NO_MACHINE_OPTION,
-      ...machineOptions.map((item) => ({
+      ...machineOptions.map(item => ({
         value: item.id,
         label: `${item.unified_device_no} | ${item.machine_name}`,
       })),
@@ -167,7 +169,7 @@ export default function ToolingStockOutForm({
         description: '不关联任何机器',
         keywords: '无 不关联 机器',
       },
-      ...machineOptions.map((item) => ({
+      ...machineOptions.map(item => ({
         value: item.id,
         label: item.unified_device_no,
         description: (
@@ -191,7 +193,7 @@ export default function ToolingStockOutForm({
       return NO_MACHINE_OPTION.label
     }
 
-    const machine = machineOptions.find((item) => item.id === selectedMachineId)
+    const machine = machineOptions.find(item => item.id === selectedMachineId)
     return machine
       ? `${machine.unified_device_no} | ${machine.machine_name}`
       : ''
@@ -236,10 +238,11 @@ export default function ToolingStockOutForm({
 
   useEffect(() => {
     setSelectedToolingSnapshot((snapshot) => {
-      if (!snapshot) return snapshot
+      if (!snapshot)
+        return snapshot
 
       return (
-        toolingOptions.find((option) => option.id === snapshot.id) ?? snapshot
+        toolingOptions.find(option => option.id === snapshot.id) ?? snapshot
       )
     })
   }, [selectedToolingSnapshot?.id, toolingOptions])
@@ -250,7 +253,7 @@ export default function ToolingStockOutForm({
 
   const handleToolingChange = (toolingId: string) => {
     const nextSnapshot = mergedToolingOptions.find(
-      (item) => item.id === toolingId,
+      item => item.id === toolingId,
     )
     setSelectedToolingSnapshot(nextSnapshot)
   }
@@ -294,73 +297,77 @@ export default function ToolingStockOutForm({
           label="关联刀具资料"
           rules={[{ required: true, message: '请选择刀具资料' }]}
         >
-          {toolingInputMode === 'bottom-sheet' ? (
-            <button
-              type="button"
-              disabled={
-                isAuditLocked ||
-                lockTooling ||
-                isSubmitting ||
-                mergedToolingOptions.length === 0
-              }
-              onClick={() => setIsToolingSheetOpen(true)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-            >
-              {currentToolingLabel ||
-                (mergedToolingOptions.length > 0
-                  ? '请选择刀具资料'
-                  : '暂无刀具资料，请先维护刀具资料')}
-            </button>
-          ) : (
-            <Select
-              disabled={isAuditLocked || lockTooling}
-              loading={isToolingOptionsLoading}
-              showSearch={{
-                filterOption: false,
-                onSearch: onToolingSearch,
-              }}
-              onChange={handleToolingChange}
-              placeholder={
-                mergedToolingOptions.length > 0
-                  ? '请选择刀具资料'
-                  : '暂无刀具资料，请先维护刀具资料'
-              }
-              options={toolingSelectOptions}
-            />
-          )}
+          {toolingInputMode === 'bottom-sheet'
+            ? (
+                <button
+                  type="button"
+                  disabled={
+                    isAuditLocked
+                    || lockTooling
+                    || isSubmitting
+                    || mergedToolingOptions.length === 0
+                  }
+                  onClick={() => setIsToolingSheetOpen(true)}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                >
+                  {currentToolingLabel
+                    || (mergedToolingOptions.length > 0
+                      ? '请选择刀具资料'
+                      : '暂无刀具资料，请先维护刀具资料')}
+                </button>
+              )
+            : (
+                <Select
+                  disabled={isAuditLocked || lockTooling}
+                  loading={isToolingOptionsLoading}
+                  showSearch={{
+                    filterOption: false,
+                    onSearch: onToolingSearch,
+                  }}
+                  onChange={handleToolingChange}
+                  placeholder={
+                    mergedToolingOptions.length > 0
+                      ? '请选择刀具资料'
+                      : '暂无刀具资料，请先维护刀具资料'
+                  }
+                  options={toolingSelectOptions}
+                />
+              )}
         </Form.Item>
 
         <Form.Item name="machine_equipment_id" label="机器编号">
-          {toolingInputMode === 'bottom-sheet' ? (
-            <button
-              type="button"
-              disabled={isAuditLocked || isSubmitting}
-              onClick={() => setIsMachineSheetOpen(true)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-            >
-              {currentMachineLabel ||
-                (machineOptions.length > 0
-                  ? '请选择机器编号'
-                  : '暂无机器资料，请先维护机器设备')}
-            </button>
-          ) : (
-            <Select
-              disabled={isAuditLocked}
-              loading={isMachineOptionsLoading}
-              showSearch={{
-                filterOption: (input, option) =>
-                  String(option?.label || '')
-                    .toLowerCase()
-                    .includes(input.toLowerCase()),
-              }}
-              placeholder={
-                machineOptions.length > 0
-                  ? '请选择机器编号'
-                  : '暂无机器资料，请先维护机器设备'
-              }
-              options={machineSelectOptions}
-            />
-          )}
+          {toolingInputMode === 'bottom-sheet'
+            ? (
+                <button
+                  type="button"
+                  disabled={isAuditLocked || isSubmitting}
+                  onClick={() => setIsMachineSheetOpen(true)}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                >
+                  {currentMachineLabel
+                    || (machineOptions.length > 0
+                      ? '请选择机器编号'
+                      : '暂无机器资料，请先维护机器设备')}
+                </button>
+              )
+            : (
+                <Select
+                  disabled={isAuditLocked}
+                  loading={isMachineOptionsLoading}
+                  showSearch={{
+                    filterOption: (input, option) =>
+                      String(option?.label || '')
+                        .toLowerCase()
+                        .includes(input.toLowerCase()),
+                  }}
+                  placeholder={
+                    machineOptions.length > 0
+                      ? '请选择机器编号'
+                      : '暂无机器资料，请先维护机器设备'
+                  }
+                  options={machineSelectOptions}
+                />
+              )}
         </Form.Item>
 
         <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
@@ -435,26 +442,28 @@ export default function ToolingStockOutForm({
           label="出库数量"
           rules={[{ required: true, message: '请输入出库数量' }]}
         >
-          {toolingInputMode === 'bottom-sheet' ? (
-            <MobileNumberInput
-              disabled={isAuditLocked}
-              min={0.001}
-              step={0.001}
-              precision={3}
-              keyboardMode="decimal"
-              className="w-full"
-              placeholder="请输入出库数量"
-            />
-          ) : (
-            <InputNumber
-              disabled={isAuditLocked}
-              min={0.001}
-              step={0.001}
-              precision={3}
-              style={{ width: '100%' }}
-              placeholder="请输入出库数量"
-            />
-          )}
+          {toolingInputMode === 'bottom-sheet'
+            ? (
+                <MobileNumberInput
+                  disabled={isAuditLocked}
+                  min={0.001}
+                  step={0.001}
+                  precision={3}
+                  keyboardMode="decimal"
+                  className="w-full"
+                  placeholder="请输入出库数量"
+                />
+              )
+            : (
+                <InputNumber
+                  disabled={isAuditLocked}
+                  min={0.001}
+                  step={0.001}
+                  precision={3}
+                  style={{ width: '100%' }}
+                  placeholder="请输入出库数量"
+                />
+              )}
         </Form.Item>
 
         <Form.Item
@@ -484,37 +493,41 @@ export default function ToolingStockOutForm({
         </Form.Item>
       </Form>
 
-      {toolingInputMode === 'bottom-sheet' ? (
-        <MobileBottomSelectSheet
-          open={isToolingSheetOpen}
-          title="选择刀具资料"
-          options={toolingSheetOptions}
-          value={selectedToolingId}
-          searchPlaceholder="输入刀具编号、名称、规格或材质搜索"
-          emptyText="暂无可选刀具资料"
-          onSearch={onToolingSearch}
-          onClose={() => setIsToolingSheetOpen(false)}
-          onSelect={(value) => {
-            form.setFieldValue('tooling_data_id', value)
-            handleToolingChange(value)
-          }}
-        />
-      ) : null}
+      {toolingInputMode === 'bottom-sheet'
+        ? (
+            <MobileBottomSelectSheet
+              open={isToolingSheetOpen}
+              title="选择刀具资料"
+              options={toolingSheetOptions}
+              value={selectedToolingId}
+              searchPlaceholder="输入刀具编号、名称、规格或材质搜索"
+              emptyText="暂无可选刀具资料"
+              onSearch={onToolingSearch}
+              onClose={() => setIsToolingSheetOpen(false)}
+              onSelect={(value) => {
+                form.setFieldValue('tooling_data_id', value)
+                handleToolingChange(value)
+              }}
+            />
+          )
+        : null}
 
-      {toolingInputMode === 'bottom-sheet' ? (
-        <MobileBottomSelectSheet
-          open={isMachineSheetOpen}
-          title="选择机器编号"
-          options={machineSheetOptions}
-          value={selectedMachineId}
-          searchPlaceholder="输入机器编号、机器名称或工序搜索"
-          emptyText="暂无可选机器编号"
-          onClose={() => setIsMachineSheetOpen(false)}
-          onSelect={(value) => {
-            form.setFieldValue('machine_equipment_id', value)
-          }}
-        />
-      ) : null}
+      {toolingInputMode === 'bottom-sheet'
+        ? (
+            <MobileBottomSelectSheet
+              open={isMachineSheetOpen}
+              title="选择机器编号"
+              options={machineSheetOptions}
+              value={selectedMachineId}
+              searchPlaceholder="输入机器编号、机器名称或工序搜索"
+              emptyText="暂无可选机器编号"
+              onClose={() => setIsMachineSheetOpen(false)}
+              onSelect={(value) => {
+                form.setFieldValue('machine_equipment_id', value)
+              }}
+            />
+          )
+        : null}
     </>
   )
 }

@@ -1,11 +1,12 @@
 import type jsPDF from 'jspdf'
-import { useState } from 'react'
-
-import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
 
-const loadYoumaiLabelPdfRuntime = () =>
-  Promise.all([import('jspdf'), import('@/utils/pdfUtils')] as const)
+import { useState } from 'react'
+import { GOOGLE_FONT_CONFIG, loadGoogleFont } from '@/utils/googleFontLoader'
+
+function loadYoumaiLabelPdfRuntime() {
+  return Promise.all([import('jspdf'), import('@/utils/pdfUtils')] as const)
+}
 
 function preloadPrint() {
   void loadYoumaiLabelPdfRuntime()
@@ -59,8 +60,8 @@ export function usePrintYoumaiLabel() {
     try {
       setIsPrinting(true)
 
-      const [[{ default: JsPDF }, { openPDFInNewWindow }], fontData] =
-        await Promise.all([loadYoumaiLabelPdfRuntime(), loadGoogleFont()])
+      const [[{ default: JsPDF }, { openPDFInNewWindow }], fontData]
+        = await Promise.all([loadYoumaiLabelPdfRuntime(), loadGoogleFont()])
       const doc = new JsPDF({
         orientation: 'l',
         unit: 'mm',
@@ -124,14 +125,15 @@ export function usePrintYoumaiLabel() {
 
           // 每10页让出控制权，避免阻塞UI
           if (pageCount % 10 === 0) {
-            await new Promise((resolve) => setTimeout(resolve, 0))
+            await new Promise(resolve => setTimeout(resolve, 0))
           }
         }
       }
 
       // 输出 PDF
       openPDFInNewWindow(doc)
-    } finally {
+    }
+    finally {
       setIsPrinting(false)
     }
   }

@@ -1,10 +1,11 @@
+import type { ProductionSchedulingSummary } from './productionSchedulingUtils'
 import { ArrowPathIcon } from '@heroicons/react/16/solid'
-import { Button } from 'antd'
 
+import { Button } from 'antd'
 import ExportButton from '@/ui/ExportButton'
 import {
+
   renderQuantity,
-  type ProductionSchedulingSummary,
 } from './productionSchedulingUtils'
 
 export interface ProductionSchedulingSummaryBarProps {

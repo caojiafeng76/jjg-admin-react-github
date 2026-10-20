@@ -1,23 +1,23 @@
-import { useRef, useState, useMemo } from 'react'
-import { App, Button, Modal } from 'antd'
+import type { FormInstance } from 'antd/lib'
+import type { ISyneyItem } from '@/types'
 import { ArrowLeftIcon } from '@heroicons/react/16/solid'
-import dayjs from 'dayjs'
+import DetailTable from '@syney/ReportDetail/DetailTable'
 
 import { useDetail } from '@syney/ReportDetail/useDetail'
 
-import { ISyneyItem } from '@/types'
-import DetailTable from '@syney/ReportDetail/DetailTable'
 import EditButton from '@ui/EditButton'
-import DetailForm from './DetailForm'
-import { useUpdateDetail } from './useUpdateDetail'
-import DeleteButton from '@/ui/DeleteButton'
-import { useDeleteDetail } from './useDeleteDetail'
-import { FormInstance } from 'antd/lib'
-import { useAppStore } from '@/store'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import AppPagination from '@/ui/AppPagination'
-import { TableState } from '@/ui/TableState'
+import { App, Button, Modal } from 'antd'
+import dayjs from 'dayjs'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useAppStore } from '@/store'
+import AppPagination from '@/ui/AppPagination'
+import DeleteButton from '@/ui/DeleteButton'
+import { TableState } from '@/ui/TableState'
+import DetailForm from './DetailForm'
+import { useDeleteDetail } from './useDeleteDetail'
+import { useUpdateDetail } from './useUpdateDetail'
 
 // 状态 pill 语义色（与 ReportList ReportTable STATUS_STYLES 一致）
 const STATUS_PILL: Record<string, string> = {
@@ -58,9 +58,9 @@ export default function ReportDetail() {
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -71,7 +71,7 @@ export default function ReportDetail() {
   const { isDeleting, deleteDetail } = useDeleteDetail()
 
   const reportItem = useMemo(
-    () => report?.find((item) => item.id === Number(tableSelectedKeys?.at(0))),
+    () => report?.find(item => item.id === Number(tableSelectedKeys?.at(0))),
     [report, tableSelectedKeys],
   )
 
@@ -98,8 +98,9 @@ export default function ReportDetail() {
 
   const selectedCount = tableSelectedKeys.length
   const selectedAmount = useMemo(() => {
-    if (selectedCount === 0) return 0
-    const keySet = new Set(tableSelectedKeys.map((k) => String(k)))
+    if (selectedCount === 0)
+      return 0
+    const keySet = new Set(tableSelectedKeys.map(k => String(k)))
     let totalAmount = 0
     for (const item of records) {
       if (keySet.has(String(item.id))) {
@@ -153,23 +154,27 @@ export default function ReportDetail() {
               对账单信息
             </span>
           </div>
-          {reportInfo?.Status && STATUS_PILL[reportInfo.Status] ? (
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[reportInfo.Status]}`}
-            >
-              {STATUS_LABEL[reportInfo.Status]}
-            </span>
-          ) : null}
+          {reportInfo?.Status && STATUS_PILL[reportInfo.Status]
+            ? (
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[reportInfo.Status]}`}
+                >
+                  {STATUS_LABEL[reportInfo.Status]}
+                </span>
+              )
+            : null}
         </div>
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
-          {reportFields.map((item) => (
+          {reportFields.map(item => (
             <InfoItem key={item.label} label={item.label}>
-              {item.label === '明细条数' ? (
-                <span className="tabular-nums">{item.value}</span>
-              ) : (
-                item.value
-              )}
+              {item.label === '明细条数'
+                ? (
+                    <span className="tabular-nums">{item.value}</span>
+                  )
+                : (
+                    item.value
+                  )}
             </InfoItem>
           ))}
           <InfoItem label="总金额">
@@ -181,55 +186,59 @@ export default function ReportDetail() {
       </div>
 
       {/* 选中摘要条 */}
-      {selectedCount > 0 ? (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
-          <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-              <svg
-                className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            已选
-            <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-              {selectedCount}
-            </span>
-            条
-          </span>
-          {selectedAmount > 0 ? (
-            <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
-                <svg
-                  className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                  />
-                </svg>
-              </div>
-              选中金额合计：
-              <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
-                {selectedAmount.toLocaleString()}
+      {selectedCount > 0
+        ? (
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
+              <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
+                  <svg
+                    className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                已选
+                <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {selectedCount}
+                </span>
+                条
               </span>
-            </span>
-          ) : null}
-        </div>
-      ) : null}
+              {selectedAmount > 0
+                ? (
+                    <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
+                        <svg
+                          className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                          />
+                        </svg>
+                      </div>
+                      选中金额合计：
+                      <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
+                        {selectedAmount.toLocaleString()}
+                      </span>
+                    </span>
+                  )
+                : null}
+            </div>
+          )
+        : null}
 
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
@@ -277,7 +286,7 @@ export default function ReportDetail() {
       </div>
 
       <Modal
-        title={'编辑参数规格'}
+        title="编辑参数规格"
         open={isModalOpen}
         confirmLoading={isUpdating}
         width={560}

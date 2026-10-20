@@ -1,12 +1,13 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import type { EmployeeSelectOption } from './employeeSelectOptions'
 import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
 import dayjs from 'dayjs'
 
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import {
+
   mergeEmployeeSelectOptions,
   rememberEmployeeOptions,
   toEmployeeSelectOption,
-  type EmployeeSelectOption,
 } from './employeeSelectOptions'
 import { usePackagingEmployeeOptions } from './useWorkOrders'
 
@@ -43,8 +44,8 @@ export default function WorkOrderSearch({
   const [selectedEmployeeSnapshots, setSelectedEmployeeSnapshots] = useState<
     EmployeeSelectOption[]
   >([])
-  const { data: employeeOptions, isFetching: isEmployeeOptionsFetching } =
-    usePackagingEmployeeOptions(deferredEmployeeKeyword)
+  const { data: employeeOptions, isFetching: isEmployeeOptionsFetching }
+    = usePackagingEmployeeOptions(deferredEmployeeKeyword)
 
   const employeeSelectOptions = useMemo(
     () =>
@@ -57,14 +58,16 @@ export default function WorkOrderSearch({
   )
 
   useEffect(() => {
-    if (!selectedEmployeeId) return
+    if (!selectedEmployeeId)
+      return
 
     const selectedEmployee = employeeOptions?.items.find(
       ({ id }) => id === selectedEmployeeId,
     )
-    if (!selectedEmployee) return
+    if (!selectedEmployee)
+      return
 
-    setSelectedEmployeeSnapshots((previous) =>
+    setSelectedEmployeeSnapshots(previous =>
       rememberEmployeeOptions(previous, [
         toEmployeeSelectOption(selectedEmployee),
       ]),
@@ -122,9 +125,10 @@ export default function WorkOrderSearch({
           loading={isEmployeeOptionsFetching}
           onClear={() => setEmployeeKeyword('')}
           onSelect={(_, option) => {
-            if (typeof option.label !== 'string') return
+            if (typeof option.label !== 'string')
+              return
 
-            setSelectedEmployeeSnapshots((previous) =>
+            setSelectedEmployeeSnapshots(previous =>
               rememberEmployeeOptions(previous, [
                 { label: option.label, value: String(option.value) },
               ]),

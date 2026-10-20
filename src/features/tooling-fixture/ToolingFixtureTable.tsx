@@ -1,14 +1,15 @@
-import { memo, useMemo } from 'react'
+import type { TableColumnsType } from 'antd'
+import type { ToolingFixture } from '@/services/apiToolingFixture'
 import {
   Button,
   Grid,
   QRCode,
   Table,
+
   Tooltip,
-  type TableColumnsType,
 } from 'antd'
 
-import type { ToolingFixture } from '@/services/apiToolingFixture'
+import { memo, useMemo } from 'react'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
 import { getToolingFixtureQrValue } from './fixtureDomain'
@@ -34,7 +35,7 @@ interface ToolingFixtureTableProps {
 }
 
 function formatDate(value: string | null): string {
-  return value ? value : '-'
+  return value || '-'
 }
 
 function ToolingFixtureTable({

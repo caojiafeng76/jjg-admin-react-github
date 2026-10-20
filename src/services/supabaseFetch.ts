@@ -21,8 +21,8 @@ function getRequestMethod(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): string {
-  const method =
-    init?.method ?? (input instanceof Request ? input.method : undefined)
+  const method
+    = init?.method ?? (input instanceof Request ? input.method : undefined)
   return (method ?? 'GET').toUpperCase()
 }
 
@@ -44,8 +44,8 @@ function isNetworkError(error: unknown): boolean {
 
 function createAbortError(signal: AbortSignal): unknown {
   return (
-    signal.reason ??
-    new DOMException('The operation was aborted.', 'AbortError')
+    signal.reason
+    ?? new DOMException('The operation was aborted.', 'AbortError')
   )
 }
 
@@ -79,19 +79,20 @@ export function createRetryingFetch(
 
     for (let attempt = 0; ; attempt += 1) {
       // Request 对象只能消费一次，重试时复制一份
-      const requestInput =
-        canRetry && input instanceof Request ? input.clone() : input
+      const requestInput
+        = canRetry && input instanceof Request ? input.clone() : input
 
       try {
         return await baseFetch(requestInput, init)
-      } catch (error) {
+      }
+      catch (error) {
         const delay = retryDelays[attempt]
         if (
-          !canRetry ||
-          delay === undefined ||
-          isAbortError(error) ||
-          signal?.aborted ||
-          !isNetworkError(error)
+          !canRetry
+          || delay === undefined
+          || isAbortError(error)
+          || signal?.aborted
+          || !isNetworkError(error)
         ) {
           throw error
         }

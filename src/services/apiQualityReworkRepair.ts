@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export const QUALITY_REWORK_REPAIR_CATEGORIES = [
   '进货检验不合格',
@@ -8,8 +8,8 @@ export const QUALITY_REWORK_REPAIR_CATEGORIES = [
   '顾客退货',
 ] as const
 
-export type QualityReworkRepairCategory =
-  (typeof QUALITY_REWORK_REPAIR_CATEGORIES)[number]
+export type QualityReworkRepairCategory
+  = (typeof QUALITY_REWORK_REPAIR_CATEGORIES)[number]
 
 export const QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES = [
   'workshop_pending',
@@ -19,8 +19,8 @@ export const QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES = [
   'completed',
 ] as const
 
-export type QualityReworkRepairWorkflowStatus =
-  (typeof QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES)[number]
+export type QualityReworkRepairWorkflowStatus
+  = (typeof QUALITY_REWORK_REPAIR_WORKFLOW_STATUSES)[number]
 
 export interface QualityReworkRepair {
   id: string
@@ -119,15 +119,15 @@ type QualityReworkRepairPayload = Omit<
   verification_date: string | null
 }
 
-type QualityReworkRepairTable = {
+interface QualityReworkRepairTable {
   from: (table: string) => any
 }
 
-type QualityReworkRepairRpcClient = {
+interface QualityReworkRepairRpcClient {
   rpc: (
     functionName: 'next_quality_rework_repair_document_no',
     args?: { p_document_date?: string | null },
-  ) => Promise<{ data: string | null; error: unknown }>
+  ) => Promise<{ data: string | null, error: unknown }>
 }
 
 function qualityReworkRepairTable() {
@@ -146,7 +146,7 @@ function trimText(value: string | undefined | null) {
 
 function emptyToNull(value: string | undefined | null) {
   const normalized = value?.trim()
-  return normalized ? normalized : null
+  return normalized || null
 }
 
 function normalizePayload(
@@ -291,7 +291,8 @@ export async function getQualityReworkRepairOrderOptions() {
       })
     }
 
-    if ((data || []).length < QUALITY_ORDER_OPTIONS_PAGE_SIZE) break
+    if ((data || []).length < QUALITY_ORDER_OPTIONS_PAGE_SIZE)
+      break
     from += QUALITY_ORDER_OPTIONS_PAGE_SIZE
   }
 

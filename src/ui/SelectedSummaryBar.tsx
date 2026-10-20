@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { CheckCircleIcon } from '@heroicons/react/24/outline'
 
 export type SummaryTone = 'primary' | 'success' | 'warning' | 'error'
@@ -18,7 +18,7 @@ interface SelectedSummaryBarProps {
   stats: SummaryStatItem[]
 }
 
-const TONE_CLASSES: Record<SummaryTone, { chip: string; value: string }> = {
+const TONE_CLASSES: Record<SummaryTone, { chip: string, value: string }> = {
   primary: { chip: 'bg-primary/10 text-primary', value: 'text-primary' },
   success: { chip: 'bg-success/10 text-success', value: 'text-success' },
   warning: { chip: 'bg-warning/10 text-warning', value: 'text-warning' },
@@ -46,11 +46,13 @@ export default function SelectedSummaryBar({
           {selectedCount}
         </span>
         条
-        {matchedCount < selectedCount ? (
-          <span className="ml-1 text-xs text-warning">
-            （当前页参与合计 {matchedCount} 条）
-          </span>
-        ) : null}
+        {matchedCount < selectedCount
+          ? (
+              <span className="ml-1 text-xs text-warning">
+                （当前页参与合计 {matchedCount} 条）
+              </span>
+            )
+          : null}
       </span>
       {stats.map((stat) => {
         const tone = TONE_CLASSES[stat.tone]

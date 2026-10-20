@@ -1,9 +1,9 @@
-import { Modal } from 'antd'
+import type { EmployeeAuthAccountActions } from './useEmployeeAuthAccountActions'
 
+import { Modal } from 'antd'
 import EmployeeAuthAccountForm from './EmployeeAuthAccountForm'
 import EmployeeRebindAccountForm from './EmployeeRebindAccountForm'
 import EmployeeResetPasswordForm from './EmployeeResetPasswordForm'
-import type { EmployeeAuthAccountActions } from './useEmployeeAuthAccountActions'
 
 export interface EmployeeAccountModalsProps {
   actions: EmployeeAuthAccountActions
@@ -47,14 +47,16 @@ export default function EmployeeAccountModals({
         onOk={() => authFormRef.current?.submit()}
         onCancel={handleCancelAuthModal}
       >
-        {authTargetEmployee ? (
-          <EmployeeAuthAccountForm
-            employee={authTargetEmployee}
-            setFormRef={setAuthFormRef}
-            onFinish={handleCreateAuthAccount}
-            isSubmitting={createEmployeeAuthMutation.isPending}
-          />
-        ) : null}
+        {authTargetEmployee
+          ? (
+              <EmployeeAuthAccountForm
+                employee={authTargetEmployee}
+                setFormRef={setAuthFormRef}
+                onFinish={handleCreateAuthAccount}
+                isSubmitting={createEmployeeAuthMutation.isPending}
+              />
+            )
+          : null}
       </Modal>
 
       <Modal
@@ -66,14 +68,16 @@ export default function EmployeeAccountModals({
         onOk={() => resetPasswordFormRef.current?.submit()}
         onCancel={handleCancelResetPasswordModal}
       >
-        {authTargetEmployee ? (
-          <EmployeeResetPasswordForm
-            employee={authTargetEmployee}
-            setFormRef={setResetPasswordFormRef}
-            onFinish={handleResetPassword}
-            isSubmitting={resetEmployeeAuthPasswordMutation.isPending}
-          />
-        ) : null}
+        {authTargetEmployee
+          ? (
+              <EmployeeResetPasswordForm
+                employee={authTargetEmployee}
+                setFormRef={setResetPasswordFormRef}
+                onFinish={handleResetPassword}
+                isSubmitting={resetEmployeeAuthPasswordMutation.isPending}
+              />
+            )
+          : null}
       </Modal>
 
       <Modal
@@ -85,16 +89,18 @@ export default function EmployeeAccountModals({
         onOk={() => rebindFormRef.current?.submit()}
         onCancel={handleCancelRebindModal}
       >
-        {authTargetEmployee ? (
-          <EmployeeRebindAccountForm
-            employee={authTargetEmployee}
-            initialEmail={rebindAuthEmail?.email}
-            setFormRef={setRebindFormRef}
-            onFinish={handleRebindAccount}
-            isSubmitting={rebindEmployeeAuthAccountMutation.isPending}
-            isLoadingInitialEmail={isFetchingRebindAuthEmail}
-          />
-        ) : null}
+        {authTargetEmployee
+          ? (
+              <EmployeeRebindAccountForm
+                employee={authTargetEmployee}
+                initialEmail={rebindAuthEmail?.email}
+                setFormRef={setRebindFormRef}
+                onFinish={handleRebindAccount}
+                isSubmitting={rebindEmployeeAuthAccountMutation.isPending}
+                isLoadingInitialEmail={isFetchingRebindAuthEmail}
+              />
+            )
+          : null}
       </Modal>
     </>
   )

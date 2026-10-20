@@ -1,7 +1,7 @@
 import type { Database } from './database.types'
-import { ISyneyItem, ISyneyPo } from './types'
-import supabase from './supabase'
+import type { ISyneyItem, ISyneyPo } from './types'
 import { handleApiError } from '@utils/errorHandler'
+import supabase from './supabase'
 
 function distinctItemsForPo(items: ISyneyItem[]): ISyneyItem[] {
   const itemMap = new Map<string, ISyneyItem>()
@@ -13,7 +13,8 @@ function distinctItemsForPo(items: ISyneyItem[]): ISyneyItem[] {
       const unitPrice = item.TaxUnitPrice || 0
       existing.Qty = newQty
       existing.TaxTotalPrice = newQty * unitPrice
-    } else {
+    }
+    else {
       itemMap.set(key, {
         ...item,
         Qty: item.Qty || 0,
@@ -51,26 +52,27 @@ function normalizeSyneyPoUpdatePayload(data: Partial<ISyneyPo>): SyneyPoUpdate {
 function extractBrandFromItems(items: ISyneyItem[]): string | null {
   // 查找后板组件（前沿后板组件）
   const backPlateItem = items.find(
-    (item) =>
+    item =>
       item.PartName?.includes('前沿后板') || item.PartName?.includes('后板'),
   )
 
   if (backPlateItem && backPlateItem.Remark) {
     const remark = backPlateItem.Remark
-    
+
     // 优先匹配 "商标为" 格式（如：商标为现代电梯）
     let brandMatch = remark.match(/商标为\s*([^\s，,。]+)/)
     if (brandMatch && brandMatch[1]) {
       return brandMatch[1].trim()
     }
-    
+
     // 匹配 "商标:" 或 "商标：" 格式
     brandMatch = remark.match(/商标[:：]\s*([^\s，,。]+)/)
     if (brandMatch && brandMatch[1]) {
       return brandMatch[1].trim()
     }
-    
+
     // 匹配 "品牌:" 后面的内容,支持括号(如 "现代电梯(杭州)有限公司")
+    // eslint-disable-next-line regexp/no-super-linear-backtracking -- 备注文本很短，保持原有匹配语义
     brandMatch = remark.match(/品牌[:：\s]*([^\s，,。]+(?:\([^)]+\))?[^\s，,。]*)/)
     if (brandMatch && brandMatch[1]) {
       return brandMatch[1].trim()
@@ -86,16 +88,16 @@ function extractBrandFromItems(items: ISyneyItem[]): string | null {
  * @returns 推断的规格,如果无法推断则返回 null
  */
 function normalizePartNo(partNo: string) {
-  return partNo.replace(/^[^A-Za-z0-9]+/, '')
+  return partNo.replace(/^[^A-Z0-9]+/i, '')
 }
 
 function extractSpecFromItems(items: ISyneyItem[]): string | null {
   // 1. 查找前沿板组件
   const frontPlateItem = items.find(
-    (item) =>
-      item.PartName?.includes('前沿板') ||
-      item.PartNo?.startsWith('XN2808EB') ||
-      item.PartNo?.startsWith('XN3024BR'),
+    item =>
+      item.PartName?.includes('前沿板')
+      || item.PartNo?.startsWith('XN2808EB')
+      || item.PartNo?.startsWith('XN3024BR'),
   )
 
   if (!frontPlateItem) {
@@ -105,7 +107,7 @@ function extractSpecFromItems(items: ISyneyItem[]): string | null {
   // 2. 从 Spec 字段提取型号（1000型/800型/600型）
   let model = ''
   if (frontPlateItem.Spec) {
-    const specMatch = frontPlateItem.Spec.match(/(1000(?:型)?|800(?:型)?|600(?:型)?)/)
+    const specMatch = frontPlateItem.Spec.match(/(1000型?|800型?|600型?)/)
     if (specMatch) {
       model = specMatch[1].includes('型') ? specMatch[1] : `${specMatch[1]}型`
     }
@@ -122,9 +124,11 @@ function extractSpecFromItems(items: ISyneyItem[]): string | null {
   // XN2808EB 系列是扶梯，XN3024BR 系列是人行道
   if (partNo.startsWith('XN2808EB') || partNo.startsWith('XN2808')) {
     type = '扶梯'
-  } else if (partNo.startsWith('XN3024BR') || partNo.startsWith('XN3024')) {
+  }
+  else if (partNo.startsWith('XN3024BR') || partNo.startsWith('XN3024')) {
     type = '人行道'
-  } else if (partNo.startsWith('XN2838')) {
+  }
+  else if (partNo.startsWith('XN2838')) {
     type = '扶梯' // 800型扶梯
   }
 
@@ -139,13 +143,13 @@ function extractSpecFromItems(items: ISyneyItem[]): string | null {
   const middlePlateItem = items.find((item) => {
     const partNo = normalizePartNo(item.PartNo || '')
     return (
-      item.PartName?.includes('中板') ||
-      partNo.startsWith('XN2808BP') ||
-      partNo.startsWith('XN2808BQ') ||
-      partNo.startsWith('XN3024BS') ||
-      partNo.startsWith('XN3024BT') ||
-      partNo.startsWith('XN3024AP') ||
-      partNo.startsWith('XN3024AQ')
+      item.PartName?.includes('中板')
+      || partNo.startsWith('XN2808BP')
+      || partNo.startsWith('XN2808BQ')
+      || partNo.startsWith('XN3024BS')
+      || partNo.startsWith('XN3024BT')
+      || partNo.startsWith('XN3024AP')
+      || partNo.startsWith('XN3024AQ')
     )
   })
 
@@ -153,7 +157,8 @@ function extractSpecFromItems(items: ISyneyItem[]): string | null {
     // 从 Spec 字段匹配环境（如 "1000型 室内" 或 "1000型 室外"）
     if (middlePlateItem.Spec.includes('室外')) {
       environment = '室外'
-    } else if (middlePlateItem.Spec.includes('室内')) {
+    }
+    else if (middlePlateItem.Spec.includes('室内')) {
       environment = '室内'
     }
   }
@@ -215,9 +220,11 @@ export async function getSyneyPos({
   // 日期范围过滤
   if (startDate && endDate) {
     query = query.gte('EndDate', startDate).lte('EndDate', endDate)
-  } else if (startDate) {
+  }
+  else if (startDate) {
     query = query.gte('EndDate', startDate)
-  } else if (endDate) {
+  }
+  else if (endDate) {
     query = query.lte('EndDate', endDate)
   }
 
@@ -238,16 +245,16 @@ export async function getSyneyPos({
     query = query.abortSignal(signal)
   }
 
-  const { data: syneyPos, count, error } =
-    await query.overrideTypes<ISyneyPo[]>()
+  const { data: syneyPos, count, error }
+    = await query.overrideTypes<ISyneyPo[]>()
 
   if (error) {
     // 请求被取消时 Supabase 可能抛出 AbortError，这属于正常行为，这里直接返回空结果避免报错
     if (
-      error &&
-      typeof error === 'object' &&
-      'name' in error &&
-      (error as { name?: string }).name === 'AbortError'
+      error
+      && typeof error === 'object'
+      && 'name' in error
+      && (error as { name?: string }).name === 'AbortError'
     ) {
       return { syneyPos: [], count: 0 }
     }
@@ -271,10 +278,10 @@ export default async function getSyneyPo(id: string, signal?: AbortSignal) {
   if (error) {
     // 请求被取消时 Supabase 可能抛出 AbortError，这属于正常行为，这里直接返回 null 避免报错
     if (
-      error &&
-      typeof error === 'object' &&
-      'name' in error &&
-      (error as { name?: string }).name === 'AbortError'
+      error
+      && typeof error === 'object'
+      && 'name' in error
+      && (error as { name?: string }).name === 'AbortError'
     ) {
       return null
     }
@@ -334,11 +341,12 @@ export async function createPo({
         // 记录成功创建的订单ID
         createdPoIds.push(poRepo.id)
 
-        if (!items || items.length === 0) return
+        if (!items || items.length === 0)
+          return
 
         const dedupedItems = distinctItemsForPo(items)
 
-        const poItems = dedupedItems.map((item) => ({
+        const poItems = dedupedItems.map(item => ({
           No: item.No,
           PartNo: item.PartNo,
           PartName: item.PartName,
@@ -363,7 +371,8 @@ export async function createPo({
         }
       }),
     )
-  } catch (error) {
+  }
+  catch (error) {
     // 清理所有已创建的订单,确保数据一致性
     if (createdPoIds.length > 0) {
       await supabase.from('syney-pos').delete().in('id', createdPoIds)
@@ -389,9 +398,10 @@ export async function deletePo(ids: string[]) {
 
   for (const id of ids) {
     const num = Number(id)
-    if (isNaN(num) || num <= 0 || !Number.isInteger(num)) {
+    if (Number.isNaN(num) || num <= 0 || !Number.isInteger(num)) {
       invalidIds.push(id)
-    } else {
+    }
+    else {
       numericIds.push(num)
     }
   }
@@ -423,8 +433,8 @@ export async function deletePo(ids: string[]) {
 
   // 检查是否有订单不存在
   if (existingPos.length !== uniqueIds.length) {
-    const foundIds = new Set(existingPos.map((p) => p.id))
-    const missingIds = uniqueIds.filter((id) => !foundIds.has(id))
+    const foundIds = new Set(existingPos.map(p => p.id))
+    const missingIds = uniqueIds.filter(id => !foundIds.has(id))
     throw new Error(`以下订单不存在: ${missingIds.join(', ')}`)
   }
 
@@ -466,7 +476,7 @@ export async function deletePo(ids: string[]) {
   return {
     deletedCount: deletedData?.length || 0,
     deletedIds: uniqueIds,
-    deletedOrders: existingPos.map((p) => ({
+    deletedOrders: existingPos.map(p => ({
       id: p.id,
       No: p.No,
       Status: p.Status,

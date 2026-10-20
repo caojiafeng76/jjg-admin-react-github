@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
-import { DatePicker, Button, Form, Input, Select, Space } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type { ProductionDailyReportFilters } from '@/services/apiProductionDailyReport'
+import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import type { Dayjs } from 'dayjs'
 
-import type { ProductionDailyReportFilters } from '@/services/apiProductionDailyReport'
-import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { useEffect, useState } from 'react'
 
 const { RangePicker } = DatePicker
 
@@ -65,7 +65,7 @@ export default function ProductionDailyReportSearch({
     if (mobile) {
       setIsExpanded(false)
     }
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   const handleReset = () => {
@@ -75,7 +75,7 @@ export default function ProductionDailyReportSearch({
     if (mobile) {
       setIsExpanded(false)
     }
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   const formContent = (
@@ -109,22 +109,24 @@ export default function ProductionDailyReportSearch({
         />
       </Form.Item>
 
-      {mobile ? null : (
-        <Form.Item name="dataCategory" className="mb-0">
-          <Select
-            allowClear
-            placeholder="数据类别"
-            style={{ width: 140 }}
-            className="rounded-lg"
-            popupMatchSelectWidth={false}
-            getPopupContainer={() => document.body}
-            options={[
-              { label: 'A', value: 'A' },
-              { label: 'B', value: 'B' },
-            ]}
-          />
-        </Form.Item>
-      )}
+      {mobile
+        ? null
+        : (
+            <Form.Item name="dataCategory" className="mb-0">
+              <Select
+                allowClear
+                placeholder="数据类别"
+                style={{ width: 140 }}
+                className="rounded-lg"
+                popupMatchSelectWidth={false}
+                getPopupContainer={() => document.body}
+                options={[
+                  { label: 'A', value: 'A' },
+                  { label: 'B', value: 'B' },
+                ]}
+              />
+            </Form.Item>
+          )}
 
       <Form.Item name="productModel" className="mb-0">
         <Input
@@ -181,7 +183,7 @@ export default function ProductionDailyReportSearch({
         <Button
           block
           type="default"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={() => setIsExpanded(prev => !prev)}
           className="h-11 rounded-2xl border-slate-200 bg-slate-50 px-4 text-slate-700 shadow-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
         >
           <span className="flex w-full items-center justify-between text-sm font-medium">
@@ -196,11 +198,13 @@ export default function ProductionDailyReportSearch({
           </span>
         </Button>
 
-        {isExpanded ? (
-          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain pr-1 pb-1">
-            {formContent}
-          </div>
-        ) : null}
+        {isExpanded
+          ? (
+              <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain pr-1 pb-1">
+                {formContent}
+              </div>
+            )
+          : null}
       </div>
     )
   }

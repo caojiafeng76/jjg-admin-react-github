@@ -32,43 +32,45 @@ export default function SyneySetting() {
         西尼相关设置
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Spin />
-        </div>
-      ) : (
-        <Form
-          form={form}
-          layout="inline"
-          onFinish={handleSave}
-          className="flex flex-wrap items-end gap-4"
-        >
-          <Form.Item
-            label="编号"
-            name="SyneySerialNo"
-            rules={[
-              { required: true, whitespace: true, message: '请输入编号' },
-              { pattern: /^\d+$/, message: '编号必须为非负整数' },
-            ]}
-          >
-            <Input
-              allowClear
-              className="w-48 rounded-lg"
-              placeholder="请输入编号"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={isUpdating}
-              className="rounded-lg"
+      {isLoading
+        ? (
+            <div className="flex justify-center py-12">
+              <Spin />
+            </div>
+          )
+        : (
+            <Form
+              form={form}
+              layout="inline"
+              onFinish={handleSave}
+              className="flex flex-wrap items-end gap-4"
             >
-              保存
-            </Button>
-          </Form.Item>
-        </Form>
-      )}
+              <Form.Item
+                label="编号"
+                name="SyneySerialNo"
+                rules={[
+                  { required: true, whitespace: true, message: '请输入编号' },
+                  { pattern: /^\d+$/, message: '编号必须为非负整数' },
+                ]}
+              >
+                <Input
+                  allowClear
+                  className="w-48 rounded-lg"
+                  placeholder="请输入编号"
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={isUpdating}
+                  className="rounded-lg"
+                >
+                  保存
+                </Button>
+              </Form.Item>
+            </Form>
+          )}
     </div>
   )
 }

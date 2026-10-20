@@ -1,10 +1,11 @@
-import { Tag } from 'antd'
+import type { ActiveSheet, ProjectNoData } from './mobileProductionOrderScanTypes'
 
 import type { useOperationsByModel } from './useProcessStandards'
+import { Tag } from 'antd'
 import {
+
   formatDisplayValue,
-  type ActiveSheet,
-  type ProjectNoData,
+
 } from './mobileProductionOrderScanTypes'
 
 export interface MobileProductionOrderScanBasicInfoProps {
@@ -84,17 +85,19 @@ export default function MobileProductionOrderScanBasicInfo({
       <div>
         <div className="mb-1 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
           <span>工序</span>
-          {operationMatch?.matchLevel ? (
-            <Tag
-              color={
-                operationMatch.matchLevel === 'type-a'
-                  ? 'success'
-                  : 'processing'
-              }
-            >
-              {operationMatch.matchLevel === 'type-a' ? 'A类匹配' : 'B类匹配'}
-            </Tag>
-          ) : null}
+          {operationMatch?.matchLevel
+            ? (
+                <Tag
+                  color={
+                    operationMatch.matchLevel === 'type-a'
+                      ? 'success'
+                      : 'processing'
+                  }
+                >
+                  {operationMatch.matchLevel === 'type-a' ? 'A类匹配' : 'B类匹配'}
+                </Tag>
+              )
+            : null}
         </div>
         <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">
           {currentProductModel

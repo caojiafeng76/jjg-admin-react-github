@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER,
   isProductionSchedulingMaterialCode,
+  PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER,
 } from '../src/services/productionSchedulingMaterialFilter'
 
 describe('isProductionSchedulingMaterialCode', () => {

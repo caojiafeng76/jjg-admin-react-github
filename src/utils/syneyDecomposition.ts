@@ -1,18 +1,19 @@
+import type { DecompositionRole, SyneySafePartRule } from './syneySafePartRules'
 import type { ISyneyItem } from '@/services/types'
 import {
+
   findSafePartRule,
   hasDownFlag,
   hasUpFlag,
-  type DecompositionRole,
-  type SyneySafePartRule,
+
 } from './syneySafePartRules'
 
-export type DecompositionCell = {
+export interface DecompositionCell {
   spec: string
   qty: number
 }
 
-export type DecompositionCells = {
+export interface DecompositionCells {
   frontPlate?: DecompositionCell
   upperMiddle?: DecompositionCell
   lowerMiddle?: DecompositionCell
@@ -37,11 +38,11 @@ const ROLE_TO_CELL_KEY: Partial<Record<DecompositionRole, CellKey>> = {
 }
 
 function normalizePartNo(partNo: string | null | undefined) {
-  return (partNo || '').trim().replace(/^[^A-Za-z0-9]+/, '')
+  return (partNo || '').trim().replace(/^[^A-Z0-9]+/i, '')
 }
 
 function startsWithAny(value: string, prefixes: string[]) {
-  return prefixes.some((prefix) => value.startsWith(prefix))
+  return prefixes.some(prefix => value.startsWith(prefix))
 }
 
 function getConfiguredCellKey(
@@ -51,7 +52,7 @@ function getConfiguredCellKey(
   const rule = findSafePartRule(
     item.PartNo,
     settings,
-    (candidate) => !!candidate.decomposition_role,
+    candidate => !!candidate.decomposition_role,
   )
   const role = rule?.decomposition_role as DecompositionRole | undefined
 
@@ -99,16 +100,16 @@ function getLegacyCellKey(item: ISyneyItem): CellKey | undefined {
   }
 
   if (
-    (partNo.startsWith('XN2808AL') && remark.includes('上头部')) ||
-    (partNo.startsWith('XN3024X997') &&
-      (hasUpFlag(remark) || !hasDownFlag(remark)))
+    (partNo.startsWith('XN2808AL') && remark.includes('上头部'))
+    || (partNo.startsWith('XN3024X997')
+      && (hasUpFlag(remark) || !hasDownFlag(remark)))
   ) {
     return 'extensionUpper'
   }
 
   if (
-    (partNo.startsWith('XN2808AL') && remark.includes('下头部')) ||
-    (partNo.startsWith('XN3024X997') && hasDownFlag(remark))
+    (partNo.startsWith('XN2808AL') && remark.includes('下头部'))
+    || (partNo.startsWith('XN3024X997') && hasDownFlag(remark))
   ) {
     return 'extensionLower'
   }
@@ -123,11 +124,11 @@ function getLegacyCellKey(item: ISyneyItem): CellKey | undefined {
 function isLegacyRearPlateCandidate(item: ISyneyItem) {
   const partNo = normalizePartNo(item.PartNo)
   return (
-    partNo.startsWith('XN2808AF') ||
-    partNo.startsWith('XN2808FN') ||
-    partNo.startsWith('XN3024BX') ||
-    partNo.startsWith('XN3024BY') ||
-    partNo.startsWith('XN3024Y997')
+    partNo.startsWith('XN2808AF')
+    || partNo.startsWith('XN2808FN')
+    || partNo.startsWith('XN3024BX')
+    || partNo.startsWith('XN3024BY')
+    || partNo.startsWith('XN3024Y997')
   )
 }
 
@@ -141,8 +142,10 @@ function getLegacyMiddleCellKey(item: ISyneyItem): CellKey | undefined {
   const isUp = hasUpFlag(remark)
   const isDown = hasDownFlag(remark)
 
-  if (isUp && !isDown) return 'upperMiddle'
-  if (isDown && !isUp) return 'lowerMiddle'
+  if (isUp && !isDown)
+    return 'upperMiddle'
+  if (isDown && !isUp)
+    return 'lowerMiddle'
 
   return undefined
 }
@@ -152,8 +155,10 @@ function getLegacyRearCellKey(item: ISyneyItem): CellKey | undefined {
   const isUp = hasUpFlag(remark)
   const isDown = hasDownFlag(remark)
 
-  if (isUp && !isDown) return 'rearUpper'
-  if (isDown && !isUp) return 'rearLower'
+  if (isUp && !isDown)
+    return 'rearUpper'
+  if (isDown && !isUp)
+    return 'rearLower'
 
   return undefined
 }
@@ -243,7 +248,6 @@ export function buildDecompositionCells(
     const legacyKey = getLegacyCellKey(item)
     if (legacyKey) {
       addCell(cells, legacyKey, item)
-      return
     }
   })
 
@@ -251,7 +255,8 @@ export function buildDecompositionCells(
     const item = unassignedRearItems[0]
     addCell(cells, 'rearUpper', item, 1)
     addCell(cells, 'rearLower', item, 1)
-  } else if (unassignedRearItems.length >= 2) {
+  }
+  else if (unassignedRearItems.length >= 2) {
     addCell(cells, 'rearUpper', unassignedRearItems[0])
     addCell(cells, 'rearLower', unassignedRearItems[1])
   }
@@ -260,7 +265,8 @@ export function buildDecompositionCells(
     const item = unassignedMiddleItems[0]
     addCell(cells, 'upperMiddle', item, 1)
     addCell(cells, 'lowerMiddle', item, 1)
-  } else if (unassignedMiddleItems.length >= 2) {
+  }
+  else if (unassignedMiddleItems.length >= 2) {
     addCell(cells, 'upperMiddle', unassignedMiddleItems[0])
     addCell(cells, 'lowerMiddle', unassignedMiddleItems[1])
   }

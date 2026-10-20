@@ -1,3 +1,4 @@
+import type { ProcessStandardCapacityRow, ProductionSchedulingOrder, ProductionSchedulingProcessRow, SchedulingProcessDefinition } from './apiProductionSchedulingTypes'
 import type {
   WorkshopOrder,
   WorkshopOrderProcessSchedule,
@@ -5,21 +6,19 @@ import type {
 } from '@/features/workshop/OrderList'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import {
+
   PRODUCTION_SCHEDULING_PROCESS_OPTIONS,
-  type ProcessStandardCapacityRow,
-  type ProductionSchedulingOrder,
-  type ProductionSchedulingProcessRow,
-  type SchedulingProcessDefinition,
+
 } from './apiProductionSchedulingTypes'
 
 const PROCESS_CODE_PATTERN = /[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯]/g
 
 const PROCESS_BY_CODE = new Map(
-  PRODUCTION_SCHEDULING_PROCESS_OPTIONS.map((item) => [item.code, item]),
+  PRODUCTION_SCHEDULING_PROCESS_OPTIONS.map(item => [item.code, item]),
 )
 
 const PROCESS_BY_NAME = new Map(
-  PRODUCTION_SCHEDULING_PROCESS_OPTIONS.map((item) => [item.name, item]),
+  PRODUCTION_SCHEDULING_PROCESS_OPTIONS.map(item => [item.name, item]),
 )
 
 export function normalizeNullableText(value: unknown) {
@@ -28,7 +27,7 @@ export function normalizeNullableText(value: unknown) {
   }
 
   const trimmed = value.trim()
-  return trimmed ? trimmed : null
+  return trimmed || null
 }
 
 export function normalizeNullableNumber(value: unknown) {
@@ -71,7 +70,8 @@ function createScheduleId() {
 
 function normalizeProcessName(name: string) {
   const trimmed = name.trim()
-  if (trimmed === '自动切') return '切割'
+  if (trimmed === '自动切')
+    return '切割'
   return trimmed
 }
 
@@ -81,7 +81,7 @@ export function normalizeCapacityMatchText(value: unknown) {
 
 function getOrderProcessNames(order: Pick<WorkshopOrder, 'process_flow'>) {
   return new Set(
-    parseSchedulingProcesses(order.process_flow).map((process) => process.name),
+    parseSchedulingProcesses(order.process_flow).map(process => process.name),
   )
 }
 
@@ -122,9 +122,9 @@ function normalizeScheduleRecord(
     return null
   }
 
-  const definition =
-    (processCode ? PROCESS_BY_CODE.get(processCode) : undefined) ||
-    (processName ? PROCESS_BY_NAME.get(processName) : undefined)
+  const definition
+    = (processCode ? PROCESS_BY_CODE.get(processCode) : undefined)
+      || (processName ? PROCESS_BY_NAME.get(processName) : undefined)
 
   return {
     id: String(record.id || createScheduleId()),
@@ -181,7 +181,7 @@ export function parseSchedulingProcesses(
 
   const tokens = text
     .split(/[\s,，、/／|｜>＞→\-—]+/)
-    .map((item) => normalizeProcessName(item))
+    .map(item => normalizeProcessName(item))
     .filter(Boolean)
 
   for (const token of tokens) {
@@ -226,7 +226,7 @@ export function buildInitialProcessSchedules(
     return [createEmptyProcessSchedule(order)]
   }
 
-  return processes.map((process) => ({
+  return processes.map(process => ({
     id: createScheduleId(),
     process_code: process.code,
     process_name: process.name,
@@ -243,7 +243,7 @@ export function buildInitialProcessSchedules(
 
 function sumScheduledQuantity(schedules: WorkshopOrderProcessSchedule[]) {
   return schedules
-    .filter((schedule) => schedule.status === '已排')
+    .filter(schedule => schedule.status === '已排')
     .reduce(
       (total, schedule) => total + toQuantity(schedule.scheduled_quantity),
       0,
@@ -252,8 +252,8 @@ function sumScheduledQuantity(schedules: WorkshopOrderProcessSchedule[]) {
 
 function getLastScheduledDate(schedules: WorkshopOrderProcessSchedule[]) {
   const scheduledDates = schedules
-    .filter((schedule) => schedule.status === '已排')
-    .map((schedule) => schedule.scheduled_date)
+    .filter(schedule => schedule.status === '已排')
+    .map(schedule => schedule.scheduled_date)
     .filter((date): date is string => Boolean(date))
 
   return scheduledDates.at(-1) ?? null
@@ -281,9 +281,9 @@ export function reconcileProcessSchedulesWithFlow(
 
   for (const process of processes) {
     const matchedSchedules = remainingSchedules.filter(
-      (schedule) =>
-        schedule.process_code === process.code ||
-        normalizeProcessName(schedule.process_name) === process.name,
+      schedule =>
+        schedule.process_code === process.code
+        || normalizeProcessName(schedule.process_name) === process.name,
     )
 
     if (matchedSchedules.length === 0) {
@@ -311,7 +311,7 @@ export function reconcileProcessSchedulesWithFlow(
       })
 
       const scheduleIndex = remainingSchedules.findIndex(
-        (item) => item.id === schedule.id,
+        item => item.id === schedule.id,
       )
       if (scheduleIndex !== -1) {
         remainingSchedules.splice(scheduleIndex, 1)
@@ -323,7 +323,7 @@ export function reconcileProcessSchedulesWithFlow(
       Math.max(orderQuantity - scheduledQuantity, 0),
     )
     const hasPendingOrRemainingSchedule = matchedSchedules.some(
-      (schedule) => schedule.status !== '已排',
+      schedule => schedule.status !== '已排',
     )
 
     if (remainingQuantity > 0 && !hasPendingOrRemainingSchedule) {
@@ -360,12 +360,12 @@ export function getOrderScheduledQuantity(order: WorkshopOrder) {
       continue
     }
 
-    const processKey =
-      schedule.process_code || normalizeProcessName(schedule.process_name)
+    const processKey
+      = schedule.process_code || normalizeProcessName(schedule.process_name)
     scheduledQuantityByProcess.set(
       processKey,
-      (scheduledQuantityByProcess.get(processKey) || 0) +
-        toQuantity(schedule.scheduled_quantity),
+      (scheduledQuantityByProcess.get(processKey) || 0)
+      + toQuantity(schedule.scheduled_quantity),
     )
   }
 
@@ -388,19 +388,19 @@ function getMatchedCapacityRows({
   const partNo = normalizeCapacityMatchText(order.material_code)
   const length = Number(order.length_mm)
   const exactRows = standardRows.filter(
-    (row) =>
-      row.record_type === 'A' &&
-      normalizeCapacityMatchText(row.model) === model &&
-      normalizeCapacityMatchText(row.part_no) === partNo &&
-      isSameLength(row.length, length),
+    row =>
+      row.record_type === 'A'
+      && normalizeCapacityMatchText(row.model) === model
+      && normalizeCapacityMatchText(row.part_no) === partNo
+      && isSameLength(row.length, length),
   )
-  const matchedRows =
-    exactRows.length > 0
+  const matchedRows
+    = exactRows.length > 0
       ? exactRows
       : standardRows.filter(
-          (row) =>
-            row.record_type === 'B' &&
-            normalizeCapacityMatchText(row.model) === model,
+          row =>
+            row.record_type === 'B'
+            && normalizeCapacityMatchText(row.model) === model,
         )
   const processNames = getOrderProcessNames(order)
 
@@ -408,7 +408,7 @@ function getMatchedCapacityRows({
     return matchedRows
   }
 
-  const processRows = matchedRows.filter((row) =>
+  const processRows = matchedRows.filter(row =>
     processNames.has(normalizeProcessName(row.operation || '')),
   )
 
@@ -423,8 +423,8 @@ export function getMatchedDailyStandardCapacity({
   standardRows: ProcessStandardCapacityRow[]
 }) {
   const capacities = getMatchedCapacityRows({ order, standardRows })
-    .map((row) => calculateDailyStandardCapacity(row.standard_seconds))
-    .filter((capacity) => capacity > 0)
+    .map(row => calculateDailyStandardCapacity(row.standard_seconds))
+    .filter(capacity => capacity > 0)
 
   if (capacities.length === 0) {
     return null
@@ -436,8 +436,8 @@ export function getMatchedDailyStandardCapacity({
 export function getProductionSchedulingProcessRows(
   orders: ProductionSchedulingOrder[],
 ): ProductionSchedulingProcessRow[] {
-  return orders.flatMap((order) =>
-    getOrderScheduleRows(order).map((schedule) => ({
+  return orders.flatMap(order =>
+    getOrderScheduleRows(order).map(schedule => ({
       key: `${order.id || order.project_no}-${schedule.id}`,
       order,
       schedule,

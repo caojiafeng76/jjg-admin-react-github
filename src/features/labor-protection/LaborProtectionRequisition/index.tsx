@@ -1,15 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import type { FormInstance } from 'antd'
+import type { LaborProtectionRequisition, LaborProtectionRequisitionFormValues } from '@/services/apiLaborProtectionRequisitions'
 import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
-import { App, Button, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import { App, Button, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
+import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
-import {
-  getLaborProtectionRequisitionsForExport,
-  type LaborProtectionRequisition,
-} from '@/services/apiLaborProtectionRequisitions'
+import { getLaborProtectionRequisitionsForExport } from '@/services/apiLaborProtectionRequisitions'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -26,10 +25,10 @@ import {
   useUpdateLaborProtectionRequisition,
 } from './useLaborProtectionRequisition'
 import { usePrintLaborProtectionPublicQrPoster } from './usePrintLaborProtectionPublicQrPoster'
-import type { LaborProtectionRequisitionFormValues } from '@/services/apiLaborProtectionRequisitions'
 
-const loadLaborProtectionRequisitionExport = () =>
-  import('@/utils/laborProtectionRequisitionExport')
+function loadLaborProtectionRequisitionExport() {
+  return import('@/utils/laborProtectionRequisitionExport')
+}
 
 function preloadLaborProtectionRequisitionExport() {
   void loadLaborProtectionRequisitionExport()
@@ -43,10 +42,10 @@ export default function LaborProtectionRequisitionPage() {
   const [modalTitle, setModalTitle] = useState('新建劳保领料单')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<LaborProtectionRequisition | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<LaborProtectionRequisitionFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<LaborProtectionRequisition | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<LaborProtectionRequisitionFormValues> | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -68,10 +67,10 @@ export default function LaborProtectionRequisitionPage() {
     pageSize,
     searchParams,
   })
-  const { data: categoryOptions = [], isLoading: isCategoryOptionsLoading } =
-    useLaborProtectionDataOptions()
-  const { data: machineOptions = [], isLoading: isMachineOptionsLoading } =
-    useMachineEquipmentOptions()
+  const { data: categoryOptions = [], isLoading: isCategoryOptionsLoading }
+    = useLaborProtectionDataOptions()
+  const { data: machineOptions = [], isLoading: isMachineOptionsLoading }
+    = useMachineEquipmentOptions()
 
   const createMutation = useCreateLaborProtectionRequisition()
   const updateMutation = useUpdateLaborProtectionRequisition()
@@ -79,8 +78,8 @@ export default function LaborProtectionRequisitionPage() {
   const { printPoster, isPrinting } = usePrintLaborProtectionPublicQrPoster()
   const [isExporting, setIsExporting] = useState(false)
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -107,7 +106,7 @@ export default function LaborProtectionRequisitionPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -129,10 +128,12 @@ export default function LaborProtectionRequisitionPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('劳保领料单删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除劳保领料单失败，请稍后重试')
       }
     }
@@ -152,16 +153,19 @@ export default function LaborProtectionRequisitionPage() {
             values,
           })
           message.success('劳保领料单更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('劳保领料单创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -188,25 +192,29 @@ export default function LaborProtectionRequisitionPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
       if (params.categoryId) {
         nextSearchParamsURL.set('categoryId', params.categoryId)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('categoryId')
       }
 
       if (params.updatedStartDate) {
         nextSearchParamsURL.set('updatedStartDate', params.updatedStartDate)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('updatedStartDate')
       }
 
       if (params.updatedEndDate) {
         nextSearchParamsURL.set('updatedEndDate', params.updatedEndDate)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('updatedEndDate')
       }
 
@@ -245,8 +253,8 @@ export default function LaborProtectionRequisitionPage() {
 
     setIsExporting(true)
     try {
-      const [items, { exportLaborProtectionRequisitionsToExcel }] =
-        await Promise.all([
+      const [items, { exportLaborProtectionRequisitionsToExcel }]
+        = await Promise.all([
           getLaborProtectionRequisitionsForExport(searchParams),
           loadLaborProtectionRequisitionExport(),
         ])
@@ -257,7 +265,7 @@ export default function LaborProtectionRequisitionPage() {
 
       const categoryOption = searchParams.categoryId
         ? categoryOptions.find(
-            (option) => option.id === searchParams.categoryId,
+            option => option.id === searchParams.categoryId,
           )
         : undefined
 
@@ -268,14 +276,17 @@ export default function LaborProtectionRequisitionPage() {
         updatedEndDate: searchParams.updatedEndDate,
       })
       message.success(`已导出 ${items.length} 条劳保领料单`)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('导出劳保领料单失败:', error)
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('导出失败，请稍后重试')
       }
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [categoryOptions, message, searchParams, viewerDenied, viewerOperationTip])

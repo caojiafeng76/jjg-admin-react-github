@@ -1,4 +1,17 @@
+import { useQuery } from '@tanstack/react-query'
+
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  getAllProcessStandardJobRows,
+  getOrderStatusDashboard,
+} from '@/services/apiOrderStatusDashboard'
+import {
+  ORDER_STATUS_DASHBOARD_KEY,
+  PROCESS_STANDARD_JOB_ROWS_KEY,
+  PROCESS_STANDARDS_KEY,
+  useOrderStatusDashboard,
+  useProcessStandardJobRows,
+} from './useOrderStatusDashboard'
 
 vi.mock('@tanstack/react-query', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-query')>()
@@ -15,19 +28,6 @@ vi.mock('@/services/apiOrderStatusDashboard', () => ({
   REWORK_REPAIR_STATUS_COLORS: {},
   REWORK_REPAIR_STATUS_LABELS: {},
 }))
-
-import { useQuery } from '@tanstack/react-query'
-import {
-  getAllProcessStandardJobRows,
-  getOrderStatusDashboard,
-} from '@/services/apiOrderStatusDashboard'
-import {
-  ORDER_STATUS_DASHBOARD_KEY,
-  PROCESS_STANDARDS_KEY,
-  PROCESS_STANDARD_JOB_ROWS_KEY,
-  useOrderStatusDashboard,
-  useProcessStandardJobRows,
-} from './useOrderStatusDashboard'
 
 const useQueryMock = vi.mocked(useQuery)
 const getAllProcessStandardJobRowsMock = vi.mocked(getAllProcessStandardJobRows)
@@ -67,7 +67,7 @@ describe('useProcessStandardJobRows', () => {
     const queryFn = options?.queryFn
 
     if (typeof queryFn !== 'function') {
-      throw new Error('Expected the latest query to define a query function')
+      throw new TypeError('Expected the latest query to define a query function')
     }
 
     const signal = new AbortController().signal
@@ -95,7 +95,7 @@ describe('useOrderStatusDashboard', () => {
     const queryFn = options?.queryFn
 
     if (typeof queryFn !== 'function') {
-      throw new Error('Expected the latest query to define a query function')
+      throw new TypeError('Expected the latest query to define a query function')
     }
 
     await queryFn({ signal: new AbortController().signal } as never)

@@ -1,17 +1,19 @@
-import { useEffect, useState } from 'react'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type { PrecisionCuttingTransferFilters } from '@/services/apiPrecisionCuttingTransfers'
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import dayjs, { type Dayjs } from 'dayjs'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import dayjs from 'dayjs'
 
+import { useEffect, useState } from 'react'
 import {
   PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS,
   PRECISION_CUTTING_TRANSFER_OPERATORS,
   PRECISION_CUTTING_TRANSFER_WORKSHOPS,
-  type PrecisionCuttingTransferFilters,
+
 } from '@/services/apiPrecisionCuttingTransfers'
 
 const { RangePicker } = DatePicker
@@ -72,7 +74,7 @@ export default function MaterialTransferSearch({
       isAudited:
         typeof values.isAudited === 'boolean' ? values.isAudited : undefined,
     })
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   function handleReset() {
@@ -82,7 +84,7 @@ export default function MaterialTransferSearch({
     if (mobile) {
       setIsExpanded(false)
     }
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   const formClassName = mobile
@@ -139,7 +141,7 @@ export default function MaterialTransferSearch({
           showSearch={{ optionFilterProp: 'label' }}
           getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 140 }}
-          options={PRECISION_CUTTING_TRANSFER_OPERATORS.map((name) => ({
+          options={PRECISION_CUTTING_TRANSFER_OPERATORS.map(name => ({
             label: name,
             value: name,
           }))}
@@ -154,7 +156,7 @@ export default function MaterialTransferSearch({
           allowClear
           getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 140 }}
-          options={PRECISION_CUTTING_TRANSFER_WORKSHOPS.map((workshop) => ({
+          options={PRECISION_CUTTING_TRANSFER_WORKSHOPS.map(workshop => ({
             label: workshop,
             value: workshop,
           }))}
@@ -215,7 +217,7 @@ export default function MaterialTransferSearch({
         <Button
           block
           type="default"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={() => setIsExpanded(prev => !prev)}
           className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm font-medium shadow-sm transition-all hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:border-slate-700 dark:bg-slate-800"
         >
           <span className="flex w-full items-center justify-between">
@@ -233,11 +235,13 @@ export default function MaterialTransferSearch({
           </span>
         </Button>
 
-        {isExpanded ? (
-          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            {formContent}
-          </div>
-        ) : null}
+        {isExpanded
+          ? (
+              <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                {formContent}
+              </div>
+            )
+          : null}
       </div>
     )
   }

@@ -1,11 +1,11 @@
-import supabase from './supabase'
-import { handleApiError } from '@utils/errorHandler'
 import type { Database } from './database.types'
+import { handleApiError } from '@utils/errorHandler'
+import supabase from './supabase'
 
 const SAFE_PART_DRAWING_BUCKET = 'syney-safe-part-drawings'
 
-export const SAFE_PART_DRAWING_ACCEPT =
-  'application/pdf,image/png,image/jpeg,image/webp'
+export const SAFE_PART_DRAWING_ACCEPT
+  = 'application/pdf,image/png,image/jpeg,image/webp'
 
 export const SAFE_PART_DRAWING_MAX_SIZE = 50 * 1024 * 1024
 
@@ -16,10 +16,10 @@ const SAFE_PART_DRAWING_MIME_TYPES = new Set([
   'image/webp',
 ])
 
-type SyneySafePartSettingBase =
-  Database['public']['Tables']['syney_safe_part_settings']['Row']
+type SyneySafePartSettingBase
+  = Database['public']['Tables']['syney_safe_part_settings']['Row']
 
-type SyneySafePartDrawingFields = {
+interface SyneySafePartDrawingFields {
   drawing_file_path: string | null
   drawing_file_name: string | null
   drawing_file_mime_type: string | null
@@ -27,12 +27,12 @@ type SyneySafePartDrawingFields = {
   drawing_uploaded_at: string | null
 }
 
-type SyneySafePartSettingUpdate =
-  Database['public']['Tables']['syney_safe_part_settings']['Update'] &
-    Partial<SyneySafePartDrawingFields>
+type SyneySafePartSettingUpdate
+  = Database['public']['Tables']['syney_safe_part_settings']['Update']
+    & Partial<SyneySafePartDrawingFields>
 
-export type SyneySafePartSetting = SyneySafePartSettingBase &
-  SyneySafePartDrawingFields
+export type SyneySafePartSetting = SyneySafePartSettingBase
+  & SyneySafePartDrawingFields
 
 export function isSupportedSafePartDrawing(file: File) {
   return SAFE_PART_DRAWING_MIME_TYPES.has(file.type)
@@ -41,7 +41,7 @@ export function isSupportedSafePartDrawing(file: File) {
 function sanitizeFileName(fileName: string) {
   return fileName
     .trim()
-    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/[^\w.-]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
 

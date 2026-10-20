@@ -1,10 +1,11 @@
-import { useCallback, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType, type TableProps } from 'antd'
-
+import type { TableColumnsType, TableProps } from 'antd'
 import type { PrecisionCuttingTransferRow } from '@/services/apiPrecisionCuttingTransfers'
+import { Table } from 'antd'
+import { useCallback, useMemo } from 'react'
+
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -67,7 +68,8 @@ export default function MaterialTransferTable({
         },
         sortDirections: ['descend', 'ascend'],
         render: (text: string) => {
-          if (!text) return '-'
+          if (!text)
+            return '-'
           return new Date(text).toLocaleString('zh-CN')
         },
       },
@@ -93,8 +95,8 @@ export default function MaterialTransferTable({
         key: 'customer',
         width: 120,
         filters: Array.from(
-          new Set(data.map((r) => r.customer).filter(Boolean)),
-        ).map((v) => ({ text: v as string, value: v as string })),
+          new Set(data.map(r => r.customer).filter(Boolean)),
+        ).map(v => ({ text: v as string, value: v as string })),
         onFilter: (value, record) => record.customer === (value as string),
         filterSearch: true,
         sorter: (a, b) =>
@@ -109,8 +111,8 @@ export default function MaterialTransferTable({
         dataIndex: 'project_no',
         key: 'project_no',
         width: 130,
-        filters: Array.from(new Set(data.map((r) => r.project_no))).map(
-          (v) => ({ text: v, value: v }),
+        filters: Array.from(new Set(data.map(r => r.project_no))).map(
+          v => ({ text: v, value: v }),
         ),
         onFilter: (value, record) => record.project_no === (value as string),
         filterSearch: true,
@@ -127,8 +129,8 @@ export default function MaterialTransferTable({
         key: 'product_model',
         width: 130,
         filters: Array.from(
-          new Set(data.map((r) => r.product_model).filter(Boolean)),
-        ).map((v) => ({ text: v as string, value: v as string })),
+          new Set(data.map(r => r.product_model).filter(Boolean)),
+        ).map(v => ({ text: v as string, value: v as string })),
         onFilter: (value, record) => record.product_model === (value as string),
         filterSearch: true,
         render: (value: string | null) => value || '-',
@@ -141,18 +143,20 @@ export default function MaterialTransferTable({
         align: 'right',
         filters: Array.from(
           new Set(
-            data.map((r) => r.length_mm).filter((v): v is number => v !== null),
+            data.map(r => r.length_mm).filter((v): v is number => v !== null),
           ),
         )
           .sort((a, b) => a - b)
-          .map((v) => ({ text: `${v}mm`, value: v })),
+          .map(v => ({ text: `${v}mm`, value: v })),
         onFilter: (value, record) => record.length_mm === (value as number),
         render: (value: number | null) =>
-          value == null ? (
-            '-'
-          ) : (
-            <span className="tabular-nums">{value}</span>
-          ),
+          value == null
+            ? (
+                '-'
+              )
+            : (
+                <span className="tabular-nums">{value}</span>
+              ),
       },
       {
         title: '实际长料数量',
@@ -171,11 +175,13 @@ export default function MaterialTransferTable({
         width: 120,
         align: 'right',
         render: (value: number | null) =>
-          value == null ? (
-            '-'
-          ) : (
-            <span className="tabular-nums">{value}</span>
-          ),
+          value == null
+            ? (
+                '-'
+              )
+            : (
+                <span className="tabular-nums">{value}</span>
+              ),
       },
       {
         title: 'ERP长料数量',
@@ -184,11 +190,13 @@ export default function MaterialTransferTable({
         width: 110,
         align: 'right',
         render: (value: number | null) =>
-          value == null ? (
-            '-'
-          ) : (
-            <span className="tabular-nums">{value}</span>
-          ),
+          value == null
+            ? (
+                '-'
+              )
+            : (
+                <span className="tabular-nums">{value}</span>
+              ),
       },
       {
         title: '数据错误责任人',
@@ -222,25 +230,27 @@ export default function MaterialTransferTable({
         width: 100,
         fixed: 'right',
         filters: Array.from(
-          new Set(data.map((r) => r.target_workshop).filter(Boolean)),
-        ).map((v) => ({ text: v, value: v })),
+          new Set(data.map(r => r.target_workshop).filter(Boolean)),
+        ).map(v => ({ text: v, value: v })),
         onFilter: (value, record) =>
           record.target_workshop === (value as string),
         render: (value: string | null) =>
-          value ? (
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-              {value}
-            </span>
-          ) : (
-            '-'
-          ),
+          value
+            ? (
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                  {value}
+                </span>
+              )
+            : (
+                '-'
+              ),
       },
     ],
     [page, pageSize, data],
   )
 
-  const rowSelection: TableProps<PrecisionCuttingTransferRow>['rowSelection'] =
-    {
+  const rowSelection: TableProps<PrecisionCuttingTransferRow>['rowSelection']
+    = {
       selectedRowKeys,
       onChange: onSelect,
       preserveSelectedRowKeys: true,
@@ -269,7 +279,7 @@ export default function MaterialTransferTable({
 
   return (
     <Table<PrecisionCuttingTransferRow>
-      rowKey={(record) => record.id}
+      rowKey={record => record.id}
       loading={loading}
       columns={columns}
       dataSource={data}
@@ -288,7 +298,7 @@ export default function MaterialTransferTable({
           />
         ),
       }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-row:hover>td]:bg-blue-500/10 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-400"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-500/10 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-400"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800/80">

@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import AddButton from '@/ui/AddButton'
-import AppPagination from '@/ui/AppPagination'
-import DeleteButton from '@/ui/DeleteButton'
-import EditButton from '@/ui/EditButton'
-import { useTableHeight } from '@/hooks/useTableHeight'
+import type { FormInstance } from 'antd'
 import type {
   JobBaseSetting,
   JobBaseSettingFormValues,
 } from '@/services/apiJobBaseSettings'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import AddButton from '@/ui/AddButton'
+import AppPagination from '@/ui/AppPagination'
+import DeleteButton from '@/ui/DeleteButton'
+import EditButton from '@/ui/EditButton'
 import JobBaseSettingForm from './JobBaseSettingForm'
 import JobBaseSettingSearch from './JobBaseSettingSearch'
 import JobBaseSettingTable from './JobBaseSettingTable'
@@ -58,8 +59,8 @@ export default function JobBaseSettingPage() {
   const updateMutation = useUpdateJobBaseSetting()
   const deleteMutation = useDeleteJobBaseSettings()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -86,7 +87,7 @@ export default function JobBaseSettingPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -108,10 +109,12 @@ export default function JobBaseSettingPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('岗位基础数值删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除岗位基础数值失败，请稍后重试')
       }
     }
@@ -126,16 +129,19 @@ export default function JobBaseSettingPage() {
             values,
           })
           message.success('岗位基础数值更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('岗位基础数值创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -160,7 +166,8 @@ export default function JobBaseSettingPage() {
 
       if (params.jobName) {
         nextSearchParamsURL.set('jobName', params.jobName)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('jobName')
       }
 

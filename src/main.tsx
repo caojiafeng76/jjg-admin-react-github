@@ -1,9 +1,9 @@
+import { validateAllEnvVars } from '@utils/env'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from '@/App.tsx'
 
+import App from '@/App.tsx'
 import '@/index.css'
-import { validateAllEnvVars } from '@utils/env'
 
 // 在应用启动时验证环境变量
 const envValidation = validateAllEnvVars()
@@ -13,7 +13,7 @@ if (!envValidation.isValid) {
   console.error(
     '请检查 .env 文件，确保已配置所有必需的环境变量。参考 README.md 环境配置说明。',
   )
-  
+
   // 在开发环境下显示更详细的错误信息
   if (import.meta.env.DEV) {
     document.body.innerHTML = `
@@ -36,7 +36,8 @@ if (!envValidation.isValid) {
         </p>
       </div>
     `
-  } else {
+  }
+  else {
     // 生产环境下显示简洁的错误信息
     document.body.innerHTML = `
       <div style="
@@ -51,7 +52,8 @@ if (!envValidation.isValid) {
       </div>
     `
   }
-} else {
+}
+else {
   // 环境变量验证通过，正常启动应用
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

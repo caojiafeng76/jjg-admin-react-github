@@ -17,7 +17,7 @@ export function buildExtrusionMachineOptions(
   machines: MachineEquipmentOption[] | undefined,
 ): ExtrusionMachineSelectOption[] {
   return (machines || [])
-    .filter((machine) => machine.operation.trim() === EXTRUSION_OPERATION)
+    .filter(machine => machine.operation.trim() === EXTRUSION_OPERATION)
     .map((machine) => {
       const machineName = machine.machine_name.trim()
       const tonnage = extractExtrusionTonnage(machineName)
@@ -45,5 +45,5 @@ function buildMachineOptionLabel(
 }
 
 function formatDiameters(diameters: number[]): string {
-  return diameters.map((d) => `${d}mm`).join('/')
+  return diameters.map(d => `${d}mm`).join('/')
 }

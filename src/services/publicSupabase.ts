@@ -1,8 +1,8 @@
+import type { Database } from './database.types'
+
 import { createClient } from '@supabase/supabase-js'
 
 import { validateSupabaseEnv } from '@utils/env'
-
-import type { Database } from './database.types'
 import { createRetryingFetch } from './supabaseFetch'
 
 const { supabaseKey, apiUrl, authStorageKey } = validateSupabaseEnv()

@@ -1,6 +1,6 @@
 import type { ExcelRow } from './excelUtilsTypes'
 
-type SpecInferenceResult = {
+interface SpecInferenceResult {
   spec: string | null
   hasMixedSpecs: boolean
 }
@@ -12,7 +12,8 @@ export function inferConsistentSpecFromRows(
 
   for (const row of rows) {
     const soNo = String(row.生产编号 || '').trim()
-    if (!soNo) continue
+    if (!soNo)
+      continue
 
     const groupRows = rowsBySONo.get(soNo) || []
     groupRows.push(row)
@@ -27,7 +28,7 @@ export function inferConsistentSpecFromRows(
   }
 
   const inferredSpecs = Array.from(rowsBySONo.values())
-    .map((groupRows) => extractSpecFromRows(groupRows))
+    .map(groupRows => extractSpecFromRows(groupRows))
     .filter((spec): spec is string => !!spec)
   const distinctSpecs = new Set(inferredSpecs)
 
@@ -52,7 +53,7 @@ export function inferConsistentSpecFromRows(
 export function extractBrandFromBackPlate(rows: ExcelRow[]): string | null {
   // 1. 找到后板组件 (物料名称包含"后板")
   const backPlateRow = rows.find(
-    (row) => row.物料名称 && String(row.物料名称).includes('后板'),
+    row => row.物料名称 && String(row.物料名称).includes('后板'),
   )
 
   if (!backPlateRow || !backPlateRow.备注) {
@@ -93,10 +94,10 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
 
   // 1. 查找前板组件
   const frontPlateRow = rows.find(
-    (row) =>
-      (row.物料名称 && String(row.物料名称).includes('前沿板')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN2808EB')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
+    row =>
+      (row.物料名称 && String(row.物料名称).includes('前沿板'))
+      || (row.物料件号 && String(row.物料件号).includes('XN2808EB'))
+      || (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
   )
 
   // 检查前板remark是否包含"角钢"
@@ -113,12 +114,12 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
         index,
       )
       // 排除包含否定词的情况
-      const hasNegativeWord =
-        beforeText.includes('不带') ||
-        beforeText.includes('不') ||
-        beforeText.includes('无') ||
-        beforeText.includes('没有') ||
-        beforeText.includes('无需')
+      const hasNegativeWord
+        = beforeText.includes('不带')
+          || beforeText.includes('不')
+          || beforeText.includes('无')
+          || beforeText.includes('没有')
+          || beforeText.includes('无需')
 
       // 如果"角钢"前面没有否定词，则提取
       if (!hasNegativeWord) {
@@ -129,9 +130,9 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
 
   // 2. 查找后板组件
   const backPlateRow = rows.find(
-    (row) =>
-      (row.物料名称 && String(row.物料名称).includes('后板')) ||
-      (row.物料名称 && String(row.物料名称).includes('前沿后板')),
+    row =>
+      (row.物料名称 && String(row.物料名称).includes('后板'))
+      || (row.物料名称 && String(row.物料名称).includes('前沿后板')),
   )
 
   // 检查后板remark是否包含"前沿板中间"（必须是完整的连续字符串）
@@ -146,14 +147,14 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
 
   // 3. 查找中板组件（包括上中板和下中板）
   const middlePlateRows = rows.filter(
-    (row) =>
-      (row.物料名称 && String(row.物料名称).includes('中板')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN2808BP')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN2808BQ')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN3024BS')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN3024BT')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN3024AP')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN3024AQ')),
+    row =>
+      (row.物料名称 && String(row.物料名称).includes('中板'))
+      || (row.物料件号 && String(row.物料件号).includes('XN2808BP'))
+      || (row.物料件号 && String(row.物料件号).includes('XN2808BQ'))
+      || (row.物料件号 && String(row.物料件号).includes('XN3024BS'))
+      || (row.物料件号 && String(row.物料件号).includes('XN3024BT'))
+      || (row.物料件号 && String(row.物料件号).includes('XN3024AP'))
+      || (row.物料件号 && String(row.物料件号).includes('XN3024AQ')),
   )
 
   // 检查中板remark是否包含"雷达孔"或"不剪角"
@@ -168,14 +169,14 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
           Math.max(0, index - 10),
           index,
         )
-        const hasNegativeWord =
-          beforeText.includes('不带') ||
-          (beforeText.includes('不') &&
-            !beforeText.endsWith('不') &&
-            !beforeText.includes('带')) ||
-          beforeText.includes('无') ||
-          beforeText.includes('没有') ||
-          beforeText.includes('无需')
+        const hasNegativeWord
+          = beforeText.includes('不带')
+            || (beforeText.includes('不')
+              && !beforeText.endsWith('不')
+              && !beforeText.includes('带'))
+            || beforeText.includes('无')
+            || beforeText.includes('没有')
+            || beforeText.includes('无需')
 
         if (!hasNegativeWord) {
           if (!techniqueList.includes('中：雷达孔')) {
@@ -191,13 +192,13 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
           Math.max(0, index - 15),
           index,
         )
-        const hasNegativeWord =
-          (beforeText.trim() && beforeText.includes('不')) ||
-          beforeText.includes('无') ||
-          beforeText.includes('没有') ||
-          beforeText.includes('无需') ||
-          beforeText.includes('不要') ||
-          beforeText.includes('不带')
+        const hasNegativeWord
+          = (beforeText.trim() && beforeText.includes('不'))
+            || beforeText.includes('无')
+            || beforeText.includes('没有')
+            || beforeText.includes('无需')
+            || beforeText.includes('不要')
+            || beforeText.includes('不带')
 
         if (!hasNegativeWord) {
           if (!techniqueList.includes('中：不剪角')) {
@@ -218,7 +219,7 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
  * @returns 推断的规格,如果无法推断则返回 null
  */
 function normalizePartNo(partNo: string) {
-  return partNo.replace(/^[^A-Za-z0-9]+/, '')
+  return partNo.replace(/^[^A-Z0-9]+/i, '')
 }
 
 export function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
@@ -235,7 +236,7 @@ export function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
     // 匹配型号（允许不带“型”）
     if (!model) {
       const modelMatch = combinedText.match(
-        /(1000(?:型)?|800(?:型)?|600(?:型)?)/,
+        /(1000型?|800型?|600型?)/,
       )
       if (modelMatch) {
         model = modelMatch[1].includes('型')
@@ -246,7 +247,8 @@ export function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
 
     if (combinedText.includes('室外')) {
       environment = '室外'
-    } else if (combinedText.includes('室内')) {
+    }
+    else if (combinedText.includes('室内')) {
       environment = '室内'
     }
 
@@ -255,7 +257,8 @@ export function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
     if (!type) {
       if (partNo.includes('XN2808EB') || partNo.startsWith('XN2808')) {
         type = '扶梯'
-      } else if (partNo.includes('XN3024BR') || partNo.startsWith('XN3024')) {
+      }
+      else if (partNo.includes('XN3024BR') || partNo.startsWith('XN3024')) {
         type = '人行道'
       }
     }
@@ -303,10 +306,10 @@ export function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
 function extractSpecFromRows(rows: ExcelRow[]): string | null {
   // 1. 查找前沿板组件(用于判断扶梯/人行道)
   const frontPlateRow = rows.find(
-    (row) =>
-      (row.物料名称 && String(row.物料名称).includes('前沿板')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN2808EB')) ||
-      (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
+    row =>
+      (row.物料名称 && String(row.物料名称).includes('前沿板'))
+      || (row.物料件号 && String(row.物料件号).includes('XN2808EB'))
+      || (row.物料件号 && String(row.物料件号).includes('XN3024BR')),
   )
 
   if (!frontPlateRow) {
@@ -320,7 +323,8 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
   // 包含 XN2808EB 的是扶梯,包含 XN3024BR 的是人行道
   if (frontPlatePartNo.includes('XN2808EB')) {
     type = '扶梯'
-  } else if (frontPlatePartNo.includes('XN3024BR')) {
+  }
+  else if (frontPlatePartNo.includes('XN3024BR')) {
     type = '人行道'
   }
 
@@ -333,13 +337,13 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
     const partNoRaw = String(row.物料件号 || '')
     const partNo = normalizePartNo(partNoRaw)
     return (
-      name.includes('中板') ||
-      partNo.startsWith('XN2808BP') ||
-      partNo.startsWith('XN2808BQ') ||
-      partNo.startsWith('XN3024BS') ||
-      partNo.startsWith('XN3024BT') ||
-      partNo.startsWith('XN3024AP') ||
-      partNo.startsWith('XN3024AQ')
+      name.includes('中板')
+      || partNo.startsWith('XN2808BP')
+      || partNo.startsWith('XN2808BQ')
+      || partNo.startsWith('XN3024BS')
+      || partNo.startsWith('XN3024BT')
+      || partNo.startsWith('XN3024AP')
+      || partNo.startsWith('XN3024AQ')
     )
   })
 
@@ -349,7 +353,7 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
 
   let model = ''
   const middlePlateSpec = String(middlePlateRow.规格)
-  const specMatch = middlePlateSpec.match(/(1000(?:型)?|800(?:型)?|600(?:型)?)/)
+  const specMatch = middlePlateSpec.match(/(1000型?|800型?|600型?)/)
   if (specMatch) {
     model = specMatch[1].includes('型') ? specMatch[1] : `${specMatch[1]}型`
   }
@@ -362,7 +366,8 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
   let environment = '室内' // 默认室内
   if (middlePlateSpec.includes('室外')) {
     environment = '室外'
-  } else if (middlePlateSpec.includes('室内')) {
+  }
+  else if (middlePlateSpec.includes('室内')) {
     environment = '室内'
   }
 

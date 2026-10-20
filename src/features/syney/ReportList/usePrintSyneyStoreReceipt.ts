@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import type { SyneyStoreReceiptItem } from '@/utils/syneyStoreReceiptPdf'
 import { useMutation } from '@tanstack/react-query'
 import { App } from 'antd'
 
+import { useState } from 'react'
 import { fetchSyneyStoreReportFromScm } from '@/services/apiSyneyStoreReports'
-import type { SyneyStoreReceiptItem } from '@/utils/syneyStoreReceiptPdf'
 
 const loadStoreReceiptPDF = () => import('@/utils/syneyStoreReceiptPdf')
 
@@ -89,7 +89,8 @@ export function usePrintSyneyStoreReceipt() {
     const printWindow = window.open('', '_blank')
     if (printWindow) {
       renderPreparingWindow(printWindow, trimmedStoreInNo)
-    } else {
+    }
+    else {
       message.warning('浏览器阻止了打印窗口，请允许弹窗后重试')
     }
 
@@ -105,24 +106,27 @@ export function usePrintSyneyStoreReceipt() {
         return false
       }
 
-      const { buildSyneyStoreReceiptReport, printSyneyStoreReceipt } =
-        await loadStoreReceiptPDF()
+      const { buildSyneyStoreReceiptReport, printSyneyStoreReceipt }
+        = await loadStoreReceiptPDF()
       const report = buildSyneyStoreReceiptReport(items)
       const printed = await printSyneyStoreReceipt(report, printWindow)
 
       if (printed) {
         message.success('已打开浏览器打印窗口')
-      } else {
+      }
+      else {
         message.warning('浏览器阻止了直接打印，已回退为 PDF 预览')
       }
 
       return printed
-    } catch (error) {
+    }
+    catch (error) {
       printWindow?.close()
       console.error('打印西尼入库单失败:', error)
       message.error(error instanceof Error ? error.message : '打印入库单失败')
       return false
-    } finally {
+    }
+    finally {
       setIsGenerating(false)
     }
   }

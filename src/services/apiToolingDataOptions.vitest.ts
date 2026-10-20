@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getToolingDataOptions as getInventoryOptions } from './apiToolingInventory'
+import { getToolingDataOptions as getStockInOptions } from './apiToolingStockIn'
+import {
+  getPublicToolingDataOptions,
+  getToolingDataOptions as getStockOutOptions,
+} from './apiToolingStockOut'
+
 const { fromMock, publicFromMock } = vi.hoisted(() => ({
   fromMock: vi.fn(),
   publicFromMock: vi.fn(),
@@ -13,15 +20,8 @@ vi.mock('./publicSupabase', () => ({
   default: { from: publicFromMock },
 }))
 
-import { getToolingDataOptions as getInventoryOptions } from './apiToolingInventory'
-import { getToolingDataOptions as getStockInOptions } from './apiToolingStockIn'
-import {
-  getPublicToolingDataOptions,
-  getToolingDataOptions as getStockOutOptions,
-} from './apiToolingStockOut'
-
-const TOOLING_OPTION_SELECT =
-  'id, tool_code, tool_name, tool_spec, material, unit_price'
+const TOOLING_OPTION_SELECT
+  = 'id, tool_code, tool_name, tool_spec, material, unit_price'
 
 interface QueryBuilder {
   data: unknown[]

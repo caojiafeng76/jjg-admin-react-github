@@ -1,10 +1,10 @@
-import { memo, useMemo } from 'react'
-import { Button, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType } from 'antd'
+import type { VillaLiftCuttingRecordWithOrder } from '@/services/apiVillaLiftCutting'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
+import { Button, Table, Tag, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 
-import type { VillaLiftCuttingRecordWithOrder } from '@/services/apiVillaLiftCutting'
+import { memo, useMemo } from 'react'
 
 // ----------------------------------------------------------------
 // Types
@@ -171,7 +171,7 @@ function CuttingProcessTable({
       size="small"
       rowSelection={{
         selectedRowKeys,
-        onChange: (keys) => onSelectionChange(keys as string[]),
+        onChange: keys => onSelectionChange(keys as string[]),
       }}
       onRow={() => ({ style: { height: rowHeight } })}
     />

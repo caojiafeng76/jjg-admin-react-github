@@ -1,24 +1,22 @@
-import { ISyneyItem, ISyneyStoreReport } from './types'
+import type { ISyneyItem, ISyneyStoreReport } from './types'
 import supabase from '@services/supabase'
 import { handleApiError } from '@utils/errorHandler'
-import { resolveSyneyStoreReportProxyUrl } from './syneyStoreReportProxy'
-import { getAuthenticatedProxyHeaders } from './proxyAuth'
 import {
   extractFunctionInvokeErrorMessage,
   getFunctionRegion,
   withTimeout,
 } from './functionInvokeHelpers'
+import { getAuthenticatedProxyHeaders } from './proxyAuth'
+import { resolveSyneyStoreReportProxyUrl } from './syneyStoreReportProxy'
 
 const FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS = 45000
-const SYNEY_STORE_REPORT_API_URL = import.meta.env
-  .VITE_SYNEY_STORE_REPORT_API_URL as string | undefined
-const SYNEY_STORE_REPORT_FUNCTION_REGION = import.meta.env
-  .VITE_SUPABASE_FUNCTION_REGION as string | undefined
+const SYNEY_STORE_REPORT_API_URL = import.meta.env.VITE_SYNEY_STORE_REPORT_API_URL as string | undefined
+const SYNEY_STORE_REPORT_FUNCTION_REGION = import.meta.env.VITE_SUPABASE_FUNCTION_REGION as string | undefined
 
 function isBrowserFetchFailure(error: unknown) {
   return (
-    error instanceof TypeError &&
-    /failed to fetch|fetch failed|network/i.test(error.message)
+    error instanceof TypeError
+    && /failed to fetch|fetch failed|network/i.test(error.message)
   )
 }
 
@@ -50,7 +48,8 @@ async function invokeSyneyStoreReportFunction(storeInNo: string) {
       FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
       '西尼入库单获取超时，请稍后重试或检查 SCM 网络',
     )
-  } catch (error) {
+  }
+  catch (error) {
     if (isBrowserFetchFailure(error)) {
       throw new Error(
         '西尼入库单云函数连接失败，请检查网络或 Supabase 函数配置',
@@ -108,7 +107,8 @@ export async function fetchSyneyStoreReportFromScm(storeInNo: string) {
       FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS,
       '西尼入库单获取超时，请稍后重试或检查 SCM 网络',
     )
-  } catch (error) {
+  }
+  catch (error) {
     if (isBrowserFetchFailure(error)) {
       throw new Error(
         '西尼入库单代理接口连接失败，请检查代理地址或开发服务器',
@@ -230,7 +230,7 @@ export async function getSelectedSyneyStoreReports(Nos: string[]) {
   }
 
   // 使用 Map 提升查找性能，避免重复过滤和查找
-  const reportsMap = new Map(reports?.map((report) => [report.No, report]))
+  const reportsMap = new Map(reports?.map(report => [report.No, report]))
 
   const itemsGroupMap = new Map<string, ISyneyItem[]>()
 
@@ -244,7 +244,7 @@ export async function getSelectedSyneyStoreReports(Nos: string[]) {
   // 构建最终结果Map
   const result = new Map<
     string,
-    { items: ISyneyItem[]; totalAmount: number; createdAt: string }
+    { items: ISyneyItem[], totalAmount: number, createdAt: string }
   >()
 
   Nos.forEach((No) => {
@@ -281,7 +281,7 @@ export async function createSyneyStoreReport({
   }
 
   // 过滤掉数据库中不存在的字段（PartCode、PartModel、PartName2）
-  const filteredItems = items.map((item) => ({
+  const filteredItems = items.map(item => ({
     No: item.No,
     ParamSpec: item.ParamSpec,
     PartName: item.PartName,

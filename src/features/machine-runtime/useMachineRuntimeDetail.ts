@@ -1,10 +1,11 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import type { MachineRuntimeFilters } from '@/services/apiMachineRuntime'
 
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { queryConfig } from '@/config/queryClient'
 import {
   getMachineRuntimeItems,
-  type MachineRuntimeFilters,
+
 } from '@/services/apiMachineRuntime'
-import { queryConfig } from '@/config/queryClient'
 
 export function useMachineRuntimeDetail(filters: MachineRuntimeFilters) {
   return useQuery({

@@ -1,6 +1,8 @@
+import type { WorkshopOrder } from './index'
+import type { WorksheetSketchPlacement } from '@/utils/workshopOrderSketchXlsx'
+
 import dayjs from 'dayjs'
 import * as XLSX from 'xlsx-js-style'
-
 import { downloadWorkshopOrderSketchFile } from '@/services/apiWorkshopOrders'
 import {
   applyRegisterSheetStyles,
@@ -8,9 +10,8 @@ import {
 } from '@/utils/excelStyleUtils'
 import {
   embedSketchFilesIntoFirstWorksheet,
-  type WorksheetSketchPlacement,
+
 } from '@/utils/workshopOrderSketchXlsx'
-import type { WorkshopOrder } from './index'
 import { getWorkshopOrderQrPngData } from './workshopOrderQrImage'
 
 const SHEET_NAME = '车间订单'
@@ -41,11 +42,30 @@ const EXCEL_HEADERS = [
 ] as const
 
 const COLUMN_WIDTHS = [
-  14, 14, 12, 18, 18, 14, 14, 14, 24, 9, 10, 12, 8, 12, 10, 12, 12, 18, 20,
+  14,
+  14,
+  12,
+  18,
+  18,
+  14,
+  14,
+  14,
+  24,
+  9,
+  10,
+  12,
+  8,
+  12,
+  10,
+  12,
+  12,
+  18,
+  20,
 ]
 
 function formatCellText(value: string | number | null | undefined) {
-  if (value === null || value === undefined) return ''
+  if (value === null || value === undefined)
+    return ''
   return String(value)
 }
 
@@ -138,7 +158,7 @@ function downloadExcel(buffer: ArrayBuffer, filename: string) {
 
 export function createWorkshopOrderWorkbookBuffer(orders: WorkshopOrder[]) {
   const workbook = XLSX.utils.book_new()
-  const rows = orders.map((order) => [
+  const rows = orders.map(order => [
     '',
     '',
     formatCellText(order.product_delivery_date),

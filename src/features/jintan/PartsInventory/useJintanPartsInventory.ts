@@ -1,6 +1,5 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { JintanPartsStockStatus } from '@services/apiJintanPartsInventory'
 
-import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
 import {
   createJintanPartsInventoryBatch,
@@ -8,9 +7,11 @@ import {
   getJintanPartsInventoryOptions,
   getJintanPartsInventoryStatusSummary,
   getPublicJintanPartsInventoryOptions,
-  type JintanPartsStockStatus,
+
   updateJintanPartsInventory,
 } from '@services/apiJintanPartsInventory'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { queryConfig } from '@/config/queryClient'
 
 import { jintanKeys } from '../queryKeys'
 

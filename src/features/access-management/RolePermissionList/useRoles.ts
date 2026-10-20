@@ -1,8 +1,7 @@
+import { useMutationWithMessage } from '@hooks/useMutationWithMessage'
 import { useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
-import { getRoles } from '@/services/apiRoles'
-import { useMutationWithMessage } from '@hooks/useMutationWithMessage'
-import { createRole, deleteRole } from '@/services/apiRoles'
+import { createRole, deleteRole, getRoles } from '@/services/apiRoles'
 
 export function useRoles() {
   return useQuery({

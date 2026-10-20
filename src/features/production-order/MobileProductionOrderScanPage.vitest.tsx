@@ -1,6 +1,6 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -82,26 +82,28 @@ vi.mock('@/ui/mobile/MobileBottomSelectSheet', () => ({
     onClose,
   }: {
     open: boolean
-    options: Array<{ value: string; label: string }>
+    options: Array<{ value: string, label: string }>
     onSelect: (value: string) => void
     onClose: () => void
   }) =>
-    open ? (
-      <div>
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => {
-              onSelect(option.value)
-              onClose()
-            }}
-          >
-            选项:{option.label}
-          </button>
-        ))}
-      </div>
-    ) : null,
+    open
+      ? (
+          <div>
+            {options.map(option => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onSelect(option.value)
+                  onClose()
+                }}
+              >
+                选项:{option.label}
+              </button>
+            ))}
+          </div>
+        )
+      : null,
 }))
 
 const EDITING_ITEM = {

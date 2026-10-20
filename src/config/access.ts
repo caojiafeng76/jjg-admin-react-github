@@ -1,11 +1,11 @@
-export type AppRole =
-  | 'admin'
-  | 'employee'
-  | 'team_leader'
-  | 'precision_cutting_admin'
-  | 'warehouse_admin'
-  | 'viewer'
-  | 'extrusion_admin'
+export type AppRole
+  = | 'admin'
+    | 'employee'
+    | 'team_leader'
+    | 'precision_cutting_admin'
+    | 'warehouse_admin'
+    | 'viewer'
+    | 'extrusion_admin'
 
 export const PRECISION_CUTTING_ADMIN_ROLE: AppRole = 'precision_cutting_admin'
 export const WAREHOUSE_ADMIN_ROLE: AppRole = 'warehouse_admin'
@@ -36,7 +36,7 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   extrusion_admin: '挤压主任',
 }
 
-export const ROLE_OPTIONS: Array<{ label: string; value: AppRole }> = [
+export const ROLE_OPTIONS: Array<{ label: string, value: AppRole }> = [
   { label: ROLE_LABELS.employee, value: 'employee' },
   { label: ROLE_LABELS.team_leader, value: 'team_leader' },
   {

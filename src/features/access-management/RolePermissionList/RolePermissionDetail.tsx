@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import type { PermissionRow } from '@/services/apiPermissions'
+import { DownOutlined, RightOutlined } from '@ant-design/icons'
 import {
   Button,
   Checkbox,
@@ -9,8 +10,7 @@ import {
   Tag,
   Tooltip,
 } from 'antd'
-import { DownOutlined, RightOutlined } from '@ant-design/icons'
-import type { PermissionRow } from '@/services/apiPermissions'
+import { useEffect, useMemo, useState } from 'react'
 
 interface Props {
   role: string
@@ -61,8 +61,9 @@ export default function RolePermissionDetail({
   }, [role])
 
   const isDirty = useMemo(() => {
-    if (localChecked.size !== checkedIds.length) return true
-    return checkedIds.some((id) => !localChecked.has(id))
+    if (localChecked.size !== checkedIds.length)
+      return true
+    return checkedIds.some(id => !localChecked.has(id))
   }, [localChecked, checkedIds])
 
   // 按 module 分组
@@ -79,7 +80,8 @@ export default function RolePermissionDetail({
   const handleToggle = (permId: string, checked: boolean) => {
     setLocalChecked((prev) => {
       const next = new Set(prev)
-      if (checked) next.add(permId)
+      if (checked)
+        next.add(permId)
       else next.delete(permId)
       return next
     })
@@ -88,7 +90,7 @@ export default function RolePermissionDetail({
   const handleModuleToggleAll = (permIds: string[], allChecked: boolean) => {
     setLocalChecked((prev) => {
       const next = new Set(prev)
-      permIds.forEach((id) => (allChecked ? next.delete(id) : next.add(id)))
+      permIds.forEach(id => (allChecked ? next.delete(id) : next.add(id)))
       return next
     })
   }
@@ -112,8 +114,8 @@ export default function RolePermissionDetail({
   }
 
   const collapseItems = Array.from(grouped.entries()).map(([module, perms]) => {
-    const permIds = perms.map((p) => p.id)
-    const checkedCount = permIds.filter((id) => localChecked.has(id)).length
+    const permIds = perms.map(p => p.id)
+    const checkedCount = permIds.filter(id => localChecked.has(id)).length
     const allChecked = checkedCount === permIds.length
     const indeterminate = checkedCount > 0 && !allChecked
 
@@ -125,7 +127,7 @@ export default function RolePermissionDetail({
             checked={allChecked}
             indeterminate={indeterminate}
             onChange={() => handleModuleToggleAll(permIds, allChecked)}
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           />
           <span className="font-medium">{module}</span>
           <span className="text-xs text-gray-400">
@@ -135,14 +137,14 @@ export default function RolePermissionDetail({
       ),
       children: (
         <div className="grid gap-2 pl-6">
-          {perms.map((perm) => (
+          {perms.map(perm => (
             <div
               key={perm.id}
               className="flex items-center justify-between gap-2"
             >
               <Checkbox
                 checked={localChecked.has(perm.id)}
-                onChange={(e) => handleToggle(perm.id, e.target.checked)}
+                onChange={e => handleToggle(perm.id, e.target.checked)}
               >
                 <span className="text-sm">{perm.label}</span>
                 <span className="ml-1 text-xs text-gray-400">({perm.key})</span>
@@ -180,19 +182,20 @@ export default function RolePermissionDetail({
               type="link"
               size="small"
               icon={
-                activeKeys.length === grouped.size ? (
-                  <DownOutlined />
-                ) : (
-                  <RightOutlined />
-                )
+                activeKeys.length === grouped.size
+                  ? (
+                      <DownOutlined />
+                    )
+                  : (
+                      <RightOutlined />
+                    )
               }
               onClick={() =>
                 setActiveKeys(
                   activeKeys.length === grouped.size
                     ? []
                     : Array.from(grouped.keys()),
-                )
-              }
+                )}
             >
               {activeKeys.length === grouped.size ? '收起全部' : '展开全部'}
             </Button>
@@ -211,7 +214,7 @@ export default function RolePermissionDetail({
       <Collapse
         items={collapseItems}
         activeKey={activeKeys}
-        onChange={(keys) => setActiveKeys(keys as string[])}
+        onChange={keys => setActiveKeys(keys as string[])}
         size="small"
       />
     </div>

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react'
-import { InputNumber } from 'antd'
 import type { InputNumberProps } from 'antd'
+import { InputNumber } from 'antd'
+import { useEffect, useMemo, useRef } from 'react'
 
 type MobileNumberKeyboardMode = 'numeric' | 'decimal'
 

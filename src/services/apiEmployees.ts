@@ -1,7 +1,7 @@
 import type { Database } from './database.types'
-import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 import { extractFunctionInvokeErrorMessage } from './functionInvokeHelpers'
+import supabase from './supabase'
 
 type EmployeeInsert = Database['public']['Tables']['employees']['Insert']
 type EmployeeUpdate = Database['public']['Tables']['employees']['Update']
@@ -64,11 +64,11 @@ async function throwFunctionInvokeError(
   }
 
   if (
-    error &&
-    typeof error === 'object' &&
-    'message' in error &&
-    typeof error.message === 'string' &&
-    error.message.includes('Failed to send a request to the Edge Function')
+    error
+    && typeof error === 'object'
+    && 'message' in error
+    && typeof error.message === 'string'
+    && error.message.includes('Failed to send a request to the Edge Function')
   ) {
     throw new AppError(
       `无法访问 Edge Function ${functionName}，请确认该函数已部署且当前网络可连接到 Supabase`,
@@ -80,8 +80,10 @@ async function throwFunctionInvokeError(
 }
 
 function formatBlockedNames(names: string[], fallbackLabel: string) {
-  if (names.length === 0) return fallbackLabel
-  if (names.length <= 3) return names.join('、')
+  if (names.length === 0)
+    return fallbackLabel
+  if (names.length <= 3)
+    return names.join('、')
 
   return `${names.slice(0, 3).join('、')} 等${names.length}人`
 }
@@ -95,7 +97,7 @@ async function assertEmployeesNotReferenced(ids: string[]) {
 
   throw new AppError(
     `员工 ${formatBlockedNames(
-      blockers.map((item) => item.employeeName),
+      blockers.map(item => item.employeeName),
       '所选员工',
     )} 已关联生产工单，无法删除`,
     'FOREIGN_KEY_CONSTRAINT',
@@ -124,12 +126,13 @@ export async function getEmployeeDeleteBlockers(
   }
 
   const employeeMap = new Map(
-    (employees || []).map((employee) => [employee.id, employee.name]),
+    (employees || []).map(employee => [employee.id, employee.name]),
   )
-  const grouped = new Map<string, { count: number; dates: Set<string> }>()
+  const grouped = new Map<string, { count: number, dates: Set<string> }>()
 
   ;(referencedOrders || []).forEach((order) => {
-    if (!order.employee_id) return
+    if (!order.employee_id)
+      return
 
     const current = grouped.get(order.employee_id) || {
       count: 0,
@@ -338,14 +341,14 @@ export async function batchCreateEmployees(names: string[]) {
   }
 
   // 过滤掉空字符串和重复的姓名
-  const uniqueNames = Array.from(new Set(names.filter((name) => name.trim())))
+  const uniqueNames = Array.from(new Set(names.filter(name => name.trim())))
 
   if (uniqueNames.length === 0) {
     throw new Error('没有有效的员工姓名')
   }
 
   // 准备插入数据
-  const employees = uniqueNames.map((name) => ({ name: name.trim() }))
+  const employees = uniqueNames.map(name => ({ name: name.trim() }))
 
   // 批量插入，使用 ON CONFLICT 忽略已存在的记录
   const { data, error } = await supabase
@@ -365,7 +368,7 @@ export async function batchCreateEmployees(names: string[]) {
 
 export async function getAllEmployees() {
   const PAGE_SIZE = 1000
-  const rows: { id: string; name: string }[] = []
+  const rows: { id: string, name: string }[] = []
   let from = 0
 
   while (true) {
@@ -380,7 +383,7 @@ export async function getAllEmployees() {
       throw handleApiError(error, '获取员工列表失败')
     }
 
-    const pageRows = (data || []) as { id: string; name: string }[]
+    const pageRows = (data || []) as { id: string, name: string }[]
     rows.push(...pageRows)
 
     if (pageRows.length < PAGE_SIZE) {
@@ -557,7 +560,8 @@ export async function getEmployeeAuthEmail(
     }
 
     return data as EmployeeAuthEmailResult
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('获取员工绑定邮箱失败，已降级为空值', error)
 
     return {

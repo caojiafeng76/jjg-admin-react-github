@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   ToolingInventory,
   ToolingInventoryFormValues,
   ToolingInventoryImportRow,
 } from '@/services/apiToolingInventory'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -42,8 +43,8 @@ export default function ToolingInventoryPage() {
   const [editingRecord, setEditingRecord] = useState<ToolingInventory | null>(
     null,
   )
-  const [formRef, setFormRef] =
-    useState<FormInstance<ToolingInventoryFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<ToolingInventoryFormValues> | null>(null)
   const [toolingOptionsKeyword, setToolingOptionsKeyword] = useState('')
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -58,16 +59,16 @@ export default function ToolingInventoryPage() {
     pageSize,
     searchParams,
   })
-  const { data: toolingOptions = [], isFetching: isToolingOptionsLoading } =
-    useToolingDataOptions(toolingOptionsKeyword)
+  const { data: toolingOptions = [], isFetching: isToolingOptionsLoading }
+    = useToolingDataOptions(toolingOptionsKeyword)
 
   const createMutation = useCreateToolingInventory()
   const updateMutation = useUpdateToolingInventory()
   const importMutation = useImportToolingInventory()
   const deleteMutation = useDeleteToolingInventory()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -96,7 +97,7 @@ export default function ToolingInventoryPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -119,10 +120,12 @@ export default function ToolingInventoryPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('刀具库存删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除刀具库存失败，请稍后重试')
       }
     }
@@ -144,10 +147,12 @@ export default function ToolingInventoryPage() {
         await importMutation.mutateAsync(rows)
         message.success(`刀具库存导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入刀具库存失败，请稍后重试')
         }
       }
@@ -180,16 +185,19 @@ export default function ToolingInventoryPage() {
             values,
           })
           message.success('刀具库存更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('刀具库存创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -217,7 +225,8 @@ export default function ToolingInventoryPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 

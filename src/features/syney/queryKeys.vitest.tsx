@@ -1,6 +1,6 @@
+import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
-import { type ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useAppStore } from '@/store'
@@ -27,8 +27,8 @@ vi.mock('@/services/apiSyneyPos', () => ({
 }))
 
 vi.mock('react-router-dom', async () => {
-  const actual =
-    await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
+  const actual
+    = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
 
   return {
     ...actual,
@@ -114,7 +114,7 @@ describe('Syney PO query keys', () => {
       queryClient
         .getQueryCache()
         .getAll()
-        .map((query) => query.queryKey),
+        .map(query => query.queryKey),
     ).toEqual([syneyPoKeys.detail(759)])
   })
 
@@ -197,7 +197,7 @@ describe('Syney PO query keys', () => {
       syneyPoKeys.selected([759, 760]),
     ] as const
 
-    keys.forEach((queryKey) => queryClient.setQueryData(queryKey, 'cached'))
+    keys.forEach(queryKey => queryClient.setQueryData(queryKey, 'cached'))
     await queryClient.invalidateQueries({ queryKey: syneyPoKeys.all })
 
     keys.forEach((queryKey) => {

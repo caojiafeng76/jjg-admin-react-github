@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-
 import type { ToolingFixture } from '@/services/apiToolingFixture'
+
+import { describe, expect, it } from 'vitest'
 import { buildToolingFixtureQrLabelsHtml } from './usePrintToolingFixtureQrLabels'
 
 function makeFixture(index: number): ToolingFixture {

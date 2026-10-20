@@ -1,8 +1,8 @@
+import type { Database } from './database.types'
 import type {
   WorkshopOrder,
   WorkshopOrderProcessSchedule,
 } from '@/features/workshop/OrderList'
-import type { Database } from './database.types'
 
 export type ProcessStandardCapacityRow = Pick<
   Database['public']['Tables']['process_standards']['Row'],
@@ -87,8 +87,8 @@ export interface ProductionSchedulingOrderUpdate {
   process_schedules?: WorkshopOrderProcessSchedule[] | null
 }
 
-export const PRODUCTION_SCHEDULING_PROCESS_OPTIONS: SchedulingProcessDefinition[] =
-  [
+export const PRODUCTION_SCHEDULING_PROCESS_OPTIONS: SchedulingProcessDefinition[]
+  = [
     { code: '①', name: '精切' },
     { code: '②', name: '切割' },
     { code: '③', name: 'CNC' },

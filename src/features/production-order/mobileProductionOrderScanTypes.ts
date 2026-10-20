@@ -1,5 +1,5 @@
-import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import type { ScannedProjectPayload } from './ProjectNoScanButton'
+import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 
 export type ActiveSheet = 'project' | 'operation' | 'machine' | null
 

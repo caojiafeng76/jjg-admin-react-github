@@ -1,9 +1,10 @@
-import * as XLSX from 'xlsx-js-style'
+import type { WorksheetSketchPlacement } from './workshopOrderSketchXlsx'
 
 import type { StandardTime } from '@/services/apiStandardTimes'
+import * as XLSX from 'xlsx-js-style'
 import {
   embedSketchFilesIntoFirstWorksheet,
-  type WorksheetSketchPlacement,
+
 } from './workshopOrderSketchXlsx'
 
 export const PROCESS_SHEET_HEADERS = [
@@ -117,7 +118,7 @@ export async function buildPrecisionFinishingProcessExcelBuffer(
 ) {
   const rows = getRows(records)
   const worksheetData = [
-    [PROCESS_SHEET_TITLE, ...Array(PROCESS_SHEET_HEADERS.length - 1).fill('')],
+    [PROCESS_SHEET_TITLE, ...Array.from({ length: PROCESS_SHEET_HEADERS.length - 1 }, () => '')],
     [...PROCESS_SHEET_HEADERS],
     ...rows,
   ]
@@ -130,7 +131,7 @@ export async function buildPrecisionFinishingProcessExcelBuffer(
       e: { r: 0, c: PROCESS_SHEET_HEADERS.length - 1 },
     },
   ]
-  worksheet['!cols'] = COLUMN_WIDTHS.map((width) => ({ wch: width }))
+  worksheet['!cols'] = COLUMN_WIDTHS.map(width => ({ wch: width }))
   worksheet['!rows'] = [
     { hpt: 30, hpx: 30 },
     { hpt: 42, hpx: 42 },
@@ -151,14 +152,16 @@ export async function buildPrecisionFinishingProcessExcelBuffer(
   const images: WorksheetSketchPlacement[] = []
   for (let index = 0; index < records.length; index += 1) {
     const record = records[index]
-    if (!record.process_image_path) continue
+    if (!record.process_image_path)
+      continue
 
     try {
       const image = await resolveImage(record)
       if (image) {
         images.push({ ...image, rowNumber: index + 3, columnNumber: 12 })
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.warn('工艺图示导出失败，已跳过图片:', error)
     }
   }

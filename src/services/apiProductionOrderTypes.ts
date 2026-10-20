@@ -1,21 +1,21 @@
-import type { Database } from './database.types'
 import type {
   ProductionOrderDataCategory,
   ProductionOrderItem,
 } from './apiProductionOrderItems'
+import type { Database } from './database.types'
 
 export type ProductionOrderShift = '白班' | '夜班'
 
-export type ProductionOrder =
-  Database['public']['Tables']['production_orders']['Row'] & {
+export type ProductionOrder
+  = Database['public']['Tables']['production_orders']['Row'] & {
     shift: ProductionOrderShift
   }
-export type ProductionOrderInsert =
-  Database['public']['Tables']['production_orders']['Insert'] & {
+export type ProductionOrderInsert
+  = Database['public']['Tables']['production_orders']['Insert'] & {
     shift?: ProductionOrderShift
   }
-export type ProductionOrderUpdate =
-  Database['public']['Tables']['production_orders']['Update'] & {
+export type ProductionOrderUpdate
+  = Database['public']['Tables']['production_orders']['Update'] & {
     shift?: ProductionOrderShift
   }
 

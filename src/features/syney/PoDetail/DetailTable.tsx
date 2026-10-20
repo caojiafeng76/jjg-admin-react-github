@@ -1,8 +1,10 @@
-import { Key, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, TableColumnsType, TableProps } from 'antd'
+import type { TableColumnsType, TableProps } from 'antd'
+import type { Key } from 'react'
+import type { ISyneyItem } from '@/types'
+import { Table } from 'antd'
+import { useMemo } from 'react'
 import { useAppStore } from '@/store'
-import { ISyneyItem } from '@/types'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { useDetail } from './useDetail'
 
 interface Props {
@@ -26,9 +28,9 @@ export default function DetailTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const { items, isLoading } = useDetail()
 
@@ -114,13 +116,15 @@ export default function DetailTable({
       width: 90,
       align: 'right',
       render: (value: number | null) =>
-        value === null || value === undefined ? (
-          <span className="text-slate-400 dark:text-slate-500">-</span>
-        ) : (
-          <span className="font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
-            {value}
-          </span>
-        ),
+        value === null || value === undefined
+          ? (
+              <span className="text-slate-400 dark:text-slate-500">-</span>
+            )
+          : (
+              <span className="font-semibold text-slate-700 tabular-nums dark:text-slate-200">
+                {value}
+              </span>
+            ),
       sorter: (a, b) => (a.Qty || 0) - (b.Qty || 0),
     },
     {
@@ -162,7 +166,7 @@ export default function DetailTable({
   return (
     <Table<ISyneyItem>
       rowSelection={rowSelection}
-      rowKey={(record) => record.id?.toString() ?? ''}
+      rowKey={record => record.id?.toString() ?? ''}
       columns={columns}
       dataSource={data}
       loading={loading || isLoading}
@@ -171,7 +175,7 @@ export default function DetailTable({
       onRow={handleRow}
       scroll={{ x: 1380, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">
@@ -180,7 +184,7 @@ export default function DetailTable({
               <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={9} align="right">
-              <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+              <span className="font-bold text-slate-900 tabular-nums dark:text-slate-100">
                 {currentPageTotalQty.toLocaleString()}
               </span>
             </Table.Summary.Cell>

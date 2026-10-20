@@ -9,8 +9,10 @@ export function formatBlockedProjectNos(
   projectNos: string[],
   fallbackLabel: string,
 ) {
-  if (projectNos.length === 0) return fallbackLabel
-  if (projectNos.length <= 3) return projectNos.join('、')
+  if (projectNos.length === 0)
+    return fallbackLabel
+  if (projectNos.length <= 3)
+    return projectNos.join('、')
 
   return `${projectNos.slice(0, 3).join('、')} 等${projectNos.length}条订单`
 }
@@ -22,7 +24,8 @@ export function findDuplicateProjectNos(
   const duplicates = new Set<string>()
 
   projectNos.forEach((projectNo) => {
-    if (!projectNo) return
+    if (!projectNo)
+      return
 
     if (seen.has(projectNo)) {
       duplicates.add(projectNo)
@@ -41,7 +44,7 @@ export function normalizeOptionalText(value: string | null | undefined) {
   }
 
   const trimmed = value.trim()
-  return trimmed ? trimmed : null
+  return trimmed || null
 }
 
 function normalizeOptionalNumber(value: number | null | undefined) {
@@ -55,15 +58,15 @@ function normalizeOptionalNumber(value: number | null | undefined) {
 function sanitizeStoragePathPart(value: string) {
   return value
     .trim()
-    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/[^\w.-]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
 
 export function buildSketchPath(row: WorkshopOrder, index: number) {
   const projectNo = sanitizeStoragePathPart(row.project_no || '') || 'unknown'
-  const fileName =
-    sanitizeStoragePathPart(row.sketch_file?.fileName || '') ||
-    `sketch.${row.sketch_file?.extension || 'emf'}`
+  const fileName
+    = sanitizeStoragePathPart(row.sketch_file?.fileName || '')
+      || `sketch.${row.sketch_file?.extension || 'emf'}`
 
   return `${projectNo}/${Date.now()}-${index + 1}-${fileName}`
 }
@@ -95,15 +98,15 @@ export function normalizeWorkshopOrderInput(
 
 function hasMeaningfulWorkshopOrderContent(values: WorkshopOrder) {
   return Boolean(
-    values.project_no ||
-    values.product_model ||
-    values.customer ||
-    values.customer_model ||
-    values.process_flow ||
-    values.material_code ||
-    values.length_mm !== null ||
-    values.order_quantity !== null ||
-    values.weight_per_meter_kg !== null,
+    values.project_no
+    || values.product_model
+    || values.customer
+    || values.customer_model
+    || values.process_flow
+    || values.material_code
+    || values.length_mm !== null
+    || values.order_quantity !== null
+    || values.weight_per_meter_kg !== null,
   )
 }
 
@@ -133,10 +136,7 @@ export function buildSalesOrderPayload(
   mode: 'create' | 'update',
 ): SalesOrderInsert | SalesOrderUpdate {
   const normalizedValues = normalizeWorkshopOrderInput(values)
-  const hasClosedAtValue = Object.prototype.hasOwnProperty.call(
-    values,
-    'closed_at',
-  )
+  const hasClosedAtValue = Object.hasOwn(values, 'closed_at')
 
   const payload: SalesOrderUpdate = {
     product_delivery_date: normalizedValues.product_delivery_date,
@@ -167,7 +167,8 @@ export function buildSalesOrderPayload(
 
   if (normalizedValues.status != null) {
     payload.status = normalizeWorkshopOrderStatus(normalizedValues.status)
-  } else {
+  }
+  else {
     delete payload.status
   }
 
@@ -183,8 +184,8 @@ export function buildWorkshopOrderStatusUpdateValues(
   closedAt: Date | string = new Date(),
 ): SalesOrderUpdate {
   const normalizedStatus = normalizeWorkshopOrderStatus(status)
-  const normalizedClosedAt =
-    typeof closedAt === 'string' ? closedAt : closedAt.toISOString()
+  const normalizedClosedAt
+    = typeof closedAt === 'string' ? closedAt : closedAt.toISOString()
 
   return {
     status: normalizedStatus,

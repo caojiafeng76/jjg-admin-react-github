@@ -1,12 +1,12 @@
-import XLSX from 'xlsx-js-style'
-
 import type { ProductionOrderForExport } from '@/services/apiProductionOrders'
+
 import {
   autoFitColumnWidths,
   centerAllCells,
   EXCEL_WRITE_OPTIONS,
   setRowHeight,
 } from '@utils/excelStyleUtils'
+import XLSX from 'xlsx-js-style'
 
 const EXPORT_HEADERS = [
   '日期',
@@ -62,8 +62,8 @@ const SUMMARY_SALARY_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('工资')
 
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
 const WORK_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('出勤工时')
-const POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX =
-  EXPORT_HEADERS.indexOf('正工工时(h)')
+const POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX
+  = EXPORT_HEADERS.indexOf('正工工时(h)')
 const EXTRA_QUALIFIED_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('零工工时(h)')
 const TOTAL_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('总工时(h)')
 const EFFICIENCY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('工时效率')
@@ -80,22 +80,22 @@ function roundToTwo(value: number) {
 
 function getEmployeeJobName(orders: ProductionOrderForExport[]) {
   return (
-    orders.find((order) => order.employee?.job_name)?.employee?.job_name || ''
+    orders.find(order => order.employee?.job_name)?.employee?.job_name || ''
   )
 }
 
 function getEmployeeHourlyWage(orders: ProductionOrderForExport[]) {
   return roundToTwo(
     normalizeNumber(
-      orders.find((order) => order.employee?.hourly_wage != null)?.employee
-        ?.hourly_wage,
+      orders.find(order => order.employee?.hourly_wage != null)?.employee?.hourly_wage,
     ),
   )
 }
 
 function getEmployeeCoefficient(orders: ProductionOrderForExport[]) {
-  const value = orders.find((order) => order.employee?.coefficient != null)
-    ?.employee?.coefficient
+  const value = orders.find(order => order.employee?.coefficient != null)
+    ?.employee
+    ?.coefficient
 
   return roundToTwo(value == null ? 1 : Number(value))
 }
@@ -212,12 +212,12 @@ function buildExportRow(
   item: ProductionOrderForExport['items'][number],
   positiveQualifiedHours: number,
 ): ExportRow {
-  const personalDefectQuantity =
-    normalizeNumber(item.defect_quantity_1) +
-    normalizeNumber(item.defect_quantity_2)
+  const personalDefectQuantity
+    = normalizeNumber(item.defect_quantity_1)
+      + normalizeNumber(item.defect_quantity_2)
   const penaltyHours = normalizeNumber(item.defect_hours)
-  const efficiency =
-    order.efficiency === null || order.efficiency === undefined
+  const efficiency
+    = order.efficiency === null || order.efficiency === undefined
       ? ''
       : `${(order.efficiency * 100).toFixed(2)}%`
 
@@ -246,8 +246,8 @@ function buildExportRow(
 
 function buildEmptyExportRow(order: ProductionOrderForExport): ExportRow {
   const positiveQualifiedHours = getOrderPositiveQualifiedHours(order)
-  const efficiency =
-    order.efficiency === null || order.efficiency === undefined
+  const efficiency
+    = order.efficiency === null || order.efficiency === undefined
       ? ''
       : `${(order.efficiency * 100).toFixed(2)}%`
 
@@ -281,7 +281,7 @@ function shouldMergeOrderRemark(rows: ExportRow[]) {
 
   const firstRemark = String(rows[0][REMARK_COLUMN_INDEX] ?? '')
   return rows.every(
-    (row) => String(row[REMARK_COLUMN_INDEX] ?? '') === firstRemark,
+    row => String(row[REMARK_COLUMN_INDEX] ?? '') === firstRemark,
   )
 }
 
@@ -290,9 +290,9 @@ function buildOrderSheetRows(
   startRowIndex: number,
 ) {
   const positiveQualifiedHours = getOrderPositiveQualifiedHours(order)
-  const rawRows =
-    order.items.length > 0
-      ? order.items.map((item) =>
+  const rawRows
+    = order.items.length > 0
+      ? order.items.map(item =>
           buildExportRow(order, item, positiveQualifiedHours),
         )
       : [buildEmptyExportRow(order)]
@@ -553,7 +553,7 @@ function applySummarySheetStyles(
 }
 
 function isExternalEmployeeGroup(orders: ProductionOrderForExport[]) {
-  return orders.some((order) => order.employee?.is_external === true)
+  return orders.some(order => order.employee?.is_external === true)
 }
 
 function appendSummarySheet(

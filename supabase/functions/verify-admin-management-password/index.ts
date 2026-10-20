@@ -37,7 +37,8 @@ serve(async (request) => {
 
   try {
     ;({ adminClient, adminEmployee } = await assertAdmin(authorization))
-  } catch (error) {
+  }
+  catch (error) {
     const message = error instanceof Error ? error.message : '权限校验失败'
     const status = message.includes('登录状态') ? 401 : 403
     return jsonResponse({ error: message }, status)
@@ -47,7 +48,8 @@ serve(async (request) => {
 
   try {
     payload = await request.json()
-  } catch {
+  }
+  catch {
     return jsonResponse({ error: '请求体格式不正确' }, 400)
   }
 

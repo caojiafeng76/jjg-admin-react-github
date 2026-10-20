@@ -1,26 +1,25 @@
-import { useEffect, useMemo, useState } from 'react'
-import { App, Button, Card, DatePicker, Form, Input, Typography } from 'antd'
-import dayjs from 'dayjs'
-import { useNavigate, useParams } from 'react-router-dom'
-
-import type { ProductionOrderShift } from '@/services/apiProductionOrders'
 import type {
   ProductionOrderItem,
   ProductionOrderItemWithMachine,
 } from '@/services/apiProductionOrderItems'
-import MobileBottomSelectSheet, {
-  type MobileBottomSelectOption,
-} from '@/ui/mobile/MobileBottomSelectSheet'
+import type { ProductionOrderShift } from '@/services/apiProductionOrders'
+import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
+import { App, Button, Card, DatePicker, Form, Input, Typography } from 'antd'
+
+import dayjs from 'dayjs'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import MobileBottomSelectSheet from '@/ui/mobile/MobileBottomSelectSheet'
 import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 import ProductionOrderItemMobileList from './ProductionOrderItemMobileList'
-import {
-  useProductionOrder,
-  useUpdateProductionOrder,
-} from './useProductionOrders'
 import {
   useDeleteProductionOrderItems,
   useProductionOrderItems,
 } from './useProductionOrderItems'
+import {
+  useProductionOrder,
+  useUpdateProductionOrder,
+} from './useProductionOrders'
 
 const { Paragraph, Title } = Typography
 
@@ -42,8 +41,8 @@ export default function MobileProductionOrderEditPage() {
   const navigate = useNavigate()
   const { orderId } = useParams<{ orderId: string }>()
   const { data: order, isLoading } = useProductionOrder(orderId)
-  const { data: items = [], isLoading: itemsLoading } =
-    useProductionOrderItems(orderId)
+  const { data: items = [], isLoading: itemsLoading }
+    = useProductionOrderItems(orderId)
   const updateMutation = useUpdateProductionOrder()
   const deleteMutation = useDeleteProductionOrderItems()
   const [form] = Form.useForm<OrderFormValues>()
@@ -74,7 +73,8 @@ export default function MobileProductionOrderEditPage() {
     try {
       await deleteMutation.mutateAsync(ids)
       message.success('工序明细删除成功')
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '删除失败')
     }
   }
@@ -97,7 +97,8 @@ export default function MobileProductionOrderEditPage() {
       })
       message.success('工单更新成功')
       navigate(`/production-order/${orderId}`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '工单更新失败')
     }
   }

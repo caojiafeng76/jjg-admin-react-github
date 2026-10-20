@@ -68,7 +68,7 @@ describe('apiExtrusionProductions', () => {
     single.mockResolvedValueOnce({ data: salesOrder, error: null })
 
     const { getExtrusionSalesOrderByProjectNo } = await import(
-      './apiExtrusionProductions'
+      './apiExtrusionProductions',
     )
 
     const result = await getExtrusionSalesOrderByProjectNo('PRJ-001')

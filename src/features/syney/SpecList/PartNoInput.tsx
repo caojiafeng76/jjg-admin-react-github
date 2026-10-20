@@ -1,7 +1,7 @@
-import { Input } from 'antd'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
+import { Input } from 'antd'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
 
 export default function PartNoInput() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -16,7 +16,8 @@ export default function PartNoInput() {
     setValue(next)
     if (next) {
       searchParams.set('PartNo', next)
-    } else {
+    }
+    else {
       searchParams.delete('PartNo')
     }
     searchParams.set('page', '1')

@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface YoumaiProductData {
   id: string
@@ -22,7 +22,7 @@ export interface YoumaiProductDataFormValues {
   remarks: string
 }
 
-type YoumaiProductDataTable = {
+interface YoumaiProductDataTable {
   from: (table: string) => any
 }
 
@@ -133,9 +133,9 @@ export async function createYoumaiProductDataBatch(
     materialCodeSet.add(row.material_code)
   }
 
-  const materialCodes = payload.map((row) => row.material_code)
-  const { data: existingRows, error: existingError } =
-    await youmaiProductDataTable()
+  const materialCodes = payload.map(row => row.material_code)
+  const { data: existingRows, error: existingError }
+    = await youmaiProductDataTable()
       .select('material_code')
       .in('material_code', materialCodes)
 

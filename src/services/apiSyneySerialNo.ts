@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@utils/errorHandler'
+import supabase from './supabase'
 
 export async function getSerialNo() {
   const { data, error } = await supabase

@@ -1,16 +1,16 @@
-import { useMemo, useState } from 'react'
-import { Button, Input, Table, Tag } from 'antd'
-import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
-import { useRoleOptions } from '@/hooks/useRoleOptions'
 import type { AppRole } from '@/config/access'
 import type { Employee } from '@/services/apiEmployees'
+import { Button, Input, Table, Tag } from 'antd'
+import { useMemo, useState } from 'react'
+import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
+import { useRoleOptions } from '@/hooks/useRoleOptions'
 import {
   useAllPermissions,
   useRolePermissionIds,
 } from '../RolePermissionList/useRolePermissions'
-import { useUserPermissionOverrides } from './useUserPermissions'
-import { useUpdateUserPermissions } from './useUpdateUserPermissions'
 import UserPermissionDetail from './UserPermissionDetail'
+import { useUpdateUserPermissions } from './useUpdateUserPermissions'
+import { useUserPermissionOverrides } from './useUserPermissions'
 
 type EmployeeRow = Required<Pick<Employee, 'id' | 'name'>> & {
   role: AppRole | null
@@ -24,13 +24,13 @@ function EmployeeDetailPanel({
   employee: EmployeeRow
   onBack: () => void
 }) {
-  const { data: allPermissions = [], isLoading: loadingAllPerms } =
-    useAllPermissions()
+  const { data: allPermissions = [], isLoading: loadingAllPerms }
+    = useAllPermissions()
   const { data: rolePermissionIds = [] } = useRolePermissionIds(
     employee.role ?? 'employee',
   )
-  const { data: userOverrides = [], isLoading: loadingOverrides } =
-    useUserPermissionOverrides(employee.id)
+  const { data: userOverrides = [], isLoading: loadingOverrides }
+    = useUserPermissionOverrides(employee.id)
   const {
     mutate: updateOverrides,
     isPending: saving,
@@ -47,9 +47,8 @@ function EmployeeDetailPanel({
         userOverrides={userOverrides}
         loadingPerms={loadingAllPerms || loadingOverrides}
         saving={saving}
-        onSave={(overrides) =>
-          updateOverrides({ employeeId: employee.id, overrides })
-        }
+        onSave={overrides =>
+          updateOverrides({ employeeId: employee.id, overrides })}
         onBack={onBack}
       />
     </>
@@ -68,7 +67,7 @@ export default function UserPermissionList() {
   const filtered = useMemo(
     () =>
       allEmployees.filter(
-        (e) => !search || e.name?.toLowerCase().includes(search.toLowerCase()),
+        e => !search || e.name?.toLowerCase().includes(search.toLowerCase()),
       ),
     [allEmployees, search],
   )
@@ -85,22 +84,26 @@ export default function UserPermissionList() {
         dataIndex: 'role',
         key: 'role',
         render: (role: AppRole | null) =>
-          role ? (
-            <Tag>{getRoleLabel(role)}</Tag>
-          ) : (
-            <span className="text-gray-400">—</span>
-          ),
+          role
+            ? (
+                <Tag>{getRoleLabel(role)}</Tag>
+              )
+            : (
+                <span className="text-gray-400">—</span>
+              ),
       },
       {
         title: '状态',
         dataIndex: 'is_active',
         key: 'is_active',
         render: (val: boolean) =>
-          val !== false ? (
-            <Tag color="success">在职</Tag>
-          ) : (
-            <Tag color="default">离职</Tag>
-          ),
+          val !== false
+            ? (
+                <Tag color="success">在职</Tag>
+              )
+            : (
+                <Tag color="default">离职</Tag>
+              ),
       },
       {
         title: '操作',
@@ -134,7 +137,7 @@ export default function UserPermissionList() {
       <Input.Search
         placeholder="搜索员工姓名"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={e => setSearch(e.target.value)}
         allowClear
         style={{ maxWidth: 280 }}
       />

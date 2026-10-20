@@ -1,20 +1,23 @@
-import { useCallback, useState } from 'react'
+import type { ProductionOrderFilters } from '@/services/apiProductionOrders'
 import { App } from 'antd'
+import { useCallback, useState } from 'react'
 import {
   getProductionOrdersForExportByFiltersChunked,
   getProductionOrdersForExportChunked,
   PRODUCTION_ORDER_CHUNKED_EXPORT_PAGE_SIZE,
-  type ProductionOrderFilters,
-} from '@/services/apiProductionOrders'
-const loadProductionOrderExcel = () => import('@/utils/productionOrderExcel')
-const loadProductionOrderNightSnackExcel = () =>
-  import('@/utils/productionOrderNightSnackExcel')
 
-const preloadProductionOrderExcel = () => {
+} from '@/services/apiProductionOrders'
+
+const loadProductionOrderExcel = () => import('@/utils/productionOrderExcel')
+function loadProductionOrderNightSnackExcel() {
+  return import('@/utils/productionOrderNightSnackExcel')
+}
+
+function preloadProductionOrderExcel() {
   void loadProductionOrderExcel()
 }
 
-const preloadProductionOrderNightSnackExcel = () => {
+function preloadProductionOrderNightSnackExcel() {
   void loadProductionOrderNightSnackExcel()
 }
 export function useProductionOrderExport({
@@ -34,8 +37,8 @@ export function useProductionOrderExport({
   const [isExporting, setIsExporting] = useState(false)
   const [isNightSnackExporting, setIsNightSnackExporting] = useState(false)
   const handleExport = useCallback(async () => {
-    const exportTargetCount =
-      selectedRowKeys.length > 0 ? selectedRowKeys.length : (total ?? 0)
+    const exportTargetCount
+      = selectedRowKeys.length > 0 ? selectedRowKeys.length : (total ?? 0)
 
     if (exportTargetCount === 0) {
       message.warning('当前没有可导出的工单')
@@ -56,10 +59,10 @@ export function useProductionOrderExport({
 
       updateProgress(0, exportTargetCount)
 
-      const exportOrders =
-        selectedRowKeys.length > 0
+      const exportOrders
+        = selectedRowKeys.length > 0
           ? await getProductionOrdersForExportChunked(
-              selectedRowKeys.map((key) => String(key)),
+              selectedRowKeys.map(key => String(key)),
               {
                 onProgress: ({ loaded, total }) => {
                   updateProgress(loaded, total)
@@ -92,26 +95,29 @@ export function useProductionOrderExport({
       if (selectedRowKeys.length > 0) {
         setSelectedRowKeys([])
       }
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error({
           key: 'production-order-export',
           content: error.message,
         })
-      } else {
+      }
+      else {
         message.error({
           key: 'production-order-export',
           content: '导出失败，请稍后重试',
         })
       }
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [filters, message, selectedRowKeys, setSelectedRowKeys, total])
 
   const handleNightSnackExport = useCallback(async () => {
-    const exportTargetCount =
-      selectedRowKeys.length > 0 ? selectedRowKeys.length : (total ?? 0)
+    const exportTargetCount
+      = selectedRowKeys.length > 0 ? selectedRowKeys.length : (total ?? 0)
 
     if (exportTargetCount === 0) {
       message.warning('当前没有可导出的工单')
@@ -131,10 +137,10 @@ export function useProductionOrderExport({
 
       updateProgress(0, exportTargetCount)
 
-      const exportOrders =
-        selectedRowKeys.length > 0
+      const exportOrders
+        = selectedRowKeys.length > 0
           ? await getProductionOrdersForExportChunked(
-              selectedRowKeys.map((key) => String(key)),
+              selectedRowKeys.map(key => String(key)),
               {
                 onProgress: ({ loaded, total }) => {
                   updateProgress(loaded, total)
@@ -154,8 +160,8 @@ export function useProductionOrderExport({
         duration: 0,
       })
 
-      const { exportProductionOrderNightSnackDetailsToExcel } =
-        await loadProductionOrderNightSnackExcel()
+      const { exportProductionOrderNightSnackDetailsToExcel }
+        = await loadProductionOrderNightSnackExcel()
       const result = exportProductionOrderNightSnackDetailsToExcel(
         exportOrders,
         {
@@ -179,19 +185,22 @@ export function useProductionOrderExport({
       if (selectedRowKeys.length > 0) {
         setSelectedRowKeys([])
       }
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error({
           key: 'production-order-night-snack-export',
           content: error.message,
         })
-      } else {
+      }
+      else {
         message.error({
           key: 'production-order-night-snack-export',
           content: '夜宵明细导出失败，请稍后重试',
         })
       }
-    } finally {
+    }
+    finally {
       setIsNightSnackExporting(false)
     }
   }, [

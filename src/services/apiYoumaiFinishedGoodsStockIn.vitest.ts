@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-type TableName =
-  | 'youmai_finished_goods_stock_in'
-  | 'youmai_finished_goods_inventory'
-  | 'youmai_product_data'
+type TableName
+  = | 'youmai_finished_goods_stock_in'
+    | 'youmai_finished_goods_inventory'
+    | 'youmai_product_data'
 
 interface QueryCall {
   table: TableName
@@ -42,7 +42,7 @@ function createQueryBuilder(table: TableName) {
       call.payload = payload
       return builder
     },
-    then(resolve: (value: { data: unknown[]; error: null }) => void) {
+    then(resolve: (value: { data: unknown[], error: null }) => void) {
       return Promise.resolve({
         data: mockResults[table] || [],
         error: null,
@@ -94,8 +94,8 @@ describe('apiYoumaiFinishedGoodsStockIn', () => {
       },
     ]
 
-    const { batchUpdateYoumaiFinishedGoodsStockInStatus } =
-      await import('./apiYoumaiFinishedGoodsStockIn')
+    const { batchUpdateYoumaiFinishedGoodsStockInStatus }
+      = await import('./apiYoumaiFinishedGoodsStockIn')
 
     await expect(
       batchUpdateYoumaiFinishedGoodsStockInStatus({
@@ -108,9 +108,9 @@ describe('apiYoumaiFinishedGoodsStockIn', () => {
 
     expect(
       calls.some(
-        (call) =>
-          call.table === 'youmai_finished_goods_stock_in' &&
-          call.operation === 'update',
+        call =>
+          call.table === 'youmai_finished_goods_stock_in'
+          && call.operation === 'update',
       ),
     ).toBe(false)
   })
@@ -132,8 +132,8 @@ describe('apiYoumaiFinishedGoodsStockIn', () => {
       },
     ]
 
-    const { batchUpdateYoumaiFinishedGoodsStockInStatus } =
-      await import('./apiYoumaiFinishedGoodsStockIn')
+    const { batchUpdateYoumaiFinishedGoodsStockInStatus }
+      = await import('./apiYoumaiFinishedGoodsStockIn')
 
     await batchUpdateYoumaiFinishedGoodsStockInStatus({
       ids: ['stock-in-1'],
@@ -141,9 +141,9 @@ describe('apiYoumaiFinishedGoodsStockIn', () => {
     })
 
     const updateCall = calls.find(
-      (call) =>
-        call.table === 'youmai_finished_goods_stock_in' &&
-        call.operation === 'update',
+      call =>
+        call.table === 'youmai_finished_goods_stock_in'
+        && call.operation === 'update',
     )
 
     expect(updateCall?.payload).toEqual({ status: '待审核' })

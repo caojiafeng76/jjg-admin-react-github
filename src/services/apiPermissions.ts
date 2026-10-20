@@ -1,10 +1,11 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 import type { PermissionDefinition, PermissionMap } from '@/types/permission'
+import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export async function getMyPermissions(): Promise<PermissionMap> {
   const { data, error } = await supabase.rpc('get_my_permissions')
-  if (error) throw handleApiError(error, '权限加载失败')
+  if (error)
+    throw handleApiError(error, '权限加载失败')
   const map: PermissionMap = {}
   for (const row of data ?? []) {
     map[row.key] = row.enabled
@@ -15,7 +16,8 @@ export async function getMyPermissions(): Promise<PermissionMap> {
 export async function syncPermissionRegistry(
   registry: PermissionDefinition[],
 ): Promise<void> {
-  if (registry.length === 0) return
+  if (registry.length === 0)
+    return
   const rows = registry.map(
     ({ key, scope, module, surface, label, description }) => ({
       key,
@@ -29,7 +31,8 @@ export async function syncPermissionRegistry(
   const { error } = await supabase
     .from('permissions')
     .upsert(rows, { onConflict: 'key', ignoreDuplicates: true })
-  if (error) throw handleApiError(error, '权限注册表同步失败')
+  if (error)
+    throw handleApiError(error, '权限注册表同步失败')
 }
 
 // ----------------------------------------------------------------
@@ -62,7 +65,8 @@ export async function getAllPermissions(): Promise<PermissionRow[]> {
     .select('*')
     .order('module')
     .order('scope')
-  if (error) throw handleApiError(error, '权限列表加载失败')
+  if (error)
+    throw handleApiError(error, '权限列表加载失败')
   return data ?? []
 }
 
@@ -72,8 +76,9 @@ export async function getRolePermissionIds(role: string): Promise<string[]> {
     .from('role_permissions')
     .select('permission_id')
     .eq('role', role)
-  if (error) throw handleApiError(error, '角色权限加载失败')
-  return (data ?? []).map((r) => r.permission_id)
+  if (error)
+    throw handleApiError(error, '角色权限加载失败')
+  return (data ?? []).map(r => r.permission_id)
 }
 
 /** 批量替换角色权限（先删除旧绑定，再插入新绑定） */
@@ -85,15 +90,18 @@ export async function setRolePermissions(
     .from('role_permissions')
     .delete()
     .eq('role', role)
-  if (delError) throw handleApiError(delError, '角色权限更新失败（清除旧记录）')
+  if (delError)
+    throw handleApiError(delError, '角色权限更新失败（清除旧记录）')
 
-  if (permissionIds.length === 0) return
+  if (permissionIds.length === 0)
+    return
 
-  const rows = permissionIds.map((permission_id) => ({ role, permission_id }))
+  const rows = permissionIds.map(permission_id => ({ role, permission_id }))
   const { error: insError } = await supabase
     .from('role_permissions')
     .insert(rows)
-  if (insError) throw handleApiError(insError, '角色权限更新失败（写入新记录）')
+  if (insError)
+    throw handleApiError(insError, '角色权限更新失败（写入新记录）')
 }
 
 /** 获取某员工的权限覆盖记录 */
@@ -104,14 +112,15 @@ export async function getUserPermissionOverrides(
     .from('user_permission_overrides')
     .select('*')
     .eq('employee_id', employeeId)
-  if (error) throw handleApiError(error, '用户权限覆盖加载失败')
+  if (error)
+    throw handleApiError(error, '用户权限覆盖加载失败')
   return data ?? []
 }
 
 /** 批量替换用户权限覆盖（先删除旧记录，再插入新记录） */
 export async function setUserPermissionOverrides(
   employeeId: string,
-  overrides: Array<{ permissionId: string; enabled: boolean }>,
+  overrides: Array<{ permissionId: string, enabled: boolean }>,
 ): Promise<void> {
   const { error: delError } = await supabase
     .from('user_permission_overrides')
@@ -120,7 +129,8 @@ export async function setUserPermissionOverrides(
   if (delError)
     throw handleApiError(delError, '用户权限覆盖更新失败（清除旧记录）')
 
-  if (overrides.length === 0) return
+  if (overrides.length === 0)
+    return
 
   const rows = overrides.map(({ permissionId, enabled }) => ({
     employee_id: employeeId,

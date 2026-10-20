@@ -1,21 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-  Alert,
-  Form,
-  type FormInstance,
-  Input,
-  InputNumber,
-  Select,
-} from 'antd'
+import type { FormInstance } from 'antd'
+import type { YoumaiRawMaterialInventoryOption } from '@/services/apiYoumaiRawMaterialInventory'
 
 import type {
   YoumaiRawMaterialStockOut,
   YoumaiRawMaterialStockOutFormValues,
 } from '@/services/apiYoumaiRawMaterialStockOut'
-import type { YoumaiRawMaterialInventoryOption } from '@/services/apiYoumaiRawMaterialInventory'
+import {
+  Alert,
+  Form,
 
-import { useRemoteSelectOptions } from '../remoteSelectOptions'
+  Input,
+  InputNumber,
+  Select,
+} from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+
 import { useYoumaiRawMaterialInventoryOption } from '../RawMaterialInventory/useYoumaiRawMaterialInventory'
+import { useRemoteSelectOptions } from '../remoteSelectOptions'
 import { useYoumaiRawMaterialInventoryOptionsForStockOut } from './useYoumaiRawMaterialStockOut'
 
 interface Props {
@@ -45,22 +46,22 @@ export default function YoumaiRawMaterialStockOutForm({
     data: inventoryOptions = [],
     isFetching: areInventoryOptionsLoading,
   } = useYoumaiRawMaterialInventoryOptionsForStockOut(inventoryOptionKeyword)
-  const { data: editingInventoryOption } =
-    useYoumaiRawMaterialInventoryOption(
+  const { data: editingInventoryOption }
+    = useYoumaiRawMaterialInventoryOption(
       isEdit ? editingRecord?.inventory_id : undefined,
     )
   const initialInventorySnapshot = useMemo(
     () =>
       isEdit && editingRecord
-        ? editingInventoryOption ??
-          inventoryOptions.find(
-            (option) => option.id === editingRecord.inventory_id,
-          )
+        ? editingInventoryOption
+        ?? inventoryOptions.find(
+          option => option.id === editingRecord.inventory_id,
+        )
         : undefined,
     [editingInventoryOption, editingRecord, inventoryOptions, isEdit],
   )
-  const { mergedOptions, rememberSelectedOption } =
-    useRemoteSelectOptions<YoumaiRawMaterialInventoryOption>(
+  const { mergedOptions, rememberSelectedOption }
+    = useRemoteSelectOptions<YoumaiRawMaterialInventoryOption>(
       inventoryOptions,
       initialInventorySnapshot,
     )
@@ -68,15 +69,15 @@ export default function YoumaiRawMaterialStockOutForm({
   const outQuantity = Form.useWatch('quantity', form)
 
   const selectedOption = useMemo(
-    () => mergedOptions.find((item) => item.id === selectedInventoryId),
+    () => mergedOptions.find(item => item.id === selectedInventoryId),
     [mergedOptions, selectedInventoryId],
   )
 
-  const isInsufficient =
-    !isEdit &&
-    selectedOption != null &&
-    typeof outQuantity === 'number' &&
-    outQuantity > selectedOption.quantity
+  const isInsufficient
+    = !isEdit
+      && selectedOption != null
+      && typeof outQuantity === 'number'
+      && outQuantity > selectedOption.quantity
 
   useEffect(() => {
     setFormRef(form)
@@ -97,7 +98,7 @@ export default function YoumaiRawMaterialStockOutForm({
 
   const options = useMemo(
     () =>
-      mergedOptions.map((item) => ({
+      mergedOptions.map(item => ({
         value: item.id,
         label: `${item.model} - ${item.specification}（当前库存：${item.quantity}）`,
       })),
@@ -116,23 +117,25 @@ export default function YoumaiRawMaterialStockOutForm({
         label="原料（型号 - 规格）"
         rules={[{ required: true, message: '请选择原料' }]}
       >
-        {isEdit && editingRecord ? (
-          <Input
-            disabled
-            value={`${editingRecord.model} - ${editingRecord.specification}`}
-          />
-        ) : (
-          <Select
-            showSearch={{
-              filterOption: false,
-              onSearch: setInventoryOptionKeyword,
-            }}
-            onChange={rememberSelectedOption}
-            loading={areInventoryOptionsLoading}
-            placeholder="请选择原料"
-            options={options}
-          />
-        )}
+        {isEdit && editingRecord
+          ? (
+              <Input
+                disabled
+                value={`${editingRecord.model} - ${editingRecord.specification}`}
+              />
+            )
+          : (
+              <Select
+                showSearch={{
+                  filterOption: false,
+                  onSearch: setInventoryOptionKeyword,
+                }}
+                onChange={rememberSelectedOption}
+                loading={areInventoryOptionsLoading}
+                placeholder="请选择原料"
+                options={options}
+              />
+            )}
       </Form.Item>
 
       {selectedOption && (

@@ -1,12 +1,12 @@
 import { DocumentIcon } from '@heroicons/react/16/solid'
-import { Button, App } from 'antd'
-import { useGenerateSummaryPDF } from './useGenerateSummaryPDF'
+import { App, Button } from 'antd'
 import { useAppStore } from '@/store'
+import { useGenerateSummaryPDF } from './useGenerateSummaryPDF'
 
 export default function ExportPDFButton() {
   const { message } = App.useApp()
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const { generateSummaryPDF, preloadPDF, isLoading } = useGenerateSummaryPDF()
 
@@ -22,7 +22,8 @@ export default function ExportPDFButton() {
     if (success) {
       message.success('PDF 文件生成成功')
       setTableSelectedKeys([])
-    } else {
+    }
+    else {
       message.warning('没有可导出的数据')
     }
   }

@@ -1,13 +1,13 @@
-import * as XLSX from 'xlsx-js-style'
 import type { WorkSheet } from 'xlsx-js-style'
-
 import type { WorkshopOrder } from '@/features/workshop/OrderList'
+
 import {
   autoFitColumnWidths,
-  setRowHeight,
   centerAllCells,
   EXCEL_WRITE_OPTIONS,
+  setRowHeight,
 } from '@utils/excelStyleUtils'
+import * as XLSX from 'xlsx-js-style'
 import { extractFirstWorksheetSketchFiles } from './workshopOrderSketchXlsx'
 
 export const TEMPLATE_HEADERS = [
@@ -45,21 +45,21 @@ export function downloadWorkshopOrderTemplate() {
 
 export interface WorkshopOrderExcelRow {
   '产品交货日期(yyyy-mm-dd)': string
-  项目号: string
-  产品型号: string
+  '项目号': string
+  '产品型号': string
   '长度(mm)': number
-  长度公差: string
-  客户: string
-  客户型号: string
-  订支数: number
+  '长度公差': string
+  '客户': string
+  '客户型号': string
+  '订支数': number
   '每米理论重(kg/m)': number
-  颜色名称: string
-  包装名称: string
-  产品类别: string
-  材质名称: string
-  料号: string
-  工艺流程: string
-  行备注: string
+  '颜色名称': string
+  '包装名称': string
+  '产品类别': string
+  '材质名称': string
+  '料号': string
+  '工艺流程': string
+  '行备注': string
 }
 
 export async function parseWorkshopOrderExcel(
@@ -95,8 +95,8 @@ function parseTemplateSheet(sheet: WorkSheet): WorkshopOrder[] {
   })
 
   return rows
-    .filter((row) => !!row.项目号 || !!row.产品型号)
-    .map((row) => ({
+    .filter(row => !!row.项目号 || !!row.产品型号)
+    .map(row => ({
       product_delivery_date: row['产品交货日期(yyyy-mm-dd)'] || '',
       project_no: row.项目号 || null,
       product_model: row.产品型号 || null,
@@ -143,7 +143,8 @@ interface ErpColumnMap {
 
 function getWorksheetRowEntries(sheet: WorkSheet): WorksheetRowEntry[] {
   const ref = sheet['!ref']
-  if (!ref) return []
+  if (!ref)
+    return []
 
   const range = XLSX.utils.decode_range(ref)
   const entries: WorksheetRowEntry[] = []
@@ -178,7 +179,7 @@ function parseErpSalesOrderSheet(
   >(),
 ): WorkshopOrder[] {
   const rowEntries = getWorksheetRowEntries(sheet)
-  const rows = rowEntries.map((entry) => entry.row)
+  const rows = rowEntries.map(entry => entry.row)
 
   let columnMap = findErpColumnMap(rows)
   if (!columnMap) {
@@ -191,28 +192,31 @@ function parseErpSalesOrderSheet(
   for (const entry of rowEntries) {
     const row = entry.row
 
-    if (!row || row.length === 0) continue
+    if (!row || row.length === 0)
+      continue
 
     if (isErpHeaderRow(row)) {
       columnMap = buildErpColumnMap(row)
       continue
     }
 
-    if (!columnMap || isNoiseRow(row)) continue
+    if (!columnMap || isNoiseRow(row))
+      continue
 
     const projectNo = getStringFromRow(row, columnMap.project_no)
     const productModel = getStringFromRow(row, columnMap.product_model)
 
     // 如果关键列（项目号或产品型号）有值，即使该行在合并单元格中，也应该解析
     // 因为合并单元格可能只影响某些显示列，而不影响关键数据列
-    if (!projectNo && !productModel) continue
+    if (!projectNo && !productModel)
+      continue
 
     const normalizedProjectNo = projectNo ? removeSpaces(projectNo) : ''
     if (
-      normalizedProjectNo === '' ||
-      normalizedProjectNo.includes('小计') ||
-      normalizedProjectNo.includes('合计') ||
-      normalizedProjectNo.includes('客户订单号')
+      normalizedProjectNo === ''
+      || normalizedProjectNo.includes('小计')
+      || normalizedProjectNo.includes('合计')
+      || normalizedProjectNo.includes('客户订单号')
     ) {
       continue
     }
@@ -259,7 +263,8 @@ function deduplicateOrders(orders: WorkshopOrder[]): WorkshopOrder[] {
       order.order_quantity ?? '',
     ].join('|')
 
-    if (seen.has(key)) continue
+    if (seen.has(key))
+      continue
     seen.add(key)
     unique.push(order)
   }
@@ -269,7 +274,7 @@ function deduplicateOrders(orders: WorkshopOrder[]): WorkshopOrder[] {
 
 function validateProjectNoUniqueness(orders: WorkshopOrder[]) {
   const duplicates = orders
-    .map((order) => order.project_no?.trim())
+    .map(order => order.project_no?.trim())
     .filter((projectNo): projectNo is string => !!projectNo)
     .reduce<Record<string, number>>((acc, projectNo) => {
       acc[projectNo] = (acc[projectNo] || 0) + 1
@@ -288,19 +293,21 @@ function validateProjectNoUniqueness(orders: WorkshopOrder[]) {
 }
 
 function findErpColumnMap(rows: WorksheetRow[]): ErpColumnMap | null {
-  const headerRow = rows.find((row) => row && isErpHeaderRow(row))
+  const headerRow = rows.find(row => row && isErpHeaderRow(row))
   return headerRow ? buildErpColumnMap(headerRow) : null
 }
 
 function findErpCustomer(rows: WorksheetRow[]): string | null {
   for (const row of rows) {
     for (const cell of row) {
-      if (typeof cell !== 'string') continue
+      if (typeof cell !== 'string')
+        continue
 
       const normalized = removeSpaces(cell)
       const marker = '购货单位：'
 
-      if (!normalized.includes(marker)) continue
+      if (!normalized.includes(marker))
+        continue
 
       const value = normalized.split(marker)[1]?.trim()
       if (value) {
@@ -347,21 +354,23 @@ function findColumnIndices(row: WorksheetRow, keyword: string): number[] {
         ? index
         : -1,
     )
-    .filter((index) => index !== -1)
+    .filter(index => index !== -1)
 }
 
 function getStringFromRow(row: WorksheetRow, indices: number[]): string | null {
   const value = getCellValue(row, indices)
-  if (value === null) return null
+  if (value === null)
+    return null
   return typeof value === 'string' ? value.trim() : String(value)
 }
 
 function getNumberFromRow(row: WorksheetRow, indices: number[]): number | null {
   const value = getCellValue(row, indices)
-  if (value === null) return null
+  if (value === null)
+    return null
 
-  const numericValue =
-    typeof value === 'number'
+  const numericValue
+    = typeof value === 'number'
       ? value
       : Number(String(value).replace(/[^0-9.-]/g, ''))
 
@@ -370,20 +379,24 @@ function getNumberFromRow(row: WorksheetRow, indices: number[]): number | null {
 
 function getDateFromRow(row: WorksheetRow, indices: number[]): string | null {
   const value = getCellValue(row, indices)
-  if (value === null) return null
+  if (value === null)
+    return null
 
   if (typeof value === 'number') {
     const parsed = XLSX.SSF.parse_date_code(value)
-    if (!parsed) return null
+    if (!parsed)
+      return null
     return `${parsed.y}-${String(parsed.m).padStart(2, '0')}-${String(parsed.d).padStart(2, '0')}`
   }
 
   const normalized = value.trim().replace(/[./]/g, '-')
-  if (!normalized) return null
+  if (!normalized)
+    return null
 
   const [datePart] = normalized.split(' ')
   const match = datePart.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/)
-  if (!match) return datePart
+  if (!match)
+    return datePart
 
   const [, year, month, day] = match
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
@@ -394,15 +407,20 @@ function getCellValue(
   indices: number[],
 ): string | number | null {
   for (const index of indices) {
-    if (index === undefined || index === null) continue
+    if (index === undefined || index === null)
+      continue
     const value = row[index]
-    if (value === undefined || value === null) continue
+    if (value === undefined || value === null)
+      continue
 
     if (typeof value === 'string') {
       const trimmed = value.trim()
-      if (trimmed) return trimmed
-    } else if (typeof value === 'number') {
-      if (!Number.isNaN(value)) return value
+      if (trimmed)
+        return trimmed
+    }
+    else if (typeof value === 'number') {
+      if (!Number.isNaN(value))
+        return value
     }
   }
 
@@ -412,12 +430,13 @@ function getCellValue(
 function isErpHeaderRow(row: WorksheetRow) {
   const normalizedRow = row
     .filter((cell): cell is string => typeof cell === 'string')
-    .map((cell) => removeSpaces(cell))
+    .map(cell => removeSpaces(cell))
 
-  if (!normalizedRow.length) return false
+  if (!normalizedRow.length)
+    return false
 
   const requiredHeaders = ['项目号', '产品型号']
-  return requiredHeaders.every((header) => normalizedRow.includes(header))
+  return requiredHeaders.every(header => normalizedRow.includes(header))
 }
 
 function isNoiseRow(row: WorksheetRow) {
@@ -435,9 +454,10 @@ function isNoiseRow(row: WorksheetRow) {
     '业务员',
   ]
   return row.some((cell) => {
-    if (typeof cell !== 'string') return false
+    if (typeof cell !== 'string')
+      return false
     const normalized = removeSpaces(cell)
-    return keywords.some((keyword) =>
+    return keywords.some(keyword =>
       normalized.includes(removeSpaces(keyword)),
     )
   })

@@ -1,13 +1,13 @@
-import dayjs from 'dayjs'
+import type { Database } from './database.types'
 
 import type {
   ToolingFixtureLifecycle,
   ToolingFixtureStatus,
 } from '@/features/tooling-fixture/fixtureDomain'
+import dayjs from 'dayjs'
 import { TOOLING_FIXTURE_LIFECYCLES } from '@/features/tooling-fixture/fixtureDomain'
 import { handleApiError } from '@/utils/errorHandler'
 import { buildPostgrestOrIlikeFilter } from '@/utils/postgrestFilters'
-import type { Database } from './database.types'
 import supabase from './supabase'
 
 type ToolingFixtureRow = Database['public']['Tables']['tooling_fixtures']['Row']
@@ -90,9 +90,9 @@ export function normalizeToolingFixtureFormValues(
     throw new Error('请输入工装模具编号')
   }
 
-  const cycle =
-    values.maintenance_cycle_days === null ||
-    values.maintenance_cycle_days === undefined
+  const cycle
+    = values.maintenance_cycle_days === null
+      || values.maintenance_cycle_days === undefined
       ? null
       : Number(values.maintenance_cycle_days)
 
@@ -175,7 +175,7 @@ export async function getToolingFixtureList({
   manufacturedDateRange?: ToolingFixtureDateRange
   updatedDateRange?: ToolingFixtureDateRange
   signal?: AbortSignal
-}): Promise<{ items: ToolingFixture[]; total: number }> {
+}): Promise<{ items: ToolingFixture[], total: number }> {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
   let query = supabase.from('tooling_fixtures').select('*', { count: 'exact' })
@@ -385,7 +385,7 @@ export async function createToolingFixturesBatch(
     fixtureNoSet.add(row.fixture_no)
   }
 
-  const fixtureNos = payload.map((row) => row.fixture_no)
+  const fixtureNos = payload.map(row => row.fixture_no)
   const { data: existingRows, error: existingError } = await supabase
     .from('tooling_fixtures')
     .select('fixture_no')
@@ -397,7 +397,7 @@ export async function createToolingFixturesBatch(
 
   if ((existingRows ?? []).length > 0) {
     const duplicateNos = (existingRows as Array<{ fixture_no: string }>)
-      .map((row) => row.fixture_no)
+      .map(row => row.fixture_no)
       .join('、')
 
     throw new Error(`以下工装模具编号已存在，无法导入：${duplicateNos}`)

@@ -97,8 +97,8 @@ const SUMMARY_SALARY_COLUMN_INDEX = SUMMARY_HEADERS.indexOf('工资')
 
 const ORDER_DATE_COLUMN_INDEX = EXPORT_HEADERS.indexOf('日期')
 const WORK_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('出勤工时')
-const POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX =
-  EXPORT_HEADERS.indexOf('正工工时(h)')
+const POSITIVE_QUALIFIED_HOURS_COLUMN_INDEX
+  = EXPORT_HEADERS.indexOf('正工工时(h)')
 const EXTRA_QUALIFIED_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('零工工时(h)')
 const TOTAL_HOURS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('总工时(h)')
 const EFFICIENCY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('工时效率')
@@ -121,14 +121,15 @@ function getTextDisplayWidth(text: string): number {
       const code = line.charCodeAt(index)
 
       if (
-        (code >= 0x4e00 && code <= 0x9fff) ||
-        (code >= 0x3400 && code <= 0x4dbf) ||
-        (code >= 0xf900 && code <= 0xfaff) ||
-        (code >= 0x3000 && code <= 0x303f) ||
-        (code >= 0xff00 && code <= 0xffef)
+        (code >= 0x4E00 && code <= 0x9FFF)
+        || (code >= 0x3400 && code <= 0x4DBF)
+        || (code >= 0xF900 && code <= 0xFAFF)
+        || (code >= 0x3000 && code <= 0x303F)
+        || (code >= 0xFF00 && code <= 0xFFEF)
       ) {
         width += 2
-      } else {
+      }
+      else {
         width += 1
       }
     }
@@ -143,10 +144,11 @@ function autoFitColumnWidths(
   minWidth = 8,
   maxWidth = 60,
 ) {
-  if (!data || data.length === 0) return
+  if (!data || data.length === 0)
+    return
 
   const colCount = data[0].length
-  const colWidths: { wch: number; wpx: number }[] = []
+  const colWidths: { wch: number, wpx: number }[] = []
 
   for (let col = 0; col < colCount; col += 1) {
     let maxLen = minWidth
@@ -173,7 +175,7 @@ function autoFitColumnWidths(
 }
 
 function setRowHeight(ws: XLSX.WorkSheet, rowHeight: number, rowCount: number) {
-  const rows: { hpt?: number; hpx?: number }[] = []
+  const rows: { hpt?: number, hpx?: number }[] = []
 
   for (let index = 0; index < rowCount; index += 1) {
     rows.push({ hpt: rowHeight, hpx: rowHeight })
@@ -194,7 +196,8 @@ function columnIndexToLetter(index: number): string {
 }
 
 function centerAllCells(ws: XLSX.WorkSheet, data: Array<Array<unknown>>) {
-  if (!data || data.length === 0) return
+  if (!data || data.length === 0)
+    return
 
   const rowCount = data.length
   const colCount = data[0].length
@@ -226,22 +229,22 @@ function centerAllCells(ws: XLSX.WorkSheet, data: Array<Array<unknown>>) {
 
 function getEmployeeJobName(orders: ProductionOrderForExportRecord[]) {
   return (
-    orders.find((order) => order.employee?.job_name)?.employee?.job_name || ''
+    orders.find(order => order.employee?.job_name)?.employee?.job_name || ''
   )
 }
 
 function getEmployeeHourlyWage(orders: ProductionOrderForExportRecord[]) {
   return roundToTwo(
     normalizeNumber(
-      orders.find((order) => order.employee?.hourly_wage != null)?.employee
-        ?.hourly_wage,
+      orders.find(order => order.employee?.hourly_wage != null)?.employee?.hourly_wage,
     ),
   )
 }
 
 function getEmployeeCoefficient(orders: ProductionOrderForExportRecord[]) {
-  const value = orders.find((order) => order.employee?.coefficient != null)
-    ?.employee?.coefficient
+  const value = orders.find(order => order.employee?.coefficient != null)
+    ?.employee
+    ?.coefficient
 
   return roundToTwo(value == null ? 1 : Number(value))
 }
@@ -358,12 +361,12 @@ function buildExportRow(
   item: ProductionOrderExportItem,
   positiveQualifiedHours: number,
 ): ExportRow {
-  const personalDefectQuantity =
-    normalizeNumber(item.defect_quantity_1) +
-    normalizeNumber(item.defect_quantity_2)
+  const personalDefectQuantity
+    = normalizeNumber(item.defect_quantity_1)
+      + normalizeNumber(item.defect_quantity_2)
   const penaltyHours = normalizeNumber(item.defect_hours)
-  const efficiency =
-    order.efficiency === null || order.efficiency === undefined
+  const efficiency
+    = order.efficiency === null || order.efficiency === undefined
       ? ''
       : `${(order.efficiency * 100).toFixed(2)}%`
 
@@ -392,8 +395,8 @@ function buildExportRow(
 
 function buildEmptyExportRow(order: ProductionOrderForExportRecord): ExportRow {
   const positiveQualifiedHours = getOrderPositiveQualifiedHours(order)
-  const efficiency =
-    order.efficiency === null || order.efficiency === undefined
+  const efficiency
+    = order.efficiency === null || order.efficiency === undefined
       ? ''
       : `${(order.efficiency * 100).toFixed(2)}%`
 
@@ -427,7 +430,7 @@ function shouldMergeOrderRemark(rows: ExportRow[]) {
 
   const firstRemark = String(rows[0][REMARK_COLUMN_INDEX] ?? '')
   return rows.every(
-    (row) => String(row[REMARK_COLUMN_INDEX] ?? '') === firstRemark,
+    row => String(row[REMARK_COLUMN_INDEX] ?? '') === firstRemark,
   )
 }
 
@@ -436,9 +439,9 @@ function buildOrderSheetRows(
   startRowIndex: number,
 ) {
   const positiveQualifiedHours = getOrderPositiveQualifiedHours(order)
-  const rawRows =
-    order.items.length > 0
-      ? order.items.map((item) =>
+  const rawRows
+    = order.items.length > 0
+      ? order.items.map(item =>
           buildExportRow(order, item, positiveQualifiedHours),
         )
       : [buildEmptyExportRow(order)]

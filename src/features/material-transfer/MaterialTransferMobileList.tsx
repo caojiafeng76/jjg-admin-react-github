@@ -1,7 +1,7 @@
-import { Button, Spin } from 'antd'
+import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
-import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
+import { Button, Spin } from 'antd'
 
 interface Props {
   loading: boolean
@@ -181,8 +181,8 @@ export default function MaterialTransferMobileList({
                   <div
                     className={
                       selected
-                        ? 'text-[11px] font-medium uppercase tracking-[0.15em] text-white/60'
-                        : 'text-[11px] font-medium uppercase tracking-[0.15em] text-slate-500'
+                        ? 'text-[11px] font-medium tracking-[0.15em] text-white/60 uppercase'
+                        : 'text-[11px] font-medium tracking-[0.15em] text-slate-500 uppercase'
                     }
                   >
                     转移数量
@@ -224,7 +224,7 @@ export default function MaterialTransferMobileList({
                         })
                       : '未审核',
                   },
-                ].map((item) => (
+                ].map(item => (
                   <div
                     key={item.label}
                     className={
@@ -236,8 +236,8 @@ export default function MaterialTransferMobileList({
                     <div
                       className={
                         selected
-                          ? 'text-[11px] font-medium uppercase tracking-[0.1em] text-white/50'
-                          : 'text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400'
+                          ? 'text-[11px] font-medium tracking-[0.1em] text-white/50 uppercase'
+                          : 'text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase'
                       }
                     >
                       {item.label}
@@ -265,8 +265,8 @@ export default function MaterialTransferMobileList({
                   <div
                     className={
                       selected
-                        ? 'text-[11px] font-medium uppercase tracking-[0.1em] text-white/50'
-                        : 'text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400'
+                        ? 'text-[11px] font-medium tracking-[0.1em] text-white/50 uppercase'
+                        : 'text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase'
                     }
                   >
                     备注
@@ -274,8 +274,8 @@ export default function MaterialTransferMobileList({
                   <div
                     className={
                       selected
-                        ? 'mt-1 text-sm font-medium leading-relaxed text-white'
-                        : 'mt-1 text-sm font-medium leading-relaxed text-slate-600'
+                        ? 'mt-1 text-sm leading-relaxed font-medium text-white'
+                        : 'mt-1 text-sm leading-relaxed font-medium text-slate-600'
                     }
                   >
                     {record.remark?.trim() || '无备注'}

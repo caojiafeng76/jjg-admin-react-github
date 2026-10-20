@@ -1,17 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import type { FormInstance } from 'antd'
+import type {
+  JintanPartsStockOut,
+  JintanPartsStockOutFormValues,
+} from '@/services/apiJintanPartsStockOut'
 import {
   Alert,
   Form,
-  type FormInstance,
+
   Input,
   InputNumber,
   Select,
 } from 'antd'
 
-import type {
-  JintanPartsStockOut,
-  JintanPartsStockOutFormValues,
-} from '@/services/apiJintanPartsStockOut'
+import { useEffect, useMemo, useState } from 'react'
 import { useJintanPartsInventoryOptions } from '../PartsInventory/useJintanPartsInventory'
 
 interface Props {
@@ -53,11 +54,11 @@ export default function JintanPartsStockOutForm({
     error,
   } = useJintanPartsInventoryOptions(keyword)
   const selectedInventoryId = Form.useWatch('inventory_id', form)
-  const selected = options.find((option) => option.id === selectedInventoryId)
+  const selected = options.find(option => option.id === selectedInventoryId)
 
   const selectOptions = useMemo(
     () =>
-      options.map((option) => ({
+      options.map(option => ({
         value: option.id,
         label: `${option.part_name} / ${option.specification || '无规格'}（库存 ${option.quantity}）`,
       })),
@@ -94,41 +95,45 @@ export default function JintanPartsStockOutForm({
       onFinish={onFinish}
       disabled={isSubmitting}
     >
-      {editingRecord ? (
-        <>
-          <Form.Item name="inventory_id" hidden>
-            <Input />
-          </Form.Item>
-          <Form.Item label="配件资料">
-            <Input
-              disabled
-              value={`${editingRecord.part_name} / ${editingRecord.specification || '无规格'}`}
-            />
-          </Form.Item>
-        </>
-      ) : quickInventory ? (
-        <>
-          <Form.Item name="inventory_id" hidden>
-            <Input />
-          </Form.Item>
-          <Form.Item label="配件资料">
-            <Input disabled value={quickInventory.label} />
-          </Form.Item>
-        </>
-      ) : (
-        <Form.Item
-          name="inventory_id"
-          label="配件资料"
-          rules={[{ required: true, message: '请选择配件' }]}
-        >
-          <Select
-            showSearch={{ filterOption: false, onSearch: setKeyword }}
-            options={selectOptions}
-            loading={isFetching}
-            placeholder="按名称、规格、材质或采购厂家查找配件"
-          />
-        </Form.Item>
-      )}
+      {editingRecord
+        ? (
+            <>
+              <Form.Item name="inventory_id" hidden>
+                <Input />
+              </Form.Item>
+              <Form.Item label="配件资料">
+                <Input
+                  disabled
+                  value={`${editingRecord.part_name} / ${editingRecord.specification || '无规格'}`}
+                />
+              </Form.Item>
+            </>
+          )
+        : quickInventory
+          ? (
+              <>
+                <Form.Item name="inventory_id" hidden>
+                  <Input />
+                </Form.Item>
+                <Form.Item label="配件资料">
+                  <Input disabled value={quickInventory.label} />
+                </Form.Item>
+              </>
+            )
+          : (
+              <Form.Item
+                name="inventory_id"
+                label="配件资料"
+                rules={[{ required: true, message: '请选择配件' }]}
+              >
+                <Select
+                  showSearch={{ filterOption: false, onSearch: setKeyword }}
+                  options={selectOptions}
+                  loading={isFetching}
+                  placeholder="按名称、规格、材质或采购厂家查找配件"
+                />
+              </Form.Item>
+            )}
       {!editingRecord && !quickInventory && error && (
         <Alert type="error" showIcon title="配件列表加载失败，请重试" />
       )}
@@ -160,7 +165,7 @@ export default function JintanPartsStockOutForm({
                   )
                 }
                 const currentOption = options.find(
-                  (option) => option.id === form.getFieldValue('inventory_id'),
+                  option => option.id === form.getFieldValue('inventory_id'),
                 )
                 if (currentOption && value > currentOption.quantity) {
                   throw new Error(

@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
-import { Form, FormInstance, Input } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   LaborProtectionData,
   LaborProtectionDataFormValues,
 } from '@/services/apiLaborProtectionData'
+import { Form, Input } from 'antd'
+
+import { useEffect } from 'react'
 
 interface Props {
   onFinish: (values: LaborProtectionDataFormValues) => void

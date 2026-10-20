@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type { MaterialTransferFilters } from '@/services/apiMaterialTransfers'
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import dayjs, { type Dayjs } from 'dayjs'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import dayjs from 'dayjs'
 
+import { useEffect, useState } from 'react'
 import {
   MATERIAL_TRANSFER_AUDIT_OPTIONS,
   MATERIAL_TRANSFER_WORKSHOPS,
-  type MaterialTransferFilters,
+
 } from '@/services/apiMaterialTransfers'
 
 const { RangePicker } = DatePicker
@@ -22,7 +24,7 @@ interface MaterialTransferSearchValues extends MaterialTransferFilters {
 interface Props {
   onSearch: (values: MaterialTransferSearchValues) => void
   onReset: () => void
-  employees: { id: string; name: string }[]
+  employees: { id: string, name: string }[]
   lengthOptions: number[]
   initialValues?: MaterialTransferSearchValues
   mobile?: boolean
@@ -81,7 +83,7 @@ export default function MaterialTransferSearch({
       isAudited:
         typeof values.isAudited === 'boolean' ? values.isAudited : undefined,
     })
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   function handleReset() {
@@ -91,7 +93,7 @@ export default function MaterialTransferSearch({
     if (mobile) {
       setIsExpanded(false)
     }
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   const formClassName = mobile
@@ -160,7 +162,7 @@ export default function MaterialTransferSearch({
           getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 140 }}
           maxTagCount="responsive"
-          options={lengthOptions.map((v) => ({ label: `${v}mm`, value: v }))}
+          options={lengthOptions.map(v => ({ label: `${v}mm`, value: v }))}
           className="rounded-lg"
           styles={{
             popup: {
@@ -172,29 +174,31 @@ export default function MaterialTransferSearch({
         />
       </Form.Item>
 
-      {showEmployeeFilter ? (
-        <Form.Item name="employeeId" className={formItemClassName}>
-          <Select
-            placeholder="操作人"
-            allowClear
-            showSearch={{ optionFilterProp: 'label' }}
-            getPopupContainer={getPopupContainer}
-            style={{ width: mobile ? '100%' : 140 }}
-            options={employees.map((employee) => ({
-              label: employee.name,
-              value: employee.id,
-            }))}
-            className="rounded-lg"
-            styles={{
-              popup: {
-                root: {
-                  minWidth: 120,
-                },
-              },
-            }}
-          />
-        </Form.Item>
-      ) : null}
+      {showEmployeeFilter
+        ? (
+            <Form.Item name="employeeId" className={formItemClassName}>
+              <Select
+                placeholder="操作人"
+                allowClear
+                showSearch={{ optionFilterProp: 'label' }}
+                getPopupContainer={getPopupContainer}
+                style={{ width: mobile ? '100%' : 140 }}
+                options={employees.map(employee => ({
+                  label: employee.name,
+                  value: employee.id,
+                }))}
+                className="rounded-lg"
+                styles={{
+                  popup: {
+                    root: {
+                      minWidth: 120,
+                    },
+                  },
+                }}
+              />
+            </Form.Item>
+          )
+        : null}
 
       <Form.Item name="targetWorkshop" className={formItemClassName}>
         <Select
@@ -202,7 +206,7 @@ export default function MaterialTransferSearch({
           allowClear
           getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 140 }}
-          options={MATERIAL_TRANSFER_WORKSHOPS.map((workshop) => ({
+          options={MATERIAL_TRANSFER_WORKSHOPS.map(workshop => ({
             label: workshop,
             value: workshop,
           }))}
@@ -265,7 +269,7 @@ export default function MaterialTransferSearch({
         <Button
           block
           type="default"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={() => setIsExpanded(prev => !prev)}
           className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm font-medium shadow-sm transition-all hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:border-slate-700 dark:bg-slate-800"
         >
           <span className="flex w-full items-center justify-between">
@@ -283,11 +287,13 @@ export default function MaterialTransferSearch({
           </span>
         </Button>
 
-        {isExpanded ? (
-          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            {formContent}
-          </div>
-        ) : null}
+        {isExpanded
+          ? (
+              <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                {formContent}
+              </div>
+            )
+          : null}
       </div>
     )
   }

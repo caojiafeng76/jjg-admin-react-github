@@ -97,40 +97,40 @@ function getErrorCategory({
   const normalizedCode = code?.toLowerCase() || ''
 
   if (
-    statusCode === 404 ||
-    normalizedCode === 'not_found' ||
-    normalizedMessage.includes('not found') ||
-    normalizedMessage.includes('不存在') ||
-    normalizedMessage.includes('未找到')
+    statusCode === 404
+    || normalizedCode === 'not_found'
+    || normalizedMessage.includes('not found')
+    || normalizedMessage.includes('不存在')
+    || normalizedMessage.includes('未找到')
   ) {
     return 'notFound'
   }
 
   if (
-    statusCode === 401 ||
-    statusCode === 403 ||
-    normalizedCode === 'unauthorized' ||
-    normalizedCode === 'forbidden' ||
-    normalizedCode === '42501' ||
-    normalizedMessage.includes('permission denied') ||
-    normalizedMessage.includes('row-level security') ||
-    normalizedMessage.includes('认证') ||
-    normalizedMessage.includes('未授权') ||
-    normalizedMessage.includes('没有权限') ||
-    normalizedMessage.includes('权限')
+    statusCode === 401
+    || statusCode === 403
+    || normalizedCode === 'unauthorized'
+    || normalizedCode === 'forbidden'
+    || normalizedCode === '42501'
+    || normalizedMessage.includes('permission denied')
+    || normalizedMessage.includes('row-level security')
+    || normalizedMessage.includes('认证')
+    || normalizedMessage.includes('未授权')
+    || normalizedMessage.includes('没有权限')
+    || normalizedMessage.includes('权限')
   ) {
     return 'permission'
   }
 
   if (
-    normalizedCode === 'network_error' ||
-    normalizedMessage.includes('failed to fetch') ||
-    normalizedMessage.includes('networkerror') ||
-    normalizedMessage.includes('network error') ||
-    normalizedMessage.includes('load failed') ||
-    normalizedMessage.includes('fetch') ||
-    normalizedMessage.includes('网络') ||
-    normalizedMessage.includes('连接失败')
+    normalizedCode === 'network_error'
+    || normalizedMessage.includes('failed to fetch')
+    || normalizedMessage.includes('networkerror')
+    || normalizedMessage.includes('network error')
+    || normalizedMessage.includes('load failed')
+    || normalizedMessage.includes('fetch')
+    || normalizedMessage.includes('网络')
+    || normalizedMessage.includes('连接失败')
   ) {
     return 'network'
   }
@@ -168,10 +168,10 @@ function parseJsonLikeError(message: string): ErrorDisplayInfo | null {
       .trim()
       .replace(/[：:]$/, '')
 
-    const primaryMessage =
-      stringifyErrorField(parsed.message) ||
-      stringifyErrorField(parsed.error_description) ||
-      stringifyErrorField(parsed.hint)
+    const primaryMessage
+      = stringifyErrorField(parsed.message)
+        || stringifyErrorField(parsed.error_description)
+        || stringifyErrorField(parsed.hint)
 
     const detailParts = [
       stringifyErrorField(parsed.details),
@@ -188,11 +188,12 @@ function parseJsonLikeError(message: string): ErrorDisplayInfo | null {
       ),
       detail:
         detailParts.length > 0
-          ? detailParts.map((part) => translateErrorMessage(part)).join('；')
+          ? detailParts.map(part => translateErrorMessage(part)).join('；')
           : undefined,
       code: stringifyErrorField(parsed.code),
     }
-  } catch {
+  }
+  catch {
     return null
   }
 }
@@ -201,27 +202,27 @@ export function getErrorDisplayInfo(
   error: unknown,
   fallbackMessage = '系统暂时不可用，请稍后重试。',
 ): ErrorDisplayInfo {
-  const errorCode =
-    error &&
-    typeof error === 'object' &&
-    'code' in error &&
-    typeof error.code === 'string'
+  const errorCode
+    = error
+      && typeof error === 'object'
+      && 'code' in error
+      && typeof error.code === 'string'
       ? error.code
       : undefined
 
-  const statusCode =
-    error &&
-    typeof error === 'object' &&
-    'statusCode' in error &&
-    typeof error.statusCode === 'number'
+  const statusCode
+    = error
+      && typeof error === 'object'
+      && 'statusCode' in error
+      && typeof error.statusCode === 'number'
       ? error.statusCode
       : undefined
 
-  const rawDetail =
-    error &&
-    typeof error === 'object' &&
-    'details' in error &&
-    typeof error.details === 'string'
+  const rawDetail
+    = error
+      && typeof error === 'object'
+      && 'details' in error
+      && typeof error.details === 'string'
       ? error.details
       : undefined
 
@@ -290,11 +291,11 @@ export function handleApiError(
 ): AppError {
   // 忽略 AbortError（请求被取消是正常行为，不应该作为错误处理）
   if (
-    error &&
-    typeof error === 'object' &&
-    'name' in error &&
-    (error.name === 'AbortError' ||
-      (error as { message?: string }).message?.includes('aborted'))
+    error
+    && typeof error === 'object'
+    && 'name' in error
+    && (error.name === 'AbortError'
+      || (error as { message?: string }).message?.includes('aborted'))
   ) {
     // 返回一个特殊的 AppError，但标记为可忽略
     const abortError = new AppError('请求已取消', 'ABORT_ERROR', 0, error)
@@ -311,7 +312,7 @@ export function handleApiError(
 
   // 处理 Supabase 错误
   if (error && typeof error === 'object' && 'message' in error) {
-    const supabaseError = error as { message: string; code?: string }
+    const supabaseError = error as { message: string, code?: string }
     const originalMessage = customMessage
       ? `${customMessage}: ${supabaseError.message}`
       : supabaseError.message

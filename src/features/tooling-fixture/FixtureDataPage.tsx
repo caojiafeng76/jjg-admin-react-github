@@ -1,15 +1,16 @@
-import { useCallback, useState } from 'react'
-import { App } from 'antd'
 import type { FormInstance } from 'antd'
 import type { Dayjs } from 'dayjs'
+import type { ToolingFixture, ToolingFixtureDateRange, ToolingFixtureFormValues } from '@/services/apiToolingFixture'
+import { App } from 'antd'
 
+import { useCallback, useState } from 'react'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   getAllToolingFixtures,
-  type ToolingFixture,
-  type ToolingFixtureDateRange,
-  type ToolingFixtureFormValues,
+
 } from '@/services/apiToolingFixture'
+import FixtureDataView from './FixtureDataView'
+import { usePrintToolingFixtureQrLabels } from './usePrintToolingFixtureQrLabels'
 import {
   useCreateToolingFixture,
   useDeleteToolingFixtures,
@@ -17,8 +18,6 @@ import {
   useToolingFixtureList,
   useUpdateToolingFixture,
 } from './useToolingFixtures'
-import FixtureDataView from './FixtureDataView'
-import { usePrintToolingFixtureQrLabels } from './usePrintToolingFixtureQrLabels'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -50,8 +49,8 @@ export default function FixtureDataPage() {
     null,
   )
   const [modalOpen, setModalOpen] = useState(false)
-  const [formRef, setFormRef] =
-    useState<FormInstance<ToolingFixtureFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<ToolingFixtureFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const { data, isLoading, error, refetch } = useToolingFixtureList({
@@ -86,13 +85,15 @@ export default function FixtureDataPage() {
         if (editingRecord) {
           await updateMutation.mutateAsync({ id: editingRecord.id, values })
           message.success('工装资料更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('工装资料创建成功')
         }
         closeModal()
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         setFormError(
           error instanceof Error ? error : new Error('保存工装资料失败'),
         )
@@ -114,7 +115,8 @@ export default function FixtureDataPage() {
             await deleteMutation.mutateAsync([record.id])
             message.success('工装资料删除成功')
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error ? error.message : '删除工装资料失败',
             )
@@ -139,7 +141,8 @@ export default function FixtureDataPage() {
           await deleteMutation.mutateAsync(ids)
           message.success('工装资料删除成功')
           setSelectedRowKeys([])
-        } catch (error) {
+        }
+        catch (error) {
           message.error(
             error instanceof Error ? error.message : '删除工装资料失败',
           )
@@ -171,7 +174,8 @@ export default function FixtureDataPage() {
         await importMutation.mutateAsync(rows)
         message.success(`工装资料导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error ? error.message : '导入工装资料失败',
         )
@@ -197,9 +201,11 @@ export default function FixtureDataPage() {
       }
 
       await printLabels(items)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '获取工装资料失败')
-    } finally {
+    }
+    finally {
       setIsPrintLoading(false)
     }
   }, [

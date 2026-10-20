@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { MachineEquipmentMaintenance } from '@/services/apiMachineEquipmentMaintenances'
+import { Table } from 'antd'
+import { useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 function formatAmount(value: number | null | undefined, digits = 2) {
   return Number(value || 0).toFixed(digits)
@@ -133,11 +134,13 @@ export default function MachineEquipmentMaintenanceTable({
       scroll={{ x: 'max-content', y: scrollY }}
       size="small"
       rowClassName={(record, index) => {
-        if (record.id === activeRowId) return 'bg-sky-100'
-        if (selectedRowKeys.includes(record.id)) return 'bg-sky-50'
+        if (record.id === activeRowId)
+          return 'bg-sky-100'
+        if (selectedRowKeys.includes(record.id))
+          return 'bg-sky-50'
         return index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
       }}
-      onRow={(record) => ({
+      onRow={record => ({
         ...createKeyboardTableRowProps(() => {
           onSelect([record.id])
           onRowClick?.(record)

@@ -1,10 +1,10 @@
-import { Button, Descriptions } from 'antd'
-import { PencilSquareIcon } from '@heroicons/react/16/solid'
-
 import type {
   MaterialTransferOrderProgress,
   MaterialTransferWithEmployee,
 } from '@/services/apiMaterialTransfers'
+import { PencilSquareIcon } from '@heroicons/react/16/solid'
+
+import { Button, Descriptions } from 'antd'
 import { OrderProgressCell, OrderStatusCell } from './OrderProgressCell'
 
 interface Props {
@@ -155,7 +155,7 @@ export default function MaterialTransferDetail({
         <Descriptions
           size="small"
           column={{ xs: 1, sm: 2, md: 3, lg: 4 }}
-          className="[&_.ant-descriptions-item-label]:pl-5 [&_.ant-descriptions-item-label]:text-slate-500 [&_.ant-descriptions-item-content]:pl-2 [&_.ant-descriptions-item-content]:text-slate-700 dark:[&_.ant-descriptions-item-label]:text-slate-400 dark:[&_.ant-descriptions-item-content]:text-slate-300"
+          className="[&_.ant-descriptions-item-content]:pl-2 [&_.ant-descriptions-item-content]:text-slate-700 dark:[&_.ant-descriptions-item-content]:text-slate-300 [&_.ant-descriptions-item-label]:pl-5 [&_.ant-descriptions-item-label]:text-slate-500 dark:[&_.ant-descriptions-item-label]:text-slate-400"
           items={[
             {
               key: 'customer',
@@ -189,13 +189,15 @@ export default function MaterialTransferDetail({
             {
               key: 'audited_at',
               label: '审核时间',
-              children: audited_at ? (
-                <span className="text-slate-600 dark:text-slate-300">
-                  {new Date(audited_at).toLocaleString('zh-CN')}
-                </span>
-              ) : (
-                <span className="text-slate-400 dark:text-slate-500">-</span>
-              ),
+              children: audited_at
+                ? (
+                    <span className="text-slate-600 dark:text-slate-300">
+                      {new Date(audited_at).toLocaleString('zh-CN')}
+                    </span>
+                  )
+                : (
+                    <span className="text-slate-400 dark:text-slate-500">-</span>
+                  ),
             },
             {
               key: 'remark',

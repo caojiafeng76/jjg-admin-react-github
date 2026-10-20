@@ -1,14 +1,14 @@
-import { Key } from 'react'
+import type { Key } from 'react'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 
-type State = {
+interface State {
   tableSelectedKeys: Key[]
   isDarkMode: boolean
 }
 
-type Actions = {
+interface Actions {
   setTableSelectedKeys: (keys: Key[]) => void
   setIsDarkMode: () => void
 }
@@ -16,7 +16,7 @@ type Actions = {
 export const useAppStore = create<State & Actions>()(
   devtools(
     persist(
-      immer((set) => ({
+      immer(set => ({
         tableSelectedKeys: [] as Key[],
         isDarkMode: false,
 
@@ -26,7 +26,7 @@ export const useAppStore = create<State & Actions>()(
           })
         },
 
-        setTableSelectedKeys: (keys) =>
+        setTableSelectedKeys: keys =>
           set((state) => {
             state.tableSelectedKeys = keys
           }),

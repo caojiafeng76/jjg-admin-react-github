@@ -1,13 +1,14 @@
 import type {} from '../_shared/edge-runtime.d.ts'
 
-import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
+import type { ProductionDailyReportExportRow } from '../_shared/production-daily-report-export-workbook.ts'
 
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { assertAdmin } from '../_shared/admin.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 import {
   buildProductionDailyReportExcelBuffer,
   getProductionDailyReportExportFilename,
-  type ProductionDailyReportExportRow,
+
 } from '../_shared/production-daily-report-export-workbook.ts'
 
 type ProductionOrderDataCategory = 'A' | 'B'
@@ -131,7 +132,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
 
 function normalizeString(value?: string | null) {
   const normalized = value?.trim()
-  return normalized ? normalized : undefined
+  return normalized || undefined
 }
 
 function normalizeFilters(filters?: ProductionDailyReportFilters) {
@@ -142,7 +143,7 @@ function normalizeFilters(filters?: ProductionDailyReportFilters) {
   const productModel = Array.from(
     new Set(
       (filters.productModel || [])
-        .map((item) => normalizeString(item))
+        .map(item => normalizeString(item))
         .filter((item): item is string => Boolean(item)),
     ),
   ).sort((left, right) => left.localeCompare(right, 'zh-CN'))
@@ -165,7 +166,7 @@ function normalizeFilters(filters?: ProductionDailyReportFilters) {
 function normalizeSelectedIds(selectedIds?: string[]) {
   return Array.from(
     new Set(
-      (selectedIds || []).map((id) => id.trim()).filter((id) => id.length > 0),
+      (selectedIds || []).map(id => id.trim()).filter(id => id.length > 0),
     ),
   )
 }
@@ -274,15 +275,15 @@ async function getProductionDailyReportItems(
 
   const rows = (
     await Promise.all(
-      batches.map((batchIds) =>
+      batches.map(batchIds =>
         getProductionDailyReportItemsBatch(adminClient, batchIds),
       ),
     )
   ).flat()
-  const rowMap = new Map(rows.map((row) => [row.id, row]))
+  const rowMap = new Map(rows.map(row => [row.id, row]))
 
   return uniqueIds
-    .map((id) => rowMap.get(id))
+    .map(id => rowMap.get(id))
     .filter((row): row is ProductionDailyReportItemRow => Boolean(row))
 }
 
@@ -354,7 +355,7 @@ async function getProductionDailyReportItemsByFilters(
       index + EXPORT_PAGE_CONCURRENCY,
     )
     const pageResults = await Promise.all(
-      pageChunk.map((page) =>
+      pageChunk.map(page =>
         getProductionDailyReportItemsPageByFilters(adminClient, {
           page,
           pageSize: EXPORT_PAGE_SIZE,
@@ -434,7 +435,7 @@ async function buildProductionDailyReportRows(
 ) {
   const weightMap = await getProjectWeightMap(
     adminClient,
-    items.map((item) => item.project_no),
+    items.map(item => item.project_no),
   )
 
   return items
@@ -449,11 +450,11 @@ async function buildProductionDailyReportRows(
       const outsourceDefectCount = Number(item.outsource_defect_quantity || 0)
       const setupDefectCount = Number(item.setup_defect_quantity || 0)
       const qualifiedCount = Number(item.qualified_quantity || 0)
-      const defectCount =
-        rawMaterialDefectCount +
-        processingDefectCount +
-        outsourceDefectCount +
-        setupDefectCount
+      const defectCount
+        = rawMaterialDefectCount
+          + processingDefectCount
+          + outsourceDefectCount
+          + setupDefectCount
       const weightPerMeterKg = weightMap.get(item.project_no) || 0
       const lengthMm = Number(item.length_mm || 0)
 
@@ -554,8 +555,8 @@ async function processExportJob({
       error_message: null,
     })
 
-    const items =
-      selectedIds.length > 0
+    const items
+      = selectedIds.length > 0
         ? await getProductionDailyReportItems(adminClient, selectedIds)
         : await getProductionDailyReportItemsByFilters(adminClient, filters)
 
@@ -592,7 +593,8 @@ async function processExportJob({
       expires_at: expiresAt.toISOString(),
       error_message: null,
     })
-  } catch (error) {
+  }
+  catch (error) {
     await updateJob(adminClient, jobId, {
       status: 'failed',
       error_message:
@@ -718,7 +720,8 @@ serve(async (request) => {
 
   try {
     ;({ adminClient, adminEmployee } = await assertAdmin(authorization))
-  } catch (error) {
+  }
+  catch (error) {
     const message = error instanceof Error ? error.message : '权限校验失败'
     const status = message.includes('登录状态') ? 401 : 403
     return jsonResponse({ error: message }, status)
@@ -728,7 +731,8 @@ serve(async (request) => {
 
   try {
     payload = await request.json()
-  } catch {
+  }
+  catch {
     return jsonResponse({ error: '请求体格式不正确' }, 400)
   }
 

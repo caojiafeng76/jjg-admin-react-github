@@ -1,18 +1,20 @@
-import { useState } from 'react'
+import type {
+  TableColumnsType,
+} from 'antd'
+import type { UploadFile } from 'antd/es/upload/interface'
+import type { AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
+import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 import {
   Alert,
   App,
   Button,
   Modal,
   Table,
-  TableColumnsType,
   Upload,
 } from 'antd'
-import type { UploadFile } from 'antd/es/upload/interface'
-import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 
+import { useState } from 'react'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import type { AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
 
 const loadAttendanceExcel = () => import('@/utils/attendanceExcel')
 
@@ -32,7 +34,7 @@ const PREVIEW_COLUMNS: TableColumnsType<
     title: '#',
     dataIndex: '_idx',
     width: 60,
-    render: (v) => (
+    render: v => (
       <span className="flex size-6 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">
         {v + 1}
       </span>
@@ -78,12 +80,12 @@ export default function AttendanceExcelImport({
       return Upload.LIST_IGNORE
     }
 
-    const isExcel =
-      file.type === 'application/vnd.ms-excel' ||
-      file.type ===
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-      file.name.endsWith('.xls') ||
-      file.name.endsWith('.xlsx')
+    const isExcel
+      = file.type === 'application/vnd.ms-excel'
+        || file.type
+        === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        || file.name.endsWith('.xls')
+        || file.name.endsWith('.xlsx')
 
     if (!isExcel) {
       return Upload.LIST_IGNORE
@@ -103,12 +105,14 @@ export default function AttendanceExcelImport({
       setFileList([
         { uid: file.name, name: file.name, status: 'done' } as UploadFile,
       ])
-    } catch (err) {
+    }
+    catch (err) {
       setParseErrors([err instanceof Error ? err.message : 'Excel 解析失败'])
       setParsedRows([])
       setRemovedCount(0)
       setFileList([])
-    } finally {
+    }
+    finally {
       setParsing(false)
     }
 
@@ -141,7 +145,8 @@ export default function AttendanceExcelImport({
       return
     }
 
-    if (parsedRows.length === 0) return
+    if (parsedRows.length === 0)
+      return
     await onImport(parsedRows)
     setModalOpen(false)
     setParsedRows([])
@@ -231,7 +236,7 @@ export default function AttendanceExcelImport({
               type="warning"
               showIcon
               message={`解析时发现 ${parseErrors.length} 条问题（已跳过）`}
-              description={
+              description={(
                 <ul className="mt-1 list-inside list-disc text-xs">
                   {parseErrors.slice(0, 10).map((e, i) => (
                     <li key={i}>{e}</li>
@@ -240,7 +245,7 @@ export default function AttendanceExcelImport({
                     <li>...还有 {parseErrors.length - 10} 条</li>
                   )}
                 </ul>
-              }
+              )}
               className="rounded-lg"
             />
           )}

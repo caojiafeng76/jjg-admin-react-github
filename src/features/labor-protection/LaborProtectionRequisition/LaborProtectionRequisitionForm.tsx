@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Form, type FormInstance, Input, InputNumber, Select } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type { LaborProtectionDataOption } from '@/services/apiLaborProtectionData'
+
 import type {
   LaborProtectionRequisition,
   LaborProtectionRequisitionFormValues,
 } from '@/services/apiLaborProtectionRequisitions'
 import type { MachineEquipmentOption } from '@/services/apiMachineEquipmentMaintenances'
-import MobileBottomSelectSheet, {
-  type MobileBottomSelectOption,
-} from '@/ui/mobile/MobileBottomSelectSheet'
+import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
+import { Form, Input, InputNumber, Select } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import MobileBottomSelectSheet from '@/ui/mobile/MobileBottomSelectSheet'
 import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 
 interface Props {
@@ -61,7 +61,7 @@ export default function LaborProtectionRequisitionForm({
 
   const categorySelectOptions = useMemo(
     () =>
-      categoryOptions.map((item) => ({
+      categoryOptions.map(item => ({
         value: item.id,
         label: item.category,
       })),
@@ -70,7 +70,7 @@ export default function LaborProtectionRequisitionForm({
 
   const categorySheetOptions = useMemo<MobileBottomSelectOption[]>(
     () =>
-      categoryOptions.map((item) => ({
+      categoryOptions.map(item => ({
         value: item.id,
         label: item.category,
         keywords: item.category,
@@ -82,7 +82,7 @@ export default function LaborProtectionRequisitionForm({
     () =>
       [
         NO_MACHINE_OPTION,
-        ...machineOptions.map((item) => ({
+        ...machineOptions.map(item => ({
           value: item.id,
           label: `${item.unified_device_no} | ${item.machine_name}`,
         })),
@@ -99,7 +99,7 @@ export default function LaborProtectionRequisitionForm({
           description: '不关联任何机器',
           keywords: '无 不关联 机器',
         },
-        ...machineOptions.map((item) => ({
+        ...machineOptions.map(item => ({
           value: item.id,
           label: item.unified_device_no,
           description: (
@@ -120,7 +120,7 @@ export default function LaborProtectionRequisitionForm({
 
   const currentCategoryLabel = useMemo(
     () =>
-      categoryOptions.find((item) => item.id === currentCategoryId)?.category,
+      categoryOptions.find(item => item.id === currentCategoryId)?.category,
     [categoryOptions, currentCategoryId],
   )
 
@@ -129,7 +129,7 @@ export default function LaborProtectionRequisitionForm({
       return NO_MACHINE_OPTION.label
     }
 
-    const machine = machineOptions.find((item) => item.id === currentMachineId)
+    const machine = machineOptions.find(item => item.id === currentMachineId)
     return machine
       ? `${machine.unified_device_no} | ${machine.machine_name}`
       : ''
@@ -170,70 +170,74 @@ export default function LaborProtectionRequisitionForm({
           label="种类"
           rules={[{ required: true, message: '请选择劳保种类' }]}
         >
-          {categoryInputMode === 'bottom-sheet' ? (
-            <button
-              type="button"
-              disabled={isSubmitting || categoryOptions.length === 0}
-              onClick={() => setIsCategorySheetOpen(true)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:border-stone-700 dark:bg-stone-800 dark:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {currentCategoryLabel ||
-                (categoryOptions.length > 0
-                  ? '请选择劳保种类'
-                  : '暂无劳保资料，请先维护劳保资料')}
-            </button>
-          ) : (
-            <Select
-              loading={isCategoryOptionsLoading}
-              showSearch={{
-                filterOption: (input, option) =>
-                  String(option?.label || '')
-                    .toLowerCase()
-                    .includes(input.toLowerCase()),
-              }}
-              placeholder={
-                categoryOptions.length > 0
-                  ? '请选择劳保种类'
-                  : '暂无劳保资料，请先维护劳保资料'
-              }
-              options={categorySelectOptions}
-            />
-          )}
+          {categoryInputMode === 'bottom-sheet'
+            ? (
+                <button
+                  type="button"
+                  disabled={isSubmitting || categoryOptions.length === 0}
+                  onClick={() => setIsCategorySheetOpen(true)}
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-700 dark:bg-stone-800 dark:text-slate-100"
+                >
+                  {currentCategoryLabel
+                    || (categoryOptions.length > 0
+                      ? '请选择劳保种类'
+                      : '暂无劳保资料，请先维护劳保资料')}
+                </button>
+              )
+            : (
+                <Select
+                  loading={isCategoryOptionsLoading}
+                  showSearch={{
+                    filterOption: (input, option) =>
+                      String(option?.label || '')
+                        .toLowerCase()
+                        .includes(input.toLowerCase()),
+                  }}
+                  placeholder={
+                    categoryOptions.length > 0
+                      ? '请选择劳保种类'
+                      : '暂无劳保资料，请先维护劳保资料'
+                  }
+                  options={categorySelectOptions}
+                />
+              )}
         </Form.Item>
 
         <Form.Item
           name="machine_equipment_id"
           label="机器编号"
         >
-          {machineInputMode === 'bottom-sheet' ? (
-            <button
-              type="button"
-              disabled={isSubmitting}
-              onClick={() => setIsMachineSheetOpen(true)}
-              className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:border-stone-700 dark:bg-stone-800 dark:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {currentMachineLabel ||
-                (machineOptions.length > 0
-                  ? '请选择机器编号'
-                  : '暂无机器资料，请先维护机器设备')}
-            </button>
-          ) : (
-            <Select
-              loading={isMachineOptionsLoading}
-              showSearch={{
-                filterOption: (input, option) =>
-                  String(option?.label || '')
-                    .toLowerCase()
-                    .includes(input.toLowerCase()),
-              }}
-              placeholder={
-                machineOptions.length > 0
-                  ? '请选择机器编号'
-                  : '暂无机器资料，请先维护机器设备'
-              }
-              options={machineSelectOptions}
-            />
-          )}
+          {machineInputMode === 'bottom-sheet'
+            ? (
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => setIsMachineSheetOpen(true)}
+                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-700 dark:bg-stone-800 dark:text-slate-100"
+                >
+                  {currentMachineLabel
+                    || (machineOptions.length > 0
+                      ? '请选择机器编号'
+                      : '暂无机器资料，请先维护机器设备')}
+                </button>
+              )
+            : (
+                <Select
+                  loading={isMachineOptionsLoading}
+                  showSearch={{
+                    filterOption: (input, option) =>
+                      String(option?.label || '')
+                        .toLowerCase()
+                        .includes(input.toLowerCase()),
+                  }}
+                  placeholder={
+                    machineOptions.length > 0
+                      ? '请选择机器编号'
+                      : '暂无机器资料，请先维护机器设备'
+                  }
+                  options={machineSelectOptions}
+                />
+              )}
         </Form.Item>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -261,24 +265,26 @@ export default function LaborProtectionRequisitionForm({
               },
             ]}
           >
-            {categoryInputMode === 'bottom-sheet' ? (
-              <MobileNumberInput
-                min={1}
-                precision={0}
-                step={1}
-                keyboardMode="numeric"
-                className="w-full"
-                placeholder="请输入数量"
-              />
-            ) : (
-              <InputNumber
-                min={1}
-                precision={0}
-                step={1}
-                style={{ width: '100%' }}
-                placeholder="请输入数量"
-              />
-            )}
+            {categoryInputMode === 'bottom-sheet'
+              ? (
+                  <MobileNumberInput
+                    min={1}
+                    precision={0}
+                    step={1}
+                    keyboardMode="numeric"
+                    className="w-full"
+                    placeholder="请输入数量"
+                  />
+                )
+              : (
+                  <InputNumber
+                    min={1}
+                    precision={0}
+                    step={1}
+                    style={{ width: '100%' }}
+                    placeholder="请输入数量"
+                  />
+                )}
           </Form.Item>
         </div>
 
@@ -304,35 +310,39 @@ export default function LaborProtectionRequisitionForm({
         </Form.Item>
       </Form>
 
-      {categoryInputMode === 'bottom-sheet' ? (
-        <MobileBottomSelectSheet
-          open={isCategorySheetOpen}
-          title="选择劳保种类"
-          options={categorySheetOptions}
-          value={currentCategoryId}
-          searchPlaceholder="输入种类名称搜索"
-          emptyText="暂无可选劳保种类"
-          onClose={() => setIsCategorySheetOpen(false)}
-          onSelect={(value) => {
-            form.setFieldValue('labor_protection_data_id', value)
-          }}
-        />
-      ) : null}
+      {categoryInputMode === 'bottom-sheet'
+        ? (
+            <MobileBottomSelectSheet
+              open={isCategorySheetOpen}
+              title="选择劳保种类"
+              options={categorySheetOptions}
+              value={currentCategoryId}
+              searchPlaceholder="输入种类名称搜索"
+              emptyText="暂无可选劳保种类"
+              onClose={() => setIsCategorySheetOpen(false)}
+              onSelect={(value) => {
+                form.setFieldValue('labor_protection_data_id', value)
+              }}
+            />
+          )
+        : null}
 
-      {machineInputMode === 'bottom-sheet' ? (
-        <MobileBottomSelectSheet
-          open={isMachineSheetOpen}
-          title="选择机器编号"
-          options={machineSheetOptions}
-          value={currentMachineId}
-          searchPlaceholder="输入机器编号、机器名称或工序搜索"
-          emptyText="暂无可选机器编号"
-          onClose={() => setIsMachineSheetOpen(false)}
-          onSelect={(value) => {
-            form.setFieldValue('machine_equipment_id', value)
-          }}
-        />
-      ) : null}
+      {machineInputMode === 'bottom-sheet'
+        ? (
+            <MobileBottomSelectSheet
+              open={isMachineSheetOpen}
+              title="选择机器编号"
+              options={machineSheetOptions}
+              value={currentMachineId}
+              searchPlaceholder="输入机器编号、机器名称或工序搜索"
+              emptyText="暂无可选机器编号"
+              onClose={() => setIsMachineSheetOpen(false)}
+              onSelect={(value) => {
+                form.setFieldValue('machine_equipment_id', value)
+              }}
+            />
+          )
+        : null}
     </>
   )
 }

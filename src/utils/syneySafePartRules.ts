@@ -1,15 +1,15 @@
-export type DecompositionRole =
-  | 'side_frame'
-  | 'cross_frame'
-  | 'front_plate'
-  | 'upper_middle'
-  | 'lower_middle'
-  | 'rear_upper'
-  | 'rear_lower'
-  | 'extension_upper'
-  | 'extension_lower'
+export type DecompositionRole
+  = | 'side_frame'
+    | 'cross_frame'
+    | 'front_plate'
+    | 'upper_middle'
+    | 'lower_middle'
+    | 'rear_upper'
+    | 'rear_lower'
+    | 'extension_upper'
+    | 'extension_lower'
 
-export type SyneySafePartRule = {
+export interface SyneySafePartRule {
   part_no: string
   name?: string | null
   part_model?: string | null
@@ -30,30 +30,31 @@ function hasStandaloneDirection(
   remark: string | null | undefined,
   direction: '上' | '下',
 ): boolean {
-  if (!remark) return false
+  if (!remark)
+    return false
 
   return new RegExp(
-    `(^|[${DIRECTION_SEPARATOR_CHARS}])${direction}` +
-      `${DIRECTION_SEPARATOR_PATTERN}($|[${DIRECTION_SEPARATOR_CHARS}])`,
+    `(^|[${DIRECTION_SEPARATOR_CHARS}])${direction}`
+    + `${DIRECTION_SEPARATOR_PATTERN}($|[${DIRECTION_SEPARATOR_CHARS}])`,
   ).test(remark)
 }
 
 export function hasUpFlag(remark: string | null | undefined): boolean {
   return (
-    UP_KEYWORDS.some((k) => remark?.includes(k)) ||
-    hasStandaloneDirection(remark, '上')
+    UP_KEYWORDS.some(k => remark?.includes(k))
+    || hasStandaloneDirection(remark, '上')
   )
 }
 
 export function hasDownFlag(remark: string | null | undefined): boolean {
   return (
-    DOWN_KEYWORDS.some((k) => remark?.includes(k)) ||
-    hasStandaloneDirection(remark, '下')
+    DOWN_KEYWORDS.some(k => remark?.includes(k))
+    || hasStandaloneDirection(remark, '下')
   )
 }
 
 function normalizePartNo(partNo: string) {
-  return partNo.trim().replace(/^[^A-Za-z0-9]+/, '')
+  return partNo.trim().replace(/^[^A-Z0-9]+/i, '')
 }
 
 function getSortedRules(settings: SyneySafePartRule[] = []) {
@@ -80,8 +81,8 @@ export function findSafePartRule(
       }
 
       return (
-        normalizedPartNo.includes(normalizePartNo(rule.part_no)) &&
-        (!predicate || predicate(rule))
+        normalizedPartNo.includes(normalizePartNo(rule.part_no))
+        && (!predicate || predicate(rule))
       )
     }) ?? null
   )
@@ -91,7 +92,7 @@ export function isSafePartBySettings(
   partNo: string | null | undefined,
   settings: SyneySafePartRule[] | undefined,
 ) {
-  return Boolean(findSafePartRule(partNo, settings, (rule) => !!rule.is_safe_part))
+  return Boolean(findSafePartRule(partNo, settings, rule => !!rule.is_safe_part))
 }
 
 export function getLabelInfoBySettings(
@@ -102,7 +103,7 @@ export function getLabelInfoBySettings(
   const matchedRule = findSafePartRule(
     partNo,
     settings,
-    (rule) => !!rule.need_print_label,
+    rule => !!rule.need_print_label,
   )
 
   if (!matchedRule?.name || !matchedRule?.part_model || !matchedRule?.part_code_prefix) {
@@ -130,8 +131,8 @@ export function getLabelInfoFromStoredItem(
     return null
   }
 
-  const englishPartName =
-    settings?.find((r) => r.name === item.PartName2)?.english_name ?? ''
+  const englishPartName
+    = settings?.find(r => r.name === item.PartName2)?.english_name ?? ''
 
   return {
     partName2: item.PartName2,

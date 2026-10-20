@@ -1,6 +1,6 @@
-import dayjs from 'dayjs'
+import type { Database } from './database.types'
 
-import supabase from './supabase'
+import dayjs from 'dayjs'
 import { handleApiError } from '@/utils/errorHandler'
 import {
   calculateActualOutputWeight,
@@ -8,7 +8,7 @@ import {
   calculateMaterialYield,
   calculateTheoreticalOutputWeight,
 } from '@/utils/extrusionCalculations'
-import type { Database } from './database.types'
+import supabase from './supabase'
 
 type SalesOrderRow = Database['public']['Tables']['sales_orders']['Row']
 
@@ -156,7 +156,7 @@ function extrusionProductionsTable() {
 
 function normalizeOptionalText(value: string | null | undefined) {
   const normalized = value?.trim()
-  return normalized ? normalized : null
+  return normalized || null
 }
 
 function normalizeRequiredText(value: string, fieldLabel: string) {
@@ -236,27 +236,27 @@ function normalizeExtrusionProductionItem(
     '理论支数',
   )
 
-  const theoreticalOutputWeightKg =
-    item.theoretical_output_weight_kg ??
-    calculateTheoreticalOutputWeight({
-      orderLengthMm,
-      theoreticalOutputCount,
-      theoreticalUnitWeightKgPerMeter,
-    })
+  const theoreticalOutputWeightKg
+    = item.theoretical_output_weight_kg
+      ?? calculateTheoreticalOutputWeight({
+        orderLengthMm,
+        theoreticalOutputCount,
+        theoreticalUnitWeightKgPerMeter,
+      })
 
-  const actualOutputWeightKg =
-    item.actual_output_weight_kg ??
-    calculateActualOutputWeight({
-      actualQuantity,
-      actualUnitWeightKg,
-    })
+  const actualOutputWeightKg
+    = item.actual_output_weight_kg
+      ?? calculateActualOutputWeight({
+        actualQuantity,
+        actualUnitWeightKg,
+      })
 
-  const materialYield =
-    item.material_yield ??
-    calculateMaterialYield({
-      actualOutputWeightKg,
-      inputWeightKg: item.billet_input_weight_kg,
-    })
+  const materialYield
+    = item.material_yield
+      ?? calculateMaterialYield({
+        actualOutputWeightKg,
+        inputWeightKg: item.billet_input_weight_kg,
+      })
 
   return {
     id: item.id?.trim() || undefined,
@@ -369,7 +369,8 @@ export async function getExtrusionSalesOrdersProjectNos() {
       ),
     )
 
-    if ((data || []).length < SALES_ORDER_OPTIONS_PAGE_SIZE) break
+    if ((data || []).length < SALES_ORDER_OPTIONS_PAGE_SIZE)
+      break
     from += SALES_ORDER_OPTIONS_PAGE_SIZE
   }
 
@@ -456,7 +457,7 @@ export async function createExtrusionProduction(
   const { data, error } = await (supabase.rpc as unknown as (
     fn: string,
     args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: unknown }>)(
+  ) => Promise<{ data: unknown, error: unknown }>)(
     'upsert_extrusion_production',
     {
       p_header: normalizedHeader,
@@ -487,7 +488,7 @@ export async function updateExtrusionProduction({
   const { data, error } = await (supabase.rpc as unknown as (
     fn: string,
     args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: unknown }>)(
+  ) => Promise<{ data: unknown, error: unknown }>)(
     'upsert_extrusion_production',
     {
       p_header: normalizedHeader,

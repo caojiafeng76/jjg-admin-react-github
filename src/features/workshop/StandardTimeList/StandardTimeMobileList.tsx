@@ -1,15 +1,15 @@
-import { Button, Empty, Image } from 'antd'
-import { useEffect, useState } from 'react'
+import type { StandardTime } from '@/services/apiStandardTimes'
 import {
-  PencilSquareIcon,
-  ClockIcon,
-  ChartBarIcon,
-  UserCircleIcon,
   BuildingOfficeIcon,
+  ChartBarIcon,
+  ClockIcon,
+  PencilSquareIcon,
+  UserCircleIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline'
+import { Button, Empty, Image } from 'antd'
 
-import type { StandardTime } from '@/services/apiStandardTimes'
+import { useEffect, useState } from 'react'
 import { getProcessStandardImagePreviewUrl } from '@/services/apiProcessStandardImages'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import { formatNumber } from '@/utils/format'
@@ -35,10 +35,12 @@ function ProcessImagePreview({ record }: { record: StandardTime }) {
 
     void getProcessStandardImagePreviewUrl(record.process_image_path)
       .then((url) => {
-        if (!cancelled) setImageUrl(url)
+        if (!cancelled)
+          setImageUrl(url)
       })
       .catch(() => {
-        if (!cancelled) setImageUrl(null)
+        if (!cancelled)
+          setImageUrl(null)
       })
 
     return () => {
@@ -46,20 +48,22 @@ function ProcessImagePreview({ record }: { record: StandardTime }) {
     }
   }, [record.process_image_path])
 
-  return imageUrl ? (
-    <Image
-      alt={record.process_image_name || '工艺图示'}
-      height={52}
-      width={68}
-      src={imageUrl}
-      preview={{ src: imageUrl }}
-      className="rounded border border-slate-200 object-cover dark:border-slate-700"
-    />
-  ) : (
-    <span className="text-sm text-slate-400 dark:text-slate-500">
-      {record.process_image_name || '暂无图示'}
-    </span>
-  )
+  return imageUrl
+    ? (
+        <Image
+          alt={record.process_image_name || '工艺图示'}
+          height={52}
+          width={68}
+          src={imageUrl}
+          preview={{ src: imageUrl }}
+          className="rounded border border-slate-200 object-cover dark:border-slate-700"
+        />
+      )
+    : (
+        <span className="text-sm text-slate-400 dark:text-slate-500">
+          {record.process_image_name || '暂无图示'}
+        </span>
+      )
 }
 
 export default function StandardTimeMobileList({
@@ -72,11 +76,11 @@ export default function StandardTimeMobileList({
       <div className="flex h-64 items-center justify-center">
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={
+          description={(
             <span className="text-slate-400 dark:text-slate-500">
               暂无理论工时数据
             </span>
-          }
+          )}
         />
       </div>
     )

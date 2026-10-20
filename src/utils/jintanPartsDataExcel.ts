@@ -1,10 +1,10 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
-
 import type {
   JintanPartsData,
   JintanPartsDataFormValues,
 } from '@/services/apiJintanPartsData'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   applyRegisterSheetStyles,
   autoFitColumnWidths,
@@ -120,8 +120,8 @@ export async function parseJintanPartsDataExcel(
     const supplier = normalizeText(cells[3])
     const remarks = normalizeText(cells[4])
 
-    const isEmptyRow =
-      !partName && !specification && !material && !supplier && !remarks
+    const isEmptyRow
+      = !partName && !specification && !material && !supplier && !remarks
 
     if (isEmptyRow) {
       return
@@ -160,7 +160,7 @@ export async function parseJintanPartsDataExcel(
 function validateTemplateHeaders(
   headerCells: Array<string | number | null> = [],
 ) {
-  const headerRow = headerCells.map((cell) => normalizeText(cell))
+  const headerRow = headerCells.map(cell => normalizeText(cell))
   const templateHeaders = Array.from(TEMPLATE_HEADERS)
 
   const matches = templateHeaders.every(

@@ -1,7 +1,7 @@
-import { useEffect, useMemo } from 'react'
+import type { PrecisionCuttingTransferInsert, PrecisionCuttingTransferRow, PrecisionCuttingTransferUpdate } from '@/services/apiPrecisionCuttingTransfers'
 import {
-  AutoComplete,
   App,
+  AutoComplete,
   Button,
   Form,
   Input,
@@ -12,23 +12,22 @@ import {
   Switch,
 } from 'antd'
 
-import FormErrorAlert from '@/ui/FormErrorAlert'
+import { useEffect, useMemo } from 'react'
 
 import {
   buildProjectNoSelectOptions,
   filterProjectNoOption,
   renderProjectNoOption,
 } from '@/features/production-order/projectNoSelect'
+import { useSalesOrdersProjectNos } from '@/features/production-order/useProcessStandards'
 import {
   PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS,
   PRECISION_CUTTING_TRANSFER_OPERATORS,
   PRECISION_CUTTING_TRANSFER_RECIPIENTS,
   PRECISION_CUTTING_TRANSFER_WORKSHOPS,
-  type PrecisionCuttingTransferInsert,
-  type PrecisionCuttingTransferUpdate,
-  type PrecisionCuttingTransferRow,
+
 } from '@/services/apiPrecisionCuttingTransfers'
-import { useSalesOrdersProjectNos } from '@/features/production-order/useProcessStandards'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 
 interface Props {
   open: boolean
@@ -59,8 +58,8 @@ export default function MaterialTransferForm({
 }: Props) {
   const { message } = App.useApp()
   const [form] = Form.useForm<PrecisionCuttingTransferFormValues>()
-  const { data: projectNos, isLoading: isLoadingProjectNos } =
-    useSalesOrdersProjectNos()
+  const { data: projectNos, isLoading: isLoadingProjectNos }
+    = useSalesOrdersProjectNos()
 
   const longMaterialQuantity = Form.useWatch('long_material_quantity', form)
   const processCardQuantity = Form.useWatch(
@@ -69,19 +68,19 @@ export default function MaterialTransferForm({
   )
   const erpQuantity = Form.useWatch('erp_long_material_quantity', form)
 
-  const processCardDiff =
-    longMaterialQuantity == null || processCardQuantity == null
+  const processCardDiff
+    = longMaterialQuantity == null || processCardQuantity == null
       ? null
       : longMaterialQuantity - processCardQuantity
 
-  const erpDiff =
-    longMaterialQuantity == null || erpQuantity == null
+  const erpDiff
+    = longMaterialQuantity == null || erpQuantity == null
       ? null
       : longMaterialQuantity - erpQuantity
 
   const recipientOptions = useMemo(
     () =>
-      PRECISION_CUTTING_TRANSFER_RECIPIENTS.map((name) => ({
+      PRECISION_CUTTING_TRANSFER_RECIPIENTS.map(name => ({
         label: name,
         value: name,
       })),
@@ -95,7 +94,7 @@ export default function MaterialTransferForm({
 
   const projectInfoMap = useMemo(() => {
     const map = new Map(
-      (projectNos || []).map((item) => [item.project_no, item]),
+      (projectNos || []).map(item => [item.project_no, item]),
     )
 
     return map
@@ -213,28 +212,32 @@ export default function MaterialTransferForm({
     triggerNode.parentElement || document.body
 
   const formItemClassName = 'mb-0'
-  const sectionClassName =
-    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/90'
-  const sectionTitleClassName =
-    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
+  const sectionClassName
+    = 'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/90'
+  const sectionTitleClassName
+    = 'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
 
   const sectionDot = (className = 'bg-blue-500') => (
     <span className={`h-1.5 w-1.5 rounded-full ${className}`} />
   )
 
   const renderQuantityDiff = (value: number | null) =>
-    value === null ? (
-      <span className="text-slate-400 dark:text-slate-500">-</span>
-    ) : value !== 0 ? (
-      <span className="font-semibold text-amber-600 tabular-nums dark:text-amber-400">
-        {value}
-      </span>
-    ) : (
-      <span className="text-slate-600 tabular-nums dark:text-slate-300">{value}</span>
-    )
+    value === null
+      ? (
+          <span className="text-slate-400 dark:text-slate-500">-</span>
+        )
+      : value !== 0
+        ? (
+            <span className="font-semibold text-amber-600 tabular-nums dark:text-amber-400">
+              {value}
+            </span>
+          )
+        : (
+            <span className="text-slate-600 tabular-nums dark:text-slate-300">{value}</span>
+          )
 
-  const readOnlyDiffFieldClassName =
-    'flex h-8 w-full items-center justify-center rounded-lg border border-dashed border-amber-200 bg-amber-50/60 px-2 text-sm dark:border-amber-800 dark:bg-amber-900/30'
+  const readOnlyDiffFieldClassName
+    = 'flex h-8 w-full items-center justify-center rounded-lg border border-dashed border-amber-200 bg-amber-50/60 px-2 text-sm dark:border-amber-800 dark:bg-amber-900/30'
 
   const outsourceSection = (
     <section className="rounded-2xl border border-red-200/80 bg-red-50/70 p-4 shadow-sm dark:border-red-900/50 dark:bg-red-900/20">
@@ -289,11 +292,13 @@ export default function MaterialTransferForm({
       destroyOnHidden
     >
       <div className={mobile ? 'overscroll-contain pr-1' : undefined}>
-        {formError ? (
-          <div className="mb-4">
-            <FormErrorAlert error={formError} />
-          </div>
-        ) : null}
+        {formError
+          ? (
+              <div className="mb-4">
+                <FormErrorAlert error={formError} />
+              </div>
+            )
+          : null}
         <Form
           form={form}
           layout="vertical"
@@ -527,7 +532,7 @@ export default function MaterialTransferForm({
                   placeholder="请选择操作人"
                   showSearch={{ optionFilterProp: 'label' }}
                   getPopupContainer={getPopupContainer}
-                  options={PRECISION_CUTTING_TRANSFER_OPERATORS.map((name) => ({
+                  options={PRECISION_CUTTING_TRANSFER_OPERATORS.map(name => ({
                     label: name,
                     value: name,
                   }))}
@@ -544,7 +549,7 @@ export default function MaterialTransferForm({
                   placeholder="请选择接收车间"
                   getPopupContainer={getPopupContainer}
                   options={PRECISION_CUTTING_TRANSFER_WORKSHOPS.map(
-                    (workshop) => ({
+                    workshop => ({
                       label: workshop,
                       value: workshop,
                     }),
@@ -585,33 +590,37 @@ export default function MaterialTransferForm({
               备注与审核
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {mobile ? null : (
-                <Form.Item
-                  name="uploaded_by_name"
-                  label="数据上传"
-                  className={formItemClassName}
-                >
-                  <Input disabled placeholder="自动记录当前登录用户" />
-                </Form.Item>
-              )}
+              {mobile
+                ? null
+                : (
+                    <Form.Item
+                      name="uploaded_by_name"
+                      label="数据上传"
+                      className={formItemClassName}
+                    >
+                      <Input disabled placeholder="自动记录当前登录用户" />
+                    </Form.Item>
+                  )}
 
-              {canAudit ? (
-                <Form.Item
-                  name="is_audited"
-                  label="审核状态"
-                  valuePropName="checked"
-                  className={formItemClassName}
-                >
-                  <Switch
-                    checkedChildren={
-                      PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS[1].label
-                    }
-                    unCheckedChildren={
-                      PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS[0].label
-                    }
-                  />
-                </Form.Item>
-              ) : null}
+              {canAudit
+                ? (
+                    <Form.Item
+                      name="is_audited"
+                      label="审核状态"
+                      valuePropName="checked"
+                      className={formItemClassName}
+                    >
+                      <Switch
+                        checkedChildren={
+                          PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS[1].label
+                        }
+                        unCheckedChildren={
+                          PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS[0].label
+                        }
+                      />
+                    </Form.Item>
+                  )
+                : null}
 
               <Form.Item
                 name="remark"

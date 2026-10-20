@@ -1,28 +1,28 @@
-import supabase from './supabase'
+import type { Database } from './database.types'
 import dayjs from 'dayjs'
 import { handleApiError } from '@/utils/errorHandler'
 import {
-  normalizeSearchKeywords,
   buildOrIlikeFilter,
+  normalizeSearchKeywords,
 } from '@/utils/searchKeywords'
-import type { Database } from './database.types'
 import { getMachineEquipmentHourlyRate } from './apiMachineEquipmentMaintenances'
 import { clearStandardSecondsCache } from './apiProcessStandards'
+import supabase from './supabase'
 
-type ProcessStandardRow =
-  Database['public']['Tables']['process_standards']['Row']
-type ProcessStandardInsert =
-  Database['public']['Tables']['process_standards']['Insert']
+type ProcessStandardRow
+  = Database['public']['Tables']['process_standards']['Row']
+type ProcessStandardInsert
+  = Database['public']['Tables']['process_standards']['Insert']
 
-type LastProcessFlagFields = {
+interface LastProcessFlagFields {
   is_last_process: boolean
 }
 
-type LastProcessUpdateQuery = {
+interface LastProcessUpdateQuery {
   in: (column: string, values: string[]) => PromiseLike<{ error: unknown }>
 }
 
-type DynamicProcessStandardsTable = {
+interface DynamicProcessStandardsTable {
   from: (table: 'process_standards') => {
     update: (values: LastProcessFlagFields) => LastProcessUpdateQuery
   }
@@ -303,8 +303,8 @@ export async function getStandardTimes({
   }
 
   const normalizedZeroCount = zeroCount || 0
-  const fetchTasks: Array<Promise<{ data: StandardTime[]; error: unknown }>> =
-    []
+  const fetchTasks: Array<Promise<{ data: StandardTime[], error: unknown }>>
+    = []
 
   if (from < normalizedZeroCount) {
     fetchTasks.push(
@@ -344,14 +344,14 @@ export async function getStandardTimes({
   }
 
   const results = await Promise.all(fetchTasks)
-  const failed = results.find((result) => result.error)
+  const failed = results.find(result => result.error)
 
   if (failed?.error) {
     throw handleApiError(failed.error, '获取成本核算列表失败')
   }
 
   return {
-    items: results.flatMap((result) => result.data || []),
+    items: results.flatMap(result => result.data || []),
     total: total || 0,
   }
 }
@@ -371,7 +371,8 @@ async function checkStandardTimeExists(
 
   if (partNo) {
     query = query.eq('part_no', partNo)
-  } else {
+  }
+  else {
     query = query.is('part_no', null)
   }
 
@@ -431,8 +432,8 @@ export async function ensureStandardTimeExists({
   model,
   standard_seconds = 0,
   theoretical_seconds = 0,
-}: Pick<StandardTimeFormValues, 'operation' | 'model'> &
-  Partial<
+}: Pick<StandardTimeFormValues, 'operation' | 'model'>
+  & Partial<
     Pick<StandardTimeFormValues, 'standard_seconds' | 'theoretical_seconds'>
   >) {
   const normalizedOperation = normalizeStandardTimeValue(operation)

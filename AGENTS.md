@@ -26,9 +26,9 @@ bun run test:watch        # Vitest 监听模式
 bun run test:coverage     # 生成测试覆盖率报告
 
 # 代码质量
-bun lint                  # ESLint 检查
-bun lint:fix              # ESLint 自动修复
-bun format                # Prettier 格式化
+bun lint                  # ESLint 检查（@antfu/eslint-config）
+bun lint:fix              # ESLint 自动修复（同时完成格式化）
+bun format                # 等同 eslint . --fix（项目不再使用 Prettier）
 
 # AI / Spec / 数据库工具
 bun run ai:doctor          # 检查本地 AI 工具链
@@ -131,10 +131,10 @@ bun run db:types           # 根据已连接的 Supabase schema 重新生成数�
 
 ### 格式化
 
-- 使用 Prettier + prettier-plugin-tailwindcss
-- 单引号, 无分号, 2空格缩进
-- 行宽 80-100 字符
-- 尾部逗号: es5
+- 统一使用 [`@antfu/eslint-config`](https://github.com/antfu/eslint-config)（配置见 `eslint.config.js`）同时负责 lint 与格式化；**项目已移除 Prettier，禁止再引入 Prettier 或用它格式化**
+- 风格：单引号、无分号、2 空格缩进、多行尾逗号、import 自动排序；Tailwind 类名由 `eslint-plugin-better-tailwindcss` 自动排序、去重
+- **写完或修改代码后必须用 ESLint 格式化**：执行 `bunx eslint --fix <改动的文件或目录>`（或全量 `bun lint:fix`），再执行 `bun lint` 确认 0 error
+- 不要手动对齐格式或为通过 lint 关闭规则；确需禁用时用 `// eslint-disable-next-line <rule> -- 原因` 并写明原因
 
 ---
 
@@ -172,7 +172,7 @@ FeatureName/
 
 > **权威规则来源：[.github/copilot-instructions.md](.github/copilot-instructions.md)**。本节不再重复维护完整规则文本，仅保留一句话摘要，避免与权威文档出现内容漂移：
 >
-> 所有 AI 助手处理本项目任务时，必须遵循 `.github/copilot-instructions.md` 中定义的默认任务执行流程（复述目标 → 分析任务 → 查找相关 skill → 文件搜索建立上下文 → 阅读代码 → 最小必要澄清 → 给出计划 → 最小化改动 → 更新根目录 `CHANGELOG.MD` → 按任务类型完成最低验证 → 固定格式汇报）、附加强制规则（禁止盲改覆盖、必须验证、诚实报告验证状态、字段/缓存/路由/业务口径一致性检查等）、任务类型最低验证标准、工具优先级约定（文件搜索 / Supabase CLI / Figma MCP）。如果该文档更新，本节无需同步复制，直接以其为准即可。
+> 所有 AI 助手处理本项目任务时，必须遵循 `.github/copilot-instructions.md` 中定义的默认任务执行流程（复述目标 → 分析任务 → 查找相关 skill → 文件搜索建立上下文 → 阅读代码 → 最小必要澄清 → 给出计划 → 最小化改动 → `bunx eslint --fix` 格式化改动文件 → 更新根目录 `CHANGELOG.MD` → 按任务类型完成最低验证 → 固定格式汇报）、附加强制规则（禁止盲改覆盖、必须验证、诚实报告验证状态、字段/缓存/路由/业务口径一致性检查等）、任务类型最低验证标准、工具优先级约定（文件搜索 / Supabase CLI / Figma MCP）。如果该文档更新，本节无需同步复制，直接以其为准即可。
 >
 > **强制项：任何修改代码、配置、脚本、SQL、指令或文档的任务，必须在同一工作区变更中更新根目录 `CHANGELOG.MD`（顶部追加：日期/类别/范围/摘要/验证），并在最终汇报中说明；这是任务完成条件，遗漏即视为任务未完成。**
 

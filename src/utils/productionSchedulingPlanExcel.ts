@@ -1,6 +1,6 @@
-import XLSX from 'xlsx-js-style'
-
 import type { ProductionSchedulingOrder } from '@/services/apiProductionScheduling'
+
+import XLSX from 'xlsx-js-style'
 import { EXCEL_WRITE_OPTIONS, setColumnWidths } from './excelStyleUtils'
 
 const BORDER_COLOR = '000000'
@@ -84,7 +84,7 @@ function getProgressText(order: ProductionSchedulingOrder) {
 
 function getPlanPeriod(orders: ProductionSchedulingOrder[]) {
   const dates = orders
-    .flatMap((order) => [order.planned_start_date, order.planned_finish_date])
+    .flatMap(order => [order.planned_start_date, order.planned_finish_date])
     .filter((value): value is string => Boolean(value))
     .sort()
 
@@ -111,13 +111,14 @@ function groupOrdersByMaterialCodePrefix(orders: ProductionSchedulingOrder[]) {
 
     if (group) {
       group.push(order)
-    } else {
+    }
+    else {
       groupMap.set(sheetName, [order])
     }
   }
 
   const sortedSheetNames = Array.from(groupMap.keys())
-    .filter((sheetName) => sheetName !== OTHER_MATERIAL_CODE_SHEET_NAME)
+    .filter(sheetName => sheetName !== OTHER_MATERIAL_CODE_SHEET_NAME)
     .sort((left, right) =>
       left.localeCompare(right, 'zh-Hans-CN', { numeric: true }),
     )
@@ -126,7 +127,7 @@ function groupOrdersByMaterialCodePrefix(orders: ProductionSchedulingOrder[]) {
     sortedSheetNames.push(OTHER_MATERIAL_CODE_SHEET_NAME)
   }
 
-  return sortedSheetNames.map((sheetName) => ({
+  return sortedSheetNames.map(sheetName => ({
     orders: groupMap.get(sheetName) || [],
     sheetName,
   }))
@@ -141,7 +142,7 @@ function applyCommonStyles(
   setColumnWidths(worksheet, columnWidths)
 
   const rowCount = data.length
-  const colCount = Math.max(...data.map((row) => row.length))
+  const colCount = Math.max(...data.map(row => row.length))
 
   worksheet['!rows'] = data.map((_, index) => ({
     hpx: index === 0 ? 32 : index === rowCount - 1 ? 44 : 26,
@@ -237,7 +238,7 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
   const data: WorksheetData = [
     ['订单排产核心详情表', ...headers.slice(1).map(() => null)],
     headers,
-    ...orders.map((order) => [
+    ...orders.map(order => [
       order.id?.slice(0, 8) || '',
       order.project_no || '',
       order.customer || '',
@@ -245,7 +246,7 @@ function createDetailSheet(orders: ProductionSchedulingOrder[]) {
       toCellText(order.customer_model),
       toCellText(order.material_name),
       toCellText(order.material_code),
-      toCellText(order.length_mm, (raw) => `${raw}mm`),
+      toCellText(order.length_mm, raw => `${raw}mm`),
       toCellText(order.color_name),
       normalizeNumber(order.order_quantity),
       order.process_requirement || '',

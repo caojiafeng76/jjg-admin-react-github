@@ -1,14 +1,15 @@
-import { useQuery } from '@tanstack/react-query'
+import type { ProcessStandardMatchLevel } from '@/services/apiProcessStandards'
 
-import {
-  getOperationsByModel,
-  getStandardSeconds,
-  getModels,
-  getSalesOrdersProjectNos,
-  getSalesOrderByProjectNo,
-  type ProcessStandardMatchLevel,
-} from '@/services/apiProcessStandards'
+import { useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
+import {
+  getModels,
+  getOperationsByModel,
+  getSalesOrderByProjectNo,
+  getSalesOrdersProjectNos,
+  getStandardSeconds,
+
+} from '@/services/apiProcessStandards'
 
 const PROCESS_STANDARDS_KEY = 'process-standards' as const
 

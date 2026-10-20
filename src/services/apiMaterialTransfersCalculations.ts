@@ -1,15 +1,15 @@
-import dayjs from 'dayjs'
-
-import {
-  buildOrIlikeFilter,
-  normalizeSearchKeywords,
-} from '@/utils/searchKeywords'
 import type {
   MaterialTransferFilters,
   MaterialTransferInsert,
   MaterialTransferOrderProgress,
   MaterialTransferUpdate,
 } from './apiMaterialTransfersTypes'
+
+import dayjs from 'dayjs'
+import {
+  buildOrIlikeFilter,
+  normalizeSearchKeywords,
+} from '@/utils/searchKeywords'
 
 export function applyMaterialTransferFilters<
   TQuery extends {
@@ -102,7 +102,7 @@ function normalizeOperatorPayload(
     new Set(operatorEmployeeIds.filter(Boolean)),
   )
   const normalizedOperatorNames = operatorNames
-    .map((name) => name.trim())
+    .map(name => name.trim())
     .filter(Boolean)
 
   if (normalizedOperatorEmployeeIds.length === 0) {
@@ -155,8 +155,8 @@ export function normalizeMaterialTransferUpdatePayload(
   }
 
   if (
-    values.operator_employee_ids !== undefined ||
-    values.operator_names !== undefined
+    values.operator_employee_ids !== undefined
+    || values.operator_names !== undefined
   ) {
     if (!values.operator_employee_ids || !values.operator_names) {
       throw new Error('操作人信息不完整，请重新选择')

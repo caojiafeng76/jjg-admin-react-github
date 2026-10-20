@@ -1,9 +1,9 @@
-import * as XLSX from 'xlsx-js-style'
-
 import type {
   OrderStatusDashboardItem,
   OrderStatusJobColumn,
 } from '@/services/apiOrderStatusDashboard'
+
+import * as XLSX from 'xlsx-js-style'
 import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@/utils/excelStyleUtils'
 
 type ExportRow = Record<string, string | number>
@@ -25,7 +25,7 @@ function formatPercent(value: number | null | undefined) {
 }
 
 function getJobColumns(jobColumns: OrderStatusJobColumn[]) {
-  return jobColumns.filter((column) => column.key !== '精切')
+  return jobColumns.filter(column => column.key !== '精切')
 }
 
 function toExportRows(
@@ -80,7 +80,7 @@ export function exportOrderStatusDashboardToExcel(
 
   setColumnWidths(
     worksheet,
-    Object.keys(exportRows[0] ?? {}).map((header) =>
+    Object.keys(exportRows[0] ?? {}).map(header =>
       Math.max(10, Math.min(24, header.length + 6)),
     ),
   )

@@ -1,13 +1,15 @@
-import { useMemo } from 'react'
 import type { TableColumnsType } from 'antd'
+import type {
+  ExtrusionDetailRow,
+  SelectedExtrusionDetail,
+} from './dashboardRenderUtils'
 import { Modal, Table, Tag } from 'antd'
 import dayjs from 'dayjs'
 
+import { useMemo } from 'react'
 import {
-  ExtrusionDetailRow,
   renderDetailQuantity,
   renderText,
-  SelectedExtrusionDetail,
 } from './dashboardRenderUtils'
 
 export function ExtrusionDetailModal({
@@ -33,12 +35,12 @@ export function ExtrusionDetailModal({
     (total, item) => total + item.actualOutputWeightKg,
     0,
   )
-  const weightedYield =
-    totalTheoreticalCount > 0
+  const weightedYield
+    = totalTheoreticalCount > 0
       ? rows.reduce(
-          (sum, item) => sum + item.materialYield * item.theoreticalOutputCount,
-          0,
-        ) / totalTheoreticalCount
+        (sum, item) => sum + item.materialYield * item.theoreticalOutputCount,
+        0,
+      ) / totalTheoreticalCount
       : 0
 
   const columns: TableColumnsType<ExtrusionDetailRow> = [
@@ -129,7 +131,7 @@ export function ExtrusionDetailModal({
   return (
     <Modal
       open={Boolean(detail)}
-      title={
+      title={(
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 shadow-md shadow-amber-500/30">
             <svg
@@ -159,7 +161,7 @@ export function ExtrusionDetailModal({
             </span>
           </div>
         </div>
-      }
+      )}
       footer={null}
       width={1180}
       destroyOnHidden
@@ -205,13 +207,13 @@ export function ExtrusionDetailModal({
             <div className="flex items-center gap-1.5 rounded-lg bg-cyan-50/80 px-3 py-1.5 ring-1 ring-cyan-100/80 dark:bg-cyan-900/30 dark:ring-cyan-900/50">
               <span className="text-xs font-medium text-cyan-600 dark:text-cyan-300">已审核</span>
               <span className="text-xs font-bold text-cyan-700 tabular-nums dark:text-cyan-200">
-                {rows.filter((item) => item.isAudited).length}
+                {rows.filter(item => item.isAudited).length}
               </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-lg bg-pink-50/80 px-3 py-1.5 ring-1 ring-pink-100/80 dark:bg-pink-900/30 dark:ring-pink-900/50">
               <span className="text-xs font-medium text-pink-600 dark:text-pink-300">未审核</span>
               <span className="text-xs font-bold text-pink-700 tabular-nums dark:text-pink-200">
-                {rows.filter((item) => !item.isAudited).length}
+                {rows.filter(item => !item.isAudited).length}
               </span>
             </div>
           </div>

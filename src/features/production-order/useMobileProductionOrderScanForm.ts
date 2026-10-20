@@ -6,13 +6,13 @@ export function useMobileProductionOrderScanForm() {
   const [machineEquipmentId, setMachineEquipmentId] = useState<
     string | null | undefined
   >(undefined)
-  const [incomingQualifiedQuantity, setIncomingQualifiedQuantity] =
-    useState<number>(0)
+  const [incomingQualifiedQuantity, setIncomingQualifiedQuantity]
+    = useState<number>(0)
   const [qualifiedQuantity, setQualifiedQuantity] = useState<number>(0)
   const [defectQuantity1, setDefectQuantity1] = useState<number>(0)
   const [defectQuantity2, setDefectQuantity2] = useState<number>(0)
-  const [outsourceDefectQuantity, setOutsourceDefectQuantity] =
-    useState<number>(0)
+  const [outsourceDefectQuantity, setOutsourceDefectQuantity]
+    = useState<number>(0)
   const [outsourceDefectReason, setOutsourceDefectReason] = useState('')
   const [outsourceUnit, setOutsourceUnit] = useState('')
   const [setupDefectQuantity, setSetupDefectQuantity] = useState<number>(0)

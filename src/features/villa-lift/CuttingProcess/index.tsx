@@ -1,18 +1,22 @@
-import { useCallback, useRef, useState } from 'react'
-import { App, Button, FormInstance, Modal, Popconfirm, Select } from 'antd'
-import { TrashIcon } from '@heroicons/react/16/solid'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermissions } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   VillaLiftCuttingBatchFormValues,
   VillaLiftCuttingRecordFormValues,
   VillaLiftCuttingRecordWithOrder,
 } from '@/services/apiVillaLiftCutting'
+import { TrashIcon } from '@heroicons/react/16/solid'
+import { App, Button, Modal, Popconfirm, Select } from 'antd'
+import { useCallback, useRef, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermissions } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
+import CuttingProcessForm from './CuttingProcessForm'
+import CuttingProcessTable from './CuttingProcessTable'
+import CuttingRecordEditModal from './CuttingRecordEditModal'
 import {
   useBatchDeleteCuttingRecords,
   useCreateCuttingBatch,
@@ -20,9 +24,6 @@ import {
   useUpdateCuttingRecord,
   useVillaLiftOrdersForSelect,
 } from './useCuttingProcess'
-import CuttingProcessForm from './CuttingProcessForm'
-import CuttingProcessTable from './CuttingProcessTable'
-import CuttingRecordEditModal from './CuttingRecordEditModal'
 
 export default function CuttingProcessPage() {
   const { message } = App.useApp()
@@ -45,8 +46,8 @@ export default function CuttingProcessPage() {
   // 弹窗状态
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
-  const [editingRecord, setEditingRecord] =
-    useState<VillaLiftCuttingRecordWithOrder | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<VillaLiftCuttingRecordWithOrder | null>(null)
 
   const formRef = useRef<FormInstance<VillaLiftCuttingBatchFormValues> | null>(
     null,
@@ -86,15 +87,18 @@ export default function CuttingProcessPage() {
       return
     }
 
-    if (!formRef.current) return
+    if (!formRef.current)
+      return
     try {
       const values = await formRef.current.validateFields()
       await createMutation.mutateAsync(values)
       message.success('切割记录创建成功')
       setCreateModalOpen(false)
       formRef.current.resetFields()
-    } catch (err) {
-      if (err instanceof Error) message.error(err.message)
+    }
+    catch (err) {
+      if (err instanceof Error)
+        message.error(err.message)
     }
   }, [createMutation, message, viewerDenied, viewerOperationTip])
 
@@ -118,14 +122,17 @@ export default function CuttingProcessPage() {
         return
       }
 
-      if (!editingRecord) return
+      if (!editingRecord)
+        return
       try {
         await updateMutation.mutateAsync({ id: editingRecord.id, values })
         message.success('更新成功')
         setEditModalOpen(false)
         setEditingRecord(null)
-      } catch (err) {
-        if (err instanceof Error) message.error(err.message)
+      }
+      catch (err) {
+        if (err instanceof Error)
+          message.error(err.message)
       }
     },
     [editingRecord, message, updateMutation, viewerDenied, viewerOperationTip],
@@ -141,8 +148,10 @@ export default function CuttingProcessPage() {
       await batchDeleteMutation.mutateAsync(selectedRowKeys)
       message.success(`已删除 ${selectedRowKeys.length} 条记录`)
       setSelectedRowKeys([])
-    } catch (err) {
-      if (err instanceof Error) message.error(err.message)
+    }
+    catch (err) {
+      if (err instanceof Error)
+        message.error(err.message)
     }
   }, [
     batchDeleteMutation,
@@ -157,7 +166,8 @@ export default function CuttingProcessPage() {
     next.set('page', '1')
     if (value) {
       next.set('orderId', value)
-    } else {
+    }
+    else {
       next.delete('orderId')
     }
     setSearchParams(next)
@@ -195,7 +205,7 @@ export default function CuttingProcessPage() {
           value={filterOrderId}
           onChange={handleOrderFilter}
           optionFilterProp="search"
-          options={ordersData.map((o) => ({
+          options={ordersData.map(o => ({
             value: o.id,
             label: `${o.project_name} · ${o.customer}`,
             search: `${o.project_name} ${o.customer}`,

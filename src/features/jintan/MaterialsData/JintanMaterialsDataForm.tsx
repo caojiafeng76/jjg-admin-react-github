@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
-import { Form, FormInstance, Input } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   JintanMaterialsData,
   JintanMaterialsDataFormValues,
 } from '@/services/apiJintanMaterialsData'
+import { Form, Input } from 'antd'
+
+import { useEffect } from 'react'
 
 interface Props {
   onFinish: (values: JintanMaterialsDataFormValues) => void

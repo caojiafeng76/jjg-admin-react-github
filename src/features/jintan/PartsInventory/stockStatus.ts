@@ -54,11 +54,8 @@ export function isJintanPartsStockStatus(
   value: unknown,
 ): value is JintanPartsStockStatus {
   return (
-    typeof value === 'string' &&
-    Object.prototype.hasOwnProperty.call(
-      JINTAN_PARTS_STOCK_STATUS_CONFIG,
-      value,
-    )
+    typeof value === 'string'
+    && Object.hasOwn(JINTAN_PARTS_STOCK_STATUS_CONFIG, value)
   )
 }
 
@@ -66,7 +63,7 @@ export function isJintanPartsStockStatus(
 export function calcJintanPartsSafetyStock(
   unitQuantity: number | null | undefined,
   safetyMultiple: number | null | undefined,
-): { safetyStock: number; thresholdStock: number } | null {
+): { safetyStock: number, thresholdStock: number } | null {
   if (!unitQuantity || unitQuantity <= 0) {
     return null
   }
@@ -85,8 +82,11 @@ export function getJintanPartsStockStatus(
   safetyMultiple: number | null | undefined,
 ): JintanPartsStockStatus {
   const result = calcJintanPartsSafetyStock(unitQuantity, safetyMultiple)
-  if (!result) return 'unset'
-  if (quantity >= result.safetyStock) return 'safe'
-  if (quantity < result.thresholdStock) return 'danger'
+  if (!result)
+    return 'unset'
+  if (quantity >= result.safetyStock)
+    return 'safe'
+  if (quantity < result.thresholdStock)
+    return 'danger'
   return 'warning'
 }

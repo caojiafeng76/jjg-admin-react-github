@@ -1,5 +1,5 @@
-import { fireEvent } from '@testing-library/react'
 import type { KeyboardEvent } from 'react'
+import { fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { createKeyboardTableRowProps } from './keyboardTableRow'
@@ -14,9 +14,8 @@ describe('createKeyboardTableRowProps', () => {
       tabIndex: props.tabIndex,
       ariaLabel: props['aria-label'],
     })
-    row.addEventListener('keydown', (event) =>
-      props.onKeyDown?.(event as unknown as KeyboardEvent<HTMLTableRowElement>),
-    )
+    row.addEventListener('keydown', event =>
+      props.onKeyDown?.(event as unknown as KeyboardEvent<HTMLTableRowElement>))
 
     fireEvent.keyDown(row, { key })
 
@@ -32,9 +31,8 @@ describe('createKeyboardTableRowProps', () => {
     const props = createKeyboardTableRowProps(onActivate)
 
     row.append(button)
-    row.addEventListener('keydown', (event) =>
-      props.onKeyDown?.(event as unknown as KeyboardEvent<HTMLTableRowElement>),
-    )
+    row.addEventListener('keydown', event =>
+      props.onKeyDown?.(event as unknown as KeyboardEvent<HTMLTableRowElement>))
 
     fireEvent.keyDown(row, { key: 'ArrowDown' })
     fireEvent.keyDown(button, { key: 'Enter' })

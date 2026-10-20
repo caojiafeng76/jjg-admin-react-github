@@ -1,14 +1,16 @@
-import { memo, useMemo, type Key } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import type { TableColumnsType } from 'antd'
+import type { Key } from 'react'
+import type { QualityIssueAuditStatus, QualityIssueRecord } from '@/services/apiQualityIssueRecords'
+import { Table, Tag } from 'antd'
 import dayjs from 'dayjs'
-import { Table, Tag, type TableColumnsType } from 'antd'
-
+import { memo, useMemo } from 'react'
 import {
   getQualityIssueOperatorName,
   getQualityIssueReporterName,
-  type QualityIssueAuditStatus,
-  type QualityIssueRecord,
+
 } from '@/services/apiQualityIssueRecords'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { AUDIT_STATUS_LABELS } from './IssueRecordSearch'
 
 const AUDIT_STATUS_COLORS: Record<QualityIssueAuditStatus, string> = {
@@ -26,7 +28,7 @@ function formatDateTime(value: string | null | undefined) {
 }
 
 function formatNumber(value: number | null | undefined) {
-  return value === null || value === undefined ? '-' : value
+  return value ?? '-'
 }
 
 function renderAuditStatus(status: QualityIssueAuditStatus) {
@@ -255,9 +257,8 @@ function IssueRecordTable({
       scroll={{ x: 3600, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择质量问题 ${record.id}`,

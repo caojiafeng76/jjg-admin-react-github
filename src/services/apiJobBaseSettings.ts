@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface JobBaseSettingOption {
   job_name: string
@@ -25,7 +25,7 @@ export interface JobBaseSettingFormValues {
   working_days: number
 }
 
-type JobBaseSettingsTable = {
+interface JobBaseSettingsTable {
   from: (table: string) => any
 }
 

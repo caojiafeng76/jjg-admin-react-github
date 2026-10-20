@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
 import { Button, Form, Input, Space } from 'antd'
+import { useEffect } from 'react'
 
 interface Props {
   onSearch: (keyword?: string) => void
@@ -18,7 +18,7 @@ export default function JintanMaterialsStockInSearch({
   return (
     <Form
       form={form}
-      onFinish={(values) => onSearch(values.keyword?.trim() || undefined)}
+      onFinish={values => onSearch(values.keyword?.trim() || undefined)}
       className="flex flex-1 flex-wrap items-center gap-3"
     >
       <Form.Item name="keyword" className="mb-0" style={{ width: 360 }}>

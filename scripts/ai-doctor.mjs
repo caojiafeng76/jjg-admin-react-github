@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 
+import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { basename, join } from 'node:path'
-import { spawnSync } from 'node:child_process'
 
 const root = process.cwd()
 const results = []
@@ -20,7 +20,8 @@ function readJson(relativePath) {
 
   try {
     return JSON.parse(readFileSync(fullPath, 'utf8'))
-  } catch (error) {
+  }
+  catch (error) {
     add('error', `${relativePath} parse`, error.message)
     return null
   }
@@ -35,11 +36,11 @@ function commandVersion(command, args = ['--version']) {
   })
 
   if (result.error || result.status !== 0) {
-    const detail =
-      result.error?.message ||
-      result.stderr?.trim() ||
-      result.stdout?.trim() ||
-      'not available'
+    const detail
+      = result.error?.message
+        || result.stderr?.trim()
+        || result.stdout?.trim()
+        || 'not available'
     add('warn', command, detail)
     return
   }
@@ -70,7 +71,8 @@ function checkEnvFromDotenv(keys) {
 
     if (inProcess || inFile) {
       add('ok', `env:${key}`, inProcess ? 'process env' : '.env')
-    } else {
+    }
+    else {
       add('warn', `env:${key}`, 'missing from process env and .env')
     }
   }
@@ -78,7 +80,8 @@ function checkEnvFromDotenv(keys) {
 
 function checkMcpConfig() {
   const mcp = readJson('.mcp.json')
-  if (!mcp?.mcpServers) return
+  if (!mcp?.mcpServers)
+    return
 
   const expected = ['context7', 'chrome-devtools']
 
@@ -90,7 +93,8 @@ function checkMcpConfig() {
         ? basename(server.command)
         : server.url || 'configured'
       add('ok', `mcp:${name}`, transport)
-    } else {
+    }
+    else {
       add('warn', `mcp:${name}`, 'not configured')
     }
   }
@@ -139,8 +143,8 @@ for (const result of results) {
   hasError ||= result.status === 'error'
 }
 
-const warnings = results.filter((result) => result.status === 'warn').length
-const errors = results.filter((result) => result.status === 'error').length
+const warnings = results.filter(result => result.status === 'warn').length
+const errors = results.filter(result => result.status === 'error').length
 
 console.log(`\nSummary: ${errors} error(s), ${warnings} warning(s)`)
 

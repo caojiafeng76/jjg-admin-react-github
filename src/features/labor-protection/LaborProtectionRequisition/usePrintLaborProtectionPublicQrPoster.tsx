@@ -1,17 +1,17 @@
-import { useState } from 'react'
+import AppQRCode from '@ui/AppQRCode'
 import { App } from 'antd'
 import dayjs from 'dayjs'
-import { renderToStaticMarkup } from 'react-dom/server'
+import { useState } from 'react'
 
-import AppQRCode from '@ui/AppQRCode'
+import { renderToStaticMarkup } from 'react-dom/server'
 import {
   getLaborProtectionPublicQrPath,
   getLaborProtectionPublicQrValue,
 } from './laborProtectionPublicQr'
 
-const posterTitleFont = "'STSong', 'SimSun', 'Noto Serif SC', serif"
-const posterBodyFont =
-  "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif"
+const posterTitleFont = '\'STSong\', \'SimSun\', \'Noto Serif SC\', serif'
+const posterBodyFont
+  = '\'Microsoft YaHei\', \'PingFang SC\', \'Noto Sans SC\', sans-serif'
 
 function escapeHtml(value: string) {
   return value
@@ -19,7 +19,7 @@ function escapeHtml(value: string) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
+    .replaceAll('\'', '&#39;')
 }
 
 function buildPosterHtml({
@@ -295,13 +295,15 @@ export function usePrintLaborProtectionPublicQrPoster() {
       message.success('已打开二维码打印窗口')
 
       return true
-    } catch (error) {
+    }
+    catch (error) {
       console.error('打印劳保二维码海报失败:', error)
       message.error(
         error instanceof Error ? error.message : '打印失败，请稍后重试',
       )
       return false
-    } finally {
+    }
+    finally {
       setIsPrinting(false)
     }
   }

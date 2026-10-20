@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { useTableHeight } from '@/hooks/useTableHeight'
+import type { FormInstance } from 'antd'
 import type {
   LaborProtectionData,
   LaborProtectionDataFormValues,
 } from '@/services/apiLaborProtectionData'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -28,10 +29,10 @@ export default function LaborProtectionDataPage() {
   const [modalTitle, setModalTitle] = useState('新建劳保资料')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<LaborProtectionData | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<LaborProtectionDataFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<LaborProtectionData | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<LaborProtectionDataFormValues> | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -50,8 +51,8 @@ export default function LaborProtectionDataPage() {
   const updateMutation = useUpdateLaborProtectionData()
   const deleteMutation = useDeleteLaborProtectionData()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -78,7 +79,7 @@ export default function LaborProtectionDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -100,10 +101,12 @@ export default function LaborProtectionDataPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('劳保资料删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除劳保资料失败，请稍后重试')
       }
     }
@@ -118,16 +121,19 @@ export default function LaborProtectionDataPage() {
             values,
           })
           message.success('劳保资料更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('劳保资料创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -152,7 +158,8 @@ export default function LaborProtectionDataPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 

@@ -1,16 +1,16 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
+import { queryConfig } from '@/config/queryClient'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   createMachineEquipmentMaintenance,
   deleteMachineEquipmentMaintenances,
   getMachineEquipmentMaintenances,
   updateMachineEquipmentMaintenance,
 } from '@/services/apiMachineEquipmentMaintenances'
-import { queryConfig } from '@/config/queryClient'
-import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
-const MACHINE_EQUIPMENT_MAINTENANCES_KEY =
-  'machine-equipment-maintenances' as const
+const MACHINE_EQUIPMENT_MAINTENANCES_KEY
+  = 'machine-equipment-maintenances' as const
 
 export function useMachineEquipmentMaintenancesList({
   page,

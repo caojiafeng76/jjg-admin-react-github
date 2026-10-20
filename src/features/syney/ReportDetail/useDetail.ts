@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
+import { queryConfig } from '@/config/queryClient'
 import {
   getSyneyStoreReport,
   getSyneyStoreReportHeader,
 } from '@/services/apiSyneyStoreReports'
-import { queryConfig } from '@/config/queryClient'
 
 export function useDetail() {
   const { reportNo } = useParams()

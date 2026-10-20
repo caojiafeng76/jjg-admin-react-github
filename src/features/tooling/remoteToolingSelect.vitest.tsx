@@ -1,9 +1,9 @@
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
-import type { ReactNode } from 'react'
 import type { FormInstance } from 'antd'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
+import type { ReactNode } from 'react'
 import type { ToolingStockIn } from '@/services/apiToolingStockIn'
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import ToolingInventoryForm from './ToolingInventory/ToolingInventoryForm'
 import ToolingStockInForm from './ToolingStockIn/ToolingStockInForm'
 import ToolingStockOutForm from './ToolingStockOut/ToolingStockOutForm'
@@ -21,9 +21,9 @@ interface CapturedSelectProps {
   showSearch?:
     | boolean
     | {
-        filterOption?: boolean
-        onSearch?: (value: string) => void
-      }
+      filterOption?: boolean
+      onSearch?: (value: string) => void
+    }
 }
 
 const selectMock = vi.hoisted(() => ({
@@ -70,7 +70,7 @@ const freshToolA = {
 function latestToolingSelect(): CapturedSelectProps {
   const props = [...selectMock.props]
     .reverse()
-    .find((candidate) => String(candidate.placeholder).includes('刀具资料'))
+    .find(candidate => String(candidate.placeholder).includes('刀具资料'))
 
   if (!props) {
     throw new Error('未捕获到刀具资料 Select')

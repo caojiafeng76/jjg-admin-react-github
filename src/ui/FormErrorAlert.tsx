@@ -43,16 +43,18 @@ export default function FormErrorAlert({
       showIcon
       className={className}
       message="操作失败"
-      description={
+      description={(
         <div className="space-y-1.5 text-sm">
           <p>
             <span className="font-medium">失败原因：</span>
             {reasonText}
-            {info.detail ? (
-              <span className="text-slate-500 dark:text-slate-400">
-                （{info.detail}）
-              </span>
-            ) : null}
+            {info.detail
+              ? (
+                  <span className="text-slate-500 dark:text-slate-400">
+                    （{info.detail}）
+                  </span>
+                )
+              : null}
           </p>
           <p>
             <span className="font-medium">影响：</span>
@@ -63,7 +65,7 @@ export default function FormErrorAlert({
             {suggestion}
           </p>
         </div>
-      }
+      )}
     />
   )
 }

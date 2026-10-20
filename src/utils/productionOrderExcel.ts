@@ -12,13 +12,14 @@ export async function exportProductionOrdersToExcel(
     )
     downloadExcelBuffer(result.buffer, result.filename)
     return
-  } catch {
+  }
+  catch {
     // 回退到主线程导出，避免 Worker 异常时功能不可用。
   }
 
   // 仅在回退时才在主线程加载 xlsx，避免与 Worker 重复下载
-  const { buildProductionOrderExcelBuffer, getProductionOrderExportFilename } =
-    await import('./productionOrderExcelWorkbook')
+  const { buildProductionOrderExcelBuffer, getProductionOrderExportFilename }
+    = await import('./productionOrderExcelWorkbook')
   downloadExcelBuffer(
     buildProductionOrderExcelBuffer(orders),
     getProductionOrderExportFilename(),

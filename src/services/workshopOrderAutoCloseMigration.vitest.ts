@@ -4,7 +4,7 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const migrationDirectory = resolve(process.cwd(), 'supabase/migrations')
-const migrationNames = readdirSync(migrationDirectory).filter((name) =>
+const migrationNames = readdirSync(migrationDirectory).filter(name =>
   name.endsWith('_workshop_order_auto_close.sql'),
 )
 

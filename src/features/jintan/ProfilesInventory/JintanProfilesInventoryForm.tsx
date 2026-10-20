@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
-import { Form, FormInstance, Input, InputNumber } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   JintanProfilesInventory,
   JintanProfilesInventoryFormValues,
 } from '@/services/apiJintanProfilesInventory'
+import { Form, Input, InputNumber } from 'antd'
+
+import { useEffect } from 'react'
 
 interface Props {
   onFinish: (values: JintanProfilesInventoryFormValues) => void
@@ -26,8 +27,8 @@ export default function JintanProfilesInventoryForm({
 }: Props) {
   const [form] = Form.useForm<JintanProfilesInventoryFormValues>()
 
-  const profileSnapshot =
-    initialValues && 'profile_data_id' in initialValues
+  const profileSnapshot
+    = initialValues && 'profile_data_id' in initialValues
       ? initialValues
       : undefined
 

@@ -4,15 +4,16 @@ for await (const chunk of process.stdin) input += chunk
 let payload
 try {
   payload = JSON.parse(input || '{}')
-} catch {
+}
+catch {
   console.error('数据库保护 hook 输入不是合法 JSON。')
   process.exit(1)
 }
 if (payload.hook_event_name === 'PreToolUse') {
   const toolInput = payload.tool_input ?? {}
   const command = String(toolInput.command ?? toolInput.cmd ?? '')
-  const rawDatabaseCommand =
-    /\b(?:supabase\s+db\s+(?:query|push|reset)|psql)\b/i.test(command)
+  const rawDatabaseCommand
+    = /\b(?:supabase\s+db\s+(?:query|push|reset)|psql)\b/i.test(command)
   if (rawDatabaseCommand) {
     process.stdout.write(
       JSON.stringify({

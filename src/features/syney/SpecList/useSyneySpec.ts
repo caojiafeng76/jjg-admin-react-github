@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
-
 import { getSyneySpec } from '@services/apiSyneySpecs'
+
+import { useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 
 export function useSyneySpec(id: string) {

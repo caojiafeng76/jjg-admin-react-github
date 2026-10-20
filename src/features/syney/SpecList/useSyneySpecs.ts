@@ -1,9 +1,9 @@
-import { useSearchParams } from 'react-router-dom'
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
+import { getSyneySpecs } from '@services/apiSyneySpecs'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useEffect } from 'react'
 
-import { getSyneySpecs } from '@services/apiSyneySpecs'
+import { useSearchParams } from 'react-router-dom'
 import { isAbortError, queryConfig } from '@/config/queryClient'
 
 export function useSyneySpecs(

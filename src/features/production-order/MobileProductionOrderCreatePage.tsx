@@ -1,17 +1,17 @@
-import { useMemo, useState } from 'react'
+import type { ProductionOrderShift } from '@/services/apiProductionOrders'
+import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
 import { App, Button, Card, DatePicker, Form, Input, Typography } from 'antd'
 import dayjs from 'dayjs'
-import { useNavigate } from 'react-router-dom'
 
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import {
   checkEmployeeOrderExistsOnDate,
-  type ProductionOrderShift,
+
 } from '@/services/apiProductionOrders'
-import MobileBottomSelectSheet, {
-  type MobileBottomSelectOption,
-} from '@/ui/mobile/MobileBottomSelectSheet'
+import MobileBottomSelectSheet from '@/ui/mobile/MobileBottomSelectSheet'
 import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 import { useCreateProductionOrder } from './useProductionOrders'
 
@@ -89,7 +89,8 @@ export default function MobileProductionOrderCreatePage() {
 
       message.success('工单创建成功，请继续维护工序明细')
       navigate(`/production-order/${created.id}`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '工单创建失败')
     }
   }

@@ -51,7 +51,7 @@ vi.mock('antd', () => ({
       {props.children}
     </button>
   ),
-  Drawer: (props: { title?: React.ReactNode; children?: React.ReactNode }) => (
+  Drawer: (props: { title?: React.ReactNode, children?: React.ReactNode }) => (
     <div>
       <div>{props.title}</div>
       {props.children}
@@ -63,15 +63,17 @@ vi.mock('antd', () => ({
     children?: React.ReactNode
     open?: boolean
   }) =>
-    props.open ? (
-      <div>
-        <div>{props.title}</div>
-        {props.children}
-      </div>
-    ) : null,
-  Tabs: (props: { items?: { key: string; label: React.ReactNode }[] }) => (
+    props.open
+      ? (
+          <div>
+            <div>{props.title}</div>
+            {props.children}
+          </div>
+        )
+      : null,
+  Tabs: (props: { items?: { key: string, label: React.ReactNode }[] }) => (
     <div>
-      {props.items?.map((item) => (
+      {props.items?.map(item => (
         <div key={item.key}>{item.label}</div>
       ))}
     </div>

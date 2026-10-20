@@ -1,21 +1,23 @@
-import { useEffect } from 'react'
+import type { FormInstance } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type {
+  ToolingFixture,
+  ToolingFixtureFormValues,
+} from '@/services/apiToolingFixture'
 import {
   Col,
   DatePicker,
   Form,
+
   Input,
   InputNumber,
   Row,
   Select,
   Tag,
-  type FormInstance,
 } from 'antd'
-import dayjs, { type Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 
-import type {
-  ToolingFixture,
-  ToolingFixtureFormValues,
-} from '@/services/apiToolingFixture'
+import { useEffect } from 'react'
 import { TOOLING_FIXTURE_LIFECYCLES } from './fixtureDomain'
 import { TOOLING_FIXTURE_FORM_FIELDS } from './fixtureFormFields'
 
@@ -46,7 +48,7 @@ const DEFAULT_VALUES: ToolingFixtureFormValues = {
 function fieldLabel(
   name: (typeof TOOLING_FIXTURE_FORM_FIELDS)[number]['name'],
 ) {
-  return TOOLING_FIXTURE_FORM_FIELDS.find((field) => field.name === name)?.label
+  return TOOLING_FIXTURE_FORM_FIELDS.find(field => field.name === name)?.label
 }
 
 function getFormValues(
@@ -173,7 +175,7 @@ export default function ToolingFixtureForm({
           >
             <Select
               placeholder="请选择寿命状态"
-              options={TOOLING_FIXTURE_LIFECYCLES.map((v) => ({
+              options={TOOLING_FIXTURE_LIFECYCLES.map(v => ({
                 label: v,
                 value: v,
               }))}

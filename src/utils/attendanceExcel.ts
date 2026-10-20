@@ -1,5 +1,5 @@
-import * as XLSX from 'xlsx-js-style'
 import type { AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
+import * as XLSX from 'xlsx-js-style'
 
 /** 支持的列名映射（兼容不同列名写法） */
 const NAME_ALIASES = ['姓名', '员工姓名', '员工名称', '名字', 'Name', 'name']
@@ -9,7 +9,7 @@ const TIME_ALIASES = ['时间', '打卡时间', '考勤时间', '签到时间', 
 const DATETIME_ALIASES = ['日期时间', '打卡日期时间', '考勤时间', 'DateTime', 'datetime']
 
 /** 将 "2026/3/1 6:59:29" 或 "2026-03-01 08:00" 等格式拆分为 [date, time] */
-function splitDateTime(value: string): { date: string; time: string } | null {
+function splitDateTime(value: string): { date: string, time: string } | null {
   const s = value.trim()
   // 匹配 YYYY/M/D H:mm:ss 或 YYYY-M-D H:mm:ss
   const m = s.match(
@@ -25,7 +25,8 @@ function splitDateTime(value: string): { date: string; time: string } | null {
 
 /** 将各种格式的日期值规范为 YYYY-MM-DD */
 function normalizeDate(value: unknown): string | null {
-  if (value == null || value === '') return null
+  if (value == null || value === '')
+    return null
 
   if (typeof value === 'number' && value > 1) {
     // Excel 日期序列号（1900 epoch，有 1900-02-29 bug，用 25569 换算为 Unix）
@@ -39,7 +40,8 @@ function normalizeDate(value: unknown): string | null {
 
   if (typeof value === 'string') {
     const s = value.trim()
-    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10)
+    if (/^\d{4}-\d{2}-\d{2}/.test(s))
+      return s.slice(0, 10)
     if (/^\d{4}\/\d{1,2}\/\d{1,2}/.test(s)) {
       const parts = s.slice(0, 10).split('/')
       return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`
@@ -61,7 +63,8 @@ function normalizeDate(value: unknown): string | null {
 
 /** 将各种格式的时间值规范为 HH:mm:ss */
 function normalizeTime(value: unknown): string | null {
-  if (value == null || value === '') return null
+  if (value == null || value === '')
+    return null
 
   // Excel 时间小数（0~1）
   if (typeof value === 'number') {
@@ -75,7 +78,7 @@ function normalizeTime(value: unknown): string | null {
 
   if (typeof value === 'string') {
     const s = value.trim()
-    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) {
+    if (/^\d{1,2}:\d{2}(?::\d{2})?$/.test(s)) {
       const parts = s.split(':')
       return `${parts[0].padStart(2, '0')}:${parts[1]}:${parts[2] ?? '00'}`
     }
@@ -90,7 +93,8 @@ function normalizeTime(value: unknown): string | null {
 
 function findKey(row: Record<string, unknown>, aliases: string[]): unknown {
   for (const alias of aliases) {
-    if (alias in row) return row[alias]
+    if (alias in row)
+      return row[alias]
   }
   return undefined
 }
@@ -99,9 +103,9 @@ function findKey(row: Record<string, unknown>, aliases: string[]): unknown {
 function timeToSeconds(time: string): number {
   const parts = time.split(':')
   return (
-    parseInt(parts[0], 10) * 3600 +
-    parseInt(parts[1], 10) * 60 +
-    parseInt(parts[2] ?? '0', 10)
+    parseInt(parts[0], 10) * 3600
+    + parseInt(parts[1], 10) * 60
+    + parseInt(parts[2] ?? '0', 10)
   )
 }
 
@@ -119,7 +123,8 @@ function deduplicateRows(rows: AttendanceDetailFormValues[]): {
   rows.forEach((r) => {
     const key = `${r.name}\x00${r.date}`
     const list = map.get(key)
-    if (list) list.push(r)
+    if (list)
+      list.push(r)
     else map.set(key, [r])
   })
 
@@ -133,12 +138,13 @@ function deduplicateRows(rows: AttendanceDetailFormValues[]): {
     // 滑动窗口：连续两条差 ≤ 阈值 → 同簇，保留最晚
     let clusterLatest = group[0]
     for (let i = 1; i < group.length; i++) {
-      const diff =
-        timeToSeconds(group[i].time) - timeToSeconds(clusterLatest.time)
+      const diff
+        = timeToSeconds(group[i].time) - timeToSeconds(clusterLatest.time)
       if (diff <= THRESHOLD) {
         clusterLatest = group[i] // 丢掉更早的，保留更晚的
         removedCount++
-      } else {
+      }
+      else {
         result.push(clusterLatest)
         clusterLatest = group[i]
       }
@@ -175,10 +181,10 @@ export function parseAttendanceExcel(
 
         let headerRowIdx = -1
         for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
-          const cells = (rawRows[i] as unknown[]).map((c) =>
+          const cells = (rawRows[i] as unknown[]).map(c =>
             String(c ?? '').trim(),
           )
-          if (NAME_ALIASES.some((n) => cells.includes(n))) {
+          if (NAME_ALIASES.some(n => cells.includes(n))) {
             headerRowIdx = i
             break
           }
@@ -205,7 +211,8 @@ export function parseAttendanceExcel(
 
           const nameRaw = findKey(row, NAME_ALIASES)
           const name = typeof nameRaw === 'string' ? nameRaw.trim() : ''
-          if (!name) return // 空行跳过
+          if (!name)
+            return // 空行跳过
 
           // 优先尝试合并列 "日期时间"
           const datetimeRaw = findKey(row, DATETIME_ALIASES)
@@ -247,7 +254,8 @@ export function parseAttendanceExcel(
 
         const deduped = deduplicateRows(rows)
         resolve({ rows: deduped.rows, errors, removedCount: deduped.removedCount })
-      } catch (err) {
+      }
+      catch (err) {
         reject(err instanceof Error ? err : new Error('Excel 解析失败'))
       }
     }
@@ -255,4 +263,3 @@ export function parseAttendanceExcel(
     reader.readAsArrayBuffer(file)
   })
 }
-

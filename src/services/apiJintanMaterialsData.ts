@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface JintanMaterialsData {
   id: string
@@ -181,7 +181,7 @@ export async function createJintanMaterialsDataBatch(
   }
 
   const materialNames = Array.from(
-    new Set(payload.map((row) => row.material_name)),
+    new Set(payload.map(row => row.material_name)),
   )
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_materials_data')
@@ -193,15 +193,15 @@ export async function createJintanMaterialsDataBatch(
   }
 
   const existingKeys = new Set(
-    (existingRows || []).map((row) => materialsKeyOf(row)),
+    (existingRows || []).map(row => materialsKeyOf(row)),
   )
-  const duplicated = payload.filter((row) =>
+  const duplicated = payload.filter(row =>
     existingKeys.has(materialsKeyOf(row)),
   )
   if (duplicated.length > 0) {
     const labels = duplicated
       .map(
-        (row) =>
+        row =>
           `“${row.material_model}”/“${row.material_name}”/“${row.specification}”`,
       )
       .join('、')

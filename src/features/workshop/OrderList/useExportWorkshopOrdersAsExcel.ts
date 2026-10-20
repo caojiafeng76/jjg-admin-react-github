@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react'
+import type { WorkshopOrder } from './index'
 import { App } from 'antd'
 
-import type { WorkshopOrder } from './index'
+import { useCallback, useState } from 'react'
 
-const loadWorkshopOrdersExcelDocument = () =>
-  import('./workshopOrdersExcelDocument')
+function loadWorkshopOrdersExcelDocument() {
+  return import('./workshopOrdersExcelDocument')
+}
 
 export function useExportWorkshopOrdersAsExcel() {
   const { message } = App.useApp()
@@ -24,20 +25,22 @@ export function useExportWorkshopOrdersAsExcel() {
       setIsExporting(true)
 
       try {
-        const { exportWorkshopOrdersAsExcel } =
-          await loadWorkshopOrdersExcelDocument()
+        const { exportWorkshopOrdersAsExcel }
+          = await loadWorkshopOrdersExcelDocument()
         const exported = await exportWorkshopOrdersAsExcel(orders)
 
         if (exported) {
           message.success('订单 Excel 导出成功')
         }
         return exported
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error ? error.message : '订单 Excel 导出失败',
         )
         return false
-      } finally {
+      }
+      finally {
         setIsExporting(false)
       }
     },

@@ -1,7 +1,7 @@
-import { ISyneyItem, ISyneySpec } from '@/types'
+import type { ISyneyItem, ISyneySpec } from '@/types'
 import { distinctItems, getItemsWithParamSpec } from '@utils/syney'
 
-export type SyneyStoreReportPayload = {
+export interface SyneyStoreReportPayload {
   No: string
   TotalAmount: number
   items: ISyneyItem[]

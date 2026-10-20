@@ -1,7 +1,7 @@
-import { Button, Empty, Tag } from 'antd'
+import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
 import { EyeIcon } from '@heroicons/react/24/outline'
 
-import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
+import { Button, Empty, Tag } from 'antd'
 
 interface Props {
   loading: boolean

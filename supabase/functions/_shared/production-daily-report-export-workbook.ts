@@ -100,14 +100,15 @@ function getTextDisplayWidth(text: string): number {
       const code = line.charCodeAt(index)
 
       if (
-        (code >= 0x4e00 && code <= 0x9fff) ||
-        (code >= 0x3400 && code <= 0x4dbf) ||
-        (code >= 0xf900 && code <= 0xfaff) ||
-        (code >= 0x3000 && code <= 0x303f) ||
-        (code >= 0xff00 && code <= 0xffef)
+        (code >= 0x4E00 && code <= 0x9FFF)
+        || (code >= 0x3400 && code <= 0x4DBF)
+        || (code >= 0xF900 && code <= 0xFAFF)
+        || (code >= 0x3000 && code <= 0x303F)
+        || (code >= 0xFF00 && code <= 0xFFEF)
       ) {
         width += 2
-      } else {
+      }
+      else {
         width += 1
       }
     }
@@ -127,7 +128,7 @@ function autoFitColumnWidths(
   }
 
   const columnCount = data[0].length
-  const widths: { wch: number; wpx: number }[] = []
+  const widths: { wch: number, wpx: number }[] = []
 
   for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
     let maxLen = minWidth
@@ -200,7 +201,7 @@ function buildWorksheetData(rows: ProductionDailyReportExportRow[]) {
   return [
     [REPORT_TITLE, ...REPORT_HEADERS.slice(1).map(() => '')],
     [...REPORT_HEADERS],
-    ...rows.map((row) => [
+    ...rows.map(row => [
       row.orderDate,
       row.workHours,
       row.dataCategory,
@@ -278,11 +279,11 @@ function createProductionDailyReportWorkbook(
       t: 'n',
       f: `SUM(${columnLetter}${firstDataRow}:${columnLetter}${lastDataRow})`,
       z:
-        columnIndex === WORK_HOURS_COLUMN_INDEX ||
-        columnIndex === RAW_MATERIAL_DEFECT_WEIGHT_COLUMN_INDEX ||
-        columnIndex === PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX ||
-        columnIndex === OUTSOURCE_DEFECT_WEIGHT_COLUMN_INDEX ||
-        columnIndex === SETUP_DEFECT_WEIGHT_COLUMN_INDEX
+        columnIndex === WORK_HOURS_COLUMN_INDEX
+        || columnIndex === RAW_MATERIAL_DEFECT_WEIGHT_COLUMN_INDEX
+        || columnIndex === PROCESSING_DEFECT_WEIGHT_COLUMN_INDEX
+        || columnIndex === OUTSOURCE_DEFECT_WEIGHT_COLUMN_INDEX
+        || columnIndex === SETUP_DEFECT_WEIGHT_COLUMN_INDEX
           ? '0.00'
           : '0',
       s: worksheet[cellRef]?.s,

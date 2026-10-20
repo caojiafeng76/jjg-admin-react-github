@@ -1,18 +1,22 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { YoumaiFinishedGoodsInventory } from '@/services/apiYoumaiFinishedGoodsInventory'
+import { Table } from 'antd'
+import { memo, useMemo } from 'react'
+
 import { TableEmpty } from '@/ui/TableState'
-import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { formatNumber } from '@/utils/format'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 
 function getFinalStockColorClass(value: number | null | undefined) {
   const stock = Number(value ?? 0)
 
-  if (stock < 20) return 'text-red-600 dark:text-red-400'
-  if (stock < 50) return 'text-yellow-600 dark:text-yellow-400'
-  if (stock < 100) return 'text-orange-600 dark:text-orange-400'
+  if (stock < 20)
+    return 'text-red-600 dark:text-red-400'
+  if (stock < 50)
+    return 'text-yellow-600 dark:text-yellow-400'
+  if (stock < 100)
+    return 'text-orange-600 dark:text-orange-400'
   return 'text-green-600 dark:text-green-400'
 }
 
@@ -184,9 +188,8 @@ function YoumaiFinishedGoodsInventoryTable({
         ),
       }}
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择优迈成品库存 ${record.id}`,

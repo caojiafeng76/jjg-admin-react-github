@@ -1,10 +1,10 @@
-import { createContext } from 'react'
 import type { User } from '@supabase/supabase-js'
-
-import type { Employee } from '@/services/apiEmployees'
 import type { AppRole } from '@/config/access'
 
-export type AuthContextValue = {
+import type { Employee } from '@/services/apiEmployees'
+import { createContext } from 'react'
+
+export interface AuthContextValue {
   user: User | null
   employeeProfile: Employee | null
   role: AppRole | null

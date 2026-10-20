@@ -1,42 +1,43 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
-import dayjs from 'dayjs'
 import type { TransformedOrderData } from '@utils/excelUtils'
+import type { FormInstance } from 'antd'
+import type { ISyneyItem, ISyneyPo } from '@/types'
+import { App, Modal } from 'antd'
+import dayjs from 'dayjs'
 
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useAppStore } from '@/store'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
-import { TableState } from '@/ui/TableState'
-import PoTable from './PoTable'
-import PoForm from './PoForm'
-import { useAppStore } from '@/store'
-import { ISyneyItem, ISyneyPo } from '@/types'
 import DeleteButton from '@/ui/DeleteButton'
-import { useDeletePo } from './useDeletePo'
-import { usePos } from './usePos'
+import EditButton from '@/ui/EditButton'
 import PrintButton from '@/ui/PrintButton'
-import { usePrint } from './usePrint'
-import ExportInfoButton from './ExportInfoButton'
-import ExportShippingListButton from './ExportShippingListButton'
-import { useSyneySpecs } from '../SpecList/useSyneySpecs'
-import { useCreatePo } from './useCreatePo'
+import { TableState } from '@/ui/TableState'
 import {
   distinctItems,
   getItemsWithExtraInfo,
   getItemsWithParamSpec,
   jsonToArray,
 } from '@/utils/syney'
-import PoSelected from './PoSelected'
-import EditButton from '@/ui/EditButton'
-import { usePo } from './usePo'
-import { useUpdatePos } from './useUpdatePos'
-import PrintDecompositionButton from './PrintDecompositionButton'
-import PoSelectedFilter from './PoSelectedFilter'
-import { usePrintEnglish } from './usePrintEnglish'
-import PoDateFilter from './PoDateFilter'
-import PoSearchInput from './PoSearchInput'
+import { useSyneySpecs } from '../SpecList/useSyneySpecs'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useSearchParams } from 'react-router-dom'
+import ExportInfoButton from './ExportInfoButton'
+import ExportShippingListButton from './ExportShippingListButton'
+import PoDateFilter from './PoDateFilter'
+import PoForm from './PoForm'
+import PoSearchInput from './PoSearchInput'
+import PoSelected from './PoSelected'
+import PoSelectedFilter from './PoSelectedFilter'
+import PoTable from './PoTable'
+import PrintDecompositionButton from './PrintDecompositionButton'
+import { useCreatePo } from './useCreatePo'
+import { useDeletePo } from './useDeletePo'
+import { usePo } from './usePo'
+import { usePos } from './usePos'
+import { usePrint } from './usePrint'
+import { usePrintEnglish } from './usePrintEnglish'
+import { useUpdatePos } from './useUpdatePos'
 
 export default function PoList() {
   const { message: messageApi } = App.useApp()
@@ -52,9 +53,9 @@ export default function PoList() {
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
   const { count, pos, isLoading: posLoading, error: posError, refetch: posRefetch } = usePos()
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const [isCreating, setIsCreating] = useState(false)
   const {
@@ -72,11 +73,11 @@ export default function PoList() {
     isAll: !isEdit,
   })
 
-  const { createPo, contextHolder: createPoContextHolder } =
-    useCreatePo(messageApi)
+  const { createPo, contextHolder: createPoContextHolder }
+    = useCreatePo(messageApi)
 
-  const { data: safePartSettings, isLoading: isSafePartSettingsLoading } =
-    useSyneySafePartSettings()
+  const { data: safePartSettings, isLoading: isSafePartSettingsLoading }
+    = useSyneySafePartSettings()
 
   const {
     generateLabel,
@@ -93,7 +94,7 @@ export default function PoList() {
   const currentPoIds = useMemo(
     () =>
       records
-        .map((record) => record.id)
+        .map(record => record.id)
         .filter((id): id is number => typeof id === 'number'),
     [records],
   )
@@ -102,14 +103,15 @@ export default function PoList() {
     [currentPoIds],
   )
   const validSelectedKeys = useMemo(
-    () => tableSelectedKeys.filter((key) => currentPoIdSet.has(String(key))),
+    () => tableSelectedKeys.filter(key => currentPoIdSet.has(String(key))),
     [currentPoIdSet, tableSelectedKeys],
   )
   const selectedCount = validSelectedKeys.length
   const { data: po, isLoading: poLoading } = usePo(currentPoIds)
   const selectedQty = useMemo(() => {
-    if (selectedCount === 0) return 0
-    const keySet = new Set(validSelectedKeys.map((key) => String(key)))
+    if (selectedCount === 0)
+      return 0
+    const keySet = new Set(validSelectedKeys.map(key => String(key)))
     let total = 0
     for (const item of records) {
       if (keySet.has(String(item.id))) {
@@ -169,13 +171,14 @@ export default function PoList() {
         let items: ISyneyItem[]
 
         if (excelData && excelData.items.length > 0) {
-          items = excelData.items.map((item) => ({
+          items = excelData.items.map(item => ({
             ...item,
             No,
           })) as ISyneyItem[]
-        } else {
+        }
+        else {
           items = jsonToArray(values.Detail || '')
-          items = items?.map((item) => ({ ...item, No })) as ISyneyItem[]
+          items = items?.map(item => ({ ...item, No })) as ISyneyItem[]
         }
         items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
         // 去重：按 SONo 分组后按 PartNo+TaxUnitPrice 合并，避免跨生产编号误合并，修复 14→24 膨胀
@@ -184,26 +187,27 @@ export default function PoList() {
           for (const it of items) {
             const k = String(it.SONo || '')
             const arr = groups.get(k)
-            if (arr) arr.push(it)
+            if (arr)
+              arr.push(it)
             else groups.set(k, [it])
           }
-          items = Array.from(groups.values()).flatMap((g) =>
+          items = Array.from(groups.values()).flatMap(g =>
             distinctItems(g as ISyneyItem[]),
           ) as ISyneyItem[]
         }
 
         const hasInferredParamSpec = items.some(
-          (item) => item.ParamSpecInferred,
+          item => item.ParamSpecInferred,
         )
         if (hasInferredParamSpec) {
           messageApi.warning('部分参数规格根据备注推测生成，请确认是否准确')
         }
 
-        const uniqueSONos = new Set(items.map((item) => item.SONo))
+        const uniqueSONos = new Set(items.map(item => item.SONo))
         const incrementBy = uniqueSONos.size
 
-        const { atomicIncrementSerialNo } =
-          await import('@/services/apiSyneySerialNo')
+        const { atomicIncrementSerialNo }
+          = await import('@/services/apiSyneySerialNo')
         const finalSerialNo = await atomicIncrementSerialNo(incrementBy)
 
         const startSerialNo = finalSerialNo - incrementBy
@@ -214,7 +218,6 @@ export default function PoList() {
           safePartSettings,
         )
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { Detail, ...po } = values
 
         if (excelData) {
@@ -239,7 +242,8 @@ export default function PoList() {
             },
           },
         )
-      } catch (error) {
+      }
+      catch (error) {
         console.error('提交失败:', error)
         messageApi.error('提交失败,请重试')
         setIsCreating(false)
@@ -300,7 +304,7 @@ export default function PoList() {
       setIsCreating(false)
       setTableSelectedKeys([])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react/exhaustive-deps
   }, [])
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
@@ -365,55 +369,59 @@ export default function PoList() {
       </div>
 
       {/* 选中摘要条 */}
-      {selectedCount > 0 ? (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
-          <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-              <svg
-                className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            已选
-            <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-              {selectedCount}
-            </span>
-            条
-          </span>
-          {selectedQty > 0 ? (
-            <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
-                <svg
-                  className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                  />
-                </svg>
-              </div>
-              选中数量合计：
-              <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
-                {selectedQty.toLocaleString()}
+      {selectedCount > 0
+        ? (
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
+              <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
+                  <svg
+                    className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                已选
+                <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {selectedCount}
+                </span>
+                条
               </span>
-            </span>
-          ) : null}
-        </div>
-      ) : null}
+              {selectedQty > 0
+                ? (
+                    <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
+                        <svg
+                          className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                          />
+                        </svg>
+                      </div>
+                      选中数量合计：
+                      <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
+                        {selectedQty.toLocaleString()}
+                      </span>
+                    </span>
+                  )
+                : null}
+            </div>
+          )
+        : null}
 
       {/* 搜索 / 过滤栏 */}
       <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">

@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal, Tag, Tooltip } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import type { FormInstance } from 'antd'
+import type { JintanPartsInventorySearchValues } from './JintanPartsInventorySearch'
+import type { JintanPartsInventory, JintanPartsInventoryFormValues, JintanPartsInventoryImportRow, JintanPartsStockStatus } from '@/services/apiJintanPartsInventory'
+import { App, Modal, Tag, Tooltip } from 'antd'
 
+import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import {
   getJintanPartsInventoryForExport,
-  type JintanPartsInventory,
-  type JintanPartsInventoryFormValues,
-  type JintanPartsInventoryImportRow,
   JINTAN_PARTS_STOCK_STATUSES,
-  type JintanPartsStockStatus,
+
 } from '@/services/apiJintanPartsInventory'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
@@ -21,9 +21,7 @@ import { TableState } from '@/ui/TableState'
 import { JINTAN_PARTS_INVENTORY_PERMISSION_KEY } from '../permissions'
 import JintanPartsInventoryExcelImport from './JintanPartsInventoryExcelImport'
 import JintanPartsInventoryForm from './JintanPartsInventoryForm'
-import JintanPartsInventorySearch, {
-  type JintanPartsInventorySearchValues,
-} from './JintanPartsInventorySearch'
+import JintanPartsInventorySearch from './JintanPartsInventorySearch'
 import JintanPartsInventoryTable from './JintanPartsInventoryTable'
 import {
   isJintanPartsStockStatus,
@@ -36,8 +34,9 @@ import {
   useUpdateJintanPartsInventory,
 } from './useJintanPartsInventory'
 
-const loadJintanPartsInventoryExcel = () =>
-  import('@/utils/jintanPartsInventoryExcel')
+function loadJintanPartsInventoryExcel() {
+  return import('@/utils/jintanPartsInventoryExcel')
+}
 
 function preloadJintanPartsInventoryExcel() {
   void loadJintanPartsInventoryExcel()
@@ -60,18 +59,18 @@ export default function JintanPartsInventoryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<JintanPartsInventory | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<JintanPartsInventoryFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<JintanPartsInventory | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<JintanPartsInventoryFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const statusParam = searchParamsURL.get('status')
-  const [searchParams, setSearchParams] =
-    useState<JintanPartsInventorySearchValues>({
+  const [searchParams, setSearchParams]
+    = useState<JintanPartsInventorySearchValues>({
       keyword: searchParamsURL.get('keyword') || undefined,
       status: isJintanPartsStockStatus(statusParam) ? statusParam : undefined,
     })
@@ -88,8 +87,8 @@ export default function JintanPartsInventoryPage() {
   const updateMutation = useUpdateJintanPartsInventory()
   const importMutation = useImportJintanPartsInventory()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -107,7 +106,7 @@ export default function JintanPartsInventoryPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -130,8 +129,8 @@ export default function JintanPartsInventoryPage() {
 
     setIsExporting(true)
     try {
-      const [exportRows, { exportJintanPartsInventoryToExcel }] =
-        await Promise.all([
+      const [exportRows, { exportJintanPartsInventoryToExcel }]
+        = await Promise.all([
           getJintanPartsInventoryForExport({
             keyword: searchParams.keyword,
             status: searchParams.status,
@@ -146,11 +145,13 @@ export default function JintanPartsInventoryPage() {
 
       exportJintanPartsInventoryToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条配件库存`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '导出配件库存失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [
@@ -178,10 +179,12 @@ export default function JintanPartsInventoryPage() {
         await importMutation.mutateAsync(rows)
         message.success(`配件库存导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入配件库存失败，请稍后重试')
         }
       }
@@ -215,7 +218,8 @@ export default function JintanPartsInventoryPage() {
         await updateMutation.mutateAsync({ id: editingRecord.id, values })
         message.success('配件库存更新成功')
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         setFormError(error)
       }
     },
@@ -240,13 +244,15 @@ export default function JintanPartsInventoryPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
       if (params.status) {
         nextSearchParamsURL.set('status', params.status)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('status')
       }
 

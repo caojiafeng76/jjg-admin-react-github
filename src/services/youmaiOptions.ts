@@ -1,9 +1,9 @@
 import { buildPostgrestOrIlikeFilter } from '@/utils/postgrestFilters'
 
-export const YOUMAI_PRODUCT_DATA_OPTION_SELECT =
-  'id, material_code, material_name, model, specification, specific_gravity'
-export const YOUMAI_RAW_MATERIAL_OPTION_SELECT =
-  'id, model, specification, quantity'
+export const YOUMAI_PRODUCT_DATA_OPTION_SELECT
+  = 'id, material_code, material_name, model, specification, specific_gravity'
+export const YOUMAI_RAW_MATERIAL_OPTION_SELECT
+  = 'id, model, specification, quantity'
 
 const YOUMAI_OPTION_MAX_LIMIT = 50
 
@@ -12,7 +12,7 @@ const YOUMAI_OPTION_MAX_LIMIT = 50
  * 仅声明选项构建链路用到的链式方法 + await 结果形态。
  */
 interface OptionsQueryBuilder
-  extends PromiseLike<{ data: unknown; error: unknown }> {
+  extends PromiseLike<{ data: unknown, error: unknown }> {
   or: (filter: string) => OptionsQueryBuilder
   order: (column: string, options?: { ascending?: boolean }) => OptionsQueryBuilder
   limit: (limit: number) => OptionsQueryBuilder

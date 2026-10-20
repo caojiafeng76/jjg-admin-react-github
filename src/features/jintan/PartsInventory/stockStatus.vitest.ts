@@ -35,7 +35,7 @@ describe('金檀木业配件安全库存口径', () => {
   })
 
   it('状态选项按 不足/偏低/充足/未设置 排列并可校验 URL 参数', () => {
-    expect(JINTAN_PARTS_STOCK_STATUS_OPTIONS.map((o) => o.label)).toEqual([
+    expect(JINTAN_PARTS_STOCK_STATUS_OPTIONS.map(o => o.label)).toEqual([
       '不足',
       '偏低',
       '充足',

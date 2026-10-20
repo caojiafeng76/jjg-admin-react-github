@@ -12,14 +12,15 @@ function getTextDisplayWidth(text: string): number {
       const code = line.charCodeAt(index)
 
       if (
-        (code >= 0x4e00 && code <= 0x9fff) ||
-        (code >= 0x3400 && code <= 0x4dbf) ||
-        (code >= 0xf900 && code <= 0xfaff) ||
-        (code >= 0x3000 && code <= 0x303f) ||
-        (code >= 0xff00 && code <= 0xffef)
+        (code >= 0x4E00 && code <= 0x9FFF)
+        || (code >= 0x3400 && code <= 0x4DBF)
+        || (code >= 0xF900 && code <= 0xFAFF)
+        || (code >= 0x3000 && code <= 0x303F)
+        || (code >= 0xFF00 && code <= 0xFFEF)
       ) {
         width += 2
-      } else {
+      }
+      else {
         width += 1
       }
     }
@@ -41,10 +42,11 @@ export function autoFitColumnWidths(
   minWidth = 8,
   maxWidth = 60,
 ) {
-  if (!data || data.length === 0) return
+  if (!data || data.length === 0)
+    return
 
   const colCount = data[0].length
-  const colWidths: { wch: number; wpx: number }[] = []
+  const colWidths: { wch: number, wpx: number }[] = []
 
   for (let col = 0; col < colCount; col++) {
     let maxLen = minWidth
@@ -70,7 +72,7 @@ export function autoFitColumnWidths(
 }
 
 export function setColumnWidths(ws: WorkSheet, widths: number[]) {
-  ws['!cols'] = widths.map((width) => ({
+  ws['!cols'] = widths.map(width => ({
     wch: width,
     wpx: Math.round(width * 8 + 12),
   }))
@@ -87,7 +89,7 @@ export function setRowHeight(
   rowHeight: number,
   rowCount: number,
 ) {
-  const rows: { hpt?: number; hpx?: number }[] = []
+  const rows: { hpt?: number, hpx?: number }[] = []
   for (let i = 0; i < rowCount; i++) {
     // 同时设置 hpt（点）和 hpx（像素），以兼容不同版本
     rows.push({ hpt: rowHeight, hpx: rowHeight })
@@ -113,7 +115,8 @@ function columnIndexToLetter(index: number): string {
  * @param data 二维数组数据（用于确定范围）
  */
 export function centerAllCells(ws: WorkSheet, data: Array<Array<unknown>>) {
-  if (!data || data.length === 0) return
+  if (!data || data.length === 0)
+    return
 
   const rowCount = data.length
   const colCount = data[0].length
@@ -156,7 +159,8 @@ export function applyRegisterSheetStyles(
   data: Array<Array<string | number | null | undefined>>,
   options: RegisterSheetStyleOptions = {},
 ) {
-  if (!data || data.length === 0) return
+  if (!data || data.length === 0)
+    return
 
   const {
     columnWidths,
@@ -168,7 +172,8 @@ export function applyRegisterSheetStyles(
 
   if (columnWidths?.length) {
     setColumnWidths(ws, columnWidths)
-  } else {
+  }
+  else {
     autoFitColumnWidths(ws, data)
   }
 

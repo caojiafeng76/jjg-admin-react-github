@@ -79,7 +79,7 @@ test('restored migration history preserves every archived source and records pro
   const manifest = JSON.parse(
     readFileSync(new URL('migration-history-20260916.json', root), 'utf8'),
   )
-  const hash = (path) =>
+  const hash = path =>
     createHash('sha256')
       .update(
         readFileSync(new URL(path, root), 'utf8').replaceAll('\r\n', '\n'),
@@ -87,7 +87,7 @@ test('restored migration history preserves every archived source and records pro
       .digest('hex')
   assert.equal(manifest.migrations.length, 240)
   assert.equal(
-    manifest.migrations.filter((row) => row.source === 'local-reconstruction')
+    manifest.migrations.filter(row => row.source === 'local-reconstruction')
       .length,
     37,
   )

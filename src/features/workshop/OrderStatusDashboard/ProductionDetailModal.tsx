@@ -1,20 +1,22 @@
-import { useMemo } from 'react'
 import type { TableColumnsType } from 'antd'
+import type {
+  OperationSummaryRow,
+  ProductionDetailRow,
+  SelectedJobDetail,
+} from './dashboardRenderUtils'
 import { Modal, Table } from 'antd'
 import dayjs from 'dayjs'
 
+import { useMemo } from 'react'
 import { isViewerRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
-import { getColumnKey, getTableColumnWidth } from './dashboardUtils'
 import {
-  OperationSummaryRow,
-  ProductionDetailRow,
   renderDetailQuantity,
   renderHours,
   renderText,
-  SelectedJobDetail,
   VIEWER_PRODUCTION_DETAIL_HIDDEN_COLUMN_KEYS,
 } from './dashboardRenderUtils'
+import { getColumnKey, getTableColumnWidth } from './dashboardUtils'
 
 export function ProductionDetailModal({
   detail,
@@ -28,8 +30,8 @@ export function ProductionDetailModal({
   const rows = useMemo<ProductionDetailRow[]>(
     () =>
       (detail?.record.productionDetails ?? [])
-        .filter((item) => item.jobName === detail?.jobName)
-        .map((item) => ({ ...item, key: item.id })),
+        .filter(item => item.jobName === detail?.jobName)
+        .map(item => ({ ...item, key: item.id })),
     [detail],
   )
   const operationSummaryRows = useMemo<OperationSummaryRow[]>(() => {
@@ -310,7 +312,7 @@ export function ProductionDetailModal({
   ]
   const columns: TableColumnsType<ProductionDetailRow> = isViewer
     ? baseColumns.filter(
-        (column) =>
+        column =>
           !VIEWER_PRODUCTION_DETAIL_HIDDEN_COLUMN_KEYS.has(
             getColumnKey(column),
           ),
@@ -321,7 +323,7 @@ export function ProductionDetailModal({
   return (
     <Modal
       open={Boolean(detail)}
-      title={
+      title={(
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/30">
             <svg
@@ -346,7 +348,7 @@ export function ProductionDetailModal({
             </span>
           </div>
         </div>
-      }
+      )}
       footer={null}
       width={1280}
       destroyOnHidden

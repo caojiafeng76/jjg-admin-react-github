@@ -1,16 +1,16 @@
-import * as XLSX from 'xlsx-js-style'
 import type { CellObject, WorkSheet } from 'xlsx-js-style'
-import { ISyneyPo, ISyneyItem } from '@/types'
-import { inferParamSpecFromRemark } from '@utils/syney'
-import dayjs from 'dayjs'
-
-import { normalizeZip64ExcelBuffer } from './excelZip64'
 import type {
   ExcelData,
   ExcelRow,
   TransformedOrderData,
   ValidationResult,
 } from './excelUtilsTypes'
+import type { ISyneyItem, ISyneyPo } from '@/types'
+import { inferParamSpecFromRemark } from '@utils/syney'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
+import { normalizeZip64ExcelBuffer } from './excelZip64'
 import {
   extractBrandFromBackPlate,
   extractSpecFromAllRows,
@@ -34,11 +34,14 @@ const REQUIRED_FIELDS = [
 ]
 
 function hasCellData(cell: CellObject | undefined): boolean {
-  if (!cell) return false
+  if (!cell)
+    return false
 
   const value = cell.v
-  if (value === null || value === undefined) return false
-  if (typeof value === 'string') return value.trim() !== ''
+  if (value === null || value === undefined)
+    return false
+  if (typeof value === 'string')
+    return value.trim() !== ''
 
   return true
 }
@@ -49,10 +52,12 @@ export function getWorksheetDataRange(
   let range: XLSX.Range | null = null
 
   for (const cellRef of Object.keys(worksheet)) {
-    if (cellRef.startsWith('!')) continue
+    if (cellRef.startsWith('!'))
+      continue
 
     const cell = worksheet[cellRef] as CellObject | undefined
-    if (!hasCellData(cell)) continue
+    if (!hasCellData(cell))
+      continue
 
     const cellAddress = XLSX.utils.decode_cell(cellRef)
     if (!range) {
@@ -111,7 +116,8 @@ export async function parseExcelFile(file: File): Promise<ExcelData> {
       headers,
       rows: jsonData,
     }
-  } catch (error) {
+  }
+  catch (error) {
     throw new Error(
       `Excel解析失败: ${error instanceof Error ? error.message : String(error)}`,
       { cause: error },
@@ -136,7 +142,7 @@ export function validateExcelData(data: ExcelData): ValidationResult {
 
   // 2. 检查必填字段是否存在
   const missingHeaders = REQUIRED_FIELDS.filter(
-    (field) => !data.headers.includes(field),
+    field => !data.headers.includes(field),
   )
   if (missingHeaders.length > 0) {
     errors.push(`缺少必填列: ${missingHeaders.join(', ')}`)
@@ -144,7 +150,7 @@ export function validateExcelData(data: ExcelData): ValidationResult {
 
   // 3. 检查所有行是否属于同一个采购单号
   const uniquePONos = new Set(
-    data.rows.map((row) => row.采购单号).filter((v) => v),
+    data.rows.map(row => row.采购单号).filter(v => v),
   )
   if (uniquePONos.size > 1) {
     errors.push(
@@ -164,7 +170,7 @@ export function validateExcelData(data: ExcelData): ValidationResult {
 
     // 检查数量是否为有效数字
     const qty = row.核算数量
-    if (qty !== null && qty !== undefined && isNaN(Number(qty))) {
+    if (qty !== null && qty !== undefined && Number.isNaN(Number(qty))) {
       errors.push(`第${rowNum}行的"核算数量"不是有效数字: ${qty}`)
     }
   })
@@ -225,7 +231,7 @@ export function transformToOrderData(
     SONo: Array.from(
       new Set(
         excelData.rows
-          .map((row) => row.生产编号)
+          .map(row => row.生产编号)
           .filter((v): v is string => !!v),
       ),
     ).join('\n'),
@@ -249,8 +255,8 @@ export function transformToOrderData(
       // 如果推断失败，检查Excel规格列是否是有效格式（包含"型"字）
       const excelSpec = firstRow.规格 ? String(firstRow.规格) : null
       if (
-        excelSpec &&
-        (excelSpec.includes('型') || excelSpec.match(/^\d+型-/))
+        excelSpec
+        && (excelSpec.includes('型') || /^\d+型-/.test(excelSpec))
       ) {
         return excelSpec
       }
@@ -263,7 +269,7 @@ export function transformToOrderData(
   }
 
   // 构建订单明细数据
-  const items: Partial<ISyneyItem>[] = excelData.rows.map((row) => ({
+  const items: Partial<ISyneyItem>[] = excelData.rows.map(row => ({
     No: String(row.采购单号 || ''),
     PartNo: String(row.物料件号 || '').trim(),
     PartName: String(row.物料名称 || ''),

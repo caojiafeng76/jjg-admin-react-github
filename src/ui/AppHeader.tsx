@@ -3,12 +3,12 @@ import {
   Bars3BottomRightIcon,
 } from '@heroicons/react/16/solid'
 import { KeyIcon } from '@heroicons/react/24/outline'
+import DarkModeButton from '@ui/DarkModeButton'
 import { App, Button, Form, Input, Modal, theme } from 'antd'
 import { Header } from 'antd/es/layout/layout'
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 
-import DarkModeButton from '@ui/DarkModeButton'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { getRoleLabel } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import { usePermission } from '@/hooks/usePermission'
@@ -29,10 +29,10 @@ export default function AppHeader({
   const location = useLocation()
   const navigate = useNavigate()
   const { user, role, employeeProfile, signOut } = useAuth()
-  const [isManagementPasswordModalOpen, setIsManagementPasswordModalOpen] =
-    useState(false)
-  const [isUpdatingManagementPassword, setIsUpdatingManagementPassword] =
-    useState(false)
+  const [isManagementPasswordModalOpen, setIsManagementPasswordModalOpen]
+    = useState(false)
+  const [isUpdatingManagementPassword, setIsUpdatingManagementPassword]
+    = useState(false)
   const [managementPasswordForm] = Form.useForm<{
     currentPassword: string
     nextPassword: string
@@ -60,13 +60,16 @@ export default function AppHeader({
       managementPasswordForm.resetFields()
       setIsManagementPasswordModalOpen(false)
       message.success('管理密码修改成功')
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('管理密码修改失败')
       }
-    } finally {
+    }
+    finally {
       setIsUpdatingManagementPassword(false)
     }
   }
@@ -80,11 +83,13 @@ export default function AppHeader({
         <Button
           type="text"
           icon={
-            collapsed ? (
-              <Bars3BottomRightIcon className="size-4" />
-            ) : (
-              <Bars3BottomLeftIcon className="size-4" />
-            )
+            collapsed
+              ? (
+                  <Bars3BottomRightIcon className="size-4" />
+                )
+              : (
+                  <Bars3BottomLeftIcon className="size-4" />
+                )
           }
           onClick={onToggleCollapse}
           aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
@@ -109,22 +114,25 @@ export default function AppHeader({
             欢迎您：{displayName}
             {roleLabel ? `（${roleLabel}）` : ''}
           </span>
-          {canChangeManagementPassword ? (
-            <Button
-              type="link"
-              icon={<KeyIcon className="size-4" />}
-              onClick={() => setIsManagementPasswordModalOpen(true)}
-            >
-              修改管理密码
-            </Button>
-          ) : null}
+          {canChangeManagementPassword
+            ? (
+                <Button
+                  type="link"
+                  icon={<KeyIcon className="size-4" />}
+                  onClick={() => setIsManagementPasswordModalOpen(true)}
+                >
+                  修改管理密码
+                </Button>
+              )
+            : null}
           <Button
             type="link"
             onClick={async () => {
               try {
                 await signOut()
                 navigate('/login', { replace: true })
-              } catch {
+              }
+              catch {
                 message.error('退出登录失败，请重试')
               }
             }}

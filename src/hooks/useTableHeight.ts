@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface UseTableHeightOptions {
   targetRowCount?: number
@@ -41,11 +41,13 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
   useEffect(() => {
     const updateTableHeight = () => {
       // 如果正在更新中，跳过本次计算，避免循环
-      if (isUpdatingRef.current) return
+      if (isUpdatingRef.current)
+        return
 
       const container = tableContainerRef.current
       const pagination = paginationRef.current
-      if (!container || (reservePaginationHeight && !pagination)) return
+      if (!container || (reservePaginationHeight && !pagination))
+        return
 
       const containerHeight = container.clientHeight
       const paginationHeight = reservePaginationHeight
@@ -55,10 +57,10 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
       // 如果容器高度和分页高度都没有变化（允许2px的容差），跳过计算
       // 这样可以避免因为表格内容变化导致的微小尺寸变化触发重新计算
       if (
-        lastCalculatedHeightRef.current &&
-        Math.abs(lastCalculatedHeightRef.current.container - containerHeight) <=
-          2 &&
-        Math.abs(
+        lastCalculatedHeightRef.current
+        && Math.abs(lastCalculatedHeightRef.current.container - containerHeight)
+        <= 2
+        && Math.abs(
           lastCalculatedHeightRef.current.pagination - paginationHeight,
         ) <= 2
       ) {
@@ -68,8 +70,8 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
       // 可用高度 = 容器高度 - 分页高度 - gap。
       // 当容器本身已经是表格视口时，不再二次扣除分页器和间距。
       const reservedGap = reservePaginationHeight ? gap * 0.8 : 0
-      const availableHeight =
-        containerHeight - paginationHeight - reservedGap - 1
+      const availableHeight
+        = containerHeight - paginationHeight - reservedGap - 1
 
       if (availableHeight > 0) {
         // 表格总可用高度 = 容器高度 - 分页高度 - gap
@@ -98,14 +100,14 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
 
           // 只有当计算结果真正改变时才更新状态
           // 添加阈值检查，避免因为微小变化导致的循环更新（2px 的容差）
-          const shouldUpdate =
-            !lastCalculatedHeightRef.current ||
-            Math.abs(lastCalculatedHeightRef.current.rowHeight - newRowHeight) >
-              2 ||
-            Math.abs(lastCalculatedHeightRef.current.scrollY - newScrollY) >
-              2 ||
-            lastCalculatedHeightRef.current.container !== containerHeight ||
-            lastCalculatedHeightRef.current.pagination !== paginationHeight
+          const shouldUpdate
+            = !lastCalculatedHeightRef.current
+              || Math.abs(lastCalculatedHeightRef.current.rowHeight - newRowHeight)
+              > 2
+              || Math.abs(lastCalculatedHeightRef.current.scrollY - newScrollY)
+              > 2
+              || lastCalculatedHeightRef.current.container !== containerHeight
+              || lastCalculatedHeightRef.current.pagination !== paginationHeight
 
           if (shouldUpdate) {
             // 设置更新标志，防止在更新期间触发新的计算
@@ -114,8 +116,8 @@ export function useTableHeight(options: UseTableHeightOptions = {}) {
             setTableSize((prev) => {
               // 两个值均低于 2px 阈值时保持不变，避免循环更新
               if (
-                Math.abs(prev.rowHeight - newRowHeight) <= 2 &&
-                Math.abs(prev.scrollY - newScrollY) <= 2
+                Math.abs(prev.rowHeight - newRowHeight) <= 2
+                && Math.abs(prev.scrollY - newScrollY) <= 2
               ) {
                 return prev
               }

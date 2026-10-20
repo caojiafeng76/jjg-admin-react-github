@@ -1,9 +1,9 @@
-import { Button, Typography } from 'antd'
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
   DocumentChartBarIcon,
 } from '@heroicons/react/16/solid'
+import { Button, Typography } from 'antd'
 
 const { Title } = Typography
 
@@ -108,11 +108,11 @@ export function OrderStatusDashboardHeader({
           {/* 刷新按钮 */}
           <Button
             size="small"
-            icon={
+            icon={(
               <ArrowPathIcon
                 className={`size-3.5 ${isRefreshing ? 'animate-spin' : ''}`}
               />
-            }
+            )}
             loading={isRefreshing}
             onClick={() => void onRefetch()}
             className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md dark:!border-slate-600/60 dark:!bg-slate-800/80 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-blue-900/30 dark:hover:!text-blue-400"

@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface PackagingStandardTime {
   id: string
@@ -20,7 +20,7 @@ export interface PackagingStandardTimeFormValues {
   remark: string | null
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 

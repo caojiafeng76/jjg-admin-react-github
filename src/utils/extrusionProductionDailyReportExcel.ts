@@ -1,6 +1,6 @@
-import * as XLSX from 'xlsx-js-style'
-
 import type { ExtrusionProductionDailyReportRow } from '@/services/apiExtrusionProductionDailyReport'
+
+import * as XLSX from 'xlsx-js-style'
 
 const SHEET_TITLE = '挤压生产日报表'
 
@@ -34,7 +34,32 @@ const EXPORT_HEADERS = [
 ] as const
 
 const EXPORT_COLUMN_WIDTHS = [
-  12, 8, 12, 16, 14, 14, 12, 16, 12, 12, 14, 18, 10, 12, 18, 18, 18, 12, 14, 18, 18, 14, 14, 14, 20, 10,
+  12,
+  8,
+  12,
+  16,
+  14,
+  14,
+  12,
+  16,
+  12,
+  12,
+  14,
+  18,
+  10,
+  12,
+  18,
+  18,
+  18,
+  12,
+  14,
+  18,
+  18,
+  14,
+  14,
+  14,
+  20,
+  10,
 ]
 
 function formatValue(value: unknown): string {
@@ -49,7 +74,7 @@ function formatNumber(value: unknown, decimals = 2): string {
     return ''
   }
   const num = Number(value)
-  if (isNaN(num)) {
+  if (Number.isNaN(num)) {
     return ''
   }
   return decimals >= 0 ? num.toFixed(decimals) : String(num)
@@ -60,7 +85,7 @@ function formatPercentage(value: unknown): string {
     return ''
   }
   const num = Number(value)
-  if (isNaN(num)) {
+  if (Number.isNaN(num)) {
     return ''
   }
   return num.toFixed(2)
@@ -74,7 +99,8 @@ function applyHeaderStyle(
   const range = XLSX.utils.decode_range(worksheet['!ref'] || `A1:A1`)
   for (let col = range.s.c; col < colCount; col++) {
     const cellRef = XLSX.utils.encode_cell({ r: headerRowIndex, c: col })
-    if (!worksheet[cellRef]) continue
+    if (!worksheet[cellRef])
+      continue
 
     worksheet[cellRef].s = {
       font: { bold: true },
@@ -99,7 +125,8 @@ function applyDataStyles(
   for (let row = startRowIndex; row <= range.e.r; row++) {
     for (let col = range.s.c; col < colCount; col++) {
       const cellRef = XLSX.utils.encode_cell({ r: row, c: col })
-      if (!worksheet[cellRef]) continue
+      if (!worksheet[cellRef])
+        continue
 
       worksheet[cellRef].s = {
         alignment: { horizontal: 'center', vertical: 'center' },
@@ -123,7 +150,7 @@ export function getExtrusionProductionDailyReportExportFilename(): string {
 export function exportExtrusionProductionDailyReportToExcel(
   rows: ExtrusionProductionDailyReportRow[],
 ): void {
-  const dataRows = rows.map((row) => [
+  const dataRows = rows.map(row => [
     row.productionDate,
     row.shift,
     row.shiftLeaderName,
@@ -170,14 +197,14 @@ export function exportExtrusionProductionDailyReportToExcel(
   ]
 
   // Column widths
-  worksheet['!cols'] = EXPORT_COLUMN_WIDTHS.map((w) => ({ wch: w }))
+  worksheet['!cols'] = EXPORT_COLUMN_WIDTHS.map(w => ({ wch: w }))
 
   // Apply styles
   applyHeaderStyle(worksheet, 1, EXPORT_HEADERS.length)
   applyDataStyles(worksheet, 2, EXPORT_HEADERS.length)
 
   // Title style
-  const titleCell = worksheet['A1']
+  const titleCell = worksheet.A1
   if (titleCell) {
     titleCell.s = {
       font: { bold: true, sz: 14 },

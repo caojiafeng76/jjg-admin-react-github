@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -36,7 +36,7 @@ vi.mock('antd', () => ({
   },
   Tabs: ({ items = [] }: MockTabsProps) => (
     <div>
-      {items.map((item) => (
+      {items.map(item => (
         <div key={item.key} data-testid={`tab-${item.key}`}>
           {item.label}
         </div>

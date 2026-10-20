@@ -2,6 +2,9 @@ import { Readable } from 'node:stream'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import syneyHandler from '../../api/syney-store-report'
+import youmaiHandler from '../../api/youmai-purchase-order'
+
 const serverMocks = vi.hoisted(() => ({
   fetchSyneyStoreReportFromServer: vi.fn(),
   fetchYoumaiPurchaseOrderFromServer: vi.fn(),
@@ -15,10 +18,7 @@ vi.mock('../../server/youmaiPurchaseOrderServer', () => ({
     serverMocks.fetchYoumaiPurchaseOrderFromServer,
 }))
 
-import syneyHandler from '../../api/syney-store-report'
-import youmaiHandler from '../../api/youmai-purchase-order'
-
-type ResponseState = {
+interface ResponseState {
   body?: Record<string, unknown>
   status?: number
 }
@@ -42,7 +42,7 @@ function createStreamRequest(
   rawBody: string | string[],
   parsedBody: Record<string, unknown>,
 ) {
-  const chunks = (Array.isArray(rawBody) ? rawBody : [rawBody]).map((chunk) =>
+  const chunks = (Array.isArray(rawBody) ? rawBody : [rawBody]).map(chunk =>
     Buffer.from(chunk),
   )
   return Object.assign(Readable.from(chunks), {
@@ -183,7 +183,7 @@ describe('authenticated proxy handlers', () => {
     serverMocks.fetchSyneyStoreReportFromServer.mockRejectedValue(upstreamError)
     vi.stubGlobal(
       'fetch',
-      vi.fn<typeof fetch>(async (input) =>
+      vi.fn<typeof fetch>(async input =>
         String(input).includes('/auth/v1/user')
           ? new Response(JSON.stringify({ id: 'user-502' }), { status: 200 })
           : new Response(JSON.stringify(true), { status: 200 }),
@@ -198,7 +198,7 @@ describe('authenticated proxy handlers', () => {
       {
         body: { storeInNo: 'STORE-001' },
         headers: {
-          authorization: 'Bearer access-token',
+          'authorization': 'Bearer access-token',
           'x-forwarded-for': '192.0.2.50',
         },
         method: 'POST',
@@ -241,7 +241,7 @@ describe('authenticated proxy handlers', () => {
         {
           body: { storeInNo: 'STORE-001' },
           headers: {
-            authorization: 'Bearer access-token',
+            'authorization': 'Bearer access-token',
             'x-forwarded-for': '192.0.2.60',
           },
           method: 'POST',

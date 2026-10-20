@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type { PrecisionFinishingCuttingFilters } from '@/services/apiPrecisionFinishingCuttings'
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import dayjs, { type Dayjs } from 'dayjs'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import dayjs from 'dayjs'
 
+import { useEffect, useState } from 'react'
 import {
   PRECISION_FINISHING_CUTTING_AUDIT_OPTIONS,
   PRECISION_FINISHING_CUTTING_WORKSHOPS,
-  type PrecisionFinishingCuttingFilters,
+
 } from '@/services/apiPrecisionFinishingCuttings'
 
 const { RangePicker } = DatePicker
@@ -22,7 +24,7 @@ interface PrecisionFinishingCuttingSearchValues extends PrecisionFinishingCuttin
 interface Props {
   onSearch: (values: PrecisionFinishingCuttingSearchValues) => void
   onReset: () => void
-  employees: { id: string; name: string }[]
+  employees: { id: string, name: string }[]
   initialValues?: PrecisionFinishingCuttingSearchValues
   mobile?: boolean
   showEmployeeFilter?: boolean
@@ -120,22 +122,24 @@ export default function PrecisionFinishingCuttingSearch({
         />
       </Form.Item>
 
-      {showEmployeeFilter ? (
-        <Form.Item name="employeeId" className="mb-0">
-          <Select
-            placeholder="操作人"
-            allowClear
-            showSearch
-            optionFilterProp="label"
-            getPopupContainer={getPopupContainer}
-            style={{ width: mobile ? '100%' : 180 }}
-            options={employees.map((employee) => ({
-              label: employee.name,
-              value: employee.id,
-            }))}
-          />
-        </Form.Item>
-      ) : null}
+      {showEmployeeFilter
+        ? (
+            <Form.Item name="employeeId" className="mb-0">
+              <Select
+                placeholder="操作人"
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                getPopupContainer={getPopupContainer}
+                style={{ width: mobile ? '100%' : 180 }}
+                options={employees.map(employee => ({
+                  label: employee.name,
+                  value: employee.id,
+                }))}
+              />
+            </Form.Item>
+          )
+        : null}
 
       <Form.Item name="targetWorkshop" className="mb-0">
         <Select
@@ -143,7 +147,7 @@ export default function PrecisionFinishingCuttingSearch({
           allowClear
           getPopupContainer={getPopupContainer}
           style={{ width: mobile ? '100%' : 180 }}
-          options={PRECISION_FINISHING_CUTTING_WORKSHOPS.map((workshop) => ({
+          options={PRECISION_FINISHING_CUTTING_WORKSHOPS.map(workshop => ({
             label: workshop,
             value: workshop,
           }))}
@@ -194,7 +198,7 @@ export default function PrecisionFinishingCuttingSearch({
         <Button
           block
           type="default"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={() => setIsExpanded(prev => !prev)}
           className="h-11 rounded-2xl border-slate-200 bg-slate-50 px-4 text-slate-700 shadow-none"
         >
           <span className="flex w-full items-center justify-between text-sm font-medium">
@@ -209,11 +213,13 @@ export default function PrecisionFinishingCuttingSearch({
           </span>
         </Button>
 
-        {isExpanded ? (
-          <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain pr-1 pb-1">
-            {formContent}
-          </div>
-        ) : null}
+        {isExpanded
+          ? (
+              <div className="max-h-[calc(100dvh-340px)] overflow-y-auto overscroll-contain pr-1 pb-1">
+                {formContent}
+              </div>
+            )
+          : null}
       </div>
     )
   }

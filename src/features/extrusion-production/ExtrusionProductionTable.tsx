@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, Tag, type TableColumnsType, type TableProps } from 'antd'
-
+import type { TableColumnsType, TableProps } from 'antd'
 import type { ExtrusionProduction } from '@/services/apiExtrusionProductions'
+import { Table, Tag } from 'antd'
+import { useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -67,9 +68,9 @@ export default function ExtrusionProductionTable({
         key: 'machine_id',
         width: 180,
         render: (_value: string, record) =>
-          record.machine?.machine_name ||
-          record.machine?.unified_device_no ||
-          record.machine_id,
+          record.machine?.machine_name
+          || record.machine?.unified_device_no
+          || record.machine_id,
       },
       {
         title: '班组长',
@@ -110,12 +111,12 @@ export default function ExtrusionProductionTable({
 
   return (
     <Table<ExtrusionProduction>
-      rowKey={(record) => record.id}
+      rowKey={record => record.id}
       loading={loading}
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}
-      onRow={(record) => ({
+      onRow={record => ({
         ...(onRowClick
           ? createKeyboardTableRowProps(
               () => onRowClick(record),

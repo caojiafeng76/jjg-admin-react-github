@@ -1,8 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react'
 import type { TableColumnsType } from 'antd'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import type { ToolingData } from '@/services/apiToolingData'
+import { fireEvent, render, screen } from '@testing-library/react'
+
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import ToolingDataTable from './ToolingDataTable'
 
@@ -44,7 +44,7 @@ function createRecord(overrides: Partial<ToolingData> = {}): ToolingData {
 }
 
 function getColumn(key: string): CapturedColumn {
-  const column = capturedTable.columns.find((item) => item.key === key)
+  const column = capturedTable.columns.find(item => item.key === key)
 
   if (!column) {
     throw new Error(`Missing column: ${key}`)
@@ -85,7 +85,7 @@ describe('ToolingDataTable', () => {
       />,
     )
 
-    expect(capturedTable.columns.map((column) => column.key)).toEqual([
+    expect(capturedTable.columns.map(column => column.key)).toEqual([
       '#',
       'tool_code',
       'tool_name',
@@ -136,7 +136,7 @@ describe('ToolingDataTable', () => {
       />,
     )
 
-    expect(capturedTable.columns.map((column) => column.key)).toEqual([
+    expect(capturedTable.columns.map(column => column.key)).toEqual([
       '#',
       'tool_code',
       'tool_name',

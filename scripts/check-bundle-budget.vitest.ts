@@ -211,7 +211,7 @@ describe('bundle budget guard', () => {
           name: 'ReportPage',
           src: 'src/pages/ReportPage.tsx',
         },
-        xlsx: {
+        'xlsx': {
           file: 'assets/xlsx.js',
           name: 'xlsx',
         },

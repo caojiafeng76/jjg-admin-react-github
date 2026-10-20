@@ -1,19 +1,20 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import type { FormInstance } from 'antd'
+
+import type { AttendanceDetail, AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
 import {
   CalendarDaysIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
+import { App, Modal } from 'antd'
 
+import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { useTableHeight } from '@/hooks/useTableHeight'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
+
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
-import { useTableHeight } from '@/hooks/useTableHeight'
-
-import type { AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
-import type { AttendanceDetail } from '@/services/apiAttendanceDetails'
 import AttendanceDetailForm from './AttendanceDetailForm'
 import AttendanceDetailSearch from './AttendanceDetailSearch'
 import AttendanceDetailTable from './AttendanceDetailTable'
@@ -36,8 +37,8 @@ export default function AttendanceDetailPage() {
   const [editingRecord, setEditingRecord] = useState<AttendanceDetail | null>(
     null,
   )
-  const [formRef, setFormRef] =
-    useState<FormInstance<AttendanceDetailFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<AttendanceDetailFormValues> | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -90,7 +91,7 @@ export default function AttendanceDetailPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('未找到对应记录')
       return
@@ -112,10 +113,12 @@ export default function AttendanceDetailPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除失败，请稍后重试')
       }
     }
@@ -125,10 +128,12 @@ export default function AttendanceDetailPage() {
     try {
       await batchCreateMutation.mutateAsync(rows)
       message.success(`成功导入 ${rows.length} 条考勤记录`)
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('批量导入失败，请稍后重试')
       }
       throw error
@@ -144,16 +149,19 @@ export default function AttendanceDetailPage() {
             ...values,
           })
           message.success('更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -175,11 +183,14 @@ export default function AttendanceDetailPage() {
 
       const next = new URLSearchParams(searchParamsURL)
       next.set('page', '1')
-      if (params.name) next.set('name', params.name)
+      if (params.name)
+        next.set('name', params.name)
       else next.delete('name')
-      if (params.startDate) next.set('startDate', params.startDate)
+      if (params.startDate)
+        next.set('startDate', params.startDate)
       else next.delete('startDate')
-      if (params.endDate) next.set('endDate', params.endDate)
+      if (params.endDate)
+        next.set('endDate', params.endDate)
       else next.delete('endDate')
 
       setSearchParamsURL(next)

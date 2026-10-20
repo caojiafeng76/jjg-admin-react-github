@@ -1,5 +1,7 @@
 import { ArrowLeftOutlined } from '@ant-design/icons'
+import { ViewfinderCircleIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
+import AppQRCode from '@ui/AppQRCode'
 import {
   Alert,
   Button,
@@ -11,18 +13,16 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { ViewfinderCircleIcon } from '@heroicons/react/24/outline'
 import { useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
 
+import { useNavigate, useParams } from 'react-router-dom'
 import { queryConfig } from '@/config/queryClient'
-import AppQRCode from '@ui/AppQRCode'
-import { getWorkshopOrderById } from '@/services/apiWorkshopOrders'
 import {
   getWorkshopOrderStatusColor,
   normalizeWorkshopOrderStatus,
 } from '@/features/workshop/OrderList/orderStatus'
 import { getWorkshopOrderQrValue } from '@/features/workshop/OrderList/workshopOrderQr'
+import { getWorkshopOrderById } from '@/services/apiWorkshopOrders'
 
 const { Paragraph, Text, Title } = Typography
 
@@ -70,11 +70,11 @@ export default function WorkshopOrderQrDetail() {
         status="error"
         title="订单信息获取失败"
         subTitle={error instanceof Error ? error.message : '请稍后重试'}
-        extra={
+        extra={(
           <Button type="primary" onClick={() => navigate(-1)}>
             返回上一页
           </Button>
-        }
+        )}
       />
     )
   }

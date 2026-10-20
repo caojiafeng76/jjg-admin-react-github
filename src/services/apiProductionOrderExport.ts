@@ -1,13 +1,13 @@
-import supabase from './supabase'
-import { AppError } from '@/utils/errorHandler'
 import type { ProductionOrderFilters } from './apiProductionOrders'
+import { AppError } from '@/utils/errorHandler'
 import { extractFunctionInvokeErrorMessage } from './functionInvokeHelpers'
+import supabase from './supabase'
 
-export type ProductionOrderExportTaskStatus =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
+export type ProductionOrderExportTaskStatus
+  = | 'pending'
+    | 'processing'
+    | 'completed'
+    | 'failed'
 
 export interface ProductionOrderExportTask {
   id: string
@@ -136,7 +136,7 @@ export async function waitForProductionOrderExportTask(
       throw new AppError(job.error_message || '导出失败，请稍后重试')
     }
 
-    await new Promise((resolve) => window.setTimeout(resolve, intervalMs))
+    await new Promise(resolve => window.setTimeout(resolve, intervalMs))
   }
 
   throw new AppError('导出任务仍在处理中，请稍后再试')

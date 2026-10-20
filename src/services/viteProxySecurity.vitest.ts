@@ -2,6 +2,9 @@ import { PassThrough } from 'node:stream'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { syneyStoreReportProxy } from '../../server/viteSyneyStoreReportProxy'
+import { youmaiPurchaseOrderProxy } from '../../server/viteYoumaiPurchaseOrderProxy'
+
 const serverMocks = vi.hoisted(() => ({
   fetchSyneyStoreReportFromServer: vi.fn(),
   fetchYoumaiPurchaseOrderFromServer: vi.fn(),
@@ -15,15 +18,12 @@ vi.mock('../../server/youmaiPurchaseOrderServer', () => ({
     serverMocks.fetchYoumaiPurchaseOrderFromServer,
 }))
 
-import { syneyStoreReportProxy } from '../../server/viteSyneyStoreReportProxy'
-import { youmaiPurchaseOrderProxy } from '../../server/viteYoumaiPurchaseOrderProxy'
-
 type Middleware = (
   request: PassThrough,
   response: TestResponse,
 ) => Promise<void>
 
-type TestResponse = {
+interface TestResponse {
   body?: Record<string, unknown>
   end: (body?: string) => void
   headers: Map<string, string>
@@ -51,7 +51,8 @@ function getMiddleware(
     },
   }
   ;(plugin.configureServer as (server: unknown) => void)(server)
-  if (!middleware) throw new Error('Middleware was not registered')
+  if (!middleware)
+    throw new Error('Middleware was not registered')
   return middleware
 }
 
@@ -166,7 +167,7 @@ describe.each(cases)('$name Vite proxy security', (proxyCase) => {
     proxyCase.external.mockRejectedValue(upstreamError)
     vi.stubGlobal(
       'fetch',
-      vi.fn<typeof fetch>(async (input) =>
+      vi.fn<typeof fetch>(async input =>
         String(input).includes('/auth/v1/user')
           ? new Response(JSON.stringify({ id: `user-${proxyCase.name}` }), {
               status: 200,
@@ -181,7 +182,7 @@ describe.each(cases)('$name Vite proxy security', (proxyCase) => {
 
     await getMiddleware(proxyCase.plugin())(
       createRequest(proxyCase.body, {
-        authorization: 'Bearer access-token',
+        'authorization': 'Bearer access-token',
         'x-forwarded-for': `192.0.2.${proxyCase.name === 'Syney' ? '10' : '11'}`,
       }),
       response,

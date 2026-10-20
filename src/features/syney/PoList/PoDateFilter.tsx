@@ -1,7 +1,8 @@
-import { DatePicker } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-import dayjs, { Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs'
 import { CalendarDaysIcon } from '@heroicons/react/16/solid'
+import { DatePicker } from 'antd'
+import dayjs from 'dayjs'
+import { useSearchParams } from 'react-router-dom'
 
 const { RangePicker } = DatePicker
 
@@ -12,8 +13,8 @@ export default function PoDateFilter() {
   const startDate = searchParams.get('startDate')
   const endDate = searchParams.get('endDate')
 
-  const defaultValue: [Dayjs | null, Dayjs | null] | null | undefined =
-    startDate && endDate ? [dayjs(startDate), dayjs(endDate)] : undefined
+  const defaultValue: [Dayjs | null, Dayjs | null] | null | undefined
+    = startDate && endDate ? [dayjs(startDate), dayjs(endDate)] : undefined
 
   function handleDateChange(
     dates: null | [Dayjs | null, Dayjs | null],
@@ -22,7 +23,8 @@ export default function PoDateFilter() {
     if (dates && dates[0] && dates[1]) {
       searchParams.set('startDate', dates[0].format('YYYY-MM-DD'))
       searchParams.set('endDate', dates[1].format('YYYY-MM-DD'))
-    } else {
+    }
+    else {
       searchParams.delete('startDate')
       searchParams.delete('endDate')
     }

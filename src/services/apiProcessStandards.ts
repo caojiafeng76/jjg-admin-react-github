@@ -1,9 +1,9 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 import type { Database } from './database.types'
+import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
-export type ProcessStandard =
-  Database['public']['Tables']['process_standards']['Row']
+export type ProcessStandard
+  = Database['public']['Tables']['process_standards']['Row']
 export type ProcessStandardMatchLevel = 'type-a' | 'type-b'
 
 export interface ProcessStandardMatchResult<T> {
@@ -241,8 +241,8 @@ export async function getStandardSeconds({
     select: 'standard_seconds',
   })
 
-  const seconds =
-    (result.records[0] as ProcessStandardStandardSeconds | undefined)
+  const seconds
+    = (result.records[0] as ProcessStandardStandardSeconds | undefined)
       ?.standard_seconds ?? 0
 
   setCachedStandardSeconds(cacheKey, seconds)
@@ -260,7 +260,7 @@ export async function getModels() {
   }
 
   const uniqueModels = Array.from(
-    new Set((data || []).map((item) => item.model)),
+    new Set((data || []).map(item => item.model)),
   )
   return uniqueModels as string[]
 }
@@ -299,7 +299,8 @@ export async function getSalesOrdersProjectNos() {
       options.push(item as SalesOrderProjectNoOption)
     }
 
-    if ((data || []).length < SALES_ORDER_OPTIONS_PAGE_SIZE) break
+    if ((data || []).length < SALES_ORDER_OPTIONS_PAGE_SIZE)
+      break
     from += SALES_ORDER_OPTIONS_PAGE_SIZE
   }
 
@@ -335,7 +336,7 @@ export interface StandardSecondsResolveRequest {
   partNo?: string | null
 }
 
-type StandardSecondsCandidateRow = {
+interface StandardSecondsCandidateRow {
   record_type: string | null
   part_no: string | null
   length: number | null
@@ -346,17 +347,17 @@ type StandardSecondsCandidateRow = {
 // A 类型需料号+长度同时非空且精确匹配；否则回退 B 类型取首行（预取查询已按 operation 过滤，行内 operation 均一致）
 function matchStandardSeconds(
   rows: StandardSecondsCandidateRow[],
-  { length, partNo }: { length?: number | null; partNo?: string | null },
+  { length, partNo }: { length?: number | null, partNo?: string | null },
 ): number {
   const normalizedLength = normalizeMatchLength(length)
   const normalizedPartNo = normalizeMatchText(partNo)
 
   if (normalizedPartNo && normalizedLength !== null) {
     const typeARow = rows.find(
-      (row) =>
-        row.record_type === 'A' &&
-        row.part_no === normalizedPartNo &&
-        row.length === normalizedLength,
+      row =>
+        row.record_type === 'A'
+        && row.part_no === normalizedPartNo
+        && row.length === normalizedLength,
     )
 
     if (typeARow) {
@@ -364,7 +365,7 @@ function matchStandardSeconds(
     }
   }
 
-  const typeBRow = rows.find((row) => row.record_type === 'B')
+  const typeBRow = rows.find(row => row.record_type === 'B')
   return typeBRow?.standard_seconds ?? 0
 }
 
@@ -376,7 +377,7 @@ function matchStandardSeconds(
 export async function resolveStandardSecondsBatch(
   requests: StandardSecondsResolveRequest[],
 ): Promise<number[]> {
-  const results = new Array<number>(requests.length)
+  const results = Array.from<number>({ length: requests.length })
   const missing: Array<{
     index: number
     cacheKey: string
@@ -405,7 +406,7 @@ export async function resolveStandardSecondsBatch(
     return results
   }
 
-  const combos = new Map<string, { model: string; operation: string }>()
+  const combos = new Map<string, { model: string, operation: string }>()
   for (const { request } of missing) {
     const model = normalizeMatchText(request.model) ?? ''
     const operation = normalizeMatchText(request.operation) ?? ''
@@ -418,11 +419,11 @@ export async function resolveStandardSecondsBatch(
     .select('model, operation, record_type, part_no, length, standard_seconds')
     .in(
       'model',
-      comboList.map((combo) => combo.model),
+      comboList.map(combo => combo.model),
     )
     .in(
       'operation',
-      comboList.map((combo) => combo.operation),
+      comboList.map(combo => combo.operation),
     )
     .in('record_type', ['A', 'B'])
 

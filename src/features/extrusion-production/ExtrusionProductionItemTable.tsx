@@ -1,11 +1,14 @@
-import { Button, Popconfirm, Space, Table, type TableColumnsType } from 'antd'
+import type { TableColumnsType } from 'antd'
+import type { ExtrusionProductionItemInput } from '@/services/apiExtrusionProductions'
+
 import {
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
 } from '@heroicons/react/16/solid'
+import { Button, Popconfirm, Space, Table } from 'antd'
 
-import type { ExtrusionProductionItemInput } from '@/services/apiExtrusionProductions'
+import { formatNumber } from '@/utils/format'
 
 interface Props {
   data: ExtrusionProductionItemInput[]
@@ -13,8 +16,6 @@ interface Props {
   onEdit: (index: number) => void
   onDelete: (index: number) => void
 }
-
-import { formatNumber } from '@/utils/format'
 
 export default function ExtrusionProductionItemTable({
   data,
@@ -60,7 +61,7 @@ export default function ExtrusionProductionItemTable({
       dataIndex: 'theoretical_output_weight_kg',
       key: 'theoretical_output_weight_kg',
       width: 120,
-      render: (value) => formatNumber(value),
+      render: value => formatNumber(value),
     },
     {
       title: '实际数量',
@@ -73,14 +74,14 @@ export default function ExtrusionProductionItemTable({
       dataIndex: 'actual_output_weight_kg',
       key: 'actual_output_weight_kg',
       width: 140,
-      render: (value) => formatNumber(value),
+      render: value => formatNumber(value),
     },
     {
       title: '成材率(%)',
       dataIndex: 'material_yield',
       key: 'material_yield',
       width: 110,
-      render: (value) => formatNumber(value),
+      render: value => formatNumber(value),
     },
     {
       title: '操作',
@@ -130,9 +131,8 @@ export default function ExtrusionProductionItemTable({
       </div>
 
       <Table<ExtrusionProductionItemInput>
-        rowKey={(record) =>
-          `${record.project_no}-${record.sort_order ?? 0}-${record.die_no ?? ''}`
-        }
+        rowKey={record =>
+          `${record.project_no}-${record.sort_order ?? 0}-${record.die_no ?? ''}`}
         size="small"
         pagination={false}
         columns={columns}

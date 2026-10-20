@@ -1,6 +1,5 @@
 import { isViewerRole } from '@/config/access'
-import { useAuth } from '@/contexts'
-import { usePermissionContext } from '@/contexts'
+import { useAuth, usePermissionContext } from '@/contexts'
 
 export const VIEWER_OPERATION_TIP = '查看员仅可查看数据'
 
@@ -19,7 +18,7 @@ export function useViewerOperationGuard(
       ? [options.bypassPermissionKey]
       : []
   const canBypassViewerGuard = bypassPermissionKeys.some(
-    (key) => permissions[key] === true,
+    key => permissions[key] === true,
   )
   const viewerDenied = isViewerRole(role) && !canBypassViewerGuard
 

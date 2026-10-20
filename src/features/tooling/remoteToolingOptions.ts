@@ -25,12 +25,12 @@ export function createToolingOptionSnapshot(
 
   const candidate = value as Partial<ToolingRecordSnapshotSource>
   if (
-    !candidate.tooling_data_id ||
-    typeof candidate.tool_code !== 'string' ||
-    typeof candidate.tool_name !== 'string' ||
-    typeof candidate.tool_spec !== 'string' ||
-    typeof candidate.material !== 'string' ||
-    typeof candidate.unit_price !== 'number'
+    !candidate.tooling_data_id
+    || typeof candidate.tool_code !== 'string'
+    || typeof candidate.tool_name !== 'string'
+    || typeof candidate.tool_spec !== 'string'
+    || typeof candidate.material !== 'string'
+    || typeof candidate.unit_price !== 'number'
   ) {
     return undefined
   }

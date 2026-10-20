@@ -1,5 +1,6 @@
-import { DEFAULT_HOME_BY_ROLE, type AppRole } from '@/config/access'
+import type { AppRole } from '@/config/access'
 import type { PermissionMap } from '@/types/permission'
+import { DEFAULT_HOME_BY_ROLE } from '@/config/access'
 import { PAGE_PERMISSION_ROUTES } from './pagePermissionRoutes'
 
 export { PAGE_PERMISSION_ROUTES }
@@ -19,7 +20,7 @@ export function deriveDefaultHome(
   const routes = PAGE_PERMISSION_ROUTES
   if (role && role in DEFAULT_HOME_BY_ROLE) {
     const defaultHome = DEFAULT_HOME_BY_ROLE[role as AppRole]
-    const matched = routes.find((r) => r.path === defaultHome)
+    const matched = routes.find(r => r.path === defaultHome)
     // 默认首页若不在 PAGE_PERMISSION_ROUTES（无权限保护）或用户已授权 → 直接走
     if (!matched || permissions[matched.permission] === true) {
       return defaultHome
@@ -27,7 +28,8 @@ export function deriveDefaultHome(
     // 否则 fall through 到「首个已授权页面」，避免直接撞 access-denied
   }
   for (const { path, permission } of routes) {
-    if (permissions[permission] === true) return path
+    if (permissions[permission] === true)
+      return path
   }
   return '/access-denied'
 }
@@ -45,7 +47,8 @@ export function userCanAccessPath(
   permissions: PermissionMap,
 ): boolean {
   const routes = PAGE_PERMISSION_ROUTES
-  const matched = routes.find((r) => r.path === path)
-  if (!matched) return true
+  const matched = routes.find(r => r.path === path)
+  if (!matched)
+    return true
   return permissions[matched.permission] === true
 }

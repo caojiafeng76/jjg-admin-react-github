@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import { Upload, Button, message } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
+import type { WorkshopOrder } from './index'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
+import { Button, message, Upload } from 'antd'
+import { useState } from 'react'
 import {
   parseWorkshopOrderExcel,
   preloadWorkshopExcel,
 } from '@/utils/workshopExcel'
-import type { WorkshopOrder } from './index'
 
 interface Props {
   onParsed: (rows: WorkshopOrder[]) => void
@@ -23,10 +23,10 @@ export default function WorkshopExcelUpload({ onParsed, disabled }: Props) {
       return false
     }
 
-    const isExcel =
-      file.type === 'application/vnd.ms-excel' ||
-      file.type ===
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    const isExcel
+      = file.type === 'application/vnd.ms-excel'
+        || file.type
+        === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
     if (!isExcel) {
       message.error('只能上传Excel文件(.xlsx或.xls)')
@@ -53,13 +53,15 @@ export default function WorkshopExcelUpload({ onParsed, disabled }: Props) {
       setFileList([
         { uid: file.name, name: file.name, status: 'done' } as UploadFile,
       ])
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         `Excel解析失败: ${error instanceof Error ? error.message : '未知错误'}`,
       )
       setFileList([])
       onParsed([])
-    } finally {
+    }
+    finally {
       setLoading(false)
     }
 

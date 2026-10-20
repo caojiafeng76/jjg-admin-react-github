@@ -1,17 +1,17 @@
 import type { ProductionDailyReportRow } from '@/services/apiProductionDailyReport'
 import type { ProductionOrderForExport } from '@/services/apiProductionOrders'
 
-export type ExcelExportWorkerRequest =
-  | { kind: 'productionOrder'; orders: ProductionOrderForExport[] }
-  | { kind: 'productionDailyReport'; rows: ProductionDailyReportRow[] }
+export type ExcelExportWorkerRequest
+  = | { kind: 'productionOrder', orders: ProductionOrderForExport[] }
+    | { kind: 'productionDailyReport', rows: ProductionDailyReportRow[] }
 
-export type ExcelExportWorkerResult = {
+export interface ExcelExportWorkerResult {
   buffer: ArrayBuffer
   filename: string
 }
 
-export type ExcelExportWorkerResponse =
-  ExcelExportWorkerResult | { error: string }
+export type ExcelExportWorkerResponse
+  = ExcelExportWorkerResult | { error: string }
 
 export function downloadExcelBuffer(buffer: ArrayBuffer, filename: string) {
   const blob = new Blob([buffer], {

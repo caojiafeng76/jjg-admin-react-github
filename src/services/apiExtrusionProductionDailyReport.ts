@@ -1,11 +1,11 @@
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 import type { Database } from './database.types'
+import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
-type ExtrusionProductionItem =
-  Database['public']['Tables']['extrusion_production_items']['Row']
-type ExtrusionProductionRow =
-  Database['public']['Tables']['extrusion_productions']['Row']
+type ExtrusionProductionItem
+  = Database['public']['Tables']['extrusion_production_items']['Row']
+type ExtrusionProductionRow
+  = Database['public']['Tables']['extrusion_productions']['Row']
 
 const EXTRUSION_PRODUCTION_DAILY_REPORT_EXPORT_PAGE_SIZE = 1000
 
@@ -54,7 +54,7 @@ export interface ExtrusionProductionDailyReportResult {
 }
 
 type ProductionWithMachine = ExtrusionProductionRow & {
-  machine: { machine_name: string; unified_device_no: string } | null
+  machine: { machine_name: string, unified_device_no: string } | null
 }
 
 function buildRow(
@@ -160,8 +160,8 @@ export async function getExtrusionProductionDailyReport({
   }
 
   const rows: ExtrusionProductionDailyReportRow[] = (data || []).map((item) => {
-    const production =
-      item.extrusion_productions as unknown as ProductionWithMachine
+    const production
+      = item.extrusion_productions as unknown as ProductionWithMachine
     return buildRow(item, production)
   })
 
@@ -240,8 +240,8 @@ export async function getExtrusionProductionDailyReportForExport(
     const pageItems = data || []
     rows.push(
       ...pageItems.map((item) => {
-        const production =
-          item.extrusion_productions as unknown as ProductionWithMachine
+        const production
+          = item.extrusion_productions as unknown as ProductionWithMachine
         return buildRow(item, production)
       }),
     )

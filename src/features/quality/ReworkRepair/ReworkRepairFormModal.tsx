@@ -1,18 +1,18 @@
 import type { FormInstance } from 'antd'
-import { Form, Modal } from 'antd'
+import type {
+  QualityReworkRepairFormFields,
+  WorkflowStageConfig,
+  WorkflowStageKey,
+} from './reworkRepairFormUtils'
 
 import type { ProjectNoSelectOption } from '@/features/production-order/projectNoSelect'
+import { Form, Modal } from 'antd'
 import {
   ProductionFields,
   QualityFields,
   TechnicalFields,
   WorkshopFields,
 } from './ReworkRepairStageFields'
-import type {
-  QualityReworkRepairFormFields,
-  WorkflowStageConfig,
-  WorkflowStageKey,
-} from './reworkRepairFormUtils'
 
 export interface ReworkRepairFormModalProps {
   form: FormInstance<QualityReworkRepairFormFields>
@@ -64,32 +64,40 @@ export default function ReworkRepairFormModal({
         onFinish={onFinish}
         disabled={isSubmitting || viewerDenied}
       >
-        {processingStageKey === 'production' ? (
-          <ProductionFields />
-        ) : processingStageKey === 'technical' ? (
-          <TechnicalFields />
-        ) : processingStageKey === 'quality' ? (
-          <QualityFields />
-        ) : processingStageKey === 'completed' ? (
-          <>
-            <WorkshopFields
-              isFetchingDocumentNo={isFetchingDocumentNo}
-              isLoadingOrderOptions={isLoadingOrderOptions}
-              projectNoOptions={projectNoOptions}
-              onProjectNoChange={onProjectNoChange}
-            />
-            <ProductionFields />
-            <TechnicalFields />
-            <QualityFields />
-          </>
-        ) : (
-          <WorkshopFields
-            isFetchingDocumentNo={isFetchingDocumentNo}
-            isLoadingOrderOptions={isLoadingOrderOptions}
-            projectNoOptions={projectNoOptions}
-            onProjectNoChange={onProjectNoChange}
-          />
-        )}
+        {processingStageKey === 'production'
+          ? (
+              <ProductionFields />
+            )
+          : processingStageKey === 'technical'
+            ? (
+                <TechnicalFields />
+              )
+            : processingStageKey === 'quality'
+              ? (
+                  <QualityFields />
+                )
+              : processingStageKey === 'completed'
+                ? (
+                    <>
+                      <WorkshopFields
+                        isFetchingDocumentNo={isFetchingDocumentNo}
+                        isLoadingOrderOptions={isLoadingOrderOptions}
+                        projectNoOptions={projectNoOptions}
+                        onProjectNoChange={onProjectNoChange}
+                      />
+                      <ProductionFields />
+                      <TechnicalFields />
+                      <QualityFields />
+                    </>
+                  )
+                : (
+                    <WorkshopFields
+                      isFetchingDocumentNo={isFetchingDocumentNo}
+                      isLoadingOrderOptions={isLoadingOrderOptions}
+                      projectNoOptions={projectNoOptions}
+                      onProjectNoChange={onProjectNoChange}
+                    />
+                  )}
       </Form>
     </Modal>
   )

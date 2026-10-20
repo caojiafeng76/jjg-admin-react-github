@@ -1,10 +1,10 @@
 import type { Database } from './database.types'
-import { ISyneyItem } from './types'
-import supabase from './supabase'
+import type { ISyneyItem } from './types'
 import { handleApiError } from '@utils/errorHandler'
+import supabase from './supabase'
 
-type SyneyStoreReportItemUpdate =
-  Database['public']['Tables']['syney-store-report-items']['Update']
+type SyneyStoreReportItemUpdate
+  = Database['public']['Tables']['syney-store-report-items']['Update']
 
 function normalizeSyneyStoreReportItemPayload(
   item: ISyneyItem,
@@ -44,7 +44,8 @@ export async function updateSyneyStoreReport({ item }: { item: ISyneyItem }) {
     .eq('PartNo', item.PartNo || '')
     .single()
 
-  if (specFromRepo) return
+  if (specFromRepo)
+    return
 
   const { error: insertSpecError } = await supabase.from('syney-specs').insert([
     {

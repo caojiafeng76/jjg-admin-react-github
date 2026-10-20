@@ -1,12 +1,12 @@
-import { useEffect } from 'react'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
 import type { Dayjs } from 'dayjs'
+import type { QualityIssueAuditStatus, QualityIssueRecordSearchParams } from '@/services/apiQualityIssueRecords'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
 
+import { useEffect } from 'react'
 import {
   QUALITY_ISSUE_AUDIT_STATUS_LABELS,
   QUALITY_ISSUE_AUDIT_STATUSES,
-  type QualityIssueAuditStatus,
-  type QualityIssueRecordSearchParams,
+
 } from '@/services/apiQualityIssueRecords'
 
 const { RangePicker } = DatePicker
@@ -23,7 +23,7 @@ interface SearchValues {
 }
 
 interface Props {
-  employees: Array<{ id: string; name: string }>
+  employees: Array<{ id: string, name: string }>
   initialValues?: QualityIssueRecordSearchParams
   onReset: () => void
   onSearch: (params: QualityIssueRecordSearchParams) => void
@@ -81,7 +81,7 @@ export default function IssueRecordSearch({
           placeholder="上报人"
           optionFilterProp="label"
           style={{ width: 160 }}
-          options={employees.map((employee) => ({
+          options={employees.map(employee => ({
             label: employee.name,
             value: employee.id,
           }))}
@@ -95,7 +95,7 @@ export default function IssueRecordSearch({
           placeholder="操作人"
           optionFilterProp="label"
           style={{ width: 160 }}
-          options={employees.map((employee) => ({
+          options={employees.map(employee => ({
             label: employee.name,
             value: employee.id,
           }))}
@@ -107,7 +107,7 @@ export default function IssueRecordSearch({
           allowClear
           placeholder="审核状态"
           style={{ width: 140 }}
-          options={QUALITY_ISSUE_AUDIT_STATUSES.map((status) => ({
+          options={QUALITY_ISSUE_AUDIT_STATUSES.map(status => ({
             label: AUDIT_STATUS_LABELS[status],
             value: status,
           }))}

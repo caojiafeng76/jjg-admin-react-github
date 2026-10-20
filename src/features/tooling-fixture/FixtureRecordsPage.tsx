@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
+import type { TableColumnsType } from 'antd'
+import type { ToolingFixtureUsageRecord } from '@/services/apiToolingFixturePublic'
 import { TrashIcon } from '@heroicons/react/16/solid'
 import {
   App,
@@ -11,9 +12,8 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import type { TableColumnsType } from 'antd'
 
-import type { ToolingFixtureUsageRecord } from '@/services/apiToolingFixturePublic'
+import { useCallback, useMemo, useState } from 'react'
 import {
   useDeleteToolingFixtureUsageRecords,
   useToolingFixtureUsageRecords,
@@ -47,7 +47,8 @@ export default function FixtureRecordsPage() {
             await deleteMutation.mutateAsync([record.id])
             message.success('出入记录删除成功')
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error ? error.message : '删除出入记录失败',
             )
@@ -72,7 +73,8 @@ export default function FixtureRecordsPage() {
           await deleteMutation.mutateAsync(ids)
           message.success('出入记录删除成功')
           setSelectedRowKeys([])
-        } catch (error) {
+        }
+        catch (error) {
           message.error(
             error instanceof Error ? error.message : '删除出入记录失败',
           )
@@ -165,16 +167,18 @@ export default function FixtureRecordsPage() {
               setAction(value)
             }}
           />
-          {selectedRowKeys.length > 0 ? (
-            <Button
-              type="text"
-              danger
-              icon={<TrashIcon className="size-4" />}
-              onClick={handleDeleteSelected}
-            >
-              删除选中
-            </Button>
-          ) : null}
+          {selectedRowKeys.length > 0
+            ? (
+                <Button
+                  type="text"
+                  danger
+                  icon={<TrashIcon className="size-4" />}
+                  onClick={handleDeleteSelected}
+                >
+                  删除选中
+                </Button>
+              )
+            : null}
         </Space>
         <Table<ToolingFixtureUsageRecord>
           rowKey="id"

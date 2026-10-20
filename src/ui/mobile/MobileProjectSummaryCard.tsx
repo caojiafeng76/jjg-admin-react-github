@@ -34,47 +34,49 @@ export default function MobileProjectSummaryCard({
   return (
     <Card className="rounded-4xl border-slate-200 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <Title level={5}>{title}</Title>
-      {project ? (
-        <div className="grid grid-cols-2 gap-3 text-sm text-slate-600">
-          <div className="rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="text-xs text-slate-400">项目号</div>
-            <div className="mt-1 font-semibold text-slate-900">
-              {formatDisplayValue(project.project_no)}
+      {project
+        ? (
+            <div className="grid grid-cols-2 gap-3 text-sm text-slate-600">
+              <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="text-xs text-slate-400">项目号</div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {formatDisplayValue(project.project_no)}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="text-xs text-slate-400">客户</div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {formatDisplayValue(project.customer)}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="text-xs text-slate-400">型号</div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {formatDisplayValue(project.product_model)}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="text-xs text-slate-400">长度(mm)</div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {formatDisplayValue(project.length_mm)}
+                </div>
+              </div>
+              <div className="col-span-2 rounded-2xl bg-slate-50 px-4 py-3">
+                <div className="text-xs text-slate-400">客户型号</div>
+                <div className="mt-1 font-semibold text-slate-900">
+                  {formatDisplayValue(project.customer_model)}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="text-xs text-slate-400">客户</div>
-            <div className="mt-1 font-semibold text-slate-900">
-              {formatDisplayValue(project.customer)}
-            </div>
-          </div>
-          <div className="rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="text-xs text-slate-400">型号</div>
-            <div className="mt-1 font-semibold text-slate-900">
-              {formatDisplayValue(project.product_model)}
-            </div>
-          </div>
-          <div className="rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="text-xs text-slate-400">长度(mm)</div>
-            <div className="mt-1 font-semibold text-slate-900">
-              {formatDisplayValue(project.length_mm)}
-            </div>
-          </div>
-          <div className="col-span-2 rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="text-xs text-slate-400">客户型号</div>
-            <div className="mt-1 font-semibold text-slate-900">
-              {formatDisplayValue(project.customer_model)}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <Alert
-          type="info"
-          showIcon
-          message={emptyMessage}
-          description={emptyDescription}
-        />
-      )}
+          )
+        : (
+            <Alert
+              type="info"
+              showIcon
+              message={emptyMessage}
+              description={emptyDescription}
+            />
+          )}
     </Card>
   )
 }

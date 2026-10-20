@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getSyneyPoDetail, updatePoItems } from './apiSyneyPo'
+
 const supabaseMock = vi.hoisted(() => ({
   from: vi.fn(),
   rpc: vi.fn(),
@@ -17,8 +19,6 @@ vi.mock('./supabase', () => ({ default: supabaseMock }))
 vi.mock('@utils/errorHandler', () => ({
   handleApiError: handleApiErrorMock,
 }))
-
-import { getSyneyPoDetail, updatePoItems } from './apiSyneyPo'
 
 const detailQueryMock = vi.hoisted(() => {
   const query = {

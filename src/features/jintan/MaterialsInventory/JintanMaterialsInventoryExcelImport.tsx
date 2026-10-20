@@ -1,21 +1,23 @@
-import { useState } from 'react'
+import type { TableColumnsType } from 'antd'
+import type { UploadFile } from 'antd/es/upload/interface'
+import type { JintanMaterialsInventoryImportRow } from '@/services/apiJintanMaterialsInventory'
+import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 import {
   Alert,
   Button,
   Modal,
   Table,
-  type TableColumnsType,
+
   Upload,
 } from 'antd'
-import type { UploadFile } from 'antd/es/upload/interface'
-import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 
-import type { JintanMaterialsInventoryImportRow } from '@/services/apiJintanMaterialsInventory'
+import { useState } from 'react'
 import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
 import ImportButton from '@/ui/ImportButton'
 
-const loadJintanMaterialsInventoryExcel = () =>
-  import('@/utils/jintanMaterialsInventoryExcel')
+function loadJintanMaterialsInventoryExcel() {
+  return import('@/utils/jintanMaterialsInventoryExcel')
+}
 
 function preloadJintanMaterialsInventoryExcel() {
   void loadJintanMaterialsInventoryExcel()
@@ -78,12 +80,12 @@ export default function JintanMaterialsInventoryExcelImport({
   const [parsing, setParsing] = useState(false)
 
   const handleBeforeUpload = async (file: File) => {
-    const isExcel =
-      file.type === 'application/vnd.ms-excel' ||
-      file.type ===
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-      file.name.endsWith('.xls') ||
-      file.name.endsWith('.xlsx')
+    const isExcel
+      = file.type === 'application/vnd.ms-excel'
+        || file.type
+        === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        || file.name.endsWith('.xls')
+        || file.name.endsWith('.xlsx')
 
     if (!isExcel) {
       return Upload.LIST_IGNORE
@@ -91,21 +93,23 @@ export default function JintanMaterialsInventoryExcelImport({
 
     setParsing(true)
     try {
-      const { parseJintanMaterialsInventoryExcel } =
-        await loadJintanMaterialsInventoryExcel()
+      const { parseJintanMaterialsInventoryExcel }
+        = await loadJintanMaterialsInventoryExcel()
       const { rows, errors } = await parseJintanMaterialsInventoryExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
       setFileList([
         { uid: file.name, name: file.name, status: 'done' } as UploadFile,
       ])
-    } catch (error) {
+    }
+    catch (error) {
       setParseErrors([
         error instanceof Error ? error.message : 'Excel 解析失败',
       ])
       setParsedRows([])
       setFileList([])
-    } finally {
+    }
+    finally {
       setParsing(false)
     }
 
@@ -120,8 +124,8 @@ export default function JintanMaterialsInventoryExcelImport({
   }
 
   const handleDownloadTemplate = async () => {
-    const { downloadJintanMaterialsInventoryTemplate } =
-      await loadJintanMaterialsInventoryExcel()
+    const { downloadJintanMaterialsInventoryTemplate }
+      = await loadJintanMaterialsInventoryExcel()
     downloadJintanMaterialsInventoryTemplate()
   }
 
@@ -213,7 +217,7 @@ export default function JintanMaterialsInventoryExcelImport({
               type="warning"
               showIcon
               title={`解析时发现 ${parseErrors.length} 个问题`}
-              description={
+              description={(
                 <ul className="mt-1 list-inside list-disc text-xs">
                   {parseErrors.slice(0, 10).map((error, index) => (
                     <li key={index}>{error}</li>
@@ -222,7 +226,7 @@ export default function JintanMaterialsInventoryExcelImport({
                     <li>...还有 {parseErrors.length - 10} 条</li>
                   )}
                 </ul>
-              }
+              )}
             />
           )}
 

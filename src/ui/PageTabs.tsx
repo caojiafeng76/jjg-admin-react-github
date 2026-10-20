@@ -1,18 +1,19 @@
+import type { TabsProps } from 'antd'
+import type { CSSProperties, MouseEvent as ReactMouseEvent } from 'react'
+import type { PageLocation, PageTab } from './pageTabsUtils'
+import { Skeleton, Tabs, theme } from 'antd'
 import {
+
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type MouseEvent as ReactMouseEvent,
 } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Skeleton, Tabs, theme } from 'antd'
-import type { TabsProps } from 'antd'
 
+import { useLocation, useNavigate } from 'react-router-dom'
 import { getDefaultHomeByRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
 import { getRouteLabel } from '@/routes/routeLabels'
-import { getLocationKey, type PageLocation, type PageTab } from './pageTabsUtils'
+import { getLocationKey } from './pageTabsUtils'
 
 function getLocationHref(location: PageLocation, key: string) {
   if (location.pathname === '/') {
@@ -38,15 +39,16 @@ function createPageTab(
 }
 
 function areTabsEqual(left: PageTab[], right: PageTab[]) {
-  if (left.length !== right.length) return false
+  if (left.length !== right.length)
+    return false
 
   return left.every((tab, index) => {
     const nextTab = right[index]
     return (
-      tab.key === nextTab.key &&
-      tab.href === nextTab.href &&
-      tab.label === nextTab.label &&
-      tab.closable === nextTab.closable
+      tab.key === nextTab.key
+      && tab.href === nextTab.href
+      && tab.label === nextTab.label
+      && tab.closable === nextTab.closable
     )
   })
 }
@@ -95,10 +97,10 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
       const nextTabs: PageTab[] = []
 
       if (homeKey) {
-        const homeHref =
-          activeKey === homeKey
+        const homeHref
+          = activeKey === homeKey
             ? activeHref
-            : currentTabs.find((tab) => tab.key === homeKey)?.href || homeKey
+            : currentTabs.find(tab => tab.key === homeKey)?.href || homeKey
         nextTabs.push(createPageTab(homeKey, homeHref, homeKey))
       }
 
@@ -108,18 +110,20 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
         }
       }
 
-      const activeTabIndex = nextTabs.findIndex((tab) => tab.key === activeKey)
+      const activeTabIndex = nextTabs.findIndex(tab => tab.key === activeKey)
       if (activeTabIndex === -1) {
         nextTabs.push(createPageTab(activeKey, activeHref, homeKey))
-      } else {
+      }
+      else {
         nextTabs[activeTabIndex] = createPageTab(activeKey, activeHref, homeKey)
       }
 
       while (nextTabs.length > MAX_CACHED_TABS) {
         const evictionCandidate = nextTabs
-          .filter((tab) => tab.closable && tab.key !== activeKey)
+          .filter(tab => tab.closable && tab.key !== activeKey)
           .reduce<PageTab | null>((oldest, tab) => {
-            if (!oldest) return tab
+            if (!oldest)
+              return tab
 
             const oldestVisit = lastVisitedRef.current.get(oldest.key) ?? 0
             const tabVisit = lastVisitedRef.current.get(tab.key) ?? 0
@@ -127,10 +131,11 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
             return tabVisit < oldestVisit ? tab : oldest
           }, null)
 
-        if (!evictionCandidate) break
+        if (!evictionCandidate)
+          break
 
         nextTabs.splice(
-          nextTabs.findIndex((tab) => tab.key === evictionCandidate.key),
+          nextTabs.findIndex(tab => tab.key === evictionCandidate.key),
           1,
         )
         lastVisitedRef.current.delete(evictionCandidate.key)
@@ -145,33 +150,36 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
   }, [onTabsChange, tabs])
 
   function handleChange(nextActiveKey: string) {
-    const targetTab = tabs.find((tab) => tab.key === nextActiveKey)
+    const targetTab = tabs.find(tab => tab.key === nextActiveKey)
     const targetHref = targetTab?.href || nextActiveKey
 
-    if (nextActiveKey === activeKey || targetHref === activeHref) return
+    if (nextActiveKey === activeKey || targetHref === activeHref)
+      return
 
     navigate(targetHref)
   }
 
   const handleTabClick: TabsProps['onTabClick'] = (nextActiveKey, event) => {
-    if (nextActiveKey !== activeKey) return
+    if (nextActiveKey !== activeKey)
+      return
 
     event.preventDefault()
     event.stopPropagation()
   }
 
   function handleRemove(targetKey: string) {
-    const targetTab = tabs.find((tab) => tab.key === targetKey)
-    if (!targetTab?.closable) return
+    const targetTab = tabs.find(tab => tab.key === targetKey)
+    if (!targetTab?.closable)
+      return
 
-    const targetIndex = tabs.findIndex((tab) => tab.key === targetKey)
-    const nextTabs = tabs.filter((tab) => tab.key !== targetKey)
+    const targetIndex = tabs.findIndex(tab => tab.key === targetKey)
+    const nextTabs = tabs.filter(tab => tab.key !== targetKey)
     setTabs(nextTabs)
     lastVisitedRef.current.delete(targetKey)
 
     if (targetKey === activeKey) {
-      const nextActiveTab =
-        nextTabs[targetIndex - 1] || nextTabs[targetIndex] || nextTabs[0]
+      const nextActiveTab
+        = nextTabs[targetIndex - 1] || nextTabs[targetIndex] || nextTabs[0]
 
       if (nextActiveTab) {
         navigate(nextActiveTab.href)
@@ -186,7 +194,8 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
   }
 
   function handleTabMouseDown(event: ReactMouseEvent<HTMLSpanElement>) {
-    if (event.button !== 1) return
+    if (event.button !== 1)
+      return
 
     event.preventDefault()
     event.stopPropagation()
@@ -196,7 +205,8 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
     targetKey: string,
     event: ReactMouseEvent<HTMLSpanElement>,
   ) {
-    if (event.button !== 1) return
+    if (event.button !== 1)
+      return
 
     event.preventDefault()
     event.stopPropagation()
@@ -220,13 +230,13 @@ export default function PageTabs({ onTabsChange }: PageTabsProps) {
     )
   }
 
-  const items: TabsProps['items'] = tabs.map((tab) => ({
+  const items: TabsProps['items'] = tabs.map(tab => ({
     key: tab.key,
     label: (
       <span
         style={tabLabelStyle}
         title={tab.label}
-        onAuxClick={(event) => handleTabAuxClick(tab.key, event)}
+        onAuxClick={event => handleTabAuxClick(tab.key, event)}
         onMouseDown={handleTabMouseDown}
       >
         {tab.label}

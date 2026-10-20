@@ -1,12 +1,12 @@
-import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
+import type { WorkshopOrderStatus } from './orderStatus'
 import { DownloadOutlined } from '@ant-design/icons'
-import { Button } from 'antd'
+import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/16/solid'
 
+import { Button } from 'antd'
 import AddButton from '@/ui/AddButton'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import PrintButton from '@/ui/PrintButton'
-import type { WorkshopOrderStatus } from './orderStatus'
 
 export interface WorkshopOrderToolbarProps {
   canCreate: boolean
@@ -54,62 +54,70 @@ export default function WorkshopOrderToolbar({
       <div className="flex flex-wrap items-center gap-3">
         {/* 核心操作按钮组 */}
         <div className="flex items-center gap-2">
-          {canCreate ? (
-            <AddButton
-              handleCreate={handleCreate}
-              permissionKey="feature:workshop-order.create"
-            />
-          ) : null}
-          {canEdit ? (
-            <EditButton
-              title="编辑"
-              handleEdit={handleEdit}
-              permissionKey="feature:workshop-order.edit"
-            />
-          ) : null}
+          {canCreate
+            ? (
+                <AddButton
+                  handleCreate={handleCreate}
+                  permissionKey="feature:workshop-order.create"
+                />
+              )
+            : null}
+          {canEdit
+            ? (
+                <EditButton
+                  title="编辑"
+                  handleEdit={handleEdit}
+                  permissionKey="feature:workshop-order.edit"
+                />
+              )
+            : null}
         </div>
 
         {/* 分隔线 */}
         <div className="h-6 w-px bg-linear-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
 
         {/* 状态管理按钮组 */}
-        {canManageStatus ? (
-          <div className="flex items-center gap-1">
-            <Button
-              type="text"
-              icon={<ArrowPathIcon className="size-4" />}
-              onClick={() => handleBatchStatusChange('生产中')}
-              loading={isBatchUpdating}
-              disabled={viewerDenied}
-              className="text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20"
-            >
-              批量改为生产中
-            </Button>
-            <Button
-              type="text"
-              icon={<CheckCircleIcon className="size-4" />}
-              onClick={() => handleBatchStatusChange('已结案')}
-              loading={isBatchUpdating}
-              disabled={viewerDenied}
-              className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-900/20"
-            >
-              批量结案
-            </Button>
-          </div>
-        ) : null}
+        {canManageStatus
+          ? (
+              <div className="flex items-center gap-1">
+                <Button
+                  type="text"
+                  icon={<ArrowPathIcon className="size-4" />}
+                  onClick={() => handleBatchStatusChange('生产中')}
+                  loading={isBatchUpdating}
+                  disabled={viewerDenied}
+                  className="text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                >
+                  批量改为生产中
+                </Button>
+                <Button
+                  type="text"
+                  icon={<CheckCircleIcon className="size-4" />}
+                  onClick={() => handleBatchStatusChange('已结案')}
+                  loading={isBatchUpdating}
+                  disabled={viewerDenied}
+                  className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-900/20"
+                >
+                  批量结案
+                </Button>
+              </div>
+            )
+          : null}
 
         {/* 分隔线 */}
         <div className="h-6 w-px bg-linear-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />
 
         {/* 删除按钮 */}
-        {canDelete ? (
-          <DeleteButton
-            onClick={handleDelete}
-            isDeleting={isDeleting}
-            count={selectedCount}
-            permissionKey="feature:workshop-order.delete"
-          />
-        ) : null}
+        {canDelete
+          ? (
+              <DeleteButton
+                onClick={handleDelete}
+                isDeleting={isDeleting}
+                count={selectedCount}
+                permissionKey="feature:workshop-order.delete"
+              />
+            )
+          : null}
 
         {/* 分隔线 */}
         <div className="h-6 w-px bg-linear-to-b from-transparent via-slate-300 to-transparent dark:via-slate-600" />

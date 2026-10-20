@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from 'react'
-import { Card, Form, FormInstance, Input, InputNumber, Typography } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   JobBaseSetting,
   JobBaseSettingFormValues,
 } from '@/services/apiJobBaseSettings'
+import { Card, Form, Input, InputNumber, Typography } from 'antd'
+
+import { useEffect, useMemo } from 'react'
 
 interface Props {
   onFinish: (values: JobBaseSettingFormValues) => void
@@ -38,8 +39,8 @@ export default function JobBaseSettingForm({
     const dailyWorkHours = Number(watchedValues?.daily_work_hours || 0)
     const workingDays = Number(watchedValues?.working_days || 0)
     const monthlyStandardHours = dailyWorkHours * workingDays
-    const hourlyFee =
-      monthlyStandardHours > 0 ? standardIncome / monthlyStandardHours : 0
+    const hourlyFee
+      = monthlyStandardHours > 0 ? standardIncome / monthlyStandardHours : 0
 
     return {
       monthlyStandardHours,
@@ -133,10 +134,13 @@ export default function JobBaseSettingForm({
           { required: true, message: '请输入每日工作时间' },
           {
             validator: (_, v) => {
-              if (v == null) return Promise.resolve()
+              if (v == null)
+                return Promise.resolve()
               const n = Number(v)
-              if (n < 0.5) return Promise.reject(new Error('每日工时不能小于 0.5 小时'))
-              if (n > 24) return Promise.reject(new Error('每日工时不能超过 24 小时'))
+              if (n < 0.5)
+                return Promise.reject(new Error('每日工时不能小于 0.5 小时'))
+              if (n > 24)
+                return Promise.reject(new Error('每日工时不能超过 24 小时'))
               return Promise.resolve()
             },
           },
@@ -161,12 +165,15 @@ export default function JobBaseSettingForm({
           { required: true, message: '请输入工作天数' },
           {
             validator: (_, v) => {
-              if (v == null) return Promise.resolve()
+              if (v == null)
+                return Promise.resolve()
               const n = Number(v)
               if (!Number.isInteger(n))
                 return Promise.reject(new Error('工作天数需为整数'))
-              if (n < 1) return Promise.reject(new Error('工作天数不能小于 1'))
-              if (n > 31) return Promise.reject(new Error('工作天数不能超过 31'))
+              if (n < 1)
+                return Promise.reject(new Error('工作天数不能小于 1'))
+              if (n > 31)
+                return Promise.reject(new Error('工作天数不能超过 31'))
               return Promise.resolve()
             },
           },
@@ -188,7 +195,7 @@ export default function JobBaseSettingForm({
             <Typography.Text type="secondary">
               月标准工作时间（小时）
             </Typography.Text>
-            <div className="mt-1 text-lg font-semibold tabular-nums text-slate-900">
+            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
               {formatAmount(preview.monthlyStandardHours)}
             </div>
           </div>
@@ -196,7 +203,7 @@ export default function JobBaseSettingForm({
             <Typography.Text type="secondary">
               工时费（元/小时）
             </Typography.Text>
-            <div className="mt-1 text-lg font-semibold tabular-nums text-slate-900">
+            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
               {formatAmount(preview.hourlyFee, 8)}
             </div>
           </div>

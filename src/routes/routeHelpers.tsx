@@ -1,9 +1,9 @@
-import { Suspense } from 'react'
 import type { ComponentType } from 'react'
-import { Navigate } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
-
 import Loading from '@ui/Loading'
+import { Suspense } from 'react'
+
+import { Navigate } from 'react-router-dom'
 import RouteErrorPage from '@/pages/RouteErrorPage'
 import { PermissionProtectedRoute } from './RouteGuards'
 

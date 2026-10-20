@@ -1,8 +1,13 @@
-import { useCallback, useRef, useState } from 'react'
+import type { FormInstance } from 'antd'
 import type { Dispatch, Key, SetStateAction } from 'react'
-import { App, type FormInstance } from 'antd'
+import type { EmployeeAuthAccountValues } from './EmployeeAuthAccountForm'
 
+import type { EmployeeRebindAccountValues } from './EmployeeRebindAccountForm'
+import type { EmployeeResetPasswordValues } from './EmployeeResetPasswordForm'
 import type { Employee } from '@/services/apiEmployees'
+import { App } from 'antd'
+import { useCallback, useRef, useState } from 'react'
+import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 import {
   useCreateEmployeeAuthAccount,
   useEmployeeAuthEmail,
@@ -10,10 +15,6 @@ import {
   useResetEmployeeAuthPassword,
   useUnbindEmployeeAuthAccount,
 } from './useEmployees'
-import type { EmployeeAuthAccountValues } from './EmployeeAuthAccountForm'
-import type { EmployeeRebindAccountValues } from './EmployeeRebindAccountForm'
-import type { EmployeeResetPasswordValues } from './EmployeeResetPasswordForm'
-import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 
 interface UseEmployeeAuthAccountActionsOptions {
   data: { items: Employee[] } | undefined
@@ -31,10 +32,10 @@ export function useEmployeeAuthAccountActions({
   const authFormRef = useRef<FormInstance<EmployeeAuthAccountValues> | null>(
     null,
   )
-  const resetPasswordFormRef =
-    useRef<FormInstance<EmployeeResetPasswordValues> | null>(null)
-  const rebindFormRef =
-    useRef<FormInstance<EmployeeRebindAccountValues> | null>(null)
+  const resetPasswordFormRef
+    = useRef<FormInstance<EmployeeResetPasswordValues> | null>(null)
+  const rebindFormRef
+    = useRef<FormInstance<EmployeeRebindAccountValues> | null>(null)
   const setAuthFormRef = useCallback(
     (form: FormInstance<EmployeeAuthAccountValues>) => {
       authFormRef.current = form
@@ -57,16 +58,16 @@ export function useEmployeeAuthAccountActions({
   const [authTargetEmployee, setAuthTargetEmployee] = useState<Employee | null>(
     null,
   )
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
-    useState(false)
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen]
+    = useState(false)
   const [isRebindModalOpen, setIsRebindModalOpen] = useState(false)
 
   const createEmployeeAuthMutation = useCreateEmployeeAuthAccount()
   const resetEmployeeAuthPasswordMutation = useResetEmployeeAuthPassword()
   const unbindEmployeeAuthAccountMutation = useUnbindEmployeeAuthAccount()
   const rebindEmployeeAuthAccountMutation = useRebindEmployeeAuthAccount()
-  const { data: rebindAuthEmail, isFetching: isFetchingRebindAuthEmail } =
-    useEmployeeAuthEmail(authTargetEmployee?.id, isRebindModalOpen)
+  const { data: rebindAuthEmail, isFetching: isFetchingRebindAuthEmail }
+    = useEmployeeAuthEmail(authTargetEmployee?.id, isRebindModalOpen)
 
   const handleOpenCreateAuthModal = useCallback(() => {
     if (selectedRowKeys.length !== 1) {
@@ -74,7 +75,7 @@ export function useEmployeeAuthAccountActions({
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
 
     if (!record) {
       return
@@ -95,7 +96,7 @@ export function useEmployeeAuthAccountActions({
       return null
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
 
     if (!record) {
       message.warning('未找到所选员工')
@@ -108,7 +109,8 @@ export function useEmployeeAuthAccountActions({
   const handleOpenResetPasswordModal = useCallback(() => {
     const record = getSingleSelectedEmployee()
 
-    if (!record) return
+    if (!record)
+      return
 
     if (!record.auth_user_id) {
       message.warning('该员工尚未绑定账号，无法重置密码')
@@ -122,7 +124,8 @@ export function useEmployeeAuthAccountActions({
   const handleUnbindAuthAccount = useCallback(() => {
     const record = getSingleSelectedEmployee()
 
-    if (!record) return
+    if (!record)
+      return
 
     if (!record.auth_user_id) {
       message.warning('该员工当前没有绑定账号')
@@ -142,10 +145,12 @@ export function useEmployeeAuthAccountActions({
           )
           message.success(`已解绑员工 ${result.employeeName} 的登录账号`)
           setSelectedRowKeys([])
-        } catch (error) {
+        }
+        catch (error) {
           if (error instanceof Error) {
             message.error(error.message)
-          } else {
+          }
+          else {
             message.error('解绑员工账号失败')
           }
 
@@ -164,7 +169,8 @@ export function useEmployeeAuthAccountActions({
   const handleOpenRebindModal = useCallback(() => {
     const record = getSingleSelectedEmployee()
 
-    if (!record) return
+    if (!record)
+      return
 
     setAuthTargetEmployee(record)
     setIsRebindModalOpen(true)
@@ -191,10 +197,12 @@ export function useEmployeeAuthAccountActions({
         setIsAuthModalOpen(false)
         setAuthTargetEmployee(null)
         authFormRef.current?.resetFields()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('创建员工登录账号失败')
         }
       }
@@ -224,10 +232,12 @@ export function useEmployeeAuthAccountActions({
         setSelectedRowKeys([])
         setIsResetPasswordModalOpen(false)
         resetPasswordFormRef.current?.resetFields()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('重置员工登录密码失败')
         }
       }
@@ -259,10 +269,12 @@ export function useEmployeeAuthAccountActions({
         setSelectedRowKeys([])
         setIsRebindModalOpen(false)
         rebindFormRef.current?.resetFields()
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('重新绑定员工账号失败')
         }
       }

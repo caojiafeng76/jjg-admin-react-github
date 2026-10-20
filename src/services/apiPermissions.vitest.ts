@@ -1,5 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  getAllPermissions,
+  getMyPermissions,
+  getRolePermissionIds,
+  getUserPermissionOverrides,
+  setRolePermissions,
+  setUserPermissionOverrides,
+  syncPermissionRegistry,
+} from './apiPermissions'
+
 interface QueryResult {
   data?: unknown
   error: { message: string } | null
@@ -31,12 +41,12 @@ vi.mock('./supabase', () => ({
     from: (table: string) => {
       const response = database.responses.shift() ?? { error: null }
       const builder = {} as QueryBuilder
-      const chain =
-        (method: string) =>
-        (...args: unknown[]): QueryBuilder => {
-          database.calls.push({ args, method, table })
-          return builder
-        }
+      const chain
+        = (method: string) =>
+          (...args: unknown[]): QueryBuilder => {
+            database.calls.push({ args, method, table })
+            return builder
+          }
 
       builder.delete = chain('delete')
       builder.eq = chain('eq')
@@ -58,22 +68,12 @@ vi.mock('@/utils/errorHandler', () => ({
     new Error(`${message}: ${error.message}`),
 }))
 
-import {
-  getAllPermissions,
-  getMyPermissions,
-  getRolePermissionIds,
-  getUserPermissionOverrides,
-  setRolePermissions,
-  setUserPermissionOverrides,
-  syncPermissionRegistry,
-} from './apiPermissions'
-
 function enqueue(...responses: QueryResult[]) {
   database.responses.push(...responses)
 }
 
 function callsFor(method: string) {
-  return database.calls.filter((call) => call.method === method)
+  return database.calls.filter(call => call.method === method)
 }
 
 describe('apiPermissions', () => {
@@ -154,7 +154,7 @@ describe('apiPermissions', () => {
     enqueue({ data: [permission], error: null })
 
     await expect(getAllPermissions()).resolves.toEqual([permission])
-    expect(callsFor('order').map((call) => call.args)).toEqual([
+    expect(callsFor('order').map(call => call.args)).toEqual([
       ['module'],
       ['scope'],
     ])

@@ -1,15 +1,15 @@
-import { Descriptions, Empty, Table, Tag } from 'antd'
-
 import type {
   ExtrusionProduction,
   ExtrusionProductionItem,
 } from '@/services/apiExtrusionProductions'
 
+import { Descriptions, Empty, Table, Tag } from 'antd'
+
+import { formatNumber } from '@/utils/format'
+
 interface Props {
   selectedRecord: ExtrusionProduction | null
 }
-
-import { formatNumber } from '@/utils/format'
 
 const itemColumns = [
   {
@@ -122,9 +122,9 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
             key: 'machine_id',
             label: '设备',
             children:
-              selectedRecord.machine?.machine_name ||
-              selectedRecord.machine?.unified_device_no ||
-              selectedRecord.machine_id,
+              selectedRecord.machine?.machine_name
+              || selectedRecord.machine?.unified_device_no
+              || selectedRecord.machine_id,
           },
           {
             key: 'shift_leader_name',
@@ -164,7 +164,7 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
 
       <div className="mt-3 min-h-0 flex-1">
         <Table<ExtrusionProductionItem>
-          rowKey={(record) => record.id}
+          rowKey={record => record.id}
           size="small"
           pagination={false}
           columns={itemColumns}

@@ -1,13 +1,12 @@
+import type { Database, Json } from './database.types'
+import type { ToolingFixtureAction, ToolingFixtureLifecycle, ToolingFixtureStatus } from '@/features/tooling-fixture/fixtureDomain'
 import {
   TOOLING_FIXTURE_ACTIONS,
   TOOLING_FIXTURE_LIFECYCLES,
   TOOLING_FIXTURE_STATUSES,
-  type ToolingFixtureAction,
-  type ToolingFixtureLifecycle,
-  type ToolingFixtureStatus,
+
 } from '@/features/tooling-fixture/fixtureDomain'
 import { handleApiError } from '@/utils/errorHandler'
-import type { Database, Json } from './database.types'
 import publicSupabase from './publicSupabase'
 import supabase from './supabase'
 
@@ -110,15 +109,15 @@ function parseActionResult(
   const createdAt = record.created_at
 
   if (
-    typeof fixtureId !== 'string' ||
-    typeof fixtureNo !== 'string' ||
-    typeof status !== 'string' ||
-    !TOOLING_FIXTURE_STATUSES.includes(status as ToolingFixtureStatus) ||
-    typeof recordId !== 'string' ||
-    typeof action !== 'string' ||
-    !TOOLING_FIXTURE_ACTIONS.includes(action as ToolingFixtureAction) ||
-    typeof operatorName !== 'string' ||
-    typeof createdAt !== 'string'
+    typeof fixtureId !== 'string'
+    || typeof fixtureNo !== 'string'
+    || typeof status !== 'string'
+    || !TOOLING_FIXTURE_STATUSES.includes(status as ToolingFixtureStatus)
+    || typeof recordId !== 'string'
+    || typeof action !== 'string'
+    || !TOOLING_FIXTURE_ACTIONS.includes(action as ToolingFixtureAction)
+    || typeof operatorName !== 'string'
+    || typeof createdAt !== 'string'
   ) {
     throw new Error('工装操作返回结果无效')
   }
@@ -197,8 +196,8 @@ type ToolingFixtureSnapshot = Pick<
   'fixture_no' | 'product_name'
 >
 
-type UsageRow =
-  Database['public']['Tables']['tooling_fixture_usage_records']['Row'] & {
+type UsageRow
+  = Database['public']['Tables']['tooling_fixture_usage_records']['Row'] & {
     tooling_fixtures: ToolingFixtureSnapshot | ToolingFixtureSnapshot[] | null
   }
 
@@ -224,7 +223,7 @@ export async function getToolingFixtureUsageRecords({
   pageSize: number
   action?: ToolingFixtureAction
   signal?: AbortSignal
-}): Promise<{ items: ToolingFixtureUsageRecord[]; total: number }> {
+}): Promise<{ items: ToolingFixtureUsageRecord[], total: number }> {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
   let query = supabase
@@ -250,7 +249,7 @@ export async function getToolingFixtureUsageRecords({
     throw handleApiError(error, '获取工装出入记录失败')
   }
 
-  const items = (data ?? []).map((row) => ({
+  const items = (data ?? []).map(row => ({
     id: row.id,
     fixture_id: row.fixture_id,
     action: parseToolingFixtureAction(row.action),

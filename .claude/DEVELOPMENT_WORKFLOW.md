@@ -31,7 +31,7 @@
 
 ## 3. 统一执行流程
 
-> 完整的逐步执行流程（复述目标 → 分析任务 → 选 skill → 文件搜索建立上下文 → 计划 → 检查工作区 → 最小化改动 → 联动风险检查 → 验证 → 固定汇报）以 `.github/copilot-instructions.md` 为准，本文不再重复。
+> 完整的逐步执行流程（复述目标 → 分析任务 → 选 skill → 文件搜索建立上下文 → 计划 → 检查工作区 → 最小化改动 → ESLint 格式化 → 联动风险检查 → 验证 → 固定汇报）以 `.github/copilot-instructions.md` 为准，本文不再重复。
 
 ---
 
@@ -79,6 +79,8 @@
 ## 6. 代码风格
 
 > 导入顺序、命名规范、组件结构、路径别名等详见 `AGENTS.md`（以其为准，本文不再重复）。
+
+- **写完或修改代码后必须用 ESLint 格式化**：`bunx eslint --fix <改动的文件或目录>`（或全量 `bun lint:fix`），再确认 `bun lint` 0 error。项目使用 `@antfu/eslint-config` 统一 lint 与格式化，已移除 Prettier。
 
 ---
 

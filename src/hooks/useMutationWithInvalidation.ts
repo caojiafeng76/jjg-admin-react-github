@@ -1,4 +1,4 @@
-import { QueryKey, UseMutationOptions } from '@tanstack/react-query'
+import type { QueryKey, UseMutationOptions } from '@tanstack/react-query'
 
 import { useMutationWithMessage } from './useMutationWithMessage'
 

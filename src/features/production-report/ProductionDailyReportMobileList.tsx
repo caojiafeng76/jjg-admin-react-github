@@ -10,21 +10,21 @@ function renderQualifiedRate(value: number | null | undefined) {
     return '-'
   }
   const percent = value * 100
-  const tone =
-    percent >= 99
+  const tone
+    = percent >= 99
       ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
       : percent >= 95
         ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300'
         : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300'
-  const dot =
-    percent >= 99
+  const dot
+    = percent >= 99
       ? 'bg-emerald-500 dark:bg-emerald-400'
       : percent >= 95
         ? 'bg-blue-500 dark:bg-blue-400'
         : 'bg-amber-500 dark:bg-amber-400'
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium shadow-sm dark:shadow-none tabular-nums ${tone}`}
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium tabular-nums shadow-sm dark:shadow-none ${tone}`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
       {percent.toFixed(2)}%
@@ -36,8 +36,8 @@ function renderDataCategory(value: string | null | undefined) {
   if (value !== 'A' && value !== 'B') {
     return null
   }
-  const palette =
-    value === 'A'
+  const palette
+    = value === 'A'
       ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300'
       : 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-300'
   return (
@@ -116,7 +116,7 @@ export default function ProductionDailyReportMobileList({
                 <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
                   来料合格
                 </div>
-                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                <div className="mt-1 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
                   {row.incomingQualifiedCount}
                 </div>
               </div>
@@ -140,7 +140,7 @@ export default function ProductionDailyReportMobileList({
                 <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
                   长度
                 </div>
-                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                <div className="mt-1 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
                   {row.lengthMm ?? '-'}
                 </div>
               </div>
@@ -148,7 +148,7 @@ export default function ProductionDailyReportMobileList({
                 <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
                   原料不良
                 </div>
-                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                <div className="mt-1 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
                   {row.rawMaterialDefectCount} /{' '}
                   {row.rawMaterialDefectWeightKg.toFixed(2)}kg
                 </div>
@@ -157,7 +157,7 @@ export default function ProductionDailyReportMobileList({
                 <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
                   加工不良
                 </div>
-                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                <div className="mt-1 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
                   {row.processingDefectCount} /{' '}
                   {row.processingDefectWeightKg.toFixed(2)}kg
                 </div>
@@ -166,7 +166,7 @@ export default function ProductionDailyReportMobileList({
                 <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
                   外协不良
                 </div>
-                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                <div className="mt-1 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
                   {row.outsourceDefectCount} /{' '}
                   {row.outsourceDefectWeightKg.toFixed(2)}kg
                 </div>
@@ -175,7 +175,7 @@ export default function ProductionDailyReportMobileList({
                 <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
                   调机不良
                 </div>
-                <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                <div className="mt-1 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
                   {row.setupDefectCount} /{' '}
                   {row.setupDefectWeightKg.toFixed(2)}kg
                 </div>
@@ -188,26 +188,30 @@ export default function ProductionDailyReportMobileList({
                   {row.employeeName} / {row.setupResponsible}
                 </div>
               </div>
-              {row.outsourceUnit !== '-' || row.outsourceDefectReason !== '-' ? (
-                <div className="col-span-2 rounded-xl bg-slate-50 p-2.5 dark:bg-slate-800/50">
-                  <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
-                    外协信息
-                  </div>
-                  <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-                    {row.outsourceUnit} · {row.outsourceDefectReason}
-                  </div>
-                </div>
-              ) : null}
-              {row.remark !== '-' ? (
-                <div className="col-span-2 rounded-xl bg-slate-50 p-2.5 dark:bg-slate-800/50">
-                  <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
-                    备注
-                  </div>
-                  <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-                    {row.remark}
-                  </div>
-                </div>
-              ) : null}
+              {row.outsourceUnit !== '-' || row.outsourceDefectReason !== '-'
+                ? (
+                    <div className="col-span-2 rounded-xl bg-slate-50 p-2.5 dark:bg-slate-800/50">
+                      <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
+                        外协信息
+                      </div>
+                      <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
+                        {row.outsourceUnit} · {row.outsourceDefectReason}
+                      </div>
+                    </div>
+                  )
+                : null}
+              {row.remark !== '-'
+                ? (
+                    <div className="col-span-2 rounded-xl bg-slate-50 p-2.5 dark:bg-slate-800/50">
+                      <div className="text-[11px] font-medium tracking-[0.1em] text-slate-400 uppercase dark:text-slate-500">
+                        备注
+                      </div>
+                      <div className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
+                        {row.remark}
+                      </div>
+                    </div>
+                  )
+                : null}
             </div>
           </article>
         )

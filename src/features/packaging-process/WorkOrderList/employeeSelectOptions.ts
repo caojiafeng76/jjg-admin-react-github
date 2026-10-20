@@ -39,14 +39,16 @@ export function rememberEmployeeOptions(
   previous: EmployeeSelectOption[],
   candidates: readonly EmployeeSelectOption[],
 ): EmployeeSelectOption[] {
-  if (candidates.length === 0) return previous
+  if (candidates.length === 0)
+    return previous
 
-  const next = new Map(previous.map((option) => [option.value, option]))
+  const next = new Map(previous.map(option => [option.value, option]))
   let changed = false
 
   candidates.forEach((candidate) => {
     const current = next.get(candidate.value)
-    if (current?.label === candidate.label) return
+    if (current?.label === candidate.label)
+      return
 
     next.set(candidate.value, candidate)
     changed = true

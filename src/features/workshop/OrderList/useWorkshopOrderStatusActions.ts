@@ -1,12 +1,13 @@
-import { useCallback } from 'react'
 import type { Dispatch, Key, SetStateAction } from 'react'
-import { App } from 'antd'
-
 import type { WorkshopOrderStatus } from './orderStatus'
 import type { WorkshopOrder } from './types'
+
+import type { useUpdateWorkshopOrder } from './useWorkshopOrders'
+import { App } from 'antd'
+import { useCallback } from 'react'
 import {
   useBatchUpdateWorkshopOrderStatuses,
-  type useUpdateWorkshopOrder,
+
 } from './useWorkshopOrders'
 
 interface UseWorkshopOrderStatusActionsOptions {
@@ -43,8 +44,8 @@ export function useWorkshopOrderStatusActions({
       }
 
       const applyUpdate = async () => {
-        const closedAt =
-          nextStatus === '已结案' ? new Date().toISOString() : null
+        const closedAt
+          = nextStatus === '已结案' ? new Date().toISOString() : null
 
         await updateMutation.mutateAsync({
           id: activeOrder.id!,
@@ -54,7 +55,7 @@ export function useWorkshopOrderStatusActions({
             closed_at: closedAt,
           },
         })
-        setActiveOrder((current) =>
+        setActiveOrder(current =>
           current
             ? { ...current, status: nextStatus, closed_at: closedAt }
             : current,
@@ -101,8 +102,8 @@ export function useWorkshopOrderStatusActions({
       }
 
       const applyUpdate = async () => {
-        const closedAt =
-          nextStatus === '已结案' ? new Date().toISOString() : null
+        const closedAt
+          = nextStatus === '已结案' ? new Date().toISOString() : null
 
         await batchStatusMutation.mutateAsync({
           ids: selectedRowKeys as string[],
@@ -111,7 +112,7 @@ export function useWorkshopOrderStatusActions({
         })
 
         if (activeOrder?.id && selectedRowKeys.includes(activeOrder.id)) {
-          setActiveOrder((current) =>
+          setActiveOrder(current =>
             current
               ? { ...current, status: nextStatus, closed_at: closedAt }
               : current,
@@ -139,10 +140,12 @@ export function useWorkshopOrderStatusActions({
         onOk: async () => {
           try {
             await applyUpdate()
-          } catch (error) {
+          }
+          catch (error) {
             if (error instanceof Error) {
               message.error(error.message)
-            } else {
+            }
+            else {
               message.error(
                 nextStatus === '已结案'
                   ? '批量结案失败，请稍后重试'

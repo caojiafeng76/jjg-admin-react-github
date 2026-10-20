@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   JintanProfilesStockOut,
   JintanProfilesStockOutFormValues,
 } from '@/services/apiJintanProfilesStockOut'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -36,11 +37,11 @@ export default function JintanProfilesStockOutPage() {
   const keyword = urlParams.get('keyword') || undefined
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingRecord, setEditingRecord] =
-    useState<JintanProfilesStockOut | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<JintanProfilesStockOut | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [formRef, setFormRef] =
-    useState<FormInstance<JintanProfilesStockOutFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<JintanProfilesStockOutFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const { data, isLoading, error, refetch } = useJintanProfilesStockOutList({
@@ -51,8 +52,8 @@ export default function JintanProfilesStockOutPage() {
   const createMutation = useCreateJintanProfilesStockOut()
   const updateMutation = useUpdateJintanProfilesStockOutRemarks()
   const deleteMutation = useDeleteJintanProfilesStockOut()
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({ targetRowCount: 10 })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({ targetRowCount: 10 })
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false)
@@ -74,7 +75,7 @@ export default function JintanProfilesStockOutPage() {
       message.warning('请选择一条数据进行编辑')
       return
     }
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -99,12 +100,14 @@ export default function JintanProfilesStockOutPage() {
             remarks: values.remarks ?? '',
           })
           message.success('出库备注已更新')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('型材出库成功，库存已更新')
         }
         closeModal()
-      } catch (submitError) {
+      }
+      catch (submitError) {
         setFormError(submitError)
       }
     },
@@ -133,7 +136,8 @@ export default function JintanProfilesStockOutPage() {
       await deleteMutation.mutateAsync(selectedRowKeys[0] as string)
       message.success('出库记录已删除，库存已回补')
       setSelectedRowKeys([])
-    } catch (deleteError) {
+    }
+    catch (deleteError) {
       message.error(
         deleteError instanceof Error
           ? deleteError.message
@@ -153,7 +157,8 @@ export default function JintanProfilesStockOutPage() {
     (nextKeyword?: string) => {
       const next = new URLSearchParams(urlParams)
       next.set('page', '1')
-      if (nextKeyword) next.set('keyword', nextKeyword)
+      if (nextKeyword)
+        next.set('keyword', nextKeyword)
       else next.delete('keyword')
       setSelectedRowKeys([])
       setUrlParams(next)
@@ -225,13 +230,13 @@ export default function JintanProfilesStockOutPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={JINTAN_PROFILES_STOCK_OUT_PERMISSION_KEY}
                   disabled={viewerDenied}
                 />
-              }
+              )}
             />
           </TableState>
         </div>

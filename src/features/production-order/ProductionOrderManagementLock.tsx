@@ -1,11 +1,11 @@
 import type { FormInstance } from 'antd'
-import { Button, Card, Form, Input, Space, Typography } from 'antd'
+import type { UnlockManagementFormValues } from './productionOrderPageUtils'
 import {
   KeyIcon,
   LockClosedIcon,
   LockOpenIcon,
 } from '@heroicons/react/24/outline'
-import type { UnlockManagementFormValues } from './productionOrderPageUtils'
+import { Button, Card, Form, Input, Space, Typography } from 'antd'
 
 const { Paragraph, Text, Title } = Typography
 

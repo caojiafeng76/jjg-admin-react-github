@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface DashboardKpi {
   key: string
@@ -45,7 +45,8 @@ export function buildDailyTrend(
   const earliest = today.subtract(days - 1, 'day')
 
   for (const date of dates) {
-    if (!date) continue
+    if (!date)
+      continue
     const day = dayjs(date)
     if (!day.isValid() || day.isBefore(earliest, 'day') || day.isAfter(today, 'day')) {
       continue
@@ -63,11 +64,13 @@ export function buildDailyTrend(
  * @returns 百分比（保留 1 位小数）；前一半合计为 0 时返回 null
  */
 export function computeDeltaPercent(trend: number[]): number | null {
-  if (trend.length < 2 || trend.length % 2 !== 0) return null
+  if (trend.length < 2 || trend.length % 2 !== 0)
+    return null
   const half = trend.length / 2
   const previous = trend.slice(0, half).reduce((sum, n) => sum + n, 0)
   const current = trend.slice(half).reduce((sum, n) => sum + n, 0)
-  if (previous === 0) return null
+  if (previous === 0)
+    return null
   return Math.round(((current - previous) / previous) * 1000) / 10
 }
 
@@ -124,7 +127,7 @@ export async function getDashboardKpis(signal?: AbortSignal): Promise<DashboardK
         }
 
         const pageRows = (trendResult.data ?? []).map(
-          (row) => row.created_at as string | null,
+          row => row.created_at as string | null,
         )
         dates.push(...pageRows)
 

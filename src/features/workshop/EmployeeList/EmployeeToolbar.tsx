@@ -1,14 +1,14 @@
-import { Button } from 'antd'
 import {
   ArrowPathIcon,
   KeyIcon,
   LinkSlashIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
+import { Button } from 'antd'
 
 import AddButton from '@/ui/AddButton'
-import EditButton from '@/ui/EditButton'
 import DeleteButton from '@/ui/DeleteButton'
+import EditButton from '@/ui/EditButton'
 import PermissionButton from '@/ui/PermissionButton'
 import EmployeeSearch from './EmployeeSearch'
 

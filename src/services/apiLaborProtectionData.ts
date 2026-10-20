@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface LaborProtectionData {
   id: string
@@ -17,7 +17,7 @@ export interface LaborProtectionDataOption {
   category: string
 }
 
-type LaborProtectionDataTable = {
+interface LaborProtectionDataTable {
   from: (table: string) => any
 }
 

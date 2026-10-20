@@ -1,8 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ComponentProps } from 'react'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App } from 'antd'
-import type { ComponentProps } from 'react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import ProductionOrderForm from './ProductionOrderForm'
 

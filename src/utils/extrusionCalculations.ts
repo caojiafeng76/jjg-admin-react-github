@@ -24,16 +24,16 @@ export function calculateTheoreticalOutputCount({
   const normalizedActualQuantity = toPositiveNumber(actualQuantity)
 
   if (
-    normalizedActualLengthMm === null ||
-    normalizedOrderLengthMm === null ||
-    normalizedActualQuantity === null
+    normalizedActualLengthMm === null
+    || normalizedOrderLengthMm === null
+    || normalizedActualQuantity === null
   ) {
     return 0
   }
 
   return Math.floor(
-    (normalizedActualLengthMm / normalizedOrderLengthMm) *
-      normalizedActualQuantity,
+    (normalizedActualLengthMm / normalizedOrderLengthMm)
+    * normalizedActualQuantity,
   )
 }
 
@@ -55,17 +55,17 @@ export function calculateTheoreticalOutputWeight({
   )
 
   if (
-    normalizedTheoreticalOutputCount === null ||
-    normalizedOrderLengthMm === null ||
-    normalizedTheoreticalUnitWeightKgPerMeter === null
+    normalizedTheoreticalOutputCount === null
+    || normalizedOrderLengthMm === null
+    || normalizedTheoreticalUnitWeightKgPerMeter === null
   ) {
     return 0
   }
 
   return (
-    normalizedTheoreticalOutputCount *
-    (normalizedOrderLengthMm / 1000) *
-    normalizedTheoreticalUnitWeightKgPerMeter
+    normalizedTheoreticalOutputCount
+    * (normalizedOrderLengthMm / 1000)
+    * normalizedTheoreticalUnitWeightKgPerMeter
   )
 }
 
@@ -82,8 +82,8 @@ export function calculateActualOutputWeight({
   const normalizedActualQuantity = toPositiveNumber(actualQuantity)
 
   if (
-    normalizedActualUnitWeightKg === null ||
-    normalizedActualQuantity === null
+    normalizedActualUnitWeightKg === null
+    || normalizedActualQuantity === null
   ) {
     return 0
   }
@@ -104,8 +104,8 @@ export function calculateMaterialYield({
   const normalizedInputWeightKg = toPositiveNumber(inputWeightKg)
 
   if (
-    normalizedActualOutputWeightKg === null ||
-    normalizedInputWeightKg === null
+    normalizedActualOutputWeightKg === null
+    || normalizedInputWeightKg === null
   ) {
     return 0
   }
@@ -131,9 +131,9 @@ export function calculateBilletInputWeight({
   const normalizedQuantity = toPositiveNumber(billetQuantity)
 
   if (
-    normalizedDiameter === null ||
-    normalizedLength === null ||
-    normalizedQuantity === null
+    normalizedDiameter === null
+    || normalizedLength === null
+    || normalizedQuantity === null
   ) {
     return 0
   }

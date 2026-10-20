@@ -33,7 +33,9 @@ export function useFieldPermission(
   fieldName: string,
 ): FieldPermissionState {
   const { can } = usePermissionContext()
-  if (!can(`field:${module}.${fieldName}.view`)) return 'hidden'
-  if (!can(`field:${module}.${fieldName}.edit`)) return 'readonly'
+  if (!can(`field:${module}.${fieldName}.view`))
+    return 'hidden'
+  if (!can(`field:${module}.${fieldName}.edit`))
+    return 'readonly'
   return 'editable'
 }

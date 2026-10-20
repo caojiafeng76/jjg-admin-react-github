@@ -1,11 +1,12 @@
-import { useCallback, useState } from 'react'
 import type { Dispatch, Key, SetStateAction } from 'react'
+import type { Employee } from '@/services/apiEmployees'
 import { useQueryClient } from '@tanstack/react-query'
 import { App } from 'antd'
 
+import { useCallback, useState } from 'react'
 import {
   createEmployeeAuthAccount,
-  type Employee,
+
 } from '@/services/apiEmployees'
 import {
   DEFAULT_EMPLOYEE_AUTH_PASSWORD,
@@ -35,7 +36,7 @@ export function useEmployeeBatchAuthAccounts({
     }
 
     const selectedEmployees = (data?.items || []).filter(
-      (item) => item.id && selectedRowKeys.includes(item.id),
+      item => item.id && selectedRowKeys.includes(item.id),
     )
 
     if (selectedEmployees.length === 0) {
@@ -44,10 +45,10 @@ export function useEmployeeBatchAuthAccounts({
     }
 
     const targetEmployees = selectedEmployees.filter(
-      (item) => !item.auth_user_id,
+      item => !item.auth_user_id,
     )
     const skippedEmployees = selectedEmployees.filter(
-      (item) => item.auth_user_id,
+      item => item.auth_user_id,
     )
 
     if (targetEmployees.length === 0) {
@@ -74,28 +75,32 @@ export function useEmployeeBatchAuthAccounts({
             <strong>@{EMPLOYEE_AUTH_EMAIL_DOMAIN}</strong>
             。同名员工会自动追加数字后缀。
           </p>
-          {skippedEmployees.length > 0 ? (
-            <p className="text-amber-600">
-              已跳过 {skippedEmployees.length} 名已绑定账号员工。
-            </p>
-          ) : null}
+          {skippedEmployees.length > 0
+            ? (
+                <p className="text-amber-600">
+                  已跳过 {skippedEmployees.length} 名已绑定账号员工。
+                </p>
+              )
+            : null}
           <div className="rounded-2xl bg-slate-50 px-3 py-3">
             <div className="mb-2 text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
               邮箱预览
             </div>
             <div className="space-y-1 text-sm text-slate-700">
-              {plans.slice(0, 5).map((plan) => (
+              {plans.slice(0, 5).map(plan => (
                 <div key={plan.employee.id}>
                   {plan.employee.name}
                   {' -> '}
                   {plan.email}
                 </div>
               ))}
-              {plans.length > 5 ? (
-                <div className="text-slate-400">
-                  还有 {plans.length - 5} 名员工未展开
-                </div>
-              ) : null}
+              {plans.length > 5
+                ? (
+                    <div className="text-slate-400">
+                      还有 {plans.length - 5} 名员工未展开
+                    </div>
+                  )
+                : null}
             </div>
           </div>
         </div>
@@ -103,8 +108,8 @@ export function useEmployeeBatchAuthAccounts({
       onOk: async () => {
         setIsBatchCreatingAuth(true)
 
-        const successResults: Array<{ employeeName: string; email: string }> =
-          []
+        const successResults: Array<{ employeeName: string, email: string }>
+          = []
         const failedResults: Array<{
           employeeName: string
           email: string
@@ -133,7 +138,8 @@ export function useEmployeeBatchAuthAccounts({
                 employeeName: result.employeeName,
                 email: result.email,
               })
-            } catch (error) {
+            }
+            catch (error) {
               failedResults.push({
                 employeeName: plan.employee.name,
                 email: plan.email,
@@ -163,7 +169,7 @@ export function useEmployeeBatchAuthAccounts({
                     <strong>{failedResults.length}</strong> 个。
                   </p>
                   <div className="max-h-72 space-y-2 overflow-y-auto rounded-2xl bg-slate-50 px-3 py-3">
-                    {failedResults.map((item) => (
+                    {failedResults.map(item => (
                       <div
                         key={`${item.employeeName}-${item.email}`}
                         className="rounded-xl bg-white px-3 py-2"
@@ -184,7 +190,8 @@ export function useEmployeeBatchAuthAccounts({
               ),
             })
           }
-        } finally {
+        }
+        finally {
           setIsBatchCreatingAuth(false)
         }
       },

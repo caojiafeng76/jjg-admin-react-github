@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
-import { Form, type FormInstance, Input, InputNumber } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   YoumaiRawMaterialInventory,
   YoumaiRawMaterialInventoryFormValues,
 } from '@/services/apiYoumaiRawMaterialInventory'
+import { Form, Input, InputNumber } from 'antd'
+
+import { useEffect } from 'react'
 
 interface Props {
   onFinish: (values: YoumaiRawMaterialInventoryFormValues) => void

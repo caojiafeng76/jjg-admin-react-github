@@ -1,8 +1,8 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
 import type { WorkSheet } from 'xlsx-js-style'
-
 import type { ToolingStockOutImportRow } from '@/services/apiToolingStockOut'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   autoFitColumnWidths,
   centerAllCells,
@@ -79,13 +79,13 @@ export async function parseToolingStockOutExcel(
     const collectionMethod = normalizeText(row['领用方式']) || '新领取'
     const remarks = normalizeText(row['备注'])
 
-    const isEmptyRow =
-      !toolCode &&
-      !recipient &&
-      !purpose &&
-      !row['出库日期'] &&
-      row['出库数量'] === '' &&
-      !remarks
+    const isEmptyRow
+      = !toolCode
+        && !recipient
+        && !purpose
+        && !row['出库日期']
+        && row['出库数量'] === ''
+        && !remarks
 
     if (isEmptyRow) {
       return
@@ -112,9 +112,9 @@ export async function parseToolingStockOutExcel(
     }
 
     if (
-      stockOutQuantity === null ||
-      Number.isNaN(stockOutQuantity) ||
-      stockOutQuantity <= 0
+      stockOutQuantity === null
+      || Number.isNaN(stockOutQuantity)
+      || stockOutQuantity <= 0
     ) {
       errors.push(`第 ${rowNumber} 行出库数量格式无效，需为大于 0 的数字`)
       return
@@ -146,9 +146,9 @@ function validateRequiredHeaders(sheet: WorkSheet) {
     blankrows: false,
   })
 
-  const headerRow = new Set((rows[0] || []).map((cell) => normalizeText(cell)))
+  const headerRow = new Set((rows[0] || []).map(cell => normalizeText(cell)))
   const missingHeaders = REQUIRED_HEADERS.filter(
-    (header) => !headerRow.has(header),
+    header => !headerRow.has(header),
   )
 
   if (missingHeaders.length > 0) {

@@ -1,21 +1,22 @@
-import type jsPDF from 'jspdf'
-import dayjs from 'dayjs'
-import { message } from 'antd'
-import { useState } from 'react'
-
-import { loadGoogleFont, GOOGLE_FONT_CONFIG } from '@/utils/googleFontLoader'
-import { useSelectedPos } from './useSelectedPos'
 import type { SyneySafePartSetting } from '@services/apiSyneySafePartSettings'
+import type jsPDF from 'jspdf'
+import { message } from 'antd'
+import dayjs from 'dayjs'
+
+import { useState } from 'react'
+import { GOOGLE_FONT_CONFIG, loadGoogleFont } from '@/utils/googleFontLoader'
 import {
   getLabelInfoBySettings,
   getLabelInfoFromStoredItem,
 } from '@/utils/syneySafePartRules'
+import { useSelectedPos } from './useSelectedPos'
 
 // Type for the Ant Design message API instance returned by message.useMessage()
 type MessageApi = ReturnType<typeof message.useMessage>[0]
 
-const loadPDFDependencies = () =>
-  Promise.all([import('jspdf'), import('@/utils/pdfUtils')])
+function loadPDFDependencies() {
+  return Promise.all([import('jspdf'), import('@/utils/pdfUtils')])
+}
 
 export function usePrint(
   safePartSettings: SyneySafePartSetting[] | undefined,
@@ -114,9 +115,9 @@ export function usePrint(
 
         // 1. 打印 Item 标签
         for (const item of items) {
-          const labelInfo =
-            getLabelInfoBySettings(item.PartNo, SerialNo, safePartSettings) ??
-            getLabelInfoFromStoredItem(item, safePartSettings)
+          const labelInfo
+            = getLabelInfoBySettings(item.PartNo, SerialNo, safePartSettings)
+              ?? getLabelInfoFromStoredItem(item, safePartSettings)
 
           if (labelInfo) {
             for (let i = 0; i < (item.Qty || 1); i++) {
@@ -163,7 +164,7 @@ export function usePrint(
 
               pageCount++
               if (pageCount % 10 === 0) {
-                await new Promise((resolve) => setTimeout(resolve, 0))
+                await new Promise(resolve => setTimeout(resolve, 0))
               }
             }
           }
@@ -187,16 +188,18 @@ export function usePrint(
 
         pageCount++
         if (pageCount % 10 === 0) {
-          await new Promise((resolve) => setTimeout(resolve, 0))
+          await new Promise(resolve => setTimeout(resolve, 0))
         }
       }
 
       // 输出 PDF
       openPDFInNewWindow(doc)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('打印标签失败:', error)
       api.error('打印标签失败')
-    } finally {
+    }
+    finally {
       setIsPrinting(false)
     }
   }

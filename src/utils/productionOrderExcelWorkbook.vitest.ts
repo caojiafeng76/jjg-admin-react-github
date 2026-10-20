@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
-import * as XLSX from 'xlsx-js-style'
-
 import type { ProductionOrderForExport } from '@/services/apiProductionOrders'
+import { describe, expect, it } from 'vitest'
+
+import * as XLSX from 'xlsx-js-style'
 import { buildProductionOrderExcelBuffer } from './productionOrderExcelWorkbook'
 
 function createOrder(
@@ -20,11 +20,11 @@ function createOrder(
     total_qualified_hours: totalQualifiedHours,
     efficiency: 1,
     shift: '白班',
-      remark: null,
-      is_audited: true,
-      audited_at: null,
-      status: 'draft',
-      employee: {
+    remark: null,
+    is_audited: true,
+    audited_at: null,
+    status: 'draft',
+    employee: {
       id: `employee-${employeeName}`,
       name: employeeName,
       job_name: '操作工',
@@ -47,11 +47,11 @@ describe('buildProductionOrderExcelBuffer', () => {
     expect(workbook.SheetNames.slice(0, 2)).toEqual([
       '汇总表-非外来',
       '汇总表-外来',
-      ])
+    ])
 
-      expect(workbook.Sheets['汇总表-非外来'].B3?.v).toBe('张三')
-      expect(workbook.Sheets['汇总表-非外来'].B4?.v).not.toBe('李四')
-      expect(workbook.Sheets['汇总表-外来'].B3?.v).toBe('李四')
-      expect(workbook.Sheets['汇总表-外来'].B4?.v).not.toBe('张三')
-    })
+    expect(workbook.Sheets['汇总表-非外来'].B3?.v).toBe('张三')
+    expect(workbook.Sheets['汇总表-非外来'].B4?.v).not.toBe('李四')
+    expect(workbook.Sheets['汇总表-外来'].B3?.v).toBe('李四')
+    expect(workbook.Sheets['汇总表-外来'].B4?.v).not.toBe('张三')
   })
+})

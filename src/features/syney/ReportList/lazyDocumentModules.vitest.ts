@@ -13,7 +13,7 @@ describe('Syney report document modules', () => {
     const button = readLocalFile('ExportAsExcelButton.tsx')
 
     expect(hook).not.toMatch(/from ['"]xlsx-js-style['"]/)
-    expect(hook).toContain("import('xlsx-js-style')")
+    expect(hook).toContain('import(\'xlsx-js-style\')')
     expect(button).toContain('onMouseEnter={preloadExcel}')
     expect(button).toContain('onFocus={preloadExcel}')
   })
@@ -27,8 +27,8 @@ describe('Syney report document modules', () => {
     for (const source of [summaryHook, reportHook]) {
       expect(source).not.toMatch(/from ['"]jspdf-autotable['"]/)
       expect(source).not.toMatch(/from ['"]@\/utils\/pdfUtils['"]/)
-      expect(source).toContain("import('jspdf-autotable')")
-      expect(source).toContain("import('@/utils/pdfUtils')")
+      expect(source).toContain('import(\'jspdf-autotable\')')
+      expect(source).toContain('import(\'@/utils/pdfUtils\')')
     }
 
     expect(summaryButton).toContain('onMouseEnter={preloadPDF}')
@@ -43,7 +43,7 @@ describe('Syney report document modules', () => {
     expect(hook).not.toMatch(
       /import\s+\{[^}]+\}\s+from ['"]@\/utils\/syneyStoreReceiptPdf['"]/,
     )
-    expect(hook).toContain("import('@/utils/syneyStoreReceiptPdf')")
+    expect(hook).toContain('import(\'@/utils/syneyStoreReceiptPdf\')')
     expect(hook).toContain('preloadStoreReceiptPDF')
     expect(page).toContain('onPreload={preloadStoreReceiptPDF}')
   })

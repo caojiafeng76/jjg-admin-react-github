@@ -10,7 +10,7 @@ function bytesToBase64(bytes: Uint8Array) {
 }
 
 function base64ToBytes(value: string) {
-  return Uint8Array.from(atob(value), (char) => char.charCodeAt(0))
+  return Uint8Array.from(atob(value), char => char.charCodeAt(0))
 }
 
 function timingSafeEqual(left: Uint8Array, right: Uint8Array) {

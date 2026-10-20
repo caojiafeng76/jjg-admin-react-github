@@ -1,21 +1,21 @@
-import { useCallback, useMemo, useState } from 'react'
-import { App, Button, Splitter } from 'antd'
-import { ShieldCheckIcon } from '@heroicons/react/16/solid'
-import { useSearchParams } from 'react-router-dom'
-
-import AddButton from '@/ui/AddButton'
-import AppPagination from '@/ui/AppPagination'
-import DeleteButton from '@/ui/DeleteButton'
-import EditButton from '@/ui/EditButton'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
-import { useAuth } from '@/contexts/useAuth'
-import { useFeaturePermission } from '@/hooks/usePermission'
 import type {
   ExtrusionProduction,
   ExtrusionProductionFilters,
   UpsertExtrusionProductionPayload,
 } from '@/services/apiExtrusionProductions'
+import { ShieldCheckIcon } from '@heroicons/react/16/solid'
+import { App, Button, Splitter } from 'antd'
+import { useCallback, useMemo, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { useAuth } from '@/contexts/useAuth'
+import { useFeaturePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import AddButton from '@/ui/AddButton'
+import AppPagination from '@/ui/AppPagination'
+import DeleteButton from '@/ui/DeleteButton'
+import EditButton from '@/ui/EditButton'
 import ExtrusionProductionDetail from './ExtrusionProductionDetail'
 import ExtrusionProductionForm from './ExtrusionProductionForm'
 import ExtrusionProductionSearch from './ExtrusionProductionSearch'
@@ -40,11 +40,11 @@ export default function ExtrusionProductionPage() {
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [searchFilters, setSearchFilters] =
-    useState<ExtrusionProductionFilters>({})
+  const [searchFilters, setSearchFilters]
+    = useState<ExtrusionProductionFilters>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingRecord, setEditingRecord] =
-    useState<ExtrusionProduction | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<ExtrusionProduction | null>(null)
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null)
 
   const { data, isLoading } = useExtrusionProductions({
@@ -72,8 +72,8 @@ export default function ExtrusionProductionPage() {
 
   const openEditModal = useCallback(
     (record?: ExtrusionProduction) => {
-      const targetRecord =
-        record || records.find((item) => item.id === selectedRowKeys[0])
+      const targetRecord
+        = record || records.find(item => item.id === selectedRowKeys[0])
 
       if (!targetRecord) {
         message.warning('请选择一条数据进行编辑')
@@ -127,7 +127,7 @@ export default function ExtrusionProductionPage() {
         onSuccess: () => {
           message.success('删除成功')
           setSelectedRowKeys([])
-          setActiveRecordId((prev) =>
+          setActiveRecordId(prev =>
             prev && deleteIds.includes(prev) ? null : prev,
           )
         },
@@ -153,13 +153,15 @@ export default function ExtrusionProductionPage() {
             payload: values,
           })
           message.success('更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('创建成功')
         }
 
         handleCloseModal()
-      } catch (error) {
+      }
+      catch (error) {
         message.error(error instanceof Error ? error.message : '保存失败')
       }
     },
@@ -186,8 +188,8 @@ export default function ExtrusionProductionPage() {
         return
       }
 
-      const targetRecord =
-        record || records.find((item) => item.id === selectedRowKeys[0])
+      const targetRecord
+        = record || records.find(item => item.id === selectedRowKeys[0])
 
       if (!targetRecord) {
         message.warning('请选择一条数据进行审核')
@@ -218,7 +220,8 @@ export default function ExtrusionProductionPage() {
               },
             })
             message.success(`${nextAuditValue ? '审核' : '反审核'}成功`)
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error ? error.message : `${nextAuditValue ? '审核' : '反审核'}失败`,
             )
@@ -287,7 +290,7 @@ export default function ExtrusionProductionPage() {
                   scrollY={scrollY}
                   rowHeight={rowHeight}
                   activeRowId={activeRecordId}
-                  onRowClick={(record) => setActiveRecordId(record.id)}
+                  onRowClick={record => setActiveRecordId(record.id)}
                 />
               </div>
               <div ref={paginationRef}>

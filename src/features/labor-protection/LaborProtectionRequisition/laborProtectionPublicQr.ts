@@ -1,5 +1,5 @@
-export const LABOR_PROTECTION_PUBLIC_QR_PATH =
-  '/h5/labor-protection-requisition'
+export const LABOR_PROTECTION_PUBLIC_QR_PATH
+  = '/h5/labor-protection-requisition'
 
 export function getLaborProtectionPublicQrPath() {
   return LABOR_PROTECTION_PUBLIC_QR_PATH

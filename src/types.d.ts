@@ -1,4 +1,4 @@
-import { FormInstance } from 'antd'
+import type { FormInstance } from 'antd'
 
 // interface ITableRef {}
 
@@ -62,22 +62,22 @@ interface ISyneyPo {
 }
 
 interface ISyneySpecFormRef {
-  getInstance(): FormInstance<ISyneySpec>
+  getInstance: () => FormInstance<ISyneySpec>
 }
 
 interface ISyneyPoFormRef {
-  getInstance(): FormInstance<ISyneyPo>
-  getIsLoading(): boolean
+  getInstance: () => FormInstance<ISyneyPo>
+  getIsLoading: () => boolean
 }
 interface ISyneyStoreReportFormRef {
-  getInstance(): FormInstance<ISyneyStoreReport>
+  getInstance: () => FormInstance<ISyneyStoreReport>
 }
 
 interface ISyneyItemFormRef {
-  getInstance(): FormInstance<ISyneyItem>
+  getInstance: () => FormInstance<ISyneyItem>
 }
 
-type PoDetailFormType = {
+interface PoDetailFormType {
   PartNo: string
   ParamSpec: string
   Remark: string

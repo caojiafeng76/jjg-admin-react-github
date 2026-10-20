@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 const PRECISION_FINISHING_CUTTINGS_TABLE = 'precision_finishing_cuttings'
 
@@ -34,8 +34,8 @@ export const PRECISION_FINISHING_CUTTING_RECIPIENTS = [
   '顾鉴申',
 ] as const
 
-export type PrecisionFinishingCuttingWorkshop =
-  (typeof PRECISION_FINISHING_CUTTING_WORKSHOPS)[number]
+export type PrecisionFinishingCuttingWorkshop
+  = (typeof PRECISION_FINISHING_CUTTING_WORKSHOPS)[number]
 
 export interface PrecisionFinishingCuttingRow {
   audited_at: string | null
@@ -143,18 +143,18 @@ export interface PrecisionFinishingCuttingAuditFields {
   audited_at: string | null
 }
 
-export type PrecisionFinishingCutting = PrecisionFinishingCuttingRow &
-  PrecisionFinishingCuttingAuditFields &
-  PrecisionFinishingCuttingExtraFields
+export type PrecisionFinishingCutting = PrecisionFinishingCuttingRow
+  & PrecisionFinishingCuttingAuditFields
+  & PrecisionFinishingCuttingExtraFields
 
-export type PrecisionFinishingCuttingInsert =
-  PrecisionFinishingCuttingInsertBase & {
+export type PrecisionFinishingCuttingInsert
+  = PrecisionFinishingCuttingInsertBase & {
     is_audited?: boolean
     audited_at?: string | null
   } & Partial<PrecisionFinishingCuttingExtraFields>
 
-export type PrecisionFinishingCuttingUpdate =
-  PrecisionFinishingCuttingUpdateBase & {
+export type PrecisionFinishingCuttingUpdate
+  = PrecisionFinishingCuttingUpdateBase & {
     is_audited?: boolean
     audited_at?: string | null
   } & Partial<PrecisionFinishingCuttingExtraFields>
@@ -285,7 +285,7 @@ function normalizeOperatorPayload(
     new Set(operatorEmployeeIds.filter(Boolean)),
   )
   const normalizedOperatorNames = operatorNames
-    .map((name) => name.trim())
+    .map(name => name.trim())
     .filter(Boolean)
 
   if (normalizedOperatorEmployeeIds.length === 0) {
@@ -402,8 +402,8 @@ function normalizePrecisionFinishingCuttingUpdatePayload(
   }
 
   if (
-    values.operator_employee_ids !== undefined ||
-    values.operator_names !== undefined
+    values.operator_employee_ids !== undefined
+    || values.operator_names !== undefined
   ) {
     if (!values.operator_employee_ids || !values.operator_names) {
       throw new Error('操作人信息不完整，请重新选择')
@@ -587,7 +587,8 @@ export async function getPrecisionFinishingCuttingsForExport({
     }
 
     rows.push(...((data || []) as PrecisionFinishingCuttingRow[]))
-  } else if (filters) {
+  }
+  else if (filters) {
     let from = 0
 
     while (true) {
@@ -616,7 +617,7 @@ export async function getPrecisionFinishingCuttingsForExport({
     }
   }
 
-  const weightMap = await getProjectWeightMap(rows.map((row) => row.project_no))
+  const weightMap = await getProjectWeightMap(rows.map(row => row.project_no))
 
   const rowsWithWeight = rows.map((row) => {
     const weightPerMeterKg = weightMap.get(row.project_no) || 0
@@ -625,12 +626,12 @@ export async function getPrecisionFinishingCuttingsForExport({
     return {
       ...row,
       raw_material_defect_weight_kg: roundTo(
-        (Number(row.raw_material_defect_count || 0) * lengthMm * weightPerMeterKg) /
-          1000,
+        (Number(row.raw_material_defect_count || 0) * lengthMm * weightPerMeterKg)
+        / 1000,
       ),
       processing_defect_weight_kg: roundTo(
-        (Number(row.processing_defect_count || 0) * lengthMm * weightPerMeterKg) /
-          1000,
+        (Number(row.processing_defect_count || 0) * lengthMm * weightPerMeterKg)
+        / 1000,
       ),
     }
   })
@@ -639,10 +640,10 @@ export async function getPrecisionFinishingCuttingsForExport({
     return rowsWithWeight
   }
 
-  const rowMap = new Map(rowsWithWeight.map((row) => [row.id, row]))
+  const rowMap = new Map(rowsWithWeight.map(row => [row.id, row]))
 
   return ids
-    .map((id) => rowMap.get(id))
+    .map(id => rowMap.get(id))
     .filter((row): row is PrecisionFinishingCuttingExportRow => Boolean(row))
 }
 
@@ -665,7 +666,8 @@ export async function getPrecisionFinishingCuttingQuantityStats({
     }
 
     rows.push(...((data || []) as Array<{ transfer_quantity: number | null }>))
-  } else if (filters) {
+  }
+  else if (filters) {
     let from = 0
 
     while (true) {

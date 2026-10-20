@@ -1,6 +1,6 @@
-import { Descriptions, Empty } from 'antd'
-
 import type { MachineEquipmentMaintenance } from '@/services/apiMachineEquipmentMaintenances'
+
+import { Descriptions, Empty } from 'antd'
 
 interface Props {
   selectedRecord: MachineEquipmentMaintenance | null

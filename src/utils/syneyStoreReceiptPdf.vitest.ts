@@ -1,12 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import type { SyneyStoreReceiptItem } from './syneyStoreReceiptPdf'
 
+import { describe, expect, it } from 'vitest'
 import {
   buildSyneyStoreReceiptPages,
   buildSyneyStoreReceiptReport,
   formatSyneyStoreReceiptDate,
   getSyneyStoreReceiptPdfLayout,
+
   toReceiptDisplayText,
-  type SyneyStoreReceiptItem,
 } from './syneyStoreReceiptPdf'
 
 function createItem(
@@ -71,16 +72,15 @@ describe('syney store receipt PDF helpers', () => {
 
   it('splits receipt rows into fixed-size pages', () => {
     const items = Array.from({ length: 23 }, (_, index) =>
-      createItem({ ID: index + 1, PartNo: `PN-${index + 1}` }),
-    )
+      createItem({ ID: index + 1, PartNo: `PN-${index + 1}` }))
 
     const pages = buildSyneyStoreReceiptPages({ items }, 11)
 
     expect(pages).toHaveLength(3)
-    expect(pages.map((page) => page.items.length)).toEqual([11, 11, 1])
-    expect(pages.map((page) => page.pageNumber)).toEqual([1, 2, 3])
-    expect(pages.map((page) => page.rowStartIndex)).toEqual([0, 11, 22])
-    expect(pages.every((page) => page.totalPages === 3)).toBe(true)
+    expect(pages.map(page => page.items.length)).toEqual([11, 11, 1])
+    expect(pages.map(page => page.pageNumber)).toEqual([1, 2, 3])
+    expect(pages.map(page => page.rowStartIndex)).toEqual([0, 11, 22])
+    expect(pages.every(page => page.totalPages === 3)).toBe(true)
   })
 
   it('formats dates and nullable values for receipt cells', () => {

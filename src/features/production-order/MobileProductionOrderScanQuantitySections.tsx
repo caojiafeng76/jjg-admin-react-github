@@ -1,7 +1,7 @@
-import { Input } from 'antd'
-
-import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 import type { MobileProductionOrderScanForm } from './useMobileProductionOrderScanForm'
+
+import { Input } from 'antd'
+import MobileNumberInput from '@/ui/mobile/MobileNumberInput'
 
 export interface MobileProductionOrderScanQuantitySectionsProps {
   form: MobileProductionOrderScanForm
@@ -49,9 +49,8 @@ export default function MobileProductionOrderScanQuantitySections({
           <MobileNumberInput
             min={0}
             value={incomingQualifiedQuantity}
-            onChange={(value) =>
-              setIncomingQualifiedQuantity(Number(value || 0))
-            }
+            onChange={value =>
+              setIncomingQualifiedQuantity(Number(value || 0))}
             className="h-12 w-full rounded-2xl"
           />
         </div>
@@ -63,7 +62,7 @@ export default function MobileProductionOrderScanQuantitySections({
           <MobileNumberInput
             min={0}
             value={qualifiedQuantity}
-            onChange={(value) => setQualifiedQuantity(Number(value || 0))}
+            onChange={value => setQualifiedQuantity(Number(value || 0))}
             className="h-12 w-full rounded-2xl"
           />
         </div>
@@ -75,7 +74,7 @@ export default function MobileProductionOrderScanQuantitySections({
           <MobileNumberInput
             min={0}
             value={defectQuantity1}
-            onChange={(value) => setDefectQuantity1(Number(value || 0))}
+            onChange={value => setDefectQuantity1(Number(value || 0))}
             className="h-12 w-full rounded-2xl"
           />
         </div>
@@ -87,7 +86,7 @@ export default function MobileProductionOrderScanQuantitySections({
           <MobileNumberInput
             min={0}
             value={defectQuantity2}
-            onChange={(value) => setDefectQuantity2(Number(value || 0))}
+            onChange={value => setDefectQuantity2(Number(value || 0))}
             className="h-12 w-full rounded-2xl"
           />
         </div>
@@ -107,7 +106,7 @@ export default function MobileProductionOrderScanQuantitySections({
           <MobileNumberInput
             min={0}
             value={setupDefectQuantity}
-            onChange={(value) => setSetupDefectQuantity(Number(value || 0))}
+            onChange={value => setSetupDefectQuantity(Number(value || 0))}
             className="h-12 w-full rounded-2xl"
           />
         </div>
@@ -118,7 +117,7 @@ export default function MobileProductionOrderScanQuantitySections({
           </div>
           <Input
             value={setupResponsible}
-            onChange={(event) => setSetupResponsible(event.target.value)}
+            onChange={event => setSetupResponsible(event.target.value)}
             placeholder="请输入调机负责人"
             className="h-12 w-full rounded-2xl border-slate-200 dark:border-slate-700"
           />
@@ -135,9 +134,8 @@ export default function MobileProductionOrderScanQuantitySections({
             <MobileNumberInput
               min={0}
               value={outsourceDefectQuantity}
-              onChange={(value) =>
-                setOutsourceDefectQuantity(Number(value || 0))
-              }
+              onChange={value =>
+                setOutsourceDefectQuantity(Number(value || 0))}
               className="h-12 w-full rounded-2xl"
             />
           </div>
@@ -148,7 +146,7 @@ export default function MobileProductionOrderScanQuantitySections({
             </div>
             <Input
               value={outsourceUnit}
-              onChange={(event) => setOutsourceUnit(event.target.value)}
+              onChange={event => setOutsourceUnit(event.target.value)}
               placeholder="请输入外协单位"
               className="h-12 w-full rounded-2xl border-slate-200 dark:border-slate-700"
             />
@@ -161,7 +159,7 @@ export default function MobileProductionOrderScanQuantitySections({
             <Input.TextArea
               rows={2}
               value={outsourceDefectReason}
-              onChange={(event) => setOutsourceDefectReason(event.target.value)}
+              onChange={event => setOutsourceDefectReason(event.target.value)}
               placeholder="请输入外协不良原因"
               className="rounded-2xl"
             />
@@ -180,7 +178,7 @@ export default function MobileProductionOrderScanQuantitySections({
           <Input.TextArea
             rows={3}
             value={remark}
-            onChange={(event) => setRemark(event.target.value)}
+            onChange={event => setRemark(event.target.value)}
             placeholder="如有需要可补充说明"
             className="rounded-2xl"
           />

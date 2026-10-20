@@ -1,11 +1,11 @@
-import { Button, Card, Popconfirm, Space, Table } from 'antd'
+import type { OrderItem } from './productionOrderFormTypes'
+import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
 import {
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
 } from '@heroicons/react/16/solid'
-import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
-import type { OrderItem } from './productionOrderFormTypes'
+import { Button, Card, Popconfirm, Space, Table } from 'antd'
 
 export interface ProductionOrderFormItemsTableProps {
   hideCostColumns: boolean
@@ -28,7 +28,7 @@ export default function ProductionOrderFormItemsTable({
     <Card
       title="工序明细"
       size="small"
-      extra={
+      extra={(
         <Button
           type="primary"
           size="small"
@@ -37,7 +37,7 @@ export default function ProductionOrderFormItemsTable({
         >
           添加工序
         </Button>
-      }
+      )}
     >
       <Table
         size="small"

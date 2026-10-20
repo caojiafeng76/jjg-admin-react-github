@@ -23,8 +23,8 @@ const PROCESSING_DEFECT_KEYWORDS = [
 
 function joinUniqueValues(values: readonly string[]): string {
   const normalizedValues = values
-    .map((value) => value.trim())
-    .filter((value) => value && value !== '-')
+    .map(value => value.trim())
+    .filter(value => value && value !== '-')
 
   return Array.from(new Set(normalizedValues)).join('、')
 }
@@ -33,8 +33,8 @@ function splitRemarkSegments(remark: string): string[] {
   return remark
     .replace(/<br\s*\/?>/gi, '\n')
     .split(/[，,、\r\n；;。]+/)
-    .map((segment) => segment.trim())
-    .filter((segment) => segment && segment !== '-')
+    .map(segment => segment.trim())
+    .filter(segment => segment && segment !== '-')
 }
 
 function formatAbnormalSegment(
@@ -53,12 +53,12 @@ function joinRemarkSegmentsByKeywords(
   keywords: readonly string[],
 ): string {
   return joinUniqueValues(
-    rows.flatMap((row) =>
+    rows.flatMap(row =>
       splitRemarkSegments(row.remark)
-        .filter((segment) =>
-          keywords.some((keyword) => segment.includes(keyword)),
+        .filter(segment =>
+          keywords.some(keyword => segment.includes(keyword)),
         )
-        .map((segment) => formatAbnormalSegment(row.productModel, segment)),
+        .map(segment => formatAbnormalSegment(row.productModel, segment)),
     ),
   )
 }
@@ -76,7 +76,7 @@ export function buildProductionDailyReportAbnormalDisplays(
       PROCESSING_DEFECT_KEYWORDS,
     ),
     outsourceDefect: joinUniqueValues(
-      rows.map((row) => row.outsourceDefectReason),
+      rows.map(row => row.outsourceDefectReason),
     ),
   }
 }

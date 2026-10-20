@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
+import type { FormInstance } from 'antd'
+import type { JintanProfilesData, JintanProfilesDataFormValues } from '@/services/apiJintanProfilesData'
 import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
-import { App, Button, FormInstance, Modal, Tooltip } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import { App, Button, Modal, Tooltip } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import {
   getJintanProfilesDataForExport,
-  type JintanProfilesData,
-  type JintanProfilesDataFormValues,
+
 } from '@/services/apiJintanProfilesData'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -37,8 +38,9 @@ import {
   useUpdateJintanProfilesData,
 } from './useJintanProfilesData'
 
-const loadJintanProfilesDataExcel = () =>
-  import('@/utils/jintanProfilesDataExcel')
+function loadJintanProfilesDataExcel() {
+  return import('@/utils/jintanProfilesDataExcel')
+}
 
 function preloadJintanProfilesDataExcel() {
   void loadJintanProfilesDataExcel()
@@ -70,8 +72,8 @@ export default function JintanProfilesDataPage() {
   const [editingRecord, setEditingRecord] = useState<JintanProfilesData | null>(
     null,
   )
-  const [formRef, setFormRef] =
-    useState<FormInstance<JintanProfilesDataFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<JintanProfilesDataFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -92,8 +94,8 @@ export default function JintanProfilesDataPage() {
   const importMutation = useImportJintanProfilesData()
   const deleteMutation = useDeleteJintanProfilesData()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -123,7 +125,7 @@ export default function JintanProfilesDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行复制新增')
       return
@@ -142,7 +144,7 @@ export default function JintanProfilesDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -172,10 +174,12 @@ export default function JintanProfilesDataPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('型材资料删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除型材资料失败，请稍后重试')
       }
     }
@@ -197,10 +201,12 @@ export default function JintanProfilesDataPage() {
         await importMutation.mutateAsync(rows)
         message.success(`型材资料导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入型材资料失败，请稍后重试')
         }
       }
@@ -227,8 +233,8 @@ export default function JintanProfilesDataPage() {
 
     setIsExporting(true)
     try {
-      const [exportRows, { exportJintanProfilesDataToExcel }] =
-        await Promise.all([
+      const [exportRows, { exportJintanProfilesDataToExcel }]
+        = await Promise.all([
           getJintanProfilesDataForExport(searchParams.keyword),
           loadJintanProfilesDataExcel(),
         ])
@@ -240,11 +246,13 @@ export default function JintanProfilesDataPage() {
 
       exportJintanProfilesDataToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条型材资料`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '导出型材资料失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [
@@ -274,13 +282,15 @@ export default function JintanProfilesDataPage() {
             values,
           })
           message.success('型材资料更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('型材资料创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         setFormError(error)
       }
     },
@@ -307,7 +317,8 @@ export default function JintanProfilesDataPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
@@ -417,12 +428,12 @@ export default function JintanProfilesDataPage() {
               scrollY={scrollY}
               rowHeight={rowHeight}
               onOpenDetail={canOpenDetail ? handleOpenDetail : undefined}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={JINTAN_PROFILES_DATA_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>
@@ -455,13 +466,15 @@ export default function JintanProfilesDataPage() {
         </div>
       </Modal>
 
-      {detailRecord ? (
-        <JintanProfilesDataDetailDrawer
-          open
-          record={detailRecord}
-          onClose={handleCloseDetail}
-        />
-      ) : null}
+      {detailRecord
+        ? (
+            <JintanProfilesDataDetailDrawer
+              open
+              record={detailRecord}
+              onClose={handleCloseDetail}
+            />
+          )
+        : null}
     </div>
   )
 }

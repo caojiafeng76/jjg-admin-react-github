@@ -1,9 +1,9 @@
 function escapeLikeLiteral(value: string): string {
-  return value.replace(/[\\%_]/g, (character) => `\\${character}`)
+  return value.replace(/[\\%_]/g, character => `\\${character}`)
 }
 
 function quotePostgrestValue(value: string): string {
-  return `"${value.replace(/[\\"]/g, (character) => `\\${character}`)}"`
+  return `"${value.replace(/[\\"]/g, character => `\\${character}`)}"`
 }
 
 /**
@@ -19,5 +19,5 @@ export function buildPostgrestOrIlikeFilter(
 ): string {
   const pattern = quotePostgrestValue(`%${escapeLikeLiteral(keyword)}%`)
 
-  return columns.map((column) => `${column}.ilike.${pattern}`).join(',')
+  return columns.map(column => `${column}.ilike.${pattern}`).join(',')
 }

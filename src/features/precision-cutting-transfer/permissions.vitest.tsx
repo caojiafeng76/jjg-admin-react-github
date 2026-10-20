@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from 'antd'
 import { MemoryRouter } from 'react-router-dom'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import MaterialTransferPage from './index'
 
 const state = vi.hoisted(() => ({
@@ -71,7 +71,8 @@ function expectOperationsDisabled(disabled: boolean): void {
     '导出当前筛选结果',
   ]) {
     for (const button of screen.getAllByRole('button', { name })) {
-      if (disabled) expect(button).toBeDisabled()
+      if (disabled)
+        expect(button).toBeDisabled()
       else expect(button).toBeEnabled()
     }
   }

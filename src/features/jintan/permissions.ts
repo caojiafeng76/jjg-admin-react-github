@@ -1,25 +1,25 @@
 import type { PermissionDefinition } from '@/types/permission'
 
 export const JINTAN_PARTS_DATA_PERMISSION_KEY = 'page:jintan-parts-data'
-export const JINTAN_PARTS_INVENTORY_PERMISSION_KEY =
-  'page:jintan-parts-inventory'
+export const JINTAN_PARTS_INVENTORY_PERMISSION_KEY
+  = 'page:jintan-parts-inventory'
 export const JINTAN_PARTS_STOCK_IN_PERMISSION_KEY = 'page:jintan-parts-stock-in'
-export const JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY =
-  'page:jintan-parts-stock-out'
+export const JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY
+  = 'page:jintan-parts-stock-out'
 export const JINTAN_PROFILES_DATA_PERMISSION_KEY = 'page:jintan-profiles-data'
-export const JINTAN_PROFILES_INVENTORY_PERMISSION_KEY =
-  'page:jintan-profiles-inventory'
-export const JINTAN_PROFILES_STOCK_IN_PERMISSION_KEY =
-  'page:jintan-profiles-stock-in'
-export const JINTAN_PROFILES_STOCK_OUT_PERMISSION_KEY =
-  'page:jintan-profiles-stock-out'
+export const JINTAN_PROFILES_INVENTORY_PERMISSION_KEY
+  = 'page:jintan-profiles-inventory'
+export const JINTAN_PROFILES_STOCK_IN_PERMISSION_KEY
+  = 'page:jintan-profiles-stock-in'
+export const JINTAN_PROFILES_STOCK_OUT_PERMISSION_KEY
+  = 'page:jintan-profiles-stock-out'
 export const JINTAN_MATERIALS_DATA_PERMISSION_KEY = 'page:jintan-materials-data'
-export const JINTAN_MATERIALS_INVENTORY_PERMISSION_KEY =
-  'page:jintan-materials-inventory'
-export const JINTAN_MATERIALS_STOCK_IN_PERMISSION_KEY =
-  'page:jintan-materials-stock-in'
-export const JINTAN_MATERIALS_STOCK_OUT_PERMISSION_KEY =
-  'page:jintan-materials-stock-out'
+export const JINTAN_MATERIALS_INVENTORY_PERMISSION_KEY
+  = 'page:jintan-materials-inventory'
+export const JINTAN_MATERIALS_STOCK_IN_PERMISSION_KEY
+  = 'page:jintan-materials-stock-in'
+export const JINTAN_MATERIALS_STOCK_OUT_PERMISSION_KEY
+  = 'page:jintan-materials-stock-out'
 
 export const JINTAN_PERMISSIONS: PermissionDefinition[] = [
   // 导航

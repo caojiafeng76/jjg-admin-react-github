@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   JintanPartsStockOut,
   JintanPartsStockOutFormValues,
 } from '@/services/apiJintanPartsStockOut'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -20,13 +21,13 @@ import { JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY } from '../permissions'
 import JintanPartsStockOutForm from './JintanPartsStockOutForm'
 import JintanPartsStockOutSearch from './JintanPartsStockOutSearch'
 import JintanPartsStockOutTable from './JintanPartsStockOutTable'
-import { usePrintJintanPartsStockOutPublicQrPoster } from './usePrintJintanPartsStockOutPublicQrPoster'
 import {
   useCreateJintanPartsStockOut,
   useDeleteJintanPartsStockOut,
   useJintanPartsStockOutList,
   useUpdateJintanPartsStockOutRemarks,
 } from './useJintanPartsStockOut'
+import { usePrintJintanPartsStockOutPublicQrPoster } from './usePrintJintanPartsStockOutPublicQrPoster'
 
 export default function JintanPartsStockOutPage() {
   const { message } = App.useApp()
@@ -38,11 +39,11 @@ export default function JintanPartsStockOutPage() {
   const keyword = urlParams.get('keyword') || undefined
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingRecord, setEditingRecord] =
-    useState<JintanPartsStockOut | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<JintanPartsStockOut | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [formRef, setFormRef] =
-    useState<FormInstance<JintanPartsStockOutFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<JintanPartsStockOutFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const { data, isLoading, error, refetch } = useJintanPartsStockOutList({
@@ -57,8 +58,8 @@ export default function JintanPartsStockOutPage() {
     printPoster: printPublicQrPoster,
     isPrinting: isPrintingPublicQrPoster,
   } = usePrintJintanPartsStockOutPublicQrPoster()
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({ targetRowCount: 10 })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({ targetRowCount: 10 })
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false)
@@ -80,7 +81,7 @@ export default function JintanPartsStockOutPage() {
       message.warning('请选择一条数据进行编辑')
       return
     }
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -105,12 +106,14 @@ export default function JintanPartsStockOutPage() {
             remarks: values.remarks ?? '',
           })
           message.success('出库备注已更新')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('配件出库成功，库存已更新')
         }
         closeModal()
-      } catch (submitError) {
+      }
+      catch (submitError) {
         setFormError(submitError)
       }
     },
@@ -139,7 +142,8 @@ export default function JintanPartsStockOutPage() {
       await deleteMutation.mutateAsync(selectedRowKeys[0] as string)
       message.success('出库记录已删除，库存已回补')
       setSelectedRowKeys([])
-    } catch (deleteError) {
+    }
+    catch (deleteError) {
       message.error(
         deleteError instanceof Error
           ? deleteError.message
@@ -179,7 +183,8 @@ export default function JintanPartsStockOutPage() {
     (nextKeyword?: string) => {
       const next = new URLSearchParams(urlParams)
       next.set('page', '1')
-      if (nextKeyword) next.set('keyword', nextKeyword)
+      if (nextKeyword)
+        next.set('keyword', nextKeyword)
       else next.delete('keyword')
       setSelectedRowKeys([])
       setUrlParams(next)
@@ -258,13 +263,13 @@ export default function JintanPartsStockOutPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY}
                   disabled={viewerDenied}
                 />
-              }
+              )}
             />
           </TableState>
         </div>

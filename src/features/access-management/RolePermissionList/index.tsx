@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react'
-import { Button, Modal, Radio, Skeleton, Tag } from 'antd'
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
-import { ROLE_LABELS } from '@/config/access'
 import type { AppRole } from '@/config/access'
-import { useAllPermissions, useRolePermissionIds } from './useRolePermissions'
-import { useUpdateRolePermissions } from './useUpdateRolePermissions'
-import { useRoles, useDeleteRole } from './useRoles'
-import RolePermissionDetail from './RolePermissionDetail'
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Modal, Radio, Skeleton, Tag } from 'antd'
+import { useEffect, useState } from 'react'
+import { ROLE_LABELS } from '@/config/access'
 import RoleCreateModal from './RoleCreateModal'
+import RolePermissionDetail from './RolePermissionDetail'
+import { useAllPermissions, useRolePermissionIds } from './useRolePermissions'
+import { useDeleteRole, useRoles } from './useRoles'
+import { useUpdateRolePermissions } from './useUpdateRolePermissions'
 
 export default function RolePermissionList() {
   const [selectedRole, setSelectedRole] = useState<string>('admin')
   const [createOpen, setCreateOpen] = useState(false)
 
   const { data: roles = [], isLoading: loadingRoles } = useRoles()
-  const { data: allPermissions = [], isLoading: loadingPerms } =
-    useAllPermissions()
-  const { data: checkedIds = [], isLoading: loadingRolePerms } =
-    useRolePermissionIds(selectedRole)
+  const { data: allPermissions = [], isLoading: loadingPerms }
+    = useAllPermissions()
+  const { data: checkedIds = [], isLoading: loadingRolePerms }
+    = useRolePermissionIds(selectedRole)
   const {
     mutate: updatePermissions,
     isPending: saving,
@@ -31,8 +31,9 @@ export default function RolePermissionList() {
 
   // 角色加载后，若当前选中角色不存在则回退到第一个
   useEffect(() => {
-    if (roles.length === 0) return
-    if (!roles.some((r) => r.key === selectedRole)) {
+    if (roles.length === 0)
+      return
+    if (!roles.some(r => r.key === selectedRole)) {
       setSelectedRole(roles[0].key)
     }
   }, [roles, selectedRole])
@@ -41,12 +42,13 @@ export default function RolePermissionList() {
     updatePermissions({ role: selectedRole, permissionIds })
   }
 
-  const currentRole = roles.find((r) => r.key === selectedRole)
-  const currentLabel =
-    currentRole?.label ?? ROLE_LABELS[selectedRole as AppRole] ?? selectedRole
+  const currentRole = roles.find(r => r.key === selectedRole)
+  const currentLabel
+    = currentRole?.label ?? ROLE_LABELS[selectedRole as AppRole] ?? selectedRole
 
   const handleDelete = () => {
-    if (!currentRole || currentRole.is_builtin) return
+    if (!currentRole || currentRole.is_builtin)
+      return
     Modal.confirm({
       title: `删除角色「${currentRole.label}」`,
       content:
@@ -71,11 +73,11 @@ export default function RolePermissionList() {
         <span className="text-sm font-medium">选择角色：</span>
         <Radio.Group
           value={selectedRole}
-          onChange={(e) => setSelectedRole(e.target.value)}
+          onChange={e => setSelectedRole(e.target.value)}
           optionType="button"
           buttonStyle="solid"
         >
-          {roles.map((r) => (
+          {roles.map(r => (
             <Radio.Button key={r.key} value={r.key}>
               {r.label}
               {!r.is_builtin && (
@@ -118,7 +120,7 @@ export default function RolePermissionList() {
       <RoleCreateModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        onCreated={(key) => setSelectedRole(key)}
+        onCreated={key => setSelectedRole(key)}
       />
     </div>
   )

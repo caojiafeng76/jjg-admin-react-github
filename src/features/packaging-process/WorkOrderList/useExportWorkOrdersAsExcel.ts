@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react'
+import type { PackagingWorkOrderSearchParams } from '@/services/apiPackagingWorkOrders'
 import { App } from 'antd'
 
-import type { PackagingWorkOrderSearchParams } from '@/services/apiPackagingWorkOrders'
+import { useCallback, useState } from 'react'
 
 interface ExportInput {
   searchParams: PackagingWorkOrderSearchParams
@@ -27,16 +27,19 @@ export function useExportWorkOrdersAsExcel() {
 
         if (exported) {
           message.success('生产工单 Excel 导出成功')
-        } else {
+        }
+        else {
           message.warning('当前筛选条件下没有可导出的数据')
         }
         return exported
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error ? error.message : '生产工单 Excel 导出失败',
         )
         return false
-      } finally {
+      }
+      finally {
         setIsExporting(false)
       }
     },

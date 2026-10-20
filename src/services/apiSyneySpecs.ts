@@ -1,6 +1,6 @@
-import { ISyneySpec } from './types'
-import supabase from './supabase'
+import type { ISyneySpec } from './types'
 import { handleApiError } from '@utils/errorHandler'
+import supabase from './supabase'
 
 export async function getSyneySpecs({
   PartNo,

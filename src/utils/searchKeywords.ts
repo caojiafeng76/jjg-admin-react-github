@@ -6,8 +6,8 @@ export function normalizeSearchKeywords(
   const keywords = Array.from(
     new Set(
       rawValues
-        .flatMap((item) => String(item || '').split(/[\s,，;；]+/))
-        .map((item) => item.trim())
+        .flatMap(item => String(item || '').split(/[\s,，;；]+/))
+        .map(item => item.trim())
         .filter(Boolean),
     ),
   )
@@ -20,8 +20,8 @@ export function buildOrIlikeFilter(
   keywords: string[],
 ): string {
   return keywords
-    .flatMap((keyword) =>
-      columns.map((column) => `${column}.ilike.%${keyword}%`),
+    .flatMap(keyword =>
+      columns.map(column => `${column}.ilike.%${keyword}%`),
     )
     .join(',')
 }

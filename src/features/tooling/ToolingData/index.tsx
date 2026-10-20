@@ -1,20 +1,21 @@
-﻿import { useCallback, useEffect, useState } from 'react'
-import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
-import { App, Button, DatePicker, FormInstance, Modal, Tooltip } from 'antd'
-import dayjs from 'dayjs'
+import type { FormInstance } from 'antd'
 import type { Dayjs } from 'dayjs'
-import { useSearchParams } from 'react-router-dom'
+import type {
+  ToolingData,
+  ToolingDataFormValues,
+} from '@/services/apiToolingData'
+import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
+import { App, Button, DatePicker, Modal, Tooltip } from 'antd'
+import dayjs from 'dayjs'
+import { useCallback, useEffect, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import {
   getToolingDataForExport,
   getToolingDataMonthlySummary,
-} from '@/services/apiToolingData'
-import type {
-  ToolingData,
-  ToolingDataFormValues,
 } from '@/services/apiToolingData'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -68,15 +69,15 @@ export default function ToolingDataPage() {
   const [isEdit, setIsEdit] = useState(false)
   const [isCopyCreate, setIsCopyCreate] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
-  const [isMonthlySummaryExporting, setIsMonthlySummaryExporting] =
-    useState(false)
+  const [isMonthlySummaryExporting, setIsMonthlySummaryExporting]
+    = useState(false)
   const [monthlySummaryMonth, setMonthlySummaryMonth] = useState<Dayjs | null>(
     dayjs(),
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord] = useState<ToolingData | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<ToolingDataFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<ToolingDataFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -97,8 +98,8 @@ export default function ToolingDataPage() {
   const importMutation = useImportToolingData()
   const deleteMutation = useDeleteToolingData()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: DEFAULT_PAGE_SIZE,
       minRowHeight: MIN_TABLE_ROW_HEIGHT,
     })
@@ -129,7 +130,7 @@ export default function ToolingDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行复制新增')
       return
@@ -148,7 +149,7 @@ export default function ToolingDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -170,10 +171,12 @@ export default function ToolingDataPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('刀具资料删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除刀具资料失败，请稍后重试')
       }
     }
@@ -203,10 +206,12 @@ export default function ToolingDataPage() {
         await importMutation.mutateAsync(rows)
         message.success(`刀具资料导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入刀具资料失败，请稍后重试')
         }
       }
@@ -245,11 +250,13 @@ export default function ToolingDataPage() {
 
       exportToolingDataToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条刀具资料`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '导出刀具资料失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [canManageTooling, message, viewerDenied, viewerOperationTip])
@@ -278,8 +285,8 @@ export default function ToolingDataPage() {
 
     try {
       setIsMonthlySummaryExporting(true)
-      const [exportRows, { exportToolingDataMonthlySummaryToExcel }] =
-        await Promise.all([
+      const [exportRows, { exportToolingDataMonthlySummaryToExcel }]
+        = await Promise.all([
           getToolingDataMonthlySummary({ month }),
           loadToolingDataExcel(),
         ])
@@ -293,13 +300,15 @@ export default function ToolingDataPage() {
       message.success(
         `已导出 ${monthlySummaryMonth.format('M')} 月刀具汇总，共 ${exportRows.length} 条`,
       )
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error
           ? error.message
           : '导出刀具月度汇总失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsMonthlySummaryExporting(false)
     }
   }, [
@@ -329,13 +338,15 @@ export default function ToolingDataPage() {
             values,
           })
           message.success('刀具资料更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('刀具资料创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
         setFormError(error)
       }
@@ -363,7 +374,8 @@ export default function ToolingDataPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
@@ -486,12 +498,12 @@ export default function ToolingDataPage() {
               scrollY={scrollY}
               rowHeight={rowHeight}
               onOpenDetail={canOpenDetail ? handleOpenDetail : undefined}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>
@@ -527,13 +539,15 @@ export default function ToolingDataPage() {
         </div>
       </Modal>
 
-      {detailRecord ? (
-        <ToolingDataDetailDrawer
-          open
-          record={detailRecord}
-          onClose={handleCloseDetail}
-        />
-      ) : null}
+      {detailRecord
+        ? (
+            <ToolingDataDetailDrawer
+              open
+              record={detailRecord}
+              onClose={handleCloseDetail}
+            />
+          )
+        : null}
     </div>
   )
 }

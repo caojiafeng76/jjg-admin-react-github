@@ -27,7 +27,7 @@ vi.mock('antd', async () => {
 vi.mock('@/hooks/usePermission', () => ({
   usePermission: () => true,
   usePermissions: (keys: string[]) =>
-    Object.fromEntries(keys.map((key) => [key, true])),
+    Object.fromEntries(keys.map(key => [key, true])),
 }))
 vi.mock('@/hooks/useViewerOperationGuard', () => ({
   useViewerOperationGuard: () => ({

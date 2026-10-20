@@ -1,7 +1,7 @@
-import * as XLSX from 'xlsx-js-style'
 import type { WorkSheet } from 'xlsx-js-style'
-
 import type { YoumaiProductDataFormValues } from '@/services/apiYoumaiProductData'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   autoFitColumnWidths,
   centerAllCells,
@@ -66,13 +66,13 @@ export async function parseYoumaiProductDataExcel(
     const specificGravity = normalizeNumber(row['比重'])
     const remarks = normalizeText(row['备注'])
 
-    const isEmptyRow =
-      !materialCode &&
-      !materialName &&
-      !model &&
-      !specification &&
-      row['比重'] === '' &&
-      !remarks
+    const isEmptyRow
+      = !materialCode
+        && !materialName
+        && !model
+        && !specification
+        && row['比重'] === ''
+        && !remarks
 
     if (isEmptyRow) {
       return
@@ -94,9 +94,9 @@ export async function parseYoumaiProductDataExcel(
     }
 
     if (
-      specificGravity === null ||
-      Number.isNaN(specificGravity) ||
-      specificGravity < 0
+      specificGravity === null
+      || Number.isNaN(specificGravity)
+      || specificGravity < 0
     ) {
       errors.push(`第 ${rowNumber} 行比重格式无效，需为大于等于 0 的数字`)
       return
@@ -127,7 +127,7 @@ function validateTemplateHeaders(sheet: WorkSheet) {
     blankrows: false,
   })
 
-  const headerRow = (rows[0] || []).map((cell) => normalizeText(cell))
+  const headerRow = (rows[0] || []).map(cell => normalizeText(cell))
   const templateHeaders = Array.from(TEMPLATE_HEADERS)
 
   const matches = templateHeaders.every(

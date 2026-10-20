@@ -17,7 +17,7 @@ export default function ProductionSchedulingHeader({
     <div className="relative overflow-hidden rounded-xl border border-blue-100/50 bg-white px-3 py-1 shadow-sm dark:border-slate-700 dark:bg-slate-800/80">
       <div className="relative flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="from-primary h-6 w-1 rounded-full bg-gradient-to-b via-blue-500 to-blue-400" />
+          <div className="h-6 w-1 rounded-full bg-gradient-to-b from-primary via-blue-500 to-blue-400" />
           <Title
             level={4}
             style={{ margin: 0 }}
@@ -41,10 +41,10 @@ export default function ProductionSchedulingHeader({
                 checked={active}
                 onChange={() => onProgressStatusChange(tag.value)}
                 className={
-                  '!m-0 rounded-full border px-3.5 !text-xs font-medium transition-all duration-200 ' +
-                  (active
-                    ? '!border-primary !from-primary !bg-gradient-to-r !to-blue-400 !text-white !shadow-sm !shadow-blue-200 dark:!shadow-blue-900/40'
-                    : '!border-slate-200 !bg-white !text-slate-600 hover:!border-blue-300 hover:!bg-blue-50/50 hover:!text-blue-600 dark:!border-slate-600 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-slate-700/60 dark:hover:!text-blue-400')
+                  `!m-0 rounded-full border px-3.5 !text-xs font-medium transition-all duration-200 ${
+                    active
+                      ? '!border-primary !bg-gradient-to-r !from-primary !to-blue-400 !text-white !shadow-sm !shadow-blue-200 dark:!shadow-blue-900/40'
+                      : '!border-slate-200 !bg-white !text-slate-600 hover:!border-blue-300 hover:!bg-blue-50/50 hover:!text-blue-600 dark:!border-slate-600 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-slate-700/60 dark:hover:!text-blue-400'}`
                 }
               >
                 {tag.label}

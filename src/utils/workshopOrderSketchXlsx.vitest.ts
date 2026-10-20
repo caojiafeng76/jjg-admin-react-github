@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { describe, expect, it } from 'vitest'
 import JSZip from 'jszip'
+import { describe, expect, it } from 'vitest'
 import * as XLSX from 'xlsx-js-style'
 
 import {
@@ -60,15 +60,15 @@ describe('workshop order sketch xlsx helpers', () => {
       'application/xml',
     )
     const from = Array.from(drawingDoc.getElementsByTagName('*')).find(
-      (element) => element.localName === 'from',
+      element => element.localName === 'from',
     )
     const blip = Array.from(drawingDoc.getElementsByTagName('*')).find(
-      (element) => element.localName === 'blip',
+      element => element.localName === 'blip',
     )
 
     expect(
       Array.from(from?.children ?? []).find(
-        (element) => element.localName === 'col',
+        element => element.localName === 'col',
       )?.textContent,
     ).toBe('1')
 

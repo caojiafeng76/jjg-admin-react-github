@@ -1,7 +1,7 @@
-import dayjs from 'dayjs'
-import jsPDF from 'jspdf'
-
 import type { ISyneyItem } from '@services/types'
+import dayjs from 'dayjs'
+
+import jsPDF from 'jspdf'
 
 import { GOOGLE_FONT_CONFIG, loadGoogleFont } from './googleFontLoader'
 import { printPDF } from './pdfUtils'
@@ -88,49 +88,49 @@ const TABLE_COLUMNS: TableColumn[] = [
     align: 'left',
     header: '物料件号',
     ratio: 55,
-    value: (item) => item.PartNo,
+    value: item => item.PartNo,
   },
   {
     align: 'left',
     header: '物料名称',
     ratio: 55,
-    value: (item) => item.PartName,
+    value: item => item.PartName,
   },
   {
     align: 'left',
     header: '规格',
     ratio: 60,
-    value: (item) => item.Spec,
+    value: item => item.Spec,
   },
   {
     align: 'left',
     header: '参数规格',
     ratio: 55,
-    value: (item) => item.ParamSpec,
+    value: item => item.ParamSpec,
   },
   {
     align: 'center',
     header: '单位',
     ratio: 24,
-    value: (item) => item.Unit,
+    value: item => item.Unit,
   },
   {
     align: 'center',
     header: '数量',
     ratio: 24,
-    value: (item) => item.Qty,
+    value: item => item.Qty,
   },
   {
     align: 'left',
     header: '席位',
     ratio: 55,
-    value: (item) => item.Address,
+    value: item => item.Address,
   },
   {
     align: 'left',
     header: '备注',
     ratio: 100,
-    value: (item) => item.Remark,
+    value: item => item.Remark,
   },
 ]
 
@@ -180,7 +180,7 @@ export function buildSyneyStoreReceiptReport(
   const deliveryOrderNos = Array.from(
     new Set(
       items
-        .map((item) => item.DeliveryOrderNo?.trim() || '')
+        .map(item => item.DeliveryOrderNo?.trim() || '')
         .filter(Boolean),
     ),
   )
@@ -457,11 +457,11 @@ function drawTable(doc: jsPDF, page: SyneyStoreReceiptPage): void {
 
 function drawFooter(doc: jsPDF, page: SyneyStoreReceiptPage): void {
   const pageWidth = doc.internal.pageSize.getWidth()
-  const footerY =
-    TABLE_TOP +
-    TABLE_HEADER_HEIGHT +
-    page.items.length * TABLE_ROW_HEIGHT +
-    5
+  const footerY
+    = TABLE_TOP
+      + TABLE_HEADER_HEIGHT
+      + page.items.length * TABLE_ROW_HEIGHT
+      + 5
 
   drawTextBlock(doc, '制单人', {
     align: 'left',
@@ -526,8 +526,8 @@ function drawTextBlock(
   const lineHeight = fontSize * POINT_TO_MM * 1.2
   const width = Math.max(1, options.width - TEXT_PADDING_X * 2)
   const availableHeight = Math.max(1, options.height - TEXT_PADDING_Y * 2)
-  const maxLines =
-    options.maxLines ?? Math.max(1, Math.floor(availableHeight / lineHeight))
+  const maxLines
+    = options.maxLines ?? Math.max(1, Math.floor(availableHeight / lineHeight))
 
   doc.setFont(GOOGLE_FONT_CONFIG.FONT_FAMILY, options.fontStyle ?? 'normal')
   doc.setFontSize(fontSize)
@@ -540,8 +540,8 @@ function drawTextBlock(
   )
   const textBlockHeight = lineHeight * lines.length
   const baselineOffset = fontSize * POINT_TO_MM * 0.8
-  const firstBaseline =
-    options.y + (options.height - textBlockHeight) / 2 + baselineOffset
+  const firstBaseline
+    = options.y + (options.height - textBlockHeight) / 2 + baselineOffset
   const x = getTextX(options)
 
   lines.forEach((line, lineIndex) => {

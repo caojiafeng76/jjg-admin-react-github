@@ -1,8 +1,9 @@
-import { memo, useMemo } from 'react'
-import { Table, TableColumnsType } from 'antd'
-import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline'
-
+import type { TableColumnsType } from 'antd'
 import type { AttendanceDetail } from '@/services/apiAttendanceDetails'
+import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline'
+import { Table } from 'antd'
+
+import { memo, useMemo } from 'react'
 
 interface Props {
   loading: boolean
@@ -65,15 +66,17 @@ function AttendanceDetailTable({
         key: 'shift',
         width: 100,
         render: (value: string) =>
-          value === '夜班' ? (
-            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
-              {value || '白班'}
-            </span>
-          ) : (
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-              {value || '白班'}
-            </span>
-          ),
+          value === '夜班'
+            ? (
+                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+                  {value || '白班'}
+                </span>
+              )
+            : (
+                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+                  {value || '白班'}
+                </span>
+              ),
       },
       {
         title: (

@@ -2,8 +2,8 @@ import { DatePicker, Form, Input, InputNumber, Select, Switch } from 'antd'
 
 export interface ProductionOrderFormBaseFieldsProps {
   compact: boolean
-  employees: { id: string; name: string }[]
-  fixedEmployee?: { id: string; name: string } | null
+  employees: { id: string, name: string }[]
+  fixedEmployee?: { id: string, name: string } | null
   showAuditField: boolean
 }
 
@@ -36,11 +36,12 @@ export default function ProductionOrderFormBaseFields({
           optionFilterProp="children"
           disabled={Boolean(fixedEmployee)}
           filterOption={(input, option) => {
-            if (!option) return false
+            if (!option)
+              return false
             const label = option.label?.toString() ?? ''
             return label.toLowerCase().includes(input.toLowerCase())
           }}
-          options={employees.map((emp) => ({
+          options={employees.map(emp => ({
             label: emp.name,
             value: emp.id,
           }))}
@@ -90,11 +91,13 @@ export default function ProductionOrderFormBaseFields({
         />
       </Form.Item>
 
-      {showAuditField ? (
-        <Form.Item name="is_audited" label="审核状态" valuePropName="checked">
-          <Switch checkedChildren="已审核" unCheckedChildren="待审核" />
-        </Form.Item>
-      ) : null}
+      {showAuditField
+        ? (
+            <Form.Item name="is_audited" label="审核状态" valuePropName="checked">
+              <Switch checkedChildren="已审核" unCheckedChildren="待审核" />
+            </Form.Item>
+          )
+        : null}
 
       <Form.Item
         name="remark"

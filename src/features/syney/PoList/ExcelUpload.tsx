@@ -1,19 +1,20 @@
-import { FC, useEffect, useMemo, useState } from 'react'
-import {
-  App,
-  Upload,
-  Button,
-  Table,
-  Alert,
-  Space,
-  Typography,
-  theme,
-} from 'antd'
-import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
-import type { UploadFile } from 'antd/es/upload/interface'
 import type { ISyneySpec } from '@services/types'
 import type { TransformedOrderData } from '@utils/excelUtils'
+import type { UploadFile } from 'antd/es/upload/interface'
+import type { FC } from 'react'
+import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 import { getItemsWithParamSpec } from '@utils/syney'
+import {
+  Alert,
+  App,
+  Button,
+  Space,
+  Table,
+  theme,
+  Typography,
+  Upload,
+} from 'antd'
+import { useEffect, useMemo, useState } from 'react'
 
 // xlsx-js-style 约 800KB，独立 chunk 挂载即预加载（避免上传时临时拉取失败）
 const loadExcelUtils = () => import('@utils/excelUtils')
@@ -56,8 +57,8 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
   const { message: messageApi } = App.useApp()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [loading, setLoading] = useState(false)
-  const [rawParsedData, setRawParsedData] =
-    useState<TransformedOrderData | null>(null)
+  const [rawParsedData, setRawParsedData]
+    = useState<TransformedOrderData | null>(null)
   const [previewVisible, setPreviewVisible] = useState(false)
 
   // 挂载即预加载 Excel 解析 chunk，避免用户上传时才发起网络请求
@@ -86,10 +87,10 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
    */
   const handleBeforeUpload = async (file: File) => {
     // 检查文件类型
-    const isExcel =
-      file.type === 'application/vnd.ms-excel' ||
-      file.type ===
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    const isExcel
+      = file.type === 'application/vnd.ms-excel'
+        || file.type
+        === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
     if (!isExcel) {
       messageApi.error(
@@ -121,13 +122,15 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       messageApi.success(
         `Excel 解析成功：共 ${orderData.items?.length ?? 0} 条明细，请核对预览数据后提交`,
       )
-    } catch (error) {
+    }
+    catch (error) {
       messageApi.error(
         `Excel 解析失败：${error instanceof Error ? error.message : '未知错误'}。请检查文件内容是否符合模板格式后重新上传`,
       )
       setRawParsedData(null)
       setPreviewVisible(false)
-    } finally {
+    }
+    finally {
       setLoading(false)
     }
 
@@ -180,13 +183,15 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       key: 'ParamSpec',
       width: 120,
       render: (text: string, record: ExcelUploadItemRecord) =>
-        !specsLoading && record.ParamSpecInferred ? (
-          <Text type="warning" strong>
-            ⚠️ {text || '未识别'}
-          </Text>
-        ) : (
-          text
-        ),
+        !specsLoading && record.ParamSpecInferred
+          ? (
+              <Text type="warning" strong>
+                ⚠️ {text || '未识别'}
+              </Text>
+            )
+          : (
+              text
+            ),
     },
     {
       title: '数量',
@@ -249,7 +254,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
         <div style={{ marginTop: 16 }}>
           <Alert
             message="Excel文件解析成功"
-            description={
+            description={(
               <Space direction="vertical" style={{ width: '100%' }}>
                 <div>
                   <Text strong>订单号: </Text>
@@ -272,12 +277,12 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                   <Text>{parsedData.po.Spec || '未识别，请手动选择'}</Text>
                   {parsedData.specInferred && (
                     <Alert
-                      message={
+                      message={(
                         <Text strong style={{ fontSize: 14 }}>
                           ⚠️ 规格已通过后备逻辑推断，请仔细核对！
                         </Text>
-                      }
-                      description={
+                      )}
+                      description={(
                         <Text>
                           系统从所有条目的规格和备注字段中推断出此规格：
                           <Text
@@ -289,7 +294,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                           <br />
                           请确认此规格是否正确，如有误请手动修改！
                         </Text>
-                      }
+                      )}
                       type="warning"
                       showIcon
                       style={{
@@ -306,31 +311,31 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                     正在加载规格库，参数规格预览会在加载完成后自动刷新
                   </Text>
                 )}
-                {!specsLoading &&
-                  parsedData.items.some((item) => item.ParamSpecInferred) && (
-                    <Alert
-                      message={
-                        <Text strong style={{ fontSize: 14 }}>
-                          ⚠️ 部分参数规格为系统根据备注推测，请仔细核对
-                        </Text>
-                      }
-                      description={
-                        <Text>
-                          规格库未匹配到参数规格时，系统会按型号默认宽度
-                          (1000型对应1525，800型对应1325，600型对应1125)
-                          与备注中的宽度组合生成，例如“1525*备注宽度”。请确认这些推测值是否正确。
-                        </Text>
-                      }
-                      type="warning"
-                      showIcon
-                      style={{
-                        marginTop: 8,
-                        border: `2px solid ${token.colorWarningBorder}`,
-                        backgroundColor: token.colorWarningBg,
-                      }}
-                      banner
-                    />
-                  )}
+                {!specsLoading
+                  && parsedData.items.some(item => item.ParamSpecInferred) && (
+                  <Alert
+                    message={(
+                      <Text strong style={{ fontSize: 14 }}>
+                        ⚠️ 部分参数规格为系统根据备注推测，请仔细核对
+                      </Text>
+                    )}
+                    description={(
+                      <Text>
+                        规格库未匹配到参数规格时，系统会按型号默认宽度
+                        (1000型对应1525，800型对应1325，600型对应1125)
+                        与备注中的宽度组合生成，例如“1525*备注宽度”。请确认这些推测值是否正确。
+                      </Text>
+                    )}
+                    type="warning"
+                    showIcon
+                    style={{
+                      marginTop: 8,
+                      border: `2px solid ${token.colorWarningBorder}`,
+                      backgroundColor: token.colorWarningBg,
+                    }}
+                    banner
+                  />
+                )}
                 <div>
                   <Text strong>商标: </Text>
                   <Text>{parsedData.po.Brand || '自动推断'}</Text>
@@ -348,8 +353,8 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                           key={index}
                           style={{
                             marginBottom:
-                              index <
-                              parsedData.po.Technique!.split(',').length - 1
+                              index
+                              < parsedData.po.Technique!.split(',').length - 1
                                 ? 2
                                 : 0,
                           }}
@@ -376,7 +381,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                   </Text>
                 </div>
               </Space>
-            }
+            )}
             type="success"
             showIcon
             style={{ marginBottom: 16 }}

@@ -59,7 +59,7 @@ const checks = [
   checkMigrationPush(),
 ]
 
-const failedCount = checks.filter((item) => !item).length
+const failedCount = checks.filter(item => !item).length
 
 console.log('\n=== 汇总 ===')
 console.log(`共 ${checks.length} 项检查，失败 ${failedCount} 项。`)

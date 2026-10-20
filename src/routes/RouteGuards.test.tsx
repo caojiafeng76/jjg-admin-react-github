@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   PermissionProtectedRoute,
@@ -32,10 +32,6 @@ vi.mock('react-router-dom', async () => {
 })
 
 describe('RouteGuards', () => {
-  afterEach(() => {
-    cleanup()
-  })
-
   beforeEach(() => {
     vi.clearAllMocks()
     mockUseLocation.mockReturnValue({
@@ -43,6 +39,10 @@ describe('RouteGuards', () => {
       search: '',
       hash: '',
     })
+  })
+
+  afterEach(() => {
+    cleanup()
   })
 
   it('keeps PermissionProtectedRoute in loading state while permissions are loading', () => {

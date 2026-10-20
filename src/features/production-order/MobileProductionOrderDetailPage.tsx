@@ -1,17 +1,17 @@
-import { App, Button, Card, Typography } from 'antd'
-import { useNavigate, useParams } from 'react-router-dom'
-import dayjs from 'dayjs'
-
-import { useProductionOrder } from './useProductionOrders'
-import {
-  useDeleteProductionOrderItems,
-  useProductionOrderItems,
-} from './useProductionOrderItems'
-import ProductionOrderItemMobileList from './ProductionOrderItemMobileList'
 import type {
   ProductionOrderItem,
   ProductionOrderItemWithMachine,
 } from '@/services/apiProductionOrderItems'
+import { App, Button, Card, Typography } from 'antd'
+import dayjs from 'dayjs'
+
+import { useNavigate, useParams } from 'react-router-dom'
+import ProductionOrderItemMobileList from './ProductionOrderItemMobileList'
+import {
+  useDeleteProductionOrderItems,
+  useProductionOrderItems,
+} from './useProductionOrderItems'
+import { useProductionOrder } from './useProductionOrders'
 
 const { Paragraph, Title } = Typography
 
@@ -20,8 +20,8 @@ export default function MobileProductionOrderDetailPage() {
   const navigate = useNavigate()
   const { orderId } = useParams<{ orderId: string }>()
   const { data: order, isLoading } = useProductionOrder(orderId)
-  const { data: items = [], isLoading: itemsLoading } =
-    useProductionOrderItems(orderId)
+  const { data: items = [], isLoading: itemsLoading }
+    = useProductionOrderItems(orderId)
   const deleteMutation = useDeleteProductionOrderItems()
 
   const canEdit = !order?.is_audited
@@ -31,7 +31,8 @@ export default function MobileProductionOrderDetailPage() {
     try {
       await deleteMutation.mutateAsync(ids)
       message.success('工序明细删除成功')
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '删除失败')
     }
   }

@@ -1,9 +1,9 @@
+import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 import {
   buildYoumaiProductDataOptionsQuery,
   YOUMAI_PRODUCT_DATA_OPTION_SELECT,
 } from './youmaiOptions'
-import { handleApiError } from '@/utils/errorHandler'
 
 export type YoumaiFinishedGoodsStockInStatus = '待审核' | '已审核'
 
@@ -56,7 +56,7 @@ interface YoumaiFinishedGoodsInventoryStockRow {
   current_stock: number
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 
@@ -149,8 +149,8 @@ async function assertCanReverseAuditedStockIn(ids: string[]) {
     throw handleApiError(error, '校验优迈成品入库反审库存失败')
   }
 
-  const auditedRows = (stockInRows ||
-    []) as YoumaiFinishedGoodsStockInAuditRow[]
+  const auditedRows = (stockInRows
+    || []) as YoumaiFinishedGoodsStockInAuditRow[]
 
   if (auditedRows.length === 0) {
     return
@@ -192,7 +192,7 @@ async function assertCanReverseAuditedStockIn(ids: string[]) {
 
   const currentStockMap = new Map(
     ((inventoryRows || []) as YoumaiFinishedGoodsInventoryStockRow[]).map(
-      (row) => [row.product_data_id, normalizeQuantity(row.current_stock)],
+      row => [row.product_data_id, normalizeQuantity(row.current_stock)],
     ),
   )
 

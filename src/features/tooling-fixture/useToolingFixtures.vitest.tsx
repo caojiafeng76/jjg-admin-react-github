@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { toolingFixtureKeys } from './queryKeys'
+import { useToolingFixtureList } from './useToolingFixtures'
+
 const { getToolingFixtureListMock, useQueryMock } = vi.hoisted(() => ({
   getToolingFixtureListMock: vi.fn(),
-  useQueryMock: vi.fn((options) => options),
+  useQueryMock: vi.fn(options => options),
 }))
 
 vi.mock('@tanstack/react-query', () => ({
@@ -11,7 +14,7 @@ vi.mock('@tanstack/react-query', () => ({
 }))
 
 vi.mock('@/hooks/useMutationWithInvalidation', () => ({
-  useMutationWithInvalidation: vi.fn((options) => options),
+  useMutationWithInvalidation: vi.fn(options => options),
 }))
 
 vi.mock('@/services/apiToolingFixture', () => ({
@@ -28,9 +31,6 @@ vi.mock('@/services/apiToolingFixturePublic', () => ({
   getToolingFixtureUsageRecords: vi.fn(),
   recordPublicToolingFixtureAction: vi.fn(),
 }))
-
-import { useToolingFixtureList } from './useToolingFixtures'
-import { toolingFixtureKeys } from './queryKeys'
 
 describe('useToolingFixtureList', () => {
   beforeEach(() => {

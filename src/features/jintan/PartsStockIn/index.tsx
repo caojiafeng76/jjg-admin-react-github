@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   JintanPartsStockIn,
   JintanPartsStockInFormValues,
 } from '@/services/apiJintanPartsStockIn'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -40,8 +41,8 @@ export default function JintanPartsStockInPage() {
     null,
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [formRef, setFormRef] =
-    useState<FormInstance<JintanPartsStockInFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<JintanPartsStockInFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const { data, isLoading, error, refetch } = useJintanPartsStockInList({
@@ -52,8 +53,8 @@ export default function JintanPartsStockInPage() {
   const createMutation = useCreateJintanPartsStockIn()
   const updateMutation = useUpdateJintanPartsStockInRemarks()
   const deleteMutation = useDeleteJintanPartsStockIn()
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({ targetRowCount: 10 })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({ targetRowCount: 10 })
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false)
@@ -75,7 +76,7 @@ export default function JintanPartsStockInPage() {
       message.warning('请选择一条数据进行编辑')
       return
     }
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -100,12 +101,14 @@ export default function JintanPartsStockInPage() {
             remarks: values.remarks ?? '',
           })
           message.success('入库备注已更新')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('配件入库成功，库存已更新')
         }
         closeModal()
-      } catch (submitError) {
+      }
+      catch (submitError) {
         setFormError(submitError)
       }
     },
@@ -134,7 +137,8 @@ export default function JintanPartsStockInPage() {
       await deleteMutation.mutateAsync(selectedRowKeys[0] as string)
       message.success('入库记录已删除，库存已回退')
       setSelectedRowKeys([])
-    } catch (deleteError) {
+    }
+    catch (deleteError) {
       message.error(
         deleteError instanceof Error
           ? deleteError.message
@@ -154,7 +158,8 @@ export default function JintanPartsStockInPage() {
     (nextKeyword?: string) => {
       const next = new URLSearchParams(urlParams)
       next.set('page', '1')
-      if (nextKeyword) next.set('keyword', nextKeyword)
+      if (nextKeyword)
+        next.set('keyword', nextKeyword)
       else next.delete('keyword')
       setSelectedRowKeys([])
       setUrlParams(next)
@@ -226,13 +231,13 @@ export default function JintanPartsStockInPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={JINTAN_PARTS_STOCK_IN_PERMISSION_KEY}
                   disabled={viewerDenied}
                 />
-              }
+              )}
             />
           </TableState>
         </div>

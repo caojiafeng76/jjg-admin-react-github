@@ -1,7 +1,7 @@
-import { Input } from 'antd'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
+import { Input } from 'antd'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
 
 export default function PoSearchInput() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -17,7 +17,8 @@ export default function PoSearchInput() {
 
     if (trimmedValue) {
       searchParams.set('SONo', trimmedValue)
-    } else {
+    }
+    else {
       searchParams.delete('SONo')
     }
     searchParams.set('page', '1')
@@ -40,7 +41,7 @@ export default function PoSearchInput() {
       placeholder="搜索生产号"
       value={searchValue}
       onChange={handleChange}
-      onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+      onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
       onClear={handleClear}
       allowClear={{ clearIcon: <XMarkIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" /> }}
       prefix={

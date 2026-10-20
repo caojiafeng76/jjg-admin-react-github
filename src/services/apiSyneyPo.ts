@@ -1,12 +1,12 @@
 import type { Database } from './database.types'
-import { ISyneyItem, ISyneyPo } from './types'
-import supabase from './supabase'
+import type { ISyneyItem, ISyneyPo } from './types'
 import { handleApiError } from '@utils/errorHandler'
+import supabase from './supabase'
 
-type SyneyPoItemUpdate =
-  Database['public']['Tables']['syney-po-items']['Update']
-type UpdateSyneyPoItemsArgs =
-  Database['public']['Functions']['update_syney_po_items']['Args']
+type SyneyPoItemUpdate
+  = Database['public']['Tables']['syney-po-items']['Update']
+type UpdateSyneyPoItemsArgs
+  = Database['public']['Functions']['update_syney_po_items']['Args']
 
 export type SyneyPoDetail = ISyneyPo & {
   items: ISyneyItem[]

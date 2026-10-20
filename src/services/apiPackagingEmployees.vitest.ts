@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const fromMock = vi.hoisted(() => vi.fn())
-
-vi.mock('./supabase', () => ({
-  default: { from: fromMock },
-}))
-
 import {
   buildPackagingEmployeePayload,
   getPackagingEmployeeList,
   getPackagingEmployeeOptions,
 } from './apiPackagingEmployees'
+
+const fromMock = vi.hoisted(() => vi.fn())
+
+vi.mock('./supabase', () => ({
+  default: { from: fromMock },
+}))
 
 beforeEach(() => {
   vi.clearAllMocks()

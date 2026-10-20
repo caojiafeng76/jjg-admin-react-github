@@ -1,10 +1,10 @@
 import type { ProductionOrder } from '@/services/apiProductionOrders'
 
-export type UnlockManagementFormValues = {
+export interface UnlockManagementFormValues {
   password: string
 }
 
-export type ChangeManagementPasswordFormValues = {
+export interface ChangeManagementPasswordFormValues {
   currentPassword: string
   nextPassword: string
   confirmPassword: string

@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
+import type { PrecisionCuttingTransferInsert } from './apiPrecisionCuttingTransfersTypes'
 
+import { describe, expect, it, vi } from 'vitest'
 import {
   applyPrecisionCuttingTransferFilters,
   chunkArray,
@@ -7,7 +8,6 @@ import {
   normalizePrecisionCuttingTransferUpdatePayload,
   roundTo,
 } from './apiPrecisionCuttingTransfersCalculations'
-import type { PrecisionCuttingTransferInsert } from './apiPrecisionCuttingTransfersTypes'
 
 const BASE_INSERT: PrecisionCuttingTransferInsert = {
   project_no: ' P001 ',

@@ -1,11 +1,19 @@
-import type { WorkshopOrder } from '@/features/workshop/OrderList'
-import { normalizeWorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
+import type {
+  ProcessStandardCapacityRow,
+  ProductionSchedulingFilters,
+  ProductionSchedulingOrder,
+  ProductionSchedulingOrdersResult,
+  ProductionSchedulingOrderUpdate,
+} from './apiProductionSchedulingTypes'
 import type { Database } from './database.types'
-import supabase from './supabase'
+import type { WorkshopOrder } from '@/features/workshop/OrderList'
+import dayjs from 'dayjs'
+import { normalizeWorkshopOrderStatus } from '@/features/workshop/OrderList/orderStatus'
+import { handleApiError } from '@/utils/errorHandler'
 import {
-  PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER,
-  isProductionSchedulingMaterialCode,
-} from './productionSchedulingMaterialFilter'
+  buildOrIlikeFilter,
+  normalizeSearchKeywords,
+} from '@/utils/searchKeywords'
 import {
   getMatchedDailyStandardCapacity,
   getOrderScheduledQuantity,
@@ -19,21 +27,12 @@ import {
   roundQuantity,
   toQuantity,
 } from './apiProductionSchedulingCalculations'
-import type {
-  ProcessStandardCapacityRow,
-  ProductionSchedulingFilters,
-  ProductionSchedulingOrder,
-  ProductionSchedulingOrdersResult,
-  ProductionSchedulingOrderUpdate,
-} from './apiProductionSchedulingTypes'
-import { handleApiError } from '@/utils/errorHandler'
 import {
-  buildOrIlikeFilter,
-  normalizeSearchKeywords,
-} from '@/utils/searchKeywords'
-import dayjs from 'dayjs'
+  isProductionSchedulingMaterialCode,
+  PRODUCTION_SCHEDULING_MATERIAL_CODE_OR_FILTER,
+} from './productionSchedulingMaterialFilter'
+import supabase from './supabase'
 
-export * from './apiProductionSchedulingTypes'
 export {
   buildInitialProcessSchedules,
   createEmptyProcessSchedule,
@@ -42,13 +41,14 @@ export {
   parseSchedulingProcesses,
   reconcileProcessSchedulesWithFlow,
 } from './apiProductionSchedulingCalculations'
+export * from './apiProductionSchedulingTypes'
 
 const METRIC_PAGE_SIZE = 1000
 const PROJECT_NO_CHUNK_SIZE = 300
 
-type SalesOrderUpdatePayload =
-  Database['public']['Tables']['sales_orders']['Update'] &
-    Record<string, unknown>
+type SalesOrderUpdatePayload
+  = Database['public']['Tables']['sales_orders']['Update']
+    & Record<string, unknown>
 
 type SalesOrderTextField = Extract<
   keyof ProductionSchedulingOrderUpdate,
@@ -126,7 +126,8 @@ async function fetchProductionQuantities(
 
     for (const row of (data || []) as ProductionQuantityViewRow[]) {
       const projectNo = row.project_no?.trim()
-      if (!projectNo) continue
+      if (!projectNo)
+        continue
       quantities.set(projectNo, toQuantity(row.total_qualified_quantity))
     }
   }
@@ -160,7 +161,8 @@ async function fetchTransferSummaries(
 
     for (const row of (data || []) as TransferSummaryViewRow[]) {
       const projectNo = row.project_no?.trim()
-      if (!projectNo) continue
+      if (!projectNo)
+        continue
 
       summaries.set(projectNo, {
         latestDate: row.latest_created_at ?? null,
@@ -182,7 +184,7 @@ async function fetchProcessStandardCapacityRows(
   const models = Array.from(
     new Set(
       orders
-        .map((order) => normalizeCapacityMatchText(order.product_model))
+        .map(order => normalizeCapacityMatchText(order.product_model))
         .filter(Boolean),
     ),
   )
@@ -257,7 +259,7 @@ function applySchedulingFilters(
   const materialCodeKeywords = normalizeSearchKeywords(filters?.materialCode)
   const modelKeywords = normalizeSearchKeywords(filters?.model)
   const customer = normalizeNullableText(filters?.customer)
-  const lengthMm = (filters?.lengthMm ?? []).filter((value) =>
+  const lengthMm = (filters?.lengthMm ?? []).filter(value =>
     Number.isFinite(value),
   )
 
@@ -352,19 +354,19 @@ export async function getProductionSchedulingOrders({
     throw handleApiError(error, '获取订单排产数据失败')
   }
 
-  const rows = ((data || []) as unknown as WorkshopOrder[]).filter((order) =>
+  const rows = ((data || []) as unknown as WorkshopOrder[]).filter(order =>
     isProductionSchedulingMaterialCode(order.material_code),
   )
 
   const projectNos = Array.from(
     new Set(
       rows
-        .map((order) => order.project_no?.trim())
+        .map(order => order.project_no?.trim())
         .filter((projectNo): projectNo is string => Boolean(projectNo)),
     ),
   )
-  const [productionQuantities, transferSummaries, standardCapacityRows] =
-    await Promise.all([
+  const [productionQuantities, transferSummaries, standardCapacityRows]
+    = await Promise.all([
       fetchProductionQuantities(projectNos, signal),
       fetchTransferSummaries(projectNos, signal),
       fetchProcessStandardCapacityRows(rows, signal),
@@ -415,16 +417,19 @@ export async function getProductionSchedulingOrders({
       } satisfies ProductionSchedulingOrder
     })
     .filter((order) => {
-      if (!filters?.progressStatus) return true
+      if (!filters?.progressStatus)
+        return true
 
       const status = order.progress_status?.trim()
       const orderQuantity = Number(order.order_quantity || 0)
       const transferQuantity = Number(order.transfer_quantity || 0)
 
-      if (status === '延期') return '延期' === filters.progressStatus
+      if (status === '延期')
+        return filters.progressStatus === '延期'
       if (orderQuantity > 0 && transferQuantity >= orderQuantity)
-        return '已完工' === filters.progressStatus
-      if (transferQuantity > 0) return '进行中' === filters.progressStatus
+        return filters.progressStatus === '已完工'
+      if (transferQuantity > 0)
+        return filters.progressStatus === '进行中'
 
       const effectiveStatus = status || '未开工'
       return effectiveStatus === filters.progressStatus
@@ -536,13 +541,13 @@ export async function updateProductionSchedulingOrder({
   }
 
   if ('responsible_person_ids' in values) {
-    ;(payload as Record<string, unknown>).responsible_person_ids =
-      values.responsible_person_ids ?? []
+    ;(payload as Record<string, unknown>).responsible_person_ids
+      = values.responsible_person_ids ?? []
   }
 
   if ('responsible_person_names' in values) {
-    ;(payload as Record<string, unknown>).responsible_person_names =
-      values.responsible_person_names ?? []
+    ;(payload as Record<string, unknown>).responsible_person_names
+      = values.responsible_person_names ?? []
   }
 
   if ('process_schedules' in values) {

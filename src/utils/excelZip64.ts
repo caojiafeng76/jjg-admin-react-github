@@ -1,11 +1,11 @@
-const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50
-const ZIP_CENTRAL_DIRECTORY_HEADER_SIGNATURE = 0x02014b50
+const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034B50
+const ZIP_CENTRAL_DIRECTORY_HEADER_SIGNATURE = 0x02014B50
 const ZIP64_EXTRA_FIELD_ID = 0x0001
-const ZIP_UINT32_MAX = 0xffffffff
+const ZIP_UINT32_MAX = 0xFFFFFFFF
 const ZIP_LOCAL_FILE_HEADER_LENGTH = 30
 const ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH = 46
 
-type Zip64ExtraFields = {
+interface Zip64ExtraFields {
   uncompressedSize?: number
   compressedSize?: number
   localHeaderOffset?: number
@@ -16,7 +16,8 @@ function readUint64AsSafeNumber(
   offset: number,
 ): number | undefined {
   const value = view.getBigUint64(offset, true)
-  if (value > BigInt(Number.MAX_SAFE_INTEGER)) return undefined
+  if (value > BigInt(Number.MAX_SAFE_INTEGER))
+    return undefined
 
   return Number(value)
 }
@@ -41,7 +42,8 @@ function readZip64ExtraFields(
     const fieldStart = cursor + 4
     const fieldEnd = fieldStart + fieldLength
 
-    if (fieldEnd > extraEnd) break
+    if (fieldEnd > extraEnd)
+      break
 
     if (fieldId === ZIP64_EXTRA_FIELD_ID) {
       let fieldCursor = fieldStart
@@ -74,8 +76,10 @@ function patchUint32IfZip64(
   offset: number,
   value: number | undefined,
 ): boolean {
-  if (view.getUint32(offset, true) !== ZIP_UINT32_MAX) return false
-  if (value === undefined || value > ZIP_UINT32_MAX) return false
+  if (view.getUint32(offset, true) !== ZIP_UINT32_MAX)
+    return false
+  if (value === undefined || value > ZIP_UINT32_MAX)
+    return false
 
   view.setUint32(offset, value, true)
   return true
@@ -87,8 +91,8 @@ export function normalizeZip64ExcelBuffer(data: ArrayBuffer): ArrayBuffer {
   let cursor = 0
 
   while (
-    cursor + ZIP_LOCAL_FILE_HEADER_LENGTH <= bytes.length &&
-    view.getUint32(cursor, true) === ZIP_LOCAL_FILE_HEADER_SIGNATURE
+    cursor + ZIP_LOCAL_FILE_HEADER_LENGTH <= bytes.length
+    && view.getUint32(cursor, true) === ZIP_LOCAL_FILE_HEADER_SIGNATURE
   ) {
     const compressedSize = view.getUint32(cursor + 18, true)
     const uncompressedSize = view.getUint32(cursor + 22, true)
@@ -104,14 +108,14 @@ export function normalizeZip64ExcelBuffer(data: ArrayBuffer): ArrayBuffer {
     patchUint32IfZip64(view, cursor + 18, zip64Fields.compressedSize)
     patchUint32IfZip64(view, cursor + 22, zip64Fields.uncompressedSize)
 
-    const resolvedCompressedSize =
-      compressedSize === ZIP_UINT32_MAX
+    const resolvedCompressedSize
+      = compressedSize === ZIP_UINT32_MAX
         ? zip64Fields.compressedSize
         : compressedSize
 
     if (
-      resolvedCompressedSize === undefined ||
-      resolvedCompressedSize > bytes.length
+      resolvedCompressedSize === undefined
+      || resolvedCompressedSize > bytes.length
     ) {
       return data
     }
@@ -120,8 +124,8 @@ export function normalizeZip64ExcelBuffer(data: ArrayBuffer): ArrayBuffer {
   }
 
   while (
-    cursor + ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH <= bytes.length &&
-    view.getUint32(cursor, true) === ZIP_CENTRAL_DIRECTORY_HEADER_SIGNATURE
+    cursor + ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH <= bytes.length
+    && view.getUint32(cursor, true) === ZIP_CENTRAL_DIRECTORY_HEADER_SIGNATURE
   ) {
     const compressedSize = view.getUint32(cursor + 20, true)
     const uncompressedSize = view.getUint32(cursor + 24, true)
@@ -129,8 +133,8 @@ export function normalizeZip64ExcelBuffer(data: ArrayBuffer): ArrayBuffer {
     const fileNameLength = view.getUint16(cursor + 28, true)
     const extraLength = view.getUint16(cursor + 30, true)
     const commentLength = view.getUint16(cursor + 32, true)
-    const extraStart =
-      cursor + ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH + fileNameLength
+    const extraStart
+      = cursor + ZIP_CENTRAL_DIRECTORY_HEADER_LENGTH + fileNameLength
     const zip64Fields = readZip64ExtraFields(view, extraStart, extraLength, {
       uncompressedSize: uncompressedSize === ZIP_UINT32_MAX,
       compressedSize: compressedSize === ZIP_UINT32_MAX,

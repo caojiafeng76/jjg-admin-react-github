@@ -1,8 +1,8 @@
-import { createContext, useContext } from 'react'
-
 import type { PermissionMap } from '@/types/permission'
 
-export type PermissionContextValue = {
+import { createContext, useContext } from 'react'
+
+export interface PermissionContextValue {
   permissions: PermissionMap
   isLoading: boolean
   can: (key: string) => boolean

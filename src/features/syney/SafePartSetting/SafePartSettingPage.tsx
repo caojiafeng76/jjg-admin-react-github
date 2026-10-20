@@ -1,28 +1,17 @@
-import { useCallback, useState, useMemo, type Key } from 'react'
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Switch,
-  Table,
-  App,
-  Select,
-  Tooltip,
-  Upload,
-  Pagination,
-} from 'antd'
+import type {
+  SyneySafePartSetting,
+} from '@services/apiSyneySafePartSettings'
 import type { ColumnsType, FilterDropdownProps } from 'antd/es/table/interface'
+import type { Key } from 'react'
 import { SearchOutlined } from '@ant-design/icons'
 import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   EyeIcon,
+  MagnifyingGlassIcon,
   PencilSquareIcon,
   PlusCircleIcon,
   XCircleIcon,
-  MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
 import {
@@ -30,17 +19,31 @@ import {
   getSyneySafePartDrawingDownloadUrl,
   getSyneySafePartDrawingPreviewUrl,
   SAFE_PART_DRAWING_ACCEPT,
-  upsertSyneySafePartSetting,
-  SyneySafePartSetting,
   uploadSyneySafePartDrawing,
+  upsertSyneySafePartSetting,
 } from '@services/apiSyneySafePartSettings'
+import {
+  App,
+  Button,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Pagination,
+  Select,
+  Switch,
+  Table,
+  Tooltip,
+  Upload,
+} from 'antd'
+import { useCallback, useMemo, useState } from 'react'
+import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
 import {
   SYNEY_SAFE_PART_SETTINGS_KEY,
   useSyneySafePartSettings,
 } from '../useSyneySafePartSettings'
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
-import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
-import { TableState } from '@/ui/TableState'
 
 const DECOMPOSITION_ROLE_LABELS: Record<string, string> = {
   side_frame: '侧围',
@@ -62,7 +65,7 @@ type SafePartSettingFormValues = Parameters<
   typeof upsertSyneySafePartSetting
 >[0]
 
-type DrawingPreview = {
+interface DrawingPreview {
   url: string
   fileName: string
   mimeType: string | null
@@ -151,9 +154,11 @@ export default function SafePartSettingPage() {
 
       try {
         await drawingUploadMutation.mutateAsync({ setting: record, file })
-      } catch {
+      }
+      catch {
         // 错误消息已由 useMutationWithMessage 统一提示
-      } finally {
+      }
+      finally {
         setUploadingDrawingId(null)
       }
     },
@@ -178,9 +183,11 @@ export default function SafePartSettingPage() {
           fileName: record.drawing_file_name ?? '图纸预览',
           mimeType: record.drawing_file_mime_type,
         })
-      } catch (error) {
+      }
+      catch (error) {
         message.error(error instanceof Error ? error.message : '图纸预览失败')
-      } finally {
+      }
+      finally {
         setPreviewingDrawingId(null)
       }
     },
@@ -208,9 +215,11 @@ export default function SafePartSettingPage() {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-      } catch (error) {
+      }
+      catch (error) {
         message.error(error instanceof Error ? error.message : '图纸下载失败')
-      } finally {
+      }
+      finally {
         setDownloadingDrawingId(null)
       }
     },
@@ -229,10 +238,12 @@ export default function SafePartSettingPage() {
   }
 
   const filteredData = useMemo(() => {
-    if (!data) return []
-    if (!partNoFilter.trim()) return data
+    if (!data)
+      return []
+    if (!partNoFilter.trim())
+      return data
     const lower = partNoFilter.toLowerCase()
-    return data.filter((item) =>
+    return data.filter(item =>
       (item.part_no ?? '').toLowerCase().includes(lower),
     )
   }, [data, partNoFilter])
@@ -267,13 +278,12 @@ export default function SafePartSettingPage() {
           confirm,
           clearFilters,
         }: FilterDropdownProps) => (
-          <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+          <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
             <Input
               placeholder="搜索件号"
               value={selectedKeys[0] as string}
-              onChange={(e) =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [])
-              }
+              onChange={e =>
+                setSelectedKeys(e.target.value ? [e.target.value] : [])}
               onPressEnter={() => confirm()}
               style={{ marginBottom: 8, display: 'block' }}
             />
@@ -341,17 +351,19 @@ export default function SafePartSettingPage() {
         key: 'need_print_label',
         width: 100,
         render: (v: boolean) =>
-          v ? (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/40 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 shadow-sm">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              是
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm">
-              <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
-              否
-            </div>
-          ),
+          v
+            ? (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600 shadow-sm dark:bg-emerald-900/40 dark:text-emerald-400">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  是
+                </div>
+              )
+            : (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm dark:bg-slate-700/50 dark:text-slate-400">
+                  <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+                  否
+                </div>
+              ),
       },
       {
         title: '安全部件',
@@ -359,17 +371,19 @@ export default function SafePartSettingPage() {
         key: 'is_safe_part',
         width: 100,
         render: (v: boolean) =>
-          v ? (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/40 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 shadow-sm">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              是
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 shadow-sm">
-              <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
-              否
-            </div>
-          ),
+          v
+            ? (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600 shadow-sm dark:bg-emerald-900/40 dark:text-emerald-400">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  是
+                </div>
+              )
+            : (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm dark:bg-slate-700/50 dark:text-slate-400">
+                  <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+                  否
+                </div>
+              ),
       },
       {
         title: '分解单列',
@@ -378,13 +392,15 @@ export default function SafePartSettingPage() {
         width: 110,
         render: (v: string | null) => {
           const label = DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v
-          return label ? (
-            <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
-              {label}
-            </span>
-          ) : (
-            '-'
-          )
+          return label
+            ? (
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700/50 dark:text-slate-300">
+                  {label}
+                </span>
+              )
+            : (
+                '-'
+              )
         },
       },
       {
@@ -536,13 +552,15 @@ export default function SafePartSettingPage() {
       </div>
 
       {/* 选中摘要条（S4 通用组件） */}
-      {selectedCount > 0 ? (
-        <SelectedSummaryBar
-          selectedCount={selectedCount}
-          matchedCount={selectedCount}
-          stats={[]}
-        />
-      ) : null}
+      {selectedCount > 0
+        ? (
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedCount}
+              stats={[]}
+            />
+          )
+        : null}
 
       {/* 搜索栏 */}
       <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
@@ -581,9 +599,9 @@ export default function SafePartSettingPage() {
             <Table
               rowKey="id"
               loading={
-                isLoading ||
-                saveMutation.isPending ||
-                deleteMutation.isPending
+                isLoading
+                || saveMutation.isPending
+                || deleteMutation.isPending
               }
               dataSource={pagedData}
               columns={columns}
@@ -592,7 +610,7 @@ export default function SafePartSettingPage() {
               pagination={false}
               scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
               style={{ fontSize: '13px' }}
-              className="[&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30"
+              className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
             />
           </TableState>
         </div>
@@ -605,8 +623,8 @@ export default function SafePartSettingPage() {
               getPopupContainer: () => document.body,
             }}
             pageSizeOptions={['10', '20', '50', '100']}
-            showTotal={(t) => `共 ${t} 条`}
-            onChange={(p) => setPage(p)}
+            showTotal={t => `共 ${t} 条`}
+            onChange={p => setPage(p)}
             onShowSizeChange={(_current, size) => {
               setPageSize(size)
               setPage(1)
@@ -720,21 +738,23 @@ export default function SafePartSettingPage() {
         destroyOnHidden
         onCancel={() => setPreviewDrawing(null)}
       >
-        {previewDrawing?.mimeType?.startsWith('image/') ? (
-          <div className="flex max-h-[70vh] justify-center overflow-auto rounded border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
-            <img
-              src={previewDrawing.url}
-              alt={previewDrawing.fileName}
-              className="max-h-[66vh] max-w-full object-contain"
-            />
-          </div>
-        ) : (
-          <iframe
-            title={previewDrawing?.fileName ?? '图纸预览'}
-            src={previewDrawing?.url}
-            className="h-[70vh] w-full rounded border border-slate-200 dark:border-slate-700"
-          />
-        )}
+        {previewDrawing?.mimeType?.startsWith('image/')
+          ? (
+              <div className="flex max-h-[70vh] justify-center overflow-auto rounded border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
+                <img
+                  src={previewDrawing.url}
+                  alt={previewDrawing.fileName}
+                  className="max-h-[66vh] max-w-full object-contain"
+                />
+              </div>
+            )
+          : (
+              <iframe
+                title={previewDrawing?.fileName ?? '图纸预览'}
+                src={previewDrawing?.url}
+                className="h-[70vh] w-full rounded border border-slate-200 dark:border-slate-700"
+              />
+            )}
       </Modal>
     </div>
   )

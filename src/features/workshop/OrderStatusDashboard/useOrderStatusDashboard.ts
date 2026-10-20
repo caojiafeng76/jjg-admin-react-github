@@ -1,12 +1,13 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { OrderStatusDashboardFilters } from '@/services/apiOrderStatusDashboard'
 
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import {
   getAllProcessStandardJobRows,
   getOrderStatusDashboard,
+
   REWORK_REPAIR_STATUS_COLORS,
   REWORK_REPAIR_STATUS_LABELS,
-  type OrderStatusDashboardFilters,
 } from '@/services/apiOrderStatusDashboard'
 
 export const ORDER_STATUS_DASHBOARD_KEY = 'order-status-dashboard' as const

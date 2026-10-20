@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import type { ExcelData } from './excelUtils'
 
-import { transformToOrderData, type ExcelData } from './excelUtils'
+import { describe, expect, it } from 'vitest'
+import { transformToOrderData } from './excelUtils'
 
 describe('transformToOrderData', () => {
   it('does not use the first SONo spec as the PO-level spec when Excel rows contain mixed specs', () => {

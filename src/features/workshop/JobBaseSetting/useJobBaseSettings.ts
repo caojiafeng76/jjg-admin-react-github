@@ -1,13 +1,13 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
+import { queryConfig } from '@/config/queryClient'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   createJobBaseSetting,
   deleteJobBaseSettings,
   getJobBaseSettings,
   updateJobBaseSetting,
 } from '@/services/apiJobBaseSettings'
-import { queryConfig } from '@/config/queryClient'
-import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 
 const JOB_BASE_SETTINGS_KEY = 'job-base-settings' as const
 const JOB_BASE_SETTINGS_OPTIONS_KEY = [JOB_BASE_SETTINGS_KEY, 'options'] as const

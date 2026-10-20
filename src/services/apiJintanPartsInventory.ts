@@ -1,6 +1,6 @@
+import { handleApiError } from '@/utils/errorHandler'
 import publicSupabase from './publicSupabase'
 import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 
 export type JintanPartsStockStatus = 'danger' | 'warning' | 'safe' | 'unset'
 
@@ -245,7 +245,7 @@ export async function createJintanPartsInventoryBatch(
     seenKeys.add(key)
   }
 
-  const partNames = Array.from(new Set(rows.map((row) => row.part_name)))
+  const partNames = Array.from(new Set(rows.map(row => row.part_name)))
   const { data: inventoryRows, error: inventoryError } = await supabase
     .from('jintan_parts_inventory')
     .select('id, part_data_id, part_name, specification, material, supplier')
@@ -256,13 +256,13 @@ export async function createJintanPartsInventoryBatch(
   }
 
   const inventoryByKey = new Map(
-    (inventoryRows || []).map((row) => [inventoryKeyOf(row), row]),
+    (inventoryRows || []).map(row => [inventoryKeyOf(row), row]),
   )
 
-  const missing = rows.filter((row) => !inventoryByKey.has(inventoryKeyOf(row)))
+  const missing = rows.filter(row => !inventoryByKey.has(inventoryKeyOf(row)))
   if (missing.length > 0) {
     const labels = missing
-      .map((row) => `“${row.part_name}”/“${row.specification}”`)
+      .map(row => `“${row.part_name}”/“${row.specification}”`)
       .join('、')
     throw new Error(`以下配件在配件资料中不存在，请先维护配件资料：${labels}`)
   }
@@ -330,7 +330,8 @@ async function getJintanPartsInventoryOptionsWithClient(
   let query = client
     .from('jintan_parts_inventory')
     .select('id, part_name, specification, material, supplier, quantity')
-  if (keyword?.trim()) query = query.or(keywordFilter(keyword.trim()))
+  if (keyword?.trim())
+    query = query.or(keywordFilter(keyword.trim()))
 
   if (signal) {
     query = query.abortSignal(signal)
@@ -340,6 +341,7 @@ async function getJintanPartsInventoryOptionsWithClient(
     .order('part_name', { ascending: true })
     .limit(50)
 
-  if (error) throw handleApiError(error, '获取配件库存选项失败')
+  if (error)
+    throw handleApiError(error, '获取配件库存选项失败')
   return data ?? []
 }

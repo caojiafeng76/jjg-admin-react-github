@@ -1,7 +1,7 @@
-import { Button, Empty, Popconfirm, Tag } from 'antd'
+import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
 
-import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
+import { Button, Empty, Popconfirm, Tag } from 'antd'
 
 interface Props {
   loading: boolean
@@ -30,9 +30,9 @@ export default function ProductionOrderItemMobileList({
   return (
     <div className="space-y-3">
       {data.map((item, index) => {
-        const shouldHighlight =
-          Number(item.standard_seconds || 0) === 0 &&
-          Number(item.qualified_quantity || 0) > 0
+        const shouldHighlight
+          = Number(item.standard_seconds || 0) === 0
+            && Number(item.qualified_quantity || 0) > 0
 
         return (
           <article
@@ -112,67 +112,77 @@ export default function ProductionOrderItemMobileList({
               </div>
             </div>
 
-            {item.outsource_defect_reason ||
-            item.outsource_unit ||
-            item.setup_responsible ? (
-              <div className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                {item.outsource_defect_reason ? (
-                  <div>
-                    外协不良原因：
-                    <span className="font-medium text-slate-900 dark:text-slate-100">
-                      {item.outsource_defect_reason}
-                    </span>
+            {item.outsource_defect_reason
+              || item.outsource_unit
+              || item.setup_responsible
+              ? (
+                  <div className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                    {item.outsource_defect_reason
+                      ? (
+                          <div>
+                            外协不良原因：
+                            <span className="font-medium text-slate-900 dark:text-slate-100">
+                              {item.outsource_defect_reason}
+                            </span>
+                          </div>
+                        )
+                      : null}
+                    {item.outsource_unit
+                      ? (
+                          <div>
+                            外协单位：
+                            <span className="font-medium text-slate-900 dark:text-slate-100">
+                              {item.outsource_unit}
+                            </span>
+                          </div>
+                        )
+                      : null}
+                    {item.setup_responsible
+                      ? (
+                          <div>
+                            调机负责人：
+                            <span className="font-medium text-slate-900 dark:text-slate-100">
+                              {item.setup_responsible}
+                            </span>
+                          </div>
+                        )
+                      : null}
                   </div>
-                ) : null}
-                {item.outsource_unit ? (
-                  <div>
-                    外协单位：
-                    <span className="font-medium text-slate-900 dark:text-slate-100">
-                      {item.outsource_unit}
-                    </span>
-                  </div>
-                ) : null}
-                {item.setup_responsible ? (
-                  <div>
-                    调机负责人：
-                    <span className="font-medium text-slate-900 dark:text-slate-100">
-                      {item.setup_responsible}
-                    </span>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
+                )
+              : null}
 
-            {showActions ? (
-              <div className="mt-4 flex gap-2">
-                <Button
-                  type="primary"
-                  className="flex-1"
-                  icon={<PencilSquareIcon className="size-4" />}
-                  onClick={() => onEdit(item)}
-                >
-                  编辑
-                </Button>
-                <Popconfirm
-                  title="删除工序明细"
-                  description={`确认删除工序“${item.operation}”吗？`}
-                  okText="删除"
-                  cancelText="取消"
-                  okButtonProps={{ danger: true }}
-                  onConfirm={async () => {
-                    await onDelete([item.id])
-                  }}
-                >
-                  <Button
-                    danger
-                    className="flex-1"
-                    icon={<TrashIcon className="size-4" />}
-                  >
-                    删除
-                  </Button>
-                </Popconfirm>
-              </div>
-            ) : null}
+            {showActions
+              ? (
+                  <div className="mt-4 flex gap-2">
+                    <Button
+                      type="primary"
+                      className="flex-1"
+                      icon={<PencilSquareIcon className="size-4" />}
+                      onClick={() => onEdit(item)}
+                    >
+                      编辑
+                    </Button>
+                    <Popconfirm
+                      title="删除工序明细"
+                      description={`确认删除工序“${item.operation}”吗？`}
+                      okText="删除"
+                      cancelText="取消"
+                      okButtonProps={{ danger: true }}
+                      onConfirm={async () => {
+                        await onDelete([item.id])
+                      }}
+                    >
+                      <Button
+                        danger
+                        className="flex-1"
+                        icon={<TrashIcon className="size-4" />}
+                      >
+                        删除
+                      </Button>
+                    </Popconfirm>
+                  </div>
+                )
+              : null}
           </article>
         )
       })}

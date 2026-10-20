@@ -1,9 +1,9 @@
 const YOUMAI_SRM_BASE_URL = 'https://srm.hzoptimax.com/saafbase'
 const LOGIN_URL = `${YOUMAI_SRM_BASE_URL}/restServer/saafLoginServlet/login`
-const ORDER_LIST_URL =
-  `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfoList`
-const ORDER_LINES_URL =
-  `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfo`
+const ORDER_LIST_URL
+  = `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfoList`
+const ORDER_LINES_URL
+  = `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfo`
 const REQUEST_TIMEOUT_MS = 20000
 
 export type YoumaiPurchaseOrderServerEnv = Record<string, string | undefined>
@@ -117,13 +117,15 @@ async function fetchWithTimeout(
       ...init,
       signal: controller.signal,
     })
-  } catch (error) {
+  }
+  catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new Error(timeoutMessage, { cause: error })
     }
 
     throw error
-  } finally {
+  }
+  finally {
     clearTimeout(timeoutId)
   }
 }
@@ -146,12 +148,12 @@ async function postSrmForm<T>({
     {
       method: 'POST',
       headers: {
-        Accept: 'application/json, text/plain, */*',
+        'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        Cookie: cookie,
-        Origin: YOUMAI_SRM_BASE_URL,
-        Referer: `${YOUMAI_SRM_BASE_URL}/`,
-        TokenCode: tokenCode,
+        'Cookie': cookie,
+        'Origin': YOUMAI_SRM_BASE_URL,
+        'Referer': `${YOUMAI_SRM_BASE_URL}/`,
+        'TokenCode': tokenCode,
       },
       body: new URLSearchParams({
         params: JSON.stringify(params),
@@ -178,9 +180,9 @@ async function loginToYoumaiSrm(env: YoumaiPurchaseOrderServerEnv) {
     {
       method: 'POST',
       headers: {
-        Accept: 'application/json, text/plain, */*',
+        'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        Referer: `${YOUMAI_SRM_BASE_URL}/`,
+        'Referer': `${YOUMAI_SRM_BASE_URL}/`,
       },
       body: new URLSearchParams({
         params: JSON.stringify({
@@ -264,7 +266,7 @@ export async function fetchYoumaiPurchaseOrderFromServer(
   })
 
   const orderHeader = (headerResponse.data || []).find(
-    (item) => normalizeText(item.poNumber) === normalizedPurchaseOrderNo,
+    item => normalizeText(item.poNumber) === normalizedPurchaseOrderNo,
   )
 
   if (!orderHeader?.poHeaderId) {
@@ -280,11 +282,11 @@ export async function fetchYoumaiPurchaseOrderFromServer(
 
   const items = (linesResponse.data || []).map(mapOrderLine).filter((line) => {
     return (
-      line.purchase_order_no &&
-      line.purchase_order_line_no &&
-      line.material_code &&
-      line.stock_out_quantity > 0 &&
-      line.delivery_date
+      line.purchase_order_no
+      && line.purchase_order_line_no
+      && line.material_code
+      && line.stock_out_quantity > 0
+      && line.delivery_date
     )
   })
 

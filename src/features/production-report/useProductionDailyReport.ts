@@ -1,9 +1,10 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { ProductionDailyReportFilters } from '@/services/apiProductionDailyReport'
 
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import {
   getProductionDailyReport,
-  type ProductionDailyReportFilters,
+
 } from '@/services/apiProductionDailyReport'
 
 const PRODUCTION_DAILY_REPORT_KEY = 'production-daily-report' as const

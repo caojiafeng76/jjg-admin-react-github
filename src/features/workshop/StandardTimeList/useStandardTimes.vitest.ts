@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@/hooks/useMutationWithInvalidation', () => ({
-  useMutationWithInvalidation: vi.fn(),
-}))
-
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   useCreateStandardTime,
@@ -11,6 +7,10 @@ import {
   useUpdateStandardTime,
   useUpdateStandardTimesLastProcess,
 } from './useStandardTimes'
+
+vi.mock('@/hooks/useMutationWithInvalidation', () => ({
+  useMutationWithInvalidation: vi.fn(),
+}))
 
 const useMutationWithInvalidationMock = vi.mocked(useMutationWithInvalidation)
 

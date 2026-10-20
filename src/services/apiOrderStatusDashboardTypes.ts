@@ -1,5 +1,5 @@
-import type { WorkshopOrder } from '@/features/workshop/OrderList'
 import type { Database } from './database.types'
+import type { WorkshopOrder } from '@/features/workshop/OrderList'
 
 export type ProductionOrderItemRow = Pick<
   Database['public']['Tables']['production_order_items']['Row'],
@@ -32,7 +32,7 @@ export type ProductionOrderItemRow = Pick<
   | 'machine_equipment_id'
 >
 
-export type ProductionOrderRelation = {
+export interface ProductionOrderRelation {
   id: string
   order_date: string
   shift: string
@@ -40,7 +40,7 @@ export type ProductionOrderRelation = {
   employee: { name: string } | null
 }
 
-export type MachineEquipmentRelation = {
+export interface MachineEquipmentRelation {
   machine_name: string | null
   unified_device_no: string | null
 }
@@ -57,7 +57,7 @@ export type ProcessStandardJobRow = Pick<
   is_last_process?: boolean | null
 }
 
-export type PackagingDashboardWorkOrderRow = {
+export interface PackagingDashboardWorkOrderRow {
   id: string
   work_date: string
   employee_name?: string | null
@@ -106,9 +106,9 @@ export type OrderStatusDashboardRpcItem = WorkshopOrder & {
   yieldRate: number | null
   reworkRepairRows:
     | {
-        workflow_status: string
-        quantity: number
-      }[]
+      workflow_status: string
+      quantity: number
+    }[]
     | null
 }
 

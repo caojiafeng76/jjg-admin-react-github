@@ -1,14 +1,14 @@
-import { Select } from 'antd'
-import { useState } from 'react'
 import {
-  CheckCircleIcon,
   ArrowPathIcon,
+  CheckCircleIcon,
   ExclamationTriangleIcon,
   PauseCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/16/solid'
-import { useUpdatePos } from './useUpdatePos'
+import { Select } from 'antd'
+import { useState } from 'react'
 import { useAppStore } from '@/store'
+import { useUpdatePos } from './useUpdatePos'
 
 const STATUS_OPTIONS: Array<{
   value: string
@@ -25,9 +25,9 @@ const STATUS_OPTIONS: Array<{
 
 export default function PoSelected() {
   const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const [selectedValue, setSelectedValue] = useState<string | undefined>(
     undefined,
@@ -58,7 +58,7 @@ export default function PoSelected() {
       placeholder="选择操作"
       getPopupContainer={() => document.body}
       suffixIcon={null}
-      options={STATUS_OPTIONS.map((option) => ({
+      options={STATUS_OPTIONS.map(option => ({
         value: option.value,
         label: (
           <span className="inline-flex items-center gap-1.5">

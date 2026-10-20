@@ -1,13 +1,14 @@
-import { useEffect, useState, useRef } from 'react'
-import type { ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { useQueryClient } from '@tanstack/react-query'
-
-import supabase from '@/services/supabase'
-import type { Employee } from '@/services/apiEmployees'
-import { getCurrentEmployeeProfile } from '@/services/apiEmployees'
+import type { ReactNode } from 'react'
+import type { AuthContextValue } from './auth-context'
 import type { AppRole } from '@/config/access'
-import { AuthContext, type AuthContextValue } from './auth-context'
+
+import type { Employee } from '@/services/apiEmployees'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
+import { getCurrentEmployeeProfile } from '@/services/apiEmployees'
+import supabase from '@/services/supabase'
+import { AuthContext } from './auth-context'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -32,9 +33,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const profile = await getCurrentEmployeeProfile(nextUser.id)
       setEmployeeProfile(profile)
       return profile
-    } catch (profileError) {
-      const normalizedError =
-        profileError instanceof Error
+    }
+    catch (profileError) {
+      const normalizedError
+        = profileError instanceof Error
           ? profileError
           : new Error('获取当前员工信息失败')
 
@@ -51,21 +53,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth
       .getUser()
       .then(({ data, error }) => {
-        if (!mounted) return
+        if (!mounted)
+          return
 
         if (error) {
           console.error('Auth getUser error:', error)
           setError(error)
           setUser(null)
           setEmployeeProfile(null)
-        } else {
+        }
+        else {
           const nextUser = data.user ?? null
           setUser(nextUser)
           return loadEmployeeProfile(nextUser)
         }
       })
       .finally(() => {
-        if (!mounted) return
+        if (!mounted)
+          return
         initializedRef.current = true
         setLoading(false)
       })
@@ -74,7 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!mounted) return
+      if (!mounted)
+        return
 
       // 只有在初始化完成后才处理状态变化，避免竞态条件
       if (initializedRef.current) {
@@ -88,9 +94,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (
-          event === 'SIGNED_IN' ||
-          event === 'SIGNED_OUT' ||
-          event === 'USER_UPDATED'
+          event === 'SIGNED_IN'
+          || event === 'SIGNED_OUT'
+          || event === 'USER_UPDATED'
         ) {
           setLoading(true)
           setUser(nextUser)
@@ -135,10 +141,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 登录成功后，用户状态会通过 onAuthStateChange 自动更新
       // 这里不需要手动设置，避免与 onAuthStateChange 冲突
       setUser(data.user ?? null)
-    } catch (error) {
+    }
+    catch (error) {
       setLoading(false)
       throw error
-    } finally {
+    }
+    finally {
       // 登录成功时，loading 由 onAuthStateChange + loadEmployeeProfile 结束。
       // 这里不主动关闭，避免 role 尚未加载完成就触发前端分流误判。
     }

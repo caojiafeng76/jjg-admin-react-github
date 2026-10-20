@@ -2,15 +2,15 @@ import { QueryClient } from '@tanstack/react-query'
 import { describe, expect, it, vi } from 'vitest'
 import { jintanKeys } from '../queryKeys'
 
+import { useJintanProfilesInventoryOptions } from './useJintanProfilesInventory'
+
 const queryMock = vi.hoisted(() =>
   vi.fn((options: { queryKey: readonly unknown[] }) => options),
 )
-vi.mock('@tanstack/react-query', async (importOriginal) => ({
+vi.mock('@tanstack/react-query', async importOriginal => ({
   ...(await importOriginal<typeof import('@tanstack/react-query')>()),
   useQuery: queryMock,
 }))
-
-import { useJintanProfilesInventoryOptions } from './useJintanProfilesInventory'
 
 describe('型材出入库共享库存选择缓存', () => {
   it('选件查询挂到库存根键，入库、出库和库存调整的失效均覆盖它', async () => {

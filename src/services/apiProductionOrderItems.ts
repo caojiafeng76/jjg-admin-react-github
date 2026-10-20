@@ -1,18 +1,18 @@
-import supabase from './supabase'
+import type { Database } from './database.types'
 import { handleApiError } from '@/utils/errorHandler'
-import { Database } from './database.types'
 import { resolveStandardSecondsBatch } from './apiProcessStandards'
+import supabase from './supabase'
 
 export type ProductionOrderDataCategory = 'A' | 'B'
 
-type ProductionOrderItemRowBase =
-  Database['public']['Tables']['production_order_items']['Row']
-type ProductionOrderItemInsertBase =
-  Database['public']['Tables']['production_order_items']['Insert']
-type ProductionOrderItemUpdateBase =
-  Database['public']['Tables']['production_order_items']['Update']
+type ProductionOrderItemRowBase
+  = Database['public']['Tables']['production_order_items']['Row']
+type ProductionOrderItemInsertBase
+  = Database['public']['Tables']['production_order_items']['Insert']
+type ProductionOrderItemUpdateBase
+  = Database['public']['Tables']['production_order_items']['Update']
 
-type ProductionOrderItemExtraFields = {
+interface ProductionOrderItemExtraFields {
   outsource_defect_quantity: number
   outsource_defect_reason: string | null
   outsource_unit: string | null
@@ -20,23 +20,23 @@ type ProductionOrderItemExtraFields = {
   setup_responsible: string | null
 }
 
-export type ProductionOrderItem = ProductionOrderItemRowBase &
-  ProductionOrderItemExtraFields & {
+export type ProductionOrderItem = ProductionOrderItemRowBase
+  & ProductionOrderItemExtraFields & {
     data_category: ProductionOrderDataCategory
   }
-export type ProductionOrderItemInsert = ProductionOrderItemInsertBase &
-  Partial<ProductionOrderItemExtraFields> & {
+export type ProductionOrderItemInsert = ProductionOrderItemInsertBase
+  & Partial<ProductionOrderItemExtraFields> & {
     data_category?: ProductionOrderDataCategory
   }
-export type ProductionOrderItemUpdate = ProductionOrderItemUpdateBase &
-  Partial<ProductionOrderItemExtraFields> & {
+export type ProductionOrderItemUpdate = ProductionOrderItemUpdateBase
+  & Partial<ProductionOrderItemExtraFields> & {
     data_category?: ProductionOrderDataCategory
   }
 
-type ProductionOrderItemInsertPayload = ProductionOrderItemInsertBase &
-  Partial<ProductionOrderItemExtraFields>
-type ProductionOrderItemUpdatePayload = ProductionOrderItemUpdateBase &
-  Partial<ProductionOrderItemExtraFields>
+type ProductionOrderItemInsertPayload = ProductionOrderItemInsertBase
+  & Partial<ProductionOrderItemExtraFields>
+type ProductionOrderItemUpdatePayload = ProductionOrderItemUpdateBase
+  & Partial<ProductionOrderItemExtraFields>
 
 export type ProductionOrderItemWithMachine = ProductionOrderItem & {
   machine_equipment_maintenances: {
@@ -52,7 +52,7 @@ interface SalesOrderStandardContext {
   material_code: string | null
 }
 
-type ProductionOrderItemDerivedFields = {
+interface ProductionOrderItemDerivedFields {
   standard_seconds: number
   qualified_quantity?: number | null
   qualified_hours?: number | null
@@ -94,11 +94,11 @@ function calculateDefectHours(item: {
     return 0
   }
 
-  const defectSeconds =
-    (item.defect_reason_1 === '加工'
+  const defectSeconds
+    = (item.defect_reason_1 === '加工'
       ? Number(item.defect_quantity_1 || 0) * 2 * normalizedStandardSeconds
-      : 0) +
-    (item.defect_reason_2 === '加工'
+      : 0)
+    + (item.defect_reason_2 === '加工'
       ? Number(item.defect_quantity_2 || 0) * 2 * normalizedStandardSeconds
       : 0)
 
@@ -144,11 +144,11 @@ async function resolveProductionOrderItemStandardSeconds<
   },
 >(items: TItem[]): Promise<TItem[]> {
   const missingStandardItems = items.filter(
-    (item) =>
-      Number(item.standard_seconds || 0) <= 0 &&
-      Boolean(item.project_no?.trim()) &&
-      Boolean(item.product_model?.trim()) &&
-      Boolean(item.operation?.trim()),
+    item =>
+      Number(item.standard_seconds || 0) <= 0
+      && Boolean(item.project_no?.trim())
+      && Boolean(item.product_model?.trim())
+      && Boolean(item.operation?.trim()),
   )
 
   if (missingStandardItems.length === 0) {
@@ -158,7 +158,7 @@ async function resolveProductionOrderItemStandardSeconds<
   const projectNos = Array.from(
     new Set(
       missingStandardItems
-        .map((item) => item.project_no.trim())
+        .map(item => item.project_no.trim())
         .filter(Boolean),
     ),
   )
@@ -292,7 +292,7 @@ export async function getProductionOrderItems(orderId: string) {
   )
 }
 
-export { resolveProductionOrderItemStandardSeconds, calculateQualifiedHours }
+export { calculateQualifiedHours, resolveProductionOrderItemStandardSeconds }
 
 export async function addProductionOrderItem(
   values: ProductionOrderItemInsert,

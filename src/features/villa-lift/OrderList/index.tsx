@@ -1,28 +1,29 @@
-import { useCallback, useState } from 'react'
-import { App, FormInstance, Modal, Tabs } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermissions } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   VillaLiftOrder,
   VillaLiftOrderFormValues,
   VillaLiftOrderStatus,
 } from '@/services/apiVillaLiftOrders'
+import { App, Modal, Tabs } from 'antd'
+import { useCallback, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermissions } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AppPagination from '@/ui/AppPagination'
+import { useExportVillaLiftOrdersAsExcel } from './useExportVillaLiftOrdersAsExcel'
+import { useVillaLiftOrderBatchActions } from './useVillaLiftOrderBatchActions'
 import {
   useCreateVillaLiftOrder,
   useUpdateVillaLiftOrder,
   useVillaLiftOrders,
 } from './useVillaLiftOrders'
+import { useVillaLiftOrderSearch } from './useVillaLiftOrderSearch'
 import VillaLiftOrderForm from './VillaLiftOrderForm'
 import VillaLiftOrderItemsModal from './VillaLiftOrderItemsModal'
 import VillaLiftOrderTable from './VillaLiftOrderTable'
 import VillaLiftOrderToolbar from './VillaLiftOrderToolbar'
-import { useExportVillaLiftOrdersAsExcel } from './useExportVillaLiftOrdersAsExcel'
-import { useVillaLiftOrderBatchActions } from './useVillaLiftOrderBatchActions'
-import { useVillaLiftOrderSearch } from './useVillaLiftOrderSearch'
 
 // ----------------------------------------------------------------
 // 主页面
@@ -57,19 +58,19 @@ export default function VillaLiftOrderListPage() {
   const canMarkFilm = perms['feature:villa-lift-order.mark-film']
   const canMarkCutting = perms['feature:villa-lift-order.mark-cutting']
   const canMarkProcessing = perms['feature:villa-lift-order.mark-processing']
-  const canMarkCabinProcessing =
-    perms['feature:villa-lift-order.mark-cabin-processing']
-  const canMarkMiddleDoorProcessing =
-    perms['feature:villa-lift-order.mark-middle-door-processing']
-  const canMarkFrameProcessing =
-    perms['feature:villa-lift-order.mark-frame-processing']
+  const canMarkCabinProcessing
+    = perms['feature:villa-lift-order.mark-cabin-processing']
+  const canMarkMiddleDoorProcessing
+    = perms['feature:villa-lift-order.mark-middle-door-processing']
+  const canMarkFrameProcessing
+    = perms['feature:villa-lift-order.mark-frame-processing']
 
   // URL 参数
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const activeStatus = (searchParamsURL.get('status') ??
-    'open') as VillaLiftOrderStatus
+  const activeStatus = (searchParamsURL.get('status')
+    ?? 'open') as VillaLiftOrderStatus
 
   // 订单弹窗
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -78,8 +79,8 @@ export default function VillaLiftOrderListPage() {
   const [editingRecord, setEditingRecord] = useState<VillaLiftOrder | null>(
     null,
   )
-  const [formRef, setFormRef] =
-    useState<FormInstance<VillaLiftOrderFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<VillaLiftOrderFormValues> | null>(null)
 
   // 明细弹窗
   const [itemsModalOpen, setItemsModalOpen] = useState(false)
@@ -139,8 +140,8 @@ export default function VillaLiftOrderListPage() {
     canMarkFilm,
   })
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       headerHeight: 32,
       targetRowCount: Math.min(pageSize, 14),
       minRowHeight: 30,
@@ -213,15 +214,18 @@ export default function VillaLiftOrderListPage() {
             values: orderFields,
           })
           message.success('订单更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('订单创建成功')
         }
         resetModalState()
-      } catch (err) {
+      }
+      catch (err) {
         if (err instanceof Error) {
           message.error(err.message)
-        } else {
+        }
+        else {
           message.error('操作失败，请稍后重试')
         }
       }
@@ -239,14 +243,15 @@ export default function VillaLiftOrderListPage() {
   )
 
   // 搜索
-  const { exportAsExcel, isExporting, preloadExportAsExcel } =
-    useExportVillaLiftOrdersAsExcel()
+  const { exportAsExcel, isExporting, preloadExportAsExcel }
+    = useExportVillaLiftOrdersAsExcel()
 
   async function handleExportExcel() {
     const success = await exportAsExcel(data?.orders ?? [])
     if (success) {
       message.success(`已导出 ${data?.orders?.length ?? 0} 条订单`)
-    } else {
+    }
+    else {
       message.warning('当前列表无数据可导出')
     }
   }

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 const TOOLING_DATA_EXPORT_PAGE_SIZE = 1000
 
@@ -35,7 +35,7 @@ export interface ToolingDataMonthlySummary extends ToolingData {
   closing_quantity: number
 }
 
-type ToolingDataTable = {
+interface ToolingDataTable {
   from: (table: string) => any
 }
 
@@ -296,7 +296,7 @@ export async function getToolingDataMonthlySummary({
   ])
 
   const currentStockMap = new Map(
-    inventoryRows.map((row) => [
+    inventoryRows.map(row => [
       row.tooling_data_id,
       normalizeQuantity(row.current_stock),
     ]),
@@ -324,8 +324,8 @@ export async function getToolingDataMonthlySummary({
     const stockOutQuantity = monthlyStockOutMap.get(item.id) || 0
     const laterStockInQuantity = laterStockInMap.get(item.id) || 0
     const laterStockOutQuantity = laterStockOutMap.get(item.id) || 0
-    const closingQuantity =
-      currentStock - laterStockInQuantity + laterStockOutQuantity
+    const closingQuantity
+      = currentStock - laterStockInQuantity + laterStockOutQuantity
     const openingQuantity = closingQuantity - stockInQuantity + stockOutQuantity
 
     return {
@@ -364,7 +364,7 @@ export async function createToolingDataBatch(rows: ToolingDataFormValues[]) {
     toolCodeSet.add(row.tool_code)
   }
 
-  const toolCodes = payload.map((row) => row.tool_code)
+  const toolCodes = payload.map(row => row.tool_code)
   const { data: existingRows, error: existingError } = await toolingDataTable()
     .select('tool_code')
     .in('tool_code', toolCodes)

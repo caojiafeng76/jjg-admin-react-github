@@ -1,4 +1,5 @@
-import { QueryClient, DefaultOptions } from '@tanstack/react-query'
+import type { DefaultOptions } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
 
 import { getErrorDisplayInfo } from '@/utils/errorHandler'
 
@@ -7,12 +8,12 @@ import { getErrorDisplayInfo } from '@/utils/errorHandler'
  */
 export function isAbortError(error: unknown): boolean {
   return (
-    error !== null &&
-    typeof error === 'object' &&
-    (('name' in error && error.name === 'AbortError') ||
-      ('message' in error &&
-        typeof (error as { message: unknown }).message === 'string' &&
-        (error as { message: string }).message.includes('aborted')))
+    error !== null
+    && typeof error === 'object'
+    && (('name' in error && error.name === 'AbortError')
+      || ('message' in error
+        && typeof (error as { message: unknown }).message === 'string'
+        && (error as { message: string }).message.includes('aborted')))
   )
 }
 
@@ -23,30 +24,31 @@ export function isAbortError(error: unknown): boolean {
  * - Postgres SQLSTATE 22xxx（数据异常）/ 23xxx（约束冲突）/ 42xxx（语法或权限，如 42501 RLS 拒绝）
  */
 export function isNonRetryableError(error: unknown): boolean {
-  if (error === null || typeof error !== 'object') return false
+  if (error === null || typeof error !== 'object')
+    return false
 
-  const statusCode =
-    'statusCode' in error && typeof error.statusCode === 'number'
+  const statusCode
+    = 'statusCode' in error && typeof error.statusCode === 'number'
       ? error.statusCode
       : 'status' in error && typeof error.status === 'number'
         ? error.status
         : undefined
   if (
-    statusCode !== undefined &&
-    statusCode >= 400 &&
-    statusCode < 500 &&
-    statusCode !== 408 &&
-    statusCode !== 429
+    statusCode !== undefined
+    && statusCode >= 400
+    && statusCode < 500
+    && statusCode !== 408
+    && statusCode !== 429
   ) {
     return true
   }
 
-  const code =
-    'code' in error && typeof error.code === 'string' ? error.code : ''
+  const code
+    = 'code' in error && typeof error.code === 'string' ? error.code : ''
   return (
-    /^PGRST[1-9]/i.test(code) ||
-    /^(22|23|42)[0-9A-Z]{3}$/.test(code) ||
-    ['UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND'].includes(code.toUpperCase())
+    /^PGRST[1-9]/i.test(code)
+    || /^(?:22|23|42)[0-9A-Z]{3}$/.test(code)
+    || ['UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND'].includes(code.toUpperCase())
   )
 }
 
@@ -67,7 +69,7 @@ const defaultQueryOptions: DefaultOptions['queries'] = {
       return false
     }
     // 网络错误：GET 请求已在 createRetryingFetch 中重试过，这里只补 1 次
-    //（同时兜底不经过 fetch 重试的 RPC/POST 查询）；其他临时错误最多重试 2 次
+    // （同时兜底不经过 fetch 重试的 RPC/POST 查询）；其他临时错误最多重试 2 次
     if (getErrorDisplayInfo(error).category === 'network') {
       return failureCount < 1
     }
@@ -75,7 +77,7 @@ const defaultQueryOptions: DefaultOptions['queries'] = {
   },
 
   // 重试延迟：指数退避策略
-  retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
 
   // 窗口聚焦时不自动重新获取（避免用户切换标签页时触发不必要的请求）
   refetchOnWindowFocus: false,

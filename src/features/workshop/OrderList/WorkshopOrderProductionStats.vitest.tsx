@@ -1,10 +1,10 @@
+import type { WorkshopOrder } from './types'
+import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrders'
 import { cleanup, render, screen } from '@testing-library/react'
+
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrders'
 import WorkshopOrderProductionStats from './WorkshopOrderProductionStats'
-import type { WorkshopOrder } from './types'
 
 const hookState = vi.hoisted(() => ({
   items: [] as unknown[],

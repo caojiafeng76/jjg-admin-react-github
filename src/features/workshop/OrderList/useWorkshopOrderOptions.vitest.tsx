@@ -1,19 +1,19 @@
+import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
-import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-const getWorkshopOrderOptionsMock = vi.hoisted(() => vi.fn())
-
-vi.mock('@/services/apiWorkshopOrders', () => ({
-  getWorkshopOrderOptions: getWorkshopOrderOptionsMock,
-}))
 
 import {
   useWorkshopOrderLengths,
   useWorkshopOrderModels,
   useWorkshopOrderProjectNos,
 } from './useWorkshopOrders'
+
+const getWorkshopOrderOptionsMock = vi.hoisted(() => vi.fn())
+
+vi.mock('@/services/apiWorkshopOrders', () => ({
+  getWorkshopOrderOptions: getWorkshopOrderOptionsMock,
+}))
 
 function createWrapper() {
   const queryClient = new QueryClient({

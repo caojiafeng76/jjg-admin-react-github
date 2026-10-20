@@ -1,17 +1,15 @@
 import type { YoumaiFinishedGoodsStockOutImportRow } from './apiYoumaiFinishedGoodsStockOut'
-import { getAuthenticatedProxyHeaders } from './proxyAuth'
-import supabase from './supabase'
 import {
   extractFunctionInvokeErrorMessage,
   getFunctionRegion,
   withTimeout,
 } from './functionInvokeHelpers'
+import { getAuthenticatedProxyHeaders } from './proxyAuth'
+import supabase from './supabase'
 
 const FETCH_YOUMAI_PURCHASE_ORDER_TIMEOUT_MS = 45000
-const YOUMAI_PURCHASE_ORDER_API_URL = import.meta.env
-  .VITE_YOUMAI_PURCHASE_ORDER_API_URL as string | undefined
-const YOUMAI_PURCHASE_ORDER_FUNCTION_REGION = import.meta.env
-  .VITE_SUPABASE_FUNCTION_REGION as string | undefined
+const YOUMAI_PURCHASE_ORDER_API_URL = import.meta.env.VITE_YOUMAI_PURCHASE_ORDER_API_URL as string | undefined
+const YOUMAI_PURCHASE_ORDER_FUNCTION_REGION = import.meta.env.VITE_SUPABASE_FUNCTION_REGION as string | undefined
 
 async function invokeYoumaiPurchaseOrderFunction(purchaseOrderNo: string) {
   const region = getFunctionRegion(YOUMAI_PURCHASE_ORDER_FUNCTION_REGION)
@@ -89,9 +87,9 @@ export async function fetchYoumaiPurchaseOrder(purchaseOrderNo: string) {
   }
 
   const configuredProxyUrl = YOUMAI_PURCHASE_ORDER_API_URL?.trim()
-  const proxyUrl =
-    configuredProxyUrl ||
-    (import.meta.env.DEV ? '/api/youmai-purchase-order' : '')
+  const proxyUrl
+    = configuredProxyUrl
+      || (import.meta.env.DEV ? '/api/youmai-purchase-order' : '')
 
   if (!proxyUrl) {
     return invokeYoumaiPurchaseOrderFunction(normalizedPurchaseOrderNo)

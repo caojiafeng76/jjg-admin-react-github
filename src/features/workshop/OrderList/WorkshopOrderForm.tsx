@@ -1,26 +1,25 @@
+import type { FormInstance, TableColumnsType } from 'antd'
+import type { WorkshopOrder } from './index'
 import {
+  Alert,
   App,
   DatePicker,
   Form,
-  FormInstance,
   Input,
   InputNumber,
   Radio,
   Select,
   Table,
-  Alert,
   Typography,
 } from 'antd'
-import type { TableColumnsType } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
-import type { WorkshopOrder } from './index'
-import WorkshopExcelUpload from './WorkshopExcelUpload'
 import {
   DEFAULT_WORKSHOP_ORDER_STATUS,
-  WORKSHOP_ORDER_STATUS_OPTIONS,
   normalizeWorkshopOrderStatus,
+  WORKSHOP_ORDER_STATUS_OPTIONS,
 } from './orderStatus'
+import WorkshopExcelUpload from './WorkshopExcelUpload'
 
 const { Text } = Typography
 
@@ -76,7 +75,7 @@ export default function WorkshopOrderForm({
       }
 
       // Excel 导入模式：批量提交
-      const formattedRows = excelRows.map((row) => ({
+      const formattedRows = excelRows.map(row => ({
         ...row,
         product_delivery_date: row.product_delivery_date || null,
       }))
@@ -254,7 +253,7 @@ export default function WorkshopOrderForm({
             {canEditStatus && isEdit && (
               <Form.Item name="status" label="订单状态">
                 <Select
-                  options={WORKSHOP_ORDER_STATUS_OPTIONS.map((item) => ({
+                  options={WORKSHOP_ORDER_STATUS_OPTIONS.map(item => ({
                     label: item.label,
                     value: item.value,
                   }))}
@@ -346,13 +345,13 @@ export default function WorkshopOrderForm({
             <Form.Item label="解析结果">
               <Alert
                 message="Excel文件解析成功"
-                description={
+                description={(
                   <div>
                     <Text strong>
                       已解析 {excelRows.length} 条数据，点击确定将批量导入
                     </Text>
                   </div>
-                }
+                )}
                 type="success"
                 showIcon
                 style={{ marginBottom: 16 }}

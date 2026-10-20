@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const calls: Array<{ table: string; operation: string; payload?: unknown }> = []
+import {
+  createJintanProfilesStockOut,
+  deleteJintanProfilesStockOut,
+  updateJintanProfilesStockOutRemarks,
+} from './apiJintanProfilesStockOut'
+
+const calls: Array<{ table: string, operation: string, payload?: unknown }> = []
 
 vi.mock('./supabase', () => ({
   default: {
@@ -32,12 +38,6 @@ vi.mock('./supabase', () => ({
     },
   },
 }))
-
-import {
-  createJintanProfilesStockOut,
-  deleteJintanProfilesStockOut,
-  updateJintanProfilesStockOutRemarks,
-} from './apiJintanProfilesStockOut'
 
 describe('金檀木业型材出库服务', () => {
   beforeEach(() => {

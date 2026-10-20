@@ -1,7 +1,7 @@
-- Install deps: `pnpm install`
-- Dev server: `pnpm dev`
-- Build: `pnpm build`
-- Preview build: `pnpm preview`
-- Lint: `pnpm lint` / auto-fix `pnpm lint:fix`
-- Format all: `pnpm format`
-(Use PowerShell; repo suggests pnpm via pnpm-lock.yaml.)
+- Install deps: `bun install`
+- Dev server: `bun dev`
+- Build: `bun run build`
+- Preview build: `bun preview`
+- Lint: `bun lint` / auto-fix `bun lint:fix`
+- Format all: `bun format`（等同 `eslint . --fix`，基于 `@antfu/eslint-config`，项目不再使用 Prettier）
+- Format changed files: `bunx eslint --fix <files>`

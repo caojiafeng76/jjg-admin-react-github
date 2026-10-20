@@ -1,15 +1,17 @@
-import { Key, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Link } from 'react-router-dom'
-import { Table, TableColumnsType, TableProps } from 'antd'
+import type { TableColumnsType, TableProps } from 'antd'
+import type { Key } from 'react'
+import type { ISyneyPo } from '@/types'
+import { Table } from 'antd'
 import dayjs from 'dayjs'
+import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 
 import { useAppStore } from '@/store'
-import { ISyneyPo } from '@/types'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 const STATUS_STYLES: Record<
   string,
-  { label: string; bg: string; text: string; dot: string }
+  { label: string, bg: string, text: string, dot: string }
 > = {
   已创建: {
     label: '已创建',
@@ -64,9 +66,9 @@ function PoTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
 
   const currentPageTotalQty = useMemo(
@@ -107,7 +109,7 @@ function PoTable({
         dataIndex: 'Status',
         key: 'Status',
         width: 110,
-        filters: Object.keys(STATUS_STYLES).map((value) => ({
+        filters: Object.keys(STATUS_STYLES).map(value => ({
           text: STATUS_STYLES[value].label,
           value,
         })),
@@ -155,7 +157,7 @@ function PoTable({
         width: 80,
         align: 'right',
         render: (value: number) => (
-          <span className="font-semibold text-slate-700 dark:text-slate-200 tabular-nums">
+          <span className="font-semibold text-slate-700 tabular-nums dark:text-slate-200">
             {value ?? '-'}
           </span>
         ),
@@ -235,7 +237,7 @@ function PoTable({
   return (
     <Table<ISyneyPo>
       rowSelection={rowSelection}
-      rowKey={(record) => record.id ?? ''}
+      rowKey={record => record.id ?? ''}
       columns={columns}
       dataSource={data}
       loading={loading}
@@ -244,7 +246,7 @@ function PoTable({
       onRow={handleRow}
       scroll={{ x: 1480, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 dark:[&_.ant-table-thead>tr>th]:border-slate-700 [&_.ant-table-thead>tr>th]:bg-slate-50 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
+      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">
@@ -253,7 +255,7 @@ function PoTable({
               <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>
             </Table.Summary.Cell>
             <Table.Summary.Cell index={6} align="right">
-              <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+              <span className="font-bold text-slate-900 tabular-nums dark:text-slate-100">
                 {currentPageTotalQty.toLocaleString()}
               </span>
             </Table.Summary.Cell>

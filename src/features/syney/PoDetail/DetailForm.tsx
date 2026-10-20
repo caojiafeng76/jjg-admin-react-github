@@ -1,21 +1,22 @@
-import { useAppStore } from '@/store'
-import { ISyneyItem } from '@/types'
-import { Form, FormInstance, Input } from 'antd'
+import type { FormInstance } from 'antd'
+import type { ISyneyItem } from '@/types'
+import { Form, Input } from 'antd'
 import { forwardRef, useImperativeHandle, useState } from 'react'
+import { useAppStore } from '@/store'
 import { useUpdate } from './useUpdate'
 
 export default forwardRef<
   {
     getInstance: () => FormInstance<ISyneyItem>
   },
-  { onClose: () => void; onLoadingChange?: (loading: boolean) => void }
->(function DetailForm({ onClose, onLoadingChange }, ref) {
+  { onClose: () => void, onLoadingChange?: (loading: boolean) => void }
+>(({ onClose, onLoadingChange }, ref) => {
   const [form] = Form.useForm<ISyneyItem>()
   const [isLoading, setIsLoading] = useState(false)
 
-  const tableSelectedKeys = useAppStore((state) => state.tableSelectedKeys)
+  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const { updateItems } = useUpdate()
 

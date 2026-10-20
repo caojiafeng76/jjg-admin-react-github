@@ -1,24 +1,25 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import type { ProcessStandardRecordType } from '@/services/apiStandardTimes'
 
-import {
-  getStandardTimes,
-  createStandardTime,
-  updateStandardTime,
-  updateStandardTimesLastProcess,
-  deleteStandardTimes,
-  type ProcessStandardRecordType,
-} from '@/services/apiStandardTimes'
-import { uploadProcessStandardImage } from '@/services/apiProcessStandardImages'
-import { getJobBaseSettingOptions } from '@/services/apiJobBaseSettings'
-import { getMachineEquipmentMaintenanceOptions } from '@/services/apiMachineEquipmentMaintenances'
-import { getSalesOrdersProjectNos } from '@/services/apiProcessStandards'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
+import { getJobBaseSettingOptions } from '@/services/apiJobBaseSettings'
+import { getMachineEquipmentMaintenanceOptions } from '@/services/apiMachineEquipmentMaintenances'
+import { uploadProcessStandardImage } from '@/services/apiProcessStandardImages'
+import { getSalesOrdersProjectNos } from '@/services/apiProcessStandards'
+import {
+  createStandardTime,
+  deleteStandardTimes,
+  getStandardTimes,
+
+  updateStandardTime,
+  updateStandardTimesLastProcess,
+} from '@/services/apiStandardTimes'
 
 const STANDARD_TIMES_KEY = 'standard-times' as const
 const JOB_BASE_SETTINGS_KEY = 'job-base-settings' as const
-const MACHINE_EQUIPMENT_MAINTENANCES_KEY =
-  'machine-equipment-maintenances' as const
+const MACHINE_EQUIPMENT_MAINTENANCES_KEY
+  = 'machine-equipment-maintenances' as const
 const PROCESS_STANDARDS_KEY = 'process-standards' as const
 const PRODUCTION_ORDERS_KEY = 'production-orders' as const
 const PRODUCTION_ORDER_ITEMS_KEY = 'production-order-items' as const

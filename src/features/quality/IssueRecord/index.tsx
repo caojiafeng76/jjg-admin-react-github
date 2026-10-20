@@ -1,27 +1,26 @@
-import { useCallback, useMemo, useState, type Key } from 'react'
+import type { Key } from 'react'
+import type { QualityIssueAuditStatus, QualityIssueRecord, QualityIssueRecordFormValues, QualityIssueRecordSearchParams } from '@/services/apiQualityIssueRecords'
 import {
   ArrowPathIcon,
   ShieldCheckIcon,
   XCircleIcon,
 } from '@heroicons/react/16/solid'
 import { App, Button } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import { useCallback, useMemo, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
+import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import {
+  getQualityIssueRecordsForExport,
+
+} from '@/services/apiQualityIssueRecords'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
-import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
-import { useTableHeight } from '@/hooks/useTableHeight'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import {
-  getQualityIssueRecordsForExport,
-  type QualityIssueAuditStatus,
-  type QualityIssueRecord,
-  type QualityIssueRecordFormValues,
-  type QualityIssueRecordSearchParams,
-} from '@/services/apiQualityIssueRecords'
 import IssueRecordForm from './IssueRecordForm'
 import IssueRecordSearch, { AUDIT_STATUS_LABELS } from './IssueRecordSearch'
 import IssueRecordTable from './IssueRecordTable'
@@ -30,8 +29,8 @@ import {
   useDeleteQualityIssueRecords,
   useQualityIssueRecordList,
   useQualityIssueRecordOrderOptions,
-  useUpdateQualityIssueRecordAuditStatus,
   useUpdateQualityIssueRecord,
+  useUpdateQualityIssueRecordAuditStatus,
 } from './useQualityIssueRecords'
 
 const BATCH_AUDIT_ACTION_LABELS: Record<QualityIssueAuditStatus, string> = {
@@ -42,10 +41,11 @@ const BATCH_AUDIT_ACTION_LABELS: Record<QualityIssueAuditStatus, string> = {
 
 const QUALITY_ISSUE_EXPORT_MESSAGE_KEY = 'quality-issue-record-export'
 
-const loadQualityIssueRecordExcel = () =>
-  import('@/utils/qualityIssueRecordExcel')
+function loadQualityIssueRecordExcel() {
+  return import('@/utils/qualityIssueRecordExcel')
+}
 
-const preloadQualityIssueRecordExcel = () => {
+function preloadQualityIssueRecordExcel() {
   void loadQualityIssueRecordExcel()
 }
 
@@ -55,8 +55,8 @@ export default function QualityIssueRecordPage() {
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 50
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
-  const [searchParams, setSearchParams] =
-    useState<QualityIssueRecordSearchParams>({})
+  const [searchParams, setSearchParams]
+    = useState<QualityIssueRecordSearchParams>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [editingRecord, setEditingRecord] = useState<QualityIssueRecord | null>(
@@ -64,8 +64,8 @@ export default function QualityIssueRecordPage() {
   )
 
   const { data: employees = [] } = useAllEmployees()
-  const { data: orderOptions = [], isLoading: isLoadingOrders } =
-    useQualityIssueRecordOrderOptions()
+  const { data: orderOptions = [], isLoading: isLoadingOrders }
+    = useQualityIssueRecordOrderOptions()
   const { data, isLoading } = useQualityIssueRecordList({
     page,
     pageSize,
@@ -90,8 +90,8 @@ export default function QualityIssueRecordPage() {
 
   const openEditModal = useCallback(
     (record?: QualityIssueRecord) => {
-      const targetRecord =
-        record || records.find((item) => item.id === selectedRowKeys[0])
+      const targetRecord
+        = record || records.find(item => item.id === selectedRowKeys[0])
 
       if (!targetRecord || (!record && selectedRowKeys.length !== 1)) {
         message.warning('请选择一条质量问题记录进行编辑')
@@ -136,14 +136,16 @@ export default function QualityIssueRecordPage() {
             values,
           })
           message.success('更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('创建成功')
         }
 
         handleCloseModal()
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         message.error(
           error instanceof Error
             ? translateErrorMessage(error.message)
@@ -166,7 +168,8 @@ export default function QualityIssueRecordPage() {
       await deleteMutation.mutateAsync(selectedRowKeys.map(String))
       message.success('删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '删除失败')
     }
   }, [deleteMutation, message, selectedRowKeys])
@@ -197,7 +200,8 @@ export default function QualityIssueRecordPage() {
             })
             message.success(`批量${actionLabel}成功`)
             setSelectedRowKeys([])
-          } catch (error) {
+          }
+          catch (error) {
             message.error(
               error instanceof Error ? error.message : `批量${actionLabel}失败`,
             )
@@ -233,19 +237,21 @@ export default function QualityIssueRecordPage() {
         return
       }
 
-      const { exportQualityIssueRecordsToExcel } =
-        await loadQualityIssueRecordExcel()
+      const { exportQualityIssueRecordsToExcel }
+        = await loadQualityIssueRecordExcel()
       exportQualityIssueRecordsToExcel(exportRows)
       message.success({
         key: QUALITY_ISSUE_EXPORT_MESSAGE_KEY,
         content: `已导出 ${exportRows.length} 条质量问题记录`,
       })
-    } catch (error) {
+    }
+    catch (error) {
       message.error({
         key: QUALITY_ISSUE_EXPORT_MESSAGE_KEY,
         content: error instanceof Error ? error.message : '导出失败',
       })
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [message, searchParams, total])

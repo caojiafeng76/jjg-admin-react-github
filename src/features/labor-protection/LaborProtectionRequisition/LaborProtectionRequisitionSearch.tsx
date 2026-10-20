@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
-import dayjs, { type Dayjs } from 'dayjs'
-
+import type { Dayjs } from 'dayjs'
 import type { LaborProtectionDataOption } from '@/services/apiLaborProtectionData'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import dayjs from 'dayjs'
+
+import { useEffect } from 'react'
 
 const { RangePicker } = DatePicker
 
@@ -90,7 +91,7 @@ export default function LaborProtectionRequisitionSearch({
                 .includes(input.toLowerCase()),
           }}
           placeholder="请选择劳保种类"
-          options={categoryOptions.map((item) => ({
+          options={categoryOptions.map(item => ({
             value: item.id,
             label: item.category,
           }))}

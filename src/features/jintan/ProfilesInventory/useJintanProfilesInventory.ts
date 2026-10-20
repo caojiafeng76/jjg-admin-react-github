@@ -1,13 +1,13 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-
-import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
+
 import {
   createJintanProfilesInventoryBatch,
   getJintanProfilesInventoryList,
   getJintanProfilesInventoryOptions,
   updateJintanProfilesInventory,
 } from '@services/apiJintanProfilesInventory'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { queryConfig } from '@/config/queryClient'
 
 import { jintanKeys } from '../queryKeys'
 

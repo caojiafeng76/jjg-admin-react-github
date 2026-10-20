@@ -1,8 +1,8 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
 import type { WorkSheet } from 'xlsx-js-style'
-
 import type { YoumaiFinishedGoodsStockOutImportRow } from '@/services/apiYoumaiFinishedGoodsStockOut'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 
 const REQUIRED_HEADERS = [
   '采购订单号',
@@ -12,7 +12,7 @@ const REQUIRED_HEADERS = [
   '交货日期',
 ] as const
 
-type PurchaseOrderExcelRow = {
+interface PurchaseOrderExcelRow {
   采购订单号?: string | number
   行号?: string | number
   物料编码?: string | number
@@ -56,12 +56,12 @@ export async function parseYoumaiFinishedGoodsStockOutExcel(
     const deliveryDate = normalizeDeliveryDate(row['交货日期'])
     const remarks = buildRemarks(row['订单备注'], row['订单行备注'])
 
-    const isEmptyRow =
-      !purchaseOrderNo &&
-      !purchaseOrderLineNo &&
-      !materialCode &&
-      row['订购数量'] === '' &&
-      !row['交货日期']
+    const isEmptyRow
+      = !purchaseOrderNo
+        && !purchaseOrderLineNo
+        && !materialCode
+        && row['订购数量'] === ''
+        && !row['交货日期']
 
     if (isEmptyRow) {
       return
@@ -91,9 +91,9 @@ export async function parseYoumaiFinishedGoodsStockOutExcel(
     }
 
     if (
-      stockOutQuantity === null ||
-      Number.isNaN(stockOutQuantity) ||
-      stockOutQuantity <= 0
+      stockOutQuantity === null
+      || Number.isNaN(stockOutQuantity)
+      || stockOutQuantity <= 0
     ) {
       errors.push(`第 ${rowNumber} 行订购数量格式无效，需为大于 0 的数字`)
       return
@@ -130,9 +130,9 @@ function validateRequiredHeaders(sheet: WorkSheet) {
     blankrows: false,
   })
 
-  const headerRow = new Set((rows[0] || []).map((cell) => normalizeText(cell)))
+  const headerRow = new Set((rows[0] || []).map(cell => normalizeText(cell)))
   const missingHeaders = REQUIRED_HEADERS.filter(
-    (header) => !headerRow.has(header),
+    header => !headerRow.has(header),
   )
 
   if (missingHeaders.length > 0) {

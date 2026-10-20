@@ -1,8 +1,9 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { LaborProtectionRequisition } from '@/services/apiLaborProtectionRequisitions'
+import { Table } from 'antd'
+import { memo, useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -111,9 +112,8 @@ function LaborProtectionRequisitionTable({
       scroll={{ x: 1260, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择劳保领用记录 ${record.id}`,

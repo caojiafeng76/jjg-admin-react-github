@@ -1,7 +1,7 @@
-import { cleanup, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
-
 import type { JintanPartsInventory } from '@/services/apiJintanPartsInventory'
+import { cleanup, render, screen, within } from '@testing-library/react'
+
+import { afterEach, describe, expect, it } from 'vitest'
 import JintanPartsInventoryTable from './JintanPartsInventoryTable'
 
 function createRecord(

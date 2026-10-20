@@ -1,5 +1,6 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { VillaLiftOrderStatus } from '@/services/apiVillaLiftOrders'
 
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
@@ -15,7 +16,7 @@ import {
   updateVillaLiftOrder,
   updateVillaLiftOrderStatus,
   upsertVillaLiftOrderItems,
-  type VillaLiftOrderStatus,
+
 } from '@/services/apiVillaLiftOrders'
 
 export const VILLA_LIFT_ORDERS_KEY = 'villa-lift-orders' as const

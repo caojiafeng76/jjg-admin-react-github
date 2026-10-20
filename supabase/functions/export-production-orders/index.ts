@@ -1,13 +1,14 @@
 import type {} from '../_shared/edge-runtime.d.ts'
 
-import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
+import type { ProductionOrderForExportRecord } from '../_shared/production-order-export-workbook.ts'
 
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { assertAdmin } from '../_shared/admin.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 import {
   buildProductionOrderExcelBuffer,
   getProductionOrderExportFilename,
-  type ProductionOrderForExportRecord,
+
 } from '../_shared/production-order-export-workbook.ts'
 
 type ProductionOrderShift = '白班' | '夜班'
@@ -103,7 +104,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
 
 function normalizeString(value?: string | null) {
   const normalized = value?.trim()
-  return normalized ? normalized : undefined
+  return normalized || undefined
 }
 
 function normalizeFilters(filters?: ProductionOrderExportFilters) {
@@ -133,7 +134,7 @@ function normalizeFilters(filters?: ProductionOrderExportFilters) {
 function normalizeSelectedIds(selectedIds?: string[]) {
   return Array.from(
     new Set(
-      (selectedIds || []).map((id) => id.trim()).filter((id) => id.length > 0),
+      (selectedIds || []).map(id => id.trim()).filter(id => id.length > 0),
     ),
   )
 }
@@ -210,7 +211,7 @@ async function getProductionOrderIdsPageByFilters(
   }
 
   return {
-    ids: (data || []).map((item) => item.id),
+    ids: (data || []).map(item => item.id),
     total: count || 0,
   }
 }
@@ -247,7 +248,7 @@ async function getProductionOrderIdsByFilters(
       index + EXPORT_PAGE_CONCURRENCY,
     )
     const pageResults = await Promise.all(
-      pageChunk.map((page) =>
+      pageChunk.map(page =>
         getProductionOrderIdsPageByFilters(adminClient, {
           page,
           pageSize: EXPORT_PAGE_SIZE,
@@ -297,15 +298,15 @@ async function getProductionOrdersForExport(
 
   const rows = (
     await Promise.all(
-      batches.map((batchIds) =>
+      batches.map(batchIds =>
         getProductionOrdersForExportBatch(adminClient, batchIds),
       ),
     )
   ).flat()
-  const rowMap = new Map(rows.map((row) => [row.id, row]))
+  const rowMap = new Map(rows.map(row => [row.id, row]))
 
   return uniqueIds
-    .map((id) => rowMap.get(id))
+    .map(id => rowMap.get(id))
     .filter((row): row is ProductionOrderForExportRecord => Boolean(row))
     .sort((left, right) => {
       const dateCompare = left.order_date.localeCompare(right.order_date)
@@ -355,8 +356,8 @@ async function processExportJob({
       error_message: null,
     })
 
-    const targetIds =
-      selectedIds.length > 0
+    const targetIds
+      = selectedIds.length > 0
         ? selectedIds
         : await getProductionOrderIdsByFilters(adminClient, filters)
 
@@ -393,7 +394,8 @@ async function processExportJob({
       expires_at: expiresAt.toISOString(),
       error_message: null,
     })
-  } catch (error) {
+  }
+  catch (error) {
     await updateJob(adminClient, jobId, {
       status: 'failed',
       error_message:
@@ -519,7 +521,8 @@ serve(async (request) => {
 
   try {
     ;({ adminClient, adminEmployee } = await assertAdmin(authorization))
-  } catch (error) {
+  }
+  catch (error) {
     const message = error instanceof Error ? error.message : '权限校验失败'
     const status = message.includes('登录状态') ? 401 : 403
     return jsonResponse({ error: message }, status)
@@ -529,7 +532,8 @@ serve(async (request) => {
 
   try {
     payload = await request.json()
-  } catch {
+  }
+  catch {
     return jsonResponse({ error: '请求体格式不正确' }, 400)
   }
 

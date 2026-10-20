@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('./supabase', () => ({
-  default: {},
-}))
-
 import {
   buildEmployeeCreatePayload,
   buildEmployeeUpdatePayload,
 } from './apiEmployees'
+
+vi.mock('./supabase', () => ({
+  default: {},
+}))
 
 describe('employee payload builders', () => {
   it('defaults new employees to not external', () => {

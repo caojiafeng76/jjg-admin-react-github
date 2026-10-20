@@ -1,10 +1,10 @@
-import { updateSerialNo as updateSerialNoApi } from '@/services/apiSyneySerialNo'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { updateSerialNo as updateSerialNoApi } from '@/services/apiSyneySerialNo'
 import { syneyPoKeys } from '../queryKeys'
 
 export function useUpdateSerialNo() {
-  const { mutate: updateSerialNo, isPending: isUpdating } =
-    useMutationWithMessage({
+  const { mutate: updateSerialNo, isPending: isUpdating }
+    = useMutationWithMessage({
       mutationFn: updateSerialNoApi,
       invalidateQueries: [syneyPoKeys.serialNumbers()],
       // 成功提示保持静默

@@ -1,10 +1,9 @@
-import dayjs from 'dayjs'
+import type { PrecisionCuttingTransferFilters, PrecisionCuttingTransferInsert, PrecisionCuttingTransferUpdate } from './apiPrecisionCuttingTransfersTypes'
 
+import dayjs from 'dayjs'
 import {
   PRECISION_CUTTING_TRANSFER_OPERATORS,
-  type PrecisionCuttingTransferFilters,
-  type PrecisionCuttingTransferInsert,
-  type PrecisionCuttingTransferUpdate,
+
 } from './apiPrecisionCuttingTransfersTypes'
 
 const PRECISION_CUTTING_TRANSFER_OPERATOR_SET = new Set<string>(
@@ -127,7 +126,7 @@ function normalizeOptionalLongMaterialQuantity(
 
 function normalizeOperatorNames(operatorNames: string[]) {
   const normalizedOperatorNames = Array.from(
-    new Set(operatorNames.map((name) => name.trim()).filter(Boolean)),
+    new Set(operatorNames.map(name => name.trim()).filter(Boolean)),
   )
 
   if (normalizedOperatorNames.length === 0) {
@@ -135,7 +134,7 @@ function normalizeOperatorNames(operatorNames: string[]) {
   }
 
   const invalidOperator = normalizedOperatorNames.find(
-    (name) => !PRECISION_CUTTING_TRANSFER_OPERATOR_SET.has(name),
+    name => !PRECISION_CUTTING_TRANSFER_OPERATOR_SET.has(name),
   )
 
   if (invalidOperator) {
@@ -224,8 +223,8 @@ export function normalizePrecisionCuttingTransferUpdatePayload(
   }
 
   if (values.data_error_responsible !== undefined) {
-    payload.data_error_responsible =
-      values.data_error_responsible?.trim() || null
+    payload.data_error_responsible
+      = values.data_error_responsible?.trim() || null
   }
 
   if (values.raw_material_defect_count !== undefined) {
@@ -254,8 +253,8 @@ export function normalizePrecisionCuttingTransferUpdatePayload(
   }
 
   if (values.outsource_defect_reason !== undefined) {
-    payload.outsource_defect_reason =
-      values.outsource_defect_reason?.trim() || null
+    payload.outsource_defect_reason
+      = values.outsource_defect_reason?.trim() || null
   }
 
   if (values.outsource_unit !== undefined) {
@@ -275,8 +274,8 @@ export function normalizePrecisionCuttingTransferUpdatePayload(
   }
 
   if (values.process_card_long_material_quantity !== undefined) {
-    payload.process_card_long_material_quantity =
-      normalizeOptionalLongMaterialQuantity(
+    payload.process_card_long_material_quantity
+      = normalizeOptionalLongMaterialQuantity(
         values.process_card_long_material_quantity,
         '流程卡长料数量',
       )

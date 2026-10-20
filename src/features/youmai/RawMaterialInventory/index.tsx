@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
-import { App, type FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
-
-import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
-import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import type { FormInstance } from 'antd'
 import type {
   YoumaiRawMaterialInventory,
   YoumaiRawMaterialInventoryFormValues,
 } from '@/services/apiYoumaiRawMaterialInventory'
+import { App, Modal } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+
+import { useSearchParams } from 'react-router-dom'
+import { usePermission } from '@/hooks/usePermission'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { getYoumaiRawMaterialInventoryForExport } from '@/services/apiYoumaiRawMaterialInventory'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -18,18 +19,19 @@ import ExportButton from '@/ui/ExportButton'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
-import YoumaiRawMaterialInventoryForm from './YoumaiRawMaterialInventoryForm'
-import YoumaiRawMaterialInventorySearch from './YoumaiRawMaterialInventorySearch'
-import YoumaiRawMaterialInventoryTable from './YoumaiRawMaterialInventoryTable'
 import {
   useCreateYoumaiRawMaterialInventory,
   useDeleteYoumaiRawMaterialInventory,
   useUpdateYoumaiRawMaterialInventory,
   useYoumaiRawMaterialInventoryList,
 } from './useYoumaiRawMaterialInventory'
+import YoumaiRawMaterialInventoryForm from './YoumaiRawMaterialInventoryForm'
+import YoumaiRawMaterialInventorySearch from './YoumaiRawMaterialInventorySearch'
+import YoumaiRawMaterialInventoryTable from './YoumaiRawMaterialInventoryTable'
 
-const loadYoumaiRawMaterialInventoryExcel = () =>
-  import('@/utils/youmaiRawMaterialInventoryExcel')
+function loadYoumaiRawMaterialInventoryExcel() {
+  return import('@/utils/youmaiRawMaterialInventoryExcel')
+}
 
 function preloadYoumaiRawMaterialInventoryExcel() {
   void loadYoumaiRawMaterialInventoryExcel()
@@ -46,10 +48,10 @@ export default function YoumaiRawMaterialInventoryPage() {
   const [modalTitle, setModalTitle] = useState('新建原料库存')
   const [isEdit, setIsEdit] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<YoumaiRawMaterialInventory | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<YoumaiRawMaterialInventoryFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<YoumaiRawMaterialInventory | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<YoumaiRawMaterialInventoryFormValues> | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [formError, setFormError] = useState<unknown>(null)
 
@@ -70,8 +72,8 @@ export default function YoumaiRawMaterialInventoryPage() {
   const updateMutation = useUpdateYoumaiRawMaterialInventory()
   const deleteMutation = useDeleteYoumaiRawMaterialInventory()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({ targetRowCount: 10 })
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({ targetRowCount: 10 })
 
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
@@ -97,7 +99,7 @@ export default function YoumaiRawMaterialInventoryPage() {
       return
     }
     const record = data?.rawMaterialInventory.find(
-      (item) => item.id === selectedRowKeys[0],
+      item => item.id === selectedRowKeys[0],
     )
     if (!record) {
       message.warning('请选择一条数据进行编辑')
@@ -120,10 +122,12 @@ export default function YoumaiRawMaterialInventoryPage() {
       }
       message.success('原料库存删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除原料库存失败，请稍后重试')
       }
     }
@@ -145,12 +149,14 @@ export default function YoumaiRawMaterialInventoryPage() {
         if (isEdit && editingRecord) {
           await updateMutation.mutateAsync({ id: editingRecord.id, values })
           message.success('原料库存更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('原料库存创建成功')
         }
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         // 错误留在 Modal 内用 FormErrorAlert 三段式展示（S3），不再弹顶部队列
         setFormError(error)
       }
@@ -176,7 +182,8 @@ export default function YoumaiRawMaterialInventoryPage() {
       next.set('page', '1')
       if (params.keyword) {
         next.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         next.delete('keyword')
       }
       setSearchParamsURL(next)
@@ -206,8 +213,8 @@ export default function YoumaiRawMaterialInventoryPage() {
 
     try {
       setIsExporting(true)
-      const [records, { exportYoumaiRawMaterialInventoryToExcel }] =
-        await Promise.all([
+      const [records, { exportYoumaiRawMaterialInventoryToExcel }]
+        = await Promise.all([
           getYoumaiRawMaterialInventoryForExport(searchParams.keyword),
           loadYoumaiRawMaterialInventoryExcel(),
         ])
@@ -217,9 +224,11 @@ export default function YoumaiRawMaterialInventoryPage() {
       }
       exportYoumaiRawMaterialInventoryToExcel(records)
       message.success(`已导出 ${records.length} 条原料库存数据`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(error instanceof Error ? error.message : '导出失败')
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [
@@ -302,12 +311,12 @@ export default function YoumaiRawMaterialInventoryPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={YOUMAI_MANAGE_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>

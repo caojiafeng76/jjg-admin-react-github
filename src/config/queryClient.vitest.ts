@@ -49,8 +49,7 @@ describe('createQueryClient', () => {
 
   it('only throws query errors to the boundary when there is no cached data', () => {
     const queryClient = createQueryClient()
-    const throwOnError = queryClient.getDefaultOptions().queries
-      ?.throwOnError as (
+    const throwOnError = queryClient.getDefaultOptions().queries?.throwOnError as (
       error: unknown,
       query: { state: { data: unknown } },
     ) => boolean

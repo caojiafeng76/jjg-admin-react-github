@@ -1,6 +1,6 @@
 import type { Dayjs } from 'dayjs'
-import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 // ----------------------------------------------------------------
 // Types
@@ -293,7 +293,8 @@ export async function getVillaLiftOrders({
     .order('planned_delivery_date', { ascending: true, nullsFirst: false })
     .range(from, to)
 
-  if (error) throw handleApiError(error, '获取别墅梯订单列表失败')
+  if (error)
+    throw handleApiError(error, '获取别墅梯订单列表失败')
   return { orders: data as VillaLiftOrder[], count: count ?? 0 }
 }
 
@@ -307,7 +308,8 @@ export async function getVillaLiftOrderItems(
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
 
-  if (error) throw handleApiError(error, '获取订单明细失败')
+  if (error)
+    throw handleApiError(error, '获取订单明细失败')
   return data as VillaLiftOrderItem[]
 }
 
@@ -341,7 +343,8 @@ export async function createVillaLiftOrder(
     const { error: itemError } = await supabase
       .from('villa_lift_order_items')
       .insert(itemPayloads)
-    if (itemError) throw handleApiError(itemError, '创建订单明细失败')
+    if (itemError)
+      throw handleApiError(itemError, '创建订单明细失败')
   }
 
   return order as VillaLiftOrder
@@ -377,7 +380,8 @@ export async function deleteVillaLiftOrder(id: string): Promise<void> {
     .delete()
     .eq('id', id)
 
-  if (error) throw handleApiError(error, '删除别墅梯订单失败')
+  if (error)
+    throw handleApiError(error, '删除别墅梯订单失败')
 }
 
 export async function updateVillaLiftOrderStatus({
@@ -392,7 +396,8 @@ export async function updateVillaLiftOrderStatus({
     .update({ status })
     .eq('id', id)
 
-  if (error) throw handleApiError(error, '更新订单状态失败')
+  if (error)
+    throw handleApiError(error, '更新订单状态失败')
 }
 
 export async function batchDeleteVillaLiftOrders(ids: string[]): Promise<void> {
@@ -401,7 +406,8 @@ export async function batchDeleteVillaLiftOrders(ids: string[]): Promise<void> {
     .delete()
     .in('id', ids)
 
-  if (error) throw handleApiError(error, '批量删除别墅梯订单失败')
+  if (error)
+    throw handleApiError(error, '批量删除别墅梯订单失败')
 }
 
 export async function batchUpdateVillaLiftOrdersStatus({
@@ -416,7 +422,8 @@ export async function batchUpdateVillaLiftOrdersStatus({
     .update({ status })
     .in('id', ids)
 
-  if (error) throw handleApiError(error, '批量更新订单状态失败')
+  if (error)
+    throw handleApiError(error, '批量更新订单状态失败')
 }
 
 export async function upsertVillaLiftOrderItems({
@@ -432,9 +439,11 @@ export async function upsertVillaLiftOrderItems({
     .delete()
     .eq('order_id', orderId)
 
-  if (delError) throw handleApiError(delError, '更新订单明细失败')
+  if (delError)
+    throw handleApiError(delError, '更新订单明细失败')
 
-  if (items.length === 0) return
+  if (items.length === 0)
+    return
 
   const payloads = items.map((item, i) => ({
     ...normalizeItemPayload(item, i),
@@ -445,7 +454,8 @@ export async function upsertVillaLiftOrderItems({
     .from('villa_lift_order_items')
     .insert(payloads)
 
-  if (error) throw handleApiError(error, '保存订单明细失败')
+  if (error)
+    throw handleApiError(error, '保存订单明细失败')
 }
 
 export async function deleteVillaLiftOrderItem(id: string): Promise<void> {
@@ -454,18 +464,19 @@ export async function deleteVillaLiftOrderItem(id: string): Promise<void> {
     .delete()
     .eq('id', id)
 
-  if (error) throw handleApiError(error, '删除订单明细失败')
+  if (error)
+    throw handleApiError(error, '删除订单明细失败')
 }
 
-export type VillaLiftMarkDateField =
-  | 'material_selection_date'
-  | 'painting_date'
-  | 'film_date'
-  | 'cutting_actual_date'
-  | 'processing_actual_date'
-  | 'cabin_processing_date'
-  | 'middle_door_processing_date'
-  | 'frame_processing_date'
+export type VillaLiftMarkDateField
+  = | 'material_selection_date'
+    | 'painting_date'
+    | 'film_date'
+    | 'cutting_actual_date'
+    | 'processing_actual_date'
+    | 'cabin_processing_date'
+    | 'middle_door_processing_date'
+    | 'frame_processing_date'
 
 export async function markVillaLiftOrderDate({
   id,
@@ -488,7 +499,8 @@ export async function markVillaLiftOrderDate({
     .select()
     .single()
 
-  if (error) throw handleApiError(error, '标记完成日期失败')
+  if (error)
+    throw handleApiError(error, '标记完成日期失败')
   return data as VillaLiftOrder
 }
 
@@ -511,5 +523,6 @@ export async function batchMarkVillaLiftOrdersDate({
     .update(updatePayload)
     .in('id', ids)
 
-  if (error) throw handleApiError(error, '批量标记完成日期失败')
+  if (error)
+    throw handleApiError(error, '批量标记完成日期失败')
 }

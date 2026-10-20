@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('./supabase', () => ({
-  default: {},
-}))
-
 import {
   buildWorkshopOrderStatusUpdateValues,
   findDuplicateProjectNos,
 } from './apiWorkshopOrders'
+
+vi.mock('./supabase', () => ({
+  default: {},
+}))
 
 describe('buildWorkshopOrderStatusUpdateValues', () => {
   it('sets closed_at when an order is closed', () => {

@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface YoumaiRawMaterialStockOut {
   id: string
@@ -18,7 +18,7 @@ export interface YoumaiRawMaterialStockOutFormValues {
   remarks: string
 }
 
-type DynamicSupabaseTable = { from: (table: string) => any }
+interface DynamicSupabaseTable { from: (table: string) => any }
 
 function stockOutTable() {
   return (supabase as unknown as DynamicSupabaseTable).from(
@@ -70,10 +70,12 @@ export async function getYoumaiRawMaterialStockOutList({
     )
   }
 
-  if (signal) query = query.abortSignal(signal)
+  if (signal)
+    query = query.abortSignal(signal)
 
   const { data, error, count } = await query
-  if (error) throw handleApiError(error, '原料出库列表获取失败')
+  if (error)
+    throw handleApiError(error, '原料出库列表获取失败')
   return {
     rawMaterialStockOut: (data ?? []) as YoumaiRawMaterialStockOut[],
     count: count ?? 0,
@@ -102,7 +104,8 @@ export async function createYoumaiRawMaterialStockOut(
     .select()
     .single()
 
-  if (error) throw handleApiError(error, '原料出库新建失败')
+  if (error)
+    throw handleApiError(error, '原料出库新建失败')
   return data as YoumaiRawMaterialStockOut
 }
 
@@ -110,7 +113,8 @@ export async function deleteYoumaiRawMaterialStockOut(
   id: string,
 ): Promise<void> {
   const { error } = await stockOutTable().delete().eq('id', id)
-  if (error) throw handleApiError(error, '原料出库记录删除失败')
+  if (error)
+    throw handleApiError(error, '原料出库记录删除失败')
 }
 
 export async function updateYoumaiRawMaterialStockOut({
@@ -126,6 +130,7 @@ export async function updateYoumaiRawMaterialStockOut({
     .select()
     .single()
 
-  if (error) throw handleApiError(error, '原料出库记录更新失败')
+  if (error)
+    throw handleApiError(error, '原料出库记录更新失败')
   return data as YoumaiRawMaterialStockOut
 }

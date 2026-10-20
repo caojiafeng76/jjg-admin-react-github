@@ -1,7 +1,7 @@
 import { buildPostgrestOrIlikeFilter } from '@/utils/postgrestFilters'
 
-export const TOOLING_DATA_OPTION_SELECT =
-  'id, tool_code, tool_name, tool_spec, material, unit_price'
+export const TOOLING_DATA_OPTION_SELECT
+  = 'id, tool_code, tool_name, tool_spec, material, unit_price'
 
 export const TOOLING_DATA_OPTION_MAX_LIMIT = 50
 
@@ -10,7 +10,7 @@ export const TOOLING_DATA_OPTION_MAX_LIMIT = 50
  * 仅声明选项构建链路用到的链式方法 + await 结果形态。
  */
 interface OptionsQueryBuilder
-  extends PromiseLike<{ data: unknown; error: unknown }> {
+  extends PromiseLike<{ data: unknown, error: unknown }> {
   or: (filter: string) => OptionsQueryBuilder
   order: (column: string, options?: { ascending?: boolean }) => OptionsQueryBuilder
   limit: (limit: number) => OptionsQueryBuilder

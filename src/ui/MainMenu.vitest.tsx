@@ -38,7 +38,8 @@ function makeCan(grantedKeys: string[]) {
 /** 把 antd Menu items 转成只含 key/children 的纯结构，便于断言 */
 function toMenuTree(items: AntdMenuItem[]): MenuNode[] {
   return items.map((item) => {
-    if (!item || typeof item !== 'object') return {}
+    if (!item || typeof item !== 'object')
+      return {}
     const node = item as {
       key?: string | number
       children?: AntdMenuItem[]
@@ -55,30 +56,32 @@ function filterWith(keys: string[]) {
 }
 
 function findJintan(keys: string[]) {
-  return filterWith(keys).find((node) => node.key === 'jintan')
+  return filterWith(keys).find(node => node.key === 'jintan')
 }
 
 describe('金檀木业菜单分组', () => {
   it('全量授权时按 配件/型材/素材 三个分组展示 12 个页面', () => {
     const jintan = findJintan(JINTAN_PERMISSION_KEYS)
 
-    expect(jintan?.children?.map((group) => group.key)).toEqual([
+    expect(jintan?.children?.map(group => group.key)).toEqual([
       'jintan-parts',
       'jintan-profiles',
       'jintan-materials',
     ])
-    expect(jintan?.children?.map((group) => group.children?.length)).toEqual([
-      4, 4, 4,
+    expect(jintan?.children?.map(group => group.children?.length)).toEqual([
+      4,
+      4,
+      4,
     ])
   })
 
   it('仅授予素材页面权限时只显示素材分组', () => {
     const jintan = findJintan(['nav:jintan', 'page:jintan-materials-data'])
 
-    expect(jintan?.children?.map((group) => group.key)).toEqual([
+    expect(jintan?.children?.map(group => group.key)).toEqual([
       'jintan-materials',
     ])
-    expect(jintan?.children?.[0]?.children?.map((leaf) => leaf.key)).toEqual([
+    expect(jintan?.children?.[0]?.children?.map(leaf => leaf.key)).toEqual([
       'jintan-materials-data',
     ])
   })

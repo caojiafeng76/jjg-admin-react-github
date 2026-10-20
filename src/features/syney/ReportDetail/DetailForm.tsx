@@ -1,14 +1,15 @@
-import { Form, FormInstance, Input } from 'antd'
+import type { FormInstance } from 'antd'
+import type { Ref } from 'react'
 
-import { ISyneyItem } from '@/types'
-import { Ref } from 'react'
+import type { ISyneyItem } from '@/types'
+import { Form, Input } from 'antd'
 
 const layout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 18 },
 }
 
-type FormProps = {
+interface FormProps {
   ref: Ref<FormInstance<ISyneyItem>> | undefined
   onFinishFuc: (values: ISyneyItem) => void
 }

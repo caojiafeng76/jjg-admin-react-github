@@ -1,5 +1,6 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { QualityIssueRecordSearchParams } from '@/services/apiQualityIssueRecords'
 
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
@@ -8,9 +9,9 @@ import {
   getQualityIssueRecordById,
   getQualityIssueRecordList,
   getQualityIssueRecordOrderOptions,
-  updateQualityIssueRecordAuditStatus,
+
   updateQualityIssueRecord,
-  type QualityIssueRecordSearchParams,
+  updateQualityIssueRecordAuditStatus,
 } from '@/services/apiQualityIssueRecords'
 
 const QUALITY_ISSUE_RECORDS_KEY = 'quality-issue-records' as const

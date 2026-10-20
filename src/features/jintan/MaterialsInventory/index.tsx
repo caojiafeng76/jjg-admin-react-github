@@ -1,15 +1,15 @@
+import type { FormInstance } from 'antd'
+import type { JintanMaterialsInventory, JintanMaterialsInventoryFormValues, JintanMaterialsInventoryImportRow } from '@/services/apiJintanMaterialsInventory'
+import { App, Modal } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
-import { App, FormInstance, Modal } from 'antd'
-import { useSearchParams } from 'react-router-dom'
 
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import {
   getJintanMaterialsInventoryForExport,
-  type JintanMaterialsInventory,
-  type JintanMaterialsInventoryFormValues,
-  type JintanMaterialsInventoryImportRow,
+
 } from '@/services/apiJintanMaterialsInventory'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
@@ -27,8 +27,9 @@ import {
   useUpdateJintanMaterialsInventory,
 } from './useJintanMaterialsInventory'
 
-const loadJintanMaterialsInventoryExcel = () =>
-  import('@/utils/jintanMaterialsInventoryExcel')
+function loadJintanMaterialsInventoryExcel() {
+  return import('@/utils/jintanMaterialsInventoryExcel')
+}
 
 function preloadJintanMaterialsInventoryExcel() {
   void loadJintanMaterialsInventoryExcel()
@@ -44,10 +45,10 @@ export default function JintanMaterialsInventoryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [editingRecord, setEditingRecord] =
-    useState<JintanMaterialsInventory | null>(null)
-  const [formRef, setFormRef] =
-    useState<FormInstance<JintanMaterialsInventoryFormValues> | null>(null)
+  const [editingRecord, setEditingRecord]
+    = useState<JintanMaterialsInventory | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<JintanMaterialsInventoryFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -66,8 +67,8 @@ export default function JintanMaterialsInventoryPage() {
   const updateMutation = useUpdateJintanMaterialsInventory()
   const importMutation = useImportJintanMaterialsInventory()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -85,7 +86,7 @@ export default function JintanMaterialsInventoryPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -108,8 +109,8 @@ export default function JintanMaterialsInventoryPage() {
 
     setIsExporting(true)
     try {
-      const [exportRows, { exportJintanMaterialsInventoryToExcel }] =
-        await Promise.all([
+      const [exportRows, { exportJintanMaterialsInventoryToExcel }]
+        = await Promise.all([
           getJintanMaterialsInventoryForExport(searchParams.keyword),
           loadJintanMaterialsInventoryExcel(),
         ])
@@ -121,11 +122,13 @@ export default function JintanMaterialsInventoryPage() {
 
       exportJintanMaterialsInventoryToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条素材库存`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '导出素材库存失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [
@@ -152,10 +155,12 @@ export default function JintanMaterialsInventoryPage() {
         await importMutation.mutateAsync(rows)
         message.success(`素材库存导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入素材库存失败，请稍后重试')
         }
       }
@@ -189,7 +194,8 @@ export default function JintanMaterialsInventoryPage() {
         await updateMutation.mutateAsync({ id: editingRecord.id, values })
         message.success('素材库存更新成功')
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         setFormError(error)
       }
     },
@@ -214,7 +220,8 @@ export default function JintanMaterialsInventoryPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 

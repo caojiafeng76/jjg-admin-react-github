@@ -1,10 +1,10 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
-
 import type {
   JintanProfilesInventory,
   JintanProfilesInventoryImportRow,
 } from '@/services/apiJintanProfilesInventory'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   applyRegisterSheetStyles,
   autoFitColumnWidths,
@@ -124,12 +124,12 @@ export async function parseJintanProfilesInventoryExcel(
     const quantityText = normalizeText(cells[3])
     const remarks = normalizeText(cells[4])
 
-    const isEmptyRow =
-      !profileModel &&
-      !profileName &&
-      !specification &&
-      !quantityText &&
-      !remarks
+    const isEmptyRow
+      = !profileModel
+        && !profileName
+        && !specification
+        && !quantityText
+        && !remarks
 
     if (isEmptyRow) {
       return
@@ -174,7 +174,7 @@ export async function parseJintanProfilesInventoryExcel(
 function validateTemplateHeaders(
   headerCells: Array<string | number | null> = [],
 ) {
-  const headerRow = headerCells.map((cell) => normalizeText(cell))
+  const headerRow = headerCells.map(cell => normalizeText(cell))
   const templateHeaders = Array.from(TEMPLATE_HEADERS)
 
   const matches = templateHeaders.every(

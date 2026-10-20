@@ -1,14 +1,15 @@
-import { memo } from 'react'
+import type { ProjectNoSelectOption } from '@/features/production-order/projectNoSelect'
 import { DatePicker, Form, Input, InputNumber, Select } from 'antd'
 
+import { memo } from 'react'
 import {
   filterProjectNoOption,
+
   renderProjectNoOption,
-  type ProjectNoSelectOption,
 } from '@/features/production-order/projectNoSelect'
 import { QUALITY_REWORK_REPAIR_CATEGORIES } from '@/services/apiQualityReworkRepair'
 
-export const WorkshopFields = memo(function WorkshopFields({
+export const WorkshopFields = memo(({
   isFetchingDocumentNo,
   isLoadingOrderOptions,
   projectNoOptions,
@@ -18,7 +19,7 @@ export const WorkshopFields = memo(function WorkshopFields({
   isLoadingOrderOptions: boolean
   projectNoOptions: ProjectNoSelectOption[]
   onProjectNoChange: (projectNo: string) => void
-}) {
+}) => {
   return (
     <>
       <div className="mt-1 mb-3 border-b border-slate-200 pb-2 text-sm font-medium text-slate-700">
@@ -61,7 +62,7 @@ export const WorkshopFields = memo(function WorkshopFields({
         >
           <Select
             placeholder="请选择返工返修类别"
-            options={QUALITY_REWORK_REPAIR_CATEGORIES.map((item) => ({
+            options={QUALITY_REWORK_REPAIR_CATEGORIES.map(item => ({
               value: item,
               label: item,
             }))}
@@ -170,7 +171,7 @@ export const WorkshopFields = memo(function WorkshopFields({
   )
 })
 
-export const ProductionFields = memo(function ProductionFields() {
+export const ProductionFields = memo(() => {
   return (
     <>
       <div className="mt-1 mb-3 border-b border-slate-200 pb-2 text-sm font-medium text-slate-700">
@@ -206,7 +207,7 @@ export const ProductionFields = memo(function ProductionFields() {
   )
 })
 
-export const TechnicalFields = memo(function TechnicalFields() {
+export const TechnicalFields = memo(() => {
   return (
     <>
       <div className="mt-1 mb-3 border-b border-slate-200 pb-2 text-sm font-medium text-slate-700">
@@ -264,7 +265,7 @@ export const TechnicalFields = memo(function TechnicalFields() {
   )
 })
 
-export const QualityFields = memo(function QualityFields() {
+export const QualityFields = memo(() => {
   return (
     <>
       <div className="mt-1 mb-3 border-b border-slate-200 pb-2 text-sm font-medium text-slate-700">

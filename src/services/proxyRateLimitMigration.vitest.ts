@@ -33,23 +33,23 @@ describe('distributed proxy rate limit migration', () => {
   })
 
   it('starts with transactional counters and serializes concurrent calls', () => {
-    expect(migration).toContain("subject_kind = 'user'")
+    expect(migration).toContain('subject_kind = \'user\'')
     expect(migration).toContain('pg_advisory_xact_lock')
     expect(migration).toContain('>= 30')
   })
 
   it('prevents caller-controlled IP values from poisoning other users', () => {
     expect(poisoningPreventionMigration).toContain(
-      "subject_kind in ('user', 'user_ip')",
+      'subject_kind in (\'user\', \'user_ip\')',
     )
     expect(poisoningPreventionMigration).toContain(
-      "subject_kind = 'user_ip'",
+      'subject_kind = \'user_ip\'',
     )
     expect(poisoningPreventionMigration).toContain(
-      "concat(v_user_id::text, ':', v_ip)",
+      'concat(v_user_id::text, \':\', v_ip)',
     )
     expect(poisoningPreventionMigration).not.toContain(
-      "subject_kind = 'ip'",
+      'subject_kind = \'ip\'',
     )
   })
 

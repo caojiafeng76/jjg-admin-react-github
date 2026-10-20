@@ -1,11 +1,12 @@
-import { memo, useCallback, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType, type TableProps } from 'antd'
-
+import type { TableColumnsType, TableProps } from 'antd'
 import type {
   MaterialTransferOrderProgress,
   MaterialTransferWithEmployee,
 } from '@/services/apiMaterialTransfers'
+import { Table } from 'antd'
+import { memo, useCallback, useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { OrderProgressCell, OrderStatusCell } from './OrderProgressCell'
 
 interface Props {
@@ -65,7 +66,8 @@ function MaterialTransferTable({
         },
         sortDirections: ['descend', 'ascend'],
         render: (text: string) => {
-          if (!text) return '-'
+          if (!text)
+            return '-'
           return new Date(text).toLocaleString('zh-CN')
         },
       },
@@ -100,8 +102,8 @@ function MaterialTransferTable({
         key: 'project_no',
         width: 130,
         filters: Array.from(
-          new Set(data.map((r) => r.project_no).filter(Boolean)),
-        ).map((v) => ({ text: v as string, value: v as string })),
+          new Set(data.map(r => r.project_no).filter(Boolean)),
+        ).map(v => ({ text: v as string, value: v as string })),
         onFilter: (value, record) => record.project_no === (value as string),
         filterSearch: true,
         sorter: (a, b) =>
@@ -145,8 +147,8 @@ function MaterialTransferTable({
         key: 'product_model',
         width: 130,
         filters: Array.from(
-          new Set(data.map((r) => r.product_model).filter(Boolean)),
-        ).map((v) => ({ text: v as string, value: v as string })),
+          new Set(data.map(r => r.product_model).filter(Boolean)),
+        ).map(v => ({ text: v as string, value: v as string })),
         onFilter: (value, record) => record.product_model === (value as string),
         filterSearch: true,
         render: (value: string | null) => value || '-',
@@ -195,8 +197,8 @@ function MaterialTransferTable({
         key: 'operator_names',
         width: 160,
         filters: Array.from(
-          new Set(data.flatMap((r) => r.operator_names).filter(Boolean)),
-        ).map((v) => ({ text: v, value: v })),
+          new Set(data.flatMap(r => r.operator_names).filter(Boolean)),
+        ).map(v => ({ text: v, value: v })),
         onFilter: (value, record) =>
           record.operator_names.includes(value as string),
         filterSearch: true,
@@ -209,25 +211,27 @@ function MaterialTransferTable({
         width: 100,
         fixed: 'right',
         filters: Array.from(
-          new Set(data.map((r) => r.target_workshop).filter(Boolean)),
-        ).map((v) => ({ text: v as string, value: v as string })),
+          new Set(data.map(r => r.target_workshop).filter(Boolean)),
+        ).map(v => ({ text: v as string, value: v as string })),
         onFilter: (value, record) =>
           record.target_workshop === (value as string),
         render: (value: string | null) =>
-          value ? (
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-              {value}
-            </span>
-          ) : (
-            '-'
-          ),
+          value
+            ? (
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                  {value}
+                </span>
+              )
+            : (
+                '-'
+              ),
       },
     ],
     [page, pageSize, data, orderProgressMap],
   )
 
-  const rowSelection: TableProps<MaterialTransferWithEmployee>['rowSelection'] =
-    {
+  const rowSelection: TableProps<MaterialTransferWithEmployee>['rowSelection']
+    = {
       selectedRowKeys,
       onChange: onSelect,
       preserveSelectedRowKeys: true,
@@ -256,7 +260,7 @@ function MaterialTransferTable({
 
   return (
     <Table<MaterialTransferWithEmployee>
-      rowKey={(record) => record.id}
+      rowKey={record => record.id}
       loading={loading}
       columns={columns}
       dataSource={data}

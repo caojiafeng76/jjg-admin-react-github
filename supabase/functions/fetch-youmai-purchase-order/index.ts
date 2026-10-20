@@ -18,29 +18,29 @@ const ORDER_LIST_URL = `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/
 const ORDER_LINES_URL = `${YOUMAI_SRM_BASE_URL}/restServer/purchaseOrderServices/findOrderInfo`
 const REQUEST_TIMEOUT_MS = 20000
 
-type YoumaiPurchaseOrderPayload = {
+interface YoumaiPurchaseOrderPayload {
   purchaseOrderNo?: string
   diagnose?: boolean
 }
 
-type YoumaiSrmLoginData = {
+interface YoumaiSrmLoginData {
   sessionId?: string
   tokeCode?: string
 }
 
-type YoumaiSrmResponse<T> = {
+interface YoumaiSrmResponse<T> {
   status?: string
   msg?: string
   data?: T
   count?: number
 }
 
-type YoumaiSrmOrderHeader = {
+interface YoumaiSrmOrderHeader {
   poHeaderId?: number | string
   poNumber?: string
 }
 
-type YoumaiSrmOrderLine = {
+interface YoumaiSrmOrderLine {
   poNumber?: string
   lineNumber?: number | string
   itemCode?: string
@@ -139,13 +139,15 @@ async function fetchWithTimeout(
       ...init,
       signal: controller.signal,
     })
-  } catch (error) {
+  }
+  catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new Error(timeoutMessage, { cause: error })
     }
 
     throw error
-  } finally {
+  }
+  finally {
     clearTimeout(timeoutId)
   }
 }
@@ -166,7 +168,8 @@ async function runDiagnosticStep(
       status: response.status,
       elapsedMs: Date.now() - startedAt,
     }
-  } catch (error) {
+  }
+  catch (error) {
     return {
       name,
       ok: false,
@@ -189,9 +192,9 @@ async function diagnoseYoumaiSrmAccess() {
       await runDiagnosticStep('youmai_srm_login', LOGIN_URL, {
         method: 'POST',
         headers: {
-          Accept: 'application/json, text/plain, */*',
+          'Accept': 'application/json, text/plain, */*',
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-          Referer: `${YOUMAI_SRM_BASE_URL}/`,
+          'Referer': `${YOUMAI_SRM_BASE_URL}/`,
         },
         body: new URLSearchParams({
           params: JSON.stringify({
@@ -234,12 +237,12 @@ async function postSrmForm<T>({
     {
       method: 'POST',
       headers: {
-        Accept: 'application/json, text/plain, */*',
+        'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        Cookie: cookie,
-        Origin: YOUMAI_SRM_BASE_URL,
-        Referer: `${YOUMAI_SRM_BASE_URL}/`,
-        TokenCode: tokenCode,
+        'Cookie': cookie,
+        'Origin': YOUMAI_SRM_BASE_URL,
+        'Referer': `${YOUMAI_SRM_BASE_URL}/`,
+        'TokenCode': tokenCode,
       },
       body: new URLSearchParams({
         params: JSON.stringify(params),
@@ -266,9 +269,9 @@ async function loginToYoumaiSrm() {
     {
       method: 'POST',
       headers: {
-        Accept: 'application/json, text/plain, */*',
+        'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        Referer: `${YOUMAI_SRM_BASE_URL}/`,
+        'Referer': `${YOUMAI_SRM_BASE_URL}/`,
       },
       body: new URLSearchParams({
         params: JSON.stringify({
@@ -344,7 +347,7 @@ async function fetchYoumaiPurchaseOrder(purchaseOrderNo: string) {
   })
 
   const orderHeader = (headerResponse.data || []).find(
-    (item) => normalizeText(item.poNumber) === purchaseOrderNo,
+    item => normalizeText(item.poNumber) === purchaseOrderNo,
   )
 
   if (!orderHeader?.poHeaderId) {
@@ -360,11 +363,11 @@ async function fetchYoumaiPurchaseOrder(purchaseOrderNo: string) {
 
   const items = (linesResponse.data || []).map(mapOrderLine).filter((line) => {
     return (
-      line.purchase_order_no &&
-      line.purchase_order_line_no &&
-      line.material_code &&
-      line.stock_out_quantity > 0 &&
-      line.delivery_date
+      line.purchase_order_no
+      && line.purchase_order_line_no
+      && line.material_code
+      && line.stock_out_quantity > 0
+      && line.delivery_date
     )
   })
 
@@ -399,8 +402,8 @@ serve(async (request: Request) => {
     return respond({ error: '未登录，无法获取优迈采购订单' }, 401)
   }
 
-  const bodyResult =
-    await readLimitedJsonBody<YoumaiPurchaseOrderPayload>(request)
+  const bodyResult
+    = await readLimitedJsonBody<YoumaiPurchaseOrderPayload>(request)
   if (!bodyResult.ok) {
     return respond(
       { error: bodyResult.status === 413 ? '请求体过大' : '请求体格式不正确' },
@@ -416,7 +419,8 @@ serve(async (request: Request) => {
       'page:youmai-finished-goods-stock-out',
       payload.diagnose === true,
     )
-  } catch (error) {
+  }
+  catch (error) {
     console.error('youmai_edge_auth_failure', safeErrorMetadata(error))
     return respond({ error: '优迈采购订单代理服务暂不可用' }, 502)
   }
@@ -433,7 +437,8 @@ serve(async (request: Request) => {
     if (!(await consumeEdgeProxyRateLimit(request, 'youmai-purchase-order'))) {
       return respond({ error: '请求过于频繁，请稍后重试' }, 429)
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('youmai_edge_rate_limit_failure', safeErrorMetadata(error))
     return respond({ error: '优迈采购订单代理服务暂不可用' }, 502)
   }
@@ -455,7 +460,8 @@ serve(async (request: Request) => {
       total: items.length,
       items,
     })
-  } catch (error) {
+  }
+  catch (error) {
     console.error('youmai_edge_upstream_failure', safeErrorMetadata(error))
     return respond({ error: '优迈采购订单代理服务暂不可用' }, 502)
   }

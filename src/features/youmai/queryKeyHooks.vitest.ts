@@ -10,6 +10,9 @@ import {
   getYoumaiRawMaterialInventoryOptions,
 } from '@/services/apiYoumaiRawMaterialInventory'
 
+import { useYoumaiProductDataOptions as useInventoryProductOptions } from './FinishedGoodsInventory/useYoumaiFinishedGoodsInventory'
+import { useYoumaiProductDataOptions as useStockInProductOptions } from './FinishedGoodsStockIn/useYoumaiFinishedGoodsStockIn'
+import { useYoumaiProductDataOptions as useStockOutProductOptions } from './FinishedGoodsStockOut/useYoumaiFinishedGoodsStockOut'
 import {
   useCreateYoumaiProductData,
   useDeleteYoumaiProductData,
@@ -17,12 +20,13 @@ import {
   useUpdateYoumaiProductData,
   useYoumaiProductDataList,
 } from './ProductData/useYoumaiProductData'
+import { youmaiKeys } from './queryKeys'
 import {
   useCreateYoumaiRawMaterialInventory,
   useDeleteYoumaiRawMaterialInventory,
   useUpdateYoumaiRawMaterialInventory,
-  useYoumaiRawMaterialInventoryOption,
   useYoumaiRawMaterialInventoryList,
+  useYoumaiRawMaterialInventoryOption,
 } from './RawMaterialInventory/useYoumaiRawMaterialInventory'
 import {
   useCreateYoumaiRawMaterialStockIn,
@@ -34,10 +38,6 @@ import {
   useDeleteYoumaiRawMaterialStockOut,
   useYoumaiRawMaterialInventoryOptionsForStockOut,
 } from './RawMaterialStockOut/useYoumaiRawMaterialStockOut'
-import { useYoumaiProductDataOptions as useInventoryProductOptions } from './FinishedGoodsInventory/useYoumaiFinishedGoodsInventory'
-import { useYoumaiProductDataOptions as useStockInProductOptions } from './FinishedGoodsStockIn/useYoumaiFinishedGoodsStockIn'
-import { useYoumaiProductDataOptions as useStockOutProductOptions } from './FinishedGoodsStockOut/useYoumaiFinishedGoodsStockOut'
-import { youmaiKeys } from './queryKeys'
 
 vi.mock('@tanstack/react-query', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-query')>()
@@ -95,7 +95,7 @@ async function runLastQuery(signal: AbortSignal) {
   const queryFn = useQueryMock.mock.calls.at(-1)?.[0].queryFn
 
   if (typeof queryFn !== 'function') {
-    throw new Error('Expected the latest query to define a query function')
+    throw new TypeError('Expected the latest query to define a query function')
   }
 
   await queryFn({ signal } as never)

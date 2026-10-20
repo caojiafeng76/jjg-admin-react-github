@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { jintanKeys } from '../queryKeys'
+import {
+  useCreateJintanMaterialsStockOut,
+  useDeleteJintanMaterialsStockOut,
+  useUpdateJintanMaterialsStockOutRemarks,
+} from './useJintanMaterialsStockOut'
+
 const mutationMock = vi.hoisted(() =>
   vi.fn(
     (options: { invalidateQueries: readonly (readonly string[])[] }) => options,
@@ -8,13 +15,6 @@ const mutationMock = vi.hoisted(() =>
 vi.mock('@/hooks/useMutationWithInvalidation', () => ({
   useMutationWithInvalidation: mutationMock,
 }))
-
-import { jintanKeys } from '../queryKeys'
-import {
-  useCreateJintanMaterialsStockOut,
-  useDeleteJintanMaterialsStockOut,
-  useUpdateJintanMaterialsStockOutRemarks,
-} from './useJintanMaterialsStockOut'
 
 describe('素材出库缓存联动', () => {
   beforeEach(() => mutationMock.mockClear())

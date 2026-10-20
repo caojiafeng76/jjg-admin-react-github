@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { queryConfig } from '@/config/queryClient'
 import { getSelectedSyneyStoreReports } from '@/services/apiSyneyStoreReports'
 import { useAppStore } from '@/store'
-import { queryConfig } from '@/config/queryClient'
 
 /**
  * 获取选中的入库单详情（包含明细数据）
  * @param enabled - 是否启用查询（默认false，避免不必要的查询）
  */
 export function useSelectedReports(enabled: boolean = false) {
-  const Nos = useAppStore((state) => state.tableSelectedKeys)
+  const Nos = useAppStore(state => state.tableSelectedKeys)
 
   const {
     data: selectedMap,

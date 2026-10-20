@@ -1,10 +1,11 @@
+import type { TableColumnsType } from 'antd'
 import type { ReactNode, TdHTMLAttributes } from 'react'
-import { useMemo } from 'react'
-import { Table, TableColumnsType, Tag, Typography } from 'antd'
-import { useRoleOptions } from '@/hooks/useRoleOptions'
 import type { Employee } from '@/services/apiEmployees'
-import { useEmployeeAuthEmail } from './useEmployees'
+import { Table, Tag, Typography } from 'antd'
+import { useMemo } from 'react'
+import { useRoleOptions } from '@/hooks/useRoleOptions'
 import { formatNumber } from '@/utils/format'
+import { useEmployeeAuthEmail } from './useEmployees'
 
 interface Props {
   loading: boolean
@@ -37,8 +38,8 @@ function BoundAccountCell({ employeeId, authUserId }: BoundAccountCellProps) {
   }
 
   const email = authEmailResult?.email?.trim() || null
-  const displayText =
-    email || `${authUserId.slice(0, 8)}...${authUserId.slice(-6)}`
+  const displayText
+    = email || `${authUserId.slice(0, 8)}...${authUserId.slice(-6)}`
 
   return (
     <div className="flex items-center gap-1.5">
@@ -170,7 +171,8 @@ export default function EmployeeTable({
         key: 'created_at',
         width: 180,
         render: (text: string) => {
-          if (!text) return '-'
+          if (!text)
+            return '-'
           return new Date(text).toLocaleString('zh-CN')
         },
       },
@@ -180,7 +182,8 @@ export default function EmployeeTable({
         key: 'updated_at',
         width: 180,
         render: (text: string) => {
-          if (!text) return '-'
+          if (!text)
+            return '-'
           return new Date(text).toLocaleString('zh-CN')
         },
       },
@@ -222,7 +225,7 @@ export default function EmployeeTable({
 
   return (
     <Table<Employee>
-      rowKey={(record) => record.id || ''}
+      rowKey={record => record.id || ''}
       loading={loading}
       columns={columns}
       dataSource={data}

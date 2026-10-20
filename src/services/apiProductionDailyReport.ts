@@ -1,7 +1,7 @@
-import dayjs from 'dayjs'
-import supabase from './supabase'
-import { handleApiError } from '@/utils/errorHandler'
 import type { ProductionOrderDataCategory } from './apiProductionOrderItems'
+import dayjs from 'dayjs'
+import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface ProductionDailyReportFilters {
   startDate?: string
@@ -259,7 +259,7 @@ async function buildProductionDailyReportRows(
   items: ProductionDailyReportItemRow[],
 ) {
   const weightMap = await getProjectWeightMap(
-    items.map((item) => item.project_no),
+    items.map(item => item.project_no),
   )
   const operations = new Set<string>()
 
@@ -275,11 +275,11 @@ async function buildProductionDailyReportRows(
       const outsourceDefectCount = Number(item.outsource_defect_quantity || 0)
       const setupDefectCount = Number(item.setup_defect_quantity || 0)
       const qualifiedCount = Number(item.qualified_quantity || 0)
-      const defectCount =
-        rawMaterialDefectCount +
-        processingDefectCount +
-        outsourceDefectCount +
-        setupDefectCount
+      const defectCount
+        = rawMaterialDefectCount
+          + processingDefectCount
+          + outsourceDefectCount
+          + setupDefectCount
       const weightPerMeterKg = weightMap.get(item.project_no) || 0
       const lengthMm = Number(item.length_mm || 0)
 
@@ -384,8 +384,8 @@ export async function getProductionDailyReportForExportChunked(
     onProgress?: (progress: ProductionDailyReportExportProgress) => void
   },
 ): Promise<ProductionDailyReportResult> {
-  const pageSize =
-    options?.pageSize ?? PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE
+  const pageSize
+    = options?.pageSize ?? PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE
   const firstPage = await getProductionDailyReportPage(filters, 1, pageSize)
   const total = firstPage.total
   const items: ProductionDailyReportItemRow[] = [...firstPage.items]

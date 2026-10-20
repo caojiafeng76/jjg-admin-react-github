@@ -16,7 +16,7 @@ describe('application shell optimization guards', () => {
     const appSource = readWorkspaceFile('src/App.tsx')
 
     expect(appSource).toMatch(
-      /useAppStore\(\s*\(state\) => state\.isDarkMode\s*\)/,
+      /useAppStore\(\s*\(?state\)? => state\.isDarkMode\s*\)/,
     )
     expect(appSource).toMatch(/const themeConfig = useMemo\(\s*\(\) =>\s*\(\{/)
     expect(appSource).toMatch(/\}\),\s*\[isDarkMode\],?\s*\)/)

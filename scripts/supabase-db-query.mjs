@@ -1,6 +1,6 @@
-import { withSqlSnapshot } from './db-sql-snapshot.mjs'
 import { readFileSync } from 'node:fs'
 import { confirmSqlExecution, parseQueryArgs } from './db-sql-guard.mjs'
+import { withSqlSnapshot } from './db-sql-snapshot.mjs'
 import {
   describeDatabaseTarget,
   resolveTargetArgs,
@@ -23,19 +23,20 @@ SQL 文件只读取一次，执行已检查的内容，避免文件在确认后�
 }
 try {
   const parsed = parseQueryArgs(args)
-  const sql =
-    parsed.file === undefined ? parsed.sql : readFileSync(parsed.file, 'utf8')
-  if (!sql.trim()) throw new Error('SQL 内容不能为空。')
+  const sql
+    = parsed.file === undefined ? parsed.sql : readFileSync(parsed.file, 'utf8')
+  if (!sql.trim())
+    throw new Error('SQL 内容不能为空。')
   const { forwardArgs } = resolveTargetArgs(parsed.forwardArgs)
   const target = describeDatabaseTarget(forwardArgs)
   await confirmSqlExecution(sql, target)
   if (target !== describeDatabaseTarget(forwardArgs))
     throw new Error('数据库绑定在确认期间发生变化，请重新检查。')
-  const result = withSqlSnapshot(sql, (file) =>
-    runSupabaseCli(['db', 'query', ...forwardArgs, '--file', file]),
-  )
+  const result = withSqlSnapshot(sql, file =>
+    runSupabaseCli(['db', 'query', ...forwardArgs, '--file', file]))
   process.exit(result.error ? 1 : (result.status ?? 1))
-} catch (error) {
+}
+catch (error) {
   console.error(error instanceof Error ? error.message : 'SQL 执行失败。')
   process.exit(1)
 }

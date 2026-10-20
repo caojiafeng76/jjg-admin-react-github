@@ -1,12 +1,11 @@
-import { Button, Card, Typography } from 'antd'
+import type { ScannedProjectPayload } from './ProjectNoScanButton'
 import { ViewfinderCircleIcon } from '@heroicons/react/24/outline'
-import { useNavigate } from 'react-router-dom'
+import { Button, Card, Typography } from 'antd'
 
+import { useNavigate } from 'react-router-dom'
 import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
-import ProjectNoScanButton, {
-  type ScannedProjectPayload,
-} from './ProjectNoScanButton'
+import ProjectNoScanButton from './ProjectNoScanButton'
 import { useSalesOrdersProjectNos } from './useProcessStandards'
 
 const { Paragraph, Title } = Typography
@@ -99,8 +98,7 @@ export default function MobileScanHubPage() {
           <button
             type="button"
             onClick={() =>
-              openAutoScanPage('/precision-finishing-cutting/scan')
-            }
+              openAutoScanPage('/precision-finishing-cutting/scan')}
             className="flex min-h-44 w-full flex-col items-center justify-center rounded-4xl border-[3px] border-slate-200 bg-white px-4 py-6 text-slate-950 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           >
             <ViewfinderCircleIcon className="size-16" />

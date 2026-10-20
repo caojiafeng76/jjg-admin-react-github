@@ -1,5 +1,5 @@
-import { fetchSyneyStoreReportFromScm } from '@/services/apiSyneyStoreReports'
 import { useMutation } from '@tanstack/react-query'
+import { fetchSyneyStoreReportFromScm } from '@/services/apiSyneyStoreReports'
 
 export function useFetchSyneyStoreReport() {
   // 保留原始 useMutation 而非 useMutationWithMessage：本操作为只读的

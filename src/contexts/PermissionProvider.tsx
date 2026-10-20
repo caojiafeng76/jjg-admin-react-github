@@ -1,12 +1,13 @@
-import { useEffect, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
+import { PERMISSION_REGISTRY } from '@/config/permissionRegistry'
 import { queryConfig } from '@/config/queryClient'
 import {
   getMyPermissions,
   syncPermissionRegistry,
 } from '@/services/apiPermissions'
-import { PERMISSION_REGISTRY } from '@/config/permissionRegistry'
 import { useAuth } from './useAuth'
 import { PermissionContext } from './usePermissionContext'
 
@@ -25,8 +26,10 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   const isLoading = enabled && isPending
 
   useEffect(() => {
-    if (role !== 'admin' || isLoading || !enabled) return
-    if (PERMISSION_REGISTRY.length === 0) return
+    if (role !== 'admin' || isLoading || !enabled)
+      return
+    if (PERMISSION_REGISTRY.length === 0)
+      return
     syncPermissionRegistry(PERMISSION_REGISTRY)
       .then(() => {
         queryClient.invalidateQueries({
@@ -40,7 +43,7 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
 
   const can = (key: string) => permissions[key] === true
 
-  const canAll = (keys: string[]) => keys.every((k) => permissions[k] === true)
+  const canAll = (keys: string[]) => keys.every(k => permissions[k] === true)
 
   return (
     <PermissionContext.Provider value={{ permissions, isLoading, can, canAll }}>

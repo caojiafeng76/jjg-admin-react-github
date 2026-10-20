@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
+import type { FormInstance } from 'antd'
+import type { JintanPartsData, JintanPartsDataFormValues } from '@/services/apiJintanPartsData'
 import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
-import { App, Button, FormInstance, Modal, Tooltip } from 'antd'
-import { useSearchParams } from 'react-router-dom'
+import { App, Button, Modal, Tooltip } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
 
+import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import {
   getJintanPartsDataForExport,
-  type JintanPartsData,
-  type JintanPartsDataFormValues,
+
 } from '@/services/apiJintanPartsData'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -63,8 +64,8 @@ export default function JintanPartsDataPage() {
   const [editingRecord, setEditingRecord] = useState<JintanPartsData | null>(
     null,
   )
-  const [formRef, setFormRef] =
-    useState<FormInstance<JintanPartsDataFormValues> | null>(null)
+  const [formRef, setFormRef]
+    = useState<FormInstance<JintanPartsDataFormValues> | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -85,8 +86,8 @@ export default function JintanPartsDataPage() {
   const importMutation = useImportJintanPartsData()
   const deleteMutation = useDeleteJintanPartsData()
 
-  const { tableContainerRef, paginationRef, scrollY, rowHeight } =
-    useTableHeight({
+  const { tableContainerRef, paginationRef, scrollY, rowHeight }
+    = useTableHeight({
       targetRowCount: 10,
     })
 
@@ -116,7 +117,7 @@ export default function JintanPartsDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行复制新增')
       return
@@ -135,7 +136,7 @@ export default function JintanPartsDataPage() {
       return
     }
 
-    const record = data?.items.find((item) => item.id === selectedRowKeys[0])
+    const record = data?.items.find(item => item.id === selectedRowKeys[0])
     if (!record) {
       message.warning('请选择一条数据进行编辑')
       return
@@ -165,10 +166,12 @@ export default function JintanPartsDataPage() {
       await deleteMutation.mutateAsync(selectedRowKeys as string[])
       message.success('配件资料删除成功')
       setSelectedRowKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof Error) {
         message.error(error.message)
-      } else {
+      }
+      else {
         message.error('删除配件资料失败，请稍后重试')
       }
     }
@@ -190,10 +193,12 @@ export default function JintanPartsDataPage() {
         await importMutation.mutateAsync(rows)
         message.success(`配件资料导入成功，共 ${rows.length} 条`)
         setSelectedRowKeys([])
-      } catch (error) {
+      }
+      catch (error) {
         if (error instanceof Error) {
           message.error(error.message)
-        } else {
+        }
+        else {
           message.error('导入配件资料失败，请稍后重试')
         }
       }
@@ -226,11 +231,13 @@ export default function JintanPartsDataPage() {
 
       exportJintanPartsDataToExcel(exportRows)
       message.success(`已导出 ${exportRows.length} 条配件资料`)
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error ? error.message : '导出配件资料失败，请稍后重试',
       )
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [
@@ -260,13 +267,15 @@ export default function JintanPartsDataPage() {
             values,
           })
           message.success('配件资料更新成功')
-        } else {
+        }
+        else {
           await createMutation.mutateAsync(values)
           message.success('配件资料创建成功')
         }
 
         resetFormState()
-      } catch (error) {
+      }
+      catch (error) {
         setFormError(error)
       }
     },
@@ -293,7 +302,8 @@ export default function JintanPartsDataPage() {
 
       if (params.keyword) {
         nextSearchParamsURL.set('keyword', params.keyword)
-      } else {
+      }
+      else {
         nextSearchParamsURL.delete('keyword')
       }
 
@@ -403,12 +413,12 @@ export default function JintanPartsDataPage() {
               scrollY={scrollY}
               rowHeight={rowHeight}
               onOpenDetail={canOpenDetail ? handleOpenDetail : undefined}
-              emptyAction={
+              emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
                   permissionKey={JINTAN_PARTS_DATA_PERMISSION_KEY}
                 />
-              }
+              )}
             />
           </TableState>
         </div>
@@ -441,13 +451,15 @@ export default function JintanPartsDataPage() {
         </div>
       </Modal>
 
-      {detailRecord ? (
-        <JintanPartsDataDetailDrawer
-          open
-          record={detailRecord}
-          onClose={handleCloseDetail}
-        />
-      ) : null}
+      {detailRecord
+        ? (
+            <JintanPartsDataDetailDrawer
+              open
+              record={detailRecord}
+              onClose={handleCloseDetail}
+            />
+          )
+        : null}
     </div>
   )
 }

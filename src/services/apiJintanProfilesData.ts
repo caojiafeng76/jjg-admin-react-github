@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 export interface JintanProfilesData {
   id: string
@@ -181,7 +181,7 @@ export async function createJintanProfilesDataBatch(
   }
 
   const profileNames = Array.from(
-    new Set(payload.map((row) => row.profile_name)),
+    new Set(payload.map(row => row.profile_name)),
   )
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_profiles_data')
@@ -193,15 +193,15 @@ export async function createJintanProfilesDataBatch(
   }
 
   const existingKeys = new Set(
-    (existingRows || []).map((row) => profilesKeyOf(row)),
+    (existingRows || []).map(row => profilesKeyOf(row)),
   )
-  const duplicated = payload.filter((row) =>
+  const duplicated = payload.filter(row =>
     existingKeys.has(profilesKeyOf(row)),
   )
   if (duplicated.length > 0) {
     const labels = duplicated
       .map(
-        (row) =>
+        row =>
           `“${row.profile_model}”/“${row.profile_name}”/“${row.specification}”`,
       )
       .join('、')

@@ -20,16 +20,16 @@ describe('P3 engineering guards', () => {
     const config = readWorkspaceFile('vitest.config.ts')
 
     expect(
-      readNumericSetting(config, /statements:\s*(\d+(?:\.\d+)?)/),
+      readNumericSetting(config, /['"]?statements['"]?:\s*(\d+(?:\.\d+)?)/),
     ).toBeGreaterThanOrEqual(12)
     expect(
-      readNumericSetting(config, /branches:\s*(\d+(?:\.\d+)?)/),
+      readNumericSetting(config, /['"]?branches['"]?:\s*(\d+(?:\.\d+)?)/),
     ).toBeGreaterThanOrEqual(9)
     expect(
-      readNumericSetting(config, /functions:\s*(\d+(?:\.\d+)?)/),
+      readNumericSetting(config, /['"]?functions['"]?:\s*(\d+(?:\.\d+)?)/),
     ).toBeGreaterThanOrEqual(11)
     expect(
-      readNumericSetting(config, /lines:\s*(\d+(?:\.\d+)?)/),
+      readNumericSetting(config, /['"]?lines['"]?:\s*(\d+(?:\.\d+)?)/),
     ).toBeGreaterThanOrEqual(12)
     expect(
       readNumericSetting(
@@ -50,11 +50,18 @@ describe('P3 engineering guards', () => {
     )
   })
 
-  it('lints JavaScript tooling files with Node globals', () => {
+  it('lints and formats with @antfu/eslint-config instead of Prettier', () => {
     const config = readWorkspaceFile('eslint.config.js')
+    const packageJson = JSON.parse(readWorkspaceFile('package.json')) as {
+      scripts: Record<string, string>
+      devDependencies: Record<string, string>
+    }
 
-    expect(config).toMatch(/files:\s*\[['"]\*\*\/\*\.\{js,mjs,cjs\}['"]\]/)
-    expect(config).toMatch(/globals:\s*globals\.node/)
+    expect(config).toMatch(/import antfu from ['"]@antfu\/eslint-config['"]/)
+    expect(config).toMatch(/['"]node\/prefer-global\/process['"]:\s*['"]off['"]/)
+    expect(packageJson.scripts.format).toBe('eslint . --fix')
+    expect(packageJson.devDependencies).not.toHaveProperty('prettier')
+    expect(existsSync(resolve(process.cwd(), '.prettierrc'))).toBe(false)
   })
 
   it('runs security, edge, bundle, and audit gates in CI', () => {

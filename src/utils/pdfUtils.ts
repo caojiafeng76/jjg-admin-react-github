@@ -3,19 +3,19 @@
  * 提供通用的 PDF 处理功能，减少代码重复
  */
 
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import type { ISyneyItem } from '@services/types'
 import dayjs from 'dayjs'
+import jsPDF from 'jspdf'
 
+import autoTable from 'jspdf-autotable'
+import { GOOGLE_FONT_CONFIG, loadGoogleFont } from './googleFontLoader'
+import { formatNumberPadded } from './helps'
 import {
-  TABLE_CONFIG,
-  LAYOUT_CONFIG,
   CACHE_CONFIG,
   FILENAME_CONFIG,
+  LAYOUT_CONFIG,
+  TABLE_CONFIG,
 } from './pdfConstants'
-import { loadGoogleFont, GOOGLE_FONT_CONFIG } from './googleFontLoader'
-import { formatNumberPadded } from './helps'
-import { ISyneyItem } from '@services/types'
 
 /**
  * 初始化 PDF 文档（异步版本，使用 Google Font）
@@ -159,12 +159,12 @@ export function addPageNumber(
 ) {
   const text = `第${currentPage}页，共${totalPages}页`
   const pageSize = doc.internal.pageSize
-  const pageWidth =
-    typeof pageSize.getWidth === 'function'
+  const pageWidth
+    = typeof pageSize.getWidth === 'function'
       ? pageSize.getWidth()
       : pageSize.width
-  const pageHeight =
-    typeof pageSize.getHeight === 'function'
+  const pageHeight
+    = typeof pageSize.getHeight === 'function'
       ? pageSize.getHeight()
       : pageSize.height
   const { X_OFFSET = -150, Y_OFFSET = 10 } = LAYOUT_CONFIG.PAGE_NUMBER
@@ -188,17 +188,18 @@ export function generateFilename(
   reportNos?: string[],
 ): string {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
-  const prefix =
-    FILENAME_CONFIG.PREFIX[type.toUpperCase() as 'DETAIL' | 'SUMMARY'] ||
-    FILENAME_CONFIG.PREFIX.SUMMARY
+  const prefix
+    = FILENAME_CONFIG.PREFIX[type.toUpperCase() as 'DETAIL' | 'SUMMARY']
+      || FILENAME_CONFIG.PREFIX.SUMMARY
   const suffix = FILENAME_CONFIG.SUFFIX
 
   if (type === 'detail' && reportNos && reportNos.length > 0) {
     // 详细对账单：包含对账单号
-    const reportNoStr =
-      reportNos.length === 1 ? reportNos[0] : `${reportNos.length}条记录`
+    const reportNoStr
+      = reportNos.length === 1 ? reportNos[0] : `${reportNos.length}条记录`
     return `${prefix}_${reportNoStr}_${timestamp}${suffix}`
-  } else {
+  }
+  else {
     // 汇总表：包含数量
     return `${prefix}_${count}条_${timestamp}${suffix}`
   }
@@ -230,7 +231,7 @@ export async function processBatchWithProgress<T, R>(
     onProgress?.(processed, total)
 
     // 让出控制权，避免阻塞UI
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    await new Promise(resolve => setTimeout(resolve, 0))
   }
 
   return results
@@ -314,7 +315,7 @@ function escapeHtml(value: string) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
+    .replaceAll('\'', '&#39;')
 }
 
 /**
@@ -329,8 +330,8 @@ export function printPDF(
   targetWindow?: Window | null,
 ) {
   const url = URL.createObjectURL(doc.output('blob'))
-  const openedWindow =
-    targetWindow && !targetWindow.closed
+  const openedWindow
+    = targetWindow && !targetWindow.closed
       ? targetWindow
       : window.open('', '_blank')
 
@@ -439,7 +440,7 @@ export function addTableHeader(
  * @returns 表格数据
  */
 export function generateSummaryTableData(
-  data: Array<{ No: string; totalAmount: number }>,
+  data: Array<{ No: string, totalAmount: number }>,
 ) {
   const totalAmount = data.reduce((sum, item) => sum + item.totalAmount, 0)
 

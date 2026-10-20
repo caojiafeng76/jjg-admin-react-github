@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
-import { Table, TableColumnsType, Tag, Tooltip } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { JintanPartsInventory } from '@/services/apiJintanPartsInventory'
+import { Table, Tag, Tooltip } from 'antd'
+
+import { useMemo } from 'react'
 import { TableEmpty } from '@/ui/TableState'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { JINTAN_PARTS_STOCK_STATUS_CONFIG } from './stockStatus'
@@ -104,15 +105,17 @@ export default function JintanPartsInventoryTable({
         width: 100,
         align: 'right',
         render: (value: number | null | undefined, record) =>
-          value == null ? (
-            '-'
-          ) : (
-            <Tooltip
-              title={`单台数量 ${record.unit_quantity} × 倍数 ${record.safety_multiple}`}
-            >
-              <span className="tabular-nums">{value}</span>
-            </Tooltip>
-          ),
+          value == null
+            ? (
+                '-'
+              )
+            : (
+                <Tooltip
+                  title={`单台数量 ${record.unit_quantity} × 倍数 ${record.safety_multiple}`}
+                >
+                  <span className="tabular-nums">{value}</span>
+                </Tooltip>
+              ),
       },
       {
         title: '阈值',
@@ -170,9 +173,8 @@ export default function JintanPartsInventoryTable({
       rowClassName={(_, index) =>
         index % 2 === 0
           ? 'bg-white dark:bg-slate-800'
-          : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+          : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择配件 ${record.part_name}`,

@@ -1,8 +1,8 @@
-import { getSerialNo } from '@/services/apiSyneySerialNo'
 import { useQuery } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
+import { getSerialNo } from '@/services/apiSyneySerialNo'
 import { syneyPoKeys } from '../queryKeys'
 
 export function useSerialNo() {

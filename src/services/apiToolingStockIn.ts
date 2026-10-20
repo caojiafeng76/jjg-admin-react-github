@@ -1,9 +1,9 @@
+import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 import {
   buildToolingDataOptionsQuery,
   TOOLING_DATA_OPTION_SELECT,
 } from './toolingDataOptions'
-import { handleApiError } from '@/utils/errorHandler'
 
 export type ToolingStockInStatus = '待审核' | '已审核'
 
@@ -43,7 +43,7 @@ export interface ToolingStockInBatchStatusValues {
   status: ToolingStockInStatus
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 

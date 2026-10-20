@@ -1,4 +1,7 @@
-import { useState } from 'react'
+import type { TableColumnsType } from 'antd'
+import type { UploadFile } from 'antd/es/upload/interface'
+import type { YoumaiFinishedGoodsStockOutImportRow } from '@/services/apiYoumaiFinishedGoodsStockOut'
+import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 import {
   Alert,
   App,
@@ -6,21 +9,20 @@ import {
   Input,
   Modal,
   Table,
-  type TableColumnsType,
+
   Tooltip,
   Upload,
 } from 'antd'
-import type { UploadFile } from 'antd/es/upload/interface'
-import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/16/solid'
 
-import type { YoumaiFinishedGoodsStockOutImportRow } from '@/services/apiYoumaiFinishedGoodsStockOut'
-import { fetchYoumaiPurchaseOrder } from '@/services/apiYoumaiPurchaseOrder'
+import { useState } from 'react'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { fetchYoumaiPurchaseOrder } from '@/services/apiYoumaiPurchaseOrder'
 import ImportButton from '@/ui/ImportButton'
 
-const loadYoumaiFinishedGoodsStockOutExcel = () =>
-  import('@/utils/youmaiFinishedGoodsStockOutExcel')
+function loadYoumaiFinishedGoodsStockOutExcel() {
+  return import('@/utils/youmaiFinishedGoodsStockOutExcel')
+}
 
 function preloadYoumaiFinishedGoodsStockOutExcel() {
   void loadYoumaiFinishedGoodsStockOutExcel()
@@ -104,12 +106,12 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
   )
 
   const handleBeforeUpload = async (file: File) => {
-    const isExcel =
-      file.type === 'application/vnd.ms-excel' ||
-      file.type ===
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-      file.name.endsWith('.xls') ||
-      file.name.endsWith('.xlsx')
+    const isExcel
+      = file.type === 'application/vnd.ms-excel'
+        || file.type
+        === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        || file.name.endsWith('.xls')
+        || file.name.endsWith('.xlsx')
 
     if (!isExcel) {
       return Upload.LIST_IGNORE
@@ -117,21 +119,23 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
 
     setParsing(true)
     try {
-      const { parseYoumaiFinishedGoodsStockOutExcel } =
-        await loadYoumaiFinishedGoodsStockOutExcel()
+      const { parseYoumaiFinishedGoodsStockOutExcel }
+        = await loadYoumaiFinishedGoodsStockOutExcel()
       const { rows, errors } = await parseYoumaiFinishedGoodsStockOutExcel(file)
       setParsedRows(rows)
       setParseErrors(errors)
       setFileList([
         { uid: file.name, name: file.name, status: 'done' } as UploadFile,
       ])
-    } catch (error) {
+    }
+    catch (error) {
       setParseErrors([
         error instanceof Error ? error.message : 'Excel 解析失败',
       ])
       setParsedRows([])
       setFileList([])
-    } finally {
+    }
+    finally {
       setParsing(false)
     }
 
@@ -170,12 +174,14 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
       setParseErrors([])
       setFileList([])
       message.success(`已获取 ${rows.length} 条采购订单明细`)
-    } catch (error) {
+    }
+    catch (error) {
       setParsedRows([])
       setParseErrors([
         error instanceof Error ? error.message : '优迈采购订单获取失败',
       ])
-    } finally {
+    }
+    finally {
       setFetchingPurchaseOrder(false)
     }
   }
@@ -207,11 +213,13 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
 
   return (
     <>
-      {denied ? (
-        <Tooltip title={deniedTip}>{fetchButton}</Tooltip>
-      ) : (
-        fetchButton
-      )}
+      {denied
+        ? (
+            <Tooltip title={deniedTip}>{fetchButton}</Tooltip>
+          )
+        : (
+            fetchButton
+          )}
       <ImportButton
         onClick={() => handleOpenModal('excel')}
         permissionKey={permissionKey}
@@ -253,7 +261,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
                 autoFocus
                 placeholder="输入采购订单号"
                 value={purchaseOrderNo}
-                onChange={(event) => setPurchaseOrderNo(event.target.value)}
+                onChange={event => setPurchaseOrderNo(event.target.value)}
                 onPressEnter={handleFetchPurchaseOrder}
               />
               <Button
@@ -289,26 +297,28 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
             </Upload>
           )}
 
-          {modalMode === 'purchaseOrder' ? (
-            <Alert
-              type="info"
-              showIcon
-              title="输入优迈采购订单号后，系统会自动获取订单明细；确认导入时按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
-            />
-          ) : (
-            <Alert
-              type="info"
-              showIcon
-              title="支持直接导入采购订单导出 Excel。系统会按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
-            />
-          )}
+          {modalMode === 'purchaseOrder'
+            ? (
+                <Alert
+                  type="info"
+                  showIcon
+                  title="输入优迈采购订单号后，系统会自动获取订单明细；确认导入时按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
+                />
+              )
+            : (
+                <Alert
+                  type="info"
+                  showIcon
+                  title="支持直接导入采购订单导出 Excel。系统会按物料编码匹配货品资料，并按采购订单号 + 行号幂等写入，默认导入为待审核。"
+                />
+              )}
 
           {parseErrors.length > 0 && (
             <Alert
               type="warning"
               showIcon
               title={`解析时发现 ${parseErrors.length} 条问题`}
-              description={
+              description={(
                 <ul className="mt-1 list-inside list-disc text-xs">
                   {parseErrors.slice(0, 10).map((error, index) => (
                     <li key={index}>{error}</li>
@@ -317,7 +327,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
                     <li>...还有 {parseErrors.length - 10} 条</li>
                   )}
                 </ul>
-              }
+              )}
             />
           )}
 

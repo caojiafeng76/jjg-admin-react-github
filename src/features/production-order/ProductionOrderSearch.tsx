@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react'
-import { DatePicker, Button, Form, Input, Space, Select } from 'antd'
+import type { Dayjs } from 'dayjs'
+import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
+import type { ProductionOrderShift } from '@/services/apiProductionOrders'
 import {
+  AdjustmentsHorizontalIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  AdjustmentsHorizontalIcon,
 } from '@heroicons/react/16/solid'
-import dayjs, { type Dayjs } from 'dayjs'
 
-import type { ProductionOrderShift } from '@/services/apiProductionOrders'
-import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
+import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
 
 const { RangePicker } = DatePicker
 
@@ -27,9 +28,9 @@ interface SearchParams {
 interface Props {
   onSearch: (params: SearchParams) => void
   onReset: () => void
-  employees: { id: string; name: string }[]
+  employees: { id: string, name: string }[]
   initialValues?: SearchParams
-  fixedEmployee?: { id: string; name: string } | null
+  fixedEmployee?: { id: string, name: string } | null
   mobile?: boolean
 }
 
@@ -82,7 +83,8 @@ export default function ProductionOrderSearch({
 
     if (fixedEmployee?.id) {
       params.employeeId = fixedEmployee.id
-    } else if (values.employeeId) {
+    }
+    else if (values.employeeId) {
       params.employeeId = values.employeeId
     }
 
@@ -113,7 +115,7 @@ export default function ProductionOrderSearch({
     if (mobile) {
       setIsExpanded(false)
     }
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   const handleReset = () => {
@@ -126,7 +128,7 @@ export default function ProductionOrderSearch({
     if (mobile) {
       setIsExpanded(false)
     }
-    setTimeout(() => setIsSearching(false), 300)
+    setTimeout(setIsSearching, 300, false)
   }
 
   const formContent = (
@@ -147,34 +149,36 @@ export default function ProductionOrderSearch({
           className="rounded-lg"
         />
       </Form.Item>
-      {fixedEmployee ? (
-        <Form.Item className="mb-0">
-          <Input
-            value={fixedEmployee.name}
-            disabled
-            style={{ width: mobile ? '100%' : 160 }}
-            className="rounded-lg bg-slate-50 dark:bg-slate-800"
-            prefix={
-              <span className="mr-1 text-xs text-slate-400 dark:text-slate-500">操作人</span>
-            }
-          />
-        </Form.Item>
-      ) : (
-        <Form.Item name="employeeId" className="mb-0">
-          <Select
-            placeholder="选择操作人"
-            allowClear
-            style={{ width: mobile ? '100%' : 160 }}
-            showSearch
-            optionFilterProp="label"
-            className="rounded-lg"
-            options={employees.map((emp) => ({
-              label: emp.name,
-              value: emp.id,
-            }))}
-          />
-        </Form.Item>
-      )}
+      {fixedEmployee
+        ? (
+            <Form.Item className="mb-0">
+              <Input
+                value={fixedEmployee.name}
+                disabled
+                style={{ width: mobile ? '100%' : 160 }}
+                className="rounded-lg bg-slate-50 dark:bg-slate-800"
+                prefix={
+                  <span className="mr-1 text-xs text-slate-400 dark:text-slate-500">操作人</span>
+                }
+              />
+            </Form.Item>
+          )
+        : (
+            <Form.Item name="employeeId" className="mb-0">
+              <Select
+                placeholder="选择操作人"
+                allowClear
+                style={{ width: mobile ? '100%' : 160 }}
+                showSearch
+                optionFilterProp="label"
+                className="rounded-lg"
+                options={employees.map(emp => ({
+                  label: emp.name,
+                  value: emp.id,
+                }))}
+              />
+            </Form.Item>
+          )}
 
       <Form.Item name="productModel" className="mb-0">
         <Input
@@ -185,20 +189,22 @@ export default function ProductionOrderSearch({
         />
       </Form.Item>
 
-      {mobile ? null : (
-        <Form.Item name="dataCategory" className="mb-0">
-          <Select
-            placeholder="数据类别"
-            allowClear
-            style={{ width: 120 }}
-            className="rounded-lg"
-            options={[
-              { label: 'A', value: 'A' },
-              { label: 'B', value: 'B' },
-            ]}
-          />
-        </Form.Item>
-      )}
+      {mobile
+        ? null
+        : (
+            <Form.Item name="dataCategory" className="mb-0">
+              <Select
+                placeholder="数据类别"
+                allowClear
+                style={{ width: 120 }}
+                className="rounded-lg"
+                options={[
+                  { label: 'A', value: 'A' },
+                  { label: 'B', value: 'B' },
+                ]}
+              />
+            </Form.Item>
+          )}
 
       <Form.Item name="shift" className="mb-0">
         <Select
@@ -242,7 +248,7 @@ export default function ProductionOrderSearch({
             icon={<MagnifyingGlassIcon className="h-4 w-4" />}
             htmlType="submit"
             loading={isSearching}
-            className="h-9 rounded-lg !bg-gradient-to-r from-blue-500 to-blue-600 px-5 shadow-md transition-all duration-200 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            className="h-9 rounded-lg !bg-gradient-to-r from-blue-500 to-blue-600 px-5 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg active:translate-y-0"
           >
             搜索
           </Button>
@@ -265,7 +271,7 @@ export default function ProductionOrderSearch({
         <Button
           block
           type="default"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={() => setIsExpanded(prev => !prev)}
           className="h-11 rounded-2xl border-slate-200 bg-white px-4 text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700"
         >
           <span className="flex w-full items-center justify-between text-sm font-medium">

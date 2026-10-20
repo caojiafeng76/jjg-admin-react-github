@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import type { ScannedProjectPayload } from '@/features/production-order/ProjectNoScanButton'
+import type { MaterialTransferInsert, MaterialTransferUpdate, MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
+
 import {
-  AutoComplete,
   App,
+  AutoComplete,
   Button,
   Form,
   Input,
@@ -11,24 +13,20 @@ import {
   Space,
   Switch,
 } from 'antd'
-
+import { useEffect, useMemo, useState } from 'react'
+import ProjectNoScanButton from '@/features/production-order/ProjectNoScanButton'
 import {
   buildProjectNoSelectOptions,
   filterProjectNoOption,
   renderProjectNoOption,
 } from '@/features/production-order/projectNoSelect'
-import ProjectNoScanButton, {
-  type ScannedProjectPayload,
-} from '@/features/production-order/ProjectNoScanButton'
+import { useSalesOrdersProjectNos } from '@/features/production-order/useProcessStandards'
 import {
   MATERIAL_TRANSFER_AUDIT_OPTIONS,
   MATERIAL_TRANSFER_RECIPIENTS,
   MATERIAL_TRANSFER_WORKSHOPS,
-  type MaterialTransferInsert,
-  type MaterialTransferUpdate,
-  type MaterialTransferWithEmployee,
+
 } from '@/services/apiMaterialTransfers'
-import { useSalesOrdersProjectNos } from '@/features/production-order/useProcessStandards'
 
 interface Props {
   open: boolean
@@ -37,9 +35,9 @@ interface Props {
     values: MaterialTransferInsert | MaterialTransferUpdate,
   ) => Promise<void> | void
   initialValues?: MaterialTransferWithEmployee | null
-  employees: { id: string; name: string }[]
+  employees: { id: string, name: string }[]
   loading?: boolean
-  fixedOperator?: { id: string; name: string } | null
+  fixedOperator?: { id: string, name: string } | null
   currentUploader?: string | null
   canAudit?: boolean
   mobile?: boolean
@@ -53,7 +51,7 @@ const SHIFT_LEADER_OPTIONS = [
   '崔路路',
   '张宏',
   '刘强',
-].map((name) => ({
+].map(name => ({
   label: name,
   value: name,
 }))
@@ -85,20 +83,20 @@ export default function MaterialTransferForm({
 }: Props) {
   const { message } = App.useApp()
   const [form] = Form.useForm<MaterialTransferFormValues>()
-  const { data: projectNos, isLoading: isLoadingProjectNos } =
-    useSalesOrdersProjectNos()
+  const { data: projectNos, isLoading: isLoadingProjectNos }
+    = useSalesOrdersProjectNos()
   const [scannedProjectDataMap, setScannedProjectDataMap] = useState<
     Record<string, ProjectNoData>
   >({})
 
   const employeeNameMap = useMemo(
-    () => new Map(employees.map((employee) => [employee.id, employee.name])),
+    () => new Map(employees.map(employee => [employee.id, employee.name])),
     [employees],
   )
 
   const recipientOptions = useMemo(
     () =>
-      MATERIAL_TRANSFER_RECIPIENTS.map((name) => ({
+      MATERIAL_TRANSFER_RECIPIENTS.map(name => ({
         label: name,
         value: name,
       })),
@@ -111,7 +109,7 @@ export default function MaterialTransferForm({
   )
   const mergedProjectNoOptions = useMemo(() => {
     const existingProjectNos = new Set(
-      projectNoOptions.map((item) => item.value),
+      projectNoOptions.map(item => item.value),
     )
     const scannedProjectNos = Object.entries(scannedProjectDataMap)
       .filter(([projectNo]) => !existingProjectNos.has(projectNo))
@@ -150,7 +148,7 @@ export default function MaterialTransferForm({
     if (initialValues) {
       setScannedProjectDataMap((prev) => {
         const existsInProjectNos = (projectNos || []).some(
-          (item) => item.project_no === initialValues.project_no,
+          item => item.project_no === initialValues.project_no,
         )
 
         if (existsInProjectNos || prev[initialValues.project_no]) {
@@ -222,7 +220,7 @@ export default function MaterialTransferForm({
   }
 
   function handleProjectScanResolved(payload: ScannedProjectPayload) {
-    setScannedProjectDataMap((prev) => ({
+    setScannedProjectDataMap(prev => ({
       ...prev,
       [payload.projectNo]: {
         project_no: payload.projectNo,
@@ -253,7 +251,7 @@ export default function MaterialTransferForm({
       ? [fixedOperator.id]
       : values.operator_employee_ids || []
     const operatorNames = operatorEmployeeIds
-      .map((id) => employeeNameMap.get(id))
+      .map(id => employeeNameMap.get(id))
       .filter((name): name is string => Boolean(name))
 
     if (operatorEmployeeIds.length === 0) {
@@ -285,10 +283,10 @@ export default function MaterialTransferForm({
     triggerNode.parentElement || document.body
 
   const formItemClassName = 'mb-0'
-  const sectionClassName =
-    'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/90'
-  const sectionTitleClassName =
-    'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
+  const sectionClassName
+    = 'rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/90'
+  const sectionTitleClassName
+    = 'mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200'
 
   const sectionDot = (className = 'bg-blue-500') => (
     <span className={`h-1.5 w-1.5 rounded-full ${className}`} />
@@ -424,7 +422,7 @@ export default function MaterialTransferForm({
                   showSearch={{ optionFilterProp: 'label' }}
                   getPopupContainer={getPopupContainer}
                   disabled={Boolean(fixedOperator)}
-                  options={employees.map((employee) => ({
+                  options={employees.map(employee => ({
                     label: employee.name,
                     value: employee.id,
                   }))}
@@ -448,7 +446,7 @@ export default function MaterialTransferForm({
                 <Select
                   placeholder="请选择接收车间"
                   getPopupContainer={getPopupContainer}
-                  options={MATERIAL_TRANSFER_WORKSHOPS.map((workshop) => ({
+                  options={MATERIAL_TRANSFER_WORKSHOPS.map(workshop => ({
                     label: workshop,
                     value: workshop,
                   }))}
@@ -500,29 +498,33 @@ export default function MaterialTransferForm({
               备注与审核
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {mobile ? null : (
-                <Form.Item
-                  name="uploaded_by_name"
-                  label="数据上传"
-                  className={formItemClassName}
-                >
-                  <Input disabled placeholder="自动记录当前登录用户" />
-                </Form.Item>
-              )}
+              {mobile
+                ? null
+                : (
+                    <Form.Item
+                      name="uploaded_by_name"
+                      label="数据上传"
+                      className={formItemClassName}
+                    >
+                      <Input disabled placeholder="自动记录当前登录用户" />
+                    </Form.Item>
+                  )}
 
-              {canAudit ? (
-                <Form.Item
-                  name="is_audited"
-                  label="审核状态"
-                  valuePropName="checked"
-                  className={formItemClassName}
-                >
-                  <Switch
-                    checkedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[1].label}
-                    unCheckedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[0].label}
-                  />
-                </Form.Item>
-              ) : null}
+              {canAudit
+                ? (
+                    <Form.Item
+                      name="is_audited"
+                      label="审核状态"
+                      valuePropName="checked"
+                      className={formItemClassName}
+                    >
+                      <Switch
+                        checkedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[1].label}
+                        unCheckedChildren={MATERIAL_TRANSFER_AUDIT_OPTIONS[0].label}
+                      />
+                    </Form.Item>
+                  )
+                : null}
 
               <Form.Item
                 name="remark"

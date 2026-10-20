@@ -1,12 +1,12 @@
-import dayjs from 'dayjs'
-import * as XLSX from 'xlsx-js-style'
 import type { WorkSheet } from 'xlsx-js-style'
-
 import type {
   ToolingData,
   ToolingDataFormValues,
   ToolingDataMonthlySummary,
 } from '@/services/apiToolingData'
+import dayjs from 'dayjs'
+
+import * as XLSX from 'xlsx-js-style'
 import {
   applyRegisterSheetStyles,
   autoFitColumnWidths,
@@ -60,7 +60,22 @@ const MONTHLY_SUMMARY_HEADERS = [
   '备注',
 ] as const
 const MONTHLY_SUMMARY_COLUMN_WIDTHS = [
-  4, 11, 10, 17, 11, 12, 12, 7, 7, 7, 7, 7, 7, 7, 7, 16,
+  4,
+  11,
+  10,
+  17,
+  11,
+  12,
+  12,
+  7,
+  7,
+  7,
+  7,
+  7,
+  7,
+  7,
+  7,
+  16,
 ]
 const MONTHLY_SUMMARY_GROUP_HEADERS = [
   '',
@@ -139,8 +154,8 @@ export function createToolingDataExportWorkbook(
   for (let rowIndex = 2; rowIndex < worksheetData.length; rowIndex += 1) {
     const unitPriceRef = `F${rowIndex + 1}`
     if (
-      worksheet[unitPriceRef] &&
-      typeof worksheet[unitPriceRef].v === 'number'
+      worksheet[unitPriceRef]
+      && typeof worksheet[unitPriceRef].v === 'number'
     ) {
       worksheet[unitPriceRef].z = '0.00'
     }
@@ -184,10 +199,7 @@ export function createToolingDataMonthlySummaryWorkbook(
     item.remarks,
   ])
 
-  const totalRow: Array<string | number | null> = Array.from(
-    { length: columnCount },
-    () => null,
-  )
+  const totalRow: Array<string | number | null> = Array.from({ length: columnCount }, () => null)
   totalRow[6] = '合计'
 
   const worksheetData = [
@@ -251,14 +263,14 @@ export async function parseToolingDataExcel(
     const usage = normalizeText(row['用途'])
     const remarks = normalizeText(row['备注'])
 
-    const isEmptyRow =
-      !toolCode &&
-      !toolName &&
-      !toolSpec &&
-      !material &&
-      !usage &&
-      !remarks &&
-      row['单价'] === ''
+    const isEmptyRow
+      = !toolCode
+        && !toolName
+        && !toolSpec
+        && !material
+        && !usage
+        && !remarks
+        && row['单价'] === ''
 
     if (isEmptyRow) {
       return
@@ -312,7 +324,7 @@ function validateTemplateHeaders(sheet: WorkSheet) {
     blankrows: false,
   })
 
-  const headerRow = (rows[0] || []).map((cell) => normalizeText(cell))
+  const headerRow = (rows[0] || []).map(cell => normalizeText(cell))
   const templateHeaders = Array.from(TEMPLATE_HEADERS)
 
   const matches = templateHeaders.every(
@@ -411,8 +423,8 @@ function applyMonthlySummaryFormulas(
 
     const unitPriceRef = `F${rowNumber}`
     if (
-      worksheet[unitPriceRef] &&
-      typeof worksheet[unitPriceRef].v === 'number'
+      worksheet[unitPriceRef]
+      && typeof worksheet[unitPriceRef].v === 'number'
     ) {
       worksheet[unitPriceRef].z = '0.00'
     }
@@ -486,14 +498,22 @@ function setTotalFormulaCell(
   const columnLetter = columnIndexToLetter(column)
   const cellRef = `${columnLetter}${totalRowNumber}`
   const totalValue = items.reduce((sum, item) => {
-    if (column === 7) return sum + item.opening_quantity
-    if (column === 8) return sum + item.opening_quantity * item.unit_price
-    if (column === 9) return sum + item.stock_in_quantity
-    if (column === 10) return sum + item.stock_in_quantity * item.unit_price
-    if (column === 11) return sum + item.stock_out_quantity
-    if (column === 12) return sum + item.stock_out_quantity * item.unit_price
-    if (column === 13) return sum + item.closing_quantity
-    if (column === 14) return sum + item.closing_quantity * item.unit_price
+    if (column === 7)
+      return sum + item.opening_quantity
+    if (column === 8)
+      return sum + item.opening_quantity * item.unit_price
+    if (column === 9)
+      return sum + item.stock_in_quantity
+    if (column === 10)
+      return sum + item.stock_in_quantity * item.unit_price
+    if (column === 11)
+      return sum + item.stock_out_quantity
+    if (column === 12)
+      return sum + item.stock_out_quantity * item.unit_price
+    if (column === 13)
+      return sum + item.closing_quantity
+    if (column === 14)
+      return sum + item.closing_quantity * item.unit_price
     return sum
   }, 0)
 

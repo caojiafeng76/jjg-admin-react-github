@@ -1,8 +1,9 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { PackagingStandardTime } from '@/services/apiPackagingStandardTimes'
+import { Table } from 'antd'
+import { memo, useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -99,9 +100,8 @@ function StandardTimeTable({
       scroll={{ x: 1100, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择标准工时 ${record.id}`,

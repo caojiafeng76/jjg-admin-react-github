@@ -1,15 +1,16 @@
 import { message } from 'antd'
 
-import { useSelectedPos } from './useSelectedPos'
 import { useAppStore } from '@/store'
+import { useSelectedPos } from './useSelectedPos'
 
-const loadShippingListExcelDocument = () =>
-  import('./shippingListExcelDocument')
+function loadShippingListExcelDocument() {
+  return import('./shippingListExcelDocument')
+}
 
 export function useExportShippingListAsExcel() {
   const [messageApi, contextHolder] = message.useMessage()
   const setTableSelectedKeys = useAppStore(
-    (state) => state.setTableSelectedKeys,
+    state => state.setTableSelectedKeys,
   )
   const { isLoading, selectedPosList } = useSelectedPos()
 
@@ -29,8 +30,8 @@ export function useExportShippingListAsExcel() {
     }
 
     try {
-      const { exportShippingListAsExcel: exportShippingList } =
-        await loadShippingListExcelDocument()
+      const { exportShippingListAsExcel: exportShippingList }
+        = await loadShippingListExcelDocument()
       const rows = selectedPosList.map(({ poInfo }) => ({
         No: poInfo.No,
         SONo: poInfo.SONo,
@@ -42,7 +43,8 @@ export function useExportShippingListAsExcel() {
       exportShippingList(rows)
       messageApi.success(`导出成功！共 ${rows.length} 条订单`)
       setTableSelectedKeys([])
-    } catch (error) {
+    }
+    catch (error) {
       console.error('导出失败:', error)
       const errorMessage = error instanceof Error ? error.message : '未知错误'
       messageApi.error(`导出失败: ${errorMessage}`)

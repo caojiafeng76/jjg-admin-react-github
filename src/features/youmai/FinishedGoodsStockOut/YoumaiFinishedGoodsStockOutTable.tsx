@@ -1,15 +1,16 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, Tag, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
+import { Table, Tag } from 'antd'
+import { memo, useMemo } from 'react'
+
 import { TableEmpty } from '@/ui/TableState'
-import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 import { formatNumber } from '@/utils/format'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 
 function uniqueFilters(
   values: (string | number | null | undefined)[],
-): { text: string; value: string | number }[] {
+): { text: string, value: string | number }[] {
   const set = new Set<string | number>()
   values.forEach((v) => {
     if (v !== null && v !== undefined && v !== '') {
@@ -20,7 +21,7 @@ function uniqueFilters(
     .sort((a, b) =>
       String(a).localeCompare(String(b), undefined, { numeric: true }),
     )
-    .map((v) => ({ text: String(v), value: v }))
+    .map(v => ({ text: String(v), value: v }))
 }
 
 interface Props {
@@ -80,7 +81,7 @@ function YoumaiFinishedGoodsStockOutTable({
         fixed: 'left',
         sorter: (a, b) =>
           (a.delivery_date ?? '').localeCompare(b.delivery_date ?? ''),
-        filters: uniqueFilters(data.map((r) => r.delivery_date)),
+        filters: uniqueFilters(data.map(r => r.delivery_date)),
         onFilter: (value, record) =>
           String(record.delivery_date ?? '') === String(value),
         render: (value: string) => value || '-',
@@ -92,7 +93,7 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 160,
         sorter: (a, b) =>
           (a.purchase_order_no ?? '').localeCompare(b.purchase_order_no ?? ''),
-        filters: uniqueFilters(data.map((r) => r.purchase_order_no)),
+        filters: uniqueFilters(data.map(r => r.purchase_order_no)),
         onFilter: (value, record) =>
           String(record.purchase_order_no ?? '') === String(value),
       },
@@ -103,9 +104,9 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 72,
         align: 'right',
         sorter: (a, b) =>
-          Number(a.purchase_order_line_no ?? 0) -
-          Number(b.purchase_order_line_no ?? 0),
-        filters: uniqueFilters(data.map((r) => r.purchase_order_line_no)),
+          Number(a.purchase_order_line_no ?? 0)
+          - Number(b.purchase_order_line_no ?? 0),
+        filters: uniqueFilters(data.map(r => r.purchase_order_line_no)),
         onFilter: (value, record) =>
           String(record.purchase_order_line_no ?? '') === String(value),
       },
@@ -116,7 +117,7 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 140,
         sorter: (a, b) =>
           (a.material_code ?? '').localeCompare(b.material_code ?? ''),
-        filters: uniqueFilters(data.map((r) => r.material_code)),
+        filters: uniqueFilters(data.map(r => r.material_code)),
         onFilter: (value, record) =>
           String(record.material_code ?? '') === String(value),
       },
@@ -127,7 +128,7 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 160,
         sorter: (a, b) =>
           (a.material_name ?? '').localeCompare(b.material_name ?? ''),
-        filters: uniqueFilters(data.map((r) => r.material_name)),
+        filters: uniqueFilters(data.map(r => r.material_name)),
         onFilter: (value, record) =>
           String(record.material_name ?? '') === String(value),
       },
@@ -137,7 +138,7 @@ function YoumaiFinishedGoodsStockOutTable({
         key: 'model',
         width: 100,
         sorter: (a, b) => (a.model ?? '').localeCompare(b.model ?? ''),
-        filters: uniqueFilters(data.map((r) => r.model)),
+        filters: uniqueFilters(data.map(r => r.model)),
         onFilter: (value, record) =>
           String(record.model ?? '') === String(value),
       },
@@ -148,7 +149,7 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 120,
         sorter: (a, b) =>
           (a.specification ?? '').localeCompare(b.specification ?? ''),
-        filters: uniqueFilters(data.map((r) => r.specification)),
+        filters: uniqueFilters(data.map(r => r.specification)),
         onFilter: (value, record) =>
           String(record.specification ?? '') === String(value),
       },
@@ -160,7 +161,7 @@ function YoumaiFinishedGoodsStockOutTable({
         align: 'right',
         sorter: (a, b) =>
           (a.stock_out_quantity ?? 0) - (b.stock_out_quantity ?? 0),
-        filters: uniqueFilters(data.map((r) => r.stock_out_quantity)),
+        filters: uniqueFilters(data.map(r => r.stock_out_quantity)),
         onFilter: (value, record) =>
           String(record.stock_out_quantity ?? '') === String(value),
         render: (value: number) => formatNumber(value, 0),
@@ -172,7 +173,7 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 100,
         align: 'right',
         sorter: (a, b) => (a.specific_gravity ?? 0) - (b.specific_gravity ?? 0),
-        filters: uniqueFilters(data.map((r) => r.specific_gravity)),
+        filters: uniqueFilters(data.map(r => r.specific_gravity)),
         onFilter: (value, record) =>
           String(record.specific_gravity ?? '') === String(value),
         render: (value: number) => formatNumber(value, 3),
@@ -183,14 +184,14 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 110,
         align: 'right',
         sorter: (a, b) => {
-          const wa =
-            calculateYoumaiWeightKg({
+          const wa
+            = calculateYoumaiWeightKg({
               specification: a.specification,
               specificGravity: a.specific_gravity,
               quantity: a.stock_out_quantity,
             }) ?? 0
-          const wb =
-            calculateYoumaiWeightKg({
+          const wb
+            = calculateYoumaiWeightKg({
               specification: b.specification,
               specificGravity: b.specific_gravity,
               quantity: b.stock_out_quantity,
@@ -233,7 +234,7 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 100,
         align: 'right',
         sorter: (a, b) => (a.final_stock ?? 0) - (b.final_stock ?? 0),
-        filters: uniqueFilters(data.map((r) => r.final_stock)),
+        filters: uniqueFilters(data.map(r => r.final_stock)),
         onFilter: (value, record) =>
           String(record.final_stock ?? '') === String(value),
         render: (value: number | null | undefined) =>
@@ -245,7 +246,7 @@ function YoumaiFinishedGoodsStockOutTable({
         key: 'remarks',
         width: 220,
         sorter: (a, b) => (a.remarks ?? '').localeCompare(b.remarks ?? ''),
-        filters: uniqueFilters(data.map((r) => r.remarks)),
+        filters: uniqueFilters(data.map(r => r.remarks)),
         onFilter: (value, record) =>
           String(record.remarks ?? '') === String(value),
         render: (value: string | null | undefined) => value || '-',
@@ -257,7 +258,7 @@ function YoumaiFinishedGoodsStockOutTable({
         width: 170,
         sorter: (a, b) =>
           (a.updated_at ?? '').localeCompare(b.updated_at ?? ''),
-        filters: uniqueFilters(data.map((r) => r.updated_at)),
+        filters: uniqueFilters(data.map(r => r.updated_at)),
         onFilter: (value, record) =>
           String(record.updated_at ?? '') === String(value),
         render: (value: string) =>
@@ -295,9 +296,8 @@ function YoumaiFinishedGoodsStockOutTable({
         ),
       }}
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择优迈成品出库 ${record.id}`,

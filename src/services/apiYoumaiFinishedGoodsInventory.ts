@@ -1,9 +1,9 @@
+import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 import {
   buildYoumaiProductDataOptionsQuery,
   YOUMAI_PRODUCT_DATA_OPTION_SELECT,
 } from './youmaiOptions'
-import { handleApiError } from '@/utils/errorHandler'
 
 export interface YoumaiFinishedGoodsInventory {
   id: string
@@ -45,7 +45,7 @@ export interface YoumaiProductDataOption {
   specific_gravity: number
 }
 
-type DynamicSupabaseTable = {
+interface DynamicSupabaseTable {
   from: (table: string) => any
 }
 
@@ -259,7 +259,7 @@ export async function importYoumaiFinishedGoodsInventory(
     materialCodeSet.add(row.material_code)
   }
 
-  const materialCodes = normalizedRows.map((row) => row.material_code)
+  const materialCodes = normalizedRows.map(row => row.material_code)
   const { data: productRows, error: productError } = await productDataTable()
     .select(
       'id, material_code, material_name, model, specification, specific_gravity',
@@ -271,13 +271,13 @@ export async function importYoumaiFinishedGoodsInventory(
   }
 
   const productMap = new Map(
-    ((productRows || []) as YoumaiProductDataOption[]).map((row) => [
+    ((productRows || []) as YoumaiProductDataOption[]).map(row => [
       row.material_code,
       row,
     ]),
   )
 
-  const missingCodes = materialCodes.filter((code) => !productMap.has(code))
+  const missingCodes = materialCodes.filter(code => !productMap.has(code))
   if (missingCodes.length > 0) {
     throw new Error(
       `以下物料编码未在优迈货品资料中维护，无法导入库存：${missingCodes.join('、')}`,
@@ -303,7 +303,7 @@ export async function importYoumaiFinishedGoodsInventory(
         pending_stock_in: number
         pending_stock_out: number
       }>
-    ).map((row) => [row.product_data_id, row]),
+    ).map(row => [row.product_data_id, row]),
   )
 
   const payload = normalizedRows.map((row) => {

@@ -1,18 +1,20 @@
-import { useAppStore } from '@/store'
 import { MoonIcon, SunIcon } from '@heroicons/react/16/solid'
 import { Button } from 'antd'
+import { useAppStore } from '@/store'
 
 export default function DarkModeButton() {
-  const isDarkMode = useAppStore((state) => state.isDarkMode)
-  const setIsDarkMode = useAppStore((state) => state.setIsDarkMode)
+  const isDarkMode = useAppStore(state => state.isDarkMode)
+  const setIsDarkMode = useAppStore(state => state.setIsDarkMode)
 
   return (
     <Button type="text" onClick={setIsDarkMode}>
-      {isDarkMode ? (
-        <SunIcon className="size-4" />
-      ) : (
-        <MoonIcon className="size-4" />
-      )}
+      {isDarkMode
+        ? (
+            <SunIcon className="size-4" />
+          )
+        : (
+            <MoonIcon className="size-4" />
+          )}
     </Button>
   )
 }

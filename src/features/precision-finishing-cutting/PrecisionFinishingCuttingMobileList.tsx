@@ -1,7 +1,7 @@
-import { Button, Empty, Tag } from 'antd'
+import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
-import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
+import { Button, Empty, Tag } from 'antd'
 
 interface Props {
   loading: boolean

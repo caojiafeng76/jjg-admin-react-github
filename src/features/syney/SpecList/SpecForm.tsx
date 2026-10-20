@@ -1,7 +1,7 @@
-import { forwardRef, useCallback, useImperativeHandle } from 'react'
+import type { ISyneySpec, ISyneySpecFormRef } from '@/types'
 import { Form, Input } from 'antd'
 
-import { ISyneySpec, ISyneySpecFormRef } from '@/types'
+import { forwardRef, useCallback, useImperativeHandle } from 'react'
 
 const layout = {
   labelCol: { span: 6 },
@@ -10,7 +10,7 @@ const layout = {
 
 const SpecForm = forwardRef<
   ISyneySpecFormRef,
-  { onFinishFunc: (values: ISyneySpec) => void; isEditing: boolean }
+  { onFinishFunc: (values: ISyneySpec) => void, isEditing: boolean }
 >(({ onFinishFunc, isEditing }, ref) => {
   const [form] = Form.useForm<ISyneySpec>()
 

@@ -1,17 +1,17 @@
 import { resolve } from 'node:path'
 import {
-  createPoolerConnection,
-  resolvePushTarget,
-} from './supabase-pooler.mjs'
+  captureMigrationPlan,
+  snapshotMigrationFiles,
+} from './db-migration-guard.mjs'
+import { confirmSqlExecution } from './db-sql-guard.mjs'
 import {
   describeDatabaseTarget,
   runSupabaseCli,
 } from './supabase-cli-utils.mjs'
-import { confirmSqlExecution } from './db-sql-guard.mjs'
 import {
-  captureMigrationPlan,
-  snapshotMigrationFiles,
-} from './db-migration-guard.mjs'
+  createPoolerConnection,
+  resolvePushTarget,
+} from './supabase-pooler.mjs'
 
 const args = process.argv.slice(2)
 if (args.includes('--help') || args.includes('-h')) {
@@ -32,12 +32,12 @@ seed/roles 请写成 migration；预演不会执行迁移。`)
 }
 
 try {
-  if (args.some((arg) => arg.startsWith('--dry-run=')))
+  if (args.some(arg => arg.startsWith('--dry-run=')))
     throw new Error('请使用独立的 --dry-run 参数。')
   const isDryRun = args.includes('--dry-run')
   if (
-    !isDryRun &&
-    args.some((arg) =>
+    !isDryRun
+    && args.some(arg =>
       ['--include-seed', '--include-roles'].includes(arg.split('=')[0]),
     )
   ) {
@@ -46,12 +46,12 @@ try {
   const workdirIndex = args.indexOf('--workdir')
   const workdir = resolve(
     args
-      .find((arg) => arg.startsWith('--workdir='))
-      ?.slice('--workdir='.length) ??
-      (workdirIndex >= 0
+      .find(arg => arg.startsWith('--workdir='))
+      ?.slice('--workdir='.length)
+      ?? (workdirIndex >= 0
         ? args[workdirIndex + 1]
-        : process.env.SUPABASE_WORKDIR) ??
-      process.cwd(),
+        : process.env.SUPABASE_WORKDIR)
+      ?? process.cwd(),
   )
   const target = resolvePushTarget(args)
   let cliArgs = target.args
@@ -70,10 +70,11 @@ try {
         continue
       }
       if (
-        cliArgs[i].startsWith('--output-format=') ||
-        cliArgs[i].startsWith('--output=')
-      )
+        cliArgs[i].startsWith('--output-format=')
+        || cliArgs[i].startsWith('--output=')
+      ) {
         continue
+      }
       previewArgs.push(cliArgs[i])
     }
     const beforePreview = snapshotMigrationFiles(workdir)
@@ -81,7 +82,8 @@ try {
       ['db', 'push', ...previewArgs, '--dry-run', '--output-format', 'json'],
       { env },
     )
-    if (preview.error || preview.status !== 0) process.exit(1)
+    if (preview.error || preview.status !== 0)
+      process.exit(1)
     const plan = captureMigrationPlan(preview.stdout, workdir, beforePreview)
     const databaseTarget = describeDatabaseTarget(cliArgs)
     await confirmSqlExecution(plan.sql, databaseTarget)
@@ -90,9 +92,11 @@ try {
       throw new Error('数据库绑定在确认期间发生变化。')
   }
   const result = runSupabaseCli(['db', 'push', ...cliArgs], { env })
-  if (result.error) console.error('Supabase CLI 进程未能正常启动。')
+  if (result.error)
+    console.error('Supabase CLI 进程未能正常启动。')
   process.exit(result.error ? 1 : (result.status ?? 1))
-} catch (error) {
+}
+catch (error) {
   console.error(error instanceof Error ? error.message : '数据库预演失败。')
   process.exit(1)
 }

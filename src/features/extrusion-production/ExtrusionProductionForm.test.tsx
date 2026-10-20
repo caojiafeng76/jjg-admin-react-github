@@ -1,7 +1,7 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import ExtrusionProductionForm from './ExtrusionProductionForm'
 
@@ -187,7 +187,7 @@ async function selectMachine(
   await user.type(input, machineName)
   // 等下拉选项出现后点击第一条匹配项（选项 label 可能包含推荐直径后缀）
   const option = await screen.findByText(
-    (content) => content.includes(machineName),
+    content => content.includes(machineName),
     {
       selector: '.ant-select-item-option-content',
     },

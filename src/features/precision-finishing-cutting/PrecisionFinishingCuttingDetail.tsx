@@ -1,7 +1,7 @@
-import { Button, Descriptions, Empty, Tag } from 'antd'
+import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
 
-import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
+import { Button, Descriptions, Empty, Tag } from 'antd'
 
 interface Props {
   selectedRecord: PrecisionFinishingCuttingWithEmployee | null

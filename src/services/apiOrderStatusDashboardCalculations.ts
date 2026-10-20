@@ -1,4 +1,3 @@
-import type { WorkshopOrder } from '@/features/workshop/OrderList'
 import type {
   OrderStatusProductionDetail,
   PackagingDashboardWorkOrderRow,
@@ -7,6 +6,7 @@ import type {
   ProductionOrderItemRow,
   ReworkRepairInfo,
 } from './apiOrderStatusDashboardTypes'
+import type { WorkshopOrder } from '@/features/workshop/OrderList'
 
 const UNMATCHED_JOB_NAME = '未匹配岗位'
 export const PACKAGING_JOB_NAME = '包装'
@@ -32,7 +32,7 @@ export function normalizeStringArray(
   value: string[] | string | null | undefined,
 ) {
   if (Array.isArray(value)) {
-    return value.filter((item) => Boolean(normalizeText(item)))
+    return value.filter(item => Boolean(normalizeText(item)))
   }
 
   const normalized = normalizeText(value)
@@ -67,7 +67,7 @@ export function buildOperationMatchKey(value: string | null | undefined) {
   const compact = normalized.replace(/\s+/g, '')
   const withoutParenthetical = compact.replace(/[（(][^（）()]*[）)]/g, '')
   const withoutDirectionalSuffix = withoutParenthetical.replace(
-    /(?:上下|左右|上|下|左|右)+$/g,
+    /(?:上下|左右|[上下左右])+$/g,
     '',
   )
 
@@ -136,10 +136,10 @@ export function getSingleRelation<TRelation>(
 
 export function getDefectQuantity(row: ProductionOrderItemRow) {
   return (
-    Number(row.defect_quantity_1 || 0) +
-    Number(row.defect_quantity_2 || 0) +
-    Number(row.outsource_defect_quantity || 0) +
-    Number(row.setup_defect_quantity || 0)
+    Number(row.defect_quantity_1 || 0)
+    + Number(row.defect_quantity_2 || 0)
+    + Number(row.outsource_defect_quantity || 0)
+    + Number(row.setup_defect_quantity || 0)
   )
 }
 
@@ -217,10 +217,10 @@ export function calculateInventoryQuantity({
   transferQuantity: number
 }) {
   return roundTo(
-    toFiniteNumber(precisionCuttingQuantity) +
-      toFiniteNumber(autoCutQuantity) -
-      toFiniteNumber(defectQuantity) -
-      toFiniteNumber(transferQuantity),
+    toFiniteNumber(precisionCuttingQuantity)
+    + toFiniteNumber(autoCutQuantity)
+    - toFiniteNumber(defectQuantity)
+    - toFiniteNumber(transferQuantity),
     3,
   )
 }
@@ -321,8 +321,8 @@ export function buildPackagingProductionDetailsForDashboard(
       current.standardSeconds,
       Number(row.standard_seconds) || 0,
     )
-    current.totalHours +=
-      (Number(row.work_hours) || 0) + (Number(row.extra_qualified_hours) || 0)
+    current.totalHours
+      += (Number(row.work_hours) || 0) + (Number(row.extra_qualified_hours) || 0)
 
     if (row.employee_name) {
       current.employees.add(row.employee_name)
@@ -340,7 +340,8 @@ export function buildPackagingProductionDetailsForDashboard(
   return Array.from(grouped.values())
     .sort((left, right) => {
       const dateCompare = right.workDate.localeCompare(left.workDate)
-      if (dateCompare !== 0) return dateCompare
+      if (dateCompare !== 0)
+        return dateCompare
       return left.projectNo.localeCompare(right.projectNo)
     })
     .map((row) => {
@@ -389,9 +390,9 @@ export function buildPackagingProductionDetailsForDashboard(
 export function buildReworkRepairInfo(
   reworkRepairRows:
     | {
-        workflow_status: string
-        quantity: number
-      }[]
+      workflow_status: string
+      quantity: number
+    }[]
     | null,
 ): ReworkRepairInfo {
   const info: ReworkRepairInfo = {
@@ -649,10 +650,10 @@ export function resolveProductionJobName({
     return UNMATCHED_JOB_NAME
   }
 
-  const operationOnlyJobName =
-    processJobIndex.operationMap.get(operation) ||
-    processJobIndex.operationMatchMap.get(operationMatchKey || '') ||
-    UNMATCHED_JOB_NAME
+  const operationOnlyJobName
+    = processJobIndex.operationMap.get(operation)
+      || processJobIndex.operationMatchMap.get(operationMatchKey || '')
+      || UNMATCHED_JOB_NAME
 
   if (!model) {
     return operationOnlyJobName
@@ -674,13 +675,13 @@ export function resolveProductionJobName({
   const modelOperationMatchKey = buildProcessJobKey(model, operationMatchKey)
 
   return (
-    processJobIndex.exactMap.get(exactKey) ||
-    processJobIndex.exactOperationMatchMap.get(exactOperationMatchKey) ||
-    processJobIndex.modelOperationTypeBMap.get(modelOperationKey) ||
-    processJobIndex.modelOperationTypeBMatchMap.get(modelOperationMatchKey) ||
-    processJobIndex.modelOperationMap.get(modelOperationKey) ||
-    processJobIndex.modelOperationMatchMap.get(modelOperationMatchKey) ||
-    operationOnlyJobName
+    processJobIndex.exactMap.get(exactKey)
+    || processJobIndex.exactOperationMatchMap.get(exactOperationMatchKey)
+    || processJobIndex.modelOperationTypeBMap.get(modelOperationKey)
+    || processJobIndex.modelOperationTypeBMatchMap.get(modelOperationMatchKey)
+    || processJobIndex.modelOperationMap.get(modelOperationKey)
+    || processJobIndex.modelOperationMatchMap.get(modelOperationMatchKey)
+    || operationOnlyJobName
   )
 }
 
@@ -753,13 +754,13 @@ export function buildJobColumns({
   ReturnType<typeof buildProcessJobIndex>,
   'lastProcessJobNames' | 'lastProcessJobOperations'
 >) {
-  const jobColumns = lastProcessJobNames.map((jobName) => ({
+  const jobColumns = lastProcessJobNames.map(jobName => ({
     key: jobName,
     title: jobName,
     operations: lastProcessJobOperations.get(jobName) ?? [],
   }))
 
-  if (!jobColumns.some((column) => column.key === PACKAGING_JOB_NAME)) {
+  if (!jobColumns.some(column => column.key === PACKAGING_JOB_NAME)) {
     jobColumns.push({
       key: PACKAGING_JOB_NAME,
       title: PACKAGING_JOB_NAME,
@@ -777,7 +778,8 @@ export function groupPackagingRowsByProjectNo(
 
   for (const detail of buildPackagingProductionDetailsForDashboard(rows)) {
     const projectNo = normalizeText(detail.projectNo)
-    if (!projectNo) continue
+    if (!projectNo)
+      continue
 
     const current = grouped.get(projectNo) ?? []
     current.push(detail)

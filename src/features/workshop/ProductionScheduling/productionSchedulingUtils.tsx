@@ -1,15 +1,15 @@
-import { Typography } from 'antd'
-import dayjs from 'dayjs'
-
 import type {
   ProductionSchedulingFilters,
   ProductionSchedulingOrder,
   ProductionSchedulingOrderUpdate,
 } from '@/services/apiProductionScheduling'
+import { Typography } from 'antd'
+
+import dayjs from 'dayjs'
 
 const { Text } = Typography
 
-export type SearchFormValues = {
+export interface SearchFormValues {
   customer?: string
   lengthMm?: number[]
   materialCode?: string
@@ -21,7 +21,7 @@ export type SearchFormValues = {
   orderDateRange?: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
 }
 
-export type SchedulingFormValues = {
+export interface SchedulingFormValues {
   planned_finish_date?: dayjs.Dayjs | null
   planned_start_date?: dayjs.Dayjs | null
   product_delivery_date?: dayjs.Dayjs | null
@@ -68,19 +68,23 @@ export function renderText(value: unknown) {
 }
 
 export function renderDate(value: string | null | undefined) {
-  return value ? (
-    dayjs(value).format('YYYY-MM-DD')
-  ) : (
-    <Text type="secondary">-</Text>
-  )
+  return value
+    ? (
+        dayjs(value).format('YYYY-MM-DD')
+      )
+    : (
+        <Text type="secondary">-</Text>
+      )
 }
 
 export function renderDateTime(value: string | null | undefined) {
-  return value ? (
-    dayjs(value).format('YYYY-MM-DD HH:mm')
-  ) : (
-    <Text type="secondary">-</Text>
-  )
+  return value
+    ? (
+        dayjs(value).format('YYYY-MM-DD HH:mm')
+      )
+    : (
+        <Text type="secondary">-</Text>
+      )
 }
 
 export function renderQuantity(value: number | null | undefined) {
@@ -113,7 +117,7 @@ export function getProductSpec(order: ProductionSchedulingOrder | null) {
     order.length_mm ? `${order.length_mm}mm` : null,
     order.color_name,
   ]
-    .map((item) => (typeof item === 'string' ? item.trim() : item))
+    .map(item => (typeof item === 'string' ? item.trim() : item))
     .filter(Boolean)
     .join(' / ')
 }
@@ -172,9 +176,11 @@ export function getOrderRowKey(order: ProductionSchedulingOrder) {
 export function parseProjectNoDate(
   projectNo: string | null | undefined,
 ): string | null {
-  if (!projectNo) return null
+  if (!projectNo)
+    return null
   const head = projectNo.replace(/[\s-].*$/, '').slice(0, 6)
-  if (!/^\d{6}$/.test(head)) return null
+  if (!/^\d{6}$/.test(head))
+    return null
   const yy = Number(head.slice(0, 2))
   const mm = Number(head.slice(2, 4))
   const dd = Number(head.slice(4, 6))
@@ -183,7 +189,8 @@ export function parseProjectNoDate(
     'YYYY-M-D',
     true,
   )
-  if (!date.isValid()) return null
+  if (!date.isValid())
+    return null
   return date.format('YYYY-MM-DD')
 }
 
@@ -210,7 +217,7 @@ export function formatSchedulingPayload(
 ): ProductionSchedulingOrderUpdate {
   const responsible_person_ids = values.responsible_person_ids ?? []
   const responsible_person_names = responsible_person_ids
-    .map((id) => employeeMap.get(id))
+    .map(id => employeeMap.get(id))
     .filter((name): name is string => Boolean(name))
 
   return {

@@ -1,13 +1,13 @@
-import { getSyneyPos } from '@/services/apiSyneyPos'
 import {
   keepPreviousData,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
 import { message } from 'antd'
-import { useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { isAbortError, queryConfig } from '@/config/queryClient'
+import { getSyneyPos } from '@/services/apiSyneyPos'
 import { syneyPoKeys } from '../queryKeys'
 
 export function usePos() {

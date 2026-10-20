@@ -1,12 +1,11 @@
-import { useState } from 'react'
+import type { EmployeeChangePasswordValues } from './EmployeeChangePasswordForm'
 import { App, Button, Card, Typography } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/useAuth'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import EmployeeChangePasswordForm, {
-  type EmployeeChangePasswordValues,
-} from './EmployeeChangePasswordForm'
+import EmployeeChangePasswordForm from './EmployeeChangePasswordForm'
 
 const { Paragraph, Title } = Typography
 
@@ -29,13 +28,15 @@ export default function EmployeeMobileChangePasswordPage() {
         replace: true,
         state: { message: '密码修改成功，请使用新密码重新登录' },
       })
-    } catch (error) {
+    }
+    catch (error) {
       message.error(
         error instanceof Error
           ? translateErrorMessage(error.message)
           : '密码修改失败',
       )
-    } finally {
+    }
+    finally {
       setIsSubmitting(false)
     }
   }

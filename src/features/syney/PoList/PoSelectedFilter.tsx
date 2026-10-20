@@ -1,7 +1,7 @@
+import { ArrowPathIcon, CheckCircleIcon, ExclamationTriangleIcon, PauseCircleIcon, XCircleIcon } from '@heroicons/react/16/solid'
 import { Select } from 'antd'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { CheckCircleIcon, ArrowPathIcon, PauseCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/16/solid'
 
 const STATUS_OPTIONS: Array<{
   value: string
@@ -31,7 +31,8 @@ export default function PoSelectedFilter() {
     setValue(newValue)
     if (newValue === '全部') {
       searchParams.delete('Status')
-    } else {
+    }
+    else {
       searchParams.set('Status', newValue)
     }
     searchParams.set('page', '1')
@@ -46,7 +47,7 @@ export default function PoSelectedFilter() {
       value={value}
       getPopupContainer={() => document.body}
       suffixIcon={null}
-      options={STATUS_OPTIONS.map((option) => ({
+      options={STATUS_OPTIONS.map(option => ({
         value: option.value,
         label: (
           <span className="inline-flex items-center gap-1.5">

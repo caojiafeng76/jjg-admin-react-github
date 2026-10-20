@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 // ----------------------------------------------------------------
 // Types
@@ -70,7 +70,8 @@ export async function getVillaLiftOrdersForSelect(): Promise<
     .eq('status', 'open')
     .order('created_at', { ascending: false })
 
-  if (error) throw handleApiError(error, '获取订单列表失败')
+  if (error)
+    throw handleApiError(error, '获取订单列表失败')
   return data as VillaLiftOrderSelectOption[]
 }
 
@@ -101,7 +102,8 @@ export async function getVillaLiftCuttingRecords({
     .order('created_at', { ascending: false })
     .range(from, to)
 
-  if (error) throw handleApiError(error, '获取切割记录失败')
+  if (error)
+    throw handleApiError(error, '获取切割记录失败')
   return {
     records: data as VillaLiftCuttingRecordWithOrder[],
     count: count ?? 0,
@@ -117,9 +119,10 @@ export async function createVillaLiftCuttingBatch({
   operator,
   rows,
 }: VillaLiftCuttingBatchFormValues): Promise<void> {
-  if (!rows || rows.length === 0) throw new AppError('请至少添加一条切割记录')
+  if (!rows || rows.length === 0)
+    throw new AppError('请至少添加一条切割记录')
 
-  const payloads = rows.map((r) => ({
+  const payloads = rows.map(r => ({
     order_id,
     model: r.model?.trim() ?? '',
     name: r.name?.trim() ?? '',
@@ -134,7 +137,8 @@ export async function createVillaLiftCuttingBatch({
   const { error } = await supabase
     .from('villa_lift_cutting_records')
     .insert(payloads)
-  if (error) throw handleApiError(error, '创建切割记录失败')
+  if (error)
+    throw handleApiError(error, '创建切割记录失败')
 }
 
 export async function updateVillaLiftCuttingRecord({
@@ -158,7 +162,8 @@ export async function updateVillaLiftCuttingRecord({
     })
     .eq('id', id)
 
-  if (error) throw handleApiError(error, '更新切割记录失败')
+  if (error)
+    throw handleApiError(error, '更新切割记录失败')
 }
 
 export async function deleteVillaLiftCuttingRecord(id: string): Promise<void> {
@@ -167,7 +172,8 @@ export async function deleteVillaLiftCuttingRecord(id: string): Promise<void> {
     .delete()
     .eq('id', id)
 
-  if (error) throw handleApiError(error, '删除切割记录失败')
+  if (error)
+    throw handleApiError(error, '删除切割记录失败')
 }
 
 export async function batchDeleteVillaLiftCuttingRecords(
@@ -178,5 +184,6 @@ export async function batchDeleteVillaLiftCuttingRecords(
     .delete()
     .in('id', ids)
 
-  if (error) throw handleApiError(error, '批量删除切割记录失败')
+  if (error)
+    throw handleApiError(error, '批量删除切割记录失败')
 }

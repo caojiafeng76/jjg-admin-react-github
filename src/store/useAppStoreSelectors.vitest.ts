@@ -19,9 +19,9 @@ function getProductionSourceFiles(directory: string): string[] {
     }
 
     if (
-      !SOURCE_EXTENSIONS.has(extname(entry.name)) ||
-      entry.name.includes('.test.') ||
-      entry.name.includes('.vitest.')
+      !SOURCE_EXTENSIONS.has(extname(entry.name))
+      || entry.name.includes('.test.')
+      || entry.name.includes('.vitest.')
     ) {
       return []
     }
@@ -35,7 +35,7 @@ describe('useAppStore subscription contract', () => {
     const offenders = getProductionSourceFiles(SOURCE_ROOT).flatMap((path) => {
       const source = readFileSync(path, 'utf8')
 
-      return [...source.matchAll(ZERO_ARGUMENT_STORE_CALL)].map((match) => ({
+      return [...source.matchAll(ZERO_ARGUMENT_STORE_CALL)].map(match => ({
         file: relative(process.cwd(), path),
         line: source.slice(0, match.index).split('\n').length,
       }))

@@ -1,8 +1,9 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { PackagingEmployee } from '@/services/apiPackagingEmployees'
+import { Table } from 'antd'
+import { memo, useMemo } from 'react'
+
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -52,7 +53,7 @@ function EmployeeTable({
         key: 'position_salary',
         width: 140,
         render: (value: number | null) =>
-          value === null || value === undefined ? '-' : value,
+          value ?? '-',
       },
       {
         title: '时薪',
@@ -60,7 +61,7 @@ function EmployeeTable({
         key: 'hourly_wage',
         width: 120,
         render: (value: number | null) =>
-          value === null || value === undefined ? '-' : value,
+          value ?? '-',
       },
       {
         title: '备注',
@@ -100,9 +101,8 @@ function EmployeeTable({
       scroll={{ x: 1100, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
-      }
-      onRow={(record) => ({
+        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择包装员工 ${record.name || record.id}`,

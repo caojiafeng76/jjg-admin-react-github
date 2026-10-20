@@ -1,9 +1,10 @@
-import { memo, useMemo } from 'react'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { Table, Tag, type TableColumnsType } from 'antd'
-
+import type { TableColumnsType } from 'antd'
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
+import { Table, Tag } from 'antd'
+import { memo, useMemo } from 'react'
+
 import { formatNumber } from '@/utils/format'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -172,9 +173,8 @@ function ToolingStockOutTable({
       rowClassName={(_, index) =>
         index % 2 === 0
           ? 'bg-white dark:bg-slate-800'
-          : 'bg-slate-50/60 dark:bg-slate-800/60'
-      }
-      onRow={(record) => ({
+          : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),
           `选择刀具出库记录 ${record.id}`,

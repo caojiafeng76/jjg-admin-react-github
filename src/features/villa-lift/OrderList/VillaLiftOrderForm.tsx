@@ -1,21 +1,23 @@
-import { useCallback, useEffect } from 'react'
+import type {
+  FormInstance,
+} from 'antd'
+import type {
+  VillaLiftOrder,
+  VillaLiftOrderFormValues,
+} from '@/services/apiVillaLiftOrders'
+import { PlusCircleIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import {
   Button,
   DatePicker,
   Form,
-  FormInstance,
   Input,
   InputNumber,
   Radio,
   Table,
 } from 'antd'
-import { PlusCircleIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import dayjs from 'dayjs'
 
-import type {
-  VillaLiftOrder,
-  VillaLiftOrderFormValues,
-} from '@/services/apiVillaLiftOrders'
+import { useCallback, useEffect } from 'react'
 
 interface Props {
   onFinish: (values: VillaLiftOrderFormValues) => void
@@ -141,7 +143,7 @@ export default function VillaLiftOrderForm({
         status: initialValues.status ?? 'open',
         items: orderOnly
           ? []
-          : (initialValues.items ?? []).map((item) => ({
+          : (initialValues.items ?? []).map(item => ({
               model: item.model,
               name: item.name,
               spec: item.spec,
@@ -149,7 +151,8 @@ export default function VillaLiftOrderForm({
               remarks: item.remarks,
             })),
       })
-    } else {
+    }
+    else {
       form.resetFields()
       form.setFieldsValue(DEFAULT_ORDER_VALUES)
     }
@@ -159,7 +162,7 @@ export default function VillaLiftOrderForm({
     (raw: VillaLiftOrderFormValues) => {
       onFinish({
         ...raw,
-        items: (raw.items ?? []).map((item) => ({
+        items: (raw.items ?? []).map(item => ({
           model: item.model ?? '',
           name: item.name ?? '',
           spec: item.spec ?? '',
@@ -472,26 +475,27 @@ export default function VillaLiftOrderForm({
                         spec: '',
                         quantity: 0,
                         remarks: '',
-                      })
-                    }
+                      })}
                   >
                     添加明细
                   </Button>
                 </div>
-                {fields.length > 0 ? (
-                  <Table
-                    dataSource={fields}
-                    columns={columns}
-                    rowKey="key"
-                    pagination={false}
-                    size="small"
-                    className="mb-2"
-                  />
-                ) : (
-                  <div className="py-3 text-center text-sm text-gray-400">
-                    暂无明细，可点击「添加明细」
-                  </div>
-                )}
+                {fields.length > 0
+                  ? (
+                      <Table
+                        dataSource={fields}
+                        columns={columns}
+                        rowKey="key"
+                        pagination={false}
+                        size="small"
+                        className="mb-2"
+                      />
+                    )
+                  : (
+                      <div className="py-3 text-center text-sm text-gray-400">
+                        暂无明细，可点击「添加明细」
+                      </div>
+                    )}
               </div>
             )
           }}

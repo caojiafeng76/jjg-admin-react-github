@@ -1,8 +1,9 @@
-import { Pagination, Table, TableColumnsType } from 'antd'
-import { useMemo } from 'react'
+import type { TableColumnsType } from 'antd'
+import type { MachineRuntimeItem } from '@/services/apiMachineRuntime'
+import { Pagination, Table } from 'antd'
 import dayjs from 'dayjs'
 
-import type { MachineRuntimeItem } from '@/services/apiMachineRuntime'
+import { useMemo } from 'react'
 
 interface Props {
   loading: boolean
@@ -91,7 +92,8 @@ export default function MachineRuntimeDetailTable({
         width: 100,
         render: (_: unknown, record: MachineRuntimeItem) => {
           const seconds = record.runtime_seconds ?? 0
-          if (seconds === 0) return <span className="text-slate-400">—</span>
+          if (seconds === 0)
+            return <span className="text-slate-400">—</span>
           return `${(seconds / 3600).toFixed(2)} h`
         },
       },
@@ -102,7 +104,7 @@ export default function MachineRuntimeDetailTable({
   return (
     <div className="flex flex-col gap-2">
       <Table<MachineRuntimeItem>
-        rowKey={(r) => r.id}
+        rowKey={r => r.id}
         loading={loading}
         columns={columns}
         dataSource={data}
@@ -118,7 +120,7 @@ export default function MachineRuntimeDetailTable({
           pageSize={pageSize}
           onChange={onPageChange}
           showSizeChanger
-          showTotal={(t) => `共 ${t} 条`}
+          showTotal={t => `共 ${t} 条`}
           pageSizeOptions={['20', '50', '100']}
           size="small"
         />

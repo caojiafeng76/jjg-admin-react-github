@@ -1,6 +1,6 @@
-import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 import { formatBlockedProjectNos } from './apiWorkshopOrdersCalculations'
+import supabase from './supabase'
 
 export interface WorkshopOrderDeleteBlocker {
   orderId: string
@@ -20,7 +20,7 @@ export async function assertWorkshopOrdersNotReferenced(ids: string[]) {
   throw new AppError(
     `订单 ${formatBlockedProjectNos(
       blockers
-        .map((item) => item.projectNo?.trim())
+        .map(item => item.projectNo?.trim())
         .filter((projectNo): projectNo is string => Boolean(projectNo)),
       '所选订单',
     )} 已关联生产工单明细，无法删除`,
@@ -41,7 +41,7 @@ export async function getWorkshopOrderDeleteBlockers(
   }
 
   const selectedProjectNos = (orders || [])
-    .map((order) => order.project_no?.trim())
+    .map(order => order.project_no?.trim())
     .filter((projectNo): projectNo is string => Boolean(projectNo))
 
   if (selectedProjectNos.length === 0) {
@@ -65,12 +65,12 @@ export async function getWorkshopOrderDeleteBlockers(
 
   const orderMap = new Map(
     (orders || [])
-      .filter((order) => order.project_no?.trim())
-      .map((order) => [order.project_no!.trim(), order]),
+      .filter(order => order.project_no?.trim())
+      .map(order => [order.project_no!.trim(), order]),
   )
   const grouped = new Map<
     string,
-    { count: number; dates: Set<string>; extrusionCount: number }
+    { count: number, dates: Set<string>, extrusionCount: number }
   >()
 
   ;(
@@ -79,8 +79,8 @@ export async function getWorkshopOrderDeleteBlockers(
       order_id: string
       production_orders:
         | {
-            order_date: string
-          }
+          order_date: string
+        }
         | Array<{ order_date: string }>
         | null
     }>

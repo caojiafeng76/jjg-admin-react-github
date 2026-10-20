@@ -1,8 +1,9 @@
-import { Table, TableColumnsType } from 'antd'
-import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import type { TableColumnsType } from 'antd'
+import type { MachineRuntimeSummaryItem } from '@/services/apiMachineRuntime'
+import { Table } from 'antd'
 import { useMemo } from 'react'
 
-import type { MachineRuntimeSummaryItem } from '@/services/apiMachineRuntime'
+import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
   loading: boolean
@@ -58,19 +59,18 @@ export default function MachineRuntimeSummaryTable({
 
   return (
     <Table<MachineRuntimeSummaryItem>
-      rowKey={(r) => r.machine_equipment_id}
+      rowKey={r => r.machine_equipment_id}
       loading={loading}
       columns={columns}
       dataSource={data}
       scroll={{ y: scrollY, x: 550 }}
       size="small"
       pagination={false}
-      rowClassName={(record) =>
+      rowClassName={record =>
         record.machine_equipment_id === selectedId
           ? 'bg-blue-50 dark:bg-blue-950'
-          : 'cursor-pointer'
-      }
-      onRow={(record) => ({
+          : 'cursor-pointer'}
+      onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect(record.machine_equipment_id),
           `打开设备运行记录 ${record.machine_equipment_id}`,

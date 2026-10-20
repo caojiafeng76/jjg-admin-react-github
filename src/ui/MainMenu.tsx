@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 import type { MenuProps } from 'antd'
 import { Menu } from 'antd'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-import { usePermissionContext } from '@/contexts'
-import { useAuth } from '@/contexts'
 import { isViewerRole } from '@/config/access'
+import { useAuth, usePermissionContext } from '@/contexts'
+
 import { useAppStore } from '@/store'
 import {
   allMenuItems,
@@ -22,11 +22,12 @@ const MainMenu: React.FC = () => {
   const { can, isLoading } = usePermissionContext()
   const { role } = useAuth()
   const isViewer = isViewerRole(role)
-  const isDarkMode = useAppStore((state) => state.isDarkMode)
+  const isDarkMode = useAppStore(state => state.isDarkMode)
 
   const items = useMemo(() => {
     // 权限加载中时返回空（避免闪烁），PermissionContext 内部有 staleTime 缓存
-    if (isLoading) return []
+    if (isLoading)
+      return []
     return filterMenuByPermissions(allMenuItems, can, isViewer)
   }, [can, isLoading, isViewer])
 
@@ -45,9 +46,10 @@ const MainMenu: React.FC = () => {
   })
 
   useEffect(() => {
-    if (ancestorKeys.length === 0) return
+    if (ancestorKeys.length === 0)
+      return
     setOpenKeys((prevKeys) => {
-      const missingKeys = ancestorKeys.filter((key) => !prevKeys.includes(key))
+      const missingKeys = ancestorKeys.filter(key => !prevKeys.includes(key))
       if (missingKeys.length === 0) {
         return prevKeys
       }
@@ -56,7 +58,8 @@ const MainMenu: React.FC = () => {
   }, [ancestorKeys])
 
   const onClick: MenuProps['onClick'] = ({ key }) => {
-    if (!key) return
+    if (!key)
+      return
     const targetPath = `/${key}`
     if (pathname !== targetPath) {
       navigate(targetPath)

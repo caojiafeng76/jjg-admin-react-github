@@ -1,9 +1,12 @@
+import type {
+  QueryKey,
+  UseMutationOptions,
+} from '@tanstack/react-query'
+
 import {
   useMutation,
   useQueryClient,
-  UseMutationOptions,
 } from '@tanstack/react-query'
-import { QueryKey } from '@tanstack/react-query'
 import { message } from 'antd'
 import { useMemo } from 'react'
 
@@ -107,7 +110,7 @@ export function useMutationWithMessage<TData, TError, TVariables>({
     ...mutationOptions,
     onSuccess: async (data, variables) => {
       await Promise.all(
-        invalidateQueries.map((queryKey) =>
+        invalidateQueries.map(queryKey =>
           queryClient.invalidateQueries({ queryKey }),
         ),
       )
@@ -115,8 +118,8 @@ export function useMutationWithMessage<TData, TError, TVariables>({
       await onSuccess?.(data, variables)
 
       if (successMessage) {
-        const msg =
-          typeof successMessage === 'function'
+        const msg
+          = typeof successMessage === 'function'
             ? successMessage(data, variables)
             : successMessage
         messageApi.success(msg)
@@ -125,11 +128,11 @@ export function useMutationWithMessage<TData, TError, TVariables>({
     onError: (error, variables) => {
       // 显示错误消息
       if (showErrorMessage) {
-        const msg =
-          typeof errorMessage === 'function'
+        const msg
+          = typeof errorMessage === 'function'
             ? errorMessage(error, variables)
-            : errorMessage ||
-              (error instanceof Error ? error.message : '操作失败，请稍后重试')
+            : errorMessage
+              || (error instanceof Error ? error.message : '操作失败，请稍后重试')
         messageApi.error(msg)
       }
 

@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Form, type FormInstance, Input, InputNumber, Select } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsInventoryFormValues,
   YoumaiProductDataOption,
 } from '@/services/apiYoumaiFinishedGoodsInventory'
+import { Form, Input, InputNumber, Select } from 'antd'
+
+import { useEffect, useMemo, useState } from 'react'
 
 import {
   createProductOptionSnapshot,
@@ -40,21 +41,21 @@ export default function YoumaiFinishedGoodsInventoryForm({
 }: Props) {
   const [form] = Form.useForm<YoumaiFinishedGoodsInventoryFormValues>()
   const [productOptionKeyword, setProductOptionKeyword] = useState('')
-  const { data: productOptions = [], isFetching: areProductOptionsLoading } =
-    useYoumaiProductDataOptions(productOptionKeyword)
+  const { data: productOptions = [], isFetching: areProductOptionsLoading }
+    = useYoumaiProductDataOptions(productOptionKeyword)
   const initialProductSnapshot = useMemo(
     () => createProductOptionSnapshot(initialValues),
     [initialValues],
   )
-  const { mergedOptions, rememberSelectedOption } =
-    useRemoteSelectOptions<YoumaiProductDataOption>(
+  const { mergedOptions, rememberSelectedOption }
+    = useRemoteSelectOptions<YoumaiProductDataOption>(
       productOptions,
       initialProductSnapshot,
     )
   const selectedProductId = Form.useWatch('product_data_id', form)
 
   const selectedProduct = useMemo(
-    () => mergedOptions.find((item) => item.id === selectedProductId),
+    () => mergedOptions.find(item => item.id === selectedProductId),
     [mergedOptions, selectedProductId],
   )
 
@@ -103,14 +104,14 @@ export default function YoumaiFinishedGoodsInventoryForm({
               ? '请选择优迈货品资料'
               : '暂无优迈货品资料，请先维护货品资料'
           }
-          options={mergedOptions.map((item) => ({
+          options={mergedOptions.map(item => ({
             value: item.id,
             label: `${item.material_code} | ${item.material_name} | ${item.model} | ${item.specification}`,
           }))}
         />
       </Form.Item>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 md:grid-cols-2">
+      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
         <div>
           <div className="text-xs text-slate-400">物料编码</div>
           <div>{selectedProduct?.material_code || '-'}</div>

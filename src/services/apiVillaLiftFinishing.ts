@@ -1,5 +1,5 @@
-import supabase from './supabase'
 import { AppError, handleApiError } from '@/utils/errorHandler'
+import supabase from './supabase'
 
 // ----------------------------------------------------------------
 // Types
@@ -80,7 +80,8 @@ export async function getVillaLiftFinishingRecords({
     .order('created_at', { ascending: false })
     .range(from, to)
 
-  if (error) throw handleApiError(error, '获取加工记录失败')
+  if (error)
+    throw handleApiError(error, '获取加工记录失败')
   return {
     records: data as VillaLiftFinishingRecordWithOrder[],
     count: count ?? 0,
@@ -93,8 +94,9 @@ export async function getVillaLiftFinishingRecords({
  */
 export async function getProcessOperationsByModels(
   models: string[],
-): Promise<{ model: string; operation: string }[]> {
-  if (!models.length) return []
+): Promise<{ model: string, operation: string }[]> {
+  if (!models.length)
+    return []
 
   const { data, error } = await supabase
     .from('process_standards')
@@ -103,11 +105,12 @@ export async function getProcessOperationsByModels(
     .order('model', { ascending: true })
     .order('operation', { ascending: true })
 
-  if (error) throw handleApiError(error, '获取工序列表失败')
+  if (error)
+    throw handleApiError(error, '获取工序列表失败')
 
   // 去重
   const seen = new Set<string>()
-  const result: { model: string; operation: string }[] = []
+  const result: { model: string, operation: string }[] = []
   for (const row of data ?? []) {
     const key = `${row.model}|${row.operation}`
     if (!seen.has(key)) {
@@ -127,9 +130,10 @@ export async function createVillaLiftFinishingBatch({
   operator,
   rows,
 }: VillaLiftFinishingBatchFormValues): Promise<void> {
-  if (!rows || rows.length === 0) throw new AppError('请至少添加一条加工记录')
+  if (!rows || rows.length === 0)
+    throw new AppError('请至少添加一条加工记录')
 
-  const payloads = rows.map((r) => ({
+  const payloads = rows.map(r => ({
     order_id,
     model: r.model?.trim() ?? '',
     name: r.name?.trim() ?? '',
@@ -145,7 +149,8 @@ export async function createVillaLiftFinishingBatch({
   const { error } = await supabase
     .from('villa_lift_finishing_records')
     .insert(payloads)
-  if (error) throw handleApiError(error, '创建加工记录失败')
+  if (error)
+    throw handleApiError(error, '创建加工记录失败')
 }
 
 export async function updateVillaLiftFinishingRecord({
@@ -170,7 +175,8 @@ export async function updateVillaLiftFinishingRecord({
     })
     .eq('id', id)
 
-  if (error) throw handleApiError(error, '更新加工记录失败')
+  if (error)
+    throw handleApiError(error, '更新加工记录失败')
 }
 
 export async function deleteVillaLiftFinishingRecord(
@@ -181,7 +187,8 @@ export async function deleteVillaLiftFinishingRecord(
     .delete()
     .eq('id', id)
 
-  if (error) throw handleApiError(error, '删除加工记录失败')
+  if (error)
+    throw handleApiError(error, '删除加工记录失败')
 }
 
 export async function batchDeleteVillaLiftFinishingRecords(
@@ -192,5 +199,6 @@ export async function batchDeleteVillaLiftFinishingRecords(
     .delete()
     .in('id', ids)
 
-  if (error) throw handleApiError(error, '批量删除加工记录失败')
+  if (error)
+    throw handleApiError(error, '批量删除加工记录失败')
 }

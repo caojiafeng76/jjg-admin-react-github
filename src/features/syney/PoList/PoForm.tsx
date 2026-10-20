@@ -1,12 +1,14 @@
-import { FC, Ref, memo, useState } from 'react'
-import { DatePicker, Form, FormInstance, Input, Select, Radio } from 'antd'
-import { ISyneyPo } from '@/types'
-import ExcelUpload from './ExcelUpload'
-import type { TransformedOrderData } from '@utils/excelUtils'
-import dayjs from 'dayjs'
 import type { ISyneySpec } from '@services/types'
+import type { TransformedOrderData } from '@utils/excelUtils'
+import type { FormInstance } from 'antd'
+import type { FC, Ref } from 'react'
+import type { ISyneyPo } from '@/types'
+import { DatePicker, Form, Input, Radio, Select } from 'antd'
+import dayjs from 'dayjs'
+import { memo, useState } from 'react'
+import ExcelUpload from './ExcelUpload'
 
-type PoFormProps = {
+interface PoFormProps {
   onFinish: (values: ISyneyPo) => void
   isCreating: boolean
   isEdit: boolean
@@ -106,7 +108,7 @@ const PoForm: FC<PoFormProps> = ({
           <Form.Item label="导入方式">
             <Radio.Group
               value={importMode}
-              onChange={(e) => setImportMode(e.target.value)}
+              onChange={e => setImportMode(e.target.value)}
               disabled={isCreating}
             >
               <Radio value="manual">手动输入</Radio>

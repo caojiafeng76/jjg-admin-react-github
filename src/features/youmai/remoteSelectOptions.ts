@@ -22,12 +22,12 @@ export function createProductOptionSnapshot(
   source?: ProductOptionSnapshotSource | null,
 ): ProductOptionSnapshot | undefined {
   if (
-    !source?.product_data_id ||
-    typeof source.material_code !== 'string' ||
-    typeof source.material_name !== 'string' ||
-    typeof source.model !== 'string' ||
-    typeof source.specification !== 'string' ||
-    typeof source.specific_gravity !== 'number'
+    !source?.product_data_id
+    || typeof source.material_code !== 'string'
+    || typeof source.material_name !== 'string'
+    || typeof source.model !== 'string'
+    || typeof source.specification !== 'string'
+    || typeof source.specific_gravity !== 'number'
   ) {
     return undefined
   }
@@ -78,10 +78,11 @@ export function useRemoteSelectOptions<T extends { id: string }>(
 
   useEffect(() => {
     setSelectedSnapshot((snapshot) => {
-      if (!snapshot) return snapshot
+      if (!snapshot)
+        return snapshot
 
       return (
-        currentOptions.find((option) => option.id === snapshot.id) ?? snapshot
+        currentOptions.find(option => option.id === snapshot.id) ?? snapshot
       )
     })
   }, [currentOptions, selectedSnapshot?.id])
@@ -98,7 +99,7 @@ export function useRemoteSelectOptions<T extends { id: string }>(
   const rememberSelectedOption = useCallback(
     (id?: string) => {
       setSelectedSnapshot(
-        id ? mergedOptions.find((option) => option.id === id) : undefined,
+        id ? mergedOptions.find(option => option.id === id) : undefined,
       )
     },
     [mergedOptions],

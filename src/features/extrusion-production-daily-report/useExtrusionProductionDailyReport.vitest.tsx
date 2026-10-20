@@ -1,12 +1,17 @@
 import type { PropsWithChildren } from 'react'
-import { renderHook, waitFor } from '@testing-library/react'
 import {
   keepPreviousData,
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
+import { renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { queryConfig } from '@/config/queryClient'
+
+import {
+  EXTRUSION_PRODUCTION_DAILY_REPORT_KEY,
+  useExtrusionProductionDailyReport,
+} from './useExtrusionProductionDailyReport'
 
 const mocks = vi.hoisted(() => ({
   getDailyReport: vi.fn().mockResolvedValue({ rows: [], total: 0 }),
@@ -15,11 +20,6 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/services/apiExtrusionProductionDailyReport', () => ({
   getExtrusionProductionDailyReport: mocks.getDailyReport,
 }))
-
-import {
-  EXTRUSION_PRODUCTION_DAILY_REPORT_KEY,
-  useExtrusionProductionDailyReport,
-} from './useExtrusionProductionDailyReport'
 
 describe('useExtrusionProductionDailyReport', () => {
   it('keeps the prior page, applies list caching, and forwards the query signal', async () => {

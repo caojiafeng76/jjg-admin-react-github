@@ -1,14 +1,14 @@
-import { Alert, Button, Progress, Tag, Tooltip } from 'antd'
-
-import type { TransferWorkshopStat } from '@/services/apiMaterialTransfers'
-import StatusPill from '@/ui/StatusPill'
 import type { WorkshopOrderStatus } from './orderStatus'
+
+import type { WorkshopOrder } from './types'
+import type { TransferWorkshopStat } from '@/services/apiMaterialTransfers'
+import { Alert, Button, Progress, Tag, Tooltip } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 import {
   canWorkshopOrderBeClosed,
   getWorkshopOrderStatusTone,
   normalizeWorkshopOrderStatus,
 } from './orderStatus'
-import type { WorkshopOrder } from './types'
 
 export default function WorkshopOrderInfoHeader({
   order,
@@ -31,15 +31,15 @@ export default function WorkshopOrderInfoHeader({
   const orderQty = order.order_quantity ?? 0
   const outbound = transferStats?.totalOutbound ?? 0
   const status = normalizeWorkshopOrderStatus(order.status)
-  const progressPercent =
-    orderQty > 0 ? Math.min(Math.round((outbound / orderQty) * 100), 100) : 0
+  const progressPercent
+    = orderQty > 0 ? Math.min(Math.round((outbound / orderQty) * 100), 100) : 0
   const shouldRemindClose = canWorkshopOrderBeClosed({
     status,
     orderQuantity: orderQty,
     totalOutbound: outbound,
   })
-  const progressStatus =
-    progressPercent >= 100
+  const progressStatus
+    = progressPercent >= 100
       ? 'success'
       : progressPercent > 0
         ? 'active'
@@ -53,7 +53,7 @@ export default function WorkshopOrderInfoHeader({
           showIcon
           type="warning"
           className="mb-3"
-          message={
+          message={(
             <span className="flex items-center gap-2">
               <span className="flex size-5 items-center justify-center rounded-full bg-amber-100">
                 <svg
@@ -70,9 +70,9 @@ export default function WorkshopOrderInfoHeader({
               </span>
               <span>出库进度已达 100%，请尽快修改为已结案</span>
             </span>
-          }
+          )}
           description="结案后，新建生产工单时将不再显示该订单，避免继续关联。"
-          action={
+          action={(
             <Button
               type="primary"
               danger
@@ -83,7 +83,7 @@ export default function WorkshopOrderInfoHeader({
             >
               立即结案
             </Button>
-          }
+          )}
         />
       )}
 
@@ -265,12 +265,12 @@ export default function WorkshopOrderInfoHeader({
               className="font-medium"
               style={{
                 color:
-                  (transferStats?.totalOutbound ?? 0) >= orderQty &&
-                  orderQty > 0
+                  (transferStats?.totalOutbound ?? 0) >= orderQty
+                  && orderQty > 0
                     ? '#389e0d'
                     : (transferStats?.totalOutbound ?? 0) > 0
-                      ? '#1677ff'
-                      : '#999',
+                        ? '#1677ff'
+                        : '#999',
               }}
             >
               {transferStats?.totalOutbound ?? 0}
@@ -319,7 +319,7 @@ export default function WorkshopOrderInfoHeader({
             '100%': progressPercent >= 100 ? '#22c55e' : '#60a5fa',
           }}
           trailColor="#e5e7eb"
-          format={(pct) => (
+          format={pct => (
             <span className="text-xs font-medium text-slate-600">
               {outbound} / {orderQty} ({pct}%)
             </span>
@@ -331,7 +331,7 @@ export default function WorkshopOrderInfoHeader({
       {transferStats && transferStats.byWorkshop.length > 0 && (
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="text-xs text-slate-500">车间流转：</span>
-          {transferStats.byWorkshop.map((ws) => (
+          {transferStats.byWorkshop.map(ws => (
             <Tooltip
               key={ws.target_workshop}
               title={`${ws.record_count} 条记录`}

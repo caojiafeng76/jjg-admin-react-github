@@ -1,18 +1,18 @@
-import React, { memo, useMemo, useState } from 'react'
-import type { CSSProperties, TdHTMLAttributes, ThHTMLAttributes } from 'react'
-import { Button, Spin, Table, Tag, Tooltip } from 'antd'
 import type { TableColumnsType, TableProps } from 'antd'
-import dayjs from 'dayjs'
+import type { CSSProperties, TdHTMLAttributes, ThHTMLAttributes } from 'react'
+import type {
+  VillaLiftOrder,
+  VillaLiftOrderItem,
+} from '@/services/apiVillaLiftOrders'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
   PencilSquareIcon,
 } from '@heroicons/react/16/solid'
+import { Button, Spin, Table, Tag, Tooltip } from 'antd'
+import dayjs from 'dayjs'
 
-import type {
-  VillaLiftOrder,
-  VillaLiftOrderItem,
-} from '@/services/apiVillaLiftOrders'
+import React, { memo, useMemo, useState } from 'react'
 import { useVillaLiftOrderItems } from './useVillaLiftOrders'
 
 const EXPAND_COLUMN_WIDTH = 36
@@ -92,16 +92,20 @@ function renderPlannedDate(
   actual: string | null,
   delivery: string | null,
 ) {
-  if (!planned) return '-'
+  if (!planned)
+    return '-'
   let color: string | undefined
   if (actual) {
     color = '#52c41a'
-  } else if (delivery) {
+  }
+  else if (delivery) {
     const remaining = dayjs(delivery)
       .startOf('day')
       .diff(dayjs().startOf('day'), 'day')
-    if (remaining > 7) color = '#52c41a'
-    else if (remaining >= 3) color = '#faad14'
+    if (remaining > 7)
+      color = '#52c41a'
+    else if (remaining >= 3)
+      color = '#faad14'
     else color = '#ff4d4f'
   }
   return (
@@ -119,10 +123,10 @@ function getSelectFilter(
   data: VillaLiftOrder[],
 ) {
   const options = Array.from(
-    new Set(data.map((r) => String(r[dataIndex] ?? '')).filter(Boolean)),
+    new Set(data.map(r => String(r[dataIndex] ?? '')).filter(Boolean)),
   )
     .sort()
-    .map((v) => ({ text: v, value: v }))
+    .map(v => ({ text: v, value: v }))
 
   return {
     filters: options,
@@ -192,17 +196,19 @@ function ExpandedItems({
           </Button>
         )}
       </div>
-      {items.length === 0 ? (
-        <div className="py-2 text-sm text-gray-400">暂无明细</div>
-      ) : (
-        <Table<VillaLiftOrderItem>
-          dataSource={items}
-          columns={itemColumns}
-          rowKey="id"
-          pagination={false}
-          size="small"
-        />
-      )}
+      {items.length === 0
+        ? (
+            <div className="py-2 text-sm text-gray-400">暂无明细</div>
+          )
+        : (
+            <Table<VillaLiftOrderItem>
+              dataSource={items}
+              columns={itemColumns}
+              rowKey="id"
+              pagination={false}
+              size="small"
+            />
+          )}
     </div>
   )
 }
@@ -469,11 +475,13 @@ function VillaLiftOrderTable({
         onFilter: (value: boolean | React.Key, record: VillaLiftOrder) =>
           record.status === String(value),
         render: (v: string) =>
-          v === 'closed' ? (
-            <Tag color="green">已结案</Tag>
-          ) : (
-            <Tag color="red">未结案</Tag>
-          ),
+          v === 'closed'
+            ? (
+                <Tag color="green">已结案</Tag>
+              )
+            : (
+                <Tag color="red">未结案</Tag>
+              ),
       },
       {
         title: '操作',
@@ -481,19 +489,21 @@ function VillaLiftOrderTable({
         width: 56,
         fixed: 'right',
         render: (_v: unknown, record: VillaLiftOrder) =>
-          canEdit ? (
-            <Tooltip title="编辑订单">
-              <Button
-                type="text"
-                size="small"
-                icon={
-                  <PencilSquareIcon className="size-4 text-yellow-500/80!" />
-                }
-                aria-label={`编辑订单 ${record.project_name || record.id}`}
-                onClick={() => onEdit(record)}
-              />
-            </Tooltip>
-          ) : null,
+          canEdit
+            ? (
+                <Tooltip title="编辑订单">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={
+                      <PencilSquareIcon className="size-4 text-yellow-500/80!" />
+                    }
+                    aria-label={`编辑订单 ${record.project_name || record.id}`}
+                    onClick={() => onEdit(record)}
+                  />
+                </Tooltip>
+              )
+            : null,
       },
     ],
     [page, pageSize, canEdit, onEdit, data],
@@ -506,7 +516,7 @@ function VillaLiftOrderTable({
       setExpandedKeys(
         expanded
           ? [...expandedKeys, record.id]
-          : expandedKeys.filter((k) => k !== record.id),
+          : expandedKeys.filter(k => k !== record.id),
       )
     },
     expandIcon: ({ expanded, onExpand, record }) => (
@@ -514,17 +524,19 @@ function VillaLiftOrderTable({
         type="text"
         size="small"
         icon={
-          expanded ? (
-            <ChevronDownIcon className="size-4 text-blue-500" />
-          ) : (
-            <ChevronRightIcon className="size-4 text-gray-400" />
-          )
+          expanded
+            ? (
+                <ChevronDownIcon className="size-4 text-blue-500" />
+              )
+            : (
+                <ChevronRightIcon className="size-4 text-gray-400" />
+              )
         }
         aria-label={`${expanded ? '收起' : '展开'}订单 ${record.project_name || record.id} 明细`}
-        onClick={(e) => onExpand(record, e)}
+        onClick={e => onExpand(record, e)}
       />
     ),
-    expandedRowRender: (record) => (
+    expandedRowRender: record => (
       <ExpandedItems
         orderId={record.id}
         onEditItems={onEditItems}
@@ -533,8 +545,8 @@ function VillaLiftOrderTable({
     ),
   }
 
-  const tableWidth =
-    getTableColumnWidth(columns) + EXPAND_COLUMN_WIDTH + SELECTION_COLUMN_WIDTH
+  const tableWidth
+    = getTableColumnWidth(columns) + EXPAND_COLUMN_WIDTH + SELECTION_COLUMN_WIDTH
 
   return (
     <Table<VillaLiftOrder>
@@ -552,7 +564,7 @@ function VillaLiftOrderTable({
       rowSelection={{
         columnWidth: SELECTION_COLUMN_WIDTH,
         selectedRowKeys,
-        onChange: (keys) => onSelectionChange(keys as string[]),
+        onChange: keys => onSelectionChange(keys as string[]),
       }}
     />
   )

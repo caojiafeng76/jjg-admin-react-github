@@ -1,9 +1,9 @@
-import * as XLSX from 'xlsx-js-style'
-
 import type {
   AttendanceLateEarlyStat,
   AttendanceMonthlyRow,
 } from '@/services/apiAttendanceDetails'
+
+import * as XLSX from 'xlsx-js-style'
 import { EXCEL_WRITE_OPTIONS } from './excelStyleUtils'
 
 /** 返回指定年月的天数 */
@@ -16,7 +16,7 @@ interface EmployeeMonthData {
   /** key: day (1-31), value: { work_hours, shift, specialRemark } */
   days: Record<
     number,
-    { work_hours: number; shift: string; specialRemark?: string | null }
+    { work_hours: number, shift: string, specialRemark?: string | null }
   >
 }
 
@@ -29,7 +29,7 @@ function getSpecialRemark(row: AttendanceMonthlyRow): string | null {
     return null
   }
 
-  return SPECIAL_REMARK_KEYWORDS.some((keyword) => remark.includes(keyword))
+  return SPECIAL_REMARK_KEYWORDS.some(keyword => remark.includes(keyword))
     ? remark
     : null
 }
@@ -48,7 +48,7 @@ function formatDayCellValue(day?: {
 
   return Number.isInteger(day.work_hours)
     ? day.work_hours
-    : parseFloat(day.work_hours.toFixed(2))
+    : Number.parseFloat(day.work_hours.toFixed(2))
 }
 
 function getOrderDay(orderDate: string): number {
@@ -76,9 +76,12 @@ function aggregateByEmployee(
     const existing = emp.days[day]
     if (existing) {
       existing.work_hours += row.work_hours
-      if (row.shift === '夜班') existing.shift = '夜班'
-      if (specialRemark) existing.specialRemark = specialRemark
-    } else {
+      if (row.shift === '夜班')
+        existing.shift = '夜班'
+      if (specialRemark)
+        existing.specialRemark = specialRemark
+    }
+    else {
       emp.days[day] = {
         work_hours: row.work_hours,
         shift: row.shift,
@@ -108,7 +111,7 @@ const NIGHT_SHIFT_FILL = {
 }
 
 /** 普通单元格样式（含边框、居中、宋体） */
-function baseStyle(opts: { bold?: boolean; bg?: string } = {}) {
+function baseStyle(opts: { bold?: boolean, bg?: string } = {}) {
   return {
     font: { name: '宋体', sz: 11, bold: opts.bold },
     alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
@@ -146,7 +149,7 @@ function appendAttendanceMonthlyWorksheet(
   const sheetData: (string | number | null)[][] = []
 
   // 标题行
-  const titleRow: (string | number | null)[] = Array(totalCols).fill(null)
+  const titleRow: (string | number | null)[] = Array.from({ length: totalCols }, () => null)
   titleRow[0] = `精加工${year}-${month}月份出勤明细表${titleSuffix}`
   sheetData.push(titleRow)
 
@@ -176,11 +179,12 @@ function appendAttendanceMonthlyWorksheet(
         if (!(day.specialRemark && day.work_hours === 0)) {
           daysCount += 1
         }
-      } else {
+      }
+      else {
         row.push(null)
       }
     }
-    row.push(parseFloat(totalHours.toFixed(2)))
+    row.push(Number.parseFloat(totalHours.toFixed(2)))
     row.push(daysCount)
     row.push(null) // 备注留空
     sheetData.push(row)
@@ -229,14 +233,14 @@ function appendAttendanceMonthlyWorksheet(
 
       // 数据行
       const dataRowIdx = rowIdx - 2
-      const isNightShift =
-        colIdx >= dayColStart &&
-        colIdx < totalCol &&
-        (() => {
-          const day = colIdx - dayColStart + 1
-          const emp = employeeMap.get(employeeNames[dataRowIdx])
-          return emp?.days[day]?.shift === '夜班'
-        })()
+      const isNightShift
+        = colIdx >= dayColStart
+          && colIdx < totalCol
+          && (() => {
+            const day = colIdx - dayColStart + 1
+            const emp = employeeMap.get(employeeNames[dataRowIdx])
+            return emp?.days[day]?.shift === '夜班'
+          })()
 
       ws[cellRef] = {
         v: cellVal ?? '',
@@ -262,7 +266,7 @@ function appendAttendanceMonthlyWorksheet(
     { wch: 6 }, // 编号
     { wch: 8 }, // 岗位
     { wch: 10 }, // 姓名
-    ...Array(totalDays).fill({ wch: 4.5 }),
+    ...Array.from({ length: totalDays }, () => ({ wch: 4.5 })),
     { wch: 7 }, // 合计
     { wch: 6 }, // 天数
     { wch: 12 }, // 备注
@@ -273,7 +277,7 @@ function appendAttendanceMonthlyWorksheet(
   const rowHeights: { hpt: number }[] = [
     { hpt: 28 }, // 标题行
     { hpt: 22 }, // 表头行
-    ...Array(employeeNames.length).fill({ hpt: 20 }),
+    ...Array.from({ length: employeeNames.length }, () => ({ hpt: 20 })),
   ]
   ws['!rows'] = rowHeights
 
@@ -296,7 +300,7 @@ export function exportAttendanceMonthlyExcel(
 
   appendAttendanceMonthlyWorksheet(
     wb,
-    rows.filter((row) => row.is_external !== true),
+    rows.filter(row => row.is_external !== true),
     year,
     month,
     `${monthLabel}-非外来`,
@@ -304,7 +308,7 @@ export function exportAttendanceMonthlyExcel(
   )
   appendAttendanceMonthlyWorksheet(
     wb,
-    rows.filter((row) => row.is_external === true),
+    rows.filter(row => row.is_external === true),
     year,
     month,
     `${monthLabel}-外来`,
@@ -325,10 +329,10 @@ export function exportAttendanceMonthlyExcel(
  */
 export function exportAttendanceLateEarlyExcel(
   data: AttendanceLateEarlyStat[],
-  dateRange?: { startDate?: string; endDate?: string },
+  dateRange?: { startDate?: string, endDate?: string },
 ) {
-  const rangeStr =
-    dateRange?.startDate && dateRange?.endDate
+  const rangeStr
+    = dateRange?.startDate && dateRange?.endDate
       ? `（${dateRange.startDate} ~ ${dateRange.endDate}）`
       : dateRange?.startDate
         ? `（${dateRange.startDate} 起）`
@@ -437,7 +441,7 @@ export function exportAttendanceLateEarlyExcel(
   ws['!rows'] = [
     { hpt: 28 },
     { hpt: 22 },
-    ...Array(dataRows.length).fill({ hpt: 20 }),
+    ...Array.from({ length: dataRows.length }, () => ({ hpt: 20 })),
   ]
 
   const wb = XLSX.utils.book_new()

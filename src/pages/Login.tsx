@@ -1,13 +1,13 @@
 import { LockOutlined, MailOutlined } from '@ant-design/icons'
+import Loading from '@ui/Loading'
 import { Alert, Button, Checkbox, Form, Input, Typography } from 'antd'
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 
-import { useAuth } from '@/contexts'
-import { usePermissionContext } from '@/contexts'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth, usePermissionContext } from '@/contexts'
+
 import { deriveDefaultHome, userCanAccessPath } from '@/routes/pageHome'
 import { translateErrorMessage } from '@/utils/errorHandler'
-import Loading from '@ui/Loading'
 
 const { Title, Text } = Typography
 const REMEMBERED_LOGIN_EMAIL_KEY = 'jjg-login-email'
@@ -54,7 +54,8 @@ export default function Login() {
         let target: string | null = null
         if (redirectTarget) {
           const allowed = await userCanAccessPath(redirectTarget, permissions)
-          if (allowed) target = redirectTarget
+          if (allowed)
+            target = redirectTarget
         }
         if (!target) {
           target = await deriveDefaultHome(role, permissions)
@@ -108,17 +109,20 @@ export default function Login() {
     try {
       if (values.rememberMe) {
         window.localStorage.setItem(REMEMBERED_LOGIN_EMAIL_KEY, values.email)
-      } else {
+      }
+      else {
         window.localStorage.removeItem(REMEMBERED_LOGIN_EMAIL_KEY)
       }
 
       await signIn(values.email, values.password)
       setSuccessMessage('登录成功，正在跳转...')
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : '登录失败，请稍后重试'
+    }
+    catch (err: unknown) {
+      const message
+        = err instanceof Error ? err.message : '登录失败，请稍后重试'
       setErrorMessage(translateErrorMessage(message))
-    } finally {
+    }
+    finally {
       setSubmitting(false)
     }
   }
@@ -134,7 +138,7 @@ export default function Login() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1762341118954-d0ce391674d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjb3Jwb3JhdGUlMjBvZmZpY2UlMjBidXNpbmVzcyUyMHdvcmtpbmd8ZW58MXx8fHwxNzc2NTc1MjU5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral')",
+              'url(\'https://images.unsplash.com/photo-1762341118954-d0ce391674d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjb3Jwb3JhdGUlMjBvZmZpY2UlMjBidXNpbmVzcyUyMHdvcmtpbmd8ZW58MXx8fHwxNzc2NTc1MjU5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral\')',
           }}
         />
         <div className="absolute inset-0 bg-linear-to-t from-slate-950/85 via-slate-950/25 to-slate-900/10" />
@@ -165,8 +169,8 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-slate-50/60 px-6 py-12 dark:bg-slate-900/60 lg:px-8">
-        <div className="w-full max-w-md rounded-[28px] border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-none sm:p-10">
+      <div className="flex flex-1 items-center justify-center bg-slate-50/60 px-6 py-12 lg:px-8 dark:bg-slate-900/60">
+        <div className="w-full max-w-md rounded-[28px] border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-[15px] font-bold tracking-[0.18em] text-white shadow-[0_16px_36px_color-mix(in_srgb,var(--jjg-color-primary)_32%,transparent)]">
               JJG

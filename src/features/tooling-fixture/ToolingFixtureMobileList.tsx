@@ -1,6 +1,6 @@
-import { Button, Checkbox, theme } from 'antd'
-
 import type { ToolingFixture } from '@/services/apiToolingFixture'
+
+import { Button, Checkbox, theme } from 'antd'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
 import {
@@ -69,7 +69,7 @@ export default function ToolingFixtureMobileList({
                 onChange={(event) => {
                   const nextKeys = event.target.checked
                     ? [...selectedRowKeys, record.id]
-                    : selectedRowKeys.filter((key) => key !== record.id)
+                    : selectedRowKeys.filter(key => key !== record.id)
                   onSelect(nextKeys)
                 }}
               />

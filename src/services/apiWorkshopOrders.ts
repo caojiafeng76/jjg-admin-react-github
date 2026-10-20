@@ -1,15 +1,15 @@
-import supabase from './supabase'
+import type { WorkshopOrder } from '@/features/workshop/OrderList'
+import {
+  canWorkshopOrderBeClosed,
+  DEFAULT_WORKSHOP_ORDER_STATUS,
+  normalizeWorkshopOrderStatus,
+} from '@/features/workshop/OrderList/orderStatus'
 import { AppError, handleApiError } from '@/utils/errorHandler'
 import {
   buildOrIlikeFilter,
   normalizeSearchKeywords,
 } from '@/utils/searchKeywords'
-import type { WorkshopOrder } from '@/features/workshop/OrderList'
-import {
-  DEFAULT_WORKSHOP_ORDER_STATUS,
-  canWorkshopOrderBeClosed,
-  normalizeWorkshopOrderStatus,
-} from '@/features/workshop/OrderList/orderStatus'
+import { assertWorkshopOrdersNotReferenced } from './apiWorkshopOrderDeleteBlockers'
 import {
   assertWorkshopOrderHasMeaningfulContent,
   buildSalesOrderPayload,
@@ -18,20 +18,20 @@ import {
   normalizeOptionalText,
   normalizeWorkshopOrderInput,
 } from './apiWorkshopOrdersCalculations'
-import { assertWorkshopOrdersNotReferenced } from './apiWorkshopOrderDeleteBlockers'
 import {
   removeWorkshopOrderSketchFiles,
   uploadWorkshopOrderSketch,
 } from './apiWorkshopOrderSketches'
+import supabase from './supabase'
 
-export {
-  buildWorkshopOrderStatusUpdateValues,
-  findDuplicateProjectNos,
-} from './apiWorkshopOrdersCalculations'
 export {
   getWorkshopOrderDeleteBlockers,
   type WorkshopOrderDeleteBlocker,
 } from './apiWorkshopOrderDeleteBlockers'
+export {
+  buildWorkshopOrderStatusUpdateValues,
+  findDuplicateProjectNos,
+} from './apiWorkshopOrdersCalculations'
 export { downloadWorkshopOrderSketchFile } from './apiWorkshopOrderSketches'
 
 export async function getWorkshopOrders({
@@ -88,7 +88,8 @@ export async function getWorkshopOrders({
   // 项目号多关键词搜索（OR 逻辑，只搜索 project_no 列）
   if (projectNoKeywords?.length) {
     query = query.or(buildOrIlikeFilter(['project_no'], projectNoKeywords))
-  } else if (project_no) {
+  }
+  else if (project_no) {
     // 向后兼容单关键词项目号搜索
     query = query.ilike('project_no', `%${project_no}%`)
   }
@@ -101,7 +102,8 @@ export async function getWorkshopOrders({
         modelSearchKeywords,
       ),
     )
-  } else {
+  }
+  else {
     // 向后兼容单独的型号搜索字段
     if (product_model) {
       query = query.ilike('product_model', `%${product_model}%`)
@@ -123,9 +125,11 @@ export async function getWorkshopOrders({
     query = query
       .gte('product_delivery_date', startDate)
       .lte('product_delivery_date', endDate)
-  } else if (startDate) {
+  }
+  else if (startDate) {
     query = query.gte('product_delivery_date', startDate)
-  } else if (endDate) {
+  }
+  else if (endDate) {
     query = query.lte('product_delivery_date', endDate)
   }
 
@@ -156,12 +160,12 @@ export async function getWorkshopOrders({
     throw handleApiError(error, '获取车间订单失败')
   }
 
-  const items = ((data || []) as WorkshopOrder[]).map((item) => ({ ...item }))
+  const items = ((data || []) as WorkshopOrder[]).map(item => ({ ...item }))
 
   const projectNos = Array.from(
     new Set(
       items
-        .map((item) => item.project_no?.trim())
+        .map(item => item.project_no?.trim())
         .filter((projectNo): projectNo is string => Boolean(projectNo)),
     ),
   )
@@ -206,8 +210,8 @@ export async function getWorkshopOrders({
 
         outboundTotalByProjectNo.set(
           projectNo,
-          (outboundTotalByProjectNo.get(projectNo) || 0) +
-            Number(row.transfer_quantity || 0),
+          (outboundTotalByProjectNo.get(projectNo) || 0)
+          + Number(row.transfer_quantity || 0),
         )
       }
 
@@ -310,7 +314,8 @@ export async function getWorkshopOrderById(id: string) {
 async function checkProjectNoExists(
   projectNo: string | null,
 ): Promise<boolean> {
-  if (!projectNo) return false
+  if (!projectNo)
+    return false
 
   const { data, error } = await supabase
     .from('sales_orders')
@@ -332,7 +337,8 @@ async function checkProjectNosExist(
   projectNos: (string | null)[],
 ): Promise<string[]> {
   const validProjectNos = projectNos.filter((no): no is string => !!no)
-  if (validProjectNos.length === 0) return []
+  if (validProjectNos.length === 0)
+    return []
 
   const { data, error } = await supabase
     .from('sales_orders')
@@ -344,7 +350,7 @@ async function checkProjectNosExist(
   }
 
   return (data || [])
-    .map((item) => item.project_no)
+    .map(item => item.project_no)
     .filter((no): no is string => !!no)
 }
 
@@ -444,9 +450,10 @@ export async function updateWorkshopOrderStatuses({
 }
 
 export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
-  if (!rows.length) return
+  if (!rows.length)
+    return
 
-  const normalizedRows = rows.map((row) => normalizeWorkshopOrderInput(row))
+  const normalizedRows = rows.map(row => normalizeWorkshopOrderInput(row))
   const uploadedSketchPaths: string[] = []
 
   normalizedRows.forEach((row, index) => {
@@ -454,7 +461,7 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
   })
 
   // 检查所有项目号是否已存在
-  const projectNos = normalizedRows.map((row) => row.project_no)
+  const projectNos = normalizedRows.map(row => row.project_no)
   const duplicateProjectNos = findDuplicateProjectNos(projectNos)
 
   if (duplicateProjectNos.length > 0) {
@@ -485,12 +492,13 @@ export async function createWorkshopOrdersBatch(rows: WorkshopOrder[]) {
         sketch_file: null,
       })
     }
-  } catch (error) {
+  }
+  catch (error) {
     await removeWorkshopOrderSketchFiles(uploadedSketchPaths)
     throw error
   }
 
-  const insertRows = rowsWithSketchPaths.map((row) =>
+  const insertRows = rowsWithSketchPaths.map(row =>
     buildSalesOrderPayload(
       {
         ...row,
@@ -534,7 +542,7 @@ export async function deleteWorkshopOrders(ids: string[]) {
 
   await removeWorkshopOrderSketchFiles(
     (sketchRows || [])
-      .map((row) => row.sketch_file_path)
+      .map(row => row.sketch_file_path)
       .filter((path): path is string => Boolean(path)),
   )
 }

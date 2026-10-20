@@ -1,3 +1,11 @@
+import type {
+  ProductionDailyReportFilters,
+  ProductionDailyReportRow,
+} from '@/services/apiProductionDailyReport'
+import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
+import { App } from 'antd'
+import dayjs from 'dayjs'
 import {
   startTransition,
   useCallback,
@@ -5,35 +13,28 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { App } from 'antd'
-import { ArrowDownTrayIcon } from '@heroicons/react/16/solid'
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
-import { useSearchParams } from 'react-router-dom'
-import dayjs from 'dayjs'
 
-import AppPagination from '@/ui/AppPagination'
-import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
-import { TableState } from '@/ui/TableState'
+import { useSearchParams } from 'react-router-dom'
+import { isEmployeeSideRole } from '@/config/access'
+import { useAuth } from '@/contexts/useAuth'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import type {
-  ProductionDailyReportFilters,
-  ProductionDailyReportRow,
-} from '@/services/apiProductionDailyReport'
 import {
   getProductionDailyReportForExportChunked,
   PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE,
 } from '@/services/apiProductionDailyReport'
-import { isEmployeeSideRole } from '@/config/access'
+import AppPagination from '@/ui/AppPagination'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import { TableState } from '@/ui/TableState'
+import ProductionDailyReportMobileList from './ProductionDailyReportMobileList'
 import ProductionDailyReportSearch from './ProductionDailyReportSearch'
 import ProductionDailyReportTable from './ProductionDailyReportTable'
-import ProductionDailyReportMobileList from './ProductionDailyReportMobileList'
 import { useProductionDailyReport } from './useProductionDailyReport'
-import { useAuth } from '@/contexts/useAuth'
 
-const loadProductionDailyReportExcel = () =>
-  import('@/utils/productionDailyReportExcel')
+function loadProductionDailyReportExcel() {
+  return import('@/utils/productionDailyReportExcel')
+}
 
-const preloadProductionDailyReportExcel = () => {
+function preloadProductionDailyReportExcel() {
   void loadProductionDailyReportExcel()
 }
 
@@ -57,8 +58,8 @@ export default function ProductionDailyReportPage() {
     startDate: searchParamsURL.get('startDate') || undefined,
     endDate: searchParamsURL.get('endDate') || undefined,
     dataCategory:
-      searchParamsURL.get('dataCategory') === 'A' ||
-      searchParamsURL.get('dataCategory') === 'B'
+      searchParamsURL.get('dataCategory') === 'A'
+      || searchParamsURL.get('dataCategory') === 'B'
         ? (searchParamsURL.get('dataCategory') as 'A' | 'B')
         : undefined,
     projectNo: searchParamsURL.get('projectNo') || undefined,
@@ -90,7 +91,7 @@ export default function ProductionDailyReportPage() {
     if (selectedCount === 0) {
       return { qualifiedCount: 0, defectCount: 0, matched: 0 }
     }
-    const keySet = new Set(selectedRowKeys.map((key) => String(key)))
+    const keySet = new Set(selectedRowKeys.map(key => String(key)))
     let qualifiedCount = 0
     let defectCount = 0
     let matched = 0
@@ -106,7 +107,7 @@ export default function ProductionDailyReportPage() {
   const selectedRows = useMemo(
     () =>
       selectedRowKeys
-        .map((key) => selectedRowsMap.get(String(key)))
+        .map(key => selectedRowsMap.get(String(key)))
         .filter((row): row is ProductionDailyReportRow => Boolean(row)),
     [selectedRowKeys, selectedRowsMap],
   )
@@ -140,7 +141,8 @@ export default function ProductionDailyReportPage() {
 
         if (typeof value === 'string' && value) {
           nextParams.set(paramKey, value)
-        } else {
+        }
+        else {
           nextParams.delete(paramKey)
         }
       })
@@ -174,7 +176,7 @@ export default function ProductionDailyReportPage() {
 
   useEffect(() => {
     if (fixedEmployeeId) {
-      setFilters((prev) => ({ ...prev, employeeId: fixedEmployeeId }))
+      setFilters(prev => ({ ...prev, employeeId: fixedEmployeeId }))
     }
   }, [fixedEmployeeId])
 
@@ -201,8 +203,8 @@ export default function ProductionDailyReportPage() {
   )
 
   const handleExport = useCallback(async () => {
-    const exportTargetCount =
-      selectedRowKeys.length > 0 ? selectedRowKeys.length : total
+    const exportTargetCount
+      = selectedRowKeys.length > 0 ? selectedRowKeys.length : total
 
     if (exportTargetCount === 0) {
       message.warning('当前没有可导出的日报数据')
@@ -223,8 +225,8 @@ export default function ProductionDailyReportPage() {
 
       updateProgress(0, exportTargetCount)
 
-      const exportRows =
-        selectedRowKeys.length > 0
+      const exportRows
+        = selectedRowKeys.length > 0
           ? selectedRows
           : (
               await getProductionDailyReportForExportChunked(filters, {
@@ -247,8 +249,8 @@ export default function ProductionDailyReportPage() {
         window.requestAnimationFrame(() => resolve())
       })
 
-      const { exportProductionDailyReportToExcel } =
-        await loadProductionDailyReportExcel()
+      const { exportProductionDailyReportToExcel }
+        = await loadProductionDailyReportExcel()
       await exportProductionDailyReportToExcel(exportRows)
 
       message.success({
@@ -260,12 +262,14 @@ export default function ProductionDailyReportPage() {
         setSelectedRowKeys([])
         setSelectedRowsMap(new Map())
       }
-    } catch (error) {
+    }
+    catch (error) {
       message.error({
         key: 'production-daily-report-export',
         content: error instanceof Error ? error.message : '导出失败',
       })
-    } finally {
+    }
+    finally {
       setIsExporting(false)
     }
   }, [filters, message, selectedRowKeys, selectedRows, total])
@@ -289,48 +293,54 @@ export default function ProductionDailyReportPage() {
       }
     >
       <div className="flex flex-wrap items-center gap-2">
-        {isEmployeeView ? null : (
-          <>
-            <button
-              type="button"
-              onClick={handleExport}
-              onMouseEnter={preloadProductionDailyReportExcel}
-              onFocus={preloadProductionDailyReportExcel}
-              disabled={isExporting || (selectedCount === 0 && total === 0)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/60 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50/40 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-900 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
-            >
-              <ArrowDownTrayIcon className="h-4 w-4" />
-              {selectedCount > 0
-                ? `导出选中项 (${selectedCount})`
-                : `导出当前筛选结果${total > 0 ? ` (${total})` : ''}`}
-            </button>
-            {isExporting ? (
-              <span className="text-xs text-slate-400 dark:text-slate-500">正在生成文件...</span>
-            ) : null}
-          </>
-        )}
+        {isEmployeeView
+          ? null
+          : (
+              <>
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  onMouseEnter={preloadProductionDailyReportExcel}
+                  onFocus={preloadProductionDailyReportExcel}
+                  disabled={isExporting || (selectedCount === 0 && total === 0)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/60 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50/40 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-900 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
+                >
+                  <ArrowDownTrayIcon className="h-4 w-4" />
+                  {selectedCount > 0
+                    ? `导出选中项 (${selectedCount})`
+                    : `导出当前筛选结果${total > 0 ? ` (${total})` : ''}`}
+                </button>
+                {isExporting
+                  ? (
+                      <span className="text-xs text-slate-400 dark:text-slate-500">正在生成文件...</span>
+                    )
+                  : null}
+              </>
+            )}
       </div>
 
-      {!isEmployeeView && selectedCount > 0 ? (
-        <SelectedSummaryBar
-          selectedCount={selectedCount}
-          matchedCount={selectedSummary.matched}
-          stats={[
-            {
-              label: '合格数合计',
-              value: selectedSummary.qualifiedCount,
-              tone: 'success',
-              icon: <CheckCircleIcon className="size-3.5" />,
-            },
-            {
-              label: '不良数合计',
-              value: selectedSummary.defectCount,
-              tone: 'error',
-              icon: <XCircleIcon className="size-3.5" />,
-            },
-          ]}
-        />
-      ) : null}
+      {!isEmployeeView && selectedCount > 0
+        ? (
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedSummary.matched}
+              stats={[
+                {
+                  label: '合格数合计',
+                  value: selectedSummary.qualifiedCount,
+                  tone: 'success',
+                  icon: <CheckCircleIcon className="size-3.5" />,
+                },
+                {
+                  label: '不良数合计',
+                  value: selectedSummary.defectCount,
+                  tone: 'error',
+                  icon: <XCircleIcon className="size-3.5" />,
+                },
+              ]}
+            />
+          )
+        : null}
 
       <div
         className={
@@ -356,22 +366,24 @@ export default function ProductionDailyReportPage() {
         }
       >
         <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
-          {isEmployeeView ? (
-            <ProductionDailyReportMobileList
-              loading={isLoading || isFetching}
-              data={currentPageRows}
-            />
-          ) : (
-            <ProductionDailyReportTable
-              loading={isLoading || isFetching || isExporting}
-              data={currentPageRows}
-              page={page}
-              pageSize={pageSize}
-              selectedRowKeys={selectedRowKeys}
-              onRowSelectionChange={handleRowSelectionChange}
-              scrollY={scrollY}
-            />
-          )}
+          {isEmployeeView
+            ? (
+                <ProductionDailyReportMobileList
+                  loading={isLoading || isFetching}
+                  data={currentPageRows}
+                />
+              )
+            : (
+                <ProductionDailyReportTable
+                  loading={isLoading || isFetching || isExporting}
+                  data={currentPageRows}
+                  page={page}
+                  pageSize={pageSize}
+                  selectedRowKeys={selectedRowKeys}
+                  onRowSelectionChange={handleRowSelectionChange}
+                  scrollY={scrollY}
+                />
+              )}
         </TableState>
       </div>
 

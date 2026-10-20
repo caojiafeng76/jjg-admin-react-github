@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
-import { Form, FormInstance, Input, InputNumber } from 'antd'
-
+import type { FormInstance } from 'antd'
 import type {
   JintanPartsInventory,
   JintanPartsInventoryFormValues,
 } from '@/services/apiJintanPartsInventory'
+import { Form, Input, InputNumber } from 'antd'
+
+import { useEffect } from 'react'
 import {
   calcJintanPartsSafetyStock,
   getJintanPartsStockStatus,
@@ -35,8 +36,8 @@ export default function JintanPartsInventoryForm({
 }: Props) {
   const [form] = Form.useForm<JintanPartsInventoryFormValues>()
 
-  const partSnapshot =
-    initialValues && 'part_data_id' in initialValues ? initialValues : undefined
+  const partSnapshot
+    = initialValues && 'part_data_id' in initialValues ? initialValues : undefined
 
   const watchedQuantity = Form.useWatch('quantity', form)
   const watchedUnitQuantity = Form.useWatch('unit_quantity', form)
@@ -45,8 +46,8 @@ export default function JintanPartsInventoryForm({
     watchedUnitQuantity,
     watchedSafetyMultiple,
   )
-  const statusPreview =
-    JINTAN_PARTS_STOCK_STATUS_CONFIG[
+  const statusPreview
+    = JINTAN_PARTS_STOCK_STATUS_CONFIG[
       getJintanPartsStockStatus(
         Number(watchedQuantity || 0),
         watchedUnitQuantity,
@@ -152,16 +153,18 @@ export default function JintanPartsInventoryForm({
       </div>
 
       <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-        {safetyPreview ? (
-          <span>
-            安全库存 <b className="tabular-nums">{safetyPreview.safetyStock}</b>
-            ，阈值{' '}
-            <b className="tabular-nums">{safetyPreview.thresholdStock}</b>
-            ，当前状态：{statusPreview.label}
-          </span>
-        ) : (
-          <span>未设置单台数量，不判断库存状态</span>
-        )}
+        {safetyPreview
+          ? (
+              <span>
+                安全库存 <b className="tabular-nums">{safetyPreview.safetyStock}</b>
+                ，阈值{' '}
+                <b className="tabular-nums">{safetyPreview.thresholdStock}</b>
+                ，当前状态：{statusPreview.label}
+              </span>
+            )
+          : (
+              <span>未设置单台数量，不判断库存状态</span>
+            )}
       </div>
 
       <Form.Item

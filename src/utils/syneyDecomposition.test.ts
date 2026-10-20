@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
-
-import { buildDecompositionCells } from './syneyDecomposition'
-import type { ISyneyItem } from '@/services/types'
 import type { SyneySafePartRule } from './syneySafePartRules'
+
+import type { ISyneyItem } from '@/services/types'
+import { describe, expect, it } from 'vitest'
+import { buildDecompositionCells } from './syneyDecomposition'
 
 const settings: SyneySafePartRule[] = [
   { part_no: 'XN3024Z', decomposition_role: 'front_plate' },

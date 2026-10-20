@@ -64,9 +64,9 @@ describe('normalizeZip64ExcelBuffer', () => {
     const buffer = new ArrayBuffer(30 + fileName.length + extraLength + 3)
     const view = new DataView(buffer)
 
-    view.setUint32(0, 0x04034b50, true)
-    view.setUint32(18, 0xffffffff, true)
-    view.setUint32(22, 0xffffffff, true)
+    view.setUint32(0, 0x04034B50, true)
+    view.setUint32(18, 0xFFFFFFFF, true)
+    view.setUint32(22, 0xFFFFFFFF, true)
     view.setUint16(26, fileName.length, true)
     view.setUint16(28, extraLength, true)
     const extraStart = 30 + fileName.length
