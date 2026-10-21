@@ -15,6 +15,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-10-21
+
+- **类别**：变更 / 工程配置
+- **范围**：`.vscode/settings.json`
+- **摘要**：新增 `"deno.enablePaths": ["supabase/functions"]`，让 Deno 扩展只检查 Supabase Edge Functions 目录，避免在工作区启用 Deno 时把 `src/` 前端代码也按 Deno 规则检查、与 TypeScript 语言服务冲突。
+- **验证**：`bunx eslint .vscode/settings.json` 通过；需在 VS Code 中重新加载窗口后生效，未做编辑器内人工确认。
+
 ## 2026-10-20
 
 - **类别**：重构 / 工程优化
