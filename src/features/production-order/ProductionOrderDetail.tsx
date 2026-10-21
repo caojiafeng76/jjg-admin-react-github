@@ -4,12 +4,14 @@ import type {
 } from '@/services/apiProductionOrderItems'
 import type { ProductionOrder } from '@/services/apiProductionOrders'
 import { PlusIcon } from '@heroicons/react/16/solid'
-import { Button, Card, Descriptions, Tag } from 'antd'
+import { App, Button, Card, Descriptions, Tag } from 'antd'
 
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { isViewerRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import ProductionOrderItemForm from './ProductionOrderItemForm'
 import ProductionOrderItemMobileList from './ProductionOrderItemMobileList'
 import ProductionOrderItemTable from './ProductionOrderItemTable'
@@ -34,6 +36,7 @@ export default function ProductionOrderDetail({
   compact = false,
   canEdit = true,
 }: Props) {
+  const { message } = App.useApp()
   const { role } = useAuth()
   const hideCostColumns = isViewerRole(role)
   const [isItemModalOpen, setIsItemModalOpen] = useState(false)
@@ -69,22 +72,39 @@ export default function ProductionOrderDetail({
   }
 
   const handleDeleteItem = async (ids: string[]) => {
-    await deleteItemMutation.mutateAsync(ids)
-    await Promise.all([refetch(), refetchOrder()])
+    try {
+      await deleteItemMutation.mutateAsync(ids)
+      message.success(feedbackText.deleted('工序明细', ids.length))
+      await Promise.all([refetch(), refetchOrder()])
+    }
+    catch (error) {
+      message.error(
+        getUserErrorMessage(error, feedbackText.failed('删除', '工序明细')),
+      )
+    }
   }
 
   const handleItemSubmit = async (values: Partial<ProductionOrderItem>) => {
-    if (editingItem) {
-      await updateItemMutation.mutateAsync({
-        id: editingItem.id,
-        values,
-      })
+    const action = editingItem ? '更新' : '添加'
+    try {
+      if (editingItem) {
+        await updateItemMutation.mutateAsync({
+          id: editingItem.id,
+          values,
+        })
+      }
+      else {
+        await addItemMutation.mutateAsync(values as ProductionOrderItem)
+      }
+      message.success(`工序明细${action}成功`)
+      setIsItemModalOpen(false)
+      await Promise.all([refetch(), refetchOrder()])
     }
-    else {
-      await addItemMutation.mutateAsync(values as ProductionOrderItem)
+    catch (error) {
+      message.error(
+        getUserErrorMessage(error, feedbackText.failed(action, '工序明细')),
+      )
     }
-    setIsItemModalOpen(false)
-    await Promise.all([refetch(), refetchOrder()])
   }
 
   const orderWithEmployee = currentOrder as ProductionOrder & {
@@ -308,6 +328,7 @@ export default function ProductionOrderDetail({
         initialValues={editingItem}
         orderId={order.id}
         compact={compact}
+        submitting={addItemMutation.isPending || updateItemMutation.isPending}
       />
     </div>
   )

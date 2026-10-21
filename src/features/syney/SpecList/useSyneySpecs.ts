@@ -5,10 +5,16 @@ import { useEffect } from 'react'
 
 import { useSearchParams } from 'react-router-dom'
 import { isAbortError, queryConfig } from '@/config/queryClient'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 
-export function useSyneySpecs(
-  { isAll }: { isAll: boolean } = { isAll: false },
-) {
+export function useSyneySpecs({
+  isAll = false,
+  silentError = false,
+}: {
+  isAll?: boolean
+  /** 页面已通过 TableState 内联展示错误时传 true，避免重复 toast */
+  silentError?: boolean
+} = {}) {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
@@ -27,14 +33,15 @@ export function useSyneySpecs(
     queryFn: () => getSyneySpecs({ PartNo, page, pageSize, isAll }),
     placeholderData: keepPreviousData,
     ...queryConfig.list,
+    throwOnError: false,
   })
 
-  // 错误处理：忽略 AbortError
+  // 下拉选项等无内联错误区域的场景用 toast 提示；忽略 AbortError
   useEffect(() => {
-    if (error && !isAbortError(error)) {
-      message.error('获取规格列表失败，请稍后重试')
+    if (error && !silentError && !isAbortError(error)) {
+      message.error(getUserErrorMessage(error, '规格列表获取失败，请稍后重试'))
     }
-  }, [error, message])
+  }, [error, message, silentError])
 
   const pageCount = Math.ceil((count || 0) / pageSize)
 

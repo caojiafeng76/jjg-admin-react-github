@@ -4,7 +4,7 @@ import type { ISyneyPo } from '@/types'
 import { Table } from 'antd'
 import dayjs from 'dayjs'
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 import { useAppStore } from '@/store'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
@@ -76,6 +76,10 @@ function PoTable({
     [data],
   )
 
+  const location = useLocation()
+  // 详情页「返回列表」时恢复当前列表的筛选与分页
+  const listHref = `${location.pathname}${location.search}`
+
   const columns: TableColumnsType<ISyneyPo> = useMemo(
     () => [
       {
@@ -138,6 +142,7 @@ function PoTable({
           <Link
             className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             to={`/syney-po-list/${record.id}`}
+            state={{ from: listHref }}
           >
             {`${text}-[${record.SONo?.split('-').at(-2)}-${record.SONo?.split('-').at(-1)}]`}
           </Link>
@@ -205,7 +210,7 @@ function PoTable({
         render: (value: string | null) => value || '-',
       },
     ],
-    [page, pageSize],
+    [listHref, page, pageSize],
   )
 
   const rowSelection: TableProps<ISyneyPo>['rowSelection'] = {

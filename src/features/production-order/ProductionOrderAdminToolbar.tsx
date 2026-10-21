@@ -122,6 +122,7 @@ export default function ProductionOrderAdminToolbar({
           onConfirm={handleDelete}
           isDeleting={isDeleting}
           count={selectedRowKeys.length}
+          title="删除工单"
           itemName="工单"
         />
       </div>

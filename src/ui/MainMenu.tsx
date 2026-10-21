@@ -1,4 +1,5 @@
 import type { MenuProps } from 'antd'
+import type { PageTab } from './pageTabsUtils'
 import { Menu } from 'antd'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -16,7 +17,12 @@ import {
 // ----------------------------------------------------------------
 // MainMenu 组件
 // ----------------------------------------------------------------
-const MainMenu: React.FC = () => {
+interface MainMenuProps {
+  /** 当前已打开的标签页：点击菜单进入已打开页面时恢复该标签记录的完整地址（含筛选参数） */
+  tabs?: PageTab[]
+}
+
+const MainMenu: React.FC<MainMenuProps> = ({ tabs }) => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { can, isLoading } = usePermissionContext()
@@ -62,7 +68,9 @@ const MainMenu: React.FC = () => {
       return
     const targetPath = `/${key}`
     if (pathname !== targetPath) {
-      navigate(targetPath)
+      // 与标签切换行为一致：已打开的页面恢复其筛选/分页地址，避免 URL 与页面内筛选状态不一致
+      const openedTab = tabs?.find(tab => tab.key === targetPath)
+      navigate(openedTab?.href || targetPath)
     }
   }
 

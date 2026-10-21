@@ -216,7 +216,13 @@ export default function ReportList() {
       {/* 顶部工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
-        <DeleteButton onConfirm={handleDelete} isDeleting={isDeleting} />
+        <DeleteButton
+          onConfirm={handleDelete}
+          isDeleting={isDeleting}
+          count={tableSelectedKeys.length}
+          title="删除对账单"
+          itemName="对账单"
+        />
         <PrintButton handlePrint={handlePrint} onPreload={preloadPDF}>
           打印对账单
         </PrintButton>

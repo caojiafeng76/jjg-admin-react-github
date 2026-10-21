@@ -1,5 +1,3 @@
-import { App } from 'antd'
-
 /**
  * 自定义应用错误类
  */
@@ -26,13 +24,13 @@ export class AppError extends Error {
  * 错误类型映射
  */
 const ERROR_MESSAGES: Record<string, string> = {
-  NETWORK_ERROR: '网络连接失败,请检查网络设置',
-  UNAUTHORIZED: '未授权,请重新登录',
+  NETWORK_ERROR: '网络连接失败，请检查网络设置',
+  UNAUTHORIZED: '未授权，请重新登录',
   FORBIDDEN: '没有权限执行此操作',
   NOT_FOUND: '请求的资源不存在',
   VALIDATION_ERROR: '数据验证失败',
-  SERVER_ERROR: '服务器错误,请稍后重试',
-  UNKNOWN_ERROR: '发生未知错误',
+  SERVER_ERROR: '服务器错误，请稍后重试',
+  UNKNOWN_ERROR: '操作失败，请稍后重试',
 }
 
 /**
@@ -45,6 +43,8 @@ const ERROR_MESSAGE_TRANSLATIONS: Record<string, string> = {
   'Email not confirmed': '邮箱未确认，请先验证邮箱',
   'User not found': '用户不存在',
   'Invalid password': '密码错误',
+  'JWT expired': '登录已过期，请重新登录',
+  'Failed to fetch': '网络连接失败，请检查网络设置',
 }
 
 const ERROR_MESSAGE_PARTIAL_TRANSLATIONS: Array<[string, string]> = [
@@ -59,6 +59,42 @@ const ERROR_MESSAGE_PARTIAL_TRANSLATIONS: Array<[string, string]> = [
   ['permission denied for table', '没有权限访问当前数据表'],
   ['permission denied', '没有权限执行当前操作'],
 ]
+
+/**
+ * Postgres / PostgREST 错误码 → 用户可读原因
+ */
+const ERROR_CODE_TRANSLATIONS: Record<string, string> = {
+  '23505': '数据已存在，请勿重复提交',
+  '23503': '数据被其他记录引用，或关联的数据不存在',
+  '23502': '缺少必填字段',
+  '23514': '数据不符合校验规则',
+  '22P02': '数据格式不正确',
+  '22001': '输入内容超出长度限制',
+  '42501': '没有权限执行当前操作',
+  'PGRST116': '数据不存在或已被删除',
+  'PGRST301': '登录已过期，请重新登录',
+}
+
+const CJK_PATTERN = /[\u4E00-\u9FFF]/
+
+/** 文本是否包含中文（数据库 RAISE / 业务校验抛出的中文原因可直接展示给用户） */
+function containsChinese(text: string | undefined): text is string {
+  return !!text && CJK_PATTERN.test(text)
+}
+
+/**
+ * 把底层错误翻译为用户可读的中文原因；无法识别的英文错误返回 undefined
+ */
+function resolveUserReason(message: string, code?: string): string | undefined {
+  const translated = translateErrorMessage(message)
+  if (translated !== message)
+    return translated
+
+  if (code && ERROR_CODE_TRANSLATIONS[code])
+    return ERROR_CODE_TRANSLATIONS[code]
+
+  return containsChinese(message) ? message : undefined
+}
 
 /**
  * 翻译错误消息
@@ -283,7 +319,53 @@ export function getErrorDisplayInfo(
 }
 
 /**
+ * 获取可展示给用户的中文错误消息（用于 toast）
+ *
+ * - 已识别的错误 / 中文业务错误：返回中文原因
+ * - 无法识别的英文原文：返回 fallback（原文请用 getErrorTechnicalDetail 展示在可展开详情中）
+ */
+export function getUserErrorMessage(
+  error: unknown,
+  fallback = ERROR_MESSAGES.UNKNOWN_ERROR,
+): string {
+  const info = getErrorDisplayInfo(error, fallback)
+
+  if (containsChinese(info.message))
+    return info.message
+
+  const reason = resolveUserReason(info.message, info.code)
+  if (reason)
+    return reason
+
+  if (info.category === 'network')
+    return ERROR_MESSAGES.NETWORK_ERROR
+  if (info.category === 'permission')
+    return ERROR_MESSAGES.FORBIDDEN
+
+  return fallback
+}
+
+/**
+ * 获取错误的技术详情（错误码、数据库原文等），用于“技术详情”折叠区，便于反馈给开发
+ */
+export function getErrorTechnicalDetail(error: unknown): string | undefined {
+  const info = getErrorDisplayInfo(error, '')
+  const parts = [
+    info.code ? `错误码：${info.code}` : undefined,
+    containsChinese(info.message) ? undefined : info.message,
+    info.detail,
+  ].filter((part): part is string => !!part && part.trim().length > 0)
+
+  const unique = [...new Set(parts)]
+  return unique.length > 0 ? unique.join('\n') : undefined
+}
+
+/**
  * 处理 API 错误
+ *
+ * 返回的 AppError.message 始终是可直接展示的中文：
+ * `${customMessage}：${中文原因}`，原因无法识别时仅为 customMessage；
+ * 数据库英文原文保存在 AppError.details 中（技术详情）。
  */
 export function handleApiError(
   error: unknown,
@@ -305,24 +387,58 @@ export function handleApiError(
 
   console.error('API Error:', error)
 
-  // 如果已经是 AppError,直接返回
+  // 如果已经是 AppError，直接返回
   if (error instanceof AppError) {
     return error
   }
 
-  // 处理 Supabase 错误
-  if (error && typeof error === 'object' && 'message' in error) {
-    const supabaseError = error as { message: string, code?: string }
-    const originalMessage = customMessage
-      ? `${customMessage}: ${supabaseError.message}`
-      : supabaseError.message
-    const translatedMessage = translateErrorMessage(originalMessage)
-    return new AppError(translatedMessage, supabaseError.code)
+  const withPrefix = (reason: string) =>
+    customMessage ? `${customMessage}：${reason}` : reason
+
+  // 处理网络错误（TypeError: Failed to fetch 也带 message，需先于通用分支判断）
+  if (error instanceof TypeError && error.message.includes('fetch')) {
+    return new AppError(
+      withPrefix(ERROR_MESSAGES.NETWORK_ERROR),
+      'NETWORK_ERROR',
+      0,
+      error.message,
+    )
   }
 
-  // 处理网络错误
-  if (error instanceof TypeError && error.message.includes('fetch')) {
-    return new AppError(ERROR_MESSAGES.NETWORK_ERROR, 'NETWORK_ERROR', 0, error)
+  // 处理 Supabase / PostgREST 错误
+  if (error && typeof error === 'object' && 'message' in error) {
+    const supabaseError = error as {
+      message: string
+      code?: string
+      details?: string | null
+      hint?: string | null
+    }
+    const technicalDetail = [
+      supabaseError.message,
+      supabaseError.details,
+      supabaseError.hint,
+    ]
+      .filter((part): part is string => !!part)
+      .join('；')
+    const reason = resolveUserReason(supabaseError.message, supabaseError.code)
+    const category = getErrorCategory({
+      message: supabaseError.message,
+      code: supabaseError.code,
+    })
+    const userMessage = reason
+      ? withPrefix(reason)
+      : category === 'network'
+        ? withPrefix(ERROR_MESSAGES.NETWORK_ERROR)
+        : category === 'permission'
+          ? withPrefix(ERROR_MESSAGES.FORBIDDEN)
+          : customMessage || ERROR_MESSAGES.UNKNOWN_ERROR
+
+    return new AppError(
+      userMessage,
+      supabaseError.code,
+      undefined,
+      technicalDetail || undefined,
+    )
   }
 
   // 未知错误
@@ -330,53 +446,6 @@ export function handleApiError(
     customMessage || ERROR_MESSAGES.UNKNOWN_ERROR,
     'UNKNOWN_ERROR',
     500,
-    error,
+    typeof error === 'string' ? error : undefined,
   )
-}
-
-/**
- * 显示错误通知的 Hook
- * 需要在 Ant Design App 组件内部使用
- */
-export function useErrorHandler() {
-  const { message } = App.useApp()
-
-  const showError = (error: unknown, fallbackMessage?: string) => {
-    const appError = handleApiError(error, fallbackMessage)
-    // 忽略 AbortError（请求被取消是正常行为，不应该显示错误）
-    if (appError.name === 'AbortError' || appError.code === 'ABORT_ERROR') {
-      return
-    }
-    message.error(appError.message)
-  }
-
-  const showSuccess = (msg: string) => {
-    message.success(msg)
-  }
-
-  const showWarning = (msg: string) => {
-    message.warning(msg)
-  }
-
-  const showInfo = (msg: string) => {
-    message.info(msg)
-  }
-
-  return {
-    showError,
-    showSuccess,
-    showWarning,
-    showInfo,
-  }
-}
-
-/**
- * 全局错误处理函数(不依赖 React Context)
- * 用于在非组件环境中显示错误
- */
-export function showErrorNotification(error: unknown, customMessage?: string) {
-  const appError = handleApiError(error, customMessage)
-  console.error('Error:', appError)
-  // 这里可以集成其他通知方式,如 toast
-  return appError
 }

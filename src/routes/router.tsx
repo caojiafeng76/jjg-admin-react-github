@@ -49,6 +49,15 @@ export const router = createBrowserRouter([
       ...jintanRoutes,
       ...villaLiftRoutes,
       ...packagingRoutes,
+      // 布局内 404：保留菜单与标签页（未登录时由 ProtectedRoute 跳转登录）
+      {
+        path: '*',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <PageNotFound />
+          </Suspense>
+        ),
+      },
     ],
   },
   // 无需登录的公开扫码页
@@ -64,12 +73,4 @@ export const router = createBrowserRouter([
   publicRoute(TOOLING_FIXTURE_PUBLIC_QR_PATH, ToolingFixturePublicPage),
   publicRoute('/login', Login),
   publicRoute('/access-denied', AccessDenied),
-  {
-    path: '*',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <PageNotFound />
-      </Suspense>
-    ),
-  },
 ])

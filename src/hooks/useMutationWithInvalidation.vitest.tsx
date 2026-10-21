@@ -12,8 +12,8 @@ const internalMessageApi = vi.hoisted(() => ({
 }))
 
 vi.mock('antd', () => ({
-  message: {
-    useMessage: () => [internalMessageApi, null],
+  App: {
+    useApp: () => ({ message: internalMessageApi }),
   },
 }))
 
@@ -149,5 +149,54 @@ describe('shared mutation invalidation', () => {
     await waitFor(() => {
       expect(result.current.isPending).toBe(false)
     })
+  })
+
+  it('shows messages through App.useApp() without rendering a contextHolder', async () => {
+    const queryClient = new QueryClient()
+
+    const { result } = renderHook(
+      () =>
+        useMutationWithMessage({
+          mutationFn: async (value: string) => {
+            if (value === 'fail')
+              throw new Error('boom')
+            return value
+          },
+          successMessage: '对账单标记成功',
+          errorMessage: '对账单标记失败',
+        }),
+      { wrapper: createWrapper(queryClient) },
+    )
+
+    expect(result.current.contextHolder).toBeNull()
+
+    await act(async () => {
+      await result.current.mutateAsync('ok')
+    })
+    expect(internalMessageApi.success).toHaveBeenCalledWith('对账单标记成功')
+
+    await act(async () => {
+      await result.current.mutateAsync('fail').catch(() => {})
+    })
+    expect(internalMessageApi.error).toHaveBeenCalledWith('对账单标记失败')
+  })
+
+  it('keeps the silent invalidation variant free of error toasts', async () => {
+    const queryClient = new QueryClient()
+
+    const { result } = renderHook(
+      () =>
+        useMutationWithInvalidation({
+          mutationFn: async () => {
+            throw new Error('boom')
+          },
+        }),
+      { wrapper: createWrapper(queryClient) },
+    )
+
+    await act(async () => {
+      await result.current.mutateAsync(undefined).catch(() => {})
+    })
+    expect(internalMessageApi.error).not.toHaveBeenCalled()
   })
 })

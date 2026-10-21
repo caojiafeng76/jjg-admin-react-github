@@ -101,8 +101,9 @@ export default function ExtrusionProductionItemTable({
             title="删除明细"
             description="确定删除这条明细吗？"
             onConfirm={() => onDelete(index)}
-            okText="删除"
+            okText="确认删除"
             cancelText="取消"
+            okButtonProps={{ danger: true }}
           >
             <Button
               type="text"

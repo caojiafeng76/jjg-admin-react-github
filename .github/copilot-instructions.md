@@ -31,20 +31,21 @@ src/
 
 ### Feature 模块标准结构
 
-每个 feature 模块包含完整的 CRUD 功能，参考 `src/features/syney/PoList/`：
+每个 feature 模块包含完整的 CRUD 功能，参考 `src/features/youmai/ProductData/`（jintan / youmai 为样板模块；`syney/*` 是早期写法，不要再参考）：
 
 ```
-PoList/
-├── index.tsx           # 主容器组件（默认导出）
-├── PoTable.tsx         # 数据表格
-├── PoForm.tsx          # 表单（创建/编辑）
-├── usePos.ts           # 列表查询 Hook
-├── usePo.ts            # 详情查询 Hook
-├── useCreatePo.ts      # 创建 Mutation Hook
-├── useDeletePo.ts      # 删除 Mutation Hook
-├── useUpdatePos.ts     # 更新 Mutation Hook
-└── CLAUDE.md           # 模块文档（可选）
+youmai/
+├── queryKeys.ts                    # 模块级 query key 工厂
+└── ProductData/
+    ├── index.tsx                   # 主容器组件（默认导出）
+    ├── YoumaiProductDataTable.tsx  # 数据表格
+    ├── YoumaiProductDataForm.tsx   # 表单（创建/编辑，放在 Modal 内）
+    ├── YoumaiProductDataSearch.tsx # 搜索栏
+    ├── YoumaiProductDataExcelImport.tsx # Excel 导入（可选）
+    └── useYoumaiProductData.ts     # 列表 query + 增删改 mutation（useMutationWithInvalidation）
 ```
+
+**页面骨架、反馈、出错与无权限、表格、URL 状态、表单弹层、格式与视觉的统一规则见 [docs/前端交互与反馈规范.md](../docs/前端交互与反馈规范.md)，新增或修改页面必须遵守。**
 
 ## 关键模式
 
@@ -74,18 +75,29 @@ const { data } = useQuery({
 
 ### 2. Mutation 封装 Hook
 
-使用 `useMutationWithMessage` 自动处理消息提示和缓存失效：
+Mutation hook 用静默的 `useMutationWithInvalidation`（只负责缓存失效），由调用处统一弹提示（同一操作只允许一处提示）：
 
 ```typescript
-import { useMutationWithMessage } from '@hooks/useMutationWithMessage'
+import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
+import { getUserErrorMessage } from '@utils/errorHandler'
+import { feedbackText } from '@utils/feedbackText'
 
-const { mutate, isPending, contextHolder } = useMutationWithMessage({
-  mutationFn: createSyneySpec,
-  invalidateQueries: [['syney-specs']],
-  successMessage: '创建成功',
-  errorMessage: '创建失败',
+const createMutation = useMutationWithInvalidation({
+  mutationFn: createYoumaiProductData,
+  invalidateQueries: [youmaiKeys.productData.all],
 })
+
+const { message } = App.useApp()
+try {
+  await createMutation.mutateAsync(values)
+  message.success(feedbackText.created('货品资料'))
+}
+catch (error) {
+  message.error(getUserErrorMessage(error, feedbackText.failed('创建', '货品资料')))
+}
 ```
+
+`useMutationWithMessage` 仅保留给存量代码（内部已改用 `App.useApp()`，无需渲染 `contextHolder`）。
 
 ### 3. API 服务层模式
 

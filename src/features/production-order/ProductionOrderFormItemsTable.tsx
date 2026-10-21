@@ -185,8 +185,9 @@ export default function ProductionOrderFormItemsTable({
                 />
                 <Popconfirm
                   title="确定删除此工序明细吗？"
-                  okText="确定"
+                  okText="确认删除"
                   cancelText="取消"
+                  okButtonProps={{ danger: true }}
                   onConfirm={() => onDelete(record.key)}
                 >
                   <Button

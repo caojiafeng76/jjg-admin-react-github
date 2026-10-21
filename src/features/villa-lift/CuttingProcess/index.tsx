@@ -29,11 +29,9 @@ export default function CuttingProcessPage() {
   const { message } = App.useApp()
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const perms = usePermissions([
-    'feature:villa-lift-cutting.create',
     'feature:villa-lift-cutting.edit',
     'feature:villa-lift-cutting.delete',
   ])
-  const canCreate = perms['feature:villa-lift-cutting.create']
   const canEdit = perms['feature:villa-lift-cutting.edit']
   const canDelete = perms['feature:villa-lift-cutting.delete']
   const [searchParams, setSearchParams] = useSearchParams()
@@ -177,7 +175,10 @@ export default function CuttingProcessPage() {
     <div className="grid h-full grid-rows-[auto_1fr] gap-4">
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
-        {canCreate && <AddButton handleCreate={handleCreate} />}
+        <AddButton
+          handleCreate={handleCreate}
+          permissionKey="feature:villa-lift-cutting.create"
+        />
         {canDelete && selectedRowKeys.length > 0 && (
           <Popconfirm
             title={`确认删除选中的 ${selectedRowKeys.length} 条记录？`}

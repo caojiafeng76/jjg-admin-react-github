@@ -251,8 +251,9 @@ function ProductionOrderItemTable({
                   <Popconfirm
                     title="确定删除此工序明细吗？"
                     onConfirm={() => onDelete([record.id])}
-                    okText="确定"
+                    okText="确认删除"
                     cancelText="取消"
+                    okButtonProps={{ danger: true }}
                   >
                     <Button
                       type="text"

@@ -1,9 +1,14 @@
 import { validateAllEnvVars } from '@utils/env'
+import dayjs from 'dayjs'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import App from '@/App.tsx'
+import 'dayjs/locale/zh-cn'
 import '@/index.css'
+
+// dayjs 全局中文 locale（与 antd ConfigProvider zhCN 保持一致）
+dayjs.locale('zh-cn')
 
 // 在应用启动时验证环境变量
 const envValidation = validateAllEnvVars()

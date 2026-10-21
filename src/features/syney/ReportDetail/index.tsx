@@ -9,12 +9,13 @@ import EditButton from '@ui/EditButton'
 import { App, Button, Modal } from 'antd'
 import dayjs from 'dayjs'
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useAppStore } from '@/store'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import { TableState } from '@/ui/TableState'
+import { feedbackText } from '@/utils/feedbackText'
 import DetailForm from './DetailForm'
 import { useDeleteDetail } from './useDeleteDetail'
 import { useUpdateDetail } from './useUpdateDetail'
@@ -54,6 +55,10 @@ function InfoItem({
 export default function ReportDetail() {
   const { message } = App.useApp()
   const navigate = useNavigate()
+  const location = useLocation()
+  // 从列表进入时携带列表地址（含筛选/分页）；直接打开详情时回到列表首页
+  const listHref
+    = (location.state as { from?: string } | null)?.from || '/syney-store-report-list'
   const { reportNo } = useParams()
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
@@ -262,7 +267,7 @@ export default function ReportDetail() {
       <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200/60 pt-3 dark:border-slate-700">
         <Button
           icon={<ArrowLeftIcon className="h-4 w-4" />}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(listHref)}
         >
           返回列表
         </Button>
@@ -270,9 +275,12 @@ export default function ReportDetail() {
           <EditButton title="请选择一条数据" handleEdit={handleEdit} />
           <DeleteButton
             isDeleting={isDeleting}
+            count={tableSelectedKeys.length}
+            title="删除入库明细"
+            itemName="入库明细"
             onConfirm={() => {
               if (tableSelectedKeys.length === 0) {
-                message.error('请选择要删除的数据')
+                message.warning(feedbackText.selectRequired('删除'))
                 return
               }
               deleteDetail(tableSelectedKeys.map(String), {

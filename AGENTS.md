@@ -99,7 +99,7 @@ bun run db:types           # 根据已连接的 Supabase schema 重新生成数�
   if (error) throw handleApiError(error, '操作失败的中文提示')
   ```
 - 用户消息使用中文，开发日志可用英文
-- 使用 Ant Design `message` 组件显示用户反馈
+- 用户反馈统一用 `App.useApp()` 的 `message` / `modal`；toast 中的错误用 `getUserErrorMessage(error, fallback)`，不直接展示 `error.message`
 
 ### React 模式
 
@@ -114,12 +114,19 @@ bun run db:types           # 根据已连接的 Supabase schema 重新生成数�
 2. **Mutation 封装**:
 
    ```typescript
-   import { useMutationWithMessage } from '@hooks/useMutationWithMessage'
-   const { mutate } = useMutationWithMessage({
+   // 新代码：静默 mutation + 调用处提示（文案用 feedbackText，错误用 getUserErrorMessage）
+   import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
+   const createMutation = useMutationWithInvalidation({
      mutationFn: createItem,
-     invalidateQueries: [['items']],
-     successMessage: '创建成功',
+     invalidateQueries: [itemKeys.all],
    })
+   try {
+     await createMutation.mutateAsync(values)
+     message.success(feedbackText.created('工装'))
+   }
+   catch (error) {
+     message.error(getUserErrorMessage(error, feedbackText.failed('创建', '工装')))
+   }
    ```
 
 3. **组件结构**:
@@ -141,21 +148,20 @@ bun run db:types           # 根据已连接的 Supabase schema 重新生成数�
 
 ## Feature 模块结构
 
-业务模块按功能域组织在 `src/features/` 下；涉及 CRUD 的模块通常采用以下结构，实际文件以模块现状为准：
+业务模块按功能域组织在 `src/features/` 下，以 `jintan` / `youmai` 为样板（`syney/*` 是早期写法，不要再参考）：
 
 ```
-FeatureName/
-├── index.tsx              # 主容器组件
-├── FeatureTable.tsx       # 数据表格
-├── FeatureForm.tsx        # 表单
-├── FeatureSearch.tsx      # 搜索栏
-├── useFeatures.ts         # 列表 query hook
-├── useFeature.ts          # 详情 query hook
-├── useCreateFeature.ts    # 创建 mutation
-├── useUpdateFeature.ts    # 更新 mutation
-├── useDeleteFeature.ts    # 删除 mutation
-└── CLAUDE.md              # 模块文档(可选)
+domain/
+├── queryKeys.ts           # 模块级 query key 工厂
+└── FeatureName/
+    ├── index.tsx          # 主容器组件
+    ├── FeatureTable.tsx   # 数据表格
+    ├── FeatureForm.tsx    # 表单（放在 Modal 内）
+    ├── FeatureSearch.tsx  # 搜索栏
+    └── useFeature.ts      # 列表 query + 增删改 mutation（useMutationWithInvalidation，调用处弹提示）
 ```
+
+**前端统一规范**：页面骨架、反馈文案、出错与无权限、表格、URL 状态、表单弹层、日期格式等，以 [docs/前端交互与反馈规范.md](docs/前端交互与反馈规范.md) 为唯一权威来源，新增或修改页面必须遵守。
 
 ---
 

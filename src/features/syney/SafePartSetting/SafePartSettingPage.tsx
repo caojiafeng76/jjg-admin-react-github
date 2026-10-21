@@ -5,19 +5,20 @@ import type { Key } from 'react'
 import type { SafePartSettingFormValues } from './SafePartSettingFormModal'
 import {
   MagnifyingGlassIcon,
-  PlusCircleIcon,
-  XCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
 import {
   deleteSyneySafePartSettings,
   upsertSyneySafePartSetting,
 } from '@services/apiSyneySafePartSettings'
-import { App, Button, Form, Input, Pagination, Tooltip } from 'antd'
+import { App, Form, Input, Pagination } from 'antd'
 import { useCallback, useMemo, useState } from 'react'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import AddButton from '@/ui/AddButton'
+import DeleteButton from '@/ui/DeleteButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
+import { feedbackText } from '@/utils/feedbackText'
 import {
   SYNEY_SAFE_PART_SETTINGS_KEY,
   useSyneySafePartSettings,
@@ -81,7 +82,7 @@ export default function SafePartSettingPage() {
   const deleteMutation = useMutationWithMessage({
     mutationFn: deleteSyneySafePartSettings,
     invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
-    successMessage: '删除成功',
+    successMessage: (_data, ids) => feedbackText.deleted('安全件设置', ids.length),
     messageApi: message,
     onSuccess: () => setSelectedRowKeys([]),
   })
@@ -124,32 +125,14 @@ export default function SafePartSettingPage() {
     <div className="flex h-full flex-col gap-3 overflow-hidden">
       {/* 顶部工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
-        <Button
-          type="text"
-          icon={<PlusCircleIcon className="size-4 text-emerald-500/80!" />}
-          onClick={openCreate}
-        >
-          新增
-        </Button>
-        <Tooltip
-          title={
-            selectedCount > 0
-              ? `已选择 ${selectedCount} 条数据`
-              : '请选择要删除的数据'
-          }
-        >
-          <span>
-            <Button
-              type="text"
-              loading={deleteMutation.isPending}
-              disabled={selectedCount === 0}
-              onClick={handleBatchDelete}
-              icon={<XCircleIcon className="size-4 text-rose-500/80!" />}
-            >
-              删除{selectedCount > 0 ? `(${selectedCount})` : ''}
-            </Button>
-          </span>
-        </Tooltip>
+        <AddButton handleCreate={openCreate} />
+        <DeleteButton
+          onConfirm={handleBatchDelete}
+          isDeleting={deleteMutation.isPending}
+          count={selectedCount}
+          title="删除安全件设置"
+          itemName="安全件设置"
+        />
       </div>
 
       {/* 选中摘要条（S4 通用组件） */}

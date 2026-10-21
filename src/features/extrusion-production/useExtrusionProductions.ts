@@ -3,7 +3,7 @@ import type { ExtrusionProductionFilters, UpsertExtrusionProductionPayload } fro
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { ORDER_STATUS_DASHBOARD_KEY } from '@/features/workshop/OrderStatusDashboard/useOrderStatusDashboard'
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   createExtrusionProduction,
   deleteExtrusionProductions,
@@ -69,15 +69,14 @@ export function useExtrusionSalesOrderByProjectNo(projectNo: string | undefined)
 }
 
 export function useCreateExtrusionProduction() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: createExtrusionProduction,
     invalidateQueries: EXTRUSION_PRODUCTION_INVALIDATE_KEYS,
-    successMessage: '创建挤压生产单成功',
   })
 }
 
 export function useUpdateExtrusionProduction() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: ({
       id,
       payload,
@@ -86,14 +85,12 @@ export function useUpdateExtrusionProduction() {
       payload: UpsertExtrusionProductionPayload
     }) => updateExtrusionProduction({ id, payload }),
     invalidateQueries: EXTRUSION_PRODUCTION_INVALIDATE_KEYS,
-    successMessage: '更新挤压生产单成功',
   })
 }
 
 export function useDeleteExtrusionProductions() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: deleteExtrusionProductions,
     invalidateQueries: EXTRUSION_PRODUCTION_INVALIDATE_KEYS,
-    successMessage: '删除挤压生产单成功',
   })
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { AppRole } from '@/config/access'
 import Loading from '@ui/Loading'
+import PageForbidden from '@ui/PageForbidden'
 
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
@@ -104,7 +105,8 @@ export function RoleHomeRedirect() {
 /**
  * 基于 `page:*` 权限的路由守卫（权限系统版）。
  * auth 或权限加载中时显示 Loading；仅在权限就绪后才判定是否可访问。
- * 无权限时重定向到 /access-denied。
+ * 账号无档案/停用时重定向到 /access-denied；
+ * 仅当前页面无权限时在布局内渲染 403（菜单与其他标签页保持可用）。
  */
 export function PermissionProtectedRoute({
   element,
@@ -137,7 +139,7 @@ export function PermissionProtectedRoute({
   }
 
   if (!can(permissionKey)) {
-    return <Navigate to="/access-denied" replace />
+    return <PageForbidden pathname={location.pathname} />
   }
 
   return <>{element}</>

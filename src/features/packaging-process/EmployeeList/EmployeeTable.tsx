@@ -101,7 +101,7 @@ function EmployeeTable({
       scroll={{ x: 1100, y: scrollY }}
       size="small"
       rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
+        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

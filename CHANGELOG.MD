@@ -17,6 +17,22 @@
 
 ## 2026-10-21
 
+- **类别**：修复 / 变更 / 文档（前端体验统一 Phase 1）
+- **范围**：`src/hooks/useMutationWithMessage.ts`；`src/utils/{errorHandler,feedbackText,format}.ts`；`src/ui/{TableState,FormErrorAlert,DeleteButton,AppPagination,MainMenu,AppLayout}.tsx`，新增 `src/ui/{PageErrorBoundary,PageForbidden,ErrorTechnicalDetail}.tsx`、`src/hooks/useUrlListState.ts`、`src/config/pagination.ts`；`src/routes/{routeHelpers,RouteGuards,router}.tsx`、`src/pages/PageNotFound.tsx`、`src/main.tsx`；production-order / material-transfer / extrusion-production 的 mutation hook 与明细组件；syney 的 PoList / PoDetail / ReportList / ReportDetail / SpecList / SafePartSetting；villa-lift 三个页面；packaging / quality / workshop 的 7 张表；文档 `docs/前端交互与反馈规范.md`（新增）、`AGENTS.md`、`.github/copilot-instructions.md`、`src/ui/CLAUDE.md`、`docs/UI设计调研与改版指南.md`
+- **摘要**：用户反馈前端体验割裂。排查结论是三代写法并存（syney 早期、车间中期、jintan/youmai 新一代），且文档仍以最老的 syney/PoList 为样板。本批先修实际 bug、补基础设施、定统一规范，模块迁移后续分批进行。
+  ① **提示被吞**：`useMutationWithMessage` 原用 `message.useMessage()`，调用方不渲染 `contextHolder` 时提示不显示（syney 规格编辑/删除、入库明细编辑/删除、标记已校对等 7 处成功失败均无反馈），改为 `App.useApp()`，`contextHolder` 恒为 null 以兼容旧调用；production-order / material-transfer / extrusion 的 hook 原本也配了（被吞的）提示，页面另有 toast，改为静默 `useMutationWithInvalidation` 避免修复后双弹；生产工单详情的工序明细增删改原本无任何反馈且失败时为未处理异常，补齐提示与 `confirmLoading`。
+  ② **错误原因**：`handleApiError` 不再把数据库英文原文拼进用户消息；常见 Postgres 错误码（23505 / 23503 / 23502 / 23514 / 22P02 / 42501 / PGRST116 等）翻译为中文原因，数据库抛出的中文业务错误原样保留；原文和错误码存入 `AppError.details` / `code`；`Failed to fetch` 先于通用分支识别为网络错误（原逻辑因 TypeError 也带 message 而走不到）；标点改全角。新增 `getUserErrorMessage` / `getErrorTechnicalDetail`；`TableError` 改为显示真实原因（原先固定为「请检查网络连接后重试」），`TableError` 与 `FormErrorAlert` 增加可折叠、可复制的「技术详情」；删除 0 处使用的 `useErrorHandler` / `showErrorNotification`。
+  ③ **出错不再整页崩**：每个 `permissionRoute` 包裹 `PageErrorBoundary`（结合 `QueryErrorResetBoundary`，提供重试），首屏查询失败或渲染异常只替换当前内容区，菜单和其他缓存标签页不受影响（原先冒泡到根路由 errorElement，整个布局被替换）；404 移入布局内；syney 列表查询改 `throwOnError:false` 并去掉 `useEffect` 中的报错 toast，消除与 `TableError` 的双重反馈。
+  ④ **权限**：仅当前页面无权限时在布局内渲染 403（`PageForbidden`），不再跳到「当前账号暂无可用前端入口」全屏页；villa-lift 新增按钮由「无权限隐藏」改为与全站一致的「禁用 + 提示」。
+  ⑤ **删除确认**：SafePartSetting 批量删除原本无二次确认，改用 `DeleteButton`；`DeleteButton` 默认标题由「删除订单」改为按 `itemName` 推导（默认「删除记录」），补全 syney 规格 / 对账单 / 入库明细 / 订单、生产工单调用方的 `title` / `itemName` / `count`；3 处手写删除 Popconfirm 补危险色确认按钮，文案统一为「确认删除」。
+  ⑥ **格式与状态基础设施**：`dayjs.locale('zh-cn')`（已确认代码无依赖周起始日的逻辑）；`format.ts` 新增 `DATE_FORMAT` / `DATETIME_FORMAT` / `formatDate` / `formatDateTime`；新增 `feedbackText` 文案模板（对象+动作+结果）、`config/pagination.ts`、`useUrlListState`（筛选/分页只以 URL 为源，replace 写入）；`AppPagination` 改 replace 模式；点击菜单进入已打开的页面时恢复该标签页的完整地址（与标签切换一致）；syney 详情「返回列表」由 `navigate(-1)` 改为携带列表地址返回。
+  ⑦ **暗色**：7 张表的斑马行和高亮行补 `dark:` 变体。
+  ⑧ **规范文档**：新增 `docs/前端交互与反馈规范.md` 作为唯一权威规范（样板为 jintan/youmai），`AGENTS.md` / `copilot-instructions.md` 的模块结构与 mutation 示例改指向新规范，重写过时的 `src/ui/CLAUDE.md`，在 UI 设计指南中标注与现状冲突的 Drawer / 24px 条目。
+- **验证**：`bun lint` 0 error；`bun run typecheck` 通过；`bun run test` 187 个文件 / 843 个用例全部通过。新增测试：`useMutationWithInvalidation.vitest.tsx` 补 2 例（不渲染 contextHolder 也能出提示、静默版不弹错误）、`errorHandler.vitest.ts`、`PageErrorBoundary.vitest.tsx`（布局内报错、重试恢复）、`DeleteButton.vitest.tsx`、`useUrlListState.vitest.tsx`、`RouteGuards.test.tsx`（无权限渲染 403 不跳转、停用账号仍跳转）。随行为变化更新的断言：`apiWorkshopOrderOptions.vitest.ts`（错误消息改为「动作：原因」）、`ProductionOrderForm.vitest.tsx`（确认按钮改为「确认删除」）、`SafePartSettingPage.vitest.tsx`（补权限 hook mock）。`bun run build` 和 `bun run check:bundle` 通过（入口 gzip 32.0 KB）。**未做浏览器手测**（需要登录账号）：标记已校对提示、断网时只有内容区报错、无权限账号看到布局内 403、暗色斑马行这几项建议人工确认。
+- **遗留（后续批次）**：Phase 2 车间生产、Phase 3 syney、Phase 4 其余模块按规范迁移（页面骨架、`TableState` + `throwOnError:false`、`StatusPill`、`formatDateTime`、`useUrlListState`、`feedbackText`、Modal 三档宽度、14 个 ExcelImport 收敛、员工端暗色）；villa-lift 批量删除仍为「选中后才出现、无权限隐藏」，随 Phase 4 改用 `DeleteButton`。审计列出的 5 处 service 层裸 `throw error` 经核查均为清理后重抛已处理的错误或 fetch 层透传，无需修改。
+
+## 2026-10-21
+
 - **类别**：变更 / 工程配置
 - **范围**：`.vscode/settings.json`
 - **摘要**：新增 `"deno.enablePaths": ["supabase/functions"]`，让 Deno 扩展只检查 Supabase Edge Functions 目录，避免在工作区启用 Deno 时把 `src/` 前端代码也按 Deno 规则检查、与 TypeScript 语言服务冲突。

@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 
 import { useMemo } from 'react'
 
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAppStore } from '@/store'
 import { formatNumberPadded } from '@/utils/helps'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
@@ -74,6 +74,10 @@ export default function ReportTable({
     [data],
   )
 
+  const location = useLocation()
+  // 详情页「返回列表」时恢复当前列表的筛选与分页
+  const listHref = `${location.pathname}${location.search}`
+
   const columns: TableColumnsType<ISyneyStoreReport> = useMemo(
     () => [
       {
@@ -133,6 +137,7 @@ export default function ReportTable({
           <Link
             className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             to={`/syney-store-report-list/${text}`}
+            state={{ from: listHref }}
           >
             {text}
           </Link>
@@ -152,7 +157,7 @@ export default function ReportTable({
         ),
       },
     ],
-    [page, pageSize],
+    [listHref, page, pageSize],
   )
 
   const rowSelection: TableProps<ISyneyStoreReport>['rowSelection'] = {

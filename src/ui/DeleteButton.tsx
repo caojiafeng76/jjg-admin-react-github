@@ -6,8 +6,8 @@ import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 interface SharedProps {
   isDeleting: boolean
   count?: number // 要删除的数量
-  title?: string // 自定义标题，默认为"删除订单"
-  itemName?: string // 项目名称，默认为"订单"
+  title?: string // 自定义标题，默认为"删除{itemName}"
+  itemName?: string // 删除对象名称，默认为"记录"，建议每个调用方显式传入
   permissionKey?: string // 删除权限 key，传入且无权限时禁用
   noPermissionTip?: string // 无权限提示文案
 }
@@ -27,8 +27,8 @@ export default function DeleteButton({
   onConfirm,
   isDeleting,
   count,
-  title = '删除订单',
-  itemName = '订单',
+  title,
+  itemName = '记录',
   permissionKey,
   noPermissionTip = '无删除权限',
 }: Props) {
@@ -38,6 +38,7 @@ export default function DeleteButton({
   })
   const denied = viewerDenied || (Boolean(permissionKey) && !allowed)
   const deniedTip = viewerDenied ? viewerOperationTip : noPermissionTip
+  const confirmTitle = title ?? `删除${itemName}`
 
   if (onClick) {
     const btn = (
@@ -59,10 +60,10 @@ export default function DeleteButton({
       ? (
           <div>
             <p>
-              确定删除选中的 <strong>{count}</strong> 个{itemName}吗？
+              确定删除选中的 <strong>{count}</strong> 条{itemName}吗？
             </p>
-            <p style={{ color: 'red', fontSize: '12px', marginTop: '8px' }}>
-              此操作不可撤销，将同时删除{itemName}及其所有明细。
+            <p className="mt-2 text-xs text-red-500 dark:text-red-400">
+              此操作不可撤销，关联的明细数据会一并删除。
             </p>
           </div>
         )
@@ -102,7 +103,7 @@ export default function DeleteButton({
 
   return (
     <Popconfirm
-      title={title}
+      title={confirmTitle}
       description={description}
       onConfirm={() => onConfirm()}
       okText="确认删除"

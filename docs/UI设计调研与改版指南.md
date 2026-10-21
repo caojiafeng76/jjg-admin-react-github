@@ -1,5 +1,7 @@
 # UI 设计调研与改版指南
 
+> **2026-10-21 起**，页面写法（骨架、反馈、出错/无权限、表格、表单弹层、格式）以 [前端交互与反馈规范.md](前端交互与反馈规范.md) 为准。本文保留视觉 token 与设计调研内容。与现状冲突的条目已在原处标注。
+
 > 本文档基于 2025-2026 年主流后台管理系统设计趋势的调研，结合本项目（React 19 + Ant Design 6 + Tailwind CSS 4 + TanStack Query 5 + Vite 8）的现状分析，给出可落地的 UI 改版方向与具体规格。供全站视觉升级时参考。
 
 ---
@@ -139,6 +141,8 @@ const TABLE_TOKENS = {
 
 间距基数 4px：`4 / 8 / 12 / 16 / 24 / 32 / 48`；内容区 padding 统一 24px（移动端 16px）。
 
+> 注：实际实现为 `AppLayout` Content 12px 内边距 + 页面根节点不再加 padding（见《前端交互与反馈规范》§1），以保证表格可视行数。
+
 ### 4.4 数字与字体细节
 
 - **所有数字列**（金额/数量/工时/百分比）：`font-variant-numeric: tabular-nums`（等宽数字，防止跳动）——`<span className="tabular-nums">` 或 antd 全局配置。
@@ -241,7 +245,7 @@ import { StyleProvider } from '@ant-design/cssinjs'
 
 1. **内联校验**（antd `Form rules` 原生），错误提示在字段下方即时出现。
 2. **长表单分组**：>10 字段用 `Steps` 或分区卡片，高级选项折叠。
-3. **弹层选型**：编辑/详情用 Drawer（保持上下文），确认类用 Modal。
+3. **弹层选型**：~~编辑/详情用 Drawer（保持上下文），确认类用 Modal。~~ 已调整为：新增/编辑用 Modal，字段多的只读详情用 Drawer，确认用 Popconfirm / `modal.confirm`（见《前端交互与反馈规范》§6）。
 4. **反馈文案**："操作失败" → "失败原因 + 影响 + 建议"。
 5. **微交互**：按钮按下 100ms 内反馈；成功 toast；高频操作动画 <300ms。
 

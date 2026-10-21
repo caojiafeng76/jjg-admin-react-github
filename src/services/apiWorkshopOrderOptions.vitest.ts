@@ -73,7 +73,7 @@ describe('getWorkshopOrderOptions', () => {
     })
 
     await expect(getWorkshopOrderOptions()).rejects.toMatchObject({
-      message: '没有权限执行当前操作',
+      message: '获取车间订单选项失败：没有权限执行当前操作',
       code: '42501',
     })
   })

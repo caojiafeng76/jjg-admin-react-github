@@ -342,6 +342,8 @@ export default function PoList() {
           onConfirm={handleDelete}
           isDeleting={isDeleting}
           count={tableSelectedKeys.length}
+          title="删除订单"
+          itemName="订单"
           permissionKey="feature:syney-po-list.delete"
         />
 

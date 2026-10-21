@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { queryConfig } from '@/config/queryClient'
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   addProductionOrderItem,
   deleteProductionOrderItems,
@@ -21,15 +21,14 @@ export function useProductionOrderItems(orderId: string | undefined) {
 }
 
 export function useAddProductionOrderItem() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: addProductionOrderItem,
     invalidateQueries: [[PRODUCTION_ORDER_ITEMS_KEY], ['production-orders']],
-    successMessage: '添加工单明细成功',
   })
 }
 
 export function useUpdateProductionOrderItem() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: ({
       id,
       values,
@@ -38,14 +37,12 @@ export function useUpdateProductionOrderItem() {
       values: Parameters<typeof updateProductionOrderItem>[0]['values']
     }) => updateProductionOrderItem({ id, values }),
     invalidateQueries: [[PRODUCTION_ORDER_ITEMS_KEY], ['production-orders']],
-    successMessage: '更新工单明细成功',
   })
 }
 
 export function useDeleteProductionOrderItems() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: deleteProductionOrderItems,
     invalidateQueries: [[PRODUCTION_ORDER_ITEMS_KEY], ['production-orders']],
-    successMessage: '删除工单明细成功',
   })
 }

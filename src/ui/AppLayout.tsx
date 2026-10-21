@@ -165,7 +165,7 @@ export default function AppLayout() {
           <div className="flex h-full flex-col overflow-hidden">
             <AppLogo collapsed={collapsed} />
             <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-              <MainMenu />
+              <MainMenu tabs={pageTabs} />
             </div>
           </div>
         </Sider>

@@ -2,7 +2,7 @@ import type { MaterialTransferFilters, MaterialTransferOrderProgress } from '@/s
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   batchUpdateMaterialTransfers,
   buildOrderProgressMap,
@@ -116,15 +116,14 @@ export function useMaterialTransferLengths() {
 }
 
 export function useCreateMaterialTransfer() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: createMaterialTransfer,
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
-    successMessage: '创建物料调拨单成功',
   })
 }
 
 export function useUpdateMaterialTransfer() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: ({
       id,
       values,
@@ -133,22 +132,19 @@ export function useUpdateMaterialTransfer() {
       values: Parameters<typeof updateMaterialTransfer>[0]['values']
     }) => updateMaterialTransfer({ id, values }),
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
-    successMessage: '更新物料调拨单成功',
   })
 }
 
 export function useDeleteMaterialTransfers() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: deleteMaterialTransfers,
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
-    successMessage: '删除物料调拨单成功',
   })
 }
 
 export function useBatchUpdateMaterialTransfers() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: batchUpdateMaterialTransfers,
     invalidateQueries: [[MATERIAL_TRANSFERS_KEY]],
-    successMessage: '批量更新物料调拨单成功',
   })
 }

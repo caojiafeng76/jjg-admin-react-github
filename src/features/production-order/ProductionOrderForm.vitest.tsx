@@ -118,7 +118,7 @@ describe('ProductionOrderForm 拆分后的组件连接', { timeout: 15_000 }, ()
     renderForm({ initialValues: existingOrder })
 
     await user.click(await screen.findByLabelText('删除工序 CNC'))
-    await user.click(await screen.findByRole('button', { name: /确\s*定/ }))
+    await user.click(await screen.findByRole('button', { name: '确认删除' }))
 
     await waitFor(() =>
       expect(screen.queryByLabelText('删除工序 CNC')).not.toBeInTheDocument(),

@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import Loading from '@ui/Loading'
+import PageErrorBoundary from '@ui/PageErrorBoundary'
 import { Suspense } from 'react'
 
 import { Navigate } from 'react-router-dom'
@@ -11,7 +12,10 @@ export interface PermissionRouteHandle {
   permission: string
 }
 
-/** 登录后布局内的页面：懒加载 + 页面权限守卫 */
+/**
+ * 登录后布局内的页面：页面级错误边界 + 懒加载 + 页面权限守卫
+ * 页面出错只替换当前内容区，菜单与其他缓存标签页不受影响
+ */
 export function permissionRoute(
   path: string,
   permissionKey: string,
@@ -21,12 +25,14 @@ export function permissionRoute(
     path,
     handle: { permission: permissionKey } satisfies PermissionRouteHandle,
     element: (
-      <Suspense fallback={<Loading />}>
-        <PermissionProtectedRoute
-          permissionKey={permissionKey}
-          element={<Page />}
-        />
-      </Suspense>
+      <PageErrorBoundary>
+        <Suspense fallback={<Loading />}>
+          <PermissionProtectedRoute
+            permissionKey={permissionKey}
+            element={<Page />}
+          />
+        </Suspense>
+      </PageErrorBoundary>
     ),
   }
 }

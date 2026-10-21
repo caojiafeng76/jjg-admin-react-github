@@ -2,6 +2,7 @@ import type { PaginationProps } from 'antd'
 import { ConfigProvider, Pagination } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN'
 import { useSearchParams } from 'react-router-dom'
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/config/pagination'
 
 const PAGINATION_LOCALE = {
   ...zhCN.Pagination,
@@ -17,8 +18,8 @@ interface Props {
 
 export default function AppPagination({
   total,
-  pageSizeOptions = ['10', '20', '50', '100'],
-  defaultPageSize = 10,
+  pageSizeOptions = PAGE_SIZE_OPTIONS,
+  defaultPageSize = DEFAULT_PAGE_SIZE,
 }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
   const currentPage = Number(searchParams.get('page')) || 1
@@ -33,9 +34,13 @@ export default function AppPagination({
       )
 
   function onChange(page: number, pageSize: number) {
-    searchParams.set('page', page.toString())
-    searchParams.set('pageSize', pageSize.toString())
-    setSearchParams(searchParams)
+    // replace：翻页不产生浏览器历史记录，「后退」直接离开页面而不是逐页回退
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('page', page.toString())
+      next.set('pageSize', pageSize.toString())
+      return next
+    }, { replace: true })
   }
 
   return (

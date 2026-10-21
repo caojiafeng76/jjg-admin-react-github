@@ -32,7 +32,6 @@ export default function VillaLiftOrderListPage() {
   const { message } = App.useApp()
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const perms = usePermissions([
-    'feature:villa-lift-order.create',
     'feature:villa-lift-order.edit',
     'feature:villa-lift-order.edit-items',
     'feature:villa-lift-order.delete',
@@ -47,7 +46,6 @@ export default function VillaLiftOrderListPage() {
     'feature:villa-lift-order.mark-middle-door-processing',
     'feature:villa-lift-order.mark-frame-processing',
   ])
-  const canCreate = perms['feature:villa-lift-order.create']
   const canEdit = perms['feature:villa-lift-order.edit']
   const canEditItems = perms['feature:villa-lift-order.edit-items']
   const canDelete = perms['feature:villa-lift-order.delete']
@@ -272,7 +270,6 @@ export default function VillaLiftOrderListPage() {
         {/* 工具栏 */}
         <VillaLiftOrderToolbar
           permissions={{
-            canCreate,
             canDelete,
             canClose,
             canReopen,

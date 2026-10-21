@@ -34,6 +34,17 @@ vi.mock('../useSyneySafePartSettings', () => ({
   }),
 }))
 
+vi.mock('@/hooks/usePermission', () => ({
+  usePermission: () => true,
+}))
+
+vi.mock('@/hooks/useViewerOperationGuard', () => ({
+  useViewerOperationGuard: () => ({
+    viewerDenied: false,
+    viewerOperationTip: '',
+  }),
+}))
+
 vi.mock('@services/apiSyneySafePartSettings', () => ({
   SAFE_PART_DRAWING_ACCEPT: '.pdf,.png,.jpg',
   deleteSyneySafePartSettings: vi.fn(),

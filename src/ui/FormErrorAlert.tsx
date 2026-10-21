@@ -1,5 +1,6 @@
 import { Alert } from 'antd'
-import { getErrorDisplayInfo } from '@/utils/errorHandler'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import ErrorTechnicalDetail from './ErrorTechnicalDetail'
 
 /**
  * 表单错误反馈组件（S3 UI 改版）
@@ -7,7 +8,8 @@ import { getErrorDisplayInfo } from '@/utils/errorHandler'
  * 规格（docs/UI设计调研与改版指南.md §6.2.4）：
  * "操作失败" → "失败原因 + 影响 + 建议" 三段式结构化反馈。
  *
- * 失败原因自动从 error 提取（复用 getErrorDisplayInfo 的英转中映射），
+ * 失败原因自动从 error 提取（getUserErrorMessage：已知错误转中文，未知英文原文
+ * 不直接展示，而是放进可展开的「技术详情」），
  * 影响 / 建议提供默认文案，页面可按业务覆盖。
  * 通常放在 Modal/Drawer 内表单上方，或页面级表单顶部。
  */
@@ -34,8 +36,7 @@ export default function FormErrorAlert({
     return null
   }
 
-  const info = getErrorDisplayInfo(error)
-  const reasonText = reason ?? info.message
+  const reasonText = reason ?? getUserErrorMessage(error, '系统暂时无法完成操作')
 
   return (
     <Alert
@@ -48,13 +49,6 @@ export default function FormErrorAlert({
           <p>
             <span className="font-medium">失败原因：</span>
             {reasonText}
-            {info.detail
-              ? (
-                  <span className="text-slate-500 dark:text-slate-400">
-                    （{info.detail}）
-                  </span>
-                )
-              : null}
           </p>
           <p>
             <span className="font-medium">影响：</span>
@@ -64,6 +58,7 @@ export default function FormErrorAlert({
             <span className="font-medium">建议：</span>
             {suggestion}
           </p>
+          <ErrorTechnicalDetail error={error} />
         </div>
       )}
     />

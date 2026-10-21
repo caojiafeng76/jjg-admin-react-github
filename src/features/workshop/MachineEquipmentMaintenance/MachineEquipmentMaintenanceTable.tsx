@@ -135,10 +135,10 @@ export default function MachineEquipmentMaintenanceTable({
       size="small"
       rowClassName={(record, index) => {
         if (record.id === activeRowId)
-          return 'bg-sky-100'
+          return 'bg-sky-100 dark:bg-sky-900/40'
         if (selectedRowKeys.includes(record.id))
-          return 'bg-sky-50'
-        return index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'
+          return 'bg-sky-50 dark:bg-sky-900/20'
+        return index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
       }}
       onRow={record => ({
         ...createKeyboardTableRowProps(() => {

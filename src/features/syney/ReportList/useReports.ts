@@ -1,13 +1,11 @@
 import { getSyneyStoreReports } from '@services/apiSyneyStoreReports'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
-import { App } from 'antd'
 import { useEffect } from 'react'
 
 import { useSearchParams } from 'react-router-dom'
-import { isAbortError, queryConfig } from '@/config/queryClient'
+import { queryConfig } from '@/config/queryClient'
 
 export function useReports() {
-  const { message } = App.useApp()
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
 
@@ -29,14 +27,9 @@ export function useReports() {
     placeholderData: keepPreviousData,
     // 使用列表查询配置预设
     ...queryConfig.list,
+    // 错误由页面 TableState 内联展示（含重试），不抛到错误边界
+    throwOnError: false,
   })
-
-  // 错误处理：忽略 AbortError
-  useEffect(() => {
-    if (error && !isAbortError(error)) {
-      message.error('获取对账单列表失败，请稍后重试')
-    }
-  }, [error, message])
 
   const pageCount = Math.ceil((count || 0) / pageSize)
 

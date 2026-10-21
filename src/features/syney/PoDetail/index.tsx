@@ -4,7 +4,7 @@ import { ArrowLeftIcon } from '@heroicons/react/16/solid'
 import { App, Button, Modal } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useAppStore } from '@/store'
 import AppPagination from '@/ui/AppPagination'
@@ -46,6 +46,10 @@ function InfoItem({
 export default function PoDetail() {
   const { message } = App.useApp()
   const navigate = useNavigate()
+  const location = useLocation()
+  // 从列表进入时携带列表地址（含筛选/分页）；直接打开详情时回到列表首页
+  const listHref
+    = (location.state as { from?: string } | null)?.from || '/syney-po-list'
   const { PoId } = useParams()
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
@@ -168,7 +172,7 @@ export default function PoDetail() {
       <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200/60 pt-3 dark:border-slate-700">
         <Button
           icon={<ArrowLeftIcon className="h-4 w-4" />}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(listHref)}
         >
           返回列表
         </Button>

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { InboxOutlined, ReloadOutlined } from '@ant-design/icons'
 import { Button, Empty, Result, Skeleton } from 'antd'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import ErrorTechnicalDetail from './ErrorTechnicalDetail'
 
 /**
  * 表格三态通用组件（S1 UI 改版）
@@ -83,33 +85,45 @@ export function TableEmpty({
 export interface TableErrorProps {
   /** 错误标题，默认「数据加载失败」 */
   title?: string
-  /** 错误说明（失败原因），默认「请检查网络连接后重试」 */
+  /** 查询错误对象：用于提取中文失败原因与可展开的技术详情 */
+  error?: unknown
+  /** 错误说明（失败原因），默认从 error 提取，缺省为「请检查网络连接后重试」 */
   description?: string
   /** 重试回调（通常传 query 的 refetch） */
   onRetry?: () => void
 }
 
-/** 错误态：错误说明 + 重试按钮，保留已填数据（表格已渲染部分不受影响） */
+/** 错误态：失败原因 + 重试按钮 + 可展开技术详情，保留已填数据（表格已渲染部分不受影响） */
 export function TableError({
   title = '数据加载失败',
-  description = '请检查网络连接后重试',
+  error,
+  description,
   onRetry,
 }: TableErrorProps) {
+  const subTitle
+    = description
+      ?? (error
+        ? getUserErrorMessage(error, '请检查网络连接后重试')
+        : '请检查网络连接后重试')
+
   return (
     <Result
       status="error"
       title={title}
-      subTitle={description}
+      subTitle={subTitle}
       className="py-8"
-      extra={
-        onRetry
-          ? (
-              <Button type="primary" icon={<ReloadOutlined />} onClick={onRetry}>
-                重试
-              </Button>
-            )
-          : undefined
-      }
+      extra={(
+        <div className="flex flex-col items-center gap-3">
+          {onRetry
+            ? (
+                <Button type="primary" icon={<ReloadOutlined />} onClick={onRetry}>
+                  重试
+                </Button>
+              )
+            : null}
+          {error ? <ErrorTechnicalDetail error={error} className="max-w-xl" /> : null}
+        </div>
+      )}
     />
   )
 }
@@ -140,7 +154,7 @@ export function TableState({
   }
 
   if (error) {
-    return <TableError onRetry={onRetry} />
+    return <TableError error={error} onRetry={onRetry} />
   }
 
   return <>{children}</>

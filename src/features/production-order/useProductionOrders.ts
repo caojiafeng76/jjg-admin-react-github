@@ -3,7 +3,7 @@ import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderI
 import type { ProductionOrderShift } from '@/services/apiProductionOrders'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
   createProductionOrder,
   deleteProductionOrders,
@@ -63,15 +63,14 @@ export function useProductionOrder(
 }
 
 export function useCreateProductionOrder() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: createProductionOrder,
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
-    successMessage: '创建生产工单成功',
   })
 }
 
 export function useUpdateProductionOrder() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: ({
       id,
       values,
@@ -80,20 +79,18 @@ export function useUpdateProductionOrder() {
       values: Parameters<typeof updateProductionOrder>[0]['values']
     }) => updateProductionOrder({ id, values }),
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
-    successMessage: '更新生产工单成功',
   })
 }
 
 export function useDeleteProductionOrders() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: deleteProductionOrders,
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
-    successMessage: '删除生产工单成功',
   })
 }
 
 export function useBatchUpdateProductionOrders() {
-  return useMutationWithMessage({
+  return useMutationWithInvalidation({
     mutationFn: ({
       ids,
       values,
@@ -102,6 +99,5 @@ export function useBatchUpdateProductionOrders() {
       values: Parameters<typeof updateProductionOrders>[0]['values']
     }) => updateProductionOrders({ ids, values }),
     invalidateQueries: [[PRODUCTION_ORDERS_KEY]],
-    successMessage: '批量更新生产工单成功',
   })
 }

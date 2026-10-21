@@ -19,7 +19,6 @@ import { Button, DatePicker, Input, Popconfirm } from 'antd'
 import AddButton from '@/ui/AddButton'
 
 export interface VillaLiftOrderToolbarPermissions {
-  canCreate: boolean
   canDelete: boolean
   canClose: boolean
   canReopen: boolean
@@ -74,7 +73,6 @@ export default function VillaLiftOrderToolbar({
   preloadExportAsExcel,
 }: VillaLiftOrderToolbarProps) {
   const {
-    canCreate,
     canDelete,
     canClose,
     canReopen,
@@ -104,7 +102,10 @@ export default function VillaLiftOrderToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {canCreate && <AddButton handleCreate={handleCreate} />}
+      <AddButton
+        handleCreate={handleCreate}
+        permissionKey="feature:villa-lift-order.create"
+      />
       {selectedCount > 0 && (
         <>
           {canDelete && (

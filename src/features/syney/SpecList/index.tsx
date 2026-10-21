@@ -32,7 +32,7 @@ export default function SpecList() {
   const [isEditing, setIsEditing] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
-  const { syneySpecs, isLoading, error, count, refetch } = useSyneySpecs()
+  const { syneySpecs, isLoading, error, count, refetch } = useSyneySpecs({ silentError: true })
   const {
     isCreating,
     createSyneySpec,
@@ -132,7 +132,13 @@ export default function SpecList() {
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <EditButton title="只能选择一条数据" handleEdit={handleEdit} />
-        <DeleteButton onConfirm={handleDelete} isDeleting={isDeleting} />
+        <DeleteButton
+          onConfirm={handleDelete}
+          isDeleting={isDeleting}
+          count={selectedCount}
+          title="删除规格"
+          itemName="规格"
+        />
       </div>
 
       {/* 选中摘要条（S4 通用组件） */}

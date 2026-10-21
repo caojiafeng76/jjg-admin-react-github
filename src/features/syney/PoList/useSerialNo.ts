@@ -3,6 +3,7 @@ import { App } from 'antd'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
 import { getSerialNo } from '@/services/apiSyneySerialNo'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 import { syneyPoKeys } from '../queryKeys'
 
 export function useSerialNo() {
@@ -16,12 +17,13 @@ export function useSerialNo() {
     queryFn: getSerialNo,
     // 序列号数据变化较少，使用静态数据配置
     ...queryConfig.static,
+    throwOnError: false,
   })
 
   // 错误处理：忽略 AbortError
   useEffect(() => {
     if (error && !isAbortError(error)) {
-      message.error('获取序列号失败，请稍后重试')
+      message.error(getUserErrorMessage(error, '序列号获取失败，请稍后重试'))
     }
   }, [error, message])
 

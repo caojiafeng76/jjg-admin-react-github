@@ -19,6 +19,12 @@ vi.mock('@ui/Loading', () => ({
   default: () => <div>loading...</div>,
 }))
 
+vi.mock('@ui/PageForbidden', () => ({
+  default: ({ pathname }: { pathname?: string }) => (
+    <div data-testid="page-forbidden">{pathname}</div>
+  ),
+}))
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>(
     'react-router-dom',
@@ -70,7 +76,7 @@ describe('RouteGuards', () => {
     expect(screen.queryByText('protected content')).not.toBeInTheDocument()
   })
 
-  it('redirects PermissionProtectedRoute to access denied after permissions finish loading without access', () => {
+  it('renders in-layout 403 instead of redirecting when the page permission is missing', () => {
     mockUseAuth.mockReturnValue({
       user: { id: 'user-1' },
       loading: false,
@@ -80,6 +86,31 @@ describe('RouteGuards', () => {
     mockUsePermissionContext.mockReturnValue({
       isLoading: false,
       can: vi.fn().mockReturnValue(false),
+      permissions: {},
+    })
+
+    render(
+      <PermissionProtectedRoute
+        element={<div>protected content</div>}
+        permissionKey="page:production-order:view"
+      />,
+    )
+
+    expect(screen.getByTestId('page-forbidden')).toHaveTextContent('/production-order')
+    expect(screen.queryByTestId('navigate')).not.toBeInTheDocument()
+    expect(screen.queryByText('protected content')).not.toBeInTheDocument()
+  })
+
+  it('still redirects inactive accounts to access denied', () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: 'user-1' },
+      loading: false,
+      role: 'admin',
+      employeeProfile: { is_active: false },
+    })
+    mockUsePermissionContext.mockReturnValue({
+      isLoading: false,
+      can: vi.fn().mockReturnValue(true),
       permissions: {},
     })
 

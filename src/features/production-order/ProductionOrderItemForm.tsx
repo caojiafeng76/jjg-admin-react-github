@@ -27,6 +27,7 @@ interface Props {
   initialValues?: ProductionOrderItem
   orderId: string
   compact?: boolean
+  submitting?: boolean
 }
 
 interface ProjectNoData {
@@ -54,6 +55,7 @@ export default function ProductionOrderItemForm({
   initialValues,
   orderId,
   compact = false,
+  submitting = false,
 }: Props) {
   const [form] = Form.useForm()
   const formInitialValues = useMemo(
@@ -345,6 +347,7 @@ export default function ProductionOrderItemForm({
       open={open}
       onCancel={onCancel}
       onOk={() => form.submit()}
+      confirmLoading={submitting}
       width={compact ? 'calc(100vw - 20px)' : 700}
       style={compact ? { top: 12, maxWidth: 560 } : undefined}
       destroyOnHidden

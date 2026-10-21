@@ -7,11 +7,10 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
-import { message } from 'antd'
-import { useMemo } from 'react'
+import { App } from 'antd'
 
-// Type for the Ant Design message API instance returned by message.useMessage()
-type MessageApi = ReturnType<typeof message.useMessage>[0]
+// Type for the Ant Design message API instance returned by App.useApp()
+type MessageApi = ReturnType<typeof App.useApp>['message']
 
 /**
  * 带消息提示和查询失效功能的 Mutation Hook 配置
@@ -40,7 +39,7 @@ export interface MutationWithMessageOptions<TData, TError, TVariables> {
 
   /**
    * 外部提供的 Message API 实例（可选）
-   * 如果不提供，会使用内部的 message.useMessage()
+   * 如果不提供，会使用 App.useApp() 的全局 message（无需渲染 contextHolder）
    */
   messageApi?: MessageApi
 
@@ -77,7 +76,7 @@ export interface MutationWithMessageOptions<TData, TError, TVariables> {
  *
  * @example
  * ```typescript
- * const { mutate, isPending, contextHolder } = useMutationWithMessage({
+ * const { mutate, isPending } = useMutationWithMessage({
  *   mutationFn: createItem,
  *   invalidateQueries: [['items']],
  *   successMessage: '创建成功',
@@ -97,13 +96,10 @@ export function useMutationWithMessage<TData, TError, TVariables>({
   mutationOptions,
 }: MutationWithMessageOptions<TData, TError, TVariables>) {
   const queryClient = useQueryClient()
-  const [internalMessageApi, contextHolder] = message.useMessage()
+  const { message: appMessageApi } = App.useApp()
 
-  // 使用外部提供的 messageApi 或内部的
-  const messageApi = useMemo(
-    () => externalMessageApi || internalMessageApi,
-    [externalMessageApi, internalMessageApi],
-  )
+  // 优先使用外部提供的 messageApi；否则使用 <AntdApp> 提供的全局实例
+  const messageApi = externalMessageApi || appMessageApi
 
   const mutation = useMutation<TData, TError, TVariables>({
     mutationFn,
@@ -143,7 +139,10 @@ export function useMutationWithMessage<TData, TError, TVariables>({
 
   return {
     ...mutation,
-    // 如果使用外部 messageApi，不需要返回 contextHolder
-    contextHolder: externalMessageApi ? null : contextHolder,
+    /**
+     * @deprecated 消息已通过 App.useApp() 全局渲染，无需再挂载 contextHolder；
+     * 保留字段仅为兼容旧调用方，恒为 null
+     */
+    contextHolder: null,
   }
 }
