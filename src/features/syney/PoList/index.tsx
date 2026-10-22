@@ -15,7 +15,6 @@ import EditButton from '@/ui/EditButton'
 import PrintButton from '@/ui/PrintButton'
 import { TableState } from '@/ui/TableState'
 import {
-  distinctItems,
   getItemsWithExtraInfo,
   getItemsWithParamSpec,
   jsonToArray,
@@ -180,21 +179,8 @@ export default function PoList() {
           items = jsonToArray(values.Detail || '')
           items = items?.map(item => ({ ...item, No })) as ISyneyItem[]
         }
+        // 不去重：ERP 同件号多行是上/下头部等独立零件（参数规格或备注不同），合并会丢失下头部规格与备注
         items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
-        // 去重：按 SONo 分组后按 PartNo+TaxUnitPrice 合并，避免跨生产编号误合并，修复 14→24 膨胀
-        {
-          const groups = new Map<string, ISyneyItem[]>()
-          for (const it of items) {
-            const k = String(it.SONo || '')
-            const arr = groups.get(k)
-            if (arr)
-              arr.push(it)
-            else groups.set(k, [it])
-          }
-          items = Array.from(groups.values()).flatMap(g =>
-            distinctItems(g as ISyneyItem[]),
-          ) as ISyneyItem[]
-        }
 
         const hasInferredParamSpec = items.some(
           item => item.ParamSpecInferred,

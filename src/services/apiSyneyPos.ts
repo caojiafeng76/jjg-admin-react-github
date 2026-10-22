@@ -3,29 +3,6 @@ import type { ISyneyItem, ISyneyPo } from './types'
 import { handleApiError } from '@utils/errorHandler'
 import supabase from './supabase'
 
-function distinctItemsForPo(items: ISyneyItem[]): ISyneyItem[] {
-  const itemMap = new Map<string, ISyneyItem>()
-  for (const item of items) {
-    const key = `${item.PartNo}-${item.TaxUnitPrice}`
-    const existing = itemMap.get(key)
-    if (existing) {
-      const newQty = (existing.Qty || 0) + (item.Qty || 0)
-      const unitPrice = item.TaxUnitPrice || 0
-      existing.Qty = newQty
-      existing.TaxTotalPrice = newQty * unitPrice
-    }
-    else {
-      itemMap.set(key, {
-        ...item,
-        Qty: item.Qty || 0,
-        TaxUnitPrice: item.TaxUnitPrice || 0,
-        TaxTotalPrice: (item.Qty || 0) * (item.TaxUnitPrice || 0),
-      })
-    }
-  }
-  return Array.from(itemMap.values())
-}
-
 type SyneyPoUpdate = Database['public']['Tables']['syney-pos']['Update']
 
 function normalizeSyneyPoUpdatePayload(data: Partial<ISyneyPo>): SyneyPoUpdate {
@@ -344,9 +321,8 @@ export async function createPo({
         if (!items || items.length === 0)
           return
 
-        const dedupedItems = distinctItemsForPo(items)
-
-        const poItems = dedupedItems.map(item => ({
+        // 明细按 Excel 行原样入库，不去重（同件号多行是上/下头部等独立零件）
+        const poItems = items.map(item => ({
           No: item.No,
           PartNo: item.PartNo,
           PartName: item.PartName,
@@ -354,7 +330,7 @@ export async function createPo({
           Spec: item.Spec,
           ParamSpec: item.ParamSpec,
           Unit: item.Unit,
-          Qty: item.Qty,
+          Qty: item.Qty || 0,
           SONo: item.SONo,
           PartCode: item.PartCode ?? null,
           PartModel: item.PartModel ?? null,
