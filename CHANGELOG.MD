@@ -17,6 +17,11 @@
 
 ## 2026-10-22
 
+- **类别**：变更
+- **范围**：`src/utils/syneyDecomposition.ts`、`src/utils/syneyDecomposition.rear.test.ts`
+- **摘要**：删除分解单后板候选（AF/FN/BX/BY/Y997）中"`Qty===2` 一律拆成上 1 下 1"的规则。这条规则是为导入去重造成的合并行准备的；导入去重已移除，存量合并行也已拆开，所以不再需要。现在带上头部或下头部标记的行整行进入对应格子；无标记的单条后板仍走原有的均分队列（单条 1+1，两条按顺序上/下），这部分不变。删除前核查数据库：后板候选中"Qty=2 且只带一个方向标记"的行为 0 条，存量订单的分解单结果不受影响。
+- **验证**：`bun run test src/utils/syneyDecomposition`、全量 `bun run test`、`bun run typecheck`、`bun lint`
+
 - **类别**：修复
 - **范围**：`src/features/syney/PoList/index.tsx`、`src/services/apiSyneyPos.ts`（删除 `distinctItemsForPo`）；新增 `src/utils/syney.vitest.ts`
 - **摘要**：西尼订单 Excel 导入时，同一生产编号下同件号的多行明细被合并。例如 XNJD-FZ26-148-0374 的 XN2808AF998 有上头部 L1=648 和下头部 L1=684 两行，创建后只剩 `1325*648 ×2`。原因是 2026-08-27（`a38fa0e`）加入的两处导入去重按 `PartNo+TaxUnitPrice` 合并，而导入明细没有单价。现在两处去重都删除，Excel 每行原样入库，入库条数与导入预览一致。
