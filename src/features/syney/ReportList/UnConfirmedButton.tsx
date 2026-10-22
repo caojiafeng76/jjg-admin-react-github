@@ -1,10 +1,10 @@
 import { XCircleIcon } from '@heroicons/react/16/solid'
 import { Button } from 'antd'
-import { useAppStore } from '@/store'
+import { useTableSelection } from '../useTableSelection'
 import { useMarkReportsStatus } from './useMarkReportsStatus'
 
 export default function UnConfirmedButton() {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
+  const { tableSelectedKeys } = useTableSelection()
   const { markStatus, isPending } = useMarkReportsStatus()
 
   return (

@@ -5,8 +5,8 @@ import { formatNumberPadded } from '@utils/helps'
 
 import { Table } from 'antd'
 import { useMemo } from 'react'
-import { useAppStore } from '@/store'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import { useTableSelection } from '../useTableSelection'
 
 interface Props {
   data: ISyneyItem[]
@@ -29,10 +29,7 @@ export default function DetailTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
 
   const currentPageTotalAmount = useMemo(
     () => data.reduce((sum, item) => sum + Number(item.TaxTotalPrice || 0), 0),

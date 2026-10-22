@@ -3,13 +3,13 @@ import { App } from 'antd'
 import { useEffect } from 'react'
 import { isAbortError, queryConfig } from '@/config/queryClient'
 import { getSyneyPoDetail } from '@/services/apiSyneyPo'
-import { useAppStore } from '@/store'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { syneyPoKeys } from '../queryKeys'
+import { useTableSelection } from '../useTableSelection'
 
 export function usePo(validPoIds?: number[]) {
   const { message } = App.useApp()
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
+  const { tableSelectedKeys } = useTableSelection()
 
   const id = tableSelectedKeys[0] || ''
   const numericId = Number(id)

@@ -4,11 +4,11 @@ import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { queryConfig } from '@/config/queryClient'
 import { getSelectedPosWithItems } from '@/services/apiSyneyPos'
-import { useAppStore } from '@/store'
 import { syneyPoKeys } from '../queryKeys'
+import { useTableSelection } from '../useTableSelection'
 
 export function useSelectedPos() {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
+  const { tableSelectedKeys } = useTableSelection()
 
   const {
     data: selectedMap,

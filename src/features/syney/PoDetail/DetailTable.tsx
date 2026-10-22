@@ -3,8 +3,8 @@ import type { Key } from 'react'
 import type { ISyneyItem } from '@/types'
 import { Table } from 'antd'
 import { useMemo } from 'react'
-import { useAppStore } from '@/store'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import { useTableSelection } from '../useTableSelection'
 import { useDetail } from './useDetail'
 
 interface Props {
@@ -28,10 +28,7 @@ export default function DetailTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const { items, isLoading } = useDetail()
 
   const currentPageTotalQty = useMemo(

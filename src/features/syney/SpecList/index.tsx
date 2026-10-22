@@ -11,6 +11,7 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
+import { feedbackText } from '@/utils/feedbackText'
 import PartNoInput from './PartNoInput'
 import SpecForm from './SpecForm'
 import SpecTable from './SpecTable'
@@ -28,16 +29,12 @@ export default function SpecList() {
   const specFormRef = useRef<ISyneySpecFormRef>(null)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalTitle, setModalTitle] = useState('创建规格')
+  const [modalTitle, setModalTitle] = useState('新建踏板规格')
   const [isEditing, setIsEditing] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
   const { syneySpecs, isLoading, error, count, refetch } = useSyneySpecs({ silentError: true })
-  const {
-    isCreating,
-    createSyneySpec,
-    contextHolder: createMessageContextHolder,
-  } = useCreateSyneySpec()
+  const { isCreating, createSyneySpec } = useCreateSyneySpec()
   const { isUpdating, updateSyneySpec } = useUpdateSyneySpec()
   const { isDeleting, deleteSyneySpecs } = useDeleteSyneySpecs()
 
@@ -83,14 +80,14 @@ export default function SpecList() {
   }
 
   function handleCreate() {
-    setModalTitle('创建规格')
+    setModalTitle('新建踏板规格')
     setIsEditing(false)
     showModal()
   }
 
   function handleEdit() {
     if (specIds?.length !== 1) {
-      message.warning('请选择一条数据')
+      message.warning('请选择一条踏板规格进行编辑')
       return
     }
     setIsEditing(true)
@@ -99,7 +96,7 @@ export default function SpecList() {
 
   function handleDelete() {
     if (specIds?.length === 0) {
-      message.warning('请选择至少一条数据')
+      message.warning(feedbackText.selectRequired('删除'))
       return
     }
     deleteSyneySpecs(specIds, {
@@ -112,7 +109,7 @@ export default function SpecList() {
   useEffect(() => {
     if (spec && isEditing) {
       specFormRef.current?.getInstance().setFieldsValue({ ...spec })
-      setModalTitle('编辑规格')
+      setModalTitle('编辑踏板规格')
     }
   }, [spec, isEditing])
 
@@ -126,8 +123,6 @@ export default function SpecList() {
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
-      {createMessageContextHolder}
-
       {/* 顶部工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
@@ -136,8 +131,8 @@ export default function SpecList() {
           onConfirm={handleDelete}
           isDeleting={isDeleting}
           count={selectedCount}
-          title="删除规格"
-          itemName="规格"
+          title="删除踏板规格"
+          itemName="踏板规格"
         />
       </div>
 
@@ -153,16 +148,10 @@ export default function SpecList() {
         : null}
 
       {/* 搜索 / 过滤栏 */}
-      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">筛选条件</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">件号：</span>
-            <PartNoInput />
-          </div>
+          <span className="text-slate-600 dark:text-slate-300">件号：</span>
+          <PartNoInput />
         </div>
       </div>
 
@@ -170,7 +159,7 @@ export default function SpecList() {
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
           <TableState
-            loading={isLoading && records.length === 0}
+            loading={isLoading}
             error={error}
             onRetry={refetch}
           >
@@ -194,7 +183,8 @@ export default function SpecList() {
         title={modalTitle}
         open={isModalOpen}
         confirmLoading={isCreating || isUpdating}
-        width={560}
+        width={520}
+        destroyOnHidden
         onOk={handleOk}
         onCancel={handleCancel}
       >

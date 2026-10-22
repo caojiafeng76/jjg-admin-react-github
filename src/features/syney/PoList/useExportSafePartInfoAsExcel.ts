@@ -4,16 +4,18 @@ import {
   EXCEL_WRITE_OPTIONS,
   setRowHeight,
 } from '@utils/excelStyleUtils'
-import { message } from 'antd'
+import { App } from 'antd'
 import dayjs from 'dayjs'
 
-import { useAppStore } from '@/store'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import {
   getLabelInfoBySettings,
   getLabelInfoFromStoredItem,
   isSafePartBySettings,
 } from '@/utils/syneySafePartRules'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
+import { useTableSelection } from '../useTableSelection'
 import { useSelectedPos } from './useSelectedPos'
 
 const loadExcel = () => import('xlsx-js-style')
@@ -31,10 +33,8 @@ interface ExcelRow {
 }
 
 export function useExportSafePartInfoAsExcel() {
-  const [messageApi, contextHolder] = message.useMessage()
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { message: messageApi } = App.useApp()
+  const { setTableSelectedKeys } = useTableSelection()
   const { isLoading, selectedPosList } = useSelectedPos()
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading }
     = useSyneySafePartSettings()
@@ -51,12 +51,12 @@ export function useExportSafePartInfoAsExcel() {
     }
 
     if (isSafePartSettingsLoading || !safePartSettings) {
-      messageApi.warning('安全部件设置加载中，请稍后再试')
+      messageApi.warning('件号配置加载中，请稍后再试')
       return
     }
 
     if (!selectedPosList || selectedPosList.length === 0) {
-      messageApi.warning('请选择至少一条数据')
+      messageApi.warning(feedbackText.selectRequired('导出'))
       return
     }
 
@@ -166,15 +166,16 @@ export function useExportSafePartInfoAsExcel() {
 
       // 导出文件
       writeFile(wb, fileName, EXCEL_WRITE_OPTIONS)
-      messageApi.success(`导出成功！共 ${allSafeParts.length} 条安全部件数据`)
+      messageApi.success(feedbackText.exported('安全部件', allSafeParts.length))
       setTableSelectedKeys([])
     }
     catch (error) {
       console.error('导出失败:', error)
-      const errorMessage = error instanceof Error ? error.message : '未知错误'
-      messageApi.error(`导出失败: ${errorMessage}`)
+      messageApi.error(
+        getUserErrorMessage(error, feedbackText.failed('导出', '安全部件信息')),
+      )
     }
   }
 
-  return { exportSafePartInfoAsExcel, preloadExcel, contextHolder }
+  return { exportSafePartInfoAsExcel, preloadExcel }
 }

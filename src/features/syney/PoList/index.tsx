@@ -1,26 +1,31 @@
 import type { TransformedOrderData } from '@utils/excelUtils'
 import type { FormInstance } from 'antd'
 import type { ISyneyItem, ISyneyPo } from '@/types'
+import { Bars3Icon } from '@heroicons/react/24/outline'
 import { App, Modal } from 'antd'
 import dayjs from 'dayjs'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { useAppStore } from '@/store'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import PrintButton from '@/ui/PrintButton'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import {
   getItemsWithExtraInfo,
   getItemsWithParamSpec,
   jsonToArray,
 } from '@/utils/syney'
 import { useSyneySpecs } from '../SpecList/useSyneySpecs'
+import TableSelectionProvider from '../TableSelectionProvider'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
+import { useTableSelection } from '../useTableSelection'
 import ExportInfoButton from './ExportInfoButton'
 import ExportShippingListButton from './ExportShippingListButton'
 import PoDateFilter from './PoDateFilter'
@@ -38,7 +43,7 @@ import { usePrint } from './usePrint'
 import { usePrintEnglish } from './usePrintEnglish'
 import { useUpdatePos } from './useUpdatePos'
 
-export default function PoList() {
+function PoListContent() {
   const { message: messageApi } = App.useApp()
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
@@ -51,43 +56,34 @@ export default function PoList() {
 
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
 
-  const { count, pos, isLoading: posLoading, error: posError, refetch: posRefetch } = usePos()
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const {
+    count,
+    pos,
+    isLoading: posLoading,
+    isFirstLoading: posFirstLoading,
+    error: posError,
+    refetch: posRefetch,
+  } = usePos()
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const [isCreating, setIsCreating] = useState(false)
-  const {
-    deletePo,
-    isDeleting,
-    contextHolder: deletePoContextHolder,
-  } = useDeletePo(messageApi)
-  const {
-    updatePos,
-    isUpdating: isPoUpdating,
-    contextHolder: updatePosContextHolder,
-  } = useUpdatePos(messageApi)
+  const { deletePo, isDeleting } = useDeletePo()
+  const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
 
   const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
     isAll: !isEdit,
   })
 
-  const { createPo, contextHolder: createPoContextHolder }
-    = useCreatePo(messageApi)
+  const { createPo } = useCreatePo()
 
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading }
     = useSyneySafePartSettings()
 
-  const {
-    generateLabel,
-    preloadPDF: preloadChineseLabelPDF,
-    contextHolder: labelContextHolder,
-  } = usePrint(safePartSettings, isSafePartSettingsLoading, messageApi)
-  const {
-    generateEnglishLabel,
-    preloadPDF: preloadEnglishLabelPDF,
-    contextHolder: englishLabelContextHolder,
-  } = usePrintEnglish(safePartSettings, isSafePartSettingsLoading, messageApi)
+  const { generateLabel, preloadPDF: preloadChineseLabelPDF } = usePrint(
+    safePartSettings,
+    isSafePartSettingsLoading,
+  )
+  const { generateEnglishLabel, preloadPDF: preloadEnglishLabelPDF }
+    = usePrintEnglish(safePartSettings, isSafePartSettingsLoading)
 
   const records = useMemo(() => pos || [], [pos])
   const currentPoIds = useMemo(
@@ -122,7 +118,7 @@ export default function PoList() {
 
   const handleDelete = useCallback(() => {
     if (tableSelectedKeys.length === 0) {
-      messageApi.warning('请选择至少一条数据')
+      messageApi.warning(feedbackText.selectRequired('删除'))
       return
     }
     deletePo(tableSelectedKeys.map(String), {
@@ -139,12 +135,12 @@ export default function PoList() {
   const onFinish = useCallback(
     async (values: ISyneyPo) => {
       if (specsLoading) {
-        messageApi.warning('规格数据加载中,请稍后再试')
+        messageApi.warning('踏板规格加载中，请稍后再试')
         return
       }
 
       if (isSafePartSettingsLoading || !safePartSettings) {
-        messageApi.warning('安全部件设置加载中,请稍后再试')
+        messageApi.warning('件号配置加载中，请稍后再试')
         return
       }
 
@@ -158,7 +154,8 @@ export default function PoList() {
           updatePos(
             { ids: tableSelectedKeys.map(String), data: values },
             {
-              onSettled: () => {
+              // 失败提示由 useUpdatePos 统一弹出；弹窗保持打开，便于修改后重试
+              onSuccess: () => {
                 setIsModalOpen(false)
                 setTableSelectedKeys([])
               },
@@ -217,21 +214,18 @@ export default function PoList() {
 
         setIsCreating(true)
 
-        await createPo(
-          { po, map },
-          {
-            onSettled: () => {
-              setIsModalOpen(false)
-              setTableSelectedKeys([])
-              setIsCreating(false)
-              setExcelData(null)
-            },
-          },
-        )
+        await createPo({ po, map })
+        // 仅成功时关闭弹窗；失败时保留已填内容与已解析的 Excel，便于修正后重试
+        setIsModalOpen(false)
+        setTableSelectedKeys([])
+        setIsCreating(false)
+        setExcelData(null)
       }
       catch (error) {
-        console.error('提交失败:', error)
-        messageApi.error('提交失败,请重试')
+        console.error('订单创建失败:', error)
+        messageApi.error(
+          getUserErrorMessage(error, feedbackText.failed('创建', '订单')),
+        )
         setIsCreating(false)
       }
     },
@@ -266,7 +260,7 @@ export default function PoList() {
       if (tableSelectedKeys.length > 0) {
         setTableSelectedKeys([])
       }
-      messageApi.warning('请选择至少一条数据进行编辑')
+      messageApi.warning(feedbackText.selectRequired('编辑'))
       return
     }
 
@@ -300,12 +294,6 @@ export default function PoList() {
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
-      {labelContextHolder}
-      {englishLabelContextHolder}
-      {createPoContextHolder}
-      {updatePosContextHolder}
-      {deletePoContextHolder}
-
       {/* 顶部工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton
@@ -359,84 +347,38 @@ export default function PoList() {
       {/* 选中摘要条 */}
       {selectedCount > 0
         ? (
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
-              <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-                  <svg
-                    className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                已选
-                <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {selectedCount}
-                </span>
-                条
-              </span>
-              {selectedQty > 0
-                ? (
-                    <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
-                        <svg
-                          className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                          />
-                        </svg>
-                      </div>
-                      选中数量合计：
-                      <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
-                        {selectedQty.toLocaleString()}
-                      </span>
-                    </span>
-                  )
-                : null}
-            </div>
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedCount}
+              stats={[
+                {
+                  label: '选中数量合计',
+                  value: selectedQty,
+                  tone: 'error',
+                  icon: <Bars3Icon className="size-3.5" />,
+                },
+              ]}
+            />
           )
         : null}
 
       {/* 搜索 / 过滤栏 */}
-      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">筛选条件</span>
+          <span className="text-slate-600 dark:text-slate-300">交货日期：</span>
+          <PoDateFilter />
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">交货日期：</span>
-            <PoDateFilter />
-          </div>
-          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">状态：</span>
-            <PoSelectedFilter />
-          </div>
-          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">搜索：</span>
-            <PoSearchInput />
-          </div>
-          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">操作：</span>
-            <PoSelected />
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="text-slate-600 dark:text-slate-300">状态：</span>
+          <PoSelectedFilter />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-slate-600 dark:text-slate-300">搜索：</span>
+          <PoSearchInput />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-slate-600 dark:text-slate-300">操作：</span>
+          <PoSelected />
         </div>
       </div>
 
@@ -444,7 +386,7 @@ export default function PoList() {
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
           <TableState
-            loading={posLoading && records.length === 0}
+            loading={posFirstLoading}
             error={posError}
             onRetry={posRefetch}
           >
@@ -491,5 +433,14 @@ export default function PoList() {
         />
       </Modal>
     </div>
+  )
+}
+
+/** 选中状态随页面实例独立（多标签页缓存下互不影响） */
+export default function PoList() {
+  return (
+    <TableSelectionProvider>
+      <PoListContent />
+    </TableSelectionProvider>
   )
 }

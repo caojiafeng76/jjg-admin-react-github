@@ -2,29 +2,21 @@ import type { FormInstance } from 'antd/lib'
 import type { ISyneyItem, ISyneyPo } from '@/types'
 import { ArrowLeftIcon } from '@heroicons/react/16/solid'
 import { App, Button, Modal } from 'antd'
-import dayjs from 'dayjs'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { useAppStore } from '@/store'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
+import StatusPill from '@/ui/StatusPill'
 import { TableState } from '@/ui/TableState'
+import { formatDate } from '@/utils/format'
+import { PO_STATUS_TONES } from '../statusTones'
+import TableSelectionProvider from '../TableSelectionProvider'
+import { useTableSelection } from '../useTableSelection'
 import DetailForm from './DetailForm'
 import DetailTable from './DetailTable'
 import { useDetail } from './useDetail'
 import { useItem } from './useItem'
-
-// 状态 pill 语义色（与 PoTable STATUS_STYLES 一致）
-const STATUS_PILL: Record<string, string> = {
-  已创建: 'bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400',
-  部分送货:
-    'bg-amber-50 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400',
-  已入库:
-    'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
-  暂停: 'bg-pink-50 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400',
-  作废: 'bg-slate-100 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400',
-}
 
 function InfoItem({
   label,
@@ -43,7 +35,7 @@ function InfoItem({
   )
 }
 
-export default function PoDetail() {
+function PoDetailContent() {
   const { message } = App.useApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -57,9 +49,7 @@ export default function PoDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [isLoading, setIsLoading] = useState(false)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { setTableSelectedKeys } = useTableSelection()
   const { items, po, isLoading: isDetailLoading } = useDetail()
 
   const detailFormRef = useRef<{
@@ -99,7 +89,7 @@ export default function PoDetail() {
       { label: '规格', value: p?.Spec || '-' },
       {
         label: '交货日期',
-        value: p?.EndDate ? dayjs(p.EndDate).format('YYYY-MM-DD') : '-',
+        value: formatDate(p?.EndDate),
       },
       { label: '商标', value: p?.Brand || '-' },
       { label: '工艺要求', value: p?.Technique || '-' },
@@ -111,7 +101,7 @@ export default function PoDetail() {
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
       {/* 订单信息分区卡片 */}
-      <div className="app-card p-4">
+      <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
@@ -119,14 +109,8 @@ export default function PoDetail() {
               订单信息
             </span>
           </div>
-          {po?.Status && STATUS_PILL[po.Status]
-            ? (
-                <span
-                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[po.Status]}`}
-                >
-                  {po.Status}
-                </span>
-              )
+          {po?.Status && PO_STATUS_TONES[po.Status]
+            ? <StatusPill tone={PO_STATUS_TONES[po.Status]}>{po.Status}</StatusPill>
             : null}
         </div>
 
@@ -153,7 +137,7 @@ export default function PoDetail() {
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <TableState loading={isDetailLoading && records.length === 0}>
+          <TableState loading={isDetailLoading}>
             <DetailTable
               loading={isLoading || isDetailLoading}
               data={paginatedRecords}
@@ -180,15 +164,10 @@ export default function PoDetail() {
           title="选择至少一条数据"
           handleEdit={() => {
             if (!data) {
-              message.warning('请先选择一条数据进行编辑')
+              message.warning('请选择一条订单明细进行编辑')
               return
             }
             setIsModalOpen(true)
-            setTimeout(() => {
-              detailFormRef.current
-                ?.getInstance()
-                .setFieldsValue(data as ISyneyItem)
-            }, 0)
           }}
         />
       </div>
@@ -197,7 +176,15 @@ export default function PoDetail() {
         title="编辑明细"
         open={isModalOpen}
         confirmLoading={isLoading}
-        width={560}
+        width={520}
+        destroyOnHidden
+        afterOpenChange={(open) => {
+          if (open && data) {
+            detailFormRef.current
+              ?.getInstance()
+              .setFieldsValue(data as ISyneyItem)
+          }
+        }}
         onCancel={() => setIsModalOpen(false)}
         onOk={() => {
           detailFormRef.current?.getInstance().submit()
@@ -210,5 +197,14 @@ export default function PoDetail() {
         />
       </Modal>
     </div>
+  )
+}
+
+/** 选中状态随页面实例独立（多标签页缓存下互不影响） */
+export default function PoDetail() {
+  return (
+    <TableSelectionProvider>
+      <PoDetailContent />
+    </TableSelectionProvider>
   )
 }

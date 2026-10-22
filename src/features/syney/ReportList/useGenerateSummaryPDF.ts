@@ -1,8 +1,10 @@
 import { App } from 'antd'
 
-import { useAppStore } from '@/store'
-import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 
+import { feedbackText } from '@/utils/feedbackText'
+import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
+import { useTableSelection } from '../useTableSelection'
 import { useSelectedReports } from './useSelectedReports'
 
 function loadPDFDependencies() {
@@ -10,7 +12,7 @@ function loadPDFDependencies() {
 }
 
 export function useGenerateSummaryPDF() {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
+  const { tableSelectedKeys } = useTableSelection()
   const { message } = App.useApp()
 
   // 只在有选中项时才查询数据
@@ -25,12 +27,12 @@ export function useGenerateSummaryPDF() {
   async function generateSummaryPDF() {
     // 改进错误处理
     if (selectedReportsLoading) {
-      message.warning('数据加载中，请稍候重试')
+      message.warning('对账单数据加载中，请稍后再试')
       return false
     }
 
     if (!selectedMap || selectedMap.size === 0) {
-      message.warning('请选择至少一条对账单数据')
+      message.warning(feedbackText.selectRequired('打印'))
       return false
     }
 
@@ -87,13 +89,13 @@ export function useGenerateSummaryPDF() {
       // 预览 PDF
       previewPDF(doc, filename)
 
-      message.success(`PDF生成完成: ${filename}`)
+      message.success('汇总单 PDF 已生成')
       return true // 返回 true 表示生成成功
     }
     catch (error) {
       console.error('生成汇总 PDF 时发生错误:', error)
       message.error(
-        error instanceof Error ? error.message : 'PDF生成失败，请重试',
+        getUserErrorMessage(error, feedbackText.failed('生成', '汇总单 PDF')),
       )
       return false
     }

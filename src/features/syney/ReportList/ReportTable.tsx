@@ -2,14 +2,16 @@ import type { TableColumnsType, TableProps } from 'antd'
 import type { Key } from 'react'
 import type { ISyneyStoreReport } from '@/types'
 import { Table } from 'antd'
-import dayjs from 'dayjs'
 
 import { useMemo } from 'react'
 
 import { Link, useLocation } from 'react-router-dom'
-import { useAppStore } from '@/store'
+import StatusPill from '@/ui/StatusPill'
+import { formatDate } from '@/utils/format'
 import { formatNumberPadded } from '@/utils/helps'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import { getReportStatusTone, REPORT_STATUS_LABELS } from '../statusTones'
+import { useTableSelection } from '../useTableSelection'
 import { useReports } from './useReports'
 
 interface Props {
@@ -23,36 +25,6 @@ interface Props {
   onRowClick?: (record: ISyneyStoreReport) => void
 }
 
-const STATUS_STYLES: Record<
-  string,
-  { label: string, bg: string, text: string, dot: string }
-> = {
-  unconfirmed: {
-    label: '未校对',
-    bg: 'bg-rose-50 dark:bg-rose-900/40',
-    text: 'text-rose-600 dark:text-rose-400',
-    dot: 'bg-rose-500',
-  },
-  confirmed: {
-    label: '已校对',
-    bg: 'bg-emerald-50 dark:bg-emerald-900/40',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    dot: 'bg-emerald-500',
-  },
-  未校对: {
-    label: '未校对',
-    bg: 'bg-rose-50 dark:bg-rose-900/40',
-    text: 'text-rose-600 dark:text-rose-400',
-    dot: 'bg-rose-500',
-  },
-  已校对: {
-    label: '已校对',
-    bg: 'bg-emerald-50 dark:bg-emerald-900/40',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    dot: 'bg-emerald-500',
-  },
-}
-
 export default function ReportTable({
   loading,
   data,
@@ -63,10 +35,7 @@ export default function ReportTable({
   activeRowId,
   onRowClick,
 }: Props) {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const { isLoading } = useReports()
 
   const currentPageTotalAmount = useMemo(
@@ -103,8 +72,7 @@ export default function ReportTable({
           return at - bt
         },
         defaultSortOrder: 'descend',
-        render: (text: string | null) =>
-          text ? dayjs(new Date(text)).format('YYYY-MM-DD') : '-',
+        render: (text: string | null) => formatDate(text),
       },
       {
         title: '对账状态',
@@ -116,17 +84,11 @@ export default function ReportTable({
           { text: '未校对', value: '未校对' },
         ],
         onFilter: (value, record) => record.Status === value,
-        render: (text: string) => {
-          const style = STATUS_STYLES[text] || STATUS_STYLES.unconfirmed
-          return (
-            <div
-              className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium shadow-sm ${style.bg} ${style.text}`}
-            >
-              <div className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
-              {style.label}
-            </div>
-          )
-        },
+        render: (text: string) => (
+          <StatusPill tone={getReportStatusTone(text)}>
+            {REPORT_STATUS_LABELS[text] ?? '未校对'}
+          </StatusPill>
+        ),
       },
       {
         title: '对账单号',

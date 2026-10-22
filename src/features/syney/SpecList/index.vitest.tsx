@@ -91,7 +91,7 @@ async function fillValidSpecForm(
   await user.type(await screen.findByLabelText('件号'), 'ULW-REF-FIRST')
   await user.type(screen.getByLabelText('名称'), '首提交流程')
   await user.type(screen.getByLabelText('规格'), '1000型 铝合金')
-  await user.type(screen.getByLabelText('参数'), '1525*550')
+  await user.type(screen.getByLabelText('参数规格'), '1525*550')
 }
 
 describe('SpecList create form', { timeout: 20_000 }, () => {
@@ -150,6 +150,6 @@ describe('SpecList create form', { timeout: 20_000 }, () => {
     await waitFor(() => {
       expect(createSyneySpecMock).toHaveBeenCalledOnce()
     })
-    expect(await screen.findByText('创建规格失败')).toBeInTheDocument()
+    expect(await screen.findByText('踏板规格创建失败：请稍后重试')).toBeInTheDocument()
   })
 })

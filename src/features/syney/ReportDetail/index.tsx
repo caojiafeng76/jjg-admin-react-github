@@ -1,39 +1,29 @@
 import type { FormInstance } from 'antd/lib'
 import type { ISyneyItem } from '@/types'
 import { ArrowLeftIcon } from '@heroicons/react/16/solid'
+import { CurrencyYenIcon } from '@heroicons/react/24/outline'
+
 import DetailTable from '@syney/ReportDetail/DetailTable'
 
 import { useDetail } from '@syney/ReportDetail/useDetail'
-
 import EditButton from '@ui/EditButton'
 import { App, Button, Modal } from 'antd'
-import dayjs from 'dayjs'
 import { useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { useAppStore } from '@/store'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
+import StatusPill from '@/ui/StatusPill'
 import { TableState } from '@/ui/TableState'
 import { feedbackText } from '@/utils/feedbackText'
+import { formatDate } from '@/utils/format'
+import { getReportStatusTone, REPORT_STATUS_LABELS } from '../statusTones'
+import TableSelectionProvider from '../TableSelectionProvider'
+import { useTableSelection } from '../useTableSelection'
 import DetailForm from './DetailForm'
 import { useDeleteDetail } from './useDeleteDetail'
 import { useUpdateDetail } from './useUpdateDetail'
-
-// 状态 pill 语义色（与 ReportList ReportTable STATUS_STYLES 一致）
-const STATUS_PILL: Record<string, string> = {
-  confirmed: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
-  unconfirmed: 'bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400',
-  已校对: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
-  未校对: 'bg-rose-50 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400',
-}
-
-const STATUS_LABEL: Record<string, string> = {
-  confirmed: '已校对',
-  unconfirmed: '未校对',
-  已校对: '已校对',
-  未校对: '未校对',
-}
 
 function InfoItem({
   label,
@@ -52,7 +42,7 @@ function InfoItem({
   )
 }
 
-export default function ReportDetail() {
+function ReportDetailContent() {
   const { message } = App.useApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -63,10 +53,7 @@ export default function ReportDetail() {
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)
@@ -92,9 +79,7 @@ export default function ReportDetail() {
       { label: '对账单号', value: reportInfo?.No ?? reportNo ?? '-' },
       {
         label: '创建日期',
-        value: reportInfo?.created_at
-          ? dayjs(reportInfo.created_at).format('YYYY-MM-DD')
-          : '-',
+        value: formatDate(reportInfo?.created_at),
       },
       { label: '明细条数', value: records.length },
     ],
@@ -122,7 +107,7 @@ export default function ReportDetail() {
 
   function handleEdit() {
     if (tableSelectedKeys?.length !== 1) {
-      message.warning('只能选择一条数据')
+      message.warning('请选择一条对账单明细进行编辑')
       return
     }
     showModal()
@@ -130,7 +115,6 @@ export default function ReportDetail() {
 
   function handleOk() {
     detailFormRef?.current?.submit()
-    setTableSelectedKeys([])
   }
 
   function handleCancel() {
@@ -140,7 +124,8 @@ export default function ReportDetail() {
   }
 
   function onFinishFuc(values: ISyneyItem) {
-    updateItem({ item: values }, { onSettled: handleCancel })
+    // 失败提示由 useUpdateDetail 统一弹出；弹窗保持打开，便于修改后重试
+    updateItem({ item: values }, { onSuccess: handleCancel })
   }
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
@@ -151,7 +136,7 @@ export default function ReportDetail() {
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
       {/* 对账单信息分区卡片 */}
-      <div className="app-card p-4">
+      <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
@@ -159,13 +144,11 @@ export default function ReportDetail() {
               对账单信息
             </span>
           </div>
-          {reportInfo?.Status && STATUS_PILL[reportInfo.Status]
+          {reportInfo?.Status && REPORT_STATUS_LABELS[reportInfo.Status]
             ? (
-                <span
-                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[reportInfo.Status]}`}
-                >
-                  {STATUS_LABEL[reportInfo.Status]}
-                </span>
+                <StatusPill tone={getReportStatusTone(reportInfo.Status)}>
+                  {REPORT_STATUS_LABELS[reportInfo.Status]}
+                </StatusPill>
               )
             : null}
         </div>
@@ -193,62 +176,25 @@ export default function ReportDetail() {
       {/* 选中摘要条 */}
       {selectedCount > 0
         ? (
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
-              <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-                  <svg
-                    className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                已选
-                <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {selectedCount}
-                </span>
-                条
-              </span>
-              {selectedAmount > 0
-                ? (
-                    <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
-                        <svg
-                          className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                          />
-                        </svg>
-                      </div>
-                      选中金额合计：
-                      <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
-                        {selectedAmount.toLocaleString()}
-                      </span>
-                    </span>
-                  )
-                : null}
-            </div>
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedCount}
+              stats={[
+                {
+                  label: '选中金额合计',
+                  value: selectedAmount,
+                  tone: 'error',
+                  icon: <CurrencyYenIcon className="size-3.5" />,
+                },
+              ]}
+            />
           )
         : null}
 
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <TableState loading={reportLoading && records.length === 0}>
+          <TableState loading={reportLoading}>
             <DetailTable
               data={pagedRecords}
               loading={reportLoading || isUpdating || isDeleting}
@@ -276,8 +222,8 @@ export default function ReportDetail() {
           <DeleteButton
             isDeleting={isDeleting}
             count={tableSelectedKeys.length}
-            title="删除入库明细"
-            itemName="入库明细"
+            title="删除对账单明细"
+            itemName="对账单明细"
             onConfirm={() => {
               if (tableSelectedKeys.length === 0) {
                 message.warning(feedbackText.selectRequired('删除'))
@@ -297,7 +243,8 @@ export default function ReportDetail() {
         title="编辑参数规格"
         open={isModalOpen}
         confirmLoading={isUpdating}
-        width={560}
+        width={520}
+        destroyOnHidden
         onOk={handleOk}
         onCancel={handleCancel}
         afterOpenChange={(open) => {
@@ -309,5 +256,14 @@ export default function ReportDetail() {
         <DetailForm ref={detailFormRef} onFinishFuc={onFinishFuc} />
       </Modal>
     </div>
+  )
+}
+
+/** 选中状态随页面实例独立（多标签页缓存下互不影响） */
+export default function ReportDetail() {
+  return (
+    <TableSelectionProvider>
+      <ReportDetailContent />
+    </TableSelectionProvider>
   )
 }

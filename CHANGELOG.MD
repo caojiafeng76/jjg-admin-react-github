@@ -17,6 +17,19 @@
 
 ## 2026-10-22
 
+- **类别**：重构 / 修复（前端体验统一 Phase 3：西尼 syney）
+- **范围**：`src/features/syney/**`（PoList / PoDetail / ReportList / ReportDetail / SpecList / SafePartSetting），新增 `src/features/syney/{TableSelectionProvider.tsx,tableSelectionContext.ts,useTableSelection.ts,statusTones.ts}`；`src/pages/SyneySetting.tsx`；`src/store/index.ts`；`src/ui/StatusPill.tsx`；`docs/前端交互与反馈规范.md`、`src/hooks/REFACTORING_SUMMARY.md`
+- **摘要**：按《前端交互与反馈规范》迁移西尼模块（Phase 2 车间生产因影响面大暂缓）。用户确认：选中状态改每页独立、hook 文件不合并、表单改纵向。
+  ① **选中状态**：删除全局 zustand `tableSelectedKeys`，改为每个页面根组件提供 `TableSelectionProvider`，组件通过 `useTableSelection()` 读取；多标签页缓存下订单列表、对账单列表和两个详情页不再互相串选中项。
+  ② **反馈**：去掉 22 个文件里的 `message.useMessage()` + `contextHolder` 和 `messageApi` 透传，统一 `App.useApp()`；文案统一为 `feedbackText`（对象+动作+结果），错误统一 `getUserErrorMessage`，不再直接展示 `error.message`；修正「导出成功！」「提交失败,请重试」「请稍候重试」「请选择至少一条数据」等不一致写法。修复几处重复提示：对账单 PDF / 汇总单 PDF 生成成功时 hook 和按钮各弹一次；创建订单失败时 hook 与页面各弹一次。对账单 PDF 进度提示改用固定 key 原地替换，不再用 `message.destroy()` 清掉页面上的其他提示。
+  ③ **失败不关弹窗**：订单新建 / 编辑、订单明细编辑、对账单明细编辑、新建对账单、踏板规格保存失败时弹窗保持打开、已填内容（含已解析的 Excel）保留；对账单明细编辑原先在提交前就清空选中项（校验失败也会清空），已修正。
+  ④ **表单**：5 个表单由横向（labelCol）改为纵向布局，11 条缺少文案的必填规则补全；明细编辑弹窗补 `destroyOnHidden`，改用 `afterOpenChange` 回填（替代 `setTimeout`）；弹窗宽度归到 520 / 720 档；「参数」标签统一为「参数规格」。
+  ⑤ **视觉**：状态徽章统一 `StatusPill`（4 处自写颜色映射收敛为 `statusTones.ts`；`StatusPill` 新增 `info` 进行中色，部分送货→info、暂停→warning）；选中摘要条统一 `SelectedSummaryBar`（去掉手写 SVG / 渐变）；筛选区去掉「筛选条件」卡片外壳；详情信息区和编号设置页不再在内容卡片里再套 `app-card`；日期统一 `formatDate`。
+  ⑥ **命名**：对账单页内统一称「对账单 / 对账单明细」，件号配置页统一「件号配置」（替换 Phase 1 写的「安全件设置」），踏板规格页统一「踏板规格」。
+  ⑦ 规范文档补充「选中状态不放全局 store」与 StatusPill tone 语义，迁移进度更新。
+- **验证**：`bun lint` 0 error；`bun run typecheck` 通过；`bun run test` 189 个文件 / 849 个用例全部通过（新增 `TableSelectionProvider.vitest.tsx` 验证两个页面实例选中互不影响；`usePo` / `useItem` / `queryKeys` 测试改为用 Provider 注入选中项；`SpecList/index.vitest.tsx` 随标签与错误文案更新）；`bun run build`、`bun run check:bundle` 通过。**未做浏览器手测**：建议人工确认订单列表与对账单列表同时打开时选中互不影响、打印对账单只出现一次成功提示、表单纵向布局观感。
+- **遗留**：踏板规格 / 对账单列表 / 件号配置的按钮没有对应的功能权限 key（仅订单列表有），本批未新增；菜单名「入库单列表」与页内「对账单」称呼不一致，待确认是否改菜单名。
+
 - **类别**：变更
 - **范围**：`src/utils/toolingDataExcel.ts`、`src/utils/toolingDataExcel.vitest.ts`
 - **摘要**：刀具资料「导出月度汇总」中上次盘点 / 入库 / 出库 / 结余四组数量列改为整数（四舍五入取整，单元格格式 `0;-0;;@`，0 仍显示为空）；合计行数量格式改为 `0`，合计与金额的缓存值均按取整后的数量计算，与 Excel 公式结果一致。只改导出层，service 计算与数据库不变。

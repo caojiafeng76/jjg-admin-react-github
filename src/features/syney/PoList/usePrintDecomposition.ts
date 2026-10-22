@@ -3,8 +3,10 @@ import type { SyneySafePartSetting } from '@/services/apiSyneySafePartSettings'
 import type { ISyneyItem } from '@/services/types'
 
 import type { DecompositionCell } from '@/utils/syneyDecomposition'
-import { message } from 'antd'
+import { App } from 'antd'
 import { useState } from 'react'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import {
   buildDecompositionCells,
 
@@ -44,7 +46,7 @@ export function usePrintDecomposition(
   isSafePartSettingsLoading = false,
 ) {
   const { selectedPosList, isLoading } = useSelectedPos()
-  const [messageApi, contextHolder] = message.useMessage()
+  const { message: messageApi } = App.useApp()
   const [isPrinting, setIsPrinting] = useState(false)
 
   function preloadPDF() {
@@ -451,7 +453,7 @@ export function usePrintDecomposition(
     }
 
     if (isSafePartSettingsLoading || !safePartSettings) {
-      messageApi.warning('安全部件设置加载中，请稍后再试')
+      messageApi.warning('件号配置加载中，请稍后再试')
       return
     }
 
@@ -502,11 +504,11 @@ export function usePrintDecomposition(
 
       // 6. 输出 PDF
       openPDFInNewWindow(doc)
-      messageApi.success('打印完成')
+      messageApi.success('分解单已生成')
     }
     catch (error) {
       console.error('打印分解单失败:', error)
-      messageApi.error('打印失败，请重试')
+      messageApi.error(getUserErrorMessage(error, feedbackText.failed('打印', '分解单')))
     }
     finally {
       setIsPrinting(false)
@@ -516,8 +518,6 @@ export function usePrintDecomposition(
   return {
     printDecomposition,
     preloadPDF,
-    contextHolder,
     isPrinting,
-    messageApi,
   }
 }

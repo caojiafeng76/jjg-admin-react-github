@@ -5,14 +5,14 @@ import type { ReactNode } from 'react'
  *
  * 规格（docs/UI设计调研与改版指南.md §6.1.4）：
  * 状态列统一 pill 徽章 = 圆角 + 语义色浅底 + 色点，
- * 全站语义一致：成功=绿 / 警告=琥珀 / 危险=红 / 中性=灰。
+ * 全站语义一致：成功=绿 / 进行中=主色蓝 / 警告=琥珀 / 危险=红 / 中性=灰。
  *
  * 语义色走 antd token（@theme inline 桥接 --color-success/warning/error），
  * 暗色模式由 token 自动切换，无需 dark: 变体；
  * 中性灰无对应 token，保留 slate 类 + dark: 变体。
  */
 
-export type StatusTone = 'success' | 'warning' | 'danger' | 'neutral'
+export type StatusTone = 'success' | 'info' | 'warning' | 'danger' | 'neutral'
 
 export interface StatusPillProps {
   tone: StatusTone
@@ -24,6 +24,7 @@ export interface StatusPillProps {
 
 const TONE_CLASSES: Record<StatusTone, { pill: string, dot: string }> = {
   success: { pill: 'bg-success/10 text-success', dot: 'bg-success' },
+  info: { pill: 'bg-primary/10 text-primary', dot: 'bg-primary' },
   warning: { pill: 'bg-warning/10 text-warning', dot: 'bg-warning' },
   danger: { pill: 'bg-error/10 text-error', dot: 'bg-error' },
   neutral: {

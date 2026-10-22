@@ -4,7 +4,7 @@ import { usePermission } from '@/hooks/usePermission'
 import { useExportSafePartInfoAsExcel } from './useExportSafePartInfoAsExcel'
 
 export default function ExportInfoButton() {
-  const { exportSafePartInfoAsExcel, preloadExcel, contextHolder }
+  const { exportSafePartInfoAsExcel, preloadExcel }
     = useExportSafePartInfoAsExcel()
   const allowed = usePermission('feature:syney-po-list.export')
   const denied = !allowed
@@ -22,7 +22,6 @@ export default function ExportInfoButton() {
   )
   return (
     <>
-      {contextHolder}
       {denied ? <Tooltip title="无导出权限">{btn}</Tooltip> : btn}
     </>
   )

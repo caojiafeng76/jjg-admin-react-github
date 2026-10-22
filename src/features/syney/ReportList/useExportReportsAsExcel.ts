@@ -6,13 +6,13 @@ import {
 } from '@utils/excelStyleUtils'
 import dayjs from 'dayjs'
 
-import { useAppStore } from '@/store'
+import { useTableSelection } from '../useTableSelection'
 import { useSelectedReports } from './useSelectedReports'
 
 const loadExcel = () => import('xlsx-js-style')
 
 export function useExportReportsAsExcel() {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
+  const { tableSelectedKeys } = useTableSelection()
 
   // 只在有选中项时才查询数据
   const { selectedMap, selectedReportsLoading } = useSelectedReports(

@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 
 import { useSerialNo } from '@/features/syney/PoList/useSerialNo'
 import { useUpdateSerialNo } from '@/features/syney/PoList/useUpdateSerialNo'
+import { feedbackText } from '@/utils/feedbackText'
 
 interface SyneySettingFormValues {
   SyneySerialNo: string
@@ -22,15 +23,12 @@ export default function SyneySetting() {
 
   function handleSave(values: SyneySettingFormValues) {
     updateSerialNo(Number(values.SyneySerialNo), {
-      onSuccess: () => message.success('保存成功'),
+      onSuccess: () => message.success(feedbackText.saved('编号')),
     })
   }
 
   return (
-    <div className="app-card p-6">
-      <div className="mb-4 text-base font-semibold text-slate-700 dark:text-slate-200">
-        西尼相关设置
-      </div>
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
 
       {isLoading
         ? (

@@ -1,6 +1,8 @@
-import { message } from 'antd'
+import { App } from 'antd'
 
-import { useAppStore } from '@/store'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
+import { useTableSelection } from '../useTableSelection'
 import { useSelectedPos } from './useSelectedPos'
 
 function loadShippingListExcelDocument() {
@@ -8,10 +10,8 @@ function loadShippingListExcelDocument() {
 }
 
 export function useExportShippingListAsExcel() {
-  const [messageApi, contextHolder] = message.useMessage()
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { message: messageApi } = App.useApp()
+  const { setTableSelectedKeys } = useTableSelection()
   const { isLoading, selectedPosList } = useSelectedPos()
 
   function preloadExcel() {
@@ -25,7 +25,7 @@ export function useExportShippingListAsExcel() {
     }
 
     if (!selectedPosList || selectedPosList.length === 0) {
-      messageApi.warning('请选择至少一条数据')
+      messageApi.warning(feedbackText.selectRequired('导出'))
       return
     }
 
@@ -41,15 +41,16 @@ export function useExportShippingListAsExcel() {
         Remark: poInfo.Remark,
       }))
       exportShippingList(rows)
-      messageApi.success(`导出成功！共 ${rows.length} 条订单`)
+      messageApi.success(feedbackText.exported('订单发货清单', rows.length))
       setTableSelectedKeys([])
     }
     catch (error) {
       console.error('导出失败:', error)
-      const errorMessage = error instanceof Error ? error.message : '未知错误'
-      messageApi.error(`导出失败: ${errorMessage}`)
+      messageApi.error(
+        getUserErrorMessage(error, feedbackText.failed('导出', '发货清单')),
+      )
     }
   }
 
-  return { exportShippingListAsExcel, preloadExcel, contextHolder }
+  return { exportShippingListAsExcel, preloadExcel }
 }

@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { getItemById } from '@/services/apiSyneyPo'
-import { useAppStore } from '@/store'
 
 import { syneyPoKeys } from '../queryKeys'
+import { useTableSelection } from '../useTableSelection'
 
 export function useItem(validItemIds?: number[]) {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
+  const { tableSelectedKeys } = useTableSelection()
   const id = Number(tableSelectedKeys[0])
   const isSelectedItemInCurrentDetail
     = validItemIds === undefined || validItemIds.includes(id)

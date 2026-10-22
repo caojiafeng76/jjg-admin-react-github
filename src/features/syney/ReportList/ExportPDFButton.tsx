@@ -1,30 +1,23 @@
 import { DocumentIcon } from '@heroicons/react/16/solid'
 import { App, Button } from 'antd'
-import { useAppStore } from '@/store'
+import { useTableSelection } from '../useTableSelection'
 import { useGenerateSummaryPDF } from './useGenerateSummaryPDF'
 
 export default function ExportPDFButton() {
   const { message } = App.useApp()
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { setTableSelectedKeys } = useTableSelection()
   const { generateSummaryPDF, preloadPDF, isLoading } = useGenerateSummaryPDF()
 
   const handleExport = async () => {
-    // 如果正在加载，提示用户
     if (isLoading) {
-      message.loading('数据加载中，请稍候...', 1)
+      message.warning('对账单数据加载中，请稍后再试')
       return
     }
 
-    // 调用生成函数，根据返回值显示消息
+    // 成功 / 失败提示由 useGenerateSummaryPDF 统一弹出
     const success = await generateSummaryPDF()
     if (success) {
-      message.success('PDF 文件生成成功')
       setTableSelectedKeys([])
-    }
-    else {
-      message.warning('没有可导出的数据')
     }
   }
 

@@ -1,30 +1,17 @@
-import type { message } from 'antd'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 import { createPo as createPoApi } from '@/services/apiSyneyPos'
+import { feedbackText } from '@/utils/feedbackText'
 import { syneyPoKeys } from '../queryKeys'
 
-// Type for the Ant Design message API instance returned by message.useMessage()
-type MessageApi = ReturnType<typeof message.useMessage>[0]
+export function useCreatePo() {
+  const { mutateAsync: createPo, isPending: isCreating }
+    = useMutationWithMessage({
+      mutationFn: createPoApi,
+      invalidateQueries: [syneyPoKeys.all],
+      successMessage: feedbackText.created('订单'),
+      // 失败提示由调用处统一处理（创建流程中还有流水号等其他失败点）
+      showErrorMessage: false,
+    })
 
-export function useCreatePo(messageApi?: MessageApi) {
-  const {
-    mutateAsync: createPo,
-    isPending: isCreating,
-    contextHolder,
-  } = useMutationWithMessage({
-    mutationFn: createPoApi,
-    invalidateQueries: [syneyPoKeys.all],
-    successMessage: '创建订单成功',
-    errorMessage: '创建订单失败',
-    messageApi,
-    mutationOptions: {
-      // 保持原有的 mutateAsync 行为
-    },
-  })
-
-  return {
-    createPo,
-    isCreating,
-    contextHolder: messageApi ? null : contextHolder,
-  }
+  return { createPo, isCreating }
 }

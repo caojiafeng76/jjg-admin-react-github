@@ -19,11 +19,6 @@ interface PoFormProps {
   specsLoading?: boolean
 }
 
-const layout = {
-  labelCol: { span: 6 },
-  wrapperCol: { span: 18 },
-}
-
 const SPEC_OPTIONS = [
   { value: '1000型-室内-扶梯', label: <span>1000型-室内-扶梯</span> },
   { value: '1000型-室外-扶梯', label: <span>1000型-室外-扶梯</span> },
@@ -73,13 +68,17 @@ const PoForm: FC<PoFormProps> = ({
   return (
     <Form
       ref={ref}
-      {...layout}
+      layout="vertical"
       name="po-form"
       onFinish={onFinish}
       initialValues={initialValues}
       className="[&_.ant-form-item]:mb-3"
     >
-      <Form.Item name="No" label="订单号" rules={[{ required: true }]}>
+      <Form.Item
+        name="No"
+        label="订单号"
+        rules={[{ required: true, message: '请输入订单号' }]}
+      >
         <Input
           disabled={isCreating || importMode === 'excel'}
           className={fieldClassName}
@@ -96,7 +95,11 @@ const PoForm: FC<PoFormProps> = ({
           className={fieldClassName}
         />
       </Form.Item>
-      <Form.Item name="EndDate" label="交货日期" rules={[{ required: true }]}>
+      <Form.Item
+        name="EndDate"
+        label="交货日期"
+        rules={[{ required: true, message: '请选择交货日期' }]}
+      >
         <DatePicker
           disabled={isCreating || importMode === 'excel'}
           className={`${fieldClassName} w-full`}
@@ -117,7 +120,11 @@ const PoForm: FC<PoFormProps> = ({
           </Form.Item>
 
           {importMode === 'manual' && (
-            <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
+            <Form.Item
+              name="Detail"
+              label="详情"
+              rules={[{ required: true, message: '请粘贴订单明细数据' }]}
+            >
               <Input.TextArea
                 rows={14}
                 disabled={isCreating}
@@ -162,7 +169,11 @@ const PoForm: FC<PoFormProps> = ({
               className={fieldClassName}
             />
           </Form.Item>
-          <Form.Item name="Brand" label="商标" rules={[{ required: true }]}>
+          <Form.Item
+            name="Brand"
+            label="商标"
+            rules={[{ required: true, message: '请输入商标' }]}
+          >
             <Input disabled={isCreating} className={fieldClassName} />
           </Form.Item>
           <Form.Item name="Technique" label="工艺要求">

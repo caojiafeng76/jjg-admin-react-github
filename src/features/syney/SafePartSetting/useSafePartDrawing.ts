@@ -7,6 +7,8 @@ import {
 import { App } from 'antd'
 import { useCallback, useState } from 'react'
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import { SYNEY_SAFE_PART_SETTINGS_KEY } from '../useSyneySafePartSettings'
 
 export interface DrawingPreview {
@@ -75,7 +77,7 @@ export function useSafePartDrawing() {
         })
       }
       catch (error) {
-        message.error(error instanceof Error ? error.message : '图纸预览失败')
+        message.error(getUserErrorMessage(error, feedbackText.failed('预览', '图纸')))
       }
       finally {
         setPreviewingDrawingId(null)
@@ -107,7 +109,7 @@ export function useSafePartDrawing() {
         document.body.removeChild(link)
       }
       catch (error) {
-        message.error(error instanceof Error ? error.message : '图纸下载失败')
+        message.error(getUserErrorMessage(error, feedbackText.failed('下载', '图纸')))
       }
       finally {
         setDownloadingDrawingId(null)

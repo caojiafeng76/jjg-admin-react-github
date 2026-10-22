@@ -3,10 +3,14 @@ import type jsPDF from 'jspdf'
 import { App } from 'antd'
 
 import { useState } from 'react'
-import { useAppStore } from '@/store'
-import { TABLE_COLUMNS, TABLE_CONFIG } from '@/utils/pdfConstants'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 
+import { feedbackText } from '@/utils/feedbackText'
+import { TABLE_COLUMNS, TABLE_CONFIG } from '@/utils/pdfConstants'
+import { useTableSelection } from '../useTableSelection'
 import { useSelectedReports } from './useSelectedReports'
+
+const PDF_PROGRESS_MESSAGE_KEY = 'syney-report-pdf-progress'
 
 type AutoTable = (typeof import('jspdf-autotable'))['default']
 type PDFUtils = typeof import('@/utils/pdfUtils')
@@ -131,7 +135,7 @@ async function generateAllReports(
 }
 
 export function useGenerateSyneyStoreReportPDF() {
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
+  const { tableSelectedKeys } = useTableSelection()
   const { message } = App.useApp()
 
   // 只在有选中项时才查询数据
@@ -149,12 +153,12 @@ export function useGenerateSyneyStoreReportPDF() {
   async function print() {
     // 改进错误处理
     if (selectedReportsLoading) {
-      message.warning('数据加载中，请稍候重试')
+      message.warning('对账单数据加载中，请稍后再试')
       return false
     }
 
     if (!selectedMap || selectedMap.size === 0) {
-      message.warning('请选择至少一条对账单数据')
+      message.warning(feedbackText.selectRequired('打印'))
       return false
     }
 
@@ -178,7 +182,11 @@ export function useGenerateSyneyStoreReportPDF() {
         pdfUtils,
         (processed, total) => {
           setProgress(Math.round((processed / total) * 100))
-          message.loading(`正在生成PDF: ${processed}/${total}`, 0)
+          message.loading({
+            content: `正在生成对账单 PDF：${processed}/${total}`,
+            key: PDF_PROGRESS_MESSAGE_KEY,
+            duration: 0,
+          })
         },
       )
 
@@ -192,17 +200,23 @@ export function useGenerateSyneyStoreReportPDF() {
       previewPDF(doc, filename)
 
       setProgress(100)
-      message.destroy() // 销毁加载提示
-      message.success(`PDF生成完成: ${filename}`)
+      // 同 key 替换进度提示（不用 message.destroy，避免清掉其他提示）
+      message.success({
+        content: '对账单 PDF 已生成',
+        key: PDF_PROGRESS_MESSAGE_KEY,
+      })
 
       return true // 返回 true 表示打印成功
     }
     catch (error) {
       console.error('生成 PDF 时发生错误:', error)
-      message.destroy()
-      message.error(
-        error instanceof Error ? error.message : 'PDF生成失败，请重试',
-      )
+      message.error({
+        content: getUserErrorMessage(
+          error,
+          feedbackText.failed('生成', '对账单 PDF'),
+        ),
+        key: PDF_PROGRESS_MESSAGE_KEY,
+      })
       return false
     }
     finally {

@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react'
+import type { Key, ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useAppStore } from '@/store'
+import TableSelectionProvider from '../TableSelectionProvider'
 import { usePo } from './usePo'
 
 const getSyneyPoMock = vi.hoisted(() => vi.fn())
@@ -24,7 +24,7 @@ vi.mock('antd', async () => {
   }
 })
 
-function createWrapper() {
+function createWrapper(selectedKeys: Key[] = []) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -36,7 +36,9 @@ function createWrapper() {
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        {children}
+        <TableSelectionProvider initialSelectedKeys={selectedKeys}>
+          {children}
+        </TableSelectionProvider>
       </QueryClientProvider>
     )
   }
@@ -45,14 +47,11 @@ function createWrapper() {
 describe('usePo', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useAppStore.getState().setTableSelectedKeys([])
   })
 
   it('ignores a selected id that is not in the current order rows', async () => {
-    useAppStore.getState().setTableSelectedKeys([10255])
-
     renderHook(() => usePo([759]), {
-      wrapper: createWrapper(),
+      wrapper: createWrapper([10255]),
     })
 
     await waitFor(() => {

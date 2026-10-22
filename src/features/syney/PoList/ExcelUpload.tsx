@@ -15,6 +15,7 @@ import {
   Upload,
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 
 // xlsx-js-style 约 800KB，独立 chunk 挂载即预加载（避免上传时临时拉取失败）
 const loadExcelUtils = () => import('@utils/excelUtils')
@@ -125,7 +126,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
     }
     catch (error) {
       messageApi.error(
-        `Excel 解析失败：${error instanceof Error ? error.message : '未知错误'}。请检查文件内容是否符合模板格式后重新上传`,
+        `Excel 解析失败：${getUserErrorMessage(error, '文件内容无法识别')}。请检查文件内容是否符合模板格式后重新上传`,
       )
       setRawParsedData(null)
       setPreviewVisible(false)

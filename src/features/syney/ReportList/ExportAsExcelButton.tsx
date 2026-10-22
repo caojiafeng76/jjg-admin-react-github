@@ -1,31 +1,36 @@
 import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
 import { App, Button } from 'antd'
-import { useAppStore } from '@/store'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
+import { useTableSelection } from '../useTableSelection'
 import { useExportReportsAsExcel } from './useExportReportsAsExcel'
 
 export default function ExportAsExcelButton() {
   const { message } = App.useApp()
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { setTableSelectedKeys } = useTableSelection()
   const { saveReportsAsExcel, preloadExcel, isLoading }
     = useExportReportsAsExcel()
 
   const handleExport = async () => {
-    // 如果正在加载，提示用户
     if (isLoading) {
-      message.loading('数据加载中，请稍候...', 1)
+      message.warning('对账单数据加载中，请稍后再试')
       return
     }
 
-    // 调用导出函数，根据返回值显示消息
-    const success = await saveReportsAsExcel()
-    if (success) {
-      message.success('Excel 文件导出成功')
-      setTableSelectedKeys([])
+    try {
+      const success = await saveReportsAsExcel()
+      if (success) {
+        message.success('对账单 Excel 已导出')
+        setTableSelectedKeys([])
+      }
+      else {
+        message.warning(feedbackText.selectRequired('导出'))
+      }
     }
-    else {
-      message.warning('没有可导出的数据')
+    catch (error) {
+      message.error(
+        getUserErrorMessage(error, feedbackText.failed('导出', '对账单')),
+      )
     }
   }
 

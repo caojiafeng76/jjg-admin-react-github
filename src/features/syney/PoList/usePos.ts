@@ -24,6 +24,7 @@ export function usePos() {
   const {
     data: { syneyPos: pos, count } = { syneyPos: [], count: 0 },
     isFetching,
+    isLoading: isFirstLoading,
     error,
     refetch,
   } = useQuery({
@@ -105,6 +106,8 @@ export function usePos() {
     pos,
     count,
     isLoading: isFetching,
+    /** 首屏加载（尚无任何数据），用于 TableState 骨架屏 */
+    isFirstLoading,
     error,
     refetch,
   }

@@ -4,6 +4,8 @@ import { App } from 'antd'
 
 import { useState } from 'react'
 import { fetchSyneyStoreReportFromScm } from '@/services/apiSyneyStoreReports'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 
 const loadStoreReceiptPDF = () => import('@/utils/syneyStoreReceiptPdf')
 
@@ -123,7 +125,7 @@ export function usePrintSyneyStoreReceipt() {
     catch (error) {
       printWindow?.close()
       console.error('打印西尼入库单失败:', error)
-      message.error(error instanceof Error ? error.message : '打印入库单失败')
+      message.error(getUserErrorMessage(error, feedbackText.failed('打印', '入库单')))
       return false
     }
     finally {

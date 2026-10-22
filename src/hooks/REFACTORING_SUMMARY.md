@@ -32,7 +32,7 @@ const { mutate, isPending } = useMutationWithInvalidation({
 
 **示例**:
 ```typescript
-const { mutate, isPending, contextHolder } = useMutationWithMessage({
+const { mutate, isPending } = useMutationWithMessage({
   mutationFn: createItem,
   invalidateQueries: [['items']],
   successMessage: '创建成功',

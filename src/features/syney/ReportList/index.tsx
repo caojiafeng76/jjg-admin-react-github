@@ -7,6 +7,7 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
+import { CurrencyYenIcon } from '@heroicons/react/24/outline'
 
 import ReportForm from '@syney/ReportList/ReportForm'
 import ReportTable from '@syney/ReportList/ReportTable'
@@ -21,11 +22,15 @@ import { App, Button, Input, Modal } from 'antd'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import { useAppStore } from '@/store'
 import AppPagination from '@/ui/AppPagination'
 import PrintButton from '@/ui/PrintButton'
+import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import { useSyneySpecs } from '../SpecList/useSyneySpecs'
+import TableSelectionProvider from '../TableSelectionProvider'
+import { useTableSelection } from '../useTableSelection'
 import ConfirmButton from './ConfirmButton'
 import ExportAsExcelButton from './ExportAsExcelButton'
 import ExportPDFButton from './ExportPDFButton'
@@ -37,7 +42,7 @@ import { useGenerateSyneyStoreReportPDF } from './useGenerateSyneyStoreReportPDF
 import { usePrintSyneyStoreReceipt } from './usePrintSyneyStoreReceipt'
 import { useReports } from './useReports'
 
-export default function ReportList() {
+function ReportListContent() {
   const { message: messageApi } = App.useApp()
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
@@ -46,10 +51,7 @@ export default function ReportList() {
   const [specsLoading, setSpecsLoading] = useState(false)
   const [storeInNo, setStoreInNo] = useState('')
 
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const [isCreating, setIsCreating] = useState(false)
   const {
     print,
@@ -85,17 +87,19 @@ export default function ReportList() {
 
   function handleDelete() {
     if (tableSelectedKeys.length === 0) {
-      messageApi.warning('请选择至少一条数据')
+      messageApi.warning(feedbackText.selectRequired('删除'))
       return
     }
+    const count = tableSelectedKeys.length
     deleteReport(tableSelectedKeys.map(String), {
       onSuccess: () => {
-        messageApi.success('删除对账单成功')
+        messageApi.success(feedbackText.deleted('对账单', count))
         setTableSelectedKeys([])
       },
       onError: (err) => {
-        console.error(err)
-        messageApi.error('删除对账单失败')
+        messageApi.error(
+          getUserErrorMessage(err, feedbackText.failed('删除', '对账单')),
+        )
       },
     })
   }
@@ -109,7 +113,7 @@ export default function ReportList() {
     }
 
     if (importSpecsLoading) {
-      messageApi.loading('规格数据加载中，请稍后再试', 1)
+      messageApi.warning('踏板规格加载中，请稍后再试')
       return
     }
 
@@ -130,26 +134,26 @@ export default function ReportList() {
         }
         catch (error) {
           messageApi.error(
-            error instanceof Error ? error.message : '入库单数据解析失败',
+            getUserErrorMessage(error, '入库单数据解析失败，请稍后重试'),
           )
           return
         }
 
         createReport(payload, {
           onSuccess: () => {
-            messageApi.success('入库单生成成功')
+            messageApi.success(feedbackText.created('对账单'))
             setStoreInNo('')
           },
           onError: (err) => {
-            console.error(err)
-            messageApi.error('入库单生成失败')
+            messageApi.error(
+              getUserErrorMessage(err, feedbackText.failed('创建', '对账单')),
+            )
           },
         })
       },
       onError: (err) => {
-        console.error(err)
         messageApi.error(
-          err instanceof Error ? err.message : '西尼入库单获取失败',
+          getUserErrorMessage(err, '西尼入库单获取失败，请稍后重试'),
         )
       },
     })
@@ -157,28 +161,25 @@ export default function ReportList() {
 
   async function handlePrint() {
     if (tableSelectedKeys.length === 0) {
-      messageApi.warning('请选择至少一条数据')
+      messageApi.warning(feedbackText.selectRequired('打印'))
       return
     }
 
     if (isPrinting) {
-      messageApi.loading('数据加载中，请稍候...', 1)
+      messageApi.warning('对账单数据加载中，请稍后再试')
       return
     }
 
+    // 成功 / 失败提示由 useGenerateSyneyStoreReportPDF 统一弹出
     const success = await print()
     if (success) {
-      messageApi.success('PDF 文件生成成功')
       setTableSelectedKeys([])
-    }
-    else {
-      messageApi.warning('没有可打印的数据')
     }
   }
 
   async function handlePrintStoreReceipt() {
     if (isPrintingStoreReceipt) {
-      messageApi.loading('入库单打印准备中，请稍候...', 1)
+      messageApi.warning('入库单打印准备中，请稍后再试')
       return
     }
 
@@ -270,69 +271,26 @@ export default function ReportList() {
       {/* 选中摘要条 */}
       {selectedCount > 0
         ? (
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-blue-50/80 px-5 py-3 shadow-[0_8px_30px_rgba(59,130,246,0.12)] backdrop-blur-sm dark:border-blue-900/50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-blue-950/60">
-              <span className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
-                  <svg
-                    className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                已选
-                <span className="mx-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {selectedCount}
-                </span>
-                条
-              </span>
-              {selectedAmount > 0
-                ? (
-                    <span className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/40">
-                        <svg
-                          className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-                          />
-                        </svg>
-                      </div>
-                      选中金额合计：
-                      <span className="text-xl font-bold text-rose-600 tabular-nums dark:text-rose-400">
-                        {selectedAmount.toLocaleString()}
-                      </span>
-                    </span>
-                  )
-                : null}
-            </div>
+            <SelectedSummaryBar
+              selectedCount={selectedCount}
+              matchedCount={selectedCount}
+              stats={[
+                {
+                  label: '选中金额合计',
+                  value: selectedAmount,
+                  tone: 'error',
+                  icon: <CurrencyYenIcon className="size-3.5" />,
+                },
+              ]}
+            />
           )
         : null}
 
       {/* 过滤栏 */}
-      <div className="flex flex-col gap-3 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">筛选条件</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">对账状态：</span>
-            <ReportSelect />
-          </div>
+          <span className="text-slate-600 dark:text-slate-300">对账状态：</span>
+          <ReportSelect />
         </div>
       </div>
 
@@ -340,7 +298,7 @@ export default function ReportList() {
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
           <TableState
-            loading={reportsLoading && records.length === 0}
+            loading={reportsLoading}
             error={error}
             onRetry={refetch}
           >
@@ -359,9 +317,11 @@ export default function ReportList() {
       </div>
 
       <Modal
-        title="创建对账单"
+        title="新建对账单"
         open={isModalOpen}
         confirmLoading={isCreating || specsLoading}
+        width={720}
+        destroyOnHidden
         onOk={handleOk}
         onCancel={handleCancel}
       >
@@ -373,5 +333,14 @@ export default function ReportList() {
         />
       </Modal>
     </div>
+  )
+}
+
+/** 选中状态随页面实例独立（多标签页缓存下互不影响） */
+export default function ReportList() {
+  return (
+    <TableSelectionProvider>
+      <ReportListContent />
+    </TableSelectionProvider>
   )
 }

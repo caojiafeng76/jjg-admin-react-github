@@ -16,6 +16,8 @@ import {
 import { App, Form, Input } from 'antd'
 import { useCallback, useEffect, useImperativeHandle } from 'react'
 
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import { useCreateReport } from './useCreateReport'
 
 interface ReportFormProps {
@@ -23,11 +25,6 @@ interface ReportFormProps {
   handleCancel: () => void
   onSpecsLoadingChange: (loading: boolean) => void
   onCreatingChange?: (creating: boolean) => void
-}
-
-const layout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 20 },
 }
 
 export default function ReportForm({
@@ -50,7 +47,7 @@ export default function ReportForm({
       const detailData = jsonToArray(values.Detail || '') || []
 
       if (detailData.length === 0) {
-        message.error('详情数据为空，请粘贴有效的 JSON 数据')
+        message.warning('详情数据为空，请粘贴有效的 JSON 数据')
         return
       }
 
@@ -63,16 +60,20 @@ export default function ReportForm({
         )
       }
       catch (error) {
-        message.error(error instanceof Error ? error.message : '入库单数据解析失败')
+        message.error(getUserErrorMessage(error, '入库单数据解析失败，请检查粘贴的内容'))
         return
       }
 
       createReport(payload, {
-        onSettled: () => handleCancel(),
-        onSuccess: () => message.success('创建入库单成功'),
+        onSuccess: () => {
+          message.success(feedbackText.created('对账单'))
+          handleCancel()
+        },
+        // 失败时弹窗保持打开，已粘贴的内容不丢失
         onError: (err) => {
-          console.error(err)
-          message.error('创建入库单失败')
+          message.error(
+            getUserErrorMessage(err, feedbackText.failed('创建', '对账单')),
+          )
         },
       })
     },
@@ -96,8 +97,12 @@ export default function ReportForm({
   }, [specsLoading, onSpecsLoadingChange])
 
   return (
-    <Form {...layout} form={form} name="report-form" onFinish={onFinish}>
-      <Form.Item name="Detail" label="详情" rules={[{ required: true }]}>
+    <Form layout="vertical" form={form} name="report-form" onFinish={onFinish}>
+      <Form.Item
+        name="Detail"
+        label="详情"
+        rules={[{ required: true, message: '请粘贴入库单详情数据' }]}
+      >
         <Input.TextArea rows={20} cols={30} disabled={isCreating} />
       </Form.Item>
     </Form>

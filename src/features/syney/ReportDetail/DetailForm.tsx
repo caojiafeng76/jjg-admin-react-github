@@ -4,11 +4,6 @@ import type { Ref } from 'react'
 import type { ISyneyItem } from '@/types'
 import { Form, Input } from 'antd'
 
-const layout = {
-  labelCol: { span: 6 },
-  wrapperCol: { span: 18 },
-}
-
 interface FormProps {
   ref: Ref<FormInstance<ISyneyItem>> | undefined
   onFinishFuc: (values: ISyneyItem) => void
@@ -23,7 +18,7 @@ export default function DetailForm({ ref, onFinishFuc }: FormProps) {
 
   return (
     <Form
-      {...layout}
+      layout="vertical"
       form={form}
       name="detail-form"
       onFinish={onFinish}
@@ -44,10 +39,10 @@ export default function DetailForm({ ref, onFinishFuc }: FormProps) {
       </Form.Item>
       <Form.Item
         name="ParamSpec"
-        label="参数"
-        rules={[{ required: true }]}
+        label="参数规格"
+        rules={[{ required: true, message: '请输入参数规格' }]}
       >
-        <Input className="rounded-lg" placeholder="请输入参数" />
+        <Input className="rounded-lg" placeholder="请输入参数规格" />
       </Form.Item>
       <Form.Item name="Remark" label="备注">
         <Input.TextArea

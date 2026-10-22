@@ -18,6 +18,7 @@ import AddButton from '@/ui/AddButton'
 import DeleteButton from '@/ui/DeleteButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import {
   SYNEY_SAFE_PART_SETTINGS_KEY,
@@ -74,7 +75,9 @@ export default function SafePartSettingPage() {
   const saveMutation = useMutationWithMessage({
     mutationFn: upsertSyneySafePartSetting,
     invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
-    successMessage: '保存成功',
+    successMessage: feedbackText.saved('件号配置'),
+    errorMessage: error =>
+      getUserErrorMessage(error, feedbackText.failed('保存', '件号配置')),
     messageApi: message,
     onSuccess: () => closeModal(),
   })
@@ -82,7 +85,9 @@ export default function SafePartSettingPage() {
   const deleteMutation = useMutationWithMessage({
     mutationFn: deleteSyneySafePartSettings,
     invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
-    successMessage: (_data, ids) => feedbackText.deleted('安全件设置', ids.length),
+    successMessage: (_data, ids) => feedbackText.deleted('件号配置', ids.length),
+    errorMessage: error =>
+      getUserErrorMessage(error, feedbackText.failed('删除', '件号配置')),
     messageApi: message,
     onSuccess: () => setSelectedRowKeys([]),
   })
@@ -91,7 +96,7 @@ export default function SafePartSettingPage() {
     const selectedIds = selectedRowKeys.map(String)
 
     if (selectedIds.length === 0) {
-      message.warning('请选择至少一条数据')
+      message.warning(feedbackText.selectRequired('删除'))
       return
     }
 
@@ -130,8 +135,8 @@ export default function SafePartSettingPage() {
           onConfirm={handleBatchDelete}
           isDeleting={deleteMutation.isPending}
           count={selectedCount}
-          title="删除安全件设置"
-          itemName="安全件设置"
+          title="删除件号配置"
+          itemName="件号配置"
         />
       </div>
 

@@ -1,21 +1,15 @@
-import type { message } from 'antd'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 import { deletePo as deletePoApi } from '@/services/apiSyneyPos'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import { syneyPoKeys } from '../queryKeys'
 
-// Type for the Ant Design message API instance returned by message.useMessage()
-type MessageApi = ReturnType<typeof message.useMessage>[0]
-
-export function useDeletePo(messageApi?: MessageApi) {
+export function useDeletePo() {
   const queryClient = useQueryClient()
 
-  const {
-    mutate: deletePo,
-    isPending: isDeleting,
-    contextHolder,
-  } = useMutationWithMessage({
+  const { mutate: deletePo, isPending: isDeleting } = useMutationWithMessage({
     mutationFn: deletePoApi,
     // 列表、单条、选中项缓存统一失效
     invalidateQueries: [syneyPoKeys.all],
@@ -30,18 +24,11 @@ export function useDeletePo(messageApi?: MessageApi) {
         })
       }
     },
-    successMessage: (result) => {
-      const count = result?.deletedCount || 0
-      return count > 0 ? `成功删除 ${count} 个订单` : '删除订单成功'
-    },
+    successMessage: result =>
+      feedbackText.deleted('订单', result?.deletedCount || 0),
     errorMessage: err =>
-      err instanceof Error ? err.message : '删除订单失败，请稍后重试',
-    messageApi,
+      getUserErrorMessage(err, feedbackText.failed('删除', '订单')),
   })
 
-  return {
-    deletePo,
-    isDeleting,
-    contextHolder: messageApi ? null : contextHolder,
-  }
+  return { deletePo, isDeleting }
 }

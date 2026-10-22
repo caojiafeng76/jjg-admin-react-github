@@ -1,13 +1,13 @@
-import type { ReactNode } from 'react'
+import type { Key, ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useAppStore } from '@/store'
 import { useDetail } from './PoDetail/useDetail'
 import { usePo } from './PoList/usePo'
 import { usePos } from './PoList/usePos'
 import { syneyPoKeys } from './queryKeys'
+import TableSelectionProvider from './TableSelectionProvider'
 
 const { getSyneyPoDetailMock, getSyneyPoMock, getSyneyPosMock } = vi.hoisted(
   () => ({
@@ -53,10 +53,14 @@ vi.mock('antd', async () => {
   }
 })
 
-function createWrapper(queryClient: QueryClient) {
+function createWrapper(queryClient: QueryClient, selectedKeys: Key[] = []) {
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <TableSelectionProvider initialSelectedKeys={selectedKeys}>
+          {children}
+        </TableSelectionProvider>
+      </QueryClientProvider>
     )
   }
 }
@@ -74,7 +78,6 @@ function createQueryClient(): QueryClient {
 describe('Syney PO query keys', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useAppStore.getState().setTableSelectedKeys([])
     getSyneyPoMock.mockResolvedValue({ id: 759 })
     getSyneyPoDetailMock.mockResolvedValue({
       id: 759,
@@ -85,8 +88,7 @@ describe('Syney PO query keys', () => {
 
   it('shares the complete detail contract between both detail hooks', async () => {
     const queryClient = createQueryClient()
-    const wrapper = createWrapper(queryClient)
-    useAppStore.getState().setTableSelectedKeys([759])
+    const wrapper = createWrapper(queryClient, [759])
 
     const listDetail = renderHook(() => usePo([759]), { wrapper })
 

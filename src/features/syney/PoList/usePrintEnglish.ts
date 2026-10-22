@@ -1,18 +1,17 @@
 import type { SyneySafePartSetting } from '@services/apiSyneySafePartSettings'
 import type jsPDF from 'jspdf'
-import { message } from 'antd'
+import { App } from 'antd'
 import dayjs from 'dayjs'
 
 import { useState } from 'react'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import { GOOGLE_FONT_CONFIG, loadGoogleFont } from '@/utils/googleFontLoader'
 import {
   getLabelInfoBySettings,
   getLabelInfoFromStoredItem,
 } from '@/utils/syneySafePartRules'
 import { useSelectedPos } from './useSelectedPos'
-
-// Type for the Ant Design message API instance returned by message.useMessage()
-type MessageApi = ReturnType<typeof message.useMessage>[0]
 
 function loadPDFDependencies() {
   return Promise.all([import('jspdf'), import('@/utils/pdfUtils')])
@@ -21,11 +20,9 @@ function loadPDFDependencies() {
 export function usePrintEnglish(
   safePartSettings: SyneySafePartSetting[] | undefined,
   isSafePartSettingsLoading: boolean,
-  messageApi?: MessageApi,
 ) {
   const { selectedPosList, isLoading } = useSelectedPos()
-  const [internalMessageApi, contextHolder] = message.useMessage()
-  const api = messageApi || internalMessageApi
+  const { message: api } = App.useApp()
   const [isPrinting, setIsPrinting] = useState(false)
 
   function preloadPDF() {
@@ -82,7 +79,7 @@ export function usePrintEnglish(
     }
 
     if (isSafePartSettingsLoading || !safePartSettings) {
-      api.warning('安全部件设置加载中，请稍后再试')
+      api.warning('件号配置加载中，请稍后再试')
       return
     }
 
@@ -207,7 +204,7 @@ export function usePrintEnglish(
     }
     catch (error) {
       console.error('打印英文标签失败:', error)
-      api.error('打印英文标签失败')
+      api.error(getUserErrorMessage(error, feedbackText.failed('打印', '英文标签')))
     }
     finally {
       setIsPrinting(false)
@@ -217,7 +214,6 @@ export function usePrintEnglish(
   return {
     generateEnglishLabel,
     preloadPDF,
-    contextHolder: messageApi ? null : contextHolder,
     isPrinting,
   }
 }

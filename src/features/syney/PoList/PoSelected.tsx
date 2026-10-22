@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/16/solid'
 import { Select } from 'antd'
 import { useState } from 'react'
-import { useAppStore } from '@/store'
+import { useTableSelection } from '../useTableSelection'
 import { useUpdatePos } from './useUpdatePos'
 
 const STATUS_OPTIONS: Array<{
@@ -25,10 +25,7 @@ const STATUS_OPTIONS: Array<{
 
 export default function PoSelected() {
   const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const [selectedValue, setSelectedValue] = useState<string | undefined>(
     undefined,
   )

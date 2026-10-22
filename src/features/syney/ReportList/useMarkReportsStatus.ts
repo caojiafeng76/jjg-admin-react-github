@@ -2,7 +2,9 @@ import { App } from 'antd'
 
 import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
 import { updateSyneyStoreReports } from '@/services/apiSyneyStoreReports'
-import { useAppStore } from '@/store'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
+import { useTableSelection } from '../useTableSelection'
 
 type ReportStatus = 'confirmed' | 'unconfirmed'
 
@@ -14,16 +16,15 @@ type ReportStatus = 'confirmed' | 'unconfirmed'
  */
 export function useMarkReportsStatus() {
   const { message } = App.useApp()
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { setTableSelectedKeys } = useTableSelection()
 
   const { mutate: mark, isPending } = useMutationWithMessage({
     mutationFn: updateSyneyStoreReports,
     invalidateQueries: [['syney-reports']],
-    successMessage: (_data, variables) =>
-      variables.Status === 'confirmed' ? '标记已校对成功' : '标记未校对成功',
-    errorMessage: '标记失败，请稍后重试',
+    successMessage: (_data, { Nos, Status }) =>
+      `已将 ${Nos.length} 条对账单标记为${Status === 'confirmed' ? '已校对' : '未校对'}`,
+    errorMessage: error =>
+      getUserErrorMessage(error, feedbackText.failed('标记', '对账单')),
     onSuccess: () => {
       // 成功后清空选择
       setTableSelectedKeys([])
@@ -32,11 +33,11 @@ export function useMarkReportsStatus() {
 
   const markStatus = (Nos: string[], Status: ReportStatus) => {
     if (!Nos.length) {
-      const tip
-        = Status === 'confirmed'
-          ? '请选择要标记已校对的条目'
-          : '请选择要标记未校对的条目'
-      message.warning(tip)
+      message.warning(
+        feedbackText.selectRequired(
+          Status === 'confirmed' ? '标记已校对' : '标记未校对',
+        ),
+      )
       return
     }
     mark({ Nos, Status })

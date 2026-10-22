@@ -3,7 +3,7 @@ import type { Ref } from 'react'
 import type { ISyneyItem } from '@/types'
 import { Form, Input } from 'antd'
 import { useImperativeHandle, useState } from 'react'
-import { useAppStore } from '@/store'
+import { useTableSelection } from '../useTableSelection'
 import { useUpdate } from './useUpdate'
 
 export interface DetailFormRef {
@@ -24,38 +24,31 @@ export default function DetailForm({
   const [form] = Form.useForm<ISyneyItem>()
   const [isLoading, setIsLoading] = useState(false)
 
-  const tableSelectedKeys = useAppStore(state => state.tableSelectedKeys)
-  const setTableSelectedKeys = useAppStore(
-    state => state.setTableSelectedKeys,
-  )
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const { updateItems } = useUpdate()
-
-  const layout = {
-    labelCol: { span: 6 },
-    wrapperCol: { span: 18 },
-  }
 
   async function onFinish(values: ISyneyItem) {
     setIsLoading(true)
     onLoadingChange?.(true)
-    await updateItems(
-      { ids: tableSelectedKeys.map(Number), values },
-      {
-        onSettled: () => {
-          setTableSelectedKeys([])
-          setIsLoading(false)
-          onLoadingChange?.(false)
-          onClose()
-        },
-      },
-    )
+    try {
+      await updateItems({ ids: tableSelectedKeys.map(Number), values })
+      setTableSelectedKeys([])
+      onClose()
+    }
+    catch {
+      // 失败提示由 useUpdate 统一弹出；弹窗保持打开，便于修改后重试
+    }
+    finally {
+      setIsLoading(false)
+      onLoadingChange?.(false)
+    }
   }
 
   useImperativeHandle(ref, () => ({ getInstance: () => form }))
 
   return (
     <Form
-      {...layout}
+      layout="vertical"
       name="po-detail"
       form={form}
       onFinish={onFinish}
@@ -76,7 +69,7 @@ export default function DetailForm({
       <Form.Item
         name="ParamSpec"
         label="参数规格"
-        rules={[{ required: true }]}
+        rules={[{ required: true, message: '请输入参数规格' }]}
       >
         <Input
           disabled={isLoading}
