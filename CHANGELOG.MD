@@ -18,6 +18,11 @@
 ## 2026-10-22
 
 - **类别**：变更
+- **范围**：`src/utils/toolingDataExcel.ts`、`src/utils/toolingDataExcel.vitest.ts`
+- **摘要**：刀具资料「导出月度汇总」中上次盘点 / 入库 / 出库 / 结余四组数量列改为整数（四舍五入取整，单元格格式 `0;-0;;@`，0 仍显示为空）；合计行数量格式改为 `0`，合计与金额的缓存值均按取整后的数量计算，与 Excel 公式结果一致。只改导出层，service 计算与数据库不变。
+- **验证**：`bun run test src/utils/toolingDataExcel.vitest.ts src/features/tooling/ToolingData/index.vitest.tsx`（5 passed）、`bun run typecheck`、`bun lint`（0 error）；未在浏览器中实际导出验证
+
+- **类别**：变更
 - **范围**：`src/utils/syneyDecomposition.ts`、`src/utils/syneyDecomposition.rear.test.ts`
 - **摘要**：删除分解单后板候选（AF/FN/BX/BY/Y997）中"`Qty===2` 一律拆成上 1 下 1"的规则。这条规则是为导入去重造成的合并行准备的；导入去重已移除，存量合并行也已拆开，所以不再需要。现在带上头部或下头部标记的行整行进入对应格子；无标记的单条后板仍走原有的均分队列（单条 1+1，两条按顺序上/下），这部分不变。删除前核查数据库：后板候选中"Qty=2 且只带一个方向标记"的行为 0 条，存量订单的分解单结果不受影响。
 - **验证**：`bun run test src/utils/syneyDecomposition`、全量 `bun run test`、`bun run typecheck`、`bun lint`

@@ -438,7 +438,7 @@ function applyMonthlySummaryFormulas(
       firstBodyRowNumber,
       lastBodyRowNumber,
       items,
-      '0.###',
+      '0',
     )
   })
 
@@ -464,9 +464,9 @@ function setQuantityCell(
   worksheet[cellRef] = {
     ...(worksheet[cellRef] || {}),
     t: 'n',
-    v: roundNumber(value, 3),
+    v: toQuantityInt(value),
     ...(formula ? { f: formula } : {}),
-    z: '0.###;-0.###;;@',
+    z: '0;-0;;@',
   }
 }
 
@@ -498,29 +498,34 @@ function setTotalFormulaCell(
   const columnLetter = columnIndexToLetter(column)
   const cellRef = `${columnLetter}${totalRowNumber}`
   const totalValue = items.reduce((sum, item) => {
+    const openingQuantity = toQuantityInt(item.opening_quantity)
+    const stockInQuantity = toQuantityInt(item.stock_in_quantity)
+    const stockOutQuantity = toQuantityInt(item.stock_out_quantity)
+    const closingQuantity = toQuantityInt(item.closing_quantity)
+
     if (column === 7)
-      return sum + item.opening_quantity
+      return sum + openingQuantity
     if (column === 8)
-      return sum + item.opening_quantity * item.unit_price
+      return sum + openingQuantity * item.unit_price
     if (column === 9)
-      return sum + item.stock_in_quantity
+      return sum + stockInQuantity
     if (column === 10)
-      return sum + item.stock_in_quantity * item.unit_price
+      return sum + stockInQuantity * item.unit_price
     if (column === 11)
-      return sum + item.stock_out_quantity
+      return sum + stockOutQuantity
     if (column === 12)
-      return sum + item.stock_out_quantity * item.unit_price
+      return sum + stockOutQuantity * item.unit_price
     if (column === 13)
-      return sum + item.closing_quantity
+      return sum + closingQuantity
     if (column === 14)
-      return sum + item.closing_quantity * item.unit_price
+      return sum + closingQuantity * item.unit_price
     return sum
   }, 0)
 
   worksheet[cellRef] = {
     ...(worksheet[cellRef] || {}),
     t: 'n',
-    v: roundNumber(totalValue, numberFormat === '0.00' ? 2 : 3),
+    v: roundNumber(totalValue, numberFormat === '0.00' ? 2 : 0),
     ...(items.length > 0
       ? {
           f: `SUM(${columnLetter}${firstBodyRowNumber}:${columnLetter}${lastBodyRowNumber})`,
@@ -544,6 +549,10 @@ function columnIndexToLetter(index: number) {
 
 function roundNumber(value: number, digits: number) {
   return Number(value.toFixed(digits))
+}
+
+function toQuantityInt(value: number) {
+  return Math.round(Number(value || 0))
 }
 
 function getMonthlySummaryTitle(month: string) {

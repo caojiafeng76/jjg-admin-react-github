@@ -110,11 +110,12 @@ describe('createToolingDataMonthlySummaryWorkbook', () => {
     expect(worksheet.N4?.v).toBe(13)
     expect(worksheet.O4?.f).toBe('N4*$F4')
     expect(worksheet.H5?.v).toBe(0)
-    expect(worksheet.H5?.z).toBe('0.###;-0.###;;@')
+    expect(worksheet.H5?.z).toBe('0;-0;;@')
 
     expect(worksheet.G6?.v).toBe('合计')
     expect(worksheet.H6?.f).toBe('SUM(H4:H5)')
     expect(worksheet.H6?.v).toBe(10)
+    expect(worksheet.H6?.z).toBe('0')
     expect(worksheet.J6?.f).toBe('SUM(J4:J5)')
     expect(worksheet.J6?.v).toBe(6)
     expect(worksheet.O6?.f).toBe('SUM(O4:O5)')
@@ -137,5 +138,39 @@ describe('createToolingDataMonthlySummaryWorkbook', () => {
       ]),
     )
     expect(worksheet['!freeze']).toEqual({ xSplit: 0, ySplit: 3 })
+  })
+
+  it('exports quantities as integers', () => {
+    const workbook = createToolingDataMonthlySummaryWorkbook(
+      [
+        {
+          id: 'tooling-data-1',
+          tool_code: 'T-001',
+          tool_name: '立铣刀',
+          tool_spec: 'D10',
+          material: '硬质合金',
+          unit_price: 10,
+          usage: '精加工',
+          remarks: '常用',
+          created_at: '2026-05-28T08:00:00',
+          updated_at: '2026-05-28T09:30:00',
+          opening_quantity: 2.6,
+          stock_in_quantity: 1.2,
+          stock_out_quantity: 0.4,
+          closing_quantity: 3.8,
+        },
+      ] satisfies ToolingDataMonthlySummary[],
+      '2026-05',
+    )
+
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+    expect(worksheet.H4?.v).toBe(3)
+    expect(worksheet.I4?.v).toBe(30)
+    expect(worksheet.J4?.v).toBe(1)
+    expect(worksheet.L4?.v).toBe(0)
+    expect(worksheet.N4?.v).toBe(4)
+    expect(worksheet.H5?.v).toBe(3)
+    expect(worksheet.N5?.v).toBe(4)
+    expect(worksheet.O5?.v).toBe(40)
   })
 })
