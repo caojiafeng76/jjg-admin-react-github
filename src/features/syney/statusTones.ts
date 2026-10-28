@@ -4,6 +4,7 @@ import type { StatusTone } from '@/ui/StatusPill'
 export const PO_STATUS_TONES: Record<string, StatusTone> = {
   已创建: 'danger',
   部分送货: 'info',
+  已送货: 'info',
   已入库: 'success',
   暂停: 'warning',
   作废: 'neutral',

@@ -9,13 +9,9 @@ import dayjs from 'dayjs'
 
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
-import {
-  getLabelInfoBySettings,
-  getLabelInfoFromStoredItem,
-  isSafePartBySettings,
-} from '@/utils/syneySafePartRules'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { useTableSelection } from '../useTableSelection'
+import { buildSafePartInfoRows } from './safePartInfoRows'
 import { useSelectedPos } from './useSelectedPos'
 
 const loadExcel = () => import('xlsx-js-style')
@@ -29,7 +25,7 @@ interface ExcelRow {
   型号: string | null | undefined
   名称: string | null | undefined
   件号: string | null
-  生产号: string
+  生产号: string | null
 }
 
 export function useExportSafePartInfoAsExcel() {
@@ -72,31 +68,13 @@ export function useExportSafePartInfoAsExcel() {
         const { SONo, EndDate, No, SerialNo } = poInfo
 
         // 过滤安全件并转换为 Excel 数据格式
-        const excelData: ExcelRow[] = items
-          .filter(item => isSafePartBySettings(item.PartNo, safePartSettings))
-          .map((item) => {
-            // 当 DB 存储字段为空时（新零件号尚未写入），从 settings 推导
-            const labelInfo
-              = item.PartCode && item.PartModel && item.PartName2
-                ? null
-                : (getLabelInfoBySettings(
-                    item.PartNo,
-                    SerialNo,
-                    safePartSettings,
-                  ) ?? getLabelInfoFromStoredItem(item, safePartSettings))
-
-            globalIndex++
-            return {
-              序号: globalIndex,
-              采购单号: No,
-              日期: EndDate,
-              编号: item.PartCode || labelInfo?.partCode,
-              型号: item.PartModel || labelInfo?.partModel,
-              名称: item.PartName2 || labelInfo?.partName2,
-              件号: item.PartNo,
-              生产号: SONo,
-            }
-          })
+        const excelData: ExcelRow[] = buildSafePartInfoRows(
+          { No, EndDate, SONo, SerialNo, items },
+          safePartSettings,
+        ).map((row) => {
+          globalIndex++
+          return { 序号: globalIndex, ...row }
+        })
 
         // 如果有符合条件的数据才添加工作表
         if (excelData.length > 0) {

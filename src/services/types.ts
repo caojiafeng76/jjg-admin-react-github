@@ -69,6 +69,7 @@ export interface ISyneyPo {
   Spec: string | null
   Status: string | null
   Technique: string | null
+  DeliveryNo?: string | null
   Detail?: string | null
 }
 

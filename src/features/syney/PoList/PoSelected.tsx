@@ -3,6 +3,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   PauseCircleIcon,
+  TruckIcon,
   XCircleIcon,
 } from '@heroicons/react/16/solid'
 import { Select } from 'antd'
@@ -19,6 +20,7 @@ const STATUS_OPTIONS: Array<{
   { value: '已创建', label: '已创建', icon: XCircleIcon, color: 'text-rose-500' },
   { value: '已入库', label: '已入库', icon: CheckCircleIcon, color: 'text-emerald-500' },
   { value: '部分送货', label: '部分送货', icon: ArrowPathIcon, color: 'text-amber-500' },
+  { value: '已送货', label: '已送货', icon: TruckIcon, color: 'text-sky-500' },
   { value: '暂停', label: '暂停', icon: PauseCircleIcon, color: 'text-pink-500' },
   { value: '作废', label: '作废', icon: ExclamationTriangleIcon, color: 'text-slate-500 dark:text-slate-400' },
 ]

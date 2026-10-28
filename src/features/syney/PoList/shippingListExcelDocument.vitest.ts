@@ -21,7 +21,7 @@ vi.mock('xlsx-js-style', async (importOriginal) => {
 })
 
 describe('exportShippingListAsExcel', () => {
-  it('builds a shipping list with headers, data and an empty delivery-note column', () => {
+  it('builds a shipping list with headers, data and the written-back delivery-note number', () => {
     writeFileMock.mockClear()
 
     const result = exportShippingListAsExcel(
@@ -33,6 +33,7 @@ describe('exportShippingListAsExcel', () => {
           Spec: '1000型-室外-扶梯',
           Technique: '前：商标\n中：雷达孔',
           Remark: '',
+          DeliveryNo: 'S2026081300012',
         },
         {
           No: 'P202608030361',
@@ -41,6 +42,7 @@ describe('exportShippingListAsExcel', () => {
           Spec: '1000型-室外-扶梯',
           Technique: 'null', // 数据库 null 经 key 拼接后的字面值，应归一化为空
           Remark: '贴牌梯,注意不要出现西尼字样',
+          DeliveryNo: 'null', // 未生成送货单，应留空
         },
       ],
       new Date('2026-08-13'),
@@ -70,12 +72,12 @@ describe('exportShippingListAsExcel', () => {
       '工艺',
       '备注',
     ])
-    // 第一行数据：字段映射正确，送货单号留空
+    // 第一行数据：字段映射正确，送货单号取回写的 SCM 送货单号
     expect(rows[2]).toEqual([
       1,
       'P202607310731',
       'XNJD-FZ26-100-0249',
-      '',
+      'S2026081300012',
       '西尼',
       '1000型-室外-扶梯',
       '前：商标\n中：雷达孔',

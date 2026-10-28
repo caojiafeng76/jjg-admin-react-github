@@ -39,6 +39,7 @@ export function useExportShippingListAsExcel() {
         Spec: poInfo.Spec,
         Technique: poInfo.Technique,
         Remark: poInfo.Remark,
+        DeliveryNo: poInfo.DeliveryNo,
       }))
       exportShippingList(rows)
       messageApi.success(feedbackText.exported('订单发货清单', rows.length))

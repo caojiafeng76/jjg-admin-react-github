@@ -1,6 +1,9 @@
 export const MAX_JSON_BODY_BYTES = 16 * 1024
 
-export type ProxyRateLimitScope = 'syney-store-report' | 'youmai-purchase-order'
+export type ProxyRateLimitScope
+  = | 'syney-store-report'
+    | 'syney-delivery-order'
+    | 'youmai-purchase-order'
 
 interface AuthorizeProxyRequestOptions {
   authorization: string | undefined
@@ -144,6 +147,7 @@ export type ContentLengthValidation = 'ok' | 'invalid' | 'too-large'
 
 export function validateContentLength(
   contentLength: string | undefined,
+  maxBytes = MAX_JSON_BODY_BYTES,
 ): ContentLengthValidation {
   if (contentLength === undefined)
     return 'ok'
@@ -151,15 +155,18 @@ export function validateContentLength(
   const value = Number(contentLength)
   if (!Number.isInteger(value) || value < 0)
     return 'invalid'
-  return value <= MAX_JSON_BODY_BYTES ? 'ok' : 'too-large'
+  return value <= maxBytes ? 'ok' : 'too-large'
 }
 
 export type JsonObjectBodyResult
   = | { ok: true, body: Record<string, unknown> }
     | { ok: false, status: 400 | 413 }
 
-export function parseJsonObjectBody(body: unknown): JsonObjectBodyResult {
-  if (!isJsonBodyWithinLimit(body)) {
+export function parseJsonObjectBody(
+  body: unknown,
+  maxBytes = MAX_JSON_BODY_BYTES,
+): JsonObjectBodyResult {
+  if (!isJsonBodyWithinLimit(body, maxBytes)) {
     return { ok: false, status: 413 }
   }
 
@@ -273,12 +280,15 @@ export function safeErrorMetadata(error: unknown): {
     : { name }
 }
 
-export function isJsonBodyWithinLimit(body: unknown): boolean {
+export function isJsonBodyWithinLimit(
+  body: unknown,
+  maxBytes = MAX_JSON_BODY_BYTES,
+): boolean {
   try {
     const serialized = typeof body === 'string' ? body : JSON.stringify(body)
     return (
       new TextEncoder().encode(serialized ?? '').byteLength
-        <= MAX_JSON_BODY_BYTES
+        <= maxBytes
     )
   }
   catch {

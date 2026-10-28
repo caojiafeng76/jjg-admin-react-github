@@ -5,10 +5,13 @@ import supabase from './supabase'
 
 type SyneyPoUpdate = Database['public']['Tables']['syney-pos']['Update']
 
-function normalizeSyneyPoUpdatePayload(data: Partial<ISyneyPo>): SyneyPoUpdate {
+export function normalizeSyneyPoUpdatePayload(data: Partial<ISyneyPo>): SyneyPoUpdate {
   return {
     BorderMaterial: data.BorderMaterial,
     Brand: data.Brand,
+    // 编辑时可清空送货单号：空字符串存为 NULL；未传（如只改状态）保持 undefined 不更新
+    DeliveryNo:
+      data.DeliveryNo === undefined ? undefined : data.DeliveryNo?.trim() || null,
     EndDate: data.EndDate,
     No: data.No,
     Qty: data.Qty,
@@ -186,7 +189,7 @@ export async function getSyneyPos({
   let query = supabase
     .from('syney_pos_sorted')
     .select(
-      'id, No, SONo, Spec, EndDate, Status, Qty, Brand, Technique, SerialNo, Remark, BorderMaterial, created_at',
+      'id, No, SONo, Spec, EndDate, Status, Qty, Brand, Technique, SerialNo, Remark, BorderMaterial, DeliveryNo, created_at',
       { count: 'exact' },
     )
 
@@ -520,10 +523,62 @@ export async function getSelectedPosWithItems(PoIds: number[]) {
 
   posResult.data.forEach((po) => {
     // 保持原有的键格式以确保兼容性
-    const key = `${po.SONo}~${po.Spec}~${po.EndDate}~${po.No}~${po.SerialNo}~${po.Brand}~${po.Technique}~${po.Remark}~${po.BorderMaterial}`
+    const key = `${po.SONo}~${po.Spec}~${po.EndDate}~${po.No}~${po.SerialNo}~${po.Brand}~${po.Technique}~${po.Remark}~${po.BorderMaterial}~${po.DeliveryNo ?? ''}`
     const items = itemsByPoId.get(po.id) || []
     map.set(key, items)
   })
 
   return map
+}
+
+/**
+ * 按订单号取出该号下的全部订单行及明细（不只是勾选的行），
+ * 生成送货单时 SCM 会勾选该订单号的全部明细，安全部件信息也必须完整。
+ */
+export async function getPosWithItemsByNos(nos: string[]) {
+  if (nos.length === 0) {
+    return []
+  }
+
+  const { data: pos, error: posError } = await supabase
+    .from('syney-pos')
+    .select('*')
+    .in('No', nos)
+    .order('No', { ascending: true })
+    .order('SONo', { ascending: true })
+    .order('SerialNo', { ascending: true })
+
+  if (posError) {
+    throw handleApiError(posError, '订单获取失败')
+  }
+
+  const poIds = pos.map(po => po.id)
+  const { data: items, error: itemsError } = poIds.length
+    ? await supabase.from('syney-po-items').select('*').in('PoId', poIds)
+    : { data: [], error: null }
+
+  if (itemsError) {
+    throw handleApiError(itemsError, '订单明细获取失败')
+  }
+
+  const itemsByPoId = new Map<number, ISyneyItem[]>()
+  items.forEach((item) => {
+    if (item.PoId) {
+      itemsByPoId.set(item.PoId, [...(itemsByPoId.get(item.PoId) ?? []), item])
+    }
+  })
+
+  return pos.map(po => ({ po, items: itemsByPoId.get(po.id) ?? [] }))
+}
+
+/** 送货单生成后回写：该订单号下所有行写入 SCM 送货单号，状态改为「已送货」 */
+export async function markPosDelivered(no: string, deliveryNo: string) {
+  const { error } = await supabase
+    .from('syney-pos')
+    .update({ DeliveryNo: deliveryNo, Status: '已送货' })
+    .eq('No', no)
+
+  if (error) {
+    throw handleApiError(error, '订单送货状态回写失败')
+  }
 }

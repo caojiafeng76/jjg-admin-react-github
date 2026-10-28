@@ -2561,6 +2561,7 @@ export type Database = {
           BorderMaterial: string
           Brand: string | null
           created_at: string
+          DeliveryNo: string | null
           EndDate: string | null
           id: number
           No: string | null
@@ -2576,6 +2577,7 @@ export type Database = {
           BorderMaterial?: string
           Brand?: string | null
           created_at?: string
+          DeliveryNo?: string | null
           EndDate?: string | null
           id?: number
           No?: string | null
@@ -2591,6 +2593,7 @@ export type Database = {
           BorderMaterial?: string
           Brand?: string | null
           created_at?: string
+          DeliveryNo?: string | null
           EndDate?: string | null
           id?: number
           No?: string | null
@@ -3721,6 +3724,7 @@ export type Database = {
           BorderMaterial: string | null
           Brand: string | null
           created_at: string | null
+          DeliveryNo: string | null
           end_date_sort_key: number | null
           EndDate: string | null
           id: number | null
@@ -3740,6 +3744,7 @@ export type Database = {
           BorderMaterial?: string | null
           Brand?: string | null
           created_at?: string | null
+          DeliveryNo?: string | null
           end_date_sort_key?: never
           EndDate?: string | null
           id?: number | null
@@ -3759,6 +3764,7 @@ export type Database = {
           BorderMaterial?: string | null
           Brand?: string | null
           created_at?: string | null
+          DeliveryNo?: string | null
           end_date_sort_key?: never
           EndDate?: string | null
           id?: number | null

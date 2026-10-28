@@ -86,6 +86,15 @@ function PoTable({
         },
       },
       {
+        title: '送货单号',
+        dataIndex: 'DeliveryNo',
+        key: 'DeliveryNo',
+        width: 130,
+        render: (value: string | null | undefined) => (
+          <span className="tabular-nums">{value || '-'}</span>
+        ),
+      },
+      {
         title: '订单号-[生产号]',
         dataIndex: 'No',
         key: 'No',

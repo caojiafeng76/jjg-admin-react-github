@@ -26,6 +26,7 @@ import { useSyneySpecs } from '../SpecList/useSyneySpecs'
 import TableSelectionProvider from '../TableSelectionProvider'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { useTableSelection } from '../useTableSelection'
+import DeliveryOrderButton from './DeliveryOrderButton'
 import ExportInfoButton from './ExportInfoButton'
 import ExportShippingListButton from './ExportShippingListButton'
 import PoDateFilter from './PoDateFilter'
@@ -337,6 +338,8 @@ function PoListContent() {
         <ExportInfoButton />
 
         <ExportShippingListButton />
+
+        <DeliveryOrderButton />
 
         <PrintDecompositionButton
           safePartSettings={safePartSettings}

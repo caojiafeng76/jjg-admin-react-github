@@ -33,3 +33,6 @@ graphify-out/
 
 # TypeScript incremental build info
 *.tsbuildinfo
+
+.vercel
+.env*

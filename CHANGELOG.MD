@@ -15,6 +15,111 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-10-28
+
+- **类别**：变更（部署）
+- **范围**：阿里云函数计算华东 1（杭州）新函数 `syney-delivery-order`；本地 `.env`（不入库）
+- **摘要**：通过用户的 Chrome 在 FC 控制台部署「生成送货单」跳板函数。
+  - **函数配置**：Web 函数，自定义运行时 Node.js 22（Debian 11）；0.35 vCPU / 0.5 GB，单实例并发 20，最小实例数 0；启动命令 `npm run start`，端口 9000，超时 120 秒；允许默认网卡访问公网；代码包为 `bun run fc:package:syney-delivery-order` 的产物。
+  - **环境变量**：`ALLOWED_ORIGIN`、`SUPABASE_URL`、`SYNEY_SCM_USERNAME` 沿用 `syney-store-report`；`SUPABASE_PUBLISHABLE_KEY`、`SYNEY_SCM_PASSWORD` 由用户本人填写。
+  - **HTTP 触发器**：认证方式由用户改为「无需认证」，与入库单函数一致，鉴权由函数代码完成：来源白名单、Supabase 登录、功能权限。
+  - **前端**：本地 `.env` 新增 `VITE_SYNEY_DELIVERY_ORDER_API_URL`，指向该函数公网地址。
+- **验证**：对公网地址做冒烟测试，均符合预期：无 token 返回 401、伪造 token 返回 401、非白名单来源返回 403，`wumalu.top` 的 CORS 预检返回 204 并放行 POST。尚未在线上前端实际生成送货单；线上前端需带新变量重新构建发布后才会生效。
+
+- **类别**：变更
+- **范围**：`src/features/syney/PoList/PoForm.tsx`、`src/services/apiSyneyPos.ts`、`src/services/apiSyneyPos.vitest.ts`
+- **摘要**：订单列表「编辑订单」弹窗新增「送货单号」字段，可修改或清空（带清除按钮），便于删除测试送货单后改回。清空时存为 NULL。只改状态等不涉及该字段的更新不会动送货单号。清空送货单号不会自动改状态，需要时在「操作」里另行修改。
+- **验证**：新增 `normalizeSyneyPoUpdatePayload` 用例（修改、清空存 NULL、未传不更新）；PoList 与 apiSyneyPos 相关 22 个用例通过；`bun run typecheck` 通过；改动文件 ESLint 0 error。在开发页面打开 S202610280324 所在订单的编辑弹窗，确认字段已显示原值与清除按钮（未保存）。
+
+- **类别**：修复
+- **范围**：`server/syneyScmClient.ts`、`server/viteSyneyDeliveryOrderProxy.ts`、`server/syneyDeliveryOrderLogic.ts`（注释）、`src/services/syneyDeliveryOrderLogic.vitest.ts`、`.env.example`
+- **摘要**：「生成送货单」单张试跑在「查询送货单列表」处失败，提示 SCM 返回内容为空。
+  - **排查**：
+    - 新增仅开发环境、按需开启的 SCM 请求跟踪（`SYNEY_SCM_TRACE=1`），写入系统临时目录 `syney-scm-trace.log`，不记录密码和 cookie 值。
+    - 在用户的开发页面完整复现后，又在用户已登录的 SCM 里逐项对比查询写法，确认原因：**SCM 的 BindGrid 在查询结果为 0 条时返回空内容（0 字节），而不是 `{ data: [] }`**。订单 P202610270408 此前没有送货单，所以生成前按采购单号查送货单列表必然为空。同样的情况还出现在安全部件明细为 0 条，以及安全部件列表、送货单列表按不存在的单号查询时。
+    - 上一条把空内容归因于自行添加 `PKID` 的判断不成立，相关注释已更正；BindFields 保持与页面一致。
+  - **修复**：`bindScmGrid` 把空响应按 0 条处理。
+  - **会话**：SCM 同一账号只允许一处登录，代理登录会把浏览器里同账号的 SCM 会话挤下线（用户已确认知晓）。
+- **验证**：
+  - 在开发页面对 P202610270408 完整跑通，跟踪日志中 SCM 逐步返回：
+    1. 「生成成功！送货单号：S202610280324」（14 条明细）；
+    2. 安全部件明细 2 条均「添加成功」（ZC005276 / YD1001XN / 梳齿支撑板，LC005276 / YD0201XN / 楼层板，制造日期 2026-11-05）；
+    3. 「确认成功」；
+    4. 「导出成功」。
+  - 下载得到 `1f176828…送货单.pdf`（75 KB，3 页，`%PDF-1.4`）。本系统该订单变为「已送货」，送货单号为 S202610280324。
+  - 新增 `bindScmGrid` 空响应与 MiniUI 格式解析用例；`bun run test` 192 个文件 / 906 个用例全部通过；`bun lint` 0 error；`bun run typecheck` 通过。
+
+- **类别**：修复
+- **范围**：`server/syneyScmClient.ts`、`server/syneyDeliveryOrderServer.ts`
+- **摘要**：「查询采购订单履行明细」仍返回空内容。
+  - **排查**：在用户已登录的 Chrome 里打开 SCM「采购订单履行」，用页面自带的查询功能搜索 P202610270408，记录真实请求。真实请求的 URL、`BindFields`、分页、排序与代码完全一致；在同一登录会话里，带与不带 `charset` 发送同样的查询，都能返回完整数据。由此判断差异在会话：浏览器登录成功后由 `login.js` 写入「上次登录用户」cookie 并跳转 `Main.aspx`，代码只登录后就直接打开页面。
+  - **修改**：新增 `openScmSession`，按浏览器顺序执行：登录 → 写入用户 cookie → 进入 `Main.aspx` → 收集返回的 cookie。送货单代理的所有动作改用它。入库单服务仍用原 `loginToScm`，行为不变。`login.js` 还把密码明文写入 cookie，这一点不模仿。
+- **验证**：`bun run typecheck` 通过；`syneyDeliveryOrderLogic`、`syneyDeliveryOrderHttp`、`proxyHandlers`、`viteProxySecurity`、`deliveryOrderBatch` 共 75 个用例通过；改动文件 ESLint 0 error。会话假设尚未经真实流程验证，待用户重试。
+
+- **类别**：修复
+- **范围**：`server/syneyDeliveryOrderLogic.ts`、`server/syneyDeliveryOrderServer.ts`、`src/services/syneyDeliveryOrderLogic.vitest.ts`
+- **摘要**：单张试跑时，「查询采购订单履行明细」返回 HTTP 200 但内容为空。登录有效，页面也没有跳回登录页，说明是 SCM 查询本身出错后吞掉了异常。
+  - **原因**：`BindFields` 由我们自行挑选，其中包含不在页面表格列里的 `PKID`、`QuoteStatus`。SCM 页面脚本直接使用 `row.PKID`、`row.QuoteStatus`，可见这两列由服务端自动附带，重复请求会导致查询出错。
+  - **字段列表**：采购订单履行、送货单列表、安全部件列表三处查询的 `BindFields` 改为与 SCM 页面表格列完全一致，字段和顺序都相同，安全部件明细原本就一致。
+  - **PKID 校验**：返回行统一把 `PKID` 转为数字，缺失时明确报错，不会悄悄选错行。
+  - **QuoteStatus**：没有返回时不在本地拦截，交给 SCM 自己校验。
+- **验证**：新增 BindFields 与缺少 QuoteStatus 的用例；`syneyDeliveryOrderLogic`、`syneyDeliveryOrderHttp`、`deliveryOrderBatch` 共 55 个用例通过；`bun run typecheck` 通过；改动文件 ESLint 0 error。是否解决待用户重试确认。
+
+- **类别**：修复
+- **范围**：`server/syneyScmClient.ts`、`src/services/syneyDeliveryOrderLogic.vitest.ts`
+- **摘要**：单张试跑在「查询采购订单履行明细」处提示「返回的数据无法解析」，但没有附 SCM 原文，原因是返回内容为空或只有 HTML 标签，清理后什么都不剩。现在：
+  - 打开 SCM 页面时，如果页面是未登录时那段跳回登录页的脚本（`UserLogin.aspx?tar=UnKnowUser`），直接提示「登录状态无效，被跳转到登录页，请确认账号有该页面权限」。
+  - 查询结果无法解析时，区分三种情况：返回为空、跳回登录页、其他。其他情况附上压缩后的原始片段。
+- **验证**：新增 `describeScmResponse` / `isScmLoginRedirect` 用例；`syneyDeliveryOrderLogic`、`syneyDeliveryOrderHttp`、`proxyHandlers`、`viteProxySecurity` 共 65 个用例通过；`bun run typecheck` 通过；改动文件 ESLint 0 error。真实原因待用户重试确认。
+
+- **类别**：修复
+- **范围**：`server/syneyDeliveryOrderHttp.ts`、`server/viteSyneyDeliveryOrderProxy.ts`、新增 `src/services/syneyDeliveryOrderHttp.vitest.ts`
+- **摘要**：本地 `bun dev` 下点「生成送货单」时提示「Origin not allowed」，请求没有到达 SCM。
+  - **原因**：开发代理沿用了 FC 的来源白名单 `ALLOWED_ORIGIN`，本地 `.env` 未配置该变量，页面自己发出的 POST 也带 Origin，因此被拒绝。
+  - **同源放行**：开发中间件开启 `allowSameOrigin`，Origin 与请求 Host 相同即放行。FC 仍只认 `ALLOWED_ORIGIN`。
+    - Vite 以 HTTPS（mkcert）运行时走 HTTP/2，请求没有 `Host` 头，因此改为在缺少 `Host` 时读取 `:authority`。
+    - 已对正在运行的 dev server 用 HTTP/2 复现并验证：修复前 403「Origin not allowed」，修复后 401「未登录」，即已通过来源校验。
+  - **Supabase 校验配置**：本地 `.env` 也没有 `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY`，否则下一步登录校验会失败。开发代理在未配置时沿用前端的 Supabase 地址（优先 `VITE_REACT_APP_SUPABASE_PROXY_URL`）和公开 key，仍会校验用户 token 与权限。
+- **验证**：新增 `syneyDeliveryOrderHttp.vitest.ts`（7 个用例：同源判断、未开启时拒绝、开启后放行同源但仍拒绝其他来源、env 回退）；与 `syneyDeliveryOrderLogic`、`deliveryOrderBatch` 共 50 个用例通过；`bun run typecheck` 通过；改动文件 ESLint 0 error。真实 SCM 联调待用户重试。
+
+- **类别**：修复
+- **范围**：`server/syneyScmClient.ts`、`server/syneyDeliveryOrderServer.ts`、`server/syneyDeliveryOrderHttp.ts`、`src/features/syney/PoList/deliveryOrderBatch.ts`（含测试）
+- **摘要**：单张试跑时，「生成送货单」步骤只显示「处理失败，请稍后重试」，看不到真实原因。原因是 SCM 返回的是英文异常页，前端 `getUserErrorMessage` 遇到不含中文的消息会换成兜底文案。现在：
+  - 每个 SCM 请求带中文步骤名，失败时提示「<步骤>失败（HTTP 状态码）：SCM 原文」，如「查询采购订单履行明细失败（HTTP 500）：…」；返回数据无法解析时同样附原文。
+  - SCM 登录失败、账号未配置改为可展示的业务错误。
+  - 其他意外错误在 502 提示后附原因，如连不上 SCM 或超时。
+  - 进度弹窗在只能拿到英文原文时，把原文附在兜底文案后面。
+- **验证**：`deliveryOrderBatch.vitest.ts` 新增 `describeError` 用例；`deliveryOrderBatch`、`syneyDeliveryOrderLogic`、`proxyHandlers`、`viteProxySecurity`、`syneyStoreReportFields` 共 68 个用例通过；`bun run typecheck` 通过；改动文件 ESLint 0 error。真实原因待用户重试后确认。
+
+- **类别**：新建
+- **范围**：
+  - 服务端：`server/{syneyScmClient,syneyDeliveryOrderLogic,syneyDeliveryOrderServer,syneyDeliveryOrderHttp,syneyDeliveryOrderFcServer,viteSyneyDeliveryOrderProxy}.ts`、`server/syneyStoreReportServer.ts`、`api/proxySecurity.ts`、`vite.config.ts`
+  - 阿里云 FC：`aliyun-fc/syney-delivery-order/`、`scripts/package-syney-delivery-order-fc.mjs`、`package.json`
+  - 数据库：`supabase/migrations/20261028090000_add_syney_po_delivery_no.sql`、`src/services/database.types.ts`（重新生成）
+  - 前端：`src/services/{apiSyneyDeliveryOrder,syneyDeliveryOrderContract,apiSyneyPos,types}.ts`、`src/types.d.ts`；`src/features/syney/PoList/{DeliveryOrderButton,DeliveryOrderProgressModal,useGenerateDeliveryOrders}.tsx`、`deliveryOrderBatch.ts`、`safePartInfoRows.ts`；`index.tsx`、`PoTable.tsx`、`PoSelected.tsx`、`PoSelectedFilter.tsx`、`useSelectedPos.ts`、`useExportSafePartInfoAsExcel.ts`、`useExportShippingListAsExcel.ts`、`shippingListExcelDocument.ts`；`src/features/syney/{permissions,statusTones}.ts`；`.env.example`
+- **摘要**：西尼订单列表新增「生成送货单」，把在西尼 SCM 里手动做的整套流程自动化。
+  - **流程**：勾选订单后按订单号逐张、严格串行执行：① 在「采购订单履行」勾选该订单号全部可送明细（已创建 / 部分送货）并生成送货单 → ② 在「安全部件」按「修改 → 添加明细」逐条填写 → ③ 供应商确认 → ④ 回写本系统。全部结束后只调用一次 SCM 导出，由 SCM 合并成一个送货单文件并自动下载。
+  - **进度弹窗**：每张订单逐步显示状态，安全部件显示 x/n。某张失败会记录原因并继续下一张；可以「停止」，在当前步骤完成后停下；结束后支持「重新下载」。
+  - **安全部件数据**：与「导出安全部件信息」同源，行构建逻辑抽为 `safePartInfoRows.ts` 共用，并取该订单号下全部订单行，而不只是勾选的行。
+    - 字段对应：编号 → 编号、型号 → 型号、名称 → 产品名称、订单交货日期 → 制造日期。
+    - 按「生产号 + 件号」匹配 SCM 行：SCM 中一行对应多条信息时全部作为明细添加；n 行对 n 条时按顺序一一对应。
+    - 以下情况整张单不提交并提示：信息匹配不上、产品名称不在 SCM 可选项中、产品名称为安全钳 / 限速器（需上传附件）。
+    - 已存在的编号自动跳过，重跑不会重复添加；已生成但未确认的送货单会沿用。
+  - **SCM 前置校验**：服务端复刻 SCM 页面在生成送货单前的校验，包括供应商、交货期、订单类型、备注、有效价格和原材料称重规则。
+  - **回写**：`syney-pos` 新增 `DeliveryNo`，订单状态改为新增的「已送货」。列表新增「送货单号」列，「导出发货清单」的送货单号列改为自动带出。
+  - **网络**：西尼 SCM 只接受中国 IP，生产环境新增杭州 FC 函数 `syney-delivery-order` 做跳板（`VITE_SYNEY_DELIVERY_ORDER_API_URL`）；开发环境走 Vite 中间件。
+    - 业务逻辑只在 `server/` 维护一份 TS，FC 包由 `bun build` 打成单文件，不再手抄 JS。
+    - SCM 登录、Cookie、表单提交抽为 `syneyScmClient.ts`，入库单服务改为复用，行为不变。
+  - **权限与限流**：新增功能权限 `feature:syney-po-list.delivery-order`；代理限流新增 `syney-delivery-order` 作用域，上限 120 次/分钟，其余作用域仍为 30；代理请求体上限放宽为 64 KiB（仅该接口）。
+- **验证**：
+  - 新增 `src/services/syneyDeliveryOrderLogic.vitest.ts`（36 个用例：校验、匹配、FormSave 载荷快照、响应解析、请求体校验）和 `deliveryOrderBatch.vitest.ts`（7 个用例：严格串行顺序、失败继续、只导出一次、停止、沿用），更新 `shippingListExcelDocument.vitest.ts` 和 `apiSyneyPos.vitest.ts`（查询列加 `DeliveryNo`）。
+  - `bun run test`：191 个文件 / 892 个用例，修正 `apiSyneyPos.vitest.ts` 后全部通过。
+  - `bun lint` 0 error。
+  - migration 由用户推送；随后用 Supabase CLI 重新生成 `src/services/database.types.ts`，差异仅为 `syney-pos` / `syney_pos_sorted` 新增 `DeliveryNo`。
+  - `bun run typecheck`、`bun run build`、`bun run check:bundle` 通过。
+  - `bun run fc:package:syney-delivery-order` 打包成功；本地起包后未带 token 的请求返回 401。
+  - **未完成**：未连真实 SCM 联调，FC 函数也未部署。SCM 接口参数是从页面源码推断的，首次请用单张订单在 `bun dev` 下试跑并到 SCM 核对。
+
 ## 2026-10-22
 
 - **类别**：重构 / 修复（前端体验统一 Phase 3：西尼 syney）

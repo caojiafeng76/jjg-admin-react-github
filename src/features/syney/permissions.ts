@@ -76,4 +76,11 @@ export const SYNEY_PERMISSIONS: PermissionDefinition[] = [
     surface: 'pc',
     label: '西尼订单-导出',
   },
+  {
+    key: 'feature:syney-po-list.delivery-order',
+    scope: 'feature',
+    module: 'syney-po-list',
+    surface: 'pc',
+    label: '西尼订单-生成送货单',
+  },
 ]

@@ -41,6 +41,7 @@ export function useSelectedPos() {
         Technique: string
         Remark: string
         BorderMaterial: string
+        DeliveryNo: string
       }
       items: ISyneyItem[]
     }[] = []
@@ -56,6 +57,7 @@ export function useSelectedPos() {
         Technique,
         Remark,
         BorderMaterial,
+        DeliveryNo,
       ] = key.split('~')
       list.push({
         key,
@@ -69,6 +71,7 @@ export function useSelectedPos() {
           Technique,
           Remark,
           BorderMaterial: BorderMaterial ?? '橡胶',
+          DeliveryNo: DeliveryNo ?? '',
         },
         items,
       })

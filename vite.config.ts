@@ -5,6 +5,7 @@ import { defineConfig, loadEnv } from 'vite'
 import viteCompression from 'vite-plugin-compression'
 
 import mkcert from 'vite-plugin-mkcert'
+import { syneyDeliveryOrderProxy } from './server/viteSyneyDeliveryOrderProxy'
 import { syneyStoreReportProxy } from './server/viteSyneyStoreReportProxy'
 import { youmaiPurchaseOrderProxy } from './server/viteYoumaiPurchaseOrderProxy'
 
@@ -42,6 +43,7 @@ export default defineConfig(({ mode }) => {
       react(),
       mkcert(),
       syneyStoreReportProxy(env),
+      syneyDeliveryOrderProxy(env),
       youmaiPurchaseOrderProxy(env),
       viteCompression({
         algorithm: 'gzip',

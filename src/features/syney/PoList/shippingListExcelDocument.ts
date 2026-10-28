@@ -28,6 +28,8 @@ export interface ShippingListRow {
   Spec: string
   Technique: string
   Remark: string
+  /** SCM 送货单号；未生成送货单时为空 */
+  DeliveryNo?: string | null
 }
 
 const BORDER = {
@@ -106,7 +108,7 @@ function normalize(value: string | null | undefined): string {
 
 /**
  * 导出发货清单 Excel。
- * 送货单号列留空，由用户导出后自行填写。
+ * 送货单号列取订单回写的 SCM 送货单号，未生成时留空。
  */
 export function exportShippingListAsExcel(
   orders: ShippingListRow[],
@@ -124,7 +126,7 @@ export function exportShippingListAsExcel(
       i + 1,
       normalize(order.No),
       normalize(order.SONo),
-      '', // 送货单号：留空，由用户填写
+      normalize(order.DeliveryNo), // 送货单号：生成送货单后回写，没有则留空
       normalize(order.Brand),
       normalize(order.Spec),
       normalize(order.Technique),

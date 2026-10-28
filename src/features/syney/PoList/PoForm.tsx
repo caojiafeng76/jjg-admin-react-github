@@ -182,6 +182,18 @@ const PoForm: FC<PoFormProps> = ({
           <Form.Item name="Remark" label="备注">
             <Input disabled={isCreating} className={fieldClassName} />
           </Form.Item>
+          <Form.Item
+            name="DeliveryNo"
+            label="送货单号"
+            extra="西尼 SCM 送货单号，生成送货单后自动回写；可修改或清空"
+          >
+            <Input
+              disabled={isCreating}
+              allowClear
+              placeholder="未生成送货单时留空"
+              className={fieldClassName}
+            />
+          </Form.Item>
         </>
       )}
     </Form>

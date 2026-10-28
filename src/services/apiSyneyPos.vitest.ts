@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getSyneyPos } from './apiSyneyPos'
+import { getSyneyPos, normalizeSyneyPoUpdatePayload } from './apiSyneyPos'
 
 interface SyneyPoFixture {
   BorderMaterial: string | null
@@ -210,7 +210,7 @@ describe('getSyneyPos', () => {
     const url = new URL(requests.urls[0])
     expect(url.pathname).toBe('/rest/v1/syney_pos_sorted')
     expect(url.searchParams.get('select')).toBe(
-      'id,No,SONo,Spec,EndDate,Status,Qty,Brand,Technique,SerialNo,Remark,BorderMaterial,created_at',
+      'id,No,SONo,Spec,EndDate,Status,Qty,Brand,Technique,SerialNo,Remark,BorderMaterial,DeliveryNo,created_at',
     )
     expect(url.searchParams.get('select')).not.toContain('natural_sort_key')
     expect(url.searchParams.get('order')).toBe(EXPECTED_NATURAL_ORDER)
@@ -275,5 +275,18 @@ describe('getSyneyPos', () => {
     expect(
       requests.urls.map(url => new URL(url).searchParams.get('offset')),
     ).toEqual(Array.from({ length: 21 }, (_, index) => String(index * 50)))
+  })
+})
+
+describe('normalizeSyneyPoUpdatePayload', () => {
+  it('saves an edited delivery-note number and stores a cleared one as NULL', () => {
+    expect(normalizeSyneyPoUpdatePayload({ DeliveryNo: ' S202610280324 ' }).DeliveryNo).toBe('S202610280324')
+    expect(normalizeSyneyPoUpdatePayload({ DeliveryNo: '' }).DeliveryNo).toBeNull()
+    expect(normalizeSyneyPoUpdatePayload({ DeliveryNo: null }).DeliveryNo).toBeNull()
+  })
+
+  it('leaves the delivery-note number untouched when it is not part of the update', () => {
+    expect(normalizeSyneyPoUpdatePayload({ Status: '已创建' })).not.toHaveProperty('DeliveryNo', null)
+    expect(normalizeSyneyPoUpdatePayload({ Status: '已创建' }).DeliveryNo).toBeUndefined()
   })
 })
