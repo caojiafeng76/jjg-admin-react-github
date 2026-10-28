@@ -8,9 +8,10 @@ export interface SpecFormProps {
   ref?: Ref<ISyneySpecFormRef>
   onFinishFunc: (values: ISyneySpec) => void
   isEditing: boolean
+  initialValues?: Partial<ISyneySpec>
 }
 
-export default function SpecForm({ ref, onFinishFunc, isEditing }: SpecFormProps) {
+export default function SpecForm({ ref, onFinishFunc, isEditing, initialValues }: SpecFormProps) {
   const [form] = Form.useForm<ISyneySpec>()
 
   const onFinish = useCallback(
@@ -33,6 +34,7 @@ export default function SpecForm({ ref, onFinishFunc, isEditing }: SpecFormProps
       layout="vertical"
       form={form}
       name="control-hooks"
+      initialValues={initialValues}
       onFinish={onFinish}
       className="[&_.ant-form-item]:mb-3"
     >

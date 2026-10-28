@@ -33,9 +33,21 @@ vi.mock('@ui/AddButton', () => ({
 
 vi.mock('@ui/AppPagination', () => ({ default: () => null }))
 vi.mock('@ui/DeleteButton', () => ({ default: () => null }))
-vi.mock('@ui/EditButton', () => ({ default: () => null }))
+vi.mock('@ui/EditButton', () => ({
+  default: ({ handleEdit }: { handleEdit: () => void }) => (
+    <button type="button" onClick={handleEdit}>
+      编辑
+    </button>
+  ),
+}))
 vi.mock('./PartNoInput', () => ({ default: () => null }))
-vi.mock('./SpecTable', () => ({ default: () => null }))
+vi.mock('./SpecTable', () => ({
+  default: ({ onSelect }: { onSelect: (keys: number[]) => void }) => (
+    <button type="button" onClick={() => onSelect([7])}>
+      选中第一行
+    </button>
+  ),
+}))
 
 vi.mock('./useDeleteSyneySpecs', () => ({
   useDeleteSyneySpecs: () => ({
@@ -48,7 +60,16 @@ vi.mock('./useSyneySpecs', () => ({
   useSyneySpecs: () => ({
     count: 0,
     isLoading: false,
-    syneySpecs: [],
+    syneySpecs: [
+      {
+        ParamSpec: '1525*550',
+        PartName: '前沿板',
+        PartNo: 'XN2808X001',
+        Spec: '1000型',
+        Unit: '件',
+        id: 7,
+      },
+    ],
   }),
 }))
 
@@ -151,5 +172,30 @@ describe('SpecList create form', { timeout: 20_000 }, () => {
       expect(createSyneySpecMock).toHaveBeenCalledOnce()
     })
     expect(await screen.findByText('踏板规格创建失败：请稍后重试')).toBeInTheDocument()
+  })
+})
+
+describe('SpecList edit form', { timeout: 20_000 }, () => {
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('prefills the form with the selected spec when editing', async () => {
+    // Given: one spec row is selected.
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByRole('button', { name: '选中第一行' }))
+
+    // When: the user opens the edit modal.
+    await user.click(screen.getByRole('button', { name: '编辑' }))
+
+    // Then: every field shows the selected spec and the part number is locked.
+    expect(await screen.findByText('编辑踏板规格')).toBeInTheDocument()
+    const partNoInput = await screen.findByLabelText('件号')
+    expect(partNoInput).toHaveValue('XN2808X001')
+    expect(partNoInput).toBeDisabled()
+    expect(screen.getByLabelText('名称')).toHaveValue('前沿板')
+    expect(screen.getByLabelText('规格')).toHaveValue('1000型')
+    expect(screen.getByLabelText('参数规格')).toHaveValue('1525*550')
   })
 })

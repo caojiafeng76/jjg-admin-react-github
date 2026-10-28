@@ -5,7 +5,7 @@ import AddButton from '@ui/AddButton'
 import DeleteButton from '@ui/DeleteButton'
 import EditButton from '@ui/EditButton'
 import { App, Modal } from 'antd'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
@@ -41,8 +41,8 @@ export default function SpecList() {
   const specIds = selectedRowKeys.map(id => Number(id))
   const spec = syneySpecs?.find(item => item.id === specIds?.at(0))
 
+  // Modal 使用 destroyOnHidden，每次打开都会重新挂载 SpecForm，表单初值由 initialValues 提供
   function showModal() {
-    specFormRef.current?.getInstance().resetFields()
     setIsModalOpen(true)
   }
 
@@ -70,7 +70,6 @@ export default function SpecList() {
   }
 
   function handleCancel() {
-    specFormRef.current?.getInstance().resetFields()
     setIsEditing(false)
     setIsModalOpen(false)
   }
@@ -90,6 +89,7 @@ export default function SpecList() {
       message.warning('请选择一条踏板规格进行编辑')
       return
     }
+    setModalTitle('编辑踏板规格')
     setIsEditing(true)
     showModal()
   }
@@ -105,13 +105,6 @@ export default function SpecList() {
       },
     })
   }
-
-  useEffect(() => {
-    if (spec && isEditing) {
-      specFormRef.current?.getInstance().setFieldsValue({ ...spec })
-      setModalTitle('编辑踏板规格')
-    }
-  }, [spec, isEditing])
 
   const records = useMemo(() => syneySpecs || [], [syneySpecs])
   const selectedCount = selectedRowKeys.length
@@ -192,6 +185,7 @@ export default function SpecList() {
           ref={specFormRef}
           onFinishFunc={onFinishFuc}
           isEditing={isEditing}
+          initialValues={isEditing ? spec : undefined}
         />
       </Modal>
     </div>

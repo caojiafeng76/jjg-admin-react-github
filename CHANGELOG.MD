@@ -17,6 +17,11 @@
 
 ## 2026-10-28
 
+- **类别**：修复
+- **范围**：`src/features/syney/SpecList/index.tsx`、`src/features/syney/SpecList/SpecForm.tsx`、`src/features/syney/SpecList/index.vitest.tsx`
+- **摘要**：修复「编辑踏板规格」弹窗字段不回填。原因是 Modal 用了 `destroyOnHidden`，打开时 `useEffect` 调 `setFieldsValue` 早于表单挂载，赋值丢失。改为 `SpecForm` 接收 `initialValues`，编辑时传入选中规格；删掉该 effect 和对未挂载表单的 `resetFields`，标题改在 `handleEdit` 中设置。新增编辑回填组件测试。
+- **验证**：新测试修复前失败、修复后通过；`bun run test src/features/syney/SpecList` 3/3 通过，`bun run typecheck` 通过，`bun lint` 0 error。未在浏览器中手动验证。
+
 - **类别**：变更（部署）
 - **范围**：阿里云函数计算华东 1（杭州）新函数 `syney-delivery-order`；本地 `.env`（不入库）
 - **摘要**：通过用户的 Chrome 在 FC 控制台部署「生成送货单」跳板函数。
