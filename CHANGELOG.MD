@@ -18,6 +18,16 @@
 ## 2026-10-29
 
 - **类别**：变更
+- **范围**：`src/features/syney/SafePartSetting/{constants.ts,SafePartSettingFormModal.tsx,SafePartSettingPage.tsx,SafePartSettingPage.vitest.tsx}`
+- **摘要**：件号配置弹窗的「产品型号」「编号前缀」「英文名称」由输入框改为下拉选择。
+  - 选项为固定常量 `SAFE_PART_LABEL_PRESETS`：梳齿支撑板 → YD1001XN / ZC00 / COMB PLATE；楼层板 → YD0201XN / LC00 / COVER PLATE。
+  - 选择「名称」为梳齿支撑板或楼层板时，自动带出这三项，之后仍可修改。选择横框、侧框或清空名称时，不改动这三项。
+  - 编辑回填时，空值改为 `undefined`，下拉框会显示占位文字。
+- **验证**：`bunx eslint --fix` + `bunx eslint` 改动目录 0 error；`bun run typecheck` 通过；`bun run test src/features/syney/SafePartSetting` 4/4 通过（新增联动用例）。未在浏览器中手动验证。
+
+## 2026-10-29
+
+- **类别**：变更
 - **范围**：`server/syneyDeliveryOrderLogic.ts`、`server/syneyDeliveryOrderServer.ts`、`server/syneyDeliveryOrderHttp.ts`、`src/services/syneyDeliveryOrderContract.ts`、`src/services/apiSyneyDeliveryOrder.ts`、`src/features/syney/PoList/{deliveryOrderBatch.ts,DeliveryOrderProgressModal.tsx,safePartInfoRows.ts,useExportSafePartInfoAsExcel.ts,ExportInfoButton.tsx}`，及对应测试
 - **摘要**：按 SCM「采购订单履行」明细的 `IsSafePart` 判断订单是否含安全部件。
   - **生成送货单**：`create` 返回 `hasSafeParts`。明细全部为 false 时跳过「填写安全部件」，进度框显示「无需填写」；如果本系统按件号配置仍识别出安全部件，额外提示核对件号配置。

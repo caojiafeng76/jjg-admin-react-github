@@ -52,9 +52,9 @@ export default function SafePartSettingPage() {
     form.setFieldsValue({
       part_no: record.part_no,
       name: record.name ?? undefined,
-      part_model: record.part_model ?? '',
-      part_code_prefix: record.part_code_prefix ?? '',
-      english_name: record.english_name ?? '',
+      part_model: record.part_model ?? undefined,
+      part_code_prefix: record.part_code_prefix ?? undefined,
+      english_name: record.english_name ?? undefined,
       need_print_label: record.need_print_label,
       is_safe_part: record.is_safe_part,
       decomposition_role: record.decomposition_role ?? undefined,

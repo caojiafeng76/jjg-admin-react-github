@@ -106,6 +106,21 @@ describe('SafePartSettingPage', { timeout: 15_000 }, () => {
     expect(partNoInput.disabled).toBe(true)
   })
 
+  it('新增时选择名称自动带出产品型号、编号前缀、英文名称', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.click(screen.getByRole('button', { name: /添加/ }))
+    expect(await screen.findByText('新增件号配置')).toBeTruthy()
+
+    await user.click(screen.getByLabelText('名称'))
+    await user.click(await screen.findByTitle('楼层板'))
+
+    expect(await screen.findByTitle('YD0201XN')).toBeTruthy()
+    expect(screen.getByTitle('LC00')).toBeTruthy()
+    expect(screen.getByTitle('COVER PLATE')).toBeTruthy()
+  })
+
   it('件号筛选为前端过滤', async () => {
     const user = userEvent.setup()
     renderPage()

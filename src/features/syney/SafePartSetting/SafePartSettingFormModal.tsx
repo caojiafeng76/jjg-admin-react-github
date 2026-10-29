@@ -4,7 +4,13 @@ import type {
 } from '@services/apiSyneySafePartSettings'
 import type { FormInstance } from 'antd'
 import { Divider, Form, Input, Modal, Select, Switch } from 'antd'
-import { DECOMPOSITION_ROLE_OPTIONS } from './constants'
+import {
+  DECOMPOSITION_ROLE_OPTIONS,
+  ENGLISH_NAME_OPTIONS,
+  PART_CODE_PREFIX_OPTIONS,
+  PART_MODEL_OPTIONS,
+  SAFE_PART_LABEL_PRESETS,
+} from './constants'
 
 export type SafePartSettingFormValues = Parameters<
   typeof upsertSyneySafePartSetting
@@ -65,6 +71,11 @@ export default function SafePartSettingFormModal({
             allowClear
             getPopupContainer={() => document.body}
             className="rounded-lg"
+            onChange={(value?: string) => {
+              const preset = value ? SAFE_PART_LABEL_PRESETS[value] : undefined
+              if (preset)
+                form.setFieldsValue(preset)
+            }}
             options={[
               { label: '梳齿支撑板', value: '梳齿支撑板' },
               { label: '楼层板', value: '楼层板' },
@@ -74,20 +85,30 @@ export default function SafePartSettingFormModal({
           />
         </Form.Item>
         <Form.Item label="产品型号" name="part_model">
-          <Input
+          <Select
             allowClear
-            placeholder="如 YD1001XN"
+            placeholder="请选择产品型号"
+            getPopupContainer={() => document.body}
             className="rounded-lg"
+            options={PART_MODEL_OPTIONS}
           />
         </Form.Item>
         <Form.Item label="编号前缀" name="part_code_prefix">
-          <Input allowClear placeholder="如 ZC00" className="rounded-lg" />
+          <Select
+            allowClear
+            placeholder="请选择编号前缀"
+            getPopupContainer={() => document.body}
+            className="rounded-lg"
+            options={PART_CODE_PREFIX_OPTIONS}
+          />
         </Form.Item>
         <Form.Item label="英文名称" name="english_name">
-          <Input
+          <Select
             allowClear
-            placeholder="如 COMB PLATE"
+            placeholder="请选择英文名称"
+            getPopupContainer={() => document.body}
             className="rounded-lg"
+            options={ENGLISH_NAME_OPTIONS}
           />
         </Form.Item>
         <Divider titlePlacement="left">配置说明</Divider>
