@@ -97,6 +97,12 @@ export function confirmSyneyDeliveryOrder(deliveryOrderId: number, deliveryNo: s
   return callSyneyDeliveryOrderProxy('confirm', { deliveryOrderId, deliveryNo })
 }
 
+/** 按 SCM 明细的 IsSafePart 判断各订单号是否含安全部件 */
+export async function checkSyneySafeParts(poNos: string[]) {
+  const { results } = await callSyneyDeliveryOrderProxy('checkSafeParts', { poNos })
+  return results
+}
+
 export async function printSyneyDeliveryOrders(
   deliveryOrderIds: number[],
   deliveryNos: string[],

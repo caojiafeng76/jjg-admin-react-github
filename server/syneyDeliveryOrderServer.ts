@@ -15,6 +15,7 @@ import {
   DELIVERY_ORDER_FIELDS,
   fileNameFromPath,
   filterDeliveryOrdersForPo,
+  hasSafePartLines,
   isScmSuccess,
   parseAjaxMessage,
   parseContentDispositionFileName,
@@ -87,6 +88,22 @@ async function listDeliveryOrders(cookie: string, searchParams: string) {
   )
 }
 
+/** 采购订单履行明细（调用前需先 warmUp PO_LINE_PAGE） */
+async function listPoLines(cookie: string, poNo: string) {
+  const label = '查询采购订单履行明细'
+  return requirePkid(
+    await bindScmGrid<ScmPoLine>(
+      cookie,
+      PO_LINE_PAGE,
+      'method=BindGrid&Type=NPO',
+      PO_LINE_FIELDS,
+      `&QUERY_S_PONo=${poNo}`,
+      { label },
+    ),
+    label,
+  )
+}
+
 async function createDeliveryOrder(
   env: SyneyServerEnv,
   { poNo }: SyneyDeliveryOrderRequestMap['create'],
@@ -94,17 +111,7 @@ async function createDeliveryOrder(
   const cookie = await openScmSession(env)
   await warmUpScmPage(cookie, PO_LINE_PAGE)
 
-  const lines = requirePkid(
-    await bindScmGrid<ScmPoLine>(
-      cookie,
-      PO_LINE_PAGE,
-      'method=BindGrid&Type=NPO',
-      PO_LINE_FIELDS,
-      `&QUERY_S_PONo=${poNo}`,
-      { label: '查询采购订单履行明细' },
-    ),
-    '查询采购订单履行明细',
-  )
+  const lines = await listPoLines(cookie, poNo)
   const deliverableLines = selectDeliverableLines(lines, poNo)
 
   await warmUpScmPage(cookie, DELIVERY_ORDER_LIST_PAGE)
@@ -121,6 +128,8 @@ async function createDeliveryOrder(
         deliveryNo: reusable.No,
         lineCount: 0,
         reused: true,
+        // 沿用的送货单不知道当初包含哪些明细，按该订单全部明细判断
+        hasSafeParts: hasSafePartLines(lines, poNo),
       }
     }
 
@@ -159,7 +168,26 @@ async function createDeliveryOrder(
     deliveryNo: created.No,
     lineCount: deliverableLines.length,
     reused: false,
+    hasSafeParts: hasSafePartLines(deliverableLines),
   }
+}
+
+async function checkSafeParts(
+  env: SyneyServerEnv,
+  { poNos }: SyneyDeliveryOrderRequestMap['checkSafeParts'],
+): Promise<SyneyDeliveryOrderResponseMap['checkSafeParts']> {
+  const cookie = await openScmSession(env)
+  await warmUpScmPage(cookie, PO_LINE_PAGE)
+
+  const results: SyneyDeliveryOrderResponseMap['checkSafeParts']['results'] = []
+  // SCM 是同步会话，逐个订单号串行查询
+  for (const poNo of poNos) {
+    const lines = (await listPoLines(cookie, poNo)).filter(
+      line => String(line.PONo ?? '').trim() === poNo,
+    )
+    results.push({ poNo, found: lines.length > 0, hasSafeParts: hasSafePartLines(lines) })
+  }
+  return { results }
 }
 
 async function fetchPartNameOptions(cookie: string, SONo: string) {
@@ -412,6 +440,7 @@ export const syneyDeliveryOrderHandlers: DeliveryOrderHandlers = {
   addSafePartDetail,
   confirm: confirmDeliveryOrder,
   print: printDeliveryOrders,
+  checkSafeParts,
 }
 
 export async function runSyneyDeliveryOrderAction<A extends keyof SyneyDeliveryOrderRequestMap>(

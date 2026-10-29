@@ -1,4 +1,4 @@
-import type { SyneySafePartSourceRow } from '@/services/syneyDeliveryOrderContract'
+import type { SyneySafePartCheckResult, SyneySafePartSourceRow } from '@/services/syneyDeliveryOrderContract'
 import type { ISyneyItem } from '@/services/types'
 import type { SyneySafePartRule } from '@/utils/syneySafePartRules'
 import dayjs from 'dayjs'
@@ -68,4 +68,22 @@ export function toSafePartSourceRows(rows: SafePartInfoRow[]): SyneySafePartSour
     partName: row.名称 ?? '',
     date: row.日期 && dayjs(row.日期).isValid() ? dayjs(row.日期).format('YYYY-MM-DD') : '',
   }))
+}
+
+/**
+ * 按 SCM 明细的 IsSafePart 过滤要导出的订单：SCM 明确查到且全部为 false 的订单号跳过；
+ * SCM 查不到的订单号保留，按本系统件号配置导出。
+ */
+export function filterPosBySafePartCheck<T extends { poInfo: { No: string | null } }>(
+  posList: T[],
+  results: SyneySafePartCheckResult[],
+): { kept: T[], skippedPoNos: string[] } {
+  const noSafePartPoNos = new Set(
+    results.filter(result => result.found && !result.hasSafeParts).map(result => result.poNo),
+  )
+  const kept = posList.filter(({ poInfo }) => !noSafePartPoNos.has((poInfo.No ?? '').trim()))
+  const skippedPoNos = Array.from(noSafePartPoNos).filter(poNo =>
+    posList.some(({ poInfo }) => (poInfo.No ?? '').trim() === poNo),
+  )
+  return { kept, skippedPoNos }
 }

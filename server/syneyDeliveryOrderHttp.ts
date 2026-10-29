@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { ProxyAuthorizationResult } from '../api/proxySecurity'
 import type { SyneyServerEnv } from './syneyScmClient'
 
 import {
@@ -9,7 +10,10 @@ import {
   safeErrorMetadata,
   validateContentLength,
 } from '../api/proxySecurity'
-import { SYNEY_DELIVERY_ORDER_PERMISSION } from '../src/services/syneyDeliveryOrderContract'
+import {
+  SYNEY_DELIVERY_ORDER_PERMISSION,
+  SYNEY_SAFE_PART_CHECK_PERMISSIONS,
+} from '../src/services/syneyDeliveryOrderContract'
 import { parseDeliveryOrderRequest } from './syneyDeliveryOrderLogic'
 import { runSyneyDeliveryOrderAction } from './syneyDeliveryOrderServer'
 import { sanitizeScmMessage, ScmUserError } from './syneyScmClient'
@@ -20,6 +24,33 @@ const RATE_LIMIT_SCOPE = 'syney-delivery-order' as const
 const UNAVAILABLE_MESSAGE = '西尼送货单代理服务暂不可用'
 
 class RequestBodyTooLargeError extends Error {}
+
+/** 只读的 checkSafeParts 也供「导出安全部件信息」使用，其余操作只认生成送货单权限 */
+function permissionsForAction(action: unknown): readonly string[] {
+  return action === 'checkSafeParts'
+    ? SYNEY_SAFE_PART_CHECK_PERMISSIONS
+    : [SYNEY_DELIVERY_ORDER_PERMISSION]
+}
+
+/** 依次校验，有任一权限即通过；未登录（401）不再继续尝试 */
+async function authorizeAnyPermission(
+  authorization: string | undefined,
+  permissions: readonly string[],
+  env: SyneyServerEnv,
+): Promise<ProxyAuthorizationResult> {
+  let result: ProxyAuthorizationResult = { ok: false, status: 403 }
+  for (const permission of permissions) {
+    result = await authorizeProxyRequest({
+      authorization,
+      permission,
+      supabasePublishableKey: env.SUPABASE_PUBLISHABLE_KEY,
+      supabaseUrl: env.SUPABASE_URL,
+    })
+    if (result.ok || result.status === 401)
+      return result
+  }
+  return result
+}
 
 function getHeader(request: IncomingMessage, name: string): string | undefined {
   const value = request.headers[name.toLowerCase()]
@@ -181,12 +212,11 @@ export function createSyneyDeliveryOrderHandler(
     }
 
     try {
-      const access = await authorizeProxyRequest({
-        authorization: getHeader(request, 'authorization'),
-        permission: SYNEY_DELIVERY_ORDER_PERMISSION,
-        supabasePublishableKey: env.SUPABASE_PUBLISHABLE_KEY,
-        supabaseUrl: env.SUPABASE_URL,
-      })
+      const access = await authorizeAnyPermission(
+        getHeader(request, 'authorization'),
+        permissionsForAction(bodyResult.body.action),
+        env,
+      )
       if (!access.ok) {
         sendJson(response, access.status, {
           error: access.status === 401 ? '未登录' : '无权访问',

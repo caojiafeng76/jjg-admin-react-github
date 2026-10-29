@@ -6,12 +6,15 @@ import {
 } from '@utils/excelStyleUtils'
 import { App } from 'antd'
 import dayjs from 'dayjs'
+import { useState } from 'react'
 
+import { checkSyneySafeParts } from '@/services/apiSyneyDeliveryOrder'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { useTableSelection } from '../useTableSelection'
-import { buildSafePartInfoRows } from './safePartInfoRows'
+import { uniquePoNos } from './deliveryOrderBatch'
+import { buildSafePartInfoRows, filterPosBySafePartCheck } from './safePartInfoRows'
 import { useSelectedPos } from './useSelectedPos'
 
 const loadExcel = () => import('xlsx-js-style')
@@ -34,6 +37,7 @@ export function useExportSafePartInfoAsExcel() {
   const { isLoading, selectedPosList } = useSelectedPos()
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading }
     = useSyneySafePartSettings()
+  const [exporting, setExporting] = useState(false)
 
   function preloadExcel() {
     void loadExcel()
@@ -56,7 +60,33 @@ export function useExportSafePartInfoAsExcel() {
       return
     }
 
+    if (exporting)
+      return
+
+    setExporting(true)
+    const hideLoading = messageApi.loading('正在核对 SCM 安全部件标记…', 0)
     try {
+      // 先按 SCM 明细的 IsSafePart 排除无安全部件的订单；查询失败时照常导出
+      let posToExport = selectedPosList
+      let skippedPoNos: string[] = []
+      let checkFailed = false
+      try {
+        const results = await checkSyneySafeParts(
+          uniquePoNos(selectedPosList.map(({ poInfo }) => poInfo.No)),
+        )
+        ;({ kept: posToExport, skippedPoNos } = filterPosBySafePartCheck(selectedPosList, results))
+      }
+      catch (error) {
+        console.error('核对 SCM 安全部件标记失败:', error)
+        checkFailed = true
+      }
+      hideLoading()
+
+      if (posToExport.length === 0) {
+        messageApi.info('所选订单在 SCM 中的明细均不是安全部件，无需导出')
+        return
+      }
+
       const { utils, writeFile } = await loadExcel()
       // 创建新的工作簿
       const wb = utils.book_new()
@@ -64,7 +94,7 @@ export function useExportSafePartInfoAsExcel() {
       let globalIndex = 0
 
       // 处理每个订单的数据
-      selectedPosList.forEach(({ poInfo, items }) => {
+      posToExport.forEach(({ poInfo, items }) => {
         const { SONo, EndDate, No, SerialNo } = poInfo
 
         // 过滤安全件并转换为 Excel 数据格式
@@ -144,7 +174,13 @@ export function useExportSafePartInfoAsExcel() {
 
       // 导出文件
       writeFile(wb, fileName, EXCEL_WRITE_OPTIONS)
-      messageApi.success(feedbackText.exported('安全部件', allSafeParts.length))
+      const skippedText = skippedPoNos.length > 0
+        ? `，已跳过 ${skippedPoNos.length} 个 SCM 中无安全部件的订单`
+        : ''
+      messageApi.success(`${feedbackText.exported('安全部件', allSafeParts.length)}${skippedText}`)
+      if (checkFailed) {
+        messageApi.warning('未能从 SCM 核对安全部件标记，已按本系统件号配置导出')
+      }
       setTableSelectedKeys([])
     }
     catch (error) {
@@ -153,7 +189,11 @@ export function useExportSafePartInfoAsExcel() {
         getUserErrorMessage(error, feedbackText.failed('导出', '安全部件信息')),
       )
     }
+    finally {
+      hideLoading()
+      setExporting(false)
+    }
   }
 
-  return { exportSafePartInfoAsExcel, preloadExcel }
+  return { exportSafePartInfoAsExcel, preloadExcel, exporting }
 }

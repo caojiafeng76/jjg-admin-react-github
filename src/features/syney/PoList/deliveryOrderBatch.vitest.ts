@@ -27,7 +27,7 @@ function createDeps(calls: string[], overrides: Partial<DeliveryOrderBatchDeps> 
     createDeliveryOrder: vi.fn(async (poNo: string) => {
       calls.push(`create:${poNo}`)
       const id = Number(poNo.slice(1))
-      return { deliveryOrderId: id, deliveryNo: `D${id}`, lineCount: 1, reused: false }
+      return { deliveryOrderId: id, deliveryNo: `D${id}`, lineCount: 1, reused: false, hasSafeParts: true }
     }),
     planSafeParts: vi.fn(async (deliveryNo: string) => {
       calls.push(`plan:${deliveryNo}`)
@@ -63,6 +63,28 @@ describe('uniquePoNos', () => {
 })
 
 describe('runDeliveryOrderBatch', () => {
+  it('skips filling safe parts when SCM marks no line as a safe part', async () => {
+    const calls: string[] = []
+    const deps = createDeps(calls, {
+      createDeliveryOrder: vi.fn(async (poNo: string) => {
+        calls.push(`create:${poNo}`)
+        return { deliveryOrderId: 1, deliveryNo: 'D1', lineCount: 1, reused: false, hasSafeParts: false }
+      }),
+    })
+
+    const result = await runDeliveryOrderBatch({ poNos: ['P1'], deps, onUpdate: () => {} })
+
+    expect(calls).toEqual(['load', 'create:P1', 'confirm:D1', 'mark:P1:D1', 'print:1:D1', 'download:送货单.xls'])
+    expect(deps.planSafeParts).not.toHaveBeenCalled()
+    expect(result.orders[0]).toMatchObject({
+      status: 'success',
+      safePartSkipped: true,
+      steps: { create: 'finish', safeParts: 'finish', confirm: 'finish', writeBack: 'finish' },
+    })
+    // 本系统按件号配置仍识别出 1 条，提示核对
+    expect(result.orders[0].warnings).toEqual([expect.stringContaining('本系统按件号配置识别到 1 条')])
+  })
+
   it('runs every step strictly in sequence and prints once at the end', async () => {
     const calls: string[] = []
     const deps = createDeps(calls)
@@ -188,6 +210,7 @@ describe('runDeliveryOrderBatch', () => {
         deliveryNo: 'D9',
         lineCount: 0,
         reused: true,
+        hasSafeParts: true,
       })),
     })
 

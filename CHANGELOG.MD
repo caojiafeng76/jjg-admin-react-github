@@ -15,6 +15,23 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-10-29
+
+- **类别**：变更
+- **范围**：`server/syneyDeliveryOrderLogic.ts`、`server/syneyDeliveryOrderServer.ts`、`server/syneyDeliveryOrderHttp.ts`、`src/services/syneyDeliveryOrderContract.ts`、`src/services/apiSyneyDeliveryOrder.ts`、`src/features/syney/PoList/{deliveryOrderBatch.ts,DeliveryOrderProgressModal.tsx,safePartInfoRows.ts,useExportSafePartInfoAsExcel.ts,ExportInfoButton.tsx}`，及对应测试
+- **摘要**：按 SCM「采购订单履行」明细的 `IsSafePart` 判断订单是否含安全部件。
+  - **生成送货单**：`create` 返回 `hasSafeParts`。明细全部为 false 时跳过「填写安全部件」，进度框显示「无需填写」；如果本系统按件号配置仍识别出安全部件，额外提示核对件号配置。
+  - **导出安全部件信息**：导出前调用新的代理 action `checkSafeParts`，一次登录，按订单号逐个串行查询。
+    - 全部订单都没有安全部件时，提示「无需导出」。
+    - 只有部分订单没有时，跳过这些订单并在成功提示中说明。
+    - SCM 查不到的订单保留。
+    - 查询失败时照常按本系统配置导出，并给出警告。
+    - 导出按钮在查询期间显示 loading。
+  - **权限**：`checkSafeParts` 有「西尼订单-导出」或「西尼订单-生成送货单」任一权限即可，其余 action 仍只认生成送货单权限。
+  - **注意**：导出现在也会登录 SCM，会顶掉浏览器里同账号的 SCM 会话。
+  - **部署**：已通过用户的 Chrome，把新代码包上传到 FC 函数 `syney-delivery-order`（「上传 ZIP 包」→「保存并部署」）。代码大小从 14.89 KB 变为 15.52 KB。冒烟测试：预检 204，无 token 和假 token 均为 401，非白名单来源为 403。
+- **验证**：新增测试覆盖以下内容：`isScmTrue` / `hasSafePartLines` / `checkSafeParts` 请求解析；按 action 区分权限（导出权限可查询、不能 create）；batch 跳过安全部件步骤；`filterPosBySafePartCheck`。`bun run test` 193 个文件 / 919 个测试全部通过，`bun run typecheck` 通过，`bun lint` 0 error，`bun run fc:package:syney-delivery-order` 打包成功。未在浏览器中联调。
+
 ## 2026-10-28
 
 - **类别**：修复

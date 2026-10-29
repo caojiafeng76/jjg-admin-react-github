@@ -41,6 +41,16 @@ export interface SyneyDeliveryOrderRequestMap {
   addSafePartDetail: { item: SyneySafePartDetailPlanItem }
   confirm: { deliveryOrderId: number, deliveryNo: string }
   print: { deliveryOrderIds: number[], deliveryNos: string[] }
+  checkSafeParts: { poNos: string[] }
+}
+
+/** 按 SCM「采购订单履行」明细的 IsSafePart 判断订单是否含安全部件 */
+export interface SyneySafePartCheckResult {
+  poNo: string
+  /** SCM 中查到了该订单的明细 */
+  found: boolean
+  /** 任意一条明细 IsSafePart 为 true */
+  hasSafeParts: boolean
 }
 
 export interface SyneyDeliveryOrderResponseMap {
@@ -50,6 +60,8 @@ export interface SyneyDeliveryOrderResponseMap {
     lineCount: number
     /** 已存在未确认的送货单且没有可送明细时，沿用该送货单 */
     reused: boolean
+    /** 送货单明细中有 IsSafePart 为 true 的行；为 false 时无需填写安全部件 */
+    hasSafeParts: boolean
   }
   planSafeParts: {
     items: SyneySafePartDetailPlanItem[]
@@ -62,6 +74,7 @@ export interface SyneyDeliveryOrderResponseMap {
   addSafePartDetail: { skipped: boolean, message: string }
   confirm: { alreadyConfirmed: boolean, message: string }
   print: { fileName: string, contentType: string, base64: string }
+  checkSafeParts: { results: SyneySafePartCheckResult[] }
 }
 
 export type SyneyDeliveryOrderAction = keyof SyneyDeliveryOrderRequestMap
@@ -72,7 +85,15 @@ export const SYNEY_DELIVERY_ORDER_ACTIONS = [
   'addSafePartDetail',
   'confirm',
   'print',
+  'checkSafeParts',
 ] as const satisfies readonly SyneyDeliveryOrderAction[]
+
+/** 只读查询，导出安全部件信息也会调用：有导出或生成送货单权限之一即可 */
+export const SYNEY_SAFE_PART_CHECK_PERMISSIONS = [
+  'feature:syney-po-list.export',
+  SYNEY_DELIVERY_ORDER_PERMISSION,
+] as const
 
 export const MAX_SAFE_PART_SOURCE_ROWS = 500
 export const MAX_PRINT_DELIVERY_ORDERS = 50
+export const MAX_SAFE_PART_CHECK_PO_NOS = 50

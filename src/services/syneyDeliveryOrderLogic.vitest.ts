@@ -10,7 +10,9 @@ import {
   buildSafePartDetailFormFields,
   DELIVERY_ORDER_FIELDS,
   fileNameFromPath,
+  hasSafePartLines,
   isScmSuccess,
+  isScmTrue,
   normalizeScmDateTime,
   parseAjaxMessage,
   parseContentDispositionFileName,
@@ -473,5 +475,41 @@ describe('bindScmGrid', () => {
     finally {
       vi.unstubAllGlobals()
     }
+  })
+})
+
+describe('IsSafePart', () => {
+  it('reads SCM booleans in boolean, string and number form', () => {
+    expect([true, 'true', 'True', 1, '1'].map(isScmTrue)).toEqual([true, true, true, true, true])
+    expect([false, 'false', 'False', 0, '0', null, undefined, ''].map(isScmTrue)).toEqual(
+      Array.from({ length: 8 }, () => false),
+    )
+  })
+
+  it('needs safe parts only when some line of the PO is marked', () => {
+    const lines = [
+      line({ PKID: 1, IsSafePart: false }),
+      line({ PKID: 2, IsSafePart: false }),
+      line({ PKID: 3, PONo: 'OTHER', IsSafePart: true }),
+    ]
+    expect(hasSafePartLines(lines, 'P202610280001')).toBe(false)
+    expect(hasSafePartLines(lines)).toBe(true)
+    expect(hasSafePartLines([...lines, line({ PKID: 4, IsSafePart: true })], 'P202610280001')).toBe(true)
+  })
+
+  it('parses checkSafeParts requests', () => {
+    expect(
+      parseDeliveryOrderRequest({ action: 'checkSafeParts', payload: { poNos: [' P1 ', 'P1', 'P2'] } }),
+    ).toEqual({ ok: true, action: 'checkSafeParts', payload: { poNos: ['P1', 'P2'] } })
+    expect(parseDeliveryOrderRequest({ action: 'checkSafeParts', payload: { poNos: [] } }).ok).toBe(false)
+    expect(
+      parseDeliveryOrderRequest({ action: 'checkSafeParts', payload: { poNos: ['P1&QUERY_S_x=1'] } }).ok,
+    ).toBe(false)
+    expect(
+      parseDeliveryOrderRequest({
+        action: 'checkSafeParts',
+        payload: { poNos: Array.from({ length: 51 }, (_, index) => `P${index}`) },
+      }).ok,
+    ).toBe(false)
   })
 })

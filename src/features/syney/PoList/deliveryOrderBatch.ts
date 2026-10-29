@@ -26,6 +26,8 @@ export interface DeliveryOrderProgress {
   deliveryNo?: string
   safePartDone: number
   safePartTotal: number
+  /** SCM 明细 IsSafePart 全部为 false，跳过了填写安全部件 */
+  safePartSkipped: boolean
   /** 失败原因或停止说明 */
   message?: string
   warnings: string[]
@@ -97,6 +99,7 @@ function createProgress(poNo: string): DeliveryOrderProgress {
     steps: { create: 'wait', safeParts: 'wait', confirm: 'wait', writeBack: 'wait' },
     safePartDone: 0,
     safePartTotal: 0,
+    safePartSkipped: false,
     warnings: [],
   }
 }
@@ -177,16 +180,27 @@ export async function runDeliveryOrderBatch({
       finishStep(order, 'create')
 
       startStep(order, 'safeParts')
-      const plan = await deps.planSafeParts(created.deliveryNo, sources.get(order.poNo) ?? [])
-      order.warnings.push(...plan.warnings)
-      order.safePartTotal = plan.items.length + plan.skipped
-      order.safePartDone = plan.skipped
-      emit()
-      for (const item of plan.items) {
-        checkStop()
-        await deps.addSafePartDetail(item)
-        order.safePartDone++
+      const parts = sources.get(order.poNo) ?? []
+      if (created.hasSafeParts === false) {
+        order.safePartSkipped = true
+        if (parts.length > 0) {
+          order.warnings.push(
+            `SCM 标记该订单明细均不是安全部件，已跳过填写（本系统按件号配置识别到 ${parts.length} 条，请核对件号配置）`,
+          )
+        }
+      }
+      else {
+        const plan = await deps.planSafeParts(created.deliveryNo, parts)
+        order.warnings.push(...plan.warnings)
+        order.safePartTotal = plan.items.length + plan.skipped
+        order.safePartDone = plan.skipped
         emit()
+        for (const item of plan.items) {
+          checkStop()
+          await deps.addSafePartDetail(item)
+          order.safePartDone++
+          emit()
+        }
       }
       finishStep(order, 'safeParts')
 

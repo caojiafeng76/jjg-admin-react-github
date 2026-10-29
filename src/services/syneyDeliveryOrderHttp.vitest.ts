@@ -1,5 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { describe, expect, it } from 'vitest'
+import { Buffer } from 'node:buffer'
+import { Readable } from 'node:stream'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   createSyneyDeliveryOrderHandler,
@@ -110,5 +112,76 @@ describe('resolveDevProxyEnv', () => {
       SUPABASE_URL: 'https://server.example.com',
       SUPABASE_PUBLISHABLE_KEY: 'server-key',
     })
+  })
+})
+
+describe('createSyneyDeliveryOrderHandler permissions', () => {
+  const env = {
+    ALLOWED_ORIGIN: 'https://app.example.com',
+    SUPABASE_URL: 'https://supabase.example.com',
+    SUPABASE_PUBLISHABLE_KEY: 'public-key',
+  }
+
+  /** 模拟 Supabase：用户已登录，只有 grantedPermissions 中的权限；限流返回 false 以便止步于 429 */
+  function stubSupabase(grantedPermissions: string[]) {
+    const checked: string[] = []
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith('/auth/v1/user'))
+        return Response.json({ id: 'user-1' })
+      if (url.endsWith('/rpc/current_user_has_permission')) {
+        const { p_key } = JSON.parse(String(init?.body)) as { p_key: string }
+        checked.push(p_key)
+        return Response.json(grantedPermissions.includes(p_key))
+      }
+      if (url.endsWith('/rpc/consume_proxy_rate_limit'))
+        return Response.json(false)
+      throw new Error(`unexpected fetch ${url}`)
+    }))
+    return checked
+  }
+
+  async function post(body: unknown) {
+    const json = JSON.stringify(body)
+    const request = Object.assign(Readable.from([json]), {
+      method: 'POST',
+      headers: {
+        'origin': 'https://app.example.com',
+        'authorization': 'Bearer token',
+        'content-length': String(Buffer.byteLength(json)),
+      },
+      socket: {},
+    }) as unknown as IncomingMessage
+    const { response } = createResponse()
+    await createSyneyDeliveryOrderHandler(env)(request, response as unknown as ServerResponse)
+    return response
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('lets checkSafeParts through with only the export permission', async () => {
+    const checked = stubSupabase(['feature:syney-po-list.export'])
+    const response = await post({ action: 'checkSafeParts', payload: { poNos: ['P1'] } })
+    // 通过了权限校验，止步于限流
+    expect(response.statusCode).toBe(429)
+    expect(checked).toEqual(['feature:syney-po-list.export'])
+  })
+
+  it('falls back to the delivery-order permission for checkSafeParts', async () => {
+    const checked = stubSupabase(['feature:syney-po-list.delivery-order'])
+    const response = await post({ action: 'checkSafeParts', payload: { poNos: ['P1'] } })
+    expect(response.statusCode).toBe(429)
+    expect(checked).toEqual([
+      'feature:syney-po-list.export',
+      'feature:syney-po-list.delivery-order',
+    ])
+  })
+
+  it('rejects create with only the export permission', async () => {
+    const checked = stubSupabase(['feature:syney-po-list.export'])
+    const response = await post({ action: 'create', payload: { poNo: 'P1' } })
+    expect(response.statusCode).toBe(403)
+    expect(checked).toEqual(['feature:syney-po-list.delivery-order'])
   })
 })

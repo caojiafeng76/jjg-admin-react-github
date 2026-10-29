@@ -32,6 +32,8 @@ function isOrderDone(order: DeliveryOrderProgress) {
 }
 
 function stepDescription(order: DeliveryOrderProgress, key: string) {
+  if (key === 'safeParts' && order.safePartSkipped)
+    return '无需填写'
   if (key === 'safeParts' && order.safePartTotal > 0)
     return `${order.safePartDone}/${order.safePartTotal}`
   if (key === 'create' && order.deliveryNo)

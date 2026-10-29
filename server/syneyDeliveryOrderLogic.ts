@@ -10,6 +10,7 @@ import type {
 } from '../src/services/syneyDeliveryOrderContract'
 import {
   MAX_PRINT_DELIVERY_ORDERS,
+  MAX_SAFE_PART_CHECK_PO_NOS,
   MAX_SAFE_PART_SOURCE_ROWS,
   SYNEY_DELIVERY_ORDER_ACTIONS,
 } from '../src/services/syneyDeliveryOrderContract'
@@ -29,6 +30,8 @@ export interface ScmPoLine {
   QuoteStatus?: number | null
   PartNo: string | null
   SONo: string | null
+  /** SCM 返回 JSON 布尔值，兼容字符串 / 数字写法 */
+  IsSafePart?: boolean | string | number | null
 }
 
 /** 送货单列表（DeliveryOrderList）行 */
@@ -230,6 +233,20 @@ export function selectDeliverableLines(lines: ScmPoLine[], poNo: string) {
     line =>
       text(line.PONo) === poNo
       && DELIVERABLE_PART_STATUSES.has(Number(line.PartStatus)),
+  )
+}
+
+export function isScmTrue(value: unknown) {
+  if (typeof value === 'boolean')
+    return value
+  const raw = text(value).toLowerCase()
+  return raw === 'true' || raw === '1'
+}
+
+/** 明细中任意一条 IsSafePart 为 true；全部为 false 时该订单无需填写 / 导出安全部件 */
+export function hasSafePartLines(lines: ScmPoLine[], poNo?: string) {
+  return lines.some(
+    line => (poNo === undefined || text(line.PONo) === poNo) && isScmTrue(line.IsSafePart),
   )
 }
 
@@ -740,6 +757,21 @@ export function parseDeliveryOrderRequest(body: Record<string, unknown>): Parsed
           deliveryOrderIds: ids as number[],
           deliveryNos: nos as string[],
         },
+      }
+    }
+    case 'checkSafeParts': {
+      const poNos = Array.isArray(payload.poNos) ? payload.poNos.map(parseIdentifier) : []
+      if (
+        poNos.length === 0
+        || poNos.length > MAX_SAFE_PART_CHECK_PO_NOS
+        || poNos.includes(null)
+      ) {
+        return { ok: false, error: `订单号参数不正确（1 到 ${MAX_SAFE_PART_CHECK_PO_NOS} 个）` }
+      }
+      return {
+        ok: true,
+        action: 'checkSafeParts',
+        payload: { poNos: Array.from(new Set(poNos as string[])) },
       }
     }
   }
