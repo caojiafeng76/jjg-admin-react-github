@@ -180,11 +180,11 @@ function ToolingStockInTable({
           compareNumber(a.stock_in_quantity, b.stock_in_quantity),
         filters: uniqueFilters(
           data.map(record => record.stock_in_quantity),
-          value => formatNumber(Number(value)),
+          value => formatNumber(Number(value), 0),
         ),
         onFilter: (value, record) =>
           matchesFilter(value, record.stock_in_quantity),
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => formatNumber(value, 0),
       },
       {
         title: '备注',

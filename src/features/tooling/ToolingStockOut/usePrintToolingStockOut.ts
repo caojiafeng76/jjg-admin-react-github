@@ -125,7 +125,7 @@ export function usePrintToolingStockOut() {
 
         doc.setFontSize(11)
         if (pageIndex === 0) {
-          doc.text(`数量合计: ${formatNumber(totalQuantity)}`, 10, 21)
+          doc.text(`数量合计: ${formatNumber(totalQuantity, 0)}`, 10, 21)
         }
         doc.text(`打印日期: ${printDate}`, pageWidth - 10, 21, {
           align: 'right',
@@ -141,10 +141,10 @@ export function usePrintToolingStockOut() {
           formatCellText(item.tool_name),
           formatCellText(item.tool_spec),
           formatCellText(item.material),
-          formatNumber(item.stock_out_quantity),
+          formatNumber(item.stock_out_quantity, 0),
           item.final_stock === null || item.final_stock === undefined
             ? '-'
-            : formatNumber(item.final_stock),
+            : formatNumber(item.final_stock, 0),
           formatCellText(item.remarks),
         ])
 

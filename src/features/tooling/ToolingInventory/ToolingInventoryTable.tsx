@@ -76,7 +76,7 @@ function ToolingInventoryTable({
         width: 120,
         render: (value: number) => (
           <span className="text-slate-400 dark:text-slate-500">
-            {formatNumber(value)}
+            {formatNumber(value, 0)}
           </span>
         ),
       },
@@ -85,7 +85,7 @@ function ToolingInventoryTable({
         dataIndex: 'current_stock',
         key: 'current_stock',
         width: 120,
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => formatNumber(value, 0),
       },
       {
         title: '待出库',
@@ -94,7 +94,7 @@ function ToolingInventoryTable({
         width: 120,
         render: (value: number) => (
           <span className="text-slate-400 dark:text-slate-500">
-            {formatNumber(value)}
+            {formatNumber(value, 0)}
           </span>
         ),
       },
@@ -105,7 +105,7 @@ function ToolingInventoryTable({
         width: 120,
         render: (value: number) => (
           <span className={`${getFinalStockColorClass(value)} font-medium`}>
-            {formatNumber(value)}
+            {formatNumber(value, 0)}
           </span>
         ),
       },

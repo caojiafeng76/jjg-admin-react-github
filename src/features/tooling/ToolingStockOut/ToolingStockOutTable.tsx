@@ -115,7 +115,7 @@ function ToolingStockOutTable({
         dataIndex: 'stock_out_quantity',
         key: 'stock_out_quantity',
         width: 110,
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => formatNumber(value, 0),
       },
       {
         title: '最终库存',
@@ -123,7 +123,7 @@ function ToolingStockOutTable({
         key: 'final_stock',
         width: 110,
         render: (value: number | null | undefined) =>
-          value === null || value === undefined ? '-' : formatNumber(value),
+          value === null || value === undefined ? '-' : formatNumber(value, 0),
       },
       {
         title: '备注',

@@ -446,10 +446,9 @@ export default function ToolingStockOutForm({
             ? (
                 <MobileNumberInput
                   disabled={isAuditLocked}
-                  min={0.001}
-                  step={0.001}
-                  precision={3}
-                  keyboardMode="decimal"
+                  min={1}
+                  step={1}
+                  precision={0}
                   className="w-full"
                   placeholder="请输入出库数量"
                 />
@@ -457,9 +456,9 @@ export default function ToolingStockOutForm({
             : (
                 <InputNumber
                   disabled={isAuditLocked}
-                  min={0.001}
-                  step={0.001}
-                  precision={3}
+                  min={1}
+                  step={1}
+                  precision={0}
                   style={{ width: '100%' }}
                   placeholder="请输入出库数量"
                 />

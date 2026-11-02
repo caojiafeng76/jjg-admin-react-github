@@ -96,7 +96,7 @@ function InventorySummary({ toolingDataId }: { toolingDataId: string }) {
                     : 'text-slate-800 dark:text-slate-100',
               ].join(' ')}
             >
-              {isLoading ? '-' : formatNumber(stat.value)}
+              {isLoading ? '-' : formatNumber(stat.value, 0)}
             </div>
           </div>
         ))}

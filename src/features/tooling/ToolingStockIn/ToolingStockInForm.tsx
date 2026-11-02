@@ -190,9 +190,9 @@ export default function ToolingStockInForm({
         >
           <InputNumber
             disabled={isAuditLocked}
-            min={0.001}
-            step={0.001}
-            precision={3}
+            min={1}
+            step={1}
+            precision={0}
             style={{ width: '100%' }}
             placeholder="请输入入库数量"
           />

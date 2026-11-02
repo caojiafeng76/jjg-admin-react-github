@@ -76,8 +76,9 @@ export async function parseToolingInventoryExcel(
       currentStock === null
       || Number.isNaN(currentStock)
       || currentStock < 0
+      || !Number.isInteger(currentStock)
     ) {
-      errors.push(`第 ${rowNumber} 行现有库存格式无效，需为大于等于 0 的数字`)
+      errors.push(`第 ${rowNumber} 行现有库存格式无效，需为大于等于 0 的整数`)
       return
     }
 

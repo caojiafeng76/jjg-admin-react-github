@@ -84,7 +84,7 @@ export function ToolingStockInRecordsTab({
         dataIndex: 'stock_in_quantity',
         key: 'stock_in_quantity',
         width: 110,
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => formatNumber(value, 0),
       },
       {
         title: '备注',
@@ -214,7 +214,7 @@ export function ToolingStockOutRecordsTab({
         dataIndex: 'stock_out_quantity',
         key: 'stock_out_quantity',
         width: 100,
-        render: (value: number) => formatNumber(value),
+        render: (value: number) => formatNumber(value, 0),
       },
       {
         title: '备注',

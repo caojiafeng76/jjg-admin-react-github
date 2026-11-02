@@ -115,8 +115,9 @@ export async function parseToolingStockOutExcel(
       stockOutQuantity === null
       || Number.isNaN(stockOutQuantity)
       || stockOutQuantity <= 0
+      || !Number.isInteger(stockOutQuantity)
     ) {
-      errors.push(`第 ${rowNumber} 行出库数量格式无效，需为大于 0 的数字`)
+      errors.push(`第 ${rowNumber} 行出库数量格式无效，需为大于 0 的整数`)
       return
     }
 

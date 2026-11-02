@@ -17,6 +17,15 @@
 
 ## 2026-11-02
 
+- **类别**：变更
+- **范围**：`src/features/tooling/{ToolingStockIn,ToolingStockOut,ToolingInventory,ToolingData}/*`、`src/utils/{toolingStockOutExport,toolingStockOutExcel,toolingInventoryExcel}.ts`、`supabase/migrations/20261102100000_enforce_integer_tooling_quantities.sql`
+- **摘要**：刀具资料、库存、入库、出库各模块的数量统一为整数。单价和金额仍保留 2 位小数。
+  - 入库数量、出库数量（含手机端和公共扫码出库页）、现有库存的输入框改为整数：`precision=0`、`step=1`；入库和出库数量最小为 1。
+  - 列表、出入库记录、详情抽屉库存卡片、出库 PDF 打印、出库 Excel 导出中的数量都显示为整数，不再显示 `13.00` 或 `0.000` 这样的小数位。
+  - 刀具出库、刀具库存的 Excel 导入遇到小数数量时会报错，提示“需为整数”。
+  - 新增 migration：给 `tooling_stock_in`、`tooling_stock_out`、`tooling_inventory` 的数量列加整数 check 约束。线上现有数据已经核对过，全部是整数。
+- **验证**：`bunx eslint --fix` 改动的文件；`bun lint` 0 error；`bun run typecheck` 通过；`bun run test -- src/features/tooling src/utils/tooling` 18 个文件、51 个用例通过，其中新增了 2 个 Excel 导入整数校验用例；`bun run db:push:dry-run` 确认待推送的只有本 migration。之后由用户手动执行了 `bun run db:push`，并用只读查询确认线上已有这 5 个整数约束。
+
 - **类别**：新建
 - **范围**：`supabase/migrations/20261102090000_add_jintan_monthly_inventory_report.sql`、`src/services/apiJintanMonthlyReport.ts`、`src/utils/jintanMonthlyReportExcel.ts`、`src/features/jintan/{MonthlyReport/*,permissions.ts,queryKeys.ts}`、`src/routes/{lazyPages.ts,modules/inventoryRoutes.ts,pagePermissionRoutes.ts,routeLabels.ts}`、`src/ui/mainMenuItems.tsx`
 - **摘要**：新增「金檀木业 / 月度报表」页面，可一键导出配件、型材、素材的月度库存数据。

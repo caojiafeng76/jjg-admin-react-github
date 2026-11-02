@@ -59,7 +59,7 @@ function buildWorkbook(items: ToolingStockOut[]) {
   titleRow[0] = TITLE
 
   const infoRow = Array.from({ length: colCount }, () => '' as string | number)
-  infoRow[0] = `数量合计: ${formatNumber(totalQuantity)}`
+  infoRow[0] = `数量合计: ${formatNumber(totalQuantity, 0)}`
   infoRow[halfCol] = `打印日期: ${printDate}`
 
   const headerRow = [...TABLE_HEADERS] as (string | number)[]
@@ -76,10 +76,10 @@ function buildWorkbook(items: ToolingStockOut[]) {
     formatCellText(item.tool_name),
     formatCellText(item.tool_spec),
     formatCellText(item.material),
-    Number(formatNumber(item.stock_out_quantity)),
+    Number(formatNumber(item.stock_out_quantity, 0)),
     item.final_stock === null || item.final_stock === undefined
       ? '-'
-      : Number(formatNumber(item.final_stock)),
+      : Number(formatNumber(item.final_stock, 0)),
     formatCellText(item.remarks),
   ])
 
@@ -165,7 +165,7 @@ function buildWorkbook(items: ToolingStockOut[]) {
     numericColumns.forEach((c) => {
       const ref = `${colLetter(c)}${r + 1}`
       if (ws[ref] && typeof ws[ref].v === 'number') {
-        ws[ref].z = '0.000'
+        ws[ref].z = '0'
       }
     })
   }

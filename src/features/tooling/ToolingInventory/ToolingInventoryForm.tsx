@@ -171,8 +171,8 @@ export default function ToolingInventoryForm({
       >
         <InputNumber
           min={0}
-          step={0.001}
-          precision={3}
+          step={1}
+          precision={0}
           style={{ width: '100%' }}
           placeholder="请输入现有库存"
         />

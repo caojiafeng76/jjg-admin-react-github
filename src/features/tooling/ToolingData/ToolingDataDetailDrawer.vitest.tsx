@@ -176,7 +176,7 @@ describe('ToolingDataDetailDrawer', () => {
     renderDrawer()
 
     expect(screen.getByText('现有库存')).toBeInTheDocument()
-    expect(screen.getByText('13.00')).toBeInTheDocument()
+    expect(screen.getByText('13')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '新建入库' })).toBeNull()
     expect(screen.queryByRole('button', { name: '新建出库' })).toBeNull()
     expect(screen.queryByText('入库记录')).toBeNull()
