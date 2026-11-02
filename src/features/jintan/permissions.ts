@@ -20,6 +20,7 @@ export const JINTAN_MATERIALS_STOCK_IN_PERMISSION_KEY
   = 'page:jintan-materials-stock-in'
 export const JINTAN_MATERIALS_STOCK_OUT_PERMISSION_KEY
   = 'page:jintan-materials-stock-out'
+export const JINTAN_MONTHLY_REPORT_PERMISSION_KEY = 'page:jintan-monthly-report'
 
 export const JINTAN_PERMISSIONS: PermissionDefinition[] = [
   // 导航
@@ -115,5 +116,12 @@ export const JINTAN_PERMISSIONS: PermissionDefinition[] = [
     module: 'jintan',
     surface: 'pc',
     label: '素材出库',
+  },
+  {
+    key: JINTAN_MONTHLY_REPORT_PERMISSION_KEY,
+    scope: 'page',
+    module: 'jintan',
+    surface: 'pc',
+    label: '金檀月度报表',
   },
 ]

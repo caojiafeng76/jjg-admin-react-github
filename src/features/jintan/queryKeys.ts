@@ -96,6 +96,8 @@ const MATERIALS_INVENTORY_ROOT = 'jintan-materials-inventory'
 const MATERIALS_STOCK_IN_ROOT = 'jintan-materials-stock-in'
 const MATERIALS_STOCK_OUT_ROOT = 'jintan-materials-stock-out'
 
+const MONTHLY_REPORT_ROOT = 'jintan-monthly-report'
+
 export const jintanKeys = {
   partsData: {
     all: [PARTS_DATA_ROOT] as const,
@@ -321,5 +323,9 @@ export const jintanKeys = {
         'list',
         { ...params, keyword: normalizeKeyword(params.keyword) },
       ] as const,
+  },
+  monthlyReport: {
+    all: [MONTHLY_REPORT_ROOT] as const,
+    detail: (month: string) => [MONTHLY_REPORT_ROOT, 'detail', month] as const,
   },
 } as const

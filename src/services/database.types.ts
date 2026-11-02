@@ -3941,6 +3941,23 @@ export type Database = {
           total_days: number
         }[]
       }
+      get_jintan_monthly_inventory_report: {
+        Args: { p_month: string }
+        Returns: {
+          category: string
+          closing_quantity: number
+          current_quantity: number
+          inventory_id: string
+          item_model: string
+          item_name: string
+          material: string
+          opening_quantity: number
+          specification: string
+          stock_in_quantity: number
+          stock_out_quantity: number
+          supplier: string
+        }[]
+      }
       get_job_base_setting_options: {
         Args: never
         Returns: {

@@ -15,6 +15,21 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-11-02
+
+- **类别**：新建
+- **范围**：`supabase/migrations/20261102090000_add_jintan_monthly_inventory_report.sql`、`src/services/apiJintanMonthlyReport.ts`、`src/utils/jintanMonthlyReportExcel.ts`、`src/features/jintan/{MonthlyReport/*,permissions.ts,queryKeys.ts}`、`src/routes/{lazyPages.ts,modules/inventoryRoutes.ts,pagePermissionRoutes.ts,routeLabels.ts}`、`src/ui/mainMenuItems.tsx`
+- **摘要**：新增「金檀木业 / 月度报表」页面，可一键导出配件、型材、素材的月度库存数据。
+  - 导出为一个工作簿，配件、型材、素材各一张工作表，格式相同：`# / 型号 / 名称 / 规格 / 材质 / 上月结余 / 本月入库 / 本月出库 / 月末结存`，末行为合计。
+  - 页面可选择任意历史月份（默认上月，不能选未来月份）；月份和当前分类都保存在 URL 中。页面上分三类预览，表格带合计行。
+  - 新增只读 RPC `get_jintan_monthly_inventory_report(p_month)`，类型为 `security definer`，按 Asia/Shanghai 的月份区间汇总。调用时要求是管理员或拥有 `page:jintan-monthly-report` 权限，因此报表用户不需要 12 张出入库表的读权限。该权限已写入 `public.permissions`。
+  - 计算口径：上月结余 = 当前库存 − 月初以来的入库 + 月初以来的出库；月末结存 = 上月结余 + 本月入库 − 本月出库。在库存页直接改数量、用 Excel 导入库存都不产生流水，这两种情况结余会有偏差，页面上已注明。结余为负数时照常输出，并标红显示。
+  - migration 已推送，并重新生成了 `database.types.ts`（只新增这个 RPC 的类型），service 改为带类型的 `supabase.rpc` 调用。
+- **验证**：
+  - 代码检查：`bun lint` 0 error；`bun run typecheck` 通过；`bun run test` 196 个文件、930 个用例全部通过（新增 Excel 工作簿、月份工具、页面三组测试）；`bun run build`、`bun run check:bundle` 通过。
+  - SQL 交叉核对（只读事务，最后回滚）：报表行数与库存表一致（配件 57 / 型材 78 / 素材 43）；2026-10 与独立 SQL 计算 0 处不一致；10 月月末结存等于 11 月上月结余；当月月末结存等于现有库存；没有登录身份时调用报「无权查看金檀月度报表」。
+  - 浏览器验证（管理员账号）：三类的条数与合计和 SQL 一致；分类和月份写入 URL；12 月不可选；导出提示「已导出 178 条2026年10月库存记录」；用线上数据生成的工作簿共三张表（配件、型材、素材），表头、标题、合计行和冻结窗格都正确。下载下来的文件没有用 Excel 打开检查。
+
 ## 2026-10-29
 
 - **类别**：变更

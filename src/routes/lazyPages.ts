@@ -220,3 +220,6 @@ export const JintanMaterialsStockIn = lazy(
 export const JintanMaterialsStockOut = lazy(
   () => import('@features/jintan/MaterialsStockOut'),
 )
+export const JintanMonthlyReport = lazy(
+  () => import('@features/jintan/MonthlyReport'),
+)

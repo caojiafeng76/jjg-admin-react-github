@@ -87,4 +87,5 @@ export const PAGE_PERMISSION_ROUTES: PagePermissionRoute[] = [
     path: '/jintan-materials-stock-out',
     permission: 'page:jintan-materials-stock-out',
   },
+  { path: '/jintan-monthly-report', permission: 'page:jintan-monthly-report' },
 ]

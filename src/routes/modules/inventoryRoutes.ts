@@ -5,6 +5,7 @@ import {
   JintanMaterialsInventory,
   JintanMaterialsStockIn,
   JintanMaterialsStockOut,
+  JintanMonthlyReport,
   JintanPartsData,
   JintanPartsInventory,
   JintanPartsStockIn,
@@ -71,4 +72,5 @@ export const jintanRoutes: RouteObject[] = [
   samePermissionRoute('jintan-materials-inventory', JintanMaterialsInventory),
   samePermissionRoute('jintan-materials-stock-in', JintanMaterialsStockIn),
   samePermissionRoute('jintan-materials-stock-out', JintanMaterialsStockOut),
+  samePermissionRoute('jintan-monthly-report', JintanMonthlyReport),
 ]

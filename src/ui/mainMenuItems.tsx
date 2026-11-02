@@ -432,6 +432,11 @@ export const allMenuItems: MenuItemDef[] = [
           },
         ],
       },
+      {
+        key: 'jintan-monthly-report',
+        label: '月度报表',
+        permission: 'page:jintan-monthly-report',
+      },
     ],
   },
   {
