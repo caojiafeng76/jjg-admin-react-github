@@ -27,6 +27,15 @@ function renderQuantity(value: number | null | undefined) {
   )
 }
 
+function renderSignedQuantity(value: number | null | undefined) {
+  const quantity = value ?? 0
+  return (
+    <span className={`tabular-nums ${quantity < 0 ? 'text-red-500' : ''}`}>
+      {quantity > 0 ? `+${quantity}` : quantity}
+    </span>
+  )
+}
+
 export default function JintanMonthlyReportTable({
   loading,
   data,
@@ -95,6 +104,14 @@ export default function JintanMonthlyReportTable({
         render: renderQuantity,
       },
       {
+        title: '本月调整',
+        dataIndex: 'stock_adjust_quantity',
+        key: 'stock_adjust_quantity',
+        width: 110,
+        align: 'right',
+        render: renderSignedQuantity,
+      },
+      {
         title: '月末结存',
         dataIndex: 'closing_quantity',
         key: 'closing_quantity',
@@ -115,7 +132,7 @@ export default function JintanMonthlyReportTable({
       columns={columns}
       dataSource={data}
       pagination={false}
-      scroll={{ x: 1100, y: scrollY }}
+      scroll={{ x: 1210, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

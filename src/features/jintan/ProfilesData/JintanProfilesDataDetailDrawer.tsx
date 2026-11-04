@@ -21,6 +21,7 @@ import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import JintanInventoryAdjustForm from '../JintanInventoryAdjustForm'
+import JintanInventoryAdjustmentRecordsTab from '../JintanInventoryAdjustmentRecordsTab'
 import {
   JINTAN_PROFILES_DATA_PERMISSION_KEY,
   JINTAN_PROFILES_INVENTORY_PERMISSION_KEY,
@@ -255,8 +256,21 @@ export default function JintanProfilesDataDetailDrawer({
       })
     }
 
+    if (canViewInventory) {
+      items.push({
+        key: 'adjustments',
+        label: '调整记录',
+        children: (
+          <JintanInventoryAdjustmentRecordsTab
+            category="profiles"
+            inventoryId={inventory.id}
+          />
+        ),
+      })
+    }
+
     return items
-  }, [canViewStockIn, canViewStockOut, inventory])
+  }, [canViewInventory, canViewStockIn, canViewStockOut, inventory])
 
   const canQuickCreate = canViewStockIn || canViewStockOut
 

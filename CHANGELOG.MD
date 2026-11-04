@@ -17,6 +17,18 @@
 
 ## 2026-11-04
 
+- **类别**：修复
+- **范围**：`supabase/migrations/20261104090000_fix_jintan_material_ydg222_162_3300.sql`、`supabase/migrations/20261104090100_add_jintan_inventory_adjustments.sql`、`src/services/{apiJintanInventoryAdjustments,apiJintanMonthlyReport,database.types}.ts`、`src/features/jintan/JintanInventoryAdjustmentRecordsTab.tsx`、`src/features/jintan/{JintanInventoryAdjustForm.tsx,queryKeys.ts,MonthlyReport/*,{PartsData,ProfilesData,MaterialsData}/*DetailDrawer.tsx}`、`src/utils/jintanMonthlyReportExcel.ts` 及对应测试
+- **摘要**：修复金檀月度报表素材 YDG222-162 / 3300 上月结余显示 -9 的问题。原因是库存被直接改小 9，而报表用当前库存减流水倒推，差额被摊到历史月份。
+  - 数据修复：实物确认为 16，把库存调回流水结余 25，再补录 9 的出库单，库存仍为 16。修复后 10 月为 0 / 53 / 53 / 0，11 月为 0 / 78 / 62 / 16。
+  - 新增 `jintan_inventory_adjustments` 表和三张库存表的触发器：抽屉调整、库存页编辑、Excel 导入改数量都会留下调整前后数量、差额、备注和操作人；出入库单引起的变化已有流水，不重复记录。这取代了此前「直接改数、不留记录」的口径。
+  - 月度报表和导出的 Excel 新增「本月调整」，并计入结余倒推，历史月份不再随直接改数变化。
+  - 三个资料详情抽屉新增「调整记录」Tab（需对应库存页权限），调整弹窗和报表页的提示文案同步更新。
+  - 上线前的直接改数没有记录，无法补回，只修正了这一条。
+- **验证**：`bun run db:push` 由用户在交互终端确认后执行；只读查询确认库存 16、补录出库单已入账、调整表为空。在线上库用回滚事务验证触发器：直接改数记录一条（配件、型材、素材各一条），出入库单和只改备注不记录，回滚后无残留；Excel 导入使用的 upsert 路径因含受限关键字未做线上实测。`bun run typecheck`、`bun lint` 通过，`bun run test src/features/jintan src/utils/jintanMonthlyReportExcel` 97 个用例全部通过。Chrome 确认 10 月、11 月报表数值，素材抽屉调整记录 Tab 和弹窗文案正常；暗色模式仅核对计算样式，截图超时未目视确认。未在浏览器提交真实调整，操作人写入真实姓名未实测。
+
+## 2026-11-04
+
 - **类别**：新建
 - **范围**：`src/features/jintan/JintanInventoryAdjustForm.tsx`、`src/features/jintan/{PartsData,ProfilesData,MaterialsData}/*DetailDrawer.tsx` 及对应测试
 - **摘要**：金檀木业配件、型材、素材资料详情抽屉新增「调整库存」按钮，填写调整后数量即可直接修改库存，弹窗实时提示差额。

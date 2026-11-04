@@ -28,9 +28,10 @@ export const JINTAN_MONTHLY_REPORT_HEADERS = [
   '上月结余',
   '本月入库',
   '本月出库',
+  '本月调整',
   '月末结存',
 ] as const
-const COLUMN_WIDTHS = [6, 18, 24, 20, 14, 12, 12, 12, 12]
+const COLUMN_WIDTHS = [6, 18, 24, 20, 14, 12, 12, 12, 12, 12]
 
 function createCategorySheet(
   rows: JintanMonthlyReportRow[],

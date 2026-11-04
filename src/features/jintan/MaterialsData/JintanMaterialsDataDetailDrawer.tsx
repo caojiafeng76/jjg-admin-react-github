@@ -21,6 +21,7 @@ import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import JintanInventoryAdjustForm from '../JintanInventoryAdjustForm'
+import JintanInventoryAdjustmentRecordsTab from '../JintanInventoryAdjustmentRecordsTab'
 import { useUpdateJintanMaterialsInventory } from '../MaterialsInventory/useJintanMaterialsInventory'
 import JintanMaterialsStockInForm from '../MaterialsStockIn/JintanMaterialsStockInForm'
 import { useCreateJintanMaterialsStockIn } from '../MaterialsStockIn/useJintanMaterialsStockIn'
@@ -255,8 +256,21 @@ export default function JintanMaterialsDataDetailDrawer({
       })
     }
 
+    if (canViewInventory) {
+      items.push({
+        key: 'adjustments',
+        label: '调整记录',
+        children: (
+          <JintanInventoryAdjustmentRecordsTab
+            category="materials"
+            inventoryId={inventory.id}
+          />
+        ),
+      })
+    }
+
     return items
-  }, [canViewStockIn, canViewStockOut, inventory])
+  }, [canViewInventory, canViewStockIn, canViewStockOut, inventory])
 
   const canQuickCreate = canViewStockIn || canViewStockOut
 

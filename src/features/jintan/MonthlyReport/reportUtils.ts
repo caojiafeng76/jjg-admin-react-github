@@ -5,6 +5,7 @@ export const JINTAN_MONTHLY_REPORT_QUANTITY_KEYS = [
   'opening_quantity',
   'stock_in_quantity',
   'stock_out_quantity',
+  'stock_adjust_quantity',
   'closing_quantity',
 ] as const satisfies ReadonlyArray<keyof JintanMonthlyReportRow>
 
@@ -31,7 +32,7 @@ export function formatJintanReportMonth(month: string) {
   return dayjs(`${month}-01`).format('YYYY年M月')
 }
 
-/** 按 上月结余 / 本月入库 / 本月出库 / 月末结存 顺序合计 */
+/** 按 上月结余 / 本月入库 / 本月出库 / 本月调整 / 月末结存 顺序合计 */
 export function sumJintanMonthlyReportRows(rows: JintanMonthlyReportRow[]) {
   return JINTAN_MONTHLY_REPORT_QUANTITY_KEYS.map(key =>
     rows.reduce((total, row) => total + row[key], 0),

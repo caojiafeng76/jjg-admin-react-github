@@ -29,6 +29,8 @@ export interface JintanMonthlyReportRow {
   stock_in_quantity: number
   /** 本月出库 */
   stock_out_quantity: number
+  /** 本月调整（直接改数的差额合计，可为负） */
+  stock_adjust_quantity: number
   /** 月末结存 */
   closing_quantity: number
   /** 当前库存（倒推基准） */
@@ -76,6 +78,7 @@ export async function getJintanMonthlyInventoryReport(
       opening_quantity: Number(row.opening_quantity),
       stock_in_quantity: Number(row.stock_in_quantity),
       stock_out_quantity: Number(row.stock_out_quantity),
+      stock_adjust_quantity: Number(row.stock_adjust_quantity),
       closing_quantity: Number(row.closing_quantity),
       current_quantity: Number(row.current_quantity),
     })

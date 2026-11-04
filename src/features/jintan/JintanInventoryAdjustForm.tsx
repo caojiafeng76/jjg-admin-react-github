@@ -27,7 +27,7 @@ function getDifferenceText(target: number | null | undefined, current: number) {
   return `差额 ${difference > 0 ? '+' : ''}${difference.toLocaleString('zh-CN')}`
 }
 
-/** 资料详情抽屉内的库存调整表单：直接改库存行，不生成出入库记录 */
+/** 资料详情抽屉内的库存调整表单：直接改库存行，由数据库触发器写入调整流水 */
 export default function JintanInventoryAdjustForm({
   currentQuantity,
   initialRemarks,
@@ -55,7 +55,7 @@ export default function JintanInventoryAdjustForm({
         className="mb-4"
         type="warning"
         showIcon
-        title="直接修改库存数量，不生成出入库记录；月度报表各月的上月结余和月末结存会随差额变化。"
+        title="直接修改库存数量，不生成出入库单；差额会记入调整记录，并计入当月月度报表。"
       />
 
       <div className="mb-4 text-sm text-slate-600 dark:text-slate-300">

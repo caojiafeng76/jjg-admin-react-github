@@ -125,6 +125,9 @@ vi.mock('../MaterialsInventory/useJintanMaterialsInventory', () => ({
     mutateAsync: state.updateInventory,
   }),
 }))
+vi.mock('../JintanInventoryAdjustmentRecordsTab', () => ({
+  default: () => <div>调整记录表格</div>,
+}))
 vi.mock('../JintanInventoryAdjustForm', () => ({
   default: (props: NonNullable<typeof state.adjustProps>) => {
     state.adjustProps = props
@@ -193,6 +196,7 @@ describe('JintanMaterialsDataDetailDrawer', () => {
     expect(screen.getByText('40')).toBeInTheDocument()
     expect(screen.getByText('入库记录')).toBeInTheDocument()
     expect(screen.getByText('出库记录')).toBeInTheDocument()
+    expect(screen.getByText('调整记录')).toBeInTheDocument()
   })
 
   it('quick stock-in locks the inventory and submits through the create mutation', async () => {
@@ -277,6 +281,7 @@ describe('JintanMaterialsDataDetailDrawer', () => {
     expect(
       screen.queryByRole('button', { name: '调整库存' }),
     ).not.toBeInTheDocument()
+    expect(screen.queryByText('调整记录')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '新建入库' })).toBeInTheDocument()
   })
 })

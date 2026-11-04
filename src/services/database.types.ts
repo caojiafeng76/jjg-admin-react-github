@@ -341,6 +341,54 @@ export type Database = {
         }
         Relationships: []
       }
+      jintan_inventory_adjustments: {
+        Row: {
+          category: string
+          created_at: string
+          difference: number | null
+          id: string
+          inventory_id: string
+          item_model: string
+          item_name: string
+          material: string
+          operator_name: string
+          quantity_after: number
+          quantity_before: number
+          remarks: string
+          specification: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          difference?: number | null
+          id?: string
+          inventory_id: string
+          item_model?: string
+          item_name?: string
+          material?: string
+          operator_name?: string
+          quantity_after: number
+          quantity_before: number
+          remarks?: string
+          specification?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          difference?: number | null
+          id?: string
+          inventory_id?: string
+          item_model?: string
+          item_name?: string
+          material?: string
+          operator_name?: string
+          quantity_after?: number
+          quantity_before?: number
+          remarks?: string
+          specification?: string
+        }
+        Relationships: []
+      }
       jintan_materials_data: {
         Row: {
           created_at: string
@@ -3953,6 +4001,7 @@ export type Database = {
           material: string
           opening_quantity: number
           specification: string
+          stock_adjust_quantity: number
           stock_in_quantity: number
           stock_out_quantity: number
           supplier: string

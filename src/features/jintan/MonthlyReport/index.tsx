@@ -133,7 +133,7 @@ export default function JintanMonthlyReportPage() {
           导出月度报表
         </ExportButton>
         <span className="text-xs text-slate-500 dark:text-slate-400">
-          上月结余由当前库存与出入库记录倒推；库存页直接修改或导入的数量不计入出入库流水
+          上月结余由当前库存与出入库、调整记录倒推；直接修改或导入库存时的差额计入当月「本月调整」
         </span>
       </div>
 

@@ -137,6 +137,16 @@ export const jintanKeys = {
       ] as const,
     summary: (keyword?: string) =>
       [PARTS_INVENTORY_ROOT, 'summary', normalizeKeyword(keyword)] as const,
+    adjustments: (params: JintanStockByInventoryKeyParams) =>
+      [
+        PARTS_INVENTORY_ROOT,
+        'adjustments',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
   },
   partsStockIn: {
     all: [PARTS_STOCK_IN_ROOT] as const,
@@ -209,6 +219,16 @@ export const jintanKeys = {
           keyword: normalizeKeyword(params.keyword),
         },
       ] as const,
+    adjustments: (params: JintanStockByInventoryKeyParams) =>
+      [
+        PROFILES_INVENTORY_ROOT,
+        'adjustments',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
   },
   profilesStockIn: {
     all: [PROFILES_STOCK_IN_ROOT] as const,
@@ -279,6 +299,16 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+        },
+      ] as const,
+    adjustments: (params: JintanStockByInventoryKeyParams) =>
+      [
+        MATERIALS_INVENTORY_ROOT,
+        'adjustments',
+        {
+          inventoryId: params.inventoryId,
+          page: params.page,
+          pageSize: params.pageSize,
         },
       ] as const,
   },
