@@ -1,4 +1,5 @@
 import type { FormInstance, TabsProps } from 'antd'
+import type { JintanInventoryAdjustFormValues } from '../JintanInventoryAdjustForm'
 import type { JintanPartsQuickInventory } from '../PartsStockIn/JintanPartsStockInForm'
 
 import type { JintanPartsData } from '@/services/apiJintanPartsData'
@@ -18,6 +19,9 @@ import {
 import { useCallback, useMemo, useState } from 'react'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import JintanInventoryAdjustForm from '../JintanInventoryAdjustForm'
+import { useUpdateJintanPartsInventory } from '../PartsInventory/useJintanPartsInventory'
 import JintanPartsStockInForm from '../PartsStockIn/JintanPartsStockInForm'
 import { useCreateJintanPartsStockIn } from '../PartsStockIn/useJintanPartsStockIn'
 import JintanPartsStockOutForm from '../PartsStockOut/JintanPartsStockOutForm'
@@ -52,13 +56,16 @@ export default function JintanPartsDataDetailDrawer({
   const canViewStockOut = usePermission(JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY)
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
 
-  const [quickMode, setQuickMode] = useState<'stock-in' | 'stock-out' | null>(
-    null,
-  )
+  const [quickMode, setQuickMode] = useState<
+    'stock-in' | 'stock-out' | 'adjust' | null
+  >(null)
   const [stockInFormRef, setStockInFormRef]
     = useState<FormInstance<JintanPartsStockInFormValues> | null>(null)
   const [stockOutFormRef, setStockOutFormRef]
     = useState<FormInstance<JintanPartsStockOutFormValues> | null>(null)
+  const [adjustFormRef, setAdjustFormRef]
+    = useState<FormInstance<JintanInventoryAdjustFormValues> | null>(null)
+  const [adjustError, setAdjustError] = useState<unknown>(null)
 
   const {
     data: inventory,
@@ -68,6 +75,7 @@ export default function JintanPartsDataDetailDrawer({
   } = useJintanPartsInventoryDetail(record?.id)
   const createStockInMutation = useCreateJintanPartsStockIn()
   const createStockOutMutation = useCreateJintanPartsStockOut()
+  const updateInventoryMutation = useUpdateJintanPartsInventory()
 
   const quickInventory = useMemo<JintanPartsQuickInventory | null>(() => {
     if (!inventory)
@@ -89,11 +97,20 @@ export default function JintanPartsDataDetailDrawer({
             ? '尚未产生库存记录，暂不能建单'
             : null
 
+  const adjustDisabled = viewerDenied || !canViewInventory || !inventory
+  const adjustTip = viewerDenied
+    ? viewerOperationTip
+    : !inventory
+        ? '尚未产生库存记录，暂不能调整'
+        : null
+
   const closeQuickModal = useCallback(() => {
     setQuickMode(null)
+    setAdjustError(null)
     stockInFormRef?.resetFields()
     stockOutFormRef?.resetFields()
-  }, [stockInFormRef, stockOutFormRef])
+    adjustFormRef?.resetFields()
+  }, [adjustFormRef, stockInFormRef, stockOutFormRef])
 
   const handleClose = useCallback(() => {
     closeQuickModal()
@@ -165,6 +182,51 @@ export default function JintanPartsDataDetailDrawer({
       closeQuickModal,
       createStockOutMutation,
       message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
+  )
+
+  const handleAdjustFinish = useCallback(
+    async (values: JintanInventoryAdjustFormValues) => {
+      if (!canViewInventory) {
+        message.warning('无金檀木业模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
+      if (!inventory) {
+        return
+      }
+
+      setAdjustError(null)
+      try {
+        // 更新接口会同时写入安全库存字段，需原样带上，避免被清空
+        await updateInventoryMutation.mutateAsync({
+          id: inventory.id,
+          values: {
+            ...values,
+            unit_quantity: inventory.unit_quantity,
+            safety_multiple: inventory.safety_multiple,
+          },
+        })
+        message.success('配件库存调整成功')
+        closeQuickModal()
+      }
+      catch (error) {
+        setAdjustError(error)
+      }
+    },
+    [
+      canViewInventory,
+      closeQuickModal,
+      inventory,
+      message,
+      updateInventoryMutation,
       viewerDenied,
       viewerOperationTip,
     ],
@@ -278,7 +340,7 @@ export default function JintanPartsDataDetailDrawer({
                     )}
               </div>
 
-              {canQuickCreate
+              {canQuickCreate || canViewInventory
                 ? (
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
@@ -307,11 +369,27 @@ export default function JintanPartsDataDetailDrawer({
                               </Tooltip>
                             )
                           : null}
+                        {canViewInventory
+                          ? (
+                              <Tooltip title={adjustTip}>
+                                <Button
+                                  disabled={adjustDisabled}
+                                  onClick={() => setQuickMode('adjust')}
+                                >
+                                  调整库存
+                                </Button>
+                              </Tooltip>
+                            )
+                          : null}
                       </div>
-                      <div className="text-xs text-slate-400 dark:text-slate-500">
-                        新建单据将直接更新库存；历史单据请前往配件入库 /
-                        配件出库页面管理。
-                      </div>
+                      {canQuickCreate
+                        ? (
+                            <div className="text-xs text-slate-400 dark:text-slate-500">
+                              新建单据将直接更新库存；历史单据请前往配件入库 /
+                              配件出库页面管理。
+                            </div>
+                          )
+                        : null}
                     </div>
                   )
                 : null}
@@ -366,6 +444,31 @@ export default function JintanPartsDataDetailDrawer({
           isSubmitting={createStockOutMutation.isPending}
           quickInventory={quickInventory}
         />
+      </Modal>
+
+      <Modal
+        title="调整配件库存"
+        open={quickMode === 'adjust'}
+        destroyOnHidden
+        confirmLoading={updateInventoryMutation.isPending}
+        okButtonProps={{ disabled: adjustDisabled }}
+        onOk={() => adjustFormRef?.submit()}
+        onCancel={closeQuickModal}
+      >
+        {inventory
+          ? (
+              <div className="space-y-4">
+                <FormErrorAlert error={adjustError} />
+                <JintanInventoryAdjustForm
+                  currentQuantity={inventory.quantity}
+                  initialRemarks={inventory.remarks}
+                  onFinish={handleAdjustFinish}
+                  setFormRef={setAdjustFormRef}
+                  isSubmitting={updateInventoryMutation.isPending}
+                />
+              </div>
+            )
+          : null}
       </Modal>
     </Drawer>
   )

@@ -1,4 +1,5 @@
 import type { FormInstance, TabsProps } from 'antd'
+import type { JintanInventoryAdjustFormValues } from '../JintanInventoryAdjustForm'
 import type { JintanMaterialsQuickInventory } from '../MaterialsStockIn/JintanMaterialsStockInForm'
 
 import type { JintanMaterialsData } from '@/services/apiJintanMaterialsData'
@@ -18,6 +19,9 @@ import {
 import { useCallback, useMemo, useState } from 'react'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import JintanInventoryAdjustForm from '../JintanInventoryAdjustForm'
+import { useUpdateJintanMaterialsInventory } from '../MaterialsInventory/useJintanMaterialsInventory'
 import JintanMaterialsStockInForm from '../MaterialsStockIn/JintanMaterialsStockInForm'
 import { useCreateJintanMaterialsStockIn } from '../MaterialsStockIn/useJintanMaterialsStockIn'
 import JintanMaterialsStockOutForm from '../MaterialsStockOut/JintanMaterialsStockOutForm'
@@ -56,13 +60,16 @@ export default function JintanMaterialsDataDetailDrawer({
   )
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
 
-  const [quickMode, setQuickMode] = useState<'stock-in' | 'stock-out' | null>(
-    null,
-  )
+  const [quickMode, setQuickMode] = useState<
+    'stock-in' | 'stock-out' | 'adjust' | null
+  >(null)
   const [stockInFormRef, setStockInFormRef]
     = useState<FormInstance<JintanMaterialsStockInFormValues> | null>(null)
   const [stockOutFormRef, setStockOutFormRef]
     = useState<FormInstance<JintanMaterialsStockOutFormValues> | null>(null)
+  const [adjustFormRef, setAdjustFormRef]
+    = useState<FormInstance<JintanInventoryAdjustFormValues> | null>(null)
+  const [adjustError, setAdjustError] = useState<unknown>(null)
 
   const {
     data: inventory,
@@ -72,6 +79,7 @@ export default function JintanMaterialsDataDetailDrawer({
   } = useJintanMaterialsInventoryDetail(record?.id)
   const createStockInMutation = useCreateJintanMaterialsStockIn()
   const createStockOutMutation = useCreateJintanMaterialsStockOut()
+  const updateInventoryMutation = useUpdateJintanMaterialsInventory()
 
   const quickInventory = useMemo<JintanMaterialsQuickInventory | null>(() => {
     if (!inventory)
@@ -94,11 +102,20 @@ export default function JintanMaterialsDataDetailDrawer({
             ? '尚未产生库存记录，暂不能建单'
             : null
 
+  const adjustDisabled = viewerDenied || !canViewInventory || !inventory
+  const adjustTip = viewerDenied
+    ? viewerOperationTip
+    : !inventory
+        ? '尚未产生库存记录，暂不能调整'
+        : null
+
   const closeQuickModal = useCallback(() => {
     setQuickMode(null)
+    setAdjustError(null)
     stockInFormRef?.resetFields()
     stockOutFormRef?.resetFields()
-  }, [stockInFormRef, stockOutFormRef])
+    adjustFormRef?.resetFields()
+  }, [adjustFormRef, stockInFormRef, stockOutFormRef])
 
   const handleClose = useCallback(() => {
     closeQuickModal()
@@ -170,6 +187,43 @@ export default function JintanMaterialsDataDetailDrawer({
       closeQuickModal,
       createStockOutMutation,
       message,
+      viewerDenied,
+      viewerOperationTip,
+    ],
+  )
+
+  const handleAdjustFinish = useCallback(
+    async (values: JintanInventoryAdjustFormValues) => {
+      if (!canViewInventory) {
+        message.warning('无金檀木业模块操作权限')
+        return
+      }
+
+      if (viewerDenied) {
+        message.warning(viewerOperationTip)
+        return
+      }
+
+      if (!inventory) {
+        return
+      }
+
+      setAdjustError(null)
+      try {
+        await updateInventoryMutation.mutateAsync({ id: inventory.id, values })
+        message.success('素材库存调整成功')
+        closeQuickModal()
+      }
+      catch (error) {
+        setAdjustError(error)
+      }
+    },
+    [
+      canViewInventory,
+      closeQuickModal,
+      inventory,
+      message,
+      updateInventoryMutation,
       viewerDenied,
       viewerOperationTip,
     ],
@@ -287,7 +341,7 @@ export default function JintanMaterialsDataDetailDrawer({
                     )}
               </div>
 
-              {canQuickCreate
+              {canQuickCreate || canViewInventory
                 ? (
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
@@ -316,11 +370,27 @@ export default function JintanMaterialsDataDetailDrawer({
                               </Tooltip>
                             )
                           : null}
+                        {canViewInventory
+                          ? (
+                              <Tooltip title={adjustTip}>
+                                <Button
+                                  disabled={adjustDisabled}
+                                  onClick={() => setQuickMode('adjust')}
+                                >
+                                  调整库存
+                                </Button>
+                              </Tooltip>
+                            )
+                          : null}
                       </div>
-                      <div className="text-xs text-slate-400 dark:text-slate-500">
-                        新建单据将直接更新库存；历史单据请前往素材入库 /
-                        素材出库页面管理。
-                      </div>
+                      {canQuickCreate
+                        ? (
+                            <div className="text-xs text-slate-400 dark:text-slate-500">
+                              新建单据将直接更新库存；历史单据请前往素材入库 /
+                              素材出库页面管理。
+                            </div>
+                          )
+                        : null}
                     </div>
                   )
                 : null}
@@ -375,6 +445,31 @@ export default function JintanMaterialsDataDetailDrawer({
           isSubmitting={createStockOutMutation.isPending}
           quickInventory={quickInventory}
         />
+      </Modal>
+
+      <Modal
+        title="调整素材库存"
+        open={quickMode === 'adjust'}
+        destroyOnHidden
+        confirmLoading={updateInventoryMutation.isPending}
+        okButtonProps={{ disabled: adjustDisabled }}
+        onOk={() => adjustFormRef?.submit()}
+        onCancel={closeQuickModal}
+      >
+        {inventory
+          ? (
+              <div className="space-y-4">
+                <FormErrorAlert error={adjustError} />
+                <JintanInventoryAdjustForm
+                  currentQuantity={inventory.quantity}
+                  initialRemarks={inventory.remarks}
+                  onFinish={handleAdjustFinish}
+                  setFormRef={setAdjustFormRef}
+                  isSubmitting={updateInventoryMutation.isPending}
+                />
+              </div>
+            )
+          : null}
       </Modal>
     </Drawer>
   )

@@ -15,6 +15,16 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-11-04
+
+- **类别**：新建
+- **范围**：`src/features/jintan/JintanInventoryAdjustForm.tsx`、`src/features/jintan/{PartsData,ProfilesData,MaterialsData}/*DetailDrawer.tsx` 及对应测试
+- **摘要**：金檀木业配件、型材、素材资料详情抽屉新增「调整库存」按钮，填写调整后数量即可直接修改库存，弹窗实时提示差额。
+  - 按钮看对应库存页权限，只读账号不可操作；复用库存页的更新接口，无数据库改动。
+  - 直接改数，不生成出入库记录。月度报表用当前库存减流水倒推结余，调整后各月的上月结余和月末结存会随差额变化，弹窗内有提示。
+  - 备注选填，写入库存备注并覆盖旧值。配件调整时原样保留单台数量和倍数，不影响安全库存。
+- **验证**：`bunx eslint --fix src/features/jintan`；`bun lint` 0 error；`bun run typecheck` 通过；`bun run test src/features/jintan` 27 个文件、90 个用例通过。在 Chrome 中确认三个抽屉的按钮和弹窗显示正常；在素材抽屉确认差额提示、必填校验、取消后恢复和暗色模式正常。为避免改动线上数据，未在浏览器中实际提交调整，保存逻辑由单元测试覆盖。
+
 ## 2026-11-02
 
 - **类别**：变更

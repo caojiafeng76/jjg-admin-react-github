@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import JintanMaterialsDataDetailDrawer from './JintanMaterialsDataDetailDrawer'
@@ -34,6 +34,15 @@ const state = vi.hoisted(() => ({
   stockOutFinish: undefined as ((values: unknown) => void) | undefined,
   createStockIn: vi.fn().mockResolvedValue(undefined),
   createStockOut: vi.fn().mockResolvedValue(undefined),
+  adjustProps: undefined as
+  | {
+    currentQuantity: number
+    initialRemarks: string
+    onFinish: (values: unknown) => Promise<void>
+  }
+  | undefined,
+  updateInventory: vi.fn().mockResolvedValue(undefined),
+  denyInventory: false,
   message: { warning: vi.fn(), success: vi.fn(), error: vi.fn() },
 }))
 
@@ -81,7 +90,14 @@ vi.mock('antd', () => ({
   Tooltip: (props: { children?: React.ReactNode }) => props.children,
 }))
 
-vi.mock('@/hooks/usePermission', () => ({ usePermission: () => true }))
+vi.mock('@/hooks/usePermission', () => ({
+  usePermission: (key: string) =>
+    !(state.denyInventory && key.endsWith('-inventory')),
+}))
+vi.mock('@/ui/FormErrorAlert', () => ({
+  default: (props: { error: unknown }) =>
+    props.error ? <div>表单错误提示</div> : null,
+}))
 vi.mock('@/hooks/useViewerOperationGuard', () => ({
   useViewerOperationGuard: () => ({
     viewerDenied: false,
@@ -101,6 +117,19 @@ vi.mock('./useJintanMaterialsDataDetail', () => ({
 vi.mock('./JintanMaterialsStockRecordsTabs', () => ({
   JintanMaterialsStockInRecordsTab: () => <div>入库记录表格</div>,
   JintanMaterialsStockOutRecordsTab: () => <div>出库记录表格</div>,
+}))
+
+vi.mock('../MaterialsInventory/useJintanMaterialsInventory', () => ({
+  useUpdateJintanMaterialsInventory: () => ({
+    isPending: false,
+    mutateAsync: state.updateInventory,
+  }),
+}))
+vi.mock('../JintanInventoryAdjustForm', () => ({
+  default: (props: NonNullable<typeof state.adjustProps>) => {
+    state.adjustProps = props
+    return <div>调整库存表单</div>
+  },
 }))
 
 vi.mock('../MaterialsStockIn/useJintanMaterialsStockIn', () => ({
@@ -150,6 +179,8 @@ describe('JintanMaterialsDataDetailDrawer', () => {
     state.stockInFinish = undefined
     state.stockOutQuick = undefined
     state.stockOutFinish = undefined
+    state.adjustProps = undefined
+    state.denyInventory = false
   })
 
   afterEach(() => cleanup())
@@ -198,5 +229,54 @@ describe('JintanMaterialsDataDetailDrawer', () => {
         remarks: '',
       }),
     )
+  })
+
+  it('adjusts the inventory directly through the update mutation', async () => {
+    renderDrawer()
+
+    fireEvent.click(screen.getByRole('button', { name: '调整库存' }))
+
+    expect(screen.getByText('调整素材库存')).toBeInTheDocument()
+    expect(state.adjustProps).toMatchObject({
+      currentQuantity: 40,
+      initialRemarks: '',
+    })
+
+    await act(async () => {
+      await state.adjustProps?.onFinish({ quantity: 45, remarks: '月底盘点' })
+    })
+
+    expect(state.updateInventory).toHaveBeenCalledWith({
+      id: 'inv-1',
+      values: { quantity: 45, remarks: '月底盘点' },
+    })
+    expect(state.createStockIn).not.toHaveBeenCalled()
+    expect(state.createStockOut).not.toHaveBeenCalled()
+    expect(state.message.success).toHaveBeenCalledWith('素材库存调整成功')
+    expect(screen.queryByText('调整素材库存')).not.toBeInTheDocument()
+  })
+
+  it('keeps the adjust modal open and shows the error when saving fails', async () => {
+    state.updateInventory.mockRejectedValueOnce(new Error('保存失败'))
+    renderDrawer()
+
+    fireEvent.click(screen.getByRole('button', { name: '调整库存' }))
+    await act(async () => {
+      await state.adjustProps?.onFinish({ quantity: 45, remarks: '' })
+    })
+
+    expect(screen.getByText('调整素材库存')).toBeInTheDocument()
+    expect(screen.getByText('表单错误提示')).toBeInTheDocument()
+    expect(state.message.success).not.toHaveBeenCalled()
+  })
+
+  it('hides the adjust button without the inventory permission', () => {
+    state.denyInventory = true
+    renderDrawer()
+
+    expect(
+      screen.queryByRole('button', { name: '调整库存' }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '新建入库' })).toBeInTheDocument()
   })
 })
