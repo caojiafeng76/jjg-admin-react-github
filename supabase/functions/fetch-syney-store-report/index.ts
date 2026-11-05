@@ -550,7 +550,7 @@ serve(async (request: Request) => {
     jsonResponse(body, status, corsHeaders)
 
   if (request.method === 'OPTIONS') {
-    return new Response('ok', {
+    return new Response(null, {
       status: isProxyOriginAllowed(request) ? 204 : 403,
       headers: corsHeaders,
     })

@@ -18,6 +18,16 @@
 ## 2026-11-05
 
 - **类别**：修复
+- **范围**：线上 Edge Function `fetch-syney-store-report`、`supabase/functions/fetch-syney-store-report/index.ts`
+- **摘要**：把线上函数从 2026-05-09 的 v6 更新为带来源白名单、页面权限校验（`page:syney-store-report-list`）和限流（scope `syney-store-report`）的仓库版本，线上现为 v7。
+  - 修复预检：`new Response('ok', { status: 204 })` 会抛 `TypeError`，合法来源预检全部 500，改为空响应体，和 `fetch-youmai-purchase-order` 一致。
+  - 部署前发现 v6 虽显示 ACTIVE，但所有请求都返回 404（`NOT_FOUND_FUNCTION_BLOB`），重试和指定区域结果相同，原因未查明。因此部署前探测时该函数不可调用；部署后接口恢复服务，只放行有页面权限的用户。
+  - 生产影响：`ydlyerp.top` 构建产物已配置 `VITE_SYNEY_STORE_REPORT_API_URL`，入库单请求走杭州 FC，不调用此函数。代码里只有该变量为空时才回退到此函数。
+- **验证**：Deno 本地运行修复版：三个合法来源预检 204 且回显来源，非法来源 403，无 token 401，GET 405。线上 v7 实测：无 token 和假 token 返回网关 401，anon key 作为 Bearer 返回函数自身的 401，非法来源 POST 和预检返回 403，三个合法来源预检返回 204 且回显来源。依赖核对：线上 `consume_proxy_rate_limit` 存在且映射 scope，权限键存在；用只读 SQL 按在职员工身份调用线上 `current_user_has_permission`：有权限 4 人（均为 admin），无权限 57 人。`bunx eslint --fix` 无报错，`syneyStoreReportFields`、`proxyDiagnosticSanitization` 测试 7 个用例通过，未跑全量 `bun run test`。未用真实无权限账号或有权限账号实调函数，因此 403（无权限）、限流和 SCM 查询成功路径都没有线上实测；CHANGELOG 记录西尼 SCM 只接受中国 IP，此函数实际查询可能返回 502。
+
+## 2026-11-05
+
+- **类别**：修复
 - **范围**：线上 Edge Function `fetch-youmai-purchase-order`、Supabase secret `ALLOWED_ORIGIN`、`supabase/functions/fetch-youmai-purchase-order/index.ts`
 - **摘要**：把线上函数从 2026-05-10 的 v1（只校验 JWT 角色）更新为带来源白名单、页面权限校验和限流的仓库版本，函数保留作前端回退通道。
   - 新增 secret `ALLOWED_ORIGIN`，值为 ydlyerp.top、ydlyerp.xyz、wumalu.top 三个 HTTPS 域名。
