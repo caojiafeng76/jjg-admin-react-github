@@ -17,6 +17,16 @@
 
 ## 2026-11-05
 
+- **类别**：修复
+- **范围**：线上 Edge Function `fetch-youmai-purchase-order`、Supabase secret `ALLOWED_ORIGIN`、`supabase/functions/fetch-youmai-purchase-order/index.ts`
+- **摘要**：把线上函数从 2026-05-10 的 v1（只校验 JWT 角色）更新为带来源白名单、页面权限校验和限流的仓库版本，函数保留作前端回退通道。
+  - 新增 secret `ALLOWED_ORIGIN`，值为 ydlyerp.top、ydlyerp.xyz、wumalu.top 三个 HTTPS 域名。
+  - 修复预检：`new Response('ok', { status: 204 })` 会抛 `TypeError`，合法来源预检全部 500，改为空响应体。首次部署的 v3 带有此 bug，修复后重新部署，线上现为 v4。
+  - 已知问题：`fetch-syney-store-report` 仓库版本有相同的预检写法，线上仍是 2026-05-09 的 v6，早于权限和限流加固；本次未改动。
+- **验证**：线上 v4 实测：无 token 和假 token 返回 401，anon key 作为 Bearer 返回函数自身的 401，非法来源 POST 和预检返回 403，三个合法来源预检返回 204 且回显来源（v3 时为 500）。`bunx eslint --fix` 无报错。权限判定用只读 SQL 模拟在职员工身份：有权限 15 人（admin、viewer、warehouse_admin），无权限 46 人。未用真实无权限账号实调函数，未在浏览器中用已登录账号走通回退通道，未跑 `bun run test`（改动在 Deno 函数内，该测试不覆盖预检）。
+
+## 2026-11-05
+
 - **类别**：新建
 - **范围**：`aliyun-fc/youmai-purchase-order/*`、`scripts/package-youmai-purchase-order-fc.mjs`、`server/youmaiPurchaseOrder{FcServer,Http,Errors,Server}.ts`、`server/viteYoumaiPurchaseOrderProxy.ts`、`server/syneyDeliveryOrderHttp.ts`、`api/proxySecurity.ts`、`package.json`、`.env.example`、`src/services/youmaiPurchaseOrderHttp.vitest.ts`
 - **摘要**：生产环境获取优迈采购订单时报「优迈 SRM 登录请求超时」，新增杭州阿里云函数作为跳板，部署后配置 `VITE_YOUMAI_PURCHASE_ORDER_API_URL` 即可切换，清空即回退到 Edge Function。
