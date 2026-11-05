@@ -15,6 +15,17 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-11-05
+
+- **类别**：新建
+- **范围**：`aliyun-fc/youmai-purchase-order/*`、`scripts/package-youmai-purchase-order-fc.mjs`、`server/youmaiPurchaseOrder{FcServer,Http,Errors,Server}.ts`、`server/viteYoumaiPurchaseOrderProxy.ts`、`server/syneyDeliveryOrderHttp.ts`、`api/proxySecurity.ts`、`package.json`、`.env.example`、`src/services/youmaiPurchaseOrderHttp.vitest.ts`
+- **摘要**：生产环境获取优迈采购订单时报「优迈 SRM 登录请求超时」，新增杭州阿里云函数作为跳板，部署后配置 `VITE_YOUMAI_PURCHASE_ORDER_API_URL` 即可切换，清空即回退到 Edge Function。
+  - Vite 开发代理和函数共用 `createYoumaiPurchaseOrderHandler`，权限、限流校验不变；开发代理改用 `resolveDevProxyEnv` 和同源放行，本地不再需要配置 `ALLOWED_ORIGIN`、`SUPABASE_URL`。
+  - 新增 `YoumaiSrmUserError`：超时、无法连接、登录失败、未找到订单、没有可导入明细、账号未配置返回 422 和具体提示；其他上游错误仍只返回通用 502。网络错误只记录错误码。
+  - `isSameOriginRequest` 移到 `api/proxySecurity.ts`，避免函数包打入西尼代码。
+  - 已知问题：线上 `fetch-youmai-purchase-order` 仍是 2026-05-10 的 v1，只校验 JWT 角色，没有页面权限校验和限流；本次未改动，切换后需决定重新部署或删除。
+- **验证**：`bun lint`、`bun run typecheck` 通过，`bun run test` 201 个文件 959 个用例全部通过。函数包不含西尼代码，本地启动后预检、无 token、非法来源、GET 分别返回 204/403（拒绝来源）、401、403、405。Chrome 本地开发环境实测：`HFZDCG20261105001573` 取到 6 行明细，不存在的单号提示「未找到优迈采购订单」，未点确认导入；不存在单号的首次请求偶发一次「无法连接优迈 SRM」，重试正常，Node 单独连跑 6 次未复现，原因未查明，错误码日志是实测后才补的，仅单元测试覆盖。函数 `youmai-purchase-order` 已部署到杭州（Web 函数、Node.js 22、最小实例 0，触发器无需认证、只开放 POST/OPTIONS，`ALLOWED_ORIGIN` 含 ydlyerp.top、ydlyerp.xyz、wumalu.top）；线上实测预检通过、非法来源 403、无 token 和假 token 401。杭州到 SRM 的连通性和超时根因尚未验证，前端也未切换（`VITE_YOUMAI_PURCHASE_ORDER_API_URL` 未配置）。
+
 ## 2026-11-04
 
 - **类别**：修复

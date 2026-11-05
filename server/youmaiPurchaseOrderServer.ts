@@ -1,3 +1,5 @@
+import { YoumaiSrmUserError } from './youmaiPurchaseOrderErrors'
+
 const YOUMAI_SRM_BASE_URL = 'https://srm.hzoptimax.com/saafbase'
 const LOGIN_URL = `${YOUMAI_SRM_BASE_URL}/restServer/saafLoginServlet/login`
 const ORDER_LIST_URL
@@ -62,7 +64,7 @@ function getCredentials(env: YoumaiPurchaseOrderServerEnv) {
   const password = env.YOUMAI_SRM_PASSWORD?.trim()
 
   if (!username || !password) {
-    throw new Error('优迈 SRM 账号环境变量未配置')
+    throw new YoumaiSrmUserError('优迈 SRM 账号环境变量未配置')
   }
 
   return { username, password }
@@ -120,10 +122,13 @@ async function fetchWithTimeout(
   }
   catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error(timeoutMessage, { cause: error })
+      throw new YoumaiSrmUserError(timeoutMessage, { cause: error })
     }
 
-    throw error
+    // 只记录错误码（如 ECONNRESET、ENOTFOUND），用于区分网络问题，不含账号和响应内容
+    const { code } = (error as { cause?: { code?: unknown } }).cause ?? {}
+    console.error('youmai_srm_network_failure', { code: String(code ?? 'unknown') })
+    throw new YoumaiSrmUserError('无法连接优迈 SRM', { cause: error })
   }
   finally {
     clearTimeout(timeoutId)
@@ -204,7 +209,10 @@ async function loginToYoumaiSrm(env: YoumaiPurchaseOrderServerEnv) {
 
   const loginResponse = JSON.parse(text) as YoumaiSrmResponse<string>
   if (loginResponse.status !== 'S' || !loginResponse.data) {
-    throw new Error(loginResponse.msg || '优迈 SRM 登录失败')
+    const detail = normalizeText(loginResponse.msg).slice(0, 200)
+    throw new YoumaiSrmUserError(
+      detail ? `优迈 SRM 登录失败：${detail}` : '优迈 SRM 登录失败',
+    )
   }
 
   const loginData = JSON.parse(loginResponse.data) as YoumaiSrmLoginData
@@ -270,7 +278,7 @@ export async function fetchYoumaiPurchaseOrderFromServer(
   )
 
   if (!orderHeader?.poHeaderId) {
-    throw new Error(`未找到优迈采购订单：${normalizedPurchaseOrderNo}`)
+    throw new YoumaiSrmUserError(`未找到优迈采购订单：${normalizedPurchaseOrderNo}`)
   }
 
   const linesResponse = await postSrmForm<YoumaiSrmOrderLine[]>({
@@ -291,7 +299,7 @@ export async function fetchYoumaiPurchaseOrderFromServer(
   })
 
   if (items.length === 0) {
-    throw new Error(`优迈采购订单 ${normalizedPurchaseOrderNo} 没有可导入明细`)
+    throw new YoumaiSrmUserError(`优迈采购订单 ${normalizedPurchaseOrderNo} 没有可导入明细`)
   }
 
   return items

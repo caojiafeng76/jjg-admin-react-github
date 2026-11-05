@@ -319,3 +319,18 @@ export function resolveAllowedOrigin(
     .filter(origin => origin && origin !== '*')
   return origins.includes(requestOrigin) ? requestOrigin : null
 }
+
+/** 请求来自与代理同一地址的页面（Origin 的 host 与请求 Host 相同） */
+export function isSameOriginRequest(
+  origin: string | undefined,
+  host: string | undefined,
+): boolean {
+  if (!origin || !host)
+    return false
+  try {
+    return new URL(origin).host === host
+  }
+  catch {
+    return false
+  }
+}
