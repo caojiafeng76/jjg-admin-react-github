@@ -1,9 +1,11 @@
+import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 
 export interface JintanMaterialsInventory {
   id: string
   material_data_id: string
+  item_type: JintanItemType
   material_model: string
   material_name: string
   specification: string
@@ -20,6 +22,7 @@ export interface JintanMaterialsInventoryFormValues {
 }
 
 export interface JintanMaterialsInventoryImportRow {
+  item_type: JintanItemType
   material_model: string
   material_name: string
   specification: string
@@ -39,11 +42,12 @@ function normalizeFormValues(
 }
 
 function inventoryKeyOf(row: {
+  item_type: string
   material_model: string
   material_name: string
   specification: string
 }): string {
-  return `${row.material_model}\u0000${row.material_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.material_model}\u0000${row.material_name}\u0000${row.specification}`
 }
 
 function keywordFilter(keyword: string) {
@@ -54,10 +58,12 @@ export async function getJintanMaterialsInventoryList({
   page,
   pageSize,
   keyword,
+  itemType,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -68,6 +74,9 @@ export async function getJintanMaterialsInventoryList({
 
   if (keyword) {
     query = query.or(keywordFilter(keyword.trim()))
+  }
+  if (itemType) {
+    query = query.eq('item_type', itemType)
   }
 
   const { data, error, count } = await query
@@ -108,7 +117,10 @@ export async function getJintanMaterialsInventoryByDataId(
   return (data as JintanMaterialsInventory | null) ?? null
 }
 
-export async function getJintanMaterialsInventoryForExport(keyword?: string) {
+export async function getJintanMaterialsInventoryForExport(
+  keyword?: string,
+  itemType?: JintanItemType,
+) {
   const rows: JintanMaterialsInventory[] = []
   let from = 0
 
@@ -117,6 +129,9 @@ export async function getJintanMaterialsInventoryForExport(keyword?: string) {
 
     if (keyword) {
       query = query.or(keywordFilter(keyword.trim()))
+    }
+    if (itemType) {
+      query = query.eq('item_type', itemType)
     }
 
     const { data, error } = await query
@@ -172,7 +187,7 @@ export async function createJintanMaterialsInventoryBatch(
     const key = inventoryKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `型号“${row.material_model}”名称“${row.material_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
+        `类型“${row.item_type}”型号“${row.material_model}”名称“${row.material_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -184,7 +199,7 @@ export async function createJintanMaterialsInventoryBatch(
   const { data: inventoryRows, error: inventoryError } = await supabase
     .from('jintan_materials_inventory')
     .select(
-      'id, material_data_id, material_model, material_name, specification, material',
+      'id, material_data_id, item_type, material_model, material_name, specification, material',
     )
     .in('material_name', materialNames)
 
@@ -201,7 +216,7 @@ export async function createJintanMaterialsInventoryBatch(
     const labels = missing
       .map(
         row =>
-          `“${row.material_model}”/“${row.material_name}”/“${row.specification}”`,
+          `“${row.item_type}”/“${row.material_model}”/“${row.material_name}”/“${row.specification}”`,
       )
       .join('、')
     throw new Error(`以下素材在素材资料中不存在，请先维护素材资料：${labels}`)
@@ -211,13 +226,14 @@ export async function createJintanMaterialsInventoryBatch(
     const matched = inventoryByKey.get(inventoryKeyOf(row))
     if (!matched) {
       throw new Error(
-        `未找到型号“${row.material_model}”名称“${row.material_name}”规格“${row.specification}”的库存行，请刷新后重试`,
+        `未找到类型“${row.item_type}”型号“${row.material_model}”名称“${row.material_name}”规格“${row.specification}”的库存行，请刷新后重试`,
       )
     }
 
     return {
       id: matched.id,
       material_data_id: matched.material_data_id,
+      item_type: matched.item_type,
       material_model: matched.material_model,
       material_name: matched.material_name,
       specification: matched.specification,
@@ -238,6 +254,7 @@ export async function createJintanMaterialsInventoryBatch(
 
 export interface JintanMaterialsInventoryOption {
   id: string
+  item_type: JintanItemType
   material_model: string
   material_name: string
   specification: string
@@ -251,7 +268,7 @@ export async function getJintanMaterialsInventoryOptions(
   let query = supabase
     .from('jintan_materials_inventory')
     .select(
-      'id, material_model, material_name, specification, material, quantity',
+      'id, item_type, material_model, material_name, specification, material, quantity',
     )
   if (keyword?.trim())
     query = query.or(keywordFilter(keyword.trim()))
@@ -263,5 +280,5 @@ export async function getJintanMaterialsInventoryOptions(
 
   if (error)
     throw handleApiError(error, '获取素材库存选项失败')
-  return data ?? []
+  return (data ?? []) as JintanMaterialsInventoryOption[]
 }

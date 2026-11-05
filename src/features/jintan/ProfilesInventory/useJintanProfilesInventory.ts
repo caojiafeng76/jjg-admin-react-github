@@ -1,5 +1,6 @@
-import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
+import type { JintanItemType } from '@/services/jintanItemType'
 
+import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
 import {
   createJintanProfilesInventoryBatch,
   getJintanProfilesInventoryList,
@@ -7,8 +8,8 @@ import {
   updateJintanProfilesInventory,
 } from '@services/apiJintanProfilesInventory'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { queryConfig } from '@/config/queryClient'
 
+import { queryConfig } from '@/config/queryClient'
 import { jintanKeys } from '../queryKeys'
 
 export function useJintanProfilesInventoryList({
@@ -20,6 +21,7 @@ export function useJintanProfilesInventoryList({
   pageSize: number
   searchParams: {
     keyword?: string
+    itemType?: JintanItemType
   }
 }) {
   return useQuery({
@@ -27,12 +29,14 @@ export function useJintanProfilesInventoryList({
       page,
       pageSize,
       keyword: searchParams.keyword,
+      itemType: searchParams.itemType,
     }),
     queryFn: () =>
       getJintanProfilesInventoryList({
         page,
         pageSize,
         keyword: searchParams.keyword,
+        itemType: searchParams.itemType,
       }),
     placeholderData: keepPreviousData,
     throwOnError: false,

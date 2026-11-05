@@ -40,6 +40,11 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
     render: (value: number) => value + 1,
   },
   {
+    title: '类型',
+    dataIndex: 'item_type',
+    width: 70,
+  },
+  {
     title: '型号',
     dataIndex: 'profile_model',
     width: 150,
@@ -210,7 +215,7 @@ export default function JintanProfilesInventoryExcelImport({
           <Alert
             type="info"
             showIcon
-            title="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；型号、名称与规格均相同的行视为重复；库存数量需为非负整数；导入会覆盖对应型材的库存数量与备注，型材需已存在于型材资料。"
+            title="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；类型列选填，留空按 A；类型、型号、名称与规格均相同的行视为重复；库存数量需为非负整数；导入会覆盖对应型材的库存数量与备注，型材需已存在于型材资料。"
           />
 
           {parseErrors.length > 0 && (
@@ -235,7 +240,7 @@ export default function JintanProfilesInventoryExcelImport({
                 dataSource={previewData}
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}
-                scroll={{ y: 320, x: 850 }}
+                scroll={{ y: 320, x: 920 }}
               />
             </div>
           )}

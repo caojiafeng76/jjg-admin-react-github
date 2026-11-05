@@ -1,8 +1,10 @@
+import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 
 export interface JintanProfilesData {
   id: string
+  item_type: JintanItemType
   profile_model: string
   profile_name: string
   specification: string
@@ -13,6 +15,7 @@ export interface JintanProfilesData {
 }
 
 export interface JintanProfilesDataFormValues {
+  item_type: JintanItemType
   profile_model: string
   profile_name: string
   specification: string
@@ -26,6 +29,7 @@ function normalizePayload(
   values: JintanProfilesDataFormValues,
 ): JintanProfilesDataFormValues {
   return {
+    item_type: values.item_type,
     profile_model: values.profile_model.trim(),
     profile_name: values.profile_name.trim(),
     specification: values.specification.trim(),
@@ -35,11 +39,12 @@ function normalizePayload(
 }
 
 function profilesKeyOf(row: {
+  item_type: string
   profile_model: string
   profile_name: string
   specification: string
 }): string {
-  return `${row.profile_model}\u0000${row.profile_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.profile_model}\u0000${row.profile_name}\u0000${row.specification}`
 }
 
 function keywordFilter(keyword: string) {
@@ -47,6 +52,7 @@ function keywordFilter(keyword: string) {
 }
 
 async function checkJintanProfilesDataExists(
+  itemType: JintanItemType,
   profileModel: string,
   profileName: string,
   specification: string,
@@ -55,6 +61,7 @@ async function checkJintanProfilesDataExists(
   let query = supabase
     .from('jintan_profiles_data')
     .select('id')
+    .eq('item_type', itemType)
     .eq('profile_model', profileModel)
     .eq('profile_name', profileName)
     .eq('specification', specification)
@@ -77,10 +84,12 @@ export async function getJintanProfilesDataList({
   page,
   pageSize,
   keyword,
+  itemType,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -91,6 +100,9 @@ export async function getJintanProfilesDataList({
 
   if (keyword) {
     query = query.or(keywordFilter(keyword.trim()))
+  }
+  if (itemType) {
+    query = query.eq('item_type', itemType)
   }
 
   const { data, error, count } = await query
@@ -108,7 +120,10 @@ export async function getJintanProfilesDataList({
   }
 }
 
-export async function getJintanProfilesDataForExport(keyword?: string) {
+export async function getJintanProfilesDataForExport(
+  keyword?: string,
+  itemType?: JintanItemType,
+) {
   const rows: JintanProfilesData[] = []
   let from = 0
 
@@ -117,6 +132,9 @@ export async function getJintanProfilesDataForExport(keyword?: string) {
 
     if (keyword) {
       query = query.or(keywordFilter(keyword.trim()))
+    }
+    if (itemType) {
+      query = query.eq('item_type', itemType)
     }
 
     const { data, error } = await query
@@ -147,13 +165,14 @@ export async function createJintanProfilesData(
   const payload = normalizePayload(values)
 
   const exists = await checkJintanProfilesDataExists(
+    payload.item_type,
     payload.profile_model,
     payload.profile_name,
     payload.specification,
   )
   if (exists) {
     throw new Error(
-      `型号“${payload.profile_model}”名称“${payload.profile_name}”规格“${payload.specification}”已存在，无法创建`,
+      `类型“${payload.item_type}”型号“${payload.profile_model}”名称“${payload.profile_name}”规格“${payload.specification}”已存在，无法创建`,
     )
   }
 
@@ -174,7 +193,7 @@ export async function createJintanProfilesDataBatch(
     const key = profilesKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `型号“${row.profile_model}”名称“${row.profile_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
+        `类型“${row.item_type}”型号“${row.profile_model}”名称“${row.profile_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -185,7 +204,7 @@ export async function createJintanProfilesDataBatch(
   )
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_profiles_data')
-    .select('profile_model, profile_name, specification')
+    .select('item_type, profile_model, profile_name, specification')
     .in('profile_name', profileNames)
 
   if (existingError) {
@@ -202,7 +221,7 @@ export async function createJintanProfilesDataBatch(
     const labels = duplicated
       .map(
         row =>
-          `“${row.profile_model}”/“${row.profile_name}”/“${row.specification}”`,
+          `“${row.item_type}”/“${row.profile_model}”/“${row.profile_name}”/“${row.specification}”`,
       )
       .join('、')
     throw new Error(`以下型材已存在，无法导入：${labels}`)
@@ -225,6 +244,7 @@ export async function updateJintanProfilesData({
   const payload = normalizePayload(values)
 
   const exists = await checkJintanProfilesDataExists(
+    payload.item_type,
     payload.profile_model,
     payload.profile_name,
     payload.specification,
@@ -232,7 +252,7 @@ export async function updateJintanProfilesData({
   )
   if (exists) {
     throw new Error(
-      `型号“${payload.profile_model}”名称“${payload.profile_name}”规格“${payload.specification}”已存在，无法更新`,
+      `类型“${payload.item_type}”型号“${payload.profile_model}”名称“${payload.profile_name}”规格“${payload.specification}”已存在，无法更新`,
     )
   }
 

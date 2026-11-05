@@ -5,6 +5,7 @@ import JintanProfilesDataDetailDrawer from './JintanProfilesDataDetailDrawer'
 
 const record = {
   id: 'profile-1',
+  item_type: 'A' as const,
   profile_model: '140U',
   profile_name: '立柱',
   specification: '3米',
@@ -17,6 +18,7 @@ const record = {
 const inventory = {
   id: 'inv-1',
   profile_data_id: 'profile-1',
+  item_type: 'A' as const,
   profile_model: '140U',
   profile_name: '立柱',
   specification: '3米',
@@ -192,7 +194,7 @@ describe('JintanProfilesDataDetailDrawer', () => {
     renderDrawer()
 
     expect(screen.getByText('型材详情')).toBeInTheDocument()
-    expect(screen.getByText('140U / 立柱 / 3米')).toBeInTheDocument()
+    expect(screen.getByText('A / 140U / 立柱 / 3米')).toBeInTheDocument()
     expect(screen.getByText('30')).toBeInTheDocument()
     expect(screen.getByText('入库记录')).toBeInTheDocument()
     expect(screen.getByText('出库记录')).toBeInTheDocument()

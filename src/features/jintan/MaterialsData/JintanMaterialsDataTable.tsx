@@ -42,6 +42,13 @@ export default function JintanMaterialsDataTable({
         render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        title: '类型',
+        dataIndex: 'item_type',
+        key: 'item_type',
+        width: 70,
+        fixed: 'left',
+      },
+      {
         title: '型号',
         dataIndex: 'material_model',
         key: 'material_model',
@@ -127,7 +134,7 @@ export default function JintanMaterialsDataTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: onOpenDetail ? 1210 : 1090, y: scrollY }}
+      scroll={{ x: onOpenDetail ? 1280 : 1160, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

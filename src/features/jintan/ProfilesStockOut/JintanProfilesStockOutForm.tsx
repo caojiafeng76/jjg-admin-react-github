@@ -60,7 +60,7 @@ export default function JintanProfilesStockOutForm({
     () =>
       options.map(option => ({
         value: option.id,
-        label: `${option.profile_model ? `${option.profile_model} / ` : ''}${option.profile_name} / ${option.specification || '无规格'}（库存 ${option.quantity}）`,
+        label: `${option.item_type} / ${option.profile_model ? `${option.profile_model} / ` : ''}${option.profile_name} / ${option.specification || '无规格'}（库存 ${option.quantity}）`,
       })),
     [options],
   )
@@ -104,7 +104,7 @@ export default function JintanProfilesStockOutForm({
               <Form.Item label="型材资料">
                 <Input
                   disabled
-                  value={`${editingRecord.profile_model ? `${editingRecord.profile_model} / ` : ''}${editingRecord.profile_name} / ${editingRecord.specification || '无规格'}`}
+                  value={`${editingRecord.item_type} / ${editingRecord.profile_model ? `${editingRecord.profile_model} / ` : ''}${editingRecord.profile_name} / ${editingRecord.specification || '无规格'}`}
                 />
               </Form.Item>
             </>
@@ -139,6 +139,7 @@ export default function JintanProfilesStockOutForm({
       )}
       {!editingRecord && !quickInventory && selected && (
         <div className="mb-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+          <div>类型：{selected.item_type}</div>
           <div>
             型号：{selected.profile_model || '-'} / 名称：
             {selected.profile_name}

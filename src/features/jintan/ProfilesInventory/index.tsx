@@ -1,7 +1,8 @@
 import type { FormInstance } from 'antd'
 import type { JintanProfilesInventory, JintanProfilesInventoryFormValues, JintanProfilesInventoryImportRow } from '@/services/apiJintanProfilesInventory'
+import type { JintanItemType } from '@/services/jintanItemType'
 import { App, Modal } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
@@ -11,6 +12,7 @@ import {
   getJintanProfilesInventoryForExport,
 
 } from '@/services/apiJintanProfilesInventory'
+import { parseJintanItemType } from '@/services/jintanItemType'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
@@ -54,9 +56,13 @@ export default function JintanProfilesInventoryPage() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const [searchParams, setSearchParams] = useState<{ keyword?: string }>({
-    keyword: searchParamsURL.get('keyword') || undefined,
-  })
+  const keyword = searchParamsURL.get('keyword') || undefined
+  const itemType
+    = parseJintanItemType(searchParamsURL.get('itemType')) ?? undefined
+  const searchParams = useMemo(
+    () => ({ keyword, itemType }),
+    [keyword, itemType],
+  )
 
   const { data, isLoading, error, refetch } = useJintanProfilesInventoryList({
     page,
@@ -111,7 +117,7 @@ export default function JintanProfilesInventoryPage() {
     try {
       const [exportRows, { exportJintanProfilesInventoryToExcel }]
         = await Promise.all([
-          getJintanProfilesInventoryForExport(searchParams.keyword),
+          getJintanProfilesInventoryForExport(keyword, itemType),
           loadJintanProfilesInventoryExcel(),
         ])
 
@@ -134,7 +140,8 @@ export default function JintanProfilesInventoryPage() {
   }, [
     canManageInventory,
     message,
-    searchParams.keyword,
+    itemType,
+    keyword,
     viewerDenied,
     viewerOperationTip,
   ])
@@ -211,8 +218,7 @@ export default function JintanProfilesInventoryPage() {
   )
 
   const handleSearch = useCallback(
-    (params: typeof searchParams) => {
-      setSearchParams(params)
+    (params: { keyword?: string, itemType?: JintanItemType }) => {
       setSelectedRowKeys([])
 
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
@@ -225,18 +231,25 @@ export default function JintanProfilesInventoryPage() {
         nextSearchParamsURL.delete('keyword')
       }
 
+      if (params.itemType) {
+        nextSearchParamsURL.set('itemType', params.itemType)
+      }
+      else {
+        nextSearchParamsURL.delete('itemType')
+      }
+
       setSearchParamsURL(nextSearchParamsURL)
     },
     [searchParamsURL, setSearchParamsURL],
   )
 
   const handleResetSearch = useCallback(() => {
-    setSearchParams({})
     setSelectedRowKeys([])
 
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
     nextSearchParamsURL.delete('keyword')
+    nextSearchParamsURL.delete('itemType')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
 

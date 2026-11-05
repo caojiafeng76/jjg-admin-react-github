@@ -3,9 +3,13 @@ import type {
   JintanMaterialsData,
   JintanMaterialsDataFormValues,
 } from '@/services/apiJintanMaterialsData'
-import { Form, Input } from 'antd'
+import { Form, Input, Radio } from 'antd'
 
 import { useEffect } from 'react'
+import {
+  DEFAULT_JINTAN_ITEM_TYPE,
+  JINTAN_ITEM_TYPE_OPTIONS,
+} from '@/services/jintanItemType'
 
 interface Props {
   onFinish: (values: JintanMaterialsDataFormValues) => void
@@ -15,6 +19,7 @@ interface Props {
 }
 
 const DEFAULT_VALUES: JintanMaterialsDataFormValues = {
+  item_type: DEFAULT_JINTAN_ITEM_TYPE,
   material_model: '',
   material_name: '',
   specification: '',
@@ -38,6 +43,7 @@ export default function JintanMaterialsDataForm({
     if (initialValues) {
       form.setFieldsValue({
         ...DEFAULT_VALUES,
+        item_type: initialValues.item_type,
         material_model: initialValues.material_model,
         material_name: initialValues.material_name,
         specification: initialValues.specification,
@@ -58,6 +64,18 @@ export default function JintanMaterialsDataForm({
       onFinish={onFinish}
       disabled={isSubmitting}
     >
+      <Form.Item
+        name="item_type"
+        label="类型"
+        rules={[{ required: true, message: '请选择类型' }]}
+      >
+        <Radio.Group
+          options={JINTAN_ITEM_TYPE_OPTIONS}
+          optionType="button"
+          buttonStyle="solid"
+        />
+      </Form.Item>
+
       <Form.Item
         name="material_model"
         label="型号"

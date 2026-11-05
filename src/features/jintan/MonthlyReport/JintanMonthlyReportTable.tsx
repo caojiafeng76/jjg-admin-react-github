@@ -53,6 +53,13 @@ export default function JintanMonthlyReportTable({
         render: (_value, _record, index) => index + 1,
       },
       {
+        title: '类型',
+        dataIndex: 'item_type',
+        key: 'item_type',
+        width: 70,
+        render: renderText,
+      },
+      {
         title: '型号',
         dataIndex: 'item_model',
         key: 'item_model',
@@ -132,7 +139,7 @@ export default function JintanMonthlyReportTable({
       columns={columns}
       dataSource={data}
       pagination={false}
-      scroll={{ x: 1210, y: scrollY }}
+      scroll={{ x: 1280, y: scrollY }}
       size="small"
       locale={{
         emptyText: (
@@ -152,14 +159,14 @@ export default function JintanMonthlyReportTable({
           ? (
               <Table.Summary fixed>
                 <Table.Summary.Row className="font-semibold">
-                  <Table.Summary.Cell index={0} colSpan={5}>
+                  <Table.Summary.Cell index={0} colSpan={6}>
                     合计
                   </Table.Summary.Cell>
                   {totals.map((total, offset) => (
                     <Table.Summary.Cell
                       // eslint-disable-next-line react/no-array-index-key -- 合计列顺序固定
                       key={offset}
-                      index={5 + offset}
+                      index={6 + offset}
                       align="right"
                     >
                       {renderQuantity(total)}

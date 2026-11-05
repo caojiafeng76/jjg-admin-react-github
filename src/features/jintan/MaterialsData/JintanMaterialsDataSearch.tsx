@@ -1,14 +1,17 @@
+import type { JintanItemType } from '@/services/jintanItemType'
 import { Button, Form, Input, Space } from 'antd'
 import { useEffect } from 'react'
+import JintanItemTypeFilterItem from '../JintanItemTypeFilterItem'
 
 interface SearchValues {
   keyword?: string
+  itemType?: JintanItemType
 }
 
 interface Props {
-  onSearch: (params: { keyword?: string }) => void
+  onSearch: (params: SearchValues) => void
   onReset: () => void
-  initialValues?: { keyword?: string }
+  initialValues?: SearchValues
 }
 
 export default function JintanMaterialsDataSearch({
@@ -21,12 +24,14 @@ export default function JintanMaterialsDataSearch({
   useEffect(() => {
     form.setFieldsValue({
       keyword: initialValues?.keyword,
+      itemType: initialValues?.itemType,
     })
   }, [form, initialValues])
 
   const handleSearch = (values: SearchValues) => {
     onSearch({
       keyword: values.keyword?.trim() || undefined,
+      itemType: values.itemType,
     })
   }
 
@@ -49,6 +54,7 @@ export default function JintanMaterialsDataSearch({
           className="rounded-lg"
         />
       </Form.Item>
+      <JintanItemTypeFilterItem />
       <Form.Item className="mb-0">
         <Space>
           <Button

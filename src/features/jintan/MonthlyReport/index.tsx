@@ -1,16 +1,20 @@
 import type { Dayjs } from 'dayjs'
 import type { JintanMonthlyReportCategory } from '@/services/apiJintanMonthlyReport'
 import { useQueryClient } from '@tanstack/react-query'
-import { App, DatePicker, Segmented } from 'antd'
+import { App, DatePicker, Segmented, Select } from 'antd'
 import dayjs from 'dayjs'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   JINTAN_MONTHLY_REPORT_CATEGORIES,
   JINTAN_MONTHLY_REPORT_CATEGORY_LABELS,
 } from '@/services/apiJintanMonthlyReport'
+import {
+  JINTAN_ITEM_TYPE_OPTIONS,
+  parseJintanItemType,
+} from '@/services/jintanItemType'
 import ExportButton from '@/ui/ExportButton'
 import { TableState } from '@/ui/TableState'
 import { getUserErrorMessage } from '@/utils/errorHandler'
@@ -18,6 +22,7 @@ import { feedbackText } from '@/utils/feedbackText'
 import { JINTAN_MONTHLY_REPORT_PERMISSION_KEY } from '../permissions'
 import JintanMonthlyReportTable from './JintanMonthlyReportTable'
 import {
+  filterJintanMonthlyReportByItemType,
   formatJintanReportMonth,
   normalizeJintanReportMonth,
 } from './reportUtils'
@@ -58,9 +63,14 @@ export default function JintanMonthlyReportPage() {
     ? tabParam
     : 'parts'
   const categoryLabel = JINTAN_MONTHLY_REPORT_CATEGORY_LABELS[category]
+  const itemType = parseJintanItemType(searchParams.get('itemType')) ?? undefined
 
-  const { data, isLoading, isFetching, error, refetch }
+  const { data: report, isLoading, isFetching, error, refetch }
     = useJintanMonthlyReport(month)
+  const data = useMemo(
+    () => report && filterJintanMonthlyReportByItemType(report, itemType),
+    [report, itemType],
+  )
 
   const { tableContainerRef, scrollY, rowHeight } = useTableHeight({
     targetRowCount: 10,
@@ -69,10 +79,15 @@ export default function JintanMonthlyReportPage() {
   })
 
   const updateSearchParam = useCallback(
-    (key: 'month' | 'tab', value: string) => {
+    (key: 'month' | 'tab' | 'itemType', value?: string) => {
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev)
-        next.set(key, value)
+        if (value) {
+          next.set(key, value)
+        }
+        else {
+          next.delete(key)
+        }
         return next
       }, { replace: true })
     },
@@ -82,13 +97,14 @@ export default function JintanMonthlyReportPage() {
   const handleExport = useCallback(async () => {
     setIsExporting(true)
     try {
-      const [report, { exportJintanMonthlyReportToExcel }] = await Promise.all([
+      const [fullReport, { exportJintanMonthlyReportToExcel }] = await Promise.all([
         queryClient.query(jintanMonthlyReportQueryOptions(month)),
         loadJintanMonthlyReportExcel(),
       ])
 
+      const exportReport = filterJintanMonthlyReportByItemType(fullReport, itemType)
       const total = JINTAN_MONTHLY_REPORT_CATEGORIES.reduce(
-        (sum, key) => sum + report[key].length,
+        (sum, key) => sum + exportReport[key].length,
         0,
       )
       if (total === 0) {
@@ -96,7 +112,7 @@ export default function JintanMonthlyReportPage() {
         return
       }
 
-      exportJintanMonthlyReportToExcel(report, month)
+      exportJintanMonthlyReportToExcel(exportReport, month)
       message.success(
         feedbackText.exported(`${formatJintanReportMonth(month)}库存记录`, total),
       )
@@ -109,7 +125,7 @@ export default function JintanMonthlyReportPage() {
     finally {
       setIsExporting(false)
     }
-  }, [message, month, queryClient])
+  }, [itemType, message, month, queryClient])
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
@@ -137,17 +153,29 @@ export default function JintanMonthlyReportPage() {
         </span>
       </div>
 
-      <Segmented<JintanMonthlyReportCategory>
-        className="self-start"
-        value={category}
-        onChange={value => updateSearchParam('tab', value)}
-        options={JINTAN_MONTHLY_REPORT_CATEGORIES.map(key => ({
-          value: key,
-          label: `${JINTAN_MONTHLY_REPORT_CATEGORY_LABELS[key]}${
-            data ? `（${data[key].length}）` : ''
-          }`,
-        }))}
-      />
+      <div className="flex flex-wrap items-center gap-2">
+        <Segmented<JintanMonthlyReportCategory>
+          value={category}
+          onChange={value => updateSearchParam('tab', value)}
+          options={JINTAN_MONTHLY_REPORT_CATEGORIES.map(key => ({
+            value: key,
+            label: `${JINTAN_MONTHLY_REPORT_CATEGORY_LABELS[key]}${
+              data ? `（${data[key].length}）` : ''
+            }`,
+          }))}
+        />
+        {category !== 'parts' && (
+          <Select
+            allowClear
+            placeholder="全部类型"
+            aria-label="类型"
+            style={{ width: 120 }}
+            value={itemType}
+            options={JINTAN_ITEM_TYPE_OPTIONS}
+            onChange={value => updateSearchParam('itemType', value)}
+          />
+        )}
+      </div>
 
       <div
         ref={tableContainerRef}

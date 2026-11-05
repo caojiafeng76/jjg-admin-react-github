@@ -5,6 +5,7 @@ import JintanMaterialsDataDetailDrawer from './JintanMaterialsDataDetailDrawer'
 
 const record = {
   id: 'material-1',
+  item_type: 'A' as const,
   material_model: '140U',
   material_name: '横梁',
   specification: '2米',
@@ -17,6 +18,7 @@ const record = {
 const inventory = {
   id: 'inv-1',
   material_data_id: 'material-1',
+  item_type: 'A' as const,
   material_model: '140U',
   material_name: '横梁',
   specification: '2米',
@@ -192,7 +194,7 @@ describe('JintanMaterialsDataDetailDrawer', () => {
     renderDrawer()
 
     expect(screen.getByText('素材详情')).toBeInTheDocument()
-    expect(screen.getByText('140U / 横梁 / 2米')).toBeInTheDocument()
+    expect(screen.getByText('A / 140U / 横梁 / 2米')).toBeInTheDocument()
     expect(screen.getByText('40')).toBeInTheDocument()
     expect(screen.getByText('入库记录')).toBeInTheDocument()
     expect(screen.getByText('出库记录')).toBeInTheDocument()
