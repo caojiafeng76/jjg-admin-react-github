@@ -37,6 +37,13 @@ export default function JintanProfilesInventoryTable({
         render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        title: '类型',
+        dataIndex: 'item_type',
+        key: 'item_type',
+        width: 70,
+        fixed: 'left',
+      },
+      {
         title: '型号',
         dataIndex: 'profile_model',
         key: 'profile_model',
@@ -110,7 +117,7 @@ export default function JintanProfilesInventoryTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1200, y: scrollY }}
+      scroll={{ x: 1270, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

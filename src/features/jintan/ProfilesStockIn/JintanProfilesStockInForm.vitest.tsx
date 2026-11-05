@@ -10,6 +10,7 @@ vi.mock('../ProfilesInventory/useJintanProfilesInventory', () => ({
     data: [
       {
         id: 'inventory-1',
+        item_type: 'A',
         profile_model: 'YDJ222-166-1',
         profile_name: '120*120立柱',
         specification: '2000',

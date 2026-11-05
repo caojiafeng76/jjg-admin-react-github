@@ -7,6 +7,7 @@ import JintanMaterialsDataPage from './index'
 const records = [
   {
     id: 'material-1',
+    item_type: 'A',
     material_model: '140U',
     material_name: '横梁',
     specification: '2米',

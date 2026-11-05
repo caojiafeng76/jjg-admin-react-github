@@ -3,6 +3,7 @@ import type {
   JintanMaterialsStockIn,
   JintanMaterialsStockInFormValues,
 } from '@/services/apiJintanMaterialsStockIn'
+import type { JintanItemType } from '@/services/jintanItemType'
 import { App, Modal } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -10,6 +11,7 @@ import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { parseJintanItemType } from '@/services/jintanItemType'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -35,6 +37,7 @@ export default function JintanMaterialsStockInPage() {
   const page = Number(urlParams.get('page')) || 1
   const pageSize = Number(urlParams.get('pageSize')) || 10
   const keyword = urlParams.get('keyword') || undefined
+  const itemType = parseJintanItemType(urlParams.get('itemType')) ?? undefined
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingRecord, setEditingRecord]
@@ -48,6 +51,7 @@ export default function JintanMaterialsStockInPage() {
     page,
     pageSize,
     keyword,
+    itemType,
   })
   const createMutation = useCreateJintanMaterialsStockIn()
   const updateMutation = useUpdateJintanMaterialsStockInRemarks()
@@ -154,12 +158,15 @@ export default function JintanMaterialsStockInPage() {
   ])
 
   const handleSearch = useCallback(
-    (nextKeyword?: string) => {
+    (params: { keyword?: string, itemType?: JintanItemType }) => {
       const next = new URLSearchParams(urlParams)
       next.set('page', '1')
-      if (nextKeyword)
-        next.set('keyword', nextKeyword)
+      if (params.keyword)
+        next.set('keyword', params.keyword)
       else next.delete('keyword')
+      if (params.itemType)
+        next.set('itemType', params.itemType)
+      else next.delete('itemType')
       setSelectedRowKeys([])
       setUrlParams(next)
     },
@@ -206,8 +213,9 @@ export default function JintanMaterialsStockInPage() {
         </div>
         <JintanMaterialsStockInSearch
           keyword={keyword}
+          itemType={itemType}
           onSearch={handleSearch}
-          onReset={() => handleSearch()}
+          onReset={() => handleSearch({})}
         />
       </div>
 

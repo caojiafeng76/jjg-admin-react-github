@@ -1,24 +1,40 @@
+import type { JintanItemType } from '@/services/jintanItemType'
 import { Button, Form, Input, Space } from 'antd'
 import { useEffect } from 'react'
+import JintanItemTypeFilterItem from '../JintanItemTypeFilterItem'
+
+interface SearchValues {
+  keyword?: string
+  itemType?: JintanItemType
+}
 
 interface Props {
-  onSearch: (keyword?: string) => void
+  onSearch: (params: SearchValues) => void
   onReset: () => void
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export default function JintanProfilesStockOutSearch({
   onSearch,
   onReset,
   keyword,
+  itemType,
 }: Props) {
-  const [form] = Form.useForm<{ keyword?: string }>()
-  useEffect(() => form.setFieldsValue({ keyword }), [form, keyword])
+  const [form] = Form.useForm<SearchValues>()
+  useEffect(
+    () => form.setFieldsValue({ keyword, itemType }),
+    [form, keyword, itemType],
+  )
 
   return (
     <Form
       form={form}
-      onFinish={values => onSearch(values.keyword?.trim() || undefined)}
+      onFinish={values =>
+        onSearch({
+          keyword: values.keyword?.trim() || undefined,
+          itemType: values.itemType,
+        })}
       className="flex flex-1 flex-wrap items-center gap-3"
     >
       <Form.Item name="keyword" className="mb-0" style={{ width: 360 }}>
@@ -28,6 +44,7 @@ export default function JintanProfilesStockOutSearch({
           onPressEnter={() => form.submit()}
         />
       </Form.Item>
+      <JintanItemTypeFilterItem />
       <Form.Item className="mb-0">
         <Space>
           <Button type="primary" htmlType="submit">

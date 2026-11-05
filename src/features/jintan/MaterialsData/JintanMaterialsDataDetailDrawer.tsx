@@ -88,7 +88,7 @@ export default function JintanMaterialsDataDetailDrawer({
 
     return {
       id: inventory.id,
-      label: `${inventory.material_model ? `${inventory.material_model} / ` : ''}${inventory.material_name} / ${inventory.specification || '无规格'}（库存 ${inventory.quantity}）`,
+      label: `${inventory.item_type} / ${inventory.material_model ? `${inventory.material_model} / ` : ''}${inventory.material_name} / ${inventory.specification || '无规格'}（库存 ${inventory.quantity}）`,
       quantity: inventory.quantity,
     }
   }, [inventory])
@@ -287,10 +287,12 @@ export default function JintanMaterialsDataDetailDrawer({
             <div className="space-y-4">
               <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
                 <div className="text-base font-medium text-slate-900 dark:text-slate-100">
+                  {record.item_type} /{' '}
                   {record.material_model ? `${record.material_model} / ` : ''}
                   {record.material_name} / {record.specification || '无规格'}
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-600 md:grid-cols-3 dark:text-slate-300">
+                  <div>类型：{record.item_type}</div>
                   <div>材质：{record.material || '-'}</div>
                   <div className="col-span-2">备注：{record.remarks || '-'}</div>
                 </div>

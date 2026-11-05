@@ -17,6 +17,13 @@
 
 ## 2026-11-05
 
+- **类别**：新建
+- **范围**：`supabase/migrations/20261105090000_add_jintan_item_type.sql`、`src/services/apiJintan{Materials,Profiles}*`、`src/services/jintanItemType.ts`、`src/features/jintan/{Materials,Profiles}*`、`src/features/jintan/MonthlyReport`、`src/utils/jintan{Materials,Profiles}*Excel.ts`、`src/utils/jintanMonthlyReportExcel.ts`
+- **摘要**：金檀素材、型材增加类型字段 `item_type`（A / B），默认 A，已有数据归为 A。判重改为“类型+型号+名称+规格”，同一物料可同时有 A、B 两条，资料、库存和出入库分开记账。库存、入库、出库、调整流水保存类型快照；资料、库存、入库、出库和月度报表显示类型并可按类型筛选（`itemType` URL 参数），资料、库存和月报导出按当前筛选输出。资料和库存 Excel 模板末尾增加选填的“类型”列，留空按 A，旧模板仍可导入；库存导入按类型匹配库存行。资料页、库存页的搜索状态改为只从 URL 读取。配件不变，月报中配件类型为空。
+- **验证**：迁移由用户本人在终端执行 `bun run db:push`（命令触发 SQL 安全守卫，需本人确认），之后 `db:push:dry-run` 显示远端无待推送迁移，`bun run db:types` 已更新 `database.types.ts`。`bun lint`、`bun run typecheck`、`bun run build`、`bun run check:bundle` 通过；`bun run test` 202 个文件、984 个用例通过。生产库 8 张表行数与推送前一致（63/63/15/30、78/78/32/51），已有行全部为 A。在回滚事务中验证：同 key 的 A、B 可并存且各有库存行，不传类型默认 A，入库、出库快照和库存增减正确，改资料类型后库存快照跟随，调整流水带类型；同 key 同类型被唯一约束拒绝，类型 C 被 check 约束拒绝；事后确认无测试数据残留。Claude in Chrome 只读检查素材/型材的资料、库存、入库、出库页及月报：类型列、默认 A、筛选、URL 保留、重置、物料下拉和详情抽屉正常。未覆盖：生产库现无 B 数据，月报只验证了函数返回 `item_type`、已有行和筛选 B 时为空，没有看到真实 B 行；页面新增保存、Excel 下载与导入未在浏览器实际操作（由单元测试和回滚事务覆盖）。验证时控制台有一条 `syncPermissionRegistry` 权限报错，本次未改动相关代码，未调查。
+
+## 2026-11-05
+
 - **类别**：修复
 - **范围**：线上 Edge Function `fetch-syney-store-report`、`supabase/functions/fetch-syney-store-report/index.ts`
 - **摘要**：把线上函数从 2026-05-09 的 v6 更新为带来源白名单、页面权限校验（`page:syney-store-report-list`）和限流（scope `syney-store-report`）的仓库版本，线上现为 v7。

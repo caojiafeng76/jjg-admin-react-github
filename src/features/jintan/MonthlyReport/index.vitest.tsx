@@ -11,6 +11,7 @@ const report: JintanMonthlyReport = {
   parts: [
     {
       category: 'parts',
+      item_type: '',
       inventory_id: 'p-1',
       item_model: '',
       item_name: '十字沉头螺钉',
@@ -28,6 +29,7 @@ const report: JintanMonthlyReport = {
   profiles: [
     {
       category: 'profiles',
+      item_type: '',
       inventory_id: 'pr-1',
       item_model: '140U',
       item_name: '铝合金立柱',

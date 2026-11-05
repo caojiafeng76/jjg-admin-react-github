@@ -14,6 +14,7 @@ function row(overrides: Partial<JintanMonthlyReportRow>): JintanMonthlyReportRow
   return {
     category: 'parts',
     inventory_id: 'inventory-1',
+    item_type: '',
     item_model: '',
     item_name: '螺钉',
     specification: 'ST4.2*20',
@@ -53,6 +54,7 @@ const report: JintanMonthlyReport = {
     row({
       category: 'profiles',
       inventory_id: 'pr-1',
+      item_type: 'B',
       item_model: '140U',
       item_name: '立柱',
       specification: '3米',
@@ -86,13 +88,13 @@ describe('createJintanMonthlyReportWorkbook', () => {
 
     expect(parts[0][0]).toBe('金檀木业配件月度库存报表（2026年10月）')
     expect(parts[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
-    expect(parts[2]).toEqual([1, '', '螺钉', 'ST4.2*20', 'SUS304', 100, 20, 30, 0, 90])
-    expect(parts[3]).toEqual([2, '', '合页', '4寸', 'SUS304', 10, 5, 0, -3, 12])
-    expect(parts[4]).toEqual(['合计', '', '', '', '', 110, 25, 30, -3, 102])
+    expect(parts[2]).toEqual([1, '', '', '螺钉', 'ST4.2*20', 'SUS304', 100, 20, 30, 0, 90])
+    expect(parts[3]).toEqual([2, '', '', '合页', '4寸', 'SUS304', 10, 5, 0, -3, 12])
+    expect(parts[4]).toEqual(['合计', '', '', '', '', '', 110, 25, 30, -3, 102])
 
     const profiles = sheetRows(workbook, '型材')
     expect(profiles[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
-    expect(profiles[2]).toEqual([1, '140U', '立柱', '3米', '6063铝合金', 8, 2, 4, 0, 6])
+    expect(profiles[2]).toEqual([1, 'B', '140U', '立柱', '3米', '6063铝合金', 8, 2, 4, 0, 6])
   })
 
   it('keeps an empty category sheet with headers and a zero total row', () => {
@@ -100,6 +102,6 @@ describe('createJintanMonthlyReportWorkbook', () => {
     const materials = sheetRows(workbook, '素材')
 
     expect(materials[0][0]).toBe('金檀木业素材月度库存报表（2026年10月）')
-    expect(materials[2]).toEqual(['合计', '', '', '', '', 0, 0, 0, 0, 0])
+    expect(materials[2]).toEqual(['合计', '', '', '', '', '', 0, 0, 0, 0, 0])
   })
 })

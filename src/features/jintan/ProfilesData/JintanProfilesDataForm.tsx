@@ -3,9 +3,13 @@ import type {
   JintanProfilesData,
   JintanProfilesDataFormValues,
 } from '@/services/apiJintanProfilesData'
-import { Form, Input } from 'antd'
+import { Form, Input, Radio } from 'antd'
 
 import { useEffect } from 'react'
+import {
+  DEFAULT_JINTAN_ITEM_TYPE,
+  JINTAN_ITEM_TYPE_OPTIONS,
+} from '@/services/jintanItemType'
 
 interface Props {
   onFinish: (values: JintanProfilesDataFormValues) => void
@@ -15,6 +19,7 @@ interface Props {
 }
 
 const DEFAULT_VALUES: JintanProfilesDataFormValues = {
+  item_type: DEFAULT_JINTAN_ITEM_TYPE,
   profile_model: '',
   profile_name: '',
   specification: '',
@@ -38,6 +43,7 @@ export default function JintanProfilesDataForm({
     if (initialValues) {
       form.setFieldsValue({
         ...DEFAULT_VALUES,
+        item_type: initialValues.item_type,
         profile_model: initialValues.profile_model,
         profile_name: initialValues.profile_name,
         specification: initialValues.specification,
@@ -58,6 +64,18 @@ export default function JintanProfilesDataForm({
       onFinish={onFinish}
       disabled={isSubmitting}
     >
+      <Form.Item
+        name="item_type"
+        label="类型"
+        rules={[{ required: true, message: '请选择类型' }]}
+      >
+        <Radio.Group
+          options={JINTAN_ITEM_TYPE_OPTIONS}
+          optionType="button"
+          buttonStyle="solid"
+        />
+      </Form.Item>
+
       <Form.Item
         name="profile_model"
         label="型号"

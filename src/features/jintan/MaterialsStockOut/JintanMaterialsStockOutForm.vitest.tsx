@@ -10,6 +10,7 @@ vi.mock('../MaterialsInventory/useJintanMaterialsInventory', () => ({
     data: [
       {
         id: 'inventory-1',
+        item_type: 'A',
         material_model: 'YDJ222-166-1',
         material_name: '120*120立柱',
         specification: '2000',
@@ -105,6 +106,7 @@ describe('金檀木业素材出库表单', () => {
           id: 'record-1',
           inventory_id: 'inventory-1',
           quantity: 20,
+          item_type: 'A',
           material_model: 'YDJ222-166-1',
           material_name: '120*120立柱',
           specification: '2000',
@@ -116,7 +118,7 @@ describe('金檀木业素材出库表单', () => {
       />,
     )
     expect(
-      screen.getByDisplayValue('YDJ222-166-1 / 120*120立柱 / 2000'),
+      screen.getByDisplayValue('A / YDJ222-166-1 / 120*120立柱 / 2000'),
     ).toBeDisabled()
     expect(screen.getByRole('spinbutton')).toBeDisabled()
     act(() => {

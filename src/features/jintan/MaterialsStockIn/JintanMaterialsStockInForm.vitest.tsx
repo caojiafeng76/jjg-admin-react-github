@@ -10,6 +10,7 @@ vi.mock('../MaterialsInventory/useJintanMaterialsInventory', () => ({
     data: [
       {
         id: 'inventory-1',
+        item_type: 'A',
         material_model: 'YDJ222-166-1',
         material_name: '120*120立柱',
         specification: '2000',

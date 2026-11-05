@@ -1,8 +1,10 @@
+import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 
 export interface JintanMaterialsData {
   id: string
+  item_type: JintanItemType
   material_model: string
   material_name: string
   specification: string
@@ -13,6 +15,7 @@ export interface JintanMaterialsData {
 }
 
 export interface JintanMaterialsDataFormValues {
+  item_type: JintanItemType
   material_model: string
   material_name: string
   specification: string
@@ -26,6 +29,7 @@ function normalizePayload(
   values: JintanMaterialsDataFormValues,
 ): JintanMaterialsDataFormValues {
   return {
+    item_type: values.item_type,
     material_model: values.material_model.trim(),
     material_name: values.material_name.trim(),
     specification: values.specification.trim(),
@@ -35,11 +39,12 @@ function normalizePayload(
 }
 
 function materialsKeyOf(row: {
+  item_type: string
   material_model: string
   material_name: string
   specification: string
 }): string {
-  return `${row.material_model}\u0000${row.material_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.material_model}\u0000${row.material_name}\u0000${row.specification}`
 }
 
 function keywordFilter(keyword: string) {
@@ -47,6 +52,7 @@ function keywordFilter(keyword: string) {
 }
 
 async function checkJintanMaterialsDataExists(
+  itemType: JintanItemType,
   profileModel: string,
   profileName: string,
   specification: string,
@@ -55,6 +61,7 @@ async function checkJintanMaterialsDataExists(
   let query = supabase
     .from('jintan_materials_data')
     .select('id')
+    .eq('item_type', itemType)
     .eq('material_model', profileModel)
     .eq('material_name', profileName)
     .eq('specification', specification)
@@ -77,10 +84,12 @@ export async function getJintanMaterialsDataList({
   page,
   pageSize,
   keyword,
+  itemType,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -91,6 +100,9 @@ export async function getJintanMaterialsDataList({
 
   if (keyword) {
     query = query.or(keywordFilter(keyword.trim()))
+  }
+  if (itemType) {
+    query = query.eq('item_type', itemType)
   }
 
   const { data, error, count } = await query
@@ -108,7 +120,10 @@ export async function getJintanMaterialsDataList({
   }
 }
 
-export async function getJintanMaterialsDataForExport(keyword?: string) {
+export async function getJintanMaterialsDataForExport(
+  keyword?: string,
+  itemType?: JintanItemType,
+) {
   const rows: JintanMaterialsData[] = []
   let from = 0
 
@@ -117,6 +132,9 @@ export async function getJintanMaterialsDataForExport(keyword?: string) {
 
     if (keyword) {
       query = query.or(keywordFilter(keyword.trim()))
+    }
+    if (itemType) {
+      query = query.eq('item_type', itemType)
     }
 
     const { data, error } = await query
@@ -147,13 +165,14 @@ export async function createJintanMaterialsData(
   const payload = normalizePayload(values)
 
   const exists = await checkJintanMaterialsDataExists(
+    payload.item_type,
     payload.material_model,
     payload.material_name,
     payload.specification,
   )
   if (exists) {
     throw new Error(
-      `型号“${payload.material_model}”名称“${payload.material_name}”规格“${payload.specification}”已存在，无法创建`,
+      `类型“${payload.item_type}”型号“${payload.material_model}”名称“${payload.material_name}”规格“${payload.specification}”已存在，无法创建`,
     )
   }
 
@@ -174,7 +193,7 @@ export async function createJintanMaterialsDataBatch(
     const key = materialsKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `型号“${row.material_model}”名称“${row.material_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
+        `类型“${row.item_type}”型号“${row.material_model}”名称“${row.material_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -185,7 +204,7 @@ export async function createJintanMaterialsDataBatch(
   )
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_materials_data')
-    .select('material_model, material_name, specification')
+    .select('item_type, material_model, material_name, specification')
     .in('material_name', materialNames)
 
   if (existingError) {
@@ -202,7 +221,7 @@ export async function createJintanMaterialsDataBatch(
     const labels = duplicated
       .map(
         row =>
-          `“${row.material_model}”/“${row.material_name}”/“${row.specification}”`,
+          `“${row.item_type}”/“${row.material_model}”/“${row.material_name}”/“${row.specification}”`,
       )
       .join('、')
     throw new Error(`以下素材已存在，无法导入：${labels}`)
@@ -225,6 +244,7 @@ export async function updateJintanMaterialsData({
   const payload = normalizePayload(values)
 
   const exists = await checkJintanMaterialsDataExists(
+    payload.item_type,
     payload.material_model,
     payload.material_name,
     payload.specification,
@@ -232,7 +252,7 @@ export async function updateJintanMaterialsData({
   )
   if (exists) {
     throw new Error(
-      `型号“${payload.material_model}”名称“${payload.material_name}”规格“${payload.specification}”已存在，无法更新`,
+      `类型“${payload.item_type}”型号“${payload.material_model}”名称“${payload.material_name}”规格“${payload.specification}”已存在，无法更新`,
     )
   }
 

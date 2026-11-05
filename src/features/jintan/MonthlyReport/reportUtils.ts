@@ -1,4 +1,8 @@
-import type { JintanMonthlyReportRow } from '@/services/apiJintanMonthlyReport'
+import type {
+  JintanMonthlyReport,
+  JintanMonthlyReportRow,
+} from '@/services/apiJintanMonthlyReport'
+import type { JintanItemType } from '@/services/jintanItemType'
 import dayjs from 'dayjs'
 
 export const JINTAN_MONTHLY_REPORT_QUANTITY_KEYS = [
@@ -30,6 +34,21 @@ export function normalizeJintanReportMonth(
 /** 月份 YYYY-MM → 2026年10月 */
 export function formatJintanReportMonth(month: string) {
   return dayjs(`${month}-01`).format('YYYY年M月')
+}
+
+/** 按类型筛选型材、素材；配件没有类型，不受影响 */
+export function filterJintanMonthlyReportByItemType(
+  report: JintanMonthlyReport,
+  itemType?: JintanItemType,
+): JintanMonthlyReport {
+  if (!itemType) {
+    return report
+  }
+  return {
+    parts: report.parts,
+    profiles: report.profiles.filter(row => row.item_type === itemType),
+    materials: report.materials.filter(row => row.item_type === itemType),
+  }
 }
 
 /** 按 上月结余 / 本月入库 / 本月出库 / 本月调整 / 月末结存 顺序合计 */

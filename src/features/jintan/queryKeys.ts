@@ -1,3 +1,5 @@
+import type { JintanItemType } from '@/services/jintanItemType'
+
 export interface JintanPartsListKeyParams {
   page: number
   pageSize: number
@@ -27,48 +29,56 @@ export interface JintanProfilesListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanProfilesInventoryListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanProfilesStockInListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanProfilesStockOutListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanMaterialsListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanMaterialsInventoryListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanMaterialsStockInListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanMaterialsStockOutListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanStockByInventoryKeyParams {
@@ -200,6 +210,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
         },
       ] as const,
   },
@@ -217,6 +228,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
         },
       ] as const,
     adjustments: (params: JintanStockByInventoryKeyParams) =>
@@ -250,6 +262,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
         },
       ] as const,
   },
@@ -269,7 +282,11 @@ export const jintanKeys = {
       [
         PROFILES_STOCK_OUT_ROOT,
         'list',
-        { ...params, keyword: normalizeKeyword(params.keyword) },
+        {
+          ...params,
+          keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
+        },
       ] as const,
   },
   materialsData: {
@@ -282,6 +299,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
         },
       ] as const,
   },
@@ -299,6 +317,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
         },
       ] as const,
     adjustments: (params: JintanStockByInventoryKeyParams) =>
@@ -332,6 +351,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
         },
       ] as const,
   },
@@ -351,7 +371,11 @@ export const jintanKeys = {
       [
         MATERIALS_STOCK_OUT_ROOT,
         'list',
-        { ...params, keyword: normalizeKeyword(params.keyword) },
+        {
+          ...params,
+          keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
+        },
       ] as const,
   },
   monthlyReport: {

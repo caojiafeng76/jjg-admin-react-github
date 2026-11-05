@@ -21,6 +21,7 @@ import {
 
 export const JINTAN_MONTHLY_REPORT_HEADERS = [
   '#',
+  '类型',
   '型号',
   '名称',
   '规格',
@@ -31,7 +32,7 @@ export const JINTAN_MONTHLY_REPORT_HEADERS = [
   '本月调整',
   '月末结存',
 ] as const
-const COLUMN_WIDTHS = [6, 18, 24, 20, 14, 12, 12, 12, 12, 12]
+const COLUMN_WIDTHS = [6, 6, 18, 24, 20, 14, 12, 12, 12, 12, 12]
 
 function createCategorySheet(
   rows: JintanMonthlyReportRow[],
@@ -46,13 +47,14 @@ function createCategorySheet(
 
   const bodyRows = rows.map((row, index) => [
     index + 1,
+    row.item_type,
     row.item_model,
     row.item_name,
     row.specification,
     row.material,
     ...JINTAN_MONTHLY_REPORT_QUANTITY_KEYS.map(key => row[key]),
   ])
-  const totalRow = ['合计', '', '', '', '', ...sumJintanMonthlyReportRows(rows)]
+  const totalRow = ['合计', '', '', '', '', '', ...sumJintanMonthlyReportRows(rows)]
 
   const worksheetData = [
     titleRow,
@@ -65,7 +67,7 @@ function createCategorySheet(
 
   worksheet['!merges'] = [
     { s: { r: 0, c: 0 }, e: { r: 0, c: columnCount - 1 } },
-    { s: { r: totalRowIndex, c: 0 }, e: { r: totalRowIndex, c: 4 } },
+    { s: { r: totalRowIndex, c: 0 }, e: { r: totalRowIndex, c: 5 } },
   ]
 
   applyRegisterSheetStyles(worksheet, worksheetData, {

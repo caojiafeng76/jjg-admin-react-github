@@ -60,6 +60,10 @@ export default function JintanMaterialsInventoryForm({
       {materialSnapshot && (
         <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
           <div>
+            <div className="text-xs text-slate-400">类型</div>
+            <div>{materialSnapshot.item_type}</div>
+          </div>
+          <div>
             <div className="text-xs text-slate-400">型号</div>
             <div>{materialSnapshot.material_model || '-'}</div>
           </div>

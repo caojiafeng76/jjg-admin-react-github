@@ -1,9 +1,11 @@
+import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 
 export interface JintanProfilesStockOut {
   id: string
   inventory_id: string
+  item_type: JintanItemType
   profile_model: string
   profile_name: string
   specification: string
@@ -28,12 +30,14 @@ export async function getJintanProfilesStockOutList({
   page,
   pageSize,
   keyword,
+  itemType,
   inventoryId,
   signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
   inventoryId?: string
   signal?: AbortSignal
 }): Promise<{ items: JintanProfilesStockOut[], total: number }> {
@@ -42,6 +46,8 @@ export async function getJintanProfilesStockOutList({
     .select('*', { count: 'exact' })
   if (keyword?.trim())
     query = query.or(keywordFilter(keyword.trim()))
+  if (itemType)
+    query = query.eq('item_type', itemType)
   if (inventoryId)
     query = query.eq('inventory_id', inventoryId)
   if (signal)
@@ -53,7 +59,7 @@ export async function getJintanProfilesStockOutList({
 
   if (error)
     throw handleApiError(error, '获取型材出库列表失败')
-  return { items: data ?? [], total: count ?? 0 }
+  return { items: (data ?? []) as JintanProfilesStockOut[], total: count ?? 0 }
 }
 
 export async function createJintanProfilesStockOut(

@@ -7,6 +7,7 @@ import JintanProfilesDataPage from './index'
 const records = [
   {
     id: 'profile-1',
+    item_type: 'A',
     profile_model: '140U',
     profile_name: '立柱',
     specification: '3米',

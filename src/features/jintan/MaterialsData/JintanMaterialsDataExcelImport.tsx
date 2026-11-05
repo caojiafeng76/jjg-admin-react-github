@@ -40,6 +40,11 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
     render: (value: number) => value + 1,
   },
   {
+    title: '类型',
+    dataIndex: 'item_type',
+    width: 70,
+  },
+  {
     title: '型号',
     dataIndex: 'material_model',
     width: 150,
@@ -209,7 +214,7 @@ export default function JintanMaterialsDataExcelImport({
           <Alert
             type="info"
             showIcon
-            title="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；型号、名称与规格均相同的行视为重复，导入会失败。"
+            title="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；类型列选填，留空按 A；类型、型号、名称与规格均相同的行视为重复，导入会失败。"
           />
 
           {parseErrors.length > 0 && (
@@ -234,7 +239,7 @@ export default function JintanMaterialsDataExcelImport({
                 dataSource={previewData}
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}
-                scroll={{ y: 320, x: 900 }}
+                scroll={{ y: 320, x: 970 }}
               />
             </div>
           )}

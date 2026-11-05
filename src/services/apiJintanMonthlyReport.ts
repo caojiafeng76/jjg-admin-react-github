@@ -18,6 +18,8 @@ export const JINTAN_MONTHLY_REPORT_CATEGORY_LABELS: Record<
 export interface JintanMonthlyReportRow {
   category: JintanMonthlyReportCategory
   inventory_id: string
+  /** 类型 A / B；配件没有类型，为空字符串 */
+  item_type: string
   item_model: string
   item_name: string
   specification: string

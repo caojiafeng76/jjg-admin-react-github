@@ -1,9 +1,11 @@
+import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 
 export interface JintanProfilesInventory {
   id: string
   profile_data_id: string
+  item_type: JintanItemType
   profile_model: string
   profile_name: string
   specification: string
@@ -20,6 +22,7 @@ export interface JintanProfilesInventoryFormValues {
 }
 
 export interface JintanProfilesInventoryImportRow {
+  item_type: JintanItemType
   profile_model: string
   profile_name: string
   specification: string
@@ -39,11 +42,12 @@ function normalizeFormValues(
 }
 
 function inventoryKeyOf(row: {
+  item_type: string
   profile_model: string
   profile_name: string
   specification: string
 }): string {
-  return `${row.profile_model}\u0000${row.profile_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.profile_model}\u0000${row.profile_name}\u0000${row.specification}`
 }
 
 function keywordFilter(keyword: string) {
@@ -54,10 +58,12 @@ export async function getJintanProfilesInventoryList({
   page,
   pageSize,
   keyword,
+  itemType,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -68,6 +74,9 @@ export async function getJintanProfilesInventoryList({
 
   if (keyword) {
     query = query.or(keywordFilter(keyword.trim()))
+  }
+  if (itemType) {
+    query = query.eq('item_type', itemType)
   }
 
   const { data, error, count } = await query
@@ -108,7 +117,10 @@ export async function getJintanProfilesInventoryByDataId(
   return (data as JintanProfilesInventory | null) ?? null
 }
 
-export async function getJintanProfilesInventoryForExport(keyword?: string) {
+export async function getJintanProfilesInventoryForExport(
+  keyword?: string,
+  itemType?: JintanItemType,
+) {
   const rows: JintanProfilesInventory[] = []
   let from = 0
 
@@ -117,6 +129,9 @@ export async function getJintanProfilesInventoryForExport(keyword?: string) {
 
     if (keyword) {
       query = query.or(keywordFilter(keyword.trim()))
+    }
+    if (itemType) {
+      query = query.eq('item_type', itemType)
     }
 
     const { data, error } = await query
@@ -172,7 +187,7 @@ export async function createJintanProfilesInventoryBatch(
     const key = inventoryKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `型号“${row.profile_model}”名称“${row.profile_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
+        `类型“${row.item_type}”型号“${row.profile_model}”名称“${row.profile_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -182,7 +197,7 @@ export async function createJintanProfilesInventoryBatch(
   const { data: inventoryRows, error: inventoryError } = await supabase
     .from('jintan_profiles_inventory')
     .select(
-      'id, profile_data_id, profile_model, profile_name, specification, material',
+      'id, profile_data_id, item_type, profile_model, profile_name, specification, material',
     )
     .in('profile_name', profileNames)
 
@@ -199,7 +214,7 @@ export async function createJintanProfilesInventoryBatch(
     const labels = missing
       .map(
         row =>
-          `“${row.profile_model}”/“${row.profile_name}”/“${row.specification}”`,
+          `“${row.item_type}”/“${row.profile_model}”/“${row.profile_name}”/“${row.specification}”`,
       )
       .join('、')
     throw new Error(`以下型材在型材资料中不存在，请先维护型材资料：${labels}`)
@@ -209,13 +224,14 @@ export async function createJintanProfilesInventoryBatch(
     const matched = inventoryByKey.get(inventoryKeyOf(row))
     if (!matched) {
       throw new Error(
-        `未找到型号“${row.profile_model}”名称“${row.profile_name}”规格“${row.specification}”的库存行，请刷新后重试`,
+        `未找到类型“${row.item_type}”型号“${row.profile_model}”名称“${row.profile_name}”规格“${row.specification}”的库存行，请刷新后重试`,
       )
     }
 
     return {
       id: matched.id,
       profile_data_id: matched.profile_data_id,
+      item_type: matched.item_type,
       profile_model: matched.profile_model,
       profile_name: matched.profile_name,
       specification: matched.specification,
@@ -236,6 +252,7 @@ export async function createJintanProfilesInventoryBatch(
 
 export interface JintanProfilesInventoryOption {
   id: string
+  item_type: JintanItemType
   profile_model: string
   profile_name: string
   specification: string
@@ -249,7 +266,7 @@ export async function getJintanProfilesInventoryOptions(
   let query = supabase
     .from('jintan_profiles_inventory')
     .select(
-      'id, profile_model, profile_name, specification, material, quantity',
+      'id, item_type, profile_model, profile_name, specification, material, quantity',
     )
   if (keyword?.trim())
     query = query.or(keywordFilter(keyword.trim()))
@@ -261,5 +278,5 @@ export async function getJintanProfilesInventoryOptions(
 
   if (error)
     throw handleApiError(error, '获取型材库存选项失败')
-  return data ?? []
+  return (data ?? []) as JintanProfilesInventoryOption[]
 }
