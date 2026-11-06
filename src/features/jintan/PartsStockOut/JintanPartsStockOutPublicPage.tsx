@@ -63,7 +63,7 @@ export default function JintanPartsStockOutPublicPage() {
     () =>
       options.map(option => ({
         value: option.id,
-        label: `${option.part_name} / ${option.specification || '无规格'}（库存 ${option.quantity}）`,
+        label: `${option.item_type} / ${option.part_name} / ${option.specification || '无规格'}（库存 ${option.quantity}）`,
       })),
     [options],
   )
@@ -91,7 +91,7 @@ export default function JintanPartsStockOutPublicPage() {
       )
       setSubmitted({
         partLabel: submittedOption
-          ? `${submittedOption.part_name} / ${submittedOption.specification || '无规格'}`
+          ? `${submittedOption.item_type} / ${submittedOption.part_name} / ${submittedOption.specification || '无规格'}`
           : '配件出库',
         quantity: payload.quantity,
         remarks: payload.remarks || '无',
@@ -233,6 +233,7 @@ export default function JintanPartsStockOutPublicPage() {
 
                                 {selected && (
                                   <div className="mb-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                                    <div>类型：{selected.item_type}</div>
                                     <div>
                                       名称：{selected.part_name} / 规格：
                                       {selected.specification || '-'}

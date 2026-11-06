@@ -38,6 +38,13 @@ export default function JintanPartsInventoryTable({
         render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        title: '类型',
+        dataIndex: 'item_type',
+        key: 'item_type',
+        width: 70,
+        fixed: 'left',
+      },
+      {
         title: '名称',
         dataIndex: 'part_name',
         key: 'part_name',
@@ -160,7 +167,7 @@ export default function JintanPartsInventoryTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1480, y: scrollY }}
+      scroll={{ x: 1550, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

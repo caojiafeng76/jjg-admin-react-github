@@ -32,7 +32,10 @@ function reportRow(
 
 describe('filterJintanMonthlyReportByItemType', () => {
   const report: JintanMonthlyReport = {
-    parts: [reportRow({ category: 'parts', inventory_id: 'p', item_type: '' })],
+    parts: [
+      reportRow({ category: 'parts', inventory_id: 'pa-a', item_type: 'A' }),
+      reportRow({ category: 'parts', inventory_id: 'pa-b', item_type: 'B' }),
+    ],
     profiles: [
       reportRow({ category: 'profiles', inventory_id: 'pa', item_type: 'A' }),
       reportRow({ category: 'profiles', inventory_id: 'pb', item_type: 'B' }),
@@ -46,10 +49,10 @@ describe('filterJintanMonthlyReportByItemType', () => {
     expect(filterJintanMonthlyReportByItemType(report)).toBe(report)
   })
 
-  it('filters profiles and materials but keeps parts', () => {
+  it('filters parts, profiles and materials', () => {
     const filtered = filterJintanMonthlyReportByItemType(report, 'B')
 
-    expect(filtered.parts.map(row => row.inventory_id)).toEqual(['p'])
+    expect(filtered.parts.map(row => row.inventory_id)).toEqual(['pa-b'])
     expect(filtered.profiles.map(row => row.inventory_id)).toEqual(['pb'])
     expect(filtered.materials).toEqual([])
   })

@@ -4,6 +4,7 @@ export interface JintanPartsListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanPartsInventoryListKeyParams {
@@ -11,18 +12,21 @@ export interface JintanPartsInventoryListKeyParams {
   pageSize: number
   keyword?: string
   status?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanPartsStockInListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanPartsStockOutListKeyParams {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }
 
 export interface JintanProfilesListKeyParams {
@@ -119,6 +123,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
         },
       ] as const,
   },
@@ -143,10 +148,16 @@ export const jintanKeys = {
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
           status: params.status ?? '',
+          itemType: params.itemType ?? '',
         },
       ] as const,
-    summary: (keyword?: string) =>
-      [PARTS_INVENTORY_ROOT, 'summary', normalizeKeyword(keyword)] as const,
+    summary: (keyword?: string, itemType?: JintanItemType) =>
+      [
+        PARTS_INVENTORY_ROOT,
+        'summary',
+        normalizeKeyword(keyword),
+        itemType ?? '',
+      ] as const,
     adjustments: (params: JintanStockByInventoryKeyParams) =>
       [
         PARTS_INVENTORY_ROOT,
@@ -178,6 +189,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
         },
       ] as const,
   },
@@ -197,7 +209,11 @@ export const jintanKeys = {
       [
         PARTS_STOCK_OUT_ROOT,
         'list',
-        { ...params, keyword: normalizeKeyword(params.keyword) },
+        {
+          ...params,
+          keyword: normalizeKeyword(params.keyword),
+          itemType: params.itemType ?? '',
+        },
       ] as const,
   },
   profilesData: {

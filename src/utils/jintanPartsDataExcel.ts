@@ -6,6 +6,10 @@ import dayjs from 'dayjs'
 
 import * as XLSX from 'xlsx-js-style'
 import {
+  DEFAULT_JINTAN_ITEM_TYPE,
+  parseJintanItemType,
+} from '@/services/jintanItemType'
+import {
   applyRegisterSheetStyles,
   autoFitColumnWidths,
   centerAllCells,
@@ -13,7 +17,8 @@ import {
   setRowHeight,
 } from '@/utils/excelStyleUtils'
 
-const TEMPLATE_HEADERS = ['名称', '规格', '材质', '采购厂家', '备注'] as const
+const TEMPLATE_HEADERS = ['名称', '规格', '材质', '采购厂家', '备注', '类型'] as const
+const ITEM_TYPE_COLUMN_INDEX = TEMPLATE_HEADERS.length - 1
 
 const TEMPLATE_FILE_NAME = '金檀木业配件资料模板.xlsx'
 const TEMPLATE_SHEET_NAME = '配件资料导入模板'
@@ -22,6 +27,7 @@ const EXPORT_SHEET_NAME = '配件资料'
 const EXPORT_TITLE = '金檀木业配件资料'
 const EXPORT_HEADERS = [
   '#',
+  '类型',
   '名称',
   '规格',
   '材质',
@@ -29,7 +35,7 @@ const EXPORT_HEADERS = [
   '备注',
   '更新时间',
 ] as const
-const EXPORT_COLUMN_WIDTHS = [6, 20, 18, 14, 18, 28, 20]
+const EXPORT_COLUMN_WIDTHS = [6, 6, 20, 18, 14, 18, 28, 20]
 
 export interface ParseJintanPartsDataExcelResult {
   rows: JintanPartsDataFormValues[]
@@ -58,6 +64,7 @@ export function createJintanPartsDataExportWorkbook(
 
   const bodyRows = items.map((item, index) => [
     index + 1,
+    item.item_type,
     item.part_name,
     item.specification,
     item.material,
@@ -107,6 +114,9 @@ export async function parseJintanPartsDataExcel(
   )
 
   validateTemplateHeaders(rawRows[0])
+  const hasItemTypeColumn = Boolean(
+    normalizeText(rawRows[0]?.[ITEM_TYPE_COLUMN_INDEX]),
+  )
 
   const rows: JintanPartsDataFormValues[] = []
   const errors: string[] = []
@@ -132,16 +142,28 @@ export async function parseJintanPartsDataExcel(
       return
     }
 
-    const dedupeKey = `${partName}\u0000${specification}`
+    const itemTypeText = hasItemTypeColumn
+      ? normalizeText(cells[ITEM_TYPE_COLUMN_INDEX])
+      : ''
+    const itemType = itemTypeText
+      ? parseJintanItemType(itemTypeText)
+      : DEFAULT_JINTAN_ITEM_TYPE
+    if (!itemType) {
+      errors.push(`第 ${rowNumber} 行类型只能填 A 或 B`)
+      return
+    }
+
+    const dedupeKey = `${itemType}\u0000${partName}\u0000${specification}`
     if (seenKeys.has(dedupeKey)) {
       errors.push(
-        `第 ${rowNumber} 行名称“${partName}”规格“${specification}”在 Excel 中重复`,
+        `第 ${rowNumber} 行类型“${itemType}”名称“${partName}”规格“${specification}”在 Excel 中重复`,
       )
       return
     }
 
     seenKeys.add(dedupeKey)
     rows.push({
+      item_type: itemType,
       part_name: partName,
       specification,
       material,
@@ -163,8 +185,12 @@ function validateTemplateHeaders(
   const headerRow = headerCells.map(cell => normalizeText(cell))
   const templateHeaders = Array.from(TEMPLATE_HEADERS)
 
+  // 类型列选填：旧模板没有这一列也能导入，有内容时表头必须是「类型」
+  const itemTypeHeader = headerRow[ITEM_TYPE_COLUMN_INDEX]
   const matches = templateHeaders.every(
-    (header, index) => headerRow[index] === header,
+    (header, index) =>
+      headerRow[index] === header
+      || (index === ITEM_TYPE_COLUMN_INDEX && !itemTypeHeader),
   )
 
   if (!matches) {

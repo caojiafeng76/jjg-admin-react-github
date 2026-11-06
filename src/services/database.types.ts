@@ -582,6 +582,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          item_type: string
           material: string
           part_name: string
           remarks: string
@@ -592,6 +593,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          item_type?: string
           material?: string
           part_name: string
           remarks?: string
@@ -602,6 +604,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          item_type?: string
           material?: string
           part_name?: string
           remarks?: string
@@ -615,6 +618,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          item_type: string
           material: string
           part_data_id: string
           part_name: string
@@ -633,6 +637,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          item_type?: string
           material?: string
           part_data_id: string
           part_name: string
@@ -651,6 +656,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          item_type?: string
           material?: string
           part_data_id?: string
           part_name?: string
@@ -681,6 +687,7 @@ export type Database = {
           created_at: string
           id: string
           inventory_id: string
+          item_type: string
           material: string
           part_name: string
           quantity: number
@@ -693,6 +700,7 @@ export type Database = {
           created_at?: string
           id?: string
           inventory_id: string
+          item_type?: string
           material?: string
           part_name?: string
           quantity: number
@@ -705,6 +713,7 @@ export type Database = {
           created_at?: string
           id?: string
           inventory_id?: string
+          item_type?: string
           material?: string
           part_name?: string
           quantity?: number
@@ -728,6 +737,7 @@ export type Database = {
           created_at: string
           id: string
           inventory_id: string
+          item_type: string
           material: string
           part_name: string
           quantity: number
@@ -740,6 +750,7 @@ export type Database = {
           created_at?: string
           id?: string
           inventory_id: string
+          item_type?: string
           material?: string
           part_name?: string
           quantity: number
@@ -752,6 +763,7 @@ export type Database = {
           created_at?: string
           id?: string
           inventory_id?: string
+          item_type?: string
           material?: string
           part_name?: string
           quantity?: number

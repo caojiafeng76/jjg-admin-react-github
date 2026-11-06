@@ -1,5 +1,6 @@
-import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
+import type { JintanItemType } from '@/services/jintanItemType'
 
+import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
 import {
   createJintanPartsData,
   createJintanPartsDataBatch,
@@ -8,8 +9,8 @@ import {
   updateJintanPartsData,
 } from '@services/apiJintanPartsData'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { queryConfig } from '@/config/queryClient'
 
+import { queryConfig } from '@/config/queryClient'
 import { jintanKeys } from '../queryKeys'
 
 export function useJintanPartsDataList({
@@ -21,6 +22,7 @@ export function useJintanPartsDataList({
   pageSize: number
   searchParams: {
     keyword?: string
+    itemType?: JintanItemType
   }
 }) {
   return useQuery({
@@ -28,12 +30,14 @@ export function useJintanPartsDataList({
       page,
       pageSize,
       keyword: searchParams.keyword,
+      itemType: searchParams.itemType,
     }),
     queryFn: () =>
       getJintanPartsDataList({
         page,
         pageSize,
         keyword: searchParams.keyword,
+        itemType: searchParams.itemType,
       }),
     placeholderData: keepPreviousData,
     throwOnError: false,

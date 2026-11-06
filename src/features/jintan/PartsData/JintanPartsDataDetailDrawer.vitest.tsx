@@ -5,6 +5,7 @@ import JintanPartsDataDetailDrawer from './JintanPartsDataDetailDrawer'
 
 const record = {
   id: 'part-1',
+  item_type: 'A' as const,
   part_name: '螺丝',
   specification: 'M6*16',
   material: '不锈钢',
@@ -17,6 +18,7 @@ const record = {
 const inventory = {
   id: 'inv-1',
   part_data_id: 'part-1',
+  item_type: 'A' as const,
   part_name: '螺丝',
   specification: 'M6*16',
   material: '不锈钢',
@@ -194,7 +196,7 @@ describe('JintanPartsDataDetailDrawer', () => {
     renderDrawer()
 
     expect(screen.getByText('配件详情')).toBeInTheDocument()
-    expect(screen.getByText('螺丝 / M6*16')).toBeInTheDocument()
+    expect(screen.getByText('A / 螺丝 / M6*16')).toBeInTheDocument()
     expect(screen.getByText('20')).toBeInTheDocument()
     expect(screen.getByText('入库记录')).toBeInTheDocument()
     expect(screen.getByText('出库记录')).toBeInTheDocument()

@@ -1,3 +1,4 @@
+import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
 import publicSupabase from './publicSupabase'
 import supabase from './supabase'
@@ -14,6 +15,7 @@ export const JINTAN_PARTS_STOCK_STATUSES: readonly JintanPartsStockStatus[] = [
 export interface JintanPartsInventory {
   id: string
   part_data_id: string
+  item_type: JintanItemType
   part_name: string
   specification: string
   material: string
@@ -43,6 +45,7 @@ export type JintanPartsStockStatusSummary = Record<
 >
 
 export interface JintanPartsInventoryImportRow {
+  item_type: JintanItemType
   part_name: string
   specification: string
   quantity: number
@@ -63,10 +66,11 @@ function normalizeFormValues(
 }
 
 function inventoryKeyOf(row: {
+  item_type: string
   part_name: string
   specification: string
 }): string {
-  return `${row.part_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}`
 }
 
 function keywordFilter(keyword: string) {
@@ -78,11 +82,13 @@ export async function getJintanPartsInventoryList({
   pageSize,
   keyword,
   status,
+  itemType,
 }: {
   page: number
   pageSize: number
   keyword?: string
   status?: JintanPartsStockStatus
+  itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -97,6 +103,9 @@ export async function getJintanPartsInventoryList({
 
   if (status) {
     query = query.eq('stock_status', status)
+  }
+  if (itemType) {
+    query = query.eq('item_type', itemType)
   }
 
   const { data, error, count } = await query
@@ -141,9 +150,11 @@ export async function getJintanPartsInventoryByDataId(
 export async function getJintanPartsInventoryForExport({
   keyword,
   status,
+  itemType,
 }: {
   keyword?: string
   status?: JintanPartsStockStatus
+  itemType?: JintanItemType
 } = {}) {
   const rows: JintanPartsInventory[] = []
   let from = 0
@@ -157,6 +168,9 @@ export async function getJintanPartsInventoryForExport({
 
     if (status) {
       query = query.eq('stock_status', status)
+    }
+    if (itemType) {
+      query = query.eq('item_type', itemType)
     }
 
     const { data, error } = await query
@@ -184,6 +198,7 @@ export async function getJintanPartsInventoryForExport({
 
 export async function getJintanPartsInventoryStatusSummary(
   keyword?: string,
+  itemType?: JintanItemType,
 ): Promise<JintanPartsStockStatusSummary> {
   const results = await Promise.all(
     JINTAN_PARTS_STOCK_STATUSES.map(async (status) => {
@@ -194,6 +209,10 @@ export async function getJintanPartsInventoryStatusSummary(
 
       if (keyword) {
         query = query.or(keywordFilter(keyword.trim()))
+      }
+
+      if (itemType) {
+        query = query.eq('item_type', itemType)
       }
 
       const { count, error } = await query
@@ -239,7 +258,7 @@ export async function createJintanPartsInventoryBatch(
     const key = inventoryKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `名称“${row.part_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
+        `类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -248,7 +267,7 @@ export async function createJintanPartsInventoryBatch(
   const partNames = Array.from(new Set(rows.map(row => row.part_name)))
   const { data: inventoryRows, error: inventoryError } = await supabase
     .from('jintan_parts_inventory')
-    .select('id, part_data_id, part_name, specification, material, supplier')
+    .select('id, part_data_id, item_type, part_name, specification, material, supplier')
     .in('part_name', partNames)
 
   if (inventoryError) {
@@ -262,7 +281,7 @@ export async function createJintanPartsInventoryBatch(
   const missing = rows.filter(row => !inventoryByKey.has(inventoryKeyOf(row)))
   if (missing.length > 0) {
     const labels = missing
-      .map(row => `“${row.part_name}”/“${row.specification}”`)
+      .map(row => `“${row.item_type}”/“${row.part_name}”/“${row.specification}”`)
       .join('、')
     throw new Error(`以下配件在配件资料中不存在，请先维护配件资料：${labels}`)
   }
@@ -271,13 +290,14 @@ export async function createJintanPartsInventoryBatch(
     const matched = inventoryByKey.get(inventoryKeyOf(row))
     if (!matched) {
       throw new Error(
-        `未找到名称“${row.part_name}”规格“${row.specification}”的库存行，请刷新后重试`,
+        `未找到类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”的库存行，请刷新后重试`,
       )
     }
 
     return {
       id: matched.id,
       part_data_id: matched.part_data_id,
+      item_type: matched.item_type,
       part_name: matched.part_name,
       specification: matched.specification,
       material: matched.material,
@@ -298,6 +318,7 @@ export async function createJintanPartsInventoryBatch(
 
 export interface JintanPartsInventoryOption {
   id: string
+  item_type: JintanItemType
   part_name: string
   specification: string
   material: string
@@ -329,7 +350,7 @@ async function getJintanPartsInventoryOptionsWithClient(
 ): Promise<JintanPartsInventoryOption[]> {
   let query = client
     .from('jintan_parts_inventory')
-    .select('id, part_name, specification, material, supplier, quantity')
+    .select('id, item_type, part_name, specification, material, supplier, quantity')
   if (keyword?.trim())
     query = query.or(keywordFilter(keyword.trim()))
 
@@ -343,5 +364,5 @@ async function getJintanPartsInventoryOptionsWithClient(
 
   if (error)
     throw handleApiError(error, '获取配件库存选项失败')
-  return data ?? []
+  return (data ?? []) as JintanPartsInventoryOption[]
 }

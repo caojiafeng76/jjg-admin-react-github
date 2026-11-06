@@ -36,7 +36,7 @@ export function formatJintanReportMonth(month: string) {
   return dayjs(`${month}-01`).format('YYYY年M月')
 }
 
-/** 按类型筛选型材、素材；配件没有类型，不受影响 */
+/** 按类型筛选配件、型材、素材 */
 export function filterJintanMonthlyReportByItemType(
   report: JintanMonthlyReport,
   itemType?: JintanItemType,
@@ -45,7 +45,7 @@ export function filterJintanMonthlyReportByItemType(
     return report
   }
   return {
-    parts: report.parts,
+    parts: report.parts.filter(row => row.item_type === itemType),
     profiles: report.profiles.filter(row => row.item_type === itemType),
     materials: report.materials.filter(row => row.item_type === itemType),
   }

@@ -102,9 +102,9 @@ export default function JintanMonthlyReportPage() {
         loadJintanMonthlyReportExcel(),
       ])
 
-      const exportReport = filterJintanMonthlyReportByItemType(fullReport, itemType)
+      const selectedReport = filterJintanMonthlyReportByItemType(fullReport, itemType)
       const total = JINTAN_MONTHLY_REPORT_CATEGORIES.reduce(
-        (sum, key) => sum + exportReport[key].length,
+        (sum, key) => sum + selectedReport[key].length,
         0,
       )
       if (total === 0) {
@@ -112,7 +112,7 @@ export default function JintanMonthlyReportPage() {
         return
       }
 
-      exportJintanMonthlyReportToExcel(exportReport, month)
+      exportJintanMonthlyReportToExcel(fullReport, month, itemType)
       message.success(
         feedbackText.exported(`${formatJintanReportMonth(month)}库存记录`, total),
       )
@@ -164,17 +164,15 @@ export default function JintanMonthlyReportPage() {
             }`,
           }))}
         />
-        {category !== 'parts' && (
-          <Select
-            allowClear
-            placeholder="全部类型"
-            aria-label="类型"
-            style={{ width: 120 }}
-            value={itemType}
-            options={JINTAN_ITEM_TYPE_OPTIONS}
-            onChange={value => updateSearchParam('itemType', value)}
-          />
-        )}
+        <Select
+          allowClear
+          placeholder="全部类型"
+          aria-label="类型"
+          style={{ width: 120 }}
+          value={itemType}
+          options={JINTAN_ITEM_TYPE_OPTIONS}
+          onChange={value => updateSearchParam('itemType', value)}
+        />
       </div>
 
       <div
