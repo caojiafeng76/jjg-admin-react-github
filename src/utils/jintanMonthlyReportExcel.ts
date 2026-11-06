@@ -2,6 +2,7 @@ import type {
   JintanMonthlyReport,
   JintanMonthlyReportRow,
 } from '@/services/apiJintanMonthlyReport'
+import type { JintanItemType } from '@/services/jintanItemType'
 import dayjs from 'dayjs'
 
 import * as XLSX from 'xlsx-js-style'
@@ -14,6 +15,7 @@ import {
   JINTAN_MONTHLY_REPORT_CATEGORIES,
   JINTAN_MONTHLY_REPORT_CATEGORY_LABELS,
 } from '@/services/apiJintanMonthlyReport'
+import { JINTAN_ITEM_TYPES } from '@/services/jintanItemType'
 import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
@@ -85,20 +87,28 @@ function createCategorySheet(
   return worksheet
 }
 
+/**
+ * 按「配件A、配件B、型材A、型材B、素材A、素材B」顺序生成工作表；
+ * 传 itemType 时只生成该类型的工作表。
+ */
 export function createJintanMonthlyReportWorkbook(
   report: JintanMonthlyReport,
   month: string,
+  itemType?: JintanItemType,
 ): XLSX.WorkBook {
   const monthLabel = formatJintanReportMonth(month)
   const workbook = XLSX.utils.book_new()
+  const itemTypes = itemType ? [itemType] : JINTAN_ITEM_TYPES
 
   for (const category of JINTAN_MONTHLY_REPORT_CATEGORIES) {
     const label = JINTAN_MONTHLY_REPORT_CATEGORY_LABELS[category]
-    const worksheet = createCategorySheet(
-      report[category],
-      `金檀木业${label}月度库存报表（${monthLabel}）`,
-    )
-    XLSX.utils.book_append_sheet(workbook, worksheet, label)
+    for (const type of itemTypes) {
+      const worksheet = createCategorySheet(
+        report[category].filter(row => row.item_type === type),
+        `金檀木业${label}${type}月度库存报表（${monthLabel}）`,
+      )
+      XLSX.utils.book_append_sheet(workbook, worksheet, `${label}${type}`)
+    }
   }
 
   return workbook
@@ -107,8 +117,10 @@ export function createJintanMonthlyReportWorkbook(
 export function exportJintanMonthlyReportToExcel(
   report: JintanMonthlyReport,
   month: string,
+  itemType?: JintanItemType,
 ) {
-  const workbook = createJintanMonthlyReportWorkbook(report, month)
-  const filename = `金檀木业月度库存报表_${month}_${dayjs().format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
+  const workbook = createJintanMonthlyReportWorkbook(report, month, itemType)
+  const typeSuffix = itemType ? `_${itemType}类` : ''
+  const filename = `金檀木业月度库存报表${typeSuffix}_${month}_${dayjs().format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
   XLSX.writeFile(workbook, filename, EXCEL_WRITE_OPTIONS)
 }

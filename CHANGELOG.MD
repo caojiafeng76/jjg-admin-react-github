@@ -15,6 +15,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-11-06
+
+- **类别**：新建
+- **范围**：`supabase/migrations/20261106090000_add_jintan_parts_item_type.sql`、`src/services/apiJintanParts*`、`src/features/jintan/Parts*`、`src/features/jintan/MonthlyReport`、`src/utils/jintanParts*Excel.ts`、`src/utils/jintanMonthlyReportExcel.ts`
+- **摘要**：金檀配件增加类型字段 `item_type`（A / B），默认 A，已有数据归为 A。判重改为“类型+名称+规格”，A、B 的资料、库存、出入库和安全库存分开。配件资料、库存、入库、出库、详情抽屉和公开扫码出库页显示类型，列表可按类型筛选，导出跟随筛选，库存状态统计也跟随筛选；Excel 模板末尾增加选填的“类型”列，库存导入按类型匹配。月度报表导出拆为配件A、配件B、型材A、型材B、素材A、素材B 6 个工作表，各自合计；页面选了类型时只导出该类型的 3 个工作表，文件名带类型。月报页面的类型筛选扩展到配件页签。
+- **验证**：迁移由用户本人在终端执行 `bun run db:push`，之后 `db:push:dry-run` 显示远端无待推送迁移，`bun run db:types` 已更新 `database.types.ts`。`bun lint`、`bun run typecheck`、`bun run build`、`bun run check:bundle`、`bunx antd lint`、`bun audit --production` 通过；`bun run test:coverage` 202 个文件、994 个用例通过（含配件 Excel 类型列、库存导入按类型匹配、资料判重、月报分表和页面导出用例）。生产库配件 4 张表行数与推送前一致（57/57/3/23），全部为 A；调整流水没有类型为空的行。在回滚事务中验证：同名称规格的 A、B 可并存且各有库存行，不传类型默认 A，B 行入库 5、出库 2 后库存为 3，改资料类型后库存快照跟随，调整流水带类型，给 B 设单台数量只影响 B 的状态；同 key 同类型被唯一约束拒绝，类型 C 被 check 约束拒绝；事后确认无测试数据残留。Claude in Chrome 只读检查：配件资料、库存、入库、出库页的类型列，库存页类型筛选和状态统计联动，扫码出库页下拉和选中摘要带类型（未提交），月报各页签筛选。用 2026 年 11 月真实数据在页面内存中生成工作簿（未下载）：6 张表依次为配件A/B、型材A/B、素材A/B，行数 57/0、78/0、65/8，与报表合计 57、78、73 一致；选 B 时只有 3 张。未覆盖：配件没有真实 B 数据；页面新增保存、Excel 文件的实际下载和导入未在浏览器操作（由单元测试和回滚事务覆盖）。
+
 ## 2026-11-05
 
 - **类别**：新建

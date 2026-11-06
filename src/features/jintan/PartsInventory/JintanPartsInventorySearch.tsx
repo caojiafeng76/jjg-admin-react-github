@@ -1,12 +1,15 @@
 import type { JintanPartsStockStatus } from '@/services/apiJintanPartsInventory'
-import { Button, Form, Input, Select, Space } from 'antd'
+import type { JintanItemType } from '@/services/jintanItemType'
 
+import { Button, Form, Input, Select, Space } from 'antd'
 import { useEffect } from 'react'
+import JintanItemTypeFilterItem from '../JintanItemTypeFilterItem'
 import { JINTAN_PARTS_STOCK_STATUS_OPTIONS } from './stockStatus'
 
 export interface JintanPartsInventorySearchValues {
   keyword?: string
   status?: JintanPartsStockStatus
+  itemType?: JintanItemType
 }
 
 interface Props {
@@ -26,6 +29,7 @@ export default function JintanPartsInventorySearch({
     form.setFieldsValue({
       keyword: initialValues?.keyword,
       status: initialValues?.status,
+      itemType: initialValues?.itemType,
     })
   }, [form, initialValues])
 
@@ -33,6 +37,7 @@ export default function JintanPartsInventorySearch({
     onSearch({
       keyword: values.keyword?.trim() || undefined,
       status: values.status || undefined,
+      itemType: values.itemType,
     })
   }
 
@@ -55,6 +60,7 @@ export default function JintanPartsInventorySearch({
           className="rounded-lg"
         />
       </Form.Item>
+      <JintanItemTypeFilterItem />
       <Form.Item name="status" className="mb-0" style={{ width: 160 }}>
         <Select
           placeholder="库存状态"

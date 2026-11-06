@@ -3,7 +3,7 @@ import type { JintanPartsInventorySearchValues } from './JintanPartsInventorySea
 import type { JintanPartsInventory, JintanPartsInventoryFormValues, JintanPartsInventoryImportRow, JintanPartsStockStatus } from '@/services/apiJintanPartsInventory'
 import { App, Modal, Tag, Tooltip } from 'antd'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
@@ -13,6 +13,7 @@ import {
   JINTAN_PARTS_STOCK_STATUSES,
 
 } from '@/services/apiJintanPartsInventory'
+import { parseJintanItemType } from '@/services/jintanItemType'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
@@ -69,11 +70,14 @@ export default function JintanPartsInventoryPage() {
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const statusParam = searchParamsURL.get('status')
-  const [searchParams, setSearchParams]
-    = useState<JintanPartsInventorySearchValues>(() => ({
-      keyword: searchParamsURL.get('keyword') || undefined,
-      status: isJintanPartsStockStatus(statusParam) ? statusParam : undefined,
-    }))
+  const keyword = searchParamsURL.get('keyword') || undefined
+  const status = isJintanPartsStockStatus(statusParam) ? statusParam : undefined
+  const itemType
+    = parseJintanItemType(searchParamsURL.get('itemType')) ?? undefined
+  const searchParams = useMemo<JintanPartsInventorySearchValues>(
+    () => ({ keyword, status, itemType }),
+    [keyword, status, itemType],
+  )
 
   const { data, isLoading, error, refetch } = useJintanPartsInventoryList({
     page,
@@ -81,7 +85,8 @@ export default function JintanPartsInventoryPage() {
     searchParams,
   })
   const { data: statusSummary } = useJintanPartsInventorySummary(
-    searchParams.keyword,
+    keyword,
+    itemType,
   )
 
   const updateMutation = useUpdateJintanPartsInventory()
@@ -132,8 +137,9 @@ export default function JintanPartsInventoryPage() {
       const [exportRows, { exportJintanPartsInventoryToExcel }]
         = await Promise.all([
           getJintanPartsInventoryForExport({
-            keyword: searchParams.keyword,
-            status: searchParams.status,
+            keyword,
+            status,
+            itemType,
           }),
           loadJintanPartsInventoryExcel(),
         ])
@@ -156,9 +162,10 @@ export default function JintanPartsInventoryPage() {
     }
   }, [
     canManageInventory,
+    itemType,
+    keyword,
     message,
-    searchParams.keyword,
-    searchParams.status,
+    status,
     viewerDenied,
     viewerOperationTip,
   ])
@@ -235,8 +242,7 @@ export default function JintanPartsInventoryPage() {
   )
 
   const handleSearch = useCallback(
-    (params: typeof searchParams) => {
-      setSearchParams(params)
+    (params: JintanPartsInventorySearchValues) => {
       setSelectedRowKeys([])
 
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
@@ -256,30 +262,38 @@ export default function JintanPartsInventoryPage() {
         nextSearchParamsURL.delete('status')
       }
 
+      if (params.itemType) {
+        nextSearchParamsURL.set('itemType', params.itemType)
+      }
+      else {
+        nextSearchParamsURL.delete('itemType')
+      }
+
       setSearchParamsURL(nextSearchParamsURL)
     },
     [searchParamsURL, setSearchParamsURL],
   )
 
   const handleResetSearch = useCallback(() => {
-    setSearchParams({})
     setSelectedRowKeys([])
 
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
     nextSearchParamsURL.delete('keyword')
     nextSearchParamsURL.delete('status')
+    nextSearchParamsURL.delete('itemType')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
 
   const handleStatusClick = useCallback(
-    (status: JintanPartsStockStatus) => {
+    (nextStatus: JintanPartsStockStatus) => {
       handleSearch({
-        keyword: searchParams.keyword,
-        status: searchParams.status === status ? undefined : status,
+        keyword,
+        itemType,
+        status: status === nextStatus ? undefined : nextStatus,
       })
     },
-    [handleSearch, searchParams.keyword, searchParams.status],
+    [handleSearch, itemType, keyword, status],
   )
 
   useEffect(() => {

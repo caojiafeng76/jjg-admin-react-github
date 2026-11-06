@@ -38,6 +38,12 @@ export default function JintanPartsStockInTable({
         fixed: 'left',
         render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
       },
+      {
+        title: '类型',
+        dataIndex: 'item_type',
+        width: 70,
+        fixed: 'left',
+      },
       { title: '名称', dataIndex: 'part_name', width: 200, fixed: 'left' },
       {
         title: '规格',
@@ -93,7 +99,7 @@ export default function JintanPartsStockInTable({
       dataSource={data}
       rowSelection={{ type: 'radio', selectedRowKeys, onChange: onSelect }}
       pagination={false}
-      scroll={{ x: 1190, y: scrollY }}
+      scroll={{ x: 1260, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

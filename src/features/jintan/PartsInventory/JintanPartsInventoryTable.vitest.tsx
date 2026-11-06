@@ -10,6 +10,7 @@ function createRecord(
   return {
     id: 'inventory-1',
     part_data_id: 'part-1',
+    item_type: 'A' as const,
     part_name: '压簧',
     specification: '1.6*16*82*14',
     material: 'SUS304',
@@ -39,6 +40,7 @@ describe('金檀木业配件库存表格', () => {
           createRecord({}),
           createRecord({
             id: 'inventory-2',
+            item_type: 'A' as const,
             part_name: '防松螺母',
             quantity: 150,
             unit_quantity: 20,
@@ -48,6 +50,7 @@ describe('金檀木业配件库存表格', () => {
           }),
           createRecord({
             id: 'inventory-3',
+            item_type: 'A' as const,
             part_name: '十字沉头自攻螺钉',
             quantity: 2041,
             unit_quantity: 220,
@@ -57,6 +60,7 @@ describe('金檀木业配件库存表格', () => {
           }),
           createRecord({
             id: 'inventory-4',
+            item_type: 'A' as const,
             part_name: '膨胀螺栓',
             quantity: 320,
             unit_quantity: 32,
@@ -66,6 +70,7 @@ describe('金檀木业配件库存表格', () => {
           }),
           createRecord({
             id: 'inventory-5',
+            item_type: 'A' as const,
             part_name: '纸箱',
             quantity: 0,
             unit_quantity: null,

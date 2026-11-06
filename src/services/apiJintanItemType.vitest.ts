@@ -4,6 +4,8 @@ import {
   createJintanMaterialsDataBatch,
 } from './apiJintanMaterialsData'
 import { createJintanMaterialsInventoryBatch } from './apiJintanMaterialsInventory'
+import { createJintanPartsDataBatch } from './apiJintanPartsData'
+import { createJintanPartsInventoryBatch } from './apiJintanPartsInventory'
 import { createJintanProfilesDataBatch } from './apiJintanProfilesData'
 import { createJintanProfilesInventoryBatch } from './apiJintanProfilesInventory'
 import { parseJintanItemType } from './jintanItemType'
@@ -14,6 +16,7 @@ const db = vi.hoisted(() => ({
   upserted: [] as unknown[],
 }))
 
+vi.mock('./publicSupabase', () => ({ default: {} }))
 vi.mock('./supabase', () => ({
   default: {
     from() {
@@ -142,7 +145,68 @@ describe('型材库存导入按类型匹配', () => {
   })
 })
 
+describe('配件库存导入按类型匹配', () => {
+  const inventoryRow = (id: string, itemType: string) => ({
+    id,
+    part_data_id: `data-${id}`,
+    item_type: itemType,
+    part_name: '螺钉',
+    specification: 'M6',
+    material: 'SUS304',
+    supplier: '',
+  })
+  const importRow = (itemType: 'A' | 'B', quantity: number) => ({
+    item_type: itemType,
+    part_name: '螺钉',
+    specification: 'M6',
+    quantity,
+    remarks: '',
+  })
+
+  it('同名称规格的 A、B 各自写入对应库存行', async () => {
+    db.rows = [inventoryRow('inv-a', 'A'), inventoryRow('inv-b', 'B')]
+
+    await createJintanPartsInventoryBatch([
+      importRow('B', 7),
+      importRow('A', 3),
+    ])
+
+    expect(db.upserted[0]).toEqual([
+      expect.objectContaining({ id: 'inv-b', item_type: 'B', quantity: 7 }),
+      expect.objectContaining({ id: 'inv-a', item_type: 'A', quantity: 3 }),
+    ])
+  })
+
+  it('只有 A 库存时，导入 B 行报资料不存在，不写入 A', async () => {
+    db.rows = [inventoryRow('inv-a', 'A')]
+
+    await expect(
+      createJintanPartsInventoryBatch([importRow('B', 7)]),
+    ).rejects.toThrow('“B”/“螺钉”/“M6”')
+    expect(db.upserted).toEqual([])
+  })
+})
+
 describe('资料批量导入按类型判重', () => {
+  it('配件：已有 A 时可导入同名称规格的 B，重复的 A 被拒绝', async () => {
+    db.rows = [{ item_type: 'A', part_name: '螺钉', specification: 'M6' }]
+    const row = {
+      part_name: '螺钉',
+      specification: 'M6',
+      material: '',
+      supplier: '',
+      remarks: '',
+    }
+
+    await createJintanPartsDataBatch([{ ...row, item_type: 'B' }])
+    expect(db.inserted).toHaveLength(1)
+
+    await expect(
+      createJintanPartsDataBatch([{ ...row, item_type: 'A' }]),
+    ).rejects.toThrow('以下配件已存在')
+    expect(db.inserted).toHaveLength(1)
+  })
+
   it('素材：已有 A 时可导入同型号名称规格的 B，重复的 A 被拒绝', async () => {
     db.rows = [{
       item_type: 'A',

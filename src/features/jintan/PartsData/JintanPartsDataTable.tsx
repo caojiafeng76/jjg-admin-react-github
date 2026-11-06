@@ -42,6 +42,13 @@ export default function JintanPartsDataTable({
         render: (_value, _record, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        title: '类型',
+        dataIndex: 'item_type',
+        key: 'item_type',
+        width: 70,
+        fixed: 'left',
+      },
+      {
         title: '名称',
         dataIndex: 'part_name',
         key: 'part_name',
@@ -126,7 +133,7 @@ export default function JintanPartsDataTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: onOpenDetail ? 1240 : 1120, y: scrollY }}
+      scroll={{ x: onOpenDetail ? 1310 : 1190, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

@@ -7,6 +7,7 @@ import JintanPartsDataPage from './index'
 const records = [
   {
     id: 'part-1',
+    item_type: 'A',
     part_name: '螺丝',
     specification: 'M6*16',
     material: '不锈钢',

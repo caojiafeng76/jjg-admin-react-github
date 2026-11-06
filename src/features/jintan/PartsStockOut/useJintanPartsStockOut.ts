@@ -1,5 +1,6 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { JintanItemType } from '@/services/jintanItemType'
 
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
@@ -15,14 +16,21 @@ export function useJintanPartsStockOutList({
   page,
   pageSize,
   keyword,
+  itemType,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }) {
   return useQuery({
-    queryKey: jintanKeys.partsStockOut.list({ page, pageSize, keyword }),
-    queryFn: () => getJintanPartsStockOutList({ page, pageSize, keyword }),
+    queryKey: jintanKeys.partsStockOut.list({
+      page,
+      pageSize,
+      keyword,
+      itemType,
+    }),
+    queryFn: () => getJintanPartsStockOutList({ page, pageSize, keyword, itemType }),
     placeholderData: keepPreviousData,
     throwOnError: false,
     ...queryConfig.list,

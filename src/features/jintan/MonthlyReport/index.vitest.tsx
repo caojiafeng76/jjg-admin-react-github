@@ -11,7 +11,7 @@ const report: JintanMonthlyReport = {
   parts: [
     {
       category: 'parts',
-      item_type: '',
+      item_type: 'A',
       inventory_id: 'p-1',
       item_model: '',
       item_name: '十字沉头螺钉',
@@ -29,7 +29,7 @@ const report: JintanMonthlyReport = {
   profiles: [
     {
       category: 'profiles',
-      item_type: '',
+      item_type: 'A',
       inventory_id: 'pr-1',
       item_model: '140U',
       item_name: '铝合金立柱',
@@ -117,7 +117,7 @@ describe('jintanMonthlyReportPage', () => {
     expect(await screen.findByText('铝合金立柱')).toBeTruthy()
   })
 
-  it('exports all three categories for the selected month in one workbook', async () => {
+  it('exports both types for the selected month when no type is selected', async () => {
     getReport.mockResolvedValue(report)
     renderPage()
 
@@ -125,7 +125,32 @@ describe('jintanMonthlyReportPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /导出月度报表/ }))
 
     await waitFor(() =>
-      expect(exportToExcel).toHaveBeenCalledWith(report, '2026-10'),
+      expect(exportToExcel).toHaveBeenCalledWith(report, '2026-10', undefined),
     )
+  })
+
+  it('exports only the selected type', async () => {
+    getReport.mockResolvedValue(report)
+    renderPage('/jintan-monthly-report?month=2026-10&itemType=A')
+
+    await screen.findByText('十字沉头螺钉')
+    fireEvent.click(screen.getByRole('button', { name: /导出月度报表/ }))
+
+    await waitFor(() =>
+      expect(exportToExcel).toHaveBeenCalledWith(report, '2026-10', 'A'),
+    )
+  })
+
+  it('filters parts by type and does not export when the type has no rows', async () => {
+    getReport.mockResolvedValue(report)
+    renderPage('/jintan-monthly-report?month=2026-10&itemType=B')
+
+    expect(await screen.findByText('配件（0）')).toBeTruthy()
+    expect(screen.queryByText('十字沉头螺钉')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: /导出月度报表/ }))
+
+    expect(await screen.findByText('当前没有可导出的金檀库存数据')).toBeTruthy()
+    expect(exportToExcel).not.toHaveBeenCalled()
   })
 })

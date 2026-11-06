@@ -1,8 +1,10 @@
+import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 
 export interface JintanPartsData {
   id: string
+  item_type: JintanItemType
   part_name: string
   specification: string
   material: string
@@ -13,6 +15,7 @@ export interface JintanPartsData {
 }
 
 export interface JintanPartsDataFormValues {
+  item_type: JintanItemType
   part_name: string
   specification: string
   material: string
@@ -26,6 +29,7 @@ function normalizePayload(
   values: JintanPartsDataFormValues,
 ): JintanPartsDataFormValues {
   return {
+    item_type: values.item_type,
     part_name: values.part_name.trim(),
     specification: values.specification.trim(),
     material: values.material.trim(),
@@ -35,10 +39,11 @@ function normalizePayload(
 }
 
 function partsKeyOf(row: {
+  item_type: string
   part_name: string
   specification: string
 }): string {
-  return `${row.part_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}`
 }
 
 function keywordFilter(keyword: string) {
@@ -46,6 +51,7 @@ function keywordFilter(keyword: string) {
 }
 
 async function checkJintanPartsDataExists(
+  itemType: JintanItemType,
   partName: string,
   specification: string,
   excludeId?: string,
@@ -53,6 +59,7 @@ async function checkJintanPartsDataExists(
   let query = supabase
     .from('jintan_parts_data')
     .select('id')
+    .eq('item_type', itemType)
     .eq('part_name', partName)
     .eq('specification', specification)
     .limit(1)
@@ -74,10 +81,12 @@ export async function getJintanPartsDataList({
   page,
   pageSize,
   keyword,
+  itemType,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -86,6 +95,9 @@ export async function getJintanPartsDataList({
 
   if (keyword) {
     query = query.or(keywordFilter(keyword.trim()))
+  }
+  if (itemType) {
+    query = query.eq('item_type', itemType)
   }
 
   const { data, error, count } = await query
@@ -103,7 +115,10 @@ export async function getJintanPartsDataList({
   }
 }
 
-export async function getJintanPartsDataForExport(keyword?: string) {
+export async function getJintanPartsDataForExport(
+  keyword?: string,
+  itemType?: JintanItemType,
+) {
   const rows: JintanPartsData[] = []
   let from = 0
 
@@ -112,6 +127,9 @@ export async function getJintanPartsDataForExport(keyword?: string) {
 
     if (keyword) {
       query = query.or(keywordFilter(keyword.trim()))
+    }
+    if (itemType) {
+      query = query.eq('item_type', itemType)
     }
 
     const { data, error } = await query
@@ -140,12 +158,13 @@ export async function createJintanPartsData(values: JintanPartsDataFormValues) {
   const payload = normalizePayload(values)
 
   const exists = await checkJintanPartsDataExists(
+    payload.item_type,
     payload.part_name,
     payload.specification,
   )
   if (exists) {
     throw new Error(
-      `名称“${payload.part_name}”规格“${payload.specification}”已存在，无法创建`,
+      `类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”已存在，无法创建`,
     )
   }
 
@@ -166,7 +185,7 @@ export async function createJintanPartsDataBatch(
     const key = partsKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `名称“${row.part_name}”规格“${row.specification}”重复，无法导入`,
+        `类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -175,7 +194,7 @@ export async function createJintanPartsDataBatch(
   const partNames = Array.from(new Set(payload.map(row => row.part_name)))
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_parts_data')
-    .select('part_name, specification')
+    .select('item_type, part_name, specification')
     .in('part_name', partNames)
 
   if (existingError) {
@@ -188,7 +207,7 @@ export async function createJintanPartsDataBatch(
   const duplicated = payload.filter(row => existingKeys.has(partsKeyOf(row)))
   if (duplicated.length > 0) {
     const labels = duplicated
-      .map(row => `“${row.part_name}”/“${row.specification}”`)
+      .map(row => `“${row.item_type}”/“${row.part_name}”/“${row.specification}”`)
       .join('、')
     throw new Error(`以下配件已存在，无法导入：${labels}`)
   }
@@ -210,13 +229,14 @@ export async function updateJintanPartsData({
   const payload = normalizePayload(values)
 
   const exists = await checkJintanPartsDataExists(
+    payload.item_type,
     payload.part_name,
     payload.specification,
     id,
   )
   if (exists) {
     throw new Error(
-      `名称“${payload.part_name}”规格“${payload.specification}”已存在，无法更新`,
+      `类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”已存在，无法更新`,
     )
   }
 

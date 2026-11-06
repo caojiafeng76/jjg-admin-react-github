@@ -1,9 +1,11 @@
+import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
 import supabase from './supabase'
 
 export interface JintanPartsStockIn {
   id: string
   inventory_id: string
+  item_type: JintanItemType
   part_name: string
   specification: string
   material: string
@@ -28,12 +30,14 @@ export async function getJintanPartsStockInList({
   page,
   pageSize,
   keyword,
+  itemType,
   inventoryId,
   signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
+  itemType?: JintanItemType
   inventoryId?: string
   signal?: AbortSignal
 }): Promise<{ items: JintanPartsStockIn[], total: number }> {
@@ -42,6 +46,8 @@ export async function getJintanPartsStockInList({
     .select('*', { count: 'exact' })
   if (keyword?.trim())
     query = query.or(keywordFilter(keyword.trim()))
+  if (itemType)
+    query = query.eq('item_type', itemType)
   if (inventoryId)
     query = query.eq('inventory_id', inventoryId)
   if (signal)
@@ -53,7 +59,7 @@ export async function getJintanPartsStockInList({
 
   if (error)
     throw handleApiError(error, '获取配件入库列表失败')
-  return { items: data ?? [], total: count ?? 0 }
+  return { items: (data ?? []) as JintanPartsStockIn[], total: count ?? 0 }
 }
 
 export async function createJintanPartsStockIn(
