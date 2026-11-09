@@ -34,8 +34,8 @@ describe('出入库共享库存选择缓存', () => {
 
   it('状态统计挂到库存根键，库存变动后一并刷新；列表 key 区分状态筛选', async () => {
     const client = new QueryClient()
-    const summary = jintanKeys.partsInventory.summary(' 螺丝 ')
-    expect(summary).toEqual(jintanKeys.partsInventory.summary('螺丝'))
+    const summary = jintanKeys.partsInventory.summary({ name: ' 螺丝 ', color: ' ' })
+    expect(summary).toEqual(jintanKeys.partsInventory.summary({ name: '螺丝' }))
     client.setQueryData(summary, {})
     await client.invalidateQueries({ queryKey: jintanKeys.partsInventory.all })
     expect(client.getQueryState(summary)?.isInvalidated).toBe(true)

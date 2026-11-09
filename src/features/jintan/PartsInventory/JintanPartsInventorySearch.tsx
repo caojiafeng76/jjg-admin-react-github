@@ -1,88 +1,47 @@
+import type { JintanFieldSearchValues } from '../JintanFieldSearch'
 import type { JintanPartsStockStatus } from '@/services/apiJintanPartsInventory'
-import type { JintanItemType } from '@/services/jintanItemType'
-
-import { Button, Form, Input, Select, Space } from 'antd'
-import { useEffect } from 'react'
-import JintanItemTypeFilterItem from '../JintanItemTypeFilterItem'
+import { Form, Select } from 'antd'
+import { JINTAN_PARTS_SEARCH_FIELDS } from '@/services/jintanSearchFields'
+import JintanFieldSearch from '../JintanFieldSearch'
 import { JINTAN_PARTS_STOCK_STATUS_OPTIONS } from './stockStatus'
 
-export interface JintanPartsInventorySearchValues {
-  keyword?: string
+export interface JintanPartsInventorySearchValues extends JintanFieldSearchValues {
   status?: JintanPartsStockStatus
-  itemType?: JintanItemType
 }
 
 interface Props {
-  onSearch: (params: JintanPartsInventorySearchValues) => void
+  onSearch: (values: JintanPartsInventorySearchValues) => void
   onReset: () => void
-  initialValues?: JintanPartsInventorySearchValues
+  values?: JintanPartsInventorySearchValues
+}
+
+function StockStatusFilterItem() {
+  const form = Form.useFormInstance()
+  return (
+    <Form.Item name="status" className="mb-0" style={{ width: 160 }}>
+      <Select
+        placeholder="库存状态"
+        aria-label="库存状态"
+        allowClear
+        options={JINTAN_PARTS_STOCK_STATUS_OPTIONS}
+        onChange={() => form.submit()}
+      />
+    </Form.Item>
+  )
 }
 
 export default function JintanPartsInventorySearch({
   onSearch,
-  onReset,
-  initialValues,
+  ...props
 }: Props) {
-  const [form] = Form.useForm<JintanPartsInventorySearchValues>()
-
-  useEffect(() => {
-    form.setFieldsValue({
-      keyword: initialValues?.keyword,
-      status: initialValues?.status,
-      itemType: initialValues?.itemType,
-    })
-  }, [form, initialValues])
-
-  const handleSearch = (values: JintanPartsInventorySearchValues) => {
-    onSearch({
-      keyword: values.keyword?.trim() || undefined,
-      status: values.status || undefined,
-      itemType: values.itemType,
-    })
-  }
-
-  const handleReset = () => {
-    form.resetFields()
-    onReset()
-  }
-
   return (
-    <Form
-      form={form}
-      onFinish={handleSearch}
-      className="flex flex-1 flex-wrap items-center gap-3"
+    <JintanFieldSearch<JintanPartsInventorySearchValues>
+      fields={JINTAN_PARTS_SEARCH_FIELDS}
+      onSearch={values =>
+        onSearch({ ...values, status: values.status || undefined })}
+      {...props}
     >
-      <Form.Item name="keyword" className="mb-0" style={{ width: 360 }}>
-        <Input
-          placeholder="请输入名称、规格、颜色、材质或采购厂家"
-          allowClear
-          onPressEnter={() => form.submit()}
-          className="rounded-lg"
-        />
-      </Form.Item>
-      <JintanItemTypeFilterItem />
-      <Form.Item name="status" className="mb-0" style={{ width: 160 }}>
-        <Select
-          placeholder="库存状态"
-          allowClear
-          options={JINTAN_PARTS_STOCK_STATUS_OPTIONS}
-          onChange={() => form.submit()}
-        />
-      </Form.Item>
-      <Form.Item className="mb-0">
-        <Space>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="rounded-lg font-medium shadow-sm"
-          >
-            搜索
-          </Button>
-          <Button onClick={handleReset} className="rounded-lg">
-            重置
-          </Button>
-        </Space>
-      </Form.Item>
-    </Form>
+      <StockStatusFilterItem />
+    </JintanFieldSearch>
   )
 }

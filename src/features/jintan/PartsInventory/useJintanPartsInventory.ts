@@ -1,5 +1,6 @@
 import type { JintanPartsStockStatus } from '@services/apiJintanPartsInventory'
 import type { JintanItemType } from '@/services/jintanItemType'
+import type { JintanSearchFilters } from '@/services/jintanSearchFields'
 
 import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
 import {
@@ -24,7 +25,7 @@ export function useJintanPartsInventoryList({
   page: number
   pageSize: number
   searchParams: {
-    keyword?: string
+    filters?: JintanSearchFilters
     status?: JintanPartsStockStatus
     itemType?: JintanItemType
   }
@@ -33,7 +34,7 @@ export function useJintanPartsInventoryList({
     queryKey: jintanKeys.partsInventory.list({
       page,
       pageSize,
-      keyword: searchParams.keyword,
+      filters: searchParams.filters,
       status: searchParams.status,
       itemType: searchParams.itemType,
     }),
@@ -41,7 +42,7 @@ export function useJintanPartsInventoryList({
       getJintanPartsInventoryList({
         page,
         pageSize,
-        keyword: searchParams.keyword,
+        filters: searchParams.filters,
         status: searchParams.status,
         itemType: searchParams.itemType,
       }),
@@ -52,12 +53,12 @@ export function useJintanPartsInventoryList({
 }
 
 export function useJintanPartsInventorySummary(
-  keyword?: string,
+  filters?: JintanSearchFilters,
   itemType?: JintanItemType,
 ) {
   return useQuery({
-    queryKey: jintanKeys.partsInventory.summary(keyword, itemType),
-    queryFn: () => getJintanPartsInventoryStatusSummary(keyword, itemType),
+    queryKey: jintanKeys.partsInventory.summary(filters, itemType),
+    queryFn: () => getJintanPartsInventoryStatusSummary(filters, itemType),
     placeholderData: keepPreviousData,
     throwOnError: false,
     ...queryConfig.list,

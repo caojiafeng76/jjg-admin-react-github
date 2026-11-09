@@ -1,4 +1,5 @@
 import type { JintanItemType } from '@/services/jintanItemType'
+import type { JintanSearchFilters } from '@/services/jintanSearchFields'
 
 import { useMutationWithInvalidation } from '@hooks/useMutationWithInvalidation'
 import {
@@ -21,7 +22,7 @@ export function useJintanProfilesDataList({
   page: number
   pageSize: number
   searchParams: {
-    keyword?: string
+    filters?: JintanSearchFilters
     itemType?: JintanItemType
   }
 }) {
@@ -29,14 +30,14 @@ export function useJintanProfilesDataList({
     queryKey: jintanKeys.profilesData.list({
       page,
       pageSize,
-      keyword: searchParams.keyword,
+      filters: searchParams.filters,
       itemType: searchParams.itemType,
     }),
     queryFn: () =>
       getJintanProfilesDataList({
         page,
         pageSize,
-        keyword: searchParams.keyword,
+        filters: searchParams.filters,
         itemType: searchParams.itemType,
       }),
     placeholderData: keepPreviousData,

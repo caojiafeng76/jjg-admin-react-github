@@ -1,17 +1,18 @@
 import type { FormInstance } from 'antd'
+import type { JintanFieldSearchValues } from '../JintanFieldSearch'
 import type {
   JintanPartsStockOut,
   JintanPartsStockOutFormValues,
 } from '@/services/apiJintanPartsStockOut'
-import type { JintanItemType } from '@/services/jintanItemType'
 import { App, Modal } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
-
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { parseJintanItemType } from '@/services/jintanItemType'
+import { JINTAN_PARTS_SEARCH_FIELDS, readJintanSearchFilters, writeJintanSearchFilters } from '@/services/jintanSearchFields'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -38,8 +39,15 @@ export default function JintanPartsStockOutPage() {
   const [urlParams, setUrlParams] = useSearchParams()
   const page = Number(urlParams.get('page')) || 1
   const pageSize = Number(urlParams.get('pageSize')) || 10
-  const keyword = urlParams.get('keyword') || undefined
+  const filters = useMemo(
+    () => readJintanSearchFilters(urlParams, JINTAN_PARTS_SEARCH_FIELDS),
+    [urlParams],
+  )
   const itemType = parseJintanItemType(urlParams.get('itemType')) ?? undefined
+  const searchValues = useMemo(
+    () => ({ ...filters, itemType }),
+    [filters, itemType],
+  )
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingRecord, setEditingRecord]
@@ -52,7 +60,7 @@ export default function JintanPartsStockOutPage() {
   const { data, isLoading, error, refetch } = useJintanPartsStockOutList({
     page,
     pageSize,
-    keyword,
+    filters,
     itemType,
   })
   const createMutation = useCreateJintanPartsStockOut()
@@ -184,12 +192,10 @@ export default function JintanPartsStockOutPage() {
   ])
 
   const handleSearch = useCallback(
-    (params: { keyword?: string, itemType?: JintanItemType }) => {
+    (params: JintanFieldSearchValues) => {
       const next = new URLSearchParams(urlParams)
       next.set('page', '1')
-      if (params.keyword)
-        next.set('keyword', params.keyword)
-      else next.delete('keyword')
+      writeJintanSearchFilters(next, params, JINTAN_PARTS_SEARCH_FIELDS)
       if (params.itemType)
         next.set('itemType', params.itemType)
       else next.delete('itemType')
@@ -245,8 +251,7 @@ export default function JintanPartsStockOutPage() {
           </span>
         </div>
         <JintanPartsStockOutSearch
-          keyword={keyword}
-          itemType={itemType}
+          values={searchValues}
           onSearch={handleSearch}
           onReset={() => handleSearch({})}
         />

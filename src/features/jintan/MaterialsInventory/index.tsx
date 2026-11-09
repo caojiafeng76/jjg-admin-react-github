@@ -1,10 +1,10 @@
 import type { FormInstance } from 'antd'
+import type { JintanFieldSearchValues } from '../JintanFieldSearch'
 import type { JintanMaterialsInventory, JintanMaterialsInventoryFormValues, JintanMaterialsInventoryImportRow } from '@/services/apiJintanMaterialsInventory'
-import type { JintanItemType } from '@/services/jintanItemType'
 import { App, Modal } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
 import { useSearchParams } from 'react-router-dom'
+
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
@@ -13,6 +13,7 @@ import {
 
 } from '@/services/apiJintanMaterialsInventory'
 import { parseJintanItemType } from '@/services/jintanItemType'
+import { JINTAN_MATERIALS_SEARCH_FIELDS, readJintanSearchFilters, writeJintanSearchFilters } from '@/services/jintanSearchFields'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
@@ -56,12 +57,19 @@ export default function JintanMaterialsInventoryPage() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const keyword = searchParamsURL.get('keyword') || undefined
+  const filters = useMemo(
+    () => readJintanSearchFilters(searchParamsURL, JINTAN_MATERIALS_SEARCH_FIELDS),
+    [searchParamsURL],
+  )
   const itemType
     = parseJintanItemType(searchParamsURL.get('itemType')) ?? undefined
   const searchParams = useMemo(
-    () => ({ keyword, itemType }),
-    [keyword, itemType],
+    () => ({ filters, itemType }),
+    [filters, itemType],
+  )
+  const searchValues = useMemo(
+    () => ({ ...filters, itemType }),
+    [filters, itemType],
   )
 
   const { data, isLoading, error, refetch } = useJintanMaterialsInventoryList({
@@ -117,7 +125,7 @@ export default function JintanMaterialsInventoryPage() {
     try {
       const [exportRows, { exportJintanMaterialsInventoryToExcel }]
         = await Promise.all([
-          getJintanMaterialsInventoryForExport(keyword, itemType),
+          getJintanMaterialsInventoryForExport(filters, itemType),
           loadJintanMaterialsInventoryExcel(),
         ])
 
@@ -141,7 +149,7 @@ export default function JintanMaterialsInventoryPage() {
     canManageInventory,
     message,
     itemType,
-    keyword,
+    filters,
     viewerDenied,
     viewerOperationTip,
   ])
@@ -218,18 +226,13 @@ export default function JintanMaterialsInventoryPage() {
   )
 
   const handleSearch = useCallback(
-    (params: { keyword?: string, itemType?: JintanItemType }) => {
+    (params: JintanFieldSearchValues) => {
       setSelectedRowKeys([])
 
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
       nextSearchParamsURL.set('page', '1')
 
-      if (params.keyword) {
-        nextSearchParamsURL.set('keyword', params.keyword)
-      }
-      else {
-        nextSearchParamsURL.delete('keyword')
-      }
+      writeJintanSearchFilters(nextSearchParamsURL, params, JINTAN_MATERIALS_SEARCH_FIELDS)
 
       if (params.itemType) {
         nextSearchParamsURL.set('itemType', params.itemType)
@@ -248,7 +251,7 @@ export default function JintanMaterialsInventoryPage() {
 
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
-    nextSearchParamsURL.delete('keyword')
+    writeJintanSearchFilters(nextSearchParamsURL, undefined, JINTAN_MATERIALS_SEARCH_FIELDS)
     nextSearchParamsURL.delete('itemType')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
@@ -294,7 +297,7 @@ export default function JintanMaterialsInventoryPage() {
         <JintanMaterialsInventorySearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
-          initialValues={searchParams}
+          values={searchValues}
         />
       </div>
 

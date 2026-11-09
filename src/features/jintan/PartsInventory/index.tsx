@@ -14,6 +14,11 @@ import {
 
 } from '@/services/apiJintanPartsInventory'
 import { parseJintanItemType } from '@/services/jintanItemType'
+import {
+  JINTAN_PARTS_SEARCH_FIELDS,
+  readJintanSearchFilters,
+  writeJintanSearchFilters,
+} from '@/services/jintanSearchFields'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
@@ -70,13 +75,20 @@ export default function JintanPartsInventoryPage() {
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const statusParam = searchParamsURL.get('status')
-  const keyword = searchParamsURL.get('keyword') || undefined
+  const filters = useMemo(
+    () => readJintanSearchFilters(searchParamsURL, JINTAN_PARTS_SEARCH_FIELDS),
+    [searchParamsURL],
+  )
   const status = isJintanPartsStockStatus(statusParam) ? statusParam : undefined
   const itemType
     = parseJintanItemType(searchParamsURL.get('itemType')) ?? undefined
-  const searchParams = useMemo<JintanPartsInventorySearchValues>(
-    () => ({ keyword, status, itemType }),
-    [keyword, status, itemType],
+  const searchParams = useMemo(
+    () => ({ filters, status, itemType }),
+    [filters, status, itemType],
+  )
+  const searchValues = useMemo<JintanPartsInventorySearchValues>(
+    () => ({ ...filters, status, itemType }),
+    [filters, status, itemType],
   )
 
   const { data, isLoading, error, refetch } = useJintanPartsInventoryList({
@@ -85,7 +97,7 @@ export default function JintanPartsInventoryPage() {
     searchParams,
   })
   const { data: statusSummary } = useJintanPartsInventorySummary(
-    keyword,
+    filters,
     itemType,
   )
 
@@ -137,7 +149,7 @@ export default function JintanPartsInventoryPage() {
       const [exportRows, { exportJintanPartsInventoryToExcel }]
         = await Promise.all([
           getJintanPartsInventoryForExport({
-            keyword,
+            filters,
             status,
             itemType,
           }),
@@ -162,8 +174,8 @@ export default function JintanPartsInventoryPage() {
     }
   }, [
     canManageInventory,
+    filters,
     itemType,
-    keyword,
     message,
     status,
     viewerDenied,
@@ -248,12 +260,11 @@ export default function JintanPartsInventoryPage() {
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
       nextSearchParamsURL.set('page', '1')
 
-      if (params.keyword) {
-        nextSearchParamsURL.set('keyword', params.keyword)
-      }
-      else {
-        nextSearchParamsURL.delete('keyword')
-      }
+      writeJintanSearchFilters(
+        nextSearchParamsURL,
+        params,
+        JINTAN_PARTS_SEARCH_FIELDS,
+      )
 
       if (params.status) {
         nextSearchParamsURL.set('status', params.status)
@@ -279,7 +290,11 @@ export default function JintanPartsInventoryPage() {
 
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
-    nextSearchParamsURL.delete('keyword')
+    writeJintanSearchFilters(
+      nextSearchParamsURL,
+      undefined,
+      JINTAN_PARTS_SEARCH_FIELDS,
+    )
     nextSearchParamsURL.delete('status')
     nextSearchParamsURL.delete('itemType')
     setSearchParamsURL(nextSearchParamsURL)
@@ -288,12 +303,12 @@ export default function JintanPartsInventoryPage() {
   const handleStatusClick = useCallback(
     (nextStatus: JintanPartsStockStatus) => {
       handleSearch({
-        keyword,
+        ...filters,
         itemType,
         status: status === nextStatus ? undefined : nextStatus,
       })
     },
-    [handleSearch, itemType, keyword, status],
+    [filters, handleSearch, itemType, status],
   )
 
   useEffect(() => {
@@ -368,7 +383,7 @@ export default function JintanPartsInventoryPage() {
         <JintanPartsInventorySearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
-          initialValues={searchParams}
+          values={searchValues}
         />
       </div>
 

@@ -1,6 +1,8 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
 import { describeJintanColor } from './jintanColor'
+import { applyJintanSearchFilters, JINTAN_PARTS_SEARCH_FIELDS } from './jintanSearchFields'
 import publicSupabase from './publicSupabase'
 import supabase from './supabase'
 
@@ -84,13 +86,13 @@ function keywordFilter(keyword: string) {
 export async function getJintanPartsInventoryList({
   page,
   pageSize,
-  keyword,
+  filters,
   status,
   itemType,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   status?: JintanPartsStockStatus
   itemType?: JintanItemType
 }) {
@@ -101,9 +103,7 @@ export async function getJintanPartsInventoryList({
     .from('jintan_parts_inventory')
     .select('*', { count: 'exact' })
 
-  if (keyword) {
-    query = query.or(keywordFilter(keyword.trim()))
-  }
+  query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
 
   if (status) {
     query = query.eq('stock_status', status)
@@ -152,11 +152,11 @@ export async function getJintanPartsInventoryByDataId(
 }
 
 export async function getJintanPartsInventoryForExport({
-  keyword,
+  filters,
   status,
   itemType,
 }: {
-  keyword?: string
+  filters?: JintanSearchFilters
   status?: JintanPartsStockStatus
   itemType?: JintanItemType
 } = {}) {
@@ -166,9 +166,7 @@ export async function getJintanPartsInventoryForExport({
   while (true) {
     let query = supabase.from('jintan_parts_inventory').select('*')
 
-    if (keyword) {
-      query = query.or(keywordFilter(keyword.trim()))
-    }
+    query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
 
     if (status) {
       query = query.eq('stock_status', status)
@@ -201,7 +199,7 @@ export async function getJintanPartsInventoryForExport({
 }
 
 export async function getJintanPartsInventoryStatusSummary(
-  keyword?: string,
+  filters?: JintanSearchFilters,
   itemType?: JintanItemType,
 ): Promise<JintanPartsStockStatusSummary> {
   const results = await Promise.all(
@@ -211,9 +209,7 @@ export async function getJintanPartsInventoryStatusSummary(
         .select('id', { count: 'exact', head: true })
         .eq('stock_status', status)
 
-      if (keyword) {
-        query = query.or(keywordFilter(keyword.trim()))
-      }
+      query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
 
       if (itemType) {
         query = query.eq('item_type', itemType)

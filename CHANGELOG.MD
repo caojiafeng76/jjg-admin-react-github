@@ -17,6 +17,13 @@
 
 ## 2026-11-09
 
+- **类别**：变更
+- **范围**：`src/services/jintanSearchFields.ts`（新）、`src/services/apiJintan{Parts,Profiles,Materials}{Data,Inventory,StockIn,StockOut}.ts`、`src/features/jintan/JintanFieldSearch.tsx`（新）、`src/features/jintan/queryKeys.ts`、`src/features/jintan/*/index.tsx`、`*/*Search.tsx`、`*/use*.ts`
+- **摘要**：金檀木业 12 个列表页（配件/型材/原材料 × 资料/库存/入库/出库）的筛选栏，从一个模糊关键词框改为每个字段一个输入框，可同时组合筛选（框内模糊匹配，框之间同时满足）。配件：名称、规格、颜色、材质、采购厂家；型材：型号、名称、规格、颜色、材质；原材料：型号、名称、规格、材质。类型筛选、配件库存的库存状态筛选不变。筛选写入 URL（`name`/`model`/`specification`/`color`/`material`/`supplier`，旧的 `keyword` 参数会被忽略并在下次搜索时清除），刷新后回填；导出和配件库存状态统计跟随同样的条件。查询改用逐列 `ilike` 并转义 `%`、`_`。入库/出库表单里的库存下拉和公开扫码出库页仍用原来的单关键词搜索，未改动。12 个搜索组件改为共用 `JintanFieldSearch`。
+- **验证**：`bun lint` 0 error，`bun run typecheck` 通过；`bun run test -- src/services src/features/jintan` 83 个文件、473 个用例通过（新增 `jintanSearchFields.vitest.ts`：逐字段 ilike、按域映射列、通配符转义、URL 读写与归一化；更新库存状态统计 key 用例）。Claude in Chrome 只读检查（用户本地 dev server）：配件资料页填名称“转角”+颜色“灰”回车，URL 带 `name`/`color`，结果 3 条且都满足两个条件；带参数刷新后输入框回填；重置清空。配件库存同条件 3 条，状态统计随筛选变为“未设置 3”，点状态标签后名称/颜色条件保留。型材入库 `model=YDG222&specification=3250` 返回 2 条；原材料出库页显示型号/名称/规格/材质 4 个框。控制台只有已知的 `syncPermissionRegistry` 权限报错，与本次无关。未覆盖：Excel 导出未在浏览器实际下载（导出与列表共用同一个筛选函数）；其余 8 个页面只经类型检查和代码路径一致性确认，未逐页打开；未跑 `bun run build`。
+
+## 2026-11-09
+
 - **类别**：新建
 - **范围**：`supabase/migrations/20261109090000_add_jintan_color.sql`、`src/services/apiJintan{Parts,Profiles}*`、`src/services/apiJintanMonthlyReport.ts`、`src/services/jintanColor.ts`、`src/features/jintan/{Parts,Profiles}*`、`src/features/jintan/MonthlyReport`、`src/utils/jintan{Parts,Profiles}*Excel.ts`、`src/utils/jintanMonthlyReportExcel.ts`
 - **摘要**：金檀配件、型材增加颜色字段 `color`（自由文本、选填，默认空字符串，已有数据为空）。判重改为“类型+(型号)+名称+规格+颜色”，同名同规格不同颜色是两种物料，资料、库存、出入库分开记账。库存、入库、出库保存颜色快照，调整流水新增 `item_color` 快照，月度报表函数新增返回列 `item_color`（素材为空）。资料表单可填颜色；资料、库存、入库、出库、月报表格和详情抽屉显示颜色，入库/出库和公开扫码出库页的库存下拉与选中摘要带颜色；关键字搜索覆盖颜色。资料和库存 Excel 模板在“类型”后增加选填的“颜色”列，旧模板仍可导入，库存导入按颜色匹配库存行；导出和月报导出增加“颜色”列。素材不变。

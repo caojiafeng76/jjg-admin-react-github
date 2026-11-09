@@ -1,16 +1,18 @@
 import type { JintanItemType } from '@/services/jintanItemType'
+import type { JintanSearchFilters } from '@/services/jintanSearchFields'
+import { normalizeJintanSearchFilters } from '@/services/jintanSearchFields'
 
 export interface JintanPartsListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanPartsInventoryListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   status?: string
   itemType?: JintanItemType
 }
@@ -18,70 +20,70 @@ export interface JintanPartsInventoryListKeyParams {
 export interface JintanPartsStockInListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanPartsStockOutListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanProfilesListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanProfilesInventoryListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanProfilesStockInListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanProfilesStockOutListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanMaterialsListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanMaterialsInventoryListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanMaterialsStockInListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
 export interface JintanMaterialsStockOutListKeyParams {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }
 
@@ -122,7 +124,7 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -146,16 +148,16 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           status: params.status ?? '',
           itemType: params.itemType ?? '',
         },
       ] as const,
-    summary: (keyword?: string, itemType?: JintanItemType) =>
+    summary: (filters?: JintanSearchFilters, itemType?: JintanItemType) =>
       [
         PARTS_INVENTORY_ROOT,
         'summary',
-        normalizeKeyword(keyword),
+        normalizeJintanSearchFilters(filters),
         itemType ?? '',
       ] as const,
     adjustments: (params: JintanStockByInventoryKeyParams) =>
@@ -188,7 +190,7 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -211,7 +213,7 @@ export const jintanKeys = {
         'list',
         {
           ...params,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -225,7 +227,7 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -243,7 +245,7 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -277,7 +279,7 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -300,7 +302,7 @@ export const jintanKeys = {
         'list',
         {
           ...params,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -314,7 +316,7 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -332,7 +334,7 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -366,7 +368,7 @@ export const jintanKeys = {
         {
           page: params.page,
           pageSize: params.pageSize,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -389,7 +391,7 @@ export const jintanKeys = {
         'list',
         {
           ...params,
-          keyword: normalizeKeyword(params.keyword),
+          filters: normalizeJintanSearchFilters(params.filters),
           itemType: params.itemType ?? '',
         },
       ] as const,

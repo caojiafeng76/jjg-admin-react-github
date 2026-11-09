@@ -1,5 +1,7 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
+import { applyJintanSearchFilters, JINTAN_PARTS_SEARCH_FIELDS } from './jintanSearchFields'
 import publicSupabase from './publicSupabase'
 import supabase from './supabase'
 
@@ -24,21 +26,17 @@ export interface JintanPartsStockOutFormValues {
   remarks: string
 }
 
-function keywordFilter(keyword: string): string {
-  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%,color.ilike.%${keyword}%`
-}
-
 export async function getJintanPartsStockOutList({
   page,
   pageSize,
-  keyword,
+  filters,
   itemType,
   inventoryId,
   signal,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
   inventoryId?: string
   signal?: AbortSignal
@@ -46,8 +44,7 @@ export async function getJintanPartsStockOutList({
   let query = supabase
     .from('jintan_parts_stock_out')
     .select('*', { count: 'exact' })
-  if (keyword?.trim())
-    query = query.or(keywordFilter(keyword.trim()))
+  query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
   if (itemType)
     query = query.eq('item_type', itemType)
   if (inventoryId)

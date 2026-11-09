@@ -1,5 +1,7 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
+import { applyJintanSearchFilters, JINTAN_MATERIALS_SEARCH_FIELDS } from './jintanSearchFields'
 import supabase from './supabase'
 
 export interface JintanMaterialsData {
@@ -47,10 +49,6 @@ function materialsKeyOf(row: {
   return `${row.item_type}\u0000${row.material_model}\u0000${row.material_name}\u0000${row.specification}`
 }
 
-function keywordFilter(keyword: string) {
-  return `material_model.ilike.%${keyword}%,material_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%`
-}
-
 async function checkJintanMaterialsDataExists(
   itemType: JintanItemType,
   profileModel: string,
@@ -83,12 +81,12 @@ async function checkJintanMaterialsDataExists(
 export async function getJintanMaterialsDataList({
   page,
   pageSize,
-  keyword,
+  filters,
   itemType,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
@@ -98,9 +96,7 @@ export async function getJintanMaterialsDataList({
     .from('jintan_materials_data')
     .select('*', { count: 'exact' })
 
-  if (keyword) {
-    query = query.or(keywordFilter(keyword.trim()))
-  }
+  query = applyJintanSearchFilters(query, filters, JINTAN_MATERIALS_SEARCH_FIELDS)
   if (itemType) {
     query = query.eq('item_type', itemType)
   }
@@ -121,7 +117,7 @@ export async function getJintanMaterialsDataList({
 }
 
 export async function getJintanMaterialsDataForExport(
-  keyword?: string,
+  filters?: JintanSearchFilters,
   itemType?: JintanItemType,
 ) {
   const rows: JintanMaterialsData[] = []
@@ -130,9 +126,7 @@ export async function getJintanMaterialsDataForExport(
   while (true) {
     let query = supabase.from('jintan_materials_data').select('*')
 
-    if (keyword) {
-      query = query.or(keywordFilter(keyword.trim()))
-    }
+    query = applyJintanSearchFilters(query, filters, JINTAN_MATERIALS_SEARCH_FIELDS)
     if (itemType) {
       query = query.eq('item_type', itemType)
     }

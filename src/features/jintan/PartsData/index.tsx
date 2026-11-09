@@ -1,11 +1,11 @@
 import type { FormInstance } from 'antd'
+import type { JintanFieldSearchValues } from '../JintanFieldSearch'
 import type { JintanPartsData, JintanPartsDataFormValues } from '@/services/apiJintanPartsData'
-import type { JintanItemType } from '@/services/jintanItemType'
 import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
 import { App, Button, Modal, Tooltip } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
 import { useSearchParams } from 'react-router-dom'
+
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
@@ -14,6 +14,7 @@ import {
 
 } from '@/services/apiJintanPartsData'
 import { parseJintanItemType } from '@/services/jintanItemType'
+import { JINTAN_PARTS_SEARCH_FIELDS, readJintanSearchFilters, writeJintanSearchFilters } from '@/services/jintanSearchFields'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -73,12 +74,19 @@ export default function JintanPartsDataPage() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const keyword = searchParamsURL.get('keyword') || undefined
+  const filters = useMemo(
+    () => readJintanSearchFilters(searchParamsURL, JINTAN_PARTS_SEARCH_FIELDS),
+    [searchParamsURL],
+  )
   const itemType
     = parseJintanItemType(searchParamsURL.get('itemType')) ?? undefined
   const searchParams = useMemo(
-    () => ({ keyword, itemType }),
-    [keyword, itemType],
+    () => ({ filters, itemType }),
+    [filters, itemType],
+  )
+  const searchValues = useMemo(
+    () => ({ ...filters, itemType }),
+    [filters, itemType],
   )
 
   const { data, isLoading, error, refetch } = useJintanPartsDataList({
@@ -226,7 +234,7 @@ export default function JintanPartsDataPage() {
     setIsExporting(true)
     try {
       const [exportRows, { exportJintanPartsDataToExcel }] = await Promise.all([
-        getJintanPartsDataForExport(keyword, itemType),
+        getJintanPartsDataForExport(filters, itemType),
         loadJintanPartsDataExcel(),
       ])
 
@@ -250,7 +258,7 @@ export default function JintanPartsDataPage() {
     canManageParts,
     message,
     itemType,
-    keyword,
+    filters,
     viewerDenied,
     viewerOperationTip,
   ])
@@ -300,18 +308,13 @@ export default function JintanPartsDataPage() {
   )
 
   const handleSearch = useCallback(
-    (params: { keyword?: string, itemType?: JintanItemType }) => {
+    (params: JintanFieldSearchValues) => {
       setSelectedRowKeys([])
 
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
       nextSearchParamsURL.set('page', '1')
 
-      if (params.keyword) {
-        nextSearchParamsURL.set('keyword', params.keyword)
-      }
-      else {
-        nextSearchParamsURL.delete('keyword')
-      }
+      writeJintanSearchFilters(nextSearchParamsURL, params, JINTAN_PARTS_SEARCH_FIELDS)
 
       if (params.itemType) {
         nextSearchParamsURL.set('itemType', params.itemType)
@@ -330,7 +333,7 @@ export default function JintanPartsDataPage() {
 
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
-    nextSearchParamsURL.delete('keyword')
+    writeJintanSearchFilters(nextSearchParamsURL, undefined, JINTAN_PARTS_SEARCH_FIELDS)
     nextSearchParamsURL.delete('itemType')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
@@ -402,7 +405,7 @@ export default function JintanPartsDataPage() {
         <JintanPartsDataSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
-          initialValues={searchParams}
+          values={searchValues}
         />
       </div>
 

@@ -1,6 +1,8 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
 import { describeJintanColor } from './jintanColor'
+import { applyJintanSearchFilters, JINTAN_PROFILES_SEARCH_FIELDS } from './jintanSearchFields'
 import supabase from './supabase'
 
 export interface JintanProfilesData {
@@ -52,10 +54,6 @@ function profilesKeyOf(row: {
   return `${row.item_type}\u0000${row.profile_model}\u0000${row.profile_name}\u0000${row.specification}\u0000${row.color}`
 }
 
-function keywordFilter(keyword: string) {
-  return `profile_model.ilike.%${keyword}%,profile_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,color.ilike.%${keyword}%`
-}
-
 async function checkJintanProfilesDataExists(
   itemType: JintanItemType,
   profileModel: string,
@@ -90,12 +88,12 @@ async function checkJintanProfilesDataExists(
 export async function getJintanProfilesDataList({
   page,
   pageSize,
-  keyword,
+  filters,
   itemType,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
@@ -105,9 +103,7 @@ export async function getJintanProfilesDataList({
     .from('jintan_profiles_data')
     .select('*', { count: 'exact' })
 
-  if (keyword) {
-    query = query.or(keywordFilter(keyword.trim()))
-  }
+  query = applyJintanSearchFilters(query, filters, JINTAN_PROFILES_SEARCH_FIELDS)
   if (itemType) {
     query = query.eq('item_type', itemType)
   }
@@ -128,7 +124,7 @@ export async function getJintanProfilesDataList({
 }
 
 export async function getJintanProfilesDataForExport(
-  keyword?: string,
+  filters?: JintanSearchFilters,
   itemType?: JintanItemType,
 ) {
   const rows: JintanProfilesData[] = []
@@ -137,9 +133,7 @@ export async function getJintanProfilesDataForExport(
   while (true) {
     let query = supabase.from('jintan_profiles_data').select('*')
 
-    if (keyword) {
-      query = query.or(keywordFilter(keyword.trim()))
-    }
+    query = applyJintanSearchFilters(query, filters, JINTAN_PROFILES_SEARCH_FIELDS)
     if (itemType) {
       query = query.eq('item_type', itemType)
     }

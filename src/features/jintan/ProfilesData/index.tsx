@@ -1,11 +1,11 @@
 import type { FormInstance } from 'antd'
+import type { JintanFieldSearchValues } from '../JintanFieldSearch'
 import type { JintanProfilesData, JintanProfilesDataFormValues } from '@/services/apiJintanProfilesData'
-import type { JintanItemType } from '@/services/jintanItemType'
 import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
 import { App, Button, Modal, Tooltip } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
 import { useSearchParams } from 'react-router-dom'
+
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
@@ -14,6 +14,7 @@ import {
 
 } from '@/services/apiJintanProfilesData'
 import { parseJintanItemType } from '@/services/jintanItemType'
+import { JINTAN_PROFILES_SEARCH_FIELDS, readJintanSearchFilters, writeJintanSearchFilters } from '@/services/jintanSearchFields'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -81,12 +82,19 @@ export default function JintanProfilesDataPage() {
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
-  const keyword = searchParamsURL.get('keyword') || undefined
+  const filters = useMemo(
+    () => readJintanSearchFilters(searchParamsURL, JINTAN_PROFILES_SEARCH_FIELDS),
+    [searchParamsURL],
+  )
   const itemType
     = parseJintanItemType(searchParamsURL.get('itemType')) ?? undefined
   const searchParams = useMemo(
-    () => ({ keyword, itemType }),
-    [keyword, itemType],
+    () => ({ filters, itemType }),
+    [filters, itemType],
+  )
+  const searchValues = useMemo(
+    () => ({ ...filters, itemType }),
+    [filters, itemType],
   )
 
   const { data, isLoading, error, refetch } = useJintanProfilesDataList({
@@ -241,7 +249,7 @@ export default function JintanProfilesDataPage() {
     try {
       const [exportRows, { exportJintanProfilesDataToExcel }]
         = await Promise.all([
-          getJintanProfilesDataForExport(keyword, itemType),
+          getJintanProfilesDataForExport(filters, itemType),
           loadJintanProfilesDataExcel(),
         ])
 
@@ -265,7 +273,7 @@ export default function JintanProfilesDataPage() {
     canManageProfiles,
     message,
     itemType,
-    keyword,
+    filters,
     viewerDenied,
     viewerOperationTip,
   ])
@@ -315,18 +323,13 @@ export default function JintanProfilesDataPage() {
   )
 
   const handleSearch = useCallback(
-    (params: { keyword?: string, itemType?: JintanItemType }) => {
+    (params: JintanFieldSearchValues) => {
       setSelectedRowKeys([])
 
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
       nextSearchParamsURL.set('page', '1')
 
-      if (params.keyword) {
-        nextSearchParamsURL.set('keyword', params.keyword)
-      }
-      else {
-        nextSearchParamsURL.delete('keyword')
-      }
+      writeJintanSearchFilters(nextSearchParamsURL, params, JINTAN_PROFILES_SEARCH_FIELDS)
 
       if (params.itemType) {
         nextSearchParamsURL.set('itemType', params.itemType)
@@ -345,7 +348,7 @@ export default function JintanProfilesDataPage() {
 
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
-    nextSearchParamsURL.delete('keyword')
+    writeJintanSearchFilters(nextSearchParamsURL, undefined, JINTAN_PROFILES_SEARCH_FIELDS)
     nextSearchParamsURL.delete('itemType')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
@@ -417,7 +420,7 @@ export default function JintanProfilesDataPage() {
         <JintanProfilesDataSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
-          initialValues={searchParams}
+          values={searchValues}
         />
       </div>
 

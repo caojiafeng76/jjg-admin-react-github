@@ -1,6 +1,8 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
 import { describeJintanColor } from './jintanColor'
+import { applyJintanSearchFilters, JINTAN_PARTS_SEARCH_FIELDS } from './jintanSearchFields'
 import supabase from './supabase'
 
 export interface JintanPartsData {
@@ -51,10 +53,6 @@ function partsKeyOf(row: {
   return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}\u0000${row.color}`
 }
 
-function keywordFilter(keyword: string) {
-  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%,color.ilike.%${keyword}%`
-}
-
 async function checkJintanPartsDataExists(
   itemType: JintanItemType,
   partName: string,
@@ -87,12 +85,12 @@ async function checkJintanPartsDataExists(
 export async function getJintanPartsDataList({
   page,
   pageSize,
-  keyword,
+  filters,
   itemType,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
@@ -100,9 +98,7 @@ export async function getJintanPartsDataList({
 
   let query = supabase.from('jintan_parts_data').select('*', { count: 'exact' })
 
-  if (keyword) {
-    query = query.or(keywordFilter(keyword.trim()))
-  }
+  query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
   if (itemType) {
     query = query.eq('item_type', itemType)
   }
@@ -123,7 +119,7 @@ export async function getJintanPartsDataList({
 }
 
 export async function getJintanPartsDataForExport(
-  keyword?: string,
+  filters?: JintanSearchFilters,
   itemType?: JintanItemType,
 ) {
   const rows: JintanPartsData[] = []
@@ -132,9 +128,7 @@ export async function getJintanPartsDataForExport(
   while (true) {
     let query = supabase.from('jintan_parts_data').select('*')
 
-    if (keyword) {
-      query = query.or(keywordFilter(keyword.trim()))
-    }
+    query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
     if (itemType) {
       query = query.eq('item_type', itemType)
     }

@@ -1,4 +1,5 @@
 import type { JintanItemType } from '@/services/jintanItemType'
+import type { JintanSearchFilters } from '@/services/jintanSearchFields'
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
@@ -15,22 +16,22 @@ import { jintanKeys } from '../queryKeys'
 export function useJintanPartsStockOutList({
   page,
   pageSize,
-  keyword,
+  filters,
   itemType,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }) {
   return useQuery({
     queryKey: jintanKeys.partsStockOut.list({
       page,
       pageSize,
-      keyword,
+      filters,
       itemType,
     }),
-    queryFn: () => getJintanPartsStockOutList({ page, pageSize, keyword, itemType }),
+    queryFn: () => getJintanPartsStockOutList({ page, pageSize, filters, itemType }),
     placeholderData: keepPreviousData,
     throwOnError: false,
     ...queryConfig.list,

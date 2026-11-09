@@ -1,5 +1,7 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
+import { applyJintanSearchFilters, JINTAN_MATERIALS_SEARCH_FIELDS } from './jintanSearchFields'
 import supabase from './supabase'
 
 export interface JintanMaterialsInventory {
@@ -57,12 +59,12 @@ function keywordFilter(keyword: string) {
 export async function getJintanMaterialsInventoryList({
   page,
   pageSize,
-  keyword,
+  filters,
   itemType,
 }: {
   page: number
   pageSize: number
-  keyword?: string
+  filters?: JintanSearchFilters
   itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
@@ -72,9 +74,7 @@ export async function getJintanMaterialsInventoryList({
     .from('jintan_materials_inventory')
     .select('*', { count: 'exact' })
 
-  if (keyword) {
-    query = query.or(keywordFilter(keyword.trim()))
-  }
+  query = applyJintanSearchFilters(query, filters, JINTAN_MATERIALS_SEARCH_FIELDS)
   if (itemType) {
     query = query.eq('item_type', itemType)
   }
@@ -118,7 +118,7 @@ export async function getJintanMaterialsInventoryByDataId(
 }
 
 export async function getJintanMaterialsInventoryForExport(
-  keyword?: string,
+  filters?: JintanSearchFilters,
   itemType?: JintanItemType,
 ) {
   const rows: JintanMaterialsInventory[] = []
@@ -127,9 +127,7 @@ export async function getJintanMaterialsInventoryForExport(
   while (true) {
     let query = supabase.from('jintan_materials_inventory').select('*')
 
-    if (keyword) {
-      query = query.or(keywordFilter(keyword.trim()))
-    }
+    query = applyJintanSearchFilters(query, filters, JINTAN_MATERIALS_SEARCH_FIELDS)
     if (itemType) {
       query = query.eq('item_type', itemType)
     }
