@@ -10,6 +10,7 @@ import {
 
 const TEMPLATE_HEADERS = ['型号', '名称', '规格', '材质', '备注']
 const TEMPLATE_HEADERS_WITH_TYPE = [...TEMPLATE_HEADERS, '类型']
+const TEMPLATE_HEADERS_WITH_COLOR = [...TEMPLATE_HEADERS_WITH_TYPE, '颜色']
 
 const writeFileMock = vi.hoisted(() => vi.fn())
 
@@ -48,6 +49,7 @@ describe('createJintanProfilesDataExportWorkbook', () => {
         profile_model: 'YDJ222-166-1',
         profile_name: '120*120立柱',
         specification: '2000',
+        color: '黑色',
         material: '6063铝合金',
         remarks: '',
         created_at: '2026-10-05T08:00:00',
@@ -66,10 +68,12 @@ describe('createJintanProfilesDataExportWorkbook', () => {
     expect(worksheet.C3?.v).toBe('YDJ222-166-1')
     expect(worksheet.D3?.v).toBe('120*120立柱')
     expect(worksheet.E3?.v).toBe('2000')
-    expect(worksheet.F3?.v).toBe('6063铝合金')
-    expect(worksheet.H3?.v).toBe('2026-10-05 09:30')
+    expect(worksheet.F2?.v).toBe('颜色')
+    expect(worksheet.F3?.v).toBe('黑色')
+    expect(worksheet.G3?.v).toBe('6063铝合金')
+    expect(worksheet.I3?.v).toBe('2026-10-05 09:30')
     expect(worksheet['!merges']).toEqual([
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
     ])
   })
 })
@@ -91,6 +95,7 @@ describe('parseJintanProfilesDataExcel', () => {
       profile_model: 'YDJ222-166-1',
       profile_name: '120*120立柱',
       specification: '2000',
+      color: '',
       material: '6063铝合金',
       remarks: '备注',
     })
@@ -99,6 +104,7 @@ describe('parseJintanProfilesDataExcel', () => {
       profile_model: '',
       profile_name: '叶片封盖左1',
       specification: '',
+      color: '',
       material: '6063铝合金',
       remarks: '',
     })
@@ -139,6 +145,25 @@ describe('parseJintanProfilesDataExcel', () => {
     expect(errors).toEqual([
       '第 4 行类型“A”型号“M1”名称“立柱”规格“2000”在 Excel 中重复',
       '第 5 行类型只能填 A 或 B',
+    ])
+  })
+
+  it('reads the optional color column and treats colors as different rows', async () => {
+    const file = createExcelFile([
+      TEMPLATE_HEADERS_WITH_COLOR,
+      ['M1', '立柱', '2000', '', '', '', ' 银色 '],
+      ['M1', '立柱', '2000', '', '', 'A', ''],
+      ['M1', '立柱', '2000', '', '', '', '银色'],
+    ])
+
+    const { rows, errors } = await parseJintanProfilesDataExcel(file)
+
+    expect(rows.map(row => [row.item_type, row.color])).toEqual([
+      ['A', '银色'],
+      ['A', ''],
+    ])
+    expect(errors).toEqual([
+      '第 4 行类型“A”型号“M1”名称“立柱”规格“2000”颜色“银色”在 Excel 中重复',
     ])
   })
 
@@ -202,5 +227,6 @@ describe('downloadJintanProfilesDataTemplate', () => {
     expect(worksheet.A1?.v).toBe('型号')
     expect(worksheet.E1?.v).toBe('备注')
     expect(worksheet.F1?.v).toBe('类型')
+    expect(worksheet.G1?.v).toBe('颜色')
   })
 })

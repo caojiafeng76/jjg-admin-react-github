@@ -59,6 +59,13 @@ export default function JintanPartsInventoryTable({
         render: (value: string | null | undefined) => value || '-',
       },
       {
+        title: '颜色',
+        dataIndex: 'color',
+        key: 'color',
+        width: 100,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
         title: '材质',
         dataIndex: 'material',
         key: 'material',
@@ -167,7 +174,7 @@ export default function JintanPartsInventoryTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1550, y: scrollY }}
+      scroll={{ x: 1650, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

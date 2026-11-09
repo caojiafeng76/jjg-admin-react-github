@@ -4,8 +4,9 @@ import type {
   JintanPartsDataFormValues,
 } from '@/services/apiJintanPartsData'
 import { Form, Input, Radio } from 'antd'
-
 import { useEffect } from 'react'
+
+import { JINTAN_COLOR_MAX_LENGTH } from '@/services/jintanColor'
 import {
   DEFAULT_JINTAN_ITEM_TYPE,
   JINTAN_ITEM_TYPE_OPTIONS,
@@ -22,6 +23,7 @@ const DEFAULT_VALUES: JintanPartsDataFormValues = {
   item_type: DEFAULT_JINTAN_ITEM_TYPE,
   part_name: '',
   specification: '',
+  color: '',
   material: '',
   supplier: '',
   remarks: '',
@@ -46,6 +48,7 @@ export default function JintanPartsDataForm({
         item_type: initialValues.item_type,
         part_name: initialValues.part_name,
         specification: initialValues.specification,
+        color: initialValues.color,
         material: initialValues.material,
         supplier: initialValues.supplier,
         remarks: initialValues.remarks,
@@ -93,6 +96,14 @@ export default function JintanPartsDataForm({
         rules={[{ max: 100, message: '规格不能超过 100 个字符' }]}
       >
         <Input placeholder="请输入规格" maxLength={100} />
+      </Form.Item>
+
+      <Form.Item
+        name="color"
+        label="颜色"
+        rules={[{ max: JINTAN_COLOR_MAX_LENGTH, message: `颜色不能超过 ${JINTAN_COLOR_MAX_LENGTH} 个字符` }]}
+      >
+        <Input placeholder="选填，如：黑色" maxLength={JINTAN_COLOR_MAX_LENGTH} />
       </Form.Item>
 
       <Form.Item

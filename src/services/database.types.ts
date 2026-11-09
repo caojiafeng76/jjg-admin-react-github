@@ -348,6 +348,7 @@ export type Database = {
           difference: number | null
           id: string
           inventory_id: string
+          item_color: string
           item_model: string
           item_name: string
           item_type: string
@@ -364,6 +365,7 @@ export type Database = {
           difference?: number | null
           id?: string
           inventory_id: string
+          item_color?: string
           item_model?: string
           item_name?: string
           item_type?: string
@@ -380,6 +382,7 @@ export type Database = {
           difference?: number | null
           id?: string
           inventory_id?: string
+          item_color?: string
           item_model?: string
           item_name?: string
           item_type?: string
@@ -580,6 +583,7 @@ export type Database = {
       }
       jintan_parts_data: {
         Row: {
+          color: string
           created_at: string
           id: string
           item_type: string
@@ -591,6 +595,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: string
           item_type?: string
@@ -602,6 +607,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: string
           item_type?: string
@@ -616,6 +622,7 @@ export type Database = {
       }
       jintan_parts_inventory: {
         Row: {
+          color: string
           created_at: string
           id: string
           item_type: string
@@ -635,6 +642,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: string
           item_type?: string
@@ -654,6 +662,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: string
           item_type?: string
@@ -684,6 +693,7 @@ export type Database = {
       }
       jintan_parts_stock_in: {
         Row: {
+          color: string
           created_at: string
           id: string
           inventory_id: string
@@ -697,6 +707,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: string
           inventory_id: string
@@ -710,6 +721,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: string
           inventory_id?: string
@@ -734,6 +746,7 @@ export type Database = {
       }
       jintan_parts_stock_out: {
         Row: {
+          color: string
           created_at: string
           id: string
           inventory_id: string
@@ -747,6 +760,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: string
           inventory_id: string
@@ -760,6 +774,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: string
           inventory_id?: string
@@ -784,6 +799,7 @@ export type Database = {
       }
       jintan_profiles_data: {
         Row: {
+          color: string
           created_at: string
           id: string
           item_type: string
@@ -795,6 +811,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: string
           item_type?: string
@@ -806,6 +823,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: string
           item_type?: string
@@ -820,6 +838,7 @@ export type Database = {
       }
       jintan_profiles_inventory: {
         Row: {
+          color: string
           created_at: string
           id: string
           item_type: string
@@ -833,6 +852,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: string
           item_type?: string
@@ -846,6 +866,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: string
           item_type?: string
@@ -870,6 +891,7 @@ export type Database = {
       }
       jintan_profiles_stock_in: {
         Row: {
+          color: string
           created_at: string
           id: string
           inventory_id: string
@@ -883,6 +905,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: string
           inventory_id: string
@@ -896,6 +919,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: string
           inventory_id?: string
@@ -920,6 +944,7 @@ export type Database = {
       }
       jintan_profiles_stock_out: {
         Row: {
+          color: string
           created_at: string
           id: string
           inventory_id: string
@@ -933,6 +958,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: string
           inventory_id: string
@@ -946,6 +972,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: string
           inventory_id?: string
@@ -4035,6 +4062,7 @@ export type Database = {
           closing_quantity: number
           current_quantity: number
           inventory_id: string
+          item_color: string
           item_model: string
           item_name: string
           item_type: string

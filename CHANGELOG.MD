@@ -15,6 +15,13 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-11-09
+
+- **类别**：新建
+- **范围**：`supabase/migrations/20261109090000_add_jintan_color.sql`、`src/services/apiJintan{Parts,Profiles}*`、`src/services/apiJintanMonthlyReport.ts`、`src/services/jintanColor.ts`、`src/features/jintan/{Parts,Profiles}*`、`src/features/jintan/MonthlyReport`、`src/utils/jintan{Parts,Profiles}*Excel.ts`、`src/utils/jintanMonthlyReportExcel.ts`
+- **摘要**：金檀配件、型材增加颜色字段 `color`（自由文本、选填，默认空字符串，已有数据为空）。判重改为“类型+(型号)+名称+规格+颜色”，同名同规格不同颜色是两种物料，资料、库存、出入库分开记账。库存、入库、出库保存颜色快照，调整流水新增 `item_color` 快照，月度报表函数新增返回列 `item_color`（素材为空）。资料表单可填颜色；资料、库存、入库、出库、月报表格和详情抽屉显示颜色，入库/出库和公开扫码出库页的库存下拉与选中摘要带颜色；关键字搜索覆盖颜色。资料和库存 Excel 模板在“类型”后增加选填的“颜色”列，旧模板仍可导入，库存导入按颜色匹配库存行；导出和月报导出增加“颜色”列。素材不变。
+- **验证**：迁移由用户本人在终端执行 `bun run db:push`，之后 `db:push:dry-run` 显示远端无待推送迁移，`bun run db:types` 已更新 `database.types.ts`（仅新增 `color` / `item_color`）。`bun lint` 0 error，`bun run typecheck`、`bun run build`、`bun run check:bundle` 通过；`bun run test` 203 个文件、1004 个用例通过（新增颜色判重、库存导入按颜色匹配、Excel 颜色列和表头校验用例）。生产库配件、型材资料行数与推送前一致（57、78），已有资料颜色全部为空。在回滚事务中验证：同类型名称规格的无色与黑色配件可并存且各有库存行；黑色入库 5、出库 2 后库存 3，出入库快照为黑色；资料改为红色后库存行跟随，直接改库存写入的调整流水 `item_color` 为红色；型材银色/无色并存，入库快照为银色；两条唯一约束已含 `color`，月报函数返回 `item_color`；事后确认无测试数据残留。调整流水由推送前 39 条变为 68 条，新增的是用户账号当天 09:23–09:40 在页面上对配件库存的直接修改，与迁移无关。Claude in Chrome 只读检查：配件资料、配件库存、配件出库、型材入库页有颜色列或颜色搜索提示，型材资料新增弹窗有颜色输入框（未保存），月报配件页签有颜色列且合计行对齐，公开扫码出库页（未登录）下拉正常加载。未覆盖：生产库暂无带颜色的数据，下拉和摘要里的颜色段只由单元测试覆盖；页面新增保存、Excel 下载与导入未在浏览器实际操作（由单元测试和回滚事务覆盖）。控制台仍有一条已知的 `syncPermissionRegistry` 权限报错，与本次无关。
+
 ## 2026-11-06
 
 - **类别**：新建

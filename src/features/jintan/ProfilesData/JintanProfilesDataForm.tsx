@@ -4,8 +4,9 @@ import type {
   JintanProfilesDataFormValues,
 } from '@/services/apiJintanProfilesData'
 import { Form, Input, Radio } from 'antd'
-
 import { useEffect } from 'react'
+
+import { JINTAN_COLOR_MAX_LENGTH } from '@/services/jintanColor'
 import {
   DEFAULT_JINTAN_ITEM_TYPE,
   JINTAN_ITEM_TYPE_OPTIONS,
@@ -23,6 +24,7 @@ const DEFAULT_VALUES: JintanProfilesDataFormValues = {
   profile_model: '',
   profile_name: '',
   specification: '',
+  color: '',
   material: '',
   remarks: '',
 }
@@ -47,6 +49,7 @@ export default function JintanProfilesDataForm({
         profile_model: initialValues.profile_model,
         profile_name: initialValues.profile_name,
         specification: initialValues.specification,
+        color: initialValues.color,
         material: initialValues.material,
         remarks: initialValues.remarks,
       })
@@ -101,6 +104,14 @@ export default function JintanProfilesDataForm({
         rules={[{ max: 100, message: '规格不能超过 100 个字符' }]}
       >
         <Input placeholder="请输入规格" maxLength={100} />
+      </Form.Item>
+
+      <Form.Item
+        name="color"
+        label="颜色"
+        rules={[{ max: JINTAN_COLOR_MAX_LENGTH, message: `颜色不能超过 ${JINTAN_COLOR_MAX_LENGTH} 个字符` }]}
+      >
+        <Input placeholder="选填，如：黑色" maxLength={JINTAN_COLOR_MAX_LENGTH} />
       </Form.Item>
 
       <Form.Item

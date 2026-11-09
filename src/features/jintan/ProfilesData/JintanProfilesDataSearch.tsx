@@ -48,7 +48,7 @@ export default function JintanProfilesDataSearch({
     >
       <Form.Item name="keyword" className="mb-0" style={{ width: 360 }}>
         <Input
-          placeholder="请输入型号、名称、规格或材质"
+          placeholder="请输入型号、名称、规格、颜色或材质"
           allowClear
           onPressEnter={() => form.submit()}
           className="rounded-lg"

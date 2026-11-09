@@ -10,6 +10,7 @@ import {
 
 const TEMPLATE_HEADERS = ['型号', '名称', '规格', '库存数量', '备注']
 const TEMPLATE_HEADERS_WITH_TYPE = [...TEMPLATE_HEADERS, '类型']
+const TEMPLATE_HEADERS_WITH_COLOR = [...TEMPLATE_HEADERS_WITH_TYPE, '颜色']
 
 const writeFileMock = vi.hoisted(() => vi.fn())
 
@@ -49,6 +50,7 @@ describe('createJintanProfilesInventoryExportWorkbook', () => {
         profile_model: 'YDJ222-166-1',
         profile_name: '120*120立柱',
         specification: '2000',
+        color: '黑色',
         material: '6063铝合金',
         quantity: 120,
         remarks: '常用',
@@ -68,12 +70,14 @@ describe('createJintanProfilesInventoryExportWorkbook', () => {
     expect(worksheet.C3?.v).toBe('YDJ222-166-1')
     expect(worksheet.D3?.v).toBe('120*120立柱')
     expect(worksheet.E3?.v).toBe('2000')
-    expect(worksheet.F3?.v).toBe('6063铝合金')
-    expect(worksheet.G3?.v).toBe(120)
-    expect(worksheet.H3?.v).toBe('常用')
-    expect(worksheet.I3?.v).toBe('2026-10-05 09:30')
+    expect(worksheet.F2?.v).toBe('颜色')
+    expect(worksheet.F3?.v).toBe('黑色')
+    expect(worksheet.G3?.v).toBe('6063铝合金')
+    expect(worksheet.H3?.v).toBe(120)
+    expect(worksheet.I3?.v).toBe('常用')
+    expect(worksheet.J3?.v).toBe('2026-10-05 09:30')
     expect(worksheet['!merges']).toEqual([
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
     ])
   })
 })
@@ -95,6 +99,7 @@ describe('parseJintanProfilesInventoryExcel', () => {
       profile_model: 'YDJ222-166-1',
       profile_name: '120*120立柱',
       specification: '2000',
+      color: '',
       quantity: 120,
       remarks: '常用',
     })
@@ -103,6 +108,7 @@ describe('parseJintanProfilesInventoryExcel', () => {
       profile_model: '',
       profile_name: '叶片封盖左1',
       specification: '',
+      color: '',
       quantity: 0,
       remarks: '',
     })
@@ -125,6 +131,7 @@ describe('parseJintanProfilesInventoryExcel', () => {
         profile_model: 'YDJ222-166-1',
         profile_name: '立柱',
         specification: '2000',
+        color: '',
         quantity: 12,
         remarks: '',
       },
@@ -174,6 +181,25 @@ describe('parseJintanProfilesInventoryExcel', () => {
     expect(errors).toEqual([
       '第 4 行类型“A”型号“M1”名称“立柱”规格“2000”在 Excel 中重复',
       '第 5 行类型只能填 A 或 B',
+    ])
+  })
+
+  it('reads the optional color column and treats colors as different rows', async () => {
+    const file = createExcelFile([
+      TEMPLATE_HEADERS_WITH_COLOR,
+      ['M1', '立柱', '2000', 1, '', '', ' 银色 '],
+      ['M1', '立柱', '2000', 2, '', 'A', ''],
+      ['M1', '立柱', '2000', 3, '', '', '银色'],
+    ])
+
+    const { rows, errors } = await parseJintanProfilesInventoryExcel(file)
+
+    expect(rows.map(row => [row.color, row.quantity])).toEqual([
+      ['银色', 1],
+      ['', 2],
+    ])
+    expect(errors).toEqual([
+      '第 4 行类型“A”型号“M1”名称“立柱”规格“2000”颜色“银色”在 Excel 中重复',
     ])
   })
 
@@ -229,5 +255,6 @@ describe('downloadJintanProfilesInventoryTemplate', () => {
     expect(worksheet.D1?.v).toBe('库存数量')
     expect(worksheet.E1?.v).toBe('备注')
     expect(worksheet.F1?.v).toBe('类型')
+    expect(worksheet.G1?.v).toBe('颜色')
   })
 })

@@ -53,6 +53,12 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
     width: 140,
   },
   {
+    title: '颜色',
+    dataIndex: 'color',
+    width: 100,
+    render: (value: string) => value || '-',
+  },
+  {
     title: '材质',
     dataIndex: 'material',
     width: 120,
@@ -208,7 +214,7 @@ export default function JintanPartsDataExcelImport({
           <Alert
             type="info"
             showIcon
-            title="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；类型列选填，留空按 A；类型、名称与规格均相同的行视为重复，导入会失败。"
+            title="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；类型、颜色列选填，类型留空按 A；类型、名称、规格与颜色均相同的行视为重复，导入会失败。"
           />
 
           {parseErrors.length > 0 && (
@@ -233,7 +239,7 @@ export default function JintanPartsDataExcelImport({
                 dataSource={previewData}
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}
-                scroll={{ y: 320, x: 970 }}
+                scroll={{ y: 320, x: 1070 }}
               />
             </div>
           )}

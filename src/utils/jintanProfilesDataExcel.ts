@@ -17,8 +17,10 @@ import {
   setRowHeight,
 } from '@/utils/excelStyleUtils'
 
-const TEMPLATE_HEADERS = ['型号', '名称', '规格', '材质', '备注', '类型'] as const
-const ITEM_TYPE_COLUMN_INDEX = TEMPLATE_HEADERS.length - 1
+const TEMPLATE_HEADERS = ['型号', '名称', '规格', '材质', '备注', '类型', '颜色'] as const
+const ITEM_TYPE_COLUMN_INDEX = TEMPLATE_HEADERS.indexOf('类型')
+const COLOR_COLUMN_INDEX = TEMPLATE_HEADERS.indexOf('颜色')
+const OPTIONAL_COLUMN_INDEXES: readonly number[] = [ITEM_TYPE_COLUMN_INDEX, COLOR_COLUMN_INDEX]
 
 const TEMPLATE_FILE_NAME = '金檀木业型材资料模板.xlsx'
 const TEMPLATE_SHEET_NAME = '型材资料导入模板'
@@ -31,11 +33,12 @@ const EXPORT_HEADERS = [
   '型号',
   '名称',
   '规格',
+  '颜色',
   '材质',
   '备注',
   '更新时间',
 ] as const
-const EXPORT_COLUMN_WIDTHS = [6, 6, 16, 20, 18, 14, 28, 20]
+const EXPORT_COLUMN_WIDTHS = [6, 6, 16, 20, 18, 10, 14, 28, 20]
 
 export interface ParseJintanProfilesDataExcelResult {
   rows: JintanProfilesDataFormValues[]
@@ -68,6 +71,7 @@ export function createJintanProfilesDataExportWorkbook(
     item.profile_model,
     item.profile_name,
     item.specification,
+    item.color,
     item.material,
     item.remarks,
     formatDateTime(item.updated_at),
@@ -117,6 +121,9 @@ export async function parseJintanProfilesDataExcel(
   const hasItemTypeColumn = Boolean(
     normalizeText(rawRows[0]?.[ITEM_TYPE_COLUMN_INDEX]),
   )
+  const hasColorColumn = Boolean(
+    normalizeText(rawRows[0]?.[COLOR_COLUMN_INDEX]),
+  )
 
   const rows: JintanProfilesDataFormValues[] = []
   const errors: string[] = []
@@ -153,10 +160,14 @@ export async function parseJintanProfilesDataExcel(
       return
     }
 
-    const dedupeKey = `${itemType}\u0000${profileModel}\u0000${profileName}\u0000${specification}`
+    const color = hasColorColumn
+      ? normalizeText(cells[COLOR_COLUMN_INDEX])
+      : ''
+
+    const dedupeKey = `${itemType}\u0000${profileModel}\u0000${profileName}\u0000${specification}\u0000${color}`
     if (seenKeys.has(dedupeKey)) {
       errors.push(
-        `第 ${rowNumber} 行类型“${itemType}”型号“${profileModel}”名称“${profileName}”规格“${specification}”在 Excel 中重复`,
+        `第 ${rowNumber} 行类型“${itemType}”型号“${profileModel}”名称“${profileName}”规格“${specification}”${color ? `颜色“${color}”` : ''}在 Excel 中重复`,
       )
       return
     }
@@ -167,6 +178,7 @@ export async function parseJintanProfilesDataExcel(
       profile_model: profileModel,
       profile_name: profileName,
       specification,
+      color,
       material,
       remarks,
     })
@@ -185,12 +197,11 @@ function validateTemplateHeaders(
   const headerRow = headerCells.map(cell => normalizeText(cell))
   const templateHeaders = Array.from(TEMPLATE_HEADERS)
 
-  // 类型列选填：旧模板没有这一列也能导入，有内容时表头必须是「类型」
-  const itemTypeHeader = headerRow[ITEM_TYPE_COLUMN_INDEX]
+  // 类型、颜色列选填：旧模板没有这两列也能导入，有内容时表头必须是「类型」「颜色」
   const matches = templateHeaders.every(
     (header, index) =>
       headerRow[index] === header
-      || (index === ITEM_TYPE_COLUMN_INDEX && !itemTypeHeader),
+      || (OPTIONAL_COLUMN_INDEXES.includes(index) && !headerRow[index]),
   )
 
   if (!matches) {

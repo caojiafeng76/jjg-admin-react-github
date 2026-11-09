@@ -23,6 +23,8 @@ export interface JintanMonthlyReportRow {
   item_model: string
   item_name: string
   specification: string
+  /** 颜色，素材为空字符串 */
+  item_color: string
   material: string
   supplier: string
   /** 上月结余 */

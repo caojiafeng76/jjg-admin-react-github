@@ -110,6 +110,7 @@ describe('型材库存导入按类型匹配', () => {
     profile_model: 'M1',
     profile_name: '立柱',
     specification: '2000',
+    color: '',
     material: '6063',
   })
   const importRow = (itemType: 'A' | 'B', quantity: number) => ({
@@ -117,6 +118,7 @@ describe('型材库存导入按类型匹配', () => {
     profile_model: 'M1',
     profile_name: '立柱',
     specification: '2000',
+    color: '',
     quantity,
     remarks: '',
   })
@@ -152,6 +154,7 @@ describe('配件库存导入按类型匹配', () => {
     item_type: itemType,
     part_name: '螺钉',
     specification: 'M6',
+    color: '',
     material: 'SUS304',
     supplier: '',
   })
@@ -159,6 +162,7 @@ describe('配件库存导入按类型匹配', () => {
     item_type: itemType,
     part_name: '螺钉',
     specification: 'M6',
+    color: '',
     quantity,
     remarks: '',
   })
@@ -189,10 +193,11 @@ describe('配件库存导入按类型匹配', () => {
 
 describe('资料批量导入按类型判重', () => {
   it('配件：已有 A 时可导入同名称规格的 B，重复的 A 被拒绝', async () => {
-    db.rows = [{ item_type: 'A', part_name: '螺钉', specification: 'M6' }]
+    db.rows = [{ item_type: 'A', part_name: '螺钉', specification: 'M6', color: '' }]
     const row = {
       part_name: '螺钉',
       specification: 'M6',
+      color: '',
       material: '',
       supplier: '',
       remarks: '',
@@ -237,11 +242,13 @@ describe('资料批量导入按类型判重', () => {
       profile_model: 'M1',
       profile_name: '立柱',
       specification: '2000',
+      color: '',
     }]
     const row = {
       profile_model: 'M1',
       profile_name: '立柱',
       specification: '2000',
+      color: '',
       material: '',
       remarks: '',
     }

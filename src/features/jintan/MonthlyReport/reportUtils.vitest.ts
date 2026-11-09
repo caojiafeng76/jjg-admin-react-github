@@ -18,6 +18,7 @@ function reportRow(
     item_model: '',
     item_name: '立柱',
     specification: '',
+    item_color: '',
     material: '',
     supplier: '',
     opening_quantity: 0,

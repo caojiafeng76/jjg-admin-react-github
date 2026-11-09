@@ -9,6 +9,7 @@ export interface JintanProfilesStockIn {
   profile_model: string
   profile_name: string
   specification: string
+  color: string
   material: string
   quantity: number
   remarks: string
@@ -23,7 +24,7 @@ export interface JintanProfilesStockInFormValues {
 }
 
 function keywordFilter(keyword: string): string {
-  return `profile_model.ilike.%${keyword}%,profile_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%`
+  return `profile_model.ilike.%${keyword}%,profile_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,color.ilike.%${keyword}%`
 }
 
 export async function getJintanProfilesStockInList({
