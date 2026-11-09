@@ -13,6 +13,7 @@ function createRecord(
     item_type: 'A' as const,
     part_name: '压簧',
     specification: '1.6*16*82*14',
+    color: '',
     material: 'SUS304',
     supplier: '蓝工',
     quantity: 20,

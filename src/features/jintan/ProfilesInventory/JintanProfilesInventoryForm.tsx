@@ -4,8 +4,9 @@ import type {
   JintanProfilesInventoryFormValues,
 } from '@/services/apiJintanProfilesInventory'
 import { Form, Input, InputNumber } from 'antd'
-
 import { useEffect } from 'react'
+
+import { formatJintanColor } from '@/services/jintanColor'
 
 interface Props {
   onFinish: (values: JintanProfilesInventoryFormValues) => void
@@ -74,6 +75,10 @@ export default function JintanProfilesInventoryForm({
           <div>
             <div className="text-xs text-slate-400">规格</div>
             <div>{profileSnapshot.specification || '-'}</div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-400">颜色</div>
+            <div>{formatJintanColor(profileSnapshot.color)}</div>
           </div>
           <div>
             <div className="text-xs text-slate-400">材质</div>

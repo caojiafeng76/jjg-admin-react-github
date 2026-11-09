@@ -1,8 +1,8 @@
 import type { FormInstance, TabsProps } from 'antd'
 import type { JintanInventoryAdjustFormValues } from '../JintanInventoryAdjustForm'
 import type { JintanProfilesQuickInventory } from '../ProfilesStockIn/JintanProfilesStockInForm'
-
 import type { JintanProfilesData } from '@/services/apiJintanProfilesData'
+
 import type { JintanProfilesStockInFormValues } from '@/services/apiJintanProfilesStockIn'
 import type { JintanProfilesStockOutFormValues } from '@/services/apiJintanProfilesStockOut'
 import {
@@ -19,6 +19,7 @@ import {
 import { useCallback, useMemo, useState } from 'react'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { formatJintanColor, jintanColorSegment } from '@/services/jintanColor'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import JintanInventoryAdjustForm from '../JintanInventoryAdjustForm'
 import JintanInventoryAdjustmentRecordsTab from '../JintanInventoryAdjustmentRecordsTab'
@@ -88,7 +89,7 @@ export default function JintanProfilesDataDetailDrawer({
 
     return {
       id: inventory.id,
-      label: `${inventory.item_type} / ${inventory.profile_model ? `${inventory.profile_model} / ` : ''}${inventory.profile_name} / ${inventory.specification || '无规格'}（库存 ${inventory.quantity}）`,
+      label: `${inventory.item_type} / ${inventory.profile_model ? `${inventory.profile_model} / ` : ''}${inventory.profile_name} / ${inventory.specification || '无规格'}${jintanColorSegment(inventory.color)}（库存 ${inventory.quantity}）`,
       quantity: inventory.quantity,
     }
   }, [inventory])
@@ -290,9 +291,11 @@ export default function JintanProfilesDataDetailDrawer({
                   {record.item_type} /{' '}
                   {record.profile_model ? `${record.profile_model} / ` : ''}
                   {record.profile_name} / {record.specification || '无规格'}
+                  {jintanColorSegment(record.color)}
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-600 md:grid-cols-3 dark:text-slate-300">
                   <div>类型：{record.item_type}</div>
+                  <div>颜色：{formatJintanColor(record.color)}</div>
                   <div>材质：{record.material || '-'}</div>
                   <div className="col-span-2">备注：{record.remarks || '-'}</div>
                 </div>

@@ -64,6 +64,12 @@ export default function JintanProfilesStockOutTable({
         render: (value: string) => value || '-',
       },
       {
+        title: '颜色',
+        dataIndex: 'color',
+        width: 100,
+        render: (value: string) => value || '-',
+      },
+      {
         title: '材质',
         dataIndex: 'material',
         width: 120,
@@ -105,7 +111,7 @@ export default function JintanProfilesStockOutTable({
       dataSource={data}
       rowSelection={{ type: 'radio', selectedRowKeys, onChange: onSelect }}
       pagination={false}
-      scroll={{ x: 1270, y: scrollY }}
+      scroll={{ x: 1370, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

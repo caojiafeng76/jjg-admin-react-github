@@ -9,6 +9,7 @@ export interface JintanPartsStockOut {
   item_type: JintanItemType
   part_name: string
   specification: string
+  color: string
   material: string
   supplier: string
   quantity: number
@@ -24,7 +25,7 @@ export interface JintanPartsStockOutFormValues {
 }
 
 function keywordFilter(keyword: string): string {
-  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%`
+  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%,color.ilike.%${keyword}%`
 }
 
 export async function getJintanPartsStockOutList({

@@ -66,6 +66,13 @@ export default function JintanProfilesInventoryTable({
         render: (value: string | null | undefined) => value || '-',
       },
       {
+        title: '颜色',
+        dataIndex: 'color',
+        key: 'color',
+        width: 100,
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
         title: '材质',
         dataIndex: 'material',
         key: 'material',
@@ -117,7 +124,7 @@ export default function JintanProfilesInventoryTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1270, y: scrollY }}
+      scroll={{ x: 1370, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

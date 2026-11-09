@@ -14,6 +14,7 @@ vi.mock('../ProfilesInventory/useJintanProfilesInventory', () => ({
         profile_model: 'YDJ222-166-1',
         profile_name: '120*120立柱',
         specification: '2000',
+        color: '',
         material: '6063铝合金',
         quantity: 12,
       },

@@ -1,5 +1,6 @@
 import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
+import { describeJintanColor } from './jintanColor'
 import supabase from './supabase'
 
 export interface JintanProfilesData {
@@ -8,6 +9,7 @@ export interface JintanProfilesData {
   profile_model: string
   profile_name: string
   specification: string
+  color: string
   material: string
   remarks: string
   created_at: string
@@ -19,6 +21,7 @@ export interface JintanProfilesDataFormValues {
   profile_model: string
   profile_name: string
   specification: string
+  color: string
   material: string
   remarks: string
 }
@@ -33,6 +36,7 @@ function normalizePayload(
     profile_model: values.profile_model.trim(),
     profile_name: values.profile_name.trim(),
     specification: values.specification.trim(),
+    color: (values.color ?? '').trim(),
     material: values.material.trim(),
     remarks: values.remarks.trim(),
   }
@@ -43,12 +47,13 @@ function profilesKeyOf(row: {
   profile_model: string
   profile_name: string
   specification: string
+  color: string
 }): string {
-  return `${row.item_type}\u0000${row.profile_model}\u0000${row.profile_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.profile_model}\u0000${row.profile_name}\u0000${row.specification}\u0000${row.color}`
 }
 
 function keywordFilter(keyword: string) {
-  return `profile_model.ilike.%${keyword}%,profile_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%`
+  return `profile_model.ilike.%${keyword}%,profile_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,color.ilike.%${keyword}%`
 }
 
 async function checkJintanProfilesDataExists(
@@ -56,6 +61,7 @@ async function checkJintanProfilesDataExists(
   profileModel: string,
   profileName: string,
   specification: string,
+  color: string,
   excludeId?: string,
 ) {
   let query = supabase
@@ -65,6 +71,7 @@ async function checkJintanProfilesDataExists(
     .eq('profile_model', profileModel)
     .eq('profile_name', profileName)
     .eq('specification', specification)
+    .eq('color', color)
     .limit(1)
 
   if (excludeId) {
@@ -169,10 +176,11 @@ export async function createJintanProfilesData(
     payload.profile_model,
     payload.profile_name,
     payload.specification,
+    payload.color,
   )
   if (exists) {
     throw new Error(
-      `类型“${payload.item_type}”型号“${payload.profile_model}”名称“${payload.profile_name}”规格“${payload.specification}”已存在，无法创建`,
+      `类型“${payload.item_type}”型号“${payload.profile_model}”名称“${payload.profile_name}”规格“${payload.specification}”${describeJintanColor(payload.color)}已存在，无法创建`,
     )
   }
 
@@ -193,7 +201,7 @@ export async function createJintanProfilesDataBatch(
     const key = profilesKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `类型“${row.item_type}”型号“${row.profile_model}”名称“${row.profile_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
+        `类型“${row.item_type}”型号“${row.profile_model}”名称“${row.profile_name}”规格“${row.specification}”${describeJintanColor(row.color)}在 Excel 中重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -204,7 +212,7 @@ export async function createJintanProfilesDataBatch(
   )
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_profiles_data')
-    .select('item_type, profile_model, profile_name, specification')
+    .select('item_type, profile_model, profile_name, specification, color')
     .in('profile_name', profileNames)
 
   if (existingError) {
@@ -221,7 +229,7 @@ export async function createJintanProfilesDataBatch(
     const labels = duplicated
       .map(
         row =>
-          `“${row.item_type}”/“${row.profile_model}”/“${row.profile_name}”/“${row.specification}”`,
+          `“${row.item_type}”/“${row.profile_model}”/“${row.profile_name}”/“${row.specification}”${row.color ? `/“${row.color}”` : ''}`,
       )
       .join('、')
     throw new Error(`以下型材已存在，无法导入：${labels}`)
@@ -248,11 +256,12 @@ export async function updateJintanProfilesData({
     payload.profile_model,
     payload.profile_name,
     payload.specification,
+    payload.color,
     id,
   )
   if (exists) {
     throw new Error(
-      `类型“${payload.item_type}”型号“${payload.profile_model}”名称“${payload.profile_name}”规格“${payload.specification}”已存在，无法更新`,
+      `类型“${payload.item_type}”型号“${payload.profile_model}”名称“${payload.profile_name}”规格“${payload.specification}”${describeJintanColor(payload.color)}已存在，无法更新`,
     )
   }
 

@@ -18,6 +18,7 @@ function row(overrides: Partial<JintanMonthlyReportRow>): JintanMonthlyReportRow
     item_model: '',
     item_name: '螺钉',
     specification: 'ST4.2*20',
+    item_color: '',
     material: 'SUS304',
     supplier: '',
     opening_quantity: 0,
@@ -66,6 +67,7 @@ const report: JintanMonthlyReport = {
       item_model: '140U',
       item_name: '立柱',
       specification: '3米',
+      item_color: '银色',
       material: '6063铝合金',
       opening_quantity: 8,
       stock_in_quantity: 2,
@@ -103,19 +105,19 @@ describe('createJintanMonthlyReportWorkbook', () => {
     const partsA = sheetRows(workbook, '配件A')
     expect(partsA[0][0]).toBe('金檀木业配件A月度库存报表（2026年10月）')
     expect(partsA[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
-    expect(partsA[2]).toEqual([1, 'A', '', '螺钉', 'ST4.2*20', 'SUS304', 100, 20, 30, 0, 90])
-    expect(partsA[3]).toEqual([2, 'A', '', '合页', '4寸', 'SUS304', 10, 5, 0, -3, 12])
-    expect(partsA[4]).toEqual(['合计', '', '', '', '', '', 110, 25, 30, -3, 102])
+    expect(partsA[2]).toEqual([1, 'A', '', '螺钉', 'ST4.2*20', '', 'SUS304', 100, 20, 30, 0, 90])
+    expect(partsA[3]).toEqual([2, 'A', '', '合页', '4寸', '', 'SUS304', 10, 5, 0, -3, 12])
+    expect(partsA[4]).toEqual(['合计', '', '', '', '', '', '', 110, 25, 30, -3, 102])
     expect(partsA).toHaveLength(5)
 
     const partsB = sheetRows(workbook, '配件B')
     expect(partsB[0][0]).toBe('金檀木业配件B月度库存报表（2026年10月）')
-    expect(partsB[2]).toEqual([1, 'B', '', '螺钉', 'ST4.2*20', 'SUS304', 7, 1, 2, 0, 6])
-    expect(partsB[3]).toEqual(['合计', '', '', '', '', '', 7, 1, 2, 0, 6])
+    expect(partsB[2]).toEqual([1, 'B', '', '螺钉', 'ST4.2*20', '', 'SUS304', 7, 1, 2, 0, 6])
+    expect(partsB[3]).toEqual(['合计', '', '', '', '', '', '', 7, 1, 2, 0, 6])
 
     const profilesB = sheetRows(workbook, '型材B')
     expect(profilesB[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
-    expect(profilesB[2]).toEqual([1, 'B', '140U', '立柱', '3米', '6063铝合金', 8, 2, 4, 0, 6])
+    expect(profilesB[2]).toEqual([1, 'B', '140U', '立柱', '3米', '银色', '6063铝合金', 8, 2, 4, 0, 6])
   })
 
   it('keeps an empty sheet with headers and a zero total row', () => {
@@ -123,11 +125,11 @@ describe('createJintanMonthlyReportWorkbook', () => {
 
     const profilesA = sheetRows(workbook, '型材A')
     expect(profilesA[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
-    expect(profilesA[2]).toEqual(['合计', '', '', '', '', '', 0, 0, 0, 0, 0])
+    expect(profilesA[2]).toEqual(['合计', '', '', '', '', '', '', 0, 0, 0, 0, 0])
 
     const materialsB = sheetRows(workbook, '素材B')
     expect(materialsB[0][0]).toBe('金檀木业素材B月度库存报表（2026年10月）')
-    expect(materialsB[2]).toEqual(['合计', '', '', '', '', '', 0, 0, 0, 0, 0])
+    expect(materialsB[2]).toEqual(['合计', '', '', '', '', '', '', 0, 0, 0, 0, 0])
   })
 
   it('creates only the selected type when one is given', () => {

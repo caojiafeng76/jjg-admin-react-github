@@ -10,6 +10,7 @@ import {
 
 const TEMPLATE_HEADERS = ['名称', '规格', '库存数量', '备注']
 const TEMPLATE_HEADERS_WITH_TYPE = [...TEMPLATE_HEADERS, '类型']
+const TEMPLATE_HEADERS_WITH_COLOR = [...TEMPLATE_HEADERS_WITH_TYPE, '颜色']
 
 const writeFileMock = vi.hoisted(() => vi.fn())
 
@@ -48,6 +49,7 @@ describe('createJintanPartsInventoryExportWorkbook', () => {
         item_type: 'B',
         part_name: '十字沉头自攻螺钉',
         specification: 'ST4.2*20',
+        color: '黑色',
         material: 'SUS304',
         supplier: '南浔螺丝店',
         quantity: 120,
@@ -67,6 +69,7 @@ describe('createJintanPartsInventoryExportWorkbook', () => {
         item_type: 'A',
         part_name: '纸箱',
         specification: '',
+        color: '黑色',
         material: '',
         supplier: '',
         quantity: 0,
@@ -92,28 +95,30 @@ describe('createJintanPartsInventoryExportWorkbook', () => {
     expect(worksheet.B3?.v).toBe('B')
     expect(worksheet.C3?.v).toBe('十字沉头自攻螺钉')
     expect(worksheet.D3?.v).toBe('ST4.2*20')
-    expect(worksheet.E3?.v).toBe('SUS304')
-    expect(worksheet.F3?.v).toBe('南浔螺丝店')
-    expect(worksheet.G3?.v).toBe(120)
-    expect(worksheet.H2?.v).toBe('单台数量')
-    expect(worksheet.H3?.v).toBe(14)
-    expect(worksheet.I3?.v).toBe(140)
-    expect(worksheet.J3?.v).toBe(70)
-    expect(worksheet.K3?.v).toBe('偏低')
-    expect(worksheet.L3?.v).toBe('常用')
-    expect(worksheet.M3?.v).toBe('2026-09-27 09:30')
+    expect(worksheet.E2?.v).toBe('颜色')
+    expect(worksheet.E3?.v).toBe('黑色')
+    expect(worksheet.F3?.v).toBe('SUS304')
+    expect(worksheet.G3?.v).toBe('南浔螺丝店')
+    expect(worksheet.H3?.v).toBe(120)
+    expect(worksheet.I2?.v).toBe('单台数量')
+    expect(worksheet.I3?.v).toBe(14)
+    expect(worksheet.J3?.v).toBe(140)
+    expect(worksheet.K3?.v).toBe(70)
+    expect(worksheet.L3?.v).toBe('偏低')
+    expect(worksheet.M3?.v).toBe('常用')
+    expect(worksheet.N3?.v).toBe('2026-09-27 09:30')
     expect(worksheet['!merges']).toEqual([
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 12 } },
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 13 } },
     ])
 
     // 库存数量 / 状态按状态填底色，未设置保持白底
-    expect(worksheet.G3?.s?.fill?.fgColor?.rgb).toBe('FFEB9C')
-    expect(worksheet.K3?.s?.fill?.fgColor?.rgb).toBe('FFEB9C')
-    expect(worksheet.F3?.s?.fill?.fgColor?.rgb).not.toBe('FFEB9C')
-    expect(worksheet.G3?.s?.border?.top?.style).toBe('thin')
-    expect(worksheet.H4?.v).toBe('')
-    expect(worksheet.K4?.v).toBe('未设置')
-    expect(worksheet.G4?.s?.fill?.fgColor?.rgb).toBe('FFFFFF')
+    expect(worksheet.H3?.s?.fill?.fgColor?.rgb).toBe('FFEB9C')
+    expect(worksheet.L3?.s?.fill?.fgColor?.rgb).toBe('FFEB9C')
+    expect(worksheet.G3?.s?.fill?.fgColor?.rgb).not.toBe('FFEB9C')
+    expect(worksheet.H3?.s?.border?.top?.style).toBe('thin')
+    expect(worksheet.I4?.v).toBe('')
+    expect(worksheet.L4?.v).toBe('未设置')
+    expect(worksheet.H4?.s?.fill?.fgColor?.rgb).toBe('FFFFFF')
   })
 })
 
@@ -133,6 +138,7 @@ describe('parseJintanPartsInventoryExcel', () => {
       item_type: 'A',
       part_name: '十字沉头自攻螺钉',
       specification: 'ST4.2*20',
+      color: '',
       quantity: 120,
       remarks: '常用',
     })
@@ -140,6 +146,7 @@ describe('parseJintanPartsInventoryExcel', () => {
       item_type: 'A',
       part_name: '毛巾',
       specification: '',
+      color: '',
       quantity: 0,
       remarks: '',
     })
@@ -157,7 +164,7 @@ describe('parseJintanPartsInventoryExcel', () => {
     const { rows, errors } = await parseJintanPartsInventoryExcel(file)
 
     expect(rows).toEqual([
-      { item_type: 'A', part_name: '螺钉', specification: '', quantity: 12, remarks: '' },
+      { item_type: 'A', part_name: '螺钉', specification: '', color: '', quantity: 12, remarks: '' },
     ])
     expect(errors).toEqual([
       '第 3 行库存数量必须为非负整数',
@@ -204,6 +211,25 @@ describe('parseJintanPartsInventoryExcel', () => {
     expect(errors).toEqual([
       '第 4 行类型“A”名称“螺钉”规格“M6”在 Excel 中重复',
       '第 5 行类型只能填 A 或 B',
+    ])
+  })
+
+  it('reads the optional color column and treats colors as different rows', async () => {
+    const file = createExcelFile([
+      TEMPLATE_HEADERS_WITH_COLOR,
+      ['螺钉', 'M6', 1, '', '', ' 黑色 '],
+      ['螺钉', 'M6', 2, '', 'A', ''],
+      ['螺钉', 'M6', 3, '', '', '黑色'],
+    ])
+
+    const { rows, errors } = await parseJintanPartsInventoryExcel(file)
+
+    expect(rows.map(row => [row.color, row.quantity])).toEqual([
+      ['黑色', 1],
+      ['', 2],
+    ])
+    expect(errors).toEqual([
+      '第 4 行类型“A”名称“螺钉”规格“M6”颜色“黑色”在 Excel 中重复',
     ])
   })
 
@@ -255,5 +281,6 @@ describe('downloadJintanPartsInventoryTemplate', () => {
     expect(worksheet.C1?.v).toBe('库存数量')
     expect(worksheet.D1?.v).toBe('备注')
     expect(worksheet.E1?.v).toBe('类型')
+    expect(worksheet.F1?.v).toBe('颜色')
   })
 })

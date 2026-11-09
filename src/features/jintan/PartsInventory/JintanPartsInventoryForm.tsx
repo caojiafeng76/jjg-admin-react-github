@@ -4,8 +4,9 @@ import type {
   JintanPartsInventoryFormValues,
 } from '@/services/apiJintanPartsInventory'
 import { Form, Input, InputNumber } from 'antd'
-
 import { useEffect } from 'react'
+
+import { formatJintanColor } from '@/services/jintanColor'
 import {
   calcJintanPartsSafetyStock,
   getJintanPartsStockStatus,
@@ -96,6 +97,10 @@ export default function JintanPartsInventoryForm({
           <div>
             <div className="text-xs text-slate-400">规格</div>
             <div>{partSnapshot.specification || '-'}</div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-400">颜色</div>
+            <div>{formatJintanColor(partSnapshot.color)}</div>
           </div>
           <div>
             <div className="text-xs text-slate-400">材质</div>

@@ -1,5 +1,6 @@
 import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
+import { describeJintanColor } from './jintanColor'
 import publicSupabase from './publicSupabase'
 import supabase from './supabase'
 
@@ -18,6 +19,7 @@ export interface JintanPartsInventory {
   item_type: JintanItemType
   part_name: string
   specification: string
+  color: string
   material: string
   supplier: string
   quantity: number
@@ -48,6 +50,7 @@ export interface JintanPartsInventoryImportRow {
   item_type: JintanItemType
   part_name: string
   specification: string
+  color: string
   quantity: number
   remarks: string
 }
@@ -69,12 +72,13 @@ function inventoryKeyOf(row: {
   item_type: string
   part_name: string
   specification: string
+  color: string
 }): string {
-  return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}\u0000${row.color}`
 }
 
 function keywordFilter(keyword: string) {
-  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%`
+  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%,color.ilike.%${keyword}%`
 }
 
 export async function getJintanPartsInventoryList({
@@ -258,7 +262,7 @@ export async function createJintanPartsInventoryBatch(
     const key = inventoryKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”在 Excel 中重复，无法导入`,
+        `类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}在 Excel 中重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -267,7 +271,7 @@ export async function createJintanPartsInventoryBatch(
   const partNames = Array.from(new Set(rows.map(row => row.part_name)))
   const { data: inventoryRows, error: inventoryError } = await supabase
     .from('jintan_parts_inventory')
-    .select('id, part_data_id, item_type, part_name, specification, material, supplier')
+    .select('id, part_data_id, item_type, part_name, specification, color, material, supplier')
     .in('part_name', partNames)
 
   if (inventoryError) {
@@ -281,7 +285,7 @@ export async function createJintanPartsInventoryBatch(
   const missing = rows.filter(row => !inventoryByKey.has(inventoryKeyOf(row)))
   if (missing.length > 0) {
     const labels = missing
-      .map(row => `“${row.item_type}”/“${row.part_name}”/“${row.specification}”`)
+      .map(row => `“${row.item_type}”/“${row.part_name}”/“${row.specification}”${row.color ? `/“${row.color}”` : ''}`)
       .join('、')
     throw new Error(`以下配件在配件资料中不存在，请先维护配件资料：${labels}`)
   }
@@ -290,7 +294,7 @@ export async function createJintanPartsInventoryBatch(
     const matched = inventoryByKey.get(inventoryKeyOf(row))
     if (!matched) {
       throw new Error(
-        `未找到类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”的库存行，请刷新后重试`,
+        `未找到类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}的库存行，请刷新后重试`,
       )
     }
 
@@ -300,6 +304,7 @@ export async function createJintanPartsInventoryBatch(
       item_type: matched.item_type,
       part_name: matched.part_name,
       specification: matched.specification,
+      color: matched.color,
       material: matched.material,
       supplier: matched.supplier,
       quantity: row.quantity,
@@ -321,6 +326,7 @@ export interface JintanPartsInventoryOption {
   item_type: JintanItemType
   part_name: string
   specification: string
+  color: string
   material: string
   supplier: string
   quantity: number
@@ -350,7 +356,7 @@ async function getJintanPartsInventoryOptionsWithClient(
 ): Promise<JintanPartsInventoryOption[]> {
   let query = client
     .from('jintan_parts_inventory')
-    .select('id, item_type, part_name, specification, material, supplier, quantity')
+    .select('id, item_type, part_name, specification, color, material, supplier, quantity')
   if (keyword?.trim())
     query = query.or(keywordFilter(keyword.trim()))
 

@@ -11,8 +11,9 @@ import {
   InputNumber,
   Select,
 } from 'antd'
-
 import { useEffect, useMemo, useState } from 'react'
+
+import { formatJintanColor, jintanColorSegment } from '@/services/jintanColor'
 import { useJintanPartsInventoryOptions } from '../PartsInventory/useJintanPartsInventory'
 
 interface Props {
@@ -60,7 +61,7 @@ export default function JintanPartsStockOutForm({
     () =>
       options.map(option => ({
         value: option.id,
-        label: `${option.item_type} / ${option.part_name} / ${option.specification || '无规格'}（库存 ${option.quantity}）`,
+        label: `${option.item_type} / ${option.part_name} / ${option.specification || '无规格'}${jintanColorSegment(option.color)}（库存 ${option.quantity}）`,
       })),
     [options],
   )
@@ -104,7 +105,7 @@ export default function JintanPartsStockOutForm({
               <Form.Item label="配件资料">
                 <Input
                   disabled
-                  value={`${editingRecord.item_type} / ${editingRecord.part_name} / ${editingRecord.specification || '无规格'}`}
+                  value={`${editingRecord.item_type} / ${editingRecord.part_name} / ${editingRecord.specification || '无规格'}${jintanColorSegment(editingRecord.color)}`}
                 />
               </Form.Item>
             </>
@@ -140,6 +141,7 @@ export default function JintanPartsStockOutForm({
       {!editingRecord && !quickInventory && selected && (
         <div className="mb-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-700 dark:text-slate-200">
           <div>类型：{selected.item_type}</div>
+          <div>颜色：{formatJintanColor(selected.color)}</div>
           <div>
             名称：{selected.part_name} / 规格：{selected.specification || '-'}
           </div>

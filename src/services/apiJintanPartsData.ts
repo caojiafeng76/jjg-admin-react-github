@@ -1,5 +1,6 @@
 import type { JintanItemType } from './jintanItemType'
 import { handleApiError } from '@/utils/errorHandler'
+import { describeJintanColor } from './jintanColor'
 import supabase from './supabase'
 
 export interface JintanPartsData {
@@ -7,6 +8,7 @@ export interface JintanPartsData {
   item_type: JintanItemType
   part_name: string
   specification: string
+  color: string
   material: string
   supplier: string
   remarks: string
@@ -18,6 +20,7 @@ export interface JintanPartsDataFormValues {
   item_type: JintanItemType
   part_name: string
   specification: string
+  color: string
   material: string
   supplier: string
   remarks: string
@@ -32,6 +35,7 @@ function normalizePayload(
     item_type: values.item_type,
     part_name: values.part_name.trim(),
     specification: values.specification.trim(),
+    color: (values.color ?? '').trim(),
     material: values.material.trim(),
     supplier: values.supplier.trim(),
     remarks: values.remarks.trim(),
@@ -42,18 +46,20 @@ function partsKeyOf(row: {
   item_type: string
   part_name: string
   specification: string
+  color: string
 }): string {
-  return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}`
+  return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}\u0000${row.color}`
 }
 
 function keywordFilter(keyword: string) {
-  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%`
+  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%,color.ilike.%${keyword}%`
 }
 
 async function checkJintanPartsDataExists(
   itemType: JintanItemType,
   partName: string,
   specification: string,
+  color: string,
   excludeId?: string,
 ) {
   let query = supabase
@@ -62,6 +68,7 @@ async function checkJintanPartsDataExists(
     .eq('item_type', itemType)
     .eq('part_name', partName)
     .eq('specification', specification)
+    .eq('color', color)
     .limit(1)
 
   if (excludeId) {
@@ -161,10 +168,11 @@ export async function createJintanPartsData(values: JintanPartsDataFormValues) {
     payload.item_type,
     payload.part_name,
     payload.specification,
+    payload.color,
   )
   if (exists) {
     throw new Error(
-      `类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”已存在，无法创建`,
+      `类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”${describeJintanColor(payload.color)}已存在，无法创建`,
     )
   }
 
@@ -185,7 +193,7 @@ export async function createJintanPartsDataBatch(
     const key = partsKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”重复，无法导入`,
+        `类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -194,7 +202,7 @@ export async function createJintanPartsDataBatch(
   const partNames = Array.from(new Set(payload.map(row => row.part_name)))
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_parts_data')
-    .select('item_type, part_name, specification')
+    .select('item_type, part_name, specification, color')
     .in('part_name', partNames)
 
   if (existingError) {
@@ -207,7 +215,7 @@ export async function createJintanPartsDataBatch(
   const duplicated = payload.filter(row => existingKeys.has(partsKeyOf(row)))
   if (duplicated.length > 0) {
     const labels = duplicated
-      .map(row => `“${row.item_type}”/“${row.part_name}”/“${row.specification}”`)
+      .map(row => `“${row.item_type}”/“${row.part_name}”/“${row.specification}”${row.color ? `/“${row.color}”` : ''}`)
       .join('、')
     throw new Error(`以下配件已存在，无法导入：${labels}`)
   }
@@ -232,11 +240,12 @@ export async function updateJintanPartsData({
     payload.item_type,
     payload.part_name,
     payload.specification,
+    payload.color,
     id,
   )
   if (exists) {
     throw new Error(
-      `类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”已存在，无法更新`,
+      `类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”${describeJintanColor(payload.color)}已存在，无法更新`,
     )
   }
 
