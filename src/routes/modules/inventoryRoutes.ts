@@ -14,6 +14,11 @@ import {
   JintanProfilesInventory,
   JintanProfilesStockIn,
   JintanProfilesStockOut,
+  SyneyMaterialsData,
+  SyneyMaterialsInventory,
+  SyneyMaterialsMonthlyReport,
+  SyneyMaterialsStockIn,
+  SyneyMaterialsStockOut,
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsStockIn,
   YoumaiFinishedGoodsStockOut,
@@ -73,4 +78,16 @@ export const jintanRoutes: RouteObject[] = [
   samePermissionRoute('jintan-materials-stock-in', JintanMaterialsStockIn),
   samePermissionRoute('jintan-materials-stock-out', JintanMaterialsStockOut),
   samePermissionRoute('jintan-monthly-report', JintanMonthlyReport),
+]
+
+/** 西尼材料：资料、入库、出库、库存、月度报表 */
+export const syneyMaterialsRoutes: RouteObject[] = [
+  samePermissionRoute('syney-materials-data', SyneyMaterialsData),
+  samePermissionRoute('syney-materials-stock-in', SyneyMaterialsStockIn),
+  samePermissionRoute('syney-materials-stock-out', SyneyMaterialsStockOut),
+  samePermissionRoute('syney-materials-inventory', SyneyMaterialsInventory),
+  samePermissionRoute(
+    'syney-materials-monthly-report',
+    SyneyMaterialsMonthlyReport,
+  ),
 ]

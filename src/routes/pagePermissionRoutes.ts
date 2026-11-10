@@ -88,4 +88,21 @@ export const PAGE_PERMISSION_ROUTES: PagePermissionRoute[] = [
     permission: 'page:jintan-materials-stock-out',
   },
   { path: '/jintan-monthly-report', permission: 'page:jintan-monthly-report' },
+  { path: '/syney-materials-data', permission: 'page:syney-materials-data' },
+  {
+    path: '/syney-materials-stock-in',
+    permission: 'page:syney-materials-stock-in',
+  },
+  {
+    path: '/syney-materials-stock-out',
+    permission: 'page:syney-materials-stock-out',
+  },
+  {
+    path: '/syney-materials-inventory',
+    permission: 'page:syney-materials-inventory',
+  },
+  {
+    path: '/syney-materials-monthly-report',
+    permission: 'page:syney-materials-monthly-report',
+  },
 ]

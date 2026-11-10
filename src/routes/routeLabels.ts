@@ -67,6 +67,11 @@ const routeToLabelMap: Record<string, string> = {
   'jintan-materials-stock-in': '金檀木业 / 素材入库',
   'jintan-materials-stock-out': '金檀木业 / 素材出库',
   'jintan-monthly-report': '金檀木业 / 月度报表',
+  'syney-materials-data': '西尼材料库存 / 材料资料',
+  'syney-materials-stock-in': '西尼材料库存 / 材料入库',
+  'syney-materials-stock-out': '西尼材料库存 / 材料出库',
+  'syney-materials-inventory': '西尼材料库存 / 材料库存',
+  'syney-materials-monthly-report': '西尼材料库存 / 月度报表',
   'access-denied': '无权限',
 }
 

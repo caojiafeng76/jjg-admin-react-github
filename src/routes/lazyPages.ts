@@ -223,3 +223,19 @@ export const JintanMaterialsStockOut = lazy(
 export const JintanMonthlyReport = lazy(
   () => import('@features/jintan/MonthlyReport'),
 )
+
+export const SyneyMaterialsData = lazy(
+  () => import('@features/syney-materials/Data'),
+)
+export const SyneyMaterialsStockIn = lazy(
+  () => import('@features/syney-materials/StockIn'),
+)
+export const SyneyMaterialsStockOut = lazy(
+  () => import('@features/syney-materials/StockOut'),
+)
+export const SyneyMaterialsInventory = lazy(
+  () => import('@features/syney-materials/Inventory'),
+)
+export const SyneyMaterialsMonthlyReport = lazy(
+  () => import('@features/syney-materials/MonthlyReport'),
+)

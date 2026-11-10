@@ -147,6 +147,10 @@ const PAGE_DOCUMENT_MODULES = [
     'src/features/workshop/OrderStatusDashboard/useOrderStatusDashboardExport.ts',
     '@/utils/orderStatusDashboardExcel',
   ],
+  [
+    'src/features/syney-materials/loadSyneyMaterialsExcel.ts',
+    '@/utils/syneyMaterialsExcel',
+  ],
 ] as const
 
 const DIRECT_HEAVY_MODULES = [
@@ -195,6 +199,8 @@ const PRELOAD_TRIGGER_FILES: Partial<Record<string, string>> = {
     'src/features/production-order/ProductionOrderAdminToolbar.tsx',
   'src/features/workshop/StandardTimeList/useStandardTimeExport.ts':
     'src/features/workshop/StandardTimeList/index.tsx',
+  'src/features/syney-materials/loadSyneyMaterialsExcel.ts':
+    'src/features/syney-materials/SyneyMaterialsExcelImport.tsx',
 }
 
 describe('lazy document modules', () => {

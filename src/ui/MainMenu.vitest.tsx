@@ -95,6 +95,40 @@ describe('金檀木业菜单分组', () => {
   })
 })
 
+describe('西尼材料库存菜单', () => {
+  function findSyneyMaterials(keys: string[]) {
+    return filterWith(keys).find(node => node.key === 'syney-materials')
+  }
+
+  it('全量授权时按 资料/入库/出库/库存/月报 顺序展示', () => {
+    const group = findSyneyMaterials([
+      'nav:syney-materials',
+      'page:syney-materials-data',
+      'page:syney-materials-stock-in',
+      'page:syney-materials-stock-out',
+      'page:syney-materials-inventory',
+      'page:syney-materials-monthly-report',
+    ])
+
+    expect(group?.children?.map(leaf => leaf.key)).toEqual([
+      'syney-materials-data',
+      'syney-materials-stock-in',
+      'syney-materials-stock-out',
+      'syney-materials-inventory',
+      'syney-materials-monthly-report',
+    ])
+  })
+
+  it('只显示有权限的页面，缺 nav 权限时整组隐藏', () => {
+    expect(
+      findSyneyMaterials(['nav:syney-materials', 'page:syney-materials-stock-out'])
+        ?.children
+        ?.map(leaf => leaf.key),
+    ).toEqual(['syney-materials-stock-out'])
+    expect(findSyneyMaterials(['page:syney-materials-data'])).toBeUndefined()
+  })
+})
+
 describe('findAncestorMenuKeys', () => {
   it('三级菜单叶子返回完整祖先链', () => {
     const items = filterMenuByPermissions(
