@@ -49,7 +49,7 @@ describe('西尼材料 query key', () => {
 describe('西尼材料页面不静态加载 Excel 工具', () => {
   it.each([
     'src/features/syney-materials/Data/index.tsx',
-    'src/features/syney-materials/Inventory/index.tsx',
+    'src/features/syney-materials/Inventory/SyneyMaterialsInventoryPcPage.tsx',
     'src/features/syney-materials/MonthlyReport/index.tsx',
     'src/features/syney-materials/SyneyMaterialsExcelImport.tsx',
   ])('%s', (file) => {

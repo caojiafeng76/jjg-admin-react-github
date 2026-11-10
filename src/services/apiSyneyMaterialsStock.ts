@@ -2,7 +2,10 @@ import type { SyneyMaterialsSearchFilters } from './syneyMaterialsSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
 import { applyJintanSearchFilters } from './jintanSearchFields'
 import supabase from './supabase'
-import { SYNEY_MATERIALS_SEARCH_FIELDS } from './syneyMaterialsSearchFields'
+import {
+  applySyneyMaterialsKeyword,
+  SYNEY_MATERIALS_SEARCH_FIELDS,
+} from './syneyMaterialsSearchFields'
 
 /** 入库 / 出库两张流水表结构一致，共用一套读写函数 */
 export type SyneyMaterialsStockDirection = 'in' | 'out'
@@ -48,12 +51,15 @@ export async function getSyneyMaterialsStockList(
     page,
     pageSize,
     filters,
+    keyword,
     inventoryId,
     signal,
   }: {
     page: number
     pageSize: number
     filters?: SyneyMaterialsSearchFilters
+    /** 手机端单关键词：品名或规格 */
+    keyword?: string
     inventoryId?: string
     signal?: AbortSignal
   },
@@ -62,6 +68,7 @@ export async function getSyneyMaterialsStockList(
     .from(stockTable(direction))
     .select('*', { count: 'exact' })
   query = applyJintanSearchFilters(query, filters, SYNEY_MATERIALS_SEARCH_FIELDS)
+  query = applySyneyMaterialsKeyword(query, keyword)
   if (inventoryId)
     query = query.eq('inventory_id', inventoryId)
   if (signal)

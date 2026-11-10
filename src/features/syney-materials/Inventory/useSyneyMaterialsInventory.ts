@@ -22,14 +22,16 @@ export function useSyneyMaterialsInventoryList({
   page,
   pageSize,
   filters,
+  keyword,
 }: {
   page: number
   pageSize: number
   filters?: SyneyMaterialsSearchFilters
+  keyword?: string
 }) {
   return useQuery({
-    queryKey: syneyMaterialsKeys.inventory.list({ page, pageSize, filters }),
-    queryFn: () => getSyneyMaterialsInventoryList({ page, pageSize, filters }),
+    queryKey: syneyMaterialsKeys.inventory.list({ page, pageSize, filters, keyword }),
+    queryFn: () => getSyneyMaterialsInventoryList({ page, pageSize, filters, keyword }),
     placeholderData: keepPreviousData,
     throwOnError: false,
     ...queryConfig.list,

@@ -6,6 +6,8 @@ export interface SyneyMaterialsListKeyParams {
   page: number
   pageSize: number
   filters?: SyneyMaterialsSearchFilters
+  /** 手机端单关键词；PC 页面不传，key 保持不变 */
+  keyword?: string
 }
 
 export interface SyneyMaterialsByInventoryKeyParams {
@@ -21,10 +23,12 @@ const STOCK_OUT_ROOT = 'syney-materials-stock-out'
 const MONTHLY_REPORT_ROOT = 'syney-materials-monthly-report'
 
 function listParams(params: SyneyMaterialsListKeyParams) {
+  const keyword = params.keyword?.trim()
   return {
     page: params.page,
     pageSize: params.pageSize,
     filters: normalizeJintanSearchFilters(params.filters),
+    ...(keyword ? { keyword } : {}),
   }
 }
 
