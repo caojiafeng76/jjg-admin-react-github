@@ -17,6 +17,13 @@
 
 ## 2026-11-10
 
+- **类别**：修复
+- **范围**：`src/test/setup.ts`、`src/test/rtlCleanup.test.tsx`（新）
+- **摘要**：修复 CI `verify`（`bun run test:coverage`）偶发失败：用例全过，但 Vitest 报 1 个 unhandled error `ReferenceError: window is not defined`，堆栈指向 `src/ui/AppLayout.tsx` 切页后 150ms 的 `setTimeout` 回调里的 `setIsNavigating(false)`（如 run 42766302551）。根因：项目未开启 Vitest `globals`，Testing Library 检测不到全局 `afterEach`，从未自动执行 `cleanup()`，所有测试渲染的组件都一直挂载到测试文件结束。`AppLayout.test.tsx` 第二个用例最后一次 rerender 切到新路由，启动的 150ms 定时器没有被卸载清理；若 jsdom 环境销毁后 worker 进程还没退出，定时器触发并访问 `window` 即报错，是否出现取决于 CI 机器上的时序，所以时好时坏。修复：在全局测试 setup 里注册 `afterEach(cleanup)`，每个用例结束后卸载组件、执行 effect 清理（含 `clearTimeout`）；新增守卫用例确认上一个用例渲染的组件已被卸载。没有关闭 Vitest 的 unhandled error 检查，也没有给 CI 加重试。
+- **验证**：守卫用例在恢复原 setup 时失败、修复后通过；`bunx vitest run src/ui/AppLayout.test.tsx` 连续 20 次全部通过、无 unhandled error；以 CI 占位环境变量执行 `bun run test:coverage` 215 个文件、1059 个用例通过，无 unhandled error，退出码 0；`bun lint` 0 error，`bun run typecheck` 通过。未覆盖：原问题在本地 Windows 上无法稳定复现（单文件运行时 worker 在定时器触发前就退出），修复效果最终以 CI 多次运行为准。
+
+## 2026-11-10
+
 - **类别**：新建
 - **范围**：`src/features/syney-materials/Mobile/`（新）、`src/features/syney-materials/{StockIn,StockOut,Inventory}/index.tsx`、`src/features/syney-materials/Inventory/SyneyMaterialsInventoryPcPage.tsx`（由原 `Inventory/index.tsx` 改名）、`src/features/production-order/MobileScanHubPage.tsx`、`src/services/apiSyneyMaterials{Stock,Inventory}.ts`、`src/services/syneyMaterialsSearchFields.ts`、`src/features/syney-materials/queryKeys.ts`、`user_permission_overrides`（生产数据）
 - **摘要**：员工端 H5「扫码」页新增「西尼材料」分组（材料入库 / 材料出库 / 查库存），按 `page:syney-materials-*` 权限逐个显示。员工侧角色打开这三个路由时显示手机版页面，其他角色仍是 PC 页面：一个搜索框同时搜品名和规格，卡片列表 +「加载更多」，底部固定「新增入库 / 新增出库」；新增在底部弹层里完成，材料从底部列表选，数量用数字键盘和大号 −/+，出库超库存时直接提示并禁用提交；点记录可改备注或删除（二次确认，提示库存回退）；查库存只读，点材料看最近入库 / 出库，并可直接带入该材料入库 / 出库。资料维护、月报、Excel 不放到手机端。服务层 `getSyneyMaterialsStockList` / `getSyneyMaterialsInventoryList` 增加可选 `keyword`（品名或规格模糊匹配），PC 页面不传，查询键不变。只给 test1（`test1@ydly.cn`）加了 3 条个人权限覆盖（材料入库、出库、库存），未改员工角色。
