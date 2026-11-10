@@ -12,3 +12,14 @@ export const SYNEY_MATERIALS_SEARCH_FIELDS: readonly JintanSearchField[] = [
 export function sanitizeSyneyMaterialsKeyword(keyword?: string): string {
   return (keyword ?? '').replace(/[,()]/g, ' ').trim()
 }
+
+/** 单个关键词同时模糊匹配品名或规格（手机端搜索框、下拉选项） */
+export function applySyneyMaterialsKeyword<Q extends { or: (filters: string) => Q }>(
+  query: Q,
+  keyword?: string,
+): Q {
+  const text = sanitizeSyneyMaterialsKeyword(keyword)
+  return text
+    ? query.or(`material_name.ilike.%${text}%,specification.ilike.%${text}%`)
+    : query
+}

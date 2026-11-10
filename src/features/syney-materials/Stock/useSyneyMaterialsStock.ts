@@ -28,16 +28,18 @@ export function useSyneyMaterialsStockList(
     page,
     pageSize,
     filters,
+    keyword,
   }: {
     page: number
     pageSize: number
     filters?: SyneyMaterialsSearchFilters
+    keyword?: string
   },
 ) {
   return useQuery({
-    queryKey: syneyMaterialsKeys.stock(direction).list({ page, pageSize, filters }),
+    queryKey: syneyMaterialsKeys.stock(direction).list({ page, pageSize, filters, keyword }),
     queryFn: () =>
-      getSyneyMaterialsStockList(direction, { page, pageSize, filters }),
+      getSyneyMaterialsStockList(direction, { page, pageSize, filters, keyword }),
     placeholderData: keepPreviousData,
     throwOnError: false,
     ...queryConfig.list,

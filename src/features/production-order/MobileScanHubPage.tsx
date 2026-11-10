@@ -1,10 +1,21 @@
 import type { ScannedProjectPayload } from './ProjectNoScanButton'
-import { ViewfinderCircleIcon } from '@heroicons/react/24/outline'
+import {
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
+  CubeIcon,
+  ViewfinderCircleIcon,
+} from '@heroicons/react/24/outline'
 import { Button, Card, Typography } from 'antd'
 
 import { useNavigate } from 'react-router-dom'
 import { isEmployeeSideRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
+import {
+  SYNEY_MATERIALS_INVENTORY_PERMISSION_KEY,
+  SYNEY_MATERIALS_STOCK_IN_PERMISSION_KEY,
+  SYNEY_MATERIALS_STOCK_OUT_PERMISSION_KEY,
+} from '@/features/syney-materials/permissions'
+import { usePermission } from '@/hooks/usePermission'
 import ProjectNoScanButton from './ProjectNoScanButton'
 import { useSalesOrdersProjectNos } from './useProcessStandards'
 
@@ -15,6 +26,14 @@ export default function MobileScanHubPage() {
   const { role, employeeProfile } = useAuth()
   const { data: projectNos } = useSalesOrdersProjectNos()
   const isEmployeeView = isEmployeeSideRole(role)
+  const canSyneyStockIn = usePermission(SYNEY_MATERIALS_STOCK_IN_PERMISSION_KEY)
+  const canSyneyStockOut = usePermission(SYNEY_MATERIALS_STOCK_OUT_PERMISSION_KEY)
+  const canSyneyInventory = usePermission(SYNEY_MATERIALS_INVENTORY_PERMISSION_KEY)
+  const syneyMaterialsEntries = [
+    canSyneyStockIn && { path: '/syney-materials-stock-in', label: '材料入库', icon: ArrowDownTrayIcon },
+    canSyneyStockOut && { path: '/syney-materials-stock-out', label: '材料出库', icon: ArrowUpTrayIcon },
+    canSyneyInventory && { path: '/syney-materials-inventory', label: '查库存', icon: CubeIcon },
+  ].filter(entry => entry !== false)
 
   const openAutoScanPage = (pathname: string) => {
     navigate(pathname, {
@@ -110,6 +129,31 @@ export default function MobileScanHubPage() {
             </span>
           </button>
         </div>
+
+        {syneyMaterialsEntries.length > 0
+          ? (
+              <section aria-label="西尼材料">
+                <div className="mt-2 mb-3 px-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                  西尼材料
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {syneyMaterialsEntries.map(entry => (
+                    <button
+                      key={entry.path}
+                      type="button"
+                      onClick={() => navigate(entry.path)}
+                      className="flex min-h-28 w-full flex-col items-center justify-center rounded-3xl border-2 border-slate-200 bg-white px-2 py-4 text-slate-950 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition active:scale-[0.98] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    >
+                      <entry.icon className="size-9" />
+                      <span className="mt-3 text-base font-semibold tracking-tight">
+                        {entry.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )
+          : null}
       </div>
     </div>
   )

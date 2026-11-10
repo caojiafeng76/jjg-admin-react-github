@@ -4,7 +4,7 @@ import { describeSyneyMaterial, syneyMaterialsKeyOf } from './apiSyneyMaterialsD
 import { applyJintanSearchFilters } from './jintanSearchFields'
 import supabase from './supabase'
 import {
-  sanitizeSyneyMaterialsKeyword,
+  applySyneyMaterialsKeyword,
   SYNEY_MATERIALS_SEARCH_FIELDS,
 } from './syneyMaterialsSearchFields'
 
@@ -46,10 +46,13 @@ export async function getSyneyMaterialsInventoryList({
   page,
   pageSize,
   filters,
+  keyword,
 }: {
   page: number
   pageSize: number
   filters?: SyneyMaterialsSearchFilters
+  /** 手机端单关键词：品名或规格 */
+  keyword?: string
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -59,6 +62,7 @@ export async function getSyneyMaterialsInventoryList({
     .select('*', { count: 'exact' })
 
   query = applyJintanSearchFilters(query, filters, SYNEY_MATERIALS_SEARCH_FIELDS)
+  query = applySyneyMaterialsKeyword(query, keyword)
 
   const { data, error, count } = await query
     .order('updated_at', { ascending: false })
@@ -219,12 +223,7 @@ export async function getSyneyMaterialsInventoryOptions(
     .from('syney_materials_inventory')
     .select('id, material_name, specification, unit, quantity')
 
-  const text = sanitizeSyneyMaterialsKeyword(keyword)
-  if (text) {
-    query = query.or(
-      `material_name.ilike.%${text}%,specification.ilike.%${text}%`,
-    )
-  }
+  query = applySyneyMaterialsKeyword(query, keyword)
 
   const { data, error } = await query
     .order('material_name', { ascending: true })
