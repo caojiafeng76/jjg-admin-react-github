@@ -10,6 +10,7 @@ import { PRECISION_CUTTING_PERMISSIONS } from '@/features/precision-cutting-tran
 import { PRECISION_FINISHING_CUTTING_PERMISSIONS } from '@/features/precision-finishing-cutting/permissions'
 import { PRODUCTION_ORDER_PERMISSIONS } from '@/features/production-order/permissions'
 import { QUALITY_PERMISSIONS } from '@/features/quality/permissions'
+import { SYNEY_MATERIALS_PERMISSIONS } from '@/features/syney-materials/permissions'
 import { SYNEY_PERMISSIONS } from '@/features/syney/permissions'
 import { TOOLING_PERMISSIONS } from '@/features/tooling/permissions'
 import { VILLA_LIFT_PERMISSIONS } from '@/features/villa-lift/permissions'
@@ -73,4 +74,5 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
   ...EXTRUSION_PRODUCTION_PERMISSIONS,
   ...PACKAGING_PROCESS_PERMISSIONS,
   ...JINTAN_PERMISSIONS,
+  ...SYNEY_MATERIALS_PERMISSIONS,
 ]

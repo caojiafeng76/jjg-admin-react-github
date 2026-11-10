@@ -17,7 +17,11 @@ import {
   ToolingFixturePublicPage,
   ToolingStockOutPublicPage,
 } from './lazyPages'
-import { jintanRoutes, youmaiRoutes } from './modules/inventoryRoutes'
+import {
+  jintanRoutes,
+  syneyMaterialsRoutes,
+  youmaiRoutes,
+} from './modules/inventoryRoutes'
 import { packagingRoutes, villaLiftRoutes } from './modules/processRoutes'
 import { productionRoutes } from './modules/productionRoutes'
 import { syneyRoutes } from './modules/syneyRoutes'
@@ -47,6 +51,7 @@ export const router = createBrowserRouter([
       ...toolingRoutes,
       ...youmaiRoutes,
       ...jintanRoutes,
+      ...syneyMaterialsRoutes,
       ...villaLiftRoutes,
       ...packagingRoutes,
       // 布局内 404：保留菜单与标签页（未登录时由 ProtectedRoute 跳转登录）

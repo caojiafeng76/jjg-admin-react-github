@@ -2541,6 +2541,210 @@ export type Database = {
         }
         Relationships: []
       }
+      syney_materials_data: {
+        Row: {
+          created_at: string
+          id: string
+          material_name: string
+          remarks: string
+          specification: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_name: string
+          remarks?: string
+          specification?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_name?: string
+          remarks?: string
+          specification?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      syney_materials_inventory: {
+        Row: {
+          created_at: string
+          id: string
+          material_data_id: string
+          material_name: string
+          quantity: number
+          remarks: string
+          specification: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_data_id: string
+          material_name: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_data_id?: string
+          material_name?: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syney_materials_inventory_material_data_id_fkey"
+            columns: ["material_data_id"]
+            isOneToOne: true
+            referencedRelation: "syney_materials_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syney_materials_inventory_adjustments: {
+        Row: {
+          created_at: string
+          difference: number | null
+          id: string
+          inventory_id: string
+          material_name: string
+          operator_name: string
+          quantity_after: number
+          quantity_before: number
+          remarks: string
+          specification: string
+          unit: string
+        }
+        Insert: {
+          created_at?: string
+          difference?: number | null
+          id?: string
+          inventory_id: string
+          material_name?: string
+          operator_name?: string
+          quantity_after: number
+          quantity_before: number
+          remarks?: string
+          specification?: string
+          unit?: string
+        }
+        Update: {
+          created_at?: string
+          difference?: number | null
+          id?: string
+          inventory_id?: string
+          material_name?: string
+          operator_name?: string
+          quantity_after?: number
+          quantity_before?: number
+          remarks?: string
+          specification?: string
+          unit?: string
+        }
+        Relationships: []
+      }
+      syney_materials_stock_in: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_id: string
+          material_name: string
+          quantity: number
+          remarks: string
+          specification: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_id: string
+          material_name?: string
+          quantity: number
+          remarks?: string
+          specification?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_id?: string
+          material_name?: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syney_materials_stock_in_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "syney_materials_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syney_materials_stock_out: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_id: string
+          material_name: string
+          quantity: number
+          remarks: string
+          specification: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_id: string
+          material_name?: string
+          quantity: number
+          remarks?: string
+          specification?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_id?: string
+          material_name?: string
+          quantity?: number
+          remarks?: string
+          specification?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syney_materials_stock_out_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "syney_materials_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       syney_safe_part_settings: {
         Row: {
           created_at: string | null
@@ -4153,6 +4357,21 @@ export type Database = {
           weight_per_meter_kg: number
           work_date: string
           work_hours: number
+        }[]
+      }
+      get_syney_materials_monthly_report: {
+        Args: { p_month: string }
+        Returns: {
+          closing_quantity: number
+          current_quantity: number
+          inventory_id: string
+          material_name: string
+          opening_quantity: number
+          specification: string
+          stock_adjust_quantity: number
+          stock_in_quantity: number
+          stock_out_quantity: number
+          unit: string
         }[]
       }
       get_tooling_fixture_by_qr_token: {

@@ -440,6 +440,39 @@ export const allMenuItems: MenuItemDef[] = [
     ],
   },
   {
+    key: 'syney-materials',
+    label: '西尼材料库存',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:syney-materials',
+    children: [
+      {
+        key: 'syney-materials-data',
+        label: '材料资料',
+        permission: 'page:syney-materials-data',
+      },
+      {
+        key: 'syney-materials-stock-in',
+        label: '材料入库',
+        permission: 'page:syney-materials-stock-in',
+      },
+      {
+        key: 'syney-materials-stock-out',
+        label: '材料出库',
+        permission: 'page:syney-materials-stock-out',
+      },
+      {
+        key: 'syney-materials-inventory',
+        label: '材料库存',
+        permission: 'page:syney-materials-inventory',
+      },
+      {
+        key: 'syney-materials-monthly-report',
+        label: '月度报表',
+        permission: 'page:syney-materials-monthly-report',
+      },
+    ],
+  },
+  {
     key: 'attendance',
     label: '考勤',
     icon: <Square3Stack3DIcon className="size-4" />,
