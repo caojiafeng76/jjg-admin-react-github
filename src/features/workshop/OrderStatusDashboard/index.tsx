@@ -29,6 +29,7 @@ import { createOrderStatusDashboardColumns } from './dashboardColumns'
 import {
   DENSE_TABLE_COMPONENTS,
 } from './dashboardRenderUtils'
+import { renderOrderStatusSummary } from './dashboardSummary'
 import {
   canCloseDashboardOrder,
 
@@ -43,7 +44,6 @@ import {
 import { ExtrusionDetailModal } from './ExtrusionDetailModal'
 import { OrderStatusDashboardHeader } from './OrderStatusDashboardHeader'
 import { OrderStatusDashboardSearchBar } from './OrderStatusDashboardSearchBar'
-import { OrderStatusKpiGrid } from './OrderStatusKpiGrid'
 import { PrecisionCuttingDetailModal } from './PrecisionCuttingDetailModal'
 import { ProductionDetailModal } from './ProductionDetailModal'
 import { TransferDetailModal } from './TransferDetailModal'
@@ -54,6 +54,7 @@ import {
 import { useOrderStatusDashboardExport } from './useOrderStatusDashboardExport'
 
 const EMPTY_JOB_COLUMNS: OrderStatusJobColumn[] = []
+const SUMMARY_ROW_HEIGHT = 31
 export default function OrderStatusDashboard() {
   const { message, modal } = App.useApp()
   const { role } = useAuth()
@@ -72,9 +73,6 @@ export default function OrderStatusDashboard() {
     = useState<SelectedExtrusionDetail | null>(null)
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
   const [closingOrderId, setClosingOrderId] = useState<string | null>(null)
-  // KPI 看板默认策略：可视高度 ≥800px（1080p 及以上）默认展开，小屏默认收起保表格；
-  // 用户可随时通过页头"看板"按钮切换。
-  const [showKpis, setShowKpis] = useState(() => window.innerHeight >= 800)
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE
@@ -117,6 +115,8 @@ export default function OrderStatusDashboard() {
       targetRowCount: Math.min(pageSize, 10),
       minRowHeight: 24,
       gap: 12,
+      // 汇总行固定在表格底部，不参与滚动
+      summaryRowHeight: SUMMARY_ROW_HEIGHT,
     })
   const { data, isLoading, isPlaceholderData, refetch }
     = useOrderStatusDashboard({
@@ -379,14 +379,7 @@ export default function OrderStatusDashboard() {
         onExport={handleExportCurrentFilters}
         onPreloadExport={preloadOrderStatusDashboardExcel}
         onRefetch={handleRefetch}
-        onToggleKpis={() => setShowKpis(current => !current)}
-        showKpis={showKpis}
       />
-
-      {/* KPI 看板（Bento Grid，图表配色随主题 token；可收起以让位表格） */}
-      {showKpis && (
-        <OrderStatusKpiGrid kpis={data?.kpis} loading={isDataLoading} />
-      )}
 
       {/* Tabs 标签页 */}
       <div className="flex items-center gap-1 rounded-xl border border-slate-200/60 bg-white/60 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
@@ -502,6 +495,8 @@ export default function OrderStatusDashboard() {
           }}
           onChange={handleTableChange}
           sticky={{ offsetHeader: 0 }}
+          summary={pageData =>
+            renderOrderStatusSummary({ columns, jobColumns, rows: pageData })}
           rowClassName={record =>
             record.productionStatus === '延期'
               ? 'bg-red-50/50 hover:bg-red-50 dark:bg-red-950/30 dark:hover:bg-red-950/40'

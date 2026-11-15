@@ -1,8 +1,4 @@
-import {
-  ArrowDownTrayIcon,
-  ArrowPathIcon,
-  DocumentChartBarIcon,
-} from '@heroicons/react/16/solid'
+import { ArrowDownTrayIcon, ArrowPathIcon } from '@heroicons/react/16/solid'
 import { Button, Typography } from 'antd'
 
 const { Title } = Typography
@@ -16,8 +12,6 @@ export interface OrderStatusDashboardHeaderProps {
   onExport: () => void
   onPreloadExport: () => void
   onRefetch: () => void
-  onToggleKpis: () => void
-  showKpis: boolean
 }
 
 export function OrderStatusDashboardHeader({
@@ -29,8 +23,6 @@ export function OrderStatusDashboardHeader({
   onExport,
   onPreloadExport,
   onRefetch,
-  onToggleKpis,
-  showKpis,
 }: OrderStatusDashboardHeaderProps) {
   const isRefreshing = isFetching && !isLoading
 
@@ -80,16 +72,8 @@ export function OrderStatusDashboardHeader({
           </div>
         </div>
 
-        {/* 右侧：看板开关 / 导出 / 刷新 */}
+        {/* 右侧：导出 / 刷新 */}
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="small"
-            icon={<DocumentChartBarIcon className="size-3.5" />}
-            onClick={onToggleKpis}
-            className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md dark:!border-slate-600/60 dark:!bg-slate-800/80 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-blue-900/30 dark:hover:!text-blue-400"
-          >
-            {showKpis ? '收起看板' : '展开看板'}
-          </Button>
           {canExportCurrentFilters && (
             <Button
               size="small"

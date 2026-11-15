@@ -28,7 +28,7 @@ import {
   PRODUCTION_STATUS_OPTIONS,
 } from './dashboardUtils'
 
-const STATUS_COLOR: Record<OrderProductionStatus, string> = {
+export const STATUS_COLOR: Record<OrderProductionStatus, string> = {
   正常: 'green',
   预警: 'gold',
   延期: 'red',
