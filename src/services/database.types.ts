@@ -3724,6 +3724,54 @@ export type Database = {
           },
         ]
       }
+      youmai_finished_goods_inventory_adjustments: {
+        Row: {
+          created_at: string
+          difference: number | null
+          id: string
+          inventory_id: string
+          material_code: string
+          material_name: string
+          model: string
+          operator_name: string
+          product_data_id: string
+          quantity_after: number
+          quantity_before: number
+          remarks: string
+          specification: string
+        }
+        Insert: {
+          created_at?: string
+          difference?: number | null
+          id?: string
+          inventory_id: string
+          material_code?: string
+          material_name?: string
+          model?: string
+          operator_name?: string
+          product_data_id: string
+          quantity_after: number
+          quantity_before: number
+          remarks?: string
+          specification?: string
+        }
+        Update: {
+          created_at?: string
+          difference?: number | null
+          id?: string
+          inventory_id?: string
+          material_code?: string
+          material_name?: string
+          model?: string
+          operator_name?: string
+          product_data_id?: string
+          quantity_after?: number
+          quantity_before?: number
+          remarks?: string
+          specification?: string
+        }
+        Relationships: []
+      }
       youmai_finished_goods_stock_in: {
         Row: {
           created_at: string

@@ -1,6 +1,6 @@
 import type { TableColumnsType } from 'antd'
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
-import { Table, Tag } from 'antd'
+import { Button, Table, Tag } from 'antd'
 import { memo, useMemo } from 'react'
 
 import { TableEmpty } from '@/ui/TableState'
@@ -35,6 +35,8 @@ interface Props {
   rowHeight?: number
   /** 空态引导动作（通常为新建按钮），透传给 TableEmpty */
   emptyAction?: React.ReactNode
+  /** 打开行详情抽屉（库存/入库/调整）；不传时不渲染操作列 */
+  onOpenDetail?: (record: YoumaiFinishedGoodsStockOut) => void
 }
 
 function YoumaiFinishedGoodsStockOutTable({
@@ -47,9 +49,10 @@ function YoumaiFinishedGoodsStockOutTable({
   scrollY = 400,
   rowHeight = 40,
   emptyAction,
+  onOpenDetail,
 }: Props) {
-  const columns: TableColumnsType<YoumaiFinishedGoodsStockOut> = useMemo(
-    () => [
+  const columns: TableColumnsType<YoumaiFinishedGoodsStockOut> = useMemo(() => {
+    const base: TableColumnsType<YoumaiFinishedGoodsStockOut> = [
       {
         title: '#',
         key: '#',
@@ -240,19 +243,6 @@ function YoumaiFinishedGoodsStockOutTable({
         },
       },
       {
-        title: '最终库存',
-        dataIndex: 'final_stock',
-        key: 'final_stock',
-        width: 100,
-        align: 'right',
-        sorter: (a, b) => (a.final_stock ?? 0) - (b.final_stock ?? 0),
-        filters: uniqueFilters(data.map(r => r.final_stock)),
-        onFilter: (value, record) =>
-          String(record.final_stock ?? '') === String(value),
-        render: (value: number | null | undefined) =>
-          value === null || value === undefined ? '-' : formatNumber(value, 0),
-      },
-      {
         title: '备注',
         dataIndex: 'remarks',
         key: 'remarks',
@@ -276,9 +266,45 @@ function YoumaiFinishedGoodsStockOutTable({
         render: (value: string) =>
           value ? new Date(value).toLocaleString('zh-CN') : '-',
       },
-    ],
-    [page, pageSize, data],
-  )
+      {
+        title: '最终库存',
+        dataIndex: 'final_stock',
+        key: 'final_stock',
+        width: 100,
+        align: 'right',
+        fixed: 'right',
+        sorter: (a, b) => (a.final_stock ?? 0) - (b.final_stock ?? 0),
+        filters: uniqueFilters(data.map(r => r.final_stock)),
+        onFilter: (value, record) =>
+          String(record.final_stock ?? '') === String(value),
+        render: (value: number | null | undefined) =>
+          value === null || value === undefined ? '-' : formatNumber(value, 0),
+      },
+    ]
+
+    if (onOpenDetail) {
+      base.push({
+        title: '库存/入库',
+        key: 'inventory-detail',
+        width: 110,
+        fixed: 'right',
+        render: (_value, record) => (
+          <Button
+            type="link"
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation()
+              onOpenDetail(record)
+            }}
+          >
+            查看
+          </Button>
+        ),
+      })
+    }
+
+    return base
+  }, [data, onOpenDetail, page, pageSize])
 
   const rowSelection = useMemo(
     () => ({
@@ -296,7 +322,7 @@ function YoumaiFinishedGoodsStockOutTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1842, y: scrollY }}
+      scroll={{ x: onOpenDetail ? 1952 : 1842, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

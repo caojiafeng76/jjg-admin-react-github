@@ -249,16 +249,24 @@ export async function getYoumaiFinishedGoodsStockInList({
   pageSize,
   keyword,
   status,
+  productDataId,
+  signal,
 }: {
   page: number
   pageSize: number
   keyword?: string
   status?: YoumaiFinishedGoodsStockInStatus
+  productDataId?: string
+  signal?: AbortSignal
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
   let query = stockInTable().select('*', { count: 'exact' })
+
+  if (productDataId) {
+    query = query.eq('product_data_id', productDataId)
+  }
 
   if (keyword?.trim()) {
     const normalizedKeyword = keyword.trim()
@@ -271,10 +279,17 @@ export async function getYoumaiFinishedGoodsStockInList({
     query = query.eq('status', status)
   }
 
-  const { data, error, count } = await query
-    .order('updated_at', { ascending: false })
-    .order('material_code', { ascending: true })
-    .range(from, to)
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  query = productDataId
+    ? query.order('created_at', { ascending: false })
+    : query
+        .order('updated_at', { ascending: false })
+        .order('material_code', { ascending: true })
+
+  const { data, error, count } = await query.range(from, to)
 
   if (error) {
     throw handleApiError(error, '获取优迈成品入库列表失败')

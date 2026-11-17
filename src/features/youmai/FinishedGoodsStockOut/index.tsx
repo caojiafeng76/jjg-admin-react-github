@@ -3,6 +3,7 @@ import type {
   YoumaiFinishedGoodsStockOut,
   YoumaiFinishedGoodsStockOutFormValues,
   YoumaiFinishedGoodsStockOutImportRow,
+  YoumaiProductDataOption,
 } from '@/services/apiYoumaiFinishedGoodsStockOut'
 import {
   ArrowDownTrayIcon,
@@ -37,6 +38,7 @@ import {
   useUpdateYoumaiFinishedGoodsStockOut,
   useYoumaiFinishedGoodsStockOutList,
 } from './useYoumaiFinishedGoodsStockOut'
+import YoumaiFinishedGoodsStockDetailDrawer from './YoumaiFinishedGoodsStockDetailDrawer'
 import YoumaiFinishedGoodsStockOutExcelImport from './YoumaiFinishedGoodsStockOutExcelImport'
 import YoumaiFinishedGoodsStockOutForm from './YoumaiFinishedGoodsStockOutForm'
 import YoumaiFinishedGoodsStockOutSearch from './YoumaiFinishedGoodsStockOutSearch'
@@ -75,6 +77,8 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     = useState<YoumaiFinishedGoodsStockOut | null>(null)
   const [formRef, setFormRef] = useState<FormInstance | null>(null)
   const [formError, setFormError] = useState<unknown>(null)
+  const [detailProduct, setDetailProduct]
+    = useState<YoumaiProductDataOption | null>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -243,6 +247,24 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     setFormError(null)
     formRef?.resetFields()
   }, [formRef])
+
+  const handleOpenDetail = useCallback(
+    (record: YoumaiFinishedGoodsStockOut) => {
+      setDetailProduct({
+        id: record.product_data_id,
+        material_code: record.material_code,
+        material_name: record.material_name,
+        model: record.model,
+        specification: record.specification,
+        specific_gravity: Number(record.specific_gravity ?? 0),
+      })
+    },
+    [],
+  )
+
+  const handleCloseDetail = useCallback(() => {
+    setDetailProduct(null)
+  }, [])
 
   const handleCreate = useCallback(() => {
     setIsEdit(false)
@@ -619,6 +641,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
               pageSize={pageSize}
               scrollY={scrollY}
               rowHeight={rowHeight}
+              onOpenDetail={handleOpenDetail}
               emptyAction={(
                 <AddButton
                   handleCreate={handleCreate}
@@ -657,6 +680,16 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           />
         </div>
       </Modal>
+
+      {detailProduct
+        ? (
+            <YoumaiFinishedGoodsStockDetailDrawer
+              open
+              product={detailProduct}
+              onClose={handleCloseDetail}
+            />
+          )
+        : null}
     </div>
   )
 }

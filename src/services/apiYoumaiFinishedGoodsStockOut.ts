@@ -216,6 +216,8 @@ export async function getYoumaiFinishedGoodsStockOutList({
   specification,
   remarks,
   status,
+  productDataId,
+  signal,
 }: {
   page: number
   pageSize: number
@@ -227,11 +229,17 @@ export async function getYoumaiFinishedGoodsStockOutList({
   specification?: string
   remarks?: string
   status?: YoumaiFinishedGoodsStockOutStatus
+  productDataId?: string
+  signal?: AbortSignal
 }) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
   let query = stockOutTable().select('*', { count: 'exact' })
+
+  if (productDataId) {
+    query = query.eq('product_data_id', productDataId)
+  }
 
   const textFilters: Array<[string, string | undefined]> = [
     ['purchase_order_no', purchaseOrderNo],
@@ -254,13 +262,20 @@ export async function getYoumaiFinishedGoodsStockOutList({
     query = query.eq('status', status)
   }
 
-  const { data, error, count } = await query
-    .order('status', { ascending: false })
-    .order('delivery_date', { ascending: true })
-    .order('updated_at', { ascending: false })
-    .order('purchase_order_no', { ascending: false })
-    .order('purchase_order_line_no', { ascending: true })
-    .range(from, to)
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  query = productDataId
+    ? query.order('created_at', { ascending: false })
+    : query
+        .order('status', { ascending: false })
+        .order('delivery_date', { ascending: true })
+        .order('updated_at', { ascending: false })
+        .order('purchase_order_no', { ascending: false })
+        .order('purchase_order_line_no', { ascending: true })
+
+  const { data, error, count } = await query.range(from, to)
 
   if (error) {
     throw handleApiError(error, '获取优迈成品出库列表失败')

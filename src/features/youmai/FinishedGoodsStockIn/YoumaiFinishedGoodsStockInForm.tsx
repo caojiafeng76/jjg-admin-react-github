@@ -7,12 +7,10 @@ import type {
 import {
   Alert,
   Form,
-
   Input,
   InputNumber,
   Select,
 } from 'antd'
-
 import { useEffect, useMemo, useState } from 'react'
 
 import {
@@ -29,6 +27,10 @@ interface Props {
     | YoumaiFinishedGoodsStockIn
     | YoumaiFinishedGoodsStockInFormValues
   isAuditLocked?: boolean
+  /** 快捷建单模式：锁定为指定货品资料（详情抽屉内新建入库时使用） */
+  lockedProduct?: YoumaiProductDataOption | null
+  /** 是否允许在表单内直接选择审核状态（详情抽屉快捷入库时使用） */
+  allowStatusSelect?: boolean
 }
 
 const DEFAULT_VALUES: YoumaiFinishedGoodsStockInFormValues = {
@@ -38,14 +40,52 @@ const DEFAULT_VALUES: YoumaiFinishedGoodsStockInFormValues = {
   remarks: '',
 }
 
-export default function YoumaiFinishedGoodsStockInForm({
-  onFinish,
-  setFormRef,
-  isSubmitting,
+function ProductSnapshotSummary({
+  selectedProduct,
+}: {
+  selectedProduct?: YoumaiProductDataOption
+}) {
+  return (
+    <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+      <div>
+        <div className="text-xs text-slate-400">物料编码</div>
+        <div>{selectedProduct?.material_code || '-'}</div>
+      </div>
+      <div>
+        <div className="text-xs text-slate-400">物料名称</div>
+        <div>{selectedProduct?.material_name || '-'}</div>
+      </div>
+      <div>
+        <div className="text-xs text-slate-400">型号</div>
+        <div>{selectedProduct?.model || '-'}</div>
+      </div>
+      <div>
+        <div className="text-xs text-slate-400">规格</div>
+        <div>{selectedProduct?.specification || '-'}</div>
+      </div>
+      <div>
+        <div className="text-xs text-slate-400">比重</div>
+        <div>
+          {selectedProduct
+            ? Number(selectedProduct.specific_gravity).toFixed(3)
+            : '-'}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function RemoteProductField({
+  form,
   initialValues,
-  isAuditLocked = false,
-}: Props) {
-  const [form] = Form.useForm<YoumaiFinishedGoodsStockInFormValues>()
+  isAuditLocked,
+}: {
+  form: FormInstance<YoumaiFinishedGoodsStockInFormValues>
+  initialValues?:
+    | YoumaiFinishedGoodsStockIn
+    | YoumaiFinishedGoodsStockInFormValues
+  isAuditLocked: boolean
+}) {
   const [productOptionKeyword, setProductOptionKeyword] = useState('')
   const { data: productOptions = [], isFetching: areProductOptionsLoading }
     = useYoumaiProductDataOptions(productOptionKeyword)
@@ -59,48 +99,13 @@ export default function YoumaiFinishedGoodsStockInForm({
       initialProductSnapshot,
     )
   const selectedProductId = Form.useWatch('product_data_id', form)
-
   const selectedProduct = useMemo(
     () => mergedOptions.find(item => item.id === selectedProductId),
     [mergedOptions, selectedProductId],
   )
 
-  useEffect(() => {
-    setFormRef(form)
-  }, [form, setFormRef])
-
-  useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue({
-        ...DEFAULT_VALUES,
-        product_data_id: initialValues.product_data_id,
-        status: initialValues.status,
-        stock_in_quantity: Number(initialValues.stock_in_quantity || 0),
-        remarks: initialValues.remarks,
-      })
-      return
-    }
-
-    form.resetFields()
-    form.setFieldsValue(DEFAULT_VALUES)
-  }, [form, initialValues])
-
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={onFinish}
-      disabled={isSubmitting}
-    >
-      {isAuditLocked && (
-        <Alert
-          className="mb-4"
-          type="info"
-          showIcon
-          title="当前记录已审核，仅允许修改备注。货品和入库数量已锁定；审核与反审请使用页面顶部按钮。"
-        />
-      )}
-
+    <>
       <Form.Item
         name="product_data_id"
         label="关联货品资料"
@@ -125,39 +130,98 @@ export default function YoumaiFinishedGoodsStockInForm({
           }))}
         />
       </Form.Item>
+      <ProductSnapshotSummary selectedProduct={selectedProduct} />
+    </>
+  )
+}
 
-      <div className="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 md:grid-cols-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-        <div>
-          <div className="text-xs text-slate-400">物料编码</div>
-          <div>{selectedProduct?.material_code || '-'}</div>
-        </div>
-        <div>
-          <div className="text-xs text-slate-400">物料名称</div>
-          <div>{selectedProduct?.material_name || '-'}</div>
-        </div>
-        <div>
-          <div className="text-xs text-slate-400">型号</div>
-          <div>{selectedProduct?.model || '-'}</div>
-        </div>
-        <div>
-          <div className="text-xs text-slate-400">规格</div>
-          <div>{selectedProduct?.specification || '-'}</div>
-        </div>
-        <div>
-          <div className="text-xs text-slate-400">比重</div>
-          <div>
-            {selectedProduct
-              ? Number(selectedProduct.specific_gravity).toFixed(3)
-              : '-'}
-          </div>
-        </div>
-      </div>
+export default function YoumaiFinishedGoodsStockInForm({
+  onFinish,
+  setFormRef,
+  isSubmitting,
+  initialValues,
+  isAuditLocked = false,
+  lockedProduct = null,
+  allowStatusSelect = false,
+}: Props) {
+  const [form] = Form.useForm<YoumaiFinishedGoodsStockInFormValues>()
+
+  useEffect(() => {
+    setFormRef(form)
+  }, [form, setFormRef])
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue({
+        ...DEFAULT_VALUES,
+        product_data_id: initialValues.product_data_id,
+        status: initialValues.status,
+        stock_in_quantity: Number(initialValues.stock_in_quantity || 0),
+        remarks: initialValues.remarks,
+      })
+      return
+    }
+
+    if (lockedProduct) {
+      form.resetFields()
+      form.setFieldsValue({
+        ...DEFAULT_VALUES,
+        product_data_id: lockedProduct.id,
+      })
+      return
+    }
+
+    form.resetFields()
+    form.setFieldsValue(DEFAULT_VALUES)
+  }, [form, initialValues, lockedProduct])
+
+  return (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={onFinish}
+      disabled={isSubmitting}
+    >
+      {isAuditLocked && (
+        <Alert
+          className="mb-4"
+          type="info"
+          showIcon
+          title="当前记录已审核，仅允许修改备注。货品和入库数量已锁定；审核与反审请使用页面顶部按钮。"
+        />
+      )}
+
+      {lockedProduct
+        ? (
+            <>
+              <Form.Item name="product_data_id" hidden>
+                <Input />
+              </Form.Item>
+              <Form.Item label="关联货品资料">
+                <Input
+                  disabled
+                  value={`${lockedProduct.material_code} | ${lockedProduct.material_name} | ${lockedProduct.model} | ${lockedProduct.specification}`}
+                />
+              </Form.Item>
+              <ProductSnapshotSummary selectedProduct={lockedProduct} />
+            </>
+          )
+        : (
+            <RemoteProductField
+              form={form}
+              initialValues={initialValues}
+              isAuditLocked={isAuditLocked}
+            />
+          )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Form.Item
           name="stock_in_quantity"
           label="入库数量"
-          rules={[{ required: true, message: '请输入入库数量' }]}
+          rules={[
+            { required: true, message: '请输入入库数量' },
+            { type: 'integer', min: 1, message: '入库数量必须为正整数' },
+          ]}
         >
           <InputNumber
             disabled={isAuditLocked}
@@ -167,7 +231,28 @@ export default function YoumaiFinishedGoodsStockInForm({
             placeholder="请输入入库数量"
           />
         </Form.Item>
+
+        {allowStatusSelect && !isAuditLocked && (
+          <Form.Item
+            name="status"
+            label="审核状态"
+            rules={[{ required: true, message: '请选择审核状态' }]}
+          >
+            <Select
+              options={[
+                { value: '待审核', label: '待审核（计入待入库）' },
+                { value: '已审核', label: '已审核（立即增加现有库存）' },
+              ]}
+            />
+          </Form.Item>
+        )}
       </div>
+
+      {!allowStatusSelect && (
+        <Form.Item name="status" hidden>
+          <Input />
+        </Form.Item>
+      )}
 
       <Form.Item
         name="remarks"

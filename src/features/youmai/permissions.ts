@@ -1,6 +1,12 @@
 import type { PermissionDefinition } from '@/types/permission'
 
 export const YOUMAI_MANAGE_PERMISSION_KEY = 'feature:youmai.manage'
+export const YOUMAI_FINISHED_GOODS_INVENTORY_PERMISSION_KEY
+  = 'page:youmai-finished-goods-inventory'
+export const YOUMAI_FINISHED_GOODS_STOCK_IN_PERMISSION_KEY
+  = 'page:youmai-finished-goods-stock-in'
+export const YOUMAI_FINISHED_GOODS_STOCK_OUT_PERMISSION_KEY
+  = 'page:youmai-finished-goods-stock-out'
 
 export const YOUMAI_PERMISSIONS: PermissionDefinition[] = [
   // 导航

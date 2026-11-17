@@ -18,6 +18,29 @@
 ## 2026-11-17
 
 - **类别**：变更
+- **范围**：`src/features/youmai/FinishedGoodsStockOut/YoumaiFinishedGoodsStockOutTable.tsx`
+- **摘要**：将优迈成品出库表格的「最终库存」列调整至右侧并与「库存/入库」操作列相邻固定（`fixed: 'right'`），无需横向滚动即可直接查看最终库存。
+- **验证**：`bunx eslint --fix`、`bun lint`、`bunx antd lint`、`bun run typecheck`、`bun run test` 与 `bun run build` 通过；未在浏览器实操检查窄屏滚动效果。
+
+## 2026-11-17
+
+- **类别**：变更
+- **范围**：`supabase/migrations/20261117164500_add_youmai_finished_goods_inventory_adjustments.sql`、`src/services/{apiYoumaiFinishedGoodsInventoryAdjustments,apiYoumaiFinishedGoodsInventory,apiYoumaiFinishedGoodsStockIn,apiYoumaiFinishedGoodsStockOut}.ts`、`src/services/apiYoumaiFinishedGoodsInventory.vitest.ts`、`src/features/youmai/{permissions,queryKeys}.ts`、`src/features/youmai/FinishedGoodsInventory/useYoumaiFinishedGoodsInventory.ts`、`src/features/youmai/FinishedGoodsStockIn/YoumaiFinishedGoodsStockInForm.tsx`、`src/features/youmai/FinishedGoodsStockOut/*`
+- **摘要**：参考金檀木业详情抽屉与库存调整流水模式，为优迈成品出库新增货品库存概览、快捷入库、直接库存调整与流水查看功能。
+  - 新增数据库 migration `20261117164500_add_youmai_finished_goods_inventory_adjustments.sql`：创建 `youmai_finished_goods_inventory_adjustments` 调整流水表（`numeric(12, 3)` 精度、操作人快照、只读 RLS），并通过 `pg_trigger_depth() > 1` 保护的 `AFTER UPDATE OF current_stock` 触发器仅记录直接修改库存的变更（不重复记录出入库审核触发器改动）；同时补充 `youmai_finished_goods_inventory` 面向成品入/出库页面的只读 `SELECT` RLS。
+  - 优迈成品出库表格右侧固定新增「库存/入库 → 查看」列，点击打开 `YoumaiFinishedGoodsStockDetailDrawer` 抽屉展示货品信息、4 项库存指标（待入库/现有库存/待出库/最终库存）及「入库记录」「出库记录」「调整记录」三个分页页签；抽屉内支持锁定当前货品「新建入库」（可选待审核/已审核）与「调整库存」（`adjustYoumaiFinishedGoodsInventory` 仅更新 `current_stock` 与 `remarks` 并联动刷新库存及出库列表最终库存）。
+- **验证**：`bun run db:push:dry-run` 预演通过（正式 `bun run db:push` 因项目危险 SQL 三次交互确认保护需用户本人终端执行，待推送后执行 `bun run db:types`）；`bun lint`、`bun run typecheck`、`bun run test`、`bun run build` 与 `bunx antd lint` 通过（详见最终验证结果）。
+
+## 2026-11-17
+
+- **类别**：文档
+- **范围**：`.github/copilot-instructions.md`、`.github/prompts/task-exec.prompt.md`、`AGENTS.md`
+- **摘要**：调整 AI 助手需求澄清与 Plan 阶段交互规则，明确在需求不明确、存在多方案权衡或处于 Plan 模式且关键决策未对齐时，必须立即暂停并优先调用交互式选择题工具（`ask_question` / `AskUserQuestion`）让用户当场选择，避免先跑完一轮或写完完整方案后再在回复末尾用纯文本追问。
+- **验证**：`git diff --check` 与 `git diff` 跨文件一致性检查通过；已同步检查 `.claude/DEVELOPMENT_WORKFLOW.md` 与其余 `.github/prompts/*.prompt.md`，无需额外改动。仅修改规则文档，未重复运行应用测试或构建。
+
+## 2026-11-17
+
+- **类别**：变更
 - **范围**：`supabase/migrations/20261117153500_add_youmai_finished_goods_stock_out_contract_no.sql`、`server/youmaiPurchaseOrderServer.ts`、`supabase/functions/fetch-youmai-purchase-order/index.ts`、`src/services/{apiYoumaiFinishedGoodsStockOut,database.types}.ts`、`src/utils/{youmaiFinishedGoodsStockOutExcel,youmaiFinishedGoodsStockOutExport}.ts`、`src/features/youmai/FinishedGoodsStockOut/*`、`src/services/youmaiPurchaseOrderHttp.vitest.ts`、`src/utils/youmaiFinishedGoodsStockOutExcel.vitest.ts`
 - **摘要**：优迈成品出库模块新增独立「合同号」（`contract_no`）字段，打通 SRM 获取订单、Excel 导入导出及列表/搜索/表单全链路。
   - 数据库 `youmai_finished_goods_stock_out` 新增 `contract_no text not null default ''`（已有 807 条历史数据默认为空字符串），并将 `contract_no` 纳入已审核锁定触发器 `validate_youmai_finished_goods_stock_out_edit_rules` 校验。

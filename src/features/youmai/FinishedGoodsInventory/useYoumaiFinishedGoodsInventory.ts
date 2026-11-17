@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryConfig } from '@/config/queryClient'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import {
+  adjustYoumaiFinishedGoodsInventory,
   createYoumaiFinishedGoodsInventory,
   deleteYoumaiFinishedGoodsInventory,
   getYoumaiFinishedGoodsInventoryList,
@@ -15,6 +16,8 @@ import { youmaiKeys } from '../queryKeys'
 
 const YOUMAI_FINISHED_GOODS_INVENTORY_KEY
   = 'youmai-finished-goods-inventory' as const
+const YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY
+  = 'youmai-finished-goods-stock-out' as const
 
 export function useYoumaiFinishedGoodsInventoryList({
   page,
@@ -61,27 +64,49 @@ export function useYoumaiProductDataOptions(keyword?: string) {
 export function useCreateYoumaiFinishedGoodsInventory() {
   return useMutationWithInvalidation({
     mutationFn: createYoumaiFinishedGoodsInventory,
-    invalidateQueries: [[YOUMAI_FINISHED_GOODS_INVENTORY_KEY]],
+    invalidateQueries: [
+      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
+    ],
   })
 }
 
 export function useUpdateYoumaiFinishedGoodsInventory() {
   return useMutationWithInvalidation({
     mutationFn: updateYoumaiFinishedGoodsInventory,
-    invalidateQueries: [[YOUMAI_FINISHED_GOODS_INVENTORY_KEY]],
+    invalidateQueries: [
+      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
+    ],
+  })
+}
+
+export function useAdjustYoumaiFinishedGoodsInventory() {
+  return useMutationWithInvalidation({
+    mutationFn: adjustYoumaiFinishedGoodsInventory,
+    invalidateQueries: [
+      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
+    ],
   })
 }
 
 export function useImportYoumaiFinishedGoodsInventory() {
   return useMutationWithInvalidation({
     mutationFn: importYoumaiFinishedGoodsInventory,
-    invalidateQueries: [[YOUMAI_FINISHED_GOODS_INVENTORY_KEY]],
+    invalidateQueries: [
+      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
+    ],
   })
 }
 
 export function useDeleteYoumaiFinishedGoodsInventory() {
   return useMutationWithInvalidation({
     mutationFn: deleteYoumaiFinishedGoodsInventory,
-    invalidateQueries: [[YOUMAI_FINISHED_GOODS_INVENTORY_KEY]],
+    invalidateQueries: [
+      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
+      [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
+    ],
   })
 }

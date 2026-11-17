@@ -208,6 +208,54 @@ export async function getYoumaiFinishedGoodsInventoryList({
   }
 }
 
+export async function getYoumaiFinishedGoodsInventoryByProductDataId(
+  productDataId: string,
+  signal?: AbortSignal,
+): Promise<YoumaiFinishedGoodsInventory | null> {
+  let query = inventoryTable()
+    .select('*')
+    .eq('product_data_id', productDataId)
+    .limit(1)
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.maybeSingle()
+
+  if (error) {
+    throw handleApiError(error, '获取优迈成品库存详情失败')
+  }
+
+  return (data as YoumaiFinishedGoodsInventory | null) ?? null
+}
+
+export async function adjustYoumaiFinishedGoodsInventory({
+  id,
+  current_stock,
+  remarks,
+}: {
+  id: string
+  current_stock: number
+  remarks: string
+}) {
+  const nextStock = normalizeQuantity(current_stock)
+  if (nextStock < 0) {
+    throw new Error('调整后库存不能小于 0')
+  }
+
+  const { error } = await inventoryTable()
+    .update({
+      current_stock: nextStock,
+      remarks: remarks.trim(),
+    })
+    .eq('id', id)
+
+  if (error) {
+    throw handleApiError(error, '调整优迈成品库存失败')
+  }
+}
+
 export async function createYoumaiFinishedGoodsInventory(
   values: YoumaiFinishedGoodsInventoryFormValues,
 ) {

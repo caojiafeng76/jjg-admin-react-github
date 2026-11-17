@@ -33,7 +33,58 @@ function createMasterDataKeys<const TRoot extends string>(root: TRoot) {
   } as const
 }
 
+export interface YoumaiByProductKeyParams {
+  productDataId: string
+  page: number
+  pageSize: number
+}
+
+const FINISHED_GOODS_INVENTORY_ROOT = 'youmai-finished-goods-inventory'
+const FINISHED_GOODS_STOCK_IN_ROOT = 'youmai-finished-goods-stock-in'
+const FINISHED_GOODS_STOCK_OUT_ROOT = 'youmai-finished-goods-stock-out'
+
 export const youmaiKeys = {
   productData: createMasterDataKeys('youmai-product-data'),
   rawMaterialInventory: createMasterDataKeys('youmai-raw-material-inventory'),
+  finishedGoodsInventory: {
+    all: [FINISHED_GOODS_INVENTORY_ROOT] as const,
+    detail: (productDataId: string) =>
+      [FINISHED_GOODS_INVENTORY_ROOT, 'detail', productDataId] as const,
+    adjustments: (params: YoumaiByProductKeyParams) =>
+      [
+        FINISHED_GOODS_INVENTORY_ROOT,
+        'adjustments',
+        {
+          productDataId: params.productDataId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
+  },
+  finishedGoodsStockIn: {
+    all: [FINISHED_GOODS_STOCK_IN_ROOT] as const,
+    byProduct: (params: YoumaiByProductKeyParams) =>
+      [
+        FINISHED_GOODS_STOCK_IN_ROOT,
+        'by-product',
+        {
+          productDataId: params.productDataId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
+  },
+  finishedGoodsStockOut: {
+    all: [FINISHED_GOODS_STOCK_OUT_ROOT] as const,
+    byProduct: (params: YoumaiByProductKeyParams) =>
+      [
+        FINISHED_GOODS_STOCK_OUT_ROOT,
+        'by-product',
+        {
+          productDataId: params.productDataId,
+          page: params.page,
+          pageSize: params.pageSize,
+        },
+      ] as const,
+  },
 } as const
