@@ -1,10 +1,11 @@
 import type {
-  OrderStatusDashboardFilters,
+  OrderStatusDashboardItem,
   OrderStatusJobColumn,
 } from '@/services/apiOrderStatusDashboard'
 import { App } from 'antd'
 import { useState } from 'react'
-import { getOrderStatusDashboardForExport } from '@/services/apiOrderStatusDashboard'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 
 function loadOrderStatusDashboardExcel() {
   return import('@/utils/orderStatusDashboardExcel')
@@ -15,57 +16,47 @@ export function preloadOrderStatusDashboardExcel() {
 }
 
 export function useOrderStatusDashboardExport({
-  filters,
+  rows,
   jobColumns,
-  total,
+  startIndex,
 }: {
-  filters: OrderStatusDashboardFilters
-  jobColumns: OrderStatusJobColumn[]
-  total: number | undefined
+  rows: readonly OrderStatusDashboardItem[]
+  jobColumns: readonly OrderStatusJobColumn[]
+  startIndex: number
 }) {
   const { message } = App.useApp()
   const [isExporting, setIsExporting] = useState(false)
 
-  async function handleExportCurrentFilters() {
-    if (total === 0) {
-      message.warning('当前没有可导出的订单现状数据')
+  async function handleExportCurrentPage(): Promise<void> {
+    if (rows.length === 0) {
+      message.warning('当前页没有可导出的订单现状数据')
       return
     }
 
     try {
+      // 固定点击时的当前页快照，避免模块加载期间翻页或后台刷新影响文件。
+      const exportRows = structuredClone(rows)
+      const exportJobColumns = structuredClone(jobColumns)
       setIsExporting(true)
       message.open({
         key: 'order-status-dashboard-export',
         type: 'loading',
-        content: '正在导出当前筛选结果...',
+        content: '正在导出当前页订单现状...',
         duration: 0,
       })
 
-      const exportRows = await getOrderStatusDashboardForExport({
-        filters,
-        total: total ?? 0,
-      })
-
-      if (exportRows.length === 0) {
-        message.warning({
-          key: 'order-status-dashboard-export',
-          content: '当前没有可导出的订单现状数据',
-        })
-        return
-      }
-
       const { exportOrderStatusDashboardToExcel }
         = await loadOrderStatusDashboardExcel()
-      exportOrderStatusDashboardToExcel(exportRows, jobColumns)
+      exportOrderStatusDashboardToExcel(exportRows, exportJobColumns, startIndex)
       message.success({
         key: 'order-status-dashboard-export',
-        content: `已导出 ${exportRows.length} 条订单现状数据`,
+        content: feedbackText.exported('订单现状', exportRows.length),
       })
     }
     catch (error) {
       message.error({
         key: 'order-status-dashboard-export',
-        content: error instanceof Error ? error.message : '导出失败',
+        content: getUserErrorMessage(error, feedbackText.failed('导出', '订单现状')),
       })
     }
     finally {
@@ -74,7 +65,7 @@ export function useOrderStatusDashboardExport({
   }
 
   return {
-    handleExportCurrentFilters,
+    handleExportCurrentPage,
     isExporting,
     preloadOrderStatusDashboardExcel,
   }

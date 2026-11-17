@@ -6,6 +6,7 @@ import type {
   SelectedTransferDetail,
 } from './dashboardRenderUtils'
 import type { ColumnWidthMap, SearchValues } from './dashboardUtils'
+import type { DashboardTableView } from './dashboardView'
 import type {
   OrderStatusDashboardItem,
   OrderStatusJobColumn,
@@ -41,6 +42,7 @@ import {
 
   STATUS_TABS,
 } from './dashboardUtils'
+import { applyDashboardTableView, EMPTY_TABLE_VIEW, getVisibleDashboardRows } from './dashboardView'
 import { ExtrusionDetailModal } from './ExtrusionDetailModal'
 import { OrderStatusDashboardHeader } from './OrderStatusDashboardHeader'
 import { OrderStatusDashboardSearchBar } from './OrderStatusDashboardSearchBar'
@@ -60,7 +62,7 @@ export default function OrderStatusDashboard() {
   const { role } = useAuth()
   const queryClient = useQueryClient()
   const canManageStatus = usePermission('feature:workshop-order.manage-status')
-  const canExportCurrentFilters = isAdminRole(role)
+  const canExportCurrentPage = isAdminRole(role)
   const { mutateAsync: updateOrderStatuses, isPending: isUpdatingOrderStatus }
     = useBatchUpdateWorkshopOrderStatuses()
   const [selectedJobDetail, setSelectedJobDetail]
@@ -72,6 +74,7 @@ export default function OrderStatusDashboard() {
   const [selectedExtrusionDetail, setSelectedExtrusionDetail]
     = useState<SelectedExtrusionDetail | null>(null)
   const [columnWidths, setColumnWidths] = useState<ColumnWidthMap>({})
+  const [tableView, setTableView] = useState<DashboardTableView>(EMPTY_TABLE_VIEW)
   const [closingOrderId, setClosingOrderId] = useState<string | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
@@ -135,15 +138,6 @@ export default function OrderStatusDashboard() {
 
   const rows = useMemo(() => data?.items ?? [], [data?.items])
   const jobColumns = data?.jobColumns ?? EMPTY_JOB_COLUMNS
-  const {
-    handleExportCurrentFilters,
-    isExporting,
-    preloadOrderStatusDashboardExcel,
-  } = useOrderStatusDashboardExport({
-    filters,
-    jobColumns,
-    total: data?.total,
-  })
   const openJobDetail = useCallback(
     (record: OrderStatusDashboardItem, jobName: string) => {
       setSelectedJobDetail({ record, jobName })
@@ -222,7 +216,7 @@ export default function OrderStatusDashboard() {
 
   const columns = useMemo(
     () =>
-      createOrderStatusDashboardColumns({
+      applyDashboardTableView(createOrderStatusDashboardColumns({
         canManageStatus,
         closingOrderId,
         columnWidths,
@@ -239,7 +233,7 @@ export default function OrderStatusDashboard() {
         page,
         pageSize,
         rows,
-      }),
+      }), tableView),
     [
       canManageStatus,
       closingOrderId,
@@ -257,10 +251,21 @@ export default function OrderStatusDashboard() {
       page,
       pageSize,
       rows,
+      tableView,
     ],
   )
 
   const tableWidth = getTableColumnWidth(columns)
+  const visibleRows = useMemo(() => getVisibleDashboardRows(rows, columns), [rows, columns])
+  const {
+    handleExportCurrentPage,
+    isExporting,
+    preloadOrderStatusDashboardExcel,
+  } = useOrderStatusDashboardExport({
+    rows: visibleRows,
+    jobColumns,
+    startIndex: (page - 1) * pageSize,
+  })
 
   useEffect(() => {
     setSearchValues(searchParamValues)
@@ -306,6 +311,7 @@ export default function OrderStatusDashboard() {
   }
 
   function handleResetSearch() {
+    setTableView(EMPTY_TABLE_VIEW)
     const next = new URLSearchParams(searchParams)
 
     next.delete('customer')
@@ -326,9 +332,15 @@ export default function OrderStatusDashboard() {
   const handleTableChange: TableProps<OrderStatusDashboardItem>['onChange'] = (
     _pagination,
     tableFilters,
-    _sorter,
+    sorter,
     extra,
   ) => {
+    const activeSorter = Array.isArray(sorter) ? sorter[0] : sorter
+    setTableView({
+      filters: tableFilters,
+      sortColumnKey: activeSorter.columnKey === undefined ? null : String(activeSorter.columnKey),
+      sortOrder: activeSorter.order ?? null,
+    })
     if (extra.action !== 'filter') {
       return
     }
@@ -338,6 +350,10 @@ export default function OrderStatusDashboard() {
       .filter(Boolean)
     const next = new URLSearchParams(searchParams)
     const modelValue = selectedModels.join(',')
+
+    if (modelValue === modelFilterValues.join(',')) {
+      return
+    }
 
     setOrDeleteParam(next, 'model', modelValue)
     next.set('page', '1')
@@ -371,12 +387,12 @@ export default function OrderStatusDashboard() {
   return (
     <div className="flex h-full min-h-0 flex-col gap-1.5 p-3">
       <OrderStatusDashboardHeader
-        canExportCurrentFilters={canExportCurrentFilters}
-        exportDisabled={isDataLoading || (data?.total ?? 0) === 0}
+        canExportCurrentPage={canExportCurrentPage}
+        exportDisabled={isDataLoading || visibleRows.length === 0}
         isExporting={isExporting}
         isFetching={isDataLoading}
         isLoading={isLoading}
-        onExport={handleExportCurrentFilters}
+        onExport={handleExportCurrentPage}
         onPreloadExport={preloadOrderStatusDashboardExcel}
         onRefetch={handleRefetch}
       />

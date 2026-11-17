@@ -4,7 +4,7 @@ import { Button, Typography } from 'antd'
 const { Title } = Typography
 
 export interface OrderStatusDashboardHeaderProps {
-  canExportCurrentFilters: boolean
+  canExportCurrentPage: boolean
   exportDisabled: boolean
   isExporting: boolean
   isFetching: boolean
@@ -15,7 +15,7 @@ export interface OrderStatusDashboardHeaderProps {
 }
 
 export function OrderStatusDashboardHeader({
-  canExportCurrentFilters,
+  canExportCurrentPage,
   exportDisabled,
   isExporting,
   isFetching,
@@ -74,7 +74,7 @@ export function OrderStatusDashboardHeader({
 
         {/* 右侧：导出 / 刷新 */}
         <div className="flex flex-wrap items-center gap-2">
-          {canExportCurrentFilters && (
+          {canExportCurrentPage && (
             <Button
               size="small"
               icon={<ArrowDownTrayIcon className="size-3.5" />}
@@ -85,7 +85,7 @@ export function OrderStatusDashboardHeader({
               onFocus={onPreloadExport}
               className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-600 !shadow-sm backdrop-blur-sm transition-all duration-200 hover:!border-blue-300 hover:!bg-blue-50/80 hover:!text-blue-600 hover:!shadow-md dark:!border-slate-600/60 dark:!bg-slate-800/80 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-blue-900/30 dark:hover:!text-blue-400"
             >
-              导出当前筛选结果
+              导出当前页
             </Button>
           )}
 
