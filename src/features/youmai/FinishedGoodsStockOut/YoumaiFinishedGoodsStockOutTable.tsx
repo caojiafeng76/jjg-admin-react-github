@@ -111,6 +111,18 @@ function YoumaiFinishedGoodsStockOutTable({
           String(record.purchase_order_line_no ?? '') === String(value),
       },
       {
+        title: '合同号',
+        dataIndex: 'contract_no',
+        key: 'contract_no',
+        width: 150,
+        sorter: (a, b) =>
+          (a.contract_no ?? '').localeCompare(b.contract_no ?? ''),
+        filters: uniqueFilters(data.map(r => r.contract_no)),
+        onFilter: (value, record) =>
+          String(record.contract_no ?? '') === String(value),
+        render: (value: string | null | undefined) => value || '-',
+      },
+      {
         title: '物料编码',
         dataIndex: 'material_code',
         key: 'material_code',
@@ -284,7 +296,7 @@ function YoumaiFinishedGoodsStockOutTable({
       dataSource={data}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: 1692, y: scrollY }}
+      scroll={{ x: 1842, y: scrollY }}
       size="small"
       locale={{
         emptyText: (

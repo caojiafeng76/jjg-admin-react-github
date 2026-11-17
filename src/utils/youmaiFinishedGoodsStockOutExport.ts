@@ -14,6 +14,7 @@ const TABLE_HEADERS = [
   '交货日期',
   '采购订单号',
   '行号',
+  '合同号',
   '物料编码',
   '物料名称',
   '型号',
@@ -25,7 +26,7 @@ const TABLE_HEADERS = [
   '加工数量',
 ] as const
 
-const COLUMN_WIDTHS = [4, 12, 26, 6, 18, 16, 10, 10, 10, 12, 12, 10, 10]
+const COLUMN_WIDTHS = [4, 12, 26, 6, 16, 18, 16, 10, 10, 10, 12, 12, 10, 10]
 const BORDER_COLOR = '000000'
 const HEADER_FILL = 'FFFFFF'
 
@@ -46,7 +47,7 @@ function formatCellText(value: string | number | null | undefined) {
   return String(value)
 }
 
-function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
+export function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
   const totalWeight = items.reduce((sum, item) => {
     const w = calculateYoumaiWeightKg({
       specification: item.specification,
@@ -81,6 +82,7 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
       formatCellText(item.delivery_date),
       formatCellText(item.purchase_order_no),
       formatCellText(item.purchase_order_line_no),
+      formatCellText(item.contract_no),
       formatCellText(item.material_code),
       formatCellText(item.material_name),
       formatCellText(item.model),
@@ -177,7 +179,7 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
   }
 
   // 数值列格式：数量/库存整数，重量保留 3 位
-  const integerColumns = [8, 10]
+  const integerColumns = [9, 11]
   for (let r = 3; r < totalRows; r += 1) {
     integerColumns.forEach((c) => {
       const ref = `${colLetter(c)}${r + 1}`
@@ -186,7 +188,7 @@ function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
       }
     })
   }
-  const weightColumn = [9]
+  const weightColumn = [10]
   for (let r = 3; r < totalRows; r += 1) {
     weightColumn.forEach((c) => {
       const ref = `${colLetter(c)}${r + 1}`

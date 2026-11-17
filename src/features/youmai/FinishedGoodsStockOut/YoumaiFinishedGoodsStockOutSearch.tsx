@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 
 const SEARCH_FIELDS = [
   { name: 'purchaseOrderNo', placeholder: '采购订单号', width: 150 },
+  { name: 'contractNo', placeholder: '合同号', width: 150 },
   { name: 'materialCode', placeholder: '物料编码', width: 130 },
   { name: 'materialName', placeholder: '物料名称', width: 140 },
   { name: 'model', placeholder: '型号', width: 110 },
@@ -12,6 +13,7 @@ const SEARCH_FIELDS = [
 
 interface SearchValues {
   purchaseOrderNo?: string
+  contractNo?: string
   materialCode?: string
   materialName?: string
   model?: string
@@ -36,6 +38,7 @@ export default function YoumaiFinishedGoodsStockOutSearch({
   useEffect(() => {
     form.setFieldsValue({
       purchaseOrderNo: initialValues?.purchaseOrderNo,
+      contractNo: initialValues?.contractNo,
       materialCode: initialValues?.materialCode,
       materialName: initialValues?.materialName,
       model: initialValues?.model,
@@ -48,6 +51,7 @@ export default function YoumaiFinishedGoodsStockOutSearch({
   const handleSearch = (values: SearchValues) => {
     onSearch({
       purchaseOrderNo: values.purchaseOrderNo?.trim() || undefined,
+      contractNo: values.contractNo?.trim() || undefined,
       materialCode: values.materialCode?.trim() || undefined,
       materialName: values.materialName?.trim() || undefined,
       model: values.model?.trim() || undefined,

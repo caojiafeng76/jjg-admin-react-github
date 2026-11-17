@@ -3779,6 +3779,7 @@ export type Database = {
       }
       youmai_finished_goods_stock_out: {
         Row: {
+          contract_no: string
           created_at: string
           delivery_date: string
           id: string
@@ -3796,6 +3797,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          contract_no?: string
           created_at?: string
           delivery_date: string
           id?: string
@@ -3813,6 +3815,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          contract_no?: string
           created_at?: string
           delivery_date?: string
           id?: string

@@ -55,6 +55,12 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
     width: 90,
   },
   {
+    title: '合同号',
+    dataIndex: 'contract_no',
+    width: 150,
+    render: (value: string | undefined) => value || '-',
+  },
+  {
     title: '物料编码',
     dataIndex: 'material_code',
     width: 180,
@@ -336,7 +342,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
                 dataSource={previewData}
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}
-                scroll={{ y: 320, x: 1160 }}
+                scroll={{ y: 320, x: 1310 }}
               />
             </div>
           )}

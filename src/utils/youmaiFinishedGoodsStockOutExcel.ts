@@ -15,6 +15,7 @@ const REQUIRED_HEADERS = [
 interface PurchaseOrderExcelRow {
   采购订单号?: string | number
   行号?: string | number
+  合同号?: string | number
   物料编码?: string | number
   物料名称?: string | number
   订购数量?: string | number
@@ -50,6 +51,7 @@ export async function parseYoumaiFinishedGoodsStockOutExcel(
     const rowNumber = index + 2
     const purchaseOrderNo = normalizeText(row['采购订单号'])
     const purchaseOrderLineNo = normalizeText(row['行号'])
+    const contractNo = normalizeText(row['合同号'])
     const materialCode = normalizeText(row['物料编码'])
     const materialName = normalizeText(row['物料名称'])
     const stockOutQuantity = normalizeNumber(row['订购数量'])
@@ -108,6 +110,7 @@ export async function parseYoumaiFinishedGoodsStockOutExcel(
     rows.push({
       purchase_order_no: purchaseOrderNo,
       purchase_order_line_no: purchaseOrderLineNo,
+      contract_no: contractNo,
       material_code: materialCode,
       material_name: materialName,
       stock_out_quantity: stockOutQuantity,

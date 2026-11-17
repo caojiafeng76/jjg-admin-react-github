@@ -28,6 +28,7 @@ export interface YoumaiFinishedGoodsStockOut {
   specific_gravity: number
   purchase_order_no: string
   purchase_order_line_no: string
+  contract_no: string
   delivery_date: string
   status: YoumaiFinishedGoodsStockOutStatus
   stock_out_quantity: number
@@ -46,6 +47,7 @@ export interface YoumaiFinishedGoodsStockOutFormValues {
   product_data_id: string
   purchase_order_no: string
   purchase_order_line_no: string
+  contract_no: string
   delivery_date: string
   status: YoumaiFinishedGoodsStockOutStatus
   stock_out_quantity: number
@@ -60,6 +62,7 @@ export interface YoumaiFinishedGoodsStockOutBatchStatusValues {
 export interface YoumaiFinishedGoodsStockOutImportRow {
   purchase_order_no: string
   purchase_order_line_no: string
+  contract_no?: string
   material_code: string
   material_name: string
   delivery_date: string
@@ -119,6 +122,7 @@ function normalizeFormValues(
     product_data_id: values.product_data_id,
     purchase_order_no: normalizeText(values.purchase_order_no),
     purchase_order_line_no: normalizeText(values.purchase_order_line_no),
+    contract_no: normalizeText(values.contract_no),
     delivery_date: normalizeDateString(values.delivery_date),
     status: values.status || '待审核',
     stock_out_quantity: normalizeQuantity(values.stock_out_quantity),
@@ -132,6 +136,7 @@ function normalizeImportRow(
   return {
     purchase_order_no: normalizeText(row.purchase_order_no),
     purchase_order_line_no: normalizeText(row.purchase_order_line_no),
+    contract_no: normalizeText(row.contract_no),
     material_code: normalizeText(row.material_code),
     material_name: normalizeText(row.material_name),
     delivery_date: normalizeDateString(row.delivery_date),
@@ -173,6 +178,7 @@ function buildStockOutPayload(
     specific_gravity: normalizeQuantity(snapshot.specific_gravity),
     purchase_order_no: values.purchase_order_no,
     purchase_order_line_no: values.purchase_order_line_no,
+    contract_no: values.contract_no,
     delivery_date: values.delivery_date,
     status: values.status,
     stock_out_quantity: normalizeQuantity(values.stock_out_quantity),
@@ -203,6 +209,7 @@ export async function getYoumaiFinishedGoodsStockOutList({
   page,
   pageSize,
   purchaseOrderNo,
+  contractNo,
   materialCode,
   materialName,
   model,
@@ -213,6 +220,7 @@ export async function getYoumaiFinishedGoodsStockOutList({
   page: number
   pageSize: number
   purchaseOrderNo?: string
+  contractNo?: string
   materialCode?: string
   materialName?: string
   model?: string
@@ -227,6 +235,7 @@ export async function getYoumaiFinishedGoodsStockOutList({
 
   const textFilters: Array<[string, string | undefined]> = [
     ['purchase_order_no', purchaseOrderNo],
+    ['contract_no', contractNo],
     ['material_code', materialCode],
     ['material_name', materialName],
     ['model', model],
@@ -406,7 +415,7 @@ export async function importYoumaiFinishedGoodsStockOut(
   )
 
   let existingQuery = stockOutTable().select(
-    'id, product_data_id, material_code, material_name, model, specification, specific_gravity, purchase_order_no, purchase_order_line_no, delivery_date, status, stock_out_quantity, remarks',
+    'id, product_data_id, material_code, material_name, model, specification, specific_gravity, purchase_order_no, purchase_order_line_no, contract_no, delivery_date, status, stock_out_quantity, remarks',
   )
 
   if (purchaseOrderNos.length > 0) {
@@ -454,6 +463,7 @@ export async function importYoumaiFinishedGoodsStockOut(
         specific_gravity: normalizeQuantity(existing.specific_gravity),
         purchase_order_no: existing.purchase_order_no,
         purchase_order_line_no: existing.purchase_order_line_no,
+        contract_no: normalizeText(existing.contract_no),
         delivery_date: existing.delivery_date,
         status: existing.status,
         stock_out_quantity: normalizeQuantity(existing.stock_out_quantity),
@@ -471,6 +481,7 @@ export async function importYoumaiFinishedGoodsStockOut(
       specific_gravity: normalizeQuantity(product.specific_gravity),
       purchase_order_no: row.purchase_order_no,
       purchase_order_line_no: row.purchase_order_line_no,
+      contract_no: normalizeText(row.contract_no),
       delivery_date: row.delivery_date,
       status: existing?.status || '待审核',
       stock_out_quantity: normalizeQuantity(row.stock_out_quantity),

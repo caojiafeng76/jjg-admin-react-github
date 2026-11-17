@@ -28,6 +28,7 @@ export function useYoumaiFinishedGoodsStockOutList({
   pageSize: number
   searchParams: {
     purchaseOrderNo?: string
+    contractNo?: string
     materialCode?: string
     materialName?: string
     model?: string
@@ -48,6 +49,7 @@ export function useYoumaiFinishedGoodsStockOutList({
         page,
         pageSize,
         purchaseOrderNo: searchParams.purchaseOrderNo,
+        contractNo: searchParams.contractNo,
         materialCode: searchParams.materialCode,
         materialName: searchParams.materialName,
         model: searchParams.model,

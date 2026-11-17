@@ -28,6 +28,7 @@ interface YoumaiFinishedGoodsStockOutFormFields {
   product_data_id: string
   purchase_order_no: string
   purchase_order_line_no: string
+  contract_no: string
   delivery_date: Dayjs | null
   status: '待审核' | '已审核'
   stock_out_quantity: number
@@ -48,6 +49,7 @@ const DEFAULT_VALUES: YoumaiFinishedGoodsStockOutFormFields = {
   product_data_id: '',
   purchase_order_no: '',
   purchase_order_line_no: '1',
+  contract_no: '',
   delivery_date: null,
   status: '待审核',
   stock_out_quantity: 0,
@@ -92,6 +94,7 @@ export default function YoumaiFinishedGoodsStockOutForm({
         product_data_id: initialValues.product_data_id,
         purchase_order_no: initialValues.purchase_order_no,
         purchase_order_line_no: initialValues.purchase_order_line_no,
+        contract_no: initialValues.contract_no ?? '',
         delivery_date: initialValues.delivery_date
           ? dayjs(initialValues.delivery_date)
           : null,
@@ -112,6 +115,7 @@ export default function YoumaiFinishedGoodsStockOutForm({
         product_data_id: values.product_data_id,
         purchase_order_no: values.purchase_order_no.trim(),
         purchase_order_line_no: values.purchase_order_line_no.trim(),
+        contract_no: (values.contract_no ?? '').trim(),
         delivery_date: values.delivery_date?.format('YYYY-MM-DD') || '',
         status: values.status,
         stock_out_quantity: Number(values.stock_out_quantity || 0),
@@ -133,7 +137,7 @@ export default function YoumaiFinishedGoodsStockOutForm({
           className="mb-4"
           type="info"
           showIcon
-          title="当前记录已审核，仅允许修改备注。货品、采购订单、交货日期和出库数量已锁定；审核与反审请使用页面顶部按钮。"
+          title="当前记录已审核，仅允许修改备注。货品、采购订单、合同号、交货日期和出库数量已锁定；审核与反审请使用页面顶部按钮。"
         />
       )}
 
@@ -206,6 +210,18 @@ export default function YoumaiFinishedGoodsStockOutForm({
           <Input disabled={isAuditLocked} placeholder="请输入采购订单行号" />
         </Form.Item>
       </div>
+
+      <Form.Item
+        name="contract_no"
+        label="合同号"
+        rules={[{ max: 100, message: '合同号不能超过 100 个字符' }]}
+      >
+        <Input
+          disabled={isAuditLocked}
+          placeholder="请输入合同号（选填）"
+          maxLength={100}
+        />
+      </Form.Item>
 
       <Form.Item
         name="delivery_date"

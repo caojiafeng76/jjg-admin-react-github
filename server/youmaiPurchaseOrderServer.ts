@@ -13,6 +13,7 @@ export type YoumaiPurchaseOrderServerEnv = Record<string, string | undefined>
 export interface YoumaiPurchaseOrderLine {
   purchase_order_no: string
   purchase_order_line_no: string
+  contract_no: string
   material_code: string
   material_name: string
   delivery_date: string
@@ -231,9 +232,6 @@ function buildLineRemarks(line: YoumaiSrmOrderLine) {
   return [
     normalizeText(line.description),
     normalizeText(line.lineDescription),
-    normalizeText(line.contractNumber)
-      ? `合同号：${normalizeText(line.contractNumber)}`
-      : '',
     normalizeText(line.packingItem)
       ? `打包件：${normalizeText(line.packingItem)}`
       : '',
@@ -247,6 +245,7 @@ function mapOrderLine(line: YoumaiSrmOrderLine): YoumaiPurchaseOrderLine {
   return {
     purchase_order_no: normalizeText(line.poNumber),
     purchase_order_line_no: normalizeText(line.lineNumber),
+    contract_no: normalizeText(line.contractNumber),
     material_code: normalizeText(line.itemCode),
     material_name: normalizeText(line.itemName),
     delivery_date: normalizeText(line.demandDate),

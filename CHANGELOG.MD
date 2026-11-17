@@ -18,6 +18,16 @@
 ## 2026-11-17
 
 - **类别**：变更
+- **范围**：`supabase/migrations/20261117153500_add_youmai_finished_goods_stock_out_contract_no.sql`、`server/youmaiPurchaseOrderServer.ts`、`supabase/functions/fetch-youmai-purchase-order/index.ts`、`src/services/{apiYoumaiFinishedGoodsStockOut,database.types}.ts`、`src/utils/{youmaiFinishedGoodsStockOutExcel,youmaiFinishedGoodsStockOutExport}.ts`、`src/features/youmai/FinishedGoodsStockOut/*`、`src/services/youmaiPurchaseOrderHttp.vitest.ts`、`src/utils/youmaiFinishedGoodsStockOutExcel.vitest.ts`
+- **摘要**：优迈成品出库模块新增独立「合同号」（`contract_no`）字段，打通 SRM 获取订单、Excel 导入导出及列表/搜索/表单全链路。
+  - 数据库 `youmai_finished_goods_stock_out` 新增 `contract_no text not null default ''`（已有 807 条历史数据默认为空字符串），并将 `contract_no` 纳入已审核锁定触发器 `validate_youmai_finished_goods_stock_out_edit_rules` 校验。
+  - 优迈 SRM 采购订单代理（`server/youmaiPurchaseOrderServer.ts`）与备用 Edge Function（`fetch-youmai-purchase-order`）从明细 `contractNumber` 提取 `contract_no`，并不再在 `remarks` 中重复拼接 `合同号：...`。
+  - 列表页新增「合同号」列（支持排序、列筛选、URL 参数联动搜索）、新建/编辑弹窗增加「合同号」输入框（已审核锁定）、Excel 导入支持可选「合同号」列并兼容无该列的旧模板、导入预览与 Excel 导出同步新增「合同号」列并顺移数值列格式索引。
+- **验证**：`bun run db:push` 已由用户确认执行，`bun run db:types` 重新生成类型，`bun run db:query` 只读核验 807 条现有记录 `contract_no` 均为空字符串；杭州阿里云 FC `youmai-purchase-order`（`7.93 KB`，2026-11-17 16:09:51）与备用 Supabase Edge Function `fetch-youmai-purchase-order` 均已完成部署；`bun lint`、`bun run typecheck`、`bun run test` 与 `bun run build` 全部通过（未在浏览器端对已登录账号页面实操点击导入真实 SRM 订单）。
+
+## 2026-11-17
+
+- **类别**：变更
 - **范围**：`src/utils/orderStatusDashboardExcel.ts`、`src/utils/orderStatusDashboardExcel.vitest.ts`
 - **摘要**：重设计订单现状当前页 Excel 导出样式。新增第 1–2 行报表主标题（「订单现状生产进度报表」）与导出元信息栏（当前页记录区间及导出时间）；去掉高饱和亮宝蓝表头与冰蓝斑马纹，改用极简浅色商务配色（表头 `#EEF2F6` + 深炭字 `#0F172A` + 底部 `#334155` 分隔线，斑马纹 `#FFFFFF` / `#F8FAFC`，汇总行 `#F1F5F9` 双中粗边框）；为左对齐文本列增加 `indent: 1` 留白与均衡列宽，弱化零值 `-`（`#94A3B8`），为负库存增加淡红底加粗红字提示，为生产状态（正常/预警/延期）及订单状态补充语义色区分。保持原有 3 参导出签名与全部汇总口径不变；经检查 `xlsx-js-style` 序列化层会忽略 `!freeze` 属性，未写入无效冻结配置。
 - **验证**：改动文件已执行 `bunx eslint --fix`；`bun lint`（0 error）、`bun run typecheck`、`bun run test`、`bun run build` 与 `bun run check:bundle` 全部通过；生成真实 `.xlsx` 样本校验合并单元格、样式、数值格式与千分位汇总结果。

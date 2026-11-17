@@ -52,6 +52,7 @@ function preloadYoumaiFinishedGoodsStockOutExport() {
 
 const SEARCH_TEXT_FIELDS = [
   'purchaseOrderNo',
+  'contractNo',
   'materialCode',
   'materialName',
   'model',
@@ -80,6 +81,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
   const pageSize = Number(searchParamsURL.get('pageSize')) || 10
   const [searchParams, setSearchParams] = useState<{
     purchaseOrderNo?: string
+    contractNo?: string
     materialCode?: string
     materialName?: string
     model?: string
@@ -88,6 +90,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     status?: '待审核' | '已审核'
   }>({
     purchaseOrderNo: searchParamsURL.get('purchaseOrderNo') || undefined,
+    contractNo: searchParamsURL.get('contractNo') || undefined,
     materialCode: searchParamsURL.get('materialCode') || undefined,
     materialName: searchParamsURL.get('materialName') || undefined,
     model: searchParamsURL.get('model') || undefined,

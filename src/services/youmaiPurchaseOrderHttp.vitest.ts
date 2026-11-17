@@ -171,6 +171,73 @@ describe('fetchYoumaiPurchaseOrderFromServer errors', () => {
     expect(error).toBeInstanceOf(Error)
     expect(error).not.toBeInstanceOf(YoumaiSrmUserError)
   })
+
+  it('extracts contractNumber into contract_no without duplicating it in remarks', async () => {
+    let step = 0
+    const items = await fetchOrderWith(async () => {
+      step += 1
+      if (step === 1) {
+        return Response.json({
+          status: 'S',
+          data: JSON.stringify({ sessionId: 'sid-1', tokeCode: 'tok-1' }),
+        })
+      }
+      if (step === 2) {
+        return Response.json({
+          status: 'S',
+          data: [{ poHeaderId: 1001, poNumber: 'PO-001' }],
+        })
+      }
+      return Response.json({
+        status: 'S',
+        data: [
+          {
+            poNumber: 'PO-001',
+            lineNumber: 1,
+            itemCode: 'MAT-01',
+            itemName: '上封头',
+            demandQty: 10,
+            demandDate: '2026-11-19',
+            description: '订单备注',
+            lineDescription: '行备注',
+            contractNumber: ' HT-2026-001 ',
+            packingItem: '木箱',
+          },
+          {
+            poNumber: 'PO-001',
+            lineNumber: 2,
+            itemCode: 'MAT-02',
+            itemName: '下封头',
+            demandQty: 5,
+            demandDate: '2026-11-20',
+          },
+        ],
+      })
+    })
+
+    expect(items).toEqual([
+      {
+        purchase_order_no: 'PO-001',
+        purchase_order_line_no: '1',
+        contract_no: 'HT-2026-001',
+        material_code: 'MAT-01',
+        material_name: '上封头',
+        delivery_date: '2026-11-19',
+        stock_out_quantity: 10,
+        remarks: '订单备注 | 行备注 | 打包件：木箱',
+      },
+      {
+        purchase_order_no: 'PO-001',
+        purchase_order_line_no: '2',
+        contract_no: '',
+        material_code: 'MAT-02',
+        material_name: '下封头',
+        delivery_date: '2026-11-20',
+        stock_out_quantity: 5,
+        remarks: '',
+      },
+    ])
+  })
 })
 
 describe('createYoumaiPurchaseOrderHandler origin check', () => {
