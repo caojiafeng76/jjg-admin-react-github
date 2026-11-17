@@ -44,6 +44,8 @@ bun run db:types           # 根据已连接的 Supabase schema 重新生成数�
 
 **注意**: 项目使用 `bun` 作为包管理器。测试框架使用 Vitest + Testing Library + jsdom；运行测试请使用 `bun run test`，不要用 Bun 内置的 `bun test` 代替。
 
+**浏览器测试约定**：本项目页面、交互与流程回归测试默认使用 **GPT in Chrome（连接用户 Chrome 的扩展）**，具体规则见 [.github/copilot-instructions.md](.github/copilot-instructions.md) 的工具优先级约定。
+
 ---
 
 ## 代码风格指南
