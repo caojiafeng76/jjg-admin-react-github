@@ -1,1 +1,1 @@
-Before handing off a change: format the changed files with `bunx eslint --fix <files>` (or `bun lint:fix`), then run `bun lint` (0 errors), `bun run typecheck`, `bun run test` and `bun run build`. Formatting is done only by ESLint (`@antfu/eslint-config`); Prettier has been removed. Provide manual verification notes for affected features.
+当前验证与交付要求见 [AGENTS.md](../../AGENTS.md) 和[任务矩阵](../../.github/ai-task-matrix.md)。

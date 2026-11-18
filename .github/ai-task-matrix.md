@@ -1,43 +1,21 @@
-# AI Task Matrix
+# AI 任务矩阵
 
-本文件用于把 AI 执行流程从“阅读长规则后自行判断”压缩成可执行分流表。具体编码规范仍以 `AGENTS.md` 和 `.github/copilot-instructions.md` 为准。
+[AGENTS.md](../AGENTS.md)定义通用流程、日志与格式化要求。多种任务同时适用时，执行相应验证的并集。
 
-## Fast Lane
+| 任务类型 | 优先查看或使用 | 最低验证 |
+| --- | --- | --- |
+| 文档、指令、任务模板 | 对应规则源、引用和生效路径 | 本地链接、配置入口、`git diff --check` |
+| 普通前端 / TypeScript 应用代码 | 现有组件、调用方和测试 | `bun run test`、`bun run typecheck` |
+| 页面、表单、列表、详情 | `query-before-page-edit`、`ant-design`、前端交互规范与功能域地图 | 前端基础验证。涉及用户流程时加 `bun run build` 和对应浏览器流程验证 |
+| Query / Mutation / 缓存联动 | `tanstack-query`、query key 工厂、服务层和调用点 | 前端基础验证。验证受影响的列表、详情或汇总刷新 |
+| 路由、菜单、权限 | 功能域地图、路由及菜单入口、权限注册和 RLS | 前端基础验证、`bun run build`，检查允许和拒绝路径 |
+| 数据库、RLS、索引、迁移 | 仓库数据库 CLI，`.github/skills/supabase-rls-patterns` | migration 或 SQL 预演，按授权范围验证实际执行结果。执行 schema 变更后运行 `bun run db:types` |
+| Excel 导入、批量 upsert、数据修复 | `.github/skills/supabase-bulk-operations`、冲突键与导入入口 | 规则单测、小样本或 dry-run。验证失败、重复与重试路径 |
+| PDF / Excel 导出 | 导出工具、字段链路、中文字体初始化 | 相关单测。涉及用户流程时用样例验证生成结果 |
+| 业务规则、状态流转、数量 / 工时 / 成本 | `.github/skills/business-rules-engine`、写入、展示和汇总入口 | 规则单测，核对相邻入口和汇总口径 |
+| 手机端、H5、扫码或触屏 | `mobile-responsiveness`、`webapp-testing`、移动端入口和权限 | 前端基础验证、移动视口和关键流程，涉及用户流程时加 `bun run build` |
+| 构建配置或依赖 | `package.json`、`bun.lock`、构建和 CI 配置 | `bun run test`、`bun run typecheck`、`bun run build`，涉及产物时运行 `bun run check:bundle` |
+| 脚本、CLI、MCP、CI | 相关脚本或配置、现有工程守卫 | 相关测试和配置解析。按影响执行命令 help、dry-run 或临时环境验证 |
+| 代码评审 | diff、受影响调用链和测试 | 保持只读，按严重程度报告可定位的发现及验证缺口 |
 
-满足以下全部条件时，可以直接给出简短计划并做最小化实现：
-
-- 需求范围明确，不需要重新讨论方案或业务口径。
-- 不涉及数据库结构、RLS、权限、状态流转、业务计算、路由菜单或跨模块联动。
-- 只修改少量文档、脚本、单文件样式、文案或局部配置。
-- 可以通过一个明确命令或人工检查完成验证。
-
-Fast lane 输出仍需说明：任务范围、改了什么、如何验证、剩余风险。
-
-**无论 Fast lane 还是完整流程，任何实际改动都必须在同一变更中更新根目录 `CHANGELOG.MD`（顶部追加：日期/类别/范围/摘要/验证），并在最终汇报中说明；这是任务完成条件。**
-
-**所有代码 / 配置改动在下表最低验证之外，还必须先执行 `bunx eslint --fix <改动的文件或目录>` 格式化（基于 `@antfu/eslint-config`，已移除 Prettier），并确认 `bun lint` 0 error。**
-
-## Task Routing
-
-| 任务类型                           | 必选工具 / skill                          | 优先查看                                                                             | 最低验证                                                        |
-| ---------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| 页面、表单、列表、详情             | `query-before-page-edit`, `ant-design`    | feature 目录、服务层、路由、菜单、权限                                               | `bun run typecheck` + 相关测试；影响流程时补页面验证            |
-| Query / Mutation / 缓存联动        | `tanstack-query`                          | hook、queryKey、invalidateQueries、调用点                                            | `bun run test` + 缓存刷新链路检查                               |
-| 数据库、RLS、索引、迁移            | 仓库 Supabase CLI, `db-change` prompt     | migration、服务层、类型、权限策略                                                    | SQL / migration 验证；执行 schema 变更后运行 `bun run db:types` |
-| Excel 导入、批量 upsert、数据修复  | `supabase-bulk-operations`                | utils、导入入口、服务层、唯一键/冲突键                                               | 单元测试 + 小样本导入或 dry-run                                 |
-| PDF / Excel 导出                   | 文件搜索                                  | utils、导出 hook、表格字段、中文字体初始化                                           | 相关单测；必要时手动导出验证                                    |
-| 业务规则、状态流转、数量/工时/成本 | `business-rules-engine`                   | 写入入口、展示入口、汇总入口、测试                                                   | 规则单测 + 受影响页面/汇总口径检查                              |
-| 手机端、H5、扫码、触屏             | `mobile-responsiveness`, `webapp-testing` | 移动页面、路由、权限、扫码依赖                                                       | 移动 viewport 页面验证 + `bun run typecheck`                    |
-| 路由、菜单、标题、权限             | 文件搜索                                  | `router.tsx`, `routeLabels.ts`, `MainMenu.tsx`, `access.ts`, `permissionRegistry.ts` | 路由入口检查 + 权限边界回归                                     |
-| 脚本、MCP、开发流程配置            | 文件搜索                                  | `package.json`, `.mcp.json`, prompts, instructions, README                           | 相关脚本 help/dry-run + JSON/配置解析                           |
-| 代码评审                           | 文件搜索 + review prompt                  | diff、受影响调用链、测试覆盖                                                         | 不改代码；按严重程度列 findings                                 |
-
-## Tool Health
-
-开始较大任务前建议运行：
-
-```bash
-bun run ai:doctor
-```
-
-它用于快速检查 Bun、Supabase CLI、MCP 配置、环境变量、Graphify 索引等工具状态。检查结果是执行辅助，不替代任务本身的验证。
+前端基础验证指 `bun run test` 和 `bun run typecheck`。涉及 Ant Design 组件用法时，按页面编辑 skill 核实组件 API 并运行针对性检查。浏览器工具的优先级见 [AGENTS.md](../AGENTS.md)。

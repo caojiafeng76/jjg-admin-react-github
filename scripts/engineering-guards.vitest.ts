@@ -1,5 +1,6 @@
+import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
@@ -78,6 +79,88 @@ describe('P3 engineering guards', () => {
     expect(workflow).toMatch(/deno check supabase\/functions\/\*\/index\.ts/)
     expect(workflow).toMatch(/bun audit --production/)
     expect(workflow).toMatch(/bun run check:bundle/)
+    expect(workflow).toMatch(/bun run changelog:check --github-event/)
+  })
+
+  it('keeps the six agents connected to the common rules', () => {
+    const rootRules = readWorkspaceFile('AGENTS.md')
+    expect(rootRules).toContain('CHANGELOG.MD')
+    expect(rootRules).toContain('src/pages/dashboardChangelog.ts')
+
+    expect(readWorkspaceFile('CLAUDE.md').trim()).toBe('@AGENTS.md')
+    expect(readWorkspaceFile('GEMINI.md').trim()).toBe('@./AGENTS.md')
+    expect(readWorkspaceFile('.github/copilot-instructions.md')).toMatch(/\]\(\.\.\/AGENTS\.md\)/)
+
+    const cursor = readWorkspaceFile('.cursor/rules/development-workflow.mdc')
+    const frontmatter = cursor.match(/^---\r?\n[\s\S]*?\r?\n---(?=\r?\n|$)/)?.[0]
+    expect(frontmatter).toMatch(/^alwaysApply: true$/m)
+    expect(cursor).toContain('@AGENTS.md')
+
+    for (const config of ['.codex/config.toml', 'opencode.jsonc']) {
+      expect(existsSync(resolve(process.cwd(), config))).toBe(true)
+    }
+  })
+
+  it('resolves required project references in the main agent rules', () => {
+    const references = {
+      'AGENTS.md': [
+        '.github/ai-task-matrix.md',
+        '.github/instructions/project-feature-map.instructions.md',
+        'docs/前端交互与反馈规范.md',
+        'docs/Supabase数据库脚本执行说明.md',
+      ],
+      '.github/ai-task-matrix.md': ['../AGENTS.md'],
+      '.claude/DEVELOPMENT_WORKFLOW.md': ['../AGENTS.md'],
+    }
+
+    for (const [file, targets] of Object.entries(references)) {
+      const source = readWorkspaceFile(file)
+      for (const target of targets) {
+        expect(source, file).toContain(`](${target})`)
+        expect(existsSync(resolve(process.cwd(), dirname(file), target)), target).toBe(true)
+      }
+    }
+  })
+
+  it('configures the existing Copilot database hook for the current runtime', () => {
+    expect(JSON.parse(readWorkspaceFile('.github/hooks/db-destructive-guard.json'))).toMatchObject({
+      version: 1,
+      hooks: {
+        PreToolUse: [{
+          type: 'command',
+          command: 'bun ./scripts/db-destructive-guard.mjs',
+          timeoutSec: 10,
+        }],
+      },
+    })
+  })
+
+  it.each([
+    ['bun run db:query -- --file test.sql', false],
+    ['bun run db:push:dry-run', false],
+    ['supabase db push', true],
+    ['psql', true],
+  ])('checks Copilot database hook decisions for %s', (command, denied) => {
+    const result = spawnSync(
+      process.execPath,
+      [resolve(process.cwd(), 'scripts/db-destructive-guard.mjs')],
+      {
+        encoding: 'utf8',
+        input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_input: { command } }),
+      },
+    )
+
+    expect(result.status, result.stderr).toBe(0)
+    if (denied) {
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        permissionDecision: 'deny',
+        permissionDecisionReason: expect.any(String),
+        hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny' },
+      })
+    }
+    else {
+      expect(result.stdout).toBe('')
+    }
   })
 
   it('pins a patched DOMPurify and exposes the bundle budget command', () => {

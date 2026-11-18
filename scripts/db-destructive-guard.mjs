@@ -15,13 +15,17 @@ if (payload.hook_event_name === 'PreToolUse') {
   const rawDatabaseCommand
     = /\b(?:supabase\s+db\s+(?:query|push|reset)|psql)\b/i.test(command)
   if (rawDatabaseCommand) {
+    const decision = {
+      permissionDecision: 'deny',
+      permissionDecisionReason:
+        '请使用仓库 db:query / db:push 保护入口；数据库重置不在自动执行范围内。',
+    }
     process.stdout.write(
       JSON.stringify({
+        ...decision,
         hookSpecificOutput: {
           hookEventName: 'PreToolUse',
-          permissionDecision: 'deny',
-          permissionDecisionReason:
-            '请使用仓库 db:query / db:push 保护入口；数据库重置不在自动执行范围内。',
+          ...decision,
         },
       }),
     )

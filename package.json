@@ -22,6 +22,7 @@
     "fc:package:youmai-purchase-order": "bun scripts/package-youmai-purchase-order-fc.mjs",
     "fc:package:supabase-proxy": "bun scripts/package-supabase-proxy-fc.mjs",
     "ai:doctor": "bun scripts/ai-doctor.mjs",
+    "changelog:check": "bun scripts/check-changelog.mjs",
     "skills:sync": "bun scripts/sync-skills.mjs",
     "graphify:build": "graphify build .",
     "graphify:update": "graphify auto-update .",

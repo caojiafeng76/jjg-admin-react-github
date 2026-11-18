@@ -36,9 +36,8 @@ description: 强制“先查询、后动手”的页面级工作流。当用户�
 
 ## 验证
 
-- 改动后运行 `bun lint` 与 `bun run build`。
+- 按根目录 [AGENTS.md](../../../AGENTS.md) 和[任务矩阵](../../../.github/ai-task-matrix.md)选择验证。用户流程、路由或权限的改动加跑构建并验证对应入口。
 - 若改动了 antd 组件代码，运行：
   ```bash
   bunx antd lint <changed-path> --format json
   ```
-- 若项目有对应测试，运行 `bun run test`。

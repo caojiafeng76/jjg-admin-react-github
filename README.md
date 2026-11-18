@@ -41,9 +41,9 @@ bun run db:types
 - 项目使用 bun 作为包管理器
 - 已配置 Vitest + Testing Library + jsdom，日常验证默认先跑 `bun run test`
 - 运行测试请使用 `bun run test`，不要用 Bun 内置的 `bun test` 代替
-- 完成任务后必须确保测试通过才能交付；涉及前端或 TypeScript 改动时，继续按风险补充 `bun run build`、lint 和局部回归
+- 按[任务矩阵](.github/ai-task-matrix.md)执行测试、类型检查、构建和用户流程验证
 - `bun run typecheck` 只做 TypeScript 项目级类型检查（`tsc -b`），比完整 `bun run build` 快，适合作为改动后的快速校验
-- 推送到 GitHub 后，CI（`.github/workflows/ci.yml`）会自动执行 lint、typecheck、test、build 兜底校验
+- 向 `main` 推送或提交 PR 后，CI 会检查根更新日志，并运行 lint、typecheck、test、build 等验证
 - `bun run ai:doctor` 用于检查 AI 工具链、MCP 配置、环境变量 和 Graphify 索引状态
 
 Supabase 数据库命令补充：
@@ -53,7 +53,7 @@ Supabase 数据库命令补充：
 - `bun run db:push:api`: 兼容别名，执行与 `db:push` 相同的标准迁移流程
 - `bun run db:query -- --file <sql-file>`: 检查实际 SQL 后执行；危险操作必须由用户在交互终端核对并连续确认三次，非交互直接拦截
 - `bun run db:doctor`: 检查 CLI、登录、query 链路、push 链路分别是否正常
-- `bun run db:types`: 从远程 linked 项目重新生成 `src/services/database.types.ts`；任何 migration 执行成功后都应运行一次，保持类型与 schema 一致
+- `bun run db:types`: 执行 schema 变更后，从 linked 项目重新生成 `src/services/database.types.ts`
 
 说明：本仓库已确认 `supabase start/status` 的本地容器模式依赖 Docker Desktop；如果 Docker 未运行，不影响远程 CLI 继续执行数据库脚本。`db:push` 使用本机 `SUPABASE_ACCESS_TOKEN` 获取临时登录角色，并将密码仅放入子进程 `PGPASSWORD`，避免代理 Fake-IP 造成的直连误判。`db:doctor` 验证同一入口；显式 `SUPABASE_DB_URL` / `--db-url` / `--local` 仍保留原目标。迁移版本不一致会失败，不会自动改写远程历史或切换 API 裸执行。详见 [docs/Supabase数据库脚本执行说明.md](docs/Supabase数据库脚本执行说明.md)。
 
@@ -85,33 +85,23 @@ src/
 - API 访问统一放在 `src/services/`
 - Supabase 错误统一通过 `handleApiError` 处理
 - 列表和详情查询优先复用 `queryClient` 中已有的缓存策略
-- Mutation 优先使用 `useMutationWithMessage`
+- 新 mutation 使用 `useMutationWithInvalidation`，由调用处统一提供反馈
 - 错误信息和用户可见文案默认使用中文
 - `src/services/database.types.ts` 由工具生成，禁止手动修改
 
-## Copilot 固定流程
+## AI 开发规则
 
-本仓库已经为 VS Code Copilot 配置了项目级固定执行流程，目标是让 AI 在日常任务里尽量遵循一致的方法：
+[AGENTS.md](AGENTS.md) 是 Codex、OpenCode、Claude Code、Gemini CLI、Copilot 和 Cursor 代码代理会话共用的项目规则。[任务矩阵](.github/ai-task-matrix.md)记录各类任务的最低验证。
 
-1. 先复述目标、约束和预期输出
-2. 复杂任务先分析问题、假设、风险和执行顺序
-3. 使用文件搜索、`rg` 或可用的语言服务建立上下文
-4. 根据任务类型使用相关 skill
-5. 仅在信息不足时提出最少必要澄清问题
-6. 实施前给出简短计划
-7. 保持改动最小化，优先修复根因
-8. 改动后做必要验证，完成任务后必须确保 `bun run test` 通过才能交付
-9. 最终按固定结构汇报结果
+`.github/prompts/` 中的模板供 VS Code Local 会话使用。Copilot 会话按任务矩阵加载对应 skill。
 
-默认规则定义在 [.github/copilot-instructions.md](.github/copilot-instructions.md)，任务类型分流和最低验证矩阵见 [.github/ai-task-matrix.md](.github/ai-task-matrix.md)。工具状态不确定时，先运行 `bun run ai:doctor`。
+本地检查已提交范围的日志，例如 `bun run changelog:check --base HEAD~1 --head HEAD`。PR 比较共同祖先与 PR head，推送比较前后提交，检查失败会令 CI 标红。
 
 ## MCP 配置
 
-项目级配置位于 [.mcp.json](.mcp.json)、[.codex/config.toml](.codex/config.toml) 和 [opencode.jsonc](opencode.jsonc)，保留 Supabase、Context7 和 Chrome DevTools。
+项目级 Context7 和 Chrome DevTools 配置位于 [.mcp.json](.mcp.json)、[.codex/config.toml](.codex/config.toml) 和 [opencode.jsonc](opencode.jsonc)。数据库统一走仓库 CLI，本机 `SUPABASE_ACCESS_TOKEN` 由 CLI 使用。修改 MCP 配置后通过新会话刷新工具列表。
 
-项目已移除 Supabase MCP 注册，数据库统一走仓库 CLI；保留 Context7 和 Chrome DevTools。CLI 继续使用本机 `SUPABASE_ACCESS_TOKEN`，不要删除凭据或写入仓库。修改 MCP 配置后重启相应客户端或新建会话，以刷新工具列表。
-
-历史业务规格保留在 `openspec/`，历史工具笔记保留在 `docs/ai-notes/`，仅供查阅；当前任务执行规则以 `.github/copilot-instructions.md` 为准。
+历史业务规格保留在 `openspec/`，历史工具笔记保留在 `docs/ai-notes/`。当前任务规则见 [AGENTS.md](AGENTS.md)。
 
 ## Skill 使用约定
 
@@ -286,7 +276,7 @@ src/
 
 ## 相关文件
 
-- [.github/copilot-instructions.md](.github/copilot-instructions.md)
+- [AGENTS.md](AGENTS.md)
 - [.github/prompts/task-exec.prompt.md](.github/prompts/task-exec.prompt.md)
 - [.github/prompts/bugfix.prompt.md](.github/prompts/bugfix.prompt.md)
 - [.github/prompts/review.prompt.md](.github/prompts/review.prompt.md)
