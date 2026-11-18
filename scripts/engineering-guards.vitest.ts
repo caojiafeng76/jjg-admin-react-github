@@ -96,9 +96,7 @@ describe('P3 engineering guards', () => {
     expect(frontmatter).toMatch(/^alwaysApply: true$/m)
     expect(cursor).toContain('@AGENTS.md')
 
-    for (const config of ['.codex/config.toml', 'opencode.jsonc']) {
-      expect(existsSync(resolve(process.cwd(), config))).toBe(true)
-    }
+    expect(existsSync(resolve(process.cwd(), 'opencode.jsonc'))).toBe(true)
   })
 
   it('resolves required project references in the main agent rules', () => {

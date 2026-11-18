@@ -99,7 +99,7 @@ src/
 
 ## MCP 配置
 
-项目级 Context7 和 Chrome DevTools 配置位于 [.mcp.json](.mcp.json)、[.codex/config.toml](.codex/config.toml) 和 [opencode.jsonc](opencode.jsonc)。数据库统一走仓库 CLI，本机 `SUPABASE_ACCESS_TOKEN` 由 CLI 使用。修改 MCP 配置后通过新会话刷新工具列表。
+项目级 Context7 和 Chrome DevTools 配置位于 [.mcp.json](.mcp.json) 和 [opencode.jsonc](opencode.jsonc)。Codex 的模型和 MCP 工具由使用者自行配置。数据库统一走仓库 CLI，本机 `SUPABASE_ACCESS_TOKEN` 由 CLI 使用。修改 MCP 配置后通过新会话刷新工具列表。
 
 历史业务规格保留在 `openspec/`，历史工具笔记保留在 `docs/ai-notes/`。当前任务规则见 [AGENTS.md](AGENTS.md)。
 
