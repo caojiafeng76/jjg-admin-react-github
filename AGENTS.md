@@ -34,7 +34,7 @@
 - 保持组件和 Hook 渲染纯净，渲染期间不执行副作用。可由现有 props 或 state 计算的值直接推导。用户操作引发的副作用放在事件处理函数中，Effect 用于同步外部系统。
 - TypeScript 使用严格类型和明确的服务接口，运行时输入在边界校验。组件和 Props 使用 PascalCase，Hook 用 `use` 前缀，常量用大写下划线。导入使用仓库已有别名，按 ESLint 排序。
 - 新业务模块参考 `src/features/jintan/` 与 `src/features/youmai/` 的容器、表格、表单、搜索、hooks 和 Query Key 组织。改西尼存量模块时，以实际调用方和业务行为为依据。
-- 改页面前读[前端交互与反馈规范](docs/前端交互与反馈规范.md)和[项目功能域地图](.github/instructions/project-feature-map.instructions.md)。字段改动检查服务层、类型、查询、搜索、表格、表单、详情和导出。路由与权限改动检查 router、routeLabels、MainMenu、AppHeader、access 和权限注册。业务计算或状态流转改动检查写入、展示和汇总。
+- 改页面前读[前端页面风格规范与设计指南](docs/前端页面风格规范与设计指南.md)、[前端交互与反馈规范](docs/前端交互与反馈规范.md)和[项目功能域地图](.github/instructions/project-feature-map.instructions.md)。字段改动检查服务层、类型、查询、搜索、表格、表单、详情和导出。路由与权限改动检查 router、routeLabels、MainMenu、AppHeader、access 和权限注册。业务计算或状态流转改动检查写入、展示和汇总。
 - 暗色模式同步 Ant Design theme 和 Tailwind `dark` class。导出含中文的 PDF 前 `await initializePDF()` 加载 Noto Sans SC 字体。
 
 ## 按任务查阅

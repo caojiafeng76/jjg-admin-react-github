@@ -8,13 +8,13 @@ interface AppLogoProps {
 export default function AppLogo({ collapsed = false }: AppLogoProps) {
   return (
     <div
-      className={`mx-3 my-4 rounded-2xl border py-3 ${
+      className={`mx-3 my-4 rounded-xl border py-2.5 ${
         collapsed
           ? 'flex justify-center px-0'
           : 'flex items-center gap-3 px-3'
-      } border-slate-200/80 bg-slate-50 dark:border-slate-700/60 dark:bg-slate-900/70 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]`}
+      } border-slate-200/80 bg-slate-50 dark:border-slate-700/70 dark:bg-slate-800/60`}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-sky-500 to-cyan-400 text-white shadow-[0_10px_24px_rgba(14,165,233,0.28)]">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
         <Squares2X2Icon className="size-5" strokeWidth={2.2} />
       </div>
 

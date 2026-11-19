@@ -37,6 +37,11 @@ vi.mock('antd', () => {
   )
 
   return {
+    App: {
+      useApp: () => ({
+        message: { error: vi.fn() },
+      }),
+    },
     Layout,
     Skeleton: {
       Button: () => <div />,

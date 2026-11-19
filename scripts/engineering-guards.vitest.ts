@@ -104,6 +104,7 @@ describe('P3 engineering guards', () => {
       'AGENTS.md': [
         '.github/ai-task-matrix.md',
         '.github/instructions/project-feature-map.instructions.md',
+        'docs/前端页面风格规范与设计指南.md',
         'docs/前端交互与反馈规范.md',
         'docs/Supabase数据库脚本执行说明.md',
       ],

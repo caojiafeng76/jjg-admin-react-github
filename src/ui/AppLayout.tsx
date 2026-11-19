@@ -3,7 +3,7 @@ import type { PageTab } from './pageTabsUtils'
 import AppHeader from '@ui/AppHeader'
 
 import MainMenu from '@ui/MainMenu'
-import { Layout, message, Spin, theme } from 'antd'
+import { App, Layout, Spin, theme } from 'antd'
 import {
   Activity,
 
@@ -29,7 +29,7 @@ export default function AppLayout() {
   const { error, clearError, role } = useAuth()
   const { isLoading: permLoading } = usePermissionContext()
   const outlet = useOutlet()
-  const [messageApi, contextHolder] = message.useMessage()
+  const { message: messageApi } = App.useApp()
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const [isNavigating, setIsNavigating] = useState(false)
@@ -142,103 +142,95 @@ export default function AppLayout() {
   }, [error, messageApi, clearError])
 
   if (isEmployeeSideRole(role)) {
-    return (
-      <>
-        {contextHolder}
-        <EmployeeMobileLayout />
-      </>
-    )
+    return <EmployeeMobileLayout />
   }
 
   return (
-    <>
-      {contextHolder}
-      <Layout className="h-screen overflow-hidden bg-slate-100 dark:bg-slate-900">
-        <Sider
-          trigger={null}
-          collapsible
-          collapsed={collapsed}
-          theme="light"
-          collapsedWidth={64}
-          className="bg-white dark:bg-slate-900"
-        >
-          <div className="flex h-full flex-col overflow-hidden">
-            <AppLogo collapsed={collapsed} />
-            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-              <MainMenu tabs={pageTabs} />
-            </div>
+    <Layout className="h-screen overflow-hidden bg-slate-100 dark:bg-slate-900">
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        theme="light"
+        collapsedWidth={64}
+        className="bg-white dark:bg-slate-900"
+      >
+        <div className="flex h-full flex-col overflow-hidden">
+          <AppLogo collapsed={collapsed} />
+          <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+            <MainMenu tabs={pageTabs} />
           </div>
-        </Sider>
-        <Layout className="bg-slate-100 dark:bg-slate-900">
-          <AppHeader
-            colorBgContainer={colorBgContainer}
-            collapsed={collapsed}
-            onToggleCollapse={onToggleCollapse}
-          />
-          <PageTabs onTabsChange={handleTabsChange} />
-          <Content
-            className="flex flex-col overflow-hidden app-card"
-            style={{
-              margin: '12px 8px',
-              padding: 12,
-              position: 'relative',
-            }}
-          >
-            {isNavigating && (
+        </div>
+      </Sider>
+      <Layout className="bg-slate-100 dark:bg-slate-900">
+        <AppHeader
+          colorBgContainer={colorBgContainer}
+          collapsed={collapsed}
+          onToggleCollapse={onToggleCollapse}
+        />
+        <PageTabs onTabsChange={handleTabsChange} />
+        <Content
+          className="flex flex-col overflow-hidden app-card"
+          style={{
+            margin: '12px 8px',
+            padding: 12,
+            position: 'relative',
+          }}
+        >
+          {isNavigating && (
+            <div
+              className="bg-white/80 dark:bg-black/60"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 10,
+                borderRadius: 12,
+                backdropFilter: 'blur(2px)',
+              }}
+            >
+              <Spin size="large" description="切换中..." />
+            </div>
+          )}
+          {permLoadBlock && (
+            <div
+              className="bg-white/80 dark:bg-black/60"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 11,
+                borderRadius: 12,
+                backdropFilter: 'blur(2px)',
+              }}
+            >
+              <Spin size="large" description="权限加载中..." />
+            </div>
+          )}
+          {outletEntries.map(([key, cachedOutlet]) => (
+            <Activity
+              key={key}
+              mode={key === activeKey ? 'visible' : 'hidden'}
+            >
               <div
-                className="bg-white/80 dark:bg-black/60"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  zIndex: 10,
-                  borderRadius: 12,
-                  backdropFilter: 'blur(2px)',
-                }}
+                className="flex min-h-0 flex-1 flex-col overflow-hidden"
               >
-                <Spin size="large" description="切换中..." />
+                {cachedOutlet}
               </div>
-            )}
-            {permLoadBlock && (
-              <div
-                className="bg-white/80 dark:bg-black/60"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  zIndex: 11,
-                  borderRadius: 12,
-                  backdropFilter: 'blur(2px)',
-                }}
-              >
-                <Spin size="large" description="权限加载中..." />
-              </div>
-            )}
-            {outletEntries.map(([key, cachedOutlet]) => (
-              <Activity
-                key={key}
-                mode={key === activeKey ? 'visible' : 'hidden'}
-              >
-                <div
-                  className="flex min-h-0 flex-1 flex-col overflow-hidden"
-                >
-                  {cachedOutlet}
-                </div>
-              </Activity>
-            ))}
-          </Content>
-        </Layout>
+            </Activity>
+          ))}
+        </Content>
       </Layout>
-    </>
+    </Layout>
   )
 }

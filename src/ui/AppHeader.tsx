@@ -1,8 +1,8 @@
 import {
   Bars3BottomLeftIcon,
   Bars3BottomRightIcon,
+  KeyIcon,
 } from '@heroicons/react/16/solid'
-import { KeyIcon } from '@heroicons/react/24/outline'
 import DarkModeButton from '@ui/DarkModeButton'
 import { App, Button, Form, Input, Modal, theme } from 'antd'
 import { Header } from 'antd/es/layout/layout'

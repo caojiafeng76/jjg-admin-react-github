@@ -44,8 +44,9 @@ export default function DeleteButton({
     const btn = (
       <Button
         type="text"
+        danger
         loading={isDeleting}
-        icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+        icon={<XCircleIcon className="size-4" />}
         onClick={onClick}
         disabled={denied}
       >
@@ -62,7 +63,7 @@ export default function DeleteButton({
             <p>
               确定删除选中的 <strong>{count}</strong> 条{itemName}吗？
             </p>
-            <p className="mt-2 text-xs text-red-500 dark:text-red-400">
+            <p className="mt-2 text-xs text-error">
               此操作不可撤销，关联的明细数据会一并删除。
             </p>
           </div>
@@ -76,8 +77,9 @@ export default function DeleteButton({
     const btn0 = (
       <Button
         type="text"
+        danger
         loading={isDeleting}
-        icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+        icon={<XCircleIcon className="size-4" />}
         onClick={onConfirm}
         disabled={denied}
       >
@@ -90,7 +92,8 @@ export default function DeleteButton({
   const trigger = (
     <Button
       type="text"
-      icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+      danger
+      icon={<XCircleIcon className="size-4" />}
       disabled={denied}
     >
       删除

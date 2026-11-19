@@ -32,15 +32,15 @@ const BASE_TOKENS = {
 }
 
 const TABLE_TOKENS = {
-  // 默认/中等密度放松：13px 字 / 8px 行高 / 12px 内边距
+  // 全站统一微呼吸紧凑密度：13px 字 / 6px 上下内边距 / 10px 左右内边距
   cellFontSize: 13,
   cellFontSizeMD: 13,
-  cellFontSizeSM: 12, // size="small" 局部降级：保持旧紧凑密度
-  cellPaddingBlock: 8,
-  cellPaddingBlockMD: 8,
+  cellFontSizeSM: 12, // size="small" 保留极密模式，供排产/大看板局部降级
+  cellPaddingBlock: 6,
+  cellPaddingBlockMD: 6,
   cellPaddingBlockSM: 4,
-  cellPaddingInline: 12,
-  cellPaddingInlineMD: 12,
+  cellPaddingInline: 10,
+  cellPaddingInlineMD: 10,
   cellPaddingInlineSM: 6,
   selectionColumnWidth: 30,
 }

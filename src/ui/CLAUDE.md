@@ -2,7 +2,7 @@
 
 > [根目录](../../CLAUDE.md) > [src](../) > **ui**
 >
-> 页面怎么组合这些组件（骨架、反馈、出错/无权限、表格、URL 状态、表单弹层）见 **[docs/前端交互与反馈规范.md](../../docs/前端交互与反馈规范.md)**；本文只列出组件清单和职责。
+> 页面视觉风格、布局骨架、按钮主次与暗色模式规范见 **[docs/前端页面风格规范与设计指南.md](../../docs/前端页面风格规范与设计指南.md)**；交互、反馈、错误与 URL 状态规范见 **[docs/前端交互与反馈规范.md](../../docs/前端交互与反馈规范.md)**；本文只列出组件清单和职责。
 
 ---
 
@@ -29,9 +29,9 @@
 | `ErrorBoundary.tsx` / `AppErrorView.tsx` | 应用根错误边界与全屏错误视图（根路由、公开页使用） |
 | `Loading.tsx` | 路由懒加载 Suspense 占位 |
 
-## 操作按钮（统一为 `type="text"` 加彩色 heroicon，传 `permissionKey` 后无权限时显示为禁用并提示）
+## 操作按钮（主次分明：`AddButton` 默认 `primary` 主操作，`DeleteButton` 危险语义，其余为中性 `type="text"`；传 `permissionKey` 后无权限时禁用并提示）
 
-`AddButton` · `EditButton` · `DeleteButton`（Popconfirm 确认，显式传 `title` / `itemName` / `count`）· `ExportButton` · `ImportButton` · `DownloadTemplateButton` · `PrintButton`
+`AddButton`（默认 `variant="primary"`，可选 `"text"`）· `EditButton` · `DeleteButton`（Popconfirm 确认，显式传 `title` / `itemName` / `count`）· `ExportButton` · `ImportButton` · `DownloadTemplateButton` · `PrintButton`
 
 ## 权限
 
@@ -41,13 +41,17 @@
 | `PermissionGate.tsx` | 按权限隐藏或禁用任意子元素 |
 | `PermissionField.tsx` | 带权限三态的 `Form.Item` |
 
-## 数据展示
+## 数据展示与通用壳
 
 | 组件 | 职责 |
 |---|---|
+| `FilterBar.tsx` / `filterBarTokens.ts` | 桌面列表页扁平筛选栏容器 + 标准控件宽度常量与「搜索 / 重置」按钮组 |
+| `ExcelImportModal.tsx` | 统一 960px 宽 Excel 批量导入弹窗（下载模板 / 选择文件 / 解析错误 / 预览表 / FormErrorAlert） |
+| `PublicQrPageShell.tsx` | 免登录公开二维码页统一移动端/暗色视觉壳 |
+| `tableStyles.ts` | 暗色兼容斑马纹 `zebraRowClassName` 与报表汇总行样式 `SUMMARY_ROW_CLASS_NAME` |
 | `AppPagination.tsx` | URL 驱动的分页（`page` / `pageSize`，replace 模式），默认值见 `config/pagination.ts` |
 | `StatusPill.tsx` | 状态徽章（替代各模块自写的 `Tag color` 映射） |
-| `SelectedSummaryBar.tsx` | 已选行摘要条 |
+| `SelectedSummaryBar.tsx` | 已选行摘要条（克制扁平样式） |
 | `ExcelParseErrorList.tsx` | Excel 导入解析错误列表 |
 | `AppQRCode.tsx` | 二维码 |
 

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { InboxOutlined, ReloadOutlined } from '@ant-design/icons'
+import { ArrowPathIcon } from '@heroicons/react/16/solid'
+import { InboxIcon } from '@heroicons/react/24/outline'
 import { Button, Empty, Result, Skeleton } from 'antd'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import ErrorTechnicalDetail from './ErrorTechnicalDetail'
@@ -64,7 +65,7 @@ export function TableEmpty({
 }: TableEmptyProps) {
   return (
     <Empty
-      image={<InboxOutlined className="text-slate-300 dark:text-slate-600" />}
+      image={<InboxIcon className="mx-auto size-12 text-slate-300 dark:text-slate-600" />}
       styles={{ image: { height: 48 } }}
       description={(
         <span className="text-slate-500 dark:text-slate-400">
@@ -116,7 +117,7 @@ export function TableError({
         <div className="flex flex-col items-center gap-3">
           {onRetry
             ? (
-                <Button type="primary" icon={<ReloadOutlined />} onClick={onRetry}>
+                <Button type="primary" icon={<ArrowPathIcon className="size-4" />} onClick={onRetry}>
                   重试
                 </Button>
               )

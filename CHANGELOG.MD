@@ -15,6 +15,28 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-11-19
+
+- **类别**：变更
+- **范围**：`src/App.tsx`、`src/ui/{tableStyles,filterBarTokens,FilterBar,ExcelImportModal,PublicQrPageShell,AddButton,EditButton,DeleteButton,ImportButton,DownloadTemplateButton,TableState,AppErrorView,SelectedSummaryBar,AppLogo,AppLayout,AppHeader}.*`、`src/ui/uiStyleConventions.vitest.ts`、`src/ui/CLAUDE.md`、`src/pages/dashboardChangelog.ts`、`todolist.md`
+- **摘要**：完成前端界面风格统一 Phase 1（全局 Token、共享按钮层级与核心 UI 抽象）。
+  - 统一 `src/App.tsx` 的 `TABLE_TOKENS` 标准紧凑密度（`13px / 6px / 10px`，`small` 保留 `12px / 4px / 6px` 供极密场景降级），并新增 `src/ui/tableStyles.ts` 提供暗色兼容斑马纹与报表汇总行样式。
+  - 升级共享工具栏按钮主次层级：`AddButton` 默认改为品牌主色 `type="primary"`（保留 `variant="text"`）；`DeleteButton` 改用语义 `danger`；`EditButton`、`ImportButton`、`DownloadTemplateButton` 去除硬编码彩色图标类，与 `ExportButton`、`PrintButton` 统一视觉语义。
+  - 清理共享基建异味：`TableState` 与 `AppErrorView` 移除 `@ant-design/icons` 并收敛为克制风格；`SelectedSummaryBar` 与 `AppLogo` 移除任意重阴影/渐变并对齐品牌主色；`AppLayout` 移除 `message.useMessage()` 改用 `App.useApp()`；`AppHeader` 统一为 `@heroicons/react/16/solid`。
+  - 新增 3 个高复用共享壳组件及单测：`FilterBar`（含 `filterBarTokens.ts`）、`ExcelImportModal`（960px 统一导入弹窗）、`PublicQrPageShell`（免登录公开二维码页统一壳），并将全部 7 个新达标共享 UI 组件加入 `uiStyleConventions.vitest.ts` 防回退守卫。
+- **验证**：`bunx eslint --fix`、`bun run lint`（0 error）、`bun run typecheck`、`bun run build`、`bun run check:bundle`（主包 gzip 32.7 KB）及 `bun run test`（38 项脚本测试、231 个 Vitest 文件、1152 个用例）全部通过。
+
+## 2026-11-19
+
+- **类别**：文档
+- **范围**：`docs/前端页面风格规范与设计指南.md`、`docs/前端交互与反馈规范.md`、`docs/UI设计调研与改版指南.md`、`docs/UI改版-逐页问题分析与改进方案.md`、`AGENTS.md`、`src/ui/CLAUDE.md`、`todolist.md`、`scripts/engineering-guards.vitest.ts`、`src/ui/uiStyleConventions.vitest.ts`
+- **摘要**：完成前端界面风格统一 Phase 0（规范收口与自动化守卫建基）。
+  - 新增唯一权威视觉与布局文档 `docs/前端页面风格规范与设计指南.md`，确立极简扁平单层、统一微呼吸紧凑表格密度、工具栏主次分层及全端（含移动端与公开二维码页）暗色同权标准。
+  - 消除 `docs/前端交互与反馈规范.md` 中与现状冲突的卡片/工具栏/表格密度/进度条目，将两份早期调研文档标注为历史归档，并在 `AGENTS.md`、`src/ui/CLAUDE.md` 与 `scripts/engineering-guards.vitest.ts` 接入新规范入口。
+  - 重置 `todolist.md` 为覆盖全站 83 个路由页面的 Phase 0–Phase 5 分阶段任务清单（补齐 `jintan` 与 `syney-materials` 等遗漏域）。
+  - 新增渐进式风格守卫测试 `src/ui/uiStyleConventions.vitest.ts`，锁定文档收口状态及首批 29 个已达标基线文件的视觉红线，供后续阶段逐步扩面。
+- **验证**：`bunx eslint --fix`、`bun run lint`、`bun run typecheck` 通过；`bun run test` 全量通过（38 项脚本测试、226 个 Vitest 文件、1133 个用例，含新增 30 项风格守卫测试与 14 项工程守卫测试）。
+
 ## 2026-11-18
 
 - **类别**：变更

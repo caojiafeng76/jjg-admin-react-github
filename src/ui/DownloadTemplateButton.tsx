@@ -32,7 +32,7 @@ export default function DownloadTemplateButton({
   const button = (
     <Button
       type="text"
-      icon={<ArrowDownTrayIcon className="size-4 text-cyan-600/80!" />}
+      icon={<ArrowDownTrayIcon className="size-4" />}
       onClick={onClick}
       onMouseEnter={onPreload}
       onFocus={onPreload}

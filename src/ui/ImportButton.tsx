@@ -31,7 +31,7 @@ export default function ImportButton({
   const btn = (
     <Button
       type="text"
-      icon={<ArrowUpTrayIcon className="size-4 text-sky-500/80!" />}
+      icon={<ArrowUpTrayIcon className="size-4" />}
       onClick={onClick}
       onMouseEnter={onPreload}
       onFocus={onPreload}
