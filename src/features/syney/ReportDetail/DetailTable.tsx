@@ -5,6 +5,8 @@ import { formatNumberPadded } from '@utils/helps'
 
 import { Table } from 'antd'
 import { useMemo } from 'react'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { useTableSelection } from '../useTableSelection'
 
@@ -158,11 +160,12 @@ export default function DetailTable({
       dataSource={data}
       loading={loading}
       pagination={false}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无对账单明细" /> }}
       size="small"
       onRow={handleRow}
       scroll={{ x: 1100, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">

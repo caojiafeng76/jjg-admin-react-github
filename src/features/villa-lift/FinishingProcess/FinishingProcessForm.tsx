@@ -66,8 +66,8 @@ function CombinedItemSelect({
       label: (
         <span className="flex gap-2 text-sm">
           <span className="font-medium">{item.model}</span>
-          <span className="text-gray-600 dark:text-gray-300">{item.name}</span>
-          <span className="text-gray-400">{item.spec}</span>
+          <span className="text-slate-600 dark:text-slate-300">{item.name}</span>
+          <span className="text-slate-400 dark:text-slate-500">{item.spec}</span>
         </span>
       ),
       search: `${item.model} ${item.name} ${item.spec}`,
@@ -143,10 +143,10 @@ function OperationSelectCell({
         notFoundContent={
           model
             ? (
-                <span className="text-xs text-gray-400">该型号无对应工序</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">该型号无对应工序</span>
               )
             : (
-                <span className="text-xs text-gray-400">请先选择型号</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">请先选择型号</span>
               )
         }
       />
@@ -260,7 +260,7 @@ export default function FinishingProcessForm({
             label: (
               <span className="flex flex-wrap items-center gap-x-3 gap-y-0">
                 <span className="font-medium">{opt.order.project_name}</span>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-slate-400 dark:text-slate-500">
                   {opt.order.customer} · {opt.order.product_name}
                   {opt.order.color ? ` · ${opt.order.color}` : ''} · 数量{' '}
                   {opt.order.quantity}
@@ -425,13 +425,13 @@ export default function FinishingProcessForm({
           return (
             <div>
               {loadingItems && selectedOrderId && (
-                <div className="mb-2 flex items-center gap-2 text-sm text-gray-400">
+                <div className="mb-2 flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
                   <Spin size="small" /> 加载型号中…
                 </div>
               )}
 
               {/* 表头 */}
-              <div className="mb-1 grid grid-cols-[3fr_1.5fr_1fr_1fr_1fr_1.5fr_36px] gap-x-2 px-0 text-sm text-gray-500">
+              <div className="mb-1 grid grid-cols-[3fr_1.5fr_1fr_1fr_1fr_1.5fr_36px] gap-x-2 px-0 text-sm text-slate-500 dark:text-slate-400">
                 {columns.map(col => (
                   <div key={String(col.key)}>{col.title}</div>
                 ))}

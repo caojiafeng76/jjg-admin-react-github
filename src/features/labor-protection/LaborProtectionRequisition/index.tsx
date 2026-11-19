@@ -13,7 +13,10 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import PrintButton from '@/ui/PrintButton'
+import { TableState } from '@/ui/TableState'
 import { useLaborProtectionDataOptions } from '../LaborProtectionData/useLaborProtectionData'
 import LaborProtectionRequisitionForm from './LaborProtectionRequisitionForm'
 import LaborProtectionRequisitionSearch from './LaborProtectionRequisitionSearch'
@@ -46,6 +49,7 @@ export default function LaborProtectionRequisitionPage() {
     = useState<LaborProtectionRequisition | null>(null)
   const [formRef, setFormRef]
     = useState<FormInstance<LaborProtectionRequisitionFormValues> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -62,7 +66,7 @@ export default function LaborProtectionRequisitionPage() {
     updatedEndDate: searchParamsURL.get('updatedEndDate') || undefined,
   })
 
-  const { data, isLoading } = useLaborProtectionRequisitionList({
+  const { data, isLoading, error, refetch } = useLaborProtectionRequisitionList({
     page,
     pageSize,
     searchParams,
@@ -87,6 +91,7 @@ export default function LaborProtectionRequisitionPage() {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     formRef?.resetFields()
   }, [formRef])
@@ -94,6 +99,7 @@ export default function LaborProtectionRequisitionPage() {
   const handleCreate = useCallback(() => {
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setModalTitle('新建劳保领料单')
     setIsModalOpen(true)
@@ -113,6 +119,7 @@ export default function LaborProtectionRequisitionPage() {
     }
 
     setEditingRecord(record)
+    setFormError(null)
     setIsEdit(true)
     setModalTitle('编辑劳保领料单')
     setIsModalOpen(true)
@@ -147,6 +154,7 @@ export default function LaborProtectionRequisitionPage() {
       }
 
       try {
+        setFormError(null)
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
@@ -162,12 +170,7 @@ export default function LaborProtectionRequisitionPage() {
         resetFormState()
       }
       catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
+        setFormError(error)
       }
     },
     [
@@ -309,7 +312,7 @@ export default function LaborProtectionRequisitionPage() {
         </PrintButton>
         <Button
           type="text"
-          icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
+          icon={<ArrowDownTrayIcon className="size-4" />}
           onClick={handleExportExcel}
           onMouseEnter={preloadLaborProtectionRequisitionExport}
           onFocus={preloadLaborProtectionRequisitionExport}
@@ -327,8 +330,7 @@ export default function LaborProtectionRequisitionPage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">搜索：</span>
+      <FilterBar>
         <LaborProtectionRequisitionSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
@@ -336,23 +338,29 @@ export default function LaborProtectionRequisitionPage() {
           categoryOptions={categoryOptions}
           isCategoryOptionsLoading={isCategoryOptionsLoading}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <LaborProtectionRequisitionTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <LaborProtectionRequisitionTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -368,16 +376,19 @@ export default function LaborProtectionRequisitionPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <LaborProtectionRequisitionForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          categoryOptions={categoryOptions}
-          isCategoryOptionsLoading={isCategoryOptionsLoading}
-          machineOptions={machineOptions}
-          isMachineOptionsLoading={isMachineOptionsLoading}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <LaborProtectionRequisitionForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            categoryOptions={categoryOptions}
+            isCategoryOptionsLoading={isCategoryOptionsLoading}
+            machineOptions={machineOptions}
+            isMachineOptionsLoading={isMachineOptionsLoading}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          />
+        </div>
       </Modal>
     </div>
   )

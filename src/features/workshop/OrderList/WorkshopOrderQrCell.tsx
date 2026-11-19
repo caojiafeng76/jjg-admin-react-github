@@ -1,10 +1,11 @@
 import type { WorkshopOrder } from './index'
-import { LinkOutlined } from '@ant-design/icons'
+import { LinkIcon } from '@heroicons/react/16/solid'
 import AppQRCode from '@ui/AppQRCode'
-import { Button, Popover, Space, Tag, Typography } from 'antd'
-
+import { Button, Popover, Space, Typography } from 'antd'
 import { useMemo } from 'react'
+
 import { useNavigate } from 'react-router-dom'
+import StatusPill from '@/ui/StatusPill'
 import {
   getWorkshopOrderQrPath,
   getWorkshopOrderQrValue,
@@ -33,7 +34,7 @@ export default function WorkshopOrderQrCell({
   const qrValue = useMemo(() => getWorkshopOrderQrValue(orderId), [orderId])
 
   if (!orderId) {
-    return <Tag variant="filled">无</Tag>
+    return <StatusPill tone="neutral" dot={false}>无</StatusPill>
   }
 
   return (
@@ -58,7 +59,7 @@ export default function WorkshopOrderQrCell({
           <Button
             type="link"
             size="small"
-            icon={<LinkOutlined />}
+            icon={<LinkIcon className="size-3.5" />}
             onClick={() => navigate(qrPath)}
           >
             打开详情

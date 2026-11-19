@@ -7,9 +7,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import { DEFAULT_EMPLOYEE_AUTH_PASSWORD } from './constants'
 import EmployeeAccountModals from './EmployeeAccountModals'
 import EmployeeForm from './EmployeeForm'
+import EmployeeSearch from './EmployeeSearch'
 import EmployeeTable from './EmployeeTable'
 import EmployeeToolbar from './EmployeeToolbar'
 import { useEmployeeAuthAccountActions } from './useEmployeeAuthAccountActions'
@@ -41,7 +45,7 @@ export default function EmployeeList() {
     is_active?: boolean
   }>({})
 
-  const { data, isFetching } = useEmployeesList({
+  const { data, isLoading, isFetching, error, refetch } = useEmployeesList({
     page,
     pageSize,
     searchParams,
@@ -57,6 +61,7 @@ export default function EmployeeList() {
     })
 
   const handleCreate = useCallback(() => {
+    setFormError(null)
     setIsEdit(false)
     setModalTitle('创建员工')
     setIsModalOpen(true)
@@ -64,8 +69,10 @@ export default function EmployeeList() {
   }, [])
 
   const [editingRecord, setEditingRecord] = useState<Employee | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const resetFormState = useCallback(() => {
+    setFormError(null)
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
@@ -82,6 +89,7 @@ export default function EmployeeList() {
     if (!record)
       return
 
+    setFormError(null)
     setEditingRecord(record)
     setIsEdit(true)
     setModalTitle('编辑员工')
@@ -107,6 +115,7 @@ export default function EmployeeList() {
 
   const handleFinish = useCallback(
     async (values: EmployeeFormValues) => {
+      setFormError(null)
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -150,9 +159,10 @@ export default function EmployeeList() {
         // 成功后关闭模态框并清理状态
         resetFormState()
       }
-      catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
+      catch (err) {
+        setFormError(err)
+        if (err instanceof Error) {
+          message.error(err.message)
         }
         else {
           message.error('操作失败，请稍后重试')
@@ -195,8 +205,7 @@ export default function EmployeeList() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="grid h-full grid-rows-[auto_1fr] gap-2">
-      {/* 工具栏 + 搜索栏（合并一行，宽屏单行、窄屏自动换行） */}
+    <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
       <EmployeeToolbar
         selectedCount={selectedRowKeys.length}
         isDeleting={isDeleting}
@@ -211,26 +220,30 @@ export default function EmployeeList() {
         }
         handleUnbindAuthAccount={authAccountActions.handleUnbindAuthAccount}
         handleOpenRebindModal={authAccountActions.handleOpenRebindModal}
-        handleSearch={handleSearch}
-        handleResetSearch={handleResetSearch}
       />
+
+      <FilterBar>
+        <EmployeeSearch onSearch={handleSearch} onReset={handleResetSearch} />
+      </FilterBar>
 
       {/* 表格和分页 */}
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <EmployeeTable
-            loading={isFetching}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+            <EmployeeTable
+              loading={isFetching}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -240,7 +253,7 @@ export default function EmployeeList() {
       <Modal
         title={modalTitle}
         open={isModalOpen}
-        width={640}
+        width={720}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         destroyOnHidden
         onOk={() => formRef.current?.submit()}
@@ -248,6 +261,7 @@ export default function EmployeeList() {
           resetFormState()
         }}
       >
+        <FormErrorAlert error={formError} className="mb-3" />
         <EmployeeForm
           onFinish={handleFinish}
           setFormRef={setFormRef}

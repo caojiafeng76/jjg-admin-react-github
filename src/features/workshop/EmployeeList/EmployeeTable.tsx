@@ -1,9 +1,12 @@
 import type { TableColumnsType } from 'antd'
 import type { ReactNode, TdHTMLAttributes } from 'react'
 import type { Employee } from '@/services/apiEmployees'
-import { Table, Tag, Typography } from 'antd'
+import { Table, Typography } from 'antd'
 import { useMemo } from 'react'
 import { useRoleOptions } from '@/hooks/useRoleOptions'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { formatNumber } from '@/utils/format'
 import { useEmployeeAuthEmail } from './useEmployees'
 
@@ -34,7 +37,7 @@ function BoundAccountCell({ employeeId, authUserId }: BoundAccountCellProps) {
   )
 
   if (!authUserId) {
-    return <Tag color="default">未绑定</Tag>
+    return <StatusPill tone="neutral">未绑定</StatusPill>
   }
 
   const email = authEmailResult?.email?.trim() || null
@@ -43,9 +46,9 @@ function BoundAccountCell({ employeeId, authUserId }: BoundAccountCellProps) {
 
   return (
     <div className="flex items-center gap-1.5">
-      <Tag color="processing" className="mr-0 w-fit shrink-0">
+      <StatusPill tone="info" className="w-fit shrink-0">
         已绑定
-      </Tag>
+      </StatusPill>
       <Typography.Text
         copyable={{ text: email || authUserId }}
         className="truncate text-xs text-slate-500"
@@ -102,18 +105,18 @@ export default function EmployeeTable({
         width: 110,
         render: (value: Employee['role']) => {
           if (value === 'admin') {
-            return <Tag color="gold">管理员</Tag>
+            return <StatusPill tone="warning" dot={false}>管理员</StatusPill>
           }
 
           if (value === 'precision_cutting_admin') {
-            return <Tag color="purple">精切管理员</Tag>
+            return <StatusPill tone="info" dot={false}>精切管理员</StatusPill>
           }
 
           if (value === 'team_leader') {
-            return <Tag color="cyan">班组长</Tag>
+            return <StatusPill tone="info" dot={false}>班组长</StatusPill>
           }
 
-          return <Tag color="blue">{getRoleLabel(value || 'employee')}</Tag>
+          return <StatusPill tone="neutral" dot={false}>{getRoleLabel(value || 'employee')}</StatusPill>
         },
       },
       {
@@ -146,10 +149,10 @@ export default function EmployeeTable({
         width: 110,
         render: (value: boolean | undefined) => {
           if (value === false) {
-            return <Tag color="red">停用</Tag>
+            return <StatusPill tone="danger">停用</StatusPill>
           }
 
-          return <Tag color="green">启用</Tag>
+          return <StatusPill tone="success">启用</StatusPill>
         },
       },
       {
@@ -159,10 +162,10 @@ export default function EmployeeTable({
         width: 110,
         render: (value: boolean | undefined) => {
           if (value) {
-            return <Tag color="orange">是</Tag>
+            return <StatusPill tone="warning">是</StatusPill>
           }
 
-          return <Tag color="default">否</Tag>
+          return <StatusPill tone="neutral">否</StatusPill>
         },
       },
       {
@@ -226,6 +229,8 @@ export default function EmployeeTable({
   return (
     <Table<Employee>
       rowKey={record => record.id || ''}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无员工记录" description="请新建员工或调整筛选条件" /> }}
       loading={loading}
       columns={columns}
       dataSource={data}

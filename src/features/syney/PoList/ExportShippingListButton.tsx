@@ -11,7 +11,7 @@ export default function ExportShippingListButton() {
   const btn = (
     <Button
       type="text"
-      icon={<TruckIcon className="size-4 text-emerald-500/80!" />}
+      icon={<TruckIcon className="size-4" />}
       onClick={exportShippingListAsExcel}
       onMouseEnter={preloadExcel}
       onFocus={preloadExcel}

@@ -11,15 +11,14 @@ import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useTableHeight } from '@/hooks/useTableHeight'
-import {
-  getQualityIssueRecordsForExport,
-
-} from '@/services/apiQualityIssueRecords'
+import { getQualityIssueRecordsForExport } from '@/services/apiQualityIssueRecords'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
+import FilterBar from '@/ui/FilterBar'
+import { TableState } from '@/ui/TableState'
 import { translateErrorMessage } from '@/utils/errorHandler'
 import IssueRecordForm from './IssueRecordForm'
 import IssueRecordSearch, { AUDIT_STATUS_LABELS } from './IssueRecordSearch'
@@ -58,6 +57,7 @@ export default function QualityIssueRecordPage() {
   const [searchParams, setSearchParams]
     = useState<QualityIssueRecordSearchParams>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [editingRecord, setEditingRecord] = useState<QualityIssueRecord | null>(
     null,
@@ -66,7 +66,7 @@ export default function QualityIssueRecordPage() {
   const { data: employees = [] } = useAllEmployees()
   const { data: orderOptions = [], isLoading: isLoadingOrders }
     = useQualityIssueRecordOrderOptions()
-  const { data, isLoading } = useQualityIssueRecordList({
+  const { data, isLoading, error, refetch } = useQualityIssueRecordList({
     page,
     pageSize,
     searchParams,
@@ -85,6 +85,7 @@ export default function QualityIssueRecordPage() {
 
   const openCreateModal = useCallback(() => {
     setEditingRecord(null)
+    setFormError(null)
     setIsModalOpen(true)
   }, [])
 
@@ -99,6 +100,7 @@ export default function QualityIssueRecordPage() {
       }
 
       setEditingRecord(targetRecord)
+      setFormError(null)
       setIsModalOpen(true)
     },
     [message, records, selectedRowKeys],
@@ -107,6 +109,7 @@ export default function QualityIssueRecordPage() {
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
     setEditingRecord(null)
+    setFormError(null)
   }, [])
 
   const handleSearch = useCallback(
@@ -130,6 +133,7 @@ export default function QualityIssueRecordPage() {
   const handleSubmit = useCallback(
     async (values: QualityIssueRecordFormValues) => {
       try {
+        setFormError(null)
         if (editingRecord) {
           await updateMutation.mutateAsync({
             id: editingRecord.id,
@@ -146,6 +150,7 @@ export default function QualityIssueRecordPage() {
         setSelectedRowKeys([])
       }
       catch (error) {
+        setFormError(error)
         message.error(
           error instanceof Error
             ? translateErrorMessage(error.message)
@@ -264,7 +269,7 @@ export default function QualityIssueRecordPage() {
           <EditButton title="编辑" handleEdit={() => openEditModal()} />
           <Button
             type="text"
-            icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+            icon={<ShieldCheckIcon className="size-4" />}
             loading={auditStatusMutation.isPending}
             onClick={() => handleBatchAuditStatus('approved')}
           >
@@ -272,7 +277,7 @@ export default function QualityIssueRecordPage() {
           </Button>
           <Button
             type="text"
-            icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+            icon={<ArrowPathIcon className="size-4" />}
             loading={auditStatusMutation.isPending}
             onClick={() => handleBatchAuditStatus('pending')}
           >
@@ -280,7 +285,7 @@ export default function QualityIssueRecordPage() {
           </Button>
           <Button
             type="text"
-            icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+            icon={<XCircleIcon className="size-4" />}
             loading={auditStatusMutation.isPending}
             onClick={() => handleBatchAuditStatus('rejected')}
           >
@@ -303,30 +308,36 @@ export default function QualityIssueRecordPage() {
           />
         </div>
 
-        <div className="w-full">
+        <FilterBar>
           <IssueRecordSearch
             employees={employees}
             initialValues={searchParams}
             onReset={handleResetSearch}
             onSearch={handleSearch}
           />
-        </div>
+        </FilterBar>
       </div>
 
-      <div ref={tableContainerRef} className="min-h-0 flex-1">
-        <IssueRecordTable
-          data={records}
-          loading={isLoading}
-          onEdit={openEditModal}
-          onSelect={setSelectedRowKeys}
-          page={page}
-          pageSize={pageSize}
-          scrollY={scrollY}
-          selectedRowKeys={selectedRowKeys}
-        />
+      <div ref={tableContainerRef} className="min-h-0 flex-1 overflow-x-auto">
+        <TableState
+          loading={isLoading && !data}
+          error={error}
+          onRetry={refetch}
+        >
+          <IssueRecordTable
+            data={records}
+            loading={isLoading}
+            onEdit={openEditModal}
+            onSelect={setSelectedRowKeys}
+            page={page}
+            pageSize={pageSize}
+            scrollY={scrollY}
+            selectedRowKeys={selectedRowKeys}
+          />
+        </TableState>
       </div>
 
-      <div ref={paginationRef}>
+      <div ref={paginationRef} className="flex shrink-0 justify-end">
         <AppPagination
           total={total}
           defaultPageSize={50}
@@ -336,6 +347,7 @@ export default function QualityIssueRecordPage() {
 
       <IssueRecordForm
         employees={employees}
+        formError={formError}
         initialValues={editingRecord}
         loadingOrders={isLoadingOrders}
         onCancel={handleCloseModal}

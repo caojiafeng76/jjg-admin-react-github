@@ -14,6 +14,9 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import CuttingProcessForm from './CuttingProcessForm'
 import CuttingProcessTable from './CuttingProcessTable'
 import CuttingRecordEditModal from './CuttingRecordEditModal'
@@ -43,7 +46,9 @@ export default function CuttingProcessPage() {
 
   // 弹窗状态
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [createFormError, setCreateFormError] = useState<unknown>(null)
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editFormError, setEditFormError] = useState<unknown>(null)
   const [editingRecord, setEditingRecord]
     = useState<VillaLiftCuttingRecordWithOrder | null>(null)
 
@@ -53,7 +58,7 @@ export default function CuttingProcessPage() {
 
   // 数据
   const { data: ordersData = [] } = useVillaLiftOrdersForSelect()
-  const { data, isLoading } = useCuttingRecords({
+  const { data, isLoading, error, refetch } = useCuttingRecords({
     page,
     pageSize,
     orderId: filterOrderId,
@@ -76,6 +81,7 @@ export default function CuttingProcessPage() {
       return
     }
 
+    setCreateFormError(null)
     setCreateModalOpen(true)
   }, [message, viewerDenied, viewerOperationTip])
 
@@ -88,6 +94,7 @@ export default function CuttingProcessPage() {
     if (!formRef.current)
       return
     try {
+      setCreateFormError(null)
       const values = await formRef.current.validateFields()
       await createMutation.mutateAsync(values)
       message.success('切割记录创建成功')
@@ -95,8 +102,9 @@ export default function CuttingProcessPage() {
       formRef.current.resetFields()
     }
     catch (err) {
-      if (err instanceof Error)
-        message.error(err.message)
+      if (err && typeof err === 'object' && 'errorFields' in err)
+        return
+      setCreateFormError(err)
     }
   }, [createMutation, message, viewerDenied, viewerOperationTip])
 
@@ -108,6 +116,7 @@ export default function CuttingProcessPage() {
       }
 
       setEditingRecord(record)
+      setEditFormError(null)
       setEditModalOpen(true)
     },
     [message, viewerDenied, viewerOperationTip],
@@ -123,14 +132,14 @@ export default function CuttingProcessPage() {
       if (!editingRecord)
         return
       try {
+        setEditFormError(null)
         await updateMutation.mutateAsync({ id: editingRecord.id, values })
         message.success('更新成功')
         setEditModalOpen(false)
         setEditingRecord(null)
       }
       catch (err) {
-        if (err instanceof Error)
-          message.error(err.message)
+        setEditFormError(err)
       }
     },
     [editingRecord, message, updateMutation, viewerDenied, viewerOperationTip],
@@ -172,7 +181,7 @@ export default function CuttingProcessPage() {
   }
 
   return (
-    <div className="grid h-full grid-rows-[auto_1fr] gap-4">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton
@@ -198,11 +207,15 @@ export default function CuttingProcessPage() {
             </Button>
           </Popconfirm>
         )}
+      </div>
+
+      {/* 筛选栏 */}
+      <FilterBar>
         <Select
           allowClear
           showSearch={{ optionFilterProp: 'search' }}
           placeholder="按项目筛选"
-          style={{ width: 240 }}
+          style={{ width: 260 }}
           value={filterOrderId}
           onChange={handleOrderFilter}
           options={ordersData.map(o => ({
@@ -211,25 +224,31 @@ export default function CuttingProcessPage() {
             search: `${o.project_name} ${o.customer}`,
           }))}
         />
-      </div>
+      </FilterBar>
 
       {/* 表格区域 */}
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <CuttingProcessTable
-            loading={isLoading}
-            data={data?.records ?? []}
-            canEdit={!viewerDenied && canEdit}
-            selectedRowKeys={selectedRowKeys}
-            onSelectionChange={setSelectedRowKeys}
-            onEdit={handleEdit}
-            scrollY={scrollY}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <CuttingProcessTable
+              loading={isLoading}
+              data={data?.records ?? []}
+              canEdit={!viewerDenied && canEdit}
+              selectedRowKeys={selectedRowKeys}
+              onSelectionChange={setSelectedRowKeys}
+              onEdit={handleEdit}
+              scrollY={scrollY}
+            />
+          </TableState>
         </div>
-        <div ref={paginationRef}>
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.count ?? 0} />
         </div>
       </div>
@@ -241,34 +260,39 @@ export default function CuttingProcessPage() {
         onOk={handleCreateOk}
         onCancel={() => {
           setCreateModalOpen(false)
+          setCreateFormError(null)
           formRef.current?.resetFields()
         }}
         confirmLoading={createMutation.isPending}
         okButtonProps={{ disabled: viewerDenied }}
-        width={800}
+        width={720}
         destroyOnHidden
       >
-        <CuttingProcessForm
-          orders={ordersData}
-          onFinish={async (values) => {
-            if (viewerDenied) {
-              message.warning(viewerOperationTip)
-              return
-            }
+        <div className="space-y-4">
+          <FormErrorAlert error={createFormError} />
+          <CuttingProcessForm
+            orders={ordersData}
+            onFinish={async (values) => {
+              if (viewerDenied) {
+                message.warning(viewerOperationTip)
+                return
+              }
 
-            await createMutation.mutateAsync(values)
-            message.success('切割记录创建成功')
-            setCreateModalOpen(false)
-          }}
-          setFormRef={(f) => {
-            formRef.current = f
-          }}
-        />
+              await createMutation.mutateAsync(values)
+              message.success('切割记录创建成功')
+              setCreateModalOpen(false)
+            }}
+            setFormRef={(f) => {
+              formRef.current = f
+            }}
+          />
+        </div>
       </Modal>
 
       {/* 编辑弹窗 */}
       <CuttingRecordEditModal
         open={editModalOpen}
+        formError={editFormError}
         initialValues={
           editingRecord
             ? {
@@ -287,6 +311,7 @@ export default function CuttingProcessPage() {
         onOk={handleEditOk}
         onCancel={() => {
           setEditModalOpen(false)
+          setEditFormError(null)
           setEditingRecord(null)
         }}
       />

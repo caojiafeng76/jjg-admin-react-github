@@ -2,6 +2,8 @@ import type { OperationSummary } from './workshopOrderProductionStatsColumns'
 
 import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrders'
 import { Table } from 'antd'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
 
   recordColumns,
@@ -19,12 +21,13 @@ export default function WorkshopOrderOperationRecordsTable({
       <Table<ProductionItemWithOrderDetail>
         rowKey="id"
         columns={recordColumns}
+        rowClassName={zebraRowClassName}
+        locale={{ emptyText: <TableEmpty title="暂无工序操作记录" /> }}
         dataSource={group.items}
         size="small"
         pagination={false}
         scroll={{ x: 'max-content', y: 180 }}
         style={{ fontSize: 11 }}
-        className="shadow-sm"
         summary={() => {
           const totalDefect1 = group.items.reduce(
             (sum, item) => sum + (item.defect_quantity_1 ?? 0),

@@ -41,7 +41,7 @@ export default function EmployeeAccountModals({
       <Modal
         title="为现有员工开通账号"
         open={isAuthModalOpen}
-        width={560}
+        width={520}
         destroyOnHidden
         confirmLoading={createEmployeeAuthMutation.isPending}
         onOk={() => authFormRef.current?.submit()}

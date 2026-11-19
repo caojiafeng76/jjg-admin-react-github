@@ -4,12 +4,15 @@ import type {
   ProductionDetailRow,
   SelectedJobDetail,
 } from './dashboardRenderUtils'
+import { ClipboardDocumentListIcon } from '@heroicons/react/16/solid'
 import { Modal, Table } from 'antd'
 import dayjs from 'dayjs'
-
 import { useMemo } from 'react'
 import { isViewerRole } from '@/config/access'
+
 import { useAuth } from '@/contexts/useAuth'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
   renderDetailQuantity,
   renderHours,
@@ -325,20 +328,8 @@ export function ProductionDetailModal({
       open={Boolean(detail)}
       title={(
         <div className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/30">
-            <svg
-              className="size-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
+            <ClipboardDocumentListIcon className="size-4" />
           </div>
           <div>
             <span className="font-semibold text-slate-700 dark:text-slate-200">
@@ -350,10 +341,9 @@ export function ProductionDetailModal({
         </div>
       )}
       footer={null}
-      width={1280}
+      width={960}
       destroyOnHidden
       onCancel={onClose}
-      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white dark:[&_.ant-modal-header]:!border-slate-700 dark:[&_.ant-modal-header]:!from-slate-800 dark:[&_.ant-modal-header]:!to-slate-800"
     >
       {detail && (
         <div className="space-y-4">
@@ -404,9 +394,10 @@ export function ProductionDetailModal({
               size="small"
               columns={operationSummaryColumns}
               dataSource={operationSummaryRows}
+              rowClassName={zebraRowClassName}
+              locale={{ emptyText: <TableEmpty title="暂无工序汇总" /> }}
               pagination={false}
               scroll={{ x: 370 }}
-              className="[&_.ant-table]:!rounded-none"
             />
           </div>
 
@@ -423,9 +414,10 @@ export function ProductionDetailModal({
               size="small"
               columns={columns}
               dataSource={rows}
+              rowClassName={zebraRowClassName}
+              locale={{ emptyText: <TableEmpty title="暂无详细记录" /> }}
               pagination={false}
               scroll={{ x: productionDetailScrollX, y: 360 }}
-              className="[&_.ant-table]:!rounded-none"
             />
           </div>
         </div>

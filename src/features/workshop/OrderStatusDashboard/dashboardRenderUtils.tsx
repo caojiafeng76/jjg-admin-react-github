@@ -8,7 +8,8 @@ import type {
   ReworkRepairInfo,
 } from '@/services/apiOrderStatusDashboard'
 
-import { Button, Space, Tag, Tooltip, Typography } from 'antd'
+import { Button, Space, Tooltip, Typography } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 import { DenseBodyCell, ResizableHeaderCell } from './dashboardTableCells'
 import {
   REWORK_REPAIR_STATUS_COLORS,
@@ -125,7 +126,9 @@ export function renderTransferWorkshops(value: string[]) {
   return (
     <Space size={4} wrap>
       {value.map(workshop => (
-        <Tag key={workshop}>{workshop}</Tag>
+        <StatusPill key={workshop} tone="neutral" dot={false}>
+          {workshop}
+        </StatusPill>
       ))}
     </Space>
   )
@@ -283,13 +286,19 @@ export function renderReworkRepairStatus(reworkRepairInfo: ReworkRepairInfo) {
         }
 
         return (
-          <Tag
+          <StatusPill
             key={key}
-            color={REWORK_REPAIR_STATUS_COLORS[key]}
-            className="text-xs!"
+            dot={false}
+            tone={
+              REWORK_REPAIR_STATUS_COLORS[key] === 'green'
+                ? 'success'
+                : REWORK_REPAIR_STATUS_COLORS[key] === 'red'
+                  ? 'danger'
+                  : 'warning'
+            }
           >
             {REWORK_REPAIR_STATUS_LABELS[key]} {count}
-          </Tag>
+          </StatusPill>
         )
       })}
     </Space>

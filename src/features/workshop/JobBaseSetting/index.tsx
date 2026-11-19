@@ -12,6 +12,9 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import JobBaseSettingForm from './JobBaseSettingForm'
 import JobBaseSettingSearch from './JobBaseSettingSearch'
 import JobBaseSettingTable from './JobBaseSettingTable'
@@ -32,6 +35,7 @@ export default function JobBaseSettingPage() {
   const [editingRecord, setEditingRecord] = useState<JobBaseSetting | null>(
     null,
   )
+  const [formError, setFormError] = useState<unknown>(null)
   const formRef = useRef<FormInstance<JobBaseSettingFormValues> | null>(null)
   const setFormRef = useCallback(
     (form: FormInstance<JobBaseSettingFormValues>) => {
@@ -49,7 +53,7 @@ export default function JobBaseSettingPage() {
     jobName: searchParamsURL.get('jobName') || undefined,
   })
 
-  const { data, isLoading } = useJobBaseSettingsList({
+  const { data, isLoading, error, refetch } = useJobBaseSettingsList({
     page,
     pageSize,
     searchParams,
@@ -65,6 +69,7 @@ export default function JobBaseSettingPage() {
     })
 
   const resetFormState = useCallback(() => {
+    setFormError(null)
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
@@ -73,6 +78,7 @@ export default function JobBaseSettingPage() {
   }, [])
 
   const handleCreate = useCallback(() => {
+    setFormError(null)
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
@@ -93,6 +99,7 @@ export default function JobBaseSettingPage() {
       return
     }
 
+    setFormError(null)
     setEditingRecord(record)
     setIsEdit(true)
     setModalTitle('编辑岗位基础数值')
@@ -122,6 +129,7 @@ export default function JobBaseSettingPage() {
 
   const handleFinish = useCallback(
     async (values: JobBaseSettingFormValues) => {
+      setFormError(null)
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -137,9 +145,10 @@ export default function JobBaseSettingPage() {
 
         resetFormState()
       }
-      catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
+      catch (err) {
+        setFormError(err)
+        if (err instanceof Error) {
+          message.error(err.message)
         }
         else {
           message.error('操作失败，请稍后重试')
@@ -208,30 +217,31 @@ export default function JobBaseSettingPage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
+      <FilterBar>
         <JobBaseSettingSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <JobBaseSettingTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+            <JobBaseSettingTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -246,6 +256,7 @@ export default function JobBaseSettingPage() {
         onOk={() => formRef.current?.submit()}
         onCancel={resetFormState}
       >
+        <FormErrorAlert error={formError} className="mb-3" />
         <JobBaseSettingForm
           onFinish={handleFinish}
           setFormRef={setFormRef}

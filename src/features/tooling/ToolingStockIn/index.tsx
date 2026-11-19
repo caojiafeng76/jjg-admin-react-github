@@ -15,6 +15,9 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 import ToolingStockInForm from './ToolingStockInForm'
 import ToolingStockInSearch from './ToolingStockInSearch'
@@ -44,6 +47,7 @@ export default function ToolingStockInPage() {
   )
   const [formRef, setFormRef]
     = useState<FormInstance<ToolingStockInFormValues> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
   const [toolingOptionsKeyword, setToolingOptionsKeyword] = useState('')
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -59,7 +63,7 @@ export default function ToolingStockInPage() {
       || undefined,
   })
 
-  const { data, isLoading } = useToolingStockInList({
+  const { data, isLoading, error, refetch } = useToolingStockInList({
     page,
     pageSize,
     searchParams,
@@ -88,6 +92,7 @@ export default function ToolingStockInPage() {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setToolingOptionsKeyword('')
     formRef?.resetFields()
@@ -96,6 +101,7 @@ export default function ToolingStockInPage() {
   const handleCreate = useCallback(() => {
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setToolingOptionsKeyword('')
     setModalTitle('新建刀具入库')
@@ -117,6 +123,7 @@ export default function ToolingStockInPage() {
 
     setEditingRecord(record)
     setToolingOptionsKeyword('')
+    setFormError(null)
     setIsEdit(true)
     setModalTitle(
       record.status === '已审核' ? '编辑刀具入库备注' : '编辑刀具入库',
@@ -217,6 +224,7 @@ export default function ToolingStockInPage() {
       }
 
       try {
+        setFormError(null)
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
@@ -232,12 +240,7 @@ export default function ToolingStockInPage() {
         resetFormState()
       }
       catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
+        setFormError(error)
       }
     },
     [
@@ -308,7 +311,7 @@ export default function ToolingStockInPage() {
         />
         <Button
           type="text"
-          icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+          icon={<ShieldCheckIcon className="size-4" />}
           onClick={() => handleBatchAudit('已审核')}
           loading={batchStatusMutation.isPending}
           disabled={viewerDenied || !canManageTooling}
@@ -317,7 +320,7 @@ export default function ToolingStockInPage() {
         </Button>
         <Button
           type="text"
-          icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+          icon={<ArrowPathIcon className="size-4" />}
           onClick={() => handleBatchAudit('待审核')}
           loading={batchStatusMutation.isPending}
           disabled={viewerDenied || !canManageTooling}
@@ -339,30 +342,35 @@ export default function ToolingStockInPage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">搜索：</span>
+      <FilterBar>
         <ToolingStockInSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <ToolingStockInTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <ToolingStockInTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -382,16 +390,19 @@ export default function ToolingStockInPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <ToolingStockInForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          toolingOptions={toolingOptions}
-          isToolingOptionsLoading={isToolingOptionsLoading}
-          onToolingSearch={setToolingOptionsKeyword}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-          isAuditLocked={editingRecord?.status === '已审核'}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <ToolingStockInForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            toolingOptions={toolingOptions}
+            isToolingOptionsLoading={isToolingOptionsLoading}
+            onToolingSearch={setToolingOptionsKeyword}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+            isAuditLocked={editingRecord?.status === '已审核'}
+          />
+        </div>
       </Modal>
     </div>
   )

@@ -14,6 +14,9 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import StandardTimeForm from './StandardTimeForm'
 import StandardTimeSearch from './StandardTimeSearch'
 import StandardTimeTable from './StandardTimeTable'
@@ -45,6 +48,7 @@ export default function PackagingStandardTimeListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建标准工时')
   const [isEdit, setIsEdit] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord]
     = useState<PackagingStandardTime | null>(null)
@@ -58,7 +62,7 @@ export default function PackagingStandardTimeListPage() {
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = usePackagingStandardTimeList({
+  const { data, isLoading, error, refetch } = usePackagingStandardTimeList({
     page,
     pageSize,
     searchParams,
@@ -77,6 +81,7 @@ export default function PackagingStandardTimeListPage() {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     formRef?.resetFields()
   }, [formRef])
@@ -84,6 +89,7 @@ export default function PackagingStandardTimeListPage() {
   const handleCreate = useCallback(() => {
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setModalTitle('新建标准工时')
     setIsModalOpen(true)
@@ -103,6 +109,7 @@ export default function PackagingStandardTimeListPage() {
     }
 
     setEditingRecord(record)
+    setFormError(null)
     setIsEdit(true)
     setModalTitle('编辑标准工时')
     setIsModalOpen(true)
@@ -137,6 +144,7 @@ export default function PackagingStandardTimeListPage() {
       }
 
       try {
+        setFormError(null)
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
@@ -152,12 +160,7 @@ export default function PackagingStandardTimeListPage() {
         resetFormState()
       }
       catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
+        setFormError(error)
       }
     },
     [
@@ -232,30 +235,35 @@ export default function PackagingStandardTimeListPage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
+      <FilterBar>
         <StandardTimeSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <StandardTimeTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <StandardTimeTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -273,12 +281,15 @@ export default function PackagingStandardTimeListPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <StandardTimeForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <StandardTimeForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          />
+        </div>
       </Modal>
     </div>
   )

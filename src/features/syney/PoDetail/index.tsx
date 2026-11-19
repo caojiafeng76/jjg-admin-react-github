@@ -100,15 +100,12 @@ function PoDetailContent() {
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
-      {/* 订单信息分区卡片 */}
-      <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              订单信息
-            </span>
-          </div>
+      {/* 订单信息轻量分栏区 */}
+      <div className="border-b border-slate-200 pb-3 dark:border-slate-700">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            订单信息
+          </span>
           {po?.Status && PO_STATUS_TONES[po.Status]
             ? <StatusPill tone={PO_STATUS_TONES[po.Status]}>{po.Status}</StatusPill>
             : null}

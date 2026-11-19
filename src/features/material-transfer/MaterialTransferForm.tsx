@@ -314,7 +314,7 @@ export default function MaterialTransferForm({
           form={form}
           layout="vertical"
           onFinish={handleFinish}
-          className="flex flex-col gap-4 [&_.ant-form-item-label>label]:font-medium"
+          className="flex flex-col gap-4"
         >
           <section className={sectionClassName}>
             <div className={sectionTitleClassName}>

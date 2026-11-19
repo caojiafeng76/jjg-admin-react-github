@@ -1,7 +1,7 @@
 import type { ProductionOrder } from '@/services/apiProductionOrders'
 import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
 import { KeyIcon, LockClosedIcon } from '@heroicons/react/24/outline'
-import { Badge, Button } from 'antd'
+import { Button } from 'antd'
 import AddButton from '@/ui/AddButton'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
@@ -72,16 +72,15 @@ export default function ProductionOrderAdminToolbar({
           锁定
         </Button>
         <div className="mx-2 h-6 w-px bg-slate-200 dark:bg-slate-700" />
-        <Badge status="success" />
         <Button
           type="text"
           size="small"
           icon={
-            <ShieldCheckIcon className="size-4 text-emerald-500 dark:text-emerald-400" />
+            <ShieldCheckIcon className="size-4" />
           }
           onClick={() => handleBatchAudit(true)}
           loading={isBatchUpdating}
-          className="h-8 rounded-lg px-3 text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-300"
+          className="h-8 px-3"
         >
           批量审核
         </Button>
@@ -89,11 +88,11 @@ export default function ProductionOrderAdminToolbar({
           type="text"
           size="small"
           icon={
-            <ArrowPathIcon className="size-4 text-amber-500 dark:text-amber-400" />
+            <ArrowPathIcon className="size-4" />
           }
           onClick={() => handleBatchAudit(false)}
           loading={isBatchUpdating}
-          className="h-8 rounded-lg px-3 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30 dark:hover:text-amber-300"
+          className="h-8 px-3"
         >
           批量反审核
         </Button>

@@ -6,8 +6,9 @@ import type {
   OrderStatusJobColumn,
 } from '@/services/apiOrderStatusDashboard'
 
-import { Space, Table, Tag, Typography } from 'antd'
-import { STATUS_COLOR } from './dashboardColumns'
+import { Space, Table, Typography } from 'antd'
+import StatusPill from '@/ui/StatusPill'
+import { STATUS_TONE } from './dashboardColumns'
 import { renderReworkRepairStatus } from './dashboardRenderUtils'
 import {
   buildDashboardSummary,
@@ -59,13 +60,12 @@ function renderSummaryProductionStatus(summary: DashboardSummary) {
   return (
     <Space size={3} wrap>
       {tags.map(option => (
-        <Tag
+        <StatusPill
           key={option.value}
-          color={STATUS_COLOR[option.value]}
-          className="rounded-full! font-medium!"
+          tone={STATUS_TONE[option.value]}
         >
           {option.label} {summary.productionStatusCounts[option.value]}
-        </Tag>
+        </StatusPill>
       ))}
     </Space>
   )

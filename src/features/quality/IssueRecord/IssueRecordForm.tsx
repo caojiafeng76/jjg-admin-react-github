@@ -19,6 +19,7 @@ import {
   QUALITY_ISSUE_TYPES,
 
 } from '@/services/apiQualityIssueRecords'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import { AUDIT_STATUS_LABELS } from './IssueRecordSearch'
 
 interface QualityIssueRecordFormFields {
@@ -59,6 +60,7 @@ interface ProjectSelectOption {
 
 interface Props {
   employees: Array<{ id: string, name: string }>
+  formError?: unknown
   initialValues?: QualityIssueRecord | null
   loadingOrders?: boolean
   onCancel: () => void
@@ -203,6 +205,7 @@ function toSubmitValues(
 
 export default function IssueRecordForm({
   employees,
+  formError,
   initialValues,
   loadingOrders,
   onCancel,
@@ -286,227 +289,230 @@ export default function IssueRecordForm({
       title={initialValues ? '编辑质量问题记录' : '新增质量问题记录'}
       open={open}
       onCancel={onCancel}
-      width={980}
+      width={960}
       footer={null}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
-        <SectionTitle title="基本信息" />
-        <div className="grid grid-cols-3 gap-3">
-          <Form.Item
-            name="production_date"
-            label="生产日期"
-            rules={[{ required: true, message: '请选择生产日期' }]}
-          >
-            <DatePicker className="w-full" format="YYYY-MM-DD" />
-          </Form.Item>
+      <div className="space-y-4">
+        <FormErrorAlert error={formError} />
+        <Form form={form} layout="vertical" onFinish={handleFinish}>
+          <SectionTitle title="基本信息" />
+          <div className="grid grid-cols-3 gap-3">
+            <Form.Item
+              name="production_date"
+              label="生产日期"
+              rules={[{ required: true, message: '请选择生产日期' }]}
+            >
+              <DatePicker className="w-full" format="YYYY-MM-DD" />
+            </Form.Item>
 
-          <Form.Item
-            name="reporter_employee_id"
-            label="上报人"
-            rules={[{ required: true, message: '请选择上报人' }]}
-          >
-            <Select
-              showSearch={{ optionFilterProp: 'label' }}
-              placeholder="请选择上报人"
-              getPopupContainer={getPopupContainer}
-              options={employees.map(employee => ({
-                label: employee.name,
-                value: employee.id,
-              }))}
-            />
-          </Form.Item>
+            <Form.Item
+              name="reporter_employee_id"
+              label="上报人"
+              rules={[{ required: true, message: '请选择上报人' }]}
+            >
+              <Select
+                showSearch={{ optionFilterProp: 'label' }}
+                placeholder="请选择上报人"
+                getPopupContainer={getPopupContainer}
+                options={employees.map(employee => ({
+                  label: employee.name,
+                  value: employee.id,
+                }))}
+              />
+            </Form.Item>
 
-          <Form.Item name="audit_status" label="审核状态">
-            <Select
-              getPopupContainer={getPopupContainer}
-              options={QUALITY_ISSUE_AUDIT_STATUSES.map(status => ({
-                label: AUDIT_STATUS_LABELS[status],
-                value: status,
-              }))}
-            />
-          </Form.Item>
-        </div>
+            <Form.Item name="audit_status" label="审核状态">
+              <Select
+                getPopupContainer={getPopupContainer}
+                options={QUALITY_ISSUE_AUDIT_STATUSES.map(status => ({
+                  label: AUDIT_STATUS_LABELS[status],
+                  value: status,
+                }))}
+              />
+            </Form.Item>
+          </div>
 
-        <SectionTitle title="订单信息" />
-        <div className="grid grid-cols-1 gap-3">
-          <Form.Item
-            name="project_no"
-            label="项目号"
-            rules={[{ required: true, message: '请选择项目号' }]}
-          >
-            <Select
-              showSearch={{
-                filterOption: (input, option) =>
-                  String(option?.searchText || '').includes(
-                    input.trim().toLowerCase(),
-                  ),
-              }}
-              placeholder="输入或选择项目号"
-              loading={loadingOrders}
-              getPopupContainer={getPopupContainer}
-              options={projectOptions}
-              optionRender={(option) => {
-                const data = option.data as ProjectSelectOption
+          <SectionTitle title="订单信息" />
+          <div className="grid grid-cols-1 gap-3">
+            <Form.Item
+              name="project_no"
+              label="项目号"
+              rules={[{ required: true, message: '请选择项目号' }]}
+            >
+              <Select
+                showSearch={{
+                  filterOption: (input, option) =>
+                    String(option?.searchText || '').includes(
+                      input.trim().toLowerCase(),
+                    ),
+                }}
+                placeholder="输入或选择项目号"
+                loading={loadingOrders}
+                getPopupContainer={getPopupContainer}
+                options={projectOptions}
+                optionRender={(option) => {
+                  const data = option.data as ProjectSelectOption
 
-                return (
-                  <div className="py-1">
-                    <div className="font-medium text-slate-800">
-                      {data.label}
+                  return (
+                    <div className="py-1">
+                      <div className="font-medium text-slate-800">
+                        {data.label}
+                      </div>
+                      <div className="mt-1 grid grid-cols-4 gap-3 text-xs text-slate-500">
+                        <span className="truncate">客户: {data.customer}</span>
+                        <span className="truncate">
+                          型号: {data.productModel}
+                        </span>
+                        <span className="truncate">长度: {data.lengthText}</span>
+                        <span className="truncate">
+                          数量: {data.orderQuantityText}
+                        </span>
+                      </div>
                     </div>
-                    <div className="mt-1 grid grid-cols-4 gap-3 text-xs text-slate-500">
-                      <span className="truncate">客户: {data.customer}</span>
-                      <span className="truncate">
-                        型号: {data.productModel}
-                      </span>
-                      <span className="truncate">长度: {data.lengthText}</span>
-                      <span className="truncate">
-                        数量: {data.orderQuantityText}
-                      </span>
-                    </div>
-                  </div>
-                )
-              }}
-              onChange={handleProjectChange}
-            />
-          </Form.Item>
-        </div>
+                  )
+                }}
+                onChange={handleProjectChange}
+              />
+            </Form.Item>
+          </div>
 
-        <div className="mb-4 grid grid-cols-5 gap-3 rounded-lg bg-slate-50 px-3 pt-3 dark:bg-slate-800/50">
-          <Form.Item name="customer" label="客户" className="mb-3">
-            <Input disabled placeholder="自动带出" />
-          </Form.Item>
+          <div className="mb-4 grid grid-cols-5 gap-3 rounded-lg bg-slate-50 px-3 pt-3 dark:bg-slate-800/50">
+            <Form.Item name="customer" label="客户" className="mb-3">
+              <Input disabled placeholder="自动带出" />
+            </Form.Item>
 
-          <Form.Item name="product_model" label="型号" className="mb-3">
-            <Input disabled placeholder="自动带出" />
-          </Form.Item>
+            <Form.Item name="product_model" label="型号" className="mb-3">
+              <Input disabled placeholder="自动带出" />
+            </Form.Item>
 
-          <Form.Item name="length_mm" label="长度(mm)" className="mb-3">
-            <InputNumber disabled className="w-full" placeholder="自动带出" />
-          </Form.Item>
+            <Form.Item name="length_mm" label="长度(mm)" className="mb-3">
+              <InputNumber disabled className="w-full" placeholder="自动带出" />
+            </Form.Item>
 
-          <Form.Item name="customer_model" label="客户型号" className="mb-3">
-            <Input disabled placeholder="自动带出" />
-          </Form.Item>
+            <Form.Item name="customer_model" label="客户型号" className="mb-3">
+              <Input disabled placeholder="自动带出" />
+            </Form.Item>
 
-          <Form.Item name="order_quantity" label="订单数量" className="mb-3">
-            <InputNumber disabled className="w-full" placeholder="自动带出" />
-          </Form.Item>
-        </div>
+            <Form.Item name="order_quantity" label="订单数量" className="mb-3">
+              <InputNumber disabled className="w-full" placeholder="自动带出" />
+            </Form.Item>
+          </div>
 
-        <SectionTitle title="数量统计" />
-        <div className="grid grid-cols-4 gap-3">
-          <Form.Item
-            name="processed_quantity"
-            label="加工数量"
-            rules={[{ required: true, message: '请输入加工数量' }]}
-          >
-            <InputNumber min={0} precision={0} className="w-full" />
-          </Form.Item>
+          <SectionTitle title="数量统计" />
+          <div className="grid grid-cols-4 gap-3">
+            <Form.Item
+              name="processed_quantity"
+              label="加工数量"
+              rules={[{ required: true, message: '请输入加工数量' }]}
+            >
+              <InputNumber min={0} precision={0} className="w-full" />
+            </Form.Item>
 
-          <Form.Item
-            name="qualified_quantity"
-            label="合格数量"
-            rules={[{ required: true, message: '请输入合格数量' }]}
-          >
-            <InputNumber min={0} precision={0} className="w-full" />
-          </Form.Item>
+            <Form.Item
+              name="qualified_quantity"
+              label="合格数量"
+              rules={[{ required: true, message: '请输入合格数量' }]}
+            >
+              <InputNumber min={0} precision={0} className="w-full" />
+            </Form.Item>
 
-          <Form.Item
-            name="defective_quantity"
-            label="不良数量"
-            rules={[{ required: true, message: '请输入不良数量' }]}
-          >
-            <InputNumber min={0} precision={0} className="w-full" />
-          </Form.Item>
+            <Form.Item
+              name="defective_quantity"
+              label="不良数量"
+              rules={[{ required: true, message: '请输入不良数量' }]}
+            >
+              <InputNumber min={0} precision={0} className="w-full" />
+            </Form.Item>
 
-          <Form.Item label="不良率（%）">
-            <InputNumber value={defectRate} disabled className="w-full" />
-          </Form.Item>
-        </div>
+            <Form.Item label="不良率（%）">
+              <InputNumber value={defectRate} disabled className="w-full" />
+            </Form.Item>
+          </div>
 
-        <SectionTitle title="相关人员" />
-        <div className="grid grid-cols-3 gap-3">
-          <Form.Item
-            name="operator_employee_id"
-            label="操作人"
-            rules={[{ required: true, message: '请选择操作人' }]}
-          >
-            <Select
-              showSearch={{ optionFilterProp: 'label' }}
-              placeholder="请选择操作人"
-              getPopupContainer={getPopupContainer}
-              options={employees.map(employee => ({
-                label: employee.name,
-                value: employee.id,
-              }))}
-            />
-          </Form.Item>
+          <SectionTitle title="相关人员" />
+          <div className="grid grid-cols-3 gap-3">
+            <Form.Item
+              name="operator_employee_id"
+              label="操作人"
+              rules={[{ required: true, message: '请选择操作人' }]}
+            >
+              <Select
+                showSearch={{ optionFilterProp: 'label' }}
+                placeholder="请选择操作人"
+                getPopupContainer={getPopupContainer}
+                options={employees.map(employee => ({
+                  label: employee.name,
+                  value: employee.id,
+                }))}
+              />
+            </Form.Item>
 
-          <Form.Item name="shift_leader_name" label="当班负责人">
-            <Input placeholder="请输入当班负责人" maxLength={50} />
-          </Form.Item>
+            <Form.Item name="shift_leader_name" label="当班负责人">
+              <Input placeholder="请输入当班负责人" maxLength={50} />
+            </Form.Item>
 
-          <Form.Item name="inspector_name" label="检验人">
-            <Input placeholder="请输入检验人" maxLength={50} />
-          </Form.Item>
-        </div>
+            <Form.Item name="inspector_name" label="检验人">
+              <Input placeholder="请输入检验人" maxLength={50} />
+            </Form.Item>
+          </div>
 
-        <SectionTitle title="问题与处理" />
-        <div className="grid grid-cols-3 gap-3">
-          <Form.Item name="issue_type" label="问题类型">
-            <Select
-              allowClear
-              placeholder="请选择问题类型"
-              getPopupContainer={getPopupContainer}
-              options={QUALITY_ISSUE_TYPES.map(type => ({
-                label: type,
-                value: type,
-              }))}
-            />
-          </Form.Item>
+          <SectionTitle title="问题与处理" />
+          <div className="grid grid-cols-3 gap-3">
+            <Form.Item name="issue_type" label="问题类型">
+              <Select
+                allowClear
+                placeholder="请选择问题类型"
+                getPopupContainer={getPopupContainer}
+                options={QUALITY_ISSUE_TYPES.map(type => ({
+                  label: type,
+                  value: type,
+                }))}
+              />
+            </Form.Item>
 
-          <Form.Item
-            name="quality_issue"
-            label="质量问题"
-            className="col-span-2"
-            rules={[{ required: true, message: '请输入质量问题' }]}
-          >
-            <Input.TextArea
-              rows={2}
-              autoSize={{ minRows: 2, maxRows: 4 }}
-              placeholder="请输入质量问题"
-            />
-          </Form.Item>
-        </div>
+            <Form.Item
+              name="quality_issue"
+              label="质量问题"
+              className="col-span-2"
+              rules={[{ required: true, message: '请输入质量问题' }]}
+            >
+              <Input.TextArea
+                rows={2}
+                autoSize={{ minRows: 2, maxRows: 4 }}
+                placeholder="请输入质量问题"
+              />
+            </Form.Item>
+          </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <Form.Item name="cause" label="造成原因">
-            <Input.TextArea rows={3} placeholder="请输入造成原因" />
-          </Form.Item>
+          <div className="grid grid-cols-3 gap-3">
+            <Form.Item name="cause" label="造成原因">
+              <Input.TextArea rows={3} placeholder="请输入造成原因" />
+            </Form.Item>
 
-          <Form.Item name="defective_handling_result" label="不良品处理结果">
-            <Input.TextArea rows={3} placeholder="请输入处理结果" />
+            <Form.Item name="defective_handling_result" label="不良品处理结果">
+              <Input.TextArea rows={3} placeholder="请输入处理结果" />
+            </Form.Item>
+
+            <Form.Item name="responsibility_handling_result" label="责任处理结果">
+              <Input.TextArea rows={3} placeholder="请输入责任处理结果" />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="remark" label="备注">
+            <Input.TextArea rows={2} placeholder="可填写补充说明" />
           </Form.Item>
 
-          <Form.Item name="responsibility_handling_result" label="责任处理结果">
-            <Input.TextArea rows={3} placeholder="请输入责任处理结果" />
+          <Form.Item className="mb-0">
+            <Space className="flex justify-end">
+              <Button onClick={onCancel}>取消</Button>
+              <Button type="primary" htmlType="submit" loading={submitting}>
+                保存
+              </Button>
+            </Space>
           </Form.Item>
-        </div>
-
-        <Form.Item name="remark" label="备注">
-          <Input.TextArea rows={2} placeholder="可填写补充说明" />
-        </Form.Item>
-
-        <Form.Item className="mb-0">
-          <Space className="flex justify-end">
-            <Button onClick={onCancel}>取消</Button>
-            <Button type="primary" htmlType="submit" loading={submitting}>
-              保存
-            </Button>
-          </Space>
-        </Form.Item>
-      </Form>
+        </Form>
+      </div>
     </Modal>
   )
 }

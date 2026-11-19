@@ -4,7 +4,8 @@ import {
   PlusIcon,
   TrashIcon,
 } from '@heroicons/react/16/solid'
-import { App, Button, Empty, Tag } from 'antd'
+import { App, Button, Empty } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 
 export interface ProductionOrderFormItemsMobileListProps {
   items: OrderItem[]
@@ -22,7 +23,7 @@ export default function ProductionOrderFormItemsMobileList({
   const { modal } = App.useApp()
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none">
+    <section className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
       <div className="flex items-center justify-between gap-3">
         <div>
           <div className="text-xs tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
@@ -60,7 +61,7 @@ export default function ProductionOrderFormItemsMobileList({
                     <article
                       // eslint-disable-next-line react/no-array-index-key -- 卡片无内部状态，新增工序尚无 id，编辑/删除也按下标定位（与桌面表格一致）
                       key={`${item.project_no}-${item.operation}-${index}`}
-                      className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -76,12 +77,9 @@ export default function ProductionOrderFormItemsMobileList({
                           </div>
                         </div>
 
-                        <Tag
-                          color={shouldHighlight ? 'error' : 'processing'}
-                          className="mr-0 rounded-full px-3 py-1"
-                        >
+                        <StatusPill tone={shouldHighlight ? 'danger' : 'info'}>
                           {shouldHighlight ? '需补标准工时' : '正常'}
-                        </Tag>
+                        </StatusPill>
                       </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-400">

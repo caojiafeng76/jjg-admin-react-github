@@ -3,10 +3,14 @@ import type {
   SelectedTransferDetail,
   TransferDetailRow,
 } from './dashboardRenderUtils'
-import { Modal, Table, Tag } from 'antd'
+import { ArrowsRightLeftIcon } from '@heroicons/react/16/solid'
+import { Modal, Table } from 'antd'
 import dayjs from 'dayjs'
-
 import { useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
   renderDetailQuantity,
   renderText,
@@ -83,9 +87,9 @@ export function TransferDetailModal({
       width: 100,
       align: 'center',
       render: (value: boolean) => (
-        <Tag color={value ? 'green' : 'gold'}>
+        <StatusPill tone={value ? 'success' : 'warning'}>
           {value ? '已审核' : '未审核'}
-        </Tag>
+        </StatusPill>
       ),
     },
   ]
@@ -95,20 +99,8 @@ export function TransferDetailModal({
       open={Boolean(detail)}
       title={(
         <div className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 shadow-md shadow-purple-500/30">
-            <svg
-              className="size-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-              />
-            </svg>
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
+            <ArrowsRightLeftIcon className="size-4" />
           </div>
           <div>
             <span className="font-semibold text-slate-700 dark:text-slate-200">
@@ -120,10 +112,9 @@ export function TransferDetailModal({
         </div>
       )}
       footer={null}
-      width={920}
+      width={960}
       destroyOnHidden
       onCancel={onClose}
-      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white dark:[&_.ant-modal-header]:!border-slate-700 dark:[&_.ant-modal-header]:!from-slate-800 dark:[&_.ant-modal-header]:!to-slate-800"
     >
       {detail && (
         <div className="space-y-4">
@@ -170,9 +161,10 @@ export function TransferDetailModal({
               size="small"
               columns={columns}
               dataSource={rows}
+              rowClassName={zebraRowClassName}
+              locale={{ emptyText: <TableEmpty title="暂无物料转移明细" /> }}
               pagination={false}
               scroll={{ x: 780, y: 420 }}
-              className="[&_.ant-table]:!rounded-none"
             />
           </div>
         </div>

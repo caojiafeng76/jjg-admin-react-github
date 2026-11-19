@@ -12,6 +12,8 @@ import { usePermissions } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AppPagination from '@/ui/AppPagination'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import { useExportVillaLiftOrdersAsExcel } from './useExportVillaLiftOrdersAsExcel'
 import { useVillaLiftOrderBatchActions } from './useVillaLiftOrderBatchActions'
 import {
@@ -74,6 +76,7 @@ export default function VillaLiftOrderListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建订单')
   const [isEdit, setIsEdit] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
   const [editingRecord, setEditingRecord] = useState<VillaLiftOrder | null>(
     null,
   )
@@ -106,7 +109,7 @@ export default function VillaLiftOrderListPage() {
   } = search
 
   // 数据
-  const { data, isLoading } = useVillaLiftOrders({
+  const { data, isLoading, error, refetch } = useVillaLiftOrders({
     page,
     pageSize,
     status: activeStatus,
@@ -149,6 +152,7 @@ export default function VillaLiftOrderListPage() {
   const resetModalState = useCallback(() => {
     setIsModalOpen(false)
     setIsEdit(false)
+    setFormError(null)
     setEditingRecord(null)
     formRef?.resetFields()
   }, [formRef])
@@ -161,6 +165,7 @@ export default function VillaLiftOrderListPage() {
     }
 
     setIsEdit(false)
+    setFormError(null)
     setEditingRecord(null)
     setModalTitle('新建别墅梯订单')
     setIsModalOpen(true)
@@ -175,6 +180,7 @@ export default function VillaLiftOrderListPage() {
       }
 
       setEditingRecord(record)
+      setFormError(null)
       setIsEdit(true)
       setModalTitle('编辑别墅梯订单')
       setIsModalOpen(true)
@@ -205,6 +211,7 @@ export default function VillaLiftOrderListPage() {
       }
 
       try {
+        setFormError(null)
         if (isEdit && editingRecord) {
           const { items: _items, ...orderFields } = values
           await updateMutation.mutateAsync({
@@ -220,12 +227,7 @@ export default function VillaLiftOrderListPage() {
         resetModalState()
       }
       catch (err) {
-        if (err instanceof Error) {
-          message.error(err.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
+        setFormError(err)
       }
     },
     [
@@ -306,20 +308,26 @@ export default function VillaLiftOrderListPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <VillaLiftOrderTable
-            loading={isLoading}
-            data={data?.orders ?? []}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-            canEdit={!viewerDenied && canEdit}
-            canEditItems={!viewerDenied && canEditItems}
-            onEdit={handleEdit}
-            onEditItems={handleEditItems}
-            selectedRowKeys={selectedRowKeys}
-            onSelectionChange={setSelectedRowKeys}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <VillaLiftOrderTable
+              loading={isLoading}
+              data={data?.orders ?? []}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+              canEdit={!viewerDenied && canEdit}
+              canEditItems={!viewerDenied && canEditItems}
+              onEdit={handleEdit}
+              onEditItems={handleEditItems}
+              selectedRowKeys={selectedRowKeys}
+              onSelectionChange={setSelectedRowKeys}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.count ?? 0} />
@@ -334,16 +342,19 @@ export default function VillaLiftOrderListPage() {
         onCancel={resetModalState}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         okButtonProps={{ disabled: viewerDenied }}
-        width={760}
+        width={720}
         destroyOnHidden
       >
-        <VillaLiftOrderForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          initialValues={editingRecord}
-          orderOnly={isEdit}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <VillaLiftOrderForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            initialValues={editingRecord}
+            orderOnly={isEdit}
+          />
+        </div>
       </Modal>
 
       {/* 明细编辑弹窗 */}

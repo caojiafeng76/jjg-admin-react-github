@@ -3,8 +3,11 @@ import type {
   ExtrusionProductionItem,
 } from '@/services/apiExtrusionProductions'
 
-import { Descriptions, Empty, Table, Tag } from 'antd'
+import { Descriptions, Empty, Table } from 'antd'
 
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { formatNumber } from '@/utils/format'
 
 interface Props {
@@ -105,9 +108,9 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
   return (
     <div className="flex h-full flex-col overflow-hidden p-3">
       <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-        <Tag color={selectedRecord.is_audited ? 'success' : 'default'}>
+        <StatusPill tone={selectedRecord.is_audited ? 'success' : 'neutral'}>
           {selectedRecord.is_audited ? '已审核' : '待审核'}
-        </Tag>
+        </StatusPill>
         <span className="font-medium">{selectedRecord.production_date}</span>
         <span className="text-slate-400">·</span>
         <span>{selectedRecord.shift}</span>
@@ -168,6 +171,8 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
           size="small"
           pagination={false}
           columns={itemColumns}
+          rowClassName={zebraRowClassName}
+          locale={{ emptyText: <TableEmpty title="暂无明细" /> }}
           dataSource={selectedRecord.extrusion_production_items || []}
           scroll={{ x: 1200, y: 360 }}
         />

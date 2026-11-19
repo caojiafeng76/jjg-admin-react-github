@@ -9,10 +9,13 @@ import {
   ChevronRightIcon,
   PencilSquareIcon,
 } from '@heroicons/react/16/solid'
-import { Button, Spin, Table, Tag, Tooltip } from 'antd'
+import { Button, Spin, Table, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 
 import React, { memo, useMemo, useState } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { useVillaLiftOrderItems } from './useVillaLiftOrders'
 
 const EXPAND_COLUMN_WIDTH = 36
@@ -180,9 +183,9 @@ function ExpandedItems({
   }
 
   return (
-    <div className="px-8 py-3">
+    <div className="px-4 py-2">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+        <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
           订单明细 ({items.length} 条)
         </span>
         {canEditItems && (
@@ -198,13 +201,14 @@ function ExpandedItems({
       </div>
       {items.length === 0
         ? (
-            <div className="py-2 text-sm text-gray-400">暂无明细</div>
+            <div className="py-2 text-sm text-slate-400 dark:text-slate-500">暂无明细</div>
           )
         : (
             <Table<VillaLiftOrderItem>
               dataSource={items}
               columns={itemColumns}
               rowKey="id"
+              rowClassName={zebraRowClassName}
               pagination={false}
               size="small"
             />
@@ -305,7 +309,7 @@ function VillaLiftOrderTable({
         key: 'color',
         width: 76,
         ...getSelectFilter('color', data),
-        render: (v: string) => (v ? <Tag>{v}</Tag> : '-'),
+        render: (v: string) => (v ? <StatusPill tone="neutral">{v}</StatusPill> : '-'),
       },
       {
         title: '数量',
@@ -474,14 +478,11 @@ function VillaLiftOrderTable({
         ],
         onFilter: (value: boolean | React.Key, record: VillaLiftOrder) =>
           record.status === String(value),
-        render: (v: string) =>
-          v === 'closed'
-            ? (
-                <Tag color="green">已结案</Tag>
-              )
-            : (
-                <Tag color="red">未结案</Tag>
-              ),
+        render: (v: string) => (
+          <StatusPill tone={v === 'closed' ? 'success' : 'danger'}>
+            {v === 'closed' ? '已结案' : '未结案'}
+          </StatusPill>
+        ),
       },
       {
         title: '操作',
@@ -496,7 +497,7 @@ function VillaLiftOrderTable({
                     type="text"
                     size="small"
                     icon={
-                      <PencilSquareIcon className="size-4 text-yellow-500/80!" />
+                      <PencilSquareIcon className="size-4" />
                     }
                     aria-label={`编辑订单 ${record.project_name || record.id}`}
                     onClick={() => onEdit(record)}
@@ -529,7 +530,7 @@ function VillaLiftOrderTable({
                 <ChevronDownIcon className="size-4 text-blue-500" />
               )
             : (
-                <ChevronRightIcon className="size-4 text-gray-400" />
+                <ChevronRightIcon className="size-4 text-slate-400 dark:text-slate-500" />
               )
         }
         aria-label={`${expanded ? '收起' : '展开'}订单 ${record.project_name || record.id} 明细`}
@@ -555,6 +556,15 @@ function VillaLiftOrderTable({
       columns={columns}
       rowKey="id"
       size="small"
+      rowClassName={zebraRowClassName}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无别墅梯订单"
+            description="点击上方「添加」创建订单"
+          />
+        ),
+      }}
       components={DENSE_TABLE_COMPONENTS}
       scroll={{ x: tableWidth, y: scrollY }}
       pagination={false}

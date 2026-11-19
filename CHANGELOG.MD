@@ -18,6 +18,13 @@
 ## 2026-11-19
 
 - **类别**：变更
+- **范围**：`src/features/tooling/`、`src/features/labor-protection/`、`src/features/quality/`、`src/features/packaging-process/`、`src/features/villa-lift/`、`src/features/extrusion-production/`、`src/features/extrusion-production-daily-report/`、`src/features/workshop/`、`src/features/syney/`、`src/features/material-transfer/`、`src/features/precision-cutting-transfer/`、`src/features/precision-finishing-cutting/`、`src/features/production-order/`、`src/features/production-report/`、`src/pages/SyneySetting.tsx`、`src/pages/WorkshopOrderProduction.tsx`、`src/ui/uiStyleConventions.vitest.ts`、`src/pages/dashboardChangelog.ts`、`todolist.md`
+- **摘要**：完成前端界面风格统一 Phase 3（`P3-A`～`P3-D`，覆盖 14 个桌面端业务域及 2 个页面入口组件）：统一筛选区为 `FilterBar`、表格为 `TableState`/`TableEmpty`/`zebraRowClassName`、状态标签为 `StatusPill`、弹窗宽度与 `FormErrorAlert` 错误提示，移除非规范 `.ant-*` 样式穿透、`Tag.CheckableTag` 及手写 `<svg>` 图标等；扩展 `uiStyleConventions.vitest.ts` 守卫覆盖 Phase 3 全目录并将移动端扫码与公开二维码海报页纳入 Phase 4 延期名单；同步勾选 `todolist.md` 并更新首页更新日志。
+- **验证**：`bun run lint`（0 error）、`bun run typecheck`、`bun run build`、`bun run check:bundle`（主包 gzip 33.6 KB）及 `bun run test`（38 项脚本测试、238 个 Vitest 文件、1571 个用例，含 414 项 UI 风格守卫测试）全部通过。
+
+## 2026-11-19
+
+- **类别**：变更
 - **范围**：`src/features/youmai/`、`src/features/jintan/`、`src/features/syney-materials/`、`src/features/machine-runtime/`、`src/features/access-management/`、`src/features/attendance/`、`src/features/tooling-fixture/`、`src/ui/uiStyleConventions.vitest.ts`、`src/pages/dashboardChangelog.ts`、`todolist.md`
 - **摘要**：完成前端界面风格统一 Phase 2（高感知冲突域优先治理：消除“双卡套娃”与“外边距叠加”，覆盖 7 个业务域共 31 个管理端页面及西尼材料移动端壳）。
   - `youmai`（7 页）、`jintan`（13 个管理端页）与 `syney-materials`（5 个管理端页 + 移动端壳）：去除页面内搜索白卡（含蓝点「筛选条件」标题）与表格外层带阴影白卡套娃，统一改用扁平 `<FilterBar>`；对齐工具栏主次顺序（危险操作「删除」置尾，移除硬编码彩虹图标类）；将 10 个 Excel 批量导入组件收口至 960px `<ExcelImportModal>`；统一优迈原料/成品出入库与西尼材料表格紧凑密度、`<StatusPill>` 语义胶囊及暗色斑马纹 `zebraRowClassName`，并清理西尼材料移动端任意圆角與重阴影。

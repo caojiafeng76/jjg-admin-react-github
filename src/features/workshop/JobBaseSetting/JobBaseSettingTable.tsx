@@ -3,6 +3,8 @@ import type { JobBaseSetting } from '@/services/apiJobBaseSettings'
 import { Table } from 'antd'
 import { useMemo } from 'react'
 
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 function formatAmount(value: number | null | undefined, digits = 2) {
@@ -131,8 +133,8 @@ export default function JobBaseSettingTable({
       pagination={false}
       scroll={{ x: 1160, y: scrollY }}
       size="small"
-      rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无岗位基础数值" description="请新建配置或调整筛选条件" /> }}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

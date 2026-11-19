@@ -12,6 +12,9 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import LaborProtectionDataForm from './LaborProtectionDataForm'
 import LaborProtectionDataSearch from './LaborProtectionDataSearch'
 import LaborProtectionDataTable from './LaborProtectionDataTable'
@@ -33,6 +36,7 @@ export default function LaborProtectionDataPage() {
     = useState<LaborProtectionData | null>(null)
   const [formRef, setFormRef]
     = useState<FormInstance<LaborProtectionDataFormValues> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -41,7 +45,7 @@ export default function LaborProtectionDataPage() {
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = useLaborProtectionDataList({
+  const { data, isLoading, error, refetch } = useLaborProtectionDataList({
     page,
     pageSize,
     searchParams,
@@ -60,6 +64,7 @@ export default function LaborProtectionDataPage() {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     formRef?.resetFields()
   }, [formRef])
@@ -67,6 +72,7 @@ export default function LaborProtectionDataPage() {
   const handleCreate = useCallback(() => {
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setModalTitle('新建劳保资料')
     setIsModalOpen(true)
@@ -86,6 +92,7 @@ export default function LaborProtectionDataPage() {
     }
 
     setEditingRecord(record)
+    setFormError(null)
     setIsEdit(true)
     setModalTitle('编辑劳保资料')
     setIsModalOpen(true)
@@ -115,6 +122,7 @@ export default function LaborProtectionDataPage() {
   const handleFinish = useCallback(
     async (values: LaborProtectionDataFormValues) => {
       try {
+        setFormError(null)
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
@@ -130,12 +138,7 @@ export default function LaborProtectionDataPage() {
         resetFormState()
       }
       catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
+        setFormError(error)
       }
     },
     [
@@ -200,30 +203,35 @@ export default function LaborProtectionDataPage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">搜索：</span>
+      <FilterBar>
         <LaborProtectionDataSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <LaborProtectionDataTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <LaborProtectionDataTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -238,12 +246,15 @@ export default function LaborProtectionDataPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <LaborProtectionDataForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <LaborProtectionDataForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          />
+        </div>
       </Modal>
     </div>
   )

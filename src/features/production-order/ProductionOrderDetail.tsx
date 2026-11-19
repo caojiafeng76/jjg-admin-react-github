@@ -4,12 +4,13 @@ import type {
 } from '@/services/apiProductionOrderItems'
 import type { ProductionOrder } from '@/services/apiProductionOrders'
 import { PlusIcon } from '@heroicons/react/16/solid'
-import { App, Button, Card, Descriptions, Tag } from 'antd'
+import { App, Button, Descriptions } from 'antd'
 
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { isViewerRole } from '@/config/access'
 import { useAuth } from '@/contexts/useAuth'
+import StatusPill from '@/ui/StatusPill'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import ProductionOrderItemForm from './ProductionOrderItemForm'
@@ -139,7 +140,7 @@ export default function ProductionOrderDetail({
     <div className="space-y-4">
       {compact
         ? (
-            <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none">
+            <section className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="text-xs tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
@@ -152,9 +153,9 @@ export default function ProductionOrderDetail({
                     {orderWithEmployee.employee?.name || '-'}
                   </div>
                   <div className="mt-2">
-                    <Tag color={currentOrder.is_audited ? 'success' : 'default'}>
+                    <StatusPill tone={currentOrder.is_audited ? 'success' : 'neutral'}>
                       {currentOrder.is_audited ? '已审核' : '待审核'}
-                    </Tag>
+                    </StatusPill>
                   </div>
                 </div>
 
@@ -201,14 +202,15 @@ export default function ProductionOrderDetail({
             </section>
           )
         : (
-            <Card
-              title="生产工单信息"
-              extra={(
+            <section className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+              <div className="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5 dark:border-slate-700">
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  生产工单信息
+                </span>
                 <Button type="primary" onClick={onEdit} disabled={!canEdit}>
                   编辑工单
                 </Button>
-              )}
-            >
+              </div>
               <Descriptions column={compact ? 1 : 2} size="small">
                 <Descriptions.Item label="日期">
                   {currentOrder.order_date}
@@ -217,9 +219,9 @@ export default function ProductionOrderDetail({
                   {orderWithEmployee.employee?.name || '-'}
                 </Descriptions.Item>
                 <Descriptions.Item label="审核状态">
-                  <Tag color={currentOrder.is_audited ? 'success' : 'default'}>
+                  <StatusPill tone={currentOrder.is_audited ? 'success' : 'neutral'}>
                     {currentOrder.is_audited ? '已审核' : '待审核'}
-                  </Tag>
+                  </StatusPill>
                 </Descriptions.Item>
                 <Descriptions.Item label="审核时间">
                   {formattedAuditedAt || '-'}
@@ -259,12 +261,12 @@ export default function ProductionOrderDetail({
                   {currentOrder.remark || '-'}
                 </Descriptions.Item>
               </Descriptions>
-            </Card>
+            </section>
           )}
 
       {compact
         ? (
-            <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none">
+            <section className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <div className="text-xs tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
@@ -296,9 +298,11 @@ export default function ProductionOrderDetail({
             </section>
           )
         : (
-            <Card
-              title="工序明细"
-              extra={(
+            <section className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+              <div className="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5 dark:border-slate-700">
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  工序明细
+                </span>
                 <Button
                   type="primary"
                   icon={<PlusIcon className="h-4 w-4" />}
@@ -307,8 +311,7 @@ export default function ProductionOrderDetail({
                 >
                   添加工序
                 </Button>
-              )}
-            >
+              </div>
               <ProductionOrderItemTable
                 loading={itemsLoading}
                 data={items}
@@ -318,7 +321,7 @@ export default function ProductionOrderDetail({
                 showActions={canEdit}
                 hideCostColumns={hideCostColumns}
               />
-            </Card>
+            </section>
           )}
 
       <ProductionOrderItemForm

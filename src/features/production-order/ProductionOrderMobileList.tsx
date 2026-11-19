@@ -1,7 +1,8 @@
 import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
 import { EyeIcon } from '@heroicons/react/24/outline'
 
-import { Button, Empty, Tag } from 'antd'
+import { Button, Empty } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 
 interface Props {
   loading: boolean
@@ -33,8 +34,8 @@ export default function ProductionOrderMobileList({
             onClick={() => onSelect?.(selected ? [] : [record.id])}
             className={
               selected
-                ? 'rounded-3xl border border-slate-900 bg-slate-900 px-4 py-4 text-white shadow-[0_18px_40px_rgba(15,23,42,0.16)]'
-                : 'rounded-3xl border border-slate-200 bg-white px-4 py-4 text-slate-900 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
+                ? 'rounded-xl border border-slate-900 bg-slate-900 px-4 py-4 text-white shadow-sm'
+                : 'rounded-xl border border-slate-200 bg-white px-4 py-4 text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
             }
           >
             <div className="flex items-start justify-between gap-3">
@@ -52,19 +53,17 @@ export default function ProductionOrderMobileList({
                   {record.employee?.name || '未分配员工'}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Tag color={record.is_audited ? 'success' : 'default'}>
+                  <StatusPill tone={record.is_audited ? 'success' : 'neutral'}>
                     {record.is_audited ? '已审核' : '待审核'}
-                  </Tag>
-                  <Tag color="blue">{record.shift || '白班'}</Tag>
+                  </StatusPill>
+                  <StatusPill tone="info" dot={false}>
+                    {record.shift || '白班'}
+                  </StatusPill>
                 </div>
               </div>
-              <Tag
-                color={
-                  record.hasZeroStandardQualifiedItem ? 'error' : 'processing'
-                }
-              >
+              <StatusPill tone={record.hasZeroStandardQualifiedItem ? 'danger' : 'info'}>
                 {record.hasZeroStandardQualifiedItem ? '待修正工时' : '正常'}
-              </Tag>
+              </StatusPill>
             </div>
 
             <div

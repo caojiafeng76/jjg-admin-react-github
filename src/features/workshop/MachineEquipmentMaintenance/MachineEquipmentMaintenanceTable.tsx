@@ -3,6 +3,8 @@ import type { MachineEquipmentMaintenance } from '@/services/apiMachineEquipment
 import { Table } from 'antd'
 import { useMemo } from 'react'
 
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 function formatAmount(value: number | null | undefined, digits = 2) {
@@ -133,12 +135,13 @@ export default function MachineEquipmentMaintenanceTable({
       pagination={false}
       scroll={{ x: 'max-content', y: scrollY }}
       size="small"
+      locale={{ emptyText: <TableEmpty title="暂无设备维护记录" description="请新建记录或调整筛选条件" /> }}
       rowClassName={(record, index) => {
         if (record.id === activeRowId)
           return 'bg-sky-100 dark:bg-sky-900/40'
         if (selectedRowKeys.includes(record.id))
           return 'bg-sky-50 dark:bg-sky-900/20'
-        return index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'
+        return zebraRowClassName(record, index)
       }}
       onRow={record => ({
         ...createKeyboardTableRowProps(() => {

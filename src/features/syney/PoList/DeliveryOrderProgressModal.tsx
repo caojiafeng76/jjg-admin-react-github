@@ -143,7 +143,7 @@ export default function DeliveryOrderProgressModal({
     <Modal
       title="生成送货单"
       open={open}
-      width={760}
+      width={720}
       closable={!running}
       mask={{ closable: false }}
       keyboard={!running}

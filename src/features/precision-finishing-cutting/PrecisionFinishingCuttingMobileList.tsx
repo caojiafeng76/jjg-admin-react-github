@@ -1,7 +1,8 @@
 import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
-import { Button, Empty, Tag } from 'antd'
+import { Button, Empty } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 
 interface Props {
   loading: boolean
@@ -40,8 +41,8 @@ export default function PrecisionFinishingCuttingMobileList({
             onClick={() => onSelect(selected ? [] : [record.id])}
             className={
               selected
-                ? 'rounded-3xl border border-slate-900 bg-slate-900 px-4 py-4 text-white shadow-[0_18px_40px_rgba(15,23,42,0.16)]'
-                : 'rounded-3xl border border-slate-200 bg-white px-4 py-4 text-slate-900 shadow-[0_10px_25px_rgba(15,23,42,0.06)]'
+                ? 'rounded-xl border border-slate-900 bg-slate-900 px-4 py-4 text-white shadow-sm'
+                : 'rounded-xl border border-slate-200 bg-white px-4 py-4 text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
             }
           >
             <div className="flex items-start justify-between gap-3">
@@ -79,10 +80,12 @@ export default function PrecisionFinishingCuttingMobileList({
                   {record.product_model || '-'} / {record.customer_model || '-'}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Tag color={record.is_audited ? 'success' : 'default'}>
+                  <StatusPill tone={record.is_audited ? 'success' : 'neutral'}>
                     {record.is_audited ? '已审核' : '待审核'}
-                  </Tag>
-                  <Tag color="processing">{record.target_workshop}</Tag>
+                  </StatusPill>
+                  <StatusPill tone="info" dot={false}>
+                    {record.target_workshop}
+                  </StatusPill>
                 </div>
               </div>
 

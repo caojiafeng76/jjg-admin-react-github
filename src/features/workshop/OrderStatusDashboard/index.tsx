@@ -11,8 +11,9 @@ import type {
   OrderStatusDashboardItem,
   OrderStatusJobColumn,
 } from '@/services/apiOrderStatusDashboard'
-import { useQueryClient } from '@tanstack/react-query'
+import { CheckCircleIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { App, Table } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -25,6 +26,8 @@ import {
 import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
+import { TableEmpty, TableState } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import { createOrderStatusDashboardColumns } from './dashboardColumns'
 import {
@@ -121,7 +124,7 @@ export default function OrderStatusDashboard() {
       // 汇总行固定在表格底部，不参与滚动
       summaryRowHeight: SUMMARY_ROW_HEIGHT,
     })
-  const { data, isLoading, isPlaceholderData, refetch }
+  const { data, isLoading, isPlaceholderData, error, refetch }
     = useOrderStatusDashboard({
       page,
       pageSize,
@@ -385,7 +388,7 @@ export default function OrderStatusDashboard() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-1.5 p-3">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       <OrderStatusDashboardHeader
         canExportCurrentPage={canExportCurrentPage}
         exportDisabled={isDataLoading || visibleRows.length === 0}
@@ -425,26 +428,12 @@ export default function OrderStatusDashboard() {
       {/* 表格区域 */}
       <div
         ref={tableContainerRef}
-        className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/50 dark:bg-slate-800/80"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
         {/* 表头装饰 */}
         <div className="flex items-center justify-between border-b border-slate-100/60 bg-gradient-to-r from-slate-50/80 via-white to-slate-50/80 px-4 py-1.5 dark:border-slate-700/60 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/80">
           <div className="flex items-center gap-2">
-            <div className="flex size-5 items-center justify-center rounded-md bg-blue-100/80 dark:bg-blue-900/40">
-              <svg
-                className="size-3 text-blue-500 dark:text-blue-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
+            <TableCellsIcon className="size-4 text-slate-400" />
             <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
               数据列表
             </span>
@@ -454,19 +443,7 @@ export default function OrderStatusDashboard() {
           {canManageStatus && (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 dark:bg-emerald-900/30 dark:ring-emerald-900/50">
-                <svg
-                  className="size-3.5 text-emerald-500 dark:text-emerald-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <CheckCircleIcon className="size-3.5 text-success" />
                 <span className="text-xs text-emerald-600 dark:text-emerald-400">
                   {
                     rows.filter(r =>
@@ -495,36 +472,41 @@ export default function OrderStatusDashboard() {
           </span>
         </div>
 
-        <Table<OrderStatusDashboardItem>
-          rowKey="id"
-          bordered
-          size="small"
-          components={DENSE_TABLE_COMPONENTS}
-          loading={{ spinning: isDataLoading, tip: '数据加载中...' }}
-          columns={columns}
-          dataSource={rows}
-          pagination={false}
-          scroll={{
-            x: tableWidth,
-            y: scrollY,
-            scrollToFirstRowOnChange: true,
-          }}
-          onChange={handleTableChange}
-          sticky={{ offsetHeader: 0 }}
-          summary={pageData =>
-            renderOrderStatusSummary({ columns, jobColumns, rows: pageData })}
-          rowClassName={record =>
-            record.productionStatus === '延期'
-              ? 'bg-red-50/50 hover:bg-red-50 dark:bg-red-950/30 dark:hover:bg-red-950/40'
-              : record.productionStatus === '预警'
-                ? 'bg-amber-50/50 hover:bg-amber-50 dark:bg-amber-950/30 dark:hover:bg-amber-950/40'
-                : 'hover:bg-blue-50/30 dark:hover:bg-blue-950/40'}
-          onRow={() => ({
-            style: { height: rowHeight },
-            className: 'transition-colors duration-150',
-          })}
-          className="[&_.ant-table]:!font-mono [&_.ant-table-thead>tr>th]:!text-xs [&_.ant-table-thead>tr>th]:!font-semibold [&_.ant-table-thead>tr>th]:!text-slate-500 dark:[&_.ant-table-thead>tr>th]:!text-slate-400"
-        />
+        <div className="min-h-0 flex-1 overflow-x-auto">
+          <TableState loading={isLoading && !data} error={error} onRetry={handleRefetch}>
+            <Table<OrderStatusDashboardItem>
+              rowKey="id"
+              bordered
+              size="small"
+              components={DENSE_TABLE_COMPONENTS}
+              loading={{ spinning: isDataLoading, tip: '数据加载中...' }}
+              columns={columns}
+              dataSource={rows}
+              pagination={false}
+              scroll={{
+                x: tableWidth,
+                y: scrollY,
+                scrollToFirstRowOnChange: true,
+              }}
+              onChange={handleTableChange}
+              sticky={{ offsetHeader: 0 }}
+              summary={pageData =>
+                renderOrderStatusSummary({ columns, jobColumns, rows: pageData })}
+              locale={{ emptyText: <TableEmpty title="暂无订单现状数据" description="请调整筛选条件后查询" /> }}
+              rowClassName={(record, index) =>
+                record.productionStatus === '延期'
+                  ? 'bg-red-50/50 hover:bg-red-50 dark:bg-red-950/30 dark:hover:bg-red-950/40'
+                  : record.productionStatus === '预警'
+                    ? 'bg-amber-50/50 hover:bg-amber-50 dark:bg-amber-950/30 dark:hover:bg-amber-950/40'
+                    : zebraRowClassName(record, index)}
+              onRow={() => ({
+                style: { height: rowHeight },
+                className: 'transition-colors duration-150',
+              })}
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            />
+          </TableState>
+        </div>
       </div>
 
       {/* 分页区域 */}

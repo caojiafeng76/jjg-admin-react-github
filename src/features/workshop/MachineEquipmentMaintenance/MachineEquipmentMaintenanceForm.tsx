@@ -3,7 +3,7 @@ import type {
   MachineEquipmentMaintenance,
   MachineEquipmentMaintenanceFormValues,
 } from '@/services/apiMachineEquipmentMaintenances'
-import { Card, Form, Input, InputNumber, Typography } from 'antd'
+import { Form, Input, InputNumber, Typography } from 'antd'
 
 import { useEffect, useMemo } from 'react'
 
@@ -254,11 +254,11 @@ export default function MachineEquipmentMaintenanceForm({
         <TextArea rows={3} placeholder="请输入备注" maxLength={500} />
       </Form.Item>
 
-      <Card size="small" className="border-slate-200 bg-slate-50">
+      <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-900/50">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
             <Typography.Text type="secondary">单小时电费（元）</Typography.Text>
-            <div className="mt-1 text-lg font-semibold text-slate-900">
+            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums dark:text-slate-100">
               {formatAmount(preview.hourlyElectricityFee, 8)}
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function MachineEquipmentMaintenanceForm({
             <Typography.Text type="secondary">
               折旧费率（元/小时）
             </Typography.Text>
-            <div className="mt-1 text-lg font-semibold text-slate-900">
+            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums dark:text-slate-100">
               {formatAmount(preview.depreciationRate, 8)}
             </div>
           </div>
@@ -274,12 +274,12 @@ export default function MachineEquipmentMaintenanceForm({
             <Typography.Text type="secondary">
               设备小时费率（元/小时）
             </Typography.Text>
-            <div className="mt-1 text-lg font-semibold text-slate-900">
+            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums dark:text-slate-100">
               {formatAmount(preview.equipmentHourlyRate, 8)}
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </Form>
   )
 }

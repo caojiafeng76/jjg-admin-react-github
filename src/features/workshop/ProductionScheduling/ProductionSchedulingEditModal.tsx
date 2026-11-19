@@ -13,14 +13,15 @@ import {
   Space,
   theme,
 } from 'antd'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import {
   getProductSpec,
   PROGRESS_STATUS_OPTIONS,
-
 } from './productionSchedulingUtils'
 
 export interface ProductionSchedulingEditModalProps {
   open: boolean
+  formError?: unknown
   form: FormInstance<SchedulingFormValues>
   editingOrder: ProductionSchedulingOrder | null
   confirmLoading: boolean
@@ -32,6 +33,7 @@ export interface ProductionSchedulingEditModalProps {
 
 export default function ProductionSchedulingEditModal({
   open,
+  formError = null,
   form,
   editingOrder,
   confirmLoading,
@@ -53,7 +55,7 @@ export default function ProductionSchedulingEditModal({
         </div>
       )}
       open={open}
-      width={860}
+      width={960}
       okText="保存"
       cancelText="取消"
       confirmLoading={confirmLoading}
@@ -77,11 +79,12 @@ export default function ProductionSchedulingEditModal({
       onOk={onOk}
     >
       <div className="mb-4 flex items-center gap-2 rounded-lg border border-blue-100/50 bg-gradient-to-r from-blue-50/50 to-white px-4 py-2.5 shadow-sm dark:border-blue-900/50 dark:from-blue-950/40 dark:to-slate-800">
-        <TableCellsIcon className="size-4 text-blue-500 dark:text-blue-400" />
+        <TableCellsIcon className="size-4 text-slate-500 dark:text-slate-400" />
         <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
           {getProductSpec(editingOrder)}
         </span>
       </div>
+      <FormErrorAlert error={formError} className="mb-3" />
       <Form<SchedulingFormValues> form={form} layout="vertical">
         <div className="grid grid-cols-1 gap-x-4 gap-y-4 md:grid-cols-3">
           <Form.Item

@@ -10,6 +10,8 @@ import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AppPagination from '@/ui/AppPagination'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import { normalizeSearchKeywords } from '@/utils/searchKeywords'
 import { useExportWorkshopOrdersAsExcel } from './useExportWorkshopOrdersAsExcel'
 import { usePrintWorkshopOrders } from './usePrintWorkshopOrders'
@@ -94,7 +96,7 @@ export default function WorkshopOrderList() {
     [fixedStatus, searchParams],
   )
 
-  const { data, isLoading } = useWorkshopOrdersList({
+  const { data, isLoading, error, refetch } = useWorkshopOrdersList({
     page,
     pageSize,
     searchParams: mergedSearchParams,
@@ -190,6 +192,7 @@ export default function WorkshopOrderList() {
       return
     }
 
+    setFormError(null)
     setIsEdit(false)
     setModalTitle('创建订单')
     setIsModalOpen(true)
@@ -197,8 +200,10 @@ export default function WorkshopOrderList() {
   }, [message, viewerDenied, viewerOperationTip])
 
   const [editingRecord, setEditingRecord] = useState<WorkshopOrder | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const resetFormState = useCallback(() => {
+    setFormError(null)
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
@@ -229,6 +234,7 @@ export default function WorkshopOrderList() {
         ? dayjs(record.product_delivery_date)
         : undefined,
     } as WorkshopOrder & { product_delivery_date: dayjs.Dayjs | undefined }
+    setFormError(null)
     setEditingRecord(formValues as unknown as WorkshopOrder)
     setIsEdit(true)
     setModalTitle('编辑订单')
@@ -253,15 +259,17 @@ export default function WorkshopOrderList() {
         message.success(successMessage)
         resetFormState()
       }
-      const handleError = (error: unknown) => {
-        if (error instanceof Error) {
-          message.error(error.message)
+      const handleError = (err: unknown) => {
+        setFormError(err)
+        if (err instanceof Error) {
+          message.error(err.message)
         }
         else {
           message.error('操作失败，请稍后重试')
         }
       }
 
+      setFormError(null)
       if (isEdit && selectedRowKeys[0]) {
         // 编辑模式：单条更新
         updateMutation.mutate(
@@ -441,7 +449,7 @@ export default function WorkshopOrderList() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 p-1">
+    <div className="flex h-full flex-col gap-3">
       {/* 状态 Tab - 工业风格面板 */}
       <WorkshopOrderStatusTabs
         activeTab={activeTab}
@@ -471,7 +479,7 @@ export default function WorkshopOrderList() {
         preloadExportAsExcel={preloadExportAsExcel}
       />
 
-      {/* 搜索栏 - 工业风格面板 */}
+      {/* 搜索栏 */}
       <WorkshopOrderSearchPanel
         onSearch={handleSearch}
         onReset={handleResetSearch}
@@ -486,28 +494,30 @@ export default function WorkshopOrderList() {
       >
         {/* 上半部分：订单列表 */}
         <Splitter.Panel defaultSize="60%" min="30%">
-          <div className="flex h-full flex-col gap-3 overflow-hidden rounded-lg border border-slate-200/60 bg-white/90 p-3 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/90">
+          <div className="flex h-full flex-col gap-3 overflow-hidden pr-1">
             <div
               ref={tableContainerRef}
               className="min-h-0 flex-1 overflow-hidden"
             >
-              <WorkshopOrderTable
-                loading={isLoading}
-                data={data?.items || []}
-                projectNoOptions={projectNoOptions}
-                modelOptions={modelOptions}
-                projectNoFilterValues={projectNoFilterValues}
-                modelFilterValues={modelFilterValues}
-                selectedRowKeys={selectedRowKeys}
-                onSelect={setSelectedRowKeys}
-                onChange={handleTableChange}
-                activeRowId={activeOrder?.id ?? null}
-                onRowClick={setActiveOrder}
-                scrollY={scrollY}
-                rowHeight={rowHeight}
-                page={page}
-                pageSize={pageSize}
-              />
+              <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+                <WorkshopOrderTable
+                  loading={isLoading}
+                  data={data?.items || []}
+                  projectNoOptions={projectNoOptions}
+                  modelOptions={modelOptions}
+                  projectNoFilterValues={projectNoFilterValues}
+                  modelFilterValues={modelFilterValues}
+                  selectedRowKeys={selectedRowKeys}
+                  onSelect={setSelectedRowKeys}
+                  onChange={handleTableChange}
+                  activeRowId={activeOrder?.id ?? null}
+                  onRowClick={setActiveOrder}
+                  scrollY={scrollY}
+                  rowHeight={rowHeight}
+                  page={page}
+                  pageSize={pageSize}
+                />
+              </TableState>
             </div>
             <div ref={paginationRef} className="flex shrink-0 justify-end">
               <AppPagination total={data?.total || 0} />
@@ -517,7 +527,7 @@ export default function WorkshopOrderList() {
 
         {/* 下半部分：生产工单统计 */}
         <Splitter.Panel min="20%">
-          <div className="h-full overflow-hidden rounded-lg border border-slate-200/60 bg-white/90 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/90">
+          <div className="h-full overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
             <WorkshopOrderProductionStats
               selectedOrder={activeOrder}
               canManageStatus={!viewerDenied && canManageStatus}
@@ -544,6 +554,7 @@ export default function WorkshopOrderList() {
           resetFormState()
         }}
       >
+        <FormErrorAlert error={formError} className="mb-3" />
         <WorkshopOrderForm
           onFinish={handleFinish}
           setFormRef={setFormRef}

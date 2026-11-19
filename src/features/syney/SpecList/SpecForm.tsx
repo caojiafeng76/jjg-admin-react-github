@@ -36,7 +36,6 @@ export default function SpecForm({ ref, onFinishFunc, isEditing, initialValues }
       name="control-hooks"
       initialValues={initialValues}
       onFinish={onFinish}
-      className="[&_.ant-form-item]:mb-3"
     >
       <Form.Item
         name="PartNo"

@@ -385,7 +385,7 @@ export default function ProjectNoScanButton({
         footer={null}
         destroyOnHidden
         forceRender
-        width={420}
+        width={520}
       >
         <div className="space-y-4">
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 dark:border-slate-700">
@@ -397,7 +397,7 @@ export default function ProjectNoScanButton({
                 playsInline
               />
               <div className="pointer-events-none absolute inset-0 border-20 border-black/20" />
-              <div className="pointer-events-none absolute inset-x-10 top-1/2 h-44 -translate-y-1/2 overflow-hidden rounded-3xl border-2 border-emerald-300/90 shadow-[0_0_0_9999px_rgba(15,23,42,0.35)]">
+              <div className="pointer-events-none absolute inset-x-10 top-1/2 h-44 -translate-y-1/2 overflow-hidden rounded-2xl border-2 border-emerald-300/90" style={{ boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.35)' }}>
                 <div className="scanner-sweep-line absolute inset-x-3 top-0 h-4 rounded-full" />
               </div>
               {starting

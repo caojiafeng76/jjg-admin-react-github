@@ -97,10 +97,10 @@ export default function StandardTimeMobileList({
         return (
           <article
             key={record.id}
-            className={`relative overflow-hidden rounded-2xl ${
+            className={`relative overflow-hidden rounded-xl ${
               isMatched
-                ? 'border border-slate-200 bg-white shadow-[0_4px_20px_rgba(15,23,42,0.08)] dark:border-slate-700 dark:bg-slate-800'
-                : 'border border-amber-200 bg-gradient-to-br from-amber-50/80 to-orange-50/80 shadow-[0_4px_20px_rgba(245,158,11,0.15)] dark:border-amber-500/30 dark:from-amber-500/10 dark:to-orange-500/10'
+                ? 'border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800'
+                : 'border border-amber-200 bg-amber-50/70 shadow-sm dark:border-amber-500/30 dark:bg-amber-950/30'
             }`}
           >
             {/* Accent Line */}

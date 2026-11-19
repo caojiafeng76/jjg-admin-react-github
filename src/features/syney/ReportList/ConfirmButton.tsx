@@ -14,7 +14,7 @@ export default function ConfirmButton() {
       onClick={() => {
         markStatus(tableSelectedKeys.map(String), 'confirmed')
       }}
-      icon={<CheckCircleIcon className="size-4 text-green-500/80!" />}
+      icon={<CheckCircleIcon className="size-4" />}
     >
       已校对
     </Button>

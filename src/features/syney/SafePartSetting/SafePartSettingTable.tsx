@@ -2,16 +2,19 @@ import type { SyneySafePartSetting } from '@services/apiSyneySafePartSettings'
 import type { ColumnsType, FilterDropdownProps } from 'antd/es/table/interface'
 import type { Key } from 'react'
 import type { useSafePartDrawing } from './useSafePartDrawing'
-import { SearchOutlined } from '@ant-design/icons'
 import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   EyeIcon,
+  MagnifyingGlassIcon,
   PencilSquareIcon,
 } from '@heroicons/react/16/solid'
 import { SAFE_PART_DRAWING_ACCEPT } from '@services/apiSyneySafePartSettings'
 import { Button, Input, Table, Tooltip, Upload } from 'antd'
 import { useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { DECOMPOSITION_ROLE_LABELS } from './constants'
 
 type SafePartDrawingActions = Omit<
@@ -31,19 +34,11 @@ export interface SafePartSettingTableProps {
 }
 
 function BooleanBadge({ value }: { value: boolean }) {
-  return value
-    ? (
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600 shadow-sm dark:bg-emerald-900/40 dark:text-emerald-400">
-          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          是
-        </div>
-      )
-    : (
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 shadow-sm dark:bg-slate-700/50 dark:text-slate-400">
-          <div className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
-          否
-        </div>
-      )
+  return (
+    <StatusPill tone={value ? 'success' : 'neutral'}>
+      {value ? '是' : '否'}
+    </StatusPill>
+  )
 }
 
 export default function SafePartSettingTable({
@@ -122,7 +117,7 @@ export default function SafePartSettingTable({
           </div>
         ),
         filterIcon: (filtered: boolean) => (
-          <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+          <MagnifyingGlassIcon className={`size-3.5 ${filtered ? 'text-primary' : 'text-slate-400'}`} />
         ),
         onFilter: (value, record) =>
           (record.part_no ?? '')
@@ -218,7 +213,7 @@ export default function SafePartSettingTable({
                   loading={uploadLoading}
                   disabled={uploadLoading}
                   icon={
-                    <ArrowUpTrayIcon className="size-4 text-emerald-500/80!" />
+                    <ArrowUpTrayIcon className="size-4" />
                   }
                 >
                   {hasDrawing ? '替换' : '上传'}
@@ -230,7 +225,7 @@ export default function SafePartSettingTable({
                   size="small"
                   disabled={!hasDrawing}
                   loading={previewLoading}
-                  icon={<EyeIcon className="size-4 text-blue-500/80!" />}
+                  icon={<EyeIcon className="size-4" />}
                   onClick={() => handlePreviewDrawing(record)}
                 >
                   查看
@@ -242,7 +237,7 @@ export default function SafePartSettingTable({
                 disabled={!hasDrawing}
                 loading={downloadLoading}
                 icon={
-                  <ArrowDownTrayIcon className="size-4 text-slate-500/80!" />
+                  <ArrowDownTrayIcon className="size-4" />
                 }
                 onClick={() => handleDownloadDrawing(record)}
               >
@@ -270,7 +265,7 @@ export default function SafePartSettingTable({
             type="text"
             size="small"
             icon={
-              <PencilSquareIcon className="size-4 text-amber-500/80!" />
+              <PencilSquareIcon className="size-4" />
             }
             onClick={() => onEdit(record)}
           >
@@ -305,11 +300,12 @@ export default function SafePartSettingTable({
       dataSource={data}
       columns={columns}
       rowSelection={rowSelection}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无件号配置" description="请新建配置或调整筛选条件" /> }}
       size="small"
       pagination={false}
       scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
     />
   )
 }

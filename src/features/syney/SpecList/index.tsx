@@ -9,6 +9,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
+import FilterBar from '@/ui/FilterBar'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
 import { feedbackText } from '@/utils/feedbackText'
@@ -141,12 +142,14 @@ export default function SpecList() {
         : null}
 
       {/* 搜索 / 过滤栏 */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 dark:text-slate-300">件号：</span>
-          <PartNoInput />
+      <FilterBar>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600 dark:text-slate-300">件号：</span>
+            <PartNoInput />
+          </div>
         </div>
-      </div>
+      </FilterBar>
 
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">

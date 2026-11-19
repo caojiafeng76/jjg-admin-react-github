@@ -1,7 +1,8 @@
 import type { TableColumnsType } from 'antd'
 import type { ProductionItemWithOrderDetail } from '@/services/apiProductionOrders'
 
-import { Tag, Typography } from 'antd'
+import { Typography } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 
 const { Text } = Typography
 
@@ -38,9 +39,9 @@ export const recordColumns: TableColumnsType<ProductionItemWithOrderDetail> = [
     key: 'shift',
     width: 60,
     render: (v: string) => (
-      <Tag color={v === '白班' ? 'blue' : 'purple'} style={{ fontSize: 11 }}>
+      <StatusPill tone={v === '白班' ? 'info' : 'neutral'} dot={false}>
         {v}
-      </Tag>
+      </StatusPill>
     ),
   },
   {

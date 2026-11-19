@@ -7,6 +7,8 @@ import { useMemo } from 'react'
 
 import { Link, useLocation } from 'react-router-dom'
 import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { formatDate } from '@/utils/format'
 import { formatNumberPadded } from '@/utils/helps'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
@@ -156,11 +158,12 @@ export default function ReportTable({
       dataSource={data}
       loading={loading || isLoading}
       pagination={false}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无西尼入库单" description="请新建或调整筛选条件" /> }}
       size="small"
       onRow={handleRow}
       scroll={{ x: 700, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">

@@ -1,5 +1,5 @@
 import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
-import { PencilSquareIcon } from '@heroicons/react/24/outline'
+import { ArchiveBoxIcon, BuildingStorefrontIcon, ClockIcon, PencilSquareIcon } from '@heroicons/react/24/outline'
 
 import { Button, Spin } from 'antd'
 
@@ -23,20 +23,8 @@ export default function MaterialTransferMobileList({
   if (!loading && data.length === 0) {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-          <svg
-            className="h-8 w-8 text-slate-300"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-            />
-          </svg>
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
+          <ArchiveBoxIcon className="h-8 w-8 text-slate-300 dark:text-slate-600" />
         </div>
         <p className="text-sm text-slate-400">暂无转移单</p>
       </div>
@@ -55,8 +43,8 @@ export default function MaterialTransferMobileList({
               onClick={() => onSelect(selected ? [] : [record.id])}
               className={
                 selected
-                  ? 'group cursor-pointer overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-br from-slate-800 to-slate-900 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.25)]'
-                  : 'group cursor-pointer overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_8px_30px_rgba(15,23,42,0.08)] transition-all duration-200 hover:border-slate-300 hover:shadow-[0_12px_40px_rgba(15,23,42,0.12)]'
+                  ? 'group cursor-pointer overflow-hidden rounded-xl border border-slate-700 bg-slate-900 p-4 shadow-sm'
+                  : 'group cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800'
               }
             >
               <div className="flex items-start justify-between gap-3">
@@ -69,19 +57,7 @@ export default function MaterialTransferMobileList({
                         : 'mb-2 flex items-center gap-1.5 text-xs text-slate-400'
                     }
                   >
-                    <svg
-                      className="h-3 w-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
+                    <ClockIcon className="h-3 w-3" />
                     {record.created_at
                       ? new Date(record.created_at).toLocaleString('zh-CN', {
                           month: '2-digit',
@@ -152,19 +128,7 @@ export default function MaterialTransferMobileList({
                           : 'inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 shadow-sm'
                       }
                     >
-                      <svg
-                        className="h-3 w-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-                        />
-                      </svg>
+                      <BuildingStorefrontIcon className="h-3 w-3" />
                       {record.target_workshop}
                     </div>
                   </div>

@@ -3,10 +3,14 @@ import type {
   PrecisionCuttingDetailRow,
   SelectedPrecisionCuttingDetail,
 } from './dashboardRenderUtils'
-import { Modal, Table, Tag } from 'antd'
+import { ScissorsIcon } from '@heroicons/react/16/solid'
+import { Modal, Table } from 'antd'
 import dayjs from 'dayjs'
-
 import { useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
   renderDetailQuantity,
   renderText,
@@ -156,9 +160,9 @@ export function PrecisionCuttingDetailModal({
       width: 90,
       align: 'center',
       render: (value: boolean) => (
-        <Tag color={value ? 'green' : 'gold'}>
+        <StatusPill tone={value ? 'success' : 'warning'}>
           {value ? '已审核' : '未审核'}
-        </Tag>
+        </StatusPill>
       ),
     },
     {
@@ -175,20 +179,8 @@ export function PrecisionCuttingDetailModal({
       open={Boolean(detail)}
       title={(
         <div className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 shadow-md shadow-cyan-500/30">
-            <svg
-              className="size-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-              />
-            </svg>
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
+            <ScissorsIcon className="size-4" />
           </div>
           <div>
             <span className="font-semibold text-slate-700 dark:text-slate-200">
@@ -200,10 +192,9 @@ export function PrecisionCuttingDetailModal({
         </div>
       )}
       footer={null}
-      width={1180}
+      width={960}
       destroyOnHidden
       onCancel={onClose}
-      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white dark:[&_.ant-modal-header]:!border-slate-700 dark:[&_.ant-modal-header]:!from-slate-800 dark:[&_.ant-modal-header]:!to-slate-800"
     >
       {detail && (
         <div className="space-y-4">
@@ -262,9 +253,10 @@ export function PrecisionCuttingDetailModal({
               size="small"
               columns={columns}
               dataSource={rows}
+              rowClassName={zebraRowClassName}
+              locale={{ emptyText: <TableEmpty title="暂无精切明细" /> }}
               pagination={false}
               scroll={{ x: 1640, y: 420 }}
-              className="[&_.ant-table]:!rounded-none"
             />
           </div>
         </div>

@@ -5,6 +5,7 @@ import { useCallback, useMemo } from 'react'
 
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -210,6 +211,7 @@ export default function PrecisionFinishingCuttingTable({
   return (
     <Table<PrecisionFinishingCuttingWithEmployee>
       rowKey={record => record.id}
+      rowClassName={zebraRowClassName}
       loading={loading}
       columns={columns}
       dataSource={data}
@@ -228,7 +230,6 @@ export default function PrecisionFinishingCuttingTable({
           />
         ),
       }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-500/10 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-400"
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800/80">

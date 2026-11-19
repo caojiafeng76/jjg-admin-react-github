@@ -7,6 +7,7 @@ import type {
 
 import type { ProjectNoSelectOption } from '@/features/production-order/projectNoSelect'
 import { Form, Modal } from 'antd'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import {
   ProductionFields,
   QualityFields,
@@ -16,6 +17,7 @@ import {
 
 export interface ReworkRepairFormModalProps {
   form: FormInstance<QualityReworkRepairFormFields>
+  formError?: unknown
   open: boolean
   isEdit: boolean
   isSubmitting: boolean
@@ -32,6 +34,7 @@ export interface ReworkRepairFormModalProps {
 
 export default function ReworkRepairFormModal({
   form,
+  formError,
   open,
   isEdit,
   isSubmitting,
@@ -49,7 +52,7 @@ export default function ReworkRepairFormModal({
     <Modal
       title={isEdit ? processingStage.modalTitle : '新建返工返修记录'}
       open={open}
-      width={980}
+      width={960}
       destroyOnHidden
       okText={isEdit ? processingStage.okText : '保存车间发起'}
       cancelText="取消"
@@ -58,47 +61,50 @@ export default function ReworkRepairFormModal({
       onCancel={onCancel}
       okButtonProps={{ disabled: viewerDenied }}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        disabled={isSubmitting || viewerDenied}
-      >
-        {processingStageKey === 'production'
-          ? (
-              <ProductionFields />
-            )
-          : processingStageKey === 'technical'
+      <div className="space-y-4">
+        <FormErrorAlert error={formError} />
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          disabled={isSubmitting || viewerDenied}
+        >
+          {processingStageKey === 'production'
             ? (
-                <TechnicalFields />
+                <ProductionFields />
               )
-            : processingStageKey === 'quality'
+            : processingStageKey === 'technical'
               ? (
-                  <QualityFields />
+                  <TechnicalFields />
                 )
-              : processingStageKey === 'completed'
+              : processingStageKey === 'quality'
                 ? (
-                    <>
+                    <QualityFields />
+                  )
+                : processingStageKey === 'completed'
+                  ? (
+                      <>
+                        <WorkshopFields
+                          isFetchingDocumentNo={isFetchingDocumentNo}
+                          isLoadingOrderOptions={isLoadingOrderOptions}
+                          projectNoOptions={projectNoOptions}
+                          onProjectNoChange={onProjectNoChange}
+                        />
+                        <ProductionFields />
+                        <TechnicalFields />
+                        <QualityFields />
+                      </>
+                    )
+                  : (
                       <WorkshopFields
                         isFetchingDocumentNo={isFetchingDocumentNo}
                         isLoadingOrderOptions={isLoadingOrderOptions}
                         projectNoOptions={projectNoOptions}
                         onProjectNoChange={onProjectNoChange}
                       />
-                      <ProductionFields />
-                      <TechnicalFields />
-                      <QualityFields />
-                    </>
-                  )
-                : (
-                    <WorkshopFields
-                      isFetchingDocumentNo={isFetchingDocumentNo}
-                      isLoadingOrderOptions={isLoadingOrderOptions}
-                      projectNoOptions={projectNoOptions}
-                      onProjectNoChange={onProjectNoChange}
-                    />
-                  )}
-      </Form>
+                    )}
+        </Form>
+      </div>
     </Modal>
   )
 }

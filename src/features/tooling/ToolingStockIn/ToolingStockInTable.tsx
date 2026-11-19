@@ -1,8 +1,11 @@
 import type { TableColumnsType } from 'antd'
 import type { ToolingStockIn } from '@/services/apiToolingStockIn'
-import { Table, Tag } from 'antd'
+import { Table } from 'antd'
 import { memo, useMemo } from 'react'
 
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { formatNumber } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
@@ -114,7 +117,9 @@ function ToolingStockInTable({
         ],
         onFilter: (value, record) => record.status === value,
         render: (value: ToolingStockIn['status']) => (
-          <Tag color={value === '已审核' ? 'success' : 'default'}>{value}</Tag>
+          <StatusPill tone={value === '已审核' ? 'success' : 'neutral'}>
+            {value}
+          </StatusPill>
         ),
       },
       {
@@ -246,10 +251,15 @@ function ToolingStockInTable({
       pagination={false}
       scroll={{ x: 1750, y: scrollY }}
       size="small"
-      rowClassName={(_, index) =>
-        index % 2 === 0
-          ? 'bg-white dark:bg-slate-800'
-          : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无刀具入库记录"
+            description="点击上方「添加」创建刀具入库单"
+          />
+        ),
+      }}
+      rowClassName={zebraRowClassName}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

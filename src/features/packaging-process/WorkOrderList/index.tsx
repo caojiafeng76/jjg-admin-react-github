@@ -17,6 +17,9 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import { useExportWorkOrdersAsExcel } from './useExportWorkOrdersAsExcel'
 import {
   useCreatePackagingWorkOrder,
@@ -52,6 +55,7 @@ export default function WorkOrderListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建生产工单')
   const [isEdit, setIsEdit] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [editingRecord, setEditingRecord]
     = useState<PackagingWorkOrderBatch | null>(null)
@@ -65,7 +69,7 @@ export default function WorkOrderListPage() {
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = usePackagingWorkOrderList({
+  const { data, isLoading, error, refetch } = usePackagingWorkOrderList({
     page,
     pageSize,
     searchParams,
@@ -86,6 +90,7 @@ export default function WorkOrderListPage() {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     formRef?.resetFields()
   }, [formRef])
@@ -93,6 +98,7 @@ export default function WorkOrderListPage() {
   const handleCreate = useCallback(() => {
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setModalTitle('新建生产工单')
     setIsModalOpen(true)
@@ -112,6 +118,7 @@ export default function WorkOrderListPage() {
     }
 
     setEditingRecord(record)
+    setFormError(null)
     setIsEdit(true)
     setModalTitle('编辑生产工单')
     setIsModalOpen(true)
@@ -165,6 +172,7 @@ export default function WorkOrderListPage() {
       }
 
       try {
+        setFormError(null)
         if (isEdit && editingRecord) {
           await updateMutation.mutateAsync({
             id: editingRecord.id,
@@ -182,12 +190,7 @@ export default function WorkOrderListPage() {
         resetFormState()
       }
       catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
+        setFormError(error)
       }
     },
     [
@@ -271,6 +274,13 @@ export default function WorkOrderListPage() {
           handleEdit={handleEdit}
           permissionKey={EDIT_PERMISSION_KEY}
         />
+        <ExportButton
+          handleExport={handleExport}
+          loading={isExporting}
+          onPreload={preloadExportAsExcel}
+          count={data?.total || 0}
+          permissionKey={EXPORT_PERMISSION_KEY}
+        />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
@@ -279,39 +289,37 @@ export default function WorkOrderListPage() {
           itemName="生产工单"
           permissionKey={DELETE_PERMISSION_KEY}
         />
-        <ExportButton
-          handleExport={handleExport}
-          loading={isExporting}
-          onPreload={preloadExportAsExcel}
-          count={data?.total || 0}
-          permissionKey={EXPORT_PERMISSION_KEY}
-        />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
+      <FilterBar>
         <WorkOrderSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <WorkOrderTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <WorkOrderTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -322,7 +330,7 @@ export default function WorkOrderListPage() {
         title={modalTitle}
         open={isModalOpen}
         destroyOnHidden
-        width={760}
+        width={720}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         okButtonProps={{
           disabled: viewerDenied || (isEdit ? !canEdit : !canCreate),
@@ -330,15 +338,18 @@ export default function WorkOrderListPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <WorkOrderForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-          isHistoricalInconsistent={
-            isEdit && editingRecord?.is_historical_inconsistent
-          }
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <WorkOrderForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+            isHistoricalInconsistent={
+              isEdit && editingRecord?.is_historical_inconsistent
+            }
+          />
+        </div>
       </Modal>
     </div>
   )

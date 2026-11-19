@@ -23,7 +23,6 @@ export default function DetailForm({ ref, onFinishFuc }: FormProps) {
       name="detail-form"
       onFinish={onFinish}
       ref={ref}
-      className="[&_.ant-form-item]:mb-3"
     >
       <Form.Item name="id" label="id" hidden>
         <Input hidden disabled={true} />

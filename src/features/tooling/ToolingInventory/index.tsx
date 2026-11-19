@@ -15,6 +15,9 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 import ToolingInventoryExcelImport from './ToolingInventoryExcelImport'
 import ToolingInventoryForm from './ToolingInventoryForm'
@@ -45,6 +48,7 @@ export default function ToolingInventoryPage() {
   )
   const [formRef, setFormRef]
     = useState<FormInstance<ToolingInventoryFormValues> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
   const [toolingOptionsKeyword, setToolingOptionsKeyword] = useState('')
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -54,7 +58,7 @@ export default function ToolingInventoryPage() {
     keyword: searchParamsURL.get('keyword') || undefined,
   })
 
-  const { data, isLoading } = useToolingInventoryList({
+  const { data, isLoading, error, refetch } = useToolingInventoryList({
     page,
     pageSize,
     searchParams,
@@ -76,6 +80,7 @@ export default function ToolingInventoryPage() {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setToolingOptionsKeyword('')
     formRef?.resetFields()
@@ -84,6 +89,7 @@ export default function ToolingInventoryPage() {
   const handleCreate = useCallback(() => {
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setToolingOptionsKeyword('')
     setModalTitle('新建刀具库存')
@@ -105,6 +111,7 @@ export default function ToolingInventoryPage() {
 
     setEditingRecord(record)
     setToolingOptionsKeyword('')
+    setFormError(null)
     setIsEdit(true)
     setModalTitle('编辑刀具库存')
     setIsModalOpen(true)
@@ -155,6 +162,7 @@ export default function ToolingInventoryPage() {
         else {
           message.error('导入刀具库存失败，请稍后重试')
         }
+        throw error
       }
     },
     [
@@ -179,6 +187,7 @@ export default function ToolingInventoryPage() {
       }
 
       try {
+        setFormError(null)
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
@@ -194,12 +203,7 @@ export default function ToolingInventoryPage() {
         resetFormState()
       }
       catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
+        setFormError(error)
       }
     },
     [
@@ -265,6 +269,10 @@ export default function ToolingInventoryPage() {
           handleEdit={handleEdit}
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
         />
+        <ToolingInventoryExcelImport
+          onImport={handleImport}
+          isImporting={importMutation.isPending}
+        />
         <DeleteButton
           onConfirm={handleDelete}
           isDeleting={deleteMutation.isPending}
@@ -273,36 +281,37 @@ export default function ToolingInventoryPage() {
           itemName="刀具库存"
           permissionKey={TOOLING_MANAGE_PERMISSION_KEY}
         />
-        <ToolingInventoryExcelImport
-          onImport={handleImport}
-          isImporting={importMutation.isPending}
-        />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">搜索：</span>
+      <FilterBar>
         <ToolingInventorySearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <ToolingInventoryTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <ToolingInventoryTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -318,15 +327,18 @@ export default function ToolingInventoryPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <ToolingInventoryForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          toolingOptions={toolingOptions}
-          isToolingOptionsLoading={isToolingOptionsLoading}
-          onToolingSearch={setToolingOptionsKeyword}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <ToolingInventoryForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            toolingOptions={toolingOptions}
+            isToolingOptionsLoading={isToolingOptionsLoading}
+            onToolingSearch={setToolingOptionsKeyword}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          />
+        </div>
       </Modal>
     </div>
   )

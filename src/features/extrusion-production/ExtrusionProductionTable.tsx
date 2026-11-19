@@ -1,7 +1,10 @@
 import type { TableColumnsType, TableProps } from 'antd'
 import type { ExtrusionProduction } from '@/services/apiExtrusionProductions'
-import { Table, Tag } from 'antd'
+import { Table } from 'antd'
 import { useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
@@ -57,9 +60,9 @@ export default function ExtrusionProductionTable({
         key: 'is_audited',
         width: 100,
         render: (value: boolean) => (
-          <Tag color={value ? 'success' : 'default'}>
+          <StatusPill tone={value ? 'success' : 'neutral'}>
             {value ? '已审核' : '待审核'}
-          </Tag>
+          </StatusPill>
         ),
       },
       {
@@ -112,6 +115,8 @@ export default function ExtrusionProductionTable({
   return (
     <Table<ExtrusionProduction>
       rowKey={record => record.id}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无挤压生产记录" description="请新建记录或调整筛选条件" /> }}
       loading={loading}
       columns={columns}
       dataSource={data}

@@ -1,7 +1,8 @@
 import type { ProductionOrderItem } from '@/services/apiProductionOrderItems'
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
 
-import { Button, Empty, Popconfirm, Tag } from 'antd'
+import { Button, Empty, Popconfirm } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 
 interface Props {
   loading: boolean
@@ -37,7 +38,7 @@ export default function ProductionOrderItemMobileList({
         return (
           <article
             key={item.id}
-            className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -53,12 +54,9 @@ export default function ProductionOrderItemMobileList({
                 </div>
               </div>
 
-              <Tag
-                color={shouldHighlight ? 'error' : 'processing'}
-                className="mr-0 rounded-full px-3 py-1"
-              >
+              <StatusPill tone={shouldHighlight ? 'danger' : 'info'}>
                 {shouldHighlight ? '需补标准工时' : '正常'}
-              </Tag>
+              </StatusPill>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-400">

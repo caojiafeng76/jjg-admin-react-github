@@ -25,6 +25,8 @@ import {
 
 } from '@/services/apiProductionOrders'
 import AppPagination from '@/ui/AppPagination'
+import FilterBar from '@/ui/FilterBar'
+import { TableState } from '@/ui/TableState'
 import { useAllEmployees } from '../workshop/EmployeeList/useEmployees'
 import ProductionOrderAdminToolbar from './ProductionOrderAdminToolbar'
 import ProductionOrderDetail from './ProductionOrderDetail'
@@ -122,6 +124,8 @@ export default function ProductionOrderPage() {
     isFetching,
     isLoading,
     isPlaceholderData,
+    error,
+    refetch,
   } = useProductionOrders({
     page,
     pageSize,
@@ -384,17 +388,11 @@ export default function ProductionOrderPage() {
       className={
         isEmployeeView
           ? 'grid h-full grid-rows-[auto_auto_1fr] gap-3 p-3'
-          : 'flex h-full flex-col'
+          : 'flex h-full flex-col gap-3'
       }
     >
       {/* 页面标题与操作区 */}
-      <div
-        className={
-          isEmployeeView
-            ? 'w-full'
-            : 'rounded-xl border border-slate-200/80 bg-gradient-to-r from-slate-50 via-white to-slate-50 p-4 shadow-sm dark:border-slate-700/80 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800 dark:shadow-none'
-        }
-      >
+      <div className={isEmployeeView ? 'w-full' : ''}>
         {isEmployeeView
           ? (
               <div className="space-y-1">
@@ -439,21 +437,7 @@ export default function ProductionOrderPage() {
               />
             )}
       </div>
-      {/* 搜索区域 */}
-      <div
-        className={
-          isEmployeeView
-            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-none'
-            : 'rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none'
-        }
-      >
-        {isEmployeeView
-          ? null
-          : (
-              <span className="mb-2 block text-xs font-medium tracking-wide text-slate-400 uppercase dark:text-slate-500">
-                筛选条件
-              </span>
-            )}
+      <FilterBar className={isEmployeeView ? 'p-3' : ''}>
         <ProductionOrderSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
@@ -462,7 +446,7 @@ export default function ProductionOrderPage() {
           fixedEmployee={fixedEmployee}
           mobile={isEmployeeView}
         />
-      </div>
+      </FilterBar>
       {isEmployeeView
         ? (
             <div
@@ -524,25 +508,24 @@ export default function ProductionOrderPage() {
                   )}
                 </div>
               )}
-              <div className="min-h-0 flex-1 overflow-x-auto rounded-lg border border-slate-200/60 bg-white shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none">
-                <ProductionOrderList
-                  loading={isLoading}
-                  data={orderData?.items || []}
-                  page={page}
-                  pageSize={pageSize}
-                  selectedRowKeys={selectedRowKeys}
-                  onSelect={handleSelect}
-                  onView={handleView}
-                  scrollY={scrollY}
-                />
+              <div className="min-h-0 flex-1 overflow-x-auto">
+                <TableState loading={isLoading && !orderData} error={error} onRetry={refetch}>
+                  <ProductionOrderList
+                    loading={isLoading}
+                    data={orderData?.items || []}
+                    page={page}
+                    pageSize={pageSize}
+                    selectedRowKeys={selectedRowKeys}
+                    onSelect={handleSelect}
+                    onView={handleView}
+                    scrollY={scrollY}
+                  />
+                </TableState>
               </div>
               <div
                 ref={paginationRef}
-                className="flex shrink-0 items-center justify-between rounded-lg border border-slate-200/60 bg-white px-4 py-2 shadow-sm dark:border-slate-700/80 dark:bg-slate-800 dark:shadow-none"
+                className="flex shrink-0 items-center justify-end"
               >
-                <span className="text-xs text-slate-400 dark:text-slate-500">
-                  每页显示条数
-                </span>
                 <AppPagination
                   total={orderData?.total || 0}
                   pageSizeOptions={['10', '20', '50', '100', '500', '1000']}
@@ -570,7 +553,7 @@ export default function ProductionOrderPage() {
                 open={isModalOpen && isView}
                 onCancel={resetFormState}
                 footer={[]}
-                width={900}
+                width={960}
                 destroyOnHidden
               >
                 {detailOrder

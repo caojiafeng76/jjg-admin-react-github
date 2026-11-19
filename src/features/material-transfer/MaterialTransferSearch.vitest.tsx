@@ -44,7 +44,7 @@ describe('MaterialTransferSearch', () => {
 
     const form = container.querySelector('form')
     expect(form).toHaveClass('flex-nowrap')
-    expect(form?.className).toContain('[&_.ant-form-item]:[margin-inline-end:0]')
+    expect(form).not.toHaveClass('ant-form-inline')
 
     const searchButton = screen.getByRole('button', { name: /搜索/ })
     expect(searchButton.closest('.ant-form-item')).toHaveClass('shrink-0')

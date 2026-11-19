@@ -21,7 +21,10 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import PrintButton from '@/ui/PrintButton'
+import { TableState } from '@/ui/TableState'
 import { TOOLING_MANAGE_PERMISSION_KEY } from '../permissions'
 import ToolingStockOutExcelImport from './ToolingStockOutExcelImport'
 import ToolingStockOutForm from './ToolingStockOutForm'
@@ -60,6 +63,7 @@ export default function ToolingStockOutPage() {
     null,
   )
   const [formRef, setFormRef] = useState<FormInstance | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
   const [toolingOptionsKeyword, setToolingOptionsKeyword] = useState('')
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
@@ -75,7 +79,7 @@ export default function ToolingStockOutPage() {
       || undefined,
   })
 
-  const { data, isLoading } = useToolingStockOutList({
+  const { data, isLoading, error, refetch } = useToolingStockOutList({
     page,
     pageSize,
     searchParams,
@@ -186,6 +190,7 @@ export default function ToolingStockOutPage() {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setToolingOptionsKeyword('')
     formRef?.resetFields()
@@ -194,6 +199,7 @@ export default function ToolingStockOutPage() {
   const handleCreate = useCallback(() => {
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setToolingOptionsKeyword('')
     setModalTitle('新建刀具出库')
@@ -215,6 +221,7 @@ export default function ToolingStockOutPage() {
 
     setEditingRecord(record)
     setToolingOptionsKeyword('')
+    setFormError(null)
     setIsEdit(true)
     setModalTitle(
       record.status === '已审核' ? '编辑刀具出库备注' : '编辑刀具出库',
@@ -326,6 +333,7 @@ export default function ToolingStockOutPage() {
         else {
           message.error('导入刀具出库失败，请稍后重试')
         }
+        throw error
       }
     },
     [
@@ -350,6 +358,7 @@ export default function ToolingStockOutPage() {
       }
 
       try {
+        setFormError(null)
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
@@ -365,12 +374,7 @@ export default function ToolingStockOutPage() {
         resetFormState()
       }
       catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
-        }
-        else {
-          message.error('操作失败，请稍后重试')
-        }
+        setFormError(error)
       }
     },
     [
@@ -441,7 +445,7 @@ export default function ToolingStockOutPage() {
         />
         <Button
           type="text"
-          icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+          icon={<ShieldCheckIcon className="size-4" />}
           onClick={() => handleBatchAudit('已审核')}
           loading={batchStatusMutation.isPending}
           disabled={viewerDenied || !canManageTooling}
@@ -450,7 +454,7 @@ export default function ToolingStockOutPage() {
         </Button>
         <Button
           type="text"
-          icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+          icon={<ArrowPathIcon className="size-4" />}
           onClick={() => handleBatchAudit('待审核')}
           loading={batchStatusMutation.isPending}
           disabled={viewerDenied || !canManageTooling}
@@ -480,7 +484,7 @@ export default function ToolingStockOutPage() {
         </PrintButton>
         <Button
           type="text"
-          icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
+          icon={<ArrowDownTrayIcon className="size-4" />}
           onClick={handleExportExcel}
           onMouseEnter={preloadToolingStockOutExport}
           onFocus={preloadToolingStockOutExport}
@@ -507,30 +511,35 @@ export default function ToolingStockOutPage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">搜索：</span>
+      <FilterBar>
         <ToolingStockOutSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <ToolingStockOutTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <ToolingStockOutTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -550,18 +559,21 @@ export default function ToolingStockOutPage() {
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <ToolingStockOutForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          toolingOptions={toolingOptions}
-          isToolingOptionsLoading={isToolingOptionsLoading}
-          onToolingSearch={setToolingOptionsKeyword}
-          machineOptions={machineOptions}
-          isMachineOptionsLoading={isMachineOptionsLoading}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-          isAuditLocked={editingRecord?.status === '已审核'}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert error={formError} />
+          <ToolingStockOutForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={createMutation.isPending || updateMutation.isPending}
+            toolingOptions={toolingOptions}
+            isToolingOptionsLoading={isToolingOptionsLoading}
+            onToolingSearch={setToolingOptionsKeyword}
+            machineOptions={machineOptions}
+            isMachineOptionsLoading={isMachineOptionsLoading}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+            isAuditLocked={editingRecord?.status === '已审核'}
+          />
+        </div>
       </Modal>
     </div>
   )

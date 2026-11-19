@@ -42,7 +42,7 @@ export default function SafePartSettingFormModal({
       okText={editing ? '保存修改' : '新增'}
       cancelText="取消"
       confirmLoading={confirmLoading}
-      width={640}
+      width={720}
       destroyOnHidden
     >
       <Form

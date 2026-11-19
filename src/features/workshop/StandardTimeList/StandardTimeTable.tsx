@@ -15,6 +15,8 @@ import {
   getProcessStandardImagePreviewUrl,
   PROCESS_STANDARD_IMAGE_ACCEPT,
 } from '@/services/apiProcessStandardImages'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
 import { formatNumber } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
@@ -602,6 +604,8 @@ const StandardTimeTable = memo(({
         columns={columns}
         dataSource={data}
         rowSelection={rowSelection}
+        rowClassName={zebraRowClassName}
+        locale={{ emptyText: <TableEmpty title="暂无成本核算记录" description="请新建记录或调整筛选条件" /> }}
         onRow={handleRow}
         scroll={{ x: tableWidth, y: scrollY }}
         sticky={{ offsetScroll: 0 }}

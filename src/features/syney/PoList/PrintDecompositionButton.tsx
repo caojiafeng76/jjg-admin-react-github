@@ -36,7 +36,7 @@ export default function PrintDecompositionButton({
     <>
       <Button
         type="text"
-        icon={<DocumentArrowDownIcon className="size-4 text-rose-500/80!" />}
+        icon={<DocumentArrowDownIcon className="size-4" />}
         onClick={onClick}
         onMouseEnter={preloadPDF}
         onFocus={preloadPDF}

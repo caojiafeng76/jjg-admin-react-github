@@ -6,7 +6,10 @@ import type {
   OrderStatusJobColumn,
   ReworkRepairInfo,
 } from '@/services/apiOrderStatusDashboard'
-import { Space, Tag } from 'antd'
+import type { StatusTone } from '@/ui/StatusPill'
+import { ArrowPathIcon, CheckIcon } from '@heroicons/react/16/solid'
+import { Button, Space } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 import { getDashboardJobColumns } from './dashboardJobColumns'
 import {
   renderExtrusionQuantityCell,
@@ -33,6 +36,12 @@ export const STATUS_COLOR: Record<OrderProductionStatus, string> = {
   正常: 'green',
   预警: 'gold',
   延期: 'red',
+}
+
+export const STATUS_TONE: Record<OrderProductionStatus, StatusTone> = {
+  正常: 'success',
+  预警: 'warning',
+  延期: 'danger',
 }
 
 const JOB_OUTPUT_COLUMN_WIDTH = 72
@@ -373,65 +382,32 @@ export function createOrderStatusDashboardColumns({
 
         return (
           <Space size={3} wrap>
-            <Tag
-              color={STATUS_COLOR[value]}
-              className="!rounded-full !font-medium"
-            >
+            <StatusPill tone={STATUS_TONE[value]}>
               {value}
-            </Tag>
+            </StatusPill>
             {record.status && (
-              <Tag className="!rounded-full">{record.status}</Tag>
+              <StatusPill tone="neutral" dot={false}>
+                {record.status}
+              </StatusPill>
             )}
             {canCloseOrder
               ? (
-                  <button
-                    type="button"
-                    disabled={isUpdatingOrderStatus && closingOrderId === record.id}
+                  <Button
+                    size="small"
+                    type="primary"
+                    loading={isUpdatingOrderStatus && closingOrderId === record.id}
+                    icon={
+                      isUpdatingOrderStatus && closingOrderId === record.id
+                        ? <ArrowPathIcon className="size-3 animate-spin" />
+                        : <CheckIcon className="size-3" />
+                    }
                     onClick={(event) => {
                       event.stopPropagation()
                       handleCloseOrder(record)
                     }}
-                    className="group flex items-center gap-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-2.5 py-1 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:from-emerald-600 hover:to-teal-600 hover:shadow-md hover:shadow-emerald-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {isUpdatingOrderStatus && closingOrderId === record.id
-                      ? (
-                          <svg
-                            className="size-3 animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            />
-                          </svg>
-                        )
-                      : (
-                          <svg
-                            className="size-3"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                    <span>结案</span>
-                  </button>
+                    结案
+                  </Button>
                 )
               : null}
           </Space>

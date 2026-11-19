@@ -13,6 +13,8 @@ import { buildProjectNoSelectOptions } from '@/features/production-order/project
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import AppPagination from '@/ui/AppPagination'
+import FilterBar from '@/ui/FilterBar'
+import { TableState } from '@/ui/TableState'
 import ReworkRepairFormModal from './ReworkRepairFormModal'
 import {
   buildPayload,
@@ -22,12 +24,10 @@ import {
   formatOrderText,
   parseCategory,
   parseWorkflowStatus,
-
   toFormValues,
   WORKFLOW_STAGE_BY_KEY,
   WORKFLOW_STAGE_BY_STATUS,
   WORKFLOW_STAGES,
-
 } from './reworkRepairFormUtils'
 import ReworkRepairSearch from './ReworkRepairSearch'
 import ReworkRepairTable from './ReworkRepairTable'
@@ -71,11 +71,12 @@ export default function QualityReworkRepairPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
   const [processingStageKey, setProcessingStageKey]
     = useState<WorkflowStageKey>('workshop')
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
-  const { data, isLoading } = useQualityReworkRepairList({
+  const { data, isLoading, error, refetch } = useQualityReworkRepairList({
     page,
     pageSize,
     searchParams: listSearchParams,
@@ -114,6 +115,7 @@ export default function QualityReworkRepairPage() {
   const resetFormState = useCallback(() => {
     setIsModalOpen(false)
     setIsEdit(false)
+    setFormError(null)
     setProcessingStageKey('workshop')
     setSelectedRowKeys([])
     form.resetFields()
@@ -126,6 +128,7 @@ export default function QualityReworkRepairPage() {
     }
 
     setIsEdit(false)
+    setFormError(null)
     setProcessingStageKey('workshop')
     setSelectedRowKeys([])
     form.resetFields()
@@ -156,6 +159,7 @@ export default function QualityReworkRepairPage() {
     }
 
     setIsEdit(true)
+    setFormError(null)
     setProcessingStageKey(activeStage.key)
     form.resetFields()
     form.setFieldsValue(toFormValues(record))
@@ -216,6 +220,7 @@ export default function QualityReworkRepairPage() {
     const payload = buildPayload(values, workflowStatus)
 
     try {
+      setFormError(null)
       if (isEdit && selectedRowKeys[0]) {
         await updateMutation.mutateAsync({
           id: selectedRowKeys[0] as string,
@@ -231,12 +236,7 @@ export default function QualityReworkRepairPage() {
       resetFormState()
     }
     catch (error) {
-      if (error instanceof Error) {
-        message.error(error.message)
-      }
-      else {
-        message.error('操作失败，请稍后重试')
-      }
+      setFormError(error)
     }
   }, [
     createMutation,
@@ -355,30 +355,35 @@ export default function QualityReworkRepairPage() {
         onChange={handleWorkflowTabChange}
       />
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
+      <FilterBar>
         <ReworkRepairSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <ReworkRepairTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-            rowHeight={rowHeight}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <ReworkRepairTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+              rowHeight={rowHeight}
+            />
+          </TableState>
         </div>
         <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
@@ -387,6 +392,7 @@ export default function QualityReworkRepairPage() {
 
       <ReworkRepairFormModal
         form={form}
+        formError={formError}
         open={isModalOpen}
         isEdit={isEdit}
         isSubmitting={isSubmitting}

@@ -1,4 +1,4 @@
-import { Tag, Typography } from 'antd'
+import { Typography } from 'antd'
 
 import { PROGRESS_STATUS_TAGS } from './productionSchedulingUtils'
 
@@ -36,19 +36,20 @@ export default function ProductionSchedulingHeader({
           {PROGRESS_STATUS_TAGS.map((tag) => {
             const active = (tag.value ?? null) === (progressStatus ?? null)
             return (
-              <Tag.CheckableTag
+              <button
                 key={tag.label}
-                checked={active}
-                onChange={() => onProgressStatusChange(tag.value)}
+                type="button"
+                aria-pressed={active}
+                onClick={() => onProgressStatusChange(tag.value)}
                 className={
-                  `!m-0 rounded-full border px-3.5 !text-xs font-medium transition-all duration-200 ${
+                  `cursor-pointer rounded-full border px-3.5 py-0.5 text-xs font-medium transition-colors ${
                     active
-                      ? '!border-primary !bg-gradient-to-r !from-primary !to-blue-400 !text-white !shadow-sm !shadow-blue-200 dark:!shadow-blue-900/40'
-                      : '!border-slate-200 !bg-white !text-slate-600 hover:!border-blue-300 hover:!bg-blue-50/50 hover:!text-blue-600 dark:!border-slate-600 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!border-blue-500 dark:hover:!bg-slate-700/60 dark:hover:!text-blue-400'}`
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500 dark:hover:bg-slate-700/60 dark:hover:text-blue-400'}`
                 }
               >
                 {tag.label}
-              </Tag.CheckableTag>
+              </button>
             )
           })}
         </div>

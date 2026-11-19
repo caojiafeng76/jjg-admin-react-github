@@ -8,6 +8,8 @@ import {
 } from '@heroicons/react/16/solid'
 import { Button, Popconfirm, Space, Table } from 'antd'
 
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { formatNumber } from '@/utils/format'
 
 interface Props {
@@ -92,7 +94,7 @@ export default function ExtrusionProductionItemTable({
         <Space size="small">
           <Button
             type="text"
-            icon={<PencilSquareIcon className="size-4 text-yellow-500/80!" />}
+            icon={<PencilSquareIcon className="size-4" />}
             onClick={() => onEdit(index)}
           >
             编辑
@@ -107,7 +109,8 @@ export default function ExtrusionProductionItemTable({
           >
             <Button
               type="text"
-              icon={<TrashIcon className="size-4 text-red-500/80!" />}
+              danger
+              icon={<TrashIcon className="size-4" />}
             >
               删除
             </Button>
@@ -118,9 +121,9 @@ export default function ExtrusionProductionItemTable({
   ]
 
   return (
-    <div className="rounded-2xl border border-slate-200 p-3">
+    <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-sm font-medium text-slate-700">挤压明细</div>
+        <div className="text-sm font-medium text-slate-700 dark:text-slate-200">挤压明细</div>
         <Button
           type="dashed"
           icon={<PlusIcon className="size-4" />}
@@ -134,11 +137,12 @@ export default function ExtrusionProductionItemTable({
       <Table<ExtrusionProductionItemInput>
         rowKey={record =>
           `${record.project_no}-${record.sort_order ?? 0}-${record.die_no ?? ''}`}
+        rowClassName={zebraRowClassName}
         size="small"
         pagination={false}
         columns={columns}
         dataSource={data}
-        locale={{ emptyText: '请先添加至少一条明细' }}
+        locale={{ emptyText: <TableEmpty title="暂无挤压明细" description="请点击右上角「添加明细」" /> }}
         scroll={{ x: 1200 }}
       />
     </div>

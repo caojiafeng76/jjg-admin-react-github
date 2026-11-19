@@ -1,22 +1,25 @@
 import type { TableColumnsType } from 'antd'
 import type { Key } from 'react'
 import type { QualityIssueAuditStatus, QualityIssueRecord } from '@/services/apiQualityIssueRecords'
-import { Table, Tag } from 'antd'
+import type { StatusTone } from '@/ui/StatusPill'
+import { Table } from 'antd'
 import dayjs from 'dayjs'
 import { memo, useMemo } from 'react'
 import {
   getQualityIssueOperatorName,
   getQualityIssueReporterName,
-
 } from '@/services/apiQualityIssueRecords'
 
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { AUDIT_STATUS_LABELS } from './IssueRecordSearch'
 
-const AUDIT_STATUS_COLORS: Record<QualityIssueAuditStatus, string> = {
+const AUDIT_STATUS_TONES: Record<QualityIssueAuditStatus, StatusTone> = {
   approved: 'success',
-  pending: 'processing',
-  rejected: 'error',
+  pending: 'info',
+  rejected: 'danger',
 }
 
 function formatDate(value: string | null | undefined) {
@@ -33,9 +36,9 @@ function formatNumber(value: number | null | undefined) {
 
 function renderAuditStatus(status: QualityIssueAuditStatus) {
   return (
-    <Tag color={AUDIT_STATUS_COLORS[status] || 'default'}>
+    <StatusPill tone={AUDIT_STATUS_TONES[status] || 'neutral'}>
       {AUDIT_STATUS_LABELS[status] || status}
-    </Tag>
+    </StatusPill>
   )
 }
 
@@ -256,8 +259,15 @@ function IssueRecordTable({
       pagination={false}
       scroll={{ x: 3600, y: scrollY }}
       size="small"
-      rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无质量问题记录"
+            description="点击上方「添加」记录质量问题"
+          />
+        ),
+      }}
+      rowClassName={zebraRowClassName}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

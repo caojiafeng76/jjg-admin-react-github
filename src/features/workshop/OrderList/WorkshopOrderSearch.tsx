@@ -1,4 +1,5 @@
 import type { Dayjs } from 'dayjs'
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
 import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
 import { useState } from 'react'
 
@@ -132,21 +133,7 @@ export default function WorkshopOrderSearch({
         <Space>
           <Button
             type="primary"
-            icon={(
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            )}
+            icon={<MagnifyingGlassIcon className="size-4" />}
             htmlType="submit"
             loading={isSearching}
             className="shadow-sm transition-all hover:shadow-md"
@@ -154,21 +141,7 @@ export default function WorkshopOrderSearch({
             搜索
           </Button>
           <Button
-            icon={(
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            )}
+            icon={<XMarkIcon className="size-4" />}
             onClick={handleReset}
             disabled={isSearching}
             className="shadow-sm transition-all hover:shadow-md"

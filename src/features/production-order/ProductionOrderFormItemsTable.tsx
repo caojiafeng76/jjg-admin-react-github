@@ -5,7 +5,9 @@ import {
   PlusIcon,
   TrashIcon,
 } from '@heroicons/react/16/solid'
-import { Button, Card, Popconfirm, Space, Table } from 'antd'
+import { Button, Popconfirm, Space, Table } from 'antd'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 export interface ProductionOrderFormItemsTableProps {
   hideCostColumns: boolean
@@ -25,10 +27,11 @@ export default function ProductionOrderFormItemsTable({
   onEdit,
 }: ProductionOrderFormItemsTableProps) {
   return (
-    <Card
-      title="工序明细"
-      size="small"
-      extra={(
+    <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+          工序明细
+        </span>
         <Button
           type="primary"
           size="small"
@@ -37,9 +40,10 @@ export default function ProductionOrderFormItemsTable({
         >
           添加工序
         </Button>
-      )}
-    >
+      </div>
       <Table
+        rowClassName={zebraRowClassName}
+        locale={{ emptyText: <TableEmpty title="暂无工序明细" description="请点击右上角「添加工序」" /> }}
         size="small"
         pagination={false}
         dataSource={items.map((item: OrderItem, index: number) => ({
@@ -203,6 +207,6 @@ export default function ProductionOrderFormItemsTable({
           },
         ]}
       />
-    </Card>
+    </div>
   )
 }

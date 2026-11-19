@@ -3,6 +3,8 @@ import type { LaborProtectionData } from '@/services/apiLaborProtectionData'
 import { Table } from 'antd'
 import { useMemo } from 'react'
 
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -72,8 +74,15 @@ export default function LaborProtectionDataTable({
       pagination={false}
       scroll={{ x: 680, y: scrollY }}
       size="small"
-      rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无劳保资料"
+            description="点击上方「添加」维护劳保用品种类"
+          />
+        ),
+      }}
+      rowClassName={zebraRowClassName}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

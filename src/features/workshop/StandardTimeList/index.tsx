@@ -11,8 +11,11 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import PermissionButton from '@/ui/PermissionButton'
 import PermissionGate from '@/ui/PermissionGate'
+import { TableState } from '@/ui/TableState'
 import StandardTimeCostDetail from './StandardTimeCostDetail'
 import StandardTimeForm from './StandardTimeForm'
 import StandardTimeMobileList from './StandardTimeMobileList'
@@ -45,7 +48,7 @@ export default function StandardTimeList() {
     resetSearch,
   } = useStandardTimeSearchParams()
 
-  const { data, isLoading } = useStandardTimesList({
+  const { data, isLoading, error, refetch } = useStandardTimesList({
     page,
     pageSize,
     searchParams,
@@ -56,6 +59,7 @@ export default function StandardTimeList() {
     modalTitle,
     isEdit,
     editingRecord,
+    formError,
     isSubmitting,
     isCreating,
     uploadingImageId,
@@ -141,7 +145,7 @@ export default function StandardTimeList() {
             </Button>
           )
         : (
-            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200/80 bg-white/60 p-3 shadow-sm backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-800/60">
+            <div className="flex flex-wrap items-center gap-2">
               <AddButton
                 handleCreate={handleCreate}
                 permissionKey="feature:standard-time-list.create"
@@ -154,7 +158,7 @@ export default function StandardTimeList() {
               <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
               <PermissionButton
                 type="text"
-                icon={<CheckCircleIcon className="size-4 text-emerald-500" />}
+                icon={<CheckCircleIcon className="size-4" />}
                 loading={isUpdatingLastProcess}
                 permissionKey="feature:standard-time-list.edit"
                 noPermissionTip="无编辑权限"
@@ -164,7 +168,7 @@ export default function StandardTimeList() {
               </PermissionButton>
               <PermissionButton
                 type="text"
-                icon={<XCircleIcon className="size-4 text-red-400" />}
+                icon={<XCircleIcon className="size-4" />}
                 loading={isUpdatingLastProcess}
                 permissionKey="feature:standard-time-list.edit"
                 noPermissionTip="无编辑权限"
@@ -218,28 +222,14 @@ export default function StandardTimeList() {
             </div>
           )}
 
-      {/* Search Bar */}
-      <div
-        className={
-          isTeamLeaderMode
-            ? 'rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_4px_20px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800'
-            : 'flex items-center gap-2'
-        }
-      >
-        {isTeamLeaderMode
-          ? null
-          : (
-              <span className="text-sm font-medium whitespace-nowrap text-slate-500 dark:text-slate-300">
-                搜索：
-              </span>
-            )}
+      <FilterBar>
         <StandardTimeSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           mobile={isTeamLeaderMode}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       {/* Content Area */}
       {isTeamLeaderMode
@@ -268,23 +258,25 @@ export default function StandardTimeList() {
               <Splitter.Panel defaultSize="65%" min="30%">
                 <div
                   ref={tableContainerRef}
-                  className="flex h-full flex-col gap-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                  className="flex h-full flex-col gap-4 overflow-hidden pr-2"
                 >
                   <div className="min-h-0 flex-1 overflow-x-auto">
-                    <StandardTimeTable
-                      loading={isLoading}
-                      data={data?.items || []}
-                      selectedRowKeys={selectedRowKeys}
-                      onSelect={setSelectedRowKeys}
-                      page={page}
-                      pageSize={pageSize}
-                      scrollY={scrollY}
-                      rowHeight={rowHeight}
-                      activeRowId={activeRecord?.id ?? null}
-                      onRowClick={setActiveRecord}
-                      onUploadImage={handleUploadProcessImage}
-                      uploadingImageId={uploadingImageId}
-                    />
+                    <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+                      <StandardTimeTable
+                        loading={isLoading}
+                        data={data?.items || []}
+                        selectedRowKeys={selectedRowKeys}
+                        onSelect={setSelectedRowKeys}
+                        page={page}
+                        pageSize={pageSize}
+                        scrollY={scrollY}
+                        rowHeight={rowHeight}
+                        activeRowId={activeRecord?.id ?? null}
+                        onRowClick={setActiveRecord}
+                        onUploadImage={handleUploadProcessImage}
+                        uploadingImageId={uploadingImageId}
+                      />
+                    </TableState>
                   </div>
                   <div
                     ref={paginationRef}
@@ -298,7 +290,7 @@ export default function StandardTimeList() {
                 </div>
               </Splitter.Panel>
               <Splitter.Panel min="20%">
-                <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
                   <PermissionGate permissionKey="field:standard-time-list.cost-detail.view">
                     <StandardTimeCostDetail selectedRecord={activeRecord} />
                   </PermissionGate>
@@ -312,11 +304,12 @@ export default function StandardTimeList() {
         open={isModalOpen}
         confirmLoading={isSubmitting}
         destroyOnHidden
-        width={isTeamLeaderMode ? 'calc(100vw - 24px)' : 900}
+        width={isTeamLeaderMode ? 'calc(100vw - 24px)' : 960}
         style={isTeamLeaderMode ? { top: 16, maxWidth: 520 } : undefined}
         onOk={() => formRef.current?.submit()}
         onCancel={resetFormState}
       >
+        <FormErrorAlert error={formError} className="mb-3" />
         <StandardTimeForm
           onFinish={handleFinish}
           setFormRef={setFormRef}

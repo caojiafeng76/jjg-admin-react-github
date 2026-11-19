@@ -6,6 +6,9 @@ import type {
 import { Table } from 'antd'
 import { memo, useCallback, useMemo } from 'react'
 
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { OrderProgressCell, OrderStatusCell } from './OrderProgressCell'
 
@@ -82,18 +85,9 @@ function MaterialTransferTable({
         ],
         onFilter: (value, record) => record.is_audited === value,
         render: (value: boolean) => (
-          <div
-            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium shadow-sm ${
-              value
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-slate-100 text-slate-500'
-            }`}
-          >
-            <div
-              className={`h-1.5 w-1.5 rounded-full ${value ? 'bg-emerald-500' : 'bg-slate-400'}`}
-            />
+          <StatusPill tone={value ? 'success' : 'neutral'}>
             {value ? '已审核' : '待审核'}
-          </div>
+          </StatusPill>
         ),
       },
       {
@@ -261,6 +255,8 @@ function MaterialTransferTable({
   return (
     <Table<MaterialTransferWithEmployee>
       rowKey={record => record.id}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无物料转移单" description="请新建转移单或调整筛选条件" /> }}
       loading={loading}
       columns={columns}
       dataSource={data}

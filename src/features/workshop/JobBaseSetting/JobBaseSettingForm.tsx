@@ -3,7 +3,7 @@ import type {
   JobBaseSetting,
   JobBaseSettingFormValues,
 } from '@/services/apiJobBaseSettings'
-import { Card, Form, Input, InputNumber, Typography } from 'antd'
+import { Form, Input, InputNumber, Typography } from 'antd'
 
 import { useEffect, useMemo } from 'react'
 
@@ -189,13 +189,13 @@ export default function JobBaseSettingForm({
         />
       </Form.Item>
 
-      <Card size="small" className="border-slate-200 bg-slate-50">
+      <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-900/50">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <Typography.Text type="secondary">
               月标准工作时间（小时）
             </Typography.Text>
-            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums dark:text-slate-100">
               {formatAmount(preview.monthlyStandardHours)}
             </div>
           </div>
@@ -203,12 +203,12 @@ export default function JobBaseSettingForm({
             <Typography.Text type="secondary">
               工时费（元/小时）
             </Typography.Text>
-            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+            <div className="mt-1 text-lg font-semibold text-slate-900 tabular-nums dark:text-slate-100">
               {formatAmount(preview.hourlyFee, 8)}
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </Form>
   )
 }

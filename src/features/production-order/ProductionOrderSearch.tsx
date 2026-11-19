@@ -8,7 +8,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/16/solid'
 
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { Button, DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 
@@ -241,7 +241,7 @@ export default function ProductionOrderSearch({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : 'gap-2'}>
+        <div className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}>
           <Button
             type="primary"
             icon={<MagnifyingGlassIcon className="h-4 w-4" />}
@@ -259,7 +259,7 @@ export default function ProductionOrderSearch({
           >
             重置
           </Button>
-        </Space>
+        </div>
       </Form.Item>
     </Form>
   )

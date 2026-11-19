@@ -5,8 +5,10 @@ import type {
 } from '@/services/apiProductionOrderItems'
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/16/solid'
 import { Button, Popconfirm, Space, Table } from 'antd'
-
 import { memo, useMemo } from 'react'
+import { TableEmpty } from '@/ui/TableState'
+
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 const dangerTextStyle = {
   color: '#cf1322',
@@ -275,6 +277,8 @@ function ProductionOrderItemTable({
   return (
     <Table<ProductionOrderItemWithMachine>
       rowKey={record => record.id}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无工序明细" /> }}
       loading={loading}
       columns={columns}
       dataSource={data}

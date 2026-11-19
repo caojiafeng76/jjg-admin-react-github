@@ -3,6 +3,8 @@ import type { PackagingEmployee } from '@/services/apiPackagingEmployees'
 import { Table } from 'antd'
 import { memo, useMemo } from 'react'
 
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -100,8 +102,15 @@ function EmployeeTable({
       pagination={false}
       scroll={{ x: 1100, y: scrollY }}
       size="small"
-      rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无员工信息"
+            description="点击上方「添加」维护包装员工"
+          />
+        ),
+      }}
+      rowClassName={zebraRowClassName}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

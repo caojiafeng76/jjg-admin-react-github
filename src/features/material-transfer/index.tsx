@@ -1,5 +1,5 @@
 import type { MaterialTransferFilters, MaterialTransferInsert, MaterialTransferUpdate, MaterialTransferWithEmployee } from '@/services/apiMaterialTransfers'
-import { ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
+import { ArchiveBoxIcon, ArrowPathIcon, ShieldCheckIcon } from '@heroicons/react/16/solid'
 import { App, Button, Splitter } from 'antd'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -21,6 +21,7 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
+import FilterBar from '@/ui/FilterBar'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
 import { translateErrorMessage } from '@/utils/errorHandler'
@@ -454,7 +455,7 @@ export default function MaterialTransferPage() {
                 <AddButton handleCreate={openCreateModal} />
                 <Button
                   type="text"
-                  icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+                  icon={<ShieldCheckIcon className="size-4" />}
                   onClick={() => handleBatchAudit(true)}
                   loading={batchUpdateMutation.isPending}
                   disabled={viewerDenied}
@@ -463,7 +464,7 @@ export default function MaterialTransferPage() {
                 </Button>
                 <Button
                   type="text"
-                  icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+                  icon={<ArrowPathIcon className="size-4" />}
                   onClick={() => handleBatchAudit(false)}
                   loading={batchUpdateMutation.isPending}
                   disabled={viewerDenied}
@@ -502,34 +503,14 @@ export default function MaterialTransferPage() {
                   label: '转移数量合计',
                   value: selectedSummary.quantity,
                   tone: 'error',
-                  icon: (
-                    <svg
-                      className="size-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                      />
-                    </svg>
-                  ),
+                  icon: <ArchiveBoxIcon className="size-3.5" />,
                 },
               ]}
             />
           )
         : null}
 
-      <div
-        className={
-          isEmployeeView
-            ? 'rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_12px_40px_rgba(15,23,42,0.1)]'
-            : ''
-        }
-      >
+      <FilterBar className={isEmployeeView ? 'p-3' : ''}>
         <MaterialTransferSearch
           employees={employees}
           lengthOptions={lengthOptions}
@@ -539,7 +520,7 @@ export default function MaterialTransferPage() {
           mobile={isEmployeeView}
           showEmployeeFilter={!isOwnOnlyView}
         />
-      </div>
+      </FilterBar>
 
       {isEmployeeView
         ? null

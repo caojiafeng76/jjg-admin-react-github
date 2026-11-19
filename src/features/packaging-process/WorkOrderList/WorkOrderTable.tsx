@@ -4,6 +4,8 @@ import { Table } from 'antd'
 import dayjs from 'dayjs'
 import { memo, useMemo } from 'react'
 
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -229,8 +231,15 @@ function WorkOrderTable({
       pagination={false}
       scroll={{ x: 2380, y: scrollY }}
       size="small"
-      rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无生产工单"
+            description="点击上方「添加」登记包装生产工单"
+          />
+        ),
+      }}
+      rowClassName={zebraRowClassName}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

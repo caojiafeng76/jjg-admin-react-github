@@ -22,6 +22,7 @@ import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import ExportButton from '@/ui/ExportButton'
+import FilterBar from '@/ui/FilterBar'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
 import {
@@ -417,9 +418,7 @@ export default function ToolingDataPage() {
         <Tooltip title={viewerDenied ? viewerOperationTip : '复制新增刀具资料'}>
           <Button
             type="text"
-            icon={
-              <DocumentDuplicateIcon className="size-4 text-indigo-500/80!" />
-            }
+            icon={<DocumentDuplicateIcon className="size-4" />}
             disabled={viewerDenied || !canManageTooling}
             onClick={handleCopyCreate}
           >
@@ -467,16 +466,13 @@ export default function ToolingDataPage() {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="whitespace-nowrap text-slate-600 dark:text-slate-400">
-          搜索：
-        </span>
+      <FilterBar>
         <ToolingDataSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}

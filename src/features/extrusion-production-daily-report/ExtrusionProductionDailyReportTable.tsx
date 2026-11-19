@@ -1,8 +1,11 @@
 import type { TableColumnsType, TableProps } from 'antd'
 import type { ExtrusionProductionDailyReportRow } from '@/services/apiExtrusionProductionDailyReport'
 import { Table } from 'antd'
-
 import { memo, useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 interface Props {
   loading: boolean
@@ -215,7 +218,11 @@ const ExtrusionProductionDailyReportTable = memo(({
         dataIndex: 'isAudited',
         key: 'isAudited',
         width: 90,
-        render: (value: boolean) => (value ? '已审核' : '待审核'),
+        render: (value: boolean) => (
+          <StatusPill tone={value ? 'success' : 'neutral'}>
+            {value ? '已审核' : '待审核'}
+          </StatusPill>
+        ),
         filters: [
           { text: '已审核', value: true },
           { text: '待审核', value: false },
@@ -239,6 +246,8 @@ const ExtrusionProductionDailyReportTable = memo(({
       columns={columns}
       dataSource={data}
       rowKey="id"
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无挤压生产日报" description="请调整筛选条件后查询" /> }}
       loading={loading}
       rowSelection={rowSelection}
       scroll={{ x: 2400, y: scrollY }}

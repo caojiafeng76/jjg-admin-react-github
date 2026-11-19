@@ -3,10 +3,14 @@ import type {
   QualityReworkRepair,
   QualityReworkRepairWorkflowStatus,
 } from '@/services/apiQualityReworkRepair'
-import { Table, Tag } from 'antd'
+import type { StatusTone } from '@/ui/StatusPill'
+import { Table } from 'antd'
 import dayjs from 'dayjs'
 import { memo, useMemo } from 'react'
 
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 function formatDate(value: string | null | undefined) {
@@ -19,21 +23,21 @@ function formatDateTime(value: string | null | undefined) {
 
 const WORKFLOW_STATUS_MAP: Record<
   QualityReworkRepairWorkflowStatus,
-  { label: string, color: string }
+  { label: string, tone: StatusTone }
 > = {
-  workshop_pending: { label: '车间发起', color: 'default' },
-  production_pending: { label: '生产部待确认', color: 'processing' },
-  technical_pending: { label: '技术部待确认', color: 'warning' },
-  quality_pending: { label: '质量部待最终确认', color: 'orange' },
-  completed: { label: '已完成', color: 'success' },
+  workshop_pending: { label: '车间发起', tone: 'neutral' },
+  production_pending: { label: '生产部待确认', tone: 'info' },
+  technical_pending: { label: '技术部待确认', tone: 'warning' },
+  quality_pending: { label: '质量部待最终确认', tone: 'warning' },
+  completed: { label: '已完成', tone: 'success' },
 }
 
 function renderWorkflowStatus(status: QualityReworkRepairWorkflowStatus) {
   const config = WORKFLOW_STATUS_MAP[status] || {
     label: status,
-    color: 'default',
+    tone: 'neutral' as StatusTone,
   }
-  return <Tag color={config.color}>{config.label}</Tag>
+  return <StatusPill tone={config.tone}>{config.label}</StatusPill>
 }
 
 interface Props {
@@ -198,8 +202,15 @@ function ReworkRepairTable({
       pagination={false}
       scroll={{ x: 2800, y: scrollY }}
       size="small"
-      rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无返工返修记录"
+            description="可在「车间发起」页签点击「新建返工返修记录」发起流程"
+          />
+        ),
+      }}
+      rowClassName={zebraRowClassName}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

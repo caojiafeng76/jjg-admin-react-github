@@ -1,7 +1,8 @@
 import type { PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
 
-import { Button, Descriptions, Empty, Tag } from 'antd'
+import { Button, Descriptions, Empty } from 'antd'
+import StatusPill from '@/ui/StatusPill'
 
 interface Props {
   selectedRecord: PrecisionFinishingCuttingWithEmployee | null
@@ -51,9 +52,9 @@ export default function PrecisionFinishingCuttingDetail({
   return (
     <div className="h-full overflow-auto p-3">
       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-        <Tag color={is_audited ? 'success' : 'default'}>
+        <StatusPill tone={is_audited ? 'success' : 'neutral'}>
           {is_audited ? '已审核' : '待审核'}
-        </Tag>
+        </StatusPill>
         {customer && <span className="font-medium">{customer}</span>}
         {customer && project_no && <span className="text-slate-400">·</span>}
         <span className="font-medium">{project_no}</span>

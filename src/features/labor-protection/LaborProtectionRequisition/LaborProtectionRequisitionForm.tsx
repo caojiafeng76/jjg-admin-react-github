@@ -176,7 +176,7 @@ export default function LaborProtectionRequisitionForm({
                   type="button"
                   disabled={isSubmitting || categoryOptions.length === 0}
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-700 dark:bg-stone-800 dark:text-slate-100"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   {currentCategoryLabel
                     || (categoryOptions.length > 0
@@ -213,7 +213,7 @@ export default function LaborProtectionRequisitionForm({
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setIsMachineSheetOpen(true)}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-700 dark:bg-stone-800 dark:text-slate-100"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   {currentMachineLabel
                     || (machineOptions.length > 0

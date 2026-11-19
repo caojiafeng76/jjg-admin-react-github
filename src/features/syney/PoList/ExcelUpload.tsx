@@ -15,6 +15,8 @@ import {
   Upload,
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 
 // xlsx-js-style 约 800KB，独立 chunk 挂载即预加载（避免上传时临时拉取失败）
@@ -391,6 +393,8 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
 
           <Table
             columns={itemColumns}
+            rowClassName={zebraRowClassName}
+            locale={{ emptyText: <TableEmpty title="暂无解析明细" /> }}
             dataSource={parsedData.items.map((item, index) => ({
               ...item,
               key: index,

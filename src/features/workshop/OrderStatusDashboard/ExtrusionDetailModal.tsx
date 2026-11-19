@@ -3,10 +3,14 @@ import type {
   ExtrusionDetailRow,
   SelectedExtrusionDetail,
 } from './dashboardRenderUtils'
-import { Modal, Table, Tag } from 'antd'
+import { FireIcon } from '@heroicons/react/16/solid'
+import { Modal, Table } from 'antd'
 import dayjs from 'dayjs'
-
 import { useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
   renderDetailQuantity,
   renderText,
@@ -121,9 +125,9 @@ export function ExtrusionDetailModal({
       width: 90,
       align: 'center',
       render: (value: boolean) => (
-        <Tag color={value ? 'green' : 'gold'}>
+        <StatusPill tone={value ? 'success' : 'warning'}>
           {value ? '已审核' : '未审核'}
-        </Tag>
+        </StatusPill>
       ),
     },
   ]
@@ -133,25 +137,8 @@ export function ExtrusionDetailModal({
       open={Boolean(detail)}
       title={(
         <div className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 shadow-md shadow-amber-500/30">
-            <svg
-              className="size-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"
-              />
-            </svg>
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
+            <FireIcon className="size-4" />
           </div>
           <div>
             <span className="font-semibold text-slate-700 dark:text-slate-200">
@@ -163,10 +150,9 @@ export function ExtrusionDetailModal({
         </div>
       )}
       footer={null}
-      width={1180}
+      width={960}
       destroyOnHidden
       onCancel={onClose}
-      className="[&_.ant-modal-content]:!rounded-2xl [&_.ant-modal-header]:!rounded-t-2xl [&_.ant-modal-header]:!border-b [&_.ant-modal-header]:!border-slate-100 [&_.ant-modal-header]:!bg-gradient-to-r [&_.ant-modal-header]:!from-slate-50 [&_.ant-modal-header]:!to-white dark:[&_.ant-modal-header]:!border-slate-700 dark:[&_.ant-modal-header]:!from-slate-800 dark:[&_.ant-modal-header]:!to-slate-800"
     >
       {detail && (
         <div className="space-y-4">
@@ -231,9 +217,10 @@ export function ExtrusionDetailModal({
               size="small"
               columns={columns}
               dataSource={rows}
+              rowClassName={zebraRowClassName}
+              locale={{ emptyText: <TableEmpty title="暂无挤压明细" /> }}
               pagination={false}
               scroll={{ x: 1060, y: 420 }}
-              className="[&_.ant-table]:!rounded-none"
             />
           </div>
         </div>

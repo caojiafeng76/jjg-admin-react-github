@@ -9,10 +9,8 @@ import {
   App,
   Button,
   Drawer,
-
   Modal,
   Tabs,
-
   Tooltip,
 } from 'antd'
 import dayjs from 'dayjs'
@@ -20,6 +18,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import { formatNumber } from '@/utils/format'
 import { getFinalStockColorClass } from '../inventoryPresentation'
 import {
@@ -142,6 +141,7 @@ export default function ToolingDataDetailDrawer({
   const [quickMode, setQuickMode] = useState<'stock-in' | 'stock-out' | null>(
     null,
   )
+  const [quickError, setQuickError] = useState<unknown>(null)
   const [stockInFormRef, setStockInFormRef]
     = useState<FormInstance<ToolingStockInFormValues> | null>(null)
   const [stockOutFormRef, setStockOutFormRef] = useState<FormInstance | null>(
@@ -207,6 +207,7 @@ export default function ToolingDataDetailDrawer({
 
   const closeQuickModal = useCallback(() => {
     setQuickMode(null)
+    setQuickError(null)
     stockInFormRef?.resetFields()
     stockOutFormRef?.resetFields()
   }, [stockInFormRef, stockOutFormRef])
@@ -229,11 +230,13 @@ export default function ToolingDataDetailDrawer({
       }
 
       try {
+        setQuickError(null)
         await createStockInMutation.mutateAsync(values)
         message.success('刀具入库创建成功，当前为待审核')
         closeQuickModal()
       }
       catch (error) {
+        setQuickError(error)
         message.error(
           error instanceof Error
             ? error.message
@@ -264,11 +267,13 @@ export default function ToolingDataDetailDrawer({
       }
 
       try {
+        setQuickError(null)
         await createStockOutMutation.mutateAsync(values)
         message.success('刀具出库创建成功，当前为待审核')
         closeQuickModal()
       }
       catch (error) {
+        setQuickError(error)
         message.error(
           error instanceof Error
             ? error.message
@@ -362,7 +367,10 @@ export default function ToolingDataDetailDrawer({
                                 <Button
                                   type="primary"
                                   disabled={quickCreateDisabled}
-                                  onClick={() => setQuickMode('stock-in')}
+                                  onClick={() => {
+                                    setQuickError(null)
+                                    setQuickMode('stock-in')
+                                  }}
                                 >
                                   新建入库
                                 </Button>
@@ -374,7 +382,10 @@ export default function ToolingDataDetailDrawer({
                               <Tooltip title={quickCreateTip}>
                                 <Button
                                   disabled={quickCreateDisabled}
-                                  onClick={() => setQuickMode('stock-out')}
+                                  onClick={() => {
+                                    setQuickError(null)
+                                    setQuickMode('stock-out')
+                                  }}
                                 >
                                   新建出库
                                 </Button>
@@ -415,16 +426,19 @@ export default function ToolingDataDetailDrawer({
         onOk={() => stockInFormRef?.submit()}
         onCancel={closeQuickModal}
       >
-        <ToolingStockInForm
-          onFinish={handleQuickStockInFinish}
-          setFormRef={setStockInFormRef}
-          isSubmitting={createStockInMutation.isPending}
-          toolingOptions={[]}
-          isToolingOptionsLoading={false}
-          onToolingSearch={() => {}}
-          initialValues={quickStockInInitialValues}
-          lockTooling
-        />
+        <div className="space-y-3">
+          <FormErrorAlert error={quickError} />
+          <ToolingStockInForm
+            onFinish={handleQuickStockInFinish}
+            setFormRef={setStockInFormRef}
+            isSubmitting={createStockInMutation.isPending}
+            toolingOptions={[]}
+            isToolingOptionsLoading={false}
+            onToolingSearch={() => {}}
+            initialValues={quickStockInInitialValues}
+            lockTooling
+          />
+        </div>
       </Modal>
 
       <Modal
@@ -436,18 +450,21 @@ export default function ToolingDataDetailDrawer({
         onOk={() => stockOutFormRef?.submit()}
         onCancel={closeQuickModal}
       >
-        <ToolingStockOutForm
-          onFinish={handleQuickStockOutFinish}
-          setFormRef={setStockOutFormRef}
-          isSubmitting={createStockOutMutation.isPending}
-          toolingOptions={[]}
-          isToolingOptionsLoading={false}
-          onToolingSearch={() => {}}
-          machineOptions={machineOptions}
-          isMachineOptionsLoading={isMachineOptionsLoading}
-          initialValues={quickStockOutInitialValues}
-          lockTooling
-        />
+        <div className="space-y-3">
+          <FormErrorAlert error={quickError} />
+          <ToolingStockOutForm
+            onFinish={handleQuickStockOutFinish}
+            setFormRef={setStockOutFormRef}
+            isSubmitting={createStockOutMutation.isPending}
+            toolingOptions={[]}
+            isToolingOptionsLoading={false}
+            onToolingSearch={() => {}}
+            machineOptions={machineOptions}
+            isMachineOptionsLoading={isMachineOptionsLoading}
+            initialValues={quickStockOutInitialValues}
+            lockTooling
+          />
+        </div>
       </Modal>
     </Drawer>
   )

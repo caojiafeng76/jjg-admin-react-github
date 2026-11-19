@@ -1,10 +1,13 @@
 import type { TableColumnsType } from 'antd'
 import type { VillaLiftCuttingRecordWithOrder } from '@/services/apiVillaLiftCutting'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
-import { Button, Table, Tag, Tooltip } from 'antd'
+import { Button, Table, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 
 import { memo, useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 // ----------------------------------------------------------------
 // Types
@@ -68,7 +71,7 @@ function CuttingProcessTable({
         key: 'model',
         width: 120,
         ellipsis: true,
-        render: (v: string) => <Tag>{v}</Tag>,
+        render: (v: string) => <StatusPill tone="neutral">{v}</StatusPill>,
       },
       {
         title: '名称',
@@ -169,6 +172,15 @@ function CuttingProcessTable({
       pagination={false}
       scroll={{ x: 1350, y: scrollY }}
       size="small"
+      rowClassName={zebraRowClassName}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无切割记录"
+            description="点击上方「添加」录入切割工序记录"
+          />
+        ),
+      }}
       rowSelection={{
         selectedRowKeys,
         onChange: keys => onSelectionChange(keys as string[]),

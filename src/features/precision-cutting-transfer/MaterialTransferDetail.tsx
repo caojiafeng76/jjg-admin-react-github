@@ -1,5 +1,5 @@
 import type { PrecisionCuttingTransferRow } from '@/services/apiPrecisionCuttingTransfers'
-import { PencilSquareIcon } from '@heroicons/react/16/solid'
+import { CursorArrowRaysIcon, PencilSquareIcon } from '@heroicons/react/16/solid'
 
 import { Button, Descriptions } from 'antd'
 
@@ -17,20 +17,8 @@ export default function MaterialTransferDetail({
   if (!selectedRecord) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-6">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-700">
-          <svg
-            className="h-8 w-8 text-slate-300 dark:text-slate-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59"
-            />
-          </svg>
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
+          <CursorArrowRaysIcon className="h-8 w-8 text-slate-300 dark:text-slate-600" />
         </div>
         <div className="text-center">
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -137,7 +125,6 @@ export default function MaterialTransferDetail({
         <Descriptions
           size="small"
           column={{ xs: 1, sm: 2, md: 3, lg: 4 }}
-          className="[&_.ant-descriptions-item-content]:pl-2 [&_.ant-descriptions-item-content]:text-slate-700 dark:[&_.ant-descriptions-item-content]:text-slate-300 [&_.ant-descriptions-item-label]:pl-5 [&_.ant-descriptions-item-label]:text-slate-500 dark:[&_.ant-descriptions-item-label]:text-slate-400"
           items={[
             {
               key: 'customer_model',

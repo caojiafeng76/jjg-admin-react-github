@@ -14,6 +14,8 @@ import {
 } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
   DEFAULT_WORKSHOP_ORDER_STATUS,
   normalizeWorkshopOrderStatus,
@@ -25,11 +27,8 @@ const { Text } = Typography
 
 function SectionTitle({ title }: { title: string }) {
   return (
-    <div className="mb-3 flex items-center gap-2">
-      <span className="h-3.5 w-1 rounded-full bg-blue-500" />
-      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-        {title}
-      </span>
+    <div className="mb-3 border-b border-slate-200 pb-1.5 text-sm font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-200">
+      {title}
     </div>
   )
 }
@@ -362,6 +361,8 @@ export default function WorkshopOrderForm({
                   ...row,
                   key: index,
                 }))}
+                rowClassName={zebraRowClassName}
+                locale={{ emptyText: <TableEmpty title="暂无解析数据" /> }}
                 size="small"
                 pagination={false}
                 scroll={{ x: 1960, y: 300 }}

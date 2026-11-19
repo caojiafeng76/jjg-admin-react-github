@@ -1,10 +1,13 @@
 import type { TableColumnsType } from 'antd'
 import type { VillaLiftFinishingRecordWithOrder } from '@/services/apiVillaLiftFinishing'
 import { PencilSquareIcon } from '@heroicons/react/16/solid'
-import { Button, Table, Tag, Tooltip } from 'antd'
+import { Button, Table, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 
 import { memo, useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 // ----------------------------------------------------------------
 // Types
@@ -68,7 +71,7 @@ function FinishingProcessTable({
         key: 'model',
         width: 120,
         ellipsis: true,
-        render: (v: string) => <Tag>{v}</Tag>,
+        render: (v: string) => <StatusPill tone="neutral">{v}</StatusPill>,
       },
       {
         title: '名称',
@@ -92,7 +95,8 @@ function FinishingProcessTable({
         key: 'operation',
         width: 120,
         ellipsis: true,
-        render: (v: string) => (v ? <Tag color="blue">{v}</Tag> : '-'),
+        render: (v: string) =>
+          v ? <StatusPill tone="info">{v}</StatusPill> : '-',
       },
       {
         title: '加工数量',
@@ -180,6 +184,15 @@ function FinishingProcessTable({
       pagination={false}
       scroll={{ x: 1450, y: scrollY }}
       size="small"
+      rowClassName={zebraRowClassName}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无加工记录"
+            description="点击上方「添加」录入加工工序记录"
+          />
+        ),
+      }}
       rowSelection={{
         selectedRowKeys,
         onChange: keys => onSelectionChange(keys as string[]),

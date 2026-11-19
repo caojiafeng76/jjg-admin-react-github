@@ -6,10 +6,12 @@ import type {
   ThHTMLAttributes,
 } from 'react'
 import type { WorkshopOrder } from './index'
-import { Table, Tag } from 'antd'
+import { Table } from 'antd'
 import dayjs from 'dayjs'
 import { memo, useMemo } from 'react'
 import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import {
   getWorkshopOrderStatusTone,
@@ -24,13 +26,6 @@ const DENSE_TABLE_CELL_STYLE: CSSProperties = {
   lineHeight: 1.2,
   padding: '4px 6px',
   whiteSpace: 'nowrap',
-}
-
-const DENSE_TAG_STYLE: CSSProperties = {
-  fontSize: 12,
-  lineHeight: '18px',
-  marginInlineEnd: 0,
-  paddingInline: 4,
 }
 
 const DENSE_TABLE_STYLES = {
@@ -176,7 +171,7 @@ function WorkshopOrderTable({
         width: 54,
         align: 'center',
         render: (value: WorkshopOrder['sketch_file_path']) =>
-          value ? <Tag style={DENSE_TAG_STYLE}>有</Tag> : null,
+          value ? <StatusPill tone="info" dot={false}>有</StatusPill> : null,
       },
       {
         title: '交货日期',
@@ -325,6 +320,8 @@ function WorkshopOrderTable({
   return (
     <Table<WorkshopOrder>
       rowKey={record => record.id || ''}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无订单记录" description="请新建订单或调整筛选条件" /> }}
       loading={loading}
       columns={columns}
       dataSource={data}

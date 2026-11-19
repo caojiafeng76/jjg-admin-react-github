@@ -28,8 +28,8 @@ export default function ReworkRepairToolbar({
       {activeStage.key === 'workshop'
         ? (
             <Button
-              type="text"
-              icon={<PlusCircleIcon className="size-4 text-green-500/80!" />}
+              type="primary"
+              icon={<PlusCircleIcon className="size-4" />}
               onClick={onCreate}
               disabled={viewerDenied}
             >
@@ -39,7 +39,7 @@ export default function ReworkRepairToolbar({
         : null}
       <Button
         type="text"
-        icon={<PencilSquareIcon className="size-4 text-yellow-500/80!" />}
+        icon={<PencilSquareIcon className="size-4" />}
         onClick={onProcess}
         disabled={viewerDenied}
       >

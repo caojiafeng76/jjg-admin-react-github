@@ -16,6 +16,8 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import { TableState } from '@/ui/TableState'
 import ExtrusionProductionDetail from './ExtrusionProductionDetail'
 import ExtrusionProductionForm from './ExtrusionProductionForm'
 import ExtrusionProductionSearch from './ExtrusionProductionSearch'
@@ -46,8 +48,9 @@ export default function ExtrusionProductionPage() {
   const [editingRecord, setEditingRecord]
     = useState<ExtrusionProduction | null>(null)
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
-  const { data, isLoading } = useExtrusionProductions({
+  const { data, isLoading, error, refetch } = useExtrusionProductions({
     page,
     pageSize,
     filters: searchFilters,
@@ -66,6 +69,7 @@ export default function ExtrusionProductionPage() {
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
   const openCreateModal = useCallback(() => {
+    setFormError(null)
     setEditingRecord(null)
     setIsModalOpen(true)
   }, [])
@@ -85,6 +89,7 @@ export default function ExtrusionProductionPage() {
         return
       }
 
+      setFormError(null)
       setEditingRecord(targetRecord)
       setIsModalOpen(true)
     },
@@ -92,6 +97,7 @@ export default function ExtrusionProductionPage() {
   )
 
   const handleCloseModal = useCallback(() => {
+    setFormError(null)
     setIsModalOpen(false)
     setEditingRecord(null)
   }, [])
@@ -146,6 +152,7 @@ export default function ExtrusionProductionPage() {
         return
       }
 
+      setFormError(null)
       try {
         if (editingRecord) {
           await updateMutation.mutateAsync({
@@ -161,8 +168,9 @@ export default function ExtrusionProductionPage() {
 
         handleCloseModal()
       }
-      catch (error) {
-        message.error(error instanceof Error ? error.message : '保存失败')
+      catch (err) {
+        setFormError(err)
+        message.error(err instanceof Error ? err.message : '保存失败')
       }
     },
     [
@@ -243,10 +251,12 @@ export default function ExtrusionProductionPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <ExtrusionProductionSearch
-        onSearch={handleSearch}
-        onReset={handleResetSearch}
-      />
+      <FilterBar>
+        <ExtrusionProductionSearch
+          onSearch={handleSearch}
+          onReset={handleResetSearch}
+        />
+      </FilterBar>
 
       <div className="flex flex-wrap items-center gap-2">
         <AddButton
@@ -257,6 +267,14 @@ export default function ExtrusionProductionPage() {
           title="编辑挤压生产单"
           handleEdit={() => openEditModal()}
         />
+        <Button
+          type="text"
+          icon={<ShieldCheckIcon className="size-4" />}
+          onClick={() => handleAudit()}
+          disabled={viewerDenied || !canAudit}
+        >
+          审核
+        </Button>
         <DeleteButton
           isDeleting={deleteMutation.isPending}
           count={selectedRowKeys.length}
@@ -265,14 +283,6 @@ export default function ExtrusionProductionPage() {
           permissionKey="feature:extrusion-production.delete"
           onConfirm={() => handleDelete()}
         />
-        <Button
-          type="text"
-          icon={<ShieldCheckIcon className="size-4 text-sky-500/80!" />}
-          onClick={() => handleAudit()}
-          disabled={viewerDenied || !canAudit}
-        >
-          审核
-        </Button>
       </div>
 
       <div className="min-h-0 flex-1 overflow-hidden" ref={tableContainerRef}>
@@ -280,18 +290,20 @@ export default function ExtrusionProductionPage() {
           <Splitter.Panel defaultSize="65%" min="45%">
             <div className="flex h-full min-h-0 flex-col gap-4 pr-2">
               <div className="min-h-0 flex-1 overflow-hidden">
-                <ExtrusionProductionTable
-                  loading={isLoading}
-                  data={records}
-                  page={page}
-                  pageSize={pageSize}
-                  selectedRowKeys={selectedRowKeys}
-                  onSelect={setSelectedRowKeys}
-                  scrollY={scrollY}
-                  rowHeight={rowHeight}
-                  activeRowId={activeRecordId}
-                  onRowClick={record => setActiveRecordId(record.id)}
-                />
+                <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+                  <ExtrusionProductionTable
+                    loading={isLoading}
+                    data={records}
+                    page={page}
+                    pageSize={pageSize}
+                    selectedRowKeys={selectedRowKeys}
+                    onSelect={setSelectedRowKeys}
+                    scrollY={scrollY}
+                    rowHeight={rowHeight}
+                    activeRowId={activeRecordId}
+                    onRowClick={record => setActiveRecordId(record.id)}
+                  />
+                </TableState>
               </div>
               <div ref={paginationRef}>
                 <AppPagination total={data?.total || 0} />
@@ -299,7 +311,7 @@ export default function ExtrusionProductionPage() {
             </div>
           </Splitter.Panel>
           <Splitter.Panel>
-            <div className="h-full min-h-0 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="h-full min-h-0 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
               <ExtrusionProductionDetail selectedRecord={activeRecord} />
             </div>
           </Splitter.Panel>
@@ -314,6 +326,7 @@ export default function ExtrusionProductionPage() {
         loading={isSubmitting}
         currentUploader={currentUploader}
         canAudit={canAudit}
+        formError={formError}
       />
     </div>
   )

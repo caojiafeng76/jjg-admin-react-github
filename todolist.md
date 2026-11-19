@@ -43,10 +43,10 @@
 
 ## Phase 3：其余桌面业务域分批对齐
 
-- [ ] **P3-A 刀具与劳保（6 个管理端页）**：`tooling`（刀具资料 / 库存 / 入库 / 出库 4 页）+ `labor-protection`（劳保资料 / 领料单 2 页；公开页见 P4-B） —— 补 `TableState` / `TableEmpty` / `FormErrorAlert` / `FilterBar`；状态 `<Tag>` → `StatusPill`；清 `labor-protection` 33 处非 `slate` 灰阶；导入接 `ExcelImportModal`
-- [ ] **P3-B 质量、包装与别墅梯（8 页）**：`quality`（返工返修 / 质量问题记录 2 页）+ `packaging-process`（员工管理 / 标准工时 / 生产工单 3 页）+ `villa-lift`（订单管理 / 切割工序 / 加工工序 3 页） —— 全部补齐 `TableState` / `TableEmpty` / `FormErrorAlert` / 暗色斑马纹；`<Tag>` → `StatusPill`；清 `villa-lift` 21 处非 `slate` 灰阶与冗余内联 style；Modal 宽度收敛
-- [ ] **P3-C 挤压生产与车间基础资料（9 页）**：`extrusion-production`（挤压生产单 / 挤压生产日报表 2 页）+ `workshop`（订单管理 `WorkshopOrderProduction` / 订单现状 `OrderStatusDashboard` / 订单排产 `ProductionScheduling` / 员工管理 `EmployeeList` / 成本核算 `StandardTimeList` / 岗位基础数值 `JobBaseSetting` / 设备维护 `MachineEquipmentMaintenance` 7 页） —— 补 `TableState` / `TableEmpty` / 暗色适配；清 24 处手写 `<svg>` 与 `@ant-design/icons`；状态 `<Tag>` 收口 `StatusPill`；`OrderStatusDashboard` 去外层 `p-4`；统一 `FilterBar`
-- [ ] **P3-D 西尼与生产流转报表（12 页）**：`syney`（订单列表 / 订单详情 / 入库单列表 / 入库单详情 / 踏板规格 / 件号配置 / 编号设置 7 页）+ `material-transfer`（1 页）+ `precision-cutting-transfer`（1 页）+ `precision-finishing-cutting`（1 页）+ `production-order`（桌面工单 1 页）+ `production-report`（生产日报表 1 页） —— 清 9 处手写 `<svg>` 与 `@ant-design/icons`；`PoDetail` / `ReportDetail` 去多余 `p-4` 对齐 C 类详情页；`ProductionOrder` 补 `TableState` / `StatusPill` 并去冗余 `<Card>`；筛选栏统一 `FilterBar`
+- [x] **P3-A 刀具与劳保（6 个管理端页）**：`tooling`（刀具资料 / 库存 / 入库 / 出库 4 页）+ `labor-protection`（劳保资料 / 领料单 2 页；公开页见 P4-B） —— 补 `TableState` / `TableEmpty` / `FormErrorAlert` / `FilterBar`；状态 `<Tag>` → `StatusPill`；清 `labor-protection` 33 处非 `slate` 灰阶；导入接 `ExcelImportModal`
+- [x] **P3-B 质量、包装与别墅梯（8 页）**：`quality`（返工返修 / 质量问题记录 2 页）+ `packaging-process`（员工管理 / 标准工时 / 生产工单 3 页）+ `villa-lift`（订单管理 / 切割工序 / 加工工序 3 页） —— 全部补齐 `TableState` / `TableEmpty` / `FormErrorAlert` / 暗色斑马纹；`<Tag>` → `StatusPill`；清 `villa-lift` 21 处非 `slate` 灰阶与冗余内联 style；Modal 宽度收敛
+- [x] **P3-C 挤压生产与车间基础资料（9 页）**：`extrusion-production`（挤压生产单 / 挤压生产日报表 2 页）+ `workshop`（订单管理 `WorkshopOrderProduction` / 订单现状 `OrderStatusDashboard` / 订单排产 `ProductionScheduling` / 员工管理 `EmployeeList` / 成本核算 `StandardTimeList` / 岗位基础数值 `JobBaseSetting` / 设备维护 `MachineEquipmentMaintenance` 7 页） —— 补 `TableState` / `TableEmpty` / 暗色适配；清 24 处手写 `<svg>` 与 `@ant-design/icons`；状态 `<Tag>` 收口 `StatusPill`；`OrderStatusDashboard` 去外层 `p-4`；统一 `FilterBar`
+- [x] **P3-D 西尼与生产流转报表（12 页）**：`syney`（订单列表 / 订单详情 / 入库单列表 / 入库单详情 / 踏板规格 / 件号配置 / 编号设置 7 页）+ `material-transfer`（1 页）+ `precision-cutting-transfer`（1 页）+ `precision-finishing-cutting`（1 页）+ `production-order`（桌面工单 1 页）+ `production-report`（生产日报表 1 页） —— 清 9 处手写 `<svg>` 与 `@ant-design/icons`；`PoDetail` / `ReportDetail` 去多余 `p-4` 对齐 C 类详情页；`ProductionOrder` 补 `TableState` / `StatusPill` 并去冗余 `<Card>`；筛选栏统一 `FilterBar`
 
 ---
 

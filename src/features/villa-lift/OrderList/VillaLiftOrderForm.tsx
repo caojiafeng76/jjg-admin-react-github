@@ -18,6 +18,7 @@ import {
 import dayjs from 'dayjs'
 
 import { useCallback, useEffect } from 'react'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 interface Props {
   onFinish: (values: VillaLiftOrderFormValues) => void
@@ -461,7 +462,7 @@ export default function VillaLiftOrderForm({
             return (
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
                     订单明细
                   </span>
                   <Button
@@ -483,6 +484,7 @@ export default function VillaLiftOrderForm({
                 {fields.length > 0
                   ? (
                       <Table
+                        rowClassName={zebraRowClassName}
                         dataSource={fields}
                         columns={columns}
                         rowKey="key"
@@ -492,7 +494,7 @@ export default function VillaLiftOrderForm({
                       />
                     )
                   : (
-                      <div className="py-3 text-center text-sm text-gray-400">
+                      <div className="py-3 text-center text-sm text-slate-400 dark:text-slate-500">
                         暂无明细，可点击「添加明细」
                       </div>
                     )}

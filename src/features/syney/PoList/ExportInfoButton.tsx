@@ -11,7 +11,7 @@ export default function ExportInfoButton() {
   const btn = (
     <Button
       type="text"
-      icon={<DocumentArrowDownIcon className="size-4 text-emerald-500/80!" />}
+      icon={<DocumentArrowDownIcon className="size-4" />}
       onClick={exportSafePartInfoAsExcel}
       onMouseEnter={preloadExcel}
       onFocus={preloadExcel}

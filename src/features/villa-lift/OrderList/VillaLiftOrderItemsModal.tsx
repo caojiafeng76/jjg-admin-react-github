@@ -5,7 +5,8 @@ import type {
 } from '@/services/apiVillaLiftOrders'
 import { App, Modal } from 'antd'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import {
   useUpsertVillaLiftOrderItems,
   useVillaLiftOrderItems,
@@ -24,6 +25,7 @@ export default function VillaLiftOrderItemsModal({
   onClose,
 }: VillaLiftOrderItemsModalProps) {
   const { message } = App.useApp()
+  const [formError, setFormError] = useState<unknown>(null)
   const { data: items = [], isLoading } = useVillaLiftOrderItems(
     open ? orderId : null,
   )
@@ -36,6 +38,7 @@ export default function VillaLiftOrderItemsModal({
     if (!orderId || !formRef.current)
       return
     try {
+      setFormError(null)
       const values = await formRef.current.validateFields()
       await upsertMutation.mutateAsync({
         orderId,
@@ -45,9 +48,9 @@ export default function VillaLiftOrderItemsModal({
       onClose()
     }
     catch (err) {
-      if (err instanceof Error) {
-        message.error(err.message)
-      }
+      if (err && typeof err === 'object' && 'errorFields' in err)
+        return
+      setFormError(err)
     }
   }
 
@@ -56,39 +59,45 @@ export default function VillaLiftOrderItemsModal({
       title="编辑订单明细"
       open={open}
       onOk={handleOk}
-      onCancel={onClose}
+      onCancel={() => {
+        setFormError(null)
+        onClose()
+      }}
       confirmLoading={upsertMutation.isPending}
-      width={800}
+      width={720}
       destroyOnHidden
     >
-      <VillaLiftOrderForm
-        onFinish={() => {}}
-        setFormRef={(f) => {
-          formRef.current = f as unknown as FormInstance<{
-            items: VillaLiftOrderItemFormValues[]
-          }>
-        }}
-        isSubmitting={upsertMutation.isPending}
-        initialValues={
-          orderId
-            ? ({
-                id: orderId,
-                schedule_date: null,
-                delivery_date: null,
-                customer: '',
-                project_name: '',
-                product_name: '',
-                color: '',
-                quantity: 0,
-                remarks: '',
-                created_at: '',
-                updated_at: '',
-                items: isLoading ? [] : items,
-              } as VillaLiftOrder)
-            : null
-        }
-        itemsOnly
-      />
+      <div className="space-y-4">
+        <FormErrorAlert error={formError} />
+        <VillaLiftOrderForm
+          onFinish={() => {}}
+          setFormRef={(f) => {
+            formRef.current = f as unknown as FormInstance<{
+              items: VillaLiftOrderItemFormValues[]
+            }>
+          }}
+          isSubmitting={upsertMutation.isPending}
+          initialValues={
+            orderId
+              ? ({
+                  id: orderId,
+                  schedule_date: null,
+                  delivery_date: null,
+                  customer: '',
+                  project_name: '',
+                  product_name: '',
+                  color: '',
+                  quantity: 0,
+                  remarks: '',
+                  created_at: '',
+                  updated_at: '',
+                  items: isLoading ? [] : items,
+                } as VillaLiftOrder)
+              : null
+          }
+          itemsOnly
+        />
+      </div>
     </Modal>
   )
 }

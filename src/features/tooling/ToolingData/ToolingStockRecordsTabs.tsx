@@ -2,9 +2,11 @@ import type { TableColumnsType } from 'antd'
 import type { ToolingStockIn } from '@/services/apiToolingStockIn'
 import type { ToolingStockOut } from '@/services/apiToolingStockOut'
 
-import { Alert, Button, Pagination, Table, Tag } from 'antd'
+import { Alert, Button, Pagination, Table } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { formatNumber } from '@/utils/format'
 import {
   TOOLING_DETAIL_RECORDS_PAGE_SIZE,
@@ -17,7 +19,11 @@ function formatDateTime(value: string | null | undefined) {
 }
 
 function renderStatus(value: ToolingStockIn['status']) {
-  return <Tag color={value === '已审核' ? 'success' : 'default'}>{value}</Tag>
+  return (
+    <StatusPill tone={value === '已审核' ? 'success' : 'neutral'}>
+      {value}
+    </StatusPill>
+  )
 }
 
 function RecordsPagination({
@@ -139,10 +145,7 @@ export function ToolingStockInRecordsTab({
             />
           ),
         }}
-        rowClassName={(_, index) =>
-          index % 2 === 0
-            ? 'bg-white dark:bg-slate-800'
-            : 'bg-slate-50/60 dark:bg-slate-800/60'}
+        rowClassName={zebraRowClassName}
       />
       <RecordsPagination
         page={page}
@@ -269,10 +272,7 @@ export function ToolingStockOutRecordsTab({
             />
           ),
         }}
-        rowClassName={(_, index) =>
-          index % 2 === 0
-            ? 'bg-white dark:bg-slate-800'
-            : 'bg-slate-50/60 dark:bg-slate-800/60'}
+        rowClassName={zebraRowClassName}
       />
       <RecordsPagination
         page={page}

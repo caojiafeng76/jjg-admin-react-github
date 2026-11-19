@@ -12,7 +12,7 @@ export default function WorkshopOrderStatusTabs({
   onChange,
 }: WorkshopOrderStatusTabsProps) {
   return (
-    <div className="rounded-lg border border-slate-200/60 bg-white/80 px-4 pt-3 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/80">
+    <div className="border-b border-slate-200 dark:border-slate-700">
       <Tabs
         activeKey={activeTab}
         onChange={onChange}
@@ -47,7 +47,7 @@ export default function WorkshopOrderStatusTabs({
             ),
           },
         ]}
-        className="[&_.ant-tabs-nav]::!mb-0"
+        tabBarStyle={{ marginBottom: 0 }}
       />
     </div>
   )

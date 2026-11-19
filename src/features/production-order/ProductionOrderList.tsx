@@ -1,10 +1,13 @@
 import type { TableColumnsType, TableProps } from 'antd'
 import type { ProductionOrderListItem } from '@/services/apiProductionOrders'
 import { EyeIcon } from '@heroicons/react/16/solid'
-import { Button, Table, Tag, Tooltip } from 'antd'
+import { Button, Table, Tooltip } from 'antd'
 import dayjs from 'dayjs'
-
 import { useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 interface Props {
   loading: boolean
@@ -65,12 +68,9 @@ export default function ProductionOrderList({
         key: 'is_audited',
         width: 90,
         render: (value: boolean) => (
-          <Tag
-            color={value ? 'success' : 'default'}
-            className="rounded-full px-2.5 py-0.5 text-xs font-medium"
-          >
+          <StatusPill tone={value ? 'success' : 'neutral'}>
             {value ? '已审核' : '待审核'}
-          </Tag>
+          </StatusPill>
         ),
       },
       {
@@ -262,15 +262,9 @@ export default function ProductionOrderList({
   return (
     <Table<ProductionOrderListItem>
       rowKey={record => record.id}
-      loading={{
-        spinning: loading,
-        tip: (
-          <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
-            <span className="animate-pulse">加载中...</span>
-          </div>
-        ),
-      }}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无生产工单" description="请新建工单或调整筛选条件" /> }}
+      loading={loading}
       columns={columns}
       dataSource={data}
       rowSelection={rowSelection}

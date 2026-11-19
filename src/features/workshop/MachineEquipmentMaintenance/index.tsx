@@ -12,6 +12,9 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import MachineEquipmentMaintenanceDetail from './MachineEquipmentMaintenanceDetail'
 import MachineEquipmentMaintenanceForm from './MachineEquipmentMaintenanceForm'
 import MachineEquipmentMaintenanceSearch from './MachineEquipmentMaintenanceSearch'
@@ -34,6 +37,7 @@ export default function MachineEquipmentMaintenancePage() {
     = useState<MachineEquipmentMaintenance | null>(null)
   const [activeRecord, setActiveRecord]
     = useState<MachineEquipmentMaintenance | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
   const formRef = useRef<FormInstance<MachineEquipmentMaintenanceFormValues> | null>(
     null,
   )
@@ -57,7 +61,7 @@ export default function MachineEquipmentMaintenancePage() {
     machineName: searchParamsURL.get('machineName') || undefined,
   })
 
-  const { data, isLoading } = useMachineEquipmentMaintenancesList({
+  const { data, isLoading, error, refetch } = useMachineEquipmentMaintenancesList({
     page,
     pageSize,
     searchParams,
@@ -74,6 +78,7 @@ export default function MachineEquipmentMaintenancePage() {
     })
 
   const resetFormState = useCallback(() => {
+    setFormError(null)
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
@@ -82,6 +87,7 @@ export default function MachineEquipmentMaintenancePage() {
   }, [])
 
   const handleCreate = useCallback(() => {
+    setFormError(null)
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
@@ -102,6 +108,7 @@ export default function MachineEquipmentMaintenancePage() {
       return
     }
 
+    setFormError(null)
     setEditingRecord(record)
     setIsEdit(true)
     setModalTitle('编辑机器设备维护')
@@ -131,6 +138,7 @@ export default function MachineEquipmentMaintenancePage() {
 
   const handleFinish = useCallback(
     async (values: MachineEquipmentMaintenanceFormValues) => {
+      setFormError(null)
       try {
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
@@ -146,9 +154,10 @@ export default function MachineEquipmentMaintenancePage() {
 
         resetFormState()
       }
-      catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
+      catch (err) {
+        setFormError(err)
+        if (err instanceof Error) {
+          message.error(err.message)
         }
         else {
           message.error('操作失败，请稍后重试')
@@ -220,7 +229,7 @@ export default function MachineEquipmentMaintenancePage() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="flex h-full flex-col gap-2">
+    <div className="flex h-full flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
         <EditButton title="编辑机器设备维护" handleEdit={handleEdit} />
@@ -233,14 +242,13 @@ export default function MachineEquipmentMaintenancePage() {
         />
       </div>
 
-      <div className="flex items-center gap-2 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)]">
-        <span className="whitespace-nowrap text-slate-600">搜索：</span>
+      <FilterBar>
         <MachineEquipmentMaintenanceSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div className="min-h-0 flex-1 overflow-hidden">
         <Splitter orientation="vertical" style={{ flex: 1, minHeight: 0 }}>
@@ -250,18 +258,20 @@ export default function MachineEquipmentMaintenancePage() {
               className="flex h-full flex-col gap-2 overflow-hidden"
             >
               <div className="min-h-0 flex-1 overflow-x-auto">
-                <MachineEquipmentMaintenanceTable
-                  loading={isLoading}
-                  data={data?.items || []}
-                  selectedRowKeys={selectedRowKeys}
-                  onSelect={setSelectedRowKeys}
-                  onRowClick={setActiveRecord}
-                  page={page}
-                  pageSize={pageSize}
-                  scrollY={scrollY}
-                  rowHeight={rowHeight}
-                  activeRowId={activeRecord?.id ?? null}
-                />
+                <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+                  <MachineEquipmentMaintenanceTable
+                    loading={isLoading}
+                    data={data?.items || []}
+                    selectedRowKeys={selectedRowKeys}
+                    onSelect={setSelectedRowKeys}
+                    onRowClick={setActiveRecord}
+                    page={page}
+                    pageSize={pageSize}
+                    scrollY={scrollY}
+                    rowHeight={rowHeight}
+                    activeRowId={activeRecord?.id ?? null}
+                  />
+                </TableState>
               </div>
               <div ref={paginationRef} className="flex shrink-0 justify-end">
                 <AppPagination total={data?.total || 0} />
@@ -287,6 +297,7 @@ export default function MachineEquipmentMaintenancePage() {
         onOk={() => formRef.current?.submit()}
         onCancel={resetFormState}
       >
+        <FormErrorAlert error={formError} className="mb-3" />
         <MachineEquipmentMaintenanceForm
           onFinish={handleFinish}
           setFormRef={setFormRef}

@@ -5,6 +5,8 @@ import type { ISyneySpec } from '@/types'
 import { Table } from 'antd'
 import { useMemo } from 'react'
 
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -114,12 +116,13 @@ export default function SpecTable({
       columns={columns}
       dataSource={data}
       loading={loading}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无踏板规格" description="请新建规格或调整筛选条件" /> }}
       size="small"
       pagination={false}
       onRow={handleRow}
       scroll={{ x: 800, y: scrollY }}
       style={{ fontSize: '13px' }}
-      className="[&_.ant-table-row:hover>td]:bg-blue-50/50 dark:[&_.ant-table-row:hover>td]:bg-blue-900/30 [&_.ant-table-thead>tr>th]:border-slate-200 [&_.ant-table-thead>tr>th]:bg-slate-50 [&_.ant-table-thead>tr>th]:font-medium [&_.ant-table-thead>tr>th]:text-slate-600 dark:[&_.ant-table-thead>tr>th]:border-slate-700 dark:[&_.ant-table-thead>tr>th]:bg-slate-800 dark:[&_.ant-table-thead>tr>th]:text-slate-300"
     />
   )
 }

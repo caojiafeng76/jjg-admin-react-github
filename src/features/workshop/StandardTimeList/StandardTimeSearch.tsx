@@ -1,7 +1,7 @@
 import type { Dayjs } from 'dayjs'
 import type { ProcessStandardRecordType } from '@/services/apiStandardTimes'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
-import { Button, Checkbox, DatePicker, Form, Input, Select, Space } from 'antd'
+import { Button, Checkbox, DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 
 import { useEffect, useState } from 'react'
@@ -189,7 +189,7 @@ export default function StandardTimeSearch({
         </Form.Item>
       )}
       <Form.Item className="mb-0">
-        <Space className={mobile ? 'flex w-full [&_.ant-btn]:flex-1' : ''}>
+        <div className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}>
           <Button
             type="primary"
             htmlType="submit"
@@ -203,7 +203,7 @@ export default function StandardTimeSearch({
           >
             重置
           </Button>
-        </Space>
+        </div>
       </Form.Item>
     </Form>
   )
@@ -218,10 +218,7 @@ export default function StandardTimeSearch({
           className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm font-medium shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
         >
           <span className="flex w-full items-center justify-between">
-            <span className="flex items-center gap-2">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-              <span className="text-slate-600 dark:text-slate-300">筛选条件</span>
-            </span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">筛选条件</span>
             <ChevronDownIcon
               className={`h-4 w-4 text-slate-400 transition-transform duration-200 dark:text-slate-500 ${
                 isExpanded ? 'rotate-180' : ''

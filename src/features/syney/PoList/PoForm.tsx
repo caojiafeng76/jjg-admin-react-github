@@ -72,7 +72,6 @@ const PoForm: FC<PoFormProps> = ({
       name="po-form"
       onFinish={onFinish}
       initialValues={initialValues}
-      className="[&_.ant-form-item]:mb-3"
     >
       <Form.Item
         name="No"

@@ -15,6 +15,8 @@ import { useMachineEquipmentOptions } from '@/features/production-order/useMachi
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { getAllEmployees } from '@/services/apiEmployees'
+import { TableEmpty, TableState } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { getErrorDisplayInfo } from '@/utils/errorHandler'
 import { makeOrderColumns } from './productionSchedulingColumns'
 import ProductionSchedulingEditModal from './ProductionSchedulingEditModal'
@@ -57,6 +59,7 @@ export default function ProductionScheduling() {
   const [editingOrder, setEditingOrder]
     = useState<ProductionSchedulingOrder | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [formError, setFormError] = useState<unknown>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
   const { data: employees = [] } = useQuery({
@@ -81,7 +84,9 @@ export default function ProductionScheduling() {
 
   const {
     data: schedulingResult,
+    isLoading,
     isFetching,
+    error,
     refetch,
   } = useProductionSchedulingOrders({ filters, page, pageSize })
   const updateMutation = useUpdateProductionSchedulingOrder()
@@ -107,6 +112,7 @@ export default function ProductionScheduling() {
         return
       }
 
+      setFormError(null)
       setEditingOrder(order)
       schedulingForm.setFieldsValue(makeSchedulingInitialValues(order))
       setModalOpen(true)
@@ -218,6 +224,7 @@ export default function ProductionScheduling() {
       return
     }
 
+    setFormError(null)
     try {
       const values = await schedulingForm.validateFields()
       await updateMutation.mutateAsync({
@@ -228,9 +235,10 @@ export default function ProductionScheduling() {
       setModalOpen(false)
       setEditingOrder(null)
     }
-    catch (error) {
+    catch (err) {
+      setFormError(err)
       const { message: errorMessage } = getErrorDisplayInfo(
-        error,
+        err,
         '订单排产信息保存失败',
       )
       message.error(errorMessage)
@@ -238,6 +246,7 @@ export default function ProductionScheduling() {
   }, [editingOrder, message, schedulingForm, updateMutation, employeeMap])
 
   const handleCancelEdit = useCallback(() => {
+    setFormError(null)
     setModalOpen(false)
     setEditingOrder(null)
   }, [])
@@ -258,7 +267,7 @@ export default function ProductionScheduling() {
   }, [message, selectedOrders, selectedRowKeys])
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-1.5 bg-gradient-to-br from-slate-50 via-slate-50 to-blue-50/30 p-1 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       {/* 标题区 + 进度快捷标签 */}
       <ProductionSchedulingHeader
         progressStatus={filters.progressStatus}
@@ -287,24 +296,26 @@ export default function ProductionScheduling() {
       {/* 表格区 */}
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+        className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <Table<ProductionSchedulingOrder>
-            size="small"
-            rowKey={getOrderRowKey}
-            columns={columns}
-            dataSource={orders}
-            loading={tableLoading}
-            pagination={false}
-            scroll={{ x: 2530, y: scrollY }}
-            tableLayout="fixed"
-            rowSelection={rowSelection}
-            components={components}
-            rowClassName={(_record, index) =>
-              index % 2 === 0 ? 'bg-slate-50/40 dark:bg-slate-700/30' : ''}
-            classNames={{ root: 'font-medium' }}
-          />
+          <TableState loading={isLoading && !schedulingResult} error={error} onRetry={refetch}>
+            <Table<ProductionSchedulingOrder>
+              size="small"
+              rowKey={getOrderRowKey}
+              columns={columns}
+              dataSource={orders}
+              loading={tableLoading}
+              pagination={false}
+              scroll={{ x: 2530, y: scrollY }}
+              tableLayout="fixed"
+              rowSelection={rowSelection}
+              components={components}
+              rowClassName={zebraRowClassName}
+              locale={{ emptyText: <TableEmpty title="暂无排产订单" description="请调整筛选条件后查询" /> }}
+              classNames={{ root: 'font-medium' }}
+            />
+          </TableState>
         </div>
         <div
           ref={paginationRef}
@@ -328,6 +339,7 @@ export default function ProductionScheduling() {
 
       <ProductionSchedulingEditModal
         open={modalOpen}
+        formError={formError}
         form={schedulingForm}
         editingOrder={editingOrder}
         confirmLoading={updateMutation.isPending}

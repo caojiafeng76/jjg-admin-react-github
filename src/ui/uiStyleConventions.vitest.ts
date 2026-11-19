@@ -53,6 +53,8 @@ const GUARDED_FILES = [
   'src/ui/TableState.tsx',
   'src/pages/Dashboard.tsx',
   'src/pages/PageNotFound.tsx',
+  'src/pages/SyneySetting.tsx',
+  'src/pages/WorkshopOrderProduction.tsx',
 ] as const
 
 /** 已完成风格迁移并锁定防回退的目录清单（随 Phase 1–5 逐步追加） */
@@ -65,13 +67,45 @@ const GUARDED_DIRS: readonly string[] = [
   'src/features/access-management',
   'src/features/attendance',
   'src/features/tooling-fixture',
+  'src/features/tooling',
+  'src/features/labor-protection',
+  'src/features/quality',
+  'src/features/packaging-process',
+  'src/features/villa-lift',
+  'src/features/extrusion-production',
+  'src/features/extrusion-production-daily-report',
+  'src/features/workshop',
+  'src/features/syney',
+  'src/features/material-transfer',
+  'src/features/precision-cutting-transfer',
+  'src/features/precision-finishing-cutting',
+  'src/features/production-order',
+  'src/features/production-report',
 ]
+
+/** 归属 Phase 4-A（员工移动端与扫码页）的待迁移文件，在 Phase 4-A 完成后移除豁免 */
+const DEFERRED_UNTIL_PHASE_4A = new Set<string>([
+  'src/features/material-transfer/MobileMaterialTransferScanPage.tsx',
+  'src/features/precision-finishing-cutting/MobilePrecisionFinishingCuttingScanPage.tsx',
+  'src/features/production-order/MobileProductionOrderCreatePage.tsx',
+  'src/features/production-order/MobileProductionOrderDetailPage.tsx',
+  'src/features/production-order/MobileProductionOrderEditPage.tsx',
+  'src/features/production-order/MobileProductionOrderScanPage.tsx',
+  'src/features/production-order/MobileProductionOrderScanHeader.tsx',
+  'src/features/production-order/MobileProductionOrderScanBasicInfo.tsx',
+  'src/features/production-order/MobileProductionOrderScanQuantitySections.tsx',
+  'src/features/production-order/MobileScanHubPage.tsx',
+])
 
 /** 归属 Phase 4-B（外部公开扫码页收口）的待迁移文件，在 Phase 4-B 完成后移除豁免 */
 const DEFERRED_UNTIL_PHASE_4B = new Set<string>([
   'src/features/jintan/PartsStockOut/JintanPartsStockOutPublicPage.tsx',
   'src/features/jintan/PartsStockOut/usePrintJintanPartsStockOutPublicQrPoster.tsx',
   'src/features/tooling-fixture/ToolingFixturePublicPage.tsx',
+  'src/features/tooling/ToolingStockOut/ToolingStockOutPublicPage.tsx',
+  'src/features/tooling/ToolingStockOut/usePrintToolingStockOutPublicQrPoster.tsx',
+  'src/features/labor-protection/LaborProtectionRequisition/LaborProtectionPublicRequisitionPage.tsx',
+  'src/features/labor-protection/LaborProtectionRequisition/usePrintLaborProtectionPublicQrPoster.tsx',
 ])
 
 function readWorkspaceFile(relativePath: string): string {
@@ -105,7 +139,7 @@ function collectGuardedFiles(): string[] {
   const unique = new Set<string>(GUARDED_FILES)
   for (const dir of GUARDED_DIRS) {
     for (const file of walkTsxFiles(dir)) {
-      if (!DEFERRED_UNTIL_PHASE_4B.has(file)) {
+      if (!DEFERRED_UNTIL_PHASE_4A.has(file) && !DEFERRED_UNTIL_PHASE_4B.has(file)) {
         unique.add(file)
       }
     }

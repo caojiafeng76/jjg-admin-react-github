@@ -36,6 +36,7 @@ export function useStandardTimeFormActions({
   const [isEdit, setIsEdit] = useState(false)
   const [editingRecord, setEditingRecord] = useState<StandardTime | null>(null)
   const [uploadingImageId, setUploadingImageId] = useState<string | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
   const formRef = useRef<FormInstance<StandardTimeFormValues> | null>(null)
   const setFormRef = useCallback(
     (form: FormInstance<StandardTimeFormValues>) => {
@@ -49,6 +50,7 @@ export function useStandardTimeFormActions({
   const uploadImageMutation = useUploadProcessStandardImage()
 
   const handleCreate = useCallback(() => {
+    setFormError(null)
     setIsEdit(false)
     setEditingRecord(null)
     setSelectedRowKeys([])
@@ -58,6 +60,7 @@ export function useStandardTimeFormActions({
   }, [isTeamLeaderMode, setSelectedRowKeys])
 
   const resetFormState = useCallback(() => {
+    setFormError(null)
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
@@ -80,6 +83,7 @@ export function useStandardTimeFormActions({
         return
       }
 
+      setFormError(null)
       setEditingRecord(targetRecord)
       setSelectedRowKeys(targetRecord.id ? [targetRecord.id] : [])
       setIsEdit(true)
@@ -121,6 +125,7 @@ export function useStandardTimeFormActions({
 
   const handleFinish = useCallback(
     async (values: StandardTimeFormValues) => {
+      setFormError(null)
       try {
         const nextValues = buildStandardTimeSubmitValues({
           values,
@@ -160,9 +165,10 @@ export function useStandardTimeFormActions({
 
         resetFormState()
       }
-      catch (error) {
-        if (error instanceof Error) {
-          message.error(error.message)
+      catch (err) {
+        setFormError(err)
+        if (err instanceof Error) {
+          message.error(err.message)
         }
         else {
           message.error('操作失败，请稍后重试')
@@ -187,6 +193,7 @@ export function useStandardTimeFormActions({
     modalTitle,
     isEdit,
     editingRecord,
+    formError,
     isSubmitting: createMutation.isPending || updateMutation.isPending,
     isCreating: createMutation.isPending,
     uploadingImageId,

@@ -12,6 +12,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
 import PrintButton from '@/ui/PrintButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
@@ -313,15 +314,6 @@ function PoListContent() {
           permissionKey="feature:syney-po-list.edit"
         />
 
-        <DeleteButton
-          onConfirm={handleDelete}
-          isDeleting={isDeleting}
-          count={tableSelectedKeys.length}
-          title="删除订单"
-          itemName="订单"
-          permissionKey="feature:syney-po-list.delete"
-        />
-
         <PrintButton
           handlePrint={handlePrint}
           onPreload={preloadChineseLabelPDF}
@@ -345,6 +337,15 @@ function PoListContent() {
           safePartSettings={safePartSettings}
           isSafePartSettingsLoading={isSafePartSettingsLoading}
         />
+
+        <DeleteButton
+          onConfirm={handleDelete}
+          isDeleting={isDeleting}
+          count={tableSelectedKeys.length}
+          title="删除订单"
+          itemName="订单"
+          permissionKey="feature:syney-po-list.delete"
+        />
       </div>
 
       {/* 选中摘要条 */}
@@ -366,24 +367,26 @@ function PoListContent() {
         : null}
 
       {/* 搜索 / 过滤栏 */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 dark:text-slate-300">交货日期：</span>
-          <PoDateFilter />
+      <FilterBar>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600 dark:text-slate-300">交货日期：</span>
+            <PoDateFilter />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600 dark:text-slate-300">状态：</span>
+            <PoSelectedFilter />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600 dark:text-slate-300">搜索：</span>
+            <PoSearchInput />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600 dark:text-slate-300">操作：</span>
+            <PoSelected />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 dark:text-slate-300">状态：</span>
-          <PoSelectedFilter />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 dark:text-slate-300">搜索：</span>
-          <PoSearchInput />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 dark:text-slate-300">操作：</span>
-          <PoSelected />
-        </div>
-      </div>
+      </FilterBar>
 
       {/* 表格和分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">

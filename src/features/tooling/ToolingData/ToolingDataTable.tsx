@@ -4,6 +4,7 @@ import { Button, Table } from 'antd'
 import { memo, useMemo } from 'react'
 
 import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 type FilterValue = string | number
@@ -266,10 +267,7 @@ function ToolingDataTable({
           />
         ),
       }}
-      rowClassName={(_, index) =>
-        index % 2 === 0
-          ? 'bg-white dark:bg-slate-800'
-          : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      rowClassName={zebraRowClassName}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

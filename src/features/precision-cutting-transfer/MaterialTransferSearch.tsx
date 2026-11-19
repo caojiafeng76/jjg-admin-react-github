@@ -5,7 +5,7 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/16/solid'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { Button, DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 
 import { useEffect, useState } from 'react'
@@ -89,17 +89,14 @@ export default function MaterialTransferSearch({
 
   const formClassName = mobile
     ? 'grid grid-cols-1 gap-3'
-    : 'flex flex-1 flex-nowrap items-center gap-3 [&_.ant-form-item]:[margin-inline-end:0]'
+    : 'flex flex-1 flex-nowrap items-center gap-3'
   const formItemClassName = mobile ? 'mb-0' : 'mb-0 shrink-0'
-  const actionSpaceClassName = mobile
-    ? 'flex w-full [&_.ant-btn]:flex-1'
-    : 'whitespace-nowrap'
 
   const formContent = (
     <Form
       form={form}
       onFinish={handleFinish}
-      layout={mobile ? 'vertical' : 'inline'}
+      layout={mobile ? 'vertical' : 'horizontal'}
       className={formClassName}
     >
       <Form.Item name="dateRange" className={formItemClassName}>
@@ -188,7 +185,7 @@ export default function MaterialTransferSearch({
       </Form.Item>
 
       <Form.Item className={formItemClassName}>
-        <Space className={actionSpaceClassName}>
+        <div className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2 whitespace-nowrap'}>
           <Button
             type="primary"
             icon={<MagnifyingGlassIcon className="h-4 w-4" />}
@@ -206,7 +203,7 @@ export default function MaterialTransferSearch({
           >
             重置
           </Button>
-        </Space>
+        </div>
       </Form.Item>
     </Form>
   )
@@ -221,11 +218,8 @@ export default function MaterialTransferSearch({
           className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm font-medium shadow-sm transition-all hover:border-slate-300 hover:shadow-md active:scale-[0.99] dark:border-slate-700 dark:bg-slate-800"
         >
           <span className="flex w-full items-center justify-between">
-            <span className="flex items-center gap-2">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-              <span className="text-slate-600 dark:text-slate-300">
-                筛选条件
-              </span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">
+              筛选条件
             </span>
             <ChevronDownIcon
               className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${
@@ -246,15 +240,5 @@ export default function MaterialTransferSearch({
     )
   }
 
-  return (
-    <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-      <div className="flex items-center gap-2">
-        <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-          筛选条件
-        </span>
-      </div>
-      {formContent}
-    </div>
-  )
+  return formContent
 }

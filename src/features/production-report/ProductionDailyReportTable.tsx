@@ -3,6 +3,8 @@ import type { ProductionDailyReportRow } from '@/services/apiProductionDailyRepo
 import { Table } from 'antd'
 
 import { memo, useCallback, useMemo } from 'react'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 interface Props {
   loading: boolean
@@ -420,6 +422,8 @@ function ProductionDailyReportTable({
   return (
     <Table<ProductionDailyReportRow>
       rowKey={record => record.key}
+      rowClassName={zebraRowClassName}
+      locale={{ emptyText: <TableEmpty title="暂无生产日报" description="请调整筛选条件后查询" /> }}
       loading={loading}
       columns={columns}
       dataSource={data}

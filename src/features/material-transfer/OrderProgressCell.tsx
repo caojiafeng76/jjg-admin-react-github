@@ -1,7 +1,8 @@
 import type { MaterialTransferOrderProgress } from '@/services/apiMaterialTransfers'
-import { Progress, Tag } from 'antd'
-
+import { Progress } from 'antd'
 import { memo } from 'react'
+
+import StatusPill from '@/ui/StatusPill'
 
 interface ProgressCellProps {
   progress: MaterialTransferOrderProgress | undefined
@@ -30,16 +31,8 @@ function OrderStatusCellBase({ progress }: ProgressCellProps) {
     return <span className="text-slate-400">-</span>
   }
   return progress.isCompleted
-    ? (
-        <Tag color="green" className="m-0">
-          完工
-        </Tag>
-      )
-    : (
-        <Tag color="default" className="m-0">
-          未完工
-        </Tag>
-      )
+    ? <StatusPill tone="success">完工</StatusPill>
+    : <StatusPill tone="neutral">未完工</StatusPill>
 }
 
 export const OrderStatusCell = memo(OrderStatusCellBase)

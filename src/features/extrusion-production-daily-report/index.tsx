@@ -9,6 +9,8 @@ import { useTableHeight } from '@/hooks/useTableHeight'
 import {
   getExtrusionProductionDailyReportForExport,
 } from '@/services/apiExtrusionProductionDailyReport'
+import AppPagination from '@/ui/AppPagination'
+import FilterBar from '@/ui/FilterBar'
 import { TableState } from '@/ui/TableState'
 import ExtrusionProductionDailyReportSearch from './ExtrusionProductionDailyReportSearch'
 import ExtrusionProductionDailyReportTable from './ExtrusionProductionDailyReportTable'
@@ -104,29 +106,17 @@ export default function ExtrusionProductionDailyReportPage() {
     }
   }, [message, searchFilters])
 
-  const handlePageChange = useCallback(
-    (newPage: number, newPageSize: number) => {
-      setSelectedRowKeys([])
-      const params = new URLSearchParams(searchParamsURL.toString())
-      params.set('page', String(newPage))
-      if (newPageSize !== pageSize) {
-        params.set('pageSize', String(newPageSize))
-        params.set('page', '1')
-      }
-      setSearchParamsURL(params)
-    },
-    [pageSize, searchParamsURL, setSearchParamsURL],
-  )
-
   return (
     <div className="flex h-full flex-col gap-4">
-      <ExtrusionProductionDailyReportSearch
-        onSearch={handleSearch}
-        onReset={handleResetSearch}
-      />
+      <FilterBar>
+        <ExtrusionProductionDailyReportSearch
+          onSearch={handleSearch}
+          onReset={handleResetSearch}
+        />
+      </FilterBar>
 
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-slate-500 dark:text-slate-400">
           共 {total} 条记录
           {selectedRowKeys.length > 0 && (
             <span className="ml-2">已选择 {selectedRowKeys.length} 条</span>
@@ -158,43 +148,8 @@ export default function ExtrusionProductionDailyReportPage() {
         </TableState>
       </div>
 
-      <div ref={paginationRef}>
-        {total > 0 && (
-          <div className="flex justify-end">
-            <Button
-              onClick={() => handlePageChange(1, pageSize)}
-              disabled={page === 1}
-              size="small"
-            >
-              首页
-            </Button>
-            <Button
-              onClick={() => handlePageChange(page - 1, pageSize)}
-              disabled={page === 1}
-              size="small"
-            >
-              上一页
-            </Button>
-            <span className="flex items-center px-4">
-              第 {page} / {Math.ceil(total / pageSize)} 页
-            </span>
-            <Button
-              onClick={() => handlePageChange(page + 1, pageSize)}
-              disabled={page >= Math.ceil(total / pageSize)}
-              size="small"
-            >
-              下一页
-            </Button>
-            <Button
-              onClick={() =>
-                handlePageChange(Math.ceil(total / pageSize), pageSize)}
-              disabled={page >= Math.ceil(total / pageSize)}
-              size="small"
-            >
-              末页
-            </Button>
-          </div>
-        )}
+      <div ref={paginationRef} className="flex shrink-0 justify-end">
+        <AppPagination total={total} />
       </div>
     </div>
   )

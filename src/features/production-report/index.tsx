@@ -23,6 +23,7 @@ import {
   PRODUCTION_DAILY_REPORT_CHUNKED_EXPORT_PAGE_SIZE,
 } from '@/services/apiProductionDailyReport'
 import AppPagination from '@/ui/AppPagination'
+import FilterBar from '@/ui/FilterBar'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
 import ProductionDailyReportMobileList from './ProductionDailyReportMobileList'
@@ -342,20 +343,14 @@ export default function ProductionDailyReportPage() {
           )
         : null}
 
-      <div
-        className={
-          isEmployeeView
-            ? 'rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-800'
-            : 'rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-800'
-        }
-      >
+      <FilterBar className={isEmployeeView ? 'p-3' : ''}>
         <ProductionDailyReportSearch
           initialValues={initialSearchValues}
           onSearch={handleSearch}
           onReset={handleReset}
           mobile={isEmployeeView}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}

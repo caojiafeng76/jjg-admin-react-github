@@ -22,6 +22,7 @@ import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
 import { buildProjectNoSelectOptions, filterProjectNoOption, renderProjectNoOption } from '@/features/production-order/projectNoSelect'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import {
   calculateActualOutputWeight,
   calculateBilletInputWeight,
@@ -48,6 +49,7 @@ interface Props {
   loading?: boolean
   currentUploader?: string | null
   canAudit?: boolean
+  formError?: unknown
 }
 
 interface HeaderFormValues {
@@ -88,6 +90,7 @@ export default function ExtrusionProductionForm({
   loading = false,
   currentUploader = null,
   canAudit = true,
+  formError = null,
 }: Props) {
   const { message } = App.useApp()
   const [headerForm] = Form.useForm<HeaderFormValues>()
@@ -315,11 +318,12 @@ export default function ExtrusionProductionForm({
         title={initialValues ? '编辑挤压生产单' : '创建挤压生产单'}
         open={open}
         onCancel={onCancel}
-        width={1100}
+        width={960}
         footer={null}
         destroyOnHidden
       >
         <div className="max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
+          <FormErrorAlert error={formError} className="mb-3" />
           <Form form={headerForm} layout="vertical" onFinish={handleFinish}>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
               <Form.Item
@@ -395,7 +399,7 @@ export default function ExtrusionProductionForm({
         open={itemModalOpen}
         onCancel={() => setItemModalOpen(false)}
         onOk={handleSaveItem}
-        width={920}
+        width={960}
         destroyOnHidden
       >
         <Form form={itemForm} layout="vertical">
@@ -591,33 +595,33 @@ export default function ExtrusionProductionForm({
             </Form.Item>
           </div>
 
-          <div className="mt-2 grid grid-cols-1 gap-3 rounded-2xl border border-blue-200 bg-blue-50/60 p-4 md:grid-cols-5">
+          <div className="mt-2 grid grid-cols-1 gap-3 rounded-xl border border-blue-200 bg-blue-50/60 p-4 md:grid-cols-5 dark:border-blue-800/60 dark:bg-blue-950/30">
             <div>
-              <div className="text-xs text-slate-500">铝棒投入重量(kg)</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">铝棒投入重量(kg)</div>
               <div className="text-base font-semibold" data-testid="preview-billet-weight">
                 {billetInputWeightPreview.toFixed(2)}
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">理论支数</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">理论支数</div>
               <div className="text-base font-semibold" data-testid="preview-theoretical-count">
                 {theoreticalOutputCountPreview}
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">理论支重(kg)</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">理论支重(kg)</div>
               <div className="text-base font-semibold" data-testid="preview-theoretical-weight">
                 {theoreticalOutputWeightPreview.toFixed(2)}
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">实际产出重量(kg)</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">实际产出重量(kg)</div>
               <div className="text-base font-semibold" data-testid="preview-actual-weight">
                 {actualOutputWeightPreview.toFixed(2)}
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">成材率(%)</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">成材率(%)</div>
               <div className="text-base font-semibold" data-testid="preview-yield">
                 {materialYieldPreview.toFixed(2)}
               </div>

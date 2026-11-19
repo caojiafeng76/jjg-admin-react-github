@@ -52,7 +52,6 @@ export default function DetailForm({
       name="po-detail"
       form={form}
       onFinish={onFinish}
-      className="[&_.ant-form-item]:mb-3"
     >
       <Form.Item name="PartNo" label="件号">
         <Input disabled className="rounded-lg" />
