@@ -17,6 +17,13 @@
 
 ## 2026-11-19
 
+- **类别**：修复
+- **范围**：`src/features/youmai/FinishedGoodsStockIn/useYoumaiFinishedGoodsStockIn.ts`、`src/features/youmai/FinishedGoodsStockIn/useYoumaiFinishedGoodsStockIn.vitest.ts`、`src/features/youmai/FinishedGoodsInventory/useYoumaiFinishedGoodsInventory.vitest.ts`、`src/pages/dashboardChangelog.ts`
+- **摘要**：修复优迈成品出库「查看」抽屉内新建入库后主表「最终库存」不刷新的问题。出库列表实时读取库存表 `final_stock`，而成品入库的新建、编辑、批量审核/反审和删除 4 个 mutation 只失效了入库与库存缓存；现统一追加失效 `youmai-finished-goods-stock-out` 前缀。新增回归测试锁定入库 mutation 的三项失效范围，以及抽屉「调整库存」已有的库存与出库列表失效；同步首页更新日志。
+- **验证**：新增入库测试在修复前失败、修复后通过；`bunx vitest run src/features/youmai`（8 个文件 29 个用例）、`bun run lint`（0 error）、`bun run typecheck`、`bun run test` 通过；未在浏览器写入真实库存数据做端到端验证。
+
+## 2026-11-19
+
 - **类别**：变更
 - **范围**：`src/features/tooling/`、`src/features/labor-protection/`、`src/features/quality/`、`src/features/packaging-process/`、`src/features/villa-lift/`、`src/features/extrusion-production/`、`src/features/extrusion-production-daily-report/`、`src/features/workshop/`、`src/features/syney/`、`src/features/material-transfer/`、`src/features/precision-cutting-transfer/`、`src/features/precision-finishing-cutting/`、`src/features/production-order/`、`src/features/production-report/`、`src/pages/SyneySetting.tsx`、`src/pages/WorkshopOrderProduction.tsx`、`src/ui/uiStyleConventions.vitest.ts`、`src/pages/dashboardChangelog.ts`、`todolist.md`
 - **摘要**：完成前端界面风格统一 Phase 3（`P3-A`～`P3-D`，覆盖 14 个桌面端业务域及 2 个页面入口组件）：统一筛选区为 `FilterBar`、表格为 `TableState`/`TableEmpty`/`zebraRowClassName`、状态标签为 `StatusPill`、弹窗宽度与 `FormErrorAlert` 错误提示，移除非规范 `.ant-*` 样式穿透、`Tag.CheckableTag` 及手写 `<svg>` 图标等；扩展 `uiStyleConventions.vitest.ts` 守卫覆盖 Phase 3 全目录并将移动端扫码与公开二维码海报页纳入 Phase 4 延期名单；同步勾选 `todolist.md` 并更新首页更新日志。

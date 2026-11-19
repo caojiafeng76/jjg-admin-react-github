@@ -17,6 +17,15 @@ const YOUMAI_FINISHED_GOODS_STOCK_IN_KEY
   = 'youmai-finished-goods-stock-in' as const
 const YOUMAI_FINISHED_GOODS_INVENTORY_KEY
   = 'youmai-finished-goods-inventory' as const
+const YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY
+  = 'youmai-finished-goods-stock-out' as const
+
+/** 入库单变动会影响库存行，出库列表实时读取 final_stock，需一并刷新 */
+const STOCK_IN_MUTATION_INVALIDATE_KEYS = [
+  [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
+  [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
+  [YOUMAI_FINISHED_GOODS_STOCK_OUT_KEY],
+]
 
 export function useYoumaiFinishedGoodsStockInList({
   page,
@@ -65,39 +74,27 @@ export function useYoumaiProductDataOptions(keyword?: string) {
 export function useCreateYoumaiFinishedGoodsStockIn() {
   return useMutationWithInvalidation({
     mutationFn: createYoumaiFinishedGoodsStockIn,
-    invalidateQueries: [
-      [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
-      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
-    ],
+    invalidateQueries: STOCK_IN_MUTATION_INVALIDATE_KEYS,
   })
 }
 
 export function useUpdateYoumaiFinishedGoodsStockIn() {
   return useMutationWithInvalidation({
     mutationFn: updateYoumaiFinishedGoodsStockIn,
-    invalidateQueries: [
-      [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
-      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
-    ],
+    invalidateQueries: STOCK_IN_MUTATION_INVALIDATE_KEYS,
   })
 }
 
 export function useBatchUpdateYoumaiFinishedGoodsStockInStatus() {
   return useMutationWithInvalidation({
     mutationFn: batchUpdateYoumaiFinishedGoodsStockInStatus,
-    invalidateQueries: [
-      [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
-      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
-    ],
+    invalidateQueries: STOCK_IN_MUTATION_INVALIDATE_KEYS,
   })
 }
 
 export function useDeleteYoumaiFinishedGoodsStockIn() {
   return useMutationWithInvalidation({
     mutationFn: deleteYoumaiFinishedGoodsStockIn,
-    invalidateQueries: [
-      [YOUMAI_FINISHED_GOODS_STOCK_IN_KEY],
-      [YOUMAI_FINISHED_GOODS_INVENTORY_KEY],
-    ],
+    invalidateQueries: STOCK_IN_MUTATION_INVALIDATE_KEYS,
   })
 }
