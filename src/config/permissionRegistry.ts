@@ -14,6 +14,7 @@ import { SYNEY_MATERIALS_PERMISSIONS } from '@/features/syney-materials/permissi
 import { SYNEY_PERMISSIONS } from '@/features/syney/permissions'
 import { TOOLING_PERMISSIONS } from '@/features/tooling/permissions'
 import { VILLA_LIFT_PERMISSIONS } from '@/features/villa-lift/permissions'
+import { WORKSHOP_MISC_MATERIALS_PERMISSIONS } from '@/features/workshop-misc-materials/permissions'
 import { WORKSHOP_PERMISSIONS } from '@/features/workshop/permissions'
 import { YOUMAI_PERMISSIONS } from '@/features/youmai/permissions'
 
@@ -75,4 +76,5 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
   ...PACKAGING_PROCESS_PERMISSIONS,
   ...JINTAN_PERMISSIONS,
   ...SYNEY_MATERIALS_PERMISSIONS,
+  ...WORKSHOP_MISC_MATERIALS_PERMISSIONS,
 ]

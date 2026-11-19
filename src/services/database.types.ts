@@ -3665,6 +3665,279 @@ export type Database = {
         }
         Relationships: []
       }
+      workshop_misc_materials_data: {
+        Row: {
+          category: string
+          created_at: string
+          customer_model: string
+          id: string
+          model: string
+          remarks: string
+          specification: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          id?: string
+          model: string
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          id?: string
+          model?: string
+          remarks?: string
+          specification?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      workshop_misc_materials_inventory: {
+        Row: {
+          category: string
+          created_at: string
+          customer_model: string
+          finished_quantity: number
+          id: string
+          material_data_id: string
+          model: string
+          raw_material_quantity: number
+          remarks: string
+          semi_finished_quantity: number
+          specification: string
+          total_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          finished_quantity?: number
+          id?: string
+          material_data_id: string
+          model: string
+          raw_material_quantity?: number
+          remarks?: string
+          semi_finished_quantity?: number
+          specification?: string
+          total_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          finished_quantity?: number
+          id?: string
+          material_data_id?: string
+          model?: string
+          raw_material_quantity?: number
+          remarks?: string
+          semi_finished_quantity?: number
+          specification?: string
+          total_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_misc_materials_inventory_material_data_id_fkey"
+            columns: ["material_data_id"]
+            isOneToOne: true
+            referencedRelation: "workshop_misc_materials_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshop_misc_materials_inventory_adjustments: {
+        Row: {
+          category: string
+          created_at: string
+          customer_model: string
+          finished_after: number
+          finished_before: number
+          finished_diff: number | null
+          id: string
+          inventory_id: string
+          model: string
+          operator_name: string
+          raw_material_after: number
+          raw_material_before: number
+          raw_material_diff: number | null
+          remarks: string
+          semi_finished_after: number
+          semi_finished_before: number
+          semi_finished_diff: number | null
+          specification: string
+          total_after: number | null
+          total_before: number | null
+          total_difference: number | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          finished_after: number
+          finished_before: number
+          finished_diff?: number | null
+          id?: string
+          inventory_id: string
+          model?: string
+          operator_name?: string
+          raw_material_after: number
+          raw_material_before: number
+          raw_material_diff?: number | null
+          remarks?: string
+          semi_finished_after: number
+          semi_finished_before: number
+          semi_finished_diff?: number | null
+          specification?: string
+          total_after?: number | null
+          total_before?: number | null
+          total_difference?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          finished_after?: number
+          finished_before?: number
+          finished_diff?: number | null
+          id?: string
+          inventory_id?: string
+          model?: string
+          operator_name?: string
+          raw_material_after?: number
+          raw_material_before?: number
+          raw_material_diff?: number | null
+          remarks?: string
+          semi_finished_after?: number
+          semi_finished_before?: number
+          semi_finished_diff?: number | null
+          specification?: string
+          total_after?: number | null
+          total_before?: number | null
+          total_difference?: number | null
+        }
+        Relationships: []
+      }
+      workshop_misc_materials_stock_in: {
+        Row: {
+          category: string
+          created_at: string
+          customer_model: string
+          finished_quantity: number
+          id: string
+          inventory_id: string
+          model: string
+          raw_material_quantity: number
+          remarks: string
+          semi_finished_quantity: number
+          specification: string
+          total_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          finished_quantity?: number
+          id?: string
+          inventory_id: string
+          model?: string
+          raw_material_quantity?: number
+          remarks?: string
+          semi_finished_quantity?: number
+          specification?: string
+          total_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          finished_quantity?: number
+          id?: string
+          inventory_id?: string
+          model?: string
+          raw_material_quantity?: number
+          remarks?: string
+          semi_finished_quantity?: number
+          specification?: string
+          total_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_misc_materials_stock_in_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_misc_materials_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshop_misc_materials_stock_out: {
+        Row: {
+          category: string
+          created_at: string
+          customer_model: string
+          finished_quantity: number
+          id: string
+          inventory_id: string
+          model: string
+          raw_material_quantity: number
+          remarks: string
+          semi_finished_quantity: number
+          specification: string
+          total_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          finished_quantity?: number
+          id?: string
+          inventory_id: string
+          model?: string
+          raw_material_quantity?: number
+          remarks?: string
+          semi_finished_quantity?: number
+          specification?: string
+          total_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          customer_model?: string
+          finished_quantity?: number
+          id?: string
+          inventory_id?: string
+          model?: string
+          raw_material_quantity?: number
+          remarks?: string
+          semi_finished_quantity?: number
+          specification?: string
+          total_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_misc_materials_stock_out_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_misc_materials_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       youmai_finished_goods_inventory: {
         Row: {
           created_at: string
@@ -4443,6 +4716,28 @@ export type Database = {
           responsible_person: string
           status: string
           storage_location: string
+        }[]
+      }
+      get_workshop_misc_materials_categories: {
+        Args: never
+        Returns: {
+          category: string
+        }[]
+      }
+      get_workshop_misc_materials_monthly_report: {
+        Args: { p_month: string; p_stage?: string }
+        Returns: {
+          category: string
+          closing_quantity: number
+          current_quantity: number
+          customer_model: string
+          inventory_id: string
+          model: string
+          opening_quantity: number
+          specification: string
+          stock_adjust_quantity: number
+          stock_in_quantity: number
+          stock_out_quantity: number
         }[]
       }
       get_workshop_order_options: {

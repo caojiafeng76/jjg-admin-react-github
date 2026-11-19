@@ -56,7 +56,9 @@ const GUARDED_FILES = [
 ] as const
 
 /** 已完成风格迁移并锁定防回退的目录清单（随 Phase 1–5 逐步追加） */
-const GUARDED_DIRS: readonly string[] = []
+const GUARDED_DIRS: readonly string[] = [
+  'src/features/workshop-misc-materials',
+]
 
 function readWorkspaceFile(relativePath: string): string {
   return readFileSync(path.resolve(process.cwd(), relativePath), 'utf8')

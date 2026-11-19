@@ -473,6 +473,39 @@ export const allMenuItems: MenuItemDef[] = [
     ],
   },
   {
+    key: 'workshop-misc-materials',
+    label: '车间杂项材料库存',
+    icon: <Square3Stack3DIcon className="size-4" />,
+    permission: 'nav:workshop-misc-materials',
+    children: [
+      {
+        key: 'workshop-misc-materials-data',
+        label: '材料资料',
+        permission: 'page:workshop-misc-materials-data',
+      },
+      {
+        key: 'workshop-misc-materials-stock-in',
+        label: '材料入库',
+        permission: 'page:workshop-misc-materials-stock-in',
+      },
+      {
+        key: 'workshop-misc-materials-stock-out',
+        label: '材料出库',
+        permission: 'page:workshop-misc-materials-stock-out',
+      },
+      {
+        key: 'workshop-misc-materials-inventory',
+        label: '材料库存',
+        permission: 'page:workshop-misc-materials-inventory',
+      },
+      {
+        key: 'workshop-misc-materials-monthly-report',
+        label: '月度报表',
+        permission: 'page:workshop-misc-materials-monthly-report',
+      },
+    ],
+  },
+  {
     key: 'attendance',
     label: '考勤',
     icon: <Square3Stack3DIcon className="size-4" />,

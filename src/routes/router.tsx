@@ -20,6 +20,7 @@ import {
 import {
   jintanRoutes,
   syneyMaterialsRoutes,
+  workshopMiscMaterialsRoutes,
   youmaiRoutes,
 } from './modules/inventoryRoutes'
 import { packagingRoutes, villaLiftRoutes } from './modules/processRoutes'
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       ...youmaiRoutes,
       ...jintanRoutes,
       ...syneyMaterialsRoutes,
+      ...workshopMiscMaterialsRoutes,
       ...villaLiftRoutes,
       ...packagingRoutes,
       // 布局内 404：保留菜单与标签页（未登录时由 ProtectedRoute 跳转登录）

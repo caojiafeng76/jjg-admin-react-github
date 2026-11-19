@@ -105,4 +105,24 @@ export const PAGE_PERMISSION_ROUTES: PagePermissionRoute[] = [
     path: '/syney-materials-monthly-report',
     permission: 'page:syney-materials-monthly-report',
   },
+  {
+    path: '/workshop-misc-materials-data',
+    permission: 'page:workshop-misc-materials-data',
+  },
+  {
+    path: '/workshop-misc-materials-stock-in',
+    permission: 'page:workshop-misc-materials-stock-in',
+  },
+  {
+    path: '/workshop-misc-materials-stock-out',
+    permission: 'page:workshop-misc-materials-stock-out',
+  },
+  {
+    path: '/workshop-misc-materials-inventory',
+    permission: 'page:workshop-misc-materials-inventory',
+  },
+  {
+    path: '/workshop-misc-materials-monthly-report',
+    permission: 'page:workshop-misc-materials-monthly-report',
+  },
 ]

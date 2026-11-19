@@ -72,6 +72,11 @@ const routeToLabelMap: Record<string, string> = {
   'syney-materials-stock-out': '西尼材料库存 / 材料出库',
   'syney-materials-inventory': '西尼材料库存 / 材料库存',
   'syney-materials-monthly-report': '西尼材料库存 / 月度报表',
+  'workshop-misc-materials-data': '车间杂项材料库存 / 材料资料',
+  'workshop-misc-materials-stock-in': '车间杂项材料库存 / 材料入库',
+  'workshop-misc-materials-stock-out': '车间杂项材料库存 / 材料出库',
+  'workshop-misc-materials-inventory': '车间杂项材料库存 / 材料库存',
+  'workshop-misc-materials-monthly-report': '车间杂项材料库存 / 月度报表',
   'access-denied': '无权限',
 }
 

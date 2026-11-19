@@ -17,6 +17,16 @@
 
 ## 2026-11-19
 
+- **类别**：新建
+- **范围**：`supabase/migrations/20261119140000_create_workshop_misc_materials.sql`、`src/services/{database.types,workshopMiscMaterialsSearchFields,apiWorkshopMiscMaterialsData,apiWorkshopMiscMaterialsInventory,apiWorkshopMiscMaterialsStock,apiWorkshopMiscMaterialsReport}.ts`、`src/utils/workshopMiscMaterialsExcel.ts`、`src/features/workshop-misc-materials/`、`src/routes/{lazyPages,modules/inventoryRoutes,router,routeLabels,pagePermissionRoutes}.ts*`、`src/config/permissionRegistry.ts`、`src/ui/{mainMenuItems,MainMenu.vitest,uiStyleConventions.vitest}.*`、`src/features/lazyDocumentModules.vitest.ts`、`src/pages/dashboardChangelog.ts`、`.github/instructions/project-feature-map.instructions.md`
+- **摘要**：新增「车间杂项材料库存」模块（PC 端材料资料、材料入库、材料出库、材料库存、月度报表）。
+  - 新建 5 张数据库表（`workshop_misc_materials_data`、`workshop_misc_materials_inventory`、`workshop_misc_materials_stock_in`、`workshop_misc_materials_stock_out`、`workshop_misc_materials_inventory_adjustments`）、同事务库存同步与调整审计触发器、RLS 权限策略、历史类别联想 RPC（`get_workshop_misc_materials_categories`）及支持按「合计 / 原材料 / 半成品 / 成品」倒推结存的月度报表 RPC（`get_workshop_misc_materials_monthly_report`）；型号必填，以「型号 + 客户型号 + 规格 + 类别」组合唯一，合计由数据库自动计算。
+  - 落地 5 个 PC 页面与资料详情抽屉（支持历史类别联想、单笔同时登记原材料/半成品/成品数量、直接调数与流水追溯），接入新版工业风设计规范与 `uiStyleConventions.vitest.ts` 自动化守卫，并修复空表头固定列与长宽比不同步导致的列标题轻微遮挡问题。
+  - 实现材料资料、材料库存、月度报表 Excel 按型号开头（取第一个 `-` 含横杠如 `196-`、`267-`，不含横杠归入「其他」）拆分多工作表导出，每表独立编号并附本组小计行。
+- **验证**：`bun run db:push:dry-run`、远端 `db:push` 迁移后 `bun run db:types` 及只读 `db:query` 核验表/函数/RLS/权限通过；`bunx antd lint src/features/workshop-misc-materials --format json`（0 issues）、`bun run lint`（0 error）、`bun run typecheck`、`bun run build`、`bun run check:bundle`（主包 gzip 33.4 KB）及 `bun run test`（38 项脚本测试、238 个 Vitest 文件、1210 个用例）全部通过；使用 Chrome DevTools MCP 核验 5 个页面及亮/暗色界面、表单校验与权限管理模块注册。
+
+## 2026-11-19
+
 - **类别**：变更
 - **范围**：`src/App.tsx`、`src/ui/{tableStyles,filterBarTokens,FilterBar,ExcelImportModal,PublicQrPageShell,AddButton,EditButton,DeleteButton,ImportButton,DownloadTemplateButton,TableState,AppErrorView,SelectedSummaryBar,AppLogo,AppLayout,AppHeader}.*`、`src/ui/uiStyleConventions.vitest.ts`、`src/ui/CLAUDE.md`、`src/pages/dashboardChangelog.ts`、`todolist.md`
 - **摘要**：完成前端界面风格统一 Phase 1（全局 Token、共享按钮层级与核心 UI 抽象）。

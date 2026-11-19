@@ -151,6 +151,10 @@ const PAGE_DOCUMENT_MODULES = [
     'src/features/syney-materials/loadSyneyMaterialsExcel.ts',
     '@/utils/syneyMaterialsExcel',
   ],
+  [
+    'src/features/workshop-misc-materials/loadWorkshopMiscMaterialsExcel.ts',
+    '@/utils/workshopMiscMaterialsExcel',
+  ],
 ] as const
 
 const DIRECT_HEAVY_MODULES = [
@@ -201,6 +205,8 @@ const PRELOAD_TRIGGER_FILES: Partial<Record<string, string>> = {
     'src/features/workshop/StandardTimeList/index.tsx',
   'src/features/syney-materials/loadSyneyMaterialsExcel.ts':
     'src/features/syney-materials/SyneyMaterialsExcelImport.tsx',
+  'src/features/workshop-misc-materials/loadWorkshopMiscMaterialsExcel.ts':
+    'src/features/workshop-misc-materials/Data/index.tsx',
 }
 
 describe('lazy document modules', () => {

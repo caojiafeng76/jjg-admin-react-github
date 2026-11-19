@@ -19,6 +19,11 @@ import {
   SyneyMaterialsMonthlyReport,
   SyneyMaterialsStockIn,
   SyneyMaterialsStockOut,
+  WorkshopMiscMaterialsData,
+  WorkshopMiscMaterialsInventory,
+  WorkshopMiscMaterialsMonthlyReport,
+  WorkshopMiscMaterialsStockIn,
+  WorkshopMiscMaterialsStockOut,
   YoumaiFinishedGoodsInventory,
   YoumaiFinishedGoodsStockIn,
   YoumaiFinishedGoodsStockOut,
@@ -89,5 +94,29 @@ export const syneyMaterialsRoutes: RouteObject[] = [
   samePermissionRoute(
     'syney-materials-monthly-report',
     SyneyMaterialsMonthlyReport,
+  ),
+]
+
+/** 车间杂项材料：资料、入库、出库、库存、月度报表 */
+export const workshopMiscMaterialsRoutes: RouteObject[] = [
+  samePermissionRoute(
+    'workshop-misc-materials-data',
+    WorkshopMiscMaterialsData,
+  ),
+  samePermissionRoute(
+    'workshop-misc-materials-stock-in',
+    WorkshopMiscMaterialsStockIn,
+  ),
+  samePermissionRoute(
+    'workshop-misc-materials-stock-out',
+    WorkshopMiscMaterialsStockOut,
+  ),
+  samePermissionRoute(
+    'workshop-misc-materials-inventory',
+    WorkshopMiscMaterialsInventory,
+  ),
+  samePermissionRoute(
+    'workshop-misc-materials-monthly-report',
+    WorkshopMiscMaterialsMonthlyReport,
   ),
 ]

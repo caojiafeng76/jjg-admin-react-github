@@ -239,3 +239,19 @@ export const SyneyMaterialsInventory = lazy(
 export const SyneyMaterialsMonthlyReport = lazy(
   () => import('@features/syney-materials/MonthlyReport'),
 )
+
+export const WorkshopMiscMaterialsData = lazy(
+  () => import('@features/workshop-misc-materials/Data'),
+)
+export const WorkshopMiscMaterialsStockIn = lazy(
+  () => import('@features/workshop-misc-materials/StockIn'),
+)
+export const WorkshopMiscMaterialsStockOut = lazy(
+  () => import('@features/workshop-misc-materials/StockOut'),
+)
+export const WorkshopMiscMaterialsInventory = lazy(
+  () => import('@features/workshop-misc-materials/Inventory'),
+)
+export const WorkshopMiscMaterialsMonthlyReport = lazy(
+  () => import('@features/workshop-misc-materials/MonthlyReport'),
+)

@@ -129,6 +129,45 @@ describe('西尼材料库存菜单', () => {
   })
 })
 
+describe('车间杂项材料库存菜单', () => {
+  function findWorkshopMiscMaterials(keys: string[]) {
+    return filterWith(keys).find(node => node.key === 'workshop-misc-materials')
+  }
+
+  it('全量授权时按 资料/入库/出库/库存/月报 顺序展示', () => {
+    const group = findWorkshopMiscMaterials([
+      'nav:workshop-misc-materials',
+      'page:workshop-misc-materials-data',
+      'page:workshop-misc-materials-stock-in',
+      'page:workshop-misc-materials-stock-out',
+      'page:workshop-misc-materials-inventory',
+      'page:workshop-misc-materials-monthly-report',
+    ])
+
+    expect(group?.children?.map(leaf => leaf.key)).toEqual([
+      'workshop-misc-materials-data',
+      'workshop-misc-materials-stock-in',
+      'workshop-misc-materials-stock-out',
+      'workshop-misc-materials-inventory',
+      'workshop-misc-materials-monthly-report',
+    ])
+  })
+
+  it('只显示有权限的页面，缺 nav 权限时整组隐藏', () => {
+    expect(
+      findWorkshopMiscMaterials([
+        'nav:workshop-misc-materials',
+        'page:workshop-misc-materials-inventory',
+      ])
+        ?.children
+        ?.map(leaf => leaf.key),
+    ).toEqual(['workshop-misc-materials-inventory'])
+    expect(
+      findWorkshopMiscMaterials(['page:workshop-misc-materials-data']),
+    ).toBeUndefined()
+  })
+})
+
 describe('findAncestorMenuKeys', () => {
   it('三级菜单叶子返回完整祖先链', () => {
     const items = filterMenuByPermissions(
