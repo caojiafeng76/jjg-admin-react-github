@@ -1,10 +1,9 @@
 import type { FormInstance } from 'antd'
 
-import type { AttendanceDetail, AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
-import {
-  CalendarDaysIcon,
-  MagnifyingGlassIcon,
-} from '@heroicons/react/24/outline'
+import type {
+  AttendanceDetail,
+  AttendanceDetailFormValues,
+} from '@/services/apiAttendanceDetails'
 import { App, Modal } from 'antd'
 
 import { useCallback, useEffect, useState } from 'react'
@@ -12,9 +11,11 @@ import { useSearchParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
-
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
+import { TableState } from '@/ui/TableState'
 import AttendanceDetailForm from './AttendanceDetailForm'
 import AttendanceDetailSearch from './AttendanceDetailSearch'
 import AttendanceDetailTable from './AttendanceDetailTable'
@@ -39,6 +40,7 @@ export default function AttendanceDetailPage() {
   )
   const [formRef, setFormRef]
     = useState<FormInstance<AttendanceDetailFormValues> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
   const [searchParamsURL, setSearchParamsURL] = useSearchParams()
   const page = Number(searchParamsURL.get('page')) || 1
@@ -53,7 +55,7 @@ export default function AttendanceDetailPage() {
     endDate: searchParamsURL.get('endDate') || undefined,
   })
 
-  const { data, isLoading } = useAttendanceDetailsList({
+  const { data, isLoading, error, refetch } = useAttendanceDetailsList({
     page,
     pageSize,
     searchParams,
@@ -72,6 +74,7 @@ export default function AttendanceDetailPage() {
     setIsModalOpen(false)
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     formRef?.resetFields()
   }, [formRef])
@@ -79,6 +82,7 @@ export default function AttendanceDetailPage() {
   const handleCreate = useCallback(() => {
     setIsEdit(false)
     setEditingRecord(null)
+    setFormError(null)
     setSelectedRowKeys([])
     setModalTitle('新建考勤明细')
     setIsModalOpen(true)
@@ -99,6 +103,7 @@ export default function AttendanceDetailPage() {
 
     setEditingRecord(record)
     setIsEdit(true)
+    setFormError(null)
     setModalTitle('编辑考勤明细')
     setIsModalOpen(true)
   }, [data?.items, message, selectedRowKeys])
@@ -143,6 +148,7 @@ export default function AttendanceDetailPage() {
   const handleFinish = useCallback(
     async (values: AttendanceDetailFormValues) => {
       try {
+        setFormError(null)
         if (isEdit && selectedRowKeys[0]) {
           await updateMutation.mutateAsync({
             id: selectedRowKeys[0] as string,
@@ -158,6 +164,7 @@ export default function AttendanceDetailPage() {
         resetFormState()
       }
       catch (error) {
+        setFormError(error)
         if (error instanceof Error) {
           message.error(error.message)
         }
@@ -219,78 +226,56 @@ export default function AttendanceDetailPage() {
   }, [data, page, searchParamsURL, setSearchParamsURL])
 
   return (
-    <div className="flex h-full flex-col gap-4 p-4">
-      {/* 工具栏卡片 */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          {/* 操作按钮组 */}
-          <div className="flex items-center gap-1">
-            <AddButton handleCreate={handleCreate} />
-            <EditButton title="编辑考勤明细" handleEdit={handleEdit} />
-            <DeleteButton
-              onConfirm={handleDelete}
-              isDeleting={deleteMutation.isPending}
-              count={selectedRowKeys.length}
-              title="删除考勤明细"
-              itemName="考勤记录"
-            />
-            <div className="mx-2 h-5 w-px bg-slate-200" />
-            <AttendanceExcelImport
-              onImport={handleBatchImport}
-              isImporting={batchCreateMutation.isPending}
-            />
-          </div>
-        </div>
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
+      {/* 操作工具栏 */}
+      <div className="flex flex-wrap items-center gap-2">
+        <AddButton handleCreate={handleCreate} />
+        <EditButton title="编辑考勤明细" handleEdit={handleEdit} />
+        <AttendanceExcelImport
+          onImport={handleBatchImport}
+          isImporting={batchCreateMutation.isPending}
+        />
+        <DeleteButton
+          onConfirm={handleDelete}
+          isDeleting={deleteMutation.isPending}
+          count={selectedRowKeys.length}
+          title="删除考勤明细"
+          itemName="考勤记录"
+        />
       </div>
 
-      {/* 搜索区域卡片 */}
-      <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-50/80 to-white px-5 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-        <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-500">
-          <MagnifyingGlassIcon className="h-4 w-4" />
-          <span>筛选条件</span>
-          {selectedRowKeys.length > 0 && (
-            <span className="ml-2 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">
-              已选 {selectedRowKeys.length} 条
-            </span>
-          )}
-        </div>
+      {/* 筛选栏 */}
+      <FilterBar>
         <AttendanceDetailSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
-
-      {/* 数据统计提示 */}
-      {data && data.total > 0 && (
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <CalendarDaysIcon className="h-4 w-4" />
-          <span>
-            共 <span className="font-medium text-slate-700">{data.total}</span> 条考勤记录
-          </span>
-        </div>
-      )}
+      </FilterBar>
 
       {/* 表格区域 */}
       <div
         ref={tableContainerRef}
-        className="min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+        className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
         <div className="min-h-0 flex-1 overflow-x-auto">
-          <AttendanceDetailTable
-            loading={isLoading}
-            data={data?.items || []}
-            selectedRowKeys={selectedRowKeys}
-            onSelect={setSelectedRowKeys}
-            page={page}
-            pageSize={pageSize}
-            scrollY={scrollY}
-          />
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <AttendanceDetailTable
+              loading={isLoading}
+              data={data?.items || []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={setSelectedRowKeys}
+              page={page}
+              pageSize={pageSize}
+              scrollY={scrollY}
+            />
+          </TableState>
         </div>
-        <div
-          ref={paginationRef}
-          className="flex shrink-0 justify-end border-t border-slate-100 bg-slate-50/50 px-4 py-3"
-        >
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
           <AppPagination total={data?.total || 0} />
         </div>
       </div>
@@ -299,17 +284,20 @@ export default function AttendanceDetailPage() {
         title={modalTitle}
         open={isModalOpen}
         destroyOnHidden
-        width={480}
+        width={520}
         confirmLoading={createMutation.isPending || updateMutation.isPending}
         onOk={() => formRef?.submit()}
         onCancel={resetFormState}
       >
-        <AttendanceDetailForm
-          onFinish={handleFinish}
-          setFormRef={setFormRef}
-          isCreating={createMutation.isPending || updateMutation.isPending}
-          initialValues={isEdit && editingRecord ? editingRecord : undefined}
-        />
+        <div className="space-y-3">
+          <FormErrorAlert error={formError} />
+          <AttendanceDetailForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isCreating={createMutation.isPending || updateMutation.isPending}
+            initialValues={isEdit && editingRecord ? editingRecord : undefined}
+          />
+        </div>
       </Modal>
     </div>
   )

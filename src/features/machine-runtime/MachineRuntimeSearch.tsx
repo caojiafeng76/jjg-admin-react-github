@@ -79,7 +79,7 @@ export default function MachineRuntimeSearch({ onSearch, onReset }: Props) {
       <Form.Item>
         <Space>
           <Button type="primary" htmlType="submit">
-            查询
+            搜索
           </Button>
           <Button onClick={handleReset}>重置</Button>
         </Space>

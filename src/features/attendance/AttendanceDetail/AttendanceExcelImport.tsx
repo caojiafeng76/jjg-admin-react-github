@@ -1,6 +1,4 @@
-import type {
-  TableColumnsType,
-} from 'antd'
+import type { TableColumnsType } from 'antd'
 import type { UploadFile } from 'antd/es/upload/interface'
 import type { AttendanceDetailFormValues } from '@/services/apiAttendanceDetails'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
@@ -16,6 +14,7 @@ import { useState } from 'react'
 
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import ExcelParseErrorList from '@/ui/ExcelParseErrorList'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 const loadAttendanceExcel = () => import('@/utils/attendanceExcel')
 
@@ -36,7 +35,7 @@ const PREVIEW_COLUMNS: TableColumnsType<
     dataIndex: '_idx',
     width: 60,
     render: v => (
-      <span className="flex size-6 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">
+      <span className="flex size-6 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500 tabular-nums dark:bg-slate-800 dark:text-slate-400">
         {v + 1}
       </span>
     ),
@@ -162,7 +161,7 @@ export default function AttendanceExcelImport({
     <>
       <Button
         type="text"
-        icon={<ArrowUpTrayIcon className="size-4 text-sky-500/80!" />}
+        icon={<ArrowUpTrayIcon className="size-4" />}
         onClick={handleOpenModal}
         onMouseEnter={preloadAttendanceExcel}
         onFocus={preloadAttendanceExcel}
@@ -175,7 +174,8 @@ export default function AttendanceExcelImport({
         title="导入考勤明细"
         open={modalOpen}
         onCancel={handleCancel}
-        width={680}
+        width={960}
+        destroyOnHidden
         footer={[
           <Button key="cancel" onClick={handleCancel}>
             取消
@@ -187,13 +187,13 @@ export default function AttendanceExcelImport({
             loading={isImporting}
             onClick={handleConfirmImport}
           >
-            确认导入{' '}
+            确认导入
             {parsedRows.length > 0 ? `（${parsedRows.length} 条）` : ''}
           </Button>,
         ]}
       >
         <div className="space-y-4">
-          <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 text-center transition-colors hover:border-blue-300 hover:bg-blue-50/30">
+          <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 text-center transition-colors hover:border-blue-300 hover:bg-blue-50/30 dark:border-slate-700 dark:bg-slate-800/40 dark:hover:border-blue-500 dark:hover:bg-blue-950/20">
             <Upload
               fileList={fileList}
               beforeUpload={handleBeforeUpload}
@@ -217,7 +217,7 @@ export default function AttendanceExcelImport({
                 {parsing ? '解析中...' : '选择 Excel 文件'}
               </Button>
             </Upload>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-slate-500">
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
               <TableCellsIcon className="h-4 w-4" />
               支持 ZKTeco 考勤管理系统导出文件，列名需包含：姓名、日期、时间
             </p>
@@ -246,7 +246,7 @@ export default function AttendanceExcelImport({
 
           {parsedRows.length > 0 && (
             <div>
-              <p className="mb-2 text-sm font-medium text-slate-600">
+              <p className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
                 预览（共 {parsedRows.length} 条）
               </p>
               <Table
@@ -254,6 +254,7 @@ export default function AttendanceExcelImport({
                 rowKey="_idx"
                 dataSource={tableData}
                 columns={PREVIEW_COLUMNS}
+                rowClassName={zebraRowClassName}
                 pagination={{ pageSize: 10, size: 'small' }}
                 scroll={{ y: 300 }}
                 className="rounded-lg"

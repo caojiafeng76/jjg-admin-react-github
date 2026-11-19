@@ -250,7 +250,7 @@ export default function SyneyMaterialsDataPage() {
         <Tooltip title={viewerDenied ? viewerOperationTip : '复制新增材料资料'}>
           <Button
             type="text"
-            icon={<DocumentDuplicateIcon className="size-4 text-indigo-500/80!" />}
+            icon={<DocumentDuplicateIcon className="size-4" />}
             disabled={viewerDenied || !canManage}
             onClick={() => openWithSelected('copy')}
           >
@@ -295,7 +295,7 @@ export default function SyneyMaterialsDataPage() {
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
-        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="min-h-0 flex-1 overflow-hidden">
           <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
             <SyneyMaterialsDataTable
               loading={isLoading}

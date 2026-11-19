@@ -15,6 +15,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
 import { YOUMAI_MANAGE_PERMISSION_KEY } from '../permissions'
@@ -299,21 +300,19 @@ export default function YoumaiFinishedGoodsStockInPage() {
         />
         <Button
           type="text"
-          icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+          icon={<ShieldCheckIcon className="size-4" />}
           onClick={() => handleBatchAudit('已审核')}
           loading={batchStatusMutation.isPending}
           disabled={viewerDenied || !canManageYoumai}
-          className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
         >
           批量审核
         </Button>
         <Button
           type="text"
-          icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+          icon={<ArrowPathIcon className="size-4" />}
           onClick={() => handleBatchAudit('待审核')}
           loading={batchStatusMutation.isPending}
           disabled={viewerDenied || !canManageYoumai}
-          className="text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
         >
           批量反审核
         </Button>
@@ -332,25 +331,19 @@ export default function YoumaiFinishedGoodsStockInPage() {
         />
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div className="flex items-center gap-2">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-            筛选条件
-          </span>
-        </div>
+      <FilterBar>
         <YoumaiFinishedGoodsStockInSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
-        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="min-h-0 flex-1 overflow-hidden">
           <TableState
             loading={isLoading && !data}
             error={error}

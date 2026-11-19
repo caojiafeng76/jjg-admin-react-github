@@ -1,5 +1,6 @@
 import type { PermissionRow } from '@/services/apiPermissions'
-import { DownOutlined, RightOutlined } from '@ant-design/icons'
+import type { StatusTone } from '@/ui/StatusPill'
+import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/16/solid'
 import {
   App,
   Button,
@@ -7,10 +8,10 @@ import {
   Collapse,
   Empty,
   Skeleton,
-  Tag,
   Tooltip,
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import StatusPill from '@/ui/StatusPill'
 
 interface Props {
   role: string
@@ -29,10 +30,10 @@ const SCOPE_LABELS: Record<string, string> = {
   field: '字段',
 }
 
-const SURFACE_COLORS: Record<string, string> = {
-  pc: 'blue',
-  mobile: 'green',
-  both: 'purple',
+const SURFACE_TONES: Record<string, StatusTone> = {
+  pc: 'info',
+  mobile: 'success',
+  both: 'warning',
 }
 
 export default function RolePermissionDetail({
@@ -131,7 +132,7 @@ export default function RolePermissionDetail({
             onClick={e => e.stopPropagation()}
           />
           <span className="font-medium">{module}</span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-slate-400 dark:text-slate-500">
             {checkedCount}/{permIds.length}
           </span>
         </div>
@@ -148,18 +149,17 @@ export default function RolePermissionDetail({
                 onChange={e => handleToggle(perm.id, e.target.checked)}
               >
                 <span className="text-sm">{perm.label}</span>
-                <span className="ml-1 text-xs text-gray-400">({perm.key})</span>
+                <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">
+                  ({perm.key})
+                </span>
               </Checkbox>
-              <div className="flex gap-1">
-                <Tag className="text-[10px]">
+              <div className="flex gap-1.5">
+                <StatusPill tone="neutral">
                   {SCOPE_LABELS[perm.scope] ?? perm.scope}
-                </Tag>
-                <Tag
-                  color={SURFACE_COLORS[perm.surface]}
-                  className="text-[10px]"
-                >
+                </StatusPill>
+                <StatusPill tone={SURFACE_TONES[perm.surface] ?? 'neutral'}>
                   {perm.surface}
-                </Tag>
+                </StatusPill>
               </div>
             </div>
           ))}
@@ -172,23 +172,29 @@ export default function RolePermissionDetail({
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-slate-500 dark:text-slate-400">
             已选 {localChecked.size} / {allPermissions.length} 项权限
           </span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-slate-400 dark:text-slate-500">
             {grouped.size} 个模块，展开 {activeKeys.length}
           </span>
-          <Tooltip title={activeKeys.length === grouped.size ? '收起全部模块' : '展开全部模块'}>
+          <Tooltip
+            title={
+              activeKeys.length === grouped.size
+                ? '收起全部模块'
+                : '展开全部模块'
+            }
+          >
             <Button
               type="link"
               size="small"
               icon={
                 activeKeys.length === grouped.size
                   ? (
-                      <DownOutlined />
+                      <ChevronDownIcon className="size-4" />
                     )
                   : (
-                      <RightOutlined />
+                      <ChevronRightIcon className="size-4" />
                     )
               }
               onClick={() =>

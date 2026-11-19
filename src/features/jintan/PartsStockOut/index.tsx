@@ -17,6 +17,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import PrintButton from '@/ui/PrintButton'
 import { TableState } from '@/ui/TableState'
@@ -227,13 +228,6 @@ export default function JintanPartsStockOutPage() {
           permissionKey={JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY}
           disabled={viewerDenied}
         />
-        <DeleteButton
-          onConfirm={handleDelete}
-          isDeleting={deleteMutation.isPending}
-          title="删除配件出库记录"
-          itemName="配件出库记录"
-          permissionKey={JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY}
-        />
         <PrintButton
           handlePrint={handlePrintPublicQrPoster}
           loading={isPrintingPublicQrPoster}
@@ -241,27 +235,28 @@ export default function JintanPartsStockOutPage() {
         >
           打印二维码
         </PrintButton>
+        <DeleteButton
+          onConfirm={handleDelete}
+          isDeleting={deleteMutation.isPending}
+          title="删除配件出库记录"
+          itemName="配件出库记录"
+          permissionKey={JINTAN_PARTS_STOCK_OUT_PERMISSION_KEY}
+        />
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div className="flex items-center gap-2">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-            筛选条件
-          </span>
-        </div>
+      <FilterBar>
         <JintanPartsStockOutSearch
           values={searchValues}
           onSearch={handleSearch}
           onReset={() => handleSearch({})}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
-        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="min-h-0 flex-1 overflow-hidden">
           <TableState
             loading={isLoading && !data}
             error={error}

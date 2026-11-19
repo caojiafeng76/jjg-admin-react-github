@@ -4,6 +4,7 @@ import { Table } from 'antd'
 
 import { useMemo } from 'react'
 import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 interface Props {
   loading: boolean
@@ -58,7 +59,7 @@ export default function YoumaiRawMaterialStockInTable({
         width: 120,
         align: 'right',
         render: (value: number) => (
-          <span className="font-medium text-green-600">+{value}</span>
+          <span className="font-medium text-success">+{value}</span>
         ),
       },
       {
@@ -85,6 +86,8 @@ export default function YoumaiRawMaterialStockInTable({
   return (
     <Table
       rowKey="id"
+      size="small"
+      rowClassName={zebraRowClassName}
       loading={loading}
       columns={columns}
       dataSource={data}

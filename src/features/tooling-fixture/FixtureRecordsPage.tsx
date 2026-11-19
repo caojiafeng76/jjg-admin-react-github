@@ -4,16 +4,17 @@ import { TrashIcon } from '@heroicons/react/16/solid'
 import {
   App,
   Button,
-  Card,
   Pagination,
   Select,
-  Space,
   Table,
-  Tag,
-  Typography,
 } from 'antd'
 
 import { useCallback, useMemo, useState } from 'react'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import FilterBar from '@/ui/FilterBar'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty, TableState } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
   useDeleteToolingFixtureUsageRecords,
   useToolingFixtureUsageRecords,
@@ -27,12 +28,15 @@ export default function FixtureRecordsPage() {
   const [pageSize, setPageSize] = useState(20)
   const [action, setAction] = useState<ToolingFixtureUsageRecord['action']>()
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const { data, isLoading } = useToolingFixtureUsageRecords({
+  const { data, isLoading, error, refetch } = useToolingFixtureUsageRecords({
     page,
     pageSize,
     action,
   })
   const deleteMutation = useDeleteToolingFixtureUsageRecords()
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: 15,
+  })
 
   const handleDelete = useCallback(
     (record: ToolingFixtureUsageRecord) => {
@@ -98,7 +102,9 @@ export default function FixtureRecordsPage() {
         key: 'action',
         width: 100,
         render: (value: ToolingFixtureUsageRecord['action']) => (
-          <Tag color={value === '使用' ? 'orange' : 'green'}>{value}</Tag>
+          <StatusPill tone={value === '使用' ? 'warning' : 'success'}>
+            {value}
+          </StatusPill>
         ),
       },
       {
@@ -140,59 +146,73 @@ export default function FixtureRecordsPage() {
   )
 
   return (
-    <div className="space-y-4 p-4 md:p-6">
-      <div>
-        <Typography.Title level={2} className="!mb-1">
-          工装出入记录
-        </Typography.Title>
-        <Typography.Text type="secondary">
-          查看现场扫码产生的使用与归还记录。
-        </Typography.Text>
-      </div>
-      <Card>
-        <Space wrap className="mb-4">
-          <Select
-            allowClear
-            placeholder="按动作筛选"
-            value={action}
-            style={{ width: 150 }}
-            options={[
-              { label: '使用记录', value: '使用' },
-              { label: '归还记录', value: '归还' },
-            ]}
-            onChange={(
-              value: ToolingFixtureUsageRecord['action'] | undefined,
-            ) => {
-              setPage(1)
-              setAction(value)
-            }}
-          />
-          {selectedRowKeys.length > 0
-            ? (
-                <Button
-                  type="text"
-                  danger
-                  icon={<TrashIcon className="size-4" />}
-                  onClick={handleDeleteSelected}
-                >
-                  删除选中
-                </Button>
-              )
-            : null}
-        </Space>
-        <Table<ToolingFixtureUsageRecord>
-          rowKey="id"
-          loading={isLoading}
-          columns={columns}
-          dataSource={data?.items ?? []}
-          pagination={false}
-          rowSelection={{
-            selectedRowKeys,
-            onChange: setSelectedRowKeys,
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
+      <FilterBar className="flex flex-wrap items-center gap-3">
+        <Select
+          allowClear
+          placeholder="按动作筛选"
+          value={action}
+          style={{ width: 150 }}
+          options={[
+            { label: '使用记录', value: '使用' },
+            { label: '归还记录', value: '归还' },
+          ]}
+          onChange={(
+            value: ToolingFixtureUsageRecord['action'] | undefined,
+          ) => {
+            setPage(1)
+            setAction(value)
           }}
-          scroll={{ x: 800 }}
         />
-        <div className="mt-4 flex justify-end">
+        {selectedRowKeys.length > 0
+          ? (
+              <Button
+                type="text"
+                danger
+                icon={<TrashIcon className="size-4" />}
+                onClick={handleDeleteSelected}
+              >
+                删除选中
+              </Button>
+            )
+          : null}
+      </FilterBar>
+
+      <div
+        ref={tableContainerRef}
+        className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+      >
+        <div className="min-h-0 flex-1 overflow-x-auto">
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <Table<ToolingFixtureUsageRecord>
+              rowKey="id"
+              size="small"
+              loading={isLoading}
+              columns={columns}
+              dataSource={data?.items ?? []}
+              pagination={false}
+              rowClassName={zebraRowClassName}
+              locale={{
+                emptyText: (
+                  <TableEmpty
+                    title="暂无工装出入记录"
+                    description="现场扫码产生的使用与归还记录会显示在这里"
+                  />
+                ),
+              }}
+              rowSelection={{
+                selectedRowKeys,
+                onChange: setSelectedRowKeys,
+              }}
+              scroll={{ x: 800, y: scrollY }}
+            />
+          </TableState>
+        </div>
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
           <Pagination
             current={page}
             pageSize={pageSize}
@@ -206,7 +226,7 @@ export default function FixtureRecordsPage() {
             }}
           />
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

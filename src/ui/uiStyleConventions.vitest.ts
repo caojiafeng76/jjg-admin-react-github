@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
  * 规范来源：docs/前端页面风格规范与设计指南.md
  * 推进策略：
  * - Phase 0：锁定规范文档收口状态 + 保护已达标的共享 UI / 系统页基线文件；
- * - Phase 1：将整个 `src/ui` 纳入 GUARDED_DIRS；
+ * - Phase 1：将整个 `src/ui` 纳入守卫；
  * - Phase 2–4：每完成一个业务域迁移，立即把该目录追加到 GUARDED_DIRS；
  * - Phase 5：切换为覆盖全部 `src/features`、`src/pages`、`src/ui` 的全库强制门槛。
  */
@@ -58,7 +58,21 @@ const GUARDED_FILES = [
 /** 已完成风格迁移并锁定防回退的目录清单（随 Phase 1–5 逐步追加） */
 const GUARDED_DIRS: readonly string[] = [
   'src/features/workshop-misc-materials',
+  'src/features/youmai',
+  'src/features/jintan',
+  'src/features/syney-materials',
+  'src/features/machine-runtime',
+  'src/features/access-management',
+  'src/features/attendance',
+  'src/features/tooling-fixture',
 ]
+
+/** 归属 Phase 4-B（外部公开扫码页收口）的待迁移文件，在 Phase 4-B 完成后移除豁免 */
+const DEFERRED_UNTIL_PHASE_4B = new Set<string>([
+  'src/features/jintan/PartsStockOut/JintanPartsStockOutPublicPage.tsx',
+  'src/features/jintan/PartsStockOut/usePrintJintanPartsStockOutPublicQrPoster.tsx',
+  'src/features/tooling-fixture/ToolingFixturePublicPage.tsx',
+])
 
 function readWorkspaceFile(relativePath: string): string {
   return readFileSync(path.resolve(process.cwd(), relativePath), 'utf8')
@@ -91,7 +105,9 @@ function collectGuardedFiles(): string[] {
   const unique = new Set<string>(GUARDED_FILES)
   for (const dir of GUARDED_DIRS) {
     for (const file of walkTsxFiles(dir)) {
-      unique.add(file)
+      if (!DEFERRED_UNTIL_PHASE_4B.has(file)) {
+        unique.add(file)
+      }
     }
   }
   return Array.from(unique).sort()

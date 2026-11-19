@@ -1,28 +1,16 @@
 import type { TableColumnsType } from 'antd'
-import type { UploadFile } from 'antd/es/upload/interface'
 import type { JintanPartsDataFormValues } from '@/services/apiJintanPartsData'
-import { ArrowUpTrayIcon } from '@heroicons/react/16/solid'
-import {
-  Alert,
-  Button,
-  Modal,
-  Table,
+import ExcelImportModal from '@/ui/ExcelImportModal'
 
-  Upload,
-} from 'antd'
-import { useState } from 'react'
-
-import DownloadTemplateButton from '@/ui/DownloadTemplateButton'
-import ExcelParseErrorList from '@/ui/ExcelParseErrorList'
-import ImportButton from '@/ui/ImportButton'
-
-const loadJintanPartsDataExcel = () => import('@/utils/jintanPartsDataExcel')
-
-function preloadJintanPartsDataExcel() {
-  void loadJintanPartsDataExcel()
+function loadExcel() {
+  return import('@/utils/jintanPartsDataExcel')
 }
 
-interface Props {
+function preloadExcel() {
+  void loadExcel()
+}
+
+export interface JintanPartsDataExcelImportProps {
   onImport: (rows: JintanPartsDataFormValues[]) => Promise<void>
   isImporting: boolean
   permissionKey?: string
@@ -79,172 +67,24 @@ export default function JintanPartsDataExcelImport({
   onImport,
   isImporting,
   permissionKey,
-}: Props) {
-  const [modalOpen, setModalOpen] = useState(false)
-  const [fileList, setFileList] = useState<UploadFile[]>([])
-  const [parsedRows, setParsedRows] = useState<JintanPartsDataFormValues[]>([])
-  const [parseErrors, setParseErrors] = useState<string[]>([])
-  const [parsing, setParsing] = useState(false)
-
-  const handleBeforeUpload = async (file: File) => {
-    const isExcel
-      = file.type === 'application/vnd.ms-excel'
-        || file.type
-        === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        || file.name.endsWith('.xls')
-        || file.name.endsWith('.xlsx')
-
-    if (!isExcel) {
-      return Upload.LIST_IGNORE
-    }
-
-    setParsing(true)
-    try {
-      const { parseJintanPartsDataExcel } = await loadJintanPartsDataExcel()
-      const { rows, errors } = await parseJintanPartsDataExcel(file)
-      setParsedRows(rows)
-      setParseErrors(errors)
-      setFileList([
-        { uid: file.name, name: file.name, status: 'done' } as UploadFile,
-      ])
-    }
-    catch (error) {
-      setParseErrors([
-        error instanceof Error ? error.message : 'Excel 解析失败',
-      ])
-      setParsedRows([])
-      setFileList([])
-    }
-    finally {
-      setParsing(false)
-    }
-
-    return false
-  }
-
-  const handleOpenModal = () => {
-    setModalOpen(true)
-    setParsedRows([])
-    setParseErrors([])
-    setFileList([])
-  }
-
-  const handleDownloadTemplate = async () => {
-    const { downloadJintanPartsDataTemplate } = await loadJintanPartsDataExcel()
-    downloadJintanPartsDataTemplate()
-  }
-
-  const handleCancel = () => {
-    setModalOpen(false)
-    setParsedRows([])
-    setParseErrors([])
-    setFileList([])
-  }
-
-  const handleConfirmImport = async () => {
-    if (parsedRows.length === 0) {
-      return
-    }
-
-    await onImport(parsedRows)
-    handleCancel()
-  }
-
-  const previewData = parsedRows.map((row, index) => ({
-    ...row,
-    _idx: index,
-  }))
-
+}: JintanPartsDataExcelImportProps) {
   return (
-    <>
-      <ImportButton
-        onClick={handleOpenModal}
-        permissionKey={permissionKey}
-        onPreload={preloadJintanPartsDataExcel}
-      />
-
-      <DownloadTemplateButton
-        onClick={handleDownloadTemplate}
-        permissionKey={permissionKey}
-        onPreload={preloadJintanPartsDataExcel}
-      />
-
-      <Modal
-        title="批量导入配件资料"
-        open={modalOpen}
-        onCancel={handleCancel}
-        width={920}
-        footer={[
-          <Button key="cancel" onClick={handleCancel}>
-            取消
-          </Button>,
-          <Button
-            key="import"
-            type="primary"
-            loading={isImporting}
-            disabled={parsedRows.length === 0}
-            onClick={handleConfirmImport}
-          >
-            确认导入{parsedRows.length > 0 ? `（${parsedRows.length} 条）` : ''}
-          </Button>,
-        ]}
-      >
-        <div className="space-y-4">
-          <Upload
-            fileList={fileList}
-            beforeUpload={handleBeforeUpload}
-            onRemove={() => {
-              setFileList([])
-              setParsedRows([])
-              setParseErrors([])
-            }}
-            maxCount={1}
-            accept=".xlsx,.xls"
-          >
-            <Button
-              loading={parsing}
-              icon={<ArrowUpTrayIcon className="h-4 w-4" />}
-              onMouseEnter={preloadJintanPartsDataExcel}
-              onFocus={preloadJintanPartsDataExcel}
-            >
-              {parsing ? '解析中...' : '选择 Excel 文件'}
-            </Button>
-          </Upload>
-
-          <Alert
-            type="info"
-            showIcon
-            title="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；类型、颜色列选填，类型留空按 A；类型、名称、规格与颜色均相同的行视为重复，导入会失败。"
-          />
-
-          {parseErrors.length > 0 && (
-            <Alert
-              type="warning"
-              showIcon
-              title={`解析时发现 ${parseErrors.length} 个问题`}
-              description={(
-                <ExcelParseErrorList errors={parseErrors} />
-              )}
-            />
-          )}
-
-          {parsedRows.length > 0 && (
-            <div>
-              <p className="mb-2 text-sm font-medium">
-                预览（共 {parsedRows.length} 条）
-              </p>
-              <Table
-                size="small"
-                rowKey="_idx"
-                dataSource={previewData}
-                columns={PREVIEW_COLUMNS}
-                pagination={{ pageSize: 10, size: 'small' }}
-                scroll={{ y: 320, x: 1070 }}
-              />
-            </div>
-          )}
-        </div>
-      </Modal>
-    </>
+    <ExcelImportModal<JintanPartsDataFormValues>
+      title="批量导入配件资料"
+      tip="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；类型、颜色列选填，类型留空按 A；类型、名称、规格与颜色均相同的行视为重复，导入会失败。"
+      columns={PREVIEW_COLUMNS}
+      parseFile={async (file) => {
+        const { parseJintanPartsDataExcel } = await loadExcel()
+        return parseJintanPartsDataExcel(file)
+      }}
+      onDownloadTemplate={async () => {
+        const { downloadJintanPartsDataTemplate } = await loadExcel()
+        downloadJintanPartsDataTemplate()
+      }}
+      onImport={onImport}
+      isImporting={isImporting}
+      permissionKey={permissionKey}
+      onPreload={preloadExcel}
+    />
   )
 }

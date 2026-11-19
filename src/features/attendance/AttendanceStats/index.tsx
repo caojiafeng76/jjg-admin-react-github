@@ -1,26 +1,23 @@
-import type {
-  TableColumnsType,
-} from 'antd'
+import type { TableColumnsType } from 'antd'
 import type { Dayjs } from 'dayjs'
 import type {
   AttendanceLateEarlyStat,
   AttendanceShiftStat,
 } from '@/services/apiAttendanceDetails'
+import type { StatusTone } from '@/ui/StatusPill'
 import { ArrowDownTrayIcon as ArrowDownTrayIconSolid } from '@heroicons/react/16/solid'
 import {
   CalendarDaysIcon,
   ClipboardDocumentListIcon,
-  MagnifyingGlassIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
 import {
+  App,
   Button,
   DatePicker,
-  message,
   Popover,
   Table,
   Tabs,
-  Tag,
 } from 'antd'
 
 import { useState } from 'react'
@@ -30,6 +27,10 @@ import {
   getAttendanceLateEarlyStats,
   getAttendanceMonthlyExportData,
 } from '@/services/apiAttendanceDetails'
+import FilterBar from '@/ui/FilterBar'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty, TableState } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
   useAttendanceLateEarlyStats,
   useAttendanceShiftStats,
@@ -56,31 +57,31 @@ function preloadAttendanceMonthlyExcel() {
 function DatesPopover({
   count,
   dates,
-  color,
+  tone,
 }: {
   count: number
   dates: string[]
-  color: string
+  tone: StatusTone
 }) {
   if (count === 0)
-    return <span className="text-slate-400">0</span>
+    return <span className="text-slate-400 dark:text-slate-500">0</span>
   return (
     <Popover
       content={(
-        <div className="flex max-w-xs flex-wrap gap-1">
+        <div className="flex max-w-xs flex-wrap gap-1.5">
           {dates.map(d => (
-            <Tag key={d} color={color} className="mb-1">
+            <StatusPill key={d} tone={tone}>
               {d}
-            </Tag>
+            </StatusPill>
           ))}
         </div>
       )}
       title="涉及日期"
       trigger="click"
     >
-      <Tag color={color} className="cursor-pointer">
-        {count} 次
-      </Tag>
+      <button type="button" className="cursor-pointer border-0 bg-transparent p-0">
+        <StatusPill tone={tone}>{count} 次</StatusPill>
+      </button>
     </Popover>
   )
 }
@@ -92,7 +93,7 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     width: 60,
     fixed: 'left',
     render: (_v, _r, i) => (
-      <span className="flex size-7 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500">
+      <span className="flex size-7 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500 tabular-nums dark:bg-slate-800 dark:text-slate-400">
         {i + 1}
       </span>
     ),
@@ -100,7 +101,7 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
   {
     title: (
       <span className="flex items-center gap-1.5">
-        <UserCircleIcon className="h-4 w-4 text-slate-400" />
+        <UserCircleIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
         姓名
       </span>
     ),
@@ -109,7 +110,9 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     width: 140,
     fixed: 'left',
     render: (value: string) => (
-      <span className="font-medium text-slate-700">{value}</span>
+      <span className="font-medium text-slate-700 dark:text-slate-200">
+        {value}
+      </span>
     ),
   },
   {
@@ -119,7 +122,9 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     width: 110,
     align: 'center',
     render: (v: number) => (
-      <span className="font-semibold text-slate-700">{v}</span>
+      <span className="font-semibold text-slate-700 tabular-nums dark:text-slate-200">
+        {v}
+      </span>
     ),
   },
   {
@@ -128,11 +133,7 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     key: 'day_shift_days',
     width: 110,
     align: 'center',
-    render: (v: number) => (
-      <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-        {v}
-      </span>
-    ),
+    render: (v: number) => <StatusPill tone="neutral">{v}</StatusPill>,
   },
   {
     title: '夜班天数',
@@ -140,11 +141,7 @@ const shiftStatsColumns: TableColumnsType<AttendanceShiftStat> = [
     key: 'night_shift_days',
     width: 110,
     align: 'center',
-    render: (v: number) => (
-      <span className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700">
-        {v}
-      </span>
-    ),
+    render: (v: number) => <StatusPill tone="info">{v}</StatusPill>,
   },
 ]
 
@@ -155,7 +152,7 @@ const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
     width: 60,
     fixed: 'left',
     render: (_v, _r, i) => (
-      <span className="flex size-7 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500">
+      <span className="flex size-7 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500 tabular-nums dark:bg-slate-800 dark:text-slate-400">
         {i + 1}
       </span>
     ),
@@ -163,7 +160,7 @@ const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
   {
     title: (
       <span className="flex items-center gap-1.5">
-        <UserCircleIcon className="h-4 w-4 text-slate-400" />
+        <UserCircleIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
         姓名
       </span>
     ),
@@ -172,7 +169,9 @@ const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
     width: 140,
     fixed: 'left',
     render: (value: string) => (
-      <span className="font-medium text-slate-700">{value}</span>
+      <span className="font-medium text-slate-700 dark:text-slate-200">
+        {value}
+      </span>
     ),
   },
   {
@@ -183,7 +182,7 @@ const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
     align: 'center',
     sorter: (a, b) => a.late_count - b.late_count,
     render: (v: number, r) => (
-      <DatesPopover count={v} dates={r.late_dates} color="orange" />
+      <DatesPopover count={v} dates={r.late_dates} tone="warning" />
     ),
   },
   {
@@ -194,64 +193,88 @@ const lateEarlyColumns: TableColumnsType<AttendanceLateEarlyStat> = [
     align: 'center',
     sorter: (a, b) => a.early_leave_count - b.early_leave_count,
     render: (v: number, r) => (
-      <DatesPopover count={v} dates={r.early_leave_dates} color="volcano" />
+      <DatesPopover count={v} dates={r.early_leave_dates} tone="danger" />
     ),
   },
 ]
 
 function ShiftStatsTab({ searchParams }: { searchParams: SearchParams }) {
-  const { data, isLoading } = useAttendanceShiftStats(searchParams)
+  const { data, isLoading, error, refetch } = useAttendanceShiftStats(searchParams)
   const { tableContainerRef, scrollY } = useTableHeight({ targetRowCount: 14 })
 
   return (
-    <div
-      ref={tableContainerRef}
-      className="min-h-0 overflow-hidden rounded-xl border border-slate-200/80"
-    >
-      <Table<AttendanceShiftStat>
-        size="small"
-        loading={isLoading}
-        dataSource={data || []}
-        rowKey="name"
-        pagination={false}
-        scroll={{ x: SHIFT_STATS_TABLE_SCROLL_X, y: scrollY }}
-        tableLayout="fixed"
-        columns={shiftStatsColumns}
-      />
+    <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
+      <TableState
+        loading={isLoading && !data}
+        error={error}
+        onRetry={refetch}
+      >
+        <Table<AttendanceShiftStat>
+          size="small"
+          loading={isLoading}
+          dataSource={data || []}
+          rowKey="name"
+          pagination={false}
+          rowClassName={zebraRowClassName}
+          locale={{
+            emptyText: (
+              <TableEmpty
+                title="暂无班次统计数据"
+                description="请调整筛选条件后重试"
+              />
+            ),
+          }}
+          scroll={{ x: SHIFT_STATS_TABLE_SCROLL_X, y: scrollY }}
+          tableLayout="fixed"
+          columns={shiftStatsColumns}
+        />
+      </TableState>
     </div>
   )
 }
 
 function LateEarlyTab({ searchParams }: { searchParams: SearchParams }) {
-  const { data, isLoading } = useAttendanceLateEarlyStats(searchParams)
+  const { data, isLoading, error, refetch } = useAttendanceLateEarlyStats(searchParams)
   const { tableContainerRef, scrollY } = useTableHeight({ targetRowCount: 14 })
 
   return (
-    <div
-      ref={tableContainerRef}
-      className="min-h-0 overflow-hidden rounded-xl border border-slate-200/80"
-    >
-      <Table
-        size="small"
-        loading={isLoading}
-        dataSource={data || []}
-        rowKey="name"
-        pagination={false}
-        scroll={{ x: LATE_EARLY_TABLE_SCROLL_X, y: scrollY }}
-        tableLayout="fixed"
-        columns={lateEarlyColumns}
-      />
+    <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
+      <TableState
+        loading={isLoading && !data}
+        error={error}
+        onRetry={refetch}
+      >
+        <Table<AttendanceLateEarlyStat>
+          size="small"
+          loading={isLoading}
+          dataSource={data || []}
+          rowKey="name"
+          pagination={false}
+          rowClassName={zebraRowClassName}
+          locale={{
+            emptyText: (
+              <TableEmpty
+                title="暂无迟到/早退统计数据"
+                description="请调整筛选条件后重试"
+              />
+            ),
+          }}
+          scroll={{ x: LATE_EARLY_TABLE_SCROLL_X, y: scrollY }}
+          tableLayout="fixed"
+          columns={lateEarlyColumns}
+        />
+      </TableState>
     </div>
   )
 }
 
 export default function AttendanceStatsPage() {
+  const { message: messageApi } = App.useApp()
   const { viewerDenied, viewerOperationTip } = useViewerOperationGuard()
   const [searchParams, setSearchParams] = useState<SearchParams>({})
   const [exportMonth, setExportMonth] = useState<Dayjs | null>(null)
   const [exporting, setExporting] = useState(false)
   const [exportingLateEarly, setExportingLateEarly] = useState(false)
-  const [messageApi, contextHolder] = message.useMessage()
 
   async function handleExportLateEarly() {
     if (viewerDenied) {
@@ -321,61 +344,50 @@ export default function AttendanceStatsPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 p-4">
-      {/* 搜索区域卡片 */}
-      <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-50/80 to-white px-5 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500">
-          <MagnifyingGlassIcon className="h-4 w-4" />
-          <span>筛选条件</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-4">
-          <AttendanceStatsSearch
-            onSearch={setSearchParams}
-            onReset={() => setSearchParams({})}
-            initialValues={searchParams}
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
+      {/* 筛选与导出栏 */}
+      <FilterBar className="flex flex-wrap items-center gap-4">
+        <AttendanceStatsSearch
+          onSearch={setSearchParams}
+          onReset={() => setSearchParams({})}
+          initialValues={searchParams}
+        />
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <DatePicker
+            picker="month"
+            value={exportMonth}
+            onChange={setExportMonth}
+            placeholder="选择导出月份"
+            allowClear
+            className="!w-36 rounded-lg"
           />
-          {/* 导出操作区域 */}
-          <div className="ml-auto flex items-center gap-3">
-            <DatePicker
-              picker="month"
-              value={exportMonth}
-              onChange={setExportMonth}
-              placeholder="选择导出月份"
-              allowClear
-              className="!w-36 rounded-lg"
-            />
-            <Button
-              type="text"
-              icon={
-                <ArrowDownTrayIconSolid className="size-4 text-amber-500/80!" />
-              }
-              loading={exportingLateEarly}
-              onClick={handleExportLateEarly}
-              onMouseEnter={preloadAttendanceMonthlyExcel}
-              onFocus={preloadAttendanceMonthlyExcel}
-              disabled={viewerDenied}
-            >
-              导出迟到/早退
-            </Button>
-            <Button
-              type="text"
-              icon={
-                <ArrowDownTrayIconSolid className="size-4 text-emerald-500/80!" />
-              }
-              loading={exporting}
-              onClick={handleExport}
-              onMouseEnter={preloadAttendanceMonthlyExcel}
-              onFocus={preloadAttendanceMonthlyExcel}
-              disabled={viewerDenied}
-            >
-              导出出勤月报
-            </Button>
-          </div>
+          <Button
+            type="text"
+            icon={<ArrowDownTrayIconSolid className="size-4" />}
+            loading={exportingLateEarly}
+            onClick={handleExportLateEarly}
+            onMouseEnter={preloadAttendanceMonthlyExcel}
+            onFocus={preloadAttendanceMonthlyExcel}
+            disabled={viewerDenied}
+          >
+            导出迟到/早退
+          </Button>
+          <Button
+            type="text"
+            icon={<ArrowDownTrayIconSolid className="size-4" />}
+            loading={exporting}
+            onClick={handleExport}
+            onMouseEnter={preloadAttendanceMonthlyExcel}
+            onFocus={preloadAttendanceMonthlyExcel}
+            disabled={viewerDenied}
+          >
+            导出出勤月报
+          </Button>
         </div>
-      </div>
+      </FilterBar>
 
       {/* 统计概览 */}
-      <div className="flex items-center gap-4 text-sm text-slate-500">
+      <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
         <div className="flex items-center gap-1.5">
           <ClipboardDocumentListIcon className="h-4 w-4" />
           <span>考勤统计</span>
@@ -418,7 +430,6 @@ export default function AttendanceStatsPage() {
           ]}
         />
       </div>
-      {contextHolder}
     </div>
   )
 }

@@ -89,7 +89,7 @@ export default function RoleCreateModal({ open, onClose, onCreated }: Props) {
           <Form.Item name="description" label="描述（可选）">
             <Input.TextArea rows={2} maxLength={200} showCount />
           </Form.Item>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-slate-400 dark:text-slate-500">
             创建成功后，可在角色权限管理界面为该角色勾选具体权限并保存。
             当前权限注册表共 {allPermissions.length} 项。
           </div>

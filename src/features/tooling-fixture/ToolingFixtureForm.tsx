@@ -8,18 +8,18 @@ import {
   Col,
   DatePicker,
   Form,
-
   Input,
   InputNumber,
   Row,
   Select,
-  Tag,
 } from 'antd'
 import dayjs from 'dayjs'
 
 import { useEffect } from 'react'
+import StatusPill from '@/ui/StatusPill'
 import { TOOLING_FIXTURE_LIFECYCLES } from './fixtureDomain'
 import { TOOLING_FIXTURE_FORM_FIELDS } from './fixtureFormFields'
+import { getStatusTone } from './toolingFixturePresentation'
 
 interface ToolingFixtureFormProps {
   onFinish: (values: ToolingFixtureFormValues) => void
@@ -184,7 +184,7 @@ export default function ToolingFixtureForm({
         </Col>
         <Col xs={24} md={12}>
           <Form.Item label={fieldLabel('status')}>
-            <Tag color={status === '使用中' ? 'orange' : 'green'}>{status}</Tag>
+            <StatusPill tone={getStatusTone(status)}>{status}</StatusPill>
           </Form.Item>
         </Col>
         <Col xs={24} md={12}>

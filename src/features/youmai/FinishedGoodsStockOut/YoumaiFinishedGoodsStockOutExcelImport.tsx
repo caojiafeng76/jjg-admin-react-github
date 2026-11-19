@@ -20,6 +20,7 @@ import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { fetchYoumaiPurchaseOrder } from '@/services/apiYoumaiPurchaseOrder'
 import ExcelParseErrorList from '@/ui/ExcelParseErrorList'
 import ImportButton from '@/ui/ImportButton'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 function loadYoumaiFinishedGoodsStockOutExcel() {
   return import('@/utils/youmaiFinishedGoodsStockOutExcel')
@@ -210,7 +211,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
   const fetchButton = (
     <Button
       type="text"
-      icon={<ArrowDownTrayIcon className="size-4 text-cyan-500/80!" />}
+      icon={<ArrowDownTrayIcon className="size-4" />}
       onClick={() => handleOpenModal('purchaseOrder')}
       disabled={denied}
     >
@@ -242,8 +243,9 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
             : '导入优迈成品出库'
         }
         open={modalOpen}
+        destroyOnHidden
         onCancel={handleCancel}
-        width={1080}
+        width={960}
         footer={[
           <Button key="cancel" onClick={handleCancel}>
             取消
@@ -295,7 +297,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
             >
               <Button
                 loading={parsing}
-                icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+                icon={<ArrowUpTrayIcon className="size-4" />}
                 onMouseEnter={preloadYoumaiFinishedGoodsStockOutExcel}
                 onFocus={preloadYoumaiFinishedGoodsStockOutExcel}
               >
@@ -339,6 +341,7 @@ export default function YoumaiFinishedGoodsStockOutExcelImport({
               <Table
                 size="small"
                 rowKey="_idx"
+                rowClassName={zebraRowClassName}
                 dataSource={previewData}
                 columns={PREVIEW_COLUMNS}
                 pagination={{ pageSize: 10, size: 'small' }}

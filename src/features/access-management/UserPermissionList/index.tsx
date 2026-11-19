@@ -1,9 +1,13 @@
 import type { AppRole } from '@/config/access'
 import type { Employee } from '@/services/apiEmployees'
-import { Button, Input, Table, Tag } from 'antd'
+import { Button, Input, Table } from 'antd'
 import { useMemo, useState } from 'react'
 import { useAllEmployees } from '@/features/workshop/EmployeeList/useEmployees'
 import { useRoleOptions } from '@/hooks/useRoleOptions'
+import FilterBar from '@/ui/FilterBar'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import {
   useAllPermissions,
   useRolePermissionIds,
@@ -86,24 +90,21 @@ export default function UserPermissionList() {
         render: (role: AppRole | null) =>
           role
             ? (
-                <Tag>{getRoleLabel(role)}</Tag>
+                <StatusPill tone="info">{getRoleLabel(role)}</StatusPill>
               )
             : (
-                <span className="text-gray-400">—</span>
+                <span className="text-slate-400 dark:text-slate-500">—</span>
               ),
       },
       {
         title: '状态',
         dataIndex: 'is_active',
         key: 'is_active',
-        render: (val: boolean) =>
-          val !== false
-            ? (
-                <Tag color="success">在职</Tag>
-              )
-            : (
-                <Tag color="default">离职</Tag>
-              ),
+        render: (val: boolean) => (
+          <StatusPill tone={val !== false ? 'success' : 'neutral'}>
+            {val !== false ? '在职' : '离职'}
+          </StatusPill>
+        ),
       },
       {
         title: '操作',
@@ -133,14 +134,16 @@ export default function UserPermissionList() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <Input.Search
-        placeholder="搜索员工姓名"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        allowClear
-        style={{ maxWidth: 280 }}
-      />
+    <div className="flex flex-col gap-3">
+      <FilterBar>
+        <Input.Search
+          placeholder="搜索员工姓名"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          allowClear
+          style={{ maxWidth: 280 }}
+        />
+      </FilterBar>
 
       <Table
         dataSource={filtered as EmployeeRow[]}
@@ -148,6 +151,15 @@ export default function UserPermissionList() {
         rowKey="id"
         loading={isLoading}
         size="small"
+        rowClassName={zebraRowClassName}
+        locale={{
+          emptyText: (
+            <TableEmpty
+              title="暂无匹配员工"
+              description="请尝试其他员工姓名关键词"
+            />
+          ),
+        }}
         pagination={{ pageSize: 20 }}
       />
     </div>

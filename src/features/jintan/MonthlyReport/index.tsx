@@ -16,6 +16,7 @@ import {
   parseJintanItemType,
 } from '@/services/jintanItemType'
 import ExportButton from '@/ui/ExportButton'
+import FilterBar from '@/ui/FilterBar'
 import { TableState } from '@/ui/TableState'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
@@ -153,7 +154,7 @@ export default function JintanMonthlyReportPage() {
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <FilterBar className="flex flex-wrap items-center gap-2">
         <Segmented<JintanMonthlyReportCategory>
           value={category}
           onChange={value => updateSearchParam('tab', value)}
@@ -173,11 +174,11 @@ export default function JintanMonthlyReportPage() {
           options={JINTAN_ITEM_TYPE_OPTIONS}
           onChange={value => updateSearchParam('itemType', value)}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
-        className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+        className="min-h-0 flex-1 overflow-hidden"
       >
         <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
           <JintanMonthlyReportTable

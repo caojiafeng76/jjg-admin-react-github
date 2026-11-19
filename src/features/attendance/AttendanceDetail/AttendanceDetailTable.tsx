@@ -4,6 +4,9 @@ import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { Table } from 'antd'
 
 import { memo, useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 interface Props {
   loading: boolean
@@ -34,7 +37,7 @@ function AttendanceDetailTable({
         width: 60,
         fixed: 'left',
         render: (_value, _record, index) => (
-          <span className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500">
+          <span className="flex size-7 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-500 tabular-nums dark:bg-slate-800 dark:text-slate-400">
             {(page - 1) * pageSize + index + 1}
           </span>
         ),
@@ -42,7 +45,7 @@ function AttendanceDetailTable({
       {
         title: (
           <span className="flex items-center gap-1.5">
-            <UserCircleIcon className="h-4 w-4 text-slate-400" />
+            <UserCircleIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
             姓名
           </span>
         ),
@@ -51,7 +54,9 @@ function AttendanceDetailTable({
         width: 140,
         fixed: 'left',
         render: (value: string) => (
-          <span className="font-medium text-slate-700">{value}</span>
+          <span className="font-medium text-slate-700 dark:text-slate-200">
+            {value}
+          </span>
         ),
       },
       {
@@ -65,23 +70,16 @@ function AttendanceDetailTable({
         dataIndex: 'shift',
         key: 'shift',
         width: 100,
-        render: (value: string) =>
-          value === '夜班'
-            ? (
-                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
-                  {value || '白班'}
-                </span>
-              )
-            : (
-                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                  {value || '白班'}
-                </span>
-              ),
+        render: (value: string) => (
+          <StatusPill tone={value === '夜班' ? 'info' : 'neutral'}>
+            {value || '白班'}
+          </StatusPill>
+        ),
       },
       {
         title: (
           <span className="flex items-center gap-1.5">
-            <ClockIcon className="h-4 w-4 text-slate-400" />
+            <ClockIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
             时间
           </span>
         ),
@@ -89,7 +87,7 @@ function AttendanceDetailTable({
         key: 'time',
         width: 120,
         render: (value: string) => (
-          <span className="font-mono text-slate-600">
+          <span className="font-mono text-slate-600 dark:text-slate-300">
             {value?.slice(0, 5) ?? '-'}
           </span>
         ),
@@ -100,7 +98,7 @@ function AttendanceDetailTable({
         key: 'created_at',
         width: 180,
         render: (value: string) => (
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-400 dark:text-slate-500">
             {value ? new Date(value).toLocaleString('zh-CN') : '-'}
           </span>
         ),
@@ -123,6 +121,15 @@ function AttendanceDetailTable({
         onChange: onSelect,
       }}
       size="small"
+      rowClassName={zebraRowClassName}
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无考勤明细"
+            description="可点击上方“新建”或“导入 Excel”录入考勤记录"
+          />
+        ),
+      }}
       onRow={() => ({ style: { height: rowHeight } })}
     />
   )

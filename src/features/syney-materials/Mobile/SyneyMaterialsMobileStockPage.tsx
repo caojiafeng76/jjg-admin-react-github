@@ -72,7 +72,7 @@ export default function SyneyMaterialsMobileStockPage({
             key={record.id}
             type="button"
             onClick={() => setActiveRecord(record)}
-            className="w-full rounded-3xl border border-slate-200/80 bg-white p-4 text-left shadow-[0_8px_30px_rgba(15,23,42,0.08)] active:scale-[0.99] dark:border-slate-700 dark:bg-slate-800"
+            className="w-full rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-sm active:scale-[0.99] dark:border-slate-700 dark:bg-slate-800"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">

@@ -87,7 +87,7 @@ export default function AttendanceStatsSearch({
             htmlType="submit"
             className="rounded-lg"
           >
-            查询
+            搜索
           </Button>
           <Button
             onClick={handleReset}

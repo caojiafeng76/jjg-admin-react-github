@@ -30,10 +30,10 @@
 
 ## Phase 2：高感知冲突域优先治理（消除“双卡套娃”与“外边距叠加”）
 
-- [ ] **P2-A 优迈（`youmai`，7 页）**：货品资料、成品库存、成品入库、成品出库、原料库存、原料入库、原料出库 —— 去搜索白卡/蓝点标题与表格白卡套娃；改用 `FilterBar`；统一原料 3 页密度与斑马纹；工具栏排序与 `ExcelImportModal` 对齐
-- [ ] **P2-B 金檀木业（`jintan`，13 个管理端页）**：配件资料/库存/入库/出库、型材资料/库存/入库/出库、素材资料/库存/入库/出库、月报（公开扫码出库页见 P4-B） —— `JintanFieldSearch` 接入 `FilterBar`；12 列表页去双白卡套娃；月报对齐 D 类报表骨架；导入接入 `ExcelImportModal`
-- [ ] **P2-C 西尼材料（`syney-materials`，5 页）**：材料资料、库存、入库、出库、月报 —— 去表格白卡套娃；`SyneyMaterialsSearch` 接入 `FilterBar`；补齐标准斑马纹；导入接入 `ExcelImportModal`
-- [ ] **P2-D 外边距叠加与 `<Card>` 嵌套域（6 页）**：
+- [x] **P2-A 优迈（`youmai`，7 页）**：货品资料、成品库存、成品入库、成品出库、原料库存、原料入库、原料出库 —— 去搜索白卡/蓝点标题与表格白卡套娃；改用 `FilterBar`；统一原料 3 页密度与斑马纹；工具栏排序与 `ExcelImportModal` 对齐
+- [x] **P2-B 金檀木业（`jintan`，13 个管理端页）**：配件资料/库存/入库/出库、型材资料/库存/入库/出库、素材资料/库存/入库/出库、月报（公开扫码出库页见 P4-B） —— `JintanFieldSearch` 接入 `FilterBar`；12 列表页去双白卡套娃；月报对齐 D 类报表骨架；导入接入 `ExcelImportModal`
+- [x] **P2-C 西尼材料（`syney-materials`，5 页）**：材料资料、库存、入库、出库、月报 —— 去表格白卡套娃；`SyneyMaterialsSearch` 接入 `FilterBar`；补齐标准斑马纹；导入接入 `ExcelImportModal`
+- [x] **P2-D 外边距叠加与 `<Card>` 嵌套域（6 页）**：
   - `machine-runtime`（设备运行时间 1 页）：去外层 `p-4` 与 `<Card>`，改 B 类轻量分栏头，补 `TableState`
   - `access-management`（权限管理 1 页）：去外层 `p-4`，清 `@ant-design/icons` 与 `gray-*`
   - `attendance`（考勤明细 / 考勤统计 2 页）：去外层 `p-4`，补 `TableState` / `TableEmpty` / `StatusPill` / 暗色模式，清 `message.useMessage` 与手写彩色 pill

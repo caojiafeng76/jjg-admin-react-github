@@ -48,7 +48,7 @@ export default function SyneyMaterialsMobileShell({
   return (
     <div className={`h-full overflow-y-auto ${footer ? 'pb-36' : 'pb-8'}`}>
       <div className="mx-auto flex max-w-2xl flex-col gap-3 px-4 pt-4">
-        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-4 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
+        <section className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-900/90">
           <button
             type="button"
             onClick={() => navigate('/scan')}

@@ -1,6 +1,9 @@
 import type { PermissionRow, UserOverrideRow } from '@/services/apiPermissions'
-import { App, Button, Select, Skeleton, Table, Tag } from 'antd'
+import { App, Button, Select, Skeleton, Table } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 type OverrideValue = 'default' | 'allow' | 'deny'
 
@@ -75,7 +78,9 @@ export default function UserPermissionDetail({
         render: (label: string, record: PermissionRow) => (
           <div>
             <div className="font-medium">{label}</div>
-            <div className="text-xs text-gray-400">{record.key}</div>
+            <div className="text-xs text-slate-400 dark:text-slate-500">
+              {record.key}
+            </div>
           </div>
         ),
       },
@@ -91,13 +96,11 @@ export default function UserPermissionDetail({
         width: 90,
         render: (_: unknown, record: PermissionRow) => {
           const hasRole = rolePermissionIds.includes(record.id)
-          return hasRole
-            ? (
-                <Tag color="success">允许</Tag>
-              )
-            : (
-                <Tag color="default">无</Tag>
-              )
+          return (
+            <StatusPill tone={hasRole ? 'success' : 'neutral'}>
+              {hasRole ? '允许' : '无'}
+            </StatusPill>
+          )
         },
       },
       {
@@ -134,13 +137,11 @@ export default function UserPermissionDetail({
           const hasRole = rolePermissionIds.includes(record.id)
           const effective
             = override === 'allow' ? true : override === 'deny' ? false : hasRole
-          return effective
-            ? (
-                <Tag color="success">允许</Tag>
-              )
-            : (
-                <Tag color="error">拒绝</Tag>
-              )
+          return (
+            <StatusPill tone={effective ? 'success' : 'danger'}>
+              {effective ? '允许' : '拒绝'}
+            </StatusPill>
+          )
         },
       },
     ],
@@ -172,7 +173,7 @@ export default function UserPermissionDetail({
           ← 返回用户列表
         </Button>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-slate-500 dark:text-slate-400">
             已覆盖 {overrideMap.size} 项
           </span>
           <Button
@@ -191,6 +192,10 @@ export default function UserPermissionDetail({
         columns={columns}
         rowKey="id"
         size="small"
+        rowClassName={zebraRowClassName}
+        locale={{
+          emptyText: <TableEmpty title="暂无权限数据" />,
+        }}
         pagination={{ pageSize: 20 }}
         scroll={{ x: 700 }}
       />

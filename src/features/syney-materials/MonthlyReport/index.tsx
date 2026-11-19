@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
 import ExportButton from '@/ui/ExportButton'
+import FilterBar from '@/ui/FilterBar'
 import { TableState } from '@/ui/TableState'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
@@ -84,7 +85,7 @@ export default function SyneyMaterialsMonthlyReportPage() {
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
-      <div className="flex flex-wrap items-center gap-2">
+      <FilterBar className="flex flex-wrap items-center gap-2">
         <DatePicker
           picker="month"
           allowClear={false}
@@ -105,11 +106,11 @@ export default function SyneyMaterialsMonthlyReportPage() {
         <span className="text-xs text-slate-500 dark:text-slate-400">
           上月结余由当前库存与出入库、调整记录倒推；直接修改或导入库存时的差额计入当月「本月调整」
         </span>
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
-        className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+        className="min-h-0 flex-1 overflow-hidden"
       >
         <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
           <SyneyMaterialsMonthlyReportTable

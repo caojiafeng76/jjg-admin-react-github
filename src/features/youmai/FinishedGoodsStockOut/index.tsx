@@ -8,9 +8,9 @@ import type {
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
+  ScaleIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/16/solid'
-import { ScaleIcon } from '@heroicons/react/24/outline'
 import { App, Button, Modal } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -22,6 +22,7 @@ import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
+import FilterBar from '@/ui/FilterBar'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import PrintButton from '@/ui/PrintButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
@@ -515,21 +516,19 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         />
         <Button
           type="text"
-          icon={<ShieldCheckIcon className="size-4 text-green-500/80!" />}
+          icon={<ShieldCheckIcon className="size-4" />}
           onClick={() => handleBatchAudit('已审核')}
           loading={batchStatusMutation.isPending}
           disabled={viewerDenied || !canManageYoumai}
-          className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
         >
           批量审核
         </Button>
         <Button
           type="text"
-          icon={<ArrowPathIcon className="size-4 text-amber-500/80!" />}
+          icon={<ArrowPathIcon className="size-4" />}
           onClick={() => handleBatchAudit('待审核')}
           loading={batchStatusMutation.isPending}
           disabled={viewerDenied || !canManageYoumai}
-          className="text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
         >
           批量反审核
         </Button>
@@ -558,14 +557,13 @@ export default function YoumaiFinishedGoodsStockOutPage() {
         </PrintButton>
         <Button
           type="text"
-          icon={<ArrowDownTrayIcon className="size-4 text-blue-500/80!" />}
+          icon={<ArrowDownTrayIcon className="size-4" />}
           onClick={handleExportExcel}
           onMouseEnter={preloadYoumaiFinishedGoodsStockOutExport}
           onFocus={preloadYoumaiFinishedGoodsStockOutExport}
           disabled={
             viewerDenied || !canManageYoumai || selectedRowKeys.length === 0
           }
-          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         >
           导出Excel
           {selectedRowKeys.length > 0 && (
@@ -600,7 +598,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
                         label: '总出库重量(KG)',
                         value: totalSelectedWeight,
                         tone: 'primary',
-                        icon: <ScaleIcon className="size-3.5" />,
+                        icon: <ScaleIcon className="size-4" />,
                       },
                     ]
               }
@@ -608,25 +606,19 @@ export default function YoumaiFinishedGoodsStockOutPage() {
           )
         : null}
 
-      <div className="flex flex-col gap-2 rounded-lg border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div className="flex items-center gap-2">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500" />
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-            筛选条件
-          </span>
-        </div>
+      <FilterBar>
         <YoumaiFinishedGoodsStockOutSearch
           onSearch={handleSearch}
           onReset={handleResetSearch}
           initialValues={searchParams}
         />
-      </div>
+      </FilterBar>
 
       <div
         ref={tableContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       >
-        <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="min-h-0 flex-1 overflow-hidden">
           <TableState
             loading={isLoading && !data}
             error={error}

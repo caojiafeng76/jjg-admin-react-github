@@ -9,15 +9,13 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/16/solid'
 import PrintButton from '@ui/PrintButton'
 import {
   Button,
-  Card,
   DatePicker,
   Input,
   Modal,
   Pagination,
   Select,
-  Space,
-  Typography,
 } from 'antd'
+import FilterBar from '@/ui/FilterBar'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { TableState } from '@/ui/TableState'
 import ToolingFixtureExcelImport from './ToolingFixtureExcelImport'
@@ -110,150 +108,135 @@ export default function FixtureDataView({
   onSetFormRef,
 }: FixtureDataViewProps) {
   return (
-    <div className="flex h-full flex-col gap-4 overflow-hidden p-4 md:p-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <Typography.Title level={2} className="!mb-1">
-            工装资料
-          </Typography.Title>
-          <Typography.Text type="secondary">
-            维护工装模具资料，并为每个工装生成现场扫码二维码。
-          </Typography.Text>
-        </div>
-        <div className="flex items-center gap-2">
-          <ToolingFixtureExcelImport
-            onImport={onImport}
-            isImporting={isImporting}
-          />
-          <Button
-            type="primary"
-            icon={<PlusIcon className="size-4" />}
-            onClick={onCreate}
-          >
-            新增工装
-          </Button>
-        </div>
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
+      {/* 操作工具栏 */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="primary"
+          icon={<PlusIcon className="size-4" />}
+          onClick={onCreate}
+        >
+          新增工装
+        </Button>
+        <ToolingFixtureExcelImport
+          onImport={onImport}
+          isImporting={isImporting}
+        />
+        <PrintButton
+          handlePrint={onPrintFiltered}
+          loading={isPrinting || isPrintLoading}
+        >
+          打印二维码
+        </PrintButton>
+        {selectedRowKeys.length > 0
+          ? (
+              <Button
+                type="text"
+                danger
+                icon={<TrashIcon className="size-4" />}
+                onClick={onDeleteSelected}
+              >
+                删除选中
+              </Button>
+            )
+          : null}
       </div>
 
-      <Card
-        className="flex min-h-0 flex-1 flex-col overflow-hidden shadow-sm"
-        styles={{
-          body: {
-            flex: 1,
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        }}
-      >
-        <Space wrap className="mb-4">
-          <Input.Search
-            allowClear
-            placeholder="搜索编号、产品、设备、责任人"
-            defaultValue={keyword}
-            onSearch={onSearch}
-            style={{ width: 320, maxWidth: '85vw' }}
-          />
-          <Select
-            allowClear
-            placeholder="按状态筛选"
-            value={status}
-            style={{ width: 140 }}
-            options={[
-              { label: '未使用', value: '未使用' },
-              { label: '使用中', value: '使用中' },
-            ]}
-            onChange={onStatusChange}
-          />
-          <DatePicker.RangePicker
-            allowClear
-            format="YYYY-MM-DD"
-            placeholder={['制作开始日期', '制作结束日期']}
-            value={manufacturedDateRange}
-            style={{ width: 260 }}
-            onChange={value =>
-              onManufacturedDateChange(
-                value?.[0] && value?.[1] ? [value[0], value[1]] : null,
-              )}
-          />
-          <DatePicker.RangePicker
-            allowClear
-            format="YYYY-MM-DD"
-            placeholder={['更新开始日期', '更新结束日期']}
-            value={updatedDateRange}
-            style={{ width: 260 }}
-            onChange={value =>
-              onUpdatedDateChange(
-                value?.[0] && value?.[1] ? [value[0], value[1]] : null,
-              )}
-          />
-          <PrintButton
-            handlePrint={onPrintFiltered}
-            loading={isPrinting || isPrintLoading}
-          >
-            打印二维码
-          </PrintButton>
-          {selectedRowKeys.length > 0
-            ? (
-                <Button
-                  type="text"
-                  danger
-                  icon={<TrashIcon className="size-4" />}
-                  onClick={onDeleteSelected}
-                >
-                  删除选中
-                </Button>
-              )
-            : null}
-        </Space>
+      {/* 筛选栏 */}
+      <FilterBar className="flex flex-wrap items-center gap-3">
+        <Input.Search
+          allowClear
+          placeholder="搜索编号、产品、设备、责任人"
+          defaultValue={keyword}
+          onSearch={onSearch}
+          style={{ width: 280, maxWidth: '85vw' }}
+        />
+        <Select
+          allowClear
+          placeholder="按状态筛选"
+          value={status}
+          style={{ width: 140 }}
+          options={[
+            { label: '未使用', value: '未使用' },
+            { label: '使用中', value: '使用中' },
+          ]}
+          onChange={onStatusChange}
+        />
+        <DatePicker.RangePicker
+          allowClear
+          format="YYYY-MM-DD"
+          placeholder={['制作开始日期', '制作结束日期']}
+          value={manufacturedDateRange}
+          style={{ width: 240 }}
+          onChange={value =>
+            onManufacturedDateChange(
+              value?.[0] && value?.[1] ? [value[0], value[1]] : null,
+            )}
+        />
+        <DatePicker.RangePicker
+          allowClear
+          format="YYYY-MM-DD"
+          placeholder={['更新开始日期', '更新结束日期']}
+          value={updatedDateRange}
+          style={{ width: 240 }}
+          onChange={value =>
+            onUpdatedDateChange(
+              value?.[0] && value?.[1] ? [value[0], value[1]] : null,
+            )}
+        />
+      </FilterBar>
 
-        <div
-          ref={tableContainerRef}
-          className="flex min-h-0 flex-1 flex-col overflow-hidden"
-        >
-          <div className="min-h-0 flex-1 overflow-x-auto">
-            <TableState
-              loading={isLoading && !data}
-              error={error}
-              onRetry={refetch}
-            >
-              <ToolingFixtureTable
-                loading={isLoading}
-                data={data?.items ?? []}
-                selectedRowKeys={selectedRowKeys}
-                onSelect={onSelect}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onPrint={onPrint}
-                page={page}
-                pageSize={pageSize}
-                scrollY={scrollY}
-                emptyAction={(
-                  <Button type="primary" icon={<PlusIcon />} onClick={onCreate}>
-                    新增工装
-                  </Button>
-                )}
-              />
-            </TableState>
-          </div>
-          <div ref={paginationRef} className="mt-4 flex shrink-0 justify-end">
-            <Pagination
-              current={page}
+      {/* 表格区域 */}
+      <div
+        ref={tableContainerRef}
+        className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+      >
+        <div className="min-h-0 flex-1 overflow-x-auto">
+          <TableState
+            loading={isLoading && !data}
+            error={error}
+            onRetry={refetch}
+          >
+            <ToolingFixtureTable
+              loading={isLoading}
+              data={data?.items ?? []}
+              selectedRowKeys={selectedRowKeys}
+              onSelect={onSelect}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onPrint={onPrint}
+              page={page}
               pageSize={pageSize}
-              total={data?.total ?? 0}
-              showSizeChanger
-              pageSizeOptions={PAGE_SIZE_OPTIONS}
-              onChange={onPageChange}
-              onShowSizeChange={(_current, size) => onPageSizeChange(size)}
+              scrollY={scrollY}
+              emptyAction={(
+                <Button
+                  type="primary"
+                  icon={<PlusIcon className="size-4" />}
+                  onClick={onCreate}
+                >
+                  新增工装
+                </Button>
+              )}
             />
-          </div>
+          </TableState>
         </div>
-      </Card>
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
+          <Pagination
+            current={page}
+            pageSize={pageSize}
+            total={data?.total ?? 0}
+            showSizeChanger
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            onChange={onPageChange}
+            onShowSizeChange={(_current, size) => onPageSizeChange(size)}
+          />
+        </div>
+      </div>
 
       <Modal
         open={modalOpen}
         title={editingRecord ? '编辑工装资料' : '新增工装资料'}
-        width={860}
+        width={720}
         destroyOnHidden
         onCancel={onClose}
         onOk={onSubmit}

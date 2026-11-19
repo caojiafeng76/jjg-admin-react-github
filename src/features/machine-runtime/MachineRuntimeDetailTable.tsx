@@ -4,6 +4,8 @@ import { Pagination, Table } from 'antd'
 import dayjs from 'dayjs'
 
 import { useMemo } from 'react'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 interface Props {
   loading: boolean
@@ -93,7 +95,7 @@ export default function MachineRuntimeDetailTable({
         render: (_: unknown, record: MachineRuntimeItem) => {
           const seconds = record.runtime_seconds ?? 0
           if (seconds === 0)
-            return <span className="text-slate-400">—</span>
+            return <span className="text-slate-400 dark:text-slate-500">—</span>
           return `${(seconds / 3600).toFixed(2)} h`
         },
       },
@@ -111,6 +113,15 @@ export default function MachineRuntimeDetailTable({
         scroll={{ y: scrollY, x: 1000 }}
         size="small"
         pagination={false}
+        rowClassName={zebraRowClassName}
+        locale={{
+          emptyText: (
+            <TableEmpty
+              title="暂无运行明细记录"
+              description="请点击上方设备行或调整筛选条件"
+            />
+          ),
+        }}
         onRow={() => ({ style: { height: rowHeight } })}
       />
       <div className="flex justify-end">

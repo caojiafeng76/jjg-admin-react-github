@@ -17,6 +17,19 @@
 
 ## 2026-11-19
 
+- **类别**：变更
+- **范围**：`src/features/youmai/`、`src/features/jintan/`、`src/features/syney-materials/`、`src/features/machine-runtime/`、`src/features/access-management/`、`src/features/attendance/`、`src/features/tooling-fixture/`、`src/ui/uiStyleConventions.vitest.ts`、`src/pages/dashboardChangelog.ts`、`todolist.md`
+- **摘要**：完成前端界面风格统一 Phase 2（高感知冲突域优先治理：消除“双卡套娃”与“外边距叠加”，覆盖 7 个业务域共 31 个管理端页面及西尼材料移动端壳）。
+  - `youmai`（7 页）、`jintan`（13 个管理端页）与 `syney-materials`（5 个管理端页 + 移动端壳）：去除页面内搜索白卡（含蓝点「筛选条件」标题）与表格外层带阴影白卡套娃，统一改用扁平 `<FilterBar>`；对齐工具栏主次顺序（危险操作「删除」置尾，移除硬编码彩虹图标类）；将 10 个 Excel 批量导入组件收口至 960px `<ExcelImportModal>`；统一优迈原料/成品出入库与西尼材料表格紧凑密度、`<StatusPill>` 语义胶囊及暗色斑马纹 `zebraRowClassName`，并清理西尼材料移动端任意圆角與重阴影。
+  - `machine-runtime`（1 页）：移除外层重复 `p-4` 与 3 处 `<Card>` 嵌套，改用 `<FilterBar>` 与 B 类上下分栏轻量标题头，并为汇总表与明细表补齐 `<TableState>`、`<TableEmpty>` 与暗色斑马纹。
+  - `access-management`（1 页 3 标签页）：移除外层重复 `p-4`，将 `@ant-design/icons` 统一替换为 `@heroicons/react/16/solid`，将 `gray-*` 灰阶统一为 `slate-*`（含暗色对偶），筛选区接入 `<FilterBar>`，状态与端标识统一为 `<StatusPill>`。
+  - `attendance`（2 页）：移除外层 `p-4` 与 `rounded-2xl` 任意阴影套娃卡片，接入 `<FilterBar>`、`<TableState>`、`<TableEmpty>`、`<FormErrorAlert>` 与暗色斑马纹；将 `AttendanceStats` 的 `message.useMessage()` 改为 `App.useApp()`，手写班次与迟到/早退彩色胶囊统一为 `<StatusPill>`，导入弹窗对齐 960px 档。
+  - `tooling-fixture`（2 个管理端页）：`FixtureDataView` 与 `FixtureRecordsPage` 移除外层 `p-4 md:p-6` 与 `<Card>` 套娃，接入 `<FilterBar>`、`<TableState>`、`<StatusPill>` 与暗色斑马纹；表单弹窗对齐 720px 档，`ToolingFixtureExcelImport` 接入 `<ExcelImportModal>`。
+  - 扩充 `src/ui/uiStyleConventions.vitest.ts` 的 `GUARDED_DIRS`，将上述 7 个业务域共 201 个已达标 `.tsx` 文件纳入自动化防回退守卫（3 个归属 Phase 4-B 的公开扫码页显式登记待 P4-B 迁移后移除豁免）。
+- **验证**：`bunx eslint --fix`、`bun run lint`（0 error）、`bun run typecheck`、`bun run build`、`bun run check:bundle`（主包 gzip 33.5 KB）及 `bun run test`（38 项脚本测试、238 个 Vitest 文件、1359 个用例，含 202 项 UI 风格守卫测试）全部通过。
+
+## 2026-11-19
+
 - **类别**：新建
 - **范围**：`supabase/migrations/20261119140000_create_workshop_misc_materials.sql`、`src/services/{database.types,workshopMiscMaterialsSearchFields,apiWorkshopMiscMaterialsData,apiWorkshopMiscMaterialsInventory,apiWorkshopMiscMaterialsStock,apiWorkshopMiscMaterialsReport}.ts`、`src/utils/workshopMiscMaterialsExcel.ts`、`src/features/workshop-misc-materials/`、`src/routes/{lazyPages,modules/inventoryRoutes,router,routeLabels,pagePermissionRoutes}.ts*`、`src/config/permissionRegistry.ts`、`src/ui/{mainMenuItems,MainMenu.vitest,uiStyleConventions.vitest}.*`、`src/features/lazyDocumentModules.vitest.ts`、`src/pages/dashboardChangelog.ts`、`.github/instructions/project-feature-map.instructions.md`
 - **摘要**：新增「车间杂项材料库存」模块（PC 端材料资料、材料入库、材料出库、材料库存、月度报表）。

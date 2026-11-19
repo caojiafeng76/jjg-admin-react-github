@@ -5,13 +5,13 @@ import {
   Grid,
   QRCode,
   Table,
-
   Tooltip,
 } from 'antd'
 
 import { memo, useMemo } from 'react'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { getToolingFixtureQrValue } from './fixtureDomain'
 import ToolingFixtureMobileList from './ToolingFixtureMobileList'
 import {
@@ -231,6 +231,7 @@ function ToolingFixtureTable({
       dataSource={data}
       columns={columns}
       pagination={false}
+      rowClassName={zebraRowClassName}
       rowSelection={{
         selectedRowKeys,
         onChange: onSelect,

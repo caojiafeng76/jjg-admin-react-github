@@ -3,6 +3,8 @@ import type { MachineRuntimeSummaryItem } from '@/services/apiMachineRuntime'
 import { Table } from 'antd'
 import { useMemo } from 'react'
 
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -66,10 +68,18 @@ export default function MachineRuntimeSummaryTable({
       scroll={{ y: scrollY, x: 550 }}
       size="small"
       pagination={false}
-      rowClassName={record =>
+      locale={{
+        emptyText: (
+          <TableEmpty
+            title="暂无设备运行汇总"
+            description="请调整筛选条件后重试"
+          />
+        ),
+      }}
+      rowClassName={(record, index) =>
         record.machine_equipment_id === selectedId
-          ? 'bg-blue-50 dark:bg-blue-950'
-          : 'cursor-pointer'}
+          ? 'cursor-pointer bg-blue-50 dark:bg-blue-950'
+          : `cursor-pointer ${zebraRowClassName(record, index)}`.trim()}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect(record.machine_equipment_id),

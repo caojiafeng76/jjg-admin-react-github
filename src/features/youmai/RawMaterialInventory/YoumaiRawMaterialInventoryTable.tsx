@@ -1,9 +1,11 @@
 import type { TableColumnsType } from 'antd'
 import type { YoumaiRawMaterialInventory } from '@/services/apiYoumaiRawMaterialInventory'
-import { Table, Tag } from 'antd'
+import { Table } from 'antd'
 
 import { memo, useMemo } from 'react'
+import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 
 interface Props {
   loading: boolean
@@ -21,16 +23,16 @@ interface Props {
 function QuantityCell({ quantity }: { quantity: number }) {
   if (quantity < 50) {
     return (
-      <Tag color="red" className="font-semibold">
+      <StatusPill tone="danger" dot={false}>
         {quantity}
-      </Tag>
+      </StatusPill>
     )
   }
   if (quantity < 100) {
     return (
-      <Tag color="gold" className="font-semibold">
+      <StatusPill tone="warning" dot={false}>
         {quantity}
-      </Tag>
+      </StatusPill>
     )
   }
   return <span>{quantity}</span>
@@ -95,6 +97,8 @@ function YoumaiRawMaterialInventoryTable({
   return (
     <Table
       rowKey="id"
+      size="small"
+      rowClassName={zebraRowClassName}
       loading={loading}
       columns={columns}
       dataSource={data}

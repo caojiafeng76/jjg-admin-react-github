@@ -1,6 +1,11 @@
 import type { PermissionRow } from '@/services/apiPermissions'
-import { Input, Select, Table, Tag } from 'antd'
+import type { StatusTone } from '@/ui/StatusPill'
+import { Input, Select, Table } from 'antd'
 import { useMemo, useState } from 'react'
+import FilterBar from '@/ui/FilterBar'
+import StatusPill from '@/ui/StatusPill'
+import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { useAllPermissions } from '../RolePermissionList/useRolePermissions'
 
 const SCOPE_LABELS: Record<string, string> = {
@@ -10,10 +15,10 @@ const SCOPE_LABELS: Record<string, string> = {
   field: '字段',
 }
 
-const SURFACE_COLORS: Record<string, string> = {
-  pc: 'blue',
-  mobile: 'green',
-  both: 'purple',
+const SURFACE_TONES: Record<string, StatusTone> = {
+  pc: 'info',
+  mobile: 'success',
+  both: 'warning',
 }
 
 export default function PermissionRegistry() {
@@ -64,7 +69,9 @@ export default function PermissionRegistry() {
         dataIndex: 'scope',
         key: 'scope',
         width: 80,
-        render: (scope: string) => <Tag>{SCOPE_LABELS[scope] ?? scope}</Tag>,
+        render: (scope: string) => (
+          <StatusPill tone="neutral">{SCOPE_LABELS[scope] ?? scope}</StatusPill>
+        ),
       },
       {
         title: '端',
@@ -72,7 +79,9 @@ export default function PermissionRegistry() {
         key: 'surface',
         width: 80,
         render: (surface: string) => (
-          <Tag color={SURFACE_COLORS[surface]}>{surface}</Tag>
+          <StatusPill tone={SURFACE_TONES[surface] ?? 'neutral'}>
+            {surface}
+          </StatusPill>
         ),
       },
       {
@@ -80,15 +89,15 @@ export default function PermissionRegistry() {
         dataIndex: 'description',
         key: 'description',
         render: (desc: string | null) =>
-          desc ?? <span className="text-gray-400">—</span>,
+          desc ?? <span className="text-slate-400 dark:text-slate-500">—</span>,
       },
     ],
     [],
   )
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col gap-3">
+      <FilterBar className="flex flex-wrap items-center gap-3">
         <Input.Search
           placeholder="搜索 key / 名称 / 模块"
           value={keyword}
@@ -113,10 +122,10 @@ export default function PermissionRegistry() {
             value: val,
           }))}
         />
-        <span className="text-sm text-gray-400">
+        <span className="text-sm text-slate-400 dark:text-slate-500">
           共 {filtered.length} / {allPermissions.length} 项
         </span>
-      </div>
+      </FilterBar>
 
       <Table<PermissionRow>
         dataSource={filtered}
@@ -124,6 +133,15 @@ export default function PermissionRegistry() {
         rowKey="id"
         loading={isLoading}
         size="small"
+        rowClassName={zebraRowClassName}
+        locale={{
+          emptyText: (
+            <TableEmpty
+              title="暂无权限注册项"
+              description="请尝试调整搜索关键词或筛选范围"
+            />
+          ),
+        }}
         pagination={{
           current: page,
           pageSize,

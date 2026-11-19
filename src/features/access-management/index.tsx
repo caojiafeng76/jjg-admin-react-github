@@ -23,7 +23,7 @@ export default function AccessManagement() {
   ]
 
   return (
-    <div className="h-full overflow-auto p-4">
+    <div className="h-full overflow-auto">
       <Tabs items={items} destroyOnHidden={false} />
     </div>
   )

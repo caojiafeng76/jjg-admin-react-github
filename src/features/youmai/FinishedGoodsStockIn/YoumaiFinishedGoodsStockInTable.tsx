@@ -1,9 +1,11 @@
 import type { TableColumnsType } from 'antd'
 import type { YoumaiFinishedGoodsStockIn } from '@/services/apiYoumaiFinishedGoodsStockIn'
-import { Table, Tag } from 'antd'
+import { Table } from 'antd'
 import { useMemo } from 'react'
 
+import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
+import { zebraRowClassName } from '@/ui/tableStyles'
 import { formatNumber } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
@@ -48,7 +50,7 @@ export default function YoumaiFinishedGoodsStockInTable({
         width: 110,
         fixed: 'left',
         render: (value: YoumaiFinishedGoodsStockIn['status']) => (
-          <Tag color={value === '已审核' ? 'success' : 'default'}>{value}</Tag>
+          <StatusPill tone={value === '已审核' ? 'success' : 'neutral'}>{value}</StatusPill>
         ),
       },
       {
@@ -153,8 +155,7 @@ export default function YoumaiFinishedGoodsStockInTable({
           />
         ),
       }}
-      rowClassName={(_, index) =>
-        index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/60 dark:bg-slate-800/60'}
+      rowClassName={zebraRowClassName}
       onRow={record => ({
         ...createKeyboardTableRowProps(
           () => onSelect([record.id]),

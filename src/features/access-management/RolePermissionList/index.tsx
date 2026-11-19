@@ -1,8 +1,9 @@
 import type { AppRole } from '@/config/access'
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
-import { App, Button, Radio, Skeleton, Tag } from 'antd'
+import { PlusCircleIcon, TrashIcon } from '@heroicons/react/16/solid'
+import { App, Button, Radio, Skeleton } from 'antd'
 import { useEffect, useState } from 'react'
 import { ROLE_LABELS } from '@/config/access'
+import StatusPill from '@/ui/StatusPill'
 import RoleCreateModal from './RoleCreateModal'
 import RolePermissionDetail from './RolePermissionDetail'
 import { useAllPermissions, useRolePermissionIds } from './useRolePermissions'
@@ -71,7 +72,9 @@ export default function RolePermissionList() {
       {deleteContextHolder}
 
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-sm font-medium">选择角色：</span>
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          选择角色：
+        </span>
         <Radio.Group
           value={selectedRole}
           onChange={e => setSelectedRole(e.target.value)}
@@ -82,16 +85,16 @@ export default function RolePermissionList() {
             <Radio.Button key={r.key} value={r.key}>
               {r.label}
               {!r.is_builtin && (
-                <Tag color="orange" className="ml-1">
+                <StatusPill tone="warning" className="ml-1.5">
                   自定义
-                </Tag>
+                </StatusPill>
               )}
             </Radio.Button>
           ))}
         </Radio.Group>
         <Button
           type="primary"
-          icon={<PlusOutlined />}
+          icon={<PlusCircleIcon className="size-4" />}
           onClick={() => setCreateOpen(true)}
         >
           新建角色
@@ -99,7 +102,7 @@ export default function RolePermissionList() {
         {currentRole && !currentRole.is_builtin && (
           <Button
             danger
-            icon={<DeleteOutlined />}
+            icon={<TrashIcon className="size-4" />}
             loading={deleting}
             onClick={handleDelete}
           >

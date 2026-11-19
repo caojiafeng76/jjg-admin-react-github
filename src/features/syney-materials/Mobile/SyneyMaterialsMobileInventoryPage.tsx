@@ -116,7 +116,7 @@ export default function SyneyMaterialsMobileInventoryPage() {
             key={item.id}
             type="button"
             onClick={() => setActiveId(item.id)}
-            className="flex w-full items-center justify-between gap-3 rounded-3xl border border-slate-200/80 bg-white p-4 text-left shadow-[0_8px_30px_rgba(15,23,42,0.08)] active:scale-[0.99] dark:border-slate-700 dark:bg-slate-800"
+            className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-sm active:scale-[0.99] dark:border-slate-700 dark:bg-slate-800"
           >
             <div className="min-w-0">
               <div className="truncate text-base font-bold text-slate-900 dark:text-slate-100">

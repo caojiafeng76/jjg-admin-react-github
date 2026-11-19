@@ -1,9 +1,11 @@
 import type { MachineRuntimeFilters } from '@/services/apiMachineRuntime'
-import { Card, Splitter } from 'antd'
+import { Splitter } from 'antd'
 import dayjs from 'dayjs'
 
 import { startTransition, useState } from 'react'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import FilterBar from '@/ui/FilterBar'
+import { TableState } from '@/ui/TableState'
 import MachineRuntimeDetailTable from './MachineRuntimeDetailTable'
 import MachineRuntimeSearch from './MachineRuntimeSearch'
 import MachineRuntimeSummaryTable from './MachineRuntimeSummaryTable'
@@ -34,8 +36,12 @@ export default function MachineRuntime() {
   const { tableContainerRef: detailContainerRef, scrollY: detailScrollY }
     = useTableHeight({ targetRowCount: 8 })
 
-  const { data: summaryData, isLoading: summaryLoading }
-    = useMachineRuntimeSummary(summaryFilters)
+  const {
+    data: summaryData,
+    isLoading: summaryLoading,
+    error: summaryError,
+    refetch: refetchSummary,
+  } = useMachineRuntimeSummary(summaryFilters)
 
   const detailFilters: MachineRuntimeFilters = {
     ...summaryFilters,
@@ -43,8 +49,12 @@ export default function MachineRuntime() {
     page: detailPage,
     pageSize: detailPageSize,
   }
-  const { data: detailResult, isLoading: detailLoading }
-    = useMachineRuntimeDetail(detailFilters)
+  const {
+    data: detailResult,
+    isLoading: detailLoading,
+    error: detailError,
+    refetch: refetchDetail,
+  } = useMachineRuntimeDetail(detailFilters)
 
   const handleSearch = (filters: SummaryFilters) => {
     startTransition(() => {
@@ -77,61 +87,72 @@ export default function MachineRuntime() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
-      {/* 筛选栏 */}
-      <Card size="small">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
+      <FilterBar>
         <MachineRuntimeSearch onSearch={handleSearch} onReset={handleReset} />
-      </Card>
+      </FilterBar>
 
       {/* 上下布局：汇总 + 明细 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-hidden">
         <Splitter orientation="vertical" className="h-full">
           <Splitter.Panel defaultSize="40%" min="20%">
-            <Card
-              size="small"
-              title="设备运行汇总"
-              className="h-full"
-              styles={{ body: { padding: '8px', height: 'calc(100% - 48px)' } }}
-            >
-              <div ref={summaryContainerRef} className="h-full">
-                <MachineRuntimeSummaryTable
-                  loading={summaryLoading}
-                  data={summaryData || []}
-                  selectedId={selectedMachineId}
-                  onSelect={handleSelectMachine}
-                  scrollY={summaryScrollY}
-                />
+            <div className="flex h-full flex-col gap-2 overflow-hidden pb-2">
+              <div className="border-b border-divider pb-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                设备运行汇总
               </div>
-            </Card>
+              <div
+                ref={summaryContainerRef}
+                className="min-h-0 flex-1 overflow-hidden"
+              >
+                <TableState
+                  loading={summaryLoading && !summaryData}
+                  error={summaryError}
+                  onRetry={refetchSummary}
+                >
+                  <MachineRuntimeSummaryTable
+                    loading={summaryLoading}
+                    data={summaryData || []}
+                    selectedId={selectedMachineId}
+                    onSelect={handleSelectMachine}
+                    scrollY={summaryScrollY}
+                  />
+                </TableState>
+              </div>
+            </div>
           </Splitter.Panel>
 
           <Splitter.Panel min="20%">
-            <Card
-              size="small"
-              title={
-                selectedMachineId
+            <div className="flex h-full flex-col gap-2 overflow-hidden pt-2">
+              <div className="border-b border-divider pb-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                {selectedMachineId
                   ? `运行明细（${
                     summaryData?.find(
                       s => s.machine_equipment_id === selectedMachineId,
                     )?.unified_device_no ?? ''
                   }）`
-                  : '运行明细（点击上方设备行筛选）'
-              }
-              className="h-full"
-              styles={{ body: { padding: '8px', height: 'calc(100% - 48px)' } }}
-            >
-              <div ref={detailContainerRef} className="h-full">
-                <MachineRuntimeDetailTable
-                  loading={detailLoading}
-                  data={detailResult?.items || []}
-                  total={detailResult?.total || 0}
-                  page={detailPage}
-                  pageSize={detailPageSize}
-                  onPageChange={handleDetailPageChange}
-                  scrollY={detailScrollY}
-                />
+                  : '运行明细（点击上方设备行筛选）'}
               </div>
-            </Card>
+              <div
+                ref={detailContainerRef}
+                className="min-h-0 flex-1 overflow-hidden"
+              >
+                <TableState
+                  loading={detailLoading && !detailResult}
+                  error={detailError}
+                  onRetry={refetchDetail}
+                >
+                  <MachineRuntimeDetailTable
+                    loading={detailLoading}
+                    data={detailResult?.items || []}
+                    total={detailResult?.total || 0}
+                    page={detailPage}
+                    pageSize={detailPageSize}
+                    onPageChange={handleDetailPageChange}
+                    scrollY={detailScrollY}
+                  />
+                </TableState>
+              </div>
+            </div>
           </Splitter.Panel>
         </Splitter>
       </div>
