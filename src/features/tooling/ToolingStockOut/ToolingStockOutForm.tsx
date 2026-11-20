@@ -280,6 +280,7 @@ export default function ToolingStockOutForm({
       <Form
         form={form}
         layout="vertical"
+        size={toolingInputMode === 'bottom-sheet' ? 'large' : undefined}
         onFinish={handleFinish}
         disabled={isSubmitting}
       >
@@ -308,7 +309,7 @@ export default function ToolingStockOutForm({
                     || mergedToolingOptions.length === 0
                   }
                   onClick={() => setIsToolingSheetOpen(true)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   {currentToolingLabel
                     || (mergedToolingOptions.length > 0
@@ -342,7 +343,7 @@ export default function ToolingStockOutForm({
                   type="button"
                   disabled={isAuditLocked || isSubmitting}
                   onClick={() => setIsMachineSheetOpen(true)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   {currentMachineLabel
                     || (machineOptions.length > 0

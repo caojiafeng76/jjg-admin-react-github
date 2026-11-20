@@ -5,15 +5,12 @@ import type { JintanMaterialsStockOut } from '@/services/apiJintanMaterialsStock
 import { Alert, Button, Pagination, Table } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { TableEmpty } from '@/ui/TableState'
+import { formatDateTime } from '@/utils/format'
 import {
   JINTAN_MATERIALS_DETAIL_RECORDS_PAGE_SIZE,
   useJintanMaterialsStockInRecords,
   useJintanMaterialsStockOutRecords,
 } from './useJintanMaterialsDataDetail'
-
-function formatDateTime(value: string | null | undefined) {
-  return value ? new Date(value).toLocaleString('zh-CN') : '-'
-}
 
 function RecordsPagination({
   page,

@@ -5,6 +5,7 @@ import type {
 
 import * as XLSX from 'xlsx-js-style'
 import { applyRegisterSheetStyles } from '@/utils/excelStyleUtils'
+import { formatDateTime as formatSharedDateTime } from '@/utils/format'
 
 export const MATERIAL_TRANSFER_SUMMARY_SHEET_NAME = '汇总表'
 
@@ -52,11 +53,7 @@ const SUMMARY_COLUMN_WIDTHS = [
 ]
 
 function formatDateTime(value: string | null | undefined): string {
-  if (!value) {
-    return ''
-  }
-
-  return new Date(value).toLocaleString('zh-CN')
+  return formatSharedDateTime(value, { withSeconds: true, fallback: '' })
 }
 
 function formatOrderProgressCell(

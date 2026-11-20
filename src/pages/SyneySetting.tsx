@@ -29,7 +29,6 @@ export default function SyneySetting() {
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
-
       {isLoading
         ? (
             <div className="flex justify-center py-12">
@@ -39,9 +38,9 @@ export default function SyneySetting() {
         : (
             <Form
               form={form}
-              layout="inline"
+              layout="vertical"
               onFinish={handleSave}
-              className="flex flex-wrap items-end gap-4"
+              className="max-w-xs"
             >
               <Form.Item
                 label="编号"
@@ -53,16 +52,14 @@ export default function SyneySetting() {
               >
                 <Input
                   allowClear
-                  className="w-48 rounded-lg"
                   placeholder="请输入编号"
                 />
               </Form.Item>
-              <Form.Item>
+              <Form.Item className="mb-0!">
                 <Button
                   type="primary"
                   htmlType="submit"
                   loading={isUpdating}
-                  className="rounded-lg"
                 >
                   保存
                 </Button>

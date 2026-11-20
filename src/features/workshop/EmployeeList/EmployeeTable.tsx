@@ -7,7 +7,7 @@ import { useRoleOptions } from '@/hooks/useRoleOptions'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
-import { formatNumber } from '@/utils/format'
+import { formatDateTime, formatNumber } from '@/utils/format'
 import { useEmployeeAuthEmail } from './useEmployees'
 
 interface Props {
@@ -173,22 +173,14 @@ export default function EmployeeTable({
         dataIndex: 'created_at',
         key: 'created_at',
         width: 180,
-        render: (text: string) => {
-          if (!text)
-            return '-'
-          return new Date(text).toLocaleString('zh-CN')
-        },
+        render: (text: string) => formatDateTime(text),
       },
       {
         title: '更新时间',
         dataIndex: 'updated_at',
         key: 'updated_at',
         width: 180,
-        render: (text: string) => {
-          if (!text)
-            return '-'
-          return new Date(text).toLocaleString('zh-CN')
-        },
+        render: (text: string) => formatDateTime(text),
       },
     ],
     [page, pageSize, getRoleLabel],

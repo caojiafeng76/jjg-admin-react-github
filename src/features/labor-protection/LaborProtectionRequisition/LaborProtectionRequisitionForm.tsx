@@ -162,6 +162,7 @@ export default function LaborProtectionRequisitionForm({
       <Form
         form={form}
         layout="vertical"
+        size={categoryInputMode === 'bottom-sheet' ? 'large' : undefined}
         onFinish={onFinish}
         disabled={isSubmitting}
       >
@@ -176,7 +177,7 @@ export default function LaborProtectionRequisitionForm({
                   type="button"
                   disabled={isSubmitting || categoryOptions.length === 0}
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   {currentCategoryLabel
                     || (categoryOptions.length > 0
@@ -213,7 +214,7 @@ export default function LaborProtectionRequisitionForm({
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setIsMachineSheetOpen(true)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
                   {currentMachineLabel
                     || (machineOptions.length > 0

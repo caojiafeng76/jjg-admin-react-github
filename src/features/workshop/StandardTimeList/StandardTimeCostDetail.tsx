@@ -1,7 +1,7 @@
 import type { StandardTime } from '@/services/apiStandardTimes'
 import { Empty } from 'antd'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
-import { formatNumber } from '@/utils/format'
+import { formatDateTime, formatNumber } from '@/utils/format'
 
 interface Props {
   selectedRecord: StandardTime | null
@@ -229,8 +229,8 @@ export default function StandardTimeCostDetail({ selectedRecord }: Props) {
           </div>
         )}
         <div className="flex flex-wrap gap-4 text-xs text-slate-400 dark:text-slate-500">
-          <span>创建: {created_at ? new Date(created_at).toLocaleString('zh-CN') : '-'}</span>
-          <span>更新: {updated_at ? new Date(updated_at).toLocaleString('zh-CN') : '-'}</span>
+          <span>创建: {formatDateTime(created_at)}</span>
+          <span>更新: {formatDateTime(updated_at)}</span>
         </div>
       </div>
     </div>

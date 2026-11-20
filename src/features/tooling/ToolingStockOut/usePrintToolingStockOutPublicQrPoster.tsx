@@ -9,9 +9,9 @@ import {
   getToolingStockOutPublicQrValue,
 } from './toolingStockOutPublicQr'
 
-const posterTitleFont = '\'STSong\', \'SimSun\', \'Noto Serif SC\', serif'
 const posterBodyFont
-  = '\'Microsoft YaHei\', \'PingFang SC\', \'Noto Sans SC\', sans-serif'
+  = '-apple-system, BlinkMacSystemFont, \'Segoe UI\', \'PingFang SC\', \'Hiragino Sans GB\', \'Microsoft YaHei\', \'Noto Sans SC\', sans-serif'
+const posterTitleFont = posterBodyFont
 
 function escapeHtml(value: string) {
   return value

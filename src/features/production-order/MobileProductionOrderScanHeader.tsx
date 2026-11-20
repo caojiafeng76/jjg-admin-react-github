@@ -23,13 +23,13 @@ export default function MobileProductionOrderScanHeader({
   handleProjectNoScanResolved,
 }: MobileProductionOrderScanHeaderProps) {
   return (
-    <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
+    <section className="rounded-2xl border border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-[11px] font-semibold tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
+          <div className="text-[11px] font-semibold tracking-[0.2em] text-slate-400 uppercase dark:text-slate-500">
             Scan To Add
           </div>
-          <Title level={4} style={{ marginTop: 8, marginBottom: 4 }}>
+          <Title level={4} className="mt-1.5! mb-1! text-slate-900! dark:text-slate-100!">
             {isEditMode
               ? '编辑工序明细'
               : isExistingOrderMode
@@ -51,10 +51,10 @@ export default function MobileProductionOrderScanHeader({
         />
       </div>
 
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
         <div className="flex items-center justify-between gap-3">
           <span>当前录入日期</span>
-          <span className="font-semibold text-slate-900 dark:text-slate-100">
+          <span className="font-semibold text-slate-900 tabular-nums dark:text-slate-100">
             {dayjs().format('YYYY-MM-DD')}
           </span>
         </div>

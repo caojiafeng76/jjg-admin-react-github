@@ -5,6 +5,7 @@ import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
 } from '@/utils/excelStyleUtils'
+import { formatDate, formatDateTime } from '@/utils/format'
 
 const SHEET_TITLE = '优迈原料库存清单'
 
@@ -16,12 +17,6 @@ function getWarningStatus(quantity: number): string {
   if (quantity < 100)
     return '黄色预警'
   return '正常'
-}
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value)
-    return '-'
-  return new Date(value).toLocaleString('zh-CN')
 }
 
 export function exportYoumaiRawMaterialInventoryToExcel(
@@ -46,6 +41,6 @@ export function exportYoumaiRawMaterialInventoryToExcel(
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, SHEET_TITLE)
 
-  const date = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')
+  const date = formatDate(new Date())
   XLSX.writeFile(wb, `优迈原料库存_${date}.xlsx`, EXCEL_WRITE_OPTIONS)
 }

@@ -2,7 +2,7 @@ import type { ScannedProjectPayload } from '@/features/production-order/ProjectN
 import type { PrecisionFinishingCuttingInsert, PrecisionFinishingCuttingUpdate, PrecisionFinishingCuttingWithEmployee } from '@/services/apiPrecisionFinishingCuttings'
 import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
 
-import { App, Button, Card, Form, Input, Space, Typography } from 'antd'
+import { App, Button, Form, Input, Space, Typography } from 'antd'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { isEmployeeOnlyRole, isEmployeeSideRole } from '@/config/access'
@@ -370,15 +370,17 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
   if (!isEmployeeView || !employeeProfile?.id) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-          <Title level={4}>当前账号不可使用扫码录入</Title>
-          <Paragraph type="secondary">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
+          <Title level={4} className="text-slate-900! dark:text-slate-100!">
+            当前账号不可使用扫码录入
+          </Title>
+          <Paragraph className="text-slate-500! dark:text-slate-400!">
             请使用员工端账号进入后再尝试录入精加工切割单。
           </Paragraph>
           <Button type="primary" onClick={() => navigate(returnTo)}>
             返回精加工切割单
           </Button>
-        </Card>
+        </div>
       </div>
     )
   }
@@ -408,7 +410,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
           />
         )}
         content={(
-          <Card className="rounded-4xl border-slate-200 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
             <Form
               form={form}
               layout="vertical"
@@ -423,7 +425,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                 <button
                   type="button"
                   onClick={() => setActiveSheet('project')}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                 >
                   {projectNo || '请选择项目号'}
                 </button>
@@ -495,8 +497,8 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                 <Input.TextArea rows={2} placeholder="可填写不良原因" />
               </Form.Item>
 
-              <div className="mb-4 rounded-2xl border border-red-300 bg-red-50/60 p-4">
-                <div className="mb-3 text-sm font-medium text-red-600">
+              <div className="mb-4 rounded-xl border border-error/25 bg-error/5 p-4 dark:bg-error/10">
+                <div className="mb-3 text-sm font-medium text-error">
                   外协相关信息
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -540,7 +542,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                     type="button"
                     disabled={Boolean(fixedEmployee)}
                     onClick={() => setActiveSheet('operator')}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                   >
                     {currentOperatorLabel}
                   </button>
@@ -556,7 +558,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                   <button
                     type="button"
                     onClick={() => setActiveSheet('workshop')}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                   >
                     {targetWorkshop || '请选择接收车间'}
                   </button>
@@ -575,7 +577,7 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                       <button
                         type="button"
                         onClick={() => setActiveSheet('recipient')}
-                        className="text-xs text-slate-600"
+                        className="text-xs text-slate-600 dark:text-slate-300"
                       >
                         常用
                       </button>
@@ -588,24 +590,24 @@ export default function MobilePrecisionFinishingCuttingScanPage() {
                 <Form.Item name="inspector_name" label="检验人">
                   <Input placeholder="默认崔路路，可修改" />
                 </Form.Item>
-                <Form.Item name="remark" label="备注">
+                <Form.Item name="remark" label="备注" className="mb-0!">
                   <Input.TextArea rows={2} placeholder="可填写切割说明" />
                 </Form.Item>
               </div>
             </Form>
-          </Card>
+          </section>
         )}
         footer={(
           <div className="grid grid-cols-2 gap-3">
             <Button
-              className="h-11 rounded-2xl"
+              className="h-11 rounded-xl"
               onClick={() => navigate(returnTo)}
             >
               返回上一页
             </Button>
             <Button
               type="primary"
-              className="h-11 rounded-2xl"
+              className="h-11 rounded-xl"
               loading={createMutation.isPending || updateMutation.isPending}
               onClick={() => form.submit()}
             >

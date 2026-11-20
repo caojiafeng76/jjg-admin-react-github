@@ -347,8 +347,8 @@ export default function PrecisionFinishingCuttingForm({
       title={initialValues ? '编辑精加工切割单' : '创建精加工切割单'}
       open={open}
       onCancel={onCancel}
-      width={mobile ? 'calc(100vw - 24px)' : 960}
-      style={mobile ? { top: 16, maxWidth: 520 } : undefined}
+      width={mobile ? 520 : 960}
+      style={mobile ? { top: 16 } : undefined}
       styles={{
         body: {
           maxHeight: mobile ? 'calc(100vh - 120px)' : 'calc(100vh - 180px)',

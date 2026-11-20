@@ -8,7 +8,7 @@ import { Descriptions, Empty, Table } from 'antd'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
-import { formatNumber } from '@/utils/format'
+import { formatDateTime, formatNumber } from '@/utils/format'
 
 interface Props {
   selectedRecord: ExtrusionProduction | null
@@ -142,9 +142,7 @@ export default function ExtrusionProductionDetail({ selectedRecord }: Props) {
           {
             key: 'audited_at',
             label: '审核时间',
-            children: selectedRecord.audited_at
-              ? new Date(selectedRecord.audited_at).toLocaleString('zh-CN')
-              : '-',
+            children: formatDateTime(selectedRecord.audited_at, { withSeconds: true }),
           },
           {
             key: 'total_theoretical_count',

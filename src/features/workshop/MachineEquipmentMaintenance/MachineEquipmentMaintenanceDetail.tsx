@@ -1,6 +1,7 @@
 import type { MachineEquipmentMaintenance } from '@/services/apiMachineEquipmentMaintenances'
 
 import { Descriptions, Empty } from 'antd'
+import { formatDateTime } from '@/utils/format'
 
 interface Props {
   selectedRecord: MachineEquipmentMaintenance | null
@@ -88,9 +89,7 @@ export default function MachineEquipmentMaintenanceDetail({
             key: 'updated_at',
             label: '更新时间',
             span: 1,
-            children: updated_at
-              ? new Date(updated_at).toLocaleString('zh-CN')
-              : '-',
+            children: formatDateTime(updated_at),
           },
         ]}
       />

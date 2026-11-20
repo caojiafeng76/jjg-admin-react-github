@@ -5,6 +5,7 @@ import type {
 import { CursorArrowRaysIcon, PencilSquareIcon } from '@heroicons/react/16/solid'
 
 import { Button, Descriptions } from 'antd'
+import { formatDateTime } from '@/utils/format'
 import { OrderProgressCell, OrderStatusCell } from './OrderProgressCell'
 
 interface Props {
@@ -179,7 +180,7 @@ export default function MaterialTransferDetail({
               children: audited_at
                 ? (
                     <span className="text-slate-600 dark:text-slate-300">
-                      {new Date(audited_at).toLocaleString('zh-CN')}
+                      {formatDateTime(audited_at, { withSeconds: true })}
                     </span>
                   )
                 : (

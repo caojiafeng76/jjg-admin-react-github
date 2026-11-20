@@ -6,6 +6,7 @@ import { useCallback, useMemo } from 'react'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
+import { formatDateTime } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -68,11 +69,7 @@ export default function MaterialTransferTable({
           return at - bt
         },
         sortDirections: ['descend', 'ascend'],
-        render: (text: string) => {
-          if (!text)
-            return '-'
-          return new Date(text).toLocaleString('zh-CN')
-        },
+        render: (text: string) => formatDateTime(text),
       },
       {
         title: '审核状态',

@@ -4,6 +4,7 @@ import { Table } from 'antd'
 
 import { useMemo } from 'react'
 import { TableEmpty } from '@/ui/TableState'
+import { formatDateTime } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -101,8 +102,7 @@ export default function JintanProfilesInventoryTable({
         dataIndex: 'updated_at',
         key: 'updated_at',
         width: 180,
-        render: (value: string) =>
-          value ? new Date(value).toLocaleString('zh-CN') : '-',
+        render: (value: string) => formatDateTime(value),
       },
     ],
     [page, pageSize],

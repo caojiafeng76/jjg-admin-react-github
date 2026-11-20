@@ -7,6 +7,7 @@ import { memo, useMemo } from 'react'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
+import { formatDateTime } from '@/utils/format'
 
 interface Props {
   loading: boolean
@@ -99,7 +100,7 @@ function AttendanceDetailTable({
         width: 180,
         render: (value: string) => (
           <span className="text-xs text-slate-400 dark:text-slate-500">
-            {value ? new Date(value).toLocaleString('zh-CN') : '-'}
+            {formatDateTime(value)}
           </span>
         ),
       },

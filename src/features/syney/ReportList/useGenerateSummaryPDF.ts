@@ -3,6 +3,7 @@ import { App } from 'antd'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 
 import { feedbackText } from '@/utils/feedbackText'
+import { formatDate } from '@/utils/format'
 import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
 import { useTableSelection } from '../useTableSelection'
 import { useSelectedReports } from './useSelectedReports'
@@ -70,7 +71,7 @@ export function useGenerateSummaryPDF() {
         startY: 30,
         willDrawPage: () => {
           // 添加标题
-          const date = new Date().toLocaleDateString('zh-CN')
+          const date = formatDate(new Date())
           const title = `对账单【湖州银都铝业科技有限公司】-- ${date}`
 
           doc.setFontSize(16)

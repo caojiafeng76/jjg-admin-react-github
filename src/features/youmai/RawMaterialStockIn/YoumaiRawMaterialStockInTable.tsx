@@ -5,6 +5,7 @@ import { Table } from 'antd'
 import { useMemo } from 'react'
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
+import { formatDateTime } from '@/utils/format'
 
 interface Props {
   loading: boolean
@@ -74,8 +75,7 @@ export default function YoumaiRawMaterialStockInTable({
         dataIndex: 'created_at',
         key: 'created_at',
         width: 180,
-        render: (value: string) =>
-          value ? new Date(value).toLocaleString('zh-CN') : '-',
+        render: (value: string) => formatDateTime(value),
       },
     ],
     [page, pageSize],

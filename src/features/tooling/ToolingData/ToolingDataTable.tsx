@@ -5,16 +5,13 @@ import { memo, useMemo } from 'react'
 
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
+import { formatDateTime } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 type FilterValue = string | number
 
 function formatAmount(value: number | null | undefined): string {
   return Number(value || 0).toFixed(2)
-}
-
-function formatDateTime(value: string | null | undefined): string {
-  return value ? new Date(value).toLocaleString('zh-CN') : '-'
 }
 
 function compareText(

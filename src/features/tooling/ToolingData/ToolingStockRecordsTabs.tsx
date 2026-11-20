@@ -7,16 +7,12 @@ import { useEffect, useMemo, useState } from 'react'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
-import { formatNumber } from '@/utils/format'
+import { formatDateTime, formatNumber } from '@/utils/format'
 import {
   TOOLING_DETAIL_RECORDS_PAGE_SIZE,
   useToolingStockInRecords,
   useToolingStockOutRecords,
 } from './useToolingDataDetail'
-
-function formatDateTime(value: string | null | undefined) {
-  return value ? new Date(value).toLocaleString('zh-CN') : '-'
-}
 
 function renderStatus(value: ToolingStockIn['status']) {
   return (

@@ -304,8 +304,8 @@ export default function StandardTimeList() {
         open={isModalOpen}
         confirmLoading={isSubmitting}
         destroyOnHidden
-        width={isTeamLeaderMode ? 'calc(100vw - 24px)' : 960}
-        style={isTeamLeaderMode ? { top: 16, maxWidth: 520 } : undefined}
+        width={isTeamLeaderMode ? 520 : 960}
+        style={isTeamLeaderMode ? { top: 16 } : undefined}
         onOk={() => formRef.current?.submit()}
         onCancel={resetFormState}
       >

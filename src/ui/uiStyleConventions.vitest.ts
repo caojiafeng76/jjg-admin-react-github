@@ -3,116 +3,41 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 /**
- * 渐进式前端页面风格守卫测试（Phase 0 建立，随 Phase 1–5 逐步扩大覆盖范围）。
+ * 全仓库前端页面风格与交互硬约束守卫（Phase 0 建立，Phase 5 升级为全库强制门槛）。
  *
- * 规范来源：docs/前端页面风格规范与设计指南.md
- * 推进策略：
- * - Phase 0：锁定规范文档收口状态 + 保护已达标的共享 UI / 系统页基线文件；
- * - Phase 1：将整个 `src/ui` 纳入守卫；
- * - Phase 2–4：每完成一个业务域迁移，立即把该目录追加到 GUARDED_DIRS；
- * - Phase 5：切换为覆盖全部 `src/features`、`src/pages`、`src/ui` 的全库强制门槛。
+ * 规范来源：
+ * - docs/前端页面风格规范与设计指南.md
+ * - docs/前端交互与反馈规范.md
+ *
+ * 覆盖范围：自动递归扫描 `src/features/`、`src/pages/`、`src/ui/` 全量 `.tsx`（以及日期格式扫描 `src/utils/` `.ts`），
+ * 后续新增业务模块或页面无需手工登记即可自动受守卫保护。
  */
 
 const ALLOWED_MODAL_WIDTHS = new Set(['520', '720', '960'])
 
-/** 已达标并锁定防回退的单文件清单 */
-const GUARDED_FILES = [
-  'src/ui/AddButton.tsx',
-  'src/ui/AppErrorView.tsx',
-  'src/ui/AppHeader.tsx',
-  'src/ui/AppLayout.tsx',
-  'src/ui/AppLogo.tsx',
-  'src/ui/AppPagination.tsx',
-  'src/ui/AppQRCode.tsx',
-  'src/ui/DarkModeButton.tsx',
-  'src/ui/DeleteButton.tsx',
-  'src/ui/DownloadTemplateButton.tsx',
-  'src/ui/EditButton.tsx',
-  'src/ui/EmployeeChangePasswordForm.tsx',
-  'src/ui/ErrorBoundary.tsx',
-  'src/ui/ErrorTechnicalDetail.tsx',
-  'src/ui/ExcelImportModal.tsx',
-  'src/ui/ExcelParseErrorList.tsx',
-  'src/ui/ExportButton.tsx',
-  'src/ui/FilterBar.tsx',
-  'src/ui/FormErrorAlert.tsx',
-  'src/ui/ImportButton.tsx',
-  'src/ui/Loading.tsx',
-  'src/ui/MainMenu.tsx',
-  'src/ui/mainMenuItems.tsx',
-  'src/ui/PageErrorBoundary.tsx',
-  'src/ui/PageForbidden.tsx',
-  'src/ui/PageTabs.tsx',
-  'src/ui/PermissionButton.tsx',
-  'src/ui/PermissionField.tsx',
-  'src/ui/PermissionGate.tsx',
-  'src/ui/PrintButton.tsx',
-  'src/ui/PublicQrPageShell.tsx',
-  'src/ui/SelectedSummaryBar.tsx',
-  'src/ui/StatusPill.tsx',
-  'src/ui/TableState.tsx',
-  'src/pages/Dashboard.tsx',
-  'src/pages/PageNotFound.tsx',
-  'src/pages/SyneySetting.tsx',
-  'src/pages/WorkshopOrderProduction.tsx',
+/** 极少数特殊宽排产/图纸预览弹窗白名单，必须在此注明业务原因 */
+const MODAL_WIDTH_EXCEPTIONS: Record<string, string> = {
+  'src/features/syney/SafePartSetting/SafePartDrawingPreviewModal.tsx':
+    '安全件图纸预览弹窗使用 80vw 自适应展示 PDF 与图纸大图，避免图纸细节被截断',
+}
+
+/** 全库强制覆盖根路径 */
+const GUARDED_TSX_ROOTS = ['src/features', 'src/pages', 'src/ui'] as const
+const DATE_FORMAT_GUARDED_ROOTS = [
+  'src/features',
+  'src/pages',
+  'src/ui',
+  'src/utils',
 ] as const
-
-/** 已完成风格迁移并锁定防回退的目录清单（随 Phase 1–5 逐步追加） */
-const GUARDED_DIRS: readonly string[] = [
-  'src/features/workshop-misc-materials',
-  'src/features/youmai',
-  'src/features/jintan',
-  'src/features/syney-materials',
-  'src/features/machine-runtime',
-  'src/features/access-management',
-  'src/features/attendance',
-  'src/features/tooling-fixture',
-  'src/features/tooling',
-  'src/features/labor-protection',
-  'src/features/quality',
-  'src/features/packaging-process',
-  'src/features/villa-lift',
-  'src/features/extrusion-production',
-  'src/features/extrusion-production-daily-report',
-  'src/features/workshop',
-  'src/features/syney',
-  'src/features/material-transfer',
-  'src/features/precision-cutting-transfer',
-  'src/features/precision-finishing-cutting',
-  'src/features/production-order',
-  'src/features/production-report',
-]
-
-/** 归属 Phase 4-A（员工移动端与扫码页）的待迁移文件，在 Phase 4-A 完成后移除豁免 */
-const DEFERRED_UNTIL_PHASE_4A = new Set<string>([
-  'src/features/material-transfer/MobileMaterialTransferScanPage.tsx',
-  'src/features/precision-finishing-cutting/MobilePrecisionFinishingCuttingScanPage.tsx',
-  'src/features/production-order/MobileProductionOrderCreatePage.tsx',
-  'src/features/production-order/MobileProductionOrderDetailPage.tsx',
-  'src/features/production-order/MobileProductionOrderEditPage.tsx',
-  'src/features/production-order/MobileProductionOrderScanPage.tsx',
-  'src/features/production-order/MobileProductionOrderScanHeader.tsx',
-  'src/features/production-order/MobileProductionOrderScanBasicInfo.tsx',
-  'src/features/production-order/MobileProductionOrderScanQuantitySections.tsx',
-  'src/features/production-order/MobileScanHubPage.tsx',
-])
-
-/** 归属 Phase 4-B（外部公开扫码页收口）的待迁移文件，在 Phase 4-B 完成后移除豁免 */
-const DEFERRED_UNTIL_PHASE_4B = new Set<string>([
-  'src/features/jintan/PartsStockOut/JintanPartsStockOutPublicPage.tsx',
-  'src/features/jintan/PartsStockOut/usePrintJintanPartsStockOutPublicQrPoster.tsx',
-  'src/features/tooling-fixture/ToolingFixturePublicPage.tsx',
-  'src/features/tooling/ToolingStockOut/ToolingStockOutPublicPage.tsx',
-  'src/features/tooling/ToolingStockOut/usePrintToolingStockOutPublicQrPoster.tsx',
-  'src/features/labor-protection/LaborProtectionRequisition/LaborProtectionPublicRequisitionPage.tsx',
-  'src/features/labor-protection/LaborProtectionRequisition/usePrintLaborProtectionPublicQrPoster.tsx',
-])
 
 function readWorkspaceFile(relativePath: string): string {
   return readFileSync(path.resolve(process.cwd(), relativePath), 'utf8')
 }
 
-function walkTsxFiles(dirRelativePath: string): string[] {
+function walkSourceFiles(
+  dirRelativePath: string,
+  extensions: readonly string[],
+): string[] {
   const fullDir = path.resolve(process.cwd(), dirRelativePath)
   if (!existsSync(fullDir)) {
     return []
@@ -122,10 +47,10 @@ function walkTsxFiles(dirRelativePath: string): string[] {
   for (const entry of readdirSync(fullDir, { withFileTypes: true })) {
     const childRel = path.join(dirRelativePath, entry.name).replaceAll('\\', '/')
     if (entry.isDirectory()) {
-      results.push(...walkTsxFiles(childRel))
+      results.push(...walkSourceFiles(childRel, extensions))
     }
     else if (
-      entry.name.endsWith('.tsx')
+      extensions.some(ext => entry.name.endsWith(ext))
       && !entry.name.includes('.test.')
       && !entry.name.includes('.vitest.')
     ) {
@@ -135,11 +60,21 @@ function walkTsxFiles(dirRelativePath: string): string[] {
   return results
 }
 
-function collectGuardedFiles(): string[] {
-  const unique = new Set<string>(GUARDED_FILES)
-  for (const dir of GUARDED_DIRS) {
-    for (const file of walkTsxFiles(dir)) {
-      if (!DEFERRED_UNTIL_PHASE_4A.has(file) && !DEFERRED_UNTIL_PHASE_4B.has(file)) {
+function collectTsxFiles(): string[] {
+  const unique = new Set<string>()
+  for (const root of GUARDED_TSX_ROOTS) {
+    for (const file of walkSourceFiles(root, ['.tsx'])) {
+      unique.add(file)
+    }
+  }
+  return Array.from(unique).sort()
+}
+
+function collectDateFormatFiles(): string[] {
+  const unique = new Set<string>()
+  for (const root of DATE_FORMAT_GUARDED_ROOTS) {
+    for (const file of walkSourceFiles(root, ['.ts', '.tsx'])) {
+      if (file !== 'src/utils/format.ts') {
         unique.add(file)
       }
     }
@@ -147,16 +82,61 @@ function collectGuardedFiles(): string[] {
   return Array.from(unique).sort()
 }
 
-function findNonStandardModalWidths(source: string): string[] {
+function findNonStandardModalWidths(
+  source: string,
+  filePath: string,
+): string[] {
+  if (filePath in MODAL_WIDTH_EXCEPTIONS) {
+    return []
+  }
+
   const badWidths: string[] = []
-  const modalOpenings = source.matchAll(/<Modal\b[\s\S]{0,600}?>/g)
+  const modalOpenings = source.matchAll(/<Modal(?=\s|>)([\s\S]{0,700}?)>/g)
   for (const match of modalOpenings) {
-    const widthMatch = match[0].match(/\bwidth=\{\s*(\d+)\s*\}/)
-    if (widthMatch && !ALLOWED_MODAL_WIDTHS.has(widthMatch[1])) {
-      badWidths.push(widthMatch[1])
+    const widthMatch = match[1].match(
+      /\bwidth=(?:\{([^}]+)\}|"([^"]+)"|'([^']+)')/,
+    )
+    if (!widthMatch) {
+      continue
+    }
+
+    const expr = (widthMatch[1] ?? widthMatch[2] ?? widthMatch[3]).trim()
+    // 支持三元响应宽度（如 mobile ? 520 : 960），每一分支均须落在三档内
+    const qIndex = expr.indexOf('?')
+    const cIndex = qIndex >= 0 ? expr.indexOf(':', qIndex + 1) : -1
+    const candidates = qIndex >= 0 && cIndex > qIndex
+      ? [expr.slice(qIndex + 1, cIndex).trim(), expr.slice(cIndex + 1).trim()]
+      : [expr]
+
+    for (const candidate of candidates) {
+      if (!ALLOWED_MODAL_WIDTHS.has(candidate)) {
+        badWidths.push(expr)
+        break
+      }
     }
   }
   return badWidths
+}
+
+function findNonVerticalForms(source: string, filePath: string): string[] {
+  if (/Search[^/]*\.tsx$/.test(filePath)) {
+    return []
+  }
+
+  const badLayouts: string[] = []
+  const formOpenings = source.matchAll(/<Form(?=\s|>)([\s\S]{0,600}?)>/g)
+  for (const match of formOpenings) {
+    const layoutMatch = match[1].match(
+      /\blayout=(?:\{([^}]+)\}|"([^"]+)"|'([^']+)')/,
+    )
+    const layout = layoutMatch
+      ? (layoutMatch[1] ?? layoutMatch[2] ?? layoutMatch[3]).trim()
+      : '(default)'
+    if (layout !== 'vertical') {
+      badLayouts.push(layout)
+    }
+  }
+  return badLayouts
 }
 
 describe('UI style conventions guard', () => {
@@ -174,8 +154,8 @@ describe('UI style conventions guard', () => {
     expect(todo).toContain('docs/前端页面风格规范与设计指南.md')
   })
 
-  it.each(collectGuardedFiles())(
-    '%s follows UI style redlines (icons, slate grays, no arbitrary radius/shadow, no raw svg, standard modal widths)',
+  it.each(collectTsxFiles())(
+    '%s follows UI style redlines (icons, slate grays, no arbitrary radius/shadow, no raw svg, standard modal widths, vertical forms)',
     (filePath) => {
       const source = readWorkspaceFile(filePath)
 
@@ -196,9 +176,25 @@ describe('UI style conventions guard', () => {
         `${filePath} 不应在页面内再套蓝点「筛选条件」白卡或带阴影表格白卡`,
       ).not.toMatch(/rounded-lg border border-slate-200\/60 bg-white p-4 shadow-sm|rounded-full bg-blue-500[\s\S]{0,120}筛选条件|min-h-0 flex-1 overflow-hidden rounded-xl border/)
       expect(
-        findNonStandardModalWidths(source),
+        findNonStandardModalWidths(source, filePath),
         `${filePath} Modal 宽度应仅使用 520 / 720 / 960 三档`,
       ).toEqual([])
+      expect(
+        findNonVerticalForms(source, filePath),
+        `${filePath} 非搜索表单应统一使用 layout="vertical"`,
+      ).toEqual([])
+    },
+  )
+
+  it.each(collectDateFormatFiles())(
+    '%s uses formatDate/formatDateTime instead of Date.prototype.toLocale*String',
+    (filePath) => {
+      const source = readWorkspaceFile(filePath)
+
+      expect(
+        source,
+        `${filePath} 日期时间展示应使用 @/utils/format 的 formatDate / formatDateTime，禁止 new Date(...).toLocaleString()`,
+      ).not.toMatch(/new Date\([^)]*\)\.toLocale(?:Date|Time)?String\(|\.toLocale(?:Date|Time)String\(/)
     },
   )
 })

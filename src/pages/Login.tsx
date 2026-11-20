@@ -1,4 +1,4 @@
-import { LockOutlined, MailOutlined } from '@ant-design/icons'
+import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/16/solid'
 import Loading from '@ui/Loading'
 import { Alert, Button, Checkbox, Form, Input, Typography } from 'antd'
 import { useEffect, useState } from 'react'
@@ -145,7 +145,7 @@ export default function Login() {
 
         <div className="relative flex h-full w-full flex-col justify-between px-12 py-12 text-white xl:px-16 xl:py-14">
           <div className="inline-flex w-fit items-center gap-3 rounded-2xl border border-white/18 bg-white/10 px-4 py-3 backdrop-blur-md">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-[11px] font-bold tracking-[0.18em] text-white shadow-[0_14px_30px_color-mix(in_srgb,var(--jjg-color-primary)_40%,transparent)]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-[11px] font-bold tracking-[0.18em] text-white">
               JJG
             </div>
             <div>
@@ -169,10 +169,10 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-slate-50/60 px-6 py-12 lg:px-8 dark:bg-slate-900/60">
-        <div className="w-full max-w-md rounded-[28px] border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
+      <div className="flex flex-1 items-center justify-center bg-slate-100 px-6 py-12 lg:px-8 dark:bg-slate-950">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-[15px] font-bold tracking-[0.18em] text-white shadow-[0_16px_36px_color-mix(in_srgb,var(--jjg-color-primary)_32%,transparent)]">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-[15px] font-bold tracking-[0.18em] text-white">
               JJG
             </div>
             <Title level={3} className="mb-1! text-slate-900! dark:text-slate-100!">
@@ -216,10 +216,10 @@ export default function Login() {
               ]}
             >
               <Input
-                prefix={<MailOutlined className="text-slate-400" />}
+                prefix={<EnvelopeIcon className="size-4 text-slate-400 dark:text-slate-500" />}
                 placeholder="admin@example.com"
                 autoComplete="username"
-                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-primary! dark:border-slate-700! dark:bg-slate-800! dark:text-slate-100! dark:placeholder:text-slate-500! dark:hover:border-slate-600!"
+                className="h-12! rounded-xl!"
               />
             </Form.Item>
 
@@ -229,10 +229,10 @@ export default function Login() {
               rules={[{ required: true, message: '请输入密码' }]}
             >
               <Input.Password
-                prefix={<LockOutlined className="text-slate-400" />}
+                prefix={<LockClosedIcon className="size-4 text-slate-400 dark:text-slate-500" />}
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="h-12! rounded-xl! border-slate-200! shadow-none! placeholder:text-slate-400! hover:border-slate-300! focus:border-primary! dark:border-slate-700! dark:bg-slate-800! dark:text-slate-100! dark:placeholder:text-slate-500! dark:hover:border-slate-600!"
+                className="h-12! rounded-xl!"
               />
             </Form.Item>
 
@@ -250,7 +250,7 @@ export default function Login() {
                 htmlType="submit"
                 block
                 loading={submitting}
-                className="h-11! rounded-xl! border-0! bg-primary! text-base! font-medium! shadow-[0_16px_32px_color-mix(in_srgb,var(--jjg-color-primary)_20%,transparent)] hover:bg-primary-hover!"
+                className="h-11! rounded-xl! text-base! font-medium!"
               >
                 登 录
               </Button>

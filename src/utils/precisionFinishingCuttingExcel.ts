@@ -5,6 +5,7 @@ import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
 } from '@/utils/excelStyleUtils'
+import { formatDateTime as formatSharedDateTime } from '@/utils/format'
 
 const SHEET_TITLE = '精加工切割单登记表'
 
@@ -69,11 +70,7 @@ const EXPORT_COLUMN_WIDTHS = [
 ]
 
 function formatDateTime(value: string | null | undefined) {
-  if (!value) {
-    return ''
-  }
-
-  return new Date(value).toLocaleString('zh-CN')
+  return formatSharedDateTime(value, { withSeconds: true, fallback: '' })
 }
 
 export function exportPrecisionFinishingCuttingsToExcel(

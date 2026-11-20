@@ -15,6 +15,7 @@ import FilterBar from '@/ui/FilterBar'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty, TableState } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
+import { formatDateTime } from '@/utils/format'
 import {
   useDeleteToolingFixtureUsageRecords,
   useToolingFixtureUsageRecords,
@@ -94,7 +95,7 @@ export default function FixtureRecordsPage() {
         dataIndex: 'created_at',
         key: 'created_at',
         width: 190,
-        render: (value: string) => new Date(value).toLocaleString('zh-CN'),
+        render: (value: string) => formatDateTime(value, { withSeconds: true }),
       },
       {
         title: '动作',

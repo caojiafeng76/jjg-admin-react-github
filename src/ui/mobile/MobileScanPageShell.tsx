@@ -36,17 +36,19 @@ export default function MobileScanPageShell({
 
   return (
     <div
-      className={`h-full overflow-y-auto px-4 pt-4 ${hasCustomFooter ? 'pb-52' : 'pb-8'}`}
+      className={`h-full overflow-y-auto px-4 pt-4 ${hasCustomFooter ? 'pb-44' : 'pb-8'}`}
     >
-      <div className="mx-auto flex max-w-2xl flex-col gap-4">
-        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-          <div className="text-[11px] font-semibold tracking-[0.28em] text-slate-400 uppercase">
+      <div className="mx-auto flex max-w-2xl flex-col gap-3">
+        <section className="rounded-2xl border border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
+          <div className="text-[11px] font-semibold tracking-[0.2em] text-slate-400 uppercase dark:text-slate-500">
             {eyebrow}
           </div>
-          <Title level={3} style={{ marginTop: 12, marginBottom: 8 }}>
+          <Title level={4} className="mt-2! mb-1.5! text-slate-900! dark:text-slate-100!">
             {title}
           </Title>
-          <Paragraph className="mb-0 text-slate-500">{description}</Paragraph>
+          <Paragraph className="mb-0! text-sm text-slate-500 dark:text-slate-400">
+            {description}
+          </Paragraph>
         </section>
 
         {scanTrigger}
@@ -61,18 +63,18 @@ export default function MobileScanPageShell({
                 {secondaryAction
                   ? (
                       <Button
-                        className="h-11 rounded-2xl"
+                        className="h-11 rounded-xl"
                         onClick={secondaryAction.onClick}
                       >
                         {secondaryAction.label}
                       </Button>
                     )
                   : (
-                      <Card className="rounded-2xl border-dashed border-slate-200 shadow-none" />
+                      <Card className="rounded-xl border-dashed border-slate-200 shadow-none dark:border-slate-700" />
                     )}
                 <Button
                   type={primaryAction.type || 'primary'}
-                  className="h-11 rounded-2xl"
+                  className="h-11 rounded-xl"
                   onClick={primaryAction.onClick}
                 >
                   {primaryAction.label}
@@ -85,8 +87,8 @@ export default function MobileScanPageShell({
       {hasCustomFooter
         ? (
             <div
-              className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl"
-              style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
+              className="fixed inset-x-0 z-40 border-t border-slate-200 bg-white/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95"
+              style={{ bottom: 'calc(env(safe-area-inset-bottom) + 74px)' }}
             >
               <div className="mx-auto max-w-2xl">{footer}</div>
             </div>

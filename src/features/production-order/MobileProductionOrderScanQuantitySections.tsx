@@ -37,8 +37,7 @@ export default function MobileProductionOrderScanQuantitySections({
     <>
       {/* 数量明细 */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase dark:text-slate-500">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+        <div className="border-b border-divider pb-1.5 text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
           数量明细
         </div>
 
@@ -51,7 +50,7 @@ export default function MobileProductionOrderScanQuantitySections({
             value={incomingQualifiedQuantity}
             onChange={value =>
               setIncomingQualifiedQuantity(Number(value || 0))}
-            className="h-12 w-full rounded-2xl"
+            className="h-12 w-full rounded-xl"
           />
         </div>
 
@@ -63,7 +62,7 @@ export default function MobileProductionOrderScanQuantitySections({
             min={0}
             value={qualifiedQuantity}
             onChange={value => setQualifiedQuantity(Number(value || 0))}
-            className="h-12 w-full rounded-2xl"
+            className="h-12 w-full rounded-xl"
           />
         </div>
 
@@ -75,7 +74,7 @@ export default function MobileProductionOrderScanQuantitySections({
             min={0}
             value={defectQuantity1}
             onChange={value => setDefectQuantity1(Number(value || 0))}
-            className="h-12 w-full rounded-2xl"
+            className="h-12 w-full rounded-xl"
           />
         </div>
 
@@ -87,15 +86,14 @@ export default function MobileProductionOrderScanQuantitySections({
             min={0}
             value={defectQuantity2}
             onChange={value => setDefectQuantity2(Number(value || 0))}
-            className="h-12 w-full rounded-2xl"
+            className="h-12 w-full rounded-xl"
           />
         </div>
       </div>
 
       {/* 调机与外协 */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase dark:text-slate-500">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+        <div className="border-b border-divider pb-1.5 text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
           调机与外协
         </div>
 
@@ -107,7 +105,7 @@ export default function MobileProductionOrderScanQuantitySections({
             min={0}
             value={setupDefectQuantity}
             onChange={value => setSetupDefectQuantity(Number(value || 0))}
-            className="h-12 w-full rounded-2xl"
+            className="h-12 w-full rounded-xl"
           />
         </div>
 
@@ -119,12 +117,12 @@ export default function MobileProductionOrderScanQuantitySections({
             value={setupResponsible}
             onChange={event => setSetupResponsible(event.target.value)}
             placeholder="请输入调机负责人"
-            className="h-12 w-full rounded-2xl border-slate-200 dark:border-slate-700"
+            className="h-12 w-full rounded-xl"
           />
         </div>
 
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/60 dark:bg-rose-950/40">
-          <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+        <div className="rounded-xl border border-error/25 bg-error/5 p-4 dark:bg-error/10">
+          <div className="mb-3 text-xs font-medium text-error">
             涉及外协工序时填写
           </div>
           <div>
@@ -136,7 +134,7 @@ export default function MobileProductionOrderScanQuantitySections({
               value={outsourceDefectQuantity}
               onChange={value =>
                 setOutsourceDefectQuantity(Number(value || 0))}
-              className="h-12 w-full rounded-2xl"
+              className="h-12 w-full rounded-xl"
             />
           </div>
 
@@ -148,7 +146,7 @@ export default function MobileProductionOrderScanQuantitySections({
               value={outsourceUnit}
               onChange={event => setOutsourceUnit(event.target.value)}
               placeholder="请输入外协单位"
-              className="h-12 w-full rounded-2xl border-slate-200 dark:border-slate-700"
+              className="h-12 w-full rounded-xl"
             />
           </div>
 
@@ -161,7 +159,7 @@ export default function MobileProductionOrderScanQuantitySections({
               value={outsourceDefectReason}
               onChange={event => setOutsourceDefectReason(event.target.value)}
               placeholder="请输入外协不良原因"
-              className="rounded-2xl"
+              className="rounded-xl"
             />
           </div>
         </div>
@@ -169,8 +167,7 @@ export default function MobileProductionOrderScanQuantitySections({
 
       {/* 备注 */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-slate-400 uppercase dark:text-slate-500">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+        <div className="border-b border-divider pb-1.5 text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
           备注
         </div>
 
@@ -180,7 +177,7 @@ export default function MobileProductionOrderScanQuantitySections({
             value={remark}
             onChange={event => setRemark(event.target.value)}
             placeholder="如有需要可补充说明"
-            className="rounded-2xl"
+            className="rounded-xl"
           />
         </div>
       </div>

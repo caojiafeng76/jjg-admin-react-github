@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { queryConfig } from '@/config/queryClient'
 import { getJintanInventoryAdjustmentList } from '@/services/apiJintanInventoryAdjustments'
 import { TableEmpty } from '@/ui/TableState'
+import { formatDateTime } from '@/utils/format'
 import { jintanKeys } from './queryKeys'
 
 const JINTAN_ADJUSTMENT_RECORDS_PAGE_SIZE = 10
@@ -74,8 +75,7 @@ const columns: TableColumnsType<JintanInventoryAdjustment> = [
     dataIndex: 'created_at',
     key: 'created_at',
     width: 170,
-    render: (value: string) =>
-      value ? new Date(value).toLocaleString('zh-CN') : '-',
+    render: (value: string) => formatDateTime(value),
   },
 ]
 

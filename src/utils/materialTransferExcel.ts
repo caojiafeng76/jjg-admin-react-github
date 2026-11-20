@@ -8,6 +8,7 @@ import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
 } from '@/utils/excelStyleUtils'
+import { formatDateTime as formatSharedDateTime } from '@/utils/format'
 import {
   buildMaterialTransferSummaryWorksheet,
   MATERIAL_TRANSFER_SUMMARY_SHEET_NAME,
@@ -65,11 +66,7 @@ const TRANSFER_QUANTITY_TOTAL_LABEL_COLUMN_INDEX
   = TRANSFER_QUANTITY_COLUMN_INDEX - 1
 
 function formatDateTime(value: string | null | undefined) {
-  if (!value) {
-    return ''
-  }
-
-  return new Date(value).toLocaleString('zh-CN')
+  return formatSharedDateTime(value, { withSeconds: true, fallback: '' })
 }
 
 function formatOrderProgressCell(

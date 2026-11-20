@@ -5,7 +5,7 @@ import { memo, useMemo } from 'react'
 
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
-import { formatNumber } from '@/utils/format'
+import { formatDateTime, formatNumber } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { getFinalStockColorClass } from '../inventoryPresentation'
 
@@ -123,16 +123,14 @@ function ToolingInventoryTable({
         dataIndex: 'created_at',
         key: 'created_at',
         width: 180,
-        render: (value: string) =>
-          value ? new Date(value).toLocaleString('zh-CN') : '-',
+        render: (value: string) => formatDateTime(value),
       },
       {
         title: '更新时间',
         dataIndex: 'updated_at',
         key: 'updated_at',
         width: 180,
-        render: (value: string) =>
-          value ? new Date(value).toLocaleString('zh-CN') : '-',
+        render: (value: string) => formatDateTime(value),
       },
     ],
     [page, pageSize],

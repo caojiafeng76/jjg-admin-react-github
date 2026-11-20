@@ -1,8 +1,8 @@
 import {
-  ArrowLeftOutlined,
-  HomeOutlined,
-  ReloadOutlined,
-} from '@ant-design/icons'
+  ArrowLeftIcon,
+  ArrowPathIcon,
+  HomeIcon,
+} from '@heroicons/react/16/solid'
 import AppErrorView from '@ui/AppErrorView'
 
 import {
@@ -115,19 +115,19 @@ export default function RouteErrorPage() {
           key: 'reload',
           label: '重新加载',
           type: 'primary',
-          icon: <ReloadOutlined />,
+          icon: <ArrowPathIcon className="size-4" />,
           onClick: () => window.location.reload(),
         },
         {
           key: 'home',
           label: '返回首页',
-          icon: <HomeOutlined />,
+          icon: <HomeIcon className="size-4" />,
           onClick: () => navigate('/', { replace: true }),
         },
         {
           key: 'back',
           label: '返回上一页',
-          icon: <ArrowLeftOutlined />,
+          icon: <ArrowLeftIcon className="size-4" />,
           onClick: () => navigate(-1),
         },
       ]}

@@ -3,6 +3,7 @@ import { PencilSquareIcon } from '@heroicons/react/16/solid'
 
 import { Button, Descriptions, Empty } from 'antd'
 import StatusPill from '@/ui/StatusPill'
+import { formatDateTime } from '@/utils/format'
 
 interface Props {
   selectedRecord: PrecisionFinishingCuttingWithEmployee | null
@@ -155,9 +156,7 @@ export default function PrecisionFinishingCuttingDetail({
           {
             key: 'audited_at',
             label: '审核时间',
-            children: audited_at
-              ? new Date(audited_at).toLocaleString('zh-CN')
-              : '-',
+            children: formatDateTime(audited_at, { withSeconds: true }),
           },
           {
             key: 'remark',

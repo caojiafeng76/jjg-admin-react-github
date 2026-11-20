@@ -4,7 +4,7 @@ import type {
 } from '@/services/apiProductionOrderItems'
 import type { ProductionOrderShift } from '@/services/apiProductionOrders'
 import type { MobileBottomSelectOption } from '@/ui/mobile/MobileBottomSelectSheet'
-import { App, Button, Card, DatePicker, Form, Input, Typography } from 'antd'
+import { App, Button, DatePicker, Form, Input, Typography } from 'antd'
 
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
@@ -106,34 +106,38 @@ export default function MobileProductionOrderEditPage() {
   if (!orderId || (!order && !isLoading)) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-          <Title level={4}>未找到工单</Title>
-          <Paragraph type="secondary">当前工单不存在或已被删除。</Paragraph>
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
+          <Title level={4} className="text-slate-900! dark:text-slate-100!">
+            未找到工单
+          </Title>
+          <Paragraph className="text-slate-500! dark:text-slate-400!">
+            当前工单不存在或已被删除。
+          </Paragraph>
           <Button type="primary" onClick={() => navigate('/production-order')}>
             返回我的工单
           </Button>
-        </Card>
+        </div>
       </div>
     )
   }
 
   return (
     <>
-      <div className="h-full overflow-y-auto px-4 pt-4 pb-52">
-        <div className="mx-auto flex max-w-2xl flex-col gap-4">
-          <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
-            <div className="text-[11px] font-semibold tracking-[0.28em] text-slate-400 uppercase dark:text-slate-500">
+      <div className="h-full overflow-y-auto px-4 pt-4 pb-44">
+        <div className="mx-auto flex max-w-2xl flex-col gap-3">
+          <section className="rounded-2xl border border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
+            <div className="text-[11px] font-semibold tracking-[0.2em] text-slate-400 uppercase dark:text-slate-500">
               Edit Order
             </div>
-            <Title level={3} style={{ marginTop: 12, marginBottom: 8 }}>
+            <Title level={4} className="mt-1.5! mb-1! text-slate-900! dark:text-slate-100!">
               编辑生产工单
             </Title>
-            <Paragraph className="mb-0 text-slate-500 dark:text-slate-400">
+            <Paragraph className="mb-0! text-sm text-slate-500 dark:text-slate-400">
               移动端改为独立页面编辑，保存后返回详情页。
             </Paragraph>
           </section>
 
-          <Card className="rounded-4xl border-slate-200 shadow-[0_18px_40px_rgba(15,23,42,0.06)] dark:border-slate-700">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
             <Form form={form} layout="vertical" onFinish={handleSubmit}>
               <Form.Item
                 name="order_date"
@@ -160,7 +164,7 @@ export default function MobileProductionOrderEditPage() {
                 <button
                   type="button"
                   onClick={() => setIsShiftSheetOpen(true)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                 >
                   {currentShift || '请选择班别'}
                 </button>
@@ -189,17 +193,17 @@ export default function MobileProductionOrderEditPage() {
                 />
               </Form.Item>
 
-              <Form.Item name="remark" label="备注">
+              <Form.Item name="remark" label="备注" className="mb-0!">
                 <Input.TextArea rows={3} placeholder="请输入备注" />
               </Form.Item>
             </Form>
-          </Card>
+          </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white px-4 py-4 shadow-[0_10px_25px_rgba(15,23,42,0.06)] dark:border-slate-700/80 dark:bg-slate-900/90">
-            <div className="mb-4 text-xs tracking-[0.24em] text-slate-400 uppercase dark:text-slate-500">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+            <div className="text-xs tracking-[0.2em] text-slate-400 uppercase dark:text-slate-500">
               Process Items
             </div>
-            <div className="mb-4 text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            <div className="mt-1 mb-3 text-base font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               工序明细
             </div>
 
@@ -223,18 +227,18 @@ export default function MobileProductionOrderEditPage() {
       </div>
 
       <div
-        className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
+        className="fixed inset-x-0 z-40 border-t border-slate-200 bg-white/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 74px)' }}
       >
         <div className="mx-auto grid max-w-2xl grid-cols-3 gap-3">
           <Button
-            className="h-11 rounded-2xl"
+            className="h-11 rounded-xl"
             onClick={() => navigate(`/production-order/${orderId}`)}
           >
             返回详情
           </Button>
           <Button
-            className="h-11 rounded-2xl"
+            className="h-11 rounded-xl"
             disabled={!canEdit}
             onClick={() => {
               navigate('/production-order/scan', {
@@ -249,7 +253,7 @@ export default function MobileProductionOrderEditPage() {
           </Button>
           <Button
             type="primary"
-            className="h-11 rounded-2xl"
+            className="h-11 rounded-xl"
             disabled={!canEdit}
             loading={updateMutation.isPending}
             onClick={() => form.submit()}

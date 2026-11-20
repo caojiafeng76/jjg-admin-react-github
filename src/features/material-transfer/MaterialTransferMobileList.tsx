@@ -2,6 +2,7 @@ import type { MaterialTransferWithEmployee } from '@/services/apiMaterialTransfe
 import { ArchiveBoxIcon, BuildingStorefrontIcon, ClockIcon, PencilSquareIcon } from '@heroicons/react/24/outline'
 
 import { Button, Spin } from 'antd'
+import { formatDateTime } from '@/utils/format'
 
 interface Props {
   loading: boolean
@@ -58,14 +59,7 @@ export default function MaterialTransferMobileList({
                     }
                   >
                     <ClockIcon className="h-3 w-3" />
-                    {record.created_at
-                      ? new Date(record.created_at).toLocaleString('zh-CN', {
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-                      : '-'}
+                    {formatDateTime(record.created_at)}
                   </div>
 
                   {/* Customer */}
@@ -179,14 +173,7 @@ export default function MaterialTransferMobileList({
                   { label: '长度', value: record.length_mm ? `${record.length_mm}mm` : '-' },
                   {
                     label: '审核时间',
-                    value: record.audited_at
-                      ? new Date(record.audited_at).toLocaleString('zh-CN', {
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-                      : '未审核',
+                    value: formatDateTime(record.audited_at, { withSeconds: true, fallback: '未审核' }),
                   },
                 ].map(item => (
                   <div

@@ -6,6 +6,7 @@ import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
 
+import { formatDateTime } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -100,7 +101,7 @@ export default function ExtrusionProductionTable({
         dataIndex: 'created_at',
         key: 'created_at',
         width: 170,
-        render: (value: string) => new Date(value).toLocaleString('zh-CN'),
+        render: (value: string) => formatDateTime(value),
       },
     ],
     [page, pageSize],

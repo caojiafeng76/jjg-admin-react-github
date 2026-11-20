@@ -3,6 +3,7 @@ import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
 import { Button, Empty } from 'antd'
 import StatusPill from '@/ui/StatusPill'
+import { formatDateTime } from '@/utils/format'
 
 interface Props {
   loading: boolean
@@ -49,9 +50,7 @@ export default function MaterialTransferMobileList({
                       : 'text-xs text-slate-400'
                   }
                 >
-                  {record.created_at
-                    ? new Date(record.created_at).toLocaleString('zh-CN')
-                    : '-'}
+                  {formatDateTime(record.created_at)}
                 </div>
                 <div
                   className={
@@ -170,9 +169,7 @@ export default function MaterialTransferMobileList({
                   审核时间
                 </div>
                 <div className="mt-1 font-semibold">
-                  {record.audited_at
-                    ? new Date(record.audited_at).toLocaleString('zh-CN')
-                    : '未审核'}
+                  {formatDateTime(record.audited_at, { withSeconds: true, fallback: '未审核' })}
                 </div>
               </div>
               <div className="rounded-2xl bg-black/5 px-3 py-3">

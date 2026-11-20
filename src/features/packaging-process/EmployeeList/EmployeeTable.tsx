@@ -5,6 +5,7 @@ import { memo, useMemo } from 'react'
 
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
+import { formatDateTime } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 
 interface Props {
@@ -77,8 +78,7 @@ function EmployeeTable({
         dataIndex: 'updated_at',
         key: 'updated_at',
         width: 180,
-        render: (value: string) =>
-          value ? new Date(value).toLocaleString('zh-CN') : '-',
+        render: (value: string) => formatDateTime(value),
       },
     ],
     [page, pageSize],

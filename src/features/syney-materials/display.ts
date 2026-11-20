@@ -1,3 +1,5 @@
+import { formatDateTime as formatSharedDateTime } from '@/utils/format'
+
 /** 下拉、只读输入框里展示一条材料：品名 / 规格（单位） */
 export function formatSyneyMaterialLabel(row: {
   material_name: string
@@ -13,7 +15,7 @@ export function renderText(value: string | null | undefined) {
 }
 
 export function formatDateTime(value: string | null | undefined) {
-  return value ? new Date(value).toLocaleString('zh-CN') : '-'
+  return formatSharedDateTime(value)
 }
 
 export function zebraRowClassName(_record: unknown, index: number) {

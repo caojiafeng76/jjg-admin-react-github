@@ -5,7 +5,7 @@ import type {
 } from './mobileProductionOrderScanTypes'
 import type { ScannedProjectPayload } from './ProjectNoScanButton'
 import { useQueryClient } from '@tanstack/react-query'
-import { App, Button, Card, Typography } from 'antd'
+import { App, Button, Typography } from 'antd'
 import dayjs from 'dayjs'
 
 import { useEffect, useRef, useState } from 'react'
@@ -202,15 +202,17 @@ export default function MobileProductionOrderScanPage() {
   if (!isEmployeeView || !employeeId) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-3xl text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-          <Title level={4}>当前账号不可使用扫码录入</Title>
-          <Paragraph type="secondary">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
+          <Title level={4} className="text-slate-900! dark:text-slate-100!">
+            当前账号不可使用扫码录入
+          </Title>
+          <Paragraph className="text-slate-500! dark:text-slate-400!">
             请使用员工端账号进入后再尝试录入工单。
           </Paragraph>
           <Button type="primary" onClick={() => navigate(returnTo)}>
             返回我的工单
           </Button>
-        </Card>
+        </div>
       </div>
     )
   }
@@ -360,8 +362,8 @@ export default function MobileProductionOrderScanPage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto px-4 pt-4 pb-[calc(--spacing(16)+env(safe-area-inset-bottom))]">
-      <div className="mx-auto flex max-w-2xl flex-col gap-4">
+    <div className="h-full overflow-y-auto px-4 pt-4 pb-44">
+      <div className="mx-auto flex max-w-2xl flex-col gap-3">
         <MobileProductionOrderScanHeader
           isEditMode={isEditMode}
           isExistingOrderMode={isExistingOrderMode}
@@ -370,7 +372,7 @@ export default function MobileProductionOrderScanPage() {
           handleProjectNoScanResolved={handleProjectNoScanResolved}
         />
 
-        <section className="rounded-[30px] border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-slate-900/90">
+        <section className="rounded-2xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex flex-col gap-5">
             {/* 基本信息 */}
             <MobileProductionOrderScanBasicInfo
@@ -389,19 +391,19 @@ export default function MobileProductionOrderScanPage() {
       </div>
 
       <div
-        className="fixed inset-x-0 z-40 border-t border-white/70 bg-white/92 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 82px)' }}
+        className="fixed inset-x-0 z-40 border-t border-slate-200 bg-white/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 74px)' }}
       >
         <div className="mx-auto grid max-w-2xl grid-cols-[1fr_1.4fr] gap-3">
           <Button
-            className="h-12 rounded-2xl"
+            className="h-11 rounded-xl"
             onClick={() => navigate(returnTo)}
           >
             取消
           </Button>
           <Button
             type="primary"
-            className="h-12 rounded-2xl"
+            className="h-11 rounded-xl"
             loading={isSubmitting}
             onClick={handleSubmit}
           >

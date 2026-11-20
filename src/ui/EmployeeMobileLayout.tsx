@@ -1,15 +1,18 @@
 import type { ElementType } from 'react'
 import {
   ArrowRightStartOnRectangleIcon,
+  KeyIcon,
+} from '@heroicons/react/16/solid'
+import {
   ArrowsRightLeftIcon,
   ClipboardDocumentListIcon,
   ClockIcon,
   DocumentChartBarIcon,
-  KeyIcon,
   ScissorsIcon,
   ViewfinderCircleIcon,
 } from '@heroicons/react/24/outline'
-import { Button, Layout, theme } from 'antd'
+import DarkModeButton from '@ui/DarkModeButton'
+import { Button, Layout } from 'antd'
 import { useMemo } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -69,9 +72,6 @@ export default function EmployeeMobileLayout() {
   const location = useLocation()
   const { signOut, user, employeeProfile } = useAuth()
   const { can, isLoading } = usePermissionContext()
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken()
 
   const navItems = useMemo(() => {
     if (isLoading)
@@ -82,31 +82,31 @@ export default function EmployeeMobileLayout() {
   }, [can, isLoading])
 
   return (
-    <Layout className="h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,#f5f7ff_0%,#eef2ff_35%,#e8edf5_100%)]">
-      <header className="sticky top-0 z-20 border-b border-white/50 bg-white/85 px-4 pt-[calc(env(safe-area-inset-top)+14px)] pb-3 backdrop-blur-xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="text-[11px] font-medium tracking-[0.24em] text-slate-400 uppercase">
-              Employee Workspace
+    <Layout className="h-dvh overflow-hidden bg-slate-100 dark:bg-slate-950">
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 pt-[calc(env(safe-area-inset-top)+10px)] pb-2.5 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-medium tracking-[0.2em] text-slate-400 uppercase dark:text-slate-500">
+              工作台
             </div>
-            <div className="mt-1 text-xl font-black tracking-tight text-slate-900">
+            <div className="mt-0.5 truncate text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
               {employeeProfile?.name || user?.email || '员工端'}
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex shrink-0 items-center gap-1">
+            <DarkModeButton />
             <Button
               type="text"
-              className="rounded-full border border-slate-200/80 bg-white/90 px-3"
+              size="small"
               icon={<KeyIcon className="size-4" />}
               onClick={() => navigate('/employee/change-password')}
             >
-              修改密码
+              改密
             </Button>
-
             <Button
               type="text"
-              className="rounded-full border border-slate-200/80 bg-white/90 px-3"
+              size="small"
               icon={<ArrowRightStartOnRectangleIcon className="size-4" />}
               onClick={async () => {
                 await signOut()
@@ -119,18 +119,15 @@ export default function EmployeeMobileLayout() {
         </div>
       </header>
 
-      <Content className="min-h-0 overflow-hidden px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+84px)]">
-        <div
-          className="h-full min-h-0 overflow-hidden rounded-4xl border border-white/60 shadow-[0_20px_70px_rgba(15,23,42,0.08)]"
-          style={{ background: colorBgContainer }}
-        >
+      <Content className="min-h-0 overflow-hidden px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+74px)]">
+        <div className="h-full min-h-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <Outlet />
         </div>
       </Content>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/60 bg-white/92 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+10px)] backdrop-blur-xl">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+8px)] backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95">
         <div
-          className="grid gap-3"
+          className="grid gap-1.5"
           style={{
             gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))`,
           }}
@@ -145,14 +142,18 @@ export default function EmployeeMobileLayout() {
                 type="button"
                 onClick={() => navigate(item.key)}
                 aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
                 title={item.label}
                 className={
                   isActive
-                    ? 'flex items-center justify-center rounded-2xl bg-slate-900 px-2 py-3 text-white shadow-[0_10px_30px_rgba(15,23,42,0.25)] transition'
-                    : 'flex items-center justify-center rounded-2xl bg-slate-100 px-2 py-3 text-slate-600 transition'
+                    ? 'flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl bg-primary/10 px-1 py-1.5 text-primary transition'
+                    : 'flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
                 }
               >
-                <Icon className="size-6" />
+                <Icon className="size-5 shrink-0" />
+                <span className="text-[11px] leading-tight font-medium whitespace-nowrap">
+                  {item.label}
+                </span>
               </button>
             )
           })}

@@ -1,16 +1,14 @@
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { ArrowLeftIcon } from '@heroicons/react/16/solid'
 import { ViewfinderCircleIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import AppQRCode from '@ui/AppQRCode'
+import StatusPill from '@ui/StatusPill'
 import {
   Alert,
   Button,
-  Card,
   Descriptions,
   Result,
-  Space,
   Spin,
-  Tag,
   Typography,
 } from 'antd'
 import { useMemo } from 'react'
@@ -18,7 +16,7 @@ import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { queryConfig } from '@/config/queryClient'
 import {
-  getWorkshopOrderStatusColor,
+  getWorkshopOrderStatusTone,
   normalizeWorkshopOrderStatus,
 } from '@/features/workshop/OrderList/orderStatus'
 import { getWorkshopOrderQrValue } from '@/features/workshop/OrderList/workshopOrderQr'
@@ -82,35 +80,37 @@ export default function WorkshopOrderQrDetail() {
   const status = normalizeWorkshopOrderStatus(data.status)
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-4 sm:px-6">
-      <Space align="center" className="justify-between">
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-divider pb-2.5">
+        <Button icon={<ArrowLeftIcon className="size-4" />} onClick={() => navigate(-1)}>
           返回
         </Button>
-        <Tag color={getWorkshopOrderStatusColor(status)}>{status}</Tag>
-      </Space>
+        <StatusPill tone={getWorkshopOrderStatusTone(status)}>
+          {status}
+        </StatusPill>
+      </div>
 
-      <Card className="shadow-sm">
-        <Space orientation="vertical" size={12} className="w-full">
-          <Space align="start" className="w-full justify-between gap-4">
+      <div className="min-h-0 flex-1 overflow-y-auto py-3">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
             <div>
-              <Title level={3} style={{ marginBottom: 8 }}>
+              <Title level={4} className="mt-0! mb-1.5! text-slate-900! dark:text-slate-100!">
                 订单扫码详情
               </Title>
-              <Paragraph className="mb-0 text-slate-500">
+              <Paragraph className="mb-0! text-sm text-slate-500 dark:text-slate-400">
                 扫码后展示该订单的核心信息，适合在手机端快速查看。
               </Paragraph>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-              <div className="h-28 w-28">
+            <div className="rounded-xl border border-slate-200 bg-white p-2.5 dark:border-slate-700">
+              <div className="h-24 w-24">
                 <AppQRCode
                   value={qrValue}
-                  size={112}
+                  size={96}
                   style={{ height: '100%', width: '100%' }}
                 />
               </div>
             </div>
-          </Space>
+          </div>
 
           <Alert
             type="info"
@@ -123,7 +123,7 @@ export default function WorkshopOrderQrDetail() {
           <Descriptions
             bordered
             column={1}
-            size="middle"
+            size="small"
             styles={{ label: { width: 120 } }}
             items={[
               {
@@ -190,17 +190,19 @@ export default function WorkshopOrderQrDetail() {
                 key: 'status',
                 label: '状态',
                 children: (
-                  <Tag color={getWorkshopOrderStatusColor(status)}>
+                  <StatusPill tone={getWorkshopOrderStatusTone(status)}>
                     {status}
-                  </Tag>
+                  </StatusPill>
                 ),
               },
             ]}
           />
 
-          <Text type="secondary">如需编辑订单，请使用桌面端订单管理页面。</Text>
-        </Space>
-      </Card>
+          <Text className="text-xs text-slate-500 dark:text-slate-400">
+            如需编辑订单，请使用桌面端订单管理页面。
+          </Text>
+        </div>
+      </div>
     </div>
   )
 }

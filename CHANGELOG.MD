@@ -17,6 +17,26 @@
 
 ## 2026-11-20
 
+- **类别**：变更
+- **范围**：`src/features/`、`src/pages/SyneySetting.tsx`、`src/utils/*Excel.ts`、`src/utils/materialTransferSummaryWorksheet.ts`、`src/ui/uiStyleConventions.vitest.ts`、`src/pages/dashboardChangelog.ts`、`todolist.md`
+- **摘要**：完成全站前端界面风格统一收官 Phase 5（`P5-1`～`P5-3`）：
+  - `P5-1`（Modal 宽度全站收敛）：将 `material-transfer`、`precision-cutting-transfer`、`precision-finishing-cutting` 表单弹窗及 `workshop/StandardTimeList` 弹窗宽度收敛为 `520 / 960` 档；全库仅 `SafePartDrawingPreviewModal.tsx`（`80vw` 图纸预览）保留在守卫显式白名单并注明原因。
+  - `P5-2`（表单布局与日期展示统一）：将 `SyneySetting` 表单收口为 `layout="vertical"`（全库非搜索表单 100% 垂直布局）；将全库残留的 40 余处 `new Date(...).toLocaleString('zh-CN')` / `.toLocaleDateString('zh-CN')`（覆盖列表页、详情页、移动端卡片、`syney-materials/display.ts`、PDF 与 Excel 导出）统一替换为 `@/utils/format` 的 `formatDate` / `formatDateTime`。
+  - `P5-3`（全仓库强守卫上线）：将 `src/ui/uiStyleConventions.vitest.ts` 升级为覆盖全部 `src/features/`、`src/pages/`、`src/ui/` 与日期格式化红线的全仓库强制测试门槛（1162 项守卫测试），勾选 `todolist.md` 全部阶段并同步首页更新日志。
+- **验证**：`bun run lint`（0 error）、`bun run typecheck`、`bun run build`、`bun run check:bundle` 及 `bun run test`（含 `src/ui/uiStyleConventions.vitest.ts` 1162 项全库风格守卫测试）全部通过；尚未在真实浏览器下对本次日期格式调整与各弹窗尺寸做逐页交互走查。
+
+## 2026-11-20
+
+- **类别**：变更
+- **范围**：`src/ui/EmployeeMobileLayout.tsx`、`src/ui/EmployeeMobileChangePasswordPage.tsx`、`src/ui/mobile/`、`src/features/production-order/`、`src/features/material-transfer/`、`src/features/precision-finishing-cutting/`、`src/features/labor-protection/`、`src/features/tooling/`、`src/features/jintan/`、`src/features/tooling-fixture/`、`src/pages/Login.tsx`、`src/pages/AccessDenied.tsx`、`src/pages/RouteErrorPage.tsx`、`src/pages/WorkshopOrderQrDetail.tsx`、`src/ui/uiStyleConventions.vitest.ts`、`src/pages/dashboardChangelog.ts`、`todolist.md`
+- **摘要**：完成前端界面风格统一 Phase 4（`P4-A`～`P4-C`）：
+  - `P4-A`（员工手机端壳、改密页、移动端选择/汇总/扫码壳及 7 个移动端扫码与工单页面）：重构 `EmployeeMobileLayout` 为浅灰画布、`DarkModeButton` 单行顶栏、品牌主色激活态 + 文字标签底栏；清除全局 `rounded-4xl` / `rounded-[30px]` / `shadow-[...]` 并补全暗色模式，状态徽章与审核时间统一收口至 `StatusPill` 与 `formatDateTime`。
+  - `P4-B`（4 个免登录公开二维码页及海报打印 Hook）：劳保领用、刀具出库、金檀配件出库与工装使用公开页统一接入 `PublicQrPageShell` 并启用 `size="large"` 触控表单，移除各自渐变背景、光斑、深黑头图、`stone-*` 灰阶及宋体装饰字，海报打印改用无衬线系统字体。
+  - `P4-C`（系统登录、权限提示、路由错误与订单扫码详情页）：替换 `Login`、`AccessDenied`、`RouteErrorPage`、`WorkshopOrderQrDetail` 残留 `@ant-design/icons` 为 `@heroicons/react/16/solid`，清理登录页任意圆角/阴影并按 C 类详情骨架重构订单扫码详情页；扩展 `uiStyleConventions.vitest.ts` 覆盖 `src/ui/`、`src/pages/` 及全部 `src/features/` 业务域（移除 `DEFERRED_UNTIL_PHASE_4A/4B` 豁免），同步更新 `todolist.md` 与首页更新日志。
+- **验证**：`bun run lint`（0 error）、`bun run typecheck`、`bun run build`、`bun run check:bundle` 及 `bun run test`（含 `src/ui/uiStyleConventions.vitest.ts` 442 项 UI 风格守卫测试）全部通过；尚未在真实移动端与浏览器下逐页实机走查明/暗色视觉表现。
+
+## 2026-11-20
+
 - **类别**：新建
 - **范围**：`supabase/migrations/20261120090000_add_jintan_parts_category.sql`、`src/services/database.types.ts`、`src/services/jintanPartCategory.ts`、`src/services/apiJintanParts*.ts`、`src/services/apiJintanMonthlyReport.ts`、`src/utils/jintanPartsDataExcel.ts`、`src/utils/jintanPartsInventoryExcel.ts`、`src/utils/jintanMonthlyReportExcel.ts`、`src/features/jintan/`、`src/pages/dashboardChangelog.ts`
 - **摘要**：金檀木业配件模块新增「类别」字段（`140U` / `220U` / `通用`，默认 `通用`，存量配件回填为 `通用`），并将 Excel 导出拆分为 6 张分表：

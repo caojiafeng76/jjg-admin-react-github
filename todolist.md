@@ -52,14 +52,14 @@
 
 ## Phase 4：员工手机端、公开扫码页 & 系统页视觉统一
 
-- [ ] **P4-A 员工手机端壳与 7 个移动端页**：重塑 `EmployeeMobileLayout.tsx`（去径向渐变、`rounded-4xl`、70px 重阴影与黑底导航，补齐暗色模式与品牌主色激活态 + 文字标签）；对齐 `MobileScanHubPage`、`MobileProductionOrderScanPage`、`MobileProductionOrderCreatePage`、`MobileProductionOrderDetailPage`、`MobileProductionOrderEditPage`、`MobileMaterialTransferScanPage`、`MobilePrecisionFinishingCuttingScanPage`、`EmployeeMobileChangePasswordPage`
-- [ ] **P4-B 4 个免登录公开二维码页**：`LaborProtectionPublicRequisitionPage`、`ToolingStockOutPublicPage`、`JintanPartsStockOutPublicPage`、`ToolingFixturePublicPage` 统一接入 `PublicQrPageShell`（去宋体标题、光斑、不同渐变背景与深黑头图，统一亮/暗色与 44px+ 触控表单）
-- [ ] **P4-C 登录、首页与兜底页（6 页）**：`Login.tsx`（清 `@ant-design/icons` 与任意圆角/阴影）、`Dashboard.tsx`、`PageNotFound.tsx`、`AccessDenied.tsx`、`RouteErrorPage.tsx`、`WorkshopOrderQrDetail.tsx` 清理残留 `@ant-design/icons` 并对齐标准圆角与按钮层级
+- [x] **P4-A 员工手机端壳与 7 个移动端页**：重塑 `EmployeeMobileLayout.tsx`（去径向渐变、`rounded-4xl`、70px 重阴影与黑底导航，补齐暗色模式与品牌主色激活态 + 文字标签）；对齐 `MobileScanHubPage`、`MobileProductionOrderScanPage`、`MobileProductionOrderCreatePage`、`MobileProductionOrderDetailPage`、`MobileProductionOrderEditPage`、`MobileMaterialTransferScanPage`、`MobilePrecisionFinishingCuttingScanPage`、`EmployeeMobileChangePasswordPage`
+- [x] **P4-B 4 个免登录公开二维码页**：`LaborProtectionPublicRequisitionPage`、`ToolingStockOutPublicPage`、`JintanPartsStockOutPublicPage`、`ToolingFixturePublicPage` 统一接入 `PublicQrPageShell`（去宋体标题、光斑、不同渐变背景与深黑头图，统一亮/暗色与 44px+ 触控表单）
+- [x] **P4-C 登录、首页与兜底页（6 页）**：`Login.tsx`（清 `@ant-design/icons` 与任意圆角/阴影）、`Dashboard.tsx`、`PageNotFound.tsx`、`AccessDenied.tsx`、`RouteErrorPage.tsx`、`WorkshopOrderQrDetail.tsx` 清理残留 `@ant-design/icons` 并对齐标准圆角与按钮层级
 
 ---
 
 ## Phase 5：全站原子收口 & 永久防回退上线
 
-- [ ] **P5-1** Modal 宽度全站收敛至 `520 / 720 / 960` 三档（极少数特殊宽排产/打印预览弹窗须在守卫白名单注明原因）
-- [ ] **P5-2** 非搜索表单布局核对统一 `layout="vertical"`，清理残留日期 `.toLocaleString()` 替换为 `formatDate` / `formatDateTime`
-- [ ] **P5-3** `src/ui/uiStyleConventions.vitest.ts` 切换为全仓库强制门槛（覆盖 `src/features/`、`src/pages/`、`src/ui/`），并在 `CHANGELOG.MD` 与 `src/pages/dashboardChangelog.ts` 记录全站风格统一收官
+- [x] **P5-1** Modal 宽度全站收敛至 `520 / 720 / 960` 三档（极少数特殊宽排产/打印预览弹窗须在守卫白名单注明原因）
+- [x] **P5-2** 非搜索表单布局核对统一 `layout="vertical"`，清理残留日期 `.toLocaleString()` 替换为 `formatDate` / `formatDateTime`
+- [x] **P5-3** `src/ui/uiStyleConventions.vitest.ts` 切换为全仓库强制门槛（覆盖 `src/features/`、`src/pages/`、`src/ui/`），并在 `CHANGELOG.MD` 与 `src/pages/dashboardChangelog.ts` 记录全站风格统一收官

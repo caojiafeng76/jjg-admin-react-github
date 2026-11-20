@@ -12,7 +12,7 @@ import { Button, Empty, Image } from 'antd'
 import { useEffect, useState } from 'react'
 import { getProcessStandardImagePreviewUrl } from '@/services/apiProcessStandardImages'
 import { calculateDailyStandardCapacity } from '@/utils/costAccounting'
-import { formatNumber } from '@/utils/format'
+import { formatDateTime, formatNumber } from '@/utils/format'
 
 interface Props {
   loading: boolean
@@ -120,14 +120,7 @@ export default function StandardTimeMobileList({
                   <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
                     <ClockIcon className="h-3 w-3" />
                     <span>
-                      {record.updated_at
-                        ? new Date(record.updated_at).toLocaleString('zh-CN', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : '暂无更新'}
+                      {formatDateTime(record.updated_at, { fallback: '暂无更新' })}
                     </span>
                   </div>
 

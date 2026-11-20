@@ -1,4 +1,7 @@
-import { LoginOutlined, LogoutOutlined } from '@ant-design/icons'
+import {
+  ArrowRightEndOnRectangleIcon,
+  ArrowRightStartOnRectangleIcon,
+} from '@heroicons/react/16/solid'
 import AppErrorView from '@ui/AppErrorView'
 
 import { useNavigate } from 'react-router-dom'
@@ -30,7 +33,7 @@ export default function AccessDenied() {
           key: 'login',
           label: '返回登录页',
           type: 'primary',
-          icon: <LoginOutlined />,
+          icon: <ArrowRightEndOnRectangleIcon className="size-4" />,
           onClick: () => navigate('/login', { replace: true }),
         },
         ...(user
@@ -38,7 +41,7 @@ export default function AccessDenied() {
               {
                 key: 'signout',
                 label: '退出当前账号',
-                icon: <LogoutOutlined />,
+                icon: <ArrowRightStartOnRectangleIcon className="size-4" />,
                 onClick: async () => {
                   await signOut()
                   navigate('/login', { replace: true })
