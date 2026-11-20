@@ -26,6 +26,11 @@ const PREVIEW_COLUMNS: TableColumnsType<PreviewRow> = [
     render: (value: number) => value + 1,
   },
   {
+    title: '类别',
+    dataIndex: 'part_category',
+    width: 80,
+  },
+  {
     title: '类型',
     dataIndex: 'item_type',
     width: 70,
@@ -71,7 +76,7 @@ export default function JintanPartsDataExcelImport({
   return (
     <ExcelImportModal<JintanPartsDataFormValues>
       title="批量导入配件资料"
-      tip="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；类型、颜色列选填，类型留空按 A；类型、名称、规格与颜色均相同的行视为重复，导入会失败。"
+      tip="请先下载模板，按模板列顺序填写；表头需保持不变；空白行会自动跳过；类型、颜色、类别列选填，类型留空按 A，类别留空按 通用；类别、类型、名称、规格与颜色均相同的行视为重复，导入会失败。"
       columns={PREVIEW_COLUMNS}
       parseFile={async (file) => {
         const { parseJintanPartsDataExcel } = await loadExcel()

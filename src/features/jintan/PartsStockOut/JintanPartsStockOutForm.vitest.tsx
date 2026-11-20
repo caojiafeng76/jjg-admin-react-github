@@ -10,6 +10,7 @@ vi.mock('../PartsInventory/useJintanPartsInventory', () => ({
     data: [
       {
         id: 'inventory-1',
+        part_category: '通用',
         item_type: 'A',
         part_name: '扶手配件',
         specification: 'A1',
@@ -107,6 +108,7 @@ describe('金檀木业配件出库表单', () => {
           id: 'record-1',
           inventory_id: 'inventory-1',
           quantity: 20,
+          part_category: '通用',
           item_type: 'A',
           part_name: '扶手配件',
           specification: 'A1',
@@ -119,7 +121,7 @@ describe('金檀木业配件出库表单', () => {
         }}
       />,
     )
-    expect(screen.getByDisplayValue('A / 扶手配件 / A1')).toBeDisabled()
+    expect(screen.getByDisplayValue('通用 / A / 扶手配件 / A1')).toBeDisabled()
     expect(screen.getByRole('spinbutton')).toBeDisabled()
     act(() => {
       form?.setFieldValue('remarks', '修改备注')

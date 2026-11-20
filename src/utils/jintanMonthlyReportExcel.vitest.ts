@@ -14,6 +14,7 @@ function row(overrides: Partial<JintanMonthlyReportRow>): JintanMonthlyReportRow
   return {
     category: 'parts',
     inventory_id: 'inventory-1',
+    part_category: '通用',
     item_type: 'A',
     item_model: '',
     item_name: '螺钉',
@@ -35,6 +36,7 @@ const report: JintanMonthlyReport = {
   parts: [
     row({
       inventory_id: 'p-1',
+      part_category: '140U',
       opening_quantity: 100,
       stock_in_quantity: 20,
       stock_out_quantity: 30,
@@ -42,6 +44,7 @@ const report: JintanMonthlyReport = {
     }),
     row({
       inventory_id: 'p-2',
+      part_category: '通用',
       item_name: '合页',
       specification: '4寸',
       opening_quantity: 10,
@@ -52,6 +55,7 @@ const report: JintanMonthlyReport = {
     }),
     row({
       inventory_id: 'p-3',
+      part_category: '220U',
       item_type: 'B',
       opening_quantity: 7,
       stock_in_quantity: 1,
@@ -63,6 +67,7 @@ const report: JintanMonthlyReport = {
     row({
       category: 'profiles',
       inventory_id: 'pr-1',
+      part_category: '',
       item_type: 'B',
       item_model: '140U',
       item_name: '立柱',
@@ -86,12 +91,16 @@ function sheetRows(workbook: XLSX.WorkBook, name: string) {
 }
 
 describe('createJintanMonthlyReportWorkbook', () => {
-  it('creates one A sheet and one B sheet per category, in order', () => {
+  it('splits parts into 6 category-type sheets and keeps 2 type sheets for profiles/materials', () => {
     const workbook = createJintanMonthlyReportWorkbook(report, '2026-10')
 
     expect(workbook.SheetNames).toEqual([
-      '配件A',
-      '配件B',
+      '配件140U-A',
+      '配件140U-B',
+      '配件220U-A',
+      '配件220U-B',
+      '配件通用-A',
+      '配件通用-B',
       '型材A',
       '型材B',
       '素材A',
@@ -99,25 +108,28 @@ describe('createJintanMonthlyReportWorkbook', () => {
     ])
   })
 
-  it('splits rows by type and totals each sheet separately', () => {
+  it('splits rows by part category and type and totals each sheet separately', () => {
     const workbook = createJintanMonthlyReportWorkbook(report, '2026-10')
 
-    const partsA = sheetRows(workbook, '配件A')
-    expect(partsA[0][0]).toBe('金檀木业配件A月度库存报表（2026年10月）')
-    expect(partsA[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
-    expect(partsA[2]).toEqual([1, 'A', '', '螺钉', 'ST4.2*20', '', 'SUS304', 100, 20, 30, 0, 90])
-    expect(partsA[3]).toEqual([2, 'A', '', '合页', '4寸', '', 'SUS304', 10, 5, 0, -3, 12])
-    expect(partsA[4]).toEqual(['合计', '', '', '', '', '', '', 110, 25, 30, -3, 102])
-    expect(partsA).toHaveLength(5)
+    const parts140uA = sheetRows(workbook, '配件140U-A')
+    expect(parts140uA[0][0]).toBe('金檀木业配件140U-A月度库存报表（2026年10月）')
+    expect(parts140uA[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
+    expect(parts140uA[2]).toEqual([1, '140U', 'A', '', '螺钉', 'ST4.2*20', '', 'SUS304', 100, 20, 30, 0, 90])
+    expect(parts140uA[3]).toEqual(['合计', '', '', '', '', '', '', '', 100, 20, 30, 0, 90])
+    expect(parts140uA).toHaveLength(4)
 
-    const partsB = sheetRows(workbook, '配件B')
-    expect(partsB[0][0]).toBe('金檀木业配件B月度库存报表（2026年10月）')
-    expect(partsB[2]).toEqual([1, 'B', '', '螺钉', 'ST4.2*20', '', 'SUS304', 7, 1, 2, 0, 6])
-    expect(partsB[3]).toEqual(['合计', '', '', '', '', '', '', 7, 1, 2, 0, 6])
+    const partsCommonA = sheetRows(workbook, '配件通用-A')
+    expect(partsCommonA[2]).toEqual([1, '通用', 'A', '', '合页', '4寸', '', 'SUS304', 10, 5, 0, -3, 12])
+    expect(partsCommonA[3]).toEqual(['合计', '', '', '', '', '', '', '', 10, 5, 0, -3, 12])
+
+    const parts220uB = sheetRows(workbook, '配件220U-B')
+    expect(parts220uB[0][0]).toBe('金檀木业配件220U-B月度库存报表（2026年10月）')
+    expect(parts220uB[2]).toEqual([1, '220U', 'B', '', '螺钉', 'ST4.2*20', '', 'SUS304', 7, 1, 2, 0, 6])
+    expect(parts220uB[3]).toEqual(['合计', '', '', '', '', '', '', '', 7, 1, 2, 0, 6])
 
     const profilesB = sheetRows(workbook, '型材B')
     expect(profilesB[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
-    expect(profilesB[2]).toEqual([1, 'B', '140U', '立柱', '3米', '银色', '6063铝合金', 8, 2, 4, 0, 6])
+    expect(profilesB[2]).toEqual([1, '', 'B', '140U', '立柱', '3米', '银色', '6063铝合金', 8, 2, 4, 0, 6])
   })
 
   it('keeps an empty sheet with headers and a zero total row', () => {
@@ -125,17 +137,33 @@ describe('createJintanMonthlyReportWorkbook', () => {
 
     const profilesA = sheetRows(workbook, '型材A')
     expect(profilesA[1]).toEqual(Array.from(JINTAN_MONTHLY_REPORT_HEADERS))
-    expect(profilesA[2]).toEqual(['合计', '', '', '', '', '', '', 0, 0, 0, 0, 0])
+    expect(profilesA[2]).toEqual(['合计', '', '', '', '', '', '', '', 0, 0, 0, 0, 0])
 
     const materialsB = sheetRows(workbook, '素材B')
     expect(materialsB[0][0]).toBe('金檀木业素材B月度库存报表（2026年10月）')
-    expect(materialsB[2]).toEqual(['合计', '', '', '', '', '', '', 0, 0, 0, 0, 0])
+    expect(materialsB[2]).toEqual(['合计', '', '', '', '', '', '', '', 0, 0, 0, 0, 0])
   })
 
-  it('creates only the selected type when one is given', () => {
+  it('creates only the selected type and part category when filtered', () => {
     const workbook = createJintanMonthlyReportWorkbook(report, '2026-10', 'B')
 
-    expect(workbook.SheetNames).toEqual(['配件B', '型材B', '素材B'])
-    expect(sheetRows(workbook, '配件B')[2][3]).toBe('螺钉')
+    expect(workbook.SheetNames).toEqual([
+      '配件140U-B',
+      '配件220U-B',
+      '配件通用-B',
+      '型材B',
+      '素材B',
+    ])
+    expect(sheetRows(workbook, '配件220U-B')[2][4]).toBe('螺钉')
+
+    const categoryFiltered = createJintanMonthlyReportWorkbook(report, '2026-10', undefined, '140U')
+    expect(categoryFiltered.SheetNames).toEqual([
+      '配件140U-A',
+      '配件140U-B',
+      '型材A',
+      '型材B',
+      '素材A',
+      '素材B',
+    ])
   })
 })

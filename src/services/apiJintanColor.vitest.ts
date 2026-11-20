@@ -58,8 +58,9 @@ describe('颜色显示工具', () => {
 
 describe('资料批量导入按颜色判重', () => {
   it('配件：已有无颜色的一条时可导入同名同规格的黑色，重复的黑色被拒绝', async () => {
-    db.rows = [{ item_type: 'A', part_name: '螺钉', specification: 'M6', color: '' }]
+    db.rows = [{ part_category: '通用', item_type: 'A', part_name: '螺钉', specification: 'M6', color: '' }]
     const row = {
+      part_category: '通用' as const,
       item_type: 'A' as const,
       part_name: '螺钉',
       specification: 'M6',
@@ -71,10 +72,10 @@ describe('资料批量导入按颜色判重', () => {
     await createJintanPartsDataBatch([{ ...row, color: ' 黑色 ' }])
     expect(db.inserted).toEqual([[expect.objectContaining({ color: '黑色' })]])
 
-    db.rows.push({ item_type: 'A', part_name: '螺钉', specification: 'M6', color: '黑色' })
+    db.rows.push({ part_category: '通用', item_type: 'A', part_name: '螺钉', specification: 'M6', color: '黑色' })
     await expect(
       createJintanPartsDataBatch([{ ...row, color: '黑色' }]),
-    ).rejects.toThrow('“A”/“螺钉”/“M6”/“黑色”')
+    ).rejects.toThrow('“通用”/“A”/“螺钉”/“M6”/“黑色”')
     expect(db.inserted).toHaveLength(1)
   })
 
@@ -104,6 +105,7 @@ describe('库存导入按颜色匹配', () => {
     const inventoryRow = (id: string, color: string) => ({
       id,
       part_data_id: `data-${id}`,
+      part_category: '通用',
       item_type: 'A',
       part_name: '螺钉',
       specification: 'M6',
@@ -112,6 +114,7 @@ describe('库存导入按颜色匹配', () => {
       supplier: '',
     })
     const importRow = (color: string, quantity: number) => ({
+      part_category: '通用' as const,
       item_type: 'A' as const,
       part_name: '螺钉',
       specification: 'M6',

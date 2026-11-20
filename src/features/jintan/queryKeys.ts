@@ -1,4 +1,5 @@
 import type { JintanItemType } from '@/services/jintanItemType'
+import type { JintanPartCategory } from '@/services/jintanPartCategory'
 import type { JintanSearchFilters } from '@/services/jintanSearchFields'
 import { normalizeJintanSearchFilters } from '@/services/jintanSearchFields'
 
@@ -6,6 +7,7 @@ export interface JintanPartsListKeyParams {
   page: number
   pageSize: number
   filters?: JintanSearchFilters
+  partCategory?: JintanPartCategory
   itemType?: JintanItemType
 }
 
@@ -14,6 +16,7 @@ export interface JintanPartsInventoryListKeyParams {
   pageSize: number
   filters?: JintanSearchFilters
   status?: string
+  partCategory?: JintanPartCategory
   itemType?: JintanItemType
 }
 
@@ -21,6 +24,7 @@ export interface JintanPartsStockInListKeyParams {
   page: number
   pageSize: number
   filters?: JintanSearchFilters
+  partCategory?: JintanPartCategory
   itemType?: JintanItemType
 }
 
@@ -28,6 +32,7 @@ export interface JintanPartsStockOutListKeyParams {
   page: number
   pageSize: number
   filters?: JintanSearchFilters
+  partCategory?: JintanPartCategory
   itemType?: JintanItemType
 }
 
@@ -125,6 +130,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           filters: normalizeJintanSearchFilters(params.filters),
+          partCategory: params.partCategory ?? '',
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -150,14 +156,20 @@ export const jintanKeys = {
           pageSize: params.pageSize,
           filters: normalizeJintanSearchFilters(params.filters),
           status: params.status ?? '',
+          partCategory: params.partCategory ?? '',
           itemType: params.itemType ?? '',
         },
       ] as const,
-    summary: (filters?: JintanSearchFilters, itemType?: JintanItemType) =>
+    summary: (
+      filters?: JintanSearchFilters,
+      itemType?: JintanItemType,
+      partCategory?: JintanPartCategory,
+    ) =>
       [
         PARTS_INVENTORY_ROOT,
         'summary',
         normalizeJintanSearchFilters(filters),
+        partCategory ?? '',
         itemType ?? '',
       ] as const,
     adjustments: (params: JintanStockByInventoryKeyParams) =>
@@ -191,6 +203,7 @@ export const jintanKeys = {
           page: params.page,
           pageSize: params.pageSize,
           filters: normalizeJintanSearchFilters(params.filters),
+          partCategory: params.partCategory ?? '',
           itemType: params.itemType ?? '',
         },
       ] as const,
@@ -214,6 +227,7 @@ export const jintanKeys = {
         {
           ...params,
           filters: normalizeJintanSearchFilters(params.filters),
+          partCategory: params.partCategory ?? '',
           itemType: params.itemType ?? '',
         },
       ] as const,

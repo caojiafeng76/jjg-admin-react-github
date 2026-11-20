@@ -1,4 +1,5 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanPartCategory } from './jintanPartCategory'
 import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
 import { describeJintanColor } from './jintanColor'
@@ -18,6 +19,7 @@ export const JINTAN_PARTS_STOCK_STATUSES: readonly JintanPartsStockStatus[] = [
 export interface JintanPartsInventory {
   id: string
   part_data_id: string
+  part_category: JintanPartCategory
   item_type: JintanItemType
   part_name: string
   specification: string
@@ -49,6 +51,7 @@ export type JintanPartsStockStatusSummary = Record<
 >
 
 export interface JintanPartsInventoryImportRow {
+  part_category: JintanPartCategory
   item_type: JintanItemType
   part_name: string
   specification: string
@@ -71,16 +74,17 @@ function normalizeFormValues(
 }
 
 function inventoryKeyOf(row: {
+  part_category: string
   item_type: string
   part_name: string
   specification: string
   color: string
 }): string {
-  return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}\u0000${row.color}`
+  return `${row.part_category}\u0000${row.item_type}\u0000${row.part_name}\u0000${row.specification}\u0000${row.color}`
 }
 
 function keywordFilter(keyword: string) {
-  return `part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%,color.ilike.%${keyword}%`
+  return `part_category.ilike.%${keyword}%,part_name.ilike.%${keyword}%,specification.ilike.%${keyword}%,material.ilike.%${keyword}%,supplier.ilike.%${keyword}%,color.ilike.%${keyword}%`
 }
 
 export async function getJintanPartsInventoryList({
@@ -88,12 +92,14 @@ export async function getJintanPartsInventoryList({
   pageSize,
   filters,
   status,
+  partCategory,
   itemType,
 }: {
   page: number
   pageSize: number
   filters?: JintanSearchFilters
   status?: JintanPartsStockStatus
+  partCategory?: JintanPartCategory
   itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
@@ -107,6 +113,9 @@ export async function getJintanPartsInventoryList({
 
   if (status) {
     query = query.eq('stock_status', status)
+  }
+  if (partCategory) {
+    query = query.eq('part_category', partCategory)
   }
   if (itemType) {
     query = query.eq('item_type', itemType)
@@ -154,10 +163,12 @@ export async function getJintanPartsInventoryByDataId(
 export async function getJintanPartsInventoryForExport({
   filters,
   status,
+  partCategory,
   itemType,
 }: {
   filters?: JintanSearchFilters
   status?: JintanPartsStockStatus
+  partCategory?: JintanPartCategory
   itemType?: JintanItemType
 } = {}) {
   const rows: JintanPartsInventory[] = []
@@ -170,6 +181,9 @@ export async function getJintanPartsInventoryForExport({
 
     if (status) {
       query = query.eq('stock_status', status)
+    }
+    if (partCategory) {
+      query = query.eq('part_category', partCategory)
     }
     if (itemType) {
       query = query.eq('item_type', itemType)
@@ -201,6 +215,7 @@ export async function getJintanPartsInventoryForExport({
 export async function getJintanPartsInventoryStatusSummary(
   filters?: JintanSearchFilters,
   itemType?: JintanItemType,
+  partCategory?: JintanPartCategory,
 ): Promise<JintanPartsStockStatusSummary> {
   const results = await Promise.all(
     JINTAN_PARTS_STOCK_STATUSES.map(async (status) => {
@@ -211,6 +226,9 @@ export async function getJintanPartsInventoryStatusSummary(
 
       query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
 
+      if (partCategory) {
+        query = query.eq('part_category', partCategory)
+      }
       if (itemType) {
         query = query.eq('item_type', itemType)
       }
@@ -258,7 +276,7 @@ export async function createJintanPartsInventoryBatch(
     const key = inventoryKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}在 Excel 中重复，无法导入`,
+        `类别“${row.part_category}”类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}在 Excel 中重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -267,7 +285,7 @@ export async function createJintanPartsInventoryBatch(
   const partNames = Array.from(new Set(rows.map(row => row.part_name)))
   const { data: inventoryRows, error: inventoryError } = await supabase
     .from('jintan_parts_inventory')
-    .select('id, part_data_id, item_type, part_name, specification, color, material, supplier')
+    .select('id, part_data_id, part_category, item_type, part_name, specification, color, material, supplier')
     .in('part_name', partNames)
 
   if (inventoryError) {
@@ -281,7 +299,7 @@ export async function createJintanPartsInventoryBatch(
   const missing = rows.filter(row => !inventoryByKey.has(inventoryKeyOf(row)))
   if (missing.length > 0) {
     const labels = missing
-      .map(row => `“${row.item_type}”/“${row.part_name}”/“${row.specification}”${row.color ? `/“${row.color}”` : ''}`)
+      .map(row => `“${row.part_category}”/“${row.item_type}”/“${row.part_name}”/“${row.specification}”${row.color ? `/“${row.color}”` : ''}`)
       .join('、')
     throw new Error(`以下配件在配件资料中不存在，请先维护配件资料：${labels}`)
   }
@@ -290,13 +308,14 @@ export async function createJintanPartsInventoryBatch(
     const matched = inventoryByKey.get(inventoryKeyOf(row))
     if (!matched) {
       throw new Error(
-        `未找到类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}的库存行，请刷新后重试`,
+        `未找到类别“${row.part_category}”类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}的库存行，请刷新后重试`,
       )
     }
 
     return {
       id: matched.id,
       part_data_id: matched.part_data_id,
+      part_category: matched.part_category,
       item_type: matched.item_type,
       part_name: matched.part_name,
       specification: matched.specification,
@@ -319,6 +338,7 @@ export async function createJintanPartsInventoryBatch(
 
 export interface JintanPartsInventoryOption {
   id: string
+  part_category: JintanPartCategory
   item_type: JintanItemType
   part_name: string
   specification: string
@@ -352,7 +372,7 @@ async function getJintanPartsInventoryOptionsWithClient(
 ): Promise<JintanPartsInventoryOption[]> {
   let query = client
     .from('jintan_parts_inventory')
-    .select('id, item_type, part_name, specification, color, material, supplier, quantity')
+    .select('id, part_category, item_type, part_name, specification, color, material, supplier, quantity')
   if (keyword?.trim())
     query = query.or(keywordFilter(keyword.trim()))
 

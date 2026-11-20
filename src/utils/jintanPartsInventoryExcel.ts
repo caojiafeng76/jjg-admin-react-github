@@ -2,6 +2,8 @@ import type {
   JintanPartsInventory,
   JintanPartsInventoryImportRow,
 } from '@/services/apiJintanPartsInventory'
+import type { JintanItemType } from '@/services/jintanItemType'
+import type { JintanPartCategory } from '@/services/jintanPartCategory'
 import dayjs from 'dayjs'
 
 import * as XLSX from 'xlsx-js-style'
@@ -11,6 +13,11 @@ import {
   parseJintanItemType,
 } from '@/services/jintanItemType'
 import {
+  DEFAULT_JINTAN_PART_CATEGORY,
+  getJintanPartSheetGroups,
+  parseJintanPartCategory,
+} from '@/services/jintanPartCategory'
+import {
   applyRegisterSheetStyles,
   autoFitColumnWidths,
   centerAllCells,
@@ -18,18 +25,23 @@ import {
   setRowHeight,
 } from '@/utils/excelStyleUtils'
 
-const TEMPLATE_HEADERS = ['名称', '规格', '库存数量', '备注', '类型', '颜色'] as const
+const TEMPLATE_HEADERS = ['名称', '规格', '库存数量', '备注', '类型', '颜色', '类别'] as const
 const ITEM_TYPE_COLUMN_INDEX = TEMPLATE_HEADERS.indexOf('类型')
 const COLOR_COLUMN_INDEX = TEMPLATE_HEADERS.indexOf('颜色')
-const OPTIONAL_COLUMN_INDEXES: readonly number[] = [ITEM_TYPE_COLUMN_INDEX, COLOR_COLUMN_INDEX]
+const PART_CATEGORY_COLUMN_INDEX = TEMPLATE_HEADERS.indexOf('类别')
+const OPTIONAL_COLUMN_INDEXES: readonly number[] = [
+  ITEM_TYPE_COLUMN_INDEX,
+  COLOR_COLUMN_INDEX,
+  PART_CATEGORY_COLUMN_INDEX,
+]
 
 const TEMPLATE_FILE_NAME = '金檀木业配件库存模板.xlsx'
 const TEMPLATE_SHEET_NAME = '配件库存导入模板'
 
-const EXPORT_SHEET_NAME = '配件库存'
-const EXPORT_TITLE = '金檀木业配件库存'
+const EXPORT_TITLE_PREFIX = '金檀木业配件库存'
 const EXPORT_HEADERS = [
   '#',
+  '类别',
   '类型',
   '名称',
   '规格',
@@ -44,7 +56,7 @@ const EXPORT_HEADERS = [
   '备注',
   '更新时间',
 ] as const
-const EXPORT_COLUMN_WIDTHS = [6, 6, 20, 18, 10, 14, 18, 12, 10, 10, 10, 10, 28, 20]
+const EXPORT_COLUMN_WIDTHS = [6, 8, 6, 20, 18, 10, 14, 18, 12, 10, 10, 10, 10, 28, 20]
 const EXPORT_QUANTITY_COLUMN_INDEX = EXPORT_HEADERS.indexOf('库存数量')
 const EXPORT_STATUS_COLUMN_INDEX = EXPORT_HEADERS.indexOf('状态')
 const EXPORT_BODY_START_ROW = 2
@@ -52,6 +64,11 @@ const EXPORT_BODY_START_ROW = 2
 export interface ParseJintanPartsInventoryExcelResult {
   rows: JintanPartsInventoryImportRow[]
   errors: string[]
+}
+
+export interface JintanPartsInventoryExportOptions {
+  partCategory?: JintanPartCategory
+  itemType?: JintanItemType
 }
 
 export function downloadJintanPartsInventoryTemplate() {
@@ -67,15 +84,17 @@ export function downloadJintanPartsInventoryTemplate() {
   XLSX.writeFile(workbook, TEMPLATE_FILE_NAME, EXCEL_WRITE_OPTIONS)
 }
 
-export function createJintanPartsInventoryExportWorkbook(
+function createPartsInventorySheet(
   items: JintanPartsInventory[],
-): XLSX.WorkBook {
+  title: string,
+): XLSX.WorkSheet {
   const columnCount = EXPORT_HEADERS.length
   const titleRow = Array.from({ length: columnCount }, () => '')
-  titleRow[0] = EXPORT_TITLE
+  titleRow[0] = title
 
   const bodyRows = items.map((item, index) => [
     index + 1,
+    item.part_category,
     item.item_type,
     item.part_name,
     item.specification,
@@ -104,15 +123,35 @@ export function createJintanPartsInventoryExportWorkbook(
   })
   applyStockStatusFills(worksheet, items)
 
+  return worksheet
+}
+
+export function createJintanPartsInventoryExportWorkbook(
+  items: JintanPartsInventory[],
+  options?: JintanPartsInventoryExportOptions,
+): XLSX.WorkBook {
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME)
+  const groups = getJintanPartSheetGroups(options)
+
+  for (const group of groups) {
+    const groupItems = items.filter(
+      item => item.part_category === group.partCategory && item.item_type === group.itemType,
+    )
+    const worksheet = createPartsInventorySheet(
+      groupItems,
+      `${EXPORT_TITLE_PREFIX}（${group.label}）`,
+    )
+    XLSX.utils.book_append_sheet(workbook, worksheet, group.label)
+  }
+
   return workbook
 }
 
 export function exportJintanPartsInventoryToExcel(
   items: JintanPartsInventory[],
+  options?: JintanPartsInventoryExportOptions,
 ) {
-  const workbook = createJintanPartsInventoryExportWorkbook(items)
+  const workbook = createJintanPartsInventoryExportWorkbook(items, options)
   const filename = `金檀木业配件库存_${items.length}条_${dayjs(new Date()).format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
   XLSX.writeFile(workbook, filename, EXCEL_WRITE_OPTIONS)
 }
@@ -140,6 +179,9 @@ export async function parseJintanPartsInventoryExcel(
   )
   const hasColorColumn = Boolean(
     normalizeText(rawRows[0]?.[COLOR_COLUMN_INDEX]),
+  )
+  const hasPartCategoryColumn = Boolean(
+    normalizeText(rawRows[0]?.[PART_CATEGORY_COLUMN_INDEX]),
   )
 
   const rows: JintanPartsInventoryImportRow[] = []
@@ -185,16 +227,28 @@ export async function parseJintanPartsInventoryExcel(
       ? normalizeText(cells[COLOR_COLUMN_INDEX])
       : ''
 
-    const dedupeKey = `${itemType}\u0000${partName}\u0000${specification}\u0000${color}`
+    const partCategoryText = hasPartCategoryColumn
+      ? normalizeText(cells[PART_CATEGORY_COLUMN_INDEX])
+      : ''
+    const partCategory = partCategoryText
+      ? parseJintanPartCategory(partCategoryText)
+      : DEFAULT_JINTAN_PART_CATEGORY
+    if (!partCategory) {
+      errors.push(`第 ${rowNumber} 行类别只能填 140U、220U 或 通用`)
+      return
+    }
+
+    const dedupeKey = `${partCategory}\u0000${itemType}\u0000${partName}\u0000${specification}\u0000${color}`
     if (seenKeys.has(dedupeKey)) {
       errors.push(
-        `第 ${rowNumber} 行类型“${itemType}”名称“${partName}”规格“${specification}”${color ? `颜色“${color}”` : ''}在 Excel 中重复`,
+        `第 ${rowNumber} 行类别“${partCategory}”类型“${itemType}”名称“${partName}”规格“${specification}”${color ? `颜色“${color}”` : ''}在 Excel 中重复`,
       )
       return
     }
 
     seenKeys.add(dedupeKey)
     rows.push({
+      part_category: partCategory,
       item_type: itemType,
       part_name: partName,
       specification,

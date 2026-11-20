@@ -1,5 +1,5 @@
 import type { FormInstance } from 'antd'
-import type { JintanFieldSearchValues } from '../JintanFieldSearch'
+import type { JintanPartsFieldSearchValues } from '../JintanPartCategoryFilterItem'
 import type { JintanPartsData, JintanPartsDataFormValues } from '@/services/apiJintanPartsData'
 import { DocumentDuplicateIcon } from '@heroicons/react/16/solid'
 import { App, Button, Modal, Tooltip } from 'antd'
@@ -14,6 +14,7 @@ import {
 
 } from '@/services/apiJintanPartsData'
 import { parseJintanItemType } from '@/services/jintanItemType'
+import { parseJintanPartCategory } from '@/services/jintanPartCategory'
 import { JINTAN_PARTS_SEARCH_FIELDS, readJintanSearchFilters, writeJintanSearchFilters } from '@/services/jintanSearchFields'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -81,13 +82,15 @@ export default function JintanPartsDataPage() {
   )
   const itemType
     = parseJintanItemType(searchParamsURL.get('itemType')) ?? undefined
+  const partCategory
+    = parseJintanPartCategory(searchParamsURL.get('partCategory')) ?? undefined
   const searchParams = useMemo(
-    () => ({ filters, itemType }),
-    [filters, itemType],
+    () => ({ filters, partCategory, itemType }),
+    [filters, partCategory, itemType],
   )
   const searchValues = useMemo(
-    () => ({ ...filters, itemType }),
-    [filters, itemType],
+    () => ({ ...filters, partCategory, itemType }),
+    [filters, partCategory, itemType],
   )
 
   const { data, isLoading, error, refetch } = useJintanPartsDataList({
@@ -235,7 +238,7 @@ export default function JintanPartsDataPage() {
     setIsExporting(true)
     try {
       const [exportRows, { exportJintanPartsDataToExcel }] = await Promise.all([
-        getJintanPartsDataForExport(filters, itemType),
+        getJintanPartsDataForExport(filters, itemType, partCategory),
         loadJintanPartsDataExcel(),
       ])
 
@@ -244,7 +247,7 @@ export default function JintanPartsDataPage() {
         return
       }
 
-      exportJintanPartsDataToExcel(exportRows)
+      exportJintanPartsDataToExcel(exportRows, { partCategory, itemType })
       message.success(`已导出 ${exportRows.length} 条配件资料`)
     }
     catch (error) {
@@ -258,6 +261,7 @@ export default function JintanPartsDataPage() {
   }, [
     canManageParts,
     message,
+    partCategory,
     itemType,
     filters,
     viewerDenied,
@@ -309,13 +313,20 @@ export default function JintanPartsDataPage() {
   )
 
   const handleSearch = useCallback(
-    (params: JintanFieldSearchValues) => {
+    (params: JintanPartsFieldSearchValues) => {
       setSelectedRowKeys([])
 
       const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
       nextSearchParamsURL.set('page', '1')
 
       writeJintanSearchFilters(nextSearchParamsURL, params, JINTAN_PARTS_SEARCH_FIELDS)
+
+      if (params.partCategory) {
+        nextSearchParamsURL.set('partCategory', params.partCategory)
+      }
+      else {
+        nextSearchParamsURL.delete('partCategory')
+      }
 
       if (params.itemType) {
         nextSearchParamsURL.set('itemType', params.itemType)
@@ -335,6 +346,7 @@ export default function JintanPartsDataPage() {
     const nextSearchParamsURL = new URLSearchParams(searchParamsURL)
     nextSearchParamsURL.set('page', '1')
     writeJintanSearchFilters(nextSearchParamsURL, undefined, JINTAN_PARTS_SEARCH_FIELDS)
+    nextSearchParamsURL.delete('partCategory')
     nextSearchParamsURL.delete('itemType')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])

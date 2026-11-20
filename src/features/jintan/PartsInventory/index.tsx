@@ -14,6 +14,7 @@ import {
 
 } from '@/services/apiJintanPartsInventory'
 import { parseJintanItemType } from '@/services/jintanItemType'
+import { parseJintanPartCategory } from '@/services/jintanPartCategory'
 import {
   JINTAN_PARTS_SEARCH_FIELDS,
   readJintanSearchFilters,
@@ -81,15 +82,17 @@ export default function JintanPartsInventoryPage() {
     [searchParamsURL],
   )
   const status = isJintanPartsStockStatus(statusParam) ? statusParam : undefined
+  const partCategory
+    = parseJintanPartCategory(searchParamsURL.get('partCategory')) ?? undefined
   const itemType
     = parseJintanItemType(searchParamsURL.get('itemType')) ?? undefined
   const searchParams = useMemo(
-    () => ({ filters, status, itemType }),
-    [filters, status, itemType],
+    () => ({ filters, status, partCategory, itemType }),
+    [filters, status, partCategory, itemType],
   )
   const searchValues = useMemo<JintanPartsInventorySearchValues>(
-    () => ({ ...filters, status, itemType }),
-    [filters, status, itemType],
+    () => ({ ...filters, status, partCategory, itemType }),
+    [filters, status, partCategory, itemType],
   )
 
   const { data, isLoading, error, refetch } = useJintanPartsInventoryList({
@@ -100,6 +103,7 @@ export default function JintanPartsInventoryPage() {
   const { data: statusSummary } = useJintanPartsInventorySummary(
     filters,
     itemType,
+    partCategory,
   )
 
   const updateMutation = useUpdateJintanPartsInventory()
@@ -152,6 +156,7 @@ export default function JintanPartsInventoryPage() {
           getJintanPartsInventoryForExport({
             filters,
             status,
+            partCategory,
             itemType,
           }),
           loadJintanPartsInventoryExcel(),
@@ -162,7 +167,7 @@ export default function JintanPartsInventoryPage() {
         return
       }
 
-      exportJintanPartsInventoryToExcel(exportRows)
+      exportJintanPartsInventoryToExcel(exportRows, { partCategory, itemType })
       message.success(`已导出 ${exportRows.length} 条配件库存`)
     }
     catch (error) {
@@ -176,6 +181,7 @@ export default function JintanPartsInventoryPage() {
   }, [
     canManageInventory,
     filters,
+    partCategory,
     itemType,
     message,
     status,
@@ -274,6 +280,13 @@ export default function JintanPartsInventoryPage() {
         nextSearchParamsURL.delete('status')
       }
 
+      if (params.partCategory) {
+        nextSearchParamsURL.set('partCategory', params.partCategory)
+      }
+      else {
+        nextSearchParamsURL.delete('partCategory')
+      }
+
       if (params.itemType) {
         nextSearchParamsURL.set('itemType', params.itemType)
       }
@@ -297,6 +310,7 @@ export default function JintanPartsInventoryPage() {
       JINTAN_PARTS_SEARCH_FIELDS,
     )
     nextSearchParamsURL.delete('status')
+    nextSearchParamsURL.delete('partCategory')
     nextSearchParamsURL.delete('itemType')
     setSearchParamsURL(nextSearchParamsURL)
   }, [searchParamsURL, setSearchParamsURL])
@@ -305,11 +319,12 @@ export default function JintanPartsInventoryPage() {
     (nextStatus: JintanPartsStockStatus) => {
       handleSearch({
         ...filters,
+        partCategory,
         itemType,
         status: status === nextStatus ? undefined : nextStatus,
       })
     },
-    [filters, handleSearch, itemType, status],
+    [filters, handleSearch, itemType, partCategory, status],
   )
 
   useEffect(() => {

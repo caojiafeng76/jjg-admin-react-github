@@ -1,5 +1,5 @@
 import type { FormInstance } from 'antd'
-import type { JintanFieldSearchValues } from '../JintanFieldSearch'
+import type { JintanPartsFieldSearchValues } from '../JintanPartCategoryFilterItem'
 import type {
   JintanPartsStockOut,
   JintanPartsStockOutFormValues,
@@ -12,6 +12,7 @@ import { usePermission } from '@/hooks/usePermission'
 import { useTableHeight } from '@/hooks/useTableHeight'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
 import { parseJintanItemType } from '@/services/jintanItemType'
+import { parseJintanPartCategory } from '@/services/jintanPartCategory'
 import { JINTAN_PARTS_SEARCH_FIELDS, readJintanSearchFilters, writeJintanSearchFilters } from '@/services/jintanSearchFields'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
@@ -45,9 +46,10 @@ export default function JintanPartsStockOutPage() {
     [urlParams],
   )
   const itemType = parseJintanItemType(urlParams.get('itemType')) ?? undefined
+  const partCategory = parseJintanPartCategory(urlParams.get('partCategory')) ?? undefined
   const searchValues = useMemo(
-    () => ({ ...filters, itemType }),
-    [filters, itemType],
+    () => ({ ...filters, partCategory, itemType }),
+    [filters, partCategory, itemType],
   )
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -62,6 +64,7 @@ export default function JintanPartsStockOutPage() {
     page,
     pageSize,
     filters,
+    partCategory,
     itemType,
   })
   const createMutation = useCreateJintanPartsStockOut()
@@ -193,10 +196,13 @@ export default function JintanPartsStockOutPage() {
   ])
 
   const handleSearch = useCallback(
-    (params: JintanFieldSearchValues) => {
+    (params: JintanPartsFieldSearchValues) => {
       const next = new URLSearchParams(urlParams)
       next.set('page', '1')
       writeJintanSearchFilters(next, params, JINTAN_PARTS_SEARCH_FIELDS)
+      if (params.partCategory)
+        next.set('partCategory', params.partCategory)
+      else next.delete('partCategory')
       if (params.itemType)
         next.set('itemType', params.itemType)
       else next.delete('itemType')

@@ -15,6 +15,10 @@ import {
   JINTAN_ITEM_TYPE_OPTIONS,
   parseJintanItemType,
 } from '@/services/jintanItemType'
+import {
+  JINTAN_PART_CATEGORY_OPTIONS,
+  parseJintanPartCategory,
+} from '@/services/jintanPartCategory'
 import ExportButton from '@/ui/ExportButton'
 import FilterBar from '@/ui/FilterBar'
 import { TableState } from '@/ui/TableState'
@@ -23,7 +27,7 @@ import { feedbackText } from '@/utils/feedbackText'
 import { JINTAN_MONTHLY_REPORT_PERMISSION_KEY } from '../permissions'
 import JintanMonthlyReportTable from './JintanMonthlyReportTable'
 import {
-  filterJintanMonthlyReportByItemType,
+  filterJintanMonthlyReport,
   formatJintanReportMonth,
   normalizeJintanReportMonth,
 } from './reportUtils'
@@ -65,12 +69,13 @@ export default function JintanMonthlyReportPage() {
     : 'parts'
   const categoryLabel = JINTAN_MONTHLY_REPORT_CATEGORY_LABELS[category]
   const itemType = parseJintanItemType(searchParams.get('itemType')) ?? undefined
+  const partCategory = parseJintanPartCategory(searchParams.get('partCategory')) ?? undefined
 
   const { data: report, isLoading, isFetching, error, refetch }
     = useJintanMonthlyReport(month)
   const data = useMemo(
-    () => report && filterJintanMonthlyReportByItemType(report, itemType),
-    [report, itemType],
+    () => report && filterJintanMonthlyReport(report, { itemType, partCategory }),
+    [report, itemType, partCategory],
   )
 
   const { tableContainerRef, scrollY, rowHeight } = useTableHeight({
@@ -80,7 +85,7 @@ export default function JintanMonthlyReportPage() {
   })
 
   const updateSearchParam = useCallback(
-    (key: 'month' | 'tab' | 'itemType', value?: string) => {
+    (key: 'month' | 'tab' | 'itemType' | 'partCategory', value?: string) => {
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev)
         if (value) {
@@ -103,7 +108,10 @@ export default function JintanMonthlyReportPage() {
         loadJintanMonthlyReportExcel(),
       ])
 
-      const selectedReport = filterJintanMonthlyReportByItemType(fullReport, itemType)
+      const selectedReport = filterJintanMonthlyReport(fullReport, {
+        itemType,
+        partCategory,
+      })
       const total = JINTAN_MONTHLY_REPORT_CATEGORIES.reduce(
         (sum, key) => sum + selectedReport[key].length,
         0,
@@ -113,7 +121,12 @@ export default function JintanMonthlyReportPage() {
         return
       }
 
-      exportJintanMonthlyReportToExcel(fullReport, month, itemType)
+      if (partCategory) {
+        exportJintanMonthlyReportToExcel(fullReport, month, itemType, partCategory)
+      }
+      else {
+        exportJintanMonthlyReportToExcel(fullReport, month, itemType)
+      }
       message.success(
         feedbackText.exported(`${formatJintanReportMonth(month)}库存记录`, total),
       )
@@ -126,7 +139,7 @@ export default function JintanMonthlyReportPage() {
     finally {
       setIsExporting(false)
     }
-  }, [itemType, message, month, queryClient])
+  }, [itemType, message, month, partCategory, queryClient])
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
@@ -173,6 +186,15 @@ export default function JintanMonthlyReportPage() {
           value={itemType}
           options={JINTAN_ITEM_TYPE_OPTIONS}
           onChange={value => updateSearchParam('itemType', value)}
+        />
+        <Select
+          allowClear
+          placeholder="全部类别"
+          aria-label="类别"
+          style={{ width: 120 }}
+          value={partCategory}
+          options={JINTAN_PART_CATEGORY_OPTIONS}
+          onChange={value => updateSearchParam('partCategory', value)}
         />
       </FilterBar>
 

@@ -11,6 +11,7 @@ const report: JintanMonthlyReport = {
   parts: [
     {
       category: 'parts',
+      part_category: '140U',
       item_type: 'A',
       inventory_id: 'p-1',
       item_model: '',
@@ -30,6 +31,7 @@ const report: JintanMonthlyReport = {
   profiles: [
     {
       category: 'profiles',
+      part_category: '',
       item_type: 'A',
       inventory_id: 'pr-1',
       item_model: '140U',
@@ -154,5 +156,19 @@ describe('jintanMonthlyReportPage', () => {
 
     expect(await screen.findByText('当前没有可导出的金檀库存数据')).toBeTruthy()
     expect(exportToExcel).not.toHaveBeenCalled()
+  })
+
+  it('filters parts by category and forwards category on export', async () => {
+    getReport.mockResolvedValue(report)
+    renderPage('/jintan-monthly-report?month=2026-10&partCategory=220U')
+
+    expect(await screen.findByText('配件（0）')).toBeTruthy()
+    expect(screen.queryByText('十字沉头螺钉')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: /导出月度报表/ }))
+
+    await waitFor(() =>
+      expect(exportToExcel).toHaveBeenCalledWith(report, '2026-10', undefined, '220U'),
+    )
   })
 })

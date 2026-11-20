@@ -1,4 +1,5 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanPartCategory } from './jintanPartCategory'
 import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
 import { applyJintanSearchFilters, JINTAN_PARTS_SEARCH_FIELDS } from './jintanSearchFields'
@@ -8,6 +9,7 @@ import supabase from './supabase'
 export interface JintanPartsStockOut {
   id: string
   inventory_id: string
+  part_category: JintanPartCategory
   item_type: JintanItemType
   part_name: string
   specification: string
@@ -30,6 +32,7 @@ export async function getJintanPartsStockOutList({
   page,
   pageSize,
   filters,
+  partCategory,
   itemType,
   inventoryId,
   signal,
@@ -37,6 +40,7 @@ export async function getJintanPartsStockOutList({
   page: number
   pageSize: number
   filters?: JintanSearchFilters
+  partCategory?: JintanPartCategory
   itemType?: JintanItemType
   inventoryId?: string
   signal?: AbortSignal
@@ -45,6 +49,8 @@ export async function getJintanPartsStockOutList({
     .from('jintan_parts_stock_out')
     .select('*', { count: 'exact' })
   query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
+  if (partCategory)
+    query = query.eq('part_category', partCategory)
   if (itemType)
     query = query.eq('item_type', itemType)
   if (inventoryId)

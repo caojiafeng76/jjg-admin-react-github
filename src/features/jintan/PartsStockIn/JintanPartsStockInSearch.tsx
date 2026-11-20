@@ -1,13 +1,21 @@
-import type { JintanFieldSearchValues } from '../JintanFieldSearch'
+import type { JintanPartsFieldSearchValues } from '../JintanPartCategoryFilterItem'
 import { JINTAN_PARTS_SEARCH_FIELDS } from '@/services/jintanSearchFields'
 import JintanFieldSearch from '../JintanFieldSearch'
+import JintanPartCategoryFilterItem from '../JintanPartCategoryFilterItem'
 
 interface Props {
-  onSearch: (values: JintanFieldSearchValues) => void
+  onSearch: (values: JintanPartsFieldSearchValues) => void
   onReset: () => void
-  values?: JintanFieldSearchValues
+  values?: JintanPartsFieldSearchValues
 }
 
 export default function JintanPartsStockInSearch(props: Props) {
-  return <JintanFieldSearch fields={JINTAN_PARTS_SEARCH_FIELDS} {...props} />
+  return (
+    <JintanFieldSearch<JintanPartsFieldSearchValues>
+      fields={JINTAN_PARTS_SEARCH_FIELDS}
+      {...props}
+    >
+      <JintanPartCategoryFilterItem />
+    </JintanFieldSearch>
+  )
 }

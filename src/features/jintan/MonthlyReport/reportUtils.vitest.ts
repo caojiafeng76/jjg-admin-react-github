@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 
 import { describe, expect, it } from 'vitest'
 import {
+  filterJintanMonthlyReport,
   filterJintanMonthlyReportByItemType,
   formatJintanReportMonth,
   getDefaultJintanReportMonth,
@@ -12,9 +13,12 @@ import {
 const now = dayjs('2026-11-02T10:00:00')
 
 function reportRow(
-  overrides: Pick<JintanMonthlyReportRow, 'category' | 'inventory_id' | 'item_type'>,
+  overrides: Pick<JintanMonthlyReportRow, 'category' | 'inventory_id' | 'item_type'> & {
+    part_category?: string
+  },
 ): JintanMonthlyReportRow {
   return {
+    part_category: overrides.category === 'parts' ? '通用' : '',
     item_model: '',
     item_name: '立柱',
     specification: '',
@@ -34,8 +38,8 @@ function reportRow(
 describe('filterJintanMonthlyReportByItemType', () => {
   const report: JintanMonthlyReport = {
     parts: [
-      reportRow({ category: 'parts', inventory_id: 'pa-a', item_type: 'A' }),
-      reportRow({ category: 'parts', inventory_id: 'pa-b', item_type: 'B' }),
+      reportRow({ category: 'parts', inventory_id: 'pa-a', item_type: 'A', part_category: '140U' }),
+      reportRow({ category: 'parts', inventory_id: 'pa-b', item_type: 'B', part_category: '通用' }),
     ],
     profiles: [
       reportRow({ category: 'profiles', inventory_id: 'pa', item_type: 'A' }),
@@ -56,6 +60,14 @@ describe('filterJintanMonthlyReportByItemType', () => {
     expect(filtered.parts.map(row => row.inventory_id)).toEqual(['pa-b'])
     expect(filtered.profiles.map(row => row.inventory_id)).toEqual(['pb'])
     expect(filtered.materials).toEqual([])
+  })
+
+  it('filters parts by partCategory without dropping profiles or materials', () => {
+    const filtered = filterJintanMonthlyReport(report, { partCategory: '140U' })
+
+    expect(filtered.parts.map(row => row.inventory_id)).toEqual(['pa-a'])
+    expect(filtered.profiles).toHaveLength(2)
+    expect(filtered.materials).toHaveLength(1)
   })
 })
 

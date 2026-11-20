@@ -1,11 +1,12 @@
-import type { JintanFieldSearchValues } from '../JintanFieldSearch'
+import type { JintanPartsFieldSearchValues } from '../JintanPartCategoryFilterItem'
 import type { JintanPartsStockStatus } from '@/services/apiJintanPartsInventory'
 import { Form, Select } from 'antd'
 import { JINTAN_PARTS_SEARCH_FIELDS } from '@/services/jintanSearchFields'
 import JintanFieldSearch from '../JintanFieldSearch'
+import JintanPartCategoryFilterItem from '../JintanPartCategoryFilterItem'
 import { JINTAN_PARTS_STOCK_STATUS_OPTIONS } from './stockStatus'
 
-export interface JintanPartsInventorySearchValues extends JintanFieldSearchValues {
+export interface JintanPartsInventorySearchValues extends JintanPartsFieldSearchValues {
   status?: JintanPartsStockStatus
 }
 
@@ -41,6 +42,7 @@ export default function JintanPartsInventorySearch({
         onSearch({ ...values, status: values.status || undefined })}
       {...props}
     >
+      <JintanPartCategoryFilterItem />
       <StockStatusFilterItem />
     </JintanFieldSearch>
   )

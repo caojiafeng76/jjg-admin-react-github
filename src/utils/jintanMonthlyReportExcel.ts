@@ -3,6 +3,7 @@ import type {
   JintanMonthlyReportRow,
 } from '@/services/apiJintanMonthlyReport'
 import type { JintanItemType } from '@/services/jintanItemType'
+import type { JintanPartCategory } from '@/services/jintanPartCategory'
 import dayjs from 'dayjs'
 
 import * as XLSX from 'xlsx-js-style'
@@ -16,6 +17,7 @@ import {
   JINTAN_MONTHLY_REPORT_CATEGORY_LABELS,
 } from '@/services/apiJintanMonthlyReport'
 import { JINTAN_ITEM_TYPES } from '@/services/jintanItemType'
+import { getJintanPartSheetGroups } from '@/services/jintanPartCategory'
 import {
   applyRegisterSheetStyles,
   EXCEL_WRITE_OPTIONS,
@@ -23,6 +25,7 @@ import {
 
 export const JINTAN_MONTHLY_REPORT_HEADERS = [
   '#',
+  '类别',
   '类型',
   '型号',
   '名称',
@@ -35,7 +38,7 @@ export const JINTAN_MONTHLY_REPORT_HEADERS = [
   '本月调整',
   '月末结存',
 ] as const
-const COLUMN_WIDTHS = [6, 6, 18, 24, 20, 10, 14, 12, 12, 12, 12, 12]
+const COLUMN_WIDTHS = [6, 8, 6, 18, 24, 20, 10, 14, 12, 12, 12, 12, 12]
 /** 合计行合并到「材质」列，后面是数量列 */
 const TOTAL_LABEL_COLUMN_COUNT = JINTAN_MONTHLY_REPORT_HEADERS.indexOf('材质') + 1
 
@@ -52,6 +55,7 @@ function createCategorySheet(
 
   const bodyRows = rows.map((row, index) => [
     index + 1,
+    row.part_category,
     row.item_type,
     row.item_model,
     row.item_name,
@@ -96,20 +100,35 @@ function createCategorySheet(
 }
 
 /**
- * 按「配件A、配件B、型材A、型材B、素材A、素材B」顺序生成工作表；
- * 传 itemType 时只生成该类型的工作表。
+ * 默认按「配件140U-A、配件140U-B、配件220U-A、配件220U-B、配件通用-A、配件通用-B、型材A、型材B、素材A、素材B」顺序生成工作表；
+ * 传 itemType / partCategory 时只生成对应范围的工作表。
  */
 export function createJintanMonthlyReportWorkbook(
   report: JintanMonthlyReport,
   month: string,
   itemType?: JintanItemType,
+  partCategory?: JintanPartCategory,
 ): XLSX.WorkBook {
   const monthLabel = formatJintanReportMonth(month)
   const workbook = XLSX.utils.book_new()
   const itemTypes = itemType ? [itemType] : JINTAN_ITEM_TYPES
+  const partGroups = getJintanPartSheetGroups({ partCategory, itemType })
 
   for (const category of JINTAN_MONTHLY_REPORT_CATEGORIES) {
     const label = JINTAN_MONTHLY_REPORT_CATEGORY_LABELS[category]
+    if (category === 'parts') {
+      for (const group of partGroups) {
+        const worksheet = createCategorySheet(
+          report.parts.filter(
+            row => row.part_category === group.partCategory && row.item_type === group.itemType,
+          ),
+          `金檀木业${label}${group.label}月度库存报表（${monthLabel}）`,
+        )
+        XLSX.utils.book_append_sheet(workbook, worksheet, `${label}${group.label}`)
+      }
+      continue
+    }
+
     for (const type of itemTypes) {
       const worksheet = createCategorySheet(
         report[category].filter(row => row.item_type === type),
@@ -126,9 +145,16 @@ export function exportJintanMonthlyReportToExcel(
   report: JintanMonthlyReport,
   month: string,
   itemType?: JintanItemType,
+  partCategory?: JintanPartCategory,
 ) {
-  const workbook = createJintanMonthlyReportWorkbook(report, month, itemType)
+  const workbook = createJintanMonthlyReportWorkbook(
+    report,
+    month,
+    itemType,
+    partCategory,
+  )
+  const categorySuffix = partCategory ? `_${partCategory}` : ''
   const typeSuffix = itemType ? `_${itemType}类` : ''
-  const filename = `金檀木业月度库存报表${typeSuffix}_${month}_${dayjs().format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
+  const filename = `金檀木业月度库存报表${categorySuffix}${typeSuffix}_${month}_${dayjs().format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
   XLSX.writeFile(workbook, filename, EXCEL_WRITE_OPTIONS)
 }

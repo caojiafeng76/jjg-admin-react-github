@@ -151,6 +151,7 @@ describe('配件库存导入按类型匹配', () => {
   const inventoryRow = (id: string, itemType: string) => ({
     id,
     part_data_id: `data-${id}`,
+    part_category: '通用',
     item_type: itemType,
     part_name: '螺钉',
     specification: 'M6',
@@ -159,6 +160,7 @@ describe('配件库存导入按类型匹配', () => {
     supplier: '',
   })
   const importRow = (itemType: 'A' | 'B', quantity: number) => ({
+    part_category: '通用' as const,
     item_type: itemType,
     part_name: '螺钉',
     specification: 'M6',
@@ -186,15 +188,16 @@ describe('配件库存导入按类型匹配', () => {
 
     await expect(
       createJintanPartsInventoryBatch([importRow('B', 7)]),
-    ).rejects.toThrow('“B”/“螺钉”/“M6”')
+    ).rejects.toThrow('“通用”/“B”/“螺钉”/“M6”')
     expect(db.upserted).toEqual([])
   })
 })
 
 describe('资料批量导入按类型判重', () => {
   it('配件：已有 A 时可导入同名称规格的 B，重复的 A 被拒绝', async () => {
-    db.rows = [{ item_type: 'A', part_name: '螺钉', specification: 'M6', color: '' }]
+    db.rows = [{ part_category: '通用', item_type: 'A', part_name: '螺钉', specification: 'M6', color: '' }]
     const row = {
+      part_category: '通用' as const,
       part_name: '螺钉',
       specification: 'M6',
       color: '',

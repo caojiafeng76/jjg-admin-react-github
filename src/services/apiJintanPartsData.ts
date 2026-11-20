@@ -1,12 +1,15 @@
 import type { JintanItemType } from './jintanItemType'
+import type { JintanPartCategory } from './jintanPartCategory'
 import type { JintanSearchFilters } from './jintanSearchFields'
 import { handleApiError } from '@/utils/errorHandler'
 import { describeJintanColor } from './jintanColor'
+import { DEFAULT_JINTAN_PART_CATEGORY } from './jintanPartCategory'
 import { applyJintanSearchFilters, JINTAN_PARTS_SEARCH_FIELDS } from './jintanSearchFields'
 import supabase from './supabase'
 
 export interface JintanPartsData {
   id: string
+  part_category: JintanPartCategory
   item_type: JintanItemType
   part_name: string
   specification: string
@@ -19,6 +22,7 @@ export interface JintanPartsData {
 }
 
 export interface JintanPartsDataFormValues {
+  part_category: JintanPartCategory
   item_type: JintanItemType
   part_name: string
   specification: string
@@ -34,6 +38,7 @@ function normalizePayload(
   values: JintanPartsDataFormValues,
 ): JintanPartsDataFormValues {
   return {
+    part_category: values.part_category ?? DEFAULT_JINTAN_PART_CATEGORY,
     item_type: values.item_type,
     part_name: values.part_name.trim(),
     specification: values.specification.trim(),
@@ -45,15 +50,17 @@ function normalizePayload(
 }
 
 function partsKeyOf(row: {
+  part_category: string
   item_type: string
   part_name: string
   specification: string
   color: string
 }): string {
-  return `${row.item_type}\u0000${row.part_name}\u0000${row.specification}\u0000${row.color}`
+  return `${row.part_category}\u0000${row.item_type}\u0000${row.part_name}\u0000${row.specification}\u0000${row.color}`
 }
 
 async function checkJintanPartsDataExists(
+  partCategory: JintanPartCategory,
   itemType: JintanItemType,
   partName: string,
   specification: string,
@@ -63,6 +70,7 @@ async function checkJintanPartsDataExists(
   let query = supabase
     .from('jintan_parts_data')
     .select('id')
+    .eq('part_category', partCategory)
     .eq('item_type', itemType)
     .eq('part_name', partName)
     .eq('specification', specification)
@@ -86,11 +94,13 @@ export async function getJintanPartsDataList({
   page,
   pageSize,
   filters,
+  partCategory,
   itemType,
 }: {
   page: number
   pageSize: number
   filters?: JintanSearchFilters
+  partCategory?: JintanPartCategory
   itemType?: JintanItemType
 }) {
   const from = (page - 1) * pageSize
@@ -99,6 +109,9 @@ export async function getJintanPartsDataList({
   let query = supabase.from('jintan_parts_data').select('*', { count: 'exact' })
 
   query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
+  if (partCategory) {
+    query = query.eq('part_category', partCategory)
+  }
   if (itemType) {
     query = query.eq('item_type', itemType)
   }
@@ -121,6 +134,7 @@ export async function getJintanPartsDataList({
 export async function getJintanPartsDataForExport(
   filters?: JintanSearchFilters,
   itemType?: JintanItemType,
+  partCategory?: JintanPartCategory,
 ) {
   const rows: JintanPartsData[] = []
   let from = 0
@@ -129,6 +143,9 @@ export async function getJintanPartsDataForExport(
     let query = supabase.from('jintan_parts_data').select('*')
 
     query = applyJintanSearchFilters(query, filters, JINTAN_PARTS_SEARCH_FIELDS)
+    if (partCategory) {
+      query = query.eq('part_category', partCategory)
+    }
     if (itemType) {
       query = query.eq('item_type', itemType)
     }
@@ -159,6 +176,7 @@ export async function createJintanPartsData(values: JintanPartsDataFormValues) {
   const payload = normalizePayload(values)
 
   const exists = await checkJintanPartsDataExists(
+    payload.part_category,
     payload.item_type,
     payload.part_name,
     payload.specification,
@@ -166,7 +184,7 @@ export async function createJintanPartsData(values: JintanPartsDataFormValues) {
   )
   if (exists) {
     throw new Error(
-      `类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”${describeJintanColor(payload.color)}已存在，无法创建`,
+      `类别“${payload.part_category}”类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”${describeJintanColor(payload.color)}已存在，无法创建`,
     )
   }
 
@@ -187,7 +205,7 @@ export async function createJintanPartsDataBatch(
     const key = partsKeyOf(row)
     if (seenKeys.has(key)) {
       throw new Error(
-        `类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}重复，无法导入`,
+        `类别“${row.part_category}”类型“${row.item_type}”名称“${row.part_name}”规格“${row.specification}”${describeJintanColor(row.color)}重复，无法导入`,
       )
     }
     seenKeys.add(key)
@@ -196,7 +214,7 @@ export async function createJintanPartsDataBatch(
   const partNames = Array.from(new Set(payload.map(row => row.part_name)))
   const { data: existingRows, error: existingError } = await supabase
     .from('jintan_parts_data')
-    .select('item_type, part_name, specification, color')
+    .select('part_category, item_type, part_name, specification, color')
     .in('part_name', partNames)
 
   if (existingError) {
@@ -209,7 +227,7 @@ export async function createJintanPartsDataBatch(
   const duplicated = payload.filter(row => existingKeys.has(partsKeyOf(row)))
   if (duplicated.length > 0) {
     const labels = duplicated
-      .map(row => `“${row.item_type}”/“${row.part_name}”/“${row.specification}”${row.color ? `/“${row.color}”` : ''}`)
+      .map(row => `“${row.part_category}”/“${row.item_type}”/“${row.part_name}”/“${row.specification}”${row.color ? `/“${row.color}”` : ''}`)
       .join('、')
     throw new Error(`以下配件已存在，无法导入：${labels}`)
   }
@@ -231,6 +249,7 @@ export async function updateJintanPartsData({
   const payload = normalizePayload(values)
 
   const exists = await checkJintanPartsDataExists(
+    payload.part_category,
     payload.item_type,
     payload.part_name,
     payload.specification,
@@ -239,7 +258,7 @@ export async function updateJintanPartsData({
   )
   if (exists) {
     throw new Error(
-      `类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”${describeJintanColor(payload.color)}已存在，无法更新`,
+      `类别“${payload.part_category}”类型“${payload.item_type}”名称“${payload.part_name}”规格“${payload.specification}”${describeJintanColor(payload.color)}已存在，无法更新`,
     )
   }
 

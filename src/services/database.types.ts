@@ -354,6 +354,7 @@ export type Database = {
           item_type: string
           material: string
           operator_name: string
+          part_category: string
           quantity_after: number
           quantity_before: number
           remarks: string
@@ -371,6 +372,7 @@ export type Database = {
           item_type?: string
           material?: string
           operator_name?: string
+          part_category?: string
           quantity_after: number
           quantity_before: number
           remarks?: string
@@ -388,6 +390,7 @@ export type Database = {
           item_type?: string
           material?: string
           operator_name?: string
+          part_category?: string
           quantity_after?: number
           quantity_before?: number
           remarks?: string
@@ -588,6 +591,7 @@ export type Database = {
           id: string
           item_type: string
           material: string
+          part_category: string
           part_name: string
           remarks: string
           specification: string
@@ -600,6 +604,7 @@ export type Database = {
           id?: string
           item_type?: string
           material?: string
+          part_category?: string
           part_name: string
           remarks?: string
           specification?: string
@@ -612,6 +617,7 @@ export type Database = {
           id?: string
           item_type?: string
           material?: string
+          part_category?: string
           part_name?: string
           remarks?: string
           specification?: string
@@ -627,6 +633,7 @@ export type Database = {
           id: string
           item_type: string
           material: string
+          part_category: string
           part_data_id: string
           part_name: string
           quantity: number
@@ -647,6 +654,7 @@ export type Database = {
           id?: string
           item_type?: string
           material?: string
+          part_category?: string
           part_data_id: string
           part_name: string
           quantity?: number
@@ -667,6 +675,7 @@ export type Database = {
           id?: string
           item_type?: string
           material?: string
+          part_category?: string
           part_data_id?: string
           part_name?: string
           quantity?: number
@@ -699,6 +708,7 @@ export type Database = {
           inventory_id: string
           item_type: string
           material: string
+          part_category: string
           part_name: string
           quantity: number
           remarks: string
@@ -713,6 +723,7 @@ export type Database = {
           inventory_id: string
           item_type?: string
           material?: string
+          part_category?: string
           part_name?: string
           quantity: number
           remarks?: string
@@ -727,6 +738,7 @@ export type Database = {
           inventory_id?: string
           item_type?: string
           material?: string
+          part_category?: string
           part_name?: string
           quantity?: number
           remarks?: string
@@ -752,6 +764,7 @@ export type Database = {
           inventory_id: string
           item_type: string
           material: string
+          part_category: string
           part_name: string
           quantity: number
           remarks: string
@@ -766,6 +779,7 @@ export type Database = {
           inventory_id: string
           item_type?: string
           material?: string
+          part_category?: string
           part_name?: string
           quantity: number
           remarks?: string
@@ -780,6 +794,7 @@ export type Database = {
           inventory_id?: string
           item_type?: string
           material?: string
+          part_category?: string
           part_name?: string
           quantity?: number
           remarks?: string
@@ -4596,6 +4611,7 @@ export type Database = {
           item_type: string
           material: string
           opening_quantity: number
+          part_category: string
           specification: string
           stock_adjust_quantity: number
           stock_in_quantity: number

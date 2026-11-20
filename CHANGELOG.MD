@@ -15,6 +15,16 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-11-20
+
+- **类别**：新建
+- **范围**：`supabase/migrations/20261120090000_add_jintan_parts_category.sql`、`src/services/database.types.ts`、`src/services/jintanPartCategory.ts`、`src/services/apiJintanParts*.ts`、`src/services/apiJintanMonthlyReport.ts`、`src/utils/jintanPartsDataExcel.ts`、`src/utils/jintanPartsInventoryExcel.ts`、`src/utils/jintanMonthlyReportExcel.ts`、`src/features/jintan/`、`src/pages/dashboardChangelog.ts`
+- **摘要**：金檀木业配件模块新增「类别」字段（`140U` / `220U` / `通用`，默认 `通用`，存量配件回填为 `通用`），并将 Excel 导出拆分为 6 张分表：
+  - 数据库迁移在配件资料、库存、入库、出库与调整流水中新增 `part_category` 字段及快照同步触发器，更新 `jintan_parts_data` 唯一约束为 `(part_category, item_type, part_name, specification, color)` 允许不同类别同名建档并独立记账，同步扩展 `get_jintan_monthly_inventory_report` 返回 `part_category`；
+  - 配件资料新建/编辑表单新增「类别」单选按钮组（默认选中 `通用`）；配件资料、库存、出入库、详情抽屉、公开扫码页与月度报表同步展示并支持按类别筛选和下拉区分；
+  - 配件资料导出与配件库存导出拆分为 `140U-A`、`140U-B`、`220U-A`、`220U-B`、`通用-A`、`通用-B` 6 张工作表，月度库存报表配件部分拆分为 `配件140U-A`～`配件通用-B` 6 张工作表（跟随页面筛选，范围内保留空表头）；导入模板末尾追加选填「类别」列并保持旧模板兼容；同步首页更新日志。
+- **验证**：`bun run db:push` 已推送至远程库并重新生成 `database.types.ts`，`bun run db:query` 只读核对 `part_category` 列与唯一约束已生效；`bunx antd lint src/features/jintan --format json`（0 issue）、`bun run lint`（0 error）、`bun run typecheck`、`bun run test`（38 项脚本测试、242 个 Vitest 文件共 1595 个用例）及 `bun run build`（2.29s）全部通过；尚未在浏览器界面写入真实业务数据做端到端操作验证。
+
 ## 2026-11-19
 
 - **类别**：修复

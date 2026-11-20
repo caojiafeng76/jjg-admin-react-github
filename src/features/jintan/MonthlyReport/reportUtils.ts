@@ -3,6 +3,7 @@ import type {
   JintanMonthlyReportRow,
 } from '@/services/apiJintanMonthlyReport'
 import type { JintanItemType } from '@/services/jintanItemType'
+import type { JintanPartCategory } from '@/services/jintanPartCategory'
 import dayjs from 'dayjs'
 
 export const JINTAN_MONTHLY_REPORT_QUANTITY_KEYS = [
@@ -48,6 +49,35 @@ export function filterJintanMonthlyReportByItemType(
     parts: report.parts.filter(row => row.item_type === itemType),
     profiles: report.profiles.filter(row => row.item_type === itemType),
     materials: report.materials.filter(row => row.item_type === itemType),
+  }
+}
+
+/** 按类型与配件类别筛选月度报表 */
+export function filterJintanMonthlyReport(
+  report: JintanMonthlyReport,
+  {
+    itemType,
+    partCategory,
+  }: {
+    itemType?: JintanItemType
+    partCategory?: JintanPartCategory
+  },
+): JintanMonthlyReport {
+  if (!itemType && !partCategory) {
+    return report
+  }
+  return {
+    parts: report.parts.filter(
+      row =>
+        (!itemType || row.item_type === itemType)
+        && (!partCategory || row.part_category === partCategory),
+    ),
+    profiles: itemType
+      ? report.profiles.filter(row => row.item_type === itemType)
+      : report.profiles,
+    materials: itemType
+      ? report.materials.filter(row => row.item_type === itemType)
+      : report.materials,
   }
 }
 

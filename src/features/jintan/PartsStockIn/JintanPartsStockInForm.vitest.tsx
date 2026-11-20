@@ -10,6 +10,7 @@ vi.mock('../PartsInventory/useJintanPartsInventory', () => ({
     data: [
       {
         id: 'inventory-1',
+        part_category: '通用',
         item_type: 'A',
         part_name: '扶手配件',
         specification: 'A1',

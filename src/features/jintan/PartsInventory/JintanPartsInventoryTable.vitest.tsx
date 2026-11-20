@@ -10,6 +10,7 @@ function createRecord(
   return {
     id: 'inventory-1',
     part_data_id: 'part-1',
+    part_category: '通用' as const,
     item_type: 'A' as const,
     part_name: '压簧',
     specification: '1.6*16*82*14',

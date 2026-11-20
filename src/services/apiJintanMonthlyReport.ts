@@ -18,6 +18,8 @@ export const JINTAN_MONTHLY_REPORT_CATEGORY_LABELS: Record<
 export interface JintanMonthlyReportRow {
   category: JintanMonthlyReportCategory
   inventory_id: string
+  /** 配件类别 140U / 220U / 通用，型材与素材为空字符串 */
+  part_category: string
   /** 类型 A / B */
   item_type: string
   item_model: string

@@ -11,6 +11,10 @@ import {
   DEFAULT_JINTAN_ITEM_TYPE,
   JINTAN_ITEM_TYPE_OPTIONS,
 } from '@/services/jintanItemType'
+import {
+  DEFAULT_JINTAN_PART_CATEGORY,
+  JINTAN_PART_CATEGORY_OPTIONS,
+} from '@/services/jintanPartCategory'
 
 interface Props {
   onFinish: (values: JintanPartsDataFormValues) => void
@@ -20,6 +24,7 @@ interface Props {
 }
 
 const DEFAULT_VALUES: JintanPartsDataFormValues = {
+  part_category: DEFAULT_JINTAN_PART_CATEGORY,
   item_type: DEFAULT_JINTAN_ITEM_TYPE,
   part_name: '',
   specification: '',
@@ -45,6 +50,7 @@ export default function JintanPartsDataForm({
     if (initialValues) {
       form.setFieldsValue({
         ...DEFAULT_VALUES,
+        part_category: initialValues.part_category ?? DEFAULT_JINTAN_PART_CATEGORY,
         item_type: initialValues.item_type,
         part_name: initialValues.part_name,
         specification: initialValues.specification,
@@ -67,6 +73,18 @@ export default function JintanPartsDataForm({
       onFinish={onFinish}
       disabled={isSubmitting}
     >
+      <Form.Item
+        name="part_category"
+        label="类别"
+        rules={[{ required: true, message: '请选择类别' }]}
+      >
+        <Radio.Group
+          options={JINTAN_PART_CATEGORY_OPTIONS}
+          optionType="button"
+          buttonStyle="solid"
+        />
+      </Form.Item>
+
       <Form.Item
         name="item_type"
         label="类型"
