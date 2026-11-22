@@ -132,4 +132,22 @@ describe('WorkshopOrderProductionStats', () => {
     await user.click(screen.getByRole('button', { name: /立即结案/ }))
     expect(onStatusChange).toHaveBeenCalledWith('已结案')
   })
+
+  it('车间流转包含「凉亭仓库」时显示入库支数并以绿色高亮展示', () => {
+    hookState.transferStats = {
+      byWorkshop: [
+        { target_workshop: '凉亭仓库', total_quantity: 7, record_count: 1 },
+        { target_workshop: '精加工', total_quantity: 3, record_count: 1 },
+      ],
+      totalOutbound: 10,
+      totalInWarehouse: 7,
+      totalTransferred: 10,
+    }
+
+    render(<WorkshopOrderProductionStats selectedOrder={ORDER} />)
+
+    expect(screen.getByText('入库支数')).toBeTruthy()
+    expect(screen.getByText('凉亭仓库')).toBeTruthy()
+    expect(screen.getAllByText('7')).toHaveLength(2)
+  })
 })

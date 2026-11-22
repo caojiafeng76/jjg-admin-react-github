@@ -199,7 +199,7 @@ function MaterialTransferTable({
         title: '接收车间',
         dataIndex: 'target_workshop',
         key: 'target_workshop',
-        width: 100,
+        width: 110,
         fixed: 'right',
         filters: Array.from(
           new Set(data.map(r => r.target_workshop).filter(Boolean)),

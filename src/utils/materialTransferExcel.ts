@@ -48,7 +48,7 @@ const EXPORT_COLUMN_WIDTHS = [
   28,
   10,
   14,
-  10,
+  12,
   8,
   12,
   8,

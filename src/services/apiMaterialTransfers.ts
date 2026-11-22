@@ -15,6 +15,7 @@ import {
   normalizeMaterialTransferInsertPayload,
   normalizeMaterialTransferUpdatePayload,
 } from './apiMaterialTransfersCalculations'
+import { isWarehouseWorkshop } from './apiMaterialTransfersTypes'
 import supabase from './supabase'
 
 export {
@@ -468,7 +469,13 @@ export async function getTransferStatsByProjectNo(
 
   const totalOutbound = totalTransferred
 
-  const totalInWarehouse = workshopMap.get('仓库')?.total ?? 0
+  const totalInWarehouse = byWorkshop.reduce(
+    (sum, item) =>
+      isWarehouseWorkshop(item.target_workshop)
+        ? sum + item.total_quantity
+        : sum,
+    0,
+  )
 
   return { byWorkshop, totalOutbound, totalInWarehouse, totalTransferred }
 }

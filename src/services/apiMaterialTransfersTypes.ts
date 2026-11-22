@@ -9,7 +9,26 @@ export const MATERIAL_TRANSFER_WORKSHOPS = [
   '抛光',
   '包装',
   '仓库',
+  '凉亭仓库',
 ] as const
+
+export const MATERIAL_TRANSFER_WAREHOUSE_WORKSHOPS = [
+  '仓库',
+  '凉亭仓库',
+] as const
+
+const MATERIAL_TRANSFER_WAREHOUSE_WORKSHOP_SET = new Set<string>(
+  MATERIAL_TRANSFER_WAREHOUSE_WORKSHOPS,
+)
+
+/** 判断接收车间是否属于仓库类（仓库 / 凉亭仓库），用于入库统计与样式高亮 */
+export function isWarehouseWorkshop(
+  workshop: string | null | undefined,
+): boolean {
+  return Boolean(
+    workshop && MATERIAL_TRANSFER_WAREHOUSE_WORKSHOP_SET.has(workshop.trim()),
+  )
+}
 
 export const MATERIAL_TRANSFER_AUDIT_OPTIONS = [
   { label: '待审核', value: false },
@@ -158,7 +177,7 @@ export interface TransferWorkshopStat {
 export interface ProjectTransferStats {
   byWorkshop: TransferWorkshopStat[]
   totalOutbound: number // 所有转移单的总数量（有记录即算出库）
-  totalInWarehouse: number // 进入"仓库"的数量（入库量）
+  totalInWarehouse: number // 进入仓库类接收车间（仓库 / 凉亭仓库）的数量（入库量）
   totalTransferred: number // 所有车间转移总数（同 totalOutbound）
 }
 

@@ -7,6 +7,12 @@ import {
   normalizeMaterialTransferInsertPayload,
   normalizeMaterialTransferUpdatePayload,
 } from './apiMaterialTransfersCalculations'
+import {
+  isWarehouseWorkshop,
+  MATERIAL_TRANSFER_WORKSHOPS,
+} from './apiMaterialTransfersTypes'
+import { PRECISION_CUTTING_TRANSFER_WORKSHOPS } from './apiPrecisionCuttingTransfersTypes'
+import { PRECISION_FINISHING_CUTTING_WORKSHOPS } from './precisionFinishingCuttings/types'
 
 function createQueryRecorder() {
   const calls: Array<[string, ...unknown[]]> = []
@@ -124,5 +130,37 @@ describe('物料转移计算函数', () => {
       transferTotal: 20,
       orderQuantity: null,
     })
+  })
+
+  it('三张流转/切割单的接收车间常量都在「仓库」后包含「凉亭仓库」', () => {
+    for (const workshops of [
+      MATERIAL_TRANSFER_WORKSHOPS,
+      PRECISION_CUTTING_TRANSFER_WORKSHOPS,
+      PRECISION_FINISHING_CUTTING_WORKSHOPS,
+    ]) {
+      const warehouseIndex = workshops.indexOf('仓库')
+      const liangtingIndex = workshops.indexOf('凉亭仓库')
+      expect(warehouseIndex).toBeGreaterThan(-1)
+      expect(liangtingIndex).toBe(warehouseIndex + 1)
+    }
+  })
+
+  it('isWarehouseWorkshop 正确识别仓库与凉亭仓库', () => {
+    expect(isWarehouseWorkshop('仓库')).toBe(true)
+    expect(isWarehouseWorkshop('凉亭仓库')).toBe(true)
+    expect(isWarehouseWorkshop(' 凉亭仓库 ')).toBe(true)
+    expect(isWarehouseWorkshop('精加工')).toBe(false)
+    expect(isWarehouseWorkshop('')).toBe(false)
+    expect(isWarehouseWorkshop(null)).toBe(false)
+  })
+
+  it('筛选条件支持按「凉亭仓库」过滤接收车间', () => {
+    const { calls, query } = createQueryRecorder()
+
+    applyMaterialTransferFilters(query, {
+      targetWorkshop: '凉亭仓库',
+    })
+
+    expect(calls).toEqual([['eq', 'target_workshop', '凉亭仓库']])
   })
 })

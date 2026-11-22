@@ -15,6 +15,16 @@
 - **验证**：执行过的检查、测试或构建命令；未执行时说明原因
 ```
 
+## 2026-11-22
+
+- **类别**：变更
+- **范围**：`supabase/migrations/20261122120000_add_liangting_warehouse_workshop.sql`、`src/services/apiMaterialTransfersTypes.ts`、`src/services/apiMaterialTransfers.ts`、`src/services/apiPrecisionCuttingTransfersTypes.ts`、`src/services/precisionFinishingCuttings/types.ts`、`src/features/workshop/OrderList/WorkshopOrderInfoHeader.tsx`、`src/features/material-transfer/MaterialTransferTable.tsx`、`src/features/precision-cutting-transfer/MaterialTransferTable.tsx`、`src/features/precision-finishing-cutting/PrecisionFinishingCuttingTable.tsx`、`src/utils/*Transfer*Excel.ts`、`src/utils/precisionFinishingCuttingExcel.ts`、`src/pages/dashboardChangelog.ts`
+- **摘要**：新增「凉亭仓库」接收车间并统一仓库入库统计口径：
+  - 为 `MATERIAL_TRANSFER_WORKSHOPS`、`PRECISION_CUTTING_TRANSFER_WORKSHOPS`、`PRECISION_FINISHING_CUTTING_WORKSHOPS` 在「仓库」后追加「凉亭仓库」，PC 端表单/筛选栏与手机扫码页选择器同步生效；微调 3 张桌面表格与 4 处 Excel 导出「接收车间」列宽。
+  - 在 `apiMaterialTransfersTypes.ts` 抽离 `MATERIAL_TRANSFER_WAREHOUSE_WORKSHOPS` 与 `isWarehouseWorkshop`；同步更新订单详情 `getTransferStatsByProjectNo`（`totalInWarehouse`）、`WorkshopOrderInfoHeader`（入库支数与绿色状态胶囊高亮）以及订单现状看板视图 `order_status_dashboard_order_summaries`（`warehouse_transfer_quantity`）。
+  - 新增数据库迁移 `20261122120000_add_liangting_warehouse_workshop.sql`，扩展三张表的 `target_workshop` CHECK 约束及订单现状视图过滤条件，并补充单测与迁移一致性守卫、同步首页更新日志。
+- **验证**：`bun run db:push` 已推送至远程库并运行 `bun run db:types`（`database.types.ts` 无变更），`bun run db:push:dry-run` 返回 `Remote database is up to date.`，`bun run db:query` 只读核验 3 张表的 `CHECK` 约束与 `order_status_dashboard_order_summaries` 视图定义均已包含 `'凉亭仓库'`；`bun run lint`（0 error）、`bun run typecheck`、`bun run build`、`bunx antd lint`（4 个改动组件均 0 issue）及 `bun run test`（Node 测试 38 项 + Vitest 243 文件 2348 项）全部通过；使用 Chrome DevTools MCP 复用管理员登录态验证首页更新日志与「物料转移单」「精切转移单」「精加工切割单」新建表单中的「接收车间」下拉均已出现「仓库」「凉亭仓库」，并验证「订单现状」列表加载正常（未写入测试业务单据，未在员工手机端真实账号下打开扫码页，未在浏览器端实测下载 Excel）。
+
 ## 2026-11-20
 
 - **类别**：变更

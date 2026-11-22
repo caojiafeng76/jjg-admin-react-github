@@ -9,6 +9,7 @@ export const PRECISION_CUTTING_TRANSFER_WORKSHOPS = [
   '抛光',
   '包装',
   '仓库',
+  '凉亭仓库',
 ] as const
 
 export const PRECISION_CUTTING_TRANSFER_AUDIT_OPTIONS = [

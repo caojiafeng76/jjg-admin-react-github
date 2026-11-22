@@ -14,6 +14,7 @@ import {
   TagIcon,
 } from '@heroicons/react/24/outline'
 import { Alert, Button, Progress, Tooltip } from 'antd'
+import { isWarehouseWorkshop } from '@/services/apiMaterialTransfers'
 import StatusPill from '@/ui/StatusPill'
 import {
   canWorkshopOrderBeClosed,
@@ -243,7 +244,7 @@ export default function WorkshopOrderInfoHeader({
                 <StatusPill
                   dot={false}
                   tone={
-                    ws.target_workshop === '仓库'
+                    isWarehouseWorkshop(ws.target_workshop)
                       ? 'success'
                       : ws.target_workshop === '包装'
                         ? 'info'
@@ -255,7 +256,7 @@ export default function WorkshopOrderInfoHeader({
                 <span
                   style={{
                     color:
-                      ws.target_workshop === '仓库'
+                      isWarehouseWorkshop(ws.target_workshop)
                         ? '#389e0d'
                         : ws.target_workshop === '包装'
                           ? '#1677ff'

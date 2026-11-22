@@ -70,7 +70,7 @@ const EXPORT_COLUMN_WIDTHS = [
   14,
   10,
   14,
-  10,
+  12,
   8,
   8,
   9,
