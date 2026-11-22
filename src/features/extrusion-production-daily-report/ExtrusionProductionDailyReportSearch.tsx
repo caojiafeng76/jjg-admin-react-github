@@ -1,15 +1,12 @@
 import type { Dayjs } from 'dayjs'
 import type { ExtrusionProductionDailyReportFilters } from '@/services/apiExtrusionProductionDailyReport'
-import {
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from '@heroicons/react/16/solid'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 
 import { useEffect } from 'react'
 import { buildExtrusionMachineOptions } from '@/features/extrusion-production/extrusionMachineOptions'
 import { useMachineEquipmentOptions } from '@/features/production-order/useMachineEquipmentOptions'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -126,18 +123,7 @@ export default function ExtrusionProductionDailyReportSearch({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <Space>
-          <Button
-            type="primary"
-            icon={<MagnifyingGlassIcon className="h-4 w-4" />}
-            htmlType="submit"
-          >
-            搜索
-          </Button>
-          <Button icon={<XMarkIcon className="h-4 w-4" />} onClick={handleReset}>
-            重置
-          </Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

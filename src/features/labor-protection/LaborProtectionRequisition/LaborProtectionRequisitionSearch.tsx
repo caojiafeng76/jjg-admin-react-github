@@ -1,9 +1,10 @@
 import type { Dayjs } from 'dayjs'
 import type { LaborProtectionDataOption } from '@/services/apiLaborProtectionData'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 
 import { useEffect } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -113,12 +114,7 @@ export default function LaborProtectionRequisitionSearch({
         />
       </Form.Item>
       <Form.Item className="mb-0">
-        <Space>
-          <Button type="primary" htmlType="submit">
-            搜索
-          </Button>
-          <Button onClick={handleReset}>重置</Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

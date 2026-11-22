@@ -1,14 +1,11 @@
 import type { Dayjs } from 'dayjs'
 import type { ProductionDailyReportFilters } from '@/services/apiProductionDailyReport'
 import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderItems'
-import {
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from '@heroicons/react/16/solid'
+import { ChevronDownIcon } from '@heroicons/react/16/solid'
 
 import { Button, DatePicker, Form, Input, Select } from 'antd'
 import { useEffect, useState } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -156,23 +153,11 @@ export default function ProductionDailyReportSearch({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <div className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}>
-          <Button
-            type="primary"
-            icon={<MagnifyingGlassIcon className="h-4 w-4" />}
-            htmlType="submit"
-            loading={isSearching}
-          >
-            搜索
-          </Button>
-          <Button
-            icon={<XMarkIcon className="h-4 w-4" />}
-            onClick={handleReset}
-            disabled={isSearching}
-          >
-            重置
-          </Button>
-        </div>
+        <FilterBarActions
+          onReset={handleReset}
+          isLoading={isSearching}
+          className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}
+        />
       </Form.Item>
     </Form>
   )

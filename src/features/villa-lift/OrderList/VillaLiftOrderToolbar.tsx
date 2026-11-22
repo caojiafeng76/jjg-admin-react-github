@@ -17,7 +17,7 @@ import {
 } from '@heroicons/react/16/solid'
 import { Button, DatePicker, Input, Popconfirm } from 'antd'
 import AddButton from '@/ui/AddButton'
-import FilterBar from '@/ui/FilterBar'
+import FilterBar, { FilterBarActions } from '@/ui/FilterBar'
 
 export interface VillaLiftOrderToolbarPermissions {
   canDelete: boolean
@@ -318,10 +318,7 @@ export default function VillaLiftOrderToolbar({
           style={{ width: 260 }}
           allowClear
         />
-        <Button type="primary" onClick={handleSearch}>
-          搜索
-        </Button>
-        <Button onClick={handleSearchReset}>重置</Button>
+        <FilterBarActions onSearch={handleSearch} onReset={handleSearchReset} />
       </FilterBar>
     </div>
   )

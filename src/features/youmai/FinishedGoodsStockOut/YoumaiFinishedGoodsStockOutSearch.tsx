@@ -1,5 +1,6 @@
-import { Button, Form, Input, Select, Space } from 'antd'
+import { Form, Input, Select } from 'antd'
 import { useEffect } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const SEARCH_FIELDS = [
   { name: 'purchaseOrderNo', placeholder: '采购订单号', width: 150 },
@@ -99,18 +100,7 @@ export default function YoumaiFinishedGoodsStockOutSearch({
         />
       </Form.Item>
       <Form.Item className="mb-0">
-        <Space>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="rounded-lg font-medium shadow-sm"
-          >
-            搜索
-          </Button>
-          <Button onClick={handleReset} className="rounded-lg">
-            重置
-          </Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

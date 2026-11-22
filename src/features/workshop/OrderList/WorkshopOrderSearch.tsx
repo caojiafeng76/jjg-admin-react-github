@@ -1,7 +1,7 @@
 import type { Dayjs } from 'dayjs'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { DatePicker, Form, Input, Select } from 'antd'
 import { useState } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -130,25 +130,7 @@ export default function WorkshopOrderSearch({
         />
       </Form.Item>
       <Form.Item className="mb-0">
-        <Space>
-          <Button
-            type="primary"
-            icon={<MagnifyingGlassIcon className="size-4" />}
-            htmlType="submit"
-            loading={isSearching}
-            className="shadow-sm transition-all hover:shadow-md"
-          >
-            搜索
-          </Button>
-          <Button
-            icon={<XMarkIcon className="size-4" />}
-            onClick={handleReset}
-            disabled={isSearching}
-            className="shadow-sm transition-all hover:shadow-md"
-          >
-            重置
-          </Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} isLoading={isSearching} />
       </Form.Item>
     </Form>
   )

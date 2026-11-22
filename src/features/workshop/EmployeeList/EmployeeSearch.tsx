@@ -1,6 +1,7 @@
-import { Button, Input, Select, Space } from 'antd'
+import { Input, Select, Space } from 'antd'
 import { useState } from 'react'
 import { useRoleOptions } from '@/hooks/useRoleOptions'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 interface Props {
   onSearch: (params: {
@@ -67,10 +68,7 @@ export default function EmployeeSearch({ onSearch, onReset }: Props) {
           { label: '停用', value: 'inactive' },
         ]}
       />
-      <Button type="primary" onClick={handleSearch}>
-        搜索
-      </Button>
-      <Button onClick={handleReset}>重置</Button>
+      <FilterBarActions onSearch={handleSearch} onReset={handleReset} />
     </Space>
   )
 }

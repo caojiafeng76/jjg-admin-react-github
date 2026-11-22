@@ -109,7 +109,7 @@ describe('订单排产页面子组件回调', () => {
       screen.getAllByPlaceholderText('多关键词用空格分隔')[0],
       'P001',
     )
-    await user.click(screen.getByRole('button', { name: /查询/ }))
+    await user.click(screen.getByRole('button', { name: /搜\s*索/ }))
 
     await waitFor(() =>
       expect(onSearch).toHaveBeenCalledWith(

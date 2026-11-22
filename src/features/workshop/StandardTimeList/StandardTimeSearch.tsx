@@ -5,6 +5,7 @@ import { Button, Checkbox, DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 
 import { useEffect, useState } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -189,21 +190,10 @@ export default function StandardTimeSearch({
         </Form.Item>
       )}
       <Form.Item className="mb-0">
-        <div className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="rounded-lg font-medium shadow-sm"
-          >
-            搜索
-          </Button>
-          <Button
-            onClick={handleReset}
-            className="rounded-lg"
-          >
-            重置
-          </Button>
-        </div>
+        <FilterBarActions
+          onReset={handleReset}
+          className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}
+        />
       </Form.Item>
     </Form>
   )

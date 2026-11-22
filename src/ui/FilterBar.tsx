@@ -1,4 +1,6 @@
+import type { ButtonProps } from 'antd'
 import type { ReactNode } from 'react'
+import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/16/solid'
 import { Button, Space } from 'antd'
 
 export interface FilterBarProps {
@@ -28,26 +30,50 @@ export default function FilterBar({
 
 export interface FilterBarActionsProps {
   onReset: () => void
+  onSearch?: () => void
   isLoading?: boolean
+  size?: ButtonProps['size']
   searchText?: string
   resetText?: string
+  className?: string
 }
 
-/** 筛选栏末尾标准操作按钮组：固定「搜索」（回车提交）+「重置」 */
+/** 筛选栏末尾标准操作按钮组：固定「搜索」（回车提交或 onSearch）+「重置」，统一内置 16px solid 前置图标 */
 export function FilterBarActions({
   onReset,
+  onSearch,
   isLoading = false,
+  size,
   searchText = '搜索',
   resetText = '重置',
+  className,
 }: FilterBarActionsProps) {
-  return (
-    <Space size={8}>
-      <Button type="primary" htmlType="submit" loading={isLoading}>
+  const buttons = (
+    <>
+      <Button
+        type="primary"
+        htmlType={onSearch ? 'button' : 'submit'}
+        size={size}
+        icon={<MagnifyingGlassIcon className="size-4" />}
+        loading={isLoading}
+        onClick={onSearch}
+      >
         {searchText}
       </Button>
-      <Button onClick={onReset} disabled={isLoading}>
+      <Button
+        size={size}
+        icon={<ArrowPathIcon className="size-4" />}
+        onClick={onReset}
+        disabled={isLoading}
+      >
         {resetText}
       </Button>
-    </Space>
+    </>
   )
+
+  if (className) {
+    return <div className={className}>{buttons}</div>
+  }
+
+  return <Space size={8}>{buttons}</Space>
 }

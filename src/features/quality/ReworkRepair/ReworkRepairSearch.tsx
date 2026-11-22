@@ -1,11 +1,11 @@
 import type { QualityReworkRepairCategory } from '@/services/apiQualityReworkRepair'
-import { Button, Form, Input, Select, Space } from 'antd'
+import { Form, Input, Select } from 'antd'
 
 import { useEffect } from 'react'
 import {
   QUALITY_REWORK_REPAIR_CATEGORIES,
-
 } from '@/services/apiQualityReworkRepair'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 interface SearchValues {
   keyword?: string
@@ -76,12 +76,7 @@ export default function ReworkRepairSearch({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <Space>
-          <Button type="primary" htmlType="submit">
-            搜索
-          </Button>
-          <Button onClick={handleReset}>重置</Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

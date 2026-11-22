@@ -1,10 +1,6 @@
 import type { Dayjs } from 'dayjs'
 import type { PrecisionCuttingTransferFilters } from '@/services/apiPrecisionCuttingTransfers'
-import {
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from '@heroicons/react/16/solid'
+import { ChevronDownIcon } from '@heroicons/react/16/solid'
 import { Button, DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 
@@ -15,6 +11,7 @@ import {
   PRECISION_CUTTING_TRANSFER_WORKSHOPS,
 
 } from '@/services/apiPrecisionCuttingTransfers'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -185,25 +182,11 @@ export default function MaterialTransferSearch({
       </Form.Item>
 
       <Form.Item className={formItemClassName}>
-        <div className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2 whitespace-nowrap'}>
-          <Button
-            type="primary"
-            icon={<MagnifyingGlassIcon className="h-4 w-4" />}
-            htmlType="submit"
-            loading={isSearching}
-            className="rounded-lg font-medium shadow-sm"
-          >
-            搜索
-          </Button>
-          <Button
-            icon={<XMarkIcon className="h-4 w-4" />}
-            onClick={handleReset}
-            disabled={isSearching}
-            className="rounded-lg"
-          >
-            重置
-          </Button>
-        </div>
+        <FilterBarActions
+          onReset={handleReset}
+          isLoading={isSearching}
+          className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2 whitespace-nowrap'}
+        />
       </Form.Item>
     </Form>
   )

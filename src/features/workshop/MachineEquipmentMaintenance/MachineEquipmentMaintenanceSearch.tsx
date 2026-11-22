@@ -1,5 +1,6 @@
-import { Button, Form, Input, Space } from 'antd'
+import { Form, Input } from 'antd'
 import { useEffect } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 interface SearchValues {
   unifiedDeviceNo?: string
@@ -69,12 +70,7 @@ export default function MachineEquipmentMaintenanceSearch({
         />
       </Form.Item>
       <Form.Item className="mb-0">
-        <Space>
-          <Button type="primary" htmlType="submit">
-            搜索
-          </Button>
-          <Button onClick={handleReset}>重置</Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

@@ -1,5 +1,5 @@
 import type { SearchValues } from './dashboardUtils'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/16/solid'
+import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/16/solid'
 import { Button, DatePicker, Input, Select, Typography } from 'antd'
 import dayjs from 'dayjs'
 import FilterBar from '@/ui/FilterBar'
@@ -158,7 +158,7 @@ export function OrderStatusDashboardSearchBar({
             搜索
           </Button>
           <Button
-            icon={<XMarkIcon className="size-4" />}
+            icon={<ArrowPathIcon className="size-4" />}
             onClick={onReset}
             className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-500 !shadow-sm !transition-all !duration-200 hover:!border-slate-300 hover:!bg-slate-50 hover:!text-slate-600 dark:!border-slate-600/70 dark:!bg-slate-800/80 dark:!text-slate-400 dark:hover:!border-slate-500 dark:hover:!bg-slate-700 dark:hover:!text-slate-200"
           >

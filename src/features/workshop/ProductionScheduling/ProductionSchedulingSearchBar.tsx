@@ -1,10 +1,9 @@
 import type { FormInstance } from 'antd'
 import type { SearchFormValues } from './productionSchedulingUtils'
-import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/16/solid'
 
-import { Button, DatePicker, Form, Input, Select } from 'antd'
+import { DatePicker, Form, Input, Select } from 'antd'
 import { WORKSHOP_ORDER_STATUS_OPTIONS } from '@/features/workshop/OrderList/orderStatus'
-import FilterBar from '@/ui/FilterBar'
+import FilterBar, { FilterBarActions } from '@/ui/FilterBar'
 import {
   DEFAULT_FILTERS,
 
@@ -191,23 +190,7 @@ export default function ProductionSchedulingSearchBar({
           />
         </Form.Item>
         <Form.Item className="!mb-0">
-          <Button
-            type="primary"
-            size="small"
-            htmlType="submit"
-            icon={<MagnifyingGlassIcon className="size-4" />}
-          >
-            查询
-          </Button>
-        </Form.Item>
-        <Form.Item className="!mb-0">
-          <Button
-            size="small"
-            icon={<ArrowPathIcon className="size-4" />}
-            onClick={onReset}
-          >
-            重置
-          </Button>
+          <FilterBarActions size="small" onReset={onReset} />
         </Form.Item>
       </Form>
     </FilterBar>

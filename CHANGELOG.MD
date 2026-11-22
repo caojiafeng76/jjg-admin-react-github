@@ -18,6 +18,17 @@
 ## 2026-11-22
 
 - **类别**：变更
+- **范围**：`src/ui/FilterBar.tsx`、`src/ui/FilterBar.vitest.tsx`、`src/ui/uiStyleConventions.vitest.ts`、`src/features/` 38 个业务筛选组件、`src/features/workshop/ProductionScheduling/ProductionSchedulingControls.vitest.tsx`、`docs/前端页面风格规范与设计指南.md`、`src/pages/dashboardChangelog.ts`
+- **摘要**：统一全站搜索与重置按钮前置图标与组件复用：
+  - 升级共享组件 `FilterBarActions`（`src/ui/FilterBar.tsx`），内置 `@heroicons/react/16/solid` 的 `MagnifyingGlassIcon`（「搜索」）与 `ArrowPathIcon`（「重置」），尺寸统一为 `size-4`，并扩展可选 `onSearch`、`size` 与 `className` 属性以适配非表单提交、紧凑尺寸及移动端两列按钮布局。
+  - 将 28 个原无前置图标的业务筛选组件及 8 个原有内联图标/尺寸不统一的筛选组件收口复用 `FilterBarActions`（覆盖考勤、金檀、劳保、设备运行时间、包装工序、质量、西尼材料、刀具、别墅梯、车间基础资料、优迈、挤压生产、物料流转、生产日报表、订单排产等），同步将 `ProductionSchedulingSearchBar` 的「查询」文案统一为「搜索」。
+  - 保留 `ProductionOrderSearch` 与 `OrderStatusDashboardSearchBar` 的定制按钮外观，仅将前置图标与尺寸统一为 `MagnifyingGlassIcon` / `ArrowPathIcon`（`size-4`）；同步更新 `docs/前端页面风格规范与设计指南.md` §5.2 与首页更新日志 `src/pages/dashboardChangelog.ts`。
+  - 在 `src/ui/uiStyleConventions.vitest.ts` 新增基于 TypeScript AST 的全仓库风格守卫，强制校验搜索/重置按钮前置规范图标（表格列筛选下拉中的 `SafePartSettingTable.tsx` 紧凑「重置」小按钮已显式登记白名单）。
+- **验证**：`bun run lint`（0 error）、`bun run typecheck`、`bun run build`、`bunx antd lint`（`FilterBar.tsx`、`ProductionOrderSearch.tsx`、`OrderStatusDashboardSearchBar.tsx`、`ProductionSchedulingSearchBar.tsx` 均 0 issue）、`bun run test`（Node 测试 38 项 + Vitest 243 文件 2349 项，含新增的 `FilterBarActions` 单测与全仓库搜索/重置按钮 AST 守卫）全部通过；使用 Chrome DevTools MCP 复用本地 `https://localhost:5173` 管理员登录态抽检首页更新日志、订单排产（亮色）、刀具资料（亮色）、物料转移单（亮色）、订单现状（暗色）、别墅梯订单（暗色）及安全件设置列筛选下拉（无回归），均符合预期（生产工单页受二次管理密码锁定未解锁抽检，未执行真实数据写入）。
+
+## 2026-11-22
+
+- **类别**：变更
 - **范围**：`supabase/migrations/20261122120000_add_liangting_warehouse_workshop.sql`、`src/services/apiMaterialTransfersTypes.ts`、`src/services/apiMaterialTransfers.ts`、`src/services/apiPrecisionCuttingTransfersTypes.ts`、`src/services/precisionFinishingCuttings/types.ts`、`src/features/workshop/OrderList/WorkshopOrderInfoHeader.tsx`、`src/features/material-transfer/MaterialTransferTable.tsx`、`src/features/precision-cutting-transfer/MaterialTransferTable.tsx`、`src/features/precision-finishing-cutting/PrecisionFinishingCuttingTable.tsx`、`src/utils/*Transfer*Excel.ts`、`src/utils/precisionFinishingCuttingExcel.ts`、`src/pages/dashboardChangelog.ts`
 - **摘要**：新增「凉亭仓库」接收车间并统一仓库入库统计口径：
   - 为 `MATERIAL_TRANSFER_WORKSHOPS`、`PRECISION_CUTTING_TRANSFER_WORKSHOPS`、`PRECISION_FINISHING_CUTTING_WORKSHOPS` 在「仓库」后追加「凉亭仓库」，PC 端表单/筛选栏与手机扫码页选择器同步生效；微调 3 张桌面表格与 4 处 Excel 导出「接收车间」列宽。

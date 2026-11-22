@@ -25,7 +25,7 @@ describe('FilterBar', () => {
     })
   })
 
-  it('renders standard search and reset actions', () => {
+  it('renders standard search and reset actions with icons', () => {
     const onReset = vi.fn()
     render(<FilterBarActions onReset={onReset} />)
 
@@ -33,7 +33,36 @@ describe('FilterBar', () => {
     const resetBtn = screen.getByRole('button', { name: /重\s*置/ })
 
     expect(searchBtn.getAttribute('type')).toBe('submit')
+    expect(searchBtn.querySelector('.ant-btn-icon svg')?.getAttribute('class')).toContain('size-4')
+    expect(resetBtn.querySelector('.ant-btn-icon svg')?.getAttribute('class')).toContain('size-4')
+
     fireEvent.click(resetBtn)
     expect(onReset).toHaveBeenCalledTimes(1)
+  })
+
+  it('supports onSearch, size and custom container className', () => {
+    const onSearch = vi.fn()
+    const onReset = vi.fn()
+    const { container } = render(
+      <FilterBarActions
+        onSearch={onSearch}
+        onReset={onReset}
+        size="small"
+        className="grid w-full grid-cols-2 gap-2"
+      />,
+    )
+
+    const wrapper = container.firstElementChild
+    expect(wrapper?.tagName).toBe('DIV')
+    expect(wrapper?.className).toContain('grid-cols-2')
+
+    const searchBtn = screen.getByRole('button', { name: /搜\s*索/ })
+    const resetBtn = screen.getByRole('button', { name: /重\s*置/ })
+    expect(searchBtn.getAttribute('type')).toBe('button')
+    expect(searchBtn.className).toContain('ant-btn-sm')
+    expect(resetBtn.className).toContain('ant-btn-sm')
+
+    fireEvent.click(searchBtn)
+    expect(onSearch).toHaveBeenCalledTimes(1)
   })
 })

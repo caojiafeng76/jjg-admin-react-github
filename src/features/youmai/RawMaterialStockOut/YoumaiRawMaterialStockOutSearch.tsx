@@ -1,5 +1,6 @@
-import { Button, Form, Input, Space } from 'antd'
+import { Form, Input } from 'antd'
 import { useEffect } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 interface SearchValues {
   keyword?: string
@@ -46,14 +47,7 @@ export default function YoumaiRawMaterialStockOutSearch({
         />
       </Form.Item>
       <Form.Item className="mb-0">
-        <Space>
-          <Button type="primary" htmlType="submit" className="rounded-lg font-medium shadow-sm">
-            搜索
-          </Button>
-          <Button onClick={handleReset} className="rounded-lg">
-            重置
-          </Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

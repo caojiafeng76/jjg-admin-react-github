@@ -1,10 +1,6 @@
 import type { Dayjs } from 'dayjs'
 import type { PrecisionFinishingCuttingFilters } from '@/services/apiPrecisionFinishingCuttings'
-import {
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from '@heroicons/react/16/solid'
+import { ChevronDownIcon } from '@heroicons/react/16/solid'
 import { Button, DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 
@@ -14,6 +10,7 @@ import {
   PRECISION_FINISHING_CUTTING_WORKSHOPS,
 
 } from '@/services/apiPrecisionFinishingCuttings'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -172,21 +169,10 @@ export default function PrecisionFinishingCuttingSearch({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <div className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}>
-          <Button
-            type="primary"
-            icon={<MagnifyingGlassIcon className="h-4 w-4" />}
-            htmlType="submit"
-          >
-            搜索
-          </Button>
-          <Button
-            icon={<XMarkIcon className="h-4 w-4" />}
-            onClick={handleReset}
-          >
-            重置
-          </Button>
-        </div>
+        <FilterBarActions
+          onReset={handleReset}
+          className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}
+        />
       </Form.Item>
     </Form>
   )

@@ -1,8 +1,9 @@
 import type { RangePickerProps } from 'antd/es/date-picker'
 import { UserIcon } from '@heroicons/react/24/outline'
-import { Button, DatePicker, Form, Input, Space } from 'antd'
+import { DatePicker, Form, Input } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -81,21 +82,7 @@ export default function AttendanceStatsSearch({
         />
       </Form.Item>
       <Form.Item className="!mb-0">
-        <Space>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="rounded-lg"
-          >
-            搜索
-          </Button>
-          <Button
-            onClick={handleReset}
-            className="rounded-lg"
-          >
-            重置
-          </Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

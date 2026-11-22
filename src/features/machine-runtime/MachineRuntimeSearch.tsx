@@ -1,8 +1,9 @@
 import type { MachineRuntimeFilters } from '@/services/apiMachineRuntime'
-import { Button, DatePicker, Form, Input, Space } from 'antd'
+import { DatePicker, Form, Input } from 'antd'
 import dayjs from 'dayjs'
 
 import { useCallback, useMemo } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -77,12 +78,7 @@ export default function MachineRuntimeSearch({ onSearch, onReset }: Props) {
       </Form.Item>
 
       <Form.Item>
-        <Space>
-          <Button type="primary" htmlType="submit">
-            搜索
-          </Button>
-          <Button onClick={handleReset}>重置</Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

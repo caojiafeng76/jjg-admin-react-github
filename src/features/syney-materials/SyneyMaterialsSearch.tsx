@@ -1,9 +1,9 @@
 import type { SyneyMaterialsSearchFilters } from '@/services/syneyMaterialsSearchFields'
-import { Button, Form, Input, Space } from 'antd'
+import { Form, Input } from 'antd'
 import { useEffect } from 'react'
 
 import { SYNEY_MATERIALS_SEARCH_FIELDS } from '@/services/syneyMaterialsSearchFields'
-import FilterBar from '@/ui/FilterBar'
+import FilterBar, { FilterBarActions } from '@/ui/FilterBar'
 
 export interface SyneyMaterialsSearchProps {
   values: SyneyMaterialsSearchFilters
@@ -62,18 +62,7 @@ export default function SyneyMaterialsSearch({
           </Form.Item>
         ))}
         <Form.Item className="mb-0">
-          <Space>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="rounded-lg font-medium"
-            >
-              搜索
-            </Button>
-            <Button onClick={handleReset} className="rounded-lg">
-              重置
-            </Button>
-          </Space>
+          <FilterBarActions onReset={handleReset} />
         </Form.Item>
       </Form>
     </FilterBar>

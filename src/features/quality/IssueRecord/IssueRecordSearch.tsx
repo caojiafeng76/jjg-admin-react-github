@@ -1,6 +1,6 @@
 import type { Dayjs } from 'dayjs'
 import type { QualityIssueAuditStatus, QualityIssueRecordSearchParams } from '@/services/apiQualityIssueRecords'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { DatePicker, Form, Input, Select } from 'antd'
 
 import { useEffect } from 'react'
 import {
@@ -8,6 +8,7 @@ import {
   QUALITY_ISSUE_AUDIT_STATUSES,
 
 } from '@/services/apiQualityIssueRecords'
+import { FilterBarActions } from '@/ui/FilterBar'
 
 const { RangePicker } = DatePicker
 
@@ -130,12 +131,7 @@ export default function IssueRecordSearch({
       </Form.Item>
 
       <Form.Item className="mb-0">
-        <Space>
-          <Button type="primary" htmlType="submit">
-            搜索
-          </Button>
-          <Button onClick={handleReset}>重置</Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

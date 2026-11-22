@@ -1,10 +1,10 @@
 import type { EmployeeSelectOption } from './employeeSelectOptions'
-import { Button, DatePicker, Form, Input, Select, Space } from 'antd'
+import { DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 import {
-
   mergeEmployeeSelectOptions,
   rememberEmployeeOptions,
   toEmployeeSelectOption,
@@ -142,12 +142,7 @@ export default function WorkOrderSearch({
         <RangePicker />
       </Form.Item>
       <Form.Item className="mb-0">
-        <Space>
-          <Button type="primary" htmlType="submit">
-            搜索
-          </Button>
-          <Button onClick={handleReset}>重置</Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )

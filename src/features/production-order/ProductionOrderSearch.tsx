@@ -3,9 +3,9 @@ import type { ProductionOrderDataCategory } from '@/services/apiProductionOrderI
 import type { ProductionOrderShift } from '@/services/apiProductionOrders'
 import {
   AdjustmentsHorizontalIcon,
+  ArrowPathIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
-  XMarkIcon,
 } from '@heroicons/react/16/solid'
 
 import { Button, DatePicker, Form, Input, Select } from 'antd'
@@ -244,7 +244,7 @@ export default function ProductionOrderSearch({
         <div className={mobile ? 'grid w-full grid-cols-2 gap-2' : 'flex items-center gap-2'}>
           <Button
             type="primary"
-            icon={<MagnifyingGlassIcon className="h-4 w-4" />}
+            icon={<MagnifyingGlassIcon className="size-4" />}
             htmlType="submit"
             loading={isSearching}
             className="h-9 rounded-lg !bg-gradient-to-r from-blue-500 to-blue-600 px-5 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg active:translate-y-0"
@@ -252,7 +252,7 @@ export default function ProductionOrderSearch({
             搜索
           </Button>
           <Button
-            icon={<XMarkIcon className="h-4 w-4" />}
+            icon={<ArrowPathIcon className="size-4" />}
             onClick={handleReset}
             disabled={isSearching}
             className="h-9 rounded-lg border-slate-200 bg-white px-5 text-slate-600 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700 active:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200 dark:active:bg-slate-700"

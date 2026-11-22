@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import ts from 'typescript'
 import { describe, expect, it } from 'vitest'
 
 /**
@@ -19,6 +20,12 @@ const ALLOWED_MODAL_WIDTHS = new Set(['520', '720', '960'])
 const MODAL_WIDTH_EXCEPTIONS: Record<string, string> = {
   'src/features/syney/SafePartSetting/SafePartDrawingPreviewModal.tsx':
     '安全件图纸预览弹窗使用 80vw 自适应展示 PDF 与图纸大图，避免图纸细节被截断',
+}
+
+/** 表格列筛选下拉内的紧凑「重置」小按钮白名单（非页面级筛选栏按钮） */
+const SEARCH_RESET_BUTTON_EXCEPTIONS: Record<string, string> = {
+  'src/features/syney/SafePartSetting/SafePartSettingTable.tsx':
+    'Antd Table 列筛选下拉中的紧凑重置按钮（size="small"），非页面级 FilterBar 搜索/重置按钮',
 }
 
 /** 全库强制覆盖根路径 */
@@ -139,6 +146,66 @@ function findNonVerticalForms(source: string, filePath: string): string[] {
   return badLayouts
 }
 
+function findNonStandardSearchResetButtons(
+  source: string,
+  filePath: string,
+): string[] {
+  if (filePath in SEARCH_RESET_BUTTON_EXCEPTIONS) {
+    return []
+  }
+
+  const sf = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const solid16Icons = new Set<string>()
+  for (const stmt of sf.statements) {
+    if (
+      ts.isImportDeclaration(stmt)
+      && ts.isStringLiteral(stmt.moduleSpecifier)
+      && stmt.moduleSpecifier.text === '@heroicons/react/16/solid'
+      && stmt.importClause?.namedBindings
+      && ts.isNamedImports(stmt.importClause.namedBindings)
+    ) {
+      for (const el of stmt.importClause.namedBindings.elements) {
+        solid16Icons.add(el.name.text)
+      }
+    }
+  }
+
+  const violations: string[] = []
+  function visit(node: ts.Node) {
+    if (ts.isJsxElement(node)) {
+      const tag = node.openingElement.tagName.getText(sf)
+      if (tag === 'Button' || tag === 'PermissionButton') {
+        const childrenText = node.children
+          .map(child => child.getText(sf).trim())
+          .filter(Boolean)
+          .join(' ')
+          .replace(/\s+/g, ' ')
+
+        const isSearchBtn = childrenText === '搜索' || (filePath === 'src/ui/FilterBar.tsx' && childrenText === '{searchText}')
+        const isResetBtn = childrenText === '重置' || (filePath === 'src/ui/FilterBar.tsx' && childrenText === '{resetText}')
+
+        if (isSearchBtn || isResetBtn) {
+          const expectedIcon = isSearchBtn ? 'MagnifyingGlassIcon' : 'ArrowPathIcon'
+          let iconExpr = ''
+          for (const attr of node.openingElement.attributes.properties) {
+            if (ts.isJsxAttribute(attr) && attr.name.getText(sf) === 'icon') {
+              iconExpr = attr.initializer?.getText(sf).replace(/\s+/g, ' ') ?? ''
+            }
+          }
+
+          if (!solid16Icons.has(expectedIcon) || !iconExpr.includes(`<${expectedIcon}`) || !iconExpr.includes('size-4')) {
+            const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1
+            violations.push(`L${line}: "${childrenText}" 必须配置 @heroicons/react/16/solid 的 <${expectedIcon} className="size-4" />`)
+          }
+        }
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(sf)
+  return violations
+}
+
 describe('UI style conventions guard', () => {
   it('keeps the unified design guide authoritative and marks legacy UI docs as archived', () => {
     const designGuide = readWorkspaceFile('docs/前端页面风格规范与设计指南.md')
@@ -182,6 +249,10 @@ describe('UI style conventions guard', () => {
       expect(
         findNonVerticalForms(source, filePath),
         `${filePath} 非搜索表单应统一使用 layout="vertical"`,
+      ).toEqual([])
+      expect(
+        findNonStandardSearchResetButtons(source, filePath),
+        `${filePath} 搜索/重置按钮应统一前置 @heroicons/react/16/solid 图标（size-4）`,
       ).toEqual([])
     },
   )

@@ -4,8 +4,9 @@ import type {
   JintanSearchField,
   JintanSearchFilters,
 } from '@/services/jintanSearchFields'
-import { Button, Form, Input, Space } from 'antd'
+import { Form, Input } from 'antd'
 import { useEffect } from 'react'
+import { FilterBarActions } from '@/ui/FilterBar'
 import JintanItemTypeFilterItem from './JintanItemTypeFilterItem'
 
 export interface JintanFieldSearchValues extends JintanSearchFilters {
@@ -79,18 +80,7 @@ export default function JintanFieldSearch<T extends JintanFieldSearchValues>({
       <JintanItemTypeFilterItem />
       {children}
       <Form.Item className="mb-0">
-        <Space>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="rounded-lg font-medium shadow-sm"
-          >
-            搜索
-          </Button>
-          <Button onClick={handleReset} className="rounded-lg">
-            重置
-          </Button>
-        </Space>
+        <FilterBarActions onReset={handleReset} />
       </Form.Item>
     </Form>
   )
