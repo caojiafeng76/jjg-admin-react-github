@@ -1,8 +1,14 @@
 import type { YoumaiFinishedGoodsStockOut } from '@/services/apiYoumaiFinishedGoodsStockOut'
+import type {
+  ExcelPrintMargins,
+  ExcelPrintSetupOptions,
+} from '@/utils/excelPrintSetup'
 import dayjs from 'dayjs'
 
 import * as XLSX from 'xlsx-js-style'
-import { EXCEL_WRITE_OPTIONS, setColumnWidths } from '@/utils/excelStyleUtils'
+import { downloadExcelBuffer } from '@/utils/excelExportWorker'
+import { applyExcelPrintSetup } from '@/utils/excelPrintSetup'
+import { EXCEL_WRITE_OPTIONS } from '@/utils/excelStyleUtils'
 import { formatNumber } from '@/utils/format'
 import { calculateYoumaiWeightKg } from '@/utils/youmaiWeight'
 
@@ -26,9 +32,27 @@ const TABLE_HEADERS = [
   '加工数量',
 ] as const
 
-const COLUMN_WIDTHS = [4, 12, 26, 6, 16, 18, 16, 10, 10, 10, 12, 12, 10, 10]
+// A4 横向 100% 比例 + 窄边距（0.2 in）下精确列宽（合计 137.0，预留打印安全余量）
+const COLUMN_WIDTHS = [3.8, 10.8, 20.2, 5, 14, 15.5, 9.2, 6.5, 6.5, 9, 9.5, 9, 9, 9]
 const BORDER_COLOR = '000000'
 const HEADER_FILL = 'FFFFFF'
+const BASE_BODY_ROW_HEIGHT = 22
+const BASE_HEADER_ROW_HEIGHT = 24
+const PRINT_MARGINS: ExcelPrintMargins = {
+  left: 0.2,
+  right: 0.2,
+  top: 0.35,
+  bottom: 0.35,
+  header: 0.15,
+  footer: 0.15,
+}
+const PRINT_SETUP: ExcelPrintSetupOptions = {
+  paperSize: 9,
+  orientation: 'landscape',
+  scale: 100,
+  horizontalCentered: true,
+  margins: PRINT_MARGINS,
+}
 
 function colLetter(index: number) {
   let letter = ''
@@ -45,6 +69,67 @@ function formatCellText(value: string | number | null | undefined) {
     return '-'
   }
   return String(value)
+}
+
+const HALF_WIDTH_CHAR_PX = 6.8
+const FULL_WIDTH_CHAR_PX = 13.5
+const EXCEL_MDW_PX = 7
+const EXCEL_CELL_PADDING_PX = 5
+
+function getLineDisplayWidthPx(line: string): number {
+  let widthPx = 0
+
+  for (let index = 0; index < line.length; index += 1) {
+    const code = line.charCodeAt(index)
+
+    if (
+      (code >= 0x4E00 && code <= 0x9FFF)
+      || (code >= 0x3400 && code <= 0x4DBF)
+      || (code >= 0xF900 && code <= 0xFAFF)
+      || (code >= 0x3000 && code <= 0x303F)
+      || (code >= 0xFF00 && code <= 0xFFEF)
+    ) {
+      widthPx += FULL_WIDTH_CHAR_PX
+    }
+    else {
+      widthPx += HALF_WIDTH_CHAR_PX
+    }
+  }
+
+  return widthPx
+}
+
+function estimateWrappedLines(value: string | number, columnWidth: number): number {
+  const text = String(value)
+  if (!text) {
+    return 1
+  }
+
+  const availablePx = Math.max(
+    HALF_WIDTH_CHAR_PX,
+    columnWidth * EXCEL_MDW_PX - EXCEL_CELL_PADDING_PX,
+  )
+  return text.split(/\r?\n/).reduce((lines, segment) => {
+    const displayWidthPx = getLineDisplayWidthPx(segment)
+    return lines + Math.max(1, Math.ceil(displayWidthPx / availablePx))
+  }, 0)
+}
+
+function estimateRowHeight(
+  row: Array<string | number>,
+  baseHeight: number,
+  extraPadding: number,
+): number {
+  const maxLines = row.reduce<number>((max, cell, columnIndex) => {
+    const colWidth = COLUMN_WIDTHS[columnIndex] ?? 10
+    return Math.max(max, estimateWrappedLines(cell, colWidth))
+  }, 1)
+
+  if (maxLines <= 1) {
+    return baseHeight
+  }
+
+  return Math.max(baseHeight, maxLines * 14 + extraPadding)
 }
 
 export function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
@@ -106,13 +191,22 @@ export function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
     { s: { r: 1, c: halfCol }, e: { r: 1, c: colCount - 1 } },
   ]
 
-  setColumnWidths(ws, COLUMN_WIDTHS)
+  ws['!cols'] = COLUMN_WIDTHS.map(width => ({ width }))
+  ws['!margins'] = { ...PRINT_MARGINS }
 
+  const headerRowHeight = estimateRowHeight(
+    headerRow,
+    BASE_HEADER_ROW_HEIGHT,
+    8,
+  )
   ws['!rows'] = [
     { hpt: 30, hpx: 30 },
     { hpt: 22, hpx: 22 },
-    { hpt: 24, hpx: 24 },
-    ...bodyRows.map(() => ({ hpt: 22, hpx: 22 })),
+    { hpt: headerRowHeight, hpx: headerRowHeight },
+    ...bodyRows.map((row) => {
+      const height = estimateRowHeight(row, BASE_BODY_ROW_HEIGHT, 6)
+      return { hpt: height, hpx: height }
+    }),
   ]
 
   // 标题
@@ -146,7 +240,7 @@ export function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
     if (!ws[ref])
       ws[ref] = { v: '' }
     ws[ref].s = {
-      font: { name: '宋体', sz: 11, bold: true },
+      font: { name: '宋体', sz: 10, bold: true },
       alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
       fill: { fgColor: { rgb: HEADER_FILL } },
       border: {
@@ -166,7 +260,7 @@ export function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
       if (!ws[ref])
         ws[ref] = { v: '' }
       ws[ref].s = {
-        font: { name: '宋体', sz: 10.5 },
+        font: { name: '宋体', sz: 10 },
         alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
         border: {
           top: { style: 'thin', color: { rgb: BORDER_COLOR } },
@@ -205,10 +299,23 @@ export function buildWorkbook(items: YoumaiFinishedGoodsStockOut[]) {
   return wb
 }
 
-export function exportYoumaiFinishedGoodsStockOutToExcel(
+export async function buildWorkbookBuffer(
+  items: YoumaiFinishedGoodsStockOut[],
+): Promise<ArrayBuffer> {
+  const wb = buildWorkbook(items)
+  const rawBuffer = XLSX.write(wb, {
+    ...EXCEL_WRITE_OPTIONS,
+    type: 'array',
+    bookType: 'xlsx',
+  }) as ArrayBuffer
+
+  return applyExcelPrintSetup(rawBuffer, PRINT_SETUP)
+}
+
+export async function exportYoumaiFinishedGoodsStockOutToExcel(
   items: YoumaiFinishedGoodsStockOut[],
 ) {
-  const wb = buildWorkbook(items)
+  const buffer = await buildWorkbookBuffer(items)
   const filename = `优迈成品出库_${items.length}条_${dayjs(new Date()).format('YYYY-MM-DD_HH-mm-ss')}.xlsx`
-  XLSX.writeFile(wb, filename, EXCEL_WRITE_OPTIONS)
+  downloadExcelBuffer(buffer, filename)
 }

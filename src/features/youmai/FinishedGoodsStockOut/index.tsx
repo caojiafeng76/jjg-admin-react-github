@@ -225,7 +225,7 @@ export default function YoumaiFinishedGoodsStockOutPage() {
     try {
       const { exportYoumaiFinishedGoodsStockOutToExcel }
         = await loadYoumaiFinishedGoodsStockOutExport()
-      exportYoumaiFinishedGoodsStockOutToExcel(selectedRecords)
+      await exportYoumaiFinishedGoodsStockOutToExcel(selectedRecords)
       message.success(`已导出 ${selectedRecords.length} 条优迈成品出库`)
     }
     catch (error) {

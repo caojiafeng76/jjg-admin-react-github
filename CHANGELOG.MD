@@ -17,6 +17,13 @@
 
 ## 2026-11-23
 
+- **类别**：变更
+- **范围**：`src/utils/excelPrintSetup.ts`、`src/utils/excelPrintSetup.vitest.ts`、`src/utils/youmaiFinishedGoodsStockOutExport.ts`、`src/utils/youmaiFinishedGoodsStockOutExcel.vitest.ts`、`src/features/youmai/FinishedGoodsStockOut/index.tsx`、`src/pages/dashboardChangelog.ts`
+- **摘要**：优化优迈成品出库导出 Excel 的 A4 横向 100% 单页打印排版：新增通用 OOXML 工作表打印配置注入工具 `excelPrintSetup.ts`（按 ECMA-376 子元素顺序写入 `<printOptions horizontalCentered="1"/>`、`<pageMargins>` 与 `<pageSetup>`）；修复导出列宽因 `setColumnWidths` 写入 `wpx` 导致在 XML 中膨胀约 1.5 倍的问题，结合生产数据字段长度分布将 14 列精确 `<col width>` 收紧至合计 `137.0`；默认设置 A4 横向（`paperSize="9" orientation="landscape"`）、`scale="100"` 无缩放、左右窄边距 `0.2 in`（上下 `0.35 in`、页眉/页脚 `0.15 in`）与水平居中，表头与正文统一为宋体 `10pt`，并为超长物料编码等折行数据自动提升行高防止裁切；同步更新页面导出调用 `await` 与首页 `src/pages/dashboardChangelog.ts`。
+- **验证**：`bun run lint`（0 error / 0 warning）、`bun run typecheck`、`bunx antd lint src/features/youmai/FinishedGoodsStockOut/index.tsx --format json`（0 issue）、`bun run build`、`bun run check:bundle`（`Bundle budget passed: assets/index-BhRY-BpL.js gzip 33.7 KB`）与 `bun run test`（Node 测试 38 项 + Vitest 251 文件 2422 项，含新增 `excelPrintSetup.vitest.ts` 4 项及扩展 `youmaiFinishedGoodsStockOutExcel.vitest.ts` 4 项通过 `JSZip` 校验 XML 列宽、页边距、A4 横向与 `scale="100"`）均已通过；本机未安装 Excel / WPS / LibreOffice，且本地开发服务未启动（`https://localhost:5173` 连接被拒绝），尚未在浏览器登录态及桌面表格软件打印预览中完成实机导出复核。
+
+## 2026-11-23
+
 - **类别**：重构
 - **范围**：西尼模块第四阶段（`src/features/syney/PoList/poLabelPdfDocument.ts`、`decompositionPdfDocument.ts`、`usePrint.ts`、`usePrintEnglish.ts`、`usePrintDecomposition.ts`、`usePo.vitest.tsx`、`lazyDocumentModules.vitest.ts`、`shippingListExcelDocument.vitest.ts`、`src/features/syney/ReportList/useGenerateSyneyStoreReportPDF.ts`、`lazyDocumentModules.vitest.ts`、`src/features/syney/phase4Regressions.vitest.tsx`）
 - **摘要**：完成西尼模块第四阶段 P3 重型 PDF/Excel 文档模块抽离与测试补强：抽取 `PoList/poLabelPdfDocument.ts` 合并 `usePrint.ts` 与 `usePrintEnglish.ts` 中重复的标签 PDF 绘图代码并通过 `usePoLabelPrint` 按需动态懒加载；抽取 `PoList/decompositionPdfDocument.ts` 剥离 `usePrintDecomposition.ts` 中 400 余行 jsPDF 绘制逻辑并实现按需懒加载与按钮悬停预加载；移除 `ReportList/useGenerateSyneyStoreReportPDF.ts` 中无人消费且触发列表页高频重渲染的 `progress` 状态；同步更新 `PoList/lazyDocumentModules.vitest.ts` 与 `ReportList/lazyDocumentModules.vitest.ts` 守卫规则，修复 `PoList/usePo.vitest.tsx` 并新增 `phase4Regressions.vitest.tsx` 与 `shippingListExcelDocument.vitest.ts` 用例（覆盖中英文标签及 `~` 备注导出/打印、`side_frame` 件号配置驱动分解单与无额外 `progress` 重渲染）。本次为内部模块抽离与测试补强，未涉及界面或业务规则变更，未改动 `src/pages/dashboardChangelog.ts`。
