@@ -1,11 +1,16 @@
 import { handleApiError } from '@utils/errorHandler'
 import supabase from './supabase'
 
-export async function getSerialNo() {
-  const { data, error } = await supabase
+export async function getSerialNo(signal?: AbortSignal) {
+  let query = supabase
     .from('syney-serial-no')
     .select('*')
-    .single()
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.single()
 
   if (error) {
     throw handleApiError(error, '获取流水号失败')

@@ -1,11 +1,10 @@
 import type { DecompositionRole, SyneySafePartRule } from './syneySafePartRules'
 import type { ISyneyItem } from '@/services/types'
+import { normalizeSyneyPartNo } from './syneyOrderDefaults'
 import {
-
   findSafePartRule,
   hasDownFlag,
   hasUpFlag,
-
 } from './syneySafePartRules'
 
 export interface DecompositionCell {
@@ -39,10 +38,6 @@ const ROLE_TO_CELL_KEY: Partial<Record<DecompositionRole, CellKey>> = {
   cross_frame: 'crossFrame',
 }
 
-function normalizePartNo(partNo: string | null | undefined) {
-  return (partNo || '').trim().replace(/^[^A-Z0-9]+/i, '')
-}
-
 function startsWithAny(value: string, prefixes: string[]) {
   return prefixes.some(prefix => value.startsWith(prefix))
 }
@@ -62,7 +57,7 @@ function getConfiguredCellKey(
 }
 
 function getLegacyCellKey(item: ISyneyItem): CellKey | undefined {
-  const partNo = normalizePartNo(item.PartNo)
+  const partNo = normalizeSyneyPartNo(item.PartNo)
   const remark = item.Remark || ''
 
   if (startsWithAny(partNo, ['XN2808EB', 'XN3024BR'])) {
@@ -124,7 +119,7 @@ function getLegacyCellKey(item: ISyneyItem): CellKey | undefined {
 }
 
 function isLegacyRearPlateCandidate(item: ISyneyItem) {
-  const partNo = normalizePartNo(item.PartNo)
+  const partNo = normalizeSyneyPartNo(item.PartNo)
   return (
     partNo.startsWith('XN2808AF')
     || partNo.startsWith('XN2808FN')
@@ -135,7 +130,7 @@ function isLegacyRearPlateCandidate(item: ISyneyItem) {
 }
 
 function isLegacyMiddlePlateCandidate(item: ISyneyItem) {
-  const partNo = normalizePartNo(item.PartNo)
+  const partNo = normalizeSyneyPartNo(item.PartNo)
   return partNo.startsWith('XN3024DA') || partNo.startsWith('XN2808DA')
 }
 
@@ -204,7 +199,7 @@ function isSideFrameCandidate(
     return configuredRule.decomposition_role === 'side_frame'
   }
 
-  const partNo = normalizePartNo(item.PartNo)
+  const partNo = normalizeSyneyPartNo(item.PartNo)
   return partNo.includes('XN2808ED') || partNo.includes('XN2838CQ')
 }
 

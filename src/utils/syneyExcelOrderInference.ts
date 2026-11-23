@@ -1,4 +1,10 @@
 import type { ExcelRow } from './excelUtilsTypes'
+import {
+  extractBrandFromRemark,
+  inferSyneySpecTypeFromPartNo,
+  isValidStandardSyneySpec,
+  normalizeSyneyPartNo,
+} from './syneyOrderDefaults'
 
 interface SpecInferenceResult {
   spec: string | null
@@ -60,28 +66,8 @@ export function extractBrandFromBackPlate(rows: ExcelRow[]): string | null {
     return null
   }
 
-  // 2. 从备注中提取品牌
-  const remark = String(backPlateRow.备注)
-
-  // 优先匹配 "商标为" 格式（如：商标为现代电梯）
-  let match = remark.match(/商标为\s*([^\s，,。]+)/)
-  if (match && match[1]) {
-    return match[1].trim()
-  }
-
-  // 匹配 "商标:" 或 "商标：" 格式
-  match = remark.match(/商标[:：]\s*([^\s，,。]+)/)
-  if (match && match[1]) {
-    return match[1].trim()
-  }
-
-  // 匹配 "品牌:" 或 "品牌：" 格式
-  match = remark.match(/品牌[:：]\s*([^\s，,。]+)/)
-  if (match && match[1]) {
-    return match[1].trim()
-  }
-
-  return null
+  // 2. 从备注中提取品牌（统一支持带括号商标名）
+  return extractBrandFromRemark(String(backPlateRow.备注))
 }
 
 /**
@@ -212,10 +198,6 @@ export function extractTechnique(rows: ExcelRow[]): string | null {
   return techniqueList.length > 0 ? techniqueList.join(',') : null
 }
 
-function normalizePartNo(partNo: string) {
-  return partNo.replace(/^[^A-Z0-9]+/i, '')
-}
-
 /**
  * 从所有行中搜索规格信息（后备逻辑）
  * 在所有条目的spec和remark字段中匹配1000型/800型/600型和室内/室外
@@ -225,7 +207,7 @@ function normalizePartNo(partNo: string) {
 export function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
   let model = ''
   let environment = '室内' // 默认室内
-  let type = ''
+  let type: '扶梯' | '人行道' | null = null
 
   // 遍历所有行，搜索型号、环境和类型
   for (const row of rows) {
@@ -252,53 +234,23 @@ export function extractSpecFromAllRows(rows: ExcelRow[]): string | null {
       environment = '室内'
     }
 
-    // 从件号判断类型（扶梯/人行道）
-    const partNo = normalizePartNo(String(row.物料件号 || ''))
+    // 从件号判断类型（扶梯/人行道），兼容 XN2808 / XN2838 / XN3024 系列
     if (!type) {
-      if (partNo.includes('XN2808EB') || partNo.startsWith('XN2808')) {
-        type = '扶梯'
-      }
-      else if (partNo.includes('XN3024BR') || partNo.startsWith('XN3024')) {
-        type = '人行道'
-      }
+      type = inferSyneySpecTypeFromPartNo(String(row.物料件号 || ''))
     }
   }
 
-  if (!model) {
-    return null
-  }
-
-  // 如果找不到类型，返回null（无法确定是扶梯还是人行道）
-  if (!type) {
+  if (!model || !type) {
     return null
   }
 
   const spec = `${model}-${environment}-${type}`
-
-  const validSpecs = [
-    '1000型-室内-扶梯',
-    '1000型-室外-扶梯',
-    '1000型-室内-人行道',
-    '1000型-室外-人行道',
-    '800型-室内-扶梯',
-    '800型-室外-扶梯',
-    '800型-室内-人行道',
-    '800型-室外-人行道',
-    '600型-室内-扶梯',
-    '600型-室外-扶梯',
-    '1000型-室内-老围框',
-    '800型-室内-老围框',
-    '600型-室内-老围框',
-  ]
-
-  const isValid = validSpecs.includes(spec)
-
-  return isValid ? spec : null
+  return isValidStandardSyneySpec(spec) ? spec : null
 }
 
 /**
  * 从Excel行数据中推断规格信息
- * 按前板件号区分扶梯还是人行道: 包含XN2808EB的是扶梯,包含XN3024BR的是人行道
+ * 按前板件号区分扶梯还是人行道: 包含XN2808EB/XN2838的是扶梯,包含XN3024BR的是人行道
  * 解析中板规格字段确定 1000型/800型/600型 和 室内/室外
  * @param rows Excel行数据
  * @returns 推断的规格,如果无法推断则返回 null
@@ -317,17 +269,7 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
   }
 
   // 2. 从前板件号判断类型(扶梯/人行道)
-  let type = ''
-  const frontPlatePartNo = normalizePartNo(String(frontPlateRow.物料件号 || ''))
-
-  // 包含 XN2808EB 的是扶梯,包含 XN3024BR 的是人行道
-  if (frontPlatePartNo.includes('XN2808EB')) {
-    type = '扶梯'
-  }
-  else if (frontPlatePartNo.includes('XN3024BR')) {
-    type = '人行道'
-  }
-
+  const type = inferSyneySpecTypeFromPartNo(String(frontPlateRow.物料件号 || ''))
   if (!type) {
     return null
   }
@@ -335,7 +277,7 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
   const middlePlateRow = rows.find((row) => {
     const name = String(row.物料名称 || '')
     const partNoRaw = String(row.物料件号 || '')
-    const partNo = normalizePartNo(partNoRaw)
+    const partNo = normalizeSyneyPartNo(partNoRaw)
     return (
       name.includes('中板')
       || partNo.startsWith('XN2808BP')
@@ -373,23 +315,5 @@ function extractSpecFromRows(rows: ExcelRow[]): string | null {
 
   const spec = `${model}-${environment}-${type}`
 
-  const validSpecs = [
-    '1000型-室内-扶梯',
-    '1000型-室外-扶梯',
-    '1000型-室内-人行道',
-    '1000型-室外-人行道',
-    '800型-室内-扶梯',
-    '800型-室外-扶梯',
-    '800型-室内-人行道',
-    '800型-室外-人行道',
-    '600型-室内-扶梯',
-    '600型-室外-扶梯',
-    '1000型-室内-老围框',
-    '800型-室内-老围框',
-    '600型-室内-老围框',
-  ]
-
-  const isValid = validSpecs.includes(spec)
-
-  return isValid ? spec : null
+  return isValidStandardSyneySpec(spec) ? spec : null
 }

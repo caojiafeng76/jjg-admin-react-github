@@ -10,6 +10,7 @@ const getSyneyPoMock = vi.hoisted(() => vi.fn())
 
 vi.mock('@/services/apiSyneyPos', () => ({
   default: getSyneyPoMock,
+  getSyneyPoDetail: getSyneyPoMock,
 }))
 
 vi.mock('antd', async () => {

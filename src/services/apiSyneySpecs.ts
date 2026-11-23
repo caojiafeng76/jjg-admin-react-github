@@ -7,21 +7,23 @@ export async function getSyneySpecs({
   page,
   pageSize,
   isAll,
+  signal,
 }: {
   PartNo: string
   page: number
   pageSize: number
   isAll: boolean
+  signal?: AbortSignal
 }) {
-  let query = supabase
-    .from('syney-specs')
-    // 选择所有ISyneySpec必需的字段,并始终获取准确的总数
-    .select('id, PartNo, ParamSpec, PartName, Spec, Unit, created_at', {
-      count: 'exact',
-    })
-    .order('PartNo')
-
   if (!isAll) {
+    let query = supabase
+      .from('syney-specs')
+      // 选择所有ISyneySpec必需的字段,并始终获取准确的总数
+      .select('id, PartNo, ParamSpec, PartName, Spec, Unit, created_at', {
+        count: 'exact',
+      })
+      .order('PartNo')
+
     if (PartNo) {
       query = query.ilike('PartNo', `%${PartNo}%`)
     }
@@ -30,6 +32,10 @@ export async function getSyneySpecs({
     const to = from + pageSize
 
     query = query.range(from, to - 1)
+
+    if (signal) {
+      query = query.abortSignal(signal)
+    }
 
     const { data: syneySpecs, error, count } = await query
 
@@ -49,13 +55,19 @@ export async function getSyneySpecs({
 
   while (true) {
     const to = from + PAGE_SIZE - 1
-    const { data: syneySpecs, error, count } = await supabase
+    let pageQuery = supabase
       .from('syney-specs')
       .select('id, PartNo, ParamSpec, PartName, Spec, Unit, created_at', {
         count: 'exact',
       })
       .order('PartNo')
       .range(from, to)
+
+    if (signal) {
+      pageQuery = pageQuery.abortSignal(signal)
+    }
+
+    const { data: syneySpecs, error, count } = await pageQuery
 
     if (error) {
       throw handleApiError(error, '踏板规格列表获取失败')
@@ -75,12 +87,17 @@ export async function getSyneySpecs({
   return { syneySpecs: allSpecs, count: totalCount }
 }
 
-export async function getSyneySpec(id: number) {
-  const { data: syneySpec, error } = await supabase
+export async function getSyneySpec(id: number, signal?: AbortSignal) {
+  let query = supabase
     .from('syney-specs')
     .select('*')
     .eq('id', id)
-    .single()
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data: syneySpec, error } = await query.single()
 
   if (error) {
     throw handleApiError(error, '踏板规格获取失败')
@@ -104,10 +121,21 @@ export async function createSyneySpec(newSyneySpec: ISyneySpec) {
 }
 
 export async function updateSyneySpec(updates: Partial<ISyneySpec>) {
-  const { data, error } = await supabase
+  const { id, ...payload } = updates
+  const hasId = typeof id === 'number' && !Number.isNaN(id)
+  const partNo = updates.PartNo?.trim()
+
+  if (!hasId && !partNo) {
+    throw new Error('踏板规格更新缺少 id 或件号')
+  }
+
+  let query = supabase
     .from('syney-specs')
-    .update(updates)
-    .eq('PartNo', updates.PartNo!)
+    .update(payload)
+
+  query = hasId ? query.eq('id', id) : query.eq('PartNo', partNo!)
+
+  const { data, error } = await query
     .select()
     .single()
 

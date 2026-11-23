@@ -20,10 +20,8 @@ import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
-import {
-  SYNEY_SAFE_PART_SETTINGS_KEY,
-  useSyneySafePartSettings,
-} from '../useSyneySafePartSettings'
+import { syneyKeys } from '../queryKeys'
+import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import SafePartDrawingPreviewModal from './SafePartDrawingPreviewModal'
 import SafePartSearch from './SafePartSearch'
 import SafePartSettingFormModal from './SafePartSettingFormModal'
@@ -65,12 +63,12 @@ export default function SafePartSettingPage() {
 
   const saveMutation = useMutationWithInvalidation({
     mutationFn: upsertSyneySafePartSetting,
-    invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
+    invalidateQueries: [syneyKeys.safePartSettings.all],
   })
 
   const deleteMutation = useMutationWithInvalidation({
     mutationFn: deleteSyneySafePartSettings,
-    invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
+    invalidateQueries: [syneyKeys.safePartSettings.all],
   })
 
   const handleBatchDelete = async () => {

@@ -4,6 +4,7 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 import { updateSyneyStoreReports } from '@/services/apiSyneyStoreReports'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
+import { syneyKeys } from '../queryKeys'
 import { useTableSelection } from '../useTableSelection'
 
 type ReportStatus = 'confirmed' | 'unconfirmed'
@@ -20,7 +21,7 @@ export function useMarkReportsStatus() {
 
   const { mutateAsync: mark, isPending } = useMutationWithInvalidation({
     mutationFn: updateSyneyStoreReports,
-    invalidateQueries: [['syney-reports']],
+    invalidateQueries: [syneyKeys.report.all],
   })
 
   async function markStatus(Nos: string[], Status: ReportStatus) {

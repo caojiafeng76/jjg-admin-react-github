@@ -16,9 +16,9 @@ export const SyneyStoreReportDetail = lazy(
   () => import('@features/syney/ReportDetail'),
 )
 export const SyneyPoList = lazy(() => import('@features/syney/PoList'))
-export const SyneySetting = lazy(() => import('@pages/SyneySetting'))
+export const SyneySetting = lazy(() => import('@features/syney/Setting'))
 export const SafePartSettingPage = lazy(
-  () => import('@features/syney/SafePartSetting/SafePartSettingPage'),
+  () => import('@features/syney/SafePartSetting'),
 )
 export const SyneyPoDetail = lazy(() => import('@features/syney/PoDetail'))
 

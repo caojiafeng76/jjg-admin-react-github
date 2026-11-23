@@ -2,8 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { queryConfig } from '@/config/queryClient'
 import { getSyneySafePartSettings } from '@/services/apiSyneySafePartSettings'
-
-export const SYNEY_SAFE_PART_SETTINGS_KEY = 'syney_safe_part_settings' as const
+import { syneyKeys } from './queryKeys'
 
 /**
  * 安全部件设置查询（静态数据，1 小时缓存）。
@@ -12,8 +11,8 @@ export const SYNEY_SAFE_PART_SETTINGS_KEY = 'syney_safe_part_settings' as const
  */
 export function useSyneySafePartSettings() {
   return useQuery({
-    queryKey: [SYNEY_SAFE_PART_SETTINGS_KEY],
-    queryFn: getSyneySafePartSettings,
+    queryKey: syneyKeys.safePartSettings.all,
+    queryFn: ({ signal }) => getSyneySafePartSettings(signal),
     ...queryConfig.static,
   })
 }

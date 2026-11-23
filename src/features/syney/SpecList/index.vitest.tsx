@@ -57,7 +57,7 @@ vi.mock('./useDeleteSyneySpecs', () => ({
 }))
 
 vi.mock('./useSyneySpecs', () => ({
-  useSyneySpecs: () => ({
+  useSyneySpecsList: () => ({
     count: 0,
     isLoading: false,
     syneySpecs: [

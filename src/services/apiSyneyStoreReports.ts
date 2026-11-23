@@ -1,3 +1,4 @@
+import type { Database } from './database.types'
 import type { ISyneyItem, ISyneyStoreReport } from './types'
 import supabase from '@services/supabase'
 import { handleApiError } from '@utils/errorHandler'
@@ -8,6 +9,9 @@ import {
 } from './functionInvokeHelpers'
 import { getAuthenticatedProxyHeaders } from './proxyAuth'
 import { resolveSyneyStoreReportProxyUrl } from './syneyStoreReportProxy'
+
+type SyneyStoreReportItemUpdate
+  = Database['public']['Tables']['syney-store-report-items']['Update']
 
 const FETCH_SYNEY_STORE_REPORT_TIMEOUT_MS = 45000
 const SYNEY_STORE_REPORT_API_URL = import.meta.env.VITE_SYNEY_STORE_REPORT_API_URL as string | undefined
@@ -151,10 +155,12 @@ export async function getSyneyStoreReports({
   status,
   page,
   pageSize,
+  signal,
 }: {
   status: string
   page: number
   pageSize: number
+  signal?: AbortSignal
 }) {
   let query = supabase
     .from('syney-store-reports')
@@ -168,6 +174,10 @@ export async function getSyneyStoreReports({
     query = query.eq('Status', status)
   }
 
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
   const { data: syneyStoreReports, error, count } = await query
 
   if (error) {
@@ -177,12 +187,18 @@ export async function getSyneyStoreReports({
   return { syneyStoreReports, count }
 }
 
-export async function getSyneyStoreReport(No: string) {
-  const { data: syneyStoreReport, error } = await supabase
+export async function getSyneyStoreReport(No: string, signal?: AbortSignal) {
+  let query = supabase
     .from('syney-store-report-items')
     .select('*')
     .eq('No', No)
     .order('PartNo')
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data: syneyStoreReport, error } = await query
 
   if (error) {
     throw handleApiError(error, '入库单详情获取失败')
@@ -193,12 +209,18 @@ export async function getSyneyStoreReport(No: string) {
 
 export async function getSyneyStoreReportHeader(
   No: string,
+  signal?: AbortSignal,
 ): Promise<ISyneyStoreReport> {
-  const { data, error } = await supabase
+  let query = supabase
     .from('syney-store-reports')
     .select('id, No, Status, TotalAmount, created_at')
     .eq('No', No)
-    .single()
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query.single()
 
   if (error) {
     throw handleApiError(error, '入库单信息获取失败')
@@ -207,18 +229,30 @@ export async function getSyneyStoreReportHeader(
   return data as ISyneyStoreReport
 }
 
-export async function getSelectedSyneyStoreReports(Nos: string[]) {
+export async function getSelectedSyneyStoreReports(
+  Nos: string[],
+  signal?: AbortSignal,
+) {
+  let itemsQuery = supabase
+    .from('syney-store-report-items')
+    .select('*')
+    .in('No', Nos)
+    .order('No')
+
+  let reportsQuery = supabase
+    .from('syney-store-reports')
+    .select('id, No, Status, TotalAmount, created_at')
+    .in('No', Nos)
+
+  if (signal) {
+    itemsQuery = itemsQuery.abortSignal(signal)
+    reportsQuery = reportsQuery.abortSignal(signal)
+  }
+
   // 使用 Promise.all 并行查询，提升性能
   const [itemsResult, reportsResult] = await Promise.all([
-    supabase
-      .from('syney-store-report-items')
-      .select('*')
-      .in('No', Nos)
-      .order('No'),
-    supabase
-      .from('syney-store-reports')
-      .select('id, No, Status, TotalAmount, created_at')
-      .in('No', Nos),
+    itemsQuery,
+    reportsQuery,
   ])
 
   const { data: itemsFromRepo, error: itemsError } = itemsResult
@@ -339,5 +373,75 @@ export async function updateSyneyStoreReports({
 
   if (error) {
     throw handleApiError(error, '入库单状态更新失败')
+  }
+}
+
+function normalizeSyneyStoreReportItemPayload(
+  item: ISyneyItem,
+): SyneyStoreReportItemUpdate {
+  return {
+    No: item.No,
+    ParamSpec: item.ParamSpec,
+    PartName: item.PartName,
+    PartNo: item.PartNo,
+    Qty: item.Qty,
+    Remark: item.Remark,
+    SONo: item.SONo,
+    Spec: item.Spec,
+    TaxTotalPrice: item.TaxTotalPrice ?? null,
+    TaxUnitPrice: item.TaxUnitPrice ?? null,
+    Unit: item.Unit,
+  }
+}
+
+export async function updateSyneyStoreReport({ item }: { item: ISyneyItem }) {
+  const payload = normalizeSyneyStoreReportItemPayload(item)
+
+  const { error: updateItemError } = await supabase
+    .from('syney-store-report-items')
+    .update(payload)
+    .eq('id', item.id!)
+    .select()
+    .single()
+
+  if (updateItemError) {
+    throw handleApiError(updateItemError, '更新入库单条目失败')
+  }
+
+  const { data: specFromRepo, error: checkSpecError } = await supabase
+    .from('syney-specs')
+    .select('id')
+    .eq('PartNo', item.PartNo || '')
+    .maybeSingle()
+
+  if (checkSpecError) {
+    throw handleApiError(checkSpecError, '检查踏板规格失败')
+  }
+
+  if (specFromRepo)
+    return
+
+  const { error: insertSpecError } = await supabase.from('syney-specs').insert([
+    {
+      ParamSpec: item.ParamSpec,
+      PartName: item.PartName,
+      PartNo: item.PartNo,
+      Spec: item.Spec,
+    },
+  ])
+
+  if (insertSpecError) {
+    throw handleApiError(insertSpecError, '创建踏板规格失败')
+  }
+}
+
+export async function deleteSyneyStoreReportItems(ids: string[]) {
+  const { error } = await supabase
+    .from('syney-store-report-items')
+    .delete()
+    .in('id', ids.map(Number))
+
+  if (error) {
+    throw handleApiError(error, '删除入库单条目失败')
   }
 }

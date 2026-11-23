@@ -34,6 +34,7 @@ import { TableState } from '@/ui/TableState'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import { jsonToArray } from '@/utils/syney'
+import { syneyKeys } from '../queryKeys'
 import TableSelectionProvider from '../TableSelectionProvider'
 import { useTableSelection } from '../useTableSelection'
 import ConfirmButton from './ConfirmButton'
@@ -107,8 +108,9 @@ function ReportListContent() {
     setIsSubmittingModal(true)
     try {
       const { syneySpecs } = await queryClient.fetchQuery({
-        queryKey: ['syney-Specs', 'all'],
-        queryFn: () => getSyneySpecs({ PartNo: '', page: 1, pageSize: 10, isAll: true }),
+        queryKey: syneyKeys.spec.listAll(),
+        queryFn: ({ signal }) =>
+          getSyneySpecs({ PartNo: '', page: 1, pageSize: 10, isAll: true, signal }),
         ...queryConfig.static,
       })
       const payload = buildSyneyStoreReportPayload(
@@ -164,8 +166,9 @@ function ReportListContent() {
 
         try {
           const { syneySpecs } = await queryClient.fetchQuery({
-            queryKey: ['syney-Specs', 'all'],
-            queryFn: () => getSyneySpecs({ PartNo: '', page: 1, pageSize: 10, isAll: true }),
+            queryKey: syneyKeys.spec.listAll(),
+            queryFn: ({ signal }) =>
+              getSyneySpecs({ PartNo: '', page: 1, pageSize: 10, isAll: true, signal }),
             ...queryConfig.static,
           })
           payload = buildSyneyStoreReportPayload(

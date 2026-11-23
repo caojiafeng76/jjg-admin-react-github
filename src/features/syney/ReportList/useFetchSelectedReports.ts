@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 
 import { queryConfig } from '@/config/queryClient'
 import { getSelectedSyneyStoreReports } from '@/services/apiSyneyStoreReports'
+import { syneyKeys } from '../queryKeys'
 import { useTableSelection } from '../useTableSelection'
 
 export type SelectedReportsMap = Map<
@@ -32,8 +33,8 @@ export function useFetchSelectedReports() {
       }
 
       return queryClient.fetchQuery({
-        queryKey: ['selected-reports', [...reportNos].sort()],
-        queryFn: () => getSelectedSyneyStoreReports(reportNos),
+        queryKey: syneyKeys.report.selected(reportNos),
+        queryFn: ({ signal }) => getSelectedSyneyStoreReports(reportNos, signal),
         ...queryConfig.detail,
       })
     },

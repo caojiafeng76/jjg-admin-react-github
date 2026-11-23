@@ -14,7 +14,7 @@ export function useSerialNo() {
     error,
   } = useQuery({
     queryKey: syneyPoKeys.serialNumbers(),
-    queryFn: getSerialNo,
+    queryFn: ({ signal }) => getSerialNo(signal),
     // 序列号数据变化较少，使用静态数据配置
     ...queryConfig.static,
     throwOnError: false,

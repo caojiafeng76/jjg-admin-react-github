@@ -1,5 +1,3 @@
-import type { FormInstance } from 'antd'
-
 /**
  * 规格实体类型
  */
@@ -71,42 +69,4 @@ export interface ISyneyPo {
   Technique: string | null
   DeliveryNo?: string | null
   Detail?: string | null
-}
-
-/**
- * 规格表单 Ref 类型
- */
-export interface ISyneySpecFormRef {
-  getInstance: () => FormInstance<ISyneySpec>
-}
-
-/**
- * 采购订单表单 Ref 类型
- */
-export interface ISyneyPoFormRef {
-  getInstance: () => FormInstance<ISyneyPo>
-  getIsLoading: () => boolean
-}
-
-/**
- * 库存报告表单 Ref 类型
- */
-export interface ISyneyStoreReportFormRef {
-  getInstance: () => FormInstance<ISyneyStoreReport>
-}
-
-/**
- * 订单明细表单 Ref 类型
- */
-export interface ISyneyItemFormRef {
-  getInstance: () => FormInstance<ISyneyItem>
-}
-
-/**
- * 订单详情表单类型
- */
-export interface PoDetailFormType {
-  PartNo: string
-  ParamSpec: string
-  Remark: string
 }

@@ -5,7 +5,7 @@ import { App } from 'antd'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import SafePartSettingPage from './SafePartSettingPage'
+import SafePartSettingPage from './index'
 
 vi.mock('@/hooks/useTableHeight', () => ({
   useTableHeight: () => ({
@@ -34,7 +34,6 @@ const settings = vi.hoisted(() => [
 ])
 
 vi.mock('../useSyneySafePartSettings', () => ({
-  SYNEY_SAFE_PART_SETTINGS_KEY: 'syney_safe_part_settings',
   useSyneySafePartSettings: () => ({
     data: settings,
     isLoading: false,

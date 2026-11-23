@@ -1,5 +1,5 @@
 import type { Key, ReactNode } from 'react'
-import type { SyneyPoDetail } from '@/services/apiSyneyPo'
+import type { SyneyPoDetail } from '@/services/apiSyneyPos'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, renderHook, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -46,9 +46,6 @@ vi.mock('@/hooks/useTableHeight', () => ({
 vi.mock('@/services/apiSyneyPos', () => ({
   getSelectedPosWithItems: mocks.getSelectedPosWithItems,
   updatePos: mocks.updatePos,
-}))
-
-vi.mock('@/services/apiSyneyPo', () => ({
   getSyneyPoDetail: mocks.getSyneyPoDetail,
   updatePoItems: vi.fn(),
 }))
@@ -56,9 +53,6 @@ vi.mock('@/services/apiSyneyPo', () => ({
 vi.mock('@/services/apiSyneyStoreReports', () => ({
   getSyneyStoreReport: mocks.getSyneyStoreReport,
   getSyneyStoreReportHeader: mocks.getSyneyStoreReportHeader,
-}))
-
-vi.mock('@/services/apiSyneyStoreReport', () => ({
   updateSyneyStoreReport: vi.fn(),
   deleteSyneyStoreReportItems: vi.fn(),
 }))

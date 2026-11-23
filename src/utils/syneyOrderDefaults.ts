@@ -2,7 +2,7 @@ import type { ISyneyItem } from '@/types'
 
 export const SYNEY_LOOSE_PARTS_SPEC = '散件'
 
-export const SYNEY_SPEC_OPTIONS = [
+export const SYNEY_STANDARD_SPEC_OPTIONS = [
   '1000型-室内-扶梯',
   '1000型-室外-扶梯',
   '1000型-室内-人行道',
@@ -16,11 +16,80 @@ export const SYNEY_SPEC_OPTIONS = [
   '1000型-室内-老围框',
   '800型-室内-老围框',
   '600型-室内-老围框',
+] as const
+
+export const SYNEY_SPEC_OPTIONS = [
+  ...SYNEY_STANDARD_SPEC_OPTIONS,
   SYNEY_LOOSE_PARTS_SPEC,
 ] as const
 
+const STANDARD_SPEC_SET = new Set<string>(SYNEY_STANDARD_SPEC_OPTIONS)
+
+const BRAND_CAPTURE_SOURCE = '((?:[^\\s，,。()]|\\([^)]*\\))+)'
+const BRAND_PATTERNS = [
+  new RegExp(`商标为\\s*${BRAND_CAPTURE_SOURCE}`),
+  new RegExp(`商标[:：]\\s*${BRAND_CAPTURE_SOURCE}`),
+  new RegExp(`品牌[:：\\s]+${BRAND_CAPTURE_SOURCE}`),
+]
+
 export function isSyneyLoosePartsSpec(spec: string | null | undefined) {
   return spec?.trim() === SYNEY_LOOSE_PARTS_SPEC
+}
+
+export function isValidStandardSyneySpec(
+  spec: string | null | undefined,
+): spec is (typeof SYNEY_STANDARD_SPEC_OPTIONS)[number] {
+  return typeof spec === 'string' && STANDARD_SPEC_SET.has(spec)
+}
+
+/** 规范化西尼物料件号：去除首尾空白及开头非字母数字前缀 */
+export function normalizeSyneyPartNo(partNo: string | null | undefined): string {
+  return (partNo || '').trim().replace(/^[^A-Z0-9]+/i, '')
+}
+
+/**
+ * 从备注文本中提取商标/品牌名，统一支持带括号的品牌名称（如 "现代电梯(杭州)有限公司"）
+ */
+export function extractBrandFromRemark(
+  remark: string | null | undefined,
+): string | null {
+  if (!remark) {
+    return null
+  }
+
+  for (const pattern of BRAND_PATTERNS) {
+    const match = remark.match(pattern)
+    if (match?.[1]) {
+      return match[1].trim()
+    }
+  }
+
+  return null
+}
+
+/**
+ * 根据物料件号判断产品类型（扶梯 / 人行道），兼容 XN2808 / XN2838 / XN3024 系列
+ */
+export function inferSyneySpecTypeFromPartNo(
+  rawPartNo: string | null | undefined,
+): '扶梯' | '人行道' | null {
+  const partNo = normalizeSyneyPartNo(rawPartNo)
+
+  // XN2808EB / XN2808 系列及 XN2838 系列（800型）均属于扶梯
+  if (
+    partNo.includes('XN2808EB')
+    || partNo.startsWith('XN2808')
+    || partNo.startsWith('XN2838')
+  ) {
+    return '扶梯'
+  }
+
+  // XN3024BR / XN3024 系列属于人行道
+  if (partNo.includes('XN3024BR') || partNo.startsWith('XN3024')) {
+    return '人行道'
+  }
+
+  return null
 }
 
 /**
@@ -35,34 +104,7 @@ export function extractBrandFromItems(items: ISyneyItem[]): string | null {
       item.PartName?.includes('前沿后板') || item.PartName?.includes('后板'),
   )
 
-  if (backPlateItem && backPlateItem.Remark) {
-    const remark = backPlateItem.Remark
-
-    // 优先匹配 "商标为" 格式（如：商标为现代电梯）
-    let brandMatch = remark.match(/商标为\s*([^\s，,。]+)/)
-    if (brandMatch && brandMatch[1]) {
-      return brandMatch[1].trim()
-    }
-
-    // 匹配 "商标:" 或 "商标：" 格式
-    brandMatch = remark.match(/商标[:：]\s*([^\s，,。]+)/)
-    if (brandMatch && brandMatch[1]) {
-      return brandMatch[1].trim()
-    }
-
-    // 匹配 "品牌:" 后面的内容,支持括号(如 "现代电梯(杭州)有限公司")
-    // eslint-disable-next-line regexp/no-super-linear-backtracking -- 备注文本很短，保持原有匹配语义
-    brandMatch = remark.match(/品牌[:：\s]*([^\s，,。]+(?:\([^)]+\))?[^\s，,。]*)/)
-    if (brandMatch && brandMatch[1]) {
-      return brandMatch[1].trim()
-    }
-  }
-
-  return null
-}
-
-function normalizePartNo(partNo: string) {
-  return partNo.replace(/^[^A-Z0-9]+/i, '')
+  return extractBrandFromRemark(backPlateItem?.Remark)
 }
 
 /**
@@ -97,20 +139,7 @@ export function extractSpecFromItems(items: ISyneyItem[]): string | null {
   }
 
   // 3. 从件号判断类型（扶梯/人行道）
-  let type = ''
-  const partNo = normalizePartNo(frontPlateItem.PartNo || '')
-
-  // XN2808EB 系列是扶梯，XN3024BR 系列是人行道
-  if (partNo.startsWith('XN2808EB') || partNo.startsWith('XN2808')) {
-    type = '扶梯'
-  }
-  else if (partNo.startsWith('XN3024BR') || partNo.startsWith('XN3024')) {
-    type = '人行道'
-  }
-  else if (partNo.startsWith('XN2838')) {
-    type = '扶梯' // 800型扶梯
-  }
-
+  const type = inferSyneySpecTypeFromPartNo(frontPlateItem.PartNo)
   if (!type) {
     return null
   }
@@ -120,7 +149,7 @@ export function extractSpecFromItems(items: ISyneyItem[]): string | null {
 
   // 查找中板组件（上前中板组件、下前中板组件）
   const middlePlateItem = items.find((item) => {
-    const partNo = normalizePartNo(item.PartNo || '')
+    const partNo = normalizeSyneyPartNo(item.PartNo)
     return (
       item.PartName?.includes('中板')
       || partNo.startsWith('XN2808BP')
@@ -145,22 +174,6 @@ export function extractSpecFromItems(items: ISyneyItem[]): string | null {
   // 5. 组合规格
   const spec = `${model}-${environment}-${type}`
 
-  // 6. 验证规格是否存在于支持的选项中
-  const validSpecs = [
-    '1000型-室内-扶梯',
-    '1000型-室外-扶梯',
-    '1000型-室内-人行道',
-    '1000型-室外-人行道',
-    '800型-室内-扶梯',
-    '800型-室外-扶梯',
-    '800型-室内-人行道',
-    '800型-室外-人行道',
-    '600型-室内-扶梯',
-    '600型-室外-扶梯',
-    '1000型-室内-老围框',
-    '800型-室内-老围框',
-    '600型-室内-老围框',
-  ]
-
-  return validSpecs.includes(spec) ? spec : null
+  // 6. 验证规格是否存在于支持的标准选项中
+  return isValidStandardSyneySpec(spec) ? spec : null
 }

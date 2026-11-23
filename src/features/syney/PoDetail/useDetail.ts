@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { queryConfig } from '@/config/queryClient'
-import { getSyneyPoDetail } from '@/services/apiSyneyPo'
+import { getSyneyPoDetail } from '@/services/apiSyneyPos'
 import { syneyPoKeys } from '../queryKeys'
 
 export function useDetail() {

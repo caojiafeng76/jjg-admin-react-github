@@ -23,7 +23,7 @@ vi.mock('@/services/apiSyneyPurchaseOrder', () => ({
   importSyneyPurchaseOrder: mocks.importOrder,
 }))
 vi.mock('../SpecList/useSyneySpecs', () => ({
-  useSyneySpecs: () => ({ syneySpecs: mocks.specsError ? [] : [], error: mocks.specsError, isLoading: false }),
+  useAllSyneySpecs: () => ({ syneySpecs: mocks.specsError ? [] : [], error: mocks.specsError, isLoading: false }),
 }))
 vi.mock('../useSyneySafePartSettings', () => ({
   useSyneySafePartSettings: () => ({ data: mocks.settingsData, isLoading: false }),

@@ -1,11 +1,11 @@
 import { App, Button, Form, Input, Spin } from 'antd'
 import { useEffect, useState } from 'react'
 
-import { useSerialNo } from '@/features/syney/PoList/useSerialNo'
-import { useUpdateSerialNo } from '@/features/syney/PoList/useUpdateSerialNo'
 import FormErrorAlert from '@/ui/FormErrorAlert'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
+import { useSerialNo } from '../PoList/useSerialNo'
+import { useUpdateSerialNo } from '../PoList/useUpdateSerialNo'
 
 interface SyneySettingFormValues {
   SyneySerialNo: string

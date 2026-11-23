@@ -9,7 +9,7 @@ import { useCallback, useState } from 'react'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
-import { SYNEY_SAFE_PART_SETTINGS_KEY } from '../useSyneySafePartSettings'
+import { syneyKeys } from '../queryKeys'
 
 export interface DrawingPreview {
   url: string
@@ -35,7 +35,7 @@ export function useSafePartDrawing() {
 
   const drawingUploadMutation = useMutationWithInvalidation({
     mutationFn: uploadSyneySafePartDrawing,
-    invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
+    invalidateQueries: [syneyKeys.safePartSettings.all],
   })
 
   const handleDrawingUpload = useCallback(

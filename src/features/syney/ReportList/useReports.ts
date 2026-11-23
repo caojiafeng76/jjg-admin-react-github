@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 
 import { useSearchParams } from 'react-router-dom'
 import { queryConfig } from '@/config/queryClient'
+import { syneyKeys } from '../queryKeys'
 
 export function useReports() {
   const queryClient = useQueryClient()
@@ -24,8 +25,9 @@ export function useReports() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['syney-reports', status, page, pageSize],
-    queryFn: () => getSyneyStoreReports({ status, page, pageSize }),
+    queryKey: syneyKeys.report.list({ status, page, pageSize }),
+    queryFn: ({ signal }) =>
+      getSyneyStoreReports({ status, page, pageSize, signal }),
     placeholderData: keepPreviousData,
     // 使用列表查询配置预设
     ...queryConfig.list,
@@ -43,16 +45,18 @@ export function useReports() {
 
     if (page < pageCount) {
       queryClient.prefetchQuery({
-        queryKey: ['syney-reports', status, page + 1, pageSize],
-        queryFn: () => getSyneyStoreReports({ status, page: page + 1, pageSize }),
+        queryKey: syneyKeys.report.list({ status, page: page + 1, pageSize }),
+        queryFn: ({ signal }) =>
+          getSyneyStoreReports({ status, page: page + 1, pageSize, signal }),
         ...queryConfig.list,
       })
     }
 
     if (page > 1) {
       queryClient.prefetchQuery({
-        queryKey: ['syney-reports', status, page - 1, pageSize],
-        queryFn: () => getSyneyStoreReports({ status, page: page - 1, pageSize }),
+        queryKey: syneyKeys.report.list({ status, page: page - 1, pageSize }),
+        queryFn: ({ signal }) =>
+          getSyneyStoreReports({ status, page: page - 1, pageSize, signal }),
         ...queryConfig.list,
       })
     }

@@ -9,12 +9,17 @@ import {
 } from './syneyExcelOrderInference'
 
 describe('西尼 Excel 订单推断规则', () => {
-  it('从后板备注提取商标', () => {
+  it('从后板备注提取商标（含带括号商标名）', () => {
     expect(
       extractBrandFromBackPlate([
         { 物料名称: '后板', 备注: '前沿板中间，商标为现代电梯，其他' },
       ]),
     ).toBe('现代电梯')
+    expect(
+      extractBrandFromBackPlate([
+        { 物料名称: '前沿后板', 备注: '品牌: 现代电梯(杭州)有限公司，其他' },
+      ]),
+    ).toBe('现代电梯(杭州)有限公司')
     expect(extractBrandFromBackPlate([{ 物料名称: '中板' }])).toBeNull()
   })
 
@@ -31,22 +36,32 @@ describe('西尼 Excel 订单推断规则', () => {
     )
   })
 
-  it('后备规格推断需同时识别型号与扶梯/人行道类型', () => {
+  it('后备规格推断需同时识别型号与扶梯/人行道类型（含 XN2838 扶梯）', () => {
     expect(
       extractSpecFromAllRows([{ 物料件号: 'XN2808AA', 规格: '800 室外' }]),
     ).toBe('800型-室外-扶梯')
+    expect(
+      extractSpecFromAllRows([{ 物料件号: 'XN2838CP1', 规格: '800型 室内' }]),
+    ).toBe('800型-室内-扶梯')
     expect(extractSpecFromAllRows([{ 物料件号: 'ABC', 规格: '800型' }])).toBe(
       null,
     )
   })
 
-  it('同一生产编号按前沿板件号与中板规格推断规格', () => {
+  it('同一生产编号按前沿板件号与中板规格推断规格（含 XN2838 扶梯）', () => {
     expect(
       inferConsistentSpecFromRows([
         { 生产编号: 'S1', 物料件号: 'XN3024BR01', 物料名称: '前沿板' },
         { 生产编号: 'S1', 物料名称: '中板', 规格: '1000型 室内' },
       ]),
     ).toEqual({ spec: '1000型-室内-人行道', hasMixedSpecs: false })
+
+    expect(
+      inferConsistentSpecFromRows([
+        { 生产编号: 'S2', 物料件号: '*XN2838AB01', 物料名称: '前沿板' },
+        { 生产编号: 'S2', 物料名称: '上中板', 规格: '800型 室外' },
+      ]),
+    ).toEqual({ spec: '800型-室外-扶梯', hasMixedSpecs: false })
   })
 })
 

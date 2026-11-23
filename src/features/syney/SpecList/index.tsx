@@ -21,7 +21,7 @@ import SpecSearch from './SpecSearch'
 import SpecTable from './SpecTable'
 import { useCreateSyneySpec } from './useCreateSpec'
 import { useDeleteSyneySpecs } from './useDeleteSyneySpecs'
-import { useSyneySpecs } from './useSyneySpecs'
+import { useSyneySpecsList } from './useSyneySpecs'
 import { useUpdateSyneySpec } from './useUpdateSyneySpec'
 
 export default function SpecList() {
@@ -37,7 +37,12 @@ export default function SpecList() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
   const { syneySpecs, isLoading, isFetching, error, count, refetch }
-    = useSyneySpecs({ silentError: true })
+    = useSyneySpecsList({
+      partNo: filters.PartNo,
+      page,
+      pageSize,
+      silentError: true,
+    })
   const { isCreating, createSyneySpec } = useCreateSyneySpec()
   const { isUpdating, updateSyneySpec } = useUpdateSyneySpec()
   const { isDeleting, deleteSyneySpecs } = useDeleteSyneySpecs()
@@ -59,7 +64,7 @@ export default function SpecList() {
     setFormError(null)
     try {
       if (isEditing) {
-        await updateSyneySpec(specData)
+        await updateSyneySpec({ ...specData, id: spec?.id })
         message.success(feedbackText.updated('踏板规格'))
       }
       else {

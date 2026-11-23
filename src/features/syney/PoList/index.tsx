@@ -26,7 +26,7 @@ import {
   buildSyneyPurchaseOrderPayload,
   prepareManualOrExcelPoGroups,
 } from '@/utils/syneyPurchaseOrder'
-import { useSyneySpecs } from '../SpecList/useSyneySpecs'
+import { useAllSyneySpecs } from '../SpecList/useSyneySpecs'
 import TableSelectionProvider from '../TableSelectionProvider'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { useTableSelection } from '../useTableSelection'
@@ -73,8 +73,7 @@ function PoListContent() {
   const { deletePo, isDeleting } = useDeletePo()
   const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
 
-  const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
-    isAll: true,
+  const { syneySpecs, isLoading: specsLoading } = useAllSyneySpecs({
     enabled: isModalOpen && !isEdit,
     silentError: true,
   })

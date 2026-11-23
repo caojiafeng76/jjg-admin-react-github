@@ -1,3 +1,5 @@
+import { normalizeSyneyPartNo } from './syneyOrderDefaults'
+
 export type DecompositionRole
   = | 'side_frame'
     | 'cross_frame'
@@ -53,10 +55,6 @@ export function hasDownFlag(remark: string | null | undefined): boolean {
   )
 }
 
-function normalizePartNo(partNo: string) {
-  return partNo.trim().replace(/^[^A-Z0-9]+/i, '')
-}
-
 function getSortedRules(settings: SyneySafePartRule[] = []) {
   return [...settings].sort(
     (left, right) => right.part_no.length - left.part_no.length,
@@ -72,7 +70,7 @@ export function findSafePartRule(
     return null
   }
 
-  const normalizedPartNo = normalizePartNo(partNo)
+  const normalizedPartNo = normalizeSyneyPartNo(partNo)
 
   return (
     getSortedRules(settings).find((rule) => {
@@ -81,7 +79,7 @@ export function findSafePartRule(
       }
 
       return (
-        normalizedPartNo.includes(normalizePartNo(rule.part_no))
+        normalizedPartNo.includes(normalizeSyneyPartNo(rule.part_no))
         && (!predicate || predicate(rule))
       )
     }) ?? null

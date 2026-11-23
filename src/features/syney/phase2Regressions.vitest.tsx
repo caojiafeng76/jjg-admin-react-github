@@ -8,7 +8,6 @@ import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-rou
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useUrlListState } from '@/hooks/useUrlListState'
-import SyneySetting from '@/pages/SyneySetting'
 import PoDetail from './PoDetail'
 import DeliveryOrderButton from './PoList/DeliveryOrderButton'
 import ExportInfoButton from './PoList/ExportInfoButton'
@@ -16,6 +15,7 @@ import ExportShippingListButton from './PoList/ExportShippingListButton'
 import PoSearch from './PoList/PoSearch'
 import ReportDetail from './ReportDetail'
 import ReportSearch from './ReportList/ReportSearch'
+import SyneySetting from './Setting'
 import SpecSearch from './SpecList/SpecSearch'
 import TableSelectionProvider from './TableSelectionProvider'
 
@@ -49,17 +49,18 @@ vi.mock('@/hooks/useTableHeight', () => ({
   }),
 }))
 
-vi.mock('@/services/apiSyneyPo', () => ({
-  getSyneyPoDetail: mocks.getSyneyPoDetail,
-  updatePoItems: mocks.updatePoItems,
-}))
+vi.mock('@/services/apiSyneyPos', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/services/apiSyneyPos')>()
+  return {
+    ...actual,
+    getSyneyPoDetail: mocks.getSyneyPoDetail,
+    updatePoItems: mocks.updatePoItems,
+  }
+})
 
 vi.mock('@/services/apiSyneyStoreReports', () => ({
   getSyneyStoreReport: mocks.getSyneyStoreReport,
   getSyneyStoreReportHeader: mocks.getSyneyStoreReportHeader,
-}))
-
-vi.mock('@/services/apiSyneyStoreReport', () => ({
   updateSyneyStoreReport: mocks.updateSyneyStoreReport,
   deleteSyneyStoreReportItems: vi.fn(),
 }))

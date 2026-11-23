@@ -5,6 +5,7 @@ import {
   getSyneyStoreReport,
   getSyneyStoreReportHeader,
 } from '@/services/apiSyneyStoreReports'
+import { syneyKeys } from '../queryKeys'
 
 export function useDetail() {
   const { reportNo } = useParams()
@@ -16,8 +17,8 @@ export function useDetail() {
     error: reportError,
     refetch: refetchReport,
   } = useQuery({
-    queryKey: ['syney-store-report', reportNo],
-    queryFn: () => getSyneyStoreReport(reportNo || ''),
+    queryKey: syneyKeys.report.detail(reportNo || ''),
+    queryFn: ({ signal }) => getSyneyStoreReport(reportNo || '', signal),
     enabled: !!reportNo,
     ...queryConfig.detail,
     throwOnError: false,
@@ -30,8 +31,8 @@ export function useDetail() {
     error: reportInfoError,
     refetch: refetchInfo,
   } = useQuery({
-    queryKey: ['syney-store-report-info', reportNo],
-    queryFn: () => getSyneyStoreReportHeader(reportNo || ''),
+    queryKey: syneyKeys.report.header(reportNo || ''),
+    queryFn: ({ signal }) => getSyneyStoreReportHeader(reportNo || '', signal),
     enabled: !!reportNo,
     ...queryConfig.detail,
     throwOnError: false,

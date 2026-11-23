@@ -16,23 +16,11 @@ const SAFE_PART_DRAWING_MIME_TYPES = new Set([
   'image/webp',
 ])
 
-type SyneySafePartSettingBase
+export type SyneySafePartSetting
   = Database['public']['Tables']['syney_safe_part_settings']['Row']
-
-interface SyneySafePartDrawingFields {
-  drawing_file_path: string | null
-  drawing_file_name: string | null
-  drawing_file_mime_type: string | null
-  drawing_file_size: number | null
-  drawing_uploaded_at: string | null
-}
 
 type SyneySafePartSettingUpdate
   = Database['public']['Tables']['syney_safe_part_settings']['Update']
-    & Partial<SyneySafePartDrawingFields>
-
-export type SyneySafePartSetting = SyneySafePartSettingBase
-  & SyneySafePartDrawingFields
 
 export function isSupportedSafePartDrawing(file: File) {
   return SAFE_PART_DRAWING_MIME_TYPES.has(file.type)
@@ -63,11 +51,17 @@ function assertSafePartDrawingFile(file: File) {
   }
 }
 
-export async function getSyneySafePartSettings() {
-  const { data, error } = await supabase
+export async function getSyneySafePartSettings(signal?: AbortSignal) {
+  let query = supabase
     .from('syney_safe_part_settings')
     .select('*')
     .order('part_no')
+
+  if (signal) {
+    query = query.abortSignal(signal)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     throw handleApiError(error, '安全件设置列表获取失败')
@@ -143,7 +137,7 @@ export async function uploadSyneySafePartDrawing({
 
   const { data, error } = await supabase
     .from('syney_safe_part_settings')
-    .update(drawingUpdate as never)
+    .update(drawingUpdate)
     .eq('id', setting.id)
     .select()
     .single()

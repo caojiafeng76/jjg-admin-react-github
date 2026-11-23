@@ -17,7 +17,7 @@ import {
   prepareSyneyPurchaseOrder,
 } from '@/utils/syneyPurchaseOrder'
 import { syneyPoKeys } from '../queryKeys'
-import { useSyneySpecs } from '../SpecList/useSyneySpecs'
+import { useAllSyneySpecs } from '../SpecList/useSyneySpecs'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { PoImportModePicker } from './PoImportMode'
 
@@ -69,8 +69,7 @@ export function SyneyPurchaseOrderModal({
   const lookupRef = useRef<AbortController | null>(null)
   const submitLockRef = useRef(false)
   const isLoosePartsMode = mode === 'loose-parts'
-  const { syneySpecs, isLoading: specsLoading, error: specsError } = useSyneySpecs({
-    isAll: true,
+  const { syneySpecs, isLoading: specsLoading, error: specsError } = useAllSyneySpecs({
     enabled: !isLoosePartsMode,
     silentError: true,
   })

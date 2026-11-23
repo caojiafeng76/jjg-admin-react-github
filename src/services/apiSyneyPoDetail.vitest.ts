@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getSyneyPoDetail, updatePoItems } from './apiSyneyPo'
+import { getSyneyPoDetail, updatePoItems } from './apiSyneyPos'
 
 const supabaseMock = vi.hoisted(() => ({
   from: vi.fn(),

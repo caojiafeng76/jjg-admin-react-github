@@ -17,13 +17,10 @@ const { getSyneyPoDetailMock, getSyneyPoMock, getSyneyPosMock } = vi.hoisted(
   }),
 )
 
-vi.mock('@/services/apiSyneyPo', () => ({
-  getSyneyPoDetail: getSyneyPoDetailMock,
-}))
-
 vi.mock('@/services/apiSyneyPos', () => ({
   default: getSyneyPoMock,
   getSyneyPos: getSyneyPosMock,
+  getSyneyPoDetail: getSyneyPoDetailMock,
 }))
 
 vi.mock('react-router-dom', async () => {
