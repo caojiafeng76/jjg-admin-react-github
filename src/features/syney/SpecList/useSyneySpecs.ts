@@ -28,6 +28,8 @@ export function useSyneySpecs({
   const {
     data: { syneySpecs, count } = { syneySpecs: [], count: 0 },
     isLoading,
+    isFetching,
+    isPlaceholderData,
     error,
     refetch,
   } = useQuery({
@@ -50,7 +52,7 @@ export function useSyneySpecs({
 
   // 优化预取逻辑：仅在启用的分页列表模式下预取相邻页
   useEffect(() => {
-    if (!enabled || isAll) {
+    if (!enabled || isAll || isPlaceholderData) {
       return
     }
 
@@ -69,7 +71,7 @@ export function useSyneySpecs({
         ...queryConfig.list,
       })
     }
-  }, [enabled, page, pageCount, pageSize, PartNo, isAll, queryClient])
+  }, [enabled, isPlaceholderData, page, pageCount, pageSize, PartNo, isAll, queryClient])
 
-  return { syneySpecs, isLoading, error, count, refetch }
+  return { syneySpecs, isLoading, isFetching, error, count, refetch }
 }

@@ -1,16 +1,15 @@
 import type { SyneySafePartSetting } from '@services/apiSyneySafePartSettings'
-import type { ColumnsType, FilterDropdownProps } from 'antd/es/table/interface'
+import type { ColumnsType } from 'antd/es/table/interface'
 import type { Key } from 'react'
 import type { useSafePartDrawing } from './useSafePartDrawing'
 import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   EyeIcon,
-  MagnifyingGlassIcon,
   PencilSquareIcon,
 } from '@heroicons/react/16/solid'
 import { SAFE_PART_DRAWING_ACCEPT } from '@services/apiSyneySafePartSettings'
-import { Button, Input, Table, Tooltip, Upload } from 'antd'
+import { Button, Table, Tooltip, Upload } from 'antd'
 import { useMemo } from 'react'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
@@ -27,6 +26,7 @@ export interface SafePartSettingTableProps {
   loading: boolean
   page: number
   pageSize: number
+  scrollY?: number
   selectedRowKeys: Key[]
   onSelectionChange: (keys: Key[]) => void
   onEdit: (record: SyneySafePartSetting) => void
@@ -46,6 +46,7 @@ export default function SafePartSettingTable({
   loading,
   page,
   pageSize,
+  scrollY = 400,
   selectedRowKeys,
   onSelectionChange,
   onEdit,
@@ -79,50 +80,6 @@ export default function SafePartSettingTable({
         dataIndex: 'part_no',
         key: 'part_no',
         width: 200,
-        filterDropdown: ({
-          setSelectedKeys,
-          selectedKeys,
-          confirm,
-          clearFilters,
-        }: FilterDropdownProps) => (
-          <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
-            <Input
-              placeholder="搜索件号"
-              value={selectedKeys[0] as string}
-              onChange={e =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [])}
-              onPressEnter={() => confirm()}
-              style={{ marginBottom: 8, display: 'block' }}
-            />
-            <div className="flex gap-2">
-              <Button
-                type="primary"
-                size="small"
-                onClick={() => confirm()}
-                className="rounded-lg"
-              >
-                确定
-              </Button>
-              <Button
-                size="small"
-                onClick={() => {
-                  clearFilters?.()
-                  confirm({ closeDropdown: false })
-                }}
-                className="rounded-lg"
-              >
-                重置
-              </Button>
-            </div>
-          </div>
-        ),
-        filterIcon: (filtered: boolean) => (
-          <MagnifyingGlassIcon className={`size-3.5 ${filtered ? 'text-primary' : 'text-slate-400'}`} />
-        ),
-        onFilter: (value, record) =>
-          (record.part_no ?? '')
-            .toLowerCase()
-            .includes(String(value).toLowerCase()),
       },
       {
         title: '名称',
@@ -174,14 +131,8 @@ export default function SafePartSettingTable({
         render: (v: string | null) => {
           const label = DECOMPOSITION_ROLE_LABELS[v ?? ''] ?? v
           return label
-            ? (
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700/50 dark:text-slate-300">
-                  {label}
-                </span>
-              )
-            : (
-                '-'
-              )
+            ? <StatusPill tone="neutral">{label}</StatusPill>
+            : '-'
         },
       },
       {
@@ -302,10 +253,8 @@ export default function SafePartSettingTable({
       rowSelection={rowSelection}
       rowClassName={zebraRowClassName}
       locale={{ emptyText: <TableEmpty title="暂无件号配置" description="请新建配置或调整筛选条件" /> }}
-      size="small"
       pagination={false}
-      scroll={{ x: 'max-content', y: 'calc(100vh - 420px)' }}
-      style={{ fontSize: '13px' }}
+      scroll={{ x: 'max-content', y: scrollY }}
     />
   )
 }

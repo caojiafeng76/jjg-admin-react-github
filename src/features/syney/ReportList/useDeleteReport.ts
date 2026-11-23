@@ -2,7 +2,7 @@ import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation
 import { deleteSyneyStoreReport } from '@/services/apiSyneyStoreReports'
 
 export function useDeleteReport() {
-  const { mutate: deleteReport, isPending: isDeleting }
+  const { mutateAsync: deleteReport, isPending: isDeleting }
     = useMutationWithInvalidation({
       mutationFn: deleteSyneyStoreReport,
       invalidateQueries: [['syney-reports']],

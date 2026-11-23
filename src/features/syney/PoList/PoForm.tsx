@@ -1,20 +1,20 @@
 import type { ISyneySpec } from '@services/types'
 import type { TransformedOrderData } from '@utils/excelUtils'
 import type { FormInstance } from 'antd'
-import type { FC, Ref } from 'react'
+import type { FC } from 'react'
 import type { ISyneyPo } from '@/types'
 import { DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 import { SYNEY_LOOSE_PARTS_SPEC, SYNEY_SPEC_OPTIONS } from '@/utils/syneyOrderDefaults'
 import ExcelUpload from './ExcelUpload'
 
 interface PoFormProps {
   onFinish: (values: ISyneyPo) => void
+  setFormRef: (form: FormInstance<ISyneyPo>) => void
   isCreating: boolean
   isEdit: boolean
   importMode: 'manual' | 'excel'
-  ref: Ref<FormInstance<ISyneyPo>> | undefined
   initialValues?: ISyneyPo
   onExcelDataChange?: (data: TransformedOrderData) => void
   syneySpecs: ISyneySpec[]
@@ -23,30 +23,42 @@ interface PoFormProps {
 
 const SPEC_OPTIONS = SYNEY_SPEC_OPTIONS.map(spec => ({
   value: spec,
-  label: <span>{spec}</span>,
+  label: spec,
 }))
 
 const PoForm: FC<PoFormProps> = ({
   onFinish,
+  setFormRef,
   isCreating,
   isEdit,
   importMode,
-  ref,
   initialValues,
   onExcelDataChange,
   syneySpecs,
   specsLoading = false,
 }) => {
-  const handleExcelDataParsed = (data: TransformedOrderData) => {
-    if (ref && 'current' in ref && ref.current) {
-      ref.current.setFieldsValue({
-        No: data.po.No,
-        EndDate: data.po.EndDate ? dayjs(data.po.EndDate) : null,
-        Remark: data.po.Remark || '',
-        Spec: data.po.Spec || undefined,
-        Brand: data.po.Brand || undefined,
-      } as Partial<ISyneyPo>)
+  const [form] = Form.useForm<ISyneyPo>()
+
+  useEffect(() => {
+    setFormRef(form)
+  }, [form, setFormRef])
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues)
+      return
     }
+    form.resetFields()
+  }, [form, initialValues])
+
+  const handleExcelDataParsed = (data: TransformedOrderData) => {
+    form.setFieldsValue({
+      No: data.po.No,
+      EndDate: data.po.EndDate ? dayjs(data.po.EndDate) : null,
+      Remark: data.po.Remark || '',
+      Spec: data.po.Spec || undefined,
+      Brand: data.po.Brand || undefined,
+    } as Partial<ISyneyPo>)
 
     if (onExcelDataChange) {
       onExcelDataChange(data)
@@ -57,11 +69,11 @@ const PoForm: FC<PoFormProps> = ({
 
   return (
     <Form
-      ref={ref}
+      form={form}
       layout="vertical"
       name="po-form"
+      disabled={isCreating}
       onFinish={onFinish}
-      initialValues={initialValues}
     >
       <Form.Item
         name="No"

@@ -5,16 +5,17 @@ import type { ISyneyItem, ISyneyPo } from '@/types'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import { App, Modal } from 'antd'
 import dayjs from 'dayjs'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useUrlListState } from '@/hooks/useUrlListState'
 import { SYNEY_PURCHASE_ORDER_NO_PATTERN } from '@/services/syneyDeliveryOrderContract'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import EditButton from '@/ui/EditButton'
 import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import PrintButton from '@/ui/PrintButton'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
@@ -32,12 +33,10 @@ import { useTableSelection } from '../useTableSelection'
 import DeliveryOrderButton from './DeliveryOrderButton'
 import ExportInfoButton from './ExportInfoButton'
 import ExportShippingListButton from './ExportShippingListButton'
-import PoDateFilter from './PoDateFilter'
 import PoForm from './PoForm'
 import { PoImportModePicker } from './PoImportMode'
-import PoSearchInput from './PoSearchInput'
+import PoSearch from './PoSearch'
 import PoSelected from './PoSelected'
-import PoSelectedFilter from './PoSelectedFilter'
 import PoTable from './PoTable'
 import PrintDecompositionButton from './PrintDecompositionButton'
 import { SyneyPurchaseOrderModal } from './SyneyPurchaseOrderModal'
@@ -51,17 +50,16 @@ import { useUpdatePos } from './useUpdatePos'
 
 function PoListContent() {
   const { message: messageApi } = App.useApp()
-  const [searchParams] = useSearchParams()
-  const page = Number(searchParams.get('page')) || 1
-  const pageSize = Number(searchParams.get('pageSize')) || 10
+  const { page, pageSize, filters, setFilters, resetFilters }
+    = useUrlListState(['Status', 'startDate', 'endDate', 'SONo'] as const)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')
   const [isEdit, setIsEdit] = useState(false)
   const [importMode, setImportMode] = useState<PoImportMode>('scm')
   const [excelData, setExcelData] = useState<TransformedOrderData | null>(null)
-
-  const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
+  const [formError, setFormError] = useState<unknown>(null)
+  const [poFormRef, setPoFormRef] = useState<FormInstance<ISyneyPo> | null>(null)
 
   const {
     count,
@@ -131,20 +129,26 @@ function PoListContent() {
     return total
   }, [records, selectedCount, validSelectedKeys])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (tableSelectedKeys.length === 0) {
       messageApi.warning(feedbackText.selectRequired('删除'))
       return
     }
-    deletePo(tableSelectedKeys.map(String), {
-      onSettled: () => {
-        setTableSelectedKeys([])
-      },
-    })
+    try {
+      const result = await deletePo(tableSelectedKeys.map(String))
+      messageApi.success(feedbackText.deleted('订单', result?.deletedCount || 0))
+    }
+    catch (error) {
+      messageApi.error(getUserErrorMessage(error, feedbackText.failed('删除', '订单')))
+    }
+    finally {
+      setTableSelectedKeys([])
+    }
   }, [tableSelectedKeys, messageApi, deletePo, setTableSelectedKeys])
 
   function changeImportMode(mode: PoImportMode) {
     setExcelData(null)
+    setFormError(null)
     setImportMode(mode)
   }
 
@@ -154,25 +158,25 @@ function PoListContent() {
 
   const onFinish = useCallback(
     async (values: ISyneyPo) => {
+      setFormError(null)
       try {
         const formattedEndDate = values.EndDate
           ? dayjs(values.EndDate).format('YYYY-MM-DD')
           : ''
 
         if (isEdit) {
-          updatePos(
-            {
-              ids: tableSelectedKeys.map(String),
-              data: { ...values, EndDate: formattedEndDate },
-            },
-            {
-              // 失败提示由 useUpdatePos 统一弹出；弹窗保持打开，便于修改后重试
-              onSuccess: () => {
-                setIsModalOpen(false)
-                setTableSelectedKeys([])
-              },
-            },
+          const ids = tableSelectedKeys.map(String)
+          await updatePos({
+            ids,
+            data: { ...values, EndDate: formattedEndDate },
+          })
+          messageApi.success(
+            ids.length > 1
+              ? feedbackText.batch('更新', '订单', ids.length)
+              : feedbackText.updated('订单'),
           )
+          setIsModalOpen(false)
+          setTableSelectedKeys([])
           return
         }
 
@@ -252,10 +256,8 @@ function PoListContent() {
         setExcelData(null)
       }
       catch (error) {
-        console.error('订单创建失败:', error)
-        messageApi.error(
-          getUserErrorMessage(error, feedbackText.failed('创建', '订单')),
-        )
+        console.error(isEdit ? '订单更新失败:' : '订单创建失败:', error)
+        setFormError(error)
       }
     },
     [
@@ -298,6 +300,7 @@ function PoListContent() {
     }
 
     setIsEdit(true)
+    setFormError(null)
     setTableSelectedKeys(validSelectedKeys)
     setModalTitle(
       validSelectedKeys.length === 1
@@ -342,6 +345,8 @@ function PoListContent() {
           handleEdit={handleEdit}
           permissionKey="feature:syney-po-list.edit"
         />
+
+        <PoSelected />
 
         <PrintButton
           handlePrint={() => void handlePrint()}
@@ -399,31 +404,25 @@ function PoListContent() {
 
       {/* 搜索 / 过滤栏 */}
       <FilterBar>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">交货日期：</span>
-            <PoDateFilter />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">状态：</span>
-            <PoSelectedFilter />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">搜索：</span>
-            <PoSearchInput />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">操作：</span>
-            <PoSelected />
-          </div>
-        </div>
+        <PoSearch
+          values={filters}
+          onSearch={(next) => {
+            setTableSelectedKeys([])
+            setFilters(next)
+          }}
+          onReset={() => {
+            setTableSelectedKeys([])
+            resetFilters()
+          }}
+          isLoading={posLoading}
+        />
       </FilterBar>
 
       {/* 表格和分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
           <TableState
-            loading={posFirstLoading}
+            loading={posFirstLoading && records.length === 0}
             error={posError}
             onRetry={posRefetch}
           >
@@ -455,29 +454,43 @@ function PoListContent() {
         confirmLoading={isCreating || isPoUpdating}
         destroyOnHidden={true}
         width={720}
-        onOk={() => poFormRef.current?.submit()}
+        onOk={() => poFormRef?.submit()}
         onCancel={() => {
           setIsModalOpen(false)
           setIsEdit(false)
+          setFormError(null)
         }}
       >
-        {!isEdit && <PoImportModePicker value={importMode} onChange={changeImportMode} disabled={isCreating} />}
-        <PoForm
-          key={isEdit ? 'edit' : importMode}
-          importMode={isEdit || importMode === 'scm' || importMode === 'loose-parts' ? 'manual' : importMode}
-          ref={poFormRef}
-          onExcelDataChange={handleExcelDataChange}
-          onFinish={onFinish}
-          isCreating={isCreating || isPoUpdating}
-          isEdit={isEdit}
-          syneySpecs={syneySpecs}
-          specsLoading={specsLoading}
-          initialValues={
-            (po && isEdit
-              ? { ...po, EndDate: dayjs(po.EndDate) }
-              : undefined) as ISyneyPo | undefined
-          }
-        />
+        <div className="space-y-4">
+          <FormErrorAlert
+            error={formError}
+            reason={
+              formError
+                ? getUserErrorMessage(
+                    formError,
+                    feedbackText.failed(isEdit ? '更新' : '创建', '订单'),
+                  )
+                : undefined
+            }
+          />
+          {!isEdit && <PoImportModePicker value={importMode} onChange={changeImportMode} disabled={isCreating} />}
+          <PoForm
+            key={isEdit ? 'edit' : importMode}
+            importMode={isEdit || importMode === 'scm' || importMode === 'loose-parts' ? 'manual' : importMode}
+            setFormRef={setPoFormRef}
+            onExcelDataChange={handleExcelDataChange}
+            onFinish={onFinish}
+            isCreating={isCreating || isPoUpdating}
+            isEdit={isEdit}
+            syneySpecs={syneySpecs}
+            specsLoading={specsLoading}
+            initialValues={
+              (po && isEdit
+                ? { ...po, EndDate: dayjs(po.EndDate) }
+                : undefined) as ISyneyPo | undefined
+            }
+          />
+        </div>
       </Modal>
     </div>
   )

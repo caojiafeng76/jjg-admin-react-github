@@ -6,19 +6,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { syneyPoKeys } from '../queryKeys'
 import { useDeletePo } from './useDeletePo'
 
-const useMutationWithMessageMock = vi.hoisted(() => vi.fn())
+const useMutationWithInvalidationMock = vi.hoisted(() => vi.fn())
 
-vi.mock('@/hooks/useMutationWithMessage', () => ({
-  useMutationWithMessage: useMutationWithMessageMock,
+vi.mock('@/hooks/useMutationWithInvalidation', () => ({
+  useMutationWithInvalidation: useMutationWithInvalidationMock,
 }))
 
 describe('useDeletePo', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useMutationWithMessageMock.mockReturnValue({
-      mutate: vi.fn(),
+    useMutationWithInvalidationMock.mockReturnValue({
+      mutateAsync: vi.fn(),
       isPending: false,
-      contextHolder: null,
     })
   })
 
@@ -31,7 +30,7 @@ describe('useDeletePo', () => {
 
     renderHook(() => useDeletePo(), { wrapper })
 
-    const config = useMutationWithMessageMock.mock.calls[0][0]
+    const config = useMutationWithInvalidationMock.mock.calls[0][0]
     config.onSuccess({ deletedIds: [759], deletedCount: 1 })
 
     expect(config.invalidateQueries).toEqual([syneyPoKeys.all])

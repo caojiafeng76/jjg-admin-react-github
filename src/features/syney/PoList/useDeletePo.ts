@@ -1,15 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query'
 
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import { deletePo as deletePoApi } from '@/services/apiSyneyPos'
-import { getUserErrorMessage } from '@/utils/errorHandler'
-import { feedbackText } from '@/utils/feedbackText'
 import { syneyPoKeys } from '../queryKeys'
 
 export function useDeletePo() {
   const queryClient = useQueryClient()
 
-  const { mutate: deletePo, isPending: isDeleting } = useMutationWithMessage({
+  const { mutateAsync: deletePo, isPending: isDeleting } = useMutationWithInvalidation({
     mutationFn: deletePoApi,
     // 列表、单条、选中项缓存统一失效
     invalidateQueries: [syneyPoKeys.all],
@@ -24,10 +22,6 @@ export function useDeletePo() {
         })
       }
     },
-    successMessage: result =>
-      feedbackText.deleted('订单', result?.deletedCount || 0),
-    errorMessage: err =>
-      getUserErrorMessage(err, feedbackText.failed('删除', '订单')),
   })
 
   return { deletePo, isDeleting }

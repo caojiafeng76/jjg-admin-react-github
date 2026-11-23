@@ -191,7 +191,7 @@ export function useGenerateDeliveryOrders() {
             : null}
           {deliveredNos.length > 0
             ? (
-                <div className="text-amber-600 dark:text-amber-400">
+                <div className="text-warning">
                   {`其中 ${deliveredNos.join('、')} 已有送货单号，SCM 中没有可送明细时会提示失败。`}
                 </div>
               )

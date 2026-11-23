@@ -1,40 +1,43 @@
-import type { Ref } from 'react'
-import type { ISyneySpec, ISyneySpecFormRef } from '@/types'
+import type { FormInstance } from 'antd'
+import type { ISyneySpec } from '@/types'
 import { Form, Input } from 'antd'
-
-import { useCallback, useImperativeHandle } from 'react'
+import { useEffect } from 'react'
 
 export interface SpecFormProps {
-  ref?: Ref<ISyneySpecFormRef>
-  onFinishFunc: (values: ISyneySpec) => void
+  onFinish: (values: ISyneySpec) => void
+  setFormRef: (form: FormInstance<ISyneySpec>) => void
+  isSubmitting?: boolean
   isEditing: boolean
   initialValues?: Partial<ISyneySpec>
 }
 
-export default function SpecForm({ ref, onFinishFunc, isEditing, initialValues }: SpecFormProps) {
+export default function SpecForm({
+  onFinish,
+  setFormRef,
+  isSubmitting = false,
+  isEditing,
+  initialValues,
+}: SpecFormProps) {
   const [form] = Form.useForm<ISyneySpec>()
 
-  const onFinish = useCallback(
-    (values: ISyneySpec) => {
-      onFinishFunc(values)
-    },
-    [onFinishFunc],
-  )
+  useEffect(() => {
+    setFormRef(form)
+  }, [form, setFormRef])
 
-  useImperativeHandle(ref, () => {
-    return {
-      getInstance() {
-        return form
-      },
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues)
+      return
     }
-  })
+    form.resetFields()
+  }, [form, initialValues])
 
   return (
     <Form
       layout="vertical"
       form={form}
-      name="control-hooks"
-      initialValues={initialValues}
+      name="syney-spec-form"
+      disabled={isSubmitting}
       onFinish={onFinish}
     >
       <Form.Item

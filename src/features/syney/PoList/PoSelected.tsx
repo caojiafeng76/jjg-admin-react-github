@@ -11,6 +11,7 @@ import { useState } from 'react'
 
 import { usePermission } from '@/hooks/usePermission'
 import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import { useTableSelection } from '../useTableSelection'
 import { useUpdatePos } from './useUpdatePos'
@@ -19,14 +20,14 @@ const STATUS_OPTIONS: Array<{
   value: string
   label: string
   icon: React.ComponentType<{ className?: string }>
-  color: string
+  colorClassName: string
 }> = [
-  { value: '已创建', label: '已创建', icon: XCircleIcon, color: 'text-rose-500' },
-  { value: '已入库', label: '已入库', icon: CheckCircleIcon, color: 'text-emerald-500' },
-  { value: '部分送货', label: '部分送货', icon: ArrowPathIcon, color: 'text-amber-500' },
-  { value: '已送货', label: '已送货', icon: TruckIcon, color: 'text-sky-500' },
-  { value: '暂停', label: '暂停', icon: PauseCircleIcon, color: 'text-pink-500' },
-  { value: '作废', label: '作废', icon: ExclamationTriangleIcon, color: 'text-slate-500 dark:text-slate-400' },
+  { value: '已创建', label: '已创建', icon: XCircleIcon, colorClassName: 'text-error' },
+  { value: '已入库', label: '已入库', icon: CheckCircleIcon, colorClassName: 'text-success' },
+  { value: '部分送货', label: '部分送货', icon: ArrowPathIcon, colorClassName: 'text-primary' },
+  { value: '已送货', label: '已送货', icon: TruckIcon, colorClassName: 'text-primary' },
+  { value: '暂停', label: '暂停', icon: PauseCircleIcon, colorClassName: 'text-warning' },
+  { value: '作废', label: '作废', icon: ExclamationTriangleIcon, colorClassName: 'text-slate-500 dark:text-slate-400' },
 ]
 
 export default function PoSelected() {
@@ -42,7 +43,7 @@ export default function PoSelected() {
   })
   const denied = viewerDenied || !allowed
 
-  const changeStatus = (value: string) => {
+  async function changeStatus(value: string) {
     if (denied) {
       return
     }
@@ -53,21 +54,26 @@ export default function PoSelected() {
       return
     }
 
+    const ids = tableSelectedKeys.map(String)
     setSelectedValue(value)
-    updatePos(
-      {
-        ids: tableSelectedKeys.map(String),
+    try {
+      await updatePos({
+        ids,
         data: { Status: value },
-      },
-      {
-        onSuccess: () => {
-          setTableSelectedKeys([])
-        },
-        onSettled: () => {
-          setSelectedValue(undefined)
-        },
-      },
-    )
+      })
+      message.success(
+        ids.length > 1
+          ? feedbackText.batch('更新状态', '订单', ids.length)
+          : feedbackText.updated('订单状态'),
+      )
+      setTableSelectedKeys([])
+    }
+    catch (error) {
+      message.error(getUserErrorMessage(error, feedbackText.failed('更新状态', '订单')))
+    }
+    finally {
+      setSelectedValue(undefined)
+    }
   }
 
   const select = (
@@ -75,15 +81,15 @@ export default function PoSelected() {
       className="w-32 rounded-lg"
       disabled={denied || isPoUpdating}
       value={selectedValue}
-      onChange={changeStatus}
-      placeholder="选择操作"
+      onChange={value => void changeStatus(value)}
+      placeholder="批量改状态"
       getPopupContainer={() => document.body}
       suffixIcon={null}
       options={STATUS_OPTIONS.map(option => ({
         value: option.value,
         label: (
           <span className="inline-flex items-center gap-1.5">
-            <option.icon className={`h-3.5 w-3.5 ${option.color}`} />
+            <option.icon className={`size-4 ${option.colorClassName}`} />
             <span>{option.label}</span>
           </span>
         ),

@@ -1,4 +1,4 @@
-import type { FormInstance } from 'antd/lib'
+import type { FormInstance } from 'antd'
 import type { ISyneyItem } from '@/types'
 import { ArrowLeftIcon } from '@heroicons/react/16/solid'
 import { CurrencyYenIcon } from '@heroicons/react/24/outline'
@@ -8,39 +8,26 @@ import DetailTable from '@syney/ReportDetail/DetailTable'
 import { useDetail } from '@syney/ReportDetail/useDetail'
 import EditButton from '@ui/EditButton'
 import { App, Button, Modal } from 'antd'
-import { useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useUrlListState } from '@/hooks/useUrlListState'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import StatusPill from '@/ui/StatusPill'
 import { TableState } from '@/ui/TableState'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import { formatDate } from '@/utils/format'
 import { getReportStatusTone, REPORT_STATUS_LABELS } from '../statusTones'
+import SyneyDetailInfoItem from '../SyneyDetailInfoItem'
 import TableSelectionProvider from '../TableSelectionProvider'
 import { useTableSelection } from '../useTableSelection'
 import DetailForm from './DetailForm'
 import { useDeleteDetail } from './useDeleteDetail'
 import { useUpdateDetail } from './useUpdateDetail'
-
-function InfoItem({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="min-w-0">
-      <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
-      <div className="mt-0.5 truncate text-sm font-medium text-slate-800 dark:text-slate-100">
-        {children}
-      </div>
-    </div>
-  )
-}
 
 function ReportDetailContent() {
   const { message } = App.useApp()
@@ -50,17 +37,19 @@ function ReportDetailContent() {
   const listHref
     = (location.state as { from?: string } | null)?.from || '/syney-store-report-list'
   const { reportNo } = useParams()
-  const [searchParams] = useSearchParams()
-  const page = Number(searchParams.get('page')) || 1
-  const pageSize = Number(searchParams.get('pageSize')) || 10
+  const { page, pageSize } = useUrlListState([] as const)
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)
+  const [formError, setFormError] = useState<unknown>(null)
+  const [detailFormRef, setDetailFormRef] = useState<FormInstance<ISyneyItem> | null>(null)
 
   const { report, reportInfo, reportLoading, isFetching, error: detailError, refetch } = useDetail()
   const { updateItem, isUpdating } = useUpdateDetail()
   const { isDeleting, deleteDetail } = useDeleteDetail()
+
+  useEffect(() => {
+    setTableSelectedKeys([])
+  }, [reportNo, setTableSelectedKeys])
 
   const reportItem = useMemo(
     () => report?.find(item => item.id === Number(tableSelectedKeys?.at(0))),
@@ -100,32 +89,54 @@ function ReportDetailContent() {
     return totalAmount
   }, [records, selectedCount, tableSelectedKeys])
 
-  function showModal() {
-    detailFormRef?.current?.resetFields()
-    setIsModalOpen(true)
-  }
-
   function handleEdit() {
     if (tableSelectedKeys?.length !== 1) {
       message.warning('请选择一条对账单明细进行编辑')
       return
     }
-    showModal()
+    setFormError(null)
+    setIsModalOpen(true)
   }
 
   function handleOk() {
-    detailFormRef?.current?.submit()
+    detailFormRef?.submit()
   }
 
   function handleCancel() {
-    detailFormRef?.current?.resetFields()
+    setFormError(null)
+    detailFormRef?.resetFields()
     setIsModalOpen(false)
     setTableSelectedKeys([])
   }
 
-  function onFinishFuc(values: ISyneyItem) {
-    // 失败提示由 useUpdateDetail 统一弹出；弹窗保持打开，便于修改后重试
-    updateItem({ item: values }, { onSuccess: handleCancel })
+  async function handleFinish(values: ISyneyItem) {
+    setFormError(null)
+    try {
+      await updateItem({ item: values })
+      message.success(feedbackText.updated('对账单明细'))
+      handleCancel()
+    }
+    catch (err) {
+      setFormError(err)
+    }
+  }
+
+  async function handleDeleteSelected() {
+    if (tableSelectedKeys.length === 0) {
+      message.warning(feedbackText.selectRequired('删除'))
+      return
+    }
+    const ids = tableSelectedKeys.map(String)
+    try {
+      await deleteDetail(ids)
+      message.success(feedbackText.deleted('对账单明细', ids.length))
+    }
+    catch (err) {
+      message.error(getUserErrorMessage(err, feedbackText.failed('删除', '对账单明细')))
+    }
+    finally {
+      setTableSelectedKeys([])
+    }
   }
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
@@ -152,7 +163,7 @@ function ReportDetailContent() {
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
           {reportFields.map(item => (
-            <InfoItem key={item.label} label={item.label}>
+            <SyneyDetailInfoItem key={item.label} label={item.label}>
               {item.label === '明细条数'
                 ? (
                     <span className="tabular-nums">{item.value}</span>
@@ -160,13 +171,13 @@ function ReportDetailContent() {
                 : (
                     item.value
                   )}
-            </InfoItem>
+            </SyneyDetailInfoItem>
           ))}
-          <InfoItem label="总金额">
+          <SyneyDetailInfoItem label="总金额">
             <span className="text-lg font-bold text-slate-900 tabular-nums dark:text-slate-100">
               {reportInfo?.TotalAmount?.toLocaleString() ?? '-'}
             </span>
-          </InfoItem>
+          </SyneyDetailInfoItem>
         </div>
       </div>
 
@@ -213,7 +224,7 @@ function ReportDetailContent() {
       {/* 底部吸底操作区 */}
       <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200/60 pt-3 dark:border-slate-700">
         <Button
-          icon={<ArrowLeftIcon className="h-4 w-4" />}
+          icon={<ArrowLeftIcon className="size-4" />}
           onClick={() => navigate(listHref)}
         >
           返回列表
@@ -225,17 +236,7 @@ function ReportDetailContent() {
             count={tableSelectedKeys.length}
             title="删除对账单明细"
             itemName="对账单明细"
-            onConfirm={() => {
-              if (tableSelectedKeys.length === 0) {
-                message.warning(feedbackText.selectRequired('删除'))
-                return
-              }
-              deleteDetail(tableSelectedKeys.map(String), {
-                onSettled: () => {
-                  setTableSelectedKeys([])
-                },
-              })
-            }}
+            onConfirm={handleDeleteSelected}
           />
         </div>
       </div>
@@ -248,13 +249,23 @@ function ReportDetailContent() {
         destroyOnHidden
         onOk={handleOk}
         onCancel={handleCancel}
-        afterOpenChange={(open) => {
-          if (open) {
-            detailFormRef.current?.setFieldsValue(reportItem || {})
-          }
-        }}
       >
-        <DetailForm ref={detailFormRef} onFinishFuc={onFinishFuc} />
+        <div className="space-y-4">
+          <FormErrorAlert
+            error={formError}
+            reason={
+              formError
+                ? getUserErrorMessage(formError, feedbackText.failed('更新', '对账单明细'))
+                : undefined
+            }
+          />
+          <DetailForm
+            setFormRef={setDetailFormRef}
+            onFinish={handleFinish}
+            isSubmitting={isUpdating}
+            initialValues={reportItem}
+          />
+        </div>
       </Modal>
     </div>
   )

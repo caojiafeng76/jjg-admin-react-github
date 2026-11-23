@@ -10,9 +10,9 @@ export default function UnConfirmedButton() {
   return (
     <Button
       type="text"
-      icon={<XCircleIcon className="size-4 text-red-500/80!" />}
+      icon={<XCircleIcon className="size-4 text-error" />}
       onClick={() => {
-        markStatus(tableSelectedKeys.map(String), 'unconfirmed')
+        void markStatus(tableSelectedKeys.map(String), 'unconfirmed')
       }}
       loading={isPending}
     >

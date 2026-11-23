@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
+import { toggleTableSelectionKey } from '../useTableSelection'
 
 interface Props {
   data: ISyneySpec[]
@@ -17,9 +18,6 @@ interface Props {
   page: number
   pageSize: number
   scrollY?: number
-  rowHeight?: number
-  activeRowId?: number | null
-  onRowClick?: (record: ISyneySpec) => void
 }
 
 export default function SpecTable({
@@ -30,9 +28,6 @@ export default function SpecTable({
   page,
   pageSize,
   scrollY = 400,
-  rowHeight = 40,
-  activeRowId,
-  onRowClick,
 }: Props) {
   const columns: TableColumnsType<ISyneySpec> = useMemo(
     () => [
@@ -91,24 +86,6 @@ export default function SpecTable({
     preserveSelectedRowKeys: true,
   }
 
-  const handleRow = (record: ISyneySpec) => ({
-    ...(onRowClick
-      ? createKeyboardTableRowProps(
-          () => onRowClick(record),
-          `打开西尼规格 ${record.PartNo || record.id}`,
-        )
-      : {}),
-    onClick: () => onRowClick?.(record),
-    style: {
-      cursor: onRowClick ? 'pointer' : undefined,
-      backgroundColor:
-        record.id && record.id === activeRowId
-          ? 'var(--table-active-row-bg)'
-          : undefined,
-      height: rowHeight,
-    },
-  })
-
   return (
     <Table<ISyneySpec>
       rowSelection={rowSelection}
@@ -118,11 +95,15 @@ export default function SpecTable({
       loading={loading}
       rowClassName={zebraRowClassName}
       locale={{ emptyText: <TableEmpty title="暂无踏板规格" description="请新建规格或调整筛选条件" /> }}
-      size="small"
+      onRow={record =>
+        record.id !== undefined && record.id !== null
+          ? createKeyboardTableRowProps(
+              () => onSelect(toggleTableSelectionKey(selectedRowKeys, record.id!.toString())),
+              `选择西尼规格 ${record.PartNo || record.id}`,
+            )
+          : {}}
       pagination={false}
-      onRow={handleRow}
       scroll={{ x: 800, y: scrollY }}
-      style={{ fontSize: '13px' }}
     />
   )
 }

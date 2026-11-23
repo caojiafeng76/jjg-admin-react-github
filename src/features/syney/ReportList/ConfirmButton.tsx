@@ -12,7 +12,7 @@ export default function ConfirmButton() {
       type="text"
       loading={isPending}
       onClick={() => {
-        markStatus(tableSelectedKeys.map(String), 'confirmed')
+        void markStatus(tableSelectedKeys.map(String), 'confirmed')
       }}
       icon={<CheckCircleIcon className="size-4" />}
     >

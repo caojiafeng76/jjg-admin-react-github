@@ -15,6 +15,8 @@ export function useReports() {
 
   const {
     isLoading,
+    isFetching,
+    isPlaceholderData,
     data: { syneyStoreReports: reports, count } = {
       syneyStoreReports: [],
       count: 0,
@@ -35,6 +37,10 @@ export function useReports() {
 
   // 优化预取逻辑：将副作用移到 useEffect 中
   useEffect(() => {
+    if (isPlaceholderData) {
+      return
+    }
+
     if (page < pageCount) {
       queryClient.prefetchQuery({
         queryKey: ['syney-reports', status, page + 1, pageSize],
@@ -50,10 +56,11 @@ export function useReports() {
         ...queryConfig.list,
       })
     }
-  }, [page, pageCount, pageSize, status, queryClient])
+  }, [isPlaceholderData, page, pageCount, pageSize, status, queryClient])
 
   return {
     isLoading,
+    isFetching,
     reports,
     count,
     error,

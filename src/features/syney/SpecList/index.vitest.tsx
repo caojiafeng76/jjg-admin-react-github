@@ -40,7 +40,7 @@ vi.mock('@ui/EditButton', () => ({
     </button>
   ),
 }))
-vi.mock('./PartNoInput', () => ({ default: () => null }))
+vi.mock('./SpecSearch', () => ({ default: () => null }))
 vi.mock('./SpecTable', () => ({
   default: ({ onSelect }: { onSelect: (keys: number[]) => void }) => (
     <button type="button" onClick={() => onSelect([7])}>
@@ -167,11 +167,13 @@ describe('SpecList create form', { timeout: 20_000 }, () => {
     // When: the user submits the valid form.
     await user.click(screen.getByRole('button', { name: '确 定' }))
 
-    // Then: the request runs and its configured error feedback is visible.
+    // Then: the request runs and FormErrorAlert renders in the open modal with input preserved.
     await waitFor(() => {
       expect(createSyneySpecMock).toHaveBeenCalledOnce()
     })
-    expect(await screen.findByText('踏板规格创建失败：请稍后重试')).toBeInTheDocument()
+    expect(await screen.findByText('操作失败')).toBeInTheDocument()
+    expect(screen.getByText('踏板规格创建失败：请稍后重试')).toBeInTheDocument()
+    expect(screen.getByLabelText('件号')).toHaveValue('ULW-REF-FIRST')
   })
 })
 

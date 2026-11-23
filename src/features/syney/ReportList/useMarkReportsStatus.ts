@@ -1,6 +1,6 @@
 import { App } from 'antd'
 
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import { updateSyneyStoreReports } from '@/services/apiSyneyStoreReports'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
@@ -18,20 +18,12 @@ export function useMarkReportsStatus() {
   const { message } = App.useApp()
   const { setTableSelectedKeys } = useTableSelection()
 
-  const { mutate: mark, isPending } = useMutationWithMessage({
+  const { mutateAsync: mark, isPending } = useMutationWithInvalidation({
     mutationFn: updateSyneyStoreReports,
     invalidateQueries: [['syney-reports']],
-    successMessage: (_data, { Nos, Status }) =>
-      `已将 ${Nos.length} 条对账单标记为${Status === 'confirmed' ? '已校对' : '未校对'}`,
-    errorMessage: error =>
-      getUserErrorMessage(error, feedbackText.failed('标记', '对账单')),
-    onSuccess: () => {
-      // 成功后清空选择
-      setTableSelectedKeys([])
-    },
   })
 
-  const markStatus = (Nos: string[], Status: ReportStatus) => {
+  async function markStatus(Nos: string[], Status: ReportStatus) {
     if (!Nos.length) {
       message.warning(
         feedbackText.selectRequired(
@@ -40,7 +32,17 @@ export function useMarkReportsStatus() {
       )
       return
     }
-    mark({ Nos, Status })
+
+    try {
+      await mark({ Nos, Status })
+      message.success(
+        `已将 ${Nos.length} 条对账单标记为${Status === 'confirmed' ? '已校对' : '未校对'}`,
+      )
+      setTableSelectedKeys([])
+    }
+    catch (error) {
+      message.error(getUserErrorMessage(error, feedbackText.failed('标记', '对账单')))
+    }
   }
 
   return {

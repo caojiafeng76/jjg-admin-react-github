@@ -1,29 +1,23 @@
 import { TruckIcon } from '@heroicons/react/16/solid'
-import { Button, Tooltip } from 'antd'
-import { usePermission } from '@/hooks/usePermission'
+import PermissionButton from '@/ui/PermissionButton'
 import { useExportShippingListAsExcel } from './useExportShippingListAsExcel'
 
 export default function ExportShippingListButton() {
   const { exportShippingListAsExcel, preloadExcel, exporting }
     = useExportShippingListAsExcel()
-  const allowed = usePermission('feature:syney-po-list.export')
-  const denied = !allowed
-  const btn = (
-    <Button
+
+  return (
+    <PermissionButton
       type="text"
+      permissionKey="feature:syney-po-list.export"
+      noPermissionTip="无导出权限"
       icon={<TruckIcon className="size-4" />}
       onClick={exportShippingListAsExcel}
       onMouseEnter={preloadExcel}
       onFocus={preloadExcel}
-      disabled={denied}
       loading={exporting}
     >
       导出发货清单
-    </Button>
-  )
-  return (
-    <>
-      {denied ? <Tooltip title="无导出权限">{btn}</Tooltip> : btn}
-    </>
+    </PermissionButton>
   )
 }

@@ -72,8 +72,8 @@ function OrderRow({ order }: { order: DeliveryOrderProgress }) {
             <div
               className={
                 order.status === 'error'
-                  ? 'text-sm text-rose-600 dark:text-rose-400'
-                  : 'text-sm text-amber-600 dark:text-amber-400'
+                  ? 'text-sm text-error'
+                  : 'text-sm text-warning'
               }
             >
               {order.message}
@@ -81,7 +81,7 @@ function OrderRow({ order }: { order: DeliveryOrderProgress }) {
           )
         : null}
       {order.warnings.map(warning => (
-        <div key={warning} className="text-xs text-amber-600 dark:text-amber-400">
+        <div key={warning} className="text-xs text-warning">
           {warning}
         </div>
       ))}

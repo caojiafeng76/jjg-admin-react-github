@@ -7,11 +7,11 @@ import { Link, useLocation } from 'react-router-dom'
 
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
-import { zebraRowClassName } from '@/ui/tableStyles'
+import { SUMMARY_ROW_CLASS_NAME, zebraRowClassName } from '@/ui/tableStyles'
 import { formatDate } from '@/utils/format'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { PO_STATUS_TONES, PO_STATUSES } from '../statusTones'
-import { useTableSelection } from '../useTableSelection'
+import { PO_STATUS_TONES } from '../statusTones'
+import { toggleTableSelectionKey, useTableSelection } from '../useTableSelection'
 
 function formatOrderLinkText(no: string, soNo?: string | null) {
   const trimmed = soNo?.trim()
@@ -29,9 +29,6 @@ interface Props {
   page: number
   pageSize: number
   scrollY?: number
-  rowHeight?: number
-  activeRowId?: number | null
-  onRowClick?: (record: ISyneyPo) => void
 }
 
 function PoTable({
@@ -40,9 +37,6 @@ function PoTable({
   page,
   pageSize,
   scrollY = 400,
-  rowHeight = 40,
-  activeRowId,
-  onRowClick,
 }: Props) {
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
 
@@ -87,8 +81,6 @@ function PoTable({
         dataIndex: 'Status',
         key: 'Status',
         width: 110,
-        filters: PO_STATUSES.map(value => ({ text: value, value })),
-        onFilter: (value, record) => record.Status === value,
         render: (text: string) => {
           const tone = PO_STATUS_TONES[text]
           if (!tone) {
@@ -113,7 +105,7 @@ function PoTable({
         width: 240,
         render: (text: string, record: ISyneyPo) => (
           <Link
-            className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            className="font-medium text-primary hover:opacity-80"
             to={`/syney-po-list/${record.id}`}
             state={{ from: listHref }}
           >
@@ -196,24 +188,6 @@ function PoTable({
     preserveSelectedRowKeys: true,
   }
 
-  const handleRow = (record: ISyneyPo) => ({
-    ...(onRowClick
-      ? createKeyboardTableRowProps(
-          () => onRowClick(record),
-          `打开西尼订单 ${record.No || record.id}`,
-        )
-      : {}),
-    onClick: () => onRowClick?.(record),
-    style: {
-      cursor: onRowClick ? 'pointer' : undefined,
-      backgroundColor:
-        record.id && record.id === activeRowId
-          ? 'var(--table-active-row-bg)'
-          : undefined,
-      height: rowHeight,
-    },
-  })
-
   return (
     <Table<ISyneyPo>
       rowSelection={rowSelection}
@@ -224,13 +198,17 @@ function PoTable({
       pagination={false}
       rowClassName={zebraRowClassName}
       locale={{ emptyText: <TableEmpty title="暂无西尼订单" description="请新建订单或调整筛选条件" /> }}
-      size="small"
-      onRow={handleRow}
+      onRow={record =>
+        record.id !== undefined && record.id !== null
+          ? createKeyboardTableRowProps(
+              () => setTableSelectedKeys(toggleTableSelectionKey(tableSelectedKeys, record.id!)),
+              `选择西尼订单 ${record.No || record.id}`,
+            )
+          : {}}
       scroll={{ x: 1480, y: scrollY }}
-      style={{ fontSize: '13px' }}
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">
+          <Table.Summary.Row className={SUMMARY_ROW_CLASS_NAME}>
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={5}>
               <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>

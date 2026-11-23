@@ -1,28 +1,42 @@
 import type { FormInstance } from 'antd'
-import type { Ref } from 'react'
-
 import type { ISyneyItem } from '@/types'
 import { Form, Input } from 'antd'
+import { useEffect } from 'react'
 
-interface FormProps {
-  ref: Ref<FormInstance<ISyneyItem>> | undefined
-  onFinishFuc: (values: ISyneyItem) => void
+export interface DetailFormProps {
+  onFinish: (values: ISyneyItem) => void
+  setFormRef: (form: FormInstance<ISyneyItem>) => void
+  isSubmitting?: boolean
+  initialValues?: Partial<ISyneyItem>
 }
 
-export default function DetailForm({ ref, onFinishFuc }: FormProps) {
+export default function DetailForm({
+  onFinish,
+  setFormRef,
+  isSubmitting = false,
+  initialValues,
+}: DetailFormProps) {
   const [form] = Form.useForm<ISyneyItem>()
 
-  function onFinish(values: ISyneyItem) {
-    onFinishFuc(values)
-  }
+  useEffect(() => {
+    setFormRef(form)
+  }, [form, setFormRef])
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues)
+      return
+    }
+    form.resetFields()
+  }, [form, initialValues])
 
   return (
     <Form
       layout="vertical"
       form={form}
       name="detail-form"
+      disabled={isSubmitting}
       onFinish={onFinish}
-      ref={ref}
     >
       <Form.Item name="id" label="id" hidden>
         <Input hidden disabled={true} />

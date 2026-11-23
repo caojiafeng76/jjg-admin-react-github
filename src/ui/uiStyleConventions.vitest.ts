@@ -22,12 +22,6 @@ const MODAL_WIDTH_EXCEPTIONS: Record<string, string> = {
     '安全件图纸预览弹窗使用 80vw 自适应展示 PDF 与图纸大图，避免图纸细节被截断',
 }
 
-/** 表格列筛选下拉内的紧凑「重置」小按钮白名单（非页面级筛选栏按钮） */
-const SEARCH_RESET_BUTTON_EXCEPTIONS: Record<string, string> = {
-  'src/features/syney/SafePartSetting/SafePartSettingTable.tsx':
-    'Antd Table 列筛选下拉中的紧凑重置按钮（size="small"），非页面级 FilterBar 搜索/重置按钮',
-}
-
 /** 全库强制覆盖根路径 */
 const GUARDED_TSX_ROOTS = ['src/features', 'src/pages', 'src/ui'] as const
 const DATE_FORMAT_GUARDED_ROOTS = [
@@ -150,10 +144,6 @@ function findNonStandardSearchResetButtons(
   source: string,
   filePath: string,
 ): string[] {
-  if (filePath in SEARCH_RESET_BUTTON_EXCEPTIONS) {
-    return []
-  }
-
   const sf = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
   const solid16Icons = new Set<string>()
   for (const stmt of sf.statements) {

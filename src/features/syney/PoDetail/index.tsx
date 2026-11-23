@@ -1,38 +1,27 @@
-import type { FormInstance } from 'antd/lib'
+import type { FormInstance } from 'antd'
 import type { ISyneyItem, ISyneyPo } from '@/types'
 import { ArrowLeftIcon } from '@heroicons/react/16/solid'
 import { App, Button, Modal } from 'antd'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useUrlListState } from '@/hooks/useUrlListState'
 import AppPagination from '@/ui/AppPagination'
 import EditButton from '@/ui/EditButton'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import StatusPill from '@/ui/StatusPill'
 import { TableState } from '@/ui/TableState'
+import { getUserErrorMessage } from '@/utils/errorHandler'
+import { feedbackText } from '@/utils/feedbackText'
 import { formatDate } from '@/utils/format'
 import { PO_STATUS_TONES } from '../statusTones'
+import SyneyDetailInfoItem from '../SyneyDetailInfoItem'
 import TableSelectionProvider from '../TableSelectionProvider'
 import { useTableSelection } from '../useTableSelection'
 import DetailForm from './DetailForm'
 import DetailTable from './DetailTable'
 import { useDetail } from './useDetail'
-
-function InfoItem({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="min-w-0">
-      <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
-      <div className="mt-0.5 truncate text-sm font-medium text-slate-800 dark:text-slate-100">
-        {children}
-      </div>
-    </div>
-  )
-}
+import { useUpdate } from './useUpdate'
 
 function PoDetailContent() {
   const { message } = App.useApp()
@@ -42,18 +31,14 @@ function PoDetailContent() {
   const listHref
     = (location.state as { from?: string } | null)?.from || '/syney-po-list'
   const { PoId } = useParams()
-  const [searchParams] = useSearchParams()
-  const page = Number(searchParams.get('page')) || 1
-  const pageSize = Number(searchParams.get('pageSize')) || 10
+  const { page, pageSize } = useUrlListState([] as const)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [formRef, setFormRef] = useState<FormInstance<ISyneyItem> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
 
-  const [isLoading, setIsLoading] = useState(false)
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const { items, po, isLoading: isDetailLoading, isFetching: isDetailFetching, error: detailError, refetch } = useDetail()
-
-  const detailFormRef = useRef<{
-    getInstance: () => FormInstance<ISyneyItem>
-  }>(null)
+  const { updateItems, isUpdating } = useUpdate()
 
   const records = useMemo(() => (items as ISyneyItem[]) || [], [items])
   const total = records.length
@@ -93,6 +78,19 @@ function PoDetailContent() {
     ]
   }, [po])
 
+  async function handleFinish(values: ISyneyItem) {
+    setFormError(null)
+    try {
+      await updateItems({ ids: tableSelectedKeys.map(Number), values })
+      message.success(feedbackText.updated('订单明细'))
+      setTableSelectedKeys([])
+      setIsModalOpen(false)
+    }
+    catch (error) {
+      setFormError(error)
+    }
+  }
+
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
       {/* 订单信息轻量分栏区 */}
@@ -108,7 +106,7 @@ function PoDetailContent() {
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4">
           {orderInfo.map(item => (
-            <InfoItem key={item.label} label={item.label}>
+            <SyneyDetailInfoItem key={item.label} label={item.label}>
               {item.label === '编号'
                 ? (
                     <span className="tabular-nums">{item.value}</span>
@@ -116,13 +114,13 @@ function PoDetailContent() {
                 : (
                     item.value
                   )}
-            </InfoItem>
+            </SyneyDetailInfoItem>
           ))}
-          <InfoItem label="数量">
+          <SyneyDetailInfoItem label="数量">
             <span className="text-lg font-bold text-slate-900 tabular-nums dark:text-slate-100">
               {po?.Qty?.toLocaleString() ?? '-'}
             </span>
-          </InfoItem>
+          </SyneyDetailInfoItem>
         </div>
       </div>
 
@@ -135,7 +133,7 @@ function PoDetailContent() {
             onRetry={refetch}
           >
             <DetailTable
-              loading={isLoading || isDetailFetching}
+              loading={isDetailFetching || isUpdating}
               data={paginatedRecords}
               page={page}
               pageSize={pageSize}
@@ -151,7 +149,7 @@ function PoDetailContent() {
       {/* 底部吸底操作区 */}
       <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200/60 pt-3 dark:border-slate-700">
         <Button
-          icon={<ArrowLeftIcon className="h-4 w-4" />}
+          icon={<ArrowLeftIcon className="size-4" />}
           onClick={() => navigate(listHref)}
         >
           返回列表
@@ -164,6 +162,7 @@ function PoDetailContent() {
               message.warning('请选择一条订单明细进行编辑')
               return
             }
+            setFormError(null)
             setIsModalOpen(true)
           }}
         />
@@ -172,26 +171,33 @@ function PoDetailContent() {
       <Modal
         title="编辑明细"
         open={isModalOpen}
-        confirmLoading={isLoading}
+        confirmLoading={isUpdating}
         width={520}
         destroyOnHidden
-        afterOpenChange={(open) => {
-          if (open && selectedItem) {
-            detailFormRef.current
-              ?.getInstance()
-              .setFieldsValue(selectedItem)
-          }
+        onCancel={() => {
+          setFormError(null)
+          setIsModalOpen(false)
         }}
-        onCancel={() => setIsModalOpen(false)}
         onOk={() => {
-          detailFormRef.current?.getInstance().submit()
+          formRef?.submit()
         }}
       >
-        <DetailForm
-          ref={detailFormRef}
-          onClose={() => setIsModalOpen(false)}
-          onLoadingChange={setIsLoading}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert
+            error={formError}
+            reason={
+              formError
+                ? getUserErrorMessage(formError, feedbackText.failed('更新', '订单明细'))
+                : undefined
+            }
+          />
+          <DetailForm
+            setFormRef={setFormRef}
+            onFinish={handleFinish}
+            isSubmitting={isUpdating}
+            initialValues={selectedItem}
+          />
+        </div>
       </Modal>
     </div>
   )

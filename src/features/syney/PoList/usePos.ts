@@ -25,6 +25,7 @@ export function usePos() {
     data: { syneyPos: pos, count } = { syneyPos: [], count: 0 },
     isFetching,
     isLoading: isFirstLoading,
+    isPlaceholderData,
     error,
     refetch,
   } = useQuery({
@@ -57,6 +58,10 @@ export function usePos() {
 
   // 优化预取逻辑:将副作用移到 useEffect 中,避免在渲染阶段执行
   useEffect(() => {
+    if (isPlaceholderData) {
+      return
+    }
+
     if (page < pageCount) {
       queryClient.prefetchQuery({
         queryKey: syneyPoKeys.list({
@@ -100,7 +105,7 @@ export function usePos() {
           }),
       })
     }
-  }, [page, pageCount, pageSize, status, startDate, endDate, keyword, queryClient])
+  }, [isPlaceholderData, page, pageCount, pageSize, status, startDate, endDate, keyword, queryClient])
 
   return {
     pos,

@@ -6,7 +6,7 @@ import {
 } from '@services/apiSyneySafePartSettings'
 import { App } from 'antd'
 import { useCallback, useState } from 'react'
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import { SYNEY_SAFE_PART_SETTINGS_KEY } from '../useSyneySafePartSettings'
@@ -33,11 +33,9 @@ export function useSafePartDrawing() {
     string | null
   >(null)
 
-  const drawingUploadMutation = useMutationWithMessage({
+  const drawingUploadMutation = useMutationWithInvalidation({
     mutationFn: uploadSyneySafePartDrawing,
     invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
-    successMessage: '图纸上传成功',
-    messageApi: message,
   })
 
   const handleDrawingUpload = useCallback(
@@ -46,15 +44,16 @@ export function useSafePartDrawing() {
 
       try {
         await drawingUploadMutation.mutateAsync({ setting: record, file })
+        message.success('图纸上传成功')
       }
-      catch {
-        // 错误消息已由 useMutationWithMessage 统一提示
+      catch (error) {
+        message.error(getUserErrorMessage(error, feedbackText.failed('上传', '图纸')))
       }
       finally {
         setUploadingDrawingId(null)
       }
     },
-    [drawingUploadMutation],
+    [drawingUploadMutation, message],
   )
 
   const handlePreviewDrawing = useCallback(

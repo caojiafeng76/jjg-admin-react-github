@@ -1,29 +1,23 @@
 import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
-import { Button, Tooltip } from 'antd'
-import { usePermission } from '@/hooks/usePermission'
+import PermissionButton from '@/ui/PermissionButton'
 import { useExportSafePartInfoAsExcel } from './useExportSafePartInfoAsExcel'
 
 export default function ExportInfoButton() {
   const { exportSafePartInfoAsExcel, preloadExcel, exporting }
     = useExportSafePartInfoAsExcel()
-  const allowed = usePermission('feature:syney-po-list.export')
-  const denied = !allowed
-  const btn = (
-    <Button
+
+  return (
+    <PermissionButton
       type="text"
+      permissionKey="feature:syney-po-list.export"
+      noPermissionTip="无导出权限"
       icon={<DocumentArrowDownIcon className="size-4" />}
       onClick={exportSafePartInfoAsExcel}
       onMouseEnter={preloadExcel}
       onFocus={preloadExcel}
-      disabled={denied}
       loading={exporting}
     >
       导出安全部件信息
-    </Button>
-  )
-  return (
-    <>
-      {denied ? <Tooltip title="无导出权限">{btn}</Tooltip> : btn}
-    </>
+    </PermissionButton>
   )
 }

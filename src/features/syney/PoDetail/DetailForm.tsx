@@ -1,56 +1,41 @@
 import type { FormInstance } from 'antd'
-import type { Ref } from 'react'
 import type { ISyneyItem } from '@/types'
 import { Form, Input } from 'antd'
-import { useImperativeHandle, useState } from 'react'
-import { useTableSelection } from '../useTableSelection'
-import { useUpdate } from './useUpdate'
-
-export interface DetailFormRef {
-  getInstance: () => FormInstance<ISyneyItem>
-}
+import { useEffect } from 'react'
 
 export interface DetailFormProps {
-  ref?: Ref<DetailFormRef>
-  onClose: () => void
-  onLoadingChange?: (loading: boolean) => void
+  onFinish: (values: ISyneyItem) => void
+  setFormRef: (form: FormInstance<ISyneyItem>) => void
+  isSubmitting?: boolean
+  initialValues?: Partial<ISyneyItem>
 }
 
 export default function DetailForm({
-  ref,
-  onClose,
-  onLoadingChange,
+  onFinish,
+  setFormRef,
+  isSubmitting = false,
+  initialValues,
 }: DetailFormProps) {
   const [form] = Form.useForm<ISyneyItem>()
-  const [isLoading, setIsLoading] = useState(false)
 
-  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
-  const { updateItems } = useUpdate()
+  useEffect(() => {
+    setFormRef(form)
+  }, [form, setFormRef])
 
-  async function onFinish(values: ISyneyItem) {
-    setIsLoading(true)
-    onLoadingChange?.(true)
-    try {
-      await updateItems({ ids: tableSelectedKeys.map(Number), values })
-      setTableSelectedKeys([])
-      onClose()
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues)
+      return
     }
-    catch {
-      // 失败提示由 useUpdate 统一弹出；弹窗保持打开，便于修改后重试
-    }
-    finally {
-      setIsLoading(false)
-      onLoadingChange?.(false)
-    }
-  }
-
-  useImperativeHandle(ref, () => ({ getInstance: () => form }))
+    form.resetFields()
+  }, [form, initialValues])
 
   return (
     <Form
       layout="vertical"
       name="po-detail"
       form={form}
+      disabled={isSubmitting}
       onFinish={onFinish}
     >
       <Form.Item name="PartNo" label="件号">
@@ -71,7 +56,7 @@ export default function DetailForm({
         rules={[{ required: true, message: '请输入参数规格' }]}
       >
         <Input
-          disabled={isLoading}
+          disabled={isSubmitting}
           className="rounded-lg"
           placeholder="请输入参数规格"
         />

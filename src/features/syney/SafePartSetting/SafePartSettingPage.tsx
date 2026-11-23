@@ -4,17 +4,16 @@ import type {
 import type { Key } from 'react'
 import type { SafePartSettingFormValues } from './SafePartSettingFormModal'
 import {
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from '@heroicons/react/16/solid'
-import {
   deleteSyneySafePartSettings,
   upsertSyneySafePartSetting,
 } from '@services/apiSyneySafePartSettings'
-import { App, Form, Input, Pagination } from 'antd'
-import { useCallback, useMemo, useState } from 'react'
-import { useMutationWithMessage } from '@/hooks/useMutationWithMessage'
+import { App } from 'antd'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
+import { useTableHeight } from '@/hooks/useTableHeight'
+import { useUrlListState } from '@/hooks/useUrlListState'
 import AddButton from '@/ui/AddButton'
+import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
 import FilterBar from '@/ui/FilterBar'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
@@ -26,74 +25,55 @@ import {
   useSyneySafePartSettings,
 } from '../useSyneySafePartSettings'
 import SafePartDrawingPreviewModal from './SafePartDrawingPreviewModal'
+import SafePartSearch from './SafePartSearch'
 import SafePartSettingFormModal from './SafePartSettingFormModal'
 import SafePartSettingTable from './SafePartSettingTable'
 import { useSafePartDrawing } from './useSafePartDrawing'
 
+const ENTITY = '件号配置'
+const DEFAULT_SAFE_PART_PAGE_SIZE = 20
+
 export default function SafePartSettingPage() {
   const { message } = App.useApp()
+  const { page, pageSize, filters, setFilters, resetFilters, setPage }
+    = useUrlListState(['partNo'] as const, { defaultPageSize: DEFAULT_SAFE_PART_PAGE_SIZE })
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<SyneySafePartSetting | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
-  const [partNoFilter, setPartNoFilter] = useState('')
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
-  const [form] = Form.useForm<SafePartSettingFormValues>()
   const { previewDrawing, closePreview, ...drawing } = useSafePartDrawing()
 
   const openCreate = () => {
     setEditing(null)
-    form.resetFields()
-    form.setFieldsValue({ need_print_label: true, is_safe_part: true })
+    setFormError(null)
     setModalOpen(true)
   }
 
   const openEdit = useCallback((record: SyneySafePartSetting) => {
     setEditing(record)
-    form.setFieldsValue({
-      part_no: record.part_no,
-      name: record.name ?? undefined,
-      part_model: record.part_model ?? undefined,
-      part_code_prefix: record.part_code_prefix ?? undefined,
-      english_name: record.english_name ?? undefined,
-      need_print_label: record.need_print_label,
-      is_safe_part: record.is_safe_part,
-      decomposition_role: record.decomposition_role ?? undefined,
-      remark: record.remark ?? '',
-      id: record.id,
-    })
+    setFormError(null)
     setModalOpen(true)
-  }, [form])
+  }, [])
 
   const closeModal = () => {
     setModalOpen(false)
     setEditing(null)
-    form.resetFields()
+    setFormError(null)
   }
 
-  const { data, isLoading, error, refetch } = useSyneySafePartSettings()
+  const { data, isLoading, isFetching, error, refetch } = useSyneySafePartSettings()
 
-  const saveMutation = useMutationWithMessage({
+  const saveMutation = useMutationWithInvalidation({
     mutationFn: upsertSyneySafePartSetting,
     invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
-    successMessage: feedbackText.saved('件号配置'),
-    errorMessage: error =>
-      getUserErrorMessage(error, feedbackText.failed('保存', '件号配置')),
-    messageApi: message,
-    onSuccess: () => closeModal(),
   })
 
-  const deleteMutation = useMutationWithMessage({
+  const deleteMutation = useMutationWithInvalidation({
     mutationFn: deleteSyneySafePartSettings,
     invalidateQueries: [[SYNEY_SAFE_PART_SETTINGS_KEY]],
-    successMessage: (_data, ids) => feedbackText.deleted('件号配置', ids.length),
-    errorMessage: error =>
-      getUserErrorMessage(error, feedbackText.failed('删除', '件号配置')),
-    messageApi: message,
-    onSuccess: () => setSelectedRowKeys([]),
   })
 
-  const handleBatchDelete = () => {
+  const handleBatchDelete = async () => {
     const selectedIds = selectedRowKeys.map(String)
 
     if (selectedIds.length === 0) {
@@ -101,31 +81,59 @@ export default function SafePartSettingPage() {
       return
     }
 
-    deleteMutation.mutate(selectedIds)
+    try {
+      await deleteMutation.mutateAsync(selectedIds)
+      message.success(feedbackText.deleted(ENTITY, selectedIds.length))
+      setSelectedRowKeys([])
+    }
+    catch (deleteError) {
+      message.error(getUserErrorMessage(deleteError, feedbackText.failed('删除', ENTITY)))
+    }
   }
 
   const filteredData = useMemo(() => {
     if (!data)
       return []
-    if (!partNoFilter.trim())
+    const keyword = filters.partNo?.trim()
+    if (!keyword)
       return data
-    const lower = partNoFilter.toLowerCase()
+    const lower = keyword.toLowerCase()
     return data.filter(item =>
       (item.part_no ?? '').toLowerCase().includes(lower),
     )
-  }, [data, partNoFilter])
+  }, [data, filters.partNo])
+
+  const total = filteredData.length
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(total / pageSize))
+    if (data && page > maxPage) {
+      setPage(maxPage)
+    }
+  }, [data, page, pageSize, setPage, total])
 
   const pagedData = useMemo(() => {
     const start = (page - 1) * pageSize
     return filteredData.slice(start, start + pageSize)
   }, [filteredData, page, pageSize])
 
-  const handleSubmit = (values: SafePartSettingFormValues) => {
-    saveMutation.mutate(values)
+  const handleSubmit = async (values: SafePartSettingFormValues) => {
+    setFormError(null)
+    try {
+      await saveMutation.mutateAsync(values)
+      message.success(feedbackText.saved(ENTITY))
+      closeModal()
+    }
+    catch (submitError) {
+      setFormError(submitError)
+    }
   }
 
   const selectedCount = selectedRowKeys.length
-  const total = filteredData.length
+  const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
+    targetRowCount: 12,
+    summaryRowHeight: 0,
+  })
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-hidden">
@@ -137,7 +145,7 @@ export default function SafePartSettingPage() {
           isDeleting={deleteMutation.isPending}
           count={selectedCount}
           title="删除件号配置"
-          itemName="件号配置"
+          itemName={ENTITY}
         />
       </div>
 
@@ -153,43 +161,34 @@ export default function SafePartSettingPage() {
         : null}
 
       <FilterBar>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">件号：</span>
-            <Input
-              placeholder="搜索件号（前端过滤）"
-              value={partNoFilter}
-              onChange={(e) => {
-                setPartNoFilter(e.target.value)
-                setPage(1)
-              }}
-              allowClear={{
-                clearIcon: (
-                  <XMarkIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                ),
-              }}
-              prefix={
-                <MagnifyingGlassIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-              }
-              className="w-64"
-            />
-          </div>
-        </div>
+        <SafePartSearch
+          values={filters}
+          onSearch={(next) => {
+            setSelectedRowKeys([])
+            setFilters(next)
+          }}
+          onReset={() => {
+            setSelectedRowKeys([])
+            resetFilters()
+          }}
+          isLoading={Boolean(isFetching)}
+        />
       </FilterBar>
 
       {/* 表格 + 分页 */}
-      <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
-        <div className="min-h-0 overflow-hidden">
-          <TableState loading={isLoading && !data} error={error} onRetry={refetch}>
+      <div ref={tableContainerRef} className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <TableState loading={Boolean(isLoading) && !data} error={error} onRetry={refetch}>
             <SafePartSettingTable
               data={pagedData}
               loading={
-                isLoading
+                Boolean(isFetching)
                 || saveMutation.isPending
                 || deleteMutation.isPending
               }
               page={page}
               pageSize={pageSize}
+              scrollY={scrollY}
               selectedRowKeys={selectedRowKeys}
               onSelectionChange={setSelectedRowKeys}
               onEdit={openEdit}
@@ -197,30 +196,16 @@ export default function SafePartSettingPage() {
             />
           </TableState>
         </div>
-        <div className="flex shrink-0 justify-end">
-          <Pagination
-            current={page}
-            pageSize={pageSize}
-            total={total}
-            showSizeChanger={{
-              getPopupContainer: () => document.body,
-            }}
-            pageSizeOptions={['10', '20', '50', '100']}
-            showTotal={t => `共 ${t} 条`}
-            onChange={p => setPage(p)}
-            onShowSizeChange={(_current, size) => {
-              setPageSize(size)
-              setPage(1)
-            }}
-          />
+        <div ref={paginationRef} className="flex shrink-0 justify-end">
+          <AppPagination total={total} defaultPageSize={DEFAULT_SAFE_PART_PAGE_SIZE} />
         </div>
       </div>
 
       <SafePartSettingFormModal
         open={modalOpen}
         editing={editing}
-        form={form}
         confirmLoading={saveMutation.isPending}
+        error={formError}
         onCancel={closeModal}
         onFinish={handleSubmit}
       />

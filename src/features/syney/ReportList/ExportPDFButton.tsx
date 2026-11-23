@@ -24,7 +24,7 @@ export default function ExportPDFButton() {
   return (
     <Button
       type="text"
-      icon={<DocumentIcon className="size-4 text-red-500/80!" />}
+      icon={<DocumentIcon className="size-4 text-error" />}
       onClick={handleExport}
       onMouseEnter={preloadPDF}
       onFocus={preloadPDF}

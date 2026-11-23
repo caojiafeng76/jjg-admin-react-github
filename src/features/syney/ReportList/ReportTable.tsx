@@ -8,13 +8,12 @@ import { useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import StatusPill from '@/ui/StatusPill'
 import { TableEmpty } from '@/ui/TableState'
-import { zebraRowClassName } from '@/ui/tableStyles'
+import { SUMMARY_ROW_CLASS_NAME, zebraRowClassName } from '@/ui/tableStyles'
 import { formatDate } from '@/utils/format'
 import { formatNumberPadded } from '@/utils/helps'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { getReportStatusTone, REPORT_STATUS_LABELS } from '../statusTones'
-import { useTableSelection } from '../useTableSelection'
-import { useReports } from './useReports'
+import { toggleTableSelectionKey, useTableSelection } from '../useTableSelection'
 
 interface Props {
   loading: boolean
@@ -22,9 +21,6 @@ interface Props {
   page: number
   pageSize: number
   scrollY?: number
-  rowHeight?: number
-  activeRowId?: string | null
-  onRowClick?: (record: ISyneyStoreReport) => void
 }
 
 export default function ReportTable({
@@ -33,12 +29,8 @@ export default function ReportTable({
   page,
   pageSize,
   scrollY = 400,
-  rowHeight = 40,
-  activeRowId,
-  onRowClick,
 }: Props) {
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
-  const { isLoading } = useReports()
 
   const currentPageTotalAmount = useMemo(
     () => data.reduce((sum, item) => sum + Number(item.TotalAmount || 0), 0),
@@ -81,11 +73,6 @@ export default function ReportTable({
         dataIndex: 'Status',
         key: 'Status',
         width: 110,
-        filters: [
-          { text: '已校对', value: '已校对' },
-          { text: '未校对', value: '未校对' },
-        ],
-        onFilter: (value, record) => record.Status === value,
         render: (text: string) => (
           <StatusPill tone={getReportStatusTone(text)}>
             {REPORT_STATUS_LABELS[text] ?? '未校对'}
@@ -99,7 +86,7 @@ export default function ReportTable({
         width: 200,
         render: (text: string) => (
           <Link
-            className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            className="font-medium text-primary hover:opacity-80"
             to={`/syney-store-report-list/${text}`}
             state={{ from: listHref }}
           >
@@ -132,41 +119,27 @@ export default function ReportTable({
     preserveSelectedRowKeys: true,
   }
 
-  const handleRow = (record: ISyneyStoreReport) => ({
-    ...(onRowClick
-      ? createKeyboardTableRowProps(
-          () => onRowClick(record),
-          `打开西尼对账单 ${record.No}`,
-        )
-      : {}),
-    onClick: () => onRowClick?.(record),
-    style: {
-      cursor: onRowClick ? 'pointer' : undefined,
-      backgroundColor:
-        record.No && record.No === activeRowId
-          ? 'var(--table-active-row-bg)'
-          : undefined,
-      height: rowHeight,
-    },
-  })
-
   return (
     <Table<ISyneyStoreReport>
       rowSelection={rowSelection}
       rowKey={record => record.No ?? ''}
       columns={columns}
       dataSource={data}
-      loading={loading || isLoading}
+      loading={loading}
       pagination={false}
       rowClassName={zebraRowClassName}
       locale={{ emptyText: <TableEmpty title="暂无西尼入库单" description="请新建或调整筛选条件" /> }}
-      size="small"
-      onRow={handleRow}
+      onRow={record =>
+        record.No
+          ? createKeyboardTableRowProps(
+              () => setTableSelectedKeys(toggleTableSelectionKey(tableSelectedKeys, record.No)),
+              `选择西尼对账单 ${record.No}`,
+            )
+          : {}}
       scroll={{ x: 700, y: scrollY }}
-      style={{ fontSize: '13px' }}
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">
+          <Table.Summary.Row className={SUMMARY_ROW_CLASS_NAME}>
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={4}>
               <span className="font-medium text-slate-600 dark:text-slate-300">当前页合计</span>

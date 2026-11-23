@@ -6,9 +6,9 @@ import { formatNumberPadded } from '@utils/helps'
 import { Table } from 'antd'
 import { useMemo } from 'react'
 import { TableEmpty } from '@/ui/TableState'
-import { zebraRowClassName } from '@/ui/tableStyles'
+import { SUMMARY_ROW_CLASS_NAME, zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
-import { useTableSelection } from '../useTableSelection'
+import { toggleTableSelectionKey, useTableSelection } from '../useTableSelection'
 
 interface Props {
   data: ISyneyItem[]
@@ -16,9 +16,6 @@ interface Props {
   page: number
   pageSize: number
   scrollY?: number
-  rowHeight?: number
-  activeRowId?: number | null
-  onRowClick?: (record: ISyneyItem) => void
 }
 
 export default function DetailTable({
@@ -27,9 +24,6 @@ export default function DetailTable({
   page,
   pageSize,
   scrollY = 400,
-  rowHeight = 40,
-  activeRowId,
-  onRowClick,
 }: Props) {
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
 
@@ -134,24 +128,6 @@ export default function DetailTable({
     preserveSelectedRowKeys: true,
   }
 
-  const handleRow = (record: ISyneyItem) => ({
-    ...(onRowClick
-      ? createKeyboardTableRowProps(
-          () => onRowClick(record),
-          `打开对账明细 ${record.id}`,
-        )
-      : {}),
-    onClick: () => onRowClick?.(record),
-    style: {
-      cursor: onRowClick ? 'pointer' : undefined,
-      backgroundColor:
-        record.id && record.id === activeRowId
-          ? 'var(--table-active-row-bg)'
-          : undefined,
-      height: rowHeight,
-    },
-  })
-
   return (
     <Table<ISyneyItem>
       rowSelection={rowSelection}
@@ -162,13 +138,17 @@ export default function DetailTable({
       pagination={false}
       rowClassName={zebraRowClassName}
       locale={{ emptyText: <TableEmpty title="暂无对账单明细" /> }}
-      size="small"
-      onRow={handleRow}
+      onRow={record =>
+        record.id !== undefined && record.id !== null
+          ? createKeyboardTableRowProps(
+              () => setTableSelectedKeys(toggleTableSelectionKey(tableSelectedKeys, record.id!)),
+              `选择对账明细 ${record.PartNo || record.id}`,
+            )
+          : {}}
       scroll={{ x: 1100, y: scrollY }}
-      style={{ fontSize: '13px' }}
       summary={() => (
         <Table.Summary fixed>
-          <Table.Summary.Row className="bg-slate-50 dark:bg-slate-800">
+          <Table.Summary.Row className={SUMMARY_ROW_CLASS_NAME}>
             <Table.Summary.Cell index={0} />
             <Table.Summary.Cell index={1} colSpan={7}>
               <span className="font-medium text-slate-600 dark:text-slate-300">当前页小计</span>

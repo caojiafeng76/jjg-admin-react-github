@@ -1,20 +1,23 @@
+import type { FormInstance } from 'antd'
 import type { Key } from 'react'
-import type { ISyneySpec, ISyneySpecFormRef } from '@/types'
+import type { ISyneySpec } from '@/types'
 
 import AddButton from '@ui/AddButton'
 import DeleteButton from '@ui/DeleteButton'
 import EditButton from '@ui/EditButton'
 import { App, Modal } from 'antd'
-import { useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { useUrlListState } from '@/hooks/useUrlListState'
 import AppPagination from '@/ui/AppPagination'
 import FilterBar from '@/ui/FilterBar'
+import FormErrorAlert from '@/ui/FormErrorAlert'
 import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
+import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
-import PartNoInput from './PartNoInput'
 import SpecForm from './SpecForm'
+import SpecSearch from './SpecSearch'
 import SpecTable from './SpecTable'
 import { useCreateSyneySpec } from './useCreateSpec'
 import { useDeleteSyneySpecs } from './useDeleteSyneySpecs'
@@ -23,18 +26,18 @@ import { useUpdateSyneySpec } from './useUpdateSyneySpec'
 
 export default function SpecList() {
   const { message } = App.useApp()
-  const [searchParams] = useSearchParams()
-  const page = Number(searchParams.get('page')) || 1
-  const pageSize = Number(searchParams.get('pageSize')) || 10
+  const { page, pageSize, filters, setFilters, resetFilters }
+    = useUrlListState(['PartNo'] as const)
 
-  const specFormRef = useRef<ISyneySpecFormRef>(null)
-
+  const [formRef, setFormRef] = useState<FormInstance<ISyneySpec> | null>(null)
+  const [formError, setFormError] = useState<unknown>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('新建踏板规格')
   const [isEditing, setIsEditing] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
 
-  const { syneySpecs, isLoading, error, count, refetch } = useSyneySpecs({ silentError: true })
+  const { syneySpecs, isLoading, isFetching, error, count, refetch }
+    = useSyneySpecs({ silentError: true })
   const { isCreating, createSyneySpec } = useCreateSyneySpec()
   const { isUpdating, updateSyneySpec } = useUpdateSyneySpec()
   const { isDeleting, deleteSyneySpecs } = useDeleteSyneySpecs()
@@ -44,6 +47,7 @@ export default function SpecList() {
 
   // Modal 使用 destroyOnHidden，每次打开都会重新挂载 SpecForm，表单初值由 initialValues 提供
   function showModal() {
+    setFormError(null)
     setIsModalOpen(true)
   }
 
@@ -51,32 +55,33 @@ export default function SpecList() {
     setSelectedRowKeys(keys)
   }
 
-  function onFinishFuc(spec: ISyneySpec) {
-    if (isEditing) {
-      updateSyneySpec(spec, {
-        onSuccess: () => {
-          setSelectedRowKeys([])
-          handleCancel()
-        },
-      })
+  async function handleFinish(specData: ISyneySpec) {
+    setFormError(null)
+    try {
+      if (isEditing) {
+        await updateSyneySpec(specData)
+        message.success(feedbackText.updated('踏板规格'))
+      }
+      else {
+        await createSyneySpec(specData)
+        message.success(feedbackText.created('踏板规格'))
+      }
+      setSelectedRowKeys([])
+      handleCancel()
     }
-    else {
-      createSyneySpec(spec, {
-        onSuccess: () => {
-          setSelectedRowKeys([])
-          handleCancel()
-        },
-      })
+    catch (err) {
+      setFormError(err)
     }
   }
 
   function handleCancel() {
     setIsEditing(false)
+    setFormError(null)
     setIsModalOpen(false)
   }
 
   function handleOk() {
-    specFormRef.current?.getInstance().submit()
+    formRef?.submit()
   }
 
   function handleCreate() {
@@ -95,20 +100,24 @@ export default function SpecList() {
     showModal()
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (specIds?.length === 0) {
       message.warning(feedbackText.selectRequired('删除'))
       return
     }
-    deleteSyneySpecs(specIds, {
-      onSuccess: () => {
-        setSelectedRowKeys([])
-      },
-    })
+    try {
+      await deleteSyneySpecs(specIds)
+      message.success(feedbackText.deleted('踏板规格', specIds.length))
+      setSelectedRowKeys([])
+    }
+    catch (err) {
+      message.error(getUserErrorMessage(err, feedbackText.failed('删除', '踏板规格')))
+    }
   }
 
   const records = useMemo(() => syneySpecs || [], [syneySpecs])
   const selectedCount = selectedRowKeys.length
+  const hasData = records.length > 0
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 12,
@@ -143,25 +152,31 @@ export default function SpecList() {
 
       {/* 搜索 / 过滤栏 */}
       <FilterBar>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600 dark:text-slate-300">件号：</span>
-            <PartNoInput />
-          </div>
-        </div>
+        <SpecSearch
+          values={filters}
+          onSearch={(next) => {
+            setSelectedRowKeys([])
+            setFilters(next)
+          }}
+          onReset={() => {
+            setSelectedRowKeys([])
+            resetFilters()
+          }}
+          isLoading={Boolean(isFetching)}
+        />
       </FilterBar>
 
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
           <TableState
-            loading={isLoading}
+            loading={Boolean(isLoading) && !hasData}
             error={error}
             onRetry={refetch}
           >
             <SpecTable
               data={records}
-              loading={isLoading || isCreating || isUpdating || isDeleting}
+              loading={Boolean(isFetching) || isDeleting}
               onSelect={onSelect}
               selectedRowKeys={selectedRowKeys}
               page={page}
@@ -184,12 +199,26 @@ export default function SpecList() {
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <SpecForm
-          ref={specFormRef}
-          onFinishFunc={onFinishFuc}
-          isEditing={isEditing}
-          initialValues={isEditing ? spec : undefined}
-        />
+        <div className="space-y-4">
+          <FormErrorAlert
+            error={formError}
+            reason={
+              formError
+                ? getUserErrorMessage(
+                    formError,
+                    feedbackText.failed(isEditing ? '更新' : '创建', '踏板规格'),
+                  )
+                : undefined
+            }
+          />
+          <SpecForm
+            onFinish={handleFinish}
+            setFormRef={setFormRef}
+            isSubmitting={isCreating || isUpdating}
+            isEditing={isEditing}
+            initialValues={isEditing ? spec : undefined}
+          />
+        </div>
       </Modal>
     </div>
   )

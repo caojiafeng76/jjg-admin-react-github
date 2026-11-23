@@ -1,10 +1,19 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App } from 'antd'
+import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import SafePartSettingPage from './SafePartSettingPage'
+
+vi.mock('@/hooks/useTableHeight', () => ({
+  useTableHeight: () => ({
+    paginationRef: { current: null },
+    scrollY: 400,
+    tableContainerRef: { current: null },
+  }),
+}))
 
 const settings = vi.hoisted(() => [
   {
@@ -61,9 +70,11 @@ function renderPage() {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <App>
-        <SafePartSettingPage />
-      </App>
+      <MemoryRouter initialEntries={['/syney-safe-part-setting']}>
+        <App>
+          <SafePartSettingPage />
+        </App>
+      </MemoryRouter>
     </QueryClientProvider>,
   )
 }
@@ -121,13 +132,37 @@ describe('SafePartSettingPage', { timeout: 15_000 }, () => {
     expect(screen.getByTitle('COVER PLATE')).toBeTruthy()
   })
 
-  it('件号筛选为前端过滤', async () => {
+  it('件号筛选支持搜索与重置（前端过滤）', async () => {
     const user = userEvent.setup()
     renderPage()
 
     await user.type(screen.getByPlaceholderText('搜索件号（前端过滤）'), 'ZZZ')
+    await user.click(screen.getByRole('button', { name: '搜索' }))
 
-    expect(screen.queryByText('XN2808EB')).toBeNull()
+    await waitFor(() => {
+      expect(screen.queryByText('XN2808EB')).toBeNull()
+    })
     expect(screen.getByText('共 0 条')).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: '重置' }))
+
+    expect(await screen.findByText('XN2808EB')).toBeTruthy()
+    expect(screen.getByText('共 1 条')).toBeTruthy()
+  })
+
+  it('保存失败时保留弹窗与输入并展示 FormErrorAlert', async () => {
+    const user = userEvent.setup()
+    const { upsertSyneySafePartSetting } = await import('@services/apiSyneySafePartSettings')
+    vi.mocked(upsertSyneySafePartSetting).mockRejectedValueOnce(new Error('save failed'))
+    renderPage()
+
+    await user.click(screen.getByRole('button', { name: /编\s*辑/ }))
+    expect(await screen.findByText('编辑件号配置')).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: '保存修改' }))
+
+    expect(await screen.findByText('操作失败')).toBeTruthy()
+    expect(screen.getByText('件号配置更新失败：请稍后重试')).toBeTruthy()
+    expect((screen.getByPlaceholderText('如 XN2808EB') as HTMLInputElement).value).toBe('XN2808EB')
   })
 })

@@ -10,7 +10,6 @@ import {
   Button,
   Space,
   Table,
-  theme,
   Typography,
   Upload,
 } from 'antd'
@@ -56,7 +55,6 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
   syneySpecs,
   specsLoading = false,
 }) => {
-  const { token } = theme.useToken()
   const { message: messageApi } = App.useApp()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [loading, setLoading] = useState(false)
@@ -207,6 +205,8 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       dataIndex: 'Qty',
       key: 'Qty',
       width: 80,
+      align: 'right' as const,
+      render: (value: number) => <span className="tabular-nums">{value}</span>,
     },
     {
       title: '单位',
@@ -240,7 +240,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
         disabled={disabled}
       >
         <Button
-          icon={<ArrowUpTrayIcon className="h-4 w-4" />}
+          icon={<ArrowUpTrayIcon className="size-4" />}
           loading={loading}
           disabled={disabled}
         >
@@ -248,24 +248,25 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
         </Button>
       </Upload>
 
-      <div style={{ marginTop: 8 }}>
+      <div className="mt-2">
         <Text
           type="secondary"
-          style={{ fontSize: 12 }}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 text-xs"
         >
-          <TableCellsIcon className="h-4 w-4" />{' '}
+          <TableCellsIcon className="size-4" />
+          {' '}
           支持.xlsx和.xls格式，文件大小不超过10MB
         </Text>
       </div>
 
       {/* 解析结果预览 */}
       {previewVisible && parsedData && (
-        <div style={{ marginTop: 16 }}>
+        <div className="mt-4">
           <Alert
+            className="mb-4"
             title="Excel文件解析成功"
             description={(
-              <Space orientation="vertical" style={{ width: '100%' }}>
+              <Space orientation="vertical" className="w-full">
                 <div>
                   <Text strong>订单号: </Text>
                   <Text>{parsedData.po.No}</Text>
@@ -274,11 +275,12 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                   <Text strong>交货日期: </Text>
                   <Text>{parsedData.po.EndDate}</Text>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                  <Text strong style={{ flexShrink: 0 }}>
-                    生产编号:{' '}
+                <div className="flex items-start">
+                  <Text strong className="shrink-0">
+                    生产编号:
+                    {' '}
                   </Text>
-                  <Text style={{ whiteSpace: 'pre-wrap' }}>
+                  <Text className="whitespace-pre-wrap">
                     {parsedData.po.SONo}
                   </Text>
                 </div>
@@ -287,8 +289,9 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                   <Text>{parsedData.po.Spec || '未识别，请手动选择'}</Text>
                   {parsedData.specInferred && (
                     <Alert
+                      className="mt-2 border border-warning/40 bg-warning/10"
                       title={(
-                        <Text strong style={{ fontSize: 14 }}>
+                        <Text strong className="text-sm">
                           ⚠️ 规格已通过后备逻辑推断，请仔细核对！
                         </Text>
                       )}
@@ -297,7 +300,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                           系统从所有条目的规格和备注字段中推断出此规格：
                           <Text
                             strong
-                            style={{ color: '#ff4d4f', marginLeft: 4 }}
+                            className="ml-1 text-error"
                           >
                             {parsedData.po.Spec}
                           </Text>
@@ -307,11 +310,6 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                       )}
                       type="warning"
                       showIcon
-                      style={{
-                        marginTop: 8,
-                        border: `2px solid ${token.colorWarningBorder}`,
-                        backgroundColor: token.colorWarningBg,
-                      }}
                       banner
                     />
                   )}
@@ -324,8 +322,9 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                 {!specsLoading
                   && parsedData.items.some(item => item.ParamSpecInferred) && (
                   <Alert
+                    className="mt-2 border border-warning/40 bg-warning/10"
                     title={(
-                      <Text strong style={{ fontSize: 14 }}>
+                      <Text strong className="text-sm">
                         ⚠️ 部分参数规格为系统根据备注推测，请仔细核对
                       </Text>
                     )}
@@ -338,11 +337,6 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                     )}
                     type="warning"
                     showIcon
-                    style={{
-                      marginTop: 8,
-                      border: `2px solid ${token.colorWarningBorder}`,
-                      backgroundColor: token.colorWarningBg,
-                    }}
                     banner
                   />
                 )}
@@ -357,18 +351,11 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                 {parsedData.po.Technique && (
                   <div>
                     <Text strong>工艺要求: </Text>
-                    <div style={{ marginTop: 4 }}>
+                    <div className="mt-1 space-y-0.5">
                       {parsedData.po.Technique.split(',').map((item, index) => (
                         <div
                           // eslint-disable-next-line react/no-array-index-key -- 工艺要求按逗号拆分的只读列表，条目可能重复
                           key={index}
-                          style={{
-                            marginBottom:
-                              index
-                              < parsedData.po.Technique!.split(',').length - 1
-                                ? 2
-                                : 0,
-                          }}
                         >
                           <Text>{item.trim()}</Text>
                         </div>
@@ -379,15 +366,14 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
                 <div>
                   <Text strong>明细数量: </Text>
                   <Text
-                    style={{
-                      color:
-                        parsedData.items.length % 14 === 0
-                          ? '#52c41a'
-                          : '#ff4d4f',
-                      fontWeight: 'bold',
-                    }}
+                    className={`font-bold tabular-nums ${
+                      parsedData.items.length % 14 === 0
+                        ? 'text-success'
+                        : 'text-error'
+                    }`}
                   >
-                    {parsedData.items.length} 条
+                    {parsedData.items.length}
+                    {' 条'}
                     {parsedData.items.length % 14 === 0 ? ' ✓' : ' ⚠️'}
                   </Text>
                 </div>
@@ -395,7 +381,6 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
             )}
             type="success"
             showIcon
-            style={{ marginBottom: 16 }}
           />
 
           <Table
@@ -406,10 +391,8 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
               ...item,
               key: index,
             }))}
-            size="small"
             pagination={false}
             scroll={{ x: 1200, y: 300 }}
-            bordered
           />
         </div>
       )}
