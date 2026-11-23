@@ -1,4 +1,5 @@
 import type { TableProps } from 'antd'
+import type { CSSProperties } from 'react'
 import type {
   SelectedExtrusionDetail,
   SelectedJobDetail,
@@ -11,10 +12,9 @@ import type {
   OrderStatusDashboardItem,
   OrderStatusJobColumn,
 } from '@/services/apiOrderStatusDashboard'
-import { CheckCircleIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { App, Table } from 'antd'
+import { App, Table, Tabs } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { isAdminRole } from '@/config/access'
@@ -24,7 +24,6 @@ import {
   useWorkshopOrderModels,
 } from '@/features/workshop/OrderList/useWorkshopOrders'
 import { usePermission } from '@/hooks/usePermission'
-import { useTableHeight } from '@/hooks/useTableHeight'
 import AppPagination from '@/ui/AppPagination'
 import { TableEmpty, TableState } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
@@ -59,7 +58,15 @@ import {
 import { useOrderStatusDashboardExport } from './useOrderStatusDashboardExport'
 
 const EMPTY_JOB_COLUMNS: OrderStatusJobColumn[] = []
-const SUMMARY_ROW_HEIGHT = 31
+const TABLE_SECTION_STYLE = {
+  // 表头、汇总和横向滚动条占用实际高度，剩余空间留给表体。
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  gridTemplateRows: 'auto minmax(0, max-content) auto auto',
+  alignContent: 'start',
+  height: '100cqh',
+} satisfies CSSProperties
+
 export default function OrderStatusDashboard() {
   const { message, modal } = App.useApp()
   const { role } = useAuth()
@@ -115,15 +122,6 @@ export default function OrderStatusDashboard() {
     }),
     [activeStatus, searchParamValues],
   )
-  const { tableContainerRef, paginationRef, scrollY, rowHeight }
-    = useTableHeight({
-      headerHeight: 32,
-      targetRowCount: Math.min(pageSize, 10),
-      minRowHeight: 24,
-      gap: 12,
-      // 汇总行固定在表格底部，不参与滚动
-      summaryRowHeight: SUMMARY_ROW_HEIGHT,
-    })
   const { data, isLoading, isPlaceholderData, error, refetch }
     = useOrderStatusDashboard({
       page,
@@ -387,36 +385,8 @@ export default function OrderStatusDashboard() {
     setSelectedExtrusionDetail(null)
   }
 
-  return (
+  const tabContent = (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      <OrderStatusDashboardHeader
-        canExportCurrentPage={canExportCurrentPage}
-        exportDisabled={isDataLoading || visibleRows.length === 0}
-        isExporting={isExporting}
-        isFetching={isDataLoading}
-        isLoading={isLoading}
-        onExport={handleExportCurrentPage}
-        onPreloadExport={preloadOrderStatusDashboardExcel}
-        onRefetch={handleRefetch}
-      />
-
-      {/* Tabs 标签页 */}
-      <div className="flex items-center gap-1 rounded-xl border border-slate-200/60 bg-white/60 p-1 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
-        {STATUS_TABS.map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => handleStatusTabChange(tab.key)}
-            className={`flex-1 rounded-lg px-4 py-1 text-sm font-medium transition-all duration-200 ${
-              activeStatus === tab.key
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/30'
-                : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-slate-200'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
       <OrderStatusDashboardSearchBar
         isSearching={isUserFetching && !isLoading}
         onReset={handleResetSearch}
@@ -425,107 +395,82 @@ export default function OrderStatusDashboard() {
         searchValues={searchValues}
       />
 
-      {/* 表格区域 */}
-      <div
-        ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col overflow-hidden"
-      >
-        {/* 表头装饰 */}
-        <div className="flex items-center justify-between border-b border-slate-100/60 bg-gradient-to-r from-slate-50/80 via-white to-slate-50/80 px-4 py-1.5 dark:border-slate-700/60 dark:from-slate-800/80 dark:via-slate-800/60 dark:to-slate-800/80">
-          <div className="flex items-center gap-2">
-            <TableCellsIcon className="size-4 text-slate-400" />
-            <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
-              数据列表
-            </span>
-          </div>
-
-          {/* 可结案订单提示 */}
-          {canManageStatus && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 rounded-lg bg-emerald-50/80 px-3 py-1.5 ring-1 ring-emerald-100/80 dark:bg-emerald-900/30 dark:ring-emerald-900/50">
-                <CheckCircleIcon className="size-3.5 text-success" />
-                <span className="text-xs text-emerald-600 dark:text-emerald-400">
-                  {
-                    rows.filter(r =>
-                      canCloseDashboardOrder({
-                        canManageStatus: true,
-                        record: r,
-                      }),
-                    ).length
-                  }{' '}
-                  个订单可结案
-                </span>
-              </div>
-            </div>
-          )}
-
-          <span className="text-xs text-slate-400 dark:text-slate-500">
-            岗位{' '}
-            <span className="font-medium text-slate-600 dark:text-slate-300">
-              {jobColumns.length}
-            </span>{' '}
-            · 共{' '}
-            <span className="font-medium text-slate-600 dark:text-slate-300">
-              {data?.total ?? 0}
-            </span>{' '}
-            条记录
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-text-secondary tabular-nums">
+        <span>岗位 {jobColumns.length}</span>
+        {canManageStatus && (
+          <span>
+            本页 {visibleRows.filter(record => canCloseDashboardOrder({ canManageStatus, record })).length} 个订单可结案
           </span>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-x-auto">
-          <TableState loading={isLoading && !data} error={error} onRetry={handleRefetch}>
-            <Table<OrderStatusDashboardItem>
-              rowKey="id"
-              bordered
-              size="small"
-              components={DENSE_TABLE_COMPONENTS}
-              loading={{ spinning: isDataLoading, tip: '数据加载中...' }}
-              columns={columns}
-              dataSource={rows}
-              pagination={false}
-              scroll={{
-                x: tableWidth,
-                y: scrollY,
-                scrollToFirstRowOnChange: true,
-              }}
-              onChange={handleTableChange}
-              sticky={{ offsetHeader: 0 }}
-              summary={pageData =>
-                renderOrderStatusSummary({ columns, jobColumns, rows: pageData })}
-              locale={{ emptyText: <TableEmpty title="暂无订单现状数据" description="请调整筛选条件后查询" /> }}
-              rowClassName={(record, index) =>
-                record.productionStatus === '延期'
-                  ? 'bg-red-50/50 hover:bg-red-50 dark:bg-red-950/30 dark:hover:bg-red-950/40'
-                  : record.productionStatus === '预警'
-                    ? 'bg-amber-50/50 hover:bg-amber-50 dark:bg-amber-950/30 dark:hover:bg-amber-950/40'
-                    : zebraRowClassName(record, index)}
-              onRow={() => ({
-                style: { height: rowHeight },
-                className: 'transition-colors duration-150',
-              })}
-              style={{ fontVariantNumeric: 'tabular-nums' }}
-            />
-          </TableState>
-        </div>
+        )}
       </div>
 
-      {/* 分页区域 */}
-      <div
-        ref={paginationRef}
-        className="flex shrink-0 items-center justify-between rounded-xl border border-slate-200/60 bg-white/80 px-4 py-2 shadow-sm backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/80"
-      >
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <span className="font-medium text-slate-700 dark:text-slate-200">
-            {data?.total ?? 0}
-          </span>
-          <span>条记录</span>
-        </div>
+      <div className="[container-type:size] min-h-0 flex-1 overflow-auto">
+        <TableState loading={isLoading && !data} error={error} onRetry={handleRefetch}>
+          <Table<OrderStatusDashboardItem>
+            rowKey="id"
+            bordered
+            size="small"
+            components={DENSE_TABLE_COMPONENTS}
+            loading={{ spinning: isDataLoading, description: '数据加载中...' }}
+            columns={columns}
+            dataSource={rows}
+            pagination={false}
+            scroll={{
+              x: tableWidth,
+              y: '100%',
+              scrollToFirstRowOnChange: true,
+            }}
+            onChange={handleTableChange}
+            sticky={{ offsetHeader: 0 }}
+            summary={pageData =>
+              renderOrderStatusSummary({ columns, jobColumns, rows: pageData })}
+            locale={{ emptyText: <TableEmpty title="暂无订单现状数据" description="请调整筛选条件后查询" /> }}
+            rowClassName={(record, index) =>
+              record.productionStatus === '延期'
+                ? 'bg-error/5 dark:bg-error/10'
+                : record.productionStatus === '预警'
+                  ? 'bg-warning/5 dark:bg-warning/10'
+                  : zebraRowClassName(record, index)}
+            classNames={{ body: { row: 'h-6' } }}
+            styles={{ section: TABLE_SECTION_STYLE }}
+          />
+        </TableState>
+      </div>
+
+      <div className="flex shrink-0 justify-end">
         <AppPagination
           total={data?.total ?? 0}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           pageSizeOptions={['10', '20', '50', '100', '500']}
         />
       </div>
+    </div>
+  )
+
+  return (
+    <div className="h-full min-h-0 overflow-hidden">
+      <Tabs
+        className="h-full"
+        classNames={{ body: 'h-full', content: 'h-full' }}
+        activeKey={activeStatus}
+        items={STATUS_TABS.map(tab => ({
+          ...tab,
+          children: tab.key === activeStatus ? tabContent : undefined,
+        }))}
+        onChange={handleStatusTabChange}
+        styles={{ header: { marginBottom: 12 } }}
+        tabBarExtraContent={(
+          <OrderStatusDashboardHeader
+            canExportCurrentPage={canExportCurrentPage}
+            exportDisabled={isDataLoading || visibleRows.length === 0}
+            isExporting={isExporting}
+            isRefreshing={isUserFetching && !isLoading}
+            onExport={handleExportCurrentPage}
+            onPreloadExport={preloadOrderStatusDashboardExcel}
+            onRefetch={handleRefetch}
+          />
+        )}
+      />
 
       {/* 模态框：生产明细 */}
       <ProductionDetailModal

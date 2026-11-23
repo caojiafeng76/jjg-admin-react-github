@@ -1,11 +1,9 @@
 import type { SearchValues } from './dashboardUtils'
-import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/16/solid'
-import { Button, DatePicker, Input, Select, Typography } from 'antd'
+import { DatePicker, Input, Select } from 'antd'
 import dayjs from 'dayjs'
-import FilterBar from '@/ui/FilterBar'
+import { useId } from 'react'
+import FilterBar, { FilterBarActions } from '@/ui/FilterBar'
 import { PRODUCTION_STATUS_OPTIONS } from './dashboardUtils'
-
-const { Text } = Typography
 
 export interface OrderStatusDashboardSearchBarProps {
   isSearching: boolean
@@ -18,6 +16,13 @@ export interface OrderStatusDashboardSearchBarProps {
   searchValues: SearchValues
 }
 
+const TEXT_FILTERS = [
+  { key: 'projectNo', label: '项目号', width: 160 },
+  { key: 'customer', label: '客户', width: 128 },
+  { key: 'model', label: '型号', width: 128 },
+  { key: 'materialCode', label: '料号', width: 144 },
+] as const
+
 export function OrderStatusDashboardSearchBar({
   isSearching,
   onReset,
@@ -25,146 +30,58 @@ export function OrderStatusDashboardSearchBar({
   onUpdateValue,
   searchValues,
 }: OrderStatusDashboardSearchBarProps) {
+  const id = useId()
+
   return (
-    <FilterBar className="p-2.5">
-      <div className="flex items-center gap-x-6 overflow-x-auto [&>*]:shrink-0">
-        {/* 交货日期 */}
-        <div className="group flex items-center gap-2.5">
-          <Text
-            type="secondary"
-            className="!text-xs font-medium text-slate-400 dark:text-slate-500"
-          >
-            交货日期
-          </Text>
+    <FilterBar className="shrink-0">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
+        <div className="flex items-center gap-2">
+          <label htmlFor={`${id}-orderDate`}>交货日期</label>
           <DatePicker
+            id={`${id}-orderDate`}
             allowClear
             format="YYYY-MM-DD"
             placeholder="交货日期"
-            value={
-              searchValues.orderDate ? dayjs(searchValues.orderDate) : null
-            }
-            onChange={date =>
-              onUpdateValue(
-                'orderDate',
-                date ? date.format('YYYY-MM-DD') : '',
-              )}
-            className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
+            value={searchValues.orderDate ? dayjs(searchValues.orderDate) : null}
+            onChange={date => onUpdateValue('orderDate', date ? date.format('YYYY-MM-DD') : '')}
+            style={{ width: 144 }}
           />
         </div>
 
-        {/* 项目号 */}
-        <div className="group flex items-center gap-2.5">
-          <Text
-            type="secondary"
-            className="!text-xs font-medium text-slate-400 dark:text-slate-500"
-          >
-            项目号
-          </Text>
-          <Input
-            allowClear
-            placeholder="项目号"
-            value={searchValues.projectNo}
-            onChange={event =>
-              onUpdateValue('projectNo', event.target.value)}
-            onPressEnter={onSearch}
-            className="!w-44 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
-          />
-        </div>
+        {TEXT_FILTERS.map(({ key, label, width }) => (
+          <div key={key} className="flex items-center gap-2">
+            <label htmlFor={`${id}-${key}`}>{label}</label>
+            <Input
+              id={`${id}-${key}`}
+              allowClear
+              placeholder={label}
+              value={searchValues[key]}
+              onChange={event => onUpdateValue(key, event.target.value)}
+              onPressEnter={onSearch}
+              style={{ width }}
+            />
+          </div>
+        ))}
 
-        {/* 客户 */}
-        <div className="group flex items-center gap-2.5">
-          <Text
-            type="secondary"
-            className="!text-xs font-medium text-slate-400 dark:text-slate-500"
-          >
-            客户
-          </Text>
-          <Input
-            allowClear
-            placeholder="客户"
-            value={searchValues.customer}
-            onChange={event =>
-              onUpdateValue('customer', event.target.value)}
-            onPressEnter={onSearch}
-            className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
-          />
-        </div>
-
-        {/* 型号 */}
-        <div className="group flex items-center gap-2.5">
-          <Text
-            type="secondary"
-            className="!text-xs font-medium text-slate-400 dark:text-slate-500"
-          >
-            型号
-          </Text>
-          <Input
-            allowClear
-            placeholder="型号"
-            value={searchValues.model}
-            onChange={event => onUpdateValue('model', event.target.value)}
-            onPressEnter={onSearch}
-            className="!w-32 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
-          />
-        </div>
-
-        {/* 料号 */}
-        <div className="group flex items-center gap-2.5">
-          <Text
-            type="secondary"
-            className="!text-xs font-medium text-slate-400 dark:text-slate-500"
-          >
-            料号
-          </Text>
-          <Input
-            allowClear
-            placeholder="料号"
-            value={searchValues.materialCode}
-            onChange={event =>
-              onUpdateValue('materialCode', event.target.value)}
-            onPressEnter={onSearch}
-            className="!w-36 !rounded-lg !border-slate-200/80 !bg-slate-50/50 transition-all duration-200 hover:!border-slate-300 hover:!bg-white focus:!border-blue-400 focus:!bg-white dark:!border-slate-600/70 dark:!bg-slate-900/60 dark:hover:!border-slate-500 dark:hover:!bg-slate-800/80 dark:focus:!border-blue-500 dark:focus:!bg-slate-800/80"
-          />
-        </div>
-
-        {/* 状态 */}
-        <div className="group flex items-center gap-2.5">
-          <Text
-            type="secondary"
-            className="!text-xs font-medium text-slate-400 dark:text-slate-500"
-          >
-            状态
-          </Text>
+        <div className="flex items-center gap-2">
+          <label htmlFor={`${id}-productionStatus`}>状态</label>
           <Select
+            id={`${id}-productionStatus`}
             allowClear
             placeholder="生产状态"
             value={searchValues.productionStatus || undefined}
             options={PRODUCTION_STATUS_OPTIONS}
-            onChange={value =>
-              onUpdateValue('productionStatus', value ?? '')}
-            className="w-32"
+            onChange={value => onUpdateValue('productionStatus', value ?? '')}
+            style={{ width: 128 }}
           />
         </div>
 
-        {/* 操作按钮 */}
-        <div className="ml-auto flex items-center gap-2">
-          <Button
-            type="primary"
-            icon={<MagnifyingGlassIcon className="size-4" />}
-            loading={isSearching}
-            onClick={onSearch}
-            className="!rounded-lg !bg-gradient-to-r !from-blue-500 !to-indigo-500 !shadow-md !shadow-blue-500/30 !transition-all !duration-200 hover:!from-blue-600 hover:!to-indigo-600 hover:!shadow-lg hover:!shadow-blue-500/40 active:!scale-95 active:!transform"
-          >
-            搜索
-          </Button>
-          <Button
-            icon={<ArrowPathIcon className="size-4" />}
-            onClick={onReset}
-            className="!rounded-lg !border-slate-200/80 !bg-white/80 !text-slate-500 !shadow-sm !transition-all !duration-200 hover:!border-slate-300 hover:!bg-slate-50 hover:!text-slate-600 dark:!border-slate-600/70 dark:!bg-slate-800/80 dark:!text-slate-400 dark:hover:!border-slate-500 dark:hover:!bg-slate-700 dark:hover:!text-slate-200"
-          >
-            重置
-          </Button>
-        </div>
+        <FilterBarActions
+          className="ml-auto flex items-center gap-2"
+          isLoading={isSearching}
+          onSearch={onSearch}
+          onReset={onReset}
+        />
       </div>
     </FilterBar>
   )

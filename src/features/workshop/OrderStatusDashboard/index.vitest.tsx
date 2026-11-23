@@ -2,7 +2,7 @@ import type { OrderStatusDashboardItem } from '@/services/apiOrderStatusDashboar
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { App } from 'antd'
-import { MemoryRouter } from 'react-router-dom'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createDashboardOrder, createScreenshotDashboardOrders, DASHBOARD_JOB_COLUMNS } from '@/test/fixtures/orderStatusDashboard'
 import OrderStatusDashboard from './index'
@@ -11,13 +11,14 @@ const mocks = vi.hoisted(() => ({
   exportExcel: vi.fn(),
   refetch: vi.fn(async () => undefined),
   role: 'admin',
+  canManageStatus: false,
   pages: {} as Record<number, OrderStatusDashboardItem[]>,
   isPlaceholderData: false,
 }))
 
 vi.mock('@/utils/orderStatusDashboardExcel', () => ({ exportOrderStatusDashboardToExcel: mocks.exportExcel }))
 vi.mock('@/contexts/useAuth', () => ({ useAuth: () => ({ role: mocks.role }) }))
-vi.mock('@/hooks/usePermission', () => ({ usePermission: () => false }))
+vi.mock('@/hooks/usePermission', () => ({ usePermission: () => mocks.canManageStatus }))
 vi.mock('@/features/workshop/OrderList/useWorkshopOrders', () => ({
   useBatchUpdateWorkshopOrderStatuses: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useWorkshopOrderModels: () => ({ data: ['105-268'] }),
@@ -37,13 +38,15 @@ vi.mock('./ProductionDetailModal', () => ({ ProductionDetailModal: () => null })
 vi.mock('./TransferDetailModal', () => ({ TransferDetailModal: () => null }))
 
 function renderPage(page = 1) {
-  return render(
+  const router = createMemoryRouter([
+    { path: '/production-scheduling', element: <App><OrderStatusDashboard /></App> },
+  ], { initialEntries: [`/production-scheduling?page=${page}&pageSize=20`] })
+  const view = render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={[`/production-scheduling?page=${page}&pageSize=20`]}>
-        <App><OrderStatusDashboard /></App>
-      </MemoryRouter>
+      <RouterProvider router={router} />
     </QueryClientProvider>,
   )
+  return { ...view, router }
 }
 
 function getExportButton(): HTMLElement {
@@ -69,6 +72,7 @@ describe('OrderStatusDashboard current-page export', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.role = 'admin'
+    mocks.canManageStatus = false
     mocks.isPlaceholderData = false
     mocks.pages = {
       1: createScreenshotDashboardOrders(),
@@ -127,4 +131,40 @@ describe('OrderStatusDashboard current-page export', () => {
     renderPage()
     expect(screen.queryByRole('button', { name: '导出当前页' })).not.toBeInTheDocument()
   })
+
+  it('submits a filter with Enter and preserves it when switching status tabs', () => {
+    const { router } = renderPage(2)
+
+    const closedTab = screen.getByRole('tab', { name: '已结案' })
+    expect(screen.getByRole('tab', { name: '生产中' })).toHaveAttribute('aria-selected', 'true')
+    const productionPanel = screen.getByRole('tabpanel', { name: '生产中' })
+    const projectInput = within(productionPanel).getByRole('textbox', { name: '项目号' })
+    fireEvent.change(projectInput, { target: { value: 'P-10' } })
+    fireEvent.keyDown(projectInput, { key: 'Enter', code: 'Enter' })
+    expect(new URLSearchParams(router.state.location.search).get('projectNo')).toBe('P-10')
+
+    fireEvent.click(closedTab)
+    expect(closedTab).toHaveAttribute('aria-selected', 'true')
+    const params = new URLSearchParams(router.state.location.search)
+    expect(params.get('status')).toBe('已结案')
+    expect(params.get('page')).toBe('1')
+    const closedPanel = screen.getByRole('tabpanel', { name: '已结案' })
+    expect(within(closedPanel).getByRole('textbox', { name: '项目号' })).toHaveValue('P-10')
+  })
+
+  it('counts only shown orders that can be closed and gates the count by permission', async () => {
+    mocks.pages[2][0].completionRate = 100
+    const readOnly = renderPage(2)
+    expect(screen.queryByText(/本页.*可结案/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^结案$/ })).not.toBeInTheDocument()
+    readOnly.unmount()
+
+    mocks.canManageStatus = true
+    renderPage(2)
+    expect(screen.getByText('本页 1 个订单可结案')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^结案$/ })).toBeInTheDocument()
+    await filterColumn('客户', '客户B')
+    expect(screen.getByText('本页 0 个订单可结案')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^结案$/ })).not.toBeInTheDocument()
+  }, 20000)
 })
