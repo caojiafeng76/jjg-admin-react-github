@@ -1,12 +1,12 @@
 import { App } from 'antd'
+import { useState } from 'react'
 
 import { getUserErrorMessage } from '@/utils/errorHandler'
-
 import { feedbackText } from '@/utils/feedbackText'
 import { formatDate } from '@/utils/format'
 import { SUMMARY_TABLE_COLUMNS } from '@/utils/pdfConstants'
 import { useTableSelection } from '../useTableSelection'
-import { useSelectedReports } from './useSelectedReports'
+import { useFetchSelectedReports } from './useFetchSelectedReports'
 
 function loadPDFDependencies() {
   return Promise.all([import('jspdf-autotable'), import('@/utils/pdfUtils')])
@@ -14,30 +14,34 @@ function loadPDFDependencies() {
 
 export function useGenerateSummaryPDF() {
   const { tableSelectedKeys } = useTableSelection()
+  const { fetchSelectedReports } = useFetchSelectedReports()
   const { message } = App.useApp()
-
-  // 只在有选中项时才查询数据
-  const { selectedReportsLoading, selectedMap } = useSelectedReports(
-    tableSelectedKeys.length > 0,
-  )
+  const [isGenerating, setIsGenerating] = useState(false)
 
   function preloadPDF() {
     void loadPDFDependencies()
   }
 
   async function generateSummaryPDF() {
-    // 改进错误处理
-    if (selectedReportsLoading) {
+    if (isGenerating) {
       message.warning('对账单数据加载中，请稍后再试')
       return false
     }
 
-    if (!selectedMap || selectedMap.size === 0) {
+    if (tableSelectedKeys.length === 0) {
       message.warning(feedbackText.selectRequired('打印'))
       return false
     }
 
     try {
+      setIsGenerating(true)
+      const selectedMap = await fetchSelectedReports()
+
+      if (selectedMap.size === 0) {
+        message.warning(feedbackText.selectRequired('打印'))
+        return false
+      }
+
       const [autoTableModule, pdfUtils] = await loadPDFDependencies()
       const autoTable = autoTableModule.default
       const {
@@ -91,7 +95,7 @@ export function useGenerateSummaryPDF() {
       previewPDF(doc, filename)
 
       message.success('汇总单 PDF 已生成')
-      return true // 返回 true 表示生成成功
+      return true
     }
     catch (error) {
       console.error('生成汇总 PDF 时发生错误:', error)
@@ -100,11 +104,14 @@ export function useGenerateSummaryPDF() {
       )
       return false
     }
+    finally {
+      setIsGenerating(false)
+    }
   }
 
   return {
     generateSummaryPDF,
     preloadPDF,
-    isLoading: selectedReportsLoading,
+    isLoading: isGenerating,
   }
 }

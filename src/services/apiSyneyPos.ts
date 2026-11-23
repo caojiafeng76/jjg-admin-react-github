@@ -1,10 +1,14 @@
 import type { Database } from './database.types'
 import type { ISyneyItem, ISyneyPo } from './types'
 import { handleApiError } from '@utils/errorHandler'
-import { extractBrandFromItems, extractSpecFromItems } from '@/utils/syneyOrderDefaults'
 import supabase from './supabase'
 
 type SyneyPoUpdate = Database['public']['Tables']['syney-pos']['Update']
+
+export interface SelectedSyneyPoWithItems {
+  po: ISyneyPo
+  items: ISyneyItem[]
+}
 
 export function normalizeSyneyPoUpdatePayload(data: Partial<ISyneyPo>): SyneyPoUpdate {
   return {
@@ -89,135 +93,10 @@ export async function getSyneyPos({
     = await query.overrideTypes<ISyneyPo[]>()
 
   if (error) {
-    // 请求被取消时 Supabase 可能抛出 AbortError，这属于正常行为，这里直接返回空结果避免报错
-    if (
-      error
-      && typeof error === 'object'
-      && 'name' in error
-      && (error as { name?: string }).name === 'AbortError'
-    ) {
-      return { syneyPos: [], count: 0 }
-    }
-
     throw handleApiError(error, '订单列表获取失败')
   }
 
   return { syneyPos: syneyPos || [], count: count || 0 }
-}
-
-export default async function getSyneyPo(id: string, signal?: AbortSignal) {
-  let query = supabase.from('syney-pos').select('*').eq('id', +id)
-
-  // 支持请求取消
-  if (signal) {
-    query = query.abortSignal(signal)
-  }
-
-  const { data, error } = await query.single()
-
-  if (error) {
-    // 请求被取消时 Supabase 可能抛出 AbortError，这属于正常行为，这里直接返回 null 避免报错
-    if (
-      error
-      && typeof error === 'object'
-      && 'name' in error
-      && (error as { name?: string }).name === 'AbortError'
-    ) {
-      return null
-    }
-
-    if (error.code === 'PGRST116') {
-      throw new Error('入库单不存在或已被删除')
-    }
-
-    throw handleApiError(error, '获取订单详情失败')
-  }
-
-  return data
-}
-
-export async function createPo({
-  po,
-  map,
-}: {
-  po: ISyneyPo
-  map: Map<string, ISyneyItem[]>
-}) {
-  // 追踪已创建的订单ID,用于失败时回滚
-  const createdPoIds: number[] = []
-
-  try {
-    await Promise.all(
-      Array.from(map.keys()).map(async (key) => {
-        const [SONo, SerialNo] = key.split('~')
-        const items = map.get(key)
-
-        // 自动提取商标信息（从后板的 Remark）
-        const extractedBrand = items ? extractBrandFromItems(items) : null
-        const finalBrand = po.Brand || extractedBrand
-
-        // 自动推断规格（从前沿板的 Spec 字段）
-        const extractedSpec = items ? extractSpecFromItems(items) : null
-        const finalSpec = po.Spec || extractedSpec
-
-        const { data: poRepo, error: poError } = await supabase
-          .from('syney-pos')
-          .insert([
-            {
-              ...po,
-              SONo,
-              SerialNo: +SerialNo,
-              Brand: finalBrand,
-              Spec: finalSpec,
-            },
-          ])
-          .select()
-          .single()
-
-        if (poError) {
-          throw handleApiError(poError, '订单创建失败')
-        }
-
-        // 记录成功创建的订单ID
-        createdPoIds.push(poRepo.id)
-
-        if (!items || items.length === 0)
-          return
-
-        // 明细按 Excel 行原样入库，不去重（同件号多行是上/下头部等独立零件）
-        const poItems = items.map(item => ({
-          No: item.No,
-          PartNo: item.PartNo,
-          PartName: item.PartName,
-          PartName2: item.PartName2 ?? null,
-          Spec: item.Spec,
-          ParamSpec: item.ParamSpec,
-          Unit: item.Unit,
-          Qty: item.Qty || 0,
-          SONo: item.SONo,
-          PartCode: item.PartCode ?? null,
-          PartModel: item.PartModel ?? null,
-          Remark: item.Remark,
-          PoId: poRepo.id,
-        }))
-
-        const { error: itemsError } = await supabase
-          .from('syney-po-items')
-          .insert(poItems)
-
-        if (itemsError) {
-          throw handleApiError(itemsError, '订单明细创建失败')
-        }
-      }),
-    )
-  }
-  catch (error) {
-    // 清理所有已创建的订单,确保数据一致性
-    if (createdPoIds.length > 0) {
-      await supabase.from('syney-pos').delete().in('id', createdPoIds)
-    }
-    throw error
-  }
 }
 
 /**
@@ -277,20 +156,7 @@ export async function deletePo(ids: string[]) {
     throw new Error(`以下订单不存在: ${missingIds.join(', ')}`)
   }
 
-  // 4. 可选：检查订单状态，某些状态的订单不允许删除
-  // 根据业务需求，可以配置哪些状态不允许删除
-  // 当前暂不限制，但保留扩展能力
-  // const restrictedStatuses = ['已入库'] // 可根据业务需求调整
-  // const restrictedPos = existingPos.filter(
-  //   (p) => p.Status && restrictedStatuses.includes(p.Status),
-  // )
-  // if (restrictedPos.length > 0) {
-  //   throw new Error(
-  //     `以下订单状态不允许删除: ${restrictedPos.map((p) => p.No || p.id).join(', ')}`,
-  //   )
-  // }
-
-  // 5. 先删除关联的订单明细（确保数据一致性，即使数据库有级联删除）
+  // 4. 先删除关联的订单明细（确保数据一致性，即使数据库有级联删除）
   const { error: itemsError } = await supabase
     .from('syney-po-items')
     .delete()
@@ -300,7 +166,7 @@ export async function deletePo(ids: string[]) {
     throw handleApiError(itemsError, '删除订单明细失败')
   }
 
-  // 6. 删除订单主表
+  // 5. 删除订单主表
   const { data: deletedData, error } = await supabase
     .from('syney-pos')
     .delete()
@@ -311,7 +177,7 @@ export async function deletePo(ids: string[]) {
     throw handleApiError(error, '订单删除失败')
   }
 
-  // 7. 返回删除结果
+  // 6. 返回删除结果
   return {
     deletedCount: deletedData?.length || 0,
     deletedIds: uniqueIds,
@@ -330,35 +196,48 @@ export async function updatePos({
   ids: string[]
   data: Partial<ISyneyPo>
 }) {
+  const numericIds = ids.map(Number).filter(id => Number.isInteger(id) && id > 0)
+  if (numericIds.length === 0) {
+    throw new Error('请先选择需要更新的订单')
+  }
+
   const payload = normalizeSyneyPoUpdatePayload(data)
 
   const { error } = await supabase
     .from('syney-pos')
     .update(payload)
-    .in('id', ids.map(Number))
+    .in('id', numericIds)
 
   if (error) {
     throw handleApiError(error, '订单更新失败')
   }
 }
 
-export async function getSelectedPosWithItems(PoIds: number[]) {
+export async function getSelectedPosWithItems(
+  PoIds: number[],
+  signal?: AbortSignal,
+): Promise<SelectedSyneyPoWithItems[]> {
   if (PoIds.length === 0) {
-    return new Map<string, ISyneyItem[]>()
+    return []
+  }
+
+  let itemsQuery = supabase.from('syney-po-items').select('*').in('PoId', PoIds)
+  let posQuery = supabase
+    .from('syney-pos')
+    .select('*')
+    .in('id', PoIds)
+    .order('EndDate', { ascending: false })
+    .order('No', { ascending: true })
+    .order('SONo', { ascending: true })
+    .order('SerialNo', { ascending: true })
+
+  if (signal) {
+    itemsQuery = itemsQuery.abortSignal(signal)
+    posQuery = posQuery.abortSignal(signal)
   }
 
   // 1. 并行查询订单和明细
-  const [itemsResult, posResult] = await Promise.all([
-    supabase.from('syney-po-items').select('*').in('PoId', PoIds),
-    supabase
-      .from('syney-pos')
-      .select('*')
-      .in('id', PoIds)
-      .order('EndDate', { ascending: false })
-      .order('No', { ascending: true })
-      .order('SONo', { ascending: true })
-      .order('SerialNo', { ascending: true }),
-  ])
+  const [itemsResult, posResult] = await Promise.all([itemsQuery, posQuery])
 
   if (itemsResult.error) {
     throw handleApiError(itemsResult.error, '订单明细获取失败')
@@ -378,17 +257,11 @@ export async function getSelectedPosWithItems(PoIds: number[]) {
     }
   })
 
-  // 3. 构建结果 Map
-  const map = new Map<string, ISyneyItem[]>()
-
-  posResult.data.forEach((po) => {
-    // 保持原有的键格式以确保兼容性
-    const key = `${po.SONo}~${po.Spec}~${po.EndDate}~${po.No}~${po.SerialNo}~${po.Brand}~${po.Technique}~${po.Remark}~${po.BorderMaterial}~${po.DeliveryNo ?? ''}`
-    const items = itemsByPoId.get(po.id) || []
-    map.set(key, items)
-  })
-
-  return map
+  // 3. 返回结构化数组（避免字段拼串破坏含特殊字符的备注或工艺要求）
+  return posResult.data.map(po => ({
+    po: po as ISyneyPo,
+    items: itemsByPoId.get(po.id) || [],
+  }))
 }
 
 /**

@@ -52,6 +52,21 @@ describe('handleApiError', () => {
     expect(error.code).toBe('NETWORK_ERROR')
     expect(error.message).toBe('订单列表获取失败：网络连接失败，请检查网络设置')
   })
+
+  it('recognizes Supabase-wrapped AbortError objects without a name property', () => {
+    const error = handleApiError(
+      {
+        message: 'AbortError: The operation was aborted.',
+        details: 'Request was aborted',
+        code: '',
+      },
+      '订单列表获取失败',
+    )
+
+    expect(error).toBeInstanceOf(AppError)
+    expect(error.name).toBe('AbortError')
+    expect(error.code).toBe('ABORT_ERROR')
+  })
 })
 
 describe('getUserErrorMessage', () => {

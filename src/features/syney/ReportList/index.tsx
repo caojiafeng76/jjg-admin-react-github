@@ -11,8 +11,8 @@ import { CurrencyYenIcon } from '@heroicons/react/24/outline'
 
 import ReportForm from '@syney/ReportList/ReportForm'
 import ReportTable from '@syney/ReportList/ReportTable'
-
 import { useDeleteReport } from '@syney/ReportList/useDeleteReport'
+import { useQueryClient } from '@tanstack/react-query'
 import AddButton from '@ui/AddButton'
 import DeleteButton from '@ui/DeleteButton'
 import {
@@ -21,7 +21,9 @@ import {
 import { App, Button, Input, Modal } from 'antd'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { queryConfig } from '@/config/queryClient'
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { getSyneySpecs } from '@/services/apiSyneySpecs'
 import AppPagination from '@/ui/AppPagination'
 import FilterBar from '@/ui/FilterBar'
 import PrintButton from '@/ui/PrintButton'
@@ -29,7 +31,6 @@ import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
-import { useSyneySpecs } from '../SpecList/useSyneySpecs'
 import TableSelectionProvider from '../TableSelectionProvider'
 import { useTableSelection } from '../useTableSelection'
 import ConfirmButton from './ConfirmButton'
@@ -45,6 +46,7 @@ import { useReports } from './useReports'
 
 function ReportListContent() {
   const { message: messageApi } = App.useApp()
+  const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
   const page = Number(searchParams.get('page')) || 1
   const pageSize = Number(searchParams.get('pageSize')) || 10
@@ -59,9 +61,6 @@ function ReportListContent() {
     preloadPDF,
     isLoading: isPrinting,
   } = useGenerateSyneyStoreReportPDF()
-  const { syneySpecs, isLoading: importSpecsLoading } = useSyneySpecs({
-    isAll: true,
-  })
   const { fetchSyneyStoreReport, isFetching } = useFetchSyneyStoreReport()
   const { createReport, isCreating: isCreatingFromScm } = useCreateReport()
   const { printByStoreInNo, preloadStoreReceiptPDF, isPrintingStoreReceipt }
@@ -113,13 +112,8 @@ function ReportListContent() {
       return
     }
 
-    if (importSpecsLoading) {
-      messageApi.warning('踏板规格加载中，请稍后再试')
-      return
-    }
-
     fetchSyneyStoreReport(trimmedStoreInNo, {
-      onSuccess: (items) => {
+      onSuccess: async (items) => {
         if (items.length === 0) {
           messageApi.warning('未获取到该入库单数据')
           return
@@ -128,6 +122,11 @@ function ReportListContent() {
         let payload: SyneyStoreReportPayload
 
         try {
+          const { syneySpecs } = await queryClient.fetchQuery({
+            queryKey: ['syney-Specs', 'all'],
+            queryFn: () => getSyneySpecs({ PartNo: '', page: 1, pageSize: 10, isAll: true }),
+            ...queryConfig.static,
+          })
           payload = buildSyneyStoreReportPayload(
             items as ISyneyItem[],
             syneySpecs || [],
@@ -218,7 +217,11 @@ function ReportListContent() {
       {/* 顶部工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <AddButton handleCreate={handleCreate} />
-        <PrintButton handlePrint={handlePrint} onPreload={preloadPDF}>
+        <PrintButton
+          handlePrint={() => void handlePrint()}
+          loading={isPrinting}
+          onPreload={preloadPDF}
+        >
           打印对账单
         </PrintButton>
         <ExportAsExcelButton />

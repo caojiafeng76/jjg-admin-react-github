@@ -1,14 +1,13 @@
 import type { ISyneyItem } from '@services/types'
 import type jsPDF from 'jspdf'
 import { App } from 'antd'
-
 import { useState } from 'react'
-import { getUserErrorMessage } from '@/utils/errorHandler'
 
+import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import { TABLE_COLUMNS, TABLE_CONFIG } from '@/utils/pdfConstants'
 import { useTableSelection } from '../useTableSelection'
-import { useSelectedReports } from './useSelectedReports'
+import { useFetchSelectedReports } from './useFetchSelectedReports'
 
 const PDF_PROGRESS_MESSAGE_KEY = 'syney-report-pdf-progress'
 
@@ -21,14 +20,6 @@ function loadPDFDependencies() {
 
 /**
  * 生成单个报告的 PDF 页面
- * @param doc PDF 文档实例
- * @param reportNo 报告编号
- * @param reportData 报告数据
- * @param reportData.items 报告明细
- * @param reportData.totalAmount 报告合计数量
- * @param reportData.createdAt 报告创建时间
- * @param autoTable jspdf-autotable 绘表函数
- * @param pdfUtils PDF 工具函数模块
  */
 function generateReportPage(
   doc: jsPDF,
@@ -85,11 +76,6 @@ function generateReportPage(
 
 /**
  * 批量生成报告（处理大数据量优化）
- * @param doc PDF 文档实例
- * @param selectedMap 选中的报告数据
- * @param autoTable jspdf-autotable 绘表函数
- * @param pdfUtils PDF 工具函数模块
- * @param onProgress 进度回调
  */
 async function generateAllReports(
   doc: jsPDF,
@@ -136,12 +122,8 @@ async function generateAllReports(
 
 export function useGenerateSyneyStoreReportPDF() {
   const { tableSelectedKeys } = useTableSelection()
+  const { fetchSelectedReports } = useFetchSelectedReports()
   const { message } = App.useApp()
-
-  // 只在有选中项时才查询数据
-  const { selectedMap, selectedReportsLoading } = useSelectedReports(
-    tableSelectedKeys.length > 0,
-  )
 
   const [progress, setProgress] = useState(0)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -151,13 +133,12 @@ export function useGenerateSyneyStoreReportPDF() {
   }
 
   async function print() {
-    // 改进错误处理
-    if (selectedReportsLoading) {
+    if (isGenerating) {
       message.warning('对账单数据加载中，请稍后再试')
       return false
     }
 
-    if (!selectedMap || selectedMap.size === 0) {
+    if (tableSelectedKeys.length === 0) {
       message.warning(feedbackText.selectRequired('打印'))
       return false
     }
@@ -165,6 +146,13 @@ export function useGenerateSyneyStoreReportPDF() {
     try {
       setIsGenerating(true)
       setProgress(0)
+
+      const selectedMap = await fetchSelectedReports()
+
+      if (selectedMap.size === 0) {
+        message.warning(feedbackText.selectRequired('打印'))
+        return false
+      }
 
       const [autoTableModule, pdfUtils] = await loadPDFDependencies()
       const autoTable = autoTableModule.default
@@ -206,7 +194,7 @@ export function useGenerateSyneyStoreReportPDF() {
         key: PDF_PROGRESS_MESSAGE_KEY,
       })
 
-      return true // 返回 true 表示打印成功
+      return true
     }
     catch (error) {
       console.error('生成 PDF 时发生错误:', error)
@@ -228,7 +216,7 @@ export function useGenerateSyneyStoreReportPDF() {
   return {
     print,
     preloadPDF,
-    isLoading: selectedReportsLoading || isGenerating,
+    isLoading: isGenerating,
     progress,
   }
 }

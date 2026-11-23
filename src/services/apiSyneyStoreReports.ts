@@ -215,7 +215,10 @@ export async function getSelectedSyneyStoreReports(Nos: string[]) {
       .select('*')
       .in('No', Nos)
       .order('No'),
-    supabase.from('syney-store-reports').select('*').in('No', Nos),
+    supabase
+      .from('syney-store-reports')
+      .select('id, No, Status, TotalAmount, created_at')
+      .in('No', Nos),
   ])
 
   const { data: itemsFromRepo, error: itemsError } = itemsResult

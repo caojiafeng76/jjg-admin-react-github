@@ -7,16 +7,13 @@ import { syneyPoKeys } from '../queryKeys'
 export function useDetail() {
   const { PoId } = useParams()
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: syneyPoKeys.detail(PoId || ''),
     queryFn: ({ signal }) => getSyneyPoDetail(PoId || '', signal),
     enabled: !!PoId,
     ...queryConfig.detail,
+    throwOnError: false,
   })
-
-  if (error) {
-    throw new Error('获取采购单详情失败')
-  }
 
   const items = data?.items ?? []
 
@@ -24,5 +21,8 @@ export function useDetail() {
     items,
     po: data,
     isLoading,
+    isFetching,
+    error,
+    refetch,
   }
 }

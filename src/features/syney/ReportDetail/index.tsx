@@ -58,7 +58,7 @@ function ReportDetailContent() {
 
   const detailFormRef = useRef<FormInstance<ISyneyItem>>(null)
 
-  const { report, reportInfo, reportLoading } = useDetail()
+  const { report, reportInfo, reportLoading, isFetching, error: detailError, refetch } = useDetail()
   const { updateItem, isUpdating } = useUpdateDetail()
   const { isDeleting, deleteDetail } = useDeleteDetail()
 
@@ -191,10 +191,14 @@ function ReportDetailContent() {
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <TableState loading={reportLoading}>
+          <TableState
+            loading={reportLoading && !report}
+            error={detailError}
+            onRetry={refetch}
+          >
             <DetailTable
               data={pagedRecords}
-              loading={reportLoading || isUpdating || isDeleting}
+              loading={isFetching || isUpdating || isDeleting}
               page={page}
               pageSize={pageSize}
               scrollY={scrollY}

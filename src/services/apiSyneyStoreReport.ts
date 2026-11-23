@@ -38,11 +38,15 @@ export async function updateSyneyStoreReport({ item }: { item: ISyneyItem }) {
     throw handleApiError(updateItemError, '更新入库单条目失败')
   }
 
-  const { data: specFromRepo } = await supabase
+  const { data: specFromRepo, error: checkSpecError } = await supabase
     .from('syney-specs')
-    .select('*')
+    .select('id')
     .eq('PartNo', item.PartNo || '')
-    .single()
+    .maybeSingle()
+
+  if (checkSpecError) {
+    throw handleApiError(checkSpecError, '检查踏板规格失败')
+  }
 
   if (specFromRepo)
     return

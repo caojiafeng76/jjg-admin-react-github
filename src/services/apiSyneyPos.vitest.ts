@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getSyneyPos, normalizeSyneyPoUpdatePayload } from './apiSyneyPos'
+import {
+  getSelectedPosWithItems,
+  getSyneyPos,
+  normalizeSyneyPoUpdatePayload,
+} from './apiSyneyPos'
 
 interface SyneyPoFixture {
   BorderMaterial: string | null
@@ -22,6 +26,8 @@ const requests = vi.hoisted(() => ({
   urls: [] as string[],
   signals: [] as Array<AbortSignal | null | undefined>,
   sourceRows: [] as SyneyPoFixture[],
+  itemRows: [] as Array<{ id: number, PoId: number, PartNo: string }>,
+  abortNext: false,
   sortRows: undefined as
     | ((rows: SyneyPoFixture[], order: string) => SyneyPoFixture[])
     | undefined,
@@ -35,9 +41,31 @@ vi.mock('./supabase', async () => {
     {
       global: {
         fetch: async (input, init) => {
+          if (requests.abortNext) {
+            requests.abortNext = false
+            throw new DOMException('The operation was aborted.', 'AbortError')
+          }
+
           const url = new URL(String(input))
+          requests.urls.push(url.toString())
+          requests.signals.push(init?.signal)
+
+          if (url.pathname === '/rest/v1/syney-po-items') {
+            const poIdInMatch = url.searchParams.get('PoId')?.match(/^in\.\(([^)]+)\)$/)
+            const poIds = new Set((poIdInMatch?.[1] ?? '').split(',').filter(Boolean).map(Number))
+            const itemRows = requests.itemRows.filter(item => poIds.has(item.PoId))
+            return new Response(JSON.stringify(itemRows), {
+              status: 200,
+              headers: { 'content-type': 'application/json' },
+            })
+          }
+
           const offset = Number(url.searchParams.get('offset') ?? 0)
           const limit = Number(url.searchParams.get('limit') ?? 1000)
+          const idInMatch = url.searchParams.get('id')?.match(/^in\.\(([^)]+)\)$/)
+          const idInSet = idInMatch
+            ? new Set(idInMatch[1].split(',').filter(Boolean).map(Number))
+            : null
           const statusFilter = url.searchParams
             .get('Status')
             ?.replace(/^eq\./, '')
@@ -51,6 +79,8 @@ vi.mock('./supabase', async () => {
             .replace(/%$/, '')
 
           let rows = requests.sourceRows.filter((row) => {
+            if (idInSet && !idInSet.has(row.id))
+              return false
             if (statusFilter && row.Status !== statusFilter)
               return false
 
@@ -80,9 +110,6 @@ vi.mock('./supabase', async () => {
           const contentRange = pageRows.length
             ? `${offset}-${offset + pageRows.length - 1}/${rows.length}`
             : `*/${rows.length}`
-
-          requests.urls.push(url.toString())
-          requests.signals.push(init?.signal)
 
           return new Response(JSON.stringify(pageRows), {
             status: 200,
@@ -191,6 +218,8 @@ describe('getSyneyPos', () => {
     requests.urls.length = 0
     requests.signals.length = 0
     requests.sourceRows = []
+    requests.itemRows = []
+    requests.abortNext = false
     requests.sortRows = (rows, order) =>
       rows.sort(
         order === EXPECTED_NATURAL_ORDER
@@ -314,5 +343,48 @@ describe('normalizeSyneyPoUpdatePayload', () => {
   it('leaves the delivery-note number untouched when it is not part of the update', () => {
     expect(normalizeSyneyPoUpdatePayload({ Status: '已创建' })).not.toHaveProperty('DeliveryNo', null)
     expect(normalizeSyneyPoUpdatePayload({ Status: '已创建' }).DeliveryNo).toBeUndefined()
+  })
+})
+
+describe('getSelectedPosWithItems', () => {
+  beforeEach(() => {
+    requests.urls.length = 0
+    requests.signals.length = 0
+    requests.sourceRows = []
+    requests.itemRows = []
+    requests.abortNext = false
+  })
+
+  it('returns structured PO and items without corrupting ~ characters or null fields', async () => {
+    requests.sourceRows = [
+      createPo(11, {
+        No: 'P20261123',
+        SONo: 'SO-11',
+        Remark: '厚度2~3mm~注意不要出现西尼',
+        Technique: null,
+        Brand: null,
+      }),
+    ]
+    requests.itemRows = [{ id: 1001, PoId: 11, PartNo: 'XN2808AF998' }]
+    const controller = new AbortController()
+
+    const result = await getSelectedPosWithItems([11], controller.signal)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].po.Remark).toBe('厚度2~3mm~注意不要出现西尼')
+    expect(result[0].po.Technique).toBeNull()
+    expect(result[0].po.Brand).toBeNull()
+    expect(result[0].items).toEqual([{ id: 1001, PoId: 11, PartNo: 'XN2808AF998' }])
+    expect(requests.signals).toEqual([controller.signal, controller.signal])
+  })
+})
+
+describe('getSyneyPos cancellation', () => {
+  it('propagates AbortError instead of returning empty rows to pollute the cache', async () => {
+    requests.abortNext = true
+
+    await expect(
+      getSyneyPos({ page: 1, pageSize: 10, Status: '全部' }),
+    ).rejects.toMatchObject({ name: 'AbortError' })
   })
 })

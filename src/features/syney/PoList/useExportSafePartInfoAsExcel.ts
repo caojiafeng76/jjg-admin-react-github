@@ -16,7 +16,7 @@ import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { useTableSelection } from '../useTableSelection'
 import { uniquePoNos } from './deliveryOrderBatch'
 import { buildSafePartInfoRows, filterPosBySafePartCheck } from './safePartInfoRows'
-import { useSelectedPos } from './useSelectedPos'
+import { useFetchSelectedPos } from './useFetchSelectedPos'
 
 const loadExcel = () => import('xlsx-js-style')
 
@@ -34,8 +34,8 @@ interface ExcelRow {
 
 export function useExportSafePartInfoAsExcel() {
   const { message: messageApi } = App.useApp()
-  const { setTableSelectedKeys } = useTableSelection()
-  const { isLoading, selectedPosList } = useSelectedPos()
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
+  const { fetchSelectedPos } = useFetchSelectedPos()
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading }
     = useSyneySafePartSettings()
   const [exporting, setExporting] = useState(false)
@@ -45,9 +45,12 @@ export function useExportSafePartInfoAsExcel() {
   }
 
   async function exportSafePartInfoAsExcel() {
-    // 数据验证
-    if (isLoading) {
-      messageApi.warning('数据加载中，请稍后再试')
+    if (exporting) {
+      return
+    }
+
+    if (tableSelectedKeys.length === 0) {
+      messageApi.warning(feedbackText.selectRequired('导出'))
       return
     }
 
@@ -56,31 +59,30 @@ export function useExportSafePartInfoAsExcel() {
       return
     }
 
-    if (!selectedPosList || selectedPosList.length === 0) {
-      messageApi.warning(feedbackText.selectRequired('导出'))
-      return
-    }
-
-    if (exporting)
-      return
-
-    const nonLoosePos = selectedPosList.filter(({ poInfo }) => !isSyneyLoosePartsSpec(poInfo.Spec))
-    const skippedLooseCount = selectedPosList.length - nonLoosePos.length
-    if (nonLoosePos.length === 0) {
-      messageApi.info('所选订单均为散件，无需导出安全部件信息')
-      return
-    }
-
     setExporting(true)
-    const hideLoading = messageApi.loading('正在核对 SCM 安全部件标记…', 0)
+    const hideCheckLoading = messageApi.loading('正在核对 SCM 安全部件标记…', 0)
     try {
+      const selectedPosList = await fetchSelectedPos()
+
+      if (selectedPosList.length === 0) {
+        messageApi.warning(feedbackText.selectRequired('导出'))
+        return
+      }
+
+      const nonLoosePos = selectedPosList.filter(({ po }) => !isSyneyLoosePartsSpec(po.Spec))
+      const skippedLooseCount = selectedPosList.length - nonLoosePos.length
+      if (nonLoosePos.length === 0) {
+        messageApi.info('所选订单均为散件，无需导出安全部件信息')
+        return
+      }
+
       // 先按 SCM 明细的 IsSafePart 排除无安全部件的订单；查询失败时照常导出
       let posToExport = nonLoosePos
       let skippedPoNos: string[] = []
       let checkFailed = false
       try {
         const results = await checkSyneySafeParts(
-          uniquePoNos(nonLoosePos.map(({ poInfo }) => poInfo.No)),
+          uniquePoNos(nonLoosePos.map(({ po }) => po.No)),
         )
         ;({ kept: posToExport, skippedPoNos } = filterPosBySafePartCheck(nonLoosePos, results))
       }
@@ -88,7 +90,7 @@ export function useExportSafePartInfoAsExcel() {
         console.error('核对 SCM 安全部件标记失败:', error)
         checkFailed = true
       }
-      hideLoading()
+      hideCheckLoading()
 
       if (posToExport.length === 0) {
         messageApi.info('所选订单在 SCM 中的明细均不是安全部件，无需导出')
@@ -102,8 +104,8 @@ export function useExportSafePartInfoAsExcel() {
       let globalIndex = 0
 
       // 处理每个订单的数据
-      posToExport.forEach(({ poInfo, items }) => {
-        const { SONo, EndDate, No, SerialNo } = poInfo
+      posToExport.forEach(({ po, items }) => {
+        const { SONo, EndDate, No, SerialNo } = po
 
         // 过滤安全件并转换为 Excel 数据格式
         const excelData: ExcelRow[] = buildSafePartInfoRows(
@@ -138,7 +140,8 @@ export function useExportSafePartInfoAsExcel() {
           // 居中显示
           centerAllCells(ws, data)
           // 工作表名称限制在31个字符以内（Excel限制）
-          const sheetName = SONo.length > 31 ? SONo.substring(0, 31) : SONo
+          const rawSheetName = SONo || No || String(po.id)
+          const sheetName = rawSheetName.length > 31 ? rawSheetName.substring(0, 31) : rawSheetName
           utils.book_append_sheet(wb, ws, sheetName)
 
           // 收集所有安全件用于汇总表
@@ -201,7 +204,7 @@ export function useExportSafePartInfoAsExcel() {
       )
     }
     finally {
-      hideLoading()
+      hideCheckLoading()
       setExporting(false)
     }
   }

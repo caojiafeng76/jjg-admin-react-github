@@ -16,7 +16,6 @@ import { useTableSelection } from '../useTableSelection'
 import DetailForm from './DetailForm'
 import DetailTable from './DetailTable'
 import { useDetail } from './useDetail'
-import { useItem } from './useItem'
 
 function InfoItem({
   label,
@@ -49,8 +48,8 @@ function PoDetailContent() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [isLoading, setIsLoading] = useState(false)
-  const { setTableSelectedKeys } = useTableSelection()
-  const { items, po, isLoading: isDetailLoading } = useDetail()
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
+  const { items, po, isLoading: isDetailLoading, isFetching: isDetailFetching, error: detailError, refetch } = useDetail()
 
   const detailFormRef = useRef<{
     getInstance: () => FormInstance<ISyneyItem>
@@ -62,15 +61,11 @@ function PoDetailContent() {
     () => records.slice((page - 1) * pageSize, page * pageSize),
     [records, page, pageSize],
   )
-  // 编辑校验需基于全量 records，避免切页后跨页选中被误判为无效
-  const allItemIds = useMemo(
-    () =>
-      records
-        .map(item => item.id)
-        .filter((id): id is number => typeof id === 'number'),
-    [records],
+  // 直接从已加载的全量明细中派生当前选中项，不再额外发起单条详情请求
+  const selectedItem = useMemo(
+    () => records.find(item => item.id === Number(tableSelectedKeys[0])),
+    [records, tableSelectedKeys],
   )
-  const { data } = useItem(allItemIds)
 
   useEffect(() => {
     setTableSelectedKeys([])
@@ -134,9 +129,13 @@ function PoDetailContent() {
       {/* 表格 + 分页 */}
       <div className="grid flex-1 grid-rows-[1fr_auto] gap-3 overflow-hidden">
         <div ref={tableContainerRef} className="min-h-0 overflow-hidden">
-          <TableState loading={isDetailLoading}>
+          <TableState
+            loading={isDetailLoading && !po}
+            error={detailError}
+            onRetry={refetch}
+          >
             <DetailTable
-              loading={isLoading || isDetailLoading}
+              loading={isLoading || isDetailFetching}
               data={paginatedRecords}
               page={page}
               pageSize={pageSize}
@@ -159,8 +158,9 @@ function PoDetailContent() {
         </Button>
         <EditButton
           title="选择至少一条数据"
+          permissionKey="feature:syney-po-list.edit"
           handleEdit={() => {
-            if (!data) {
+            if (!selectedItem) {
               message.warning('请选择一条订单明细进行编辑')
               return
             }
@@ -176,10 +176,10 @@ function PoDetailContent() {
         width={520}
         destroyOnHidden
         afterOpenChange={(open) => {
-          if (open && data) {
+          if (open && selectedItem) {
             detailFormRef.current
               ?.getInstance()
-              .setFieldsValue(data as ISyneyItem)
+              .setFieldsValue(selectedItem)
           }
         }}
         onCancel={() => setIsModalOpen(false)}

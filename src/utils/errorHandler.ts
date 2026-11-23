@@ -371,13 +371,15 @@ export function handleApiError(
   error: unknown,
   customMessage?: string,
 ): AppError {
-  // 忽略 AbortError（请求被取消是正常行为，不应该作为错误处理）
+  // 忽略 AbortError（请求被取消是正常行为，不应该作为错误处理；兼容 Supabase PostgREST 包装后的无 name 错误对象）
   if (
     error
     && typeof error === 'object'
-    && 'name' in error
-    && (error.name === 'AbortError'
-      || (error as { message?: string }).message?.includes('aborted'))
+    && (('name' in error && error.name === 'AbortError')
+      || ('message' in error
+        && typeof (error as { message: unknown }).message === 'string'
+        && ((error as { message: string }).message.includes('aborted')
+          || (error as { message: string }).message.startsWith('AbortError:'))))
   ) {
     // 返回一个特殊的 AppError，但标记为可忽略
     const abortError = new AppError('请求已取消', 'ABORT_ERROR', 0, error)

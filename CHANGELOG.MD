@@ -17,6 +17,13 @@
 
 ## 2026-11-23
 
+- **类别**：重构
+- **范围**：西尼模块第一阶段（`src/features/syney/PoList`、`PoDetail`、`ReportList`、`ReportDetail`、`SpecList/useSyneySpecs.ts`）、`src/services/apiSyneyPos.ts`、`src/services/apiSyneySerialNo.ts`、`src/services/apiSyneyStoreReport.ts`、`src/services/apiSyneyStoreReports.ts`、`src/utils/syney.ts`、`src/utils/syneyPurchaseOrder.ts`、`src/utils/syneyDecomposition.ts`、`src/utils/errorHandler.ts`、`src/pages/dashboardChangelog.ts`
+- **摘要**：完成西尼模块第一阶段 P0 重构与缺陷修复：手工建单与 Excel 导入统一接入 `import_syney_purchase_order` 原子建单 RPC（移除废弃 `createPo` 与非原子 `atomicIncrementSerialNo` 跳号路径）；订单列表与入库单列表选中行改为点击打印/导出按钮时按需 `fetchQuery` 拉取，`syney-store-reports` 选择查询排除大字段 `Detail`；入库单列表不再在挂载时全量拉取踏板规格；订单/入库单详情页移除渲染期 `throw new Error` 改由 `TableState` 展示错误与重试，并修正订单详情页脚「当前页合计」口径与按钮权限校验；踏板分解表在 `buildDecompositionCells` 统一支持 `decomposition_role === 'side_frame'`（保留 `XN2808ED`/`XN2838CQ` 兼容兜底）并移除硬编码过滤；补全入库单打印准备页 HTML 转义、`ExcelUpload` 扩展名校验兜底与受控状态；移除 `getItemsWithExtraInfo` 及 `~` 字符串拼接键，修正 `extractDataArray`/`jsonToArray` 字符串字面量扫描，并修复 `handleApiError` 对 PostgREST 包装版 `AbortError` 的识别及 `getSyneyStoreReport` 的 `.maybeSingle()` 查询；同步更新首页 `src/pages/dashboardChangelog.ts`。
+- **验证**：`bun run test`（Node 测试 38 项 + Vitest 245 文件 2384 项，含新增 `phase1Regressions.vitest.tsx` 与更新的 5 个单测文件）、`bun run lint`（0 error）、`bun run typecheck`、`bunx antd lint src/features/syney --format json`（0 issue）与 `bun run build` 均已通过；Chrome DevTools MCP 连接本地开发服务器（`https://localhost:5173`，已登录账号 `曹佳峰（管理员）`）只读验证 `/syney-po-list`、`/syney-po-list/830`、`/syney-store-report-list`、`/syney-store-report-list/K202611190051` 与 `/dashboard` 渲染、页脚当前页合计（`37`）、零自动选中明细请求、入库单页零页面初始化踏板规格全量请求、更新日志展示及控制台无新增错误；实库写入/删除与打印导出按钮点击通过自动化单测覆盖，未在连接真实代理的会话中触发实库写入。
+
+## 2026-11-23
+
 - **类别**：新建
 - **范围**：西尼订单新增弹窗、列表与编辑表单、送货单生成与安全部件导出、杭州 SCM 代理、`import_syney_purchase_order` 事务、`src/pages/dashboardChangelog.ts`
 - **摘要**：新增西尼订单「导入散件」录入方式与「散件」规格类型，支持无生产编号（如 `P202611100277`）及带生产编号的散件采购单直接导入建单；按单号获取查到无生产编号单据时提示并支持一键切换复用已拉取预览。散件不匹配踏板规格与安全件规则、不分配流水号并保留原 `SONo`，列表链接与搜索框兼容无生产编号并支持同时搜索订单号与生产号；生成送货单及导出安全部件信息时自动跳过散件的安全部件查询与填写。

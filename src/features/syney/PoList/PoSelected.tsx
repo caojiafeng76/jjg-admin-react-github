@@ -6,8 +6,12 @@ import {
   TruckIcon,
   XCircleIcon,
 } from '@heroicons/react/16/solid'
-import { Select } from 'antd'
+import { App, Select, Tooltip } from 'antd'
 import { useState } from 'react'
+
+import { usePermission } from '@/hooks/usePermission'
+import { useViewerOperationGuard } from '@/hooks/useViewerOperationGuard'
+import { feedbackText } from '@/utils/feedbackText'
 import { useTableSelection } from '../useTableSelection'
 import { useUpdatePos } from './useUpdatePos'
 
@@ -26,13 +30,29 @@ const STATUS_OPTIONS: Array<{
 ]
 
 export default function PoSelected() {
+  const { message } = App.useApp()
   const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
   const [selectedValue, setSelectedValue] = useState<string | undefined>(
     undefined,
   )
+  const allowed = usePermission('feature:syney-po-list.edit')
+  const { viewerDenied, viewerOperationTip } = useViewerOperationGuard({
+    bypassPermissionKey: 'feature:syney-po-list.edit',
+  })
+  const denied = viewerDenied || !allowed
 
   const changeStatus = (value: string) => {
+    if (denied) {
+      return
+    }
+
+    if (tableSelectedKeys.length === 0) {
+      message.warning(feedbackText.selectRequired('修改状态'))
+      setSelectedValue(undefined)
+      return
+    }
+
     setSelectedValue(value)
     updatePos(
       {
@@ -41,17 +61,19 @@ export default function PoSelected() {
       },
       {
         onSuccess: () => {
-          setSelectedValue(undefined)
           setTableSelectedKeys([])
+        },
+        onSettled: () => {
+          setSelectedValue(undefined)
         },
       },
     )
   }
 
-  return (
+  const select = (
     <Select
       className="w-32 rounded-lg"
-      disabled={isPoUpdating}
+      disabled={denied || isPoUpdating}
       value={selectedValue}
       onChange={changeStatus}
       placeholder="选择操作"
@@ -68,4 +90,8 @@ export default function PoSelected() {
       }))}
     />
   )
+
+  return denied
+    ? <Tooltip title={viewerDenied ? viewerOperationTip : '无编辑权限'}>{select}</Tooltip>
+    : select
 }

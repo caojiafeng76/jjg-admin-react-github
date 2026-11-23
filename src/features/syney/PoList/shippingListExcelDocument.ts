@@ -22,12 +22,12 @@ const EXCEL_HEADERS = [
 ] as const
 
 export interface ShippingListRow {
-  No: string
-  SONo: string
-  Brand: string
-  Spec: string
-  Technique: string
-  Remark: string
+  No: string | null | undefined
+  SONo: string | null | undefined
+  Brand: string | null | undefined
+  Spec: string | null | undefined
+  Technique: string | null | undefined
+  Remark: string | null | undefined
   /** SCM 送货单号；未生成送货单时为空 */
   DeliveryNo?: string | null
 }
@@ -97,8 +97,7 @@ function applyBodyStyle(
 }
 
 /**
- * 归一化导出值：数据库 null 经 key 拼接后变成字面 "null"，
- * 统一转为空字符串，避免用户看到 "null"。
+ * 归一化导出值：空值转为空字符串（兼容历史测试中的字面 "null"）。
  */
 function normalize(value: string | null | undefined): string {
   if (value === null || value === undefined || value === 'null')

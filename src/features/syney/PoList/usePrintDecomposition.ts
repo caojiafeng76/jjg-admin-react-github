@@ -1,36 +1,17 @@
 import type jsPDF from 'jspdf'
+import type { SelectedSyneyPoWithItems } from '@/services/apiSyneyPos'
 import type { SyneySafePartSetting } from '@/services/apiSyneySafePartSettings'
-import type { ISyneyItem } from '@/services/types'
-
 import type { DecompositionCell } from '@/utils/syneyDecomposition'
 import { App } from 'antd'
 import { useState } from 'react'
+
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
-import {
-  buildDecompositionCells,
-
-} from '@/utils/syneyDecomposition'
-import { hasDownFlag, hasUpFlag } from '@/utils/syneySafePartRules'
-import { useSelectedPos } from './useSelectedPos'
+import { buildDecompositionCells } from '@/utils/syneyDecomposition'
+import { useTableSelection } from '../useTableSelection'
+import { useFetchSelectedPos } from './useFetchSelectedPos'
 
 const loadPDFUtils = () => import('@/utils/pdfUtils')
-
-interface ISyneyPoGroup {
-  key: string
-  poInfo: {
-    SONo: string
-    Spec: string
-    EndDate: string
-    No: string
-    SerialNo: string
-    Brand: string
-    Technique: string
-    Remark: string
-    BorderMaterial: string
-  }
-  items: ISyneyItem[]
-}
 
 // 页面配置常量
 const CONFIG = {
@@ -41,11 +22,16 @@ const CONFIG = {
   MAX_TECHNIQUE_LINES: 3, // 工艺要求最多显示行数（受PDF格子高度限制）
 }
 
+function stripSpecPrefix(spec: string) {
+  return spec.includes('=') ? spec.slice(spec.indexOf('=') + 1) : spec
+}
+
 export function usePrintDecomposition(
   safePartSettings?: SyneySafePartSetting[],
   isSafePartSettingsLoading = false,
 ) {
-  const { selectedPosList, isLoading } = useSelectedPos()
+  const { tableSelectedKeys } = useTableSelection()
+  const { fetchSelectedPos } = useFetchSelectedPos()
   const { message: messageApi } = App.useApp()
   const [isPrinting, setIsPrinting] = useState(false)
 
@@ -239,9 +225,12 @@ export function usePrintDecomposition(
   /**
    * 填充页面数据
    */
-  function fillPageData(doc: jsPDF, data: ISyneyPoGroup[], pageIndex: number) {
-    data.forEach((record, i) => {
-      const { poInfo, items } = record
+  function fillPageData(
+    doc: jsPDF,
+    data: SelectedSyneyPoWithItems[],
+    pageIndex: number,
+  ) {
+    data.forEach(({ po, items }, i) => {
       const {
         SONo,
         Spec,
@@ -252,7 +241,7 @@ export function usePrintDecomposition(
         Technique,
         Remark,
         BorderMaterial,
-      } = poInfo
+      } = po
       const [xinghao, huanjing, leixing] = (Spec || '').split('-')
 
       const yBase = CONFIG.BASE_Y + i * CONFIG.ROW_HEIGHT
@@ -266,7 +255,7 @@ export function usePrintDecomposition(
       doc.text(`${EndDate ? EndDate.substring(0, 10) : ''}`, 30, yBase - 9)
       doc.text(`${No || ''}`, 50, yBase + 7)
       doc.text(`${SONo || ''}`, 220, yBase + 7)
-      doc.text(`${SerialNo || ''}`, 175, yBase + 7)
+      doc.text(`${SerialNo ?? ''}`, 175, yBase + 7)
       doc.text(`${Brand || ''}`, 105, yBase + 7)
 
       if (Technique && Technique !== 'null') {
@@ -323,90 +312,20 @@ export function usePrintDecomposition(
         safePartSettings,
       )
 
-      // 记录"无上下备注"的侧围，用于在上下格子之间平均分配，避免重复
-      let genericSideFrameIndex = 0
-
-      // 先处理侧围：收集所有侧围item，确定分配，分组汇总
-      const sideFrameItems = items.filter(
-        (item: ISyneyItem) =>
-          item.PartNo?.includes('XN2808ED')
-          || item.PartNo?.includes('XN2838CQ'),
-      )
-
-      // 确定每个侧围item的分配（上/下）
-      const sideFrameAssignments: Array<{
-        item: ISyneyItem
-        isUpper: boolean
-        isLower: boolean
-      }> = []
-
-      sideFrameItems.forEach((item: ISyneyItem) => {
-        const remark = item.Remark || ''
-        const isUp = hasUpFlag(remark)
-        const isDown = hasDownFlag(remark)
-
-        let isUpper = false
-        let isLower = false
-
-        if (isUp && !isDown) {
-          isUpper = true
-        }
-        else if (isDown && !isUp) {
-          isLower = true
-        }
-        else {
-          // 无明确标志，交替分配
-          const assignToTop = genericSideFrameIndex % 2 === 0
-          if (assignToTop) {
-            isUpper = true
-          }
-          else {
-            isLower = true
-          }
-          genericSideFrameIndex += 1
-        }
-
-        sideFrameAssignments.push({ item, isUpper, isLower })
-      })
-
-      // 汇总上侧围和下侧围的数量和规格
-      const upperSideFrameItems = sideFrameAssignments.filter(a => a.isUpper)
-      const lowerSideFrameItems = sideFrameAssignments.filter(a => a.isLower)
-
-      const upperSideFrameQty = upperSideFrameItems.reduce(
-        (sum, a) => sum + (a.item.Qty || 0),
-        0,
-      )
-      const lowerSideFrameQty = lowerSideFrameItems.reduce(
-        (sum, a) => sum + (a.item.Qty || 0),
-        0,
-      )
-
-      // 获取侧围的规格（取第一个侧围item的规格，如果规格相同的话）
-      const firstUpperSideFrame = upperSideFrameItems[0]?.item
-      const firstLowerSideFrame = lowerSideFrameItems[0]?.item
-
-      // 绘制上侧围（只绘制一次，避免重复）
-      if (upperSideFrameQty > 0 && firstUpperSideFrame) {
-        const upperSpecText = firstUpperSideFrame.ParamSpec || ''
-        const upperSpecVal = upperSpecText.includes('=')
-          ? upperSpecText.slice(upperSpecText.indexOf('=') + 1)
-          : upperSpecText
+      const { sideFrameUpper, sideFrameLower, crossFrame } = decompositionCells
+      if (sideFrameUpper) {
+        const upperSpecVal = stripSpecPrefix(sideFrameUpper.spec)
         if (upperSpecVal) {
           doc.setFontSize(8)
-          doc.text(`${upperSpecVal}*${upperSideFrameQty}`, 259, yBase - 13)
+          doc.text(`${upperSpecVal}*${sideFrameUpper.qty}`, 259, yBase - 13)
         }
       }
 
-      // 绘制下侧围（只绘制一次，避免重复）
-      if (lowerSideFrameQty > 0 && firstLowerSideFrame) {
-        const lowerSpecText = firstLowerSideFrame.ParamSpec || ''
-        const lowerSpecVal = lowerSpecText.includes('=')
-          ? lowerSpecText.slice(lowerSpecText.indexOf('=') + 1)
-          : lowerSpecText
+      if (sideFrameLower) {
+        const lowerSpecVal = stripSpecPrefix(sideFrameLower.spec)
         if (lowerSpecVal) {
           doc.setFontSize(8)
-          doc.text(`${lowerSpecVal}*${lowerSideFrameQty}`, 259, yBase - 4)
+          doc.text(`${lowerSpecVal}*${sideFrameLower.qty}`, 259, yBase - 4)
         }
       }
 
@@ -433,11 +352,8 @@ export function usePrintDecomposition(
         yBase - 4,
       )
 
-      const crossFrame = decompositionCells.crossFrame
       if (crossFrame) {
-        const crossFrameSpec = crossFrame.spec.includes('=')
-          ? crossFrame.spec.slice(crossFrame.spec.indexOf('=') + 1)
-          : crossFrame.spec
+        const crossFrameSpec = stripSpecPrefix(crossFrame.spec)
         if (crossFrameSpec) {
           doc.setFontSize(8)
           doc.text(`${crossFrameSpec}*${crossFrame.qty}`, 244, yBase - 9)
@@ -446,43 +362,48 @@ export function usePrintDecomposition(
     })
   }
 
-  async function printDecomposition() {
-    if (isLoading) {
-      messageApi.warning('数据加载中，请稍后再试')
-      return
+  async function printDecomposition(): Promise<boolean> {
+    if (isPrinting) {
+      return false
+    }
+
+    if (tableSelectedKeys.length === 0) {
+      messageApi.warning(feedbackText.selectRequired('打印'))
+      return false
+    }
+
+    if (tableSelectedKeys.length > 4) {
+      messageApi.warning('分解单一次最多打印 4 条订单')
+      return false
     }
 
     if (isSafePartSettingsLoading || !safePartSettings) {
       messageApi.warning('件号配置加载中，请稍后再试')
-      return
-    }
-
-    if (!selectedPosList || selectedPosList.length === 0) {
-      messageApi.warning('没有数据可供打印')
-      return
+      return false
     }
 
     try {
       setIsPrinting(true)
+      const selectedPosList = await fetchSelectedPos()
+
+      if (selectedPosList.length === 0) {
+        messageApi.warning('没有数据可供打印')
+        return false
+      }
+
       const { initializePDF, openPDFInNewWindow } = await loadPDFUtils()
-      // 1. 初始化 PDF（现在是异步的）
       const doc = await initializePDF('l')
 
-      // 2. 字体已通过 initializePDF 设置（使用 Google Font）
-
-      // 3. 直接使用数据库中的 ParamSpec（不再处理，因为创建时已保存）
       // 按合同号升序排序
       const sortedPosList = [...selectedPosList].sort((a, b) => {
-        const sonoA = a.poInfo.SONo || ''
-        const sonoB = b.poInfo.SONo || ''
+        const sonoA = a.po.SONo || ''
+        const sonoB = b.po.SONo || ''
         return sonoA.localeCompare(sonoB, 'zh-CN', { numeric: true })
       })
 
-      // 4. 计算分页
       const total = sortedPosList.length
       const totalPages = Math.ceil(total / CONFIG.ROWS_PER_PAGE)
 
-      // 5. 生成每一页
       for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
         if (pageIndex > 0) {
           doc.addPage()
@@ -502,13 +423,14 @@ export function usePrintDecomposition(
         }
       }
 
-      // 6. 输出 PDF
       openPDFInNewWindow(doc)
       messageApi.success('分解单已生成')
+      return true
     }
     catch (error) {
       console.error('打印分解单失败:', error)
       messageApi.error(getUserErrorMessage(error, feedbackText.failed('打印', '分解单')))
+      return false
     }
     finally {
       setIsPrinting(false)

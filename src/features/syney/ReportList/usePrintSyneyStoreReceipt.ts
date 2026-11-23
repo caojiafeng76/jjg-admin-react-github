@@ -9,7 +9,17 @@ import { feedbackText } from '@/utils/feedbackText'
 
 const loadStoreReceiptPDF = () => import('@/utils/syneyStoreReceiptPdf')
 
+function escapeHtml(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('\'', '&#39;')
+}
+
 function renderPreparingWindow(printWindow: Window, storeInNo: string): void {
+  const safeStoreInNo = escapeHtml(storeInNo)
   printWindow.document.open()
   printWindow.document.write(`
     <!DOCTYPE html>
@@ -17,7 +27,7 @@ function renderPreparingWindow(printWindow: Window, storeInNo: string): void {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>正在准备打印 ${storeInNo}</title>
+        <title>正在准备打印 ${safeStoreInNo}</title>
         <style>
           html,
           body {
@@ -55,7 +65,7 @@ function renderPreparingWindow(printWindow: Window, storeInNo: string): void {
       <body>
         <main class="panel">
           <p class="title">正在生成入库单打印内容</p>
-          <p class="hint">单号：${storeInNo}</p>
+          <p class="hint">单号：${safeStoreInNo}</p>
         </main>
       </body>
     </html>

@@ -22,6 +22,8 @@ export interface DecompositionCells {
   extensionUpper?: DecompositionCell
   extensionLower?: DecompositionCell
   crossFrame?: DecompositionCell
+  sideFrameUpper?: DecompositionCell
+  sideFrameLower?: DecompositionCell
 }
 
 type CellKey = keyof DecompositionCells
@@ -189,6 +191,70 @@ function addCell(
   cells[key] = { spec, qty }
 }
 
+function isSideFrameCandidate(
+  item: ISyneyItem,
+  settings?: SyneySafePartRule[],
+): boolean {
+  const configuredRule = findSafePartRule(
+    item.PartNo,
+    settings,
+    candidate => Boolean(candidate.decomposition_role),
+  )
+  if (configuredRule) {
+    return configuredRule.decomposition_role === 'side_frame'
+  }
+
+  const partNo = normalizePartNo(item.PartNo)
+  return partNo.includes('XN2808ED') || partNo.includes('XN2838CQ')
+}
+
+function assignSideFrameCells(
+  cells: DecompositionCells,
+  sideFrameItems: ISyneyItem[],
+) {
+  let genericSideFrameIndex = 0
+  const upperItems: ISyneyItem[] = []
+  const lowerItems: ISyneyItem[] = []
+
+  for (const item of sideFrameItems) {
+    const remark = item.Remark || ''
+    const isUp = hasUpFlag(remark)
+    const isDown = hasDownFlag(remark)
+
+    if (isUp && !isDown) {
+      upperItems.push(item)
+    }
+    else if (isDown && !isUp) {
+      lowerItems.push(item)
+    }
+    else {
+      if (genericSideFrameIndex % 2 === 0) {
+        upperItems.push(item)
+      }
+      else {
+        lowerItems.push(item)
+      }
+      genericSideFrameIndex += 1
+    }
+  }
+
+  const toSideFrameCell = (groupItems: ISyneyItem[]): DecompositionCell | undefined => {
+    const qty = groupItems.reduce((sum, item) => sum + (item.Qty || 0), 0)
+    const spec = groupItems[0]?.ParamSpec || ''
+    return qty > 0 && spec ? { spec, qty } : undefined
+  }
+
+  const upperCell = toSideFrameCell(upperItems)
+  if (upperCell) {
+    cells.sideFrameUpper = upperCell
+  }
+
+  const lowerCell = toSideFrameCell(lowerItems)
+  if (lowerCell) {
+    cells.sideFrameLower = lowerCell
+  }
+}
+
 export function buildDecompositionCells(
   items: ISyneyItem[],
   settings?: SyneySafePartRule[],
@@ -196,8 +262,14 @@ export function buildDecompositionCells(
   const cells: DecompositionCells = {}
   const unassignedRearItems: ISyneyItem[] = []
   const unassignedMiddleItems: ISyneyItem[] = []
+  const sideFrameItems: ISyneyItem[] = []
 
   items.forEach((item) => {
+    if (isSideFrameCandidate(item, settings)) {
+      sideFrameItems.push(item)
+      return
+    }
+
     if (isLegacyRearPlateCandidate(item)) {
       const rearKey = getLegacyRearCellKey(item)
       if (rearKey) {
@@ -244,6 +316,10 @@ export function buildDecompositionCells(
       addCell(cells, legacyKey, item)
     }
   })
+
+  if (sideFrameItems.length > 0) {
+    assignSideFrameCells(cells, sideFrameItems)
+  }
 
   if (unassignedRearItems.length === 1) {
     const item = unassignedRearItems[0]

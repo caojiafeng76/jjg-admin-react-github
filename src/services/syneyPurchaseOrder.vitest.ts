@@ -1,7 +1,13 @@
+import type { ISyneySpec } from '@/types'
 import { describe, expect, it } from 'vitest'
 import { parseDeliveryOrderRequest } from '../../server/syneyDeliveryOrderLogic'
 import { fetchPurchaseOrderRows } from '../../server/syneyPurchaseOrder'
-import { buildSyneyPurchaseOrderPayload, prepareSyneyLoosePartsOrder, prepareSyneyPurchaseOrder } from '../utils/syneyPurchaseOrder'
+import {
+  buildSyneyPurchaseOrderPayload,
+  prepareManualOrExcelPoGroups,
+  prepareSyneyLoosePartsOrder,
+  prepareSyneyPurchaseOrder,
+} from '../utils/syneyPurchaseOrder'
 
 const row = {
   PONo: 'P123',
@@ -97,5 +103,146 @@ describe('西尼采购单取数', () => {
       rows: [{ ...row, PKID: 1 }],
       total: 3,
     }), 2)).rejects.toThrow('未取齐')
+  })
+})
+
+describe('手工 / Excel 建单统一走 RPC 分组转换', () => {
+  const specs: ISyneySpec[] = [
+    { id: 1, PartNo: 'XN2808AF998', PartName: '前沿后板组件', Spec: '1000型', ParamSpec: '1525*实际宽度', Unit: 'EA' },
+  ]
+
+  it('按生产编号分组并匹配规格与安全部件前缀', () => {
+    const { groups, hasInferredParamSpec } = prepareManualOrExcelPoGroups({
+      order: {
+        endDate: '2026-11-25',
+        spec: '1000型-室内-扶梯',
+        technique: '前：商标',
+        remark: '贴牌梯~注意',
+      },
+      items: [
+        {
+          No: 'P20261123001',
+          PartNo: 'XN2808AF998',
+          PartName: '前沿后板组件',
+          Spec: '1000型',
+          ParamSpec: '',
+          Qty: 1,
+          Unit: 'EA',
+          SONo: 'SO-A',
+          Remark: '品牌:西尼 L1=540mm',
+        },
+        {
+          No: 'P20261123001',
+          PartNo: 'XN2808DA1',
+          PartName: '中板组件',
+          Spec: '1000型',
+          ParamSpec: '',
+          Qty: 2,
+          Unit: 'EA',
+          SONo: 'SO-B',
+          Remark: '宽=550',
+        },
+      ],
+      specs,
+    })
+
+    expect(hasInferredParamSpec).toBe(true)
+    expect(groups).toHaveLength(2)
+    expect(groups[0]).toMatchObject({
+      soNo: 'SO-A',
+      brand: '西尼',
+      spec: '1000型-室内-扶梯',
+      technique: '前：商标',
+      remark: '贴牌梯~注意',
+      isLooseParts: false,
+    })
+    expect(groups[0].items[0].ParamSpec).toBe('1525*540')
+    expect(groups[1].items[0].ParamSpec).toBe('1525*550')
+
+    const payload = buildSyneyPurchaseOrderPayload(groups, [
+      {
+        part_no: 'XN2808AF',
+        name: '后板',
+        part_model: 'YD1001',
+        part_code_prefix: 'HB00',
+        need_print_label: true,
+      },
+    ])
+    expect(payload[0].items[0]).toMatchObject({
+      PartNo: 'XN2808AF998',
+      PartName2: '后板',
+      PartModel: 'YD1001',
+      PartCodePrefix: 'HB00',
+    })
+  })
+
+  it('规格为散件时允许空生产编号并跳过品牌/工艺/安全件前缀', () => {
+    const { groups } = prepareManualOrExcelPoGroups({
+      order: { endDate: '2026-11-25', spec: '散件', brand: '西尼', technique: '前：角钢' },
+      items: [
+        {
+          No: 'P20261123002',
+          PartNo: 'XN4025H3',
+          PartName: '梳齿板',
+          Spec: '右件',
+          ParamSpec: '',
+          Qty: 4,
+          Unit: 'EA',
+          SONo: '',
+          Remark: '',
+        },
+      ],
+      specs: [],
+    })
+
+    expect(groups[0]).toMatchObject({
+      soNo: '',
+      spec: '散件',
+      brand: null,
+      technique: null,
+      isLooseParts: true,
+    })
+  })
+
+  it('普通订单缺少生产编号或明细数量非法时拦截报错', () => {
+    expect(() =>
+      prepareManualOrExcelPoGroups({
+        order: { endDate: '2026-11-25', spec: '1000型-室内-扶梯' },
+        items: [
+          {
+            No: 'P1',
+            PartNo: 'XN1',
+            PartName: '件',
+            Spec: '',
+            ParamSpec: '',
+            Qty: 1,
+            Unit: 'EA',
+            SONo: '',
+            Remark: '',
+          },
+        ],
+        specs: [],
+      }),
+    ).toThrow('缺少生产编号')
+
+    expect(() =>
+      prepareManualOrExcelPoGroups({
+        order: { endDate: '2026-11-25', spec: '散件' },
+        items: [
+          {
+            No: 'P1',
+            PartNo: 'XN1',
+            PartName: '件',
+            Spec: '',
+            ParamSpec: '',
+            Qty: 1.5,
+            Unit: 'EA',
+            SONo: '',
+            Remark: '',
+          },
+        ],
+        specs: [],
+      }),
+    ).toThrow('非负整数')
   })
 })

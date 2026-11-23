@@ -68,7 +68,12 @@ export function SyneyPurchaseOrderModal({
   const [isFetching, setIsFetching] = useState(false)
   const lookupRef = useRef<AbortController | null>(null)
   const submitLockRef = useRef(false)
-  const { syneySpecs, isLoading: specsLoading, error: specsError } = useSyneySpecs({ isAll: true, silentError: true })
+  const isLoosePartsMode = mode === 'loose-parts'
+  const { syneySpecs, isLoading: specsLoading, error: specsError } = useSyneySpecs({
+    isAll: true,
+    enabled: !isLoosePartsMode,
+    silentError: true,
+  })
   const { data: settings, isLoading: settingsLoading } = useSyneySafePartSettings()
   const mutation = useMutationWithInvalidation({
     mutationFn: importSyneyPurchaseOrder,
@@ -76,8 +81,6 @@ export function SyneyPurchaseOrderModal({
   })
 
   useEffect(() => () => lookupRef.current?.abort(), [])
-
-  const isLoosePartsMode = mode === 'loose-parts'
 
   function changePoNo(value: string) {
     lookupRef.current?.abort()

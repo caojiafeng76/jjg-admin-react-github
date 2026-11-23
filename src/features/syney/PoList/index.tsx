@@ -5,10 +5,11 @@ import type { ISyneyItem, ISyneyPo } from '@/types'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import { App, Modal } from 'antd'
 import dayjs from 'dayjs'
-
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+
 import { useTableHeight } from '@/hooks/useTableHeight'
+import { SYNEY_PURCHASE_ORDER_NO_PATTERN } from '@/services/syneyDeliveryOrderContract'
 import AddButton from '@/ui/AddButton'
 import AppPagination from '@/ui/AppPagination'
 import DeleteButton from '@/ui/DeleteButton'
@@ -19,11 +20,11 @@ import SelectedSummaryBar from '@/ui/SelectedSummaryBar'
 import { TableState } from '@/ui/TableState'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
+import { jsonToArray } from '@/utils/syney'
 import {
-  getItemsWithExtraInfo,
-  getItemsWithParamSpec,
-  jsonToArray,
-} from '@/utils/syney'
+  buildSyneyPurchaseOrderPayload,
+  prepareManualOrExcelPoGroups,
+} from '@/utils/syneyPurchaseOrder'
 import { useSyneySpecs } from '../SpecList/useSyneySpecs'
 import TableSelectionProvider from '../TableSelectionProvider'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
@@ -71,25 +72,30 @@ function PoListContent() {
     refetch: posRefetch,
   } = usePos()
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
-  const [isCreating, setIsCreating] = useState(false)
   const { deletePo, isDeleting } = useDeletePo()
   const { updatePos, isUpdating: isPoUpdating } = useUpdatePos()
 
   const { syneySpecs, isLoading: specsLoading } = useSyneySpecs({
-    isAll: !isEdit,
+    isAll: true,
+    enabled: isModalOpen && !isEdit,
+    silentError: true,
   })
 
-  const { createPo } = useCreatePo()
+  const { createPo, isCreating } = useCreatePo()
 
   const { data: safePartSettings, isLoading: isSafePartSettingsLoading }
     = useSyneySafePartSettings()
 
-  const { generateLabel, preloadPDF: preloadChineseLabelPDF } = usePrint(
-    safePartSettings,
-    isSafePartSettingsLoading,
-  )
-  const { generateEnglishLabel, preloadPDF: preloadEnglishLabelPDF }
-    = usePrintEnglish(safePartSettings, isSafePartSettingsLoading)
+  const {
+    generateLabel,
+    preloadPDF: preloadChineseLabelPDF,
+    isPrinting: isPrintingChinese,
+  } = usePrint(safePartSettings, isSafePartSettingsLoading)
+  const {
+    generateEnglishLabel,
+    preloadPDF: preloadEnglishLabelPDF,
+    isPrinting: isPrintingEnglish,
+  } = usePrintEnglish(safePartSettings, isSafePartSettingsLoading)
 
   const records = useMemo(() => pos || [], [pos])
   const currentPoIds = useMemo(
@@ -108,7 +114,10 @@ function PoListContent() {
     [currentPoIdSet, tableSelectedKeys],
   )
   const selectedCount = validSelectedKeys.length
-  const { data: po, isLoading: poLoading } = usePo(currentPoIds)
+  const { data: po, isLoading: poLoading } = usePo(
+    currentPoIds,
+    isModalOpen && isEdit,
+  )
   const selectedQty = useMemo(() => {
     if (selectedCount === 0)
       return 0
@@ -145,25 +154,17 @@ function PoListContent() {
 
   const onFinish = useCallback(
     async (values: ISyneyPo) => {
-      if (specsLoading) {
-        messageApi.warning('踏板规格加载中，请稍后再试')
-        return
-      }
-
-      if (isSafePartSettingsLoading || !safePartSettings) {
-        messageApi.warning('件号配置加载中，请稍后再试')
-        return
-      }
-
       try {
-        const No = values.No
-        values.EndDate = dayjs(values.EndDate?.toString() || '').format(
-          'YYYY-MM-DD',
-        )
+        const formattedEndDate = values.EndDate
+          ? dayjs(values.EndDate).format('YYYY-MM-DD')
+          : ''
 
         if (isEdit) {
           updatePos(
-            { ids: tableSelectedKeys.map(String), data: values },
+            {
+              ids: tableSelectedKeys.map(String),
+              data: { ...values, EndDate: formattedEndDate },
+            },
             {
               // 失败提示由 useUpdatePos 统一弹出；弹窗保持打开，便于修改后重试
               onSuccess: () => {
@@ -172,6 +173,22 @@ function PoListContent() {
               },
             },
           )
+          return
+        }
+
+        if (specsLoading) {
+          messageApi.warning('踏板规格加载中，请稍后再试')
+          return
+        }
+
+        if (isSafePartSettingsLoading || !safePartSettings) {
+          messageApi.warning('件号配置加载中，请稍后再试')
+          return
+        }
+
+        const poNo = values.No?.trim() ?? ''
+        if (!SYNEY_PURCHASE_ORDER_NO_PATTERN.test(poNo)) {
+          messageApi.warning('请输入有效的西尼采购单号（仅支持字母、数字、下划线和连字符）')
           return
         }
 
@@ -184,60 +201,54 @@ function PoListContent() {
           }
           items = excelData.items.map(item => ({
             ...item,
-            No,
+            No: poNo,
           })) as ISyneyItem[]
         }
         else {
           items = jsonToArray(values.Detail || '')
-          if (!items?.length) {
+          if (!items.length) {
             messageApi.warning('请输入有效的订单明细')
             return
           }
-          items = items.map(item => ({ ...item, No }))
+          items = items.map(item => ({ ...item, No: poNo }))
         }
-        // 不去重：ERP 同件号多行是上/下头部等独立零件（参数规格或备注不同），合并会丢失下头部规格与备注
-        items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
 
-        const hasInferredParamSpec = items.some(
-          item => item.ParamSpecInferred,
-        )
+        const { groups, hasInferredParamSpec } = prepareManualOrExcelPoGroups({
+          order: {
+            endDate: formattedEndDate,
+            spec: values.Spec,
+            brand: values.Brand || (importMode === 'excel' ? excelData?.po.Brand : null),
+            technique: importMode === 'excel' ? excelData?.po.Technique : null,
+            remark:
+              values.Remark !== undefined
+                ? values.Remark
+                : (importMode === 'excel' ? excelData?.po.Remark : null),
+          },
+          items,
+          specs: syneySpecs || [],
+        })
+
         if (hasInferredParamSpec) {
           messageApi.warning('部分参数规格根据备注推测生成，请确认是否准确')
         }
 
-        const uniqueSONos = new Set(items.map(item => item.SONo))
-        const incrementBy = uniqueSONos.size
+        const result = await createPo({
+          poNo,
+          groups: buildSyneyPurchaseOrderPayload(groups, safePartSettings),
+        })
 
-        const { atomicIncrementSerialNo }
-          = await import('@/services/apiSyneySerialNo')
-        const finalSerialNo = await atomicIncrementSerialNo(incrementBy)
-
-        const startSerialNo = finalSerialNo - incrementBy
-
-        const { map } = getItemsWithExtraInfo(
-          items,
-          startSerialNo,
-          safePartSettings,
-        )
-
-        const { Detail, ...po } = values
-
-        if (importMode === 'excel' && excelData) {
-          if (excelData.po.Technique) {
-            po.Technique = excelData.po.Technique
-          }
-          if (excelData.po.Remark) {
-            po.Remark = excelData.po.Remark
-          }
+        if (result.created === 0) {
+          messageApi.warning('该采购单下的生产编号已全部建单，未新增订单')
+          return
         }
 
-        setIsCreating(true)
-
-        await createPo({ po, map })
-        // 仅成功时关闭弹窗；失败时保留已填内容与已解析的 Excel，便于修正后重试
+        messageApi.success(
+          result.skipped > 0
+            ? `${feedbackText.batch('新增', '订单', result.created)}，跳过 ${result.skipped} 条已存在订单`
+            : feedbackText.batch('新增', '订单', result.created),
+        )
         setIsModalOpen(false)
         setTableSelectedKeys([])
-        setIsCreating(false)
         setExcelData(null)
       }
       catch (error) {
@@ -245,7 +256,6 @@ function PoListContent() {
         messageApi.error(
           getUserErrorMessage(error, feedbackText.failed('创建', '订单')),
         )
-        setIsCreating(false)
       }
     },
     [
@@ -256,7 +266,6 @@ function PoListContent() {
       tableSelectedKeys,
       setTableSelectedKeys,
       syneySpecs,
-      setIsCreating,
       createPo,
       excelData,
       importMode,
@@ -265,14 +274,18 @@ function PoListContent() {
     ],
   )
 
-  const handlePrint = useCallback(() => {
-    generateLabel()
-    setTableSelectedKeys([])
+  const handlePrint = useCallback(async () => {
+    const success = await generateLabel()
+    if (success) {
+      setTableSelectedKeys([])
+    }
   }, [generateLabel, setTableSelectedKeys])
 
-  const handlePrintEnglish = useCallback(() => {
-    generateEnglishLabel()
-    setTableSelectedKeys([])
+  const handlePrintEnglish = useCallback(async () => {
+    const success = await generateEnglishLabel()
+    if (success) {
+      setTableSelectedKeys([])
+    }
   }, [generateEnglishLabel, setTableSelectedKeys])
 
   const handleEdit = useCallback(() => {
@@ -301,11 +314,9 @@ function PoListContent() {
 
   useEffect(() => {
     return () => {
-      setIsCreating(false)
       setTableSelectedKeys([])
     }
-    // eslint-disable-next-line react/exhaustive-deps
-  }, [])
+  }, [setTableSelectedKeys])
 
   const { tableContainerRef, paginationRef, scrollY } = useTableHeight({
     targetRowCount: 12,
@@ -333,13 +344,15 @@ function PoListContent() {
         />
 
         <PrintButton
-          handlePrint={handlePrint}
+          handlePrint={() => void handlePrint()}
+          loading={isPrintingChinese}
           onPreload={preloadChineseLabelPDF}
         >
           打印中文标签
         </PrintButton>
         <PrintButton
-          handlePrint={handlePrintEnglish}
+          handlePrint={() => void handlePrintEnglish()}
+          loading={isPrintingEnglish}
           onPreload={preloadEnglishLabelPDF}
         >
           打印英文标签
@@ -455,7 +468,7 @@ function PoListContent() {
           ref={poFormRef}
           onExcelDataChange={handleExcelDataChange}
           onFinish={onFinish}
-          isCreating={isCreating}
+          isCreating={isCreating || isPoUpdating}
           isEdit={isEdit}
           syneySpecs={syneySpecs}
           specsLoading={specsLoading}

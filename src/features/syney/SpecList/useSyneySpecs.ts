@@ -10,10 +10,12 @@ import { getUserErrorMessage } from '@/utils/errorHandler'
 export function useSyneySpecs({
   isAll = false,
   silentError = false,
+  enabled = true,
 }: {
   isAll?: boolean
   /** 页面已通过 TableState 内联展示错误时传 true，避免重复 toast */
   silentError?: boolean
+  enabled?: boolean
 } = {}) {
   const { message } = App.useApp()
   const queryClient = useQueryClient()
@@ -29,10 +31,11 @@ export function useSyneySpecs({
     error,
     refetch,
   } = useQuery({
-    queryKey: ['syney-Specs', PartNo, page, pageSize, isAll],
-    queryFn: () => getSyneySpecs({ PartNo, page, pageSize, isAll }),
+    queryKey: isAll ? ['syney-Specs', 'all'] : ['syney-Specs', PartNo, page, pageSize, false],
+    queryFn: () => getSyneySpecs({ PartNo: isAll ? '' : PartNo, page, pageSize, isAll }),
+    enabled,
     placeholderData: keepPreviousData,
-    ...queryConfig.list,
+    ...(isAll ? queryConfig.static : queryConfig.list),
     throwOnError: false,
   })
 
@@ -45,24 +48,28 @@ export function useSyneySpecs({
 
   const pageCount = Math.ceil((count || 0) / pageSize)
 
-  // 优化预取逻辑：将副作用移到 useEffect 中
+  // 优化预取逻辑：仅在启用的分页列表模式下预取相邻页
   useEffect(() => {
+    if (!enabled || isAll) {
+      return
+    }
+
     if (page < pageCount) {
       queryClient.prefetchQuery({
-        queryKey: ['syney-Specs', PartNo, page + 1, pageSize, isAll],
-        queryFn: () => getSyneySpecs({ PartNo, page: page + 1, pageSize, isAll }),
+        queryKey: ['syney-Specs', PartNo, page + 1, pageSize, false],
+        queryFn: () => getSyneySpecs({ PartNo, page: page + 1, pageSize, isAll: false }),
         ...queryConfig.list,
       })
     }
 
     if (page > 1) {
       queryClient.prefetchQuery({
-        queryKey: ['syney-Specs', PartNo, page - 1, pageSize, isAll],
-        queryFn: () => getSyneySpecs({ PartNo, page: page - 1, pageSize, isAll }),
+        queryKey: ['syney-Specs', PartNo, page - 1, pageSize, false],
+        queryFn: () => getSyneySpecs({ PartNo, page: page - 1, pageSize, isAll: false }),
         ...queryConfig.list,
       })
     }
-  }, [page, pageCount, pageSize, PartNo, isAll, queryClient])
+  }, [enabled, page, pageCount, pageSize, PartNo, isAll, queryClient])
 
   return { syneySpecs, isLoading, error, count, refetch }
 }

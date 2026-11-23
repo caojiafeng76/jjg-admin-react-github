@@ -7,7 +7,6 @@ import { TableEmpty } from '@/ui/TableState'
 import { zebraRowClassName } from '@/ui/tableStyles'
 import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { useTableSelection } from '../useTableSelection'
-import { useDetail } from './useDetail'
 
 interface Props {
   loading: boolean
@@ -31,15 +30,14 @@ export default function DetailTable({
   onRowClick,
 }: Props) {
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
-  const { items, isLoading } = useDetail()
 
   const currentPageTotalQty = useMemo(
     () =>
-      ((items as ISyneyItem[]) || []).reduce(
+      data.reduce(
         (sum, item) => sum + Number(item.Qty || 0),
         0,
       ),
-    [items],
+    [data],
   )
 
   const columns: TableColumnsType<ISyneyItem> = [
@@ -168,7 +166,7 @@ export default function DetailTable({
       rowKey={record => record.id?.toString() ?? ''}
       columns={columns}
       dataSource={data}
-      loading={loading || isLoading}
+      loading={loading}
       pagination={false}
       rowClassName={zebraRowClassName}
       locale={{ emptyText: <TableEmpty title="暂无订单明细" /> }}

@@ -1,6 +1,7 @@
 import type { SyneySafePartSetting } from '@/services/apiSyneySafePartSettings'
 import { DocumentArrowDownIcon } from '@heroicons/react/16/solid'
 import { App, Button } from 'antd'
+
 import { feedbackText } from '@/utils/feedbackText'
 import { useTableSelection } from '../useTableSelection'
 import { usePrintDecomposition } from './usePrintDecomposition'
@@ -15,11 +16,11 @@ export default function PrintDecompositionButton({
   isSafePartSettingsLoading,
 }: PrintDecompositionButtonProps) {
   const { message } = App.useApp()
-  const { printDecomposition, preloadPDF }
+  const { printDecomposition, preloadPDF, isPrinting }
     = usePrintDecomposition(safePartSettings, isSafePartSettingsLoading)
   const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
 
-  function onClick() {
+  async function onClick() {
     if (tableSelectedKeys.length === 0) {
       message.warning(feedbackText.selectRequired('打印'))
       return
@@ -28,21 +29,22 @@ export default function PrintDecompositionButton({
       message.warning('分解单一次最多打印 4 条订单')
       return
     }
-    printDecomposition()
-    setTableSelectedKeys([])
+    const success = await printDecomposition()
+    if (success) {
+      setTableSelectedKeys([])
+    }
   }
 
   return (
-    <>
-      <Button
-        type="text"
-        icon={<DocumentArrowDownIcon className="size-4" />}
-        onClick={onClick}
-        onMouseEnter={preloadPDF}
-        onFocus={preloadPDF}
-      >
-        打印分解单
-      </Button>
-    </>
+    <Button
+      type="text"
+      icon={<DocumentArrowDownIcon className="size-4" />}
+      loading={isPrinting}
+      onClick={() => void onClick()}
+      onMouseEnter={preloadPDF}
+      onFocus={preloadPDF}
+    >
+      打印分解单
+    </Button>
   )
 }

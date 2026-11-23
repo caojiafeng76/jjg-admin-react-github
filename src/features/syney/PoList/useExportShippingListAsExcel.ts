@@ -1,9 +1,10 @@
 import { App } from 'antd'
+import { useState } from 'react'
 
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import { useTableSelection } from '../useTableSelection'
-import { useSelectedPos } from './useSelectedPos'
+import { useFetchSelectedPos } from './useFetchSelectedPos'
 
 function loadShippingListExcelDocument() {
   return import('./shippingListExcelDocument')
@@ -11,35 +12,43 @@ function loadShippingListExcelDocument() {
 
 export function useExportShippingListAsExcel() {
   const { message: messageApi } = App.useApp()
-  const { setTableSelectedKeys } = useTableSelection()
-  const { isLoading, selectedPosList } = useSelectedPos()
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
+  const { fetchSelectedPos } = useFetchSelectedPos()
+  const [exporting, setExporting] = useState(false)
 
   function preloadExcel() {
     void loadShippingListExcelDocument()
   }
 
   async function exportShippingListAsExcel() {
-    if (isLoading) {
-      messageApi.warning('数据加载中，请稍后再试')
+    if (exporting) {
       return
     }
 
-    if (!selectedPosList || selectedPosList.length === 0) {
+    if (tableSelectedKeys.length === 0) {
       messageApi.warning(feedbackText.selectRequired('导出'))
       return
     }
 
+    setExporting(true)
     try {
+      const selectedPosList = await fetchSelectedPos()
+
+      if (selectedPosList.length === 0) {
+        messageApi.warning(feedbackText.selectRequired('导出'))
+        return
+      }
+
       const { exportShippingListAsExcel: exportShippingList }
         = await loadShippingListExcelDocument()
-      const rows = selectedPosList.map(({ poInfo }) => ({
-        No: poInfo.No,
-        SONo: poInfo.SONo,
-        Brand: poInfo.Brand,
-        Spec: poInfo.Spec,
-        Technique: poInfo.Technique,
-        Remark: poInfo.Remark,
-        DeliveryNo: poInfo.DeliveryNo,
+      const rows = selectedPosList.map(({ po }) => ({
+        No: po.No,
+        SONo: po.SONo,
+        Brand: po.Brand,
+        Spec: po.Spec,
+        Technique: po.Technique,
+        Remark: po.Remark,
+        DeliveryNo: po.DeliveryNo,
       }))
       exportShippingList(rows)
       messageApi.success(feedbackText.exported('订单发货清单', rows.length))
@@ -51,7 +60,10 @@ export function useExportShippingListAsExcel() {
         getUserErrorMessage(error, feedbackText.failed('导出', '发货清单')),
       )
     }
+    finally {
+      setExporting(false)
+    }
   }
 
-  return { exportShippingListAsExcel, preloadExcel }
+  return { exportShippingListAsExcel, preloadExcel, exporting }
 }

@@ -70,20 +70,26 @@ export function toSafePartSourceRows(rows: SafePartInfoRow[]): SyneySafePartSour
   }))
 }
 
+function readPoNo(entry: { po?: { No: string | null }, poInfo?: { No: string | null } }) {
+  return ((entry.po?.No ?? entry.poInfo?.No) ?? '').trim()
+}
+
 /**
  * 按 SCM 明细的 IsSafePart 过滤要导出的订单：SCM 明确查到且全部为 false 的订单号跳过；
  * SCM 查不到的订单号保留，按本系统件号配置导出。
  */
-export function filterPosBySafePartCheck<T extends { poInfo: { No: string | null } }>(
+export function filterPosBySafePartCheck<
+  T extends { po?: { No: string | null }, poInfo?: { No: string | null } },
+>(
   posList: T[],
   results: SyneySafePartCheckResult[],
 ): { kept: T[], skippedPoNos: string[] } {
   const noSafePartPoNos = new Set(
     results.filter(result => result.found && !result.hasSafeParts).map(result => result.poNo),
   )
-  const kept = posList.filter(({ poInfo }) => !noSafePartPoNos.has((poInfo.No ?? '').trim()))
+  const kept = posList.filter(entry => !noSafePartPoNos.has(readPoNo(entry)))
   const skippedPoNos = Array.from(noSafePartPoNos).filter(poNo =>
-    posList.some(({ poInfo }) => (poInfo.No ?? '').trim() === poNo),
+    posList.some(entry => readPoNo(entry) === poNo),
   )
   return { kept, skippedPoNos }
 }

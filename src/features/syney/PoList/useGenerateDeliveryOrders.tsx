@@ -4,8 +4,8 @@ import type {
 } from './deliveryOrderBatch'
 import { useQueryClient } from '@tanstack/react-query'
 import { App } from 'antd'
-
 import { useRef, useState } from 'react'
+
 import {
   addSyneySafePartDetail,
   confirmSyneyDeliveryOrder,
@@ -22,7 +22,7 @@ import { syneyPoKeys } from '../queryKeys'
 import { useTableSelection } from '../useTableSelection'
 import { runDeliveryOrderBatch, uniquePoNos } from './deliveryOrderBatch'
 import { buildSafePartInfoRows, toSafePartSourceRows } from './safePartInfoRows'
-import { useSelectedPos } from './useSelectedPos'
+import { useFetchSelectedPos } from './useFetchSelectedPos'
 
 function downloadBlob(fileName: string, blob: Blob) {
   const url = URL.createObjectURL(blob)
@@ -68,10 +68,11 @@ const deps: DeliveryOrderBatchDeps = {
 export function useGenerateDeliveryOrders() {
   const { message, modal } = App.useApp()
   const queryClient = useQueryClient()
-  const { setTableSelectedKeys } = useTableSelection()
-  const { isLoading, selectedPosList } = useSelectedPos()
+  const { tableSelectedKeys, setTableSelectedKeys } = useTableSelection()
+  const { fetchSelectedPos } = useFetchSelectedPos()
 
   const [open, setOpen] = useState(false)
+  const [preparing, setPreparing] = useState(false)
   const [running, setRunning] = useState(false)
   const [stopping, setStopping] = useState(false)
   const [snapshot, setSnapshot] = useState<DeliveryOrderBatchSnapshot | null>(null)
@@ -114,30 +115,47 @@ export function useGenerateDeliveryOrders() {
     }
   }
 
-  function generateDeliveryOrders() {
+  async function generateDeliveryOrders() {
     if (running) {
       setOpen(true)
       return
     }
 
-    if (isLoading) {
-      message.warning('数据加载中，请稍后再试')
+    if (preparing) {
       return
     }
 
-    const poNos = uniquePoNos(selectedPosList.map(({ poInfo }) => poInfo.No))
+    if (tableSelectedKeys.length === 0) {
+      message.warning(feedbackText.selectRequired('生成送货单'))
+      return
+    }
+
+    setPreparing(true)
+    let selectedPosList
+    try {
+      selectedPosList = await fetchSelectedPos()
+    }
+    catch (error) {
+      message.error(getUserErrorMessage(error, '订单信息获取失败，请稍后重试'))
+      return
+    }
+    finally {
+      setPreparing(false)
+    }
+
+    const poNos = uniquePoNos(selectedPosList.map(({ po }) => po.No))
     if (poNos.length === 0) {
       message.warning(feedbackText.selectRequired('生成送货单'))
       return
     }
 
-    const specsByPoNo = new Map<string, string[]>()
-    for (const { poInfo } of selectedPosList) {
-      const poNo = (poInfo.No ?? '').trim()
-      if (!poNo || poNo === 'null')
+    const specsByPoNo = new Map<string, Array<string | null>>()
+    for (const { po } of selectedPosList) {
+      const poNo = (po.No ?? '').trim()
+      if (!poNo)
         continue
       const specs = specsByPoNo.get(poNo) ?? []
-      specs.push(poInfo.Spec)
+      specs.push(po.Spec)
       specsByPoNo.set(poNo, specs)
     }
     const loosePartsPoNos = new Set<string>(
@@ -150,8 +168,8 @@ export function useGenerateDeliveryOrders() {
 
     const deliveredNos = uniquePoNos(
       selectedPosList
-        .filter(({ poInfo }) => poInfo.DeliveryNo && !['null', 'undefined'].includes(poInfo.DeliveryNo))
-        .map(({ poInfo }) => poInfo.No),
+        .filter(({ po }) => Boolean(po.DeliveryNo?.trim()))
+        .map(({ po }) => po.No),
     )
 
     modal.confirm({
@@ -208,6 +226,7 @@ export function useGenerateDeliveryOrders() {
   return {
     generateDeliveryOrders,
     open,
+    preparing,
     running,
     stopping,
     snapshot,

@@ -12,28 +12,41 @@ export function useDetail() {
   const {
     data: report,
     isLoading: reportLoading,
+    isFetching: reportFetching,
     error: reportError,
+    refetch: refetchReport,
   } = useQuery({
     queryKey: ['syney-store-report', reportNo],
     queryFn: () => getSyneyStoreReport(reportNo || ''),
     enabled: !!reportNo,
     ...queryConfig.detail,
+    throwOnError: false,
   })
 
-  const { data: reportInfo, isLoading: reportInfoLoading } = useQuery({
+  const {
+    data: reportInfo,
+    isLoading: reportInfoLoading,
+    isFetching: reportInfoFetching,
+    error: reportInfoError,
+    refetch: refetchInfo,
+  } = useQuery({
     queryKey: ['syney-store-report-info', reportNo],
     queryFn: () => getSyneyStoreReportHeader(reportNo || ''),
     enabled: !!reportNo,
     ...queryConfig.detail,
+    throwOnError: false,
   })
 
-  if (reportError) {
-    throw new Error('获取入库单详情失败')
+  const refetch = async () => {
+    await Promise.all([refetchReport(), refetchInfo()])
   }
 
   return {
     report,
     reportInfo,
     reportLoading: reportLoading || reportInfoLoading,
+    isFetching: reportFetching || reportInfoFetching,
+    error: reportError || reportInfoError,
+    refetch,
   }
 }

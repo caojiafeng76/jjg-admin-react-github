@@ -275,4 +275,40 @@ describe('buildDecompositionCells', () => {
 
     expect(cells.crossFrame).toEqual({ spec: 'L=900', qty: 3 })
   })
+
+  it('routes configured side_frame parts into upper and lower side frame cells', () => {
+    const cells = buildDecompositionCells(
+      [
+        item({
+          PartNo: 'XN3024CF1',
+          ParamSpec: 'L=1420',
+          Qty: 1,
+          Remark: '上头部',
+        }),
+        item({
+          PartNo: 'XN3024CF2',
+          ParamSpec: 'L=1680',
+          Qty: 2,
+          Remark: '下头部',
+        }),
+      ],
+      [{ part_no: 'XN3024CF', decomposition_role: 'side_frame' }],
+    )
+
+    expect(cells.sideFrameUpper).toEqual({ spec: 'L=1420', qty: 1 })
+    expect(cells.sideFrameLower).toEqual({ spec: 'L=1680', qty: 2 })
+  })
+
+  it('falls back to alternating legacy side frames when settings lack a side_frame role', () => {
+    const cells = buildDecompositionCells(
+      [
+        item({ PartNo: 'XN2808ED1', ParamSpec: 'L=1100', Qty: 1 }),
+        item({ PartNo: 'XN2838CQ1', ParamSpec: 'L=1200', Qty: 1 }),
+      ],
+      [{ part_no: 'XN2808ED', decomposition_role: null }],
+    )
+
+    expect(cells.sideFrameUpper).toEqual({ spec: 'L=1100', qty: 1 })
+    expect(cells.sideFrameLower).toEqual({ spec: 'L=1200', qty: 1 })
+  })
 })

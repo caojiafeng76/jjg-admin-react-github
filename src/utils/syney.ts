@@ -1,5 +1,4 @@
 import type { ISyneyItem, ISyneySpec } from '@/types'
-import { getLabelInfoBySettings } from './syneySafePartRules'
 
 // 正则表达式常量,避免重复创建
 const LENGTH_PATTERN = /(?:L1=|L=)(\d+)/g
@@ -269,6 +268,19 @@ export function distinctItems(items: ISyneyItem[]): ISyneyItem[] {
   return Array.from(itemMap.values())
 }
 
+function extractArrayFromParsedJson(parsed: unknown): unknown[] | null {
+  if (Array.isArray(parsed)) {
+    return parsed
+  }
+
+  if (parsed && typeof parsed === 'object' && 'data' in parsed) {
+    const data = (parsed as { data?: unknown }).data
+    return Array.isArray(data) ? data : null
+  }
+
+  return null
+}
+
 function extractDataArray(jsonString: string) {
   // 找到"data"键的起始位置
   const dataKeyStart = jsonString.indexOf('data')
@@ -290,15 +302,36 @@ function extractDataArray(jsonString: string) {
   if (jsonString[startIndex] !== '[')
     return ''
 
-  // 开始计数
-  let count = 1
+  // 跳过字符串字面量内的括号，避免备注中包含 "[" / "]" 时提前截断数组
+  let depth = 1
+  let inString = false
+  let escaped = false
+
   for (let i = startIndex + 1; i < jsonString.length; i++) {
-    if (jsonString[i] === '[') {
-      count++
+    const ch = jsonString[i]
+
+    if (inString) {
+      if (escaped) {
+        escaped = false
+      }
+      else if (ch === '\\') {
+        escaped = true
+      }
+      else if (ch === '"') {
+        inString = false
+      }
+      continue
     }
-    else if (jsonString[i] === ']') {
-      count--
-      if (count === 0) {
+
+    if (ch === '"') {
+      inString = true
+    }
+    else if (ch === '[') {
+      depth++
+    }
+    else if (ch === ']') {
+      depth--
+      if (depth === 0) {
         return jsonString.substring(startIndex, i + 1)
       }
     }
@@ -306,18 +339,10 @@ function extractDataArray(jsonString: string) {
   return ''
 }
 
-export function jsonToArray(json: string): ISyneyItem[] {
-  const jsonArrayStr = extractDataArray(json)
-
-  if (!jsonArrayStr) {
-    console.error('无法从JSON字符串中提取数据数组')
-    return []
-  }
-
-  try {
-    const jsonArray = JSON.parse(jsonArrayStr) as ISyneyItem[]
-
-    return jsonArray.map((item: ISyneyItem) => ({
+function normalizeParsedItems(rawItems: unknown[]): ISyneyItem[] {
+  return rawItems
+    .filter((item): item is ISyneyItem => Boolean(item && typeof item === 'object'))
+    .map(item => ({
       No: item.No,
       ParamSpec: '',
       PartName: item.PartName,
@@ -333,70 +358,42 @@ export function jsonToArray(json: string): ISyneyItem[] {
       PartCode: item.PartCode || '',
       PartModel: item.PartModel || '',
     }))
+}
+
+export function jsonToArray(json: string): ISyneyItem[] {
+  const trimmed = json.trim()
+  if (!trimmed) {
+    return []
+  }
+
+  try {
+    const directParsed = JSON.parse(trimmed) as unknown
+    const directArray = extractArrayFromParsedJson(directParsed)
+    if (directArray) {
+      return normalizeParsedItems(directArray)
+    }
+  }
+  catch {
+    // 兼容前后混有非 JSON 文本的场景，降级到精确提取 data 数组
+  }
+
+  const jsonArrayStr = extractDataArray(trimmed)
+
+  if (!jsonArrayStr) {
+    console.error('无法从JSON字符串中提取数据数组')
+    return []
+  }
+
+  try {
+    const jsonArray = JSON.parse(jsonArrayStr) as unknown
+    if (!Array.isArray(jsonArray)) {
+      return []
+    }
+
+    return normalizeParsedItems(jsonArray)
   }
   catch (error) {
     console.error('JSON解析失败:', error)
     return []
-  }
-}
-
-/**
- * 根据物品列表和起始序列号，为特定零件号的物品添加额外信息（如 PartName2、PartModel、PartCode），
- * 并按销售订单号（SONo）和序列号分组存储。
- *
- * @param items - 物品列表，包含需要处理的物品信息。
- * @param startSerialNo - 起始序列号（预分配），用于生成 PartCode。应该从数据库原子操作获取。
- * @returns 返回一个对象，包含分组后的物品映射（map）和使用后的最终序列号（tmpSerialNo）。
- */
-export function getItemsWithExtraInfo(
-  items: ISyneyItem[],
-  startSerialNo: number,
-  safePartSettings?: {
-    part_no: string
-    name?: string | null
-    need_print_label?: boolean
-  }[],
-): { map: Map<string, ISyneyItem[]>, tmpSerialNo: number } {
-  // 创建一个 Map，用于按销售订单号（SONo）和序列号分组存储物品
-  const map = new Map<string, ISyneyItem[]>()
-
-  // 性能优化: 预先按 SONo 分组,避免多次过滤
-  const itemsBySONo = new Map<string | null, ISyneyItem[]>()
-  items.forEach((item) => {
-    const soNo = item.SONo
-    if (!itemsBySONo.has(soNo)) {
-      itemsBySONo.set(soNo, [])
-    }
-    itemsBySONo.get(soNo)!.push(item)
-  })
-
-  // 使用起始序列号，为每个 SONo 分配递增的序列号
-  let currentSerialNo = startSerialNo
-
-  // 遍历每个唯一的销售订单号
-  itemsBySONo.forEach((soItems, soNo) => {
-    // 为当前销售订单号分配序列号
-    const seNo = currentSerialNo + 1
-    currentSerialNo = seNo
-
-    // 性能优化: 只遍历一次物品列表
-    soItems.forEach((item) => {
-      const labelInfo = getLabelInfoBySettings(item.PartNo, seNo, safePartSettings)
-
-      if (labelInfo) {
-        item.PartName2 = labelInfo.partName2
-        item.PartModel = labelInfo.partModel
-        item.PartCode = labelInfo.partCode
-      }
-    })
-
-    // 将当前销售订单号的物品按分组键（SONo~seNo）存入 Map
-    map.set(`${soNo}~${seNo}`, soItems)
-  })
-
-  // 返回分组后的 Map 和使用后的最终序列号
-  return {
-    map,
-    tmpSerialNo: currentSerialNo,
   }
 }

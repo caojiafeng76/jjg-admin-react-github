@@ -1,6 +1,6 @@
 import type { ISyneySpec } from '@services/types'
 import type { TransformedOrderData } from '@utils/excelUtils'
-import type { UploadFile } from 'antd/es/upload/interface'
+import type { UploadFile, UploadProps } from 'antd/es/upload/interface'
 import type { FC } from 'react'
 import { ArrowUpTrayIcon, TableCellsIcon } from '@heroicons/react/16/solid'
 import { getItemsWithParamSpec } from '@utils/syney'
@@ -89,17 +89,18 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
    * 处理文件上传前的验证和解析
    */
   const handleBeforeUpload = async (file: File) => {
-    // 检查文件类型
-    const isExcel
+    // 检查文件类型（兼容部分系统/浏览器未提供 MIME type 的场景）
+    const isExcelMime
       = file.type === 'application/vnd.ms-excel'
         || file.type
         === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    const isExcelExt = /\.(?:xlsx|xls)$/i.test(file.name)
 
-    if (!isExcel) {
+    if (!isExcelMime && !isExcelExt) {
       messageApi.error(
         '文件格式不支持：仅支持 .xlsx 或 .xls 格式的 Excel 文件，请更换文件后重试',
       )
-      return false
+      return Upload.LIST_IGNORE
     }
 
     // 检查文件大小 (限制10MB)
@@ -108,7 +109,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       messageApi.error(
         '文件过大：单文件不能超过 10MB，请压缩或拆分后重新上传',
       )
-      return false
+      return Upload.LIST_IGNORE
     }
 
     setLoading(true)
@@ -130,6 +131,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       messageApi.error(
         `Excel 解析失败：${getUserErrorMessage(error, '文件内容无法识别')}。请检查文件内容是否符合模板格式后重新上传`,
       )
+      setFileList([])
       setRawParsedData(null)
       setPreviewVisible(false)
     }
@@ -139,6 +141,10 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
 
     // 阻止自动上传
     return false
+  }
+
+  const handleUploadChange: UploadProps['onChange'] = ({ fileList: nextFileList }) => {
+    setFileList(nextFileList.slice(-1))
   }
 
   /**
@@ -227,6 +233,7 @@ const ExcelUpload: FC<ExcelUploadProps> = ({
       <Upload
         fileList={fileList}
         beforeUpload={handleBeforeUpload}
+        onChange={handleUploadChange}
         onRemove={handleRemove}
         maxCount={1}
         accept=".xlsx,.xls"

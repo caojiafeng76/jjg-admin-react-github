@@ -7,7 +7,7 @@ import { getUserErrorMessage } from '@/utils/errorHandler'
 import { syneyPoKeys } from '../queryKeys'
 import { useTableSelection } from '../useTableSelection'
 
-export function usePo(validPoIds?: number[]) {
+export function usePo(validPoIds?: number[], enabled = true) {
   const { message } = App.useApp()
   const { tableSelectedKeys } = useTableSelection()
 
@@ -18,7 +18,7 @@ export function usePo(validPoIds?: number[]) {
 
   const { data, error, isLoading } = useQuery({
     queryKey: syneyPoKeys.detail(String(id)),
-    enabled: !!id && isSelectedPoInCurrentList,
+    enabled: enabled && !!id && isSelectedPoInCurrentList,
     queryFn: ({ signal }) => getSyneyPoDetail(id.toString(), signal),
     ...queryConfig.detail,
     // 选中订单详情仅用于工具栏操作，失败时 toast 提示即可，不切换整页错误

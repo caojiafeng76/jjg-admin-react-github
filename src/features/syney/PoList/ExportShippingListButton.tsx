@@ -4,7 +4,7 @@ import { usePermission } from '@/hooks/usePermission'
 import { useExportShippingListAsExcel } from './useExportShippingListAsExcel'
 
 export default function ExportShippingListButton() {
-  const { exportShippingListAsExcel, preloadExcel }
+  const { exportShippingListAsExcel, preloadExcel, exporting }
     = useExportShippingListAsExcel()
   const allowed = usePermission('feature:syney-po-list.export')
   const denied = !allowed
@@ -16,6 +16,7 @@ export default function ExportShippingListButton() {
       onMouseEnter={preloadExcel}
       onFocus={preloadExcel}
       disabled={denied}
+      loading={exporting}
     >
       导出发货清单
     </Button>

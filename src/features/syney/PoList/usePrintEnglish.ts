@@ -2,8 +2,8 @@ import type { SyneySafePartSetting } from '@services/apiSyneySafePartSettings'
 import type jsPDF from 'jspdf'
 import { App } from 'antd'
 import dayjs from 'dayjs'
-
 import { useState } from 'react'
+
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
 import { GOOGLE_FONT_CONFIG, loadGoogleFont } from '@/utils/googleFontLoader'
@@ -11,7 +11,8 @@ import {
   getLabelInfoBySettings,
   getLabelInfoFromStoredItem,
 } from '@/utils/syneySafePartRules'
-import { useSelectedPos } from './useSelectedPos'
+import { useTableSelection } from '../useTableSelection'
+import { useFetchSelectedPos } from './useFetchSelectedPos'
 
 function loadPDFDependencies() {
   return Promise.all([import('jspdf'), import('@/utils/pdfUtils')])
@@ -21,7 +22,8 @@ export function usePrintEnglish(
   safePartSettings: SyneySafePartSetting[] | undefined,
   isSafePartSettingsLoading: boolean,
 ) {
-  const { selectedPosList, isLoading } = useSelectedPos()
+  const { tableSelectedKeys } = useTableSelection()
+  const { fetchSelectedPos } = useFetchSelectedPos()
   const { message: api } = App.useApp()
   const [isPrinting, setIsPrinting] = useState(false)
 
@@ -71,25 +73,30 @@ export function usePrintEnglish(
     doc.setFontSize(7)
   }
 
-  async function generateEnglishLabel() {
-    // 数据验证
-    if (isLoading) {
-      api.warning('数据加载中，请稍后再试')
-      return
+  async function generateEnglishLabel(): Promise<boolean> {
+    if (isPrinting) {
+      return false
+    }
+
+    if (tableSelectedKeys.length === 0) {
+      api.warning(feedbackText.selectRequired('打印'))
+      return false
     }
 
     if (isSafePartSettingsLoading || !safePartSettings) {
       api.warning('件号配置加载中，请稍后再试')
-      return
-    }
-
-    if (!selectedPosList || selectedPosList.length === 0) {
-      api.warning('没有数据可供打印')
-      return
+      return false
     }
 
     try {
       setIsPrinting(true)
+      const selectedPosList = await fetchSelectedPos()
+
+      if (selectedPosList.length === 0) {
+        api.warning('没有数据可供打印')
+        return false
+      }
+
       const [jsPDFModule, { openPDFInNewWindow }] = await loadPDFDependencies()
       const jsPDF = jsPDFModule.default
       // 创建 PDF 文档
@@ -111,13 +118,16 @@ export function usePrintEnglish(
       let isFirstPage = true
       let pageCount = 0
 
-      for (const { poInfo, items } of selectedPosList) {
-        const { SONo, Spec, EndDate, SerialNo } = poInfo
+      for (const { po, items } of selectedPosList) {
+        const soNo = po.SONo ?? ''
+        const spec = po.Spec ?? ''
+        const endDate = po.EndDate ? dayjs(po.EndDate).format('YYYY-MM-DD') : ''
+        const serialNo = po.SerialNo ?? ''
 
         // 1. 打印 Item 标签
         for (const item of items) {
           const labelInfo
-            = getLabelInfoBySettings(item.PartNo, SerialNo, safePartSettings)
+            = getLabelInfoBySettings(item.PartNo, serialNo, safePartSettings)
               ?? getLabelInfoFromStoredItem(item, safePartSettings)
 
           if (labelInfo) {
@@ -138,12 +148,13 @@ export function usePrintEnglish(
               drawBoldText(doc, labelInfo.englishPartName, 21, 6)
               doc.setFontSize(7)
 
-              drawBoldText(doc, `${item.ParamSpec}`, 21, 11)
+              drawBoldText(doc, `${item.ParamSpec ?? ''}`, 21, 11)
               drawBoldText(doc, labelInfo.partCode, 21, 16)
               drawBoldText(doc, '1', 27, 21)
 
+              const partNo = item.PartNo ?? ''
               let PartNoX = 53
-              switch (item.PartNo?.length) {
+              switch (partNo.length) {
                 case 9:
                   PartNoX = 58
                   break
@@ -154,16 +165,11 @@ export function usePrintEnglish(
                   PartNoX = 53
                   break
               }
-              drawBoldText(doc, `${item.PartNo}`, PartNoX, 6)
+              drawBoldText(doc, partNo, PartNoX, 6)
 
-              drawBoldText(doc, `${item.SONo}`, 53, 11)
+              drawBoldText(doc, `${item.SONo ?? ''}`, 53, 11)
               drawBoldText(doc, labelInfo.partModel, 58, 16)
-              drawBoldText(
-                doc,
-                `${dayjs(EndDate).format('YYYY-MM-DD')}`,
-                58,
-                21,
-              )
+              drawBoldText(doc, endDate, 58, 21)
 
               pageCount++
               if (pageCount % 10 === 0) {
@@ -183,15 +189,11 @@ export function usePrintEnglish(
 
         // 填充 Frame 数据
         drawBoldText(doc, 'Frame', 24, 6)
-        drawBoldText(
-          doc,
-          `${/\d+/.exec(Spec.split('-').at(0) || '')?.at(0)}#`,
-          24,
-          11,
-        )
+        const frameModel = /\d+/.exec(spec.split('-').at(0) || '')?.at(0) ?? ''
+        drawBoldText(doc, frameModel ? `${frameModel}#` : '', 24, 11)
         drawBoldText(doc, '1', 27, 21)
-        drawBoldText(doc, `${SONo}`, 53, 11)
-        drawBoldText(doc, `${dayjs(EndDate).format('YYYY-MM-DD')}`, 58, 21)
+        drawBoldText(doc, soNo, 53, 11)
+        drawBoldText(doc, endDate, 58, 21)
 
         pageCount++
         if (pageCount % 10 === 0) {
@@ -201,10 +203,12 @@ export function usePrintEnglish(
 
       // 输出 PDF
       openPDFInNewWindow(doc)
+      return true
     }
     catch (error) {
       console.error('打印英文标签失败:', error)
       api.error(getUserErrorMessage(error, feedbackText.failed('打印', '英文标签')))
+      return false
     }
     finally {
       setIsPrinting(false)

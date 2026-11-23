@@ -10,6 +10,7 @@ export default function DeliveryOrderButton() {
   const {
     generateDeliveryOrders,
     open,
+    preparing,
     running,
     stopping,
     snapshot,
@@ -25,8 +26,8 @@ export default function DeliveryOrderButton() {
     <Button
       type="text"
       icon={<TruckIcon className="size-4" />}
-      onClick={generateDeliveryOrders}
-      loading={running}
+      onClick={() => void generateDeliveryOrders()}
+      loading={running || preparing}
       disabled={denied}
     >
       生成送货单
