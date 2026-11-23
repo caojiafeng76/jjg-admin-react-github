@@ -26,8 +26,10 @@ export interface DeliveryOrderProgress {
   deliveryNo?: string
   safePartDone: number
   safePartTotal: number
-  /** SCM 明细 IsSafePart 全部为 false，跳过了填写安全部件 */
+  /** SCM 明细 IsSafePart 全部为 false 或散件订单，跳过了填写安全部件 */
   safePartSkipped: boolean
+  /** 跳过安全部件的展示原因（如「散件跳过」） */
+  safePartSkipReason?: string
   /** 失败原因或停止说明 */
   message?: string
   warnings: string[]
@@ -42,6 +44,7 @@ export interface DeliveryOrderPrintProgress {
 export interface DeliveryOrderBatchSnapshot {
   orders: DeliveryOrderProgress[]
   print: DeliveryOrderPrintProgress
+  loadingSafeParts: boolean
 }
 
 export interface DeliveryOrderBatchDeps {
@@ -69,6 +72,8 @@ export interface DeliveryOrderBatchDeps {
 
 export interface RunDeliveryOrderBatchOptions {
   poNos: string[]
+  /** 散件等无需查询和填写安全部件的订单号 */
+  skipSafePartPoNos?: ReadonlySet<string>
   deps: DeliveryOrderBatchDeps
   onUpdate: (snapshot: DeliveryOrderBatchSnapshot) => void
   /** 返回 true 时，当前步骤完成后不再继续 */
@@ -122,12 +127,15 @@ export function uniquePoNos(values: Array<string | null | undefined>) {
  */
 export async function runDeliveryOrderBatch({
   poNos,
+  skipSafePartPoNos,
   deps,
   onUpdate,
   shouldStop = () => false,
 }: RunDeliveryOrderBatchOptions): Promise<DeliveryOrderBatchResult> {
   const orders = poNos.map(createProgress)
   const print: DeliveryOrderPrintProgress = { status: 'wait' }
+  const poNosNeedingSafeParts = poNos.filter(poNo => !skipSafePartPoNos?.has(poNo))
+  let loadingSafeParts = poNosNeedingSafeParts.length > 0
 
   const emit = () => {
     onUpdate({
@@ -137,6 +145,7 @@ export async function runDeliveryOrderBatch({
         warnings: [...order.warnings],
       })),
       print: { ...print },
+      loadingSafeParts,
     })
   }
 
@@ -158,7 +167,10 @@ export async function runDeliveryOrderBatch({
   }
 
   emit()
-  const sources = await deps.loadSafePartSources(poNos)
+  const sources = poNosNeedingSafeParts.length > 0
+    ? await deps.loadSafePartSources(poNosNeedingSafeParts)
+    : new Map<string, SyneySafePartSourceRow[]>()
+  loadingSafeParts = false
 
   for (const order of orders) {
     if (shouldStop()) {
@@ -180,26 +192,32 @@ export async function runDeliveryOrderBatch({
       finishStep(order, 'create')
 
       startStep(order, 'safeParts')
-      const parts = sources.get(order.poNo) ?? []
-      if (created.hasSafeParts === false) {
+      if (skipSafePartPoNos?.has(order.poNo)) {
         order.safePartSkipped = true
-        if (parts.length > 0) {
-          order.warnings.push(
-            `SCM 标记该订单明细均不是安全部件，已跳过填写（本系统按件号配置识别到 ${parts.length} 条，请核对件号配置）`,
-          )
-        }
+        order.safePartSkipReason = '散件跳过'
       }
       else {
-        const plan = await deps.planSafeParts(created.deliveryNo, parts)
-        order.warnings.push(...plan.warnings)
-        order.safePartTotal = plan.items.length + plan.skipped
-        order.safePartDone = plan.skipped
-        emit()
-        for (const item of plan.items) {
-          checkStop()
-          await deps.addSafePartDetail(item)
-          order.safePartDone++
+        const parts = sources.get(order.poNo) ?? []
+        if (created.hasSafeParts === false) {
+          order.safePartSkipped = true
+          if (parts.length > 0) {
+            order.warnings.push(
+              `SCM 标记该订单明细均不是安全部件，已跳过填写（本系统按件号配置识别到 ${parts.length} 条，请核对件号配置）`,
+            )
+          }
+        }
+        else {
+          const plan = await deps.planSafeParts(created.deliveryNo, parts)
+          order.warnings.push(...plan.warnings)
+          order.safePartTotal = plan.items.length + plan.skipped
+          order.safePartDone = plan.skipped
           emit()
+          for (const item of plan.items) {
+            checkStop()
+            await deps.addSafePartDetail(item)
+            order.safePartDone++
+            emit()
+          }
         }
       }
       finishStep(order, 'safeParts')
@@ -239,7 +257,7 @@ export async function runDeliveryOrderBatch({
     print.status = 'skipped'
     print.message = '没有成功的送货单可导出'
     emit()
-    return { orders, print }
+    return { orders, print, loadingSafeParts }
   }
 
   print.status = 'process'
@@ -253,12 +271,12 @@ export async function runDeliveryOrderBatch({
     print.status = 'finish'
     print.fileName = file.fileName
     emit()
-    return { orders, print, file }
+    return { orders, print, loadingSafeParts, file }
   }
   catch (error) {
     print.status = 'error'
     print.message = describeError(error, '送货单导出失败，请到 SCM 手动打印')
     emit()
-    return { orders, print }
+    return { orders, print, loadingSafeParts }
   }
 }

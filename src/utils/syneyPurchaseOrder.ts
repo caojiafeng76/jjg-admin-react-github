@@ -3,18 +3,24 @@ import type { SyneyPurchaseOrder, SyneyPurchaseOrderRow } from '@/services/syney
 import type { ISyneyItem, ISyneySpec } from '@/types'
 import { getItemsWithParamSpec } from './syney'
 import { transformToOrderData } from './syneyExcelOrderTransform'
-import { extractBrandFromItems, extractSpecFromItems } from './syneyOrderDefaults'
+import { extractBrandFromItems, extractSpecFromItems, SYNEY_LOOSE_PARTS_SPEC } from './syneyOrderDefaults'
 import { getLabelInfoBySettings } from './syneySafePartRules'
 
-export function prepareSyneyPurchaseOrder(order: SyneyPurchaseOrder, specs: ISyneySpec[]) {
+function groupRowsByProductionNo(rows: SyneyPurchaseOrderRow[]) {
   const byProductionNo = new Map<string, SyneyPurchaseOrderRow[]>()
-  for (const row of order.rows) {
-    const productionRows = byProductionNo.get(row.soNo)
+  for (const row of rows) {
+    const key = row.soNo.trim()
+    const productionRows = byProductionNo.get(key)
     if (productionRows)
       productionRows.push(row)
     else
-      byProductionNo.set(row.soNo, [row])
+      byProductionNo.set(key, [row])
   }
+  return byProductionNo
+}
+
+export function prepareSyneyPurchaseOrder(order: SyneyPurchaseOrder, specs: ISyneySpec[]) {
+  const byProductionNo = groupRowsByProductionNo(order.rows)
 
   return Array.from(byProductionNo, ([soNo, rows]) => {
     const dates = Array.from(new Set(rows.map(row => row.endDate)))
@@ -47,6 +53,7 @@ export function prepareSyneyPurchaseOrder(order: SyneyPurchaseOrder, specs: ISyn
       specInferred,
       technique: po.Technique ?? null,
       remark: po.Remark ?? null,
+      isLooseParts: false,
       items: matched.map((item, index) => ({
         ...item,
         id: rows[index].id,
@@ -56,17 +63,75 @@ export function prepareSyneyPurchaseOrder(order: SyneyPurchaseOrder, specs: ISyn
   })
 }
 
+export function prepareSyneyLoosePartsOrder(order: SyneyPurchaseOrder): SyneyPurchaseOrderGroup[] {
+  const byProductionNo = groupRowsByProductionNo(order.rows)
+
+  return Array.from(byProductionNo, ([soNo, rows]) => {
+    const dates = Array.from(new Set(rows.map(row => row.endDate)))
+    const endDate = dates.length === 1 ? dates[0] : null
+    const remark = rows.find(row => row.orderRemark)?.orderRemark || null
+
+    return {
+      soNo,
+      endDate,
+      dates,
+      brand: null,
+      spec: SYNEY_LOOSE_PARTS_SPEC,
+      specInferred: false,
+      technique: null,
+      remark,
+      isLooseParts: true,
+      items: rows.map(row => ({
+        id: row.id,
+        No: order.poNo,
+        ParamSpec: row.paramSpec,
+        PartName: row.partName,
+        PartName2: '',
+        PartNo: row.partNo,
+        Qty: row.quantity,
+        Remark: row.remark,
+        SONo: soNo,
+        Spec: row.spec,
+        TaxUnitPrice: 0,
+        TaxTotalPrice: 0,
+        Unit: row.unit,
+        PartCode: '',
+        PartModel: '',
+        ParamSpecInferred: false,
+      })),
+    }
+  })
+}
+
 export type SyneyPurchaseOrderGroup = ReturnType<typeof prepareSyneyPurchaseOrder>[number]
 
-export function buildSyneyPurchaseOrderPayload(groups: SyneyPurchaseOrderGroup[], settings: SyneySafePartRule[]) {
-  return groups.map(({ soNo, endDate, brand, spec, technique, remark, items }) => ({
+export function buildSyneyPurchaseOrderPayload(
+  groups: SyneyPurchaseOrderGroup[],
+  settings: SyneySafePartRule[] = [],
+) {
+  return groups.map(({ soNo, endDate, brand, spec, technique, remark, isLooseParts, items }) => ({
     soNo,
     endDate,
-    brand,
-    spec,
-    technique,
+    brand: isLooseParts ? null : brand,
+    spec: isLooseParts ? SYNEY_LOOSE_PARTS_SPEC : spec,
+    technique: isLooseParts ? null : technique,
     remark,
+    isLooseParts,
     items: items.map(({ PartNo, PartName, Spec, ParamSpec, Qty, Unit, Remark }) => {
+      if (isLooseParts) {
+        return {
+          PartNo,
+          PartName,
+          Spec,
+          ParamSpec,
+          Qty,
+          Unit,
+          Remark,
+          PartName2: null,
+          PartModel: null,
+          PartCodePrefix: null,
+        }
+      }
       const label = getLabelInfoBySettings(PartNo, '', settings)
       return {
         PartNo,

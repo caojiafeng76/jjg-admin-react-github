@@ -33,7 +33,7 @@ function isOrderDone(order: DeliveryOrderProgress) {
 
 function stepDescription(order: DeliveryOrderProgress, key: string) {
   if (key === 'safeParts' && order.safePartSkipped)
-    return '无需填写'
+    return order.safePartSkipReason || '无需填写'
   if (key === 'safeParts' && order.safePartTotal > 0)
     return `${order.safePartDone}/${order.safePartTotal}`
   if (key === 'create' && order.deliveryNo)
@@ -159,7 +159,9 @@ export default function DeliveryOrderProgressModal({
                   ? `正在处理 ${current.poNo}：${currentStepTitle ?? '准备中'}`
                   : snapshot?.print.status === 'process'
                     ? '正在导出送货单'
-                    : '正在读取本系统安全部件信息'
+                    : snapshot?.loadingSafeParts
+                      ? '正在读取本系统安全部件信息'
+                      : '正在准备生成送货单'
                 : `已完成 ${successCount}/${orders.length} 张`}
             </span>
             <span className="tabular-nums">{`${doneCount}/${orders.length}`}</span>

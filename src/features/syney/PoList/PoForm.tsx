@@ -6,6 +6,7 @@ import type { ISyneyPo } from '@/types'
 import { DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
 import { memo } from 'react'
+import { SYNEY_LOOSE_PARTS_SPEC, SYNEY_SPEC_OPTIONS } from '@/utils/syneyOrderDefaults'
 import ExcelUpload from './ExcelUpload'
 
 interface PoFormProps {
@@ -20,21 +21,10 @@ interface PoFormProps {
   specsLoading?: boolean
 }
 
-const SPEC_OPTIONS = [
-  { value: '1000型-室内-扶梯', label: <span>1000型-室内-扶梯</span> },
-  { value: '1000型-室外-扶梯', label: <span>1000型-室外-扶梯</span> },
-  { value: '1000型-室内-人行道', label: <span>1000型-室内-人行道</span> },
-  { value: '1000型-室外-人行道', label: <span>1000型-室外-人行道</span> },
-  { value: '800型-室内-扶梯', label: <span>800型-室内-扶梯</span> },
-  { value: '800型-室外-扶梯', label: <span>800型-室外-扶梯</span> },
-  { value: '800型-室内-人行道', label: <span>800型-室内-人行道</span> },
-  { value: '800型-室外-人行道', label: <span>800型-室外-人行道</span> },
-  { value: '600型-室内-扶梯', label: <span>600型-室内-扶梯</span> },
-  { value: '600型-室外-扶梯', label: <span>600型-室外-扶梯</span> },
-  { value: '1000型-室内-老围框', label: <span>1000型-室内-老围框</span> },
-  { value: '800型-室内-老围框', label: <span>800型-室内-老围框</span> },
-  { value: '600型-室内-老围框', label: <span>600型-室内-老围框</span> },
-]
+const SPEC_OPTIONS = SYNEY_SPEC_OPTIONS.map(spec => ({
+  value: spec,
+  label: <span>{spec}</span>,
+}))
 
 const PoForm: FC<PoFormProps> = ({
   onFinish,
@@ -158,11 +148,25 @@ const PoForm: FC<PoFormProps> = ({
             />
           </Form.Item>
           <Form.Item
-            name="Brand"
-            label="商标"
-            rules={[{ required: true, message: '请输入商标' }]}
+            shouldUpdate={(prev, cur) => prev.Spec !== cur.Spec}
+            noStyle
           >
-            <Input disabled={isCreating} className={fieldClassName} />
+            {({ getFieldValue }) => {
+              const isLooseParts = getFieldValue('Spec') === SYNEY_LOOSE_PARTS_SPEC
+              return (
+                <Form.Item
+                  name="Brand"
+                  label="商标"
+                  rules={isLooseParts ? [] : [{ required: true, message: '请输入商标' }]}
+                >
+                  <Input
+                    disabled={isCreating}
+                    placeholder={isLooseParts ? '散件订单可留空' : undefined}
+                    className={fieldClassName}
+                  />
+                </Form.Item>
+              )
+            }}
           </Form.Item>
           <Form.Item name="Technique" label="工艺要求">
             <Input disabled={isCreating} className={fieldClassName} />

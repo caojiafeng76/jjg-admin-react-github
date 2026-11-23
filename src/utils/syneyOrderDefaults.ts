@@ -1,5 +1,28 @@
 import type { ISyneyItem } from '@/types'
 
+export const SYNEY_LOOSE_PARTS_SPEC = '散件'
+
+export const SYNEY_SPEC_OPTIONS = [
+  '1000型-室内-扶梯',
+  '1000型-室外-扶梯',
+  '1000型-室内-人行道',
+  '1000型-室外-人行道',
+  '800型-室内-扶梯',
+  '800型-室外-扶梯',
+  '800型-室内-人行道',
+  '800型-室外-人行道',
+  '600型-室内-扶梯',
+  '600型-室外-扶梯',
+  '1000型-室内-老围框',
+  '800型-室内-老围框',
+  '600型-室内-老围框',
+  SYNEY_LOOSE_PARTS_SPEC,
+] as const
+
+export function isSyneyLoosePartsSpec(spec: string | null | undefined) {
+  return spec?.trim() === SYNEY_LOOSE_PARTS_SPEC
+}
+
 /**
  * 从订单条目中提取商标信息
  * @param items - 订单明细数组

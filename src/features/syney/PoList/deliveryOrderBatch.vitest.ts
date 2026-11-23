@@ -218,6 +218,61 @@ describe('runDeliveryOrderBatch', () => {
 
     expect(result.orders[0].warnings).toEqual(['SCM 中已有未确认的送货单 D9，已沿用'])
   })
+
+  it('skips loading and filling safe parts completely when all POs are loose parts', async () => {
+    const calls: string[] = []
+    const deps = createDeps(calls)
+    const snapshots: DeliveryOrderBatchSnapshot[] = []
+
+    const result = await runDeliveryOrderBatch({
+      poNos: ['P1'],
+      skipSafePartPoNos: new Set(['P1']),
+      deps,
+      onUpdate: snapshot => snapshots.push(snapshot),
+    })
+
+    expect(calls).toEqual(['create:P1', 'confirm:D1', 'mark:P1:D1', 'print:1:D1', 'download:送货单.xls'])
+    expect(deps.loadSafePartSources).not.toHaveBeenCalled()
+    expect(deps.planSafeParts).not.toHaveBeenCalled()
+    expect(deps.addSafePartDetail).not.toHaveBeenCalled()
+    expect(snapshots[0].loadingSafeParts).toBe(false)
+    expect(result.orders[0]).toMatchObject({
+      status: 'success',
+      safePartSkipped: true,
+      safePartSkipReason: '散件跳过',
+      warnings: [],
+    })
+  })
+
+  it('loads safe parts only for regular POs in a mixed batch', async () => {
+    const calls: string[] = []
+    const deps = createDeps(calls)
+
+    const result = await runDeliveryOrderBatch({
+      poNos: ['P1', 'P2'],
+      skipSafePartPoNos: new Set(['P1']),
+      deps,
+      onUpdate: () => {},
+    })
+
+    expect(deps.loadSafePartSources).toHaveBeenCalledWith(['P2'])
+    expect(calls).toEqual([
+      'load',
+      'create:P1',
+      'confirm:D1',
+      'mark:P1:D1',
+      'create:P2',
+      'plan:D2',
+      'add:D2-1',
+      'add:D2-2',
+      'confirm:D2',
+      'mark:P2:D2',
+      'print:1,2:D1,D2',
+      'download:送货单.xls',
+    ])
+    expect(result.orders[0]).toMatchObject({ status: 'success', safePartSkipped: true, safePartSkipReason: '散件跳过' })
+    expect(result.orders[1]).toMatchObject({ status: 'success', safePartSkipped: false })
+  })
 })
 
 describe('describeError', () => {

@@ -1,6 +1,6 @@
 import { Radio } from 'antd'
 
-export type PoImportMode = 'scm' | 'manual' | 'excel'
+export type PoImportMode = 'scm' | 'loose-parts' | 'manual' | 'excel'
 
 export function PoImportModePicker({
   value,
@@ -20,6 +20,7 @@ export function PoImportModePicker({
       disabled={disabled}
       options={[
         { value: 'scm', label: '按单号获取' },
+        { value: 'loose-parts', label: '导入散件' },
         { value: 'manual', label: '手动输入' },
         { value: 'excel', label: 'Excel 导入' },
       ]}

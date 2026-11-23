@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { checkSyneySafeParts } from '@/services/apiSyneyDeliveryOrder'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
+import { isSyneyLoosePartsSpec } from '@/utils/syneyOrderDefaults'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { useTableSelection } from '../useTableSelection'
 import { uniquePoNos } from './deliveryOrderBatch'
@@ -63,18 +64,25 @@ export function useExportSafePartInfoAsExcel() {
     if (exporting)
       return
 
+    const nonLoosePos = selectedPosList.filter(({ poInfo }) => !isSyneyLoosePartsSpec(poInfo.Spec))
+    const skippedLooseCount = selectedPosList.length - nonLoosePos.length
+    if (nonLoosePos.length === 0) {
+      messageApi.info('所选订单均为散件，无需导出安全部件信息')
+      return
+    }
+
     setExporting(true)
     const hideLoading = messageApi.loading('正在核对 SCM 安全部件标记…', 0)
     try {
       // 先按 SCM 明细的 IsSafePart 排除无安全部件的订单；查询失败时照常导出
-      let posToExport = selectedPosList
+      let posToExport = nonLoosePos
       let skippedPoNos: string[] = []
       let checkFailed = false
       try {
         const results = await checkSyneySafeParts(
-          uniquePoNos(selectedPosList.map(({ poInfo }) => poInfo.No)),
+          uniquePoNos(nonLoosePos.map(({ poInfo }) => poInfo.No)),
         )
-        ;({ kept: posToExport, skippedPoNos } = filterPosBySafePartCheck(selectedPosList, results))
+        ;({ kept: posToExport, skippedPoNos } = filterPosBySafePartCheck(nonLoosePos, results))
       }
       catch (error) {
         console.error('核对 SCM 安全部件标记失败:', error)
@@ -174,10 +182,13 @@ export function useExportSafePartInfoAsExcel() {
 
       // 导出文件
       writeFile(wb, fileName, EXCEL_WRITE_OPTIONS)
-      const skippedText = skippedPoNos.length > 0
-        ? `，已跳过 ${skippedPoNos.length} 个 SCM 中无安全部件的订单`
-        : ''
-      messageApi.success(`${feedbackText.exported('安全部件', allSafeParts.length)}${skippedText}`)
+      const skippedText = [
+        skippedLooseCount > 0 ? `已跳过 ${skippedLooseCount} 条散件订单` : '',
+        skippedPoNos.length > 0 ? `已跳过 ${skippedPoNos.length} 个 SCM 中无安全部件的订单` : '',
+      ].filter(Boolean).join('，')
+      messageApi.success(
+        `${feedbackText.exported('安全部件', allSafeParts.length)}${skippedText ? `（${skippedText}）` : ''}`,
+      )
       if (checkFailed) {
         messageApi.warning('未能从 SCM 核对安全部件标记，已按本系统件号配置导出')
       }

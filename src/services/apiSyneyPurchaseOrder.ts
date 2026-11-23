@@ -18,8 +18,7 @@ export async function getExistingSyneyProductionNos(poNo: string, signal: AbortS
       throw handleApiError(error, '查询已建西尼订单失败')
 
     for (const { SONo } of data) {
-      if (SONo)
-        productionNos.add(SONo)
+      productionNos.add((SONo ?? '').trim())
     }
     if (data.length < pageSize)
       return productionNos

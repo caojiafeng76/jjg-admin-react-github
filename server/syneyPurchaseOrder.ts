@@ -25,15 +25,18 @@ function parsePurchaseOrderRow(row: Record<string, unknown>, id: number): SyneyP
   const rawQuantity = row.CalculateQty
   const quantity = typeof rawQuantity === 'number' || readText(rawQuantity) ? Number(rawQuantity) : Number.NaN
 
-  if (!soNo || !partNo || !partName || !unit) {
-    throw new ScmUserError('西尼采购单明细缺少生产编号、物料件号、名称或核算单位')
+  if (!partNo || !partName || !unit) {
+    throw new ScmUserError('西尼采购单明细缺少物料件号、名称或核算单位')
   }
+  const rowLabel = soNo ? `生产编号 ${soNo}` : `物料 ${partNo}`
   if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate) || !Number.isFinite(+parsedDate)
     || !parsedDate.toISOString().startsWith(endDate)) {
-    throw new ScmUserError(`生产编号 ${soNo} 的交货日期无效`)
+    throw new ScmUserError(`${rowLabel} 的交货日期无效`)
   }
   if (!Number.isInteger(quantity) || quantity < 0 || quantity > 2_147_483_647) {
-    throw new ScmUserError(`生产编号 ${soNo} 的物料 ${partNo} 核算数量无效`)
+    throw new ScmUserError(
+      soNo ? `生产编号 ${soNo} 的物料 ${partNo} 核算数量无效` : `物料 ${partNo} 的核算数量无效`,
+    )
   }
 
   return {

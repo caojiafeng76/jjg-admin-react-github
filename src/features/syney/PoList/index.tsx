@@ -428,13 +428,17 @@ function PoListContent() {
         </div>
       </div>
 
-      {isModalOpen && !isEdit && importMode === 'scm' && (
-        <SyneyPurchaseOrderModal onModeChange={changeImportMode} onClose={() => setIsModalOpen(false)} />
+      {isModalOpen && !isEdit && (importMode === 'scm' || importMode === 'loose-parts') && (
+        <SyneyPurchaseOrderModal
+          mode={importMode}
+          onModeChange={changeImportMode}
+          onClose={() => setIsModalOpen(false)}
+        />
       )}
       <Modal
         title={modalTitle}
         loading={isEdit && poLoading}
-        open={isModalOpen && (isEdit || importMode !== 'scm')}
+        open={isModalOpen && (isEdit || (importMode !== 'scm' && importMode !== 'loose-parts'))}
         confirmLoading={isCreating || isPoUpdating}
         destroyOnHidden={true}
         width={720}
@@ -447,7 +451,7 @@ function PoListContent() {
         {!isEdit && <PoImportModePicker value={importMode} onChange={changeImportMode} disabled={isCreating} />}
         <PoForm
           key={isEdit ? 'edit' : importMode}
-          importMode={isEdit || importMode === 'scm' ? 'manual' : importMode}
+          importMode={isEdit || importMode === 'scm' || importMode === 'loose-parts' ? 'manual' : importMode}
           ref={poFormRef}
           onExcelDataChange={handleExcelDataChange}
           onFinish={onFinish}

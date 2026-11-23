@@ -67,9 +67,10 @@ export async function getSyneyPos({
     query = query.lte('EndDate', endDate)
   }
 
-  // 生产号模糊搜索
-  if (SONo) {
-    query = query.ilike('SONo', `%${SONo}%`)
+  // 订单号与生产号模糊搜索（去掉可能破坏 PostgREST or() 语法的字符）
+  const keyword = SONo?.replace(/[,()]/g, ' ').trim()
+  if (keyword) {
+    query = query.or(`SONo.ilike.%${keyword}%,No.ilike.%${keyword}%`)
   }
 
   query = query

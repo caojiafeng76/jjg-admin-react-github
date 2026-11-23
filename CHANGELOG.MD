@@ -18,6 +18,13 @@
 ## 2026-11-23
 
 - **类别**：新建
+- **范围**：西尼订单新增弹窗、列表与编辑表单、送货单生成与安全部件导出、杭州 SCM 代理、`import_syney_purchase_order` 事务、`src/pages/dashboardChangelog.ts`
+- **摘要**：新增西尼订单「导入散件」录入方式与「散件」规格类型，支持无生产编号（如 `P202611100277`）及带生产编号的散件采购单直接导入建单；按单号获取查到无生产编号单据时提示并支持一键切换复用已拉取预览。散件不匹配踏板规格与安全件规则、不分配流水号并保留原 `SONo`，列表链接与搜索框兼容无生产编号并支持同时搜索订单号与生产号；生成送货单及导出安全部件信息时自动跳过散件的安全部件查询与填写。
+- **验证**：定向西尼回归 5 文件 28 项（`syneyPurchaseOrder.vitest.ts`、`SyneyPurchaseOrderModal.vitest.tsx`、`deliveryOrderBatch.vitest.ts`、`apiSyneyPos.vitest.ts`、`safePartInfoRows.vitest.ts`）、全量测试（Node 38 项 + Vitest 245 文件 2372 项）、`bun run lint`（0 error）、`bun run typecheck`、`bun run build` 与 `bun run fc:package:syney-delivery-order` 均已通过；`bunx antd lint src/features/syney/PoList` 本次改动文件 0 issue（存量 `ExcelUpload.tsx` 1 条既有 warning）。数据库迁移 `20261123130000_support_syney_loose_parts_import.sql` 已由用户在交互终端推送至已链接数据库并只读核验 `import_syney_purchase_order` 生效；杭州函数 `syney-delivery-order` 已更新部署至 `2026-11-23 13:11:40`（`16.68 KB`）。线上真实建单、生成送货单写入及页面端到端点击未在本会话浏览器中实际执行，待业务使用时现场验收。
+
+## 2026-11-23
+
+- **类别**：新建
 - **范围**：西尼订单新增弹窗、杭州 SCM 代理、Supabase 建单事务、首页更新日志
 - **摘要**：新增「按单号获取」。按生产编号预览 SCM 全部物料行，确认时补建缺失订单，保留上下头部的独立明细以及已建订单的人工修改。订单、明细和流水号在同一事务内提交。手填与 Excel 模式切换时清理上一种录入的数据。
 - **验证**：全量测试通过（Node 38 项，Vitest 2366 项），评审调整后的西尼回归 89 项通过。ESLint、TypeScript、构建、Bundle 预算、Ant Design 检查、函数打包和数据库迁移预演通过。函数包本地验证来源预检返回 204，未登录返回 401，非法来源返回 403。隔离 PostgreSQL 验证首次建单、部分补建、重复提交、权限拒绝和明细失败回滚。真实采购单只读取到 29 行、2 个生产编号，核对了上下头部的件数和备注。生产迁移已由用户在终端执行，检查确认建单函数已安装、匿名角色无执行权限，数据库类型已重新生成。杭州函数 `syney-delivery-order` 已备份旧代码并部署新版，线上触发器的白名单预检、匿名和无效令牌拒绝、非白名单拒绝均符合预期。部署后的 18 项取单、权限及弹窗测试通过。Vercel 已切换至新版，`ydlyerp.top/syney-po-list` 返回 200。已核对样单的两个生产编号均在生产库，登录后页面只读验收待完成。

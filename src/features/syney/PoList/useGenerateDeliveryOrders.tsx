@@ -17,6 +17,7 @@ import { getPosWithItemsByNos, markPosDelivered } from '@/services/apiSyneyPos'
 import { getSyneySafePartSettings } from '@/services/apiSyneySafePartSettings'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
+import { isSyneyLoosePartsSpec } from '@/utils/syneyOrderDefaults'
 import { syneyPoKeys } from '../queryKeys'
 import { useTableSelection } from '../useTableSelection'
 import { runDeliveryOrderBatch, uniquePoNos } from './deliveryOrderBatch'
@@ -40,7 +41,7 @@ async function loadSafePartSources(poNos: string[]) {
 
   const sources = new Map<string, ReturnType<typeof toSafePartSourceRows>>()
   rows.forEach(({ po, items }) => {
-    if (!po.No)
+    if (!po.No || isSyneyLoosePartsSpec(po.Spec))
       return
     const sourceRows = toSafePartSourceRows(
       buildSafePartInfoRows(
@@ -77,7 +78,7 @@ export function useGenerateDeliveryOrders() {
   const [file, setFile] = useState<{ fileName: string, blob: Blob } | null>(null)
   const stopRef = useRef(false)
 
-  async function run(poNos: string[]) {
+  async function run(poNos: string[], skipSafePartPoNos: ReadonlySet<string>) {
     stopRef.current = false
     setStopping(false)
     setFile(null)
@@ -88,6 +89,7 @@ export function useGenerateDeliveryOrders() {
     try {
       const result = await runDeliveryOrderBatch({
         poNos,
+        skipSafePartPoNos,
         deps,
         onUpdate: setSnapshot,
         shouldStop: () => stopRef.current,
@@ -129,6 +131,23 @@ export function useGenerateDeliveryOrders() {
       return
     }
 
+    const specsByPoNo = new Map<string, string[]>()
+    for (const { poInfo } of selectedPosList) {
+      const poNo = (poInfo.No ?? '').trim()
+      if (!poNo || poNo === 'null')
+        continue
+      const specs = specsByPoNo.get(poNo) ?? []
+      specs.push(poInfo.Spec)
+      specsByPoNo.set(poNo, specs)
+    }
+    const loosePartsPoNos = new Set<string>(
+      Array.from(specsByPoNo.entries())
+        .filter(([, specs]) => specs.length > 0 && specs.every(spec => isSyneyLoosePartsSpec(spec)))
+        .map(([poNo]) => poNo),
+    )
+    const allLooseParts = loosePartsPoNos.size === poNos.length
+    const loosePartsList = Array.from(loosePartsPoNos)
+
     const deliveredNos = uniquePoNos(
       selectedPosList
         .filter(({ poInfo }) => poInfo.DeliveryNo && !['null', 'undefined'].includes(poInfo.DeliveryNo))
@@ -140,7 +159,18 @@ export function useGenerateDeliveryOrders() {
       content: (
         <div className="flex flex-col gap-1">
           <div>{`订单号：${poNos.join('、')}`}</div>
-          <div>将在西尼 SCM 中逐张生成送货单、填写安全部件并供应商确认，完成后自动下载送货单。</div>
+          <div>
+            {allLooseParts
+              ? '将在西尼 SCM 中逐张生成送货单并供应商确认（散件跳过安全部件查询与填写），完成后自动下载送货单。'
+              : '将在西尼 SCM 中逐张生成送货单、填写安全部件并供应商确认，完成后自动下载送货单。'}
+          </div>
+          {!allLooseParts && loosePartsList.length > 0
+            ? (
+                <div className="text-slate-600 dark:text-slate-300">
+                  {`其中 ${loosePartsList.join('、')} 为散件订单，将跳过安全部件查询与填写。`}
+                </div>
+              )
+            : null}
           {deliveredNos.length > 0
             ? (
                 <div className="text-amber-600 dark:text-amber-400">
@@ -152,7 +182,7 @@ export function useGenerateDeliveryOrders() {
       ),
       okText: '开始生成',
       onOk: () => {
-        void run(poNos)
+        void run(poNos, loosePartsPoNos)
       },
     })
   }

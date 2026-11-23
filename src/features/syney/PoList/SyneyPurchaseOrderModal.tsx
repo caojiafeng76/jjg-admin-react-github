@@ -1,8 +1,9 @@
 import type { TableColumnsType } from 'antd'
 import type { PoImportMode } from './PoImportMode'
+import type { SyneyPurchaseOrder } from '@/services/syneyDeliveryOrderContract'
 import type { SyneyPurchaseOrderGroup } from '@/utils/syneyPurchaseOrder'
-import { App, Button, Input, Modal, Table } from 'antd'
-import { useEffect, useId, useRef, useState } from 'react'
+import { Alert, App, Button, Input, Modal, Table } from 'antd'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useMutationWithInvalidation } from '@/hooks/useMutationWithInvalidation'
 import { fetchSyneyPurchaseOrder } from '@/services/apiSyneyDeliveryOrder'
 import { getExistingSyneyProductionNos, importSyneyPurchaseOrder } from '@/services/apiSyneyPurchaseOrder'
@@ -10,11 +11,21 @@ import { SYNEY_PURCHASE_ORDER_NO_PATTERN } from '@/services/syneyDeliveryOrderCo
 import StatusPill from '@/ui/StatusPill'
 import { getUserErrorMessage } from '@/utils/errorHandler'
 import { feedbackText } from '@/utils/feedbackText'
-import { buildSyneyPurchaseOrderPayload, prepareSyneyPurchaseOrder } from '@/utils/syneyPurchaseOrder'
+import {
+  buildSyneyPurchaseOrderPayload,
+  prepareSyneyLoosePartsOrder,
+  prepareSyneyPurchaseOrder,
+} from '@/utils/syneyPurchaseOrder'
 import { syneyPoKeys } from '../queryKeys'
 import { useSyneySpecs } from '../SpecList/useSyneySpecs'
 import { useSyneySafePartSettings } from '../useSyneySafePartSettings'
 import { PoImportModePicker } from './PoImportMode'
+
+interface FetchedOrder {
+  poNo: string
+  order: SyneyPurchaseOrder
+  existing: Set<string>
+}
 
 interface Preview {
   poNo: string
@@ -42,16 +53,18 @@ const columns: TableColumnsType<PreviewItem> = [
 ]
 
 export function SyneyPurchaseOrderModal({
+  mode,
   onClose,
   onModeChange,
 }: {
+  mode: 'scm' | 'loose-parts'
   onClose: () => void
   onModeChange: (mode: PoImportMode) => void
 }) {
   const { message } = App.useApp()
   const fieldId = useId()
   const [poNo, setPoNo] = useState('')
-  const [preview, setPreview] = useState<Preview>()
+  const [fetched, setFetched] = useState<FetchedOrder>()
   const [isFetching, setIsFetching] = useState(false)
   const lookupRef = useRef<AbortController | null>(null)
   const submitLockRef = useRef(false)
@@ -64,11 +77,13 @@ export function SyneyPurchaseOrderModal({
 
   useEffect(() => () => lookupRef.current?.abort(), [])
 
+  const isLoosePartsMode = mode === 'loose-parts'
+
   function changePoNo(value: string) {
     lookupRef.current?.abort()
     lookupRef.current = null
     setPoNo(value)
-    setPreview(undefined)
+    setFetched(undefined)
     setIsFetching(false)
   }
 
@@ -78,12 +93,15 @@ export function SyneyPurchaseOrderModal({
       message.warning('请输入有效的西尼采购单号')
       return
     }
-    if (!syneySpecs || specsLoading || specsError || lookupRef.current || submitLockRef.current)
+    if ((!isLoosePartsMode && (!syneySpecs || specsLoading || specsError))
+      || lookupRef.current
+      || submitLockRef.current) {
       return
+    }
 
     const controller = new AbortController()
     lookupRef.current = controller
-    setPreview(undefined)
+    setFetched(undefined)
     setIsFetching(true)
     try {
       const [order, existing] = await Promise.all([
@@ -91,7 +109,7 @@ export function SyneyPurchaseOrderModal({
         getExistingSyneyProductionNos(number, controller.signal),
       ])
       if (!controller.signal.aborted)
-        setPreview({ poNo: number, groups: prepareSyneyPurchaseOrder(order, syneySpecs), existing })
+        setFetched({ poNo: number, order, existing })
     }
     catch (error) {
       if (!controller.signal.aborted)
@@ -106,12 +124,41 @@ export function SyneyPurchaseOrderModal({
     }
   }
 
+  const preview: Preview | undefined = useMemo(() => {
+    if (!fetched)
+      return undefined
+    if (isLoosePartsMode) {
+      return {
+        poNo: fetched.poNo,
+        groups: prepareSyneyLoosePartsOrder(fetched.order),
+        existing: fetched.existing,
+      }
+    }
+    if (!syneySpecs)
+      return undefined
+    return {
+      poNo: fetched.poNo,
+      groups: prepareSyneyPurchaseOrder(fetched.order, syneySpecs),
+      existing: fetched.existing,
+    }
+  }, [fetched, isLoosePartsMode, syneySpecs])
+
+  const hasEmptySoNo = Boolean(fetched?.order.rows.some(row => !row.soNo.trim()))
+  const shouldSuggestLooseParts = !isLoosePartsMode && hasEmptySoNo
+
   const pendingGroups = preview?.groups.filter(group => !preview.existing.has(group.soNo)) ?? []
   const pendingCount = pendingGroups.length
   const hasDateConflict = pendingGroups.some(group => !group.endDate)
+  const canConfirm = Boolean(
+    preview
+    && pendingCount
+    && !hasDateConflict
+    && !isFetching
+    && (isLoosePartsMode || (settings && !shouldSuggestLooseParts)),
+  )
 
   async function confirm() {
-    if (!preview || !pendingCount || hasDateConflict || !settings || submitLockRef.current)
+    if (!preview || !canConfirm || submitLockRef.current)
       return
 
     submitLockRef.current = true
@@ -120,7 +167,8 @@ export function SyneyPurchaseOrderModal({
         poNo: preview.poNo,
         groups: buildSyneyPurchaseOrderPayload(preview.groups, settings),
       })
-      message.success(`${feedbackText.batch('新增', '西尼订单', result.created)}，跳过 ${result.skipped} 条已存在订单`)
+      const orderLabel = isLoosePartsMode ? '西尼散件订单' : '西尼订单'
+      message.success(`${feedbackText.batch('新增', orderLabel, result.created)}，跳过 ${result.skipped} 条已存在订单`)
       onClose()
     }
     catch (error) {
@@ -131,13 +179,17 @@ export function SyneyPurchaseOrderModal({
     }
   }
 
+  const okText = isLoosePartsMode
+    ? (pendingCount ? `确认生成 ${pendingCount} 条散件订单` : '确认生成')
+    : (pendingCount ? `确认生成 ${pendingCount} 条订单` : '确认生成')
+
   return (
     <Modal
       title="创建订单"
       open
       width={960}
-      okText={pendingCount ? `确认生成 ${pendingCount} 条订单` : '确认生成'}
-      okButtonProps={{ disabled: !pendingCount || hasDateConflict || isFetching || !settings }}
+      okText={okText}
+      okButtonProps={{ disabled: !canConfirm }}
       confirmLoading={mutation.isPending}
       cancelButtonProps={{ disabled: mutation.isPending }}
       closable={!mutation.isPending}
@@ -146,7 +198,7 @@ export function SyneyPurchaseOrderModal({
       onOk={confirm}
       onCancel={onClose}
     >
-      <PoImportModePicker value="scm" onChange={onModeChange} disabled={mutation.isPending} />
+      <PoImportModePicker value={mode} onChange={onModeChange} disabled={mutation.isPending} />
       <label htmlFor={fieldId} className="mb-2 block">西尼采购单号</label>
       <div className="flex items-center gap-2">
         <Input
@@ -154,22 +206,45 @@ export function SyneyPurchaseOrderModal({
           value={poNo}
           maxLength={64}
           allowClear
-          placeholder="例如 P202610100541"
+          placeholder={isLoosePartsMode ? '例如 P202611100277' : '例如 P202610100541'}
           disabled={mutation.isPending}
           onChange={event => changePoNo(event.target.value)}
           onPressEnter={() => void fetchPreview()}
         />
         <Button
-          loading={isFetching || specsLoading}
-          disabled={mutation.isPending || !!specsError}
+          loading={isFetching || (!isLoosePartsMode && specsLoading)}
+          disabled={mutation.isPending || (!isLoosePartsMode && !!specsError)}
           onClick={() => void fetchPreview()}
         >
           获取订单
         </Button>
       </div>
+      {isLoosePartsMode && (
+        <p className="mt-2 mb-0 text-xs text-slate-500 dark:text-slate-400">
+          散件模式：不匹配踏板规格与安全件，规格固定为「散件」，不分配流水号。
+        </p>
+      )}
 
-      {specsError && <p role="alert" className="mt-3 text-error">踏板规格加载失败，请重新打开后再试</p>}
-      {preview && !settingsLoading && !settings && <p role="alert" className="mt-3 text-error">件号配置加载失败，请重新打开后再试</p>}
+      {!isLoosePartsMode && specsError && (
+        <p role="alert" className="mt-3 text-error">踏板规格加载失败，请重新打开后再试</p>
+      )}
+      {!isLoosePartsMode && preview && !settingsLoading && !settings && (
+        <p role="alert" className="mt-3 text-error">件号配置加载失败，请重新打开后再试</p>
+      )}
+      {shouldSuggestLooseParts && (
+        <Alert
+          className="mt-3"
+          type="info"
+          showIcon
+          title="该采购单无生产编号，属于散件订单"
+          description="散件订单无需匹配踏板规格与安全部件，请切换为「导入散件」直接生成。"
+          action={(
+            <Button size="small" type="primary" onClick={() => onModeChange('loose-parts')}>
+              切换为导入散件
+            </Button>
+          )}
+        />
+      )}
       {preview && (
         <>
           <p className="mt-3 mb-2" role="status">
@@ -177,12 +252,12 @@ export function SyneyPurchaseOrderModal({
             {' · '}
             共 {preview.groups.reduce((count, group) => count + group.items.length, 0)} 行明细
           </p>
-          {hasDateConflict && <p role="alert" className="mb-2 text-error">待创建的生产编号有多个交货日期，请核对西尼采购单</p>}
+          {hasDateConflict && <p role="alert" className="mb-2 text-error">待创建的订单有多个交货日期，请核对西尼采购单</p>}
           <div className="max-h-[50vh] space-y-3 overflow-y-auto">
             {preview.groups.map(group => (
-              <section key={group.soNo} aria-label={group.soNo}>
+              <section key={group.soNo || '__empty_so_no__'} aria-label={group.soNo || preview.poNo}>
                 <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <strong>{group.soNo}</strong>
+                  <strong>{group.soNo || `${preview.poNo}（无生产编号）`}</strong>
                   <span>交货日期 {group.dates.join('、')}</span>
                   <StatusPill tone={preview.existing.has(group.soNo) ? 'neutral' : 'info'}>
                     {preview.existing.has(group.soNo) ? '已存在' : '待创建'}

@@ -42,6 +42,9 @@ vi.mock('./supabase', async () => {
             .get('Status')
             ?.replace(/^eq\./, '')
           const endDateFilters = url.searchParams.getAll('EndDate')
+          const orFilter = url.searchParams.get('or')
+          const orMatch = orFilter?.match(/ilike\.%([^%,]+)%,No\.ilike\.%([^%)]+)%/)
+          const searchKeyword = orMatch?.[1]
           const sonoFilter = url.searchParams
             .get('SONo')
             ?.replace(/^ilike\.%/, '')
@@ -59,6 +62,13 @@ vi.mock('./supabase', async () => {
                 return false
               if (operator === 'lte' && row.EndDate > date)
                 return false
+            }
+
+            if (searchKeyword) {
+              return (
+                row.SONo?.includes(searchKeyword) === true
+                || row.No?.includes(searchKeyword) === true
+              )
             }
 
             return !sonoFilter || row.SONo?.includes(sonoFilter) === true
@@ -219,7 +229,7 @@ describe('getSyneyPos', () => {
       'lte.2026-07-31',
     ])
     expect(url.searchParams.get('Status')).toBe('eq.已创建')
-    expect(url.searchParams.get('SONo')).toBe('ilike.%SO-%')
+    expect(url.searchParams.get('or')).toBe('(SONo.ilike.%SO-%,No.ilike.%SO-%)')
     expect(url.searchParams.get('offset')).toBe('1000')
     expect(url.searchParams.get('limit')).toBe('50')
     expect(requests.signals).toEqual([controller.signal])
@@ -240,6 +250,22 @@ describe('getSyneyPos', () => {
     })
 
     expect(result.syneyPos.map(po => po.No)).toEqual(['PO-2', 'PO-10'])
+  })
+
+  it('matches both No and SONo so loose-parts orders without SONo can be searched by PO number', async () => {
+    requests.sourceRows = [
+      createPo(1, { No: 'P202611100277', SONo: '', Spec: '散件' }),
+      createPo(2, { No: 'P202611100278', SONo: 'SO-99', Spec: '1000型-室内-扶梯' }),
+    ]
+
+    const result = await getSyneyPos({
+      page: 1,
+      pageSize: 10,
+      Status: '全部',
+      SONo: 'P202611100277',
+    })
+
+    expect(result.syneyPos.map(po => po.No)).toEqual(['P202611100277'])
   })
 
   it('paginates 1050 conflicting shuffled rows without duplicates or gaps', async () => {

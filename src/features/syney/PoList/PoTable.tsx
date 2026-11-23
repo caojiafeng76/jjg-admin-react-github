@@ -13,6 +13,16 @@ import { createKeyboardTableRowProps } from '@/utils/keyboardTableRow'
 import { PO_STATUS_TONES, PO_STATUSES } from '../statusTones'
 import { useTableSelection } from '../useTableSelection'
 
+function formatOrderLinkText(no: string, soNo?: string | null) {
+  const trimmed = soNo?.trim()
+  if (!trimmed)
+    return no
+  const parts = trimmed.split('-')
+  if (parts.length >= 2)
+    return `${no}-[${parts.at(-2)}-${parts.at(-1)}]`
+  return `${no}-[${trimmed}]`
+}
+
 interface Props {
   loading: boolean
   data: ISyneyPo[]
@@ -107,7 +117,7 @@ function PoTable({
             to={`/syney-po-list/${record.id}`}
             state={{ from: listHref }}
           >
-            {`${text}-[${record.SONo?.split('-').at(-2)}-${record.SONo?.split('-').at(-1)}]`}
+            {formatOrderLinkText(text, record.SONo)}
           </Link>
         ),
       },
@@ -117,6 +127,7 @@ function PoTable({
         key: 'Spec',
         width: 180,
         ellipsis: true,
+        render: (value: string | null) => value || '-',
       },
       {
         title: '数量',
@@ -163,6 +174,7 @@ function PoTable({
         key: 'SONo',
         width: 180,
         ellipsis: true,
+        render: (value: string | null) => value || '-',
       },
       {
         title: '备注',

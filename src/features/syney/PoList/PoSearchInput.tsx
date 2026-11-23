@@ -38,7 +38,7 @@ export default function PoSearchInput() {
 
   return (
     <Input
-      placeholder="搜索生产号"
+      placeholder="搜索订单号/生产号"
       value={searchValue}
       onChange={handleChange}
       onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
