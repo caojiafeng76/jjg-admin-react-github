@@ -45,6 +45,7 @@ Content-Type: application/json
 | action | 说明 |
 |---|---|
 | `create` | 按订单号在「采购订单履行」勾选全部可送明细并生成送货单 |
+| `fetchPurchaseOrder` | 按采购单号只读查询全部物料行，使用「西尼订单－新建」权限 |
 | `planSafeParts` | 读取送货单的安全部件行，与本系统安全部件信息匹配，返回待添加明细 |
 | `addSafePartDetail` | 添加一条安全部件明细（「修改 → 添加」） |
 | `confirm` | 供应商确认 |

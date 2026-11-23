@@ -178,6 +178,17 @@ describe('createSyneyDeliveryOrderHandler permissions', () => {
     ])
   })
 
+  it.each([
+    ['feature:syney-po-list.create', 429],
+    ['feature:syney-po-list.delivery-order', 403],
+    ['page:syney-po-list', 403],
+  ])('checks purchase order lookup with %s', async (permission, status) => {
+    const checked = stubSupabase([permission])
+    const response = await post({ action: 'fetchPurchaseOrder', payload: { poNo: 'P1' } })
+    expect(response.statusCode).toBe(status)
+    expect(checked).toEqual(['feature:syney-po-list.create'])
+  })
+
   it('rejects create with only the export permission', async () => {
     const checked = stubSupabase(['feature:syney-po-list.export'])
     const response = await post({ action: 'create', payload: { poNo: 'P1' } })

@@ -3,15 +3,16 @@ import type { TransformedOrderData } from '@utils/excelUtils'
 import type { FormInstance } from 'antd'
 import type { FC, Ref } from 'react'
 import type { ISyneyPo } from '@/types'
-import { DatePicker, Form, Input, Radio, Select } from 'antd'
+import { DatePicker, Form, Input, Select } from 'antd'
 import dayjs from 'dayjs'
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import ExcelUpload from './ExcelUpload'
 
 interface PoFormProps {
   onFinish: (values: ISyneyPo) => void
   isCreating: boolean
   isEdit: boolean
+  importMode: 'manual' | 'excel'
   ref: Ref<FormInstance<ISyneyPo>> | undefined
   initialValues?: ISyneyPo
   onExcelDataChange?: (data: TransformedOrderData) => void
@@ -39,14 +40,13 @@ const PoForm: FC<PoFormProps> = ({
   onFinish,
   isCreating,
   isEdit,
+  importMode,
   ref,
   initialValues,
   onExcelDataChange,
   syneySpecs,
   specsLoading = false,
 }) => {
-  const [importMode, setImportMode] = useState<'manual' | 'excel'>('manual')
-
   const handleExcelDataParsed = (data: TransformedOrderData) => {
     if (ref && 'current' in ref && ref.current) {
       ref.current.setFieldsValue({
@@ -107,17 +107,6 @@ const PoForm: FC<PoFormProps> = ({
 
       {!isEdit && (
         <>
-          <Form.Item label="导入方式">
-            <Radio.Group
-              value={importMode}
-              onChange={e => setImportMode(e.target.value)}
-              disabled={isCreating}
-            >
-              <Radio value="manual">手动输入</Radio>
-              <Radio value="excel">Excel导入</Radio>
-            </Radio.Group>
-          </Form.Item>
-
           {importMode === 'manual' && (
             <Form.Item
               name="Detail"

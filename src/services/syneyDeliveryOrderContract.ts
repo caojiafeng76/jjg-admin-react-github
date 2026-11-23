@@ -35,7 +35,30 @@ export interface SyneySafePartDetailPlanItem {
   SafePartFCDate: string
 }
 
+export const SYNEY_PURCHASE_ORDER_CREATE_PERMISSION = 'feature:syney-po-list.create'
+export const SYNEY_PURCHASE_ORDER_NO_PATTERN = /^[\w-]{1,64}$/
+
+export interface SyneyPurchaseOrderRow {
+  id: number
+  soNo: string
+  endDate: string
+  partNo: string
+  partName: string
+  spec: string
+  paramSpec: string
+  quantity: number
+  unit: string
+  remark: string
+  orderRemark: string
+}
+
+export interface SyneyPurchaseOrder {
+  poNo: string
+  rows: SyneyPurchaseOrderRow[]
+}
+
 export interface SyneyDeliveryOrderRequestMap {
+  fetchPurchaseOrder: { poNo: string }
   create: { poNo: string }
   planSafeParts: { deliveryNo: string, parts: SyneySafePartSourceRow[] }
   addSafePartDetail: { item: SyneySafePartDetailPlanItem }
@@ -54,6 +77,7 @@ export interface SyneySafePartCheckResult {
 }
 
 export interface SyneyDeliveryOrderResponseMap {
+  fetchPurchaseOrder: SyneyPurchaseOrder
   create: {
     deliveryOrderId: number
     deliveryNo: string
@@ -86,6 +110,7 @@ export const SYNEY_DELIVERY_ORDER_ACTIONS = [
   'confirm',
   'print',
   'checkSafeParts',
+  'fetchPurchaseOrder',
 ] as const satisfies readonly SyneyDeliveryOrderAction[]
 
 /** 只读查询，导出安全部件信息也会调用：有导出或生成送货单权限之一即可 */

@@ -1,5 +1,6 @@
 import type { TransformedOrderData } from '@utils/excelUtils'
 import type { FormInstance } from 'antd'
+import type { PoImportMode } from './PoImportMode'
 import type { ISyneyItem, ISyneyPo } from '@/types'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import { App, Modal } from 'antd'
@@ -32,11 +33,13 @@ import ExportInfoButton from './ExportInfoButton'
 import ExportShippingListButton from './ExportShippingListButton'
 import PoDateFilter from './PoDateFilter'
 import PoForm from './PoForm'
+import { PoImportModePicker } from './PoImportMode'
 import PoSearchInput from './PoSearchInput'
 import PoSelected from './PoSelected'
 import PoSelectedFilter from './PoSelectedFilter'
 import PoTable from './PoTable'
 import PrintDecompositionButton from './PrintDecompositionButton'
+import { SyneyPurchaseOrderModal } from './SyneyPurchaseOrderModal'
 import { useCreatePo } from './useCreatePo'
 import { useDeletePo } from './useDeletePo'
 import { usePo } from './usePo'
@@ -54,6 +57,7 @@ function PoListContent() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState('创建订单')
   const [isEdit, setIsEdit] = useState(false)
+  const [importMode, setImportMode] = useState<PoImportMode>('scm')
   const [excelData, setExcelData] = useState<TransformedOrderData | null>(null)
 
   const poFormRef = useRef<FormInstance<ISyneyPo>>(null)
@@ -130,6 +134,11 @@ function PoListContent() {
     })
   }, [tableSelectedKeys, messageApi, deletePo, setTableSelectedKeys])
 
+  function changeImportMode(mode: PoImportMode) {
+    setExcelData(null)
+    setImportMode(mode)
+  }
+
   const handleExcelDataChange = useCallback((data: TransformedOrderData) => {
     setExcelData(data)
   }, [])
@@ -168,7 +177,11 @@ function PoListContent() {
 
         let items: ISyneyItem[]
 
-        if (excelData && excelData.items.length > 0) {
+        if (importMode === 'excel') {
+          if (!excelData?.items.length) {
+            messageApi.warning('请先选择有效的 Excel 文件')
+            return
+          }
           items = excelData.items.map(item => ({
             ...item,
             No,
@@ -176,7 +189,11 @@ function PoListContent() {
         }
         else {
           items = jsonToArray(values.Detail || '')
-          items = items?.map(item => ({ ...item, No })) as ISyneyItem[]
+          if (!items?.length) {
+            messageApi.warning('请输入有效的订单明细')
+            return
+          }
+          items = items.map(item => ({ ...item, No }))
         }
         // 不去重：ERP 同件号多行是上/下头部等独立零件（参数规格或备注不同），合并会丢失下头部规格与备注
         items = getItemsWithParamSpec(items, syneySpecs) as ISyneyItem[]
@@ -205,7 +222,7 @@ function PoListContent() {
 
         const { Detail, ...po } = values
 
-        if (excelData) {
+        if (importMode === 'excel' && excelData) {
           if (excelData.po.Technique) {
             po.Technique = excelData.po.Technique
           }
@@ -242,6 +259,7 @@ function PoListContent() {
       setIsCreating,
       createPo,
       excelData,
+      importMode,
       isSafePartSettingsLoading,
       safePartSettings,
     ],
@@ -301,7 +319,7 @@ function PoListContent() {
         <AddButton
           handleCreate={() => {
             setIsEdit(false)
-            poFormRef.current?.resetFields()
+            changeImportMode('scm')
             setModalTitle('创建订单')
             setIsModalOpen(true)
           }}
@@ -410,10 +428,13 @@ function PoListContent() {
         </div>
       </div>
 
+      {isModalOpen && !isEdit && importMode === 'scm' && (
+        <SyneyPurchaseOrderModal onModeChange={changeImportMode} onClose={() => setIsModalOpen(false)} />
+      )}
       <Modal
         title={modalTitle}
-        loading={poLoading}
-        open={isModalOpen}
+        loading={isEdit && poLoading}
+        open={isModalOpen && (isEdit || importMode !== 'scm')}
         confirmLoading={isCreating || isPoUpdating}
         destroyOnHidden={true}
         width={720}
@@ -423,7 +444,10 @@ function PoListContent() {
           setIsEdit(false)
         }}
       >
+        {!isEdit && <PoImportModePicker value={importMode} onChange={changeImportMode} disabled={isCreating} />}
         <PoForm
+          key={isEdit ? 'edit' : importMode}
+          importMode={isEdit || importMode === 'scm' ? 'manual' : importMode}
           ref={poFormRef}
           onExcelDataChange={handleExcelDataChange}
           onFinish={onFinish}

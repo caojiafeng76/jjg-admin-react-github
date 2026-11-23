@@ -13,6 +13,7 @@ import {
   MAX_SAFE_PART_CHECK_PO_NOS,
   MAX_SAFE_PART_SOURCE_ROWS,
   SYNEY_DELIVERY_ORDER_ACTIONS,
+  SYNEY_PURCHASE_ORDER_NO_PATTERN,
 } from '../src/services/syneyDeliveryOrderContract'
 
 /** 采购订单履行（POLinePerform）明细行 */
@@ -700,6 +701,12 @@ export function parseDeliveryOrderRequest(body: Record<string, unknown>): Parsed
   const payload = isRecord(body.payload) ? body.payload : {}
 
   switch (action as SyneyDeliveryOrderAction) {
+    case 'fetchPurchaseOrder': {
+      const poNo = parseIdentifier(payload.poNo)
+      return poNo && SYNEY_PURCHASE_ORDER_NO_PATTERN.test(poNo)
+        ? { ok: true, action: 'fetchPurchaseOrder', payload: { poNo } }
+        : { ok: false, error: '请输入有效的西尼采购单号' }
+    }
     case 'create': {
       const poNo = parseIdentifier(payload.poNo)
       return poNo

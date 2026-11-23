@@ -31,6 +31,7 @@ import {
   selectDeliverableLines,
   validateDeliveryLines,
 } from './syneyDeliveryOrderLogic'
+import { fetchSyneyPurchaseOrderFromScm } from './syneyPurchaseOrder'
 import {
   ajaxMethodQuery,
   bindScmGrid,
@@ -441,6 +442,7 @@ export const syneyDeliveryOrderHandlers: DeliveryOrderHandlers = {
   confirm: confirmDeliveryOrder,
   print: printDeliveryOrders,
   checkSafeParts,
+  fetchPurchaseOrder: fetchSyneyPurchaseOrderFromScm,
 }
 
 export async function runSyneyDeliveryOrderAction<A extends keyof SyneyDeliveryOrderRequestMap>(

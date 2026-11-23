@@ -13,6 +13,7 @@ import {
 } from '../api/proxySecurity'
 import {
   SYNEY_DELIVERY_ORDER_PERMISSION,
+  SYNEY_PURCHASE_ORDER_CREATE_PERMISSION,
   SYNEY_SAFE_PART_CHECK_PERMISSIONS,
 } from '../src/services/syneyDeliveryOrderContract'
 import { parseDeliveryOrderRequest } from './syneyDeliveryOrderLogic'
@@ -28,6 +29,8 @@ class RequestBodyTooLargeError extends Error {}
 
 /** 只读的 checkSafeParts 也供「导出安全部件信息」使用，其余操作只认生成送货单权限 */
 function permissionsForAction(action: unknown): readonly string[] {
+  if (action === 'fetchPurchaseOrder')
+    return [SYNEY_PURCHASE_ORDER_CREATE_PERMISSION]
   return action === 'checkSafeParts'
     ? SYNEY_SAFE_PART_CHECK_PERMISSIONS
     : [SYNEY_DELIVERY_ORDER_PERMISSION]

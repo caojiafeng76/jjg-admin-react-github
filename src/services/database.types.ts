@@ -4764,6 +4764,10 @@ export type Database = {
           project_nos: string[]
         }[]
       }
+      import_syney_purchase_order: {
+        Args: { p_groups: Json; p_po_no: string }
+        Returns: Json
+      }
       increment_serial_no: { Args: { increment_by: number }; Returns: number }
       is_admin: { Args: never; Returns: boolean }
       is_precision_cutting_admin: { Args: never; Returns: boolean }

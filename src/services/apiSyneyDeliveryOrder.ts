@@ -34,14 +34,16 @@ function isBrowserFetchFailure(error: unknown) {
 export async function callSyneyDeliveryOrderProxy<A extends SyneyDeliveryOrderAction>(
   action: A,
   payload: SyneyDeliveryOrderRequestMap[A],
+  signal?: AbortSignal,
 ): Promise<SyneyDeliveryOrderResponseMap[A]> {
   const proxyUrl = resolveSyneyDeliveryOrderProxyUrl({
     configuredProxyUrl: SYNEY_DELIVERY_ORDER_API_URL,
     isDev: import.meta.env.DEV,
   })
 
+  const operation = action === 'fetchPurchaseOrder' ? '西尼采购单' : '西尼送货单'
   if (!proxyUrl) {
-    throw new Error('未配置西尼送货单代理地址（VITE_SYNEY_DELIVERY_ORDER_API_URL）')
+    throw new Error(`未配置${operation}代理地址（VITE_SYNEY_DELIVERY_ORDER_API_URL）`)
   }
 
   let response: Response
@@ -51,6 +53,7 @@ export async function callSyneyDeliveryOrderProxy<A extends SyneyDeliveryOrderAc
         method: 'POST',
         headers: await getAuthenticatedProxyHeaders(),
         body: JSON.stringify({ action, payload }),
+        signal,
       }),
       DELIVERY_ORDER_STEP_TIMEOUT_MS,
       '西尼 SCM 响应超时，请稍后重试',
@@ -58,7 +61,7 @@ export async function callSyneyDeliveryOrderProxy<A extends SyneyDeliveryOrderAc
   }
   catch (error) {
     if (isBrowserFetchFailure(error)) {
-      throw new Error('西尼送货单代理接口连接失败，请检查代理地址或网络', {
+      throw new Error(`${operation}代理接口连接失败，请检查代理地址或网络`, {
         cause: error,
       })
     }
@@ -67,7 +70,7 @@ export async function callSyneyDeliveryOrderProxy<A extends SyneyDeliveryOrderAc
 
   const contentType = response.headers.get('content-type') || ''
   if (!contentType.includes('application/json')) {
-    throw new Error('西尼送货单代理接口未返回 JSON，请检查代理地址配置')
+    throw new Error(`${operation}代理接口未返回 JSON，请检查代理地址配置`)
   }
 
   const data = (await response.json()) as SyneyDeliveryOrderResponseMap[A] & {
@@ -75,10 +78,14 @@ export async function callSyneyDeliveryOrderProxy<A extends SyneyDeliveryOrderAc
   }
 
   if (!response.ok || data.error) {
-    throw new Error(data.error || '西尼送货单代理请求失败')
+    throw new Error(data.error || `${operation}代理请求失败`)
   }
 
   return data
+}
+
+export function fetchSyneyPurchaseOrder(poNo: string, signal: AbortSignal) {
+  return callSyneyDeliveryOrderProxy('fetchPurchaseOrder', { poNo }, signal)
 }
 
 export function createSyneyDeliveryOrder(poNo: string) {
