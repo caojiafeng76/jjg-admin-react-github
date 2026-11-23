@@ -101,4 +101,40 @@ describe('exportShippingListAsExcel', () => {
     expect(exportShippingListAsExcel([])).toBe(false)
     expect(writeFileMock).not.toHaveBeenCalled()
   })
+
+  it('preserves ~ characters inside remark and keeps null fields empty', () => {
+    writeFileMock.mockClear()
+
+    const result = exportShippingListAsExcel(
+      [
+        {
+          No: 'P2026112399',
+          SONo: 'SO-99',
+          Brand: null,
+          Spec: '800型-室内-扶梯',
+          Technique: null,
+          Remark: '厚度2~3mm~注意不要出现西尼',
+          DeliveryNo: null,
+        },
+      ],
+      new Date('2026-11-23'),
+    )
+
+    expect(result).toBe(true)
+    const [wb] = writeFileMock.mock.calls[0]
+    const rows = utils.sheet_to_json<unknown[]>(wb.Sheets['发货清单'], {
+      header: 1,
+      defval: '',
+    })
+    expect(rows[2]).toEqual([
+      1,
+      'P2026112399',
+      'SO-99',
+      '',
+      '',
+      '800型-室内-扶梯',
+      '',
+      '厚度2~3mm~注意不要出现西尼',
+    ])
+  })
 })

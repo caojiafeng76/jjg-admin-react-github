@@ -9,26 +9,39 @@ function readLocalFile(fileName: string): string {
 
 describe('Syney PO document modules', () => {
   it.each(['usePrint.ts', 'usePrintEnglish.ts'])(
-    'loads label PDF dependencies on demand in %s',
+    'keeps heavy label PDF modules out of %s static imports',
     (fileName) => {
       const source = readLocalFile(fileName)
 
-      expect(source).not.toMatch(/import jsPDF from ['"]jspdf['"]/)
+      expect(source).not.toMatch(/from ['"]jspdf['"]/)
       expect(source).not.toMatch(/from ['"]@\/utils\/pdfUtils['"]/)
-      expect(source).toContain('import(\'jspdf\')')
-      expect(source).toContain('import(\'@/utils/pdfUtils\')')
+      expect(source).not.toMatch(/from ['"]@\/utils\/googleFontLoader['"]/)
+      expect(source).not.toMatch(/from ['"]@\/utils\/syneySafePartRules['"]/)
+      expect(source).not.toMatch(/from ['"]\.\/poLabelPdfDocument['"]/)
       expect(source).toContain('preloadPDF')
     },
   )
 
-  it('loads decomposition PDF and safe-part Excel on demand', () => {
+  it('loads poLabelPdfDocument on demand and wires hover/focus preload in PoList', () => {
+    const printHook = readLocalFile('usePrint.ts')
+    const page = readLocalFile('index.tsx')
+
+    expect(printHook).toContain('import(\'./poLabelPdfDocument\')')
+    expect(page).toContain('onPreload={preloadChineseLabelPDF}')
+    expect(page).toContain('onPreload={preloadEnglishLabelPDF}')
+  })
+
+  it('loads decomposition PDF document and safe-part Excel on demand', () => {
     const decomposition = readLocalFile('usePrintDecomposition.ts')
     const decompositionButton = readLocalFile('PrintDecompositionButton.tsx')
     const excel = readLocalFile('useExportSafePartInfoAsExcel.ts')
     const excelButton = readLocalFile('ExportInfoButton.tsx')
 
+    expect(decomposition).not.toMatch(/from ['"]jspdf['"]/)
     expect(decomposition).not.toMatch(/from ['"]@\/utils\/pdfUtils['"]/)
-    expect(decomposition).toContain('import(\'@/utils/pdfUtils\')')
+    expect(decomposition).not.toMatch(/from ['"]@\/utils\/syneyDecomposition['"]/)
+    expect(decomposition).not.toMatch(/from ['"]\.\/decompositionPdfDocument['"]/)
+    expect(decomposition).toContain('import(\'./decompositionPdfDocument\')')
     expect(decompositionButton).toContain('onMouseEnter={preloadPDF}')
     expect(decompositionButton).toContain('onFocus={preloadPDF}')
 

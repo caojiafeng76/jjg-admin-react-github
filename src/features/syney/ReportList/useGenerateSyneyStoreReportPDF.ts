@@ -125,7 +125,6 @@ export function useGenerateSyneyStoreReportPDF() {
   const { fetchSelectedReports } = useFetchSelectedReports()
   const { message } = App.useApp()
 
-  const [progress, setProgress] = useState(0)
   const [isGenerating, setIsGenerating] = useState(false)
 
   function preloadPDF() {
@@ -145,7 +144,6 @@ export function useGenerateSyneyStoreReportPDF() {
 
     try {
       setIsGenerating(true)
-      setProgress(0)
 
       const selectedMap = await fetchSelectedReports()
 
@@ -161,7 +159,7 @@ export function useGenerateSyneyStoreReportPDF() {
       // 初始化 PDF 文档（异步加载字体）
       const doc = await initializePDF()
 
-      // 生成所有报告页面（带进度回调）
+      // 生成所有报告页面（通过 Ant Design message 同 key 展示进度）
       const reportNos = Array.from(selectedMap.keys())
       await generateAllReports(
         doc,
@@ -169,7 +167,6 @@ export function useGenerateSyneyStoreReportPDF() {
         autoTable,
         pdfUtils,
         (processed, total) => {
-          setProgress(Math.round((processed / total) * 100))
           message.loading({
             content: `正在生成对账单 PDF：${processed}/${total}`,
             key: PDF_PROGRESS_MESSAGE_KEY,
@@ -187,7 +184,6 @@ export function useGenerateSyneyStoreReportPDF() {
       // 预览 PDF
       previewPDF(doc, filename)
 
-      setProgress(100)
       // 同 key 替换进度提示（不用 message.destroy，避免清掉其他提示）
       message.success({
         content: '对账单 PDF 已生成',
@@ -209,7 +205,6 @@ export function useGenerateSyneyStoreReportPDF() {
     }
     finally {
       setIsGenerating(false)
-      setProgress(0)
     }
   }
 
@@ -217,6 +212,5 @@ export function useGenerateSyneyStoreReportPDF() {
     print,
     preloadPDF,
     isLoading: isGenerating,
-    progress,
   }
 }

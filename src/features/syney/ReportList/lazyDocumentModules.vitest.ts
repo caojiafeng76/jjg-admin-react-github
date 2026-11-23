@@ -34,6 +34,7 @@ describe('Syney report document modules', () => {
     expect(summaryButton).toContain('onMouseEnter={preloadPDF}')
     expect(summaryButton).toContain('onFocus={preloadPDF}')
     expect(page).toContain('onPreload={preloadPDF}')
+    expect(reportHook).not.toMatch(/setProgress|useState\s*\(\s*0\s*\)/)
   })
 
   it('loads the store receipt renderer only after the print action', () => {
