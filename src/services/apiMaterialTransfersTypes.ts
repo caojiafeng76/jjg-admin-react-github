@@ -155,7 +155,7 @@ export interface MaterialTransferFilters {
   endDate?: string
   projectNo?: string // 支持空格/逗号分隔的多关键词模糊搜索项目号
   productModel?: string // 支持空格/逗号分隔的多关键词模糊搜索型号
-  materialCode?: string // 支持空格/逗号分隔的多关键词模糊搜索料号
+  customerModel?: string // 支持空格/逗号分隔的多关键词模糊搜索客户型号
   length_mm?: number[] // 多选长度
   employeeId?: string
   targetWorkshop?: string

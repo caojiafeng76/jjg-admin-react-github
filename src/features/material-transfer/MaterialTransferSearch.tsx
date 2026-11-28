@@ -70,7 +70,7 @@ export default function MaterialTransferSearch({
           : undefined,
       projectNo: values.projectNo?.trim() || undefined,
       productModel: values.productModel?.trim() || undefined,
-      materialCode: values.materialCode?.trim() || undefined,
+      customerModel: values.customerModel?.trim() || undefined,
       length_mm:
         values.length_mm && values.length_mm.length > 0
           ? values.length_mm
@@ -137,9 +137,9 @@ export default function MaterialTransferSearch({
         />
       </Form.Item>
 
-      <Form.Item name="materialCode" className={formItemClassName}>
+      <Form.Item name="customerModel" className={formItemClassName}>
         <Input
-          placeholder="料号"
+          placeholder="客户型号"
           allowClear
           onPressEnter={() => form.submit()}
           style={{ width: mobile ? '100%' : 160 }}

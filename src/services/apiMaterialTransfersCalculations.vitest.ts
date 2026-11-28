@@ -106,6 +106,22 @@ describe('物料转移计算函数', () => {
     ])
   })
 
+  it('筛选条件按客户型号多关键词过滤 customer_model 列而非 material_code', () => {
+    const { calls, query } = createQueryRecorder()
+
+    applyMaterialTransferFilters(query, {
+      projectNo: '26103001',
+      productModel: '105-330',
+      customerModel: ' SC-752 ， 拉手左 ',
+    })
+
+    expect(calls).toEqual([
+      ['or', 'project_no.ilike.%26103001%'],
+      ['or', 'product_model.ilike.%105-330%'],
+      ['or', 'customer_model.ilike.%SC-752%,customer_model.ilike.%拉手左%'],
+    ])
+  })
+
   it('订单进度按项目号合并订单数量与转移合计', () => {
     const progress = buildOrderProgressMap(
       new Map([

@@ -53,11 +53,11 @@ export function applyMaterialTransferFilters<
     )
   }
 
-  const materialCodeKeywords = normalizeSearchKeywords(filters.materialCode)
+  const customerModelKeywords = normalizeSearchKeywords(filters.customerModel)
 
-  if (materialCodeKeywords?.length) {
+  if (customerModelKeywords?.length) {
     nextQuery = nextQuery.or(
-      buildOrIlikeFilter(['material_code'], materialCodeKeywords),
+      buildOrIlikeFilter(['customer_model'], customerModelKeywords),
     )
   }
 
